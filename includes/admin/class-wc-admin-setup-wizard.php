@@ -1064,12 +1064,6 @@ class WC_Admin_Setup_Wizard {
 				'enabled' => $can_stripe,
 				'featured' => true,
 			),
-			'braintree_paypal' => array(
-				'name'        => __( 'PayPal by Braintree', 'woocommerce' ),
-				'image'       => WC()->plugin_url() . '/assets/images/paypal-braintree.png',
-				'description' => $paypal_bt_description,
-				'repo-slug'   => 'woocommerce-gateway-paypal-powered-by-braintree',
-			),
 			'ppec_paypal' => array(
 				'name'        => __( 'PayPal Express Checkout', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/paypal.png',
@@ -1097,14 +1091,7 @@ class WC_Admin_Setup_Wizard {
 			unset( $gateways['stripe'] );
 		}
 
-		if ( 'US' === $country ) {
-			unset( $gateways['ppec_paypal'] );
-		} else {
-			unset( $gateways['braintree_paypal'] );
-		}
-
 		if ( ! current_user_can( 'install_plugins' ) ) {
-			unset( $gateways['braintree_paypal'] );
 			unset( $gateways['ppec_paypal'] );
 			unset( $gateways['stripe'] );
 		}
