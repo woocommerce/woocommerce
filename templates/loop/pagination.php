@@ -27,8 +27,8 @@ if ( $total <= 1 ) {
 <nav class="woocommerce-pagination">
 	<?php
 		echo paginate_links( apply_filters( 'woocommerce_pagination_args', array(
-			'base'         => esc_url_raw( str_replace( 999999999, '%#%', remove_query_arg( 'add-to-cart', get_pagenum_link( 999999999, false ) ) ) ),
-			'format'       => '',
+			'base'         => $base,
+			'format'       => $format,
 			'add_args'     => false,
 			'current'      => max( 1, $current ),
 			'total'        => $total,

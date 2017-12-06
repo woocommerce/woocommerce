@@ -71,9 +71,10 @@ class WC_Query {
 	public function init_query_vars() {
 		// Query vars to add to WP.
 		$this->query_vars = array(
+			'product-page'               => '',
 			// Checkout actions.
-			'order-pay'          => get_option( 'woocommerce_checkout_pay_endpoint', 'order-pay' ),
-			'order-received'     => get_option( 'woocommerce_checkout_order_received_endpoint', 'order-received' ),
+			'order-pay'                  => get_option( 'woocommerce_checkout_pay_endpoint', 'order-pay' ),
+			'order-received'             => get_option( 'woocommerce_checkout_order_received_endpoint', 'order-received' ),
 			// My account actions.
 			'orders'                     => get_option( 'woocommerce_myaccount_orders_endpoint', 'orders' ),
 			'view-order'                 => get_option( 'woocommerce_myaccount_view_order_endpoint', 'view-order' ),
