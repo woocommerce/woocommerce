@@ -159,19 +159,33 @@ function wc_setup_loop( $args = array() ) {
 		return; // If the loop has already been setup, bail.
 	}
 
-	$GLOBALS['woocommerce_loop'] = wp_parse_args( $args, array(
+	$default_args = array(
 		'loop'         => 0,
 		'columns'      => wc_get_default_products_per_row(),
 		'name'         => '',
 		'is_shortcode' => false,
 		'is_paginated' => true,
-		'is_search'    => $GLOBALS['wp_query']->is_search(),
-		'is_filtered'  => is_filtered(),
-		'total'        => $GLOBALS['wp_query']->found_posts,
-		'total_pages'  => $GLOBALS['wp_query']->max_num_pages,
-		'per_page'     => $GLOBALS['wp_query']->get( 'posts_per_page' ),
-		'current_page' => max( 1, $GLOBALS['wp_query']->get( 'paged', 1 ) ),
-	) );
+		'is_search'    => false,
+		'is_filtered'  => false,
+		'total'        => 0,
+		'total_pages'  => 0,
+		'per_page'     => 0,
+		'current_page' => 1,
+	);
+
+	// If this is a main WC query, use global args as defaults.
+	if ( $GLOBALS['wp_query']->get( 'wc_query' ) ) {
+		$default_args = array_merge( $default_args, array(
+			'is_search'    => $GLOBALS['wp_query']->is_search(),
+			'is_filtered'  => is_filtered(),
+			'total'        => $GLOBALS['wp_query']->found_posts,
+			'total_pages'  => $GLOBALS['wp_query']->max_num_pages,
+			'per_page'     => $GLOBALS['wp_query']->get( 'posts_per_page' ),
+			'current_page' => max( 1, $GLOBALS['wp_query']->get( 'paged', 1 ) ),
+		) );
+	}
+
+	$GLOBALS['woocommerce_loop'] = wp_parse_args( $args, $default_args );
 }
 add_action( 'woocommerce_before_shop_loop', 'wc_setup_loop' );
 
@@ -886,15 +900,16 @@ if ( ! function_exists( 'woocommerce_result_count' ) ) {
 	 * Output the result count text (Showing x - x of x results).
 	 */
 	function woocommerce_result_count() {
-		if ( wc_get_loop_prop( 'is_paginated' ) && woocommerce_products_will_display() ) {
-			$args = array(
-				'total'    => wc_get_loop_prop( 'total' ),
-				'per_page' => wc_get_loop_prop( 'per_page' ),
-				'current'  => wc_get_loop_prop( 'current_page' ),
-			);
-
-			wc_get_template( 'loop/result-count.php', $args );
+		if ( ! wc_get_loop_prop( 'is_paginated' ) || ! woocommerce_products_will_display() ) {
+			return;
 		}
+		$args = array(
+			'total'    => wc_get_loop_prop( 'total' ),
+			'per_page' => wc_get_loop_prop( 'per_page' ),
+			'current'  => wc_get_loop_prop( 'current_page' ),
+		);
+
+		wc_get_template( 'loop/result-count.php', $args );
 	}
 }
 
@@ -904,7 +919,7 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 	 * Output the product sorting options.
 	 */
 	function woocommerce_catalog_ordering() {
-		if ( ! woocommerce_products_will_display() ) {
+		if ( ! wc_get_loop_prop( 'is_paginated' ) || ! woocommerce_products_will_display() ) {
 			return;
 		}
 		$orderby                 = isset( $_GET['orderby'] ) ? wc_clean( wp_unslash( $_GET['orderby'] ) ) : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
@@ -947,22 +962,23 @@ if ( ! function_exists( 'woocommerce_pagination' ) ) {
 	/**
 	 * Output the pagination.	 */
 	function woocommerce_pagination() {
-		if ( wc_get_loop_prop( 'is_paginated' ) && woocommerce_products_will_display() ) {
-			$args = array(
-				'total'   => wc_get_loop_prop( 'total_pages' ),
-				'current' => wc_get_loop_prop( 'current_page' ),
-			);
-
-			if ( wc_get_loop_prop( 'is_shortcode' ) ) {
-				$args['base']   = esc_url_raw( add_query_arg( 'product-page', '%#%', false ) );
-				$args['format'] = '?product-page = %#%';
-			} else {
-				$args['base']   = esc_url_raw( str_replace( 999999999, '%#%', remove_query_arg( 'add-to-cart', get_pagenum_link( 999999999, false ) ) ) );
-				$args['format'] = '';
-			}
-
-			wc_get_template( 'loop/pagination.php', $args );
+		if ( ! wc_get_loop_prop( 'is_paginated' ) || ! woocommerce_products_will_display() ) {
+			return;
 		}
+		$args = array(
+			'total'   => wc_get_loop_prop( 'total_pages' ),
+			'current' => wc_get_loop_prop( 'current_page' ),
+		);
+
+		if ( wc_get_loop_prop( 'is_shortcode' ) ) {
+			$args['base']   = esc_url_raw( add_query_arg( 'product-page', '%#%', false ) );
+			$args['format'] = '?product-page = %#%';
+		} else {
+			$args['base']   = esc_url_raw( str_replace( 999999999, '%#%', remove_query_arg( 'add-to-cart', get_pagenum_link( 999999999, false ) ) ) );
+			$args['format'] = '';
+		}
+
+		wc_get_template( 'loop/pagination.php', $args );
 	}
 }
 

@@ -507,12 +507,14 @@ class WC_Shortcode_Products {
 				$query = new WP_Query( $this->query_args );
 			}
 
+			$paginated = ! $query->get( 'no_found_rows' );
+
 			$results = (object) array(
 				'ids'          => wp_parse_id_list( $query->posts ),
-				'total'        => (int) $query->found_posts,
-				'total_pages'  => (int) $query->max_num_pages,
+				'total'        => $paginated ? (int) $query->found_posts : count( $query->posts ),
+				'total_pages'  => $paginated ? (int) $query->max_num_pages : 1,
 				'per_page'     => (int) $query->get( 'posts_per_page' ),
-				'current_page' => (int) max( 1, $query->get( 'paged', 1 ) ),
+				'current_page' => $paginated ? (int) max( 1, $query->get( 'paged', 1 ) ) : 1,
 			);
 
 			if ( $cache ) {
