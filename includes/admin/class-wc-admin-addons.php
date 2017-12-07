@@ -513,24 +513,22 @@ class WC_Admin_Addons {
 	 * Should an extension be shown on the featured page.
 	 *
 	 * @param object $item
-	 *
 	 * @return boolean
 	 */
 	public static function show_extension( $item ) {
 		$location = WC()->countries->get_base_country();
-		$show = true;
-		if ( isset( $item->geowhitelist ) && ! in_array( $location, $item->geowhitelist ) ) {
-			$show = false;
+		if ( isset( $item->geowhitelist ) && ! in_array( $location, $item->geowhitelist, true ) ) {
+			return false;
 		}
 
-		if ( isset( $item->geoblacklist ) && in_array( $location, $item->geoblacklist ) ) {
-			$show = false;
+		if ( isset( $item->geoblacklist ) && in_array( $location, $item->geoblacklist, true ) ) {
+			return false;
 		}
 
 		if ( is_plugin_active( $item->plugin ) ) {
-			$show = false;
+			return false;
 		}
 
-		return $show;
+		return true;
 	}
 }
