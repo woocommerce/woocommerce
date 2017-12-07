@@ -476,7 +476,7 @@ class WC_Admin_Setup_Wizard {
 		$postcode       = sanitize_text_field( $_POST['store_postcode'] );
 		$currency_code  = sanitize_text_field( $_POST['currency_code'] );
 		$product_type   = sanitize_text_field( $_POST['product_type'] );
-		$sell_in_person = 'yes' === sanitize_text_field( $_POST['sell_in_person'] );
+		$sell_in_person = isset( $_POST['sell_in_person'] ) && ( 'yes' === sanitize_text_field( $_POST['sell_in_person'] ) );
 		$tracking       = isset( $_POST['wc_tracker_optin'] ) && ( 'yes' === sanitize_text_field( $_POST['wc_tracker_optin'] ) );
 		// @codingStandardsIgnoreEnd
 		update_option( 'woocommerce_store_address', $address );
