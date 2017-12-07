@@ -688,8 +688,8 @@ function wc_get_image_size( $image_size ) {
 		$image_size = $size['width'] . '_' . $size['height'];
 	} elseif ( in_array( $image_size, array( 'single', 'shop_single', 'woocommerce_single' ), true ) ) {
 		// If the theme supports woocommerce, take image sizes from that definition.
-		if ( isset( $theme_support[ 'single_image_width' ] ) ) {
-			$size['width'] = $theme_support[ 'single_image_width' ];
+		if ( isset( $theme_support['single_image_width'] ) ) {
+			$size['width'] = $theme_support['single_image_width'];
 		} else {
 			$size['width'] = get_option( 'woocommerce_single_image_width', 600 );
 		}
@@ -698,8 +698,8 @@ function wc_get_image_size( $image_size ) {
 		$image_size     = 'single';
 	} elseif ( in_array( $image_size, array( 'thumbnail', 'shop_thumbnail', 'shop_catalog', 'woocommerce_thumbnail' ), true ) ) {
 		// If the theme supports woocommerce, take image sizes from that definition.
-		if ( isset( $theme_support[ 'thumbnail_image_width' ] ) ) {
-			$size['width'] = $theme_support[ 'thumbnail_image_width' ];
+		if ( isset( $theme_support['thumbnail_image_width'] ) ) {
+			$size['width'] = $theme_support['thumbnail_image_width'];
 		} else {
 			$size['width'] = get_option( 'woocommerce_thumbnail_image_width', 300 );
 		}
@@ -709,11 +709,16 @@ function wc_get_image_size( $image_size ) {
 		if ( 'uncropped' === $cropping ) {
 			$size['height'] = 9999999999;
 			$size['crop']   = 0;
+		} elseif ( 'custom' === $cropping ) {
+			$width          = max( 1, get_option( 'woocommerce_thumbnail_cropping_custom_width', '4' ) );
+			$height         = max( 1, get_option( 'woocommerce_thumbnail_cropping_custom_width', '3' ) );
+			$size['height'] = round( ( $size['width'] / $width ) * $height );
+			$size['crop']   = 1;
 		} else {
 			$cropping_split = explode( ':', $cropping );
-			$width_ratio    = max( 1, current( $cropping_split ) );
-			$height_ratio   = max( 1, end( $cropping_split ) );
-			$size['height'] = round( ( $size['width'] / $width_ratio ) * $height_ratio );
+			$width          = max( 1, current( $cropping_split ) );
+			$height         = max( 1, end( $cropping_split ) );
+			$size['height'] = round( ( $size['width'] / $width ) * $height );
 			$size['crop']   = 1;
 		}
 		$image_size = 'thumbnail';

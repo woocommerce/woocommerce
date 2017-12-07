@@ -183,24 +183,6 @@ class WC_Settings_General extends WC_Settings_Page {
 				'type'    => 'checkbox',
 			),
 
-			array(
-				'title'   => __( 'Store notice', 'woocommerce' ),
-				'desc'    => __( 'Enable site-wide store notice text', 'woocommerce' ),
-				'id'      => 'woocommerce_demo_store',
-				'default' => 'no',
-				'type'    => 'checkbox',
-			),
-
-			array(
-				'title'    => __( 'Store notice text', 'woocommerce' ),
-				'desc'     => '',
-				'id'       => 'woocommerce_demo_store_notice',
-				'default'  => __( 'This is a demo store for testing purposes &mdash; no orders shall be fulfilled.', 'woocommerce' ),
-				'type'     => 'textarea',
-				'css'     => 'width:350px; height: 65px;',
-				'autoload' => false,
-			),
-
 			array( 'type' => 'sectionend', 'id' => 'general_options' ),
 
 			array( 'title' => __( 'Currency options', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'The following options affect how prices are displayed on the frontend.', 'woocommerce' ), 'id' => 'pricing_options' ),
