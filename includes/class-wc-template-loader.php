@@ -1,26 +1,50 @@
 <?php
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 /**
  * Template Loader
  *
  * @class 		WC_Template
- * @version		2.2.0
  * @package		WooCommerce/Classes
  * @category	Class
- * @author 		WooThemes
+ * @author 		Automattic
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * WC_Template_Loader.
  */
 class WC_Template_Loader {
+
+	/**
+	 * Store the shop page ID.
+	 *
+	 * @var integer
+	 */
+	private static $shop_page_id = 0;
+
+	/**
+	 * Store whether we're processing a product inside the_content filter.
+	 *
+	 * @var boolean
+	 */
+	private static $in_content_filter = false;
 
 	/**
 	 * Hook in methods.
 	 */
 	public static function init() {
-		add_filter( 'template_include', array( __CLASS__, 'template_loader' ) );
-		add_filter( 'comments_template', array( __CLASS__, 'comments_template_loader' ) );
+		self::$shop_page_id = wc_get_page_id( 'shop' );
+
+		// Supported themes.
+		if ( current_theme_supports( 'woocommerce' ) ) {
+			add_filter( 'template_include', array( __CLASS__, 'template_loader' ) );
+			add_filter( 'comments_template', array( __CLASS__, 'comments_template_loader' ) );
+		} else {
+			// Unsupported themes.
+			add_action( 'template_redirect', array( __CLASS__, 'unsupported_theme_init' ) );
+		}
 	}
 
 	/**
@@ -35,7 +59,7 @@ class WC_Template_Loader {
 	 * this to the theme (containing a woocommerce() inside) this will be used for all.
 	 * woocommerce templates.
 	 *
-	 * @param mixed $template
+	 * @param string $template Template to load.
 	 * @return string
 	 */
 	public static function template_loader( $template ) {
@@ -71,15 +95,15 @@ class WC_Template_Loader {
 		if ( is_singular( 'product' ) ) {
 			$default_file = 'single-product.php';
 		} elseif ( is_product_taxonomy() ) {
-			$term = get_queried_object();
+			$object = get_queried_object();
 
 			if ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) {
-				$default_file = 'taxonomy-' . $term->taxonomy . '.php';
+				$default_file = 'taxonomy-' . $object->taxonomy . '.php';
 			} else {
 				$default_file = 'archive-product.php';
 			}
 		} elseif ( is_post_type_archive( 'product' ) || is_page( wc_get_page_id( 'shop' ) ) ) {
-			$default_file = 'archive-product.php';
+			$default_file = current_theme_supports( 'woocommerce' ) ? 'archive-product.php' : '';
 		} else {
 			$default_file = '';
 		}
@@ -94,31 +118,40 @@ class WC_Template_Loader {
 	 * @return string[]
 	 */
 	private static function get_template_loader_files( $default_file ) {
-		$search_files   = apply_filters( 'woocommerce_template_loader_files', array(), $default_file );
-		$search_files[] = 'woocommerce.php';
+		$templates   = apply_filters( 'woocommerce_template_loader_files', array(), $default_file );
+		$templates[] = 'woocommerce.php';
 
 		if ( is_page_template() ) {
-			$search_files[] = get_page_template_slug();
+			$templates[] = get_page_template_slug();
+		}
+
+		if ( is_singular( 'product' ) ) {
+			$object       = get_queried_object();
+			$name_decoded = urldecode( $object->post_name );
+			if ( $name_decoded !== $object->post_name ) {
+				$templates[] = "single-product-{$name_decoded}.php";
+			}
+			$templates[] = "single-product-{$object->post_name}.php";
 		}
 
 		if ( is_product_taxonomy() ) {
-			$term   = get_queried_object();
-			$search_files[] = 'taxonomy-' . $term->taxonomy . '-' . $term->slug . '.php';
-			$search_files[] = WC()->template_path() . 'taxonomy-' . $term->taxonomy . '-' . $term->slug . '.php';
-			$search_files[] = 'taxonomy-' . $term->taxonomy . '.php';
-			$search_files[] = WC()->template_path() . 'taxonomy-' . $term->taxonomy . '.php';
+			$object      = get_queried_object();
+			$templates[] = 'taxonomy-' . $object->taxonomy . '-' . $object->slug . '.php';
+			$templates[] = WC()->template_path() . 'taxonomy-' . $object->taxonomy . '-' . $object->slug . '.php';
+			$templates[] = 'taxonomy-' . $object->taxonomy . '.php';
+			$templates[] = WC()->template_path() . 'taxonomy-' . $object->taxonomy . '.php';
 		}
 
-		$search_files[] = $default_file;
-		$search_files[] = WC()->template_path() . $default_file;
+		$templates[] = $default_file;
+		$templates[] = WC()->template_path() . $default_file;
 
-		return array_unique( $search_files );
+		return array_unique( $templates );
 	}
 
 	/**
 	 * Load comments template.
 	 *
-	 * @param mixed $template
+	 * @param string $template template to load.
 	 * @return string
 	 */
 	public static function comments_template_loader( $template ) {
@@ -144,6 +177,315 @@ class WC_Template_Loader {
 			}
 		}
 	}
+
+	/**
+	 * Unsupported theme compatibility methods.
+	 */
+
+	/**
+	 * Hook in methods to enhance the unsupported theme experience on pages.
+	 *
+	 * @since 3.3.0
+	 */
+	public static function unsupported_theme_init() {
+		if ( self::$shop_page_id ) {
+			if ( is_product_taxonomy() ) {
+				self::unsupported_theme_tax_archive_init();
+			} elseif ( is_product() ) {
+				self::unsupported_theme_product_page_init();
+			} else {
+				self::unsupported_theme_shop_page_init();
+			}
+		}
+	}
+
+	/**
+	 * Hook in methods to enhance the unsupported theme experience on the Shop page.
+	 *
+	 * @since 3.3.0
+	 */
+	private static function unsupported_theme_shop_page_init() {
+		add_filter( 'the_content', array( __CLASS__, 'unsupported_theme_shop_content_filter' ), 10 );
+		add_filter( 'the_title', array( __CLASS__, 'unsupported_theme_title_filter' ), 10, 2 );
+		add_filter( 'comments_number', '__return_empty_string' );
+	}
+
+	/**
+	 * Hook in methods to enhance the unsupported theme experience on Product pages.
+	 *
+	 * @since 3.3.0
+	 */
+	private static function unsupported_theme_product_page_init() {
+		add_filter( 'the_content', array( __CLASS__, 'unsupported_theme_product_content_filter' ), 10 );
+		add_filter( 'post_thumbnail_html', array( __CLASS__, 'unsupported_theme_single_featured_image_filter' ) );
+		add_filter( 'woocommerce_product_tabs', array( __CLASS__, 'unsupported_theme_remove_review_tab' ) );
+		remove_action( 'woocommerce_before_main_content', 'woocommerce_output_content_wrapper', 10 );
+		remove_action( 'woocommerce_after_main_content', 'woocommerce_output_content_wrapper_end', 10 );
+		add_theme_support( 'wc-product-gallery-zoom' );
+		add_theme_support( 'wc-product-gallery-lightbox' );
+		add_theme_support( 'wc-product-gallery-slider' );
+	}
+
+	/**
+	 * Enhance the unsupported theme experience on Product Category and Attribute pages by rendering
+	 * those pages using the single template and shortcode-based content. To do this we make a dummy
+	 * post and set a shortcode as the post content. This approach is adapted from bbPress.
+	 *
+	 * @since 3.3.0
+	 */
+	private static function unsupported_theme_tax_archive_init() {
+		global $wp_query, $post;
+
+		$queried_object = get_queried_object();
+		$args           = self::get_current_shop_view_args();
+		$shortcode_args = array(
+			'page'     => $args->page,
+			'columns'  => $args->columns,
+			'rows'     => $args->rows,
+			'orderby'  => '',
+			'order'    => '',
+			'paginate' => true,
+			'cache'    => false,
+		);
+
+		if ( is_product_category() ) {
+			$shortcode_args['category'] = sanitize_title( $queried_object->slug );
+		} elseif ( taxonomy_is_product_attribute( $queried_object->taxonomy ) ) {
+			$shortcode_args['attribute'] = sanitize_title( $queried_object->taxonomy );
+			$shortcode_args['terms'] = sanitize_title( $queried_object->slug );
+		} elseif ( is_product_tag() ) {
+			$shortcode_args['tag'] = sanitize_title( $queried_object->slug );
+		} else {
+			// Default theme archive for all other taxonomies.
+			return;
+		}
+
+		$shortcode = new WC_Shortcode_Products( $shortcode_args );
+		$shop_page = get_post( self::$shop_page_id );
+
+		$dummy_post_properties = array(
+			'ID'                    => 0,
+			'post_status'           => 'publish',
+			'post_author'           => $shop_page->post_author,
+			'post_parent'           => 0,
+			'post_type'             => 'page',
+			'post_date'             => $shop_page->post_date,
+			'post_date_gmt'         => $shop_page->post_date_gmt,
+			'post_modified'         => $shop_page->post_modified,
+			'post_modified_gmt'     => $shop_page->post_modified_gmt,
+			'post_content'          => $shortcode->get_content(),
+			'post_title'            => wc_clean( $queried_object->name ),
+			'post_excerpt'          => '',
+			'post_content_filtered' => '',
+			'post_mime_type'        => '',
+			'post_password'         => '',
+			'post_name'             => $queried_object->slug,
+			'guid'                  => '',
+			'menu_order'            => 0,
+			'pinged'                => '',
+			'to_ping'               => '',
+			'ping_status'           => '',
+			'comment_status'        => 'closed',
+			'comment_count'         => 0,
+			'filter'                => 'raw',
+		);
+
+		// Set the $post global.
+		$post = new WP_Post( (object) $dummy_post_properties );
+
+		// Copy the new post global into the main $wp_query.
+		$wp_query->post = $post;
+		$wp_query->posts = array( $post );
+
+        // Prevent comments form from appearing.
+		$wp_query->post_count = 1;
+		$wp_query->is_404     = false;
+		$wp_query->is_page    = true;
+		$wp_query->is_single  = true;
+		$wp_query->is_archive = false;
+		$wp_query->is_tax     = false;
+
+		// Prepare everything for rendering.
+		setup_postdata( $post );
+		remove_all_filters( 'the_content' );
+		remove_all_filters( 'the_excerpt' );
+		add_filter( 'template_include', array( __CLASS__, 'force_single_template_filter' ) );
+	}
+
+	/**
+	 * Force the loading of one of the single templates instead of whatever template was about to be loaded.
+	 *
+	 * @since 3.3.0
+	 * @param string $template Path to template.
+	 * @return string
+	 */
+	public static function force_single_template_filter( $template ) {
+		$possible_templates = array(
+			'page',
+			'single',
+			'singular',
+			'index',
+		);
+
+		foreach ( $possible_templates as $possible_template ) {
+			$path = get_query_template( $possible_template );
+			if ( $path ) {
+				return $path;
+			}
+		}
+
+		return $template;
+	}
+
+	/**
+	 * Get information about the current shop page view.
+	 *
+	 * @since 3.3.0
+	 * @return array
+	 */
+	private static function get_current_shop_view_args() {
+		return (object) array(
+			'page'    => absint( max( 1, absint( get_query_var( 'paged' ) ) ) ),
+			'columns' => wc_get_default_products_per_row(),
+			'rows'    => wc_get_default_product_rows_per_page(),
+		);
+	}
+
+	/**
+	 * Filter the title and insert WooCommerce content on the shop page.
+	 *
+	 * For non-WC themes, this will setup the main shop page to be shortcode based to improve default appearance.
+	 *
+	 * @since 3.3.0
+	 * @param string $title Existing title.
+	 * @param int    $id ID of the post being filtered.
+	 * @return string
+	 */
+	public static function unsupported_theme_title_filter( $title, $id ) {
+		if ( ! current_theme_supports( 'woocommerce' ) && is_page( self::$shop_page_id ) && $id === self::$shop_page_id ) {
+			$args         = self::get_current_shop_view_args();
+			$title_suffix = array();
+
+			if ( $args->page > 1 ) {
+				$title_suffix[] = sprintf( esc_html__( 'Page %d', 'woocommerce' ), $args->page );
+			}
+
+			if ( $title_suffix ) {
+				$title = $title . ' &ndash; ' . implode( ', ', $title_suffix );
+			}
+		}
+		return $title;
+	}
+
+	/**
+	 * Filter the content and insert WooCommerce content on the shop page.
+	 *
+	 * For non-WC themes, this will setup the main shop page to be shortcode based to improve default appearance.
+	 *
+	 * @since 3.3.0
+	 * @param string $content Existing post content.
+	 * @return string
+	 */
+	public static function unsupported_theme_shop_content_filter( $content ) {
+		global $wp_query;
+
+		if ( current_theme_supports( 'woocommerce' ) || ! is_main_query() ) {
+			return $content;
+		}
+
+		self::$in_content_filter = true;
+
+		// Remove the filter we're in to avoid nested calls.
+		remove_filter( 'the_content', array( __CLASS__, 'the_content_filter' ) );
+
+		// Unsupported theme shop page.
+		if ( is_page( self::$shop_page_id ) ) {
+			$args      = self::get_current_shop_view_args();
+			$shortcode = new WC_Shortcode_Products(
+				array_merge(
+					wc()->query->get_catalog_ordering_args(),
+					array(
+						'page'     => $args->page,
+						'columns'  => $args->columns,
+						'rows'     => $args->rows,
+						'orderby'  => '',
+						'order'    => '',
+						'paginate' => true,
+						'cache'    => false,
+					)
+				),
+			'products' );
+
+			// Allow queries to run e.g. layered nav.
+			add_action( 'pre_get_posts', array( wc()->query, 'product_query' ) );
+
+			$content = $content . $shortcode->get_content();
+
+			// Remove actions and self to avoid nested calls.
+			remove_action( 'pre_get_posts', array( wc()->query, 'product_query' ) );
+		}
+
+		self::$in_content_filter = false;
+
+		return $content;
+	}
+
+	/**
+	 * Filter the content and insert WooCommerce content on the shop page.
+	 *
+	 * For non-WC themes, this will setup the main shop page to be shortcode based to improve default appearance.
+	 *
+	 * @since 3.3.0
+	 * @param string $content Existing post content.
+	 * @return string
+	 */
+	public static function unsupported_theme_product_content_filter( $content ) {
+		global $wp_query;
+
+		if ( current_theme_supports( 'woocommerce' ) || ! is_main_query() ) {
+			return $content;
+		}
+
+		self::$in_content_filter = true;
+
+		// Remove the filter we're in to avoid nested calls.
+		remove_filter( 'the_content', array( __CLASS__, 'the_content_filter' ) );
+
+		if ( is_product() ) {
+			$content = do_shortcode( '[product_page id="' . get_the_ID() . '" show_title=0]' );
+		}
+
+		self::$in_content_filter = false;
+
+		return $content;
+	}
+
+	/**
+	 * Prevent the main featured image on product pages because there will be another featured image
+	 * in the gallery.
+	 *
+	 * @since 3.3.0
+	 * @param string $html Img element HTML.
+	 * @return string
+	 */
+	public static function unsupported_theme_single_featured_image_filter( $html ) {
+		if ( self::$in_content_filter || ! is_product() || ! is_main_query() ) {
+			return $html;
+		}
+
+		return '';
+	}
+
+	/**
+	 * Remove the Review tab and just use the regular comment form.
+	 *
+	 * @param array $tabs Tab info.
+	 * @return array
+	 */
+	public static function unsupported_theme_remove_review_tab( $tabs ) {
+		unset( $tabs['reviews'] );
+		return $tabs;
+	}
 }
 
-WC_Template_Loader::init();
+add_action( 'init', array( 'WC_Template_Loader', 'init' ) );

@@ -1366,9 +1366,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->add_item( $item );
 		}
 
-		// Save tax totals.
-		$this->set_shipping_tax( WC_Tax::round( array_sum( $shipping_taxes ) ) );
-		$this->set_cart_tax( WC_Tax::round( array_sum( $cart_taxes ) ) );
+		if ( 'yes' !== get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
+			$this->set_shipping_tax( wc_round_tax_total( array_sum( array_map( 'wc_round_tax_total', $shipping_taxes ) ) ) );
+			$this->set_cart_tax( wc_round_tax_total( array_sum( array_map( 'wc_round_tax_total', $cart_taxes ) ) ) );
+		} else {
+			$this->set_shipping_tax( wc_round_tax_total( array_sum( $shipping_taxes ) ) );
+			$this->set_cart_tax( wc_round_tax_total( array_sum( $cart_taxes ) ) );
+		}
+
 		$this->save();
 	}
 
@@ -1599,7 +1604,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	public function get_subtotal_to_display( $compound = false, $tax_display = '' ) {
 		$tax_display = $tax_display ? $tax_display : get_option( 'woocommerce_tax_display_cart' );
 		$subtotal    = 0;
-		
+
 		if ( ! $compound ) {
 			foreach ( $this->get_items() as $item ) {
 				$subtotal += $item->get_subtotal();

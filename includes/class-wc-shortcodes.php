@@ -151,8 +151,6 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public static function product_categories( $atts ) {
-		global $woocommerce_loop;
-
 		if ( isset( $atts['number'] ) ) {
 			$atts['limit'] = $atts['number'];
 		}
@@ -202,7 +200,8 @@ class WC_Shortcodes {
 		}
 
 		$columns = absint( $atts['columns'] );
-		$woocommerce_loop['columns'] = $columns;
+
+		wc_set_loop_prop( 'columns', $columns );
 
 		ob_start();
 
@@ -498,6 +497,11 @@ class WC_Shortcodes {
 			$args['p'] = absint( $atts['id'] );
 		}
 
+		// Don't render titles if desired.
+		if ( isset( $atts['show_title'] ) && ! $atts['show_title'] ) {
+			remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_title', 5 );
+		}
+
 		$single_product = new WP_Query( $args );
 
 		$preselected_id = '0';
@@ -564,6 +568,11 @@ class WC_Shortcodes {
 		$wp_query = $previous_wp_query;
 		// @codingStandardsIgnoreEnd
 		wp_reset_postdata();
+
+		// Re-enable titles if they were removed.
+		if ( isset( $atts['show_title'] ) && ! $atts['show_title'] ) {
+			add_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_title', 5 );
+		}
 
 		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
 	}
