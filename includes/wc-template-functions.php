@@ -960,7 +960,8 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 if ( ! function_exists( 'woocommerce_pagination' ) ) {
 
 	/**
-	 * Output the pagination.	 */
+	 * Output the pagination.
+	 */
 	function woocommerce_pagination() {
 		if ( ! wc_get_loop_prop( 'is_paginated' ) || ! woocommerce_products_will_display() ) {
 			return;
@@ -2799,8 +2800,9 @@ function wc_get_cart_undo_url( $cart_item_key ) {
 	);
 
 	return apply_filters( 'woocommerce_get_undo_url', $cart_page_url ? wp_nonce_url( add_query_arg( $query_args, $cart_page_url ), 'woocommerce-cart' ) : '', $cart_item_key );
+}
 
-/*
+/**
  * Products RSS Feed.
  *
  * @deprecated 2.6
