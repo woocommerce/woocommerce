@@ -310,11 +310,12 @@ function wc_product_cat_class( $class = '', $category = null ) {
  * @return int
  */
 function wc_get_default_products_per_row() {
-	$columns = get_option( 'woocommerce_catalog_columns', 3 );
-
 	// Theme support.
 	$theme_support = get_theme_support( 'woocommerce' );
 	$theme_support = is_array( $theme_support ) ? $theme_support[0] : false;
+
+	$default_columns = isset( $theme_support['product_grid']['default_columns'] ) ? absint( $theme_support['product_grid']['default_columns'] ) : 3;
+	$columns = get_option( 'woocommerce_catalog_columns', $default_columns );
 
 	if ( isset( $theme_support['product_grid']['min_columns'] ) && $columns < $theme_support['product_grid']['min_columns'] ) {
 		$columns = $theme_support['product_grid']['min_columns'];
@@ -339,11 +340,12 @@ function wc_get_default_products_per_row() {
  * @return int
  */
 function wc_get_default_product_rows_per_page() {
-	$rows = absint( get_option( 'woocommerce_catalog_rows', 4 ) );
-
 	// Theme support.
 	$theme_support = get_theme_support( 'woocommerce' );
 	$theme_support = is_array( $theme_support ) ? $theme_support[0] : false;
+
+	$default_rows = isset( $theme_support['product_grid']['default_rows'] ) ? absint( $theme_support['product_grid']['default_rows'] ) : 4;
+	$rows = absint( get_option( 'woocommerce_catalog_rows', $default_rows ) );
 
 	if ( isset( $theme_support['product_grid']['min_rows'] ) && $rows < $theme_support['product_grid']['min_rows'] ) {
 		$rows = $theme_support['product_grid']['min_rows'];
@@ -960,7 +962,8 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 if ( ! function_exists( 'woocommerce_pagination' ) ) {
 
 	/**
-	 * Output the pagination.	 */
+	 * Output the pagination.
+	 */
 	function woocommerce_pagination() {
 		if ( ! wc_get_loop_prop( 'is_paginated' ) || ! woocommerce_products_will_display() ) {
 			return;
