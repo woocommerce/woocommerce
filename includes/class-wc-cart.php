@@ -430,7 +430,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $value Value to set.
 	 */
 	public function set_subtotal( $value ) {
-		$this->totals['subtotal'] = wc_format_decimal( $value );
+		$this->totals['subtotal'] = wc_format_decimal( $value, wc_get_price_decimals() );
 	}
 
 	/**
@@ -460,7 +460,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $value Value to set.
 	 */
 	public function set_discount_tax( $value ) {
-		$this->totals['discount_tax'] = wc_format_decimal( $value );
+		$this->totals['discount_tax'] = wc_round_tax_total( $value );
 	}
 
 	/**
@@ -470,7 +470,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $value Value to set.
 	 */
 	public function set_shipping_total( $value ) {
-		$this->totals['shipping_total'] = wc_format_decimal( $value );
+		$this->totals['shipping_total'] = wc_format_decimal( $value, wc_get_price_decimals() );
 	}
 
 	/**
@@ -490,7 +490,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $value Value to set.
 	 */
 	public function set_cart_contents_total( $value ) {
-		$this->totals['cart_contents_total'] = wc_format_decimal( $value );
+		$this->totals['cart_contents_total'] = wc_format_decimal( $value, wc_get_price_decimals() );
 	}
 
 	/**
@@ -510,7 +510,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $value Value to set.
 	 */
 	public function set_total( $value ) {
-		$this->totals['total'] = wc_format_decimal( $value );
+		$this->totals['total'] = wc_format_decimal( $value, wc_get_price_decimals() );
 	}
 
 	/**
@@ -530,7 +530,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $value Value to set.
 	 */
 	public function set_fee_total( $value ) {
-		$this->totals['fee_total'] = wc_format_decimal( $value );
+		$this->totals['fee_total'] = wc_format_decimal( $value, wc_get_price_decimals() );
 	}
 
 	/**

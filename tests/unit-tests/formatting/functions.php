@@ -221,15 +221,29 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Test wc_round_tax_total().
 	 *
-	 * Note the PHP 5.2 section of wc_round_tax_total() is excluded from test.
-	 * coverage.
-	 *
 	 * @since 2.2
 	 */
 	public function test_wc_round_tax_total() {
+		update_option( 'woocommerce_prices_include_tax', 'no' );
 		$this->assertEquals( 1.25, wc_round_tax_total( 1.246 ) );
 		$this->assertEquals( 20, wc_round_tax_total( 19.9997 ) );
 		$this->assertEquals( 19.99, wc_round_tax_total( 19.99 ) );
+		$this->assertEquals( 19.99, wc_round_tax_total( 19.99 ) );
+		$this->assertEquals( 83, wc_round_tax_total( 82.5, 0 ) );
+		$this->assertEquals( 83, wc_round_tax_total( 82.54, 0 ) );
+		$this->assertEquals( 83, wc_round_tax_total( 82.546, 0 ) );
+
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		$this->assertEquals( 1.25, wc_round_tax_total( 1.246 ) );
+		$this->assertEquals( 20, wc_round_tax_total( 19.9997 ) );
+		$this->assertEquals( 19.99, wc_round_tax_total( 19.99 ) );
+		$this->assertEquals( 19.99, wc_round_tax_total( 19.99 ) );
+		$this->assertEquals( 82, wc_round_tax_total( 82.5, 0 ) );
+		$this->assertEquals( 83, wc_round_tax_total( 82.54, 0 ) );
+		$this->assertEquals( 83, wc_round_tax_total( 82.546, 0 ) );
+
+		// Default.
+		update_option( 'woocommerce_prices_include_tax', 'no' );
 	}
 
 	/**
