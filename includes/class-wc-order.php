@@ -1381,7 +1381,7 @@ class WC_Order extends WC_Abstract_Order {
 			}
 		}
 
-		return apply_filters( 'woocommerce_get_downloadable_items', $downloads );
+		return apply_filters( 'woocommerce_order_get_downloadable_items', $downloads, $this );
 	}
 
 	/**
