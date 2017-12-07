@@ -18,14 +18,14 @@ class WC_Tax {
 	/**
 	 * Precision.
 	 *
-	 * @deprecated 3.3.0
+	 * @var int
 	 */
 	public static $precision;
 
 	/**
 	 * Round at subtotal.
 	 *
-	 * @deprecated 3.3.0
+	 * @var bool
 	 */
 	public static $round_at_subtotal = false;
 
