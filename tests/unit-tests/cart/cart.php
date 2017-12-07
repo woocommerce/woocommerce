@@ -374,7 +374,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_calc_taxes', 'no' );
 	}
 
-
 	/**
 	 * Helper that can be hooked to a filter to force the customer's shipping country to be GB.
 	 *
@@ -588,10 +587,10 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		$cart_totals = WC()->cart->get_totals();
 
-		$this->assertEquals( '2.44', number_format( $cart_totals['total_tax'], 2, '.', '' ) );
-		$this->assertEquals( '2.44', number_format( $cart_totals['cart_contents_tax'], 2, '.', '' ) );
-		$this->assertEquals( '44.17', number_format( $cart_totals['cart_contents_total'], 2, '.', '' ) );
-		$this->assertEquals( '46.61', number_format( $cart_totals['total'], 2, '.', '' ) );
+		$this->assertEquals( '2.44', wc_format_decimal( $cart_totals['total_tax'], 2 ) );
+		$this->assertEquals( '2.44', wc_format_decimal( $cart_totals['cart_contents_tax'], 2 ) );
+		$this->assertEquals( '44.17', wc_format_decimal( $cart_totals['cart_contents_total'], 2 ) );
+		$this->assertEquals( '46.61', wc_format_decimal( $cart_totals['total'], 2 ) );
 
 		// Clean up.
 		WC()->cart->empty_cart();
