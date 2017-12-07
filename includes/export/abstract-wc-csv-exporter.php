@@ -219,7 +219,7 @@ abstract class WC_CSV_Exporter {
 			if ( ! $this->is_column_exporting( $column_id ) ) {
 				continue;
 			}
-			$export_row[] = $column_name;
+			$export_row[] = $this->format_data( $column_name );
 		}
 
 		fputcsv( $buffer, $export_row );
