@@ -337,6 +337,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-background-emailer.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-discounts.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-cart-totals.php' );
+		include_once( WC_ABSPATH . 'includes/customizer/class-wc-customizer.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-regenerate-images.php' ); // Image regeneration class.
 
 		/**
@@ -400,13 +401,11 @@ final class WooCommerce {
 	}
 
 	/**
-	 * Include classes sfor theme support.
+	 * Include classes for theme support.
 	 *
 	 * @since 3.3.0
 	 */
 	private function theme_support_includes() {
-		$theme_support = array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
-
 		if ( $this->is_active_theme( array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' ) ) ) {
 			switch ( get_template() ) {
 				case 'twentyten':

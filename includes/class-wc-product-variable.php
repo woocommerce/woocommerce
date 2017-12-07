@@ -74,11 +74,11 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Get an array of all sale and regular prices from all variations. This is used for example when displaying the price range at variable product level or seeing if the variable product is on sale.
 	 *
-	 * @param  bool $include_taxes Should taxes be included in the prices.
+	 * @param  bool  $for_display If true, prices will be adapted for display based on the `woocommerce_tax_display_shop` setting (including or excluding taxes).
 	 * @return array Array of RAW prices, regular prices, and sale prices with keys set to variation ID.
 	 */
-	public function get_variation_prices( $include_taxes = false ) {
-		$prices = $this->data_store->read_price_data( $this, $include_taxes );
+	public function get_variation_prices( $for_display = false ) {
+		$prices = $this->data_store->read_price_data( $this, $for_display );
 
 		foreach ( $prices as $price_key => $variation_prices ) {
 			$prices[ $price_key ] = $this->sort_variation_prices( $variation_prices );
@@ -90,40 +90,40 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Get the min or max variation regular price.
 	 *
-	 * @param  string  $min_or_max    Min or max price.
-	 * @param  boolean $include_taxes Should the price include taxes?
+	 * @param  string  $min_or_max  Min or max price.
+	 * @param  boolean $for_display If true, prices will be adapted for display based on the `woocommerce_tax_display_shop` setting (including or excluding taxes).
 	 * @return string
 	 */
-	public function get_variation_regular_price( $min_or_max = 'min', $include_taxes = false ) {
-		$prices = $this->get_variation_prices( $include_taxes );
+	public function get_variation_regular_price( $min_or_max = 'min', $for_display = false ) {
+		$prices = $this->get_variation_prices( $for_display );
 		$price  = 'min' === $min_or_max ? current( $prices['regular_price'] ) : end( $prices['regular_price'] );
-		return apply_filters( 'woocommerce_get_variation_regular_price', $price, $this, $min_or_max, $include_taxes );
+		return apply_filters( 'woocommerce_get_variation_regular_price', $price, $this, $min_or_max, $for_display );
 	}
 
 	/**
 	 * Get the min or max variation sale price.
 	 *
-	 * @param  string  $min_or_max    Min or max price.
-	 * @param  boolean $include_taxes Should the price include taxes?
+	 * @param  string  $min_or_max  Min or max price.
+	 * @param  boolean $for_display If true, prices will be adapted for display based on the `woocommerce_tax_display_shop` setting (including or excluding taxes).
 	 * @return string
 	 */
-	public function get_variation_sale_price( $min_or_max = 'min', $include_taxes = false ) {
-		$prices = $this->get_variation_prices( $include_taxes );
+	public function get_variation_sale_price( $min_or_max = 'min', $for_display = false ) {
+		$prices = $this->get_variation_prices( $for_display );
 		$price  = 'min' === $min_or_max ? current( $prices['sale_price'] ) : end( $prices['sale_price'] );
-		return apply_filters( 'woocommerce_get_variation_sale_price', $price, $this, $min_or_max, $include_taxes );
+		return apply_filters( 'woocommerce_get_variation_sale_price', $price, $this, $min_or_max, $for_display );
 	}
 
 	/**
 	 * Get the min or max variation (active) price.
 	 *
-	 * @param  string  $min_or_max    Min or max price.
-	 * @param  boolean $include_taxes Should the price include taxes?
+	 * @param  string  $min_or_max  Min or max price.
+	 * @param  boolean $for_display If true, prices will be adapted for display based on the `woocommerce_tax_display_shop` setting (including or excluding taxes).
 	 * @return string
 	 */
-	public function get_variation_price( $min_or_max = 'min', $include_taxes = false ) {
-		$prices = $this->get_variation_prices( $include_taxes );
+	public function get_variation_price( $min_or_max = 'min', $for_display = false ) {
+		$prices = $this->get_variation_prices( $for_display );
 		$price  = 'min' === $min_or_max ? current( $prices['price'] ) : end( $prices['price'] );
-		return apply_filters( 'woocommerce_get_variation_price', $price, $this, $min_or_max, $include_taxes );
+		return apply_filters( 'woocommerce_get_variation_price', $price, $this, $min_or_max, $for_display );
 	}
 
 	/**
