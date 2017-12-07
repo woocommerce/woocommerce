@@ -102,11 +102,6 @@ class WC_Admin_Webhooks {
 			$event    = '';
 
 			switch ( $_POST['webhook_topic'] ) { // WPCS: input var okay, CSRF ok.
-				case 'custom':
-					if ( ! empty( $_POST['webhook_custom_topic'] ) && false !== strpos( $_POST['webhook_custom_topic'], '.' ) ) { // WPCS: input var okay, CSRF ok, sanitization ok.
-						list( $resource, $event ) = explode( '.', sanitize_text_field( wp_unslash( $_POST['webhook_custom_topic'] ) ) ); // WPCS: input var okay, CSRF ok.
-					}
-					break;
 				case 'action':
 					$resource = 'action';
 					$event    = ! empty( $_POST['webhook_action_event'] ) ? sanitize_text_field( wp_unslash( $_POST['webhook_action_event'] ) ) : ''; // WPCS: input var okay, CSRF ok.
