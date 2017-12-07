@@ -287,6 +287,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-shipping-zone-data-store-interface.php' );
 		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-logger-interface.php' );
 		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-log-handler-interface.php' );
+		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-webhooks-data-store-interface.php' );
 
 		/**
 		 * Abstract classes.
@@ -366,6 +367,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/data-stores/abstract-wc-order-data-store-cpt.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-data-store-cpt.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-refund-data-store-cpt.php' );
+		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-webhook-data-store.php' );
 
 		/**
 		 * REST API.
@@ -640,19 +642,7 @@ final class WooCommerce {
 			return;
 		}
 
-		if ( false === ( $webhooks = get_transient( 'woocommerce_webhook_ids' ) ) ) { // @codingStandardsIgnoreLine
-			$webhooks = get_posts( array(
-				'fields'         => 'ids',
-				'post_type'      => 'shop_webhook',
-				'post_status'    => 'publish',
-				'posts_per_page' => -1, // @codingStandardsIgnoreLine
-			) );
-			set_transient( 'woocommerce_webhook_ids', $webhooks );
-		}
-		foreach ( $webhooks as $webhook_id ) {
-			$webhook = new WC_Webhook( $webhook_id );
-			$webhook->enqueue();
-		}
+		wc_load_webhooks();
 	}
 
 	/**
