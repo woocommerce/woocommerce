@@ -851,8 +851,6 @@ function wc_update_240_api_keys() {
 }
 
 /**
-<<<<<<< HEAD
-=======
  * Update webhooks for 2.4
  *
  * @return void
@@ -877,7 +875,6 @@ function wc_update_240_webhooks() {
 }
 
 /**
->>>>>>> master
  * Update refunds for 2.4
  *
  * @return void
@@ -1179,8 +1176,6 @@ function wc_update_260_db_version() {
 }
 
 /**
-<<<<<<< HEAD
-=======
  * Update webhooks for 3.0
  *
  * @return void
@@ -1205,7 +1200,6 @@ function wc_update_300_webhooks() {
 }
 
 /**
->>>>>>> master
  * Add an index to the field comment_type to improve the response time of the query
  * used by WC_Comments::wp_count_comments() to get the number of comments by type.
  */
