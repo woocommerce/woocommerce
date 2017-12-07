@@ -819,9 +819,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return string
 	 */
 	public function get_item_data( $cart_item, $flat = false ) {
-		wc_deprecated_function( 'WC_Cart::get_item_data', '3.3', 'wc_get_cart_item_data' );
+		wc_deprecated_function( 'WC_Cart::get_item_data', '3.3', 'wc_get_formatted_cart_item_data' );
 
-		return wc_get_cart_item_data( $cart_item, $flat );
+		return wc_get_formatted_cart_item_data( $cart_item, $flat );
 	}
 
 	/**

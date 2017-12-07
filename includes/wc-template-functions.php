@@ -2703,7 +2703,7 @@ function wc_get_theme_slug_for_templates() {
  * @param bool  $flat Should the data be returned flat or in a list.
  * @return string
  */
-function wc_get_cart_item_data( $cart_item, $flat = false ) {
+function wc_get_formatted_cart_item_data( $cart_item, $flat = false ) {
 	$item_data = array();
 
 	// Variation values are shown only if they are not found in the title as of 3.0.
