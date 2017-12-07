@@ -38,8 +38,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<?php if ( isset( $_GET['search'] ) ) : ?>
 			<h1 class="search-form-title" >
-				<?php _e( 'Showing Search results for:', 'woocommerce' ); ?>
-				<strong><?php echo esc_html( $_GET['search'] ); ?></strong>
+				<?php printf( __( 'Showing search results for: %s', 'woocommerce' ), '<strong>' . esc_html( $_GET['search'] ) . '</strong>' ); ?>
 			</h1>
 		<?php endif; ?>
 
