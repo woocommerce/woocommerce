@@ -819,7 +819,7 @@ final class WC_Cart_Totals {
 	}
 
 	/**
-	 * Apply rounding to an array of taxes before summing. Rounds to store DP setting, ignoing precision.
+	 * Apply rounding to an array of taxes before summing. Rounds to store DP setting, ignoring precision.
 	 *
 	 * @since  3.3.0
 	 * @param  float $value Tax value.
