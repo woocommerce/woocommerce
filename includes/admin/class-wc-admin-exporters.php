@@ -115,11 +115,11 @@ class WC_Admin_Exporters {
 		$exporter = new WC_Product_CSV_Exporter();
 
 		if ( ! empty( $_POST['columns'] ) ) {
-			$exporter->set_column_names( $_POST['columns'] );
+			$exporter->set_column_names( wp_unslash( $_POST['columns'] ) );
 		}
 
 		if ( ! empty( $_POST['selected_columns'] ) ) {
-			$exporter->set_columns_to_export( $_POST['selected_columns'] );
+			$exporter->set_columns_to_export( wp_unslash( $_POST['selected_columns'] ) );
 		}
 
 		if ( ! empty( $_POST['export_meta'] ) ) {
@@ -127,7 +127,7 @@ class WC_Admin_Exporters {
 		}
 
 		if ( ! empty( $_POST['export_types'] ) ) {
-			$exporter->set_product_types_to_export( $_POST['export_types'] );
+			$exporter->set_product_types_to_export( wp_unslash( $_POST['export_types'] ) );
 		}
 
 		$exporter->set_page( $step );
