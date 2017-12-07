@@ -136,14 +136,26 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return '';
 		}
 
+		// IDs are prefixed with id:.
 		if ( preg_match( '/^id:(\d+)$/', $value, $matches ) ) {
-			$id          = intval( $matches[1] );
+			$id = intval( $matches[1] );
+
+			// If original_id is found, use that instead of the given ID since a new placeholder must have been created already.
 			$original_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_original_id' AND meta_value = %s;", $id ) );
 
 			if ( $original_id ) {
 				return absint( $original_id );
-			} elseif ( ! $this->params['update_existing'] ) {
-				// If we're not updating existing posts, we need a placeholder.
+			}
+
+			// See if the given ID maps to a valid product allready.
+			$existing_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation' ) AND ID = %d;", $id ) );
+
+			if ( $existing_id ) {
+				return absint( $existing_id );
+			}
+
+			// If we're not updating existing posts, we may need a placeholder product to map to.
+			if ( ! $this->params['update_existing'] ) {
 				$product = new WC_Product_Simple();
 				$product->set_name( 'Import placeholder for ' . $id );
 				$product->set_status( 'importing' );
