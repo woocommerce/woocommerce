@@ -528,6 +528,82 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test a rounding issue on prices and totals that are entered exclusive tax.
+	 * See: #17647.
+	 *
+	 * @since 3.2.6
+	 */
+	public function test_exclusive_tax_rounding_and_totals() {
+		global $wpdb;
+
+		WC()->cart->empty_cart();
+		WC()->cart->remove_coupons();
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
+
+		$product_data = array(
+			// price, quantity.
+			array( 2.13, 1 ),
+			array( 2.55, 0.5 ),
+			array( 39, 1 ),
+			array( 1.76, 1 ),
+		);
+
+		foreach ( $product_data as $data ) {
+			$product = new WC_Product_Simple();
+			$product->set_regular_price( $data[0] );
+			$product->save();
+			$products[] = array( $product, $data[1] );
+		}
+
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '5.5',
+			'tax_rate_name'     => 'TAX',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_tax_round_at_subtotal', 'no' );
+
+		foreach ( $products as $data ) {
+			WC()->cart->add_to_cart( $data[0]->get_id(), $data[1] );
+		}
+
+		// We need this to have the calculate_totals() method calculate totals.
+		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
+			define( 'WOOCOMMERCE_CHECKOUT', true );
+		}
+
+		WC()->cart->calculate_totals();
+
+		$cart_totals = WC()->cart->get_totals();
+
+		$this->assertEquals( '2.44', wc_format_decimal( $cart_totals['total_tax'], 2 ) );
+		$this->assertEquals( '2.44', wc_format_decimal( $cart_totals['cart_contents_tax'], 2 ) );
+		$this->assertEquals( '44.17', wc_format_decimal( $cart_totals['cart_contents_total'], 2 ) );
+		$this->assertEquals( '46.61', wc_format_decimal( $cart_totals['total'], 2 ) );
+
+		// Clean up.
+		WC()->cart->empty_cart();
+		foreach ( $products as $data ) {
+			WC_Helper_Product::delete_product( $data[0]->get_id() );
+		}
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+	}
+
+	/**
 	 * Test get_remove_url.
 	 *
 	 * @since 2.3
