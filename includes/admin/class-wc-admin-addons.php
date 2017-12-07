@@ -24,7 +24,7 @@ class WC_Admin_Addons {
 	 */
 	public static function get_featured() {
 		if ( false === ( $featured = get_transient( 'wc_addons_featured' ) ) ) {
-			$raw_featured = wp_safe_remote_get( 'https://d3t0oesq8995hv.cloudfront.net/add-ons/featured.json', array( 'user-agent' => 'WooCommerce Addons Page' ) );
+			$raw_featured = wp_safe_remote_get( 'https://d3t0oesq8995hv.cloudfront.net/add-ons/featured-v2.json', array( 'user-agent' => 'WooCommerce Addons Page' ) );
 			if ( ! is_wp_error( $raw_featured ) ) {
 				$featured = json_decode( wp_remote_retrieve_body( $raw_featured ) );
 				if ( $featured ) {
@@ -160,23 +160,25 @@ class WC_Admin_Addons {
 			<p><?php echo esc_html( $block->description ); ?></p>
 			<div class="addons-banner-block-items">
 				<?php foreach ( $block->items as $item ) : ?>
-					<div class="addons-banner-block-item">
-						<div class="addons-banner-block-item-icon">
-							<img class="addons-img" src="<?php echo esc_url( $item->image ); ?>" />
+					<?php if ( self::show_extension( $item ) ) : ?>
+						<div class="addons-banner-block-item">
+							<div class="addons-banner-block-item-icon">
+								<img class="addons-img" src="<?php echo esc_url( $item->image ); ?>" />
+							</div>
+							<div class="addons-banner-block-item-content">
+								<h3><?php echo esc_html( $item->title ); ?></h3>
+								<p><?php echo esc_html( $item->description ); ?></p>
+								<?php
+									self::output_button(
+										$item->href,
+										$item->button,
+										'addons-button-solid',
+										$item->plugin
+									);
+								?>
+							</div>
 						</div>
-						<div class="addons-banner-block-item-content">
-							<h3><?php echo esc_html( $item->title ); ?></h3>
-							<p><?php echo esc_html( $item->description ); ?></p>
-							<?php
-								self::output_button(
-									$item->href,
-									$item->button,
-									'addons-button-solid',
-									$item->plugin
-								);
-							?>
-						</div>
-					</div>
+					<?php endif; ?>
 				<?php endforeach; ?>
 			</div>
 		</div>
@@ -221,25 +223,25 @@ class WC_Admin_Addons {
 			<h1><?php echo esc_html( $block->title ); ?></h1>
 			<p><?php echo esc_html( $block->description ); ?></p>
 			<?php foreach ( $block->items as $item ) : ?>
-				<div class="addons-column-block-item">
-					<div class="addons-column-block-item-icon">
-						<img class="addons-img" src="<?php echo esc_url( $item->image ); ?>" />
+				<?php if ( self::show_extension( $item ) ) : ?>
+					<div class="addons-column-block-item">
+						<div class="addons-column-block-item-icon">
+							<img class="addons-img" src="<?php echo esc_url( $item->image ); ?>" />
+						</div>
+						<div class="addons-column-block-item-content">
+							<h2><?php echo esc_html( $item->title ); ?></h2>
+							<?php
+								self::output_button(
+									$item->href,
+									$item->button,
+									'addons-button-solid',
+									$item->plugin
+								);
+							?>
+							<p><?php echo esc_html( $item->description ); ?></p>
+						</div>
 					</div>
-
-					<div class="addons-column-block-item-content">
-						<h2><?php echo esc_html( $item->title ); ?></h2>
-						<?php
-							self::output_button(
-								$item->href,
-								$item->button,
-								'addons-button-solid',
-								$item->plugin
-							);
-						?>
-						<p><?php echo esc_html( $item->description ); ?></p>
-
-					</div>
-				</div>
+				<?php endif; ?>
 			<?php endforeach; ?>
 		</div>
 
@@ -505,5 +507,28 @@ class WC_Admin_Addons {
 
 		wp_safe_redirect( remove_query_arg( array( 'install-addon', '_wpnonce' ) ) );
 		exit;
+	}
+
+	/**
+	 * Should an extension be shown on the featured page.
+	 *
+	 * @param object $item
+	 * @return boolean
+	 */
+	public static function show_extension( $item ) {
+		$location = WC()->countries->get_base_country();
+		if ( isset( $item->geowhitelist ) && ! in_array( $location, $item->geowhitelist, true ) ) {
+			return false;
+		}
+
+		if ( isset( $item->geoblacklist ) && in_array( $location, $item->geoblacklist, true ) ) {
+			return false;
+		}
+
+		if ( is_plugin_active( $item->plugin ) ) {
+			return false;
+		}
+
+		return true;
 	}
 }

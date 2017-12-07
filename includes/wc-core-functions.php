@@ -710,11 +710,16 @@ function wc_get_image_size( $image_size ) {
 		if ( 'uncropped' === $cropping ) {
 			$size['height'] = 9999999999;
 			$size['crop']   = 0;
+		} elseif ( 'custom' === $cropping ) {
+			$width          = max( 1, get_option( 'woocommerce_thumbnail_cropping_custom_width', '4' ) );
+			$height         = max( 1, get_option( 'woocommerce_thumbnail_cropping_custom_width', '3' ) );
+			$size['height'] = round( ( $size['width'] / $width ) * $height );
+			$size['crop']   = 1;
 		} else {
 			$cropping_split = explode( ':', $cropping );
-			$width_ratio    = max( 1, current( $cropping_split ) );
-			$height_ratio   = max( 1, end( $cropping_split ) );
-			$size['height'] = round( ( $size['width'] / $width_ratio ) * $height_ratio );
+			$width          = max( 1, current( $cropping_split ) );
+			$height         = max( 1, end( $cropping_split ) );
+			$size['height'] = round( ( $size['width'] / $width ) * $height );
 			$size['crop']   = 1;
 		}
 		$image_size = 'thumbnail';
@@ -1495,17 +1500,17 @@ function wc_get_rounding_precision() {
 }
 
 /**
- * Add precision to a number and return an int.
+ * Add precision to a number and return a number.
  *
  * @since  3.2.0
  * @param  float $value Number to add precision to.
- * @param  bool  $round Should we round after adding precision?.
+ * @param  bool  $round If should round after adding precision.
  * @return int|float
  */
 function wc_add_number_precision( $value, $round = true ) {
-	$precision = pow( 10, wc_get_price_decimals() );
-	$value     = $value * $precision;
-	return $round ? intval( round( $value ) ) : $value;
+	$cent_precision = pow( 10, wc_get_price_decimals() );
+	$value          = $value * $cent_precision;
+	return $round ? round( $value, wc_get_rounding_precision() - wc_get_price_decimals() ) : $value;
 }
 
 /**
@@ -1516,8 +1521,8 @@ function wc_add_number_precision( $value, $round = true ) {
  * @return float
  */
 function wc_remove_number_precision( $value ) {
-	$precision = pow( 10, wc_get_price_decimals() );
-	return $value / $precision;
+	$cent_precision = pow( 10, wc_get_price_decimals() );
+	return $value / $cent_precision;
 }
 
 /**

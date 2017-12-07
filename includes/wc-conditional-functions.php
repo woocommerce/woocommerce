@@ -260,7 +260,7 @@ if ( ! function_exists( 'is_store_notice_showing' ) ) {
 	 * @return bool
 	 */
 	function is_store_notice_showing() {
-		return 'no' !== get_option( 'woocommerce_demo_store' );
+		return 'no' !== get_option( 'woocommerce_demo_store', 'no' );
 	}
 }
 
