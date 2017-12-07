@@ -517,7 +517,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		$data_formatting = array(
 			'id'                => array( $this, 'parse_id_field' ),
 			'type'              => array( $this, 'parse_comma_field' ),
-			'published'         => array( $this, 'parse_bool_field' ),
+			'published'         => array( $this, 'parse_float_field' ),
 			'featured'          => array( $this, 'parse_bool_field' ),
 			'date_on_sale_from' => array( $this, 'parse_date_field' ),
 			'date_on_sale_to'   => array( $this, 'parse_date_field' ),
@@ -628,8 +628,13 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 		// Status is mapped from a special published field.
 		if ( isset( $data['published'] ) ) {
-			$non_published_status = isset( $data['type'] ) && 'variation' === $data['type'] ? 'private' : 'draft';
-			$data['status']       = ( $data['published'] ? 'publish' : $non_published_status );
+			$statuses      = array(
+				-1 => 'draft',
+				0  => 'private',
+				1  => 'publish',
+			);
+			$data['status'] = isset( $statuses[ $data['published'] ] ) ? $statuses[ $data['published'] ] : -1;
+
 			unset( $data['published'] );
 		}
 

@@ -130,7 +130,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	public function prepare_data_to_export() {
 		$columns  = $this->get_column_names();
 		$args = apply_filters( "woocommerce_product_export_{$this->export_type}_query_args", array(
-			'status'   => array( 'private', 'publish' ),
+			'status'   => array( 'private', 'publish', 'draft' ),
 			'type'     => $this->product_types_to_export,
 			'limit'    => $this->get_limit(),
 			'page'     => $this->get_page(),
@@ -188,7 +188,15 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * @return int
 	 */
 	protected function get_column_value_published( $product ) {
-		return 'publish' === $product->get_status( 'edit' ) ? 1 : 0;
+		$statuses = array(
+			'draft'   => -1,
+			'private' => 0,
+			'publish' => 1,
+		);
+
+		$status = $product->get_status( 'edit' );
+
+		return isset( $statuses[ $status ] ) ? $statuses[ $status ] : -1;
 	}
 
 	/**
