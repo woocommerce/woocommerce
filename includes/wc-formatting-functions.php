@@ -237,7 +237,7 @@ function wc_round_tax_total( $value, $precision = null ) {
 /**
  * Round half down in PHP 5.2.
  *
- * @since 3.3
+ * @since 3.2.6
  * @param float $value Value to round.
  * @param int   $precision Precision to round down to.
  * @return float
