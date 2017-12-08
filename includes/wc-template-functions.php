@@ -960,7 +960,8 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 if ( ! function_exists( 'woocommerce_pagination' ) ) {
 
 	/**
-	 * Output the pagination.	 */
+	 * Output the pagination.
+	 */
 	function woocommerce_pagination() {
 		if ( ! wc_get_loop_prop( 'is_paginated' ) || ! woocommerce_products_will_display() ) {
 			return;
@@ -2696,6 +2697,109 @@ add_action( 'wp_head', 'wc_page_noindex' );
  */
 function wc_get_theme_slug_for_templates() {
 	return apply_filters( 'woocommerce_theme_slug_for_templates', get_option( 'template' ) );
+}
+
+/**
+ * Gets and formats a list of cart item data + variations for display on the frontend.
+ *
+ * @since 3.3.0
+ * @param array $cart_item Cart item object.
+ * @param bool  $flat Should the data be returned flat or in a list.
+ * @return string
+ */
+function wc_get_formatted_cart_item_data( $cart_item, $flat = false ) {
+	$item_data = array();
+
+	// Variation values are shown only if they are not found in the title as of 3.0.
+	// This is because variation titles display the attributes.
+	if ( $cart_item['data']->is_type( 'variation' ) && is_array( $cart_item['variation'] ) ) {
+		foreach ( $cart_item['variation'] as $name => $value ) {
+			$taxonomy = wc_attribute_taxonomy_name( str_replace( 'attribute_pa_', '', urldecode( $name ) ) );
+
+			if ( taxonomy_exists( $taxonomy ) ) {
+				// If this is a term slug, get the term's nice name.
+				$term = get_term_by( 'slug', $value, $taxonomy );
+				if ( ! is_wp_error( $term ) && $term && $term->name ) {
+					$value = $term->name;
+				}
+				$label = wc_attribute_label( $taxonomy );
+			} else {
+				// If this is a custom option slug, get the options name.
+				$value = apply_filters( 'woocommerce_variation_option_name', $value );
+				$label = wc_attribute_label( str_replace( 'attribute_', '', $name ), $cart_item['data'] );
+			}
+
+			// Check the nicename against the title.
+			if ( '' === $value || wc_is_attribute_in_product_name( $value, $cart_item['data']->get_name() ) ) {
+				continue;
+			}
+
+			$item_data[] = array(
+				'key'   => $label,
+				'value' => $value,
+			);
+		}
+	}
+
+	// Filter item data to allow 3rd parties to add more to the array.
+	$item_data = apply_filters( 'woocommerce_get_item_data', $item_data, $cart_item );
+
+	// Format item data ready to display.
+	foreach ( $item_data as $key => $data ) {
+		// Set hidden to true to not display meta on cart.
+		if ( ! empty( $data['hidden'] ) ) {
+			unset( $item_data[ $key ] );
+			continue;
+		}
+		$item_data[ $key ]['key']     = ! empty( $data['key'] ) ? $data['key'] : $data['name'];
+		$item_data[ $key ]['display'] = ! empty( $data['display'] ) ? $data['display'] : $data['value'];
+	}
+
+	// Output flat or in list format.
+	if ( count( $item_data ) > 0 ) {
+		ob_start();
+
+		if ( $flat ) {
+			foreach ( $item_data as $data ) {
+				echo esc_html( $data['key'] ) . ': ' . wp_kses_post( $data['display'] ) . "\n";
+			}
+		} else {
+			wc_get_template( 'cart/cart-item-data.php', array( 'item_data' => $item_data ) );
+		}
+
+		return ob_get_clean();
+	}
+
+	return '';
+}
+
+/**
+ * Gets the url to remove an item from the cart.
+ *
+ * @since 3.3.0
+ * @param string $cart_item_key contains the id of the cart item.
+ * @return string url to page
+ */
+function wc_get_cart_remove_url( $cart_item_key ) {
+	$cart_page_url = wc_get_page_permalink( 'cart' );
+	return apply_filters( 'woocommerce_get_remove_url', $cart_page_url ? wp_nonce_url( add_query_arg( 'remove_item', $cart_item_key, $cart_page_url ), 'woocommerce-cart' ) : '' );
+}
+
+/**
+ * Gets the url to re-add an item into the cart.
+ *
+ * @since 3.3.0
+ * @param  string $cart_item_key Cart item key to undo.
+ * @return string url to page
+ */
+function wc_get_cart_undo_url( $cart_item_key ) {
+	$cart_page_url = wc_get_page_permalink( 'cart' );
+
+	$query_args = array(
+		'undo_item' => $cart_item_key,
+	);
+
+	return apply_filters( 'woocommerce_get_undo_url', $cart_page_url ? wp_nonce_url( add_query_arg( $query_args, $cart_page_url ), 'woocommerce-cart' ) : '', $cart_item_key );
 }
 
 /**

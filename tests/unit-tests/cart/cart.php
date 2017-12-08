@@ -616,7 +616,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$cart_item_key = 'test';
 
 		// Do the check
-		$this->assertEquals( apply_filters( 'woocommerce_get_remove_url', $cart_page_url ? wp_nonce_url( add_query_arg( 'remove_item', $cart_item_key, $cart_page_url ), 'woocommerce-cart' ) : '' ), WC()->cart->get_remove_url( $cart_item_key ) );
+		$this->assertEquals( apply_filters( 'woocommerce_get_remove_url', $cart_page_url ? wp_nonce_url( add_query_arg( 'remove_item', $cart_item_key, $cart_page_url ), 'woocommerce-cart' ) : '' ), wc_get_cart_remove_url( $cart_item_key ) );
 	}
 
 	/**
