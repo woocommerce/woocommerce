@@ -20,6 +20,7 @@
 }
 
 .wc_addons_wrap {
+	max-width: 1200px;
 
 	h1.search-form-title {
 		clear: left;
@@ -31,14 +32,15 @@
 		display: block;
 		position: relative;
 		margin-top: 1em;
-		width: 100%;
+		margin-bottom: 1em;
 
 		input {
-			border: none;
-			box-shadow: 0 0 1px rgba(0, 0, 0, 0.2);
+			border: 1px solid #ddd;
+			box-shadow: none;
 			height: 53px;
 			padding-left: 50px;
 			width: 100%;
+			margin: 0;
 		}
 
 		button {
@@ -65,7 +67,7 @@
 	}
 
 	.addons-featured {
-		max-width: 1140px;
+		margin: 0;
 	}
 
 	ul.subsubsub.subsubsub {
@@ -90,10 +92,9 @@
 	.addons-banner-block,
 	.addons-wcs-banner-block {
 		background: #ffffff;
-		box-shadow: 0 0 1px rgba(0, 0, 0, 0.2);
-		margin: 2% 0;
-		max-width: 1140px;
-		padding: 20px;
+		border: 1px solid #ddd;
+		margin: 0 0 1em 0;
+		padding: 2em 2em 1em;
 	}
 
 	.addons-banner-block img {
@@ -115,9 +116,8 @@
 	.addons-banner-block-item {
 		border: 1px solid #e6e6e6;
 		border-radius: 3px;
-		flex: 1 1 200px;
-		margin: 10px;
-		max-width: 350px;
+		flex: 1;
+		margin: 1em;
 		min-width: 200px;
 		width: 30%;
 	}
@@ -194,17 +194,21 @@
 	}
 
 	.addons-column {
-		flex: 1 1 200px;
-		margin: 0 1%;
-		width: 49.5%;
+		flex: 1;
+		width: 50%;
+		padding: 0 .5em;
+	}
+
+	.addons-column:nth-child(2) {
+		margin-right: 0;
 	}
 
 	.addons-small-light-block,
 	.addons-small-dark-block,
 	.addons-column-block {
 		box-sizing: border-box;
-		box-shadow: 0 0 1px rgba(0, 0, 0, 0.2);
-		margin: 4% 0 0;
+		border: 1px solid #ddd;
+		margin: 0 0 1em;
 		padding: 20px;
 	}
 
@@ -245,7 +249,7 @@
 
 	.addons-column-block-item-content {
 		display: flex;
-		flex: 1 1 200px;
+		flex: 1;
 		flex-wrap: wrap;
 		height: 20%;
 		justify-content: space-between;
@@ -417,25 +421,37 @@
 
 	.products {
 		overflow: hidden;
+		display: flex;
+		flex-flow: row;
+		flex-wrap: wrap;
+		margin: 0 -.5em;
 
 		li {
 			float: left;
-			margin: 0 1em 1em 0 !important;
+			border: 1px solid #ddd;
+			margin: 0 .5em 1em !important;
 			padding: 0;
 			vertical-align: top;
-			width: 300px;
+			width: 25%;
+			min-width: 280px;
+			min-height: 220px;
+			flex: 1;
+			overflow: hidden;
+			background: #f5f5f5;
+			box-shadow:
+				inset 0 1px 0 rgba(255, 255, 255, 0.2),
+				inset 0 -1px 0 rgba(0, 0, 0, 0.1);
 
 			a {
 				text-decoration: none;
 				color: inherit;
-				border: 1px solid #ddd;
 				display: block;
-				min-height: 220px;
-				overflow: hidden;
-				background: #f5f5f5;
-				box-shadow:
-					inset 0 1px 0 rgba(255, 255, 255, 0.2),
-					inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+				height: 100%;
+
+				.product-img-wrap {
+					background: #fff;
+					display: block;
+				}
 
 				img {
 					max-width: 258px;
