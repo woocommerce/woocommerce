@@ -357,7 +357,7 @@ function wc_get_default_product_rows_per_page() {
 }
 
 /**
- * Reset the product grid settings if the current theme has default product grid settings defined.
+ * Reset the product grid settings when a new theme is activated.
  *
  * @since 3.3.0
  */
