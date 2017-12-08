@@ -32,6 +32,7 @@
 		position: relative;
 		margin-top: 1em;
 		margin-right: 1em;
+		margin-bottom: 1em;
 
 		input {
 			border: none;
@@ -65,7 +66,7 @@
 	}
 
 	.addons-featured {
-		max-width: 1140px;
+		margin: 0 1em 0 0;
 	}
 
 	ul.subsubsub.subsubsub {
@@ -91,9 +92,8 @@
 	.addons-wcs-banner-block {
 		background: #ffffff;
 		box-shadow: 0 0 1px rgba(0, 0, 0, 0.2);
-		margin: 2% 0;
-		max-width: 1140px;
-		padding: 20px;
+		margin: 0 0 1em 0;
+		padding: 2em 2em 1em;
 	}
 
 	.addons-banner-block img {
@@ -115,9 +115,8 @@
 	.addons-banner-block-item {
 		border: 1px solid #e6e6e6;
 		border-radius: 3px;
-		flex: 1 1 200px;
-		margin: 10px;
-		max-width: 350px;
+		flex: 1;
+		margin: 1em;
 		min-width: 200px;
 		width: 30%;
 	}
@@ -194,9 +193,13 @@
 	}
 
 	.addons-column {
-		flex: 1 1 200px;
-		margin: 0 1%;
-		width: 49.5%;
+		flex: 1;
+		margin-right: 1em;
+		width: 50%;
+	}
+
+	.addons-column:nth-child(2) {
+		margin-right: 0;
 	}
 
 	.addons-small-light-block,
@@ -204,7 +207,7 @@
 	.addons-column-block {
 		box-sizing: border-box;
 		box-shadow: 0 0 1px rgba(0, 0, 0, 0.2);
-		margin: 4% 0 0;
+		margin: 0 0 1em;
 		padding: 20px;
 	}
 
@@ -245,7 +248,7 @@
 
 	.addons-column-block-item-content {
 		display: flex;
-		flex: 1 1 200px;
+		flex: 1;
 		flex-wrap: wrap;
 		height: 20%;
 		justify-content: space-between;
