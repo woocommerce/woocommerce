@@ -66,6 +66,11 @@ final class WC_Cart_Fees {
 	}
 
 	/**
+	 * Register methods for this object on the appropriate WordPress hooks.
+	 */
+	public function init() {}
+
+	/**
 	 * Add a fee. Fee IDs must be unique.
 	 *
 	 * @since 3.2.0
