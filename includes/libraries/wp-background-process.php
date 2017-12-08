@@ -184,17 +184,21 @@ abstract class WP_Background_Process extends WP_Async_Request {
 	protected function is_queue_empty() {
 		global $wpdb;
 
-		$key = $wpdb->esc_like( $this->identifier . '_batch_' ) . '%';
+		$table  = $wpdb->options;
+		$column = 'option_name';
 
 		if ( is_multisite() ) {
-			$count = $wpdb->get_var( $wpdb->prepare( "
-				SELECT COUNT(*) FROM {$wpdb->sitemeta} WHERE meta_key LIKE %s AND site_id = %d
-			", $key, get_current_blog_id() ) );
-		} else {
-			$count = $wpdb->get_var( $wpdb->prepare( "
-				SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE %s
-			", $key ) );
+			$table  = $wpdb->sitemeta;
+			$column = 'meta_key';
 		}
+
+		$key = $wpdb->esc_like( $this->identifier . '_batch_' ) . '%';
+
+		$count = $wpdb->get_var( $wpdb->prepare( "
+		SELECT COUNT(*)
+		FROM {$table}
+		WHERE {$column} LIKE %s
+	", $key ) );
 
 		return ( $count > 0 ) ? false : true;
 	}
@@ -244,31 +248,34 @@ abstract class WP_Background_Process extends WP_Async_Request {
 	}
 
 	/**
-	 * Get batch.
+	 * Get batch
 	 *
 	 * @return stdClass Return the first batch from the queue
 	 */
 	protected function get_batch() {
 		global $wpdb;
 
-		$key = $wpdb->esc_like( $this->identifier . '_batch_' ) . '%';
+		$table        = $wpdb->options;
+		$column       = 'option_name';
+		$key_column   = 'option_id';
+		$value_column = 'option_value';
 
 		if ( is_multisite() ) {
+			$table        = $wpdb->sitemeta;
+			$column       = 'meta_key';
+			$key_column   = 'meta_id';
 			$value_column = 'meta_value';
-			$query        = $wpdb->get_row( $wpdb->prepare( "
-				SELECT * FROM {$wpdb->sitemeta}
-				WHERE meta_key LIKE %s
-				AND site_id = %d
-				ORDER BY meta_id ASC LIMIT 1
-			", $key, get_current_blog_id() ) );
-		} else {
-			$value_column = 'option_value';
-			$query        = $wpdb->get_row( $wpdb->prepare( "
-				SELECT * FROM {$wpdb->options}
-				WHERE option_name LIKE %s
-				ORDER BY option_id ASC LIMIT 1
-			", $key ) );
 		}
+
+		$key = $wpdb->esc_like( $this->identifier . '_batch_' ) . '%';
+
+		$query = $wpdb->get_row( $wpdb->prepare( "
+		SELECT *
+		FROM {$table}
+		WHERE {$column} LIKE %s
+		ORDER BY {$key_column} ASC
+		LIMIT 1
+		", $key ) );
 
 		$batch       = new stdClass();
 		$batch->key  = $query->$value_column;
