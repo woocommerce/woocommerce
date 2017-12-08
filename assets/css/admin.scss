@@ -3127,7 +3127,6 @@ img.help_tip {
 		}
 
 		// Give regular settings inputs a standard width and padding.
-		select,
 		textarea,
 		input[type="text"],
 		input[type="email"],
@@ -3139,7 +3138,16 @@ img.help_tip {
 			box-sizing: border-box;
 		}
 
-		// Ignore nested inputs.
+		select {
+			width: 400px;
+			margin: 0;
+			box-sizing: border-box;
+		}
+
+		input[size] {
+			width: auto !important;
+		}
+
 		table {
 			select,
 			textarea,
