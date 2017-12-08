@@ -20,6 +20,7 @@
 }
 
 .wc_addons_wrap {
+	max-width: 1200px;
 
 	h1.search-form-title {
 		clear: left;
@@ -31,15 +32,15 @@
 		display: block;
 		position: relative;
 		margin-top: 1em;
-		margin-right: 1em;
 		margin-bottom: 1em;
 
 		input {
-			border: none;
-			box-shadow: 0 0 1px rgba(0, 0, 0, 0.2);
+			border: 1px solid #ddd;
+			box-shadow: none;
 			height: 53px;
 			padding-left: 50px;
 			width: 100%;
+			margin: 0;
 		}
 
 		button {
@@ -66,7 +67,7 @@
 	}
 
 	.addons-featured {
-		margin: 0 1em 0 0;
+		margin: 0;
 	}
 
 	ul.subsubsub.subsubsub {
@@ -91,7 +92,7 @@
 	.addons-banner-block,
 	.addons-wcs-banner-block {
 		background: #ffffff;
-		box-shadow: 0 0 1px rgba(0, 0, 0, 0.2);
+		border: 1px solid #ddd;
 		margin: 0 0 1em 0;
 		padding: 2em 2em 1em;
 	}
@@ -194,8 +195,8 @@
 
 	.addons-column {
 		flex: 1;
-		margin-right: 1em;
 		width: 50%;
+		padding: 0 .5em;
 	}
 
 	.addons-column:nth-child(2) {
@@ -206,7 +207,7 @@
 	.addons-small-dark-block,
 	.addons-column-block {
 		box-sizing: border-box;
-		box-shadow: 0 0 1px rgba(0, 0, 0, 0.2);
+		border: 1px solid #ddd;
 		margin: 0 0 1em;
 		padding: 20px;
 	}
@@ -423,28 +424,29 @@
 		display: flex;
 		flex-flow: row;
 		flex-wrap: wrap;
+		margin: 0 -.5em;
 
 		li {
 			float: left;
-			margin: 0;
+			border: 1px solid #ddd;
+			margin: 0 .5em 1em !important;
 			padding: 0;
 			vertical-align: top;
 			width: 25%;
-			min-width: 300px;
+			min-width: 280px;
+			min-height: 220px;
 			flex: 1;
+			overflow: hidden;
+			background: #f5f5f5;
+			box-shadow:
+				inset 0 1px 0 rgba(255, 255, 255, 0.2),
+				inset 0 -1px 0 rgba(0, 0, 0, 0.1);
 
 			a {
-				margin: 0 1em 1em 0 !important;
 				text-decoration: none;
 				color: inherit;
-				border: 1px solid #ddd;
 				display: block;
-				min-height: 220px;
-				overflow: hidden;
-				background: #f5f5f5;
-				box-shadow:
-					inset 0 1px 0 rgba(255, 255, 255, 0.2),
-					inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+				height: 100%;
 
 				.product-img-wrap {
 					background: #fff;
