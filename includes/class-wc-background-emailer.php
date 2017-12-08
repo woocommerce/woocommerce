@@ -29,16 +29,17 @@ if ( ! class_exists( 'WP_Background_Process', false ) ) {
 class WC_Background_Emailer extends WP_Background_Process {
 
 	/**
-	 * @var string
-	 */
-	protected $action = 'wc_emailer';
-
-	/**
-	 * Initiate new background process
+	 * Initiate new background process.
 	 */
 	public function __construct() {
-		parent::__construct();
+		// Uses unique prefix per blog so each blog has separate queue.
+		$this->prefix = 'wp_' . get_current_blog_id();
+		$this->action = 'wc_emailer';
+
+		// Dispatch queue after shutdown.
 		add_action( 'shutdown', array( $this, 'dispatch_queue' ) );
+
+		parent::__construct();
 	}
 
 	/**

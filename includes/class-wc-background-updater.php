@@ -29,9 +29,15 @@ if ( ! class_exists( 'WP_Background_Process', false ) ) {
 class WC_Background_Updater extends WP_Background_Process {
 
 	/**
-	 * @var string
+	 * Initiate new background process.
 	 */
-	protected $action = 'wc_updater';
+	public function __construct() {
+		// Uses unique prefix per blog so each blog has separate queue.
+		$this->prefix = 'wp_' . get_current_blog_id();
+		$this->action = 'wc_updater';
+
+		parent::__construct();
+	}
 
 	/**
 	 * Dispatch updater.
