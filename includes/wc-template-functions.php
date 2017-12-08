@@ -357,6 +357,29 @@ function wc_get_default_product_rows_per_page() {
 }
 
 /**
+ * Reset the product grid settings if the current theme has default product grid settings defined.
+ *
+ * @since 3.3.0
+ */
+function wc_maybe_reset_product_grid() {
+	$theme_support = get_theme_support( 'woocommerce' );
+	$theme_support = is_array( $theme_support ) ? $theme_support[0] : false;
+
+	if ( isset( $theme_support['product_grid']['default_rows'] ) ) {
+		update_option( 'woocommerce_catalog_rows', absint( $theme_support['product_grid']['default_rows'] ) );
+	} else {
+		delete_option( 'woocommerce_catalog_rows' );
+	}
+
+	if ( isset( $theme_support['product_grid']['default_rows'] ) ) {
+		update_option( 'woocommerce_catalog_columns', absint( $theme_support['product_grid']['default_columns'] ) );
+	} else {
+		delete_option( 'woocommerce_catalog_columns' );
+	}
+}
+add_action( 'after_switch_theme', 'wc_maybe_reset_product_grid' );
+
+/**
  * Get classname for woocommerce loops.
  *
  * @since 2.6.0
@@ -960,7 +983,8 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 if ( ! function_exists( 'woocommerce_pagination' ) ) {
 
 	/**
-	 * Output the pagination.	 */
+	 * Output the pagination.
+	 */
 	function woocommerce_pagination() {
 		if ( ! wc_get_loop_prop( 'is_paginated' ) || ! woocommerce_products_will_display() ) {
 			return;
