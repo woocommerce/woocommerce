@@ -40,35 +40,63 @@ class WC_Admin_Addons {
 	}
 
 	/**
+	 * Build url parameter string
+	 *
+	 * @param  string $category
+	 * @param  string $term
+	 * @param  string $country
+	 *
+	 * @return string url parameter string
+	 */
+	public static function build_parameter_string( $category, $term, $country ) {
+
+		$paramters = array(
+			'category' => $category,
+			'term' => $term,
+			'country' => $country,
+		);
+
+		return '?' . http_build_query( $paramters );
+	}
+
+	/**
+	 * Call API to get extensions
+	 *
+	 * @param  string $category
+	 * @param  string $term
+	 * @param  string $country
+	 *
+	 * @return array of extensions
+	 */
+	public static function get_extension_data( $category, $term, $country ) {
+		$parameters = self::build_parameter_string( $category, $term, $country );
+		$raw_extensions = wp_remote_get(
+			'https://woocommerce.com/wp-json/wccom-extensions/1.0/search' . $parameters
+		);
+		if ( ! is_wp_error( $raw_extensions ) ) {
+			$addons = json_decode( wp_remote_retrieve_body( $raw_extensions ) )->products;
+		}
+		return $addons;
+	}
+
+	/**
 	 * Get sections for the addons screen
 	 *
 	 * @return array of objects
 	 */
 	public static function get_sections() {
-		if ( false === ( $sections = get_transient( 'wc_addons_sections' ) ) ) {
-			$raw_sections = wp_safe_remote_get( 'https://d3t0oesq8995hv.cloudfront.net/addon-sections.json', array( 'user-agent' => 'WooCommerce Addons Page' ) );
+		$addon_sections = get_transient( 'wc_addons_sections' );
+		if ( false === ( $addon_sections ) ) {
+			$raw_sections = wp_safe_remote_get(
+				'https://woocommerce.com/wp-json/wccom-extensions/1.0/categories'
+			);
 			if ( ! is_wp_error( $raw_sections ) ) {
-				$sections = json_decode( wp_remote_retrieve_body( $raw_sections ) );
-
-				if ( $sections ) {
-					set_transient( 'wc_addons_sections', $sections, WEEK_IN_SECONDS );
+				$addon_sections = json_decode( wp_remote_retrieve_body( $raw_sections ) );
+				if ( $addon_sections ) {
+					set_transient( 'wc_addons_sections', $addon_sections, WEEK_IN_SECONDS );
 				}
 			}
 		}
-
-		$addon_sections = array();
-
-		if ( $sections ) {
-			foreach ( $sections as $sections_id => $section ) {
-				if ( empty( $sections_id ) ) {
-					continue;
-				}
-				$addon_sections[ $sections_id ]           = new stdClass;
-				$addon_sections[ $sections_id ]->title    = wc_clean( $section->title );
-				$addon_sections[ $sections_id ]->endpoint = wc_clean( $section->endpoint );
-			}
-		}
-
 		return apply_filters( 'woocommerce_addons_sections', $addon_sections );
 	}
 
@@ -477,15 +505,22 @@ class WC_Admin_Addons {
 
 		$sections        = self::get_sections();
 		$theme           = wp_get_theme();
-		$section_keys    = array_keys( $sections );
-		$current_section = isset( $_GET['section'] ) ? sanitize_text_field( $_GET['section'] ) : current( $section_keys );
+		$current_section = isset( $_GET['section'] ) ? sanitize_text_field( $_GET['section'] ) : '_featured';
+		$addons = array();
+
+		if ( '_featured' !== $current_section ) {
+			$category = isset( $_GET['section'] ) ? $_GET['section'] : null;
+			$term =  isset( $_GET['search'] ) ? $_GET['search'] : null;
+			$country = WC()->countries->get_base_country();
+			$addons = self::get_extension_data( $category, $term, $country );
+		}
 
 		/**
 		 * Addon page view.
 		 *
+		 * @uses $addons
 		 * @uses $sections
 		 * @uses $theme
-		 * @uses $section_keys
 		 * @uses $current_section
 		 */
 		include_once( dirname( __FILE__ ) . '/views/html-admin-page-addons.php' );

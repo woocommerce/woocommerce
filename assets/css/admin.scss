@@ -21,6 +21,36 @@
 
 .wc_addons_wrap {
 
+	h1.search-form-title {
+		clear: left;
+		padding: 0;
+	}
+
+	form.search-form {
+		clear: both;
+		display: block;
+		position: relative;
+		margin-top: 1em;
+		width: 100%;
+
+		input {
+			border: none;
+			box-shadow: 0 0 1px rgba(0, 0, 0, 0.2);
+			height: 53px;
+			padding-left: 50px;
+			width: 100%;
+		}
+
+		button {
+			background: none;
+			border: none;
+			cursor: pointer;
+			height: 53px;
+			position: absolute;
+			width: 53px;
+		}
+	}
+
 	.update-plugins .update-count  {
 		background-color: #d54e21;
 		border-radius: 10px;
@@ -36,7 +66,18 @@
 
 	.addons-featured {
 		max-width: 1140px;
-		margin: -1%;
+	}
+
+	ul.subsubsub.subsubsub {
+		margin: -2px 0 12px;
+	}
+
+	.subsubsub li::after {
+		content: '|';
+	}
+
+	.subsubsub li:last-child::after {
+		content: '';
 	}
 
 	.addons-banner-block-item-icon,
@@ -50,7 +91,7 @@
 	.addons-wcs-banner-block {
 		background: #ffffff;
 		box-shadow: 0 0 1px rgba(0, 0, 0, 0.2);
-		margin: 2% 1% 0;
+		margin: 2% 0;
 		max-width: 1140px;
 		padding: 20px;
 	}
@@ -437,6 +478,7 @@
 	.storefront {
 		background: url('../images/storefront-bg.jpg') bottom right #f6f6f6;
 		border: 1px solid #ddd;
+		margin-top: 1em;
 		padding: 20px;
 		overflow: hidden;
 		zoom: 1;
