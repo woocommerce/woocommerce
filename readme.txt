@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, code
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
 Requires at least: 4.4
 Tested up to: 4.9
-Stable tag: 3.2.5
+Stable tag: 3.2.6
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -159,6 +159,29 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 6. A product archive (grid).
 
 == Changelog ==
+
+= 3.2.6 - 2017-12-xx =
+* Fix - CSV Importer - Fix ID mapping to existing IDs.
+* Fix - CSV Importer - Unslash header fields to avoid extra slashes.
+* Fix - CSV Importer - Allow import and export of draft products.
+* Fix - CSV Importer - Get global attribute ID only when is a global attribute.
+* Fix - Additional cart rounding fixes so rounding before subtotal works again. Added more unit tests.
+* Fix - Add BOM to exported report CSVs.
+* Fix - is_visible should ensure product is is not trashed before returning true.
+* Fix - Return packages with no rates back to the cart so the shipping calculator is displayed even when the current country is not shippable.
+* Fix - Merge session and persistent carts when both exists after login.
+* Fix - Remove "wc_error" query string after login. 
+* Fix - Allow woocommerce_form_field() have 'custom_attributes' equal 0.
+* Fix - Bulk actions in status logs table.
+* Fix - Exclude add-to-cart from pagination links.
+* Fix - Updated $GLOBALS['post'] data in products shortcode to prevent theme conflicts.
+* Fix - Only remove base taxes in cart totals class if item is taxable.
+* Fix - REST API - Fixed date format in reports schema.
+* Fix - REST API - Updated product categories image schema.
+* Fix - REST API - UUse KSES for purchase_note like in admin.
+* Tweak - Use protected instead of private methods to allow easy override in session handler.
+* Tweak - wc_lostpassword_url should not be used before init - added warning.
+* Localization - Update Japanese prefectures to include prefecture type.
 
 = 3.2.5 - 2017-11-22 =
 * Fix - WordPress 4.9 - REST API - Updated schema, sanitization, and validation callbacks to support correct data types.
