@@ -107,10 +107,17 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$date_paid = get_post_meta( $id, '_paid_date', true );
 		}
 
+		// Make sure post_author is used only after WC 3.3.0 DB upgrade routine is executed.
+		if ( version_compare( get_option( 'woocommerce_db_version' ), '3.3.0', '>=' ) ) {
+			$customer_id = $post_object->post_author;
+		} else {
+			$customer_id = get_post_meta( $id, '_customer_user', true );
+		}
+
 		$order->set_props(
 			array(
 				'order_key'            => get_post_meta( $id, '_order_key', true ),
-				'customer_id'          => $post_object->post_author,
+				'customer_id'          => $customer_id,
 				'billing_first_name'   => get_post_meta( $id, '_billing_first_name', true ),
 				'billing_last_name'    => get_post_meta( $id, '_billing_last_name', true ),
 				'billing_company'      => get_post_meta( $id, '_billing_company', true ),
