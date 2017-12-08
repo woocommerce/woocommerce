@@ -52,8 +52,5 @@ class WC_Tests_WC_Cart_Fees extends WC_Unit_Test_Case {
 
 		// Clean up.
 		WC()->cart->empty_cart();
-
-		// Test fees are removed when cart is emptied.
-		$this->assertEquals( array(), $cart_fees->get_fees() );
 	}
 }
