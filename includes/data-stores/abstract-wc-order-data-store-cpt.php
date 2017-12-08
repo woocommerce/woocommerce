@@ -69,7 +69,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 					'post_type'     => $order->get_type( 'edit' ),
 					'post_status'   => 'wc-' . ( $order->get_status( 'edit' ) ? $order->get_status( 'edit' ) : apply_filters( 'woocommerce_default_order_status', 'pending' ) ),
 					'ping_status'   => 'closed',
-					'post_author'   => is_callable( array( $order, 'get_customer_id' ) ) ? $order->get_customer_id() : 1,
+					'post_author'   => is_callable( array( $order, 'get_customer_id' ) ) ? $order->get_customer_id() : 0,
 					'post_title'    => $this->get_post_title(),
 					'post_password' => uniqid( 'order_' ),
 					'post_parent'   => $order->get_parent_id( 'edit' ),
@@ -146,7 +146,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 				'post_excerpt'      => $this->get_post_excerpt( $order ),
 				'post_modified'     => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getOffsetTimestamp() ) : current_time( 'mysql' ),
 				'post_modified_gmt' => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getTimestamp() ) : current_time( 'mysql', 1 ),
-				'post_author'       => is_callable( array( $order, 'get_customer_id' ) ) ? $order->get_customer_id() : 1,
+				'post_author'       => is_callable( array( $order, 'get_customer_id' ) ) ? $order->get_customer_id() : 0,
 			);
 
 			/**

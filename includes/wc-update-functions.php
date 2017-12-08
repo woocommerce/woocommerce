@@ -1544,7 +1544,7 @@ function wc_update_330_set_default_product_cat() {
 }
 
 /**
- * Copy order customer_id from post meta to post_author.
+ * Copy order customer_id from post meta to post_author and set post_author to 0 for refunds.
  */
 function wc_update_330_order_customer_id() {
 	global $wpdb;
@@ -1556,6 +1556,8 @@ function wc_update_330_order_customer_id() {
 	foreach ( $orders_to_update as $order ) {
 		$wpdb->update( $wpdb->posts, array( 'post_author' => $order->customer_id ), array( 'ID' => $order->post_id ) );
 	}
+
+	$wpdb->update( $wpdb->posts, array( 'post_author' => 0 ), array( 'post_type' => 'shop_order_refund' ) );
 }
 
 /**
