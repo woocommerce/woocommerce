@@ -361,7 +361,7 @@ function wc_get_default_product_rows_per_page() {
  *
  * @since 3.3.0
  */
-function wc_maybe_reset_product_grid() {
+function wc_reset_product_grid_settings() {
 	$theme_support = get_theme_support( 'woocommerce' );
 	$theme_support = is_array( $theme_support ) ? $theme_support[0] : false;
 
@@ -377,7 +377,7 @@ function wc_maybe_reset_product_grid() {
 		delete_option( 'woocommerce_catalog_columns' );
 	}
 }
-add_action( 'after_switch_theme', 'wc_maybe_reset_product_grid' );
+add_action( 'after_switch_theme', 'wc_reset_product_grid_settings' );
 
 /**
  * Get classname for woocommerce loops.
