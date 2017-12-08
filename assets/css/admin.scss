@@ -3378,7 +3378,6 @@ img.help_tip {
 		}
 
 		// Give regular settings inputs a standard width and padding.
-		select,
 		textarea,
 		input[type="text"],
 		input[type="email"],
@@ -3387,6 +3386,12 @@ img.help_tip {
 			width: 400px;
 			margin: 0;
 			padding: 6px;
+			box-sizing: border-box;
+		}
+
+		select {
+			width: 400px;
+			margin: 0;
 			box-sizing: border-box;
 		}
 
