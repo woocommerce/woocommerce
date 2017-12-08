@@ -1480,6 +1480,42 @@ function wc_update_330_image_options() {
 }
 
 /**
+ * Migrate webhooks from post type to CRUD.
+ */
+function wc_update_330_webhooks() {
+	register_post_type( 'shop_webhook' );
+
+	// Map statuses from post_type to Webhooks CRUD.
+	$statuses = array(
+		'publish' => 'active',
+		'draft'   => 'paused',
+		'pending' => 'disabled',
+	);
+
+	$posts = get_posts( array(
+		'posts_per_page' => -1,
+		'post_type'      => 'shop_webhook',
+		'post_status'    => 'any',
+	) );
+
+	foreach ( $posts as $post ) {
+		$webhook = new WC_Webhook();
+		$webhook->set_name( $post->post_title );
+		$webhook->set_status( isset( $statuses[ $post->post_status ] ) ? $statuses[ $post->post_status ] : 'disabled' );
+		$webhook->set_delivery_url( get_post_meta( $post->ID, '_delivery_url', true ) );
+		$webhook->set_secret( get_post_meta( $post->ID, '_secret', true ) );
+		$webhook->set_topic( get_post_meta( $post->ID, '_topic', true ) );
+		$webhook->set_api_version( get_post_meta( $post->ID, '_api_version', true ) );
+		$webhook->set_pending_delivery( false );
+		$webhook->save();
+
+		wp_delete_post( $post->ID, true );
+	}
+
+	unregister_post_type( 'shop_webhook' );
+}
+
+/**
  * Assign default cat to all products with no cats.
  */
 function wc_update_330_set_default_product_cat() {
@@ -1523,8 +1559,54 @@ function wc_update_330_order_customer_id() {
 }
 
 /**
+ * Update product stock status to use the new onbackorder status.
+ */
+function wc_update_330_product_stock_status() {
+	global $wpdb;
+
+	if ( 'yes' !== get_option( 'woocommerce_manage_stock' ) ) {
+		return;
+	}
+
+	$min_stock_amount = (int) get_option( 'woocommerce_notify_no_stock_amount', 0 );
+
+	// Get all products that have stock management enabled, stock less than or equal to min stock amount, and backorders enabled.
+	$post_ids = $wpdb->get_col( $wpdb->prepare( "
+		SELECT t1.post_id FROM $wpdb->postmeta t1
+		INNER JOIN $wpdb->postmeta t2
+			ON t1.post_id = t2.post_id
+			AND t1.meta_key = '_manage_stock' AND t1.meta_value = 'yes'
+			AND t2.meta_key = '_stock' AND t2.meta_value <= %d
+		INNER JOIN $wpdb->postmeta t3
+			ON t2.post_id = t3.post_id
+			AND t3.meta_key = '_backorders' AND ( t3.meta_value = 'yes' OR t3.meta_value = 'notify' )
+		", $min_stock_amount ) ); // WPCS: db call ok, unprepared SQL ok, cache ok.
+
+	if ( empty( $post_ids ) ) {
+		return;
+	}
+
+	$post_ids = array_map( 'absint', $post_ids );
+
+	// Set the status to onbackorder for those products.
+	$wpdb->query( "
+		UPDATE $wpdb->postmeta
+		SET meta_value = 'onbackorder'
+		WHERE meta_key = '_stock_status' AND post_id IN ( " . implode( ',', $post_ids ) . ' )
+		' ); // WPCS: db call ok, unprepared SQL ok, cache ok.
+}
+
+/**
  * Update DB Version.
  */
 function wc_update_330_db_version() {
 	WC_Install::update_db_version( '3.3.0' );
+}
+
+/**
+ * Clear addons page transients
+ */
+function wc_update_330_clear_transients() {
+	delete_transient( 'wc_addons_sections' );
+	delete_transient( 'wc_addons_featured' );
 }

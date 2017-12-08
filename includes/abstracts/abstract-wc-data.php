@@ -263,7 +263,7 @@ abstract class WC_Data {
 	 */
 	public function get_meta_data() {
 		$this->maybe_read_meta_data();
-		return array_filter( $this->meta_data, array( $this, 'filter_null_meta' ) );
+		return array_values( array_filter( $this->meta_data, array( $this, 'filter_null_meta' ) ) );
 	}
 
 	/**

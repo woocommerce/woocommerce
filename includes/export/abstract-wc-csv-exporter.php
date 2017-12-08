@@ -7,6 +7,7 @@
  * @package  WooCommerce/Export
  * @version  3.1.0
  */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -18,42 +19,49 @@ abstract class WC_CSV_Exporter {
 
 	/**
 	 * Type of export used in filter names.
+	 *
 	 * @var string
 	 */
 	protected $export_type = '';
 
 	/**
 	 * Batch limit.
+	 *
 	 * @var integer
 	 */
 	protected $limit = 50;
 
 	/**
 	 * Number exported.
+	 *
 	 * @var integer
 	 */
 	protected $exported_row_count = 0;
 
 	/**
 	 * Raw data to export.
+	 *
 	 * @var array
 	 */
 	protected $row_data = array();
 
 	/**
 	 * Total rows to export.
+	 *
 	 * @var integer
 	 */
 	protected $total_rows = 0;
 
 	/**
 	 * Columns ids and names.
+	 *
 	 * @var array
 	 */
 	protected $column_names = array();
 
 	/**
 	 * List of columns to export, or empty for all.
+	 *
 	 * @var array
 	 */
 	protected $columns_to_export = array();
@@ -77,7 +85,7 @@ abstract class WC_CSV_Exporter {
 	 * Set column names.
 	 *
 	 * @since 3.1.0
-	 * @param array $column_names
+	 * @param array $column_names Column names array.
 	 */
 	public function set_column_names( $column_names ) {
 		$this->column_names = array();
@@ -101,7 +109,7 @@ abstract class WC_CSV_Exporter {
 	 * Set columns to export.
 	 *
 	 * @since 3.1.0
-	 * @param array $column_names
+	 * @param array $columns Columns array.
 	 */
 	public function set_columns_to_export( $columns ) {
 		$this->columns_to_export = array_map( 'wc_clean', $columns );
@@ -111,7 +119,7 @@ abstract class WC_CSV_Exporter {
 	 * See if a column is to be exported or not.
 	 *
 	 * @since 3.1.0
-	 * @param  string $column_id
+	 * @param  string $column_id ID of the column being exported.
 	 * @return boolean
 	 */
 	public function is_column_exporting( $column_id ) {
@@ -122,7 +130,7 @@ abstract class WC_CSV_Exporter {
 			return true;
 		}
 
-		if ( in_array( $column_id, $columns_to_export ) || 'meta' === $column_id ) {
+		if ( in_array( $column_id, $columns_to_export, true ) || 'meta' === $column_id ) {
 			return true;
 		}
 
@@ -161,11 +169,11 @@ abstract class WC_CSV_Exporter {
 			gc_enable();
 		}
 		if ( function_exists( 'apache_setenv' ) ) {
-			@apache_setenv( 'no-gzip', 1 );
+			@apache_setenv( 'no-gzip', 1 ); // @codingStandardsIgnoreLine
 		}
-		@ini_set( 'zlib.output_compression', 'Off' );
-		@ini_set( 'output_buffering', 'Off' );
-		@ini_set( 'output_handler', '' );
+		@ini_set( 'zlib.output_compression', 'Off' ); // @codingStandardsIgnoreLine
+		@ini_set( 'output_buffering', 'Off' ); // @codingStandardsIgnoreLine
+		@ini_set( 'output_handler', '' ); // @codingStandardsIgnoreLine
 		ignore_user_abort( true );
 		wc_set_time_limit( 0 );
 		wc_nocache_headers();
@@ -188,9 +196,10 @@ abstract class WC_CSV_Exporter {
 	 * Set the export content.
 	 *
 	 * @since 3.1.0
+	 * @param string $csv_data All CSV content.
 	 */
 	public function send_content( $csv_data ) {
-		echo $csv_data;
+		echo $csv_data; // @codingStandardsIgnoreLine
 	}
 
 	/**
@@ -219,10 +228,10 @@ abstract class WC_CSV_Exporter {
 			if ( ! $this->is_column_exporting( $column_id ) ) {
 				continue;
 			}
-			$export_row[] = $column_name;
+			$export_row[] = $this->format_data( $column_name );
 		}
 
-		fputcsv( $buffer, $export_row );
+		fputcsv( $buffer, $export_row ); // @codingStandardsIgnoreLine
 
 		return ob_get_clean();
 	}
@@ -257,7 +266,9 @@ abstract class WC_CSV_Exporter {
 	 * Export rows to an array ready for the CSV.
 	 *
 	 * @since 3.1.0
-	 * @param array $row_data
+	 * @param array    $row_data Data to export.
+	 * @param string   $key Column being exported.
+	 * @param resource $buffer Output buffer.
 	 */
 	protected function export_row( $row_data, $key, $buffer ) {
 		$columns    = $this->get_column_names();
@@ -274,7 +285,7 @@ abstract class WC_CSV_Exporter {
 			}
 		}
 
-		fputcsv( $buffer, $export_row );
+		fputcsv( $buffer, $export_row ); // @codingStandardsIgnoreLine
 		++ $this->exported_row_count;
 	}
 
@@ -292,7 +303,7 @@ abstract class WC_CSV_Exporter {
 	 * Set batch limit.
 	 *
 	 * @since 3.1.0
-	 * @param int $limit
+	 * @param int $limit Limit to export.
 	 */
 	public function set_limit( $limit ) {
 		$this->limit = absint( $limit );
@@ -321,7 +332,7 @@ abstract class WC_CSV_Exporter {
 	 * @see https://hackerone.com/reports/72785
 	 *
 	 * @since 3.1.0
-	 * @param string $field CSV field to escape
+	 * @param string $data CSV field to escape.
 	 * @return string
 	 */
 	public function escape_data( $data ) {
@@ -338,7 +349,7 @@ abstract class WC_CSV_Exporter {
 	 * Format and escape data ready for the CSV file.
 	 *
 	 * @since 3.1.0
-	 * @param  string $data
+	 * @param  string $data Data to format.
 	 * @return string
 	 */
 	public function format_data( $data ) {
@@ -362,8 +373,8 @@ abstract class WC_CSV_Exporter {
 	 * Format term ids to names.
 	 *
 	 * @since 3.1.0
-	 * @param  array $term_ids
-	 * @param  string $taxonomy
+	 * @param  array  $term_ids Term IDs to format.
+	 * @param  string $taxonomy Taxonomy name.
 	 * @return array
 	 */
 	public function format_term_ids( $term_ids, $taxonomy ) {
@@ -413,7 +424,7 @@ abstract class WC_CSV_Exporter {
 	 * which contain the separator.
 	 *
 	 * @since  3.2.0
-	 * @param  array  $values
+	 * @param  array $values Values to implode.
 	 * @return string
 	 */
 	protected function implode_values( $values ) {

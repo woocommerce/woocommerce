@@ -484,9 +484,13 @@ function wc_track_product_view() {
 		$viewed_products = (array) explode( '|', $_COOKIE['woocommerce_recently_viewed'] );
 	}
 
-	if ( ! in_array( $post->ID, $viewed_products ) ) {
-		$viewed_products[] = $post->ID;
+	// Unset if already in viewed products list.
+	$keys = array_flip( $viewed_products );
+	if ( isset( $keys[ $post->ID ] ) ) {
+		unset( $viewed_products[ $keys[ $post->ID ] ] );
 	}
+
+	$viewed_products[] = $post->ID;
 
 	if ( count( $viewed_products ) > 15 ) {
 		array_shift( $viewed_products );
@@ -793,8 +797,9 @@ function wc_get_product_tax_class_options() {
  */
 function wc_get_product_stock_status_options() {
 	return array(
-		'instock'    => __( 'In stock', 'woocommerce' ),
-		'outofstock' => __( 'Out of stock', 'woocommerce' ),
+		'instock'     => __( 'In stock', 'woocommerce' ),
+		'outofstock'  => __( 'Out of stock', 'woocommerce' ),
+		'onbackorder' => __( 'On backorder', 'woocommerce' ),
 	);
 }
 

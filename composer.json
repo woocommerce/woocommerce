@@ -27,6 +27,22 @@
     ],
     "post-update-cmd": [
       "WooCommerce\\GitHooks\\Hooks::postHooks"
+    ],
+    "test": [
+      "phpunit"
+    ],
+    "phpcs": [
+      "phpcs -s -p --standard=./phpcs.ruleset.xml"
+    ],
+    "phpcbf": [
+      "phpcbf -p --standard=./phpcs.ruleset.xml"
     ]
+  },
+  "extra": {
+    "scripts-description": {
+      "test": "Run unit tests",
+      "phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
+      "phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier"
+    }
   }
 }

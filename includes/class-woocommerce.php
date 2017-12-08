@@ -287,6 +287,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-shipping-zone-data-store-interface.php' );
 		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-logger-interface.php' );
 		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-log-handler-interface.php' );
+		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-webhooks-data-store-interface.php' );
 
 		/**
 		 * Abstract classes.
@@ -337,6 +338,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-background-emailer.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-discounts.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-cart-totals.php' );
+		include_once( WC_ABSPATH . 'includes/customizer/class-wc-customizer.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-regenerate-images.php' ); // Image regeneration class.
 
 		/**
@@ -365,6 +367,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/data-stores/abstract-wc-order-data-store-cpt.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-data-store-cpt.php' );
 		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-refund-data-store-cpt.php' );
+		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-webhook-data-store.php' );
 
 		/**
 		 * REST API.
@@ -400,13 +403,11 @@ final class WooCommerce {
 	}
 
 	/**
-	 * Include classes sfor theme support.
+	 * Include classes for theme support.
 	 *
 	 * @since 3.3.0
 	 */
 	private function theme_support_includes() {
-		$theme_support = array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
-
 		if ( $this->is_active_theme( array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' ) ) ) {
 			switch ( get_template() ) {
 				case 'twentyten':
@@ -641,19 +642,7 @@ final class WooCommerce {
 			return;
 		}
 
-		if ( false === ( $webhooks = get_transient( 'woocommerce_webhook_ids' ) ) ) { // @codingStandardsIgnoreLine
-			$webhooks = get_posts( array(
-				'fields'         => 'ids',
-				'post_type'      => 'shop_webhook',
-				'post_status'    => 'publish',
-				'posts_per_page' => -1, // @codingStandardsIgnoreLine
-			) );
-			set_transient( 'woocommerce_webhook_ids', $webhooks );
-		}
-		foreach ( $webhooks as $webhook_id ) {
-			$webhook = new WC_Webhook( $webhook_id );
-			$webhook->enqueue();
-		}
+		wc_load_webhooks();
 	}
 
 	/**

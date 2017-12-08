@@ -145,6 +145,35 @@
 		}
 	}
 
+	ul.products {
+		&.columns-1 {
+			li.product {
+				width: 100%;
+				margin-right: 0;
+			}
+		}
+		&.columns-2 {
+			li.product {
+				width: 48%;
+			}
+		}
+		&.columns-3 {
+			li.product {
+				width: 30.75%;
+			}
+		}
+		&.columns-5 {
+			li.product {
+				width: 16.95%;
+			}
+		}
+		&.columns-6 {
+			li.product {
+				width: 13.5%;
+			}
+		}
+	}
+
 	&.columns-1 {
 		ul.products {
 			li.product {
