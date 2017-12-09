@@ -53,6 +53,13 @@ class WC_Product_CSV_Importer_Controller {
 	protected $delimiter = ',';
 
 	/**
+	 * Whether to use previous mapping selections.
+	 *
+	 * @var string
+	 */
+	protected $map_preferences = false;
+
+	/**
 	 * Whether to skip existing products.
 	 *
 	 * @var bool
@@ -105,6 +112,7 @@ class WC_Product_CSV_Importer_Controller {
 		$this->file            = isset( $_REQUEST['file'] ) ? wc_clean( $_REQUEST['file'] ) : '';
 		$this->update_existing = isset( $_REQUEST['update_existing'] ) ? (bool) $_REQUEST['update_existing'] : false;
 		$this->delimiter       = ! empty( $_REQUEST['delimiter'] ) ? wc_clean( $_REQUEST['delimiter'] ) : ',';
+		$this->map_preferences = isset( $_REQUEST['map_preferences'] ) ? (bool) $_REQUEST['map_preferences'] : false;
 	}
 
 	/**
@@ -136,6 +144,7 @@ class WC_Product_CSV_Importer_Controller {
 			'file'            => str_replace( DIRECTORY_SEPARATOR, '/', $this->file ),
 			'delimiter'       => $this->delimiter,
 			'update_existing' => $this->update_existing,
+			'map_preferences' => $this->map_preferences,
 			'_wpnonce'        => wp_create_nonce( 'woocommerce-csv-importer' ), // wp_nonce_url() escapes & to &amp; breaking redirects.
 		);
 
@@ -310,6 +319,10 @@ class WC_Product_CSV_Importer_Controller {
 			'delimiter' => $this->delimiter,
 		);
 
+		if ( $this->map_preferences ) {
+			add_filter( 'woocommerce_csv_product_import_mapped_columns', array( $this, 'auto_map_user_preferences' ), 99 );
+		}
+
 		$importer     = self::get_importer( $this->file, $args );
 		$headers      = $importer->get_raw_keys();
 		$mapped_items = $this->auto_map_columns( $headers );
@@ -346,6 +359,9 @@ class WC_Product_CSV_Importer_Controller {
 		if ( ! empty( $_POST['map_to'] ) ) {
 			$mapping_from = wp_unslash( $_POST['map_from'] );
 			$mapping_to   = wp_unslash( $_POST['map_to'] );
+
+			// Save mapping preferences for future imports.
+			update_user_option( get_current_user_id(), 'product_import_mapping_preferences', $mapping_to );
 		} else {
 			wp_redirect( esc_url_raw( $this->get_next_step_link( 'upload' ) ) );
 			exit;
@@ -486,6 +502,22 @@ class WC_Product_CSV_Importer_Controller {
 		}
 
 		return apply_filters( 'woocommerce_csv_product_import_mapped_columns', $headers, $raw_headers );
+	}
+
+	/**
+	 * Map columns using the user's lastest import mappings.
+	 *
+	 * @param  array $headers Header columns.
+	 * @return array
+	 */
+	public function auto_map_user_preferences( $headers ) {
+		$mapping_preferences = get_user_option( 'product_import_mapping_preferences' );
+
+		if ( ! empty( $mapping_preferences ) ) {
+			return $mapping_preferences;
+		}
+
+		return $headers;
 	}
 
 	/**
