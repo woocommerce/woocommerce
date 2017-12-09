@@ -1036,8 +1036,34 @@ jQuery( function ( $ ) {
 					data: data,
 					type: 'POST',
 					success: function( response ) {
-						window.alert( response );
 						wc_meta_boxes_order_items.unblock();
+						var response = JSON.parse( response );
+
+						if ( ! response.success ) {
+							window.alert( response.note );
+							return;
+						}
+
+						var order_note_data = {
+							action:    'woocommerce_add_order_note',
+							post_id:   woocommerce_admin_meta_boxes.post_id,
+							note:      response.note,
+							note_type: '',
+							security:  woocommerce_admin_meta_boxes.add_order_note_nonce
+						};
+
+						$( '#woocommerce-order-notes' ).block({
+							message: null,
+							overlayCSS: {
+								background: '#fff',
+								opacity: 0.6
+							}
+						});
+
+						$.post( woocommerce_admin_meta_boxes.ajax_url, order_note_data, function( response ) {
+							$( 'ul.order_notes' ).prepend( response );
+							$( '#woocommerce-order-notes' ).unblock();
+						});
 					}
 				});
 			},
@@ -1072,8 +1098,34 @@ jQuery( function ( $ ) {
 					data: data,
 					type: 'POST',
 					success: function( response ) {
-						window.alert( response );
 						wc_meta_boxes_order_items.unblock();
+						var response = JSON.parse( response );
+
+						if ( ! response.success ) {
+							window.alert( response.note );
+							return;
+						}
+
+						var order_note_data = {
+							action:    'woocommerce_add_order_note',
+							post_id:   woocommerce_admin_meta_boxes.post_id,
+							note:      response.note,
+							note_type: '',
+							security:  woocommerce_admin_meta_boxes.add_order_note_nonce
+						};
+
+						$( '#woocommerce-order-notes' ).block({
+							message: null,
+							overlayCSS: {
+								background: '#fff',
+								opacity: 0.6
+							}
+						});
+
+						$.post( woocommerce_admin_meta_boxes.ajax_url, order_note_data, function( response ) {
+							$( 'ul.order_notes' ).prepend( response );
+							$( '#woocommerce-order-notes' ).unblock();
+						});
 					}
 				});
 			}
