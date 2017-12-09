@@ -1120,7 +1120,7 @@ class WC_AJAX {
 					$item_name    = $_product->get_formatted_name();
 					$note         = sprintf( __( '%1$s stock reduced from %2$s to %3$s.', 'woocommerce' ), $item_name, $new_stock + $stock_change, $new_stock );
 					$return[]     = $note;
-					$order->add_order_note( $note );
+					$order->add_order_note( $note, 0, true );
 				}
 			}
 			do_action( 'woocommerce_reduce_order_stock', $order );
@@ -1160,7 +1160,7 @@ class WC_AJAX {
 					$item_name    = $_product->get_formatted_name();
 					$note         = sprintf( __( '%1$s stock increased from %2$s to %3$s.', 'woocommerce' ), $item_name, $old_stock, $new_quantity );
 					$return[]     = $note;
-					$order->add_order_note( $note );
+					$order->add_order_note( $note, 0, true );
 				}
 			}
 			do_action( 'woocommerce_restore_order_stock', $order );
