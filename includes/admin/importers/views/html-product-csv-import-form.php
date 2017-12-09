@@ -60,7 +60,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</tr>
 				<tr class="woocommerce-importer-advanced hidden">
 					<th>
-						<label for="woocommerce-importer-file-url"><?php esc_html_e( '<em>or</em> enter the path to a CSV file on your server:', 'woocommerce' ); ?></label>
+						<label for="woocommerce-importer-file-url"><?php esc_html_e( 'Alternatively, enter the path to a CSV file on your server:', 'woocommerce' ); ?></label>
 					</th>
 					<td>
 						<label for="woocommerce-importer-file-url" class="woocommerce-importer-file-url-field-wrapper">
