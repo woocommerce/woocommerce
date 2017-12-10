@@ -1006,7 +1006,8 @@ jQuery( function ( $ ) {
 				}
 			},
 
-			do_increase_stock: function( e ) {
+			modify_stock: function( e, action ) {
+				console.log(e);
 				e.preventDefault();
 				wc_meta_boxes_order_items.block();
 
@@ -1035,7 +1036,7 @@ jQuery( function ( $ ) {
 					order_id:       woocommerce_admin_meta_boxes.post_id,
 					order_item_ids: item_ids,
 					order_item_qty: quantities,
-					action:         'woocommerce_increase_order_item_stock',
+					action:         action,
 					security:       woocommerce_admin_meta_boxes.order_item_nonce
 				};
 
@@ -1073,71 +1074,12 @@ jQuery( function ( $ ) {
 				});
 			},
 
+			do_increase_stock: function( e ) {
+				wc_meta_boxes_order_items.bulk_actions.modify_stock( e, 'woocommerce_increase_order_item_stock' );
+			},
+
 			do_reduce_stock: function( e ) {
-				e.preventDefault();
-				wc_meta_boxes_order_items.block();
-
-				$( '#woocommerce-order-notes' ).block({
-					message: null,
-					overlayCSS: {
-						background: '#fff',
-						opacity: 0.6
-					}
-				});
-
-				var $table = $( 'table.woocommerce_order_items' );
-				var $rows = $table.find( 'tr.selected' );
-				var quantities = {};
-				var item_ids = $.map( $rows, function( $row ) {
-					return parseInt( $( $row ).data( 'order_item_id' ), 10 );
-				});
-
-				$rows.each(function() {
-					if ( $( this ).find( 'input.quantity' ).length ) {
-						quantities[ $( this ).attr( 'data-order_item_id' ) ] = $( this ).find( 'input.quantity' ).val();
-					}
-				});
-
-				var data = {
-					order_id:       woocommerce_admin_meta_boxes.post_id,
-					order_item_ids: item_ids,
-					order_item_qty: quantities,
-					action:         'woocommerce_reduce_order_item_stock',
-					security:       woocommerce_admin_meta_boxes.order_item_nonce
-				};
-
-				$.ajax({
-					url: woocommerce_admin_meta_boxes.ajax_url,
-					data: data,
-					type: 'POST',
-					success: function( response ) {
-						wc_meta_boxes_order_items.unblock();
-						var response = JSON.parse( response );
-
-						$.map( response, function( item ) {
-
-							// No items were updated.
-							if ( ! item.success ) {
-								window.alert( item.note );
-								return;
-							}
-
-							var order_note_data = {
-								action:    'woocommerce_add_order_note',
-								post_id:   woocommerce_admin_meta_boxes.post_id,
-								note:      item.note,
-								note_type: '',
-								security:  woocommerce_admin_meta_boxes.add_order_note_nonce
-							};
-
-							$.post( woocommerce_admin_meta_boxes.ajax_url, order_note_data, function( response ) {
-								$( 'ul.order_notes' ).prepend( response );
-							});
-						});
-
-						$( '#woocommerce-order-notes' ).unblock();
-					}
-				});
+				wc_meta_boxes_order_items.bulk_actions.modify_stock( e, 'woocommerce_reduce_order_item_stock' );
 			}
 		},
 
