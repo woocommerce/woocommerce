@@ -272,6 +272,13 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 			$args['orderby'] = 'date ID';
 		}
 
+		// get top selling product 
+		if ( 'top_sell' === $args['orderby'] ) {
+			$args['meta_key'] = 'total_sales'; 
+			add_filter( 'posts_clauses', array( $this, 'order_by_popularity_post_clauses' ) );
+		}
+		
+
 		$args['date_query'] = array();
 		// Set before into date query. Date query must be specified as an array of an array.
 		if ( isset( $request['before'] ) ) {
@@ -298,6 +305,23 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 		$args = apply_filters( "woocommerce_rest_{$this->post_type}_object_query", $args, $request );
 
 		return $this->prepare_items_query( $args, $request );
+	}
+
+
+
+
+	/**
+	 * WP Core doens't let us change the sort direction for individual orderby params - https://core.trac.wordpress.org/ticket/17065.
+	 *
+	 * This lets us sort by meta value desc, and have a second orderby param.
+	 *
+	 * @param array $args Query args.
+	 * @return array
+	 */
+	public function order_by_popularity_post_clauses( $args ) {
+		global $wpdb;
+		$args['orderby'] = "$wpdb->postmeta.meta_value+0 DESC, $wpdb->posts.post_date DESC";
+		return $args;
 	}
 
 	/**
@@ -554,6 +578,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 				'include',
 				'title',
 				'slug',
+				'top_sell',
 			),
 			'validate_callback'  => 'rest_validate_request_arg',
 		);
