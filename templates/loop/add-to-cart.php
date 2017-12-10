@@ -32,4 +32,4 @@ echo apply_filters( 'woocommerce_loop_add_to_cart_link', // WPCS: XSS ok.
 		esc_attr( $product->add_to_cart_description() ),
 		esc_html( $product->add_to_cart_text() )
 	),
-$product );
+$product, $args );
