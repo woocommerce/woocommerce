@@ -1007,7 +1007,6 @@ jQuery( function ( $ ) {
 			},
 
 			modify_stock: function( e, action ) {
-				console.log(e);
 				e.preventDefault();
 				wc_meta_boxes_order_items.block();
 
