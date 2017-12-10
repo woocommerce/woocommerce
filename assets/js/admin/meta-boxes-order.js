@@ -918,9 +918,10 @@ jQuery( function ( $ ) {
 			}
 
 			var $rows = $table.find( 'tr.selected' );
+			var $bulk_edit_wraper = $( 'div.wc-order-item-bulk-edit' );
 
-			if ( $rows.length ) {
-				$( 'div.wc-order-item-bulk-edit' ).slideDown();
+			if ( $rows.length && $bulk_edit_wraper.children().length > 0 ) {
+				$bulk_edit_wraper.slideDown();
 
 				var selected_product = false;
 
