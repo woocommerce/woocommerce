@@ -375,7 +375,7 @@ class WC_Admin_Attributes {
 					<div class="col-wrap">
 						<div class="form-wrap">
 							<h2><?php esc_html_e( 'Add new attribute', 'woocommerce' ); ?></h2>
-							<p><?php esc_html_e( 'Attributes let you define extra product data, such as size or color. You can use these attributes in the shop sidebar using the "layered nav" widgets. Please note: you cannot rename an attribute later on.', 'woocommerce' ); ?></p>
+							<p><?php esc_html_e( 'Attributes let you define extra product data, such as size or color. You can use these attributes in the shop sidebar using the "layered nav" widgets.', 'woocommerce' ); ?></p>
 							<form action="edit.php?post_type=product&amp;page=product_attributes" method="post">
 								<?php do_action( 'woocommerce_before_add_attribute_fields' ) ?>
 
