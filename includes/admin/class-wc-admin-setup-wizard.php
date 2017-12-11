@@ -1028,10 +1028,6 @@ class WC_Admin_Setup_Wizard {
 			__( 'Accept debit and credit cards in 135+ currencies, methods such as Alipay, and one-touch checkout with Apple Pay. <a href="%s" target="_blank">Learn more</a>.', 'woocommerce' ),
 			'https://woocommerce.com/products/stripe/'
 		) . '</p>';
-		$paypal_bt_description = '<p>' . sprintf(
-			__( 'Safe and secure payments using credit cards or your customer\'s PayPal account. <a href="%s" target="_blank">Learn more</a>.', 'woocommerce' ),
-			'https://wordpress.org/plugins/woocommerce-gateway-paypal-powered-by-braintree/'
-		) . '</p>';
 		$paypal_ec_description = '<p>' . sprintf(
 			__( 'Safe and secure payments using credit cards or your customer\'s PayPal account. <a href="%s" target="_blank">Learn more</a>.', 'woocommerce' ),
 			'https://wordpress.org/plugins/woocommerce-gateway-paypal-express-checkout/'
@@ -1064,18 +1060,13 @@ class WC_Admin_Setup_Wizard {
 				'enabled' => $can_stripe,
 				'featured' => true,
 			),
-			'braintree_paypal' => array(
-				'name'        => __( 'PayPal by Braintree', 'woocommerce' ),
-				'image'       => WC()->plugin_url() . '/assets/images/paypal-braintree.png',
-				'description' => $paypal_bt_description,
-				'repo-slug'   => 'woocommerce-gateway-paypal-powered-by-braintree',
-			),
 			'ppec_paypal' => array(
 				'name'        => __( 'PayPal Express Checkout', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/paypal.png',
 				'description' => $paypal_ec_description,
 				'class'       => 'checked',
 				'repo-slug'   => 'woocommerce-gateway-paypal-express-checkout',
+				'enabled' => true,
 				'settings'    => array(
 					'reroute_requests' => array(
 						'label'       => __( 'Accept payments without linking a PayPal account', 'woocommerce' ),
@@ -1114,14 +1105,7 @@ class WC_Admin_Setup_Wizard {
 			unset( $gateways['stripe'] );
 		}
 
-		if ( 'US' === $country ) {
-			unset( $gateways['ppec_paypal'] );
-		} else {
-			unset( $gateways['braintree_paypal'] );
-		}
-
 		if ( ! current_user_can( 'install_plugins' ) ) {
-			unset( $gateways['braintree_paypal'] );
 			unset( $gateways['ppec_paypal'] );
 			unset( $gateways['stripe'] );
 		}
