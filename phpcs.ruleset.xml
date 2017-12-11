@@ -11,6 +11,7 @@
 	<exclude-pattern>includes/gateways/simplify-commerce/includes/</exclude-pattern>
 	<exclude-pattern>includes/libraries/</exclude-pattern>
 	<exclude-pattern>includes/api/legacy/</exclude-pattern>
+	<exclude-pattern>includes/api/v1/</exclude-pattern>
 	<exclude-pattern>*/node_modules/*</exclude-pattern>
 	<exclude-pattern>*/vendor/*</exclude-pattern>
 

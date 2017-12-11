@@ -92,7 +92,7 @@ class WC_Admin_Exporters {
 	 * Serve the generated file.
 	 */
 	public function download_export_file() {
-		if ( isset( $_GET['action'], $_GET['nonce'] ) && wp_verify_nonce( $_GET['nonce'], 'product-csv' ) && 'download_product_csv' === $_GET['action'] ) {
+		if ( isset( $_GET['action'], $_GET['nonce'] ) && wp_verify_nonce( wp_unslash( $_GET['nonce'] ), 'product-csv' ) && 'download_product_csv' === wp_unslash( $_GET['action'] ) ) { // WPCS: input var ok, sanitization ok.
 			include_once( WC_ABSPATH . 'includes/export/class-wc-product-csv-exporter.php' );
 			$exporter = new WC_Product_CSV_Exporter();
 			$exporter->export();
@@ -111,23 +111,23 @@ class WC_Admin_Exporters {
 
 		include_once( WC_ABSPATH . 'includes/export/class-wc-product-csv-exporter.php' );
 
-		$step     = absint( $_POST['step'] );
+		$step     = isset( $_POST['step'] ) ? absint( $_POST['step'] ) : 1; // WPCS: input var ok, sanitization ok.
 		$exporter = new WC_Product_CSV_Exporter();
 
-		if ( ! empty( $_POST['columns'] ) ) {
-			$exporter->set_column_names( $_POST['columns'] );
+		if ( ! empty( $_POST['columns'] ) ) { // WPCS: input var ok.
+			$exporter->set_column_names( wp_unslash( $_POST['columns'] ) ); // WPCS: input var ok, sanitization ok.
 		}
 
-		if ( ! empty( $_POST['selected_columns'] ) ) {
-			$exporter->set_columns_to_export( $_POST['selected_columns'] );
+		if ( ! empty( $_POST['selected_columns'] ) ) { // WPCS: input var ok.
+			$exporter->set_columns_to_export( wp_unslash( $_POST['selected_columns'] ) ); // WPCS: input var ok, sanitization ok.
 		}
 
-		if ( ! empty( $_POST['export_meta'] ) ) {
+		if ( ! empty( $_POST['export_meta'] ) ) { // WPCS: input var ok.
 			$exporter->enable_meta_export( true );
 		}
 
-		if ( ! empty( $_POST['export_types'] ) ) {
-			$exporter->set_product_types_to_export( $_POST['export_types'] );
+		if ( ! empty( $_POST['export_types'] ) ) { // WPCS: input var ok.
+			$exporter->set_product_types_to_export( wp_unslash( $_POST['export_types'] ) ); // WPCS: input var ok, sanitization ok.
 		}
 
 		$exporter->set_page( $step );

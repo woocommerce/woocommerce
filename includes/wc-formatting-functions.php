@@ -226,30 +226,44 @@ function wc_trim_zeros( $price ) {
  *
  * @param  double $value Amount to round.
  * @param  int    $precision DP to round. Defaults to wc_get_price_decimals.
- * @return double
+ * @return float
  */
 function wc_round_tax_total( $value, $precision = null ) {
-	$precision = is_null( $precision ) ? wc_get_price_decimals() : absint( $precision );
+	$precision = is_null( $precision ) ? wc_get_price_decimals() : intval( $precision );
 
 	if ( version_compare( PHP_VERSION, '5.3.0', '>=' ) ) {
 		$rounded_tax = round( $value, $precision, wc_get_tax_rounding_mode() );
+	} elseif ( 2 === wc_get_tax_rounding_mode() ) {
+		$rounded_tax = wc_legacy_round_half_down( $value, $precision );
 	} else {
-		// Fake it in PHP 5.2.
-		if ( 2 === wc_get_tax_rounding_mode() && strstr( $value, '.' ) ) {
-			$value    = (string) $value;
-			$value    = explode( '.', $value );
-			$value[1] = substr( $value[1], 0, $precision + 1 );
-			$value    = implode( '.', $value );
-
-			if ( substr( $value, -1 ) === '5' ) {
-				$value = substr( $value, 0, -1 ) . '4';
-			}
-			$value = floatval( $value );
-		}
 		$rounded_tax = round( $value, $precision );
 	}
 
 	return apply_filters( 'wc_round_tax_total', $rounded_tax, $value, $precision, WC_TAX_ROUNDING_MODE );
+}
+
+/**
+ * Round half down in PHP 5.2.
+ *
+ * @since 3.2.6
+ * @param float $value Value to round.
+ * @param int   $precision Precision to round down to.
+ * @return float
+ */
+function wc_legacy_round_half_down( $value, $precision ) {
+	$value = wc_float_to_string( $value );
+
+	if ( false !== strstr( $value, '.' ) ) {
+		$value = explode( '.', $value );
+
+		if ( strlen( $value[1] ) > $precision && substr( $value[1], -1 ) === '5' ) {
+			$value[1] = substr( $value[1], 0, -1 ) . '4';
+		}
+
+		$value = implode( '.', $value );
+	}
+
+	return round( floatval( $value ), $precision );
 }
 
 /**
