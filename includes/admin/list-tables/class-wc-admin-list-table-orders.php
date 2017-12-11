@@ -185,10 +185,11 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	 * Render columm: order_status.
 	 */
 	protected function render_order_status_column() {
-		$tooltip       = '';
-		$comment_count = absint( get_comment_count( $this->object->get_id() )['approved'] );
+		$tooltip                 = '';
+		$comment_count           = get_comment_count( $this->object->get_id() );
+		$approved_comments_count = absint( $comment_count['approved'] );
 
-		if ( $comment_count ) {
+		if ( $approved_comments_count ) {
 			$latest_notes = wc_get_order_notes( array(
 				'order_id' => $this->object->get_id(),
 				'limit'    => 1,
@@ -197,14 +198,14 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 
 			$latest_note = current( $latest_notes );
 
-			if ( isset( $latest_note->content ) && 1 === $comment_count ) {
+			if ( isset( $latest_note->content ) && 1 === $approved_comments_count ) {
 				$tooltip = wc_sanitize_tooltip( $latest_note->content );
 			} elseif ( isset( $latest_note->content ) ) {
 				/* translators: %d: notes count */
-				$tooltip = wc_sanitize_tooltip( $latest_note->content . '<br/><small style="display:block">' . sprintf( _n( 'Plus %d other note', 'Plus %d other notes', ( $comment_count - 1 ), 'woocommerce' ), $comment_count - 1 ) . '</small>' );
+				$tooltip = wc_sanitize_tooltip( $latest_note->content . '<br/><small style="display:block">' . sprintf( _n( 'Plus %d other note', 'Plus %d other notes', ( $approved_comments_count - 1 ), 'woocommerce' ), $approved_comments_count - 1 ) . '</small>' );
 			} else {
 				/* translators: %d: notes count */
-				$tooltip = wc_sanitize_tooltip( sprintf( _n( '%d note', '%d notes', $comment_count, 'woocommerce' ), $comment_count ) );
+				$tooltip = wc_sanitize_tooltip( sprintf( _n( '%d note', '%d notes', $approved_comments_count, 'woocommerce' ), $approved_comments_count ) );
 			}
 		}
 
