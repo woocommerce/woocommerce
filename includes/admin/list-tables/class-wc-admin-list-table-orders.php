@@ -712,15 +712,21 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 
 		// Filter the orders by the posted customer.
 		if ( ! empty( $_GET['_customer_user'] ) ) { // WPCS: input var ok.
-			// @codingStandardsIgnoreStart
-			$query_vars['meta_query'] = array(
-				array(
-					'key'   => '_customer_user',
-					'value' => (int) $_GET['_customer_user'], // WPCS: input var ok, sanitization ok.
-					'compare' => '=',
-				),
-			);
-			// @codingStandardsIgnoreEnd
+			$customer_id = (int) $_GET['_customer_user'];  // WPCS: input var ok, sanitization ok.
+
+			if ( version_compare( get_option( 'woocommerce_db_version' ), '3.3.0', '>=' ) ) {
+				$query_vars['author'] = $customer_id;
+			} else {
+				// @codingStandardsIgnoreStart
+				$query_vars['meta_query'] = array(
+					array(
+						'key'     => '_customer_user',
+						'value'   => $customer_id,
+						'compare' => '=',
+					),
+				);
+				// @codingStandardsIgnoreEnd
+			}
 		}
 
 		// Sorting.
