@@ -434,7 +434,7 @@ function wc_get_chosen_shipping_method_for_package( $key, $package ) {
  * @since  3.2.0
  * @param  int    $key Key of package.
  * @param  array  $package Package data array.
- * @param  string $chosen_method Cgosen method id.
+ * @param  string $chosen_method Chosen method id.
  * @return string
  */
 function wc_get_default_shipping_method_for_package( $key, $package, $chosen_method ) {
