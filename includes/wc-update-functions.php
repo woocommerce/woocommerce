@@ -1480,6 +1480,42 @@ function wc_update_330_image_options() {
 }
 
 /**
+ * Migrate webhooks from post type to CRUD.
+ */
+function wc_update_330_webhooks() {
+	register_post_type( 'shop_webhook' );
+
+	// Map statuses from post_type to Webhooks CRUD.
+	$statuses = array(
+		'publish' => 'active',
+		'draft'   => 'paused',
+		'pending' => 'disabled',
+	);
+
+	$posts = get_posts( array(
+		'posts_per_page' => -1,
+		'post_type'      => 'shop_webhook',
+		'post_status'    => 'any',
+	) );
+
+	foreach ( $posts as $post ) {
+		$webhook = new WC_Webhook();
+		$webhook->set_name( $post->post_title );
+		$webhook->set_status( isset( $statuses[ $post->post_status ] ) ? $statuses[ $post->post_status ] : 'disabled' );
+		$webhook->set_delivery_url( get_post_meta( $post->ID, '_delivery_url', true ) );
+		$webhook->set_secret( get_post_meta( $post->ID, '_secret', true ) );
+		$webhook->set_topic( get_post_meta( $post->ID, '_topic', true ) );
+		$webhook->set_api_version( get_post_meta( $post->ID, '_api_version', true ) );
+		$webhook->set_pending_delivery( false );
+		$webhook->save();
+
+		wp_delete_post( $post->ID, true );
+	}
+
+	unregister_post_type( 'shop_webhook' );
+}
+
+/**
  * Assign default cat to all products with no cats.
  */
 function wc_update_330_set_default_product_cat() {
@@ -1550,4 +1586,12 @@ function wc_update_330_product_stock_status() {
  */
 function wc_update_330_db_version() {
 	WC_Install::update_db_version( '3.3.0' );
+}
+
+/**
+ * Clear addons page transients
+ */
+function wc_update_330_clear_transients() {
+	delete_transient( 'wc_addons_sections' );
+	delete_transient( 'wc_addons_featured' );
 }

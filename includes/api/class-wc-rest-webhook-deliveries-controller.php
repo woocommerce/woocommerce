@@ -17,6 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * REST API Webhook Deliveries controller class.
  *
+ * @deprecated 3.3.0 Webhooks deliveries logs now uses logging system.
  * @package WooCommerce/API
  * @extends WC_REST_Webhook_Deliveries_V1_Controller
  */
@@ -32,19 +33,12 @@ class WC_REST_Webhook_Deliveries_Controller extends WC_REST_Webhook_Deliveries_V
 	/**
 	 * Prepare a single webhook delivery output for response.
 	 *
-	 * @param stdClass $log Delivery log object.
-	 * @param WP_REST_Request $request Request object.
-	 * @return WP_REST_Response $response Response data.
+	 * @param  stdClass        $log Delivery log object.
+	 * @param  WP_REST_Request $request Request object.
+	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $log, $request ) {
 		$data = (array) $log;
-
-		// Add timestamp.
-		$data['date_created'] = wc_rest_prepare_date_response( $log->comment->comment_date );
-		$data['date_created_gmt'] = wc_rest_prepare_date_response( $log->comment->comment_date_gmt );
-
-		// Remove comment object.
-		unset( $data['comment'] );
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = $this->add_additional_fields_to_object( $data, $request );

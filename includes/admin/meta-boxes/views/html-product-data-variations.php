@@ -1,4 +1,10 @@
 <?php
+/**
+ * Product data variations
+ *
+ * @package WooCommerce\Admin\Metaboxes\Views
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -19,24 +25,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="variations-defaults">
 					<strong><?php esc_html_e( 'Default Form Values', 'woocommerce' ); ?>: <?php echo wc_help_tip( __( 'These are the attributes that will be pre-selected on the frontend.', 'woocommerce' ) ); ?></strong>
 					<?php
-						foreach ( $variation_attributes as $attribute ) {
-							$selected_value = isset( $default_attributes[ sanitize_title( $attribute->get_name() ) ] ) ? $default_attributes[ sanitize_title( $attribute->get_name() ) ] : '';
-							?>
-							<select name="default_attribute_<?php echo sanitize_title( $attribute->get_name() ); ?>" data-current="<?php echo esc_attr( $selected_value ); ?>">
-								<?php /* translators: WooCommerce attribute label */ ?>
-								<option value=""><?php printf( esc_html__( 'No default %s&hellip;', 'woocommerce' ), wc_attribute_label( $attribute->get_name() ) ); ?></option>
-								<?php if ( $attribute->is_taxonomy() ) : ?>
-									<?php foreach ( $attribute->get_terms() as $option ) : ?>
-										<option <?php selected( $selected_value, $option->slug ); ?> value="<?php echo esc_attr( $option->slug ); ?>"><?php echo esc_html( apply_filters( 'woocommerce_variation_option_name', $option->name ) ); ?></option>
-									<?php endforeach; ?>
-								<?php else : ?>
-									<?php foreach ( $attribute->get_options() as $option ) : ?>
-										<option <?php selected( $selected_value, $option ); ?> value="<?php echo esc_attr( $option ); ?>"><?php echo esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) ); ?></option>
-									<?php endforeach; ?>
-								<?php endif; ?>
-							</select>
-							<?php
-						}
+					foreach ( $variation_attributes as $attribute ) {
+						$selected_value = isset( $default_attributes[ sanitize_title( $attribute->get_name() ) ] ) ? $default_attributes[ sanitize_title( $attribute->get_name() ) ] : '';
+						?>
+						<select name="default_attribute_<?php echo esc_attr( sanitize_title( $attribute->get_name() ) ); ?>" data-current="<?php echo esc_attr( $selected_value ); ?>">
+							<?php /* translators: WooCommerce attribute label */ ?>
+							<option value=""><?php esc_html( sprintf( __( 'No default %s&hellip;', 'woocommerce' ), wc_attribute_label( $attribute->get_name() ) ) ); ?></option>
+							<?php if ( $attribute->is_taxonomy() ) : ?>
+								<?php foreach ( $attribute->get_terms() as $option ) : ?>
+									<option <?php selected( $selected_value, $option->slug ); ?> value="<?php echo esc_attr( $option->slug ); ?>"><?php echo esc_html( apply_filters( 'woocommerce_variation_option_name', $option->name ) ); ?></option>
+								<?php endforeach; ?>
+							<?php else : ?>
+								<?php foreach ( $attribute->get_options() as $option ) : ?>
+									<option <?php selected( $selected_value, $option ); ?> value="<?php echo esc_attr( $option ); ?>"><?php echo esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) ); ?></option>
+								<?php endforeach; ?>
+							<?php endif; ?>
+						</select>
+						<?php
+					}
 					?>
 				</div>
 				<div class="clear"></div>
@@ -62,11 +68,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<option value="variable_sale_schedule"><?php esc_html_e( 'Set scheduled sale dates', 'woocommerce' ); ?></option>
 					</optgroup>
 					<optgroup label="<?php esc_attr_e( 'Inventory', 'woocommerce' ); ?>">
-						<option value="toggle_manage_stock"><?php _e( 'Toggle &quot;Manage stock&quot;', 'woocommerce' ); ?></option>
-						<option value="variable_stock"><?php _e( 'Stock', 'woocommerce' ); ?></option>
-                        <option value="variable_stock_status_instock"><?php _e( 'Set Status - In stock', 'woocommerce' ); ?></option>
-                        <option value="variable_stock_status_outofstock"><?php _e( 'Set Status - Out of stock', 'woocommerce' ); ?></option>
-                        <option value="variable_stock_status_onbackorder"><?php _e( 'Set Status - On backorder', 'woocommerce' ); ?></option>
+						<option value="toggle_manage_stock"><?php esc_html_e( 'Toggle &quot;Manage stock&quot;', 'woocommerce' ); ?></option>
+						<option value="variable_stock"><?php esc_html_e( 'Stock', 'woocommerce' ); ?></option>
+						<option value="variable_stock_status_instock"><?php esc_html_e( 'Set Status - In stock', 'woocommerce' ); ?></option>
+						<option value="variable_stock_status_outofstock"><?php esc_html_e( 'Set Status - Out of stock', 'woocommerce' ); ?></option>
+						<option value="variable_stock_status_onbackorder"><?php esc_html_e( 'Set Status - On backorder', 'woocommerce' ); ?></option>
 					</optgroup>
 					<optgroup label="<?php esc_attr_e( 'Shipping', 'woocommerce' ); ?>">
 						<option value="variable_length"><?php esc_html_e( 'Length', 'woocommerce' ); ?></option>
@@ -84,7 +90,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 				<div class="variations-pagenav">
 					<?php /* translators: variations count */ ?>
-					<span class="displaying-num"><?php printf( esc_html( _n( '%s item', '%s items', $variations_count, 'woocommerce' ), $variations_count ) ); ?></span>
+					<span class="displaying-num"><?php echo esc_html( sprintf( _n( '%s item', '%s items', $variations_count, 'woocommerce' ), $variations_count ) ); ?></span>
 					<span class="expand-close">
 						(<a href="#" class="expand_all"><?php esc_html_e( 'Expand', 'woocommerce' ); ?></a> / <a href="#" class="close_all"><?php esc_html_e( 'Close', 'woocommerce' ); ?></a>)
 					</span>
@@ -95,10 +101,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<label for="current-page-selector-1" class="screen-reader-text"><?php esc_html_e( 'Select Page', 'woocommerce' ); ?></label>
 							<select class="page-selector" id="current-page-selector-1" title="<?php esc_attr_e( 'Current page', 'woocommerce' ); ?>">
 								<?php for ( $i = 1; $i <= $variations_total_pages; $i++ ) : ?>
-									<option value="<?php echo $i; ?>"><?php echo $i; ?></option>
+									<option value="<?php echo $i; // WPCS: XSS ok. ?>"><?php echo $i; // WPCS: XSS ok. ?></option>
 								<?php endfor; ?>
 							</select>
-							 <?php _ex( 'of', 'number of pages', 'woocommerce' ); ?> <span class="total-pages"><?php echo esc_html( $variations_total_pages ); ?></span>
+							<?php echo esc_html_x( 'of', 'number of pages', 'woocommerce' ); ?> <span class="total-pages"><?php echo esc_html( $variations_total_pages ); ?></span>
 						</span>
 						<a class="next-page" title="<?php esc_attr_e( 'Go to the next page', 'woocommerce' ); ?>" href="#">&rsaquo;</a>
 						<a class="last-page" title="<?php esc_attr_e( 'Go to the last page', 'woocommerce' ); ?>" href="#">&raquo;</a>
@@ -107,10 +113,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="clear"></div>
 			</div>
 
-			<div class="woocommerce_variations wc-metaboxes" data-attributes="<?php
-				// esc_attr does not double encode - htmlspecialchars does
-				echo htmlspecialchars( wp_json_encode( wc_list_pluck( $variation_attributes, 'get_data' ) ) );
-			?>" data-total="<?php echo esc_attr( $variations_count ); ?>" data-total_pages="<?php echo esc_attr( $variations_total_pages ); ?>" data-page="1" data-edited="false">
+			<?php
+				// esc_attr does not double encode - htmlspecialchars does.
+				$attributes_data = htmlspecialchars( wp_json_encode( wc_list_pluck( $variation_attributes, 'get_data' ) ) );
+			?>
+
+			<div class="woocommerce_variations wc-metaboxes" data-attributes="<?php echo $attributes_data; // WPCS: XSS ok. ?>" data-total="<?php echo esc_attr( $variations_count ); ?>" data-total_pages="<?php echo esc_attr( $variations_total_pages ); ?>" data-page="1" data-edited="false">
 			</div>
 
 			<div class="toolbar">
@@ -119,7 +127,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 				<div class="variations-pagenav">
 					<?php /* translators: variations count*/ ?>
-					<span class="displaying-num"><?php printf( _n( '%s item', '%s items', $variations_count, 'woocommerce' ), $variations_count ); ?></span>
+					<span class="displaying-num"><?php echo esc_html( sprintf( _n( '%s item', '%s items', $variations_count, 'woocommerce' ), $variations_count ) ); ?></span>
 					<span class="expand-close">
 						(<a href="#" class="expand_all"><?php esc_html_e( 'Expand', 'woocommerce' ); ?></a> / <a href="#" class="close_all"><?php esc_html_e( 'Close', 'woocommerce' ); ?></a>)
 					</span>
@@ -130,10 +138,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<label for="current-page-selector-1" class="screen-reader-text"><?php esc_html_e( 'Select Page', 'woocommerce' ); ?></label>
 							<select class="page-selector" id="current-page-selector-1" title="<?php esc_attr_e( 'Current page', 'woocommerce' ); ?>">
 								<?php for ( $i = 1; $i <= $variations_total_pages; $i++ ) : ?>
-									<option value="<?php echo $i; ?>"><?php echo $i; ?></option>
+									<option value="<?php echo $i; // WPCS: XSS ok. ?>"><?php echo $i; // WPCS: XSS ok. ?></option>
 								<?php endfor; ?>
 							</select>
-							 <?php _ex( 'of', 'number of pages', 'woocommerce' ); ?> <span class="total-pages"><?php echo $variations_total_pages; ?></span>
+							<?php echo esc_html_x( 'of', 'number of pages', 'woocommerce' ); ?> <span class="total-pages"><?php echo esc_html( $variations_total_pages ); ?></span>
 						</span>
 						<a class="next-page" title="<?php esc_attr_e( 'Go to the next page', 'woocommerce' ); ?>" href="#">&rsaquo;</a>
 						<a class="last-page" title="<?php esc_attr_e( 'Go to the last page', 'woocommerce' ); ?>" href="#">&raquo;</a>

@@ -260,7 +260,7 @@ if ( ! function_exists( 'is_store_notice_showing' ) ) {
 	 * @return bool
 	 */
 	function is_store_notice_showing() {
-		return 'no' !== get_option( 'woocommerce_demo_store' );
+		return 'no' !== get_option( 'woocommerce_demo_store', 'no' );
 	}
 }
 
@@ -349,38 +349,6 @@ if ( ! function_exists( 'wc_prices_include_tax' ) ) {
 	function wc_prices_include_tax() {
 		return wc_tax_enabled() && 'yes' === get_option( 'woocommerce_prices_include_tax' );
 	}
-}
-
-/**
- * Check if the given topic is a valid webhook topic, a topic is valid if:
- *
- * + starts with `action.woocommerce_` or `action.wc_`.
- * + it has a valid resource & event.
- *
- * @param  string $topic webhook topic.
- * @return bool true if valid, false otherwise
- */
-function wc_is_webhook_valid_topic( $topic ) {
-
-	// Custom topics are prefixed with woocommerce_ or wc_ are valid.
-	if ( 0 === strpos( $topic, 'action.woocommerce_' ) || 0 === strpos( $topic, 'action.wc_' ) ) {
-		return true;
-	}
-
-	@list( $resource, $event ) = explode( '.', $topic );
-
-	if ( ! isset( $resource ) || ! isset( $event ) ) {
-		return false;
-	}
-
-	$valid_resources = apply_filters( 'woocommerce_valid_webhook_resources', array( 'coupon', 'customer', 'order', 'product' ) );
-	$valid_events    = apply_filters( 'woocommerce_valid_webhook_events', array( 'created', 'updated', 'deleted', 'restored' ) );
-
-	if ( in_array( $resource, $valid_resources ) && in_array( $event, $valid_events ) ) {
-		return true;
-	}
-
-	return false;
 }
 
 /**

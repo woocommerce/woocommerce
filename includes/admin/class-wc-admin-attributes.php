@@ -181,7 +181,7 @@ class WC_Admin_Attributes {
 				$att_name    = $attribute_to_edit->attribute_name;
 				$att_orderby = $attribute_to_edit->attribute_orderby;
 				$att_public  = $attribute_to_edit->attribute_public;
-			?>
+				?>
 				<form action="edit.php?post_type=product&amp;page=product_attributes&amp;edit=<?php echo absint( $edit ); ?>" method="post">
 					<table class="form-table">
 						<tbody>
@@ -213,28 +213,43 @@ class WC_Admin_Attributes {
 									<p class="description"><?php esc_html_e( 'Enable this if you want this attribute to have product archives in your store.', 'woocommerce' ); ?></p>
 								</td>
 							</tr>
-							<tr class="form-field form-required">
-								<th scope="row" valign="top">
-									<label for="attribute_type"><?php esc_html_e( 'Type', 'woocommerce' ); ?></label>
-								</th>
-								<td>
-									<select name="attribute_type" id="attribute_type">
-										<?php foreach ( wc_get_attribute_types() as $key => $value ) : ?>
-											<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $att_type, $key ); ?>><?php echo esc_attr( $value ); ?></option>
-										<?php endforeach; ?>
+							<?php
+							/**
+							 * Attribute types can change the way attributes are displayed on the frontend and admin.
+							 *
+							 * By Default WooCommerce only includes the `select` type. Others can be added with the
+							 * `product_attributes_type_selector` filter. If there is only the default type registered,
+							 * this setting will be hidden.
+							 */
+							$attribute_types = wc_get_attribute_types();
 
-										<?php
-											/**
-											 * Deprecated action in favor of product_attributes_type_selector filter.
-											 *
-											 * @deprecated 2.4.0
-											 */
-											do_action( 'woocommerce_admin_attribute_types' );
-										?>
-									</select>
-									<p class="description"><?php esc_html_e( 'Determines how you select attributes for products. Under admin panel -> products -> product data -> attributes -> values, <strong>Text</strong> allows manual entry whereas <strong>select</strong> allows pre-configured terms in a drop-down list.', 'woocommerce' ); ?></p>
-								</td>
-							</tr>
+							if ( 1 < count( $attribute_types ) || ! array_key_exists( 'select', $attribute_types ) ) {
+								?>
+								<tr class="form-field form-required">
+									<th scope="row" valign="top">
+										<label for="attribute_type"><?php esc_html_e( 'Type', 'woocommerce' ); ?></label>
+									</th>
+									<td>
+										<select name="attribute_type" id="attribute_type">
+											<?php foreach ( wc_get_attribute_types() as $key => $value ) : ?>
+												<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $att_type, $key ); ?>><?php echo esc_attr( $value ); ?></option>
+											<?php endforeach; ?>
+											<?php
+												/**
+												 * Deprecated action in favor of product_attributes_type_selector filter.
+												 *
+												 * @todo Remove in 4.0.0
+												 * @deprecated 2.4.0
+												 */
+												do_action( 'woocommerce_admin_attribute_types' );
+											?>
+										</select>
+										<p class="description"><?php esc_html_e( "Determines how this attribute's values are displayed.", 'woocommerce' ); ?></p>
+									</td>
+								</tr>
+								<?php
+							}
+							?>
 							<tr class="form-field form-required">
 								<th scope="row" valign="top">
 									<label for="attribute_orderby"><?php esc_html_e( 'Default sort order', 'woocommerce' ); ?></label>
@@ -360,7 +375,7 @@ class WC_Admin_Attributes {
 					<div class="col-wrap">
 						<div class="form-wrap">
 							<h2><?php esc_html_e( 'Add new attribute', 'woocommerce' ); ?></h2>
-							<p><?php esc_html_e( 'Attributes let you define extra product data, such as size or color. You can use these attributes in the shop sidebar using the "layered nav" widgets. Please note: you cannot rename an attribute later on.', 'woocommerce' ); ?></p>
+							<p><?php esc_html_e( 'Attributes let you define extra product data, such as size or color. You can use these attributes in the shop sidebar using the "layered nav" widgets.', 'woocommerce' ); ?></p>
 							<form action="edit.php?post_type=product&amp;page=product_attributes" method="post">
 								<?php do_action( 'woocommerce_before_add_attribute_fields' ) ?>
 
@@ -382,25 +397,39 @@ class WC_Admin_Attributes {
 									<p class="description"><?php esc_html_e( 'Enable this if you want this attribute to have product archives in your store.', 'woocommerce' ); ?></p>
 								</div>
 
-								<div class="form-field">
-									<label for="attribute_type"><?php esc_html_e( 'Type', 'woocommerce' ); ?></label>
-									<select name="attribute_type" id="attribute_type">
-										<?php foreach ( wc_get_attribute_types() as $key => $value ) : ?>
-											<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_attr( $value ); ?></option>
-										<?php endforeach; ?>
+								<?php
+								/**
+								 * Attribute types can change the way attributes are displayed on the frontend and admin.
+								 *
+								 * By Default WooCommerce only includes the `select` type. Others can be added with the
+								 * `product_attributes_type_selector` filter. If there is only the default type registered,
+								 * this setting will be hidden.
+								 */
+								$attribute_types = wc_get_attribute_types();
 
-										<?php
-
-											/**
-											 * Deprecated action in favor of product_attributes_type_selector filter.
-											 *
-											 * @deprecated 2.4.0
-											 */
-											do_action( 'woocommerce_admin_attribute_types' );
-										?>
-									</select>
-									<p class="description"><?php esc_html_e( 'Determines how you select attributes for products. Under admin panel -> products -> product data -> attributes -> values, <strong>Text</strong> allows manual entry whereas <strong>select</strong> allows pre-configured terms in a drop-down list.', 'woocommerce' ); ?></p>
-								</div>
+								if ( 1 < count( $attribute_types ) || ! array_key_exists( 'select', $attribute_types ) ) {
+									?>
+									<div class="form-field">
+										<label for="attribute_type"><?php esc_html_e( 'Type', 'woocommerce' ); ?></label>
+										<select name="attribute_type" id="attribute_type">
+											<?php foreach ( wc_get_attribute_types() as $key => $value ) : ?>
+												<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_attr( $value ); ?></option>
+											<?php endforeach; ?>
+											<?php
+												/**
+												 * Deprecated action in favor of product_attributes_type_selector filter.
+												 *
+												 * @todo Remove in 4.0.0
+												 * @deprecated 2.4.0
+												 */
+												do_action( 'woocommerce_admin_attribute_types' );
+											?>
+										</select>
+										<p class="description"><?php esc_html_e( "Determines how this attribute's values are displayed.", 'woocommerce' ); ?></p>
+									</div>
+									<?php
+								}
+								?>
 
 								<div class="form-field">
 									<label for="attribute_orderby"><?php esc_html_e( 'Default sort order', 'woocommerce' ); ?></label>

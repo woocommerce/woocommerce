@@ -224,4 +224,41 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 			$this->assertEquals( $value, $product->{"get_{$function}"}(), $function );
 		}
 	}
+
+	/**
+	 * A test ensuring get_price_html works independently for issue #18037.
+	 */
+	public function test_multiple_get_price_html_calls() {
+		// Set up 3 products with differing prices.
+		$product1 = new WC_Product_Simple();
+		$product2 = new WC_Product_Simple();
+		$product3 = new WC_Product_Simple();
+
+		$product1->set_regular_price( '10.00' );
+		$product1->set_sale_price( '7.00' );
+		$product2->set_regular_price( '20.00' );
+		$product2->set_sale_price( '16.00' );
+		$product3->set_regular_price( '50.00' );
+
+		$product1_id = $product1->save();
+		$product2_id = $product2->save();
+		$product3_id = $product3->save();
+
+		$product = wc_get_product( $product1_id );
+		$this->assertEquals( $product1_id, $product->get_id() );
+		$this->assertEquals( '<del><span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>&#x200e;10.00</span></del> <ins><span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>&#x200e;7.00</span></ins>', $product->get_price_html() );
+
+		$product = wc_get_product( $product2_id );
+		$this->assertEquals( $product2_id, $product->get_id() );
+		$this->assertEquals( '<del><span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>&#x200e;20.00</span></del> <ins><span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>&#x200e;16.00</span></ins>', $product->get_price_html() );
+
+		$product = wc_get_product( $product3_id );
+		$this->assertEquals( $product3_id, $product->get_id() );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>&#x200e;50.00</span>', $product->get_price_html() );
+
+		// Clean up.
+		$product1->delete();
+		$product2->delete();
+		$product3->delete();
+	}
 }

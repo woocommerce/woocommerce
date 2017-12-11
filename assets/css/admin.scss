@@ -20,6 +20,38 @@
 }
 
 .wc_addons_wrap {
+	max-width: 1200px;
+
+	h1.search-form-title {
+		clear: left;
+		padding: 0;
+	}
+
+	form.search-form {
+		clear: both;
+		display: block;
+		position: relative;
+		margin-top: 1em;
+		margin-bottom: 1em;
+
+		input {
+			border: 1px solid #ddd;
+			box-shadow: none;
+			height: 53px;
+			padding-left: 50px;
+			width: 100%;
+			margin: 0;
+		}
+
+		button {
+			background: none;
+			border: none;
+			cursor: pointer;
+			height: 53px;
+			position: absolute;
+			width: 53px;
+		}
+	}
 
 	.update-plugins .update-count  {
 		background-color: #d54e21;
@@ -35,8 +67,19 @@
 	}
 
 	.addons-featured {
-		max-width: 1140px;
-		margin: -1%;
+		margin: 0;
+	}
+
+	ul.subsubsub.subsubsub {
+		margin: -2px 0 12px;
+	}
+
+	.subsubsub li::after {
+		content: '|';
+	}
+
+	.subsubsub li:last-child::after {
+		content: '';
 	}
 
 	.addons-banner-block-item-icon,
@@ -49,10 +92,9 @@
 	.addons-banner-block,
 	.addons-wcs-banner-block {
 		background: #ffffff;
-		box-shadow: 0 0 1px rgba(0, 0, 0, 0.2);
-		margin: 2% 1% 0;
-		max-width: 1140px;
-		padding: 20px;
+		border: 1px solid #ddd;
+		margin: 0 0 1em 0;
+		padding: 2em 2em 1em;
 	}
 
 	.addons-banner-block img {
@@ -74,9 +116,8 @@
 	.addons-banner-block-item {
 		border: 1px solid #e6e6e6;
 		border-radius: 3px;
-		flex: 1 1 200px;
-		margin: 10px;
-		max-width: 350px;
+		flex: 1;
+		margin: 1em;
 		min-width: 200px;
 		width: 30%;
 	}
@@ -153,17 +194,21 @@
 	}
 
 	.addons-column {
-		flex: 1 1 200px;
-		margin: 0 1%;
-		width: 49.5%;
+		flex: 1;
+		width: 50%;
+		padding: 0 .5em;
+	}
+
+	.addons-column:nth-child(2) {
+		margin-right: 0;
 	}
 
 	.addons-small-light-block,
 	.addons-small-dark-block,
 	.addons-column-block {
 		box-sizing: border-box;
-		box-shadow: 0 0 1px rgba(0, 0, 0, 0.2);
-		margin: 4% 0 0;
+		border: 1px solid #ddd;
+		margin: 0 0 1em;
 		padding: 20px;
 	}
 
@@ -186,7 +231,6 @@
 	}
 
 	.addons-column-block-item {
-		display: flex;
 		border-top: 2px solid #f9f9f9;
 		flex-direction: row;
 		flex-wrap: wrap;
@@ -205,7 +249,7 @@
 
 	.addons-column-block-item-content {
 		display: flex;
-		flex: 1 1 200px;
+		flex: 1;
 		flex-wrap: wrap;
 		height: 20%;
 		justify-content: space-between;
@@ -223,6 +267,18 @@
 
 	.addons-column-block-item-content p {
 		float: left;
+	}
+
+	.addons-banner-block-item,
+	.addons-column-block-item  {
+		display: none;
+	}
+
+	.addons-banner-block-item:nth-child(-n+3) {
+		display: block;
+	}
+	.addons-column-block-item:nth-of-type(-n+3)  {
+		display: flex;
 	}
 
 	.addons-small-dark-block {
@@ -365,25 +421,37 @@
 
 	.products {
 		overflow: hidden;
+		display: flex;
+		flex-flow: row;
+		flex-wrap: wrap;
+		margin: 0 -.5em;
 
 		li {
 			float: left;
-			margin: 0 1em 1em 0 !important;
+			border: 1px solid #ddd;
+			margin: 0 .5em 1em !important;
 			padding: 0;
 			vertical-align: top;
-			width: 300px;
+			width: 25%;
+			min-width: 280px;
+			min-height: 220px;
+			flex: 1;
+			overflow: hidden;
+			background: #f5f5f5;
+			box-shadow:
+				inset 0 1px 0 rgba(255, 255, 255, 0.2),
+				inset 0 -1px 0 rgba(0, 0, 0, 0.1);
 
 			a {
 				text-decoration: none;
 				color: inherit;
-				border: 1px solid #ddd;
 				display: block;
-				min-height: 220px;
-				overflow: hidden;
-				background: #f5f5f5;
-				box-shadow:
-					inset 0 1px 0 rgba(255, 255, 255, 0.2),
-					inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+				height: 100%;
+
+				.product-img-wrap {
+					background: #fff;
+					display: block;
+				}
 
 				img {
 					max-width: 258px;
@@ -426,6 +494,7 @@
 	.storefront {
 		background: url('../images/storefront-bg.jpg') bottom right #f6f6f6;
 		border: 1px solid #ddd;
+		margin-top: 1em;
 		padding: 20px;
 		overflow: hidden;
 		zoom: 1;
@@ -3325,7 +3394,6 @@ img.help_tip {
 		}
 
 		// Give regular settings inputs a standard width and padding.
-		select,
 		textarea,
 		input[type="text"],
 		input[type="email"],
@@ -3334,6 +3402,12 @@ img.help_tip {
 			width: 400px;
 			margin: 0;
 			padding: 6px;
+			box-sizing: border-box;
+		}
+
+		select {
+			width: 400px;
+			margin: 0;
 			box-sizing: border-box;
 		}
 
@@ -3466,105 +3540,6 @@ img.help_tip {
 
 		.wc_emails_wrapper {
 			padding: 0 15px 10px 0;
-		}
-
-		.woocommerce-thumbnail-cropping {
-			margin: 0 40px 1em 0;
-			padding: 0;
-			display:inline-block;
-			vertical-align: top;
-
-			input[type=radio] {
-				vertical-align: top;
-				margin-top: 2px;
-			}
-			label {
-				display: inline-block;
-
-				span.description {
-					margin-top: .5em;
-					display:block;
-					color: #999;
-				}
-				span.woocommerce-thumbnail-cropping-aspect-ratio {
-					margin-top: .5em;
-					display:block;
-				}
-			}
-			li {
-				margin: 5px 0 1.5em;
-				padding: 0;
-			}
-		}
-		.woocommerce-thumbnail-preview {
-			display:inline-block;
-			width: 320px;
-			vertical-align: top;
-			h4 {
-				margin-top: 0;
-			}
-			.woocommerce-thumbnail-preview-block {
-				text-align: center;
-				width: 100px;
-				margin: 0 10px 0 0;
-				float: left;
-				.woocommerce-thumbnail-preview-block__image {
-					width: 90px;
-					height: 90px;
-					border: 5px solid #fff;
-					background: #eee;
-					box-shadow: 0 1px 1px #ccc;
-					margin: 0 0 10px;
-					position: relative;
-					overflow: hidden;
-					&:before,
-					&:after {
-						content: "";
-						display: block;
-						width: 30px;
-						height: 30px;
-						background: rgba(0,0,0,.1);
-						position: absolute;
-						top: 50%;
-						left: 50%;
-						margin-left: -20px;
-						margin-top: -20px;
-					}
-					&:before {
-						margin-top: -10px;
-						margin-left: -10px;
-						background: rgba(0,0,0,.1);
-					}
-				}
-				.woocommerce-thumbnail-preview-block__text {
-					width: 50%;
-					background: #ddd;
-					margin: 0 auto 10px;
-					height: 6px;
-				}
-				.woocommerce-thumbnail-preview-block__button {
-					width: 30px;
-					height: 5px;
-					border: 8px solid #fff;
-					background: #ededed;
-					box-shadow: 0 0 0 1px #ddd;
-					margin: 0 auto;
-					border-radius: 2px;
-				}
-				&:nth-child(3) {
-					.woocommerce-thumbnail-preview-block__text {
-						width: 75%;
-					}
-				}
-				&:nth-child(4) {
-					.woocommerce-thumbnail-preview-block__text {
-						width: 35%;
-					}
-				}
-			}
-			.woocommerce-thumbnail-preview-block:last-child {
-				margin: 0;
-			}
 		}
 	}
 }
