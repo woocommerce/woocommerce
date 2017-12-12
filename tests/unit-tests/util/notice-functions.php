@@ -126,7 +126,7 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_print_success_notice() {
 
-		$this->expectOutputString( '<div class="woocommerce-message">Success!</div>' );
+		$this->expectOutputString( '<div class="woocommerce-message" role="alert">Success!</div>' );
 
 		wc_print_notice( 'Success!' );
 	}
@@ -151,7 +151,7 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	public function test_wc_print_error_notice() {
 
 		// specific type
-		$this->expectOutputString( '<ul class="woocommerce-error"><li>Error!</li></ul>' );
+		$this->expectOutputString( '<ul class="woocommerce-error" role="alert"><li>Error!</li></ul>' );
 
 		wc_print_notice( 'Error!', 'error' );
 	}
