@@ -58,6 +58,12 @@ class WC_Regenerate_Images {
 	 * @return array
 	 */
 	public static function maybe_resize_image( $image, $attachment_id, $size, $icon ) {
+		// Use a whitelist of sizes we want to resize. Ignore others.
+		if ( ! in_array( $size, array( 'woocommerce_thumbnail', 'woocommerce_single', 'shop_thumbnail', 'shop_catalog', 'shop_single' ), true ) ) {
+			return $image;
+		}
+
+		// Get image metadata - we need it to proceed.
 		$imagemeta = wp_get_attachment_metadata( $attachment_id );
 
 		if ( false === $imagemeta || empty( $imagemeta ) ) {
@@ -66,11 +72,8 @@ class WC_Regenerate_Images {
 
 		$size_settings = wc_get_image_size( $size );
 
-		if ( in_array( $size, array( 'woocommerce_thumbnail' ), true ) && isset( $imagemeta['sizes'], $imagemeta['sizes'][ $size ] ) ) {
-			if ( $imagemeta['sizes'][ $size ]['width'] !== $size_settings['width'] || $imagemeta['sizes'][ $size ]['height'] !== $size_settings['height'] ) {
-				$image = self::resize_and_return_image( $attachment_id, $image, $size, $icon );
-			}
-		} else {
+		// If size differs from image meta, regen.
+		if ( isset( $imagemeta['sizes'], $imagemeta['sizes'][ $size ] ) && ( $imagemeta['sizes'][ $size ]['width'] !== $size_settings['width'] || $imagemeta['sizes'][ $size ]['height'] !== $size_settings['height'] ) ) {
 			$image = self::resize_and_return_image( $attachment_id, $image, $size, $icon );
 		}
 
