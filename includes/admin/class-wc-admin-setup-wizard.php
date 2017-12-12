@@ -1668,7 +1668,7 @@ class WC_Admin_Setup_Wizard {
 		<p><?php echo esc_html( $description ); ?></p>
 		<img
 			class="jetpack-logo"
-			src="<?php echo esc_url( WC()->plugin_url() . '/assets/images/jetpack-green-logo.svg' ); ?>"
+			src="<?php echo esc_url( WC()->plugin_url() . '/assets/images/jetpack_vertical_logo.png' ); ?>"
 			alt="Jetpack logo"
 		/>
 		<?php if ( $has_jetpack_error ) : ?>
