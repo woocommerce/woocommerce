@@ -1138,7 +1138,7 @@ class WC_Admin_Setup_Wizard {
 			'name'        => __( 'PayPal Express Checkout', 'woocommerce' ),
 			'image'       => WC()->plugin_url() . '/assets/images/paypal.png',
 			'description' => $paypal_ec_description,
-			'class'       => 'checked',
+			'class'       => 'checked paypal-logo',
 			'repo-slug'   => 'woocommerce-gateway-paypal-express-checkout',
 			'settings'    => array(
 				'reroute_requests' => array(
