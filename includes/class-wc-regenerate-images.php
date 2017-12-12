@@ -35,8 +35,8 @@ class WC_Regenerate_Images {
 		self::$background_process = new WC_Regenerate_Images_Request();
 
 		if ( apply_filters( 'woocommerce_resize_images', true ) && ! is_admin() ) {
-			// Action to handle on-the-fly image resizing.
-			add_action( 'wp_get_attachment_image_src', array( __CLASS__, 'maybe_resize_image' ), 10, 4 );
+			// Handle on-the-fly image resizing.
+			add_filter( 'wp_get_attachment_image_src', array( __CLASS__, 'maybe_resize_image' ), 10, 4 );
 		}
 
 		if ( apply_filters( 'woocommerce_background_image_regeneration', true ) ) {
