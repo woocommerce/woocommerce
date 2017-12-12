@@ -212,9 +212,6 @@ class WC_Customizer {
 	 * @param WP_Customize_Manager $wp_customize Theme Customizer object.
 	 */
 	public function add_product_grid_section( $wp_customize ) {
-		if ( has_filter( 'loop_shop_columns' ) ) {
-			return;
-		}
 		$theme_support = get_theme_support( 'woocommerce' );
 		$theme_support = is_array( $theme_support ) ? $theme_support[0]: false;
 
@@ -308,6 +305,11 @@ class WC_Customizer {
 				) ),
 			)
 		);
+
+		// The following settings should be hidden if the theme is declaring the values.
+		if ( has_filter( 'loop_shop_columns' ) ) {
+			return;
+		}
 
 		$wp_customize->add_setting(
 			'woocommerce_catalog_columns',
