@@ -1201,7 +1201,6 @@ class WC_Admin_Setup_Wizard {
 		$gateways = array(
 			'stripe'           => $stripe,
 			'ppec_paypal'      => $ppec_paypal,
-			'paypal'           => $paypal,
 		);
 
 		if ( ! $can_stripe ) {
@@ -1233,11 +1232,9 @@ class WC_Admin_Setup_Wizard {
 		}
 
 		if ( ! current_user_can( 'install_plugins' ) ) {
-			unset( $gateways['ppec_paypal'] );
-			unset( $gateways['stripe'] );
-			unset( $gateways['klarna_checkout'] );
-			unset( $gateways['klarna_payments'] );
-			unset( $gateways['square'] );
+			$gateways = array(
+				'paypal' => $paypal,
+			);
 		}
 
 		return $gateways;
