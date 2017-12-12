@@ -55,7 +55,7 @@ class WC_Product_CSV_Importer_Controller {
 	/**
 	 * Whether to use previous mapping selections.
 	 *
-	 * @var string
+	 * @var bool
 	 */
 	protected $map_preferences = false;
 
