@@ -122,7 +122,7 @@ class WC_Customizer {
 	/**
 	 * Sanitize the shop page & category display setting.
 	 *
-	 * @return array
+	 * @return string
 	 */
 	public function sanitize_archive_display( $value ) {
 		$options = array( '', 'subcategories', 'both' );
@@ -133,7 +133,7 @@ class WC_Customizer {
 	/**
 	 * Sanitize the catalog orderby setting.
 	 *
-	 * @return array
+	 * @return string
 	 */
 	public function sanitize_default_catalog_orderby( $value ) {
 		$options = apply_filters( 'woocommerce_default_catalog_orderby_options', array(
