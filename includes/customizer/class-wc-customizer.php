@@ -120,6 +120,35 @@ class WC_Customizer {
 	}
 
 	/**
+	 * Sanitize the shop page & category display setting.
+	 *
+	 * @return array
+	 */
+	public function sanitize_archive_display( $value ) {
+		$options = array( '', 'subcategories', 'both' );
+
+		return in_array( $value, $options ) ? $value : '';
+	}
+
+	/**
+	 * Sanitize the catalog orderby setting.
+	 *
+	 * @return array
+	 */
+	public function sanitize_default_catalog_orderby( $value ) {
+		$options = apply_filters( 'woocommerce_default_catalog_orderby_options', array(
+			'menu_order' => __( 'Default sorting (custom ordering + name)', 'woocommerce' ),
+			'popularity' => __( 'Popularity (sales)', 'woocommerce' ),
+			'rating'     => __( 'Average rating', 'woocommerce' ),
+			'date'       => __( 'Sort by most recent', 'woocommerce' ),
+			'price'      => __( 'Sort by price (asc)', 'woocommerce' ),
+			'price-desc' => __( 'Sort by price (desc)', 'woocommerce' ),
+		) );
+
+		return array_key_exists( $value, $options ) ? $value : 'menu_order';
+	}
+
+	/**
 	 * Store notice section.
 	 *
 	 * @param WP_Customize_Manager $wp_customize Theme Customizer object.
@@ -196,6 +225,87 @@ class WC_Customizer {
 				'priority'        => 10,
 				'active_callback' => array( $this, 'is_products_archive' ),
 				'panel'           => 'woocommerce',
+			)
+		);
+
+		$wp_customize->add_setting(
+			'woocommerce_shop_page_display',
+			array(
+				'default'              => '',
+				'type'                 => 'option',
+				'capability'           => 'manage_woocommerce',
+				'sanitize_callback'    => array( $this, 'sanitize_archive_display' ),
+			)
+		);
+
+		$wp_customize->add_control(
+			'woocommerce_shop_page_display',
+			array(
+				'label'       => __( 'Shop page display', 'woocommerce' ),
+				'description' => __( 'This controls what is shown on the product archive.', 'woocommerce' ),
+				'section'     => 'woocommerce_product_grid',
+				'settings'    => 'woocommerce_shop_page_display',
+				'type'        => 'select',
+				'choices'     => array(
+					''              => __( 'Show products', 'woocommerce' ),
+					'subcategories' => __( 'Show categories', 'woocommerce' ),
+					'both'          => __( 'Show categories &amp; products', 'woocommerce' ),
+				),
+			)
+		);
+
+		$wp_customize->add_setting(
+			'woocommerce_category_archive_display',
+			array(
+				'default'              => '',
+				'type'                 => 'option',
+				'capability'           => 'manage_woocommerce',
+				'sanitize_callback'    => array( $this, 'sanitize_archive_display' ),
+			)
+		);
+
+		$wp_customize->add_control(
+			'woocommerce_category_archive_display',
+			array(
+				'label'       => __( 'Default category display', 'woocommerce' ),
+				'description' => __( 'This controls what is shown on category archives.', 'woocommerce' ),
+				'section'     => 'woocommerce_product_grid',
+				'settings'    => 'woocommerce_category_archive_display',
+				'type'        => 'select',
+				'choices'     => array(
+					''              => __( 'Show products', 'woocommerce' ),
+					'subcategories' => __( 'Show categories', 'woocommerce' ),
+					'both'          => __( 'Show subcategories &amp; products', 'woocommerce' ),
+				),
+			)
+		);
+
+		$wp_customize->add_setting(
+			'woocommerce_default_catalog_orderby',
+			array(
+				'default'              => '',
+				'type'                 => 'option',
+				'capability'           => 'manage_woocommerce',
+				'sanitize_callback'    => array( $this, 'sanitize_default_catalog_orderby' ),
+			)
+		);
+
+		$wp_customize->add_control(
+			'woocommerce_default_catalog_orderby',
+			array(
+				'label'       => __( 'Default product sorting', 'woocommerce' ),
+				'description' => __( 'This controls the default sort order of the catalog.', 'woocommerce' ),
+				'section'     => 'woocommerce_product_grid',
+				'settings'    => 'woocommerce_default_catalog_orderby',
+				'type'        => 'select',
+				'choices'     => apply_filters( 'woocommerce_default_catalog_orderby_options', array(
+					'menu_order' => __( 'Default sorting (custom ordering + name)', 'woocommerce' ),
+					'popularity' => __( 'Popularity (sales)', 'woocommerce' ),
+					'rating'     => __( 'Average rating', 'woocommerce' ),
+					'date'       => __( 'Sort by most recent', 'woocommerce' ),
+					'price'      => __( 'Sort by price (asc)', 'woocommerce' ),
+					'price-desc' => __( 'Sort by price (desc)', 'woocommerce' ),
+				) ),
 			)
 		);
 
