@@ -111,6 +111,15 @@ class WC_Customizer {
 	}
 
 	/**
+	 * Should our settings show on product archives?
+	 *
+	 * @return boolean
+	 */
+	public function is_products_archive() {
+		return is_shop() || is_product_taxonomy() || is_product_category() || ! current_theme_supports( 'woocommerce' );
+	}
+
+	/**
 	 * Store notice section.
 	 *
 	 * @param WP_Customize_Manager $wp_customize Theme Customizer object.
@@ -185,7 +194,7 @@ class WC_Customizer {
 			array(
 				'title'           => __( 'Product Grid', 'woocommerce' ),
 				'priority'        => 10,
-				'active_callback' => array( $this, 'is_active' ),
+				'active_callback' => array( $this, 'is_products_archive' ),
 				'panel'           => 'woocommerce',
 			)
 		);
