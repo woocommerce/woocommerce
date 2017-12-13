@@ -338,7 +338,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-background-emailer.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-discounts.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-cart-totals.php' );
-		include_once( WC_ABSPATH . 'includes/customizer/class-wc-customizer.php' );
+		include_once( WC_ABSPATH . 'includes/customizer/class-wc-shop-customizer.php' );
 		include_once( WC_ABSPATH . 'includes/class-wc-regenerate-images.php' ); // Image regeneration class.
 
 		/**
