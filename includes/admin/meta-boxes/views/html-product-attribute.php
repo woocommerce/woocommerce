@@ -27,12 +27,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</td>
 					<td rowspan="3">
 						<label><?php esc_html_e( 'Value(s)', 'woocommerce' ); ?>:</label>
-
 						<?php
-						if ( $attribute->is_taxonomy() && $attribute_taxonomy = $attribute->get_taxonomy_object() ) :
-						?>
-							<?php if ( 'select' === $attribute_taxonomy->attribute_type ) : ?>
+						if ( $attribute->is_taxonomy() && $attribute_taxonomy = $attribute->get_taxonomy_object() ) {
+							$attribute_types = wc_get_attribute_types();
 
+							if ( ! array_key_exists( $attribute_taxonomy->attribute_type, $attribute_types ) ) {
+								$attribute_taxonomy->attribute_type = 'select';
+							}
+
+							if ( 'select' === $attribute_taxonomy->attribute_type ) {
+								?>
 								<select multiple="multiple" data-placeholder="<?php esc_attr_e( 'Select terms', 'woocommerce' ); ?>" class="multiselect attribute_values wc-enhanced-select" name="attribute_values[<?php echo esc_attr( $i ); ?>][]">
 									<?php
 									$args = array(
@@ -52,30 +56,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 								<button class="button plus select_all_attributes"><?php esc_html_e( 'Select all', 'woocommerce' ); ?></button>
 								<button class="button minus select_no_attributes"><?php esc_html_e( 'Select none', 'woocommerce' ); ?></button>
 								<button class="button fr plus add_new_attribute"><?php esc_html_e( 'Add new', 'woocommerce' ); ?></button>
+								<?php
+							}
 
-							<?php elseif ( 'text' === $attribute_taxonomy->attribute_type ) : ?>
-
-								<input type="text" name="attribute_values[<?php echo esc_attr( $i ); ?>]" value="<?php
-
-									// Text attributes should list terms pipe separated
-									echo esc_attr( wc_implode_text_attributes( wp_list_pluck( $attribute->get_terms(), 'name' ) ) );
-
-								?>" placeholder="<?php
-
-									/* translators: %s: WC_DELIMITER */
-									printf( esc_attr__( '"%s" separate terms', 'woocommerce' ), WC_DELIMITER );
-
-								?>" />
-
-							<?php endif; ?>
-
-							<?php do_action( 'woocommerce_product_option_terms', $attribute_taxonomy, $i ); ?>
-
-						<?php else : ?>
-							<?php /* translators: %s: WC_DELIMITER */ ?>
-							<textarea name="attribute_values[<?php echo esc_attr( $i ); ?>]" cols="5" rows="5" placeholder="<?php printf( esc_attr__( 'Enter some text, or some attributes by "%s" separating values.', 'woocommerce' ), WC_DELIMITER ); ?>"><?php echo esc_textarea( wc_implode_text_attributes( $attribute->get_options() ) ); ?></textarea>
-
-						<?php endif; ?>
+							do_action( 'woocommerce_product_option_terms', $attribute_taxonomy, $i );
+						} else {
+							/* translators: %s: WC_DELIMITER */
+							?><textarea name="attribute_values[<?php echo esc_attr( $i ); ?>]" cols="5" rows="5" placeholder="<?php printf( esc_attr__( 'Enter some text, or some attributes by "%s" separating values.', 'woocommerce' ), WC_DELIMITER ); ?>"><?php echo esc_textarea( wc_implode_text_attributes( $attribute->get_options() ) ); ?></textarea><?php
+						}
+						?>
 					</td>
 				</tr>
 				<tr>

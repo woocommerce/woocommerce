@@ -92,7 +92,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<li class="product">
 					<a href="<?php echo esc_attr( $addon->link ); ?>">
 						<?php if ( ! empty( $addon->image ) ) : ?>
-							<img src="<?php echo esc_url( $addon->image ); ?>"/>
+							<span class="product-img-wrap"><img src="<?php echo esc_url( $addon->image ); ?>"/></span>
 						<?php else : ?>
 							<h2><?php echo esc_html( $addon->title ); ?></h2>
 						<?php endif; ?>

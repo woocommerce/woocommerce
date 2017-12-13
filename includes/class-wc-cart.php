@@ -111,7 +111,6 @@ class WC_Cart extends WC_Legacy_Cart {
 
 		// Register hooks for the objects.
 		$this->session->init();
-		$this->fees_api->init();
 
 		add_action( 'woocommerce_add_to_cart', array( $this, 'calculate_totals' ), 20, 0 );
 		add_action( 'woocommerce_applied_coupon', array( $this, 'calculate_totals' ), 20, 0 );
@@ -128,8 +127,8 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * These properties store a reference to the cart, so we use new instead of clone.
 	 */
 	public function __clone() {
-		$this->session  = new WC_Cart_Session( $this );
-		$this->fees_api = new WC_Cart_Fees( $this );
+		$this->session  = clone $this->session;
+		$this->fees_api = clone $this->fees_api;
 	}
 
 	/*
@@ -639,6 +638,8 @@ class WC_Cart extends WC_Legacy_Cart {
 		if ( $clear_persistent_cart ) {
 			$this->session->persistent_cart_destroy();
 		}
+
+		$this->fees_api->remove_all_fees();
 
 		do_action( 'woocommerce_cart_emptied' );
 	}
@@ -1901,6 +1902,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	private function reset_totals() {
 		$this->totals = $this->default_totals;
+		$this->fees_api->remove_all_fees();
 		do_action( 'woocommerce_cart_reset', $this, false );
 	}
 }

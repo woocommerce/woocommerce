@@ -12,9 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Customizer class.
+ * WC_Shop_Customizer class.
  */
-class WC_Customizer {
+class WC_Shop_Customizer {
 
 	/**
 	 * Constructor.
@@ -111,6 +111,46 @@ class WC_Customizer {
 	}
 
 	/**
+	 * Should our settings show on product archives?
+	 *
+	 * @return boolean
+	 */
+	public function is_products_archive() {
+		return is_shop() || is_product_taxonomy() || is_product_category() || ! current_theme_supports( 'woocommerce' );
+	}
+
+	/**
+	 * Sanitize the shop page & category display setting.
+	 *
+	 * @param string $value '', 'subcategories', or 'both'.
+	 * @return string
+	 */
+	public function sanitize_archive_display( $value ) {
+		$options = array( '', 'subcategories', 'both' );
+
+		return in_array( $value, $options ) ? $value : '';
+	}
+
+	/**
+	 * Sanitize the catalog orderby setting.
+	 *
+	 * @param string $value An array key from the below array.
+	 * @return string
+	 */
+	public function sanitize_default_catalog_orderby( $value ) {
+		$options = apply_filters( 'woocommerce_default_catalog_orderby_options', array(
+			'menu_order' => __( 'Default sorting (custom ordering + name)', 'woocommerce' ),
+			'popularity' => __( 'Popularity (sales)', 'woocommerce' ),
+			'rating'     => __( 'Average rating', 'woocommerce' ),
+			'date'       => __( 'Sort by most recent', 'woocommerce' ),
+			'price'      => __( 'Sort by price (asc)', 'woocommerce' ),
+			'price-desc' => __( 'Sort by price (desc)', 'woocommerce' ),
+		) );
+
+		return array_key_exists( $value, $options ) ? $value : 'menu_order';
+	}
+
+	/**
 	 * Store notice section.
 	 *
 	 * @param WP_Customize_Manager $wp_customize Theme Customizer object.
@@ -174,21 +214,104 @@ class WC_Customizer {
 	 * @param WP_Customize_Manager $wp_customize Theme Customizer object.
 	 */
 	public function add_product_grid_section( $wp_customize ) {
-		if ( has_filter( 'loop_shop_columns' ) ) {
-			return;
-		}
 		$theme_support = get_theme_support( 'woocommerce' );
-		$theme_support = is_array( $theme_support ) ? $theme_support[0]: false;
+		$theme_support = is_array( $theme_support ) ? $theme_support[0] : false;
 
 		$wp_customize->add_section(
 			'woocommerce_product_grid',
 			array(
 				'title'           => __( 'Product Grid', 'woocommerce' ),
 				'priority'        => 10,
-				'active_callback' => array( $this, 'is_active' ),
+				'active_callback' => array( $this, 'is_products_archive' ),
 				'panel'           => 'woocommerce',
 			)
 		);
+
+		$wp_customize->add_setting(
+			'woocommerce_shop_page_display',
+			array(
+				'default'              => '',
+				'type'                 => 'option',
+				'capability'           => 'manage_woocommerce',
+				'sanitize_callback'    => array( $this, 'sanitize_archive_display' ),
+			)
+		);
+
+		$wp_customize->add_control(
+			'woocommerce_shop_page_display',
+			array(
+				'label'       => __( 'Shop page display', 'woocommerce' ),
+				'description' => __( 'This controls what is shown on the product archive.', 'woocommerce' ),
+				'section'     => 'woocommerce_product_grid',
+				'settings'    => 'woocommerce_shop_page_display',
+				'type'        => 'select',
+				'choices'     => array(
+					''              => __( 'Show products', 'woocommerce' ),
+					'subcategories' => __( 'Show categories', 'woocommerce' ),
+					'both'          => __( 'Show categories &amp; products', 'woocommerce' ),
+				),
+			)
+		);
+
+		$wp_customize->add_setting(
+			'woocommerce_category_archive_display',
+			array(
+				'default'              => '',
+				'type'                 => 'option',
+				'capability'           => 'manage_woocommerce',
+				'sanitize_callback'    => array( $this, 'sanitize_archive_display' ),
+			)
+		);
+
+		$wp_customize->add_control(
+			'woocommerce_category_archive_display',
+			array(
+				'label'       => __( 'Default category display', 'woocommerce' ),
+				'description' => __( 'This controls what is shown on category archives.', 'woocommerce' ),
+				'section'     => 'woocommerce_product_grid',
+				'settings'    => 'woocommerce_category_archive_display',
+				'type'        => 'select',
+				'choices'     => array(
+					''              => __( 'Show products', 'woocommerce' ),
+					'subcategories' => __( 'Show categories', 'woocommerce' ),
+					'both'          => __( 'Show subcategories &amp; products', 'woocommerce' ),
+				),
+			)
+		);
+
+		$wp_customize->add_setting(
+			'woocommerce_default_catalog_orderby',
+			array(
+				'default'              => '',
+				'type'                 => 'option',
+				'capability'           => 'manage_woocommerce',
+				'sanitize_callback'    => array( $this, 'sanitize_default_catalog_orderby' ),
+			)
+		);
+
+		$wp_customize->add_control(
+			'woocommerce_default_catalog_orderby',
+			array(
+				'label'       => __( 'Default product sorting', 'woocommerce' ),
+				'description' => __( 'This controls the default sort order of the catalog.', 'woocommerce' ),
+				'section'     => 'woocommerce_product_grid',
+				'settings'    => 'woocommerce_default_catalog_orderby',
+				'type'        => 'select',
+				'choices'     => apply_filters( 'woocommerce_default_catalog_orderby_options', array(
+					'menu_order' => __( 'Default sorting (custom ordering + name)', 'woocommerce' ),
+					'popularity' => __( 'Popularity (sales)', 'woocommerce' ),
+					'rating'     => __( 'Average rating', 'woocommerce' ),
+					'date'       => __( 'Sort by most recent', 'woocommerce' ),
+					'price'      => __( 'Sort by price (asc)', 'woocommerce' ),
+					'price-desc' => __( 'Sort by price (desc)', 'woocommerce' ),
+				) ),
+			)
+		);
+
+		// The following settings should be hidden if the theme is declaring the values.
+		if ( has_filter( 'loop_shop_columns' ) ) {
+			return;
+		}
 
 		$wp_customize->add_setting(
 			'woocommerce_catalog_columns',
@@ -237,8 +360,8 @@ class WC_Customizer {
 				'settings'    => 'woocommerce_catalog_rows',
 				'type'        => 'number',
 				'input_attrs' => array(
-					'min'  => isset( $theme_support['product_grid']['min_rows'] ) ? absint( $theme_support['product_grid']['min_rows'] ): 1,
-					'max'  => isset( $theme_support['product_grid']['max_rows'] ) ? absint( $theme_support['product_grid']['max_rows'] ): '',
+					'min'  => isset( $theme_support['product_grid']['min_rows'] ) ? absint( $theme_support['product_grid']['min_rows'] ) : 1,
+					'max'  => isset( $theme_support['product_grid']['max_rows'] ) ? absint( $theme_support['product_grid']['max_rows'] ) : '',
 					'step' => 1,
 				),
 			)
@@ -252,7 +375,7 @@ class WC_Customizer {
 	 */
 	private function add_product_images_section( $wp_customize ) {
 		$theme_support = get_theme_support( 'woocommerce' );
-		$theme_support = is_array( $theme_support ) ? $theme_support[0]: false;
+		$theme_support = is_array( $theme_support ) ? $theme_support[0] : false;
 
 		$wp_customize->add_section(
 			'woocommerce_product_images',
@@ -312,7 +435,10 @@ class WC_Customizer {
 					'section'     => 'woocommerce_product_images',
 					'settings'    => 'thumbnail_image_width',
 					'type'        => 'number',
-					'input_attrs' => array( 'min' => 0, 'step'  => 1 ),
+					'input_attrs' => array(
+						'min'  => 0,
+						'step' => 1,
+					),
 				)
 			);
 		}
@@ -383,4 +509,4 @@ class WC_Customizer {
 	}
 }
 
-new WC_Customizer();
+new WC_Shop_Customizer();

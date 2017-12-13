@@ -317,6 +317,7 @@ class WC_Admin_Setup_Wizard {
 		$postcode       = WC()->countries->get_base_postcode();
 		$currency       = get_option( 'woocommerce_currency', 'GBP' );
 		$product_type   = get_option( 'woocommerce_product_type', 'both' );
+		$sell_in_person = get_option( 'woocommerce_sell_in_person', 'none_selected' );
 
 		if ( empty( $country ) ) {
 			$user_location = WC_Geolocation::geolocate_ip();
@@ -437,6 +438,18 @@ class WC_Admin_Setup_Wizard {
 				<option value="physical" <?php selected( $product_type, 'physical' ); ?>><?php esc_html_e( 'I plan to sell physical products', 'woocommerce' ); ?></option>
 				<option value="virtual" <?php selected( $product_type, 'virtual' ); ?>><?php esc_html_e( 'I plan to sell digital products', 'woocommerce' ); ?></option>
 			</select>
+
+			<input
+				type="checkbox"
+				id="woocommerce_sell_in_person"
+				name="sell_in_person"
+				value="yes"
+				<?php checked( $sell_in_person, true ); ?>
+			/>
+			<label class="location-prompt" for="woocommerce_sell_in_person">
+				<?php esc_html_e( 'I will also be selling products or services in person.', 'woocommerce' ); ?>
+			</label>
+
 			<?php if ( 'unknown' === get_option( 'woocommerce_allow_tracking', 'unknown' ) ) : ?>
 				<div class="allow-tracking">
 					<input type="checkbox" id="wc_tracker_optin" name="wc_tracker_optin" value="yes" checked />
@@ -463,6 +476,7 @@ class WC_Admin_Setup_Wizard {
 		$postcode       = sanitize_text_field( $_POST['store_postcode'] );
 		$currency_code  = sanitize_text_field( $_POST['currency_code'] );
 		$product_type   = sanitize_text_field( $_POST['product_type'] );
+		$sell_in_person = isset( $_POST['sell_in_person'] ) && ( 'yes' === sanitize_text_field( $_POST['sell_in_person'] ) );
 		$tracking       = isset( $_POST['wc_tracker_optin'] ) && ( 'yes' === sanitize_text_field( $_POST['wc_tracker_optin'] ) );
 		// @codingStandardsIgnoreEnd
 		update_option( 'woocommerce_store_address', $address );
@@ -472,6 +486,7 @@ class WC_Admin_Setup_Wizard {
 		update_option( 'woocommerce_store_postcode', $postcode );
 		update_option( 'woocommerce_currency', $currency_code );
 		update_option( 'woocommerce_product_type', $product_type );
+		update_option( 'woocommerce_sell_in_person', $sell_in_person );
 
 		$locale_info = include( WC()->plugin_path() . '/i18n/locale-info.php' );
 		$country     = WC()->countries->get_base_country();
@@ -1003,6 +1018,51 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
+	 * Is Klarna Checkout country supported
+	 *
+	 * @param string $country_code Country code.
+	 */
+	protected function is_klarna_checkout_supported_country( $country_code ) {
+		$supported_countries = array(
+			'SE', //Sweden
+			'FI', //Finland
+			'NO', //Norway
+			'NL', //Netherlands
+		);
+		return in_array( $country_code, $supported_countries, true );
+	}
+
+	/**
+	 * Is Klarna Payments country supported
+	 *
+	 * @param string $country_code Country code.
+	 */
+	protected function is_klarna_payments_supported_country( $country_code ) {
+		$supported_countries = array(
+			'DK', //Denmark
+			'DE', //Germany
+			'AT', //Austria
+		);
+		return in_array( $country_code, $supported_countries, true );
+	}
+
+	/**
+	 * Is Square country supported
+	 *
+	 * @param string $country_code Country code.
+	 */
+	protected function is_square_supported_country( $country_code ) {
+		$square_supported_countries = array(
+			'US',
+			'CA',
+			'JP',
+			'UK',
+			'AU',
+		);
+		return in_array( $country_code, $square_supported_countries, true );
+	}
+
+	/**
 	 * Helper method to retrieve the current user's email address.
 	 *
 	 * @return string Email address
@@ -1022,90 +1082,162 @@ class WC_Admin_Setup_Wizard {
 	protected function get_wizard_in_cart_payment_gateways() {
 		$country    = WC()->countries->get_base_country();
 		$can_stripe = $this->is_stripe_supported_country( $country );
+		$should_display_klarna_checkout = $this->is_klarna_checkout_supported_country( $country );
+		$should_display_klarna_payments = $this->is_klarna_payments_supported_country( $country );
+		$should_display_square = $this->is_square_supported_country( $country ) && get_option( 'woocommerce_sell_in_person' );
 		$user_email = $this->get_current_user_email();
 
 		$stripe_description = '<p>' . sprintf(
 			__( 'Accept debit and credit cards in 135+ currencies, methods such as Alipay, and one-touch checkout with Apple Pay. <a href="%s" target="_blank">Learn more</a>.', 'woocommerce' ),
 			'https://woocommerce.com/products/stripe/'
 		) . '</p>';
-		$paypal_bt_description = '<p>' . sprintf(
-			__( 'Safe and secure payments using credit cards or your customer\'s PayPal account. <a href="%s" target="_blank">Learn more</a>.', 'woocommerce' ),
-			'https://wordpress.org/plugins/woocommerce-gateway-paypal-powered-by-braintree/'
-		) . '</p>';
 		$paypal_ec_description = '<p>' . sprintf(
 			__( 'Safe and secure payments using credit cards or your customer\'s PayPal account. <a href="%s" target="_blank">Learn more</a>.', 'woocommerce' ),
 			'https://wordpress.org/plugins/woocommerce-gateway-paypal-express-checkout/'
 		) . '</p>';
+		$klarna_checkout_description = '<p>' . sprintf(
+			__( 'Pay now, pay later, slice it. No credit card numbers, no passwords, no worries. <a href="%s" target="_blank">Learn more about Klarna</a>.', 'woocommerce' ),
+			'https://woocommerce.com/products/klarna/'
+		) . '</p>';
+		$klarna_payments_description = '<p>' . sprintf(
+			__( 'Pay later, slice it. No credit card numbers, no passwords, no worries. <a href="%s" target="_blank">Learn more about Klarna</a>.', 'woocommerce' ),
+			'https://woocommerce.com/products/klarna/'
+		) . '</p>';
+		$square_description = '<p>' . sprintf(
+			__( 'Accept Visa, Mastercard, Discover, and American Express all for one low rate, with no surprise fees. <a href="%s" target="_blank">Learn more about Square</a>.', 'woocommerce' ),
+			'https://woocommerce.com/products/square/'
+		) . '</p>';
+
+		$stripe = array(
+			'name'        => __( 'Stripe', 'woocommerce' ),
+			'image'       => WC()->plugin_url() . '/assets/images/stripe.png',
+			'description' => $stripe_description,
+			'class'       => $can_stripe ? 'checked' : '',
+			'repo-slug'   => 'woocommerce-gateway-stripe',
+			'settings'    => array(
+				'create_account' => array(
+					'label'       => __( 'Create a new Stripe account for me', 'woocommerce' ),
+					'type'        => 'checkbox',
+					'value'       => 'yes',
+					'placeholder' => '',
+					'required'    => false,
+				),
+				'email' => array(
+					'label'       => __( 'Stripe email address:', 'woocommerce' ),
+					'type'        => 'email',
+					'value'       => $user_email,
+					'placeholder' => __( 'Stripe email address', 'woocommerce' ),
+					'description' => __( "Enter your email address and we'll handle account creation. WooCommerce Services and Jetpack will be installed and activated for you.", 'woocommerce' ),
+					'required'    => true,
+				),
+			),
+			'enabled' => $can_stripe && ! ( $should_display_klarna_checkout || $should_display_klarna_payments || $should_display_square ),
+			'featured' => ! ( $should_display_klarna_checkout || $should_display_klarna_payments || $should_display_square ),
+		);
+		$ppec_paypal = array(
+			'name'        => __( 'PayPal Express Checkout', 'woocommerce' ),
+			'image'       => WC()->plugin_url() . '/assets/images/paypal.png',
+			'description' => $paypal_ec_description,
+			'class'       => 'checked paypal-logo',
+			'repo-slug'   => 'woocommerce-gateway-paypal-express-checkout',
+			'settings'    => array(
+				'reroute_requests' => array(
+					'label'       => __( 'Accept payments without linking a PayPal account', 'woocommerce' ),
+					'type'        => 'checkbox',
+					'value'       => 'yes',
+					'placeholder' => '',
+					'required'    => false,
+				),
+				'api_subject' => array(
+					'label'       => __( 'Direct payments to email address:', 'woocommerce' ),
+					'type'        => 'email',
+					'value'       => $user_email,
+					'placeholder' => __( 'Email address to receive payments', 'woocommerce' ),
+					'description' => __( "Enter your email address and we'll authenticate payments for you. To claim a payment, you'll need to have a PayPal Business account or create one later. WooCommerce Services and Jetpack will be installed and activated for you.", 'woocommerce' ),
+					'required'    => true,
+				),
+			),
+			'enabled'     => $should_display_klarna_checkout || $should_display_klarna_payments || $should_display_square,
+		);
+		$paypal = array(
+			'name'        => __( 'PayPal Standard', 'woocommerce' ),
+			'description' => __( 'Accept payments via PayPal using account balance or credit card.', 'woocommerce' ),
+			'image'       => '',
+			'settings'    => array(
+				'email' => array(
+					'label'       => __( 'PayPal email address:', 'woocommerce' ),
+					'type'        => 'email',
+					'value'       => $user_email,
+					'placeholder' => __( 'PayPal email address', 'woocommerce' ),
+					'required'    => true,
+				),
+			),
+		);
+		$klarna_checkout = array(
+			'name'        => __( 'Klarna Checkout', 'woocommerce' ),
+			'description' => $klarna_checkout_description,
+			'image'       => WC()->plugin_url() . '/assets/images/klarna-white.png',
+			'enabled'     => true,
+			'class'       => 'klarna-logo',
+			'repo-slug'   => 'klarna-checkout-for-woocommerce',
+		);
+		$klarna_payments = array(
+			'name'        => __( 'Klarna Checkout', 'woocommerce' ),
+			'description' => $klarna_payments_description,
+			'image'       => WC()->plugin_url() . '/assets/images/klarna-white.png',
+			'enabled'     => true,
+			'class'       => 'klarna-logo',
+			'repo-slug'   => 'klarna-payments-for-woocommerce',
+		);
+		$square = array(
+			'name'        => __( 'Square', 'woocommerce' ),
+			'description' => $square_description,
+			'image'       => WC()->plugin_url() . '/assets/images/square-white.png',
+			'class'       => 'square-logo',
+			'enabled'     => true,
+			'repo-slug'   => 'woocommerce-square',
+		);
 
 		$gateways = array(
-			'stripe' => array(
-				'name'        => __( 'Stripe', 'woocommerce' ),
-				'image'       => WC()->plugin_url() . '/assets/images/stripe.png',
-				'description' => $stripe_description,
-				'class'       => $can_stripe ? 'checked' : '',
-				'repo-slug'   => 'woocommerce-gateway-stripe',
-				'settings'    => array(
-					'create_account' => array(
-						'label'       => __( 'Create a new Stripe account for me', 'woocommerce' ),
-						'type'        => 'checkbox',
-						'value'       => 'yes',
-						'placeholder' => '',
-						'required'    => false,
-					),
-					'email' => array(
-						'label'       => __( 'Stripe email address:', 'woocommerce' ),
-						'type'        => 'email',
-						'value'       => $user_email,
-						'placeholder' => __( 'Stripe email address', 'woocommerce' ),
-						'description' => __( "Enter your email address and we'll handle account creation. WooCommerce Services and Jetpack will be installed and activated for you.", 'woocommerce' ),
-						'required'    => true,
-					),
-				),
-				'enabled' => $can_stripe,
-				'featured' => true,
-			),
-			'braintree_paypal' => array(
-				'name'        => __( 'PayPal by Braintree', 'woocommerce' ),
-				'image'       => WC()->plugin_url() . '/assets/images/paypal-braintree.png',
-				'description' => $paypal_bt_description,
-				'repo-slug'   => 'woocommerce-gateway-paypal-powered-by-braintree',
-			),
-			'ppec_paypal' => array(
-				'name'        => __( 'PayPal Express Checkout', 'woocommerce' ),
-				'image'       => WC()->plugin_url() . '/assets/images/paypal.png',
-				'description' => $paypal_ec_description,
-				'repo-slug'   => 'woocommerce-gateway-paypal-express-checkout',
-			),
-			'paypal' => array(
-				'name'        => __( 'PayPal Standard', 'woocommerce' ),
-				'description' => __( 'Accept payments via PayPal using account balance or credit card.', 'woocommerce' ),
-				'image'       => '',
-				'settings'    => array(
-					'email' => array(
-						'label'       => __( 'PayPal email address:', 'woocommerce' ),
-						'type'        => 'email',
-						'value'       => $user_email,
-						'placeholder' => __( 'PayPal email address', 'woocommerce' ),
-						'required'    => true,
-					),
-				),
-			),
+			'stripe'           => $stripe,
+			'ppec_paypal'      => $ppec_paypal,
+			'paypal'           => $paypal,
 		);
 
 		if ( ! $can_stripe ) {
 			unset( $gateways['stripe'] );
 		}
 
-		if ( 'US' === $country ) {
-			unset( $gateways['ppec_paypal'] );
-		} else {
-			unset( $gateways['braintree_paypal'] );
+		if ( $should_display_klarna_checkout ) {
+			$gateways = array(
+				'klarna_checkout'  => $klarna_checkout,
+				'ppec_paypal'      => $ppec_paypal,
+				'stripe'           => $stripe,
+			);
+		}
+
+		if ( $should_display_klarna_payments ) {
+			$gateways = array(
+				'klarna_payments'  => $klarna_payments,
+				'ppec_paypal'      => $ppec_paypal,
+				'stripe'           => $stripe,
+			);
+		}
+
+		if ( $should_display_square ) {
+			$gateways = array(
+				'square'           => $square,
+				'ppec_paypal'      => $ppec_paypal,
+				'stripe'           => $stripe,
+			);
 		}
 
 		if ( ! current_user_can( 'install_plugins' ) ) {
-			unset( $gateways['braintree_paypal'] );
 			unset( $gateways['ppec_paypal'] );
 			unset( $gateways['stripe'] );
+			unset( $gateways['klarna_checkout'] );
+			unset( $gateways['klarna_payments'] );
+			unset( $gateways['square'] );
 		}
 
 		return $gateways;
@@ -1274,7 +1406,7 @@ class WC_Admin_Setup_Wizard {
 							),
 						)
 					),
-					esc_url( admin_url( 'admin.php?page=wc-addons&view=payment-gateways' ) )
+					esc_url( admin_url( 'admin.php?page=wc-addons&view=payment_gateways' ) )
 				); ?>
 			</p>
 			<?php if ( $featured_gateways ) : ?>
@@ -1322,10 +1454,16 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_payment_save() {
 		check_admin_referer( 'wc-setup' );
 
-		// Install WooCommerce Services with Stripe to enable deferred account creation.
 		if (
-			! empty( $_POST['wc-wizard-service-stripe-enabled'] ) &&
-			! empty( $_POST['stripe_create_account'] )
+			(
+				// Install WooCommerce Services with Stripe to enable deferred account creation.
+				! empty( $_POST['wc-wizard-service-stripe-enabled'] ) &&
+				! empty( $_POST['stripe_create_account'] )
+			) || (
+				// Install WooCommerce Services with PayPal EC to enable proxied payments.
+				! empty( $_POST['wc-wizard-service-ppec_paypal-enabled'] ) &&
+				! empty( $_POST['ppec_paypal_reroute_requests'] )
+			)
 		) {
 			$this->install_woocommerce_services();
 		}
@@ -1345,7 +1483,7 @@ class WC_Admin_Setup_Wizard {
 			// @codingStandardsIgnoreStart
 			if ( ! empty( $gateway['settings'] ) ) {
 				foreach ( $gateway['settings'] as $setting_id => $setting ) {
-					$settings[ $setting_id ] = 'yes' === $settings['enabled']
+					$settings[ $setting_id ] = 'yes' === $settings['enabled'] && isset( $_POST[ $gateway_id . '_' . $setting_id ] )
 						? wc_clean( wp_unslash( $_POST[ $gateway_id . '_' . $setting_id ] ) )
 						: false;
 				}
@@ -1473,6 +1611,11 @@ class WC_Admin_Setup_Wizard {
 		$stripe_enabled  = is_array( $stripe_settings )
 			&& isset( $stripe_settings['create_account'] ) && 'yes' === $stripe_settings['create_account']
 			&& isset( $stripe_settings['enabled'] ) && 'yes' === $stripe_settings['enabled'];
+		$ppec_settings   = get_option( 'woocommerce_ppec_paypal_settings', false );
+		$ppec_enabled    = is_array( $ppec_settings )
+			&& isset( $ppec_settings['reroute_requests'] ) && 'yes' === $ppec_settings['reroute_requests']
+			&& isset( $ppec_settings['enabled'] ) && 'yes' === $ppec_settings['enabled'];
+		$payment_enabled = $stripe_enabled || $ppec_enabled;
 		$taxes_enabled   = (bool) get_option( 'woocommerce_setup_automated_taxes', false );
 		$domestic_rates  = (bool) get_option( 'woocommerce_setup_domestic_live_rates_zone', false );
 		$intl_rates      = (bool) get_option( 'woocommerce_setup_intl_live_rates_zone', false );
@@ -1481,14 +1624,14 @@ class WC_Admin_Setup_Wizard {
 		/* translators: %s: list of features, potentially comma separated */
 		$description_base = __( 'Your store is almost ready! To activate services like %s, just connect with Jetpack.', 'woocommerce' );
 
-		if ( $stripe_enabled && $taxes_enabled && $rates_enabled ) {
-			$description = sprintf( $description_base, __( 'Stripe payments, automated taxes, live rates and discounted shipping labels', 'woocommerce' ) );
-		} else if ( $stripe_enabled && $taxes_enabled ) {
-			$description = sprintf( $description_base, __( 'Stripe payments and automated taxes', 'woocommerce' ) );
-		} else if ( $stripe_enabled && $rates_enabled ) {
-			$description = sprintf( $description_base, __( 'Stripe payments, live rates and discounted shipping labels', 'woocommerce' ) );
-		} else if ( $stripe_enabled ) {
-			$description = sprintf( $description_base, __( 'Stripe payments', 'woocommerce' ) );
+		if ( $payment_enabled && $taxes_enabled && $rates_enabled ) {
+			$description = sprintf( $description_base, __( 'payments, automated taxes, live rates and discounted shipping labels', 'woocommerce' ) );
+		} else if ( $payment_enabled && $taxes_enabled ) {
+			$description = sprintf( $description_base, __( 'payments and automated taxes', 'woocommerce' ) );
+		} else if ( $payment_enabled && $rates_enabled ) {
+			$description = sprintf( $description_base, __( 'payments, live rates and discounted shipping labels', 'woocommerce' ) );
+		} else if ( $payment_enabled ) {
+			$description = sprintf( $description_base, __( 'payments', 'woocommerce' ) );
 		} else if ( $taxes_enabled && $rates_enabled ) {
 			$description = sprintf( $description_base, __( 'automated taxes, live rates and discounted shipping labels', 'woocommerce' ) );
 		} else if ( $taxes_enabled ) {
@@ -1525,7 +1668,7 @@ class WC_Admin_Setup_Wizard {
 		<p><?php echo esc_html( $description ); ?></p>
 		<img
 			class="jetpack-logo"
-			src="<?php echo esc_url( WC()->plugin_url() . '/assets/images/jetpack-green-logo.svg' ); ?>"
+			src="<?php echo esc_url( WC()->plugin_url() . '/assets/images/jetpack_vertical_logo.png' ); ?>"
 			alt="Jetpack logo"
 		/>
 		<?php if ( $has_jetpack_error ) : ?>

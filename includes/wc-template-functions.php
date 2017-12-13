@@ -357,6 +357,29 @@ function wc_get_default_product_rows_per_page() {
 }
 
 /**
+ * Reset the product grid settings when a new theme is activated.
+ *
+ * @since 3.3.0
+ */
+function wc_reset_product_grid_settings() {
+	$theme_support = get_theme_support( 'woocommerce' );
+	$theme_support = is_array( $theme_support ) ? $theme_support[0] : false;
+
+	if ( isset( $theme_support['product_grid']['default_rows'] ) ) {
+		update_option( 'woocommerce_catalog_rows', absint( $theme_support['product_grid']['default_rows'] ) );
+	} else {
+		delete_option( 'woocommerce_catalog_rows' );
+	}
+
+	if ( isset( $theme_support['product_grid']['default_rows'] ) ) {
+		update_option( 'woocommerce_catalog_columns', absint( $theme_support['product_grid']['default_columns'] ) );
+	} else {
+		delete_option( 'woocommerce_catalog_columns' );
+	}
+}
+add_action( 'after_switch_theme', 'wc_reset_product_grid_settings' );
+
+/**
  * Get classname for woocommerce loops.
  *
  * @since 2.6.0
@@ -500,6 +523,21 @@ function wc_query_string_form_fields( $values = null, $exclude = array(), $curre
 	} else {
 		echo $html; // WPCS: XSS ok.
 	}
+}
+
+/**
+ * Implode and escape HTML attributes for output.
+ *
+ * @since 3.3.0
+ * @param array $raw_attributes Attribute name value pairs.
+ * @return string
+ */
+function wc_implode_html_attributes( $raw_attributes ) {
+	$attributes = array();
+	foreach ( $raw_attributes as $name => $value ) {
+		$attributes[] = esc_attr( $name ) . '="' . esc_attr( $value ) . '"';
+	}
+	return implode( ' ', $attributes );
 }
 
 /**
@@ -830,6 +868,12 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 					$product->is_purchasable() && $product->is_in_stock() ? 'add_to_cart_button' : '',
 					$product->supports( 'ajax_add_to_cart' ) ? 'ajax_add_to_cart' : '',
 				) ) ),
+				'attributes' => array(
+					'data-product_id'  => $product->get_id(),
+					'data-product_sku' => $product->get_sku(),
+					'aria-label'       => $product->add_to_cart_description(),
+					'rel'              => 'nofollow',
+				),
 			);
 
 			$args = apply_filters( 'woocommerce_loop_add_to_cart_args', wp_parse_args( $args, $defaults ), $product );
@@ -838,6 +882,7 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 		}
 	}
 }
+
 if ( ! function_exists( 'woocommerce_template_loop_product_thumbnail' ) ) {
 
 	/**
