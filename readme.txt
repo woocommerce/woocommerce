@@ -160,11 +160,12 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
-= 3.2.6 - 2017-12-xx =
+= 3.2.6 - 2017-12-13 =
 * Fix - CSV Importer - Fix ID mapping to existing IDs.
 * Fix - CSV Importer - Unslash header fields to avoid extra slashes.
 * Fix - CSV Importer - Allow import and export of draft products.
 * Fix - CSV Importer - Get global attribute ID only when is a global attribute.
+* Fix - Remove URL fragment when appending geolocation hash.
 * Fix - Additional cart rounding fixes so rounding before subtotal works again. Added more unit tests.
 * Fix - Add BOM to exported report CSVs.
 * Fix - is_visible should ensure product is is not trashed before returning true.
@@ -179,6 +180,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - REST API - Fixed date format in reports schema.
 * Fix - REST API - Updated product categories image schema.
 * Fix - REST API - UUse KSES for purchase_note like in admin.
+* Fix - REST API - Filter passed images before processing so they can be unset via querystring.
 * Tweak - Use protected instead of private methods to allow easy override in session handler.
 * Tweak - wc_lostpassword_url should not be used before init - added warning.
 * Localization - Update Japanese prefectures to include prefecture type.
