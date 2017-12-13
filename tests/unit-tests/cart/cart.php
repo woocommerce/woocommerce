@@ -1350,4 +1350,15 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		// Clean up product.
 		WC_Helper_Product::delete_product( $product->get_id() );
 	}
+
+	public function test_check_cart_item_stock() {
+		// Create dummy product.
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		$this->assertEquals( true, WC()->cart->check_cart_item_stock() );
+		// Clean up the cart.
+		WC()->cart->empty_cart();
+		// Clean up product.
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
 }
