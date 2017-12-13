@@ -1148,7 +1148,7 @@ class WC_Admin_Setup_Wizard {
 						'type'        => 'email',
 						'value'       => $user_email,
 						'placeholder' => __( 'Email address to receive payments', 'woocommerce' ),
-						'description' => __( "Enter your email address and we'll authenticate payments for you. To claim a payment, you'll need to have a PayPal Business account or create one later. WooCommerce Services and Jetpack will be installed and activated for you.", 'woocommerce' ),
+						'description' => __( "Enter your email address and we'll authenticate payments for you. WooCommerce Services and Jetpack will be installed and activated for you.", 'woocommerce' ),
 						'required'    => true,
 					),
 				),

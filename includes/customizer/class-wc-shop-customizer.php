@@ -12,9 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Customizer class.
+ * WC_Shop_Customizer class.
  */
-class WC_Customizer {
+class WC_Shop_Customizer {
 
 	/**
 	 * Constructor.
@@ -122,6 +122,7 @@ class WC_Customizer {
 	/**
 	 * Sanitize the shop page & category display setting.
 	 *
+	 * @param string $value '', 'subcategories', or 'both'.
 	 * @return string
 	 */
 	public function sanitize_archive_display( $value ) {
@@ -133,6 +134,7 @@ class WC_Customizer {
 	/**
 	 * Sanitize the catalog orderby setting.
 	 *
+	 * @param string $value An array key from the below array.
 	 * @return string
 	 */
 	public function sanitize_default_catalog_orderby( $value ) {
@@ -213,7 +215,7 @@ class WC_Customizer {
 	 */
 	public function add_product_grid_section( $wp_customize ) {
 		$theme_support = get_theme_support( 'woocommerce' );
-		$theme_support = is_array( $theme_support ) ? $theme_support[0]: false;
+		$theme_support = is_array( $theme_support ) ? $theme_support[0] : false;
 
 		$wp_customize->add_section(
 			'woocommerce_product_grid',
@@ -358,8 +360,8 @@ class WC_Customizer {
 				'settings'    => 'woocommerce_catalog_rows',
 				'type'        => 'number',
 				'input_attrs' => array(
-					'min'  => isset( $theme_support['product_grid']['min_rows'] ) ? absint( $theme_support['product_grid']['min_rows'] ): 1,
-					'max'  => isset( $theme_support['product_grid']['max_rows'] ) ? absint( $theme_support['product_grid']['max_rows'] ): '',
+					'min'  => isset( $theme_support['product_grid']['min_rows'] ) ? absint( $theme_support['product_grid']['min_rows'] ) : 1,
+					'max'  => isset( $theme_support['product_grid']['max_rows'] ) ? absint( $theme_support['product_grid']['max_rows'] ) : '',
 					'step' => 1,
 				),
 			)
@@ -373,7 +375,7 @@ class WC_Customizer {
 	 */
 	private function add_product_images_section( $wp_customize ) {
 		$theme_support = get_theme_support( 'woocommerce' );
-		$theme_support = is_array( $theme_support ) ? $theme_support[0]: false;
+		$theme_support = is_array( $theme_support ) ? $theme_support[0] : false;
 
 		$wp_customize->add_section(
 			'woocommerce_product_images',
@@ -433,7 +435,10 @@ class WC_Customizer {
 					'section'     => 'woocommerce_product_images',
 					'settings'    => 'thumbnail_image_width',
 					'type'        => 'number',
-					'input_attrs' => array( 'min' => 0, 'step'  => 1 ),
+					'input_attrs' => array(
+						'min'  => 0,
+						'step' => 1,
+					),
 				)
 			);
 		}
@@ -504,4 +509,4 @@ class WC_Customizer {
 	}
 }
 
-new WC_Customizer();
+new WC_Shop_Customizer();
