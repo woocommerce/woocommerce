@@ -61,5 +61,8 @@ class WC_Test_WooCommerce extends WC_Unit_Test_Case {
 		$this->assertInstanceOf( 'WC_Integrations', $this->wc->integrations );
 		$this->assertInstanceOf( 'WC_Cart', $this->wc->cart );
 		$this->assertInstanceOf( 'WC_Customer', $this->wc->customer );
+		$this->assertInstanceOf( 'WC_Session', $this->wc->session );
+		$this->assertInstanceOf( 'WC_Query', $this->wc->query );
+		$this->assertInstanceOf( 'WC_Structured_Data', $this->wc->structured_data );
 	}
 }
