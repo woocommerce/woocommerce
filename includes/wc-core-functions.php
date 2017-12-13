@@ -1830,7 +1830,7 @@ function wc_make_phone_clickable( $phone ) {
  * @return mixed Value sanitized by wc_clean.
  */
 function wc_get_post_data_by_key( $key, $default = '' ) {
-	return wc_clean( wc_get_var( wp_unslash( $_POST[ $key ] ), $default ) ); // @codingStandardsIgnoreLine
+	return wc_clean( wp_unslash( wc_get_var( $_POST[ $key ] ), $default ) ); // @codingStandardsIgnoreLine
 }
 
 /**
