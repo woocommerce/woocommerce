@@ -36,7 +36,7 @@ class WC_Tests_Libraries_Background_Process extends WC_Unit_Test_Case {
 	public function test_schedule_cron_healthcheck() {
 		require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'class-wc-mock-background-process.php' );
 		$queue = new WC_Mock_Background_Process();
-		$this->assertArraySubset( [ 'wp_' . get_current_blog_id() . '_wc_mock_background_process_cron_interval' => [ 'interval' => 300, 'display' => 'Every 5 minutes' ] ], $queue->schedule_cron_healthcheck( array() ) );
+		$this->assertArraySubset( array( 'wp_' . get_current_blog_id() . '_wc_mock_background_process_cron_interval' => array( 'interval' => 300, 'display' => 'Every 5 minutes' ) ), $queue->schedule_cron_healthcheck( array() ) );
 	}
 
 	/**
