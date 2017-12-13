@@ -68,5 +68,7 @@ class WC_Test_WooCommerce extends WC_Unit_Test_Case {
 		$this->assertInstanceOf( 'WC_Session', $this->wc->session );
 		$this->assertInstanceOf( 'WC_Query', $this->wc->query );
 		$this->assertInstanceOf( 'WC_Structured_Data', $this->wc->structured_data );
+		$this->assertInstanceOf( 'WC_Deprecated_Action_Hooks', $this->wc->deprecated_hook_handlers['actions'] );
+		$this->assertInstanceOf( 'WC_Deprecated_Filter_Hooks', $this->wc->deprecated_hook_handlers['filters'] );
 	}
 }
