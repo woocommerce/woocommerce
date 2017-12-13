@@ -509,6 +509,7 @@ body {
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		max-height: 4.5em;
 
 		img {
 			max-width: 75px;
@@ -560,6 +561,7 @@ body {
 		text-align: center;
 		cursor: pointer;
 		padding: 2em 0;
+		max-height: 2em;
 	}
 
 	.wc-wizard-service-toggle {
