@@ -923,6 +923,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		// Check.
 		$this->assertEquals( wc_price( 22 ), WC()->cart->get_total() );
 		$this->assertEquals( wc_price( 20 ), WC()->cart->get_total_ex_tax() );
+		$tax_totals = WC()->cart->get_tax_totals();
 
 		// Clean up the cart.
 		WC()->cart->empty_cart();
@@ -1371,5 +1372,53 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		// Clean up product.
 		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	public function test_get_tax_totals() {
+		global $wpdb;
+
+		// Set calc taxes option.
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '10.0000',
+			'tax_rate_name'     => 'TAX',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		// Create dummy product.
+		$product = WC_Helper_Product::create_simple_product();
+
+		// We need this to have the calculate_totals() method calculate totals.
+		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
+			define( 'WOOCOMMERCE_CHECKOUT', true );
+		}
+
+		// Add product to cart (10).
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// Check.
+		$tax_totals = WC()->cart->get_tax_totals();
+		$this->assertArrayHasKey( 'TAX-1', $tax_totals );
+		$this->assertEquals( 1, $tax_totals['TAX-1']->amount );
+		$this->assertEquals( false, $tax_totals['TAX-1']->is_compound );
+		$this->assertEquals( 'TAX', $tax_totals['TAX-1']->label );
+
+		// Clean up the cart.
+		WC()->cart->empty_cart();
+
+		// Clean up product.
+		WC_Helper_Product::delete_product( $product->get_id() );
+
+		// Restore option.
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
+		update_option( 'woocommerce_calc_taxes', 'no' );
 	}
 }
