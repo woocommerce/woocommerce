@@ -1199,7 +1199,7 @@ class WC_Admin_Setup_Wizard {
 	 *
 	 * @return array
 	 */
-	protected function get_wizard_in_cart_payment_gateways() {
+	public function get_wizard_in_cart_payment_gateways() {
 		$gateways = $this->get_wizard_available_in_cart_payment_gateways();
 
 		if ( ! current_user_can( 'install_plugins' ) ) {
