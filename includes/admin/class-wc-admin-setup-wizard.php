@@ -1200,12 +1200,14 @@ class WC_Admin_Setup_Wizard {
 	 * @return array
 	 */
 	protected function get_wizard_in_cart_payment_gateways() {
-		$country  = WC()->countries->get_base_country();
 		$gateways = $this->get_wizard_available_in_cart_payment_gateways();
 
 		if ( ! current_user_can( 'install_plugins' ) ) {
 			return array( 'paypal' => $gateways['paypal'] );
 		}
+
+		$country    = WC()->countries->get_base_country();
+		$can_stripe = $this->is_stripe_supported_country( $country );
 
 		if ( $this->is_klarna_checkout_supported_country( $country ) ) {
 			$spotlight = 'klarna_checkout';
@@ -1216,15 +1218,18 @@ class WC_Admin_Setup_Wizard {
 		}
 
 		if ( isset( $spotlight ) ) {
-			return array(
+			$offered_gateways = array(
 				$spotlight    => $gateways[ $spotlight ],
 				'ppec_paypal' => $gateways['ppec_paypal'],
-				'stripe'      => $gateways['stripe'],
 			);
+			if ( $can_stripe ) {
+				$offered_gateways += array( 'stripe' => $gateways['stripe'] );
+			}
+			return $offered_gateways;
 		}
 
 		$offered_gateways = array();
-		if ( $this->is_stripe_supported_country( $country ) ) {
+		if ( $can_stripe ) {
 			$gateways['stripe']['enabled'] = true;
 			$gateways['stripe']['featured'] = true;
 			$offered_gateways += array( 'stripe' => $gateways['stripe'] );
