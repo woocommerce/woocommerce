@@ -1056,7 +1056,7 @@ class WC_Admin_Setup_Wizard {
 			'US',
 			'CA',
 			'JP',
-			'UK',
+			'GB',
 			'AU',
 		);
 		return in_array( $country_code, $square_supported_countries, true );
