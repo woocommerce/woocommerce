@@ -1432,8 +1432,8 @@ class WC_Admin_Setup_Wizard {
 						<?php esc_html_e( 'Collect payments from customers offline.', 'woocommerce' ); ?>
 					</div>
 					<div class="wc-wizard-service-enable">
-							<input class="wc-wizard-service-list-toggle" id="wc-wizard-service-list-toggle" type="checkbox">
-							<label for="wc-wizard-service-list-toggle"></label>
+						<input class="wc-wizard-service-list-toggle" id="wc-wizard-service-list-toggle" type="checkbox">
+						<label for="wc-wizard-service-list-toggle"></label>
 					</div>
 				</li>
 				<?php foreach ( $manual_gateways as $gateway_id => $gateway ) :

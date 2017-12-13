@@ -483,7 +483,8 @@ body {
 	}
 }
 
-.wc-wizard-service-item, .wc-wizard-services-list-toggle {
+.wc-wizard-service-item,
+.wc-wizard-services-list-toggle {
 	display: flex;
 	flex-wrap: nowrap;
 	justify-content: space-between;
@@ -560,6 +561,7 @@ body {
 		text-align: center;
 		cursor: pointer;
 		padding: 2em 0;
+		position: relative;
 	}
 
 	.wc-wizard-service-toggle {
@@ -624,30 +626,31 @@ body {
 	}
 }
 
-// Toggle display a list of services
-.wc-wizard-service-enable input {
-	visibility: hidden;
-	position: relative;
-	cursor: pointer;
-
-	&:before {
-		content: "\f347"; // down chevron
+// Toggle display a list of services.
+.wc-wizard-services-list-toggle {
+	.wc-wizard-service-enable::before {
+		content: "\f343"; // up chevron
 		font-family: "dashicons";
 		visibility: initial;
 		color: #666;
 		font-size: 25px;
-		margin-left: -5px; // center it
-		top: -6px;
+		margin-top: -7px;
+		margin-left: -5px;
 		position: absolute;
+		visibility: visible;
+	}
+	&.closed {
+		.wc-wizard-service-enable::before {
+			content: "\f347"; // down chevron
+		}
+	}
+	.wc-wizard-service-enable input {
+		visibility: hidden;
+		position: relative;
+		cursor: pointer;
 	}
 }
 
-.wc-wizard-service-enable input:checked {
-	&:before {
-		content: "\f343"; // up chevron
-		top: -7px;
-	}
-}
 .wc-wizard-services.manual .wc-wizard-service-item {
 	display: none;
 }
