@@ -2,6 +2,7 @@
 
 /**
  * WooCommerce class.
+ *
  * @package WooCommerce\Tests\Util
  */
 class WC_Test_WooCommerce extends WC_Unit_Test_Case {
@@ -53,6 +54,7 @@ class WC_Test_WooCommerce extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_wc_class_instances() {
+		$this->assertInstanceOf( 'WooCommerce', $this->wc );
 		$this->assertInstanceOf( 'WC_Product_Factory', $this->wc->product_factory );
 		$this->assertInstanceOf( 'WC_Order_Factory', $this->wc->order_factory );
 		$this->assertInstanceOf( 'WC_Countries', $this->wc->countries );
