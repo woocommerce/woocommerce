@@ -8,11 +8,14 @@
  */
 class WC_Mock_Background_Process extends WP_Background_Process {
 	/**
-	 * Action to hook onto
-	 *
-	 * @var string
+	 * Constructor.
 	 */
-	protected $action = 'woocommerce_mock_background_process';
+	public function __construct() {
+		// Uses unique prefix per blog so each blog has separate queue.
+		$this->prefix = 'wp_' . get_current_blog_id();
+		$this->action = 'wc_mock_background_process';
+		parent::__construct();
+	}
 
 	/**
 	 * Fires when the job should start.
@@ -21,6 +24,15 @@ class WC_Mock_Background_Process extends WP_Background_Process {
 	 */
 	public function dispatch() {
 		parent::dispatch();
+	}
+
+	/**
+	 * Return the identifier string.
+	 *
+	 * @return void
+	 */
+	public function get_identifier() {
+		return $this->identifier;
 	}
 
 	/**
