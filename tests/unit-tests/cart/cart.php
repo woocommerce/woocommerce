@@ -936,6 +936,17 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_calc_taxes', 'no' );
 	}
 
+	public function test_get_cart_item_quantities() {
+		// Create dummy product.
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		$this->assetEquals( 1, WC()->cart->get_cart_item_quantities() );
+		// Clean up the cart.
+		WC()->cart->empty_cart();
+		// Clean up product.
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
 	/**
 	 * Test needs_shipping_address method.
 	 */
@@ -1311,5 +1322,10 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		// Ensure that cloned properties are not identical.
 		$identical_fees = $cart_fees === $new_cart_fees;
 		$this->assertFalse( $identical_fees, 'Cloned cart fees should not be identical to original cart.' );
+	}
+
+	public function test_cart_object_istantiation() {
+		$cart = new WC_Cart();
+		$this->assertInstanceOf( 'WC_Cart', $cart );
 	}
 }
