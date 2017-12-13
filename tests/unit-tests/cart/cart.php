@@ -1361,4 +1361,15 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		// Clean up product.
 		WC_Helper_Product::delete_product( $product->get_id() );
 	}
+
+	public function test_get_cross_sells() {
+		// Create dummy product.
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		$this->assertEquals( array(), WC()->cart->get_cross_sells() );
+		// Clean up the cart.
+		WC()->cart->empty_cart();
+		// Clean up product.
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
 }
