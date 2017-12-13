@@ -1176,7 +1176,7 @@ class WC_Admin_Setup_Wizard {
 				'repo-slug'   => 'klarna-checkout-for-woocommerce',
 			),
 			'klarna_payments' => array(
-				'name'        => __( 'Klarna Checkout', 'woocommerce' ),
+				'name'        => __( 'Klarna Payments', 'woocommerce' ),
 				'description' => $klarna_payments_description,
 				'image'       => WC()->plugin_url() . '/assets/images/klarna-white.png',
 				'enabled'     => true,
