@@ -1216,8 +1216,6 @@ class WC_Admin_Setup_Wizard {
 		}
 
 		if ( isset( $spotlight ) ) {
-			$gateways['ppec_paypal']['enabled'] = false;
-
 			return array(
 				$spotlight    => $gateways[ $spotlight ],
 				'ppec_paypal' => $gateways['ppec_paypal'],
