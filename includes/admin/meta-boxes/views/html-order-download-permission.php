@@ -51,7 +51,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							admin_url( 'admin.php?page=wc-reports&tab=orders&report=downloads' )
 						);
 						echo '<a class="button" href="' . esc_url( $report_url ) . '">';
-						echo __( 'View Report', 'woocommerce' );
+						echo __( 'View report', 'woocommerce' );
 						echo '</a>';
 					?>
 				</td>
