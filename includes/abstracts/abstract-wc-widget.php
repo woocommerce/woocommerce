@@ -278,20 +278,9 @@ abstract class WC_Widget extends WP_Widget {
 	/**
 	 * Get current page URL with various filtering props supported by WC.
 	 *
-	 * @param string $taxonomy Taxonomy.
 	 * @return string
 	 */
-	protected function get_page_base_url( $taxonomy ) {
-		wc_deprecated_function( 'WC_Widget::get_page_base_url', '3.3.0', 'WC_Widget::get_page_url' );
-		return $this->get_page_url();
-	}
-
-	/**
-	 * Get current page URL with various filtering props supported by WC.
-	 *
-	 * @return string
-	 */
-	protected function get_page_url() {
+	protected function get_current_page_url() {
 		if ( defined( 'SHOP_IS_ON_FRONT' ) ) {
 			$link = home_url();
 		} elseif ( is_shop() ) {

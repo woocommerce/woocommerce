@@ -424,7 +424,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 				$current_filter[] = $term->slug;
 			}
 
-			$link = remove_query_arg( $filter_name, $this->get_page_url() );
+			$link = remove_query_arg( $filter_name, $this->get_current_page_url() );
 
 			// Add current filters to URL.
 			foreach ( $current_filter as $key => $value ) {
