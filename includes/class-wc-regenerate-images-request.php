@@ -19,11 +19,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Regenerate_Images_Request extends WP_Background_Process {
 
 	/**
-	 * Action to hook onto
-	 *
-	 * @var string
+	 * Initiate new background process.
 	 */
-	protected $action = 'woocommerce_regenerate_images';
+	public function __construct() {
+		// Uses unique prefix per blog so each blog has separate queue.
+		$this->prefix = 'wp_' . get_current_blog_id();
+		$this->action = 'wc_regenerate_images';
+
+		parent::__construct();
+	}
 
 	/**
 	 * Fires when the job should start
