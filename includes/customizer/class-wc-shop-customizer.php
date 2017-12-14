@@ -403,7 +403,7 @@ class WC_Shop_Customizer {
 				'single_image_width',
 				array(
 					'label'       => __( 'Main image width', 'woocommerce' ),
-					'description' => __( 'This is the width used by the main image on single product pages. These images will remain uncropped.', 'woocommerce' ),
+					'description' => __( 'Image size used for the main image on single product pages. These images will remain uncropped.', 'woocommerce' ),
 					'section'     => 'woocommerce_product_images',
 					'settings'    => 'single_image_width',
 					'type'        => 'number',
@@ -431,7 +431,7 @@ class WC_Shop_Customizer {
 				'thumbnail_image_width',
 				array(
 					'label'       => __( 'Thumbnail width', 'woocommerce' ),
-					'description' => __( 'This size is used for product archives and product listings.', 'woocommerce' ),
+					'description' => __( 'Image size used for products in the catalog and product gallery thumbnails.', 'woocommerce' ),
 					'section'     => 'woocommerce_product_images',
 					'settings'    => 'thumbnail_image_width',
 					'type'        => 'number',
