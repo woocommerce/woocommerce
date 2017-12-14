@@ -280,7 +280,11 @@ abstract class WC_Widget extends WP_Widget {
 	 *
 	 * @return string
 	 */
-	protected function get_page_base_url() {
+	protected function get_page_base_url( $deprecated ) {
+		if ( $deprecated ) {
+			wc_deprecated_argument( 'taxonomy', '3.3', 'get_page_base_url() does not require a taxonomy id anymore.' );
+		}
+
 		if ( defined( 'SHOP_IS_ON_FRONT' ) ) {
 			$link = home_url();
 		} elseif ( is_shop() ) {
