@@ -518,7 +518,7 @@ class WC_Query {
 		} else {
 			$args['join']    .= " INNER JOIN ( SELECT post_id, min( meta_value+0 ) price FROM $wpdb->postmeta WHERE meta_key='_price' GROUP BY post_id ) as price_query ON $wpdb->posts.ID = price_query.post_id ";
 		}
-		$args['orderby'] = ' price_query.price ASC ';
+		$args['orderby'] = " price_query.price ASC, $wpdb->posts.ID ASC ";
 		return $args;
 	}
 
@@ -548,7 +548,7 @@ class WC_Query {
 			$args['join'] .= " INNER JOIN ( SELECT post_id, max( meta_value+0 ) price FROM $wpdb->postmeta WHERE meta_key='_price' GROUP BY post_id ) as price_query ON $wpdb->posts.ID = price_query.post_id ";
 		}
 
-		$args['orderby'] = ' price_query.price DESC ';
+		$args['orderby'] = " price_query.price DESC, $wpdb->posts.ID DESC ";
 		return $args;
 	}
 
