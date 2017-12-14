@@ -279,6 +279,7 @@ abstract class WC_Widget extends WP_Widget {
 	 * Get current page URL with various filtering props supported by WC.
 	 *
 	 * @return string
+	 * @since  3.3.0
 	 */
 	protected function get_current_page_url() {
 		if ( defined( 'SHOP_IS_ON_FRONT' ) ) {
