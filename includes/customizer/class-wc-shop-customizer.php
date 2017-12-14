@@ -39,7 +39,7 @@ class WC_Shop_Customizer {
 		) );
 
 		$this->add_store_notice_section( $wp_customize );
-		$this->add_product_grid_section( $wp_customize );
+		$this->add_product_catalog_section( $wp_customize );
 		$this->add_product_images_section( $wp_customize );
 	}
 
@@ -209,18 +209,18 @@ class WC_Shop_Customizer {
 	}
 
 	/**
-	 * Product grid section.
+	 * Product catalog section.
 	 *
 	 * @param WP_Customize_Manager $wp_customize Theme Customizer object.
 	 */
-	public function add_product_grid_section( $wp_customize ) {
+	public function add_product_catalog_section( $wp_customize ) {
 		$theme_support = get_theme_support( 'woocommerce' );
 		$theme_support = is_array( $theme_support ) ? $theme_support[0] : false;
 
 		$wp_customize->add_section(
-			'woocommerce_product_grid',
+			'woocommerce_product_catalog',
 			array(
-				'title'           => __( 'Product Grid', 'woocommerce' ),
+				'title'           => __( 'Product Catalog', 'woocommerce' ),
 				'priority'        => 10,
 				'active_callback' => array( $this, 'is_products_archive' ),
 				'panel'           => 'woocommerce',
@@ -242,7 +242,7 @@ class WC_Shop_Customizer {
 			array(
 				'label'       => __( 'Shop page display', 'woocommerce' ),
 				'description' => __( 'Choose what to display on the main shop page.', 'woocommerce' ),
-				'section'     => 'woocommerce_product_grid',
+				'section'     => 'woocommerce_product_catalog',
 				'settings'    => 'woocommerce_shop_page_display',
 				'type'        => 'select',
 				'choices'     => array(
@@ -268,7 +268,7 @@ class WC_Shop_Customizer {
 			array(
 				'label'       => __( 'Category display', 'woocommerce' ),
 				'description' => __( 'Choose what to display on product category pages.', 'woocommerce' ),
-				'section'     => 'woocommerce_product_grid',
+				'section'     => 'woocommerce_product_catalog',
 				'settings'    => 'woocommerce_category_archive_display',
 				'type'        => 'select',
 				'choices'     => array(
@@ -294,7 +294,7 @@ class WC_Shop_Customizer {
 			array(
 				'label'       => __( 'Default product sorting', 'woocommerce' ),
 				'description' => __( 'How should products by sorted in the catalog by default?', 'woocommerce' ),
-				'section'     => 'woocommerce_product_grid',
+				'section'     => 'woocommerce_product_catalog',
 				'settings'    => 'woocommerce_default_catalog_orderby',
 				'type'        => 'select',
 				'choices'     => apply_filters( 'woocommerce_default_catalog_orderby_options', array(
@@ -329,7 +329,7 @@ class WC_Shop_Customizer {
 			array(
 				'label'       => __( 'Products per row', 'woocommerce' ),
 				'description' => __( 'How many products should be shown per row?', 'woocommerce' ),
-				'section'     => 'woocommerce_product_grid',
+				'section'     => 'woocommerce_product_catalog',
 				'settings'    => 'woocommerce_catalog_columns',
 				'type'        => 'number',
 				'input_attrs' => array(
@@ -356,7 +356,7 @@ class WC_Shop_Customizer {
 			array(
 				'label'       => __( 'Rows per page', 'woocommerce' ),
 				'description' => __( 'How many rows of products should be shown per page?', 'woocommerce' ),
-				'section'     => 'woocommerce_product_grid',
+				'section'     => 'woocommerce_product_catalog',
 				'settings'    => 'woocommerce_catalog_rows',
 				'type'        => 'number',
 				'input_attrs' => array(
