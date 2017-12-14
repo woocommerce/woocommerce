@@ -155,16 +155,18 @@ class WC_Order extends WC_Abstract_Order {
 		// Tax for inclusive prices.
 		if ( wc_tax_enabled() && 'incl' === $tax_display ) {
 			$tax_string_array = array();
+			$tax_totals       = $this->get_tax_totals();
 
 			if ( 'itemized' === get_option( 'woocommerce_tax_total_display' ) ) {
-				foreach ( $this->get_tax_totals() as $code => $tax ) {
+				foreach ( $tax_totals as $code => $tax ) {
 					$tax_amount         = ( $total_refunded && $display_refunded ) ? wc_price( WC_Tax::round( $tax->amount - $this->get_total_tax_refunded_by_rate_id( $tax->rate_id ) ), array( 'currency' => $this->get_currency() ) ) : $tax->formatted_amount;
 					$tax_string_array[] = sprintf( '%s %s', $tax_amount, $tax->label );
 				}
-			} else {
+			} elseif ( ! empty( $tax_totals ) ) {
 				$tax_amount         = ( $total_refunded && $display_refunded ) ? $this->get_total_tax() - $this->get_total_tax_refunded() : $this->get_total_tax();
 				$tax_string_array[] = sprintf( '%s %s', wc_price( $tax_amount, array( 'currency' => $this->get_currency() ) ), WC()->countries->tax_or_vat() );
 			}
+
 			if ( ! empty( $tax_string_array ) ) {
 				/* translators: %s: taxes */
 				$tax_string = ' <small class="includes_tax">' . sprintf( __( '(includes %s)', 'woocommerce' ), implode( ', ', $tax_string_array ) ) . '</small>';
