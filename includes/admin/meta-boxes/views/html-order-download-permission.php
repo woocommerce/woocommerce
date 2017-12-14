@@ -44,7 +44,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					?>
 				</td>
 				<td>
-					<label><?php esc_html_e( 'Downloads completed', 'woocommerce' ); ?></label>
+					<label><?php esc_html_e( 'Customer download report', 'woocommerce' ); ?></label>
 					<?php
 						$report_url = add_query_arg(
 							'permission_id',
@@ -52,7 +52,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							admin_url( 'admin.php?page=wc-reports&tab=orders&report=downloads' )
 						);
 						echo '<a href="' . esc_url( $report_url ) . '">';
-						echo esc_html( number_format_i18n( $download->get_download_count() ) );
+						echo __( 'View Report', 'woocommerce' );
 						echo '</a>';
 					?>
 				</td>
