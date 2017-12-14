@@ -241,7 +241,7 @@ class WC_Shop_Customizer {
 			'woocommerce_shop_page_display',
 			array(
 				'label'       => __( 'Shop page display', 'woocommerce' ),
-				'description' => __( 'This controls what is shown on the product archive.', 'woocommerce' ),
+				'description' => __( 'Choose what to display on the main shop page.', 'woocommerce' ),
 				'section'     => 'woocommerce_product_grid',
 				'settings'    => 'woocommerce_shop_page_display',
 				'type'        => 'select',
@@ -266,8 +266,8 @@ class WC_Shop_Customizer {
 		$wp_customize->add_control(
 			'woocommerce_category_archive_display',
 			array(
-				'label'       => __( 'Default category display', 'woocommerce' ),
-				'description' => __( 'This controls what is shown on category archives.', 'woocommerce' ),
+				'label'       => __( 'Category display', 'woocommerce' ),
+				'description' => __( 'Choose what to display on product category pages.', 'woocommerce' ),
 				'section'     => 'woocommerce_product_grid',
 				'settings'    => 'woocommerce_category_archive_display',
 				'type'        => 'select',
@@ -293,7 +293,7 @@ class WC_Shop_Customizer {
 			'woocommerce_default_catalog_orderby',
 			array(
 				'label'       => __( 'Default product sorting', 'woocommerce' ),
-				'description' => __( 'This controls the default sort order of the catalog.', 'woocommerce' ),
+				'description' => __( 'How should products by sorted in the catalog by default?', 'woocommerce' ),
 				'section'     => 'woocommerce_product_grid',
 				'settings'    => 'woocommerce_default_catalog_orderby',
 				'type'        => 'select',
