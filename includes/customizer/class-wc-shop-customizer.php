@@ -389,7 +389,7 @@ class WC_Shop_Customizer {
 
 		if ( ! isset( $theme_support['single_image_width'] ) ) {
 			$wp_customize->add_setting(
-				'single_image_width',
+				'woocommerce_single_image_width',
 				array(
 					'default'              => 600,
 					'type'                 => 'option',
@@ -400,12 +400,12 @@ class WC_Shop_Customizer {
 			);
 
 			$wp_customize->add_control(
-				'single_image_width',
+				'woocommerce_single_image_width',
 				array(
 					'label'       => __( 'Main image width', 'woocommerce' ),
 					'description' => __( 'This is the width used by the main image on single product pages. These images will remain uncropped.', 'woocommerce' ),
 					'section'     => 'woocommerce_product_images',
-					'settings'    => 'single_image_width',
+					'settings'    => 'woocommerce_single_image_width',
 					'type'        => 'number',
 					'input_attrs' => array(
 						'min'  => 0,
@@ -417,7 +417,7 @@ class WC_Shop_Customizer {
 
 		if ( ! isset( $theme_support['thumbnail_image_width'] ) ) {
 			$wp_customize->add_setting(
-				'thumbnail_image_width',
+				'woocommerce_thumbnail_image_width',
 				array(
 					'default'              => 300,
 					'type'                 => 'option',
@@ -428,12 +428,12 @@ class WC_Shop_Customizer {
 			);
 
 			$wp_customize->add_control(
-				'thumbnail_image_width',
+				'woocommerce_thumbnail_image_width',
 				array(
 					'label'       => __( 'Thumbnail width', 'woocommerce' ),
 					'description' => __( 'This size is used for product archives and product listings.', 'woocommerce' ),
 					'section'     => 'woocommerce_product_images',
-					'settings'    => 'thumbnail_image_width',
+					'settings'    => 'woocommerce_thumbnail_image_width',
 					'type'        => 'number',
 					'input_attrs' => array(
 						'min'  => 0,
