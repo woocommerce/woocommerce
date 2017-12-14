@@ -273,7 +273,7 @@ class WC_Shop_Customizer {
 				'type'        => 'select',
 				'choices'     => array(
 					''              => __( 'Show products', 'woocommerce' ),
-					'subcategories' => __( 'Show categories', 'woocommerce' ),
+					'subcategories' => __( 'Show subcategories', 'woocommerce' ),
 					'both'          => __( 'Show subcategories &amp; products', 'woocommerce' ),
 				),
 			)
