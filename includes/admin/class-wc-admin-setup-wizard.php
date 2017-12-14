@@ -1056,7 +1056,7 @@ class WC_Admin_Setup_Wizard {
 			'US',
 			'CA',
 			'JP',
-			'UK',
+			'GB',
 			'AU',
 		);
 		return in_array( $country_code, $square_supported_countries, true );
@@ -1075,16 +1075,11 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Simple array of "in cart" gateways to show in wizard.
+	 * Array of all possible "in cart" gateways that can be offered.
 	 *
 	 * @return array
 	 */
-	protected function get_wizard_in_cart_payment_gateways() {
-		$country    = WC()->countries->get_base_country();
-		$can_stripe = $this->is_stripe_supported_country( $country );
-		$should_display_klarna_checkout = $this->is_klarna_checkout_supported_country( $country );
-		$should_display_klarna_payments = $this->is_klarna_payments_supported_country( $country );
-		$should_display_square = $this->is_square_supported_country( $country ) && get_option( 'woocommerce_sell_in_person' );
+	protected function get_wizard_available_in_cart_payment_gateways() {
 		$user_email = $this->get_current_user_email();
 
 		$stripe_description = '<p>' . sprintf(
@@ -1108,139 +1103,139 @@ class WC_Admin_Setup_Wizard {
 			'https://woocommerce.com/products/square/'
 		) . '</p>';
 
-		$stripe = array(
-			'name'        => __( 'Stripe', 'woocommerce' ),
-			'image'       => WC()->plugin_url() . '/assets/images/stripe.png',
-			'description' => $stripe_description,
-			'class'       => $can_stripe ? 'checked' : '',
-			'repo-slug'   => 'woocommerce-gateway-stripe',
-			'settings'    => array(
-				'create_account' => array(
-					'label'       => __( 'Create a new Stripe account for me', 'woocommerce' ),
-					'type'        => 'checkbox',
-					'value'       => 'yes',
-					'placeholder' => '',
-					'required'    => false,
-				),
-				'email' => array(
-					'label'       => __( 'Stripe email address:', 'woocommerce' ),
-					'type'        => 'email',
-					'value'       => $user_email,
-					'placeholder' => __( 'Stripe email address', 'woocommerce' ),
-					'description' => __( "Enter your email address and we'll handle account creation. WooCommerce Services and Jetpack will be installed and activated for you.", 'woocommerce' ),
-					'required'    => true,
-				),
-			),
-			'enabled' => $can_stripe && ! ( $should_display_klarna_checkout || $should_display_klarna_payments || $should_display_square ),
-			'featured' => ! ( $should_display_klarna_checkout || $should_display_klarna_payments || $should_display_square ),
-		);
-		$ppec_paypal = array(
-			'name'        => __( 'PayPal Express Checkout', 'woocommerce' ),
-			'image'       => WC()->plugin_url() . '/assets/images/paypal.png',
-			'description' => $paypal_ec_description,
-			'class'       => 'checked paypal-logo',
-			'repo-slug'   => 'woocommerce-gateway-paypal-express-checkout',
-			'settings'    => array(
-				'reroute_requests' => array(
-					'label'       => __( 'Accept payments without linking a PayPal account', 'woocommerce' ),
-					'type'        => 'checkbox',
-					'value'       => 'yes',
-					'placeholder' => '',
-					'required'    => false,
-				),
-				'api_subject' => array(
-					'label'       => __( 'Direct payments to email address:', 'woocommerce' ),
-					'type'        => 'email',
-					'value'       => $user_email,
-					'placeholder' => __( 'Email address to receive payments', 'woocommerce' ),
-					'description' => __( "Enter your email address and we'll authenticate payments for you. WooCommerce Services and Jetpack will be installed and activated for you.", 'woocommerce' ),
-					'required'    => true,
+		return array(
+			'stripe' => array(
+				'name'        => __( 'Stripe', 'woocommerce' ),
+				'image'       => WC()->plugin_url() . '/assets/images/stripe.png',
+				'description' => $stripe_description,
+				'class'       => 'checked',
+				'repo-slug'   => 'woocommerce-gateway-stripe',
+				'settings'    => array(
+					'create_account' => array(
+						'label'       => __( 'Create a new Stripe account for me', 'woocommerce' ),
+						'type'        => 'checkbox',
+						'value'       => 'yes',
+						'placeholder' => '',
+						'required'    => false,
+					),
+					'email' => array(
+						'label'       => __( 'Stripe email address:', 'woocommerce' ),
+						'type'        => 'email',
+						'value'       => $user_email,
+						'placeholder' => __( 'Stripe email address', 'woocommerce' ),
+						'description' => __( "Enter your email address and we'll handle account creation. WooCommerce Services and Jetpack will be installed and activated for you.", 'woocommerce' ),
+						'required'    => true,
+					),
 				),
 			),
-			'enabled'     => $should_display_klarna_checkout || $should_display_klarna_payments || $should_display_square,
-		);
-		$paypal = array(
-			'name'        => __( 'PayPal Standard', 'woocommerce' ),
-			'description' => __( 'Accept payments via PayPal using account balance or credit card.', 'woocommerce' ),
-			'image'       => '',
-			'settings'    => array(
-				'email' => array(
-					'label'       => __( 'PayPal email address:', 'woocommerce' ),
-					'type'        => 'email',
-					'value'       => $user_email,
-					'placeholder' => __( 'PayPal email address', 'woocommerce' ),
-					'required'    => true,
+			'ppec_paypal' => array(
+				'name'        => __( 'PayPal Express Checkout', 'woocommerce' ),
+				'image'       => WC()->plugin_url() . '/assets/images/paypal.png',
+				'description' => $paypal_ec_description,
+				'enabled'     => true,
+				'class'       => 'checked paypal-logo',
+				'repo-slug'   => 'woocommerce-gateway-paypal-express-checkout',
+				'settings'    => array(
+					'reroute_requests' => array(
+						'label'       => __( 'Accept payments without linking a PayPal account', 'woocommerce' ),
+						'type'        => 'checkbox',
+						'value'       => 'yes',
+						'placeholder' => '',
+						'required'    => false,
+					),
+					'api_subject' => array(
+						'label'       => __( 'Direct payments to email address:', 'woocommerce' ),
+						'type'        => 'email',
+						'value'       => $user_email,
+						'placeholder' => __( 'Email address to receive payments', 'woocommerce' ),
+						'description' => __( "Enter your email address and we'll authenticate payments for you. WooCommerce Services and Jetpack will be installed and activated for you.", 'woocommerce' ),
+						'required'    => true,
+					),
 				),
 			),
+			'paypal' => array(
+				'name'        => __( 'PayPal Standard', 'woocommerce' ),
+				'description' => __( 'Accept payments via PayPal using account balance or credit card.', 'woocommerce' ),
+				'image'       => '',
+				'settings'    => array(
+					'email' => array(
+						'label'       => __( 'PayPal email address:', 'woocommerce' ),
+						'type'        => 'email',
+						'value'       => $user_email,
+						'placeholder' => __( 'PayPal email address', 'woocommerce' ),
+						'required'    => true,
+					),
+				),
+			),
+			'klarna_checkout' => array(
+				'name'        => __( 'Klarna Checkout', 'woocommerce' ),
+				'description' => $klarna_checkout_description,
+				'image'       => WC()->plugin_url() . '/assets/images/klarna-white.png',
+				'enabled'     => true,
+				'class'       => 'klarna-logo',
+				'repo-slug'   => 'klarna-checkout-for-woocommerce',
+			),
+			'klarna_payments' => array(
+				'name'        => __( 'Klarna Payments', 'woocommerce' ),
+				'description' => $klarna_payments_description,
+				'image'       => WC()->plugin_url() . '/assets/images/klarna-white.png',
+				'enabled'     => true,
+				'class'       => 'klarna-logo',
+				'repo-slug'   => 'klarna-payments-for-woocommerce',
+			),
+			'square' => array(
+				'name'        => __( 'Square', 'woocommerce' ),
+				'description' => $square_description,
+				'image'       => WC()->plugin_url() . '/assets/images/square-white.png',
+				'class'       => 'square-logo',
+				'enabled'     => true,
+				'repo-slug'   => 'woocommerce-square',
+			),
 		);
-		$klarna_checkout = array(
-			'name'        => __( 'Klarna Checkout', 'woocommerce' ),
-			'description' => $klarna_checkout_description,
-			'image'       => WC()->plugin_url() . '/assets/images/klarna-white.png',
-			'enabled'     => true,
-			'class'       => 'klarna-logo',
-			'repo-slug'   => 'klarna-checkout-for-woocommerce',
-		);
-		$klarna_payments = array(
-			'name'        => __( 'Klarna Checkout', 'woocommerce' ),
-			'description' => $klarna_payments_description,
-			'image'       => WC()->plugin_url() . '/assets/images/klarna-white.png',
-			'enabled'     => true,
-			'class'       => 'klarna-logo',
-			'repo-slug'   => 'klarna-payments-for-woocommerce',
-		);
-		$square = array(
-			'name'        => __( 'Square', 'woocommerce' ),
-			'description' => $square_description,
-			'image'       => WC()->plugin_url() . '/assets/images/square-white.png',
-			'class'       => 'square-logo',
-			'enabled'     => true,
-			'repo-slug'   => 'woocommerce-square',
-		);
+	}
 
-		$gateways = array(
-			'stripe'           => $stripe,
-			'ppec_paypal'      => $ppec_paypal,
-			'paypal'           => $paypal,
-		);
-
-		if ( ! $can_stripe ) {
-			unset( $gateways['stripe'] );
-		}
-
-		if ( $should_display_klarna_checkout ) {
-			$gateways = array(
-				'klarna_checkout'  => $klarna_checkout,
-				'ppec_paypal'      => $ppec_paypal,
-				'stripe'           => $stripe,
-			);
-		}
-
-		if ( $should_display_klarna_payments ) {
-			$gateways = array(
-				'klarna_payments'  => $klarna_payments,
-				'ppec_paypal'      => $ppec_paypal,
-				'stripe'           => $stripe,
-			);
-		}
-
-		if ( $should_display_square ) {
-			$gateways = array(
-				'square'           => $square,
-				'ppec_paypal'      => $ppec_paypal,
-				'stripe'           => $stripe,
-			);
-		}
+	/**
+	 * Simple array of "in cart" gateways to show in wizard.
+	 *
+	 * @return array
+	 */
+	public function get_wizard_in_cart_payment_gateways() {
+		$gateways = $this->get_wizard_available_in_cart_payment_gateways();
 
 		if ( ! current_user_can( 'install_plugins' ) ) {
-			unset( $gateways['ppec_paypal'] );
-			unset( $gateways['stripe'] );
-			unset( $gateways['klarna_checkout'] );
-			unset( $gateways['klarna_payments'] );
-			unset( $gateways['square'] );
+			return array( 'paypal' => $gateways['paypal'] );
 		}
 
-		return $gateways;
+		$country    = WC()->countries->get_base_country();
+		$can_stripe = $this->is_stripe_supported_country( $country );
+
+		if ( $this->is_klarna_checkout_supported_country( $country ) ) {
+			$spotlight = 'klarna_checkout';
+		} elseif ( $this->is_klarna_payments_supported_country( $country ) ) {
+			$spotlight = 'klarna_payments';
+		} elseif ( $this->is_square_supported_country( $country ) && get_option( 'woocommerce_sell_in_person' ) ) {
+			$spotlight = 'square';
+		}
+
+		if ( isset( $spotlight ) ) {
+			$offered_gateways = array(
+				$spotlight    => $gateways[ $spotlight ],
+				'ppec_paypal' => $gateways['ppec_paypal'],
+			);
+			if ( $can_stripe ) {
+				$offered_gateways += array( 'stripe' => $gateways['stripe'] );
+			}
+			return $offered_gateways;
+		}
+
+		$offered_gateways = array();
+		if ( $can_stripe ) {
+			$gateways['stripe']['enabled'] = true;
+			$gateways['stripe']['featured'] = true;
+			$offered_gateways += array( 'stripe' => $gateways['stripe'] );
+		}
+		$offered_gateways += array( 'ppec_paypal' => $gateways['ppec_paypal'] );
+		return $offered_gateways;
 	}
 
 	/**
