@@ -1463,7 +1463,7 @@ class WC_Admin_Setup_Wizard {
 			$this->install_woocommerce_services();
 		}
 
-		$gateways = $this->get_wizard_in_cart_payment_gateways();
+		$gateways = array_merge( $this->get_wizard_in_cart_payment_gateways(), $this->get_wizard_manual_payment_gateways() );
 
 		foreach ( $gateways as $gateway_id => $gateway ) {
 			// If repo-slug is defined, download and install plugin from .org.
