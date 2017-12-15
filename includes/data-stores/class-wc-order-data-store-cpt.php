@@ -444,18 +444,15 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	public function get_unpaid_orders( $date ) {
 		global $wpdb;
 
-		$unpaid_orders = $wpdb->get_col(
-			$wpdb->prepare(
-				// @codingStandardsIgnoreStart
-				"SELECT posts.ID
-				FROM {$wpdb->posts} AS posts
-				WHERE   posts.post_type   IN ('" . implode( "','", wc_get_order_types() ) . "')
-				AND     posts.post_status = 'wc-pending'
-				AND     posts.post_modified < %s",
-				// @codingStandardsIgnoreEnd
-				date( 'Y-m-d H:i:s', absint( $date ) )
-			)
-		);
+		$unpaid_status = apply_filters( 'woocommerce_unpaid_status', array( 'wc-pending' ) );
+
+		$unpaid_orders = $wpdb->get_col( $wpdb->prepare( "
+			SELECT posts.ID
+			FROM {$wpdb->posts} AS posts
+			WHERE   posts.post_type   IN ('" . implode( "','", wc_get_order_types() ) . "')
+			AND     posts.post_status IN ('" . implode( "','", $unpaid_status ) . "')
+			AND     posts.post_modified < %s
+		", date( 'Y-m-d H:i:s', absint( $date ) ) ) );
 
 		return $unpaid_orders;
 	}
