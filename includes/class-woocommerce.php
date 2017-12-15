@@ -235,15 +235,19 @@ final class WooCommerce {
 	 * @return bool
 	 */
 	private function is_request( $type ) {
+		$is_admin = is_admin();
+		$is_ajax = defined( 'DOING_AJAX' ) && DOING_AJAX;
+		$is_cron = defined( 'DOING_CRON' ) && DOING_CRON;
+
 		switch ( $type ) {
 			case 'admin':
-				return is_admin();
+				return $is_admin;
 			case 'ajax':
-				return defined( 'DOING_AJAX' );
+				return $is_ajax;
 			case 'cron':
-				return defined( 'DOING_CRON' );
+				return $is_cron;
 			case 'frontend':
-				return ( ! is_admin() || defined( 'DOING_AJAX' ) ) && ! defined( 'DOING_CRON' );
+				return ! ( $is_admin || $is_cron );
 		}
 	}
 
