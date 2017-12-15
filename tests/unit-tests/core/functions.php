@@ -159,12 +159,21 @@ class WC_Tests_WooCommerce_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test hash_equals function
+	 * Test hash_equals function.
 	 *
 	 * @return void
 	 */
 	public function test_hash_equals() {
 		$this->assertTrue( hash_equals( 'abc', 'abc' ) );
 		$this->assertFalse( hash_equals( 'abcd', 'abc' ) );
+	}
+
+	/**
+	 * Test wc_rand_hash function.
+	 *
+	 * @return void
+	 */
+	public function test_wc_rand_hash() {
+		$this->assertNotEquals( wc_rand_hash(), wc_rand_hash() );
 	}
 }
