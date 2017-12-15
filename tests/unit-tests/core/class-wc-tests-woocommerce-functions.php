@@ -69,9 +69,10 @@ class WC_Tests_WooCommerce_Functions extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_wc_is_active_theme() {
-		$this->assertTrue( wc_is_active_theme( 'default' ) );
-		$this->assertFalse( wc_is_active_theme( 'twentyfifteen' ) );
-		$this->assertTrue( wc_is_active_theme( array( 'default', 'twentyseventeen' ) ) );
+		$current_theme = get_template();
+		$this->assertTrue( wc_is_active_theme( $current_theme ) );
+		$this->assertFalse( wc_is_active_theme( 'somegiberish' ) );
+		$this->assertTrue( wc_is_active_theme( array( $current_theme, 'somegiberish' ) ) );
 	}
 
 	/**
