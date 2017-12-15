@@ -45,11 +45,11 @@ class WC_Cart extends WC_Legacy_Cart {
 	public $applied_coupons = array();
 
 	/**
-	 * Are prices in the cart displayed inc or excl tax.
+	 * Are prices in the cart displayed inc or excl tax?
 	 *
 	 * @var string
 	 */
-	public $tax_display_cart;
+	public $tax_display_cart = 'incl';
 
 	/**
 	 * This stores the chosen shipping methods for the cart item packages.
@@ -355,6 +355,16 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function get_fee_taxes() {
 		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, $this->get_totals_var( 'fee_taxes' ) );
+	}
+
+	/**
+	 * Return whether or not the cart is displaying prices including tax, rather than excluding tax.
+	 *
+	 * @since 3.3.0
+	 * @return bool
+	 */
+	protected function display_prices_including_tax() {
+		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, 'incl' === $this->tax_display_cart );
 	}
 
 	/*
@@ -951,7 +961,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return string
 	 */
 	public function get_displayed_subtotal() {
-		return 'incl' === $this->tax_display_cart ? $this->get_subtotal() + $this->get_subtotal_tax() : $this->get_subtotal();
+		return $this->display_prices_including_tax() ? $this->get_subtotal() + $this->get_subtotal_tax() : $this->get_subtotal();
 	}
 
 	/**
@@ -1393,19 +1403,19 @@ class WC_Cart extends WC_Legacy_Cart {
 	public function get_cart_shipping_total() {
 		if ( 0 < $this->get_shipping_total() ) {
 
-			if ( 'excl' === $this->tax_display_cart ) {
-				$return = wc_price( $this->shipping_total );
-
-				if ( $this->shipping_tax_total > 0 && wc_prices_include_tax() ) {
-					$return .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
-				}
-
-				return $return;
-			} else {
+			if ( $this->display_prices_including_tax() ) {
 				$return = wc_price( $this->shipping_total + $this->shipping_tax_total );
 
 				if ( $this->shipping_tax_total > 0 && ! wc_prices_include_tax() ) {
 					$return .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
+				}
+
+				return $return;
+			} else {
+				$return = wc_price( $this->shipping_total );
+
+				if ( $this->shipping_tax_total > 0 && wc_prices_include_tax() ) {
+					$return .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 				}
 
 				return $return;
@@ -1758,17 +1768,17 @@ class WC_Cart extends WC_Legacy_Cart {
 		if ( $compound ) {
 			$cart_subtotal = wc_price( $this->get_cart_contents_total() + $this->get_shipping_total() + $this->get_taxes_total( false, false ) );
 
-		} elseif ( 'excl' === $this->tax_display_cart ) {
-			$cart_subtotal = wc_price( $this->get_subtotal() );
-
-			if ( $this->get_subtotal_tax() > 0 && wc_prices_include_tax() ) {
-				$cart_subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
-			}
-		} else {
+		} elseif ( $this->display_prices_including_tax() ) {
 			$cart_subtotal = wc_price( $this->get_subtotal() + $this->get_subtotal_tax() );
 
 			if ( $this->get_subtotal_tax() > 0 && ! wc_prices_include_tax() ) {
 				$cart_subtotal .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
+			}
+		} else {
+			$cart_subtotal = wc_price( $this->get_subtotal() );
+
+			if ( $this->get_subtotal_tax() > 0 && wc_prices_include_tax() ) {
+				$cart_subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 			}
 		}
 
@@ -1782,10 +1792,10 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return string formatted price
 	 */
 	public function get_product_price( $product ) {
-		if ( 'excl' === $this->tax_display_cart ) {
-			$product_price = wc_get_price_excluding_tax( $product );
-		} else {
+		if ( $this->display_prices_including_tax() ) {
 			$product_price = wc_get_price_including_tax( $product );
+		} else {
+			$product_price = wc_get_price_excluding_tax( $product );
 		}
 		return apply_filters( 'woocommerce_cart_product_price', wc_price( $product_price ), $product );
 	}
@@ -1806,21 +1816,19 @@ class WC_Cart extends WC_Legacy_Cart {
 
 		if ( $product->is_taxable() ) {
 
-			if ( 'excl' === $this->tax_display_cart ) {
-
-				$row_price        = wc_get_price_excluding_tax( $product, array( 'qty' => $quantity ) );
-				$product_subtotal = wc_price( $row_price );
-
-				if ( wc_prices_include_tax() && $this->get_subtotal_tax() > 0 ) {
-					$product_subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
-				}
-			} else {
-
+			if ( $this->display_prices_including_tax() ) {
 				$row_price        = wc_get_price_including_tax( $product, array( 'qty' => $quantity ) );
 				$product_subtotal = wc_price( $row_price );
 
 				if ( ! wc_prices_include_tax() && $this->get_subtotal_tax() > 0 ) {
 					$product_subtotal .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
+				}
+			} else {
+				$row_price        = wc_get_price_excluding_tax( $product, array( 'qty' => $quantity ) );
+				$product_subtotal = wc_price( $row_price );
+
+				if ( wc_prices_include_tax() && $this->get_subtotal_tax() > 0 ) {
+					$product_subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 				}
 			}
 		} else {
