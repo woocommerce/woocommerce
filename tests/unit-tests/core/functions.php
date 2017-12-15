@@ -70,4 +70,13 @@ class WC_Tests_WooCommerce_Functions extends WC_Unit_Test_Case {
 		$this->assertFalse( wc_is_active_theme( 'twentyfifteen' ) );
 		$this->assertTrue( wc_is_active_theme( array( 'default', 'twentyseventeen' ) ) );
 	}
+
+	/**
+	 * Test the wc_get_template function.
+	 *
+	 * @return void
+	 */
+	public function test_wc_get_template_part() {
+		$this->assertEmpty( wc_get_template_part( 'nothinghere' ) );
+	}
 }
