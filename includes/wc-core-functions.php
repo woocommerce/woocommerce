@@ -1947,3 +1947,14 @@ function wc_is_external_resource( $url ) {
 
 	return strstr( $url, '://' ) && strstr( $wp_base, $url );
 }
+
+/**
+ * See if theme/s is activate or not.
+ *
+ * @since 3.3.0
+ * @param string|array $theme Theme name or array of theme names to check.
+ * @return boolean
+ */
+function wc_is_active_theme( $theme ) {
+	return is_array( $theme ) ? in_array( get_template(), $theme, true ) : get_template() === $theme;
+}

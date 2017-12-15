@@ -248,17 +248,6 @@ final class WooCommerce {
 	}
 
 	/**
-	 * Check the active theme.
-	 *
-	 * @since  2.6.9
-	 * @param  string $theme Theme slug to check.
-	 * @return bool
-	 */
-	private function is_active_theme( $theme ) {
-		return is_array( $theme ) ? in_array( get_template(), $theme, true ) : get_template() === $theme;
-	}
-
-	/**
 	 * Include required core files used in admin and on the frontend.
 	 */
 	public function includes() {
@@ -408,7 +397,7 @@ final class WooCommerce {
 	 * @since 3.3.0
 	 */
 	private function theme_support_includes() {
-		if ( $this->is_active_theme( array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' ) ) ) {
+		if ( wc_is_active_theme( array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' ) ) ) {
 			switch ( get_template() ) {
 				case 'twentyten':
 					include_once( WC_ABSPATH . 'includes/theme-support/class-wc-twenty-ten.php' );
