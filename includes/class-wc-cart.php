@@ -363,7 +363,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @since 3.3.0
 	 * @return bool
 	 */
-	protected function display_prices_including_tax() {
+	public function display_prices_including_tax() {
 		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, 'incl' === $this->tax_display_cart );
 	}
 
