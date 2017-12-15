@@ -124,6 +124,37 @@ class WC_Tests_WooCommerce_Functions extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_wc_get_log_file_name() {
-		$this->assertEquals( 'test-617f475dc9f1ca945a1d5a2b1cf4ce45.log', wc_get_log_file_name( 'test' ) );
+		$this->assertNotEmpty( wc_get_log_file_name( 'test' ) );
+	}
+
+	/**
+	 * Test wc_get_page_children function.
+	 *
+	 * @return void
+	 */
+	public function test_wc_get_page_children() {
+		$page_id = wp_insert_post( array(
+			'post_title'	=> 'Parent Page',
+			'post_type' 	=> 'page',
+			'post_name'		=> 'parent-page',
+			'post_status'	=> 'publish',
+			'post_author'	=> 1,
+			'menu_order'	=> 0
+		) );
+
+		$child_page_id = wp_insert_post( array(
+			'post_parent'	=> $page_id,
+			'post_title'	=> 'Parent Page',
+			'post_type' 	=> 'page',
+			'post_name'		=> 'parent-page',
+			'post_status'	=> 'publish',
+			'post_author'	=> 1,
+			'menu_order'	=> 0
+		) );
+		$children = wc_get_page_children( $page_id );
+		$this->assertEquals( $child_page_id, $children[0] );
+
+		wp_delete_post( $page_id, true );
+		wp_delete_post( $child_page_id, true );
 	}
 }
