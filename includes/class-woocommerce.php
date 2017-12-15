@@ -475,11 +475,14 @@ final class WooCommerce {
 		// Classes/actions loaded for the frontend and for ajax requests.
 		if ( $this->is_request( 'frontend' ) ) {
 			// Session class, handles session data for users - can be overwritten if custom handler is needed.
-			$session_class  = apply_filters( 'woocommerce_session_handler', 'WC_Session_Handler' );
-			$this->session  = new $session_class();
-			$this->cart            = new WC_Cart();                                  // Cart class, stores the cart contents.
-			$this->customer        = new WC_Customer( get_current_user_id(), true ); // Customer class, handles data such as customer location.
-			add_action( 'shutdown', array( $this->customer, 'save' ), 10 );          // Customer should be saved during shutdown.
+			$session_class = apply_filters( 'woocommerce_session_handler', 'WC_Session_Handler' );
+			$this->session = new $session_class();
+			$this->session->init();
+
+			$this->cart     = new WC_Cart();                                  // Cart class, stores the cart contents.
+			$this->customer = new WC_Customer( get_current_user_id(), true ); // Customer class, handles data such as customer location.
+
+			add_action( 'shutdown', array( $this->customer, 'save' ), 10 );   // Customer should be saved during shutdown.
 		}
 
 		$this->load_webhooks();
