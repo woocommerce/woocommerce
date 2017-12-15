@@ -182,7 +182,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			}
 
 			$product = new $classname( $id );
-		} elseif ( isset( $data['id'] ) ) {
+		} elseif ( ! empty( $data['id'] ) ) {
 			$product = wc_get_product( $id );
 
 			if ( ! $product ) {
