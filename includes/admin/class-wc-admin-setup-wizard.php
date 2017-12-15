@@ -72,13 +72,23 @@ class WC_Admin_Setup_Wizard {
 	 * and the store doesn't already have a WooCommerce compatible theme.
 	 */
 	protected function should_show_theme_extra() {
+		$is_default_theme = wc_is_active_theme( array(
+			'twentyseventeen',
+			'twentysixteen',
+			'twentyfifteen',
+			'twentyfourteen',
+			'twentythirteen',
+			'twentyeleven',
+			'twentytwelve',
+			'twentyten',
+		) );
+
+		$support_woocommerce = current_theme_supports( 'woocommerce' ) && ! $is_default_theme;
 		return (
 			current_user_can( 'install_themes' ) &&
 			current_user_can( 'switch_themes' ) &&
-			! is_multisite() && (
-				! current_theme_supports( 'woocommerce' ) ||
-				WC()->is_active_theme( array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' ) )
-			)
+			! is_multisite() &&
+			! $support_woocommerce
 		);
 	}
 
