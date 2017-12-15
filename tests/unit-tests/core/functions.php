@@ -176,4 +176,58 @@ class WC_Tests_WooCommerce_Functions extends WC_Unit_Test_Case {
 	public function test_wc_rand_hash() {
 		$this->assertNotEquals( wc_rand_hash(), wc_rand_hash() );
 	}
+
+	public function test_wc_transaction_query() {
+		global $wpdb;
+
+		$wpdb->insert(
+			$wpdb->prefix . 'options',
+			array(
+				'option_name'  => 'transaction_test',
+				'option_value' => '1'
+			),
+			array(
+				'%s',
+				'%s',
+			)
+		);
+		wc_transaction_query( 'start' );
+		$this->assertTrue( WC_USE_TRANSACTIONS );
+		$wpdb->update(
+			$wpdb->prefix . 'options',
+			array(
+				'option_value' => '0',
+			),
+			array(
+				'option_name' => 'transaction_test',
+			)
+		);
+		$col = $wpdb->get_col( "SElECT option_value FROM {$wpdb->prefix}options WHERE option_name = 'transaction_test'" );
+		$this->assertEquals( '0', $col[0] );
+
+		wc_transaction_query( 'rollback' );
+		$col = $wpdb->get_col( "SElECT option_value FROM {$wpdb->prefix}options WHERE option_name = 'transaction_test'" );
+		$this->assertEquals( '1', $col[0] );
+
+		wc_transaction_query( 'start' );
+		$wpdb->update(
+			$wpdb->prefix . 'options',
+			array(
+				'option_value' => '0',
+			),
+			array(
+				'option_name' => 'transaction_test',
+			)
+		);
+		wc_transaction_query( 'commit' );
+		$col = $wpdb->get_col( "SElECT option_value FROM {$wpdb->prefix}options WHERE option_name = 'transaction_test'" );
+		$this->assertEquals( '0', $col[0] );
+
+		$wpdb->delete(
+			$wpdb->prefix . 'options',
+			array(
+				'option_name' => 'transaction_test',
+			)
+		);
+	}
 }
