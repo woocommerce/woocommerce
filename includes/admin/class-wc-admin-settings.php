@@ -733,7 +733,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 							break;
 						}
 						$default = ( empty( $option['default'] ) ? $allowed_values[0] : $option['default'] );
-						$value   = in_array( $raw_value, $allowed_values, true ) ? $raw_value : $default;
+						$value   = in_array( $raw_value, $allowed_values ) ? $raw_value : $default;
 						break;
 					default:
 						$value = wc_clean( $raw_value );
