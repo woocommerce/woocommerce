@@ -727,7 +727,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						}
 						break;
 					case 'select':
-						$allowed_values = empty( $option['options'] ) ? array() : array_keys( $option['options'] );
+						$allowed_values = empty( $option['options'] ) ? array() : array_map( 'strval', array_keys( $option['options'] ) );
 						if ( empty( $option['default'] ) && empty( $allowed_values ) ) {
 							$value = null;
 							break;
