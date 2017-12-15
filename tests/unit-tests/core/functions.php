@@ -53,6 +53,11 @@ class WC_Tests_WooCommerce_Functions extends WC_Unit_Test_Case {
 			'order_id'    => $order->get_id(),
 		) );
 		$this->assertEquals( $new_currency, $order->get_currency() );
+
+		$order = wc_update_order( array(
+			'customer_id' => 2,
+		) );
+		$this->assertInstanceOf( 'WP_Error', $order );
 	}
 
 	/**
