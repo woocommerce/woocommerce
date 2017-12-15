@@ -79,4 +79,25 @@ class WC_Tests_WooCommerce_Functions extends WC_Unit_Test_Case {
 	public function test_wc_get_template_part() {
 		$this->assertEmpty( wc_get_template_part( 'nothinghere' ) );
 	}
+
+	/**
+	 * Test wc_get_image_size function.
+	 *
+	 * @return void
+	 */
+	public function test_wc_get_image_size() {
+		$this->assertArrayHasKey( 'width', wc_get_image_size( array( 100, 100, 1 ) ) );
+		$this->assertArrayHasKey( 'height', wc_get_image_size( 'shop_single' ) );
+		update_option( 'woocommerce_thumbnail_cropping', 'uncropped' );
+		$this->assertArrayHasKey( 'crop', wc_get_image_size( 'shop_thumbnail' ) );
+		update_option( 'woocommerce_thumbnail_cropping', 'custom' );
+		$this->assertArrayHasKey( 'crop', wc_get_image_size( 'shop_thumbnail' ) );
+	}
+
+	public function test_wc_enqueue_js() {
+		global $wc_queued_js;
+		$old_js = $wc_queued_js;
+		wc_enqueue_js( 'alert( "test" );' );
+		$this->assertNotEquals( $old_js, $wc_queued_js );
+	}
 }
