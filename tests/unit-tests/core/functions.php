@@ -157,4 +157,14 @@ class WC_Tests_WooCommerce_Functions extends WC_Unit_Test_Case {
 		wp_delete_post( $page_id, true );
 		wp_delete_post( $child_page_id, true );
 	}
+
+	/**
+	 * Test hash_equals function
+	 *
+	 * @return void
+	 */
+	public function test_hash_equals() {
+		$this->assertTrue( hash_equals( 'abc', 'abc' ) );
+		$this->assertFalse( hash_equals( 'abcd', 'abc' ) );
+	}
 }
