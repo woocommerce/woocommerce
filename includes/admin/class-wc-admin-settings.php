@@ -727,13 +727,13 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						}
 						break;
 					case 'select':
-						$allowed_values = empty( $option['options'] ) ? array() : array_keys( $option['options'] );
+						$allowed_values = empty( $option['options'] ) ? array() : array_map( 'strval', array_keys( $option['options'] ) );
 						if ( empty( $option['default'] ) && empty( $allowed_values ) ) {
 							$value = null;
 							break;
 						}
 						$default = ( empty( $option['default'] ) ? $allowed_values[0] : $option['default'] );
-						$value   = in_array( $raw_value, $allowed_values ) ? $raw_value : $default;
+						$value   = in_array( $raw_value, $allowed_values, true ) ? $raw_value : $default;
 						break;
 					default:
 						$value = wc_clean( $raw_value );
