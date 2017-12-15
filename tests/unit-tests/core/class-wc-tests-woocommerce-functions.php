@@ -1,10 +1,13 @@
 <?php
-
 /**
- * Class Functions.
+ * Tests for the core functions.
  *
  * @package WooCommerce\Tests\Core
  * @since 3.2.0
+ */
+
+/**
+ * Function tests.
  */
 class WC_Tests_WooCommerce_Functions extends WC_Unit_Test_Case {
 
@@ -40,8 +43,8 @@ class WC_Tests_WooCommerce_Functions extends WC_Unit_Test_Case {
 		$order = wc_create_order( array(
 			'status'      => 'pending',
 			'customer_id' => 1,
-			'created_via'	=> 'unit tests',
-			'cart_hash'		=> '',
+			'created_via' => 'unit tests',
+			'cart_hash'   => '',
 		) );
 		$this->assertEquals( $new_currency, $order->get_currency() );
 
@@ -95,27 +98,24 @@ class WC_Tests_WooCommerce_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_enqueue_js function.
+	 * Test wc_enqueue_js and wc_print_js functions.
 	 *
 	 * @return void
 	 */
-	public function test_wc_enqueue_js() {
-		global $wc_queued_js;
-		$old_js = $wc_queued_js;
-		wc_enqueue_js( 'alert( "test" );' );
-		$this->assertNotEquals( $old_js, $wc_queued_js );
-	}
+	public function test_wc_enqueue_js_wc_print_js() {
+		$js = 'alert( "test" );';
 
-	/**
-	 * Test wc_print_js function.
-	 *
-	 * @return void
-	 */
-	public function test_wc_print_js() {
-		global $wc_queued_js;
-		wc_enqueue_js( 'alert( "test" );' );
+		ob_start();
 		wc_print_js();
-		$this->assertNotEmpty( $wc_queued_js );
+		$printed_js = ob_get_clean();
+		$this->assertNotContains( $js, $printed_js );
+
+		wc_enqueue_js( $js );
+
+		ob_start();
+		wc_print_js();
+		$printed_js = ob_get_clean();
+		$this->assertContains( $js, $printed_js );
 	}
 
 	/**
@@ -134,22 +134,22 @@ class WC_Tests_WooCommerce_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_page_children() {
 		$page_id = wp_insert_post( array(
-			'post_title'	=> 'Parent Page',
-			'post_type' 	=> 'page',
-			'post_name'		=> 'parent-page',
-			'post_status'	=> 'publish',
-			'post_author'	=> 1,
-			'menu_order'	=> 0
+			'post_title'  => 'Parent Page',
+			'post_type'   => 'page',
+			'post_name'   => 'parent-page',
+			'post_status' => 'publish',
+			'post_author' => 1,
+			'menu_order'  => 0,
 		) );
 
 		$child_page_id = wp_insert_post( array(
-			'post_parent'	=> $page_id,
-			'post_title'	=> 'Parent Page',
-			'post_type' 	=> 'page',
-			'post_name'		=> 'parent-page',
-			'post_status'	=> 'publish',
-			'post_author'	=> 1,
-			'menu_order'	=> 0
+			'post_parent' => $page_id,
+			'post_title'  => 'Parent Page',
+			'post_type'   => 'page',
+			'post_name'   => 'parent-page',
+			'post_status' => 'publish',
+			'post_author' => 1,
+			'menu_order'  => 0,
 		) );
 		$children = wc_get_page_children( $page_id );
 		$this->assertEquals( $child_page_id, $children[0] );
@@ -164,8 +164,8 @@ class WC_Tests_WooCommerce_Functions extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_hash_equals() {
-		$this->assertTrue( hash_equals( 'abc', 'abc' ) );
-		$this->assertFalse( hash_equals( 'abcd', 'abc' ) );
+		$this->assertTrue( hash_equals( 'abc', 'abc' ) ); // @codingStandardsIgnoreLine.
+		$this->assertFalse( hash_equals( 'abcd', 'abc' ) ); // @codingStandardsIgnoreLine.
 	}
 
 	/**
@@ -177,6 +177,9 @@ class WC_Tests_WooCommerce_Functions extends WC_Unit_Test_Case {
 		$this->assertNotEquals( wc_rand_hash(), wc_rand_hash() );
 	}
 
+	/**
+	 * Test wc_transaction_query function.
+	 */
 	public function test_wc_transaction_query() {
 		global $wpdb;
 
@@ -184,7 +187,7 @@ class WC_Tests_WooCommerce_Functions extends WC_Unit_Test_Case {
 			$wpdb->prefix . 'options',
 			array(
 				'option_name'  => 'transaction_test',
-				'option_value' => '1'
+				'option_value' => '1',
 			),
 			array(
 				'%s',
