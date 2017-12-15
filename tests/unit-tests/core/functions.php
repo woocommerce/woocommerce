@@ -40,6 +40,8 @@ class WC_Tests_WooCommerce_Functions extends WC_Unit_Test_Case {
 		$order = wc_create_order( array(
 			'status'      => 'pending',
 			'customer_id' => 1,
+			'created_via'	=> 'unit tests',
+			'cart_hash'		=> '',
 		) );
 		$this->assertEquals( $new_currency, $order->get_currency() );
 
