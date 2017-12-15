@@ -254,7 +254,7 @@ final class WooCommerce {
 	 * @param  string $theme Theme slug to check.
 	 * @return bool
 	 */
-	private function is_active_theme( $theme ) {
+	public function is_active_theme( $theme ) {
 		return is_array( $theme ) ? in_array( get_template(), $theme, true ) : get_template() === $theme;
 	}
 

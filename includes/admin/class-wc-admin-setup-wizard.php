@@ -75,8 +75,10 @@ class WC_Admin_Setup_Wizard {
 		return (
 			current_user_can( 'install_themes' ) &&
 			current_user_can( 'switch_themes' ) &&
-			! is_multisite() &&
-			! current_theme_supports( 'woocommerce' )
+			! is_multisite() && (
+				! current_theme_supports( 'woocommerce' ) ||
+				WC()->is_active_theme( array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' ) )
+			)
 		);
 	}
 
