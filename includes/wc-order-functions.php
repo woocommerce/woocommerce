@@ -563,6 +563,9 @@ function wc_create_refund( $args = array() ) {
 					$refund->delete();
 					return $result;
 				}
+
+				$refund->set_refunded_payment( true );
+				$refund->save();
 			}
 
 			if ( $args['restock_items'] ) {

@@ -33,9 +33,10 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @var array
 	 */
 	protected $extra_data = array(
-		'amount'      => '',
-		'reason'      => '',
-		'refunded_by' => 0,
+		'amount'           => '',
+		'reason'           => '',
+		'refunded_by'      => 0,
+		'refunded_payment' => false,
 	);
 
 	/**
@@ -95,7 +96,17 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 */
 	public function get_refunded_by( $context = 'view' ) {
 		return $this->get_prop( 'refunded_by', $context );
+	}
 
+	/**
+	 * Return if the payment was refunded via API.
+	 *
+	 * @since  3.3
+	 * @param  string $context
+	 * @return bool
+	 */
+	public function get_refunded_payment( $context = 'view' ) {
+		return $this->get_prop( 'refunded_payment', $context );
 	}
 
 	/**
@@ -136,6 +147,16 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 */
 	public function set_refunded_by( $value ) {
 		$this->set_prop( 'refunded_by', absint( $value ) );
+	}
+
+	/**
+	 * Set if the payment was refunded via API.
+	 *
+	 * @since 3.3
+	 * @param bool $value
+	 */
+	public function set_refunded_payment( $value ) {
+		$this->set_prop( 'refunded_payment', (bool) $value );
 	}
 
 	/**
