@@ -40,10 +40,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 							'key'           => $download->get_download_id(),
 						), trailingslashit( home_url() ) );
 					?>
-					<a id="copy-download-link" class="button" href="<?php echo esc_url( $download_link ) ?>" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>" data-tip-failed="<?php esc_attr_e( 'Copying to clipboard failed. You should be able to right-click the button and copy.', 'woocommerce' ); ?>"><?php _e( 'Copy link', 'woocommerce' ); ?></a>
+					<a id="copy-download-link" class="button" href="<?php echo esc_url( $download_link ) ?>" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>" data-tip-failed="<?php esc_attr_e( 'Copying to clipboard failed. You should be able to right-click the button and copy.', 'woocommerce' ); ?>"><?php esc_html_e( 'Copy link', 'woocommerce' ); ?></a>
 				</td>
 				<td>
-					<label><?php esc_html_e( 'Customer download report', 'woocommerce' ); ?></label>
+					<label><?php esc_html_e( 'Customer download log', 'woocommerce' ); ?></label>
 					<?php
 						$report_url = add_query_arg(
 							'permission_id',
@@ -51,7 +51,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							admin_url( 'admin.php?page=wc-reports&tab=orders&report=downloads' )
 						);
 						echo '<a class="button" href="' . esc_url( $report_url ) . '">';
-						echo __( 'View report', 'woocommerce' );
+						esc_html_e( 'View report', 'woocommerce' );
 						echo '</a>';
 					?>
 				</td>

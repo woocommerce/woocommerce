@@ -118,7 +118,7 @@ class WC_Report_Downloads extends WP_List_Table {
 		echo '</h1>';
 
 		echo '<div id="active-filters" class="woocommerce-reports-wide"><h2>';
-		echo __( 'Active filters', 'woocommerce' ) . ': ';
+		echo esc_html__( 'Active filters', 'woocommerce' ) . ': ';
 		echo $filter_list ? wp_kses_post( implode( ', ', $filter_list ) ) : '';
 		echo '</h2></div>';
 
