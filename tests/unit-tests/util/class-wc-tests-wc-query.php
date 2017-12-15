@@ -1,17 +1,26 @@
 <?php
 /**
+ * Tests for the WC_Query class.
  *
+ * @package WooCommerce\Tests\Util
+ * @since 3.3.0
  */
 
 /**
- *
+ * WC_Query tests.
  */
 class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 
+	/**
+	 * Test WC_Query gets initialized properly.
+	 */
 	public function test_instance() {
 		$this->assertInstanceOf( 'WC_Query', WC()->query );
 	}
 
+	/**
+	 * Test the get_errors method.
+	 */
 	public function test_get_errors() {
 		$_GET['wc_error'] = 'test';
 
@@ -27,6 +36,9 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 
 	}
 
+	/**
+	 * Test the init_query_vars and get_query_vars methods.
+	 */
 	public function test_init_query_vars_get_query_vars() {
 		// Test the default options are present.
 		WC()->query->init_query_vars();
@@ -59,6 +71,9 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_checkout_pay_endpoint', 'order-pay' );
 	}
 
+	/**
+	 * Test the get_endpoint_title method.
+	 */
 	public function test_get_endpoint_title() {
 		$endpoints = array(
 			'order-pay',
@@ -69,7 +84,7 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 			'edit-address',
 			'payment-methods',
 			'add-payment-method',
-			'lost-password'
+			'lost-password',
 		);
 
 		foreach ( $endpoints as $endpoint ) {
@@ -79,6 +94,9 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 		$this->assertEquals( '', WC()->query->get_endpoint_title( 'not-real-endpoint' ) );
 	}
 
+	/**
+	 * Test the get_endpoint_mask method.
+	 */
 	public function test_get_endpoint_mask() {
 		$this->assertEquals( EP_PAGES, WC()->query->get_endpoints_mask() );
 
@@ -88,6 +106,9 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 		$this->assertEquals( EP_ROOT | EP_PAGES, WC()->query->get_endpoints_mask() );
 	}
 
+	/**
+	 * Test the add_query_vars method.
+	 */
 	public function test_add_query_vars() {
 		WC()->query->init_query_vars();
 
@@ -103,6 +124,9 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 		$this->assertContains( 'customer-logout', $added );
 	}
 
+	/**
+	 * Test the get_current_endpoint method.
+	 */
 	public function test_get_current_endpoint() {
 		global $wp;
 
@@ -111,6 +135,9 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 		$this->assertEquals( 'order-pay', WC()->query->get_current_endpoint() );
 	}
 
+	/**
+	 * Test the parse_request method.
+	 */
 	public function test_parse_request() {
 		global $wp;
 
@@ -129,8 +156,213 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 		$this->assertEquals( 'order-pay-new', $wp->query_vars['order-pay'] );
 	}
 
-	public function test_pre_get_posts() {
+	/**
+	 * Test the remove_product_query method.
+	 */
+	public function test_remove_product_query() {
+		$this->assertTrue( (bool) has_filter( 'pre_get_posts', array( WC()->query, 'pre_get_posts' ) ) );
 
+		WC()->query->remove_product_query();
+
+		$this->assertFalse( (bool) has_filter( 'pre_get_posts', array( WC()->query, 'pre_get_posts' ) ) );
 	}
 
+	/**
+	 * Test the remove_ordering_args method.
+	 */
+	public function test_remove_ordering_args() {
+		WC()->query->get_catalog_ordering_args( 'price', 'DESC' );
+		$this->assertTrue( (bool) has_filter( 'posts_clauses', array( WC()->query, 'order_by_price_desc_post_clauses' ) ) );
+
+		WC()->query->remove_ordering_args();
+		$this->assertFalse( (bool) has_filter( 'posts_clauses', array( WC()->query, 'order_by_price_desc_post_clauses' ) ) );
+	}
+
+	/**
+	 * Test the get_catalog_ordering_args method.
+	 */
+	public function test_get_catalog_ordering_args() {
+		$data = array(
+			array(
+				'orderby'  => 'menu_order',
+				'order'    => 'ASC',
+				'expected' => array(
+					'orderby'  => 'menu_order title',
+					'order'    => 'ASC',
+					'meta_key' => '',
+				),
+			),
+			array(
+				'orderby'  => 'title',
+				'order'    => 'DESC',
+				'expected' => array(
+					'orderby'  => 'title',
+					'order'    => 'DESC',
+					'meta_key' => '',
+				),
+			),
+			array(
+				'orderby'  => 'relevance',
+				'order'    => 'ASC',
+				'expected' => array(
+					'orderby'  => 'relevance',
+					'order'    => 'DESC', // Relevance is always DESC order.
+					'meta_key' => '',
+				),
+			),
+			array(
+				'orderby'  => 'rand',
+				'order'    => '',
+				'expected' => array(
+					'orderby'  => 'rand',
+					'order'    => 'ASC',
+					'meta_key' => '',
+				),
+			),
+			array(
+				'orderby'  => 'date',
+				'order'    => 'DESC',
+				'expected' => array(
+					'orderby'  => 'date ID',
+					'order'    => 'DESC',
+					'meta_key' => '',
+				),
+			),
+			array(
+				'orderby'  => 'price',
+				'order'    => 'ASC',
+				'expected' => array(
+					'orderby'  => 'price',
+					'order'    => 'ASC',
+					'meta_key' => '',
+				),
+			),
+			array(
+				'orderby'  => 'price',
+				'order'    => 'DESC',
+				'expected' => array(
+					'orderby'  => 'price',
+					'order'    => 'DESC',
+					'meta_key' => '',
+				),
+			),
+			array(
+				'orderby'  => 'popularity',
+				'order'    => 'DESC',
+				'expected' => array(
+					'orderby'  => 'popularity',
+					'order'    => 'DESC',
+					'meta_key' => 'total_sales',
+				),
+			),
+			array(
+				'orderby'  => 'rating',
+				'order'    => 'ASC',
+				'expected' => array(
+					'orderby'  => array(
+						'meta_value_num' => 'DESC',
+						'ID'             => 'ASC',
+					),
+					'order'    => 'ASC',
+					'meta_key' => '_wc_average_rating',
+				),
+			),
+			array(
+				'orderby'  => 'unknownkey',
+				'order'    => 'ASC',
+				'expected' => array(
+					'orderby'  => 'unknownkey',
+					'order'    => 'ASC',
+					'meta_key' => '',
+				),
+			),
+			array(
+				'orderby'  => 'date',
+				'order'    => 'INVALIDORDER',
+				'expected' => array(
+					'orderby'  => 'date ID',
+					'order'    => 'DESC',
+					'meta_key' => '',
+				),
+			),
+		);
+
+		foreach ( $data as $test ) {
+			$result = WC()->query->get_catalog_ordering_args( $test['orderby'], $test['order'] );
+			$this->assertEquals( $test['expected'], $result );
+		}
+	}
+
+	/**
+	 * Test the get_catalog_ordering_args method with $_GET param.
+	 */
+	public function test_get_catalog_ordering_args_GET() {
+		$_GET['orderby'] = 'price-desc';
+
+		$expected = array(
+			'orderby'  => 'price',
+			'order'    => 'DESC',
+			'meta_key' => '',
+		);
+
+		$this->assertEquals( $expected, WC()->query->get_catalog_ordering_args() );
+
+		unset( $_GET['orderby'] );
+	}
+
+	/**
+	 * Test the get_main_query method.
+	 */
+	public function test_get_main_query() {
+		WC()->query->product_query( new WP_Query() );
+		$this->assertInstanceOf( 'WP_Query', WC_Query::get_main_query() );
+	}
+
+	/**
+	 * Test the get_main_tax_query method.
+	 */
+	public function test_get_main_tax_query() {
+		$tax_query = array(
+			'taxonomy'         => 'product_tag',
+			'field'            => 'slug',
+			'terms'            => array( 'test' ),
+			'operator'         => 'IN',
+			'include_children' => true,
+		);
+
+		$query_args = array(
+			'tax_query' => array( $tax_query ),
+		);
+
+		WC()->query->product_query( new WP_Query( $query_args ) );
+		$tax_queries = WC_Query::get_main_tax_query();
+		$this->assertContains( $tax_query, $tax_queries );
+	}
+
+	/**
+	 * Test the get_main_meta_query method.
+	 */
+	public function test_get_main_meta_query() {
+		$meta_query = array(
+			'key'     => '_stock',
+			'value'   => 10,
+			'compare' => '=',
+		);
+
+		$query_args = array(
+			'meta_query' => array( $meta_query ),
+		);
+
+		WC()->query->product_query( new WP_Query( $query_args ) );
+		$meta_queries = WC_Query::get_main_meta_query();
+		$this->assertContains( $meta_query, $meta_queries );
+	}
+
+	/**
+	 * Test the remove_add_to_cart_pagination method.
+	 */
+	public function test_remove_add_to_cart_pagination() {
+		$url = 'http://example.com/shop/page/2/?add-to-cart=1';
+		$this->assertEquals( 'http://example.com/shop/page/2/', WC()->query->remove_add_to_cart_pagination( $url ) );
+	}
 }
