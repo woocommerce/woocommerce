@@ -40,11 +40,16 @@ abstract class WC_Session {
 	protected $_dirty = false;
 
 	/**
-	 * Init hooks and session data.
+	 * Init hooks and session data. Extended by child classes.
 	 *
 	 * @since 3.3.0
 	 */
 	public function init() {}
+
+	/**
+	 * Cleanup session data. Extended by child classes.
+	 */
+	public function cleanup_sessions() {}
 
 	/**
 	 * Magic get method.

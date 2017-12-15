@@ -249,17 +249,14 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
-	 * Cleanup sessions.
+	 * Cleanup session data from the database and clear caches.
 	 */
 	public function cleanup_sessions() {
 		global $wpdb;
 
-		if ( ! defined( 'WP_SETUP_CONFIG' ) && ! defined( 'WP_INSTALLING' ) ) {
+		$wpdb->query( $wpdb->prepare( "DELETE FROM $this->_table WHERE session_expiry < %d", time() ) ); // @codingStandardsIgnoreLine.
 
-			// Delete expired sessions.
-			$wpdb->query( $wpdb->prepare( "DELETE FROM $this->_table WHERE session_expiry < %d", time() ) ); // @codingStandardsIgnoreLine.
-
-			// Invalidate cache.
+		if ( class_exists( 'WC_Cache_Helper' ) ) {
 			WC_Cache_Helper::incr_cache_prefix( WC_SESSION_CACHE_GROUP );
 		}
 	}
@@ -282,7 +279,7 @@ class WC_Session_Handler extends WC_Session {
 		$value = wp_cache_get( $this->get_cache_prefix() . $customer_id, WC_SESSION_CACHE_GROUP );
 
 		if ( false === $value ) {
-			$value = $wpdb->get_var( $wpdb->prepare( 'SELECT session_value FROM ' . esc_sql( $this->_table ) . ' WHERE session_key = %s', $customer_id ) ); // @codingStandardsIgnoreLine.
+			$value = $wpdb->get_var( $wpdb->prepare( "SELECT session_value FROM $this->_table WHERE session_key = %s", $customer_id ) ); // @codingStandardsIgnoreLine.
 
 			if ( is_null( $value ) ) {
 				$value = $default;

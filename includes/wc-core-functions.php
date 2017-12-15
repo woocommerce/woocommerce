@@ -1958,3 +1958,18 @@ function wc_is_external_resource( $url ) {
 function wc_is_active_theme( $theme ) {
 	return is_array( $theme ) ? in_array( get_template(), $theme, true ) : get_template() === $theme;
 }
+
+/**
+ * Cleans up session data - cron callback.
+ *
+ * @since 3.3.0
+ */
+function wc_cleanup_session_data() {
+	$session_class = apply_filters( 'woocommerce_session_handler', 'WC_Session_Handler' );
+	$session       = new $session_class();
+
+	if ( is_callable( array( $session, 'cleanup_sessions' ) ) ) {
+		$session->cleanup_sessions();
+	}
+}
+add_action( 'woocommerce_cleanup_sessions', 'wc_cleanup_session_data' );
