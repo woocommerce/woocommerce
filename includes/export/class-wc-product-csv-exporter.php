@@ -50,6 +50,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 */
 	public function __construct() {
 		parent::__construct();
+		$this->set_limit(apply_filters( "woocommerce_product_export_{$this->export_type}_default_limit", $this->limit));
 		$this->set_product_types_to_export( array_merge( array_keys( wc_get_product_types() ), array( 'variation' ) ) );
 	}
 
