@@ -6,6 +6,6 @@ if [[ ${RUN_PHPCS} == 1 ]]; then
 
 	if [ "$CHANGED_FILES" != "" ]; then
 		echo "Running Code Sniffer."
-		./vendor/bin/phpcs --ignore=$IGNORE --standard=./phpcs.ruleset.xml --encoding=utf-8 -n -p $CHANGED_FILES
+		./vendor/bin/phpcs --ignore=$IGNORE --encoding=utf-8 -n -p $CHANGED_FILES
 	fi
 fi
