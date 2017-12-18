@@ -925,6 +925,7 @@ class WC_Form_Handler {
 	 * Process the login form.
 	 */
 	public static function process_login() {
+		// The global form-login.php template used `_wpnonce` in template versions < 3.3.0.
 		$nonce_value = isset( $_POST['_wpnonce'] ) ? $_POST['_wpnonce'] : '';
 		$nonce_value = isset( $_POST['woocommerce-login-nonce'] ) ? $_POST['woocommerce-login-nonce'] : $nonce_value;
 
