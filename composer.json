@@ -11,7 +11,7 @@
     "squizlabs/php_codesniffer": "*",
     "wp-coding-standards/wpcs": "^0.14",
     "phpunit/phpunit": "6.2.3",
-    "woocommerce/woocommerce-git-hooks": "1.0.3",
+    "woocommerce/woocommerce-git-hooks": "1.0.4",
     "wimg/php-compatibility": "^8.0",
     "dealerdirect/phpcodesniffer-composer-installer": "^0.4.3"
   },
@@ -32,10 +32,10 @@
       "phpunit"
     ],
     "phpcs": [
-      "phpcs -s -p --standard=./phpcs.ruleset.xml"
+      "phpcs -s -p"
     ],
     "phpcbf": [
-      "phpcbf -p --standard=./phpcs.ruleset.xml"
+      "phpcbf -p"
     ]
   },
   "extra": {
