@@ -232,6 +232,17 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 			}
 		}
 
+        // Filter by multiple attributes and terms.
+        foreach ( wc_get_attribute_taxonomy_names() as $attribute ) {
+            if ( ! empty( $request[$attribute] ) ) {
+                $tax_query[] = array(
+                    'taxonomy' => $attribute,
+                    'field'    => 'term_id',
+                    'terms'    => $request[$attribute],
+                );
+            }
+        }
+
 		if ( ! empty( $tax_query ) ) {
 			$args['tax_query'] = $tax_query; // WPCS: slow query ok.
 		}
