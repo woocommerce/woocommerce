@@ -89,24 +89,6 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			$form_action = preg_replace( '%\/page/[0-9]+%', '', home_url( trailingslashit( $wp->request ) ) );
 		}
 
-		/**
-		 * Adjust max if the store taxes are not displayed how they are stored.
-		 * Min is left alone because the product may not be taxable.
-		 * Kicks in when prices excluding tax are displayed including tax.
-		 */
-		if ( wc_tax_enabled() && 'incl' === get_option( 'woocommerce_tax_display_shop' ) && ! wc_prices_include_tax() ) {
-			$tax_classes = array_merge( array( '' ), WC_Tax::get_tax_classes() );
-			$class_max   = $max;
-
-			foreach ( $tax_classes as $tax_class ) {
-				if ( $tax_rates = WC_Tax::get_rates( $tax_class ) ) {
-					$class_max = $max + WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $max, $tax_rates ) );
-				}
-			}
-
-			$max = $class_max;
-		}
-
 		$min_price = isset( $_GET['min_price'] ) ? esc_attr( $_GET['min_price'] ) : apply_filters( 'woocommerce_price_filter_widget_min_amount', $min );
 		$max_price = isset( $_GET['max_price'] ) ? esc_attr( $_GET['max_price'] ) : apply_filters( 'woocommerce_price_filter_widget_max_amount', $max );
 
