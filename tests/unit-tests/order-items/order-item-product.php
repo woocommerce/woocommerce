@@ -13,13 +13,13 @@ class WC_Tests_Order_Item_Product extends WC_Unit_Test_Case {
 	 * @since 3.2.0
 	 */
 	public function test_generic_setters_getters() {
-		$simple_product = new WC_Product_Simple;
+		$simple_product = new WC_Product_Simple();
 		$simple_product->save();
 
-		$variation_product = new WC_Product_Variation;
+		$variation_product = new WC_Product_Variation();
 		$variation_product->save();
 
-		$product_item = new WC_Order_Item_Product;
+		$product_item = new WC_Order_Item_Product();
 
 		$product_item->set_quantity( 3 );
 		$this->assertEquals( 3, $product_item->get_quantity() );
@@ -52,7 +52,7 @@ class WC_Tests_Order_Item_Product extends WC_Unit_Test_Case {
 	 * @since 3.2.0
 	 */
 	public function test_set_get_taxes() {
-		$product_item = new WC_Order_Item_Product;
+		$product_item = new WC_Order_Item_Product();
 
 		$taxes = array(
 			'total'    => array( '10', '2.4' ),
@@ -70,22 +70,23 @@ class WC_Tests_Order_Item_Product extends WC_Unit_Test_Case {
 	 * @since 3.2.0
 	 */
 	public function test_set_get_product() {
-		$simple_product = new WC_Product_Simple;
+		$simple_product = new WC_Product_Simple();
 		$simple_product->set_name( 'Test Simple' );
 		$simple_product->set_tax_class( 'reduced-rate' );
 		$simple_product->save();
 
-		$parent_product = new WC_Product_Variable;
+		$parent_product = new WC_Product_Variable();
 		$parent_product->set_name( 'Test Parent' );
 		$parent_product->save();
 
-		$variation_product = new WC_Product_Variation;
+		$variation_product = new WC_Product_Variation();
 		$variation_product->set_name( 'Test Variation' );
 		$variation_product->set_parent_id( $parent_product->get_id() );
+		$variation_product->set_attributes( array( 'color' => 'Green' ) );
 		$variation_product->save();
 
 		// Simple product.
-		$product_item = new WC_Order_Item_Product;
+		$product_item = new WC_Order_Item_Product();
 		$product_item->set_product( $simple_product );
 		$this->assertEquals( 'Test Simple', $product_item->get_name() );
 		$this->assertEquals( $simple_product->get_id(), $product_item->get_product_id() );
@@ -96,13 +97,13 @@ class WC_Tests_Order_Item_Product extends WC_Unit_Test_Case {
 		$this->assertEquals( $simple_product->get_id(), $retrieved->get_id() );
 
 		// Variation product.
-		$product_item = new WC_Order_Item_Product;
+		$product_item = new WC_Order_Item_Product();
 		$product_item->set_product( $variation_product );
-		$this->assertEquals( 'Test Parent', $product_item->get_name() );
+		$this->assertEquals( 'Test Parent - Green', $product_item->get_name() );
 		$this->assertEquals( $parent_product->get_id(), $product_item->get_product_id() );
 		$this->assertEquals( $variation_product->get_id(), $product_item->get_variation_id() );
 		$this->assertEquals( '', $product_item->get_tax_class() );
-
+		$this->assertEquals( 'Green', $product_item->get_meta( 'color' ) );
 		$retrieved = $product_item->get_product();
 		$this->assertEquals( $variation_product->get_id(), $retrieved->get_id() );
 	}
@@ -113,18 +114,92 @@ class WC_Tests_Order_Item_Product extends WC_Unit_Test_Case {
 	 * @since 3.2.0
 	 */
 	public function test_get_item_download_url() {
-		$product = new WC_Product_Simple;
+		$product = new WC_Product_Simple();
 		$product->save();
 
-		$order = new WC_Order;
+		$order = new WC_Order();
 		$order->set_billing_email( 'test@woocommerce.com' );
 		$order->save();
 
-		$product_item = new WC_Order_Item_Product;
+		$product_item = new WC_Order_Item_Product();
 		$product_item->set_product( $product );
 		$product_item->set_order_id( $order->get_id() );
 
 		$expected_regex = '/download_file=.*&order=wc_order_.*&email=test%40woocommerce.com&key=100/';
 		$this->assertRegexp( $expected_regex, $product_item->get_item_download_url( 100 ) );
+	}
+
+	public function test_get_formatted_meta_data() {
+
+		$parent_product = new WC_Product_Variable();
+		$parent_product->set_name( 'Test Parent' );
+		$parent_product->save();
+
+		$variation_product = new WC_Product_Variation();
+		$variation_product->set_name( 'Test Variation' );
+		$variation_product->set_parent_id( $parent_product->get_id() );
+		$variation_product->set_attributes( array( 'color' => 'Green', 'size' => 'Large' ) );
+		$variation_product->save();
+
+		$product_item = new WC_Order_Item_Product();
+		$product_item->set_product( $variation_product );
+		$product_item->add_meta_data( 'testkey', 'testval', true );
+		$product_item->save();
+
+		// Test with show_all on.
+		$formatted = $product_item->get_formatted_meta_data( '_', true );
+		$formatted_as_array = array();
+		foreach ( $formatted as $f ) {
+			$formatted_as_array[] = (array) $f;
+		}
+		$this->assertEquals(
+			array(
+				array(
+					"key"           => "color",
+					"value"         => "Green",
+					"display_key"   => "color",
+					"display_value" => "<p>Green</p>\n",
+				),
+				array(
+					"key"           => "size",
+					"value"         => "Large",
+					"display_key"   => "size",
+					"display_value" => "<p>Large</p>\n",
+				),
+				array(
+					"key"           => "testkey",
+					"value"         => "testval",
+					"display_key"   => "testkey",
+					"display_value" => "<p>testval</p>\n",
+				),
+			),
+			$formatted_as_array
+		);
+
+		// Test with show_all off.
+		$formatted = $product_item->get_formatted_meta_data( '_', false );
+		$formatted_as_array = array();
+		foreach ( $formatted as $f ) {
+			$formatted_as_array[] = (array) $f;
+		}
+		$this->assertEquals(
+			array(
+				array(
+					"key"           => "testkey",
+					"value"         => "testval",
+					"display_key"   => "testkey",
+					"display_value" => "<p>testval</p>\n",
+				),
+			),
+			$formatted_as_array
+		);
+
+		// Test with an exclude prefix. Should exclude everything since they're either in the title or in the exclude prefix.
+		$formatted = $product_item->get_formatted_meta_data( 'test', false );
+		$this->assertEmpty( $formatted );
+	}
+
+	public function test_offset_set_get_exists() {
+
 	}
 }
