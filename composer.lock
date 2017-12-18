@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "3087b6ab17fe867f1edafd95c2bef430",
+    "content-hash": "8573ce329aa198e3005e0909584ac4d8",
     "packages": [
         {
             "name": "composer/installers",
@@ -1755,16 +1755,16 @@
         },
         {
             "name": "woocommerce/woocommerce-git-hooks",
-            "version": "1.0.4",
+            "version": "1.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-git-hooks.git",
-                "reference": "757ff1f16979c8eb0083df64199a2bd7b4d2bdf0"
+                "reference": "1e55118258e8487c68b17c06cfde3b48a692d9d4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-git-hooks/zipball/757ff1f16979c8eb0083df64199a2bd7b4d2bdf0",
-                "reference": "757ff1f16979c8eb0083df64199a2bd7b4d2bdf0",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-git-hooks/zipball/1e55118258e8487c68b17c06cfde3b48a692d9d4",
+                "reference": "1e55118258e8487c68b17c06cfde3b48a692d9d4",
                 "shasum": ""
             },
             "type": "scripts",
@@ -1784,7 +1784,7 @@
                 }
             ],
             "description": "WooCommerce Git Hooks",
-            "time": "2017-12-18T13:34:58+00:00"
+            "time": "2017-12-18T16:55:42+00:00"
         },
         {
             "name": "wp-coding-standards/wpcs",
