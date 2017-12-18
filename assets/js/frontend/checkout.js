@@ -33,7 +33,7 @@ jQuery( function( $ ) {
 			this.$checkout_form.on( 'submit', this.submit );
 
 			// Inline validation
-			this.$checkout_form.on( 'input validate change', '.input-text, select, input:checkbox', this.validate_field );
+			this.$checkout_form.on( 'input validate change focusout', '.input-text, select, input:checkbox', this.validate_field );
 
 			// Manual trigger
 			this.$checkout_form.on( 'update', this.trigger_update_checkout );
@@ -198,7 +198,7 @@ jQuery( function( $ ) {
 				$parent.removeClass( 'woocommerce-invalid woocommerce-invalid-required-field woocommerce-invalid-email woocommerce-validated' );
 			}
 
-			if ( 'validate' === event_type || 'change' === event_type ) {
+			if ( 'validate' === event_type || 'change' === event_type || 'focusout' === event_type ) {
 
 				if ( validate_required ) {
 					if ( 'checkbox' === $this.attr( 'type' ) && ! $this.is( ':checked' ) ) {
