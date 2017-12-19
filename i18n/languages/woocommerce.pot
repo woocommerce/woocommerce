@@ -24106,7 +24106,7 @@ msgid "https://woocommerce.com/"
 msgstr ""
 
 #. Description of the plugin/theme
-msgid "An e-commerce toolkit that helps you sell anything. Beautifully."
+msgid "An eCommerce toolkit that helps you sell anything. Beautifully."
 msgstr ""
 
 #. Author of the plugin/theme

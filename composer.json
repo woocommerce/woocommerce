@@ -1,6 +1,6 @@
 {
   "name": "woocommerce/woocommerce",
-  "description": "An e-commerce toolkit that helps you sell anything. Beautifully.",
+  "description": "An eCommerce toolkit that helps you sell anything. Beautifully.",
   "homepage": "https://woocommerce.com/",
   "type": "wordpress-plugin",
   "license": "GPL-2.0+",
