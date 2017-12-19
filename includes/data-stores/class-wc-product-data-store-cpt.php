@@ -1015,7 +1015,17 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	public function get_related_products( $cats_array, $tags_array, $exclude_ids, $limit, $product_id ) {
 		global $wpdb;
-		return $wpdb->get_col( implode( ' ', apply_filters( 'woocommerce_product_related_posts_query', $this->get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit + 10 ), $product_id ) ) );
+
+		$args = array(
+			'categories'  => $cats_array,
+			'tags'        => $tags_array,
+			'exclude_ids' => $exclude_ids,
+			'limit'       => $limit + 10,
+		);
+
+		$related_product_ids = (array) apply_filters( 'woocommerce_product_related_posts_query', $this->get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit + 10 ), $product_id, $args );
+
+		return $wpdb->get_col( implode( ' ', $related_product_ids ) );
 	}
 
 	/**
