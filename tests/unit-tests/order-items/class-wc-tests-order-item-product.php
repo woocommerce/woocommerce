@@ -1,9 +1,13 @@
 <?php
-
 /**
- * Order Item Product Tests.
+ * Unit tests for the WC_Order_Item_Product class.
+ *
  * @package WooCommerce\Tests\Order_Items
  * @since 3.2.0
+ */
+
+/**
+ * Order Item Product unit tests.
  */
 class WC_Tests_Order_Item_Product extends WC_Unit_Test_Case {
 
@@ -142,7 +146,10 @@ class WC_Tests_Order_Item_Product extends WC_Unit_Test_Case {
 		$variation_product = new WC_Product_Variation();
 		$variation_product->set_name( 'Test Variation' );
 		$variation_product->set_parent_id( $parent_product->get_id() );
-		$variation_product->set_attributes( array( 'color' => 'Green', 'size' => 'Large' ) );
+		$variation_product->set_attributes( array(
+			'color' => 'Green',
+			'size'  => 'Large',
+		) );
 		$variation_product->save();
 
 		$product_item = new WC_Order_Item_Product();
@@ -159,22 +166,22 @@ class WC_Tests_Order_Item_Product extends WC_Unit_Test_Case {
 		$this->assertEquals(
 			array(
 				array(
-					"key"           => "color",
-					"value"         => "Green",
-					"display_key"   => "color",
-					"display_value" => "<p>Green</p>\n",
+					'key'           => 'color',
+					'value'         => 'Green',
+					'display_key'   => 'color',
+					'display_value' => "<p>Green</p>\n",
 				),
 				array(
-					"key"           => "size",
-					"value"         => "Large",
-					"display_key"   => "size",
-					"display_value" => "<p>Large</p>\n",
+					'key'           => 'size',
+					'value'         => 'Large',
+					'display_key'   => 'size',
+					'display_value' => "<p>Large</p>\n",
 				),
 				array(
-					"key"           => "testkey",
-					"value"         => "testval",
-					"display_key"   => "testkey",
-					"display_value" => "<p>testval</p>\n",
+					'key'           => 'testkey',
+					'value'         => 'testval',
+					'display_key'   => 'testkey',
+					'display_value' => "<p>testval</p>\n",
 				),
 			),
 			$formatted_as_array
@@ -189,10 +196,10 @@ class WC_Tests_Order_Item_Product extends WC_Unit_Test_Case {
 		$this->assertEquals(
 			array(
 				array(
-					"key"           => "testkey",
-					"value"         => "testval",
-					"display_key"   => "testkey",
-					"display_value" => "<p>testval</p>\n",
+					'key'           => 'testkey',
+					'value'         => 'testval',
+					'display_key'   => 'testkey',
+					'display_value' => "<p>testval</p>\n",
 				),
 			),
 			$formatted_as_array
@@ -261,7 +268,7 @@ class WC_Tests_Order_Item_Product extends WC_Unit_Test_Case {
 		$item['item_meta_array'] = array(
 			9999 => (object) array(
 				'key' => 'test',
-				'value' => 'val'
+				'value' => 'val',
 			),
 		);
 		$this->assertInstanceOf( 'WC_Meta_Data', current( $item->get_meta_data() ) );
