@@ -1023,9 +1023,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'limit'       => $limit + 10,
 		);
 
-		$related_product_ids = (array) apply_filters( 'woocommerce_product_related_posts_query', $this->get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit + 10 ), $product_id, $args );
+		$related_product_query = (array) apply_filters( 'woocommerce_product_related_posts_query', $this->get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit + 10 ), $product_id, $args );
 
-		return $wpdb->get_col( implode( ' ', $related_product_ids ) );
+		return $wpdb->get_col( implode( ' ', $related_product_query ) );
 	}
 
 	/**
