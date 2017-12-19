@@ -33,6 +33,7 @@ before_script:
   - bash tests/bin/travis.sh before
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3
+  - export NODE_CONFIG_DIR="./tests/e2e-tests"
   - "./tests/e2e-tests/scripts/wp-serverpilot-delete.js"
   - "./tests/e2e-tests/scripts/wp-serverpilot-init.js"
   - scp -o "StrictHostKeyChecking no" tests/e2e-tests/scripts/git-woo.sh serverpilot@wp-e2e-tests.pw:~serverpilot/git-woo.sh

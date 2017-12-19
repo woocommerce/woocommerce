@@ -1,26 +1,26 @@
 #!/usr/bin/env node
-const config = require( 'config' );
-const ServerPilot = require( 'serverpilot' );
+var config = require( 'config' );
+var ServerPilot = require( 'serverpilot' );
 
-const spConfig = config.get( 'spConfig' );
+var spConfig = config.get( 'spConfig' );
 
-const sp = new ServerPilot( {
+var sp = new ServerPilot( {
 	clientId: spConfig.clientId,
 	apiKey: spConfig.apiKey
 } );
 
-const userConfig = config.get( 'testAccounts' );
-const username = userConfig.wooUserCI[0];
-const password = userConfig.wooUserCI[1];
+var userConfig = config.get( 'testAccounts' );
+var username = userConfig.wooUserCI[0];
+var password = userConfig.wooUserCI[1];
 
-const serverPrefix = process.env.TRAVIS_PULL_REQUEST_SHA.substr( 0, 20 );
-const actionWaitTimeout = 2000;
+var serverPrefix = process.env.TRAVIS_PULL_REQUEST_SHA.substr( 0, 20 );
+var actionWaitTimeout = 2000;
 
-const serverOptions = {
-	name: `wordpress-${serverPrefix}`,
+var serverOptions = {
+	name: 'wordpress-' + serverPrefix,
 	sysuserid: spConfig.sysuserid,
 	runtime: 'php7.2',
-	domains: [ `${serverPrefix}.wp-e2e-tests.pw` ],
+	domains: [ serverPrefix + '.wp-e2e-tests.pw' ],
 	wordpress: {
 		site_title: 'WooCommerce e2e Testing',
 		admin_user: username,
@@ -38,7 +38,7 @@ sp.createApp( serverOptions, function( err, data ) {
 			console.log( actionErr );
 			throw err;
 		}
-		console.log( `Site created - http://${serverPrefix}.wp-e2e-tests.pw - ID ${data.data.id}` );
+		console.log( 'Site created - http://' + serverPrefix + '.wp-e2e-tests.pw - ID ' + data.data.id );
 	} );
 } );
 

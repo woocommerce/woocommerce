@@ -1,22 +1,22 @@
 #!/usr/bin/env node
-const config = require( 'config' );
-const ServerPilot = require( 'serverpilot' );
+var config = require( 'config' );
+var ServerPilot = require( 'serverpilot' );
 
-const spConfig = config.get( 'spConfig' );
+var spConfig = config.get( 'spConfig' );
 
-const sp = new ServerPilot( {
+var sp = new ServerPilot( {
 	clientId: spConfig.clientId,
 	apiKey: spConfig.apiKey
 } );
 
-sp.getApps( ( getErr, data ) => {
+sp.getApps( function( getErr, data ) {
 	if ( getErr !== null ) {
 		console.log( getErr );
 		throw getErr;
 	}
 
-	const currentApps = data.data.filter( ( app ) => {
-		return app.name === `wordpress-${process.env.CIRCLE_SHA1.substr( 0, 20 )}`;
+	var currentApps = data.data.filter( function( app ) {
+		return app.name === 'wordpress-' + process.env.TRAVIS_PULL_REQUEST_SHA.substr( 0, 20 );
 	} );
 
 	// There should only be one, but if not we just silently ignore
@@ -26,7 +26,7 @@ sp.getApps( ( getErr, data ) => {
 				console.log( delErr );
 				throw delErr;
 			} else {
-				console.log( `App ${currentApps[0].id} successfully deleted` );
+				console.log( 'App ' + currentApps[0].id + ' successfully deleted' );
 			}
 		} );
 	}
