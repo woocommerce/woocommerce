@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+'use strict';
 var config = require( 'config' );
 var ServerPilot = require( 'serverpilot' );
 
@@ -19,7 +20,7 @@ var actionWaitTimeout = 2000;
 var serverOptions = {
 	name: 'wordpress-' + serverPrefix,
 	sysuserid: spConfig.sysuserid,
-	runtime: 'php7.2',
+	runtime: 'php' + process.env.TRAVIS_PHP_VERSION,
 	domains: [ serverPrefix + '.wp-e2e-tests.pw' ],
 	wordpress: {
 		site_title: 'WooCommerce e2e Testing',

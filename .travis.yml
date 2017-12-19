@@ -33,6 +33,7 @@ before_script:
   - bash tests/bin/travis.sh before
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3
+  - npm install
   - export NODE_CONFIG_DIR="./tests/e2e-tests"
   - "./tests/e2e-tests/scripts/wp-serverpilot-delete.js"
   - "./tests/e2e-tests/scripts/wp-serverpilot-init.js"
