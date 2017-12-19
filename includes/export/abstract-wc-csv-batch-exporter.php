@@ -46,7 +46,6 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 		$upload_dir         = wp_upload_dir();
 		$this->file         = trailingslashit( $upload_dir['basedir'] ) . $this->get_filename();
 		$this->column_names = $this->get_default_column_names();
-		apply_filters( 'woocommerce_product_export_init', $this );
 	}
 
 	/**

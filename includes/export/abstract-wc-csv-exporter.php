@@ -296,7 +296,7 @@ abstract class WC_CSV_Exporter {
 	 * @return int
 	 */
 	public function get_limit() {
-		return $this->limit;
+		return apply_filters( "woocommerce_product_export_get_limit", $this->limit, $this->export_type);
 	}
 
 	/**
