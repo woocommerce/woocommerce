@@ -129,8 +129,12 @@ class WC_Tests_Order_Item_Product extends WC_Unit_Test_Case {
 		$this->assertRegexp( $expected_regex, $product_item->get_item_download_url( 100 ) );
 	}
 
+	/**
+	 * Test the get_formatted_meta_data method.
+	 *
+	 * @since 3.3.0
+	 */
 	public function test_get_formatted_meta_data() {
-
 		$parent_product = new WC_Product_Variable();
 		$parent_product->set_name( 'Test Parent' );
 		$parent_product->save();
@@ -199,7 +203,75 @@ class WC_Tests_Order_Item_Product extends WC_Unit_Test_Case {
 		$this->assertEmpty( $formatted );
 	}
 
-	public function test_offset_set_get_exists() {
+	/**
+	 * Test the Array Access methods.
+	 *
+	 * @since 3.3.0
+	 */
+	public function test_arrayaccess() {
+		$item = new WC_Order_Item_Product();
 
+		// Test line_subtotal.
+		$this->assertTrue( isset( $item['line_subtotal'] ) );
+		$item['line_subtotal'] = 50;
+		$this->assertEquals( 50, $item->get_subtotal() );
+		$this->assertEquals( $item->get_subtotal(), $item['line_subtotal'] );
+
+		// Test line_subtotal_tax.
+		$this->assertTrue( isset( $item['line_subtotal_tax'] ) );
+		$item['line_subtotal_tax'] = 5;
+		$this->assertEquals( 5, $item->get_subtotal_tax() );
+		$this->assertEquals( $item->get_subtotal_tax(), $item['line_subtotal_tax'] );
+
+		// Test line_total.
+		$this->assertTrue( isset( $item['line_total'] ) );
+		$item['line_total'] = 55;
+		$this->assertEquals( 55, $item->get_total() );
+		$this->assertEquals( $item->get_total(), $item['line_total'] );
+
+		// Test line_tax.
+		$this->assertTrue( isset( $item['line_tax'] ) );
+		$item['line_tax'] = 5;
+		$this->assertEquals( 5, $item->get_total_tax() );
+		$this->assertEquals( $item->get_total_tax(), $item['line_tax'] );
+
+		// Test line_tax_data.
+		$this->assertTrue( isset( $item['line_tax_data'] ) );
+		$item['line_tax_data'] = array(
+			'total'    => array( 5 ),
+			'subtotal' => array( 5 ),
+		);
+		$this->assertEquals(
+			array(
+				'total'    => array( 5 ),
+				'subtotal' => array( 5 ),
+			),
+			$item->get_taxes()
+		);
+		$this->assertEquals( $item->get_taxes(), $item['line_tax_data'] );
+
+		// Test qty.
+		$this->assertTrue( isset( $item['qty'] ) );
+		$item['qty'] = 150;
+		$this->assertEquals( 150, $item->get_quantity() );
+		$this->assertEquals( $item->get_quantity(), $item['qty'] );
+
+		// Test item_meta_array.
+		$this->assertTrue( isset( $item['item_meta_array'] ) );
+		$item['item_meta_array'] = array(
+			9999 => (object) array(
+				'key' => 'test',
+				'value' => 'val'
+			),
+		);
+		$this->assertInstanceOf( 'WC_Meta_Data', current( $item->get_meta_data() ) );
+		$this->assertEquals( current( $item->get_meta_data() ), current( $item['item_meta_array'] ) );
+		unset( $item['item_meta_array'] );
+		$this->assertEquals( array(), $item->get_meta_data() );
+
+		// Test default.
+		$this->assertFalse( isset( $item['foo'] ) );
+		$item['foo'] = 'bar';
+		$this->assertEquals( 'bar', $item->get_meta( 'foo' ) );
 	}
 }
