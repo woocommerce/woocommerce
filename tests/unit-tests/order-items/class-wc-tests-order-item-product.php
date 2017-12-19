@@ -266,13 +266,13 @@ class WC_Tests_Order_Item_Product extends WC_Unit_Test_Case {
 		// Test item_meta_array.
 		$this->assertTrue( isset( $item['item_meta_array'] ) );
 		$item['item_meta_array'] = array(
-			9999 => (object) array(
+			0 => (object) array(
 				'key' => 'test',
 				'value' => 'val',
 			),
 		);
 		$this->assertInstanceOf( 'WC_Meta_Data', current( $item->get_meta_data() ) );
-		$this->assertEquals( current( $item->get_meta_data() ), current( $item['item_meta_array'] ) );
+		$this->assertEquals( current( $item->get_meta_data() ), $item['item_meta_array'][''] );
 		unset( $item['item_meta_array'] );
 		$this->assertEquals( array(), $item->get_meta_data() );
 
