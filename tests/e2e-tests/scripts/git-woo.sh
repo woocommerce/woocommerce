@@ -1,5 +1,5 @@
 #!/bin/bash
-export APP_NAME=$1
+export APP_NAME=$2
 if [ "$APP_NAME" == "" ]; then
   echo "Please supply app directory name!"
   exit 1
