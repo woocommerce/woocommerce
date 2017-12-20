@@ -17,7 +17,7 @@ sp.getApps( function( getErr, data ) {
 	}
 
 	var currentApps = data.data.filter( function( app ) {
-		return app.name === 'wordpress-' + process.env.TRAVIS_PULL_REQUEST_SHA.substr( 0, 20 );
+		return app.name === 'wordpress-' + process.env.TRAVIS_BUILD_ID.substr( 0, 20 );
 	} );
 
 	// There should only be one, but if not we just silently ignore
