@@ -16,7 +16,7 @@ var password = userConfig.wooUserCI[1];
 
 var serverPrefix = process.env.TRAVIS_PULL_REQUEST_SHA.substr( 0, 20 );
 var actionWaitTimeout = 2000;
-
+console.log(serverPrefix);
 var serverOptions = {
 	name: 'wordpress-' + serverPrefix,
 	sysuserid: spConfig.sysuserid,
