@@ -14,7 +14,7 @@ var userConfig = config.get( 'testAccounts' );
 var username = userConfig.wooUserCI[0];
 var password = userConfig.wooUserCI[1];
 
-var serverPrefix = process.env.TRAVIS_BUILD_ID.substr( 0, 20 );
+var serverPrefix = process.env.TRAVIS_JOB_ID.substr( 0, 20 );
 var actionWaitTimeout = 2000;
 console.log(serverPrefix);
 var serverOptions = {
