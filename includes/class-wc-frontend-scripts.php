@@ -458,7 +458,7 @@ class WC_Frontend_Scripts {
 				$params = array(
 					'i18n_required_rating_text' => esc_attr__( 'Please select a rating', 'woocommerce' ),
 					'review_rating_required'    => get_option( 'woocommerce_review_rating_required' ),
-					'flexslider_options'        => apply_filters( 'woocommerce_single_product_carousel_options', array(
+					'flexslider'                => apply_filters( 'woocommerce_single_product_carousel_options', array(
 						'rtl'            => is_rtl(),
 						'animation'      => 'slide',
 						'smoothHeight'   => true,

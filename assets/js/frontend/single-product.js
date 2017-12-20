@@ -146,7 +146,7 @@ jQuery( function( $ ) {
 			after: function( slider ) {
 				gallery.initZoomForTarget( gallery.$images.eq( slider.currentSlide ) );
 			}
-		}, wc_single_product_params.flexslider_options );
+		}, wc_single_product_params.flexslider );
 
 		$target.flexslider( options );
 
