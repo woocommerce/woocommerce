@@ -19,12 +19,12 @@ mv deploy-key ~/.ssh/id_rsa
 # Configure new server
 scp -o "StrictHostKeyChecking no" tests/e2e-tests/scripts/git-woo.sh serverpilot@wp-e2e-tests.pw:~serverpilot/git-woo.sh
 scp -o "StrictHostKeyChecking no" tests/e2e-tests/data/e2e-db.sql serverpilot@wp-e2e-tests.pw:~serverpilot/e2e-db.sql
-ssh -o "StrictHostKeyChecking no" serverpilot@wp-e2e-tests.pw ~serverpilot/git-woo.sh wordpress-${TRAVIS_JOB_ID:0:20}
+ssh -o "StrictHostKeyChecking no" serverpilot@wp-e2e-tests.pw '~serverpilot/git-woo.sh $TRAVIS_BRANCH' wordpress-${TRAVIS_JOB_ID:0:20}
 
 # Run the tests
 npm run test
 
 # Delete the site when complete
-./tests/e2e-tests/scripts/jetpack/wp-serverpilot-delete.js
+#./tests/e2e-tests/scripts/jetpack/wp-serverpilot-delete.js
 
 
