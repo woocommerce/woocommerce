@@ -25,6 +25,6 @@ ssh -o "StrictHostKeyChecking no" serverpilot@wp-e2e-tests.pw ~serverpilot/git-w
 npm run test
 
 # Delete the site when complete
-# ./tests/e2e-tests/scripts/wp-serverpilot-delete.js
+
 
 
