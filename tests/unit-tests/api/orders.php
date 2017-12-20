@@ -338,6 +338,9 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	public function test_update_order_add_coupons() {
 		wp_set_current_user( $this->user );
 		$order = WC_Helper_Order::create_order();
+		$coupon = WC_Helper_Coupon::create_coupon( 'fake-coupon' );
+		$coupon->set_amount( 5 );
+		$coupon->save();
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v2/orders/' . $order->get_id() );
 		$request->set_body_params( array(

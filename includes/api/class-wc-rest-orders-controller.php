@@ -430,7 +430,6 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 					case 'line_items' :
 					case 'shipping_lines' :
 					case 'fee_lines' :
-					case 'coupon_lines' :
 						if ( is_array( $value ) ) {
 							foreach ( $value as $item ) {
 								if ( is_array( $item ) ) {
@@ -438,6 +437,28 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 										$order->remove_item( $item['id'] );
 									} else {
 										$this->set_item( $order, $key, $item );
+									}
+								}
+							}
+						}
+						break;
+					case 'coupon_lines' :
+						if ( is_array( $value ) ) {
+							foreach ( $value as $item ) {
+								if ( is_array( $item ) ) {
+									if ( $this->item_is_null( $item ) ) {
+										$item = $order->get_item( $item['id'] );
+										if ( $item && method_exists( $item, 'get_code' ) ) {
+											$order->remove_coupon( $item->get_code() );
+										} else {
+											$order->remove_item( $item['id'] );
+										}
+									} else {
+										if ( ! empty( $item['code'] ) ) {
+											$order->apply_coupon( $item['code'] );
+										} else {
+											$this->set_item( $order, $key, $item );
+										}
 									}
 								}
 							}
