@@ -1,22 +1,21 @@
 #!/usr/bin/env node
-'use strict';
-var config = require( 'config' );
-var ServerPilot = require( 'serverpilot' );
+const config = require( 'config' );
+const ServerPilot = require( 'serverpilot' );
 
-var spConfig = config.get( 'spConfig' );
+const spConfig = config.get( 'spConfig' );
 
-var sp = new ServerPilot( {
+const sp = new ServerPilot( {
 	clientId: spConfig.clientId,
 	apiKey: spConfig.apiKey
 } );
 
-var userConfig = config.get( 'testAccounts' );
-var username = userConfig.wooUserCI[0];
-var password = userConfig.wooUserCI[1];
+const userConfig = config.get( 'testAccounts' );
+const username = userConfig.wooUserCI[0];
+const password = userConfig.wooUserCI[1];
 
-var serverPrefix = process.env.TRAVIS_JOB_ID.substr( 0, 20 );
-var actionWaitTimeout = 2000;
-var serverOptions = {
+const serverPrefix = process.env.TRAVIS_JOB_ID.substr( 0, 20 );
+const actionWaitTimeout = 2000;
+const serverOptions = {
 	name: 'wordpress-' + serverPrefix,
 	sysuserid: spConfig.sysuserid,
 	runtime: 'php' + process.env.TRAVIS_PHP_VERSION,
@@ -28,12 +27,12 @@ var serverOptions = {
 		admin_email: 'example@example.com'
 	}
 };
-sp.createApp( serverOptions, function( err, data ) {
+sp.createApp( serverOptions, ( err, data ) => {
 	if ( err !== null ) {
 		console.log( err );
 		throw err;
 	}
-	waitForServerPilotAction( data.actionid, function( actionErr ) {
+	waitForServerPilotAction( data.actionid, ( actionErr ) => {
 		if ( err !== null ) {
 			console.log( actionErr );
 			throw err;
@@ -49,7 +48,7 @@ sp.createApp( serverOptions, function( err, data ) {
  */
 function waitForServerPilotAction( actionId, cb ) {
 	setTimeout( function() {
-		sp.getActionStatus( actionId, function( err, response ) {
+		sp.getActionStatus( actionId, ( err, response ) => {
 			if ( err ) {
 				return cb( err );
 			}
