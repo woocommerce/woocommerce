@@ -37,7 +37,7 @@ before_script:
   - export NODE_CONFIG_DIR="./tests/e2e-tests/config"
   - "./tests/e2e-tests/scripts/wp-serverpilot-delete.js"
   - "./tests/e2e-tests/scripts/wp-serverpilot-init.js"
-  - bash tests/e2e-test/scripts/ssh-configure.sh
+  - bash tests/e2e-tests/scripts/ssh-configure.sh
   - scp -o "StrictHostKeyChecking no" tests/e2e-tests/scripts/git-woo.sh serverpilot@wp-e2e-tests.pw:~serverpilot/git-woo.sh
   - scp -o "StrictHostKeyChecking no" tests/e2e-tests/data/e2e-db.sql serverpilot@wp-e2e-tests.pw:~serverpilot/e2e-db.sql
   - ssh -o "StrictHostKeyChecking no" serverpilot@wp-e2e-tests.pw ~serverpilot/git-woo.sh wordpress-${TRAVIS_PULL_REQUEST_SHA:0:20}
