@@ -77,9 +77,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 			}
 			$data[ $session_key ] = (string) $customer->{"get_$function_key"}( 'edit' );
 		}
-		if ( WC()->session->get( 'customer' ) !== $data ) {
-			WC()->session->set( 'customer', $data );
-		}
+		WC()->session->set( 'customer', $data );
 	}
 
 	/**
@@ -97,8 +95,11 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 		 *
 		 * If the user object has been updated since the session was created (based on date_modified) we should not load the session - data should be reloaded.
 		 */
-		if ( ! empty( $data ) && isset( $data['id'], $data['date_modified'] ) && $data['id'] === (string) $customer->get_id() && $data['date_modified'] === (string) $customer->get_date_modified( 'edit' ) ) {
+		if ( isset( $data['id'], $data['date_modified'] ) && $data['id'] === (string) $customer->get_id() && $data['date_modified'] === (string) $customer->get_date_modified( 'edit' ) ) {
 			foreach ( $this->session_keys as $session_key ) {
+				if ( in_array( $session_key, array( 'id', 'date_modified' ), true ) ) {
+					continue;
+				}
 				$function_key = $session_key;
 				if ( 'billing_' === substr( $session_key, 0, 8 ) ) {
 					$session_key = str_replace( 'billing_', '', $session_key );
