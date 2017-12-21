@@ -13,7 +13,7 @@
  * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     1.6.4
+ * @version     3.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -27,5 +27,5 @@ if ( ! $messages ) {
 ?>
 
 <?php foreach ( $messages as $message ) : ?>
-	<div class="woocommerce-info"><?php echo wp_kses_post( $message ); ?></div>
+	<div class="woocommerce-info" role="alert"><?php echo wp_kses_post( $message ); ?></div>
 <?php endforeach; ?>
