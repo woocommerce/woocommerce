@@ -1005,6 +1005,12 @@ class WC_Countries {
 						'required' => false,
 					),
 				),
+				'SR' => array(
+					'postcode' => array(
+						'required' => false,
+						'hidden'   => true,
+					),
+				),
 				'ES' => array(
 					'postcode' => array(
 						'priority' => 65,
