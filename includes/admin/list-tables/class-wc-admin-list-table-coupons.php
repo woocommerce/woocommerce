@@ -163,11 +163,20 @@ class WC_Admin_List_Table_Coupons extends WC_Admin_List_Table {
 	protected function render_usage_column() {
 		$usage_count = $this->object->get_usage_count();
 		$usage_limit = $this->object->get_usage_limit();
+		$coupon_code = $this->object->get_code();
+		$usage_url   = sprintf(
+			'<a href="%s">%s</a>',
+			admin_url(
+				sprintf( 'edit.php?s=%s&post_status=all&post_type=shop_order', esc_html( $coupon_code ) )
+			),
+			esc_html( $usage_count )
+		);
+
 
 		/* translators: 1: count 2: limit */
 		printf(
 			__( '%1$s / %2$s', 'woocommerce' ),
-			esc_html( $usage_count ),
+			$usage_url,
 			$usage_limit ? esc_html( $usage_limit ) : '&infin;'
 		);
 	}
