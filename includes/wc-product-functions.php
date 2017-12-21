@@ -375,6 +375,7 @@ function wc_scheduled_sales() {
 	// Sales which are due to start
 	$product_ids = $data_store->get_starting_sales();
 	if ( $product_ids ) {
+		do_action('wc_before_products_starting_sales', $product_ids);
 		foreach ( $product_ids as $product_id ) {
 			if ( $product = wc_get_product( $product_id ) ) {
 				$sale_price = $product->get_sale_price();
@@ -390,6 +391,7 @@ function wc_scheduled_sales() {
 				$product->save();
 			}
 		}
+		do_action('wc_after_products_starting_sales', $product_ids);
 
 		delete_transient( 'wc_products_onsale' );
 	}
@@ -397,6 +399,7 @@ function wc_scheduled_sales() {
 	// Sales which are due to end
 	$product_ids = $data_store->get_ending_sales();
 	if ( $product_ids ) {
+		do_action('wc_before_products_ending_sales', $product_ids);
 		foreach ( $product_ids as $product_id ) {
 			if ( $product = wc_get_product( $product_id ) ) {
 				$regular_price = $product->get_regular_price();
@@ -407,6 +410,7 @@ function wc_scheduled_sales() {
 				$product->save();
 			}
 		}
+		do_action('wc_after_products_ending_sales', $product_ids);
 
 		WC_Cache_Helper::get_transient_version( 'product', true );
 		delete_transient( 'wc_products_onsale' );
