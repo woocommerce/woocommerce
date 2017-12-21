@@ -1,6 +1,6 @@
 {
   "name": "woocommerce/woocommerce",
-  "description": "An e-commerce toolkit that helps you sell anything. Beautifully.",
+  "description": "An eCommerce toolkit that helps you sell anything. Beautifully.",
   "homepage": "https://woocommerce.com/",
   "type": "wordpress-plugin",
   "license": "GPL-2.0+",
@@ -11,7 +11,7 @@
     "squizlabs/php_codesniffer": "*",
     "wp-coding-standards/wpcs": "^0.14",
     "phpunit/phpunit": "6.2.3",
-    "woocommerce/woocommerce-git-hooks": "1.0.3",
+    "woocommerce/woocommerce-git-hooks": "1.0.5",
     "wimg/php-compatibility": "^8.0",
     "dealerdirect/phpcodesniffer-composer-installer": "^0.4.3"
   },
@@ -27,6 +27,22 @@
     ],
     "post-update-cmd": [
       "WooCommerce\\GitHooks\\Hooks::postHooks"
+    ],
+    "test": [
+      "phpunit"
+    ],
+    "phpcs": [
+      "phpcs -s -p"
+    ],
+    "phpcbf": [
+      "phpcbf -p"
     ]
+  },
+  "extra": {
+    "scripts-description": {
+      "test": "Run unit tests",
+      "phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
+      "phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier"
+    }
   }
 }

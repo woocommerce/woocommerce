@@ -13,12 +13,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( class_exists( 'WC_Admin_List_Table_Orders', false ) ) {
-	new WC_Admin_List_Table_Orders();
 	return;
 }
 
 if ( ! class_exists( 'WC_Admin_List_Table', false ) ) {
-	include_once( 'abstract-class-wc-admin-list-table.php' );
+	include_once 'abstract-class-wc-admin-list-table.php';
 }
 
 /**
@@ -58,7 +57,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	/**
 	 * Define primary column.
 	 *
-	 * @return array
+	 * @return string
 	 */
 	protected function get_primary_column() {
 		return 'order_number';
@@ -84,6 +83,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		return array(
 			'shipping_address',
 			'billing_address',
+			'wc_actions',
 		);
 	}
 
@@ -114,15 +114,12 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		$show_columns                     = array();
 		$show_columns['cb']               = $columns['cb'];
 		$show_columns['order_number']     = __( 'Order', 'woocommerce' );
-		$show_columns['billing_address']  = __( 'Billing', 'woocommerce' );
-		$show_columns['shipping_address'] = __( 'Ship to', 'woocommerce' );
 		$show_columns['order_date']       = __( 'Date', 'woocommerce' );
 		$show_columns['order_status']     = __( 'Status', 'woocommerce' );
+		$show_columns['billing_address']  = __( 'Billing', 'woocommerce' );
+		$show_columns['shipping_address'] = __( 'Ship to', 'woocommerce' );
 		$show_columns['order_total']      = __( 'Total', 'woocommerce' );
-
-		if ( has_action( 'woocommerce_admin_order_actions_start' ) || has_action( 'woocommerce_admin_order_actions_end' ) || has_filter( 'woocommerce_admin_order_actions' ) ) {
-			$show_columns['order_actions'] = __( 'Actions', 'woocommerce' );
-		}
+		$show_columns['wc_actions']       = __( 'Actions', 'woocommerce' );
 
 		wp_enqueue_script( 'wc-orders' );
 
@@ -140,9 +137,9 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			unset( $actions['edit'] );
 		}
 
-		$actions['mark_processing'] = __( 'Mark processing', 'woocommerce' );
-		$actions['mark_on-hold']    = __( 'Mark on-hold', 'woocommerce' );
-		$actions['mark_completed']  = __( 'Mark complete', 'woocommerce' );
+		$actions['mark_processing'] = __( 'Change status to processing', 'woocommerce' );
+		$actions['mark_on-hold']    = __( 'Change status to on-hold', 'woocommerce' );
+		$actions['mark_completed']  = __( 'Change status to completed', 'woocommerce' );
 
 		return $actions;
 	}
@@ -156,7 +153,8 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		global $the_order;
 
 		if ( empty( $this->object ) || $this->object->get_id() !== $post_id ) {
-			$this->object = $the_order = wc_get_order( $post_id );
+			$this->object = wc_get_order( $post_id );
+			$the_order    = $this->object;
 		}
 	}
 
@@ -188,26 +186,29 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	 * Render columm: order_status.
 	 */
 	protected function render_order_status_column() {
-		$tooltip       = '';
-		$comment_count = absint( get_comment_count( $this->object->get_id() )['approved'] );
+		$tooltip                 = '';
+		$comment_count           = get_comment_count( $this->object->get_id() );
+		$approved_comments_count = absint( $comment_count['approved'] );
 
-		if ( $comment_count ) {
-			$latest_notes = wc_get_order_notes( array(
-				'order_id' => $this->object->get_id(),
-				'limit'    => 1,
-				'orderby'  => 'date_created_gmt',
-			) );
+		if ( $approved_comments_count ) {
+			$latest_notes = wc_get_order_notes(
+				array(
+					'order_id' => $this->object->get_id(),
+					'limit'    => 1,
+					'orderby'  => 'date_created_gmt',
+				)
+			);
 
 			$latest_note = current( $latest_notes );
 
-			if ( isset( $latest_note->content ) && 1 === $comment_count ) {
+			if ( isset( $latest_note->content ) && 1 === $approved_comments_count ) {
 				$tooltip = wc_sanitize_tooltip( $latest_note->content );
 			} elseif ( isset( $latest_note->content ) ) {
 				/* translators: %d: notes count */
-				$tooltip = wc_sanitize_tooltip( $latest_note->content . '<br/><small style="display:block">' . sprintf( _n( 'Plus %d other note', 'Plus %d other notes', ( $comment_count - 1 ), 'woocommerce' ), $comment_count - 1 ) . '</small>' );
+				$tooltip = wc_sanitize_tooltip( $latest_note->content . '<br/><small style="display:block">' . sprintf( _n( 'Plus %d other note', 'Plus %d other notes', ( $approved_comments_count - 1 ), 'woocommerce' ), $approved_comments_count - 1 ) . '</small>' );
 			} else {
 				/* translators: %d: notes count */
-				$tooltip = wc_sanitize_tooltip( sprintf( _n( '%d note', '%d notes', $comment_count, 'woocommerce' ), $comment_count ) );
+				$tooltip = wc_sanitize_tooltip( sprintf( _n( '%d note', '%d notes', $approved_comments_count, 'woocommerce' ), $approved_comments_count ) );
 			}
 		}
 
@@ -225,9 +226,13 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		$order_timestamp = $this->object->get_date_created()->getTimestamp();
 
 		if ( $order_timestamp > strtotime( '-1 day', current_time( 'timestamp', true ) ) ) {
-			$show_date = sprintf( _x( '%s ago', '%s = human-readable time difference', 'woocommerce' ), human_time_diff( $this->object->get_date_created()->getTimestamp(), current_time( 'timestamp', true ) ) );
+			$show_date = sprintf(
+				/* translators: %s: human-readable time difference */
+				_x( '%s ago', '%s = human-readable time difference', 'woocommerce' ),
+				human_time_diff( $this->object->get_date_created()->getTimestamp(), current_time( 'timestamp', true ) )
+			);
 		} else {
-			$show_date = $this->object->get_date_created()->date_i18n( apply_filters( 'woocommerce_admin_order_date_format', get_option( 'date_format' ) ) );
+			$show_date = $this->object->get_date_created()->date_i18n( apply_filters( 'woocommerce_admin_order_date_format', __( 'M j, Y', 'woocommerce' ) ) );
 		}
 		printf(
 			'<time datetime="%1$s" title="%2$s">%3$s</time>',
@@ -250,9 +255,9 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	}
 
 	/**
-	 * Render columm: order_actions.
+	 * Render columm: wc_actions.
 	 */
-	protected function render_order_actions_column() {
+	protected function render_wc_actions_column() {
 		echo '<p>';
 
 		do_action( 'woocommerce_admin_order_actions_start', $this->object );
@@ -261,25 +266,23 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 
 		if ( $this->object->has_status( array( 'pending', 'on-hold' ) ) ) {
 			$actions['processing'] = array(
-				'url'       => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=processing&order_id=' . $this->object->get_id() ), 'woocommerce-mark-order-status' ),
-				'name'      => __( 'Processing', 'woocommerce' ),
-				'action'    => 'processing',
+				'url'    => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=processing&order_id=' . $this->object->get_id() ), 'woocommerce-mark-order-status' ),
+				'name'   => __( 'Processing', 'woocommerce' ),
+				'action' => 'processing',
 			);
 		}
 
 		if ( $this->object->has_status( array( 'pending', 'on-hold', 'processing' ) ) ) {
 			$actions['complete'] = array(
-				'url'       => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=completed&order_id=' . $this->object->get_id() ), 'woocommerce-mark-order-status' ),
-				'name'      => __( 'Complete', 'woocommerce' ),
-				'action'    => 'complete',
+				'url'    => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=completed&order_id=' . $this->object->get_id() ), 'woocommerce-mark-order-status' ),
+				'name'   => __( 'Complete', 'woocommerce' ),
+				'action' => 'complete',
 			);
 		}
 
 		$actions = apply_filters( 'woocommerce_admin_order_actions', $actions, $this->object );
 
-		foreach ( $actions as $action ) {
-			printf( '<a class="button tips %s" href="%s" data-tip="%s">%s</a>', esc_attr( $action['action'] ), esc_url( $action['url'] ), esc_attr( $action['name'] ), esc_attr( $action['name'] ) );
-		}
+		echo wc_render_action_buttons( $actions ); // WPCS: XSS ok.
 
 		do_action( 'woocommerce_admin_order_actions_end', $this->object );
 
@@ -290,8 +293,15 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	 * Render columm: billing_address.
 	 */
 	protected function render_billing_address_column() {
-		if ( $address = $this->object->get_formatted_billing_address() ) {
+		$address = $this->object->get_formatted_billing_address();
+
+		if ( $address ) {
 			echo esc_html( preg_replace( '#<br\s*/?>#i', ', ', $address ) );
+
+			if ( $this->object->get_payment_method() ) {
+				/* translators: %s: payment method */
+				echo '<span class="description">' . sprintf( __( 'via %s', 'woocommerce' ), esc_html( $this->object->get_payment_method_title() ) ) . '</span>'; // WPCS: XSS ok.
+			}
 		} else {
 			echo '&ndash;';
 		}
@@ -301,8 +311,14 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	 * Render columm: shipping_address.
 	 */
 	protected function render_shipping_address_column() {
-		if ( $address = $this->object->get_formatted_shipping_address() ) {
+		$address = $this->object->get_formatted_shipping_address();
+
+		if ( $address ) {
 			echo '<a target="_blank" href="' . esc_url( $this->object->get_shipping_address_map_url() ) . '">' . esc_html( preg_replace( '#<br\s*/?>#i', ', ', $address ) ) . '</a>';
+			if ( $this->object->get_shipping_method() ) {
+				/* translators: %s: shipping method */
+				echo '<span class="description">' . sprintf( __( 'via %s', 'woocommerce' ), esc_html( $this->object->get_shipping_method() ) ) . '</span>'; // WPCS: XSS ok.
+			}
 		} else {
 			echo '&ndash;';
 		}
@@ -320,6 +336,8 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 				<div class="wc-backbone-modal-content">
 					<section class="wc-backbone-modal-main" role="main">
 						<header class="wc-backbone-modal-header">
+							<mark class="order-status status-{{ data.status }}"><span>{{ data.status_name }}</span></mark>
+							<?php /* translators: %s: order ID */ ?>
 							<h1><?php echo esc_html( sprintf( __( 'Order #%s', 'woocommerce' ), '{{ data.order_number }}' ) ); ?></h1>
 							<button class="modal-close modal-close-link dashicons dashicons-no-alt">
 								<span class="screen-reader-text"><?php esc_html_e( 'Close modal panel', 'woocommerce' ); ?></span>
@@ -327,8 +345,6 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 						</header>
 						<article>
 							<?php do_action( 'woocommerce_admin_order_preview_start' ); ?>
-
-							{{{ data.item_html }}}
 
 							<div class="wc-order-preview-addresses">
 								<div class="wc-order-preview-address">
@@ -347,7 +363,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 
 									<# if ( data.payment_via ) { #>
 										<strong><?php esc_html_e( 'Payment via', 'woocommerce' ); ?></strong>
-										{{ data.payment_via }}
+										{{{ data.payment_via }}}
 									<# } #>
 								</div>
 								<# if ( data.needs_shipping ) { #>
@@ -371,10 +387,15 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 									</div>
 								<# } #>
 							</div>
+
+							{{{ data.item_html }}}
+
 							<?php do_action( 'woocommerce_admin_order_preview_end' ); ?>
 						</article>
 						<footer>
 							<div class="inner">
+								{{{ data.actions_html }}}
+
 								<a class="button button-primary button-large" href="<?php echo esc_url( admin_url( 'post.php?action=edit' ) ); ?>&post={{ data.data.id }}"><?php esc_html_e( 'Edit order', 'woocommerce' ); ?></a>
 							</div>
 						</footer>
@@ -384,6 +405,206 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			<div class="wc-backbone-modal-backdrop modal-close"></div>
 		</script>
 		<?php
+	}
+
+	/**
+	 * Get items to display in the preview as HTML.
+	 *
+	 * @param  WC_Order $order Order object.
+	 * @return string
+	 */
+	public static function get_order_preview_item_html( $order ) {
+		$hidden_order_itemmeta = apply_filters(
+			'woocommerce_hidden_order_itemmeta', array(
+				'_qty',
+				'_tax_class',
+				'_product_id',
+				'_variation_id',
+				'_line_subtotal',
+				'_line_subtotal_tax',
+				'_line_total',
+				'_line_tax',
+				'method_id',
+				'cost',
+			)
+		);
+
+		$line_items = apply_filters( 'woocommerce_admin_order_preview_line_items', $order->get_items(), $order );
+		$columns    = apply_filters(
+			'woocommerce_admin_order_preview_line_item_columns', array(
+				'product'  => __( 'Product', 'woocommerce' ),
+				'quantity' => __( 'Quantity', 'woocommerce' ),
+				'tax'      => __( 'Tax', 'woocommerce' ),
+				'total'    => __( 'Total', 'woocommerce' ),
+			), $order
+		);
+
+		if ( ! wc_tax_enabled() ) {
+			unset( $columns['tax'] );
+		}
+
+		$html = '
+		<div class="wc-order-preview-table-wrapper">
+			<table cellspacing="0" class="wc-order-preview-table">
+				<thead>
+					<tr>';
+
+		foreach ( $columns as $column => $label ) {
+			$html .= '<th class="wc-order-preview-table__column--' . esc_attr( $column ) . '">' . esc_html( $label ) . '</th>';
+		}
+
+		$html .= '
+					</tr>
+				</thead>
+				<tbody>';
+
+		foreach ( $line_items as $item_id => $item ) {
+			$product_object = is_callable( array( $item, 'get_product' ) ) ? $item->get_product() : null;
+
+			$html .= '<tr class="wc-order-preview-table__item wc-order-preview-table__item--' . esc_attr( $item_id ) . '">';
+
+			foreach ( $columns as $column => $label ) {
+				$html .= '<td class="wc-order-preview-table__column--' . esc_attr( $column ) . '">';
+				switch ( $column ) {
+					case 'product':
+						$html .= wp_kses_post( $item->get_name() );
+
+						if ( $product_object ) {
+							$html .= '<div class="wc-order-item-sku">' . esc_html( $product_object->get_sku() ) . '</div>';
+						}
+
+						$meta_data = $item->get_formatted_meta_data( '' );
+
+						if ( $meta_data ) {
+							$html .= '<table cellspacing="0" class="wc-order-item-meta">';
+
+							foreach ( $meta_data as $meta_id => $meta ) {
+								if ( in_array( $meta->key, $hidden_order_itemmeta ) ) {
+									continue;
+								}
+								$html .= '<tr><th>' . wp_kses_post( $meta->display_key ) . ':</th><td>' . wp_kses_post( force_balance_tags( $meta->display_value ) ) . '</td></tr>';
+							}
+							$html .= '</table>';
+						}
+						break;
+					case 'quantity':
+						$html .= esc_html( $item->get_quantity() );
+						break;
+					case 'tax':
+						$html .= wc_price( $item->get_total_tax(), array( 'currency' => $order->get_currency() ) );
+						break;
+					case 'total':
+						$html .= wc_price( $item->get_total(), array( 'currency' => $order->get_currency() ) );
+						break;
+					default:
+						$html .= apply_filters( 'woocommerce_admin_order_preview_line_item_column_' . sanitize_key( $column ), '', $item, $item_id, $order );
+						break;
+				}
+				$html .= '</td>';
+			}
+
+			$html .= '</tr>';
+		}
+
+		$html .= '
+				</tbody>
+			</table>
+		</div>';
+
+		return $html;
+	}
+
+	/**
+	 * Get actions to display in the preview as HTML.
+	 *
+	 * @param  WC_Order $order Order object.
+	 * @return string
+	 */
+	public static function get_order_preview_actions_html( $order ) {
+		$actions        = array();
+		$status_actions = array();
+
+		if ( $order->has_status( array( 'pending' ) ) ) {
+			$status_actions['on-hold'] = array(
+				'url'    => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=on-hold&order_id=' . $order->get_id() ), 'woocommerce-mark-order-status' ),
+				'name'   => __( 'On-hold', 'woocommerce' ),
+				'action' => 'on-hold',
+			);
+		}
+
+		if ( $order->has_status( array( 'pending', 'on-hold' ) ) ) {
+			$status_actions['processing'] = array(
+				'url'    => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=processing&order_id=' . $order->get_id() ), 'woocommerce-mark-order-status' ),
+				'name'   => __( 'Processing', 'woocommerce' ),
+				'action' => 'processing',
+			);
+		}
+
+		if ( $order->has_status( array( 'pending', 'on-hold', 'processing' ) ) ) {
+			$status_actions['complete'] = array(
+				'url'    => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=completed&order_id=' . $order->get_id() ), 'woocommerce-mark-order-status' ),
+				'name'   => __( 'Completed', 'woocommerce' ),
+				'action' => 'complete',
+			);
+		}
+
+		if ( $status_actions ) {
+			$actions['status'] = array(
+				'group'   => __( 'Change status: ', 'woocommerce' ),
+				'actions' => $status_actions,
+			);
+		}
+
+		return wc_render_action_buttons( apply_filters( 'woocommerce_admin_order_preview_actions', $actions, $order ) );
+	}
+
+	/**
+	 * Get order details to send to the ajax endpoint for previews.
+	 *
+	 * @param  WC_Order $order Order object.
+	 * @return array
+	 */
+	public static function order_preview_get_order_details( $order ) {
+		if ( ! $order ) {
+			return array();
+		}
+
+		$payment_via      = $order->get_payment_method_title();
+		$payment_method   = $order->get_payment_method();
+		$payment_gateways = WC()->payment_gateways() ? WC()->payment_gateways->payment_gateways() : array();
+		$transaction_id   = $order->get_transaction_id();
+
+		if ( $transaction_id ) {
+
+			$url = isset( $payment_gateways[ $payment_method ] ) ? $payment_gateways[ $payment_method ]->get_transaction_url( $order ) : false;
+
+			if ( $url ) {
+				$payment_via .= ' (<a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $transaction_id ) . '</a>)';
+			} else {
+				$payment_via .= ' (' . esc_html( $transaction_id ) . ')';
+			}
+		}
+
+		$billing_address  = $order->get_formatted_billing_address();
+		$shipping_address = $order->get_formatted_shipping_address();
+
+		return apply_filters(
+			'woocommerce_admin_order_preview_get_order_details', array(
+				'data'                       => $order->get_data(),
+				'order_number'               => $order->get_order_number(),
+				'item_html'                  => WC_Admin_List_Table_Orders::get_order_preview_item_html( $order ),
+				'actions_html'               => WC_Admin_List_Table_Orders::get_order_preview_actions_html( $order ),
+				'ship_to_billing'            => wc_ship_to_billing_address_only(),
+				'needs_shipping'             => $order->needs_shipping_address(),
+				'formatted_billing_address'  => $billing_address ? $billing_address : __( 'N/A', 'woocommerce' ),
+				'formatted_shipping_address' => $shipping_address ? $shipping_address : __( 'N/A', 'woocommerce' ),
+				'shipping_address_map_url'   => $order->get_shipping_address_map_url(),
+				'payment_via'                => $payment_via,
+				'shipping_via'               => $order->get_shipping_method(),
+				'status'                     => $order->get_status(),
+				'status_name'                => wc_get_order_status_name( $order->get_status() ),
+			), $order
+		);
 	}
 
 	/**
@@ -411,7 +632,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		}
 
 		$changed = 0;
-		$ids = array_map( 'absint', $ids );
+		$ids     = array_map( 'absint', $ids );
 
 		foreach ( $ids as $id ) {
 			$order = wc_get_order( $id );
@@ -420,12 +641,14 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			$changed++;
 		}
 
-		$redirect_to = add_query_arg( array(
-			'post_type'    => $this->list_table_type,
-			$report_action => true,
-			'changed'      => $changed,
-			'ids'          => join( ',', $ids ),
-		), $redirect_to );
+		$redirect_to = add_query_arg(
+			array(
+				'post_type'    => $this->list_table_type,
+				$report_action => true,
+				'changed'      => $changed,
+				'ids'          => join( ',', $ids ),
+			), $redirect_to
+		);
 
 		return esc_url_raw( $redirect_to );
 	}
@@ -475,10 +698,11 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		$user_id     = '';
 
 		if ( ! empty( $_GET['_customer_user'] ) ) { // WPCS: input var ok.
-			$user_id     = absint( $_GET['_customer_user'] ); // WPCS: input var ok, sanitization ok.
-			$user        = get_user_by( 'id', $user_id );
-			/* translators: 1: user display name 2: user ID 3: user email */
+			$user_id = absint( $_GET['_customer_user'] ); // WPCS: input var ok, sanitization ok.
+			$user    = get_user_by( 'id', $user_id );
+
 			$user_string = sprintf(
+				/* translators: 1: user display name 2: user ID 3: user email */
 				esc_html__( '%1$s (#%2$s &ndash; %3$s)', 'woocommerce' ),
 				$user->display_name,
 				absint( $user->ID ),
@@ -610,5 +834,3 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		}
 	}
 }
-
-new WC_Admin_List_Table_Orders();

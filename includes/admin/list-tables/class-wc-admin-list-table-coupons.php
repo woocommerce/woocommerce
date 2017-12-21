@@ -13,7 +13,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( class_exists( 'WC_Admin_List_Table_Coupons', false ) ) {
-	new WC_Admin_List_Table_Coupons();
 	return;
 }
 
@@ -233,5 +232,3 @@ class WC_Admin_List_Table_Coupons extends WC_Admin_List_Table {
 		return $query_vars;
 	}
 }
-
-new WC_Admin_List_Table_Coupons();

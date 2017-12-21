@@ -1027,6 +1027,11 @@ class WC_Countries {
 						'required' => false,
 					),
 				),
+				'MD' => array(
+					'state' => array(
+						'label'       => __( 'Municipality / Region', 'woocommerce' ),
+					),
+				),
 				'SE' => array(
 					'postcode' => array(
 						'priority' => 65,

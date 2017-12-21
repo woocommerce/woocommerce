@@ -1097,7 +1097,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 
 		// Purchase Note.
 		if ( isset( $request['purchase_note'] ) ) {
-			$product->set_purchase_note( wc_clean( $request['purchase_note'] ) );
+			$product->set_purchase_note( wp_kses_post( wp_unslash( $request['purchase_note'] ) ) );
 		}
 
 		// Featured Product.

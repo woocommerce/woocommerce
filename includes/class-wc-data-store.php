@@ -47,6 +47,7 @@ class WC_Data_Store {
 		'product-variable'      => 'WC_Product_Variable_Data_Store_CPT',
 		'product-variation'     => 'WC_Product_Variation_Data_Store_CPT',
 		'shipping-zone'         => 'WC_Shipping_Zone_Data_Store',
+		'webhook'               => 'WC_Webhook_Data_Store',
 	);
 
 	/**

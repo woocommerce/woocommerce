@@ -1,4 +1,4 @@
-/*global woocommerce_admin_meta_boxes, woocommerce_admin, accounting, woocommerce_admin_meta_boxes_order */
+/*global woocommerce_admin_meta_boxes, woocommerce_admin, accounting, woocommerce_admin_meta_boxes_order, wcSetClipboard, wcClearClipboard */
 jQuery( function ( $ ) {
 
 	/**
@@ -1274,7 +1274,10 @@ jQuery( function ( $ ) {
 		init: function() {
 			$( '.order_download_permissions' )
 				.on( 'click', 'button.grant_access', this.grant_access )
-				.on( 'click', 'button.revoke_access', this.revoke_access );
+				.on( 'click', 'button.revoke_access', this.revoke_access )
+				.on( 'click', '#copy-download-link', this.copy_link )
+				.on( 'aftercopy', '#copy-download-link', this.copy_success )
+				.on( 'aftercopyfailure', '#copy-download-link', this.copy_fail );
 		},
 
 		grant_access: function() {
@@ -1355,6 +1358,43 @@ jQuery( function ( $ ) {
 				}
 			}
 			return false;
+		},
+
+		/**
+		 * Copy download link.
+		 *
+		 * @param {Object} evt Copy event.
+		 */
+		copy_link: function( evt ) {
+			wcClearClipboard();
+			wcSetClipboard( $( this ).attr( 'href' ), $( this ) );
+			evt.preventDefault();
+		},
+
+		/**
+		 * Display a "Copied!" tip when success copying
+		 */
+		copy_success: function() {
+			$( this ).tipTip({
+				'attribute':  'data-tip',
+				'activation': 'focus',
+				'fadeIn':     50,
+				'fadeOut':    50,
+				'delay':      0
+			}).focus();
+		},
+
+		/**
+		 * Displays the copy error message when failure copying.
+		 */
+		copy_fail: function() {
+			$( this ).tipTip({
+				'attribute':  'data-tip-failed',
+				'activation': 'focus',
+				'fadeIn':     50,
+				'fadeOut':    50,
+				'delay':      0
+			}).focus();
 		}
 	};
 

@@ -6,14 +6,23 @@ jQuery( function( $ ) {
 	var $append_hashes = function() {
 		if ( wc_geolocation_params.hash ) {
 			$( 'a[href^="' + wc_geolocation_params.home_url + '"]:not(a[href*="v="]), a[href^="/"]:not(a[href*="v="])' ).each( function() {
-				var $this = $( this );
-				var href  = $this.attr( 'href' );
+				var $this      = $( this ),
+					href       = $this.attr( 'href' ),
+					href_parts = href.split( '#' );
+
+				href = href_parts[0];
 
 				if ( href.indexOf( '?' ) > 0 ) {
-					$this.attr( 'href', href + '&v=' + wc_geolocation_params.hash );
+					href = href + '&v=' + wc_geolocation_params.hash;
 				} else {
-					$this.attr( 'href', href + '?v=' + wc_geolocation_params.hash );
+					href = href + '?v=' + wc_geolocation_params.hash;
 				}
+
+				if ( typeof href_parts[1] !== 'undefined' && href_parts[1] !== null ) {
+					href = href + '#' + href_parts[1];
+				}
+
+				$this.attr( 'href', href );
 			});
 		}
 	};

@@ -484,9 +484,13 @@ function wc_track_product_view() {
 		$viewed_products = (array) explode( '|', $_COOKIE['woocommerce_recently_viewed'] );
 	}
 
-	if ( ! in_array( $post->ID, $viewed_products ) ) {
-		$viewed_products[] = $post->ID;
+	// Unset if already in viewed products list.
+	$keys = array_flip( $viewed_products );
+	if ( isset( $keys[ $post->ID ] ) ) {
+		unset( $viewed_products[ $keys[ $post->ID ] ] );
 	}
+
+	$viewed_products[] = $post->ID;
 
 	if ( count( $viewed_products ) > 15 ) {
 		array_shift( $viewed_products );
@@ -742,20 +746,22 @@ function wc_get_min_max_price_meta_query( $args ) {
 
 	/**
 	 * Adjust if the store taxes are not displayed how they are stored.
-	 * Max is left alone because the filter was already increased.
 	 * Kicks in when prices excluding tax are displayed including tax.
 	 */
 	if ( wc_tax_enabled() && 'incl' === get_option( 'woocommerce_tax_display_shop' ) && ! wc_prices_include_tax() ) {
 		$tax_classes = array_merge( array( '' ), WC_Tax::get_tax_classes() );
 		$class_min   = $min;
+		$class_max   = $max;
 
 		foreach ( $tax_classes as $tax_class ) {
 			if ( $tax_rates = WC_Tax::get_rates( $tax_class ) ) {
-				$class_min = $min - WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $min, $tax_rates ) );
+				$class_min = $min + WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $min, $tax_rates ) );
+				$class_max = $max - WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $max, $tax_rates ) );
 			}
 		}
 
 		$min = $class_min;
+		$max = $class_max;
 	}
 
 	return array(
@@ -793,8 +799,9 @@ function wc_get_product_tax_class_options() {
  */
 function wc_get_product_stock_status_options() {
 	return array(
-		'instock'    => __( 'In stock', 'woocommerce' ),
-		'outofstock' => __( 'Out of stock', 'woocommerce' ),
+		'instock'     => __( 'In stock', 'woocommerce' ),
+		'outofstock'  => __( 'Out of stock', 'woocommerce' ),
+		'onbackorder' => __( 'On backorder', 'woocommerce' ),
 	);
 }
 

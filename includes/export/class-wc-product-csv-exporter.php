@@ -7,6 +7,7 @@
  * @package  WooCommerce/Export
  * @version  3.1.0
  */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -25,18 +26,21 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 
 	/**
 	 * Type of export used in filter names.
+	 *
 	 * @var string
 	 */
 	protected $export_type = 'product';
 
 	/**
 	 * Should meta be exported?
+	 *
 	 * @var boolean
 	 */
 	protected $enable_meta_export = false;
 
 	/**
 	 * Which product types are being exported.
+	 *
 	 * @var array
 	 */
 	protected $product_types_to_export = array();
@@ -53,7 +57,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * Should meta be exported?
 	 *
 	 * @since 3.1.0
-	 * @param  bool $enable_meta_export
+	 * @param bool $enable_meta_export Should meta be exported.
 	 */
 	public function enable_meta_export( $enable_meta_export ) {
 		$this->enable_meta_export = (bool) $enable_meta_export;
@@ -63,7 +67,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * Product types to export.
 	 *
 	 * @since 3.1.0
-	 * @param array $product_types_to_export
+	 * @param array $product_types_to_export List of types to export.
 	 */
 	public function set_product_types_to_export( $product_types_to_export ) {
 		$this->product_types_to_export = array_map( 'wc_clean', $product_types_to_export );
@@ -126,7 +130,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	public function prepare_data_to_export() {
 		$columns  = $this->get_column_names();
 		$args = apply_filters( "woocommerce_product_export_{$this->export_type}_query_args", array(
-			'status'   => array( 'private', 'publish' ),
+			'status'   => array( 'private', 'publish', 'draft' ),
 			'type'     => $this->product_types_to_export,
 			'limit'    => $this->get_limit(),
 			'page'     => $this->get_page(),
@@ -148,20 +152,20 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 				$value     = '';
 
 				// Skip some columns if dynamically handled later or if we're being selective.
-				if ( in_array( $column_id, array( 'downloads', 'attributes', 'meta' ) ) || ! $this->is_column_exporting( $column_id ) ) {
+				if ( in_array( $column_id, array( 'downloads', 'attributes', 'meta' ), true ) || ! $this->is_column_exporting( $column_id ) ) {
 					continue;
 				}
 
-				// Filter for 3rd parties.
 				if ( has_filter( "woocommerce_product_export_{$this->export_type}_column_{$column_id}" ) ) {
+					// Filter for 3rd parties.
 					$value = apply_filters( "woocommerce_product_export_{$this->export_type}_column_{$column_id}", '', $product, $column_id );
 
-				// Handle special columns which don't map 1:1 to product data.
 				} elseif ( is_callable( array( $this, "get_column_value_{$column_id}" ) ) ) {
+					// Handle special columns which don't map 1:1 to product data.
 					$value = $this->{"get_column_value_{$column_id}"}( $product );
 
-				// Default and custom handling.
 				} elseif ( is_callable( array( $product, "get_{$column_id}" ) ) ) {
+					// Default and custom handling.
 					$value = $product->{"get_{$column_id}"}( 'edit' );
 				}
 
@@ -180,18 +184,26 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * Get published value.
 	 *
 	 * @since 3.1.0
-	 * @param WC_Product $product
+	 * @param WC_Product $product Product being exported.
 	 * @return int
 	 */
 	protected function get_column_value_published( $product ) {
-		return 'publish' === $product->get_status( 'edit' ) ? 1 : 0;
+		$statuses = array(
+			'draft'   => -1,
+			'private' => 0,
+			'publish' => 1,
+		);
+
+		$status = $product->get_status( 'edit' );
+
+		return isset( $statuses[ $status ] ) ? $statuses[ $status ] : -1;
 	}
 
 	/**
 	 * Get product_cat value.
 	 *
 	 * @since 3.1.0
-	 * @param WC_Product $product
+	 * @param WC_Product $product Product being exported.
 	 * @return string
 	 */
 	protected function get_column_value_category_ids( $product ) {
@@ -203,7 +215,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * Get product_tag value.
 	 *
 	 * @since 3.1.0
-	 * @param WC_Product $product
+	 * @param WC_Product $product Product being exported.
 	 * @return string
 	 */
 	protected function get_column_value_tag_ids( $product ) {
@@ -215,7 +227,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * Get product_shipping_class value.
 	 *
 	 * @since 3.1.0
-	 * @param WC_Product $product
+	 * @param WC_Product $product Product being exported.
 	 * @return string
 	 */
 	protected function get_column_value_shipping_class_id( $product ) {
@@ -227,7 +239,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * Get images value.
 	 *
 	 * @since 3.1.0
-	 * @param WC_Product $product
+	 * @param WC_Product $product Product being exported.
 	 * @return string
 	 */
 	protected function get_column_value_images( $product ) {
@@ -249,7 +261,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * Prepare linked products for export.
 	 *
 	 * @since 3.1.0
-	 * @param int[] $linked_products
+	 * @param int[] $linked_products Array of linked product ids.
 	 * @return string
 	 */
 	protected function prepare_linked_products_for_export( $linked_products ) {
@@ -270,7 +282,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * Get cross_sell_ids value.
 	 *
 	 * @since 3.1.0
-	 * @param WC_Product $product
+	 * @param WC_Product $product Product being exported.
 	 * @return string
 	 */
 	protected function get_column_value_cross_sell_ids( $product ) {
@@ -281,7 +293,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * Get upsell_ids value.
 	 *
 	 * @since 3.1.0
-	 * @param WC_Product $product
+	 * @param WC_Product $product Product being exported.
 	 * @return string
 	 */
 	protected function get_column_value_upsell_ids( $product ) {
@@ -292,7 +304,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * Get parent_id value.
 	 *
 	 * @since 3.1.0
-	 * @param WC_Product $product
+	 * @param WC_Product $product Product being exported.
 	 * @return string
 	 */
 	protected function get_column_value_parent_id( $product ) {
@@ -311,7 +323,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * Get grouped_products value.
 	 *
 	 * @since 3.1.0
-	 * @param WC_Product $product
+	 * @param WC_Product $product Product being exported.
 	 * @return string
 	 */
 	protected function get_column_value_grouped_products( $product ) {
@@ -336,7 +348,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * Get download_limit value.
 	 *
 	 * @since 3.1.0
-	 * @param WC_Product $product
+	 * @param WC_Product $product Product being exported.
 	 * @return string
 	 */
 	protected function get_column_value_download_limit( $product ) {
@@ -347,7 +359,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * Get download_expiry value.
 	 *
 	 * @since 3.1.0
-	 * @param WC_Product $product
+	 * @param WC_Product $product Product being exported.
 	 * @return string
 	 */
 	protected function get_column_value_download_expiry( $product ) {
@@ -358,7 +370,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * Get stock value.
 	 *
 	 * @since 3.1.0
-	 * @param WC_Product $product
+	 * @param WC_Product $product Product being exported.
 	 * @return string
 	 */
 	protected function get_column_value_stock( $product ) {
@@ -378,11 +390,16 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * Get stock status value.
 	 *
 	 * @since 3.1.0
-	 * @param WC_Product $product
+	 * @param WC_Product $product Product being exported.
 	 * @return string
 	 */
 	protected function get_column_value_stock_status( $product ) {
 		$status = $product->get_stock_status( 'edit' );
+
+		if ( 'onbackorder' === $status ) {
+			return 'backorder';
+		}
+
 		return 'instock' === $status ? 1 : 0;
 	}
 
@@ -390,7 +407,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * Get backorders.
 	 *
 	 * @since 3.1.0
-	 * @param WC_Product $product
+	 * @param WC_Product $product Product being exported.
 	 * @return string
 	 */
 	protected function get_column_value_backorders( $product ) {
@@ -408,7 +425,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * Get type value.
 	 *
 	 * @since 3.1.0
-	 * @param WC_Product $product
+	 * @param WC_Product $product Product being exported.
 	 * @return string
 	 */
 	protected function get_column_value_type( $product ) {
@@ -430,8 +447,8 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * Export downloads.
 	 *
 	 * @since 3.1.0
-	 * @param WC_Product $product
-	 * @param array $row
+	 * @param WC_Product $product Product being exported.
+	 * @param array      $row     Row being exported.
 	 */
 	protected function prepare_downloads_for_export( $product, &$row ) {
 		if ( $product->is_downloadable() && $this->is_column_exporting( 'downloads' ) ) {
@@ -454,8 +471,8 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * Export attributes data.
 	 *
 	 * @since 3.1.0
-	 * @param  WC_Product $product
-	 * @param  array $row
+	 * @param  WC_Product $product Product being exported.
+	 * @param  array      $row     Row being exported.
 	 */
 	protected function prepare_attributes_for_export( $product, &$row ) {
 		if ( $this->is_column_exporting( 'attributes' ) ) {
@@ -493,7 +510,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 						$row[ 'attributes:name' . $i ] = wc_attribute_label( $attribute_name, $product );
 
 						if ( 0 === strpos( $attribute_name, 'pa_' ) ) {
-							$option_term = get_term_by( 'slug', $attribute, $attribute_name );
+							$option_term = get_term_by( 'slug', $attribute, $attribute_name ); // @codingStandardsIgnoreLine.
 							$row[ 'attributes:value' . $i ]    = $option_term && ! is_wp_error( $option_term ) ? str_replace( ',', '\\,', $option_term->name ) : $attribute;
 							$row[ 'attributes:taxonomy' . $i ] = 1;
 						} else {
@@ -509,7 +526,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 						$default_value                                   = $default_attributes[ sanitize_title( $attribute_name ) ];
 
 						if ( 0 === strpos( $attribute_name, 'pa_' ) ) {
-							$option_term = get_term_by( 'slug', $default_value, $attribute_name );
+							$option_term = get_term_by( 'slug', $default_value, $attribute_name ); // @codingStandardsIgnoreLine.
 							$row[ 'attributes:default' . $i ]   = $option_term && ! is_wp_error( $option_term ) ? $option_term->name : $default_value;
 						} else {
 							$row[ 'attributes:default' . $i ] = $default_value;

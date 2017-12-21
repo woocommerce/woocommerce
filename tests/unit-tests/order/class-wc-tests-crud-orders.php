@@ -1,7 +1,13 @@
 <?php
+/**
+ * Class WC_Tests_CRUD_Orders file.
+ *
+ * @package WooCommerce\Tests\CRUD
+ */
 
 /**
  * Meta
+ *
  * @package WooCommerce\Tests\CRUD
  */
 class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
@@ -9,7 +15,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_type
 	 */
-	function test_get_type() {
+	public function test_get_type() {
 		$object = new WC_Order();
 		$this->assertEquals( 'shop_order', $object->get_type() );
 	}
@@ -17,7 +23,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_data
 	 */
-	function test_get_data() {
+	public function test_get_data() {
 		$object = new WC_Order();
 		$this->assertInternalType( 'array', $object->get_data() );
 	}
@@ -25,19 +31,19 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_id
 	 */
-	function test_get_id() {
+	public function test_get_id() {
 		$object = new WC_Order();
-		$id = $object->save();
+		$id     = $object->save();
 		$this->assertEquals( $id, $object->get_id() );
 	}
 
 	/**
 	 * Test: get_parent_id
 	 */
-	function test_get_parent_id() {
+	public function test_get_parent_id() {
 		$object1   = new WC_Order();
 		$parent_id = $object1->save();
-		$object = new WC_Order();
+		$object    = new WC_Order();
 		$object->set_parent_id( $parent_id );
 		$this->assertEquals( $parent_id, $object->get_parent_id() );
 	}
@@ -45,7 +51,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_order_number
 	 */
-	function test_get_order_number() {
+	public function test_get_order_number() {
 		$object = new WC_Order();
 		$id     = $object->save();
 		$this->assertEquals( $id, $object->get_order_number() );
@@ -54,7 +60,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_order_key
 	 */
-	function test_get_order_key() {
+	public function test_get_order_key() {
 		$object = new WC_Order();
 		$set_to = 'some_key';
 		$object->set_order_key( $set_to );
@@ -64,7 +70,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_currency
 	 */
-	function test_get_currency() {
+	public function test_get_currency() {
 		$object = new WC_Order();
 		$set_to = 'USD';
 		$object->set_currency( $set_to );
@@ -74,7 +80,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_version
 	 */
-	function test_get_version() {
+	public function test_get_version() {
 		$object = new WC_Order();
 		$set_to = '3.0.0';
 		$object->set_version( $set_to );
@@ -84,7 +90,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_prices_include_tax
 	 */
-	function test_get_prices_include_tax() {
+	public function test_get_prices_include_tax() {
 		$object = new WC_Order();
 		$set_to = 'USD';
 		$object->set_prices_include_tax( 1 );
@@ -94,7 +100,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_date_created
 	 */
-	function test_get_date_created() {
+	public function test_get_date_created() {
 		$object = new WC_Order();
 		$object->set_date_created( '2016-12-12' );
 		$this->assertEquals( '1481500800', $object->get_date_created()->getOffsetTimestamp() );
@@ -106,7 +112,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_date_modified
 	 */
-	function test_get_date_modified() {
+	public function test_get_date_modified() {
 		$object = new WC_Order();
 		$object->set_date_modified( '2016-12-12' );
 		$this->assertEquals( '1481500800', $object->get_date_modified()->getOffsetTimestamp() );
@@ -118,7 +124,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_customer_id
 	 */
-	function test_get_customer_id() {
+	public function test_get_customer_id() {
 		$object = new WC_Order();
 		$set_to = 10;
 		$object->set_customer_id( $set_to );
@@ -128,7 +134,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_user
 	 */
-	function test_get_user() {
+	public function test_get_user() {
 		$object = new WC_Order();
 		$this->assertFalse( $object->get_user() );
 		$set_to = '1';
@@ -139,7 +145,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_discount_total
 	 */
-	function test_get_discount_total() {
+	public function test_get_discount_total() {
 		$object = new WC_Order();
 		$object->set_discount_total( 50 );
 		$this->assertEquals( 50, $object->get_discount_total() );
@@ -148,7 +154,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_discount_tax
 	 */
-	function test_get_discount_tax() {
+	public function test_get_discount_tax() {
 		$object = new WC_Order();
 		$object->set_discount_tax( 5 );
 		$this->assertEquals( 5, $object->get_discount_tax() );
@@ -157,7 +163,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_shipping_total
 	 */
-	function test_get_shipping_total() {
+	public function test_get_shipping_total() {
 		$object = new WC_Order();
 		$object->set_shipping_total( 5 );
 		$this->assertEquals( 5, $object->get_shipping_total() );
@@ -166,7 +172,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_shipping_tax
 	 */
-	function test_get_shipping_tax() {
+	public function test_get_shipping_tax() {
 		$object = new WC_Order();
 		$object->set_shipping_tax( 5 );
 		$this->assertEquals( 5, $object->get_shipping_tax() );
@@ -175,7 +181,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_cart_tax
 	 */
-	function test_get_cart_tax() {
+	public function test_get_cart_tax() {
 		$object = new WC_Order();
 		$object->set_cart_tax( 5 );
 		$this->assertEquals( 5, $object->get_cart_tax() );
@@ -184,7 +190,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_total
 	 */
-	function test_get_total() {
+	public function test_get_total() {
 		$object = new WC_Order();
 		$object->set_total( 5 );
 		$this->assertEquals( 5, $object->get_total() );
@@ -193,7 +199,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_total_tax
 	 */
-	function test_get_total_tax() {
+	public function test_get_total_tax() {
 		$object = new WC_Order();
 		$object->set_cart_tax( 5 );
 		$object->set_shipping_tax( 5 );
@@ -203,7 +209,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_total_discount
 	 */
-	function test_get_total_discount() {
+	public function test_get_total_discount() {
 		$object = new WC_Order();
 		$object->set_discount_total( 50 );
 		$object->set_discount_tax( 5 );
@@ -214,7 +220,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_subtotal
 	 */
-	function test_get_subtotal() {
+	public function test_get_subtotal() {
 		$object = WC_Helper_Order::create_order();
 		$this->assertEquals( 40, $object->get_subtotal() );
 	}
@@ -222,7 +228,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_tax_totals
 	 */
-	function test_get_tax_totals() {
+	public function test_get_tax_totals() {
 		$object = WC_Helper_Order::create_order();
 		$this->assertEquals( array(), $object->get_tax_totals() );
 	}
@@ -230,19 +236,23 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: remove_order_items
 	 */
-	function test_remove_order_items() {
+	public function test_remove_order_items() {
 		$product = WC_Helper_Product::create_simple_product();
 		$object  = new WC_Order();
 		$item_1  = new WC_Order_Item_Product();
-		$item_1->set_props( array(
-			'product'  => $product,
-			'quantity' => 4,
-		) );
-		$item_2  = new WC_Order_Item_Product();
-		$item_2->set_props( array(
-			'product'  => $product,
-			'quantity' => 2,
-		) );
+		$item_1->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 4,
+			)
+		);
+		$item_2 = new WC_Order_Item_Product();
+		$item_2->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 2,
+			)
+		);
 		$object->add_item( $item_1 );
 		$object->add_item( $item_2 );
 		$object->save();
@@ -254,18 +264,22 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_items
 	 */
-	function test_get_items() {
-		$object  = new WC_Order();
-		$item_1  = new WC_Order_Item_Product();
-		$item_1->set_props( array(
-			'product'  => WC_Helper_Product::create_simple_product(),
-			'quantity' => 4,
-		) );
-		$item_2  = new WC_Order_Item_Product();
-		$item_2->set_props( array(
-			'product'  => WC_Helper_Product::create_simple_product(),
-			'quantity' => 2,
-		) );
+	public function test_get_items() {
+		$object = new WC_Order();
+		$item_1 = new WC_Order_Item_Product();
+		$item_1->set_props(
+			array(
+				'product'  => WC_Helper_Product::create_simple_product(),
+				'quantity' => 4,
+			)
+		);
+		$item_2 = new WC_Order_Item_Product();
+		$item_2->set_props(
+			array(
+				'product'  => WC_Helper_Product::create_simple_product(),
+				'quantity' => 2,
+			)
+		);
 
 		$object->add_item( $item_1 );
 		$object->add_item( $item_2 );
@@ -276,38 +290,43 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_different_items
 	 */
-	function test_get_different_items() {
-		$object  = new WC_Order();
-		$item_1  = new WC_Order_Item_Product();
-		$item_1->set_props( array(
-			'product'  => WC_Helper_Product::create_simple_product(),
-			'quantity' => 4,
-		) );
-		$item_2  = new WC_Order_Item_Fee();
-		$item_2->set_props( array(
-			'name'       => 'Some Fee',
-			'tax_status' => 'taxable',
-			'total'      => '100',
-			'tax_class'  => '',
-		) );
+	public function test_get_different_items() {
+		$object = new WC_Order();
+		$item_1 = new WC_Order_Item_Product();
+		$item_1->set_props(
+			array(
+				'product'  => WC_Helper_Product::create_simple_product(),
+				'quantity' => 4,
+			)
+		);
+		$item_2 = new WC_Order_Item_Fee();
+		$item_2->set_props(
+			array(
+				'name'       => 'Some Fee',
+				'tax_status' => 'taxable',
+				'total'      => '100',
+				'tax_class'  => '',
+			)
+		);
 		$object->add_item( $item_1 );
 		$object->add_item( $item_2 );
-		// $object->save();
 		$this->assertCount( 2, $object->get_items( array( 'line_item', 'fee' ) ) );
 	}
 
 	/**
 	 * Test: get_fees
 	 */
-	function test_get_fees() {
-		$object  = new WC_Order();
-		$item    = new WC_Order_Item_Fee();
-		$item->set_props( array(
-			'name'       => 'Some Fee',
-			'tax_status' => 'taxable',
-			'total'      => '100',
-			'tax_class'  => '',
-		) );
+	public function test_get_fees() {
+		$object = new WC_Order();
+		$item   = new WC_Order_Item_Fee();
+		$item->set_props(
+			array(
+				'name'       => 'Some Fee',
+				'tax_status' => 'taxable',
+				'total'      => '100',
+				'tax_class'  => '',
+			)
+		);
 		$object->add_item( $item );
 		$this->assertCount( 1, $object->get_fees() );
 	}
@@ -315,7 +334,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_taxes
 	 */
-	function test_get_taxes() {
+	public function test_get_taxes() {
 		global $wpdb;
 
 		update_option( 'woocommerce_calc_taxes', 'yes' );
@@ -332,12 +351,14 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		);
 		WC_Tax::_insert_tax_rate( $tax_rate );
 
-		$object  = new WC_Order();
-		$item_1  = new WC_Order_Item_Product();
-		$item_1->set_props( array(
-			'product'  => WC_Helper_Product::create_simple_product(),
-			'quantity' => 4,
-		) );
+		$object = new WC_Order();
+		$item_1 = new WC_Order_Item_Product();
+		$item_1->set_props(
+			array(
+				'product'  => WC_Helper_Product::create_simple_product(),
+				'quantity' => 4,
+			)
+		);
 		$object->add_item( $item_1 );
 		$object->calculate_totals();
 		$this->assertCount( 1, $object->get_taxes() );
@@ -351,7 +372,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 
 		$this->assertCount( 2, $object->get_taxes() );
 
-		// Cleanup
+		// Cleanup.
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 		update_option( 'woocommerce_calc_taxes', 'no' );
@@ -360,7 +381,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test mapping from old tax array keys to CRUD functions.
 	 */
-	function test_tax_legacy_arrayaccess() {
+	public function test_tax_legacy_arrayaccess() {
 		$tax = new WC_Order_item_Tax();
 		$tax->set_rate_id( 5 );
 		$tax->set_compound( true );
@@ -378,16 +399,18 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_shipping_methods
 	 */
-	function test_get_shipping_methods() {
+	public function test_get_shipping_methods() {
 		$object = new WC_Order();
 		$rate   = new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '10', array(), 'flat_rate' );
 		$item   = new WC_Order_Item_Shipping();
-		$item->set_props( array(
-			'method_title' => $rate->label,
-			'method_id'    => $rate->id,
-			'total'        => wc_format_decimal( $rate->cost ),
-			'taxes'        => $rate->taxes,
-		) );
+		$item->set_props(
+			array(
+				'method_title' => $rate->label,
+				'method_id'    => $rate->id,
+				'total'        => wc_format_decimal( $rate->cost ),
+				'taxes'        => $rate->taxes,
+			)
+		);
 		foreach ( $rate->get_meta_data() as $key => $value ) {
 			$item->add_meta_data( $key, $value, true );
 		}
@@ -399,16 +422,18 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_shipping_method
 	 */
-	function test_get_shipping_method() {
+	public function test_get_shipping_method() {
 		$object = new WC_Order();
 		$rate   = new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '10', array(), 'flat_rate' );
 		$item   = new WC_Order_Item_Shipping();
-		$item->set_props( array(
-			'method_title' => $rate->label,
-			'method_id'    => $rate->id,
-			'total'        => wc_format_decimal( $rate->cost ),
-			'taxes'        => $rate->taxes,
-		) );
+		$item->set_props(
+			array(
+				'method_title' => $rate->label,
+				'method_id'    => $rate->id,
+				'total'        => wc_format_decimal( $rate->cost ),
+				'taxes'        => $rate->taxes,
+			)
+		);
 		foreach ( $rate->get_meta_data() as $key => $value ) {
 			$item->add_meta_data( $key, $value, true );
 		}
@@ -416,14 +441,16 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->save();
 		$this->assertEquals( 'Flat rate shipping', $object->get_shipping_method() );
 
-		$rate   = new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping 2', '10', array(), 'flat_rate' );
-		$item   = new WC_Order_Item_Shipping();
-		$item->set_props( array(
-			'method_title' => $rate->label,
-			'method_id'    => $rate->id,
-			'total'        => wc_format_decimal( $rate->cost ),
-			'taxes'        => $rate->taxes,
-		) );
+		$rate = new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping 2', '10', array(), 'flat_rate' );
+		$item = new WC_Order_Item_Shipping();
+		$item->set_props(
+			array(
+				'method_title' => $rate->label,
+				'method_id'    => $rate->id,
+				'total'        => wc_format_decimal( $rate->cost ),
+				'taxes'        => $rate->taxes,
+			)
+		);
 		foreach ( $rate->get_meta_data() as $key => $value ) {
 			$item->add_meta_data( $key, $value, true );
 		}
@@ -435,14 +462,16 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_used_coupons
 	 */
-	function test_get_used_coupons() {
+	public function test_get_used_coupons() {
 		$object = new WC_Order();
 		$item   = new WC_Order_Item_Coupon();
-		$item->set_props( array(
-			'code'         => '12345',
-			'discount'     => 10,
-			'discount_tax' => 5,
-		) );
+		$item->set_props(
+			array(
+				'code'         => '12345',
+				'discount'     => 10,
+				'discount_tax' => 5,
+			)
+		);
 		$object->add_item( $item );
 		$object->save();
 		$this->assertCount( 1, $object->get_used_coupons() );
@@ -451,18 +480,22 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_item_count
 	 */
-	function test_get_item_count() {
-		$object  = new WC_Order();
-		$item_1  = new WC_Order_Item_Product();
-		$item_1->set_props( array(
-			'product'  => WC_Helper_Product::create_simple_product(),
-			'quantity' => 4,
-		) );
-		$item_2  = new WC_Order_Item_Product();
-		$item_2->set_props( array(
-			'product'  => WC_Helper_Product::create_simple_product(),
-			'quantity' => 2,
-		) );
+	public function test_get_item_count() {
+		$object = new WC_Order();
+		$item_1 = new WC_Order_Item_Product();
+		$item_1->set_props(
+			array(
+				'product'  => WC_Helper_Product::create_simple_product(),
+				'quantity' => 4,
+			)
+		);
+		$item_2 = new WC_Order_Item_Product();
+		$item_2->set_props(
+			array(
+				'product'  => WC_Helper_Product::create_simple_product(),
+				'quantity' => 2,
+			)
+		);
 		$object->add_item( $item_1 );
 		$object->add_item( $item_2 );
 		$object->save();
@@ -472,36 +505,40 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_item
 	 */
-	function test_get_item() {
+	public function test_get_item() {
 		$object = new WC_Order();
 		$item   = new WC_Order_Item_Product();
-		$item->set_props( array(
-			'product'  => WC_Helper_Product::create_simple_product(),
-			'quantity' => 4,
-		) );
+		$item->set_props(
+			array(
+				'product'  => WC_Helper_Product::create_simple_product(),
+				'quantity' => 4,
+			)
+		);
 		$item->save();
 		$object->add_item( $item->get_id() );
 		$object->save();
-		$this->assertTrue( $object->get_item( $item->get_id() ) instanceOf WC_Order_Item_Product );
+		$this->assertTrue( $object->get_item( $item->get_id() ) instanceof WC_Order_Item_Product );
 
 		$object = new WC_Order();
 		$item   = new WC_Order_Item_Coupon();
-		$item->set_props( array(
-			'code'         => '12345',
-			'discount'     => 10,
-			'discount_tax' => 5,
-		) );
+		$item->set_props(
+			array(
+				'code'         => '12345',
+				'discount'     => 10,
+				'discount_tax' => 5,
+			)
+		);
 		$item_id = $item->save();
 		$object->add_item( $item );
 		$object->save();
-		$this->assertTrue( $object->get_item( $item_id ) instanceOf WC_Order_Item_Coupon );
+		$this->assertTrue( $object->get_item( $item_id ) instanceof WC_Order_Item_Coupon );
 	}
 
 	/**
 	 * Test: add_payment_token
 	 */
-	function test_add_payment_token() {
-		$object  = new WC_Order();
+	public function test_add_payment_token() {
+		$object = new WC_Order();
 		$object->save();
 		$this->assertFalse( $object->add_payment_token( 'fish' ) );
 		$token = new WC_Payment_Token_Stub();
@@ -514,8 +551,8 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_payment_tokens
 	 */
-	function test_get_payment_tokens() {
-		$object  = new WC_Order();
+	public function test_get_payment_tokens() {
+		$object = new WC_Order();
 		$object->save();
 		$token = new WC_Payment_Token_Stub();
 		$token->set_extra( __FUNCTION__ );
@@ -528,26 +565,30 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: calculate_shipping
 	 */
-	function test_calculate_shipping() {
+	public function test_calculate_shipping() {
 		$object = new WC_Order();
 		$rate   = new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '10', array(), 'flat_rate' );
 		$item_1 = new WC_Order_Item_Shipping();
-		$item_1->set_props( array(
-			'method_title' => $rate->label,
-			'method_id'    => $rate->id,
-			'total'        => wc_format_decimal( $rate->cost ),
-			'taxes'        => $rate->taxes,
-		) );
+		$item_1->set_props(
+			array(
+				'method_title' => $rate->label,
+				'method_id'    => $rate->id,
+				'total'        => wc_format_decimal( $rate->cost ),
+				'taxes'        => $rate->taxes,
+			)
+		);
 		foreach ( $rate->get_meta_data() as $key => $value ) {
 			$item_1->add_meta_data( $key, $value, true );
 		}
 		$item_2 = new WC_Order_Item_Shipping();
-		$item_2->set_props( array(
-			'method_title' => $rate->label,
-			'method_id'    => $rate->id,
-			'total'        => wc_format_decimal( $rate->cost ),
-			'taxes'        => $rate->taxes,
-		) );
+		$item_2->set_props(
+			array(
+				'method_title' => $rate->label,
+				'method_id'    => $rate->id,
+				'total'        => wc_format_decimal( $rate->cost ),
+				'taxes'        => $rate->taxes,
+			)
+		);
 		foreach ( $rate->get_meta_data() as $key => $value ) {
 			$item->add_meta_data( $key, $value, true );
 		}
@@ -561,7 +602,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: calculate_taxes
 	 */
-	function test_calculate_taxes() {
+	public function test_calculate_taxes() {
 		global $wpdb;
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		$tax_rate = array(
@@ -580,14 +621,16 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object = new WC_Order();
 		$object->add_product( WC_Helper_Product::create_simple_product(), 4 );
 
-		$rate   = new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '10', array(), 'flat_rate' );
-		$item   = new WC_Order_Item_Shipping();
-		$item->set_props( array(
-			'method_title' => $rate->label,
-			'method_id'    => $rate->id,
-			'total'        => wc_format_decimal( $rate->cost ),
-			'taxes'        => $rate->taxes,
-		)  );
+		$rate = new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '10', array(), 'flat_rate' );
+		$item = new WC_Order_Item_Shipping();
+		$item->set_props(
+			array(
+				'method_title' => $rate->label,
+				'method_id'    => $rate->id,
+				'total'        => wc_format_decimal( $rate->cost ),
+				'taxes'        => $rate->taxes,
+			)
+		);
 		foreach ( $rate->get_meta_data() as $key => $value ) {
 			$item->add_meta_data( $key, $value, true );
 		}
@@ -596,7 +639,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->calculate_taxes();
 		$this->assertEquals( 5, $object->get_total_tax() );
 
-		// Cleanup
+		// Cleanup.
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 		update_option( 'woocommerce_calc_taxes', 'no' );
@@ -606,7 +649,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: calculate_taxes_is_vat_excempt
 	 */
-	function test_calculate_taxes_is_vat_excempt() {
+	public function test_calculate_taxes_is_vat_excempt() {
 		global $wpdb;
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		$tax_rate = array(
@@ -624,14 +667,16 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 
 		$object = new WC_Order();
 		$object->add_product( WC_Helper_Product::create_simple_product(), 4 );
-		$rate   = new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '10', array(), 'flat_rate' );
-		$item   = new WC_Order_Item_Shipping();
-		$item->set_props( array(
-			'method_title' => $rate->label,
-			'method_id'    => $rate->id,
-			'total'        => wc_format_decimal( $rate->cost ),
-			'taxes'        => $rate->taxes,
-		)  );
+		$rate = new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '10', array(), 'flat_rate' );
+		$item = new WC_Order_Item_Shipping();
+		$item->set_props(
+			array(
+				'method_title' => $rate->label,
+				'method_id'    => $rate->id,
+				'total'        => wc_format_decimal( $rate->cost ),
+				'taxes'        => $rate->taxes,
+			)
+		);
 		foreach ( $rate->get_meta_data() as $key => $value ) {
 			$item->add_meta_data( $key, $value, true );
 		}
@@ -646,14 +691,17 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->calculate_taxes();
 		$this->assertEquals( 0, $object->get_total_tax() );
 
-		// Cleanup
+		// Cleanup.
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 		update_option( 'woocommerce_calc_taxes', 'no' );
 		$object->delete();
 	}
 
-	function test_calculate_taxes_issue_with_addresses() {
+	/**
+	 * Test: calculate_taxes_issue_with_addresses
+	 */
+	public function test_calculate_taxes_issue_with_addresses() {
 		global $wpdb;
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
@@ -661,33 +709,37 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 
 		$taxes = array();
 
-		$taxes[] = WC_Tax::_insert_tax_rate( array(
-			'tax_rate_country'  => 'US',
-			'tax_rate_state'    => '',
-			'tax_rate'          => '20.0000',
-			'tax_rate_name'     => 'TAX',
-			'tax_rate_priority' => '1',
-			'tax_rate_compound' => '0',
-			'tax_rate_shipping' => '1',
-			'tax_rate_order'    => '1',
-			'tax_rate_class'    => '',
-		) );
-		$taxes[] = WC_Tax::_insert_tax_rate( array(
-			'tax_rate_country'  => 'PY',
-			'tax_rate_state'    => '',
-			'tax_rate'          => '10.0000',
-			'tax_rate_name'     => 'TAX',
-			'tax_rate_priority' => '1',
-			'tax_rate_compound' => '0',
-			'tax_rate_shipping' => '1',
-			'tax_rate_order'    => '1',
-			'tax_rate_class'    => '',
-		) );
+		$taxes[] = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '20.0000',
+				'tax_rate_name'     => 'TAX',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+		$taxes[] = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'PY',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'TAX',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
 
 		update_option( 'woocommerce_default_country', 'PY:Central' );
 		update_option( 'woocommerce_tax_based_on', 'shipping' );
 
-		$order = new WC_Order;
+		$order = new WC_Order();
 		$order->set_billing_country( 'US' );
 		$order->set_billing_state( 'CA' );
 		$order->add_product( WC_Helper_Product::create_simple_product(), 4 );
@@ -701,7 +753,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: calculate_totals
 	 */
-	function test_calculate_totals() {
+	public function test_calculate_totals() {
 		global $wpdb;
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		$tax_rate = array(
@@ -717,17 +769,19 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		);
 		WC_Tax::_insert_tax_rate( $tax_rate );
 
-		$object  = new WC_Order();
+		$object = new WC_Order();
 		$object->add_product( WC_Helper_Product::create_simple_product(), 4 );
 
-		$rate   = new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '10', array(), 'flat_rate' );
-		$item   = new WC_Order_Item_Shipping();
-		$item->set_props( array(
-			'method_title' => $rate->label,
-			'method_id'    => $rate->id,
-			'total'        => wc_format_decimal( $rate->cost ),
-			'taxes'        => $rate->taxes,
-		) );
+		$rate = new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '10', array(), 'flat_rate' );
+		$item = new WC_Order_Item_Shipping();
+		$item->set_props(
+			array(
+				'method_title' => $rate->label,
+				'method_id'    => $rate->id,
+				'total'        => wc_format_decimal( $rate->cost ),
+				'taxes'        => $rate->taxes,
+			)
+		);
 		foreach ( $rate->get_meta_data() as $key => $value ) {
 			$item->add_meta_data( $key, $value, true );
 		}
@@ -736,7 +790,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->calculate_totals();
 		$this->assertEquals( 55, $object->get_total() );
 
-		// Cleanup
+		// Cleanup.
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 		update_option( 'woocommerce_calc_taxes', 'no' );
@@ -745,7 +799,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: has_status
 	 */
-	function test_has_status() {
+	public function test_has_status() {
 		$object = new WC_Order();
 		$this->assertFalse( $object->has_status( 'completed' ) );
 		$this->assertFalse( $object->has_status( array( 'processing', 'completed' ) ) );
@@ -756,20 +810,22 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: has_shipping_method
 	 */
-	function test_has_shipping_method() {
+	public function test_has_shipping_method() {
 		$object = new WC_Order();
 		$object->save();
 
 		$this->assertFalse( $object->has_shipping_method( 'flat_rate_shipping' ) );
 
-		$rate   = new WC_Shipping_Rate( 'flat_rate_shipping:1', 'Flat rate shipping', '10', array(), 'flat_rate' );
-		$item   = new WC_Order_Item_Shipping();
-		$item->set_props( array(
-			'method_title' => $rate->label,
-			'method_id'    => $rate->id,
-			'total'        => wc_format_decimal( $rate->cost ),
-			'taxes'        => $rate->taxes,
-		) );
+		$rate = new WC_Shipping_Rate( 'flat_rate_shipping:1', 'Flat rate shipping', '10', array(), 'flat_rate' );
+		$item = new WC_Order_Item_Shipping();
+		$item->set_props(
+			array(
+				'method_title' => $rate->label,
+				'method_id'    => $rate->id,
+				'total'        => wc_format_decimal( $rate->cost ),
+				'taxes'        => $rate->taxes,
+			)
+		);
 		foreach ( $rate->get_meta_data() as $key => $value ) {
 			$item->add_meta_data( $key, $value, true );
 		}
@@ -782,7 +838,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: key_is_valid
 	 */
-	function test_key_is_valid() {
+	public function test_key_is_valid() {
 		$object = new WC_Order();
 		$object->save();
 		$this->assertFalse( $object->key_is_valid( '1234' ) );
@@ -793,7 +849,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: has_free_item
 	 */
-	function test_has_free_item() {
+	public function test_has_free_item() {
 		$object = new WC_Order();
 		$object->add_product( WC_Helper_Product::create_simple_product(), 4 );
 		$this->assertFalse( $object->has_free_item() );
@@ -807,20 +863,20 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: CRUD
 	 */
-	function test_CRUD() {
+	public function test_CRUD() {
 		$object = new WC_Order();
 
-		// Save + create
+		// Save + create.
 		$save_id = $object->save();
 		$post    = get_post( $save_id );
 		$this->assertEquals( 'shop_order', $post->post_type );
 		$this->assertEquals( 'shop_order', $post->post_type );
 
-		// Update
+		// Update.
 		$update_id = $object->save();
 		$this->assertEquals( $update_id, $save_id );
 
-		// Delete
+		// Delete.
 		$object->delete( true );
 		$post = get_post( $save_id );
 		$this->assertNull( $post );
@@ -829,7 +885,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: payment_complete
 	 */
-	function test_payment_complete() {
+	public function test_payment_complete() {
 		$object = new WC_Order();
 		$this->assertFalse( $object->payment_complete() );
 		$object->save();
@@ -841,7 +897,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_formatted_order_total
 	 */
-	function test_get_formatted_order_total() {
+	public function test_get_formatted_order_total() {
 		$object = new WC_Order();
 		$object->set_total( 100 );
 		$object->set_currency( 'USD' );
@@ -851,7 +907,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: set_status
 	 */
-	function test_set_status() {
+	public function test_set_status() {
 		$object = new WC_Order();
 		$object->set_status( 'on-hold' );
 		$this->assertEquals( 'on-hold', $object->get_status() );
@@ -860,7 +916,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: update_status
 	 */
-	function test_update_status() {
+	public function test_update_status() {
 		$object = new WC_Order();
 		$this->assertFalse( $object->update_status( 'on-hold' ) );
 		$object->save();
@@ -871,7 +927,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_billing_first_name
 	 */
-	function test_get_billing_first_name() {
+	public function test_get_billing_first_name() {
 		$object = new WC_Order();
 		$set_to = 'Fred';
 		$object->set_billing_first_name( $set_to );
@@ -881,7 +937,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_billing_last_name
 	 */
-	function test_get_billing_last_name() {
+	public function test_get_billing_last_name() {
 		$object = new WC_Order();
 		$set_to = 'Flintstone';
 		$object->set_billing_last_name( $set_to );
@@ -891,7 +947,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_billing_company
 	 */
-	function test_get_billing_company() {
+	public function test_get_billing_company() {
 		$object = new WC_Order();
 		$set_to = 'Bedrock Ltd.';
 		$object->set_billing_company( $set_to );
@@ -901,7 +957,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_billing_address_1
 	 */
-	function test_get_billing_address_1() {
+	public function test_get_billing_address_1() {
 		$object = new WC_Order();
 		$set_to = '34 Stonepants avenue';
 		$object->set_billing_address_1( $set_to );
@@ -911,7 +967,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_billing_address_2
 	 */
-	function test_get_billing_address_2() {
+	public function test_get_billing_address_2() {
 		$object = new WC_Order();
 		$set_to = 'Rockville';
 		$object->set_billing_address_2( $set_to );
@@ -921,7 +977,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_billing_city
 	 */
-	function test_get_billing_city() {
+	public function test_get_billing_city() {
 		$object = new WC_Order();
 		$set_to = 'Bedrock';
 		$object->set_billing_city( $set_to );
@@ -931,7 +987,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_billing_state
 	 */
-	function test_get_billing_state() {
+	public function test_get_billing_state() {
 		$object = new WC_Order();
 		$set_to = 'Oregon';
 		$object->set_billing_state( $set_to );
@@ -941,7 +997,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_billing_postcode
 	 */
-	function test_get_billing_postcode() {
+	public function test_get_billing_postcode() {
 		$object = new WC_Order();
 		$set_to = '00001';
 		$object->set_billing_postcode( $set_to );
@@ -951,7 +1007,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_billing_country
 	 */
-	function test_get_billing_country() {
+	public function test_get_billing_country() {
 		$object = new WC_Order();
 		$set_to = 'US';
 		$object->set_billing_country( $set_to );
@@ -961,14 +1017,14 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_billing_email
 	 */
-	function test_get_billing_email() {
+	public function test_get_billing_email() {
 		$object = new WC_Order();
 		$set_to = 'test@test.com';
 		$object->set_billing_email( $set_to );
 		$this->assertEquals( $set_to, $object->get_billing_email() );
 
 		$set_to = 'not an email';
-		$this->setExpectedException( 'WC_Data_Exception' );
+		$this->setExpectedException( 'WC_Data_Exception', 'Invalid billing email address' );
 		$object->set_billing_email( $set_to );
 		$this->assertEquals( 'test@test.com', $object->get_billing_email() );
 	}
@@ -976,7 +1032,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_billing_phone
 	 */
-	function test_get_billing_phone() {
+	public function test_get_billing_phone() {
 		$object = new WC_Order();
 		$set_to = '123456678';
 		$object->set_billing_phone( $set_to );
@@ -986,9 +1042,9 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: Setting/getting billing settings after an order is saved
 	 */
-	function test_set_billing_after_save() {
+	public function test_set_billing_after_save() {
 		$object = new WC_Order();
-		$phone = '123456678';
+		$phone  = '123456678';
 		$object->set_billing_phone( $phone );
 		$object->save();
 		$state = 'Oregon';
@@ -1001,7 +1057,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_shipping_first_name
 	 */
-	function test_get_shipping_first_name() {
+	public function test_get_shipping_first_name() {
 		$object = new WC_Order();
 		$set_to = 'Fred';
 		$object->set_shipping_first_name( $set_to );
@@ -1011,7 +1067,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_shipping_last_name
 	 */
-	function test_get_shipping_last_name() {
+	public function test_get_shipping_last_name() {
 		$object = new WC_Order();
 		$set_to = 'Flintstone';
 		$object->set_shipping_last_name( $set_to );
@@ -1021,7 +1077,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_shipping_company
 	 */
-	function test_get_shipping_company() {
+	public function test_get_shipping_company() {
 		$object = new WC_Order();
 		$set_to = 'Bedrock Ltd.';
 		$object->set_shipping_company( $set_to );
@@ -1031,7 +1087,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_shipping_address_1
 	 */
-	function test_get_shipping_address_1() {
+	public function test_get_shipping_address_1() {
 		$object = new WC_Order();
 		$set_to = '34 Stonepants avenue';
 		$object->set_shipping_address_1( $set_to );
@@ -1041,7 +1097,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_shipping_address_2
 	 */
-	function test_get_shipping_address_2() {
+	public function test_get_shipping_address_2() {
 		$object = new WC_Order();
 		$set_to = 'Rockville';
 		$object->set_shipping_address_2( $set_to );
@@ -1051,7 +1107,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_shipping_city
 	 */
-	function test_get_shipping_city() {
+	public function test_get_shipping_city() {
 		$object = new WC_Order();
 		$set_to = 'Bedrock';
 		$object->set_shipping_city( $set_to );
@@ -1061,7 +1117,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_shipping_state
 	 */
-	function test_get_shipping_state() {
+	public function test_get_shipping_state() {
 		$object = new WC_Order();
 		$set_to = 'Oregon';
 		$object->set_shipping_state( $set_to );
@@ -1071,7 +1127,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_shipping_postcode
 	 */
-	function test_get_shipping_postcode() {
+	public function test_get_shipping_postcode() {
 		$object = new WC_Order();
 		$set_to = '00001';
 		$object->set_shipping_postcode( $set_to );
@@ -1081,7 +1137,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_shipping_country
 	 */
-	function test_get_shipping_country() {
+	public function test_get_shipping_country() {
 		$object = new WC_Order();
 		$set_to = 'US';
 		$object->set_shipping_country( $set_to );
@@ -1093,8 +1149,8 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 *
 	 * @since 3.3
 	 */
-	function test_get_has_formatted_billing_address() {
-		$order = new WC_Order;
+	public function test_get_has_formatted_billing_address() {
+		$order = new WC_Order();
 
 		$this->assertEquals( 'none', $order->get_formatted_billing_address( 'none' ) );
 
@@ -1113,8 +1169,8 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 *
 	 * @since 3.3
 	 */
-	function test_get_has_formatted_shipping_address() {
-		$order = new WC_Order;
+	public function test_get_has_formatted_shipping_address() {
+		$order = new WC_Order();
 
 		$this->assertEquals( 'none', $order->get_formatted_shipping_address( 'none' ) );
 
@@ -1131,8 +1187,8 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: Setting/getting shipping settings after an order is saved
 	 */
-	function test_set_shipping_after_save() {
-		$object = new WC_Order();
+	public function test_set_shipping_after_save() {
+		$object  = new WC_Order();
 		$country = 'US';
 		$object->set_shipping_country( $country );
 		$object->save();
@@ -1146,7 +1202,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_payment_method
 	 */
-	function test_get_payment_method() {
+	public function test_get_payment_method() {
 		$object = new WC_Order();
 		$set_to = 'paypal';
 		$object->set_payment_method( $set_to );
@@ -1156,7 +1212,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_payment_method_title
 	 */
-	function test_get_payment_method_title() {
+	public function test_get_payment_method_title() {
 		$object = new WC_Order();
 		$set_to = 'PayPal';
 		$object->set_payment_method_title( $set_to );
@@ -1166,7 +1222,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_transaction_id
 	 */
-	function test_get_transaction_id() {
+	public function test_get_transaction_id() {
 		$object = new WC_Order();
 		$set_to = '12345';
 		$object->set_transaction_id( $set_to );
@@ -1176,7 +1232,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_customer_ip_address
 	 */
-	function test_get_customer_ip_address() {
+	public function test_get_customer_ip_address() {
 		$object = new WC_Order();
 		$set_to = '192.168.1.1';
 		$object->set_customer_ip_address( $set_to );
@@ -1186,7 +1242,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_customer_user_agent
 	 */
-	function test_get_customer_user_agent() {
+	public function test_get_customer_user_agent() {
 		$object = new WC_Order();
 		$set_to = 'UAstring';
 		$object->set_customer_user_agent( $set_to );
@@ -1196,7 +1252,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_created_via
 	 */
-	function test_get_created_via() {
+	public function test_get_created_via() {
 		$object = new WC_Order();
 		$set_to = 'WooCommerce';
 		$object->set_created_via( $set_to );
@@ -1206,7 +1262,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_customer_note
 	 */
-	function test_get_customer_note() {
+	public function test_get_customer_note() {
 		$object = new WC_Order();
 		$set_to = 'Leave on porch.';
 		$object->set_customer_note( $set_to );
@@ -1216,7 +1272,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_date_completed
 	 */
-	function test_get_date_completed() {
+	public function test_get_date_completed() {
 		$object = new WC_Order();
 		$object->set_date_completed( '2016-12-12' );
 		$this->assertEquals( '1481500800', $object->get_date_completed()->getOffsetTimestamp() );
@@ -1228,7 +1284,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_date_paid
 	 */
-	function test_get_date_paid() {
+	public function test_get_date_paid() {
 		$object = new WC_Order();
 		$set_to = 'PayPal';
 		$object->set_date_paid( '2016-12-12' );
@@ -1241,7 +1297,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_cart_hash
 	 */
-	function test_get_cart_hash() {
+	public function test_get_cart_hash() {
 		$object = new WC_Order();
 		$set_to = '12345';
 		$object->set_cart_hash( $set_to );
@@ -1251,7 +1307,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_address
 	 */
-	function test_get_address() {
+	public function test_get_address() {
 		$object = new WC_Order();
 
 		$billing = array(
@@ -1307,7 +1363,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_shipping_address_map_url
 	 */
-	function test_get_shipping_address_map_url() {
+	public function test_get_shipping_address_map_url() {
 		$object = new WC_Order();
 		$object->set_shipping_first_name( 'Barney' );
 		$object->set_shipping_last_name( 'Rubble' );
@@ -1318,13 +1374,13 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->set_shipping_state( 'Boulder' );
 		$object->set_shipping_postcode( '00001' );
 		$object->set_shipping_country( 'US' );
-		$this->assertEquals( 'https://maps.google.com/maps?&q=34+Stonepants+avenue%2C+Rockville%2C+Bedrock%2C+Boulder%2C+00001%2C+US&z=16', $object->get_shipping_address_map_url() );
+		$this->assertEquals( 'https://maps.google.com/maps?&q=34%20Stonepants%20avenue%2C%20Rockville%2C%20Bedrock%2C%20Boulder%2C%2000001%2C%20US&z=16', $object->get_shipping_address_map_url() );
 	}
 
 	/**
 	 * Test: get_formatted_billing_full_name
 	 */
-	function test_get_formatted_billing_full_name() {
+	public function test_get_formatted_billing_full_name() {
 		$object = new WC_Order();
 		$object->set_billing_first_name( 'Fred' );
 		$object->set_billing_last_name( 'Flintstone' );
@@ -1334,7 +1390,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_formatted_shipping_full_name
 	 */
-	function test_get_formatted_shipping_full_name() {
+	public function test_get_formatted_shipping_full_name() {
 		$object = new WC_Order();
 		$object->set_shipping_first_name( 'Barney' );
 		$object->set_shipping_last_name( 'Rubble' );
@@ -1344,7 +1400,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_formatted_billing_address
 	 */
-	function test_get_formatted_billing_address() {
+	public function test_get_formatted_billing_address() {
 		$object = new WC_Order();
 		$object->set_billing_first_name( 'Fred' );
 		$object->set_billing_last_name( 'Flintstone' );
@@ -1361,7 +1417,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_formatted_shipping_address
 	 */
-	function test_get_formatted_shipping_address() {
+	public function test_get_formatted_shipping_address() {
 		$object = new WC_Order();
 		$object->set_shipping_first_name( 'Barney' );
 		$object->set_shipping_last_name( 'Rubble' );
@@ -1378,7 +1434,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: has_cart_hash
 	 */
-	function test_has_cart_hash() {
+	public function test_has_cart_hash() {
 		$object = new WC_Order();
 		$this->assertFalse( $object->has_cart_hash( '12345' ) );
 		$set_to = '12345';
@@ -1389,7 +1445,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: is_editable
 	 */
-	function test_is_editable() {
+	public function test_is_editable() {
 		$object = new WC_Order();
 		$object->set_status( 'pending' );
 		$this->assertTrue( $object->is_editable() );
@@ -1400,7 +1456,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: is_paid
 	 */
-	function test_is_paid() {
+	public function test_is_paid() {
 		$object = new WC_Order();
 		$object->set_status( 'pending' );
 		$this->assertFalse( $object->is_paid() );
@@ -1411,7 +1467,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: is_download_permitted
 	 */
-	function test_is_download_permitted() {
+	public function test_is_download_permitted() {
 		$object = new WC_Order();
 		$object->set_status( 'pending' );
 		$this->assertFalse( $object->is_download_permitted() );
@@ -1422,7 +1478,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: needs_shipping_address
 	 */
-	function test_needs_shipping_address() {
+	public function test_needs_shipping_address() {
 		$object = new WC_Order();
 		$this->assertFalse( $object->needs_shipping_address() );
 
@@ -1433,7 +1489,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: has_downloadable_item
 	 */
-	function test_has_downloadable_item() {
+	public function test_has_downloadable_item() {
 		$object = new WC_Order();
 		$this->assertFalse( $object->has_downloadable_item() );
 
@@ -1444,7 +1500,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: needs_payment
 	 */
-	function test_needs_payment() {
+	public function test_needs_payment() {
 		$object = new WC_Order();
 
 		$object->set_status( 'pending' );
@@ -1460,7 +1516,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_checkout_payment_url
 	 */
-	function test_get_checkout_payment_url() {
+	public function test_get_checkout_payment_url() {
 		$object = new WC_Order();
 		$id     = $object->save();
 		$this->assertEquals( 'http://example.org?order-pay=' . $id . '&pay_for_order=true&key=' . $object->get_order_key(), $object->get_checkout_payment_url() );
@@ -1469,17 +1525,17 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_checkout_order_received_url
 	 */
-	function test_get_checkout_order_received_url() {
+	public function test_get_checkout_order_received_url() {
 		$object = new WC_Order();
 		$object->set_order_key( 'xxx' );
-		$id     = $object->save();
+		$id = $object->save();
 		$this->assertEquals( 'http://example.org?order-received=' . $id . '&key=' . $object->get_order_key(), $object->get_checkout_order_received_url() );
 	}
 
 	/**
 	 * Test: get_cancel_order_url
 	 */
-	function test_get_cancel_order_url() {
+	public function test_get_cancel_order_url() {
 		$object = new WC_Order();
 		$this->assertInternalType( 'string', $object->get_cancel_order_url() );
 	}
@@ -1487,7 +1543,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_cancel_order_url_raw
 	 */
-	function test_get_cancel_order_url_raw() {
+	public function test_get_cancel_order_url_raw() {
 		$object = new WC_Order();
 		$this->assertInternalType( 'string', $object->get_cancel_order_url_raw() );
 	}
@@ -1495,7 +1551,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_cancel_endpoint
 	 */
-	function test_get_cancel_endpoint() {
+	public function test_get_cancel_endpoint() {
 		$object = new WC_Order();
 		$this->assertEquals( 'http://example.org/', $object->get_cancel_endpoint() );
 	}
@@ -1503,7 +1559,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_view_order_url
 	 */
-	function test_get_view_order_url() {
+	public function test_get_view_order_url() {
 		$object = new WC_Order();
 		$id     = $object->save();
 		$this->assertEquals( 'http://example.org?view-order=' . $id, $object->get_view_order_url() );
@@ -1512,28 +1568,28 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: add_order_note
 	 */
-	function test_add_order_note() {
+	public function test_add_order_note() {
 		$object     = new WC_Order();
 		$id         = $object->save();
-		$comment_id = $object->add_order_note( "Hello, I am a fish" );
+		$comment_id = $object->add_order_note( 'Hello, I am a fish' );
 		$this->assertTrue( $comment_id > 0 );
 
 		$comment = get_comment( $comment_id );
-		$this->assertEquals( "Hello, I am a fish", $comment->comment_content );
+		$this->assertEquals( 'Hello, I am a fish', $comment->comment_content );
 	}
 
 	/**
 	 * Test: get_customer_order_notes
 	 */
-	function test_get_customer_order_notes() {
-		$object     = new WC_Order();
-		$id         = $object->save();
+	public function test_get_customer_order_notes() {
+		$object = new WC_Order();
+		$id     = $object->save();
 
 		$this->assertCount( 0, $object->get_customer_order_notes() );
 
-		$object->add_order_note( "Hello, I am a fish", true );
-		$object->add_order_note( "Hello, I am a fish", false );
-		$object->add_order_note( "Hello, I am a fish", true );
+		$object->add_order_note( 'Hello, I am a fish', true );
+		$object->add_order_note( 'Hello, I am a fish', false );
+		$object->add_order_note( 'Hello, I am a fish', true );
 
 		$this->assertCount( 2, $object->get_customer_order_notes() );
 	}
@@ -1541,18 +1597,20 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_refunds
 	 */
-	function test_get_refunds() {
-		$object     = new WC_Order();
+	public function test_get_refunds() {
+		$object = new WC_Order();
 		$object->set_total( 100 );
-		$id         = $object->save();
+		$id = $object->save();
 
 		$this->assertCount( 0, $object->get_refunds() );
 
-		wc_create_refund( array(
-			'order_id'   => $id,
-			'amount'     => '100',
-			'line_items' => array(),
-		) );
+		wc_create_refund(
+			array(
+				'order_id'   => $id,
+				'amount'     => '100',
+				'line_items' => array(),
+			)
+		);
 
 		$this->assertCount( 1, $object->get_refunds() );
 	}
@@ -1560,27 +1618,31 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_total_refunded
 	 */
-	function test_get_total_refunded() {
+	public function test_get_total_refunded() {
 		$object = new WC_Order();
 		$object->set_total( 400 );
-		$id     = $object->save();
-		wc_create_refund( array(
-			'order_id'   => $id,
-			'amount'     => '100',
-			'line_items' => array(),
-		) );
-		wc_create_refund( array(
-			'order_id'   => $id,
-			'amount'     => '100',
-			'line_items' => array(),
-		) );
+		$id = $object->save();
+		wc_create_refund(
+			array(
+				'order_id'   => $id,
+				'amount'     => '100',
+				'line_items' => array(),
+			)
+		);
+		wc_create_refund(
+			array(
+				'order_id'   => $id,
+				'amount'     => '100',
+				'line_items' => array(),
+			)
+		);
 		$this->assertEquals( 200, $object->get_total_refunded() );
 	}
 
 	/**
 	 * Test: get_total_tax_refunded
 	 */
-	function test_get_total_tax_refunded() {
+	public function test_get_total_tax_refunded() {
 		$object = new WC_Order();
 		$this->assertEquals( 0, $object->get_total_tax_refunded() );
 	}
@@ -1588,7 +1650,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_total_shipping_refunded
 	 */
-	function test_get_total_shipping_refunded() {
+	public function test_get_total_shipping_refunded() {
 		$object = new WC_Order();
 		$this->assertEquals( 0, $object->get_total_shipping_refunded() );
 	}
@@ -1596,7 +1658,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_total_shipping_refunded
 	 */
-	function test_get_total_qty_refunded() {
+	public function test_get_total_qty_refunded() {
 		$object = new WC_Order();
 		$this->assertEquals( 0, $object->get_total_shipping_refunded() );
 	}
@@ -1604,7 +1666,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_qty_refunded_for_item
 	 */
-	function test_get_qty_refunded_for_item() {
+	public function test_get_qty_refunded_for_item() {
 		$object = new WC_Order();
 		$this->assertEquals( 0, $object->get_qty_refunded_for_item( 2 ) );
 	}
@@ -1612,7 +1674,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: test_get_total_refunded_for_item
 	 */
-	function test_get_total_refunded_for_item() {
+	public function test_get_total_refunded_for_item() {
 		$object = new WC_Order();
 		$this->assertEquals( 0, $object->get_total_refunded_for_item( 2 ) );
 	}
@@ -1620,7 +1682,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_tax_refunded_for_item
 	 */
-	function test_get_tax_refunded_for_item() {
+	public function test_get_tax_refunded_for_item() {
 		$object = new WC_Order();
 		$this->assertEquals( 0, $object->get_tax_refunded_for_item( 1, 1 ) );
 	}
@@ -1628,7 +1690,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_total_tax_refunded_by_rate_id
 	 */
-	function test_get_total_tax_refunded_by_rate_id() {
+	public function test_get_total_tax_refunded_by_rate_id() {
 		$object = new WC_Order();
 		$this->assertEquals( 0, $object->get_total_tax_refunded_by_rate_id( 2 ) );
 	}
@@ -1636,22 +1698,24 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_remaining_refund_amount
 	 */
-	function test_get_remaining_refund_amount() {
+	public function test_get_remaining_refund_amount() {
 		$object = new WC_Order();
 		$object->set_total( 400 );
-		$id     = $object->save();
-		wc_create_refund( array(
-			'order_id'   => $id,
-			'amount'     => '100',
-			'line_items' => array(),
-		) );
+		$id = $object->save();
+		wc_create_refund(
+			array(
+				'order_id'   => $id,
+				'amount'     => '100',
+				'line_items' => array(),
+			)
+		);
 		$this->assertEquals( 300, $object->get_remaining_refund_amount() );
 	}
 
 	/**
 	 * Test: get_total_tax_refunded_by_rate_id
 	 */
-	function test_get_remaining_refund_items() {
+	public function test_get_remaining_refund_items() {
 		$object = WC_Helper_Order::create_order();
 		$this->assertEquals( 4, $object->get_remaining_refund_items() );
 	}
@@ -1659,26 +1723,29 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test that if an exception is thrown when creating a refund, the refund is deleted from database.
 	 */
-	function test_refund_exception() {
+	public function test_refund_exception() {
 		$order = WC_Helper_Order::create_order();
 		add_action( 'woocommerce_create_refund', array( $this, 'throwAnException' ) );
-		$refund = wc_create_refund( array(
-			'order_id'   => $order->get_id(),
-			'amount'     => $order->get_total(),
-			'line_items' => array(),
-		) );
+		$refund = wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => $order->get_total(),
+				'line_items' => array(),
+			)
+		);
 		remove_action( 'woocommerce_create_refund', array( $this, 'throwAnException' ) );
 		$this->assertEmpty( $order->get_refunds() );
 	}
 
 	/**
 	 * Test apply_coupon and remove_coupon with a fixed discount coupon.
+	 *
 	 * @since 3.2.0
 	 */
-	function test_add_remove_coupon_fixed() {
+	public function test_add_remove_coupon_fixed() {
 		$order = WC_Helper_Order::create_order();
 
-		$coupon = new WC_Coupon;
+		$coupon = new WC_Coupon();
 		$coupon->set_code( 'test' );
 		$coupon->set_discount_type( 'fixed_cart' );
 		$coupon->set_amount( 10 );
@@ -1696,12 +1763,13 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 
 	/**
 	 * Test apply_coupon and remove_coupon with a percent discount coupon.
+	 *
 	 * @since 3.2.0
 	 */
-	function test_add_remove_coupon_percent() {
+	public function test_add_remove_coupon_percent() {
 		$order = WC_Helper_Order::create_order();
 
-		$coupon = new WC_Coupon;
+		$coupon = new WC_Coupon();
 		$coupon->set_code( 'test' );
 		$coupon->set_discount_type( 'percent' );
 		$coupon->set_amount( 50 );
@@ -1722,22 +1790,26 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 *
 	 * @since 3.2.0
 	 */
-	function test_add_remove_items() {
+	public function test_add_remove_items() {
 		$product = WC_Helper_Product::create_simple_product();
 		$object  = new WC_Order();
 		$item_1  = new WC_Order_Item_Product();
-		$item_1->set_props( array(
-			'product'  => $product,
-			'quantity' => 4,
-			'total'    => 100,
-		) );
+		$item_1->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 4,
+				'total'    => 100,
+			)
+		);
 		$item_1_id = $item_1->save();
-		$item_2  = new WC_Order_Item_Product();
-		$item_2->set_props( array(
-			'product'  => $product,
-			'quantity' => 2,
-			'total'    => 100,
-		) );
+		$item_2    = new WC_Order_Item_Product();
+		$item_2->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 2,
+				'total'    => 100,
+			)
+		);
 		$item_2_id = $item_2->save();
 		$object->add_item( $item_1 );
 		$object->add_item( $item_2 );
@@ -1748,12 +1820,14 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 
 		// remove an item and add an item, then compare totals.
 		$object->remove_item( $item_1_id );
-		$item_3  = new WC_Order_Item_Product();
-		$item_3->set_props( array(
-			'product'  => $product,
-			'quantity' => 1,
-			'total'    => 100,
-		) );
+		$item_3 = new WC_Order_Item_Product();
+		$item_3->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'total'    => 100,
+			)
+		);
 		$object->add_item( $item_3 );
 		$object->save();
 		$object->calculate_totals();

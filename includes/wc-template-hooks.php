@@ -67,6 +67,11 @@ add_action( 'woocommerce_archive_description', 'woocommerce_taxonomy_archive_des
 add_action( 'woocommerce_archive_description', 'woocommerce_product_archive_description', 10 );
 
 /**
+ * Product loop start.
+ */
+add_filter( 'woocommerce_product_loop_start', 'woocommerce_maybe_show_product_subcategories' );
+
+/**
  * Products Loop.
  *
  * @see woocommerce_result_count()

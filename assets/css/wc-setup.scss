@@ -473,6 +473,7 @@ body {
 	margin: 0 0 1em;
 	list-style: none outside;
 	border-radius: 4px;
+	overflow: hidden; // Make sure dark background doesn't cover curved border
 
 	p {
 		margin: 0 0 1em 0;
@@ -482,11 +483,12 @@ body {
 	}
 }
 
-.wc-wizard-service-item, .wc-wizard-services-list-toggle {
+.wc-wizard-service-item,
+.wc-wizard-services-list-toggle {
 	display: flex;
 	flex-wrap: nowrap;
 	justify-content: space-between;
-	padding: 2em 0;
+	padding: 0;
 	border-bottom: 1px solid #eee;
 	color: #666;
 
@@ -500,19 +502,43 @@ body {
 
 	.wc-wizard-service-name {
 		flex-basis: 0;
-		min-width: 175px;
+		min-width: 160px;
 		text-align: center;
 		font-weight: bold;
+		padding: 2em 0;
+		align-self: stretch;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 
 		img {
 			max-width: 75px;
-			margin-top: 0.5em;
+		}
+	}
+
+	&.paypal-logo .wc-wizard-service-name img {
+		max-width: 87px;
+	}
+
+	&.klarna-logo .wc-wizard-service-name {
+		background: #000000;
+
+		img {
+			max-width: 87px;
+		}
+	}
+
+	&.square-logo .wc-wizard-service-name {
+		background: #000000;
+
+		img {
+			max-width: 95px;
 		}
 	}
 
 	.wc-wizard-service-description {
 		flex-grow: 1;
-		padding: 0 1em;
+		padding: 2em 20px;
 
 		p {
 			margin-bottom: 0;
@@ -534,6 +560,8 @@ body {
 		min-width: 75px;
 		text-align: center;
 		cursor: pointer;
+		padding: 2em 0;
+		position: relative;
 	}
 
 	.wc-wizard-service-toggle {
@@ -598,30 +626,31 @@ body {
 	}
 }
 
-// Toggle display a list of services
-.wc-wizard-service-enable input {
-	visibility: hidden;
-	position: relative;
-	cursor: pointer;
-
-	&:before {
-		content: "\f347"; // down chevron
+// Toggle display a list of services.
+.wc-wizard-services-list-toggle {
+	.wc-wizard-service-enable::before {
+		content: "\f343"; // up chevron
 		font-family: "dashicons";
 		visibility: initial;
 		color: #666;
 		font-size: 25px;
-		margin-left: -5px; // center it
-		top: -6px;
+		margin-top: -7px;
+		margin-left: -5px;
 		position: absolute;
+		visibility: visible;
+	}
+	&.closed {
+		.wc-wizard-service-enable::before {
+			content: "\f347"; // down chevron
+		}
+	}
+	.wc-wizard-service-enable input {
+		visibility: hidden;
+		position: relative;
+		cursor: pointer;
 	}
 }
 
-.wc-wizard-service-enable input:checked {
-	&:before {
-		content: "\f343"; // up chevron
-		top: -7px;
-	}
-}
 .wc-wizard-services.manual .wc-wizard-service-item {
 	display: none;
 }
@@ -982,12 +1011,14 @@ p.jetpack-terms {
 
 .allow-tracking {
 	color: #9f9f9f;
-	margin-top: 2em;
+	margin-top: 1em;
 	text-align: center;
 	font-size: 0.9em;
+	padding-top: 2em;
+	border-top: 1px solid #ccc;
 }
 
-.wc-wizard-service-setting-stripe_create_account {
+.wc-wizard-service-setting-stripe_create_account, .wc-wizard-service-setting-ppec_paypal_reroute_requests {
 	display: flex;
 	align-items: flex-end;
 	margin-top: 0.75em;
@@ -999,16 +1030,16 @@ p.jetpack-terms {
 		width: 1.5em;
 	}
 
-	.stripe_create_account {
+	.stripe_create_account, .ppec_paypal_reroute_requests {
 		order: 2;
 		margin-left: 0.3em;
 	}
 }
 
-.wc-wizard-service-setting-stripe_email {
+.wc-wizard-service-setting-stripe_email, .wc-wizard-service-setting-ppec_paypal_api_subject {
 	margin-top: 0.75em;
 
-	label.stripe_email {
+	label.stripe_email, label.ppec_paypal_api_subject {
 		position: absolute;
 		margin: -1px;
 		padding: 0;

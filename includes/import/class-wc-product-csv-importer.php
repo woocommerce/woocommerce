@@ -136,14 +136,26 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return '';
 		}
 
+		// IDs are prefixed with id:.
 		if ( preg_match( '/^id:(\d+)$/', $value, $matches ) ) {
-			$id          = intval( $matches[1] );
+			$id = intval( $matches[1] );
+
+			// If original_id is found, use that instead of the given ID since a new placeholder must have been created already.
 			$original_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_original_id' AND meta_value = %s;", $id ) );
 
 			if ( $original_id ) {
 				return absint( $original_id );
-			} elseif ( ! $this->params['update_existing'] ) {
-				// If we're not updating existing posts, we need a placeholder.
+			}
+
+			// See if the given ID maps to a valid product allready.
+			$existing_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation' ) AND ID = %d;", $id ) );
+
+			if ( $existing_id ) {
+				return absint( $existing_id );
+			}
+
+			// If we're not updating existing posts, we may need a placeholder product to map to.
+			if ( ! $this->params['update_existing'] ) {
 				$product = new WC_Product_Simple();
 				$product->set_name( 'Import placeholder for ' . $id );
 				$product->set_status( 'importing' );
@@ -280,6 +292,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return $value;
 		}
 
+		// Remove the ' prepended to fields that start with - if needed.
+		$value = $this->unescape_negative_number( $value );
+
 		return floatval( $value );
 	}
 
@@ -293,6 +308,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		if ( '' === $value ) {
 			return $value;
 		}
+
+		// Remove the ' prepended to fields that start with - if needed.
+		$value = $this->unescape_negative_number( $value );
 
 		return wc_stock_amount( $value );
 	}
@@ -511,7 +529,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		$data_formatting = array(
 			'id'                => array( $this, 'parse_id_field' ),
 			'type'              => array( $this, 'parse_comma_field' ),
-			'published'         => array( $this, 'parse_bool_field' ),
+			'published'         => array( $this, 'parse_float_field' ),
 			'featured'          => array( $this, 'parse_bool_field' ),
 			'date_on_sale_from' => array( $this, 'parse_date_field' ),
 			'date_on_sale_to'   => array( $this, 'parse_date_field' ),
@@ -622,8 +640,13 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 		// Status is mapped from a special published field.
 		if ( isset( $data['published'] ) ) {
-			$non_published_status = isset( $data['type'] ) && 'variation' === $data['type'] ? 'private' : 'draft';
-			$data['status']       = ( $data['published'] ? 'publish' : $non_published_status );
+			$statuses      = array(
+				-1 => 'draft',
+				0  => 'private',
+				1  => 'publish',
+			);
+			$data['status'] = isset( $statuses[ $data['published'] ] ) ? $statuses[ $data['published'] ] : -1;
+
 			unset( $data['published'] );
 		}
 
@@ -633,17 +656,16 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				$data['stock_status'] = isset( $data['stock_status'] ) ? $data['stock_status'] : true;
 			} else {
 				$data['manage_stock'] = true;
-
-				// Only auto set status when stock_status is empty.
-				if ( ! isset( $data['stock_status'] ) || isset( $data['stock_status'] ) && '' === $data['stock_status'] ) {
-					$data['stock_status'] = 0 < $data['stock_quantity'];
-				}
 			}
 		}
 
-		// Stock is bool.
+		// Stock is bool or 'backorder'.
 		if ( isset( $data['stock_status'] ) ) {
-			$data['stock_status'] = $data['stock_status'] ? 'instock' : 'outofstock';
+			if ( 'backorder' === $data['stock_status'] ) {
+				$data['stock_status'] = 'onbackorder';
+			} else {
+				$data['stock_status'] = $data['stock_status'] ? 'instock' : 'outofstock';
+			}
 		}
 
 		// Prepare grouped products.

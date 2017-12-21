@@ -585,15 +585,21 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * For all stored terms in all taxonomies, save them to the DB.
 	 *
-	 * @param WC_Product
-	 * @param bool Force update. Used during create.
+	 * @param WC_Product $product Product object.
+	 * @param bool       $force Force update. Used during create.
 	 * @since 3.0.0
 	 */
 	protected function update_terms( &$product, $force = false ) {
 		$changes = $product->get_changes();
 
 		if ( $force || array_key_exists( 'category_ids', $changes ) ) {
-			wp_set_post_terms( $product->get_id(), $product->get_category_ids( 'edit' ), 'product_cat', false );
+			$categories = $product->get_category_ids( 'edit' );
+
+			if ( empty( $categories ) && get_option( 'default_product_cat', 0 ) ) {
+				$categories = array( get_option( 'default_product_cat', 0 ) );
+			}
+
+			wp_set_post_terms( $product->get_id(), $categories, 'product_cat', false );
 		}
 		if ( $force || array_key_exists( 'tag_ids', $changes ) ) {
 			wp_set_post_terms( $product->get_id(), $product->get_tag_ids( 'edit' ), 'product_tag', false );
@@ -1009,7 +1015,17 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	public function get_related_products( $cats_array, $tags_array, $exclude_ids, $limit, $product_id ) {
 		global $wpdb;
-		return $wpdb->get_col( implode( ' ', apply_filters( 'woocommerce_product_related_posts_query', $this->get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit + 10 ), $product_id ) ) );
+
+		$args = array(
+			'categories'  => $cats_array,
+			'tags'        => $tags_array,
+			'exclude_ids' => $exclude_ids,
+			'limit'       => $limit + 10,
+		);
+
+		$related_product_query = (array) apply_filters( 'woocommerce_product_related_posts_query', $this->get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit + 10 ), $product_id, $args );
+
+		return $wpdb->get_col( implode( ' ', $related_product_query ) );
 	}
 
 	/**

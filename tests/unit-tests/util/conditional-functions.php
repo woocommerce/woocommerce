@@ -38,47 +38,6 @@ class WC_Tests_Conditional_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Data provider for test_wc_is_webhook_valid_topic.
-	 *
-	 * @since 2.4
-	 */
-	public function data_provider_test_wc_is_webhook_valid_topic() {
-		return array(
-			array( true, wc_is_webhook_valid_topic( 'action.woocommerce_add_to_cart' ) ),
-			array( true, wc_is_webhook_valid_topic( 'action.wc_add_to_cart' ) ),
-			array( true, wc_is_webhook_valid_topic( 'product.created' ) ),
-			array( true, wc_is_webhook_valid_topic( 'product.updated' ) ),
-			array( true, wc_is_webhook_valid_topic( 'product.deleted' ) ),
-			array( true, wc_is_webhook_valid_topic( 'product.restored' ) ),
-			array( true, wc_is_webhook_valid_topic( 'order.created' ) ),
-			array( true, wc_is_webhook_valid_topic( 'order.updated' ) ),
-			array( true, wc_is_webhook_valid_topic( 'order.deleted' ) ),
-			array( true, wc_is_webhook_valid_topic( 'order.restored' ) ),
-			array( true, wc_is_webhook_valid_topic( 'customer.created' ) ),
-			array( true, wc_is_webhook_valid_topic( 'customer.updated' ) ),
-			array( true, wc_is_webhook_valid_topic( 'customer.deleted' ) ),
-			array( true, wc_is_webhook_valid_topic( 'coupon.created' ) ),
-			array( true, wc_is_webhook_valid_topic( 'coupon.updated' ) ),
-			array( true, wc_is_webhook_valid_topic( 'coupon.deleted' ) ),
-			array( true, wc_is_webhook_valid_topic( 'coupon.restored' ) ),
-			array( false, wc_is_webhook_valid_topic( 'coupon.upgraded' ) ),
-			array( false, wc_is_webhook_valid_topic( 'wc.product.updated' ) ),
-			array( false, wc_is_webhook_valid_topic( 'missingdot' ) ),
-			array( false, wc_is_webhook_valid_topic( 'with space' ) ),
-		);
-	}
-
-	/**
-	 * Test wc_is_webhook_valid_topic().
-	 *
-	 * @dataProvider data_provider_test_wc_is_webhook_valid_topic
-	 * @since 2.4
-	 */
-	public function test_wc_is_webhook_valid_topic( $assert, $values ) {
-		$this->assertEquals( $assert, $values );
-	}
-
-	/**
 	 * Data provider for test_wc_is_valid_url.
 	 *
 	 * @since 2.4

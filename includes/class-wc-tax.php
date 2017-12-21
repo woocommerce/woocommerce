@@ -27,7 +27,7 @@ class WC_Tax {
 	 *
 	 * @var bool
 	 */
-	public static $round_at_subtotal;
+	public static $round_at_subtotal = false;
 
 	/**
 	 * Load options.
@@ -64,32 +64,20 @@ class WC_Tax {
 
 	/**
 	 * Calculate tax for a line.
-	 * @param  float  $price              Price to calc tax on
-	 * @param  array  $rates              Rates to apply
-	 * @param  boolean $price_includes_tax Whether the passed price has taxes included
-	 * @param  boolean $suppress_rounding  Whether to suppress any rounding from taking place
-	 * @return array                      Array of rates + prices after tax
+	 *
+	 * @param  float   $price              Price to calc tax on.
+	 * @param  array   $rates              Rates to apply.
+	 * @param  boolean $price_includes_tax Whether the passed price has taxes included.
+	 * @param  boolean $deprecated         Whether to suppress any rounding from taking place. No longer used here.
+	 * @return array                       Array of rates + prices after tax.
 	 */
-	public static function calc_tax( $price, $rates, $price_includes_tax = false, $suppress_rounding = false ) {
-		// Work in pence to X precision
-		$price = self::precision( $price );
-
+	public static function calc_tax( $price, $rates, $price_includes_tax = false, $deprecated = false ) {
 		if ( $price_includes_tax ) {
 			$taxes = self::calc_inclusive_tax( $price, $rates );
 		} else {
 			$taxes = self::calc_exclusive_tax( $price, $rates );
 		}
-
-		// Round to precision
-		if ( ! self::$round_at_subtotal && ! $suppress_rounding ) {
-			$taxes = array_map( 'round', $taxes ); // Round to precision
-		}
-
-		// Remove precision
-		$price     = self::remove_precision( $price );
-		$taxes     = array_map( array( __CLASS__, 'remove_precision' ), $taxes );
-
-		return apply_filters( 'woocommerce_calc_tax', $taxes, $price, $rates, $price_includes_tax, $suppress_rounding );
+		return apply_filters( 'woocommerce_calc_tax', $taxes, $price, $rates, $price_includes_tax, $deprecated );
 	}
 
 	/**
@@ -102,24 +90,6 @@ class WC_Tax {
 	public static function calc_shipping_tax( $price, $rates ) {
 		$taxes = self::calc_exclusive_tax( $price, $rates );
 		return apply_filters( 'woocommerce_calc_shipping_tax', $taxes, $price, $rates );
-	}
-
-	/**
-	 * Multiply cost by pow precision.
-	 * @param  float $price
-	 * @return float
-	 */
-	private static function precision( $price ) {
-		return $price * ( pow( 10, self::$precision ) );
-	}
-
-	/**
-	 * Divide cost by pow precision.
-	 * @param  float $price
-	 * @return float
-	 */
-	private static function remove_precision( $price ) {
-		return $price / ( pow( 10, self::$precision ) );
 	}
 
 	/**
@@ -137,7 +107,7 @@ class WC_Tax {
 	 * @return float
 	 */
 	public static function round( $in ) {
-		return apply_filters( 'woocommerce_tax_round', round( $in, self::$precision ), $in );
+		return apply_filters( 'woocommerce_tax_round', round( $in, wc_get_rounding_precision() ), $in );
 	}
 
 	/**
