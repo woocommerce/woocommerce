@@ -28,19 +28,10 @@ $base_text       = wc_light_or_dark( $base, '#202020', '#ffffff' );
 $text            = get_option( 'woocommerce_email_text_color' );
 
 // Pick a contrasting color for links.
-if ( wc_hex_is_light( $body ) ) :
-	if ( wc_hex_is_light( $base ) ) :
-		$link = $base_text;
-	else :
-		$link = $base;
-	endif;
-else :
-	if ( wc_hex_is_light( $base ) ) :
-		$link = $base;
-	else :
-		$link = $base_text;
-	endif;
-endif;
+$link = wc_hex_is_light( $base ) ? $base : $base_text;
+if ( wc_hex_is_light( $body ) ) {
+	$link = wc_hex_is_light( $base ) ? $base_text : $base;
+}
 
 $bg_darker_10    = wc_hex_darker( $bg, 10 );
 $body_darker_10  = wc_hex_darker( $body, 10 );
