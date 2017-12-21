@@ -17,10 +17,10 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
-// Load colors
+// Load colors.
 $bg              = get_option( 'woocommerce_email_background_color' );
 $body            = get_option( 'woocommerce_email_body_background_color' );
 $base            = get_option( 'woocommerce_email_base_color' );
@@ -185,7 +185,7 @@ h3 {
 }
 
 a {
-	color: <?php echo esc_attr( $base_text ); ?>;
+	color: <?php echo esc_attr( $text ); ?>;
 	font-weight: normal;
 	text-decoration: underline;
 }
