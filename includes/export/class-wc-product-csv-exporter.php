@@ -200,6 +200,26 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	}
 
 	/**
+	 * Get formatted sale price.
+	 *
+	 * @param WC_Product $product Product being exported.
+	 * @return string
+	 */
+	protected function get_column_value_sale_price( $product ) {
+		return wc_format_localized_price( $product->get_sale_price( 'view' ) );
+	}
+
+	/**
+	 * Get formatted regular price.
+	 *
+	 * @param WC_Product $product Product being exported.
+	 * @return string
+	 */
+	protected function get_column_value_regular_price( $product ) {
+		return wc_format_localized_price( $product->get_regular_price() );
+	}
+
+	/**
 	 * Get product_cat value.
 	 *
 	 * @since 3.1.0
