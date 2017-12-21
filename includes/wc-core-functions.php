@@ -54,7 +54,6 @@ add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // After wpau
 add_filter( 'woocommerce_short_description', 'wc_format_product_short_description', 9999999 );
 add_filter( 'woocommerce_short_description', 'wc_do_oembeds' );
 add_filter( 'woocommerce_short_description', array( $GLOBALS['wp_embed'], 'run_shortcode' ), 8 ); // Before wpautop().
-add_filter( 'woocommerce_short_description', 'shortcode_unautop' );
 
 /**
  * Define a constant if it is not already defined.
