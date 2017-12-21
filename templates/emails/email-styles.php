@@ -13,7 +13,7 @@
  * @see     https://docs.woocommerce.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates/Emails
- * @version 2.3.0
+ * @version 2.7.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -26,6 +26,21 @@ $body            = get_option( 'woocommerce_email_body_background_color' );
 $base            = get_option( 'woocommerce_email_base_color' );
 $base_text       = wc_light_or_dark( $base, '#202020', '#ffffff' );
 $text            = get_option( 'woocommerce_email_text_color' );
+
+// Pick a contrasting color for links.
+if ( wc_hex_is_light( $body ) ):
+	if ( wc_hex_is_light( $base ) ):
+		$link = $base_text;
+	else:
+		$link = $base;
+	endif;
+else:
+	if ( wc_hex_is_light( $base ) ):
+		$link = $base;
+	else:
+		$link = $base_text;
+	endif;
+endif;
 
 $bg_darker_10    = wc_hex_darker( $bg, 10 );
 $body_darker_10  = wc_hex_darker( $body, 10 );
@@ -185,7 +200,7 @@ h3 {
 }
 
 a {
-	color: <?php echo esc_attr( $text ); ?>;
+	color: <?php echo esc_attr( $link ); ?>;
 	font-weight: normal;
 	text-decoration: underline;
 }
