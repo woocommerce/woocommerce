@@ -306,7 +306,7 @@ jQuery( function( $ ) {
 				data.shipping_method = shipping_methods;
 			}
 
-			$( '.woocommerce-checkout-payment, .woocommerce-checkout-review-order-table' ).block({
+			$( '.woocommerce-checkout-payment, .woocommerce-checkout-review-order-table' ).addClass( 'processing' ).block({
 				message: null,
 				overlayCSS: {
 					background: '#fff',
