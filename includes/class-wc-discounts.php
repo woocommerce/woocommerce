@@ -817,9 +817,6 @@ class WC_Discounts {
 			$categories = array();
 
 			foreach ( $this->items as $item ) {
-				if ( $coupon->get_exclude_sale_items() && $item->product && $item->product->is_on_sale() ) {
-					continue;
-				}
 
 				$product_cats = wc_get_product_cat_ids( $item->product->get_id() );
 
