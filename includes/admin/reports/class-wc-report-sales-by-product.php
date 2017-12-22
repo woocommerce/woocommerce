@@ -196,7 +196,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 			}
 		}
 
-		echo '<p><strong>' . esc_html( implode( ', ', $this->product_ids_titles ) ) . '</strong></p>';
+		echo '<p><strong>' . wc_clean( implode( ', ', $this->product_ids_titles ) ) . '</strong></p>';
 		echo '<p><a class="button" href="' . esc_url( remove_query_arg( 'product_ids' ) ) . '">' . esc_html__( 'Reset', 'woocommerce' ) . '</a></p>';
 	}
 
