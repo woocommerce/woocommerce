@@ -2,8 +2,6 @@
 /**
  * WooCommerce setup
  *
- * @author   Automattic
- * @category API
  * @package  WooCommerce
  * @since    3.2.0
  */
