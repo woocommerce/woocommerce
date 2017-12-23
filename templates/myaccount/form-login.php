@@ -65,11 +65,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php do_action( 'woocommerce_login_form_end' ); ?>
 
 		</form>
-
-<?php if ( get_option( 'woocommerce_enable_myaccount_registration' ) === 'yes' ) : ?>
-
 	</div>
-
+	
+<?php if ( get_option( 'woocommerce_enable_myaccount_registration' ) === 'yes' ) : ?>
 	<div class="u-column2 col-2">
 
 		<h2><?php esc_html_e( 'Register', 'woocommerce' ); ?></h2>
@@ -113,8 +111,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</form>
 
 	</div>
-
-</div>
 <?php endif; ?>
+</div>
 
 <?php do_action( 'woocommerce_after_customer_login_form' ); ?>
