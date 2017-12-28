@@ -133,7 +133,7 @@
 				if ( form.xhr ) {
 					form.xhr.abort();
 				}
-				form.$form.block( { message: null, overlayCSS: { background: '#fff', opacity: 0.6 } } );
+				form.$form.addClass( 'woocommerce-blockui' );
 				currentAttributes.product_id  = parseInt( form.$form.data( 'product_id' ), 10 );
 				currentAttributes.custom_data = form.$form.data( 'custom_data' );
 				form.xhr                      = $.ajax( {
@@ -150,7 +150,7 @@
 						}
 					},
 					complete: function() {
-						form.$form.unblock();
+						form.$form.removeClass( 'woocommerce-blockui' );
 					}
 				} );
 			} else {

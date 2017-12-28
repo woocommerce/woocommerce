@@ -38,13 +38,7 @@ jQuery( function( $ ) {
 	 */
 	var block = function( $node ) {
 		if ( ! is_blocked( $node ) ) {
-			$node.addClass( 'processing' ).block( {
-				message: null,
-				overlayCSS: {
-					background: '#fff',
-					opacity: 0.6
-				}
-			} );
+			$node.addClass( 'processing' ).addClass( 'woocommerce-blockui' );
 		}
 	};
 
@@ -54,7 +48,7 @@ jQuery( function( $ ) {
 	 * @param {JQuery Object} $node
 	 */
 	var unblock = function( $node ) {
-		$node.removeClass( 'processing' ).unblock();
+		$node.removeClass( 'processing' ).removeClass( 'woocommerce-blockui' );
 	};
 
 	/**

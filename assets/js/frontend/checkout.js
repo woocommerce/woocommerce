@@ -6,8 +6,6 @@ jQuery( function( $ ) {
 		return false;
 	}
 
-	$.blockUI.defaults.overlayCSS.cursor = 'default';
-
 	var wc_checkout_form = {
 		updateTimer: false,
 		dirtyInput: false,
@@ -306,13 +304,7 @@ jQuery( function( $ ) {
 				data.shipping_method = shipping_methods;
 			}
 
-			$( '.woocommerce-checkout-payment, .woocommerce-checkout-review-order-table' ).block({
-				message: null,
-				overlayCSS: {
-					background: '#fff',
-					opacity: 0.6
-				}
-			});
+			$( '.woocommerce-checkout-payment, .woocommerce-checkout-review-order-table' ).addClass( 'woocommerce-blockui' );
 
 			wc_checkout_form.xhr = $.ajax({
 				type:		'POST',
@@ -349,7 +341,7 @@ jQuery( function( $ ) {
 					if ( data && data.fragments ) {
 						$.each( data.fragments, function ( key, value ) {
 							$( key ).replaceWith( value );
-							$( key ).unblock();
+							$( key ).removeClass( 'woocommerce-blockui' );
 						} );
 					}
 
@@ -414,19 +406,7 @@ jQuery( function( $ ) {
 			// Trigger a handler to let gateways manipulate the checkout if needed
 			if ( $form.triggerHandler( 'checkout_place_order' ) !== false && $form.triggerHandler( 'checkout_place_order_' + wc_checkout_form.get_payment_method() ) !== false ) {
 
-				$form.addClass( 'processing' );
-
-				var form_data = $form.data();
-
-				if ( 1 !== form_data['blockUI.isBlocked'] ) {
-					$form.block({
-						message: null,
-						overlayCSS: {
-							background: '#fff',
-							opacity: 0.6
-						}
-					});
-				}
+				$form.addClass( 'processing' ).addClass( 'woocommerce-blockui' );
 
 				// ajaxSetup is global, but we use it to ensure JSON is valid once returned.
 				$.ajaxSetup( {
@@ -506,7 +486,7 @@ jQuery( function( $ ) {
 		submit_error: function( error_message ) {
 			$( '.woocommerce-NoticeGroup-checkout, .woocommerce-error, .woocommerce-message' ).remove();
 			wc_checkout_form.$checkout_form.prepend( '<div class="woocommerce-NoticeGroup woocommerce-NoticeGroup-checkout">' + error_message + '</div>' );
-			wc_checkout_form.$checkout_form.removeClass( 'processing' ).unblock();
+			wc_checkout_form.$checkout_form.removeClass( 'processing' ).removeClass( 'woocommerce-blockui' );
 			wc_checkout_form.$checkout_form.find( '.input-text, select, input:checkbox' ).trigger( 'validate' ).blur();
 			wc_checkout_form.scroll_to_notices();
 			$( document.body ).trigger( 'checkout_error' );
@@ -552,13 +532,7 @@ jQuery( function( $ ) {
 				return false;
 			}
 
-			$form.addClass( 'processing' ).block({
-				message: null,
-				overlayCSS: {
-					background: '#fff',
-					opacity: 0.6
-				}
-			});
+			$form.addClass( 'processing' ).addClass( 'woocommerce-blockui' );
 
 			var data = {
 				security:		wc_checkout_params.apply_coupon_nonce,
@@ -571,7 +545,7 @@ jQuery( function( $ ) {
 				data:		data,
 				success:	function( code ) {
 					$( '.woocommerce-error, .woocommerce-message' ).remove();
-					$form.removeClass( 'processing' ).unblock();
+					$form.removeClass( 'processing' ).addClass( 'woocommerce-blockui' );
 
 					if ( code ) {
 						$form.before( code );
@@ -591,13 +565,7 @@ jQuery( function( $ ) {
 			var container = $( this ).parents( '.woocommerce-checkout-review-order' ),
 				coupon    = $( this ).data( 'coupon' );
 
-			container.addClass( 'processing' ).block({
-				message: null,
-				overlayCSS: {
-					background: '#fff',
-					opacity: 0.6
-				}
-			});
+			container.addClass( 'processing' ).addClass( 'woocommerce-blockui' );
 
 			var data = {
 				security: wc_checkout_params.remove_coupon_nonce,
@@ -610,7 +578,7 @@ jQuery( function( $ ) {
 				data:    data,
 				success: function( code ) {
 					$( '.woocommerce-error, .woocommerce-message' ).remove();
-					container.removeClass( 'processing' ).unblock();
+					container.removeClass( 'processing' ).removeClass( 'woocommerce-blockui' );
 
 					if ( code ) {
 						$( 'form.woocommerce-checkout' ).before( code );

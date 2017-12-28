@@ -289,7 +289,7 @@ class WC_Frontend_Scripts {
 			),
 			'woocommerce' => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/woocommerce' . $suffix . '.js' ),
-				'deps'    => array( 'jquery', 'jquery-blockui', 'js-cookie' ),
+				'deps'    => array( 'jquery', 'js-cookie' ),
 				'version' => WC_VERSION,
 			),
 			'zoom' => array(
