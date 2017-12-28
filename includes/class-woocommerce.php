@@ -370,7 +370,6 @@ final class WooCommerce {
 
 		if ( $this->is_request( 'admin' ) ) {
 			include_once( WC_ABSPATH . 'includes/admin/class-wc-admin.php' );
-			include_once( WC_ABSPATH . 'includes/libraries/gridicons.php' );
 		}
 
 		if ( $this->is_request( 'frontend' ) ) {

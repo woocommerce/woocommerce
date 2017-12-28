@@ -58,6 +58,9 @@ class WC_Admin {
 		include_once( dirname( __FILE__ ) . '/class-wc-admin-importers.php' );
 		include_once( dirname( __FILE__ ) . '/class-wc-admin-exporters.php' );
 
+		// Gridicons
+		include_once( WC_ABSPATH . '/includes/libraries/gridicons.php' );
+
 		// Help Tabs
 		if ( apply_filters( 'woocommerce_enable_admin_help_tab', true ) ) {
 			include_once( dirname( __FILE__ ) . '/class-wc-admin-help.php' );
