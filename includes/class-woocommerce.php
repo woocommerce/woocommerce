@@ -248,17 +248,6 @@ final class WooCommerce {
 	}
 
 	/**
-	 * Check the active theme.
-	 *
-	 * @since  2.6.9
-	 * @param  string $theme Theme slug to check.
-	 * @return bool
-	 */
-	private function is_active_theme( $theme ) {
-		return is_array( $theme ) ? in_array( get_template(), $theme, true ) : get_template() === $theme;
-	}
-
-	/**
 	 * Include required core files used in admin and on the frontend.
 	 */
 	public function includes() {
@@ -408,7 +397,7 @@ final class WooCommerce {
 	 * @since 3.3.0
 	 */
 	private function theme_support_includes() {
-		if ( $this->is_active_theme( array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' ) ) ) {
+		if ( wc_is_active_theme( array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' ) ) ) {
 			switch ( get_template() ) {
 				case 'twentyten':
 					include_once( WC_ABSPATH . 'includes/theme-support/class-wc-twenty-ten.php' );
@@ -483,17 +472,17 @@ final class WooCommerce {
 		$this->deprecated_hook_handlers['actions'] = new WC_Deprecated_Action_Hooks();
 		$this->deprecated_hook_handlers['filters'] = new WC_Deprecated_Filter_Hooks();
 
-		// Session class, handles session data for users - can be overwritten if custom handler is needed.
-		if ( $this->is_request( 'frontend' ) || $this->is_request( 'cron' ) ) {
-			$session_class  = apply_filters( 'woocommerce_session_handler', 'WC_Session_Handler' );
-			$this->session  = new $session_class();
-		}
-
 		// Classes/actions loaded for the frontend and for ajax requests.
 		if ( $this->is_request( 'frontend' ) ) {
-			$this->cart            = new WC_Cart();                                  // Cart class, stores the cart contents.
-			$this->customer        = new WC_Customer( get_current_user_id(), true ); // Customer class, handles data such as customer location.
-			add_action( 'shutdown', array( $this->customer, 'save' ), 10 );          // Customer should be saved during shutdown.
+			// Session class, handles session data for users - can be overwritten if custom handler is needed.
+			$session_class = apply_filters( 'woocommerce_session_handler', 'WC_Session_Handler' );
+			$this->session = new $session_class();
+			$this->session->init();
+
+			$this->cart     = new WC_Cart();                                  // Cart class, stores the cart contents.
+			$this->customer = new WC_Customer( get_current_user_id(), true ); // Customer class, handles data such as customer location.
+
+			add_action( 'shutdown', array( $this->customer, 'save' ), 10 );   // Customer should be saved during shutdown.
 		}
 
 		$this->load_webhooks();

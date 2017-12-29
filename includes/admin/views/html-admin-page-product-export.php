@@ -69,6 +69,7 @@ $total_rows      = $product_count->publish + $product_count->private + $variatio
 								<label for="woocommerce-exporter-meta"><?php esc_html_e( 'Yes, export all custom meta', 'woocommerce' ); ?></label>
 							</td>
 						</tr>
+						<?php do_action( 'woocommerce_product_export_row' ); ?>
 					</tbody>
 				</table>
 				<progress class="woocommerce-exporter-progress" max="100" value="0"></progress>

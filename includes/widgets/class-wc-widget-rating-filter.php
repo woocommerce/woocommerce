@@ -112,7 +112,7 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 				continue;
 			}
 			$found = true;
-			$link  = $this->get_page_base_url();
+			$link  = $this->get_current_page_url();
 
 			if ( in_array( $rating, $rating_filter ) ) {
 				$link_ratings = implode( ',', array_diff( $rating_filter, array( $rating ) ) );

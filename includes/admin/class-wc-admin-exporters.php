@@ -133,11 +133,13 @@ class WC_Admin_Exporters {
 		$exporter->set_page( $step );
 		$exporter->generate_file();
 
+		$query_args = apply_filters( 'woocommerce_export_get_ajax_query_args', array( 'nonce' => wp_create_nonce( 'product-csv' ), 'action' => 'download_product_csv' ) );
+
 		if ( 100 === $exporter->get_percent_complete() ) {
 			wp_send_json_success( array(
 				'step'       => 'done',
 				'percentage' => 100,
-				'url'        => add_query_arg( array( 'nonce' => wp_create_nonce( 'product-csv' ), 'action' => 'download_product_csv' ), admin_url( 'edit.php?post_type=product&page=product_exporter' ) ),
+				'url'        => add_query_arg( $query_args, admin_url( 'edit.php?post_type=product&page=product_exporter' ) ),
 			) );
 		} else {
 			wp_send_json_success( array(

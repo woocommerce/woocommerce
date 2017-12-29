@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Include dependencies.
  */
 if ( ! class_exists( 'WC_CSV_Batch_Exporter', false ) ) {
-	include_once( WC_ABSPATH . 'includes/export/abstract-wc-csv-batch-exporter.php' );
+	include_once WC_ABSPATH . 'includes/export/abstract-wc-csv-batch-exporter.php';
 }
 
 /**
@@ -98,9 +98,13 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			'stock'              => __( 'Stock', 'woocommerce' ),
 			'backorders'         => __( 'Backorders allowed?', 'woocommerce' ),
 			'sold_individually'  => __( 'Sold individually?', 'woocommerce' ),
+			/* translators: %s: weight */
 			'weight'             => sprintf( __( 'Weight (%s)', 'woocommerce' ), get_option( 'woocommerce_weight_unit' ) ),
+			/* translators: %s: length */
 			'length'             => sprintf( __( 'Length (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ),
+			/* translators: %s: width */
 			'width'              => sprintf( __( 'Width (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ),
+			/* translators: %s: Height */
 			'height'             => sprintf( __( 'Height (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ),
 			'reviews_allowed'    => __( 'Allow customer reviews?', 'woocommerce' ),
 			'purchase_note'      => __( 'Purchase note', 'woocommerce' ),
@@ -129,13 +133,13 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 */
 	public function prepare_data_to_export() {
 		$columns  = $this->get_column_names();
-		$args = apply_filters( "woocommerce_product_export_{$this->export_type}_query_args", array(
+		$args     = apply_filters( "woocommerce_product_export_{$this->export_type}_query_args", array(
 			'status'   => array( 'private', 'publish', 'draft' ),
 			'type'     => $this->product_types_to_export,
 			'limit'    => $this->get_limit(),
 			'page'     => $this->get_page(),
 			'orderby'  => array(
-				'ID'   => 'ASC',
+				'ID' => 'ASC',
 			),
 			'return'   => 'objects',
 			'paginate' => true,
@@ -200,6 +204,26 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	}
 
 	/**
+	 * Get formatted sale price.
+	 *
+	 * @param WC_Product $product Product being exported.
+	 * @return string
+	 */
+	protected function get_column_value_sale_price( $product ) {
+		return wc_format_localized_price( $product->get_sale_price( 'view' ) );
+	}
+
+	/**
+	 * Get formatted regular price.
+	 *
+	 * @param WC_Product $product Product being exported.
+	 * @return string
+	 */
+	protected function get_column_value_regular_price( $product ) {
+		return wc_format_localized_price( $product->get_regular_price() );
+	}
+
+	/**
 	 * Get product_cat value.
 	 *
 	 * @since 3.1.0
@@ -247,7 +271,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 		$images    = array();
 
 		foreach ( $image_ids as $image_id ) {
-			$image  = wp_get_attachment_image_src( $image_id, 'full' );
+			$image = wp_get_attachment_image_src( $image_id, 'full' );
 
 			if ( $image ) {
 				$images[] = $image[0];
@@ -332,7 +356,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 		}
 
 		$grouped_products = array();
-		$child_ids = $product->get_children( 'edit' );
+		$child_ids        = $product->get_children( 'edit' );
 		foreach ( $child_ids as $child_id ) {
 			$child = wc_get_product( $child_id );
 			if ( ! $child ) {
@@ -414,9 +438,9 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 		$backorders = $product->get_backorders( 'edit' );
 
 		switch ( $backorders ) {
-			case 'notify' :
+			case 'notify':
 				return 'notify';
-			default :
+			default:
 				return wc_string_to_bool( $backorders ) ? 1 : 0;
 		}
 	}
@@ -457,10 +481,12 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			if ( $downloads ) {
 				$i = 1;
 				foreach ( $downloads as $download ) {
+					/* translators: %s: download number */
 					$this->column_names[ 'downloads:name' . $i ] = sprintf( __( 'Download %d name', 'woocommerce' ), $i );
-					$this->column_names[ 'downloads:url' . $i ]  = sprintf( __( 'Download %d URL', 'woocommerce' ), $i );
-					$row[ 'downloads:name' . $i ] = $download->get_name();
-					$row[ 'downloads:url' . $i ]  = $download->get_file();
+					/* translators: %s: download number */
+					$this->column_names[ 'downloads:url' . $i ] = sprintf( __( 'Download %d URL', 'woocommerce' ), $i );
+					$row[ 'downloads:name' . $i ]               = $download->get_name();
+					$row[ 'downloads:url' . $i ]                = $download->get_file();
 					$i++;
 				}
 			}
@@ -482,9 +508,13 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			if ( count( $attributes ) ) {
 				$i = 1;
 				foreach ( $attributes as $attribute_name => $attribute ) {
-					$this->column_names[ 'attributes:name' . $i ]     = sprintf( __( 'Attribute %d name', 'woocommerce' ), $i );
-					$this->column_names[ 'attributes:value' . $i ]    = sprintf( __( 'Attribute %d value(s)', 'woocommerce' ), $i );
-					$this->column_names[ 'attributes:visible' . $i ]  = sprintf( __( 'Attribute %d visible', 'woocommerce' ), $i );
+					/* translators: %s: attribute number */
+					$this->column_names[ 'attributes:name' . $i ] = sprintf( __( 'Attribute %d name', 'woocommerce' ), $i );
+					/* translators: %s: attribute number */
+					$this->column_names[ 'attributes:value' . $i ] = sprintf( __( 'Attribute %d value(s)', 'woocommerce' ), $i );
+					/* translators: %s: attribute number */
+					$this->column_names[ 'attributes:visible' . $i ] = sprintf( __( 'Attribute %d visible', 'woocommerce' ), $i );
+					/* translators: %s: attribute number */
 					$this->column_names[ 'attributes:taxonomy' . $i ] = sprintf( __( 'Attribute %d global', 'woocommerce' ), $i );
 
 					if ( is_a( $attribute, 'WC_Product_Attribute' ) ) {
@@ -522,12 +552,13 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 					}
 
 					if ( $product->is_type( 'variable' ) && isset( $default_attributes[ sanitize_title( $attribute_name ) ] ) ) {
+						/* translators: %s: attribute number */
 						$this->column_names[ 'attributes:default' . $i ] = sprintf( __( 'Attribute %d default', 'woocommerce' ), $i );
 						$default_value                                   = $default_attributes[ sanitize_title( $attribute_name ) ];
 
 						if ( 0 === strpos( $attribute_name, 'pa_' ) ) {
 							$option_term = get_term_by( 'slug', $default_value, $attribute_name ); // @codingStandardsIgnoreLine.
-							$row[ 'attributes:default' . $i ]   = $option_term && ! is_wp_error( $option_term ) ? $option_term->name : $default_value;
+							$row[ 'attributes:default' . $i ] = $option_term && ! is_wp_error( $option_term ) ? $option_term->name : $default_value;
 						} else {
 							$row[ 'attributes:default' . $i ] = $default_value;
 						}
@@ -565,7 +596,8 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 						continue;
 					}
 
-					$column_key                        = 'meta:' . esc_attr( $meta->key );
+					$column_key = 'meta:' . esc_attr( $meta->key );
+					/* translators: %s: meta data name */
 					$this->column_names[ $column_key ] = sprintf( __( 'Meta: %s', 'woocommerce' ), $meta->key );
 					$row[ $column_key ]                = $meta_value;
 					$i ++;

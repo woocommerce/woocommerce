@@ -39,7 +39,7 @@ class WC_Shop_Customizer {
 		) );
 
 		$this->add_store_notice_section( $wp_customize );
-		$this->add_product_grid_section( $wp_customize );
+		$this->add_product_catalog_section( $wp_customize );
 		$this->add_product_images_section( $wp_customize );
 	}
 
@@ -209,18 +209,18 @@ class WC_Shop_Customizer {
 	}
 
 	/**
-	 * Product grid section.
+	 * Product catalog section.
 	 *
 	 * @param WP_Customize_Manager $wp_customize Theme Customizer object.
 	 */
-	public function add_product_grid_section( $wp_customize ) {
+	public function add_product_catalog_section( $wp_customize ) {
 		$theme_support = get_theme_support( 'woocommerce' );
 		$theme_support = is_array( $theme_support ) ? $theme_support[0] : false;
 
 		$wp_customize->add_section(
-			'woocommerce_product_grid',
+			'woocommerce_product_catalog',
 			array(
-				'title'           => __( 'Product Grid', 'woocommerce' ),
+				'title'           => __( 'Product Catalog', 'woocommerce' ),
 				'priority'        => 10,
 				'active_callback' => array( $this, 'is_products_archive' ),
 				'panel'           => 'woocommerce',
@@ -241,8 +241,8 @@ class WC_Shop_Customizer {
 			'woocommerce_shop_page_display',
 			array(
 				'label'       => __( 'Shop page display', 'woocommerce' ),
-				'description' => __( 'This controls what is shown on the product archive.', 'woocommerce' ),
-				'section'     => 'woocommerce_product_grid',
+				'description' => __( 'Choose what to display on the main shop page.', 'woocommerce' ),
+				'section'     => 'woocommerce_product_catalog',
 				'settings'    => 'woocommerce_shop_page_display',
 				'type'        => 'select',
 				'choices'     => array(
@@ -266,14 +266,14 @@ class WC_Shop_Customizer {
 		$wp_customize->add_control(
 			'woocommerce_category_archive_display',
 			array(
-				'label'       => __( 'Default category display', 'woocommerce' ),
-				'description' => __( 'This controls what is shown on category archives.', 'woocommerce' ),
-				'section'     => 'woocommerce_product_grid',
+				'label'       => __( 'Category display', 'woocommerce' ),
+				'description' => __( 'Choose what to display on product category pages.', 'woocommerce' ),
+				'section'     => 'woocommerce_product_catalog',
 				'settings'    => 'woocommerce_category_archive_display',
 				'type'        => 'select',
 				'choices'     => array(
 					''              => __( 'Show products', 'woocommerce' ),
-					'subcategories' => __( 'Show categories', 'woocommerce' ),
+					'subcategories' => __( 'Show subcategories', 'woocommerce' ),
 					'both'          => __( 'Show subcategories &amp; products', 'woocommerce' ),
 				),
 			)
@@ -293,8 +293,8 @@ class WC_Shop_Customizer {
 			'woocommerce_default_catalog_orderby',
 			array(
 				'label'       => __( 'Default product sorting', 'woocommerce' ),
-				'description' => __( 'This controls the default sort order of the catalog.', 'woocommerce' ),
-				'section'     => 'woocommerce_product_grid',
+				'description' => __( 'How should products by sorted in the catalog by default?', 'woocommerce' ),
+				'section'     => 'woocommerce_product_catalog',
 				'settings'    => 'woocommerce_default_catalog_orderby',
 				'type'        => 'select',
 				'choices'     => apply_filters( 'woocommerce_default_catalog_orderby_options', array(
@@ -329,7 +329,7 @@ class WC_Shop_Customizer {
 			array(
 				'label'       => __( 'Products per row', 'woocommerce' ),
 				'description' => __( 'How many products should be shown per row?', 'woocommerce' ),
-				'section'     => 'woocommerce_product_grid',
+				'section'     => 'woocommerce_product_catalog',
 				'settings'    => 'woocommerce_catalog_columns',
 				'type'        => 'number',
 				'input_attrs' => array(
@@ -356,7 +356,7 @@ class WC_Shop_Customizer {
 			array(
 				'label'       => __( 'Rows per page', 'woocommerce' ),
 				'description' => __( 'How many rows of products should be shown per page?', 'woocommerce' ),
-				'section'     => 'woocommerce_product_grid',
+				'section'     => 'woocommerce_product_catalog',
 				'settings'    => 'woocommerce_catalog_rows',
 				'type'        => 'number',
 				'input_attrs' => array(
@@ -389,7 +389,7 @@ class WC_Shop_Customizer {
 
 		if ( ! isset( $theme_support['single_image_width'] ) ) {
 			$wp_customize->add_setting(
-				'single_image_width',
+				'woocommerce_single_image_width',
 				array(
 					'default'              => 600,
 					'type'                 => 'option',
@@ -400,12 +400,12 @@ class WC_Shop_Customizer {
 			);
 
 			$wp_customize->add_control(
-				'single_image_width',
+				'woocommerce_single_image_width',
 				array(
 					'label'       => __( 'Main image width', 'woocommerce' ),
-					'description' => __( 'This is the width used by the main image on single product pages. These images will remain uncropped.', 'woocommerce' ),
+					'description' => __( 'Image size used for the main image on single product pages. These images will remain uncropped.', 'woocommerce' ),
 					'section'     => 'woocommerce_product_images',
-					'settings'    => 'single_image_width',
+					'settings'    => 'woocommerce_single_image_width',
 					'type'        => 'number',
 					'input_attrs' => array(
 						'min'  => 0,
@@ -417,7 +417,7 @@ class WC_Shop_Customizer {
 
 		if ( ! isset( $theme_support['thumbnail_image_width'] ) ) {
 			$wp_customize->add_setting(
-				'thumbnail_image_width',
+				'woocommerce_thumbnail_image_width',
 				array(
 					'default'              => 300,
 					'type'                 => 'option',
@@ -428,12 +428,12 @@ class WC_Shop_Customizer {
 			);
 
 			$wp_customize->add_control(
-				'thumbnail_image_width',
+				'woocommerce_thumbnail_image_width',
 				array(
 					'label'       => __( 'Thumbnail width', 'woocommerce' ),
-					'description' => __( 'This size is used for product archives and product listings.', 'woocommerce' ),
+					'description' => __( 'Image size used for products in the catalog and product gallery thumbnails.', 'woocommerce' ),
 					'section'     => 'woocommerce_product_images',
-					'settings'    => 'thumbnail_image_width',
+					'settings'    => 'woocommerce_thumbnail_image_width',
 					'type'        => 'number',
 					'input_attrs' => array(
 						'min'  => 0,

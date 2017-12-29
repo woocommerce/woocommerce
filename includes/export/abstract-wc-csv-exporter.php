@@ -189,7 +189,9 @@ abstract class WC_CSV_Exporter {
 	 * @return string
 	 */
 	public function get_filename() {
-		return sanitize_file_name( 'wc-' . $this->export_type . '-export-' . date_i18n( 'Y-m-d', current_time( 'timestamp' ) ) . '.csv' );
+		$filename = 'wc-' . $this->export_type . '-export-' . date_i18n( 'Y-m-d', current_time( 'timestamp' ) ) . '.csv';
+
+		return sanitize_file_name( apply_filters( "woocommerce_{$this->export_type}_export_get_filename", $filename ) );
 	}
 
 	/**
@@ -296,7 +298,7 @@ abstract class WC_CSV_Exporter {
 	 * @return int
 	 */
 	public function get_limit() {
-		return $this->limit;
+		return apply_filters( "woocommerce_{$this->export_type}_export_batch_limit", $this->limit, $this );
 	}
 
 	/**

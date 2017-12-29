@@ -450,47 +450,43 @@ class WC_Query {
 		);
 
 		switch ( $orderby ) {
-			case 'menu_order' :
+			case 'menu_order':
 				$args['orderby']  = 'menu_order title';
 				break;
-			case 'relevance' :
-				$args['orderby']= 'relevance';
-				$args['order']  = 'DESC';
+			case 'title':
+				$args['orderby'] = 'title';
+				$args['order']   = ( 'DESC' === $order ) ? 'DESC' : 'ASC';
 				break;
-			case 'rand' :
-				$args['orderby']  = 'rand'; // @codingStandardsIgnoreLine
+			case 'relevance':
+				$args['orderby'] = 'relevance';
+				$args['order']   = 'DESC';
 				break;
-			case 'date' :
-				$args['orderby']  = 'date ID';
-				$args['order']    = ( 'ASC' === $order ) ? 'ASC' : 'DESC';
+			case 'rand':
+				$args['orderby'] = 'rand'; // @codingStandardsIgnoreLine
 				break;
-			case 'price' :
+			case 'date':
+				$args['orderby'] = 'date ID';
+				$args['order']   = ( 'ASC' === $order ) ? 'ASC' : 'DESC';
+				break;
+			case 'price':
 				if ( 'DESC' === $order ) {
 					add_filter( 'posts_clauses', array( $this, 'order_by_price_desc_post_clauses' ) );
 				} else {
 					add_filter( 'posts_clauses', array( $this, 'order_by_price_asc_post_clauses' ) );
 				}
 				break;
-			case 'popularity' :
+			case 'popularity':
 				$args['meta_key'] = 'total_sales'; // @codingStandardsIgnoreLine
 
 				// Sorting handled later though a hook.
 				add_filter( 'posts_clauses', array( $this, 'order_by_popularity_post_clauses' ) );
 				break;
-			case 'rating' :
+			case 'rating':
 				$args['meta_key'] = '_wc_average_rating'; // @codingStandardsIgnoreLine
 				$args['orderby']  = array(
 					'meta_value_num' => 'DESC',
 					'ID'             => 'ASC',
 				);
-				break;
-			case 'title' :
-				$args['orderby'] = 'title';
-				$args['order']   = ( 'DESC' === $order ) ? 'DESC' : 'ASC';
-				break;
-			case 'relevance' :
-				$args['orderby'] = 'relevance';
-				$args['order']   = 'DESC';
 				break;
 		}
 
@@ -522,7 +518,7 @@ class WC_Query {
 		} else {
 			$args['join']    .= " INNER JOIN ( SELECT post_id, min( meta_value+0 ) price FROM $wpdb->postmeta WHERE meta_key='_price' GROUP BY post_id ) as price_query ON $wpdb->posts.ID = price_query.post_id ";
 		}
-		$args['orderby'] = ' price_query.price ASC ';
+		$args['orderby'] = " price_query.price ASC, $wpdb->posts.ID ASC ";
 		return $args;
 	}
 
@@ -552,7 +548,7 @@ class WC_Query {
 			$args['join'] .= " INNER JOIN ( SELECT post_id, max( meta_value+0 ) price FROM $wpdb->postmeta WHERE meta_key='_price' GROUP BY post_id ) as price_query ON $wpdb->posts.ID = price_query.post_id ";
 		}
 
-		$args['orderby'] = ' price_query.price DESC ';
+		$args['orderby'] = " price_query.price DESC, $wpdb->posts.ID DESC ";
 		return $args;
 	}
 
@@ -740,8 +736,9 @@ class WC_Query {
 	public static function get_layered_nav_chosen_attributes() {
 		if ( ! is_array( self::$_chosen_attributes ) ) {
 			self::$_chosen_attributes = array();
+			$attribute_taxonomies     = wc_get_attribute_taxonomies();
 
-			if ( $attribute_taxonomies = wc_get_attribute_taxonomies() ) {
+			if ( ! empty( $attribute_taxonomies ) ) {
 				foreach ( $attribute_taxonomies as $tax ) {
 					$attribute    = wc_sanitize_taxonomy_name( $tax->attribute_name );
 					$taxonomy     = wc_attribute_taxonomy_name( $attribute );

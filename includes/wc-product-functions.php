@@ -391,6 +391,7 @@ function wc_scheduled_sales() {
 	// Sales which are due to start.
 	$product_ids = $data_store->get_starting_sales();
 	if ( $product_ids ) {
+		do_action( 'wc_before_products_starting_sales', $product_ids );
 		foreach ( $product_ids as $product_id ) {
 			if ( $product = wc_get_product( $product_id ) ) {
 				$sale_price = $product->get_sale_price();
@@ -406,6 +407,7 @@ function wc_scheduled_sales() {
 				$product->save();
 			}
 		}
+		do_action( 'wc_after_products_starting_sales', $product_ids );
 
 		delete_transient( 'wc_products_onsale' );
 	}
@@ -413,6 +415,7 @@ function wc_scheduled_sales() {
 	// Sales which are due to end.
 	$product_ids = $data_store->get_ending_sales();
 	if ( $product_ids ) {
+		do_action( 'wc_before_products_ending_sales', $product_ids );
 		foreach ( $product_ids as $product_id ) {
 			if ( $product = wc_get_product( $product_id ) ) {
 				$regular_price = $product->get_regular_price();
@@ -423,6 +426,7 @@ function wc_scheduled_sales() {
 				$product->save();
 			}
 		}
+		do_action( 'wc_after_products_ending_sales', $product_ids );
 
 		WC_Cache_Helper::get_transient_version( 'product', true );
 		delete_transient( 'wc_products_onsale' );
@@ -746,20 +750,22 @@ function wc_get_min_max_price_meta_query( $args ) {
 
 	/**
 	 * Adjust if the store taxes are not displayed how they are stored.
-	 * Max is left alone because the filter was already increased.
 	 * Kicks in when prices excluding tax are displayed including tax.
 	 */
 	if ( wc_tax_enabled() && 'incl' === get_option( 'woocommerce_tax_display_shop' ) && ! wc_prices_include_tax() ) {
 		$tax_classes = array_merge( array( '' ), WC_Tax::get_tax_classes() );
 		$class_min   = $min;
+		$class_max   = $max;
 
 		foreach ( $tax_classes as $tax_class ) {
 			if ( $tax_rates = WC_Tax::get_rates( $tax_class ) ) {
-				$class_min = $min - WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $min, $tax_rates ) );
+				$class_min = $min + WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $min, $tax_rates ) );
+				$class_max = $max - WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $max, $tax_rates ) );
 			}
 		}
 
 		$min = $class_min;
+		$max = $class_max;
 	}
 
 	return array(
