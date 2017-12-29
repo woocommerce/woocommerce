@@ -2112,8 +2112,16 @@ ul.wc_coupon_list_block {
 			border: 2px solid transparent;
 			border-radius: 4px;
 
+			.gridicon {
+				fill: #0073aa;
+			}
+
 			&:hover {
 				border: 2px solid #00a0d2;
+
+				.gridicon {
+					fill: #00a0d2;
+				}
 			}
 		}
 		.order-preview.disabled {
