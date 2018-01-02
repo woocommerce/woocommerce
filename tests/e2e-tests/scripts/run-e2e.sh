@@ -8,7 +8,7 @@ npm install
 export NODE_CONFIG_DIR="./tests/e2e-tests/config"
 
 # Delete existing site if it exists and then create new
-# ./tests/e2e-tests/scripts/wp-serverpilot-delete.js
+./tests/e2e-tests/scripts/wp-serverpilot-delete.js
 ./tests/e2e-tests/scripts/wp-serverpilot-init.js
 
 # Import the encrypted SSH key
@@ -22,7 +22,7 @@ scp -o "StrictHostKeyChecking no" tests/e2e-tests/data/e2e-db.sql serverpilot@wp
 ssh -o "StrictHostKeyChecking no" serverpilot@wp-e2e-tests.pw ~serverpilot/git-woo.sh "${TRAVIS_BRANCH}" wordpress-${TRAVIS_JOB_ID:0:20}
 
 # Run the tests
-npm run test
+# npm run test
 
 # Delete the site when complete
 
