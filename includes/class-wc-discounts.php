@@ -817,6 +817,9 @@ class WC_Discounts {
 			$categories = array();
 
 			foreach ( $this->items as $item ) {
+				if ( ! $item->product ) {
+					continue;
+				}
 
 				$product_cats = wc_get_product_cat_ids( $item->product->get_id() );
 
