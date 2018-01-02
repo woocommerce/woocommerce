@@ -29,10 +29,10 @@ $text_align = is_rtl() ? 'right' : 'left';
 
 			<address class="address">
 				<?php echo ( $address = $order->get_formatted_billing_address() ) ? $address : __( 'N/A', 'woocommerce' ); ?>
-				<?php if ( $order->get_billing_phone() ) : ?>
+				<?php if ( $order->get_billing_phone() && apply_filters( 'woocommerce_add_order_billing_phone', true, $order ) ) : ?>
 					<br/><?php echo esc_html( $order->get_billing_phone() ); ?>
 				<?php endif; ?>
-				<?php if ( $order->get_billing_email() ) : ?>
+				<?php if ( $order->get_billing_email() && apply_filters( 'woocommerce_add_order_billing_email', true, $order ) ) : ?>
 					<p><?php echo esc_html( $order->get_billing_email() ); ?></p>
 				<?php endif; ?>
 			</address>
