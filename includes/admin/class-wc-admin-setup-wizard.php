@@ -1155,7 +1155,7 @@ class WC_Admin_Setup_Wizard {
 						'placeholder' => '',
 						'required'    => false,
 					),
-					'api_subject' => array(
+					'email' => array(
 						'label'       => __( 'Direct payments to email address:', 'woocommerce' ),
 						'type'        => 'email',
 						'value'       => $user_email,
