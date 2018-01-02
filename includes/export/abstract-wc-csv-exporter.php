@@ -2,8 +2,6 @@
 /**
  * Handles CSV export.
  *
- * @author   Automattic
- * @category Admin
  * @package  WooCommerce/Export
  * @version  3.1.0
  */
@@ -23,6 +21,13 @@ abstract class WC_CSV_Exporter {
 	 * @var string
 	 */
 	protected $export_type = '';
+
+	/**
+	 * Filename to export to.
+	 *
+	 * @var string
+	 */
+	protected $filename = 'wc-export.csv';
 
 	/**
 	 * Batch limit.
@@ -184,14 +189,22 @@ abstract class WC_CSV_Exporter {
 	}
 
 	/**
+	 * Set filename to export to.
+	 *
+	 * @param  string $filename Filename to export to.
+	 * @return string
+	 */
+	public function set_filename( $filename ) {
+		$this->filename = sanitize_file_name( str_replace( '.csv', '', $filename ) . '.csv' );
+	}
+
+	/**
 	 * Generate and return a filename.
 	 *
 	 * @return string
 	 */
 	public function get_filename() {
-		$filename = 'wc-' . $this->export_type . '-export-' . date_i18n( 'Y-m-d', current_time( 'timestamp' ) ) . '.csv';
-
-		return sanitize_file_name( apply_filters( "woocommerce_{$this->export_type}_export_get_filename", $filename ) );
+		return sanitize_file_name( apply_filters( "woocommerce_{$this->export_type}_export_get_filename", $this->filename ) );
 	}
 
 	/**
