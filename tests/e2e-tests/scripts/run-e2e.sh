@@ -9,6 +9,7 @@ if [[ ${RUN_E2E} == 1 ]]; then
 	export NODE_CONFIG_DIR="./tests/e2e-tests/config"
 
 	# Delete existing site if it exists and then create new
+	./tests/e2e-tests/scripts/wp-serverpilot-delete.js
 	./tests/e2e-tests/scripts/wp-serverpilot-init.js
 
 	# Import the encrypted SSH key
@@ -22,7 +23,7 @@ if [[ ${RUN_E2E} == 1 ]]; then
 	ssh -o "StrictHostKeyChecking no" serverpilot@wp-e2e-tests.pw ~serverpilot/git-woo.sh "${TRAVIS_BRANCH}" wordpress-${TRAVIS_JOB_ID:0:20}
 
 	# Run the tests
-	npm run test
+	grunt e2e-tests
 
 	# Delete the site when complete
 
