@@ -855,6 +855,11 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 		set_transient( $transient_name, $related_posts, DAY_IN_SECONDS );
 	}
 
+	$related_posts = apply_filters( 'woocommerce_related_products', $related_posts, $product_id, array(
+		'limit'        => $limit,
+		'excluded_ids' => $exclude_ids,
+	) );
+
 	shuffle( $related_posts );
 
 	return array_slice( $related_posts, 0, $limit );
