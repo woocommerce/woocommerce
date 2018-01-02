@@ -371,7 +371,7 @@ function wc_reset_product_grid_settings() {
 		delete_option( 'woocommerce_catalog_rows' );
 	}
 
-	if ( isset( $theme_support['product_grid']['default_rows'] ) ) {
+	if ( isset( $theme_support['product_grid']['default_columns'] ) ) {
 		update_option( 'woocommerce_catalog_columns', absint( $theme_support['product_grid']['default_columns'] ) );
 	} else {
 		delete_option( 'woocommerce_catalog_columns' );
