@@ -731,7 +731,9 @@ class WC_Query {
 	}
 
 	/**
-	 * Layered Nav Init.
+	 * Get an array of attributes and terms selected with the layered nav widget.
+	 *
+	 * @return array
 	 */
 	public static function get_layered_nav_chosen_attributes() {
 		if ( ! is_array( self::$_chosen_attributes ) ) {
