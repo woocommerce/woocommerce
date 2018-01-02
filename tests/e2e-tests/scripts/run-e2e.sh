@@ -9,7 +9,6 @@ if [[ ${RUN_E2E} == 1 ]]; then
 	export NODE_CONFIG_DIR="./tests/e2e-tests/config"
 
 	# Delete existing site if it exists and then create new
-	./tests/e2e-tests/scripts/wp-serverpilot-delete.js
 	./tests/e2e-tests/scripts/wp-serverpilot-init.js
 
 	# Import the encrypted SSH key
