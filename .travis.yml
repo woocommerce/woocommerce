@@ -21,7 +21,7 @@ matrix:
   - php: 5.2
     dist: precise
   - php: 7.2
-    env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
+    env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1 RUN_E2E=1
   - php: 7.2
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
   allow_failures:
