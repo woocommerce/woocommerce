@@ -1,5 +1,8 @@
 language: php
 
+addons:
+  chrome: stable
+
 sudo: false
 
 # Test main supported versions of PHP against latest WP.
