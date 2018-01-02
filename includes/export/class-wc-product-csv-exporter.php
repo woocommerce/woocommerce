@@ -2,8 +2,6 @@
 /**
  * Handles product CSV export.
  *
- * @author   Automattic
- * @category Admin
  * @package  WooCommerce/Export
  * @version  3.1.0
  */

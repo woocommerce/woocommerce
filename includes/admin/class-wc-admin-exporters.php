@@ -2,8 +2,6 @@
 /**
  * Init WooCommerce data exporters.
  *
- * @author      WooThemes
- * @category    Admin
  * @package     WooCommerce/Admin
  * @version     3.1.0
  */
@@ -128,6 +126,10 @@ class WC_Admin_Exporters {
 
 		if ( ! empty( $_POST['export_types'] ) ) { // WPCS: input var ok.
 			$exporter->set_product_types_to_export( wp_unslash( $_POST['export_types'] ) ); // WPCS: input var ok, sanitization ok.
+		}
+
+		if ( ! empty( $_POST['filename'] ) ) { // WPCS: input var ok.
+			$exporter->set_filename( wp_unslash( $_POST['filename'] ) ); // WPCS: input var ok, sanitization ok.
 		}
 
 		$exporter->set_page( $step );

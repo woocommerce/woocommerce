@@ -32,10 +32,14 @@
 	 * Process the current export step.
 	 */
 	productExportForm.prototype.processStep = function( step, data, columns ) {
-		var $this = this,
+		var $this         = this,
 			selected_columns = $( '.woocommerce-exporter-columns' ).val(),
-			export_meta      = $( '#woocommerce-exporter-meta:checked' ).length ? 1 : 0,
+			export_meta      = $( '#woocommerce-exporter-meta:checked' ).length ? 1: 0,
 			export_types     = $( '.woocommerce-exporter-types' ).val();
+			currentDate      = new Date(),
+			day              = currentDate.getDate(),
+			month            = currentDate.getMonth() + 1,
+			year             = currentDate.getFullYear();
 
 		$.ajax( {
 			type: 'POST',
@@ -48,6 +52,7 @@
 				selected_columns : selected_columns,
 				export_meta      : export_meta,
 				export_types     : export_types,
+				filename         : 'wc-product-export-' + day + '-' + month + '-' + year + '.csv',
 				security         : wc_product_export_params.export_nonce
 			},
 			dataType: 'json',
