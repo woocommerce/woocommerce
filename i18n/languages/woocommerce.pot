@@ -9888,6 +9888,10 @@ msgstr ""
 msgid "Learn more about coupons"
 msgstr ""
 
+#: includes/admin/list-tables/class-wc-admin-list-table-coupons.php:49
+msgid "Create your first coupon"
+msgstr ""
+
 #: includes/admin/list-tables/class-wc-admin-list-table-coupons.php:83
 msgid "Code"
 msgstr ""
