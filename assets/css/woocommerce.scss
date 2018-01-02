@@ -62,7 +62,9 @@ p.demo_store,
  * Main WooCommerce styles
  */
 .woocommerce {
-	.blockUI.blockOverlay {
+	.woocommerce-blockui {
+		opacity: 0.6;
+		pointer-events: none;
 		position: relative;
 		@include loader();
 	}

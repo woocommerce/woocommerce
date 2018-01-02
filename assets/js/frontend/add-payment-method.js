@@ -27,7 +27,7 @@ jQuery( function( $ ) {
 	.find( 'input[name=payment_method]:checked' ).click();
 
 	$( '#add_payment_method' ).submit( function() {
-		$( '#add_payment_method' ).block({ message: null, overlayCSS: { background: '#fff', opacity: 0.6 } });
+		$( '#add_payment_method' ).addClass( 'woocommerce-blockui' );
 	});
 
 	$( document.body ).trigger( 'init_add_payment_method' );

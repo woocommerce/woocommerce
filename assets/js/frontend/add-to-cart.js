@@ -74,12 +74,7 @@ jQuery( function( $ ) {
 
 		e.preventDefault();
 
-		$row.block({
-			message: null,
-			overlayCSS: {
-				opacity: 0.6
-			}
-		});
+		$row.addClass( 'woocommerce-blockui' );
 
 		$.post( wc_add_to_cart_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'remove_from_cart' ), { cart_item_key : $thisbutton.data( 'cart_item_key' ) }, function( response ) {
 			if ( ! response || ! response.fragments ) {
@@ -120,12 +115,12 @@ jQuery( function( $ ) {
 		var page = window.location.toString().replace( 'add-to-cart', 'added-to-cart' );
 
 		$( '.shop_table.cart' ).load( page + ' .shop_table.cart:eq(0) > *', function() {
-			$( '.shop_table.cart' ).stop( true ).css( 'opacity', '1' ).unblock();
+			$( '.shop_table.cart' ).stop( true ).css( 'opacity', '1' ).removeClass( 'woocommerce-blockui' );
 			$( document.body ).trigger( 'cart_page_refreshed' );
 		});
 
 		$( '.cart_totals' ).load( page + ' .cart_totals:eq(0) > *', function() {
-			$( '.cart_totals' ).stop( true ).css( 'opacity', '1' ).unblock();
+			$( '.cart_totals' ).stop( true ).css( 'opacity', '1' ).removeClass( 'woocommerce-blockui' );
 			$( document.body ).trigger( 'cart_totals_refreshed' );
 		});
 	};
@@ -138,18 +133,12 @@ jQuery( function( $ ) {
 			$.each( fragments, function( key ) {
 				$( key )
 					.addClass( 'updating' )
-					.fadeTo( '400', '0.6' )
-					.block({
-						message: null,
-						overlayCSS: {
-							opacity: 0.6
-						}
-					});
+					.addClass( 'woocommerce-blockui' );
 			});
 
 			$.each( fragments, function( key, value ) {
 				$( key ).replaceWith( value );
-				$( key ).stop( true ).css( 'opacity', '1' ).unblock();
+				$( key ).stop( true ).css( 'opacity', '1' ).removeClass( 'woocommerce-blockui' );
 			});
 
 			$( document.body ).trigger( 'wc_fragments_loaded' );
