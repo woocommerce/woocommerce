@@ -1018,6 +1018,7 @@ class WC_Countries {
 					),
 					'RO' => array(
 						'state' => array(
+							'label'    => __( 'County', 'woocommerce' ),
 							'required' => false,
 						),
 					),
@@ -1072,7 +1073,7 @@ class WC_Countries {
 					),
 					'MD' => array(
 						'state' => array(
-							'label' => __( 'Municipality / Region', 'woocommerce' ),
+							'label' => __( 'Municipality / District', 'woocommerce' ),
 						),
 					),
 					'SE' => array(
