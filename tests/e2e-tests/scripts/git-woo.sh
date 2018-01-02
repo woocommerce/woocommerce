@@ -40,5 +40,6 @@ sed -i 's/wp_woocommerce_tax_rate_locations/'"$prefix"'woocommerce_tax_rate_loca
 sed -i 's/wp_woocommerce_tax_rates/'"$prefix"'woocommerce_tax_rates/g' ~/e2e-db.sql
 
 wp theme install twentytwelve --activate
-wp plugin install https://github.com/woocommerce/woocommerce/archive/$1.zip --activate
+wget https://github.com/woocommerce/woocommerce/archive/$1.zip -O woocommerce.zip
+wp plugin install woocommerce.zip --activate
 wp db import ~/e2e-db.sql --debug
