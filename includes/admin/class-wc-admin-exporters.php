@@ -93,6 +93,11 @@ class WC_Admin_Exporters {
 		if ( isset( $_GET['action'], $_GET['nonce'] ) && wp_verify_nonce( wp_unslash( $_GET['nonce'] ), 'product-csv' ) && 'download_product_csv' === wp_unslash( $_GET['action'] ) ) { // WPCS: input var ok, sanitization ok.
 			include_once( WC_ABSPATH . 'includes/export/class-wc-product-csv-exporter.php' );
 			$exporter = new WC_Product_CSV_Exporter();
+
+			if ( ! empty( $_GET['filename'] ) ) { // WPCS: input var ok.
+				$exporter->set_filename( wp_unslash( $_GET['filename'] ) ); // WPCS: input var ok, sanitization ok.
+			}
+
 			$exporter->export();
 		}
 	}
@@ -135,7 +140,7 @@ class WC_Admin_Exporters {
 		$exporter->set_page( $step );
 		$exporter->generate_file();
 
-		$query_args = apply_filters( 'woocommerce_export_get_ajax_query_args', array( 'nonce' => wp_create_nonce( 'product-csv' ), 'action' => 'download_product_csv' ) );
+		$query_args = apply_filters( 'woocommerce_export_get_ajax_query_args', array( 'nonce' => wp_create_nonce( 'product-csv' ), 'action' => 'download_product_csv', 'filename' => $exporter->get_filename() ) );
 
 		if ( 100 === $exporter->get_percent_complete() ) {
 			wp_send_json_success( array(
