@@ -491,6 +491,7 @@ body {
 	padding: 0;
 	border-bottom: 1px solid #eee;
 	color: #666;
+	align-items: center;
 
 	&:last-child {
 		border-bottom: 0;
@@ -508,17 +509,21 @@ body {
 		padding: 2em 0;
 		align-self: stretch;
 		display: flex;
-		align-items: center;
+		align-items: baseline;
 		justify-content: center;
-		max-height: 4.5em;
 
 		img {
 			max-width: 75px;
 		}
 	}
 
+	&.stripe-logo .wc-wizard-service-name img {
+		padding: 8px 0;
+	}
+
 	&.paypal-logo .wc-wizard-service-name img {
 		max-width: 87px;
+		padding: 2px 0;
 	}
 
 	&.klarna-logo .wc-wizard-service-name {
@@ -526,6 +531,7 @@ body {
 
 		img {
 			max-width: 87px;
+			padding: 12px 0;
 		}
 	}
 
@@ -534,12 +540,13 @@ body {
 
 		img {
 			max-width: 95px;
+			padding: 12px 0;
 		}
 	}
 
 	.wc-wizard-service-description {
 		flex-grow: 1;
-		padding: 2em 20px;
+		padding: 20px;
 
 		p {
 			margin-bottom: 0;
@@ -563,7 +570,8 @@ body {
 		cursor: pointer;
 		padding: 2em 0;
 		position: relative;
-		max-height: 2em;
+		max-height: 1.5em;
+		align-self: flex-start;
 	}
 
 	.wc-wizard-service-toggle {
