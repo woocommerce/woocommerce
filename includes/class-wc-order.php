@@ -96,17 +96,19 @@ class WC_Order extends WC_Abstract_Order {
 	 * Sales are also recorded for products.
 	 * Finally, record the date of payment.
 	 *
-	 * Order must exist.
-	 *
 	 * @param string $transaction_id Optional transaction id to store in post meta.
 	 * @return bool success
 	 */
 	public function payment_complete( $transaction_id = '' ) {
-		try {
-			if ( ! $this->get_id() ) {
-				return false;
-			}
+		if ( ! $this->get_id() ) { // Order must exist.
+			return false;
+		}
 
+		if ( $this->get_changes() ) { // Before updating the order status, let's ensure other changes are already persisted to the DB.
+			$this->save();
+		}
+
+		try {
 			wc_transaction_query( 'start' );
 
 			do_action( 'woocommerce_pre_payment_complete', $this->get_id() );
@@ -219,19 +221,31 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return int order ID
 	 */
 	public function save() {
-		$this->maybe_set_user_billing_email();
-		if ( $this->data_store ) {
-			// Trigger action before saving to the DB. Allows you to adjust object props before save.
-			do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
+		try {
+			$this->maybe_set_user_billing_email();
 
-			if ( $this->get_id() ) {
-				$this->data_store->update( $this );
-			} else {
-				$this->data_store->create( $this );
+			if ( $this->data_store ) {
+				// Trigger action before saving to the DB. Allows you to adjust object props before save.
+				do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
+
+				if ( $this->get_id() ) {
+					$this->data_store->update( $this );
+				} else {
+					$this->data_store->create( $this );
+				}
 			}
+
+			$this->save_items();
+			$this->status_transition();
+		} catch ( Exception $e ) {
+			$logger = wc_get_logger();
+			$logger->error( sprintf( 'Error saving order #%d', $this->get_id() ), array(
+				'order' => $this,
+				'error' => $e,
+			) );
+			$this->add_order_note( __( 'Error saving order.', 'woocommerce' ) . ' ' . $e->getMessage() );
 		}
-		$this->save_items();
-		$this->status_transition();
+
 		return $this->get_id();
 	}
 
@@ -295,7 +309,7 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Updates status of order immediately. Order must exist.
+	 * Updates status of order immediately.
 	 *
 	 * @uses WC_Order::set_status()
 	 * @param string $new_status    Status to change the order to. No internal wc- prefix is required.
@@ -304,14 +318,20 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool
 	 */
 	public function update_status( $new_status, $note = '', $manual = false ) {
-		try {
-			if ( ! $this->get_id() ) {
-				return false;
-			}
+		if ( ! $this->get_id() ) { // Order must exist.
+			return false;
+		}
 
+		if ( $this->get_changes() ) { // Before updating the order status, let's ensure other changes are already persisted to the DB.
+			$this->save();
+		}
+
+		try {
 			wc_transaction_query( 'start' );
+
 			$this->set_status( $new_status, $note, $manual );
 			$this->save();
+
 			wc_transaction_query( 'commit' );
 		} catch ( Exception $e ) {
 			wc_transaction_query( 'rollback' );
@@ -322,7 +342,6 @@ class WC_Order extends WC_Abstract_Order {
 				'error' => $e,
 			) );
 			$this->add_order_note( __( 'Update status event failed.', 'woocommerce' ) . ' ' . $e->getMessage() );
-
 			return false;
 		}
 		return true;
@@ -338,21 +357,30 @@ class WC_Order extends WC_Abstract_Order {
 		$this->status_transition = false;
 
 		if ( $status_transition ) {
-			do_action( 'woocommerce_order_status_' . $status_transition['to'], $this->get_id(), $this );
+			try {
+				do_action( 'woocommerce_order_status_' . $status_transition['to'], $this->get_id(), $this );
 
-			if ( ! empty( $status_transition['from'] ) ) {
-				/* translators: 1: old order status 2: new order status */
-				$transition_note = sprintf( __( 'Order status changed from %1$s to %2$s.', 'woocommerce' ), wc_get_order_status_name( $status_transition['from'] ), wc_get_order_status_name( $status_transition['to'] ) );
+				if ( ! empty( $status_transition['from'] ) ) {
+					/* translators: 1: old order status 2: new order status */
+					$transition_note = sprintf( __( 'Order status changed from %1$s to %2$s.', 'woocommerce' ), wc_get_order_status_name( $status_transition['from'] ), wc_get_order_status_name( $status_transition['to'] ) );
 
-				do_action( 'woocommerce_order_status_' . $status_transition['from'] . '_to_' . $status_transition['to'], $this->get_id(), $this );
-				do_action( 'woocommerce_order_status_changed', $this->get_id(), $status_transition['from'], $status_transition['to'], $this );
-			} else {
-				/* translators: %s: new order status */
-				$transition_note = sprintf( __( 'Order status set to %s.', 'woocommerce' ), wc_get_order_status_name( $status_transition['to'] ) );
+					do_action( 'woocommerce_order_status_' . $status_transition['from'] . '_to_' . $status_transition['to'], $this->get_id(), $this );
+					do_action( 'woocommerce_order_status_changed', $this->get_id(), $status_transition['from'], $status_transition['to'], $this );
+				} else {
+					/* translators: %s: new order status */
+					$transition_note = sprintf( __( 'Order status set to %s.', 'woocommerce' ), wc_get_order_status_name( $status_transition['to'] ) );
+				}
+
+				// Note the transition occurred.
+				$this->add_order_note( trim( $status_transition['note'] . ' ' . $transition_note ), 0, $status_transition['manual'] );
+			} catch ( Exception $e ) {
+				$logger = wc_get_logger();
+				$logger->error( sprintf( 'Status transition of order #%d errored!', $this->get_id() ), array(
+					'order' => $this,
+					'error' => $e,
+				) );
+				$this->add_order_note( __( 'Error during status transition.', 'woocommerce' ) . ' ' . $e->getMessage() );
 			}
-
-			// Note the transition occurred.
-			$this->add_order_note( trim( $status_transition['note'] . ' ' . $transition_note ), 0, $status_transition['manual'] );
 		}
 	}
 
