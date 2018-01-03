@@ -518,7 +518,6 @@ p.demo_store,
 		background-color: $highlight;
 		color: $highlightext;
 		font-size: 0.857em;
-		-webkit-font-smoothing: antialiased;
 		z-index: 9;
 	}
 
@@ -695,7 +694,6 @@ p.demo_store,
 				font-family: 'WooCommerce';
 				content: '\e01c';
 				vertical-align: top;
-				-webkit-font-smoothing: antialiased;
 				font-weight: 400;
 				position: absolute;
 				top: 0.618em;
