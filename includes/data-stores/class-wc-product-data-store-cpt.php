@@ -149,8 +149,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			throw new Exception( __( 'Invalid product.', 'woocommerce' ) );
 		}
 
-		$id = $product->get_id();
-
 		$product->set_props(
 			array(
 				'name'              => $post_object->post_title,
@@ -1311,13 +1309,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	public function search_products( $term, $type = '', $include_variations = false ) {
 		global $wpdb;
 
-		$search_fields = array_map(
-			'wc_clean', apply_filters(
-				'woocommerce_product_search_fields', array(
-					'_sku',
-				)
-			)
-		);
 		$like_term     = '%' . $wpdb->esc_like( $term ) . '%';
 		$post_types    = $include_variations ? array( 'product', 'product_variation' ) : array( 'product' );
 		$post_statuses = current_user_can( 'edit_private_products' ) ? array( 'private', 'publish' ) : array( 'publish' );
