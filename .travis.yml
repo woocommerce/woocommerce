@@ -39,8 +39,6 @@ script:
   #- bash tests/bin/phpunit.sh
   - bash tests/bin/phpcs.sh
   - bash tests/e2e-tests/scripts/run-e2e.sh
-  - bash npm run test
-  - bash ./tests/e2e-tests/scripts/wp-serverpilot-delete.js
 
 after_script:
   - bash tests/bin/travis.sh after

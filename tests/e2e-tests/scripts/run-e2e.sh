@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 if [[ ${RUN_E2E} == 1 ]]; then
-	set -x
 
 	# Setup
 	export DISPLAY=:99.0
@@ -25,5 +24,11 @@ if [[ ${RUN_E2E} == 1 ]]; then
 
 	# Set BASE_URL for tests
 	export BASE_URL="http://${TRAVIS_JOB_ID:0:20}.wp-e2e-tests.pw"
+
+	# Run e2e tests
+	npm run test
+
+	# Delete site after tests complete
+	./tests/e2e-tests/scripts/wp-serverpilot-delete.js
 
 fi
