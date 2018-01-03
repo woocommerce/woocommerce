@@ -11,7 +11,7 @@
 		}
 	},
 	"startBrowserTimeoutMs": 30000,
-	"mochaTimeoutMs": 120000
+	"mochaTimeoutMs": 120000,
     "spConfig": {
         "clientId": "",
         "apiKey": "",
