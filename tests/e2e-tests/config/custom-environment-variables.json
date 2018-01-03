@@ -7,8 +7,7 @@
   },
   "testAccounts": {
     "wooUserCI": [
-      "WOO_USER_LOGIN",
-      "WOO_USER_PASSWORD"
+      "WOO_USER_LOGIN"
     ]
   }
 }
