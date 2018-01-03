@@ -1174,15 +1174,16 @@ function wc_array_cartesian( $input ) {
  *
  * @since 2.5.0
  * @param string $type Types: start (default), commit, rollback.
+ * @param bool   $force use of transactions.
  */
-function wc_transaction_query( $type = 'start' ) {
+function wc_transaction_query( $type = 'start', $force = false ) {
 	global $wpdb;
 
 	$wpdb->hide_errors();
 
 	wc_maybe_define_constant( 'WC_USE_TRANSACTIONS', true );
 
-	if ( WC_USE_TRANSACTIONS ) {
+	if ( WC_USE_TRANSACTIONS || $force ) {
 		switch ( $type ) {
 			case 'commit':
 				$wpdb->query( 'COMMIT' );

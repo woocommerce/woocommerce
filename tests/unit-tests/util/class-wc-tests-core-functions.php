@@ -606,8 +606,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 				'%s',
 			)
 		);
-		wc_transaction_query( 'start' );
-		$this->assertTrue( WC_USE_TRANSACTIONS );
+		wc_transaction_query( 'start', true );
 		$wpdb->update(
 			$wpdb->prefix . 'options',
 			array(
@@ -620,11 +619,11 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		$col = $wpdb->get_col( "SElECT option_value FROM {$wpdb->prefix}options WHERE option_name = 'transaction_test'" );
 		$this->assertEquals( '0', $col[0] );
 
-		wc_transaction_query( 'rollback' );
+		wc_transaction_query( 'rollback', true );
 		$col = $wpdb->get_col( "SElECT option_value FROM {$wpdb->prefix}options WHERE option_name = 'transaction_test'" );
 		$this->assertEquals( '1', $col[0] );
 
-		wc_transaction_query( 'start' );
+		wc_transaction_query( 'start', true );
 		$wpdb->update(
 			$wpdb->prefix . 'options',
 			array(
@@ -634,7 +633,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 				'option_name' => 'transaction_test',
 			)
 		);
-		wc_transaction_query( 'commit' );
+		wc_transaction_query( 'commit', true );
 		$col = $wpdb->get_col( "SElECT option_value FROM {$wpdb->prefix}options WHERE option_name = 'transaction_test'" );
 		$this->assertEquals( '0', $col[0] );
 
