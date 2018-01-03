@@ -23,7 +23,7 @@ if [[ ${RUN_E2E} == 1 ]]; then
 	ssh -o "StrictHostKeyChecking no" serverpilot@wp-e2e-tests.pw ~serverpilot/git-woo.sh "${TRAVIS_BRANCH}" wordpress-${TRAVIS_JOB_ID:0:20}
 
 	# Run the tests
-	grunt e2e-tests
+	npm run tests
 
 	# Delete the site when complete
 
