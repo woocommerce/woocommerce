@@ -1,0 +1,15 @@
+{
+  "url": "BASE_URL",
+  "spConfig": {
+    "clientId": "SP_CLIENTID",
+    "apiKey": "SP_APIKEY",
+    "sysuserid": "SP_SYSUSERID"
+  },
+  "testAccounts": {
+    "wooUserCI": [
+      "WOO_USER_LOGIN",
+      "WOO_USER_PASSWORD"
+    ]
+  }
+}
+
