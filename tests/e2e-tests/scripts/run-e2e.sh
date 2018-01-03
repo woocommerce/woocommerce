@@ -26,7 +26,7 @@ if [[ ${RUN_E2E} == 1 ]]; then
 	export BASE_URL="http://${TRAVIS_JOB_ID:0:20}.wp-e2e-tests.pw"
 
 	# Run e2e tests
-	npm run test
+	grunt e2e-tests
 
 	# Delete site after tests complete
 	./tests/e2e-tests/scripts/wp-serverpilot-delete.js
