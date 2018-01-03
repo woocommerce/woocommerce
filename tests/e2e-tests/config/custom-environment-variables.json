@@ -6,9 +6,7 @@
     "sysuserid": "SP_SYSUSERID"
   },
   "testAccounts": {
-    "wooUserCI": [
-      "WOO_USER_LOGIN"
-    ]
+    "wooUserCI": "WOO_USER_LOGIN"
   }
 }
 
