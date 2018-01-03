@@ -1120,7 +1120,7 @@ class WC_Admin_Setup_Wizard {
 				'name'        => __( 'Stripe', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/stripe.png',
 				'description' => $stripe_description,
-				'class'       => 'checked',
+				'class'       => 'checked stripe-logo',
 				'repo-slug'   => 'woocommerce-gateway-stripe',
 				'settings'    => array(
 					'create_account' => array(
