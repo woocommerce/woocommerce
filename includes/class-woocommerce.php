@@ -378,10 +378,6 @@ final class WooCommerce {
 			$this->frontend_includes();
 		}
 
-		if ( $this->is_request( 'frontend' ) || $this->is_request( 'cron' ) ) {
-			include_once( WC_ABSPATH . 'includes/class-wc-session-handler.php' );
-		}
-
 		if ( $this->is_request( 'cron' ) && 'yes' === get_option( 'woocommerce_allow_tracking', 'no' ) ) {
 			include_once( WC_ABSPATH . 'includes/class-wc-tracker.php' );
 		}
@@ -444,6 +440,7 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-shortcodes.php' );       // Shortcodes class.
 		include_once( WC_ABSPATH . 'includes/class-wc-embed.php' );            // Embeds.
 		include_once( WC_ABSPATH . 'includes/class-wc-structured-data.php' );  // Structured Data class.
+		include_once( WC_ABSPATH . 'includes/class-wc-session-handler.php' );  // Session handler class.
 	}
 
 	/**
