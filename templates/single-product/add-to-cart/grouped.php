@@ -52,7 +52,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 						case 'quantity' :
 							ob_start();
 
-							if ( ! $grouped_product->is_purchasable() || $grouped_product->has_options() ) {
+							if ( ! $grouped_product->is_purchasable() || $grouped_product->has_options() || ! $grouped_product->is_in_stock() ) {
 								woocommerce_template_loop_add_to_cart();
 							} elseif ( $grouped_product->is_sold_individually() ) {
 								echo '<input type="checkbox" name="' . esc_attr( 'quantity[' . $grouped_product->get_id() . ']' ) . '" value="1" class="wc-grouped-product-add-to-cart-checkbox" />';

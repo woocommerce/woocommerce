@@ -13,9 +13,9 @@ class WC_Helper_Customer {
 	 * @return WC_Customer
 	 */
 	public static function create_mock_customer() {
-
 		$customer_data = array(
 			'id'                     => 0,
+			'date_modified'          => null,
 			'country' 				 => 'US',
 			'state' 				 => 'PA',
 			'postcode' 				 => '19123',
@@ -35,6 +35,7 @@ class WC_Helper_Customer {
 		WC_Helper_Customer::set_customer_details( $customer_data );
 
 		$customer = new WC_Customer( 0, true );
+
 		return $customer;
 	}
 
@@ -105,7 +106,7 @@ class WC_Helper_Customer {
 	 * @param string $default_shipping_method Shipping Method slug
 	 */
 	public static function set_customer_details( $customer_details ) {
-		WC()->session->set( 'customer', $customer_details );
+		WC()->session->set( 'customer', array_map( 'strval', $customer_details ) );
 	}
 
 	/**

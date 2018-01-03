@@ -1946,9 +1946,23 @@ ul.wc_coupon_list_block {
 			padding: 0 !important;
 			height: 2em !important;
 			width: 2em;
+			overflow: hidden;
 
 			&::after {
-				@include icon_dashicons;
+				font-family: 'Dashicons';
+				speak: none;
+				font-weight: normal;
+				font-variant: normal;
+				text-transform: none;
+				-webkit-font-smoothing: antialiased;
+				margin: 0;
+				text-indent: 0;
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				text-align: center;
 				line-height: 1.85;
 			}
 

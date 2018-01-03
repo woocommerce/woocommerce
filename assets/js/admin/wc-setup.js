@@ -130,14 +130,14 @@ jQuery( function( $ ) {
 				.find( 'input.payment-email-input' )
 				.prop( 'required', true );
 			$( this ).closest( '.wc-wizard-service-settings' )
-				.find( '.wc-wizard-service-setting-stripe_email, .wc-wizard-service-setting-ppec_paypal_api_subject' )
+				.find( '.wc-wizard-service-setting-stripe_email, .wc-wizard-service-setting-ppec_paypal_email' )
 				.show();
 		} else {
 			$( this ).closest( '.wc-wizard-service-settings' )
 				.find( 'input.payment-email-input' )
 				.prop( 'required', false );
 			$( this ).closest( '.wc-wizard-service-settings' )
-				.find( '.wc-wizard-service-setting-stripe_email, .wc-wizard-service-setting-ppec_paypal_api_subject' )
+				.find( '.wc-wizard-service-setting-stripe_email, .wc-wizard-service-setting-ppec_paypal_email' )
 				.hide();
 		}
 	} ).find( 'input#stripe_create_account, input#ppec_paypal_reroute_requests' ).change();

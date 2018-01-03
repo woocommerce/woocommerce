@@ -9888,6 +9888,10 @@ msgstr ""
 msgid "Learn more about coupons"
 msgstr ""
 
+#: includes/admin/list-tables/class-wc-admin-list-table-coupons.php:49
+msgid "Create your first coupon"
+msgstr ""
+
 #: includes/admin/list-tables/class-wc-admin-list-table-coupons.php:83
 msgid "Code"
 msgstr ""
@@ -24106,7 +24110,7 @@ msgid "https://woocommerce.com/"
 msgstr ""
 
 #. Description of the plugin/theme
-msgid "An e-commerce toolkit that helps you sell anything. Beautifully."
+msgid "An eCommerce toolkit that helps you sell anything. Beautifully."
 msgstr ""
 
 #. Author of the plugin/theme

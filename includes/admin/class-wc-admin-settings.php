@@ -83,7 +83,6 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 			// Clear any unwanted data and flush rules.
 			add_option( 'woocommerce_queue_flush_rewrite_rules', 'true' );
-			delete_transient( 'woocommerce_cache_excluded_uris' );
 			WC()->query->init_query_vars();
 			WC()->query->add_endpoints();
 
@@ -727,7 +726,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						}
 						break;
 					case 'select':
-						$allowed_values = empty( $option['options'] ) ? array() : array_keys( $option['options'] );
+						$allowed_values = empty( $option['options'] ) ? array() : array_map( 'strval', array_keys( $option['options'] ) );
 						if ( empty( $option['default'] ) && empty( $allowed_values ) ) {
 							$value = null;
 							break;
