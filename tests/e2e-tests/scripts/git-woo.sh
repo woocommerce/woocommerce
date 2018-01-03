@@ -44,4 +44,4 @@ wget https://github.com/woocommerce/woocommerce/archive/$1.zip -O woocommerce.zi
 wp plugin install woocommerce.zip --activate --activate-network
 wp plugin list
 wp db import ~/e2e-db.sql --debug
-exit
+

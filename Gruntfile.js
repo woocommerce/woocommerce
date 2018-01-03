@@ -255,7 +255,7 @@ module.exports = function( grunt ) {
 				].join( '&&' )
 			},
 			e2e_test: {
-				command: 'npm run --silent test:single tests/e2e-tests/' + grunt.option( 'file' )
+				command: 'npm run --silent test:single tests/e2e-tests/tests' + grunt.option( 'file' )
 			},
 			e2e_tests: {
 				command: 'npm run --silent test'
