@@ -4,7 +4,6 @@
  *
  * @version  3.3.0
  * @package  WooCommerce\l10n
- * @author   WooThemes
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -492,7 +491,7 @@ class WC_Countries {
 					'IN'      => "{company}\n{name}\n{address_1}\n{address_2}\n{city} - {postcode}\n{state}, {country}",
 					'IS'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
 					'IT'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode}\n{city}\n{state_upper}\n{country}",
-					'JP'      => "{postcode}\n{state}{city}{address_1}\n{address_2}\n{company}\n{last_name} {first_name}\n{country}",
+					'JP'      => "{postcode}\n{state} {city} {address_1}\n{address_2}\n{company}\n{last_name} {first_name}\n{country}",
 					'TW'      => "{company}\n{last_name} {first_name}\n{address_1}\n{address_2}\n{state}, {city} {postcode}\n{country}",
 					'LI'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
 					'NL'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
@@ -1019,6 +1018,7 @@ class WC_Countries {
 					),
 					'RO' => array(
 						'state' => array(
+							'label'    => __( 'County', 'woocommerce' ),
 							'required' => false,
 						),
 					),
@@ -1073,7 +1073,7 @@ class WC_Countries {
 					),
 					'MD' => array(
 						'state' => array(
-							'label' => __( 'Municipality / Region', 'woocommerce' ),
+							'label' => __( 'Municipality / District', 'woocommerce' ),
 						),
 					),
 					'SE' => array(

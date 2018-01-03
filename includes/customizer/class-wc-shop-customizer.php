@@ -282,7 +282,7 @@ class WC_Shop_Customizer {
 		$wp_customize->add_setting(
 			'woocommerce_default_catalog_orderby',
 			array(
-				'default'              => '',
+				'default'              => 'menu_order',
 				'type'                 => 'option',
 				'capability'           => 'manage_woocommerce',
 				'sanitize_callback'    => array( $this, 'sanitize_default_catalog_orderby' ),

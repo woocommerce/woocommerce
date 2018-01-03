@@ -371,7 +371,7 @@ function wc_reset_product_grid_settings() {
 		delete_option( 'woocommerce_catalog_rows' );
 	}
 
-	if ( isset( $theme_support['product_grid']['default_rows'] ) ) {
+	if ( isset( $theme_support['product_grid']['default_columns'] ) ) {
 		update_option( 'woocommerce_catalog_columns', absint( $theme_support['product_grid']['default_columns'] ) );
 	} else {
 		delete_option( 'woocommerce_catalog_columns' );
@@ -778,7 +778,11 @@ if ( ! function_exists( 'woocommerce_template_loop_product_link_open' ) ) {
 	 * Insert the opening anchor tag for products in the loop.
 	 */
 	function woocommerce_template_loop_product_link_open() {
-		echo '<a href="' . esc_url( get_the_permalink() ) . '" class="woocommerce-LoopProduct-link woocommerce-loop-product__link">';
+		global $product;
+
+		$link = apply_filters( 'woocommerce_loop_product_link', get_the_permalink(), $product );
+
+		echo '<a href="' . esc_url( $link ) . '" class="woocommerce-LoopProduct-link woocommerce-loop-product__link">';
 	}
 }
 
