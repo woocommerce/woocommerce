@@ -104,10 +104,6 @@ class WC_Order extends WC_Abstract_Order {
 			return false;
 		}
 
-		if ( $this->get_changes() ) { // Before updating the order status, let's ensure other changes are already persisted to the DB.
-			$this->save();
-		}
-
 		try {
 			wc_transaction_query( 'start' );
 
@@ -320,10 +316,6 @@ class WC_Order extends WC_Abstract_Order {
 	public function update_status( $new_status, $note = '', $manual = false ) {
 		if ( ! $this->get_id() ) { // Order must exist.
 			return false;
-		}
-
-		if ( $this->get_changes() ) { // Before updating the order status, let's ensure other changes are already persisted to the DB.
-			$this->save();
 		}
 
 		try {
