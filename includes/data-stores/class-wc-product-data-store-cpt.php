@@ -1,4 +1,10 @@
 <?php
+/**
+ * WC_Product_Data_Store_CPT class file.
+ *
+ * @package WooCommerce/Classes
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -7,8 +13,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * WC Product Data Store: Stored in CPT.
  *
  * @version  3.0.0
- * @category Class
- * @author   WooThemes
  */
 class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Data_Store_Interface, WC_Product_Data_Store_Interface {
 
@@ -64,6 +68,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 	/**
 	 * If we have already saved our extra data, don't do automatic / default handling.
+	 *
+	 * @var bool
 	 */
 	protected $extra_data_saved = false;
 
@@ -83,7 +89,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Method to create a new product in the database.
 	 *
-	 * @param WC_Product $product
+	 * @param WC_Product $product Product object.
 	 */
 	public function create( &$product ) {
 		if ( ! $product->get_date_created( 'edit' ) ) {
@@ -132,13 +138,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Method to read a product from the database.
 	 *
-	 * @param WC_Product $product
-	 * @throws Exception
+	 * @param WC_Product $product Product object.
+	 * @throws Exception If invalid product.
 	 */
 	public function read( &$product ) {
 		$product->set_defaults();
+		$post_object = get_post( $product->get_id() );
 
-		if ( ! $product->get_id() || ! ( $post_object = get_post( $product->get_id() ) ) || 'product' !== $post_object->post_type ) {
+		if ( ! $product->get_id() || ! $post_object || 'product' !== $post_object->post_type ) {
 			throw new Exception( __( 'Invalid product.', 'woocommerce' ) );
 		}
 
@@ -170,7 +177,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Method to update a product in the database.
 	 *
-	 * @param WC_Product $product
+	 * @param WC_Product $product Product object.
 	 */
 	public function update( &$product ) {
 		$product->save_meta_data();
@@ -235,7 +242,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Method to delete a product from the database.
 	 *
-	 * @param WC_Product $product
+	 * @param WC_Product $product Product object.
 	 * @param array      $args Array of args to pass to the delete method.
 	 */
 	public function delete( &$product, $args = array() ) {
@@ -272,25 +279,28 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Read product data. Can be overridden by child classes to load other props.
 	 *
-	 * @param WC_Product
+	 * @param WC_Product $product Product object.
 	 * @since 3.0.0
 	 */
 	protected function read_product_data( &$product ) {
-		$id = $product->get_id();
+		$id             = $product->get_id();
+		$review_count   = get_post_meta( $id, '_wc_review_count', true );
+		$rating_counts  = get_post_meta( $id, '_wc_rating_count', true );
+		$average_rating = get_post_meta( $id, '_wc_average_rating', true );
 
-		if ( '' === ( $review_count = get_post_meta( $id, '_wc_review_count', true ) ) ) {
+		if ( '' === $review_count ) {
 			WC_Comments::get_review_count_for_product( $product );
 		} else {
 			$product->set_review_count( $review_count );
 		}
 
-		if ( '' === ( $rating_counts = get_post_meta( $id, '_wc_rating_count', true ) ) ) {
+		if ( '' === $rating_counts ) {
 			WC_Comments::get_rating_counts_for_product( $product );
 		} else {
 			$product->set_rating_counts( $rating_counts );
 		}
 
-		if ( '' === ( $average_rating = get_post_meta( $id, '_wc_average_rating', true ) ) ) {
+		if ( '' === $average_rating ) {
 			WC_Comments::get_average_rating_for_product( $product );
 		} else {
 			$product->set_average_rating( $average_rating );
@@ -342,7 +352,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Read extra data associated with the product, like button text or product URL for external products.
 	 *
-	 * @param WC_Product
+	 * @param WC_Product $product Product object.
 	 * @since 3.0.0
 	 */
 	protected function read_extra_data( &$product ) {
@@ -358,15 +368,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Convert visibility terms to props.
 	 * Catalog visibility valid values are 'visible', 'catalog', 'search', and 'hidden'.
 	 *
-	 * @param WC_Product
+	 * @param WC_Product $product Product object.
 	 * @since 3.0.0
 	 */
 	protected function read_visibility( &$product ) {
 		$terms           = get_the_terms( $product->get_id(), 'product_visibility' );
 		$term_names      = is_array( $terms ) ? wp_list_pluck( $terms, 'name' ) : array();
-		$featured        = in_array( 'featured', $term_names );
-		$exclude_search  = in_array( 'exclude-from-search', $term_names );
-		$exclude_catalog = in_array( 'exclude-from-catalog', $term_names );
+		$featured        = in_array( 'featured', $term_names, true );
+		$exclude_search  = in_array( 'exclude-from-search', $term_names, true );
+		$exclude_catalog = in_array( 'exclude-from-catalog', $term_names, true );
 
 		if ( $exclude_search && $exclude_catalog ) {
 			$catalog_visibility = 'hidden';
@@ -436,7 +446,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Read downloads from post meta.
 	 *
-	 * @param WC_Product
+	 * @param WC_Product $product Product object.
 	 * @since 3.0.0
 	 */
 	protected function read_downloads( &$product ) {
@@ -461,8 +471,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Helper method that updates all the post meta for a product based on it's settings in the WC_Product class.
 	 *
-	 * @param WC_Product
-	 * @param bool Force update. Used during create.
+	 * @param WC_Product $product Product object.
+	 * @param bool       $force Force update. Used during create.
 	 * @since 3.0.0
 	 */
 	protected function update_post_meta( &$product, $force = false ) {
@@ -564,8 +574,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Handle updated meta props after updating meta data.
 	 *
-	 * @since  3.0.0
-	 * @param  WC_Product $product Product Object.
+	 * @since 3.0.0
+	 * @param WC_Product $product Product Object.
 	 */
 	protected function handle_updated_props( &$product ) {
 		if ( in_array( 'regular_price', $this->updated_props, true ) || in_array( 'sale_price', $this->updated_props, true ) ) {
@@ -631,7 +641,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 *
 	 * @since 3.0.0
 	 *
-	 * @param WC_Product $product
+	 * @param WC_Product $product Product object.
 	 * @param bool       $force Force update. Used during create.
 	 */
 	protected function update_visibility( &$product, $force = false ) {
@@ -677,8 +687,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Update attributes which are a mix of terms and meta data.
 	 *
-	 * @param WC_Product
-	 * @param bool Force update. Used during create.
+	 * @param WC_Product $product Product object.
+	 * @param bool       $force Force update. Used during create.
 	 * @since 3.0.0
 	 */
 	protected function update_attributes( &$product, $force = false ) {
@@ -725,8 +735,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Update downloads.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Product        $product
-	 * @param bool Force update. Used during create.
+	 * @param WC_Product $product Product object.
+	 * @param bool       $force Force update. Used during create.
 	 * @return bool If updated or not.
 	 */
 	protected function update_downloads( &$product, $force = false ) {
@@ -757,7 +767,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Make sure we store the product type and version (to track data changes).
 	 *
-	 * @param WC_Product
+	 * @param WC_Product $product Product object.
 	 * @since 3.0.0
 	 */
 	protected function update_version_and_type( &$product ) {
@@ -777,7 +787,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Clear any caches.
 	 *
-	 * @param WC_Product
+	 * @param WC_Product $product Product object.
 	 * @since 3.0.0
 	 */
 	protected function clear_caches( &$product ) {
@@ -803,20 +813,23 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		$decimals = absint( wc_get_price_decimals() );
 
+		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 		return $wpdb->get_results(
-			"
-			SELECT post.ID as id, post.post_parent as parent_id FROM `$wpdb->posts` AS post
-			LEFT JOIN `$wpdb->postmeta` AS meta ON post.ID = meta.post_id
-			LEFT JOIN `$wpdb->postmeta` AS meta2 ON post.ID = meta2.post_id
-			WHERE post.post_type IN ( 'product', 'product_variation' )
-				AND post.post_status = 'publish'
-				AND meta.meta_key = '_sale_price'
-				AND meta2.meta_key = '_price'
-				AND CAST( meta.meta_value AS DECIMAL ) >= 0
-				AND CAST( meta.meta_value AS CHAR ) != ''
-				AND CAST( meta.meta_value AS DECIMAL( 10, {$decimals} ) ) = CAST( meta2.meta_value AS DECIMAL( 10, {$decimals} ) )
-			GROUP BY post.ID;
-		"
+			$wpdb->prepare(
+				"SELECT post.ID as id, post.post_parent as parent_id FROM `$wpdb->posts` AS post
+				LEFT JOIN `$wpdb->postmeta` AS meta ON post.ID = meta.post_id
+				LEFT JOIN `$wpdb->postmeta` AS meta2 ON post.ID = meta2.post_id
+				WHERE post.post_type IN ( 'product', 'product_variation' )
+					AND post.post_status = 'publish'
+					AND meta.meta_key = '_sale_price'
+					AND meta2.meta_key = '_price'
+					AND CAST( meta.meta_value AS DECIMAL ) >= 0
+					AND CAST( meta.meta_value AS CHAR ) != ''
+					AND CAST( meta.meta_value AS DECIMAL( 10, %d ) ) = CAST( meta2.meta_value AS DECIMAL( 10, %d ) )
+				GROUP BY post.ID",
+				$decimals,
+				$decimals
+			)
 		);
 	}
 
@@ -836,6 +849,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'post_type'      => array( 'product', 'product_variation' ),
 				'posts_per_page' => -1,
 				'post_status'    => 'publish',
+				// phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_tax_query
 				'tax_query'      => array(
 					'relation' => 'AND',
 					array(
@@ -859,23 +873,25 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Check if product sku is found for any other product IDs.
 	 *
 	 * @since 3.0.0
-	 * @param int    $product_id
-	 * @param string $sku Will be slashed to work around https://core.trac.wordpress.org/ticket/27421
+	 * @param int    $product_id Product ID.
+	 * @param string $sku Will be slashed to work around https://core.trac.wordpress.org/ticket/27421.
 	 * @return bool
 	 */
 	public function is_existing_sku( $product_id, $sku ) {
 		global $wpdb;
+
+		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 		return $wpdb->get_var(
 			$wpdb->prepare(
-				"
-			SELECT $wpdb->posts.ID
-			FROM $wpdb->posts
-			LEFT JOIN $wpdb->postmeta ON ( $wpdb->posts.ID = $wpdb->postmeta.post_id )
-			WHERE $wpdb->posts.post_type IN ( 'product', 'product_variation' )
-			AND $wpdb->posts.post_status != 'trash'
-			AND $wpdb->postmeta.meta_key = '_sku' AND $wpdb->postmeta.meta_value = '%s'
-			AND $wpdb->postmeta.post_id <> %d LIMIT 1
-		 ", wp_slash( $sku ), $product_id
+				"SELECT $wpdb->posts.ID
+				FROM $wpdb->posts
+				LEFT JOIN $wpdb->postmeta ON ( $wpdb->posts.ID = $wpdb->postmeta.post_id )
+				WHERE $wpdb->posts.post_type IN ( 'product', 'product_variation' )
+					AND $wpdb->posts.post_status != 'trash'
+					AND $wpdb->postmeta.meta_key = '_sku' AND $wpdb->postmeta.meta_value = %s
+					AND $wpdb->postmeta.post_id <> %d
+				LIMIT 1",
+				wp_slash( $sku ), $product_id
 			)
 		);
 	}
@@ -890,18 +906,18 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	public function get_product_id_by_sku( $sku ) {
 		global $wpdb;
 
+		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 		$id = $wpdb->get_var(
 			$wpdb->prepare(
-				"
-			SELECT posts.ID
-			FROM $wpdb->posts AS posts
-			LEFT JOIN $wpdb->postmeta AS postmeta ON ( posts.ID = postmeta.post_id )
-			WHERE posts.post_type IN ( 'product', 'product_variation' )
-			AND posts.post_status != 'trash'
-			AND postmeta.meta_key = '_sku'
-			AND postmeta.meta_value = '%s'
-			LIMIT 1
-		 ", $sku
+				"SELECT posts.ID
+				FROM $wpdb->posts AS posts
+				LEFT JOIN $wpdb->postmeta AS postmeta ON ( posts.ID = postmeta.post_id )
+				WHERE posts.post_type IN ( 'product', 'product_variation' )
+					AND posts.post_status != 'trash'
+					AND postmeta.meta_key = '_sku'
+					AND postmeta.meta_value = %s
+				LIMIT 1",
+				$sku
 			)
 		);
 
@@ -916,19 +932,20 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	public function get_starting_sales() {
 		global $wpdb;
+
+		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 		return $wpdb->get_col(
 			$wpdb->prepare(
-				"
-			SELECT postmeta.post_id FROM {$wpdb->postmeta} as postmeta
-			LEFT JOIN {$wpdb->postmeta} as postmeta_2 ON postmeta.post_id = postmeta_2.post_id
-			LEFT JOIN {$wpdb->postmeta} as postmeta_3 ON postmeta.post_id = postmeta_3.post_id
-			WHERE postmeta.meta_key = '_sale_price_dates_from'
-			AND postmeta_2.meta_key = '_price'
-			AND postmeta_3.meta_key = '_sale_price'
-			AND postmeta.meta_value > 0
-			AND postmeta.meta_value < %s
-			AND postmeta_2.meta_value != postmeta_3.meta_value
-		", current_time( 'timestamp', true )
+				"SELECT postmeta.post_id FROM {$wpdb->postmeta} as postmeta
+				LEFT JOIN {$wpdb->postmeta} as postmeta_2 ON postmeta.post_id = postmeta_2.post_id
+				LEFT JOIN {$wpdb->postmeta} as postmeta_3 ON postmeta.post_id = postmeta_3.post_id
+				WHERE postmeta.meta_key = '_sale_price_dates_from'
+					AND postmeta_2.meta_key = '_price'
+					AND postmeta_3.meta_key = '_sale_price'
+					AND postmeta.meta_value > 0
+					AND postmeta.meta_value < %s
+					AND postmeta_2.meta_value != postmeta_3.meta_value",
+				current_time( 'timestamp', true )
 			)
 		);
 	}
@@ -941,19 +958,20 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	public function get_ending_sales() {
 		global $wpdb;
+
+		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 		return $wpdb->get_col(
 			$wpdb->prepare(
-				"
-			SELECT postmeta.post_id FROM {$wpdb->postmeta} as postmeta
-			LEFT JOIN {$wpdb->postmeta} as postmeta_2 ON postmeta.post_id = postmeta_2.post_id
-			LEFT JOIN {$wpdb->postmeta} as postmeta_3 ON postmeta.post_id = postmeta_3.post_id
-			WHERE postmeta.meta_key = '_sale_price_dates_to'
-			AND postmeta_2.meta_key = '_price'
-			AND postmeta_3.meta_key = '_regular_price'
-			AND postmeta.meta_value > 0
-			AND postmeta.meta_value < %s
-			AND postmeta_2.meta_value != postmeta_3.meta_value
-		", current_time( 'timestamp', true )
+				"SELECT postmeta.post_id FROM {$wpdb->postmeta} as postmeta
+				LEFT JOIN {$wpdb->postmeta} as postmeta_2 ON postmeta.post_id = postmeta_2.post_id
+				LEFT JOIN {$wpdb->postmeta} as postmeta_3 ON postmeta.post_id = postmeta_3.post_id
+				WHERE postmeta.meta_key = '_sale_price_dates_to'
+					AND postmeta_2.meta_key = '_price'
+					AND postmeta_3.meta_key = '_regular_price'
+					AND postmeta.meta_value > 0
+					AND postmeta.meta_value < %s
+					AND postmeta_2.meta_value != postmeta_3.meta_value",
+				current_time( 'timestamp', true )
 			)
 		);
 	}
@@ -975,7 +993,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'fields'      => 'ids',
 			'post_status' => 'publish',
 			'numberposts' => 1,
-			'meta_query'  => array(),
+			'meta_query'  => array(), // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_query
 		);
 
 		// Allow large queries in case user has many variations or attributes.
@@ -1027,14 +1045,22 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Make sure all variations have a sort order set so they can be reordered correctly.
 	 *
-	 * @param int $parent_id
+	 * @param int $parent_id Product ID.
 	 */
 	public function sort_all_product_variations( $parent_id ) {
 		global $wpdb;
-		$ids   = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_type = 'product_variation' AND post_parent = %d AND post_status = 'publish' ORDER BY menu_order ASC, ID ASC", $parent_id ) );
+
+		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
+		$ids   = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT ID FROM {$wpdb->posts} WHERE post_type = 'product_variation' AND post_parent = %d AND post_status = 'publish' ORDER BY menu_order ASC, ID ASC",
+				$parent_id
+			)
+		);
 		$index = 1;
 
 		foreach ( $ids as $id ) {
+			// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 			$wpdb->update( $wpdb->posts, array( 'menu_order' => ( $index++ ) ), array( 'ID' => absint( $id ) ) );
 		}
 	}
@@ -1047,7 +1073,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @param array $tags_array  List of tags IDs.
 	 * @param array $exclude_ids Excluded IDs.
 	 * @param int   $limit       Limit of results.
-	 * @param int   $product_id
+	 * @param int   $product_id  Product ID.
 	 * @return array
 	 */
 	public function get_related_products( $cats_array, $tags_array, $exclude_ids, $limit, $product_id ) {
@@ -1062,6 +1088,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		$related_product_query = (array) apply_filters( 'woocommerce_product_related_posts_query', $this->get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit + 10 ), $product_id, $args );
 
+		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery, WordPress.WP.PreparedSQL.NotPrepared
 		return $wpdb->get_col( implode( ' ', $related_product_query ) );
 	}
 
@@ -1130,24 +1157,39 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Uses queries rather than update_post_meta so we can do this in one query (to avoid stock issues).
 	 *
 	 * @since  3.0.0 this supports set, increase and decrease.
-	 * @param  int
-	 * @param  int|null $stock_quantity
-	 * @param  string   $operation set, increase and decrease.
+	 * @param  int      $product_id_with_stock Product ID.
+	 * @param  int|null $stock_quantity Stock quantity.
+	 * @param  string   $operation Set, increase and decrease.
 	 */
 	public function update_product_stock( $product_id_with_stock, $stock_quantity = null, $operation = 'set' ) {
 		global $wpdb;
 		add_post_meta( $product_id_with_stock, '_stock', 0, true );
 
-		// Update stock in DB directly
+		// Update stock in DB directly.
 		switch ( $operation ) {
 			case 'increase':
-				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value + %f WHERE post_id = %d AND meta_key='_stock'", $stock_quantity, $product_id_with_stock ) );
+				// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
+				$wpdb->query(
+					$wpdb->prepare(
+						"UPDATE {$wpdb->postmeta} SET meta_value = meta_value + %f WHERE post_id = %d AND meta_key='_stock'", $stock_quantity, $product_id_with_stock
+					)
+				);
 				break;
 			case 'decrease':
-				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value - %f WHERE post_id = %d AND meta_key='_stock'", $stock_quantity, $product_id_with_stock ) );
+				// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
+				$wpdb->query(
+					$wpdb->prepare(
+						"UPDATE {$wpdb->postmeta} SET meta_value = meta_value - %f WHERE post_id = %d AND meta_key='_stock'", $stock_quantity, $product_id_with_stock
+					)
+				);
 				break;
 			default:
-				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'", $stock_quantity, $product_id_with_stock ) );
+				// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
+				$wpdb->query(
+					$wpdb->prepare(
+						"UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'", $stock_quantity, $product_id_with_stock
+					)
+				);
 				break;
 		}
 
@@ -1160,24 +1202,39 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Uses queries rather than update_post_meta so we can do this in one query for performance.
 	 *
 	 * @since  3.0.0 this supports set, increase and decrease.
-	 * @param  int
-	 * @param  int|null $quantity
+	 * @param  int      $product_id Product ID.
+	 * @param  int|null $quantity Quantity.
 	 * @param  string   $operation set, increase and decrease.
 	 */
 	public function update_product_sales( $product_id, $quantity = null, $operation = 'set' ) {
 		global $wpdb;
 		add_post_meta( $product_id, 'total_sales', 0, true );
 
-		// Update stock in DB directly
+		// Update stock in DB directly.
 		switch ( $operation ) {
 			case 'increase':
-				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value + %f WHERE post_id = %d AND meta_key='total_sales'", $quantity, $product_id ) );
+				// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
+				$wpdb->query(
+					$wpdb->prepare(
+						"UPDATE {$wpdb->postmeta} SET meta_value = meta_value + %f WHERE post_id = %d AND meta_key='total_sales'", $quantity, $product_id
+					)
+				);
 				break;
 			case 'decrease':
-				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value - %f WHERE post_id = %d AND meta_key='total_sales'", $quantity, $product_id ) );
+				// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
+				$wpdb->query(
+					$wpdb->prepare(
+						"UPDATE {$wpdb->postmeta} SET meta_value = meta_value - %f WHERE post_id = %d AND meta_key='total_sales'", $quantity, $product_id
+					)
+				);
 				break;
 			default:
-				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='total_sales'", $quantity, $product_id ) );
+				// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
+				$wpdb->query(
+					$wpdb->prepare(
+						"UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='total_sales'", $quantity, $product_id
+					)
+				);
 				break;
 		}
 
@@ -1188,7 +1245,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Update a products average rating meta.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Product $product
+	 * @param WC_Product $product Product object.
 	 */
 	public function update_average_rating( $product ) {
 		update_post_meta( $product->get_id(), '_wc_average_rating', $product->get_average_rating( 'edit' ) );
@@ -1199,7 +1256,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Update a products review count meta.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Product $product
+	 * @param WC_Product $product Product object.
 	 */
 	public function update_review_count( $product ) {
 		update_post_meta( $product->get_id(), '_wc_review_count', $product->get_review_count( 'edit' ) );
@@ -1209,7 +1266,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Update a products rating counts.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Product $product
+	 * @param WC_Product $product Product object.
 	 */
 	public function update_rating_counts( $product ) {
 		update_post_meta( $product->get_id(), '_wc_rating_count', $product->get_rating_counts( 'edit' ) );
@@ -1219,7 +1276,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Get shipping class ID by slug.
 	 *
 	 * @since 3.0.0
-	 * @param $slug string
+	 * @param string $slug Product shipping class slug.
 	 * @return int|false
 	 */
 	public function get_shipping_class_id_by_slug( $slug ) {
@@ -1234,9 +1291,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Returns an array of products.
 	 *
-	 * @param  array $args @see wc_get_products
-	 *
+	 * @param  array $args Args to pass to WC_Product_Query().
 	 * @return array|object
+	 * @see wc_get_products
 	 */
 	public function get_products( $args = array() ) {
 		$query = new WC_Product_Query( $args );
@@ -1246,9 +1303,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Search product data for a term and return ids.
 	 *
-	 * @param  string $term
-	 * @param  string $type of product
-	 * @param  bool   $include_variations in search or not
+	 * @param  string $term Search term.
+	 * @param  string $type Type of product.
+	 * @param  bool   $include_variations Include variations in search or not.
 	 * @return array of ids
 	 */
 	public function search_products( $term, $type = '', $include_variations = false ) {
@@ -1268,16 +1325,17 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$type_where    = '';
 
 		if ( $type ) {
-			if ( in_array( $type, array( 'virtual', 'downloadable' ) ) ) {
+			if ( in_array( $type, array( 'virtual', 'downloadable' ), true ) ) {
 				$type_join  = " LEFT JOIN {$wpdb->postmeta} postmeta_type ON posts.ID = postmeta_type.post_id ";
 				$type_where = " AND ( postmeta_type.meta_key = '_{$type}' AND postmeta_type.meta_value = 'yes' ) ";
 			}
 		}
 
+		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 		$product_ids = $wpdb->get_col(
+			// phpcs:disable
 			$wpdb->prepare(
-				"
-				SELECT DISTINCT posts.ID FROM {$wpdb->posts} posts
+				"SELECT DISTINCT posts.ID FROM {$wpdb->posts} posts
 				LEFT JOIN {$wpdb->postmeta} postmeta ON posts.ID = postmeta.post_id
 				$type_join
 				WHERE (
@@ -1290,12 +1348,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				AND posts.post_type IN ('" . implode( "','", $post_types ) . "')
 				AND posts.post_status IN ('" . implode( "','", $post_statuses ) . "')
 				$type_where
-				ORDER BY posts.post_parent ASC, posts.post_title ASC
-				",
+				ORDER BY posts.post_parent ASC, posts.post_title ASC",
 				$like_term,
 				$like_term,
 				$like_term
 			)
+			// phpcs:enable
 		);
 
 		if ( is_numeric( $term ) ) {
@@ -1318,7 +1376,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Get the product type based on product ID.
 	 *
 	 * @since 3.0.0
-	 * @param int $product_id
+	 * @param int $product_id Product ID.
 	 * @return bool|string
 	 */
 	public function get_product_type( $product_id ) {
@@ -1337,8 +1395,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Add ability to get products by 'reviews_allowed' in WC_Product_Query.
 	 *
 	 * @since 3.2.0
-	 * @param string   $where where clause
-	 * @param WP_Query $wp_query
+	 * @param string   $where Where clause.
+	 * @param WP_Query $wp_query WP_Query instance.
+	 * @return string
 	 */
 	public function reviews_allowed_query_where( $where, $wp_query ) {
 		global $wpdb;
@@ -1358,7 +1417,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Get valid WP_Query args from a WC_Product_Query's query variables.
 	 *
 	 * @since 3.2.0
-	 * @param array $query_vars query vars from a WC_Product_Query
+	 * @param array $query_vars Query vars from a WC_Product_Query.
 	 * @return array
 	 */
 	protected function get_wp_query_args( $query_vars ) {
@@ -1411,13 +1470,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$wp_query_args['date_query'] = array();
 		}
 		if ( ! isset( $wp_query_args['meta_query'] ) ) {
+			// phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_query
 			$wp_query_args['meta_query'] = array();
 		}
 
 		// Handle product types.
 		if ( 'variation' === $query_vars['type'] ) {
 			$wp_query_args['post_type'] = 'product_variation';
-		} elseif ( is_array( $query_vars['type'] ) && in_array( 'variation', $query_vars['type'] ) ) {
+		} elseif ( is_array( $query_vars['type'] ) && in_array( 'variation', $query_vars['type'], true ) ) {
 			$wp_query_args['post_type']   = array( 'product_variation', 'product' );
 			$wp_query_args['tax_query'][] = array(
 				'relation' => 'OR',
@@ -1589,7 +1649,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 *
 	 * @since 3.2.0
 	 *
-	 * @param array $query_vars query vars from a WC_Product_Query
+	 * @param array $query_vars Query vars from a WC_Product_Query.
 	 *
 	 * @return array|object
 	 */
