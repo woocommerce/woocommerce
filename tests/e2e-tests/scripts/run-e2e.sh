@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 if [[ ${RUN_E2E} == 1 ]]; then
-	np
 
 	# Setup
 	export DISPLAY=:99.0
@@ -27,9 +26,15 @@ if [[ ${RUN_E2E} == 1 ]]; then
 	export BASE_URL="http://${TRAVIS_JOB_ID:0:20}.wp-e2e-tests.pw"
 
 	# Run e2e tests
-	npm test
+	testresults = `npm test`
+	echo $testresults
 
 	# Delete site after tests complete
 	./tests/e2e-tests/scripts/wp-serverpilot-delete.js
+
+	# Fail script if tests fail
+	if [[ $testresults == *"npm ERR! Test failed."* ]]; then
+  		exit 1
+	fi
 
 fi
