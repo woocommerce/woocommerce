@@ -21,6 +21,9 @@ define('SP_REQUEST_URL', (\$_SERVER['HTTPS'] ? 'https://' : 'http://') . \$_SERV
 
 define('WP_SITEURL', SP_REQUEST_URL);
 define('WP_HOME', SP_REQUEST_URL);
+
+/* Change WP_MEMORY_LIMIT to increase the memory limit for public pages. */
+define('WP_MEMORY_LIMIT', '256M');
 PHP
 
 wp db create
