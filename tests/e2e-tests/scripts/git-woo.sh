@@ -17,7 +17,7 @@ dbpass=`wp config get --constant=DB_PASSWORD`
 wp db drop --yes
 
 wp config create --dbname=$dbname --dbuser=$dbuser --dbpass=$dbpass --force --extra-php <<PHP
-define('SP_REQUEST_URL', ($_SERVER['HTTPS'] ? 'https://' : 'http://') . $_SERVER['HTTP_HOST']);
+define('SP_REQUEST_URL', (\$_SERVER['HTTPS'] ? 'https://' : 'http://') . \$_SERVER['HTTP_HOST']);
 
 define('WP_SITEURL', SP_REQUEST_URL);
 define('WP_HOME', SP_REQUEST_URL);
