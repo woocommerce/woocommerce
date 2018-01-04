@@ -26,15 +26,18 @@ if [[ ${RUN_E2E} == 1 ]]; then
 	export BASE_URL="http://${TRAVIS_JOB_ID:0:20}.wp-e2e-tests.pw"
 
 	# Run e2e tests
-	testresults = `npm test`
-	echo $testresults
+	echo "Running e2e tests, results will display upon completion"
+	npm test
+
+	# Fail script if tests fail
+	if [[ $? == *"npm ERR! Test failed."* ]]; then
+		# Delete site after tests complete
+		./tests/e2e-tests/scripts/wp-serverpilot-delete.js
+
+  		exit 1
+	fi
 
 	# Delete site after tests complete
 	./tests/e2e-tests/scripts/wp-serverpilot-delete.js
-
-	# Fail script if tests fail
-	if [[ $testresults == *"npm ERR! Test failed."* ]]; then
-  		exit 1
-	fi
 
 fi
