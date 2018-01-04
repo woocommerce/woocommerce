@@ -16,6 +16,8 @@ dbpass=`wp config get --constant=DB_PASSWORD`
 
 wp config create --dbname=$dbname --dbuser=$dbuser --dbpass=$dbpass --force
 
+cd ~/apps/$APP_NAME/public/
+
 wp theme install twentytwelve --activate
 wget https://github.com/woocommerce/woocommerce/archive/$1.zip -O woocommerce.zip
 wp plugin install woocommerce.zip
