@@ -40,10 +40,10 @@ test.describe( 'Single Product Page', function() {
 	test.it( 'should be able to add variation products to the cart', () => {
 		const variableProductPage = new SingleProductPage( driver, { url: manager.getPageUrl( '/product/hoodie' ) } );
 		variableProductPage.selectVariation( 'Color', 'Blue' );
-		variableProductPage.addToCart();
 
-		// Pause for a half-second. Driver goes too fast and makes wrong selections otherwise.
+		// Pause for a half-second. Driver clicks while content is expanding and button is moving
 		driver.sleep( 500 );
+		variableProductPage.addToCart();
 
 		variableProductPage.selectVariation( 'Color', 'Green' );
 		variableProductPage.addToCart();

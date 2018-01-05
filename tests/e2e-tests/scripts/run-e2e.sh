@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-if [[ ${RUN_E2E} == 1 ]]; then
+#if [[ ${RUN_E2E} == 1 ]]; then
 	set -ev
 	# Setup
 	export DISPLAY=:99.0
@@ -24,5 +24,6 @@ if [[ ${RUN_E2E} == 1 ]]; then
 
 	export BASE_URL="http://${TRAVIS_JOB_ID:0:20}.wp-e2e-tests.pw"
 
+	# Run the tests
 	npm test
-fi
+#fi
