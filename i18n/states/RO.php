@@ -5,7 +5,6 @@
  * For more details check:
  * https://ro.wikipedia.org/wiki/Jude%C8%9Bele_Rom%C3%A2niei
  *
- * @author  Automattic
  * @package WooCommerce/i18n
  * @version 3.1.0
  */
@@ -20,15 +19,15 @@ $states['RO'] = array(
 	'AB' => __( 'Alba', 'woocommerce' ),
 	'AR' => __( 'Arad', 'woocommerce' ),
 	'AG' => __( 'Arge&#537;', 'woocommerce' ),
-	'BC' => __( 'Bac&abreve;u', 'woocommerce' ),
+	'BC' => __( 'Bac&#259;u', 'woocommerce' ),
 	'BH' => __( 'Bihor', 'woocommerce' ),
-	'BN' => __( 'Bistri&#539;a-N&abreve;s&abreve;ud', 'woocommerce' ),
+	'BN' => __( 'Bistri&#539;a-N&#259;s&#259;ud', 'woocommerce' ),
 	'BT' => __( 'Boto&#537;ani', 'woocommerce' ),
-	'BR' => __( 'Br&abreve;ila', 'woocommerce' ),
+	'BR' => __( 'Br&#259;ila', 'woocommerce' ),
 	'BV' => __( 'Bra&#537;ov', 'woocommerce' ),
 	'B'  => __( 'Bucure&#537;ti', 'woocommerce' ),
-	'BZ' => __( 'Buz&abreve;u', 'woocommerce' ),
-	'CL' => __( 'C&abreve;l&abreve;ra&#537;i', 'woocommerce' ),
+	'BZ' => __( 'Buz&#259;u', 'woocommerce' ),
+	'CL' => __( 'C&#259;l&#259;ra&#537;i', 'woocommerce' ),
 	'CS' => __( 'Cara&#537;-Severin', 'woocommerce' ),
 	'CJ' => __( 'Cluj', 'woocommerce' ),
 	'CT' => __( 'Constan&#539;a', 'woocommerce' ),
@@ -49,7 +48,7 @@ $states['RO'] = array(
 	'NT' => __( 'Neam&#539;', 'woocommerce' ),
 	'OT' => __( 'Olt', 'woocommerce' ),
 	'PH' => __( 'Prahova', 'woocommerce' ),
-	'SJ' => __( 'S&abreve;laj', 'woocommerce' ),
+	'SJ' => __( 'S&#259;laj', 'woocommerce' ),
 	'SM' => __( 'Satu Mare', 'woocommerce' ),
 	'SB' => __( 'Sibiu', 'woocommerce' ),
 	'SV' => __( 'Suceava', 'woocommerce' ),
