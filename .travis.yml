@@ -43,7 +43,7 @@ script:
   - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start
   - sleep 3
-  - grunt e2e-test --file=cart-page.js
+  - npm test
 
 after_script:
   - bash tests/bin/travis.sh after
