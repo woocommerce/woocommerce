@@ -5,7 +5,6 @@
  * For more details check:
  * https://ro.wikipedia.org/wiki/Jude%C8%9Bele_Rom%C3%A2niei
  *
- * @author  Automattic
  * @package WooCommerce/i18n
  * @version 3.1.0
  */

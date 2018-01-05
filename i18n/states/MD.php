@@ -8,7 +8,6 @@
  * https://en.wikipedia.org/wiki/ISO_3166-2:MD
  * https://en.wikipedia.org/wiki/Romanian_alphabet#Unicode_and_HTML
  *
- * @author  Alexander Minza
  * @package WooCommerce/i18n
  * @version 3.3.0
  */
