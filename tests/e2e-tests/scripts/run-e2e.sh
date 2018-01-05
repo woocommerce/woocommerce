@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 if [[ ${RUN_E2E} == 1 ]]; then
 
 	# Setup
