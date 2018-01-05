@@ -149,9 +149,12 @@ class WC_Breadcrumb {
 				$this->term_ancestors( $main_term->term_id, 'product_cat' );
 				$this->add_crumb( $main_term->name, get_term_link( $main_term ) );
 			}
-		} elseif ( 'post' != get_post_type( $post ) ) {
+		} elseif ( 'post' !== get_post_type( $post ) ) {
 			$post_type = get_post_type_object( get_post_type( $post ) );
-			$this->add_crumb( $post_type->labels->singular_name, get_post_type_archive_link( get_post_type( $post ) ) );
+
+			if ( ! empty( $post_type->has_archive ) ) {
+				$this->add_crumb( $post_type->labels->singular_name, get_post_type_archive_link( get_post_type( $post ) ) );
+			}
 		} else {
 			$cat = current( get_the_category( $post ) );
 			if ( $cat ) {

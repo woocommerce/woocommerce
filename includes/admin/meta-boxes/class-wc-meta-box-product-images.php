@@ -25,6 +25,7 @@ class WC_Meta_Box_Product_Images {
 	 * @param WP_Post $post
 	 */
 	public static function output( $post ) {
+		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
 		?>
 		<div id="product_images_container">
 			<ul class="product_images">

@@ -282,8 +282,6 @@ body {
 				padding: 0 10px 0 0;
 				top: 1px;
 				position: relative;
-				-webkit-font-smoothing: antialiased;
-				-moz-osx-font-smoothing: grayscale;
 				text-decoration: none !important;
 				vertical-align: top;
 			}
@@ -491,6 +489,7 @@ body {
 	padding: 0;
 	border-bottom: 1px solid #eee;
 	color: #666;
+	align-items: center;
 
 	&:last-child {
 		border-bottom: 0;
@@ -508,7 +507,7 @@ body {
 		padding: 2em 0;
 		align-self: stretch;
 		display: flex;
-		align-items: center;
+		align-items: baseline;
 		justify-content: center;
 
 		img {
@@ -516,8 +515,13 @@ body {
 		}
 	}
 
+	&.stripe-logo .wc-wizard-service-name img {
+		padding: 8px 0;
+	}
+
 	&.paypal-logo .wc-wizard-service-name img {
 		max-width: 87px;
+		padding: 2px 0;
 	}
 
 	&.klarna-logo .wc-wizard-service-name {
@@ -525,6 +529,7 @@ body {
 
 		img {
 			max-width: 87px;
+			padding: 12px 0;
 		}
 	}
 
@@ -533,12 +538,13 @@ body {
 
 		img {
 			max-width: 95px;
+			padding: 12px 0;
 		}
 	}
 
 	.wc-wizard-service-description {
 		flex-grow: 1;
-		padding: 2em 20px;
+		padding: 20px;
 
 		p {
 			margin-bottom: 0;
@@ -562,6 +568,8 @@ body {
 		cursor: pointer;
 		padding: 2em 0;
 		position: relative;
+		max-height: 1.5em;
+		align-self: flex-start;
 	}
 
 	.wc-wizard-service-toggle {
@@ -1036,10 +1044,10 @@ p.jetpack-terms {
 	}
 }
 
-.wc-wizard-service-setting-stripe_email, .wc-wizard-service-setting-ppec_paypal_api_subject {
+.wc-wizard-service-setting-stripe_email, .wc-wizard-service-setting-ppec_paypal_email {
 	margin-top: 0.75em;
 
-	label.stripe_email, label.ppec_paypal_api_subject {
+	label.stripe_email, label.ppec_paypal_email {
 		position: absolute;
 		margin: -1px;
 		padding: 0;

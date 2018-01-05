@@ -178,6 +178,10 @@ jQuery( function ( $ ) {
 			ui.item.removeAttr( 'style' );
 		}
 	});
+	// Focus on inputs within the table if clicked instead of trying to sort.
+	$( '.wc_input_table.sortable tbody input' ).on( 'click', function() {
+		$( this ).focus();
+	} );
 
 	$( '.wc_input_table .remove_rows' ).click( function() {
 		var $tbody = $( this ).closest( '.wc_input_table' ).find( 'tbody' );

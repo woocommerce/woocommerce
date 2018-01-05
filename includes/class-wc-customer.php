@@ -270,7 +270,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @param bool $is_vat_exempt
 	 */
 	public function set_is_vat_exempt( $is_vat_exempt ) {
-		$this->is_vat_exempt = (bool) $is_vat_exempt;
+		$this->is_vat_exempt = wc_string_to_bool( $is_vat_exempt );
 	}
 
 	/**
@@ -279,7 +279,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @param boolean $calculated
 	 */
 	public function set_calculated_shipping( $calculated = true ) {
-		$this->calculated_shipping = (bool) $calculated;
+		$this->calculated_shipping = wc_string_to_bool( $calculated );
 	}
 
 	/**

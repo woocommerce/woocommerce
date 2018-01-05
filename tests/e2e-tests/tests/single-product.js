@@ -16,6 +16,13 @@ let manager;
 let driver;
 
 test.describe( 'Single Product Page', function() {
+	const visitProductByPath = path => {
+		return new SingleProductPage( driver, { url: manager.getPageUrl( path ) } );
+	};
+	const visitCart = () => {
+		return new CartPage( driver, { url: manager.getPageUrl( '/cart' ) } );
+	};
+
 	// open browser
 	test.before( function() {
 		this.timeout( config.get( 'startBrowserTimeoutMs' ) );
@@ -29,28 +36,29 @@ test.describe( 'Single Product Page', function() {
 	this.timeout( config.get( 'mochaTimeoutMs' ) );
 
 	test.it( 'should be able to add simple products to the cart', () => {
-		const productPage = new SingleProductPage( driver, { url: manager.getPageUrl( '/product/t-shirt' ) } );
+		const productPage = visitProductByPath( '/product/t-shirt' );
 		productPage.setQuantity( 5 );
 		productPage.addToCart();
 
-		const cartPage = new CartPage( driver, { url: manager.getPageUrl( '/cart' ) } );
-		assert.eventually.equal( cartPage.hasItem( 'T-Shirt', { qty: 5 } ), true );
+		assert.eventually.equal( visitCart().hasItem( 'T-Shirt', { qty: 5 } ), true );
 	} );
 
 	test.it( 'should be able to add variation products to the cart', () => {
-		const variableProductPage = new SingleProductPage( driver, { url: manager.getPageUrl( '/product/hoodie' ) } );
-		variableProductPage.selectVariation( 'Color', 'Blue' );
+		let variableProductPage;
 
-		// Pause for a half-second. Driver clicks while content is expanding and button is moving
+		variableProductPage = visitProductByPath( '/product/hoodie' );
+		variableProductPage.selectVariation( 'Color', 'Blue' );
+		variableProductPage.selectVariation( 'Logo', 'Yes' );
 		driver.sleep( 500 );
 		variableProductPage.addToCart();
+		assert.eventually.ok( visitCart().hasItem( 'Hoodie - Blue, Yes' ), '"Hoodie - Blue, Yes" in the cart' );
 
+		variableProductPage = visitProductByPath( '/product/hoodie' );
 		variableProductPage.selectVariation( 'Color', 'Green' );
+		variableProductPage.selectVariation( 'Logo', 'No' );
+		driver.sleep( 500 );
 		variableProductPage.addToCart();
-
-		const cartPage = new CartPage( driver, { url: manager.getPageUrl( '/cart' ) } );
-		assert.eventually.equal( cartPage.hasItem( 'Hoodie - Blue' ), true );
-		assert.eventually.equal( cartPage.hasItem( 'Hoodie - Green' ), true );
+		assert.eventually.ok( visitCart().hasItem( 'Hoodie - Green, No' ), '"Hoodie - Green, No" in the cart' );
 	} );
 
 	// quit browser
