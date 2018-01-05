@@ -39,11 +39,11 @@ before_script:
 script:
   #- bash tests/bin/phpunit.sh
   - bash tests/bin/phpcs.sh
-  - export BASE_URL="http://${TRAVIS_JOB_ID:0:20}.wp-e2e-tests.pw"
   - grunt e2e-test --file=cart-page.js
 
 after_script:
   - bash tests/bin/travis.sh after
+  - export NODE_CONFIG_DIR="./tests/e2e-tests/config"
   - ./tests/e2e-tests/scripts/wp-serverpilot-delete.js
 
 # Specifies that Travis should create builds for master and release branches and also tags.
