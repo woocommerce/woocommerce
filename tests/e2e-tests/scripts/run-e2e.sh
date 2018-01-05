@@ -18,9 +18,9 @@ if [[ ${RUN_E2E} == 1 ]]; then
 	mv deploy-key ~/.ssh/id_rsa
 
 	# Configure new server
-	scp -o "StrictHostKeyChecking no" tests/e2e-tests/scripts/git-woo.sh serverpilot@wp-e2e-tests.pw:~serverpilot/git-woo.sh
+	scp -o "StrictHostKeyChecking no" tests/e2e-tests/scripts/sp-config.sh serverpilot@wp-e2e-tests.pw:~serverpilot/sp-config.sh
 	scp -o "StrictHostKeyChecking no" tests/e2e-tests/data/e2e-db.sql serverpilot@wp-e2e-tests.pw:~serverpilot/e2e-db.sql
-	ssh -o "StrictHostKeyChecking no" serverpilot@wp-e2e-tests.pw ~serverpilot/git-woo.sh "${TRAVIS_BRANCH}" wordpress-${TRAVIS_JOB_ID:0:20}
+	ssh -o "StrictHostKeyChecking no" serverpilot@wp-e2e-tests.pw ~serverpilot/sp-config.sh "${TRAVIS_BRANCH}" wordpress-${TRAVIS_JOB_ID:0:20}
 
 	export BASE_URL="http://${TRAVIS_JOB_ID:0:20}.wp-e2e-tests.pw"
 
