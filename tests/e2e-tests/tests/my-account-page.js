@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import config from '../config';
+import config from 'config';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import test from 'selenium-webdriver/testing';
