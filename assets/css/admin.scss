@@ -1165,7 +1165,6 @@ ul.wc_coupon_list_block {
 				line-height: 14px;
 				font-size: 14px;
 				font-weight: 400;
-				-webkit-font-smoothing: antialiased;
 			}
 		}
 		a.edit_address::after {
@@ -1954,7 +1953,6 @@ ul.wc_coupon_list_block {
 				font-weight: normal;
 				font-variant: normal;
 				text-transform: none;
-				-webkit-font-smoothing: antialiased;
 				margin: 0;
 				text-indent: 0;
 				position: absolute;
@@ -2511,8 +2509,17 @@ table.wp-list-table {
 		color: #999;
 	}
 
+	.column-sku {
+		width: 10%;
+	}
+
+	.column-price {
+		width: 10ch;
+	}
+
 	.column-is_in_stock {
 		text-align: left !important;
+		width: 12ch;
 	}
 
 	span.wc-image,
@@ -5123,6 +5130,12 @@ img.ui-datepicker-trigger {
 					color: #999;
 					margin-left: 4px;
 					margin-top: 10px;
+				}
+
+				.description {
+					margin-left: .5em;
+					font-weight: normal;
+					opacity: .8;
 				}
 			}
 		}

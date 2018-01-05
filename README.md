@@ -1,4 +1,14 @@
-# [WooCommerce](https://woocommerce.com/) [![Built with Grunt](https://cdn.gruntjs.com/builtwith.png)](http://gruntjs.com/) [![Build Status](https://travis-ci.org/woocommerce/woocommerce.svg?branch=master)](https://travis-ci.org/woocommerce/woocommerce) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/woocommerce/woocommerce/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/woocommerce/woocommerce/?branch=master) [![codecov](https://codecov.io/gh/woocommerce/woocommerce/branch/master/graph/badge.svg)](https://codecov.io/gh/woocommerce/woocommerce)
+<p align="center"><a href="https://woocommerce.com/"><img src="https://woocommerce.com/wp-content/themes/woo/images/logo-woocommerce@2x.png" alt="WooCommerce"></a></p>
+
+<p align="center">
+<a href="https://packagist.org/packages/woocommerce/woocommerce"><img src="https://poser.pugx.org/woocommerce/woocommerce/license" alt="license"></a> 
+<a href="https://packagist.org/packages/woocommerce/woocommerce"><img src="https://poser.pugx.org/woocommerce/woocommerce/v/stable" alt="Latest Stable Version"></a>
+<img src="https://img.shields.io/wordpress/plugin/dt/woocommerce.svg" alt="WordPress.org downloads">
+<img src="https://img.shields.io/wordpress/plugin/r/woocommerce.svg" alt="WordPress.org rating">
+<a href="https://travis-ci.org/woocommerce/woocommerce"><img src="https://travis-ci.org/woocommerce/woocommerce.svg?branch=master" alt="Build Status"></a>
+<a href="https://scrutinizer-ci.com/g/woocommerce/woocommerce/?branch=master"><img src="https://scrutinizer-ci.com/g/woocommerce/woocommerce/badges/quality-score.png?b=master" alt="Scrutinizer Code Quality"></a>
+<a href="https://codecov.io/gh/woocommerce/woocommerce"><img src="https://codecov.io/gh/woocommerce/woocommerce/branch/master/graph/badge.svg" alt="codecov"></a>
+</p>
 
 Welcome to the WooCommerce repository on GitHub. Here you can browse the source, look at open issues and keep track of development. We recommend all developers to follow the [WooCommerce development blog](https://woocommerce.wordpress.com/) to stay up to date about everything happening in the project. You can also [follow @DevelopWC](https://twitter.com/DevelopWC) on Twitter for the latest development updates.
 
