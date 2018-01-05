@@ -153,7 +153,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 		// Add SKU and PRICE to products.
 		if ( is_callable( array( $item, 'get_product' ) ) ) {
 			$data['sku']   = $item->get_product() ? $item->get_product()->get_sku(): null;
-			$data['price'] = $item->get_total() / max( 1, $item->get_quantity() );
+			$data['price'] = $item->get_quantity() ? $item->get_total() / $item->get_quantity() : 0;
 		}
 
 		// Format taxes.
