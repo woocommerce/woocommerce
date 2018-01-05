@@ -161,7 +161,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
-= 3.3.0 - 2017-XX-XX =
+= 3.3.0 - 2018-XX-XX =
 * Feature - Improved default appearance in themes which do not support WooCommerce, making the shop page shortcode based.
 * Feature - Products shortcodes; improved random sorting, with some caching.
 * Feature - Products shortcodes; support for pagination.
