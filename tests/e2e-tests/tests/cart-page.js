@@ -15,6 +15,7 @@ test.describe( 'Cart page', function() {
 	// open browser
 	test.before( function() {
 		this.timeout( config.get( 'startBrowserTimeoutMs' ) );
+		console.log(config.get('url'));
 
 		manager = new WebDriverManager( 'chrome', { baseUrl: config.get( 'url' ) } );
 		driver = manager.getDriver();
