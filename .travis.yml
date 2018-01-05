@@ -34,16 +34,17 @@ before_script:
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
   - bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
   - bash tests/bin/travis.sh before
-  - ./tests/e2e-tests/scripts/run-e2e.sh  	
+  #- ./tests/e2e-tests/scripts/run-e2e.sh  	
 
 script:
   #- bash tests/bin/phpunit.sh
   - bash tests/bin/phpcs.sh
-  - export BASE_URL="http://${TRAVIS_JOB_ID:0:20}.wp-e2e-tests.pw"
-  - export DISPLAY=:99.0
-  - sh -e /etc/init.d/xvfb start
-  - sleep 3
-  - npm test
+  #- export BASE_URL="http://${TRAVIS_JOB_ID:0:20}.wp-e2e-tests.pw"
+  #- export DISPLAY=:99.0
+  #- sh -e /etc/init.d/xvfb start
+  #- sleep 3
+  #- npm test
+  - ./tests/e2e-tests/scripts/run-e2e.sh  
 
 after_script:
   - bash tests/bin/travis.sh after

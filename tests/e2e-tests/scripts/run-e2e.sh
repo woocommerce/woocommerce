@@ -19,4 +19,7 @@ if [[ ${RUN_E2E} == 1 ]]; then
 	scp -o "StrictHostKeyChecking no" tests/e2e-tests/data/e2e-db.sql serverpilot@wp-e2e-tests.pw:~serverpilot/e2e-db.sql
 	ssh -o "StrictHostKeyChecking no" serverpilot@wp-e2e-tests.pw ~serverpilot/git-woo.sh "${TRAVIS_BRANCH}" wordpress-${TRAVIS_JOB_ID:0:20}
 
+	export BASE_URL="http://${TRAVIS_JOB_ID:0:20}.wp-e2e-tests.pw"
+
+	npm test
 fi
