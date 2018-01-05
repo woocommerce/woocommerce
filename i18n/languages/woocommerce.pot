@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 3.3.0-beta.1\n"
+"Project-Id-Version: WooCommerce 3.3.0-beta.2\n"
 "Report-Msgid-Bugs-To: https://github.com/woocommerce/woocommerce/issues\n"
-"POT-Creation-Date: 2018-01-05 12:22:19+00:00\n"
+"POT-Creation-Date: 2018-01-05 18:47:10+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -3509,143 +3509,143 @@ msgstr ""
 msgid "Okinawa-ken"
 msgstr ""
 
+#: i18n/states/MD.php:22
+msgid "Chi&#537;in&#259;u"
+msgstr ""
+
 #: i18n/states/MD.php:23
-msgid "Chi&#537;in&abreve;u"
+msgid "B&#259;l&#539;i"
 msgstr ""
 
 #: i18n/states/MD.php:24
-msgid "B&abreve;l&#539;i"
-msgstr ""
-
-#: i18n/states/MD.php:25
 msgid "Anenii Noi"
 msgstr ""
 
-#: i18n/states/MD.php:26
+#: i18n/states/MD.php:25
 msgid "Basarabeasca"
 msgstr ""
 
-#: i18n/states/MD.php:27
+#: i18n/states/MD.php:26
 msgid "Briceni"
 msgstr ""
 
-#: i18n/states/MD.php:28
+#: i18n/states/MD.php:27
 msgid "Cahul"
 msgstr ""
 
-#: i18n/states/MD.php:29
+#: i18n/states/MD.php:28
 msgid "Cantemir"
 msgstr ""
 
-#: i18n/states/MD.php:30 i18n/states/RO.php:31
-msgid "C&abreve;l&abreve;ra&#537;i"
+#: i18n/states/MD.php:29 i18n/states/RO.php:30
+msgid "C&#259;l&#259;ra&#537;i"
+msgstr ""
+
+#: i18n/states/MD.php:30
+msgid "C&#259;u&#537;eni"
 msgstr ""
 
 #: i18n/states/MD.php:31
-msgid "C&abreve;u&#537;eni"
-msgstr ""
-
-#: i18n/states/MD.php:32
 msgid "Cimi&#537;lia"
 msgstr ""
 
-#: i18n/states/MD.php:33
+#: i18n/states/MD.php:32
 msgid "Criuleni"
 msgstr ""
 
-#: i18n/states/MD.php:34
+#: i18n/states/MD.php:33
 msgid "Dondu&#537;eni"
 msgstr ""
 
-#: i18n/states/MD.php:35
+#: i18n/states/MD.php:34
 msgid "Drochia"
 msgstr ""
 
-#: i18n/states/MD.php:36
-msgid "Dub&abreve;sari"
+#: i18n/states/MD.php:35
+msgid "Dub&#259;sari"
 msgstr ""
 
-#: i18n/states/MD.php:37
+#: i18n/states/MD.php:36
 msgid "Edine&#539;"
 msgstr ""
 
-#: i18n/states/MD.php:38
-msgid "F&abreve;le&#537;ti"
+#: i18n/states/MD.php:37
+msgid "F&#259;le&#537;ti"
 msgstr ""
 
-#: i18n/states/MD.php:39
+#: i18n/states/MD.php:38
 msgid "Flore&#537;ti"
 msgstr ""
 
-#: i18n/states/MD.php:40
-msgid "UTA G&abreve;g&abreve;uzia"
+#: i18n/states/MD.php:39
+msgid "UTA G&#259;g&#259;uzia"
 msgstr ""
 
-#: i18n/states/MD.php:41
+#: i18n/states/MD.php:40
 msgid "Glodeni"
 msgstr ""
 
-#: i18n/states/MD.php:42
+#: i18n/states/MD.php:41
 msgid "H&icirc;nce&#537;ti"
 msgstr ""
 
-#: i18n/states/MD.php:43
+#: i18n/states/MD.php:42
 msgid "Ialoveni"
 msgstr ""
 
-#: i18n/states/MD.php:44
+#: i18n/states/MD.php:43
 msgid "Leova"
 msgstr ""
 
-#: i18n/states/MD.php:45
+#: i18n/states/MD.php:44
 msgid "Nisporeni"
 msgstr ""
 
-#: i18n/states/MD.php:46
+#: i18n/states/MD.php:45
 msgid "Ocni&#539;a"
 msgstr ""
 
-#: i18n/states/MD.php:47
+#: i18n/states/MD.php:46
 msgid "Orhei"
 msgstr ""
 
-#: i18n/states/MD.php:48
+#: i18n/states/MD.php:47
 msgid "Rezina"
 msgstr ""
 
-#: i18n/states/MD.php:49
+#: i18n/states/MD.php:48
 msgid "R&icirc;&#537;cani"
 msgstr ""
 
-#: i18n/states/MD.php:50
+#: i18n/states/MD.php:49
 msgid "S&icirc;ngerei"
 msgstr ""
 
-#: i18n/states/MD.php:51
+#: i18n/states/MD.php:50
 msgid "Soroca"
 msgstr ""
 
+#: i18n/states/MD.php:51
+msgid "Str&#259;&#537;eni"
+msgstr ""
+
 #: i18n/states/MD.php:52
-msgid "Str&abreve;&#537;eni"
+msgid "&#536;old&#259;ne&#537;ti"
 msgstr ""
 
 #: i18n/states/MD.php:53
-msgid "&#536;old&abreve;ne&#537;ti"
+msgid "&#536;tefan Vod&#259;"
 msgstr ""
 
 #: i18n/states/MD.php:54
-msgid "&#536;tefan Vod&abreve;"
-msgstr ""
-
-#: i18n/states/MD.php:55
 msgid "Taraclia"
 msgstr ""
 
-#: i18n/states/MD.php:56
+#: i18n/states/MD.php:55
 msgid "Telene&#537;ti"
 msgstr ""
 
-#: i18n/states/MD.php:57
+#: i18n/states/MD.php:56
 msgid "Ungheni"
 msgstr ""
 
@@ -4561,167 +4561,167 @@ msgstr ""
 msgid "Sindh"
 msgstr ""
 
-#: i18n/states/RO.php:20
+#: i18n/states/RO.php:19
 msgid "Alba"
 msgstr ""
 
-#: i18n/states/RO.php:21
+#: i18n/states/RO.php:20
 msgid "Arad"
 msgstr ""
 
-#: i18n/states/RO.php:22
+#: i18n/states/RO.php:21
 msgid "Arge&#537;"
 msgstr ""
 
-#: i18n/states/RO.php:23
-msgid "Bac&abreve;u"
+#: i18n/states/RO.php:22
+msgid "Bac&#259;u"
 msgstr ""
 
-#: i18n/states/RO.php:24
+#: i18n/states/RO.php:23
 msgid "Bihor"
 msgstr ""
 
-#: i18n/states/RO.php:25
-msgid "Bistri&#539;a-N&abreve;s&abreve;ud"
+#: i18n/states/RO.php:24
+msgid "Bistri&#539;a-N&#259;s&#259;ud"
 msgstr ""
 
-#: i18n/states/RO.php:26
+#: i18n/states/RO.php:25
 msgid "Boto&#537;ani"
 msgstr ""
 
-#: i18n/states/RO.php:27
-msgid "Br&abreve;ila"
+#: i18n/states/RO.php:26
+msgid "Br&#259;ila"
 msgstr ""
 
-#: i18n/states/RO.php:28
+#: i18n/states/RO.php:27
 msgid "Bra&#537;ov"
 msgstr ""
 
-#: i18n/states/RO.php:29
+#: i18n/states/RO.php:28
 msgid "Bucure&#537;ti"
 msgstr ""
 
-#: i18n/states/RO.php:30
-msgid "Buz&abreve;u"
+#: i18n/states/RO.php:29
+msgid "Buz&#259;u"
 msgstr ""
 
-#: i18n/states/RO.php:32
+#: i18n/states/RO.php:31
 msgid "Cara&#537;-Severin"
 msgstr ""
 
-#: i18n/states/RO.php:33
+#: i18n/states/RO.php:32
 msgid "Cluj"
 msgstr ""
 
-#: i18n/states/RO.php:34
+#: i18n/states/RO.php:33
 msgid "Constan&#539;a"
 msgstr ""
 
-#: i18n/states/RO.php:35
+#: i18n/states/RO.php:34
 msgid "Covasna"
 msgstr ""
 
-#: i18n/states/RO.php:36
+#: i18n/states/RO.php:35
 msgid "D&acirc;mbovi&#539;a"
 msgstr ""
 
-#: i18n/states/RO.php:37
+#: i18n/states/RO.php:36
 msgid "Dolj"
 msgstr ""
 
-#: i18n/states/RO.php:38
+#: i18n/states/RO.php:37
 msgid "Gala&#539;i"
 msgstr ""
 
-#: i18n/states/RO.php:39
+#: i18n/states/RO.php:38
 msgid "Giurgiu"
 msgstr ""
 
-#: i18n/states/RO.php:40
+#: i18n/states/RO.php:39
 msgid "Gorj"
 msgstr ""
 
-#: i18n/states/RO.php:41
+#: i18n/states/RO.php:40
 msgid "Harghita"
 msgstr ""
 
-#: i18n/states/RO.php:42
+#: i18n/states/RO.php:41
 msgid "Hunedoara"
 msgstr ""
 
-#: i18n/states/RO.php:43
+#: i18n/states/RO.php:42
 msgid "Ialomi&#539;a"
 msgstr ""
 
-#: i18n/states/RO.php:44
+#: i18n/states/RO.php:43
 msgid "Ia&#537;i"
 msgstr ""
 
-#: i18n/states/RO.php:45
+#: i18n/states/RO.php:44
 msgid "Ilfov"
 msgstr ""
 
-#: i18n/states/RO.php:46
+#: i18n/states/RO.php:45
 msgid "Maramure&#537;"
 msgstr ""
 
-#: i18n/states/RO.php:47
+#: i18n/states/RO.php:46
 msgid "Mehedin&#539;i"
 msgstr ""
 
-#: i18n/states/RO.php:48
+#: i18n/states/RO.php:47
 msgid "Mure&#537;"
 msgstr ""
 
-#: i18n/states/RO.php:49
+#: i18n/states/RO.php:48
 msgid "Neam&#539;"
 msgstr ""
 
-#: i18n/states/RO.php:50
+#: i18n/states/RO.php:49
 msgid "Olt"
 msgstr ""
 
-#: i18n/states/RO.php:51
+#: i18n/states/RO.php:50
 msgid "Prahova"
 msgstr ""
 
-#: i18n/states/RO.php:52
-msgid "S&abreve;laj"
+#: i18n/states/RO.php:51
+msgid "S&#259;laj"
 msgstr ""
 
-#: i18n/states/RO.php:53
+#: i18n/states/RO.php:52
 msgid "Satu Mare"
 msgstr ""
 
-#: i18n/states/RO.php:54
+#: i18n/states/RO.php:53
 msgid "Sibiu"
 msgstr ""
 
-#: i18n/states/RO.php:55
+#: i18n/states/RO.php:54
 msgid "Suceava"
 msgstr ""
 
-#: i18n/states/RO.php:56
+#: i18n/states/RO.php:55
 msgid "Teleorman"
 msgstr ""
 
-#: i18n/states/RO.php:57
+#: i18n/states/RO.php:56
 msgid "Timi&#537;"
 msgstr ""
 
-#: i18n/states/RO.php:58
+#: i18n/states/RO.php:57
 msgid "Tulcea"
 msgstr ""
 
-#: i18n/states/RO.php:59
+#: i18n/states/RO.php:58
 msgid "V&acirc;lcea"
 msgstr ""
 
-#: i18n/states/RO.php:60
+#: i18n/states/RO.php:59
 msgid "Vaslui"
 msgstr ""
 
-#: i18n/states/RO.php:61
+#: i18n/states/RO.php:60
 msgid "Vrancea"
 msgstr ""
 
