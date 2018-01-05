@@ -40,7 +40,7 @@ script:
   #- bash tests/bin/phpunit.sh
   - bash tests/bin/phpcs.sh
   	# Set BASE_URL for tests
-  -	export BASE_URL="http://${TRAVIS_JOB_ID:0:20}.wp-e2e-tests.pw"
+  - export BASE_URL="http://${TRAVIS_JOB_ID:0:20}.wp-e2e-tests.pw"
   - npm test
 
 after_script:
