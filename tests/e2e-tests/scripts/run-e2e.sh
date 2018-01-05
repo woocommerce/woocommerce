@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#if [[ ${RUN_E2E} == 1 ]]; then
+if [[ ${RUN_E2E} == 1 ]]; then
 	set -ev
 	# Setup
 	export DISPLAY=:99.0
@@ -26,4 +26,4 @@
 
 	# Run the tests
 	npm test
-#fi
+fi

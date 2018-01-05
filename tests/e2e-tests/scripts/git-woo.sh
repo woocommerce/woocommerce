@@ -30,7 +30,5 @@ wp db create
 wp db import ~/e2e-db.sql
 
 wp theme install twentytwelve --activate
-wget https://github.com/woocommerce/woocommerce/archive/$1.zip -O woocommerce.zip
-wp plugin install woocommerce.zip --activate
-wp plugin list
+wp plugin install https://github.com/woocommerce/woocommerce/archive/$1.zip --activate
 
