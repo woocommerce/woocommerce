@@ -2509,8 +2509,17 @@ table.wp-list-table {
 		color: #999;
 	}
 
+	.column-sku {
+		width: 10%;
+	}
+
+	.column-price {
+		width: 10ch;
+	}
+
 	.column-is_in_stock {
 		text-align: left !important;
+		width: 12ch;
 	}
 
 	span.wc-image,
