@@ -40,7 +40,7 @@ script:
   #- bash tests/bin/phpunit.sh
   - bash tests/bin/phpcs.sh
   - export BASE_URL="http://${TRAVIS_JOB_ID:0:20}.wp-e2e-tests.pw"
-  - npm test
+  - grunt e2e-test --file=cart-page.js
 
 after_script:
   - bash tests/bin/travis.sh after
