@@ -2,9 +2,6 @@
 if [[ ${RUN_E2E} == 1 ]]; then
 	set -ev
 	# Setup
-	export DISPLAY=:99.0
-	sh -e /etc/init.d/xvfb start
-	sleep 3
 	npm install
 	export NODE_CONFIG_DIR="./tests/e2e-tests/config"
 
@@ -21,8 +18,5 @@ if [[ ${RUN_E2E} == 1 ]]; then
 	scp -o "StrictHostKeyChecking no" tests/e2e-tests/scripts/git-woo.sh serverpilot@wp-e2e-tests.pw:~serverpilot/git-woo.sh
 	scp -o "StrictHostKeyChecking no" tests/e2e-tests/data/e2e-db.sql serverpilot@wp-e2e-tests.pw:~serverpilot/e2e-db.sql
 	ssh -o "StrictHostKeyChecking no" serverpilot@wp-e2e-tests.pw ~serverpilot/git-woo.sh "${TRAVIS_BRANCH}" wordpress-${TRAVIS_JOB_ID:0:20}
-
-	# Set BASE_URL for tests
-	export BASE_URL="http://${TRAVIS_JOB_ID:0:20}.wp-e2e-tests.pw"
 
 fi
