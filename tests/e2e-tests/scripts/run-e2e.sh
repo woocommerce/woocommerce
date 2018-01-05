@@ -2,6 +2,9 @@
 if [[ ${RUN_E2E} == 1 ]]; then
 	set -ev
 	# Setup
+	export DISPLAY=:99.0
+	sh -e /etc/init.d/xvfb start
+ 	sleep 3
 	npm install
 	export NODE_CONFIG_DIR="./tests/e2e-tests/config"
 
