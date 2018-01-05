@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 3.3.0-beta.2\n"
 "Report-Msgid-Bugs-To: https://github.com/woocommerce/woocommerce/issues\n"
-"POT-Creation-Date: 2018-01-05 18:09:45+00:00\n"
+"POT-Creation-Date: 2018-01-05 18:47:10+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -5816,7 +5816,7 @@ msgid "via %s"
 msgstr ""
 
 #: includes/abstracts/abstract-wc-order.php:1686
-#: includes/class-wc-cart.php:1424 includes/class-wc-product-grouped.php:119
+#: includes/class-wc-cart.php:1424 includes/class-wc-product-grouped.php:124
 msgid "Free!"
 msgstr ""
 
@@ -24697,17 +24697,6 @@ msgctxt "Order status"
 msgid "Failed"
 msgstr ""
 
-#: includes/class-wc-product-grouped.php:115
-msgctxt "Price range: from-to"
-msgid "%1$s&ndash;%2$s"
-msgstr ""
-
-#: includes/wc-formatting-functions.php:1164
-#. translators: 1: price from 2: price to
-msgctxt "Price range: from-to"
-msgid "%1$s &ndash; %2$s"
-msgstr ""
-
 #: includes/wc-account-functions.php:68
 msgctxt "edit-address-slug"
 msgid "billing"
@@ -24724,6 +24713,12 @@ msgid "Shipping"
 msgid_plural "Shipping %d"
 msgstr[0] ""
 msgstr[1] ""
+
+#: includes/wc-formatting-functions.php:1164
+#. translators: 1: price from 2: price to
+msgctxt "Price range: from-to"
+msgid "%1$s &ndash; %2$s"
+msgstr ""
 
 #: includes/wc-template-functions.php:1689
 msgctxt "breadcrumb"
