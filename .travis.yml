@@ -34,14 +34,16 @@ before_script:
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
   - bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
   - bash tests/bin/travis.sh before
+  - ./tests/e2e-tests/scripts/run-e2e.sh  	
 
 script:
   #- bash tests/bin/phpunit.sh
   - bash tests/bin/phpcs.sh
-  - bash tests/e2e-tests/scripts/run-e2e.sh
+  - npm test
 
 after_script:
   - bash tests/bin/travis.sh after
+  - ./tests/e2e-tests/scripts/wp-serverpilot-delete.js
 
 # Specifies that Travis should create builds for master and release branches and also tags.
 branches:
