@@ -56,4 +56,4 @@ if ( ! apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
 
 </tr>
 
-<?php endif; ?>
+<?php endif;

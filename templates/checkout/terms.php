@@ -28,4 +28,4 @@ if ( $terms_page_id > 0 && apply_filters( 'woocommerce_checkout_show_terms', tru
 		<input type="hidden" name="terms-field" value="1" />
 	</p>
 	<?php do_action( 'woocommerce_checkout_after_terms_and_conditions' ); ?>
-<?php endif; ?>
+<?php endif;

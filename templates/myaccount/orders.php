@@ -104,4 +104,4 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 	</div>
 <?php endif; ?>
 
-<?php do_action( 'woocommerce_after_account_orders', $has_orders ); ?>
+<?php do_action( 'woocommerce_after_account_orders', $has_orders );
