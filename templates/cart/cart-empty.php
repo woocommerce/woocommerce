@@ -33,4 +33,4 @@ if ( wc_get_page_id( 'shop' ) > 0 ) : ?>
 			<?php _e( 'Return to shop', 'woocommerce' ) ?>
 		</a>
 	</p>
-<?php endif; ?>
+<?php endif;
