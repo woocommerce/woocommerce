@@ -334,6 +334,11 @@ body {
 		position: relative;
 		border-bottom: 4px solid #ccc;
 		line-height: 1.4em;
+
+		a {
+			color: inherit;
+			text-decoration: none;
+		}
 	}
 	li::before {
 		content: '';
@@ -400,7 +405,7 @@ body {
 	margin-top: 0;
 }
 
-.wc-return-to-dashboard {
+.wc-setup-footer-links {
 	font-size: 0.85em;
 	color: #b5b5b5;
 	margin: 1.18em 0;
