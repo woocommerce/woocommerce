@@ -31,7 +31,6 @@ class WC_Admin_Notices {
 		'install'             => 'install_notice',
 		'update'              => 'update_notice',
 		'template_files'      => 'template_file_check_notice',
-		'theme_support'       => 'theme_check_notice',
 		'legacy_shipping'     => 'legacy_shipping_notice',
 		'no_shipping_methods' => 'no_shipping_methods_notice',
 		'simplify_commerce'   => 'simplify_commerce_notice',
@@ -79,10 +78,6 @@ class WC_Admin_Notices {
 	 * Reset notices for themes when switched or a new version of WC is installed.
 	 */
 	public static function reset_admin_notices() {
-		if ( ! current_theme_supports( 'woocommerce' ) ) {
-			self::add_notice( 'theme_support' );
-		}
-
 		$simplify_options = get_option( 'woocommerce_simplify_commerce_settings', array() );
 		$location         = wc_get_base_location();
 
@@ -210,17 +205,6 @@ class WC_Admin_Notices {
 	 */
 	public static function install_notice() {
 		include( 'views/html-notice-install.php' );
-	}
-
-	/**
-	 * Show the Theme Check notice.
-	 */
-	public static function theme_check_notice() {
-		if ( ! current_theme_supports( 'woocommerce' ) ) {
-			include( 'views/html-notice-theme-support.php' );
-		} else {
-			self::remove_notice( 'theme_support' );
-		}
 	}
 
 	/**
