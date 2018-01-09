@@ -24,7 +24,7 @@
 
 	#export BASE_URL="http://${TRAVIS_JOB_ID:0:20}.wp-e2e-tests.pw"
 
-	curl -I http://localhost
+	#curl -I http://localhost
 
 curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 php wp-cli.phar core download
