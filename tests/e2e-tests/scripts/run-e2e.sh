@@ -25,7 +25,7 @@
 	#export BASE_URL="http://${TRAVIS_JOB_ID:0:20}.wp-e2e-tests.pw"
 
 curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-php wp-cli.phar core download --locale=en_EN
+php wp-cli.phar core download
 php wp-cli.phar core install --url=localhost --title=Example --admin_user=admin --admin_password=password --admin_email=info@example.com
 php wp-cli.phar core install
 php wp-cli.phar db import ~/e2e-db.sql
