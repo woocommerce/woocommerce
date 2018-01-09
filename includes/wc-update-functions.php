@@ -4,8 +4,6 @@
  *
  * Functions for updating data, used by the background updater.
  *
- * @author   WooThemes
- * @category Core
  * @package  WooCommerce/Functions
  * @version  2.6.0
  */

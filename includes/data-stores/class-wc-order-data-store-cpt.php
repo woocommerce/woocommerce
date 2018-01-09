@@ -13,8 +13,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * WC Order Data Store: Stored in CPT.
  *
  * @version  3.0.0
- * @category Class
- * @author   WooThemes
  */
 class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implements WC_Object_Data_Store_Interface, WC_Order_Data_Store_Interface {
 
