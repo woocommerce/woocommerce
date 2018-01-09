@@ -300,8 +300,6 @@ class WC_Admin_Setup_Wizard {
 		?>
 			<?php if ( 'store_setup' === $this->step ) : ?>
 				<a class="wc-setup-footer-links" href="<?php echo esc_url( admin_url() ); ?>"><?php esc_html_e( 'Not right now', 'woocommerce' ); ?></a>
-			<?php elseif ( 'next_steps' === $this->step ) : ?>
-				<a class="wc-setup-footer-links" href="<?php echo esc_url( admin_url() ); ?>"><?php esc_html_e( 'Return to your dashboard', 'woocommerce' ); ?></a>
 			<?php elseif ( 'activate' === $this->step ) : ?>
 				<a class="wc-setup-footer-links" href="<?php echo esc_url( $this->get_next_step_link() ); ?>"><?php esc_html_e( 'Skip this step', 'woocommerce' ); ?></a>
 			<?php else : ?>
@@ -1902,6 +1900,24 @@ class WC_Admin_Setup_Wizard {
 					<p class="wc-setup-actions step">
 						<a class="button button-large" href="<?php echo esc_url( admin_url( 'edit.php?post_type=product&page=product_importer' ) ); ?>">
 							<?php esc_html_e( 'Import products', 'woocommerce' ); ?>
+						</a>
+					</p>
+				</div>
+			</li>
+			<li class="wc-wizard-additional-steps">
+				<div class="wc-wizard-next-step-description">
+					<p class="next-step-heading"><?php esc_html_e( 'You can also:', 'woocommerce' ); ?></p>
+				</div>
+				<div class="wc-wizard-next-step-action">
+					<p class="wc-setup-actions step">
+						<a class="button button-large" href="<?php echo esc_url( admin_url() ); ?>">
+							<?php esc_html_e( 'Visit Dashboard', 'woocommerce' ); ?>
+						</a>
+						<a class="button button-large" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings' ) ); ?>">
+							<?php esc_html_e( 'Review Settings', 'woocommerce' ); ?>
+						</a>
+						<a class="button button-large" href="<?php echo esc_url( admin_url( 'customize.php?url=' . wc_get_page_permalink( 'shop' ) . '&autofocus[panel]=woocommerce' ) ); ?>">
+							<?php esc_html_e( 'View &amp; Customize', 'woocommerce' ); ?>
 						</a>
 					</p>
 				</div>
