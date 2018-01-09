@@ -11,10 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 wp_enqueue_script( 'wc-product-export' );
 
-$exporter        = new WC_Product_CSV_Exporter();
-$product_count   = wp_count_posts( 'product' );
-$variation_count = wp_count_posts( 'product' );
-$total_rows      = $product_count->publish + $product_count->private + $variation_count->publish + $variation_count->private;
+$exporter = new WC_Product_CSV_Exporter();
 ?>
 <div class="wrap woocommerce">
 	<h1><?php esc_html_e( 'Export Products', 'woocommerce' ); ?></h1>
