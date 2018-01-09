@@ -51,3 +51,4 @@ branches:
     - master
     - /^\d+\.\d+(\.\d+)?(-\S*)?$/
     - /^release\//
+    - try/e2e-CI
