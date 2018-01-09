@@ -338,6 +338,10 @@ body {
 		a {
 			color: inherit;
 			text-decoration: none;
+
+			&:hover, &:focus {
+				color: #111;
+			}
 		}
 	}
 	li::before {
