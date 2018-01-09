@@ -798,14 +798,20 @@ class WC_Admin_Setup_Wizard {
 		$currency_code         = get_woocommerce_currency();
 		$wcs_carrier           = $this->get_wcs_shipping_carrier( $country_code, $currency_code );
 		$existing_zones        = WC_Shipping_Zones::get_zones();
+		$dimension_unit        = get_option( 'woocommerce_dimension_unit' );
+		$weight_unit           = get_option( 'woocommerce_weight_unit' );
+		$locale_info           = include( WC()->plugin_path() . '/i18n/locale-info.php' );
 
-		$locale_info = include( WC()->plugin_path() . '/i18n/locale-info.php' );
-		if ( isset( $locale_info[ $country_code ] ) ) {
-			$dimension_unit = $locale_info[ $country_code ]['dimension_unit'];
-			$weight_unit    = $locale_info[ $country_code ]['weight_unit'];
+		if ( ! $weight_unit && isset( $locale_info[ $country_code ] ) ) {
+			$weight_unit = $locale_info[ $country_code ]['weight_unit'];
 		} else {
-			$dimension_unit = 'cm';
-			$weight_unit    = 'kg';
+			$weight_unit = $weight_unit ? $weight_unit : 'kg';
+		}
+
+		if ( ! $dimension_unit && isset( $locale_info[ $country_code ] ) ) {
+			$dimension_unit = $locale_info[ $country_code ]['dimension_unit'];
+		} else {
+			$dimension_unit = $dimension_unit ? $dimension_unit : 'cm';
 		}
 
 		if ( ! empty( $existing_zones ) ) {
