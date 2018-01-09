@@ -1544,7 +1544,7 @@ function wc_update_330_set_default_product_cat() {
 /**
  * Copy order customer_id from post meta to post_author and set post_author to 0 for refunds.
  */
-function wc_update_330_order_customer_id() {
+function wc_update_340_order_customer_id() {
 	global $wpdb;
 
 	$orders_to_update = $wpdb->get_results(

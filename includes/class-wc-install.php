@@ -97,9 +97,11 @@ class WC_Install {
 			'wc_update_330_webhooks',
 			'wc_update_330_product_stock_status',
 			'wc_update_330_set_default_product_cat',
-			'wc_update_330_order_customer_id',
 			'wc_update_330_clear_transients',
 			'wc_update_330_db_version',
+		),
+		'3.4.0' => array(
+			'wc_update_340_order_customer_id',
 		),
 	);
 
