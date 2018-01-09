@@ -172,7 +172,6 @@ class WC_Form_Handler {
 	 * Save the password/account details and redirect back to the my account page.
 	 */
 	public static function save_account_details() {
-
 		if ( 'POST' !== strtoupper( $_SERVER['REQUEST_METHOD'] ) ) {
 			return;
 		}
@@ -183,31 +182,34 @@ class WC_Form_Handler {
 
 		wc_nocache_headers();
 
-		$errors       = new WP_Error();
-		$user         = new stdClass();
+		$user_id = get_current_user_id();
 
-		$user->ID     = (int) get_current_user_id();
-		$current_user = get_user_by( 'id', $user->ID );
-
-		if ( $user->ID <= 0 ) {
+		if ( $user_id <= 0 ) {
 			return;
 		}
 
-		$account_first_name = ! empty( $_POST['account_first_name'] ) ? wc_clean( $_POST['account_first_name'] ) : '';
-		$account_last_name  = ! empty( $_POST['account_last_name'] ) ? wc_clean( $_POST['account_last_name'] ) : '';
-		$account_email      = ! empty( $_POST['account_email'] ) ? wc_clean( $_POST['account_email'] ) : '';
-		$pass_cur           = ! empty( $_POST['password_current'] ) ? $_POST['password_current'] : '';
-		$pass1              = ! empty( $_POST['password_1'] ) ? $_POST['password_1'] : '';
-		$pass2              = ! empty( $_POST['password_2'] ) ? $_POST['password_2'] : '';
+		$current_user       = get_user_by( 'id', $user_id );
+		$current_first_name = $current_user->first_name;
+		$current_last_name  = $current_user->last_name;
+		$current_email      = $current_user->user_email;
+
+		$account_first_name = ! empty( $_POST['account_first_name'] ) ? wc_clean( $_POST['account_first_name'] ): '';
+		$account_last_name  = ! empty( $_POST['account_last_name'] ) ? wc_clean( $_POST['account_last_name'] )  : '';
+		$account_email      = ! empty( $_POST['account_email'] ) ? wc_clean( $_POST['account_email'] )          : '';
+		$pass_cur           = ! empty( $_POST['password_current'] ) ? $_POST['password_current']                : '';
+		$pass1              = ! empty( $_POST['password_1'] ) ? $_POST['password_1']                            : '';
+		$pass2              = ! empty( $_POST['password_2'] ) ? $_POST['password_2']                            : '';
 		$save_pass          = true;
 
+		$user               = new stdClass();
+		$user->ID           = $user_id;
 		$user->first_name   = $account_first_name;
 		$user->last_name    = $account_last_name;
 
 		// Prevent emails being displayed, or leave alone.
 		$user->display_name = is_email( $current_user->display_name ) ? $user->first_name : $current_user->display_name;
 
-		// Handle required fields
+		// Handle required fields.
 		$required_fields = apply_filters( 'woocommerce_save_account_details_required_fields', array(
 			'account_first_name' => __( 'First name', 'woocommerce' ),
 			'account_last_name'  => __( 'Last name', 'woocommerce' ),
@@ -252,6 +254,7 @@ class WC_Form_Handler {
 		}
 
 		// Allow plugins to return their own errors.
+		$errors = new WP_Error();
 		do_action_ref_array( 'woocommerce_save_account_details_errors', array( &$errors, &$user ) );
 
 		if ( $errors->get_error_messages() ) {
@@ -261,8 +264,27 @@ class WC_Form_Handler {
 		}
 
 		if ( wc_notice_count( 'error' ) === 0 ) {
-
 			wp_update_user( $user );
+
+			// Update customer object to keep data in sync.
+			$customer = new WC_Customer( $user->ID );
+
+			if ( $customer ) {
+				// Keep billing data in sync if data changed.
+				if ( is_email( $user->user_email ) && $current_email !== $user->user_email ) {
+					$customer->set_billing_email( $user->user_email );
+				}
+
+				if ( $current_first_name !== $user->first_name ) {
+					$customer->set_billing_first_name( $user->first_name );
+				}
+
+				if ( $current_last_name !== $user->last_name ) {
+					$customer->set_billing_last_name( $user->last_name );
+				}
+
+				$customer->save();
+			}
 
 			wc_add_notice( __( 'Account details changed successfully.', 'woocommerce' ) );
 
