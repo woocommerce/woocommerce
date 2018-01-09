@@ -24,7 +24,10 @@
 
 	#export BASE_URL="http://${TRAVIS_JOB_ID:0:20}.wp-e2e-tests.pw"
 
-
+curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+php wp-cli.phar --info
+chmod +x wp-cli.phar
+sudo mv wp-cli.phar /usr/local/bin/wp
 wp core download --locale=en_EN
 wp core install --url=localhost --title=Example --admin_user=admin --admin_password=password --admin_email=info@example.com
 wp core install
