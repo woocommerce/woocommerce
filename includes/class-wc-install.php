@@ -158,7 +158,7 @@ class WC_Install {
 			WC_Admin_Notices::add_notice( 'update' );
 		}
 		if ( ! empty( $_GET['force_update_woocommerce'] ) ) {
-			do_action( 'wp_wc_updater_cron' );
+			do_action( 'wp_' . get_current_blog_id() . '_wc_updater_cron' );
 			wp_safe_redirect( admin_url( 'admin.php?page=wc-settings' ) );
 			exit;
 		}
@@ -403,8 +403,6 @@ class WC_Install {
 		foreach ( $pages as $key => $page ) {
 			wc_create_page( esc_sql( $page['name'] ), 'woocommerce_' . $key . '_page_id', $page['title'], $page['content'], ! empty( $page['parent'] ) ? wc_get_page_id( $page['parent'] ) : '' );
 		}
-
-		delete_transient( 'woocommerce_cache_excluded_uris' );
 	}
 
 	/**

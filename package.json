@@ -1,7 +1,7 @@
 {
   "name": "woocommerce",
   "title": "WooCommerce",
-  "version": "3.1.0",
+  "version": "3.3.0",
   "homepage": "https://woocommerce.com/",
   "repository": {
     "type": "git",
@@ -47,10 +47,10 @@
     "istanbul": "^1.0.0-alpha",
     "mocha": "^3.0.2",
     "stylelint": "~8.2.0",
-    "wc-e2e-page-objects": "0.5.0"
+    "wc-e2e-page-objects": "0.6.0"
   },
   "engines": {
-    "node": ">=6.9.4",
-    "npm": ">=1.1.0"
+    "node": ">=8.9.3",
+    "npm": ">=5.5.1"
   }
 }

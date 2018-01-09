@@ -575,9 +575,10 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		$transaction_id   = $order->get_transaction_id();
 
 		if ( $transaction_id ) {
-			$url = $payment_gateways[ $payment_method ]->get_transaction_url( $order );
 
-			if ( isset( $payment_gateways[ $payment_method ] ) && $url ) {
+			$url = isset( $payment_gateways[ $payment_method ] ) ? $payment_gateways[ $payment_method ]->get_transaction_url( $order ) : false;
+
+			if ( $url ) {
 				$payment_via .= ' (<a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $transaction_id ) . '</a>)';
 			} else {
 				$payment_via .= ' (' . esc_html( $transaction_id ) . ')';

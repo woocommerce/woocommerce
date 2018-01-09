@@ -371,7 +371,7 @@ function wc_reset_product_grid_settings() {
 		delete_option( 'woocommerce_catalog_rows' );
 	}
 
-	if ( isset( $theme_support['product_grid']['default_rows'] ) ) {
+	if ( isset( $theme_support['product_grid']['default_columns'] ) ) {
 		update_option( 'woocommerce_catalog_columns', absint( $theme_support['product_grid']['default_columns'] ) );
 	} else {
 		delete_option( 'woocommerce_catalog_columns' );
@@ -778,7 +778,11 @@ if ( ! function_exists( 'woocommerce_template_loop_product_link_open' ) ) {
 	 * Insert the opening anchor tag for products in the loop.
 	 */
 	function woocommerce_template_loop_product_link_open() {
-		echo '<a href="' . esc_url( get_the_permalink() ) . '" class="woocommerce-LoopProduct-link woocommerce-loop-product__link">';
+		global $product;
+
+		$link = apply_filters( 'woocommerce_loop_product_link', get_the_permalink(), $product );
+
+		echo '<a href="' . esc_url( $link ) . '" class="woocommerce-LoopProduct-link woocommerce-loop-product__link">';
 	}
 }
 
@@ -1759,7 +1763,52 @@ if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
 	 * @return bool
 	 */
 	function woocommerce_products_will_display() {
-		return 0 < wc_get_loop_prop( 'total', 0 );
+		$display_type = woocommerce_get_loop_display_mode();
+
+		return 0 < wc_get_loop_prop( 'total', 0 ) && $display_type !== 'subcategories';
+	}
+}
+
+if ( ! function_exists( 'woocommerce_get_loop_display_mode' ) ) {
+
+	/**
+	 * See what is going to display in the loop.
+	 *
+	 * @since 3.3.0
+	 * @return string Either products, subcategories, or both, based on current page.
+	 */
+	function woocommerce_get_loop_display_mode() {
+		// Only return products when filtering things.
+		if ( 1 < wc_get_loop_prop( 'current_page' ) || wc_get_loop_prop( 'is_search' ) || wc_get_loop_prop( 'is_filtered' ) ) {
+			return 'products';
+		}
+
+		$parent_id    = 0;
+		$display_type = '';
+
+		if ( is_shop() ) {
+			$display_type = get_option( 'woocommerce_shop_page_display', '' );
+		} elseif ( is_product_category() ) {
+			$parent_id    = get_queried_object_id();
+			$display_type = get_woocommerce_term_meta( $parent_id, 'display_type', true );
+			$display_type = '' === $display_type ? get_option( 'woocommerce_category_archive_display', '' ) : $display_type;
+		}
+
+		// Ensure valid value.
+		if ( '' === $display_type || ! in_array( $display_type, array( 'products', 'subcategories', 'both' ), true ) ) {
+			$display_type = 'products';
+		}
+
+		// If we're showing categories, ensure we actually have something to show.
+		if ( in_array( $display_type, array( 'subcategories', 'both' ), true ) ) {
+			$subcategories = woocommerce_get_product_subcategories( $parent_id );
+
+			if ( empty( $subcategories ) ) {
+				$display_type = 'products';
+			}
+		}
+
+		return $display_type;
 	}
 }
 
@@ -1773,28 +1822,13 @@ if ( ! function_exists( 'woocommerce_maybe_show_product_subcategories' ) ) {
 	 * @return string
 	 */
 	function woocommerce_maybe_show_product_subcategories( $loop_html ) {
-		// Don't show when filtering, searching or when on page > 1.
-		if ( 1 < wc_get_loop_prop( 'current_page' ) || wc_get_loop_prop( 'is_search' ) || wc_get_loop_prop( 'is_filtered' ) ) {
-			return $loop_html;
-		}
-
-		$parent_id    = 0;
-		$display_type = '';
-
-		// Check categories are enabled and see what level to query.
-		if ( is_shop() ) {
-			$display_type = get_option( 'woocommerce_shop_page_display', '' );
-		} elseif ( is_product_category() ) {
-			$parent_id    = get_queried_object_id();
-			$display_type = get_woocommerce_term_meta( $parent_id, 'display_type', true );
-			$display_type = '' === $display_type ? get_option( 'woocommerce_category_archive_display', '' ) : $display_type;
-		}
+		$display_type = woocommerce_get_loop_display_mode();
 
 		// If displaying categories, append to the loop.
-		if ( '' !== $display_type ) {
+		if ( 'subcategories' === $display_type || 'both' === $display_type ) {
 			ob_start();
 			woocommerce_product_subcategories( array(
-				'parent_id'    => $parent_id,
+				'parent_id' => is_product_category() ? get_queried_object_id() : 0,
 			) );
 			$loop_html .= ob_get_clean();
 
@@ -1807,8 +1841,39 @@ if ( ! function_exists( 'woocommerce_maybe_show_product_subcategories' ) ) {
 	}
 }
 
-if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
+if ( ! function_exists( 'woocommerce_get_product_subcategories' ) ) {
+	/**
+	 * Get (and cache) product subcategories.
+	 *
+	 * @param int $parent_id Get subcategories of this ID.
+	 * @return array
+	 */
+	function woocommerce_get_product_subcategories( $parent_id = 0 ) {
+		$parent_id          = absint( $parent_id );
+		$product_categories = wp_cache_get( 'product-categories-' . $parent_id, 'product_cat' );
 
+		if ( false === $product_categories ) {
+			// NOTE: using child_of instead of parent - this is not ideal but due to a WP bug ( https://core.trac.wordpress.org/ticket/15626 ) pad_counts won't work.
+			$product_categories = get_categories( apply_filters( 'woocommerce_product_subcategories_args', array(
+				'parent'       => $parent_id,
+				'menu_order'   => 'ASC',
+				'hide_empty'   => 0,
+				'hierarchical' => 1,
+				'taxonomy'     => 'product_cat',
+				'pad_counts'   => 1,
+			) ) );
+			wp_cache_set( 'product-categories-' . $parent_id, $product_categories, 'product_cat' );
+		}
+
+		if ( apply_filters( 'woocommerce_product_subcategories_hide_empty', true ) ) {
+			$product_categories = wp_list_filter( $product_categories, array( 'count' => 0 ), 'NOT' );
+		}
+
+		return $product_categories;
+	}
+}
+
+if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 	/**
 	 * Display product sub categories as thumbnails.
 	 *
@@ -1822,19 +1887,7 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 			'parent_id'    => 0,
 		) );
 
-		// NOTE: using child_of instead of parent - this is not ideal but due to a WP bug ( https://core.trac.wordpress.org/ticket/15626 ) pad_counts won't work.
-		$product_categories = get_categories( apply_filters( 'woocommerce_product_subcategories_args', array(
-			'parent'       => $args['parent_id'],
-			'menu_order'   => 'ASC',
-			'hide_empty'   => 0,
-			'hierarchical' => 1,
-			'taxonomy'     => 'product_cat',
-			'pad_counts'   => 1,
-		) ) );
-
-		if ( apply_filters( 'woocommerce_product_subcategories_hide_empty', true ) ) {
-			$product_categories = wp_list_filter( $product_categories, array( 'count' => 0 ), 'NOT' );
-		}
+		$product_categories = woocommerce_get_product_subcategories( $args['parent_id'] );
 
 		if ( ! $product_categories ) {
 			return false;

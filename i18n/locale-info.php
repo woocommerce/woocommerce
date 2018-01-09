@@ -378,6 +378,26 @@ return array(
 			),
 		),
 	),
+	'MD' => array(
+		'currency_code'  => 'MDL',
+		'currency_pos'   => 'right_space',
+		'thousand_sep'   => '.',
+		'decimal_sep'    => ',',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+		'tax_rates'      => array(
+			'' => array(
+				array(
+					'country'  => 'MD',
+					'state'    => '',
+					'rate'     => '20.0000',
+					'name'     => 'TVA',
+					'shipping' => true,
+				),
+			),
+		),
+	),
 	'NL' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'left',

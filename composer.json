@@ -1,6 +1,6 @@
 {
   "name": "woocommerce/woocommerce",
-  "description": "An e-commerce toolkit that helps you sell anything. Beautifully.",
+  "description": "An eCommerce toolkit that helps you sell anything. Beautifully.",
   "homepage": "https://woocommerce.com/",
   "type": "wordpress-plugin",
   "license": "GPL-2.0+",
@@ -11,7 +11,8 @@
     "squizlabs/php_codesniffer": "*",
     "wp-coding-standards/wpcs": "^0.14",
     "phpunit/phpunit": "6.2.3",
-    "woocommerce/woocommerce-git-hooks": "1.0.3",
+    "woocommerce/woocommerce-git-hooks": "*",
+    "woocommerce/woocommerce-sniffs": "*",
     "wimg/php-compatibility": "^8.0",
     "dealerdirect/phpcodesniffer-composer-installer": "^0.4.3"
   },
@@ -32,10 +33,10 @@
       "phpunit"
     ],
     "phpcs": [
-      "phpcs -s -p --standard=./phpcs.ruleset.xml"
+      "phpcs -s -p"
     ],
     "phpcbf": [
-      "phpcbf -p --standard=./phpcs.ruleset.xml"
+      "phpcbf -p"
     ]
   },
   "extra": {

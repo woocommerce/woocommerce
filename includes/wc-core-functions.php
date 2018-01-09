@@ -53,6 +53,7 @@ add_filter( 'woocommerce_short_description', 'prepend_attachment' );
 add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // After wpautop().
 add_filter( 'woocommerce_short_description', 'wc_format_product_short_description', 9999999 );
 add_filter( 'woocommerce_short_description', 'wc_do_oembeds' );
+add_filter( 'woocommerce_short_description', array( $GLOBALS['wp_embed'], 'run_shortcode' ), 8 ); // Before wpautop().
 
 /**
  * Define a constant if it is not already defined.
@@ -1830,7 +1831,7 @@ function wc_make_phone_clickable( $phone ) {
  * @return mixed Value sanitized by wc_clean.
  */
 function wc_get_post_data_by_key( $key, $default = '' ) {
-	return wc_clean( wc_get_var( wp_unslash( $_POST[ $key ] ), $default ) ); // @codingStandardsIgnoreLine
+	return wc_clean( wp_unslash( wc_get_var( $_POST[ $key ], $default ) ) ); // @codingStandardsIgnoreLine
 }
 
 /**
@@ -1947,3 +1948,29 @@ function wc_is_external_resource( $url ) {
 
 	return strstr( $url, '://' ) && strstr( $wp_base, $url );
 }
+
+/**
+ * See if theme/s is activate or not.
+ *
+ * @since 3.3.0
+ * @param string|array $theme Theme name or array of theme names to check.
+ * @return boolean
+ */
+function wc_is_active_theme( $theme ) {
+	return is_array( $theme ) ? in_array( get_template(), $theme, true ) : get_template() === $theme;
+}
+
+/**
+ * Cleans up session data - cron callback.
+ *
+ * @since 3.3.0
+ */
+function wc_cleanup_session_data() {
+	$session_class = apply_filters( 'woocommerce_session_handler', 'WC_Session_Handler' );
+	$session       = new $session_class();
+
+	if ( is_callable( array( $session, 'cleanup_sessions' ) ) ) {
+		$session->cleanup_sessions();
+	}
+}
+add_action( 'woocommerce_cleanup_sessions', 'wc_cleanup_session_data' );

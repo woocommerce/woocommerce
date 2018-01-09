@@ -1453,11 +1453,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	public function get_item_subtotal( $item, $inc_tax = false, $round = true ) {
 		$subtotal = 0;
 
-		if ( is_callable( array( $item, 'get_subtotal' ) ) ) {
+		if ( is_callable( array( $item, 'get_subtotal' ) ) && $item->get_quantity() ) {
 			if ( $inc_tax ) {
-				$subtotal = ( $item->get_subtotal() + $item->get_subtotal_tax() ) / max( 1, $item->get_quantity() );
+				$subtotal = ( $item->get_subtotal() + $item->get_subtotal_tax() ) / $item->get_quantity();
 			} else {
-				$subtotal = ( floatval( $item->get_subtotal() ) / max( 1, $item->get_quantity() ) );
+				$subtotal = floatval( $item->get_subtotal() ) / $item->get_quantity();
 			}
 
 			$subtotal = $round ? number_format( (float) $subtotal, wc_get_price_decimals(), '.', '' ) : $subtotal;
@@ -1501,11 +1501,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	public function get_item_total( $item, $inc_tax = false, $round = true ) {
 		$total = 0;
 
-		if ( is_callable( array( $item, 'get_total' ) ) ) {
+		if ( is_callable( array( $item, 'get_total' ) ) && $item->get_quantity() ) {
 			if ( $inc_tax ) {
-				$total = ( $item->get_total() + $item->get_total_tax() ) / max( 1, $item->get_quantity() );
+				$total = ( $item->get_total() + $item->get_total_tax() ) / $item->get_quantity();
 			} else {
-				$total = floatval( $item->get_total() ) / max( 1, $item->get_quantity() );
+				$total = floatval( $item->get_total() ) / $item->get_quantity();
 			}
 
 			$total = $round ? round( $total, wc_get_price_decimals() ) : $total;
@@ -1546,8 +1546,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	public function get_item_tax( $item, $round = true ) {
 		$tax = 0;
 
-		if ( is_callable( array( $item, 'get_total_tax' ) ) ) {
-			$tax = $item->get_total_tax() / max( 1, $item->get_quantity() );
+		if ( is_callable( array( $item, 'get_total_tax' ) ) && $item->get_quantity() ) {
+			$tax = $item->get_total_tax() / $item->get_quantity();
 			$tax = $round ? wc_round_tax_total( $tax ) : $tax;
 		}
 
