@@ -166,7 +166,7 @@ jQuery( function( $ ) {
 			}
 		} ).each( function() {
 			if ( this.complete ) {
-				$( this ).load();
+				$( this ).trigger( 'load' );
 			}
 		} );
 	};
