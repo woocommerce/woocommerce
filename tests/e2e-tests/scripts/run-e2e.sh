@@ -45,7 +45,7 @@ cd ~/build/woocommerce/woocommerce
 
 	export BASE_URL="http://localhost"
 	curl -i http://localhost
-
+	curl -i http://localhost/wp-admin
 	# Run the tests
 	npm test
 #fi
