@@ -34,7 +34,6 @@ before_script:
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
   - bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
   - bash tests/bin/travis.sh before
-  - sudo rackup
 
 script:
   - bash tests/bin/phpunit.sh

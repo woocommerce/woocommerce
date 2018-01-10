@@ -36,8 +36,7 @@ php wp-cli.phar db import ./tests/e2e-tests/data/e2e-db.sql
 php wp-cli.phar theme install twentytwelve --activate
 php wp-cli.phar plugin install https://github.com/woocommerce/woocommerce/archive/$TRAVIS_BRANCH.zip --activate
 
- 	rackup
- 	sleep 3
+php -S 127.0.0.1:8080
 	export BASE_URL="http://localhost"
 
 	# Run the tests
