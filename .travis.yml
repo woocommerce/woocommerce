@@ -44,7 +44,7 @@ script:
   - sudo /etc/init.d/nginx restart
   - sudo usermod -a -G www-data www-data
   - bash tests/e2e-tests/scripts/run-e2e.sh
-  - sudo chmod 755 /home/travis/build/wordpress
+  - sudo chmod -R 755 /home/travis/build/wordpress
   - sudo chown -R www-data:www-data /home/travis/build/wordpress
   - curl -i http://localhost
   - curl -i http://localhost/wp-admin 
