@@ -25,7 +25,7 @@ jQuery( function( $ ) {
 				$tabs.find( 'li:first a' ).click();
 			}
 		} )
-		.on( 'click', '.wc-tabs li a, ul.tabs li a', function( e ) {
+		.on( 'click', '.wc-tabs li > a, ul.tabs li > a', function( e ) {
 			e.preventDefault();
 			var $tab          = $( this );
 			var $tabs_wrapper = $tab.closest( '.wc-tabs-wrapper, .woocommerce-tabs' );
