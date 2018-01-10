@@ -488,12 +488,19 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 				return $object;
 			}
 
-			if ( $creating ) {
+			if ( ! is_null( $request['customer_id'] ) && 0 !== $request['customer_id'] ) {
 				// Make sure customer exists.
-				if ( ! is_null( $request['customer_id'] ) && 0 !== $request['customer_id'] && false === get_user_by( 'id', $request['customer_id'] ) ) {
+				if ( false === get_user_by( 'id', $request['customer_id'] ) ) {
 					throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id',__( 'Customer ID is invalid.', 'woocommerce' ), 400 );
 				}
 
+				// Make sure customer is part of blog.
+				if ( is_multisite() && ! is_user_member_of_blog( $request['customer_id'] ) ) {
+					throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id_network',__( 'Customer ID does not belong to this site.', 'woocommerce' ), 400 );
+				}
+			}
+
+			if ( $creating ) {
 				$object->set_created_via( 'rest-api' );
 				$object->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
 				$object->calculate_totals();
