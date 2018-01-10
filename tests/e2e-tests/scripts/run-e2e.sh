@@ -32,7 +32,10 @@ cd wordpress
 
 curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 php wp-cli.phar core download
-php wp-cli.phar core config --dbname=woocommerce_test --dbuser=root --dbpass='' --dbhost=localhost --dbprefix=wp_
+php wp-cli.phar core config --dbname=woocommerce_test --dbuser=root --dbpass='' --dbhost=localhost --dbprefix=wp_ --extra-php <<PHP
+/* Change WP_MEMORY_LIMIT to increase the memory limit for public pages. */
+define('WP_MEMORY_LIMIT', '256M');
+PHP
 php wp-cli.phar core install --url='http://localhost' --title=Example --admin_user=admin --admin_password=password --admin_email=info@example.com
 php wp-cli.phar db import ~/build/woocommerce/woocommerce/tests/e2e-tests/data/e2e-db.sql
 
