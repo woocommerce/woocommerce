@@ -41,6 +41,8 @@ php wp-cli.phar db import ~/build/woocommerce/woocommerce/tests/e2e-tests/data/e
 php wp-cli.phar theme install twentytwelve --activate
 php wp-cli.phar plugin install https://github.com/woocommerce/woocommerce/archive/$TRAVIS_BRANCH.zip --activate
 
+chown -R www-data:www-data /home/travis/build/wordpress
+
 cd ~/build/woocommerce/woocommerce
 
 	export BASE_URL="http://localhost"
