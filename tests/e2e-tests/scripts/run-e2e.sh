@@ -45,6 +45,7 @@ php wp-cli.phar plugin install https://github.com/woocommerce/woocommerce/archiv
 cd ~/build/woocommerce/woocommerce
 
 	export BASE_URL="http://localhost"
+	curl -i http://localhost
 
 	# Run the tests
 	npm test
