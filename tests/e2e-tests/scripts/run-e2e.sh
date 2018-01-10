@@ -26,16 +26,20 @@
 	#export BASE_URL="http://${TRAVIS_JOB_ID:0:20}.wp-e2e-tests.pw"
 
 	#curl -I http://localhost
+cd ~/build
+mkdir wordpress
+cd wordpress
 
 curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 php wp-cli.phar core download
 php wp-cli.phar core config --dbname=woocommerce_test --dbuser=root --dbpass='' --dbhost=localhost --dbprefix=wp_
 php wp-cli.phar core install --url='http://localhost' --title=Example --admin_user=admin --admin_password=password --admin_email=info@example.com
-php wp-cli.phar db import ./tests/e2e-tests/data/e2e-db.sql
-#
+php wp-cli.phar db import ~/build/woocommerce/woocommerce/tests/e2e-tests/data/e2e-db.sql
+
 php wp-cli.phar theme install twentytwelve --activate
 php wp-cli.phar plugin install https://github.com/woocommerce/woocommerce/archive/$TRAVIS_BRANCH.zip --activate
 
+cd ~build/woocommerce/woocommerce
 
 	export BASE_URL="http://localhost"
 
