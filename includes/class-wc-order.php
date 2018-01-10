@@ -1339,7 +1339,7 @@ class WC_Order extends WC_Abstract_Order {
 			if ( $item->is_type( 'line_item' ) ) {
 				$product = $item->get_product();
 
-				if ( $product->has_file() ) {
+				if ( $product && $product->has_file() ) {
 					return true;
 				}
 			}
