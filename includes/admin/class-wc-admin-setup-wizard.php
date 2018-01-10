@@ -1103,11 +1103,11 @@ class WC_Admin_Setup_Wizard {
 			'https://wordpress.org/plugins/woocommerce-gateway-paypal-express-checkout/'
 		) . '</p>';
 		$klarna_checkout_description = '<p>' . sprintf(
-			__( 'Pay now, pay later, slice it. No credit card numbers, no passwords, no worries. <a href="%s" target="_blank">Learn more about Klarna</a>.', 'woocommerce' ),
+			__( 'Full checkout experience with pay now, pay later and slice it. No credit card numbers, no passwords, no worries. <a href="%s" target="_blank">Learn more about Klarna</a>.', 'woocommerce' ),
 			'https://woocommerce.com/products/klarna/'
 		) . '</p>';
 		$klarna_payments_description = '<p>' . sprintf(
-			__( 'Pay later, slice it. No credit card numbers, no passwords, no worries. <a href="%s" target="_blank">Learn more about Klarna</a>.', 'woocommerce' ),
+			__( 'Choose the payment that you want, pay now, pay later or slice it. No credit card numbers, no passwords, no worries. <a href="%s" target="_blank">Learn more about Klarna</a>.', 'woocommerce' ),
 			'https://woocommerce.com/products/klarna/'
 		) . '</p>';
 		$square_description = '<p>' . sprintf(
