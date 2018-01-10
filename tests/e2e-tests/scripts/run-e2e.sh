@@ -5,6 +5,7 @@
 	export DISPLAY=:99.0
 	sh -e /etc/init.d/xvfb start
  	sleep 3
+
 	npm install
 	export NODE_CONFIG_DIR="./tests/e2e-tests/config"
 
@@ -34,7 +35,9 @@ php wp-cli.phar db import ./tests/e2e-tests/data/e2e-db.sql
 #
 php wp-cli.phar theme install twentytwelve --activate
 php wp-cli.phar plugin install https://github.com/woocommerce/woocommerce/archive/$TRAVIS_BRANCH.zip --activate
-php wp-cli.phar server
+
+ 	sudo rackup
+ 	sleep 3
 	export BASE_URL="http://localhost:8080"
 
 	# Run the tests
