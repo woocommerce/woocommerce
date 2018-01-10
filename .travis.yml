@@ -38,6 +38,7 @@ before_script:
 script:
   - bash tests/bin/phpunit.sh
   - bash tests/bin/phpcs.sh
+  - mkdir ~/build/wordpress
   - chmod 755 ~/build/wordpress
   - sudo apt-get install nginx
   - sudo apt-get install php5-fpm
