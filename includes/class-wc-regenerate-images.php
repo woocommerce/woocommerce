@@ -169,16 +169,10 @@ class WC_Regenerate_Images {
 	}
 
 	/**
-	 * Check if we should generate images when new themes declares custom sizes
-	 *
-	 * @return void
+	 * Check if we should generate images when new themes declares custom sizes.
 	 */
 	public static function maybe_regenerate_image_theme_switch() {
-		$theme_support = get_theme_support( 'woocommerce' );
-		$theme_support = is_array( $theme_support ) ? $theme_support[0] : false;
-
-		// Only queue image generation if the theme declares custom sizes via theme_support.
-		if ( is_array( $theme_support ) && ( isset( $theme_support['single_image_width'] ) || isset( $theme_support['thumbnail_image_width'] ) ) ) {
+		if ( wc_get_theme_support( 'single_image_width' ) || wc_get_theme_support( 'thumbnail_image_width' ) ) {
 			self::queue_image_regeneration();
 		}
 	}

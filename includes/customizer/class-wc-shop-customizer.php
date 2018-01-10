@@ -77,6 +77,10 @@ class WC_Shop_Customizer {
 	 * Scripts to improve our form.
 	 */
 	public function add_scripts() {
+		$min_rows    = wc_get_theme_support( 'product_grid::min_rows', 1 );
+		$max_rows    = wc_get_theme_support( 'product_grid::max_rows', '' );
+		$min_columns = wc_get_theme_support( 'product_grid::min_columns', 1 );
+		$max_columns = wc_get_theme_support( 'product_grid::max_columns', '' );
 		?>
 		<script type="text/javascript">
 			jQuery( document ).ready( function( $ ) {
@@ -95,6 +99,68 @@ class WC_Shop_Customizer {
 
 				wp.customize.bind( 'ready', function() { // Ready?
 					$( '.woocommerce-cropping-control' ).find( 'input:checked' ).change();
+				} );
+
+				wp.customize( 'woocommerce_catalog_columns', function( setting ) {
+					setting.bind( function( value ) {
+						var min = '<?php echo esc_js( $min_columns ); ?>';
+						var max = '<?php echo esc_js( $max_columns ); ?>';
+
+						if ( max && value > max ) {
+							setting.notifications.add( 'max_columns_error', new wp.customize.Notification(
+								'max_columns_error',
+								{
+									type   : 'error',
+									message: '<?php echo esc_js( sprintf( __( 'The maximum allowed setting for columns is %d', 'woocommerce' ), $max_columns ) ); ?>'
+								}
+							) );
+						} else {
+							setting.notifications.remove( 'max_columns_error' );
+						}
+
+						if ( min && value < min ) {
+							setting.notifications.add( 'min_columns_error', new wp.customize.Notification(
+								'min_columns_error',
+								{
+									type   : 'error',
+									message: '<?php echo esc_js( sprintf( __( 'The minimum allowed setting for columns is %d', 'woocommerce' ), $min_columns ) ); ?>'
+								}
+							) );
+						} else {
+							setting.notifications.remove( 'min_columns_error' );
+						}
+					} );
+				} );
+
+				wp.customize( 'woocommerce_catalog_rows', function( setting ) {
+					setting.bind( function( value ) {
+						var min = '<?php echo esc_js( $min_rows ); ?>';
+						var max = '<?php echo esc_js( $max_rows ); ?>';
+
+						if ( max && value > max ) {
+							setting.notifications.add( 'max_rows_error', new wp.customize.Notification(
+								'max_rows_error',
+								{
+									type   : 'error',
+									message: '<?php echo esc_js( sprintf( __( 'The maximum allowed setting for rows is %d', 'woocommerce' ), $max_rows ) ); ?>'
+								}
+							) );
+						} else {
+							setting.notifications.remove( 'max_rows_error' );
+						}
+
+						if ( min && value < min ) {
+							setting.notifications.add( 'min_rows_error', new wp.customize.Notification(
+								'min_rows_error',
+								{
+									type   : 'error',
+									message: '<?php echo esc_js( sprintf( __( 'The minimum allowed setting for rows is %d', 'woocommerce' ), $min_rows ) ); ?>'
+								}
+							) );
+						} else {
+							setting.notifications.remove( 'min_rows_error' );
+						}
+					} );
 				} );
 			} );
 		</script>
@@ -214,9 +280,6 @@ class WC_Shop_Customizer {
 	 * @param WP_Customize_Manager $wp_customize Theme Customizer object.
 	 */
 	public function add_product_catalog_section( $wp_customize ) {
-		$theme_support = get_theme_support( 'woocommerce' );
-		$theme_support = is_array( $theme_support ) ? $theme_support[0] : false;
-
 		$wp_customize->add_section(
 			'woocommerce_product_catalog',
 			array(
@@ -282,7 +345,7 @@ class WC_Shop_Customizer {
 		$wp_customize->add_setting(
 			'woocommerce_default_catalog_orderby',
 			array(
-				'default'              => '',
+				'default'              => 'menu_order',
 				'type'                 => 'option',
 				'capability'           => 'manage_woocommerce',
 				'sanitize_callback'    => array( $this, 'sanitize_default_catalog_orderby' ),
@@ -333,8 +396,8 @@ class WC_Shop_Customizer {
 				'settings'    => 'woocommerce_catalog_columns',
 				'type'        => 'number',
 				'input_attrs' => array(
-					'min'  => isset( $theme_support['product_grid']['min_columns'] ) ? absint( $theme_support['product_grid']['min_columns'] ) : 1,
-					'max'  => isset( $theme_support['product_grid']['max_columns'] ) ? absint( $theme_support['product_grid']['max_columns'] ) : '',
+					'min'  => wc_get_theme_support( 'product_grid::min_columns', 1 ),
+					'max'  => wc_get_theme_support( 'product_grid::max_columns', '' ),
 					'step' => 1,
 				),
 			)
@@ -360,8 +423,8 @@ class WC_Shop_Customizer {
 				'settings'    => 'woocommerce_catalog_rows',
 				'type'        => 'number',
 				'input_attrs' => array(
-					'min'  => isset( $theme_support['product_grid']['min_rows'] ) ? absint( $theme_support['product_grid']['min_rows'] ) : 1,
-					'max'  => isset( $theme_support['product_grid']['max_rows'] ) ? absint( $theme_support['product_grid']['max_rows'] ) : '',
+					'min'  => wc_get_theme_support( 'product_grid::min_rows', 1 ),
+					'max'  => wc_get_theme_support( 'product_grid::max_rows', '' ),
 					'step' => 1,
 				),
 			)
@@ -374,9 +437,6 @@ class WC_Shop_Customizer {
 	 * @param WP_Customize_Manager $wp_customize Theme Customizer object.
 	 */
 	private function add_product_images_section( $wp_customize ) {
-		$theme_support = get_theme_support( 'woocommerce' );
-		$theme_support = is_array( $theme_support ) ? $theme_support[0] : false;
-
 		$wp_customize->add_section(
 			'woocommerce_product_images',
 			array(
@@ -387,7 +447,7 @@ class WC_Shop_Customizer {
 			)
 		);
 
-		if ( ! isset( $theme_support['single_image_width'] ) ) {
+		if ( ! wc_get_theme_support( 'single_image_width' ) ) {
 			$wp_customize->add_setting(
 				'woocommerce_single_image_width',
 				array(
@@ -415,7 +475,7 @@ class WC_Shop_Customizer {
 			);
 		}
 
-		if ( ! isset( $theme_support['thumbnail_image_width'] ) ) {
+		if ( ! wc_get_theme_support( 'thumbnail_image_width' ) ) {
 			$wp_customize->add_setting(
 				'woocommerce_thumbnail_image_width',
 				array(

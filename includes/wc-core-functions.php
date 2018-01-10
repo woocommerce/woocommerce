@@ -661,6 +661,49 @@ function wc_mail( $to, $subject, $message, $headers = "Content-Type: text/html\r
 }
 
 /**
+ * Return "theme support" values from the current theme, if set.
+ *
+ * @since  3.3.0
+ * @param  string $prop Name of prop (or key::subkey for arrays of props) if you want a specific value. Leave blank to get all props as an array.
+ * @param  mixed  $default Optional value to return if the theme does not declare support for a prop.
+ * @return mixed  Value of prop(s).
+ */
+function wc_get_theme_support( $prop = '', $default = null ) {
+	$theme_support = get_theme_support( 'woocommerce' );
+	$theme_support = is_array( $theme_support ) ? $theme_support[0] : false;
+
+	if ( ! $theme_support ) {
+		return $default;
+	}
+
+	if ( $prop ) {
+		$prop_stack = explode( '::', $prop );
+		$prop_key   = array_shift( $prop_stack );
+
+		if ( isset( $theme_support[ $prop_key ] ) ) {
+			$value = $theme_support[ $prop_key ];
+
+			if ( count( $prop_stack ) ) {
+				foreach ( $prop_stack as $prop_key ) {
+					if ( is_array( $value ) && isset( $value[ $prop_key ] ) ) {
+						$value = $value[ $prop_key ];
+					} else {
+						$value = $default;
+						break;
+					}
+				}
+			}
+		} else {
+			$value = $default;
+		}
+
+		return $value;
+	}
+
+	return $theme_support;
+}
+
+/**
  * Get an image size by name or defined dimensions.
  *
  * The returned variable is filtered by woocommerce_get_image_size_{image_size} filter to
@@ -673,9 +716,7 @@ function wc_mail( $to, $subject, $message, $headers = "Content-Type: text/html\r
  * @return array Array of dimensions including width, height, and cropping mode. Cropping mode is 0 for no crop, and 1 for hard crop.
  */
 function wc_get_image_size( $image_size ) {
-	$theme_support = get_theme_support( 'woocommerce' );
-	$theme_support = is_array( $theme_support ) ? $theme_support[0] : false;
-	$size          = array(
+	$size = array(
 		'width'  => 600,
 		'height' => 600,
 		'crop'   => 1,
@@ -689,24 +730,13 @@ function wc_get_image_size( $image_size ) {
 		);
 		$image_size = $size['width'] . '_' . $size['height'];
 	} elseif ( in_array( $image_size, array( 'single', 'shop_single', 'woocommerce_single' ), true ) ) {
-		// If the theme supports woocommerce, take image sizes from that definition.
-		if ( isset( $theme_support['single_image_width'] ) ) {
-			$size['width'] = $theme_support['single_image_width'];
-		} else {
-			$size['width'] = get_option( 'woocommerce_single_image_width', 600 );
-		}
+		$size['width']  = wc_get_theme_support( 'single_image_width', get_option( 'woocommerce_single_image_width', 600 ) );
 		$size['height'] = 9999999999;
 		$size['crop']   = 0;
 		$image_size     = 'single';
 	} elseif ( in_array( $image_size, array( 'thumbnail', 'shop_thumbnail', 'shop_catalog', 'woocommerce_thumbnail' ), true ) ) {
-		// If the theme supports woocommerce, take image sizes from that definition.
-		if ( isset( $theme_support['thumbnail_image_width'] ) ) {
-			$size['width'] = $theme_support['thumbnail_image_width'];
-		} else {
-			$size['width'] = get_option( 'woocommerce_thumbnail_image_width', 300 );
-		}
-
-		$cropping = get_option( 'woocommerce_thumbnail_cropping', '1:1' );
+		$size['width'] = wc_get_theme_support( 'thumbnail_image_width', get_option( 'woocommerce_thumbnail_image_width', 300 ) );
+		$cropping      = get_option( 'woocommerce_thumbnail_cropping', '1: 1' );
 
 		if ( 'uncropped' === $cropping ) {
 			$size['height'] = 9999999999;

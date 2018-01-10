@@ -833,16 +833,24 @@ function wc_get_product_backorder_options() {
  * @return array
  */
 function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array() ) {
+
 	$product_id     = absint( $product_id );
+	$limit          = $limit > 0 ? $limit : 5;
 	$exclude_ids    = array_merge( array( 0, $product_id ), $exclude_ids );
 	$transient_name = 'wc_related_' . $product_id;
-	$related_posts  = get_transient( $transient_name );
-	$limit          = $limit > 0 ? $limit : 5;
+	$query_args     = http_build_query( array(
+		'limit'       => $limit,
+		'exclude_ids' => $exclude_ids,
+	) );
+
+	$transient     = get_transient( $transient_name );
+	$related_posts = $transient && isset( $transient[ $query_args ] ) ? $transient[ $query_args ] : false;
 
 	// We want to query related posts if they are not cached, or we don't have enough.
 	if ( false === $related_posts || count( $related_posts ) < $limit ) {
+
 		$cats_array = apply_filters( 'woocommerce_product_related_posts_relate_by_category', true, $product_id ) ? apply_filters( 'woocommerce_get_related_product_cat_terms', wc_get_product_term_ids( $product_id, 'product_cat' ), $product_id ) : array();
-		$tags_array = apply_filters( 'woocommerce_product_related_posts_relate_by_tag', true, $product_id ) ? apply_filters( 'woocommerce_get_related_product_tag_terms', wc_get_product_term_ids( $product_id, 'product_tag' ), $product_id ) : array();
+		$tags_array = apply_filters( 'woocommerce_product_related_posts_relate_by_tag', true, $product_id )      ? apply_filters( 'woocommerce_get_related_product_tag_terms', wc_get_product_term_ids( $product_id, 'product_tag' ), $product_id ) : array();
 
 		// Don't bother if none are set, unless woocommerce_product_related_posts_force_display is set to true in which case all products are related.
 		if ( empty( $cats_array ) && empty( $tags_array ) && ! apply_filters( 'woocommerce_product_related_posts_force_display', false, $product_id ) ) {
@@ -852,8 +860,19 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 			$related_posts = $data_store->get_related_products( $cats_array, $tags_array, $exclude_ids, $limit + 10, $product_id );
 		}
 
-		set_transient( $transient_name, $related_posts, DAY_IN_SECONDS );
+		if ( $transient ) {
+			$transient[ $query_args ] = $related_posts;
+		} else {
+			$transient = array( $query_args => $related_posts );
+		}
+
+		set_transient( $transient_name, $transient, DAY_IN_SECONDS );
 	}
+
+	$related_posts = apply_filters( 'woocommerce_related_products', $related_posts, $product_id, array(
+		'limit'        => $limit,
+		'excluded_ids' => $exclude_ids,
+	) );
 
 	shuffle( $related_posts );
 

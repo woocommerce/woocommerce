@@ -2,15 +2,21 @@
 /**
  * All functionality to regenerate images in the background when settings change.
  *
- * @category Images
  * @package WooCommerce/Classes
- * @author Automattic
  * @version 3.3.0
- * @since 3.3.0
+ * @since   3.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
+}
+
+if ( ! class_exists( 'WP_Async_Request', false ) ) {
+	include_once dirname( __FILE__ ) . '/libraries/wp-async-request.php';
+}
+
+if ( ! class_exists( 'WP_Background_Process', false ) ) {
+	include_once dirname( __FILE__ ) . '/libraries/wp-background-process.php';
 }
 
 /**
@@ -56,7 +62,7 @@ class WC_Regenerate_Images_Request extends WP_Background_Process {
 		}
 
 		if ( ! function_exists( 'wp_crop_image' ) ) {
-			include( ABSPATH . 'wp-admin/includes/image.php' );
+			include ABSPATH . 'wp-admin/includes/image.php';
 		}
 
 		$attachment_id = absint( $item['attachment_id'] );
@@ -109,6 +115,4 @@ class WC_Regenerate_Images_Request extends WP_Background_Process {
 			)
 		);
 	}
-
-
 }
