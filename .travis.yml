@@ -36,7 +36,7 @@ before_script:
   - bash tests/bin/travis.sh before
 
 script:
-  - bash tests/bin/phpunit.sh
+  #- bash tests/bin/phpunit.sh
   - bash tests/bin/phpcs.sh
   - mkdir ~/build/wordpress
   - sudo apt-get install nginx
