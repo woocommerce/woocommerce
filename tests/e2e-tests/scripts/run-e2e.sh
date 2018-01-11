@@ -46,7 +46,6 @@ cp "$CONFIG_DIR/travis_php-fpm.conf" "$PHP_FPM_CONF"
 
 	# Start nginx.
 	nginx -c "$NGINX_DIR/nginx.conf"
-	nginx -T
 
 cd "$WP_CORE_DIR"
 ls
