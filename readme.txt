@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, code
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
 Requires at least: 4.7
 Tested up to: 4.9
-Stable tag: 3.2.0
+Stable tag: 3.2.6
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -177,6 +177,15 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Feature - Ability to search in logs when the database logger is used.
 * Performance - Adjusted how permalinks are retrieved and saved to avoid switching locales on each page load.
 * Performance - Added cache when loading product variation attributes.
+* Fix - Fix wc_notice_count logic.
+* Fix - Correct bulk edit price formatting.
+* Fix - Ajax add-to-cart button shortcode fix for variations.
+* Tweak - Update billing if account form changes.
+* Tweak - Remove videos from help sections.
+* Tweak - Preserve seconds when saving order date.
+* Tweak - Allow quantities less than 1, but not 0, in admin.
+* Tweak - Post types with no archives should not show in breadcrumb.
+* Tweak - Only load session handler class on frontend not during cron.
 * Tweak - Moved the 'Store Notice" option into the customizer.
 * Tweak - Checkout Postcode / Zip validation error message was missing Billing / Shipping Identification. 
 * Tweak - Added Iris color picker validation.
@@ -194,6 +203,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Tweak - Let wp_signon handle email to username conversion.
 * Tweak - Made email field wider on checkout.
 * Tweak - Post entire shipping selection when showing multiple packages.
+* Dev - REST API - Orders should be created for users who exist on the site only.
 * Dev - REST API - Fixed default value of "dp" on orders and refunds endpoints.
 * Dev - Theming - Added theme support variables to declare image sizes used for products.
 * Dev - Theming - Added support for single-product-postname.php template files.
@@ -214,8 +224,11 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Dev - Improved the `is_internal_meta_key` checks to consider getters and setters.
 * Dev - Cleaned up the Order Customer Details template.
 * Dev - JavaScript payment_method_selected events on checkout.
+* Dev - Add new `$order->get_edit_order_url()` method.
+* Dev - Pass through options to zoom, flexslider, and photoswipe.
+* Dev - Added actions before and after scheduled sales initiation and completion.
 * Localization - Add direction character to currency output.
-* Localization - States for Tanzania.
+* Localization - States for Tanzania and Moldova.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
