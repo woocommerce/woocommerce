@@ -368,7 +368,7 @@ class WC_Structured_Data {
 
 		$shop_name      = get_bloginfo( 'name' );
 		$shop_url       = home_url();
-		$order_url      = $sent_to_admin ? admin_url( 'post.php?post=' . absint( $order->get_id() ) . '&action=edit' ) : $order->get_view_order_url();
+		$order_url      = $sent_to_admin ? $order->get_edit_order_url() : $order->get_view_order_url();
 		$order_statuses = array(
 			'pending'    => 'https://schema.org/OrderPaymentDue',
 			'processing' => 'https://schema.org/OrderProcessing',
