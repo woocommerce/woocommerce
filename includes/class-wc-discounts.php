@@ -212,7 +212,7 @@ class WC_Discounts {
 	 * @return int
 	 */
 	public function get_discounted_price_in_cents( $item ) {
-		return absint( $item->price - $this->get_discount( $item->key, true ) );
+		return absint( round( $item->price - $this->get_discount( $item->key, true ) ) );
 	}
 
 	/**
