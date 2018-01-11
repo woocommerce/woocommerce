@@ -192,7 +192,15 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 			return $object;
 		}
 
-		$this->update_additional_fields_for_object( $object, $request );
+		try {
+			$this->update_additional_fields_for_object( $object, $request );
+		} catch ( WC_Data_Exception $e ) {
+			$object->delete();
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
+		} catch ( WC_REST_Exception $e ) {
+			$object->delete();
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
 
 		/**
 		 * Fires after a single object is created or updated via the REST API.
@@ -231,7 +239,13 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 			return $object;
 		}
 
-		$this->update_additional_fields_for_object( $object, $request );
+		try {
+			$this->update_additional_fields_for_object( $object, $request );
+		} catch ( WC_Data_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
+		} catch ( WC_REST_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
 
 		/**
 		 * Fires after a single object is created or updated via the REST API.
