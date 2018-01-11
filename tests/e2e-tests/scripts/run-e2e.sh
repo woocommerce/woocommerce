@@ -26,6 +26,26 @@
 	#export BASE_URL="http://${TRAVIS_JOB_ID:0:20}.wp-e2e-tests.pw"
 
 	#curl -I http://localhost
+CONFIG_DIR="./tests/e2e-tests/config"
+WP_CORE_DIR="/tmp/wordpress"
+NGINX_DIR="$HOME/nginx"
+mkdir -p "$WP_CORE_DIR"
+mkdir -p "$NGINX_DIR"
+mkdir -p "$NGINX_DIR/sites-enabled"
+mkdir -p "$NGINX_DIR/var"
+
+PHP_FPM_BIN="$HOME/.phpenv/versions/7.2/sbin/php-fpm"
+PHP_FPM_CONF="$NGINX_DIR/php-fpm.conf"
+cp "$CONFIG_DIR/php-fpm.tpl.conf" "$PHP_FPM_CONF"
+# Start php-fpm
+"$PHP_FPM_BIN" --fpm-config "$PHP_FPM_CONF"
+	# Copy the default nginx config files.
+	cp "$CONFIG_DIR/travis_nginx.conf" "$NGINX_DIR/nginx.conf"
+	cp "$CONFIG_DIR/travis_fastcgi.conf" "$NGINX_DIR/fastcgi.conf"
+	cp "$CONFIG_DIR/travis_default-site.conf" "$NGINX_DIR/sites-enabled/default-site.conf"
+
+	# Start nginx.
+	nginx -c "$NGINX_DIR/nginx.conf"
 
 cd ~/build/wordpress
 

@@ -2,6 +2,9 @@ language: php
 
 addons:
   chrome: stable
+  apt:
+    packages:
+      - nginx
 
 sudo: false
 
@@ -38,15 +41,7 @@ before_script:
 script:
   #- bash tests/bin/phpunit.sh
   - bash tests/bin/phpcs.sh
-  - mkdir ~/build/wordpress
-  - sudo apt-get install nginx
-  - sudo cp ./tests/e2e-tests/config/travis_nginx.conf /etc/nginx/nginx.conf
 
-  - sudo usermod -a -G www-data www-data
-  - bash tests/e2e-tests/scripts/run-e2e.sh
-  - sudo chmod -R 755 /home/travis/build/wordpress
-  - sudo chown -R www-data:www-data /home/travis/build/wordpress
-  - sudo /etc/init.d/nginx restart
   - curl -i http://localhost
   - curl -i http://localhost/wp-admin 
   - curl -i http://localhost/readme.html 
