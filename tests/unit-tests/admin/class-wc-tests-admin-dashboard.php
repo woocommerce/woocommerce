@@ -47,4 +47,43 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 			'can_edit_posts'           => array( 'can_edit_posts', false ),
 		);
 	}
+
+	/**
+	 * Test: get_top_seller
+	 */
+	public function test_get_top_seller() {
+		$top_product   = WC_Helper_Product::create_simple_product();
+		$other_product = WC_Helper_Product::create_simple_product();
+
+		$order1 = WC_Helper_Order::create_order( 0, $top_product );
+		$order1->set_status( 'completed' );
+		$order1->save();
+		$order2 = WC_Helper_Order::create_order( 0, $other_product );
+		$order2->set_status( 'completed' );
+		$order2->save();
+		$order3 = WC_Helper_Order::create_order( 0, $top_product );
+		$order3->set_status( 'completed' );
+		$order3->save();
+
+		// Refresh the top product.
+		$top_product = wc_get_product( $top_product->get_id() );
+
+		$dashboard = new WC_Admin_Dashboard();
+		$method    = new ReflectionMethod( $dashboard, 'get_top_seller' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( $dashboard );
+
+		$this->assertEquals(
+			$top_product->get_id(),
+			$result->product_id,
+			'Expected $top_product to be the top product.'
+		);
+
+		$this->assertEquals(
+			$top_product->get_total_sales(),
+			$result->qty,
+			'Expected a number of sales equal to $order1 + $order3.'
+		);
+	}
 }
