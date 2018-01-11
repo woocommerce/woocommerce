@@ -27,7 +27,7 @@
 
 	#curl -I http://localhost
 CONFIG_DIR="./tests/e2e-tests/config"
-WP_CORE_DIR="/tmp/wordpress"
+WP_CORE_DIR="$HOME/wordpress"
 NGINX_DIR="$HOME/nginx"
 mkdir -p "$WP_CORE_DIR"
 mkdir -p "$NGINX_DIR"
@@ -48,6 +48,7 @@ cp "$CONFIG_DIR/travis_php-fpm.conf" "$PHP_FPM_CONF"
 	nginx -c "$NGINX_DIR/nginx.conf"
 
 cd "$WP_CORE_DIR"
+ls
 
 curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 php wp-cli.phar core download
