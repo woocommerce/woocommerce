@@ -41,7 +41,7 @@ before_script:
 script:
   #- bash tests/bin/phpunit.sh
   - bash tests/bin/phpcs.sh
-
+  - bash tests/e2e-tests/scripts/run-e2e.sh
   - curl -i http://localhost
   - curl -i http://localhost/wp-admin 
   - curl -i http://localhost/readme.html 
