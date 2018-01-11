@@ -157,7 +157,7 @@ class WC_CLI_REST_Command {
 			$body = self::limit_item_to_fields( $body, $assoc_args['fields'] );
 		}
 
-		if ( ! isset( $assoc_args['format'] ) ) {
+		if ( empty( $assoc_args['format'] ) ) {
 			$assoc_args['format'] = 'table';
 		}
 
