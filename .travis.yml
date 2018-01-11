@@ -42,9 +42,9 @@ script:
   #- bash tests/bin/phpunit.sh
   - bash tests/bin/phpcs.sh
   - bash tests/e2e-tests/scripts/run-e2e.sh
-  - curl -i http://localhost
-  - curl -i http://localhost/wp-admin 
-  - curl -i http://localhost/readme.html 
+  - curl -i http://localhost:8080
+  - curl -i http://localhost:8080/wp-admin 
+  - curl -i http://localhost:8080/readme.html 
   - npm test
 
 after_script:
