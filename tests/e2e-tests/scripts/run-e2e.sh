@@ -47,7 +47,7 @@ cp "$CONFIG_DIR/php-fpm.tpl.conf" "$PHP_FPM_CONF"
 	# Start nginx.
 	nginx -c "$NGINX_DIR/nginx.conf"
 
-cd ~/build/wordpress
+cd "$WP_CORE_DIR"
 
 curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 php wp-cli.phar core download
