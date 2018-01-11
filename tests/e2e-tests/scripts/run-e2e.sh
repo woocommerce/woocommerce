@@ -36,7 +36,7 @@ mkdir -p "$NGINX_DIR/var"
 
 PHP_FPM_BIN="$HOME/.phpenv/versions/7.2/sbin/php-fpm"
 PHP_FPM_CONF="$NGINX_DIR/php-fpm.conf"
-cp "$CONFIG_DIR/php-fpm.tpl.conf" "$PHP_FPM_CONF"
+cp "$CONFIG_DIR/travis_php-fpm.conf" "$PHP_FPM_CONF"
 # Start php-fpm
 "$PHP_FPM_BIN" --fpm-config "$PHP_FPM_CONF"
 	# Copy the default nginx config files.
