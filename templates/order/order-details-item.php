@@ -38,7 +38,7 @@ if ( ! apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
 
 			wc_display_item_meta( $item );
 
-			do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order );
+			do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order, false );
 		?>
 	</td>
 
