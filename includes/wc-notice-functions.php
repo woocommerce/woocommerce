@@ -33,7 +33,7 @@ function wc_notice_count( $notice_type = '' ) {
 
 	if ( isset( $all_notices[ $notice_type ] ) ) {
 
-		$notice_count = absint( sizeof( $all_notices[ $notice_type ] ) );
+		$notice_count = count( $all_notices[ $notice_type ] );
 
 	} elseif ( empty( $notice_type ) ) {
 
