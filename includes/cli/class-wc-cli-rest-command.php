@@ -157,6 +157,10 @@ class WC_CLI_REST_Command {
 			$body = self::limit_item_to_fields( $body, $assoc_args['fields'] );
 		}
 
+		if ( ! isset( $assoc_args['format'] ) ) {
+			$assoc_args['format'] = 'table';
+		}
+
 		if ( 'headers' === $assoc_args['format'] ) {
 			echo json_encode( $headers );
 		} elseif ( 'body' === $assoc_args['format'] ) {
