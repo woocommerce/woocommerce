@@ -44,7 +44,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<?php
 								echo apply_filters( 'woocommerce_order_item_name', esc_html( $item->get_name() ), $item, false ); // @codingStandardsIgnoreLine
 
-								do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order );
+								do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order, false );
 
 								wc_display_item_meta( $item );
 
