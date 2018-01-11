@@ -86,4 +86,20 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 			'Expected a number of sales equal to $order1 + $order3.'
 		);
 	}
+
+	/**
+	 * Test: get_top_seller
+	 */
+	public function test_get_top_seller_enables_query_to_be_filtered() {
+		$dashboard = new WC_Admin_Dashboard();
+		$method    = new ReflectionMethod( $dashboard, 'get_top_seller' );
+		$method->setAccessible( true );
+
+		add_filter( 'woocommerce_dashboard_status_widget_top_seller_query', '__return_empty_array' );
+
+		$this->assertNull(
+			$method->invoke( $dashboard ),
+			'Method get_top_seller() did not call the "woocommerce_dashboard_status_widget_top_seller_query" filter.'
+		);
+	}
 }
