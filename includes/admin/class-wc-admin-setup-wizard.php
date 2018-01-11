@@ -247,6 +247,33 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
+	 * Get the URL for the last step's screen.
+	 *
+	 * @param string $step  slug (default: current step).
+	 * @return string       URL for last step if a last step exists.
+	 *                      Admin URL if it's the first step.
+	 *                      Empty string on failure.
+	 * @since 3.0.0
+	 */
+	public function get_last_step_link( $step = '' ) {
+		if ( ! $step ) {
+			$step = $this->step;
+		}
+
+		$keys = array_keys( $this->steps );
+		if ( reset( $keys ) === $step ) {
+			return admin_url();
+		}
+
+		$step_index = array_search( $step, $keys );
+		if ( false === $step_index ) {
+			return '';
+		}
+
+		return add_query_arg( 'step', $keys[ $step_index - 1 ], remove_query_arg( 'activate_error' ) );
+	}
+
+	/**
 	 * Setup Wizard Header.
 	 */
 	public function setup_wizard_header() {
@@ -272,11 +299,11 @@ class WC_Admin_Setup_Wizard {
 	public function setup_wizard_footer() {
 		?>
 			<?php if ( 'store_setup' === $this->step ) : ?>
-				<a class="wc-return-to-dashboard" href="<?php echo esc_url( admin_url() ); ?>"><?php esc_html_e( 'Not right now', 'woocommerce' ); ?></a>
-			<?php elseif ( 'next_steps' === $this->step ) : ?>
-				<a class="wc-return-to-dashboard" href="<?php echo esc_url( admin_url() ); ?>"><?php esc_html_e( 'Return to your dashboard', 'woocommerce' ); ?></a>
+				<a class="wc-setup-footer-links" href="<?php echo esc_url( admin_url() ); ?>"><?php esc_html_e( 'Not right now', 'woocommerce' ); ?></a>
 			<?php elseif ( 'activate' === $this->step ) : ?>
-				<a class="wc-return-to-dashboard" href="<?php echo esc_url( $this->get_next_step_link() ); ?>"><?php esc_html_e( 'Skip this step', 'woocommerce' ); ?></a>
+				<a class="wc-setup-footer-links" href="<?php echo esc_url( $this->get_next_step_link() ); ?>"><?php esc_html_e( 'Skip this step', 'woocommerce' ); ?></a>
+			<?php else : ?>
+				<a class="wc-setup-footer-links" href="<?php echo esc_url( $this->get_last_step_link() ); ?>"><?php esc_html_e( '&lt; Back', 'woocommerce' ); ?></a>
 			<?php endif; ?>
 			</body>
 		</html>
@@ -290,16 +317,18 @@ class WC_Admin_Setup_Wizard {
 		$output_steps = $this->steps;
 		?>
 		<ol class="wc-setup-steps">
-			<?php foreach ( $output_steps as $step_key => $step ) : ?>
-				<li class="
-					<?php
-					if ( $step_key === $this->step ) {
-						echo 'active';
-					} elseif ( array_search( $this->step, array_keys( $this->steps ) ) > array_search( $step_key, array_keys( $this->steps ) ) ) {
-						echo 'done';
-					}
-					?>
-				"><?php echo esc_html( $step['name'] ); ?></li>
+			<?php foreach ( $output_steps as $step_key => $step ) :
+				$is_completed = array_search( $this->step, array_keys( $this->steps ) ) > array_search( $step_key, array_keys( $this->steps ) );
+
+				if ( $step_key === $this->step ) : ?>
+					<li class="active"><?php echo esc_html( $step['name'] ); ?></li>
+				<?php elseif ( $is_completed ) : ?>
+					<li class="done">
+						<a href="<?php echo esc_url( add_query_arg( 'step', $step_key, remove_query_arg( 'activate_error' ) ) ) ?>"><?php echo esc_html( $step['name'] ); ?></a>
+					</li>
+				<?php else : ?>
+					<li><?php echo esc_html( $step['name'] ); ?></li>
+				<?php endif; ?>
 			<?php endforeach; ?>
 		</ol>
 		<?php
@@ -769,14 +798,20 @@ class WC_Admin_Setup_Wizard {
 		$currency_code         = get_woocommerce_currency();
 		$wcs_carrier           = $this->get_wcs_shipping_carrier( $country_code, $currency_code );
 		$existing_zones        = WC_Shipping_Zones::get_zones();
+		$dimension_unit        = get_option( 'woocommerce_dimension_unit' );
+		$weight_unit           = get_option( 'woocommerce_weight_unit' );
+		$locale_info           = include( WC()->plugin_path() . '/i18n/locale-info.php' );
 
-		$locale_info = include( WC()->plugin_path() . '/i18n/locale-info.php' );
-		if ( isset( $locale_info[ $country_code ] ) ) {
-			$dimension_unit = $locale_info[ $country_code ]['dimension_unit'];
-			$weight_unit    = $locale_info[ $country_code ]['weight_unit'];
+		if ( ! $weight_unit && isset( $locale_info[ $country_code ] ) ) {
+			$weight_unit = $locale_info[ $country_code ]['weight_unit'];
 		} else {
-			$dimension_unit = 'cm';
-			$weight_unit    = 'kg';
+			$weight_unit = $weight_unit ? $weight_unit : 'kg';
+		}
+
+		if ( ! $dimension_unit && isset( $locale_info[ $country_code ] ) ) {
+			$dimension_unit = $locale_info[ $country_code ]['dimension_unit'];
+		} else {
+			$dimension_unit = $dimension_unit ? $dimension_unit : 'cm';
 		}
 
 		if ( ! empty( $existing_zones ) ) {
@@ -1871,6 +1906,24 @@ class WC_Admin_Setup_Wizard {
 					<p class="wc-setup-actions step">
 						<a class="button button-large" href="<?php echo esc_url( admin_url( 'edit.php?post_type=product&page=product_importer' ) ); ?>">
 							<?php esc_html_e( 'Import products', 'woocommerce' ); ?>
+						</a>
+					</p>
+				</div>
+			</li>
+			<li class="wc-wizard-additional-steps">
+				<div class="wc-wizard-next-step-description">
+					<p class="next-step-heading"><?php esc_html_e( 'You can also:', 'woocommerce' ); ?></p>
+				</div>
+				<div class="wc-wizard-next-step-action">
+					<p class="wc-setup-actions step">
+						<a class="button button-large" href="<?php echo esc_url( admin_url() ); ?>">
+							<?php esc_html_e( 'Visit Dashboard', 'woocommerce' ); ?>
+						</a>
+						<a class="button button-large" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings' ) ); ?>">
+							<?php esc_html_e( 'Review Settings', 'woocommerce' ); ?>
+						</a>
+						<a class="button button-large" href="<?php echo esc_url( admin_url( 'customize.php?url=' . wc_get_page_permalink( 'shop' ) . '&autofocus[panel]=woocommerce' ) ); ?>">
+							<?php esc_html_e( 'View &amp; Customize', 'woocommerce' ); ?>
 						</a>
 					</p>
 				</div>

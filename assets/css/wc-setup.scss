@@ -334,6 +334,15 @@ body {
 		position: relative;
 		border-bottom: 4px solid #ccc;
 		line-height: 1.4em;
+
+		a {
+			color: inherit;
+			text-decoration: none;
+
+			&:hover, &:focus {
+				color: #111;
+			}
+		}
 	}
 	li::before {
 		content: '';
@@ -400,7 +409,7 @@ body {
 	margin-top: 0;
 }
 
-.wc-return-to-dashboard {
+.wc-setup-footer-links {
 	font-size: 0.85em;
 	color: #b5b5b5;
 	margin: 1.18em 0;
@@ -973,6 +982,22 @@ h3.jetpack-reasons {
 			margin: 0;
 			font-size: 16px;
 			font-weight: 600;
+		}
+	}
+
+	.wc-wizard-additional-steps {
+		border-top: 1px solid #eee;
+
+		.wc-wizard-next-step-description {
+			margin-bottom: 0;
+		}
+
+		.wc-setup-actions {
+			margin: 0 0 1.5em 0;
+
+			.button {
+				font-size: 15px;
+			}
 		}
 	}
 }

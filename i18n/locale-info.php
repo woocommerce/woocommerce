@@ -540,13 +540,13 @@ return array(
 	),
 	'US' => array(
 		'currency_code'  => 'USD',
-		'currency_pos'	=> 'left',
-		'thousand_sep'	=> ',',
-		'decimal_sep'	 => '.',
-		'num_decimals'	=> 2,
-		'weight_unit'	 => 'oz',
+		'currency_pos'   => 'left',
+		'thousand_sep'   => ',',
+		'decimal_sep'    => '.',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'oz',
 		'dimension_unit' => 'in',
-		'tax_rates'		=> array(
+		'tax_rates'      => array(
 			'AL' => array(
 				array(
 					'country'  => 'US',
