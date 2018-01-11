@@ -1535,6 +1535,16 @@ class WC_Order extends WC_Abstract_Order {
 		return apply_filters( 'woocommerce_get_view_order_url', wc_get_endpoint_url( 'view-order', $this->get_id(), wc_get_page_permalink( 'myaccount' ) ), $this );
 	}
 
+	/**
+	 * Get's the URL to edit the order in the backend.
+	 *
+	 * @since 3.3.0
+	 * @return string
+	 */
+	public function get_edit_order_url() {
+		return apply_filters( 'woocommerce_get_edit_order_url', get_admin_url( null, 'post.php?post=' . $this->get_id() . '&action=edit' ), $this );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Order notes.
