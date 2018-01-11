@@ -112,9 +112,9 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 If on the off-chance you do encounter issues with the shop/category pages after an update you simply need to flush the permalinks by going to WordPress > Settings > Permalinks and hitting 'save'. That should return things to normal.
 
-= Dummy data =
+= Sample data =
 
-WooCommerce comes with some dummy data you can use to see how products look; either import dummy_data.xml via the [WordPress importer](https://wordpress.org/plugins/wordpress-importer/) or use our [CSV Import Suite plugin](https://woocommerce.com/products/product-csv-import-suite/) to import dummy_data.csv and dummy_data_variations.csv.
+WooCommerce comes with some sample data you can use to see how products look; import sample_products.xml via the [WordPress importer](https://wordpress.org/plugins/wordpress-importer/). You can also use the core CSV importer or our [CSV Import Suite plugin](https://woocommerce.com/products/product-csv-import-suite/) to import sample_products.csv.
 
 == Frequently Asked Questions ==
 
@@ -170,7 +170,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Feature - Changing image sizes will trigger automatic thumbnail regeneration in the background.
 * Feature - Improved how downloads are stored within products, and added new reporting/logging features to track who downloaded what, when.
 * Feature - Improved the overall appearance of the backend orders list, and added a new 'preview' button to quickly see order details.
-* Feature - New default dummy data and placeholders.
+* Feature - New default sample data and placeholders.
 * Feature - Added sandbox and live API details to the PayPal standard data, as well as an indication on the checkout to what mode is currently active. PayPal IPN email notifications are also now optional.
 * Feature - Introduced product category threshold filter (`woocommerce_product_category_filter_threshold`). AJAX powered select will kick in when you have over 100 categories.
 * Feature - Added `add_to_cart_description` method and aria-labels to cart buttons in the loop for accessibility.
@@ -187,7 +187,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Tweak - Post types with no archives should not show in breadcrumb.
 * Tweak - Only load session handler class on frontend not during cron.
 * Tweak - Moved the 'Store Notice" option into the customizer.
-* Tweak - Checkout Postcode / Zip validation error message was missing Billing / Shipping Identification. 
+* Tweak - Checkout Postcode / Zip validation error message was missing Billing / Shipping Identification.
 * Tweak - Added Iris color picker validation.
 * Tweak - Use scrollIntoView on checkout.
 * Tweak - Converted input submit elements to button submit elements across the entire codebase for consistency.
@@ -210,12 +210,12 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Dev - Added actions before calculations order totals and taxes and is_vat_excempt support.
 * Dev - Add filter 'woocommerce_coupon_get_apply_quantity'.
 * Dev - Grouped products; added filters to allow custom columns and changes to values.
-* Dev - Allow for cloning the WC_Cart object 
-* Dev - Apply filters to registration-error-email-exists error. 
+* Dev - Allow for cloning the WC_Cart object
+* Dev - Apply filters to registration-error-email-exists error.
 * Dev - Added `woocommerce_cross_sells_order` filter.
-* Dev - Add order-details `before` hooks to complement existing hooks. 
+* Dev - Add order-details `before` hooks to complement existing hooks.
 * Dev - WC_CHUNK_SIZE constant for controlling readfile.
-* Dev - Add short circuit to customer bought product function. 
+* Dev - Add short circuit to customer bought product function.
 * Dev - Added a `wc_caught_exception` method to aid with logging.
 * Dev - Added Data stores and CRUD for working with Webhooks.
 * Dev - Bumped minimum WP version requirement to 4.5 and removed legacy API files.
