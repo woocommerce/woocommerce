@@ -44,6 +44,8 @@ cp "$CONFIG_DIR/travis_php-fpm.conf" "$PHP_FPM_CONF"
 	cp "$CONFIG_DIR/travis_fastcgi.conf" "$NGINX_DIR/fastcgi.conf"
 	cp "$CONFIG_DIR/travis_default-site.conf" "$NGINX_DIR/sites-enabled/default-site.conf"
 
+	nginx stop
+
 	# Start nginx.
 	nginx -c "$NGINX_DIR/nginx.conf"
 
