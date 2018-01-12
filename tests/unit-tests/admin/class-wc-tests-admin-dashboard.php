@@ -13,6 +13,18 @@
 class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 
 	/**
+	 * (Re)set options used for this testcase.
+	 *
+	 * @beforeClass
+	 */
+	public static function reset_options() {
+
+		// For the sake of these tests, "low" stock is 1, "no" stock is 0.
+		update_option( 'woocommerce_notify_low_stock_amount', 1 );
+		update_option( 'woocommerce_notify_no_stock_amount', 0 );
+	}
+
+	/**
 	 * Trigger any method that conditionally loads PHP includes.
 	 *
 	 * @beforeClass
@@ -23,6 +35,16 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 		ob_start();
 		$dashboard->status_widget(); // Loads includes/admin/reports/class-wc-admin-report.php.
 		ob_end_clean();
+	}
+
+	/**
+	 * Delete transients used for dashboard items.
+	 *
+	 * @after
+	 */
+	public function clear_transients() {
+		delete_transient( 'wc_low_stock_count' );
+		delete_transient( 'wc_outofstock_count' );
 	}
 
 	/**
@@ -132,5 +154,141 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 		$result = $method->invoke( $dashboard );
 
 		$this->assertSame( $report, $result );
+	}
+
+	/**
+	 * Test: status_widget
+	 */
+	public function test_status_widget() {
+		$dashboard    = new WC_Admin_Dashboard();
+		$action_count = did_action( 'woocommerce_after_dashboard_status_widget' );
+
+		ob_start();
+		$dashboard->status_widget();
+		$output = ob_get_clean();
+
+		$this->assertContains( '<ul class="wc_status_list">', $output );
+
+		$this->assertEquals( $action_count + 1, did_action( 'woocommerce_after_dashboard_status_widget' ) );
+	}
+
+	/**
+	 * Test: status_widget
+	 */
+	public function test_status_widget_conditionally_adds_sales_data() {
+		$user = $this->factory()->user->create_and_get();
+		$user->add_cap( 'view_woocommerce_reports', true );
+		wp_set_current_user( $user->ID );
+
+		$dashboard    = new WC_Admin_Dashboard();
+		$action_count = did_action( 'woocommerce_after_dashboard_status_widget' );
+
+		ob_start();
+		$dashboard->status_widget();
+		$output = ob_get_clean();
+
+		$this->assertContains(
+			'<li class="sales-this-month">',
+			$output,
+			'"Sales This Month" data should be visible when the current user has the "view_woocommerce_reports" capability.'
+		);
+	}
+
+	/**
+	 * Test: status_widget_order_rows
+	 */
+	public function test_status_widget_order_rows() {
+		$user = $this->factory()->user->create_and_get();
+		$user->add_cap( 'edit_shop_orders', true );
+		wp_set_current_user( $user->ID );
+
+		$dashboard = new WC_Admin_Dashboard();
+		$method    = new ReflectionMethod( $dashboard, 'status_widget_order_rows' );
+		$method->setAccessible( true );
+
+		ob_start();
+		$method->invoke( $dashboard );
+		$output = ob_get_clean();
+
+		$this->assertContains( '<li class="processing-orders">', $output );
+		$this->assertContains( '<li class="on-hold-orders">', $output );
+	}
+
+	/**
+	 * Test: status_widget_order_rows
+	 */
+	public function test_status_widget_order_rows_capability_check() {
+		$dashboard = new WC_Admin_Dashboard();
+		$method    = new ReflectionMethod( $dashboard, 'status_widget_order_rows' );
+		$method->setAccessible( true );
+
+		$this->assertFalse( current_user_can( 'edit_shop_orders' ) );
+
+		ob_start();
+		$method->invoke( $dashboard );
+		$output = ob_get_clean();
+
+		$this->assertEmpty( $output, 'Output should be empty for users without "edit_shop_orders" cap.' );
+	}
+
+	/**
+	 * Test: status_widget_stock_rows
+	 */
+	public function test_status_widget_stock_rows() {
+		$dashboard = new WC_Admin_Dashboard();
+		$method    = new ReflectionMethod( $dashboard, 'status_widget_stock_rows' );
+		$method->setAccessible( true );
+
+		ob_start();
+		$method->invoke( $dashboard );
+		$output = ob_get_clean();
+
+		$this->assertContains( '<li class="low-in-stock">', $output );
+		$this->assertContains( '<li class="out-of-stock">', $output );
+
+		$this->assertGreaterThanOrEqual( 0, get_transient( 'wc_low_stock_count' ), 'Expected wc_low_stock_count transient to be set.' );
+		$this->assertGreaterThanOrEqual( 0, get_transient( 'wc_outofstock_count' ), 'Expected wc_outofstock_count transient to be set.' );
+	}
+
+	/**
+	 * Test: status_widget_stock_rows
+	 */
+	public function test_status_widget_stock_rows_low_stock_query() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 1 );
+		$product->save();
+
+		$dashboard = new WC_Admin_Dashboard();
+		$method    = new ReflectionMethod( $dashboard, 'status_widget_stock_rows' );
+		$method->setAccessible( true );
+
+		ob_start();
+		$method->invoke( $dashboard );
+		ob_end_clean();
+
+		$this->assertEquals( 1, get_transient( 'wc_low_stock_count' ), 'One product should have low stock.' );
+		$this->assertEquals( 0, get_transient( 'wc_outofstock_count' ), 'No products should be out of stock.' );
+	}
+
+	/**
+	 * Test: status_widget_stock_rows
+	 */
+	public function test_status_widget_stock_rows_no_stock_query() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 0 );
+		$product->save();
+
+		$dashboard = new WC_Admin_Dashboard();
+		$method    = new ReflectionMethod( $dashboard, 'status_widget_stock_rows' );
+		$method->setAccessible( true );
+
+		ob_start();
+		$method->invoke( $dashboard );
+		ob_end_clean();
+
+		$this->assertEquals( 0, get_transient( 'wc_low_stock_count' ), 'No products should have low stock.' );
+		$this->assertEquals( 1, get_transient( 'wc_outofstock_count' ), 'One product should be out of stock.' );
 	}
 }
