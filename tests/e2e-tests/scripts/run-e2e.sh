@@ -1,11 +1,6 @@
 #!/usr/bin/env bash
 #if [[ ${RUN_E2E} == 1 ]]; then
 	set -ev
-	# Setup
-	export DISPLAY=:99.0
-	sh -e /etc/init.d/xvfb start
- 	sleep 3
-
 	npm install
 	export NODE_CONFIG_DIR="./tests/e2e-tests/config"
 
@@ -57,9 +52,6 @@ php wp-cli.phar core config --dbname=woocommerce_test --dbuser=root --dbpass='' 
 define('WP_MEMORY_LIMIT', '256M');
 PHP
 php wp-cli.phar core install --url="http://localhost:8080" --title="Example" --admin_user=admin --admin_password=password --admin_email=info@example.com --path=$WP_CORE_DIR --skip-email
-
-php wp-cli.phar core is-installed
-echo $?
 php wp-cli.phar db import ~/build/woocommerce/woocommerce/tests/e2e-tests/data/e2e-db.sql
 php wp-cli.phar search-replace 'http://local.wordpress.test' 'http://localhost:8080'
 
@@ -69,7 +61,10 @@ php wp-cli.phar plugin install https://github.com/woocommerce/woocommerce/archiv
 cd ~/build/woocommerce/woocommerce
 
 	export BASE_URL="http://localhost:8080"
+	export DISPLAY=:99.0
+	sh -e /etc/init.d/xvfb start
+ 	sleep 3
 
 	# Run the tests
-	#npm test
+	npm test
 #fi
