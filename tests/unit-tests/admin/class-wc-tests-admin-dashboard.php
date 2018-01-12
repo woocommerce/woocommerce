@@ -291,4 +291,54 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 		$this->assertEquals( 0, get_transient( 'wc_low_stock_count' ), 'No products should have low stock.' );
 		$this->assertEquals( 1, get_transient( 'wc_outofstock_count' ), 'One product should be out of stock.' );
 	}
+
+	/**
+	 * Test: recent_reviews
+	 */
+	public function test_recent_reviews() {
+		$dashboard = new WC_Admin_Dashboard();
+		$product   = WC_Helper_Product::create_simple_product();
+		$reviews   = $this->factory()->comment->create_post_comments( $product->get_id() );
+		$review    = get_comment( $reviews[0] );
+
+		ob_start();
+		$dashboard->recent_reviews();
+		$output = ob_get_clean();
+
+		$this->assertContains(
+			get_permalink( $review->ID ) . '#comment-' . $review->comment_ID,
+			$output,
+			'The recent reviews widget should contain a link to the public review.'
+		);
+	}
+
+	/**
+	 * Test: recent_reviews
+	 */
+	public function test_recent_reviews_with_no_reviews() {
+		$dashboard = new WC_Admin_Dashboard();
+
+		ob_start();
+		$dashboard->recent_reviews();
+		$output = ob_get_clean();
+
+		$this->assertNotContains( '<ul>', $output, 'When there are no reviews, no list should be generated.' );
+	}
+
+	/**
+	 * Test: recent_reviews
+	 */
+	public function test_recent_reviews_limited_to_approved_comments() {
+		$dashboard = new WC_Admin_Dashboard();
+		$product   = WC_Helper_Product::create_simple_product();
+		$reviews   = $this->factory()->comment->create_post_comments( $product->get_id(), 1, array(
+			'comment_approved' => 0,
+		) );
+
+		ob_start();
+		$dashboard->recent_reviews();
+		$output = ob_get_clean();
+
+		$this->assertNotContains( '<ul>', $output, 'Only approved reviews are eligible to appear in "Recent Reviews".' );
+	}
 }
