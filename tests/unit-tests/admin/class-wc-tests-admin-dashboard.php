@@ -13,6 +13,19 @@
 class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 
 	/**
+	 * Trigger any method that conditionally loads PHP includes.
+	 *
+	 * @beforeClass
+	 */
+	public static function trigger_includes() {
+		$dashboard = new WC_Admin_Dashboard();
+
+		ob_start();
+		$dashboard->status_widget(); // Loads includes/admin/reports/class-wc-admin-report.php.
+		ob_end_clean();
+	}
+
+	/**
 	 * Test: __construct
 	 *
 	 * @dataProvider construct_user_cap_provider()
@@ -101,5 +114,23 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 			$method->invoke( $dashboard ),
 			'Method get_top_seller() did not call the "woocommerce_dashboard_status_widget_top_seller_query" filter.'
 		);
+	}
+
+	/**
+	 * Test: get_sales_report_data
+	 */
+	public function test_get_sales_report_data() {
+		$dashboard = new WC_Admin_Dashboard();
+		$report    = new stdClass();
+		$method    = new ReflectionMethod( $dashboard, 'get_sales_report_data' );
+		$method->setAccessible( true );
+
+		add_filter( 'woocommerce_admin_report_data', function () use ( $report ) {
+			return $report;
+		} );
+
+		$result = $method->invoke( $dashboard );
+
+		$this->assertSame( $report, $result );
 	}
 }
