@@ -11,13 +11,13 @@
 class WC_Tests_Admin_Report extends WC_Unit_Test_Case {
 
 	/**
-	 * Load the necessary files, as they're not automatically loaded by WooCommerce.
+	 * Additional files, relative to the plugin's root directory, that should be explicitly included.
 	 *
-	 * @beforeClass
+	 * @var array
 	 */
-	public static function includes() {
-		include_once WC_Unit_Tests_Bootstrap::instance()->plugin_dir . '/includes/admin/reports/class-wc-admin-report.php';
-	}
+	public static $includes = array(
+		'includes/admin/reports/class-wc-admin-report.php',
+	);
 
 	/**
 	 * Clear cached report data.

@@ -13,6 +13,28 @@ class WC_Unit_Test_Case extends WP_UnitTestCase {
 	protected $factory;
 
 	/**
+	 * Additional files, relative to the plugin's root directory, that should be explicitly included.
+	 *
+	 * @var array
+	 */
+	protected static $includes;
+
+	/**
+	 * If a test has declared include files, load them before running the tests in the class.
+	 *
+	 * @beforeClass
+	 */
+	public static function include_dependencies() {
+		$base_dir = trailingslashit( dirname( dirname( __DIR__ ) ) );
+
+		if ( ! empty( static::$includes ) ) {
+			foreach ( (array) static::$includes as $include ) {
+				include_once $base_dir . $include;
+			}
+		}
+	}
+
+	/**
 	 * Setup test case.
 	 *
 	 * @since 2.2
