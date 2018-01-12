@@ -67,10 +67,28 @@ class WC_Admin_Setup_Wizard {
 
 	/**
 	 * The theme "extra" should only be shown if the current user can modify themes
-	 * and the store doesn't already have a WooCommerce compatible theme.
+	 * and the store doesn't already have a WooCommerce theme.
+	 *
+	 * @return boolean
 	 */
 	protected function should_show_theme_extra() {
-		$is_default_theme = wc_is_active_theme( array(
+		$support_woocommerce = current_theme_supports( 'woocommerce' ) && ! $this->is_default_theme();
+
+		return (
+			current_user_can( 'install_themes' ) &&
+			current_user_can( 'switch_themes' ) &&
+			! is_multisite() &&
+			! $support_woocommerce
+		);
+	}
+
+	/**
+	 * Is the user using a default WP theme?
+	 *
+	 * @return boolean
+	 */
+	protected function is_default_theme() {
+		return wc_is_active_theme( array(
 			'twentyseventeen',
 			'twentysixteen',
 			'twentyfifteen',
@@ -80,14 +98,6 @@ class WC_Admin_Setup_Wizard {
 			'twentytwelve',
 			'twentyten',
 		) );
-
-		$support_woocommerce = current_theme_supports( 'woocommerce' ) && ! $is_default_theme;
-		return (
-			current_user_can( 'install_themes' ) &&
-			current_user_can( 'switch_themes' ) &&
-			! is_multisite() &&
-			! $support_woocommerce
-		);
 	}
 
 	/**
@@ -268,7 +278,7 @@ class WC_Admin_Setup_Wizard {
 				<a class="wc-return-to-dashboard" href="<?php echo esc_url( admin_url() ); ?>"><?php esc_html_e( 'Not right now', 'woocommerce' ); ?></a>
 			<?php elseif ( 'next_steps' === $this->step ) : ?>
 				<a class="wc-return-to-dashboard" href="<?php echo esc_url( admin_url() ); ?>"><?php esc_html_e( 'Return to your dashboard', 'woocommerce' ); ?></a>
-			<?php elseif ( 'activate' === $this->step ) : ?>
+			<?php elseif ( 'activate' === $this->step || 'extras' === $this->step ) : ?>
 				<a class="wc-return-to-dashboard" href="<?php echo esc_url( $this->get_next_step_link() ); ?>"><?php esc_html_e( 'Skip this step', 'woocommerce' ); ?></a>
 			<?php endif; ?>
 			</body>
@@ -1527,12 +1537,19 @@ class WC_Admin_Setup_Wizard {
 					<div class="wc-wizard-service-description">
 						<h3><?php esc_html_e( 'Storefront Theme', 'woocommerce' ); ?></h3>
 						<p>
-							<?php esc_html_e( 'Your theme is not compatible with WooCommerce. We recommend you switch to Storefront, a free WordPress theme built and maintained by the makers of WooCommerce. If toggled on, Storefront will be installed and activated for you.', 'woocommerce' ); ?>
+							<?php
+							$theme      = wp_get_theme();
+							$theme_name = $theme['Name'];
+
+							if ( $this->is_default_theme() ) {
+								echo wp_kses_post( sprintf( __( 'The theme you are currently using is not optimized for WooCommerce. We recommend you switch to <a href="%s" title="Learn more about Storefront" target="_blank">Storefront</a>; our official, free, WooCommerce theme.', 'woocommerce' ), esc_url( 'https://woocommerce.com/storefront/' ) ) );
+							} else {
+								echo wp_kses_post( sprintf( __( 'The theme you are currently using does not fully support WooCommerce. We recommend you switch to <a href="%s" title="Learn more about Storefront" target="_blank">Storefront</a>; our official, free, WooCommerce theme.', 'woocommerce' ), esc_url( 'https://woocommerce.com/storefront/' ) ) );
+							}
+							?>
 						</p>
-						<p class="wc-wizard-service-learn-more">
-							<a href="<?php echo esc_url( 'https://woocommerce.com/storefront/' ); ?>" target="_blank">
-								<?php esc_html_e( 'Learn more about Storefront', 'woocommerce' ); ?>
-							</a>
+						<p>
+							<?php echo wp_kses_post( sprintf( __( 'If toggled on, Storefront will be installed for you, and <em>%s</em> theme will be deactivated.', 'woocommerce' ), esc_html( $theme_name ) ) ); ?>
 						</p>
 					</div>
 
