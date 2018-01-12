@@ -25,6 +25,11 @@
 		<exclude name="PHPCompatibility.PHP.NewKeywords.t_namespaceFound" />
 		<exclude-pattern>tests/</exclude-pattern>
 	</rule>
+	<rule ref="PHPCompatibility.PHP.RemovedExtensions">
+		<properties>
+			<property name="functionWhitelist" type="array" value="mysql_host_to_cli_args"/>
+		</properties>
+	</rule>
 
 	<rule ref="WordPress">
 		<exclude name="WordPress.VIP.DirectDatabaseQuery.NoCaching" />
