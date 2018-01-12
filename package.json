@@ -46,9 +46,8 @@
     "grunt-wp-i18n": "~1.0.1",
     "istanbul": "^1.0.0-alpha",
     "mocha": "^3.0.2",
-    "serverpilot": "0.1.2",
     "stylelint": "~8.2.0",
-    "wc-e2e-page-objects": "0.6.0"
+    "wc-e2e-page-objects": "0.7.0"
   },
   "engines": {
     "node": ">=8.9.3",
