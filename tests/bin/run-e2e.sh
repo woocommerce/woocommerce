@@ -4,6 +4,11 @@ if [[ ${RUN_E2E} == 1 ]]; then
 	npm install
 	export NODE_CONFIG_DIR="./tests/e2e-tests/config"
 
+	BRANCH=$TRAVIS_BRANCH
+	if [ "$TRAVIS_PULL_REQUEST_BRANCH" != "" ]; then
+		BRANCH=$TRAVIS_PULL_REQUEST_BRANCH
+	fi
+
 	# Set up nginx to run the server
 	CONFIG_DIR="./tests/e2e-tests/config/travis"
 	WP_CORE_DIR="$HOME/wordpress"
@@ -13,7 +18,7 @@ if [[ ${RUN_E2E} == 1 ]]; then
 	mkdir -p "$NGINX_DIR/sites-enabled"
 	mkdir -p "$NGINX_DIR/var"
 
-	PHP_FPM_BIN="$HOME/.phpenv/versions/7.2/sbin/php-fpm"
+	PHP_FPM_BIN="$HOME/.phpenv/versions/$TRAVIS_PHP_VERSION/sbin/php-fpm"
 	PHP_FPM_CONF="$NGINX_DIR/php-fpm.conf"
 	cp "$CONFIG_DIR/travis_php-fpm.conf" "$PHP_FPM_CONF"
 
@@ -41,7 +46,7 @@ PHP
 	php wp-cli.phar db import ~/build/woocommerce/woocommerce/tests/e2e-tests/data/e2e-db.sql
 	php wp-cli.phar search-replace 'http://local.wordpress.test' 'http://localhost:8080'
 	php wp-cli.phar theme install twentytwelve --activate
-	php wp-cli.phar plugin install https://github.com/woocommerce/woocommerce/archive/$TRAVIS_BRANCH.zip --activate
+	php wp-cli.phar plugin install https://github.com/woocommerce/woocommerce/archive/$BRANCH.zip --activate
 
 	cd ~/build/woocommerce/woocommerce
 
