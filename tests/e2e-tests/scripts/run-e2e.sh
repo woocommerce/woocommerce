@@ -56,7 +56,7 @@ php wp-cli.phar core config --dbname=woocommerce_test --dbuser=root --dbpass='' 
 /* Change WP_MEMORY_LIMIT to increase the memory limit for public pages. */
 define('WP_MEMORY_LIMIT', '256M');
 PHP
-php wp-cli.phar core install --url="http://localhost:8080" --title="Example" --admin_user=admin --admin_password=password --admin_email=info@example.com --skip-email
+php wp-cli.phar core install --url="http://localhost:8080" --title="Example" --admin_user=admin --admin_password=password --admin_email=info@example.com --path=$WP_CORE_DIR --skip-email
 php wp-cli.phar db import ~/build/woocommerce/woocommerce/tests/e2e-tests/data/e2e-db.sql
 
 php wp-cli.phar theme install twentytwelve --activate
