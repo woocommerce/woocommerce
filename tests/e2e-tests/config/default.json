@@ -11,16 +11,5 @@
 		}
 	},
 	"startBrowserTimeoutMs": 30000,
-	"mochaTimeoutMs": 120000,
-    "spConfig": {
-        "clientId": "",
-        "apiKey": "",
-        "sysuserid": ""
-    },
-    "testAccounts": {
-        "wooUserCI": [
-            "",
-            ""
-        ]
-    }
+	"mochaTimeoutMs": 120000
 }
