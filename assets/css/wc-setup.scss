@@ -547,6 +547,10 @@ body {
 		padding: 20px;
 
 		p {
+			margin-bottom: 1em;
+		}
+
+		p:last-child {
 			margin-bottom: 0;
 		}
 
