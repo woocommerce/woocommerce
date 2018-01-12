@@ -2,8 +2,6 @@
 /**
  * Products shortcode
  *
- * @author   Automattic
- * @category Shortcodes
  * @package  WooCommerce/Shortcodes
  * @version  3.2.4
  */
@@ -474,7 +472,7 @@ class WC_Shortcode_Products {
 	 * @return string
 	 */
 	protected function get_transient_name() {
-		$transient_name = 'wc_loop' . substr( md5( wp_json_encode( $this->query_args ) . $this->type ), 28 );
+		$transient_name = 'wc_product_loop' . substr( md5( wp_json_encode( $this->query_args ) . $this->type ), 28 );
 
 		if ( 'rand' === $this->query_args['orderby'] ) {
 			// When using rand, we'll cache a number of random queries and pull those to avoid querying rand on each page load.

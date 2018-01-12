@@ -10,8 +10,7 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see 	    https://docs.woocommerce.com/document/template-structure/
- * @author  WooThemes
+ * @see     https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce/Templates/Auth
  * @version 3.3.0
  */
@@ -24,11 +23,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <?php do_action( 'woocommerce_auth_page_header' ); ?>
 
-<h1><?php printf( esc_html__( '%s would like to connect to your store' , 'woocommerce' ), esc_html( $app_name ) ); ?></h1>
+<h1>
+	<?php
+	/* translators: %s: app name */
+	printf( esc_html__( '%s would like to connect to your store', 'woocommerce' ), esc_html( $app_name ) );
+	?>
+</h1>
 
 <?php wc_print_notices(); ?>
 
-	<p><?php printf( esc_html__( 'To connect to %1$s you need to be logged in. Log in to your store below, or <a href="%2$s">cancel and return to %1$s</a>', 'woocommerce' ), esc_html( wc_clean( $app_name ) ), esc_url( $return_url ) ); ?></p>
+<p>
+	<?php
+	/* translators: %1$s: app name, %2$s: URL */
+	echo wp_kses_post( sprintf( __( 'To connect to %1$s you need to be logged in. Log in to your store below, or <a href="%2$s">cancel and return to %1$s</a>', 'woocommerce' ), esc_html( wc_clean( $app_name ) ), esc_url( $return_url ) ) );
+	?>
+</p>
 
 <form method="post" class="wc-auth-login">
 	<p class="form-row form-row-wide">

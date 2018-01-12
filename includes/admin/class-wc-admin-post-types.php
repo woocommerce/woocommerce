@@ -507,7 +507,7 @@ class WC_Admin_Post_Types {
 
 			if ( ! empty( $_REQUEST['change_regular_price'] ) && isset( $_REQUEST['_regular_price'] ) ) { // WPCS: input var ok, sanitization ok.
 				$change_regular_price = absint( $_REQUEST['change_regular_price'] ); // WPCS: input var ok, sanitization ok.
-				$regular_price        = wc_clean( wp_unslash( $_REQUEST['_regular_price'] ) ); // WPCS: input var ok, sanitization ok.
+				$regular_price        = wc_format_decimal( wc_clean( wp_unslash( $_REQUEST['_regular_price'] ) ) ); // WPCS: input var ok, sanitization ok.
 
 				switch ( $change_regular_price ) {
 					case 1:
@@ -543,7 +543,7 @@ class WC_Admin_Post_Types {
 
 			if ( ! empty( $_REQUEST['change_sale_price'] ) && isset( $_REQUEST['_sale_price'] ) ) { // WPCS: input var ok, sanitization ok.
 				$change_sale_price = absint( $_REQUEST['change_sale_price'] ); // WPCS: input var ok, sanitization ok.
-				$sale_price        = esc_attr( wp_unslash( $_REQUEST['_sale_price'] ) ); // WPCS: input var ok, sanitization ok.
+				$sale_price        = wc_format_decimal( wc_clean( wp_unslash( $_REQUEST['_sale_price'] ) ) ); // WPCS: input var ok, sanitization ok.
 
 				switch ( $change_sale_price ) {
 					case 1:

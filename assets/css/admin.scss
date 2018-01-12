@@ -2230,6 +2230,7 @@ ul.wc_coupon_list_block {
 			float: left;
 			padding: 1.5em;
 			box-sizing: border-box;
+			word-wrap: break-word;
 
 			h2 {
 				margin-top: 0;
@@ -2509,8 +2510,17 @@ table.wp-list-table {
 		color: #999;
 	}
 
+	.column-sku {
+		width: 10%;
+	}
+
+	.column-price {
+		width: 10ch;
+	}
+
 	.column-is_in_stock {
 		text-align: left !important;
+		width: 12ch;
 	}
 
 	span.wc-image,
