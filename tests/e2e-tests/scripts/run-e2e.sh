@@ -34,19 +34,6 @@ mkdir -p "$NGINX_DIR"
 mkdir -p "$NGINX_DIR/sites-enabled"
 mkdir -p "$NGINX_DIR/var"
 
-PHP_FPM_BIN="$HOME/.phpenv/versions/7.2/sbin/php-fpm"
-PHP_FPM_CONF="$NGINX_DIR/php-fpm.conf"
-cp "$CONFIG_DIR/travis_php-fpm.conf" "$PHP_FPM_CONF"
-# Start php-fpm
-"$PHP_FPM_BIN" --fpm-config "$PHP_FPM_CONF"
-	# Copy the default nginx config files.
-	cp "$CONFIG_DIR/travis_nginx.conf" "$NGINX_DIR/nginx.conf"
-	cp "$CONFIG_DIR/travis_fastcgi.conf" "$NGINX_DIR/fastcgi.conf"
-	cp "$CONFIG_DIR/travis_default-site.conf" "$NGINX_DIR/sites-enabled/default-site.conf"
-
-	# Start nginx.
-	nginx -c "$NGINX_DIR/nginx.conf"
-
 cd "$WP_CORE_DIR"
 ls
 
@@ -61,6 +48,19 @@ php wp-cli.phar db import ~/build/woocommerce/woocommerce/tests/e2e-tests/data/e
 
 php wp-cli.phar theme install twentytwelve --activate
 php wp-cli.phar plugin install https://github.com/woocommerce/woocommerce/archive/$TRAVIS_BRANCH.zip --activate
+
+PHP_FPM_BIN="$HOME/.phpenv/versions/7.2/sbin/php-fpm"
+PHP_FPM_CONF="$NGINX_DIR/php-fpm.conf"
+cp "$CONFIG_DIR/travis_php-fpm.conf" "$PHP_FPM_CONF"
+# Start php-fpm
+"$PHP_FPM_BIN" --fpm-config "$PHP_FPM_CONF"
+	# Copy the default nginx config files.
+	cp "$CONFIG_DIR/travis_nginx.conf" "$NGINX_DIR/nginx.conf"
+	cp "$CONFIG_DIR/travis_fastcgi.conf" "$NGINX_DIR/fastcgi.conf"
+	cp "$CONFIG_DIR/travis_default-site.conf" "$NGINX_DIR/sites-enabled/default-site.conf"
+
+	# Start nginx.
+	nginx -c "$NGINX_DIR/nginx.conf"
 
 cd ~/build/woocommerce/woocommerce
 
