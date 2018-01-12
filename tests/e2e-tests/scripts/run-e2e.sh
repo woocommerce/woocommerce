@@ -61,6 +61,7 @@ php wp-cli.phar core install --url="http://localhost:8080" --title="Example" --a
 php wp-cli.phar core is-installed
 echo $?
 php wp-cli.phar db import ~/build/woocommerce/woocommerce/tests/e2e-tests/data/e2e-db.sql
+php wp-cli.phar search-replace 'http://local.wordpress.test' 'http://localhost:8080'
 
 php wp-cli.phar theme install twentytwelve --activate
 php wp-cli.phar plugin install https://github.com/woocommerce/woocommerce/archive/$TRAVIS_BRANCH.zip --activate
