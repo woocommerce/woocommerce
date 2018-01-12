@@ -382,6 +382,10 @@ final class WooCommerce {
 			include_once( WC_ABSPATH . 'includes/class-wc-tracker.php' );
 		}
 
+		if ( function_exists( 'register_block_type' ) ) {
+			$this->gutenberg_includes();
+		}
+
 		$this->theme_support_includes();
 		$this->query = new WC_Query();
 		$this->api   = new WC_API();
@@ -441,6 +445,13 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-embed.php' );            // Embeds.
 		include_once( WC_ABSPATH . 'includes/class-wc-structured-data.php' );  // Structured Data class.
 		include_once( WC_ABSPATH . 'includes/class-wc-session-handler.php' );  // Session handler class.
+	}
+
+	/**
+	 * Include files for Gutenberg editor.
+	 */
+	private function gutenberg_includes() {
+		include_once( WC_ABSPATH . 'includes/gutenberg/products-block.php' ); // Products block.
 	}
 
 	/**
