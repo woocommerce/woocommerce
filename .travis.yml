@@ -39,9 +39,9 @@ before_script:
   - bash tests/bin/travis.sh before
 
 script:
-  #- bash tests/bin/phpunit.sh
+  - bash tests/bin/phpunit.sh
   - bash tests/bin/phpcs.sh
-  - bash tests/bin/run-e2e-CI.sh woocommerce_test root '' localhost $WP_VERSION
+  - bash tests/bin/run-e2e-CI.sh
 
 after_script:
   - bash tests/bin/travis.sh after
