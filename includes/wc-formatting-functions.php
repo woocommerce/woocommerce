@@ -458,7 +458,7 @@ function get_woocommerce_price_format() {
 			$format = '%1$s%2$s';
 		break;
 		case 'right' :
-			$format = '%2$s%1$s&#x200f;';
+			$format = '%2$s%1$s';
 		break;
 		case 'left_space' :
 			$format = '%1$s&nbsp;%2$s';
