@@ -135,6 +135,7 @@ install_e2e_site() {
 		PHP_FPM_CONF="$NGINX_DIR/php-fpm.conf"
 		WP_SITE_URL="http://localhost:8080"
 		WP_DB_DATA="$HOME/build/woocommerce/woocommerce/tests/e2e-tests/data/e2e-db.sql"
+		WORKING_DIR="$PWD"
 
 		set -ev
 		npm install
@@ -179,7 +180,7 @@ PHP
 		php wp-cli.phar theme install twentytwelve --activate
 		php wp-cli.phar plugin install https://github.com/woocommerce/woocommerce/archive/$BRANCH.zip --activate
 
-		cd $HOME/build/woocommerce/woocommerce
+		cd "$WORKING_DIR"
 
 	fi
 }
