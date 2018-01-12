@@ -8,6 +8,7 @@
     "composer/installers": "~1.2"
   },
   "require-dev": {
+    "php": ">= 7.0",
     "squizlabs/php_codesniffer": "*",
     "wp-coding-standards/wpcs": "^0.14",
     "phpunit/phpunit": "6.2.3",
