@@ -38,6 +38,14 @@ class WC_Order_Item_Shipping_Data_Store extends Abstract_WC_Order_Item_Type_Data
 			'total'       => get_metadata( 'order_item', $id, 'cost', true ),
 			'taxes'       => get_metadata( 'order_item', $id, 'taxes', true ),
 		) );
+
+		// BW compat.
+		if ( '' === $item->get_instance_id() && strstr( $item->get_method_id(), ':' ) ) {
+			$legacy_method_id = explode( ':', $item->get_method_id() );
+			$item->set_method_id( $legacy_method_id[0] );
+			$item->set_instance_id( $legacy_method_id[1] );
+		}
+
 		$item->set_object_read( true );
 	}
 
