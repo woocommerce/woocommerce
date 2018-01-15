@@ -5386,10 +5386,6 @@ table.bar_chart {
 	@include icon( '\e600' );
 }
 
-.post-type-product .woocommerce-BlankState-message::before {
-	@include icon( '\e006' );
-}
-
 .woocommerce-BlankState {
   text-align: center;
   padding: 5em 0 0;
