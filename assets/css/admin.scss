@@ -2135,7 +2135,6 @@ ul.wc_coupon_list_block {
 
 .order-status {
 	display: inline-flex;
-	padding: 0px 1em;
 	line-height: 2.5em;
 	color: #777;
 	background: #E5E5E5;
@@ -2144,6 +2143,7 @@ ul.wc_coupon_list_block {
 	margin: -.25em 0;
 	cursor: inherit !important;
 	white-space: nowrap;
+	max-width: 100%;
 
 	&.status-completed {
 		background: #C8D7E1;
@@ -2168,6 +2168,12 @@ ul.wc_coupon_list_block {
 	&.status-trash {
 		background: #eba3a3;
 		color: #761919;
+	}
+
+	> span {
+		margin: 0 1em;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 }
 
