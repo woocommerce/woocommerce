@@ -2,8 +2,6 @@
 /**
  * List tables: orders.
  *
- * @author   WooCommerce
- * @category Admin
  * @package  WooCommerce/Admin
  * @version  3.3.0
  */
@@ -49,6 +47,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	 */
 	protected function render_blank_state() {
 		echo '<div class="woocommerce-BlankState">';
+		echo '<div class="woocommerce-BlankState-icon">' . get_gridicon( 'gridicons-cart' ) . '</div>'; // WPCS: XSS ok.
 		echo '<h2 class="woocommerce-BlankState-message">' . esc_html__( 'When you receive a new order, it will appear here.', 'woocommerce' ) . '</h2>';
 		echo '<a class="woocommerce-BlankState-cta button-primary button" target="_blank" href="https://docs.woocommerce.com/document/managing-orders/?utm_source=blankslate&utm_medium=product&utm_content=ordersdoc&utm_campaign=woocommerceplugin">' . esc_html__( 'Learn more about orders', 'woocommerce' ) . '</a>';
 		echo '</div>';
@@ -177,7 +176,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		if ( $this->object->get_status() === 'trash' ) {
 			echo '<strong>#' . esc_attr( $this->object->get_order_number() ) . ' ' . esc_html( $buyer ) . '</strong>';
 		} else {
-			echo '<a href="#" class="order-preview" data-order-id="' . absint( $this->object->get_id() ) . '" title="' . esc_attr( __( 'Preview', 'woocommerce' ) ) . '">' . esc_html( __( 'Preview', 'woocommerce' ) ) . '</a>';
+			echo '<a href="#" class="order-preview" data-order-id="' . absint( $this->object->get_id() ) . '" title="' . esc_attr( __( 'Preview', 'woocommerce' ) ) . '">' . get_gridicon( 'gridicons-visible' ) . esc_html( __( 'Preview', 'woocommerce' ) ) . '</a>'; // WPCS: XSS ok.
 			echo '<a href="' . esc_url( admin_url( 'post.php?post=' . absint( $this->object->get_id() ) ) . '&action=edit' ) . '" class="order-view"><strong>#' . esc_attr( $this->object->get_order_number() ) . ' ' . esc_html( $buyer ) . '</strong></a>';
 		}
 	}

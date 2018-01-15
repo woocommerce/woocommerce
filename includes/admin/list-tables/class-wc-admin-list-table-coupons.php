@@ -2,8 +2,6 @@
 /**
  * List tables: coupons.
  *
- * @author   WooCommerce
- * @category Admin
  * @package  WooCommerce/Admin
  * @version  3.3.0
  */
@@ -45,9 +43,10 @@ class WC_Admin_List_Table_Coupons extends WC_Admin_List_Table {
 	 */
 	protected function render_blank_state() {
 		echo '<div class="woocommerce-BlankState">';
+		echo '<div class="woocommerce-BlankState-icon">' . get_gridicon( 'gridicons-coupon' ) . '</div>'; // WPCS: XSS ok.
 		echo '<h2 class="woocommerce-BlankState-message">' . esc_html__( 'Coupons are a great way to offer discounts and rewards to your customers. They will appear here once created.', 'woocommerce' ) . '</h2>';
 		echo '<a class="woocommerce-BlankState-cta button-primary button" target="_blank" href="https://docs.woocommerce.com/document/coupon-management/?utm_source=blankslate&utm_medium=product&utm_content=couponsdoc&utm_campaign=woocommerceplugin">' . esc_html__( 'Learn more about coupons', 'woocommerce' ) . '</a>';
-		echo '<a class="woocommerce-BlankState-cta button-primary button" href="' . esc_url ( admin_url( 'post-new.php?post_type=shop_coupon' ) ) . '">' . esc_html__( 'Create your first coupon', 'woocommerce' ) . '</a>';
+		echo '<a class="woocommerce-BlankState-cta button-primary button" href="' . esc_url( admin_url( 'post-new.php?post_type=shop_coupon' ) ) . '">' . esc_html__( 'Create your first coupon', 'woocommerce' ) . '</a>';
 		echo '</div>';
 	}
 
@@ -101,7 +100,8 @@ class WC_Admin_List_Table_Coupons extends WC_Admin_List_Table {
 		global $the_coupon;
 
 		if ( empty( $this->object ) || $this->object->get_id() !== $post_id ) {
-			$this->object = $the_coupon = new WC_Coupon( $post_id );
+			$the_coupon = new WC_Coupon( $post_id );
+			$this->object = $the_coupon;
 		}
 	}
 
@@ -165,8 +165,8 @@ class WC_Admin_List_Table_Coupons extends WC_Admin_List_Table {
 		$usage_count = $this->object->get_usage_count();
 		$usage_limit = $this->object->get_usage_limit();
 
-		/* translators: 1: count 2: limit */
 		printf(
+			/* translators: 1: count 2: limit */
 			__( '%1$s / %2$s', 'woocommerce' ),
 			esc_html( $usage_count ),
 			$usage_limit ? esc_html( $usage_limit ) : '&infin;'

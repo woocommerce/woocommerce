@@ -2,8 +2,6 @@
 /**
  * WooCommerce setup
  *
- * @author   Automattic
- * @category API
  * @package  WooCommerce
  * @since    3.2.0
  */
@@ -365,6 +363,9 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-api.php' ); // API Class.
 		include_once( WC_ABSPATH . 'includes/class-wc-auth.php' ); // Auth Class.
 		include_once( WC_ABSPATH . 'includes/class-wc-register-wp-admin-settings.php' );
+
+		// Gridicons.
+		include_once( WC_ABSPATH . 'includes/libraries/gridicons.php' );
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			include_once( WC_ABSPATH . 'includes/class-wc-cli.php' );
