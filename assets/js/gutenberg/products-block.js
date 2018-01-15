@@ -73,7 +73,9 @@
 var __ = wp.i18n.__;
 var _wp$blocks = wp.blocks,
     registerBlockType = _wp$blocks.registerBlockType,
-    InspectorControls = _wp$blocks.InspectorControls;
+    InspectorControls = _wp$blocks.InspectorControls,
+    BlockControls = _wp$blocks.BlockControls;
+var Toolbar = wp.components.Toolbar;
 var RangeControl = InspectorControls.RangeControl,
     ToggleControl = InspectorControls.ToggleControl,
     SelectControl = InspectorControls.SelectControl;
@@ -88,6 +90,10 @@ registerBlockType('woocommerce/products', {
 	category: 'widgets',
 
 	attributes: {
+		layout: {
+			type: 'string',
+			default: 'grid'
+		},
 		columns: {
 			type: 'number',
 			default: 3
@@ -125,7 +131,8 @@ registerBlockType('woocommerce/products', {
 		    focus = props.focus,
 		    setAttributes = props.setAttributes,
 		    setFocus = props.setFocus;
-		var rows = attributes.rows,
+		var layout = attributes.layout,
+		    rows = attributes.rows,
 		    columns = attributes.columns,
 		    display_title = attributes.display_title,
 		    display_price = attributes.display_price,
@@ -205,7 +212,39 @@ registerBlockType('woocommerce/products', {
 			);
 		};
 
-		return [!!focus ? getInspectorControls() : null, wp.element.createElement(
+		function getToolbarControls() {
+			var layoutControls = [{
+				icon: 'list-view',
+				title: __('List View'),
+				onClick: function onClick() {
+					return setAttributes({ layout: 'list' });
+				},
+				isActive: layout === 'list'
+			}, {
+				icon: 'grid-view',
+				title: __('Grid View'),
+				onClick: function onClick() {
+					return setAttributes({ layout: 'grid' });
+				},
+				isActive: layout === 'grid'
+			}];
+
+			// @todo Hook this up to the Edit modal thing.
+			var productSourceControls = [{
+				icon: 'edit',
+				title: __('Edit'),
+				onClick: function onClick() {}
+			}];
+
+			return wp.element.createElement(
+				BlockControls,
+				{ key: 'controls' },
+				wp.element.createElement(Toolbar, { controls: layoutControls }),
+				wp.element.createElement(Toolbar, { controls: productSourceControls })
+			);
+		}
+
+		return [!!focus ? getInspectorControls() : null, !!focus ? getToolbarControls() : null, wp.element.createElement(
 			'div',
 			{ className: className },
 			'This needs to do stuff.'

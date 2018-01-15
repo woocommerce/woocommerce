@@ -1,5 +1,6 @@
 const { __ } = wp.i18n;
-const { registerBlockType, InspectorControls } = wp.blocks;
+const { registerBlockType, InspectorControls, BlockControls } = wp.blocks;
+const { Toolbar } = wp.components;
 const { RangeControl, ToggleControl, SelectControl } = InspectorControls;
 
 /**
@@ -11,6 +12,10 @@ registerBlockType( 'woocommerce/products', {
 	category: 'widgets',
 
 	attributes: {
+		layout: {
+			type: 'string',
+			default: 'grid',
+		},
 		columns: {
 			type: 'number',
 			default: 3,
@@ -45,7 +50,7 @@ registerBlockType( 'woocommerce/products', {
 	// @todo This will need to be converted to pull dynamic data from the API similar to https://wordpress.org/gutenberg/handbook/blocks/creating-dynamic-blocks/.
 	edit( props ) {
 		const { attributes, className, focus, setAttributes, setFocus } = props;
-		const { rows, columns, display_title, display_price, display_add_to_cart, order } = attributes;
+		const { layout, rows, columns, display_title, display_price, display_add_to_cart, order } = attributes;
 
 		/**
 		 * Get the components for the sidebar settings area that is rendered while focused on a Products block.
@@ -107,8 +112,43 @@ registerBlockType( 'woocommerce/products', {
 			);
 		};
 
+		function getToolbarControls() {
+			const layoutControls = [
+				{
+					icon: 'list-view',
+					title: __( 'List View' ),
+					onClick: () => setAttributes( { layout: 'list' } ),
+					isActive: layout === 'list',
+				},
+				{
+					icon: 'grid-view',
+					title: __( 'Grid View' ),
+					onClick: () => setAttributes( { layout: 'grid' } ),
+					isActive: layout === 'grid',
+				},
+			];
+
+			// @todo Hook this up to the Edit modal thing.
+			const productSourceControls = [
+				{
+					icon: 'edit',
+					title: __( 'Edit' ),
+					onClick: function(){}
+				},
+
+			];
+
+			return (
+				<BlockControls key="controls">
+					<Toolbar controls={ layoutControls } />
+					<Toolbar controls={ productSourceControls } />
+				</BlockControls>
+			);
+		}
+
 		return [
 			( !! focus ) ? getInspectorControls() : null,
+			( !! focus ) ? getToolbarControls() : null,
 			<div className={ className }>This needs to do stuff.</div>
 		];
 	},
