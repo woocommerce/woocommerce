@@ -293,6 +293,7 @@ class WC_Admin_Webhooks {
 		} else {
 			echo '<div class="woocommerce-BlankState woocommerce-BlankState--webhooks">';
 			?>
+			<div class="woocommerce-BlankState-icon"><?php echo get_gridicon( 'gridicons-globe' ); ?></div>
 			<h2 class="woocommerce-BlankState-message"><?php esc_html_e( 'Webhooks are event notifications sent to URLs of your choice. They can be used to integrate with third-party services which support them.', 'woocommerce' ); ?></h2>
 			<a class="woocommerce-BlankState-cta button-primary button" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=0' ) ); ?>"><?php esc_html_e( 'Create a new webhook', 'woocommerce' ); ?></a>
 
