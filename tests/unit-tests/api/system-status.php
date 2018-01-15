@@ -69,10 +69,10 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$data        = $response->get_data();
 		$environment = (array) $data['environment'];
 
-		// Make sure all expected data is present
+		// Make sure all expected data is present.
 		$this->assertEquals( 30, count( $environment ) );
 
-		// Test some responses to make sure they match up
+		// Test some responses to make sure they match up.
 		$this->assertEquals( get_option( 'home' ), $environment['home_url'] );
 		$this->assertEquals( get_option( 'siteurl' ), $environment['site_url'] );
 		$this->assertEquals( WC()->version, $environment['version'] );
@@ -341,6 +341,9 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'message', $properties );
 	}
 
+	/**
+	 * Test execute_tool() with the "add_order_indexes" tool.
+	 */
 	public function test_execute_system_tool_add_order_indexes() {
 		wp_set_current_user( $this->user );
 
