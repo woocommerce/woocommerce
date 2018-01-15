@@ -1,19 +1,23 @@
 <?php
+/**
+ * WC Order Item Shipping Data Store
+ *
+ * @version 3.0.0
+ * @package data-stores
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 /**
- * WC Order Item Shipping Data Store
- *
- * @version  3.0.0
- * @category Class
- * @author   WooCommerce
+ * WC_Order_Item_Shipping_Data_Store class.
  */
 class WC_Order_Item_Shipping_Data_Store extends Abstract_WC_Order_Item_Type_Data_Store implements WC_Object_Data_Store_Interface, WC_Order_Item_Type_Data_Store_Interface {
 
 	/**
 	 * Data stored in meta keys.
+	 *
 	 * @since 3.0.0
 	 * @var array
 	 */
@@ -23,7 +27,7 @@ class WC_Order_Item_Shipping_Data_Store extends Abstract_WC_Order_Item_Type_Data
 	 * Read/populate data properties specific to this order item.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Order_Item_Shipping $item
+	 * @param WC_Order_Item_Shipping $item Item to read to.
 	 */
 	public function read( &$item ) {
 		parent::read( $item );
@@ -41,7 +45,7 @@ class WC_Order_Item_Shipping_Data_Store extends Abstract_WC_Order_Item_Type_Data
 	 * Ran after both create and update, so $id will be set.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Order_Item_Shipping $item
+	 * @param WC_Order_Item_Shipping $item Item to save.
 	 */
 	public function save_item_data( &$item ) {
 		$id          = $item->get_id();
