@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $states['JP'] = array(
-	'JP01' => __( 'Hokkaido', 'woocommerce' ),
+	'JP01' => __( 'Hokkai-do', 'woocommerce' ),
 	'JP02' => __( 'Aomori-ken', 'woocommerce' ),
 	'JP03' => __( 'Iwate-ken', 'woocommerce' ),
 	'JP04' => __( 'Miyagi-ken', 'woocommerce' ),
