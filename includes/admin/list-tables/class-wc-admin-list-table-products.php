@@ -2,8 +2,6 @@
 /**
  * List tables: products.
  *
- * @author   WooCommerce
- * @category Admin
  * @package  WooCommerce/Admin
  * @version  3.3.0
  */
@@ -124,7 +122,8 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		global $the_product;
 
 		if ( empty( $this->object ) || $this->object->get_id() !== $post_id ) {
-			$this->object = $the_product = wc_get_product( $post_id );
+			$the_product = wc_get_product( $post_id );
+			$this->object = $the_product;
 		}
 	}
 
@@ -132,7 +131,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * Render columm: thumb.
 	 */
 	protected function render_thumb_column() {
-		echo '<a href="' . esc_url( get_edit_post_link( $this->object->get_id() ) ) . '">' . $this->object->get_image( 'thumbnail' ) . '</a>';
+		echo '<a href="' . esc_url( get_edit_post_link( $this->object->get_id() ) ) . '">' . wp_kses_post( $this->object->get_image( 'thumbnail' ) ) . '</a>';
 	}
 
 	/**
@@ -225,7 +224,8 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * Render columm: product_cat.
 	 */
 	protected function render_product_cat_column() {
-		if ( ! $terms = get_the_terms( $this->object->get_id(), 'product_cat' ) ) {
+		$terms = get_the_terms( $this->object->get_id(), 'product_cat' );
+		if ( ! $terms ) {
 			echo '<span class="na">&ndash;</span>';
 		} else {
 			$termlist = array();
@@ -241,7 +241,8 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * Render columm: product_tag.
 	 */
 	protected function render_product_tag_column() {
-		if ( ! $terms = get_the_terms( $this->object->get_id(), 'product_tag' ) ) {
+		$terms = get_the_terms( $this->object->get_id(), 'product_tag' );
+		if ( ! $terms ) {
 			echo '<span class="na">&ndash;</span>';
 		} else {
 			$termlist = array();
@@ -329,19 +330,19 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			$output .= '>';
 
 			switch ( $term->name ) {
-				case 'grouped' :
+				case 'grouped':
 					$output .= __( 'Grouped product', 'woocommerce' );
 					break;
-				case 'external' :
+				case 'external':
 					$output .= __( 'External/Affiliate product', 'woocommerce' );
 					break;
-				case 'variable' :
+				case 'variable':
 					$output .= __( 'Variable product', 'woocommerce' );
 					break;
-				case 'simple' :
+				case 'simple':
 					$output .= __( 'Simple product', 'woocommerce' );
 					break;
-				default :
+				default:
 					// Assuming that we have other types in future.
 					$output .= ucfirst( $term->name );
 					break;
@@ -369,7 +370,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 
 		$output .= '</select>';
 
-		$current_stock_status = isset( $_REQUEST['stock_status'] ) ? wc_clean( wp_unslash( $_REQUEST['stock_status'] ) ): false; // WPCS: input var ok, sanitization ok.
+		$current_stock_status = isset( $_REQUEST['stock_status'] ) ? wc_clean( wp_unslash( $_REQUEST['stock_status'] ) ) : false; // WPCS: input var ok, sanitization ok.
 		$stock_statuses       = wc_get_product_stock_status_options();
 		$output              .= '<select name="stock_status"><option value="">' . esc_html__( 'Filter by stock status', 'woocommerce' ) . '</option>';
 
