@@ -157,7 +157,7 @@ class WC_Admin_API_Keys {
 			wp_die( esc_html__( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
 		}
 
-		$key_id = absint( $_GET['revoke-key'] ); // @codingStandardsIgnoreLine.
+		$key_id = isset( $_GET['revoke-key'] ) ? absint( $_GET['revoke-key'] ) : 0;
 		$this->remove_key( $key_id );
 
 		wp_redirect( esc_url_raw( add_query_arg( array( 'revoked' => 1 ), admin_url( 'admin.php?page=wc-settings&tab=api&section=keys' ) ) ) );
@@ -172,7 +172,7 @@ class WC_Admin_API_Keys {
 			wp_die( esc_html__( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
 		}
 
-		$keys = array_map( 'absint', (array) $_GET['key'] ); // @codingStandardsIgnoreLine.
+		$keys = array_map( 'absint', isset( $_GET['key'] ) ? (array) $_GET['key'] : array() );
 
 		if ( isset( $_GET['action'] ) && 'revoke' === $_GET['action'] ) {
 			$this->bulk_revoke_key( $keys );
