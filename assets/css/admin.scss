@@ -5407,6 +5407,18 @@ table.bar_chart {
     line-height: 1.5em;
     font-size: 1.2em;
     max-width: 500px;
+
+		&::before {
+			color: #ddd;
+			text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.2), 0 1px 0 rgba(255, 255, 255, 0.8);
+			font-size: 8em;
+			display: block;
+			position: relative !important;
+			top: auto;
+			left: auto;
+			line-height: 1em;
+			margin: 0 0 0.1875em;
+		}
   }
 
   .woocommerce-BlankState-cta {
