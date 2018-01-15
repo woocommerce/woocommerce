@@ -54,4 +54,7 @@
 		<exclude-pattern>includes/**/abstract-*.php</exclude-pattern>
 		<exclude-pattern>tests/*</exclude-pattern>
 	</rule>
+	<rule ref="WordPress.PHP.DevelopmentFunctions.error_log_print_r">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
 </ruleset>
