@@ -157,8 +157,9 @@ class WC_Admin {
 	 */
 	public function prevent_admin_access() {
 		$prevent_access = false;
+		$basename = isset( $_SERVER['SCRIPT_FILENAME'] ) ? basename( $_SERVER['SCRIPT_FILENAME'] ) : ''; // WPCS: sanitization ok.
 
-		if ( 'yes' === get_option( 'woocommerce_lock_down_admin', 'yes' ) && ! is_ajax() && basename( $_SERVER['SCRIPT_FILENAME'] ) !== 'admin-post.php' ) {
+		if ( 'yes' === get_option( 'woocommerce_lock_down_admin', 'yes' ) && ! is_ajax() && 'admin-post.php' !== $basename ) {
 			$has_cap     = false;
 			$access_caps = array( 'edit_posts', 'manage_woocommerce', 'view_admin_dashboard' );
 
@@ -186,7 +187,7 @@ class WC_Admin {
 	public function preview_emails() {
 
 		if ( isset( $_GET['preview_woocommerce_mail'] ) ) {
-			if ( ! wp_verify_nonce( sanitize_key( $_REQUEST['_wpnonce'] ), 'preview-mail' ) ) {
+			if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( $_REQUEST['_wpnonce'] ), 'preview-mail' ) ) {
 				die( 'Security check' );
 			}
 
