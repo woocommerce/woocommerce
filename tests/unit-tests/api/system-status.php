@@ -12,7 +12,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	public function setUp() {
 		parent::setUp();
 		$this->endpoint = new WC_REST_System_Status_Controller();
-		$this->user = $this->factory->user->create( array(
+		$this->user     = $this->factory->user->create( array(
 			'role' => 'administrator',
 		) );
 	}
@@ -47,7 +47,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	public function test_get_system_status_info_returns_root_properties() {
 		wp_set_current_user( $this->user );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
-		$data = $response->get_data();
+		$data     = $response->get_data();
 
 		$this->assertArrayHasKey( 'environment', $data );
 		$this->assertArrayHasKey( 'database', $data );
@@ -194,9 +194,9 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_system_status_schema() {
-		$request = new WP_REST_Request( 'OPTIONS', '/wc/v2/system_status' );
-		$response = $this->server->dispatch( $request );
-		$data = $response->get_data();
+		$request    = new WP_REST_Request( 'OPTIONS', '/wc/v2/system_status' );
+		$response   = $this->server->dispatch( $request );
+		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 		$this->assertEquals( 7, count( $properties ) );
 		$this->assertArrayHasKey( 'environment', $properties );
@@ -328,10 +328,11 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_system_status_tool_schema() {
-		$request = new WP_REST_Request( 'OPTIONS', '/wc/v2/system_status/tools' );
-		$response = $this->server->dispatch( $request );
-		$data = $response->get_data();
+		$request    = new WP_REST_Request( 'OPTIONS', '/wc/v2/system_status/tools' );
+		$response   = $this->server->dispatch( $request );
+		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
+
 		$this->assertEquals( 6, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'name', $properties );
