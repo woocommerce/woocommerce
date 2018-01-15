@@ -25,6 +25,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	protected $extra_data = array(
 		'method_title' => '',
 		'method_id'    => '',
+		'instance_id'  => '',
 		'total'        => 0,
 		'total_tax'    => 0,
 		'taxes'        => array(
@@ -94,6 +95,16 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	}
 
 	/**
+	 * Set shipping instance id.
+	 *
+	 * @param string $value Value to set.
+	 * @throws WC_Data_Exception May throw exception if data is invalid.
+	 */
+	public function set_instance_id( $value ) {
+		$this->set_prop( 'instance_id', wc_clean( $value ) );
+	}
+
+	/**
 	 * Set total.
 	 *
 	 * @param string $value Value to set.
@@ -142,10 +153,11 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 * @param WC_Shipping_Rate $shipping_rate Shipping rate to set.
 	 */
 	public function set_shipping_rate( $shipping_rate ) {
-		$this->set_method_title( $shipping_rate->label );
-		$this->set_method_id( $shipping_rate->id );
-		$this->set_total( $shipping_rate->cost );
-		$this->set_taxes( $shipping_rate->taxes );
+		$this->set_method_title( $shipping_rate->get_label() );
+		$this->set_method_id( $shipping_rate->get_method_id() );
+		$this->set_instance_id( $shipping_rate->get_instance_id() );
+		$this->set_total( $shipping_rate->get_cost() );
+		$this->set_taxes( $shipping_rate->get_taxes() );
 		$this->set_meta_data( $shipping_rate->get_meta_data() );
 	}
 
@@ -197,6 +209,16 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 */
 	public function get_method_id( $context = 'view' ) {
 		return $this->get_prop( 'method_id', $context );
+	}
+
+	/**
+	 * Get instance ID.
+	 *
+	 * @param  string $context View or edit context.
+	 * @return string
+	 */
+	public function get_instance_id( $context = 'view' ) {
+		return $this->get_prop( 'instance_id', $context );
 	}
 
 	/**
