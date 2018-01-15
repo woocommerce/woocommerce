@@ -364,6 +364,9 @@ final class WooCommerce {
 		include_once( WC_ABSPATH . 'includes/class-wc-auth.php' ); // Auth Class.
 		include_once( WC_ABSPATH . 'includes/class-wc-register-wp-admin-settings.php' );
 
+		// Gridicons.
+		include_once( WC_ABSPATH . '/includes/libraries/gridicons.php' );
+
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			include_once( WC_ABSPATH . 'includes/class-wc-cli.php' );
 		}

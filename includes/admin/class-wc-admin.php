@@ -56,9 +56,6 @@ class WC_Admin {
 		include_once( dirname( __FILE__ ) . '/class-wc-admin-importers.php' );
 		include_once( dirname( __FILE__ ) . '/class-wc-admin-exporters.php' );
 
-		// Gridicons.
-		include_once( WC_ABSPATH . '/includes/libraries/gridicons.php' );
-
 		// Help Tabs.
 		if ( apply_filters( 'woocommerce_enable_admin_help_tab', true ) ) {
 			include_once( dirname( __FILE__ ) . '/class-wc-admin-help.php' );
@@ -161,7 +158,7 @@ class WC_Admin {
 	public function prevent_admin_access() {
 		$prevent_access = false;
 
-		if ( 'yes' === get_option( 'woocommerce_lock_down_admin', 'yes' ) && ! is_ajax() && basename( $_SERVER['SCRIPT_FILENAME'] ) !== 'admin-post.php' ) { // @codingStandardsIgnoreLine.
+		if ( 'yes' === get_option( 'woocommerce_lock_down_admin', 'yes' ) && ! is_ajax() && basename( $_SERVER['SCRIPT_FILENAME'] ) !== 'admin-post.php' ) {
 			$has_cap     = false;
 			$access_caps = array( 'edit_posts', 'manage_woocommerce', 'view_admin_dashboard' );
 
@@ -189,7 +186,7 @@ class WC_Admin {
 	public function preview_emails() {
 
 		if ( isset( $_GET['preview_woocommerce_mail'] ) ) {
-			if ( ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'preview-mail' ) ) { // @codingStandardsIgnoreLine.
+			if ( ! wp_verify_nonce( sanitize_key( $_REQUEST['_wpnonce'] ), 'preview-mail' ) ) {
 				die( 'Security check' );
 			}
 
