@@ -1,6 +1,13 @@
 <?php
 /**
- * System Status REST Tests
+ * Class WC_Tests_REST_System_Status file.
+ *
+ * @package WooCommerce/Tests
+ */
+
+/**
+ * System Status REST Tests.
+ *
  * @package WooCommerce\Tests\API
  * @since 3.0
  */
