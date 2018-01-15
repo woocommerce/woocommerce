@@ -216,7 +216,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	public function test_get_system_tools() {
 		wp_set_current_user( $this->user );
 
-		$tools_controller = new WC_REST_System_Status_Tools_Controller;
+		$tools_controller = new WC_REST_System_Status_Tools_Controller();
 		$raw_tools        = $tools_controller->get_tools();
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status/tools' ) );
@@ -259,7 +259,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	public function test_get_system_tool() {
 		wp_set_current_user( $this->user );
 
-		$tools_controller = new WC_REST_System_Status_Tools_Controller;
+		$tools_controller = new WC_REST_System_Status_Tools_Controller();
 		$raw_tools        = $tools_controller->get_tools();
 		$raw_tool         = $raw_tools['recount_terms'];
 
@@ -293,7 +293,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	public function test_execute_system_tool() {
 		wp_set_current_user( $this->user );
 
-		$tools_controller = new WC_REST_System_Status_Tools_Controller;
+		$tools_controller = new WC_REST_System_Status_Tools_Controller();
 		$raw_tools        = $tools_controller->get_tools();
 		$raw_tool         = $raw_tools['recount_terms'];
 
@@ -353,7 +353,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		delete_post_meta( $order2->get_id(), '_billing_address_index' );
 		delete_post_meta( $order2->get_id(), '_shipping_address_index' );
 
-		$controller = new WC_REST_System_Status_Tools_Controller;
+		$controller = new WC_REST_System_Status_Tools_Controller();
 		$response   = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v2/system_status/tools/add_order_indexes' ) );
 		$data       = $response->get_data();
 
