@@ -230,7 +230,7 @@ registerBlockType('woocommerce/products', {
 			}];
 
 			// @todo Hook this up to the Edit modal thing.
-			var productSourceControls = [{
+			var editButton = [{
 				icon: 'edit',
 				title: __('Edit'),
 				onClick: function onClick() {}
@@ -240,7 +240,7 @@ registerBlockType('woocommerce/products', {
 				BlockControls,
 				{ key: 'controls' },
 				wp.element.createElement(Toolbar, { controls: layoutControls }),
-				wp.element.createElement(Toolbar, { controls: productSourceControls })
+				wp.element.createElement(Toolbar, { controls: editButton })
 			);
 		}
 

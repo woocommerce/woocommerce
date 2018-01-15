@@ -129,7 +129,7 @@ registerBlockType( 'woocommerce/products', {
 			];
 
 			// @todo Hook this up to the Edit modal thing.
-			const productSourceControls = [
+			const editButton = [
 				{
 					icon: 'edit',
 					title: __( 'Edit' ),
@@ -141,7 +141,7 @@ registerBlockType( 'woocommerce/products', {
 			return (
 				<BlockControls key="controls">
 					<Toolbar controls={ layoutControls } />
-					<Toolbar controls={ productSourceControls } />
+					<Toolbar controls={ editButton } />
 				</BlockControls>
 			);
 		}
