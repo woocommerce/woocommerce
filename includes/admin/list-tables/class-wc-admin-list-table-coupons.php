@@ -2,8 +2,6 @@
 /**
  * List tables: coupons.
  *
- * @author   WooCommerce
- * @category Admin
  * @package  WooCommerce/Admin
  * @version  3.3.0
  */
@@ -102,7 +100,8 @@ class WC_Admin_List_Table_Coupons extends WC_Admin_List_Table {
 		global $the_coupon;
 
 		if ( empty( $this->object ) || $this->object->get_id() !== $post_id ) {
-			$this->object = $the_coupon = new WC_Coupon( $post_id );
+			$the_coupon = new WC_Coupon( $post_id );
+			$this->object = $the_coupon;
 		}
 	}
 
@@ -166,8 +165,8 @@ class WC_Admin_List_Table_Coupons extends WC_Admin_List_Table {
 		$usage_count = $this->object->get_usage_count();
 		$usage_limit = $this->object->get_usage_limit();
 
-		/* translators: 1: count 2: limit */
 		printf(
+			/* translators: 1: count 2: limit */
 			__( '%1$s / %2$s', 'woocommerce' ),
 			esc_html( $usage_count ),
 			$usage_limit ? esc_html( $usage_limit ) : '&infin;'
