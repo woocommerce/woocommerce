@@ -7,8 +7,8 @@ jQuery( function( $ ) {
 	}
 
 	/* Storage Handling */
-	var $supports_html5_storage;
-	var cart_hash_key = wc_cart_fragments_params.ajax_url.toString() + '-wc_cart_hash';
+	var $supports_html5_storage = true,
+		cart_hash_key           = wc_cart_fragments_params.cart_hash_key;
 
 	try {
 		$supports_html5_storage = ( 'sessionStorage' in window && window.sessionStorage !== null );
