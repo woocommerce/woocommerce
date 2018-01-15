@@ -5379,22 +5379,22 @@ table.bar_chart {
 }
 
 .woocommerce-BlankState {
-  text-align: center;
-  padding: 5em 0 0;
+	text-align: center;
+	padding: 5em 0 0;
 
-  .woocommerce-BlankState-icon .gridicon {
-    fill: #ddd;
-    margin: 0 0 .875em;
-    height: 12em;
-    width: 12em;
-  }
+	.woocommerce-BlankState-icon .gridicon {
+		fill: #ddd;
+		margin: 0 0 .875em;
+		height: 12em;
+		width: 12em;
+	}
 
-  .woocommerce-BlankState-message {
-    color: #aaa;
-    margin: 0 auto 1.5em;
-    line-height: 1.5em;
-    font-size: 1.2em;
-    max-width: 500px;
+	.woocommerce-BlankState-message {
+		color: #aaa;
+		margin: 0 auto 1.5em;
+		line-height: 1.5em;
+		font-size: 1.2em;
+		max-width: 500px;
 
 		&::before {
 			color: #ddd;
@@ -5407,14 +5407,14 @@ table.bar_chart {
 			line-height: 1em;
 			margin: 0 0 0.1875em;
 		}
-  }
+	}
 
-  .woocommerce-BlankState-cta {
-    font-size: 1.2em;
-    padding: 0.75em 1.5em;
-    height: auto;
-    display: inline-block !important
-  }
+	.woocommerce-BlankState-cta {
+		font-size: 1.2em;
+		padding: 0.75em 1.5em;
+		height: auto;
+		display: inline-block !important
+	}
 }
 
 /**
