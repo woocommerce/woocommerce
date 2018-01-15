@@ -6,13 +6,10 @@
  * Version: 3.3.0-rc.1
  * Author: Automattic
  * Author URI: https://woocommerce.com
- *
  * Text Domain: woocommerce
  * Domain Path: /i18n/languages/
  *
  * @package WooCommerce
- * @category Core
- * @author Automattic
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
