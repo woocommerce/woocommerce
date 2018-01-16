@@ -3854,6 +3854,14 @@ img.help_tip {
 				line-height: 20px !important;
 				border-bottom: 1px solid #eee;
 
+				.gridicon {
+					fill: currentColor;
+					height: 16px;
+					width: 16px;
+					margin: 2px 0;
+					vertical-align: top;
+				}
+
 				span {
 					margin-left: 0.618em;
 					margin-right: 0.618em;
@@ -5495,21 +5503,18 @@ table.bar_chart {
 
 	#woocommerce-coupon-data ul.coupon_data_tabs li a,
 	#woocommerce-product-data ul.product_data_tabs li a {
-		position: relative;
-		text-indent: -999px;
-		padding: 10px;
+		padding: 10px 0;
+		text-align: center;
 
 		&::before {
-			position: absolute;
-			top: 0;
-			right: 0;
-			bottom: 0;
-			left: 0;
-			text-indent: 0;
-			text-align: center;
-			line-height: 40px;
+			line-height: 20px;
 			width: 100%;
-			height: 40px;
+			height: 20px;
+		}
+
+		span {
+			position: absolute;
+			left: -999px;
 		}
 	}
 }
