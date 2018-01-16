@@ -1517,6 +1517,10 @@ class WC_Admin_Setup_Wizard {
 			}
 			// @codingStandardsIgnoreSEnd
 
+			if ( 'ppec_paypal' === $gateway_id && empty( $settings['reroute_requests'] ) ) {
+				$settings['enabled'] = 'no';
+			}
+
 			update_option( $settings_key, $settings );
 		}
 
