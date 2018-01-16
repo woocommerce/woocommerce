@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				woocommerce_wp_text_input( array(
 					'id'          => '_sku',
 					'value'       => $product_object->get_sku( 'edit' ),
-					'label'       => '<abbr title="' . __( 'Stock Keeping Unit', 'woocommerce' ) . '">' . __( 'SKU', 'woocommerce' ) . '</abbr>',
+					'label'       => '<abbr title="' . esc_attr__( 'Stock Keeping Unit', 'woocommerce' ) . '">' . esc_html__( 'SKU', 'woocommerce' ) . '</abbr>',
 					'desc_tip'    => true,
 					'description' => __( 'SKU refers to a Stock-keeping unit, a unique identifier for each distinct product and service that can be purchased.', 'woocommerce' ),
 				) );
@@ -65,7 +65,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			woocommerce_wp_select( array(
 				'id'             => '_stock_status',
 				'value'          => $product_object->get_stock_status( 'edit' ),
-				'wrapper_class'  => 'hide_if_variable hide_if_external',
+				'wrapper_class'  => 'stock_status_field hide_if_variable hide_if_external',
 				'label'          => __( 'Stock status', 'woocommerce' ),
 				'options'        => wc_get_product_stock_status_options(),
 				'desc_tip'       => true,

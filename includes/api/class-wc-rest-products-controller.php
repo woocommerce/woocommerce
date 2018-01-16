@@ -745,7 +745,7 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 
 		// Purchase Note.
 		if ( isset( $request['purchase_note'] ) ) {
-			$product->set_purchase_note( wc_clean( $request['purchase_note'] ) );
+			$product->set_purchase_note( wp_kses_post( wp_unslash( $request['purchase_note'] ) ) );
 		}
 
 		// Featured Product.
@@ -1046,7 +1046,9 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 	 * @return WC_Product
 	 */
 	protected function set_product_images( $product, $images ) {
-		if ( is_array( $images ) && ! empty( $images ) ) {
+		$images = is_array( $images ) ? array_filter( $images ) : array();
+
+		if ( ! empty( $images ) ) {
 			$gallery = array();
 
 			foreach ( $images as $image ) {
@@ -1170,10 +1172,10 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 			}
 
 			$download = new WC_Product_Download();
-			$download->set_id( $key );
+			$download->set_id( $file['id'] ? $file['id'] : wp_generate_uuid4() );
 			$download->set_name( $file['name'] ? $file['name'] : wc_get_filename_from_url( $file['file'] ) );
 			$download->set_file( apply_filters( 'woocommerce_file_download_path', $file['file'], $product, $key ) );
-			$files[]  = $download;
+			$files[] = $download;
 		}
 		$product->set_downloads( $files );
 
@@ -1991,7 +1993,7 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 							),
 							'value' => array(
 								'description' => __( 'Meta value.', 'woocommerce' ),
-								'type'        => 'string',
+								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
 						),

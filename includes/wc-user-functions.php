@@ -148,7 +148,19 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 
 	if ( ! empty( $customer_orders ) ) {
 		foreach ( $customer_orders as $order_id ) {
-			update_post_meta( $order_id, '_customer_user', $customer->ID );
+			$order = wc_get_order( $order_id );
+			if ( ! $order ) {
+				continue;
+			}
+
+			$order->set_customer_id( $customer->ID );
+			$order->save();
+
+			if ( $order->has_downloadable_item() ) {
+				$data_store = WC_Data_Store::load( 'customer-download' );
+				$data_store->delete_by_order_id( $order->get_id() );
+				wc_downloadable_product_permissions( $order->get_id(), true );
+			}
 
 			do_action( 'woocommerce_update_new_customer_past_order', $order_id, $customer );
 
@@ -437,6 +449,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 				'download_id'           => $result->download_id,
 				'product_id'            => $_product->get_id(),
 				'product_name'          => $_product->get_name(),
+				'product_url'           => $_product->is_visible() ? $_product->get_permalink() : '', // Since 3.3.0.
 				'download_name'         => $download_name,
 				'order_id'              => $order->get_id(),
 				'order_key'             => $order->get_order_key(),
@@ -590,24 +603,12 @@ function wc_get_customer_saved_methods_list( $customer_id ) {
  *
  * @since 2.6.0
  * @param int $customer_id Customer ID.
- * @return WC_Order Order object if successful or false.
+ * @return WC_Order|bool Order object if successful or false.
  */
 function wc_get_customer_last_order( $customer_id ) {
-	global $wpdb;
+	$customer = new WC_Customer( $customer_id );
 
-	$customer_id = absint( $customer_id );
-
-	$id = $wpdb->get_var( "SELECT id
-		FROM $wpdb->posts AS posts
-		LEFT JOIN {$wpdb->postmeta} AS meta on posts.ID = meta.post_id
-		WHERE meta.meta_key = '_customer_user'
-		AND   meta.meta_value = {$customer_id}
-		AND   posts.post_type = 'shop_order'
-		AND   posts.post_status IN ( '" . implode( "','", array_keys( wc_get_order_statuses() ) ) . "' )
-		ORDER BY posts.ID DESC
-	" );
-
-	return wc_get_order( $id );
+	return $customer->get_last_order();
 }
 
 /**

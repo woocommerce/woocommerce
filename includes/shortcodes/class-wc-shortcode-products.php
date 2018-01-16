@@ -2,8 +2,6 @@
 /**
  * Products shortcode
  *
- * @author   Automattic
- * @category Shortcodes
  * @package  WooCommerce/Shortcodes
  * @version  3.2.4
  */
@@ -114,7 +112,8 @@ class WC_Shortcode_Products {
 
 		return shortcode_atts( array(
 			'limit'          => '-1',      // Results limit.
-			'columns'        => '4',       // Number of columns.
+			'columns'        => '3',       // Number of columns.
+			'rows'           => '',        // Number of rows. If defined, limit will be ignored.
 			'orderby'        => 'title',   // menu_order, title, date, rand, price, popularity, rating, or id.
 			'order'          => 'ASC',     // ASC or DESC.
 			'ids'            => '',        // Comma separated IDs.
@@ -124,8 +123,12 @@ class WC_Shortcode_Products {
 			'attribute'      => '',        // Single attribute slug.
 			'terms'          => '',        // Comma separated term slugs.
 			'terms_operator' => 'IN',      // Operator to compare terms. Possible values are 'IN', 'NOT IN', 'AND'.
+			'tag'            => '',        // Comma separated tag slugs.
 			'visibility'     => 'visible', // Possible values are 'visible', 'catalog', 'search', 'hidden'.
 			'class'          => '',        // HTML class.
+			'page'           => 1,         // Page for pagination.
+			'paginate'       => false,     // Should results be paginated.
+			'cache'          => true,      // Should shortcode output be cached.
 		), $attributes, $this->type );
 	}
 
@@ -164,13 +167,30 @@ class WC_Shortcode_Products {
 			'post_type'           => 'product',
 			'post_status'         => 'publish',
 			'ignore_sticky_posts' => true,
-			'no_found_rows'       => true,
+			'no_found_rows'       => false === wc_string_to_bool( $this->attributes['paginate'] ),
 			'orderby'             => $this->attributes['orderby'],
 			'order'               => strtoupper( $this->attributes['order'] ),
 		);
 
+		if ( wc_string_to_bool( $this->attributes['paginate'] ) ) {
+			$this->attributes['page'] = get_query_var( 'product-page', 1 );
+		}
+
+		if ( ! empty( $this->attributes['rows'] ) ) {
+			$this->attributes['limit'] = $this->attributes['columns'] * $this->attributes['rows'];
+		}
+
 		// @codingStandardsIgnoreStart
-		$query_args['posts_per_page'] = (int) $this->attributes['limit'];
+		$ordering_args                = WC()->query->get_catalog_ordering_args( $query_args['orderby'], $query_args['order'] );
+		$query_args['orderby']        = $ordering_args['orderby'];
+		$query_args['order']          = $ordering_args['order'];
+		if ( $ordering_args['meta_key'] ) {
+			$query_args['meta_key']       = $ordering_args['meta_key'];
+		}
+		$query_args['posts_per_page'] = intval( $this->attributes['limit'] );
+		if ( 1 < $this->attributes['page'] ) {
+			$query_args['paged']          = absint( $this->attributes['page'] );
+		}
 		$query_args['meta_query']     = WC()->query->get_meta_query();
 		$query_args['tax_query']      = array();
 		// @codingStandardsIgnoreEnd
@@ -195,6 +215,9 @@ class WC_Shortcode_Products {
 		// Categories.
 		$this->set_categories_query_args( $query_args );
 
+		// Tags.
+		$this->set_tags_query_args( $query_args );
+
 		$query_args = apply_filters( 'woocommerce_shortcode_products_query', $query_args, $this->attributes, $this->type );
 
 		// Always query only IDs.
@@ -211,7 +234,7 @@ class WC_Shortcode_Products {
 	 */
 	protected function set_skus_query_args( &$query_args ) {
 		if ( ! empty( $this->attributes['skus'] ) ) {
-			$skus = array_map( 'trim', explode( ',', $this->attributes['skus'] ) );
+			$skus                       = array_map( 'trim', explode( ',', $this->attributes['skus'] ) );
 			$query_args['meta_query'][] = array(
 				'key'     => '_sku',
 				'value'   => 1 === count( $skus ) ? $skus[0] : $skus,
@@ -263,18 +286,28 @@ class WC_Shortcode_Products {
 	 */
 	protected function set_categories_query_args( &$query_args ) {
 		if ( ! empty( $this->attributes['category'] ) ) {
-			$ordering_args = WC()->query->get_catalog_ordering_args( $query_args['orderby'], $query_args['order'] );
-			$query_args['orderby']  = $ordering_args['orderby'];
-			$query_args['order']    = $ordering_args['order'];
- 			// @codingStandardsIgnoreStart
-			$query_args['meta_key'] = $ordering_args['meta_key'];
-			// @codingStandardsIgnoreEnd
-
 			$query_args['tax_query'][] = array(
 				'taxonomy' => 'product_cat',
 				'terms'    => array_map( 'sanitize_title', explode( ',', $this->attributes['category'] ) ),
 				'field'    => 'slug',
 				'operator' => $this->attributes['cat_operator'],
+			);
+		}
+	}
+
+	/**
+	 * Set tags query args.
+	 *
+	 * @since 3.3.0
+	 * @param array $query_args Query args.
+	 */
+	protected function set_tags_query_args( &$query_args ) {
+		if ( ! empty( $this->attributes['tag'] ) ) {
+			$query_args['tax_query'][] = array(
+				'taxonomy' => 'product_tag',
+				'terms'    => array_map( 'sanitize_title', explode( ',', $this->attributes['tag'] ) ),
+				'field'    => 'slug',
+				'operator' => 'IN',
 			);
 		}
 	}
@@ -296,9 +329,7 @@ class WC_Shortcode_Products {
 	 * @param array $query_args Query args.
 	 */
 	protected function set_best_selling_products_query_args( &$query_args ) {
-		// @codingStandardsIgnoreStart
-		$query_args['meta_key'] = 'total_sales';
-		// @codingStandardsIgnoreEnd
+		$query_args['meta_key'] = 'total_sales'; // @codingStandardsIgnoreLine
 		$query_args['order']    = 'DESC';
 		$query_args['orderby']  = 'meta_value_num';
 	}
@@ -310,7 +341,7 @@ class WC_Shortcode_Products {
 	 * @param array $query_args Query args.
 	 */
 	protected function set_visibility_hidden_query_args( &$query_args ) {
-		$this->custom_visibility = true;
+		$this->custom_visibility   = true;
 		$query_args['tax_query'][] = array(
 			'taxonomy'         => 'product_visibility',
 			'terms'            => array( 'exclude-from-catalog', 'exclude-from-search' ),
@@ -327,7 +358,7 @@ class WC_Shortcode_Products {
 	 * @param array $query_args Query args.
 	 */
 	protected function set_visibility_catalog_query_args( &$query_args ) {
-		$this->custom_visibility = true;
+		$this->custom_visibility   = true;
 		$query_args['tax_query'][] = array(
 			'taxonomy'         => 'product_visibility',
 			'terms'            => 'exclude-from-search',
@@ -351,7 +382,7 @@ class WC_Shortcode_Products {
 	 * @param array $query_args Query args.
 	 */
 	protected function set_visibility_search_query_args( &$query_args ) {
-		$this->custom_visibility = true;
+		$this->custom_visibility   = true;
 		$query_args['tax_query'][] = array(
 			'taxonomy'         => 'product_visibility',
 			'terms'            => 'exclude-from-catalog',
@@ -441,7 +472,7 @@ class WC_Shortcode_Products {
 	 * @return string
 	 */
 	protected function get_transient_name() {
-		$transient_name = 'wc_loop' . substr( md5( wp_json_encode( $this->query_args ) . $this->type ), 28 );
+		$transient_name = 'wc_product_loop' . substr( md5( wp_json_encode( $this->query_args ) . $this->type ), 28 );
 
 		if ( 'rand' === $this->query_args['orderby'] ) {
 			// When using rand, we'll cache a number of random queries and pull those to avoid querying rand on each page load.
@@ -455,35 +486,44 @@ class WC_Shortcode_Products {
 	}
 
 	/**
-	 * Get products IDs.
+	 * Run the query and return an array of data, including queried ids and pagination information.
 	 *
-	 * @since  3.2.4
-	 * @return array
+	 * @since  3.3.0
+	 * @return object Object with the following props; ids, per_page, found_posts, max_num_pages, current_page
 	 */
-	protected function get_products_ids() {
+	protected function get_query_results() {
 		$transient_name = $this->get_transient_name();
-		$ids            = get_transient( $transient_name );
+		$cache          = wc_string_to_bool( $this->attributes['cache'] ) === true;
+		$results        = $cache ? get_transient( $transient_name ) : false;
 
-		if ( false === $ids ) {
+		if ( false === $results ) {
 			if ( 'top_rated_products' === $this->type ) {
 				add_filter( 'posts_clauses', array( __CLASS__, 'order_by_rating_post_clauses' ) );
-				$products = new WP_Query( $this->query_args );
+				$query = new WP_Query( $this->query_args );
 				remove_filter( 'posts_clauses', array( __CLASS__, 'order_by_rating_post_clauses' ) );
 			} else {
-				$products = new WP_Query( $this->query_args );
+				$query = new WP_Query( $this->query_args );
 			}
 
-			$ids = wp_parse_id_list( $products->posts );
+			$paginated = ! $query->get( 'no_found_rows' );
 
-			set_transient( $transient_name, $ids, DAY_IN_SECONDS * 30 );
+			$results = (object) array(
+				'ids'          => wp_parse_id_list( $query->posts ),
+				'total'        => $paginated ? (int) $query->found_posts : count( $query->posts ),
+				'total_pages'  => $paginated ? (int) $query->max_num_pages : 1,
+				'per_page'     => (int) $query->get( 'posts_per_page' ),
+				'current_page' => $paginated ? (int) max( 1, $query->get( 'paged', 1 ) ) : 1,
+			);
+
+			if ( $cache ) {
+				set_transient( $transient_name, $results, DAY_IN_SECONDS * 30 );
+			}
 		}
-
 		// Remove ordering query arguments.
 		if ( ! empty( $this->attributes['category'] ) ) {
 			WC()->query->remove_ordering_args();
 		}
-
-		return $ids;
+		return $results;
 	}
 
 	/**
@@ -493,49 +533,64 @@ class WC_Shortcode_Products {
 	 * @return string
 	 */
 	protected function product_loop() {
-		global $woocommerce_loop;
-
-		$columns                     = absint( $this->attributes['columns'] );
-		$classes                     = $this->get_wrapper_classes( $columns );
-		$woocommerce_loop['columns'] = $columns;
-		$woocommerce_loop['name']    = $this->type;
-		$products_ids                = $this->get_products_ids();
+		$columns  = absint( $this->attributes['columns'] );
+		$classes  = $this->get_wrapper_classes( $columns );
+		$products = $this->get_query_results();
 
 		ob_start();
 
-		if ( $products_ids ) {
+		if ( $products && $products->ids ) {
 			// Prime meta cache to reduce future queries.
-			update_meta_cache( 'post', $products_ids );
-			update_object_term_cache( $products_ids, 'product' );
+			update_meta_cache( 'post', $products->ids );
+			update_object_term_cache( $products->ids, 'product' );
+
+			// Setup the loop.
+			wc_setup_loop( array(
+				'columns'      => $columns,
+				'name'         => $this->type,
+				'is_shortcode' => true,
+				'is_search'    => false,
+				'is_paginated' => wc_string_to_bool( $this->attributes['paginate'] ),
+				'total'        => $products->total,
+				'total_pages'  => $products->total_pages,
+				'per_page'     => $products->per_page,
+				'current_page' => $products->current_page,
+			) );
+
+			$original_post = $GLOBALS['post'];
 
 			do_action( "woocommerce_shortcode_before_{$this->type}_loop", $this->attributes );
+			do_action( 'woocommerce_before_shop_loop' );
 
 			woocommerce_product_loop_start();
 
-			foreach ( $products_ids as $product_id ) {
-				$post_object = get_post( $product_id );
-				$GLOBALS['post'] =& $post_object; // WPCS: override ok.
-				setup_postdata( $post_object );
+			if ( wc_get_loop_prop( 'total' ) ) {
+				foreach ( $products->ids as $product_id ) {
+					$GLOBALS['post'] = get_post( $product_id ); // WPCS: override ok.
+					setup_postdata( $GLOBALS['post'] );
 
-				// Set custom product visibility when quering hidden products.
-				add_action( 'woocommerce_product_is_visible', array( $this, 'set_product_as_visible' ) );
+					// Set custom product visibility when quering hidden products.
+					add_action( 'woocommerce_product_is_visible', array( $this, 'set_product_as_visible' ) );
 
-				// Render product template.
-				wc_get_template_part( 'content', 'product' );
+					// Render product template.
+					wc_get_template_part( 'content', 'product' );
 
-				// Restore product visibility.
-				remove_action( 'woocommerce_product_is_visible', array( $this, 'set_product_as_visible' ) );
+					// Restore product visibility.
+					remove_action( 'woocommerce_product_is_visible', array( $this, 'set_product_as_visible' ) );
+				}
 			}
 
+			$GLOBALS['post'] = $original_post; // WPCS: override ok.
 			woocommerce_product_loop_end();
 
+			do_action( 'woocommerce_after_shop_loop' );
 			do_action( "woocommerce_shortcode_after_{$this->type}_loop", $this->attributes );
+
+			wp_reset_postdata();
+			wc_reset_loop();
 		} else {
 			do_action( "woocommerce_shortcode_{$this->type}_loop_no_results", $this->attributes );
 		}
-
-		woocommerce_reset_loop();
-		wp_reset_postdata();
 
 		return '<div class="' . esc_attr( implode( ' ', $classes ) ) . '">' . ob_get_clean() . '</div>';
 	}
@@ -550,8 +605,8 @@ class WC_Shortcode_Products {
 	public static function order_by_rating_post_clauses( $args ) {
 		global $wpdb;
 
-		$args['where']   .= " AND $wpdb->commentmeta.meta_key = 'rating' ";
-		$args['join']    .= "LEFT JOIN $wpdb->comments ON($wpdb->posts.ID = $wpdb->comments.comment_post_ID) LEFT JOIN $wpdb->commentmeta ON($wpdb->comments.comment_ID = $wpdb->commentmeta.comment_id)";
+		$args['where']  .= " AND $wpdb->commentmeta.meta_key = 'rating' ";
+		$args['join']   .= "LEFT JOIN $wpdb->comments ON($wpdb->posts.ID = $wpdb->comments.comment_post_ID) LEFT JOIN $wpdb->commentmeta ON($wpdb->comments.comment_ID = $wpdb->commentmeta.comment_id)";
 		$args['orderby'] = "$wpdb->commentmeta.meta_value DESC";
 		$args['groupby'] = "$wpdb->posts.ID";
 

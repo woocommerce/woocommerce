@@ -11,10 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 wp_enqueue_script( 'wc-product-export' );
 
-$exporter        = new WC_Product_CSV_Exporter();
-$product_count   = wp_count_posts( 'product' );
-$variation_count = wp_count_posts( 'product' );
-$total_rows      = $product_count->publish + $product_count->private + $variation_count->publish + $variation_count->private;
+$exporter = new WC_Product_CSV_Exporter();
 ?>
 <div class="wrap woocommerce">
 	<h1><?php esc_html_e( 'Export Products', 'woocommerce' ); ?></h1>
@@ -69,6 +66,7 @@ $total_rows      = $product_count->publish + $product_count->private + $variatio
 								<label for="woocommerce-exporter-meta"><?php esc_html_e( 'Yes, export all custom meta', 'woocommerce' ); ?></label>
 							</td>
 						</tr>
+						<?php do_action( 'woocommerce_product_export_row' ); ?>
 					</tbody>
 				</table>
 				<progress class="woocommerce-exporter-progress" max="100" value="0"></progress>

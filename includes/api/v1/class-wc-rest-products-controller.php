@@ -960,7 +960,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 			}
 
 			$download = new WC_Product_Download();
-			$download->set_id( $key );
+			$download->set_id( $file['id'] ? $file['id'] : wp_generate_uuid4() );
 			$download->set_name( $file['name'] ? $file['name'] : wc_get_filename_from_url( $file['file'] ) );
 			$download->set_file( apply_filters( 'woocommerce_file_download_path', $file['file'], $product, $key ) );
 			$files[]  = $download;
@@ -1097,7 +1097,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 
 		// Purchase Note.
 		if ( isset( $request['purchase_note'] ) ) {
-			$product->set_purchase_note( wc_clean( $request['purchase_note'] ) );
+			$product->set_purchase_note( wp_kses_post( wp_unslash( $request['purchase_note'] ) ) );
 		}
 
 		// Featured Product.

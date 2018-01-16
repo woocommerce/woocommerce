@@ -518,7 +518,6 @@ p.demo_store,
 		background-color: $highlight;
 		color: $highlightext;
 		font-size: 0.857em;
-		-webkit-font-smoothing: antialiased;
 		z-index: 9;
 	}
 
@@ -682,7 +681,6 @@ p.demo_store,
 		color: $secondarytext;
 		background-color: $secondary;
 		border: 0;
-		white-space: nowrap;
 		display: inline-block;
 		background-image: none;
 		box-shadow: none;
@@ -696,7 +694,6 @@ p.demo_store,
 				font-family: 'WooCommerce';
 				content: '\e01c';
 				vertical-align: top;
-				-webkit-font-smoothing: antialiased;
 				font-weight: 400;
 				position: absolute;
 				top: 0.618em;
@@ -762,7 +759,6 @@ p.demo_store,
 
 	a.added_to_cart {
 		padding-top: 0.5em;
-		white-space: nowrap;
 		display: inline-block;
 	}
 
@@ -1502,7 +1498,7 @@ p.demo_store,
 
 		li {
 			float: left;
-			padding: 0 1px 1px 0;
+			padding: 0 1em 1px 1px;
 			list-style: none;
 
 			a {
@@ -1511,6 +1507,8 @@ p.demo_store,
 				&::before {
 					@include iconbefore( '\e013' );
 					color: $red;
+					vertical-align: inherit;
+					margin-right: .5em;
 				}
 			}
 		}
