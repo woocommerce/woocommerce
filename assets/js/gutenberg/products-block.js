@@ -278,42 +278,82 @@ registerBlockType('woocommerce/products', {
 	category: 'widgets',
 
 	attributes: {
+
+		/**
+   * Layout to use. 'grid' or 'list'.
+   */
 		layout: {
 			type: 'string',
 			default: 'grid'
 		},
+
+		/**
+   * Number of columns.
+   */
 		columns: {
 			type: 'number',
 			default: 3
 		},
+
+		/**
+   * Number of rows.
+   */
 		rows: {
 			type: 'number',
 			default: 1
 		},
+
+		/**
+   * Whether to display product titles.
+   */
 		display_title: {
 			type: 'boolean',
 			default: true
 		},
+
+		/**
+   * Whether to display prices.
+   */
 		display_price: {
 			type: 'boolean',
 			default: true
 		},
+
+		/**
+   * Whether to display Add to Cart buttons.
+   */
 		display_add_to_cart: {
 			type: 'boolean',
 			default: false
 		},
+
+		/**
+   * Order to use for products. 'newness', 'title', or 'best-selling'.
+   */
 		order: {
 			type: 'string',
 			default: 'newness'
 		},
-		display: { // 'all', 'specific', or 'category'.
+
+		/**
+   * What types of products to display. 'all', 'specific', or 'category'.
+   */
+		display: {
 			type: 'string',
 			default: 'all'
 		},
-		display_setting: { // Array of product ids or category slugs depending on display.
+
+		/**
+   * Which products to display if 'display' is 'specific' or 'category'. Array of product ids or category slugs depending on setting.
+   */
+		display_setting: {
 			type: 'array',
 			default: []
 		},
+
+		/**
+   * Whether the block is in edit or preview mode.
+   */
 		edit_mode: {
 			type: 'boolean',
 			default: true
