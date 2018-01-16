@@ -2276,7 +2276,7 @@ ul.wc_coupon_list_block {
 		white-space: nowrap;
 	}
 	.wc-action-button {
-		margin: -1px !important;
+		margin: 0 0 0 -1px !important;
 		border: 1px solid #ccc;
 		padding: 1px 10px !important;
 		border-radius: 0 !important;
@@ -2292,6 +2292,7 @@ ul.wc_coupon_list_block {
 		z-index: 2;
 	}
 	.wc-action-button:first-child {
+		margin-left: 0 !important;
 		border-top-left-radius: 3px !important;
 		border-bottom-left-radius: 3px !important;
 	}
