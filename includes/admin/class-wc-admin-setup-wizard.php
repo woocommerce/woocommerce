@@ -1503,9 +1503,7 @@ class WC_Admin_Setup_Wizard {
 				$this->install_plugin( $gateway_id, $gateway );
 			}
 
-			$settings_key        = 'woocommerce_' . $gateway_id . '_settings';
-			$settings            = array_filter( (array) get_option( $settings_key, array() ) );
-			$settings['enabled'] = ! empty( $_POST[ 'wc-wizard-service-' . $gateway_id . '-enabled' ] ) ? 'yes' : 'no'; // WPCS: CSRF ok, input var ok.
+			$settings = array( 'enabled' => ! empty( $_POST[ 'wc-wizard-service-' . $gateway_id . '-enabled' ] ) ? 'yes' : 'no' );  // WPCS: CSRF ok, input var ok.
 
 			// @codingStandardsIgnoreStart
 			if ( ! empty( $gateway['settings'] ) ) {
@@ -1518,10 +1516,12 @@ class WC_Admin_Setup_Wizard {
 			// @codingStandardsIgnoreSEnd
 
 			if ( 'ppec_paypal' === $gateway_id && empty( $settings['reroute_requests'] ) ) {
-				$settings['enabled'] = 'no';
+				unset( $settings['enabled'] );
 			}
 
-			update_option( $settings_key, $settings );
+			$settings_key = 'woocommerce_' . $gateway_id . '_settings';
+			$old_settings = array_filter( (array) get_option( $settings_key, array() ) );
+			update_option( $settings_key, array_merge( $old_settings, $settings ) );
 		}
 
 		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
