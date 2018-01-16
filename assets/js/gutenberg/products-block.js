@@ -70,6 +70,14 @@
 "use strict";
 
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 var __ = wp.i18n.__;
 var _wp$blocks = wp.blocks,
     registerBlockType = _wp$blocks.registerBlockType,
@@ -81,8 +89,188 @@ var RangeControl = InspectorControls.RangeControl,
     SelectControl = InspectorControls.SelectControl;
 
 /**
- * Products block.
+ * When the display mode is 'Specific products' search for and add products to the block.
+ *
+ * @todo Add the functionality and everything.
  */
+
+var ProductsSpecificSelect = function (_React$Component) {
+	_inherits(ProductsSpecificSelect, _React$Component);
+
+	function ProductsSpecificSelect() {
+		_classCallCheck(this, ProductsSpecificSelect);
+
+		return _possibleConstructorReturn(this, (ProductsSpecificSelect.__proto__ || Object.getPrototypeOf(ProductsSpecificSelect)).apply(this, arguments));
+	}
+
+	_createClass(ProductsSpecificSelect, [{
+		key: 'render',
+		value: function render() {
+			return wp.element.createElement(
+				'div',
+				null,
+				'TODO: Select specific products here'
+			);
+		}
+	}]);
+
+	return ProductsSpecificSelect;
+}(React.Component);
+
+/**
+ * When the display mode is 'Product category' search for and select product categories to pull products from.
+ *
+ * @todo Add the functionality and everything.
+ */
+
+
+var ProductsCategorySelect = function (_React$Component2) {
+	_inherits(ProductsCategorySelect, _React$Component2);
+
+	function ProductsCategorySelect() {
+		_classCallCheck(this, ProductsCategorySelect);
+
+		return _possibleConstructorReturn(this, (ProductsCategorySelect.__proto__ || Object.getPrototypeOf(ProductsCategorySelect)).apply(this, arguments));
+	}
+
+	_createClass(ProductsCategorySelect, [{
+		key: 'render',
+		value: function render() {
+			return wp.element.createElement(
+				'div',
+				null,
+				'TODO: Select specific product categories here'
+			);
+		}
+	}]);
+
+	return ProductsCategorySelect;
+}(React.Component);
+
+/**
+ * The products block when in Edit mode.
+ */
+
+
+var ProductsBlockSettingsEditor = function (_React$Component3) {
+	_inherits(ProductsBlockSettingsEditor, _React$Component3);
+
+	/**
+  * Constructor.
+  */
+	function ProductsBlockSettingsEditor(props) {
+		_classCallCheck(this, ProductsBlockSettingsEditor);
+
+		var _this3 = _possibleConstructorReturn(this, (ProductsBlockSettingsEditor.__proto__ || Object.getPrototypeOf(ProductsBlockSettingsEditor)).call(this, props));
+
+		_this3.state = {
+			display: props.selected_display
+		};
+
+		_this3.updateDisplay = _this3.updateDisplay.bind(_this3);
+		return _this3;
+	}
+
+	/**
+  * Update the display settings for the block.
+  *
+  * @param Event object evt
+  */
+
+
+	_createClass(ProductsBlockSettingsEditor, [{
+		key: 'updateDisplay',
+		value: function updateDisplay(evt) {
+			this.setState({
+				display: evt.target.value
+			});
+
+			this.props.update_display_callback(evt.target.value);
+		}
+
+		/**
+   * Render the display settings dropdown and any extra contextual settings.
+   */
+
+	}, {
+		key: 'render',
+		value: function render() {
+			var extra_settings = null;
+			if ('specific' === this.state.display) {
+				extra_settings = wp.element.createElement(ProductsSpecificSelect, null);
+			} else if ('category' === this.state.display) {
+				extra_settings = wp.element.createElement(ProductsCategorySelect, null);
+			}
+
+			return wp.element.createElement(
+				'div',
+				{ className: 'wc-product-display-settings' },
+				wp.element.createElement(
+					'h3',
+					null,
+					__('Products')
+				),
+				wp.element.createElement(
+					'select',
+					{ value: this.state.display, onChange: this.updateDisplay },
+					wp.element.createElement(
+						'option',
+						{ value: 'all' },
+						__('All')
+					),
+					wp.element.createElement(
+						'option',
+						{ value: 'specific' },
+						__('Specific products')
+					),
+					wp.element.createElement(
+						'option',
+						{ value: 'category' },
+						__('Product Category')
+					)
+				),
+				extra_settings
+			);
+		}
+	}]);
+
+	return ProductsBlockSettingsEditor;
+}(React.Component);
+
+/**
+ * The products block when in Preview mode.
+ *
+ * @todo This will need to be converted to pull dynamic data from the API for the preview similar to https://wordpress.org/gutenberg/handbook/blocks/creating-dynamic-blocks/.
+ */
+
+
+var ProductsBlockPreview = function (_React$Component4) {
+	_inherits(ProductsBlockPreview, _React$Component4);
+
+	function ProductsBlockPreview() {
+		_classCallCheck(this, ProductsBlockPreview);
+
+		return _possibleConstructorReturn(this, (ProductsBlockPreview.__proto__ || Object.getPrototypeOf(ProductsBlockPreview)).apply(this, arguments));
+	}
+
+	_createClass(ProductsBlockPreview, [{
+		key: 'render',
+		value: function render() {
+			return wp.element.createElement(
+				'div',
+				null,
+				'PREVIEWING'
+			);
+		}
+	}]);
+
+	return ProductsBlockPreview;
+}(React.Component);
+
+/**
+ * Register and run the products block.
+ */
+
 
 registerBlockType('woocommerce/products', {
 	title: __('Products'),
@@ -117,14 +305,24 @@ registerBlockType('woocommerce/products', {
 		order: {
 			type: 'string',
 			default: 'newness'
+		},
+		display: { // 'all', 'specific', or 'category'.
+			type: 'string',
+			default: 'all'
+		},
+		display_setting: { // Array of product ids or category slugs depending on display.
+			type: 'array',
+			default: []
+		},
+		edit_mode: {
+			type: 'boolean',
+			default: true
+		}
+	},
 
-			// @todo
-			// Needs attributes for the product/category select menu:
-			// display: "specific_products", "product_category", etc.
-			// display_setting: array of product/category ids?
-		} },
-
-	// @todo This will need to be converted to pull dynamic data from the API similar to https://wordpress.org/gutenberg/handbook/blocks/creating-dynamic-blocks/.
+	/**
+  * Renders and manages the block.
+  */
 	edit: function edit(props) {
 		var attributes = props.attributes,
 		    className = props.className,
@@ -137,10 +335,15 @@ registerBlockType('woocommerce/products', {
 		    display_title = attributes.display_title,
 		    display_price = attributes.display_price,
 		    display_add_to_cart = attributes.display_add_to_cart,
-		    order = attributes.order;
+		    order = attributes.order,
+		    display = attributes.display,
+		    display_setting = attributes.display_setting,
+		    edit_mode = attributes.edit_mode;
 
 		/**
    * Get the components for the sidebar settings area that is rendered while focused on a Products block.
+   *
+   * @return Component
    */
 
 		function getInspectorControls() {
@@ -212,6 +415,11 @@ registerBlockType('woocommerce/products', {
 			);
 		};
 
+		/**
+   * Get the components for the toolbar area that appears on top of the block when focused.
+   *
+   * @return Component
+   */
 		function getToolbarControls() {
 			var layoutControls = [{
 				icon: 'list-view',
@@ -229,11 +437,13 @@ registerBlockType('woocommerce/products', {
 				isActive: layout === 'grid'
 			}];
 
-			// @todo Hook this up to the Edit modal thing.
 			var editButton = [{
 				icon: 'edit',
 				title: __('Edit'),
-				onClick: function onClick() {}
+				onClick: function onClick() {
+					return setAttributes({ edit_mode: !edit_mode });
+				},
+				isActive: edit_mode
 			}];
 
 			return wp.element.createElement(
@@ -244,12 +454,35 @@ registerBlockType('woocommerce/products', {
 			);
 		}
 
-		return [!!focus ? getInspectorControls() : null, !!focus ? getToolbarControls() : null, wp.element.createElement(
-			'div',
-			{ className: className },
-			'This needs to do stuff.'
-		)];
+		/**
+   * Get the block preview component for preview mode.
+   *
+   * @return Component
+   */
+		function getPreview() {
+			return wp.element.createElement(ProductsBlockPreview, { selected_attributes: attributes });
+		}
+
+		/**
+   * Get the block edit component for edit mode.
+   *
+   * @return Component
+   */
+		function getSettingsEditor() {
+			return wp.element.createElement(ProductsBlockSettingsEditor, { selected_display: display, update_display_callback: function update_display_callback(value) {
+					return setAttributes({ display: value });
+				} });
+		}
+
+		return [!!focus ? getInspectorControls() : null, !!focus ? getToolbarControls() : null, edit_mode ? getSettingsEditor() : getPreview()];
 	},
+
+
+	/**
+  * Save the block content in the post content.
+  *
+  * @return string
+  */
 	save: function save() {
 		// @todo
 		// This can either build a shortcode out of all the settings (good backwards compatibility but may need extra shortcode work)

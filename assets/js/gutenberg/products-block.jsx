@@ -4,7 +4,101 @@ const { Toolbar } = wp.components;
 const { RangeControl, ToggleControl, SelectControl } = InspectorControls;
 
 /**
- * Products block.
+ * When the display mode is 'Specific products' search for and add products to the block.
+ *
+ * @todo Add the functionality and everything.
+ */
+class ProductsSpecificSelect extends React.Component {
+	render() {
+		return (
+			<div>TODO: Select specific products here</div>
+		);
+	}
+}
+
+/**
+ * When the display mode is 'Product category' search for and select product categories to pull products from.
+ *
+ * @todo Add the functionality and everything.
+ */
+class ProductsCategorySelect extends React.Component {
+	render() {
+		return (
+			<div>TODO: Select specific product categories here</div>
+		);
+	}
+}
+
+/**
+ * The products block when in Edit mode.
+ */
+class ProductsBlockSettingsEditor extends React.Component {
+
+	/**
+	 * Constructor.
+	 */
+	constructor( props ) {
+		super( props );
+		this.state = {
+			display: props.selected_display
+		}
+
+		this.updateDisplay = this.updateDisplay.bind( this );
+	}
+
+	/**
+	 * Update the display settings for the block.
+	 *
+	 * @param Event object evt
+	 */
+	updateDisplay( evt ) {
+		this.setState( {
+			display: evt.target.value
+		} );
+
+		this.props.update_display_callback( evt.target.value );
+	}
+
+	/**
+	 * Render the display settings dropdown and any extra contextual settings.
+	 */
+	render() {
+		let extra_settings = null;
+		if ( 'specific' === this.state.display ) {
+			extra_settings = <ProductsSpecificSelect />;
+		} else if ( 'category' === this.state.display ) {
+			extra_settings = <ProductsCategorySelect />;
+		}
+
+		return (
+			<div className="wc-product-display-settings">
+				<h3>{ __( 'Products' ) }</h3>
+				<select value={ this.state.display } onChange={ this.updateDisplay }>
+					<option value="all">{ __( 'All' ) }</option>
+					<option value="specific">{ __( 'Specific products' ) }</option>
+					<option value="category">{ __( 'Product Category' ) }</option>
+				</select>
+				{ extra_settings }
+			</div>
+		);
+	}
+}
+
+/**
+ * The products block when in Preview mode.
+ *
+ * @todo This will need to be converted to pull dynamic data from the API for the preview similar to https://wordpress.org/gutenberg/handbook/blocks/creating-dynamic-blocks/.
+ */
+class ProductsBlockPreview extends React.Component {
+	render() {
+		return (
+			<div>PREVIEWING</div>
+		);
+	}
+}
+
+/**
+ * Register and run the products block.
  */
 registerBlockType( 'woocommerce/products', {
 	title: __( 'Products' ),
@@ -39,21 +133,32 @@ registerBlockType( 'woocommerce/products', {
 		order: {
 			type: 'string',
 			default: 'newness',
-		}
-
-		// @todo
-		// Needs attributes for the product/category select menu:
-		// display: "specific_products", "product_category", etc.
-		// display_setting: array of product/category ids?
+		},
+		display: { // 'all', 'specific', or 'category'.
+			type: 'string',
+			default: 'all',
+		},
+		display_setting: { // Array of product ids or category slugs depending on display.
+			type: 'array',
+			default: [],
+		},
+		edit_mode: {
+			type: 'boolean',
+			default: true,
+		},
 	},
 
-	// @todo This will need to be converted to pull dynamic data from the API similar to https://wordpress.org/gutenberg/handbook/blocks/creating-dynamic-blocks/.
+	/**
+	 * Renders and manages the block.
+	 */
 	edit( props ) {
 		const { attributes, className, focus, setAttributes, setFocus } = props;
-		const { layout, rows, columns, display_title, display_price, display_add_to_cart, order } = attributes;
+		const { layout, rows, columns, display_title, display_price, display_add_to_cart, order, display, display_setting, edit_mode } = attributes;
 
 		/**
 		 * Get the components for the sidebar settings area that is rendered while focused on a Products block.
+		 *
+		 * @return Component
 		 */
 		function getInspectorControls() {
 			return (
@@ -112,6 +217,11 @@ registerBlockType( 'woocommerce/products', {
 			);
 		};
 
+		/**
+		 * Get the components for the toolbar area that appears on top of the block when focused.
+		 *
+		 * @return Component
+		 */
 		function getToolbarControls() {
 			const layoutControls = [
 				{
@@ -128,14 +238,13 @@ registerBlockType( 'woocommerce/products', {
 				},
 			];
 
-			// @todo Hook this up to the Edit modal thing.
 			const editButton = [
 				{
 					icon: 'edit',
 					title: __( 'Edit' ),
-					onClick: function(){}
+					onClick: () => setAttributes( { edit_mode: ! edit_mode } ),
+					isActive: edit_mode,
 				},
-
 			];
 
 			return (
@@ -146,13 +255,36 @@ registerBlockType( 'woocommerce/products', {
 			);
 		}
 
+		/**
+		 * Get the block preview component for preview mode.
+		 *
+		 * @return Component
+		 */
+		function getPreview() {
+			return <ProductsBlockPreview selected_attributes={ attributes } />;
+		}
+
+		/**
+		 * Get the block edit component for edit mode.
+		 *
+		 * @return Component
+		 */
+		function getSettingsEditor() {
+			return <ProductsBlockSettingsEditor selected_display={ display } update_display_callback={ ( value ) => setAttributes( { display: value } ) } />;
+		}
+
 		return [
 			( !! focus ) ? getInspectorControls() : null,
 			( !! focus ) ? getToolbarControls() : null,
-			<div className={ className }>This needs to do stuff.</div>
+			edit_mode ? getSettingsEditor() : getPreview(),
 		];
 	},
 
+	/**
+	 * Save the block content in the post content.
+	 *
+	 * @return string
+	 */
 	save() {
 		// @todo
 		// This can either build a shortcode out of all the settings (good backwards compatibility but may need extra shortcode work)
