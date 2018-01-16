@@ -286,7 +286,7 @@ class WC_Helper {
 				$data['_actions'][] = $action;
 			} else {
 				$action = array(
-					'message' => sprintf( __( 'To receive updates and support for this extension, you need to <strong>purchase</strong> a new subscription or consolidate your extensions to one connected account by <strong>sharing or transferring</strong> this extension to this connected account.', 'woocommerce' ), 'https://docs.woocommerce.com/document/adding-collaborators/' ),
+					'message' => sprintf( __( 'To receive updates and support for this extension, you need to <strong>purchase</strong> a new subscription or consolidate your extensions to one connected account by <strong><a href="https://docs.woocommerce.com/document/managing-woocommerce-com-subscriptions/#section-10" title="Sharing Docs">sharing</a> or <a href="https://docs.woocommerce.com/document/managing-woocommerce-com-subscriptions/#section-5" title="Transferring Docs">transferring</a></strong> this extension to this connected account.', 'woocommerce' ), 'https://docs.woocommerce.com/document/adding-collaborators/' ),
 					'button_label' => __( 'Purchase', 'woocommerce' ),
 					'button_url' => $data['_product_url'],
 					'status' => 'expired',
