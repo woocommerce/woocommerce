@@ -247,6 +247,14 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 		$execute_return = $this->execute_tool( $request['id'] );
 		$tool = array_merge( $tool, $execute_return );
 
+		/**
+		 * Fires after a WooCommerce REST system status tool has been executed.
+		 *
+		 * @param array           $tool    Details about the tool that has been executed.
+		 * @param WP_REST_Request $request The current WP_REST_Request object.
+		 */
+		do_action( 'woocommerce_rest_system_status_tool_executed', $tool, $request );
+
 		$request->set_param( 'context', 'edit' );
 		$response = $this->prepare_item_for_response( $tool, $request );
 		return rest_ensure_response( $response );
