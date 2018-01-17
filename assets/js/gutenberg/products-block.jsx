@@ -1,6 +1,6 @@
 const { __ } = wp.i18n;
 const { registerBlockType, InspectorControls, BlockControls } = wp.blocks;
-const { Toolbar } = wp.components;
+const { Toolbar, withAPIData } = wp.components;
 const { RangeControl, ToggleControl, SelectControl } = InspectorControls;
 
 /**
@@ -95,17 +95,74 @@ class ProductsBlockSettingsEditor extends React.Component {
 }
 
 /**
- * The products block when in Preview mode.
- *
- * @todo This will need to be converted to pull dynamic data from the API for the preview similar to https://wordpress.org/gutenberg/handbook/blocks/creating-dynamic-blocks/.
+ * One product in the product block preview.
  */
-class ProductsBlockPreview extends React.Component {
+class ProductPreview extends React.Component {
+
 	render() {
+		const { attributes, product } = this.props;
+
+		let image = null;
+		if ( product.images.length ) {
+			image = <img src={ product.images[0].src } />
+		}
+
+		let title = null;
+		if ( attributes.display_title ) {
+			title = <div className="product-title">{ product.name }</div>
+		}
+
+		let price = null;
+		if ( attributes.display_price ) {
+			price = <div className="product-price">{ product.price }</div>
+		}
+
+		let add_to_cart = null;
+		if ( attributes.display_add_to_cart ) {
+			add_to_cart = <span className="product-add-to-cart">{ __( 'Add to cart' ) }</span>
+		}
+
 		return (
-			<div>PREVIEWING</div>
+			<div className="product-preview">
+				{ image }
+				{ title }
+				{ price }
+				{ add_to_cart }
+			</div>
 		);
 	}
 }
+
+/**
+ * Renders a preview of what the block will look like with current settings.
+ */
+const ProductsBlockPreview = withAPIData( ( attributes ) => {
+
+		// build query here.
+
+		return {
+			products: '/wc/v2/products'
+		};
+	} )( ( { products, attributes } ) => {
+
+		if ( ! products.data ) {
+			return __( 'Loading' );
+		}
+
+		if ( 0 === products.data.length ) {
+			return __( 'No products found' );
+		}
+
+		const classes = "wc-products-block-preview " + attributes.layout + " cols-" + attributes.columns;
+
+		return (
+			<div className={ classes }>
+				{ products.data.map( ( product ) => (
+					<ProductPreview product={ product } attributes={ attributes } />
+				) ) }
+			</div>
+		);
+	} );
 
 /**
  * Register and run the products block.
@@ -311,7 +368,7 @@ registerBlockType( 'woocommerce/products', {
 		 * @return Component
 		 */
 		function getPreview() {
-			return <ProductsBlockPreview selected_attributes={ attributes } />;
+			return <ProductsBlockPreview attributes={ attributes } />;
 		}
 
 		/**

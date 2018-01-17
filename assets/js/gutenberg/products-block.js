@@ -83,7 +83,9 @@ var _wp$blocks = wp.blocks,
     registerBlockType = _wp$blocks.registerBlockType,
     InspectorControls = _wp$blocks.InspectorControls,
     BlockControls = _wp$blocks.BlockControls;
-var Toolbar = wp.components.Toolbar;
+var _wp$components = wp.components,
+    Toolbar = _wp$components.Toolbar,
+    withAPIData = _wp$components.withAPIData;
 var RangeControl = InspectorControls.RangeControl,
     ToggleControl = InspectorControls.ToggleControl,
     SelectControl = InspectorControls.SelectControl;
@@ -252,40 +254,112 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 }(React.Component);
 
 /**
- * The products block when in Preview mode.
- *
- * @todo This will need to be converted to pull dynamic data from the API for the preview similar to https://wordpress.org/gutenberg/handbook/blocks/creating-dynamic-blocks/.
+ * One product in the product block preview.
  */
 
 
-var ProductsBlockPreview = function (_React$Component4) {
-	_inherits(ProductsBlockPreview, _React$Component4);
+var ProductPreview = function (_React$Component4) {
+	_inherits(ProductPreview, _React$Component4);
 
-	function ProductsBlockPreview() {
-		_classCallCheck(this, ProductsBlockPreview);
+	function ProductPreview() {
+		_classCallCheck(this, ProductPreview);
 
-		return _possibleConstructorReturn(this, (ProductsBlockPreview.__proto__ || Object.getPrototypeOf(ProductsBlockPreview)).apply(this, arguments));
+		return _possibleConstructorReturn(this, (ProductPreview.__proto__ || Object.getPrototypeOf(ProductPreview)).apply(this, arguments));
 	}
 
-	_createClass(ProductsBlockPreview, [{
+	_createClass(ProductPreview, [{
 		key: 'render',
 		value: function render() {
+			var _props = this.props,
+			    attributes = _props.attributes,
+			    product = _props.product;
+
+
+			var image = null;
+			if (product.images.length) {
+				image = wp.element.createElement('img', { src: product.images[0].src });
+			}
+
+			var title = null;
+			if (attributes.display_title) {
+				title = wp.element.createElement(
+					'div',
+					{ className: 'product-title' },
+					product.name
+				);
+			}
+
+			var price = null;
+			if (attributes.display_price) {
+				price = wp.element.createElement(
+					'div',
+					{ className: 'product-price' },
+					product.price
+				);
+			}
+
+			var add_to_cart = null;
+			if (attributes.display_add_to_cart) {
+				add_to_cart = wp.element.createElement(
+					'span',
+					{ className: 'product-add-to-cart' },
+					__('Add to cart')
+				);
+			}
+
 			return wp.element.createElement(
 				'div',
-				null,
-				'PREVIEWING'
+				{ className: 'product-preview' },
+				image,
+				title,
+				price,
+				add_to_cart
 			);
 		}
 	}]);
 
-	return ProductsBlockPreview;
+	return ProductPreview;
 }(React.Component);
+
+/**
+ * Renders a preview of what the block will look like with current settings.
+ */
+
+
+var ProductsBlockPreview = withAPIData(function (attributes) {
+
+	// build query here.
+
+	return {
+		products: '/wc/v2/products'
+	};
+})(function (_ref) {
+	var products = _ref.products,
+	    attributes = _ref.attributes;
+
+
+	if (!products.data) {
+		return __('Loading');
+	}
+
+	if (0 === products.data.length) {
+		return __('No products found');
+	}
+
+	var classes = "wc-products-block-preview " + attributes.layout + " cols-" + attributes.columns;
+
+	return wp.element.createElement(
+		'div',
+		{ className: classes },
+		products.data.map(function (product) {
+			return wp.element.createElement(ProductPreview, { product: product, attributes: attributes });
+		})
+	);
+});
 
 /**
  * Register and run the products block.
  */
-
-
 registerBlockType('woocommerce/products', {
 	title: __('Products'),
 	icon: 'universal-access-alt', // @todo Needs a good icon.
@@ -514,7 +588,7 @@ registerBlockType('woocommerce/products', {
    * @return Component
    */
 		function getPreview() {
-			return wp.element.createElement(ProductsBlockPreview, { selected_attributes: attributes });
+			return wp.element.createElement(ProductsBlockPreview, { attributes: attributes });
 		}
 
 		/**
