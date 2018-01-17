@@ -2285,6 +2285,9 @@ ul.wc_coupon_list_block {
 		height: auto;
 		z-index: 1;
 		position:relative;
+		max-width: 175px;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 	.wc-action-button:hover,
 	.wc-action-button:focus {
