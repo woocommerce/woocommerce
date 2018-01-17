@@ -1520,8 +1520,8 @@ class WC_Admin_Setup_Wizard {
 			}
 
 			$settings_key = 'woocommerce_' . $gateway_id . '_settings';
-			$old_settings = array_filter( (array) get_option( $settings_key, array() ) );
-			update_option( $settings_key, array_merge( $old_settings, $settings ) );
+			$previously_saved_settings = array_filter( (array) get_option( $settings_key, array() ) );
+			update_option( $settings_key, array_merge( $previously_saved_settings, $settings ) );
 		}
 
 		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
