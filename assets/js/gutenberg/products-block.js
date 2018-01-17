@@ -211,25 +211,39 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 					__('Products')
 				),
 				wp.element.createElement(
-					'select',
-					{ value: this.state.display, onChange: this.updateDisplay },
+					'div',
+					{ className: 'display-select' },
+					__('Display:'),
 					wp.element.createElement(
-						'option',
-						{ value: 'all' },
-						__('All')
-					),
-					wp.element.createElement(
-						'option',
-						{ value: 'specific' },
-						__('Specific products')
-					),
-					wp.element.createElement(
-						'option',
-						{ value: 'category' },
-						__('Product Category')
+						'select',
+						{ value: this.state.display, onChange: this.updateDisplay },
+						wp.element.createElement(
+							'option',
+							{ value: 'all' },
+							__('All')
+						),
+						wp.element.createElement(
+							'option',
+							{ value: 'specific' },
+							__('Specific products')
+						),
+						wp.element.createElement(
+							'option',
+							{ value: 'category' },
+							__('Product Category')
+						)
 					)
 				),
-				extra_settings
+				extra_settings,
+				wp.element.createElement(
+					'div',
+					{ className: 'block-footer' },
+					wp.element.createElement(
+						'button',
+						{ type: 'button', onClick: this.props.done_callback },
+						__('Done')
+					)
+				)
 			);
 		}
 	}]);
@@ -509,9 +523,15 @@ registerBlockType('woocommerce/products', {
    * @return Component
    */
 		function getSettingsEditor() {
-			return wp.element.createElement(ProductsBlockSettingsEditor, { selected_display: display, update_display_callback: function update_display_callback(value) {
+			return wp.element.createElement(ProductsBlockSettingsEditor, {
+				selected_display: display,
+				update_display_callback: function update_display_callback(value) {
 					return setAttributes({ display: value });
-				} });
+				},
+				done_callback: function done_callback() {
+					return setAttributes({ edit_mode: false });
+				}
+			});
 		}
 
 		return [!!focus ? getInspectorControls() : null, !!focus ? getToolbarControls() : null, edit_mode ? getSettingsEditor() : getPreview()];

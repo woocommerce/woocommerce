@@ -72,13 +72,23 @@ class ProductsBlockSettingsEditor extends React.Component {
 
 		return (
 			<div className="wc-product-display-settings">
+
 				<h3>{ __( 'Products' ) }</h3>
-				<select value={ this.state.display } onChange={ this.updateDisplay }>
-					<option value="all">{ __( 'All' ) }</option>
-					<option value="specific">{ __( 'Specific products' ) }</option>
-					<option value="category">{ __( 'Product Category' ) }</option>
-				</select>
+
+				<div className="display-select">
+					{ __( 'Display:' ) }
+					<select value={ this.state.display } onChange={ this.updateDisplay }>
+						<option value="all">{ __( 'All' ) }</option>
+						<option value="specific">{ __( 'Specific products' ) }</option>
+						<option value="category">{ __( 'Product Category' ) }</option>
+					</select>
+				</div>
+
 				{ extra_settings }
+
+				<div className="block-footer">
+					<button type="button" onClick={ this.props.done_callback }>{ __( 'Done' ) }</button>
+				</div>
 			</div>
 		);
 	}
@@ -310,7 +320,11 @@ registerBlockType( 'woocommerce/products', {
 		 * @return Component
 		 */
 		function getSettingsEditor() {
-			return <ProductsBlockSettingsEditor selected_display={ display } update_display_callback={ ( value ) => setAttributes( { display: value } ) } />;
+			return <ProductsBlockSettingsEditor
+				selected_display={ display }
+				update_display_callback={ ( value ) => setAttributes( { display: value } ) }
+				done_callback={ () => setAttributes( { edit_mode: false } ) }
+			/>;
 		}
 
 		return [
