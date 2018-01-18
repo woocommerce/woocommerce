@@ -123,6 +123,12 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$this->assertGreaterThan( 0, $products->max_num_pages );
 		$this->assertNotEmpty( $products->products );
 
+		$product->delete( true );
+		$product_2->delete( true );
+		$external->delete( true );
+		$external_2->delete( true );
+		$grouped->delete( true );
+		$draft->delete( true );
 		$variation->delete( true );
 	}
 
@@ -153,6 +159,9 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 
 		$products = wc_get_products( array( 'return' => 'ids', 'weight' => 15 ) );
 		$this->assertEquals( array( $product_2->get_id() ), $products );
+
+		$product_1->delete( true );
+		$product_2->delete( true );
 	}
 
 	/**
@@ -181,6 +190,9 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$products = wc_get_products( array( 'return' => 'ids', 'price' => 12.5 ) );
 		sort( $products );
 		$this->assertEquals( array( $product_1->get_id(), $product_2->get_id() ), $products );
+
+		$product_1->delete( true );
+		$product_2->delete( true );
 	}
 
 	/**
@@ -202,6 +214,10 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 
 		$products = wc_get_products( array( 'return' => 'ids', 'total_sales' => 4 ) );
 		$this->assertEquals( array( $product_1->get_id() ), $products );
+
+		$product_1->delete( true );
+		$product_2->delete( true );
+		$product_3->delete( true );
 	}
 
 	/**
@@ -257,6 +273,9 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( array( $product_1->get_id() ), $products );
 		$products = wc_get_products( array( 'return' => 'ids', 'reviews_allowed' => false ) );
 		$this->assertEquals( array( $product_2->get_id() ), $products );
+
+		$product_1->delete( true );
+		$product_2->delete( true );
 	}
 
 	/**
@@ -284,6 +303,10 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$products = wc_get_products( array( 'return' => 'ids', 'visibility' => 'search' ) );
 		sort( $products );
 		$this->assertEquals( array( $product_1->get_id(), $product_3->get_id() ), $products );
+
+		$product_1->delete( true );
+		$product_2->delete( true );
+		$product_3->delete( true );
 	}
 
 	/**
@@ -311,6 +334,9 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 
 		$products = wc_get_products( array( 'return' => 'ids', 'stock_status' => 'outofstock' ) );
 		$this->assertEquals( array( $product_2->get_id() ), $products );
+
+		$product_1->delete( true );
+		$product_2->delete( true );
 	}
 
 	/**
@@ -336,6 +362,9 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 
 		$products = wc_get_products( array( 'return' => 'ids', 'tax_class' => 'reduced-rate' ) );
 		$this->assertEquals( array( $product_1->get_id() ), $products );
+
+		$product_1->delete( true );
+		$product_2->delete( true );
 	}
 
 	/**
@@ -359,35 +388,9 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( array( $product_1->get_id() ), $products );
 		$products = wc_get_products( array( 'return' => 'ids', 'shipping_class' => 'standard' ) );
 		$this->assertEquals( array( $product_2->get_id() ), $products );
-	}
 
-	/**
-	 * Tests wc_get_products() with download parameters.
-	 *
-	 * @since 3.2.0
-	 */
-	public function test_wc_get_products_download() {
-		$product_1 = new WC_Product_Simple;
-		$product_1->set_downloadable( true );
-		$product_1->set_download_limit( 5 );
-		$product_1->set_download_expiry( 90 );
-		$product_1->save();
-
-		$product_2 = new WC_Product_Simple;
-		$product_2->set_downloadable( true );
-		$product_2->set_download_limit( -1 );
-		$product_2->set_download_expiry( -1 );
-		$product_2->save();
-
-		$products = wc_get_products( array( 'return' => 'ids', 'download_limit' => 5 ) );
-		$this->assertEquals( array( $product_1->get_id() ), $products );
-		$products = wc_get_products( array( 'return' => 'ids', 'download_limit' => -1 ) );
-		$this->assertEquals( array( $product_2->get_id() ), $products );
-
-		$products = wc_get_products( array( 'return' => 'ids', 'download_expiry' => 90 ) );
-		$this->assertEquals( array( $product_1->get_id() ), $products );
-		$products = wc_get_products( array( 'return' => 'ids', 'download_expiry' => -1 ) );
-		$this->assertEquals( array( $product_2->get_id() ), $products );
+		$product_1->delete( true );
+		$product_2->delete( true );
 	}
 
 	/**
@@ -415,6 +418,9 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( array( $product_1->get_id() ), $products );
 		$products = wc_get_products( array( 'return' => 'ids', 'review_count' => 1 ) );
 		$this->assertEquals( array( $product_2->get_id() ), $products );
+
+		$product_1->delete( true );
+		$product_2->delete( true );
 	}
 
 	/**
@@ -443,8 +449,9 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	public function test_wc_update_product_stock() {
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->save();
 
-		update_post_meta( $product->get_id(), '_manage_stock', 'yes' );
 		wc_update_product_stock( $product->get_id(), 5 );
 
 		$product = new WC_Product_Simple( $product->get_id() );
@@ -456,8 +463,8 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 
 	public function test_wc_update_product_stock_increase_decrease() {
 		$product = WC_Helper_Product::create_simple_product();
-
-		update_post_meta( $product->get_id(), '_manage_stock', 'yes' );
+		$product->set_manage_stock( true );
+		$product->save();
 		wc_update_product_stock( $product->get_id(), 5 );
 
 		$new_value = wc_update_product_stock( $product->get_id(), 1, 'increase' );
@@ -569,27 +576,15 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_product_has_unique_sku().
-	 *
-	 * @since 2.3
-	 */
+     * @expectedException WC_Data_Exception
+     */
 	public function test_wc_product_has_unique_sku() {
 		$product_1 = WC_Helper_Product::create_simple_product();
 
 		$this->assertTrue( wc_product_has_unique_sku( $product_1->get_id(), $product_1->get_sku() ) );
 
 		$product_2 = WC_Helper_Product::create_simple_product();
-		// we need to manually set a sku, because WC_Product now uses wc_product_has_unique_sku before setting
-		// so we need to manually set it to test the functionality.
-		update_post_meta( $product_2->get_id(), '_sku', $product_1->get_sku() );
-
-		$this->assertFalse( wc_product_has_unique_sku( $product_2->get_id(), $product_1->get_sku() ) );
-
-		WC_Helper_Product::delete_product( $product_1->get_id() );
-
-		$this->assertTrue( wc_product_has_unique_sku( $product_2->get_id(), $product_2->get_sku() ) );
-
-		WC_Helper_Product::delete_product( $product_2->get_id() );
+		$product_2->set_sku( $product_1->get_sku() );
 	}
 
 	/**
@@ -637,7 +632,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$product_1->set_sku( 'some-custom-sku' );
 		$product_2->set_sku( 'another-custom-sku' );
 		$product_3->set_sku( 'another-custom-sku-1' );
-		$product_4->set_sku( '' );
+		$product_4->set_sku( 'some-custom-sku' );
 
 		$product_1_id = $product_1->save();
 		$product_2_id = $product_2->save();
@@ -645,15 +640,13 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$product_4_id = $product_4->save();
 
 		wc_product_force_unique_sku( $product_4_id );
-		$this->assertEquals( get_post_meta( $product_4_id, '_sku', true ), '' );
+		$product_4 = wc_get_product( $product_4_id );
+		$this->assertEquals( $product_4->get_sku( 'edit' ), 'some-custom-sku-1' );
 
-		update_post_meta( $product_4_id, '_sku', 'some-custom-sku' );
-		wc_product_force_unique_sku( $product_4_id );
-		$this->assertEquals( get_post_meta( $product_4_id, '_sku', true ), 'some-custom-sku-1' );
-
-		update_post_meta( $product_4_id, '_sku', 'another-custom-sku' );
-		wc_product_force_unique_sku( $product_4_id );
-		$this->assertEquals( get_post_meta( $product_4_id, '_sku', true ), 'another-custom-sku-2' );
+		$product_1->delete( true );
+		$product_2->delete( true );
+		$product_3->delete( true );
+		$product_4->delete( true );
 	}
 
 	/**

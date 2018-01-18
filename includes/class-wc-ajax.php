@@ -593,16 +593,45 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
-		parse_str( $_POST['data'], $data );
+		try {
+			parse_str( $_POST['data'], $data );
 
-		$attributes   = WC_Meta_Box_Product_Data::prepare_attributes( $data );
-		$product_id   = absint( $_POST['post_id'] );
-		$product_type = ! empty( $_POST['product_type'] ) ? wc_clean( $_POST['product_type'] ) : 'simple';
-		$classname    = WC_Product_Factory::get_product_classname( $product_id, $product_type );
-		$product      = new $classname( $product_id );
+			$attributes   = WC_Meta_Box_Product_Data::prepare_attributes( $data );
+			$product_id   = absint( $_POST['post_id'] );
+			$product_type = ! empty( $_POST['product_type'] ) ? wc_clean( $_POST['product_type'] ) : 'simple';
+			$classname    = WC_Product_Factory::get_product_classname( $product_id, $product_type );
+			$product      = new $classname( $product_id );
 
-		$product->set_attributes( $attributes );
-		$product->save();
+			$product->set_attributes( $attributes );
+			$product->save();
+
+			$response = array();
+
+			ob_start();
+			$attributes = $product->get_attributes( 'edit' );
+			$i          = -1;
+
+			foreach ( $attributes as $attribute ) {
+				if ( ! $attribute ) {
+					continue;
+				}
+				$i++;
+				$metabox_class = array();
+
+				if ( $attribute->is_taxonomy() ) {
+					$metabox_class[] = 'taxonomy';
+					$metabox_class[] = $attribute->get_name();
+				}
+
+				include( 'admin/meta-boxes/views/html-product-attribute.php' );
+			}
+
+			$response['html'] = ob_get_clean();
+
+			wp_send_json_success( $response );
+		} catch ( Exception $e ) {
+			wp_send_json_error( array( 'error' => $e->getMessage() ) );
+		}
 		wp_die();
 	}
 

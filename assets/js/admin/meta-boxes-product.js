@@ -435,7 +435,7 @@ jQuery( function( $ ) {
 	// Save attributes and update variations.
 	$( '.save_attributes' ).on( 'click', function() {
 
-		$( '#woocommerce-product-data' ).block({
+		$( '.product_attributes' ).block({
 			message: null,
 			overlayCSS: {
 				background: '#fff',
@@ -451,15 +451,18 @@ jQuery( function( $ ) {
 			security    : woocommerce_admin_meta_boxes.save_attributes_nonce
 		};
 
-		$.post( woocommerce_admin_meta_boxes.ajax_url, data, function() {
-			// Reload variations panel.
-			var this_page = window.location.toString();
-			this_page = this_page.replace( 'post-new.php?', 'post.php?post=' + woocommerce_admin_meta_boxes.post_id + '&action=edit&' );
+		$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
+			if ( response.error ) {
+				// Error.
+				window.alert( response.error );
+			} else if ( response.data ) {
+				// Success.
+				$( '.product_attributes' ).html( response.data.html );
+				$( '.product_attributes' ).unblock();
 
-			// Load variations panel.
-			$( '#variable_product_options' ).load( this_page + ' #variable_product_options_inner', function() {
+				// Reload variations panel.
 				$( '#variable_product_options' ).trigger( 'reload' );
-			});
+			}
 		});
 	});
 

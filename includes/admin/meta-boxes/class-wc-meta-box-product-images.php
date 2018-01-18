@@ -25,21 +25,18 @@ class WC_Meta_Box_Product_Images {
 	 * @param WP_Post $post
 	 */
 	public static function output( $post ) {
+		global $thepostid, $product_object;
+
+		$thepostid      = $post->ID;
+		$product_object = $thepostid ? wc_get_product( $thepostid ) : new WC_Product;
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
 		?>
 		<div id="product_images_container">
 			<ul class="product_images">
 				<?php
-					if ( metadata_exists( 'post', $post->ID, '_product_image_gallery' ) ) {
-						$product_image_gallery = get_post_meta( $post->ID, '_product_image_gallery', true );
-					} else {
-						// Backwards compatibility.
-						$attachment_ids = get_posts( 'post_parent=' . $post->ID . '&numberposts=-1&post_type=attachment&orderby=menu_order&order=ASC&post_mime_type=image&fields=ids&meta_key=_woocommerce_exclude_image&meta_value=0' );
-						$attachment_ids = array_diff( $attachment_ids, array( get_post_thumbnail_id() ) );
-						$product_image_gallery = implode( ',', $attachment_ids );
-					}
+					$product_image_gallery = $product_object->get_gallery_image_ids( 'edit' );
 
-					$attachments         = array_filter( explode( ',', $product_image_gallery ) );
+					$attachments         = array_filter( $product_image_gallery );
 					$update_meta         = false;
 					$updated_gallery_ids = array();
 
@@ -88,8 +85,12 @@ class WC_Meta_Box_Product_Images {
 	 * @param WP_Post $post
 	 */
 	public static function save( $post_id, $post ) {
+		$product_type   = empty( $_POST['product-type'] ) ? WC_Product_Factory::get_product_type( $post_id ) : sanitize_title( stripslashes( $_POST['product-type'] ) );
+		$classname      = WC_Product_Factory::get_product_classname( $post_id, $product_type ? $product_type : 'simple' );
+		$product        = new $classname( $post_id );
 		$attachment_ids = isset( $_POST['product_image_gallery'] ) ? array_filter( explode( ',', wc_clean( $_POST['product_image_gallery'] ) ) ) : array();
 
-		update_post_meta( $post_id, '_product_image_gallery', implode( ',', $attachment_ids ) );
+		$product->set_gallery_image_ids( $attachment_ids );
+		$product->save();
 	}
 }
