@@ -136,33 +136,52 @@ class ProductPreview extends React.Component {
 /**
  * Renders a preview of what the block will look like with current settings.
  */
-const ProductsBlockPreview = withAPIData( ( attributes ) => {
+const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
 
-		// build query here.
+	const { columns, rows, order, display, display_setting, layout } = attributes;
 
-		return {
-			products: '/wc/v2/products'
-		};
-	} )( ( { products, attributes } ) => {
+	let query = {
+		per_page: ( 'list' === layout ) ? columns : rows * columns,
+		orderby: order
+	};
 
-		if ( ! products.data ) {
-			return __( 'Loading' );
-		}
+	// @todo These will likely need to be modified to work with the final version of the category/product picker attributes.
+	if ( 'specific' === display ) {
+		query.include = JSON.stringify( display_setting );
+		query.orderby = 'include';
+	} else if ( 'category' === display ) {
+		query.category = display_setting.join( ',' );
+	}
 
-		if ( 0 === products.data.length ) {
-			return __( 'No products found' );
-		}
+	let query_string = '?';
+	for ( const key of Object.keys( query ) ) {
+		query_string += key + '=' + query[ key ] + '&';
+	}
 
-		const classes = "wc-products-block-preview " + attributes.layout + " cols-" + attributes.columns;
+	return {
+		products: '/wc/v2/products' + query_string
+	};
 
-		return (
-			<div className={ classes }>
-				{ products.data.map( ( product ) => (
-					<ProductPreview product={ product } attributes={ attributes } />
-				) ) }
-			</div>
-		);
-	} );
+} )( ( { products, attributes } ) => {
+
+	if ( ! products.data ) {
+		return __( 'Loading' );
+	}
+
+	if ( 0 === products.data.length ) {
+		return __( 'No products found' );
+	}
+
+	const classes = "wc-products-block-preview " + attributes.layout + " cols-" + attributes.columns;
+
+	return (
+		<div className={ classes }>
+			{ products.data.map( ( product ) => (
+				<ProductPreview product={ product } attributes={ attributes } />
+			) ) }
+		</div>
+	);
+} );
 
 /**
  * Register and run the products block.
@@ -223,11 +242,11 @@ registerBlockType( 'woocommerce/products', {
 		},
 
 		/**
-		 * Order to use for products. 'newness', 'title', or 'best-selling'.
+		 * Order to use for products. 'date', or 'title'.
 		 */
 		order: {
 			type: 'string',
-			default: 'newness',
+			default: 'date',
 		},
 
 		/**
@@ -307,11 +326,7 @@ registerBlockType( 'woocommerce/products', {
 						options={ [
 							{
 								label: __( 'Newness' ),
-								value: 'newness',
-							},
-							{
-								label: __( 'Best Selling' ),
-								value: 'sales',
+								value: 'date',
 							},
 							{
 								label: __( 'Title' ),

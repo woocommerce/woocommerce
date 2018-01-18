@@ -326,16 +326,61 @@ var ProductPreview = function (_React$Component4) {
  */
 
 
-var ProductsBlockPreview = withAPIData(function (attributes) {
+var ProductsBlockPreview = withAPIData(function (_ref) {
+	var attributes = _ref.attributes;
+	var columns = attributes.columns,
+	    rows = attributes.rows,
+	    order = attributes.order,
+	    display = attributes.display,
+	    display_setting = attributes.display_setting,
+	    layout = attributes.layout;
 
-	// build query here.
+
+	var query = {
+		per_page: 'list' === layout ? columns : rows * columns,
+		orderby: order
+	};
+
+	// @todo These will likely need to be modified to work with the final version of the category/product picker attributes.
+	if ('specific' === display) {
+		query.include = JSON.stringify(display_setting);
+		query.orderby = 'include';
+	} else if ('category' === display) {
+		query.category = display_setting.join(',');
+	}
+
+	var query_string = '?';
+	var _iteratorNormalCompletion = true;
+	var _didIteratorError = false;
+	var _iteratorError = undefined;
+
+	try {
+		for (var _iterator = Object.keys(query)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+			var key = _step.value;
+
+			query_string += key + '=' + query[key] + '&';
+		}
+	} catch (err) {
+		_didIteratorError = true;
+		_iteratorError = err;
+	} finally {
+		try {
+			if (!_iteratorNormalCompletion && _iterator.return) {
+				_iterator.return();
+			}
+		} finally {
+			if (_didIteratorError) {
+				throw _iteratorError;
+			}
+		}
+	}
 
 	return {
-		products: '/wc/v2/products'
+		products: '/wc/v2/products' + query_string
 	};
-})(function (_ref) {
-	var products = _ref.products,
-	    attributes = _ref.attributes;
+})(function (_ref2) {
+	var products = _ref2.products,
+	    attributes = _ref2.attributes;
 
 
 	if (!products.data) {
@@ -416,11 +461,11 @@ registerBlockType('woocommerce/products', {
 		},
 
 		/**
-   * Order to use for products. 'newness', 'title', or 'best-selling'.
+   * Order to use for products. 'date', or 'title'.
    */
 		order: {
 			type: 'string',
-			default: 'newness'
+			default: 'date'
 		},
 
 		/**
@@ -528,10 +573,7 @@ registerBlockType('woocommerce/products', {
 					value: order,
 					options: [{
 						label: __('Newness'),
-						value: 'newness'
-					}, {
-						label: __('Best Selling'),
-						value: 'sales'
+						value: 'date'
 					}, {
 						label: __('Title'),
 						value: 'title'
