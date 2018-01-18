@@ -254,7 +254,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 		 * @param array           $tool    Details about the tool that has been executed.
 		 * @param WP_REST_Request $request The current WP_REST_Request object.
 		 */
-		do_action( 'woocommerce_rest_system_status_tool_executed', $tool, $request );
+		do_action( 'woocommerce_rest_insert_system_status_tool', $tool, $request );
 
 		$request->set_param( 'context', 'edit' );
 		$response = $this->prepare_item_for_response( $tool, $request );
