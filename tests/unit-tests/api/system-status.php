@@ -368,10 +368,9 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 
 		$this->assertTrue( $data['success'] );
-		$this->assertEquals(
-			'3 indexes added',
-			$data['message'],
-			'3 indexes should be added in total: billing for $order1, billing and shipping for $order2.'
-		);
+		$this->assertNotEmpty( get_post_meta( $order1->get_id(), '_billing_address_index', true ) );
+		$this->assertNotEmpty( get_post_meta( $order2->get_id(), '_billing_address_index', true ) );
+		$this->assertNotEmpty( get_post_meta( $order2->get_id(), '_shipping_address_index', true ) );
+
 	}
 }
