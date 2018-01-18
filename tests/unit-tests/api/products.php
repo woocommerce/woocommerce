@@ -202,13 +202,30 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products/' . $product->get_id() ) );
 		$data     = $response->get_data();
 
-		$this->assertEquals( array( 'small' ), $data['attributes'][0]['options'] );
+		$this->assertEquals( array( 'large', 'small' ), $data['attributes'][0]['options'] );
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v2/products/' . $product->get_id() );
 		$request->set_body_params( array(
-			'attributes'  => array(
-				array( 'id' => 0, 'name' => 'pa_color', 'options' => array( 'red', 'yellow' ), 'visible' => false, 'variation' => 1 ),
-				array( 'name' => 'pa_size', 'options' => array( 'small' ), 'visible' => false, 'variation' => 1 ),
+			'attributes' => array(
+				array(
+					'id'        => 0,
+					'name'      => 'pa_color',
+					'options'   => array(
+						'red',
+						'yellow',
+					),
+					'visible'   => false,
+					'variation' => 1,
+				),
+				array(
+					'id'        => 0,
+					'name'      => 'pa_size',
+					'options'   => array(
+						'small',
+					),
+					'visible'   => false,
+					'variation' => 1,
+				),
 			),
 		) );
 		$response = $this->server->dispatch( $request );
