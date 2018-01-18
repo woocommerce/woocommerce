@@ -1,9 +1,26 @@
 {
 	"presets": [
 		"es2015",
-		"stage-2"
+		"stage-2",
+		[ "env", {
+			"modules": false,
+			"targets": {
+				"browsers": [
+					"last 2 Chrome versions",
+					"last 2 Firefox versions",
+					"last 2 Safari versions",
+					"last 2 iOS versions",
+					"last 1 Android version",
+					"last 1 ChromeAndroid version",
+					"ie 11"
+				]
+			}
+		} ]
 	],
 	"plugins": [
-		"add-module-exports"
+		"add-module-exports",
+		[ "transform-react-jsx", {
+			"pragma": "wp.element.createElement"
+		} ]
 	]
 }
