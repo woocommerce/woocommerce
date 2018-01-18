@@ -1280,6 +1280,14 @@ if ( ! function_exists( 'woocommerce_default_product_tabs' ) ) {
 	function woocommerce_default_product_tabs( $tabs = array() ) {
 		global $product, $post;
 
+		// Try to create new $product object if it was string product slug.
+		if ( ! empty( $product ) && is_string( $product ) ) {
+			$product = get_page_by_path( $product, OBJECT, 'product' );
+			if ( $product ) {
+				$product = wc_get_product( $product->ID );
+			}
+		}
+
 		// Description tab - shows product content.
 		if ( $post->post_content ) {
 			$tabs['description'] = array(
