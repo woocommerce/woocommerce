@@ -111,24 +111,27 @@ class WC_Shortcode_Products {
 		$attributes = $this->parse_legacy_attributes( $attributes );
 
 		return shortcode_atts( array(
-			'limit'          => '-1',      // Results limit.
-			'columns'        => '3',       // Number of columns.
-			'rows'           => '',        // Number of rows. If defined, limit will be ignored.
-			'orderby'        => 'title',   // menu_order, title, date, rand, price, popularity, rating, or id.
-			'order'          => 'ASC',     // ASC or DESC.
-			'ids'            => '',        // Comma separated IDs.
-			'skus'           => '',        // Comma separated SKUs.
-			'category'       => '',        // Comma separated category slugs.
-			'cat_operator'   => 'IN',      // Operator to compare categories. Possible values are 'IN', 'NOT IN', 'AND'.
-			'attribute'      => '',        // Single attribute slug.
-			'terms'          => '',        // Comma separated term slugs.
-			'terms_operator' => 'IN',      // Operator to compare terms. Possible values are 'IN', 'NOT IN', 'AND'.
-			'tag'            => '',        // Comma separated tag slugs.
-			'visibility'     => 'visible', // Possible values are 'visible', 'catalog', 'search', 'hidden'.
-			'class'          => '',        // HTML class.
-			'page'           => 1,         // Page for pagination.
-			'paginate'       => false,     // Should results be paginated.
-			'cache'          => true,      // Should shortcode output be cached.
+			'limit'            => '-1',      // Results limit.
+			'columns'          => '3',       // Number of columns.
+			'rows'             => '',        // Number of rows. If defined, limit will be ignored.
+			'orderby'          => 'title',   // menu_order, title, date, rand, price, popularity, rating, or id.
+			'order'            => 'ASC',     // ASC or DESC.
+			'ids'              => '',        // Comma separated IDs.
+			'skus'             => '',        // Comma separated SKUs.
+			'category'         => '',        // Comma separated category ids or slugs.
+			'cat_operator'     => 'IN',      // Operator to compare categories. Possible values are 'IN', 'NOT IN', 'AND'.
+			'attribute'        => '',        // Single attribute slug.
+			'terms'            => '',        // Comma separated term slugs.
+			'terms_operator'   => 'IN',      // Operator to compare terms. Possible values are 'IN', 'NOT IN', 'AND'.
+			'tag'              => '',        // Comma separated tag slugs.
+			'visibility'       => 'visible', // Possible values are 'visible', 'catalog', 'search', 'hidden'.
+			'class'            => '',        // HTML class.
+			'show_titles'      => true,      // Whether to show product titles.
+			'show_price'       => true,      // Whether to show product prices.
+			'show_add_to_cart' => true,      // Whether to show "Add to Cart" buttons.
+			'page'             => 1,         // Page for pagination.
+			'paginate'         => false,     // Should results be paginated.
+			'cache'            => true,      // Should shortcode output be cached.
 		), $attributes, $this->type );
 	}
 
@@ -285,11 +288,21 @@ class WC_Shortcode_Products {
 	 * @param array $query_args Query args.
 	 */
 	protected function set_categories_query_args( &$query_args ) {
+
 		if ( ! empty( $this->attributes['category'] ) ) {
+
+			$categories = array_map( 'sanitize_title', explode( ',', $this->attributes['category'] ) );
+			$field = 'slug';
+
+			if ( is_numeric( $categories[0] ) ) {
+				$categories = array_map( 'absint', $categories );
+				$field = 'term_id';
+			}
+
 			$query_args['tax_query'][] = array(
 				'taxonomy' => 'product_cat',
-				'terms'    => array_map( 'sanitize_title', explode( ',', $this->attributes['category'] ) ),
-				'field'    => 'slug',
+				'terms'    => $categories,
+				'field'    => $field,
 				'operator' => $this->attributes['cat_operator'],
 			);
 		}
@@ -447,6 +460,44 @@ class WC_Shortcode_Products {
 	}
 
 	/**
+	 * Conditionally remove parts of the template depending on attributes set.
+	 *
+	 * @since 3.4.0
+	 */
+	protected function setup_template_filters() {
+		if ( ! $this->attributes['show_titles'] ) {
+			remove_action( 'woocommerce_shop_loop_item_title', 'woocommerce_template_loop_product_title' );
+		}
+
+		if ( ! $this->attributes['show_price'] ) {
+			remove_action( 'woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_price' );
+		}
+
+		if ( ! $this->attributes['show_add_to_cart'] ) {
+			remove_action( 'woocommerce_after_shop_loop_item', 'woocommerce_template_loop_add_to_cart' );
+		}
+	}
+
+	/**
+	 * Reset any changes made during setup_template_filters.
+	 *
+	 * @since 3.4.0
+	 */
+	protected function reset_template_filters() {
+		if ( ! $this->attributes['show_titles'] ) {
+			add_action( 'woocommerce_shop_loop_item_title', 'woocommerce_template_loop_product_title' );
+		}
+
+		if ( ! $this->attributes['show_price'] ) {
+			add_action( 'woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_price' );
+		}
+
+		if ( ! $this->attributes['show_add_to_cart'] ) {
+			add_action( 'woocommerce_after_shop_loop_item', 'woocommerce_template_loop_add_to_cart' );
+		}
+	}
+
+	/**
 	 * Get wrapper classes.
 	 *
 	 * @since  3.2.0
@@ -557,6 +608,8 @@ class WC_Shortcode_Products {
 				'current_page' => $products->current_page,
 			) );
 
+			$this->setup_template_filters();
+
 			$original_post = $GLOBALS['post'];
 
 			do_action( "woocommerce_shortcode_before_{$this->type}_loop", $this->attributes );
@@ -585,6 +638,8 @@ class WC_Shortcode_Products {
 
 			do_action( 'woocommerce_after_shop_loop' );
 			do_action( "woocommerce_shortcode_after_{$this->type}_loop", $this->attributes );
+
+			$this->reset_template_filters();
 
 			wp_reset_postdata();
 			wc_reset_loop();
