@@ -153,7 +153,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 				'desc'    => sprintf(
 					'<strong class="red">%1$s</strong> %2$s',
 					__( 'Note:', 'woocommerce' ),
-					__( 'This tool will delete all customer session data from the database, including any current live carts.', 'woocommerce' )
+					__( 'This tool will delete all customer session data from the database, including current carts and saved carts in the database.', 'woocommerce' )
 				),
 			),
 			'install_pages' => array(
@@ -424,8 +424,9 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 			break;
 			case 'clear_sessions' :
 				$wpdb->query( "TRUNCATE {$wpdb->prefix}woocommerce_sessions" );
+				$result = absint( $wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key='_woocommerce_persistent_cart_" . get_current_blog_id() . "';" ) );
 				wp_cache_flush();
-				$message = __( 'Sessions successfully cleared', 'woocommerce' );
+				$message = sprintf( __( 'Deleted all active sessions, and %d saved carts.', 'woocommerce' ), absint( $result ) );
 			break;
 			case 'install_pages' :
 				WC_Install::create_pages();
