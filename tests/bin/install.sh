@@ -136,12 +136,13 @@ install_e2e_site() {
 		WP_SITE_URL="http://localhost:8080"
 		BRANCH=$TRAVIS_BRANCH
 		REPO=$TRAVIS_REPO_SLUG
+		WP_DB_DATA="$HOME/build/$REPO/tests/e2e-tests/data/e2e-db.sql"
+		WORKING_DIR="$PWD"
+
 		if [ "$TRAVIS_PULL_REQUEST_BRANCH" != "" ]; then
 			BRANCH=$TRAVIS_PULL_REQUEST_BRANCH
 			REPO=$TRAVIS_PULL_REQUEST_SLUG
 		fi
-		WP_DB_DATA="$HOME/build/$REPO/tests/e2e-tests/data/e2e-db.sql"
-		WORKING_DIR="$PWD"
 
 		set -ev
 		npm install
