@@ -2347,6 +2347,9 @@ class WC_AJAX {
 			}
 		}
 
+		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
+		WC_Cache_Helper::get_transient_version( 'shipping', true );
+
 		wp_send_json_success( array(
 			'rates' => WC_Tax::get_rates_for_tax_class( $current_class ),
 		) );
