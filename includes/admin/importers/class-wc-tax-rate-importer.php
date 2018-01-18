@@ -244,7 +244,7 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 		echo '<div class="narrow">';
 		echo '<p>' . esc_html__( 'Hi there! Upload a CSV file containing tax rates to import the contents into your shop. Choose a .csv file to upload, then click "Upload file and import".', 'woocommerce' ) . '</p>';
 
-		echo '<p>' . sprintf( esc_html__( 'Tax rates need to be defined with columns in a specific order (10 columns). <a href="%s">Click here to download a sample</a>.', 'woocommerce' ), esc_url( WC()->plugin_url() ) . '/dummy-data/sample_tax_rates.csv' ) . '</p>';
+		echo '<p>' . sprintf( esc_html__( 'Tax rates need to be defined with columns in a specific order (10 columns). <a href="%s">Click here to download a sample</a>.', 'woocommerce' ), esc_url( WC()->plugin_url() ) . '/sample-data/sample_tax_rates.csv' ) . '</p>';
 
 		$action = 'admin.php?import=woocommerce_tax_rate_csv&step=1';
 

@@ -85,7 +85,7 @@ class WC_Discounts {
 			$item->object        = $cart_item;
 			$item->product       = $cart_item['data'];
 			$item->quantity      = $cart_item['quantity'];
-			$item->price         = wc_add_number_precision_deep( $item->product->get_price() ) * $item->quantity;
+			$item->price         = wc_add_number_precision_deep( $item->product->get_price() * $item->quantity );
 			$this->items[ $key ] = $item;
 		}
 
@@ -212,7 +212,7 @@ class WC_Discounts {
 	 * @return int
 	 */
 	public function get_discounted_price_in_cents( $item ) {
-		return absint( $item->price - $this->get_discount( $item->key, true ) );
+		return absint( round( $item->price - $this->get_discount( $item->key, true ) ) );
 	}
 
 	/**
@@ -370,7 +370,7 @@ class WC_Discounts {
 				}
 			}
 
-			$discount       = min( $discounted_price, $discount );
+			$discount       = wc_cart_round_discount( min( $discounted_price, $discount ), 0 );
 			$cart_total     = $cart_total + $price_to_discount;
 			$total_discount = $total_discount + $discount;
 			$applied_count  = $applied_count + $apply_quantity;
@@ -817,7 +817,7 @@ class WC_Discounts {
 			$categories = array();
 
 			foreach ( $this->items as $item ) {
-				if ( $coupon->get_exclude_sale_items() && $item->product && $item->product->is_on_sale() ) {
+				if ( ! $item->product ) {
 					continue;
 				}
 

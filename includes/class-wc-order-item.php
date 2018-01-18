@@ -258,7 +258,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			$meta->value   = rawurldecode( (string) $meta->value );
 			$attribute_key = str_replace( 'attribute_', '', $meta->key );
 			$display_key   = wc_attribute_label( $attribute_key, $product );
-			$display_value = $meta->value;
+			$display_value = sanitize_text_field( $meta->value );
 
 			if ( taxonomy_exists( $attribute_key ) ) {
 				$term = get_term_by( 'slug', $meta->value, $attribute_key );

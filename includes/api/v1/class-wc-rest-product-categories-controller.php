@@ -240,7 +240,7 @@ class WC_REST_Product_Categories_V1_Controller extends WC_REST_Terms_Controller 
 							'format'      => 'uri',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'name' => array(
+						'title' => array(
 							'description' => __( 'Image name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),

@@ -391,6 +391,7 @@ function wc_scheduled_sales() {
 	// Sales which are due to start.
 	$product_ids = $data_store->get_starting_sales();
 	if ( $product_ids ) {
+		do_action( 'wc_before_products_starting_sales', $product_ids );
 		foreach ( $product_ids as $product_id ) {
 			if ( $product = wc_get_product( $product_id ) ) {
 				$sale_price = $product->get_sale_price();
@@ -406,6 +407,7 @@ function wc_scheduled_sales() {
 				$product->save();
 			}
 		}
+		do_action( 'wc_after_products_starting_sales', $product_ids );
 
 		delete_transient( 'wc_products_onsale' );
 	}
@@ -413,6 +415,7 @@ function wc_scheduled_sales() {
 	// Sales which are due to end.
 	$product_ids = $data_store->get_ending_sales();
 	if ( $product_ids ) {
+		do_action( 'wc_before_products_ending_sales', $product_ids );
 		foreach ( $product_ids as $product_id ) {
 			if ( $product = wc_get_product( $product_id ) ) {
 				$regular_price = $product->get_regular_price();
@@ -423,6 +426,7 @@ function wc_scheduled_sales() {
 				$product->save();
 			}
 		}
+		do_action( 'wc_after_products_ending_sales', $product_ids );
 
 		WC_Cache_Helper::get_transient_version( 'product', true );
 		delete_transient( 'wc_products_onsale' );
@@ -484,9 +488,13 @@ function wc_track_product_view() {
 		$viewed_products = (array) explode( '|', $_COOKIE['woocommerce_recently_viewed'] );
 	}
 
-	if ( ! in_array( $post->ID, $viewed_products ) ) {
-		$viewed_products[] = $post->ID;
+	// Unset if already in viewed products list.
+	$keys = array_flip( $viewed_products );
+	if ( isset( $keys[ $post->ID ] ) ) {
+		unset( $viewed_products[ $keys[ $post->ID ] ] );
 	}
+
+	$viewed_products[] = $post->ID;
 
 	if ( count( $viewed_products ) > 15 ) {
 		array_shift( $viewed_products );
@@ -742,20 +750,22 @@ function wc_get_min_max_price_meta_query( $args ) {
 
 	/**
 	 * Adjust if the store taxes are not displayed how they are stored.
-	 * Max is left alone because the filter was already increased.
 	 * Kicks in when prices excluding tax are displayed including tax.
 	 */
 	if ( wc_tax_enabled() && 'incl' === get_option( 'woocommerce_tax_display_shop' ) && ! wc_prices_include_tax() ) {
 		$tax_classes = array_merge( array( '' ), WC_Tax::get_tax_classes() );
 		$class_min   = $min;
+		$class_max   = $max;
 
 		foreach ( $tax_classes as $tax_class ) {
 			if ( $tax_rates = WC_Tax::get_rates( $tax_class ) ) {
-				$class_min = $min - WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $min, $tax_rates ) );
+				$class_min = $min + WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $min, $tax_rates ) );
+				$class_max = $max - WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $max, $tax_rates ) );
 			}
 		}
 
 		$min = $class_min;
+		$max = $class_max;
 	}
 
 	return array(
@@ -793,8 +803,9 @@ function wc_get_product_tax_class_options() {
  */
 function wc_get_product_stock_status_options() {
 	return array(
-		'instock'    => __( 'In stock', 'woocommerce' ),
-		'outofstock' => __( 'Out of stock', 'woocommerce' ),
+		'instock'     => __( 'In stock', 'woocommerce' ),
+		'outofstock'  => __( 'Out of stock', 'woocommerce' ),
+		'onbackorder' => __( 'On backorder', 'woocommerce' ),
 	);
 }
 
@@ -822,16 +833,24 @@ function wc_get_product_backorder_options() {
  * @return array
  */
 function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array() ) {
+
 	$product_id     = absint( $product_id );
+	$limit          = $limit > 0 ? $limit : 5;
 	$exclude_ids    = array_merge( array( 0, $product_id ), $exclude_ids );
 	$transient_name = 'wc_related_' . $product_id;
-	$related_posts  = get_transient( $transient_name );
-	$limit          = $limit > 0 ? $limit : 5;
+	$query_args     = http_build_query( array(
+		'limit'       => $limit,
+		'exclude_ids' => $exclude_ids,
+	) );
+
+	$transient     = get_transient( $transient_name );
+	$related_posts = $transient && isset( $transient[ $query_args ] ) ? $transient[ $query_args ] : false;
 
 	// We want to query related posts if they are not cached, or we don't have enough.
 	if ( false === $related_posts || count( $related_posts ) < $limit ) {
+
 		$cats_array = apply_filters( 'woocommerce_product_related_posts_relate_by_category', true, $product_id ) ? apply_filters( 'woocommerce_get_related_product_cat_terms', wc_get_product_term_ids( $product_id, 'product_cat' ), $product_id ) : array();
-		$tags_array = apply_filters( 'woocommerce_product_related_posts_relate_by_tag', true, $product_id ) ? apply_filters( 'woocommerce_get_related_product_tag_terms', wc_get_product_term_ids( $product_id, 'product_tag' ), $product_id ) : array();
+		$tags_array = apply_filters( 'woocommerce_product_related_posts_relate_by_tag', true, $product_id )      ? apply_filters( 'woocommerce_get_related_product_tag_terms', wc_get_product_term_ids( $product_id, 'product_tag' ), $product_id ) : array();
 
 		// Don't bother if none are set, unless woocommerce_product_related_posts_force_display is set to true in which case all products are related.
 		if ( empty( $cats_array ) && empty( $tags_array ) && ! apply_filters( 'woocommerce_product_related_posts_force_display', false, $product_id ) ) {
@@ -841,8 +860,19 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 			$related_posts = $data_store->get_related_products( $cats_array, $tags_array, $exclude_ids, $limit + 10, $product_id );
 		}
 
-		set_transient( $transient_name, $related_posts, DAY_IN_SECONDS );
+		if ( $transient ) {
+			$transient[ $query_args ] = $related_posts;
+		} else {
+			$transient = array( $query_args => $related_posts );
+		}
+
+		set_transient( $transient_name, $transient, DAY_IN_SECONDS );
 	}
+
+	$related_posts = apply_filters( 'woocommerce_related_products', $related_posts, $product_id, array(
+		'limit'        => $limit,
+		'excluded_ids' => $exclude_ids,
+	) );
 
 	shuffle( $related_posts );
 

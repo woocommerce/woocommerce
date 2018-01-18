@@ -1,12 +1,18 @@
 <?php
+/**
+ * Deprecated filter hooks
+ *
+ * @package WooCommerce\Abstracts
+ * @since   3.0.0
+ * @version 3.3.0
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 /**
- * Handles deprecation notices and triggering of legacy filter hooks.
- *
- * @since 3.0.0
+ * Handles deprecation notices and triggering of legacy filter hooks
  */
 class WC_Deprecated_Filter_Hooks extends WC_Deprecated_Hooks {
 
@@ -52,11 +58,68 @@ class WC_Deprecated_Filter_Hooks extends WC_Deprecated_Hooks {
 		'default_checkout_billing_postcode'          => 'default_checkout_postcode',
 		'woocommerce_system_status_environment_rows' => 'woocommerce_debug_posting',
 		'woocommerce_credit_card_type_labels'        => 'wocommerce_credit_card_type_labels',
+		'woocommerce_get_script_data'                => array(
+			'woocommerce_params',
+			'wc_geolocation_params',
+			'wc_single_product_params',
+			'wc_checkout_params',
+			'wc_address_i18n_params',
+			'wc_cart_params',
+			'wc_cart_fragments_params',
+			'wc_add_to_cart_params',
+			'wc_add_to_cart_variation_params',
+			'wc_country_select_params',
+			'wc_password_strength_meter_params',
+		),
+	);
+
+	/**
+	 * Array of versions on each hook has been deprecated.
+	 *
+	 * @var array
+	 */
+	protected $deprecated_version = array(
+		'woocommerce_email_order_schema_markup'      => '3.0.0',
+		'add_to_cart_fragments'                      => '3.0.0',
+		'add_to_cart_redirect'                       => '3.0.0',
+		'woocommerce_product_width'                  => '3.0.0',
+		'woocommerce_product_height'                 => '3.0.0',
+		'woocommerce_product_length'                 => '3.0.0',
+		'woocommerce_product_weight'                 => '3.0.0',
+		'woocommerce_get_sku'                        => '3.0.0',
+		'woocommerce_get_price'                      => '3.0.0',
+		'woocommerce_get_regular_price'              => '3.0.0',
+		'woocommerce_get_sale_price'                 => '3.0.0',
+		'woocommerce_product_tax_class'              => '3.0.0',
+		'woocommerce_get_stock_quantity'             => '3.0.0',
+		'woocommerce_get_product_attributes'         => '3.0.0',
+		'woocommerce_product_gallery_attachment_ids' => '3.0.0',
+		'woocommerce_product_review_count'           => '3.0.0',
+		'woocommerce_product_files'                  => '3.0.0',
+		'woocommerce_get_currency'                   => '3.0.0',
+		'woocommerce_order_amount_discount_total'    => '3.0.0',
+		'woocommerce_order_amount_discount_tax'      => '3.0.0',
+		'woocommerce_order_amount_shipping_total'    => '3.0.0',
+		'woocommerce_order_amount_shipping_tax'      => '3.0.0',
+		'woocommerce_order_amount_cart_tax'          => '3.0.0',
+		'woocommerce_order_amount_total'             => '3.0.0',
+		'woocommerce_order_amount_total_tax'         => '3.0.0',
+		'woocommerce_order_amount_total_discount'    => '3.0.0',
+		'woocommerce_order_amount_subtotal'          => '3.0.0',
+		'woocommerce_order_tax_totals'               => '3.0.0',
+		'woocommerce_refund_amount'                  => '3.0.0',
+		'woocommerce_refund_reason'                  => '3.0.0',
+		'default_checkout_country'                   => '3.0.0',
+		'default_checkout_state'                     => '3.0.0',
+		'default_checkout_postcode'                  => '3.0.0',
+		'woocommerce_debug_posting'                  => '3.0.0',
+		'wocommerce_credit_card_type_labels'         => '3.0.0',
 	);
 
 	/**
 	 * Hook into the new hook so we can handle deprecated hooks once fired.
-	 * @param  string $hook_name
+	 *
+	 * @param string $hook_name Hook name.
 	 */
 	public function hook_in( $hook_name ) {
 		add_filter( $hook_name, array( $this, 'maybe_handle_deprecated_hook' ), -1000, 8 );
@@ -65,10 +128,10 @@ class WC_Deprecated_Filter_Hooks extends WC_Deprecated_Hooks {
 	/**
 	 * If the old hook is in-use, trigger it.
 	 *
-	 * @param string $new_hook
-	 * @param string $old_hook
-	 * @param array $new_callback_args
-	 * @param mixed $return_value
+	 * @param  string $new_hook          New hook name.
+	 * @param  string $old_hook          Old hook name.
+	 * @param  array  $new_callback_args New callback args.
+	 * @param  mixed  $return_value      Returned value.
 	 * @return mixed
 	 */
 	public function handle_deprecated_hook( $new_hook, $old_hook, $new_callback_args, $return_value ) {
@@ -82,8 +145,8 @@ class WC_Deprecated_Filter_Hooks extends WC_Deprecated_Hooks {
 	/**
 	 * Fire off a legacy hook with it's args.
 	 *
-	 * @param  string $old_hook
-	 * @param  array $new_callback_args
+	 * @param  string $old_hook          Old hook name.
+	 * @param  array  $new_callback_args New callback args.
 	 * @return mixed
 	 */
 	protected function trigger_hook( $old_hook, $new_callback_args ) {

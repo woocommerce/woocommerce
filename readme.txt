@@ -1,9 +1,9 @@
 === WooCommerce ===
 Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, coderkevin, claudiulodro, woothemes, iCaleb
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
-Requires at least: 4.5
-Tested up to: 4.8
-Stable tag: 3.2.0
+Requires at least: 4.7
+Tested up to: 4.9
+Stable tag: 3.2.6
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -35,7 +35,7 @@ One of the biggest risks of using a hosted eCommerce platform is what happens to
 
 = Define your style with Storefront =
 
-[Storefront](https://wordpress.org/themes/storefront/) is a free WordPress theme available to any WooCommerce store. Along with deep WooCommerce integration, Storefront prioritizes speed and uptime while eliminating theme and plugin conflicts during major updates.
+[Storefront](https://woocommerce.com/storefront/) is a free WordPress theme available to any WooCommerce store. Along with deep WooCommerce integration, Storefront prioritizes speed and uptime while eliminating theme and plugin conflicts during major updates.
 
 Define your style even further by customizing Storefront to your liking or choosing from one of our several [Storefront child themes](https://woocommerce.com/product-category/themes/storefront-child-theme-themes/). It’s all up to you, and all open source.
 
@@ -76,7 +76,7 @@ And there’s plenty more where they came from. Visit our [extensions page](http
 
 = Join our growing community =
 
-When you download WooCommerce, you join a community of more than a million store owners, developers, and WordPress enthusiasts. We’re one of the fastest-growing open source communities online, and whether you’re a n00b or a Ninja, we’d love to have you!
+When you download WooCommerce, you join a community of more than a million store owners, developers, and WordPress enthusiasts. We're one of the fastest-growing open source communities online, and no matter your skill level we'd love to have you!
 
 If you’re interested in contributing to WooCommerce we’ve got more than 350 contributors, and there’s always room for more. Head over to the [WooCommerce GitHub Repository](https://github.com/woocommerce/woocommerce) to find out how you can pitch in.
 
@@ -112,9 +112,9 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 If on the off-chance you do encounter issues with the shop/category pages after an update you simply need to flush the permalinks by going to WordPress > Settings > Permalinks and hitting 'save'. That should return things to normal.
 
-= Dummy data =
+= Sample data =
 
-WooCommerce comes with some dummy data you can use to see how products look; either import dummy_data.xml via the [WordPress importer](https://wordpress.org/plugins/wordpress-importer/) or use our [CSV Import Suite plugin](https://woocommerce.com/products/product-csv-import-suite/) to import dummy_data.csv and dummy_data_variations.csv.
+WooCommerce comes with some sample data you can use to see how products look; import sample_products.xml via the [WordPress importer](https://wordpress.org/plugins/wordpress-importer/). You can also use the core [CSV importer](https://docs.woocommerce.com/document/product-csv-importer-exporter/) or our [CSV Import Suite plugin](https://woocommerce.com/products/product-csv-import-suite/) to import sample_products.csv.
 
 == Frequently Asked Questions ==
 
@@ -161,7 +161,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
-= 3.3.0 - 2017-XX-XX =
+= 3.3.0 - 2018-XX-XX =
 * Feature - Improved default appearance in themes which do not support WooCommerce, making the shop page shortcode based.
 * Feature - Products shortcodes; improved random sorting, with some caching.
 * Feature - Products shortcodes; support for pagination.
@@ -170,15 +170,24 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Feature - Changing image sizes will trigger automatic thumbnail regeneration in the background.
 * Feature - Improved how downloads are stored within products, and added new reporting/logging features to track who downloaded what, when.
 * Feature - Improved the overall appearance of the backend orders list, and added a new 'preview' button to quickly see order details.
-* Feature - New default dummy data and placeholders.
+* Feature - New default sample data and placeholders.
 * Feature - Added sandbox and live API details to the PayPal standard data, as well as an indication on the checkout to what mode is currently active. PayPal IPN email notifications are also now optional.
 * Feature - Introduced product category threshold filter (`woocommerce_product_category_filter_threshold`). AJAX powered select will kick in when you have over 100 categories.
 * Feature - Added `add_to_cart_description` method and aria-labels to cart buttons in the loop for accessibility.
 * Feature - Ability to search in logs when the database logger is used.
 * Performance - Adjusted how permalinks are retrieved and saved to avoid switching locales on each page load.
 * Performance - Added cache when loading product variation attributes.
+* Fix - Fix wc_notice_count logic.
+* Fix - Correct bulk edit price formatting.
+* Fix - Ajax add-to-cart button shortcode fix for variations.
+* Tweak - Update billing if account form changes.
+* Tweak - Remove videos from help sections.
+* Tweak - Preserve seconds when saving order date.
+* Tweak - Allow quantities less than 1, but not 0, in admin.
+* Tweak - Post types with no archives should not show in breadcrumb.
+* Tweak - Only load session handler class on frontend not during cron.
 * Tweak - Moved the 'Store Notice" option into the customizer.
-* Tweak - Checkout Postcode / Zip validation error message was missing Billing / Shipping Identification. 
+* Tweak - Checkout Postcode / Zip validation error message was missing Billing / Shipping Identification.
 * Tweak - Added Iris color picker validation.
 * Tweak - Use scrollIntoView on checkout.
 * Tweak - Converted input submit elements to button submit elements across the entire codebase for consistency.
@@ -194,18 +203,19 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Tweak - Let wp_signon handle email to username conversion.
 * Tweak - Made email field wider on checkout.
 * Tweak - Post entire shipping selection when showing multiple packages.
+* Dev - REST API - Orders should be created for users who exist on the site only.
 * Dev - REST API - Fixed default value of "dp" on orders and refunds endpoints.
 * Dev - Theming - Added theme support variables to declare image sizes used for products.
 * Dev - Theming - Added support for single-product-postname.php template files.
 * Dev - Added actions before calculations order totals and taxes and is_vat_excempt support.
 * Dev - Add filter 'woocommerce_coupon_get_apply_quantity'.
 * Dev - Grouped products; added filters to allow custom columns and changes to values.
-* Dev - Allow for cloning the WC_Cart object 
-* Dev - Apply filters to registration-error-email-exists error. 
+* Dev - Allow for cloning the WC_Cart object
+* Dev - Apply filters to registration-error-email-exists error.
 * Dev - Added `woocommerce_cross_sells_order` filter.
-* Dev - Add order-details `before` hooks to complement existing hooks. 
+* Dev - Add order-details `before` hooks to complement existing hooks.
 * Dev - WC_CHUNK_SIZE constant for controlling readfile.
-* Dev - Add short circuit to customer bought product function. 
+* Dev - Add short circuit to customer bought product function.
 * Dev - Added a `wc_caught_exception` method to aid with logging.
 * Dev - Added Data stores and CRUD for working with Webhooks.
 * Dev - Bumped minimum WP version requirement to 4.5 and removed legacy API files.
@@ -214,8 +224,11 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Dev - Improved the `is_internal_meta_key` checks to consider getters and setters.
 * Dev - Cleaned up the Order Customer Details template.
 * Dev - JavaScript payment_method_selected events on checkout.
+* Dev - Add new `$order->get_edit_order_url()` method.
+* Dev - Pass through options to zoom, flexslider, and photoswipe.
+* Dev - Added actions before and after scheduled sales initiation and completion.
 * Localization - Add direction character to currency output.
-* Localization - States for Tanzania.
+* Localization - States for Tanzania and Moldova.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 

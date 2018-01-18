@@ -89,7 +89,7 @@ class WC_API extends WC_Legacy_API {
 			wc_nocache_headers();
 
 			// Clean the API request.
-			$api_request = $wp->query_vars['wc-api'];
+			$api_request = strtolower( wc_clean( $wp->query_vars['wc-api'] ) );
 
 			// Trigger generic action before request hook.
 			do_action( 'woocommerce_api_request', $api_request );
@@ -162,7 +162,7 @@ class WC_API extends WC_Legacy_API {
 		include_once( dirname( __FILE__ ) . '/api/v1/class-wc-rest-reports-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/v1/class-wc-rest-tax-classes-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/v1/class-wc-rest-taxes-controller.php' );
-		include_once( dirname( __FILE__ ) . '/api/v1/class-wc-rest-webhook-deliveries.php' );
+		include_once( dirname( __FILE__ ) . '/api/v1/class-wc-rest-webhook-deliveries-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/v1/class-wc-rest-webhooks-controller.php' );
 
 		// Legacy v2 code.
@@ -195,7 +195,7 @@ class WC_API extends WC_Legacy_API {
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-shipping-zone-methods-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-tax-classes-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-taxes-controller.php' );
-		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-webhook-deliveries.php' );
+		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-webhook-deliveries-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-webhooks-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-system-status-controller.php' );
 		include_once( dirname( __FILE__ ) . '/api/class-wc-rest-system-status-tools-controller.php' );

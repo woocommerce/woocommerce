@@ -35,8 +35,8 @@ class WC_Regenerate_Images {
 		self::$background_process = new WC_Regenerate_Images_Request();
 
 		if ( apply_filters( 'woocommerce_resize_images', true ) && ! is_admin() ) {
-			// Action to handle on-the-fly image resizing.
-			add_action( 'wp_get_attachment_image_src', array( __CLASS__, 'maybe_resize_image' ), 10, 4 );
+			// Handle on-the-fly image resizing.
+			add_filter( 'wp_get_attachment_image_src', array( __CLASS__, 'maybe_resize_image' ), 10, 4 );
 		}
 
 		if ( apply_filters( 'woocommerce_background_image_regeneration', true ) ) {
@@ -58,6 +58,12 @@ class WC_Regenerate_Images {
 	 * @return array
 	 */
 	public static function maybe_resize_image( $image, $attachment_id, $size, $icon ) {
+		// Use a whitelist of sizes we want to resize. Ignore others.
+		if ( ! in_array( $size, array( 'woocommerce_thumbnail', 'woocommerce_single', 'shop_thumbnail', 'shop_catalog', 'shop_single' ), true ) ) {
+			return $image;
+		}
+
+		// Get image metadata - we need it to proceed.
 		$imagemeta = wp_get_attachment_metadata( $attachment_id );
 
 		if ( false === $imagemeta || empty( $imagemeta ) ) {
@@ -66,13 +72,11 @@ class WC_Regenerate_Images {
 
 		$size_settings = wc_get_image_size( $size );
 
-		if ( isset( $imagemeta['sizes'][ $size ] ) ) {
-			if ( $imagemeta['sizes'][ $size ]['width'] !== $size_settings['width'] || $imagemeta['sizes'][ $size ]['height'] !== $size_settings['height'] ) {
-				$image = self::resize_and_return_image( $attachment_id, $image, $size, $icon );
-			}
-		} else {
+		// If size differs from image meta, regen.
+		if ( isset( $imagemeta['sizes'], $imagemeta['sizes'][ $size ] ) && ( $imagemeta['sizes'][ $size ]['width'] !== $size_settings['width'] || $imagemeta['sizes'][ $size ]['height'] !== $size_settings['height'] ) ) {
 			$image = self::resize_and_return_image( $attachment_id, $image, $size, $icon );
 		}
+
 		return $image;
 	}
 
@@ -165,16 +169,10 @@ class WC_Regenerate_Images {
 	}
 
 	/**
-	 * Check if we should generate images when new themes declares custom sizes
-	 *
-	 * @return void
+	 * Check if we should generate images when new themes declares custom sizes.
 	 */
 	public static function maybe_regenerate_image_theme_switch() {
-		$theme_support = get_theme_support( 'woocommerce' );
-		$theme_support = is_array( $theme_support ) ? $theme_support[0] : false;
-
-		// Only queue image generation if the theme declares custom sizes via theme_support.
-		if ( is_array( $theme_support ) && ( isset( $theme_support['single_image_width'] ) || isset( $theme_support['thumbnail_image_width'] ) ) ) {
+		if ( wc_get_theme_support( 'single_image_width' ) || wc_get_theme_support( 'thumbnail_image_width' ) ) {
 			self::queue_image_regeneration();
 		}
 	}

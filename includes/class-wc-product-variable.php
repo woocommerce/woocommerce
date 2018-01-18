@@ -74,11 +74,11 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Get an array of all sale and regular prices from all variations. This is used for example when displaying the price range at variable product level or seeing if the variable product is on sale.
 	 *
-	 * @param  bool $include_taxes Should taxes be included in the prices.
+	 * @param  bool  $for_display If true, prices will be adapted for display based on the `woocommerce_tax_display_shop` setting (including or excluding taxes).
 	 * @return array Array of RAW prices, regular prices, and sale prices with keys set to variation ID.
 	 */
-	public function get_variation_prices( $include_taxes = false ) {
-		$prices = $this->data_store->read_price_data( $this, $include_taxes );
+	public function get_variation_prices( $for_display = false ) {
+		$prices = $this->data_store->read_price_data( $this, $for_display );
 
 		foreach ( $prices as $price_key => $variation_prices ) {
 			$prices[ $price_key ] = $this->sort_variation_prices( $variation_prices );
@@ -90,40 +90,40 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Get the min or max variation regular price.
 	 *
-	 * @param  string  $min_or_max    Min or max price.
-	 * @param  boolean $include_taxes Should the price include taxes?
+	 * @param  string  $min_or_max  Min or max price.
+	 * @param  boolean $for_display If true, prices will be adapted for display based on the `woocommerce_tax_display_shop` setting (including or excluding taxes).
 	 * @return string
 	 */
-	public function get_variation_regular_price( $min_or_max = 'min', $include_taxes = false ) {
-		$prices = $this->get_variation_prices( $include_taxes );
+	public function get_variation_regular_price( $min_or_max = 'min', $for_display = false ) {
+		$prices = $this->get_variation_prices( $for_display );
 		$price  = 'min' === $min_or_max ? current( $prices['regular_price'] ) : end( $prices['regular_price'] );
-		return apply_filters( 'woocommerce_get_variation_regular_price', $price, $this, $min_or_max, $include_taxes );
+		return apply_filters( 'woocommerce_get_variation_regular_price', $price, $this, $min_or_max, $for_display );
 	}
 
 	/**
 	 * Get the min or max variation sale price.
 	 *
-	 * @param  string  $min_or_max    Min or max price.
-	 * @param  boolean $include_taxes Should the price include taxes?
+	 * @param  string  $min_or_max  Min or max price.
+	 * @param  boolean $for_display If true, prices will be adapted for display based on the `woocommerce_tax_display_shop` setting (including or excluding taxes).
 	 * @return string
 	 */
-	public function get_variation_sale_price( $min_or_max = 'min', $include_taxes = false ) {
-		$prices = $this->get_variation_prices( $include_taxes );
+	public function get_variation_sale_price( $min_or_max = 'min', $for_display = false ) {
+		$prices = $this->get_variation_prices( $for_display );
 		$price  = 'min' === $min_or_max ? current( $prices['sale_price'] ) : end( $prices['sale_price'] );
-		return apply_filters( 'woocommerce_get_variation_sale_price', $price, $this, $min_or_max, $include_taxes );
+		return apply_filters( 'woocommerce_get_variation_sale_price', $price, $this, $min_or_max, $for_display );
 	}
 
 	/**
 	 * Get the min or max variation (active) price.
 	 *
-	 * @param  string  $min_or_max    Min or max price.
-	 * @param  boolean $include_taxes Should the price include taxes?
+	 * @param  string  $min_or_max  Min or max price.
+	 * @param  boolean $for_display If true, prices will be adapted for display based on the `woocommerce_tax_display_shop` setting (including or excluding taxes).
 	 * @return string
 	 */
-	public function get_variation_price( $min_or_max = 'min', $include_taxes = false ) {
-		$prices = $this->get_variation_prices( $include_taxes );
+	public function get_variation_price( $min_or_max = 'min', $for_display = false ) {
+		$prices = $this->get_variation_prices( $for_display );
 		$price  = 'min' === $min_or_max ? current( $prices['price'] ) : end( $prices['price'] );
-		return apply_filters( 'woocommerce_get_variation_price', $price, $this, $min_or_max, $include_taxes );
+		return apply_filters( 'woocommerce_get_variation_price', $price, $this, $min_or_max, $for_display );
 	}
 
 	/**
@@ -376,21 +376,21 @@ class WC_Product_Variable extends WC_Product {
 		if ( ! $this->get_manage_stock() ) {
 			$this->set_stock_quantity( '' );
 			$this->set_backorders( 'no' );
-			$this->set_stock_status( $this->child_is_in_stock() ? 'instock' : 'outofstock' );
+			$this->data_store->sync_stock_status( $this );
 
-		// If backorders are enabled, always in stock.
-		} elseif ( 'no' !== $this->get_backorders() ) {
-			$this->set_stock_status( 'instock' );
+			// If we are stock managing, backorders are allowed, and we don't have stock, force on backorder status.
+		} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount', 0 ) && 'no' !== $this->get_backorders() ) {
+			$this->set_stock_status( 'onbackorder' );
 
-		// If we are stock managing and we don't have stock, force out of stock status.
-		} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+			// If we are stock managing and we don't have stock, force out of stock status.
+		} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount', 0 ) && 'no' === $this->get_backorders() ) {
 			$this->set_stock_status( 'outofstock' );
 
-		// If the stock level is changing and we do now have enough, force in stock status.
-		} elseif ( $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount' ) && array_key_exists( 'stock_quantity', $this->get_changes() ) ) {
+			// If the stock level is changing and we do now have enough, force in stock status.
+		} elseif ( $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount', 0 ) && array_key_exists( 'stock_quantity', $this->get_changes() ) ) {
 			$this->set_stock_status( 'instock' );
 
-		// Otherwise revert to status the children have.
+			// Otherwise revert to status the children have.
 		} else {
 			$this->set_stock_status( $this->child_is_in_stock() ? 'instock' : 'outofstock' );
 		}
@@ -449,6 +449,16 @@ class WC_Product_Variable extends WC_Product {
 	 */
 	public function child_is_in_stock() {
 		return $this->data_store->child_is_in_stock( $this );
+	}
+
+	/**
+	 * Is a child on backorder?
+	 *
+	 * @since 3.3.0
+	 * @return boolean
+	 */
+	public function child_is_on_backorder() {
+		return $this->data_store->child_has_stock_status( $this, 'onbackorder' );
 	}
 
 	/**

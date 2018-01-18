@@ -12,7 +12,8 @@ let manager;
 let driver;
 
 test.describe( 'Cart page', function() {
-	test.before( 'open browser', function() {
+	// open browser
+	test.before( function() {
 		this.timeout( config.get( 'startBrowserTimeoutMs' ) );
 
 		manager = new WebDriverManager( 'chrome', { baseUrl: config.get( 'url' ) } );
@@ -93,7 +94,7 @@ test.describe( 'Cart page', function() {
 		);
 	} );
 
-	test.it( 'should go to the checkout page when "Proceed to Chcekout" is clicked', () => {
+	test.it( 'should go to the checkout page when "Proceed to Checkout" is clicked', () => {
 		const cartPage = new CartPage( driver, { url: manager.getPageUrl( '/cart' ) } );
 		const checkoutPage = cartPage.checkout();
 
@@ -104,7 +105,8 @@ test.describe( 'Cart page', function() {
 		);
 	} );
 
-	test.after( 'quit browser', () => {
+	// quit browser
+	test.after( () => {
 		manager.quitBrowser();
 	} );
 } );
