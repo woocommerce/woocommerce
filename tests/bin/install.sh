@@ -134,7 +134,7 @@ install_e2e_site() {
 		PHP_FPM_BIN="$HOME/.phpenv/versions/$TRAVIS_PHP_VERSION/sbin/php-fpm"
 		PHP_FPM_CONF="$NGINX_DIR/php-fpm.conf"
 		WP_SITE_URL="http://localhost:8080"
-		WP_DB_DATA="$HOME/build/woocommerce/woocommerce/tests/e2e-tests/data/e2e-db.sql"
+		WP_DB_DATA="$HOME/build/$TRAVIS_REPO_SLUG/tests/e2e-tests/data/e2e-db.sql"
 		WORKING_DIR="$PWD"
 
 		set -ev
@@ -178,7 +178,7 @@ PHP
 		php wp-cli.phar db import $WP_DB_DATA
 		php wp-cli.phar search-replace "http://local.wordpress.test" "$WP_SITE_URL"
 		php wp-cli.phar theme install twentytwelve --activate
-		php wp-cli.phar plugin install https://github.com/woocommerce/woocommerce/archive/$BRANCH.zip --activate
+		php wp-cli.phar plugin install https://github.com/$TRAVIS_REPO_SLUG/archive/$BRANCH.zip --activate
 
 		cd "$WORKING_DIR"
 
