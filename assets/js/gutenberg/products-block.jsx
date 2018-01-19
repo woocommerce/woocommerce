@@ -115,7 +115,7 @@ const ProductCategoryList = withAPIData( ( props ) => {
 				<ul>
 					{ filteredCategories.map( ( category ) => (
 						<li>
-							<label for={ 'product-category-' + category.id }>
+							<label htmlFor={ 'product-category-' + category.id }>
 								<input type="checkbox"
 								       id={ 'product-category-' + category.id }
 								       value={ category.id }

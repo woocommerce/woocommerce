@@ -258,7 +258,7 @@ var ProductCategoryList = withAPIData(function (props) {
 					null,
 					wp.element.createElement(
 						"label",
-						{ "for": 'product-category-' + category.id },
+						{ htmlFor: 'product-category-' + category.id },
 						wp.element.createElement("input", { type: "checkbox",
 							id: 'product-category-' + category.id,
 							value: category.id,
