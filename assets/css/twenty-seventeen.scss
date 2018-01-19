@@ -163,6 +163,18 @@
 .woocommerce-notice--error {
 	background: firebrick;
 	color: #fff;
+
+	.woocommerce-notice-list {
+		margin: 0;
+		list-style: none outside;
+
+		.woocommerce-notice-list__item {
+			margin-bottom: .5em;
+		}
+		.woocommerce-notice-list__item:last-child {
+			margin-bottom: 0;
+		}
+	}
 }
 
 .woocommerce-store-notice {

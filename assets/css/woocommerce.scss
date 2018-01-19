@@ -1717,6 +1717,18 @@ button.pswp__button--zoom:hover {
 		content: '\e016';
 		color: #b81c23;
 	}
+
+	.woocommerce-notice-list {
+		margin: 0;
+		list-style: none outside;
+
+		.woocommerce-notice-list__item {
+			margin-bottom: .5em;
+		}
+		.woocommerce-notice-list__item:last-child {
+			margin-bottom: 0;
+		}
+	}
 }
 
 /**

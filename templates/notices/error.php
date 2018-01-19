@@ -20,10 +20,14 @@ defined( 'ABSPATH' ) || exit;
 
 <?php if ( $messages ) : ?>
 	<div class="woocommerce-notice woocommerce-notice--error" role="alert">
-		<ul class="woocommerce-notice-list">
-			<?php foreach ( $messages as $message ) : ?>
-				<li class="woocommerce-notice-list__item"><?php echo wp_kses_post( $message ); ?></li>
-			<?php endforeach; ?>
-		</ul>
+		<?php if ( 1 === count( $messages ) ) : ?>
+			<?php echo wp_kses_post( $messages[0] ); ?>
+		<?php else : ?>
+			<ul class="woocommerce-notice-list">
+				<?php foreach ( $messages as $message ) : ?>
+					<li class="woocommerce-notice-list__item"><?php echo wp_kses_post( $message ); ?></li>
+				<?php endforeach; ?>
+			</ul>
+		<?php endif; ?>
 	</div>
 <?php endif; ?>
