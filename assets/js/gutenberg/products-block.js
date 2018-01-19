@@ -83,7 +83,9 @@ var _wp$blocks = wp.blocks,
     registerBlockType = _wp$blocks.registerBlockType,
     InspectorControls = _wp$blocks.InspectorControls,
     BlockControls = _wp$blocks.BlockControls;
-var Toolbar = wp.components.Toolbar;
+var _wp$components = wp.components,
+    Toolbar = _wp$components.Toolbar,
+    withAPIData = _wp$components.withAPIData;
 var RangeControl = InspectorControls.RangeControl,
     ToggleControl = InspectorControls.ToggleControl,
     SelectControl = InspectorControls.SelectControl;
@@ -211,25 +213,39 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 					__('Products')
 				),
 				wp.element.createElement(
-					'select',
-					{ value: this.state.display, onChange: this.updateDisplay },
+					'div',
+					{ className: 'display-select' },
+					__('Display:'),
 					wp.element.createElement(
-						'option',
-						{ value: 'all' },
-						__('All')
-					),
-					wp.element.createElement(
-						'option',
-						{ value: 'specific' },
-						__('Specific products')
-					),
-					wp.element.createElement(
-						'option',
-						{ value: 'category' },
-						__('Product Category')
+						'select',
+						{ value: this.state.display, onChange: this.updateDisplay },
+						wp.element.createElement(
+							'option',
+							{ value: 'all' },
+							__('All')
+						),
+						wp.element.createElement(
+							'option',
+							{ value: 'specific' },
+							__('Specific products')
+						),
+						wp.element.createElement(
+							'option',
+							{ value: 'category' },
+							__('Product Category')
+						)
 					)
 				),
-				extra_settings
+				extra_settings,
+				wp.element.createElement(
+					'div',
+					{ className: 'block-footer' },
+					wp.element.createElement(
+						'button',
+						{ type: 'button', onClick: this.props.done_callback },
+						__('Done')
+					)
+				)
 			);
 		}
 	}]);
@@ -238,40 +254,157 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 }(React.Component);
 
 /**
- * The products block when in Preview mode.
- *
- * @todo This will need to be converted to pull dynamic data from the API for the preview similar to https://wordpress.org/gutenberg/handbook/blocks/creating-dynamic-blocks/.
+ * One product in the product block preview.
  */
 
 
-var ProductsBlockPreview = function (_React$Component4) {
-	_inherits(ProductsBlockPreview, _React$Component4);
+var ProductPreview = function (_React$Component4) {
+	_inherits(ProductPreview, _React$Component4);
 
-	function ProductsBlockPreview() {
-		_classCallCheck(this, ProductsBlockPreview);
+	function ProductPreview() {
+		_classCallCheck(this, ProductPreview);
 
-		return _possibleConstructorReturn(this, (ProductsBlockPreview.__proto__ || Object.getPrototypeOf(ProductsBlockPreview)).apply(this, arguments));
+		return _possibleConstructorReturn(this, (ProductPreview.__proto__ || Object.getPrototypeOf(ProductPreview)).apply(this, arguments));
 	}
 
-	_createClass(ProductsBlockPreview, [{
+	_createClass(ProductPreview, [{
 		key: 'render',
 		value: function render() {
+			var _props = this.props,
+			    attributes = _props.attributes,
+			    product = _props.product;
+
+
+			var image = null;
+			if (product.images.length) {
+				image = wp.element.createElement('img', { src: product.images[0].src });
+			}
+
+			var title = null;
+			if (attributes.display_title) {
+				title = wp.element.createElement(
+					'div',
+					{ className: 'product-title' },
+					product.name
+				);
+			}
+
+			var price = null;
+			if (attributes.display_price) {
+				price = wp.element.createElement(
+					'div',
+					{ className: 'product-price' },
+					product.price
+				);
+			}
+
+			var add_to_cart = null;
+			if (attributes.display_add_to_cart) {
+				add_to_cart = wp.element.createElement(
+					'span',
+					{ className: 'product-add-to-cart' },
+					__('Add to cart')
+				);
+			}
+
 			return wp.element.createElement(
 				'div',
-				null,
-				'PREVIEWING'
+				{ className: 'product-preview' },
+				image,
+				title,
+				price,
+				add_to_cart
 			);
 		}
 	}]);
 
-	return ProductsBlockPreview;
+	return ProductPreview;
 }(React.Component);
+
+/**
+ * Renders a preview of what the block will look like with current settings.
+ */
+
+
+var ProductsBlockPreview = withAPIData(function (_ref) {
+	var attributes = _ref.attributes;
+	var columns = attributes.columns,
+	    rows = attributes.rows,
+	    order = attributes.order,
+	    display = attributes.display,
+	    display_setting = attributes.display_setting,
+	    layout = attributes.layout;
+
+
+	var query = {
+		per_page: 'list' === layout ? columns : rows * columns,
+		orderby: order
+	};
+
+	// @todo These will likely need to be modified to work with the final version of the category/product picker attributes.
+	if ('specific' === display) {
+		query.include = JSON.stringify(display_setting);
+		query.orderby = 'include';
+	} else if ('category' === display) {
+		query.category = display_setting.join(',');
+	}
+
+	var query_string = '?';
+	var _iteratorNormalCompletion = true;
+	var _didIteratorError = false;
+	var _iteratorError = undefined;
+
+	try {
+		for (var _iterator = Object.keys(query)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+			var key = _step.value;
+
+			query_string += key + '=' + query[key] + '&';
+		}
+	} catch (err) {
+		_didIteratorError = true;
+		_iteratorError = err;
+	} finally {
+		try {
+			if (!_iteratorNormalCompletion && _iterator.return) {
+				_iterator.return();
+			}
+		} finally {
+			if (_didIteratorError) {
+				throw _iteratorError;
+			}
+		}
+	}
+
+	return {
+		products: '/wc/v2/products' + query_string
+	};
+})(function (_ref2) {
+	var products = _ref2.products,
+	    attributes = _ref2.attributes;
+
+
+	if (!products.data) {
+		return __('Loading');
+	}
+
+	if (0 === products.data.length) {
+		return __('No products found');
+	}
+
+	var classes = "wc-products-block-preview " + attributes.layout + " cols-" + attributes.columns;
+
+	return wp.element.createElement(
+		'div',
+		{ className: classes },
+		products.data.map(function (product) {
+			return wp.element.createElement(ProductPreview, { product: product, attributes: attributes });
+		})
+	);
+});
 
 /**
  * Register and run the products block.
  */
-
-
 registerBlockType('woocommerce/products', {
 	title: __('Products'),
 	icon: 'universal-access-alt', // @todo Needs a good icon.
@@ -328,11 +461,11 @@ registerBlockType('woocommerce/products', {
 		},
 
 		/**
-   * Order to use for products. 'newness', 'title', or 'best-selling'.
+   * Order to use for products. 'date', or 'title'.
    */
 		order: {
 			type: 'string',
-			default: 'newness'
+			default: 'date'
 		},
 
 		/**
@@ -440,10 +573,7 @@ registerBlockType('woocommerce/products', {
 					value: order,
 					options: [{
 						label: __('Newness'),
-						value: 'newness'
-					}, {
-						label: __('Best Selling'),
-						value: 'sales'
+						value: 'date'
 					}, {
 						label: __('Title'),
 						value: 'title'
@@ -500,7 +630,7 @@ registerBlockType('woocommerce/products', {
    * @return Component
    */
 		function getPreview() {
-			return wp.element.createElement(ProductsBlockPreview, { selected_attributes: attributes });
+			return wp.element.createElement(ProductsBlockPreview, { attributes: attributes });
 		}
 
 		/**
@@ -509,9 +639,15 @@ registerBlockType('woocommerce/products', {
    * @return Component
    */
 		function getSettingsEditor() {
-			return wp.element.createElement(ProductsBlockSettingsEditor, { selected_display: display, update_display_callback: function update_display_callback(value) {
+			return wp.element.createElement(ProductsBlockSettingsEditor, {
+				selected_display: display,
+				update_display_callback: function update_display_callback(value) {
 					return setAttributes({ display: value });
-				} });
+				},
+				done_callback: function done_callback() {
+					return setAttributes({ edit_mode: false });
+				}
+			});
 		}
 
 		return [!!focus ? getInspectorControls() : null, !!focus ? getToolbarControls() : null, edit_mode ? getSettingsEditor() : getPreview()];

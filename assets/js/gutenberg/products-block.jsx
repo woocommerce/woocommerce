@@ -1,6 +1,6 @@
 const { __ } = wp.i18n;
 const { registerBlockType, InspectorControls, BlockControls } = wp.blocks;
-const { Toolbar } = wp.components;
+const { Toolbar, withAPIData } = wp.components;
 const { RangeControl, ToggleControl, SelectControl } = InspectorControls;
 
 /**
@@ -72,30 +72,116 @@ class ProductsBlockSettingsEditor extends React.Component {
 
 		return (
 			<div className="wc-product-display-settings">
+
 				<h3>{ __( 'Products' ) }</h3>
-				<select value={ this.state.display } onChange={ this.updateDisplay }>
-					<option value="all">{ __( 'All' ) }</option>
-					<option value="specific">{ __( 'Specific products' ) }</option>
-					<option value="category">{ __( 'Product Category' ) }</option>
-				</select>
+
+				<div className="display-select">
+					{ __( 'Display:' ) }
+					<select value={ this.state.display } onChange={ this.updateDisplay }>
+						<option value="all">{ __( 'All' ) }</option>
+						<option value="specific">{ __( 'Specific products' ) }</option>
+						<option value="category">{ __( 'Product Category' ) }</option>
+					</select>
+				</div>
+
 				{ extra_settings }
+
+				<div className="block-footer">
+					<button type="button" onClick={ this.props.done_callback }>{ __( 'Done' ) }</button>
+				</div>
 			</div>
 		);
 	}
 }
 
 /**
- * The products block when in Preview mode.
- *
- * @todo This will need to be converted to pull dynamic data from the API for the preview similar to https://wordpress.org/gutenberg/handbook/blocks/creating-dynamic-blocks/.
+ * One product in the product block preview.
  */
-class ProductsBlockPreview extends React.Component {
+class ProductPreview extends React.Component {
+
 	render() {
+		const { attributes, product } = this.props;
+
+		let image = null;
+		if ( product.images.length ) {
+			image = <img src={ product.images[0].src } />
+		}
+
+		let title = null;
+		if ( attributes.display_title ) {
+			title = <div className="product-title">{ product.name }</div>
+		}
+
+		let price = null;
+		if ( attributes.display_price ) {
+			price = <div className="product-price">{ product.price }</div>
+		}
+
+		let add_to_cart = null;
+		if ( attributes.display_add_to_cart ) {
+			add_to_cart = <span className="product-add-to-cart">{ __( 'Add to cart' ) }</span>
+		}
+
 		return (
-			<div>PREVIEWING</div>
+			<div className="product-preview">
+				{ image }
+				{ title }
+				{ price }
+				{ add_to_cart }
+			</div>
 		);
 	}
 }
+
+/**
+ * Renders a preview of what the block will look like with current settings.
+ */
+const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
+
+	const { columns, rows, order, display, display_setting, layout } = attributes;
+
+	let query = {
+		per_page: ( 'list' === layout ) ? columns : rows * columns,
+		orderby: order
+	};
+
+	// @todo These will likely need to be modified to work with the final version of the category/product picker attributes.
+	if ( 'specific' === display ) {
+		query.include = JSON.stringify( display_setting );
+		query.orderby = 'include';
+	} else if ( 'category' === display ) {
+		query.category = display_setting.join( ',' );
+	}
+
+	let query_string = '?';
+	for ( const key of Object.keys( query ) ) {
+		query_string += key + '=' + query[ key ] + '&';
+	}
+
+	return {
+		products: '/wc/v2/products' + query_string
+	};
+
+} )( ( { products, attributes } ) => {
+
+	if ( ! products.data ) {
+		return __( 'Loading' );
+	}
+
+	if ( 0 === products.data.length ) {
+		return __( 'No products found' );
+	}
+
+	const classes = "wc-products-block-preview " + attributes.layout + " cols-" + attributes.columns;
+
+	return (
+		<div className={ classes }>
+			{ products.data.map( ( product ) => (
+				<ProductPreview product={ product } attributes={ attributes } />
+			) ) }
+		</div>
+	);
+} );
 
 /**
  * Register and run the products block.
@@ -156,11 +242,11 @@ registerBlockType( 'woocommerce/products', {
 		},
 
 		/**
-		 * Order to use for products. 'newness', 'title', or 'best-selling'.
+		 * Order to use for products. 'date', or 'title'.
 		 */
 		order: {
 			type: 'string',
-			default: 'newness',
+			default: 'date',
 		},
 
 		/**
@@ -240,11 +326,7 @@ registerBlockType( 'woocommerce/products', {
 						options={ [
 							{
 								label: __( 'Newness' ),
-								value: 'newness',
-							},
-							{
-								label: __( 'Best Selling' ),
-								value: 'sales',
+								value: 'date',
 							},
 							{
 								label: __( 'Title' ),
@@ -301,7 +383,7 @@ registerBlockType( 'woocommerce/products', {
 		 * @return Component
 		 */
 		function getPreview() {
-			return <ProductsBlockPreview selected_attributes={ attributes } />;
+			return <ProductsBlockPreview attributes={ attributes } />;
 		}
 
 		/**
@@ -310,7 +392,11 @@ registerBlockType( 'woocommerce/products', {
 		 * @return Component
 		 */
 		function getSettingsEditor() {
-			return <ProductsBlockSettingsEditor selected_display={ display } update_display_callback={ ( value ) => setAttributes( { display: value } ) } />;
+			return <ProductsBlockSettingsEditor
+				selected_display={ display }
+				update_display_callback={ ( value ) => setAttributes( { display: value } ) }
+				done_callback={ () => setAttributes( { edit_mode: false } ) }
+			/>;
 		}
 
 		return [
