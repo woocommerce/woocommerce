@@ -1309,3 +1309,18 @@ function wc_array_merge_recursive_numeric() {
 
 	return $final;
 }
+
+/**
+ * Implode and escape HTML attributes for output.
+ *
+ * @since 3.3.0
+ * @param array $raw_attributes Attribute name value pairs.
+ * @return string
+ */
+function wc_implode_html_attributes( $raw_attributes ) {
+	$attributes = array();
+	foreach ( $raw_attributes as $name => $value ) {
+		$attributes[] = esc_attr( $name ) . '="' . esc_attr( $value ) . '"';
+	}
+	return implode( ' ', $attributes );
+}

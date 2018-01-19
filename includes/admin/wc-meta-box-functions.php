@@ -184,49 +184,55 @@ function woocommerce_wp_checkbox( $field ) {
 /**
  * Output a select input box.
  *
- * @param array $field
+ * @param array $field Data about the field to render.
  */
 function woocommerce_wp_select( $field ) {
 	global $thepostid, $post;
 
-	$thepostid              = empty( $thepostid ) ? $post->ID : $thepostid;
-	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'select short';
-	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
-	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
-	$field['value']         = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
-	$field['name']          = isset( $field['name'] ) ? $field['name'] : $field['id'];
-	$field['desc_tip']      = isset( $field['desc_tip'] ) ? $field['desc_tip'] : false;
+	$thepostid = empty( $thepostid ) ? $post->ID : $thepostid;
+	$field     = wp_parse_args( $field, array(
+		'class'             => 'select short',
+		'style'             => '',
+		'wrapper_class'     => '',
+		'value'             => get_post_meta( $thepostid, $field['id'], true ),
+		'name'              => $field['id'],
+		'desc_tip'          => false,
+		'custom_attributes' => array(),
+	) );
 
-	// Custom attribute handling
-	$custom_attributes = array();
+	$wrapper_attributes = array(
+		'class' => $field['wrapper_class'] . " form-field {$field['id']}_field",
+	);
 
-	if ( ! empty( $field['custom_attributes'] ) && is_array( $field['custom_attributes'] ) ) {
+	$label_attributes = array(
+		'for' => $field['id'],
+	);
 
-		foreach ( $field['custom_attributes'] as $attribute => $value ) {
-			$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $value ) . '"';
-		}
-	}
+	$field_attributes          = (array) $field['custom_attributes'];
+	$field_attributes['style'] = $field['style'];
+	$field_attributes['id']    = $field['id'];
+	$field_attributes['name']  = $field['name'];
 
-	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '">
-		<label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label>';
-
-	if ( ! empty( $field['description'] ) && false !== $field['desc_tip'] ) {
-		echo wc_help_tip( $field['description'] );
-	}
-
-	echo '<select id="' . esc_attr( $field['id'] ) . '" name="' . esc_attr( $field['name'] ) . '" class="' . esc_attr( $field['class'] ) . '" style="' . esc_attr( $field['style'] ) . '" ' . implode( ' ', $custom_attributes ) . '>';
-
-	foreach ( $field['options'] as $key => $value ) {
-		echo '<option value="' . esc_attr( $key ) . '" ' . selected( esc_attr( $field['value'] ), esc_attr( $key ), false ) . '>' . esc_html( $value ) . '</option>';
-	}
-
-	echo '</select> ';
-
-	if ( ! empty( $field['description'] ) && false === $field['desc_tip'] ) {
-		echo '<span class="description">' . wp_kses_post( $field['description'] ) . '</span>';
-	}
-
-	echo '</p>';
+	$tooltip     = ! empty( $field['description'] ) && false !== $field['desc_tip'] ? $field['description'] : '';
+	$description = ! empty( $field['description'] ) && false === $field['desc_tip'] ? $field['description'] : '';
+	?>
+	<p <?php echo wc_implode_html_attributes( $wrapper_attributes ); // WPCS: XSS ok. ?>>
+		<label <?php echo wc_implode_html_attributes( $label_attributes ); // WPCS: XSS ok. ?>><?php echo wp_kses_post( $field['label'] ); ?></label>
+		<?php if ( $tooltip ) : ?>
+			<?php echo wc_help_tip( $tooltip ); // WPCS: XSS ok. ?>
+		<?php endif; ?>
+		<select <?php echo wc_implode_html_attributes( $field_attributes ); // WPCS: XSS ok. ?>>
+			<?php
+			foreach ( $field['options'] as $key => $value ) {
+				echo '<option value="' . esc_attr( $key ) . '" ' . selected( $field['value'] === $key || ( is_array( $field['value'] ) && in_array( $key, $field['value'], true ) ), true, false ) . '>' . esc_html( $value ) . '</option>';
+			}
+			?>
+		</select>
+		<?php if ( $description ) : ?>
+			<span class="description"><?php echo wp_kses_post( $description ); ?></span>
+		<?php endif; ?>
+	</p>
+	<?php
 }
 
 /**
