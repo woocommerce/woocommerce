@@ -1237,29 +1237,16 @@ class WC_Helper {
 	 * Prompt a Helper connection if the user has WooCommerce.com extensions.
 	 */
 	private static function _prompt_helper_connect( $screen_id ) {
-		$screens = array(
-			'plugins',
-			'product',
-			'edit-product',
-			'edit-product_cat',
-			'edit-product_tag',
-			'product_page_product_attributes',
-			'shop_order',
-			'edit-shop_order',
-			'shop_coupon',
-			'edit-shop_coupon',
-			'woocommerce_page_wc-reports',
-			'woocommerce_page_wc-settings',
-			'woocommerce_page_wc-status',
-			'woocommerce_page_wc-addons',
-		);
+		$screens = wc_get_screen_ids();
+		$screens[] = 'plugins';
 
-		if ( ! in_array( $screen_id, $screens ) ) {
+		if ( ! in_array( $screen_id, $screens, true ) ) {
 			return;
 		}
 
 		// Don't show the notice on the Helper screens.
-		if ( 'woocommerce_page_wc-addons' == $screen_id && ! empty( $_REQUEST['section'] ) && 'helper' == $_REQUEST['section'] ) {
+		$screen_addons = sanitize_title( __( 'WooCommerce', 'woocommerce' ) ) . '_page_wc-addons';
+		if ( $screen_addons == $screen_id && ! empty( $_REQUEST['section'] ) && 'helper' == $_REQUEST['section'] ) {
 			return;
 		}
 
