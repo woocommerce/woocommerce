@@ -106,12 +106,12 @@ var ProductsSpecificSelect = function (_React$Component) {
 	}
 
 	_createClass(ProductsSpecificSelect, [{
-		key: 'render',
+		key: "render",
 		value: function render() {
 			return wp.element.createElement(
-				'div',
+				"div",
 				null,
-				'TODO: Select specific products here'
+				"TODO: Select specific products here"
 			);
 		}
 	}]);
@@ -122,26 +122,84 @@ var ProductsSpecificSelect = function (_React$Component) {
 /**
  * When the display mode is 'Product category' search for and select product categories to pull products from.
  *
- * @todo Add the functionality and everything.
+ * @todo Save data
  */
 
 
 var ProductsCategorySelect = function (_React$Component2) {
 	_inherits(ProductsCategorySelect, _React$Component2);
 
-	function ProductsCategorySelect() {
+	/**
+  * Constructor.
+  */
+	function ProductsCategorySelect(props) {
 		_classCallCheck(this, ProductsCategorySelect);
 
-		return _possibleConstructorReturn(this, (ProductsCategorySelect.__proto__ || Object.getPrototypeOf(ProductsCategorySelect)).apply(this, arguments));
+		var _this2 = _possibleConstructorReturn(this, (ProductsCategorySelect.__proto__ || Object.getPrototypeOf(ProductsCategorySelect)).call(this, props));
+
+		_this2.state = {
+			selectedCategories: props.selected_display_setting,
+			filterQuery: ''
+		};
+
+		_this2.checkboxChange = _this2.checkboxChange.bind(_this2);
+		_this2.filterResults = _this2.filterResults.bind(_this2);
+		return _this2;
 	}
 
+	/**
+  * Handle checkbox toggle.
+  *
+  * @param Event object evt
+  */
+
+
 	_createClass(ProductsCategorySelect, [{
-		key: 'render',
+		key: "checkboxChange",
+		value: function checkboxChange(evt) {
+			var selectedCategories = this.state.selectedCategories;
+
+			if (evt.target.checked && !selectedCategories.includes(parseInt(evt.target.value, 10))) {
+				selectedCategories.push(parseInt(evt.target.value, 10));
+			} else if (!evt.target.checked) {
+				selectedCategories = selectedCategories.filter(function (category) {
+					return category !== parseInt(evt.target.value, 10);
+				});
+			}
+
+			this.setState({
+				selectedCategories: selectedCategories
+			});
+
+			this.props.update_display_setting_callback(selectedCategories);
+		}
+
+		/**
+   * Filter categories.
+   *
+   * @param Event object evt
+   */
+
+	}, {
+		key: "filterResults",
+		value: function filterResults(evt) {
+			this.setState({
+				filterQuery: evt.target.value
+			});
+		}
+
+		/**
+   * Render the list of categories and the search input.
+   */
+
+	}, {
+		key: "render",
 		value: function render() {
 			return wp.element.createElement(
-				'div',
+				"div",
 				null,
-				'TODO: Select specific product categories here'
+				wp.element.createElement(ProductCategoryFilter, { filterResults: this.filterResults }),
+				wp.element.createElement(ProductCategoryList, { filterQuery: this.state.filterQuery, selectedCategories: this.state.selectedCategories, checkboxChange: this.checkboxChange })
 			);
 		}
 	}]);
@@ -150,9 +208,92 @@ var ProductsCategorySelect = function (_React$Component2) {
 }(React.Component);
 
 /**
- * The products block when in Edit mode.
+ * The category search input.
  */
 
+
+var ProductCategoryFilter = function ProductCategoryFilter(_ref) {
+	var filterResults = _ref.filterResults;
+
+	return wp.element.createElement(
+		"div",
+		null,
+		wp.element.createElement("input", { id: "product-category-search", type: "search", placeholder: __('Search for categories'), onChange: filterResults })
+	);
+};
+
+/**
+ * Fetch and build a tree of product categories.
+ */
+var ProductCategoryList = withAPIData(function (props) {
+	return {
+		categories: '/wc/v2/products/categories'
+	};
+})(function (_ref2) {
+	var categories = _ref2.categories,
+	    filterQuery = _ref2.filterQuery,
+	    selectedCategories = _ref2.selectedCategories,
+	    checkboxChange = _ref2.checkboxChange;
+
+	if (!categories.data) {
+		return __('Loading');
+	}
+
+	if (0 === categories.data.length) {
+		return __('No categories found');
+	}
+
+	var CategoryTree = function CategoryTree(_ref3) {
+		var categories = _ref3.categories,
+		    parent = _ref3.parent;
+
+		var filteredCategories = categories.filter(function (category) {
+			return category.parent === parent;
+		});
+
+		return filteredCategories.length > 0 && wp.element.createElement(
+			"ul",
+			null,
+			filteredCategories.map(function (category) {
+				return wp.element.createElement(
+					"li",
+					null,
+					wp.element.createElement(
+						"label",
+						{ htmlFor: 'product-category-' + category.id },
+						wp.element.createElement("input", { type: "checkbox",
+							id: 'product-category-' + category.id,
+							value: category.id,
+							checked: selectedCategories.includes(category.id),
+							onChange: checkboxChange
+						}),
+						" ",
+						category.name
+					),
+					wp.element.createElement(CategoryTree, { categories: categories, parent: category.id })
+				);
+			})
+		);
+	};
+
+	var categoriesData = categories.data;
+
+	if ('' !== filterQuery) {
+		categoriesData = categoriesData.filter(function (category) {
+			return category.slug.includes(filterQuery.toLowerCase());
+		});
+	}
+
+	return wp.element.createElement(
+		"div",
+		null,
+		wp.element.createElement(CategoryTree, { categories: categoriesData, parent: 0 })
+	);
+});
+
+/**
+ * The products block when in Edit mode.
+ */
 
 var ProductsBlockSettingsEditor = function (_React$Component3) {
 	_inherits(ProductsBlockSettingsEditor, _React$Component3);
@@ -181,7 +322,7 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 
 
 	_createClass(ProductsBlockSettingsEditor, [{
-		key: 'updateDisplay',
+		key: "updateDisplay",
 		value: function updateDisplay(evt) {
 			this.setState({
 				display: evt.target.value
@@ -195,54 +336,54 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
    */
 
 	}, {
-		key: 'render',
+		key: "render",
 		value: function render() {
 			var extra_settings = null;
 			if ('specific' === this.state.display) {
 				extra_settings = wp.element.createElement(ProductsSpecificSelect, null);
 			} else if ('category' === this.state.display) {
-				extra_settings = wp.element.createElement(ProductsCategorySelect, null);
+				extra_settings = wp.element.createElement(ProductsCategorySelect, this.props);
 			}
 
 			return wp.element.createElement(
-				'div',
-				{ className: 'wc-product-display-settings' },
+				"div",
+				{ className: "wc-product-display-settings" },
 				wp.element.createElement(
-					'h3',
+					"h3",
 					null,
 					__('Products')
 				),
 				wp.element.createElement(
-					'div',
-					{ className: 'display-select' },
+					"div",
+					{ className: "display-select" },
 					__('Display:'),
 					wp.element.createElement(
-						'select',
+						"select",
 						{ value: this.state.display, onChange: this.updateDisplay },
 						wp.element.createElement(
-							'option',
-							{ value: 'all' },
+							"option",
+							{ value: "all" },
 							__('All')
 						),
 						wp.element.createElement(
-							'option',
-							{ value: 'specific' },
+							"option",
+							{ value: "specific" },
 							__('Specific products')
 						),
 						wp.element.createElement(
-							'option',
-							{ value: 'category' },
+							"option",
+							{ value: "category" },
 							__('Product Category')
 						)
 					)
 				),
 				extra_settings,
 				wp.element.createElement(
-					'div',
-					{ className: 'block-footer' },
+					"div",
+					{ className: "block-footer" },
 					wp.element.createElement(
-						'button',
-						{ type: 'button', onClick: this.props.done_callback },
+						"button",
+						{ type: "button", onClick: this.props.done_callback },
 						__('Done')
 					)
 				)
@@ -268,7 +409,7 @@ var ProductPreview = function (_React$Component4) {
 	}
 
 	_createClass(ProductPreview, [{
-		key: 'render',
+		key: "render",
 		value: function render() {
 			var _props = this.props,
 			    attributes = _props.attributes,
@@ -277,14 +418,14 @@ var ProductPreview = function (_React$Component4) {
 
 			var image = null;
 			if (product.images.length) {
-				image = wp.element.createElement('img', { src: product.images[0].src });
+				image = wp.element.createElement("img", { src: product.images[0].src });
 			}
 
 			var title = null;
 			if (attributes.display_title) {
 				title = wp.element.createElement(
-					'div',
-					{ className: 'product-title' },
+					"div",
+					{ className: "product-title" },
 					product.name
 				);
 			}
@@ -292,8 +433,8 @@ var ProductPreview = function (_React$Component4) {
 			var price = null;
 			if (attributes.display_price) {
 				price = wp.element.createElement(
-					'div',
-					{ className: 'product-price' },
+					"div",
+					{ className: "product-price" },
 					product.price
 				);
 			}
@@ -301,15 +442,15 @@ var ProductPreview = function (_React$Component4) {
 			var add_to_cart = null;
 			if (attributes.display_add_to_cart) {
 				add_to_cart = wp.element.createElement(
-					'span',
-					{ className: 'product-add-to-cart' },
+					"span",
+					{ className: "product-add-to-cart" },
 					__('Add to cart')
 				);
 			}
 
 			return wp.element.createElement(
-				'div',
-				{ className: 'product-preview' },
+				"div",
+				{ className: "product-preview" },
 				image,
 				title,
 				price,
@@ -326,8 +467,8 @@ var ProductPreview = function (_React$Component4) {
  */
 
 
-var ProductsBlockPreview = withAPIData(function (_ref) {
-	var attributes = _ref.attributes;
+var ProductsBlockPreview = withAPIData(function (_ref4) {
+	var attributes = _ref4.attributes;
 	var columns = attributes.columns,
 	    rows = attributes.rows,
 	    order = attributes.order,
@@ -378,9 +519,9 @@ var ProductsBlockPreview = withAPIData(function (_ref) {
 	return {
 		products: '/wc/v2/products' + query_string
 	};
-})(function (_ref2) {
-	var products = _ref2.products,
-	    attributes = _ref2.attributes;
+})(function (_ref5) {
+	var products = _ref5.products,
+	    attributes = _ref5.attributes;
 
 
 	if (!products.data) {
@@ -394,7 +535,7 @@ var ProductsBlockPreview = withAPIData(function (_ref) {
 	var classes = "wc-products-block-preview " + attributes.layout + " cols-" + attributes.columns;
 
 	return wp.element.createElement(
-		'div',
+		"div",
 		{ className: classes },
 		products.data.map(function (product) {
 			return wp.element.createElement(ProductPreview, { product: product, attributes: attributes });
@@ -522,9 +663,9 @@ registerBlockType('woocommerce/products', {
 		function getInspectorControls() {
 			return wp.element.createElement(
 				InspectorControls,
-				{ key: 'inspector' },
+				{ key: "inspector" },
 				wp.element.createElement(
-					'h3',
+					"h3",
 					null,
 					__('Layout')
 				),
@@ -568,7 +709,7 @@ registerBlockType('woocommerce/products', {
 					}
 				}),
 				wp.element.createElement(SelectControl, {
-					key: 'query-panel-select',
+					key: "query-panel-select",
 					label: __('Order'),
 					value: order,
 					options: [{
@@ -618,7 +759,7 @@ registerBlockType('woocommerce/products', {
 
 			return wp.element.createElement(
 				BlockControls,
-				{ key: 'controls' },
+				{ key: "controls" },
 				wp.element.createElement(Toolbar, { controls: layoutControls }),
 				wp.element.createElement(Toolbar, { controls: editButton })
 			);
@@ -641,8 +782,12 @@ registerBlockType('woocommerce/products', {
 		function getSettingsEditor() {
 			return wp.element.createElement(ProductsBlockSettingsEditor, {
 				selected_display: display,
+				selected_display_setting: display_setting,
 				update_display_callback: function update_display_callback(value) {
 					return setAttributes({ display: value });
+				},
+				update_display_setting_callback: function update_display_setting_callback(value) {
+					return setAttributes({ display_setting: value });
 				},
 				done_callback: function done_callback() {
 					return setAttributes({ edit_mode: false });
