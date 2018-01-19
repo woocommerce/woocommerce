@@ -181,8 +181,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Save all order items which are part of this order.
 	 */
 	protected function save_items() {
+		$items_changed = false;
+
 		foreach ( $this->items_to_delete as $item ) {
 			$item->delete();
+			$items_changed = true;
 		}
 		$this->items_to_delete = array();
 
@@ -200,9 +203,15 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 						$this->items[ $item_group ][ $item_id ] = $item;
 
 						unset( $this->items[ $item_group ][ $item_key ] );
+
+						$items_changed = true;
 					}
 				}
 			}
+		}
+
+		if ( $items_changed ) {
+			delete_transient( 'wc_order_' . $this->get_id() . '_needs_processing' );
 		}
 	}
 
