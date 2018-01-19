@@ -118,7 +118,9 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			$this->save_tax_rates();
 		}
 
+		// Invalidate caches.
 		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
+		WC_Cache_Helper::get_transient_version( 'shipping', true );
 	}
 
 	/**
