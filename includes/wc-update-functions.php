@@ -1547,8 +1547,16 @@ function wc_update_330_set_default_product_cat() {
 function wc_update_340_order_customer_id() {
 	global $wpdb;
 
+	$post_types = (array) apply_filters( 'woocommerce_update_340_order_customer_id_post_types', array( 'shop_order' ) );
+	$query_placeholders = implode( ', ', array_fill( 0, count( $post_types ), '%s' ) );
+
 	$orders_to_update = $wpdb->get_results(
-		"SELECT post_id, meta_value AS customer_id FROM {$wpdb->postmeta} pm LEFT JOIN {$wpdb->posts} p ON p.ID = pm.post_id WHERE meta_key = '_customer_user' AND p.post_type = 'shop_order'"
+		$wpdb->prepare(
+			"SELECT post_id, meta_value AS customer_id FROM {$wpdb->postmeta} pm
+			LEFT JOIN {$wpdb->posts} p ON p.ID = pm.post_id
+			WHERE meta_key = '_customer_user' AND p.post_type IN ({$query_placeholders})", // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+			$post_types
+		)
 	);
 
 	foreach ( $orders_to_update as $order ) {
