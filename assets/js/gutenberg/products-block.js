@@ -197,7 +197,7 @@ var ProductsCategorySelect = function (_React$Component2) {
 		value: function render() {
 			return wp.element.createElement(
 				"div",
-				null,
+				{ className: "product-category-select" },
 				wp.element.createElement(ProductCategoryFilter, { filterResults: this.filterResults }),
 				wp.element.createElement(ProductCategoryList, { filterQuery: this.state.filterQuery, selectedCategories: this.state.selectedCategories, checkboxChange: this.checkboxChange })
 			);
@@ -349,7 +349,7 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 				"div",
 				{ className: "wc-product-display-settings" },
 				wp.element.createElement(
-					"h3",
+					"h4",
 					null,
 					__('Products')
 				),

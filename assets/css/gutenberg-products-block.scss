@@ -1,0 +1,118 @@
+/**
+ * Right now these are basic layout/placeholder styles for dev + testing.
+ * @todo Refine these to final styles.
+ */
+
+/**
+ * Products block preview mode.
+ */
+.wc-products-block-preview {
+	&.grid {
+		overflow: hidden;
+
+		.product-preview {
+			float: left;
+			text-align: center;
+			margin-right: 3.8%;
+		}
+
+		&.cols-1 .product-preview {
+			float: none;
+			margin-right: 0;
+		}
+
+		&.cols-2 .product-preview {
+			width: 48%;
+
+			&:nth-of-type(2n) {
+				margin-right: 0;
+			}
+		}
+
+		&.cols-3 .product-preview {
+			width: 30.75%;
+
+			&:nth-of-type(3n) {
+				margin-right: 0;
+			}
+		}
+
+		&.cols-4 .product-preview {
+			width: 22.05%;
+
+			&:nth-of-type(4n) {
+				margin-right: 0;
+			}
+		}
+
+		&.cols-5 .product-preview {
+			width: 16.9%;
+
+			&:nth-of-type(5n) {
+				margin-right: 0;
+			}
+		}
+	}
+
+	&.list {
+		.product-preview {
+			overflow: hidden;
+		}
+
+		img {
+			float: left;
+			width: 50%;
+			margin-right: 2em;
+			margin-bottom: 2em;
+		}
+	}
+
+	.product-add-to-cart {
+		background: gray;
+		border-radius: 10px;
+		color: white;
+		cursor: pointer;
+		padding: .5em 1em;
+		line-height: 3em;
+	}
+}
+
+/**
+ * Products block edit mode.
+ */
+ .wc-product-display-settings {
+ 	background-color: #f8f9f9;
+
+ 	h4 {
+ 		text-align: center;
+ 		padding-top: 2em;
+ 	}
+
+ 	.display-select {
+ 		width: 200px;
+ 		margin-left: auto;
+ 		margin-right: auto;
+ 		padding-bottom: 1em;
+ 	}
+
+ 	.product-category-select {
+ 		width: 400px;
+ 		margin-left: auto;
+ 		margin-right: auto;
+
+ 		#product-category-search {
+ 			width: 100%;
+ 		}
+
+ 		ul {
+ 			list-style-type: none;
+ 			margin-top: 1em;
+ 		}
+ 	}
+
+ 	.block-footer {
+ 		padding-top: 1em;
+ 		border-top: 1px solid silver;
+ 		text-align: center;
+ 	}
+ }

@@ -75,7 +75,7 @@ class ProductsCategorySelect extends React.Component {
 	 */
 	render() {
 		return (
-			<div>
+			<div className="product-category-select">
 				<ProductCategoryFilter filterResults={ this.filterResults } />
 				<ProductCategoryList filterQuery={ this.state.filterQuery } selectedCategories={ this.state.selectedCategories } checkboxChange={ this.checkboxChange } />
 			</div>
@@ -190,7 +190,7 @@ class ProductsBlockSettingsEditor extends React.Component {
 		return (
 			<div className="wc-product-display-settings">
 
-				<h3>{ __( 'Products' ) }</h3>
+				<h4>{ __( 'Products' ) }</h4>
 
 				<div className="display-select">
 					{ __( 'Display:' ) }
