@@ -1449,7 +1449,7 @@ class WC_AJAX {
 			$ids = $data_store->search_customers( $term, $limit );
 		}
 
-			$found_customers = array();
+		$found_customers = array();
 
 		if ( ! empty( $_GET['exclude'] ) ) {
 			$ids = array_diff( $ids, (array) $_GET['exclude'] );
