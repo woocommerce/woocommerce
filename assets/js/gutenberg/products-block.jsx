@@ -30,7 +30,7 @@ class ProductsCategorySelect extends React.Component {
 		super( props );
 
 		this.state = {
-			selectedCategories: [],
+			selectedCategories: props.selected_display_setting,
 			filterQuery: ''
 		}
 
@@ -55,6 +55,8 @@ class ProductsCategorySelect extends React.Component {
 		this.setState( {
 			selectedCategories: selectedCategories
 		} );
+
+		this.props.update_display_setting_callback( selectedCategories );
 	}
 
 	/**
@@ -182,7 +184,7 @@ class ProductsBlockSettingsEditor extends React.Component {
 		if ( 'specific' === this.state.display ) {
 			extra_settings = <ProductsSpecificSelect />;
 		} else if ( 'category' === this.state.display ) {
-			extra_settings = <ProductsCategorySelect />;
+			extra_settings = <ProductsCategorySelect { ...this.props } />;
 		}
 
 		return (
@@ -425,7 +427,14 @@ registerBlockType( 'woocommerce/products', {
 		 * @return Component
 		 */
 		function getSettingsEditor() {
-			return <ProductsBlockSettingsEditor selected_display={ display } update_display_callback={ ( value ) => setAttributes( { display: value } ) } />;
+			return (
+				<ProductsBlockSettingsEditor
+					selected_display={ display }
+					selected_display_setting={ display_setting }
+					update_display_callback={ ( value ) => setAttributes( { display: value } ) }
+					update_display_setting_callback={ ( value ) => setAttributes( { display_setting: value } ) }
+				/>
+			);
 		}
 
 		return [

@@ -138,7 +138,7 @@ var ProductsCategorySelect = function (_React$Component2) {
 		var _this2 = _possibleConstructorReturn(this, (ProductsCategorySelect.__proto__ || Object.getPrototypeOf(ProductsCategorySelect)).call(this, props));
 
 		_this2.state = {
-			selectedCategories: [],
+			selectedCategories: props.selected_display_setting,
 			filterQuery: ''
 		};
 
@@ -170,6 +170,8 @@ var ProductsCategorySelect = function (_React$Component2) {
 			this.setState({
 				selectedCategories: selectedCategories
 			});
+
+			this.props.update_display_setting_callback(selectedCategories);
 		}
 
 		/**
@@ -340,7 +342,7 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 			if ('specific' === this.state.display) {
 				extra_settings = wp.element.createElement(ProductsSpecificSelect, null);
 			} else if ('category' === this.state.display) {
-				extra_settings = wp.element.createElement(ProductsCategorySelect, null);
+				extra_settings = wp.element.createElement(ProductsCategorySelect, this.props);
 			}
 
 			return wp.element.createElement(
@@ -650,9 +652,16 @@ registerBlockType('woocommerce/products', {
    * @return Component
    */
 		function getSettingsEditor() {
-			return wp.element.createElement(ProductsBlockSettingsEditor, { selected_display: display, update_display_callback: function update_display_callback(value) {
+			return wp.element.createElement(ProductsBlockSettingsEditor, {
+				selected_display: display,
+				selected_display_setting: display_setting,
+				update_display_callback: function update_display_callback(value) {
 					return setAttributes({ display: value });
-				} });
+				},
+				update_display_setting_callback: function update_display_setting_callback(value) {
+					return setAttributes({ display_setting: value });
+				}
+			});
 		}
 
 		return [!!focus ? getInspectorControls() : null, !!focus ? getToolbarControls() : null, edit_mode ? getSettingsEditor() : getPreview()];
