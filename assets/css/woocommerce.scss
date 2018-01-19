@@ -363,6 +363,7 @@ p.demo_store,
 						width: 5px;
 						height: 5px;
 						content: ' ';
+						box-sizing: border-box;
 					}
 
 					&::before {
