@@ -2,14 +2,11 @@
 /**
  * Regular order
  *
- * @author  Automattic
  * @package WooCommerce\Classes
  * @version 2.2.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Order Class.
