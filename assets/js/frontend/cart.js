@@ -67,7 +67,7 @@ jQuery( function( $ ) {
 		var $html       = $.parseHTML( html_str );
 		var $new_form   = $( '.woocommerce-cart-form', $html );
 		var $new_totals = $( '.cart_totals', $html );
-		var $notices    = $( '.woocommerce-error, .woocommerce-message, .woocommerce-info', $html );
+		var $notices    = $( '.woocommerce-notice', $html );
 
 		// No form, cannot do this.
 		if ( $( '.woocommerce-cart-form' ).length === 0 ) {
@@ -77,7 +77,7 @@ jQuery( function( $ ) {
 
 		// Remove errors
 		if ( ! preserve_notices ) {
-			$( '.woocommerce-error, .woocommerce-message, .woocommerce-info' ).remove();
+			$( '.woocommerce-notice' ).remove();
 		}
 
 		if ( $new_form.length === 0 ) {
@@ -437,7 +437,7 @@ jQuery( function( $ ) {
 				data:     data,
 				dataType: 'html',
 				success: function( response ) {
-					$( '.woocommerce-error, .woocommerce-message, .woocommerce-info' ).remove();
+					$( '.woocommerce-notice' ).remove();
 					show_notice( response );
 					$( document.body ).trigger( 'applied_coupon', [ coupon_code ] );
 				},
@@ -474,7 +474,7 @@ jQuery( function( $ ) {
 				data:     data,
 				dataType: 'html',
 				success: function( response ) {
-					$( '.woocommerce-error, .woocommerce-message, .woocommerce-info' ).remove();
+					$( '.woocommerce-notice' ).remove();
 					show_notice( response );
 					$( document.body ).trigger( 'removed_coupon', [ coupon ] );
 					unblock( $wrapper );

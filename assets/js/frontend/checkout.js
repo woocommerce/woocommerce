@@ -379,7 +379,7 @@ jQuery( function( $ ) {
 						var $form = $( 'form.checkout' );
 
 						// Remove notices from all sources
-						$( '.woocommerce-error, .woocommerce-message' ).remove();
+						$( '.woocommerce-notice--success, .woocommerce-notice--error' ).remove();
 
 						// Add new errors returned by this event
 						if ( data.messages ) {
@@ -491,12 +491,12 @@ jQuery( function( $ ) {
 							if ( result.messages ) {
 								wc_checkout_form.submit_error( result.messages );
 							} else {
-								wc_checkout_form.submit_error( '<div class="woocommerce-error">' + wc_checkout_params.i18n_checkout_error + '</div>' );
+								wc_checkout_form.submit_error( '<div class="woocommerce-notice woocommerce-notice--error">' + wc_checkout_params.i18n_checkout_error + '</div>' );
 							}
 						}
 					},
 					error:	function( jqXHR, textStatus, errorThrown ) {
-						wc_checkout_form.submit_error( '<div class="woocommerce-error">' + errorThrown + '</div>' );
+						wc_checkout_form.submit_error( '<div class="woocommerce-notice woocommerce-notice--error">' + errorThrown + '</div>' );
 					}
 				});
 			}
@@ -504,7 +504,7 @@ jQuery( function( $ ) {
 			return false;
 		},
 		submit_error: function( error_message ) {
-			$( '.woocommerce-NoticeGroup-checkout, .woocommerce-error, .woocommerce-message' ).remove();
+			$( '.woocommerce-NoticeGroup-checkout, .woocommerce-notice--error, .woocommerce-notice--success' ).remove();
 			wc_checkout_form.$checkout_form.prepend( '<div class="woocommerce-NoticeGroup woocommerce-NoticeGroup-checkout">' + error_message + '</div>' );
 			wc_checkout_form.$checkout_form.removeClass( 'processing' ).unblock();
 			wc_checkout_form.$checkout_form.find( '.input-text, select, input:checkbox' ).trigger( 'validate' ).blur();
@@ -570,7 +570,7 @@ jQuery( function( $ ) {
 				url:		wc_checkout_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'apply_coupon' ),
 				data:		data,
 				success:	function( code ) {
-					$( '.woocommerce-error, .woocommerce-message' ).remove();
+					$( '.woocommerce-notice--success, .woocommerce-notice--error' ).remove();
 					$form.removeClass( 'processing' ).unblock();
 
 					if ( code ) {
@@ -609,7 +609,7 @@ jQuery( function( $ ) {
 				url:     wc_checkout_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'remove_coupon' ),
 				data:    data,
 				success: function( code ) {
-					$( '.woocommerce-error, .woocommerce-message' ).remove();
+					$( '.woocommerce-notice--success, .woocommerce-notice--error' ).remove();
 					container.removeClass( 'processing' ).unblock();
 
 					if ( code ) {

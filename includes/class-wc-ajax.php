@@ -253,9 +253,13 @@ class WC_AJAX {
 	 * Session has expired.
 	 */
 	private static function update_order_review_expired() {
+		ob_start();
+		wc_print_notice( __( 'Sorry, your session has expired.', 'woocommerce' ) . ' <a href="' . esc_url( wc_get_page_permalink( 'shop' ) ) . '" class="wc-backward">' . __( 'Return to shop', 'woocommerce' ) . '</a>', 'error' );
+		$notice = ob_get_clean();
+
 		wp_send_json( array(
 			'fragments' => apply_filters( 'woocommerce_update_order_review_fragments', array(
-				'form.woocommerce-checkout' => '<div class="woocommerce-error">' . __( 'Sorry, your session has expired.', 'woocommerce' ) . ' <a href="' . esc_url( wc_get_page_permalink( 'shop' ) ) . '" class="wc-backward">' . __( 'Return to shop', 'woocommerce' ) . '</a></div>',
+				'form.woocommerce-checkout' => $notice,
 			) ),
 		) );
 	}

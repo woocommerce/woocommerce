@@ -144,35 +144,25 @@
 	}
 }
 
-.woocommerce-message,
-.woocommerce-error,
-.woocommerce-info {
+.woocommerce-notice {
 	margin-bottom: 1.5em;
 	padding: 2em;
-	background: #eee;
+	background: royalblue;
+	color: #fff;
+
+	a {
+		@include link_white();
+	}
 }
 
-.woocommerce-message {
+.woocommerce-notice--success {
 	background: teal;
 	color: #fff;
 }
 
-.woocommerce-error {
+.woocommerce-notice--error {
 	background: firebrick;
 	color: #fff;
-}
-
-.woocommerce-info {
-	background: royalblue;
-	color: #fff;
-}
-
-.woocommerce-message,
-.woocommerce-error,
-.woocommerce-info {
-	a {
-		@include link_white();
-	}
 }
 
 .woocommerce-store-notice {

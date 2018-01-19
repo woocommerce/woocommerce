@@ -96,7 +96,8 @@ class WC_Shortcode_Checkout {
 
 				// Logged out customer does not have permission to pay for this order.
 				if ( ! current_user_can( 'pay_for_order', $order_id ) && ! is_user_logged_in() ) {
-					echo '<div class="woocommerce-info">' . __( 'Please log in to your account below to continue to the payment form.', 'woocommerce' ) . '</div>';
+					wc_print_notice( __( 'Please log in to your account below to continue to the payment form.', 'woocommerce' ), 'notice' );
+
 					woocommerce_login_form( array(
 						'redirect' => $order->get_checkout_payment_url(),
 					) );
@@ -158,7 +159,7 @@ class WC_Shortcode_Checkout {
 				if ( $order->needs_payment() ) {
 
 					wc_get_template( 'checkout/order-receipt.php', array( 'order' => $order ) );
-					
+
 				} else {
 					wc_add_notice( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), wc_get_order_status_name( $order->get_status() ) ), 'error' );
 				}

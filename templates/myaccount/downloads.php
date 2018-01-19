@@ -36,12 +36,9 @@ do_action( 'woocommerce_before_account_downloads', $has_downloads ); ?>
 	<?php do_action( 'woocommerce_after_available_downloads' ); ?>
 
 <?php else : ?>
-	<div class="woocommerce-Message woocommerce-Message--info woocommerce-info">
-		<a class="woocommerce-Button button" href="<?php echo esc_url( apply_filters( 'woocommerce_return_to_shop_redirect', wc_get_page_permalink( 'shop' ) ) ); ?>">
-			<?php esc_html_e( 'Go shop', 'woocommerce' ) ?>
-		</a>
-		<?php esc_html_e( 'No downloads available yet.', 'woocommerce' ); ?>
-	</div>
+
+	<?php wc_print_notice( '<a class="woocommerce-button button" href="' . esc_url( apply_filters( 'woocommerce_return_to_shop_redirect', wc_get_page_permalink( 'shop' ) ) ) . '">' . __( 'Go shop', 'woocommerce' ) . '</a> ' . __( 'No downloads available yet.', 'woocommerce' ), 'notice' ); ?>
+
 <?php endif; ?>
 
 <?php do_action( 'woocommerce_after_account_downloads', $has_downloads ); ?>
