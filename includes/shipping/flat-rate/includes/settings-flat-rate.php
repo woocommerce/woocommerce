@@ -29,7 +29,8 @@ $settings = array(
 	),
 	'cost' => array(
 		'title' 		=> __( 'Cost', 'woocommerce' ),
-		'type' 			=> 'text',
+		'type' 			=> 'number',
+		'min' 			=> 0,
 		'placeholder'	=> '',
 		'description'	=> $cost_desc,
 		'default'		=> '0',
