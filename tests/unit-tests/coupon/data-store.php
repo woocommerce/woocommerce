@@ -21,7 +21,7 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	function test_coupon_create() {
-		$code = 'coupon-' . time();
+		$code   = 'coupon-' . time();
 		$coupon = new WC_Coupon;
 		$coupon->set_code( $code );
 		$coupon->set_description( 'This is a test comment.' );
@@ -36,7 +36,7 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	function test_coupon_delete() {
-		$coupon = WC_Helper_Coupon::create_coupon();
+		$coupon    = WC_Helper_Coupon::create_coupon();
 		$coupon_id = $coupon->get_id();
 		$this->assertNotEquals( 0, $coupon_id );
 		$coupon->delete( true );
@@ -52,7 +52,7 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 		$coupon->delete( true );
 
 		$cache_name = WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $coupon->get_code();
-		$ids = wp_cache_get( $cache_name, 'coupons' );
+		$ids        = wp_cache_get( $cache_name, 'coupons' );
 
 		$this->assertEquals( false, $ids, sprintf( 'Object cache for %s was not removed upon deletion of coupon.', $cache_name ) );
 	}
@@ -62,7 +62,7 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	function test_coupon_update() {
-		$coupon = WC_Helper_Coupon::create_coupon();
+		$coupon    = WC_Helper_Coupon::create_coupon();
 		$coupon_id = $coupon->get_id();
 		$this->assertEquals( 'dummycoupon', $coupon->get_code() );
 		$coupon->set_code( 'dummycoupon2' );
@@ -76,7 +76,7 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	function test_coupon_read() {
-		$code = 'coupon-' . time();
+		$code   = 'coupon-' . time();
 		$coupon = new WC_Coupon;
 		$coupon->set_code( $code );
 		$coupon->set_description( 'This is a test coupon.' );
@@ -96,7 +96,7 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	function test_coupon_save() {
-		$coupon = WC_Helper_Coupon::create_coupon();
+		$coupon    = WC_Helper_Coupon::create_coupon();
 		$coupon_id = $coupon->get_id();
 		$coupon->set_code( 'dummycoupon2' );
 		$coupon->save();
