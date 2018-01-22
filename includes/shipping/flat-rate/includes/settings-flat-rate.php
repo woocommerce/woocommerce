@@ -28,12 +28,13 @@ $settings = array(
 		),
 	),
 	'cost'       => array(
-		'title'       => __( 'Cost', 'woocommerce' ),
-		'type'        => 'text',
-		'placeholder' => '',
-		'description' => $cost_desc,
-		'default'     => '0',
-		'desc_tip'    => true,
+		'title'             => __( 'Cost', 'woocommerce' ),
+		'type'              => 'text',
+		'placeholder'       => '',
+		'description'       => $cost_desc,
+		'default'           => '0',
+		'desc_tip'          => true,
+		'sanitize_callback' => array( $this, 'sanitize_cost' ),
 	),
 );
 
@@ -53,22 +54,24 @@ if ( ! empty( $shipping_classes ) ) {
 		}
 		$settings[ 'class_cost_' . $shipping_class->term_id ] = array(
 			/* translators: %s: shipping class name */
-			'title'       => sprintf( __( '"%s" shipping class cost', 'woocommerce' ), esc_html( $shipping_class->name ) ),
-			'type'        => 'text',
-			'placeholder' => __( 'N/A', 'woocommerce' ),
-			'description' => $cost_desc,
-			'default'     => $this->get_option( 'class_cost_' . $shipping_class->slug ), // Before 2.5.0, we used slug here which caused issues with long setting names.
-			'desc_tip'    => true,
+			'title'             => sprintf( __( '"%s" shipping class cost', 'woocommerce' ), esc_html( $shipping_class->name ) ),
+			'type'              => 'text',
+			'placeholder'       => __( 'N/A', 'woocommerce' ),
+			'description'       => $cost_desc,
+			'default'           => $this->get_option( 'class_cost_' . $shipping_class->slug ), // Before 2.5.0, we used slug here which caused issues with long setting names.
+			'desc_tip'          => true,
+			'sanitize_callback' => array( $this, 'sanitize_cost' ),
 		);
 	}
 
 	$settings['no_class_cost'] = array(
-		'title'       => __( 'No shipping class cost', 'woocommerce' ),
-		'type'        => 'text',
-		'placeholder' => __( 'N/A', 'woocommerce' ),
-		'description' => $cost_desc,
-		'default'     => '',
-		'desc_tip'    => true,
+		'title'             => __( 'No shipping class cost', 'woocommerce' ),
+		'type'              => 'text',
+		'placeholder'       => __( 'N/A', 'woocommerce' ),
+		'description'       => $cost_desc,
+		'default'           => '',
+		'desc_tip'          => true,
+		'sanitize_callback' => array( $this, 'sanitize_cost' ),
 	);
 
 	$settings['type'] = array(
