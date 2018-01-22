@@ -22,7 +22,7 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 	 */
 	function test_coupon_create() {
 		$code   = 'coupon-' . time();
-		$coupon = new WC_Coupon;
+		$coupon = new WC_Coupon();
 		$coupon->set_code( $code );
 		$coupon->set_description( 'This is a test comment.' );
 		$coupon->save();
@@ -77,7 +77,7 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 	 */
 	function test_coupon_read() {
 		$code   = 'coupon-' . time();
-		$coupon = new WC_Coupon;
+		$coupon = new WC_Coupon();
 		$coupon->set_code( $code );
 		$coupon->set_description( 'This is a test coupon.' );
 		$coupon->set_usage_count( 5 );
@@ -104,7 +104,7 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 		$this->assertEquals( 'dummycoupon2', $coupon->get_code() );
 		$this->assertEquals( $coupon_id, $coupon->get_id() );
 
-		$new_coupon = new WC_Coupon;
+		$new_coupon = new WC_Coupon();
 		$new_coupon->set_code( 'dummycoupon3' );
 		$new_coupon->save();
 		$new_coupon_id = $new_coupon->get_id();

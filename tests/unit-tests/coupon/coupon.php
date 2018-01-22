@@ -15,12 +15,12 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		$string_code_1 = 'test';
 
 		// Coupon with a standard string code.
-		$coupon_1 = new WC_Coupon;
+		$coupon_1 = new WC_Coupon();
 		$coupon_1->set_code( $string_code_1 );
 		$coupon_1->save();
 
 		// Coupon with a string code that is the same as coupon 1's ID.
-		$coupon_2 = new WC_Coupon;
+		$coupon_2 = new WC_Coupon();
 		$coupon_2->set_code( (string) $coupon_1->get_id() );
 		$coupon_2->save();
 

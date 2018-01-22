@@ -186,9 +186,9 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 			'used_by'                    => array( 1 ),
 		);
 
-		$coupon = new WC_Coupon;
-		 foreach ( $standard_getters_and_setters as $function => $value ) {
-		 	$function = $this->get_function_name( $function );
+		$coupon = new WC_Coupon();
+		foreach ( $standard_getters_and_setters as $function => $value ) {
+			$function = $this->get_function_name( $function );
 			$coupon->{"set_{$function}"}( $value );
 			$this->assertEquals( $value, $coupon->{"get_{$function}"}(), $function );
 		}
