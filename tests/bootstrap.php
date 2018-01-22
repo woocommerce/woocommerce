@@ -25,13 +25,17 @@ class WC_Unit_Tests_Bootstrap {
 	 */
 	public function __construct() {
 
-		ini_set( 'display_errors','on' );
+		// phpcs:disable WordPress.PHP.DiscouragedPHPFunctions, WordPress.PHP.DevelopmentFunctions
+		ini_set( 'display_errors', 'on' );
 		error_reporting( E_ALL );
+		// phpcs:enable WordPress.PHP.DiscouragedPHPFunctions, WordPress.PHP.DevelopmentFunctions
 
 		// Ensure server variable is set for WP email functions.
+		// phpcs:disable WordPress.VIP.SuperGlobalInputUsage.AccessDetected
 		if ( ! isset( $_SERVER['SERVER_NAME'] ) ) {
 			$_SERVER['SERVER_NAME'] = 'localhost';
 		}
+		// phpcs:enable WordPress.VIP.SuperGlobalInputUsage.AccessDetected
 
 		$this->tests_dir    = dirname( __FILE__ );
 		$this->plugin_dir   = dirname( $this->tests_dir );
@@ -81,11 +85,11 @@ class WC_Unit_Tests_Bootstrap {
 		if ( version_compare( $GLOBALS['wp_version'], '4.7', '<' ) ) {
 			$GLOBALS['wp_roles']->reinit();
 		} else {
-			$GLOBALS['wp_roles'] = null;
+			$GLOBALS['wp_roles'] = null; // WPCS: override ok.
 			wp_roles();
 		}
 
-		echo 'Installing WooCommerce...' . PHP_EOL;
+		echo esc_html( 'Installing WooCommerce...' . PHP_EOL );
 	}
 
 	/**
