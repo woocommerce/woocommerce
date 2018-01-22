@@ -79,8 +79,19 @@ class WC_Tests_Customer_Download extends WC_Unit_Test_Case {
 		$data_store = WC_Data_Store::load( 'customer-download' );
 		$downloads  = $data_store->get_downloads( array( 'user_email' => 'test@example.com' ) );
 		$this->assertEquals( 2, count( $downloads ) );
+		$this->assertTrue( $downloads[0] instanceof WC_Customer_Download );
+		$this->assertTrue( $downloads[1] instanceof WC_Customer_Download );
+
 		$downloads = $data_store->get_downloads( array( 'user_email' => 'test2@example.com' ) );
 		$this->assertEquals( array(), $downloads );
 
+		$expected_result = array( $download_1->get_id(), $download_2->get_id() );
+		$downloads       = $data_store->get_downloads(
+			array(
+				'user_email' => 'test@example.com',
+				'return'     => 'ids',
+			)
+		);
+		$this->assertEquals( $expected_result, $downloads );
 	}
 }
