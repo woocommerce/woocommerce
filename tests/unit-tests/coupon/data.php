@@ -163,7 +163,6 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_coupon_getters_and_setters() {
-		$time = time();
 		$standard_getters_and_setters = array(
 			'code'                       => 'test',
 			'description'                => 'hello world',
