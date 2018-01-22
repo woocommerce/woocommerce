@@ -48,6 +48,14 @@ class WC_Shortcode_Products {
 	protected $custom_visibility = false;
 
 	/**
+	 * Keeps track of which templates have been removed by shortcode attributes.
+	 *
+	 * @since 3.4.0
+	 * @var   array
+	 */
+	protected $removed_template_actions = array();
+
+	/**
 	 * Initialize shortcode.
 	 *
 	 * @since 3.2.0
@@ -126,7 +134,7 @@ class WC_Shortcode_Products {
 			'tag'              => '',        // Comma separated tag slugs.
 			'visibility'       => 'visible', // Possible values are 'visible', 'catalog', 'search', 'hidden'.
 			'class'            => '',        // HTML class.
-			'show_titles'      => true,      // Whether to show product titles.
+			'show_title'       => true,      // Whether to show product titles.
 			'show_price'       => true,      // Whether to show product prices.
 			'show_add_to_cart' => true,      // Whether to show "Add to Cart" buttons.
 			'page'             => 1,         // Page for pagination.
@@ -465,16 +473,30 @@ class WC_Shortcode_Products {
 	 * @since 3.4.0
 	 */
 	protected function setup_template_filters() {
-		if ( ! $this->attributes['show_titles'] ) {
-			remove_action( 'woocommerce_shop_loop_item_title', 'woocommerce_template_loop_product_title' );
+		if ( ! $this->attributes['show_title'] && has_action( 'woocommerce_shop_loop_item_title', 'woocommerce_template_loop_product_title' ) ) {
+			$this->removed_template_actions[] = array(
+				'hook'     => 'woocommerce_shop_loop_item_title',
+				'callback' => 'woocommerce_template_loop_product_title',
+			);
 		}
 
-		if ( ! $this->attributes['show_price'] ) {
-			remove_action( 'woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_price' );
+		if ( ! $this->attributes['show_price'] && has_action( 'woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_price' ) ) {
+			$this->removed_template_actions[] = array(
+				'hook'     => 'woocommerce_after_shop_loop_item_title',
+				'callback' => 'woocommerce_template_loop_price',
+			);
 		}
 
-		if ( ! $this->attributes['show_add_to_cart'] ) {
-			remove_action( 'woocommerce_after_shop_loop_item', 'woocommerce_template_loop_add_to_cart' );
+		if ( ! $this->attributes['show_add_to_cart'] && has_action( 'woocommerce_after_shop_loop_item', 'woocommerce_template_loop_add_to_cart' ) ) {
+			$this->removed_template_actions[] = array(
+				'hook'     => 'woocommerce_after_shop_loop_item',
+				'callback' => 'woocommerce_template_loop_add_to_cart',
+			);
+		}
+
+		$this->removed_template_actions = apply_filters( 'woocommerce_shortcode_templates_to_remove', $this->removed_template_actions );
+		foreach ( $this->removed_template_actions as $action ) {
+			remove_action( $action['hook'], $action['callback'], isset( $action['priority'] ) ? $action['priority'] : 10 );
 		}
 	}
 
@@ -484,16 +506,8 @@ class WC_Shortcode_Products {
 	 * @since 3.4.0
 	 */
 	protected function reset_template_filters() {
-		if ( ! $this->attributes['show_titles'] ) {
-			add_action( 'woocommerce_shop_loop_item_title', 'woocommerce_template_loop_product_title' );
-		}
-
-		if ( ! $this->attributes['show_price'] ) {
-			add_action( 'woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_price' );
-		}
-
-		if ( ! $this->attributes['show_add_to_cart'] ) {
-			add_action( 'woocommerce_after_shop_loop_item', 'woocommerce_template_loop_add_to_cart' );
+		foreach ( $this->removed_template_actions as $action ) {
+			add_action( $action['hook'], $action['callback'], isset( $action['priority'] ) ? $action['priority'] : 10 );
 		}
 	}
 
