@@ -43,6 +43,7 @@ class WC_Tests_Customer_Download extends WC_Unit_Test_Case {
 		$this->download->set_user_id( $this->customer_id );
 		$this->download->set_user_email( 'test@example.com' );
 		$this->download->set_order_id( 1 );
+		$this->download->set_access_granted( '2018-01-22 00:00:00' );
 		$this->download->save();
 	}
 
@@ -85,13 +86,13 @@ class WC_Tests_Customer_Download extends WC_Unit_Test_Case {
 		$download_2->set_user_id( $this->customer_id );
 		$download_2->set_user_email( 'test@example.com' );
 		$download_2->set_order_id( 1 );
+		$download_2->set_access_granted( '2018-01-22 00:00:00' );
 		$download_2->save();
 
 		$data_store = WC_Data_Store::load( 'customer-download' );
 		$downloads  = $data_store->get_downloads( array( 'user_email' => 'test@example.com' ) );
 		$this->assertEquals( 2, count( $downloads ) );
-		$this->assertTrue( $downloads[0] instanceof WC_Customer_Download );
-		$this->assertTrue( $downloads[1] instanceof WC_Customer_Download );
+		$this->assertEquals( array( $this->download, $download_2 ), $downloads );
 
 		$downloads = $data_store->get_downloads( array( 'user_email' => 'test2@example.com' ) );
 		$this->assertEquals( array(), $downloads );
@@ -101,6 +102,24 @@ class WC_Tests_Customer_Download extends WC_Unit_Test_Case {
 			array(
 				'user_email' => 'test@example.com',
 				'return'     => 'ids',
+			)
+		);
+		$this->assertEquals( $expected_result, $downloads );
+
+		$expected_result = array(
+			array(
+				'user_email'    => 'test@example.com',
+				'permission_id' => $this->download->get_id(),
+			),
+			array(
+				'user_email'    => 'test@example.com',
+				'permission_id' => $download_2->get_id(),
+			),
+		);
+		$downloads       = $data_store->get_downloads(
+			array(
+				'user_email' => 'test@example.com',
+				'return'     => 'permission_id,user_email',
 			)
 		);
 		$this->assertEquals( $expected_result, $downloads );

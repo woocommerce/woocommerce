@@ -234,8 +234,8 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	/**
 	 * Get array of download ids by specified args.
 	 *
-	 * @param  array $args Arguments to filter downloads.
-	 * @return array
+	 * @param  array $args Arguments to filter downloads. $args['return'] accepts the following values: 'objects' (default), 'ids' or a comma separeted list of fields (for example: 'order_id,user_id,user_email').
+	 * @return array Can be an array of permission_ids, an array of WC_Customer_Download objects or an array of arrays containing specified fields depending on the value of $args['return'].
 	 */
 	public function get_downloads( $args = array() ) {
 		global $wpdb;
@@ -254,8 +254,21 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 			)
 		);
 
+		$valid_fields       = array( 'permission_id', 'download_id', 'product_id', 'order_id', 'order_key', 'user_email', 'user_id', 'downloads_remaining', 'access_granted', 'access_expires', 'download_count' );
+		$get_results_output = ARRAY_A;
+
+		if ( 'ids' === $args['return'] ) {
+			$fields = 'permission_id';
+		} elseif ( 'objects' === $args['return'] ) {
+			$fields             = '*';
+			$get_results_output = OBJECT;
+		} else {
+			$fields = explode( ',', (string) $args['return'] );
+			$fields = implode( ', ', array_intersect( $fields, $valid_fields ) );
+		}
+
 		$query   = array();
-		$query[] = "SELECT * FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE 1=1";
+		$query[] = "SELECT {$fields} FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE 1=1";
 
 		if ( $args['user_email'] ) {
 			$query[] = $wpdb->prepare( 'AND user_email = %s', sanitize_email( $args['user_email'] ) );
@@ -277,24 +290,25 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 			$query[] = $wpdb->prepare( 'AND download_id = %s', $args['download_id'] );
 		}
 
-		$allowed_orders = array( 'permission_id', 'download_id', 'product_id', 'order_id', 'order_key', 'user_email', 'user_id', 'downloads_remaining', 'access_granted', 'access_expires', 'download_count' );
-		$order          = in_array( $args['order'], $allowed_orders, true ) ? $args['order'] : 'permission_id';
-		$orderby        = 'DESC' === strtoupper( $args['orderby'] ) ? 'DESC' : 'ASC';
-		$orderby_sql    = sanitize_sql_orderby( "{$order} {$orderby}" );
-		$query[]        = "ORDER BY {$orderby_sql}";
+		$order       = in_array( $args['order'], $valid_fields, true ) ? $args['order'] : 'permission_id';
+		$orderby     = 'DESC' === strtoupper( $args['orderby'] ) ? 'DESC' : 'ASC';
+		$orderby_sql = sanitize_sql_orderby( "{$order} {$orderby}" );
+		$query[]     = "ORDER BY {$orderby_sql}";
 
 		if ( 0 < $args['limit'] ) {
 			$query[] = $wpdb->prepare( 'LIMIT %d', $args['limit'] );
 		}
 
 		// phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
-		$raw_downloads = $wpdb->get_results( implode( ' ', $query ) );
+		$results = $wpdb->get_results( implode( ' ', $query ), $get_results_output );
 
 		switch ( $args['return'] ) {
 			case 'ids':
-				return wp_list_pluck( $raw_downloads, 'permission_id' );
+				return wp_list_pluck( $results, 'permission_id' );
+			case 'objects':
+				return array_map( array( $this, 'get_download' ), $results );
 			default:
-				return array_map( array( $this, 'get_download' ), $raw_downloads );
+				return $results;
 		}
 	}
 
