@@ -1235,9 +1235,11 @@ class WC_Helper {
 
 	/**
 	 * Prompt a Helper connection if the user has WooCommerce.com extensions.
+	 *
+	 * @param string $screen_id Current screen ID.
 	 */
 	private static function _prompt_helper_connect( $screen_id ) {
-		$screens = wc_get_screen_ids();
+		$screens   = wc_get_screen_ids();
 		$screens[] = 'plugins';
 
 		if ( ! in_array( $screen_id, $screens, true ) ) {
@@ -1246,11 +1248,12 @@ class WC_Helper {
 
 		// Don't show the notice on the Helper screens.
 		$screen_addons = sanitize_title( __( 'WooCommerce', 'woocommerce' ) ) . '_page_wc-addons';
-		if ( $screen_addons == $screen_id && ! empty( $_REQUEST['section'] ) && 'helper' == $_REQUEST['section'] ) {
+
+		if ( $screen_addons === $screen_id && ! empty( $_REQUEST['section'] ) && 'helper' === $_REQUEST['section'] ) {
 			return;
 		}
 
-		// We believe have an active connection.
+		// We believe we have an active connection.
 		$auth = WC_Helper_Options::get( 'auth' );
 		if ( ! empty( $auth['access_token'] ) ) {
 			return;
