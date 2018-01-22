@@ -390,7 +390,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	protected function query_filters( $query_vars ) {
 
 		if ( isset( $query_vars['orderby'] ) ) {
-			if ( 'price' === $vars['orderby'] ) {
+			if ( 'price' === $query_vars['orderby'] ) {
 				// @codingStandardsIgnoreStart
 				$query_vars = array_merge( $query_vars, array(
 					'meta_key'  => '_price',
