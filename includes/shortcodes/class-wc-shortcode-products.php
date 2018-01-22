@@ -509,6 +509,8 @@ class WC_Shortcode_Products {
 		foreach ( $this->removed_template_actions as $action ) {
 			add_action( $action['hook'], $action['callback'], isset( $action['priority'] ) ? $action['priority'] : 10 );
 		}
+
+		$this->removed_template_actions = array();
 	}
 
 	/**
