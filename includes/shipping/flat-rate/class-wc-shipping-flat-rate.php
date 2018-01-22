@@ -238,4 +238,18 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
 		return $found_shipping_classes;
 	}
+
+	/**
+	 * Sanitize the cost field.
+	 *
+	 * @since 3.4.0
+	 * @param string $value Unsanitized value.
+	 * @return string
+	 */
+	public function sanitize_cost( $value ) {
+		$value = is_null( $value ) ? '' : $value;
+		$value = wp_kses_post( trim( wp_unslash( $value ) ) );
+		$value = str_replace( array( get_woocommerce_currency_symbol(), urldecode( get_woocommerce_currency_symbol() ) ), '', $value );
+		return $value;
+	}
 }

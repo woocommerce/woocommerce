@@ -153,9 +153,10 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 	 * Get shipping methods linked to this zone.
 	 *
 	 * @param bool $enabled_only Only return enabled methods.
+	 * @param string $context Getting shipping methods for what context. Valid values, admin, json.
 	 * @return array of objects
 	 */
-	public function get_shipping_methods( $enabled_only = false ) {
+	public function get_shipping_methods( $enabled_only = false, $context = 'admin' ) {
 		if ( null === $this->get_id() ) {
 			return array();
 		}
@@ -167,30 +168,37 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 
 		foreach ( $raw_methods as $raw_method ) {
 			if ( in_array( $raw_method->method_id, array_keys( $allowed_classes ), true ) ) {
-				$class_name = $allowed_classes[ $raw_method->method_id ];
+				$class_name  = $allowed_classes[ $raw_method->method_id ];
+				$instance_id = $raw_method->instance_id;
 
 				// The returned array may contain instances of shipping methods, as well
 				// as classes. If the "class" is an instance, just use it. If not,
 				// create an instance.
 				if ( is_object( $class_name ) ) {
-					$class_name_of_instance              = get_class( $class_name );
-					$methods[ $raw_method->instance_id ] = new $class_name_of_instance( $raw_method->instance_id );
+					$class_name_of_instance  = get_class( $class_name );
+					$methods[ $instance_id ] = new $class_name_of_instance( $instance_id );
 				} else {
 					// If the class is not an object, it should be a string. It's better
 					// to double check, to be sure (a class must be a string, anything)
 					// else would be useless.
 					if ( is_string( $class_name ) && class_exists( $class_name ) ) {
-						$methods[ $raw_method->instance_id ] = new $class_name( $raw_method->instance_id );
+						$methods[ $instance_id ] = new $class_name( $instance_id );
 					}
 				}
 
 				// Let's make sure that we have an instance before setting its attributes.
-				if ( is_object( $methods[ $raw_method->instance_id ] ) ) {
-					$methods[ $raw_method->instance_id ]->method_order       = absint( $raw_method->method_order );
-					$methods[ $raw_method->instance_id ]->enabled            = $raw_method->is_enabled ? 'yes' : 'no';
-					$methods[ $raw_method->instance_id ]->has_settings       = $methods[ $raw_method->instance_id ]->has_settings();
-					$methods[ $raw_method->instance_id ]->settings_html      = $methods[ $raw_method->instance_id ]->supports( 'instance-settings-modal' ) ? $methods[ $raw_method->instance_id ]->get_admin_options_html() : false;
-					$methods[ $raw_method->instance_id ]->method_description = wp_kses_post( wpautop( $methods[ $raw_method->instance_id ]->method_description ) );
+				if ( is_object( $methods[ $instance_id ] ) ) {
+					$methods[ $instance_id ]->method_order       = absint( $raw_method->method_order );
+					$methods[ $instance_id ]->enabled            = $raw_method->is_enabled ? 'yes' : 'no';
+					$methods[ $instance_id ]->has_settings       = $methods[ $instance_id ]->has_settings();
+					$methods[ $instance_id ]->settings_html      = $methods[ $instance_id ]->supports( 'instance-settings-modal' ) ? $methods[ $instance_id ]->get_admin_options_html(): false;
+					$methods[ $instance_id ]->method_description = wp_kses_post( wpautop( $methods[ $instance_id ]->method_description ) );
+				}
+
+				if ( 'json' === $context ) {
+					// We don't want the entire object in this context, just the public props.
+					$methods[ $instance_id ] = (object) get_object_vars( $methods[ $instance_id ] );
+					unset( $methods[ $instance_id ]->instance_form_fields, $methods[ $instance_id ]->form_fields );
 				}
 			}
 		}
