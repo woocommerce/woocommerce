@@ -48,7 +48,7 @@ class WC_Shortcode_Products {
 	protected $custom_visibility = false;
 
 	/**
-	 * Keeps track of which templates have been removed by shortcode attributes.
+	 * Keeps track of which templates have been removed for shortcode rendering.
 	 *
 	 * @since 3.4.0
 	 * @var   array
