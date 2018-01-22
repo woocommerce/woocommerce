@@ -10,7 +10,7 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 	 *
 	 * @since 3.0.0
 	 */
-	function test_coupon_store_loads() {
+	public function test_coupon_store_loads() {
 		$store = new WC_Data_Store( 'coupon' );
 		$this->assertTrue( is_callable( array( $store, 'read' ) ) );
 		$this->assertEquals( 'WC_Coupon_Data_Store_CPT', $store->get_current_class_name() );
@@ -20,7 +20,7 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 	 * Test coupon create.
 	 * @since 3.0.0
 	 */
-	function test_coupon_create() {
+	public function test_coupon_create() {
 		$code   = 'coupon-' . time();
 		$coupon = new WC_Coupon();
 		$coupon->set_code( $code );
@@ -35,7 +35,7 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 	 * Test coupon deletion.
 	 * @since 3.0.0
 	 */
-	function test_coupon_delete() {
+	public function test_coupon_delete() {
 		$coupon    = WC_Helper_Coupon::create_coupon();
 		$coupon_id = $coupon->get_id();
 		$this->assertNotEquals( 0, $coupon_id );
@@ -61,7 +61,7 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 	 * Test coupon update.
 	 * @since 3.0.0
 	 */
-	function test_coupon_update() {
+	public function test_coupon_update() {
 		$coupon    = WC_Helper_Coupon::create_coupon();
 		$coupon_id = $coupon->get_id();
 		$this->assertEquals( 'dummycoupon', $coupon->get_code() );
@@ -75,7 +75,7 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 	 * Test coupon reading from the DB.
 	 * @since 3.0.0
 	 */
-	function test_coupon_read() {
+	public function test_coupon_read() {
 		$code   = 'coupon-' . time();
 		$coupon = new WC_Coupon();
 		$coupon->set_code( $code );
@@ -95,7 +95,7 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 	 * Test coupon saving.
 	 * @since 3.0.0
 	 */
-	function test_coupon_save() {
+	public function test_coupon_save() {
 		$coupon    = WC_Helper_Coupon::create_coupon();
 		$coupon_id = $coupon->get_id();
 		$coupon->set_code( 'dummycoupon2' );
@@ -116,7 +116,7 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 	 * Test coupon date saving/loading.
 	 * @since 3.0.0
 	 */
-	function test_coupon_date_saving() {
+	public function test_coupon_date_saving() {
 		$expiry_date = time() - 10;
 
 		$coupon = WC_Helper_Coupon::create_coupon( 'coupon-' . time() );
@@ -132,7 +132,7 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 	 * Test coupon increase, decrease, user usage count methods.
 	 * @since 3.0.0
 	 */
-	function test_coupon_usage_magic_methods() {
+	public function test_coupon_usage_magic_methods() {
 		$coupon  = WC_Helper_Coupon::create_coupon();
 		$user_id = 1;
 

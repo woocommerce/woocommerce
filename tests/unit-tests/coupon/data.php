@@ -12,7 +12,7 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 	 * @return string
 	 * @since 3.0.0
 	 */
-	function get_function_name( $function ) {
+	public function get_function_name( $function ) {
 		if ( 'exclude_product_ids' === $function ) {
 			$function = 'excluded_product_ids';
 		} elseif ( 'exclude_product_categories' === $function ) {
