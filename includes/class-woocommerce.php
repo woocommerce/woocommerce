@@ -176,6 +176,7 @@ final class WooCommerce {
 		add_action( 'init', array( 'WC_Shortcodes', 'init' ) );
 		add_action( 'init', array( 'WC_Emails', 'init_transactional_emails' ) );
 		add_action( 'init', array( $this, 'wpdb_table_fix' ), 0 );
+		add_action( 'init', array( $this, 'add_image_sizes' ) );
 		add_action( 'switch_blog', array( $this, 'wpdb_table_fix' ), 0 );
 	}
 
@@ -514,7 +515,6 @@ final class WooCommerce {
 		$this->define( 'WC_TEMPLATE_PATH', $this->template_path() );
 
 		$this->add_thumbnail_support();
-		$this->add_image_sizes();
 	}
 
 	/**
@@ -543,7 +543,7 @@ final class WooCommerce {
 	 *
 	 * @since 2.3
 	 */
-	private function add_image_sizes() {
+	public function add_image_sizes() {
 		$thumbnail = wc_get_image_size( 'thumbnail' );
 		$single    = wc_get_image_size( 'single' );
 
