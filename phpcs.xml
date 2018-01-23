@@ -59,6 +59,7 @@
 	</rule>
 	<rule ref="Squiz.Commenting">
 		<exclude-pattern>tests/</exclude-pattern>
+		<exclude name="Squiz.Commenting.LongConditionClosingComment" />
 	</rule>
 	<rule ref="PEAR.Functions.FunctionCallSignature.EmptyLine">
 		<exclude-pattern>tests/e2e-tests/</exclude-pattern>
