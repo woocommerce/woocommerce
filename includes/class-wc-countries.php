@@ -40,6 +40,8 @@ class WC_Countries {
 			return $this->get_countries();
 		} elseif ( 'states' === $key ) {
 			return $this->get_states();
+		} else{
+			return  apply_filters('woocommerce_countries_get_attribute',null,$key);
 		}
 	}
 
