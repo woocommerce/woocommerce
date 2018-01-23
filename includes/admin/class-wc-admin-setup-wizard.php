@@ -1691,7 +1691,7 @@ class WC_Admin_Setup_Wizard {
 		if ( isset( $_GET['activate_error'] ) ) {
 			$has_jetpack_error = true;
 
-			$title = __( "Sorry, We couldn't connect your store to Jetpack", 'woocommerce' );
+			$title = __( "Sorry, we couldn't connect your store to Jetpack", 'woocommerce' );
 
 			$error_message = $this->get_activate_error_message( sanitize_text_field( wp_unslash( $_GET['activate_error'] ) ) );
 			$description = $error_message;
@@ -1735,7 +1735,14 @@ class WC_Admin_Setup_Wizard {
 				<input type="hidden" name="save_step" value="activate" />
 				<?php wp_nonce_field( 'wc-setup' ); ?>
 			</form>
-			<h3 class="jetpack-reasons"><?php esc_html_e( "Bonus reasons you'll love Jetpack", 'woocommerce' ); ?></h3>
+			<h3 class="jetpack-reasons">
+				<?php
+					echo esc_html( $description ?
+						__( "Bonus reasons you'll love Jetpack", 'woocommerce' ) :
+						__( "Reasons you'll love Jetpack", 'woocommerce' )
+					);
+				?>
+			</h3>
 			<ul class="wc-wizard-features">
 				<li class="wc-wizard-feature-item">
 					<p class="wc-wizard-feature-name">
