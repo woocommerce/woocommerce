@@ -1426,7 +1426,7 @@ class WC_Admin_Setup_Wizard {
 							),
 						)
 					),
-					esc_url( admin_url( 'admin.php?page=wc-addons&view=payment_gateways' ) )
+					esc_url( admin_url( 'admin.php?page=wc-addons&section=payment-gateways' ) )
 				);
 				?>
 			</p>
