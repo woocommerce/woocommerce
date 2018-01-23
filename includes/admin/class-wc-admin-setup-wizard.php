@@ -1108,7 +1108,7 @@ class WC_Admin_Setup_Wizard {
 		$paypal_ec_description = '<p>' . sprintf(
 			/* translators: %s: URL */
 			__( 'Safe and secure payments using credit cards or your customer\'s PayPal account. <a href="%s" target="_blank">Learn more</a>.', 'woocommerce' ),
-			'https://wordpress.org/plugins/woocommerce-gateway-paypal-express-checkout/'
+			'https://woocommerce.com/products/woocommerce-gateway-paypal-express-checkout/'
 		) . '</p>';
 		$klarna_checkout_description = '<p>' . sprintf(
 			/* translators: %s: URL */
