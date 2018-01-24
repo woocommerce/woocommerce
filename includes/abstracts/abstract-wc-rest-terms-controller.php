@@ -225,15 +225,16 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 	protected function check_permissions( $request, $context = 'read' ) {
 		// Get taxonomy.
 		$taxonomy = $this->get_taxonomy( $request );
-		if ( ! $taxonomy ) {
+		if ( ! $taxonomy || ! taxonomy_exists( $taxonomy ) ) {
 			return new WP_Error( 'woocommerce_rest_taxonomy_invalid', __( 'Taxonomy does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		// Check permissions for a single term.
-		if ( $id = intval( $request['id'] ) ) {
+		$id = intval( $request['id'] );
+		if ( $id ) {
 			$term = get_term( $id, $taxonomy );
 
-			if ( ! $term || $term->taxonomy !== $taxonomy ) {
+			if ( is_wp_error( $term ) || ! $term || $term->taxonomy !== $taxonomy ) {
 				return new WP_Error( 'woocommerce_rest_term_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 			}
 
@@ -688,7 +689,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 	public function get_collection_params() {
 		$params = parent::get_collection_params();
 
-		if ( '' !== $this->taxonomy ) {
+		if ( '' !== $this->taxonomy && taxonomy_exists( $this->taxonomy ) ) {
 			$taxonomy = get_taxonomy( $this->taxonomy );
 		} else {
 			$taxonomy = new stdClass();
