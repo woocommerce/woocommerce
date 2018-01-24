@@ -1048,11 +1048,12 @@ p.jetpack-terms {
 
 .wc-wizard-service-setting-stripe_create_account, .wc-wizard-service-setting-ppec_paypal_reroute_requests {
 	display: flex;
-	align-items: flex-end;
+	align-items: flex-start;
 	margin-top: 0.75em;
 
 	.payment-checkbox-input {
 		order: 1;
+		margin-top: 5px;
 		margin-left: 0;
 		margin-right: 0;
 		width: 1.5em;
