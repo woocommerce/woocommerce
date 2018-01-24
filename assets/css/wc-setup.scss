@@ -840,7 +840,7 @@ h3.jetpack-reasons {
 	font-size: 13px;
 	font-weight: 500;
 	margin-bottom: 0.5em;
-	margin-top: 1em;
+	margin-top: 0.85em;
 	display: inline-block;
 }
 
@@ -869,7 +869,7 @@ h3.jetpack-reasons {
 }
 
 .store-address-container {
-	margin-bottom: 24px; // match margin-bottom on top paragraph
+	margin-top: 4px;
 
 	.city-and-postcode {
 		display: flex;
@@ -883,6 +883,16 @@ h3.jetpack-reasons {
 			}
 		}
 	}
+}
+.store-currency-container {
+	margin-top: 10px;
+}
+.product-type-container {
+	margin-top: 14px;
+	margin-bottom: 1px;
+}
+#woocommerce_sell_in_person {
+	margin-left: 0;
 }
 
 .wc-wizard-service-settings {

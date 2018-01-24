@@ -414,6 +414,7 @@ class WC_Admin_Setup_Wizard {
 			</div>
 		</div>
 
+			<div class="store-currency-container">
 			<label class="location-prompt" for="currency_code">
 				<?php esc_html_e( 'What currency do you use?', 'woocommerce' ); ?>
 			</label>
@@ -432,7 +433,9 @@ class WC_Admin_Setup_Wizard {
 			<script type="text/javascript">
 				var wc_setup_currencies = <?php echo wp_json_encode( $currency_by_country ); ?>;
 			</script>
+			</div>
 
+			<div class="product-type-container">
 			<label class="location-prompt" for="product_type">
 				<?php esc_html_e( 'What type of product do you plan to sell?', 'woocommerce' ); ?>
 			</label>
@@ -446,6 +449,7 @@ class WC_Admin_Setup_Wizard {
 				<option value="physical" <?php selected( $product_type, 'physical' ); ?>><?php esc_html_e( 'I plan to sell physical products', 'woocommerce' ); ?></option>
 				<option value="virtual" <?php selected( $product_type, 'virtual' ); ?>><?php esc_html_e( 'I plan to sell digital products', 'woocommerce' ); ?></option>
 			</select>
+			</div>
 
 			<input
 				type="checkbox"
