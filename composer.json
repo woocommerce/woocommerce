@@ -3,7 +3,7 @@
   "description": "An eCommerce toolkit that helps you sell anything. Beautifully.",
   "homepage": "https://woocommerce.com/",
   "type": "wordpress-plugin",
-  "license": "GPL-2.0+",
+  "license": "GPL-3.0-or-later",
   "require": {
     "composer/installers": "~1.2"
   },
