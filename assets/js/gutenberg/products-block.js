@@ -70,6 +70,8 @@
 "use strict";
 
 
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -121,8 +123,6 @@ var ProductsSpecificSelect = function (_React$Component) {
 
 /**
  * When the display mode is 'Product category' search for and select product categories to pull products from.
- *
- * @todo Save data
  */
 
 
@@ -478,7 +478,7 @@ var ProductsBlockPreview = withAPIData(function (_ref4) {
 
 
 	var query = {
-		per_page: 'list' === layout ? columns : rows * columns,
+		per_page: 'list' === layout ? rows : rows * columns,
 		orderby: order
 	};
 
@@ -800,15 +800,88 @@ registerBlockType('woocommerce/products', {
 
 
 	/**
-  * Save the block content in the post content.
+  * Save the block content in the post content. Block content is saved as a products shortcode.
   *
   * @return string
   */
-	save: function save() {
-		// @todo
-		// This can either build a shortcode out of all the settings (good backwards compatibility but may need extra shortcode work)
-		// Or it can return null and the html can be generated with PHP like the example at https://wordpress.org/gutenberg/handbook/blocks/creating-dynamic-blocks/
-		return '[products limit="3"]';
+	save: function save(props) {
+		var _props$attributes = props.attributes,
+		    layout = _props$attributes.layout,
+		    rows = _props$attributes.rows,
+		    columns = _props$attributes.columns,
+		    display_title = _props$attributes.display_title,
+		    display_price = _props$attributes.display_price,
+		    display_add_to_cart = _props$attributes.display_add_to_cart,
+		    order = _props$attributes.order,
+		    display = _props$attributes.display,
+		    display_setting = _props$attributes.display_setting,
+		    className = _props$attributes.className;
+
+
+		var shortcode_atts = new Map();
+		shortcode_atts.set('orderby', order);
+		shortcode_atts.set('limit', 'grid' === layout ? rows * columns : rows);
+		shortcode_atts.set('class', 'list' === layout ? className + ' list-layout' : className);
+
+		if ('grid' === layout) {
+			shortcode_atts.set('columns', columns);
+		}
+
+		if (!display_title) {
+			shortcode_atts.set('show_title', 0);
+		}
+
+		if (!display_price) {
+			shortcode_atts.set('show_price', 0);
+		}
+
+		if (!display_add_to_cart) {
+			shortcode_atts.set('show_add_to_cart', 0);
+		}
+
+		if ('specific' === display) {
+			shortcode_atts.set('include', display_setting.join(','));
+		}
+
+		if ('category' === display) {
+			shortcode_atts.set('category', display_setting.join(','));
+		}
+
+		// Build the shortcode string out of the set shortcode attributes.
+		var shortcode = '[products';
+		var _iteratorNormalCompletion2 = true;
+		var _didIteratorError2 = false;
+		var _iteratorError2 = undefined;
+
+		try {
+			for (var _iterator2 = shortcode_atts[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+				var _ref6 = _step2.value;
+
+				var _ref7 = _slicedToArray(_ref6, 2);
+
+				var key = _ref7[0];
+				var value = _ref7[1];
+
+				shortcode += ' ' + key + '="' + value + '"';
+			}
+		} catch (err) {
+			_didIteratorError2 = true;
+			_iteratorError2 = err;
+		} finally {
+			try {
+				if (!_iteratorNormalCompletion2 && _iterator2.return) {
+					_iterator2.return();
+				}
+			} finally {
+				if (_didIteratorError2) {
+					throw _iteratorError2;
+				}
+			}
+		}
+
+		shortcode += ']';
+
+		return shortcode;
 	}
 });
 
