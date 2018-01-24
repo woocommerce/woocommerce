@@ -426,13 +426,7 @@ class WC_Admin_Setup_Wizard {
 			>
 				<option value=""><?php esc_html_e( 'Choose a currency&hellip;', 'woocommerce' ); ?></option>
 				<?php foreach ( get_woocommerce_currencies() as $code => $name ) : ?>
-					<option value="<?php echo esc_attr( $code ); ?>" <?php selected( $currency, $code ); ?>>
-						<?php
-						// @codingStandardsIgnoreStart
-						printf( esc_html__( '%1$s (%2$s)', 'woocommerce' ), $name, get_woocommerce_currency_symbol( $code ) );
-						// // @codingStandardsIgnoreEnd
-						?>
-					</option>
+					<option value="<?php echo esc_attr( $code ); ?>" <?php selected( $currency, $code ); ?>><?php printf( esc_html__( '%1$s (%2$s)', 'woocommerce' ), $name, get_woocommerce_currency_symbol( $code ) ); ?></option>
 				<?php endforeach; ?>
 			</select>
 			<script type="text/javascript">
@@ -722,9 +716,7 @@ class WC_Admin_Setup_Wizard {
 			<div class="wc-wizard-shipping-method-dropdown">
 				<select id="<?php echo esc_attr( "{$input_prefix}[method]" ); ?>" name="<?php echo esc_attr( "{$input_prefix}[method]" ); ?>" class="method wc-enhanced-select">
 				<?php foreach ( $shipping_methods as $method_id => $method ) : ?>
-					<option value="<?php echo esc_attr( $method_id ); ?>" <?php selected( $selected, $method_id ); ?>>
-						<?php echo esc_html( $method['name'] ); ?>
-					</option>
+					<option value="<?php echo esc_attr( $method_id ); ?>" <?php selected( $selected, $method_id ); ?>><?php echo esc_html( $method['name'] ); ?></option>
 				<?php endforeach; ?>
 				</select>
 			</div>
