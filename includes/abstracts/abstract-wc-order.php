@@ -1438,7 +1438,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$this->set_discount_tax( $cart_subtotal_tax - $cart_total_tax );
 		$this->set_total( round( $cart_total + $fee_total + $this->get_shipping_total() + $this->get_cart_tax() + $this->get_shipping_tax(), wc_get_price_decimals() ) );
 
-		do_action( 'woocommerce_order_before_calculate_totals_order_save', $and_taxes, $this );
+		do_action( 'woocommerce_order_after_calculate_totals', $and_taxes, $this );
 
 		$this->save();
 
