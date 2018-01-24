@@ -1426,17 +1426,19 @@ class WC_AJAX {
 			wp_die();
 		}
 
+		$ids = array();
 		// Search by ID.
 		if ( is_numeric( $term ) ) {
 			$customer = new WC_Customer( intval( $term ) );
 
 			// Customer does not exists.
-			if ( 0 === $customer->get_id() ) {
-				wp_die();
+			if ( 0 !== $customer->get_id() ) {
+				$ids = array( $customer->get_id() );
 			}
+		}
 
-			$ids = array( $customer->get_id() );
-		} else {
+		// Usernames can be numeric so we first check that no users was found by ID before searching for numeric username, this prevents performance issues with ID lookups.
+		if ( empty( $ids ) ) {
 			$data_store = WC_Data_Store::load( 'customer' );
 
 			// If search is smaller than 3 characters, limit result set to avoid
