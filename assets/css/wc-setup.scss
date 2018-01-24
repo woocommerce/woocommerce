@@ -672,11 +672,15 @@ body {
 	.wc-wizard-service-name {
 		font-weight: normal;
 		text-align: left;
+		align-items: center;
+		max-height: 5em;
+		padding: 0;
 	}
 
 	// List header
 	.wc-wizard-service-item {
 		padding-left: 2em;
+		padding-top: 1em;
 
 		&:first-child {
 			border-bottom: 0;
