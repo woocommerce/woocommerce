@@ -1,16 +1,17 @@
 <?php
+/**
+ * Abstract Rest Terms Controller
+ *
+ * @package  WooCommerce/Abstracts
+ * @version  3.3.0
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 /**
- * Abstract Rest Terms Controller Class
- *
- * @author   WooThemes
- * @category API
- * @package  WooCommerce/Abstracts
- * @version  2.6.0
+ * Terms controller class.
  */
 abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 
@@ -219,7 +220,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 	 * Check permissions.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @param string $context Request context.
+	 * @param string          $context Request context.
 	 * @return bool|WP_Error
 	 */
 	protected function check_permissions( $request, $context = 'read' ) {
@@ -297,7 +298,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		 */
 		$prepared_args = apply_filters( "woocommerce_rest_{$taxonomy}_query", $prepared_args, $request );
 
-		if ( ! empty( $prepared_args['product'] )  ) {
+		if ( ! empty( $prepared_args['product'] ) ) {
 			$query_result = $this->get_terms_for_product( $prepared_args, $request );
 			$total_terms = $this->total_terms;
 		} else {
@@ -309,7 +310,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 			$total_terms = wp_count_terms( $taxonomy, $count_args );
 
 			// Ensure we don't return results when offset is out of bounds.
-			// See https://core.trac.wordpress.org/ticket/35935
+			// See https://core.trac.wordpress.org/ticket/35935.
 			if ( $prepared_args['offset'] >= $total_terms ) {
 				$query_result = array();
 			}
@@ -393,7 +394,8 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 
 			// If we're going to inform the client that the term exists,
 			// give them the identifier they can actually use.
-			if ( $term_id = $term->get_error_data( 'term_exists' ) ) {
+			$term_id = $term->get_error_data( 'term_exists' );
+			if ( $term_id ) {
 				$error_data['resource_id'] = $term_id;
 			}
 
@@ -568,7 +570,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param object $term Term object.
+	 * @param object          $term   Term object.
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return array Links for the given term.
 	 */
@@ -603,8 +605,8 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 	/**
 	 * Update term meta fields.
 	 *
-	 * @param WP_Term $term
-	 * @param WP_REST_Request $request
+	 * @param WP_Term         $term    Term object.
+	 * @param WP_REST_Request $request Full details about the request.
 	 * @return bool|WP_Error
 	 */
 	protected function update_term_meta_fields( $term, $request ) {
@@ -619,8 +621,8 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 	 * supported, notably `include`, `exclude`. In `self::get_items()` these
 	 * are instead treated as a full query.
 	 *
-	 * @param array $prepared_args Arguments for `get_terms()`.
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param array           $prepared_args Arguments for `get_terms()`.
+	 * @param WP_REST_Request $request       Full details about the request.
 	 * @return array List of term objects. (Total count in `$this->total_terms`).
 	 */
 	protected function get_terms_for_product( $prepared_args, $request ) {
@@ -636,14 +638,14 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		// ordering is by `name`.
 		if ( ! in_array( $prepared_args['orderby'], array( 'name', 'none', 'include' ) ) ) {
 			switch ( $prepared_args['orderby'] ) {
-				case 'id' :
+				case 'id':
 					$this->sort_column = 'term_id';
 					break;
 
-				case 'slug' :
-				case 'term_group' :
-				case 'description' :
-				case 'count' :
+				case 'slug':
+				case 'term_group':
+				case 'description':
+				case 'count':
 					$this->sort_column = $prepared_args['orderby'];
 					break;
 			}
