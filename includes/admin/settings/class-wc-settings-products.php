@@ -54,7 +54,36 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 		$settings = $this->get_settings( $current_section );
 
+		$this->product_display_settings_moved_notice();
+
 		WC_Admin_Settings::output_fields( $settings );
+	}
+
+	/**
+	 * Show a notice showing where some options have moved.
+	 *
+	 * @since 3.3.0
+	 * @todo remove in next major release.
+	 */
+	private function product_display_settings_moved_notice() {
+		if ( get_user_meta( get_current_user_id(), 'dismissed_product_display_settings_moved_notice', true ) ) {
+			return;
+		}
+		?>
+		<div id="message" class="updated woocommerce-message inline">
+			<a class="woocommerce-message-close notice-dismiss" style="top:0;" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'wc-hide-notice', 'product_display_settings_moved' ), 'woocommerce_hide_notices_nonce', '_wc_notice_nonce' ) ); ?>"><?php esc_html_e( 'Dismiss', 'woocommerce' ); ?></a>
+
+			<p><?php
+			/* translators: %s: URL to customizer. */
+			echo wp_kses( sprintf( __( 'Looking for the product display options? They can now be found in the Customizer. <a href="%s">Go see them in action here.</a>', 'woocommerce' ), esc_url( admin_url( 'customize.php?url=' . wc_get_page_permalink( 'shop' ) . '&autofocus[panel]=woocommerce' ) ) ), array(
+				'a' => array(
+					'href'  => array(),
+					'title' => array(),
+				),
+			) );
+			?></p>
+		</div>
+		<?php
 	}
 
 	/**
