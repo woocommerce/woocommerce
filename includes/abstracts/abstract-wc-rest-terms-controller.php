@@ -33,73 +33,81 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 	 * Register the routes for terms.
 	 */
 	public function register_routes() {
-		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
-			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_items' ),
-				'permission_callback' => array( $this, 'get_items_permissions_check' ),
-				'args'                => $this->get_collection_params(),
-			),
-			array(
-				'methods'             => WP_REST_Server::CREATABLE,
-				'callback'            => array( $this, 'create_item' ),
-				'permission_callback' => array( $this, 'create_item_permissions_check' ),
-				'args'                => array_merge( $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
-					'name' => array(
-						'type'        => 'string',
-						'description' => __( 'Name for the resource.', 'woocommerce' ),
-						'required'    => true,
-					),
-				) ),
-			),
-			'schema' => array( $this, 'get_public_item_schema' ),
-		));
-
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
-			'args' => array(
-				'id' => array(
-					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
-					'type'        => 'integer',
+		register_rest_route(
+			$this->namespace, '/' . $this->rest_base, array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_items' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => $this->get_collection_params(),
 				),
-			),
-			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_item' ),
-				'permission_callback' => array( $this, 'get_item_permissions_check' ),
-				'args'                => array(
-					'context'         => $this->get_context_param( array( 'default' => 'view' ) ),
-				),
-			),
-			array(
-				'methods'             => WP_REST_Server::EDITABLE,
-				'callback'            => array( $this, 'update_item' ),
-				'permission_callback' => array( $this, 'update_item_permissions_check' ),
-				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
-			),
-			array(
-				'methods'             => WP_REST_Server::DELETABLE,
-				'callback'            => array( $this, 'delete_item' ),
-				'permission_callback' => array( $this, 'delete_item_permissions_check' ),
-				'args'                => array(
-					'force' => array(
-						'default'     => false,
-						'type'        => 'boolean',
-						'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce' ),
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'create_item' ),
+					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+					'args'                => array_merge(
+						$this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
+							'name' => array(
+								'type'        => 'string',
+								'description' => __( 'Name for the resource.', 'woocommerce' ),
+								'required'    => true,
+							),
+						)
 					),
 				),
-			),
-			'schema' => array( $this, 'get_public_item_schema' ),
-		) );
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
 
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/batch', array(
-			array(
-				'methods'             => WP_REST_Server::EDITABLE,
-				'callback'            => array( $this, 'batch_items' ),
-				'permission_callback' => array( $this, 'batch_items_permissions_check' ),
-				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
-			),
-			'schema' => array( $this, 'get_public_batch_schema' ),
-		) );
+		register_rest_route(
+			$this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
+				'args'   => array(
+					'id' => array(
+						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+						'type'        => 'integer',
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_item' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+					'args'                => array(
+						'context' => $this->get_context_param( array( 'default' => 'view' ) ),
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'update_item' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+				),
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'delete_item' ),
+					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
+					'args'                => array(
+						'force' => array(
+							'default'     => false,
+							'type'        => 'boolean',
+							'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce' ),
+						),
+					),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace, '/' . $this->rest_base . '/batch', array(
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'batch_items' ),
+					'permission_callback' => array( $this, 'batch_items_permissions_check' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+				),
+				'schema' => array( $this, 'get_public_batch_schema' ),
+			)
+		);
 	}
 
 	/**
@@ -268,7 +276,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		if ( ! empty( $request['offset'] ) ) {
 			$prepared_args['offset'] = $request['offset'];
 		} else {
-			$prepared_args['offset']  = ( $request['page'] - 1 ) * $prepared_args['number'];
+			$prepared_args['offset'] = ( $request['page'] - 1 ) * $prepared_args['number'];
 		}
 
 		$taxonomy_obj = get_taxonomy( $taxonomy );
@@ -300,7 +308,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 
 		if ( ! empty( $prepared_args['product'] ) ) {
 			$query_result = $this->get_terms_for_product( $prepared_args, $request );
-			$total_terms = $this->total_terms;
+			$total_terms  = $this->total_terms;
 		} else {
 			$query_result = get_terms( $taxonomy, $prepared_args );
 
@@ -322,7 +330,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		}
 		$response = array();
 		foreach ( $query_result as $term ) {
-			$data = $this->prepare_item_for_response( $term, $request );
+			$data       = $this->prepare_item_for_response( $term, $request );
 			$response[] = $this->prepare_response_for_collection( $data );
 		}
 
@@ -330,7 +338,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 
 		// Store pagination values for headers then unset for count query.
 		$per_page = (int) $prepared_args['number'];
-		$page = ceil( ( ( (int) $prepared_args['offset'] ) / $per_page ) + 1 );
+		$page     = ceil( ( ( (int) $prepared_args['offset'] ) / $per_page ) + 1 );
 
 		$response->header( 'X-WP-Total', (int) $total_terms );
 		$max_pages = ceil( $total_terms / $per_page );
@@ -582,7 +590,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		}
 
 		$links = array(
-			'self' => array(
+			'self'       => array(
 				'href' => rest_url( trailingslashit( $base ) . $term->term_id ),
 			),
 			'collection' => array(
@@ -636,12 +644,11 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 
 		// get_items() verifies that we don't have `include` set, and default.
 		// ordering is by `name`.
-		if ( ! in_array( $prepared_args['orderby'], array( 'name', 'none', 'include' ) ) ) {
+		if ( ! in_array( $prepared_args['orderby'], array( 'name', 'none', 'include' ), true ) ) {
 			switch ( $prepared_args['orderby'] ) {
 				case 'id':
 					$this->sort_column = 'term_id';
 					break;
-
 				case 'slug':
 				case 'term_group':
 				case 'description':
@@ -657,7 +664,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 
 		// Pagination.
 		$this->total_terms = count( $query_result );
-		$query_result = array_slice( $query_result, $prepared_args['offset'], $prepared_args['number'] );
+		$query_result      = array_slice( $query_result, $prepared_args['offset'], $prepared_args['number'] );
 
 		return $query_result;
 	}
@@ -694,7 +701,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		if ( '' !== $this->taxonomy && taxonomy_exists( $this->taxonomy ) ) {
 			$taxonomy = get_taxonomy( $this->taxonomy );
 		} else {
-			$taxonomy = new stdClass();
+			$taxonomy               = new stdClass();
 			$taxonomy->hierarchical = true;
 		}
 
@@ -704,7 +711,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 			'description'       => __( 'Ensure result set excludes specific ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
-				'type'          => 'integer',
+				'type' => 'integer',
 			),
 			'default'           => array(),
 			'sanitize_callback' => 'wp_parse_id_list',
@@ -713,36 +720,36 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 			'description'       => __( 'Limit result set to specific ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
-				'type'          => 'integer',
+				'type' => 'integer',
 			),
 			'default'           => array(),
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
 		if ( ! $taxonomy->hierarchical ) {
 			$params['offset'] = array(
-				'description'        => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
-				'type'               => 'integer',
-				'sanitize_callback'  => 'absint',
-				'validate_callback'  => 'rest_validate_request_arg',
+				'description'       => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
+				'type'              => 'integer',
+				'sanitize_callback' => 'absint',
+				'validate_callback' => 'rest_validate_request_arg',
 			);
 		}
 		$params['order']      = array(
-			'description'           => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
-			'type'                  => 'string',
-			'sanitize_callback'     => 'sanitize_key',
-			'default'               => 'asc',
-			'enum'                  => array(
+			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
+			'type'              => 'string',
+			'sanitize_callback' => 'sanitize_key',
+			'default'           => 'asc',
+			'enum'              => array(
 				'asc',
 				'desc',
 			),
-			'validate_callback'     => 'rest_validate_request_arg',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['orderby']    = array(
-			'description'           => __( 'Sort collection by resource attribute.', 'woocommerce' ),
-			'type'                  => 'string',
-			'sanitize_callback'     => 'sanitize_key',
-			'default'               => 'name',
-			'enum'                  => array(
+			'description'       => __( 'Sort collection by resource attribute.', 'woocommerce' ),
+			'type'              => 'string',
+			'sanitize_callback' => 'sanitize_key',
+			'default'           => 'name',
+			'enum'              => array(
 				'id',
 				'include',
 				'name',
@@ -751,32 +758,32 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 				'description',
 				'count',
 			),
-			'validate_callback'     => 'rest_validate_request_arg',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['hide_empty'] = array(
-			'description'           => __( 'Whether to hide resources not assigned to any products.', 'woocommerce' ),
-			'type'                  => 'boolean',
-			'default'               => false,
-			'validate_callback'     => 'rest_validate_request_arg',
+			'description'       => __( 'Whether to hide resources not assigned to any products.', 'woocommerce' ),
+			'type'              => 'boolean',
+			'default'           => false,
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 		if ( $taxonomy->hierarchical ) {
 			$params['parent'] = array(
-				'description'        => __( 'Limit result set to resources assigned to a specific parent.', 'woocommerce' ),
-				'type'               => 'integer',
-				'sanitize_callback'  => 'absint',
-				'validate_callback'  => 'rest_validate_request_arg',
+				'description'       => __( 'Limit result set to resources assigned to a specific parent.', 'woocommerce' ),
+				'type'              => 'integer',
+				'sanitize_callback' => 'absint',
+				'validate_callback' => 'rest_validate_request_arg',
 			);
 		}
 		$params['product'] = array(
-			'description'           => __( 'Limit result set to resources assigned to a specific product.', 'woocommerce' ),
-			'type'                  => 'integer',
-			'default'               => null,
-			'validate_callback'     => 'rest_validate_request_arg',
+			'description'       => __( 'Limit result set to resources assigned to a specific product.', 'woocommerce' ),
+			'type'              => 'integer',
+			'default'           => null,
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['slug']    = array(
-			'description'        => __( 'Limit result set to resources with a specific slug.', 'woocommerce' ),
-			'type'               => 'string',
-			'validate_callback'  => 'rest_validate_request_arg',
+			'description'       => __( 'Limit result set to resources with a specific slug.', 'woocommerce' ),
+			'type'              => 'string',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		return $params;
