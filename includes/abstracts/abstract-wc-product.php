@@ -1187,6 +1187,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 				$download_object->set_id( $download['download_id'] );
 				$download_object->set_name( $download['name'] );
 				$download_object->set_file( $download['file'] );
+				$download_object->set_limit( $download['limit'] );
+				$download_object->set_expiry( $download['expiry'] );
 			}
 
 			// Validate the file extension.
