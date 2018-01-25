@@ -383,7 +383,7 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 					{ className: "block-footer" },
 					wp.element.createElement(
 						"button",
-						{ type: "button", onClick: this.props.done_callback },
+						{ type: "button", className: "button button-large", onClick: this.props.done_callback },
 						__('Done')
 					)
 				)
