@@ -103,6 +103,22 @@ class WC_Shop_Customizer {
 					$( '.woocommerce-cropping-control' ).find( 'input:checked' ).change();
 				} );
 
+				wp.customize.section( 'woocommerce_product_catalog', function( section ) {
+					section.expanded.bind( function( isExpanded ) {
+						if ( isExpanded ) {
+							wp.customize.previewer.previewUrl.set( '<?php echo esc_js( wc_get_page_permalink( 'shop' ) ); ?>' );
+						}
+					} );
+				} );
+
+				wp.customize.section( 'woocommerce_product_images', function( section ) {
+					section.expanded.bind( function( isExpanded ) {
+						if ( isExpanded ) {
+							wp.customize.previewer.previewUrl.set( '<?php echo esc_js( wc_get_page_permalink( 'shop' ) ); ?>' );
+						}
+					} );
+				} );
+
 				wp.customize( 'woocommerce_catalog_columns', function( setting ) {
 					setting.bind( function( value ) {
 						var min = '<?php echo esc_js( $min_columns ); ?>';
@@ -167,24 +183,6 @@ class WC_Shop_Customizer {
 			} );
 		</script>
 		<?php
-	}
-
-	/**
-	 * Should our settings show?
-	 *
-	 * @return boolean
-	 */
-	public function is_active() {
-		return is_woocommerce() || wc_post_content_has_shortcode( 'products' ) || ! current_theme_supports( 'woocommerce' );
-	}
-
-	/**
-	 * Should our settings show on product archives?
-	 *
-	 * @return boolean
-	 */
-	public function is_products_archive() {
-		return is_shop() || is_product_taxonomy() || is_product_category() || ! current_theme_supports( 'woocommerce' );
 	}
 
 	/**
@@ -285,10 +283,9 @@ class WC_Shop_Customizer {
 		$wp_customize->add_section(
 			'woocommerce_product_catalog',
 			array(
-				'title'           => __( 'Product Catalog', 'woocommerce' ),
-				'priority'        => 10,
-				'active_callback' => array( $this, 'is_products_archive' ),
-				'panel'           => 'woocommerce',
+				'title'    => __( 'Product Catalog', 'woocommerce' ),
+				'priority' => 10,
+				'panel'    => 'woocommerce',
 			)
 		);
 
@@ -442,10 +439,9 @@ class WC_Shop_Customizer {
 		$wp_customize->add_section(
 			'woocommerce_product_images',
 			array(
-				'title'           => __( 'Product Images', 'woocommerce' ),
-				'priority'        => 20,
-				'active_callback' => array( $this, 'is_active' ),
-				'panel'           => 'woocommerce',
+				'title'    => __( 'Product Images', 'woocommerce' ),
+				'priority' => 20,
+				'panel'    => 'woocommerce',
 			)
 		);
 
