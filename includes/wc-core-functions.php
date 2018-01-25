@@ -2019,7 +2019,7 @@ function wc_decimal_to_fraction( $decimal ) {
 	}
 
 	if ( 0 === $decimal ) {
-		return [ 0, 0 ];
+		return array( 0, 1 );
 	}
 
 	$tolerance   = 1.e-4;

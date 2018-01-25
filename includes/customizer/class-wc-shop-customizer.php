@@ -506,7 +506,7 @@ class WC_Shop_Customizer {
 		$wp_customize->add_setting(
 			'woocommerce_thumbnail_cropping',
 			array(
-				'default'           => '1: 1',
+				'default'           => '1:1',
 				'type'              => 'option',
 				'capability'        => 'manage_woocommerce',
 				'sanitize_callback' => 'wc_clean',
