@@ -172,9 +172,7 @@ class WC_Regenerate_Images {
 	 * Check if we should generate images when new themes declares custom sizes.
 	 */
 	public static function maybe_regenerate_image_theme_switch() {
-		if ( wc_get_theme_support( 'single_image_width' ) || wc_get_theme_support( 'thumbnail_image_width' ) ) {
-			self::queue_image_regeneration();
-		}
+		self::queue_image_regeneration();
 	}
 
 	/**
@@ -186,6 +184,9 @@ class WC_Regenerate_Images {
 		global $wpdb;
 		// First lets cancel existing running queue to avoid running it more than once.
 		self::$background_process->cancel_process();
+
+		// And clear the last ID variable.
+		delete_option( 'woocommerce_last_image_regen_id' );
 
 		// Now lets find all product image attachments IDs and pop them onto the queue.
 		$images = $wpdb->get_results( // @codingStandardsIgnoreLine
