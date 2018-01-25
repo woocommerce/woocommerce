@@ -680,7 +680,7 @@ body {
 	// List header
 	.wc-wizard-service-item {
 		padding-left: 2em;
-		padding-top: 1em;
+		padding-top: 0.67em;
 
 		&:first-child {
 			border-bottom: 0;
@@ -719,6 +719,7 @@ body {
 	}
 	.wc-wizard-service-item:not(:first-child) .wc-wizard-service-description {
 		font-size: 0.92em;
+		padding-bottom: 10px;
 	}
 
 	.shipping-method-setting {
