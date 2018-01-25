@@ -1595,3 +1595,21 @@ function wc_update_330_clear_transients() {
 	delete_transient( 'wc_addons_sections' );
 	delete_transient( 'wc_addons_featured' );
 }
+
+/**
+ * Set PayPal's sandbox credentials.
+ */
+function wc_update_330_set_paypal_sandbox_credentials() {
+
+	$paypal_settings = get_option( 'woocommerce_paypal_settings' );
+
+	if ( isset( $paypal_settings['testmode'] ) && 'yes' === $paypal_settings['testmode'] ) {
+		foreach ( array( 'api_username', 'api_password', 'api_signature' ) as $credential ) {
+			if ( ! empty( $paypal_settings[ $credential ] ) ) {
+				$paypal_settings[ 'sandbox_' . $credential ] = $paypal_settings[ $credential ];
+			}
+		}
+
+		update_option( 'woocommerce_paypal_settings', $paypal_settings );
+	}
+}
