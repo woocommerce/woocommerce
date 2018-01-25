@@ -187,6 +187,9 @@ class WC_Regenerate_Images {
 		// First lets cancel existing running queue to avoid running it more than once.
 		self::$background_process->cancel_process();
 
+		// And clear the last ID variable.
+		delete_option( 'woocommerce_last_image_regen_id' );
+
 		// Now lets find all product image attachments IDs and pop them onto the queue.
 		$images = $wpdb->get_results( // @codingStandardsIgnoreLine
 			"SELECT ID

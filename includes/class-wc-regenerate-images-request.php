@@ -61,17 +61,28 @@ class WC_Regenerate_Images_Request extends WP_Background_Process {
 			return false;
 		}
 
+		$attachment_id      = absint( $item['attachment_id'] );
+		$last_attachment_id = absint( get_option( 'woocommerce_last_image_regen_id', 0 ) );
+
+		// If the current task matches the last task there may have been an error which prevented the task from completing; skip.
+		if ( $last_attachment_id === $attachment_id ) {
+			return false;
+		}
+
+		update_option( 'woocommerce_last_image_regen_id', $item['attachment_id']  );
+
 		if ( ! function_exists( 'wp_crop_image' ) ) {
 			include ABSPATH . 'wp-admin/includes/image.php';
 		}
 
-		$attachment_id = absint( $item['attachment_id'] );
-
 		$attachment = get_post( $attachment_id );
+
 		if ( ! $attachment || 'attachment' !== $attachment->post_type || 'image/' !== substr( $attachment->post_mime_type, 0, 6 ) ) {
 			return false;
 		}
+
 		$log = wc_get_logger();
+
 		// translators: %s: ID of the attachment.
 		$log->info( sprintf( __( 'Regenerating images for attachment ID: %s', 'woocommerce' ), absint( $attachment->ID ) ),
 			array(
@@ -86,6 +97,9 @@ class WC_Regenerate_Images_Request extends WP_Background_Process {
 			return false;
 		}
 
+		// We only want to regen WC images.
+		add_filter( 'intermediate_image_sizes', array( $this, 'adjust_intermediate_image_sizes' ) );
+
 		// This function will generate the new image sizes.
 		$metadata = wp_generate_attachment_metadata( $attachment->ID, $fullsizepath );
 
@@ -97,8 +111,20 @@ class WC_Regenerate_Images_Request extends WP_Background_Process {
 		// Update the meta data with the new size values.
 		wp_update_attachment_metadata( $attachment->ID, $metadata );
 
+		// Remove custom filter.
+		remove_filter( 'intermediate_image_sizes', array( $this, 'adjust_intermediate_image_sizes' ) );
+
 		// We made it till the end, now lets remove the item from the queue.
 		return false;
+	}
+
+	/**
+	 * Returns only WC image sizes.
+	 *
+	 * @return array
+	 */
+	public function adjust_intermediate_image_sizes( $sizes ) {
+		return array( 'woocommerce_thumbnail', 'woocommerce_single' );
 	}
 
 	/**
