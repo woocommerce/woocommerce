@@ -2135,7 +2135,6 @@ ul.wc_coupon_list_block {
 
 .order-status {
 	display: inline-flex;
-	padding: 0px 1em;
 	line-height: 2.5em;
 	color: #777;
 	background: #E5E5E5;
@@ -2144,6 +2143,7 @@ ul.wc_coupon_list_block {
 	margin: -.25em 0;
 	cursor: inherit !important;
 	white-space: nowrap;
+	max-width: 100%;
 
 	&.status-completed {
 		background: #C8D7E1;
@@ -2168,6 +2168,12 @@ ul.wc_coupon_list_block {
 	&.status-trash {
 		background: #eba3a3;
 		color: #761919;
+	}
+
+	> span {
+		margin: 0 1em;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 }
 
@@ -2270,7 +2276,7 @@ ul.wc_coupon_list_block {
 		white-space: nowrap;
 	}
 	.wc-action-button {
-		margin: -1px !important;
+		margin: 0 0 0 -1px !important;
 		border: 1px solid #ccc;
 		padding: 1px 10px !important;
 		border-radius: 0 !important;
@@ -2279,6 +2285,9 @@ ul.wc_coupon_list_block {
 		height: auto;
 		z-index: 1;
 		position:relative;
+		max-width: 175px;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 	.wc-action-button:hover,
 	.wc-action-button:focus {
@@ -2286,6 +2295,7 @@ ul.wc_coupon_list_block {
 		z-index: 2;
 	}
 	.wc-action-button:first-child {
+		margin-left: 0 !important;
 		border-top-left-radius: 3px !important;
 		border-bottom-left-radius: 3px !important;
 	}
@@ -2391,20 +2401,20 @@ ul.order_notes {
 			border-color: #efefef transparent;
 		}
 	}
-	li.customer-note {
-		.note_content {
-			background: #a7cedc;
-		}
-		.note_content::after {
-			border-color: #a7cedc transparent;
-		}
-	}
 	li.system-note {
 		.note_content {
 			background: #d7cad2;
 		}
 		.note_content::after {
 			border-color: #d7cad2 transparent;
+		}
+	}
+	li.customer-note {
+		.note_content {
+			background: #a7cedc;
+		}
+		.note_content::after {
+			border-color: #a7cedc transparent;
 		}
 	}
 }

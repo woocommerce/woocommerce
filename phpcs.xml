@@ -21,7 +21,10 @@
 
 	<!-- Rules -->
 	<rule ref="WooCommerce-Core" />
-	<rule ref="PHPCompatibility" />
+	<rule ref="PHPCompatibility">
+		<exclude name="PHPCompatibility.PHP.NewKeywords.t_namespaceFound" />
+		<exclude-pattern>tests/</exclude-pattern>
+	</rule>
 
 	<rule ref="WordPress">
 		<exclude name="WordPress.VIP.DirectDatabaseQuery.NoCaching" />
@@ -49,5 +52,16 @@
 	</rule>
 	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
 		<exclude-pattern>includes/**/abstract-*.php</exclude-pattern>
+		<exclude-pattern>tests/</exclude-pattern>
+	</rule>
+	<rule ref="Generic.Commenting">
+		<exclude-pattern>tests/</exclude-pattern>
+	</rule>
+	<rule ref="Squiz.Commenting">
+		<exclude-pattern>tests/</exclude-pattern>
+		<exclude name="Squiz.Commenting.LongConditionClosingComment" />
+	</rule>
+	<rule ref="PEAR.Functions.FunctionCallSignature.EmptyLine">
+		<exclude-pattern>tests/e2e-tests/</exclude-pattern>
 	</rule>
 </ruleset>
