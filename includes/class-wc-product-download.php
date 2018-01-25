@@ -1,4 +1,10 @@
 <?php
+/**
+ * Product Download functionality
+ *
+ * @package WooCommerce/Admin/Classes
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -9,12 +15,12 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @version     3.0.0
  * @since       3.0.0
  * @package     WooCommerce/Classes
- * @author      WooThemes
  */
 class WC_Product_Download implements ArrayAccess {
 
 	/**
 	 * Data array.
+	 *
 	 * @since 3.0.0
 	 * @var array
 	 */
@@ -26,6 +32,7 @@ class WC_Product_Download implements ArrayAccess {
 
 	/**
 	 * Returns all data for this object.
+	 *
 	 * @return array
 	 */
 	public function get_data() {
@@ -34,6 +41,7 @@ class WC_Product_Download implements ArrayAccess {
 
 	/**
 	 * Get allowed mime types.
+	 *
 	 * @return array
 	 */
 	public function get_allowed_mime_types() {
@@ -42,6 +50,7 @@ class WC_Product_Download implements ArrayAccess {
 
 	/**
 	 * Get type of file path set.
+	 *
 	 * @param  string $file_path optional.
 	 * @return string absolute, relative, or shortcode.
 	 */
@@ -58,6 +67,7 @@ class WC_Product_Download implements ArrayAccess {
 
 	/**
 	 * Get file type.
+	 *
 	 * @return string
 	 */
 	public function get_file_type() {
@@ -67,6 +77,7 @@ class WC_Product_Download implements ArrayAccess {
 
 	/**
 	 * Get file extension.
+	 *
 	 * @return string
 	 */
 	public function get_file_extension() {
@@ -76,6 +87,7 @@ class WC_Product_Download implements ArrayAccess {
 
 	/**
 	 * Check if file is allowed.
+	 *
 	 * @return boolean
 	 */
 	public function is_allowed_filetype() {
@@ -87,6 +99,7 @@ class WC_Product_Download implements ArrayAccess {
 
 	/**
 	 * Validate file exists.
+	 *
 	 * @return boolean
 	 */
 	public function file_exists() {
@@ -110,7 +123,8 @@ class WC_Product_Download implements ArrayAccess {
 
 	/**
 	 * Set ID.
-	 * @param string $value
+	 *
+	 * @param string $value ID.
 	 */
 	public function set_id( $value ) {
 		$this->data['id'] = wc_clean( $value );
@@ -118,7 +132,8 @@ class WC_Product_Download implements ArrayAccess {
 
 	/**
 	 * Set name.
-	 * @param string $value
+	 *
+	 * @param string $value Name.
 	 */
 	public function set_name( $value ) {
 		$this->data['name'] = wc_clean( $value );
@@ -126,8 +141,9 @@ class WC_Product_Download implements ArrayAccess {
 
 	/**
 	 * Set previous_hash.
+	 *
 	 * @deprecated 3.3.0 No longer using filename based hashing to keep track of files.
-	 * @param string $value
+	 * @param string $value Previous Hash.
 	 */
 	public function set_previous_hash( $value ) {
 		wc_deprecated_function( __FUNCTION__, '3.3' );
@@ -136,11 +152,12 @@ class WC_Product_Download implements ArrayAccess {
 
 	/**
 	 * Set file.
-	 * @param string $value
+	 *
+	 * @param string $value File URL/Path.
 	 */
 	public function set_file( $value ) {
 		switch ( $this->get_type_of_file_path( $value ) ) {
-			case 'absolute' :
+			case 'absolute':
 				$this->data['file'] = esc_url_raw( $value );
 				break;
 			default:
@@ -175,6 +192,7 @@ class WC_Product_Download implements ArrayAccess {
 
 	/**
 	 * Get id.
+	 *
 	 * @return string
 	 */
 	public function get_id() {
@@ -183,6 +201,7 @@ class WC_Product_Download implements ArrayAccess {
 
 	/**
 	 * Get name.
+	 *
 	 * @return string
 	 */
 	public function get_name() {
@@ -191,6 +210,7 @@ class WC_Product_Download implements ArrayAccess {
 
 	/**
 	 * Get previous_hash.
+	 *
 	 * @deprecated 3.3.0 No longer using filename based hashing to keep track of files.
 	 * @return string
 	 */
@@ -201,6 +221,7 @@ class WC_Product_Download implements ArrayAccess {
 
 	/**
 	 * Get file.
+	 *
 	 * @return string
 	 */
 	public function get_file() {
@@ -232,13 +253,14 @@ class WC_Product_Download implements ArrayAccess {
 	*/
 
 	/**
-	 * offsetGet
-	 * @param string $offset
+	 * OffsetGet
+	 *
+	 * @param string $offset Offset.
 	 * @return mixed
 	 */
 	public function offsetGet( $offset ) {
 		switch ( $offset ) {
-			default :
+			default:
 				if ( is_callable( array( $this, "get_$offset" ) ) ) {
 					return $this->{"get_$offset"}();
 				}
@@ -248,13 +270,14 @@ class WC_Product_Download implements ArrayAccess {
 	}
 
 	/**
-	 * offsetSet
-	 * @param string $offset
-	 * @param mixed $value
+	 * OffsetSet
+	 *
+	 * @param string $offset Offset.
+	 * @param mixed  $value Offset value.
 	 */
 	public function offsetSet( $offset, $value ) {
 		switch ( $offset ) {
-			default :
+			default:
 				if ( is_callable( array( $this, "set_$offset" ) ) ) {
 					return $this->{"set_$offset"}( $value );
 				}
@@ -263,14 +286,16 @@ class WC_Product_Download implements ArrayAccess {
 	}
 
 	/**
-	 * offsetUnset
-	 * @param string $offset
+	 * OffsetUnset
+	 *
+	 * @param string $offset Offset.
 	 */
 	public function offsetUnset( $offset ) {}
 
 	/**
-	 * offsetExists
-	 * @param string $offset
+	 * OffsetExists
+	 *
+	 * @param string $offset Offset.
 	 * @return bool
 	 */
 	public function offsetExists( $offset ) {
