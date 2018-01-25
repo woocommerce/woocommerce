@@ -117,13 +117,13 @@ class WC_Regenerate_Images_Request extends WP_Background_Process {
 	}
 
 	/**
-	 * Returns only WC image sizes.
+	 * Returns the sizes we want to regenerate.
 	 *
 	 * @param array $sizes Sizes to generate.
 	 * @return array
 	 */
 	public function adjust_intermediate_image_sizes( $sizes ) {
-		return array( 'woocommerce_thumbnail', 'woocommerce_single' );
+		return apply_filters( 'woocommerce_regenerate_images_intermediate_image_sizes', array( 'woocommerce_thumbnail', 'woocommerce_thumbnail_2x', 'woocommerce_single' ) );
 	}
 
 	/**
