@@ -38,7 +38,7 @@ $text_align = is_rtl() ? 'right' : 'left';
 			<?php foreach ( $columns as $column_id => $column_name ) : ?>
 					<td class="td" style="text-align:<?php echo $text_align; ?>;"><?php
 					if ( has_action( 'woocommerce_email_downloads_column_' . $column_id ) ) {
-						do_action( 'woocommerce_email_downloads_column_' . $column_id, $download );
+						do_action( 'woocommerce_email_downloads_column_' . $column_id, $download, true );
 					} else {
 						switch ( $column_id ) {
 							case 'download-product' : ?>

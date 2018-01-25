@@ -27,7 +27,7 @@ foreach ( $downloads as $download ) {
 		echo $column_name . ": ";
 
 		if ( has_action( 'woocommerce_email_downloads_column_' . $column_id ) ) {
-			do_action( 'woocommerce_email_downloads_column_' . $column_id, $download );
+			do_action( 'woocommerce_email_downloads_column_' . $column_id, $download, false );
 		} else {
 			switch ( $column_id ) {
 				case 'download-product' :
