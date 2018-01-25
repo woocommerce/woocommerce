@@ -120,6 +120,17 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 			<td class="help"><?php echo wc_help_tip( __( 'The current language used by WordPress. Default = English', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td><?php echo esc_html( $environment['language'] ); ?></td>
 		</tr>
+		<tr>
+			<td data-export-label="External object cache"><?php _e( 'External object cache', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( __( 'Displays whether or not WordPress is using an external object cache.', 'woocommerce' ) ); ?></td>
+			<td>
+				<?php if ( $environment['external_object_cache'] ) : ?>
+					<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>
+				<?php else : ?>
+					<mark class="no">&ndash;</mark>
+				<?php endif; ?>
+			</td>
+		</tr>
 	</tbody>
 </table>
 <table class="wc_status_table widefat" cellspacing="0">

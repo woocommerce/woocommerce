@@ -612,6 +612,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 			'wp_debug_mode'             => ( defined( 'WP_DEBUG' ) && WP_DEBUG ),
 			'wp_cron'                   => ! ( defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ),
 			'language'                  => get_locale(),
+			'external_object_cache'     => wp_using_ext_object_cache(),
 			'server_info'               => $_SERVER['SERVER_SOFTWARE'],
 			'php_version'               => phpversion(),
 			'php_post_max_size'         => wc_let_to_num( ini_get( 'post_max_size' ) ),
