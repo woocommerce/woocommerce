@@ -172,7 +172,9 @@ class WC_Regenerate_Images {
 	 * Check if we should generate images when new themes declares custom sizes.
 	 */
 	public static function maybe_regenerate_image_theme_switch() {
-		self::queue_image_regeneration();
+		if ( wc_get_theme_support( 'single_image_width' ) || wc_get_theme_support( 'thumbnail_image_width' ) ) {
+			self::queue_image_regeneration();
+		}
 	}
 
 	/**
