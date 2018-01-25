@@ -7,9 +7,7 @@
  * @since   3.3.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
-}
+defined( 'ABSPATH' ) || exit;
 
 if ( ! class_exists( 'WP_Async_Request', false ) ) {
 	include_once dirname( __FILE__ ) . '/libraries/wp-async-request.php';
@@ -69,7 +67,7 @@ class WC_Regenerate_Images_Request extends WP_Background_Process {
 			return false;
 		}
 
-		update_option( 'woocommerce_last_image_regen_id', $item['attachment_id']  );
+		update_option( 'woocommerce_last_image_regen_id', $item['attachment_id'] );
 
 		if ( ! function_exists( 'wp_crop_image' ) ) {
 			include ABSPATH . 'wp-admin/includes/image.php';
@@ -121,6 +119,7 @@ class WC_Regenerate_Images_Request extends WP_Background_Process {
 	/**
 	 * Returns only WC image sizes.
 	 *
+	 * @param array $sizes Sizes to generate.
 	 * @return array
 	 */
 	public function adjust_intermediate_image_sizes( $sizes ) {
