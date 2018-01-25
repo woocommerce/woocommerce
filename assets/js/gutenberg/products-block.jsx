@@ -204,7 +204,7 @@ class ProductsBlockSettingsEditor extends React.Component {
 				{ extra_settings }
 
 				<div className="block-footer">
-					<button type="button" onClick={ this.props.done_callback }>{ __( 'Done' ) }</button>
+					<button type="button" className="button button-large" onClick={ this.props.done_callback }>{ __( 'Done' ) }</button>
 				</div>
 			</div>
 		);
