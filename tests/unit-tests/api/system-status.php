@@ -12,9 +12,11 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	public function setUp() {
 		parent::setUp();
 		$this->endpoint = new WC_REST_System_Status_Controller();
-		$this->user = $this->factory->user->create( array(
-			'role' => 'administrator',
-		) );
+		$this->user     = $this->factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
 	}
 
 	/**
@@ -47,7 +49,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	public function test_get_system_status_info_returns_root_properties() {
 		wp_set_current_user( $this->user );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
-		$data = $response->get_data();
+		$data     = $response->get_data();
 
 		$this->assertArrayHasKey( 'environment', $data );
 		$this->assertArrayHasKey( 'database', $data );
@@ -194,9 +196,9 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_system_status_schema() {
-		$request = new WP_REST_Request( 'OPTIONS', '/wc/v2/system_status' );
-		$response = $this->server->dispatch( $request );
-		$data = $response->get_data();
+		$request    = new WP_REST_Request( 'OPTIONS', '/wc/v2/system_status' );
+		$response   = $this->server->dispatch( $request );
+		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 		$this->assertEquals( 7, count( $properties ) );
 		$this->assertArrayHasKey( 'environment', $properties );
@@ -216,7 +218,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	public function test_get_system_tools() {
 		wp_set_current_user( $this->user );
 
-		$tools_controller = new WC_REST_System_Status_Tools_Controller;
+		$tools_controller = new WC_REST_System_Status_Tools_Controller();
 		$raw_tools        = $tools_controller->get_tools();
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status/tools' ) );
@@ -224,20 +226,23 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( count( $raw_tools ), count( $data ) );
-		$this->assertContains( array(
-			'id'          => 'reset_tracking',
-			'name'        => 'Reset usage tracking',
-			'action'      => 'Reset',
-			'description' => 'This will reset your usage tracking settings, causing it to show the opt-in banner again and not sending any data.',
-			'_links'      => array(
-				'item' => array(
-					array(
-						'href'       => rest_url( '/wc/v2/system_status/tools/reset_tracking' ),
-						'embeddable' => true,
+		$this->assertContains(
+			array(
+				'id'          => 'reset_tracking',
+				'name'        => 'Reset usage tracking',
+				'action'      => 'Reset',
+				'description' => 'This will reset your usage tracking settings, causing it to show the opt-in banner again and not sending any data.',
+				'_links'      => array(
+					'item' => array(
+						array(
+							'href'       => rest_url( '/wc/v2/system_status/tools/reset_tracking' ),
+							'embeddable' => true,
+						),
 					),
 				),
 			),
-		), $data );
+			$data
+		);
 	}
 
 	/**
@@ -259,7 +264,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	public function test_get_system_tool() {
 		wp_set_current_user( $this->user );
 
-		$tools_controller = new WC_REST_System_Status_Tools_Controller;
+		$tools_controller = new WC_REST_System_Status_Tools_Controller();
 		$raw_tools        = $tools_controller->get_tools();
 		$raw_tool         = $raw_tools['recount_terms'];
 
@@ -293,7 +298,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	public function test_execute_system_tool() {
 		wp_set_current_user( $this->user );
 
-		$tools_controller = new WC_REST_System_Status_Tools_Controller;
+		$tools_controller = new WC_REST_System_Status_Tools_Controller();
 		$raw_tools        = $tools_controller->get_tools();
 		$raw_tool         = $raw_tools['recount_terms'];
 
@@ -327,9 +332,9 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_system_status_tool_schema() {
-		$request = new WP_REST_Request( 'OPTIONS', '/wc/v2/system_status/tools' );
-		$response = $this->server->dispatch( $request );
-		$data = $response->get_data();
+		$request    = new WP_REST_Request( 'OPTIONS', '/wc/v2/system_status/tools' );
+		$response   = $this->server->dispatch( $request );
+		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 		$this->assertEquals( 6, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
