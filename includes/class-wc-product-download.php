@@ -25,9 +25,11 @@ class WC_Product_Download implements ArrayAccess {
 	 * @var array
 	 */
 	protected $data = array(
-		'id'            => '',
-		'name'          => '',
-		'file'          => '',
+		'id'     => '',
+		'name'   => '',
+		'file'   => '',
+		'limit'  => '',
+		'expiry' => '',
 	);
 
 	/**
@@ -81,7 +83,7 @@ class WC_Product_Download implements ArrayAccess {
 	 * @return string
 	 */
 	public function get_file_extension() {
-		$parsed_url = parse_url( $this->get_file(), PHP_URL_PATH );
+		$parsed_url = wp_parse_url( $this->get_file(), PHP_URL_PATH );
 		return pathinfo( $parsed_url, PATHINFO_EXTENSION );
 	}
 
