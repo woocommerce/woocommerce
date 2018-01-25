@@ -1465,15 +1465,38 @@ function wc_update_330_image_options() {
 	$old_single_size    = get_option( 'shop_single_image_size', array() );
 
 	if ( ! empty( $old_thumbnail_size['width'] ) ) {
-		update_option( 'woocommerce_thumbnail_image_width', absint( $old_thumbnail_size['width'] ) );
+		$width     = absint( $old_thumbnail_size['width'] );
+		$height    = absint( $old_thumbnail_size['height'] );
+		$hard_crop = ! empty( $old_thumbnail_size['crop'] );
+
+		if ( ! $width ) {
+			$width = 300;
+		}
+
+		if ( ! $height ) {
+			$height = $width;
+		}
+
+		update_option( 'woocommerce_thumbnail_image_width', $width );
+
+		// Calculate cropping mode from old image options.
+		if ( ! $hard_crop ) {
+			update_option( 'woocommerce_thumbnail_cropping', 'uncropped' );
+		} elseif ( $width === $height ) {
+			update_option( 'woocommerce_thumbnail_cropping', '1:1' );
+		} else {
+			$ratio    = $width / $height;
+			$fraction = wc_decimal_to_fraction( $ratio );
+
+			if ( $fraction ) {
+				update_option( 'woocommerce_thumbnail_cropping', 'custom' );
+				update_option( 'woocommerce_thumbnail_cropping_custom_width', $fraction[0] );
+				update_option( 'woocommerce_thumbnail_cropping_custom_height', $fraction[1] );
+			}
+		}
 	}
 
-	if ( ! empty( $old_thumbnail_size['crop'] ) ) {
-		update_option( 'woocommerce_thumbnail_cropping', '1:1' );
-	} elseif ( isset( $old_thumbnail_size['crop'] ) ) {
-		update_option( 'woocommerce_thumbnail_cropping', 'uncropped' );
-	}
-
+	// Single is uncropped.
 	if ( ! empty( $old_single_size['width'] ) ) {
 		update_option( 'woocommerce_single_image_width', absint( $old_single_size['width'] ) );
 	}
