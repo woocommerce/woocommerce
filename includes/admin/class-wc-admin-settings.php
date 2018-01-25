@@ -270,9 +270,17 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 					// Standard text inputs and subtypes like 'number'.
 					case 'text':
-					case 'email':
-					case 'number':
 					case 'password':
+					case 'datetime':
+					case 'datetime-local':
+					case 'date':
+					case 'month':
+					case 'time':
+					case 'week':
+					case 'number':
+					case 'email':
+					case 'url':
+					case 'tel':
 						$option_value = self::get_option( $value['id'], $value['default'] );
 
 						?><tr valign="top">
