@@ -154,10 +154,8 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 		$order          = null;
 		$needs_shipping = false;
 
-		// Test if shipping is needed first
-		if ( WC()->cart && WC()->cart->needs_shipping() ) {
-			$needs_shipping = true;
-		} elseif ( is_page( wc_get_page_id( 'checkout' ) ) && 0 < get_query_var( 'order-pay' ) ) {
+		// Test if paying for an existing order first.
+		if ( is_page( wc_get_page_id( 'checkout' ) ) && 0 < get_query_var( 'order-pay' ) ) {
 			$order_id = absint( get_query_var( 'order-pay' ) );
 			$order    = wc_get_order( $order_id );
 
@@ -171,6 +169,9 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 					}
 				}
 			}
+
+		} elseif ( WC()->cart && WC()->cart->needs_shipping() ) {
+			$needs_shipping = true;
 		}
 
 		$needs_shipping = apply_filters( 'woocommerce_cart_needs_shipping', $needs_shipping );
