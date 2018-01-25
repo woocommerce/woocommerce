@@ -736,7 +736,14 @@ abstract class WC_Settings_API {
 					<legend class="screen-reader-text"><span><?php echo wp_kses_post( $data['title'] ); ?></span></legend>
 					<select multiple="multiple" class="multiselect <?php echo esc_attr( $data['class'] ); ?>" name="<?php echo esc_attr( $field_key ); ?>[]" id="<?php echo esc_attr( $field_key ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?>>
 						<?php foreach ( (array) $data['options'] as $option_key => $option_value ) : ?>
-							<option value="<?php echo esc_attr( $option_key ); ?>" <?php selected( in_array( $option_key, $value ), true ); ?>><?php echo esc_attr( $option_value ); ?></option>
+							<?php if ( is_array( $option_value ) ) : ?>
+								<optgroup label="<?php echo esc_attr( $option_key ); ?>">
+									<?php foreach ( $option_value as $option_key_inner => $option_value_inner ) : ?>
+										<option value="<?php echo esc_attr( $option_key_inner ); ?>" <?php selected( in_array( $option_key_inner, $value ), true ); ?>><?php echo esc_attr( $option_value_inner ); ?></option>
+									<?php endforeach; ?>
+							<?php else : ?>
+								<option value="<?php echo esc_attr( $option_key ); ?>" <?php selected( in_array( $option_key, $value ), true ); ?>><?php echo esc_attr( $option_value ); ?></option>
+							<?php endif; ?>
 						<?php endforeach; ?>
 					</select>
 					<?php echo $this->get_description_html( $data ); ?>
