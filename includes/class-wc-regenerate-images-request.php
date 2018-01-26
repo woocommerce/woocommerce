@@ -30,22 +30,19 @@ class WC_Regenerate_Images_Request extends WP_Background_Process {
 		$this->prefix = 'wp_' . get_current_blog_id();
 		$this->action = 'wc_regenerate_images';
 
+		// This is needed to prevent timeouts due to threading. See https://core.trac.wordpress.org/ticket/36534.
+		@putenv( 'MAGICK_THREAD_LIMIT=1' ); // @codingStandardsIgnoreLine.
+
 		parent::__construct();
 	}
 
 	/**
-	 * Fires when the job should start
+	 * Limit each task ran per batch to 1 for image regen.
 	 *
-	 * @return void
+	 * @return bool
 	 */
-	public function dispatch() {
-		$log = wc_get_logger();
-		$log->info( __( 'Starting product image regeneration job.', 'woocommerce' ),
-			array(
-				'source' => 'wc-image-regeneration',
-			)
-		);
-		parent::dispatch();
+	protected function batch_limit_exceeded() {
+		return true;
 	}
 
 	/**
@@ -89,9 +86,6 @@ class WC_Regenerate_Images_Request extends WP_Background_Process {
 		if ( ! function_exists( 'wp_crop_image' ) ) {
 			include ABSPATH . 'wp-admin/includes/image.php';
 		}
-
-		// This is needed to prevent timeouts due to threading. See https://core.trac.wordpress.org/ticket/36534.
-		@putenv( 'MAGICK_THREAD_LIMIT=1' ); // @codingStandardsIgnoreLine.
 
 		$log = wc_get_logger();
 

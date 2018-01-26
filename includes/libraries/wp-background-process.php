@@ -120,12 +120,27 @@ abstract class WP_Background_Process extends WP_Async_Request {
 	/**
 	 * Delete queue
 	 *
-	 * @param string $key Key.
-	 *
+	 * @param string $key Key. Leave blank to delete all batches.
 	 * @return $this
 	 */
-	public function delete( $key ) {
-		delete_site_option( $key );
+	public function delete( $key = '' ) {
+		if ( $key ) {
+			delete_site_option( $key );
+		} else {
+			global $wpdb;
+
+			$table  = $wpdb->options;
+			$column = 'option_name';
+
+			if ( is_multisite() ) {
+				$table  = $wpdb->sitemeta;
+				$column = 'meta_key';
+			}
+
+			$key = $wpdb->esc_like( $this->identifier . '_batch_' ) . '%';
+
+			$wpdb->query( $wpdb->prepare( "DELETE FROM {$table} WHERE {$column} LIKE %s", $key ) ); // @codingStandardsIgnoreLine.
+		}
 
 		return $this;
 	}
@@ -273,6 +288,15 @@ abstract class WP_Background_Process extends WP_Async_Request {
 	}
 
 	/**
+	 * See if the batch limit has been exceeded.
+	 *
+	 * @return bool
+	 */
+	protected function batch_limit_exceeded() {
+		return $this->time_exceeded() || $this->memory_exceeded();
+	}
+
+	/**
 	 * Handle
 	 *
 	 * Pass each queue item to the task handler, while remaining
@@ -293,20 +317,19 @@ abstract class WP_Background_Process extends WP_Async_Request {
 					unset( $batch->data[ $key ] );
 				}
 
-				// Update batch so this task is not repeated.
-				$this->update( $batch->key, $batch->data );
-
-				if ( $this->time_exceeded() || $this->memory_exceeded() ) {
+				if ( $this->batch_limit_exceeded() ) {
 					// Batch limits reached.
 					break;
 				}
 			}
 
-			// Delete current batch if complete.
-			if ( empty( $batch->data ) ) {
+			// Update or delete current batch.
+			if ( ! empty( $batch->data ) ) {
+				$this->update( $batch->key, $batch->data );
+			} else {
 				$this->delete( $batch->key );
 			}
-		} while ( ! $this->time_exceeded() && ! $this->memory_exceeded() && ! $this->is_queue_empty() );
+		} while ( ! $this->batch_limit_exceeded() && ! $this->is_queue_empty() );
 
 		$this->unlock_process();
 
@@ -463,13 +486,9 @@ abstract class WP_Background_Process extends WP_Async_Request {
 	 */
 	public function cancel_process() {
 		if ( ! $this->is_queue_empty() ) {
-			$batch = $this->get_batch();
-
-			$this->delete( $batch->key );
-
+			$this->delete();
 			wp_clear_scheduled_hook( $this->cron_hook_identifier );
 		}
-
 	}
 
 	/**
