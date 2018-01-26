@@ -110,7 +110,7 @@ class WC_Shortcode_Products {
 	protected function parse_attributes( $attributes ) {
 		$attributes = $this->parse_legacy_attributes( $attributes );
 
-		return shortcode_atts( array(
+		$attributes = shortcode_atts( array(
 			'limit'          => '-1',      // Results limit.
 			'columns'        => '3',       // Number of columns.
 			'rows'           => '',        // Number of rows. If defined, limit will be ignored.
@@ -130,6 +130,12 @@ class WC_Shortcode_Products {
 			'paginate'       => false,     // Should results be paginated.
 			'cache'          => true,      // Should shortcode output be cached.
 		), $attributes, $this->type );
+
+		if ( ! absint( $attributes['columns'] ) ) {
+			$attributes['columns'] = 3;
+		}
+
+		return $attributes;
 	}
 
 	/**
