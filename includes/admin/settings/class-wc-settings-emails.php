@@ -214,6 +214,10 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section );
 			}
 		}
+
+		if ( $current_section ) {
+			do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section );
+		}
 	}
 
 	/**
