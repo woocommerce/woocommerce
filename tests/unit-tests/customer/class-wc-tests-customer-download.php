@@ -21,27 +21,29 @@ class WC_Tests_Customer_Download extends WC_Unit_Test_Case {
 	private $download;
 
 	/**
-	 * ID of the customer created for the tests.
+	 * ID of the fake customer used for the tests.
 	 *
 	 * @var int
 	 */
 	private $customer_id;
 
 	/**
+	 * E-mail of the fake customer used for the tests.
+	 *
+	 * @var string
+	 */
+	private $customer_email;
+
+	/**
 	 * Tests set up.
 	 */
 	public function setUp() {
-		$customer = get_user_by( 'login', 'testuser' );
-
-		if ( $customer ) {
-			$this->customer_id = $customer->ID;
-		} else {
-			$this->customer_id = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
-		}
+		$this->customer_id    = 1;
+		$this->customer_email = 'test@example.com';
 
 		$this->download = new WC_Customer_Download();
 		$this->download->set_user_id( $this->customer_id );
-		$this->download->set_user_email( 'test@example.com' );
+		$this->download->set_user_email( $this->customer_email );
 		$this->download->set_order_id( 1 );
 		$this->download->set_access_granted( '2018-01-22 00:00:00' );
 		$this->download->save();
@@ -84,13 +86,13 @@ class WC_Tests_Customer_Download extends WC_Unit_Test_Case {
 	public function test_get_downloads() {
 		$download_2 = new WC_Customer_Download();
 		$download_2->set_user_id( $this->customer_id );
-		$download_2->set_user_email( 'test@example.com' );
+		$download_2->set_user_email( $this->customer_email );
 		$download_2->set_order_id( 1 );
 		$download_2->set_access_granted( '2018-01-22 00:00:00' );
 		$download_2->save();
 
 		$data_store = WC_Data_Store::load( 'customer-download' );
-		$downloads  = $data_store->get_downloads( array( 'user_email' => 'test@example.com' ) );
+		$downloads  = $data_store->get_downloads( array( 'user_email' => $this->customer_email ) );
 		$this->assertEquals( 2, count( $downloads ) );
 		$this->assertEquals( array( $this->download, $download_2 ), $downloads );
 
@@ -100,7 +102,7 @@ class WC_Tests_Customer_Download extends WC_Unit_Test_Case {
 		$expected_result = array( $this->download->get_id(), $download_2->get_id() );
 		$downloads       = $data_store->get_downloads(
 			array(
-				'user_email' => 'test@example.com',
+				'user_email' => $this->customer_email,
 				'return'     => 'ids',
 			)
 		);
@@ -108,17 +110,17 @@ class WC_Tests_Customer_Download extends WC_Unit_Test_Case {
 
 		$expected_result = array(
 			array(
-				'user_email'    => 'test@example.com',
+				'user_email'    => $this->customer_email,
 				'permission_id' => $this->download->get_id(),
 			),
 			array(
-				'user_email'    => 'test@example.com',
+				'user_email'    => $this->customer_email,
 				'permission_id' => $download_2->get_id(),
 			),
 		);
 		$downloads       = $data_store->get_downloads(
 			array(
-				'user_email' => 'test@example.com',
+				'user_email' => $this->customer_email,
 				'return'     => 'permission_id,user_email',
 			)
 		);
