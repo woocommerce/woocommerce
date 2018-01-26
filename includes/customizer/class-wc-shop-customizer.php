@@ -121,8 +121,10 @@ class WC_Shop_Customizer {
 
 				wp.customize( 'woocommerce_catalog_columns', function( setting ) {
 					setting.bind( function( value ) {
-						var min = '<?php echo esc_js( $min_columns ); ?>';
-						var max = '<?php echo esc_js( $max_columns ); ?>';
+						var min = parseInt( '<?php echo esc_js( $min_columns ); ?>' );
+						var max = parseInt( '<?php echo esc_js( $max_columns ); ?>' );
+
+						value = parseInt( value );
 
 						if ( max && value > max ) {
 							setting.notifications.add( 'max_columns_error', new wp.customize.Notification(
