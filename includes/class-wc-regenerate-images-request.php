@@ -49,6 +49,26 @@ class WC_Regenerate_Images_Request extends WP_Background_Process {
 	}
 
 	/**
+	 * Determines whether an attachment can have its thumbnails regenerated.
+	 *
+	 * Adapted from Regenerate Thumbnails by Alex Mills.
+	 *
+	 * @param WP_Post $attachment An attachment's post object.
+	 * @return bool Whether the given attachment can have its thumbnails regenerated.
+	 */
+	protected function is_regeneratable( $attachment ) {
+		if ( 'site-icon' === get_post_meta( $attachment->ID, '_wp_attachment_context', true ) ) {
+			return false;
+		}
+
+		if ( wp_attachment_is_image( $attachment ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Code to execute for each item in the queue
 	 *
 	 * @param mixed $item Queue item to iterate over.
@@ -59,19 +79,19 @@ class WC_Regenerate_Images_Request extends WP_Background_Process {
 			return false;
 		}
 
-		// This is needed to prevent timeouts due to threading. See https://core.trac.wordpress.org/ticket/36534.
-		@putenv( 'MAGICK_THREAD_LIMIT=1' ); // @codingStandardsIgnoreLine.
+		$attachment_id = absint( $item['attachment_id'] );
+		$attachment    = get_post( $attachment_id );
+
+		if ( ! $attachment || 'attachment' !== $attachment->post_type || ! $this->is_regeneratable( $attachment ) ) {
+			return false;
+		}
 
 		if ( ! function_exists( 'wp_crop_image' ) ) {
 			include ABSPATH . 'wp-admin/includes/image.php';
 		}
 
-		$attachment_id = absint( $item['attachment_id'] );
-		$attachment    = get_post( $attachment_id );
-
-		if ( ! $attachment || 'attachment' !== $attachment->post_type || 'image/' !== substr( $attachment->post_mime_type, 0, 6 ) ) {
-			return false;
-		}
+		// This is needed to prevent timeouts due to threading. See https://core.trac.wordpress.org/ticket/36534.
+		@putenv( 'MAGICK_THREAD_LIMIT=1' ); // @codingStandardsIgnoreLine.
 
 		$log = wc_get_logger();
 
@@ -93,18 +113,28 @@ class WC_Regenerate_Images_Request extends WP_Background_Process {
 		add_filter( 'intermediate_image_sizes', array( $this, 'adjust_intermediate_image_sizes' ) );
 
 		// This function will generate the new image sizes.
-		$metadata = wp_generate_attachment_metadata( $attachment->ID, $fullsizepath );
-
-		// If something went wrong lets just remove the item from the queue.
-		if ( is_wp_error( $metadata ) || empty( $metadata ) ) {
-			return false;
-		}
-
-		// Update the meta data with the new size values.
-		wp_update_attachment_metadata( $attachment->ID, $metadata );
+		$new_metadata = wp_generate_attachment_metadata( $attachment->ID, $fullsizepath );
 
 		// Remove custom filter.
 		remove_filter( 'intermediate_image_sizes', array( $this, 'adjust_intermediate_image_sizes' ) );
+
+		// If something went wrong lets just remove the item from the queue.
+		if ( is_wp_error( $new_metadata ) || empty( $new_metadata ) ) {
+			return false;
+		}
+
+		$old_metadata = wp_get_attachment_metadata( $attachment->ID );
+
+		if ( ! empty( $old_metadata ) && ! empty( $old_metadata['sizes'] ) && is_array( $old_metadata['sizes'] ) ) {
+			foreach ( $old_metadata['sizes'] as $old_size => $old_size_data ) {
+				if ( empty( $new_metadata['sizes'][ $old_size ] ) ) {
+					$new_metadata['sizes'][ $old_size ] = $old_metadata['sizes'][ $old_size ];
+				}
+			}
+		}
+
+		// Update the meta data with the new size values.
+		wp_update_attachment_metadata( $attachment->ID, $new_metadata );
 
 		// We made it till the end, now lets remove the item from the queue.
 		return false;
