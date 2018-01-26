@@ -574,7 +574,11 @@ class WC_Discounts {
 	 */
 	protected function validate_coupon_user_usage_limit( $coupon, $user_id = 0 ) {
 		if ( empty( $user_id ) ) {
-			$user_id = get_current_user_id();
+			if ( $this->object instanceof WC_Order ) {
+				$user_id = $this->object->get_customer_id();
+			} else {
+				$user_id = get_current_user_id();
+			}
 		}
 
 		if ( $coupon && $user_id && $coupon->get_usage_limit_per_user() > 0 && $coupon->get_id() && $coupon->get_data_store() ) {
