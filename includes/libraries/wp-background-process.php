@@ -1,14 +1,15 @@
-<?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
+<?php // @codingStandardsIgnoreLine.
 /**
  * Abstract WP_Background_Process class.
  *
- * @abstract
  * @package WP-Background-Processing
  * @extends WP_Async_Request
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * WP_Background_Process class.
  */
 abstract class WP_Background_Process extends WP_Async_Request {
 
@@ -58,14 +59,11 @@ abstract class WP_Background_Process extends WP_Async_Request {
 		$this->cron_interval_identifier = $this->identifier . '_cron_interval';
 
 		add_action( $this->cron_hook_identifier, array( $this, 'handle_cron_healthcheck' ) );
-		add_filter( 'cron_schedules', array( $this, 'schedule_cron_healthcheck' ) );
+		add_filter( 'cron_schedules', array( $this, 'schedule_cron_healthcheck' ) ); // @codingStandardsIgnoreLine.
 	}
 
 	/**
-	 * Dispatch
-	 *
-	 * @access public
-	 * @return void
+	 * Dispatch.
 	 */
 	public function dispatch() {
 		// Schedule the cron healthcheck.
@@ -150,14 +148,14 @@ abstract class WP_Background_Process extends WP_Async_Request {
 	}
 
 	/**
-	 * Maybe process queue
+	 * Maybe process queue.
 	 *
 	 * Checks whether data exists within the queue and that
 	 * the process is not already running.
 	 */
 	public function maybe_handle() {
-		// Don't lock up other requests while processing
-		session_write_close();
+		// Don't lock up other requests while processing.
+		session_write_close(); // @codingStandardsIgnoreLine.
 
 		if ( $this->is_process_running() ) {
 			// Background process already running.
@@ -194,11 +192,7 @@ abstract class WP_Background_Process extends WP_Async_Request {
 
 		$key = $wpdb->esc_like( $this->identifier . '_batch_' ) . '%';
 
-		$count = $wpdb->get_var( $wpdb->prepare( "
-		SELECT COUNT(*)
-		FROM {$table}
-		WHERE {$column} LIKE %s
-	", $key ) );
+		$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE {$column} LIKE %s", $key ) ); // @codingStandardsIgnoreLine.
 
 		return ( $count > 0 ) ? false : true;
 	}
@@ -269,13 +263,7 @@ abstract class WP_Background_Process extends WP_Async_Request {
 
 		$key = $wpdb->esc_like( $this->identifier . '_batch_' ) . '%';
 
-		$query = $wpdb->get_row( $wpdb->prepare( "
-		SELECT *
-		FROM {$table}
-		WHERE {$column} LIKE %s
-		ORDER BY {$key_column} ASC
-		LIMIT 1
-		", $key ) );
+		$query = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE {$column} LIKE %s ORDER BY {$key_column} ASC LIMIT 1", $key ) ); // @codingStandardsIgnoreLine.
 
 		$batch       = new stdClass();
 		$batch->key  = $query->$column;
@@ -417,6 +405,7 @@ abstract class WP_Background_Process extends WP_Async_Request {
 		// Adds every 5 minutes to the existing schedules.
 		$schedules[ $this->identifier . '_cron_interval' ] = array(
 			'interval' => MINUTE_IN_SECONDS * $interval,
+			/* translators: %d: interval */
 			'display'  => sprintf( __( 'Every %d minutes', 'woocommerce' ), $interval ),
 		);
 
@@ -470,7 +459,6 @@ abstract class WP_Background_Process extends WP_Async_Request {
 	 * Cancel Process
 	 *
 	 * Stop processing queue items, clear cronjob and delete batch.
-	 *
 	 */
 	public function cancel_process() {
 		if ( ! $this->is_queue_empty() ) {
@@ -496,5 +484,4 @@ abstract class WP_Background_Process extends WP_Async_Request {
 	 * @return mixed
 	 */
 	abstract protected function task( $item );
-
 }
