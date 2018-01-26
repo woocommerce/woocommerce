@@ -213,7 +213,7 @@ abstract class WP_Background_Process extends WP_Async_Request {
 	}
 
 	/**
-	 * Lock process
+	 * Lock process.
 	 *
 	 * Lock the process so that multiple instances can't run simultaneously.
 	 * Override if applicable, but the duration should be greater than that
@@ -293,16 +293,17 @@ abstract class WP_Background_Process extends WP_Async_Request {
 					unset( $batch->data[ $key ] );
 				}
 
+				// Update batch so this task is not repeated.
+				$this->update( $batch->key, $batch->data );
+
 				if ( $this->time_exceeded() || $this->memory_exceeded() ) {
 					// Batch limits reached.
 					break;
 				}
 			}
 
-			// Update or delete current batch.
-			if ( ! empty( $batch->data ) ) {
-				$this->update( $batch->key, $batch->data );
-			} else {
+			// Delete current batch if complete.
+			if ( empty( $batch->data ) ) {
 				$this->delete( $batch->key );
 			}
 		} while ( ! $this->time_exceeded() && ! $this->memory_exceeded() && ! $this->is_queue_empty() );
