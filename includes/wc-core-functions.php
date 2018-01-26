@@ -2004,3 +2004,42 @@ function wc_cleanup_session_data() {
 	}
 }
 add_action( 'woocommerce_cleanup_sessions', 'wc_cleanup_session_data' );
+
+/**
+ * Convert a decimal (e.g. 3.5) to a fraction (e.g. 7/2).
+ * From: https://www.designedbyaturtle.co.uk/2015/converting-a-decimal-to-a-fraction-in-php/
+ *
+ * @param float $decimal the decimal number.
+ * @return array|bool a 1/2 would be [1, 2] array (this can be imploded with '/' to form a string).
+ */
+function wc_decimal_to_fraction( $decimal ) {
+	if ( 0 > $decimal || ! is_numeric( $decimal ) ) {
+		// Negative digits need to be passed in as positive numbers and prefixed as negative once the response is imploded.
+		return false;
+	}
+
+	if ( 0 === $decimal ) {
+		return array( 0, 1 );
+	}
+
+	$tolerance   = 1.e-4;
+	$numerator   = 1;
+	$h2          = 0;
+	$denominator = 0;
+	$k2          = 1;
+	$b           = 1 / $decimal;
+
+	do {
+		$b           = 1 / $b;
+		$a           = floor( $b );
+		$aux         = $numerator;
+		$numerator   = $a * $numerator + $h2;
+		$h2          = $aux;
+		$aux         = $denominator;
+		$denominator = $a * $denominator + $k2;
+		$k2          = $aux;
+		$b           = $b - $a;
+	} while ( abs( $decimal - $numerator / $denominator ) > $decimal * $tolerance );
+
+	return array( $numerator, $denominator );
+}

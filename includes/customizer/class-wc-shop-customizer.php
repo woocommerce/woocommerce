@@ -4,12 +4,9 @@
  *
  * @version 3.3.0
  * @package WooCommerce
- * @author  WooCommerce
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Shop_Customizer class.
@@ -81,6 +78,11 @@ class WC_Shop_Customizer {
 		$max_rows    = wc_get_theme_support( 'product_grid::max_rows', '' );
 		$min_columns = wc_get_theme_support( 'product_grid::min_columns', 1 );
 		$max_columns = wc_get_theme_support( 'product_grid::max_columns', '' );
+
+		/* translators: %d: Setting value */
+		$min_notice = __( 'The minimum allowed setting is %d', 'woocommerce' );
+		/* translators: %d: Setting value */
+		$max_notice = __( 'The maximum allowed setting is %d', 'woocommerce' );
 		?>
 		<script type="text/javascript">
 			jQuery( document ).ready( function( $ ) {
@@ -101,6 +103,22 @@ class WC_Shop_Customizer {
 					$( '.woocommerce-cropping-control' ).find( 'input:checked' ).change();
 				} );
 
+				wp.customize.section( 'woocommerce_product_catalog', function( section ) {
+					section.expanded.bind( function( isExpanded ) {
+						if ( isExpanded ) {
+							wp.customize.previewer.previewUrl.set( '<?php echo esc_js( wc_get_page_permalink( 'shop' ) ); ?>' );
+						}
+					} );
+				} );
+
+				wp.customize.section( 'woocommerce_product_images', function( section ) {
+					section.expanded.bind( function( isExpanded ) {
+						if ( isExpanded ) {
+							wp.customize.previewer.previewUrl.set( '<?php echo esc_js( wc_get_page_permalink( 'shop' ) ); ?>' );
+						}
+					} );
+				} );
+
 				wp.customize( 'woocommerce_catalog_columns', function( setting ) {
 					setting.bind( function( value ) {
 						var min = '<?php echo esc_js( $min_columns ); ?>';
@@ -111,7 +129,7 @@ class WC_Shop_Customizer {
 								'max_columns_error',
 								{
 									type   : 'error',
-									message: '<?php echo esc_js( sprintf( __( 'The maximum allowed setting for columns is %d', 'woocommerce' ), $max_columns ) ); ?>'
+									message: '<?php echo esc_js( sprintf( $max_notice, $max_columns ) ); ?>'
 								}
 							) );
 						} else {
@@ -123,7 +141,7 @@ class WC_Shop_Customizer {
 								'min_columns_error',
 								{
 									type   : 'error',
-									message: '<?php echo esc_js( sprintf( __( 'The minimum allowed setting for columns is %d', 'woocommerce' ), $min_columns ) ); ?>'
+									message: '<?php echo esc_js( sprintf( $min_notice, $min_columns ) ); ?>'
 								}
 							) );
 						} else {
@@ -142,7 +160,7 @@ class WC_Shop_Customizer {
 								'max_rows_error',
 								{
 									type   : 'error',
-									message: '<?php echo esc_js( sprintf( __( 'The maximum allowed setting for rows is %d', 'woocommerce' ), $max_rows ) ); ?>'
+									message: '<?php echo esc_js( sprintf( $min_notice, $max_rows ) ); ?>'
 								}
 							) );
 						} else {
@@ -154,7 +172,7 @@ class WC_Shop_Customizer {
 								'min_rows_error',
 								{
 									type   : 'error',
-									message: '<?php echo esc_js( sprintf( __( 'The minimum allowed setting for rows is %d', 'woocommerce' ), $min_rows ) ); ?>'
+									message: '<?php echo esc_js( sprintf( $min_notice, $min_rows ) ); ?>'
 								}
 							) );
 						} else {
@@ -168,24 +186,6 @@ class WC_Shop_Customizer {
 	}
 
 	/**
-	 * Should our settings show?
-	 *
-	 * @return boolean
-	 */
-	public function is_active() {
-		return is_woocommerce() || wc_post_content_has_shortcode( 'products' ) || ! current_theme_supports( 'woocommerce' );
-	}
-
-	/**
-	 * Should our settings show on product archives?
-	 *
-	 * @return boolean
-	 */
-	public function is_products_archive() {
-		return is_shop() || is_product_taxonomy() || is_product_category() || ! current_theme_supports( 'woocommerce' );
-	}
-
-	/**
 	 * Sanitize the shop page & category display setting.
 	 *
 	 * @param string $value '', 'subcategories', or 'both'.
@@ -194,7 +194,7 @@ class WC_Shop_Customizer {
 	public function sanitize_archive_display( $value ) {
 		$options = array( '', 'subcategories', 'both' );
 
-		return in_array( $value, $options ) ? $value : '';
+		return in_array( $value, $options, true ) ? $value : '';
 	}
 
 	/**
@@ -266,10 +266,10 @@ class WC_Shop_Customizer {
 		$wp_customize->add_control(
 			'woocommerce_demo_store',
 			array(
-				'label'       => __( 'Enable store notice', 'woocommerce' ),
-				'section'     => 'woocommerce_store_notice',
-				'settings'    => 'woocommerce_demo_store',
-				'type'        => 'checkbox',
+				'label'    => __( 'Enable store notice', 'woocommerce' ),
+				'section'  => 'woocommerce_store_notice',
+				'settings' => 'woocommerce_demo_store',
+				'type'     => 'checkbox',
 			)
 		);
 	}
@@ -283,20 +283,19 @@ class WC_Shop_Customizer {
 		$wp_customize->add_section(
 			'woocommerce_product_catalog',
 			array(
-				'title'           => __( 'Product Catalog', 'woocommerce' ),
-				'priority'        => 10,
-				'active_callback' => array( $this, 'is_products_archive' ),
-				'panel'           => 'woocommerce',
+				'title'    => __( 'Product Catalog', 'woocommerce' ),
+				'priority' => 10,
+				'panel'    => 'woocommerce',
 			)
 		);
 
 		$wp_customize->add_setting(
 			'woocommerce_shop_page_display',
 			array(
-				'default'              => '',
-				'type'                 => 'option',
-				'capability'           => 'manage_woocommerce',
-				'sanitize_callback'    => array( $this, 'sanitize_archive_display' ),
+				'default'           => '',
+				'type'              => 'option',
+				'capability'        => 'manage_woocommerce',
+				'sanitize_callback' => array( $this, 'sanitize_archive_display' ),
 			)
 		);
 
@@ -319,10 +318,10 @@ class WC_Shop_Customizer {
 		$wp_customize->add_setting(
 			'woocommerce_category_archive_display',
 			array(
-				'default'              => '',
-				'type'                 => 'option',
-				'capability'           => 'manage_woocommerce',
-				'sanitize_callback'    => array( $this, 'sanitize_archive_display' ),
+				'default'           => '',
+				'type'              => 'option',
+				'capability'        => 'manage_woocommerce',
+				'sanitize_callback' => array( $this, 'sanitize_archive_display' ),
 			)
 		);
 
@@ -345,10 +344,10 @@ class WC_Shop_Customizer {
 		$wp_customize->add_setting(
 			'woocommerce_default_catalog_orderby',
 			array(
-				'default'              => 'menu_order',
-				'type'                 => 'option',
-				'capability'           => 'manage_woocommerce',
-				'sanitize_callback'    => array( $this, 'sanitize_default_catalog_orderby' ),
+				'default'           => 'menu_order',
+				'type'              => 'option',
+				'capability'        => 'manage_woocommerce',
+				'sanitize_callback' => array( $this, 'sanitize_default_catalog_orderby' ),
 			)
 		);
 
@@ -440,10 +439,9 @@ class WC_Shop_Customizer {
 		$wp_customize->add_section(
 			'woocommerce_product_images',
 			array(
-				'title'           => __( 'Product Images', 'woocommerce' ),
-				'priority'        => 20,
-				'active_callback' => array( $this, 'is_active' ),
-				'panel'           => 'woocommerce',
+				'title'    => __( 'Product Images', 'woocommerce' ),
+				'priority' => 20,
+				'panel'    => 'woocommerce',
 			)
 		);
 
@@ -503,15 +501,15 @@ class WC_Shop_Customizer {
 			);
 		}
 
-		include_once( WC_ABSPATH . 'includes/customizer/class-wc-customizer-control-cropping.php' );
+		include_once WC_ABSPATH . 'includes/customizer/class-wc-customizer-control-cropping.php';
 
 		$wp_customize->add_setting(
 			'woocommerce_thumbnail_cropping',
 			array(
-				'default'              => '1:1',
-				'type'                 => 'option',
-				'capability'           => 'manage_woocommerce',
-				'sanitize_callback'    => 'wc_clean',
+				'default'           => '1:1',
+				'type'              => 'option',
+				'capability'        => 'manage_woocommerce',
+				'sanitize_callback' => 'wc_clean',
 			)
 		);
 
@@ -550,15 +548,15 @@ class WC_Shop_Customizer {
 					),
 					'label'    => __( 'Thumbnail cropping', 'woocommerce' ),
 					'choices'  => array(
-						'1:1'             => array(
+						'1:1'       => array(
 							'label'       => __( '1:1', 'woocommerce' ),
 							'description' => __( 'Images will be cropped into a square', 'woocommerce' ),
 						),
-						'custom'          => array(
+						'custom'    => array(
 							'label'       => __( 'Custom', 'woocommerce' ),
 							'description' => __( 'Images will be cropped to a custom aspect ratio', 'woocommerce' ),
 						),
-						'uncropped'       => array(
+						'uncropped' => array(
 							'label'       => __( 'Uncropped', 'woocommerce' ),
 							'description' => __( 'Images will display using the aspect ratio in which they were uploaded', 'woocommerce' ),
 						),
