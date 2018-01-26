@@ -293,29 +293,6 @@ var ProductCategoryList = withAPIData(function (props) {
 	);
 });
 
-var products_block_display_settings = [{
-	title: __('All'),
-	description: __('All products'),
-	value: 'all',
-	display_callback: function display_callback(props) {
-		console.log("ALL");
-	}
-}, {
-	title: __('Specific'),
-	description: __('Hand-picked products'),
-	value: 'specific',
-	display_callback: function display_callback(props) {
-		console.log("SPECIFIC");
-	}
-}, {
-	title: __('Category'),
-	description: __('Products from a specific category'),
-	value: 'category',
-	display_callback: function display_callback(props) {
-		console.log("CATEGORY");
-	}
-}];
-
 var ProductsBlockSettingsEditorDisplayOption = function (_React$Component3) {
 	_inherits(ProductsBlockSettingsEditorDisplayOption, _React$Component3);
 
@@ -365,6 +342,20 @@ var ProductsBlockSettingsEditorDisplayOptions = function (_React$Component4) {
 		key: "render",
 		value: function render() {
 			var _this6 = this;
+
+			var products_block_display_settings = [{
+				title: __('All'),
+				description: __('All products'),
+				value: 'all'
+			}, {
+				title: __('Specific'),
+				description: __('Hand-picked products'),
+				value: 'specific'
+			}, {
+				title: __('Category'),
+				description: __('Products from a specific category'),
+				value: 'category'
+			}];
 
 			return wp.element.createElement(
 				"div",
@@ -427,14 +418,17 @@ var ProductsBlockSettingsEditor = function (_React$Component5) {
 	}, {
 		key: "render",
 		value: function render() {
-			var extra_settings = wp.element.createElement(ProductsBlockSettingsEditorDisplayOptions, { update_display_callback: this.updateDisplay });
-			if ('all' === this.state.display) {
-				extra_settings = null;
-			} else if ('specific' === this.state.display) {
+			var extra_settings = null;
+			if ('specific' === this.state.display) {
 				extra_settings = wp.element.createElement(ProductsSpecificSelect, null);
 			} else if ('category' === this.state.display) {
 				extra_settings = wp.element.createElement(ProductsCategorySelect, this.props);
 			}
+
+			// todo:
+			/*
+   Add a "Change/Cancel" link. When clicked it toggles the visibility of ProductsBlockSettingsEditorDisplayOptions
+   */
 
 			return wp.element.createElement(
 				"div",
@@ -444,30 +438,7 @@ var ProductsBlockSettingsEditor = function (_React$Component5) {
 					null,
 					__('Products')
 				),
-				wp.element.createElement(
-					"div",
-					{ className: "display-select" },
-					__('Display:'),
-					wp.element.createElement(
-						"select",
-						{ value: this.state.display, onChange: this.updateDisplay },
-						wp.element.createElement(
-							"option",
-							{ value: "all" },
-							__('All')
-						),
-						wp.element.createElement(
-							"option",
-							{ value: "specific" },
-							__('Specific products')
-						),
-						wp.element.createElement(
-							"option",
-							{ value: "category" },
-							__('Product Category')
-						)
-					)
-				),
+				wp.element.createElement(ProductsBlockSettingsEditorDisplayOptions, { update_display_callback: this.updateDisplay }),
 				extra_settings,
 				wp.element.createElement(
 					"div",

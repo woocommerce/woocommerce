@@ -146,27 +146,6 @@ const ProductCategoryList = withAPIData( ( props ) => {
 	}
 );
 
-const products_block_display_settings = [
-	{
-		title: __( 'All' ),
-		description: __( 'All products' ),
-		value: 'all',
-		display_callback: function( props ) { console.log( "ALL" ); },
-	},
-	{
-		title: __( 'Specific' ),
-		description: __( 'Hand-picked products' ),
-		value: 'specific',
-		display_callback: function( props ) { console.log( "SPECIFIC" ); },
-	},
-	{
-		title: __( 'Category' ),
-		description: __( 'Products from a specific category' ),
-		value: 'category',
-		display_callback: function( props ) { console.log( "CATEGORY" ); },
-	}
-];
-
 class ProductsBlockSettingsEditorDisplayOption extends React.Component {
 	render() {
 		return (
@@ -180,6 +159,24 @@ class ProductsBlockSettingsEditorDisplayOption extends React.Component {
 
 class ProductsBlockSettingsEditorDisplayOptions extends React.Component {
 	render() {
+		const products_block_display_settings = [
+			{
+				title: __( 'All' ),
+				description: __( 'All products' ),
+				value: 'all',
+			},
+			{
+				title: __( 'Specific' ),
+				description: __( 'Hand-picked products' ),
+				value: 'specific',
+			},
+			{
+				title: __( 'Category' ),
+				description: __( 'Products from a specific category' ),
+				value: 'category',
+			}
+		];
+
 		return (
 			<div>
 				{ products_block_display_settings.map( ( setting ) =>
@@ -224,28 +221,24 @@ class ProductsBlockSettingsEditor extends React.Component {
 	 * Render the display settings dropdown and any extra contextual settings.
 	 */
 	render() {
-		let extra_settings = <ProductsBlockSettingsEditorDisplayOptions update_display_callback={ this.updateDisplay } />;
-		if ( 'all' === this.state.display ) {
-			extra_settings = null;
-		} else if ( 'specific' === this.state.display ) {
+		let extra_settings = null;
+		if ( 'specific' === this.state.display ) {
 			extra_settings = <ProductsSpecificSelect />;
 		} else if ( 'category' === this.state.display ) {
 			extra_settings = <ProductsCategorySelect { ...this.props } />;
 		}
+
+		// todo:
+		/*
+		Add a "Change/Cancel" link. When clicked it toggles the visibility of ProductsBlockSettingsEditorDisplayOptions
+		*/
 
 		return (
 			<div className="wc-product-display-settings">
 
 				<h4>{ __( 'Products' ) }</h4>
 
-				<div className="display-select">
-					{ __( 'Display:' ) }
-					<select value={ this.state.display } onChange={ this.updateDisplay }>
-						<option value="all">{ __( 'All' ) }</option>
-						<option value="specific">{ __( 'Specific products' ) }</option>
-						<option value="category">{ __( 'Product Category' ) }</option>
-					</select>
-				</div>
+				<ProductsBlockSettingsEditorDisplayOptions update_display_callback={ this.updateDisplay } />
 
 				{ extra_settings }
 
