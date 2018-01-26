@@ -99,25 +99,29 @@ class WC_Regenerate_Images_Request extends WP_Background_Process {
 		$fullsizepath = get_attached_file( $attachment->ID );
 
 		// Check if the file exists, if not just remove item from queue.
-		if ( false === $fullsizepath || ! file_exists( $fullsizepath ) ) {
+		if ( false === $fullsizepath || is_wp_error( $fullsizepath ) || ! file_exists( $fullsizepath ) ) {
 			return false;
 		}
+
+		$old_metadata = wp_get_attachment_metadata( $attachment->ID );
 
 		// We only want to regen WC images.
 		add_filter( 'intermediate_image_sizes', array( $this, 'adjust_intermediate_image_sizes' ) );
 
+		// We only want to resize images if they do not already exist.
+		add_filter( 'intermediate_image_sizes_advanced', array( $this, 'filter_image_sizes_to_only_missing_thumbnails' ), 10, 3 );
+
 		// This function will generate the new image sizes.
 		$new_metadata = wp_generate_attachment_metadata( $attachment->ID, $fullsizepath );
 
-		// Remove custom filter.
+		// Remove custom filters.
 		remove_filter( 'intermediate_image_sizes', array( $this, 'adjust_intermediate_image_sizes' ) );
+		remove_filter( 'intermediate_image_sizes_advanced', array( $this, 'filter_image_sizes_to_only_missing_thumbnails' ), 10, 3 );
 
 		// If something went wrong lets just remove the item from the queue.
 		if ( is_wp_error( $new_metadata ) || empty( $new_metadata ) ) {
 			return false;
 		}
-
-		$old_metadata = wp_get_attachment_metadata( $attachment->ID );
 
 		if ( ! empty( $old_metadata ) && ! empty( $old_metadata['sizes'] ) && is_array( $old_metadata['sizes'] ) ) {
 			foreach ( $old_metadata['sizes'] as $old_size => $old_size_data ) {
@@ -132,6 +136,69 @@ class WC_Regenerate_Images_Request extends WP_Background_Process {
 
 		// We made it till the end, now lets remove the item from the queue.
 		return false;
+	}
+
+	/**
+	 * Filters the list of thumbnail sizes to only include those which have missing files.
+	 *
+	 * @param array $sizes         An associative array of registered thumbnail image sizes.
+	 * @param array $metadata      An associative array of fullsize image metadata: width, height, file.
+	 * @param int   $attachment_id Attachment ID.
+	 * @return array An associative array of image sizes.
+	 */
+	public function filter_image_sizes_to_only_missing_thumbnails( $sizes, $metadata, $attachment_id ) {
+		if ( ! $sizes ) {
+			return $sizes;
+		}
+
+		$fullsizepath = get_attached_file( $attachment_id );
+		$editor       = wp_get_image_editor( $fullsizepath );
+
+		if ( is_wp_error( $editor ) ) {
+			return $sizes;
+		}
+
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+
+		// This is based on WP_Image_Editor_GD::multi_resize() and others.
+		foreach ( $sizes as $size => $size_data ) {
+			if ( empty( $metadata['sizes'][ $size ] ) ) {
+				continue;
+			}
+			if ( ! isset( $size_data['width'] ) && ! isset( $size_data['height'] ) ) {
+				continue;
+			}
+			if ( ! isset( $size_data['width'] ) ) {
+				$size_data['width'] = null;
+			}
+			if ( ! isset( $size_data['height'] ) ) {
+				$size_data['height'] = null;
+			}
+			if ( ! isset( $size_data['crop'] ) ) {
+				$size_data['crop'] = false;
+			}
+
+			list( $orig_w, $orig_h ) = getimagesize( $fullsizepath );
+
+			$dimensions = image_resize_dimensions( $orig_w, $orig_h, $size_data['width'], $size_data['height'], $size_data['crop'] );
+
+			if ( ! $dimensions || ! is_array( $dimensions ) ) {
+				continue;
+			}
+
+			$info         = pathinfo( $fullsizepath );
+			$ext          = $info['extension'];
+			$dst_w        = $dimensions[4];
+			$dst_h        = $dimensions[5];
+			$suffix       = "{$dst_w}x{$dst_h}";
+			$dst_rel_path = str_replace( '.' . $ext, '', $fullsizepath );
+			$thumbnail    = "{$dst_rel_path}-{$suffix}.{$ext}";
+
+			if ( $dst_w === $metadata['sizes'][ $size ]['width'] && $dst_h === $metadata['sizes'][ $size ]['height'] && file_exists( $thumbnail ) ) {
+				unset( $sizes[ $size ] );
+			}
+		}
+		return $sizes;
 	}
 
 	/**
