@@ -59,21 +59,15 @@ class WC_Regenerate_Images_Request extends WP_Background_Process {
 			return false;
 		}
 
-		$attachment_id      = absint( $item['attachment_id'] );
-		$last_attachment_id = absint( get_option( 'woocommerce_last_image_regen_id', 0 ) );
-
-		// If the current task matches the last task there may have been an error which prevented the task from completing; skip.
-		if ( $last_attachment_id === $attachment_id ) {
-			return false;
-		}
-
-		update_option( 'woocommerce_last_image_regen_id', $item['attachment_id'] );
+		// This is needed to prevent timeouts due to threading. See https://core.trac.wordpress.org/ticket/36534.
+		@putenv( 'MAGICK_THREAD_LIMIT=1' ); // @codingStandardsIgnoreLine.
 
 		if ( ! function_exists( 'wp_crop_image' ) ) {
 			include ABSPATH . 'wp-admin/includes/image.php';
 		}
 
-		$attachment = get_post( $attachment_id );
+		$attachment_id = absint( $item['attachment_id'] );
+		$attachment    = get_post( $attachment_id );
 
 		if ( ! $attachment || 'attachment' !== $attachment->post_type || 'image/' !== substr( $attachment->post_mime_type, 0, 6 ) ) {
 			return false;
