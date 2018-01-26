@@ -4,16 +4,12 @@
  *
  * All functionality pertaining to regenerating product images in realtime.
  *
- * @category Images
  * @package WooCommerce/Classes
- * @author Automattic
  * @version 3.3.0
  * @since 3.3.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Regenerate Images Class
@@ -31,7 +27,7 @@ class WC_Regenerate_Images {
 	 * Init function
 	 */
 	public static function init() {
-		include_once( WC_ABSPATH . 'includes/class-wc-regenerate-images-request.php' );
+		include_once WC_ABSPATH . 'includes/class-wc-regenerate-images-request.php';
 		self::$background_process = new WC_Regenerate_Images_Request();
 
 		if ( apply_filters( 'woocommerce_resize_images', true ) && ! is_admin() ) {
@@ -96,21 +92,22 @@ class WC_Regenerate_Images {
 		}
 
 		if ( ! function_exists( 'wp_crop_image' ) ) {
-			include( ABSPATH . 'wp-admin/includes/image.php' );
+			include ABSPATH . 'wp-admin/includes/image.php';
 		}
 
 		$wp_uploads     = wp_upload_dir( null, false );
 		$wp_uploads_dir = $wp_uploads['basedir'];
 		$wp_uploads_url = $wp_uploads['baseurl'];
 
-		$original_image_file_path   = get_attached_file( $attachment->ID );
+		$original_image_file_path = get_attached_file( $attachment->ID );
 
 		if ( ! file_exists( $original_image_file_path ) || ! getimagesize( $original_image_file_path ) ) {
 			return $image;
 		}
 
 		$info = pathinfo( $original_image_file_path );
-		$ext = $info['extension'];
+		$ext  = $info['extension'];
+
 		list( $orig_w, $orig_h ) = getimagesize( $original_image_file_path );
 		// Get image size after cropping.
 		$image_size = wc_get_image_size( $size );

@@ -1,14 +1,15 @@
-<?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
+<?php // @codingStandardsIgnoreLine.
 /**
  * Abstract WP_Background_Process class.
  *
- * @abstract
  * @package WP-Background-Processing
  * @extends WP_Async_Request
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * WP_Background_Process class.
  */
 abstract class WP_Background_Process extends WP_Async_Request {
 
@@ -58,14 +59,11 @@ abstract class WP_Background_Process extends WP_Async_Request {
 		$this->cron_interval_identifier = $this->identifier . '_cron_interval';
 
 		add_action( $this->cron_hook_identifier, array( $this, 'handle_cron_healthcheck' ) );
-		add_filter( 'cron_schedules', array( $this, 'schedule_cron_healthcheck' ) );
+		add_filter( 'cron_schedules', array( $this, 'schedule_cron_healthcheck' ) ); // @codingStandardsIgnoreLine.
 	}
 
 	/**
-	 * Dispatch
-	 *
-	 * @access public
-	 * @return void
+	 * Dispatch.
 	 */
 	public function dispatch() {
 		// Schedule the cron healthcheck.
@@ -122,12 +120,27 @@ abstract class WP_Background_Process extends WP_Async_Request {
 	/**
 	 * Delete queue
 	 *
-	 * @param string $key Key.
-	 *
+	 * @param string $key Key. Leave blank to delete all batches.
 	 * @return $this
 	 */
-	public function delete( $key ) {
-		delete_site_option( $key );
+	public function delete( $key = '' ) {
+		if ( $key ) {
+			delete_site_option( $key );
+		} else {
+			global $wpdb;
+
+			$table  = $wpdb->options;
+			$column = 'option_name';
+
+			if ( is_multisite() ) {
+				$table  = $wpdb->sitemeta;
+				$column = 'meta_key';
+			}
+
+			$key = $wpdb->esc_like( $this->identifier . '_batch_' ) . '%';
+
+			$wpdb->query( $wpdb->prepare( "DELETE FROM {$table} WHERE {$column} LIKE %s", $key ) ); // @codingStandardsIgnoreLine.
+		}
 
 		return $this;
 	}
@@ -150,14 +163,14 @@ abstract class WP_Background_Process extends WP_Async_Request {
 	}
 
 	/**
-	 * Maybe process queue
+	 * Maybe process queue.
 	 *
 	 * Checks whether data exists within the queue and that
 	 * the process is not already running.
 	 */
 	public function maybe_handle() {
-		// Don't lock up other requests while processing
-		session_write_close();
+		// Don't lock up other requests while processing.
+		session_write_close(); // @codingStandardsIgnoreLine.
 
 		if ( $this->is_process_running() ) {
 			// Background process already running.
@@ -194,11 +207,7 @@ abstract class WP_Background_Process extends WP_Async_Request {
 
 		$key = $wpdb->esc_like( $this->identifier . '_batch_' ) . '%';
 
-		$count = $wpdb->get_var( $wpdb->prepare( "
-		SELECT COUNT(*)
-		FROM {$table}
-		WHERE {$column} LIKE %s
-	", $key ) );
+		$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE {$column} LIKE %s", $key ) ); // @codingStandardsIgnoreLine.
 
 		return ( $count > 0 ) ? false : true;
 	}
@@ -219,7 +228,7 @@ abstract class WP_Background_Process extends WP_Async_Request {
 	}
 
 	/**
-	 * Lock process
+	 * Lock process.
 	 *
 	 * Lock the process so that multiple instances can't run simultaneously.
 	 * Override if applicable, but the duration should be greater than that
@@ -269,19 +278,22 @@ abstract class WP_Background_Process extends WP_Async_Request {
 
 		$key = $wpdb->esc_like( $this->identifier . '_batch_' ) . '%';
 
-		$query = $wpdb->get_row( $wpdb->prepare( "
-		SELECT *
-		FROM {$table}
-		WHERE {$column} LIKE %s
-		ORDER BY {$key_column} ASC
-		LIMIT 1
-		", $key ) );
+		$query = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE {$column} LIKE %s ORDER BY {$key_column} ASC LIMIT 1", $key ) ); // @codingStandardsIgnoreLine.
 
 		$batch       = new stdClass();
 		$batch->key  = $query->$column;
 		$batch->data = maybe_unserialize( $query->$value_column );
 
 		return $batch;
+	}
+
+	/**
+	 * See if the batch limit has been exceeded.
+	 *
+	 * @return bool
+	 */
+	protected function batch_limit_exceeded() {
+		return $this->time_exceeded() || $this->memory_exceeded();
 	}
 
 	/**
@@ -305,7 +317,7 @@ abstract class WP_Background_Process extends WP_Async_Request {
 					unset( $batch->data[ $key ] );
 				}
 
-				if ( $this->time_exceeded() || $this->memory_exceeded() ) {
+				if ( $this->batch_limit_exceeded() ) {
 					// Batch limits reached.
 					break;
 				}
@@ -317,7 +329,7 @@ abstract class WP_Background_Process extends WP_Async_Request {
 			} else {
 				$this->delete( $batch->key );
 			}
-		} while ( ! $this->time_exceeded() && ! $this->memory_exceeded() && ! $this->is_queue_empty() );
+		} while ( ! $this->batch_limit_exceeded() && ! $this->is_queue_empty() );
 
 		$this->unlock_process();
 
@@ -417,6 +429,7 @@ abstract class WP_Background_Process extends WP_Async_Request {
 		// Adds every 5 minutes to the existing schedules.
 		$schedules[ $this->identifier . '_cron_interval' ] = array(
 			'interval' => MINUTE_IN_SECONDS * $interval,
+			/* translators: %d: interval */
 			'display'  => sprintf( __( 'Every %d minutes', 'woocommerce' ), $interval ),
 		);
 
@@ -470,17 +483,12 @@ abstract class WP_Background_Process extends WP_Async_Request {
 	 * Cancel Process
 	 *
 	 * Stop processing queue items, clear cronjob and delete batch.
-	 *
 	 */
 	public function cancel_process() {
 		if ( ! $this->is_queue_empty() ) {
-			$batch = $this->get_batch();
-
-			$this->delete( $batch->key );
-
+			$this->delete();
 			wp_clear_scheduled_hook( $this->cron_hook_identifier );
 		}
-
 	}
 
 	/**
@@ -496,5 +504,4 @@ abstract class WP_Background_Process extends WP_Async_Request {
 	 * @return mixed
 	 */
 	abstract protected function task( $item );
-
 }
