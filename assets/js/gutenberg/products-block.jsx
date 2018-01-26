@@ -146,6 +146,50 @@ const ProductCategoryList = withAPIData( ( props ) => {
 	}
 );
 
+const products_block_display_settings = [
+	{
+		title: __( 'All' ),
+		description: __( 'All products' ),
+		value: 'all',
+		display_callback: function( props ) { console.log( "ALL" ); },
+	},
+	{
+		title: __( 'Specific' ),
+		description: __( 'Hand-picked products' ),
+		value: 'specific',
+		display_callback: function( props ) { console.log( "SPECIFIC" ); },
+	},
+	{
+		title: __( 'Category' ),
+		description: __( 'Products from a specific category' ),
+		value: 'category',
+		display_callback: function( props ) { console.log( "CATEGORY" ); },
+	}
+];
+
+class ProductsBlockSettingsEditorDisplayOption extends React.Component {
+	render() {
+		return (
+			<div onClick={ () => { this.props.update_display_callback( this.props.value ) } } >
+				<h4>{ this.props.title }</h4>
+				<p>{ this.props.description }</p>
+			</div>
+		);
+	}
+}
+
+class ProductsBlockSettingsEditorDisplayOptions extends React.Component {
+	render() {
+		return (
+			<div>
+				{ products_block_display_settings.map( ( setting ) =>
+					<ProductsBlockSettingsEditorDisplayOption { ...setting } update_display_callback={ this.props.update_display_callback } />
+				) }
+			</div>
+		);
+	}
+}
+
 /**
  * The products block when in Edit mode.
  */
@@ -168,20 +212,22 @@ class ProductsBlockSettingsEditor extends React.Component {
 	 *
 	 * @param Event object evt
 	 */
-	updateDisplay( evt ) {
+	updateDisplay( value ) {
 		this.setState( {
-			display: evt.target.value
+			display: value
 		} );
 
-		this.props.update_display_callback( evt.target.value );
+		this.props.update_display_callback( value );
 	}
 
 	/**
 	 * Render the display settings dropdown and any extra contextual settings.
 	 */
 	render() {
-		let extra_settings = null;
-		if ( 'specific' === this.state.display ) {
+		let extra_settings = <ProductsBlockSettingsEditorDisplayOptions update_display_callback={ this.updateDisplay } />;
+		if ( 'all' === this.state.display ) {
+			extra_settings = null;
+		} else if ( 'specific' === this.state.display ) {
 			extra_settings = <ProductsSpecificSelect />;
 		} else if ( 'category' === this.state.display ) {
 			extra_settings = <ProductsCategorySelect { ...this.props } />;
@@ -371,7 +417,7 @@ registerBlockType( 'woocommerce/products', {
 		 */
 		display: {
 			type: 'string',
-			default: 'all',
+			default: '',
 		},
 
 		/**
