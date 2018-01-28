@@ -43,22 +43,26 @@ class WC_Meta_Box_Coupon_Data {
 							'label'  => __( 'General', 'woocommerce' ),
 							'target' => 'general_coupon_data',
 							'class'  => 'general_coupon_data',
+							'gridicon'   => 'coupon',
 						),
 						'usage_restriction' => array(
 							'label'  => __( 'Usage restriction', 'woocommerce' ),
 							'target' => 'usage_restriction_coupon_data',
 							'class'  => '',
+							'gridicon'   => 'block',
 						),
 						'usage_limit' => array(
 							'label'  => __( 'Usage limits', 'woocommerce' ),
 							'target' => 'usage_limit_coupon_data',
 							'class'  => '',
+							'gridicon' => 'notice-outline'
 						),
 					) );
 
 					foreach ( $coupon_data_tabs as $key => $tab ) {
+						$gridicon = isset( $tab['gridicon'] ) ? sanitize_title( $tab['gridicon'] ) : 'cog';
 						?><li class="<?php echo $key; ?>_options <?php echo $key; ?>_tab <?php echo implode( ' ' , (array) $tab['class'] ); ?>">
-							<a href="#<?php echo $tab['target']; ?>"><span><?php echo esc_html( $tab['label'] ); ?></span></a>
+							<a href="#<?php echo $tab['target']; ?>"><?php echo get_gridicon( 'gridicons-' . $gridicon ); ?><span><?php echo esc_html( $tab['label'] ); ?></span></a>
 						</li><?php
 					}
 				?>

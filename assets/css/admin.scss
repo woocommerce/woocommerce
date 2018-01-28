@@ -3867,13 +3867,6 @@ img.help_tip {
 					margin-right: 0.618em;
 				}
 
-				&::before {
-					@include iconbeforedashicons( '\f107' );
-				}
-			}
-
-			&.general_options a::before {
-				content: '\f107';
 			}
 
 			&.inventory_options a::before {
@@ -3900,21 +3893,6 @@ img.help_tip {
 
 			&.variations_options a::before {
 				content: '\f509';
-			}
-
-			&.usage_restriction_options a::before {
-				font-family: 'WooCommerce';
-				content: '\e602';
-			}
-
-			&.usage_limit_options a::before {
-				font-family: 'WooCommerce';
-				content: '\e601';
-			}
-
-			&.general_coupon_data a::before {
-				font-family: 'WooCommerce';
-				content: '\e600';
 			}
 
 			&.active a {
