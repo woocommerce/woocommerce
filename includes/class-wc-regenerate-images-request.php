@@ -146,7 +146,7 @@ class WC_Regenerate_Images_Request extends WP_Background_Process {
 	 * @param int   $attachment_id Attachment ID.
 	 * @return array An associative array of image sizes.
 	 */
-	public function filter_image_sizes_to_only_missing_thumbnails( $sizes, $metadata, $attachment_id ) {
+	public function filter_image_sizes_to_only_missing_thumbnails( $sizes, $metadata, $attachment_id = null ) {
 		if ( ! $sizes ) {
 			return $sizes;
 		}
@@ -154,7 +154,7 @@ class WC_Regenerate_Images_Request extends WP_Background_Process {
 		$fullsizepath = get_attached_file( $attachment_id );
 		$editor       = wp_get_image_editor( $fullsizepath );
 
-		if ( is_wp_error( $editor ) ) {
+		if ( is_wp_error( $editor ) || is_null( $attachment_id ) ) {
 			return $sizes;
 		}
 
