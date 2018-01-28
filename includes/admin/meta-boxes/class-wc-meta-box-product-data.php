@@ -4,8 +4,6 @@
  *
  * Displays the product data box, tabbed, with several panels covering price, stock etc.
  *
- * @author   WooThemes
- * @category Admin
  * @package  WooCommerce/Admin/Meta Boxes
  * @version  3.0.0
  */
@@ -22,13 +20,13 @@ class WC_Meta_Box_Product_Data {
 	/**
 	 * Output the metabox.
 	 *
-	 * @param WP_Post $post
+	 * @param WP_Post $post Post object.
 	 */
 	public static function output( $post ) {
 		global $thepostid, $product_object;
 
 		$thepostid      = $post->ID;
-		$product_object = $thepostid ? wc_get_product( $thepostid ) : new WC_Product;
+		$product_object = $thepostid ? wc_get_product( $thepostid ) : new WC_Product();
 
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
 
@@ -51,6 +49,7 @@ class WC_Meta_Box_Product_Data {
 
 	/**
 	 * Return array of product type options.
+	 *
 	 * @return array
 	 */
 	private static function get_product_type_options() {
@@ -74,6 +73,7 @@ class WC_Meta_Box_Product_Data {
 
 	/**
 	 * Return array of tabs to show.
+	 *
 	 * @return array
 	 */
 	private static function get_product_data_tabs() {
@@ -83,42 +83,49 @@ class WC_Meta_Box_Product_Data {
 				'target'   => 'general_product_data',
 				'class'    => array( 'hide_if_grouped' ),
 				'priority' => 10,
+				'gridicon' => 'product',
 			),
 			'inventory' => array(
 				'label'    => __( 'Inventory', 'woocommerce' ),
 				'target'   => 'inventory_product_data',
 				'class'    => array( 'show_if_simple', 'show_if_variable', 'show_if_grouped', 'show_if_external' ),
 				'priority' => 20,
+				'gridicon' => 'clipboard',
 			),
 			'shipping' => array(
 				'label'    => __( 'Shipping', 'woocommerce' ),
 				'target'   => 'shipping_product_data',
 				'class'    => array( 'hide_if_virtual', 'hide_if_grouped', 'hide_if_external' ),
 				'priority' => 30,
+				'gridicon' => 'shipping',
 			),
 			'linked_product' => array(
 				'label'    => __( 'Linked Products', 'woocommerce' ),
 				'target'   => 'linked_product_data',
 				'class'    => array(),
 				'priority' => 40,
+				'gridicon' => 'link',
 			),
 			'attribute' => array(
 				'label'    => __( 'Attributes', 'woocommerce' ),
 				'target'   => 'product_attributes',
 				'class'    => array(),
 				'priority' => 50,
+				'gridicon' => 'types',
 			),
 			'variations' => array(
 				'label'    => __( 'Variations', 'woocommerce' ),
 				'target'   => 'variable_product_options',
 				'class'    => array( 'variations_tab', 'show_if_variable' ),
 				'priority' => 60,
+				'gridicon' => 'custom-post-type',
 			),
 			'advanced' => array(
 				'label'    => __( 'Advanced', 'woocommerce' ),
 				'target'   => 'advanced_product_data',
 				'class'    => array(),
 				'priority' => 70,
+				'gridicon' => 'cog',
 			),
 		) );
 
@@ -151,7 +158,8 @@ class WC_Meta_Box_Product_Data {
 
 	/**
 	 * Filter callback for finding variation attributes.
-	 * @param  WC_Product_Attribute $attribute
+	 *
+	 * @param  WC_Product_Attribute $attribute Product attribute object.
 	 * @return bool
 	 */
 	private static function filter_variation_attributes( $attribute ) {
@@ -176,9 +184,9 @@ class WC_Meta_Box_Product_Data {
 	/**
 	 * Prepare downloads for save.
 	 *
-	 * @param array $file_names
-	 * @param array $file_urls
-	 * @param array $file_hashes
+	 * @param array $file_names  Downloadable file names.
+	 * @param array $file_urls   Downloadable file URLs.
+	 * @param array $file_hashes Downloadable file ids.
 	 *
 	 * @return array
 	 */
@@ -186,14 +194,14 @@ class WC_Meta_Box_Product_Data {
 		$downloads = array();
 
 		if ( ! empty( $file_urls ) ) {
-			$file_url_size = sizeof( $file_urls );
+			$file_url_size = count( $file_urls );
 
 			for ( $i = 0; $i < $file_url_size; $i ++ ) {
 				if ( ! empty( $file_urls[ $i ] ) ) {
 					$downloads[] = array(
-						'name'          => wc_clean( $file_names[ $i ] ),
-						'file'          => wp_unslash( trim( $file_urls[ $i ] ) ),
-						'download_id'	=> wc_clean( $file_hashes[ $i ] ),
+						'name'        => wc_clean( $file_names[ $i ] ),
+						'file'        => wp_unslash( trim( $file_urls[ $i ] ) ),
+						'download_id' => wc_clean( $file_hashes[ $i ] ),
 					);
 				}
 			}
@@ -203,6 +211,7 @@ class WC_Meta_Box_Product_Data {
 
 	/**
 	 * Prepare children for save.
+	 *
 	 * @return array
 	 */
 	private static function prepare_children() {
@@ -212,7 +221,7 @@ class WC_Meta_Box_Product_Data {
 	/**
 	 * Prepare attributes for save.
 	 *
-	 * @param array $data
+	 * @param array $data Product data.
 	 *
 	 * @return array
 	 */
@@ -272,9 +281,10 @@ class WC_Meta_Box_Product_Data {
 
 	/**
 	 * Prepare attributes for a specific variation or defaults.
-	 * @param  array $all_attributes
-	 * @param  string $key_prefix
-	 * @param  int $index
+	 *
+	 * @param  array  $all_attributes Product attributes.
+	 * @param  string $key_prefix     Attributes key prefix.
+	 * @param  int    $index          Attributes index if POSTed data are arrays.
 	 * @return array
 	 */
 	private static function prepare_set_attributes( $all_attributes, $key_prefix = 'attribute_', $index = null ) {

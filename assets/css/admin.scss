@@ -3869,32 +3869,6 @@ img.help_tip {
 
 			}
 
-			&.inventory_options a::before {
-				content: '\f481';
-			}
-
-			&.shipping_options a::before {
-				font-family: 'WooCommerce';
-				content: '\e01a';
-			}
-
-			&.linked_product_options a::before {
-				content: '\f103';
-			}
-
-			&.attribute_options a::before {
-				content: '\f175';
-			}
-
-			&.advanced_options a::before {
-				font-family: 'Dashicons';
-				content: '\f111';
-			}
-
-			&.variations_options a::before {
-				content: '\f509';
-			}
-
 			&.active a {
 				color: #555;
 				position: relative;
