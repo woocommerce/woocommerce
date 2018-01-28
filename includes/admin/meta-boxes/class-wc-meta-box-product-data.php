@@ -296,9 +296,9 @@ class WC_Meta_Box_Product_Data {
 					$attribute_key = sanitize_title( $attribute->get_name() );
 
 					if ( ! is_null( $index ) ) {
-						$value = isset( $_POST[ $key_prefix . $attribute_key ][ $index ] ) ? wp_unslash( $_POST[ $key_prefix . $attribute_key ][ $index ] ) : '';
+						$value = isset( $_POST[ $key_prefix . $attribute_key ][ $index ] ) ? wp_unslash( $_POST[ $key_prefix . $attribute_key ][ $index ] ) : ''; // WPCS: Sanitization ok.
 					} else {
-						$value = isset( $_POST[ $key_prefix . $attribute_key ] ) ? wp_unslash( $_POST[ $key_prefix . $attribute_key ] ) : '';
+						$value = isset( $_POST[ $key_prefix . $attribute_key ] ) ? wp_unslash( $_POST[ $key_prefix . $attribute_key ] ) : ''; // WPCS: Sanitization ok.
 					}
 
 					if ( $attribute->is_taxonomy() ) {
@@ -319,12 +319,12 @@ class WC_Meta_Box_Product_Data {
 	/**
 	 * Save meta box data.
 	 *
-	 * @param int $post_id
-	 * @param $post
+	 * @param int     $post_id Post ID.
+	 * @param WP_Post $post    Post object.
 	 */
 	public static function save( $post_id, $post ) {
 		// Process product type first so we have the correct class to run setters.
-		$product_type = empty( $_POST['product-type'] ) ? WC_Product_Factory::get_product_type( $post_id ) : sanitize_title( stripslashes( $_POST['product-type'] ) );
+		$product_type = empty( $_POST['product-type'] ) ? WC_Product_Factory::get_product_type( $post_id ) : sanitize_title( wp_unslash( $_POST['product-type'] ) );
 		$classname    = WC_Product_Factory::get_product_classname( $post_id, $product_type ? $product_type : 'simple' );
 		$product      = new $classname( $post_id );
 		$attributes   = self::prepare_attributes();
@@ -401,8 +401,8 @@ class WC_Meta_Box_Product_Data {
 	/**
 	 * Save meta box data.
 	 *
-	 * @param int $post_id
-	 * @param WP_Post $post
+	 * @param int     $post_id Post ID.
+	 * @param WP_Post $post    Post object.
 	 */
 	public static function save_variations( $post_id, $post ) {
 		if ( isset( $_POST['variable_post_id'] ) ) {
@@ -456,10 +456,10 @@ class WC_Meta_Box_Product_Data {
 					'stock_status'      => wc_clean( $_POST['variable_stock_status'][ $i ] ),
 					'image_id'          => wc_clean( $_POST['upload_image_id'][ $i ] ),
 					'attributes'        => self::prepare_set_attributes( $parent->get_attributes(), 'attribute_', $i ),
-					'sku'               => isset( $_POST['variable_sku'][ $i ] ) ? wc_clean( $_POST['variable_sku'][ $i ] )       : '',
+					'sku'               => isset( $_POST['variable_sku'][ $i ] ) ? wc_clean( $_POST['variable_sku'][ $i ] ) : '',
 					'weight'            => isset( $_POST['variable_weight'][ $i ] ) ? wc_clean( $_POST['variable_weight'][ $i ] ) : '',
 					'length'            => isset( $_POST['variable_length'][ $i ] ) ? wc_clean( $_POST['variable_length'][ $i ] ) : '',
-					'width'             => isset( $_POST['variable_width'][ $i ] ) ? wc_clean( $_POST['variable_width'][ $i ] )   : '',
+					'width'             => isset( $_POST['variable_width'][ $i ] ) ? wc_clean( $_POST['variable_width'][ $i ] ) : '',
 					'height'            => isset( $_POST['variable_height'][ $i ] ) ? wc_clean( $_POST['variable_height'][ $i ] ) : '',
 					'shipping_class_id' => wc_clean( $_POST['variable_shipping_class'][ $i ] ),
 					'tax_class'         => isset( $_POST['variable_tax_class'][ $i ] ) ? wc_clean( $_POST['variable_tax_class'][ $i ] ) : null,
