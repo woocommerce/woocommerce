@@ -1109,12 +1109,12 @@ class WC_Admin_Setup_Wizard {
 		$klarna_checkout_description = '<p>' . sprintf(
 			/* translators: %s: URL */
 			__( 'Full checkout experience with pay now, pay later and slice it. No credit card numbers, no passwords, no worries. <a href="%s" target="_blank">Learn more about Klarna</a>.', 'woocommerce' ),
-			'https://woocommerce.com/products/klarna/'
+			'https://woocommerce.com/products/klarna-checkout/'
 		) . '</p>';
 		$klarna_payments_description = '<p>' . sprintf(
 			/* translators: %s: URL */
 			__( 'Choose the payment that you want, pay now, pay later or slice it. No credit card numbers, no passwords, no worries. <a href="%s" target="_blank">Learn more about Klarna</a>.', 'woocommerce' ),
-			'https://woocommerce.com/products/klarna/'
+			'https://woocommerce.com/products/klarna-payments/ '
 		) . '</p>';
 		$square_description = '<p>' . sprintf(
 			/* translators: %s: URL */
