@@ -125,6 +125,11 @@ class WC_Session_Handler extends WC_Session {
 	 * @return bool
 	 */
 	public function has_session() {
+		// Initialize session handler if it hasn't been intialized yet.
+		if ( ! $this->_session_expiration ) {
+			$this->init();
+		}
+
 		return isset( $_COOKIE[ $this->_cookie ] ) || $this->_has_cookie || is_user_logged_in(); // @codingStandardsIgnoreLine.
 	}
 
