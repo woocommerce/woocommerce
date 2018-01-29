@@ -23,6 +23,13 @@ if ( ! class_exists( 'WP_Background_Process', false ) ) {
 class WC_Regenerate_Images_Request extends WP_Background_Process {
 
 	/**
+	 * Stores the attachment ID being processed.
+	 *
+	 * @var integer
+	 */
+	protected $attachment_id = 0;
+
+	/**
 	 * Initiate new background process.
 	 */
 	public function __construct() {
@@ -76,8 +83,8 @@ class WC_Regenerate_Images_Request extends WP_Background_Process {
 			return false;
 		}
 
-		$attachment_id = absint( $item['attachment_id'] );
-		$attachment    = get_post( $attachment_id );
+		$this->attachment_id = absint( $item['attachment_id'] );
+		$attachment          = get_post( $this->attachment_id );
 
 		if ( ! $attachment || 'attachment' !== $attachment->post_type || ! $this->is_regeneratable( $attachment ) ) {
 			return false;
@@ -90,20 +97,20 @@ class WC_Regenerate_Images_Request extends WP_Background_Process {
 		$log = wc_get_logger();
 
 		// translators: %s: ID of the attachment.
-		$log->info( sprintf( __( 'Regenerating images for attachment ID: %s', 'woocommerce' ), absint( $attachment->ID ) ),
+		$log->info( sprintf( __( 'Regenerating images for attachment ID: %s', 'woocommerce' ), $this->attachment_id ),
 			array(
 				'source' => 'wc-image-regeneration',
 			)
 		);
 
-		$fullsizepath = get_attached_file( $attachment->ID );
+		$fullsizepath = get_attached_file( $this->attachment_id );
 
 		// Check if the file exists, if not just remove item from queue.
 		if ( false === $fullsizepath || is_wp_error( $fullsizepath ) || ! file_exists( $fullsizepath ) ) {
 			return false;
 		}
 
-		$old_metadata = wp_get_attachment_metadata( $attachment->ID );
+		$old_metadata = wp_get_attachment_metadata( $this->attachment_id );
 
 		// We only want to regen WC images.
 		add_filter( 'intermediate_image_sizes', array( $this, 'adjust_intermediate_image_sizes' ) );
@@ -112,7 +119,7 @@ class WC_Regenerate_Images_Request extends WP_Background_Process {
 		add_filter( 'intermediate_image_sizes_advanced', array( $this, 'filter_image_sizes_to_only_missing_thumbnails' ), 10, 3 );
 
 		// This function will generate the new image sizes.
-		$new_metadata = wp_generate_attachment_metadata( $attachment->ID, $fullsizepath );
+		$new_metadata = wp_generate_attachment_metadata( $this->attachment_id, $fullsizepath );
 
 		// Remove custom filters.
 		remove_filter( 'intermediate_image_sizes', array( $this, 'adjust_intermediate_image_sizes' ) );
@@ -132,7 +139,7 @@ class WC_Regenerate_Images_Request extends WP_Background_Process {
 		}
 
 		// Update the meta data with the new size values.
-		wp_update_attachment_metadata( $attachment->ID, $new_metadata );
+		wp_update_attachment_metadata( $this->attachment_id, $new_metadata );
 
 		// We made it till the end, now lets remove the item from the queue.
 		return false;
@@ -143,11 +150,13 @@ class WC_Regenerate_Images_Request extends WP_Background_Process {
 	 *
 	 * @param array $sizes         An associative array of registered thumbnail image sizes.
 	 * @param array $metadata      An associative array of fullsize image metadata: width, height, file.
-	 * @param int   $attachment_id Attachment ID.
+	 * @param int   $attachment_id Attachment ID. Only passed from WP 5.0+.
 	 * @return array An associative array of image sizes.
 	 */
-	public function filter_image_sizes_to_only_missing_thumbnails( $sizes, $metadata, $attachment_id ) {
-		if ( ! $sizes ) {
+	public function filter_image_sizes_to_only_missing_thumbnails( $sizes, $metadata, $attachment_id = null ) {
+		$attachment_id = is_null( $attachment_id ) ? $this->attachment_id : $attachment_id;
+
+		if ( ! $sizes || ! $attachment_id ) {
 			return $sizes;
 		}
 
