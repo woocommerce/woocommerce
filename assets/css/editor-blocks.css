@@ -1,0 +1,52 @@
+
+.woocommerce-product {
+	background: #fff;
+	border: gray;
+	overflow: hidden;
+	text-align: left;
+}
+
+.components-placeholder__fieldset .woocommerce-product {
+	background: #fff;
+	box-shadow: 0 0 0 1px #e2e4e7;
+	padding: 1em;
+	margin-bottom: 1px;
+}
+
+.woocommerce-product img {
+	width: 100%;
+}
+
+.components-placeholder__fieldset .woocommerce-product img {
+	float: left;
+	width: 100px;
+	height: auto;
+	margin-right: 20px;
+}
+
+.woocommerce-product h3 {
+	margin: 0;
+}
+
+.woocommerce-product .price {
+	color: #555d66;
+}
+
+/* search styles */
+[data-type="woocommerce/product"] .components-placeholder__fieldset {
+	max-width: none;
+	display: block; /* I hope this doesn't break anything */
+}
+
+.woocommerce-product-search-results {
+	display: flex;
+	flex-wrap: wrap;
+	margin-top: 20px;
+}
+
+.woocommerce-product-search-results .woocommerce-product {
+	flex-basis: 50%;
+	min-width: 265px;
+	flex-grow: 1;
+	flex-shrink: 0;
+}
