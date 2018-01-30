@@ -4,8 +4,6 @@
  *
  * Handles requests to the /products endpoint.
  *
- * @author   WooThemes
- * @category API
  * @package  WooCommerce/API
  * @since    2.6.0
  */
@@ -1823,7 +1821,7 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 				),
 				'images' => array(
 					'description' => __( 'List of images.', 'woocommerce' ),
-					'type'        => 'object',
+					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
 						'type'       => 'object',
