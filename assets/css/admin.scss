@@ -2692,9 +2692,18 @@ a.import_rates {
 	}
 }
 
+.wc_input_table_wrapper {
+	overflow-x: auto;
+	display: block;
+}
+
 table.wc_tax_rates,
 table.wc_input_table {
 	width: 100%;
+
+	th, td {
+		display: table-cell !important;
+	}
 
 	span.tips {
 		color: $blue;
@@ -2713,9 +2722,10 @@ table.wc_input_table {
 		background: #fff;
 		cursor: default;
 
-		input[type='text'],
-		input[type='number'] {
-			width: 100%;
+		input[type=text],
+		input[type=number] {
+			width: 100% !important;
+			min-width: 100px;
 			padding: 8px 10px;
 			margin: 0;
 			border: 0;
@@ -2830,6 +2840,10 @@ table.wc_emails,
 table.wc_shipping {
 	position: relative;
 
+	th, td {
+		display: table-cell !important;
+	}
+
 	td {
 		vertical-align: middle;
 		padding: 7px;
@@ -2922,7 +2936,6 @@ table.wc_shipping {
 		padding: 24px 24px 24px 0;
 	}
 	td.forminp {
-		padding: 15px 10px;
 		input, textarea {
 			padding: 8px;
 			width: 448px;
@@ -2989,6 +3002,7 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 		padding: 1em !important;
 		font-size: 14px;
 		background: #fff;
+		display: table-cell !important;
 		li {
 			line-height: 24px;
 			font-size: 14px;
@@ -3405,6 +3419,7 @@ img.help_tip {
 	table.form-table {
 		margin: 0;
 		position: relative;
+		table-layout: fixed;
 
 		.forminp-radio ul {
 			margin: 0;
