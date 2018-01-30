@@ -1816,7 +1816,7 @@ if ( ! function_exists( 'woocommerce_maybe_show_product_subcategories' ) ) {
 		// If displaying categories, append to the loop.
 		if ( 'subcategories' === $display_type || 'both' === $display_type ) {
 			ob_start();
-			woocommerce_product_subcategories( array(
+			woocommerce_output_product_categories( array(
 				'parent_id' => is_product_category() ? get_queried_object_id() : 0,
 			) );
 			$loop_html .= ob_get_clean();
@@ -1827,6 +1827,95 @@ if ( ! function_exists( 'woocommerce_maybe_show_product_subcategories' ) ) {
 		}
 
 		return $loop_html;
+	}
+}
+
+if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
+	/**
+	 * This is a legacy function which used to check if we needed to display subcats and then output them. It was called by templates.
+	 *
+	 * From 3.3 onwards this is all handled via hooks and the woocommerce_maybe_show_product_subcategories function.
+	 *
+	 * Since some templates have not updated compatibility, to avoid showing incorrect categories this function has been deprecated and will
+	 * return nothing. Replace usage with woocommerce_output_product_categories to render the category list manually.
+	 *
+	 * This is a legacy function which also checks if things should display.
+	 * Themes no longer need to call these functions. It's all done via hooks.
+	 *
+	 * @deprecated 3.3.1
+	 * @param array $args Arguments.
+	 * @return null|boolean
+	*/
+	function woocommerce_product_subcategories( $args = array() ) {
+		$defaults = array(
+			'before'        => '',
+			'after'         => '',
+			'force_display' => false,
+		);
+
+		$args = wp_parse_args( $args, $defaults );
+
+		if ( $args['force_display'] ) {
+			// We can still render if display is forced.
+			woocommerce_output_product_categories( array(
+				'before'    => $args['before'],
+				'after'     => $args['after'],
+				'parent_id' => is_product_category() ? get_queried_object_id(): 0,
+			) );
+			return true;
+		} else {
+			// Output nothing. woocommerce_maybe_show_product_subcategories would have handled this already.
+			wc_deprecated_function( 'woocommerce_product_subcategories', '3.3', 'woocommerce_output_product_categories' );
+
+			$display_type = woocommerce_get_loop_display_mode();
+
+			if ( 'subcategories' === $display_type ) {
+				// Legacy - if the template is using woocommerce_product_subcategories, it's likely they have switched to loop props.
+				global $wp_query;
+				$wp_query->post_count    = 0;
+				$wp_query->max_num_pages = 0;
+			}
+
+			return 'subcategories' === $display_type || 'both' === $display_type;
+		}
+	}
+}
+
+if ( ! function_exists( 'woocommerce_output_product_categories' ) ) {
+	/**
+	 * Display product sub categories as thumbnails.
+	 *
+	 * This is a replacement for woocommerce_product_subcategories which also does some logic
+	 * based on the loop. This function however just outputs when called.
+	 *
+	 * @since 3.3.1
+	 * @param array $args Arguments.
+	 * @return boolean
+	 */
+	function woocommerce_output_product_categories( $args = array() ) {
+		$args = wp_parse_args( $args, array(
+			'before'    => '',
+			'after'     => '',
+			'parent_id' => 0,
+		) );
+
+		$product_categories = woocommerce_get_product_subcategories( $args['parent_id'] );
+
+		if ( ! $product_categories ) {
+			return false;
+		}
+
+		echo $args['before']; // WPCS: XSS ok.
+
+		foreach ( $product_categories as $category ) {
+			wc_get_template( 'content-product_cat.php', array(
+				'category' => $category,
+			) );
+		}
+
+		echo $args['after']; // WPCS: XSS ok.
+
+		return true;
 	}
 }
 
@@ -1859,40 +1948,6 @@ if ( ! function_exists( 'woocommerce_get_product_subcategories' ) ) {
 		}
 
 		return $product_categories;
-	}
-}
-
-if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
-	/**
-	 * Display product sub categories as thumbnails.
-	 *
-	 * @param array $args Arguments.
-	 * @return boolean
-	 */
-	function woocommerce_product_subcategories( $args = array() ) {
-		$args = wp_parse_args( $args, array(
-			'before'    => '',
-			'after'     => '',
-			'parent_id' => 0,
-		) );
-
-		$product_categories = woocommerce_get_product_subcategories( $args['parent_id'] );
-
-		if ( ! $product_categories ) {
-			return false;
-		}
-
-		echo $args['before']; // WPCS: XSS ok.
-
-		foreach ( $product_categories as $category ) {
-			wc_get_template( 'content-product_cat.php', array(
-				'category' => $category,
-			) );
-		}
-
-		echo $args['after']; // WPCS: XSS ok.
-
-		return true;
 	}
 }
 
