@@ -378,9 +378,9 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 											<?php
 
 											if ( is_array( $option_value ) ) {
-												selected( in_array( $key, $option_value, true ), true );
+												selected( in_array( (string) $key, $option_value, true ), true );
 											} else {
-												selected( $option_value, $key );
+												selected( $option_value, (string) $key );
 											}
 
 										?>
