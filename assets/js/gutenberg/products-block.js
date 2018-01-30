@@ -85,7 +85,8 @@ var _wp$blocks = wp.blocks,
     BlockControls = _wp$blocks.BlockControls;
 var _wp$components = wp.components,
     Toolbar = _wp$components.Toolbar,
-    withAPIData = _wp$components.withAPIData;
+    withAPIData = _wp$components.withAPIData,
+    Dropdown = _wp$components.Dropdown;
 var RangeControl = InspectorControls.RangeControl,
     ToggleControl = InspectorControls.ToggleControl,
     SelectControl = InspectorControls.SelectControl;
@@ -99,19 +100,83 @@ var RangeControl = InspectorControls.RangeControl,
 var ProductsSpecificSelect = function (_React$Component) {
 	_inherits(ProductsSpecificSelect, _React$Component);
 
-	function ProductsSpecificSelect() {
+	/**
+  * Constructor.
+  */
+	function ProductsSpecificSelect(props) {
 		_classCallCheck(this, ProductsSpecificSelect);
 
-		return _possibleConstructorReturn(this, (ProductsSpecificSelect.__proto__ || Object.getPrototypeOf(ProductsSpecificSelect)).apply(this, arguments));
+		var _this = _possibleConstructorReturn(this, (ProductsSpecificSelect.__proto__ || Object.getPrototypeOf(ProductsSpecificSelect)).call(this, props));
+
+		_this.state = {
+			selectedProducts: props.selected_display_setting
+		};
+		return _this;
 	}
 
 	_createClass(ProductsSpecificSelect, [{
+		key: "selectProduct",
+		value: function selectProduct(evt) {
+			evt.preventDefault();
+
+			var selectProduct = this.state.selectProduct;
+
+			console.log('clicado?');
+
+			this.setState({
+				selectProduct: selectProduct
+			});
+		}
+	}, {
 		key: "render",
 		value: function render() {
 			return wp.element.createElement(
 				"div",
-				null,
-				"TODO: Select specific products here"
+				{ className: "product-specific-select" },
+				wp.element.createElement(
+					"div",
+					{ className: "add-new" },
+					wp.element.createElement(
+						"button",
+						{ type: "button", className: "button button-large", onClick: this.selectProduct },
+						__('Add product')
+					)
+				),
+				wp.element.createElement(Dropdown, {
+					className: "my-container-class-name",
+					contentClassName: "my-popover-content-classname",
+					position: "bottom right",
+					renderToggle: function renderToggle(_ref) {
+						var isOpen = _ref.isOpen,
+						    onToggle = _ref.onToggle;
+						return wp.element.createElement(
+							"button",
+							{ onClick: onToggle, "aria-expanded": isOpen },
+							"Toggle Popover!"
+						);
+					},
+					renderContent: function renderContent() {
+						return wp.element.createElement(
+							"div",
+							null,
+							wp.element.createElement(
+								"div",
+								{ role: "menu", "aria-orientation": "vertical", "aria-label": "{ __( 'Products list' ) }" },
+								wp.element.createElement(
+									"button",
+									{ type: "button", role: "menuitem", "class": "components-button" },
+									"Foo"
+								),
+								wp.element.createElement(
+									"button",
+									{ type: "button", role: "menuitem", "class": "components-button" },
+									"Bar"
+								)
+							)
+						);
+					}
+				}),
+				wp.element.createElement(ProductsSpecificList, { selectedProducts: this.state.selectedProducts })
 			);
 		}
 	}]);
@@ -119,12 +184,30 @@ var ProductsSpecificSelect = function (_React$Component) {
 	return ProductsSpecificSelect;
 }(React.Component);
 
+var ProductsSpecificList = function ProductsSpecificList(_ref2) {
+	var selectedProducts = _ref2.selectedProducts;
+
+	if (!selectedProducts || 0 === selectedProducts.length) {
+		return __('No products selected found');
+	}
+
+	var classes = "wc-products-block-preview";
+	var attributes = {};
+
+	return wp.element.createElement(
+		"div",
+		{ className: classes },
+		selectedProducts.data.map(function (product) {
+			return wp.element.createElement(ProductPreview, { product: product, attributes: attributes });
+		})
+	);
+};
+
 /**
  * When the display mode is 'Product category' search for and select product categories to pull products from.
  *
  * @todo Save data
  */
-
 
 var ProductsCategorySelect = function (_React$Component2) {
 	_inherits(ProductsCategorySelect, _React$Component2);
@@ -212,8 +295,8 @@ var ProductsCategorySelect = function (_React$Component2) {
  */
 
 
-var ProductCategoryFilter = function ProductCategoryFilter(_ref) {
-	var filterResults = _ref.filterResults;
+var ProductCategoryFilter = function ProductCategoryFilter(_ref3) {
+	var filterResults = _ref3.filterResults;
 
 	return wp.element.createElement(
 		"div",
@@ -229,11 +312,11 @@ var ProductCategoryList = withAPIData(function (props) {
 	return {
 		categories: '/wc/v2/products/categories'
 	};
-})(function (_ref2) {
-	var categories = _ref2.categories,
-	    filterQuery = _ref2.filterQuery,
-	    selectedCategories = _ref2.selectedCategories,
-	    checkboxChange = _ref2.checkboxChange;
+})(function (_ref4) {
+	var categories = _ref4.categories,
+	    filterQuery = _ref4.filterQuery,
+	    selectedCategories = _ref4.selectedCategories,
+	    checkboxChange = _ref4.checkboxChange;
 
 	if (!categories.data) {
 		return __('Loading');
@@ -243,9 +326,9 @@ var ProductCategoryList = withAPIData(function (props) {
 		return __('No categories found');
 	}
 
-	var CategoryTree = function CategoryTree(_ref3) {
-		var categories = _ref3.categories,
-		    parent = _ref3.parent;
+	var CategoryTree = function CategoryTree(_ref5) {
+		var categories = _ref5.categories,
+		    parent = _ref5.parent;
 
 		var filteredCategories = categories.filter(function (category) {
 			return category.parent === parent;
@@ -467,8 +550,8 @@ var ProductPreview = function (_React$Component4) {
  */
 
 
-var ProductsBlockPreview = withAPIData(function (_ref4) {
-	var attributes = _ref4.attributes;
+var ProductsBlockPreview = withAPIData(function (_ref6) {
+	var attributes = _ref6.attributes;
 	var columns = attributes.columns,
 	    rows = attributes.rows,
 	    order = attributes.order,
@@ -519,9 +602,9 @@ var ProductsBlockPreview = withAPIData(function (_ref4) {
 	return {
 		products: '/wc/v2/products' + query_string
 	};
-})(function (_ref5) {
-	var products = _ref5.products,
-	    attributes = _ref5.attributes;
+})(function (_ref7) {
+	var products = _ref7.products,
+	    attributes = _ref7.attributes;
 
 
 	if (!products.data) {

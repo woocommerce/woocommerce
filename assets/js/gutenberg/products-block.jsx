@@ -1,6 +1,6 @@
 const { __ } = wp.i18n;
 const { registerBlockType, InspectorControls, BlockControls } = wp.blocks;
-const { Toolbar, withAPIData } = wp.components;
+const { Toolbar, withAPIData, Dropdown } = wp.components;
 const { RangeControl, ToggleControl, SelectControl } = InspectorControls;
 
 /**
@@ -9,11 +9,77 @@ const { RangeControl, ToggleControl, SelectControl } = InspectorControls;
  * @todo Add the functionality and everything.
  */
 class ProductsSpecificSelect extends React.Component {
+
+	/**
+	 * Constructor.
+	 */
+	constructor( props ) {
+		super( props );
+
+		this.state = {
+			selectedProducts: props.selected_display_setting,
+		}
+	}
+
+	selectProduct( evt ) {
+		evt.preventDefault();
+
+		let selectProduct = this.state.selectProduct;
+
+		console.log('clicado?');
+
+		this.setState( {
+			selectProduct: selectProduct
+		} );
+	}
+
 	render() {
 		return (
-			<div>TODO: Select specific products here</div>
+			<div className="product-specific-select">
+				<div className="add-new">
+					<button type="button" className="button button-large" onClick={ this.selectProduct }>{ __( 'Add product' ) }</button>
+				</div>
+				<Dropdown
+					className="my-container-class-name"
+					contentClassName="my-popover-content-classname"
+					position="bottom right"
+					renderToggle={ ( { isOpen, onToggle } ) => (
+						<button onClick={ onToggle } aria-expanded={ isOpen }>
+							Toggle Popover!
+						</button>
+					) }
+					renderContent={ () => (
+						<div>
+							<div role="menu" aria-orientation="vertical" aria-label="{ __( 'Products list' ) }">
+							<button type="button" role="menuitem" class="components-button">
+							Foo</button>
+							<button type="button" role="menuitem" class="components-button">
+							Bar</button>
+							</div>
+						</div>
+					) }
+				/>
+				<ProductsSpecificList selectedProducts={ this.state.selectedProducts } />
+			</div>
 		);
 	}
+}
+
+const ProductsSpecificList = ( { selectedProducts } ) => {
+	if ( ! selectedProducts || 0 === selectedProducts.length ) {
+		return __( 'No products selected found' );
+	}
+
+	const classes = "wc-products-block-preview";
+	const attributes = {};
+
+	return (
+		<div className={ classes }>
+			{ selectedProducts.data.map( ( product ) => (
+				<ProductPreview product={ product } attributes={ attributes } />
+			) ) }
+		</div>
+	);
 }
 
 /**
