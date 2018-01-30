@@ -324,7 +324,9 @@ function wc_get_default_products_per_row() {
 		$columns = apply_filters( 'loop_shop_columns', $columns );
 	}
 
-	return absint( $columns );
+	$columns = absint( $columns );
+
+	return max( 1, $columns );
 }
 
 /**
