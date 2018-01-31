@@ -264,6 +264,11 @@ class WC_Post_types {
 			$has_archive = false;
 		}
 
+		// If theme support changes, we may need to flush permalinks since some are changed based on this flag.
+		if ( update_option( 'current_theme_supports_woocommerce', current_theme_supports( 'woocommerce' ) ? 1 : 0 ) ) {
+			add_option( 'woocommerce_queue_flush_rewrite_rules', 'true' );
+		}
+
 		register_post_type( 'product',
 			apply_filters( 'woocommerce_register_post_type_product',
 				array(

@@ -566,7 +566,11 @@ class WC_Shortcode_Products {
 			$original_post = $GLOBALS['post'];
 
 			do_action( "woocommerce_shortcode_before_{$this->type}_loop", $this->attributes );
-			do_action( 'woocommerce_before_shop_loop' );
+
+			// Fire standard shop loop hooks when paginating results so we can show result counts and so on.
+			if ( wc_string_to_bool( $this->attributes['paginate'] ) ) {
+				do_action( 'woocommerce_before_shop_loop' );
+			}
 
 			woocommerce_product_loop_start();
 
@@ -589,7 +593,11 @@ class WC_Shortcode_Products {
 			$GLOBALS['post'] = $original_post; // WPCS: override ok.
 			woocommerce_product_loop_end();
 
-			do_action( 'woocommerce_after_shop_loop' );
+			// Fire standard shop loop hooks when paginating results so we can show result counts and so on.
+			if ( wc_string_to_bool( $this->attributes['paginate'] ) ) {
+				do_action( 'woocommerce_after_shop_loop' );
+			}
+
 			do_action( "woocommerce_shortcode_after_{$this->type}_loop", $this->attributes );
 
 			wp_reset_postdata();
