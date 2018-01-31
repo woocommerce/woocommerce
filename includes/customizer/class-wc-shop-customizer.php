@@ -357,7 +357,7 @@ class WC_Shop_Customizer {
 			'woocommerce_default_catalog_orderby',
 			array(
 				'label'       => __( 'Default product sorting', 'woocommerce' ),
-				'description' => __( 'How should products by sorted in the catalog by default?', 'woocommerce' ),
+				'description' => __( 'How should products be sorted in the catalog by default?', 'woocommerce' ),
 				'section'     => 'woocommerce_product_catalog',
 				'settings'    => 'woocommerce_default_catalog_orderby',
 				'type'        => 'select',
