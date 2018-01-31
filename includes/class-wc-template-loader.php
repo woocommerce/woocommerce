@@ -32,13 +32,21 @@ class WC_Template_Loader {
 	private static $in_content_filter = false;
 
 	/**
+	 * Is WooCommerce support defined?
+	 *
+	 * @var boolean
+	 */
+	private static $theme_support = false;
+
+	/**
 	 * Hook in methods.
 	 */
 	public static function init() {
-		self::$shop_page_id = wc_get_page_id( 'shop' );
+		self::$theme_support = current_theme_supports( 'woocommerce' );
+		self::$shop_page_id  = wc_get_page_id( 'shop' );
 
 		// Supported themes.
-		if ( current_theme_supports( 'woocommerce' ) ) {
+		if ( self::$theme_support ) {
 			add_filter( 'template_include', array( __CLASS__, 'template_loader' ) );
 			add_filter( 'comments_template', array( __CLASS__, 'comments_template_loader' ) );
 		} else {
@@ -103,7 +111,7 @@ class WC_Template_Loader {
 				$default_file = 'archive-product.php';
 			}
 		} elseif ( is_post_type_archive( 'product' ) || is_page( wc_get_page_id( 'shop' ) ) ) {
-			$default_file = current_theme_supports( 'woocommerce' ) ? 'archive-product.php' : '';
+			$default_file = self::$theme_support ? 'archive-product.php' : '';
 		} else {
 			$default_file = '';
 		}
@@ -362,7 +370,7 @@ class WC_Template_Loader {
 	 * @return string
 	 */
 	public static function unsupported_theme_title_filter( $title, $id ) {
-		if ( ! current_theme_supports( 'woocommerce' ) && is_page( self::$shop_page_id ) && $id === self::$shop_page_id ) {
+		if ( ! self::$theme_support && is_page( self::$shop_page_id ) && $id === self::$shop_page_id ) {
 			$args         = self::get_current_shop_view_args();
 			$title_suffix = array();
 
@@ -389,7 +397,7 @@ class WC_Template_Loader {
 	public static function unsupported_theme_shop_content_filter( $content ) {
 		global $wp_query;
 
-		if ( current_theme_supports( 'woocommerce' ) || ! is_main_query() ) {
+		if ( self::$theme_support || ! is_main_query() ) {
 			return $content;
 		}
 
@@ -442,7 +450,7 @@ class WC_Template_Loader {
 	public static function unsupported_theme_product_content_filter( $content ) {
 		global $wp_query;
 
-		if ( current_theme_supports( 'woocommerce' ) || ! is_main_query() ) {
+		if ( self::$theme_support || ! is_main_query() ) {
 			return $content;
 		}
 
