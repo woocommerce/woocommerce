@@ -1870,7 +1870,7 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 			$display_type = woocommerce_get_loop_display_mode();
 
 			if ( 'subcategories' === $display_type ) {
-				// Legacy - if the template is using woocommerce_product_subcategories, it's likely they have switched to loop props.
+				// Legacy - if the template is using woocommerce_product_subcategories, this keeps the rest of the loop working.
 				global $wp_query;
 				$wp_query->post_count    = 0;
 				$wp_query->max_num_pages = 0;
