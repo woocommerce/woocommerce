@@ -205,6 +205,8 @@ add_action( 'woocommerce_after_shop_loop', 'woocommerce_reset_loop', 999 );
  * @return mixed
  */
 function wc_get_loop_prop( $prop, $default = '' ) {
+	wc_setup_loop(); // Ensure shop loop is setup.
+
 	return isset( $GLOBALS['woocommerce_loop'], $GLOBALS['woocommerce_loop'][ $prop ] ) ? $GLOBALS['woocommerce_loop'][ $prop ] : $default;
 }
 
