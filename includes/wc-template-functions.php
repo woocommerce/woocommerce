@@ -1854,7 +1854,6 @@ if ( ! function_exists( 'woocommerce_get_product_subcategories' ) ) {
 				'hierarchical' => 1,
 				'taxonomy'     => 'product_cat',
 				'pad_counts'   => 1,
-				'exclude'      => get_option( 'default_product_cat' ),
 			) ) );
 			wp_cache_set( 'product-categories-' . $parent_id, $product_categories, 'product_cat' );
 		}
