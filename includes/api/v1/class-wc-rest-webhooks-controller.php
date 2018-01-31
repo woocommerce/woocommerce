@@ -644,7 +644,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 					'readonly'    => true,
 				),
 				'secret' => array(
-					'description' => __( "Secret key used to generate a hash of the delivered webhook and provided in the request headers. This will default is a MD5 hash from the current user's ID|username if not provided.", 'woocommerce' ),
+					'description' => __( "Secret key used to generate a hash of the delivered webhook and provided in the request headers. This will default to a MD5 hash from the current user's ID|username if not provided.", 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'edit' ),
 				),
