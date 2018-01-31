@@ -2,10 +2,8 @@
 /**
  * Template Loader
  *
- * @class 		WC_Template
- * @package		WooCommerce/Classes
- * @category	Class
- * @author 		Automattic
+ * @class WC_Template
+ * @package WooCommerce/Classes
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -75,7 +73,9 @@ class WC_Template_Loader {
 			return $template;
 		}
 
-		if ( $default_file = self::get_template_loader_default_file() ) {
+		$default_file = self::get_template_loader_default_file();
+
+		if ( $default_file ) {
 			/**
 			 * Filter hook to choose which files to find before WooCommerce does it's own logic.
 			 *
@@ -260,7 +260,7 @@ class WC_Template_Loader {
 			$shortcode_args['category'] = sanitize_title( $queried_object->slug );
 		} elseif ( taxonomy_is_product_attribute( $queried_object->taxonomy ) ) {
 			$shortcode_args['attribute'] = sanitize_title( $queried_object->taxonomy );
-			$shortcode_args['terms'] = sanitize_title( $queried_object->slug );
+			$shortcode_args['terms']     = sanitize_title( $queried_object->slug );
 		} elseif ( is_product_tag() ) {
 			$shortcode_args['tag'] = sanitize_title( $queried_object->slug );
 		} else {
@@ -299,19 +299,20 @@ class WC_Template_Loader {
 		);
 
 		// Set the $post global.
-		$post = new WP_Post( (object) $dummy_post_properties );
+		$post = new WP_Post( (object) $dummy_post_properties ); // @codingStandardsIgnoreLine.
 
 		// Copy the new post global into the main $wp_query.
-		$wp_query->post = $post;
+		$wp_query->post  = $post;
 		$wp_query->posts = array( $post );
 
-        // Prevent comments form from appearing.
-		$wp_query->post_count = 1;
-		$wp_query->is_404     = false;
-		$wp_query->is_page    = true;
-		$wp_query->is_single  = true;
-		$wp_query->is_archive = false;
-		$wp_query->is_tax     = false;
+		// Prevent comments form from appearing.
+		$wp_query->post_count    = 1;
+		$wp_query->is_404        = false;
+		$wp_query->is_page       = true;
+		$wp_query->is_single     = true;
+		$wp_query->is_archive    = false;
+		$wp_query->is_tax        = false;
+		$wp_query->max_num_pages = 0;
 
 		// Prepare everything for rendering.
 		setup_postdata( $post );
@@ -375,6 +376,7 @@ class WC_Template_Loader {
 			$title_suffix = array();
 
 			if ( $args->page > 1 ) {
+				/* translators: %d: Page number. */
 				$title_suffix[] = sprintf( esc_html__( 'Page %d', 'woocommerce' ), $args->page );
 			}
 
