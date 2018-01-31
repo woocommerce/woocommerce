@@ -61,5 +61,8 @@ if ( is_user_logged_in() ) {
 </form>
 
 <noscript>
-	<style>.woocommerce-form-login { display:block !important; }</style>
+	<style>
+		.woocommerce-form-login { display:block !important; }
+		.showlogin { display: none !important; }
+	</style>
 </noscript>

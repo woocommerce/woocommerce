@@ -44,5 +44,8 @@ if ( empty( $applied_coupons ) ) {
 </form>
 
 <noscript>
-	<style>.checkout_coupon { display:block !important; }</style>
+	<style>
+		.checkout_coupon { display: block !important; }
+		.showcoupon { display: none !important; }
+	</style>
 </noscript>
