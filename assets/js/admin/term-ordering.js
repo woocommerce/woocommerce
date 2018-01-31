@@ -4,15 +4,9 @@
 jQuery( function( $ ) {
 
 	var table_selector = 'table.wp-list-table',
-		item_selector  = 'tbody tr:not(.inline-edit-row, ' + '#tag-' + woocommerce_term_ordering_params.default + ')';
+		item_selector  = 'tbody tr:not(.inline-edit-row)';
 
-	$( 'table.wp-list-table tr:not(.inline-edit-row)' ).each( function() {
-		if ( 'tag-' + woocommerce_term_ordering_params.default === $( this ).prop( 'id' ) ) {
-			$( this ).append( '<td class="column-nosort"></td>' );
-		} else {
-			$( this ).append( '<td class="column-handle"></td>' );
-		}
-	} );
+	$( table_selector ).find( '.column-handle' ).show();
 
 	$( table_selector ).sortable({
 		items: item_selector,
@@ -36,11 +30,11 @@ jQuery( function( $ ) {
 			ui.item.children( 'td, th' ).css( 'border-bottom-width', '1px' );
 		},
 		update: function( event, ui ) {
-			var termid     = ui.item.find( '.check-column input' ).val(); // this post id
+			var termid     = ui.item.find( '.column-handle input[name="term_id"]' ).val(); // this post id
 			var termparent = ui.item.find( '.parent' ).html();            // post parent
 
-			var prevtermid = ui.item.prev().find( '.check-column input' ).val();
-			var nexttermid = ui.item.next().find( '.check-column input' ).val();
+			var prevtermid = ui.item.prev().find( '.column-handle input[name="term_id"]' ).val();
+			var nexttermid = ui.item.next().find( '.column-handle input[name="term_id"]' ).val();
 
 			// Can only sort in same tree
 			var prevtermparent, nexttermparent;
@@ -65,14 +59,16 @@ jQuery( function( $ ) {
 			}
 
 			// Show Spinner
-			ui.item.find( '.check-column input' ).hide().after( '<img alt="processing" src="images/wpspin_light.gif" class="waiting" style="margin-left: 6px;" />' );
+			ui.item.find( '.check-column input' ).hide();
+			ui.item.find( '.check-column' ).append( '<img alt="processing" src="images/wpspin_light.gif" class="waiting" style="margin-left: 6px;" />' );
 
 			// Go do the sorting stuff via ajax
 			$.post( ajaxurl, { action: 'woocommerce_term_ordering', id: termid, nextid: nexttermid, thetaxonomy: woocommerce_term_ordering_params.taxonomy }, function(response){
 				if ( response === 'children' ) {
 					window.location.reload();
 				} else {
-					ui.item.find( '.check-column input' ).show().siblings( 'img' ).remove();
+					ui.item.find( '.check-column input' ).show();
+					ui.item.find( '.check-column' ).find( 'img' ).remove();
 				}
 			});
 
