@@ -151,10 +151,6 @@ add_action( 'the_post', 'wc_setup_product_data' );
  * @param array $args Args to pass into the global.
  */
 function wc_setup_loop( $args = array() ) {
-	if ( isset( $GLOBALS['woocommerce_loop'] ) ) {
-		return; // If the loop has already been setup, bail.
-	}
-
 	$default_args = array(
 		'loop'         => 0,
 		'columns'      => wc_get_default_products_per_row(),
@@ -168,6 +164,11 @@ function wc_setup_loop( $args = array() ) {
 		'per_page'     => 0,
 		'current_page' => 1,
 	);
+
+	// Merge any existing values.
+	if ( isset( $GLOBALS['woocommerce_loop'] ) ) {
+		$default_args = array_merge( $default_args, $GLOBALS['woocommerce_loop'] );
+	}
 
 	// If this is a main WC query, use global args as defaults.
 	if ( $GLOBALS['wp_query']->get( 'wc_query' ) ) {
@@ -1820,7 +1821,7 @@ if ( ! function_exists( 'woocommerce_maybe_show_product_subcategories' ) ) {
 		// If displaying categories, append to the loop.
 		if ( 'subcategories' === $display_type || 'both' === $display_type ) {
 			ob_start();
-			woocommerce_product_subcategories( array(
+			woocommerce_output_product_categories( array(
 				'parent_id' => is_product_category() ? get_queried_object_id() : 0,
 			) );
 			$loop_html .= ob_get_clean();
@@ -1834,47 +1835,67 @@ if ( ! function_exists( 'woocommerce_maybe_show_product_subcategories' ) ) {
 	}
 }
 
-if ( ! function_exists( 'woocommerce_get_product_subcategories' ) ) {
+if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 	/**
-	 * Get (and cache) product subcategories.
+	 * This is a legacy function which used to check if we needed to display subcats and then output them. It was called by templates.
 	 *
-	 * @param int $parent_id Get subcategories of this ID.
-	 * @return array
-	 */
-	function woocommerce_get_product_subcategories( $parent_id = 0 ) {
-		$parent_id          = absint( $parent_id );
-		$product_categories = wp_cache_get( 'product-categories-' . $parent_id, 'product_cat' );
+	 * From 3.3 onwards this is all handled via hooks and the woocommerce_maybe_show_product_subcategories function.
+	 *
+	 * Since some templates have not updated compatibility, to avoid showing incorrect categories this function has been deprecated and will
+	 * return nothing. Replace usage with woocommerce_output_product_categories to render the category list manually.
+	 *
+	 * This is a legacy function which also checks if things should display.
+	 * Themes no longer need to call these functions. It's all done via hooks.
+	 *
+	 * @deprecated 3.3.1 @todo Add a notice in a future version.
+	 * @param array $args Arguments.
+	 * @return null|boolean
+	*/
+	function woocommerce_product_subcategories( $args = array() ) {
+		$defaults = array(
+			'before'        => '',
+			'after'         => '',
+			'force_display' => false,
+		);
 
-		if ( false === $product_categories ) {
-			// NOTE: using child_of instead of parent - this is not ideal but due to a WP bug ( https://core.trac.wordpress.org/ticket/15626 ) pad_counts won't work.
-			$product_categories = get_categories( apply_filters( 'woocommerce_product_subcategories_args', array(
-				'parent'       => $parent_id,
-				'menu_order'   => 'ASC',
-				'hide_empty'   => 0,
-				'hierarchical' => 1,
-				'taxonomy'     => 'product_cat',
-				'pad_counts'   => 1,
-				'exclude'      => get_option( 'default_product_cat' ),
-			) ) );
-			wp_cache_set( 'product-categories-' . $parent_id, $product_categories, 'product_cat' );
+		$args = wp_parse_args( $args, $defaults );
+
+		if ( $args['force_display'] ) {
+			// We can still render if display is forced.
+			woocommerce_output_product_categories( array(
+				'before'    => $args['before'],
+				'after'     => $args['after'],
+				'parent_id' => is_product_category() ? get_queried_object_id(): 0,
+			) );
+			return true;
+		} else {
+			// Output nothing. woocommerce_maybe_show_product_subcategories will handle the output of cats.
+			$display_type = woocommerce_get_loop_display_mode();
+
+			if ( 'subcategories' === $display_type ) {
+				// Legacy - if the template is using woocommerce_product_subcategories, this keeps the rest of the loop working.
+				global $wp_query;
+				$wp_query->post_count    = 0;
+				$wp_query->max_num_pages = 0;
+			}
+
+			return 'subcategories' === $display_type || 'both' === $display_type;
 		}
-
-		if ( apply_filters( 'woocommerce_product_subcategories_hide_empty', true ) ) {
-			$product_categories = wp_list_filter( $product_categories, array( 'count' => 0 ), 'NOT' );
-		}
-
-		return $product_categories;
 	}
 }
 
-if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
+if ( ! function_exists( 'woocommerce_output_product_categories' ) ) {
 	/**
 	 * Display product sub categories as thumbnails.
 	 *
+	 * This is a replacement for woocommerce_product_subcategories which also does some logic
+	 * based on the loop. This function however just outputs when called.
+	 *
+	 * @since 3.3.1
 	 * @param array $args Arguments.
 	 * @return boolean
 	 */
-	function woocommerce_product_subcategories( $args = array() ) {
+	function woocommerce_output_product_categories( $args = array() ) {
 		$args = wp_parse_args( $args, array(
 			'before'    => '',
 			'after'     => '',
@@ -1898,6 +1919,38 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 		echo $args['after']; // WPCS: XSS ok.
 
 		return true;
+	}
+}
+
+if ( ! function_exists( 'woocommerce_get_product_subcategories' ) ) {
+	/**
+	 * Get (and cache) product subcategories.
+	 *
+	 * @param int $parent_id Get subcategories of this ID.
+	 * @return array
+	 */
+	function woocommerce_get_product_subcategories( $parent_id = 0 ) {
+		$parent_id          = absint( $parent_id );
+		$product_categories = wp_cache_get( 'product-categories-' . $parent_id, 'product_cat' );
+
+		if ( false === $product_categories ) {
+			// NOTE: using child_of instead of parent - this is not ideal but due to a WP bug ( https://core.trac.wordpress.org/ticket/15626 ) pad_counts won't work.
+			$product_categories = get_categories( apply_filters( 'woocommerce_product_subcategories_args', array(
+				'parent'       => $parent_id,
+				'menu_order'   => 'ASC',
+				'hide_empty'   => 0,
+				'hierarchical' => 1,
+				'taxonomy'     => 'product_cat',
+				'pad_counts'   => 1,
+			) ) );
+			wp_cache_set( 'product-categories-' . $parent_id, $product_categories, 'product_cat' );
+		}
+
+		if ( apply_filters( 'woocommerce_product_subcategories_hide_empty', true ) ) {
+			$product_categories = wp_list_filter( $product_categories, array( 'count' => 0 ), 'NOT' );
+		}
+
+		return $product_categories;
 	}
 }
 
