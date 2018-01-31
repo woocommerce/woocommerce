@@ -165,11 +165,6 @@ function wc_setup_loop( $args = array() ) {
 		'current_page' => 1,
 	);
 
-	// Merge any existing values.
-	if ( isset( $GLOBALS['woocommerce_loop'] ) ) {
-		$default_args = array_merge( $default_args, $GLOBALS['woocommerce_loop'] );
-	}
-
 	// If this is a main WC query, use global args as defaults.
 	if ( $GLOBALS['wp_query']->get( 'wc_query' ) ) {
 		$default_args = array_merge( $default_args, array(
@@ -180,6 +175,11 @@ function wc_setup_loop( $args = array() ) {
 			'per_page'     => $GLOBALS['wp_query']->get( 'posts_per_page' ),
 			'current_page' => max( 1, $GLOBALS['wp_query']->get( 'paged', 1 ) ),
 		) );
+	}
+
+	// Merge any existing values.
+	if ( isset( $GLOBALS['woocommerce_loop'] ) ) {
+		$default_args = array_merge( $default_args, $GLOBALS['woocommerce_loop'] );
 	}
 
 	$GLOBALS['woocommerce_loop'] = wp_parse_args( $args, $default_args );
