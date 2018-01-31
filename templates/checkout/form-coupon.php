@@ -11,9 +11,8 @@
  * the readme will list any important changes.
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
- * @author  WooThemes
  * @package WooCommerce/Templates
- * @version 3.3.0
+ * @version 3.3.1
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -24,7 +23,8 @@ if ( ! wc_coupons_enabled() ) {
 	return;
 }
 
-if ( empty( WC()->cart->applied_coupons ) ) {
+$applied_coupons = WC()->cart->applied_coupons;
+if ( empty( $applied_coupons ) ) {
 	$info_message = apply_filters( 'woocommerce_checkout_coupon_message', __( 'Have a coupon?', 'woocommerce' ) . ' <a href="#" class="showcoupon">' . __( 'Click here to enter your code', 'woocommerce' ) . '</a>' );
 	wc_print_notice( $info_message, 'notice' );
 }
