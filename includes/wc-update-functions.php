@@ -4,8 +4,6 @@
  *
  * Functions for updating data, used by the background updater.
  *
- * @author   WooThemes
- * @category Core
  * @package  WooCommerce/Functions
  * @version  2.6.0
  */
@@ -1500,6 +1498,9 @@ function wc_update_330_image_options() {
 	if ( ! empty( $old_single_size['width'] ) ) {
 		update_option( 'woocommerce_single_image_width', absint( $old_single_size['width'] ) );
 	}
+
+	// Update columns to 4 which was the old default.
+	add_option( 'woocommerce_catalog_columns', 4 );
 }
 
 /**
@@ -1605,13 +1606,6 @@ function wc_update_330_product_stock_status() {
 }
 
 /**
- * Update DB Version.
- */
-function wc_update_330_db_version() {
-	WC_Install::update_db_version( '3.3.0' );
-}
-
-/**
  * Clear addons page transients
  */
 function wc_update_330_clear_transients() {
@@ -1635,4 +1629,11 @@ function wc_update_330_set_paypal_sandbox_credentials() {
 
 		update_option( 'woocommerce_paypal_settings', $paypal_settings );
 	}
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_330_db_version() {
+	WC_Install::update_db_version( '3.3.0' );
 }
