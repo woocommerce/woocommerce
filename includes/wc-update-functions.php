@@ -1498,9 +1498,6 @@ function wc_update_330_image_options() {
 	if ( ! empty( $old_single_size['width'] ) ) {
 		update_option( 'woocommerce_single_image_width', absint( $old_single_size['width'] ) );
 	}
-
-	// Update columns to 4 which was the old default.
-	add_option( 'woocommerce_catalog_columns', 4 );
 }
 
 /**
