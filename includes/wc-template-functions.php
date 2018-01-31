@@ -151,10 +151,6 @@ add_action( 'the_post', 'wc_setup_product_data' );
  * @param array $args Args to pass into the global.
  */
 function wc_setup_loop( $args = array() ) {
-	if ( isset( $GLOBALS['woocommerce_loop'] ) ) {
-		return; // If the loop has already been setup, bail.
-	}
-
 	$default_args = array(
 		'loop'         => 0,
 		'columns'      => wc_get_default_products_per_row(),
@@ -168,6 +164,11 @@ function wc_setup_loop( $args = array() ) {
 		'per_page'     => 0,
 		'current_page' => 1,
 	);
+
+	// Merge any existing values.
+	if ( isset( $GLOBALS['woocommerce_loop'] ) ) {
+		$default_args = array_merge( $default_args, $GLOBALS['woocommerce_loop'] );
+	}
 
 	// If this is a main WC query, use global args as defaults.
 	if ( $GLOBALS['wp_query']->get( 'wc_query' ) ) {
