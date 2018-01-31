@@ -2044,8 +2044,11 @@ ul.wc_coupon_list_block {
 		tbody tr {
 			border-top: 1px solid #f5f5f5;
 		}
-		tbody tr:hover:not(.status-trash) td {
+		tbody tr:hover:not(.status-trash):not(.no-link) td {
 			cursor: pointer;
+		}
+		.no-link {
+			cursor: default !important;
 		}
 
 		// Columns.
@@ -2440,7 +2443,8 @@ table.wp-list-table {
 		white-space: nowrap;
 	}
 
-	.column-handle {
+	.column-handle,
+	.column-nosort {
 		width: 17px;
 	}
 

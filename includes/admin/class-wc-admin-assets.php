@@ -328,6 +328,7 @@ class WC_Admin_Assets {
 
 			$woocommerce_term_order_params = array(
 				'taxonomy' => $taxonomy,
+				'default'  => absint( get_option( 'default_product_cat' ) ),
 			);
 
 			wp_localize_script( 'woocommerce_term_ordering', 'woocommerce_term_ordering_params', $woocommerce_term_order_params );

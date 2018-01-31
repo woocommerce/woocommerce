@@ -380,7 +380,7 @@ class WC_Shop_Customizer {
 		$wp_customize->add_setting(
 			'woocommerce_catalog_columns',
 			array(
-				'default'              => 3,
+				'default'              => 4,
 				'type'                 => 'option',
 				'capability'           => 'manage_woocommerce',
 				'sanitize_callback'    => 'absint',
