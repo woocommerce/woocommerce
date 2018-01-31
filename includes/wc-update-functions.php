@@ -1604,13 +1604,6 @@ function wc_update_330_product_stock_status() {
 }
 
 /**
- * Update DB Version.
- */
-function wc_update_330_db_version() {
-	WC_Install::update_db_version( '3.3.0' );
-}
-
-/**
  * Clear addons page transients
  */
 function wc_update_330_clear_transients() {
@@ -1634,4 +1627,11 @@ function wc_update_330_set_paypal_sandbox_credentials() {
 
 		update_option( 'woocommerce_paypal_settings', $paypal_settings );
 	}
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_330_db_version() {
+	WC_Install::update_db_version( '3.3.0' );
 }
