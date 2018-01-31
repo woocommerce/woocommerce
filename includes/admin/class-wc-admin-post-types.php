@@ -101,6 +101,10 @@ class WC_Admin_Post_Types {
 				new WC_Admin_List_Table_Products();
 				break;
 		}
+
+		// Ensure the table handler is only loaded once. Prevents multiple loads if a plugin calls check_ajax_referer many times.
+		remove_action( 'current_screen', array( $this, 'setup_screen' ) );
+		remove_action( 'check_ajax_referer', array( $this, 'setup_screen' ) );
 	}
 
 	/**
