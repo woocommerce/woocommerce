@@ -18,7 +18,7 @@ jQuery( function( $ ) {
 	 * Click a row.
 	 */
 	WCOrdersTable.prototype.onRowClick = function( e ) {
-		if ( $( e.target ).filter( 'a' ).length ) {
+		if ( $( e.target ).filter( 'a, a *, .no-link, .no-link *' ).length ) {
 			return true;
 		}
 

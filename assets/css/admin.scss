@@ -2047,6 +2047,9 @@ ul.wc_coupon_list_block {
 		tbody tr:hover:not(.status-trash) td {
 			cursor: pointer;
 		}
+		.no-link {
+			cursor: default !important;
+		}
 
 		// Columns.
 		td,
