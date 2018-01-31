@@ -404,16 +404,19 @@ class WC_Shop_Customizer {
 			)
 		);
 
-		$wp_customize->add_setting(
-			'woocommerce_catalog_rows',
-			array(
-				'default'              => 4,
-				'type'                 => 'option',
-				'capability'           => 'manage_woocommerce',
-				'sanitize_callback'    => 'absint',
-				'sanitize_js_callback' => 'absint',
-			)
-		);
+		// Only add this setting if something else isn't managing the number of products per page.
+		if ( ! has_filter( 'loop_shop_per_page' ) ) {
+			$wp_customize->add_setting(
+				'woocommerce_catalog_rows',
+				array(
+					'default'              => 4,
+					'type'                 => 'option',
+					'capability'           => 'manage_woocommerce',
+					'sanitize_callback'    => 'absint',
+					'sanitize_js_callback' => 'absint',
+				)
+			);
+		}
 
 		$wp_customize->add_control(
 			'woocommerce_catalog_rows',
