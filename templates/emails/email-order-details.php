@@ -12,7 +12,7 @@
  *
  * @see https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce/Templates/Emails
- * @version 3.3.0
+ * @version 3.3.1
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -36,8 +36,6 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 	echo wp_kses_post( $before . sprintf( __( 'Order #%s', 'woocommerce' ) . $after . ' (<time datetime="%s">%s</time>)', $order->get_order_number(), $order->get_date_created()->format( 'c' ), wc_format_datetime( $order->get_date_created() ) ) );
 	?>
 </h2>
-
-Test
 
 <div style="margin-bottom: 40px;">
 	<table class="td" cellspacing="0" cellpadding="6" style="width: 100%; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;" border="1">
