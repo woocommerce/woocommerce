@@ -117,11 +117,11 @@ function wc_load_webhooks() {
 /**
  * Get webhook.
  *
- * @param  int $id Webhook ID.
+ * @param  int|WC_Webhook $id Webhook ID or object.
  * @return WC_Webhook|null
  */
 function wc_get_webhook( $id ) {
-	$webhook = new WC_Webhook( (int) $id );
+	$webhook = new WC_Webhook( $id );
 
 	return 0 !== $webhook->get_id() ? $webhook : null;
 }
