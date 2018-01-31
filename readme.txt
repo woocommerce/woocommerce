@@ -161,6 +161,25 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
+= 3.3.1 - 2018-02-01 =
+* Fix - Added `woocommerce_output_product_categories` to replace `woocommerce_product_subcategories` function to prevent outdated theme template files from outputting categories on the shop and category pages in err.
+* Fix - Prevented columns from being set to anything lower than 1.
+* Fix - Added extra error checking in Webhooks API to prevent notices when deleting Webhooks.
+* Fix - Prevented list table classes being loaded multiple times. This also fixes compatibility with Smart Coupons extension.
+* Fix - Removed stray debug string from order email template and fixed some typos.
+* Fix - Set up the loop when calling wc_get_loop_prop. Fixes compatibility with some themes.
+* Fix - Remove multiple application of filter 'woocommerce_order_item_product'.
+* Fix - Protect against theme support being defined too late. Fixes some issues with custom themes defining WooCommerce support incorrectly.
+* Fix - Add fallback for themes that just get the pagination template.
+* Fix - Made the on-the-fly image regen also regenerate missing sizes.
+* Fix - Fixed missing user_id in webhook migration script.
+* Fix - Allow uncategorized category to be sorted like the others.
+* Fix - If theme support changes, we may need to flush permalinks since some are changed based on this flag.
+* Fix - Fire hooks for pagination etc only when pagination is enabled.
+* Tweak - Allow devs to add 'no-link' class to elements to prevent order view link being triggered on row click.
+* Tweak - Made woocommerce_resize_images filter more useful by calling it later.
+* Tweak - Revert default columns back to 4 so it's consistent with 3.2.
+
 = 3.3.0 - 2018-01-30 =
 * Feature - Improved default appearance in themes which do not support WooCommerce, making the shop page shortcode based.
 * Feature - Products shortcodes; improved random sorting, with some caching.
