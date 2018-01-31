@@ -42,3 +42,7 @@ if ( empty( WC()->cart->applied_coupons ) ) {
 
 	<div class="clear"></div>
 </form>
+
+<noscript>
+	<style>.checkout_coupon { display:block !important; }</style>
+</noscript>
