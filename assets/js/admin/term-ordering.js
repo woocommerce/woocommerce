@@ -3,12 +3,19 @@
 /* Modifided script from the simple-page-ordering plugin */
 jQuery( function( $ ) {
 
-	$( 'table.widefat.wp-list-table tr' ).append(
-		'<td class="column-handle"></td>'
-	);
+	var table_selector = 'table.wp-list-table',
+		item_selector  = 'tbody tr:not(.inline-edit-row, ' + '#tag-' + woocommerce_term_ordering_params.default + ')';
 
-	$( 'table.widefat.wp-list-table' ).sortable({
-		items: 'tbody tr:not(.inline-edit-row)',
+	$( 'table.wp-list-table tr:not(.inline-edit-row)' ).each( function() {
+		if ( 'tag-' + woocommerce_term_ordering_params.default === $( this ).prop( 'id' ) ) {
+			$( this ).append( '<td class="column-nosort"></td>' );
+		} else {
+			$( this ).append( '<td class="column-handle"></td>' );
+		}
+	} );
+
+	$( table_selector ).sortable({
+		items: item_selector,
 		cursor: 'move',
 		handle: '.column-handle',
 		axis: 'y',
@@ -53,7 +60,7 @@ jQuery( function( $ ) {
 
 			// If previous and next not at same tree level, or next not at same tree level and the previous is the parent of the next, or just moved item beneath its own children
 			if ( ( prevtermid === undefined && nexttermid === undefined ) || ( nexttermid === undefined && nexttermparent === prevtermid ) || ( nexttermid !== undefined && prevtermparent === termid ) ) {
-				$( 'table.widefat.wp-list-table' ).sortable( 'cancel' );
+				$( table_selector ).sortable( 'cancel' );
 				return;
 			}
 

@@ -360,7 +360,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 		$id      = (int) $request['id'];
 		$webhook = wc_get_webhook( $id );
 
-		if ( empty( $id ) || is_null( $webhook->get_id() ) ) {
+		if ( empty( $webhook ) || is_null( $webhook ) ) {
 			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
@@ -519,12 +519,17 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare a single webhook output for response.
 	 *
-	 * @param int               $id       Webhook ID.
+	 * @param int               $id       Webhook ID or object.
 	 * @param WP_REST_Request   $request  Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $id, $request ) {
-		$webhook = wc_get_webhook( (int) $id );
+		$webhook = wc_get_webhook( $id );
+
+		if ( empty( $webhook ) || is_null( $webhook ) ) {
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
 		$data    = array(
 			'id'            => $webhook->get_id(),
 			'name'          => $webhook->get_name(),
