@@ -4,10 +4,8 @@
  *
  * Functions for updating data, used by the background updater.
  *
- * @author   WooThemes
- * @category Core
- * @package  WooCommerce/Functions
- * @version  2.6.0
+ * @package WooCommerce/Functions
+ * @version 3.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -1529,6 +1527,7 @@ function wc_update_330_webhooks() {
 		$webhook->set_secret( get_post_meta( $post->ID, '_secret', true ) );
 		$webhook->set_topic( get_post_meta( $post->ID, '_topic', true ) );
 		$webhook->set_api_version( get_post_meta( $post->ID, '_api_version', true ) );
+		$webhook->set_user_id( $post->post_author );
 		$webhook->set_pending_delivery( false );
 		$webhook->save();
 
