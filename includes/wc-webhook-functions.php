@@ -2,8 +2,6 @@
 /**
  * WooCommerce Webhook functions
  *
- * @author   Automattic
- * @category Core
  * @package  WooCommerce/Functions
  * @version  3.3.0
  */
