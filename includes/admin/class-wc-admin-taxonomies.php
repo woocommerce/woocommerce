@@ -318,7 +318,10 @@ class WC_Admin_Taxonomies {
 
 		$new_columns['thumb'] = __( 'Image', 'woocommerce' );
 
-		return array_merge( $new_columns, $columns );
+		$columns = array_merge( $new_columns, $columns );
+		$columns['handle'] = '';
+
+		return $columns;
 	}
 
 	/**
@@ -331,9 +334,7 @@ class WC_Admin_Taxonomies {
 	 * @return string
 	 */
 	public function product_cat_column( $columns, $column, $id ) {
-
-		if ( 'thumb' == $column ) {
-
+		if ( 'thumb' === $column ) {
 			$thumbnail_id = get_woocommerce_term_meta( $id, 'thumbnail_id', true );
 
 			if ( $thumbnail_id ) {
@@ -342,14 +343,13 @@ class WC_Admin_Taxonomies {
 				$image = wc_placeholder_img_src();
 			}
 
-			// Prevent esc_url from breaking spaces in urls for image embeds
-			// Ref: https://core.trac.wordpress.org/ticket/23605
-			$image = str_replace( ' ', '%20', $image );
-
+			// Prevent esc_url from breaking spaces in urls for image embeds. Ref: https://core.trac.wordpress.org/ticket/23605
+			$image    = str_replace( ' ', '%20', $image );
 			$columns .= '<img src="' . esc_url( $image ) . '" alt="' . esc_attr__( 'Thumbnail', 'woocommerce' ) . '" class="wp-post-image" height="48" width="48" />';
-
 		}
-
+		if ( 'handle' === $column ) {
+			$columns .= '<input type="hidden" name="term_id" value="' . esc_attr( $id ) . '" />';
+		}
 		return $columns;
 	}
 

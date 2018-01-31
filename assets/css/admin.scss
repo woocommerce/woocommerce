@@ -2443,9 +2443,9 @@ table.wp-list-table {
 		white-space: nowrap;
 	}
 
-	.column-handle,
-	.column-nosort {
+	.column-handle {
 		width: 17px;
+		display: none;
 	}
 
 	tbody {
