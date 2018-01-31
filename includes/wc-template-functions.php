@@ -306,7 +306,7 @@ function wc_product_cat_class( $class = '', $category = null ) {
  * @return int
  */
 function wc_get_default_products_per_row() {
-	$columns      = get_option( 'woocommerce_catalog_columns', 3 );
+	$columns      = get_option( 'woocommerce_catalog_columns', 4 );
 	$product_grid = wc_get_theme_support( 'product_grid' );
 	$min_columns  = isset( $product_grid['min_columns'] ) ? absint( $product_grid['min_columns'] ) : 0;
 	$max_columns  = isset( $product_grid['max_columns'] ) ? absint( $product_grid['max_columns'] ) : 0;
