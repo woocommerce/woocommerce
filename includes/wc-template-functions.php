@@ -1842,7 +1842,7 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 	 * This is a legacy function which also checks if things should display.
 	 * Themes no longer need to call these functions. It's all done via hooks.
 	 *
-	 * @deprecated 3.3.1
+	 * @deprecated 3.3.1 @todo Add a notice in a future version.
 	 * @param array $args Arguments.
 	 * @return null|boolean
 	*/
@@ -1864,9 +1864,7 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 			) );
 			return true;
 		} else {
-			// Output nothing. woocommerce_maybe_show_product_subcategories would have handled this already.
-			wc_deprecated_function( 'woocommerce_product_subcategories', '3.3', 'woocommerce_output_product_categories' );
-
+			// Output nothing. woocommerce_maybe_show_product_subcategories will handle the output of cats.
 			$display_type = woocommerce_get_loop_display_mode();
 
 			if ( 'subcategories' === $display_type ) {
