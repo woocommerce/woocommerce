@@ -28,7 +28,7 @@ jQuery( function( $ ) {
 		if ( href.length ) {
 			e.preventDefault();
 
-			if ( e.metaKey ) {
+			if ( e.metaKey || e.ctrlKey ) {
 				window.open( href, '_blank' );
 			} else {
 				window.location = href;
