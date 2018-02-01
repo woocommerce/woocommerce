@@ -24,35 +24,7 @@ if ( ! class_exists( 'WP_Background_Process', false ) ) {
 abstract class WC_Background_Process extends WP_Background_Process {
 
 	/**
-	 * Delete queue
-	 *
-	 * @param string $key Key. Leave blank to delete all batches.
-	 * @return $this
-	 */
-	public function delete( $key = '' ) {
-		if ( $key ) {
-			delete_site_option( $key );
-		} else {
-			global $wpdb;
-
-			$table  = $wpdb->options;
-			$column = 'option_name';
-
-			if ( is_multisite() ) {
-				$table  = $wpdb->sitemeta;
-				$column = 'meta_key';
-			}
-
-			$key = $wpdb->esc_like( $this->identifier . '_batch_' ) . '%';
-
-			$wpdb->query( $wpdb->prepare( "DELETE FROM {$table} WHERE {$column} LIKE %s", $key ) ); // @codingStandardsIgnoreLine.
-		}
-
-		return $this;
-	}
-
-	/**
-	 * Is queue empty
+	 * Is queue empty.
 	 *
 	 * @return bool
 	 */
@@ -75,9 +47,9 @@ abstract class WC_Background_Process extends WP_Background_Process {
 	}
 
 	/**
-	 * Get batch
+	 * Get batch.
 	 *
-	 * @return stdClass Return the first batch from the queue
+	 * @return stdClass Return the first batch from the queue.
 	 */
 	protected function get_batch() {
 		global $wpdb;
@@ -115,7 +87,7 @@ abstract class WC_Background_Process extends WP_Background_Process {
 	}
 
 	/**
-	 * Handle
+	 * Handle.
 	 *
 	 * Pass each queue item to the task handler, while remaining
 	 * within server memory and time limit constraints.
@@ -160,7 +132,7 @@ abstract class WC_Background_Process extends WP_Background_Process {
 	}
 
 	/**
-	 * Get memory limit
+	 * Get memory limit.
 	 *
 	 * @return int
 	 */
@@ -181,11 +153,10 @@ abstract class WC_Background_Process extends WP_Background_Process {
 	}
 
 	/**
-	 * Schedule cron healthcheck
+	 * Schedule cron healthcheck.
 	 *
-	 * @access public
-	 * @param mixed $schedules Schedules.
-	 * @return mixed
+	 * @param array $schedules Schedules.
+	 * @return array
 	 */
 	public function schedule_cron_healthcheck( $schedules ) {
 		$interval = apply_filters( $this->identifier . '_cron_interval', 5 );
@@ -205,13 +176,36 @@ abstract class WC_Background_Process extends WP_Background_Process {
 	}
 
 	/**
-	 * Cancel Process
+	 * Delete all batches.
 	 *
-	 * Stop processing queue items, clear cronjob and delete batch.
+	 * @return WC_Background_Process
 	 */
-	public function cancel_process() {
+	public function delete_all_batches() {
+		global $wpdb;
+
+		$table  = $wpdb->options;
+		$column = 'option_name';
+
+		if ( is_multisite() ) {
+			$table  = $wpdb->sitemeta;
+			$column = 'meta_key';
+		}
+
+		$key = $wpdb->esc_like( $this->identifier . '_batch_' ) . '%';
+
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$table} WHERE {$column} LIKE %s", $key ) ); // @codingStandardsIgnoreLine.
+
+		return $this;
+	}
+
+	/**
+	 * Kill process.
+	 *
+	 * Stop processing queue items, clear cronjob and delete all batches.
+	 */
+	public function kill_process() {
 		if ( ! $this->is_queue_empty() ) {
-			$this->delete();
+			$this->delete_all_batches();
 			wp_clear_scheduled_hook( $this->cron_hook_identifier );
 		}
 	}
