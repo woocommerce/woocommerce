@@ -1828,6 +1828,14 @@ if ( ! function_exists( 'woocommerce_maybe_show_product_subcategories' ) ) {
 
 			if ( 'subcategories' === $display_type ) {
 				wc_set_loop_prop( 'total', 0 );
+
+				// This removes pagination and products from display for themes not using wc_get_loop_prop in their product loops.  @todo Remove in future major version.
+				global $wp_query;
+
+				if ( $wp_query->is_main_query() ) {
+					$wp_query->post_count    = 0;
+					$wp_query->max_num_pages = 0;
+				}
 			}
 		}
 
@@ -1850,7 +1858,7 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 	 * @deprecated 3.3.1 @todo Add a notice in a future version.
 	 * @param array $args Arguments.
 	 * @return null|boolean
-	*/
+	 */
 	function woocommerce_product_subcategories( $args = array() ) {
 		$defaults = array(
 			'before'        => '',
@@ -1865,7 +1873,7 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 			woocommerce_output_product_categories( array(
 				'before'    => $args['before'],
 				'after'     => $args['after'],
-				'parent_id' => is_product_category() ? get_queried_object_id(): 0,
+				'parent_id' => is_product_category() ? get_queried_object_id() : 0,
 			) );
 			return true;
 		} else {
@@ -1873,10 +1881,13 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 			$display_type = woocommerce_get_loop_display_mode();
 
 			if ( 'subcategories' === $display_type ) {
-				// Legacy - if the template is using woocommerce_product_subcategories, this keeps the rest of the loop working.
+				// This removes pagination and products from display for themes not using wc_get_loop_prop in their product loops. @todo Remove in future major version.
 				global $wp_query;
-				$wp_query->post_count    = 0;
-				$wp_query->max_num_pages = 0;
+
+				if ( $wp_query->is_main_query() ) {
+					$wp_query->post_count    = 0;
+					$wp_query->max_num_pages = 0;
+				}
 			}
 
 			return 'subcategories' === $display_type || 'both' === $display_type;
