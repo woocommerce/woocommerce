@@ -724,22 +724,22 @@ function wc_get_image_size( $image_size ) {
 
 	if ( is_array( $image_size ) ) {
 		$size       = array(
-			'width'  => isset( $image_size[0] ) ? $image_size[0] : 600,
-			'height' => isset( $image_size[1] ) ? $image_size[1] : 600,
-			'crop'   => isset( $image_size[2] ) ? $image_size[2] : 1,
+			'width'  => isset( $image_size[0] ) ? absint( $image_size[0] ) : 600,
+			'height' => isset( $image_size[1] ) ? absint( $image_size[1] ) : 600,
+			'crop'   => isset( $image_size[2] ) ? absint( $image_size[2] ) : 1,
 		);
 		$image_size = $size['width'] . '_' . $size['height'];
 	} elseif ( in_array( $image_size, array( 'single', 'shop_single', 'woocommerce_single' ), true ) ) {
-		$size['width']  = wc_get_theme_support( 'single_image_width', get_option( 'woocommerce_single_image_width', 600 ) );
-		$size['height'] = 9999999999;
+		$size['width']  = absint( wc_get_theme_support( 'single_image_width', get_option( 'woocommerce_single_image_width', 600 ) ) );
+		$size['height'] = '';
 		$size['crop']   = 0;
 		$image_size     = 'single';
 	} elseif ( in_array( $image_size, array( 'thumbnail', 'shop_thumbnail', 'shop_catalog', 'woocommerce_thumbnail' ), true ) ) {
-		$size['width'] = wc_get_theme_support( 'thumbnail_image_width', get_option( 'woocommerce_thumbnail_image_width', 300 ) );
-		$cropping      = get_option( 'woocommerce_thumbnail_cropping', '1: 1' );
+		$size['width'] = absint( wc_get_theme_support( 'thumbnail_image_width', get_option( 'woocommerce_thumbnail_image_width', 300 ) ) );
+		$cropping      = get_option( 'woocommerce_thumbnail_cropping', '1:1' );
 
 		if ( 'uncropped' === $cropping ) {
-			$size['height'] = 9999999999;
+			$size['height'] = '';
 			$size['crop']   = 0;
 		} elseif ( 'custom' === $cropping ) {
 			$width          = max( 1, get_option( 'woocommerce_thumbnail_cropping_custom_width', '4' ) );

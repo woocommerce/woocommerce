@@ -74,7 +74,7 @@ class WC_Regenerate_Images {
 		$size_settings = wc_get_image_size( $size );
 
 		// If size differs from image meta, regen.
-		if ( ! isset( $imagemeta['sizes'], $imagemeta['sizes'][ $size ] ) || $imagemeta['sizes'][ $size ]['width'] !== $size_settings['width'] || $imagemeta['sizes'][ $size ]['height'] !== $size_settings['height'] ) {
+		if ( ! isset( $imagemeta['sizes'], $imagemeta['sizes'][ $size ] ) || $imagemeta['sizes'][ $size ]['width'] !== $size_settings['width'] || ( $size_settings['crop'] && $imagemeta['sizes'][ $size ]['height'] !== $size_settings['height'] ) ) {
 			$image = self::resize_and_return_image( $attachment_id, $image, $size, $icon );
 		}
 
