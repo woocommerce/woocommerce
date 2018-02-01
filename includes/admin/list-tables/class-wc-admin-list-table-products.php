@@ -479,7 +479,12 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				$id_from_sku = wc_get_product_id_by_sku( wc_clean( $term ) );
 
 				if ( $id_from_sku ) {
-					$search_ids[] = absint( $id_from_sku );
+					$product = wc_get_product( $id_from_sku );
+
+					if ( $product ) {
+						$search_ids[] = $product->get_id();
+						$search_ids[] = $product->get_parent_id();
+					}
 				}
 			}
 		}
