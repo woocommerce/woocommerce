@@ -29,7 +29,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 		 *
 		 * @var array
 		 */
-		private static $errors   = array();
+		private static $errors = array();
 
 		/**
 		 * Update messages.
@@ -45,17 +45,17 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 			if ( empty( self::$settings ) ) {
 				$settings = array();
 
-				include_once( dirname( __FILE__ ) . '/settings/class-wc-settings-page.php' );
+				include_once dirname( __FILE__ ) . '/settings/class-wc-settings-page.php';
 
-				$settings[] = include( 'settings/class-wc-settings-general.php' );
-				$settings[] = include( 'settings/class-wc-settings-products.php' );
-				$settings[] = include( 'settings/class-wc-settings-tax.php' );
-				$settings[] = include( 'settings/class-wc-settings-shipping.php' );
-				$settings[] = include( 'settings/class-wc-settings-checkout.php' );
-				$settings[] = include( 'settings/class-wc-settings-accounts.php' );
-				$settings[] = include( 'settings/class-wc-settings-emails.php' );
-				$settings[] = include( 'settings/class-wc-settings-integrations.php' );
-				$settings[] = include( 'settings/class-wc-settings-rest-api.php' );
+				$settings[] = include 'settings/class-wc-settings-general.php';
+				$settings[] = include 'settings/class-wc-settings-products.php';
+				$settings[] = include 'settings/class-wc-settings-tax.php';
+				$settings[] = include 'settings/class-wc-settings-shipping.php';
+				$settings[] = include 'settings/class-wc-settings-checkout.php';
+				$settings[] = include 'settings/class-wc-settings-accounts.php';
+				$settings[] = include 'settings/class-wc-settings-emails.php';
+				$settings[] = include 'settings/class-wc-settings-integrations.php';
+				$settings[] = include 'settings/class-wc-settings-rest-api.php';
 
 				self::$settings = apply_filters( 'woocommerce_get_settings_pages', $settings );
 			}
@@ -134,14 +134,16 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 			wp_enqueue_script( 'woocommerce_settings', WC()->plugin_url() . '/assets/js/admin/settings' . $suffix . '.js', array( 'jquery', 'jquery-ui-datepicker', 'jquery-ui-sortable', 'iris', 'selectWoo' ), WC()->version, true );
 
-			wp_localize_script( 'woocommerce_settings', 'woocommerce_settings_params', array(
-				'i18n_nav_warning' => __( 'The changes you made will be lost if you navigate away from this page.', 'woocommerce' ),
-			) );
+			wp_localize_script(
+				'woocommerce_settings', 'woocommerce_settings_params', array(
+					'i18n_nav_warning' => __( 'The changes you made will be lost if you navigate away from this page.', 'woocommerce' ),
+				)
+			);
 
 			// Get tabs for the settings page.
 			$tabs = apply_filters( 'woocommerce_settings_tabs_array', array() );
 
-			include( dirname( __FILE__ ) . '/views/html-admin-settings.php' );
+			include dirname( __FILE__ ) . '/views/html-admin-settings.php';
 		}
 
 		/**
@@ -517,7 +519,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						$disabled_message = '';
 
 						if ( has_filter( 'woocommerce_get_image_size_' . $image_size ) ) {
-							$disabled_attr = 'disabled="disabled"';
+							$disabled_attr    = 'disabled="disabled"';
 							$disabled_message = '<p><small>' . esc_html__( 'The settings of this image size have been disabled because its values are being overwritten by a filter.', 'woocommerce' ) . '</small></p>';
 						}
 
@@ -646,7 +648,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				$description  = $value['desc'];
 				$tooltip_html = $value['desc_tip'];
 			} elseif ( ! empty( $value['desc'] ) ) {
-				$description  = $value['desc'];
+				$description = $value['desc'];
 			}
 
 			if ( $description && in_array( $value['type'], array( 'textarea', 'radio' ), true ) ) {
