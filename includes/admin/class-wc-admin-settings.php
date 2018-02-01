@@ -2,10 +2,8 @@
 /**
  * WooCommerce Admin Settings Class
  *
- * @author   Automattic
- * @category Admin
  * @package  WooCommerce/Admin
- * @version  3.3.0
+ * @version  3.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -592,7 +590,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 					// Country multiselects.
 					case 'multi_select_countries':
-						$selections = (array) self::get_option( $value['id'] );
+						$selections = (array) self::get_option( $value['id'], $value['default'] );
 
 						if ( ! empty( $value['options'] ) ) {
 							$countries = $value['options'];
