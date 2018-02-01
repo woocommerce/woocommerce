@@ -370,7 +370,11 @@ class WC_Template_Loader {
 	 * @return string
 	 */
 	public static function unsupported_theme_title_filter( $title, $id ) {
-		if ( ! self::$theme_support && is_page( self::$shop_page_id ) && $id === self::$shop_page_id ) {
+		if ( self::$theme_support || ! $id !== self::$shop_page_id ) {
+			return $title;
+		}
+
+		if ( is_page( self::$shop_page_id ) || ( is_home() && 'page' === get_option( 'show_on_front' ) && absint( get_option( 'page_on_front' ) ) === self::$shop_page_id ) ) {
 			$args         = self::get_current_shop_view_args();
 			$title_suffix = array();
 
