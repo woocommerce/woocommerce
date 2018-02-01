@@ -258,11 +258,17 @@ class WC_Template_Loader {
 
 		if ( is_product_category() ) {
 			$shortcode_args['category'] = sanitize_title( $queried_object->slug );
+			
+			// Add category description above products loop.
+			add_action( 'woocommerce_before_shop_loop', 'woocommerce_taxonomy_archive_description', 15 );
 		} elseif ( taxonomy_is_product_attribute( $queried_object->taxonomy ) ) {
 			$shortcode_args['attribute'] = sanitize_title( $queried_object->taxonomy );
 			$shortcode_args['terms']     = sanitize_title( $queried_object->slug );
 		} elseif ( is_product_tag() ) {
 			$shortcode_args['tag'] = sanitize_title( $queried_object->slug );
+
+			// Add tag description above products loop.
+			add_action( 'woocommerce_before_shop_loop', 'woocommerce_taxonomy_archive_description', 15 );
 		} else {
 			// Default theme archive for all other taxonomies.
 			return;
