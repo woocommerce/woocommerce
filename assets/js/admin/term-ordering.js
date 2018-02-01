@@ -3,8 +3,15 @@
 /* Modifided script from the simple-page-ordering plugin */
 jQuery( function( $ ) {
 
-	var table_selector = 'table.wp-list-table',
-		item_selector  = 'tbody tr:not(.inline-edit-row)';
+	var table_selector   = 'table.wp-list-table',
+		item_selector    = 'tbody tr:not(.inline-edit-row)',
+		term_id_selector = '.column-handle input[name="term_id"]';
+
+	if ( 0 === $( table_selector ).find( '.column-handle' ).length ) {
+		$( table_selector ).find( 'tr:not(.inline-edit-row)' ).append( '<td class="column-handle"></td>' );
+
+		term_id_selector = '.check-column input';
+	}
 
 	$( table_selector ).find( '.column-handle' ).show();
 
@@ -30,11 +37,11 @@ jQuery( function( $ ) {
 			ui.item.children( 'td, th' ).css( 'border-bottom-width', '1px' );
 		},
 		update: function( event, ui ) {
-			var termid     = ui.item.find( '.column-handle input[name="term_id"]' ).val(); // this post id
+			var termid     = ui.item.find( term_id_selector ).val(); // this post id
 			var termparent = ui.item.find( '.parent' ).html();            // post parent
 
-			var prevtermid = ui.item.prev().find( '.column-handle input[name="term_id"]' ).val();
-			var nexttermid = ui.item.next().find( '.column-handle input[name="term_id"]' ).val();
+			var prevtermid = ui.item.prev().find( term_id_selector ).val();
+			var nexttermid = ui.item.next().find( term_id_selector ).val();
 
 			// Can only sort in same tree
 			var prevtermparent, nexttermparent;
