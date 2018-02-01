@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, claudiulodro,
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
 Requires at least: 4.7
 Tested up to: 4.9
-Stable tag: 3.3.0
+Stable tag: 3.3.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -161,7 +161,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
-= 3.3.1 - 2018-02-01 =
+= 3.3.1 - 2018-02-xx =
 * Fix - Added `woocommerce_output_product_categories` to replace `woocommerce_product_subcategories` function to prevent outdated theme template files from outputting categories on the shop and category pages in err.
 * Fix - Prevented columns from being set to anything lower than 1.
 * Fix - Added extra error checking in Webhooks API to prevent notices when deleting Webhooks.
