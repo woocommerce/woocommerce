@@ -2,31 +2,22 @@
 /**
  * Background Updater
  *
- * Uses https://github.com/A5hleyRich/wp-background-processing to handle DB
- * updates in the background.
- *
- * @class    WC_Background_Updater
  * @version  2.6.0
  * @package  WooCommerce/Classes
- * @category Class
- * @author   WooThemes
  */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WP_Async_Request', false ) ) {
-	include_once( dirname( __FILE__ ) . '/libraries/wp-async-request.php' );
-}
-
-if ( ! class_exists( 'WP_Background_Process', false ) ) {
-	include_once( dirname( __FILE__ ) . '/libraries/wp-background-process.php' );
+if ( ! class_exists( 'WC_Background_Process', false ) ) {
+	include_once dirname( __FILE__ ) . '/abstracts/class-wc-background-process.php';
 }
 
 /**
  * WC_Background_Updater Class.
  */
-class WC_Background_Updater extends WP_Background_Process {
+class WC_Background_Updater extends WC_Background_Process {
 
 	/**
 	 * Initiate new background process.
@@ -88,6 +79,7 @@ class WC_Background_Updater extends WP_Background_Process {
 
 	/**
 	 * Is the updater running?
+	 *
 	 * @return boolean
 	 */
 	public function is_updating() {
@@ -102,7 +94,7 @@ class WC_Background_Updater extends WP_Background_Process {
 	 * in the next pass through. Or, return false to remove the
 	 * item from the queue.
 	 *
-	 * @param string $callback Update callback function
+	 * @param string $callback Update callback function.
 	 * @return mixed
 	 */
 	protected function task( $callback ) {
@@ -110,7 +102,7 @@ class WC_Background_Updater extends WP_Background_Process {
 
 		$logger = wc_get_logger();
 
-		include_once( dirname( __FILE__ ) . '/wc-update-functions.php' );
+		include_once dirname( __FILE__ ) . '/wc-update-functions.php';
 
 		if ( is_callable( $callback ) ) {
 			$logger->info( sprintf( 'Running %s callback', $callback ), array( 'source' => 'wc_db_updates' ) );
