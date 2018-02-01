@@ -179,7 +179,7 @@ class WC_Shortcode_Products {
 		);
 
 		if ( wc_string_to_bool( $this->attributes['paginate'] ) ) {
-			$this->attributes['page'] = get_query_var( 'product-page', 1 );
+			$this->attributes['page'] = absint( empty( $_GET['product-page'] ) ? 1 : $_GET['product-page'] ); // WPCS: input var ok, CSRF ok.
 		}
 
 		if ( ! empty( $this->attributes['rows'] ) ) {
