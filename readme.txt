@@ -179,6 +179,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Default HTML in end wrapper template.
 * Fix - Prevent regular pagination showing on archives for unsupported themes.
 * Fix - Fix shop when shown as homepage in unsupported themes.
+* Tweak - Extended the background processing library to avoid changing methods in the library.
 * Tweak - Do not show row settings if something is managing the number of products per page.
 * Tweak - Allow devs to add 'no-link' class to elements to prevent order view link being triggered on row click.
 * Tweak - Made woocommerce_resize_images filter more useful by calling it later.
