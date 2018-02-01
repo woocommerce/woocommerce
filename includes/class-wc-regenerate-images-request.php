@@ -9,18 +9,14 @@
 
 defined( 'ABSPATH' ) || exit;
 
-if ( ! class_exists( 'WP_Async_Request', false ) ) {
-	include_once dirname( __FILE__ ) . '/libraries/wp-async-request.php';
-}
-
-if ( ! class_exists( 'WP_Background_Process', false ) ) {
-	include_once dirname( __FILE__ ) . '/libraries/wp-background-process.php';
+if ( ! class_exists( 'WC_Background_Process', false ) ) {
+	include_once dirname( __FILE__ ) . '/abstracts/class-wc-background-process.php';
 }
 
 /**
- * Class that extends WP_Background_Process to process image regeneration in the background
+ * Class that extends WC_Background_Process to process image regeneration in the background.
  */
-class WC_Regenerate_Images_Request extends WP_Background_Process {
+class WC_Regenerate_Images_Request extends WC_Background_Process {
 
 	/**
 	 * Stores the attachment ID being processed.
