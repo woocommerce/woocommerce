@@ -176,6 +176,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Allow uncategorized category to be sorted like the others.
 * Fix - If theme support changes, we may need to flush permalinks since some are changed based on this flag.
 * Fix - Fire hooks for pagination etc only when pagination is enabled.
+* Fix - Default HTML in end wrapper template.
+* Fix - Prevent regular pagination showing on archives for unsupported themes.
+* Fix - Fix shop when shown as homepage in unsupported themes.
+* Tweak - Do not show row settings if something is managing the number of products per page.
 * Tweak - Allow devs to add 'no-link' class to elements to prevent order view link being triggered on row click.
 * Tweak - Made woocommerce_resize_images filter more useful by calling it later.
 * Tweak - Revert default columns back to 4 so it's consistent with 3.2.
