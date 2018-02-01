@@ -182,7 +182,7 @@ class WC_Regenerate_Images {
 	private static function queue_image_regeneration() {
 		global $wpdb;
 		// First lets cancel existing running queue to avoid running it more than once.
-		self::$background_process->cancel_process();
+		self::$background_process->kill_process();
 
 		// Now lets find all product image attachments IDs and pop them onto the queue.
 		$images = $wpdb->get_results( // @codingStandardsIgnoreLine
