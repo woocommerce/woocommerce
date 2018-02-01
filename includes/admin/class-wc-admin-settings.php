@@ -566,7 +566,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 					// Single country selects.
 					case 'single_select_country':
-						$country_setting = (string) self::get_option( $value['id'] );
+						$country_setting = (string) self::get_option( $value['id'], $value['default'] );
 
 						if ( strstr( $country_setting, ':' ) ) {
 							$country_setting = explode( ':', $country_setting );
