@@ -572,10 +572,12 @@ if ( ! function_exists( 'woocommerce_content' ) ) {
 
 				<?php woocommerce_product_loop_start(); ?>
 
-				<?php while ( have_posts() ) : ?>
-					<?php the_post(); ?>
-					<?php wc_get_template_part( 'content', 'product' ); ?>
-				<?php endwhile; // end of the loop. ?>
+				<?php if ( wc_get_loop_prop( 'total' ) ) : ?>
+					<?php while ( have_posts() ) : ?>
+						<?php the_post(); ?>
+						<?php wc_get_template_part( 'content', 'product' ); ?>
+					<?php endwhile; ?>
+				<?php endif; ?>
 
 				<?php woocommerce_product_loop_end(); ?>
 
