@@ -268,6 +268,13 @@ class WC_Template_Loader {
 			return;
 		}
 
+		// Description handling.
+		if ( ! empty( $queried_object->description ) && ( empty( $_GET['product-page'] ) || 1 === absint( $_GET['product-page'] ) ) ) { // WPCS: input var ok, CSRF ok.
+			$prefix = '<div class="term-description">' . wc_format_content( $queried_object->description ) . '</div>'; // WPCS: XSS ok.
+		} else {
+			$prefix = '';
+		}
+
 		$shortcode = new WC_Shortcode_Products( $shortcode_args );
 		$shop_page = get_post( self::$shop_page_id );
 
@@ -281,7 +288,7 @@ class WC_Template_Loader {
 			'post_date_gmt'         => $shop_page->post_date_gmt,
 			'post_modified'         => $shop_page->post_modified,
 			'post_modified_gmt'     => $shop_page->post_modified_gmt,
-			'post_content'          => $shortcode->get_content(),
+			'post_content'          => $prefix . $shortcode->get_content(),
 			'post_title'            => wc_clean( $queried_object->name ),
 			'post_excerpt'          => '',
 			'post_content_filtered' => '',
