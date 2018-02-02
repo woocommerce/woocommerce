@@ -509,6 +509,8 @@ class WC_Form_Handler {
 			if ( $cart_item = WC()->cart->get_cart_item( $cart_item_key ) ) {
 				WC()->cart->remove_cart_item( $cart_item_key );
 
+				$product = wc_get_product( $cart_item['product_id'] );
+
 				$item_removed_title = apply_filters( 'woocommerce_cart_item_removed_title', $product ? sprintf( _x( '&ldquo;%s&rdquo;', 'Item name in quotes', 'woocommerce' ), $product->get_name() ) : __( 'Item', 'woocommerce' ), $cart_item );
 
 				// Don't show undo link if removed item is out of stock.
