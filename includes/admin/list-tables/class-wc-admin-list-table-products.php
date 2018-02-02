@@ -37,7 +37,6 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		parent::__construct();
 		add_filter( 'disable_months_dropdown', '__return_true' );
 		add_filter( 'query_vars', array( $this, 'add_custom_query_var' ) );
-		add_filter( 'posts_search', array( $this, 'sku_search' ) );
 		add_filter( 'views_edit-product', array( $this, 'product_views' ) );
 	}
 
@@ -471,8 +470,11 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 *
 	 * @deprecated Logic moved to query_filters.
 	 * @param string $where Where clause SQL.
+	 * @return string
 	 */
-	public function sku_search( $where ) {}
+	public function sku_search( $where ) {
+		return $where;
+	}
 
 	/**
 	 * Change views on the edit product screen.
