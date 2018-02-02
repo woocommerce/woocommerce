@@ -511,26 +511,25 @@ class WC_Admin_Post_Types {
 
 			if ( ! empty( $_REQUEST['change_regular_price'] ) && isset( $_REQUEST['_regular_price'] ) ) { // WPCS: input var ok, sanitization ok.
 				$change_regular_price = absint( $_REQUEST['change_regular_price'] ); // WPCS: input var ok, sanitization ok.
-				$regular_price        = wc_clean( wp_unslash( $_REQUEST['_regular_price'] ) ); // WPCS: input var ok, sanitization ok.
-				if ( ! strstr( $regular_price, '%' ) ) {
-					$regular_price = wc_format_decimal( $regular_price );
-				}
+				$raw_regular_price    = wc_clean( wp_unslash( $_REQUEST['_regular_price'] ) ); // WPCS: input var ok, sanitization ok.
+				$is_percentage        = (bool) strstr( $raw_regular_price, '%' );
+				$regular_price        = wc_format_decimal( $raw_regular_price );
 
 				switch ( $change_regular_price ) {
 					case 1:
 						$new_price = $regular_price;
 						break;
 					case 2:
-						if ( strstr( $regular_price, '%' ) ) {
-							$percent = str_replace( '%', '', $regular_price ) / 100;
+						if ( $is_percentage ) {
+							$percent = $regular_price / 100;
 							$new_price = $old_regular_price + ( round( $old_regular_price * $percent, wc_get_price_decimals() ) );
 						} else {
 							$new_price = $old_regular_price + $regular_price;
 						}
 						break;
 					case 3:
-						if ( strstr( $regular_price, '%' ) ) {
-							$percent = str_replace( '%', '', $regular_price ) / 100;
+						if ( $is_percentage ) {
+							$percent = $regular_price / 100;
 							$new_price = max( 0, $old_regular_price - ( round( $old_regular_price * $percent, wc_get_price_decimals() ) ) );
 						} else {
 							$new_price = max( 0, $old_regular_price - $regular_price );
@@ -550,34 +549,33 @@ class WC_Admin_Post_Types {
 
 			if ( ! empty( $_REQUEST['change_sale_price'] ) && isset( $_REQUEST['_sale_price'] ) ) { // WPCS: input var ok, sanitization ok.
 				$change_sale_price = absint( $_REQUEST['change_sale_price'] ); // WPCS: input var ok, sanitization ok.
-				$sale_price        = wc_clean( wp_unslash( $_REQUEST['_sale_price'] ) ); // WPCS: input var ok, sanitization ok.
-				if ( ! strstr( $sale_price, '%' ) ) {
-					$sale_price = wc_format_decimal( $sale_price );
-				}
+				$raw_sale_price    = wc_clean( wp_unslash( $_REQUEST['_sale_price'] ) ); // WPCS: input var ok, sanitization ok.
+				$is_percentage     = (bool) strstr( $raw_sale_price, '%' );
+				$sale_price        = wc_format_decimal( $raw_sale_price );
 
 				switch ( $change_sale_price ) {
 					case 1:
 						$new_price = $sale_price;
 						break;
 					case 2:
-						if ( strstr( $sale_price, '%' ) ) {
-							$percent = str_replace( '%', '', $sale_price ) / 100;
+						if ( $is_percentage ) {
+							$percent = $sale_price / 100;
 							$new_price = $old_sale_price + ( $old_sale_price * $percent );
 						} else {
 							$new_price = $old_sale_price + $sale_price;
 						}
 						break;
 					case 3:
-						if ( strstr( $sale_price, '%' ) ) {
-							$percent = str_replace( '%', '', $sale_price ) / 100;
+						if ( $is_percentage ) {
+							$percent = $sale_price / 100;
 							$new_price = max( 0, $old_sale_price - ( $old_sale_price * $percent ) );
 						} else {
 							$new_price = max( 0, $old_sale_price - $sale_price );
 						}
 						break;
 					case 4:
-						if ( strstr( $sale_price, '%' ) ) {
-							$percent = str_replace( '%', '', $sale_price ) / 100;
+						if ( $is_percentage ) {
+							$percent = $sale_price / 100;
 							$new_price = max( 0, $product->regular_price - ( $product->regular_price * $percent ) );
 						} else {
 							$new_price = max( 0, $product->regular_price - $sale_price );
