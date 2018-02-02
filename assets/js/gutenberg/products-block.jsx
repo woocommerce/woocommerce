@@ -149,7 +149,7 @@ const ProductCategoryList = withAPIData( ( props ) => {
 class ProductsBlockSettingsEditorDisplayOption extends React.Component {
 	render() {
 		return (
-			<div onClick={ () => { this.props.update_display_callback( this.props.value ) } } >
+			<div className="wc-products-display-option" onClick={ () => { this.props.update_display_callback( this.props.value ) } } >
 				<h4>{ this.props.title }</h4>
 				<p>{ this.props.description }</p>
 			</div>
@@ -177,8 +177,14 @@ class ProductsBlockSettingsEditorDisplayOptions extends React.Component {
 			}
 		];
 
+		let classes = 'display-settings-container';
+		if ( this.props.existing ) {
+			classes += ' existing';
+		}
+
 		return (
-			<div>
+			<div className={ classes }>
+				<p>{ __( 'Select the scope for products to display:' ) }</p>
 				{ products_block_display_settings.map( ( setting ) =>
 					<ProductsBlockSettingsEditorDisplayOption { ...setting } update_display_callback={ this.props.update_display_callback } />
 				) }
@@ -198,7 +204,8 @@ class ProductsBlockSettingsEditor extends React.Component {
 	constructor( props ) {
 		super( props );
 		this.state = {
-			display: props.selected_display
+			display: props.selected_display,
+			menu_visible: props.selected_display ? false : true,
 		}
 
 		this.updateDisplay = this.updateDisplay.bind( this );
@@ -211,7 +218,8 @@ class ProductsBlockSettingsEditor extends React.Component {
 	 */
 	updateDisplay( value ) {
 		this.setState( {
-			display: value
+			display: value,
+			menu_visible: false,
 		} );
 
 		this.props.update_display_callback( value );
@@ -228,17 +236,21 @@ class ProductsBlockSettingsEditor extends React.Component {
 			extra_settings = <ProductsCategorySelect { ...this.props } />;
 		}
 
-		// todo:
-		/*
-		Add a "Change/Cancel" link. When clicked it toggles the visibility of ProductsBlockSettingsEditorDisplayOptions
-		*/
+		const menu = this.state.menu_visible ? <ProductsBlockSettingsEditorDisplayOptions existing={ this.state.display ? true : false } update_display_callback={ this.updateDisplay } /> : null;
+
+		let heading = <h4>{ __( 'Products' ) }</h4>;
+		if ( this.state.display && ! this.state.menu_visible ) {
+			heading = <h4>{ __( 'Displaying ' + this.state.display ) } <a onClick={ () => { this.setState( { menu_visible: true } ) } }>{ __( 'Change' ) }</a></h4>;
+		} else if ( this.state.display ) {
+			heading = <h4>{ __( 'Displaying ' + this.state.display ) } <a onClick={ () => { this.setState( { menu_visible: false } ) } }>{ __( 'Cancel' ) }</a></h4>;
+		}
 
 		return (
 			<div className="wc-product-display-settings">
 
-				<h4>{ __( 'Products' ) }</h4>
+				{ heading }
 
-				<ProductsBlockSettingsEditorDisplayOptions update_display_callback={ this.updateDisplay } />
+				{ menu }
 
 				{ extra_settings }
 

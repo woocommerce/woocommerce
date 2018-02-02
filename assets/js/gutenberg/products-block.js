@@ -309,7 +309,7 @@ var ProductsBlockSettingsEditorDisplayOption = function (_React$Component3) {
 
 			return wp.element.createElement(
 				"div",
-				{ onClick: function onClick() {
+				{ className: "wc-products-display-option", onClick: function onClick() {
 						_this4.props.update_display_callback(_this4.props.value);
 					} },
 				wp.element.createElement(
@@ -357,9 +357,19 @@ var ProductsBlockSettingsEditorDisplayOptions = function (_React$Component4) {
 				value: 'category'
 			}];
 
+			var classes = 'display-settings-container';
+			if (this.props.existing) {
+				classes += ' existing';
+			}
+
 			return wp.element.createElement(
 				"div",
-				null,
+				{ className: classes },
+				wp.element.createElement(
+					"p",
+					null,
+					__('Select the scope for products to display:')
+				),
 				products_block_display_settings.map(function (setting) {
 					return wp.element.createElement(ProductsBlockSettingsEditorDisplayOption, _extends({}, setting, { update_display_callback: _this6.props.update_display_callback }));
 				})
@@ -387,7 +397,8 @@ var ProductsBlockSettingsEditor = function (_React$Component5) {
 		var _this7 = _possibleConstructorReturn(this, (ProductsBlockSettingsEditor.__proto__ || Object.getPrototypeOf(ProductsBlockSettingsEditor)).call(this, props));
 
 		_this7.state = {
-			display: props.selected_display
+			display: props.selected_display,
+			menu_visible: props.selected_display ? false : true
 		};
 
 		_this7.updateDisplay = _this7.updateDisplay.bind(_this7);
@@ -405,7 +416,8 @@ var ProductsBlockSettingsEditor = function (_React$Component5) {
 		key: "updateDisplay",
 		value: function updateDisplay(value) {
 			this.setState({
-				display: value
+				display: value,
+				menu_visible: false
 			});
 
 			this.props.update_display_callback(value);
@@ -418,6 +430,8 @@ var ProductsBlockSettingsEditor = function (_React$Component5) {
 	}, {
 		key: "render",
 		value: function render() {
+			var _this8 = this;
+
 			var extra_settings = null;
 			if ('specific' === this.state.display) {
 				extra_settings = wp.element.createElement(ProductsSpecificSelect, null);
@@ -425,20 +439,48 @@ var ProductsBlockSettingsEditor = function (_React$Component5) {
 				extra_settings = wp.element.createElement(ProductsCategorySelect, this.props);
 			}
 
-			// todo:
-			/*
-   Add a "Change/Cancel" link. When clicked it toggles the visibility of ProductsBlockSettingsEditorDisplayOptions
-   */
+			var menu = this.state.menu_visible ? wp.element.createElement(ProductsBlockSettingsEditorDisplayOptions, { existing: this.state.display ? true : false, update_display_callback: this.updateDisplay }) : null;
+
+			var heading = wp.element.createElement(
+				"h4",
+				null,
+				__('Products')
+			);
+			if (this.state.display && !this.state.menu_visible) {
+				heading = wp.element.createElement(
+					"h4",
+					null,
+					__('Displaying ' + this.state.display),
+					" ",
+					wp.element.createElement(
+						"a",
+						{ onClick: function onClick() {
+								_this8.setState({ menu_visible: true });
+							} },
+						__('Change')
+					)
+				);
+			} else if (this.state.display) {
+				heading = wp.element.createElement(
+					"h4",
+					null,
+					__('Displaying ' + this.state.display),
+					" ",
+					wp.element.createElement(
+						"a",
+						{ onClick: function onClick() {
+								_this8.setState({ menu_visible: false });
+							} },
+						__('Cancel')
+					)
+				);
+			}
 
 			return wp.element.createElement(
 				"div",
 				{ className: "wc-product-display-settings" },
-				wp.element.createElement(
-					"h4",
-					null,
-					__('Products')
-				),
-				wp.element.createElement(ProductsBlockSettingsEditorDisplayOptions, { update_display_callback: this.updateDisplay }),
+				heading,
+				menu,
 				extra_settings,
 				wp.element.createElement(
 					"div",
