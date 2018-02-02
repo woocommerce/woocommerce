@@ -71,7 +71,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	protected function get_row_actions( $actions, $post ) {
-		/* translators: %s: product ID. */
+		/* translators: %d: product ID. */
 		return array_merge( array( 'id' => sprintf( __( 'ID: %d', 'woocommerce' ), $post->ID ) ), $actions );
 	}
 
