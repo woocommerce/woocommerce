@@ -1,5 +1,5 @@
 /*
- * jQuery FlexSlider v2.6.1
+ * jQuery FlexSlider v2.7.0
  * Copyright 2012 WooThemes
  * Contributing Author: Tyler Smith
  */
@@ -15,15 +15,15 @@
     // making variables public
 
     //if rtl value was not passed and html is in rtl..enable it by default.
-  	if(typeof options.rtl=='undefined' && $('html').attr('dir')=='rtl'){
-  		options.rtl=true;
+    if(typeof options.rtl=='undefined' && $('html').attr('dir')=='rtl'){
+      options.rtl=true;
     }
     slider.vars = $.extend({}, $.flexslider.defaults, options);
 
     var namespace = slider.vars.namespace,
         msGesture = window.navigator && window.navigator.msPointerEnabled && window.MSGesture,
         touch = (( "ontouchstart" in window ) || msGesture || window.DocumentTouch && document instanceof DocumentTouch) && slider.vars.touch,
-        // depricating this idea, as devices are being released with both of these events
+        // deprecating this idea, as devices are being released with both of these events
         eventType = "click touchend MSPointerUp keyup",
         watchedEvent = "",
         watchedEventClearTimer,
@@ -176,14 +176,14 @@
                 e.preventDefault();
                 var $slide = $(this),
                     target = $slide.index();
-        				var posFromX;
+                var posFromX;
                 if(slider.vars.rtl){
-        					posFromX = -1*($slide.offset().right - $(slider).scrollLeft()); // Find position of slide relative to right of slider container
-        				}
-        				else
-        				{
-        					posFromX = $slide.offset().left - $(slider).scrollLeft(); // Find position of slide relative to left of slider container
-        				}
+                  posFromX = -1*($slide.offset().right - $(slider).scrollLeft()); // Find position of slide relative to right of slider container
+                }
+                else
+                {
+                  posFromX = $slide.offset().left - $(slider).scrollLeft(); // Find position of slide relative to left of slider container
+                }
                 if( posFromX <= 0 && $slide.hasClass( namespace + 'active-slide' ) ) {
                   slider.flexAnimate(slider.getTarget("prev"), true);
                 } else if (!$(slider.vars.asNavFor).data('flexslider').animating && !$slide.hasClass(namespace + "active-slide")) {
@@ -792,12 +792,8 @@
           }
         } else { // FADE:
           if (!touch) {
-            //slider.slides.eq(slider.currentSlide).fadeOut(slider.vars.animationSpeed, slider.vars.easing);
-            //slider.slides.eq(target).fadeIn(slider.vars.animationSpeed, slider.vars.easing, slider.wrapup);
-
             slider.slides.eq(slider.currentSlide).css({"zIndex": 1}).animate({"opacity": 0}, slider.vars.animationSpeed, slider.vars.easing);
             slider.slides.eq(target).css({"zIndex": 2}).animate({"opacity": 1}, slider.vars.animationSpeed, slider.vars.easing, slider.wrapup);
-
           } else {
             slider.slides.eq(slider.currentSlide).css({ "opacity": 0, "zIndex": 1 });
             slider.slides.eq(target).css({ "opacity": 1, "zIndex": 2 });
@@ -894,7 +890,7 @@
               }
             }());
 
-            return (posCalc * -1) + "px";
+            return (posCalc * ((slider.vars.rtl)?1:-1)) + "px";
           }());
 
       if (slider.transitions) {
@@ -954,7 +950,7 @@
           setTimeout(function(){
             slider.doMath();
           if(slider.vars.rtl){
-              slider.newSlides.css({"width": slider.computedW, "marginLeft" : slider.computedM, "float": "right", "display": "block"});
+              slider.newSlides.css({"width": slider.computedW, "marginRight" : slider.computedM, "float": "left", "display": "block"});
            }
             else{
               slider.newSlides.css({"width": slider.computedW, "marginRight" : slider.computedM, "float": "left", "display": "block"});
@@ -1143,7 +1139,7 @@
     // Usability features
     pauseOnAction: true,            //Boolean: Pause the slideshow when interacting with control elements, highly recommended.
     pauseOnHover: false,            //Boolean: Pause the slideshow when hovering over slider, then resume when no longer hovering
-    pauseInvisible: true,   		//{NEW} Boolean: Pause the slideshow when tab is invisible, resume when visible. Provides better UX, lower CPU usage.
+    pauseInvisible: true,       //{NEW} Boolean: Pause the slideshow when tab is invisible, resume when visible. Provides better UX, lower CPU usage.
     useCSS: true,                   //{NEW} Boolean: Slider will use CSS3 transitions if available
     touch: true,                    //{NEW} Boolean: Allow touch swipe navigation of the slider on touch-enabled devices
     video: false,                   //{NEW} Boolean: If using video in the slider, will prevent CSS3 3D Transforms to avoid graphical glitches
@@ -1185,7 +1181,7 @@
     added: function(){},            //{NEW} Callback: function(slider) - Fires after a slide is added
     removed: function(){},           //{NEW} Callback: function(slider) - Fires after a slide is removed
     init: function() {},             //{NEW} Callback: function(slider) - Fires after the slider is initially setup
-	rtl: false             //{NEW} Boolean: Whether or not to enable RTL mode
+  rtl: false             //{NEW} Boolean: Whether or not to enable RTL mode
   };
 
   //FlexSlider: Plugin Function
