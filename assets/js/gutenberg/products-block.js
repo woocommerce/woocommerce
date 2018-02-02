@@ -293,6 +293,10 @@ var ProductCategoryList = withAPIData(function (props) {
 	);
 });
 
+/**
+ * One option from the list of all available ways to display products.
+ */
+
 var ProductsBlockSettingsEditorDisplayOption = function (_React$Component3) {
 	_inherits(ProductsBlockSettingsEditorDisplayOption, _React$Component3);
 
@@ -328,6 +332,11 @@ var ProductsBlockSettingsEditorDisplayOption = function (_React$Component3) {
 
 	return ProductsBlockSettingsEditorDisplayOption;
 }(React.Component);
+
+/**
+ * A list of all available ways to display products.
+ */
+
 
 var ProductsBlockSettingsEditorDisplayOptions = function (_React$Component4) {
 	_inherits(ProductsBlockSettingsEditorDisplayOptions, _React$Component4);

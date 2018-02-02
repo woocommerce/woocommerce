@@ -146,6 +146,9 @@ const ProductCategoryList = withAPIData( ( props ) => {
 	}
 );
 
+/**
+ * One option from the list of all available ways to display products.
+ */
 class ProductsBlockSettingsEditorDisplayOption extends React.Component {
 	render() {
 		return (
@@ -157,6 +160,9 @@ class ProductsBlockSettingsEditorDisplayOption extends React.Component {
 	}
 }
 
+/**
+ * A list of all available ways to display products.
+ */
 class ProductsBlockSettingsEditorDisplayOptions extends React.Component {
 	render() {
 		const products_block_display_settings = [
