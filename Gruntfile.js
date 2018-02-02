@@ -247,9 +247,9 @@ module.exports = function( grunt ) {
 				stdout: true,
 				stderr: true
 			},
-			apigen: {
+			apidocs: {
 				command: [
-					'apigen generate -q',
+					'vendor/bin/apigen generate -q',
 					'cd apigen',
 					'php hook-docs.php'
 				].join( '&&' )
@@ -267,7 +267,7 @@ module.exports = function( grunt ) {
 
 		// Clean the directory.
 		clean: {
-			apigen: {
+			apidocs: {
 				src: [ 'wc-apidocs' ]
 			}
 		},
@@ -351,8 +351,8 @@ module.exports = function( grunt ) {
 	]);
 
 	grunt.registerTask( 'docs', [
-		'clean:apigen',
-		'shell:apigen'
+		'clean:apidocs',
+		'shell:apidocs'
 	]);
 
 	// Only an alias to 'default' task.
