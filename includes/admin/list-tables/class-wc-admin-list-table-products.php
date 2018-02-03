@@ -37,7 +37,6 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		parent::__construct();
 		add_filter( 'disable_months_dropdown', '__return_true' );
 		add_filter( 'query_vars', array( $this, 'add_custom_query_var' ) );
-		add_filter( 'posts_search', array( $this, 'sku_search' ) );
 		add_filter( 'views_edit-product', array( $this, 'product_views' ) );
 	}
 
@@ -403,7 +402,6 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	protected function query_filters( $query_vars ) {
-
 		if ( isset( $query_vars['orderby'] ) ) {
 			if ( 'price' === $query_vars['orderby'] ) {
 				// @codingStandardsIgnoreStart
@@ -457,48 +455,24 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			);
 		}
 
+		// Search using CRUD.
+		if ( isset( $query_vars['s'] ) ) {
+			$data_store = WC_Data_Store::load( 'product' );
+			$ids        = $data_store->search_products( wc_clean( $query_vars['s'] ), '', true );
+			$query_vars['post__in'] = array_merge( $ids, array( 0 ) );
+		}
+
 		return $query_vars;
 	}
 
 	/**
 	 * Search by SKU or ID for products.
 	 *
+	 * @deprecated Logic moved to query_filters.
 	 * @param string $where Where clause SQL.
 	 * @return string
 	 */
 	public function sku_search( $where ) {
-		global $pagenow, $wpdb, $wp;
-
-		if ( 'edit.php' !== $pagenow || ! is_search() || ! isset( $wp->query_vars['s'] ) || 'product' !== $wp->query_vars['post_type'] ) {
-			return $where;
-		}
-
-		$search_ids = array();
-		$terms      = explode( ',', $wp->query_vars['s'] );
-
-		foreach ( $terms as $term ) {
-			if ( is_numeric( $term ) ) {
-				$search_ids[] = absint( $term );
-			} else {
-				$id_from_sku = wc_get_product_id_by_sku( wc_clean( $term ) );
-
-				if ( $id_from_sku ) {
-					$product = wc_get_product( $id_from_sku );
-
-					if ( $product ) {
-						$search_ids[] = $product->get_id();
-						$search_ids[] = $product->get_parent_id();
-					}
-				}
-			}
-		}
-
-		$search_ids = array_filter( array_unique( array_map( 'absint', $search_ids ) ) );
-
-		if ( count( $search_ids ) > 0 ) {
-			$where = str_replace( 'AND (((', "AND ( ({$wpdb->posts}.ID IN (" . implode( ',', $search_ids ) . ')) OR ((', $where );
-		}
-
 		return $where;
 	}
 
