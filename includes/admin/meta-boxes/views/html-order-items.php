@@ -111,8 +111,9 @@ if ( wc_tax_enabled() ) {
 					<li><strong><?php esc_html_e( 'Coupon(s)', 'woocommerce' ) ?></strong></li>
 					<?php foreach ( $coupons as $item_id => $item ) :
 						$post_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish' LIMIT 1;", $item->get_code() ) );
+						$class   = $order->is_editable() ? 'code editable' : 'code';
 						?>
-						<li class="code">
+						<li class="<?php echo $class ?>">
 							<?php if ( $post_id ) : ?>
 								<a href="<?php echo esc_url( add_query_arg( array( 'post' => $post_id, 'action' => 'edit' ), admin_url( 'post.php' ) ) ) ?>" class="tips" data-tip="<?php esc_attr_e( wc_price( $item->get_discount(), array( 'currency' => $order->get_currency() ) ) ) ?>">
 									<span><?php esc_html_e( $item->get_code() ) ?></span>
