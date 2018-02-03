@@ -903,8 +903,7 @@ ul.wc_coupon_list {
 		&.code {
 			display: inline-block;
 			position: relative;
-			padding-right: 2em;
-			padding-left: .5em;
+			padding: 0 .5em;
 			background-color: #fff;
 			border: 1px solid #aaa;
 			-webkit-box-shadow: 0 1px 0 #dfdfdf;
@@ -913,6 +912,10 @@ ul.wc_coupon_list {
 			border-radius: 4px;
 			margin-right: 5px;
 			margin-top: 5px;
+
+			&.editable {
+				padding-right: 2em;
+			}
 
 			.tips {
 				cursor: pointer;
