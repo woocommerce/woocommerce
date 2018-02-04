@@ -257,7 +257,7 @@ var ProductCategoryList = withAPIData(function (props) {
 			filteredCategories.map(function (category) {
 				return wp.element.createElement(
 					"li",
-					null,
+					{ key: category.id },
 					wp.element.createElement(
 						"label",
 						{ htmlFor: 'product-category-' + category.id },
@@ -538,7 +538,7 @@ var ProductsBlockPreview = withAPIData(function (_ref4) {
 		"div",
 		{ className: classes },
 		products.data.map(function (product) {
-			return wp.element.createElement(ProductPreview, { product: product, attributes: attributes });
+			return wp.element.createElement(ProductPreview, { key: product.id, product: product, attributes: attributes });
 		})
 	);
 });
