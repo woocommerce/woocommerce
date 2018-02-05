@@ -20,6 +20,13 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 class WC_Email_Customer_Reset_Password extends WC_Email {
 
 	/**
+	 * User ID.
+	 *
+	 * @var integer
+	 */
+	public $user_id;
+
+	/**
 	 * User login name.
 	 *
 	 * @var string
@@ -92,6 +99,7 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 
 		if ( $user_login && $reset_key ) {
 			$this->object     = get_user_by( 'login', $user_login );
+			$this->user_id 	  = $this->object->ID;
 			$this->user_login = $user_login;
 			$this->reset_key  = $reset_key;
 			$this->user_email = stripslashes( $this->object->user_email );
@@ -114,6 +122,7 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 	public function get_content_html() {
 		return wc_get_template_html( $this->template_html, array(
 			'email_heading' => $this->get_heading(),
+			'user_id' 		=> $this->user_id,
 			'user_login'    => $this->user_login,
 			'reset_key'     => $this->reset_key,
 			'blogname'      => $this->get_blogname(),
@@ -132,6 +141,7 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 	public function get_content_plain() {
 		return wc_get_template_html( $this->template_plain, array(
 			'email_heading' => $this->get_heading(),
+			'user_id' 		=> $this->user_id,
 			'user_login'    => $this->user_login,
 			'reset_key'     => $this->reset_key,
 			'blogname'      => $this->get_blogname(),
