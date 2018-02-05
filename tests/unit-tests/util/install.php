@@ -33,12 +33,12 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 			define( 'WC_REMOVE_ALL_DATA', true );
 		}
 
-		include( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) . '/uninstall.php' );
+		include dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) . '/uninstall.php';
 		delete_transient( 'wc_installing' );
 
 		WC_Install::install();
 
-		$this->assertEquals( WC()->version, get_option( 'woocommerce_version' ), print_r( array( 'Stored version' => get_option( 'woocommerce_version' ), 'WC Version' => WC()->version ), true ) );
+		$this->assertEquals( WC()->version, get_option( 'woocommerce_version' ) );
 	}
 
 	/**
@@ -87,7 +87,7 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 			define( 'WP_UNINSTALL_PLUGIN', true );
 			define( 'WC_REMOVE_ALL_DATA', true );
 		}
-		include( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) . '/uninstall.php' );
+		include dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) . '/uninstall.php';
 
 		WC_Install::create_roles();
 

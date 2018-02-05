@@ -2,8 +2,6 @@
 /**
  * Installation related functions and actions.
  *
- * @author   WooThemes
- * @category Admin
  * @package  WooCommerce/Classes
  * @version  3.0.0
  */
