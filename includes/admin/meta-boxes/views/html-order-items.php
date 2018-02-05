@@ -115,16 +115,16 @@ if ( wc_tax_enabled() ) {
 						?>
 						<li class="<?php echo $class ?>">
 							<?php if ( $post_id ) : ?>
-								<a href="<?php echo esc_url( add_query_arg( array( 'post' => $post_id, 'action' => 'edit' ), admin_url( 'post.php' ) ) ) ?>" class="tips" data-tip="<?php esc_attr_e( wc_price( $item->get_discount(), array( 'currency' => $order->get_currency() ) ) ) ?>">
-									<span><?php esc_html_e( $item->get_code() ) ?></span>
+								<a href="<?php echo esc_url( add_query_arg( array( 'post' => $post_id, 'action' => 'edit' ), admin_url( 'post.php' ) ) ) ?>" class="tips" data-tip="<?php echo esc_attr( wc_price( $item->get_discount(), array( 'currency' => $order->get_currency() ) ) ) ?>">
+									<span><?php echo esc_html( $item->get_code() ) ?></span>
 								</a>
 							<?php else : ?>
-								<span class="tips" data-tip="<?php esc_attr_e( wc_price( $item->get_discount(), array( 'currency' => $order->get_currency() ) ) ) ?>">
-									<span><?php esc_html_e( $item->get_code() ) ?></span>
+								<span class="tips" data-tip="<?php echo esc_attr( wc_price( $item->get_discount(), array( 'currency' => $order->get_currency() ) ) ) ?>">
+									<span><?php echo esc_html( $item->get_code() ) ?></span>
 								</span>
 							<?php endif; ?>
 							<?php if ( $order->is_editable() ) : ?>
-								<a class="remove-coupon" href="javascript:void(0)" aria-label="Remove" data-code="<?php esc_attr_e( $item->get_code() ) ?>"></a>
+								<a class="remove-coupon" href="javascript:void(0)" aria-label="Remove" data-code="<?php echo esc_attr( $item->get_code() ) ?>"></a>
 							<?php endif; ?>
 						</li>
 					<?php endforeach; ?>
