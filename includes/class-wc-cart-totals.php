@@ -296,7 +296,7 @@ final class WC_Cart_Totals {
 
 			$fee_running_total += $fee->total;
 
-			if ( $this->calculate_tax ) {
+			if ( $this->calculate_tax && $fee->taxable ) {
 				if ( 0 > $fee->total ) {
 					// Negative fees should have the taxes split between all items so it works as a true discount.
 					$tax_class_costs = $this->get_tax_class_costs();
