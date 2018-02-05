@@ -175,7 +175,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	public function prepare_items() {
 		global $wpdb;
 
-		$per_page = $this->get_items_per_page( 'wc_api_keys_per_page' );
+		$per_page = $this->get_items_per_page( 'wc_keys_per_page' );
 		$columns  = $this->get_columns();
 		$hidden   = $this->get_hidden_columns();
 		$sortable = $this->get_sortable_columns();
