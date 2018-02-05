@@ -19,6 +19,14 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 		WC_Install::check_version();
 
 		$this->assertTrue( did_action( 'woocommerce_updated' ) === 1 );
+
+		update_option( 'woocommerce_version', (float) WC()->version + 1 );
+		WC_Install::check_version();
+
+		$this->assertTrue(
+			did_action( 'woocommerce_updated' ) === 1,
+			'WC_Install::check_version() should not call install routine when the WC version stored in the database is bigger than the version in the code as downgrades are not supported.'
+		);
 	}
 
 	/**
