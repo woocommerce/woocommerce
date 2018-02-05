@@ -1,0 +1,1 @@
+jQuery(function(i){({init:function(){i("select#discount_type").on("change",this.type_options).change()},type_options:function(){"fixed_cart"!==i(this).val()?i(".limit_usage_to_x_items_field").show():i(".limit_usage_to_x_items_field").hide()}}).init()});

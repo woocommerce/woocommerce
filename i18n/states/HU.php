@@ -2,12 +2,16 @@
 /**
  * Hungary states
  *
- * @author 		WooThemes
- * @category 	i18n
- * @package 	WooCommerce/i18n
+ * @author      WooThemes
+ * @category    i18n
+ * @package     WooCommerce/i18n
  * @version     2.0.0
  */
 global $states;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 $states['HU'] = array(
 	'BK' => __( 'Bács-Kiskun', 'woocommerce' ),
@@ -29,5 +33,5 @@ $states['HU'] = array(
 	'TO' => __( 'Tolna', 'woocommerce' ),
 	'VA' => __( 'Vas', 'woocommerce' ),
 	'VE' => __( 'Veszprém', 'woocommerce' ),
-	'ZA' => __( 'Zala', 'woocommerce' )
+	'ZA' => __( 'Zala', 'woocommerce' ),
 );

@@ -1,112 +1,206 @@
 <?php
-
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
 /**
  * WC_Cache_Helper class.
  *
  * @class 		WC_Cache_Helper
- * @version		2.0.6
+ * @version		2.2.0
  * @package		WooCommerce/Classes
  * @category	Class
  * @author 		WooThemes
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * WC_Cache_Helper.
+ */
 class WC_Cache_Helper {
 
 	/**
-	 * __construct function.
-	 *
-	 * @access public
-	 * @return void
+	 * Hook in methods.
 	 */
-	public function __construct() {
-		add_action( 'before_woocommerce_init', array( $this, 'init' ) );
-		add_action( 'admin_notices', array( $this, 'notices' ) );
+	public static function init() {
+		add_action( 'template_redirect', array( __CLASS__, 'geolocation_ajax_redirect' ) );
+		add_action( 'admin_notices', array( __CLASS__, 'notices' ) );
+		add_action( 'delete_version_transients', array( __CLASS__, 'delete_version_transients' ) );
+		add_action( 'wp', array( __CLASS__, 'prevent_caching' ) );
 	}
 
 	/**
-	 * Prevent caching on dynamic pages.
+	 * Get prefix for use with wp_cache_set. Allows all cache in a group to be invalidated at once.
 	 *
-	 * @access public
-	 * @return void
+	 * @param  string $group Group of cache to get.
+	 * @return string
 	 */
-	public function init() {
-		if ( false === ( $wc_page_uris = get_transient( 'woocommerce_cache_excluded_uris' ) ) ) {
+	public static function get_cache_prefix( $group ) {
+		// Get cache key - uses cache key wc_orders_cache_prefix to invalidate when needed.
+		$prefix = wp_cache_get( 'wc_' . $group . '_cache_prefix', $group );
 
-			if ( wc_get_page_id( 'cart' ) < 1 || wc_get_page_id( 'checkout' ) < 1 || wc_get_page_id( 'myaccount' ) < 1 )
-				return;
-
-			$wc_page_uris   = array();
-
-			// Exclude querystring when using page ID
-			$wc_page_uris[] = 'p=' . wc_get_page_id( 'cart' );
-	    	$wc_page_uris[] = 'p=' . wc_get_page_id( 'checkout' );
-	    	$wc_page_uris[] = 'p=' . wc_get_page_id( 'myaccount' );
-
-	    	// Exclude permalinks
-			$cart_page      = get_post( wc_get_page_id( 'cart' ) );
-			$checkout_page  = get_post( wc_get_page_id( 'checkout' ) );
-			$account_page   = get_post( wc_get_page_id( 'myaccount' ) );
-
-			if ( ! is_null( $cart_page ) )
-				$wc_page_uris[] = '/' . $cart_page->post_name;
-	    	if ( ! is_null( $checkout_page ) )
-	    		$wc_page_uris[] = '/' . $checkout_page->post_name;
-	    	if ( ! is_null( $account_page ) )
-	    		$wc_page_uris[] = '/' . $account_page->post_name;
-
-	    	set_transient( 'woocommerce_cache_excluded_uris', $wc_page_uris );
+		if ( false === $prefix ) {
+			$prefix = 1;
+			wp_cache_set( 'wc_' . $group . '_cache_prefix', $prefix, $group );
 		}
 
-		if ( is_array( $wc_page_uris ) )
-			foreach( $wc_page_uris as $uri )
-				if ( strstr( $_SERVER['REQUEST_URI'], $uri ) ) {
-					$this->nocache();
-					break;
-				}
+		return 'wc_cache_' . $prefix . '_';
 	}
 
 	/**
-	 * Set nocache constants and headers.
+	 * Increment group cache prefix (invalidates cache).
 	 *
-	 * @access private
-	 * @return void
+	 * @param string $group Group of cache to clear.
 	 */
-	private function nocache() {
-		if ( ! defined( 'DONOTCACHEPAGE' ) )
-			define( "DONOTCACHEPAGE", "true" );
-
-		if ( ! defined( 'DONOTCACHEOBJECT' ) )
-			define( "DONOTCACHEOBJECT", "true" );
-
-		if ( ! defined( 'DONOTCACHEDB' ) )
-			define( "DONOTCACHEDB", "true" );
-
-		nocache_headers();
+	public static function incr_cache_prefix( $group ) {
+		wp_cache_incr( 'wc_' . $group . '_cache_prefix', 1, $group );
 	}
 
 	/**
-	 * notices function.
+	 * Get a hash of the customer location.
 	 *
-	 * @access public
-	 * @return void
+	 * @return string
 	 */
-	public function notices() {
-		if ( ! function_exists( 'w3tc_pgcache_flush' ) || ! function_exists( 'w3_instance' ) )
+	public static function geolocation_ajax_get_location_hash() {
+		$customer             = new WC_Customer( 0, true );
+		$location             = array();
+		$location['country']  = $customer->get_billing_country();
+		$location['state']    = $customer->get_billing_state();
+		$location['postcode'] = $customer->get_billing_postcode();
+		$location['city']     = $customer->get_billing_city();
+		return substr( md5( implode( '', $location ) ), 0, 12 );
+	}
+
+	/**
+	 * Prevent caching on certain pages
+	 */
+	public static function prevent_caching() {
+		if ( ! is_blog_installed() ) {
 			return;
+		}
+		$page_ids = array_filter( array( wc_get_page_id( 'cart' ), wc_get_page_id( 'checkout' ), wc_get_page_id( 'myaccount' ) ) );
 
-		$config   = w3_instance('W3_Config');
+		if ( is_page( $page_ids ) ) {
+			self::set_nocache_constants();
+			nocache_headers();
+		}
+	}
+
+	/**
+	 * When using geolocation via ajax, to bust cache, redirect if the location hash does not equal the querystring.
+	 *
+	 * This prevents caching of the wrong data for this request.
+	 */
+	public static function geolocation_ajax_redirect() {
+		if ( 'geolocation_ajax' === get_option( 'woocommerce_default_customer_address' ) && ! is_checkout() && ! is_cart() && ! is_account_page() && ! is_ajax() && empty( $_POST ) ) { // WPCS: CSRF ok, input var ok.
+			$location_hash = self::geolocation_ajax_get_location_hash();
+			$current_hash  = isset( $_GET['v'] ) ? wc_clean( wp_unslash( $_GET['v'] ) ) : ''; // WPCS: sanitization ok, input var ok.
+			if ( empty( $current_hash ) || $current_hash !== $location_hash ) {
+				global $wp;
+
+				$redirect_url = trailingslashit( home_url( $wp->request ) );
+
+				if ( ! empty( $_SERVER['QUERY_STRING'] ) ) { // WPCS: Input var ok.
+					$redirect_url = add_query_arg( wp_unslash( $_SERVER['QUERY_STRING'] ), '', $redirect_url ); // WPCS: sanitization ok, Input var ok.
+				}
+
+				if ( ! get_option( 'permalink_structure' ) ) {
+					$redirect_url = add_query_arg( $wp->query_string, '', $redirect_url );
+				}
+
+				$redirect_url = add_query_arg( 'v', $location_hash, remove_query_arg( 'v', $redirect_url ) );
+
+				wp_safe_redirect( esc_url_raw( $redirect_url ), 307 );
+				exit;
+			}
+		}
+	}
+
+	/**
+	 * Get transient version.
+	 *
+	 * When using transients with unpredictable names, e.g. those containing an md5
+	 * hash in the name, we need a way to invalidate them all at once.
+	 *
+	 * When using default WP transients we're able to do this with a DB query to
+	 * delete transients manually.
+	 *
+	 * With external cache however, this isn't possible. Instead, this function is used
+	 * to append a unique string (based on time()) to each transient. When transients
+	 * are invalidated, the transient version will increment and data will be regenerated.
+	 *
+	 * Raised in issue https://github.com/woocommerce/woocommerce/issues/5777.
+	 * Adapted from ideas in http://tollmanz.com/invalidation-schemes/.
+	 *
+	 * @param  string  $group   Name for the group of transients we need to invalidate.
+	 * @param  boolean $refresh true to force a new version.
+	 * @return string transient version based on time(), 10 digits.
+	 */
+	public static function get_transient_version( $group, $refresh = false ) {
+		$transient_name  = $group . '-transient-version';
+		$transient_value = get_transient( $transient_name );
+
+		if ( false === $transient_value || true === $refresh ) {
+			self::delete_version_transients( $transient_value );
+			set_transient( $transient_name, $transient_value = time() );
+		}
+		return $transient_value;
+	}
+
+	/**
+	 * When the transient version increases, this is used to remove all past transients to avoid filling the DB.
+	 *
+	 * Note; this only works on transients appended with the transient version, and when object caching is not being used.
+	 *
+	 * @since  2.3.10
+	 * @param string $version Version of the transient to remove.
+	 */
+	public static function delete_version_transients( $version = '' ) {
+		if ( ! wp_using_ext_object_cache() && ! empty( $version ) ) {
+			global $wpdb;
+
+			$limit    = apply_filters( 'woocommerce_delete_version_transients_limit', 1000 );
+			$affected = $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s ORDER BY option_id LIMIT %d;", '\_transient\_%' . $version, $limit ) ); // WPCS: cache ok, db call ok.
+
+			// If affected rows is equal to limit, there are more rows to delete. Delete in 10 secs.
+			if ( $affected === $limit ) {
+				wp_schedule_single_event( time() + 10, 'delete_version_transients', array( $version ) );
+			}
+		}
+	}
+
+	/**
+	 * Set constants to prevent caching by some plugins.
+	 *
+	 * @param  mixed $return Value to return. Previously hooked into a filter.
+	 * @return mixed
+	 */
+	public static function set_nocache_constants( $return = true ) {
+		wc_maybe_define_constant( 'DONOTCACHEPAGE', true );
+		wc_maybe_define_constant( 'DONOTCACHEOBJECT', true );
+		wc_maybe_define_constant( 'DONOTCACHEDB', true );
+		return $return;
+	}
+
+	/**
+	 * Notices function.
+	 */
+	public static function notices() {
+		if ( ! function_exists( 'w3tc_pgcache_flush' ) || ! function_exists( 'w3_instance' ) ) {
+			return;
+		}
+
+		$config   = w3_instance( 'W3_Config' );
 		$enabled  = $config->get_integer( 'dbcache.enabled' );
-		$settings = $config->get_array( 'dbcache.reject.sql' );
+		$settings = array_map( 'trim', $config->get_array( 'dbcache.reject.sql' ) );
 
-		if ( $enabled && ! in_array( '_wc_session_', $settings ) ) {
+		if ( $enabled && ! in_array( '_wc_session_', $settings, true ) ) {
 			?>
 			<div class="error">
-				<p><?php printf( __( 'In order for <strong>database caching</strong> to work with WooCommerce you must add <code>_wc_session_</code> to the "Ignored Query Strings" option in W3 Total Cache settings <a href="%s">here</a>.', 'woocommerce' ), admin_url( 'admin.php?page=w3tc_dbcache' ) ); ?></p>
+				<p><?php echo wp_kses_post( sprintf( __( 'In order for <strong>database caching</strong> to work with WooCommerce you must add %1$s to the "Ignored Query Strings" option in <a href="%2$s">W3 Total Cache settings</a>.', 'woocommerce' ), '<code>_wc_session_</code>', esc_url( admin_url( 'admin.php?page=w3tc_dbcache' ) ) ) ); ?></p>
 			</div>
 			<?php
 		}
 	}
 }
 
-new WC_Cache_Helper();
+WC_Cache_Helper::init();

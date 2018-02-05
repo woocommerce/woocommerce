@@ -2,26 +2,71 @@
 /**
  * WooCommerce Settings Page/Tab
  *
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin
+ * @author      WooThemes
+ * @category    Admin
+ * @package     WooCommerce/Admin
  * @version     2.1.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
-if ( ! class_exists( 'WC_Settings_Page' ) ) :
+if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 
 /**
- * WC_Settings_Page
+ * WC_Settings_Page.
  */
-class WC_Settings_Page {
+abstract class WC_Settings_Page {
 
-	protected $id    = '';
+	/**
+	 * Setting page id.
+	 *
+	 * @var string
+	 */
+	protected $id = '';
+
+	/**
+	 * Setting page label.
+	 *
+	 * @var string
+	 */
 	protected $label = '';
 
 	/**
-	 * Add this page to settings
+	 * Constructor.
+	 */
+	public function __construct() {
+		add_filter( 'woocommerce_settings_tabs_array', array( $this, 'add_settings_page' ), 20 );
+		add_action( 'woocommerce_sections_' . $this->id, array( $this, 'output_sections' ) );
+		add_action( 'woocommerce_settings_' . $this->id, array( $this, 'output' ) );
+		add_action( 'woocommerce_settings_save_' . $this->id, array( $this, 'save' ) );
+	}
+
+	/**
+	 * Get settings page ID.
+	 * @since 3.0.0
+	 * @return string
+	 */
+	public function get_id() {
+		return $this->id;
+	}
+
+	/**
+	 * Get settings page label.
+	 * @since 3.0.0
+	 * @return string
+	 */
+	public function get_label() {
+		return $this->label;
+	}
+
+	/**
+	 * Add this page to settings.
+	 *
+	 * @param array $pages
+	 *
+	 * @return mixed
 	 */
 	public function add_settings_page( $pages ) {
 		$pages[ $this->id ] = $this->label;
@@ -30,16 +75,16 @@ class WC_Settings_Page {
 	}
 
 	/**
-	 * Get settings array
+	 * Get settings array.
 	 *
 	 * @return array
 	 */
 	public function get_settings() {
-		return array();
+		return apply_filters( 'woocommerce_get_settings_' . $this->id, array() );
 	}
 
 	/**
-	 * Get sections
+	 * Get sections.
 	 *
 	 * @return array
 	 */
@@ -48,28 +93,30 @@ class WC_Settings_Page {
 	}
 
 	/**
-	 * Output sections
+	 * Output sections.
 	 */
 	public function output_sections() {
 		global $current_section;
 
 		$sections = $this->get_sections();
 
-		if ( empty( $sections ) )
+		if ( empty( $sections ) || 1 === sizeof( $sections ) ) {
 			return;
+		}
 
 		echo '<ul class="subsubsub">';
 
 		$array_keys = array_keys( $sections );
 
-		foreach ( $sections as $id => $label )
+		foreach ( $sections as $id => $label ) {
 			echo '<li><a href="' . admin_url( 'admin.php?page=wc-settings&tab=' . $this->id . '&section=' . sanitize_title( $id ) ) . '" class="' . ( $current_section == $id ? 'current' : '' ) . '">' . $label . '</a> ' . ( end( $array_keys ) == $id ? '' : '|' ) . ' </li>';
+		}
 
 		echo '</ul><br class="clear" />';
 	}
 
 	/**
-	 * Output the settings
+	 * Output the settings.
 	 */
 	public function output() {
 		$settings = $this->get_settings();
@@ -78,7 +125,7 @@ class WC_Settings_Page {
 	}
 
 	/**
-	 * Save settings
+	 * Save settings.
 	 */
 	public function save() {
 		global $current_section;
@@ -86,8 +133,9 @@ class WC_Settings_Page {
 		$settings = $this->get_settings();
 		WC_Admin_Settings::save_fields( $settings );
 
-		 if ( $current_section )
-	    	do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section );
+		if ( $current_section ) {
+			do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section );
+		}
 	}
 }
 

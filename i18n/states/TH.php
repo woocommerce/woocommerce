@@ -2,12 +2,16 @@
 /**
  * Thailand states
  *
- * @author 		WooThemes
- * @category 	i18n
- * @package 	WooCommerce/i18n
+ * @author      WooThemes
+ * @category    i18n
+ * @package     WooCommerce/i18n
  * @version     2.0.0
  */
 global $states;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 $states['TH'] = array(
 	'TH-37' => __( 'Amnat Charoen (&#3629;&#3635;&#3609;&#3634;&#3592;&#3648;&#3592;&#3619;&#3636;&#3597;)', 'woocommerce' ),
@@ -86,5 +90,5 @@ $states['TH'] = array(
 	'TH-61' => __( 'Uthai Thani (&#3629;&#3640;&#3607;&#3633;&#3618;&#3608;&#3634;&#3609;&#3637;)', 'woocommerce' ),
 	'TH-53' => __( 'Uttaradit (&#3629;&#3640;&#3605;&#3619;&#3604;&#3636;&#3605;&#3606;&#3660;)', 'woocommerce' ),
 	'TH-95' => __( 'Yala (&#3618;&#3632;&#3621;&#3634;)', 'woocommerce' ),
-	'TH-35' => __( 'Yasothon (&#3618;&#3650;&#3626;&#3608;&#3619;)', 'woocommerce' )
+	'TH-35' => __( 'Yasothon (&#3618;&#3650;&#3626;&#3608;&#3619;)', 'woocommerce' ),
 );

@@ -1,0 +1,10 @@
+{contentType javascript}
+
+var ApiGen = ApiGen || {};
+ApiGen.config = {$config->template};
+
+{var $scripts = ['jquery.min.js', 'jquery.cookie.js', 'jquery.sprintf.js', 'jquery.autocomplete.js', 'jquery.sortElements.js', 'main.js']}
+
+{foreach $scripts as $script}
+	{file_get_contents("$basePath/js/$script")|noescape}
+{/foreach}

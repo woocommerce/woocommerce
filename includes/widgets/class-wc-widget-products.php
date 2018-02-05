@@ -1,31 +1,33 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * List products. One widget to rule them all.
  *
- * @author 		WooThemes
- * @category 	Widgets
- * @package 	WooCommerce/Widgets
- * @version 	2.1.0
- * @extends 	WC_Widget
+ * @author   WooThemes
+ * @category Widgets
+ * @package  WooCommerce/Widgets
+ * @version  3.3.0
+ * @extends  WC_Widget
  */
-
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
 class WC_Widget_Products extends WC_Widget {
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		$this->widget_cssclass    = 'woocommerce widget_products';
-		$this->widget_description = __( 'Display a list of your products on your site.', 'woocommerce' );
+		$this->widget_description = __( "A list of your store's products.", 'woocommerce' );
 		$this->widget_id          = 'woocommerce_products';
-		$this->widget_name        = __( 'WooCommerce Products', 'woocommerce' );
+		$this->widget_name        = __( 'Products', 'woocommerce' );
 		$this->settings           = array(
 			'title'  => array(
 				'type'  => 'text',
 				'std'   => __( 'Products', 'woocommerce' ),
-				'label' => __( 'Title', 'woocommerce' )
+				'label' => __( 'Title', 'woocommerce' ),
 			),
 			'number' => array(
 				'type'  => 'number',
@@ -33,17 +35,17 @@ class WC_Widget_Products extends WC_Widget {
 				'min'   => 1,
 				'max'   => '',
 				'std'   => 5,
-				'label' => __( 'Number of products to show', 'woocommerce' )
+				'label' => __( 'Number of products to show', 'woocommerce' ),
 			),
 			'show' => array(
 				'type'  => 'select',
 				'std'   => '',
 				'label' => __( 'Show', 'woocommerce' ),
 				'options' => array(
-					''         => __( 'All Products', 'woocommerce' ),
-					'featured' => __( 'Featured Products', 'woocommerce' ),
-					'onsale'   => __( 'On-sale Products', 'woocommerce' ),
-				)
+					''         => __( 'All products', 'woocommerce' ),
+					'featured' => __( 'Featured products', 'woocommerce' ),
+					'onsale'   => __( 'On-sale products', 'woocommerce' ),
+				),
 			),
 			'orderby' => array(
 				'type'  => 'select',
@@ -54,7 +56,7 @@ class WC_Widget_Products extends WC_Widget {
 					'price'  => __( 'Price', 'woocommerce' ),
 					'rand'   => __( 'Random', 'woocommerce' ),
 					'sales'  => __( 'Sales', 'woocommerce' ),
-				)
+				),
 			),
 			'order' => array(
 				'type'  => 'select',
@@ -63,132 +65,149 @@ class WC_Widget_Products extends WC_Widget {
 				'options' => array(
 					'asc'  => __( 'ASC', 'woocommerce' ),
 					'desc' => __( 'DESC', 'woocommerce' ),
-				)
+				),
 			),
 			'hide_free' => array(
 				'type'  => 'checkbox',
 				'std'   => 0,
-				'label' => __( 'Hide free products', 'woocommerce' )
+				'label' => __( 'Hide free products', 'woocommerce' ),
 			),
 			'show_hidden' => array(
 				'type'  => 'checkbox',
 				'std'   => 0,
-				'label' => __( 'Show hidden products', 'woocommerce' )
-			)
+				'label' => __( 'Show hidden products', 'woocommerce' ),
+			),
 		);
+
 		parent::__construct();
 	}
 
 	/**
-	 * widget function.
-	 *
-	 * @see WP_Widget
-	 * @access public
-	 * @param array $args
-	 * @param array $instance
-	 * @return void
+	 * Query the products and return them.
+	 * @param  array $args
+	 * @param  array $instance
+	 * @return WP_Query
 	 */
-	public function widget( $args, $instance ) {
+	public function get_products( $args, $instance ) {
+		$number                      = ! empty( $instance['number'] ) ? absint( $instance['number'] )           : $this->settings['number']['std'];
+		$show                        = ! empty( $instance['show'] ) ? sanitize_title( $instance['show'] )       : $this->settings['show']['std'];
+		$orderby                     = ! empty( $instance['orderby'] ) ? sanitize_title( $instance['orderby'] ) : $this->settings['orderby']['std'];
+		$order                       = ! empty( $instance['order'] ) ? sanitize_title( $instance['order'] )     : $this->settings['order']['std'];
+		$product_visibility_term_ids = wc_get_product_visibility_term_ids();
 
-		if ( $this->get_cached_widget( $args ) )
-			return;
+		$query_args = array(
+			'posts_per_page' => $number,
+			'post_status'    => 'publish',
+			'post_type'      => 'product',
+			'no_found_rows'  => 1,
+			'order'          => $order,
+			'meta_query'     => array(),
+			'tax_query'      => array(
+				'relation' => 'AND',
+			),
+		);
 
-		ob_start();
-		extract( $args );
-
-		$title       = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
-		$number      = absint( $instance['number'] );
-		$show        = sanitize_title( $instance['show'] );
-		$orderby     = sanitize_title( $instance['orderby'] );
-		$order       = sanitize_title( $instance['order'] );
-		$show_rating = false;
-
-    	$query_args = array(
-    		'posts_per_page' => $number,
-    		'post_status' 	 => 'publish',
-    		'post_type' 	 => 'product',
-    		'no_found_rows'  => 1,
-    		'order'          => $order == 'asc' ? 'asc' : 'desc'
-    	);
-
-    	$query_args['meta_query'] = array();
-
-    	if ( empty( $instance['show_hidden'] ) ) {
-			$query_args['meta_query'][] = WC()->query->visibility_meta_query();
+		if ( empty( $instance['show_hidden'] ) ) {
+			$query_args['tax_query'][] = array(
+				'taxonomy' => 'product_visibility',
+				'field'    => 'term_taxonomy_id',
+				'terms'    => is_search() ? $product_visibility_term_ids['exclude-from-search'] : $product_visibility_term_ids['exclude-from-catalog'],
+				'operator' => 'NOT IN',
+			);
 			$query_args['post_parent']  = 0;
 		}
 
 		if ( ! empty( $instance['hide_free'] ) ) {
-    		$query_args['meta_query'][] = array(
-			    'key'     => '_price',
-			    'value'   => 0,
-			    'compare' => '>',
-			    'type'    => 'DECIMAL',
+			$query_args['meta_query'][] = array(
+				'key'     => '_price',
+				'value'   => 0,
+				'compare' => '>',
+				'type'    => 'DECIMAL',
 			);
-    	}
+		}
 
-	    $query_args['meta_query'][] = WC()->query->stock_status_meta_query();
-	    $query_args['meta_query']   = array_filter( $query_args['meta_query'] );
+		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+			$query_args['tax_query'] = array(
+				array(
+					'taxonomy' => 'product_visibility',
+					'field'    => 'term_taxonomy_id',
+					'terms'    => $product_visibility_term_ids['outofstock'],
+					'operator' => 'NOT IN',
+				),
+			);
+		}
 
-    	switch ( $show ) {
-    		case 'featured' :
-    			$query_args['meta_query'][] = array(
-					'key'   => '_featured',
-					'value' => 'yes'
+		switch ( $show ) {
+			case 'featured' :
+				$query_args['tax_query'][] = array(
+					'taxonomy' => 'product_visibility',
+					'field'    => 'term_taxonomy_id',
+					'terms'    => $product_visibility_term_ids['featured'],
 				);
-    			break;
-    		case 'onsale' :
-    			$product_ids_on_sale = wc_get_product_ids_on_sale();
-				$product_ids_on_sale[] = 0;
+				break;
+			case 'onsale' :
+				$product_ids_on_sale    = wc_get_product_ids_on_sale();
+				$product_ids_on_sale[]  = 0;
 				$query_args['post__in'] = $product_ids_on_sale;
-    			break;
-    	}
+				break;
+		}
 
-    	switch ( $orderby ) {
+		switch ( $orderby ) {
 			case 'price' :
 				$query_args['meta_key'] = '_price';
-    			$query_args['orderby']  = 'meta_value_num';
+				$query_args['orderby']  = 'meta_value_num';
 				break;
 			case 'rand' :
-    			$query_args['orderby']  = 'rand';
+				$query_args['orderby']  = 'rand';
 				break;
 			case 'sales' :
 				$query_args['meta_key'] = 'total_sales';
-    			$query_args['orderby']  = 'meta_value_num';
+				$query_args['orderby']  = 'meta_value_num';
 				break;
 			default :
 				$query_args['orderby']  = 'date';
-    	}
+		}
 
-		$r = new WP_Query( $query_args );
+		return new WP_Query( apply_filters( 'woocommerce_products_widget_query_args', $query_args ) );
+	}
 
-		if ( $r->have_posts() ) {
+	/**
+	 * Output widget.
+	 *
+	 * @see WP_Widget
+	 *
+	 * @param array $args
+	 * @param array $instance
+	 */
+	public function widget( $args, $instance ) {
+		if ( $this->get_cached_widget( $args ) ) {
+			return;
+		}
 
-			echo $before_widget;
+		ob_start();
 
-			if ( $title )
-				echo $before_title . $title . $after_title;
+		if ( ( $products = $this->get_products( $args, $instance ) ) && $products->have_posts() ) {
+			$this->widget_start( $args, $instance );
 
-			echo '<ul class="product_list_widget">';
+			echo wp_kses_post( apply_filters( 'woocommerce_before_widget_product_list', '<ul class="product_list_widget">' ) );
 
-			while ( $r->have_posts()) {
-				$r->the_post();
-				wc_get_template( 'content-widget-product.php', array( 'show_rating' => $show_rating ) );
+			$template_args = array(
+				'widget_id'   => $args['widget_id'],
+				'show_rating' => true,
+			);
+
+			while ( $products->have_posts() ) {
+				$products->the_post();
+				wc_get_template( 'content-widget-product.php', $template_args );
 			}
 
-			echo '</ul>';
+			echo wp_kses_post( apply_filters( 'woocommerce_after_widget_product_list', '</ul>' ) );
 
-			echo $after_widget;
+			$this->widget_end( $args );
 		}
 
 		wp_reset_postdata();
 
-		$content = ob_get_clean();
-
-		echo $content;
-
-		$this->cache_widget( $args, $content );
+		echo $this->cache_widget( $args, ob_get_clean() );
 	}
 }
-
-register_widget( 'WC_Widget_Products' );

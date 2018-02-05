@@ -1,27 +1,33 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 /**
  * WooCommerce Integrations class
  *
  * Loads Integrations into WooCommerce.
  *
- * @class 		WC_Integrations
- * @version		2.0.0
- * @package		WooCommerce/Classes/Integrations
- * @category	Class
- * @author 		WooThemes
+ * @class    WC_Integrations
+ * @version  2.3.0
+ * @package  WooCommerce/Classes/Integrations
+ * @category Class
+ * @author   WooThemes
  */
 class WC_Integrations {
 
-	/** @var array Array of integration classes */
-	var $integrations = array();
+	/**
+	 * Array of integrations.
+	 *
+	 * @var array
+	 */
+	public $integrations = array();
 
-    /**
-     * __construct function.
-     *
-     * @access public
-     * @return void
-     */
-    public function __construct() {
+	/**
+	 * Initialize integrations.
+	 */
+	public function __construct() {
 
 		do_action( 'woocommerce_integrations_init' );
 
@@ -34,7 +40,6 @@ class WC_Integrations {
 
 			$this->integrations[ $load_integration->id ] = $load_integration;
 		}
-
 	}
 
 	/**

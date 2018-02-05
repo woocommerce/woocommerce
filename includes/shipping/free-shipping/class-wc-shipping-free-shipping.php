@@ -1,230 +1,212 @@
 <?php
-
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
- * Free Shipping Method
+ * Free Shipping Method.
  *
- * A simple shipping method for free shipping
+ * A simple shipping method for free shipping.
  *
- * @class 		WC_Shipping_Free_Shipping
- * @version		2.0.0
- * @package		WooCommerce/Classes/Shipping
- * @author 		WooThemes
+ * @class   WC_Shipping_Free_Shipping
+ * @version 2.6.0
+ * @package WooCommerce/Classes/Shipping
+ * @author  WooThemes
  */
 class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 
 	/**
-	 * __construct function.
+	 * Min amount to be valid.
 	 *
-	 * @access public
-	 * @return void
+	 * @var integer
 	 */
-	function __construct() {
-		$this->id 			= 'free_shipping';
-		$this->method_title = __( 'Free Shipping', 'woocommerce' );
+	public $min_amount = 0;
+
+	/**
+	 * Requires option.
+	 *
+	 * @var string
+	 */
+	public $requires = '';
+
+	/**
+	 * Constructor.
+	 *
+	 * @param int $instance_id Shipping method instance.
+	 */
+	public function __construct( $instance_id = 0 ) {
+		$this->id                 = 'free_shipping';
+		$this->instance_id        = absint( $instance_id );
+		$this->method_title       = __( 'Free shipping', 'woocommerce' );
+		$this->method_description = __( 'Free shipping is a special method which can be triggered with coupons and minimum spends.', 'woocommerce' );
+		$this->supports           = array(
+			'shipping-zones',
+			'instance-settings',
+			'instance-settings-modal',
+		);
+
 		$this->init();
 	}
 
 	/**
-	 * init function.
-	 *
-	 * @access public
-	 * @return void
+	 * Initialize free shipping.
 	 */
-	function init() {
-
+	public function init() {
 		// Load the settings.
 		$this->init_form_fields();
 		$this->init_settings();
 
-		// Define user set variables
-		$this->enabled		= $this->get_option( 'enabled' );
-		$this->title 		= $this->get_option( 'title' );
-		$this->min_amount 	= $this->get_option( 'min_amount', 0 );
-		$this->availability = $this->get_option( 'availability' );
-		$this->countries 	= $this->get_option( 'countries' );
-		$this->requires		= $this->get_option( 'requires' );
+		// Define user set variables.
+		$this->title      = $this->get_option( 'title' );
+		$this->min_amount = $this->get_option( 'min_amount', 0 );
+		$this->requires   = $this->get_option( 'requires' );
 
-		// Actions
+		// Actions.
 		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
 	}
 
-
 	/**
-	 * Initialise Gateway Settings Form Fields
-	 *
-	 * @access public
-	 * @return void
+	 * Init form fields.
 	 */
-	function init_form_fields() {
-
-		$this->form_fields = array(
-			'enabled' => array(
-							'title' 		=> __( 'Enable/Disable', 'woocommerce' ),
-							'type' 			=> 'checkbox',
-							'label' 		=> __( 'Enable Free Shipping', 'woocommerce' ),
-							'default' 		=> 'yes'
-						),
+	public function init_form_fields() {
+		$this->instance_form_fields = array(
 			'title' => array(
-							'title' 		=> __( 'Method Title', 'woocommerce' ),
-							'type' 			=> 'text',
-							'description' 	=> __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
-							'default'		=> __( 'Free Shipping', 'woocommerce' ),
-							'desc_tip'		=> true,
-						),
-			'availability' => array(
-							'title' 		=> __( 'Method availability', 'woocommerce' ),
-							'type' 			=> 'select',
-							'default' 		=> 'all',
-							'class'			=> 'availability',
-							'options'		=> array(
-								'all' 		=> __( 'All allowed countries', 'woocommerce' ),
-								'specific' 	=> __( 'Specific Countries', 'woocommerce' )
-							)
-						),
-			'countries' => array(
-							'title' 		=> __( 'Specific Countries', 'woocommerce' ),
-							'type' 			=> 'multiselect',
-							'class'			=> 'chosen_select',
-							'css'			=> 'width: 450px;',
-							'default' 		=> '',
-							'options'		=> WC()->countries->get_shipping_countries(),
-							'custom_attributes' => array(
-								'data-placeholder' => __( 'Select some countries', 'woocommerce' )
-							)
-						),
+				'title'       => __( 'Title', 'woocommerce' ),
+				'type'        => 'text',
+				'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
+				'default'     => $this->method_title,
+				'desc_tip'    => true,
+			),
 			'requires' => array(
-							'title' 		=> __( 'Free Shipping Requires...', 'woocommerce' ),
-							'type' 			=> 'select',
-							'default' 		=> '',
-							'options'		=> array(
-								'' 				=> __( 'N/A', 'woocommerce' ),
-								'coupon'		=> __( 'A valid free shipping coupon', 'woocommerce' ),
-								'min_amount' 	=> __( 'A minimum order amount (defined below)', 'woocommerce' ),
-								'either' 		=> __( 'A minimum order amount OR a coupon', 'woocommerce' ),
-								'both' 			=> __( 'A minimum order amount AND a coupon', 'woocommerce' ),
-							)
-						),
+				'title'   => __( 'Free shipping requires...', 'woocommerce' ),
+				'type'    => 'select',
+				'class'   => 'wc-enhanced-select',
+				'default' => '',
+				'options' => array(
+					''           => __( 'N/A', 'woocommerce' ),
+					'coupon'     => __( 'A valid free shipping coupon', 'woocommerce' ),
+					'min_amount' => __( 'A minimum order amount', 'woocommerce' ),
+					'either'     => __( 'A minimum order amount OR a coupon', 'woocommerce' ),
+					'both'       => __( 'A minimum order amount AND a coupon', 'woocommerce' ),
+				),
+			),
 			'min_amount' => array(
-							'title' 		=> __( 'Minimum Order Amount', 'woocommerce' ),
-							'type' 			=> 'price',
-							'placeholder'	=> wc_format_localized_price( 0 ),
-							'description' 	=> __( 'Users will need to spend this amount to get free shipping (if enabled above).', 'woocommerce' ),
-							'default' 		=> '0',
-							'desc_tip'		=> true
-						)
-			);
-
+				'title'       => __( 'Minimum order amount', 'woocommerce' ),
+				'type'        => 'price',
+				'placeholder' => wc_format_localized_price( 0 ),
+				'description' => __( 'Users will need to spend this amount to get free shipping (if enabled above).', 'woocommerce' ),
+				'default'     => '0',
+				'desc_tip'    => true,
+			),
+		);
 	}
 
-
 	/**
-	 * Admin Panel Options
-	 * - Options for bits like 'title' and availability on a country-by-country basis
+	 * Get setting form fields for instances of this shipping method within zones.
 	 *
-	 * @since 1.0.0
-	 * @access public
-	 * @return void
+	 * @return array
 	 */
-	public function admin_options() {
+	public function get_instance_form_fields() {
+		if ( is_admin() ) {
+			wc_enqueue_js( "
+				jQuery( function( $ ) {
+					function wcFreeShippingShowHideMinAmountField( el ) {
+						var form = $( el ).closest( 'form' );
+						var minAmountField = $( '#woocommerce_free_shipping_min_amount', form ).closest( 'tr' );
+						if ( 'coupon' === $( el ).val() || '' === $( el ).val() ) {
+							minAmountField.hide();
+						} else {
+							minAmountField.show();
+						}
+					}
 
-		?>
-		<h3><?php _e( 'Free Shipping', 'woocommerce' ); ?></h3>
-		<table class="form-table">
-		<?php
-			// Generate the HTML For the settings form.
-			$this->generate_settings_html();
-		?>
-		</table><!--/.form-table-->
-		<?php
+					$( document.body ).on( 'change', '#woocommerce_free_shipping_requires', function() {
+						wcFreeShippingShowHideMinAmountField( this );
+					});
+
+					// Change while load.
+					$( '#woocommerce_free_shipping_requires' ).change();
+					$( document.body ).on( 'wc_backbone_modal_loaded', function( evt, target ) {
+						if ( 'wc-modal-shipping-method-settings' === target ) {
+							wcFreeShippingShowHideMinAmountField( $( '#wc-backbone-modal-dialog #woocommerce_free_shipping_requires', evt.currentTarget ) );
+						}
+					} );
+				});
+			" );
+		}
+
+		return parent::get_instance_form_fields();
 	}
 
-
 	/**
-	 * is_available function.
+	 * See if free shipping is available based on the package and cart.
 	 *
-	 * @access public
-	 * @param mixed $package
+	 * @param array $package Shipping package.
 	 * @return bool
 	 */
-	function is_available( $package ) {
-
-		if ( $this->enabled == "no" ) return false;
-
-		$ship_to_countries = '';
-
-		if ( $this->availability == 'specific' )
-			$ship_to_countries = $this->countries;
-		else
-			$ship_to_countries = array_keys( WC()->countries->get_shipping_countries() );
-
-		if ( is_array( $ship_to_countries ) )
-			if ( ! in_array( $package['destination']['country'], $ship_to_countries ) )
-				return false;
-
-		// Enabled logic
-		$is_available 		= false;
-		$has_coupon 		= false;
+	public function is_available( $package ) {
+		$has_coupon         = false;
 		$has_met_min_amount = false;
 
 		if ( in_array( $this->requires, array( 'coupon', 'either', 'both' ) ) ) {
-
 			if ( $coupons = WC()->cart->get_coupons() ) {
 				foreach ( $coupons as $code => $coupon ) {
-					if ( $coupon->is_valid() && $coupon->enable_free_shipping() )
+					if ( $coupon->is_valid() && $coupon->get_free_shipping() ) {
 						$has_coupon = true;
+						break;
+					}
 				}
 			}
 		}
 
-		if ( in_array( $this->requires, array( 'min_amount', 'either', 'both' ) ) && isset( WC()->cart->cart_contents_total ) ) {	
+		if ( in_array( $this->requires, array( 'min_amount', 'either', 'both' ) ) ) {
+			$total = WC()->cart->get_displayed_subtotal();
 
-			if ( WC()->cart->prices_include_tax )
-				$total = WC()->cart->cart_contents_total + array_sum( WC()->cart->taxes );
-			else
-				$total = WC()->cart->cart_contents_total;
+			if ( WC()->cart->display_prices_including_tax() ) {
+				$total = round( $total - ( WC()->cart->get_discount_total() + WC()->cart->get_discount_tax() ), wc_get_price_decimals() );
+			} else {
+				$total = round( $total - WC()->cart->get_discount_total(), wc_get_price_decimals() );
+			}
 
-			if ( $total >= $this->min_amount )
+			if ( $total >= $this->min_amount ) {
 				$has_met_min_amount = true;
+			}
 		}
 
 		switch ( $this->requires ) {
 			case 'min_amount' :
-				if ( $has_met_min_amount ) $is_available = true;
-			break;
+				$is_available = $has_met_min_amount;
+				break;
 			case 'coupon' :
-				if ( $has_coupon ) $is_available = true;
-			break;
+				$is_available = $has_coupon;
+				break;
 			case 'both' :
-				if ( $has_met_min_amount && $has_coupon ) $is_available = true;
-			break;
+				$is_available = $has_met_min_amount && $has_coupon;
+				break;
 			case 'either' :
-				if ( $has_met_min_amount || $has_coupon ) $is_available = true;
-			break;
+				$is_available = $has_met_min_amount || $has_coupon;
+				break;
 			default :
 				$is_available = true;
-			break;
+				break;
 		}
 
-		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', $is_available );
+		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', $is_available, $package, $this );
 	}
-
 
 	/**
-	 * calculate_shipping function.
+	 * Called to calculate shipping rates for this method. Rates can be added using the add_rate() method.
 	 *
-	 * @access public
-	 * @return array
+	 * @uses WC_Shipping_Method::add_rate()
+	 *
+	 * @param array $package Shipping package.
 	 */
-	function calculate_shipping() {
-		$args = array(
-			'id' 	=> $this->id,
-			'label' => $this->title,
-			'cost' 	=> 0,
-			'taxes' => false
-		);
-		$this->add_rate( $args );
+	public function calculate_shipping( $package = array() ) {
+		$this->add_rate( array(
+			'label'   => $this->title,
+			'cost'    => 0,
+			'taxes'   => false,
+			'package' => $package,
+		) );
 	}
-
 }

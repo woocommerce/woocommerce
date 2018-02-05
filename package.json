@@ -1,22 +1,56 @@
 {
   "name": "woocommerce",
   "title": "WooCommerce",
-  "version": "2.2.0",
-  "homepage": "http://www.woothemes.com/woocommerce/",
+  "version": "3.3.0",
+  "homepage": "https://woocommerce.com/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/woocommerce/woocommerce.git"
+  },
+  "license": "GPL-3.0+",
   "main": "Gruntfile.js",
+  "scripts": {
+    "build": "grunt",
+    "build-watch": "grunt watch",
+    "test": "cross-env NODE_CONFIG_DIR='./tests/e2e-tests/config' BABEL_ENV=commonjs mocha \"tests/e2e-tests\" --compilers js:babel-register --recursive",
+    "test:grep": "cross-env NODE_CONFIG_DIR='./tests/e2e-tests/config' BABEL_ENV=commonjs mocha \"tests/e2e-tests\" --compilers js:babel-register --grep ",
+    "test:single": "cross-env NODE_CONFIG_DIR='./tests/e2e-tests/config' BABEL_ENV=commonjs mocha --compilers js:babel-register"
+  },
   "devDependencies": {
-    "grunt": "~0.4.2",
-    "grunt-contrib-uglify": "~0.3.2",
-    "grunt-contrib-less": "~0.9.0",
-    "grunt-contrib-cssmin": "~0.7.0",
-    "grunt-shell": "~0.6.4",
-    "grunt-contrib-watch": "~0.5.3",
-    "grunt-contrib-copy": "~0.5.0",
-    "grunt-contrib-clean": "0.5.x",
-    "grunt-wp-deploy": "0.3.x"
+    "autoprefixer": "~7.1.6",
+    "babel": "^6.5.2",
+    "babel-cli": "^6.14.0",
+    "babel-eslint": "^7.0.0",
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-preset-es2015": "^6.14.0",
+    "babel-preset-stage-2": "^6.13.0",
+    "chai": "^3.5.0",
+    "chai-as-promised": "^6.0.0",
+    "chromedriver": "^2.33.0",
+    "config": "^1.24.0",
+    "cross-env": "~5.1.1",
+    "grunt": "~1.0.1",
+    "grunt-checktextdomain": "~1.0.1",
+    "grunt-contrib-clean": "~1.1.0",
+    "grunt-contrib-concat": "~1.0.1",
+    "grunt-contrib-cssmin": "~2.2.1",
+    "grunt-contrib-jshint": "~1.1.0",
+    "grunt-contrib-uglify": "~3.1.0",
+    "grunt-contrib-watch": "~1.0.0",
+    "grunt-phpcs": "~0.4.0",
+    "grunt-postcss": "~0.9.0",
+    "grunt-rtlcss": "~2.0.1",
+    "grunt-sass": "~2.0.0",
+    "grunt-shell": "~2.1.0",
+    "grunt-stylelint": "~0.9.0",
+    "grunt-wp-i18n": "~1.0.1",
+    "istanbul": "^1.0.0-alpha",
+    "mocha": "^3.0.2",
+    "stylelint": "~8.2.0",
+    "wc-e2e-page-objects": "0.9.0"
   },
   "engines": {
-    "node": ">=0.8.0",
-    "npm": ">=1.1.0"
+    "node": ">=8.9.3",
+    "npm": ">=5.5.1"
   }
 }

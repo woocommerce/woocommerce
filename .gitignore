@@ -1,16 +1,46 @@
-/nbproject/private/
-/node_modules/
+# Editors
 project.xml
 project.properties
-.DS_Store
-Thumbs.db
+/nbproject/private/
 .buildpath
 .project
 .settings*
-sftp-config.json
-/deploy/
+.idea
+.vscode
+*.sublime-project
+*.sublime-workspace
+.sublimelinterrc
+
+# Grunt
+/node_modules/
+none
+
+# Sass
+.sass-cache/
+
+# OS X metadata
+.DS_Store
+
+# Windows junk
+Thumbs.db
+
+# ApiGen
 /wc-apidocs/
 
-# Ignore all log files except for .htaccess
-/logs/*
-!/logs/.htaccess
+# Behat/CLI Tests
+tests/cli/installer
+tests/cli/composer.phar
+tests/cli/composer.lock
+tests/cli/composer.json
+tests/cli/vendor
+
+# Unit tests
+/tmp
+/tests/bin/tmp
+/tests/e2e-tests/config/local-*.json
+
+# Logs
+/logs
+
+# Composer
+/vendor/

@@ -2,93 +2,133 @@
 /**
  * WooCommerce Admin Functions
  *
- * @author      WooThemes
- * @category    Core
- * @package     WooCommerce/Admin/Functions
- * @version     2.1.0
+ * @author   WooThemes
+ * @category Core
+ * @package  WooCommerce/Admin/Functions
+ * @version  2.4.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 /**
- * Get all WooCommerce screen ids
+ * Get all WooCommerce screen ids.
  *
  * @return array
  */
 function wc_get_screen_ids() {
-	$wc_screen_id = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
 
-    return apply_filters( 'woocommerce_screen_ids', array(
-    	'toplevel_page_' . $wc_screen_id,
-    	$wc_screen_id . '_page_wc-reports',
-    	$wc_screen_id . '_page_wc-settings',
-    	$wc_screen_id . '_page_wc-status',
-        $wc_screen_id . '_page_wc-addons',
-    	'product_page_product_attributes',
-    	'edit-shop_order',
-    	'shop_order',
-    	'edit-product',
-    	'product',
-    	'edit-shop_coupon',
-    	'shop_coupon',
-    	'edit-product_cat',
-    	'edit-product_tag',
-    	'edit-product_shipping_class'
-    ) );
+	$wc_screen_id = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
+	$screen_ids   = array(
+		'toplevel_page_' . $wc_screen_id,
+		$wc_screen_id . '_page_wc-reports',
+		$wc_screen_id . '_page_wc-shipping',
+		$wc_screen_id . '_page_wc-settings',
+		$wc_screen_id . '_page_wc-status',
+		$wc_screen_id . '_page_wc-addons',
+		'toplevel_page_wc-reports',
+		'product_page_product_attributes',
+		'product_page_product_exporter',
+		'product_page_product_importer',
+		'edit-product',
+		'product',
+		'edit-shop_coupon',
+		'shop_coupon',
+		'edit-product_cat',
+		'edit-product_tag',
+		'profile',
+		'user-edit',
+	);
+
+	foreach ( wc_get_order_types() as $type ) {
+		$screen_ids[] = $type;
+		$screen_ids[] = 'edit-' . $type;
+	}
+
+	if ( $attributes = wc_get_attribute_taxonomies() ) {
+		foreach ( $attributes as $attribute ) {
+			$screen_ids[] = 'edit-' . wc_attribute_taxonomy_name( $attribute->attribute_name );
+		}
+	}
+
+	return apply_filters( 'woocommerce_screen_ids', $screen_ids );
 }
 
 /**
  * Create a page and store the ID in an option.
  *
- * @access public
  * @param mixed $slug Slug for the new page
- * @param mixed $option Option name to store the page's ID
+ * @param string $option Option name to store the page's ID
  * @param string $page_title (default: '') Title for the new page
  * @param string $page_content (default: '') Content for the new page
  * @param int $post_parent (default: 0) Parent for the new page
  * @return int page ID
  */
 function wc_create_page( $slug, $option = '', $page_title = '', $page_content = '', $post_parent = 0 ) {
-    global $wpdb;
+	global $wpdb;
 
-    $option_value = get_option( $option );
+	$option_value     = get_option( $option );
 
-    if ( $option_value > 0 && get_post( $option_value ) )
-        return -1;
+	if ( $option_value > 0 && ( $page_object = get_post( $option_value ) ) ) {
+		if ( 'page' === $page_object->post_type && ! in_array( $page_object->post_status, array( 'pending', 'trash', 'future', 'auto-draft' ) ) ) {
+			// Valid page is already in place
+			return $page_object->ID;
+		}
+	}
 
-    $page_found = null;
+	if ( strlen( $page_content ) > 0 ) {
+		// Search for an existing page with the specified page content (typically a shortcode)
+		$valid_page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type='page' AND post_status NOT IN ( 'pending', 'trash', 'future', 'auto-draft' ) AND post_content LIKE %s LIMIT 1;", "%{$page_content}%" ) );
+	} else {
+		// Search for an existing page with the specified page slug
+		$valid_page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type='page' AND post_status NOT IN ( 'pending', 'trash', 'future', 'auto-draft' )  AND post_name = %s LIMIT 1;", $slug ) );
+	}
 
-    if ( strlen( $page_content ) > 0 ) {
-        // Search for an existing page with the specified page content (typically a shortcode)
-        $page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM " . $wpdb->posts . " WHERE post_type='page' AND post_content LIKE %s LIMIT 1;", "%{$page_content}%" ) );
-    } else {
-        // Search for an existing page with the specified page slug
-        $page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM " . $wpdb->posts . " WHERE post_type='page' AND post_name = %s LIMIT 1;", $slug ) );
-    }
+	$valid_page_found = apply_filters( 'woocommerce_create_page_id', $valid_page_found, $slug, $page_content );
 
-    if ( $page_found ) {
-        if ( ! $option_value )
-            update_option( $option, $page_found );
-		
-		return $page_found;
-    }
+	if ( $valid_page_found ) {
+		if ( $option ) {
+			update_option( $option, $valid_page_found );
+		}
+		return $valid_page_found;
+	}
 
-    $page_data = array(
-        'post_status'       => 'publish',
-        'post_type'         => 'page',
-        'post_author'       => 1,
-        'post_name'         => $slug,
-        'post_title'        => $page_title,
-        'post_content'      => $page_content,
-        'post_parent'       => $post_parent,
-        'comment_status'    => 'closed'
-    );
-    $page_id = wp_insert_post( $page_data );
+	// Search for a matching valid trashed page
+	if ( strlen( $page_content ) > 0 ) {
+		// Search for an existing page with the specified page content (typically a shortcode)
+		$trashed_page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type='page' AND post_status = 'trash' AND post_content LIKE %s LIMIT 1;", "%{$page_content}%" ) );
+	} else {
+		// Search for an existing page with the specified page slug
+		$trashed_page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type='page' AND post_status = 'trash' AND post_name = %s LIMIT 1;", $slug ) );
+	}
 
-    if ( $option )
-        update_option( $option, $page_id );
+	if ( $trashed_page_found ) {
+		$page_id   = $trashed_page_found;
+		$page_data = array(
+			'ID'             => $page_id,
+			'post_status'    => 'publish',
+		);
+	 	wp_update_post( $page_data );
+	} else {
+		$page_data = array(
+			'post_status'    => 'publish',
+			'post_type'      => 'page',
+			'post_author'    => 1,
+			'post_name'      => $slug,
+			'post_title'     => $page_title,
+			'post_content'   => $page_content,
+			'post_parent'    => $post_parent,
+			'comment_status' => 'closed',
+		);
+		$page_id = wp_insert_post( $page_data );
+	}
 
-    return $page_id;
+	if ( $option ) {
+		update_option( $option, $page_id );
+	}
+
+	return $page_id;
 }
 
 /**
@@ -99,97 +139,194 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
  * @param array $options Opens array to output
  */
 function woocommerce_admin_fields( $options ) {
-    if ( ! class_exists( 'WC_Admin_Settings' ) )
-        include 'class-wc-admin-settings.php';
 
-    WC_Admin_Settings::output_fields( $options );
+	if ( ! class_exists( 'WC_Admin_Settings', false ) ) {
+		include( dirname( __FILE__ ) . '/class-wc-admin-settings.php' );
+	}
+
+	WC_Admin_Settings::output_fields( $options );
 }
 
 /**
  * Update all settings which are passed.
  *
- * @access public
  * @param array $options
- * @return void
+ * @param array $data
  */
-function woocommerce_update_options( $options ) {
-    if ( ! class_exists( 'WC_Admin_Settings' ) )
-        include 'class-wc-admin-settings.php';
+function woocommerce_update_options( $options, $data = null ) {
 
-    WC_Admin_Settings::save_fields( $options );
+	if ( ! class_exists( 'WC_Admin_Settings', false ) ) {
+		include( dirname( __FILE__ ) . '/class-wc-admin-settings.php' );
+	}
+
+	WC_Admin_Settings::save_fields( $options, $data );
 }
 
 /**
  * Get a setting from the settings API.
  *
- * @param mixed $option
+ * @param mixed $option_name
+ * @param mixed $default
  * @return string
  */
 function woocommerce_settings_get_option( $option_name, $default = '' ) {
-    if ( ! class_exists( 'WC_Admin_Settings' ) )
-        include 'class-wc-admin-settings.php';
 
-    return WC_Admin_Settings::get_option( $option_name, $default );
+	if ( ! class_exists( 'WC_Admin_Settings', false ) ) {
+		include( dirname( __FILE__ ) . '/class-wc-admin-settings.php' );
+	}
+
+	return WC_Admin_Settings::get_option( $option_name, $default );
 }
 
 /**
- * Generate CSS from the less file when changing colours.
+ * Save order items. Uses the CRUD.
  *
- * @access public
- * @return void
+ * @since 2.2
+ * @param int $order_id Order ID
+ * @param array $items Order items to save
  */
-function woocommerce_compile_less_styles() {
-    global $woocommerce;
+function wc_save_order_items( $order_id, $items ) {
+	// Allow other plugins to check change in order items before they are saved.
+	do_action( 'woocommerce_before_save_order_items', $order_id, $items );
 
-    $colors         = array_map( 'esc_attr', (array) get_option( 'woocommerce_frontend_css_colors' ) );
-    $base_file      = WC()->plugin_path() . '/assets/css/woocommerce-base.less';
-    $less_file      = WC()->plugin_path() . '/assets/css/woocommerce.less';
-    $css_file       = WC()->plugin_path() . '/assets/css/woocommerce.css';
+	// Line items and fees.
+	if ( isset( $items['order_item_id'] ) ) {
+		$data_keys = array(
+			'line_tax'             => array(),
+			'line_subtotal_tax'    => array(),
+			'order_item_name'      => null,
+			'order_item_qty'       => null,
+			'order_item_tax_class' => null,
+			'line_total'           => null,
+			'line_subtotal'        => null,
+		);
+		foreach ( $items['order_item_id'] as $item_id ) {
+			if ( ! $item = WC_Order_Factory::get_order_item( absint( $item_id ) ) ) {
+				continue;
+			}
 
-    // Write less file
-    if ( is_writable( $base_file ) && is_writable( $css_file ) ) {
+			$item_data = array();
 
-        // Colours changed - recompile less
-        if ( ! class_exists( 'lessc' ) )
-            include_once( WC()->plugin_path() . '/includes/libraries/class-lessc.php' );
-        if ( ! class_exists( 'cssmin' ) )
-            include_once( WC()->plugin_path() . '/includes/libraries/class-cssmin.php' );
+			foreach ( $data_keys as $key => $default ) {
+				$item_data[ $key ] = isset( $items[ $key ][ $item_id ] ) ? wc_clean( wp_unslash( $items[ $key ][ $item_id ] ) ) : $default;
+			}
 
-        try {
-            // Set default if colours not set
-            if ( ! $colors['primary'] ) $colors['primary'] = '#ad74a2';
-            if ( ! $colors['secondary'] ) $colors['secondary'] = '#f7f6f7';
-            if ( ! $colors['highlight'] ) $colors['highlight'] = '#85ad74';
-            if ( ! $colors['content_bg'] ) $colors['content_bg'] = '#ffffff';
-            if ( ! $colors['subtext'] ) $colors['subtext'] = '#777777';
+			if ( '0' === $item_data['order_item_qty'] ) {
+				$item->delete();
+				continue;
+			}
 
-            // Write new color to base file
-            $color_rules = "
-@primary:       " . $colors['primary'] . ";
-@primarytext:   " . wc_light_or_dark( $colors['primary'], 'desaturate(darken(@primary,50%),18%)', 'desaturate(lighten(@primary,50%),18%)' ) . ";
+			$item->set_props( array(
+				'name'         => $item_data['order_item_name'],
+				'quantity'     => $item_data['order_item_qty'],
+				'tax_class'    => $item_data['order_item_tax_class'],
+				'total'        => $item_data['line_total'],
+				'subtotal'     => $item_data['line_subtotal'],
+				'taxes'        => array(
+					'total'    => $item_data['line_tax'],
+					'subtotal' => $item_data['line_subtotal_tax'],
+				),
+			) );
 
-@secondary:     " . $colors['secondary'] . ";
-@secondarytext: " . wc_light_or_dark( $colors['secondary'], 'desaturate(darken(@secondary,60%),18%)', 'desaturate(lighten(@secondary,60%),18%)' ) . ";
+			if ( 'fee' === $item->get_type() ) {
+				$item->set_amount( $item_data['line_total'] );
+			}
 
-@highlight:     " . $colors['highlight'] . ";
-@highlightext:  " . wc_light_or_dark( $colors['highlight'], 'desaturate(darken(@highlight,60%),18%)', 'desaturate(lighten(@highlight,60%),18%)' ) . ";
+			if ( isset( $items['meta_key'][ $item_id ], $items['meta_value'][ $item_id ] ) ) {
+				foreach ( $items['meta_key'][ $item_id ] as $meta_id => $meta_key ) {
+					$meta_key   = wp_unslash( $meta_key );
+					$meta_value = isset( $items['meta_value'][ $item_id ][ $meta_id ] ) ? wp_unslash( $items['meta_value'][ $item_id ][ $meta_id ] ): '';
 
-@contentbg:     " . $colors['content_bg'] . ";
+					if ( '' === $meta_key && '' === $meta_value ) {
+						if ( ! strstr( $meta_id, 'new-' ) ) {
+							$item->delete_meta_data_by_mid( $meta_id );
+						}
+					} elseif ( strstr( $meta_id, 'new-' ) ) {
+						$item->add_meta_data( $meta_key, $meta_value, false );
+					} else {
+						$item->update_meta_data( $meta_key, $meta_value, $meta_id );
+					}
+				}
+			}
 
-@subtext:       " . $colors['subtext'] . ";
-            ";
+			$item->save();
+		}
+	}
 
-            file_put_contents( $base_file, $color_rules );
+	// Shipping Rows
+	if ( isset( $items['shipping_method_id'] ) ) {
+		$data_keys = array(
+			'shipping_method'       => null,
+			'shipping_method_title' => null,
+			'shipping_cost'         => 0,
+			'shipping_taxes'        => array(),
+		);
 
-            $less         = new lessc;
-            $compiled_css = $less->compileFile( $less_file );
-            $compiled_css = CssMin::minify( $compiled_css );
+		foreach ( $items['shipping_method_id'] as $item_id ) {
+			if ( ! $item = WC_Order_Factory::get_order_item( absint( $item_id ) ) ) {
+				continue;
+			}
 
-            if ( $compiled_css )
-                file_put_contents( $css_file, $compiled_css );
+			$item_data = array();
 
-        } catch ( exception $ex ) {
-            wp_die( __( 'Could not compile woocommerce.less:', 'woocommerce' ) . ' ' . $ex->getMessage() );
-        }
-    }
+			foreach ( $data_keys as $key => $default ) {
+				$item_data[ $key ] = isset( $items[ $key ][ $item_id ] ) ? wc_clean( wp_unslash( $items[ $key ][ $item_id ] ) ) : $default;
+			}
+
+			$item->set_props( array(
+				'method_id'    => $item_data['shipping_method'],
+				'method_title' => $item_data['shipping_method_title'],
+				'total'        => $item_data['shipping_cost'],
+				'taxes'        => array(
+					'total'    => $item_data['shipping_taxes'],
+				),
+			) );
+
+			if ( isset( $items['meta_key'][ $item_id ], $items['meta_value'][ $item_id ] ) ) {
+				foreach ( $items['meta_key'][ $item_id ] as $meta_id => $meta_key ) {
+					$meta_value = isset( $items['meta_value'][ $item_id ][ $meta_id ] ) ? wp_unslash( $items['meta_value'][ $item_id ][ $meta_id ] ) : '';
+
+					if ( '' === $meta_key && '' === $meta_value ) {
+						if ( ! strstr( $meta_id, 'new-' ) ) {
+							$item->delete_meta_data_by_mid( $meta_id );
+						}
+					} elseif ( strstr( $meta_id, 'new-' ) ) {
+						$item->add_meta_data( $meta_key, $meta_value, false );
+					} else {
+						$item->update_meta_data( $meta_key, $meta_value, $meta_id );
+					}
+				}
+			}
+
+			$item->save();
+		}
+	}
+
+	$order = wc_get_order( $order_id );
+	$order->update_taxes();
+	$order->calculate_totals( false );
+
+	// Inform other plugins that the items have been saved
+	do_action( 'woocommerce_saved_order_items', $order_id, $items );
+}
+
+/**
+ * Get HTML for some action buttons. Used in list tables.
+ *
+ * @since 3.3.0
+ * @param array $actions Actions to output.
+ * @return string
+ */
+function wc_render_action_buttons( $actions ) {
+	$actions_html = '';
+
+	foreach ( $actions as $action ) {
+		if ( isset( $action['group'] ) ) {
+			$actions_html .= '<div class="wc-action-button-group"><label>' . $action['group'] . '</label> <span class="wc-action-button-group__items">' . wc_render_action_buttons( $action['actions'] ) . '</span></div>';
+		} elseif ( isset( $action['action'], $action['url'], $action['name'] ) ) {
+			$actions_html .= sprintf( '<a class="button wc-action-button wc-action-button-%s %s" href="%s" title="%s">%s</a>', esc_attr( $action['action'] ), esc_attr( $action['action'] ), esc_url( $action['url'] ), esc_attr( $action['name'] ), esc_attr( $action['name'] ) );
+		}
+	}
+
+	return $actions_html;
 }

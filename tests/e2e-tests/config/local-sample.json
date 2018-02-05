@@ -1,0 +1,13 @@
+{
+  "url": "http://local.wordpress.dev/",
+  "users": {
+    "admin": {
+      "username": "admin",
+      "password": "password"
+    },
+    "customer": {
+      "username": "Customer",
+      "password": "password"
+    }
+  }
+}

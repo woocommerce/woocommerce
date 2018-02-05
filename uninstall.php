@@ -2,54 +2,109 @@
 /**
  * WooCommerce Uninstall
  *
- * Uninstalling WooCommerce deletes user roles, options, tables, and pages.
+ * Uninstalling WooCommerce deletes user roles, pages, tables, and options.
  *
- * @author 		WooThemes
- * @category 	Core
- * @package 	WooCommerce/Uninstaller
- * @version     2.1.0
+ * @author      WooCommerce
+ * @category    Core
+ * @package     WooCommerce/Uninstaller
+ * @version     2.3.0
  */
-if( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) 
-	exit();
 
-global $wpdb, $wp_roles;
+if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
+	exit;
+}
 
-$status_options = get_option( 'woocommerce_status_options', array() );
+global $wpdb, $wp_version;
 
-// Roles + caps
-$installer = include( 'includes/class-wc-install.php' );
-$installer->remove_roles();
+wp_clear_scheduled_hook( 'woocommerce_scheduled_sales' );
+wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
+wp_clear_scheduled_hook( 'woocommerce_cleanup_sessions' );
+wp_clear_scheduled_hook( 'woocommerce_geoip_updater' );
+wp_clear_scheduled_hook( 'woocommerce_tracker_send_event' );
 
-// Pages
-wp_trash_post( get_option( 'woocommerce_shop_page_id' ) );
-wp_trash_post( get_option( 'woocommerce_cart_page_id' ) );
-wp_trash_post( get_option( 'woocommerce_checkout_page_id' ) );
-wp_trash_post( get_option( 'woocommerce_myaccount_page_id' ) );
-wp_trash_post( get_option( 'woocommerce_edit_address_page_id' ) );
-wp_trash_post( get_option( 'woocommerce_view_order_page_id' ) );
-wp_trash_post( get_option( 'woocommerce_change_password_page_id' ) );
-wp_trash_post( get_option( 'woocommerce_logout_page_id' ) );
+/*
+ * Only remove ALL product and page data if WC_REMOVE_ALL_DATA constant is set to true in user's
+ * wp-config.php. This is to prevent data loss when deleting the plugin from the backend
+ * and to ensure only the site owner can perform this action.
+ */
+if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
+	// Roles + caps.
+	include_once( dirname( __FILE__ ) . '/includes/class-wc-install.php' );
+	WC_Install::remove_roles();
 
-// mijireh checkout page
-if ( $mijireh_page = get_page_by_path( 'mijireh-secure-checkout' ) )
-	wp_trash_post( $mijireh_page->ID );
+	// Pages.
+	wp_trash_post( get_option( 'woocommerce_shop_page_id' ) );
+	wp_trash_post( get_option( 'woocommerce_cart_page_id' ) );
+	wp_trash_post( get_option( 'woocommerce_checkout_page_id' ) );
+	wp_trash_post( get_option( 'woocommerce_myaccount_page_id' ) );
+	wp_trash_post( get_option( 'woocommerce_edit_address_page_id' ) );
+	wp_trash_post( get_option( 'woocommerce_view_order_page_id' ) );
+	wp_trash_post( get_option( 'woocommerce_change_password_page_id' ) );
+	wp_trash_post( get_option( 'woocommerce_logout_page_id' ) );
 
-// Tables
-$wpdb->query( "DROP TABLE IF EXISTS " . $wpdb->prefix . "woocommerce_attribute_taxonomies" );
-$wpdb->query( "DROP TABLE IF EXISTS " . $wpdb->prefix . "woocommerce_downloadable_product_permissions" );
-$wpdb->query( "DROP TABLE IF EXISTS " . $wpdb->prefix . "woocommerce_termmeta" );
-$wpdb->query( "DROP TABLE IF EXISTS " . $wpdb->base_prefix . "shareyourcart_tokens" );
-$wpdb->query( "DROP TABLE IF EXISTS " . $wpdb->base_prefix . "shareyourcart_coupons" );
-$wpdb->query( "DROP TABLE IF EXISTS " . $wpdb->prefix . "woocommerce_tax_rates" );
-$wpdb->query( "DROP TABLE IF EXISTS " . $wpdb->prefix . "woocommerce_tax_rate_locations" );
+	if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}woocommerce_attribute_taxonomies';" ) ) {
+		$wc_attributes = array_filter( (array) $wpdb->get_col( "SELECT attribute_name FROM {$wpdb->prefix}woocommerce_attribute_taxonomies;" ) );
+	} else {
+		$wc_attributes = array();
+	}
 
-// Delete options
-$wpdb->query("DELETE FROM $wpdb->options WHERE option_name LIKE 'woocommerce_%';");
+	// Tables.
+	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_api_keys" );
+	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_attribute_taxonomies" );
+	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_downloadable_product_permissions" );
+	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_termmeta" );
+	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_tax_rates" );
+	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_tax_rate_locations" );
+	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_shipping_zone_methods" );
+	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_shipping_zone_locations" );
+	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_shipping_zones" );
+	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_sessions" );
+	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_payment_tokens" );
+	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_payment_tokenmeta" );
 
-if ( ! empty( $status_options['uninstall_data'] ) ) {
-	// Delete posts + data
-	$wpdb->query( "DELETE FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation', 'shop_coupon', 'shop_order' );" );
-	$wpdb->query( "DELETE FROM {$wpdb->postmeta} meta LEFT JOIN {$wpdb->posts} posts ON posts.ID = meta.post_id WHERE wp.ID IS NULL;" );
-	$wpdb->query( "DROP TABLE IF EXISTS " . $wpdb->prefix . "woocommerce_order_items" );
-	$wpdb->query( "DROP TABLE IF EXISTS " . $wpdb->prefix . "woocommerce_order_itemmeta" );
+	// Delete options.
+	$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE 'woocommerce\_%';" );
+
+	// Delete posts + data.
+	$wpdb->query( "DELETE FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation', 'shop_coupon', 'shop_order', 'shop_order_refund' );" );
+	$wpdb->query( "DELETE meta FROM {$wpdb->postmeta} meta LEFT JOIN {$wpdb->posts} posts ON posts.ID = meta.post_id WHERE posts.ID IS NULL;" );
+	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_order_items" );
+	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_order_itemmeta" );
+
+	// Delete terms if > WP 4.2 (term splitting was added in 4.2)
+	if ( version_compare( $wp_version, '4.2', '>=' ) ) {
+		// Delete term taxonomies
+		foreach ( array( 'product_cat', 'product_tag', 'product_shipping_class', 'product_type' ) as $taxonomy ) {
+			$wpdb->delete(
+				$wpdb->term_taxonomy,
+				array(
+					'taxonomy' => $taxonomy,
+				)
+			);
+		}
+
+		// Delete term attributes
+		foreach ( $wc_attributes as $taxonomy ) {
+			$wpdb->delete(
+				$wpdb->term_taxonomy,
+				array(
+					'taxonomy' => 'pa_' . $taxonomy,
+				)
+			);
+		}
+
+		// Delete orphan relationships
+		$wpdb->query( "DELETE tr FROM {$wpdb->term_relationships} tr LEFT JOIN {$wpdb->posts} posts ON posts.ID = tr.object_id WHERE posts.ID IS NULL;" );
+
+		// Delete orphan terms
+		$wpdb->query( "DELETE t FROM {$wpdb->terms} t LEFT JOIN {$wpdb->term_taxonomy} tt ON t.term_id = tt.term_id WHERE tt.term_id IS NULL;" );
+
+		// Delete orphan term meta
+		if ( ! empty( $wpdb->termmeta ) ) {
+			$wpdb->query( "DELETE tm FROM {$wpdb->termmeta} tm LEFT JOIN {$wpdb->term_taxonomy} tt ON tm.term_id = tt.term_id WHERE tt.term_id IS NULL;" );
+		}
+	}
+
+	// Clear any cached data that has been removed
+	wp_cache_flush();
 }
