@@ -113,6 +113,8 @@ class WC_Admin_Menus {
 		if ( ! empty( $_GET['wc_message'] ) ) { // WPCS: input var okay, CSRF ok.
 			WC_Admin_Settings::add_message( wp_kses_post( wp_unslash( $_GET['wc_message'] ) ) ); // WPCS: input var okay, CSRF ok.
 		}
+
+		do_action( 'woocommerce_settings_page_init' );
 	}
 
 	/**
