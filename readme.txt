@@ -161,7 +161,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
-= 3.3.1 - 2018-02-xx =
+= 3.3.1 - 2018-02-06 =
 * Fix - Added `woocommerce_output_product_categories` to replace `woocommerce_product_subcategories` function to prevent outdated theme template files from outputting categories on the shop and category pages in err.
 * Fix - Prevented columns from being set to anything lower than 1.
 * Fix - Added extra error checking in Webhooks API to prevent notices when deleting Webhooks.
@@ -179,6 +179,12 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Default HTML in end wrapper template.
 * Fix - Prevent regular pagination showing on archives for unsupported themes.
 * Fix - Fix shop when shown as homepage in unsupported themes.
+* Fix - Fix SKU mapping for placeholders during CSV import.
+* Fix - Use CRUD search helper in admin products table so partial SKU search works.
+* Fix - Fix bulk sale/regular price percentage handling.
+* Fix - More specificity on smallscreen style override for columns.
+* Tweak - Add notice for moved store notice setting.
+* Tweak - Allow removing coupons on editable orders only.
 * Tweak - Extended the background processing library to avoid changing methods in the library.
 * Tweak - Do not show row settings if something is managing the number of products per page.
 * Tweak - Allow devs to add 'no-link' class to elements to prevent order view link being triggered on row click.
