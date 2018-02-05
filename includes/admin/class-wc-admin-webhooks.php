@@ -21,6 +21,7 @@ class WC_Admin_Webhooks {
 	public function __construct() {
 		add_filter( 'woocommerce_save_settings_api_webhooks', array( $this, 'allow_save_settings' ) );
 		add_action( 'admin_init', array( $this, 'actions' ) );
+		add_action( 'woocommerce_settings_page_init', array( $this, 'screen_option' ) );
 	}
 
 	/**
@@ -264,6 +265,20 @@ class WC_Admin_Webhooks {
 			foreach ( explode( '|', sanitize_text_field( wp_unslash( $_GET['error'] ) ) ) as $message ) { // WPCS: input var okay, CSRF ok.
 				WC_Admin_Settings::add_error( trim( $message ) );
 			}
+		}
+	}
+
+	/**
+	 * Add screen option.
+	 */
+	public function screen_option() {
+		global $webhooks_table_list;
+
+		if ( ! isset( $_GET['edit-webhook'] ) && $this->is_webhook_settings_page() ) {
+			add_screen_option( 'per_page', array(
+				'default' => 20,
+				'option'  => 'wc_webhooks_per_page',
+			) );
 		}
 	}
 

@@ -2,8 +2,6 @@
 /**
  * WooCommerce Webhooks Table List
  *
- * @author   Automattic
- * @category Admin
  * @package  WooCommerce/Admin
  * @version  3.3.0
  */
@@ -244,7 +242,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	 * Prepare table list items.
 	 */
 	public function prepare_items() {
-		$per_page = absint( apply_filters( 'woocommerce_webhooks_settings_posts_per_page', 10 ) );
+		$per_page = $this->get_items_per_page( 'wc_webhooks_per_page' );
 		$per_page = 0 === $per_page ? 10 : $per_page;
 		$columns  = $this->get_columns();
 		$hidden   = array();

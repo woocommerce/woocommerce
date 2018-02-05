@@ -37,6 +37,7 @@ class WC_Admin_Menus {
 		add_action( 'admin_head', array( $this, 'menu_order_count' ) );
 		add_filter( 'menu_order', array( $this, 'menu_order' ) );
 		add_filter( 'custom_menu_order', array( $this, 'custom_menu_order' ) );
+		add_filter( 'set-screen-option', array( $this, 'set_screen_option' ), 10, 3 );
 
 		// Add endpoints custom URLs in Appearance > Menus > Pages.
 		add_action( 'admin_head-nav-menus.php', array( $this, 'add_nav_menu_meta_boxes' ) );
@@ -218,6 +219,21 @@ class WC_Admin_Menus {
 	 */
 	public function custom_menu_order() {
 		return current_user_can( 'manage_woocommerce' );
+	}
+
+	/**
+	 * Validate screen options on update.
+	 *
+	 * @param bool|int $status Screen option value. Default false to skip.
+	 * @param string   $option The option name.
+	 * @param int      $value  The number of rows to use.
+	 */
+	public function set_screen_option( $status, $option, $value ) {
+		if ( in_array( $option, array( 'wc_webhooks_per_page' ), true ) ) {
+			return $value;
+		}
+
+		return $status;
 	}
 
 	/**
