@@ -57,7 +57,12 @@ class WC_Admin_API_Keys {
 	 * Add screen option.
 	 */
 	public function screen_option() {
+		global $keys_table_list;
+
 		if ( ! isset( $_GET['create-key'], $_GET['edit-key'] ) && $this->is_api_keys_settings_page() ) {
+			$keys_table_list = new WC_Admin_API_Keys_Table_List();
+
+			// Add screen option.
 			add_screen_option( 'per_page', array(
 				'default' => 10,
 				'option'  => 'wc_api_keys_per_page',
@@ -69,7 +74,7 @@ class WC_Admin_API_Keys {
 	 * Table list output.
 	 */
 	private static function table_list_output() {
-		global $wpdb;
+		global $wpdb, $keys_table_list;
 
 		echo '<h2>' . __( 'Keys/Apps', 'woocommerce' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=keys&create-key=1' ) ) . '" class="add-new-h2">' . __( 'Add key', 'woocommerce' ) . '</a></h2>';
 
@@ -77,7 +82,6 @@ class WC_Admin_API_Keys {
 		$count = $wpdb->get_var( "SELECT COUNT(key_id) FROM {$wpdb->prefix}woocommerce_api_keys WHERE 1 = 1;" );
 
 		if ( absint( $count ) && $count > 0 ) {
-			$keys_table_list = new WC_Admin_API_Keys_Table_List();
 			$keys_table_list->prepare_items();
 
 			echo '<input type="hidden" name="page" value="wc-settings" />';

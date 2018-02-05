@@ -272,7 +272,12 @@ class WC_Admin_Webhooks {
 	 * Add screen option.
 	 */
 	public function screen_option() {
+		global $webhooks_table_list;
+
 		if ( ! isset( $_GET['edit-webhook'] ) && $this->is_webhook_settings_page() ) {
+			$webhooks_table_list = new WC_Admin_Webhooks_Table_List();
+
+			// Add screen option.
 			add_screen_option( 'per_page', array(
 				'default' => 10,
 				'option'  => 'wc_webhooks_per_page',
@@ -284,6 +289,8 @@ class WC_Admin_Webhooks {
 	 * Table list output.
 	 */
 	private static function table_list_output() {
+		global $webhooks_table_list;
+
 		echo '<h2>' . esc_html__( 'Webhooks', 'woocommerce' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=0' ) ) . '" class="add-new-h2">' . esc_html__( 'Add webhook', 'woocommerce' ) . '</a></h2>';
 
 		// Get the webhooks count.
@@ -291,7 +298,6 @@ class WC_Admin_Webhooks {
 		$count      = count( $data_store->get_webhooks_ids() );
 
 		if ( 0 < $count ) {
-			$webhooks_table_list = new WC_Admin_Webhooks_Table_List();
 			$webhooks_table_list->prepare_items();
 
 			echo '<input type="hidden" name="page" value="wc-settings" />';
