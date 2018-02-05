@@ -2,10 +2,8 @@
 /**
  * WooCommerce Admin Webhooks Class
  *
- * @author   Automattic
- * @category Admin
- * @package  WooCommerce/Admin
- * @version  3.3.0
+ * @package WooCommerce\Admin
+ * @version 3.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -21,7 +19,7 @@ class WC_Admin_Webhooks {
 	 * Initialize the webhooks admin actions.
 	 */
 	public function __construct() {
-		add_action( 'woocommerce_save_settings_api_webhooks', array( $this, 'allow_save_settings' ) );
+		add_filter( 'woocommerce_save_settings_api_webhooks', array( $this, 'allow_save_settings' ) );
 		add_action( 'admin_init', array( $this, 'actions' ) );
 	}
 
