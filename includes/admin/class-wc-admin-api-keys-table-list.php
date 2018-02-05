@@ -177,7 +177,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 
 		$per_page = $this->get_items_per_page( 'wc_api_keys_per_page' );
 		$columns  = $this->get_columns();
-		$hidden   = array();
+		$hidden   = $this->get_hidden_columns();
 		$sortable = $this->get_sortable_columns();
 
 		// Column headers
@@ -212,5 +212,14 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 			'per_page'    => $per_page,
 			'total_pages' => ceil( $count / $per_page ),
 		) );
+	}
+
+	/**
+	 * Get a list of hidden columns.
+	 *
+	 * @return array
+	 */
+	protected function get_hidden_columns() {
+		return get_hidden_columns( $this->screen );
 	}
 }
