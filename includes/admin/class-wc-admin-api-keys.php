@@ -2,10 +2,8 @@
 /**
  * WooCommerce Admin API Keys Class
  *
- * @author   WooThemes
- * @category Admin
- * @package  WooCommerce/Admin
- * @version  2.4.0
+ * @package WooCommerce\Admin
+ * @version 2.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -22,6 +20,7 @@ class WC_Admin_API_Keys {
 	 */
 	public function __construct() {
 		add_action( 'admin_init', array( $this, 'actions' ) );
+		add_action( 'woocommerce_settings_page_init', array( $this, 'screen_option' ) );
 	}
 
 	/**
@@ -55,10 +54,21 @@ class WC_Admin_API_Keys {
 	}
 
 	/**
+	 * Add screen option.
+	 */
+	public function screen_option() {
+		if ( ! isset( $_GET['create-key'], $_GET['edit-key'] ) && $this->is_api_keys_settings_page() ) {
+			add_screen_option( 'per_page', array(
+				'default' => 10,
+				'option'  => 'wc_api_keys_per_page',
+			) );
+		}
+	}
+
+	/**
 	 * Table list output.
 	 */
 	private static function table_list_output() {
-
 		global $wpdb;
 
 		echo '<h2>' . __( 'Keys/Apps', 'woocommerce' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=keys&create-key=1' ) ) . '" class="add-new-h2">' . __( 'Add key', 'woocommerce' ) . '</a></h2>';

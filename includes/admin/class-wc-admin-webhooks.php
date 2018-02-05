@@ -272,11 +272,9 @@ class WC_Admin_Webhooks {
 	 * Add screen option.
 	 */
 	public function screen_option() {
-		global $webhooks_table_list;
-
 		if ( ! isset( $_GET['edit-webhook'] ) && $this->is_webhook_settings_page() ) {
 			add_screen_option( 'per_page', array(
-				'default' => 20,
+				'default' => 10,
 				'option'  => 'wc_webhooks_per_page',
 			) );
 		}

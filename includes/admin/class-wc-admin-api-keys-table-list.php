@@ -2,10 +2,8 @@
 /**
  * WooCommerce API Keys Table List
  *
- * @author   WooThemes
- * @category Admin
- * @package  WooCommerce/Admin
- * @version  2.4.0
+ * @package WooCommerce\Admin
+ * @version 2.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -177,7 +175,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	public function prepare_items() {
 		global $wpdb;
 
-		$per_page = apply_filters( 'woocommerce_api_keys_settings_items_per_page', 10 );
+		$per_page = $this->get_items_per_page( 'wc_api_keys_per_page' );
 		$columns  = $this->get_columns();
 		$hidden   = array();
 		$sortable = $this->get_sortable_columns();
