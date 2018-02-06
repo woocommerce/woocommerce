@@ -165,10 +165,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 
 		get_inline_data( $post );
 
-		/* Custom inline data for woocommerce. */
-		echo '
-			<div class="hidden" id="woocommerce_inline_' . absint( $this->object->get_id() ) . '">
-				<div class="menu_order">' . absint( $this->object->get_menu_order() ) . '</div>
+		$html = '<div class="menu_order">' . absint( $this->object->get_menu_order() ) . '</div>
 				<div class="sku">' . esc_html( $this->object->get_sku() ) . '</div>
 				<div class="regular_price">' . esc_html( $this->object->get_regular_price() ) . '</div>
 				<div class="sale_price">' . esc_html( $this->object->get_sale_price() ) . '</div>
@@ -186,9 +183,12 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				<div class="product_is_virtual">' . esc_html( wc_bool_to_string( $this->object->get_virtual() ) ) . '</div>
 				<div class="tax_status">' . esc_html( $this->object->get_tax_status() ) . '</div>
 				<div class="tax_class">' . esc_html( $this->object->get_tax_class() ) . '</div>
-				<div class="backorders">' . esc_html( $this->object->get_backorders() ) . '</div>
-			</div>
-		';
+				<div class="backorders">' . esc_html( $this->object->get_backorders() ) . '</div>';
+
+		$html = apply_filters( 'woocommerce_inline_hidden_extra_data', $html, absint( $this->object->get_id() ) );
+
+		/* Custom inline data for woocommerce. */
+		echo '<div class="hidden" id="woocommerce_inline_' . absint( $this->object->get_id() ) . '">' . $html . '</div>';
 	}
 
 	/**
