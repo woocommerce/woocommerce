@@ -1884,8 +1884,8 @@ class WC_Admin_Setup_Wizard {
 			<li class="wc-wizard-next-step-item">
 				<div class="wc-wizard-next-step-description">
 					<p class="next-step-heading"><?php esc_html_e( 'Next step', 'woocommerce' ); ?></p>
-					<h3 class="next-step-description"><?php esc_html_e( 'Create your first product', 'woocommerce' ); ?></h3>
-					<p class="next-step-extra-info"><?php esc_html_e( "You're ready to add your first product.", 'woocommerce' ); ?></p>
+					<h3 class="next-step-description"><?php esc_html_e( 'Create some products', 'woocommerce' ); ?></h3>
+					<p class="next-step-extra-info"><?php esc_html_e( "You're ready to add products to your store.", 'woocommerce' ); ?></p>
 				</div>
 				<div class="wc-wizard-next-step-action">
 					<p class="wc-setup-actions step">
