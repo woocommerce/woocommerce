@@ -154,8 +154,10 @@ class WC_Shop_Customizer {
 
 				wp.customize( 'woocommerce_catalog_rows', function( setting ) {
 					setting.bind( function( value ) {
-						var min = '<?php echo esc_js( $min_rows ); ?>';
-						var max = '<?php echo esc_js( $max_rows ); ?>';
+						var min = parseInt( '<?php echo esc_js( $min_rows ); ?>', 10 );
+						var max = parseInt( '<?php echo esc_js( $max_rows ); ?>', 10 );
+						
+						value = parseInt( value, 10 );
 
 						if ( max && value > max ) {
 							setting.notifications.add( 'max_rows_error', new wp.customize.Notification(
