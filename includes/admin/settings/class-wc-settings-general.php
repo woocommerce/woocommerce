@@ -286,8 +286,10 @@ class WC_Settings_General extends WC_Settings_Page {
 			<p><?php
 			/* translators: %s: URL to customizer. */
 			echo wp_kses( sprintf( __( 'Looking for the store notice setting? It can now be found <a href="%s">in the Customizer</a>.', 'woocommerce' ), esc_url( add_query_arg( array(
-				'autofocus[panel]' => 'woocommerce',
-				'url'              => wc_get_page_permalink( 'shop' ),
+				'autofocus' => array(
+					'panel' => 'woocommerce',
+				),
+				'url' => wc_get_page_permalink( 'shop' ),
 			 ), admin_url( 'customize.php' ) ) ) ), array(
 				'a' => array(
 					'href'  => array(),
