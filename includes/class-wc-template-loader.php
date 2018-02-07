@@ -410,14 +410,14 @@ class WC_Template_Loader {
 	public static function unsupported_theme_shop_content_filter( $content ) {
 		global $wp_query;
 
-		if ( self::$theme_support || ! is_main_query() ) {
+		if ( self::$theme_support || ! is_main_query() || ! in_the_loop() ) {
 			return $content;
 		}
 
 		self::$in_content_filter = true;
 
 		// Remove the filter we're in to avoid nested calls.
-		remove_filter( 'the_content', array( __CLASS__, 'the_content_filter' ) );
+		remove_filter( 'the_content', array( __CLASS__, 'unsupported_theme_shop_content_filter' ) );
 
 		// Unsupported theme shop page.
 		if ( is_page( self::$shop_page_id ) ) {
@@ -463,14 +463,14 @@ class WC_Template_Loader {
 	public static function unsupported_theme_product_content_filter( $content ) {
 		global $wp_query;
 
-		if ( self::$theme_support || ! is_main_query() ) {
+		if ( self::$theme_support || ! is_main_query() || ! in_the_loop() ) {
 			return $content;
 		}
 
 		self::$in_content_filter = true;
 
 		// Remove the filter we're in to avoid nested calls.
-		remove_filter( 'the_content', array( __CLASS__, 'the_content_filter' ) );
+		remove_filter( 'the_content', array( __CLASS__, 'unsupported_theme_product_content_filter' ) );
 
 		if ( is_product() ) {
 			$content = do_shortcode( '[product_page id="' . get_the_ID() . '" show_title=0]' );
