@@ -38,6 +38,7 @@ class WC_Admin_Taxonomies {
 
 		// Taxonomy page descriptions
 		add_action( 'product_cat_pre_add_form', array( $this, 'product_cat_description' ) );
+		add_action( 'after-product_cat-table', array( $this, 'product_cat_notes' ) );
 
 		$attribute_taxonomies = wc_get_attribute_taxonomies();
 
@@ -293,6 +294,28 @@ class WC_Admin_Taxonomies {
 	 */
 	public function product_cat_description() {
 		echo wpautop( __( 'Product categories for your store can be managed here. To change the order of categories on the front-end you can drag and drop to sort them. To see more categories listed click the "screen options" link at the top-right of this page.', 'woocommerce' ) );
+	}
+
+	/**
+	 * Add a note to describe the behavior of deleting categories.
+	 */
+	public function product_cat_notes() {
+		$category      = get_term( get_option( 'default_product_cat', 0 ), 'product_cat' );
+		$category_name = ( ! $category || is_wp_error( $category ) ) ? _x( 'Uncategorized', 'Default category slug', 'woocommerce' ) : $category->name;
+		?>
+		<div class="form-wrap edit-term-notes">
+			<p>
+				<strong><?php _e( 'Note:', 'woocommerce' ) ?></strong><br>
+				<?php 
+					printf(
+						/* translators: %s: default category */
+						__( 'Deleting a category does not delete the products in that category. Instead, products that were only assigned to the deleted category are set to the category %s.', 'woocommerce' ),
+						'<strong>' . esc_html( $category_name ) . '</strong>'
+					);
+				?>
+			</p>
+		</div>
+		<?php
 	}
 
 	/**
