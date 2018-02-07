@@ -512,7 +512,7 @@ class WC_Post_types {
 	 */
 	public static function maybe_flush_rewrite_rules() {
 		if ( 'yes' === get_option( 'woocommerce_queue_flush_rewrite_rules' ) ) {
-			delete_option( 'woocommerce_queue_flush_rewrite_rules' );
+			update_option( 'woocommerce_queue_flush_rewrite_rules', 'no' );
 			self::flush_rewrite_rules();
 		}
 	}
