@@ -460,6 +460,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			$data_store = WC_Data_Store::load( 'product' );
 			$ids        = $data_store->search_products( wc_clean( $query_vars['s'] ), '', true );
 			$query_vars['post__in'] = array_merge( $ids, array( 0 ) );
+			unset( $query_vars['s'] );
 		}
 
 		return $query_vars;
