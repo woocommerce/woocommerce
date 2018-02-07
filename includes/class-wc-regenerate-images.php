@@ -106,7 +106,8 @@ class WC_Regenerate_Images {
 
 		$original_image_file_path = get_attached_file( $attachment->ID );
 
-		if ( ! file_exists( $original_image_file_path ) || ! getimagesize( $original_image_file_path ) ) {
+		// Check if the file exists, if not just return the original image.
+		if ( false === $original_image_file_path || is_wp_error( $original_image_file_path ) || ! file_exists( $original_image_file_path ) ) {
 			return $image;
 		}
 
