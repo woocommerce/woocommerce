@@ -308,7 +308,7 @@ class WC_Admin_Taxonomies {
 		<div class="form-wrap edit-term-notes">
 			<p>
 				<strong><?php _e( 'Note:', 'woocommerce' ) ?></strong><br>
-				<?php 
+				<?php
 					printf(
 						/* translators: %s: default category */
 						__( 'Deleting a category does not delete the products in that category. Instead, products that were only assigned to the deleted category are set to the category %s.', 'woocommerce' ),
@@ -316,12 +316,6 @@ class WC_Admin_Taxonomies {
 					);
 				?>
 			</p>
-			<span 
-				id="default-category-tooltip"
-				class="woocommerce-help-tip"
-				data-tip="<?php esc_attr_e( 'This is the default category and it cannot be deleted. It will be automatically assigned to products with no category.', 'woocommerce' ) ?>"
-				data-category-id="<?php echo esc_attr( $category_id ) ?>">
-			</span>
 		</div>
 		<?php
 	}
@@ -366,6 +360,13 @@ class WC_Admin_Taxonomies {
 	 */
 	public function product_cat_column( $columns, $column, $id ) {
 		if ( 'thumb' === $column ) {
+			// Prepend tooltip for default category.
+			$default_category_id = absint( get_option( 'default_product_cat', 0 ) );
+
+			if ( $default_category_id === $id ) {
+				$columns .= '<span id="default-category-tooltip" class="woocommerce-help-tip" data-tip="' . esc_attr__( 'This is the default category and it cannot be deleted. It will be automatically assigned to products with no category.', 'woocommerce' ) . '"></span>';
+			}
+
 			$thumbnail_id = get_woocommerce_term_meta( $id, 'thumbnail_id', true );
 
 			if ( $thumbnail_id ) {

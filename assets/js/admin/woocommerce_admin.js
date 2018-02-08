@@ -135,10 +135,6 @@ jQuery( function ( $ ) {
 
 		.on( 'init_tooltips', function() {
 
-			// Move the default category tooltip
-			var category_id = $( '#default-category-tooltip' ).data( 'category-id' );
-			$( '#default-category-tooltip' ).appendTo( '.taxonomy-product_cat .wp-list-table #tag-' + category_id + ' .check-column' );
-
 			$( '.tips, .help_tip, .woocommerce-help-tip' ).tipTip( {
 				'attribute': 'data-tip',
 				'fadeIn': 50,
@@ -164,6 +160,10 @@ jQuery( function ( $ ) {
 		});
 
 	// Tooltips
+	$( document ).ajaxComplete( function() {
+		$( document.body ).trigger( 'init_tooltips' );
+	} );
+
 	$( document.body ).trigger( 'init_tooltips' );
 
 	// wc_input_table tables
