@@ -1818,6 +1818,10 @@ if ( ! function_exists( 'woocommerce_maybe_show_product_subcategories' ) ) {
 	 * @return string
 	 */
 	function woocommerce_maybe_show_product_subcategories( $loop_html ) {
+		if ( wc_get_loop_prop( 'is_shortcode' ) && ! WC_Template_Loader::in_content_filter() ) {
+			return $loop_html;
+		}
+
 		$display_type = woocommerce_get_loop_display_mode();
 
 		// If displaying categories, append to the loop.
