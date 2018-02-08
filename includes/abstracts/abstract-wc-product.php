@@ -945,8 +945,14 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *
 	 * @param string $status New status.
 	 */
-	public function set_stock_status( $status = '' ) {
-		$this->set_prop( 'stock_status', 'outofstock' === $status ? 'outofstock' : 'instock' );
+	public function set_stock_status( $status = 'instock' ) {
+		$valid_statuses = wc_get_product_stock_status_options();
+
+		if ( isset( $valid_statuses[ $status ] ) ) {
+			$this->set_prop( 'stock_status', $status );
+		} else {
+			$this->set_prop( 'stock_status', 'instock' );
+		}
 	}
 
 	/**
@@ -1171,7 +1177,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			if ( is_a( $download, 'WC_Product_Download' ) ) {
 				$download_object = $download;
 			} else {
-				$download_object           = new WC_Product_Download();
+				$download_object = new WC_Product_Download();
 
 				// If we don't have a previous hash, generate UUID for download.
 				if ( empty( $download['download_id'] ) ) {
@@ -1300,11 +1306,15 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			$this->set_backorders( 'no' );
 
 			// If we are stock managing and we don't have stock, force out of stock status.
-		} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) && 'no' === $this->get_backorders() ) {
+		} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount', 0 ) && 'no' === $this->get_backorders() ) {
 			$this->set_stock_status( 'outofstock' );
 
+			// If we are stock managing, backorders are allowed, and we don't have stock, force on backorder status.
+		} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount', 0 ) && 'no' !== $this->get_backorders() ) {
+			$this->set_stock_status( 'onbackorder' );
+
 			// If the stock level is changing and we do now have enough, force in stock status.
-		} elseif ( $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount' ) && array_key_exists( 'stock_quantity', $this->get_changes() ) ) {
+		} elseif ( $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount', 0 ) && array_key_exists( 'stock_quantity', $this->get_changes() ) ) {
 			$this->set_stock_status( 'instock' );
 		}
 	}
@@ -1420,7 +1430,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	public function is_visible() {
 		$visible = 'visible' === $this->get_catalog_visibility() || ( is_search() && 'search' === $this->get_catalog_visibility() ) || ( ! is_search() && 'catalog' === $this->get_catalog_visibility() );
 
-		if ( 'publish' !== $this->get_status() && ! current_user_can( 'edit_post', $this->get_id() ) ) {
+		if ( 'trash' === $this->get_status() ) {
+			$visible = false;
+		} elseif ( 'publish' !== $this->get_status() && ! current_user_can( 'edit_post', $this->get_id() ) ) {
 			$visible = false;
 		}
 
@@ -1490,12 +1502,13 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Returns whether or not the product is in stock.
+	 * Returns whether or not the product can be purchased.
+	 * This returns true for 'instock' and 'onbackorder' stock statuses.
 	 *
 	 * @return bool
 	 */
 	public function is_in_stock() {
-		return apply_filters( 'woocommerce_product_is_in_stock', 'instock' === $this->get_stock_status(), $this );
+		return apply_filters( 'woocommerce_product_is_in_stock', 'outofstock' !== $this->get_stock_status(), $this );
 	}
 
 	/**
@@ -1522,7 +1535,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return bool
 	 */
 	public function is_shipping_taxable() {
-		return $this->get_tax_status() === 'taxable' || $this->get_tax_status() === 'shipping';
+		return $this->needs_shipping() && ( $this->get_tax_status() === 'taxable' || $this->get_tax_status() === 'shipping' );
 	}
 
 	/**
@@ -1562,6 +1575,10 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return bool
 	 */
 	public function is_on_backorder( $qty_in_cart = 0 ) {
+		if ( 'onbackorder' === $this->get_stock_status() ) {
+			return true;
+		}
+
 		return $this->managing_stock() && $this->backorders_allowed() && ( $this->get_stock_quantity() - $qty_in_cart ) < 0 ? true : false;
 	}
 

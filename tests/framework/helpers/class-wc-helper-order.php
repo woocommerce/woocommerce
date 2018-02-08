@@ -16,15 +16,15 @@ class WC_Helper_Order {
 
 		$order = wc_get_order( $order_id );
 
-		// Delete all products in the order
-		foreach ( $order->get_items() as $item ) :
+		// Delete all products in the order.
+		foreach ( $order->get_items() as $item ) {
 			WC_Helper_Product::delete_product( $item['product_id'] );
-		endforeach;
+		}
 
 		WC_Helper_Shipping::delete_simple_flat_rate();
 
-		// Delete the order post
-		wp_delete_post( $order_id, true );
+		// Delete the order post.
+		$order->delete( true );
 	}
 
 	/**

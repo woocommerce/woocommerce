@@ -363,17 +363,18 @@ p.demo_store,
 						width: 5px;
 						height: 5px;
 						content: ' ';
+						box-sizing: border-box;
 					}
 
 					&::before {
-						left: -6px;
+						left: -5px;
 						border-bottom-right-radius: 4px;
 						border-width: 0 1px 1px 0;
 						box-shadow: 2px 2px 0 $secondary;
 					}
 
 					&::after {
-						right: -6px;
+						right: -5px;
 						border-bottom-left-radius: 4px;
 						border-width: 0 0 1px 1px;
 						box-shadow: -2px 2px 0 $secondary;
@@ -476,7 +477,7 @@ p.demo_store,
 			}
 
 			.group_table {
-				td.label {
+				td.woocommerce-grouped-product-list-item__label {
 					padding-right: 1em;
 					padding-left: 1em;
 				}
@@ -518,7 +519,6 @@ p.demo_store,
 		background-color: $highlight;
 		color: $highlightext;
 		font-size: 0.857em;
-		-webkit-font-smoothing: antialiased;
 		z-index: 9;
 	}
 
@@ -682,7 +682,6 @@ p.demo_store,
 		color: $secondarytext;
 		background-color: $secondary;
 		border: 0;
-		white-space: nowrap;
 		display: inline-block;
 		background-image: none;
 		box-shadow: none;
@@ -696,7 +695,6 @@ p.demo_store,
 				font-family: 'WooCommerce';
 				content: '\e01c';
 				vertical-align: top;
-				-webkit-font-smoothing: antialiased;
 				font-weight: 400;
 				position: absolute;
 				top: 0.618em;
@@ -762,7 +760,6 @@ p.demo_store,
 
 	a.added_to_cart {
 		padding-top: 0.5em;
-		white-space: nowrap;
 		display: inline-block;
 	}
 
@@ -1502,7 +1499,7 @@ p.demo_store,
 
 		li {
 			float: left;
-			padding: 0 1px 1px 0;
+			padding: 0 1em 1px 1px;
 			list-style: none;
 
 			a {
@@ -1511,6 +1508,8 @@ p.demo_store,
 				&::before {
 					@include iconbefore( '\e013' );
 					color: $red;
+					vertical-align: inherit;
+					margin-right: .5em;
 				}
 			}
 		}

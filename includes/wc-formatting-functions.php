@@ -80,7 +80,7 @@ function wc_sanitize_permalink( $value ) {
 		$value = '';
 	}
 
-	$value = esc_url_raw( $value );
+	$value = esc_url_raw( trim( $value ) );
 	$value = str_replace( 'http://', '', $value );
 	return untrailingslashit( $value );
 }
@@ -226,30 +226,44 @@ function wc_trim_zeros( $price ) {
  *
  * @param  double $value Amount to round.
  * @param  int    $precision DP to round. Defaults to wc_get_price_decimals.
- * @return double
+ * @return float
  */
 function wc_round_tax_total( $value, $precision = null ) {
-	$precision = is_null( $precision ) ? wc_get_price_decimals() : absint( $precision );
+	$precision = is_null( $precision ) ? wc_get_price_decimals() : intval( $precision );
 
 	if ( version_compare( PHP_VERSION, '5.3.0', '>=' ) ) {
 		$rounded_tax = round( $value, $precision, wc_get_tax_rounding_mode() );
+	} elseif ( 2 === wc_get_tax_rounding_mode() ) {
+		$rounded_tax = wc_legacy_round_half_down( $value, $precision );
 	} else {
-		// Fake it in PHP 5.2.
-		if ( 2 === wc_get_tax_rounding_mode() && strstr( $value, '.' ) ) {
-			$value    = (string) $value;
-			$value    = explode( '.', $value );
-			$value[1] = substr( $value[1], 0, $precision + 1 );
-			$value    = implode( '.', $value );
-
-			if ( substr( $value, -1 ) === '5' ) {
-				$value = substr( $value, 0, -1 ) . '4';
-			}
-			$value = floatval( $value );
-		}
 		$rounded_tax = round( $value, $precision );
 	}
 
 	return apply_filters( 'wc_round_tax_total', $rounded_tax, $value, $precision, WC_TAX_ROUNDING_MODE );
+}
+
+/**
+ * Round half down in PHP 5.2.
+ *
+ * @since 3.2.6
+ * @param float $value Value to round.
+ * @param int   $precision Precision to round down to.
+ * @return float
+ */
+function wc_legacy_round_half_down( $value, $precision ) {
+	$value = wc_float_to_string( $value );
+
+	if ( false !== strstr( $value, '.' ) ) {
+		$value = explode( '.', $value );
+
+		if ( strlen( $value[1] ) > $precision && substr( $value[1], -1 ) === '5' ) {
+			$value[1] = substr( $value[1], 0, -1 ) . '4';
+		}
+
+		$value = implode( '.', $value );
+	}
+
+	return round( floatval( $value ), $precision );
 }
 
 /**
@@ -441,16 +455,16 @@ function get_woocommerce_price_format() {
 
 	switch ( $currency_pos ) {
 		case 'left' :
-			$format = '%1$s&#x200e;%2$s';
+			$format = '%1$s%2$s';
 		break;
 		case 'right' :
-			$format = '%2$s%1$s&#x200f;';
+			$format = '%2$s%1$s';
 		break;
 		case 'left_space' :
-			$format = '%1$s&#x200e;&nbsp;%2$s';
+			$format = '%1$s&nbsp;%2$s';
 		break;
 		case 'right_space' :
-			$format = '%2$s&nbsp;%1$s&#x200f;';
+			$format = '%2$s&nbsp;%1$s';
 		break;
 	}
 
@@ -798,6 +812,27 @@ if ( ! function_exists( 'wc_hex_lighter' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wc_is_light' ) ) {
+
+	/**
+	 * Determine whether a hex color is light.
+	 *
+	 * @param mixed  $color Color.
+	 * @return bool  True if a light color.
+	 */
+	function wc_hex_is_light( $color ) {
+		$hex = str_replace( '#', '', $color );
+
+		$c_r = hexdec( substr( $hex, 0, 2 ) );
+		$c_g = hexdec( substr( $hex, 2, 2 ) );
+		$c_b = hexdec( substr( $hex, 4, 2 ) );
+
+		$brightness = ( ( $c_r * 299 ) + ( $c_g * 587 ) + ( $c_b * 114 ) ) / 1000;
+
+		return $brightness > 155;
+	}
+}
+
 if ( ! function_exists( 'wc_light_or_dark' ) ) {
 
 	/**
@@ -811,15 +846,7 @@ if ( ! function_exists( 'wc_light_or_dark' ) ) {
 	 * @return string
 	 */
 	function wc_light_or_dark( $color, $dark = '#000000', $light = '#FFFFFF' ) {
-		$hex = str_replace( '#', '', $color );
-
-		$c_r = hexdec( substr( $hex, 0, 2 ) );
-		$c_g = hexdec( substr( $hex, 2, 2 ) );
-		$c_b = hexdec( substr( $hex, 4, 2 ) );
-
-		$brightness = ( ( $c_r * 299 ) + ( $c_g * 587 ) + ( $c_b * 114 ) ) / 1000;
-
-		return $brightness > 155 ? $dark : $light;
+		return wc_hex_is_light( $color ) ? $dark : $light;
 	}
 }
 

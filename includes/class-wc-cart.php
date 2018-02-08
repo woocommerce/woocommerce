@@ -45,11 +45,11 @@ class WC_Cart extends WC_Legacy_Cart {
 	public $applied_coupons = array();
 
 	/**
-	 * Are prices in the cart displayed inc or excl tax.
+	 * Are prices in the cart displayed inc or excl tax?
 	 *
 	 * @var string
 	 */
-	public $tax_display_cart;
+	public $tax_display_cart = 'incl';
 
 	/**
 	 * This stores the chosen shipping methods for the cart item packages.
@@ -111,7 +111,6 @@ class WC_Cart extends WC_Legacy_Cart {
 
 		// Register hooks for the objects.
 		$this->session->init();
-		$this->fees_api->init();
 
 		add_action( 'woocommerce_add_to_cart', array( $this, 'calculate_totals' ), 20, 0 );
 		add_action( 'woocommerce_applied_coupon', array( $this, 'calculate_totals' ), 20, 0 );
@@ -128,8 +127,8 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * These properties store a reference to the cart, so we use new instead of clone.
 	 */
 	public function __clone() {
-		$this->session  = new WC_Cart_Session( $this );
-		$this->fees_api = new WC_Cart_Fees( $this );
+		$this->session  = clone $this->session;
+		$this->fees_api = clone $this->fees_api;
 	}
 
 	/*
@@ -358,6 +357,16 @@ class WC_Cart extends WC_Legacy_Cart {
 		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, $this->get_totals_var( 'fee_taxes' ) );
 	}
 
+	/**
+	 * Return whether or not the cart is displaying prices including tax, rather than excluding tax.
+	 *
+	 * @since 3.3.0
+	 * @return bool
+	 */
+	public function display_prices_including_tax() {
+		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, 'incl' === $this->tax_display_cart );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Setters.
@@ -430,7 +439,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $value Value to set.
 	 */
 	public function set_subtotal( $value ) {
-		$this->totals['subtotal'] = wc_format_decimal( $value );
+		$this->totals['subtotal'] = wc_format_decimal( $value, wc_get_price_decimals() );
 	}
 
 	/**
@@ -460,7 +469,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $value Value to set.
 	 */
 	public function set_discount_tax( $value ) {
-		$this->totals['discount_tax'] = wc_format_decimal( $value );
+		$this->totals['discount_tax'] = wc_round_tax_total( $value );
 	}
 
 	/**
@@ -470,7 +479,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $value Value to set.
 	 */
 	public function set_shipping_total( $value ) {
-		$this->totals['shipping_total'] = wc_format_decimal( $value );
+		$this->totals['shipping_total'] = wc_format_decimal( $value, wc_get_price_decimals() );
 	}
 
 	/**
@@ -490,7 +499,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $value Value to set.
 	 */
 	public function set_cart_contents_total( $value ) {
-		$this->totals['cart_contents_total'] = wc_format_decimal( $value );
+		$this->totals['cart_contents_total'] = wc_format_decimal( $value, wc_get_price_decimals() );
 	}
 
 	/**
@@ -510,7 +519,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $value Value to set.
 	 */
 	public function set_total( $value ) {
-		$this->totals['total'] = wc_format_decimal( $value );
+		$this->totals['total'] = wc_format_decimal( $value, wc_get_price_decimals() );
 	}
 
 	/**
@@ -530,7 +539,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $value Value to set.
 	 */
 	public function set_fee_total( $value ) {
-		$this->totals['fee_total'] = wc_format_decimal( $value );
+		$this->totals['fee_total'] = wc_format_decimal( $value, wc_get_price_decimals() );
 	}
 
 	/**
@@ -639,6 +648,8 @@ class WC_Cart extends WC_Legacy_Cart {
 		if ( $clear_persistent_cart ) {
 			$this->session->persistent_cart_destroy();
 		}
+
+		$this->fees_api->remove_all_fees();
 
 		do_action( 'woocommerce_cart_emptied' );
 	}
@@ -819,69 +830,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return string
 	 */
 	public function get_item_data( $cart_item, $flat = false ) {
-		$item_data = array();
+		wc_deprecated_function( 'WC_Cart::get_item_data', '3.3', 'wc_get_formatted_cart_item_data' );
 
-		// Variation values are shown only if they are not found in the title as of 3.0.
-		// This is because variation titles display the attributes.
-		if ( $cart_item['data']->is_type( 'variation' ) && is_array( $cart_item['variation'] ) ) {
-			foreach ( $cart_item['variation'] as $name => $value ) {
-				$taxonomy = wc_attribute_taxonomy_name( str_replace( 'attribute_pa_', '', urldecode( $name ) ) );
-
-				if ( taxonomy_exists( $taxonomy ) ) {
-					// If this is a term slug, get the term's nice name.
-					$term = get_term_by( 'slug', $value, $taxonomy );
-					if ( ! is_wp_error( $term ) && $term && $term->name ) {
-						$value = $term->name;
-					}
-					$label = wc_attribute_label( $taxonomy );
-				} else {
-					// If this is a custom option slug, get the options name.
-					$value = apply_filters( 'woocommerce_variation_option_name', $value );
-					$label = wc_attribute_label( str_replace( 'attribute_', '', $name ), $cart_item['data'] );
-				}
-
-				// Check the nicename against the title.
-				if ( '' === $value || wc_is_attribute_in_product_name( $value, $cart_item['data']->get_name() ) ) {
-					continue;
-				}
-
-				$item_data[] = array(
-					'key'   => $label,
-					'value' => $value,
-				);
-			}
-		}
-
-		// Filter item data to allow 3rd parties to add more to the array.
-		$item_data = apply_filters( 'woocommerce_get_item_data', $item_data, $cart_item );
-
-		// Format item data ready to display.
-		foreach ( $item_data as $key => $data ) {
-			// Set hidden to true to not display meta on cart.
-			if ( ! empty( $data['hidden'] ) ) {
-				unset( $item_data[ $key ] );
-				continue;
-			}
-			$item_data[ $key ]['key']     = ! empty( $data['key'] ) ? $data['key'] : $data['name'];
-			$item_data[ $key ]['display'] = ! empty( $data['display'] ) ? $data['display'] : $data['value'];
-		}
-
-		// Output flat or in list format.
-		if ( count( $item_data ) > 0 ) {
-			ob_start();
-
-			if ( $flat ) {
-				foreach ( $item_data as $data ) {
-					echo esc_html( $data['key'] ) . ': ' . wp_kses_post( $data['display'] ) . "\n";
-				}
-			} else {
-				wc_get_template( 'cart/cart-item-data.php', array( 'item_data' => $item_data ) );
-			}
-
-			return ob_get_clean();
-		}
-
-		return '';
+		return wc_get_formatted_cart_item_data( $cart_item, $flat );
 	}
 
 	/**
@@ -911,8 +862,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return string url to page
 	 */
 	public function get_remove_url( $cart_item_key ) {
-		$cart_page_url = wc_get_page_permalink( 'cart' );
-		return apply_filters( 'woocommerce_get_remove_url', $cart_page_url ? wp_nonce_url( add_query_arg( 'remove_item', $cart_item_key, $cart_page_url ), 'woocommerce-cart' ) : '' );
+		wc_deprecated_function( 'WC_Cart::get_remove_url', '3.3', 'wc_get_cart_remove_url' );
+
+		return wc_get_cart_remove_url( $cart_item_key );
 	}
 
 	/**
@@ -922,13 +874,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return string url to page
 	 */
 	public function get_undo_url( $cart_item_key ) {
-		$cart_page_url = wc_get_page_permalink( 'cart' );
+		wc_deprecated_function( 'WC_Cart::get_undo_url', '3.3', 'wc_get_cart_undo_url' );
 
-		$query_args = array(
-			'undo_item' => $cart_item_key,
-		);
-
-		return apply_filters( 'woocommerce_get_undo_url', $cart_page_url ? wp_nonce_url( add_query_arg( $query_args, $cart_page_url ), 'woocommerce-cart' ) : '', $cart_item_key );
+		return wc_get_cart_undo_url( $cart_item_key );
 	}
 
 	/**
@@ -982,6 +930,23 @@ class WC_Cart extends WC_Legacy_Cart {
 	}
 
 	/**
+	 * Get all tax classes for shipping based on the items in the cart.
+	 *
+	 * @return array
+	 */
+	public function get_cart_item_tax_classes_for_shipping() {
+		$found_tax_classes = array();
+
+		foreach ( WC()->cart->get_cart() as $item ) {
+			if ( $item['data'] && ( $item['data']->is_shipping_taxable() ) ) {
+				$found_tax_classes[] = $item['data']->get_tax_class();
+			}
+		}
+
+		return array_unique( $found_tax_classes );
+	}
+
+	/**
 	 * Determines the value that the customer spent and the subtotal
 	 * displayed, used for things like coupon validation.
 	 *
@@ -996,7 +961,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return string
 	 */
 	public function get_displayed_subtotal() {
-		return 'incl' === $this->tax_display_cart ? $this->get_subtotal() + $this->get_subtotal_tax() : $this->get_subtotal();
+		return $this->display_prices_including_tax() ? $this->get_subtotal() + $this->get_subtotal_tax() : $this->get_subtotal();
 	}
 
 	/**
@@ -1085,7 +1050,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			}
 
 			// Load cart item data - may be added by other plugins.
-			$cart_item_data = (array) apply_filters( 'woocommerce_add_cart_item_data', $cart_item_data, $product_id, $variation_id );
+			$cart_item_data = (array) apply_filters( 'woocommerce_add_cart_item_data', $cart_item_data, $product_id, $variation_id, $quantity );
 
 			// Generate a ID based on product ID, variation ID, variation data, and other cart item data.
 			$cart_id        = $this->generate_cart_id( $product_id, $variation_id, $variation, $cart_item_data );
@@ -1438,19 +1403,19 @@ class WC_Cart extends WC_Legacy_Cart {
 	public function get_cart_shipping_total() {
 		if ( 0 < $this->get_shipping_total() ) {
 
-			if ( 'excl' === $this->tax_display_cart ) {
-				$return = wc_price( $this->shipping_total );
-
-				if ( $this->shipping_tax_total > 0 && wc_prices_include_tax() ) {
-					$return .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
-				}
-
-				return $return;
-			} else {
+			if ( $this->display_prices_including_tax() ) {
 				$return = wc_price( $this->shipping_total + $this->shipping_tax_total );
 
 				if ( $this->shipping_tax_total > 0 && ! wc_prices_include_tax() ) {
 					$return .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
+				}
+
+				return $return;
+			} else {
+				$return = wc_price( $this->shipping_total );
+
+				if ( $this->shipping_tax_total > 0 && wc_prices_include_tax() ) {
+					$return .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 				}
 
 				return $return;
@@ -1803,17 +1768,17 @@ class WC_Cart extends WC_Legacy_Cart {
 		if ( $compound ) {
 			$cart_subtotal = wc_price( $this->get_cart_contents_total() + $this->get_shipping_total() + $this->get_taxes_total( false, false ) );
 
-		} elseif ( 'excl' === $this->tax_display_cart ) {
-			$cart_subtotal = wc_price( $this->get_subtotal() );
-
-			if ( $this->get_subtotal_tax() > 0 && wc_prices_include_tax() ) {
-				$cart_subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
-			}
-		} else {
+		} elseif ( $this->display_prices_including_tax() ) {
 			$cart_subtotal = wc_price( $this->get_subtotal() + $this->get_subtotal_tax() );
 
 			if ( $this->get_subtotal_tax() > 0 && ! wc_prices_include_tax() ) {
 				$cart_subtotal .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
+			}
+		} else {
+			$cart_subtotal = wc_price( $this->get_subtotal() );
+
+			if ( $this->get_subtotal_tax() > 0 && wc_prices_include_tax() ) {
+				$cart_subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 			}
 		}
 
@@ -1827,10 +1792,10 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return string formatted price
 	 */
 	public function get_product_price( $product ) {
-		if ( 'excl' === $this->tax_display_cart ) {
-			$product_price = wc_get_price_excluding_tax( $product );
-		} else {
+		if ( $this->display_prices_including_tax() ) {
 			$product_price = wc_get_price_including_tax( $product );
+		} else {
+			$product_price = wc_get_price_excluding_tax( $product );
 		}
 		return apply_filters( 'woocommerce_cart_product_price', wc_price( $product_price ), $product );
 	}
@@ -1851,21 +1816,19 @@ class WC_Cart extends WC_Legacy_Cart {
 
 		if ( $product->is_taxable() ) {
 
-			if ( 'excl' === $this->tax_display_cart ) {
-
-				$row_price        = wc_get_price_excluding_tax( $product, array( 'qty' => $quantity ) );
-				$product_subtotal = wc_price( $row_price );
-
-				if ( wc_prices_include_tax() && $this->get_subtotal_tax() > 0 ) {
-					$product_subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
-				}
-			} else {
-
+			if ( $this->display_prices_including_tax() ) {
 				$row_price        = wc_get_price_including_tax( $product, array( 'qty' => $quantity ) );
 				$product_subtotal = wc_price( $row_price );
 
 				if ( ! wc_prices_include_tax() && $this->get_subtotal_tax() > 0 ) {
 					$product_subtotal .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
+				}
+			} else {
+				$row_price        = wc_get_price_excluding_tax( $product, array( 'qty' => $quantity ) );
+				$product_subtotal = wc_price( $row_price );
+
+				if ( wc_prices_include_tax() && $this->get_subtotal_tax() > 0 ) {
+					$product_subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 				}
 			}
 		} else {
@@ -1947,6 +1910,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	private function reset_totals() {
 		$this->totals = $this->default_totals;
+		$this->fees_api->remove_all_fees();
 		do_action( 'woocommerce_cart_reset', $this, false );
 	}
 }

@@ -90,14 +90,21 @@ class WC_Admin_Post_Types {
 		switch ( $screen_id ) {
 			case 'edit-shop_order' :
 				include_once( 'list-tables/class-wc-admin-list-table-orders.php' );
+				new WC_Admin_List_Table_Orders();
 				break;
 			case 'edit-shop_coupon' :
 				include_once( 'list-tables/class-wc-admin-list-table-coupons.php' );
+				new WC_Admin_List_Table_Coupons();
 				break;
 			case 'edit-product' :
 				include_once( 'list-tables/class-wc-admin-list-table-products.php' );
+				new WC_Admin_List_Table_Products();
 				break;
 		}
+
+		// Ensure the table handler is only loaded once. Prevents multiple loads if a plugin calls check_ajax_referer many times.
+		remove_action( 'current_screen', array( $this, 'setup_screen' ) );
+		remove_action( 'check_ajax_referer', array( $this, 'setup_screen' ) );
 	}
 
 	/**
@@ -504,23 +511,25 @@ class WC_Admin_Post_Types {
 
 			if ( ! empty( $_REQUEST['change_regular_price'] ) && isset( $_REQUEST['_regular_price'] ) ) { // WPCS: input var ok, sanitization ok.
 				$change_regular_price = absint( $_REQUEST['change_regular_price'] ); // WPCS: input var ok, sanitization ok.
-				$regular_price        = wc_clean( wp_unslash( $_REQUEST['_regular_price'] ) ); // WPCS: input var ok, sanitization ok.
+				$raw_regular_price    = wc_clean( wp_unslash( $_REQUEST['_regular_price'] ) ); // WPCS: input var ok, sanitization ok.
+				$is_percentage        = (bool) strstr( $raw_regular_price, '%' );
+				$regular_price        = wc_format_decimal( $raw_regular_price );
 
 				switch ( $change_regular_price ) {
 					case 1:
 						$new_price = $regular_price;
 						break;
 					case 2:
-						if ( strstr( $regular_price, '%' ) ) {
-							$percent = str_replace( '%', '', $regular_price ) / 100;
+						if ( $is_percentage ) {
+							$percent = $regular_price / 100;
 							$new_price = $old_regular_price + ( round( $old_regular_price * $percent, wc_get_price_decimals() ) );
 						} else {
 							$new_price = $old_regular_price + $regular_price;
 						}
 						break;
 					case 3:
-						if ( strstr( $regular_price, '%' ) ) {
-							$percent = str_replace( '%', '', $regular_price ) / 100;
+						if ( $is_percentage ) {
+							$percent = $regular_price / 100;
 							$new_price = max( 0, $old_regular_price - ( round( $old_regular_price * $percent, wc_get_price_decimals() ) ) );
 						} else {
 							$new_price = max( 0, $old_regular_price - $regular_price );
@@ -540,31 +549,33 @@ class WC_Admin_Post_Types {
 
 			if ( ! empty( $_REQUEST['change_sale_price'] ) && isset( $_REQUEST['_sale_price'] ) ) { // WPCS: input var ok, sanitization ok.
 				$change_sale_price = absint( $_REQUEST['change_sale_price'] ); // WPCS: input var ok, sanitization ok.
-				$sale_price        = esc_attr( wp_unslash( $_REQUEST['_sale_price'] ) ); // WPCS: input var ok, sanitization ok.
+				$raw_sale_price    = wc_clean( wp_unslash( $_REQUEST['_sale_price'] ) ); // WPCS: input var ok, sanitization ok.
+				$is_percentage     = (bool) strstr( $raw_sale_price, '%' );
+				$sale_price        = wc_format_decimal( $raw_sale_price );
 
 				switch ( $change_sale_price ) {
 					case 1:
 						$new_price = $sale_price;
 						break;
 					case 2:
-						if ( strstr( $sale_price, '%' ) ) {
-							$percent = str_replace( '%', '', $sale_price ) / 100;
+						if ( $is_percentage ) {
+							$percent = $sale_price / 100;
 							$new_price = $old_sale_price + ( $old_sale_price * $percent );
 						} else {
 							$new_price = $old_sale_price + $sale_price;
 						}
 						break;
 					case 3:
-						if ( strstr( $sale_price, '%' ) ) {
-							$percent = str_replace( '%', '', $sale_price ) / 100;
+						if ( $is_percentage ) {
+							$percent = $sale_price / 100;
 							$new_price = max( 0, $old_sale_price - ( $old_sale_price * $percent ) );
 						} else {
 							$new_price = max( 0, $old_sale_price - $sale_price );
 						}
 						break;
 					case 4:
-						if ( strstr( $sale_price, '%' ) ) {
-							$percent = str_replace( '%', '', $sale_price ) / 100;
+						if ( $is_percentage ) {
+							$percent = $sale_price / 100;
 							$new_price = max( 0, $product->regular_price - ( $product->regular_price * $percent ) );
 						} else {
 							$new_price = max( 0, $product->regular_price - $sale_price );
@@ -744,7 +755,7 @@ class WC_Admin_Post_Types {
 					echo '<input type="radio" name="_visibility" id="_visibility_' . esc_attr( $name ) . '" value="' . esc_attr( $name ) . '" ' . checked( $current_visibility, $name, false ) . ' data-label="' . esc_attr( $label ) . '" /> <label for="_visibility_' . esc_attr( $name ) . '" class="selectit">' . esc_html( $label ) . '</label><br />';
 				}
 
-				echo '<br /><input type="checkbox" name="_featured" id="_featured" ' . checked( $current_featured, 'yes', false ) . ' /> <label for="_featured">' . esc_html_e( 'This is a featured product', 'woocommerce' ) . '</label><br />';
+				echo '<br /><input type="checkbox" name="_featured" id="_featured" ' . checked( $current_featured, 'yes', false ) . ' /> <label for="_featured">' . esc_html__( 'This is a featured product', 'woocommerce' ) . '</label><br />';
 				?>
 				<p>
 					<a href="#catalog-visibility" class="save-post-visibility hide-if-no-js button"><?php esc_html_e( 'OK', 'woocommerce' ); ?></a>
@@ -769,11 +780,11 @@ class WC_Admin_Post_Types {
 				$pathdata['url']    = $pathdata['url'] . '/woocommerce_uploads';
 				$pathdata['subdir'] = '/woocommerce_uploads';
 			} else {
-				$new_subdir = '/woocommerce_uploads' . $uploads['subdir'];
+				$new_subdir = '/woocommerce_uploads' . $pathdata['subdir'];
 
-				$uploads['path']   = str_replace( $uploads['subdir'], $new_subdir, $uploads['path'] );
-				$uploads['url']    = str_replace( $uploads['subdir'], $new_subdir, $uploads['url'] );
-				$uploads['subdir'] = str_replace( $uploads['subdir'], $new_subdir, $uploads['subdir'] );
+				$pathdata['path']   = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['path'] );
+				$pathdata['url']    = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['url'] );
+				$pathdata['subdir'] = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['subdir'] );
 			}
 		}
 		return $pathdata;
@@ -827,7 +838,7 @@ class WC_Admin_Post_Types {
 
 		if ( $post && absint( $shop_page_id ) === absint( $post->ID ) ) {
 			echo '<div class="notice notice-info">';
-			echo '<p>' . sprintf( wp_kses_post( __( 'This is the WooCommerce shop page. The shop page is a special archive that lists your products. <a href="%s">You can read more about this here</a>.', 'woocommerce' ), 'https://docs.woocommerce.com/document/woocommerce-pages/#section-4' ) ) . '</p>';
+			echo '<p>' . sprintf( wp_kses_post( __( 'This is the WooCommerce shop page. The shop page is a special archive that lists your products. <a href="%s">You can read more about this here</a>.', 'woocommerce' ) ), 'https://docs.woocommerce.com/document/woocommerce-pages/#section-4' ) . '</p>';
 			echo '</div>';
 		}
 	}

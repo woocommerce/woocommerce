@@ -69,11 +69,41 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 		$order2 = new WC_Order;
 		$order2->save();
 
+		// Test download permissions
+		$prod_download = new WC_Product_Download;
+		$prod_download->set_file( plugin_dir_url( __FILE__ ) . '/assets/images/help.png' );
+		$prod_download->set_id( 'download' );
+
+		$product = new WC_Product_Simple;
+		$product->set_downloadable( 'yes' );
+		$product->set_downloads( array( $prod_download ) );
+		$product->save();
+
+		$order3 = new WC_Order;
+		$item   = new WC_Order_Item_Product();
+		$item->set_props( array(
+			'product'  => $product,
+			'quantity' => 1,
+		) );
+		$order3->set_billing_email( 'test@example.com' );
+		$order3->set_status( 'completed' );
+		$order3->add_item( $item );
+		$order3->save();
+
+		$downloads = wc_get_customer_available_downloads( $customer_id );
+		$this->assertEquals( 0, count( $downloads ) );
+
 		// Link orders that haven't been linked.
 		$linked = wc_update_new_customer_past_orders( $customer_id );
-		$this->assertEquals( 1, $linked );
+		$this->assertEquals( 2, $linked );
 		$order1 = wc_get_order( $order1->get_id() );
 		$this->assertEquals( $customer_id, $order1->get_customer_id() );
+		$order3 = wc_get_order( $order3->get_id() );
+		$this->assertEquals( $customer_id, $order3->get_customer_id() );
+
+		// Test download permissions.
+		$downloads = wc_get_customer_available_downloads( $customer_id );
+		$this->assertEquals( 1, count( $downloads ) );
 
 		// Don't link linked orders again.
 		$linked = wc_update_new_customer_past_orders( $customer_id );

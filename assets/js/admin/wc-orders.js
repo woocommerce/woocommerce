@@ -18,7 +18,7 @@ jQuery( function( $ ) {
 	 * Click a row.
 	 */
 	WCOrdersTable.prototype.onRowClick = function( e ) {
-		if ( $( e.target ).filter( 'a' ).length ) {
+		if ( $( e.target ).filter( 'a, a *, .no-link, .no-link *' ).length ) {
 			return true;
 		}
 
@@ -26,7 +26,13 @@ jQuery( function( $ ) {
 			href = $row.find( 'a.order-view' ).attr( 'href' );
 
 		if ( href.length ) {
-			window.location = href;
+			e.preventDefault();
+
+			if ( e.metaKey || e.ctrlKey ) {
+				window.open( href, '_blank' );
+			} else {
+				window.location = href;
+			}
 		}
 	};
 

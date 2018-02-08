@@ -3,7 +3,7 @@
  * Contains the query functions for WooCommerce which alter the front-end post queries and loops
  *
  * @version 3.2.0
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @author  Automattic
  */
 
@@ -24,6 +24,13 @@ class WC_Query {
 	public $query_vars = array();
 
 	/**
+	 * Reference to the main product query on the page.
+	 *
+	 * @var array
+	 */
+	private static $product_query;
+
+	/**
 	 * Stores chosen attributes.
 	 *
 	 * @var array
@@ -42,6 +49,7 @@ class WC_Query {
 			add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 			add_action( 'wp', array( $this, 'remove_product_query' ) );
 			add_action( 'wp', array( $this, 'remove_ordering_args' ) );
+			add_filter( 'get_pagenum_link', array( $this, 'remove_add_to_cart_pagination' ), 10, 1 );
 		}
 		$this->init_query_vars();
 	}
@@ -50,7 +58,9 @@ class WC_Query {
 	 * Get any errors from querystring.
 	 */
 	public function get_errors() {
-		if ( ! empty( $_GET['wc_error'] ) && ( $error = sanitize_text_field( $_GET['wc_error'] ) ) && ! wc_has_notice( $error, 'error' ) ) {
+		$error = ! empty( $_GET['wc_error'] ) ? sanitize_text_field( wp_unslash( $_GET['wc_error'] ) ) : ''; // WPCS: input var ok, CSRF ok.
+
+		if ( $error && ! wc_has_notice( $error, 'error' ) ) {
 			wc_add_notice( $error, 'error' );
 		}
 	}
@@ -62,8 +72,8 @@ class WC_Query {
 		// Query vars to add to WP.
 		$this->query_vars = array(
 			// Checkout actions.
-			'order-pay'          => get_option( 'woocommerce_checkout_pay_endpoint', 'order-pay' ),
-			'order-received'     => get_option( 'woocommerce_checkout_order_received_endpoint', 'order-received' ),
+			'order-pay'                  => get_option( 'woocommerce_checkout_pay_endpoint', 'order-pay' ),
+			'order-received'             => get_option( 'woocommerce_checkout_order_received_endpoint', 'order-received' ),
 			// My account actions.
 			'orders'                     => get_option( 'woocommerce_myaccount_orders_endpoint', 'orders' ),
 			'view-order'                 => get_option( 'woocommerce_myaccount_view_order_endpoint', 'view-order' ),
@@ -81,53 +91,54 @@ class WC_Query {
 
 	/**
 	 * Get page title for an endpoint.
-	 * @param  string
+	 *
+	 * @param  string $endpoint Endpoint key.
 	 * @return string
 	 */
 	public function get_endpoint_title( $endpoint ) {
 		global $wp;
 
 		switch ( $endpoint ) {
-			case 'order-pay' :
+			case 'order-pay':
 				$title = __( 'Pay for order', 'woocommerce' );
-			break;
-			case 'order-received' :
+				break;
+			case 'order-received':
 				$title = __( 'Order received', 'woocommerce' );
-			break;
-			case 'orders' :
+				break;
+			case 'orders':
 				if ( ! empty( $wp->query_vars['orders'] ) ) {
 					/* translators: %s: page */
 					$title = sprintf( __( 'Orders (page %d)', 'woocommerce' ), intval( $wp->query_vars['orders'] ) );
 				} else {
 					$title = __( 'Orders', 'woocommerce' );
 				}
-			break;
-			case 'view-order' :
+				break;
+			case 'view-order':
 				$order = wc_get_order( $wp->query_vars['view-order'] );
 				/* translators: %s: order number */
 				$title = ( $order ) ? sprintf( __( 'Order #%s', 'woocommerce' ), $order->get_order_number() ) : '';
-			break;
-			case 'downloads' :
+				break;
+			case 'downloads':
 				$title = __( 'Downloads', 'woocommerce' );
-			break;
-			case 'edit-account' :
+				break;
+			case 'edit-account':
 				$title = __( 'Account details', 'woocommerce' );
-			break;
-			case 'edit-address' :
+				break;
+			case 'edit-address':
 				$title = __( 'Addresses', 'woocommerce' );
-			break;
-			case 'payment-methods' :
+				break;
+			case 'payment-methods':
 				$title = __( 'Payment methods', 'woocommerce' );
-			break;
-			case 'add-payment-method' :
+				break;
+			case 'add-payment-method':
 				$title = __( 'Add payment method', 'woocommerce' );
-			break;
-			case 'lost-password' :
+				break;
+			case 'lost-password':
 				$title = __( 'Lost password', 'woocommerce' );
-			break;
-			default :
+				break;
+			default:
 				$title = '';
-			break;
+				break;
 		}
 
 		return apply_filters( 'woocommerce_endpoint_' . $endpoint . '_title', $title, $endpoint );
@@ -145,7 +156,7 @@ class WC_Query {
 			$myaccount_page_id = get_option( 'woocommerce_myaccount_page_id' );
 			$checkout_page_id  = get_option( 'woocommerce_checkout_page_id' );
 
-			if ( in_array( $page_on_front, array( $myaccount_page_id, $checkout_page_id ) ) ) {
+			if ( in_array( $page_on_front, array( $myaccount_page_id, $checkout_page_id ), true ) ) {
 				return EP_ROOT | EP_PAGES;
 			}
 		}
@@ -159,7 +170,7 @@ class WC_Query {
 	public function add_endpoints() {
 		$mask = $this->get_endpoints_mask();
 
-		foreach ( $this->query_vars as $key => $var ) {
+		foreach ( $this->get_query_vars() as $key => $var ) {
 			if ( ! empty( $var ) ) {
 				add_rewrite_endpoint( $var, $mask );
 			}
@@ -170,7 +181,8 @@ class WC_Query {
 	 * Add query vars.
 	 *
 	 * @access public
-	 * @param array $vars
+	 *
+	 * @param array $vars Query vars.
 	 * @return array
 	 */
 	public function add_query_vars( $vars ) {
@@ -196,6 +208,7 @@ class WC_Query {
 	 */
 	public function get_current_endpoint() {
 		global $wp;
+
 		foreach ( $this->get_query_vars() as $key => $value ) {
 			if ( isset( $wp->query_vars[ $key ] ) ) {
 				return $key;
@@ -210,10 +223,10 @@ class WC_Query {
 	public function parse_request() {
 		global $wp;
 
-		// Map query vars to their keys, or get them if endpoints are not supported
+		// Map query vars to their keys, or get them if endpoints are not supported.
 		foreach ( $this->get_query_vars() as $key => $var ) {
-			if ( isset( $_GET[ $var ] ) ) {
-				$wp->query_vars[ $key ] = $_GET[ $var ];
+			if ( isset( $_GET[ $var ] ) ) { // WPCS: input var ok, CSRF ok.
+				$wp->query_vars[ $key ] = sanitize_text_field( wp_unslash( $_GET[ $var ] ) ); // WPCS: input var ok, CSRF ok.
 			} elseif ( isset( $wp->query_vars[ $var ] ) ) {
 				$wp->query_vars[ $key ] = $wp->query_vars[ $var ];
 			}
@@ -223,8 +236,7 @@ class WC_Query {
 	/**
 	 * Are we currently on the front page?
 	 *
-	 * @param object $q
-	 *
+	 * @param WP_Query $q Query instance.
 	 * @return bool
 	 */
 	private function is_showing_page_on_front( $q ) {
@@ -234,8 +246,7 @@ class WC_Query {
 	/**
 	 * Is the front page a page we define?
 	 *
-	 * @param int $page_id
-	 *
+	 * @param int $page_id Page ID.
 	 * @return bool
 	 */
 	private function page_on_front_is( $page_id ) {
@@ -245,18 +256,18 @@ class WC_Query {
 	/**
 	 * Hook into pre_get_posts to do the main product query.
 	 *
-	 * @param object $q query object
+	 * @param WP_Query $q Query instance.
 	 */
 	public function pre_get_posts( $q ) {
-		// We only want to affect the main query
+		// We only want to affect the main query.
 		if ( ! $q->is_main_query() ) {
 			return;
 		}
 
-		// Fix for endpoints on the homepage
+		// Fix for endpoints on the homepage.
 		if ( $this->is_showing_page_on_front( $q ) && ! $this->page_on_front_is( $q->get( 'page_id' ) ) ) {
 			$_query = wp_parse_args( $q->query );
-			if ( ! empty( $_query ) && array_intersect( array_keys( $_query ), array_keys( $this->query_vars ) ) ) {
+			if ( ! empty( $_query ) && array_intersect( array_keys( $_query ), array_keys( $this->get_query_vars() ) ) ) {
 				$q->is_page     = true;
 				$q->is_home     = false;
 				$q->is_singular = true;
@@ -265,25 +276,31 @@ class WC_Query {
 			}
 		}
 
-		// When orderby is set, WordPress shows posts. Get around that here.
+		// When orderby is set, WordPress shows posts on the front-page. Get around that here.
 		if ( $this->is_showing_page_on_front( $q ) && $this->page_on_front_is( wc_get_page_id( 'shop' ) ) ) {
 			$_query = wp_parse_args( $q->query );
 			if ( empty( $_query ) || ! array_diff( array_keys( $_query ), array( 'preview', 'page', 'paged', 'cpage', 'orderby' ) ) ) {
+				$q->set( 'page_id', (int) get_option( 'page_on_front' ) );
 				$q->is_page = true;
 				$q->is_home = false;
-				$q->set( 'page_id', (int) get_option( 'page_on_front' ) );
-				$q->set( 'post_type', 'product' );
+
+				// WP supporting themes show post type archive.
+				if ( current_theme_supports( 'woocommerce' ) ) {
+					$q->set( 'post_type', 'product' );
+				} else {
+					$q->is_singular = true;
+				}
 			}
 		}
 
-		// Fix product feeds
+		// Fix product feeds.
 		if ( $q->is_feed() && $q->is_post_type_archive( 'product' ) ) {
 			$q->is_comment_feed = false;
 		}
 
-		// Special check for shops with the product archive on front
-		if ( $q->is_page() && 'page' === get_option( 'show_on_front' ) && absint( $q->get( 'page_id' ) ) === wc_get_page_id( 'shop' ) ) {
-			// This is a front-page shop
+		// Special check for shops with the PRODUCT POST TYPE ARCHIVE on front.
+		if ( current_theme_supports( 'woocommerce' ) && $q->is_page() && 'page' === get_option( 'show_on_front' ) && absint( $q->get( 'page_id' ) ) === wc_get_page_id( 'shop' ) ) {
+			// This is a front-page shop.
 			$q->set( 'post_type', 'product' );
 			$q->set( 'page_id', '' );
 
@@ -291,54 +308,44 @@ class WC_Query {
 				$q->set( 'paged', $q->query['paged'] );
 			}
 
-			// Define a variable so we know this is the front page shop later on
+			// Define a variable so we know this is the front page shop later on.
 			wc_maybe_define_constant( 'SHOP_IS_ON_FRONT', true );
 
-			// Get the actual WP page to avoid errors and let us use is_front_page()
-			// This is hacky but works. Awaiting https://core.trac.wordpress.org/ticket/21096
+			// Get the actual WP page to avoid errors and let us use is_front_page().
+			// This is hacky but works. Awaiting https://core.trac.wordpress.org/ticket/21096.
 			global $wp_post_types;
 
-			$shop_page 	= get_post( wc_get_page_id( 'shop' ) );
+			$shop_page = get_post( wc_get_page_id( 'shop' ) );
 
-			$wp_post_types['product']->ID 			= $shop_page->ID;
-			$wp_post_types['product']->post_title 	= $shop_page->post_title;
-			$wp_post_types['product']->post_name 	= $shop_page->post_name;
-			$wp_post_types['product']->post_type    = $shop_page->post_type;
-			$wp_post_types['product']->ancestors    = get_ancestors( $shop_page->ID, $shop_page->post_type );
+			$wp_post_types['product']->ID         = $shop_page->ID;
+			$wp_post_types['product']->post_title = $shop_page->post_title;
+			$wp_post_types['product']->post_name  = $shop_page->post_name;
+			$wp_post_types['product']->post_type  = $shop_page->post_type;
+			$wp_post_types['product']->ancestors  = get_ancestors( $shop_page->ID, $shop_page->post_type );
 
-			// Fix conditional Functions like is_front_page
+			// Fix conditional Functions like is_front_page.
 			$q->is_singular          = false;
 			$q->is_post_type_archive = true;
 			$q->is_archive           = true;
 			$q->is_page              = true;
 
-			// Remove post type archive name from front page title tag
+			// Remove post type archive name from front page title tag.
 			add_filter( 'post_type_archive_title', '__return_empty_string', 5 );
 
-			// Fix WP SEO
+			// Fix WP SEO.
 			if ( class_exists( 'WPSEO_Meta' ) ) {
 				add_filter( 'wpseo_metadesc', array( $this, 'wpseo_metadesc' ) );
 				add_filter( 'wpseo_metakey', array( $this, 'wpseo_metakey' ) );
 			}
-
-		// Only apply to product categories, the product post archive, the shop page, product tags, and product attribute taxonomies
 		} elseif ( ! $q->is_post_type_archive( 'product' ) && ! $q->is_tax( get_object_taxonomies( 'product' ) ) ) {
+			// Only apply to product categories, the product post archive, the shop page, product tags, and product attribute taxonomies.
 			return;
 		}
 
 		$this->product_query( $q );
 
-		// And remove the pre_get_posts hook
+		// And remove the pre_get_posts hook.
 		$this->remove_product_query();
-	}
-
-	/**
-	 * Search post excerpt.
-	 * @deprecated 3.2.0 - Not needed anymore since WordPress 4.5.
-	 */
-	public function search_post_excerpt( $where = '' ) {
-		wc_deprecated_function( 'WC_Query::search_post_excerpt', '3.2.0', 'Excerpt added to search query by default since WordPress 4.5.' );
-		return $where;
 	}
 
 	/**
@@ -346,7 +353,6 @@ class WC_Query {
 	 *
 	 * Hooked into wpseo_ hook already, so no need for function_exist.
 	 *
-	 * @access public
 	 * @return string
 	 */
 	public function wpseo_metadesc() {
@@ -366,9 +372,10 @@ class WC_Query {
 	}
 
 	/**
-	 * Query the products, applying sorting/ordering etc. This applies to the main wordpress loop.
+	 * Query the products, applying sorting/ordering etc.
+	 * This applies to the main WordPress loop.
 	 *
-	 * @param mixed $q
+	 * @param WP_Query $q Query instance.
 	 */
 	public function product_query( $q ) {
 		if ( ! is_feed() ) {
@@ -381,16 +388,20 @@ class WC_Query {
 			}
 		}
 
-		// Query vars that affect posts shown
+		// Query vars that affect posts shown.
 		$q->set( 'meta_query', $this->get_meta_query( $q->get( 'meta_query' ), true ) );
 		$q->set( 'tax_query', $this->get_tax_query( $q->get( 'tax_query' ), true ) );
-		$q->set( 'posts_per_page', $q->get( 'posts_per_page' ) ? $q->get( 'posts_per_page' ) : apply_filters( 'loop_shop_per_page', get_option( 'posts_per_page' ) ) );
 		$q->set( 'wc_query', 'product_query' );
 		$q->set( 'post__in', array_unique( (array) apply_filters( 'loop_shop_post_in', array() ) ) );
 
+		// Work out how many products to query.
+		$q->set( 'posts_per_page', $q->get( 'posts_per_page' ) ? $q->get( 'posts_per_page' ) : apply_filters( 'loop_shop_per_page', wc_get_default_products_per_row() * wc_get_default_product_rows_per_page() ) );
+
+		// Store reference to this query.
+		self::$product_query = $q;
+
 		do_action( 'woocommerce_product_query', $q, $this );
 	}
-
 
 	/**
 	 * Remove the query.
@@ -410,29 +421,26 @@ class WC_Query {
 	}
 
 	/**
-	 * Remove the posts_where filter.
-	 * @deprecated 3.2.0 - Nothing to remove anymore because search_post_excerpt() is deprecated.
-	 */
-	public function remove_posts_where() {
-		wc_deprecated_function( 'WC_Query::remove_posts_where', '3.2.0', 'Nothing to remove anymore because search_post_excerpt() is deprecated.' );
-	}
-
-	/**
 	 * Returns an array of arguments for ordering products based on the selected values.
 	 *
-	 * @access public
-	 *
-	 * @param string $orderby
-	 * @param string $order
-	 *
+	 * @param string $orderby Order by param.
+	 * @param string $order Order param.
 	 * @return array
 	 */
 	public function get_catalog_ordering_args( $orderby = '', $order = '' ) {
-		// Get ordering from query string unless defined
+		// Get ordering from query string unless defined.
 		if ( ! $orderby ) {
-			$orderby_value = isset( $_GET['orderby'] ) ? wc_clean( (string) $_GET['orderby'] ) : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
+			$orderby_value = isset( $_GET['orderby'] ) ? wc_clean( (string) wp_unslash( $_GET['orderby'] ) ) : ''; // WPCS: sanitization ok, input var ok.
 
-			// Get order + orderby args from string
+			if ( ! $orderby_value ) {
+				if ( is_search() ) {
+					$orderby_value = 'relevance';
+				} else {
+					$orderby_value = apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
+				}
+			}
+
+			// Get order + orderby args from string.
 			$orderby_value = explode( '-', $orderby_value );
 			$orderby       = esc_attr( $orderby_value[0] );
 			$order         = ! empty( $orderby_value[1] ) ? $orderby_value[1] : $order;
@@ -441,53 +449,49 @@ class WC_Query {
 		$orderby = strtolower( $orderby );
 		$order   = strtoupper( $order );
 		$args    = array(
-			'orderby'  => 'relevance',
-			'order'    => 'DESC',
-			'meta_key' => '',
+			'orderby'  => $orderby,
+			'order'    => ( 'DESC' === $order ) ? 'DESC' : 'ASC',
+			'meta_key' => '', // @codingStandardsIgnoreLine
 		);
 
-		// Set to default. Menu order for non-searches, relevance for searches.
-		if ( ! is_search() ) {
-			$args['orderby']  = 'menu_order title';
-			$args['order']    = ( 'DESC' === $order ) ? 'DESC' : 'ASC';
-			$args['meta_key'] = '';
-		}
-
 		switch ( $orderby ) {
-			case 'rand' :
-				$args['orderby']  = 'rand';
+			case 'menu_order':
+				$args['orderby']  = 'menu_order title';
 				break;
-			case 'date' :
-				$args['orderby']  = 'date ID';
-				$args['order']    = ( 'ASC' === $order ) ? 'ASC' : 'DESC';
+			case 'title':
+				$args['orderby'] = 'title';
+				$args['order']   = ( 'DESC' === $order ) ? 'DESC' : 'ASC';
 				break;
-			case 'price' :
+			case 'relevance':
+				$args['orderby'] = 'relevance';
+				$args['order']   = 'DESC';
+				break;
+			case 'rand':
+				$args['orderby'] = 'rand'; // @codingStandardsIgnoreLine
+				break;
+			case 'date':
+				$args['orderby'] = 'date ID';
+				$args['order']   = ( 'ASC' === $order ) ? 'ASC' : 'DESC';
+				break;
+			case 'price':
 				if ( 'DESC' === $order ) {
 					add_filter( 'posts_clauses', array( $this, 'order_by_price_desc_post_clauses' ) );
 				} else {
 					add_filter( 'posts_clauses', array( $this, 'order_by_price_asc_post_clauses' ) );
 				}
 				break;
-			case 'popularity' :
-				$args['meta_key'] = 'total_sales';
+			case 'popularity':
+				$args['meta_key'] = 'total_sales'; // @codingStandardsIgnoreLine
 
-				// Sorting handled later though a hook
+				// Sorting handled later though a hook.
 				add_filter( 'posts_clauses', array( $this, 'order_by_popularity_post_clauses' ) );
 				break;
-			case 'rating' :
-				$args['meta_key'] = '_wc_average_rating';
+			case 'rating':
+				$args['meta_key'] = '_wc_average_rating'; // @codingStandardsIgnoreLine
 				$args['orderby']  = array(
 					'meta_value_num' => 'DESC',
 					'ID'             => 'ASC',
 				);
-				break;
-			case 'title' :
-				$args['orderby'] = 'title';
-				$args['order']   = ( 'DESC' === $order ) ? 'DESC' : 'ASC';
-				break;
-			case 'relevance' :
-				$args['orderby'] = 'relevance';
-				$args['order']   = 'DESC';
 				break;
 		}
 
@@ -497,8 +501,7 @@ class WC_Query {
 	/**
 	 * Handle numeric price sorting.
 	 *
-	 * @access public
-	 * @param array $args
+	 * @param array $args Query args.
 	 * @return array
 	 */
 	public function order_by_price_asc_post_clauses( $args ) {
@@ -520,15 +523,14 @@ class WC_Query {
 		} else {
 			$args['join']    .= " INNER JOIN ( SELECT post_id, min( meta_value+0 ) price FROM $wpdb->postmeta WHERE meta_key='_price' GROUP BY post_id ) as price_query ON $wpdb->posts.ID = price_query.post_id ";
 		}
-		$args['orderby'] = ' price_query.price ASC ';
+		$args['orderby'] = " price_query.price ASC, $wpdb->posts.ID ASC ";
 		return $args;
 	}
 
 	/**
 	 * Handle numeric price sorting.
 	 *
-	 * @access public
-	 * @param array $args
+	 * @param array $args Query args.
 	 * @return array
 	 */
 	public function order_by_price_desc_post_clauses( $args ) {
@@ -551,7 +553,7 @@ class WC_Query {
 			$args['join'] .= " INNER JOIN ( SELECT post_id, max( meta_value+0 ) price FROM $wpdb->postmeta WHERE meta_key='_price' GROUP BY post_id ) as price_query ON $wpdb->posts.ID = price_query.post_id ";
 		}
 
-		$args['orderby'] = ' price_query.price DESC ';
+		$args['orderby'] = " price_query.price DESC, $wpdb->posts.ID DESC ";
 		return $args;
 	}
 
@@ -560,8 +562,7 @@ class WC_Query {
 	 *
 	 * This lets us sort by meta value desc, and have a second orderby param.
 	 *
-	 * @access public
-	 * @param array $args
+	 * @param array $args Query args.
 	 * @return array
 	 */
 	public function order_by_popularity_post_clauses( $args ) {
@@ -571,34 +572,10 @@ class WC_Query {
 	}
 
 	/**
-	 * Order by rating post clauses.
-	 *
-	 * @deprecated 3.0.0
-	 * @param array $args
-	 * @return array
-	 */
-	public function order_by_rating_post_clauses( $args ) {
-		global $wpdb;
-
-		wc_deprecated_function( 'order_by_rating_post_clauses', '3.0' );
-
-		$args['fields'] .= ", AVG( $wpdb->commentmeta.meta_value ) as average_rating ";
-		$args['where']  .= " AND ( $wpdb->commentmeta.meta_key = 'rating' OR $wpdb->commentmeta.meta_key IS null ) ";
-		$args['join']   .= "
-			LEFT OUTER JOIN $wpdb->comments ON($wpdb->posts.ID = $wpdb->comments.comment_post_ID)
-			LEFT JOIN $wpdb->commentmeta ON($wpdb->comments.comment_ID = $wpdb->commentmeta.comment_id)
-		";
-		$args['orderby'] = "average_rating DESC, $wpdb->posts.post_date DESC";
-		$args['groupby'] = "$wpdb->posts.ID";
-
-		return $args;
-	}
-
-	/**
 	 * Appends meta queries to an array.
 	 *
-	 * @param  array $meta_query
-	 * @param  bool $main_query
+	 * @param  array $meta_query Meta query.
+	 * @param  bool  $main_query If is main query.
 	 * @return array
 	 */
 	public function get_meta_query( $meta_query = array(), $main_query = false ) {
@@ -611,18 +588,21 @@ class WC_Query {
 
 	/**
 	 * Appends tax queries to an array.
-	 * @param array $tax_query
-	 * @param bool  $main_query
+	 *
+	 * @param  array $tax_query  Tax query.
+	 * @param  bool  $main_query If is main query.
 	 * @return array
 	 */
 	public function get_tax_query( $tax_query = array(), $main_query = false ) {
 		if ( ! is_array( $tax_query ) ) {
-			$tax_query = array( 'relation' => 'AND' );
+			$tax_query = array(
+				'relation' => 'AND',
+			);
 		}
 
 		// Layered nav filters on terms.
-		if ( $main_query && ( $_chosen_attributes = $this->get_layered_nav_chosen_attributes() ) ) {
-			foreach ( $_chosen_attributes as $taxonomy => $data ) {
+		if ( $main_query ) {
+			foreach ( $this->get_layered_nav_chosen_attributes() as $taxonomy => $data ) {
 				$tax_query[] = array(
 					'taxonomy'         => $taxonomy,
 					'field'            => 'slug',
@@ -642,11 +622,11 @@ class WC_Query {
 		}
 
 		// Filter by rating.
-		if ( isset( $_GET['rating_filter'] ) ) {
-			$rating_filter = array_filter( array_map( 'absint', explode( ',', $_GET['rating_filter'] ) ) );
+		if ( isset( $_GET['rating_filter'] ) ) { // WPCS: input var ok, CSRF ok.
+			$rating_filter = array_filter( array_map( 'absint', explode( ',', $_GET['rating_filter'] ) ) ); // WPCS: input var ok, CSRF ok, Sanitization ok.
 			$rating_terms  = array();
 			for ( $i = 1; $i <= 5; $i ++ ) {
-				if ( in_array( $i, $rating_filter ) && isset( $product_visibility_terms[ 'rated-' . $i ] ) ) {
+				if ( in_array( $i, $rating_filter, true ) && isset( $product_visibility_terms[ 'rated-' . $i ] ) ) {
 					$rating_terms[] = $product_visibility_terms[ 'rated-' . $i ];
 				}
 			}
@@ -675,17 +655,148 @@ class WC_Query {
 
 	/**
 	 * Return a meta query for filtering by price.
+	 *
 	 * @return array
 	 */
 	private function price_filter_meta_query() {
-		if ( isset( $_GET['max_price'] ) || isset( $_GET['min_price'] ) ) {
-			$meta_query = wc_get_min_max_price_meta_query( $_GET );
+		if ( isset( $_GET['max_price'] ) || isset( $_GET['min_price'] ) ) { // WPCS: input var ok, CSRF ok.
+			$meta_query = wc_get_min_max_price_meta_query( $_GET ); // WPCS: input var ok, CSRF ok.
 			$meta_query['price_filter'] = true;
 
 			return $meta_query;
 		}
 
 		return array();
+	}
+
+	/**
+	 * Get the main query which product queries ran against.
+	 *
+	 * @return array
+	 */
+	public static function get_main_query() {
+		return self::$product_query;
+	}
+
+	/**
+	 * Get the tax query which was used by the main query.
+	 *
+	 * @return array
+	 */
+	public static function get_main_tax_query() {
+		$tax_query = isset( self::$product_query->tax_query, self::$product_query->tax_query->queries ) ? self::$product_query->tax_query->queries : array();
+
+		return $tax_query;
+	}
+
+	/**
+	 * Get the meta query which was used by the main query.
+	 *
+	 * @return array
+	 */
+	public static function get_main_meta_query() {
+		$args       = self::$product_query->query_vars;
+		$meta_query = isset( $args['meta_query'] ) ? $args['meta_query'] : array();
+
+		return $meta_query;
+	}
+
+	/**
+	 * Based on WP_Query::parse_search
+	 */
+	public static function get_main_search_query_sql() {
+		global $wpdb;
+
+		$args         = self::$product_query->query_vars;
+		$search_terms = isset( $args['search_terms'] ) ? $args['search_terms'] : array();
+		$sql          = array();
+
+		foreach ( $search_terms as $term ) {
+			// Terms prefixed with '-' should be excluded.
+			$include = '-' !== substr( $term, 0, 1 );
+
+			if ( $include ) {
+				$like_op  = 'LIKE';
+				$andor_op = 'OR';
+			} else {
+				$like_op  = 'NOT LIKE';
+				$andor_op = 'AND';
+				$term     = substr( $term, 1 );
+			}
+
+			$like  = '%' . $wpdb->esc_like( $term ) . '%';
+			$sql[] = $wpdb->prepare( "(($wpdb->posts.post_title $like_op %s) $andor_op ($wpdb->posts.post_excerpt $like_op %s) $andor_op ($wpdb->posts.post_content $like_op %s))", $like, $like, $like ); // unprepared SQL ok.
+		}
+
+		if ( ! empty( $sql ) && ! is_user_logged_in() ) {
+			$sql[] = "($wpdb->posts.post_password = '')";
+		}
+
+		return implode( ' AND ', $sql );
+	}
+
+	/**
+	 * Get an array of attributes and terms selected with the layered nav widget.
+	 *
+	 * @return array
+	 */
+	public static function get_layered_nav_chosen_attributes() {
+		if ( ! is_array( self::$_chosen_attributes ) ) {
+			self::$_chosen_attributes = array();
+			$attribute_taxonomies     = wc_get_attribute_taxonomies();
+
+			if ( ! empty( $attribute_taxonomies ) ) {
+				foreach ( $attribute_taxonomies as $tax ) {
+					$attribute    = wc_sanitize_taxonomy_name( $tax->attribute_name );
+					$taxonomy     = wc_attribute_taxonomy_name( $attribute );
+					$filter_terms = ! empty( $_GET[ 'filter_' . $attribute ] ) ? explode( ',', wc_clean( wp_unslash( $_GET[ 'filter_' . $attribute ] ) ) ) : array(); // WPCS: sanitization ok, input var ok.
+
+					if ( empty( $filter_terms ) || ! taxonomy_exists( $taxonomy ) ) {
+						continue;
+					}
+
+					$query_type = ! empty( $_GET[ 'query_type_' . $attribute ] ) && in_array( $_GET[ 'query_type_' . $attribute ], array( 'and', 'or' ), true ) ? wc_clean( wp_unslash( $_GET[ 'query_type_' . $attribute ] ) ) : ''; // WPCS: sanitization ok, input var ok.
+					self::$_chosen_attributes[ $taxonomy ]['terms']      = array_map( 'sanitize_title', $filter_terms ); // Ensures correct encoding.
+					self::$_chosen_attributes[ $taxonomy ]['query_type'] = $query_type ? $query_type : apply_filters( 'woocommerce_layered_nav_default_query_type', 'and' );
+				}
+			}
+		}
+		return self::$_chosen_attributes;
+	}
+
+	/**
+	 * Remove the add-to-cart param from pagination urls.
+	 *
+	 * @param string $url URL.
+	 * @return string
+	 */
+	public function remove_add_to_cart_pagination( $url ) {
+		return remove_query_arg( 'add-to-cart', $url );
+	}
+
+	// @codingStandardsIgnoreStart
+	/**
+	 * Order by rating post clauses.
+	 *
+	 * @deprecated 3.0.0
+	 * @param array $args
+	 * @return array
+	 */
+	public function order_by_rating_post_clauses( $args ) {
+		global $wpdb;
+
+		wc_deprecated_function( 'order_by_rating_post_clauses', '3.0' );
+
+		$args['fields'] .= ", AVG( $wpdb->commentmeta.meta_value ) as average_rating ";
+		$args['where']  .= " AND ( $wpdb->commentmeta.meta_key = 'rating' OR $wpdb->commentmeta.meta_key IS null ) ";
+		$args['join']   .= "
+			LEFT OUTER JOIN $wpdb->comments ON($wpdb->posts.ID = $wpdb->comments.comment_post_ID)
+			LEFT JOIN $wpdb->commentmeta ON($wpdb->comments.comment_ID = $wpdb->commentmeta.comment_id)
+		";
+		$args['orderby'] = "average_rating DESC, $wpdb->posts.post_date DESC";
+		$args['groupby'] = "$wpdb->posts.ID";
+
+		return $args;
 	}
 
 	/**
@@ -721,91 +832,8 @@ class WC_Query {
 	}
 
 	/**
-	 * Get the tax query which was used by the main query.
-	 * @return array
-	 */
-	public static function get_main_tax_query() {
-		global $wp_the_query;
-
-		$tax_query = isset( $wp_the_query->tax_query, $wp_the_query->tax_query->queries ) ? $wp_the_query->tax_query->queries : array();
-
-		return $tax_query;
-	}
-
-	/**
-	 * Get the meta query which was used by the main query.
-	 * @return array
-	 */
-	public static function get_main_meta_query() {
-		global $wp_the_query;
-
-		$args       = $wp_the_query->query_vars;
-		$meta_query = isset( $args['meta_query'] ) ? $args['meta_query'] : array();
-
-		return $meta_query;
-	}
-
-	/**
-	 * Based on WP_Query::parse_search
-	 */
-	public static function get_main_search_query_sql() {
-		global $wp_the_query, $wpdb;
-
-		$args         = $wp_the_query->query_vars;
-		$search_terms = isset( $args['search_terms'] ) ? $args['search_terms'] : array();
-		$sql          = array();
-
-		foreach ( $search_terms as $term ) {
-			// Terms prefixed with '-' should be excluded.
-			$include = '-' !== substr( $term, 0, 1 );
-
-			if ( $include ) {
-				$like_op  = 'LIKE';
-				$andor_op = 'OR';
-			} else {
-				$like_op  = 'NOT LIKE';
-				$andor_op = 'AND';
-				$term     = substr( $term, 1 );
-			}
-
-			$like  = '%' . $wpdb->esc_like( $term ) . '%';
-			$sql[] = $wpdb->prepare( "(($wpdb->posts.post_title $like_op %s) $andor_op ($wpdb->posts.post_excerpt $like_op %s) $andor_op ($wpdb->posts.post_content $like_op %s))", $like, $like, $like );
-		}
-
-		if ( ! empty( $sql ) && ! is_user_logged_in() ) {
-			$sql[] = "($wpdb->posts.post_password = '')";
-		}
-
-		return implode( ' AND ', $sql );
-	}
-
-	/**
-	 * Layered Nav Init.
-	 */
-	public static function get_layered_nav_chosen_attributes() {
-		if ( ! is_array( self::$_chosen_attributes ) ) {
-			self::$_chosen_attributes = array();
-
-			if ( $attribute_taxonomies = wc_get_attribute_taxonomies() ) {
-				foreach ( $attribute_taxonomies as $tax ) {
-					$attribute    = wc_sanitize_taxonomy_name( $tax->attribute_name );
-					$taxonomy     = wc_attribute_taxonomy_name( $attribute );
-					$filter_terms = ! empty( $_GET[ 'filter_' . $attribute ] ) ? explode( ',', wc_clean( $_GET[ 'filter_' . $attribute ] ) ) : array();
-
-					if ( empty( $filter_terms ) || ! taxonomy_exists( $taxonomy ) ) {
-						continue;
-					}
-
-					$query_type = ! empty( $_GET[ 'query_type_' . $attribute ] ) && in_array( $_GET[ 'query_type_' . $attribute ], array( 'and', 'or' ) ) ? wc_clean( $_GET[ 'query_type_' . $attribute ] ) : '';
-					self::$_chosen_attributes[ $taxonomy ]['terms']      = array_map( 'sanitize_title', $filter_terms ); // Ensures correct encoding
-					self::$_chosen_attributes[ $taxonomy ]['query_type'] = $query_type ? $query_type : apply_filters( 'woocommerce_layered_nav_default_query_type', 'and' );
-				}
-			}
-		}
-		return self::$_chosen_attributes;
-	}
-
-	/**
+	 * Layered nav init.
+	 *
 	 * @deprecated 2.6.0
 	 */
 	public function layered_nav_init() {
@@ -814,6 +842,7 @@ class WC_Query {
 
 	/**
 	 * Get an unpaginated list all product IDs (both filtered and unfiltered). Makes use of transients.
+	 *
 	 * @deprecated 2.6.0 due to performance concerns
 	 */
 	public function get_products_in_view() {
@@ -822,11 +851,31 @@ class WC_Query {
 
 	/**
 	 * Layered Nav post filter.
+	 *
 	 * @deprecated 2.6.0 due to performance concerns
 	 *
-	 * @param $filtered_posts
+	 * @param mixed $deprecated Deprecated.
 	 */
-	public function layered_nav_query( $filtered_posts ) {
+	public function layered_nav_query( $deprecated ) {
 		wc_deprecated_function( 'layered_nav_query', '2.6' );
 	}
+
+	/**
+	 * Search post excerpt.
+	 *
+	 * @deprecated 3.2.0 - Not needed anymore since WordPress 4.5.
+	 */
+	public function search_post_excerpt( $where = '' ) {
+		wc_deprecated_function( 'WC_Query::search_post_excerpt', '3.2.0', 'Excerpt added to search query by default since WordPress 4.5.' );
+		return $where;
+	}
+
+	/**
+	 * Remove the posts_where filter.
+	 * @deprecated 3.2.0 - Nothing to remove anymore because search_post_excerpt() is deprecated.
+	 */
+	public function remove_posts_where() {
+		wc_deprecated_function( 'WC_Query::remove_posts_where', '3.2.0', 'Nothing to remove anymore because search_post_excerpt() is deprecated.' );
+	}
+	// @codingStandardsIgnoreEnd
 }

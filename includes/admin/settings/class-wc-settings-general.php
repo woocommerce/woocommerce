@@ -183,24 +183,6 @@ class WC_Settings_General extends WC_Settings_Page {
 				'type'    => 'checkbox',
 			),
 
-			array(
-				'title'   => __( 'Store notice', 'woocommerce' ),
-				'desc'    => __( 'Enable site-wide store notice text', 'woocommerce' ),
-				'id'      => 'woocommerce_demo_store',
-				'default' => 'no',
-				'type'    => 'checkbox',
-			),
-
-			array(
-				'title'    => __( 'Store notice text', 'woocommerce' ),
-				'desc'     => '',
-				'id'       => 'woocommerce_demo_store_notice',
-				'default'  => __( 'This is a demo store for testing purposes &mdash; no orders shall be fulfilled.', 'woocommerce' ),
-				'type'     => 'textarea',
-				'css'     => 'width:350px; height: 65px;',
-				'autoload' => false,
-			),
-
 			array( 'type' => 'sectionend', 'id' => 'general_options' ),
 
 			array( 'title' => __( 'Currency options', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'The following options affect how prices are displayed on the frontend.', 'woocommerce' ), 'id' => 'pricing_options' ),
@@ -224,10 +206,10 @@ class WC_Settings_General extends WC_Settings_Page {
 				'default'  => 'left',
 				'type'     => 'select',
 				'options'  => array(
-					'left'        => __( 'Left', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . '&#x200e;99.99)',
-					'right'       => __( 'Right', 'woocommerce' ) . ' (99.99' . get_woocommerce_currency_symbol() . '&#x200f;)',
-					'left_space'  => __( 'Left with space', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . '&#x200e;&nbsp;99.99)',
-					'right_space' => __( 'Right with space', 'woocommerce' ) . ' (99.99&nbsp;' . get_woocommerce_currency_symbol() . '&#x200f;)',
+					'left'        => __( 'Left', 'woocommerce' ),
+					'right'       => __( 'Right', 'woocommerce' ),
+					'left_space'  => __( 'Left with space', 'woocommerce' ),
+					'right_space' => __( 'Right with space', 'woocommerce' ),
 				),
 				'desc_tip' => true,
 			),
@@ -285,6 +267,49 @@ class WC_Settings_General extends WC_Settings_Page {
 		echo '<div class="color_box">' . wc_help_tip( $desc ) . '
 			<input name="' . esc_attr( $id ) . '" id="' . esc_attr( $id ) . '" type="text" value="' . esc_attr( $value ) . '" class="colorpick" /> <div id="colorPickerDiv_' . esc_attr( $id ) . '" class="colorpickdiv"></div>
 		</div>';
+	}
+
+	/**
+	 * Show a notice showing where the store notice setting has moved.
+	 *
+	 * @since 3.3.1
+	 * @todo remove in next major release.
+	 */
+	private function store_notice_setting_moved_notice() {
+		if ( get_user_meta( get_current_user_id(), 'dismissed_store_notice_setting_moved_notice', true ) ) {
+			return;
+		}
+		?>
+		<div id="message" class="updated woocommerce-message inline">
+			<a class="woocommerce-message-close notice-dismiss" style="top:0;" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'wc-hide-notice', 'store_notice_setting_moved' ), 'woocommerce_hide_notices_nonce', '_wc_notice_nonce' ) ); ?>"><?php esc_html_e( 'Dismiss', 'woocommerce' ); ?></a>
+
+			<p><?php
+			/* translators: %s: URL to customizer. */
+			echo wp_kses( sprintf( __( 'Looking for the store notice setting? It can now be found <a href="%s">in the Customizer</a>.', 'woocommerce' ), esc_url( add_query_arg( array(
+				'autofocus' => array(
+					'panel' => 'woocommerce',
+				),
+				'url' => wc_get_page_permalink( 'shop' ),
+			 ), admin_url( 'customize.php' ) ) ) ), array(
+				'a' => array(
+					'href'  => array(),
+					'title' => array(),
+				),
+			) );
+			?></p>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Output the settings.
+	 */
+	public function output() {
+		$settings = $this->get_settings();
+
+		$this->store_notice_setting_moved_notice();
+
+		WC_Admin_Settings::output_fields( $settings );
 	}
 
 	/**

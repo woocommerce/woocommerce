@@ -360,11 +360,20 @@ class WC_AJAX {
 		ob_start();
 
 		$product_id        = apply_filters( 'woocommerce_add_to_cart_product_id', absint( $_POST['product_id'] ) );
+		$product           = wc_get_product( $product_id );
 		$quantity          = empty( $_POST['quantity'] ) ? 1 : wc_stock_amount( $_POST['quantity'] );
 		$passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
 		$product_status    = get_post_status( $product_id );
+		$variation_id      = 0;
+		$variation         = array();
 
-		if ( $passed_validation && false !== WC()->cart->add_to_cart( $product_id, $quantity ) && 'publish' === $product_status ) {
+		if ( $product && 'variation' === $product->get_type() ) {
+			$variation_id = $product_id;
+			$product_id   = $product->get_parent_id();
+			$variation    = $product->get_variation_attributes();
+		}
+
+		if ( $passed_validation && false !== WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variation ) && 'publish' === $product_status ) {
 
 			do_action( 'woocommerce_ajax_added_to_cart', $product_id );
 
@@ -388,7 +397,7 @@ class WC_AJAX {
 	}
 
 	/**
-	 * AJAX add to cart.
+	 * AJAX remove from cart.
 	 */
 	public static function remove_from_cart() {
 		ob_start();
@@ -483,83 +492,12 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
-		if ( $order = wc_get_order( absint( $_GET['order_id'] ) ) ) {
+		$order = wc_get_order( absint( $_GET['order_id'] ) ); // WPCS: sanitization ok.
 
-			ob_start();
+		if ( $order ) {
+			include_once( 'admin/list-tables/class-wc-admin-list-table-orders.php' );
 
-			$hidden_order_itemmeta = apply_filters( 'woocommerce_hidden_order_itemmeta', array(
-				'_qty',
-				'_tax_class',
-				'_product_id',
-				'_variation_id',
-				'_line_subtotal',
-				'_line_subtotal_tax',
-				'_line_total',
-				'_line_tax',
-				'method_id',
-				'cost',
-			) );
-			?>
-			<div class="wc-order-preview__table-wrapper">
-				<table cellspacing="0" class="wc-order-preview__table">
-					<tr>
-						<th><?php _e( 'Product', 'woocommerce' ); ?></th>
-						<th><?php _e( 'Quantity', 'woocommerce' ); ?></th>
-						<th><?php _e( 'Tax', 'woocommerce' ); ?></th>
-						<th><?php _e( 'Total', 'woocommerce' ); ?></th>
-					</tr>
-				<?php
-				foreach ( $order->get_items() as $item_id => $item ) {
-					if ( apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
-						?>
-						<tr class="<?php echo esc_attr( apply_filters( 'woocommerce_order_item_class', 'order_item', $item, $order ) ); ?>">
-							<td><?php
-								echo apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false );
-
-								if ( is_callable( array( $item, 'get_product' ) ) && ( $product = $item->get_product() ) && is_object( $product ) && $product->get_sku() ) {
-									echo '<div class="wc-order-item-sku">' . esc_html( $product->get_sku() ) . '</div>';
-								}
-
-								if ( $meta_data = $item->get_formatted_meta_data( '' ) ) : ?>
-									<table cellspacing="0" class="wc-order-item-meta">
-										<?php foreach ( $meta_data as $meta_id => $meta ) :
-											if ( in_array( $meta->key, $hidden_order_itemmeta ) ) {
-												continue;
-											}
-											?>
-											<tr>
-												<th><?php echo wp_kses_post( $meta->display_key ); ?>:</th>
-												<td><?php echo wp_kses_post( force_balance_tags( $meta->display_value ) ); ?></td>
-											</tr>
-										<?php endforeach; ?>
-									</table>
-								<?php endif;
-							?></td>
-							<td><?php echo esc_html( $item->get_quantity() ); ?></td>
-							<td><?php echo wc_price( $item->get_total_tax(), array( 'currency' => $order->get_currency() ) );; ?></td>
-							<td><?php echo wc_price( $item->get_total(), array( 'currency' => $order->get_currency() ) );; ?></td>
-						</tr>
-						<?php
-					}
-				}
-				?>
-				</table>
-			</div>
-			<?php
-			$item_html = ob_get_clean();
-
-			wp_send_json_success( array(
-				'data'                       => $order->get_data(),
-				'order_number'               => $order->get_order_number(),
-				'item_html'                  => $item_html,
-				'ship_to_billing'            => wc_ship_to_billing_address_only(),
-				'needs_shipping'             => $order->needs_shipping_address(),
-				'formatted_billing_address'  => ( $address = $order->get_formatted_billing_address() ) ? $address : __( 'N/A', 'woocommerce' ),
-				'formatted_shipping_address' => ( $address = $order->get_formatted_shipping_address() ) ? $address: __( 'N/A', 'woocommerce' ),
-				'shipping_address_map_url'   => $order->get_shipping_address_map_url(),
-				'payment_via'                => $order->get_payment_method_title() . ( $order->get_transaction_id() ? ' (' . $order->get_transaction_id() . ')' : '' ),
-				'shipping_via'               => $order->get_shipping_method(),
-			) );
+			wp_send_json_success( WC_Admin_List_Table_Orders::order_preview_get_order_details( $order ) );
 		}
 		exit;
 	}
@@ -686,7 +624,7 @@ class WC_AJAX {
 		$product_object   = wc_get_product( $product_id );
 		$variation_object = new WC_Product_Variation();
 		$variation_object->set_parent_id( $product_id );
-		$variation_object->set_attributes( array_fill_keys( array_keys( $product_object->get_variation_attributes() ), '' ) );
+		$variation_object->set_attributes( array_fill_keys( array_map( 'sanitize_title', array_keys( $product_object->get_variation_attributes() ) ), '' ) );
 		$variation_id     = $variation_object->save();
 		$variation        = get_post( $variation_id );
 		$variation_data   = array_merge( array_map( 'maybe_unserialize', get_post_custom( $variation_id ) ), wc_get_product_variation_attributes( $variation_id ) ); // kept for BW compatibility.
@@ -1488,17 +1426,19 @@ class WC_AJAX {
 			wp_die();
 		}
 
+		$ids = array();
 		// Search by ID.
 		if ( is_numeric( $term ) ) {
 			$customer = new WC_Customer( intval( $term ) );
 
 			// Customer does not exists.
-			if ( 0 === $customer->get_id() ) {
-				wp_die();
+			if ( 0 !== $customer->get_id() ) {
+				$ids = array( $customer->get_id() );
 			}
+		}
 
-			$ids = array( $customer->get_id() );
-		} else {
+		// Usernames can be numeric so we first check that no users was found by ID before searching for numeric username, this prevents performance issues with ID lookups.
+		if ( empty( $ids ) ) {
 			$data_store = WC_Data_Store::load( 'customer' );
 
 			// If search is smaller than 3 characters, limit result set to avoid
@@ -1735,9 +1675,6 @@ class WC_AJAX {
 			wp_send_json_success( $response_data );
 
 		} catch ( Exception $e ) {
-			if ( $refund && is_a( $refund, 'WC_Order_Refund' ) ) {
-				wp_delete_post( $refund->get_id(), true );
-			}
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
 	}
@@ -2037,6 +1974,17 @@ class WC_AJAX {
 	 */
 	private static function variation_bulk_action_variable_stock_status_outofstock( $variations, $data ) {
 		self::variation_bulk_set( $variations, 'stock_status', 'outofstock' );
+	}
+
+	/**
+	 * Bulk action - Set Stock Status as On Backorder.
+	 * @access private
+	 * @used-by bulk_edit_variations
+	 * @param  array $variations
+	 * @param  array $data
+	 */
+	private static function variation_bulk_action_variable_stock_status_onbackorder( $variations, $data ) {
+		self::variation_bulk_set( $variations, 'stock_status', 'onbackorder' );
 	}
 
 	/**
@@ -2400,6 +2348,9 @@ class WC_AJAX {
 				WC_Tax::_update_tax_rate_cities( $tax_rate_id, array_map( 'wc_clean', $data['city'] ) );
 			}
 		}
+
+		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
+		WC_Cache_Helper::get_transient_version( 'shipping', true );
 
 		wp_send_json_success( array(
 			'rates' => WC_Tax::get_rates_for_tax_class( $current_class ),

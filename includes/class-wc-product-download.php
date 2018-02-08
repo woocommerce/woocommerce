@@ -47,7 +47,7 @@ class WC_Product_Download implements ArrayAccess {
 	 */
 	public function get_type_of_file_path( $file_path = '' ) {
 		$file_path = $file_path ? $file_path : $this->get_file();
-		if ( 0 === strpos( $file_path, 'http' ) ) {
+		if ( 0 === strpos( $file_path, 'http' ) || 0 === strpos( $file_path, '//' ) ) {
 			return 'absolute';
 		} elseif ( '[' === substr( $file_path, 0, 1 ) && ']' === substr( $file_path, -1 ) ) {
 			return 'shortcode';

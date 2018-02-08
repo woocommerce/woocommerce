@@ -30,6 +30,8 @@ class WC_Meta_Box_Product_Data {
 		$thepostid      = $post->ID;
 		$product_object = $thepostid ? wc_get_product( $thepostid ) : new WC_Product;
 
+		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
+
 		include( 'views/html-product-data-panel.php' );
 	}
 
@@ -284,12 +286,18 @@ class WC_Meta_Box_Product_Data {
 					$attribute_key = sanitize_title( $attribute->get_name() );
 
 					if ( ! is_null( $index ) ) {
-						$value = isset( $_POST[ $key_prefix . $attribute_key ][ $index ] ) ? stripslashes( $_POST[ $key_prefix . $attribute_key ][ $index ] ) : '';
+						$value = isset( $_POST[ $key_prefix . $attribute_key ][ $index ] ) ? wp_unslash( $_POST[ $key_prefix . $attribute_key ][ $index ] ) : '';
 					} else {
-						$value = isset( $_POST[ $key_prefix . $attribute_key ] ) ? stripslashes( $_POST[ $key_prefix . $attribute_key ] ) : '';
+						$value = isset( $_POST[ $key_prefix . $attribute_key ] ) ? wp_unslash( $_POST[ $key_prefix . $attribute_key ] ) : '';
 					}
 
-					$value                        = $attribute->is_taxonomy() ? sanitize_title( $value ) : wc_clean( $value ); // Don't use wc_clean as it destroys sanitized characters in terms.
+					if ( $attribute->is_taxonomy() ) {
+						// Don't use wc_clean as it destroys sanitized characters.
+						$value = sanitize_title( $value );
+					} else {
+						$value = html_entity_decode( wc_clean( $value ), ENT_QUOTES, get_bloginfo( 'charset' ) ); // WPCS: sanitization ok.
+					}
+
 					$attributes[ $attribute_key ] = $value;
 				}
 			}

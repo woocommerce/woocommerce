@@ -74,7 +74,7 @@ jQuery( function( $ ) {
 			.removeClass( 'hide' )
 			.find( '.shipping-method-required-field' )
 			.prop( 'required', true );
-	} );
+	} ).find( '.wc-wizard-shipping-method-select .method' ).change();
 
 	$( '.wc-wizard-services' ).on( 'change', '.wc-wizard-shipping-method-enable', function() {
 		var checked = $( this ).is( ':checked' );
@@ -124,25 +124,23 @@ jQuery( function( $ ) {
 		waitForJetpackInstall();
 	} );
 
-	$( '.wc-wizard-services' ).on( 'change', 'input#stripe_create_account', function() {
+	$( '.wc-wizard-services' ).on( 'change', 'input#stripe_create_account, input#ppec_paypal_reroute_requests', function() {
 		if ( $( this ).is( ':checked' ) ) {
 			$( this ).closest( '.wc-wizard-service-settings' )
 				.find( 'input.payment-email-input' )
 				.prop( 'required', true );
 			$( this ).closest( '.wc-wizard-service-settings' )
-				.find( '.wc-wizard-service-setting-stripe_email' )
+				.find( '.wc-wizard-service-setting-stripe_email, .wc-wizard-service-setting-ppec_paypal_email' )
 				.show();
 		} else {
 			$( this ).closest( '.wc-wizard-service-settings' )
 				.find( 'input.payment-email-input' )
 				.prop( 'required', false );
 			$( this ).closest( '.wc-wizard-service-settings' )
-				.find( '.wc-wizard-service-setting-stripe_email' )
+				.find( '.wc-wizard-service-setting-stripe_email, .wc-wizard-service-setting-ppec_paypal_email' )
 				.hide();
 		}
-	} );
-
-	$( '.wc-wizard-services input#stripe_create_account' ).change();
+	} ).find( 'input#stripe_create_account, input#ppec_paypal_reroute_requests' ).change();
 
 	$( 'select#store_country_state' ).on( 'change', function() {
 		var countryCode = this.value.split( ':' )[ 0 ];

@@ -4,16 +4,12 @@
  *
  * All functionality pertaining to regenerating product images in realtime.
  *
- * @category Images
  * @package WooCommerce/Classes
- * @author Automattic
  * @version 3.3.0
  * @since 3.3.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Regenerate Images Class
@@ -31,12 +27,12 @@ class WC_Regenerate_Images {
 	 * Init function
 	 */
 	public static function init() {
-		include_once( WC_ABSPATH . 'includes/class-wc-regenerate-images-request.php' );
+		include_once WC_ABSPATH . 'includes/class-wc-regenerate-images-request.php';
 		self::$background_process = new WC_Regenerate_Images_Request();
 
-		if ( apply_filters( 'woocommerce_resize_images', true ) && ! is_admin() ) {
-			// Action to handle on-the-fly image resizing.
-			add_action( 'wp_get_attachment_image_src', array( __CLASS__, 'maybe_resize_image' ), 10, 4 );
+		if ( ! is_admin() ) {
+			// Handle on-the-fly image resizing.
+			add_filter( 'wp_get_attachment_image_src', array( __CLASS__, 'maybe_resize_image' ), 10, 4 );
 		}
 
 		if ( apply_filters( 'woocommerce_background_image_regeneration', true ) ) {
@@ -58,6 +54,17 @@ class WC_Regenerate_Images {
 	 * @return array
 	 */
 	public static function maybe_resize_image( $image, $attachment_id, $size, $icon ) {
+
+		if ( ! apply_filters( 'woocommerce_resize_images', true ) ) {
+			return $image;
+		}
+
+		// Use a whitelist of sizes we want to resize. Ignore others.
+		if ( ! in_array( $size, apply_filters( 'woocommerce_image_sizes_to_resize', array( 'woocommerce_thumbnail', 'woocommerce_single', 'shop_thumbnail', 'shop_catalog', 'shop_single' ) ), true ) ) {
+			return $image;
+		}
+
+		// Get image metadata - we need it to proceed.
 		$imagemeta = wp_get_attachment_metadata( $attachment_id );
 
 		if ( false === $imagemeta || empty( $imagemeta ) ) {
@@ -66,13 +73,11 @@ class WC_Regenerate_Images {
 
 		$size_settings = wc_get_image_size( $size );
 
-		if ( isset( $imagemeta['sizes'][ $size ] ) ) {
-			if ( $imagemeta['sizes'][ $size ]['width'] !== $size_settings['width'] || $imagemeta['sizes'][ $size ]['height'] !== $size_settings['height'] ) {
-				$image = self::resize_and_return_image( $attachment_id, $image, $size, $icon );
-			}
-		} else {
+		// If size differs from image meta, regen.
+		if ( ! isset( $imagemeta['sizes'], $imagemeta['sizes'][ $size ] ) || $imagemeta['sizes'][ $size ]['width'] !== $size_settings['width'] || ( $size_settings['crop'] && $imagemeta['sizes'][ $size ]['height'] !== $size_settings['height'] ) ) {
 			$image = self::resize_and_return_image( $attachment_id, $image, $size, $icon );
 		}
+
 		return $image;
 	}
 
@@ -92,21 +97,22 @@ class WC_Regenerate_Images {
 		}
 
 		if ( ! function_exists( 'wp_crop_image' ) ) {
-			include( ABSPATH . 'wp-admin/includes/image.php' );
+			include ABSPATH . 'wp-admin/includes/image.php';
 		}
 
 		$wp_uploads     = wp_upload_dir( null, false );
 		$wp_uploads_dir = $wp_uploads['basedir'];
 		$wp_uploads_url = $wp_uploads['baseurl'];
 
-		$original_image_file_path   = get_attached_file( $attachment->ID );
+		$original_image_file_path = get_attached_file( $attachment->ID );
 
 		if ( ! file_exists( $original_image_file_path ) || ! getimagesize( $original_image_file_path ) ) {
 			return $image;
 		}
 
 		$info = pathinfo( $original_image_file_path );
-		$ext = $info['extension'];
+		$ext  = $info['extension'];
+
 		list( $orig_w, $orig_h ) = getimagesize( $original_image_file_path );
 		// Get image size after cropping.
 		$image_size = wc_get_image_size( $size );
@@ -165,16 +171,10 @@ class WC_Regenerate_Images {
 	}
 
 	/**
-	 * Check if we should generate images when new themes declares custom sizes
-	 *
-	 * @return void
+	 * Check if we should generate images when new themes declares custom sizes.
 	 */
 	public static function maybe_regenerate_image_theme_switch() {
-		$theme_support = get_theme_support( 'woocommerce' );
-		$theme_support = is_array( $theme_support ) ? $theme_support[0] : false;
-
-		// Only queue image generation if the theme declares custom sizes via theme_support.
-		if ( is_array( $theme_support ) && ( isset( $theme_support['single_image_width'] ) || isset( $theme_support['thumbnail_image_width'] ) ) ) {
+		if ( wc_get_theme_support( 'single_image_width' ) || wc_get_theme_support( 'thumbnail_image_width' ) ) {
 			self::queue_image_regeneration();
 		}
 	}
@@ -187,7 +187,7 @@ class WC_Regenerate_Images {
 	private static function queue_image_regeneration() {
 		global $wpdb;
 		// First lets cancel existing running queue to avoid running it more than once.
-		self::$background_process->cancel_process();
+		self::$background_process->kill_process();
 
 		// Now lets find all product image attachments IDs and pop them onto the queue.
 		$images = $wpdb->get_results( // @codingStandardsIgnoreLine
