@@ -123,7 +123,7 @@ final class WooCommerce {
 	 * @since 2.1
 	 */
 	public function __clone() {
-		wc_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, __( 'Cloning is forbidden.', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -132,7 +132,7 @@ final class WooCommerce {
 	 * @since 2.1
 	 */
 	public function __wakeup() {
-		wc_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, __( 'Unserializing instances of this class is forbidden.', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -546,7 +546,7 @@ final class WooCommerce {
 		add_image_size( 'woocommerce_single', $single['width'], $single['height'], $single['crop'] );
 
 		// 2x thumbnail size for retina, and when showing less columns.
-		add_image_size( 'woocommerce_thumbnail_2x', $thumbnail['width'] * 2, $thumbnail['height'] * 2, $thumbnail['crop'] );
+		add_image_size( 'woocommerce_thumbnail_2x', $thumbnail['width'] * 2, '' !== $thumbnail['height'] ? $thumbnail['height'] * 2 : '', $thumbnail['crop'] );
 
 		// Registered for bw compat. @todo remove in 4.0.
 		add_image_size( 'shop_thumbnail', $thumbnail['width'], $thumbnail['height'], $thumbnail['crop'] );

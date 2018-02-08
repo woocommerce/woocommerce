@@ -771,7 +771,7 @@ class WC_Email extends WC_Settings_API {
 			}
 
 			if ( ! current_user_can( 'edit_themes' ) ) {
-				wp_die( __( 'Cheatin&#8217; huh?', 'woocommerce' ) );
+				wp_die( __( 'You don&#8217;t have permission to do this.', 'woocommerce' ) );
 			}
 
 			if ( ! empty( $_GET['move_template'] ) ) {
