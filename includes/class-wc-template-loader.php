@@ -2,10 +2,8 @@
 /**
  * Template Loader
  *
- * @class 		WC_Template
- * @package		WooCommerce/Classes
- * @category	Class
- * @author 		Automattic
+ * @class WC_Template
+ * @package WooCommerce/Classes
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -32,13 +30,21 @@ class WC_Template_Loader {
 	private static $in_content_filter = false;
 
 	/**
+	 * Is WooCommerce support defined?
+	 *
+	 * @var boolean
+	 */
+	private static $theme_support = false;
+
+	/**
 	 * Hook in methods.
 	 */
 	public static function init() {
-		self::$shop_page_id = wc_get_page_id( 'shop' );
+		self::$theme_support = current_theme_supports( 'woocommerce' );
+		self::$shop_page_id  = wc_get_page_id( 'shop' );
 
 		// Supported themes.
-		if ( current_theme_supports( 'woocommerce' ) ) {
+		if ( self::$theme_support ) {
 			add_filter( 'template_include', array( __CLASS__, 'template_loader' ) );
 			add_filter( 'comments_template', array( __CLASS__, 'comments_template_loader' ) );
 		} else {
@@ -67,7 +73,9 @@ class WC_Template_Loader {
 			return $template;
 		}
 
-		if ( $default_file = self::get_template_loader_default_file() ) {
+		$default_file = self::get_template_loader_default_file();
+
+		if ( $default_file ) {
 			/**
 			 * Filter hook to choose which files to find before WooCommerce does it's own logic.
 			 *
@@ -103,7 +111,7 @@ class WC_Template_Loader {
 				$default_file = 'archive-product.php';
 			}
 		} elseif ( is_post_type_archive( 'product' ) || is_page( wc_get_page_id( 'shop' ) ) ) {
-			$default_file = current_theme_supports( 'woocommerce' ) ? 'archive-product.php' : '';
+			$default_file = self::$theme_support ? 'archive-product.php' : '';
 		} else {
 			$default_file = '';
 		}
@@ -252,12 +260,19 @@ class WC_Template_Loader {
 			$shortcode_args['category'] = sanitize_title( $queried_object->slug );
 		} elseif ( taxonomy_is_product_attribute( $queried_object->taxonomy ) ) {
 			$shortcode_args['attribute'] = sanitize_title( $queried_object->taxonomy );
-			$shortcode_args['terms'] = sanitize_title( $queried_object->slug );
+			$shortcode_args['terms']     = sanitize_title( $queried_object->slug );
 		} elseif ( is_product_tag() ) {
 			$shortcode_args['tag'] = sanitize_title( $queried_object->slug );
 		} else {
 			// Default theme archive for all other taxonomies.
 			return;
+		}
+
+		// Description handling.
+		if ( ! empty( $queried_object->description ) && ( empty( $_GET['product-page'] ) || 1 === absint( $_GET['product-page'] ) ) ) { // WPCS: input var ok, CSRF ok.
+			$prefix = '<div class="term-description">' . wc_format_content( $queried_object->description ) . '</div>'; // WPCS: XSS ok.
+		} else {
+			$prefix = '';
 		}
 
 		$shortcode = new WC_Shortcode_Products( $shortcode_args );
@@ -273,7 +288,7 @@ class WC_Template_Loader {
 			'post_date_gmt'         => $shop_page->post_date_gmt,
 			'post_modified'         => $shop_page->post_modified,
 			'post_modified_gmt'     => $shop_page->post_modified_gmt,
-			'post_content'          => $shortcode->get_content(),
+			'post_content'          => $prefix . $shortcode->get_content(),
 			'post_title'            => wc_clean( $queried_object->name ),
 			'post_excerpt'          => '',
 			'post_content_filtered' => '',
@@ -291,19 +306,20 @@ class WC_Template_Loader {
 		);
 
 		// Set the $post global.
-		$post = new WP_Post( (object) $dummy_post_properties );
+		$post = new WP_Post( (object) $dummy_post_properties ); // @codingStandardsIgnoreLine.
 
 		// Copy the new post global into the main $wp_query.
-		$wp_query->post = $post;
+		$wp_query->post  = $post;
 		$wp_query->posts = array( $post );
 
-        // Prevent comments form from appearing.
-		$wp_query->post_count = 1;
-		$wp_query->is_404     = false;
-		$wp_query->is_page    = true;
-		$wp_query->is_single  = true;
-		$wp_query->is_archive = false;
-		$wp_query->is_tax     = false;
+		// Prevent comments form from appearing.
+		$wp_query->post_count    = 1;
+		$wp_query->is_404        = false;
+		$wp_query->is_page       = true;
+		$wp_query->is_single     = true;
+		$wp_query->is_archive    = false;
+		$wp_query->is_tax        = false;
+		$wp_query->max_num_pages = 0;
 
 		// Prepare everything for rendering.
 		setup_postdata( $post );
@@ -362,11 +378,16 @@ class WC_Template_Loader {
 	 * @return string
 	 */
 	public static function unsupported_theme_title_filter( $title, $id ) {
-		if ( ! current_theme_supports( 'woocommerce' ) && is_page( self::$shop_page_id ) && $id === self::$shop_page_id ) {
+		if ( self::$theme_support || ! $id !== self::$shop_page_id ) {
+			return $title;
+		}
+
+		if ( is_page( self::$shop_page_id ) || ( is_home() && 'page' === get_option( 'show_on_front' ) && absint( get_option( 'page_on_front' ) ) === self::$shop_page_id ) ) {
 			$args         = self::get_current_shop_view_args();
 			$title_suffix = array();
 
 			if ( $args->page > 1 ) {
+				/* translators: %d: Page number. */
 				$title_suffix[] = sprintf( esc_html__( 'Page %d', 'woocommerce' ), $args->page );
 			}
 
@@ -389,14 +410,14 @@ class WC_Template_Loader {
 	public static function unsupported_theme_shop_content_filter( $content ) {
 		global $wp_query;
 
-		if ( current_theme_supports( 'woocommerce' ) || ! is_main_query() ) {
+		if ( self::$theme_support || ! is_main_query() || ! in_the_loop() ) {
 			return $content;
 		}
 
 		self::$in_content_filter = true;
 
 		// Remove the filter we're in to avoid nested calls.
-		remove_filter( 'the_content', array( __CLASS__, 'the_content_filter' ) );
+		remove_filter( 'the_content', array( __CLASS__, 'unsupported_theme_shop_content_filter' ) );
 
 		// Unsupported theme shop page.
 		if ( is_page( self::$shop_page_id ) ) {
@@ -442,14 +463,14 @@ class WC_Template_Loader {
 	public static function unsupported_theme_product_content_filter( $content ) {
 		global $wp_query;
 
-		if ( current_theme_supports( 'woocommerce' ) || ! is_main_query() ) {
+		if ( self::$theme_support || ! is_main_query() || ! in_the_loop() ) {
 			return $content;
 		}
 
 		self::$in_content_filter = true;
 
 		// Remove the filter we're in to avoid nested calls.
-		remove_filter( 'the_content', array( __CLASS__, 'the_content_filter' ) );
+		remove_filter( 'the_content', array( __CLASS__, 'unsupported_theme_product_content_filter' ) );
 
 		if ( is_product() ) {
 			$content = do_shortcode( '[product_page id="' . get_the_ID() . '" show_title=0]' );

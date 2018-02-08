@@ -43,8 +43,7 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 		// Test the default options are present.
 		WC()->query->init_query_vars();
 		$default_vars = WC()->query->get_query_vars();
-		$expected = array(
-			'product-page'               => '',
+		$expected     = array(
 			'order-pay'                  => 'order-pay',
 			'order-received'             => 'order-received',
 			'orders'                     => 'orders',

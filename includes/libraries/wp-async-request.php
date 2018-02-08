@@ -1,13 +1,14 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+/**
+ * WP Async Request
+ *
+ * @package WP-Background-Processing
+ */
+
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Abstract WP_Async_Request class.
- *
- * @package WP-Background-Processing
- * @abstract
  */
 abstract class WP_Async_Request {
 
@@ -155,4 +156,5 @@ abstract class WP_Async_Request {
 	 * during the async request.
 	 */
 	abstract protected function handle();
+
 }

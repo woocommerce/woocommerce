@@ -286,7 +286,8 @@ class WC_Helper {
 				$data['_actions'][] = $action;
 			} else {
 				$action = array(
-					'message' => sprintf( __( 'To receive updates and support for this extension, you need to <strong>purchase</strong> a new subscription or <a href="%1$s" target="_blank">be added as a collaborator</a>.', 'woocommerce' ), 'https://docs.woocommerce.com/document/adding-collaborators/' ),
+					/* translators: 1: subscriptions docs 2: subscriptions docs */
+					'message' => sprintf( __( 'To receive updates and support for this extension, you need to <strong>purchase</strong> a new subscription or consolidate your extensions to one connected account by <strong><a href="%1$s" title="Sharing Docs">sharing</a> or <a href="%2$s" title="Transferring Docs">transferring</a></strong> this extension to this connected account.', 'woocommerce' ), 'https://docs.woocommerce.com/document/managing-woocommerce-com-subscriptions/#section-10', 'https://docs.woocommerce.com/document/managing-woocommerce-com-subscriptions/#section-5' ),
 					'button_label' => __( 'Purchase', 'woocommerce' ),
 					'button_url' => $data['_product_url'],
 					'status' => 'expired',
@@ -1235,14 +1236,25 @@ class WC_Helper {
 
 	/**
 	 * Prompt a Helper connection if the user has WooCommerce.com extensions.
+	 *
+	 * @param string $screen_id Current screen ID.
 	 */
 	private static function _prompt_helper_connect( $screen_id ) {
-		// Don't show the notice on the Helper screens.
-		if ( 'woocommerce_page_wc-addons' == $screen_id && ! empty( $_REQUEST['section'] ) && 'helper' == $_REQUEST['section'] ) {
+		$screens   = wc_get_screen_ids();
+		$screens[] = 'plugins';
+
+		if ( ! in_array( $screen_id, $screens, true ) ) {
 			return;
 		}
 
-		// We believe have an active connection.
+		// Don't show the notice on the Helper screens.
+		$screen_addons = sanitize_title( __( 'WooCommerce', 'woocommerce' ) ) . '_page_wc-addons';
+
+		if ( $screen_addons === $screen_id && ! empty( $_REQUEST['section'] ) && 'helper' === $_REQUEST['section'] ) {
+			return;
+		}
+
+		// We believe we have an active connection.
 		$auth = WC_Helper_Options::get( 'auth' );
 		if ( ! empty( $auth['access_token'] ) ) {
 			return;

@@ -281,15 +281,6 @@ jQuery( function ( $ ) {
 		}).change();
 	});
 
-	// Demo store notice
-	$( 'input#woocommerce_demo_store' ).change(function() {
-		if ( $( this ).is( ':checked' ) ) {
-			$( '#woocommerce_demo_store_notice' ).closest( 'tr' ).show();
-		} else {
-			$( '#woocommerce_demo_store_notice' ).closest( 'tr' ).hide();
-		}
-	}).change();
-
 	// Reviews.
 	$( 'input#woocommerce_enable_reviews' ).change(function() {
 		if ( $( this ).is( ':checked' ) ) {

@@ -73,6 +73,8 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		'_shipping_address_index',
 		'_recorded_sales',
 		'_recorded_coupon_usage_counts',
+		'_download_permissions_granted',
+		'_order_stock_reduced',
 	);
 
 	/**
@@ -281,7 +283,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * Get amount already refunded.
 	 *
 	 * @param  WC_Order $order Order object.
-	 * @return string
+	 * @return float
 	 */
 	public function get_total_refunded( $order ) {
 		global $wpdb;
@@ -297,7 +299,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			)
 		);
 
-		return $total;
+		return floatval( $total );
 	}
 
 	/**
