@@ -444,6 +444,7 @@ class WC_Template_Loader {
 
 			// Remove actions and self to avoid nested calls.
 			remove_action( 'pre_get_posts', array( wc()->query, 'product_query' ) );
+			WC()->query->remove_ordering_args();
 		}
 
 		self::$in_content_filter = false;
