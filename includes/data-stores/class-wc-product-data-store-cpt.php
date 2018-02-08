@@ -1329,10 +1329,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
-		$product_ids = $wpdb->get_col(
+		$search_results = $wpdb->get_results(
 			// phpcs:disable
 			$wpdb->prepare(
-				"SELECT DISTINCT posts.ID FROM {$wpdb->posts} posts
+				"SELECT DISTINCT posts.ID as product_id, posts.post_parent as parent_id FROM {$wpdb->posts} posts
 				LEFT JOIN {$wpdb->postmeta} postmeta ON posts.ID = postmeta.post_id
 				$type_join
 				WHERE (
@@ -1352,6 +1352,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			)
 			// phpcs:enable
 		);
+
+		$product_ids = wp_parse_id_list( array_merge( wp_list_pluck( $search_results, 'product_id' ), wp_list_pluck( $search_results, 'parent_id' ) ) );
 
 		if ( is_numeric( $term ) ) {
 			$post_id   = absint( $term );
