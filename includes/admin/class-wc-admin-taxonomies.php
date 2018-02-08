@@ -298,7 +298,6 @@ class WC_Admin_Taxonomies {
 
 	/**
 	 * Add some notes to describe the behavior of the default category.
-	 * The tooltip is relocated with JavaScript.
 	 */
 	public function product_cat_notes() {
 		$category_id   = get_option( 'default_product_cat', 0 );
