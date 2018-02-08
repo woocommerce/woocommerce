@@ -1311,7 +1311,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		$like_term     = '%' . $wpdb->esc_like( $term ) . '%';
 		$post_types    = $include_variations ? array( 'product', 'product_variation' ) : array( 'product' );
-		$post_statuses = current_user_can( 'edit_private_products' ) ? array( 'private', 'publish' ) : array( 'publish' );
+		$post_statuses = current_user_can( 'edit_private_products' ) ? array( 'private', 'pending', 'publish' ) : array( 'publish' );
 		$type_join     = '';
 		$type_where    = '';
 
