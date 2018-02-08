@@ -116,7 +116,7 @@ const ProductCategoryList = withAPIData( ( props ) => {
 			return ( filteredCategories.length > 0 ) && (
 				<ul>
 					{ filteredCategories.map( ( category ) => (
-						<li>
+						<li key={ category.id }>
 							<label htmlFor={ 'product-category-' + category.id }>
 								<input type="checkbox"
 								       id={ 'product-category-' + category.id }
@@ -294,7 +294,7 @@ const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
 	return (
 		<div className={ classes }>
 			{ products.data.map( ( product ) => (
-				<ProductPreview product={ product } attributes={ attributes } />
+				<ProductPreview key={ product.id } product={ product } attributes={ attributes } />
 			) ) }
 		</div>
 	);
