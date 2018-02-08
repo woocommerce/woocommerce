@@ -364,7 +364,7 @@ class WC_Admin_Taxonomies {
 			$default_category_id = absint( get_option( 'default_product_cat', 0 ) );
 
 			if ( $default_category_id === $id ) {
-				$columns .= '<span id="default-category-tooltip" class="woocommerce-help-tip" data-tip="' . esc_attr__( 'This is the default category and it cannot be deleted. It will be automatically assigned to products with no category.', 'woocommerce' ) . '"></span>';
+				$columns .= wc_help_tip( __( 'This is the default category and it cannot be deleted. It will be automatically assigned to products with no category.', 'woocommerce' ) );
 			}
 
 			$thumbnail_id = get_woocommerce_term_meta( $id, 'thumbnail_id', true );
