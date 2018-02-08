@@ -692,6 +692,17 @@ table.wc_status_table--tools {
 	}
 }
 
+.taxonomy-product_cat {
+	.edit-term-notes #default-category-tooltip {
+		display: none;
+	}
+
+	#default-category-tooltip {
+		font-size: 1.5em;
+		margin-left: 3px;
+	}
+}
+
 #debug-report {
 	display: none;
 	margin: 10px 0;

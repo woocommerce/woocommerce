@@ -297,10 +297,12 @@ class WC_Admin_Taxonomies {
 	}
 
 	/**
-	 * Add a note to describe the behavior of deleting categories.
+	 * Add some notes to describe the behavior of the default category.
+	 * The tooltip is relocated with JavaScript.
 	 */
 	public function product_cat_notes() {
-		$category      = get_term( get_option( 'default_product_cat', 0 ), 'product_cat' );
+		$category_id   = get_option( 'default_product_cat', 0 );
+		$category      = get_term( $category_id, 'product_cat' );
 		$category_name = ( ! $category || is_wp_error( $category ) ) ? _x( 'Uncategorized', 'Default category slug', 'woocommerce' ) : $category->name;
 		?>
 		<div class="form-wrap edit-term-notes">
@@ -314,6 +316,12 @@ class WC_Admin_Taxonomies {
 					);
 				?>
 			</p>
+			<span 
+				id="default-category-tooltip"
+				class="woocommerce-help-tip"
+				data-tip="<?php esc_attr_e( 'This is the default category and it cannot be deleted. It will be automatically assigned to products with no category.', 'woocommerce' ) ?>"
+				data-category-id="<?php echo esc_attr( $category_id ) ?>">
+			</span>
 		</div>
 		<?php
 	}
