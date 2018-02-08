@@ -236,7 +236,7 @@ class WC_Structured_Data {
 			} else {
 				$markup_offer = array(
 					'@type' => 'Offer',
-					'price' => wc_format_decimal( $product->get_price(), wc_get_price_decimals() ),
+					'price' => wc_format_decimal( wc_get_price_to_display( $product ), wc_get_price_decimals() ),
 				);
 			}
 
