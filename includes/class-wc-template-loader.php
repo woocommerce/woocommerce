@@ -483,6 +483,16 @@ class WC_Template_Loader {
 	}
 
 	/**
+	 * Are we filtering content for unsupported themes?
+	 *
+	 * @since 3.3.2
+	 * @return bool
+	 */
+	public static function in_content_filter() {
+		return (bool) self::$in_content_filter;
+	}
+
+	/**
 	 * Prevent the main featured image on product pages because there will be another featured image
 	 * in the gallery.
 	 *
@@ -491,7 +501,7 @@ class WC_Template_Loader {
 	 * @return string
 	 */
 	public static function unsupported_theme_single_featured_image_filter( $html ) {
-		if ( self::$in_content_filter || ! is_product() || ! is_main_query() ) {
+		if ( self::in_content_filter() || ! is_product() || ! is_main_query() ) {
 			return $html;
 		}
 
