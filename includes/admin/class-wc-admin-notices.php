@@ -124,7 +124,7 @@ class WC_Admin_Notices {
 			}
 
 			if ( ! current_user_can( 'manage_woocommerce' ) ) {
-				wp_die( __( 'Cheatin&#8217; huh?', 'woocommerce' ) );
+				wp_die( __( 'You don&#8217;t have permission to do this.', 'woocommerce' ) );
 			}
 
 			$hide_notice = sanitize_text_field( $_GET['wc-hide-notice'] );
