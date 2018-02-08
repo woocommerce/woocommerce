@@ -131,8 +131,8 @@ class WC_Regenerate_Images {
 		if ( file_exists( $destfilename ) ) {
 			return array(
 				0 => str_replace( $wp_uploads_dir, $wp_uploads_url, $destfilename ),
-				1 => $image_size['width'],
-				2 => $image_size['height'],
+				1 => $dst_w,
+				2 => $dst_h,
 			);
 		}
 
@@ -146,8 +146,8 @@ class WC_Regenerate_Images {
 			$img_url = str_replace( $wp_uploads_dir, $wp_uploads_url, $resized_file['path'] );
 			return array(
 				0 => $img_url,
-				1 => $image_size['width'],
-				2 => $image_size['height'],
+				1 => $resized_file['width'],
+				2 => $resized_file['height'],
 			);
 		}
 
