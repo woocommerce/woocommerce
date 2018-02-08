@@ -82,33 +82,50 @@ class WC_Regenerate_Images {
 	}
 
 	/**
-	 * Regenerate the image according to the required size
+	 * Ensure we are dealing with the correct image attachment
 	 *
-	 * @param int    $attachment_id Attachment ID.
-	 * @param array  $image Original Image.
-	 * @param string $size Size to return for new URL.
-	 * @param bool   $icon If icon or not.
-	 * @return string
+	 * @param WP_Post $attachment Attachment object.
+	 * @return boolean
 	 */
-	private static function resize_and_return_image( $attachment_id, $image, $size, $icon ) {
-		$attachment = get_post( $attachment_id );
-		if ( ! $attachment || 'attachment' !== $attachment->post_type || 'image/' !== substr( $attachment->post_mime_type, 0, 6 ) ) {
-			return $image;
+	public static function is_regeneratable( $attachment ) {
+		if ( 'site-icon' === get_post_meta( $attachment->ID, '_wp_attachment_context', true ) ) {
+			return false;
 		}
 
-		if ( ! function_exists( 'wp_crop_image' ) ) {
-			include ABSPATH . 'wp-admin/includes/image.php';
+		if ( wp_attachment_is_image( $attachment ) ) {
+			return true;
 		}
 
-		$wp_uploads     = wp_upload_dir( null, false );
-		$wp_uploads_dir = $wp_uploads['basedir'];
-		$wp_uploads_url = $wp_uploads['baseurl'];
+		return false;
+	}
 
+	/**
+	 * Only regenerate images for these specific sizes.
+	 *
+	 * @param array $sizes Array of image sizes.
+	 * @return array
+	 */
+	public static function adjust_intermediate_image_sizes( $sizes ) {
+		return apply_filters( 'woocommerce_regenerate_images_intermediate_image_sizes', array( 'woocommerce_thumbnail', 'woocommerce_thumbnail_2x', 'woocommerce_single' ) );
+	}
+
+	/**
+	 * Check whether an attachment has the specific sizes on disk.
+	 *
+	 * @param WP_Post $attachment Attachment object.
+	 * @param array   $size Sizes to test.
+	 * @return boolean
+	 */
+	public static function should_generate_image( $attachment, $size ) {
 		$original_image_file_path = get_attached_file( $attachment->ID );
+		$editor                   = wp_get_image_editor( $original_image_file_path );
 
-		// Check if the file exists, if not just return the original image.
+		if ( is_wp_error( $editor ) ) {
+			return false;
+		}
+
 		if ( false === $original_image_file_path || is_wp_error( $original_image_file_path ) || ! file_exists( $original_image_file_path ) ) {
-			return $image;
+			return false;
 		}
 
 		$info = pathinfo( $original_image_file_path );
@@ -119,7 +136,7 @@ class WC_Regenerate_Images {
 		$image_size = wc_get_image_size( $size );
 		$dimensions = image_resize_dimensions( $orig_w, $orig_h, $image_size['width'], $image_size['height'], $image_size['crop'] );
 		if ( ! $dimensions || ! is_array( $dimensions ) ) {
-			return $image;
+			return false;
 		}
 
 		$dst_w        = $dimensions[4];
@@ -128,31 +145,66 @@ class WC_Regenerate_Images {
 		$dst_rel_path = str_replace( '.' . $ext, '', $original_image_file_path );
 		$destfilename = "{$dst_rel_path}-{$suffix}.{$ext}";
 
-		// If the file is already there perhaps just load it.
-		if ( file_exists( $destfilename ) ) {
-			return array(
-				0 => str_replace( $wp_uploads_dir, $wp_uploads_url, $destfilename ),
-				1 => $image_size['width'],
-				2 => $image_size['height'],
-			);
+		// If the file does not exist we should regenerate.
+		if ( ! file_exists( $destfilename ) ) {
+			return true;
 		}
+		return false;
+	}
 
-		// Lets resize the image if it does not exist yet.
-		$editor = wp_get_image_editor( $original_image_file_path );
-		if ( is_wp_error( $editor ) || is_wp_error( $editor->resize( $image_size['width'], $image_size['height'], $image_size['crop'] ) ) ) {
+	/**
+	 * Regenerate the image according to the required size
+	 *
+	 * @param int    $attachment_id Attachment ID.
+	 * @param array  $image Original Image.
+	 * @param string $size Size to return for new URL.
+	 * @param bool   $icon If icon or not.
+	 * @return string
+	 */
+	private static function resize_and_return_image( $attachment_id, $image, $size, $icon ) {
+		$attachment = get_post( $attachment_id );
+
+		if ( ! $attachment || 'attachment' !== $attachment->post_type || ! self::is_regeneratable( $attachment ) ) {
 			return $image;
 		}
-		$resized_file = $editor->save();
-		if ( ! is_wp_error( $resized_file ) ) {
-			$img_url = str_replace( $wp_uploads_dir, $wp_uploads_url, $resized_file['path'] );
-			return array(
-				0 => $img_url,
-				1 => $image_size['width'],
-				2 => $image_size['height'],
-			);
+
+		if ( ! function_exists( 'wp_crop_image' ) ) {
+			include ABSPATH . 'wp-admin/includes/image.php';
 		}
 
-		// Lets just add this here as a fallback.
+		if ( ! self::should_generate_image( $attachment, $size ) ) {
+			return $image;
+		}
+
+		$fullsizepath = get_attached_file( $attachment_id );
+		$old_metadata = wp_get_attachment_metadata( $attachment_id );
+
+		// We only want to regen WC images.
+		add_filter( 'intermediate_image_sizes', array( __CLASS__, 'adjust_intermediate_image_sizes' ) );
+
+		// This function will generate the new image sizes.
+		$new_metadata = wp_generate_attachment_metadata( $attachment_id, $fullsizepath );
+
+		// Remove custom filter.
+		remove_filter( 'intermediate_image_sizes', array( __CLASS__, 'adjust_intermediate_image_sizes' ) );
+
+		// If something went wrong lets just return the original image.
+		if ( is_wp_error( $new_metadata ) || empty( $new_metadata ) ) {
+			return $image;
+		}
+
+		if ( ! empty( $old_metadata ) && ! empty( $old_metadata['sizes'] ) && is_array( $old_metadata['sizes'] ) ) {
+			foreach ( $old_metadata['sizes'] as $old_size => $old_size_data ) {
+				if ( empty( $new_metadata['sizes'][ $old_size ] ) ) {
+					$new_metadata['sizes'][ $old_size ] = $old_metadata['sizes'][ $old_size ];
+				}
+			}
+		}
+
+		// Update the meta data with the new size values.
+		wp_update_attachment_metadata( $attachment_id, $new_metadata );
+
+		// If we made it here the image has been regenerated and we can simply continue with normal operation.
 		return $image;
 	}
 
