@@ -15,6 +15,10 @@ jQuery( function( $ ) {
 
 	$( table_selector ).find( '.column-handle' ).show();
 
+	$( document ).ajaxComplete( function() {
+		$( table_selector ).find( '.column-handle' ).show();
+	} );
+
 	$( table_selector ).sortable({
 		items: item_selector,
 		cursor: 'move',
