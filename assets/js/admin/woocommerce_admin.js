@@ -134,6 +134,7 @@ jQuery( function ( $ ) {
 		})
 
 		.on( 'init_tooltips', function() {
+
 			$( '.tips, .help_tip, .woocommerce-help-tip' ).tipTip( {
 				'attribute': 'data-tip',
 				'fadeIn': 50,
@@ -159,6 +160,10 @@ jQuery( function ( $ ) {
 		});
 
 	// Tooltips
+	$( document ).ajaxComplete( function() {
+		$( document.body ).trigger( 'init_tooltips' );
+	} );
+
 	$( document.body ).trigger( 'init_tooltips' );
 
 	// wc_input_table tables
