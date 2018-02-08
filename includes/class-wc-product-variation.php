@@ -484,7 +484,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @return bool
 	 */
 	public function variation_is_active() {
-		return apply_filters( 'woocommerce_variation_is_active', true, $this );
+		return apply_filters( 'woocommerce_variation_is_active', $this->variation_is_visible(), $this );
 	}
 
 	/**
