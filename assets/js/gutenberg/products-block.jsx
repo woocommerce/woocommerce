@@ -26,8 +26,6 @@ class ProductsSpecificSelect extends React.Component {
 
 		let selectProduct = this.state.selectProduct;
 
-		console.log('clicado?');
-
 		this.setState( {
 			selectProduct: selectProduct
 		} );
@@ -37,33 +35,64 @@ class ProductsSpecificSelect extends React.Component {
 		return (
 			<div className="product-specific-select">
 				<div className="add-new">
-					<button type="button" className="button button-large" onClick={ this.selectProduct }>{ __( 'Add product' ) }</button>
-				</div>
-				<Dropdown
-					className="my-container-class-name"
-					contentClassName="my-popover-content-classname"
-					position="bottom right"
-					renderToggle={ ( { isOpen, onToggle } ) => (
-						<button onClick={ onToggle } aria-expanded={ isOpen }>
-							Toggle Popover!
-						</button>
-					) }
-					renderContent={ () => (
-						<div>
-							<div role="menu" aria-orientation="vertical" aria-label="{ __( 'Products list' ) }">
-							<button type="button" role="menuitem" class="components-button">
-							Foo</button>
-							<button type="button" role="menuitem" class="components-button">
-							Bar</button>
+					<Dropdown
+						className="my-container-class-name"
+						contentClassName="my-popover-content-classname"
+						position="bottom right"
+						renderToggle={ ( { isOpen, onToggle } ) => (
+							<button className="button button-large" onClick={ onToggle } aria-expanded={ isOpen }>
+								{ __( 'Add product' ) }
+							</button>
+						) }
+						renderContent={ () => (
+							<div>
+								<ProductSpecifcSearch />
 							</div>
-						</div>
-					) }
-				/>
+						) }
+					/>
+				</div>
 				<ProductsSpecificList selectedProducts={ this.state.selectedProducts } />
 			</div>
 		);
 	}
 }
+
+const ProductSpecifcSearch = withAPIData( ( props ) => {
+		return {
+			products: '/wc/v2/products?per_page=10'
+		};
+	} )( ( { products } ) => {
+		if ( ! products.data ) {
+			return __( 'Loading' );
+		}
+
+		if ( 0 === products.data.length ) {
+			return __( 'No products found' );
+		}
+
+		const ProductsList = ( { products } ) => {
+			return ( products.length > 0 ) && (
+				<ul>
+					{ products.map( ( product ) => (
+						<li>
+							<button type="button" class="components-button" id={ 'product-' + product.id }>
+								<img src={ product.images[0].src } width="30px" /> { product.name }
+							</button>
+						</li>
+					) ) }
+				</ul>
+			);
+		};
+
+		let productsData = products.data;
+
+		return (
+			<div role="menu" aria-orientation="vertical" aria-label="{ __( 'Products list' ) }">
+				<ProductsList products={ productsData } />
+			</div>
+		);
+	}
+);
 
 const ProductsSpecificList = ( { selectedProducts } ) => {
 	if ( ! selectedProducts || 0 === selectedProducts.length ) {
