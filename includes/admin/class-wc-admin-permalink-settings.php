@@ -204,7 +204,7 @@ class WC_Admin_Permalink_Settings {
 			$shop_page_id   = wc_get_page_id( 'shop' );
 			$shop_permalink = ( $shop_page_id > 0 && get_post( $shop_page_id ) ) ? get_page_uri( $shop_page_id ) : _x( 'shop', 'default-slug', 'woocommerce' );
 
-			if ( $shop_page_id && trim( $permalinks['product_base'], '/' ) === $shop_permalink ) {
+			if ( $shop_page_id && stristr( trim( $permalinks['product_base'], '/' ), $shop_permalink ) ) {
 				$permalinks['use_verbose_page_rules'] = true;
 			}
 
