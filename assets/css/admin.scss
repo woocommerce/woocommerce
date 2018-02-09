@@ -2271,14 +2271,6 @@ ul.wc_coupon_list_block {
 	}
 }
 
-@media screen and (max-width: 782px) {
-	.wc-action-button-group {
-		label {
-			display: none;
-		}
-	}
-}
-
 .wc-action-button-group {
 	vertical-align: middle;
 	line-height: 26px;
@@ -2319,6 +2311,33 @@ ul.wc_coupon_list_block {
 	.wc-action-button:last-child {
 		border-top-right-radius: 3px !important;
 		border-bottom-right-radius: 3px !important;
+	}
+}
+
+@media screen and (max-width: 782px) {
+	.wc-order-preview .wc-action-button-group {
+		float: none;
+		margin: 0 0 10px;
+
+		label {
+			display: none;
+		}
+		.wc-action-button-group__items {
+			display: flex;
+			flex-direction: row;
+			flex-wrap: wrap;
+		}
+		.wc-action-button {
+			flex: 1;
+			float: none;
+			text-align: center;
+			max-width: 50%;
+		}
+	}
+	.button-large {
+		width: 100%;
+		float: none;
+		text-align: center;
 	}
 }
 
