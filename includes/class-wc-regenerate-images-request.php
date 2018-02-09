@@ -132,6 +132,16 @@ class WC_Regenerate_Images_Request extends WC_Background_Process {
 					$new_metadata['sizes'][ $old_size ] = $old_metadata['sizes'][ $old_size ];
 				}
 			}
+			// Handle legacy sizes.
+			if ( isset( $new_metadata['sizes']['shop_thumbnail'], $new_metadata['sizes']['woocommerce_thumbnail'] ) ) {
+				$new_metadata['sizes']['shop_thumbnail'] = $new_metadata['sizes']['woocommerce_thumbnail'];
+			}
+			if ( isset( $new_metadata['sizes']['shop_catalog'], $new_metadata['sizes']['woocommerce_thumbnail'] ) ) {
+				$new_metadata['sizes']['shop_catalog'] = $new_metadata['sizes']['woocommerce_thumbnail'];
+			}
+			if ( isset( $new_metadata['sizes']['shop_single'], $new_metadata['sizes']['woocommerce_single'] ) ) {
+				$new_metadata['sizes']['shop_single'] = $new_metadata['sizes']['woocommerce_single'];
+			}
 		}
 
 		// Update the meta data with the new size values.
