@@ -69,7 +69,7 @@ class WC_Meta_Box_Product_Images {
 				?>
 			</ul>
 
-			<input type="hidden" id="product_image_gallery" name="product_image_gallery" value="<?php echo esc_attr( $product_image_gallery ); ?>" />
+			<input type="hidden" id="product_image_gallery" name="product_image_gallery" value="<?php echo esc_attr( implode( ',', $updated_gallery_ids ) ) ?>" />
 
 		</div>
 		<p class="add_product_images hide-if-no-js">
