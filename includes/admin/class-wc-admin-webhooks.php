@@ -17,9 +17,9 @@ class WC_Admin_Webhooks {
 	 * Initialize the webhooks admin actions.
 	 */
 	public function __construct() {
-		add_filter( 'woocommerce_save_settings_api_webhooks', array( $this, 'allow_save_settings' ) );
 		add_action( 'admin_init', array( $this, 'actions' ) );
 		add_action( 'woocommerce_settings_page_init', array( $this, 'screen_option' ) );
+		add_filter( 'woocommerce_save_settings_api_webhooks', array( $this, 'allow_save_settings' ) );
 	}
 
 	/**

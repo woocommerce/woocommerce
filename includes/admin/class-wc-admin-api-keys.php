@@ -113,7 +113,7 @@ class WC_Admin_API_Keys {
 			'last_access'   => '',
 		);
 
-		if ( 0 == $key_id ) {
+		if ( 0 === $key_id ) {
 			return $empty;
 		}
 
@@ -135,13 +135,13 @@ class WC_Admin_API_Keys {
 	 */
 	public function actions() {
 		if ( $this->is_api_keys_settings_page() ) {
-			// Revoke key
-			if ( isset( $_GET['revoke-key'] ) ) {
+			// Revoke key.
+			if ( isset( $_GET['revoke-key'] ) ) { // WPCS: input var okay, CSRF ok.
 				$this->revoke_key();
 			}
 
-			// Bulk actions
-			if ( isset( $_GET['action'] ) && isset( $_GET['key'] ) ) {
+			// Bulk actions.
+			if ( isset( $_GET['action'] ) && isset( $_GET['key'] ) ) { // WPCS: input var okay, CSRF ok.
 				$this->bulk_actions();
 			}
 		}
@@ -151,7 +151,7 @@ class WC_Admin_API_Keys {
 	 * Notices.
 	 */
 	public static function notices() {
-		if ( isset( $_GET['revoked'] ) && 1 == $_GET['revoked'] ) {
+		if ( isset( $_GET['revoked'] ) && 1 === $_GET['revoked'] ) { // WPCS: input var okay, CSRF ok.
 			WC_Admin_Settings::add_message( __( 'API key revoked successfully.', 'woocommerce' ) );
 		}
 	}
@@ -160,12 +160,15 @@ class WC_Admin_API_Keys {
 	 * Revoke key.
 	 */
 	private function revoke_key() {
-		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'revoke' ) ) {
-			wp_die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
-		}
+		check_admin_referer( 'revoke' );
 
-		$key_id = absint( $_GET['revoke-key'] );
-		$this->remove_key( $key_id );
+		if ( isset( $_GET['revoke-key'] ) ) { // WPCS: input var okay, CSRF ok.
+			$key_id = absint( $_GET['revoke-key'] ); // WPCS: input var okay, CSRF ok.
+
+			if ( $key_id ) {
+				$this->remove_key( $key_id );
+			}
+		}
 
 		wp_redirect( esc_url_raw( add_query_arg( array( 'revoked' => 1 ), admin_url( 'admin.php?page=wc-settings&tab=api&section=keys' ) ) ) );
 		exit();
@@ -175,21 +178,26 @@ class WC_Admin_API_Keys {
 	 * Bulk actions.
 	 */
 	private function bulk_actions() {
-		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce-settings' ) ) {
-			wp_die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
+		check_admin_referer( 'woocommerce-settings' );
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_die( esc_html__( 'You do not have permission to edit API Keys', 'woocommerce' ) );
 		}
 
-		$keys = array_map( 'absint', (array) $_GET['key'] );
+		if ( isset( $_GET['action'] ) ) { // WPCS: input var okay, CSRF ok.
+			$action = sanitize_text_field( wp_unslash( $_GET['action'] ) ); // WPCS: input var okay, CSRF ok.
+			$keys   = isset( $_GET['key'] ) ? array_map( 'absint', (array) $_GET['key'] ) : array(); // WPCS: input var okay, CSRF ok.
 
-		if ( 'revoke' == $_GET['action'] ) {
-			$this->bulk_revoke_key( $keys );
+			if ( 'revoke' === $action ) {
+				$this->bulk_revoke_key( $keys );
+			}
 		}
 	}
 
 	/**
 	 * Bulk revoke key.
 	 *
-	 * @param array $keys
+	 * @param array $keys API Keys.
 	 */
 	private function bulk_revoke_key( $keys ) {
 		foreach ( $keys as $key_id ) {
@@ -200,7 +208,7 @@ class WC_Admin_API_Keys {
 	/**
 	 * Remove key.
 	 *
-	 * @param  int $key_id
+	 * @param  int $key_id API Key ID.
 	 * @return bool
 	 */
 	private function remove_key( $key_id ) {

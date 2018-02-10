@@ -85,7 +85,9 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 			/* translators: %s: API key ID. */
 			'id'    => sprintf( __( 'ID: %d', 'woocommerce' ), $key['key_id'] ),
 			'edit'  => '<a href="' . esc_url( $url ) . '">' . __( 'View/Edit', 'woocommerce' ) . '</a>',
-			'trash' => '<a class="submitdelete" aria-label="' . esc_attr__( 'Revoke API key', 'woocommerce' ) . '" href="' . esc_url( wp_nonce_url( add_query_arg( array( 'revoke-key' => $key['key_id'] ), admin_url( 'admin.php?page=wc-settings&tab=api&section=keys' ) ), 'revoke' ) ) . '">' . __( 'Revoke', 'woocommerce' ) . '</a>',
+			'trash' => '<a class="submitdelete" aria-label="' . esc_attr__( 'Revoke API key', 'woocommerce' ) . '" href="' . esc_url( wp_nonce_url( add_query_arg( array(
+				'revoke-key' => $key['key_id'],
+			), admin_url( 'admin.php?page=wc-settings&tab=api&section=keys' ) ), 'revoke' ) ) . '">' . esc_html__( 'Revoke', 'woocommerce' ) . '</a>',
 		);
 
 		$row_actions = array();
