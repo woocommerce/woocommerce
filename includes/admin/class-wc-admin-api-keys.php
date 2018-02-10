@@ -59,7 +59,7 @@ class WC_Admin_API_Keys {
 	public function screen_option() {
 		global $keys_table_list;
 
-		if ( ! isset( $_GET['create-key'], $_GET['edit-key'] ) && $this->is_api_keys_settings_page() ) {
+		if ( ! isset( $_GET['create-key'] ) && ! isset( $_GET['edit-key'] ) && $this->is_api_keys_settings_page() ) {
 			$keys_table_list = new WC_Admin_API_Keys_Table_List();
 
 			// Add screen option.
