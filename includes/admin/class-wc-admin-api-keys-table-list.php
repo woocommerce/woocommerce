@@ -42,7 +42,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	public function get_columns() {
 		return array(
 			'cb'            => '<input type="checkbox" />',
-			'description'   => __( 'Description', 'woocommerce' ),
+			'title'         => __( 'Description', 'woocommerce' ),
 			'truncated_key' => __( 'Consumer key ending in', 'woocommerce' ),
 			'user'          => __( 'User', 'woocommerce' ),
 			'permissions'   => __( 'Permissions', 'woocommerce' ),
@@ -66,7 +66,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	 * @param  array $key
 	 * @return string
 	 */
-	public function column_description( $key ) {
+	public function column_title( $key ) {
 		$url = admin_url( 'admin.php?page=wc-settings&tab=api&section=keys&edit-key=' . $key['key_id'] );
 
 		$output = '<strong>';
