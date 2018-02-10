@@ -237,6 +237,10 @@ function wc_save_order_items( $order_id, $items ) {
 					$meta_key   = wp_unslash( $meta_key );
 					$meta_value = isset( $items['meta_value'][ $item_id ][ $meta_id ] ) ? wp_unslash( $items['meta_value'][ $item_id ][ $meta_id ] ): '';
 
+					if ( strlen( $meta_key ) > 255 ) {
+						$meta_key = substr( $meta_key, 0, 255 );
+					}
+
 					if ( '' === $meta_key && '' === $meta_value ) {
 						if ( ! strstr( $meta_id, 'new-' ) ) {
 							$item->delete_meta_data_by_mid( $meta_id );
