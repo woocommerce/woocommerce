@@ -17,7 +17,7 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 
 	/**
-	 * Initialize the webhook table list.
+	 * Initialize the API key table list.
 	 */
 	public function __construct() {
 		parent::__construct( array(
@@ -25,6 +25,13 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 			'plural'   => 'keys',
 			'ajax'     => false,
 		) );
+	}
+
+	/**
+	 * No items found text.
+	 */
+	public function no_items() {
+		esc_html_e( 'No keys found.', 'woocommerce' );
 	}
 
 	/**

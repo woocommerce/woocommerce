@@ -31,6 +31,13 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	}
 
 	/**
+	 * No items found text.
+	 */
+	public function no_items() {
+		esc_html_e( 'No webhooks found.', 'woocommerce' );
+	}
+
+	/**
 	 * Get list columns.
 	 *
 	 * @return array
