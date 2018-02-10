@@ -1002,6 +1002,22 @@ h3.jetpack-reasons {
 			font-weight: 600;
 		}
 	}
+
+	.wc-wizard-additional-steps {
+		border-top: 1px solid #eee;
+
+		.wc-wizard-next-step-description {
+			margin-bottom: 0;
+		}
+
+		.wc-setup-actions {
+			margin: 0 0 1.5em 0;
+
+			.button {
+				font-size: 15px;
+			}
+		}
+	}
 }
 
 p.next-steps-help-text {

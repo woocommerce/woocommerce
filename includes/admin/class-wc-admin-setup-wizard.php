@@ -1943,6 +1943,24 @@ class WC_Admin_Setup_Wizard {
 					</p>
 				</div>
 			</li>
+			<li class="wc-wizard-additional-steps">
+				<div class="wc-wizard-next-step-description">
+					<p class="next-step-heading"><?php esc_html_e( 'You can also:', 'woocommerce' ); ?></p>
+				</div>
+				<div class="wc-wizard-next-step-action">
+					<p class="wc-setup-actions step">
+						<a class="button button-large" href="<?php echo esc_url( admin_url() ); ?>">
+							<?php esc_html_e( 'Visit Dashboard', 'woocommerce' ); ?>
+						</a>
+						<a class="button button-large" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings' ) ); ?>">
+							<?php esc_html_e( 'Review Settings', 'woocommerce' ); ?>
+						</a>
+						<a class="button button-large" href="<?php echo esc_url( add_query_arg( array( 'autofocus' => array( 'panel' => 'woocommerce' ), 'url' => wc_get_page_permalink( 'shop' ) ), admin_url( 'customize.php' ) ) ); ?>">
+							<?php esc_html_e( 'View &amp; Customize', 'woocommerce' ); ?>
+						</a>
+					</p>
+				</div>
+			</li>
 		</ul>
 		<p class="next-steps-help-text"><?php echo wp_kses_post( $help_text ); ?></p>
 		<?php
