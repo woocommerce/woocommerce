@@ -6,9 +6,7 @@
  * @version 3.3.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Webhooks.
@@ -274,7 +272,7 @@ class WC_Admin_Webhooks {
 	public function screen_option() {
 		global $webhooks_table_list;
 
-		if ( ! isset( $_GET['edit-webhook'] ) && $this->is_webhook_settings_page() ) {
+		if ( ! isset( $_GET['edit-webhook'] ) && $this->is_webhook_settings_page() ) { // WPCS: input var okay, CSRF ok.
 			$webhooks_table_list = new WC_Admin_Webhooks_Table_List();
 
 			// Add screen option.
@@ -312,9 +310,8 @@ class WC_Admin_Webhooks {
 			?>
 			<h2 class="woocommerce-BlankState-message"><?php esc_html_e( 'Webhooks are event notifications sent to URLs of your choice. They can be used to integrate with third-party services which support them.', 'woocommerce' ); ?></h2>
 			<a class="woocommerce-BlankState-cta button-primary button" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=0' ) ); ?>"><?php esc_html_e( 'Create a new webhook', 'woocommerce' ); ?></a>
-
+			<style type="text/css">#posts-filter .wp-list-table, #posts-filter .tablenav.top, .tablenav.bottom .actions { display: none; }</style>
 			<?php
-				echo '<style type="text/css">#posts-filter .wp-list-table, #posts-filter .tablenav.top, .tablenav.bottom .actions  { display: none; } </style></div>';
 		}
 	}
 

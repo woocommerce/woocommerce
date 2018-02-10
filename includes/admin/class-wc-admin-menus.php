@@ -2,13 +2,11 @@
 /**
  * Setup menus in WP admin.
  *
- * @package WooCommerce/Admin
+ * @package WooCommerce\Admin
  * @version 2.5.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 if ( class_exists( 'WC_Admin_Menus', false ) ) {
 	return new WC_Admin_Menus();

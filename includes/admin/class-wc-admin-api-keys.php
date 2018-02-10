@@ -6,9 +6,7 @@
  * @version 2.4.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_API_Keys.
@@ -25,29 +23,25 @@ class WC_Admin_API_Keys {
 
 	/**
 	 * Check if is API Keys settings page.
+	 *
 	 * @return bool
 	 */
 	private function is_api_keys_settings_page() {
-		return isset( $_GET['page'] )
-			&& 'wc-settings' === $_GET['page']
-			&& isset( $_GET['tab'] )
-			&& 'api' === $_GET['tab']
-			&& isset( $_GET['section'] )
-			&& 'keys' === $_GET['section'];
+		return isset( $_GET['page'], $_GET['tab'], $_GET['section'] ) && 'wc-settings' === $_GET['page'] && 'api' === $_GET['tab'] && 'keys' === $_GET['section']; // WPCS: input var okay, CSRF ok.
 	}
 
 	/**
 	 * Page output.
 	 */
 	public static function page_output() {
-		// Hide the save button
+		// Hide the save button.
 		$GLOBALS['hide_save_button'] = true;
 
 		if ( isset( $_GET['create-key'] ) || isset( $_GET['edit-key'] ) ) {
-			$key_id   = isset( $_GET['edit-key'] ) ? absint( $_GET['edit-key'] ) : 0;
+			$key_id   = isset( $_GET['edit-key'] ) ? absint( $_GET['edit-key'] ) : 0; // WPCS: input var okay, CSRF ok.
 			$key_data = self::get_key_data( $key_id );
 
-			include( 'settings/views/html-keys-edit.php' );
+			include 'settings/views/html-keys-edit.php';
 		} else {
 			self::table_list_output();
 		}
@@ -59,7 +53,7 @@ class WC_Admin_API_Keys {
 	public function screen_option() {
 		global $keys_table_list;
 
-		if ( ! isset( $_GET['create-key'] ) && ! isset( $_GET['edit-key'] ) && $this->is_api_keys_settings_page() ) {
+		if ( ! isset( $_GET['create-key'] ) && ! isset( $_GET['edit-key'] ) && $this->is_api_keys_settings_page() ) { // WPCS: input var okay, CSRF ok.
 			$keys_table_list = new WC_Admin_API_Keys_Table_List();
 
 			// Add screen option.
@@ -76,9 +70,9 @@ class WC_Admin_API_Keys {
 	private static function table_list_output() {
 		global $wpdb, $keys_table_list;
 
-		echo '<h2>' . __( 'Keys/Apps', 'woocommerce' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=keys&create-key=1' ) ) . '" class="add-new-h2">' . __( 'Add key', 'woocommerce' ) . '</a></h2>';
+		echo '<h2>' . esc_html__( 'Keys/Apps', 'woocommerce' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=keys&create-key=1' ) ) . '" class="add-new-h2">' . esc_html__( 'Add key', 'woocommerce' ) . '</a></h2>';
 
-		// Get the API keys count
+		// Get the API keys count.
 		$count = $wpdb->get_var( "SELECT COUNT(key_id) FROM {$wpdb->prefix}woocommerce_api_keys WHERE 1 = 1;" );
 
 		if ( absint( $count ) && $count > 0 ) {
@@ -94,17 +88,17 @@ class WC_Admin_API_Keys {
 		} else {
 			echo '<div class="woocommerce-BlankState woocommerce-BlankState--api">';
 			?>
-			<h2 class="woocommerce-BlankState-message"><?php _e( 'The WooCommerce REST API allows external apps to view and manage store data. Access is granted only to those with valid API keys.', 'woocommerce' ); ?></h2>
-			<a class="woocommerce-BlankState-cta button-primary button" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=keys&create-key=1' ) ); ?>"><?php _e( 'Create an API key', 'woocommerce' ); ?></a>
-
-			<?php echo '<style type="text/css">#posts-filter .wp-list-table, #posts-filter .tablenav.top, .tablenav.bottom .actions  { display: none; } </style></div>';
+			<h2 class="woocommerce-BlankState-message"><?php esc_html_e( 'The WooCommerce REST API allows external apps to view and manage store data. Access is granted only to those with valid API keys.', 'woocommerce' ); ?></h2>
+			<a class="woocommerce-BlankState-cta button-primary button" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=keys&create-key=1' ) ); ?>"><?php esc_html_e( 'Create an API key', 'woocommerce' ); ?></a>
+			<style type="text/css">#posts-filter .wp-list-table, #posts-filter .tablenav.top, .tablenav.bottom .actions { display: none; }</style>
+			<?php
 		}
 	}
 
 	/**
 	 * Get key data.
 	 *
-	 * @param  int $key_id
+	 * @param  int $key_id API Key ID.
 	 * @return array
 	 */
 	private static function get_key_data( $key_id ) {
