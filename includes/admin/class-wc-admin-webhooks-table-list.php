@@ -2,16 +2,14 @@
 /**
  * WooCommerce Webhooks Table List
  *
- * @package  WooCommerce/Admin
- * @version  3.3.0
+ * @package WooCommerce\Admin
+ * @version 3.3.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
-}
+defined( 'ABSPATH' ) || exit;
 
 if ( ! class_exists( 'WP_List_Table' ) ) {
-	require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
+	require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
 }
 
 /**
@@ -283,7 +281,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 		// Get total items.
 		$args['limit']  = -1;
 		$args['offset'] = 0;
-		$total_items = count( $data_store->search_webhooks( $args ) );
+		$total_items    = count( $data_store->search_webhooks( $args ) );
 
 		// Set the pagination.
 		$this->set_pagination_args( array(
