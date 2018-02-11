@@ -60,13 +60,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</tr>
 				<tr class="woocommerce-importer-advanced hidden">
 					<th>
-						<label for="woocommerce-importer-file-url"><?php esc_html_e( '<em>or</em> enter the path to a CSV file on your server:', 'woocommerce' ); ?></label>
+						<label for="woocommerce-importer-file-url"><?php esc_html_e( 'Enter the path to a CSV file on your server:', 'woocommerce' ); ?></label>
 					</th>
 					<td>
 						<label for="woocommerce-importer-file-url" class="woocommerce-importer-file-url-field-wrapper">
 							<code><?php echo esc_html( ABSPATH ) . ' '; ?></code><input type="text" id="woocommerce-importer-file-url" name="file_url" />
 						</label>
 					</td>
+				</tr>
+				<tr class="woocommerce-importer-advanced hidden">
+					<th><label><?php esc_html_e( 'Import sample products', 'woocommerce' ); ?></label><br/></th>
+					<td><input type="checkbox" name="sample_products" value="1" /></td>
 				</tr>
 				<tr class="woocommerce-importer-advanced hidden">
 					<th><label><?php esc_html_e( 'CSV Delimiter', 'woocommerce' ); ?></label><br/></th>
@@ -87,6 +91,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 					jQuery( this ).text( jQuery( this ).data( 'showtext' ) );
 				}
 				return false;
+			} );
+			jQuery( 'input[name="file_url"]' ).on( 'keyup focusout', function() {
+				jQuery( 'input[name="import"]' ).prop( 'disabled', jQuery( this ).val().length !== 0 );
+			} );
+			jQuery( 'input[name="sample_products"]' ).on( 'click', function() {
+				jQuery( 'input[name="file_url"]' ).prop( 'disabled', jQuery( this ).is( ':checked' ) );
+
+				if ( jQuery( 'input[name="file_url"]' ).val().length === 0 ) {
+					jQuery( 'input[name="import"]' ).prop( 'disabled', jQuery( this ).is( ':checked' ) );
+				}
 			} );
 		});
 	</script>
