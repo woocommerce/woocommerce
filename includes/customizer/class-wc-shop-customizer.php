@@ -156,7 +156,7 @@ class WC_Shop_Customizer {
 					setting.bind( function( value ) {
 						var min = parseInt( '<?php echo esc_js( $min_rows ); ?>', 10 );
 						var max = parseInt( '<?php echo esc_js( $max_rows ); ?>', 10 );
-						
+
 						value = parseInt( value, 10 );
 
 						if ( max && value > max ) {
@@ -496,7 +496,7 @@ class WC_Shop_Customizer {
 				'woocommerce_thumbnail_image_width',
 				array(
 					'label'       => __( 'Thumbnail width', 'woocommerce' ),
-					'description' => __( 'Image size used for products in the catalog and product gallery thumbnails.', 'woocommerce' ),
+					'description' => __( 'Image size used for products in the catalog.', 'woocommerce' ),
 					'section'     => 'woocommerce_product_images',
 					'settings'    => 'woocommerce_thumbnail_image_width',
 					'type'        => 'number',
