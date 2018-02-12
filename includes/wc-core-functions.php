@@ -722,6 +722,13 @@ function wc_get_image_size( $image_size ) {
 		'crop'   => 1,
 	);
 
+	// Size mapping.
+	if ( in_array( $image_size, array( 'shop_single', 'woocommerce_single' ), true ) ) {
+		$image_size = 'single';
+	} elseif ( in_array( $image_size, array( 'shop_thumbnail', 'shop_catalog', 'woocommerce_thumbnail' ), true ) ) {
+		$image_size = 'thumbnail';
+	}
+
 	if ( is_array( $image_size ) ) {
 		$size       = array(
 			'width'  => isset( $image_size[0] ) ? absint( $image_size[0] ) : 600,
@@ -729,12 +736,18 @@ function wc_get_image_size( $image_size ) {
 			'crop'   => isset( $image_size[2] ) ? absint( $image_size[2] ) : 1,
 		);
 		$image_size = $size['width'] . '_' . $size['height'];
-	} elseif ( in_array( $image_size, array( 'single', 'shop_single', 'woocommerce_single' ), true ) ) {
+
+	} elseif ( 'single' === $image_size ) {
 		$size['width']  = absint( wc_get_theme_support( 'single_image_width', get_option( 'woocommerce_single_image_width', 600 ) ) );
 		$size['height'] = '';
 		$size['crop']   = 0;
-		$image_size     = 'single';
-	} elseif ( in_array( $image_size, array( 'thumbnail', 'shop_thumbnail', 'shop_catalog', 'woocommerce_thumbnail' ), true ) ) {
+
+	} elseif ( 'gallery_thumbnail' === $image_size ) {
+		$size['width']  = absint( wc_get_theme_support( 'gallery_thumbnail_image_width', 100 ) );
+		$size['height'] = $size['width'];
+		$size['crop']   = 1;
+
+	} elseif ( 'thumbnail' === $image_size ) {
 		$size['width'] = absint( wc_get_theme_support( 'thumbnail_image_width', get_option( 'woocommerce_thumbnail_image_width', 300 ) ) );
 		$cropping      = get_option( 'woocommerce_thumbnail_cropping', '1:1' );
 
@@ -753,7 +766,6 @@ function wc_get_image_size( $image_size ) {
 			$size['height'] = round( ( $size['width'] / $width ) * $height );
 			$size['crop']   = 1;
 		}
-		$image_size = 'thumbnail';
 	}
 
 	return apply_filters( 'woocommerce_get_image_size_' . $image_size, $size );
