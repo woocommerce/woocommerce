@@ -22,6 +22,10 @@ jQuery( function( $ ) {
 			return true;
 		}
 
+		if ( window.getSelection && window.getSelection().toString().length ) {
+			return true;
+		}
+
 		var $row = $( this ).closest( 'tr' ),
 			href = $row.find( 'a.order-view' ).attr( 'href' );
 
