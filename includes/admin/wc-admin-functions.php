@@ -234,12 +234,8 @@ function wc_save_order_items( $order_id, $items ) {
 
 			if ( isset( $items['meta_key'][ $item_id ], $items['meta_value'][ $item_id ] ) ) {
 				foreach ( $items['meta_key'][ $item_id ] as $meta_id => $meta_key ) {
-					$meta_key   = wp_unslash( $meta_key );
+					$meta_key   = substr( wp_unslash( $meta_key ), 0, 255 );
 					$meta_value = isset( $items['meta_value'][ $item_id ][ $meta_id ] ) ? wp_unslash( $items['meta_value'][ $item_id ][ $meta_id ] ): '';
-
-					if ( strlen( $meta_key ) > 255 ) {
-						$meta_key = substr( $meta_key, 0, 255 );
-					}
 
 					if ( '' === $meta_key && '' === $meta_value ) {
 						if ( ! strstr( $meta_id, 'new-' ) ) {
