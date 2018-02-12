@@ -70,6 +70,8 @@
 "use strict";
 
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -292,11 +294,108 @@ var ProductCategoryList = withAPIData(function (props) {
 });
 
 /**
+ * One option from the list of all available ways to display products.
+ */
+
+var ProductsBlockSettingsEditorDisplayOption = function (_React$Component3) {
+	_inherits(ProductsBlockSettingsEditorDisplayOption, _React$Component3);
+
+	function ProductsBlockSettingsEditorDisplayOption() {
+		_classCallCheck(this, ProductsBlockSettingsEditorDisplayOption);
+
+		return _possibleConstructorReturn(this, (ProductsBlockSettingsEditorDisplayOption.__proto__ || Object.getPrototypeOf(ProductsBlockSettingsEditorDisplayOption)).apply(this, arguments));
+	}
+
+	_createClass(ProductsBlockSettingsEditorDisplayOption, [{
+		key: "render",
+		value: function render() {
+			var _this4 = this;
+
+			return wp.element.createElement(
+				"div",
+				{ className: "wc-products-display-option", onClick: function onClick() {
+						_this4.props.update_display_callback(_this4.props.value);
+					} },
+				wp.element.createElement(
+					"h4",
+					null,
+					this.props.title
+				),
+				wp.element.createElement(
+					"p",
+					null,
+					this.props.description
+				)
+			);
+		}
+	}]);
+
+	return ProductsBlockSettingsEditorDisplayOption;
+}(React.Component);
+
+/**
+ * A list of all available ways to display products.
+ */
+
+
+var ProductsBlockSettingsEditorDisplayOptions = function (_React$Component4) {
+	_inherits(ProductsBlockSettingsEditorDisplayOptions, _React$Component4);
+
+	function ProductsBlockSettingsEditorDisplayOptions() {
+		_classCallCheck(this, ProductsBlockSettingsEditorDisplayOptions);
+
+		return _possibleConstructorReturn(this, (ProductsBlockSettingsEditorDisplayOptions.__proto__ || Object.getPrototypeOf(ProductsBlockSettingsEditorDisplayOptions)).apply(this, arguments));
+	}
+
+	_createClass(ProductsBlockSettingsEditorDisplayOptions, [{
+		key: "render",
+		value: function render() {
+			var _this6 = this;
+
+			var products_block_display_settings = [{
+				title: __('All'),
+				description: __('All products'),
+				value: 'all'
+			}, {
+				title: __('Specific'),
+				description: __('Hand-picked products'),
+				value: 'specific'
+			}, {
+				title: __('Category'),
+				description: __('Products from a specific category'),
+				value: 'category'
+			}];
+
+			var classes = 'display-settings-container';
+			if (this.props.existing) {
+				classes += ' existing';
+			}
+
+			return wp.element.createElement(
+				"div",
+				{ className: classes },
+				wp.element.createElement(
+					"p",
+					null,
+					__('Select the scope for products to display:')
+				),
+				products_block_display_settings.map(function (setting) {
+					return wp.element.createElement(ProductsBlockSettingsEditorDisplayOption, _extends({}, setting, { update_display_callback: _this6.props.update_display_callback }));
+				})
+			);
+		}
+	}]);
+
+	return ProductsBlockSettingsEditorDisplayOptions;
+}(React.Component);
+
+/**
  * The products block when in Edit mode.
  */
 
-var ProductsBlockSettingsEditor = function (_React$Component3) {
-	_inherits(ProductsBlockSettingsEditor, _React$Component3);
+
+var ProductsBlockSettingsEditor = function (_React$Component5) {
+	_inherits(ProductsBlockSettingsEditor, _React$Component5);
 
 	/**
   * Constructor.
@@ -304,14 +403,15 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 	function ProductsBlockSettingsEditor(props) {
 		_classCallCheck(this, ProductsBlockSettingsEditor);
 
-		var _this3 = _possibleConstructorReturn(this, (ProductsBlockSettingsEditor.__proto__ || Object.getPrototypeOf(ProductsBlockSettingsEditor)).call(this, props));
+		var _this7 = _possibleConstructorReturn(this, (ProductsBlockSettingsEditor.__proto__ || Object.getPrototypeOf(ProductsBlockSettingsEditor)).call(this, props));
 
-		_this3.state = {
-			display: props.selected_display
+		_this7.state = {
+			display: props.selected_display,
+			menu_visible: props.selected_display ? false : true
 		};
 
-		_this3.updateDisplay = _this3.updateDisplay.bind(_this3);
-		return _this3;
+		_this7.updateDisplay = _this7.updateDisplay.bind(_this7);
+		return _this7;
 	}
 
 	/**
@@ -323,12 +423,13 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 
 	_createClass(ProductsBlockSettingsEditor, [{
 		key: "updateDisplay",
-		value: function updateDisplay(evt) {
+		value: function updateDisplay(value) {
 			this.setState({
-				display: evt.target.value
+				display: value,
+				menu_visible: false
 			});
 
-			this.props.update_display_callback(evt.target.value);
+			this.props.update_display_callback(value);
 		}
 
 		/**
@@ -338,6 +439,8 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 	}, {
 		key: "render",
 		value: function render() {
+			var _this8 = this;
+
 			var extra_settings = null;
 			if ('specific' === this.state.display) {
 				extra_settings = wp.element.createElement(ProductsSpecificSelect, null);
@@ -345,38 +448,48 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 				extra_settings = wp.element.createElement(ProductsCategorySelect, this.props);
 			}
 
+			var menu = this.state.menu_visible ? wp.element.createElement(ProductsBlockSettingsEditorDisplayOptions, { existing: this.state.display ? true : false, update_display_callback: this.updateDisplay }) : null;
+
+			var heading = wp.element.createElement(
+				"h4",
+				null,
+				__('Products')
+			);
+			if (this.state.display && !this.state.menu_visible) {
+				heading = wp.element.createElement(
+					"h4",
+					null,
+					__('Displaying ' + this.state.display),
+					" ",
+					wp.element.createElement(
+						"a",
+						{ onClick: function onClick() {
+								_this8.setState({ menu_visible: true });
+							} },
+						__('Change')
+					)
+				);
+			} else if (this.state.display) {
+				heading = wp.element.createElement(
+					"h4",
+					null,
+					__('Displaying ' + this.state.display),
+					" ",
+					wp.element.createElement(
+						"a",
+						{ onClick: function onClick() {
+								_this8.setState({ menu_visible: false });
+							} },
+						__('Cancel')
+					)
+				);
+			}
+
 			return wp.element.createElement(
 				"div",
 				{ className: "wc-product-display-settings" },
-				wp.element.createElement(
-					"h4",
-					null,
-					__('Products')
-				),
-				wp.element.createElement(
-					"div",
-					{ className: "display-select" },
-					__('Display:'),
-					wp.element.createElement(
-						"select",
-						{ value: this.state.display, onChange: this.updateDisplay },
-						wp.element.createElement(
-							"option",
-							{ value: "all" },
-							__('All')
-						),
-						wp.element.createElement(
-							"option",
-							{ value: "specific" },
-							__('Specific products')
-						),
-						wp.element.createElement(
-							"option",
-							{ value: "category" },
-							__('Product Category')
-						)
-					)
-				),
+				heading,
+				menu,
 				extra_settings,
 				wp.element.createElement(
 					"div",
@@ -399,8 +512,8 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
  */
 
 
-var ProductPreview = function (_React$Component4) {
-	_inherits(ProductPreview, _React$Component4);
+var ProductPreview = function (_React$Component6) {
+	_inherits(ProductPreview, _React$Component6);
 
 	function ProductPreview() {
 		_classCallCheck(this, ProductPreview);
@@ -614,7 +727,7 @@ registerBlockType('woocommerce/products', {
    */
 		display: {
 			type: 'string',
-			default: 'all'
+			default: ''
 		},
 
 		/**

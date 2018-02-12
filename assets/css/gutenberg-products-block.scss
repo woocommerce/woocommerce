@@ -86,9 +86,24 @@
 	font-size: 13px;
 	padding: 1em;
 	min-height: 200px;
+	position: relative;
 
-	h4 {
+	> h4 {
 		text-align: center;
+	}
+
+	.display-settings-container {
+		background-color: #ffffff;
+
+		&.existing {
+			position: absolute;
+			width: 100%;
+			z-index: 999;
+		}
+	}
+
+	.wc-products-display-option {
+		border: 1px solid gray; // @todo remove this when doing real styles.
 	}
 
 	.display-select {

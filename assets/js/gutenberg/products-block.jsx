@@ -147,6 +147,59 @@ const ProductCategoryList = withAPIData( ( props ) => {
 );
 
 /**
+ * One option from the list of all available ways to display products.
+ */
+class ProductsBlockSettingsEditorDisplayOption extends React.Component {
+	render() {
+		return (
+			<div className="wc-products-display-option" onClick={ () => { this.props.update_display_callback( this.props.value ) } } >
+				<h4>{ this.props.title }</h4>
+				<p>{ this.props.description }</p>
+			</div>
+		);
+	}
+}
+
+/**
+ * A list of all available ways to display products.
+ */
+class ProductsBlockSettingsEditorDisplayOptions extends React.Component {
+	render() {
+		const products_block_display_settings = [
+			{
+				title: __( 'All' ),
+				description: __( 'All products' ),
+				value: 'all',
+			},
+			{
+				title: __( 'Specific' ),
+				description: __( 'Hand-picked products' ),
+				value: 'specific',
+			},
+			{
+				title: __( 'Category' ),
+				description: __( 'Products from a specific category' ),
+				value: 'category',
+			}
+		];
+
+		let classes = 'display-settings-container';
+		if ( this.props.existing ) {
+			classes += ' existing';
+		}
+
+		return (
+			<div className={ classes }>
+				<p>{ __( 'Select the scope for products to display:' ) }</p>
+				{ products_block_display_settings.map( ( setting ) =>
+					<ProductsBlockSettingsEditorDisplayOption { ...setting } update_display_callback={ this.props.update_display_callback } />
+				) }
+			</div>
+		);
+	}
+}
+
+/**
  * The products block when in Edit mode.
  */
 class ProductsBlockSettingsEditor extends React.Component {
@@ -157,7 +210,8 @@ class ProductsBlockSettingsEditor extends React.Component {
 	constructor( props ) {
 		super( props );
 		this.state = {
-			display: props.selected_display
+			display: props.selected_display,
+			menu_visible: props.selected_display ? false : true,
 		}
 
 		this.updateDisplay = this.updateDisplay.bind( this );
@@ -168,12 +222,13 @@ class ProductsBlockSettingsEditor extends React.Component {
 	 *
 	 * @param Event object evt
 	 */
-	updateDisplay( evt ) {
+	updateDisplay( value ) {
 		this.setState( {
-			display: evt.target.value
+			display: value,
+			menu_visible: false,
 		} );
 
-		this.props.update_display_callback( evt.target.value );
+		this.props.update_display_callback( value );
 	}
 
 	/**
@@ -187,19 +242,21 @@ class ProductsBlockSettingsEditor extends React.Component {
 			extra_settings = <ProductsCategorySelect { ...this.props } />;
 		}
 
+		const menu = this.state.menu_visible ? <ProductsBlockSettingsEditorDisplayOptions existing={ this.state.display ? true : false } update_display_callback={ this.updateDisplay } /> : null;
+
+		let heading = <h4>{ __( 'Products' ) }</h4>;
+		if ( this.state.display && ! this.state.menu_visible ) {
+			heading = <h4>{ __( 'Displaying ' + this.state.display ) } <a onClick={ () => { this.setState( { menu_visible: true } ) } }>{ __( 'Change' ) }</a></h4>;
+		} else if ( this.state.display ) {
+			heading = <h4>{ __( 'Displaying ' + this.state.display ) } <a onClick={ () => { this.setState( { menu_visible: false } ) } }>{ __( 'Cancel' ) }</a></h4>;
+		}
+
 		return (
 			<div className="wc-product-display-settings">
 
-				<h4>{ __( 'Products' ) }</h4>
+				{ heading }
 
-				<div className="display-select">
-					{ __( 'Display:' ) }
-					<select value={ this.state.display } onChange={ this.updateDisplay }>
-						<option value="all">{ __( 'All' ) }</option>
-						<option value="specific">{ __( 'Specific products' ) }</option>
-						<option value="category">{ __( 'Product Category' ) }</option>
-					</select>
-				</div>
+				{ menu }
 
 				{ extra_settings }
 
@@ -371,7 +428,7 @@ registerBlockType( 'woocommerce/products', {
 		 */
 		display: {
 			type: 'string',
-			default: 'all',
+			default: '',
 		},
 
 		/**
