@@ -257,7 +257,7 @@ class WC_Regenerate_Images {
 			);
 		}
 
-		$old_metadata = wp_get_attachment_metadata( $attachment_id );
+		$metadata = wp_get_attachment_metadata( $attachment_id );
 
 		// We only want to regen WC images.
 		add_filter( 'intermediate_image_sizes', array( __CLASS__, 'adjust_intermediate_image_sizes' ) );
@@ -273,29 +273,18 @@ class WC_Regenerate_Images {
 			return $image;
 		}
 
-		if ( ! empty( $old_metadata ) && ! empty( $old_metadata['sizes'] ) && is_array( $old_metadata['sizes'] ) ) {
-			foreach ( $old_metadata['sizes'] as $old_size => $old_size_data ) {
-				if ( empty( $new_metadata['sizes'][ $old_size ] ) ) {
-					$new_metadata['sizes'][ $old_size ] = $old_metadata['sizes'][ $old_size ];
-				}
+		// Since this is only a preview we should not update the actual size. That will be done later by the background job.
+		if ( isset( $new_metadata['sizes'][ $size ] ) ) {
+			if ( $metadata && isset( $metadata['sizes'] ) ) {
+				$metadata['sizes'][ $size . '_preview' ] = $new_metadata['sizes'][ $size ];
+			} else {
+				$metadata = $new_metadata;
 			}
-			// Handle legacy sizes.
-			if ( isset( $new_metadata['sizes']['shop_thumbnail'], $new_metadata['sizes']['woocommerce_gallery_thumbnail'] ) ) {
-				$new_metadata['sizes']['shop_thumbnail'] = $new_metadata['sizes']['woocommerce_gallery_thumbnail'];
-			}
-			if ( isset( $new_metadata['sizes']['shop_catalog'], $new_metadata['sizes']['woocommerce_thumbnail'] ) ) {
-				$new_metadata['sizes']['shop_catalog'] = $new_metadata['sizes']['woocommerce_thumbnail'];
-			}
-			if ( isset( $new_metadata['sizes']['shop_single'], $new_metadata['sizes']['woocommerce_single'] ) ) {
-				$new_metadata['sizes']['shop_single'] = $new_metadata['sizes']['woocommerce_single'];
-			}
+			wp_update_attachment_metadata( $attachment_id, $metadata );
 		}
 
-		// Update the meta data with the new size values.
-		wp_update_attachment_metadata( $attachment_id, $new_metadata );
-
 		// Now we've done our regen, attempt to return the new size.
-		$new_image = image_downsize( $attachment_id, $size );
+		$new_image = image_downsize( $attachment_id, $size . '_preview' );
 
 		return $new_image ? $new_image : $image;
 	}
