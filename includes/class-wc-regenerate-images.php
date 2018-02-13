@@ -84,7 +84,7 @@ class WC_Regenerate_Images {
 		$size_hash = md5( wp_json_encode( array(
 			wc_get_image_size( 'thumbnail' ),
 			wc_get_image_size( 'single' ),
-			wc_get_image_size( 'gallery_thumbnail' )
+			wc_get_image_size( 'gallery_thumbnail' ),
 		) ) );
 
 		if ( update_option( 'woocommerce_maybe_regenerate_images_hash', $size_hash ) ) {
@@ -135,12 +135,12 @@ class WC_Regenerate_Images {
 
 		// If size differs from image meta, or height differs and we're cropping, regenerate the image.
 		if ( ! isset( $imagemeta['sizes'], $imagemeta['sizes'][ $size ] ) || $imagemeta['sizes'][ $size ]['width'] !== $size_settings['width'] || ( $size_settings['crop'] && $imagemeta['sizes'][ $size ]['height'] !== $size_settings['height'] ) ) {
-			$image = self::resize_and_return_image( $attachment_id, $image, $size, $icon );
+			return self::resize_and_return_image( $attachment_id, $image, $size, $icon );
 		}
 
 		// If cropping mode has changed, regenerate the image.
 		if ( '' === $size_settings['height'] && empty( $imagemeta['woocommerce_thumbnail_uncropped'] ) ) {
-			$image = self::resize_and_return_image( $attachment_id, $image, $size, $icon );
+			return self::resize_and_return_image( $attachment_id, $image, $size, $icon );
 		}
 
 		return $image;
