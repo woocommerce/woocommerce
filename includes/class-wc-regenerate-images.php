@@ -71,6 +71,13 @@ class WC_Regenerate_Images {
 	public static function dismiss_regenerating_notice() {
 		if ( self::$background_process ) {
 			self::$background_process->kill_process();
+
+			$log = wc_get_logger();
+			$log->info( __( 'Cancelled product image regeneration job.', 'woocommerce' ),
+				array(
+					'source' => 'wc-image-regeneration',
+				)
+			);
 		}
 		WC_Admin_Notices::remove_notice( 'regenerating_thumbnails' );
 	}
