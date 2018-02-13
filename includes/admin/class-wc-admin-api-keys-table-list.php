@@ -186,15 +186,9 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	public function prepare_items() {
 		global $wpdb;
 
-		$per_page = $this->get_items_per_page( 'wc_keys_per_page' );
-		$columns  = $this->get_columns();
-		$hidden   = $this->get_hidden_columns();
-		$sortable = $this->get_sortable_columns();
-
-		// Column headers.
-		$this->_column_headers = array( $columns, $hidden, $sortable );
-
+		$per_page     = $this->get_items_per_page( 'wc_keys_per_page' );
 		$current_page = $this->get_pagenum();
+
 		if ( 1 < $current_page ) {
 			$offset = $per_page * ( $current_page - 1 );
 		} else {
@@ -223,14 +217,5 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 			'per_page'    => $per_page,
 			'total_pages' => ceil( $count / $per_page ),
 		) );
-	}
-
-	/**
-	 * Get a list of hidden columns.
-	 *
-	 * @return array
-	 */
-	protected function get_hidden_columns() {
-		return get_hidden_columns( $this->screen );
 	}
 }

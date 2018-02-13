@@ -247,15 +247,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	 * Prepare table list items.
 	 */
 	public function prepare_items() {
-		$per_page = $this->get_items_per_page( 'wc_webhooks_per_page' );
-		$per_page = 0 === $per_page ? 10 : $per_page;
-		$columns  = $this->get_columns();
-		$hidden   = $this->get_hidden_columns();
-		$sortable = $this->get_sortable_columns();
-
-		// Column headers.
-		$this->_column_headers = array( $columns, $hidden, $sortable );
-
+		$per_page     = $this->get_items_per_page( 'wc_webhooks_per_page' );
 		$current_page = $this->get_pagenum();
 
 		// Query args.
@@ -289,14 +281,5 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 			'per_page'    => $per_page,
 			'total_pages' => ceil( $total_items / $per_page ),
 		) );
-	}
-
-	/**
-	 * Get a list of hidden columns.
-	 *
-	 * @return array
-	 */
-	protected function get_hidden_columns() {
-		return get_hidden_columns( $this->screen );
 	}
 }
