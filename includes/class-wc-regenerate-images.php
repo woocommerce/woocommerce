@@ -115,13 +115,12 @@ class WC_Regenerate_Images {
 	 * @return array
 	 */
 	public static function maybe_resize_image( $image, $attachment_id, $size, $icon ) {
-
 		if ( ! apply_filters( 'woocommerce_resize_images', true ) ) {
 			return $image;
 		}
 
 		// Use a whitelist of sizes we want to resize. Ignore others.
-		if ( ! in_array( $size, apply_filters( 'woocommerce_image_sizes_to_resize', array( 'woocommerce_thumbnail', 'woocommerce_single', 'woocommerce_gallery_thumbnail', 'shop_thumbnail', 'shop_catalog', 'shop_single' ) ), true ) ) {
+		if ( ! in_array( $size, apply_filters( 'woocommerce_image_sizes_to_resize', array( 'woocommerce_thumbnail', 'woocommerce_gallery_thumbnail', 'woocommerce_single', 'shop_thumbnail', 'shop_catalog', 'shop_single' ) ), true ) ) {
 			return $image;
 		}
 
@@ -281,8 +280,8 @@ class WC_Regenerate_Images {
 				}
 			}
 			// Handle legacy sizes.
-			if ( isset( $new_metadata['sizes']['shop_thumbnail'], $new_metadata['sizes']['woocommerce_thumbnail'] ) ) {
-				$new_metadata['sizes']['shop_thumbnail'] = $new_metadata['sizes']['woocommerce_thumbnail'];
+			if ( isset( $new_metadata['sizes']['shop_thumbnail'], $new_metadata['sizes']['woocommerce_gallery_thumbnail'] ) ) {
+				$new_metadata['sizes']['shop_thumbnail'] = $new_metadata['sizes']['woocommerce_gallery_thumbnail'];
 			}
 			if ( isset( $new_metadata['sizes']['shop_catalog'], $new_metadata['sizes']['woocommerce_thumbnail'] ) ) {
 				$new_metadata['sizes']['shop_catalog'] = $new_metadata['sizes']['woocommerce_thumbnail'];
@@ -329,4 +328,5 @@ class WC_Regenerate_Images {
 		self::$background_process->save()->dispatch();
 	}
 }
-WC_Regenerate_Images::init();
+
+add_action( 'init', array( 'WC_Regenerate_Images', 'init' ) );

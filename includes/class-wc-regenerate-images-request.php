@@ -142,8 +142,8 @@ class WC_Regenerate_Images_Request extends WC_Background_Process {
 				}
 			}
 			// Handle legacy sizes.
-			if ( isset( $new_metadata['sizes']['shop_thumbnail'], $new_metadata['sizes']['woocommerce_thumbnail'] ) ) {
-				$new_metadata['sizes']['shop_thumbnail'] = $new_metadata['sizes']['woocommerce_thumbnail'];
+			if ( isset( $new_metadata['sizes']['shop_thumbnail'], $new_metadata['sizes']['woocommerce_gallery_thumbnail'] ) ) {
+				$new_metadata['sizes']['shop_thumbnail'] = $new_metadata['sizes']['woocommerce_gallery_thumbnail'];
 			}
 			if ( isset( $new_metadata['sizes']['shop_catalog'], $new_metadata['sizes']['woocommerce_thumbnail'] ) ) {
 				$new_metadata['sizes']['shop_catalog'] = $new_metadata['sizes']['woocommerce_thumbnail'];
@@ -232,7 +232,7 @@ class WC_Regenerate_Images_Request extends WC_Background_Process {
 	 * @return array
 	 */
 	public function adjust_intermediate_image_sizes( $sizes ) {
-		return apply_filters( 'woocommerce_regenerate_images_intermediate_image_sizes', array( 'woocommerce_thumbnail', 'woocommerce_thumbnail_2x', 'woocommerce_single' ) );
+		return apply_filters( 'woocommerce_regenerate_images_intermediate_image_sizes', array( 'woocommerce_thumbnail', 'woocommerce_gallery_thumbnail', 'woocommerce_single' ) );
 	}
 
 	/**
