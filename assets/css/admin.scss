@@ -2328,10 +2328,10 @@ ul.wc_coupon_list_block {
 			flex-wrap: wrap;
 		}
 		.wc-action-button {
-			flex: 1;
+			flex: 1 0 50%;
+			max-width: 100%;
 			float: none;
 			text-align: center;
-			max-width: 50%;
 		}
 	}
 	.button-large {
