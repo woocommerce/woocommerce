@@ -18,8 +18,6 @@ class ProductsSpecificSelect extends React.Component {
 
 /**
  * When the display mode is 'Product category' search for and select product categories to pull products from.
- *
- * @todo Save data
  */
 class ProductsCategorySelect extends React.Component {
 
@@ -315,7 +313,7 @@ const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
 	const { columns, rows, order, display, display_setting, layout } = attributes;
 
 	let query = {
-		per_page: ( 'list' === layout ) ? columns : rows * columns,
+		per_page: ( 'list' === layout ) ? rows : rows * columns,
 		orderby: order
 	};
 
@@ -585,14 +583,49 @@ registerBlockType( 'woocommerce/products', {
 	},
 
 	/**
-	 * Save the block content in the post content.
+	 * Save the block content in the post content. Block content is saved as a products shortcode.
 	 *
 	 * @return string
 	 */
-	save() {
-		// @todo
-		// This can either build a shortcode out of all the settings (good backwards compatibility but may need extra shortcode work)
-		// Or it can return null and the html can be generated with PHP like the example at https://wordpress.org/gutenberg/handbook/blocks/creating-dynamic-blocks/
-		return '[products limit="3"]';
+	save( props ) {
+		const { layout, rows, columns, display_title, display_price, display_add_to_cart, order, display, display_setting, className } = props.attributes;
+
+		let shortcode_atts = new Map();
+		shortcode_atts.set( 'orderby', order );
+		shortcode_atts.set( 'limit', 'grid' === layout ? rows * columns : rows );
+		shortcode_atts.set( 'class', 'list' === layout ? className + ' list-layout' : className );
+
+		if ( 'grid' === layout ) {
+			shortcode_atts.set( 'columns', columns );
+		}
+
+		if ( ! display_title ) {
+			shortcode_atts.set( 'show_title', 0 );
+		}
+
+		if ( ! display_price ) {
+			shortcode_atts.set( 'show_price', 0 );
+		}
+
+		if ( ! display_add_to_cart ) {
+			shortcode_atts.set( 'show_add_to_cart', 0 );
+		}
+
+		if ( 'specific' === display ) {
+			shortcode_atts.set( 'include', display_setting.join( ',' ) );
+		}
+
+		if ( 'category' === display ) {
+			shortcode_atts.set( 'category', display_setting.join( ',' ) );
+		}
+
+		// Build the shortcode string out of the set shortcode attributes.
+		let shortcode = '[products';
+		for ( let [key, value] of shortcode_atts ) {
+			shortcode += ' ' + key + '="' + value + '"';
+		}
+		shortcode += ']';
+
+		return shortcode;
 	},
 } );
