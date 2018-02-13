@@ -89,7 +89,8 @@ var _wp$blocks = wp.blocks,
     BlockControls = _wp$blocks.BlockControls;
 var _wp$components = wp.components,
     Toolbar = _wp$components.Toolbar,
-    withAPIData = _wp$components.withAPIData;
+    withAPIData = _wp$components.withAPIData,
+    Dropdown = _wp$components.Dropdown;
 var RangeControl = InspectorControls.RangeControl,
     ToggleControl = InspectorControls.ToggleControl,
     SelectControl = InspectorControls.SelectControl;
@@ -103,19 +104,63 @@ var RangeControl = InspectorControls.RangeControl,
 var ProductsSpecificSelect = function (_React$Component) {
 	_inherits(ProductsSpecificSelect, _React$Component);
 
-	function ProductsSpecificSelect() {
+	/**
+  * Constructor.
+  */
+	function ProductsSpecificSelect(props) {
 		_classCallCheck(this, ProductsSpecificSelect);
 
-		return _possibleConstructorReturn(this, (ProductsSpecificSelect.__proto__ || Object.getPrototypeOf(ProductsSpecificSelect)).apply(this, arguments));
+		var _this = _possibleConstructorReturn(this, (ProductsSpecificSelect.__proto__ || Object.getPrototypeOf(ProductsSpecificSelect)).call(this, props));
+
+		_this.state = {
+			selectedProducts: props.selected_display_setting
+		};
+		return _this;
 	}
 
 	_createClass(ProductsSpecificSelect, [{
+		key: "selectProduct",
+		value: function selectProduct(evt) {
+			evt.preventDefault();
+
+			var selectProduct = this.state.selectProduct;
+
+			this.setState({
+				selectProduct: selectProduct
+			});
+		}
+	}, {
 		key: "render",
 		value: function render() {
 			return wp.element.createElement(
 				"div",
-				null,
-				"TODO: Select specific products here"
+				{ className: "product-specific-select" },
+				wp.element.createElement(
+					"div",
+					{ className: "add-new" },
+					wp.element.createElement(Dropdown, {
+						className: "my-container-class-name",
+						contentClassName: "my-popover-content-classname",
+						position: "bottom right",
+						renderToggle: function renderToggle(_ref) {
+							var isOpen = _ref.isOpen,
+							    onToggle = _ref.onToggle;
+							return wp.element.createElement(
+								"button",
+								{ className: "button button-large", onClick: onToggle, "aria-expanded": isOpen },
+								__('Add product')
+							);
+						},
+						renderContent: function renderContent() {
+							return wp.element.createElement(
+								"div",
+								null,
+								wp.element.createElement(ProductSpecifcSearch, null)
+							);
+						}
+					})
+				),
+				wp.element.createElement(ProductsSpecificList, { selectedProducts: this.state.selectedProducts })
 			);
 		}
 	}]);
@@ -123,10 +168,74 @@ var ProductsSpecificSelect = function (_React$Component) {
 	return ProductsSpecificSelect;
 }(React.Component);
 
+var ProductSpecifcSearch = withAPIData(function (props) {
+	return {
+		products: '/wc/v2/products?per_page=10'
+	};
+})(function (_ref2) {
+	var products = _ref2.products;
+
+	if (!products.data) {
+		return __('Loading');
+	}
+
+	if (0 === products.data.length) {
+		return __('No products found');
+	}
+
+	var ProductsList = function ProductsList(_ref3) {
+		var products = _ref3.products;
+
+		return products.length > 0 && wp.element.createElement(
+			"ul",
+			null,
+			products.map(function (product) {
+				return wp.element.createElement(
+					"li",
+					null,
+					wp.element.createElement(
+						"button",
+						{ type: "button", "class": "components-button", id: 'product-' + product.id },
+						wp.element.createElement("img", { src: product.images[0].src, width: "30px" }),
+						" ",
+						product.name
+					)
+				);
+			})
+		);
+	};
+
+	var productsData = products.data;
+
+	return wp.element.createElement(
+		"div",
+		{ role: "menu", "aria-orientation": "vertical", "aria-label": "{ __( 'Products list' ) }" },
+		wp.element.createElement(ProductsList, { products: productsData })
+	);
+});
+
+var ProductsSpecificList = function ProductsSpecificList(_ref4) {
+	var selectedProducts = _ref4.selectedProducts;
+
+	if (!selectedProducts || 0 === selectedProducts.length) {
+		return __('No products selected found');
+	}
+
+	var classes = "wc-products-block-preview";
+	var attributes = {};
+
+	return wp.element.createElement(
+		"div",
+		{ className: classes },
+		selectedProducts.data.map(function (product) {
+			return wp.element.createElement(ProductPreview, { product: product, attributes: attributes });
+		})
+	);
+};
+
 /**
  * When the display mode is 'Product category' search for and select product categories to pull products from.
  */
-
 
 var ProductsCategorySelect = function (_React$Component2) {
 	_inherits(ProductsCategorySelect, _React$Component2);
@@ -214,8 +323,8 @@ var ProductsCategorySelect = function (_React$Component2) {
  */
 
 
-var ProductCategoryFilter = function ProductCategoryFilter(_ref) {
-	var filterResults = _ref.filterResults;
+var ProductCategoryFilter = function ProductCategoryFilter(_ref5) {
+	var filterResults = _ref5.filterResults;
 
 	return wp.element.createElement(
 		"div",
@@ -231,11 +340,11 @@ var ProductCategoryList = withAPIData(function (props) {
 	return {
 		categories: '/wc/v2/products/categories'
 	};
-})(function (_ref2) {
-	var categories = _ref2.categories,
-	    filterQuery = _ref2.filterQuery,
-	    selectedCategories = _ref2.selectedCategories,
-	    checkboxChange = _ref2.checkboxChange;
+})(function (_ref6) {
+	var categories = _ref6.categories,
+	    filterQuery = _ref6.filterQuery,
+	    selectedCategories = _ref6.selectedCategories,
+	    checkboxChange = _ref6.checkboxChange;
 
 	if (!categories.data) {
 		return __('Loading');
@@ -245,9 +354,9 @@ var ProductCategoryList = withAPIData(function (props) {
 		return __('No categories found');
 	}
 
-	var CategoryTree = function CategoryTree(_ref3) {
-		var categories = _ref3.categories,
-		    parent = _ref3.parent;
+	var CategoryTree = function CategoryTree(_ref7) {
+		var categories = _ref7.categories,
+		    parent = _ref7.parent;
 
 		var filteredCategories = categories.filter(function (category) {
 			return category.parent === parent;
@@ -580,8 +689,8 @@ var ProductPreview = function (_React$Component6) {
  */
 
 
-var ProductsBlockPreview = withAPIData(function (_ref4) {
-	var attributes = _ref4.attributes;
+var ProductsBlockPreview = withAPIData(function (_ref8) {
+	var attributes = _ref8.attributes;
 	var columns = attributes.columns,
 	    rows = attributes.rows,
 	    order = attributes.order,
@@ -632,9 +741,9 @@ var ProductsBlockPreview = withAPIData(function (_ref4) {
 	return {
 		products: '/wc/v2/products' + query_string
 	};
-})(function (_ref5) {
-	var products = _ref5.products,
-	    attributes = _ref5.attributes;
+})(function (_ref9) {
+	var products = _ref9.products,
+	    attributes = _ref9.attributes;
 
 
 	if (!products.data) {
