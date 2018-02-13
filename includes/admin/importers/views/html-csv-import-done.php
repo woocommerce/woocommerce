@@ -81,7 +81,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</section>
 	<script type="text/javascript">
 		jQuery(function() {
-			jQuery( '.woocommerce-importer-done-view-errors' ).on( 'click', function() {
+			jQuery( '.woocommerce-importer-done-view-errors' ).on( 'click', function(e) {
+				e.preventDefault();
 				jQuery( '.wc-importer-error-log' ).slideToggle();
 				return false;
 			} );
