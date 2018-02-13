@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 3.3.2-rc.1\n"
 "Report-Msgid-Bugs-To: https://github.com/woocommerce/woocommerce/issues\n"
-"POT-Creation-Date: 2018-02-13 19:57:14+00:00\n"
+"POT-Creation-Date: 2018-02-13 20:00:01+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -6615,8 +6615,8 @@ msgid "Last warning, are you sure?"
 msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:222
-#: includes/admin/class-wc-admin-taxonomies.php:131
-#: includes/admin/class-wc-admin-taxonomies.php:241
+#: includes/admin/class-wc-admin-taxonomies.php:135
+#: includes/admin/class-wc-admin-taxonomies.php:245
 msgid "Choose an image"
 msgstr ""
 
@@ -7478,8 +7478,8 @@ msgid ""
 msgstr ""
 
 #: includes/admin/class-wc-admin-permalink-settings.php:118
-#: includes/admin/class-wc-admin-taxonomies.php:95
-#: includes/admin/class-wc-admin-taxonomies.php:203
+#: includes/admin/class-wc-admin-taxonomies.php:99
+#: includes/admin/class-wc-admin-taxonomies.php:207
 msgid "Default"
 msgstr ""
 
@@ -8810,14 +8810,14 @@ msgstr ""
 msgid "Your changes have been saved."
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:93
-#: includes/admin/class-wc-admin-taxonomies.php:200
+#: includes/admin/class-wc-admin-taxonomies.php:97
+#: includes/admin/class-wc-admin-taxonomies.php:204
 #: includes/widgets/class-wc-widget-layered-nav.php:91
 msgid "Display type"
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:96
-#: includes/admin/class-wc-admin-taxonomies.php:204
+#: includes/admin/class-wc-admin-taxonomies.php:100
+#: includes/admin/class-wc-admin-taxonomies.php:208
 #: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:153
 #: includes/admin/settings/class-wc-settings-products.php:29
 #: includes/class-wc-post-types.php:276
@@ -8826,38 +8826,38 @@ msgstr ""
 msgid "Products"
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:97
-#: includes/admin/class-wc-admin-taxonomies.php:205
+#: includes/admin/class-wc-admin-taxonomies.php:101
+#: includes/admin/class-wc-admin-taxonomies.php:209
 msgid "Subcategories"
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:98
-#: includes/admin/class-wc-admin-taxonomies.php:206
+#: includes/admin/class-wc-admin-taxonomies.php:102
+#: includes/admin/class-wc-admin-taxonomies.php:210
 msgid "Both"
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:102
-#: includes/admin/class-wc-admin-taxonomies.php:211
-#: includes/admin/class-wc-admin-taxonomies.php:379
+#: includes/admin/class-wc-admin-taxonomies.php:106
+#: includes/admin/class-wc-admin-taxonomies.php:215
+#: includes/admin/class-wc-admin-taxonomies.php:419
 msgid "Thumbnail"
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:106
-#: includes/admin/class-wc-admin-taxonomies.php:216
+#: includes/admin/class-wc-admin-taxonomies.php:110
+#: includes/admin/class-wc-admin-taxonomies.php:220
 msgid "Upload/Add image"
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:107
-#: includes/admin/class-wc-admin-taxonomies.php:217
+#: includes/admin/class-wc-admin-taxonomies.php:111
+#: includes/admin/class-wc-admin-taxonomies.php:221
 msgid "Remove image"
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:133
-#: includes/admin/class-wc-admin-taxonomies.php:243
+#: includes/admin/class-wc-admin-taxonomies.php:137
+#: includes/admin/class-wc-admin-taxonomies.php:247
 msgid "Use image"
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:296
+#: includes/admin/class-wc-admin-taxonomies.php:300
 msgid ""
 "Product categories for your store can be managed here. To change the order "
 "of categories on the front-end you can drag and drop to sort them. To see "
@@ -8865,7 +8865,7 @@ msgid ""
 "of this page."
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:309
+#: includes/admin/class-wc-admin-taxonomies.php:313
 #: includes/api/class-wc-rest-system-status-tools-controller.php:155
 #: includes/api/class-wc-rest-system-status-tools-controller.php:164
 #: includes/api/class-wc-rest-system-status-tools-controller.php:173
@@ -8875,7 +8875,7 @@ msgstr ""
 msgid "Note:"
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:313
+#: includes/admin/class-wc-admin-taxonomies.php:317
 #. translators: %s: default category
 msgid ""
 "Deleting a category does not delete the products in that category. Instead, "
@@ -8883,7 +8883,7 @@ msgid ""
 "category %s."
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:326
+#: includes/admin/class-wc-admin-taxonomies.php:330
 msgid ""
 "Attribute terms can be assigned to products and "
 "variations.<br/><br/><b>Note</b>: Deleting a term will remove it from all "
@@ -8891,12 +8891,22 @@ msgid ""
 "will not automatically assign it back to products."
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:343
+#: includes/admin/class-wc-admin-taxonomies.php:347
 #: includes/admin/list-tables/class-wc-admin-list-table-products.php:106
 msgid "Image"
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:366
+#: includes/admin/class-wc-admin-taxonomies.php:370
+#. translators: %s: taxonomy term name
+msgid "Make &#8220;%s&#8221; the default category"
+msgstr ""
+
+#: includes/admin/class-wc-admin-taxonomies.php:371
+#: includes/wc-account-functions.php:350
+msgid "Make default"
+msgstr ""
+
+#: includes/admin/class-wc-admin-taxonomies.php:406
 msgid ""
 "This is the default category and it cannot be deleted. It will be "
 "automatically assigned to products with no category."
@@ -22394,10 +22404,6 @@ msgstr ""
 msgid "Method"
 msgstr ""
 
-#: includes/wc-account-functions.php:350
-msgid "Make default"
-msgstr ""
-
 #: includes/wc-attribute-functions.php:196
 #: includes/wc-attribute-functions.php:222
 msgid "Select"
@@ -24480,7 +24486,7 @@ msgctxt "Check payment method"
 msgid "Awaiting check payment"
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:305
+#: includes/admin/class-wc-admin-taxonomies.php:309
 #: includes/class-wc-install.php:472 includes/class-wc-install.php:478
 msgctxt "Default category slug"
 msgid "Uncategorized"
