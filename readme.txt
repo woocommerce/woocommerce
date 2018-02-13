@@ -161,6 +161,26 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
+= 3.3.2 - 2018-02-xx =
+* Fix - Fixed admin product SKU searching and searching non-published products.
+* Fix - PHP7.1 notice when image height is empty.
+* Fix - Prevent repeated update_option calls on page load due to php type juggling.
+* Fix - Only do unsupported template rendering in the loop to prevent conflicts with other shortcodes on the shop page.
+* Fix - Don't prepend regular shortcodes with categories.
+* Fix - If using get_catalog_ordering_args. remove the args when finished.
+* Fix - Remove "Type" column on attributes table by default unless custom types are defined.
+* Fix - Use verbose page rules when shop is in the URL, including shop base with category, to prevent 404s.
+* Fix - Set woocommerce_hide_invisible_variations to true so disabled variation attributes are hidden on product pages.
+* Fix - Help tip for webhook status.
+* Fix - Shipping zone documentation help link was printing wrong.
+* Fix - API - Set status after order is created/updated so triggered emails are current.
+* Tweak - Bump email order details template version to show it was fixed in 3.3.1.
+* Tweak - Add help text for the default category to explain usage.
+* Tweak - Allow changing the default product category.
+* Tweak - Tweak mobile view of order preview to improve layout in non-english.
+* Tweak - If selecting text, don't link to order on row click.
+* Localization - Remove isle of man state.
+
 = 3.3.1 - 2018-02-06 =
 * Fix - Added `woocommerce_output_product_categories` to replace `woocommerce_product_subcategories` function to prevent outdated theme template files from outputting categories on the shop and category pages in err.
 * Fix - Prevented columns from being set to anything lower than 1.
