@@ -40,6 +40,15 @@ class WC_Regenerate_Images_Request extends WC_Background_Process {
 	}
 
 	/**
+	 * Is job running?
+	 *
+	 * @return boolean
+	 */
+	public function is_running() {
+		return $this->is_queue_empty();
+	}
+
+	/**
 	 * Limit each task ran per batch to 1 for image regen.
 	 *
 	 * @return bool

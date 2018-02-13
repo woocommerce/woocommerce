@@ -34,14 +34,62 @@ class WC_Regenerate_Images {
 	 * Init function
 	 */
 	public static function init() {
-		include_once WC_ABSPATH . 'includes/class-wc-regenerate-images-request.php';
-		self::$background_process = new WC_Regenerate_Images_Request();
-
 		add_filter( 'wp_generate_attachment_metadata', array( __CLASS__, 'add_uncropped_metadata' ) );
 
 		// Resize WooCommerce images on the fly when browsing site through customizer as to showcase image setting changes in real time.
 		if ( is_customize_preview() ) {
 			add_filter( 'wp_get_attachment_image_src', array( __CLASS__, 'maybe_resize_image' ), 10, 4 );
+		}
+
+		// Regenerate thumbnails in the background after settings change. Not ran on multisite to avoid multiple simultanious jobs..
+		if ( apply_filters( 'woocommerce_background_image_regeneration', ! is_multisite() ) ) {
+			include_once WC_ABSPATH . 'includes/class-wc-regenerate-images-request.php';
+
+			self::$background_process = new WC_Regenerate_Images_Request();
+
+			add_action( 'admin_init', array( __CLASS__, 'regenerating_notice' ) );
+			add_action( 'woocommerce_hide_regenerating_thumbnails_notice', array( __CLASS__, 'dismiss_regenerating_notice' ) );
+			add_action( 'customize_save_after', array( __CLASS__, 'maybe_regenerate_images' ) );
+			add_action( 'after_switch_theme', array( __CLASS__, 'maybe_regenerate_images' ) );
+		}
+	}
+
+	/**
+	 * Show notice when job is running in background.
+	 */
+	public static function regenerating_notice() {
+		if ( ! self::$background_process->is_running() ) {
+			WC_Admin_Notices::add_notice( 'regenerating_thumbnails' );
+		} else {
+			WC_Admin_Notices::remove_notice( 'regenerating_thumbnails' );
+		}
+	}
+
+	/**
+	 * Dismiss notice and cancel jobs.
+	 */
+	public static function dismiss_regenerating_notice() {
+		if ( self::$background_process ) {
+			self::$background_process->kill_process();
+		}
+		WC_Admin_Notices::remove_notice( 'regenerating_thumbnails' );
+	}
+
+	/**
+	 * Regenerate images if the settings have changed since last re-generation.
+	 *
+	 * @return void
+	 */
+	public function maybe_regenerate_images() {
+		$size_hash = md5( wp_json_encode( array(
+			wc_get_image_size( 'thumbnail' ),
+			wc_get_image_size( 'single' ),
+			wc_get_image_size( 'gallery_thumbnail' )
+		) ) );
+
+		if ( update_option( 'woocommerce_maybe_regenerate_images_hash', $size_hash ) ) {
+			// Size settings have changed. Trigger regen.
+			self::queue_image_regeneration();
 		}
 	}
 
@@ -73,7 +121,7 @@ class WC_Regenerate_Images {
 		}
 
 		// Use a whitelist of sizes we want to resize. Ignore others.
-		if ( ! in_array( $size, apply_filters( 'woocommerce_image_sizes_to_resize', array( 'woocommerce_thumbnail', 'woocommerce_single', 'shop_thumbnail', 'shop_catalog', 'shop_single' ) ), true ) ) {
+		if ( ! in_array( $size, apply_filters( 'woocommerce_image_sizes_to_resize', array( 'woocommerce_thumbnail', 'woocommerce_single', 'woocommerce_gallery_thumbnail', 'shop_thumbnail', 'shop_catalog', 'shop_single' ) ), true ) ) {
 			return $image;
 		}
 
