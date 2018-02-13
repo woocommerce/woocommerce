@@ -14,14 +14,3 @@ The source code is in the products-block.jsx file and the compiled code is in pr
 
 **Gutenberg Tutorial and Docs**: https://wordpress.org/gutenberg/handbook/blocks/
 **Using API in Gutenberg**: https://github.com/WordPress/gutenberg/tree/213c64bb495946deffa3b6fe260f95b87de5774a/components/higher-order/with-api-data
-
-**Gutenberg Products Block initial TODO:**
-- [x] Redesigned "Display" menu (@claudiulodro in progress)
-- [x] "Done" button for edit mode.
-- [ ] Product search/select (@claudiosanches in progress)
-- [x] Product category search/select
-- [x] Editor preview (Pull in products using API)
-- [x] Frontend rendering (Shortcode-based)
-- [ ] CSS styling
-- [x] Add keys to everything to prevent `Warning: Each child in an array or iterator should have a unique "key" prop` warning
-- [ ] Graceful error handling (e.g. if you set columns to 0)
