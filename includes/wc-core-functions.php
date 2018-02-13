@@ -727,6 +727,8 @@ function wc_get_image_size( $image_size ) {
 		$image_size = 'single';
 	} elseif ( in_array( $image_size, array( 'shop_thumbnail', 'shop_catalog', 'woocommerce_thumbnail' ), true ) ) {
 		$image_size = 'thumbnail';
+	} elseif ( in_array( $image_size, array( 'woocommerce_gallery_thumbnail' ), true ) ) {
+		$image_size = 'gallery_thumbnail';
 	}
 
 	if ( is_array( $image_size ) ) {
