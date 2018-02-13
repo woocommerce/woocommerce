@@ -39,17 +39,9 @@ class WC_Regenerate_Images {
 
 		add_filter( 'wp_generate_attachment_metadata', array( __CLASS__, 'add_uncropped_metadata' ) );
 
-		if ( ! is_admin() ) {
-			// Handle on-the-fly image resizing.
+		// Resize WooCommerce images on the fly when browsing site through customizer as to showcase image setting changes in real time.
+		if ( is_customize_preview() ) {
 			add_filter( 'wp_get_attachment_image_src', array( __CLASS__, 'maybe_resize_image' ), 10, 4 );
-		}
-
-		if ( apply_filters( 'woocommerce_background_image_regeneration', true ) ) {
-			// Actions to handle image generation when settings change.
-			add_action( 'update_option_woocommerce_thumbnail_cropping', array( __CLASS__, 'maybe_regenerate_images_option_update' ), 10, 3 );
-			add_action( 'update_option_woocommerce_thumbnail_image_width', array( __CLASS__, 'maybe_regenerate_images_option_update' ), 10, 3 );
-			add_action( 'update_option_woocommerce_single_image_width', array( __CLASS__, 'maybe_regenerate_images_option_update' ), 10, 3 );
-			add_action( 'after_switch_theme', array( __CLASS__, 'maybe_regenerate_image_theme_switch' ) );
 		}
 	}
 
@@ -262,35 +254,11 @@ class WC_Regenerate_Images {
 	}
 
 	/**
-	 * Check if we should regenerate the product images when options change.
-	 *
-	 * @param mixed  $old_value Old option value.
-	 * @param mixed  $new_value New option value.
-	 * @param string $option Option name.
-	 */
-	public static function maybe_regenerate_images_option_update( $old_value, $new_value, $option ) {
-		if ( $new_value === $old_value ) {
-			return;
-		}
-
-		self::queue_image_regeneration();
-	}
-
-	/**
-	 * Check if we should generate images when new themes declares custom sizes.
-	 */
-	public static function maybe_regenerate_image_theme_switch() {
-		if ( wc_get_theme_support( 'single_image_width' ) || wc_get_theme_support( 'thumbnail_image_width' ) ) {
-			self::queue_image_regeneration();
-		}
-	}
-
-	/**
 	 * Get list of images and queue them for regeneration
 	 *
 	 * @return void
 	 */
-	private static function queue_image_regeneration() {
+	public static function queue_image_regeneration() {
 		global $wpdb;
 		// First lets cancel existing running queue to avoid running it more than once.
 		self::$background_process->kill_process();
