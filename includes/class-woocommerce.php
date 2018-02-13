@@ -547,13 +547,10 @@ final class WooCommerce {
 		add_image_size( 'woocommerce_single', $single['width'], $single['height'], $single['crop'] );
 		add_image_size( 'woocommerce_gallery_thumbnail', $gallery_thumbnail['width'], $gallery_thumbnail['height'], $gallery_thumbnail['crop'] );
 
-		// 2x thumbnail size for retina, and when showing less columns.
-		add_image_size( 'woocommerce_thumbnail_2x', $thumbnail['width'] * 2, '' !== $thumbnail['height'] ? $thumbnail['height'] * 2 : '', $thumbnail['crop'] );
-
 		// Registered for bw compat. @todo remove in 4.0.
-		add_image_size( 'shop_thumbnail', $thumbnail['width'], $thumbnail['height'], $thumbnail['crop'] );
 		add_image_size( 'shop_catalog', $thumbnail['width'], $thumbnail['height'], $thumbnail['crop'] );
 		add_image_size( 'shop_single', $single['width'], $single['height'], $single['crop'] );
+		add_image_size( 'shop_thumbnail', $gallery_thumbnail['width'], $gallery_thumbnail['height'], $gallery_thumbnail['crop'] );
 	}
 
 	/**
