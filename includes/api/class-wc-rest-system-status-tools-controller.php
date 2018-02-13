@@ -4,15 +4,11 @@
  *
  * Handles requests to the /system_status/tools/* endpoints.
  *
- * @author   WooThemes
- * @category API
  * @package  WooCommerce/API
  * @since    3.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * @package WooCommerce/API
@@ -182,7 +178,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 			'regenerate_thumbnails'      => array(
 				'name'   => __( 'Regenerate shop thumbnails', 'woocommerce' ),
 				'button' => __( 'Regenerate', 'woocommerce' ),
-				'desc'   => __( 'This will regenerate all shop thumbnails to match your theme and/or image setting.', 'woocommerce' ),
+				'desc'   => __( 'This will regenerate all shop thumbnails to match your theme and/or image settings.', 'woocommerce' ),
 			)
 		);
 
