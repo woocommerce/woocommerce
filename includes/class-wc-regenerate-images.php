@@ -80,7 +80,7 @@ class WC_Regenerate_Images {
 	 *
 	 * @return void
 	 */
-	public function maybe_regenerate_images() {
+	public static function maybe_regenerate_images() {
 		$size_hash = md5( wp_json_encode( array(
 			wc_get_image_size( 'thumbnail' ),
 			wc_get_image_size( 'single' ),
