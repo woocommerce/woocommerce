@@ -18,6 +18,11 @@
 
 defined( 'ABSPATH' ) || exit;
 
+// Note: `wc_get_gallery_image_html` was added in WC 3.3.2 and did not exist prior. This check protects against theme overrides being used on older versions of WC.
+if ( ! function_exists( 'wc_get_gallery_image_html' ) ) {
+	return;
+}
+
 global $product;
 
 $columns           = apply_filters( 'woocommerce_product_thumbnails_columns', 4 );
@@ -33,7 +38,6 @@ $wrapper_classes   = apply_filters( 'woocommerce_single_product_image_gallery_cl
 	<figure class="woocommerce-product-gallery__wrapper">
 		<?php
 		if ( has_post_thumbnail() ) {
-			// Note: `wc_get_gallery_image_html` was added in WC 3.3.2 and did not exist prior.
 			$html  = wc_get_gallery_image_html( $post_thumbnail_id, true );
 		} else {
 			$html  = '<div class="woocommerce-product-gallery__image--placeholder">';
