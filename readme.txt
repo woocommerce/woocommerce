@@ -174,7 +174,6 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Help tip for webhook status.
 * Fix - Shipping zone documentation help link was printing wrong.
 * Fix - API - Set status after order is created/updated so triggered emails are current.
-* Tweak - Bump email order details template version to show it was fixed in 3.3.1.
 * Tweak - Add help text for the default category to explain usage.
 * Tweak - Allow changing the default product category.
 * Tweak - Tweak mobile view of order preview to improve layout in non-english.
