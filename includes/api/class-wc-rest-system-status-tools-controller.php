@@ -471,7 +471,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 
 			case 'regenerate_thumbnails':
 				WC_Regenerate_Images::queue_image_regeneration();
-				$message = __( 'Thumbnail regeneration is running in the background. Depending on the amount of images in your store this may take a while.', 'woocommerce' );
+				$message = __( 'Thumbnail regeneration has been scheduled to run in the background.', 'woocommerce' );
 				break;
 
 			default:
