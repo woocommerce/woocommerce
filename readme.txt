@@ -174,6 +174,14 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Help tip for webhook status.
 * Fix - Shipping zone documentation help link was printing wrong.
 * Fix - API - Set status after order is created/updated so triggered emails are current.
+* Fix - Stop background processing images when disabled via the filter.
+* Tweak - Added help text for background image processing.
+* Tweak - Added notice when background image processing is running, with cancel button.
+* Tweak - Run background image processing less often by tracking changes.
+* Tweak - Added system status tool to run background image processing manually.
+* Tweak - If using Jetpack Photon, use that instead of background image processing.
+* Tweak - Gallery thumbnail image size to handle small, square cropped images.
+* Tweak - Helper function (and template version bump for image templates) to render gallery images.
 * Tweak - Add help text for the default category to explain usage.
 * Tweak - Allow changing the default product category.
 * Tweak - Tweak mobile view of order preview to improve layout in non-english.
