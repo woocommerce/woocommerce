@@ -2,8 +2,6 @@
 /**
  * Debug/Status page
  *
- * @author      WooThemes
- * @category    Admin
  * @package     WooCommerce/Admin/System Status
  * @version     2.2.0
  */

@@ -40,6 +40,15 @@ class WC_Regenerate_Images_Request extends WC_Background_Process {
 	}
 
 	/**
+	 * Is job running?
+	 *
+	 * @return boolean
+	 */
+	public function is_running() {
+		return $this->is_queue_empty();
+	}
+
+	/**
 	 * Limit each task ran per batch to 1 for image regen.
 	 *
 	 * @return bool
@@ -132,6 +141,16 @@ class WC_Regenerate_Images_Request extends WC_Background_Process {
 					$new_metadata['sizes'][ $old_size ] = $old_metadata['sizes'][ $old_size ];
 				}
 			}
+			// Handle legacy sizes.
+			if ( isset( $new_metadata['sizes']['shop_thumbnail'], $new_metadata['sizes']['woocommerce_gallery_thumbnail'] ) ) {
+				$new_metadata['sizes']['shop_thumbnail'] = $new_metadata['sizes']['woocommerce_gallery_thumbnail'];
+			}
+			if ( isset( $new_metadata['sizes']['shop_catalog'], $new_metadata['sizes']['woocommerce_thumbnail'] ) ) {
+				$new_metadata['sizes']['shop_catalog'] = $new_metadata['sizes']['woocommerce_thumbnail'];
+			}
+			if ( isset( $new_metadata['sizes']['shop_single'], $new_metadata['sizes']['woocommerce_single'] ) ) {
+				$new_metadata['sizes']['shop_single'] = $new_metadata['sizes']['woocommerce_single'];
+			}
 		}
 
 		// Update the meta data with the new size values.
@@ -213,7 +232,7 @@ class WC_Regenerate_Images_Request extends WC_Background_Process {
 	 * @return array
 	 */
 	public function adjust_intermediate_image_sizes( $sizes ) {
-		return apply_filters( 'woocommerce_regenerate_images_intermediate_image_sizes', array( 'woocommerce_thumbnail', 'woocommerce_thumbnail_2x', 'woocommerce_single' ) );
+		return apply_filters( 'woocommerce_regenerate_images_intermediate_image_sizes', array( 'woocommerce_thumbnail', 'woocommerce_gallery_thumbnail', 'woocommerce_single' ) );
 	}
 
 	/**
