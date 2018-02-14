@@ -325,7 +325,6 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/class-wc-discounts.php';
 		include_once WC_ABSPATH . 'includes/class-wc-cart-totals.php';
 		include_once WC_ABSPATH . 'includes/customizer/class-wc-shop-customizer.php';
-		include_once WC_ABSPATH . 'includes/class-wc-regenerate-images.php';
 
 		/**
 		 * Data stores - used to store and retrieve CRUD object data from the database.
@@ -481,6 +480,11 @@ final class WooCommerce {
 		}
 
 		$this->load_webhooks();
+
+		// Unless Jetpack Photon is running, let's include our regenerate thumbnails class.
+		if ( ! class_exists( 'Jetpack' ) || ! Jetpack::is_module_active( 'photon' ) ) {
+			include_once WC_ABSPATH . 'includes/class-wc-regenerate-images.php';
+		}
 
 		// Init action.
 		do_action( 'woocommerce_init' );
