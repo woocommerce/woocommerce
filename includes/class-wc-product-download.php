@@ -96,7 +96,7 @@ class WC_Product_Download implements ArrayAccess {
 		$file_url = $this->get_file();
 		if ( '..' === substr( $file_url, 0, 2 ) || '/' !== substr( $file_url, 0, 1 ) ) {
 			$file_url = realpath( ABSPATH . $file_url );
-		} elseif ( substr( WP_CONTENT_DIR, strlen( untrailingslashit( ABSPATH ) ) ) === substr( $file_url, 0, 11 ) ) {
+		} elseif ( substr( WP_CONTENT_DIR, strlen( untrailingslashit( ABSPATH ) ) ) === substr( $file_url, 0, strlen( substr( WP_CONTENT_DIR, strlen( untrailingslashit( ABSPATH ) ) ) ) ) ) {
 			$file_url = realpath( WP_CONTENT_DIR . substr( $file_url, 11 ) );
 		}
 		return apply_filters( 'woocommerce_downloadable_file_exists', file_exists( $file_url ), $this->get_file() );
