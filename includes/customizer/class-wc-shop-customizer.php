@@ -443,12 +443,23 @@ class WC_Shop_Customizer {
 	 * @param WP_Customize_Manager $wp_customize Theme Customizer object.
 	 */
 	private function add_product_images_section( $wp_customize ) {
+		if ( class_exists( 'Jetpack' ) && Jetpack::is_module_active( 'photon' ) ) {
+			$regen_description = ''; // Nothing to report; Jetpack will handle magically.
+		} elseif ( apply_filters( 'woocommerce_background_image_regeneration', true ) && ! is_multisite() ) {
+			$regen_description = __( 'After publishing your changes, new image sizes will be generated automatically.', 'woocommerce' );
+		} elseif ( apply_filters( 'woocommerce_background_image_regeneration', true ) && is_multisite() ) {
+			$regen_description = sprintf( __( 'After publishing your changes, new image sizes may not be shown until you regenerate thumbnails. You can do this from the <a href="%1$s" target="_blank">tools section in WooCommerce</a> or by using a plugin such as <a href="%2$s" target="_blank">Regenerate Thumbnails</a>.', 'woocommerce' ), admin_url( 'admin.php?page=wc-status&tab=tools' ), 'https://en-gb.wordpress.org/plugins/regenerate-thumbnails/' );
+		} else {
+			$regen_description = sprintf( __( 'After publishing your changes, new image sizes may not be shown until you <a href="%2$s" target="_blank">Regenerate Thumbnails</a>.', 'woocommerce' ), 'https://en-gb.wordpress.org/plugins/regenerate-thumbnails/' );
+		}
+
 		$wp_customize->add_section(
 			'woocommerce_product_images',
 			array(
-				'title'    => __( 'Product Images', 'woocommerce' ),
-				'priority' => 20,
-				'panel'    => 'woocommerce',
+				'title'       => __( 'Product Images', 'woocommerce' ),
+				'description' => $regen_description,
+				'priority'    => 20,
+				'panel'       => 'woocommerce',
 			)
 		);
 
