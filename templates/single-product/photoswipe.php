@@ -21,31 +21,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 
-<?php // Root element of PhotoSwipe. Must have class pswp. ?>
 <div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
-	<?php // Background of PhotoSwipe. It's a separate element as animating opacity is faster than rgba(). ?>
 	<div class="pswp__bg"></div>
-	<?php // Slides wrapper with overflow:hidden.  ?>
 	<div class="pswp__scroll-wrap">
-		<?php /* Container that holds slides.
-		PhotoSwipe keeps only 3 of them in the DOM to save memory.
-		Don't modify these 3 pswp__item elements, data is added later on. */ ?>
 		<div class="pswp__container">
 			<div class="pswp__item"></div>
 			<div class="pswp__item"></div>
 			<div class="pswp__item"></div>
 		</div>
-		<?php // Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. ?>
 		<div class="pswp__ui pswp__ui--hidden">
 			<div class="pswp__top-bar">
-				<?php //  Controls are self-explanatory. Order can be changed. ?>
 				<div class="pswp__counter"></div>
 				<button class="pswp__button pswp__button--close" aria-label="<?php esc_attr_e( 'Close (Esc)', 'woocommerce' ); ?>"></button>
 				<button class="pswp__button pswp__button--share" aria-label="<?php esc_attr_e( 'Share', 'woocommerce' ); ?>"></button>
 				<button class="pswp__button pswp__button--fs" aria-label="<?php esc_attr_e( 'Toggle fullscreen', 'woocommerce' ); ?>"></button>
 				<button class="pswp__button pswp__button--zoom" aria-label="<?php esc_attr_e( 'Zoom in/out', 'woocommerce' ); ?>"></button>
-				<?php // Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR  ?>
-				<?php // element will get class pswp__preloader--active when preloader is running  ?>
 				<div class="pswp__preloader">
 					<div class="pswp__preloader__icn">
 						<div class="pswp__preloader__cut">
