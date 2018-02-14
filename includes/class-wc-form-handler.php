@@ -43,10 +43,15 @@ class WC_Form_Handler {
 	 * Remove key and user ID (or user login, as a fallback) from query string, set cookie, and redirect to account page to show the form.
 	 */
 	public static function redirect_reset_password_link() {
-		if ( is_account_page() && isset( $_GET['key'] ) && (isset( $_GET['id'] ) || isset( $_GET['login'] ) ) ) {
+		if ( is_account_page() && isset( $_GET['key'] ) && ( isset( $_GET['id'] ) || isset( $_GET['login'] ) ) ) {
 
 			// If available, get $user_login from query string parameter for fallback purposes.
-			$user_login = isset($_GET['login']) ? $_GET['login'] : get_user_by('id', $_GET['id'])->user_login;
+			if( isset( $_GET['login'] ) ) {
+				$user_login = $_GET['login'];
+			} else {
+				$user = get_user_by( 'id', $_GET['id'] );
+				$user_login = $user ? $user->user_login : '';
+			}
 
 			$value = sprintf( '%s:%s', wp_unslash( $user_login ), wp_unslash( $_GET['key'] ) );
 			WC_Shortcode_My_Account::set_reset_password_cookie( $value );
