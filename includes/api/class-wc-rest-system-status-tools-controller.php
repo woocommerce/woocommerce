@@ -182,6 +182,11 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 			)
 		);
 
+		// Jetpack does the image resizing heavy lifting so you don't have to.
+		if ( class_exists( 'Jetpack' ) && Jetpack::is_module_active( 'photon' ) ) {
+			unset( $tools['regenerate_thumbnails'] );
+		}
+
 		return apply_filters( 'woocommerce_debug_tools', $tools );
 	}
 

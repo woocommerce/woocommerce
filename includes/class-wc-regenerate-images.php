@@ -325,4 +325,4 @@ class WC_Regenerate_Images {
 	}
 }
 
-add_action( 'init', array( 'WC_Regenerate_Images', 'init' ) );
+WC_Regenerate_Images::init();
