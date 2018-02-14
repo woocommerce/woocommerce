@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 3.3.2-rc.1\n"
 "Report-Msgid-Bugs-To: https://github.com/woocommerce/woocommerce/issues\n"
-"POT-Creation-Date: 2018-02-13 20:00:01+00:00\n"
+"POT-Creation-Date: 2018-02-14 18:03:27+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -5946,7 +5946,7 @@ msgstr ""
 #: includes/abstracts/abstract-wc-rest-terms-controller.php:164
 #: includes/api/class-wc-rest-payment-gateways-controller.php:96
 #: includes/api/class-wc-rest-shipping-methods-controller.php:90
-#: includes/api/class-wc-rest-system-status-tools-controller.php:94
+#: includes/api/class-wc-rest-system-status-tools-controller.php:90
 #: includes/api/v1/class-wc-rest-customers-controller.php:166
 #: includes/api/v1/class-wc-rest-order-notes-controller.php:152
 #: includes/api/v1/class-wc-rest-product-attributes-controller.php:159
@@ -6125,7 +6125,7 @@ msgstr ""
 #: includes/api/class-wc-rest-settings-controller.php:179
 #: includes/api/class-wc-rest-shipping-methods-controller.php:77
 #: includes/api/class-wc-rest-system-status-controller.php:60
-#: includes/api/class-wc-rest-system-status-tools-controller.php:81
+#: includes/api/class-wc-rest-system-status-tools-controller.php:77
 #: includes/api/v1/class-wc-rest-customer-downloads-controller.php:74
 #: includes/api/v1/class-wc-rest-customers-controller.php:135
 #: includes/api/v1/class-wc-rest-order-notes-controller.php:121
@@ -6235,7 +6235,7 @@ msgstr ""
 #: includes/api/class-wc-rest-setting-options-controller.php:81
 #: includes/api/class-wc-rest-shipping-methods-controller.php:53
 #: includes/api/class-wc-rest-shipping-zones-controller.php:279
-#: includes/api/class-wc-rest-system-status-tools-controller.php:54
+#: includes/api/class-wc-rest-system-status-tools-controller.php:50
 #: includes/api/class-wc-rest-webhook-deliveries-controller.php:74
 #: includes/api/class-wc-rest-webhooks-controller.php:100
 #: includes/api/v1/class-wc-rest-coupons-controller.php:82
@@ -6421,7 +6421,7 @@ msgstr ""
 #: includes/gateways/cod/class-wc-gateway-cod.php:83
 #: includes/gateways/paypal/includes/settings-paypal.php:25
 #: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:204
-#: includes/wc-template-functions.php:1289
+#: includes/wc-template-functions.php:1319
 #: templates/single-product/tabs/description.php:25
 msgid "Description"
 msgstr ""
@@ -6534,10 +6534,10 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-api-keys.php:156
 #: includes/admin/class-wc-admin-api-keys.php:171
-#: includes/admin/class-wc-admin-notices.php:123
-#: includes/admin/class-wc-admin-status.php:280
-#: includes/admin/class-wc-admin-status.php:299
-#: includes/admin/class-wc-admin-status.php:315
+#: includes/admin/class-wc-admin-notices.php:124
+#: includes/admin/class-wc-admin-status.php:278
+#: includes/admin/class-wc-admin-status.php:297
+#: includes/admin/class-wc-admin-status.php:313
 #: includes/emails/class-wc-email.php:770
 msgid "Action failed. Please refresh the page and retry."
 msgstr ""
@@ -7442,7 +7442,7 @@ msgstr ""
 msgid "Reviews"
 msgstr ""
 
-#: includes/admin/class-wc-admin-notices.php:127
+#: includes/admin/class-wc-admin-notices.php:128
 #: includes/class-wc-checkout.php:156 includes/class-wc-checkout.php:163
 #: includes/class-wc-emails.php:53 includes/class-wc-emails.php:62
 #: includes/class-wc-payment-gateways.php:51
@@ -8018,7 +8018,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-profile.php:136
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:75
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:124
-#: includes/wc-template-functions.php:2163
+#: includes/wc-template-functions.php:2193
 #: templates/cart/shipping-calculator.php:39
 msgid "Select a country&hellip;"
 msgstr ""
@@ -8802,11 +8802,11 @@ msgstr ""
 msgid "Transfer existing products to your new store — just import a CSV file."
 msgstr ""
 
-#: includes/admin/class-wc-admin-status.php:47
+#: includes/admin/class-wc-admin-status.php:45
 msgid "Tool does not exist."
 msgstr ""
 
-#: includes/admin/class-wc-admin-status.php:59
+#: includes/admin/class-wc-admin-status.php:57
 msgid "Your changes have been saved."
 msgstr ""
 
@@ -8866,9 +8866,9 @@ msgid ""
 msgstr ""
 
 #: includes/admin/class-wc-admin-taxonomies.php:313
-#: includes/api/class-wc-rest-system-status-tools-controller.php:155
-#: includes/api/class-wc-rest-system-status-tools-controller.php:164
-#: includes/api/class-wc-rest-system-status-tools-controller.php:173
+#: includes/api/class-wc-rest-system-status-tools-controller.php:151
+#: includes/api/class-wc-rest-system-status-tools-controller.php:160
+#: includes/api/class-wc-rest-system-status-tools-controller.php:169
 #: templates/emails/email-order-details.php:79
 #: templates/emails/plain/email-order-details.php:46
 #: templates/order/order-details.php:84
@@ -9128,7 +9128,7 @@ msgstr ""
 #: includes/class-wc-emails.php:378
 #: includes/legacy/abstract-wc-legacy-order.php:507
 #: includes/wc-account-functions.php:209
-#: includes/wc-template-functions.php:2680
+#: includes/wc-template-functions.php:2710
 msgid "Download"
 msgstr ""
 
@@ -12126,7 +12126,7 @@ msgid "Showing reports for:"
 msgstr ""
 
 #: includes/admin/reports/class-wc-report-sales-by-product.php:200
-#: includes/api/class-wc-rest-system-status-tools-controller.php:179
+#: includes/api/class-wc-rest-system-status-tools-controller.php:175
 msgid "Reset"
 msgstr ""
 
@@ -14817,6 +14817,16 @@ msgid ""
 "a shipping method is available."
 msgstr ""
 
+#: includes/admin/views/html-notice-regenerating-thumbnails.php:10
+msgid "Cancel thumbnail regeneration"
+msgstr ""
+
+#: includes/admin/views/html-notice-regenerating-thumbnails.php:12
+msgid ""
+"Thumbnail regeneration is running in the background. Depending on the "
+"amount of images in your store this may take a while."
+msgstr ""
+
 #: includes/admin/views/html-notice-simplify-commerce.php:21
 msgid ""
 "<strong>The Simplify Commerce payment gateway is deprecated</strong> "
@@ -17331,217 +17341,235 @@ msgstr ""
 msgid "WooCommerce pages."
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:107
+#: includes/api/class-wc-rest-system-status-tools-controller.php:103
 #: includes/api/v1/class-wc-rest-product-attributes-controller.php:177
 msgid "Sorry, you cannot update resource."
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:121
+#: includes/api/class-wc-rest-system-status-tools-controller.php:117
 msgid "WooCommerce transients"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:122
-#: includes/api/class-wc-rest-system-status-tools-controller.php:127
+#: includes/api/class-wc-rest-system-status-tools-controller.php:118
+#: includes/api/class-wc-rest-system-status-tools-controller.php:123
 msgid "Clear transients"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:123
+#: includes/api/class-wc-rest-system-status-tools-controller.php:119
 msgid "This tool will clear the product/shop transients cache."
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:126
+#: includes/api/class-wc-rest-system-status-tools-controller.php:122
 msgid "Expired transients"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:128
+#: includes/api/class-wc-rest-system-status-tools-controller.php:124
 msgid "This tool will clear ALL expired transients from WordPress."
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:131
+#: includes/api/class-wc-rest-system-status-tools-controller.php:127
 msgid "Orphaned variations"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:132
+#: includes/api/class-wc-rest-system-status-tools-controller.php:128
 msgid "Delete orphaned variations"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:133
+#: includes/api/class-wc-rest-system-status-tools-controller.php:129
 msgid "This tool will delete all variations which have no parent."
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:136
+#: includes/api/class-wc-rest-system-status-tools-controller.php:132
 msgid "Order address indexes"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:137
+#: includes/api/class-wc-rest-system-status-tools-controller.php:133
 msgid "Index orders"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:138
+#: includes/api/class-wc-rest-system-status-tools-controller.php:134
 msgid ""
 "This tool will add address indexes to orders that do not have them yet. "
 "This improves order search results."
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:141
+#: includes/api/class-wc-rest-system-status-tools-controller.php:137
 msgid "Term counts"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:142
+#: includes/api/class-wc-rest-system-status-tools-controller.php:138
 msgid "Recount terms"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:143
+#: includes/api/class-wc-rest-system-status-tools-controller.php:139
 msgid ""
 "This tool will recount product terms - useful when changing your settings "
 "in a way which hides products from the catalog."
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:146
+#: includes/api/class-wc-rest-system-status-tools-controller.php:142
 msgid "Capabilities"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:147
+#: includes/api/class-wc-rest-system-status-tools-controller.php:143
 msgid "Reset capabilities"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:148
+#: includes/api/class-wc-rest-system-status-tools-controller.php:144
 msgid ""
 "This tool will reset the admin, customer and shop_manager roles to default. "
 "Use this if your users cannot access all of the WooCommerce admin pages."
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:151
+#: includes/api/class-wc-rest-system-status-tools-controller.php:147
 msgid "Clear customer sessions"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:152
+#: includes/api/class-wc-rest-system-status-tools-controller.php:148
 #: templates/single-product/add-to-cart/variable.php:43
 msgid "Clear"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:156
+#: includes/api/class-wc-rest-system-status-tools-controller.php:152
 msgid ""
 "This tool will delete all customer session data from the database, "
 "including any current live carts."
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:160
+#: includes/api/class-wc-rest-system-status-tools-controller.php:156
 msgid "Create default WooCommerce pages"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:161
+#: includes/api/class-wc-rest-system-status-tools-controller.php:157
 msgid "Create pages"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:165
+#: includes/api/class-wc-rest-system-status-tools-controller.php:161
 msgid ""
 "This tool will install all the missing WooCommerce pages. Pages already "
 "defined and set up will not be replaced."
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:169
+#: includes/api/class-wc-rest-system-status-tools-controller.php:165
 msgid "Delete WooCommerce tax rates"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:170
+#: includes/api/class-wc-rest-system-status-tools-controller.php:166
 msgid "Delete tax rates"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:174
+#: includes/api/class-wc-rest-system-status-tools-controller.php:170
 msgid ""
 "This option will delete ALL of your tax rates, use with caution. This "
 "action cannot be reversed."
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:178
+#: includes/api/class-wc-rest-system-status-tools-controller.php:174
 msgid "Reset usage tracking"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:180
+#: includes/api/class-wc-rest-system-status-tools-controller.php:176
 msgid ""
 "This will reset your usage tracking settings, causing it to show the opt-in "
 "banner again and not sending any data."
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:217
-#: includes/api/class-wc-rest-system-status-tools-controller.php:236
+#: includes/api/class-wc-rest-system-status-tools-controller.php:179
+msgid "Regenerate shop thumbnails"
+msgstr ""
+
+#: includes/api/class-wc-rest-system-status-tools-controller.php:180
+msgid "Regenerate"
+msgstr ""
+
+#: includes/api/class-wc-rest-system-status-tools-controller.php:181
+msgid ""
+"This will regenerate all shop thumbnails to match your theme and/or image "
+"settings."
+msgstr ""
+
+#: includes/api/class-wc-rest-system-status-tools-controller.php:223
+#: includes/api/class-wc-rest-system-status-tools-controller.php:242
 msgid "Invalid tool ID."
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:286
+#: includes/api/class-wc-rest-system-status-tools-controller.php:292
 msgid "A unique identifier for the tool."
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:294
+#: includes/api/class-wc-rest-system-status-tools-controller.php:300
 msgid "Tool name."
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:302
+#: includes/api/class-wc-rest-system-status-tools-controller.php:308
 msgid "What running the tool will do."
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:310
+#: includes/api/class-wc-rest-system-status-tools-controller.php:316
 msgid "Tool description."
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:318
+#: includes/api/class-wc-rest-system-status-tools-controller.php:324
 msgid "Did the tool run successfully?"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:323
+#: includes/api/class-wc-rest-system-status-tools-controller.php:329
 msgid "Tool return message."
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:379
+#: includes/api/class-wc-rest-system-status-tools-controller.php:385
 msgid "Product transients cleared"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:382
+#: includes/api/class-wc-rest-system-status-tools-controller.php:388
 msgid "%d transients rows cleared"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:392
+#: includes/api/class-wc-rest-system-status-tools-controller.php:398
 msgid "%d orphaned variations deleted"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:410
+#: includes/api/class-wc-rest-system-status-tools-controller.php:416
 msgid "%d indexes added"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:416
+#: includes/api/class-wc-rest-system-status-tools-controller.php:422
 msgid "Roles successfully reset"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:423
+#: includes/api/class-wc-rest-system-status-tools-controller.php:429
 msgid "Terms successfully recounted"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:428
+#: includes/api/class-wc-rest-system-status-tools-controller.php:434
 msgid "Sessions successfully cleared"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:432
+#: includes/api/class-wc-rest-system-status-tools-controller.php:438
 msgid "All missing WooCommerce pages successfully installed"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:439
+#: includes/api/class-wc-rest-system-status-tools-controller.php:445
 msgid "Tax rates successfully deleted"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:444
+#: includes/api/class-wc-rest-system-status-tools-controller.php:450
 msgid "Usage tracking settings successfully reset."
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:456
+#: includes/api/class-wc-rest-system-status-tools-controller.php:455
+msgid "Thumbnail regeneration has been scheduled to run in the background."
+msgstr ""
+
+#: includes/api/class-wc-rest-system-status-tools-controller.php:468
 msgid "There was an error calling %s"
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:458
+#: includes/api/class-wc-rest-system-status-tools-controller.php:470
 msgid "Tool ran."
 msgstr ""
 
-#: includes/api/class-wc-rest-system-status-tools-controller.php:462
+#: includes/api/class-wc-rest-system-status-tools-controller.php:474
 msgid "There was an error calling this tool. There is no callback present."
 msgstr ""
 
@@ -19206,7 +19234,7 @@ msgid ""
 msgstr ""
 
 #: includes/class-wc-cart.php:1068 includes/class-wc-frontend-scripts.php:527
-#: includes/wc-cart-functions.php:117 includes/wc-template-functions.php:1601
+#: includes/wc-cart-functions.php:117 includes/wc-template-functions.php:1631
 #. translators: %s: product name
 msgid "View cart"
 msgstr ""
@@ -19663,7 +19691,7 @@ msgstr ""
 msgid "Buy now"
 msgstr ""
 
-#: includes/class-wc-embed.php:130 includes/wc-template-functions.php:2793
+#: includes/class-wc-embed.php:130 includes/wc-template-functions.php:2823
 #: includes/widgets/class-wc-widget-layered-nav-filters.php:99
 #. translators: %s: average rating
 #. translators: %s: rating
@@ -19825,7 +19853,7 @@ msgid "Error processing checkout. Please try again."
 msgstr ""
 
 #: includes/class-wc-frontend-scripts.php:503
-#: includes/wc-template-functions.php:2105
+#: includes/wc-template-functions.php:2135
 msgid "required"
 msgstr ""
 
@@ -20391,13 +20419,17 @@ msgstr ""
 msgid "Account details"
 msgstr ""
 
-#: includes/class-wc-regenerate-images-request.php:96
+#: includes/class-wc-regenerate-images-request.php:105
 #. translators: %s: ID of the attachment.
 msgid "Regenerating images for attachment ID: %s"
 msgstr ""
 
-#: includes/class-wc-regenerate-images-request.php:227
+#: includes/class-wc-regenerate-images-request.php:246
 msgid "Completed product image regeneration job."
+msgstr ""
+
+#: includes/class-wc-regenerate-images.php:162
+msgid "Cancelled product image regeneration job."
 msgstr ""
 
 #: includes/class-wc-shipping-zone.php:141
@@ -20618,52 +20650,72 @@ msgid "How many rows of products should be shown per page?"
 msgstr ""
 
 #: includes/customizer/class-wc-shop-customizer.php:449
+msgid ""
+"After publishing your changes, new image sizes will be generated "
+"automatically."
+msgstr ""
+
+#: includes/customizer/class-wc-shop-customizer.php:451
+msgid ""
+"After publishing your changes, new image sizes may not be shown until you "
+"regenerate thumbnails. You can do this from the <a href=\"%1$s\" "
+"target=\"_blank\">tools section in WooCommerce</a> or by using a plugin "
+"such as <a href=\"%2$s\" target=\"_blank\">Regenerate Thumbnails</a>."
+msgstr ""
+
+#: includes/customizer/class-wc-shop-customizer.php:453
+msgid ""
+"After publishing your changes, new image sizes may not be shown until you "
+"<a href=\"%2$s\" target=\"_blank\">Regenerate Thumbnails</a>."
+msgstr ""
+
+#: includes/customizer/class-wc-shop-customizer.php:459
 msgid "Product Images"
 msgstr ""
 
-#: includes/customizer/class-wc-shop-customizer.php:470
+#: includes/customizer/class-wc-shop-customizer.php:481
 msgid "Main image width"
 msgstr ""
 
-#: includes/customizer/class-wc-shop-customizer.php:471
+#: includes/customizer/class-wc-shop-customizer.php:482
 msgid ""
 "Image size used for the main image on single product pages. These images "
 "will remain uncropped."
 msgstr ""
 
-#: includes/customizer/class-wc-shop-customizer.php:498
+#: includes/customizer/class-wc-shop-customizer.php:509
 msgid "Thumbnail width"
 msgstr ""
 
-#: includes/customizer/class-wc-shop-customizer.php:499
-msgid "Image size used for products in the catalog and product gallery thumbnails."
-msgstr ""
-
-#: includes/customizer/class-wc-shop-customizer.php:556
-msgid "Thumbnail cropping"
-msgstr ""
-
-#: includes/customizer/class-wc-shop-customizer.php:559
-msgid "1:1"
-msgstr ""
-
-#: includes/customizer/class-wc-shop-customizer.php:560
-msgid "Images will be cropped into a square"
-msgstr ""
-
-#: includes/customizer/class-wc-shop-customizer.php:563
-msgid "Custom"
-msgstr ""
-
-#: includes/customizer/class-wc-shop-customizer.php:564
-msgid "Images will be cropped to a custom aspect ratio"
+#: includes/customizer/class-wc-shop-customizer.php:510
+msgid "Image size used for products in the catalog."
 msgstr ""
 
 #: includes/customizer/class-wc-shop-customizer.php:567
+msgid "Thumbnail cropping"
+msgstr ""
+
+#: includes/customizer/class-wc-shop-customizer.php:570
+msgid "1:1"
+msgstr ""
+
+#: includes/customizer/class-wc-shop-customizer.php:571
+msgid "Images will be cropped into a square"
+msgstr ""
+
+#: includes/customizer/class-wc-shop-customizer.php:574
+msgid "Custom"
+msgstr ""
+
+#: includes/customizer/class-wc-shop-customizer.php:575
+msgid "Images will be cropped to a custom aspect ratio"
+msgstr ""
+
+#: includes/customizer/class-wc-shop-customizer.php:578
 msgid "Uncropped"
 msgstr ""
 
-#: includes/customizer/class-wc-shop-customizer.php:568
+#: includes/customizer/class-wc-shop-customizer.php:579
 msgid "Images will display using the aspect ratio in which they were uploaded"
 msgstr ""
 
@@ -21962,7 +22014,7 @@ msgid "No matching product exists to update."
 msgstr ""
 
 #: includes/legacy/abstract-wc-legacy-order.php:507
-#: includes/wc-template-functions.php:2680
+#: includes/wc-template-functions.php:2710
 #. translators: 1: current item count
 #. translators: %d: downloads count
 msgid "Download %d"
@@ -23104,31 +23156,31 @@ msgstr ""
 msgid "Zambian kwacha"
 msgstr ""
 
-#: includes/wc-core-functions.php:1298
+#: includes/wc-core-functions.php:1315
 msgid "MasterCard"
 msgstr ""
 
-#: includes/wc-core-functions.php:1299
+#: includes/wc-core-functions.php:1316
 msgid "Visa"
 msgstr ""
 
-#: includes/wc-core-functions.php:1300
+#: includes/wc-core-functions.php:1317
 msgid "Discover"
 msgstr ""
 
-#: includes/wc-core-functions.php:1301
+#: includes/wc-core-functions.php:1318
 msgid "American Express"
 msgstr ""
 
-#: includes/wc-core-functions.php:1302
+#: includes/wc-core-functions.php:1319
 msgid "Diners"
 msgstr ""
 
-#: includes/wc-core-functions.php:1303
+#: includes/wc-core-functions.php:1320
 msgid "JCB"
 msgstr ""
 
-#: includes/wc-core-functions.php:1624
+#: includes/wc-core-functions.php:1641
 #. translators: 1: class name 2: woocommerce_logging_class 3:
 #. WC_Logger_Interface
 msgid "The class %1$s provided by %2$s filter must implement %3$s."
@@ -23271,48 +23323,48 @@ msgstr ""
 msgid "Relevance"
 msgstr ""
 
-#: includes/wc-template-functions.php:1298
+#: includes/wc-template-functions.php:1328
 #: templates/checkout/form-shipping.php:63
 #: templates/single-product/tabs/additional-information.php:25
 msgid "Additional information"
 msgstr ""
 
-#: includes/wc-template-functions.php:1308
+#: includes/wc-template-functions.php:1338
 #. translators: %s: reviews count
 msgid "Reviews (%d)"
 msgstr ""
 
-#: includes/wc-template-functions.php:1611
+#: includes/wc-template-functions.php:1641
 msgid "Checkout"
 msgstr ""
 
-#: includes/wc-template-functions.php:1737
+#: includes/wc-template-functions.php:1767
 msgid "Place order"
 msgstr ""
 
-#: includes/wc-template-functions.php:2171
+#: includes/wc-template-functions.php:2201
 msgid "Update country"
 msgstr ""
 
-#: includes/wc-template-functions.php:2190
+#: includes/wc-template-functions.php:2220
 #: templates/cart/shipping-calculator.php:59
 msgid "Select a state&hellip;"
 msgstr ""
 
-#: includes/wc-template-functions.php:2231
-#: includes/wc-template-functions.php:2381
-#: includes/wc-template-functions.php:2391
+#: includes/wc-template-functions.php:2261
+#: includes/wc-template-functions.php:2411
+#: includes/wc-template-functions.php:2421
 msgid "Choose an option"
 msgstr ""
 
-#: includes/wc-template-functions.php:2790
+#: includes/wc-template-functions.php:2820
 #. translators: 1: rating 2: rating count
 msgid "Rated %1$s out of 5 based on %2$s customer rating"
 msgid_plural "Rated %1$s out of 5 based on %2$s customer ratings"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/wc-template-functions.php:2837
+#: includes/wc-template-functions.php:2867
 msgid "Your cart is currently empty."
 msgstr ""
 
@@ -24200,7 +24252,7 @@ msgstr ""
 msgid "Next (arrow right)"
 msgstr ""
 
-#: templates/single-product/product-image.php:54
+#: templates/single-product/product-image.php:44
 msgid "Awaiting product image"
 msgstr ""
 
@@ -24440,20 +24492,20 @@ msgid "Coupons"
 msgstr ""
 
 #: includes/admin/class-wc-admin-permalink-settings.php:76
-#: includes/wc-core-functions.php:1786 includes/wc-update-functions.php:59
+#: includes/wc-core-functions.php:1803 includes/wc-update-functions.php:59
 msgctxt "slug"
 msgid "product-category"
 msgstr ""
 
 #: includes/admin/class-wc-admin-permalink-settings.php:85
-#: includes/wc-core-functions.php:1787 includes/wc-update-functions.php:60
+#: includes/wc-core-functions.php:1804 includes/wc-update-functions.php:60
 msgctxt "slug"
 msgid "product-tag"
 msgstr ""
 
 #: includes/admin/class-wc-admin-permalink-settings.php:195
 #: includes/admin/class-wc-admin-permalink-settings.php:198
-#: includes/wc-core-functions.php:1785 includes/wc-update-functions.php:69
+#: includes/wc-core-functions.php:1802 includes/wc-update-functions.php:69
 msgctxt "slug"
 msgid "product"
 msgstr ""
@@ -24726,12 +24778,12 @@ msgctxt "Price range: from-to"
 msgid "%1$s &ndash; %2$s"
 msgstr ""
 
-#: includes/wc-template-functions.php:1685
+#: includes/wc-template-functions.php:1715
 msgctxt "breadcrumb"
 msgid "Home"
 msgstr ""
 
-#: includes/wc-template-functions.php:2808
+#: includes/wc-template-functions.php:2838
 msgctxt "min_price"
 msgid "From:"
 msgstr ""
