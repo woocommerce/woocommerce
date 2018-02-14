@@ -383,7 +383,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 					$files[ $download_id ]['download_url']        = add_query_arg( array(
 						'download_file' => $product_id,
 						'order'         => $order->get_order_key(),
-						'uid'         	=> hash('sha256', $order->get_billing_email()),
+						'uid'         	=> hash( 'sha256', $order->get_billing_email() ),
 						'key'           => $download_id,
 					), trailingslashit( home_url() ) );
 				}

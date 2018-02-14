@@ -21,7 +21,7 @@ class WC_Download_Handler {
 	 * Hook in methods.
 	 */
 	public static function init() {
-		if ( isset( $_GET['download_file'], $_GET['order'] ) && ( isset($_GET['email'] ) || isset( $_GET['uid'] ) ) ) {
+		if ( isset( $_GET['download_file'], $_GET['order'] ) && ( isset( $_GET['email'] ) || isset( $_GET['uid'] ) ) ) {
 			add_action( 'init', array( __CLASS__, 'download_product' ) );
 		}
 		add_action( 'woocommerce_download_file_redirect', array( __CLASS__, 'download_file_redirect' ), 10, 2 );
@@ -42,19 +42,19 @@ class WC_Download_Handler {
 		}
 
 		// Fallback, accept email address if it's passed.
-		if ( empty($_GET['email'] ) && empty( $_GET['uid'] ) ) {
+		if ( empty( $_GET['email'] ) && empty( $_GET['uid'] ) ) {
 			self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
 		}
 
-		if(isset($_GET['email'])) {
+		if ( isset( $_GET['email'] ) ) {
 			$email_address = $_GET['email'];
 		} else {
 			// Get email address from order to verify hash.
-			$order_id = wc_get_order_id_by_order_key($_GET['order']);
-			$order = new WC_Order($order_id);
+			$order_id = wc_get_order_id_by_order_key( $_GET['order'] );
+			$order = new WC_Order( $order_id );
 			$email_address = $order->get_billing_email();
 
-			if( $_GET['uid'] !== hash('sha256', $email_address) ) {
+			if( $_GET['uid'] !== hash( 'sha256', $email_address ) ) {
 				self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
 			}
 		}
