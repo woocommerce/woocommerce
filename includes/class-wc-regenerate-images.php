@@ -28,12 +28,13 @@ class WC_Regenerate_Images {
 	 *
 	 * @var string
 	 */
-	protected static $requested_size;
+	protected static $regenerate_size;
 
 	/**
 	 * Init function
 	 */
 	public static function init() {
+		add_action( 'image_get_intermediate_size', array( __CLASS__, 'filter_image_get_intermediate_size' ), 10, 3 );
 		add_filter( 'wp_generate_attachment_metadata', array( __CLASS__, 'add_uncropped_metadata' ) );
 
 		// Resize WooCommerce images on the fly when browsing site through customizer as to showcase image setting changes in real time.
@@ -41,7 +42,12 @@ class WC_Regenerate_Images {
 			add_filter( 'wp_get_attachment_image_src', array( __CLASS__, 'maybe_resize_image' ), 10, 4 );
 		}
 
-		// Regenerate thumbnails in the background after settings change. Not ran on multisite to avoid multiple simultanious jobs..
+		// Not required when Jetpack Photon is in use.
+		if ( class_exists( 'Jetpack' ) && Jetpack::is_module_active( 'photon' ) ) {
+			return;
+		}
+
+		// Regenerate thumbnails in the background after settings change. Not ran on multisite to avoid multiple simultanious jobs, and not required when Jetpack Photon is in use.
 		if ( apply_filters( 'woocommerce_background_image_regeneration', ! is_multisite() ) ) {
 			include_once WC_ABSPATH . 'includes/class-wc-regenerate-images-request.php';
 
@@ -52,6 +58,73 @@ class WC_Regenerate_Images {
 			add_action( 'customize_save_after', array( __CLASS__, 'maybe_regenerate_images' ) );
 			add_action( 'after_switch_theme', array( __CLASS__, 'maybe_regenerate_images' ) );
 		}
+	}
+
+	/**
+	 * If an intermediate size meta differs from the actual image size (settings were changed?) return false so the wrong size is not used.
+	 *
+	 * @param array  $data Size data.
+	 * @param int    $attachment_id Attachment ID.
+	 * @param string $size Size name.
+	 * @return array
+	 */
+	public static function filter_image_get_intermediate_size( $data, $attachment_id, $size ) {
+		if ( ! is_string( $size ) || ! in_array( $size, apply_filters( 'woocommerce_image_sizes_to_resize', array( 'woocommerce_thumbnail', 'woocommerce_gallery_thumbnail', 'woocommerce_single', 'shop_thumbnail', 'shop_catalog', 'shop_single' ) ), true ) ) {
+			return $data;
+		}
+
+		// If we don't have sizes, we cannot proceed.
+		if ( ! isset( $data['width'], $data['height'] ) ) {
+			return $data;
+		}
+
+		if ( ! self::image_size_matches_settings( $data, $size ) ) {
+			return false;
+		}
+
+		return $data;
+	}
+
+	/**
+	 * We need to track if uncropped was on or off when generating the images.
+	 *
+	 * @param array $meta_data Array of meta data.
+	 * @return array
+	 */
+	public static function add_uncropped_metadata( $meta_data ) {
+		$size_data = wc_get_image_size( 'woocommerce_thumbnail' );
+		if ( isset( $meta_data['sizes'], $meta_data['sizes']['woocommerce_thumbnail'] ) ) {
+			$meta_data['sizes']['woocommerce_thumbnail']['uncropped'] = empty( $size_settings['height'] );
+		}
+		return $meta_data;
+	}
+
+	/**
+	 * See if an image's dimensions match actual settings.
+	 *
+	 * @param array  $image Image dimensions array.
+	 * @param string $size Named size.
+	 * @return bool
+	 */
+	protected static function image_size_matches_settings( $image, $size ) {
+		$size_data = wc_get_image_size( $size );
+
+		// Size is invalid if the widths or crop setting don't match.
+		if ( $size_data['width'] !== $image['width'] ) {
+			return false;
+		}
+
+		// Size is invalid if the heights don't match.
+		if ( $size_data['height'] && $size_data['height'] !== $image['height'] ) {
+			return false;
+		}
+
+		// If cropping mode has changed, regenerate the image.
+		if ( '' === $size_data['height'] && empty( $image['uncropped'] ) ) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
@@ -101,18 +174,6 @@ class WC_Regenerate_Images {
 	}
 
 	/**
-	 * We need to track if uncropped was on or off when generating the images.
-	 *
-	 * @param array $metadata Array of meta data.
-	 * @return array
-	 */
-	public static function add_uncropped_metadata( $metadata ) {
-		$size_settings = wc_get_image_size( 'woocommerce_thumbnail' );
-		$metadata['woocommerce_thumbnail_uncropped'] = empty( $size_settings['height'] );
-		return $metadata;
-	}
-
-	/**
 	 * Check if we should maybe generate a new image size if not already there.
 	 *
 	 * @param array        $image Properties of the image.
@@ -138,15 +199,7 @@ class WC_Regenerate_Images {
 			return $image;
 		}
 
-		$size_settings = wc_get_image_size( $size );
-
-		// If size differs from image meta, or height differs and we're cropping, regenerate the image.
-		if ( ! isset( $imagemeta['sizes'], $imagemeta['sizes'][ $size ] ) || $imagemeta['sizes'][ $size ]['width'] !== $size_settings['width'] || ( $size_settings['crop'] && $imagemeta['sizes'][ $size ]['height'] !== $size_settings['height'] ) ) {
-			return self::resize_and_return_image( $attachment_id, $image, $size, $icon );
-		}
-
-		// If cropping mode has changed, regenerate the image.
-		if ( '' === $size_settings['height'] && empty( $imagemeta['woocommerce_thumbnail_uncropped'] ) ) {
+		if ( ! isset( $imagemeta['sizes'], $imagemeta['sizes'][ $size ] ) || ! self::image_size_matches_settings( $imagemeta['sizes'][ $size ], $size ) ) {
 			return self::resize_and_return_image( $attachment_id, $image, $size, $icon );
 		}
 
@@ -178,7 +231,7 @@ class WC_Regenerate_Images {
 	 * @return array
 	 */
 	public static function adjust_intermediate_image_sizes( $sizes ) {
-		return array( self::$requested_size );
+		return array( self::$regenerate_size );
 	}
 
 	/**
@@ -225,7 +278,6 @@ class WC_Regenerate_Images {
 	 * @return string
 	 */
 	private static function resize_and_return_image( $attachment_id, $image, $size, $icon ) {
-		self::$requested_size = $size;
 		$image_size           = wc_get_image_size( $size );
 		$wp_uploads           = wp_upload_dir( null, false );
 		$wp_uploads_dir       = $wp_uploads['basedir'];
@@ -246,9 +298,6 @@ class WC_Regenerate_Images {
 			include ABSPATH . 'wp-admin/includes/image.php';
 		}
 
-		// Make sure registered image size matches the size we're requesting.
-		add_image_size( $size, $image_size['width'], $image_size['height'], $image_size['crop'] );
-
 		$thumbnail = self::get_image( $fullsizepath, $image_size['width'], $image_size['height'], $image_size['crop'] );
 
 		// If the file is already there perhaps just load it.
@@ -266,7 +315,12 @@ class WC_Regenerate_Images {
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 
-		// We only want to regen WC images.
+		// Make sure registered image size matches the size we're requesting.
+		add_image_size( $size . '_preview', $image_size['width'], $image_size['height'], $image_size['crop'] );
+
+		self::$regenerate_size = $size . '_preview';
+
+		// We only want to regen a specific image size.
 		add_filter( 'intermediate_image_sizes', array( __CLASS__, 'adjust_intermediate_image_sizes' ) );
 
 		// This function will generate the new image sizes.
@@ -281,12 +335,8 @@ class WC_Regenerate_Images {
 		}
 
 		// Since this is only a preview we should not update the actual size. That will be done later by the background job.
-		if ( isset( $new_metadata['sizes'][ $size ] ) ) {
-			if ( $metadata && isset( $metadata['sizes'] ) ) {
-				$metadata['sizes'][ $size . '_preview' ] = $new_metadata['sizes'][ $size ];
-			} else {
-				$metadata = $new_metadata;
-			}
+		if ( isset( $new_metadata['sizes'][ $size . '_preview' ] ) ) {
+			$metadata['sizes'][ $size . '_preview' ] = $new_metadata['sizes'][ $size . '_preview' ];
 			wp_update_attachment_metadata( $attachment_id, $metadata );
 		}
 
@@ -325,4 +375,4 @@ class WC_Regenerate_Images {
 	}
 }
 
-WC_Regenerate_Images::init();
+add_action( 'init', array( 'WC_Regenerate_Images', 'init' ) );
