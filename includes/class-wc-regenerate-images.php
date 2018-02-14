@@ -47,16 +47,19 @@ class WC_Regenerate_Images {
 			return;
 		}
 
-		// Regenerate thumbnails in the background after settings change. Not ran on multisite to avoid multiple simultanious jobs, and not required when Jetpack Photon is in use.
-		if ( apply_filters( 'woocommerce_background_image_regeneration', ! is_multisite() ) ) {
+		if ( apply_filters( 'woocommerce_background_image_regeneration', true ) ) {
 			include_once WC_ABSPATH . 'includes/class-wc-regenerate-images-request.php';
 
 			self::$background_process = new WC_Regenerate_Images_Request();
 
 			add_action( 'admin_init', array( __CLASS__, 'regenerating_notice' ) );
 			add_action( 'woocommerce_hide_regenerating_thumbnails_notice', array( __CLASS__, 'dismiss_regenerating_notice' ) );
-			add_action( 'customize_save_after', array( __CLASS__, 'maybe_regenerate_images' ) );
-			add_action( 'after_switch_theme', array( __CLASS__, 'maybe_regenerate_images' ) );
+
+			// Regenerate thumbnails in the background after settings changes. Not ran on multisite to avoid multiple simultanious jobs.
+			if ( ! is_multisite() ) {
+				add_action( 'customize_save_after', array( __CLASS__, 'maybe_regenerate_images' ) );
+				add_action( 'after_switch_theme', array( __CLASS__, 'maybe_regenerate_images' ) );
+			}
 		}
 	}
 
