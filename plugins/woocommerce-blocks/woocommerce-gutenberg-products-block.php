@@ -10,6 +10,9 @@
 
 defined( 'ABSPATH' ) || die();
 
+/**
+ * Load up the assets if Gutenberg is active.
+ */
 function wgpb_initialize() {
 
 	if ( function_exists( 'register_block_type' ) ) {

@@ -3,6 +3,63 @@ const { registerBlockType, InspectorControls, BlockControls } = wp.blocks;
 const { Toolbar, withAPIData, Dropdown } = wp.components;
 const { RangeControl, ToggleControl, SelectControl } = InspectorControls;
 
+
+/**
+ * A setting has the following properties:
+ *    title - Display title of the setting.
+ *    description - Display description of the setting.
+ *    value - Display setting slug to set when selected.
+ *    group_container - (optional) If set the setting is a parent container.
+ */
+const PRODUCTS_BLOCK_DISPLAY_SETTINGS = {
+	'specific' : {
+		title: __( 'Individual products' ),
+		description: __( 'Hand-pick which products to display' ),
+		value: 'specific',
+	},
+	'category' : {
+		title: __( 'Product category' ),
+		description: __( 'Display products from a specific category or multiple categories' ),
+		value: 'category',
+	},
+	'filter' : {
+		title: __( 'Filter products' ),
+		description: __( 'E.g. featured products, or products with a specific attribute like size or color' ),
+		value: 'filter',
+		group_container: 'filter'
+	},
+	'featured' : {
+		title: __( 'Featured products' ),
+		description: '',
+		value: 'featured',
+	},
+	'best_sellers' : {
+		title: __( 'Best sellers' ),
+		description: '',
+		value: 'best_sellers',
+	},
+	'best_rated' : {
+		title: __( 'Best rated' ),
+		description: '',
+		value: 'best_rated',
+	},
+	'on_sale' : {
+		title: __( 'On sale' ),
+		description: '',
+		value: 'on_sale',
+	},
+	'attribute' : {
+		title: __( 'Attribute' ),
+		description: '',
+		value: 'attribute',
+	},
+	'all' : {
+		title: __( 'All products' ),
+		description: __( 'Display all products ordered chronologically' ),
+		value: 'all',
+	}
+};
+
 /**
  * When the display mode is 'Specific products' search for and add products to the block.
  *
@@ -75,7 +132,7 @@ const ProductSpecifcSearch = withAPIData( ( props ) => {
 				<ul>
 					{ products.map( ( product ) => (
 						<li>
-							<button type="button" class="components-button" id={ 'product-' + product.id }>
+							<button type="button" className="components-button" id={ 'product-' + product.id }>
 								<img src={ product.images[0].src } width="30px" /> { product.name }
 							</button>
 						</li>
@@ -245,7 +302,7 @@ const ProductCategoryList = withAPIData( ( props ) => {
 class ProductsBlockSettingsEditorDisplayOption extends React.Component {
 	render() {
 		return (
-			<div className="wc-products-display-option" onClick={ () => { this.props.update_display_callback( this.props.value ) } } >
+			<div className={ 'wc-products-display-option value-' + this.props.value } onClick={ () => { this.props.update_display_callback( this.props.value ) } } >
 				<h4>{ this.props.title }</h4>
 				<p>{ this.props.description }</p>
 			</div>
@@ -257,36 +314,27 @@ class ProductsBlockSettingsEditorDisplayOption extends React.Component {
  * A list of all available ways to display products.
  */
 class ProductsBlockSettingsEditorDisplayOptions extends React.Component {
-	render() {
-		const products_block_display_settings = [
-			{
-				title: __( 'All' ),
-				description: __( 'All products' ),
-				value: 'all',
-			},
-			{
-				title: __( 'Specific' ),
-				description: __( 'Hand-picked products' ),
-				value: 'specific',
-			},
-			{
-				title: __( 'Category' ),
-				description: __( 'Products from a specific category' ),
-				value: 'category',
-			}
-		];
 
+	render() {
 		let classes = 'display-settings-container';
 		if ( this.props.existing ) {
 			classes += ' existing';
 		}
 
+		let display_settings = [];
+		for ( var setting_key in PRODUCTS_BLOCK_DISPLAY_SETTINGS ) {
+			display_settings.push( <ProductsBlockSettingsEditorDisplayOption { ...PRODUCTS_BLOCK_DISPLAY_SETTINGS[ setting_key ] } update_display_callback={ this.props.update_display_callback } /> );
+		}
+
+		let description = null;
+		if ( ! this.props.existing ) {
+			description = <p>{ __( 'Choose which products you\'d like to display:' ) }</p>;
+		}
+
 		return (
 			<div className={ classes }>
-				<p>{ __( 'Select the scope for products to display:' ) }</p>
-				{ products_block_display_settings.map( ( setting ) =>
-					<ProductsBlockSettingsEditorDisplayOption { ...setting } update_display_callback={ this.props.update_display_callback } />
-				) }
+				{ description }
+				{ display_settings }
 			</div>
 		);
 	}
@@ -305,6 +353,7 @@ class ProductsBlockSettingsEditor extends React.Component {
 		this.state = {
 			display: props.selected_display,
 			menu_visible: props.selected_display ? false : true,
+			expanded_group: '',
 		}
 
 		this.updateDisplay = this.updateDisplay.bind( this );
@@ -313,15 +362,31 @@ class ProductsBlockSettingsEditor extends React.Component {
 	/**
 	 * Update the display settings for the block.
 	 *
-	 * @param Event object evt
+	 * @param value String
 	 */
 	updateDisplay( value ) {
-		this.setState( {
+
+		// If not a group update display.
+		let new_state = {
 			display: value,
 			menu_visible: false,
-		} );
+			expanded_group: '',
+		};
 
-		this.props.update_display_callback( value );
+		// If a settings group expand the group but keep display settings the same.
+		if ( 'undefined' !== PRODUCTS_BLOCK_DISPLAY_SETTINGS[ value ].group_container && PRODUCTS_BLOCK_DISPLAY_SETTINGS[ value ].group_container ) {
+			new_state = {
+				menu_visible: true,
+				expanded_group: value,
+			}
+		} 
+
+		this.setState( new_state );
+
+		// Only update the display setting if a non-group setting was selected.
+		if ( 'undefined' === PRODUCTS_BLOCK_DISPLAY_SETTINGS[ value ].group_container || ! PRODUCTS_BLOCK_DISPLAY_SETTINGS[ value ].group_container ) {
+			this.props.update_display_callback( value );
+		}
 	}
 
 	/**
@@ -337,15 +402,29 @@ class ProductsBlockSettingsEditor extends React.Component {
 
 		const menu = this.state.menu_visible ? <ProductsBlockSettingsEditorDisplayOptions existing={ this.state.display ? true : false } update_display_callback={ this.updateDisplay } /> : null;
 
-		let heading = <h4>{ __( 'Products' ) }</h4>;
-		if ( this.state.display && ! this.state.menu_visible ) {
-			heading = <h4>{ __( 'Displaying ' + this.state.display ) } <a onClick={ () => { this.setState( { menu_visible: true } ) } }>{ __( 'Change' ) }</a></h4>;
-		} else if ( this.state.display ) {
-			heading = <h4>{ __( 'Displaying ' + this.state.display ) } <a onClick={ () => { this.setState( { menu_visible: false } ) } }>{ __( 'Cancel' ) }</a></h4>;
+		let heading = null;
+		if ( this.state.display ) {
+			var menu_link = <a onClick={ () => { this.setState( { menu_visible: true } ) } }>{ __( 'Display different products' ) }</a>;
+			if ( this.state.menu_visible ) {
+				menu_link = <a onClick={ () => { this.setState( { menu_visible: false } ) } }>{ __( 'Cancel' ) }</a>;
+			}
+
+			heading = (
+				<div className="settings-heading">
+					<div className="currently-displayed">
+						{ __( 'Displaying ' ) }
+						<strong>{ __( PRODUCTS_BLOCK_DISPLAY_SETTINGS[ this.state.display ].title ) }</strong>
+					</div>
+					<div className="change-display">
+						{ menu_link }
+					</div>
+				</div>
+			);
 		}
 
 		return (
-			<div className="wc-product-display-settings">
+			<div className={ 'wc-product-display-settings ' + ( this.state.expanded_group ? 'expanded-group-' + this.state.expanded_group : '' ) }>
+				<h4>{ __( 'Products' ) }</h4>
 
 				{ heading }
 
