@@ -134,6 +134,7 @@ jQuery( function ( $ ) {
 		})
 
 		.on( 'init_tooltips', function() {
+
 			$( '.tips, .help_tip, .woocommerce-help-tip' ).tipTip( {
 				'attribute': 'data-tip',
 				'fadeIn': 50,
@@ -159,6 +160,10 @@ jQuery( function ( $ ) {
 		});
 
 	// Tooltips
+	$( document ).ajaxComplete( function() {
+		$( document.body ).trigger( 'init_tooltips' );
+	} );
+
 	$( document.body ).trigger( 'init_tooltips' );
 
 	// wc_input_table tables
@@ -280,15 +285,6 @@ jQuery( function ( $ ) {
 			}
 		}).change();
 	});
-
-	// Demo store notice
-	$( 'input#woocommerce_demo_store' ).change(function() {
-		if ( $( this ).is( ':checked' ) ) {
-			$( '#woocommerce_demo_store_notice' ).closest( 'tr' ).show();
-		} else {
-			$( '#woocommerce_demo_store_notice' ).closest( 'tr' ).hide();
-		}
-	}).change();
 
 	// Reviews.
 	$( 'input#woocommerce_enable_reviews' ).change(function() {

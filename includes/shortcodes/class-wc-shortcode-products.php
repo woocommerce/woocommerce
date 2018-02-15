@@ -110,7 +110,7 @@ class WC_Shortcode_Products {
 	protected function parse_attributes( $attributes ) {
 		$attributes = $this->parse_legacy_attributes( $attributes );
 
-		return shortcode_atts( array(
+		$attributes = shortcode_atts( array(
 			'limit'          => '-1',      // Results limit.
 			'columns'        => '3',       // Number of columns.
 			'rows'           => '',        // Number of rows. If defined, limit will be ignored.
@@ -130,6 +130,12 @@ class WC_Shortcode_Products {
 			'paginate'       => false,     // Should results be paginated.
 			'cache'          => true,      // Should shortcode output be cached.
 		), $attributes, $this->type );
+
+		if ( ! absint( $attributes['columns'] ) ) {
+			$attributes['columns'] = 3;
+		}
+
+		return $attributes;
 	}
 
 	/**
@@ -173,7 +179,7 @@ class WC_Shortcode_Products {
 		);
 
 		if ( wc_string_to_bool( $this->attributes['paginate'] ) ) {
-			$this->attributes['page'] = get_query_var( 'product-page', 1 );
+			$this->attributes['page'] = absint( empty( $_GET['product-page'] ) ? 1 : $_GET['product-page'] ); // WPCS: input var ok, CSRF ok.
 		}
 
 		if ( ! empty( $this->attributes['rows'] ) ) {
@@ -519,10 +525,8 @@ class WC_Shortcode_Products {
 				set_transient( $transient_name, $results, DAY_IN_SECONDS * 30 );
 			}
 		}
-		// Remove ordering query arguments.
-		if ( ! empty( $this->attributes['category'] ) ) {
-			WC()->query->remove_ordering_args();
-		}
+		// Remove ordering query arguments which may have been added by get_catalog_ordering_args.
+		WC()->query->remove_ordering_args();
 		return $results;
 	}
 
@@ -560,7 +564,11 @@ class WC_Shortcode_Products {
 			$original_post = $GLOBALS['post'];
 
 			do_action( "woocommerce_shortcode_before_{$this->type}_loop", $this->attributes );
-			do_action( 'woocommerce_before_shop_loop' );
+
+			// Fire standard shop loop hooks when paginating results so we can show result counts and so on.
+			if ( wc_string_to_bool( $this->attributes['paginate'] ) ) {
+				do_action( 'woocommerce_before_shop_loop' );
+			}
 
 			woocommerce_product_loop_start();
 
@@ -583,7 +591,11 @@ class WC_Shortcode_Products {
 			$GLOBALS['post'] = $original_post; // WPCS: override ok.
 			woocommerce_product_loop_end();
 
-			do_action( 'woocommerce_after_shop_loop' );
+			// Fire standard shop loop hooks when paginating results so we can show result counts and so on.
+			if ( wc_string_to_bool( $this->attributes['paginate'] ) ) {
+				do_action( 'woocommerce_after_shop_loop' );
+			}
+
 			do_action( "woocommerce_shortcode_after_{$this->type}_loop", $this->attributes );
 
 			wp_reset_postdata();

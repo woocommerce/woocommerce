@@ -414,6 +414,7 @@ class WC_Admin_Setup_Wizard {
 			</div>
 		</div>
 
+			<div class="store-currency-container">
 			<label class="location-prompt" for="currency_code">
 				<?php esc_html_e( 'What currency do you use?', 'woocommerce' ); ?>
 			</label>
@@ -426,19 +427,15 @@ class WC_Admin_Setup_Wizard {
 			>
 				<option value=""><?php esc_html_e( 'Choose a currency&hellip;', 'woocommerce' ); ?></option>
 				<?php foreach ( get_woocommerce_currencies() as $code => $name ) : ?>
-					<option value="<?php echo esc_attr( $code ); ?>" <?php selected( $currency, $code ); ?>>
-						<?php
-						// @codingStandardsIgnoreStart
-						printf( esc_html__( '%1$s (%2$s)', 'woocommerce' ), $name, get_woocommerce_currency_symbol( $code ) );
-						// // @codingStandardsIgnoreEnd
-						?>
-					</option>
+					<option value="<?php echo esc_attr( $code ); ?>" <?php selected( $currency, $code ); ?>><?php printf( esc_html__( '%1$s (%2$s)', 'woocommerce' ), $name, get_woocommerce_currency_symbol( $code ) ); ?></option>
 				<?php endforeach; ?>
 			</select>
 			<script type="text/javascript">
 				var wc_setup_currencies = <?php echo wp_json_encode( $currency_by_country ); ?>;
 			</script>
+			</div>
 
+			<div class="product-type-container">
 			<label class="location-prompt" for="product_type">
 				<?php esc_html_e( 'What type of product do you plan to sell?', 'woocommerce' ); ?>
 			</label>
@@ -452,6 +449,7 @@ class WC_Admin_Setup_Wizard {
 				<option value="physical" <?php selected( $product_type, 'physical' ); ?>><?php esc_html_e( 'I plan to sell physical products', 'woocommerce' ); ?></option>
 				<option value="virtual" <?php selected( $product_type, 'virtual' ); ?>><?php esc_html_e( 'I plan to sell digital products', 'woocommerce' ); ?></option>
 			</select>
+			</div>
 
 			<input
 				type="checkbox"
@@ -722,9 +720,7 @@ class WC_Admin_Setup_Wizard {
 			<div class="wc-wizard-shipping-method-dropdown">
 				<select id="<?php echo esc_attr( "{$input_prefix}[method]" ); ?>" name="<?php echo esc_attr( "{$input_prefix}[method]" ); ?>" class="method wc-enhanced-select">
 				<?php foreach ( $shipping_methods as $method_id => $method ) : ?>
-					<option value="<?php echo esc_attr( $method_id ); ?>" <?php selected( $selected, $method_id ); ?>>
-						<?php echo esc_html( $method['name'] ); ?>
-					</option>
+					<option value="<?php echo esc_attr( $method_id ); ?>" <?php selected( $selected, $method_id ); ?>><?php echo esc_html( $method['name'] ); ?></option>
 				<?php endforeach; ?>
 				</select>
 			</div>
@@ -1108,17 +1104,17 @@ class WC_Admin_Setup_Wizard {
 		$paypal_ec_description = '<p>' . sprintf(
 			/* translators: %s: URL */
 			__( 'Safe and secure payments using credit cards or your customer\'s PayPal account. <a href="%s" target="_blank">Learn more</a>.', 'woocommerce' ),
-			'https://wordpress.org/plugins/woocommerce-gateway-paypal-express-checkout/'
+			'https://woocommerce.com/products/woocommerce-gateway-paypal-express-checkout/'
 		) . '</p>';
 		$klarna_checkout_description = '<p>' . sprintf(
 			/* translators: %s: URL */
 			__( 'Full checkout experience with pay now, pay later and slice it. No credit card numbers, no passwords, no worries. <a href="%s" target="_blank">Learn more about Klarna</a>.', 'woocommerce' ),
-			'https://woocommerce.com/products/klarna/'
+			'https://woocommerce.com/products/klarna-checkout/'
 		) . '</p>';
 		$klarna_payments_description = '<p>' . sprintf(
 			/* translators: %s: URL */
 			__( 'Choose the payment that you want, pay now, pay later or slice it. No credit card numbers, no passwords, no worries. <a href="%s" target="_blank">Learn more about Klarna</a>.', 'woocommerce' ),
-			'https://woocommerce.com/products/klarna/'
+			'https://woocommerce.com/products/klarna-payments/ '
 		) . '</p>';
 		$square_description = '<p>' . sprintf(
 			/* translators: %s: URL */
@@ -1426,7 +1422,7 @@ class WC_Admin_Setup_Wizard {
 							),
 						)
 					),
-					esc_url( admin_url( 'admin.php?page=wc-addons&view=payment_gateways' ) )
+					esc_url( admin_url( 'admin.php?page=wc-addons&section=payment-gateways' ) )
 				);
 				?>
 			</p>
@@ -1663,13 +1659,13 @@ class WC_Admin_Setup_Wizard {
 		$description_base = __( 'Your store is almost ready! To activate services like %s, just connect with Jetpack.', 'woocommerce' );
 
 		if ( $payment_enabled && $taxes_enabled && $rates_enabled ) {
-			$description = sprintf( $description_base, __( 'payments, automated taxes, live rates and discounted shipping labels', 'woocommerce' ) );
+			$description = sprintf( $description_base, __( 'payment setup, automated taxes, live rates and discounted shipping labels', 'woocommerce' ) );
 		} else if ( $payment_enabled && $taxes_enabled ) {
-			$description = sprintf( $description_base, __( 'payments and automated taxes', 'woocommerce' ) );
+			$description = sprintf( $description_base, __( 'payment setup and automated taxes', 'woocommerce' ) );
 		} else if ( $payment_enabled && $rates_enabled ) {
-			$description = sprintf( $description_base, __( 'payments, live rates and discounted shipping labels', 'woocommerce' ) );
+			$description = sprintf( $description_base, __( 'payment setup, live rates and discounted shipping labels', 'woocommerce' ) );
 		} else if ( $payment_enabled ) {
-			$description = sprintf( $description_base, __( 'payments', 'woocommerce' ) );
+			$description = sprintf( $description_base, __( 'payment setup', 'woocommerce' ) );
 		} else if ( $taxes_enabled && $rates_enabled ) {
 			$description = sprintf( $description_base, __( 'automated taxes, live rates and discounted shipping labels', 'woocommerce' ) );
 		} else if ( $taxes_enabled ) {
@@ -1691,7 +1687,7 @@ class WC_Admin_Setup_Wizard {
 		if ( isset( $_GET['activate_error'] ) ) {
 			$has_jetpack_error = true;
 
-			$title = __( "Sorry, We couldn't connect your store to Jetpack", 'woocommerce' );
+			$title = __( "Sorry, we couldn't connect your store to Jetpack", 'woocommerce' );
 
 			$error_message = $this->get_activate_error_message( sanitize_text_field( wp_unslash( $_GET['activate_error'] ) ) );
 			$description = $error_message;
@@ -1735,7 +1731,14 @@ class WC_Admin_Setup_Wizard {
 				<input type="hidden" name="save_step" value="activate" />
 				<?php wp_nonce_field( 'wc-setup' ); ?>
 			</form>
-			<h3 class="jetpack-reasons"><?php esc_html_e( "Bonus reasons you'll love Jetpack", 'woocommerce' ); ?></h3>
+			<h3 class="jetpack-reasons">
+				<?php
+					echo esc_html( $description ?
+						__( "Bonus reasons you'll love Jetpack", 'woocommerce' ) :
+						__( "Reasons you'll love Jetpack", 'woocommerce' )
+					);
+				?>
+			</h3>
 			<ul class="wc-wizard-features">
 				<li class="wc-wizard-feature-item">
 					<p class="wc-wizard-feature-name">
@@ -1881,8 +1884,8 @@ class WC_Admin_Setup_Wizard {
 			<li class="wc-wizard-next-step-item">
 				<div class="wc-wizard-next-step-description">
 					<p class="next-step-heading"><?php esc_html_e( 'Next step', 'woocommerce' ); ?></p>
-					<h3 class="next-step-description"><?php esc_html_e( 'Create your first product', 'woocommerce' ); ?></h3>
-					<p class="next-step-extra-info"><?php esc_html_e( "You're ready to add your first product.", 'woocommerce' ); ?></p>
+					<h3 class="next-step-description"><?php esc_html_e( 'Create some products', 'woocommerce' ); ?></h3>
+					<p class="next-step-extra-info"><?php esc_html_e( "You're ready to add products to your store.", 'woocommerce' ); ?></p>
 				</div>
 				<div class="wc-wizard-next-step-action">
 					<p class="wc-setup-actions step">

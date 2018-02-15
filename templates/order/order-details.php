@@ -52,7 +52,7 @@ if ( $show_downloads ) {
 			do_action( 'woocommerce_order_details_before_order_table_items', $order );
 
 			foreach ( $order_items as $item_id => $item ) {
-				$product = apply_filters( 'woocommerce_order_item_product', $item->get_product(), $item );
+				$product = $item->get_product();
 
 				wc_get_template( 'order/order-details-item.php', array(
 					'order'			     => $order,
