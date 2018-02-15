@@ -396,7 +396,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 							<div class="inner">
 								{{{ data.actions_html }}}
 
-								<a class="button button-primary button-large" href="<?php echo esc_url( admin_url( 'post.php?action=edit' ) ); ?>&post={{ data.data.id }}"><?php esc_html_e( 'Edit order', 'woocommerce' ); ?></a>
+								<a class="button button-primary button-large" aria-label="<?php esc_attr_e( 'Edit this order', 'woocommerce' ); ?>" href="<?php echo esc_url( admin_url( 'post.php?action=edit' ) ); ?>&post={{ data.data.id }}"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
 							</div>
 						</footer>
 					</section>
@@ -530,6 +530,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			$status_actions['on-hold'] = array(
 				'url'    => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=on-hold&order_id=' . $order->get_id() ), 'woocommerce-mark-order-status' ),
 				'name'   => __( 'On-hold', 'woocommerce' ),
+				'title'  => __( 'Change order status to on-hold', 'woocommerce' ),
 				'action' => 'on-hold',
 			);
 		}
@@ -538,6 +539,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			$status_actions['processing'] = array(
 				'url'    => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=processing&order_id=' . $order->get_id() ), 'woocommerce-mark-order-status' ),
 				'name'   => __( 'Processing', 'woocommerce' ),
+				'title'  => __( 'Change order status to processing', 'woocommerce' ),
 				'action' => 'processing',
 			);
 		}
@@ -546,6 +548,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			$status_actions['complete'] = array(
 				'url'    => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=completed&order_id=' . $order->get_id() ), 'woocommerce-mark-order-status' ),
 				'name'   => __( 'Completed', 'woocommerce' ),
+				'title'  => __( 'Change order status to completed', 'woocommerce' ),
 				'action' => 'complete',
 			);
 		}
