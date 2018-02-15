@@ -459,9 +459,11 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 				<tbody>';
 
 		foreach ( $line_items as $item_id => $item ) {
-			$product_object = is_callable( array( $item, 'get_product' ) ) ? $item->get_product() : null;
 
-			$html .= '<tr class="wc-order-preview-table__item wc-order-preview-table__item--' . esc_attr( $item_id ) . '">';
+			$product_object = is_callable( array( $item, 'get_product' ) ) ? $item->get_product() : null;
+			$row_class      = apply_filters( 'woocommerce_admin_html_order_preview_item_class', '', $item, $order );
+
+			$html .= '<tr class="wc-order-preview-table__item wc-order-preview-table__item--' . esc_attr( $item_id ) . ( $row_class ? ' ' . esc_attr( $row_class ) : '' ) . '">';
 
 			foreach ( $columns as $column => $label ) {
 				$html .= '<td class="wc-order-preview-table__column--' . esc_attr( $column ) . '">';
@@ -710,7 +712,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			);
 		}
 		?>
-		<select class="wc-customer-search" name="_customer_user" data-placeholder="<?php esc_attr_e( 'Search for a customer&hellip;', 'woocommerce' ); ?>" data-allow_clear="true">
+		<select class="wc-customer-search" name="_customer_user" data-placeholder="<?php esc_attr_e( 'Filter by registered customer', 'woocommerce' ); ?>" data-allow_clear="true">
 			<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo wp_kses_post( $user_string ); ?><option>
 		</select>
 		<?php

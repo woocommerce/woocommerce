@@ -25,7 +25,7 @@
   */
  do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 
- <p><?php printf( __( 'The order #%1$d from %2$s has been cancelled. The order was as follows:', 'woocommerce' ), $order->get_order_number(), $order->get_formatted_billing_full_name() ); ?></p>
+ <p><?php printf( __( 'The order #%1$s from %2$s has been cancelled. The order was as follows:', 'woocommerce' ), $order->get_order_number(), $order->get_formatted_billing_full_name() ); ?></p>
 
  <?php
 

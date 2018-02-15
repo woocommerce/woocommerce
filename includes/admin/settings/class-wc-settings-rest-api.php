@@ -71,16 +71,16 @@ class WC_Settings_Rest_API extends WC_Settings_Page {
 				),
 
 				array(
-					'title'   => __( 'API', 'woocommerce' ),
-					'desc'    => __( 'Enable the REST API', 'woocommerce' ),
+					'title'   => __( 'Legacy API', 'woocommerce' ),
+					'desc'    => __( 'Enable the legacy REST API', 'woocommerce' ),
 					'id'      => 'woocommerce_api_enabled',
 					'type'    => 'checkbox',
-					'default' => 'yes',
+					'default' => 'no',
 				),
 
 				array(
 					'type' => 'sectionend',
-					'id' => 'general_options',
+					'id'   => 'general_options',
 				),
 			) );
 		}

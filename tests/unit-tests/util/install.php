@@ -11,16 +11,22 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 	 */
 	public function test_check_version() {
 		update_option( 'woocommerce_version', ( (float) WC()->version - 1 ) );
-		update_option( 'woocommerce_db_version', WC()->version );
 		WC_Install::check_version();
 
 		$this->assertTrue( did_action( 'woocommerce_updated' ) === 1 );
 
 		update_option( 'woocommerce_version', WC()->version );
-		update_option( 'woocommerce_db_version', WC()->version );
 		WC_Install::check_version();
 
 		$this->assertTrue( did_action( 'woocommerce_updated' ) === 1 );
+
+		update_option( 'woocommerce_version', (float) WC()->version + 1 );
+		WC_Install::check_version();
+
+		$this->assertTrue(
+			did_action( 'woocommerce_updated' ) === 1,
+			'WC_Install::check_version() should not call install routine when the WC version stored in the database is bigger than the version in the code as downgrades are not supported.'
+		);
 	}
 
 	/**
@@ -33,12 +39,12 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 			define( 'WC_REMOVE_ALL_DATA', true );
 		}
 
-		include( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) . '/uninstall.php' );
+		include dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) . '/uninstall.php';
 		delete_transient( 'wc_installing' );
 
 		WC_Install::install();
 
-		$this->assertEquals( WC()->version, get_option( 'woocommerce_version' ), print_r( array( 'Stored version' => get_option( 'woocommerce_version' ), 'WC Version' => WC()->version ), true ) );
+		$this->assertEquals( WC()->version, get_option( 'woocommerce_version' ) );
 	}
 
 	/**
@@ -87,7 +93,7 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 			define( 'WP_UNINSTALL_PLUGIN', true );
 			define( 'WC_REMOVE_ALL_DATA', true );
 		}
-		include( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) . '/uninstall.php' );
+		include dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) . '/uninstall.php';
 
 		WC_Install::create_roles();
 

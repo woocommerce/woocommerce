@@ -254,11 +254,10 @@ class WC_Structured_Data {
 			$markup['offers'] = array( apply_filters( 'woocommerce_structured_data_product_offer', $markup_offer, $product ) );
 		}
 
-		if ( $product->get_rating_count() ) {
+		if ( $product->get_review_count() ) {
 			$markup['aggregateRating'] = array(
 				'@type'       => 'AggregateRating',
 				'ratingValue' => $product->get_average_rating(),
-				'ratingCount' => $product->get_rating_count(),
 				'reviewCount' => $product->get_review_count(),
 			);
 		}
@@ -391,7 +390,7 @@ class WC_Structured_Data {
 				continue;
 			}
 
-			$product        = apply_filters( 'woocommerce_order_item_product', $order->get_product_from_item( $item ), $item );
+			$product        = $order->get_product_from_item( $item );
 			$product_exists = is_object( $product );
 			$is_visible     = $product_exists && $product->is_visible();
 

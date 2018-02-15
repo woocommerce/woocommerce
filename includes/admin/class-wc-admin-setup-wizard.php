@@ -4,8 +4,6 @@
  *
  * Takes new users through some basic steps to setup their store.
  *
- * @author      WooThemes
- * @category    Admin
  * @package     WooCommerce/Admin
  * @version     2.6.0
  */
@@ -24,21 +22,21 @@ class WC_Admin_Setup_Wizard {
 	 *
 	 * @var string
 	 */
-	private $step   = '';
+	private $step = '';
 
 	/**
 	 * Steps for the setup wizard
 	 *
 	 * @var array
 	 */
-	private $steps  = array();
+	private $steps = array();
 
 	/**
 	 * Actions to be executed after the HTTP response has completed
 	 *
 	 * @var array
 	 */
-	private $deferred_actions  = array();
+	private $deferred_actions = array();
 
 	/**
 	 * Tweets user can optionally send after install
@@ -69,10 +67,28 @@ class WC_Admin_Setup_Wizard {
 
 	/**
 	 * The theme "extra" should only be shown if the current user can modify themes
-	 * and the store doesn't already have a WooCommerce compatible theme.
+	 * and the store doesn't already have a WooCommerce theme.
+	 *
+	 * @return boolean
 	 */
 	protected function should_show_theme_extra() {
-		$is_default_theme = wc_is_active_theme( array(
+		$support_woocommerce = current_theme_supports( 'woocommerce' ) && ! $this->is_default_theme();
+
+		return (
+			current_user_can( 'install_themes' ) &&
+			current_user_can( 'switch_themes' ) &&
+			! is_multisite() &&
+			! $support_woocommerce
+		);
+	}
+
+	/**
+	 * Is the user using a default WP theme?
+	 *
+	 * @return boolean
+	 */
+	protected function is_default_theme() {
+		return wc_is_active_theme( array(
 			'twentyseventeen',
 			'twentysixteen',
 			'twentyfifteen',
@@ -82,14 +98,6 @@ class WC_Admin_Setup_Wizard {
 			'twentytwelve',
 			'twentyten',
 		) );
-
-		$support_woocommerce = current_theme_supports( 'woocommerce' ) && ! $is_default_theme;
-		return (
-			current_user_can( 'install_themes' ) &&
-			current_user_can( 'switch_themes' ) &&
-			! is_multisite() &&
-			! $support_woocommerce
-		);
 	}
 
 	/**
@@ -108,14 +116,14 @@ class WC_Admin_Setup_Wizard {
 			WC()->countries->get_european_union_countries()
 		);
 
-		return in_array( $country_code, $tax_supported_countries );
+		return in_array( $country_code, $tax_supported_countries, true );
 	}
 
 	/**
 	 * Show the setup wizard.
 	 */
 	public function setup_wizard() {
-		if ( empty( $_GET['page'] ) || 'wc-setup' !== $_GET['page'] ) {
+		if ( empty( $_GET['page'] ) || 'wc-setup' !== $_GET['page'] ) { // WPCS: CSRF ok, input var ok.
 			return;
 		}
 		$default_steps = array(
@@ -124,27 +132,27 @@ class WC_Admin_Setup_Wizard {
 				'view'    => array( $this, 'wc_setup_store_setup' ),
 				'handler' => array( $this, 'wc_setup_store_setup_save' ),
 			),
-			'payment' => array(
+			'payment'     => array(
 				'name'    => __( 'Payment', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_payment' ),
 				'handler' => array( $this, 'wc_setup_payment_save' ),
 			),
-			'shipping' => array(
+			'shipping'    => array(
 				'name'    => __( 'Shipping', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_shipping' ),
 				'handler' => array( $this, 'wc_setup_shipping_save' ),
 			),
-			'extras' => array(
+			'extras'      => array(
 				'name'    => __( 'Extras', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_extras' ),
 				'handler' => array( $this, 'wc_setup_extras_save' ),
 			),
-			'activate' => array(
+			'activate'    => array(
 				'name'    => __( 'Activate', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_activate' ),
 				'handler' => array( $this, 'wc_setup_activate_save' ),
 			),
-			'next_steps' => array(
+			'next_steps'  => array(
 				'name'    => __( 'Ready!', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_ready' ),
 				'handler' => '',
@@ -163,12 +171,7 @@ class WC_Admin_Setup_Wizard {
 
 		// Hide the activate step if Jetpack is already active, but not
 		// if we're returning from connecting Jetpack on WordPress.com.
-		if (
-			class_exists( 'Jetpack' ) &&
-			Jetpack::is_active() &&
-			! isset( $_GET['from'] ) &&
-			! isset( $_GET['activate_error'] )
-		) {
+		if ( class_exists( 'Jetpack' ) && Jetpack::is_active() && ! isset( $_GET['from'] ) && ! isset( $_GET['activate_error'] ) ) { // WPCS: CSRF ok, input var ok.
 			unset( $default_steps['activate'] );
 		}
 
@@ -176,8 +179,8 @@ class WC_Admin_Setup_Wizard {
 		$pending_jetpack = ! class_exists( 'Jetpack' ) && get_option( 'woocommerce_setup_background_installing_jetpack' );
 
 		$this->steps = apply_filters( 'woocommerce_setup_wizard_steps', $default_steps );
-		$this->step = isset( $_GET['step'] ) ? sanitize_key( $_GET['step'] ) : current( array_keys( $this->steps ) );
-		$suffix     = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+		$this->step  = isset( $_GET['step'] ) ? sanitize_key( $_GET['step'] ) : current( array_keys( $this->steps ) ); // WPCS: CSRF ok, input var ok.
+		$suffix      = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
 		wp_register_script( 'jquery-blockui', WC()->plugin_url() . '/assets/js/jquery-blockui/jquery.blockUI' . $suffix . '.js', array( 'jquery' ), '2.70', true );
 		wp_register_script( 'selectWoo', WC()->plugin_url() . '/assets/js/selectWoo/selectWoo.full' . $suffix . '.js', array( 'jquery' ), '1.0.0' );
@@ -238,7 +241,7 @@ class WC_Admin_Setup_Wizard {
 			return admin_url();
 		}
 
-		$step_index = array_search( $step, $keys );
+		$step_index = array_search( $step, $keys, true );
 		if ( false === $step_index ) {
 			return '';
 		}
@@ -275,7 +278,7 @@ class WC_Admin_Setup_Wizard {
 				<a class="wc-return-to-dashboard" href="<?php echo esc_url( admin_url() ); ?>"><?php esc_html_e( 'Not right now', 'woocommerce' ); ?></a>
 			<?php elseif ( 'next_steps' === $this->step ) : ?>
 				<a class="wc-return-to-dashboard" href="<?php echo esc_url( admin_url() ); ?>"><?php esc_html_e( 'Return to your dashboard', 'woocommerce' ); ?></a>
-			<?php elseif ( 'activate' === $this->step ) : ?>
+			<?php elseif ( 'activate' === $this->step || 'extras' === $this->step ) : ?>
 				<a class="wc-return-to-dashboard" href="<?php echo esc_url( $this->get_next_step_link() ); ?>"><?php esc_html_e( 'Skip this step', 'woocommerce' ); ?></a>
 			<?php endif; ?>
 			</body>
@@ -295,7 +298,7 @@ class WC_Admin_Setup_Wizard {
 					<?php
 					if ( $step_key === $this->step ) {
 						echo 'active';
-					} elseif ( array_search( $this->step, array_keys( $this->steps ) ) > array_search( $step_key, array_keys( $this->steps ) ) ) {
+					} elseif ( array_search( $this->step, array_keys( $this->steps ), true ) > array_search( $step_key, array_keys( $this->steps ), true ) ) {
 						echo 'done';
 					}
 					?>
@@ -339,9 +342,8 @@ class WC_Admin_Setup_Wizard {
 			$state = '*';
 		}
 
-		$locale_info = include( WC()->plugin_path() . '/i18n/locale-info.php' );
+		$locale_info         = include WC()->plugin_path() . '/i18n/locale-info.php';
 		$currency_by_country = wp_list_pluck( $locale_info, 'currency_code' );
-
 		?>
 		<form method="post" class="address-step">
 			<?php wp_nonce_field( 'wc-setup' ); ?>
@@ -354,7 +356,7 @@ class WC_Admin_Setup_Wizard {
 				name="store_country_state"
 				required
 				data-placeholder="<?php esc_attr_e( 'Choose a country&hellip;', 'woocommerce' ); ?>"
-				aria-label="<?php esc_attr_e( 'Country', 'woocommerce' ) ?>"
+				aria-label="<?php esc_attr_e( 'Country', 'woocommerce' ); ?>"
 				class="location-input wc-enhanced-select dropdown"
 			>
 					<?php WC()->countries->country_dropdown_options( $country, $state ); ?>
@@ -412,6 +414,7 @@ class WC_Admin_Setup_Wizard {
 			</div>
 		</div>
 
+			<div class="store-currency-container">
 			<label class="location-prompt" for="currency_code">
 				<?php esc_html_e( 'What currency do you use?', 'woocommerce' ); ?>
 			</label>
@@ -424,19 +427,15 @@ class WC_Admin_Setup_Wizard {
 			>
 				<option value=""><?php esc_html_e( 'Choose a currency&hellip;', 'woocommerce' ); ?></option>
 				<?php foreach ( get_woocommerce_currencies() as $code => $name ) : ?>
-					<option value="<?php echo esc_attr( $code ); ?>" <?php selected( $currency, $code ); ?>>
-						<?php
-						// @codingStandardsIgnoreStart
-						printf( esc_html__( '%1$s (%2$s)', 'woocommerce' ), $name, get_woocommerce_currency_symbol( $code ) );
-						// // @codingStandardsIgnoreEnd
-						?>
-					</option>
+					<option value="<?php echo esc_attr( $code ); ?>" <?php selected( $currency, $code ); ?>><?php printf( esc_html__( '%1$s (%2$s)', 'woocommerce' ), $name, get_woocommerce_currency_symbol( $code ) ); ?></option>
 				<?php endforeach; ?>
 			</select>
 			<script type="text/javascript">
-				var wc_setup_currencies = <?php echo json_encode( $currency_by_country ); ?>;
+				var wc_setup_currencies = <?php echo wp_json_encode( $currency_by_country ); ?>;
 			</script>
+			</div>
 
+			<div class="product-type-container">
 			<label class="location-prompt" for="product_type">
 				<?php esc_html_e( 'What type of product do you plan to sell?', 'woocommerce' ); ?>
 			</label>
@@ -450,6 +449,7 @@ class WC_Admin_Setup_Wizard {
 				<option value="physical" <?php selected( $product_type, 'physical' ); ?>><?php esc_html_e( 'I plan to sell physical products', 'woocommerce' ); ?></option>
 				<option value="virtual" <?php selected( $product_type, 'virtual' ); ?>><?php esc_html_e( 'I plan to sell digital products', 'woocommerce' ); ?></option>
 			</select>
+			</div>
 
 			<input
 				type="checkbox"
@@ -500,7 +500,7 @@ class WC_Admin_Setup_Wizard {
 		update_option( 'woocommerce_product_type', $product_type );
 		update_option( 'woocommerce_sell_in_person', $sell_in_person );
 
-		$locale_info = include( WC()->plugin_path() . '/i18n/locale-info.php' );
+		$locale_info = include WC()->plugin_path() . '/i18n/locale-info.php';
 		$country     = WC()->countries->get_base_country();
 
 		// Set currency formatting options based on chosen location and currency.
@@ -522,7 +522,7 @@ class WC_Admin_Setup_Wizard {
 		}
 
 		WC_Install::create_pages();
-		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
+		wp_safe_redirect( esc_url_raw( $this->get_next_step_link() ) );
 		exit;
 	}
 
@@ -549,7 +549,7 @@ class WC_Admin_Setup_Wizard {
 			if ( ! headers_sent() ) {
 				header( 'Connection: close' );
 			}
-			@ob_end_flush();
+			@ob_end_flush(); // @codingStandardsIgnoreLine.
 			flush();
 		}
 	}
@@ -673,11 +673,11 @@ class WC_Admin_Setup_Wizard {
 	 */
 	protected function get_wizard_shipping_methods( $country_code, $currency_code ) {
 		$shipping_methods = array(
-			'live_rates' => array(
+			'live_rates'    => array(
 				'name'        => __( 'Live Rates', 'woocommerce' ),
 				'description' => __( 'WooCommerce Services and Jetpack will be installed and activated for you.', 'woocommerce' ),
 			),
-			'flat_rate' => array(
+			'flat_rate'     => array(
 				'name'        => __( 'Flat Rate', 'woocommerce' ),
 				'description' => __( 'Set a fixed price to cover shipping costs.', 'woocommerce' ),
 				'settings'    => array(
@@ -720,15 +720,13 @@ class WC_Admin_Setup_Wizard {
 			<div class="wc-wizard-shipping-method-dropdown">
 				<select id="<?php echo esc_attr( "{$input_prefix}[method]" ); ?>" name="<?php echo esc_attr( "{$input_prefix}[method]" ); ?>" class="method wc-enhanced-select">
 				<?php foreach ( $shipping_methods as $method_id => $method ) : ?>
-					<option value="<?php echo esc_attr( $method_id ); ?>" <?php selected( $selected, $method_id ); ?>>
-						<?php echo esc_html( $method['name'] ); ?>
-					</option>
+					<option value="<?php echo esc_attr( $method_id ); ?>" <?php selected( $selected, $method_id ); ?>><?php echo esc_html( $method['name'] ); ?></option>
 				<?php endforeach; ?>
 				</select>
 			</div>
 			<div class="shipping-method-descriptions">
 				<?php foreach ( $shipping_methods as $method_id => $method ) : ?>
-					<p class="shipping-method-description <?php echo esc_attr( $method_id ); ?> <?php if ( $method_id !== $selected ) { echo 'hide'; } ?>">
+					<p class="shipping-method-description <?php echo esc_attr( $method_id ); ?> <?php echo $method_id !== $selected ? 'hide' : ''; ?>">
 						<?php echo esc_html( $method['description'] ); ?>
 					</p>
 				<?php endforeach; ?>
@@ -737,8 +735,12 @@ class WC_Admin_Setup_Wizard {
 
 		<div class="shipping-method-settings">
 		<?php foreach ( $shipping_methods as $method_id => $method ) : ?>
-			<?php if ( empty( $method['settings'] ) ) { continue; } ?>
-			<div class="shipping-method-setting <?php echo esc_attr( $method_id ); ?> <?php if ( $method_id !== $selected ) { echo 'hide'; } ?>">
+			<?php
+			if ( empty( $method['settings'] ) ) {
+				continue;
+			}
+			?>
+			<div class="shipping-method-setting <?php echo esc_attr( $method_id ); ?> <?php echo $method_id !== $selected ? 'hide' : ''; ?>">
 			<?php foreach ( $method['settings'] as $setting_id => $setting ) : ?>
 				<?php $method_setting_id = "{$input_prefix}[{$method_id}][{$setting_id}]"; ?>
 				<input
@@ -770,7 +772,7 @@ class WC_Admin_Setup_Wizard {
 		$wcs_carrier           = $this->get_wcs_shipping_carrier( $country_code, $currency_code );
 		$existing_zones        = WC_Shipping_Zones::get_zones();
 
-		$locale_info = include( WC()->plugin_path() . '/i18n/locale-info.php' );
+		$locale_info = include WC()->plugin_path() . '/i18n/locale-info.php';
 		if ( isset( $locale_info[ $country_code ] ) ) {
 			$dimension_unit = $locale_info[ $country_code ]['dimension_unit'];
 			$weight_unit    = $locale_info[ $country_code ]['weight_unit'];
@@ -782,15 +784,15 @@ class WC_Admin_Setup_Wizard {
 		if ( ! empty( $existing_zones ) ) {
 			$intro_text = __( 'How would you like units on your store displayed?', 'woocommerce' );
 		} elseif ( $wcs_carrier ) {
-			/* translators: %1$s: country name including the 'the' prefix, %2$s: shipping carrier name */
 			$intro_text = sprintf(
+				/* translators: %1$s: country name including the 'the' prefix, %2$s: shipping carrier name */
 				__( "You're all set up to ship anywhere in %1\$s, and outside of it. We recommend using <strong>live rates</strong> (which are powered by our WooCommerce Services plugin and Jetpack) to get accurate %2\$s shipping prices to cover the cost of order fulfillment.", 'woocommerce' ),
 				$prefixed_country_name,
 				$wcs_carrier
 			);
 		} else {
-			/* translators: %s: country name including the 'the' prefix if needed */
 			$intro_text = sprintf(
+				/* translators: %s: country name including the 'the' prefix if needed */
 				__( "You can choose which countries you'll be shipping to and with which methods. To get started, we've set you up with shipping inside and outside of %s.", 'woocommerce' ),
 				$prefixed_country_name
 			);
@@ -916,7 +918,7 @@ class WC_Admin_Setup_Wizard {
 
 		// For now, limit this setup to the first run.
 		if ( ! empty( $existing_zones ) ) {
-			wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
+			wp_safe_redirect( esc_url_raw( $this->get_next_step_link() ) );
 			exit;
 		}
 
@@ -933,7 +935,7 @@ class WC_Admin_Setup_Wizard {
 		 * store is located in, with the selected method preconfigured.
 		 */
 		if ( $setup_domestic ) {
-			$country  = WC()->countries->get_base_country();
+			$country = WC()->countries->get_base_country();
 
 			$zone = new WC_Shipping_Zone( null );
 			$zone->set_zone_order( 0 );
@@ -949,7 +951,7 @@ class WC_Admin_Setup_Wizard {
 			$zone->save();
 
 			// Save chosen shipping method settings (using REST controller for convenience).
-			if ( isset( $instance_id ) && ! empty( $_POST['shipping_zones']['domestic'][ $domestic_method ] ) ) {
+			if ( isset( $instance_id ) && ! empty( $_POST['shipping_zones']['domestic'][ $domestic_method ] ) ) { // WPCS: input var ok.
 				$method_controller = new WC_REST_Shipping_Zone_Methods_Controller();
 				// @codingStandardsIgnoreStart
 				$method_controller->update_item( array(
@@ -974,7 +976,7 @@ class WC_Admin_Setup_Wizard {
 			}
 
 			// Save chosen shipping method settings (using REST controller for convenience).
-			if ( isset( $instance_id ) && ! empty( $_POST['shipping_zones']['intl'][ $intl_method ] ) ) {
+			if ( isset( $instance_id ) && ! empty( $_POST['shipping_zones']['intl'][ $intl_method ] ) ) { // WPCS: input var ok.
 				$method_controller = new WC_REST_Shipping_Zone_Methods_Controller();
 				// @codingStandardsIgnoreStart
 				$method_controller->update_item( array(
@@ -991,7 +993,7 @@ class WC_Admin_Setup_Wizard {
 			WC_Admin_Notices::add_notice( 'no_shipping_methods' );
 		}
 
-		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
+		wp_safe_redirect( esc_url_raw( $this->get_next_step_link() ) );
 		exit;
 	}
 
@@ -1026,7 +1028,7 @@ class WC_Admin_Setup_Wizard {
 			'US',
 		);
 
-		return in_array( $country_code, $stripe_supported_countries );
+		return in_array( $country_code, $stripe_supported_countries, true );
 	}
 
 	/**
@@ -1036,10 +1038,10 @@ class WC_Admin_Setup_Wizard {
 	 */
 	protected function is_klarna_checkout_supported_country( $country_code ) {
 		$supported_countries = array(
-			'SE', //Sweden
-			'FI', //Finland
-			'NO', //Norway
-			'NL', //Netherlands
+			'SE', // Sweden.
+			'FI', // Finland.
+			'NO', // Norway.
+			'NL', // Netherlands.
 		);
 		return in_array( $country_code, $supported_countries, true );
 	}
@@ -1051,9 +1053,9 @@ class WC_Admin_Setup_Wizard {
 	 */
 	protected function is_klarna_payments_supported_country( $country_code ) {
 		$supported_countries = array(
-			'DK', //Denmark
-			'DE', //Germany
-			'AT', //Austria
+			'DK', // Denmark.
+			'DE', // Germany.
+			'AT', // Austria.
 		);
 		return in_array( $country_code, $supported_countries, true );
 	}
@@ -1095,28 +1097,33 @@ class WC_Admin_Setup_Wizard {
 		$user_email = $this->get_current_user_email();
 
 		$stripe_description = '<p>' . sprintf(
+			/* translators: %s: URL */
 			__( 'Accept debit and credit cards in 135+ currencies, methods such as Alipay, and one-touch checkout with Apple Pay. <a href="%s" target="_blank">Learn more</a>.', 'woocommerce' ),
 			'https://woocommerce.com/products/stripe/'
 		) . '</p>';
 		$paypal_ec_description = '<p>' . sprintf(
+			/* translators: %s: URL */
 			__( 'Safe and secure payments using credit cards or your customer\'s PayPal account. <a href="%s" target="_blank">Learn more</a>.', 'woocommerce' ),
-			'https://wordpress.org/plugins/woocommerce-gateway-paypal-express-checkout/'
+			'https://woocommerce.com/products/woocommerce-gateway-paypal-express-checkout/'
 		) . '</p>';
 		$klarna_checkout_description = '<p>' . sprintf(
+			/* translators: %s: URL */
 			__( 'Full checkout experience with pay now, pay later and slice it. No credit card numbers, no passwords, no worries. <a href="%s" target="_blank">Learn more about Klarna</a>.', 'woocommerce' ),
-			'https://woocommerce.com/products/klarna/'
+			'https://woocommerce.com/products/klarna-checkout/'
 		) . '</p>';
 		$klarna_payments_description = '<p>' . sprintf(
+			/* translators: %s: URL */
 			__( 'Choose the payment that you want, pay now, pay later or slice it. No credit card numbers, no passwords, no worries. <a href="%s" target="_blank">Learn more about Klarna</a>.', 'woocommerce' ),
-			'https://woocommerce.com/products/klarna/'
+			'https://woocommerce.com/products/klarna-payments/ '
 		) . '</p>';
 		$square_description = '<p>' . sprintf(
+			/* translators: %s: URL */
 			__( 'Securely accept credit and debit cards with one low rate, no surprise fees (custom rates available). Sell online and in store and track sales and inventory in one place. <a href="%s" target="_blank">Learn more about Square</a>.', 'woocommerce' ),
 			'https://woocommerce.com/products/square/'
 		) . '</p>';
 
 		return array(
-			'stripe' => array(
+			'stripe'          => array(
 				'name'        => __( 'Stripe', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/stripe.png',
 				'description' => $stripe_description,
@@ -1130,7 +1137,7 @@ class WC_Admin_Setup_Wizard {
 						'placeholder' => '',
 						'required'    => false,
 					),
-					'email' => array(
+					'email'          => array(
 						'label'       => __( 'Stripe email address:', 'woocommerce' ),
 						'type'        => 'email',
 						'value'       => $user_email,
@@ -1140,7 +1147,7 @@ class WC_Admin_Setup_Wizard {
 					),
 				),
 			),
-			'ppec_paypal' => array(
+			'ppec_paypal'     => array(
 				'name'        => __( 'PayPal Express Checkout', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/paypal.png',
 				'description' => $paypal_ec_description,
@@ -1155,7 +1162,7 @@ class WC_Admin_Setup_Wizard {
 						'placeholder' => '',
 						'required'    => false,
 					),
-					'email' => array(
+					'email'            => array(
 						'label'       => __( 'Direct payments to email address:', 'woocommerce' ),
 						'type'        => 'email',
 						'value'       => $user_email,
@@ -1165,7 +1172,7 @@ class WC_Admin_Setup_Wizard {
 					),
 				),
 			),
-			'paypal' => array(
+			'paypal'          => array(
 				'name'        => __( 'PayPal Standard', 'woocommerce' ),
 				'description' => __( 'Accept payments via PayPal using account balance or credit card.', 'woocommerce' ),
 				'image'       => '',
@@ -1195,7 +1202,7 @@ class WC_Admin_Setup_Wizard {
 				'class'       => 'klarna-logo',
 				'repo-slug'   => 'klarna-payments-for-woocommerce',
 			),
-			'square' => array(
+			'square'          => array(
 				'name'        => __( 'Square', 'woocommerce' ),
 				'description' => $square_description,
 				'image'       => WC()->plugin_url() . '/assets/images/square-white.png',
@@ -1242,9 +1249,9 @@ class WC_Admin_Setup_Wizard {
 
 		$offered_gateways = array();
 		if ( $can_stripe ) {
-			$gateways['stripe']['enabled'] = true;
+			$gateways['stripe']['enabled']  = true;
 			$gateways['stripe']['featured'] = true;
-			$offered_gateways += array( 'stripe' => $gateways['stripe'] );
+			$offered_gateways              += array( 'stripe' => $gateways['stripe'] );
 		}
 		$offered_gateways += array( 'ppec_paypal' => $gateways['ppec_paypal'] );
 		return $offered_gateways;
@@ -1263,13 +1270,13 @@ class WC_Admin_Setup_Wizard {
 				'image'       => '',
 				'class'       => '',
 			),
-			'bacs' => array(
+			'bacs'   => array(
 				'name'        => __( 'Bank transfer (BACS) payments', 'woocommerce' ),
 				'description' => __( 'A simple offline gateway that lets you accept BACS payment.', 'woocommerce' ),
 				'image'       => '',
 				'class'       => '',
 			),
-			'cod' => array(
+			'cod'    => array(
 				'name'        => __( 'Cash on delivery', 'woocommerce' ),
 				'description' => __( 'A simple offline gateway that lets you accept cash on delivery.', 'woocommerce' ),
 				'image'       => '',
@@ -1403,31 +1410,38 @@ class WC_Admin_Setup_Wizard {
 		<h1><?php esc_html_e( 'Payment', 'woocommerce' ); ?></h1>
 		<form method="post" class="wc-wizard-payment-gateway-form">
 			<p>
-				<?php printf(
+				<?php
+				printf(
 					wp_kses(
-						__( 'WooCommerce can accept both online and offline payments. <a href="%1$s" target="_blank">Additional payment methods</a> can be installed later.', 'woocommerce' ),
+						/* translators: %s: Link */
+						__( 'WooCommerce can accept both online and offline payments. <a href="%s" target="_blank">Additional payment methods</a> can be installed later.', 'woocommerce' ),
 						array(
 							'a' => array(
-								'href' => array(),
+								'href'   => array(),
 								'target' => array(),
 							),
 						)
 					),
-					esc_url( admin_url( 'admin.php?page=wc-addons&view=payment_gateways' ) )
-				); ?>
+					esc_url( admin_url( 'admin.php?page=wc-addons&section=payment-gateways' ) )
+				);
+				?>
 			</p>
 			<?php if ( $featured_gateways ) : ?>
 			<ul class="wc-wizard-services featured">
-				<?php foreach ( $featured_gateways as $gateway_id => $gateway ) :
+				<?php
+				foreach ( $featured_gateways as $gateway_id => $gateway ) {
 					$this->display_service_item( $gateway_id, $gateway );
-				endforeach; ?>
+				}
+				?>
 			</ul>
 			<?php endif; ?>
 			<?php if ( $in_cart_gateways ) : ?>
 			<ul class="wc-wizard-services in-cart">
-				<?php foreach ( $in_cart_gateways as $gateway_id => $gateway ) :
+				<?php
+				foreach ( $in_cart_gateways as $gateway_id => $gateway ) {
 					$this->display_service_item( $gateway_id, $gateway );
-				endforeach; ?>
+				}
+				?>
 			</ul>
 			<?php endif; ?>
 			<ul class="wc-wizard-services manual">
@@ -1443,9 +1457,11 @@ class WC_Admin_Setup_Wizard {
 						<label for="wc-wizard-service-list-toggle"></label>
 					</div>
 				</li>
-				<?php foreach ( $manual_gateways as $gateway_id => $gateway ) :
+				<?php
+				foreach ( $manual_gateways as $gateway_id => $gateway ) {
 					$this->display_service_item( $gateway_id, $gateway );
-				endforeach; ?>
+				}
+				?>
 			</ul>
 			<p class="wc-setup-actions step">
 				<button type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step"><?php esc_html_e( 'Continue', 'woocommerce' ); ?></button>
@@ -1464,12 +1480,12 @@ class WC_Admin_Setup_Wizard {
 		if (
 			(
 				// Install WooCommerce Services with Stripe to enable deferred account creation.
-				! empty( $_POST['wc-wizard-service-stripe-enabled'] ) &&
-				! empty( $_POST['stripe_create_account'] )
+				! empty( $_POST['wc-wizard-service-stripe-enabled'] ) && // WPCS: CSRF ok, input var ok.
+				! empty( $_POST['stripe_create_account'] ) // WPCS: CSRF ok, input var ok.
 			) || (
 				// Install WooCommerce Services with PayPal EC to enable proxied payments.
-				! empty( $_POST['wc-wizard-service-ppec_paypal-enabled'] ) &&
-				! empty( $_POST['ppec_paypal_reroute_requests'] )
+				! empty( $_POST['wc-wizard-service-ppec_paypal-enabled'] ) && // WPCS: CSRF ok, input var ok.
+				! empty( $_POST['ppec_paypal_reroute_requests'] ) // WPCS: CSRF ok, input var ok.
 			)
 		) {
 			$this->install_woocommerce_services();
@@ -1479,13 +1495,11 @@ class WC_Admin_Setup_Wizard {
 
 		foreach ( $gateways as $gateway_id => $gateway ) {
 			// If repo-slug is defined, download and install plugin from .org.
-			if ( ! empty( $gateway['repo-slug'] ) && ! empty( $_POST[ 'wc-wizard-service-' . $gateway_id . '-enabled' ] ) ) {
+			if ( ! empty( $gateway['repo-slug'] ) && ! empty( $_POST[ 'wc-wizard-service-' . $gateway_id . '-enabled' ] ) ) { // WPCS: CSRF ok, input var ok.
 				$this->install_plugin( $gateway_id, $gateway );
 			}
 
-			$settings_key        = 'woocommerce_' . $gateway_id . '_settings';
-			$settings            = array_filter( (array) get_option( $settings_key, array() ) );
-			$settings['enabled'] = ! empty( $_POST[ 'wc-wizard-service-' . $gateway_id . '-enabled' ] ) ? 'yes' : 'no';
+			$settings = array( 'enabled' => ! empty( $_POST[ 'wc-wizard-service-' . $gateway_id . '-enabled' ] ) ? 'yes' : 'no' );  // WPCS: CSRF ok, input var ok.
 
 			// @codingStandardsIgnoreStart
 			if ( ! empty( $gateway['settings'] ) ) {
@@ -1497,7 +1511,13 @@ class WC_Admin_Setup_Wizard {
 			}
 			// @codingStandardsIgnoreSEnd
 
-			update_option( $settings_key, $settings );
+			if ( 'ppec_paypal' === $gateway_id && empty( $settings['reroute_requests'] ) ) {
+				unset( $settings['enabled'] );
+			}
+
+			$settings_key = 'woocommerce_' . $gateway_id . '_settings';
+			$previously_saved_settings = array_filter( (array) get_option( $settings_key, array() ) );
+			update_option( $settings_key, array_merge( $previously_saved_settings, $settings ) );
 		}
 
 		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
@@ -1517,12 +1537,19 @@ class WC_Admin_Setup_Wizard {
 					<div class="wc-wizard-service-description">
 						<h3><?php esc_html_e( 'Storefront Theme', 'woocommerce' ); ?></h3>
 						<p>
-							<?php esc_html_e( 'Your theme is not compatible with WooCommerce. We recommend you switch to Storefront, a free WordPress theme built and maintained by the makers of WooCommerce. If toggled on, Storefront will be installed and activated for you.', 'woocommerce' ); ?>
+							<?php
+							$theme      = wp_get_theme();
+							$theme_name = $theme['Name'];
+
+							if ( $this->is_default_theme() ) {
+								echo wp_kses_post( sprintf( __( 'The theme you are currently using is not optimized for WooCommerce. We recommend you switch to <a href="%s" title="Learn more about Storefront" target="_blank">Storefront</a>; our official, free, WooCommerce theme.', 'woocommerce' ), esc_url( 'https://woocommerce.com/storefront/' ) ) );
+							} else {
+								echo wp_kses_post( sprintf( __( 'The theme you are currently using does not fully support WooCommerce. We recommend you switch to <a href="%s" title="Learn more about Storefront" target="_blank">Storefront</a>; our official, free, WooCommerce theme.', 'woocommerce' ), esc_url( 'https://woocommerce.com/storefront/' ) ) );
+							}
+							?>
 						</p>
-						<p class="wc-wizard-service-learn-more">
-							<a href="<?php echo esc_url( 'https://woocommerce.com/storefront/' ); ?>" target="_blank">
-								<?php esc_html_e( 'Learn more about Storefront', 'woocommerce' ); ?>
-							</a>
+						<p>
+							<?php echo wp_kses_post( sprintf( __( 'If toggled on, Storefront will be installed for you, and <em>%s</em> theme will be deactivated.', 'woocommerce' ), esc_html( $theme_name ) ) ); ?>
 						</p>
 					</div>
 
@@ -1632,13 +1659,13 @@ class WC_Admin_Setup_Wizard {
 		$description_base = __( 'Your store is almost ready! To activate services like %s, just connect with Jetpack.', 'woocommerce' );
 
 		if ( $payment_enabled && $taxes_enabled && $rates_enabled ) {
-			$description = sprintf( $description_base, __( 'payments, automated taxes, live rates and discounted shipping labels', 'woocommerce' ) );
+			$description = sprintf( $description_base, __( 'payment setup, automated taxes, live rates and discounted shipping labels', 'woocommerce' ) );
 		} else if ( $payment_enabled && $taxes_enabled ) {
-			$description = sprintf( $description_base, __( 'payments and automated taxes', 'woocommerce' ) );
+			$description = sprintf( $description_base, __( 'payment setup and automated taxes', 'woocommerce' ) );
 		} else if ( $payment_enabled && $rates_enabled ) {
-			$description = sprintf( $description_base, __( 'payments, live rates and discounted shipping labels', 'woocommerce' ) );
+			$description = sprintf( $description_base, __( 'payment setup, live rates and discounted shipping labels', 'woocommerce' ) );
 		} else if ( $payment_enabled ) {
-			$description = sprintf( $description_base, __( 'payments', 'woocommerce' ) );
+			$description = sprintf( $description_base, __( 'payment setup', 'woocommerce' ) );
 		} else if ( $taxes_enabled && $rates_enabled ) {
 			$description = sprintf( $description_base, __( 'automated taxes, live rates and discounted shipping labels', 'woocommerce' ) );
 		} else if ( $taxes_enabled ) {
@@ -1660,7 +1687,7 @@ class WC_Admin_Setup_Wizard {
 		if ( isset( $_GET['activate_error'] ) ) {
 			$has_jetpack_error = true;
 
-			$title = __( "Sorry, We couldn't connect your store to Jetpack", 'woocommerce' );
+			$title = __( "Sorry, we couldn't connect your store to Jetpack", 'woocommerce' );
 
 			$error_message = $this->get_activate_error_message( sanitize_text_field( wp_unslash( $_GET['activate_error'] ) ) );
 			$description = $error_message;
@@ -1704,7 +1731,14 @@ class WC_Admin_Setup_Wizard {
 				<input type="hidden" name="save_step" value="activate" />
 				<?php wp_nonce_field( 'wc-setup' ); ?>
 			</form>
-			<h3 class="jetpack-reasons"><?php esc_html_e( "Bonus reasons you'll love Jetpack", 'woocommerce' ); ?></h3>
+			<h3 class="jetpack-reasons">
+				<?php
+					echo esc_html( $description ?
+						__( "Bonus reasons you'll love Jetpack", 'woocommerce' ) :
+						__( "Reasons you'll love Jetpack", 'woocommerce' )
+					);
+				?>
+			</h3>
 			<ul class="wc-wizard-features">
 				<li class="wc-wizard-feature-item">
 					<p class="wc-wizard-feature-name">
@@ -1850,8 +1884,8 @@ class WC_Admin_Setup_Wizard {
 			<li class="wc-wizard-next-step-item">
 				<div class="wc-wizard-next-step-description">
 					<p class="next-step-heading"><?php esc_html_e( 'Next step', 'woocommerce' ); ?></p>
-					<h3 class="next-step-description"><?php esc_html_e( 'Create your first product', 'woocommerce' ); ?></h3>
-					<p class="next-step-extra-info"><?php esc_html_e( "You're ready to add your first product.", 'woocommerce' ); ?></p>
+					<h3 class="next-step-description"><?php esc_html_e( 'Create some products', 'woocommerce' ); ?></h3>
+					<p class="next-step-extra-info"><?php esc_html_e( "You're ready to add products to your store.", 'woocommerce' ); ?></p>
 				</div>
 				<div class="wc-wizard-next-step-action">
 					<p class="wc-setup-actions step">
