@@ -3,7 +3,9 @@
   "description": "An eCommerce toolkit that helps you sell anything. Beautifully.",
   "homepage": "https://woocommerce.com/",
   "type": "wordpress-plugin",
-  "license": "GPL-2.0+",
+  "license": "GPL-3.0-or-later",
+  "prefer-stable": true,
+  "minimum-stability": "dev",
   "require": {
     "composer/installers": "~1.2"
   },
@@ -14,7 +16,9 @@
     "woocommerce/woocommerce-git-hooks": "*",
     "woocommerce/woocommerce-sniffs": "*",
     "wimg/php-compatibility": "^8.0",
-    "dealerdirect/phpcodesniffer-composer-installer": "^0.4.3"
+    "dealerdirect/phpcodesniffer-composer-installer": "^0.4.3",
+    "apigen/apigen": "^4",
+    "nette/utils": "~2.3.0"
   },
   "scripts": {
     "pre-update-cmd": [

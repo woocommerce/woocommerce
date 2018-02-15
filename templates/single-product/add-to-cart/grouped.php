@@ -11,20 +11,17 @@
  * the readme will list any important changes.
  *
  * @see         https://docs.woocommerce.com/document/template-structure/
- * @author      WooThemes
  * @package     WooCommerce/Templates
  * @version     3.3.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 global $product, $post;
 
 do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 
-<form class="cart" action="<?php echo esc_url( get_permalink() ); ?>" method="post" enctype='multipart/form-data'>
+<form class="cart grouped_form" action="<?php echo esc_url( get_permalink() ); ?>" method="post" enctype='multipart/form-data'>
 	<table cellspacing="0" class="woocommerce-grouped-product-list group_table">
 		<tbody>
 			<?php
@@ -39,8 +36,8 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 			foreach ( $grouped_products as $grouped_product ) {
 				$post_object        = get_post( $grouped_product->get_id() );
 				$quantites_required = $quantites_required || ( $grouped_product->is_purchasable() && ! $grouped_product->has_options() );
-
-				setup_postdata( $post = $post_object ); // WPCS: override ok.
+				$post               = $post_object; // WPCS: override ok.
+				setup_postdata( $post );
 
 				echo '<tr id="product-' . esc_attr( get_the_ID() ) . '" class="woocommerce-grouped-product-list-item ' . esc_attr( implode( ' ', get_post_class() ) ) . '">';
 
@@ -49,7 +46,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 					do_action( 'woocommerce_grouped_product_list_before_' . $column_id, $grouped_product );
 
 					switch ( $column_id ) {
-						case 'quantity' :
+						case 'quantity':
 							ob_start();
 
 							if ( ! $grouped_product->is_purchasable() || $grouped_product->has_options() || ! $grouped_product->is_in_stock() ) {
@@ -71,27 +68,28 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 
 							$value = ob_get_clean();
 							break;
-						case 'label' :
+						case 'label':
 							$value  = '<label for="product-' . esc_attr( $grouped_product->get_id() ) . '">';
 							$value .= $grouped_product->is_visible() ? '<a href="' . esc_url( apply_filters( 'woocommerce_grouped_product_list_link', get_permalink( $grouped_product->get_id() ), $grouped_product->get_id() ) ) . '">' . $grouped_product->get_name() . '</a>' : $grouped_product->get_name();
 							$value .= '</label>';
 							break;
-						case 'price' :
+						case 'price':
 							$value = $grouped_product->get_price_html() . wc_get_stock_html( $grouped_product );
 							break;
-						default :
+						default:
 							$value = '';
 							break;
 					}
 
-					echo '<td class="woocommerce-grouped-product-list-item__' . esc_attr( $column_id ) . ' ' . esc_attr( $column_id ) . '">' . apply_filters( 'woocommerce_grouped_product_list_column_' . $column_id, $value, $grouped_product ) . '</td>'; // WPCS: XSS ok.
+					echo '<td class="woocommerce-grouped-product-list-item__' . esc_attr( $column_id ) . '">' . apply_filters( 'woocommerce_grouped_product_list_column_' . $column_id, $value, $grouped_product ) . '</td>'; // WPCS: XSS ok.
 
 					do_action( 'woocommerce_grouped_product_list_after_' . $column_id, $grouped_product );
 				}
 
 				echo '</tr>';
 			}
-			setup_postdata( $post = $previous_post ); // WPCS: override ok.
+			$post = $previous_post; // WPCS: override ok.
+			setup_postdata( $post );
 			?>
 		</tbody>
 	</table>

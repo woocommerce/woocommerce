@@ -2,8 +2,6 @@
 /**
  * Installation related functions and actions.
  *
- * @author   WooThemes
- * @category Admin
  * @package  WooCommerce/Classes
  * @version  3.0.0
  */
@@ -100,6 +98,7 @@ class WC_Install {
 			'wc_update_330_product_stock_status',
 			'wc_update_330_set_default_product_cat',
 			'wc_update_330_clear_transients',
+			'wc_update_330_set_paypal_sandbox_credentials',
 			'wc_update_330_db_version',
 		),
 	);
@@ -140,7 +139,7 @@ class WC_Install {
 	 * This check is done on all requests and runs if the versions do not match.
 	 */
 	public static function check_version() {
-		if ( ! defined( 'IFRAME_REQUEST' ) && get_option( 'woocommerce_version' ) !== WC()->version ) {
+		if ( ! defined( 'IFRAME_REQUEST' ) && version_compare( get_option( 'woocommerce_version' ), WC()->version, '<' ) ) {
 			self::install();
 			do_action( 'woocommerce_updated' );
 		}

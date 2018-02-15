@@ -391,6 +391,16 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 			}
 		}
 
+		/**
+		 * Filter the query arguments for a request.
+		 *
+		 * Enables adding extra arguments or setting defaults for an order collection request.
+		 *
+		 * @param array           $args    Key value array of query var to query value.
+		 * @param WP_REST_Request $request The request used.
+		 */
+		$args = apply_filters( 'woocommerce_rest_orders_prepare_object_query', $args, $request );
+
 		return $args;
 	}
 
@@ -423,6 +433,9 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 
 			if ( ! is_null( $value ) ) {
 				switch ( $key ) {
+					case 'status' :
+						// Status change should be done later so transitions have new data.
+						break;
 					case 'billing' :
 					case 'shipping' :
 						$this->update_address( $order, $value, $key );
@@ -504,24 +517,24 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 				$object->set_created_via( 'rest-api' );
 				$object->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
 				$object->calculate_totals();
+			} else {
+				// If items have changed, recalculate order totals.
+				if ( isset( $request['billing'] ) || isset( $request['shipping'] ) || isset( $request['line_items'] ) || isset( $request['shipping_lines'] ) || isset( $request['fee_lines'] ) || isset( $request['coupon_lines'] ) ) {
+					$object->calculate_totals();
+				}
+			}
+
+			// Set status.
+			if ( ! empty( $request['status'] ) ) {
+				$object->set_status( $request['status'] );
 			}
 
 			$object->save();
 
 			// Actions for after the order is saved.
-			if ( $creating ) {
-				if ( true === $request['set_paid'] ) {
+			if ( true === $request['set_paid'] ) {
+				if ( $creating || $object->needs_payment() ) {
 					$object->payment_complete( $request['transaction_id'] );
-				}
-			} else {
-				// Handle set paid.
-				if ( $object->needs_payment() && true === $request['set_paid'] ) {
-					$object->payment_complete( $request['transaction_id'] );
-				}
-
-				// If items have changed, recalculate order totals.
-				if ( isset( $request['billing'] ) || isset( $request['shipping'] ) || isset( $request['line_items'] ) || isset( $request['shipping_lines'] ) || isset( $request['fee_lines'] ) || isset( $request['coupon_lines'] ) ) {
-					$object->calculate_totals();
 				}
 			}
 

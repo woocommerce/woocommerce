@@ -264,6 +264,11 @@ class WC_Post_types {
 			$has_archive = false;
 		}
 
+		// If theme support changes, we may need to flush permalinks since some are changed based on this flag.
+		if ( update_option( 'current_theme_supports_woocommerce', current_theme_supports( 'woocommerce' ) ? 'yes' : 'no' ) ) {
+			update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
+		}
+
 		register_post_type( 'product',
 			apply_filters( 'woocommerce_register_post_type_product',
 				array(
@@ -277,8 +282,8 @@ class WC_Post_types {
 							'edit'                  => __( 'Edit', 'woocommerce' ),
 							'edit_item'             => __( 'Edit product', 'woocommerce' ),
 							'new_item'              => __( 'New product', 'woocommerce' ),
-							'view'                  => __( 'View product', 'woocommerce' ),
 							'view_item'             => __( 'View product', 'woocommerce' ),
+							'view_items'            => __( 'View products', 'woocommerce' ),
 							'search_items'          => __( 'Search products', 'woocommerce' ),
 							'not_found'             => __( 'No products found', 'woocommerce' ),
 							'not_found_in_trash'    => __( 'No products found in trash', 'woocommerce' ),
@@ -336,7 +341,6 @@ class WC_Post_types {
 							'edit'                  => __( 'Edit', 'woocommerce' ),
 							'edit_item'             => __( 'Edit order', 'woocommerce' ),
 							'new_item'              => __( 'New order', 'woocommerce' ),
-							'view'                  => __( 'View order', 'woocommerce' ),
 							'view_item'             => __( 'View order', 'woocommerce' ),
 							'search_items'          => __( 'Search orders', 'woocommerce' ),
 							'not_found'             => __( 'No orders found', 'woocommerce' ),
@@ -399,7 +403,6 @@ class WC_Post_types {
 								'edit'                  => __( 'Edit', 'woocommerce' ),
 								'edit_item'             => __( 'Edit coupon', 'woocommerce' ),
 								'new_item'              => __( 'New coupon', 'woocommerce' ),
-								'view'                  => __( 'View coupons', 'woocommerce' ),
 								'view_item'             => __( 'View coupon', 'woocommerce' ),
 								'search_items'          => __( 'Search coupons', 'woocommerce' ),
 								'not_found'             => __( 'No coupons found', 'woocommerce' ),
@@ -508,8 +511,8 @@ class WC_Post_types {
 	 * @since 3.3.0
 	 */
 	public static function maybe_flush_rewrite_rules() {
-		if ( 'true' === get_option( 'woocommerce_queue_flush_rewrite_rules' ) ) {
-			delete_option( 'woocommerce_queue_flush_rewrite_rules' );
+		if ( 'yes' === get_option( 'woocommerce_queue_flush_rewrite_rules' ) ) {
+			update_option( 'woocommerce_queue_flush_rewrite_rules', 'no' );
 			self::flush_rewrite_rules();
 		}
 	}
