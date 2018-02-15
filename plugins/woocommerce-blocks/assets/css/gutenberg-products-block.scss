@@ -92,18 +92,67 @@
 		text-align: center;
 	}
 
-	.display-settings-container {
-		background-color: #ffffff;
+	.wc-products-display-option {
+		background-color: #FFFFFF;
+		padding: 1.5em;
+		box-sizing: border-box;
+		border: 1px solid gray; // @todo remove this when doing real styles.
+		width: 80%;
+		margin-left: auto;
+		margin-right: auto;
 
-		&.existing {
-			position: absolute;
-			width: 100%;
-			z-index: 999;
+		h4 {
+			margin: 0;
+			font-size: 1.25em;
+		}
+
+		p {
+			margin: 0;
+		}
+
+		/**
+		 * These settings are only shown when the parent group is expanded.
+		 */
+		&.value-featured,
+		&.value-best_sellers,
+		&.value-best_rated,
+		&.value-on_sale,
+		&.value-attribute {
+			display: none;
 		}
 	}
 
-	.wc-products-display-option {
-		border: 1px solid gray; // @todo remove this when doing real styles.
+	/**
+	 * Show options when the Filter group is expanded.
+	 */
+	&.expanded-group-filter {
+		.wc-products-display-option {
+			&.value-featured,
+			&.value-best_sellers,
+			&.value-best_rated,
+			&.value-on_sale,
+			&.value-attribute {
+				display: block;
+			}
+		}
+	}
+
+	.display-settings-container {
+		&.existing {
+			right: 0;
+			position: absolute;
+			width: 80%;
+			z-index: 999;
+
+			.wc-products-display-option {
+				margin-right: 0;
+			}
+		}
+	}
+
+	.settings-heading {
+		display: flex;
+		justify-content: space-between;
 	}
 
 	.display-select {
