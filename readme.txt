@@ -175,6 +175,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Shipping zone documentation help link was printing wrong.
 * Fix - API - Set status after order is created/updated so triggered emails are current.
 * Fix - Stop background processing images when disabled via the filter.
+* Fix - Only search when a search term is provided. Ignore empty strings.
 * Tweak - Added help text for background image processing.
 * Tweak - Added notice when background image processing is running, with cancel button.
 * Tweak - Run background image processing less often by tracking changes.
