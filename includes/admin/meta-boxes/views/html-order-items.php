@@ -105,25 +105,32 @@ if ( wc_tax_enabled() ) {
 <div class="wc-order-data-row wc-order-totals-items wc-order-items-editable">
 	<?php
 		$coupons = $order->get_items( 'coupon' );
-		if ( $coupons ) {
-			?>
+		if ( $coupons ) : ?>
 			<div class="wc-used-coupons">
-				<ul class="wc_coupon_list"><?php
-					echo '<li><strong>' . esc_html__( 'Coupon(s)', 'woocommerce' ) . '</strong></li>';
-					foreach ( $coupons as $item_id => $item ) {
+				<ul class="wc_coupon_list">
+					<li><strong><?php esc_html_e( 'Coupon(s)', 'woocommerce' ) ?></strong></li>
+					<?php foreach ( $coupons as $item_id => $item ) :
 						$post_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish' LIMIT 1;", $item->get_code() ) );
-
-						if ( $post_id ) {
-							echo '<li class="code"><a href="' . esc_url( add_query_arg( array( 'post' => $post_id, 'action' => 'edit' ), admin_url( 'post.php' ) ) ) . '" class="tips" data-tip="' . esc_attr( wc_price( $item->get_discount(), array( 'currency' => $order->get_currency() ) ) ) . '"><span>' . esc_html( $item->get_code() ) . '</span></a> <a class="remove-coupon" href="javascript:void(0)" aria-label="Remove" data-code="' . esc_attr( $item->get_code() ) . '"></a></li>';
-						} else {
-							echo '<li class="code"><span class="tips" data-tip="' . esc_attr( wc_price( $item->get_discount(), array( 'currency' => $order->get_currency() ) ) ) . '"><span>' . esc_html( $item->get_code() ) . '</span></span> <a class="remove-coupon" href="javascript:void(0)" aria-label="Remove" data-code="' . esc_attr( $item->get_code() ) . '"></a></li>';
-						}
-					}
-				?></ul>
+						$class   = $order->is_editable() ? 'code editable' : 'code';
+						?>
+						<li class="<?php echo $class ?>">
+							<?php if ( $post_id ) : ?>
+								<a href="<?php echo esc_url( add_query_arg( array( 'post' => $post_id, 'action' => 'edit' ), admin_url( 'post.php' ) ) ) ?>" class="tips" data-tip="<?php echo esc_attr( wc_price( $item->get_discount(), array( 'currency' => $order->get_currency() ) ) ) ?>">
+									<span><?php echo esc_html( $item->get_code() ) ?></span>
+								</a>
+							<?php else : ?>
+								<span class="tips" data-tip="<?php echo esc_attr( wc_price( $item->get_discount(), array( 'currency' => $order->get_currency() ) ) ) ?>">
+									<span><?php echo esc_html( $item->get_code() ) ?></span>
+								</span>
+							<?php endif; ?>
+							<?php if ( $order->is_editable() ) : ?>
+								<a class="remove-coupon" href="javascript:void(0)" aria-label="Remove" data-code="<?php echo esc_attr( $item->get_code() ) ?>"></a>
+							<?php endif; ?>
+						</li>
+					<?php endforeach; ?>
+				</ul>
 			</div>
-			<?php
-		}
-	?>
+		<?php endif; ?>
 	<table class="wc-order-totals">
 		<?php if ( 0 < $order->get_total_discount() ) : ?>
 			<tr>
