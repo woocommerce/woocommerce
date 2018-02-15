@@ -290,18 +290,24 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 				expanded_group: ''
 			};
 
-			// If a settings group expand the group but keep display settings the same.
-			if ('undefined' !== PRODUCTS_BLOCK_DISPLAY_SETTINGS[value].group_container && PRODUCTS_BLOCK_DISPLAY_SETTINGS[value].group_container) {
+			var is_group = 'undefined' !== PRODUCTS_BLOCK_DISPLAY_SETTINGS[value].group_container && PRODUCTS_BLOCK_DISPLAY_SETTINGS[value].group_container;
+
+			if (is_group) {
+				// If a group and it has not been expanded, expand it.
 				new_state = {
 					menu_visible: true,
 					expanded_group: value
-				};
+
+					// If a group and it has already been expanded, collapse it.
+				};if (this.state.expanded_group === PRODUCTS_BLOCK_DISPLAY_SETTINGS[value].group_container) {
+					new_state.expanded_group = '';
+				}
 			}
 
 			this.setState(new_state);
 
 			// Only update the display setting if a non-group setting was selected.
-			if ('undefined' === PRODUCTS_BLOCK_DISPLAY_SETTINGS[value].group_container || !PRODUCTS_BLOCK_DISPLAY_SETTINGS[value].group_container) {
+			if (!is_group) {
 				this.props.update_display_callback(value);
 			}
 		}
