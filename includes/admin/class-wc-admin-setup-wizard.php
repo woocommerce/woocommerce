@@ -169,12 +169,6 @@ class WC_Admin_Setup_Wizard {
 			unset( $default_steps['shipping'] );
 		}
 
-		// Hide the activate step if Jetpack is already active, but not
-		// if we're returning from connecting Jetpack on WordPress.com.
-		if ( class_exists( 'Jetpack' ) && Jetpack::is_active() && ! isset( $_GET['from'] ) && ! isset( $_GET['activate_error'] ) ) { // WPCS: CSRF ok, input var ok.
-			unset( $default_steps['activate'] );
-		}
-
 		// Whether or not there is a pending background install of Jetpack.
 		$pending_jetpack = ! class_exists( 'Jetpack' ) && get_option( 'woocommerce_setup_background_installing_jetpack' );
 
@@ -1639,8 +1633,7 @@ class WC_Admin_Setup_Wizard {
 		}
 	}
 
-	protected function wc_setup_activate_get_description() {
-		$description     = false;
+	protected function wc_setup_activate_get_feature_list() {
 		$stripe_settings = get_option( 'woocommerce_stripe_settings', false );
 		$stripe_enabled  = is_array( $stripe_settings )
 			&& isset( $stripe_settings['create_account'] ) && 'yes' === $stripe_settings['create_account']
@@ -1655,26 +1648,22 @@ class WC_Admin_Setup_Wizard {
 		$intl_rates      = (bool) get_option( 'woocommerce_setup_intl_live_rates_zone', false );
 		$rates_enabled   = $domestic_rates || $intl_rates;
 
-		/* translators: %s: list of features, potentially comma separated */
-		$description_base = __( 'Your store is almost ready! To activate services like %s, just connect with Jetpack.', 'woocommerce' );
-
 		if ( $payment_enabled && $taxes_enabled && $rates_enabled ) {
-			$description = sprintf( $description_base, __( 'payment setup, automated taxes, live rates and discounted shipping labels', 'woocommerce' ) );
+			return __( 'payment setup, automated taxes, live rates and discounted shipping labels', 'woocommerce' );
 		} else if ( $payment_enabled && $taxes_enabled ) {
-			$description = sprintf( $description_base, __( 'payment setup and automated taxes', 'woocommerce' ) );
+			return __( 'payment setup and automated taxes', 'woocommerce' );
 		} else if ( $payment_enabled && $rates_enabled ) {
-			$description = sprintf( $description_base, __( 'payment setup, live rates and discounted shipping labels', 'woocommerce' ) );
+			return __( 'payment setup, live rates and discounted shipping labels', 'woocommerce' );
 		} else if ( $payment_enabled ) {
-			$description = sprintf( $description_base, __( 'payment setup', 'woocommerce' ) );
+			return __( 'payment setup', 'woocommerce' );
 		} else if ( $taxes_enabled && $rates_enabled ) {
-			$description = sprintf( $description_base, __( 'automated taxes, live rates and discounted shipping labels', 'woocommerce' ) );
+			return __( 'automated taxes, live rates and discounted shipping labels', 'woocommerce' );
 		} else if ( $taxes_enabled ) {
-			$description = sprintf( $description_base, __( 'automated taxes', 'woocommerce' ) );
+			return __( 'automated taxes', 'woocommerce' );
 		} else if ( $rates_enabled ) {
-			$description = sprintf( $description_base, __( 'live rates and discounted shipping labels', 'woocommerce' ) );
+			return __( 'live rates and discounted shipping labels', 'woocommerce' );
 		}
-
-		return $description;
+		return false;
 	}
 
 	/**
@@ -1682,6 +1671,8 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function wc_setup_activate() {
 		$this->wc_setup_activate_actions();
+
+		$jetpack_connected = class_exists( 'Jetpack' ) && Jetpack::is_active();
 
 		$has_jetpack_error = false;
 		if ( isset( $_GET['activate_error'] ) ) {
@@ -1692,10 +1683,32 @@ class WC_Admin_Setup_Wizard {
 			$error_message = $this->get_activate_error_message( sanitize_text_field( wp_unslash( $_GET['activate_error'] ) ) );
 			$description = $error_message;
 		} else {
-			$description = $this->wc_setup_activate_get_description();
-			$title = $description ?
-				__( 'Connect your store to Jetpack', 'woocommerce' ) :
-				__( 'Connect your store to Jetpack to enable extra features', 'woocommerce' );
+			$feature_list = $this->wc_setup_activate_get_feature_list();
+
+			$description = false;
+
+			if ( $feature_list ) {
+				if ( ! $jetpack_connected ) {
+					/* translators: %s: list of features, potentially comma separated */
+					$description_base = __( 'Your store is almost ready! To activate services like %s, just connect with Jetpack.', 'woocommerce' );
+				} else {
+					$description_base = __( 'Thanks for using Jetpack! Your store is almost ready: to activate services like %s, just connect your store.', 'woocommerce' );
+				}
+				$description = sprintf( $description_base, $feature_list );
+			}
+
+			if ( ! $jetpack_connected ) {
+				$title = $feature_list ?
+					__( 'Connect your store to Jetpack', 'woocommerce' ) :
+					__( 'Connect your store to Jetpack to enable extra features', 'woocommerce' );
+				$button_text = __( 'Continue with Jetpack', 'woocommerce' );
+			} elseif ( $feature_list ) {
+				$title = __( 'Connect your store to activate WooCommerce Services', 'woocommerce' );
+				$button_text = __( 'Continue with WooCommerce Services', 'woocommerce' );
+			} else {
+				wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
+				exit;
+			}
 		}
 		?>
 		<h1><?php echo esc_html( $title ); ?></h1>
@@ -1726,7 +1739,7 @@ class WC_Admin_Setup_Wizard {
 			</p>
 			<form method="post" class="activate-jetpack">
 				<p class="wc-setup-actions step">
-					<button type="submit" class="button-primary button button-large" value="<?php esc_attr_e( 'Connect with Jetpack', 'woocommerce' ); ?>"><?php esc_html_e( 'Continue with Jetpack', 'woocommerce' ); ?></button>
+					<button type="submit" class="button-primary button button-large" value="<?php echo esc_attr( $button_text ); ?>"><?php echo esc_html( $button_text ); ?></button>
 				</p>
 				<input type="hidden" name="save_step" value="activate" />
 				<?php wp_nonce_field( 'wc-setup' ); ?>
@@ -1801,6 +1814,11 @@ class WC_Admin_Setup_Wizard {
 
 		// Leave a note for WooCommerce Services that Jetpack has been opted into.
 		update_option( 'woocommerce_setup_jetpack_opted_in', true );
+
+		if ( class_exists( 'Jetpack' ) && Jetpack::is_active() ) {
+			wp_safe_redirect( esc_url_raw( $this->get_next_step_link() ) );
+			exit;
+		}
 
 		WC_Install::background_installer( 'jetpack', array(
 			'file'      => 'jetpack/jetpack.php',
