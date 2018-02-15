@@ -1744,48 +1744,50 @@ class WC_Admin_Setup_Wizard {
 				<input type="hidden" name="save_step" value="activate" />
 				<?php wp_nonce_field( 'wc-setup' ); ?>
 			</form>
-			<h3 class="jetpack-reasons">
-				<?php
-					echo esc_html( $description ?
-						__( "Bonus reasons you'll love Jetpack", 'woocommerce' ) :
-						__( "Reasons you'll love Jetpack", 'woocommerce' )
-					);
-				?>
-			</h3>
-			<ul class="wc-wizard-features">
-				<li class="wc-wizard-feature-item">
-					<p class="wc-wizard-feature-name">
-						<strong><?php esc_html_e( 'Better security', 'woocommerce' ); ?></strong>
-					</p>
-					<p class="wc-wizard-feature-description">
-						<?php esc_html_e( 'Protect your store from unauthorized access.', 'woocommerce' ); ?>
-					</p>
-				</li>
-				<li class="wc-wizard-feature-item">
-					<p class="wc-wizard-feature-name">
-						<strong><?php esc_html_e( 'Store stats', 'woocommerce' ); ?></strong>
-					</p>
-					<p class="wc-wizard-feature-description">
-						<?php esc_html_e( 'Get insights on how your store is doing, including total sales, top products, and more.', 'woocommerce' ); ?>
-					</p>
-				</li>
-				<li class="wc-wizard-feature-item">
-					<p class="wc-wizard-feature-name">
-						<strong><?php esc_html_e( 'Store monitoring', 'woocommerce' ); ?></strong>
-					</p>
-					<p class="wc-wizard-feature-description">
-						<?php esc_html_e( 'Get an alert if your store is down for even a few minutes.', 'woocommerce' ); ?>
-					</p>
-				</li>
-				<li class="wc-wizard-feature-item">
-					<p class="wc-wizard-feature-name">
-						<strong><?php esc_html_e( 'Product promotion', 'woocommerce' ); ?></strong>
-					</p>
-					<p class="wc-wizard-feature-description">
-						<?php esc_html_e( "Share new items on social media the moment they're live in your store.", 'woocommerce' ); ?>
-					</p>
-				</li>
-			</ul>
+			<?php if ( ! $jetpack_connected ) : ?>
+				<h3 class="jetpack-reasons">
+					<?php
+						echo esc_html( $description ?
+							__( "Bonus reasons you'll love Jetpack", 'woocommerce' ) :
+							__( "Reasons you'll love Jetpack", 'woocommerce' )
+						);
+					?>
+				</h3>
+				<ul class="wc-wizard-features">
+					<li class="wc-wizard-feature-item">
+						<p class="wc-wizard-feature-name">
+							<strong><?php esc_html_e( 'Better security', 'woocommerce' ); ?></strong>
+						</p>
+						<p class="wc-wizard-feature-description">
+							<?php esc_html_e( 'Protect your store from unauthorized access.', 'woocommerce' ); ?>
+						</p>
+					</li>
+					<li class="wc-wizard-feature-item">
+						<p class="wc-wizard-feature-name">
+							<strong><?php esc_html_e( 'Store stats', 'woocommerce' ); ?></strong>
+						</p>
+						<p class="wc-wizard-feature-description">
+							<?php esc_html_e( 'Get insights on how your store is doing, including total sales, top products, and more.', 'woocommerce' ); ?>
+						</p>
+					</li>
+					<li class="wc-wizard-feature-item">
+						<p class="wc-wizard-feature-name">
+							<strong><?php esc_html_e( 'Store monitoring', 'woocommerce' ); ?></strong>
+						</p>
+						<p class="wc-wizard-feature-description">
+							<?php esc_html_e( 'Get an alert if your store is down for even a few minutes.', 'woocommerce' ); ?>
+						</p>
+					</li>
+					<li class="wc-wizard-feature-item">
+						<p class="wc-wizard-feature-name">
+							<strong><?php esc_html_e( 'Product promotion', 'woocommerce' ); ?></strong>
+						</p>
+						<p class="wc-wizard-feature-description">
+							<?php esc_html_e( "Share new items on social media the moment they're live in your store.", 'woocommerce' ); ?>
+						</p>
+					</li>
+				</ul>
+			<?php endif; ?>
 		<?php endif; ?>
 	<?php
 	}
