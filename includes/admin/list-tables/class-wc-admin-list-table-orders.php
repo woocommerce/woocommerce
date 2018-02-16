@@ -381,12 +381,12 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 										<# } #>
 									</div>
 								<# } #>
-							</div>
 
-							<div class="wc-order-preview-note">
-								<h2><?php esc_html_e( 'Note', 'woocommerce' ); ?></h2>
 								<# if ( data.data.customer_note ) { #>
-									{{ data.data.customer_note }}
+									<div class="wc-order-preview-note">
+										<strong><?php esc_html_e( 'Note', 'woocommerce' ); ?></strong>
+										{{ data.data.customer_note }}
+								</div>
 								<# } #>
 							</div>
 
