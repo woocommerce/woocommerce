@@ -2,19 +2,19 @@
 /**
  * Checkout terms and conditions checkbox
  *
- * @author 		WooThemes
- * @package 	WooCommerce/Templates
- * @version     3.1.1
+ * @author  WooThemes
+ * @package WooCommerce/Templates
+ * @version 3.4.0
  */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$terms_page_id = wc_get_page_id( 'terms' );
+$terms_page = wc_get_page_id( 'terms' ) > 0 ? get_post( wc_get_page_id( 'terms' ) ) : false;
 
-if ( $terms_page_id > 0 && apply_filters( 'woocommerce_checkout_show_terms', true ) ) :
-	$terms         = get_post( $terms_page_id );
-	$terms_content = has_shortcode( $terms->post_content, 'woocommerce_checkout' ) ? '' : wc_format_content( $terms->post_content );
+if ( $terms_page && 'trash' !== $terms_page->post_status && apply_filters( 'woocommerce_checkout_show_terms', true ) ) :
+	$terms_content = has_shortcode( $terms_page->post_content, 'woocommerce_checkout' ) ? '' : wc_format_content( $terms_page->post_content );
 
 	if ( $terms_content ) {
 		do_action( 'woocommerce_checkout_before_terms_and_conditions' );
