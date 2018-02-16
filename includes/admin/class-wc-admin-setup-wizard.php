@@ -1713,11 +1713,27 @@ class WC_Admin_Setup_Wizard {
 		?>
 		<h1><?php echo esc_html( $title ); ?></h1>
 		<p><?php echo esc_html( $description ); ?></p>
-		<img
-			class="jetpack-logo"
-			src="<?php echo esc_url( WC()->plugin_url() . '/assets/images/jetpack_vertical_logo.png' ); ?>"
-			alt="Jetpack logo"
-		/>
+
+		<?php if ( $jetpack_connected ) : ?>
+			<div class="activate-splash">
+				<img
+					class="jetpack-logo"
+					src="<?php echo esc_url( WC()->plugin_url() . '/assets/images/jetpack_horizontal_logo.png' ); ?>"
+					alt="Jetpack logo"
+				/>
+				<img
+					class="wcs-notice"
+					src="<?php echo esc_url( WC()->plugin_url() . '/assets/images/wcs-notice.png' ); ?>"
+				/>
+			</div>
+		<?php else : ?>
+			<img
+				class="jetpack-logo"
+				src="<?php echo esc_url( WC()->plugin_url() . '/assets/images/jetpack_vertical_logo.png' ); ?>"
+				alt="Jetpack logo"
+			/>
+		<?php endif; ?>
+
 		<?php if ( $has_jetpack_error ) : ?>
 			<p class="wc-setup-actions step">
 				<a

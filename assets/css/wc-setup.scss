@@ -813,10 +813,20 @@ h3.jetpack-reasons {
 	font-size: 14px;
 }
 
-.jetpack-logo {
+.jetpack-logo, .wcs-notice {
 	display: block;
 	margin: 1.75em auto 2em auto;
 	max-height: 175px;
+}
+.activate-splash {
+	.jetpack-logo {
+		width: 170px;
+		margin-bottom: 0;
+	}
+	.wcs-notice {
+		margin-top: 1em;
+		padding-left: 57px;
+	}
 }
 
 .step {
