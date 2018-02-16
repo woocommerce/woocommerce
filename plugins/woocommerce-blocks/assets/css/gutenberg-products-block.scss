@@ -166,15 +166,6 @@
 		}
 	}
 
-	.product-specific-select {
-		.add-new {
-			background: #ddd;
-			display: inline-block;
-			margin-bottom: 20px;
-			padding: 60px 30px;
-		}
-	}
-
 	.product-category-select {
 		margin: 0 auto;
 		position: relative;
@@ -222,6 +213,68 @@
 		}
 	}
 
+	.product-specific-select {
+		margin: 0 auto;
+		position: relative;
+
+		input[type=text] {
+			width: 100%;
+			padding-right: 3em;
+		}
+
+		.cancel {
+			position: absolute;
+			top: 0.5em;
+			right: 1em;
+			cursor: pointer;
+		}
+
+		button {
+			display: flex;
+			justify-content: space-between;
+			width: 100%;
+			background-color: #FFFFFF;
+			border: 1px solid #e6eaee;
+			text-align: left;
+			padding: .5em;
+
+			img {
+				padding-top: .5em;
+			}
+
+			a {
+				line-height: 3em;
+				margin-right: .5em;
+			}
+
+			.product-name {
+				line-height: 3em;
+				width: 300px;
+				white-space: nowrap;
+				overflow: hidden;
+			}
+		}
+
+		ul {
+			list-style-type: none;
+		}
+
+		li {
+			margin: 0;
+		}
+
+		.product-search-results {
+			position: absolute;
+			width: 100%;
+			z-index: 999;
+		}
+
+		.selected-products {
+			margin-top: 1em;
+			margin-bottom: 1em;
+		}
+	}
+
 	.block-footer {
 		margin: 0 -1em;
 		padding-top: 1em;
@@ -237,6 +290,11 @@
 
 @media only screen and (min-width: 700px) {
 	.wc-product-display-settings {
+
+		.product-specific-select {
+			width: 400px;
+		}
+
 		.product-category-select {
 			width: 400px;
 

@@ -169,7 +169,7 @@ class ProductsBlockSettingsEditor extends React.Component {
 	render() {
 		let extra_settings = null;
 		if ( 'specific' === this.state.display ) {
-			extra_settings = <ProductsSpecificSelect />;
+			extra_settings = <ProductsSpecificSelect { ...this.props } />;
 		} else if ( 'category' === this.state.display ) {
 			extra_settings = <ProductsCategorySelect { ...this.props } />;
 		} else if ( 'attribute' === this.state.display ) {
