@@ -375,16 +375,18 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 											<a href="{{ data.shipping_address_map_url }}" target="_blank">{{{ data.formatted_shipping_address }}}</a>
 										<# } #>
 
-										<# if ( data.data.customer_note ) { #>
-											<strong><?php esc_html_e( 'Note', 'woocommerce' ); ?></strong>
-											{{ data.data.customer_note }}
-										<# } #>
-
 										<# if ( data.shipping_via ) { #>
 											<strong><?php esc_html_e( 'Shipping method', 'woocommerce' ); ?></strong>
 											{{ data.shipping_via }}
 										<# } #>
 									</div>
+								<# } #>
+							</div>
+
+							<div class="wc-order-preview-note">
+								<h2><?php esc_html_e( 'Note', 'woocommerce' ); ?></h2>
+								<# if ( data.data.customer_note ) { #>
+									{{ data.data.customer_note }}
 								<# } #>
 							</div>
 
