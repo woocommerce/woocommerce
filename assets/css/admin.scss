@@ -2248,7 +2248,7 @@ ul.wc_coupon_list_block {
 	}
 	.wc-order-preview-addresses {
 		overflow:hidden;
-		.wc-order-preview-address {
+		.wc-order-preview-address, .wc-order-preview-note {
 			width: 50%;
 			float: left;
 			padding: 1.5em;
@@ -2262,6 +2262,9 @@ ul.wc_coupon_list_block {
 				display: block;
 				margin-top: 1em;
 			}
+		}
+		.wc-order-preview-note {
+			padding-top: 0;
 		}
 	}
 	.wc-action-button,
