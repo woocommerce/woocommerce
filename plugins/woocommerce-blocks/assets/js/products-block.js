@@ -323,7 +323,7 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 
 			var extra_settings = null;
 			if ('specific' === this.state.display) {
-				extra_settings = wp.element.createElement(_specificSelect.ProductsSpecificSelect, null);
+				extra_settings = wp.element.createElement(_specificSelect.ProductsSpecificSelect, this.props);
 			} else if ('category' === this.state.display) {
 				extra_settings = wp.element.createElement(_categorySelect.ProductsCategorySelect, this.props);
 			} else if ('attribute' === this.state.display) {
@@ -933,21 +933,61 @@ var ProductsSpecificSelect = exports.ProductsSpecificSelect = function (_React$C
 		var _this = _possibleConstructorReturn(this, (ProductsSpecificSelect.__proto__ || Object.getPrototypeOf(ProductsSpecificSelect)).call(this, props));
 
 		_this.state = {
-			selectedProducts: props.selected_display_setting
+			selectedProducts: props.selected_display_setting || []
 		};
 		return _this;
 	}
 
 	_createClass(ProductsSpecificSelect, [{
-		key: "selectProduct",
-		value: function selectProduct(evt) {
-			evt.preventDefault();
-
-			var selectProduct = this.state.selectProduct;
+		key: "addProduct",
+		value: function addProduct(id) {
+			var selectedProducts = this.state.selectedProducts;
+			selectedProducts.push(id);
 
 			this.setState({
-				selectProduct: selectProduct
+				selectedProducts: selectedProducts
 			});
+
+			this.props.update_display_setting_callback(selectedProducts);
+		}
+	}, {
+		key: "removeProduct",
+		value: function removeProduct(id) {
+			var oldProducts = this.state.selectedProducts;
+			var newProducts = [];
+
+			var _iteratorNormalCompletion = true;
+			var _didIteratorError = false;
+			var _iteratorError = undefined;
+
+			try {
+				for (var _iterator = oldProducts[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+					var productId = _step.value;
+
+					if (productId !== id) {
+						newProducts.push(productId);
+					}
+				}
+			} catch (err) {
+				_didIteratorError = true;
+				_iteratorError = err;
+			} finally {
+				try {
+					if (!_iteratorNormalCompletion && _iterator.return) {
+						_iterator.return();
+					}
+				} finally {
+					if (_didIteratorError) {
+						throw _iteratorError;
+					}
+				}
+			}
+
+			this.setState({
+				selectedProducts: newProducts
+			});
+
+			this.props.update_display_setting_callback(newProducts);
 		}
 	}, {
 		key: "render",
@@ -955,32 +995,8 @@ var ProductsSpecificSelect = exports.ProductsSpecificSelect = function (_React$C
 			return wp.element.createElement(
 				"div",
 				{ className: "product-specific-select" },
-				wp.element.createElement(
-					"div",
-					{ className: "add-new" },
-					wp.element.createElement(Dropdown, {
-						className: "my-container-class-name",
-						contentClassName: "my-popover-content-classname",
-						position: "bottom right",
-						renderToggle: function renderToggle(_ref) {
-							var isOpen = _ref.isOpen,
-							    onToggle = _ref.onToggle;
-							return wp.element.createElement(
-								"button",
-								{ className: "button button-large", onClick: onToggle, "aria-expanded": isOpen },
-								__('Add product')
-							);
-						},
-						renderContent: function renderContent() {
-							return wp.element.createElement(
-								"div",
-								null,
-								wp.element.createElement(ProductSpecifcSearch, null)
-							);
-						}
-					})
-				),
-				wp.element.createElement(ProductsSpecificList, { selectedProducts: this.state.selectedProducts })
+				wp.element.createElement(ProductsSpecificSearchField, { addProductCallback: this.addProduct.bind(this) }),
+				wp.element.createElement(ProductSpecificSelectedProducts, { products: this.state.selectedProducts, removeProductCallback: this.removeProduct.bind(this) })
 			);
 		}
 	}]);
@@ -988,28 +1004,152 @@ var ProductsSpecificSelect = exports.ProductsSpecificSelect = function (_React$C
 	return ProductsSpecificSelect;
 }(React.Component);
 
-var ProductSpecifcSearch = withAPIData(function (props) {
+/**
+ * Product search area
+ */
+
+
+var ProductsSpecificSearchField = function (_React$Component2) {
+	_inherits(ProductsSpecificSearchField, _React$Component2);
+
+	function ProductsSpecificSearchField(props) {
+		_classCallCheck(this, ProductsSpecificSearchField);
+
+		var _this2 = _possibleConstructorReturn(this, (ProductsSpecificSearchField.__proto__ || Object.getPrototypeOf(ProductsSpecificSearchField)).call(this, props));
+
+		_this2.state = {
+			searchText: ''
+		};
+
+		_this2.updateSearchResults = _this2.updateSearchResults.bind(_this2);
+		return _this2;
+	}
+
+	_createClass(ProductsSpecificSearchField, [{
+		key: "updateSearchResults",
+		value: function updateSearchResults(evt) {
+			this.setState({
+				searchText: evt.target.value
+			});
+		}
+	}, {
+		key: "render",
+		value: function render() {
+			var _this3 = this;
+
+			return wp.element.createElement(
+				"div",
+				{ className: "product-search" },
+				wp.element.createElement("input", { type: "text", value: this.state.searchText, placeholder: __('Search for products to display'), onChange: this.updateSearchResults }),
+				wp.element.createElement(
+					"span",
+					{ className: "cancel", onClick: function onClick() {
+							_this3.setState({ searchText: '' });
+						} },
+					"X"
+				),
+				wp.element.createElement(ProductSpecificSearchResults, { searchString: this.state.searchText, addProductCallback: this.props.addProductCallback })
+			);
+		}
+	}]);
+
+	return ProductsSpecificSearchField;
+}(React.Component);
+
+/**
+ * Product search results based on the text entered into the textbox.
+ */
+
+
+var ProductSpecificSearchResults = withAPIData(function (props) {
+
+	if (!props.searchString.length) {
+		return {
+			products: []
+		};
+	}
+
 	return {
-		products: '/wc/v2/products?per_page=10'
+		products: '/wc/v2/products?per_page=10&search=' + props.searchString
 	};
-})(function (_ref2) {
-	var products = _ref2.products;
+})(function (_ref) {
+	var products = _ref.products,
+	    addProductCallback = _ref.addProductCallback;
 
 	if (!products.data) {
-		return __('Loading');
+		return null;
 	}
 
 	if (0 === products.data.length) {
 		return __('No products found');
 	}
 
-	var ProductsList = function ProductsList(_ref3) {
-		var products = _ref3.products;
-
-		return products.length > 0 && wp.element.createElement(
+	return wp.element.createElement(
+		"div",
+		{ role: "menu", className: "product-search-results", "aria-orientation": "vertical", "aria-label": "{ __( 'Products list' ) }" },
+		wp.element.createElement(
 			"ul",
 			null,
-			products.map(function (product) {
+			products.data.map(function (product) {
+				return wp.element.createElement(
+					"li",
+					null,
+					wp.element.createElement(
+						"button",
+						{ type: "button", className: "components-button", id: 'product-' + product.id, onClick: function onClick() {
+								addProductCallback(product.id);
+							} },
+						wp.element.createElement("img", { src: product.images[0].src, width: "30px" }),
+						wp.element.createElement(
+							"span",
+							{ className: "product-name" },
+							product.name
+						),
+						wp.element.createElement(
+							"a",
+							null,
+							__('Add')
+						)
+					)
+				);
+			})
+		)
+	);
+});
+
+/**
+ * List preview of selected products.
+ */
+var ProductSpecificSelectedProducts = withAPIData(function (props) {
+
+	if (!props.products.length) {
+		return {
+			products: []
+		};
+	}
+
+	return {
+		products: '/wc/v2/products?include=' + props.products.join(',')
+	};
+})(function (_ref2) {
+	var products = _ref2.products,
+	    removeProductCallback = _ref2.removeProductCallback;
+
+	if (!products.data) {
+		return null;
+	}
+
+	if (0 === products.data.length) {
+		return __('No products selected');
+	}
+
+	return wp.element.createElement(
+		"div",
+		{ role: "menu", className: "selected-products", "aria-orientation": "vertical", "aria-label": "{ __( 'Products list' ) }" },
+		wp.element.createElement(
+			"ul",
+			null,
+			products.data.map(function (product) {
 				return wp.element.createElement(
 					"li",
 					null,
@@ -1017,41 +1157,24 @@ var ProductSpecifcSearch = withAPIData(function (props) {
 						"button",
 						{ type: "button", className: "components-button", id: 'product-' + product.id },
 						wp.element.createElement("img", { src: product.images[0].src, width: "30px" }),
-						" ",
-						product.name
+						wp.element.createElement(
+							"span",
+							{ className: "product-name" },
+							product.name
+						),
+						wp.element.createElement(
+							"a",
+							{ onClick: function onClick() {
+									removeProductCallback(product.id);
+								} },
+							__('X')
+						)
 					)
 				);
 			})
-		);
-	};
-
-	var productsData = products.data;
-
-	return wp.element.createElement(
-		"div",
-		{ role: "menu", "aria-orientation": "vertical", "aria-label": "{ __( 'Products list' ) }" },
-		wp.element.createElement(ProductsList, { products: productsData })
+		)
 	);
 });
-
-var ProductsSpecificList = function ProductsSpecificList(_ref4) {
-	var selectedProducts = _ref4.selectedProducts;
-
-	if (!selectedProducts || 0 === selectedProducts.length) {
-		return __('No products selected found');
-	}
-
-	var classes = "wc-products-block-preview";
-	var attributes = {};
-
-	return wp.element.createElement(
-		"div",
-		{ className: classes },
-		selectedProducts.data.map(function (product) {
-			return wp.element.createElement(ProductPreview, { product: product, attributes: attributes });
-		})
-	);
-};
 
 /***/ }),
 /* 2 */
