@@ -126,6 +126,16 @@ class WC_Discounts {
 	}
 
 	/**
+	 * Get the object concerned.
+	 *
+	 * @since  3.3.2
+	 * @return object
+	 */
+	public function get_object() {
+		return $this->object;
+	}
+
+	/**
 	 * Get items.
 	 *
 	 * @since  3.2.0
