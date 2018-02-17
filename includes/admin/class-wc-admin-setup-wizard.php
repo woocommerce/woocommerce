@@ -285,6 +285,17 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function setup_wizard_steps() {
 		$output_steps = $this->steps;
+
+		// Hide the activate step if Jetpack is already active, unless WooCommerce Services
+		// features are selected, or unless the Activate step was already taken.
+		if (
+			class_exists( 'Jetpack' ) && Jetpack::is_active() &&
+			empty( array_filter( $this->wc_setup_activate_get_feature_list() ) ) &&
+			'yes' !== get_transient( 'wc_setup_activated' )
+		) {
+			unset( $output_steps['activate'] );
+		}
+
 		?>
 		<ol class="wc-setup-steps">
 			<?php foreach ( $output_steps as $step_key => $step ) : ?>
@@ -1634,6 +1645,8 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	protected function wc_setup_activate_get_feature_list() {
+		$features = array();
+
 		$stripe_settings = get_option( 'woocommerce_stripe_settings', false );
 		$stripe_enabled  = is_array( $stripe_settings )
 			&& isset( $stripe_settings['create_account'] ) && 'yes' === $stripe_settings['create_account']
@@ -1642,25 +1655,32 @@ class WC_Admin_Setup_Wizard {
 		$ppec_enabled    = is_array( $ppec_settings )
 			&& isset( $ppec_settings['reroute_requests'] ) && 'yes' === $ppec_settings['reroute_requests']
 			&& isset( $ppec_settings['enabled'] ) && 'yes' === $ppec_settings['enabled'];
-		$payment_enabled = $stripe_enabled || $ppec_enabled;
-		$taxes_enabled   = (bool) get_option( 'woocommerce_setup_automated_taxes', false );
+		$features['payment'] = $stripe_enabled || $ppec_enabled;
+
+		$features['taxes'] = (bool) get_option( 'woocommerce_setup_automated_taxes', false );
+
 		$domestic_rates  = (bool) get_option( 'woocommerce_setup_domestic_live_rates_zone', false );
 		$intl_rates      = (bool) get_option( 'woocommerce_setup_intl_live_rates_zone', false );
-		$rates_enabled   = $domestic_rates || $intl_rates;
+		$features['rates'] = $domestic_rates || $intl_rates;
 
-		if ( $payment_enabled && $taxes_enabled && $rates_enabled ) {
+		return $features;
+	}
+
+	protected function wc_setup_activate_get_feature_list_str() {
+		$features = $this->wc_setup_activate_get_feature_list();
+		if ( $features['payment'] && $features['taxes'] && $features['rates'] ) {
 			return __( 'payment setup, automated taxes, live rates and discounted shipping labels', 'woocommerce' );
-		} else if ( $payment_enabled && $taxes_enabled ) {
+		} else if ( $features['payment'] && $features['taxes'] ) {
 			return __( 'payment setup and automated taxes', 'woocommerce' );
-		} else if ( $payment_enabled && $rates_enabled ) {
+		} else if ( $features['payment'] && $features['rates'] ) {
 			return __( 'payment setup, live rates and discounted shipping labels', 'woocommerce' );
-		} else if ( $payment_enabled ) {
+		} else if ( $features['payment'] ) {
 			return __( 'payment setup', 'woocommerce' );
-		} else if ( $taxes_enabled && $rates_enabled ) {
+		} else if ( $features['taxes'] && $features['rates'] ) {
 			return __( 'automated taxes, live rates and discounted shipping labels', 'woocommerce' );
-		} else if ( $taxes_enabled ) {
+		} else if ( $features['taxes'] ) {
 			return __( 'automated taxes', 'woocommerce' );
-		} else if ( $rates_enabled ) {
+		} else if ( $features['rates'] ) {
 			return __( 'live rates and discounted shipping labels', 'woocommerce' );
 		}
 		return false;
@@ -1683,7 +1703,7 @@ class WC_Admin_Setup_Wizard {
 			$error_message = $this->get_activate_error_message( sanitize_text_field( wp_unslash( $_GET['activate_error'] ) ) );
 			$description = $error_message;
 		} else {
-			$feature_list = $this->wc_setup_activate_get_feature_list();
+			$feature_list = $this->wc_setup_activate_get_feature_list_str();
 
 			$description = false;
 
@@ -1829,6 +1849,8 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function wc_setup_activate_save() {
 		check_admin_referer( 'wc-setup' );
+
+		set_transient( 'wc_setup_activated', 'yes', MINUTE_IN_SECONDS * 10 );
 
 		// Leave a note for WooCommerce Services that Jetpack has been opted into.
 		update_option( 'woocommerce_setup_jetpack_opted_in', true );
