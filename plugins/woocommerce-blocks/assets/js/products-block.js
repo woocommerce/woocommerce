@@ -293,12 +293,12 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 			var is_group = 'undefined' !== PRODUCTS_BLOCK_DISPLAY_SETTINGS[value].group_container && PRODUCTS_BLOCK_DISPLAY_SETTINGS[value].group_container;
 
 			if (is_group) {
-				// If a group and it has not been expanded, expand it.
+				// If the group has not been expanded, expand it.
 				new_state = {
 					menu_visible: true,
 					expanded_group: value
 
-					// If a group and it has already been expanded, collapse it.
+					// If the group has already been expanded, collapse it.
 				};if (this.state.expanded_group === PRODUCTS_BLOCK_DISPLAY_SETTINGS[value].group_container) {
 					new_state.expanded_group = '';
 				}
@@ -1076,7 +1076,8 @@ var __ = wp.i18n.__;
 var _wp$components = wp.components,
     Toolbar = _wp$components.Toolbar,
     withAPIData = _wp$components.withAPIData,
-    Dropdown = _wp$components.Dropdown;
+    Dropdown = _wp$components.Dropdown,
+    Dashicon = _wp$components.Dashicon;
 
 /**
  * When the display mode is 'Product category' search for and select product categories to pull products from.
@@ -1095,10 +1096,12 @@ var ProductsCategorySelect = exports.ProductsCategorySelect = function (_React$C
 
 		_this.state = {
 			selectedCategories: props.selected_display_setting,
+			openAccordion: null,
 			filterQuery: ''
 		};
 
 		_this.checkboxChange = _this.checkboxChange.bind(_this);
+		_this.accordionToggle = _this.accordionToggle.bind(_this);
 		_this.filterResults = _this.filterResults.bind(_this);
 		return _this;
 	}
@@ -1129,6 +1132,19 @@ var ProductsCategorySelect = exports.ProductsCategorySelect = function (_React$C
 
 			this.props.update_display_setting_callback(selectedCategories);
 		}
+	}, {
+		key: "accordionToggle",
+		value: function accordionToggle(category) {
+			var value = category;
+
+			if (value === this.state.openAccordion) {
+				value = null;
+			}
+
+			this.setState({
+				openAccordion: value
+			});
+		}
 
 		/**
    * Filter categories.
@@ -1155,7 +1171,13 @@ var ProductsCategorySelect = exports.ProductsCategorySelect = function (_React$C
 				"div",
 				{ className: "product-category-select" },
 				wp.element.createElement(ProductCategoryFilter, { filterResults: this.filterResults }),
-				wp.element.createElement(ProductCategoryList, { filterQuery: this.state.filterQuery, selectedCategories: this.state.selectedCategories, checkboxChange: this.checkboxChange })
+				wp.element.createElement(ProductCategoryList, {
+					filterQuery: this.state.filterQuery,
+					selectedCategories: this.state.selectedCategories,
+					checkboxChange: this.checkboxChange,
+					accordionToggle: this.accordionToggle,
+					openAccordion: this.state.openAccordion
+				})
 			);
 		}
 	}]);
@@ -1189,7 +1211,9 @@ var ProductCategoryList = withAPIData(function (props) {
 	var categories = _ref2.categories,
 	    filterQuery = _ref2.filterQuery,
 	    selectedCategories = _ref2.selectedCategories,
-	    checkboxChange = _ref2.checkboxChange;
+	    checkboxChange = _ref2.checkboxChange,
+	    accordionToggle = _ref2.accordionToggle,
+	    openAccordion = _ref2.openAccordion;
 
 	if (!categories.data) {
 		return __('Loading');
@@ -1199,9 +1223,28 @@ var ProductCategoryList = withAPIData(function (props) {
 		return __('No categories found');
 	}
 
-	var CategoryTree = function CategoryTree(_ref3) {
-		var categories = _ref3.categories,
-		    parent = _ref3.parent;
+	var AccordionButton = function AccordionButton(_ref3) {
+		var category = _ref3.category,
+		    toggled = _ref3.toggled;
+
+		var icon = 'arrow-down-alt2';
+
+		if (toggled) {
+			icon = 'arrow-up-alt2';
+		}
+
+		return wp.element.createElement(
+			"button",
+			{ onClick: function onClick() {
+					return accordionToggle(category);
+				}, type: "button", className: "product-category-accordion-toggle" },
+			wp.element.createElement(Dashicon, { icon: icon })
+		);
+	};
+
+	var CategoryTree = function CategoryTree(_ref4) {
+		var categories = _ref4.categories,
+		    parent = _ref4.parent;
 
 		var filteredCategories = categories.filter(function (category) {
 			return category.parent === parent;
@@ -1213,7 +1256,7 @@ var ProductCategoryList = withAPIData(function (props) {
 			filteredCategories.map(function (category) {
 				return wp.element.createElement(
 					"li",
-					{ key: category.id },
+					{ key: category.id, className: openAccordion === category.id ? 'product-category-accordion-open' : '' },
 					wp.element.createElement(
 						"label",
 						{ htmlFor: 'product-category-' + category.id },
@@ -1224,7 +1267,13 @@ var ProductCategoryList = withAPIData(function (props) {
 							onChange: checkboxChange
 						}),
 						" ",
-						category.name
+						category.name,
+						wp.element.createElement(
+							"span",
+							{ className: "product-category-count" },
+							category.count
+						),
+						0 === category.parent && wp.element.createElement(AccordionButton, { category: category.id, toggled: openAccordion === category.id })
 					),
 					wp.element.createElement(CategoryTree, { categories: categories, parent: category.id })
 				);
@@ -1242,7 +1291,7 @@ var ProductCategoryList = withAPIData(function (props) {
 
 	return wp.element.createElement(
 		"div",
-		null,
+		{ className: "product-categories-list" },
 		wp.element.createElement(CategoryTree, { categories: categoriesData, parent: 0 })
 	);
 });
