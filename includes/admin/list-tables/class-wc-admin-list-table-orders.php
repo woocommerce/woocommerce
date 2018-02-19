@@ -3,8 +3,6 @@
  * List tables: orders.
  *
  * @author   WooCommerce
- * @category Admin
- * @package  WooCommerce/Admin
  * @version  3.3.0
  */
 
@@ -386,7 +384,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 									<div class="wc-order-preview-note">
 										<strong><?php esc_html_e( 'Note', 'woocommerce' ); ?></strong>
 										{{ data.data.customer_note }}
-								</div>
+									</div>
 								<# } #>
 							</div>
 
