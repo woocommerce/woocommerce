@@ -29,7 +29,7 @@ jQuery( function( $ ) {
 		var $row = $( this ).closest( 'tr' ),
 			href = $row.find( 'a.order-view' ).attr( 'href' );
 
-		if ( href.length ) {
+		if ( href && href.length ) {
 			e.preventDefault();
 
 			if ( e.metaKey || e.ctrlKey ) {
