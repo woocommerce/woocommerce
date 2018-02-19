@@ -1224,12 +1224,11 @@ var ProductCategoryList = withAPIData(function (props) {
 	}
 
 	var AccordionButton = function AccordionButton(_ref3) {
-		var category = _ref3.category,
-		    toggled = _ref3.toggled;
+		var category = _ref3.category;
 
 		var icon = 'arrow-down-alt2';
 
-		if (toggled) {
+		if (openAccordion === category) {
 			icon = 'arrow-up-alt2';
 		}
 
@@ -1273,7 +1272,7 @@ var ProductCategoryList = withAPIData(function (props) {
 							{ className: "product-category-count" },
 							category.count
 						),
-						0 === category.parent && wp.element.createElement(AccordionButton, { category: category.id, toggled: openAccordion === category.id })
+						0 === category.parent && wp.element.createElement(AccordionButton, { category: category.id })
 					),
 					wp.element.createElement(CategoryTree, { categories: categories, parent: category.id })
 				);

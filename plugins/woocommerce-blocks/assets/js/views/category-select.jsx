@@ -113,10 +113,10 @@ const ProductCategoryList = withAPIData( ( props ) => {
 			return __( 'No categories found' );
 		}
 
-		const AccordionButton = ( { category, toggled } ) => {
+		const AccordionButton = ( { category } ) => {
 			let icon = 'arrow-down-alt2';
 
-			if ( toggled ) {
+			if ( openAccordion === category ) {
 				icon = 'arrow-up-alt2';
 			}
 
@@ -143,7 +143,7 @@ const ProductCategoryList = withAPIData( ( props ) => {
 								/> { category.name }
 								<span className="product-category-count">{ category.count }</span>
 								{ 0 === category.parent &&
-									<AccordionButton category={ category.id } toggled={ openAccordion === category.id }  />
+									<AccordionButton category={ category.id } />
 								}
 							</label>
 							<CategoryTree categories={ categories } parent={ category.id } />
