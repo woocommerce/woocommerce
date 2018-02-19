@@ -1,5 +1,5 @@
 const { __ } = wp.i18n;
-const { Toolbar, withAPIData, Dropdown } = wp.components;
+const { Toolbar, withAPIData, Dropdown, Dashicon } = wp.components;
 
 /**
  * When the display mode is 'Product category' search for and select product categories to pull products from.
@@ -14,11 +14,13 @@ export class ProductsCategorySelect extends React.Component {
 
 		this.state = {
 			selectedCategories: props.selected_display_setting,
-			filterQuery: ''
+			openAccordion: null,
+			filterQuery: '',
 		}
 
-		this.checkboxChange = this.checkboxChange.bind( this );
-		this.filterResults = this.filterResults.bind( this );
+		this.checkboxChange  = this.checkboxChange.bind( this );
+		this.accordionToggle = this.accordionToggle.bind( this );
+		this.filterResults   = this.filterResults.bind( this );
 	}
 
 	/**
@@ -43,6 +45,23 @@ export class ProductsCategorySelect extends React.Component {
 	}
 
 	/**
+	 * Handle accordion toggle.
+	 *
+	 * @param Category ID category
+	 */
+	accordionToggle( category ) {
+		let value = category;
+
+		if ( value === this.state.openAccordion ) {
+			value = null;
+		}
+
+		this.setState( {
+			openAccordion: value
+		} );
+	}
+
+	/**
 	 * Filter categories.
 	 *
 	 * @param Event object evt
@@ -60,7 +79,13 @@ export class ProductsCategorySelect extends React.Component {
 		return (
 			<div className="product-category-select">
 				<ProductCategoryFilter filterResults={ this.filterResults } />
-				<ProductCategoryList filterQuery={ this.state.filterQuery } selectedCategories={ this.state.selectedCategories } checkboxChange={ this.checkboxChange } />
+				<ProductCategoryList
+					filterQuery={ this.state.filterQuery }
+					selectedCategories={ this.state.selectedCategories }
+					checkboxChange={ this.checkboxChange }
+					accordionToggle={ this.accordionToggle }
+					openAccordion={ this.state.openAccordion }
+				/>
 			</div>
 		);
 	}
@@ -84,7 +109,7 @@ const ProductCategoryList = withAPIData( ( props ) => {
 		return {
 			categories: '/wc/v2/products/categories'
 		};
-	} )( ( { categories, filterQuery, selectedCategories, checkboxChange } ) => {
+	} )( ( { categories, filterQuery, selectedCategories, checkboxChange, accordionToggle, openAccordion } ) => {
 		if ( ! categories.data ) {
 			return __( 'Loading' );
 		}
@@ -93,13 +118,27 @@ const ProductCategoryList = withAPIData( ( props ) => {
 			return __( 'No categories found' );
 		}
 
+		const AccordionButton = ( { category } ) => {
+			let icon = 'arrow-down-alt2';
+
+			if ( openAccordion === category ) {
+				icon = 'arrow-up-alt2';
+			}
+
+			return (
+				<button onClick={ () => accordionToggle( category ) } type="button" className="product-category-accordion-toggle">
+					<Dashicon icon={ icon } />
+				</button>
+			);
+		};
+
 		const CategoryTree = ( { categories, parent } ) => {
 			let filteredCategories = categories.filter( ( category ) => category.parent === parent );
 
 			return ( filteredCategories.length > 0 ) && (
 				<ul>
 					{ filteredCategories.map( ( category ) => (
-						<li key={ category.id }>
+						<li key={ category.id } className={ ( openAccordion === category.id ? 'product-category-accordion-open' : '' ) }>
 							<label htmlFor={ 'product-category-' + category.id }>
 								<input type="checkbox"
 								       id={ 'product-category-' + category.id }
@@ -107,6 +146,10 @@ const ProductCategoryList = withAPIData( ( props ) => {
 								       checked={ selectedCategories.includes( category.id ) }
 								       onChange={ checkboxChange }
 								/> { category.name }
+								<span className="product-category-count">{ category.count }</span>
+								{ 0 === category.parent &&
+									<AccordionButton category={ category.id } />
+								}
 							</label>
 							<CategoryTree categories={ categories } parent={ category.id } />
 						</li>
@@ -122,7 +165,7 @@ const ProductCategoryList = withAPIData( ( props ) => {
 		}
 
 		return (
-			<div>
+			<div className="product-categories-list">
 				<CategoryTree categories={ categoriesData } parent={ 0 } />
 			</div>
 		);
