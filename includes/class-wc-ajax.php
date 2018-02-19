@@ -1134,15 +1134,17 @@ class WC_AJAX {
 				}
 			}
 			do_action( 'woocommerce_reduce_order_stock', $order );
+
 			if ( empty( $return ) ) {
 				$return[] = array(
 					'note'    => wp_kses_post( __( 'No products had their stock reduced - they may not have stock management enabled.', 'woocommerce' ) ),
 					'success' => false,
 				);
 			}
-			echo json_encode( $return );
+
+			wp_send_json_success( $return );
 		}
-		wp_die();
+		wp_send_json_error();
 	}
 
 	/**
@@ -1184,9 +1186,10 @@ class WC_AJAX {
 					'success' => false,
 				);
 			}
-			echo json_encode( $return );
+
+			wp_send_json_success( $return );
 		}
-		wp_die();
+		wp_send_json_error();
 	}
 
 	/**
