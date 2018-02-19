@@ -242,11 +242,11 @@
 					}
 
 					&.product-category-accordion-open {
-						margin: 5px 0;
+						margin: 0 0 5px;
 						border-bottom-width: 1px;
 
-						&:first-child {
-							margin-top: 0;
+						&:not(:first-child) {
+							margin-top: 5px;
 						}
 
 						ul {
