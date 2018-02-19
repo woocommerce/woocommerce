@@ -3,8 +3,6 @@
  * List tables: orders.
  *
  * @author   WooCommerce
- * @category Admin
- * @package  WooCommerce/Admin
  * @version  3.3.0
  */
 
@@ -375,15 +373,17 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 											<a href="{{ data.shipping_address_map_url }}" target="_blank">{{{ data.formatted_shipping_address }}}</a>
 										<# } #>
 
-										<# if ( data.data.customer_note ) { #>
-											<strong><?php esc_html_e( 'Note', 'woocommerce' ); ?></strong>
-											{{ data.data.customer_note }}
-										<# } #>
-
 										<# if ( data.shipping_via ) { #>
 											<strong><?php esc_html_e( 'Shipping method', 'woocommerce' ); ?></strong>
 											{{ data.shipping_via }}
 										<# } #>
+									</div>
+								<# } #>
+
+								<# if ( data.data.customer_note ) { #>
+									<div class="wc-order-preview-note">
+										<strong><?php esc_html_e( 'Note', 'woocommerce' ); ?></strong>
+										{{ data.data.customer_note }}
 									</div>
 								<# } #>
 							</div>
