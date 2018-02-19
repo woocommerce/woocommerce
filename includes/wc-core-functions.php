@@ -1993,7 +1993,7 @@ function wc_get_relative_url( $url ) {
 function wc_is_external_resource( $url ) {
 	$wp_base = str_replace( array( 'http://', 'https://' ), '//', get_home_url( null, '/', 'http' ) );
 
-	return strstr( $url, '://' ) && !strstr( $url, $wp_base );
+	return strstr( $url, '://' ) && ! strstr( $url, $wp_base );
 }
 
 /**
