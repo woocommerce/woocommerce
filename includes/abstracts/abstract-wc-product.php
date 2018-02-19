@@ -1808,7 +1808,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		} else {
 			$image = '';
 		}
-		return apply_filters( 'woocommerce_product_get_image', wc_get_relative_url( $image ), $this, $size, $attr, $placeholder );
+
+		return apply_filters( 'woocommerce_product_get_image', wc_get_relative_url( $image ), $this, $size, $attr, $placeholder, $image );
 	}
 
 	/**
