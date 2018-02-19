@@ -44,6 +44,11 @@ export class ProductsCategorySelect extends React.Component {
 		this.props.update_display_setting_callback( selectedCategories );
 	}
 
+	/**
+	 * Handle accordion toggle.
+	 *
+	 * @param Category ID category
+	 */
 	accordionToggle( category ) {
 		let value = category;
 
