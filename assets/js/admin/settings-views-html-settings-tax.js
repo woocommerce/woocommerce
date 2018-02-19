@@ -17,7 +17,7 @@
 			paginationTemplate = wp.template( 'wc-tax-table-pagination' ),
 			$table             = $( '.wc_tax_rates' ),
 			$tbody             = $( '#rates' ),
-			$save_button       = $( 'input[name="save"]' ),
+			$save_button       = $( ':input[name="save"]' ),
 			$pagination        = $( '#rates-pagination' ),
 			$search_field      = $( '#rates-search .wc-tax-rates-search-field' ),
 			$submit            = $( '.submit .button-primary[type=submit]' ),
@@ -91,7 +91,7 @@
 							changes: self.changes
 						},
 						success: function( response, textStatus ) {
-							if ( 'success' === textStatus ) {
+							if ( 'success' === textStatus && response.success ) {
 								WCTaxTableModelInstance.set( 'rates', response.data.rates );
 								WCTaxTableModelInstance.trigger( 'change:rates' );
 
@@ -125,7 +125,7 @@
 					$pagination.on( 'change', 'input', { view: this }, this.onPageChange );
 					$( window ).on( 'beforeunload', { view: this }, this.unloadConfirmation );
 					$submit.on( 'click', { view: this }, this.onSubmit );
-					$save_button.attr( 'disabled','disabled' );
+					$save_button.prop( 'disabled', true );
 
 					// Can bind these directly to the buttons, as they won't get overwritten.
 					$table.find( '.insert' ).on( 'click', { view: this }, this.onAddNewRow );
@@ -319,11 +319,11 @@
 				},
 				setUnloadConfirmation: function() {
 					this.needsUnloadConfirm = true;
-					$save_button.removeAttr( 'disabled' );
+					$save_button.prop( 'disabled', false );
 				},
 				clearUnloadConfirmation: function() {
 					this.needsUnloadConfirm = false;
-					$save_button.attr( 'disabled', 'disabled' );
+					$save_button.prop( 'disabled', true );
 				},
 				unloadConfirmation: function( event ) {
 					if ( event.data.view.needsUnloadConfirm ) {
