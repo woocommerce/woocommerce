@@ -1126,17 +1126,21 @@ class WC_AJAX {
 				if ( $_product && $_product->exists() && $_product->managing_stock() && isset( $order_item_qty[ $item_id ] ) && $order_item_qty[ $item_id ] > 0 ) {
 					$stock_change = apply_filters( 'woocommerce_reduce_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
 					$new_stock    = wc_update_product_stock( $_product, $stock_change, 'decrease' );
-					$item_name    = $_product->get_sku() ? $_product->get_sku() : $_product->get_id();
-					$note         = sprintf( __( 'Item %1$s stock reduced from %2$s to %3$s.', 'woocommerce' ), $item_name, $new_stock + $stock_change, $new_stock );
-					$return[]     = $note;
-					$order->add_order_note( $note );
+					$item_name    = $_product->get_formatted_name();
+					$return[]     = array(
+						'note'    => sprintf( wp_kses_post( __( '%1$s stock reduced from %2$s to %3$s.', 'woocommerce' ) ), $item_name, $new_stock + $stock_change, $new_stock ),
+						'success' => true,
+					);
 				}
 			}
 			do_action( 'woocommerce_reduce_order_stock', $order );
 			if ( empty( $return ) ) {
-				$return[] = __( 'No products had their stock reduced - they may not have stock management enabled.', 'woocommerce' );
+				$return[] = array(
+					'note'    => wp_kses_post( __( 'No products had their stock reduced - they may not have stock management enabled.', 'woocommerce' ) ),
+					'success' => false,
+				);
 			}
-			echo wp_kses_post( implode( ', ', $return ) );
+			echo json_encode( $return );
 		}
 		wp_die();
 	}
@@ -1166,17 +1170,21 @@ class WC_AJAX {
 					$old_stock    = $_product->get_stock_quantity();
 					$stock_change = apply_filters( 'woocommerce_restore_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
 					$new_quantity = wc_update_product_stock( $_product, $stock_change, 'increase' );
-					$item_name    = $_product->get_sku() ? $_product->get_sku() : $_product->get_id();
-					$note         = sprintf( __( 'Item %1$s stock increased from %2$s to %3$s.', 'woocommerce' ), $item_name, $old_stock, $new_quantity );
-					$return[]     = $note;
-					$order->add_order_note( $note );
+					$item_name    = $_product->get_formatted_name();
+					$return[]     = array(
+						'note'    => sprintf( wp_kses_post( __( '%1$s stock increased from %2$s to %3$s.', 'woocommerce' ) ), $item_name, $old_stock, $new_quantity ),
+						'success' => true,
+					);
 				}
 			}
 			do_action( 'woocommerce_restore_order_stock', $order );
 			if ( empty( $return ) ) {
-				$return[] = __( 'No products had their stock increased - they may not have stock management enabled.', 'woocommerce' );
+				$return[] = array(
+					'note'    => wp_kses_post( __( 'No products had their stock increased - they may not have stock management enabled.', 'woocommerce' ) ),
+					'success' => false,
+				);
 			}
-			echo wp_kses_post( implode( ', ', $return ) );
+			echo json_encode( $return );
 		}
 		wp_die();
 	}
