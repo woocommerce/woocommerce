@@ -1,6 +1,13 @@
 <?php
 /**
- * System Status REST Tests
+ * Class WC_Tests_REST_System_Status file.
+ *
+ * @package WooCommerce/Tests
+ */
+
+/**
+ * System Status REST Tests.
+ *
  * @package WooCommerce\Tests\API
  * @since 3.0
  */
@@ -74,7 +81,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		// Make sure all expected data is present
 		$this->assertEquals( 31, count( $environment ) );
 
-		// Test some responses to make sure they match up
+		// Test some responses to make sure they match up.
 		$this->assertEquals( get_option( 'home' ), $environment['home_url'] );
 		$this->assertEquals( get_option( 'siteurl' ), $environment['site_url'] );
 		$this->assertEquals( WC()->version, $environment['version'] );
@@ -310,6 +317,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'Recount terms', $data['action'] );
 		$this->assertEquals( 'This tool will recount product terms - useful when changing your settings in a way which hides products from the catalog.', $data['description'] );
 		$this->assertTrue( $data['success'] );
+		$this->assertEquals( 1, did_action( 'woocommerce_rest_insert_system_status_tool' ) );
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v2/system_status/tools/not_a_real_tool' ) );
 		$this->assertEquals( 404, $response->get_status() );
@@ -336,6 +344,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
+
 		$this->assertEquals( 6, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'name', $properties );

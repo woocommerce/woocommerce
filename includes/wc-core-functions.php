@@ -723,37 +723,54 @@ function wc_get_image_size( $image_size ) {
 	);
 
 	if ( is_array( $image_size ) ) {
-		$size       = array(
-			'width'  => isset( $image_size[0] ) ? $image_size[0] : 600,
-			'height' => isset( $image_size[1] ) ? $image_size[1] : 600,
-			'crop'   => isset( $image_size[2] ) ? $image_size[2] : 1,
+		$size = array(
+			'width'  => isset( $image_size[0] ) ? absint( $image_size[0] ) : 600,
+			'height' => isset( $image_size[1] ) ? absint( $image_size[1] ) : 600,
+			'crop'   => isset( $image_size[2] ) ? absint( $image_size[2] ) : 1,
 		);
 		$image_size = $size['width'] . '_' . $size['height'];
-	} elseif ( in_array( $image_size, array( 'single', 'shop_single', 'woocommerce_single' ), true ) ) {
-		$size['width']  = wc_get_theme_support( 'single_image_width', get_option( 'woocommerce_single_image_width', 600 ) );
-		$size['height'] = 9999999999;
-		$size['crop']   = 0;
-		$image_size     = 'single';
-	} elseif ( in_array( $image_size, array( 'thumbnail', 'shop_thumbnail', 'shop_catalog', 'woocommerce_thumbnail' ), true ) ) {
-		$size['width'] = wc_get_theme_support( 'thumbnail_image_width', get_option( 'woocommerce_thumbnail_image_width', 300 ) );
-		$cropping      = get_option( 'woocommerce_thumbnail_cropping', '1: 1' );
+	} else {
+		$image_size = str_replace( 'woocommerce_', '', $image_size );
 
-		if ( 'uncropped' === $cropping ) {
-			$size['height'] = 9999999999;
-			$size['crop']   = 0;
-		} elseif ( 'custom' === $cropping ) {
-			$width          = max( 1, get_option( 'woocommerce_thumbnail_cropping_custom_width', '4' ) );
-			$height         = max( 1, get_option( 'woocommerce_thumbnail_cropping_custom_height', '3' ) );
-			$size['height'] = round( ( $size['width'] / $width ) * $height );
-			$size['crop']   = 1;
-		} else {
-			$cropping_split = explode( ':', $cropping );
-			$width          = max( 1, current( $cropping_split ) );
-			$height         = max( 1, end( $cropping_split ) );
-			$size['height'] = round( ( $size['width'] / $width ) * $height );
-			$size['crop']   = 1;
+		// Legacy size mapping.
+		if ( 'shop_single' === $image_size ) {
+			$image_size = 'single';
+		} elseif ( 'shop_catalog' === $image_size ) {
+			$image_size = 'thumbnail';
+		} elseif ( 'shop_thumbnail' === $image_size ) {
+			$image_size = 'gallery_thumbnail';
 		}
-		$image_size = 'thumbnail';
+
+		if ( 'single' === $image_size ) {
+			$size['width']  = absint( wc_get_theme_support( 'single_image_width', get_option( 'woocommerce_single_image_width', 600 ) ) );
+			$size['height'] = '';
+			$size['crop']   = 0;
+
+		} elseif ( 'gallery_thumbnail' === $image_size ) {
+			$size['width']  = absint( wc_get_theme_support( 'gallery_thumbnail_image_width', 100 ) );
+			$size['height'] = $size['width'];
+			$size['crop']   = 1;
+
+		} elseif ( 'thumbnail' === $image_size ) {
+			$size['width'] = absint( wc_get_theme_support( 'thumbnail_image_width', get_option( 'woocommerce_thumbnail_image_width', 300 ) ) );
+			$cropping      = get_option( 'woocommerce_thumbnail_cropping', '1:1' );
+
+			if ( 'uncropped' === $cropping ) {
+				$size['height'] = '';
+				$size['crop']   = 0;
+			} elseif ( 'custom' === $cropping ) {
+				$width          = max( 1, get_option( 'woocommerce_thumbnail_cropping_custom_width', '4' ) );
+				$height         = max( 1, get_option( 'woocommerce_thumbnail_cropping_custom_height', '3' ) );
+				$size['height'] = absint( round( ( $size['width'] / $width ) * $height ) );
+				$size['crop']   = 1;
+			} else {
+				$cropping_split = explode( ':', $cropping );
+				$width          = max( 1, current( $cropping_split ) );
+				$height         = max( 1, end( $cropping_split ) );
+				$size['height'] = absint( round( ( $size['width'] / $width ) * $height ) );
+				$size['crop']   = 1;
+			}
+		}
 	}
 
 	return apply_filters( 'woocommerce_get_image_size_' . $image_size, $size );
@@ -1976,7 +1993,7 @@ function wc_get_relative_url( $url ) {
 function wc_is_external_resource( $url ) {
 	$wp_base = str_replace( array( 'http://', 'https://' ), '//', get_home_url( null, '/', 'http' ) );
 
-	return strstr( $url, '://' ) && strstr( $wp_base, $url );
+	return strstr( $url, '://' ) && ! strstr( $url, $wp_base );
 }
 
 /**
@@ -2004,3 +2021,42 @@ function wc_cleanup_session_data() {
 	}
 }
 add_action( 'woocommerce_cleanup_sessions', 'wc_cleanup_session_data' );
+
+/**
+ * Convert a decimal (e.g. 3.5) to a fraction (e.g. 7/2).
+ * From: https://www.designedbyaturtle.co.uk/2015/converting-a-decimal-to-a-fraction-in-php/
+ *
+ * @param float $decimal the decimal number.
+ * @return array|bool a 1/2 would be [1, 2] array (this can be imploded with '/' to form a string).
+ */
+function wc_decimal_to_fraction( $decimal ) {
+	if ( 0 > $decimal || ! is_numeric( $decimal ) ) {
+		// Negative digits need to be passed in as positive numbers and prefixed as negative once the response is imploded.
+		return false;
+	}
+
+	if ( 0 === $decimal ) {
+		return array( 0, 1 );
+	}
+
+	$tolerance   = 1.e-4;
+	$numerator   = 1;
+	$h2          = 0;
+	$denominator = 0;
+	$k2          = 1;
+	$b           = 1 / $decimal;
+
+	do {
+		$b           = 1 / $b;
+		$a           = floor( $b );
+		$aux         = $numerator;
+		$numerator   = $a * $numerator + $h2;
+		$h2          = $aux;
+		$aux         = $denominator;
+		$denominator = $a * $denominator + $k2;
+		$k2          = $aux;
+		$b           = $b - $a;
+	} while ( abs( $decimal - $numerator / $denominator ) > $decimal * $tolerance );
+
+	return array( $numerator, $denominator );
+}

@@ -75,7 +75,12 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 			<p><?php
 			/* translators: %s: URL to customizer. */
-			echo wp_kses( sprintf( __( 'Looking for the product display options? They can now be found in the Customizer. <a href="%s">Go see them in action here.</a>', 'woocommerce' ), esc_url( admin_url( 'customize.php?url=' . wc_get_page_permalink( 'shop' ) . '&autofocus[panel]=woocommerce' ) ) ), array(
+			echo wp_kses( sprintf( __( 'Looking for the product display options? They can now be found in the Customizer. <a href="%s">Go see them in action here.</a>', 'woocommerce' ), esc_url( add_query_arg( array(
+				'autofocus' => array(
+					'panel' => 'woocommerce',
+				),
+				'url' => wc_get_page_permalink( 'shop' ),
+			 ), admin_url( 'customize.php' ) ) ) ), array(
 				'a' => array(
 					'href'  => array(),
 					'title' => array(),

@@ -52,7 +52,7 @@
 	</rule>
 	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
 		<exclude-pattern>includes/**/abstract-*.php</exclude-pattern>
-		<exclude-pattern>tests/</exclude-pattern>
+		<exclude-pattern>tests/*</exclude-pattern>
 	</rule>
 	<rule ref="Generic.Commenting">
 		<exclude-pattern>tests/</exclude-pattern>
@@ -60,6 +60,7 @@
 	<rule ref="Squiz.Commenting">
 		<exclude-pattern>tests/</exclude-pattern>
 		<exclude name="Squiz.Commenting.LongConditionClosingComment" />
+		<exclude name="Squiz.Commenting.PostStatementComment" />
 	</rule>
 	<rule ref="PEAR.Functions.FunctionCallSignature.EmptyLine">
 		<exclude-pattern>tests/e2e-tests/</exclude-pattern>

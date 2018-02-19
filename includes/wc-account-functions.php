@@ -173,6 +173,10 @@ function wc_get_account_endpoint_url( $endpoint ) {
 		return wc_get_page_permalink( 'myaccount' );
 	}
 
+	if ( 'customer-logout' === $endpoint ) {
+		return wc_logout_url();
+	}
+
 	return wc_get_endpoint_url( $endpoint, '', wc_get_page_permalink( 'myaccount' ) );
 }
 

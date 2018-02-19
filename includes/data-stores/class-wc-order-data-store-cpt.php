@@ -283,7 +283,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * Get amount already refunded.
 	 *
 	 * @param  WC_Order $order Order object.
-	 * @return string
+	 * @return float
 	 */
 	public function get_total_refunded( $order ) {
 		global $wpdb;
@@ -299,7 +299,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			)
 		);
 
-		return $total;
+		return floatval( $total );
 	}
 
 	/**
