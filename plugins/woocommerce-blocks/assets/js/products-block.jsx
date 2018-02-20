@@ -173,7 +173,7 @@ class ProductsBlockSettingsEditor extends React.Component {
 		} else if ( 'category' === this.state.display ) {
 			extra_settings = <ProductsCategorySelect { ...this.props } />;
 		} else if ( 'attribute' === this.state.display ) {
-			extra_settings = <ProductsAttributeSelect />
+			extra_settings = <ProductsAttributeSelect { ...this.props } />
 		}
 
 		const menu = this.state.menu_visible ? <ProductsBlockSettingsEditorDisplayOptions existing={ this.state.display ? true : false } update_display_callback={ this.updateDisplay } /> : null;
