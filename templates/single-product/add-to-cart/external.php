@@ -15,9 +15,8 @@
  * @package 	WooCommerce/Templates
  * @version     2.1.0
  */
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+
+defined( 'ABSPATH' ) || exit;
 
 do_action( 'woocommerce_before_add_to_cart_button' ); ?>
 
