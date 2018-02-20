@@ -48,7 +48,13 @@ function wc_empty_cart() {
  * @deprecated 2.3
  */
 function wc_load_persistent_cart( $user_login, $user ) {
-	if ( ! $user || ! ( $saved_cart = get_user_meta( $user->ID, '_woocommerce_persistent_cart_' . get_current_blog_id(), true ) ) ) {
+	if ( ! $user || ! apply_filters( 'woocommerce_persistent_cart_enabled', true ) ) {
+		return;
+	}
+
+	$saved_cart = get_user_meta( $user->ID, '_woocommerce_persistent_cart_' . get_current_blog_id(), true );
+
+	if ( ! $saved_cart ) {
 		return;
 	}
 
