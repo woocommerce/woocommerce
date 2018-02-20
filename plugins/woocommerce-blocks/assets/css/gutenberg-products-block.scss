@@ -224,16 +224,12 @@
 					margin-top: -1px;
 
 					> label {
-						padding: 10px 15px;
+						padding: 10px 0 10px 15px;
 						background: #fff;
-
-						.product-category-count {
-							margin-right: 10px;
-						}
 					}
 
 					&.product-category-accordion-open {
-						margin: 0 0 5px;
+						margin: -1px 0 5px;
 						border-bottom-width: 1px;
 
 						&:not(:first-child) {
@@ -251,7 +247,7 @@
 				cursor: pointer;
 				color: #666;
 				margin: 0;
-				padding: 0;
+				padding: 0 15px 0 10px;
 				border: none;
 				border-radius: 0;
 				background: none;
