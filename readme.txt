@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, claudiulodro,
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
 Requires at least: 4.7
 Tested up to: 4.9
-Stable tag: 3.3.1
+Stable tag: 3.3.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -161,7 +161,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
-= 3.3.2 - 2018-02-xx =
+= 3.3.2 - 2018-02-20 =
 * Fix - Fixed admin product SKU searching and searching non-published products.
 * Fix - PHP7.1 notice when image height is empty.
 * Fix - Prevent repeated update_option calls on page load due to php type juggling.
