@@ -882,7 +882,7 @@ jQuery( function ( $ ) {
 				var index  = $items.find('tr').length + 1;
 				var $row   = '<tr data-meta_id="0">' +
 					'<td>' +
-						'<input type="text" placeholder="' + woocommerce_admin_meta_boxes_order.placeholder_name + '" name="meta_key[' + $item.attr( 'data-order_item_id' ) + '][new-' + index + ']" />' +
+						'<input type="text" maxlength="255" placeholder="' + woocommerce_admin_meta_boxes_order.placeholder_name + '" name="meta_key[' + $item.attr( 'data-order_item_id' ) + '][new-' + index + ']" />' +
 						'<textarea placeholder="' + woocommerce_admin_meta_boxes_order.placeholder_value + '" name="meta_value[' + $item.attr( 'data-order_item_id' ) + '][new-' + index + ']"></textarea>' +
 					'</td>' +
 					'<td width="1%"><button class="remove_order_item_meta button">&times;</button></td>' +
