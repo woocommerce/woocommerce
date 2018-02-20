@@ -133,26 +133,25 @@ class WC_Email extends WC_Settings_API {
 	 *  @see $plain_replace
 	 */
 	public $plain_search = array(
-		"/\r/",                                          // Non-legal carriage return
-		'/&(nbsp|#160);/i',                              // Non-breaking space
-		'/&(quot|rdquo|ldquo|#8220|#8221|#147|#148);/i', // Double quotes
-		'/&(apos|rsquo|lsquo|#8216|#8217);/i',           // Single quotes
-		'/&gt;/i',                                       // Greater-than
-		'/&lt;/i',                                       // Less-than
-		'/&#38;/i',                                      // Ampersand
-		'/&#038;/i',                                     // Ampersand
-		'/&amp;/i',                                      // Ampersand
-		'/&(copy|#169);/i',                              // Copyright
-		'/&(trade|#8482|#153);/i',                       // Trademark
-		'/&(reg|#174);/i',                               // Registered
-		'/&(mdash|#151|#8212);/i',                       // mdash
-		'/&(ndash|minus|#8211|#8722);/i',                // ndash
-		'/&(bull|#149|#8226);/i',                        // Bullet
-		'/&(pound|#163);/i',                             // Pound sign
-		'/&(euro|#8364);/i',                             // Euro sign
-		'/&#36;/',                                       // Dollar sign
-		'/&[^&\s;]+;/i',                                 // Unknown/unhandled entities
-		'/[ ]{2,}/',                                      // Runs of spaces, post-handling
+		"/\r/",                                                  // Non-legal carriage return
+		'/&(nbsp|#0*160);/i',                                    // Non-breaking space
+		'/&(quot|rdquo|ldquo|#0*8220|#0*8221|#0*147|#0*148);/i', // Double quotes
+		'/&(apos|rsquo|lsquo|#0*8216|#0*8217);/i',               // Single quotes
+		'/&gt;/i',                                               // Greater-than
+		'/&lt;/i',                                               // Less-than
+		'/&#0*38;/i',                                            // Ampersand
+		'/&amp;/i',                                              // Ampersand
+		'/&(copy|#0*169);/i',                                    // Copyright
+		'/&(trade|#0*8482|#0*153);/i',                           // Trademark
+		'/&(reg|#0*174);/i',                                     // Registered
+		'/&(mdash|#0*151|#0*8212);/i',                           // mdash
+		'/&(ndash|minus|#0*8211|#0*8722);/i',                    // ndash
+		'/&(bull|#0*149|#0*8226);/i',                            // Bullet
+		'/&(pound|#0*163);/i',                                   // Pound sign
+		'/&(euro|#0*8364);/i',                                   // Euro sign
+		'/&(dollar|#0*36);/i',                                   // Dollar sign
+		'/&[^&\s;]+;/i',                                         // Unknown/unhandled entities
+		'/[ ]{2,}/',                                             // Runs of spaces, post-handling
 	);
 
 	/**
@@ -167,7 +166,6 @@ class WC_Email extends WC_Settings_API {
 		"'",                                            // Single quotes
 		'>',                                            // Greater-than
 		'<',                                            // Less-than
-		'&',                                            // Ampersand
 		'&',                                            // Ampersand
 		'&',                                            // Ampersand
 		'(c)',                                          // Copyright
