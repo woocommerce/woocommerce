@@ -1189,6 +1189,8 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -1232,21 +1234,24 @@ var ProductsCategorySelect = exports.ProductsCategorySelect = function (_React$C
 	/**
   * Handle checkbox toggle.
   *
-  * @param Event object evt
+  * @param Checked? boolean checked
+  * @param Categories array categories
   */
 
 
 	_createClass(ProductsCategorySelect, [{
 		key: "checkboxChange",
-		value: function checkboxChange(evt) {
+		value: function checkboxChange(checked, categories) {
 			var selectedCategories = this.state.selectedCategories;
 
-			if (evt.target.checked && !selectedCategories.includes(parseInt(evt.target.value, 10))) {
-				selectedCategories.push(parseInt(evt.target.value, 10));
-			} else if (!evt.target.checked) {
-				selectedCategories = selectedCategories.filter(function (category) {
-					return category !== parseInt(evt.target.value, 10);
-				});
+			selectedCategories = selectedCategories.filter(function (category) {
+				return !categories.includes(category);
+			});
+
+			if (checked) {
+				var _selectedCategories;
+
+				(_selectedCategories = selectedCategories).push.apply(_selectedCategories, _toConsumableArray(categories));
 			}
 
 			this.setState({
@@ -1353,20 +1358,56 @@ var ProductCategoryList = withAPIData(function (props) {
 		return __('No categories found');
 	}
 
+	var handleCategoriesToCheck = function handleCategoriesToCheck(evt, parent, categories) {
+		var ids = getCategoryChildren(parent, categories).map(function (category) {
+			return category.id;
+		});
+
+		ids.push(parent.id);
+
+		checkboxChange(evt.target.checked, ids);
+	};
+
+	var getCategoryChildren = function getCategoryChildren(parent, categories) {
+		var children = [];
+
+		categories.filter(function (category) {
+			return category.parent === parent.id;
+		}).forEach(function (category) {
+			children.push(category);
+			children.push.apply(children, _toConsumableArray(getCategoryChildren(category, categories)));
+		});
+
+		return children;
+	};
+
+	var categoryHasChildren = function categoryHasChildren(parent, categories) {
+		return !!getCategoryChildren(parent, categories).length;
+	};
+
 	var AccordionButton = function AccordionButton(_ref3) {
-		var category = _ref3.category;
+		var category = _ref3.category,
+		    categories = _ref3.categories;
 
 		var icon = 'arrow-down-alt2';
 
-		if (openAccordion === category) {
+		if (openAccordion === category.id) {
 			icon = 'arrow-up-alt2';
 		}
+
+		var style = null;
+
+		if (!categoryHasChildren(category, categories)) {
+			style = {
+				visibility: 'hidden'
+			};
+		};
 
 		return wp.element.createElement(
 			"button",
 			{ onClick: function onClick() {
-					return accordionToggle(category);
-				}, type: "button", className: "product-category-accordion-toggle" },
+					return accordionToggle(category.id);
+				}, style: style, type: "button", className: "product-category-accordion-toggle" },
 			wp.element.createElement(Dashicon, { icon: icon })
 		);
 	};
@@ -1393,7 +1434,9 @@ var ProductCategoryList = withAPIData(function (props) {
 							id: 'product-category-' + category.id,
 							value: category.id,
 							checked: selectedCategories.includes(category.id),
-							onChange: checkboxChange
+							onChange: function onChange(evt) {
+								return handleCategoriesToCheck(evt, category, categories);
+							}
 						}),
 						" ",
 						category.name,
@@ -1402,7 +1445,7 @@ var ProductCategoryList = withAPIData(function (props) {
 							{ className: "product-category-count" },
 							category.count
 						),
-						0 === category.parent && wp.element.createElement(AccordionButton, { category: category.id })
+						0 === category.parent && wp.element.createElement(AccordionButton, { category: category, categories: categories })
 					),
 					wp.element.createElement(CategoryTree, { categories: categories, parent: category.id })
 				);

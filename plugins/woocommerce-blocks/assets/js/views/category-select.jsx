@@ -26,15 +26,16 @@ export class ProductsCategorySelect extends React.Component {
 	/**
 	 * Handle checkbox toggle.
 	 *
-	 * @param Event object evt
+	 * @param Checked? boolean checked
+	 * @param Categories array categories
 	 */
-	checkboxChange( evt ) {
+	checkboxChange( checked, categories ) {
 		let selectedCategories = this.state.selectedCategories;
 
-		if ( evt.target.checked && ! selectedCategories.includes( parseInt( evt.target.value, 10 ) ) ) {
-			selectedCategories.push( parseInt( evt.target.value, 10 ) );
-		} else if ( ! evt.target.checked ) {
-			selectedCategories = selectedCategories.filter( category => category !== parseInt( evt.target.value, 10 ) );
+		selectedCategories = selectedCategories.filter( category => ! categories.includes( category ) );
+
+		if ( checked ) {
+			selectedCategories.push( ...categories );
 		}
 
 		this.setState( {
@@ -118,15 +119,48 @@ const ProductCategoryList = withAPIData( ( props ) => {
 			return __( 'No categories found' );
 		}
 
-		const AccordionButton = ( { category } ) => {
+		const handleCategoriesToCheck = ( evt, parent, categories ) => {
+			let ids = getCategoryChildren( parent, categories ).map( category => {
+				return category.id;
+			} );
+
+			ids.push( parent.id );
+
+			checkboxChange( evt.target.checked, ids );
+		};
+
+		const getCategoryChildren = ( parent, categories ) => {
+			let children = [];
+
+			categories.filter( ( category ) => category.parent === parent.id ).forEach( function( category ) {
+				children.push( category );
+				children.push( ...getCategoryChildren( category, categories ) );
+			} );
+
+			return children;
+		};
+
+		const categoryHasChildren = ( parent, categories ) => {
+			return !! getCategoryChildren( parent, categories ).length;
+		};
+
+		const AccordionButton = ( { category, categories } ) => {
 			let icon = 'arrow-down-alt2';
 
-			if ( openAccordion === category ) {
+			if ( openAccordion === category.id ) {
 				icon = 'arrow-up-alt2';
 			}
 
+			let style = null;
+
+			if ( ! categoryHasChildren( category, categories ) ) {
+				style = {
+					visibility: 'hidden',
+				};
+			};
+
 			return (
-				<button onClick={ () => accordionToggle( category ) } type="button" className="product-category-accordion-toggle">
+				<button onClick={ () => accordionToggle( category.id ) } style={ style } type="button" className="product-category-accordion-toggle">
 					<Dashicon icon={ icon } />
 				</button>
 			);
@@ -144,11 +178,11 @@ const ProductCategoryList = withAPIData( ( props ) => {
 								       id={ 'product-category-' + category.id }
 								       value={ category.id }
 								       checked={ selectedCategories.includes( category.id ) }
-								       onChange={ checkboxChange }
+								       onChange={ ( evt ) => handleCategoriesToCheck( evt, category, categories ) }
 								/> { category.name }
 								<span className="product-category-count">{ category.count }</span>
 								{ 0 === category.parent &&
-									<AccordionButton category={ category.id } />
+									<AccordionButton category={ category } categories={ categories } />
 								}
 							</label>
 							<CategoryTree categories={ categories } parent={ category.id } />
