@@ -48,7 +48,7 @@ jQuery( function( $ ) {
 		$checkbox.prop( 'checked', ! $checkbox.prop( 'checked' ) ).change();
 	} );
 
-	$( '.wc-wizard-services-list-toggle' ).on( 'change', '.wc-wizard-service-enable input', function() {
+	$( '.wc-wizard-services-list-toggle' ).on( 'click', function() {
 		$( this ).closest( '.wc-wizard-services-list-toggle' ).toggleClass( 'closed' );
 		$( this ).closest( '.wc-wizard-services' ).find( '.wc-wizard-service-item' )
 			.slideToggle()
