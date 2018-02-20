@@ -173,9 +173,15 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Set woocommerce_hide_invisible_variations to true so disabled variation attributes are hidden on product pages.
 * Fix - Help tip for webhook status.
 * Fix - Shipping zone documentation help link was printing wrong.
-* Fix - API - Set status after order is created/updated so triggered emails are current.
 * Fix - Stop background processing images when disabled via the filter.
 * Fix - Only search when a search term is provided. Ignore empty strings.
+* Fix - Fix check for external resources.
+* Fix - Show full date for future orders.
+* Fix - Prevent JS error is 'orders' row is disabled on order screen.
+* Fix - Fix save of tax settings when no changes have been made.
+* Fix - Add nonce to logout link on my account page so you do not need to confirm the action.
+* Fix - API - Set status after order is created/updated so triggered emails are current.
+* Fix - API - Fix single webhook endpoint.
 * Tweak - Added help text for background image processing.
 * Tweak - Added notice when background image processing is running, with cancel button.
 * Tweak - Run background image processing less often by tracking changes.
