@@ -904,9 +904,9 @@ class WC_Admin_Setup_Wizard {
 
 		// @codingStandardsIgnoreStart
 		$setup_domestic   = isset( $_POST['shipping_zones']['domestic']['enabled'] ) && ( 'yes' === $_POST['shipping_zones']['domestic']['enabled'] );
-		$domestic_method  = sanitize_text_field( wp_unslash( $_POST['shipping_zones']['domestic']['method'] ) );
+		$domestic_method  = isset( $_POST['shipping_zones']['domestic']['method'] ) ? sanitize_text_field( wp_unslash( $_POST['shipping_zones']['domestic']['method'] ) ) : '';
 		$setup_intl       = isset( $_POST['shipping_zones']['intl']['enabled'] ) && ( 'yes' === $_POST['shipping_zones']['intl']['enabled'] );
-		$intl_method      = sanitize_text_field( wp_unslash( $_POST['shipping_zones']['intl']['method'] ) );
+		$intl_method      = isset( $_POST['shipping_zones']['intl']['method'] ) ? sanitize_text_field( wp_unslash( $_POST['shipping_zones']['intl']['method'] ) ) : '';
 		$weight_unit      = sanitize_text_field( wp_unslash( $_POST['weight_unit'] ) );
 		$dimension_unit   = sanitize_text_field( wp_unslash( $_POST['dimension_unit'] ) );
 		$existing_zones   = WC_Shipping_Zones::get_zones();
