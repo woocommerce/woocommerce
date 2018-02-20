@@ -180,6 +180,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Prevent JS error is 'orders' row is disabled on order screen.
 * Fix - Fix save of tax settings when no changes have been made.
 * Fix - Add nonce to logout link on my account page so you do not need to confirm the action.
+* Fix - Fix plain text entity replacement so currency symbols are included.
 * Fix - API - Set status after order is created/updated so triggered emails are current.
 * Fix - API - Fix single webhook endpoint.
 * Tweak - Added help text for background image processing.
