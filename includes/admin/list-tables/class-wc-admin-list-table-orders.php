@@ -224,7 +224,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		$order_timestamp = $this->object->get_date_created()->getTimestamp();
 
 		// Check if the order was created within the last 24 hours, and not in the future.
-		if ( $order_timestamp > strtotime( '-1 day', current_time( 'timestamp', true ) ) && $order_timestamp < strtotime( '+1 second', current_time( 'timestamp', true ) ) ) {
+		if ( $order_timestamp > strtotime( '-1 day', current_time( 'timestamp', true ) ) && $order_timestamp <= current_time( 'timestamp', true ) ) {
 			$show_date = sprintf(
 				/* translators: %s: human-readable time difference */
 				_x( '%s ago', '%s = human-readable time difference', 'woocommerce' ),
