@@ -1720,6 +1720,13 @@ var ProductsAttributeSelect = exports.ProductsAttributeSelect = function (_React
 			displaySetting = displaySetting.concat(newTerms);
 			this.props.update_display_setting_callback(displaySetting);
 		}
+	}, {
+		key: 'updateFilter',
+		value: function updateFilter(evt) {
+			this.setState({
+				filterQuery: evt.target.value
+			});
+		}
 
 		/**
    * Render the whole section.
@@ -1731,10 +1738,11 @@ var ProductsAttributeSelect = exports.ProductsAttributeSelect = function (_React
 			return wp.element.createElement(
 				'div',
 				{ className: 'product-attribute-select' },
-				wp.element.createElement(ProductAttributeFilter, null),
+				wp.element.createElement(ProductAttributeFilter, { updateFilter: this.updateFilter.bind(this) }),
 				wp.element.createElement(ProductAttributeList, {
 					selectedAttribute: this.state.selectedAttribute,
 					selectedTerms: this.state.selectedTerms,
+					filterQuery: this.state.filterQuery,
 					setSelectedAttribute: this.setSelectedAttribute.bind(this),
 					addTerm: this.addTerm.bind(this),
 					removeTerm: this.removeTerm.bind(this)
@@ -1751,11 +1759,11 @@ var ProductsAttributeSelect = exports.ProductsAttributeSelect = function (_React
  */
 
 
-var ProductAttributeFilter = function ProductAttributeFilter() {
+var ProductAttributeFilter = function ProductAttributeFilter(props) {
 	return wp.element.createElement(
 		'div',
 		null,
-		wp.element.createElement('input', { id: 'product-attribute-search', type: 'search', placeholder: __('Search for attributes') })
+		wp.element.createElement('input', { id: 'product-attribute-search', type: 'search', placeholder: __('Search for attributes'), onChange: props.updateFilter })
 	);
 };
 
@@ -1769,6 +1777,7 @@ var ProductAttributeList = withAPIData(function (props) {
 })(function (_ref) {
 	var attributes = _ref.attributes,
 	    selectedAttribute = _ref.selectedAttribute,
+	    filterQuery = _ref.filterQuery,
 	    selectedTerms = _ref.selectedTerms,
 	    setSelectedAttribute = _ref.setSelectedAttribute,
 	    addTerm = _ref.addTerm,
@@ -1782,6 +1791,7 @@ var ProductAttributeList = withAPIData(function (props) {
 		return __('No attributes found');
 	}
 
+	var filter = filterQuery.toLowerCase();
 	var attributeElements = [];
 	var _iteratorNormalCompletion2 = true;
 	var _didIteratorError2 = false;
@@ -1790,6 +1800,12 @@ var ProductAttributeList = withAPIData(function (props) {
 	try {
 		for (var _iterator2 = attributes.data[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
 			var attribute = _step2.value;
+
+
+			// Filter out attributes that don't match the search query.
+			if (filter.length && -1 === attribute.name.toLowerCase().indexOf(filter)) {
+				continue;
+			}
 
 			if (PRODUCT_ATTRIBUTE_DATA.hasOwnProperty(attribute.slug)) {
 				attributeElements.push(wp.element.createElement(ProductAttributeElement, {
