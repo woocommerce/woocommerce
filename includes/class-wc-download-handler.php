@@ -51,10 +51,10 @@ class WC_Download_Handler {
 		} else {
 			// Get email address from order to verify hash.
 			$order_id = wc_get_order_id_by_order_key( $_GET['order'] );
-			$order = new WC_Order( $order_id );
-			$email_address = $order->get_billing_email();
+			$order = wc_get_order( $order_id );
+			$email_address = is_a( $order, 'WC_Order' ) ? $order->get_billing_email() : null;
 
-			if ( ! hash_equals( $_GET['uid'], hash( 'sha256', $email_address ) ) ) {
+			if ( is_null( $email_address ) || ! hash_equals( $_GET['uid'], hash( 'sha256', $email_address ) ) ) {
 				self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
 			}
 		}
