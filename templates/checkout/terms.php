@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $terms_page = wc_get_page_id( 'terms' ) > 0 ? get_post( wc_get_page_id( 'terms' ) ) : false;
 
-if ( $terms_page && 'trash' !== $terms_page->post_status && apply_filters( 'woocommerce_checkout_show_terms', true ) ) :
+if ( $terms_page && 'publish' === $terms_page->post_status && apply_filters( 'woocommerce_checkout_show_terms', true ) ) :
 	$terms_content = has_shortcode( $terms_page->post_content, 'woocommerce_checkout' ) ? '' : wc_format_content( $terms_page->post_content );
 
 	if ( $terms_content ) {
