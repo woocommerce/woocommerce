@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, claudiulodro,
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
 Requires at least: 4.7
 Tested up to: 4.9
-Stable tag: 3.3.2
+Stable tag: 3.3.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -160,6 +160,13 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 6. A product archive (grid).
 
 == Changelog ==
+
+= 3.3.3 - 2018-02-21 =
+* Fix - Fixed is_numeric check which was affecting order subtotals/totals when using comma decimal separator.
+* Fix - Add missing direct script access checks to loop templates.
+* Fix - Added wp-post-image class to main image so variation images are swapped correctly.
+* Fix - API - Adjusted schema for products shipping_class_id to integer.
+* Fix - Made init tooltips event more specific to avoid conflict with Product Invoices extension.
 
 = 3.3.2 - 2018-02-20 =
 * Fix - Fixed admin product SKU searching and searching non-published products.
