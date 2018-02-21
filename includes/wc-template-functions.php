@@ -1068,20 +1068,14 @@ function wc_get_gallery_image_html( $attachment_id, $main_image = false ) {
 	$full_size         = apply_filters( 'woocommerce_gallery_full_size', apply_filters( 'woocommerce_product_thumbnails_large_size', 'full' ) );
 	$thumbnail_src     = wp_get_attachment_image_src( $attachment_id, $thumbnail_size );
 	$full_src          = wp_get_attachment_image_src( $attachment_id, $full_size );
-	$size_class        = $image_size;
-
-	if ( is_array( $size_class ) ) {
-		$size_class = join( 'x', $size_class );
-	}
-
-	$image = wp_get_attachment_image( $attachment_id, $image_size, false, array(
+	$image             = wp_get_attachment_image( $attachment_id, $image_size, false, array(
 		'title'                   => get_post_field( 'post_title', $attachment_id ),
 		'data-caption'            => get_post_field( 'post_excerpt', $attachment_id ),
 		'data-src'                => $full_src[0],
 		'data-large_image'        => $full_src[0],
 		'data-large_image_width'  => $full_src[1],
 		'data-large_image_height' => $full_src[2],
-		'class'                   => $main_image ? "wp-post-image attachment-$size_class size-$size_class": "attachment-$size_class size-$size_class",
+		'class'                   => $main_image ? 'wp-post-image' : '',
 	) );
 
 	return '<div data-thumb="' . esc_url( $thumbnail_src[0] ) . '" class="woocommerce-product-gallery__image"><a href="' . esc_url( $full_src[0] ) . '">' . $image . '</a></div>';
