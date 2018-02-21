@@ -1042,7 +1042,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				$product_id   = wp_get_post_parent_id( $variation_id );
 			}
 
-			$product_data = wc_get_product( $variation_id ? $variation_id : $product_id );
+			$product_data = wc_get_product( $variation_id ? $variation_id : $product_id, array( 'cart_item_data' => $cart_item_data ) );
 			$quantity     = apply_filters( 'woocommerce_add_to_cart_quantity', $quantity, $product_id );
 
 			if ( $quantity <= 0 || ! $product_data || 'trash' === $product_data->get_status() ) {
@@ -1161,7 +1161,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		if ( isset( $this->removed_cart_contents[ $cart_item_key ] ) ) {
 			$restore_item                                  = $this->removed_cart_contents[ $cart_item_key ];
 			$this->cart_contents[ $cart_item_key ]         = $restore_item;
-			$this->cart_contents[ $cart_item_key ]['data'] = wc_get_product( $restore_item['variation_id'] ? $restore_item['variation_id'] : $restore_item['product_id'] );
+			$this->cart_contents[ $cart_item_key ]['data'] = wc_get_product( $restore_item['variation_id'] ? $restore_item['variation_id'] : $restore_item['product_id'], array( 'cart_item_data' => $restore_item ) );
 
 			do_action( 'woocommerce_restore_cart_item', $cart_item_key, $this );
 

@@ -88,7 +88,7 @@ final class WC_Cart_Session {
 			update_object_term_cache( wp_list_pluck( $cart, 'product_id' ), 'product' );
 
 			foreach ( $cart as $key => $values ) {
-				$product = wc_get_product( $values['variation_id'] ? $values['variation_id'] : $values['product_id'] );
+				$product = wc_get_product( $values['variation_id'] ? $values['variation_id'] : $values['product_id'], array( 'cart_item_data' => $values ) );
 
 				if ( ! empty( $product ) && $product->exists() && $values['quantity'] > 0 ) {
 
