@@ -1377,6 +1377,10 @@ class WC_Order extends WC_Abstract_Order {
 							'order_key'           => $this->get_order_key(),
 							'downloads_remaining' => $file['downloads_remaining'],
 							'access_expires'      => $file['access_expires'],
+							'file'                => array(
+								'name' => $file['name'],
+								'file' => $file['file'],
+							),
 						);
 					}
 				}

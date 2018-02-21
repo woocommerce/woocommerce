@@ -674,7 +674,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 					'context'     => array( 'view', 'edit' ),
 				),
 				'date_on_sale_to_gmt' => array(
-					'description' => __( "End date of sale price, in the site's timezone.", 'woocommerce' ),
+					'description' => __( 'End date of sale price, as GMT.', 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 				),
