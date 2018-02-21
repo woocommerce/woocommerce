@@ -54,7 +54,7 @@ class WC_Download_Handler {
 			$order = new WC_Order( $order_id );
 			$email_address = $order->get_billing_email();
 
-			if( $_GET['uid'] !== hash( 'sha256', $email_address ) ) {
+			if ( ! hash_equals( $_GET['uid'], hash( 'sha256', $email_address ) ) ) {
 				self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
 			}
 		}
