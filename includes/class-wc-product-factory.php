@@ -21,29 +21,24 @@ class WC_Product_Factory {
 	 * Get a product.
 	 *
 	 * @param mixed $product_id (default: false)
-	 * @param array $deprecated Previously used to pass arguments to the factory, e.g. to force a type.
+	 * @param array $args Can be used to pass arguments to the factory, e.g. to force a type.
 	 * @return WC_Product|bool Product object or null if the product cannot be loaded.
 	 */
-	public function get_product( $product_id = false, $deprecated = array() ) {
+	public function get_product( $product_id = false, $args = array() ) {
 		if ( ! $product_id = $this->get_product_id( $product_id ) ) {
 			return false;
 		}
 
 		$product_type = $this->get_product_type( $product_id );
 
-		// Backwards compatibility.
-		if ( ! empty( $deprecated ) ) {
-			wc_deprecated_argument( 'args', '3.0', 'Passing args to the product factory is deprecated. If you need to force a type, construct the product class directly.' );
-
-			if ( isset( $deprecated['product_type'] ) ) {
-				$product_type = $this->get_classname_from_product_type( $deprecated['product_type'] );
-			}
+		if ( isset( $args['product_type'] ) ) {
+			$product_type = $this->get_classname_from_product_type( $args['product_type'] );
 		}
 
 		$classname = $this->get_product_classname( $product_id, $product_type );
 
 		try {
-			return new $classname( $product_id, $deprecated );
+			return new $classname( $product_id, $args );
 		} catch ( Exception $e ) {
 			return false;
 		}
