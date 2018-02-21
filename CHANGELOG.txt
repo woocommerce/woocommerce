@@ -1,5 +1,12 @@
 == Changelog ==
 
+= 3.3.3 - 2018-02-21 =
+* Fix - Fixed is_numeric check which was affecting order subtotals/totals when using comma decimal separator.
+* Fix - Add missing direct script access checks to loop templates.
+* Fix - Added wp-post-image class to main image so variation images are swapped correctly.
+* Fix - API - Adjusted schema for products shipping_class_id to integer.
+* Fix - Made init tooltips event more specific to avoid conflict with Product Invoices extension.
+
 = 3.3.2 - 2018-02-20 =
 * Fix - Fixed admin product SKU searching and searching non-published products.
 * Fix - PHP7.1 notice when image height is empty.
