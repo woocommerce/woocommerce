@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 3.3.2\n"
+"Project-Id-Version: WooCommerce 3.3.3\n"
 "Report-Msgid-Bugs-To: https://github.com/woocommerce/woocommerce/issues\n"
-"POT-Creation-Date: 2018-02-20 12:54:09+00:00\n"
+"POT-Creation-Date: 2018-02-21 16:42:15+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -6422,7 +6422,7 @@ msgstr ""
 #: includes/gateways/cod/class-wc-gateway-cod.php:83
 #: includes/gateways/paypal/includes/settings-paypal.php:25
 #: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:204
-#: includes/wc-template-functions.php:1319
+#: includes/wc-template-functions.php:1320
 #: templates/single-product/tabs/description.php:25
 msgid "Description"
 msgstr ""
@@ -6539,7 +6539,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-status.php:278
 #: includes/admin/class-wc-admin-status.php:297
 #: includes/admin/class-wc-admin-status.php:313
-#: includes/emails/class-wc-email.php:770
+#: includes/emails/class-wc-email.php:768
 msgid "Action failed. Please refresh the page and retry."
 msgstr ""
 
@@ -7450,7 +7450,7 @@ msgstr ""
 #: includes/class-wc-payment-gateways.php:51
 #: includes/class-wc-payment-gateways.php:60 includes/class-wc-shipping.php:63
 #: includes/class-wc-shipping.php:72 includes/class-woocommerce.php:126
-#: includes/class-woocommerce.php:135 includes/emails/class-wc-email.php:774
+#: includes/class-woocommerce.php:135 includes/emails/class-wc-email.php:772
 msgid "Cheatin&#8217; huh?"
 msgstr ""
 
@@ -8020,7 +8020,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-profile.php:136
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:75
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:124
-#: includes/wc-template-functions.php:2193
+#: includes/wc-template-functions.php:2194
 #: templates/cart/shipping-calculator.php:39
 msgid "Select a country&hellip;"
 msgstr ""
@@ -9130,7 +9130,7 @@ msgstr ""
 #: includes/class-wc-emails.php:378
 #: includes/legacy/abstract-wc-legacy-order.php:507
 #: includes/wc-account-functions.php:213
-#: includes/wc-template-functions.php:2710
+#: includes/wc-template-functions.php:2711
 msgid "Download"
 msgstr ""
 
@@ -12636,8 +12636,8 @@ msgstr ""
 #: includes/emails/class-wc-email-failed-order.php:158
 #: includes/emails/class-wc-email-new-order.php:154
 #: includes/emails/class-wc-email-new-order.php:163
-#: includes/emails/class-wc-email.php:579
-#: includes/emails/class-wc-email.php:588
+#: includes/emails/class-wc-email.php:577
+#: includes/emails/class-wc-email.php:586
 #. translators: %s: list of placeholders
 msgid "Available placeholders: %s"
 msgstr ""
@@ -19247,7 +19247,7 @@ msgid ""
 msgstr ""
 
 #: includes/class-wc-cart.php:1068 includes/class-wc-frontend-scripts.php:527
-#: includes/wc-cart-functions.php:117 includes/wc-template-functions.php:1631
+#: includes/wc-cart-functions.php:117 includes/wc-template-functions.php:1632
 #. translators: %s: product name
 msgid "View cart"
 msgstr ""
@@ -19704,7 +19704,7 @@ msgstr ""
 msgid "Buy now"
 msgstr ""
 
-#: includes/class-wc-embed.php:130 includes/wc-template-functions.php:2823
+#: includes/class-wc-embed.php:130 includes/wc-template-functions.php:2824
 #: includes/widgets/class-wc-widget-layered-nav-filters.php:99
 #. translators: %s: average rating
 #. translators: %s: rating
@@ -19866,7 +19866,7 @@ msgid "Error processing checkout. Please try again."
 msgstr ""
 
 #: includes/class-wc-frontend-scripts.php:503
-#: includes/wc-template-functions.php:2135
+#: includes/wc-template-functions.php:2136
 msgid "required"
 msgstr ""
 
@@ -19965,11 +19965,11 @@ msgstr ""
 msgid "Invalid variation ID"
 msgstr ""
 
-#: includes/class-wc-order-item-product.php:192
+#: includes/class-wc-order-item-product.php:196
 msgid "Invalid product"
 msgstr ""
 
-#: includes/class-wc-order-item-product.php:211
+#: includes/class-wc-order-item-product.php:215
 #: includes/legacy/abstract-wc-legacy-order.php:164
 msgid "Backordered"
 msgstr ""
@@ -20811,7 +20811,7 @@ msgstr ""
 #: includes/emails/class-wc-email-customer-refunded-order.php:217
 #: includes/emails/class-wc-email-failed-order.php:131
 #: includes/emails/class-wc-email-new-order.php:136
-#: includes/emails/class-wc-email.php:569
+#: includes/emails/class-wc-email.php:567
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:73
 #: includes/gateways/cheque/class-wc-gateway-cheque.php:54
 #: includes/gateways/cod/class-wc-gateway-cod.php:69
@@ -20827,7 +20827,7 @@ msgstr ""
 #: includes/emails/class-wc-email-customer-refunded-order.php:219
 #: includes/emails/class-wc-email-failed-order.php:133
 #: includes/emails/class-wc-email-new-order.php:138
-#: includes/emails/class-wc-email.php:571
+#: includes/emails/class-wc-email.php:569
 msgid "Enable this email notification"
 msgstr ""
 
@@ -20843,7 +20843,7 @@ msgstr ""
 #: includes/emails/class-wc-email-customer-invoice.php:171
 #: includes/emails/class-wc-email-failed-order.php:145
 #: includes/emails/class-wc-email-new-order.php:150
-#: includes/emails/class-wc-email.php:575
+#: includes/emails/class-wc-email.php:573
 msgid "Subject"
 msgstr ""
 
@@ -20852,7 +20852,7 @@ msgstr ""
 #: includes/emails/class-wc-email-customer-invoice.php:180
 #: includes/emails/class-wc-email-failed-order.php:154
 #: includes/emails/class-wc-email-new-order.php:159
-#: includes/emails/class-wc-email.php:584
+#: includes/emails/class-wc-email.php:582
 msgid "Email heading"
 msgstr ""
 
@@ -20862,7 +20862,7 @@ msgstr ""
 #: includes/emails/class-wc-email-customer-refunded-order.php:259
 #: includes/emails/class-wc-email-failed-order.php:163
 #: includes/emails/class-wc-email-new-order.php:168
-#: includes/emails/class-wc-email.php:593
+#: includes/emails/class-wc-email.php:591
 msgid "Email type"
 msgstr ""
 
@@ -20872,7 +20872,7 @@ msgstr ""
 #: includes/emails/class-wc-email-customer-refunded-order.php:261
 #: includes/emails/class-wc-email-failed-order.php:165
 #: includes/emails/class-wc-email-new-order.php:170
-#: includes/emails/class-wc-email.php:595
+#: includes/emails/class-wc-email.php:593
 msgid "Choose which format of email to send."
 msgstr ""
 
@@ -21077,73 +21077,73 @@ msgstr ""
 msgid "New customer order"
 msgstr ""
 
-#: includes/emails/class-wc-email.php:609
+#: includes/emails/class-wc-email.php:607
 msgid "Plain text"
 msgstr ""
 
-#: includes/emails/class-wc-email.php:612
+#: includes/emails/class-wc-email.php:610
 msgid "HTML"
 msgstr ""
 
-#: includes/emails/class-wc-email.php:613
+#: includes/emails/class-wc-email.php:611
 msgid "Multipart"
 msgstr ""
 
-#: includes/emails/class-wc-email.php:678
+#: includes/emails/class-wc-email.php:676
 msgid "Could not write to template file."
 msgstr ""
 
-#: includes/emails/class-wc-email.php:724
+#: includes/emails/class-wc-email.php:722
 msgid "Template file copied to theme."
 msgstr ""
 
-#: includes/emails/class-wc-email.php:753
+#: includes/emails/class-wc-email.php:751
 msgid "Template file deleted from theme."
 msgstr ""
 
-#: includes/emails/class-wc-email.php:799
+#: includes/emails/class-wc-email.php:797
 msgid "Return to emails"
 msgstr ""
 
-#: includes/emails/class-wc-email.php:827
+#: includes/emails/class-wc-email.php:825
 msgid "HTML template"
 msgstr ""
 
-#: includes/emails/class-wc-email.php:828
+#: includes/emails/class-wc-email.php:826
 msgid "Plain text template"
 msgstr ""
 
-#: includes/emails/class-wc-email.php:853
+#: includes/emails/class-wc-email.php:851
 msgid "Delete template file"
 msgstr ""
 
-#: includes/emails/class-wc-email.php:856
+#: includes/emails/class-wc-email.php:854
 msgid "This template has been overridden by your theme and can be found in: %s."
 msgstr ""
 
-#: includes/emails/class-wc-email.php:883
+#: includes/emails/class-wc-email.php:881
 msgid "Copy file to theme"
 msgstr ""
 
-#: includes/emails/class-wc-email.php:888
+#: includes/emails/class-wc-email.php:886
 msgid ""
 "To override and edit this email template copy %1$s to your theme folder: "
 "%2$s."
 msgstr ""
 
-#: includes/emails/class-wc-email.php:897
+#: includes/emails/class-wc-email.php:895
 msgid "File was not found."
 msgstr ""
 
-#: includes/emails/class-wc-email.php:924
+#: includes/emails/class-wc-email.php:922
 msgid "View template"
 msgstr ""
 
-#: includes/emails/class-wc-email.php:925
+#: includes/emails/class-wc-email.php:923
 msgid "Hide template"
 msgstr ""
 
-#: includes/emails/class-wc-email.php:936
+#: includes/emails/class-wc-email.php:934
 msgid "Are you sure you want to delete this template file?"
 msgstr ""
 
@@ -22031,7 +22031,7 @@ msgid "No matching product exists to update."
 msgstr ""
 
 #: includes/legacy/abstract-wc-legacy-order.php:507
-#: includes/wc-template-functions.php:2710
+#: includes/wc-template-functions.php:2711
 #. translators: 1: current item count
 #. translators: %d: downloads count
 msgid "Download %d"
@@ -23340,48 +23340,48 @@ msgstr ""
 msgid "Relevance"
 msgstr ""
 
-#: includes/wc-template-functions.php:1328
+#: includes/wc-template-functions.php:1329
 #: templates/checkout/form-shipping.php:63
 #: templates/single-product/tabs/additional-information.php:25
 msgid "Additional information"
 msgstr ""
 
-#: includes/wc-template-functions.php:1338
+#: includes/wc-template-functions.php:1339
 #. translators: %s: reviews count
 msgid "Reviews (%d)"
 msgstr ""
 
-#: includes/wc-template-functions.php:1641
+#: includes/wc-template-functions.php:1642
 msgid "Checkout"
 msgstr ""
 
-#: includes/wc-template-functions.php:1767
+#: includes/wc-template-functions.php:1768
 msgid "Place order"
 msgstr ""
 
-#: includes/wc-template-functions.php:2201
+#: includes/wc-template-functions.php:2202
 msgid "Update country"
 msgstr ""
 
-#: includes/wc-template-functions.php:2220
+#: includes/wc-template-functions.php:2221
 #: templates/cart/shipping-calculator.php:59
 msgid "Select a state&hellip;"
 msgstr ""
 
-#: includes/wc-template-functions.php:2261
-#: includes/wc-template-functions.php:2411
-#: includes/wc-template-functions.php:2421
+#: includes/wc-template-functions.php:2262
+#: includes/wc-template-functions.php:2412
+#: includes/wc-template-functions.php:2422
 msgid "Choose an option"
 msgstr ""
 
-#: includes/wc-template-functions.php:2820
+#: includes/wc-template-functions.php:2821
 #. translators: 1: rating 2: rating count
 msgid "Rated %1$s out of 5 based on %2$s customer rating"
 msgid_plural "Rated %1$s out of 5 based on %2$s customer ratings"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/wc-template-functions.php:2867
+#: includes/wc-template-functions.php:2868
 msgid "Your cart is currently empty."
 msgstr ""
 
@@ -24795,12 +24795,12 @@ msgctxt "Price range: from-to"
 msgid "%1$s &ndash; %2$s"
 msgstr ""
 
-#: includes/wc-template-functions.php:1715
+#: includes/wc-template-functions.php:1716
 msgctxt "breadcrumb"
 msgid "Home"
 msgstr ""
 
-#: includes/wc-template-functions.php:2838
+#: includes/wc-template-functions.php:2839
 msgctxt "min_price"
 msgid "From:"
 msgstr ""
