@@ -1075,6 +1075,7 @@ function wc_get_gallery_image_html( $attachment_id, $main_image = false ) {
 		'data-large_image'        => $full_src[0],
 		'data-large_image_width'  => $full_src[1],
 		'data-large_image_height' => $full_src[2],
+		'class'                   => $main_image ? 'wp-post-image' : '',
 	) );
 
 	return '<div data-thumb="' . esc_url( $thumbnail_src[0] ) . '" class="woocommerce-product-gallery__image"><a href="' . esc_url( $full_src[0] ) . '">' . $image . '</a></div>';
