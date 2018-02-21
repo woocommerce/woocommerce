@@ -49,11 +49,11 @@ export class ProductsAttributeSelect extends React.Component {
 	/**
 	 * Add a term to the selected attribute's terms.
 	 *
-	 * @param slug string Term slug.
+	 * @param id int Term id.
 	 */
-	addTerm( slug ) {
+	addTerm( id ) {
 		let terms = this.state.selectedTerms;
-		terms.push( slug );
+		terms.push( id );
 		this.setState( {
 			selectedTerms: terms,
 		} );
@@ -66,13 +66,13 @@ export class ProductsAttributeSelect extends React.Component {
 	/**
 	 * Remove a term from the selected attribute's terms.
 	 *
-	 * @param slug string Term slug.
+	 * @param id int Term id.
 	 */
-	removeTerm( slug ) {
+	removeTerm( id ) {
 		let newTerms = [];
-		for ( let termSlug of this.state.selectedTerms ) {
-			if ( termSlug !== slug ) {
-				newTerms.push( termSlug );
+		for ( let termId of this.state.selectedTerms ) {
+			if ( termId !== id ) {
+				newTerms.push( termId );
 			}
 		}
 
@@ -85,6 +85,11 @@ export class ProductsAttributeSelect extends React.Component {
 		this.props.update_display_setting_callback( displaySetting );
 	}
 
+	/**
+	 * Update the search results when typing in the attributes box.
+	 *
+	 * @param evt Event object
+	 */
 	updateFilter( evt ) {
 		this.setState( {
 			filterQuery: evt.target.value,
@@ -250,6 +255,7 @@ class ProductAttributeElement extends React.Component {
 	 * @param evt Event object
 	 */
 	handleTermChange( evt ) {
+		console.log( "CHANGIN" );
 		if ( evt.target.checked ) {
 			this.props.addTerm( evt.target.value );
 		} else {
@@ -272,9 +278,9 @@ class ProductAttributeElement extends React.Component {
 						<li className="product-attribute-term">
 							<label>
 								<input type="checkbox" 
-									value={ term.slug }
+									value={ term.id }
 									onChange={ this.handleTermChange }
-									checked={ this.props.selectedTerms.includes( term.slug ) }
+									checked={ this.props.selectedTerms.includes( String( term.id ) ) }
 								/>
 								{ term.name } 
 								<span className="product-attribute-count">{ term.count }</span>

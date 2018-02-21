@@ -267,12 +267,17 @@ const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
 		orderby: order
 	};
 
-	// @todo These will likely need to be modified to work with the final version of the category/product picker attributes.
 	if ( 'specific' === display ) {
 		query.include = JSON.stringify( display_setting );
 		query.orderby = 'include';
 	} else if ( 'category' === display ) {
 		query.category = display_setting.join( ',' );
+	} else if ( 'attribute' === display && display_setting.length ) {
+		query.attribute = display_setting[0];
+
+		if ( display_setting.length > 1 ) {
+			query.attribute_term = display_setting.slice( 1 ).join( ',' );
+		}
 	}
 
 	let query_string = '?';
