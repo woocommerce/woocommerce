@@ -85,16 +85,23 @@ export class ProductsAttributeSelect extends React.Component {
 		this.props.update_display_setting_callback( displaySetting );
 	}
 
+	updateFilter( evt ) {
+		this.setState( {
+			filterQuery: evt.target.value,
+		} );
+	}
+
 	/**
 	 * Render the whole section.
 	 */
 	render() {
 		return (
 			<div className="product-attribute-select">
-				<ProductAttributeFilter />
+				<ProductAttributeFilter updateFilter={ this.updateFilter.bind( this ) } />
 				<ProductAttributeList
 					selectedAttribute={ this.state.selectedAttribute }
 					selectedTerms={ this.state.selectedTerms }
+					filterQuery={ this.state.filterQuery }
 					setSelectedAttribute={ this.setSelectedAttribute.bind( this ) }
 					addTerm={ this.addTerm.bind( this ) }
 					removeTerm={ this.removeTerm.bind( this ) }
@@ -107,10 +114,10 @@ export class ProductsAttributeSelect extends React.Component {
 /**
  * Search area for filtering through the attributes list.
  */
-const ProductAttributeFilter = () => {
+const ProductAttributeFilter = ( props ) => {
 	return (
 		<div>
-			<input id="product-attribute-search" type="search" placeholder={ __( 'Search for attributes' ) } />
+			<input id="product-attribute-search" type="search" placeholder={ __( 'Search for attributes' ) } onChange={ props.updateFilter } />
 		</div>
 	);
 }
@@ -122,7 +129,7 @@ const ProductAttributeList = withAPIData( ( props ) => {
 		return {
 			attributes: '/wc/v2/products/attributes'
 		};
-	} )( ( { attributes, selectedAttribute, selectedTerms, setSelectedAttribute, addTerm, removeTerm } ) => {
+	} )( ( { attributes, selectedAttribute, filterQuery, selectedTerms, setSelectedAttribute, addTerm, removeTerm } ) => {
 		if ( ! attributes.data ) {
 			return __( 'Loading' );
 		}
@@ -131,8 +138,16 @@ const ProductAttributeList = withAPIData( ( props ) => {
 			return __( 'No attributes found' );
 		}
 
+
+		const filter = filterQuery.toLowerCase();
 		let attributeElements = [];
 		for ( let attribute of attributes.data ) {
+
+			// Filter out attributes that don't match the search query.
+			if ( filter.length && -1 === attribute.name.toLowerCase().indexOf( filter ) ) {
+				continue;
+			}
+
 			if ( PRODUCT_ATTRIBUTE_DATA.hasOwnProperty( attribute.slug ) ) {
 				attributeElements.push( <ProductAttributeElement 
 					selectedAttribute={ selectedAttribute }
