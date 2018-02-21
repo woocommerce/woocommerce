@@ -208,6 +208,10 @@
 
 						li {
 							margin: 5px 0;
+
+							ul {
+								padding: 0px 0 0 25px;
+							}
 						}
 					}
 				}
@@ -352,6 +356,19 @@
 	.display-select + .block-footer {
 		padding-top: 0;
 		border: 0;
+	}
+
+	input[type="checkbox"] {
+		&:indeterminate {
+			&:before {
+				content: '';
+				display: inline-block;
+				margin: 6px 0 0 0px;
+				width: 8px;
+				height: 2px;
+				background: #1e8cbe;
+			}
+		}
 	}
 }
 

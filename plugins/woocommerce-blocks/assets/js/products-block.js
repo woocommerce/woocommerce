@@ -1221,13 +1221,15 @@ var ProductsCategorySelect = exports.ProductsCategorySelect = function (_React$C
 
 		_this.state = {
 			selectedCategories: props.selected_display_setting,
-			openAccordion: null,
-			filterQuery: ''
+			openAccordion: [],
+			filterQuery: '',
+			firstLoad: true
 		};
 
 		_this.checkboxChange = _this.checkboxChange.bind(_this);
 		_this.accordionToggle = _this.accordionToggle.bind(_this);
 		_this.filterResults = _this.filterResults.bind(_this);
+		_this.setFirstLoad = _this.setFirstLoad.bind(_this);
 		return _this;
 	}
 
@@ -1270,14 +1272,18 @@ var ProductsCategorySelect = exports.ProductsCategorySelect = function (_React$C
 	}, {
 		key: "accordionToggle",
 		value: function accordionToggle(category) {
-			var value = category;
+			var openAccordions = this.state.openAccordion;
 
-			if (value === this.state.openAccordion) {
-				value = null;
+			if (openAccordions.includes(category)) {
+				openAccordions = openAccordions.filter(function (c) {
+					return c !== category;
+				});
+			} else {
+				openAccordions.push(category);
 			}
 
 			this.setState({
-				openAccordion: value
+				openAccordion: openAccordions
 			});
 		}
 
@@ -1292,6 +1298,20 @@ var ProductsCategorySelect = exports.ProductsCategorySelect = function (_React$C
 		value: function filterResults(evt) {
 			this.setState({
 				filterQuery: evt.target.value
+			});
+		}
+
+		/**
+   * Update firstLoad state.
+   *
+   * @param Booolean loaded
+   */
+
+	}, {
+		key: "setFirstLoad",
+		value: function setFirstLoad(loaded) {
+			this.setState({
+				firstLoad: !!loaded
 			});
 		}
 
@@ -1311,7 +1331,9 @@ var ProductsCategorySelect = exports.ProductsCategorySelect = function (_React$C
 					selectedCategories: this.state.selectedCategories,
 					checkboxChange: this.checkboxChange,
 					accordionToggle: this.accordionToggle,
-					openAccordion: this.state.openAccordion
+					openAccordion: this.state.openAccordion,
+					firstLoad: this.state.firstLoad,
+					setFirstLoad: this.setFirstLoad
 				})
 			);
 		}
@@ -1348,7 +1370,9 @@ var ProductCategoryList = withAPIData(function (props) {
 	    selectedCategories = _ref2.selectedCategories,
 	    checkboxChange = _ref2.checkboxChange,
 	    accordionToggle = _ref2.accordionToggle,
-	    openAccordion = _ref2.openAccordion;
+	    openAccordion = _ref2.openAccordion,
+	    firstLoad = _ref2.firstLoad,
+	    setFirstLoad = _ref2.setFirstLoad;
 
 	if (!categories.data) {
 		return __('Loading');
@@ -1385,13 +1409,55 @@ var ProductCategoryList = withAPIData(function (props) {
 		return !!getCategoryChildren(parent, categories).length;
 	};
 
+	var isIndeterminate = function isIndeterminate(category, categories) {
+
+		// Currect category selected?
+		if (selectedCategories.includes(category.id)) {
+			return false;
+		}
+
+		// Has children?
+		var children = getCategoryChildren(category, categories).map(function (category) {
+			return category.id;
+		});
+
+		var _iteratorNormalCompletion = true;
+		var _didIteratorError = false;
+		var _iteratorError = undefined;
+
+		try {
+			for (var _iterator = children[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+				var child = _step.value;
+
+				if (selectedCategories.includes(child)) {
+					return true;
+				}
+			}
+		} catch (err) {
+			_didIteratorError = true;
+			_iteratorError = err;
+		} finally {
+			try {
+				if (!_iteratorNormalCompletion && _iterator.return) {
+					_iterator.return();
+				}
+			} finally {
+				if (_didIteratorError) {
+					throw _iteratorError;
+				}
+			}
+		}
+
+		return false;
+	};
+
 	var AccordionButton = function AccordionButton(_ref3) {
 		var category = _ref3.category,
 		    categories = _ref3.categories;
 
 		var icon = 'arrow-down-alt2';
 
-		if (openAccordion === category.id) {
+		if (openAccordion.includes(category.id)) {
 			icon = 'arrow-up-alt2';
 		}
 
@@ -1420,13 +1486,51 @@ var ProductCategoryList = withAPIData(function (props) {
 			return category.parent === parent;
 		});
 
+		if (firstLoad && selectedCategories.length > 0) {
+			categoriesData.filter(function (category) {
+				return category.parent === 0;
+			}).forEach(function (category) {
+				var children = getCategoryChildren(category, categoriesData);
+
+				var _iteratorNormalCompletion2 = true;
+				var _didIteratorError2 = false;
+				var _iteratorError2 = undefined;
+
+				try {
+					for (var _iterator2 = children[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+						var child = _step2.value;
+
+						if (selectedCategories.includes(child.id) && !openAccordion.includes(category.id)) {
+							accordionToggle(category.id);
+							break;
+						}
+					}
+				} catch (err) {
+					_didIteratorError2 = true;
+					_iteratorError2 = err;
+				} finally {
+					try {
+						if (!_iteratorNormalCompletion2 && _iterator2.return) {
+							_iterator2.return();
+						}
+					} finally {
+						if (_didIteratorError2) {
+							throw _iteratorError2;
+						}
+					}
+				}
+			});
+
+			setFirstLoad(false);
+		}
+
 		return filteredCategories.length > 0 && wp.element.createElement(
 			"ul",
 			null,
 			filteredCategories.map(function (category) {
 				return wp.element.createElement(
 					"li",
-					{ key: category.id, className: openAccordion === category.id ? 'product-category-accordion-open' : '' },
+					{ key: category.id, className: openAccordion.includes(category.id) ? 'product-category-accordion-open' : '' },
 					wp.element.createElement(
 						"label",
 						{ htmlFor: 'product-category-' + category.id },
@@ -1436,6 +1540,9 @@ var ProductCategoryList = withAPIData(function (props) {
 							checked: selectedCategories.includes(category.id),
 							onChange: function onChange(evt) {
 								return handleCategoriesToCheck(evt, category, categories);
+							},
+							ref: function ref(el) {
+								return el && (el.indeterminate = isIndeterminate(category, categories));
 							}
 						}),
 						" ",

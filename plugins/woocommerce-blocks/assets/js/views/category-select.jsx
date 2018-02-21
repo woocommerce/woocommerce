@@ -14,13 +14,15 @@ export class ProductsCategorySelect extends React.Component {
 
 		this.state = {
 			selectedCategories: props.selected_display_setting,
-			openAccordion: null,
+			openAccordion: [],
 			filterQuery: '',
+			firstLoad: true,
 		}
 
 		this.checkboxChange  = this.checkboxChange.bind( this );
 		this.accordionToggle = this.accordionToggle.bind( this );
 		this.filterResults   = this.filterResults.bind( this );
+		this.setFirstLoad    = this.setFirstLoad.bind( this );
 	}
 
 	/**
@@ -51,14 +53,16 @@ export class ProductsCategorySelect extends React.Component {
 	 * @param Category ID category
 	 */
 	accordionToggle( category ) {
-		let value = category;
+		let openAccordions = this.state.openAccordion;
 
-		if ( value === this.state.openAccordion ) {
-			value = null;
+		if ( openAccordions.includes( category ) ) {
+			openAccordions = openAccordions.filter( c => c !== category );
+		} else {
+			openAccordions.push( category );
 		}
 
 		this.setState( {
-			openAccordion: value
+			openAccordion: openAccordions
 		} );
 	}
 
@@ -70,6 +74,17 @@ export class ProductsCategorySelect extends React.Component {
 	filterResults( evt ) {
 		this.setState( {
 			filterQuery: evt.target.value
+		} );
+	}
+
+	/**
+	 * Update firstLoad state.
+	 *
+	 * @param Booolean loaded
+	 */
+	setFirstLoad( loaded ) {
+		this.setState( {
+			firstLoad: !! loaded
 		} );
 	}
 
@@ -86,6 +101,8 @@ export class ProductsCategorySelect extends React.Component {
 					checkboxChange={ this.checkboxChange }
 					accordionToggle={ this.accordionToggle }
 					openAccordion={ this.state.openAccordion }
+					firstLoad={ this.state.firstLoad }
+					setFirstLoad={ this.setFirstLoad }
 				/>
 			</div>
 		);
@@ -110,7 +127,7 @@ const ProductCategoryList = withAPIData( ( props ) => {
 		return {
 			categories: '/wc/v2/products/categories'
 		};
-	} )( ( { categories, filterQuery, selectedCategories, checkboxChange, accordionToggle, openAccordion } ) => {
+	} )( ( { categories, filterQuery, selectedCategories, checkboxChange, accordionToggle, openAccordion, firstLoad, setFirstLoad } ) => {
 		if ( ! categories.data ) {
 			return __( 'Loading' );
 		}
@@ -144,10 +161,31 @@ const ProductCategoryList = withAPIData( ( props ) => {
 			return !! getCategoryChildren( parent, categories ).length;
 		};
 
+		const isIndeterminate = ( category, categories ) => {
+
+			// Currect category selected?
+			if ( selectedCategories.includes( category.id ) ) {
+				return false;
+			}
+
+			// Has children?
+			let children = getCategoryChildren( category, categories ).map( category => {
+				return category.id;
+			} );
+
+			for ( let child of children ) {
+				if ( selectedCategories.includes( child ) ) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+
 		const AccordionButton = ( { category, categories } ) => {
 			let icon = 'arrow-down-alt2';
 
-			if ( openAccordion === category.id ) {
+			if ( openAccordion.includes( category.id ) ) {
 				icon = 'arrow-up-alt2';
 			}
 
@@ -169,16 +207,32 @@ const ProductCategoryList = withAPIData( ( props ) => {
 		const CategoryTree = ( { categories, parent } ) => {
 			let filteredCategories = categories.filter( ( category ) => category.parent === parent );
 
+			if ( firstLoad && selectedCategories.length > 0 ) {
+				categoriesData.filter( ( category ) => category.parent === 0 ).forEach( function( category ) {
+					let children = getCategoryChildren( category, categoriesData );
+
+					for ( let child of children ) {
+						if ( selectedCategories.includes( child.id ) && ! openAccordion.includes( category.id ) ) {
+							accordionToggle( category.id );
+							break;
+						}
+					}
+				} );
+
+				setFirstLoad( false );
+			}
+
 			return ( filteredCategories.length > 0 ) && (
 				<ul>
 					{ filteredCategories.map( ( category ) => (
-						<li key={ category.id } className={ ( openAccordion === category.id ? 'product-category-accordion-open' : '' ) }>
+						<li key={ category.id } className={ ( openAccordion.includes( category.id ) ? 'product-category-accordion-open' : '' ) }>
 							<label htmlFor={ 'product-category-' + category.id }>
 								<input type="checkbox"
 								       id={ 'product-category-' + category.id }
 								       value={ category.id }
 								       checked={ selectedCategories.includes( category.id ) }
 								       onChange={ ( evt ) => handleCategoriesToCheck( evt, category, categories ) }
+								       ref={ el => el && ( el.indeterminate = isIndeterminate( category, categories ) ) }
 								/> { category.name }
 								<span className="product-category-count">{ category.count }</span>
 								{ 0 === category.parent &&
