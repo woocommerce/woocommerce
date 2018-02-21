@@ -2,7 +2,8 @@ const { __ } = wp.i18n;
 const { Toolbar, withAPIData, Dropdown } = wp.components;
 
 /**
- * Attribute data cache. Needed because it takes a lot of API calls to generate attribute info.
+ * Attribute data cache. 
+ * Needed because it takes a lot of API calls to generate attribute info.
  */
 const PRODUCT_ATTRIBUTE_DATA = {};
 
@@ -18,8 +19,8 @@ export class ProductsAttributeSelect extends React.Component {
 		super( props );
 
 		/** 
-		 * The first item in props.selected_display_setting is the attribute.
-		 * The rest are the terms.
+		 * The first item in props.selected_display_setting is the attribute slug.
+		 * The rest are the term ids for any selected terms.
 		 */
 		this.state = {
 			selectedAttribute: props.selected_display_setting.length ? props.selected_display_setting[0] : '',
@@ -255,7 +256,6 @@ class ProductAttributeElement extends React.Component {
 	 * @param evt Event object
 	 */
 	handleTermChange( evt ) {
-		console.log( "CHANGIN" );
 		if ( evt.target.checked ) {
 			this.props.addTerm( evt.target.value );
 		} else {

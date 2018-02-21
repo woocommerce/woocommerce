@@ -1606,7 +1606,8 @@ var _wp$components = wp.components,
     Dropdown = _wp$components.Dropdown;
 
 /**
- * Attribute data cache. Needed because it takes a lot of API calls to generate attribute info.
+ * Attribute data cache. 
+ * Needed because it takes a lot of API calls to generate attribute info.
  */
 
 var PRODUCT_ATTRIBUTE_DATA = {};
@@ -1625,8 +1626,8 @@ var ProductsAttributeSelect = exports.ProductsAttributeSelect = function (_React
 		_classCallCheck(this, ProductsAttributeSelect);
 
 		/** 
-   * The first item in props.selected_display_setting is the attribute.
-   * The rest are the terms.
+   * The first item in props.selected_display_setting is the attribute slug.
+   * The rest are the term ids for any selected terms.
    */
 		var _this = _possibleConstructorReturn(this, (ProductsAttributeSelect.__proto__ || Object.getPrototypeOf(ProductsAttributeSelect)).call(this, props));
 
@@ -1974,7 +1975,6 @@ var ProductAttributeElement = function (_React$Component2) {
 	}, {
 		key: 'handleTermChange',
 		value: function handleTermChange(evt) {
-			console.log("CHANGIN");
 			if (evt.target.checked) {
 				this.props.addTerm(evt.target.value);
 			} else {
