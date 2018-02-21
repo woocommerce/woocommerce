@@ -1423,7 +1423,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$fee_total += $item->get_total();
 		}
 
-		// Calculate taxes for items, shipping, discounts.
+		// Calculate taxes for items, shipping, discounts. Note; this also triggers save().
 		if ( $and_taxes ) {
 			$this->calculate_taxes();
 		}
@@ -1437,6 +1437,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$this->set_discount_total( $cart_subtotal - $cart_total );
 		$this->set_discount_tax( $cart_subtotal_tax - $cart_total_tax );
 		$this->set_total( round( $cart_total + $fee_total + $this->get_shipping_total() + $this->get_cart_tax() + $this->get_shipping_tax(), wc_get_price_decimals() ) );
+
+		do_action( 'woocommerce_order_after_calculate_totals', $and_taxes, $this );
+
 		$this->save();
 
 		return $this->get_total();

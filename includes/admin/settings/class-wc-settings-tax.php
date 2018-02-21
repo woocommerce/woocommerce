@@ -118,6 +118,10 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			$this->save_tax_rates();
 		}
 
+		if ( $current_section ) {
+			do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section );
+		}
+
 		// Invalidate caches.
 		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
 		WC_Cache_Helper::get_transient_version( 'shipping', true );

@@ -1,12 +1,12 @@
 <?php
 /**
- * Test WP_Background_Process functionality
+ * Test WC_Background_Process functionality
  *
- * A mock class for testing the WP_Background_Process functionality.
+ * A mock class for testing the WC_Background_Process functionality.
  *
  * @since 3.3
  */
-class WC_Mock_Background_Process extends WP_Background_Process {
+class WC_Mock_Background_Process extends WC_Background_Process {
 	/**
 	 * Constructor.
 	 */

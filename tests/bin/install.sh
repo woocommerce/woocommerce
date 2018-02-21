@@ -134,17 +134,19 @@ install_e2e_site() {
 		PHP_FPM_BIN="$HOME/.phpenv/versions/$TRAVIS_PHP_VERSION/sbin/php-fpm"
 		PHP_FPM_CONF="$NGINX_DIR/php-fpm.conf"
 		WP_SITE_URL="http://localhost:8080"
-		WP_DB_DATA="$HOME/build/$TRAVIS_REPO_SLUG/tests/e2e-tests/data/e2e-db.sql"
+		BRANCH=$TRAVIS_BRANCH
+		REPO=$TRAVIS_REPO_SLUG
+		WP_DB_DATA="$HOME/build/$REPO/tests/e2e-tests/data/e2e-db.sql"
 		WORKING_DIR="$PWD"
+
+		if [ "$TRAVIS_PULL_REQUEST_BRANCH" != "" ]; then
+			BRANCH=$TRAVIS_PULL_REQUEST_BRANCH
+			REPO=$TRAVIS_PULL_REQUEST_SLUG
+		fi
 
 		set -ev
 		npm install
 		export NODE_CONFIG_DIR="./tests/e2e-tests/config"
-
-		BRANCH=$TRAVIS_BRANCH
-		if [ "$TRAVIS_PULL_REQUEST_BRANCH" != "" ]; then
-			BRANCH=$TRAVIS_PULL_REQUEST_BRANCH
-		fi
 
 		# Set up nginx to run the server
 		mkdir -p "$WP_CORE_DIR"
@@ -178,7 +180,7 @@ PHP
 		php wp-cli.phar db import $WP_DB_DATA
 		php wp-cli.phar search-replace "http://local.wordpress.test" "$WP_SITE_URL"
 		php wp-cli.phar theme install twentytwelve --activate
-		php wp-cli.phar plugin install https://github.com/$TRAVIS_REPO_SLUG/archive/$BRANCH.zip --activate
+		php wp-cli.phar plugin install https://github.com/$REPO/archive/$BRANCH.zip --activate
 
 		cd "$WORKING_DIR"
 

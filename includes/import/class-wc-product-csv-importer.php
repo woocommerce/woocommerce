@@ -23,6 +23,13 @@ if ( ! class_exists( 'WC_Product_Importer', false ) ) {
 class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 	/**
+	 * Tracks current row being parsed.
+	 *
+	 * @var integer
+	 */
+	protected $parsing_raw_data_index = 0;
+
+	/**
 	 * Initialize importer.
 	 *
 	 * @param string $file   File to read.
@@ -222,11 +229,14 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 		// Not updating? Make sure we have a new placeholder for this ID.
 		if ( ! $this->params['update_existing'] ) {
-			$id = isset( $this->raw_data['sku'] ) ? wc_get_product_id_by_sku( $this->raw_data['sku'] ) : '';
+			$mapped_keys      = $this->get_mapped_keys();
+			$sku_column_index = absint( array_search( 'sku', $mapped_keys, true ) );
+			$row_sku          = isset( $this->raw_data[ $this->parsing_raw_data_index ][ $sku_column_index ] ) ? $this->raw_data[ $this->parsing_raw_data_index ][ $sku_column_index ] : '';
+			$id_from_sku      = $row_sku ? wc_get_product_id_by_sku( $row_sku ) : '';
 
 			// If row has a SKU, make sure placeholder was not made already.
-			if ( $id ) {
-				return $id;
+			if ( $id_from_sku ) {
+				return $id_from_sku;
 			}
 
 			$product = new WC_Product_Simple();
@@ -235,8 +245,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$product->add_meta_data( '_original_id', $id, true );
 
 			// If row has a SKU, make sure placeholder has it too.
-			if ( isset( $this->raw_data['sku'] ) ) {
-				$product->set_sku( $this->raw_data['sku'] );
+			if ( $row_sku ) {
+				$product->set_sku( $row_sku );
 			}
 			$id = $product->save();
 		}
@@ -777,11 +787,14 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		$use_mb          = function_exists( 'mb_convert_encoding' );
 
 		// Parse the data.
-		foreach ( $this->raw_data as $row ) {
+		foreach ( $this->raw_data as $row_index => $row ) {
 			// Skip empty rows.
 			if ( ! count( array_filter( $row ) ) ) {
 				continue;
 			}
+
+			$this->parsing_raw_data_index = $row_index;
+
 			$data = array();
 
 			do_action( 'woocommerce_product_importer_before_set_parsed_data', $row, $mapped_keys );
@@ -869,7 +882,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			if ( $id ) {
 				$product   = wc_get_product( $id );
 				$id_exists = $product && 'importing' !== $product->get_status();
-			} elseif ( $sku ) {
+			}
+
+			if ( $sku ) {
 				$id_from_sku = wc_get_product_id_by_sku( $sku );
 				$product     = $id_from_sku ? wc_get_product( $id_from_sku ) : false;
 				$sku_exists  = $product && 'importing' !== $product->get_status();
