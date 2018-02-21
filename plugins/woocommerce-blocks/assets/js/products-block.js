@@ -1619,11 +1619,15 @@ var ProductsAttributeSelect = exports.ProductsAttributeSelect = function (_React
 	function ProductsAttributeSelect(props) {
 		_classCallCheck(this, ProductsAttributeSelect);
 
+		/** 
+   * The first item in props.selected_display_setting is the attribute.
+   * The rest are the terms.
+   */
 		var _this = _possibleConstructorReturn(this, (ProductsAttributeSelect.__proto__ || Object.getPrototypeOf(ProductsAttributeSelect)).call(this, props));
 
 		_this.state = {
-			selectedAttribute: '',
-			selectedTerms: [],
+			selectedAttribute: props.selected_display_setting.length ? props.selected_display_setting[0] : '',
+			selectedTerms: props.selected_display_setting.length > 1 ? props.selected_display_setting.slice(1) : [],
 			filterQuery: ''
 		};
 
@@ -1647,6 +1651,8 @@ var ProductsAttributeSelect = exports.ProductsAttributeSelect = function (_React
 				selectedAttribute: slug,
 				selectedTerms: []
 			});
+
+			this.props.update_display_setting_callback([slug]);
 		}
 
 		/**
@@ -1663,6 +1669,10 @@ var ProductsAttributeSelect = exports.ProductsAttributeSelect = function (_React
 			this.setState({
 				selectedTerms: terms
 			});
+
+			var displaySetting = [this.state.selectedAttribute];
+			displaySetting = displaySetting.concat(terms);
+			this.props.update_display_setting_callback(displaySetting);
 		}
 
 		/**
@@ -1705,6 +1715,10 @@ var ProductsAttributeSelect = exports.ProductsAttributeSelect = function (_React
 			this.setState({
 				selectedTerms: newTerms
 			});
+
+			var displaySetting = [this.state.selectedAttribute];
+			displaySetting = displaySetting.concat(newTerms);
+			this.props.update_display_setting_callback(displaySetting);
 		}
 
 		/**
@@ -1714,11 +1728,6 @@ var ProductsAttributeSelect = exports.ProductsAttributeSelect = function (_React
 	}, {
 		key: 'render',
 		value: function render() {
-
-			// @todo Remove this once data is moving around properly.
-			console.log("STATE UPDATED");
-			console.log(this.state);
-
 			return wp.element.createElement(
 				'div',
 				{ className: 'product-attribute-select' },
@@ -1920,12 +1929,11 @@ var ProductAttributeElement = function (_React$Component2) {
 	_createClass(ProductAttributeElement, [{
 		key: 'handleAttributeChange',
 		value: function handleAttributeChange(evt) {
-			var slug = evt.target.value;
-
-			if (this.props.selectedAttribute === slug) {
+			if (!evt.target.checked) {
 				return;
 			}
 
+			var slug = evt.target.value;
 			this.props.setSelectedAttribute(slug);
 		}
 
@@ -1997,7 +2005,7 @@ var ProductAttributeElement = function (_React$Component2) {
 						null,
 						wp.element.createElement('input', { type: 'radio',
 							value: this.props.attribute.slug,
-							onClick: this.handleAttributeChange,
+							onChange: this.handleAttributeChange,
 							checked: isSelected
 						}),
 						this.props.attribute.name,

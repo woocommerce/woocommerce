@@ -17,9 +17,13 @@ export class ProductsAttributeSelect extends React.Component {
 	constructor( props ) {
 		super( props );
 
+		/** 
+		 * The first item in props.selected_display_setting is the attribute.
+		 * The rest are the terms.
+		 */
 		this.state = {
-			selectedAttribute: '',
-			selectedTerms: [],
+			selectedAttribute: props.selected_display_setting.length ? props.selected_display_setting[0] : '',
+			selectedTerms: props.selected_display_setting.length > 1 ? props.selected_display_setting.slice( 1 ) : [],
 			filterQuery: '',
 		}
 
@@ -38,6 +42,8 @@ export class ProductsAttributeSelect extends React.Component {
 			selectedAttribute: slug,
 			selectedTerms: [],
 		} );
+
+		this.props.update_display_setting_callback( [ slug ] );
 	}
 
 	/**
@@ -51,6 +57,10 @@ export class ProductsAttributeSelect extends React.Component {
 		this.setState( {
 			selectedTerms: terms,
 		} );
+
+		let displaySetting = [ this.state.selectedAttribute ];
+		displaySetting = displaySetting.concat( terms );
+		this.props.update_display_setting_callback( displaySetting );
 	}
 
 	/**
@@ -69,17 +79,16 @@ export class ProductsAttributeSelect extends React.Component {
 		this.setState( {
 			selectedTerms: newTerms,
 		} );
+
+		let displaySetting = [ this.state.selectedAttribute ];
+		displaySetting = displaySetting.concat( newTerms );
+		this.props.update_display_setting_callback( displaySetting );
 	}
 
 	/**
 	 * Render the whole section.
 	 */
 	render() {
-
-		// @todo Remove this once data is moving around properly.
-		console.log( "STATE UPDATED" );
-		console.log( this.state );
-
 		return (
 			<div className="product-attribute-select">
 				<ProductAttributeFilter />
@@ -212,12 +221,11 @@ class ProductAttributeElement extends React.Component {
 	 * @param evt Event object
 	 */
 	handleAttributeChange( evt ) {
-		const slug = evt.target.value;
-
-		if ( this.props.selectedAttribute === slug ) {
+		if ( ! evt.target.checked ) {
 			return;
 		}
 
+		const slug = evt.target.value;
 		this.props.setSelectedAttribute( slug );
 	}
 
@@ -268,7 +276,7 @@ class ProductAttributeElement extends React.Component {
 					<label>
 						<input type="radio" 
 							value={ this.props.attribute.slug } 
-							onClick={ this.handleAttributeChange } 
+							onChange={ this.handleAttributeChange } 
 							checked={ isSelected }
 						/>
 						{ this.props.attribute.name }
