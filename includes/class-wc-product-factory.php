@@ -35,7 +35,7 @@ class WC_Product_Factory {
 			$product_type = $this->get_classname_from_product_type( $args['product_type'] );
 		}
 
-		$classname = $this->get_product_classname( $product_id, $product_type );
+		$classname = $this->get_product_classname( $product_id, $product_type, $args );
 
 		try {
 			return new $classname( $product_id, $args );
@@ -52,8 +52,8 @@ class WC_Product_Factory {
 	 * @param  string $product_type
 	 * @return string
 	 */
-	public static function get_product_classname( $product_id, $product_type ) {
-		$classname = apply_filters( 'woocommerce_product_class', self::get_classname_from_product_type( $product_type ), $product_type, 'variation' === $product_type ? 'product_variation' : 'product', $product_id );
+	public static function get_product_classname( $product_id, $product_type, $args ) {
+		$classname = apply_filters( 'woocommerce_product_class', self::get_classname_from_product_type( $product_type ), $product_type, 'variation' === $product_type ? 'product_variation' : 'product', $product_id, $args );
 
 		if ( ! $classname || ! class_exists( $classname ) ) {
 			$classname = 'WC_Product_Simple';
