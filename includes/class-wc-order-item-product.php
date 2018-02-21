@@ -96,11 +96,13 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_subtotal( $value ) {
+		$value = wc_format_decimal( $value );
+
 		if ( ! is_numeric( $value ) ) {
 			$value = 0;
 		}
 
-		$this->set_prop( 'subtotal', wc_format_decimal( $value ) );
+		$this->set_prop( 'subtotal', $value );
 	}
 
 	/**
@@ -110,11 +112,13 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_total( $value ) {
+		$value = wc_format_decimal( $value );
+
 		if ( ! is_numeric( $value ) ) {
 			$value = 0;
 		}
 
-		$this->set_prop( 'total', wc_format_decimal( $value ) );
+		$this->set_prop( 'total', $value );
 
 		// Subtotal cannot be less than total
 		if ( '' === $this->get_subtotal() || $this->get_subtotal() < $this->get_total() ) {
