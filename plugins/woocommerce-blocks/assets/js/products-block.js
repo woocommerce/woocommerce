@@ -487,12 +487,17 @@ var ProductsBlockPreview = withAPIData(function (_ref) {
 		orderby: order
 	};
 
-	// @todo These will likely need to be modified to work with the final version of the category/product picker attributes.
 	if ('specific' === display) {
 		query.include = JSON.stringify(display_setting);
 		query.orderby = 'include';
 	} else if ('category' === display) {
 		query.category = display_setting.join(',');
+	} else if ('attribute' === display && display_setting.length) {
+		query.attribute = display_setting[0];
+
+		if (display_setting.length > 1) {
+			query.attribute_term = display_setting.slice(1).join(',');
+		}
 	}
 
 	var query_string = '?';
@@ -1658,14 +1663,14 @@ var ProductsAttributeSelect = exports.ProductsAttributeSelect = function (_React
 		/**
    * Add a term to the selected attribute's terms.
    *
-   * @param slug string Term slug.
+   * @param id int Term id.
    */
 
 	}, {
 		key: 'addTerm',
-		value: function addTerm(slug) {
+		value: function addTerm(id) {
 			var terms = this.state.selectedTerms;
-			terms.push(slug);
+			terms.push(id);
 			this.setState({
 				selectedTerms: terms
 			});
@@ -1678,12 +1683,12 @@ var ProductsAttributeSelect = exports.ProductsAttributeSelect = function (_React
 		/**
    * Remove a term from the selected attribute's terms.
    *
-   * @param slug string Term slug.
+   * @param id int Term id.
    */
 
 	}, {
 		key: 'removeTerm',
-		value: function removeTerm(slug) {
+		value: function removeTerm(id) {
 			var newTerms = [];
 			var _iteratorNormalCompletion = true;
 			var _didIteratorError = false;
@@ -1691,10 +1696,10 @@ var ProductsAttributeSelect = exports.ProductsAttributeSelect = function (_React
 
 			try {
 				for (var _iterator = this.state.selectedTerms[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-					var termSlug = _step.value;
+					var termId = _step.value;
 
-					if (termSlug !== slug) {
-						newTerms.push(termSlug);
+					if (termId !== id) {
+						newTerms.push(termId);
 					}
 				}
 			} catch (err) {
@@ -1720,6 +1725,13 @@ var ProductsAttributeSelect = exports.ProductsAttributeSelect = function (_React
 			displaySetting = displaySetting.concat(newTerms);
 			this.props.update_display_setting_callback(displaySetting);
 		}
+
+		/**
+   * Update the search results when typing in the attributes box.
+   *
+   * @param evt Event object
+   */
+
 	}, {
 		key: 'updateFilter',
 		value: function updateFilter(evt) {
@@ -1962,6 +1974,7 @@ var ProductAttributeElement = function (_React$Component2) {
 	}, {
 		key: 'handleTermChange',
 		value: function handleTermChange(evt) {
+			console.log("CHANGIN");
 			if (evt.target.checked) {
 				this.props.addTerm(evt.target.value);
 			} else {
@@ -1994,9 +2007,9 @@ var ProductAttributeElement = function (_React$Component2) {
 								'label',
 								null,
 								wp.element.createElement('input', { type: 'checkbox',
-									value: term.slug,
+									value: term.id,
 									onChange: _this3.handleTermChange,
-									checked: _this3.props.selectedTerms.includes(term.slug)
+									checked: _this3.props.selectedTerms.includes(String(term.id))
 								}),
 								term.name,
 								wp.element.createElement(
