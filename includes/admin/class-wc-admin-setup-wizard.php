@@ -1304,7 +1304,7 @@ class WC_Admin_Setup_Wizard {
 		// Show the user-saved state if it was previously saved.
 		// Otherwise, rely on the item info.
 		if ( is_array( $previously_saved_settings ) ) {
-			$should_enable_toggle = 'yes' === $previously_saved_settings['enabled'];
+			$should_enable_toggle = isset( $previously_saved_settings['enabled'] ) && 'yes' === $previously_saved_settings['enabled'];
 		} else {
 			$should_enable_toggle = isset( $item_info['enabled'] ) && $item_info['enabled'];
 		}
