@@ -260,10 +260,10 @@ class ProductPreview extends React.Component {
  */
 const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
 
-	const { columns, rows, order, display, display_setting, layout } = attributes;
+	const { columns, rows, order, display, display_setting, block_layout } = attributes;
 
 	let query = {
-		per_page: ( 'list' === layout ) ? rows : rows * columns,
+		per_page: ( 'list' === block_layout ) ? rows : rows * columns,
 		orderby: order
 	};
 
@@ -299,7 +299,7 @@ const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
 		return __( 'No products found' );
 	}
 
-	const classes = "wc-products-block-preview " + attributes.layout + " cols-" + attributes.columns;
+	const classes = "wc-products-block-preview " + attributes.block_layout + " cols-" + attributes.columns;
 
 	return (
 		<div className={ classes }>
@@ -323,7 +323,7 @@ registerBlockType( 'woocommerce/products', {
 		/**
 		 * Layout to use. 'grid' or 'list'.
 		 */
-		layout: {
+		block_layout: {
 			type: 'string',
 			default: 'grid',
 		},
@@ -406,7 +406,7 @@ registerBlockType( 'woocommerce/products', {
 	 */
 	edit( props ) {
 		const { attributes, className, focus, setAttributes, setFocus } = props;
-		const { layout, rows, columns, display_title, display_price, display_add_to_cart, order, display, display_setting, edit_mode } = attributes;
+		const { block_layout, rows, columns, display_title, display_price, display_add_to_cart, order, display, display_setting, edit_mode } = attributes;
 
 		/**
 		 * Get the components for the sidebar settings area that is rendered while focused on a Products block.
@@ -476,14 +476,14 @@ registerBlockType( 'woocommerce/products', {
 				{
 					icon: 'list-view',
 					title: __( 'List View' ),
-					onClick: () => setAttributes( { layout: 'list' } ),
-					isActive: layout === 'list',
+					onClick: () => setAttributes( { block_layout: 'list' } ),
+					isActive: 'list' === block_layout,
 				},
 				{
 					icon: 'grid-view',
 					title: __( 'Grid View' ),
-					onClick: () => setAttributes( { layout: 'grid' } ),
-					isActive: layout === 'grid',
+					onClick: () => setAttributes( { block_layout: 'grid' } ),
+					isActive: 'grid' === block_layout,
 				},
 			];
 
@@ -543,14 +543,14 @@ registerBlockType( 'woocommerce/products', {
 	 * @return string
 	 */
 	save( props ) {
-		const { layout, rows, columns, display_title, display_price, display_add_to_cart, order, display, display_setting, className } = props.attributes;
+		const { block_layout, rows, columns, display_title, display_price, display_add_to_cart, order, display, display_setting, className } = props.attributes;
 
 		let shortcode_atts = new Map();
 		shortcode_atts.set( 'orderby', order );
-		shortcode_atts.set( 'limit', 'grid' === layout ? rows * columns : rows );
-		shortcode_atts.set( 'class', 'list' === layout ? className + ' list-layout' : className );
+		shortcode_atts.set( 'limit', 'grid' === block_layout ? rows * columns : rows );
+		shortcode_atts.set( 'class', 'list' === block_layout ? className + ' list-layout' : className );
 
-		if ( 'grid' === layout ) {
+		if ( 'grid' === block_layout ) {
 			shortcode_atts.set( 'columns', columns );
 		}
 
