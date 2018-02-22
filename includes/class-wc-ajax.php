@@ -1,18 +1,15 @@
 <?php
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 /**
- * WooCommerce WC_AJAX.
- *
- * AJAX Event Handler.
+ * WooCommerce WC_AJAX. AJAX Event Handlers.
  *
  * @class    WC_AJAX
  * @package  WooCommerce/Classes
- * @category Class
- * @author   WooThemes
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * WC_Ajax class.
  */
 class WC_AJAX {
 
@@ -28,7 +25,7 @@ class WC_AJAX {
 	/**
 	 * Get WC Ajax Endpoint.
 	 *
-	 * @param  string $request Optional
+	 * @param  string $request Optional.
 	 * @return string
 	 */
 	public static function get_endpoint( $request = '' ) {
@@ -43,7 +40,7 @@ class WC_AJAX {
 			wc_maybe_define_constant( 'DOING_AJAX', true );
 			wc_maybe_define_constant( 'WC_DOING_AJAX', true );
 			if ( ! WP_DEBUG || ( WP_DEBUG && ! WP_DEBUG_DISPLAY ) ) {
-				@ini_set( 'display_errors', 0 ); // Turn off display_errors during AJAX events to prevent malformed JSON
+				@ini_set( 'display_errors', 0 ); // Turn off display_errors during AJAX events to prevent malformed JSON.
 			}
 			$GLOBALS['wpdb']->hide_errors();
 		}
