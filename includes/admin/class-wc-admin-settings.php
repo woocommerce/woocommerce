@@ -80,7 +80,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 			self::check_download_folder_protection();
 
 			// Clear any unwanted data and flush rules.
-			add_option( 'woocommerce_queue_flush_rewrite_rules', 'true' );
+			update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
 			WC()->query->init_query_vars();
 			WC()->query->add_endpoints();
 

@@ -151,17 +151,31 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 		$tax_rows = array();
 
 		foreach ( $tax_rows_orders + $tax_rows_partial_refunds as $tax_row ) {
-			$key                                   = date( ( 'month' === $this->chart_groupby ) ? 'Ym' : 'Ymd', strtotime( $tax_row->post_date ) );
-			$tax_rows[ $key ]                      = isset( $tax_rows[ $key ] ) ? $tax_rows[ $key ] : (object) array( 'tax_amount' => 0, 'shipping_tax_amount' => 0, 'total_sales' => 0, 'total_shipping' => 0, 'total_orders' => 0 );
+			$key              = date( ( 'month' === $this->chart_groupby ) ? 'Ym': 'Ymd', strtotime( $tax_row->post_date ) );
+			$tax_rows[ $key ] = isset( $tax_rows[ $key ] ) ? $tax_rows[ $key ]: (object) array(
+				'tax_amount'          => 0,
+				'shipping_tax_amount' => 0,
+				'total_sales'         => 0,
+				'total_shipping'      => 0,
+				'total_orders'        => 0,
+			);
+		}
+
+		foreach ( $tax_rows_orders as $tax_row ) {
+			$key                                   =  date( ( 'month' === $this->chart_groupby ) ? 'Ym': 'Ymd', strtotime( $tax_row->post_date ) );
+			$tax_rows[ $key ]->total_orders        += $tax_row->total_orders;
 			$tax_rows[ $key ]->tax_amount          += $tax_row->tax_amount;
 			$tax_rows[ $key ]->shipping_tax_amount += $tax_row->shipping_tax_amount;
 			$tax_rows[ $key ]->total_sales         += $tax_row->total_sales;
 			$tax_rows[ $key ]->total_shipping      += $tax_row->total_shipping;
 		}
 
-		foreach ( $tax_rows_orders as $tax_row ) {
-			$key                            =  date( ( 'month' === $this->chart_groupby ) ? 'Ym': 'Ymd', strtotime( $tax_row->post_date ) );
-			$tax_rows[ $key ]->total_orders += $tax_row->total_orders;
+		foreach ( $tax_rows_partial_refunds as $tax_row ) {
+			$key                                   =  date( ( 'month' === $this->chart_groupby ) ? 'Ym': 'Ymd', strtotime( $tax_row->post_date ) );
+			$tax_rows[ $key ]->tax_amount          += $tax_row->tax_amount;
+			$tax_rows[ $key ]->shipping_tax_amount += $tax_row->shipping_tax_amount;
+			$tax_rows[ $key ]->total_sales         += $tax_row->total_sales;
+			$tax_rows[ $key ]->total_shipping      += $tax_row->total_shipping;
 		}
 
 		foreach ( $tax_rows_full_refunds as $tax_row ) {

@@ -1050,6 +1050,37 @@ if ( ! function_exists( 'woocommerce_show_product_thumbnails' ) ) {
 	}
 }
 
+/**
+ * Get HTML for a gallery image.
+ *
+ * woocommerce_gallery_thumbnail_size, woocommerce_gallery_image_size and woocommerce_gallery_full_size accept name based image sizes, or an array of width/height values.
+ *
+ * @since 3.3.2
+ * @param int $attachment_id
+ * @param bool $main_image Is this the main image or a thumbnail?
+ * @return string
+ */
+function wc_get_gallery_image_html( $attachment_id, $main_image = false ) {
+	$flexslider        = (bool) apply_filters( 'woocommerce_single_product_flexslider_enabled', get_theme_support( 'wc-product-gallery-slider' ) );
+	$gallery_thumbnail = wc_get_image_size( 'gallery_thumbnail' );
+	$thumbnail_size    = apply_filters( 'woocommerce_gallery_thumbnail_size', array( $gallery_thumbnail['width'], $gallery_thumbnail['height'] ) );
+	$image_size        = apply_filters( 'woocommerce_gallery_image_size', $flexslider || $main_image ? 'woocommerce_single': $thumbnail_size );
+	$full_size         = apply_filters( 'woocommerce_gallery_full_size', apply_filters( 'woocommerce_product_thumbnails_large_size', 'full' ) );
+	$thumbnail_src     = wp_get_attachment_image_src( $attachment_id, $thumbnail_size );
+	$full_src          = wp_get_attachment_image_src( $attachment_id, $full_size );
+	$image             = wp_get_attachment_image( $attachment_id, $image_size, false, array(
+		'title'                   => get_post_field( 'post_title', $attachment_id ),
+		'data-caption'            => get_post_field( 'post_excerpt', $attachment_id ),
+		'data-src'                => $full_src[0],
+		'data-large_image'        => $full_src[0],
+		'data-large_image_width'  => $full_src[1],
+		'data-large_image_height' => $full_src[2],
+		'class'                   => $main_image ? 'wp-post-image' : '',
+	) );
+
+	return '<div data-thumb="' . esc_url( $thumbnail_src[0] ) . '" class="woocommerce-product-gallery__image"><a href="' . esc_url( $full_src[0] ) . '">' . $image . '</a></div>';
+}
+
 if ( ! function_exists( 'woocommerce_output_product_data_tabs' ) ) {
 
 	/**
@@ -1818,6 +1849,10 @@ if ( ! function_exists( 'woocommerce_maybe_show_product_subcategories' ) ) {
 	 * @return string
 	 */
 	function woocommerce_maybe_show_product_subcategories( $loop_html ) {
+		if ( wc_get_loop_prop( 'is_shortcode' ) && ! WC_Template_Loader::in_content_filter() ) {
+			return $loop_html;
+		}
+
 		$display_type = woocommerce_get_loop_display_mode();
 
 		// If displaying categories, append to the loop.

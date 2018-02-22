@@ -146,6 +146,10 @@ class WC_Settings_Rest_API extends WC_Settings_Page {
 		if ( apply_filters( 'woocommerce_rest_api_valid_to_save', ! in_array( $current_section, array( 'keys', 'webhooks' ), true ) ) ) {
 			$settings = $this->get_settings();
 			WC_Admin_Settings::save_fields( $settings );
+
+			if ( $current_section ) {
+				do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section );
+			}
 		}
 	}
 }

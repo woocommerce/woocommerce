@@ -160,7 +160,23 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 == Changelog ==
 
 = 3.4.0 - 2018-XX-XX =
-
+* Feature - Added a new order widget to the dashboard (on multisite) so you can see your orders across multiple stores on the same WordPress network. - #17598
+* Tweak - Made the system status tool which purges user carts also purge persistent carts.
+* Tweak - Fixed settings table styling on mobile.
+* Tweak - Don't call WC_Install::install() on downgrades.
+* Tweak - Added a function to return a list of custom tables to aid with cleanup.
+* Tweak - Display whether or not external object cache is enabled in system status report.
+* Tweak - Standardize stock update messages in admin and correctly log who performed the action. When an order note is added after modifying stock manually, update order notes display via AJAX.
+* Fix - Properly set orderby and order when calling WC_Customer_Download_Data_Store::get_downloads().
+* Dev - Gallery meta box is now powered by CRUD.
+* Dev - Added support for additional HTML5 input types for settings/checkout forms.
+* Dev - Made 'woocommerce_email_downloads_column_' hook format aware.
+* Dev - Added extra params to `woocommerce_order_get_downloadable_items`.
+* Dev - Allow default value for single_select_country and multi_select_countries.
+* Dev - Added CSS classname to grouped product table.
+* Dev - Mini cart item link now respects value of $product_permalink.
+* Dev - Add missing `woocommerce_update_options__` actions for settings pages that override save method.
+* Localization - Various spelling and grammar fixes.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 

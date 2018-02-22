@@ -291,6 +291,25 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 	}
 
 	/**
+	 * Get a single item.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function get_item( $request ) {
+		$id = (int) $request['id'];
+
+		if ( empty( $id ) ) {
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$data     = $this->prepare_item_for_response( $id, $request );
+		$response = rest_ensure_response( $data );
+
+		return $response;
+	}
+
+	/**
 	 * Create a single webhook.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.

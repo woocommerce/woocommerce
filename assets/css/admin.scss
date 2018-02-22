@@ -692,6 +692,16 @@ table.wc_status_table--tools {
 	}
 }
 
+.taxonomy-product_cat {
+	.column-thumb .woocommerce-help-tip {
+		font-size: 1.5em;
+		margin: 0 0 0 -34px;
+		padding: 0px 2px 5px;
+		display: block;
+		position: absolute;
+	}
+}
+
 #debug-report {
 	display: none;
 	margin: 10px 0;
@@ -2198,7 +2208,6 @@ ul.wc_coupon_list_block {
 	.wc-order-preview-table {
 		width: 100%;
 		margin: 0;
-		border-bottom: 1px solid #ccc;
 		th, td {
 			padding: 1em 1.5em;
 			text-align: left;
@@ -2237,11 +2246,14 @@ ul.wc_coupon_list_block {
 		}
 	}
 	.wc-order-preview-addresses {
-		overflow:hidden;
-		.wc-order-preview-address {
+		overflow: hidden;
+		padding-bottom: 1.5em;
+
+		.wc-order-preview-address,
+		.wc-order-preview-note {
 			width: 50%;
 			float: left;
-			padding: 1.5em;
+			padding: 1.5em 1.5em 0;
 			box-sizing: border-box;
 			word-wrap: break-word;
 
@@ -2250,22 +2262,28 @@ ul.wc_coupon_list_block {
 			}
 			strong {
 				display: block;
-				margin-top: 1em;
+				margin-top: 1.5em;
+			}
+			strong:first-child {
+				margin-top: 0;
 			}
 		}
 	}
-	.wc-action-button,
-	.wc-action-button-group {
-		float: left;
-		margin-right: 4px;
-	}
-}
-
-@media screen and (max-width: 782px) {
-	.wc-action-button-group {
-		label {
-			display: none;
+	footer {
+		.wc-action-button-group {
+			display: inline-block;
+			float: left;
 		}
+		.button.button-large {
+			margin-left: 10px;
+			padding: 0 10px !important;
+			line-height: 28px;
+			height: auto;
+			display: inline-block;
+		}
+	}
+	.wc-action-button-group label {
+		display: none;
 	}
 }
 
@@ -2273,28 +2291,34 @@ ul.wc_coupon_list_block {
 	vertical-align: middle;
 	line-height: 26px;
 	text-align: left;
-	margin-bottom: 4px;
 	label {
 		margin-right: 6px;
 		cursor: default;
 		font-weight: bold;
+		line-height: 28px;
 	}
 	.wc-action-button-group__items {
-		white-space: nowrap;
+		display: inline-flex;
+		flex-flow: row wrap;
+		align-content: flex-start;
+		justify-content: flex-start;
 	}
 	.wc-action-button {
 		margin: 0 0 0 -1px !important;
 		border: 1px solid #ccc;
-		padding: 1px 10px !important;
+		padding: 0 10px !important;
 		border-radius: 0 !important;
 		float: none;
 		line-height: 28px;
 		height: auto;
 		z-index: 1;
 		position:relative;
-		max-width: 175px;
 		overflow: hidden;
 		text-overflow: ellipsis;
+		flex: 1 0 auto;
+		box-sizing: border-box;
+		text-align: center;
+		white-space: nowrap;
 	}
 	.wc-action-button:hover,
 	.wc-action-button:focus {
@@ -2309,6 +2333,25 @@ ul.wc_coupon_list_block {
 	.wc-action-button:last-child {
 		border-top-right-radius: 3px !important;
 		border-bottom-right-radius: 3px !important;
+	}
+}
+@media screen and (max-width: 782px) {
+	.wc-order-preview footer {
+		.wc-action-button-group .wc-action-button-group__items {
+			display: flex;
+		}
+		.wc-action-button-group {
+			float: none;
+			display: block;
+			margin-bottom: 4px;
+		}
+		.button.button-large {
+			width: 100%;
+			float: none;
+			text-align: center;
+			margin: 0;
+			display: block;
+		}
 	}
 }
 
@@ -5702,7 +5745,8 @@ table.bar_chart {
 		left: 50%;
 		top: 50%;
 		transform: translate(-50%, -50%);
-		width: 500px;
+		max-width: 100%;
+		min-width: 500px;
 		article {
 			overflow: auto;
 		}

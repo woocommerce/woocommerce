@@ -410,14 +410,14 @@ class WC_Template_Loader {
 	public static function unsupported_theme_shop_content_filter( $content ) {
 		global $wp_query;
 
-		if ( self::$theme_support || ! is_main_query() ) {
+		if ( self::$theme_support || ! is_main_query() || ! in_the_loop() ) {
 			return $content;
 		}
 
 		self::$in_content_filter = true;
 
 		// Remove the filter we're in to avoid nested calls.
-		remove_filter( 'the_content', array( __CLASS__, 'the_content_filter' ) );
+		remove_filter( 'the_content', array( __CLASS__, 'unsupported_theme_shop_content_filter' ) );
 
 		// Unsupported theme shop page.
 		if ( is_page( self::$shop_page_id ) ) {
@@ -444,6 +444,7 @@ class WC_Template_Loader {
 
 			// Remove actions and self to avoid nested calls.
 			remove_action( 'pre_get_posts', array( wc()->query, 'product_query' ) );
+			WC()->query->remove_ordering_args();
 		}
 
 		self::$in_content_filter = false;
@@ -463,14 +464,14 @@ class WC_Template_Loader {
 	public static function unsupported_theme_product_content_filter( $content ) {
 		global $wp_query;
 
-		if ( self::$theme_support || ! is_main_query() ) {
+		if ( self::$theme_support || ! is_main_query() || ! in_the_loop() ) {
 			return $content;
 		}
 
 		self::$in_content_filter = true;
 
 		// Remove the filter we're in to avoid nested calls.
-		remove_filter( 'the_content', array( __CLASS__, 'the_content_filter' ) );
+		remove_filter( 'the_content', array( __CLASS__, 'unsupported_theme_product_content_filter' ) );
 
 		if ( is_product() ) {
 			$content = do_shortcode( '[product_page id="' . get_the_ID() . '" show_title=0]' );
@@ -482,6 +483,16 @@ class WC_Template_Loader {
 	}
 
 	/**
+	 * Are we filtering content for unsupported themes?
+	 *
+	 * @since 3.3.2
+	 * @return bool
+	 */
+	public static function in_content_filter() {
+		return (bool) self::$in_content_filter;
+	}
+
+	/**
 	 * Prevent the main featured image on product pages because there will be another featured image
 	 * in the gallery.
 	 *
@@ -490,7 +501,7 @@ class WC_Template_Loader {
 	 * @return string
 	 */
 	public static function unsupported_theme_single_featured_image_filter( $html ) {
-		if ( self::$in_content_filter || ! is_product() || ! is_main_query() ) {
+		if ( self::in_content_filter() || ! is_product() || ! is_main_query() ) {
 			return $html;
 		}
 

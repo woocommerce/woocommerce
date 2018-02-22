@@ -1423,7 +1423,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$fee_total += $item->get_total();
 		}
 
-		// Calculate taxes for items, shipping, discounts.
+		// Calculate taxes for items, shipping, discounts. Note; this also triggers save().
 		if ( $and_taxes ) {
 			$this->calculate_taxes();
 		}
