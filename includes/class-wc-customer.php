@@ -749,11 +749,11 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set customer's display name.
 	 *
 	 * @since 3.1.0
-	 * @param string $display_name
-	 * @throws WC_Data_Exception
+	 * @param string $display_name Display name.
 	 */
 	public function set_display_name( $display_name ) {
-		$this->set_prop( 'display_name', $display_name );
+		/* translators: 1: first name 2: last name */
+		$this->set_prop( 'display_name', is_email( $display_name ) ? sprintf( __( '%1$s %2$s', 'display name', 'woocommerce' ), $this->get_first_name(), $this->get_last_name() ) : $display_name );
 	}
 
 	/**
