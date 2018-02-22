@@ -46,10 +46,10 @@ class WC_Form_Handler {
 		if ( is_account_page() && isset( $_GET['key'] ) && ( isset( $_GET['id'] ) || isset( $_GET['login'] ) ) ) {
 
 			// If available, get $user_login from query string parameter for fallback purposes.
-			if( isset( $_GET['login'] ) ) {
+			if ( isset( $_GET['login'] ) ) {
 				$user_login = $_GET['login'];
 			} else {
-				$user = get_user_by( 'id', $_GET['id'] );
+				$user = get_user_by( 'id', absint( $_GET['id'] ) );
 				$user_login = $user ? $user->user_login : '';
 			}
 
