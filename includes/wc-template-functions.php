@@ -380,7 +380,7 @@ add_action( 'after_switch_theme', 'wc_reset_product_grid_settings' );
  */
 function wc_get_loop_class() {
 	$loop_index = wc_get_loop_prop( 'loop', 0 );
-	$columns    = wc_get_loop_prop( 'columns', wc_get_default_products_per_row() );
+	$columns    = absint( max( 1, wc_get_loop_prop( 'columns', wc_get_default_products_per_row() ) ) );
 
 	$loop_index ++;
 	wc_set_loop_prop( 'loop', $loop_index );
