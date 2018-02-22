@@ -39,20 +39,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 							'email'         => urlencode( $download->get_user_email() ),
 							'key'           => $download->get_download_id(),
 						), trailingslashit( home_url() ) );
-
-						echo '<a href="' . esc_url( $download_link ) . '">' . esc_html( $file_count ) . '</a>';
 					?>
+					<a id="copy-download-link" class="button" href="<?php echo esc_url( $download_link ) ?>" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>" data-tip-failed="<?php esc_attr_e( 'Copying to clipboard failed. You should be able to right-click the button and copy.', 'woocommerce' ); ?>"><?php esc_html_e( 'Copy link', 'woocommerce' ); ?></a>
 				</td>
 				<td>
-					<label><?php esc_html_e( 'Downloads completed', 'woocommerce' ); ?></label>
+					<label><?php esc_html_e( 'Customer download log', 'woocommerce' ); ?></label>
 					<?php
 						$report_url = add_query_arg(
 							'permission_id',
 							rawurlencode( $download->get_id() ),
 							admin_url( 'admin.php?page=wc-reports&tab=orders&report=downloads' )
 						);
-						echo '<a href="' . esc_url( $report_url ) . '">';
-						echo esc_html( number_format_i18n( $download->get_download_count() ) );
+						echo '<a class="button" href="' . esc_url( $report_url ) . '">';
+						esc_html_e( 'View report', 'woocommerce' );
 						echo '</a>';
 					?>
 				</td>

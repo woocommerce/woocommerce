@@ -4,6 +4,10 @@
     "admin": {
       "username": "admin",
       "password": "password"
+    },
+    "customer": {
+      "username": "Customer",
+      "password": "password"
     }
   }
 }

@@ -29,6 +29,7 @@ class WC_Post_types {
 		add_action( 'init', array( __CLASS__, 'register_post_status' ), 9 );
 		add_action( 'init', array( __CLASS__, 'support_jetpack_omnisearch' ) );
 		add_filter( 'rest_api_allowed_post_types', array( __CLASS__, 'rest_api_allowed_post_types' ) );
+		add_action( 'woocommerce_after_register_post_type', array( __CLASS__, 'maybe_flush_rewrite_rules' ) );
 		add_action( 'woocommerce_flush_rewrite_rules', array( __CLASS__, 'flush_rewrite_rules' ) );
 	}
 
@@ -255,6 +256,19 @@ class WC_Post_types {
 			$supports[] = 'comments';
 		}
 
+		$shop_page_id = wc_get_page_id( 'shop' );
+
+		if ( current_theme_supports( 'woocommerce' ) ) {
+			$has_archive  = $shop_page_id && get_post( $shop_page_id ) ? urldecode( get_page_uri( $shop_page_id ) ) : 'shop';
+		} else {
+			$has_archive = false;
+		}
+
+		// If theme support changes, we may need to flush permalinks since some are changed based on this flag.
+		if ( update_option( 'current_theme_supports_woocommerce', current_theme_supports( 'woocommerce' ) ? 'yes' : 'no' ) ) {
+			update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
+		}
+
 		register_post_type( 'product',
 			apply_filters( 'woocommerce_register_post_type_product',
 				array(
@@ -268,8 +282,8 @@ class WC_Post_types {
 							'edit'                  => __( 'Edit', 'woocommerce' ),
 							'edit_item'             => __( 'Edit product', 'woocommerce' ),
 							'new_item'              => __( 'New product', 'woocommerce' ),
-							'view'                  => __( 'View product', 'woocommerce' ),
 							'view_item'             => __( 'View product', 'woocommerce' ),
+							'view_items'            => __( 'View products', 'woocommerce' ),
 							'search_items'          => __( 'Search products', 'woocommerce' ),
 							'not_found'             => __( 'No products found', 'woocommerce' ),
 							'not_found_in_trash'    => __( 'No products found in trash', 'woocommerce' ),
@@ -295,7 +309,7 @@ class WC_Post_types {
 					'rewrite'             => $permalinks['product_rewrite_slug'] ? array( 'slug' => $permalinks['product_rewrite_slug'], 'with_front' => false, 'feeds' => true ) : false,
 					'query_var'           => true,
 					'supports'            => $supports,
-					'has_archive'         => ( $shop_page_id = wc_get_page_id( 'shop' ) ) && get_post( $shop_page_id ) ? urldecode( get_page_uri( $shop_page_id ) ) : 'shop',
+					'has_archive'         => $has_archive,
 					'show_in_nav_menus'   => true,
 					'show_in_rest'        => true,
 				)
@@ -327,7 +341,6 @@ class WC_Post_types {
 							'edit'                  => __( 'Edit', 'woocommerce' ),
 							'edit_item'             => __( 'Edit order', 'woocommerce' ),
 							'new_item'              => __( 'New order', 'woocommerce' ),
-							'view'                  => __( 'View order', 'woocommerce' ),
 							'view_item'             => __( 'View order', 'woocommerce' ),
 							'search_items'          => __( 'Search orders', 'woocommerce' ),
 							'not_found'             => __( 'No orders found', 'woocommerce' ),
@@ -390,7 +403,6 @@ class WC_Post_types {
 								'edit'                  => __( 'Edit', 'woocommerce' ),
 								'edit_item'             => __( 'Edit coupon', 'woocommerce' ),
 								'new_item'              => __( 'New coupon', 'woocommerce' ),
-								'view'                  => __( 'View coupons', 'woocommerce' ),
 								'view_item'             => __( 'View coupon', 'woocommerce' ),
 								'search_items'          => __( 'Search coupons', 'woocommerce' ),
 								'not_found'             => __( 'No coupons found', 'woocommerce' ),
@@ -418,42 +430,6 @@ class WC_Post_types {
 				)
 			);
 		}
-
-		register_post_type( 'shop_webhook',
-			apply_filters( 'woocommerce_register_post_type_shop_webhook',
-				array(
-					'labels'              => array(
-						'name'               => __( 'Webhooks', 'woocommerce' ),
-						'singular_name'      => __( 'Webhook', 'woocommerce' ),
-						'menu_name'          => _x( 'Webhooks', 'Admin menu name', 'woocommerce' ),
-						'add_new'            => __( 'Add webhook', 'woocommerce' ),
-						'add_new_item'       => __( 'Add new webhook', 'woocommerce' ),
-						'edit'               => __( 'Edit', 'woocommerce' ),
-						'edit_item'          => __( 'Edit webhook', 'woocommerce' ),
-						'new_item'           => __( 'New webhook', 'woocommerce' ),
-						'view'               => __( 'View webhooks', 'woocommerce' ),
-						'view_item'          => __( 'View webhook', 'woocommerce' ),
-						'search_items'       => __( 'Search webhooks', 'woocommerce' ),
-						'not_found'          => __( 'No webhooks found', 'woocommerce' ),
-						'not_found_in_trash' => __( 'No webhooks found in trash', 'woocommerce' ),
-						'parent'             => __( 'Parent webhook', 'woocommerce' ),
-					),
-					'public'              => false,
-					'show_ui'             => true,
-					'capability_type'     => 'shop_webhook',
-					'map_meta_cap'        => true,
-					'publicly_queryable'  => false,
-					'exclude_from_search' => true,
-					'show_in_menu'        => false,
-					'hierarchical'        => false,
-					'rewrite'             => false,
-					'query_var'           => false,
-					'supports'            => false,
-					'show_in_nav_menus'   => false,
-					'show_in_admin_bar'   => false,
-				)
-			)
-		);
 
 		do_action( 'woocommerce_after_register_post_type' );
 	}
@@ -526,6 +502,18 @@ class WC_Post_types {
 
 		foreach ( $order_statuses as $order_status => $values ) {
 			register_post_status( $order_status, $values );
+		}
+	}
+
+	/**
+	 * Flush rules if the event is queued.
+	 *
+	 * @since 3.3.0
+	 */
+	public static function maybe_flush_rewrite_rules() {
+		if ( 'yes' === get_option( 'woocommerce_queue_flush_rewrite_rules' ) ) {
+			update_option( 'woocommerce_queue_flush_rewrite_rules', 'no' );
+			self::flush_rewrite_rules();
 		}
 	}
 

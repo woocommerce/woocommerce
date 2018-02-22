@@ -23,10 +23,10 @@ class WC_Shortcode_Cart {
 		try {
 			WC()->shipping->reset_shipping();
 
-			$country  = wc_clean( wp_unslash( $_POST['calc_shipping_country'] ) );
-			$state    = wc_clean( wp_unslash( isset( $_POST['calc_shipping_state'] ) ? $_POST['calc_shipping_state'] : '' ) );
-			$postcode = apply_filters( 'woocommerce_shipping_calculator_enable_postcode', true ) ? wc_clean( wp_unslash( $_POST['calc_shipping_postcode'] ) ) : '';
-			$city     = apply_filters( 'woocommerce_shipping_calculator_enable_city', false ) ? wc_clean( wp_unslash( $_POST['calc_shipping_city'] ) ) : '';
+			$country  = isset( $_POST['calc_shipping_country'] ) ? wc_clean( wp_unslash( $_POST['calc_shipping_country'] ) ) : ''; // WPCS: input var ok, CSRF ok, sanitization ok.
+			$state    = isset( $_POST['calc_shipping_state'] ) ? wc_clean( wp_unslash( $_POST['calc_shipping_state'] ) ) : ''; // WPCS: input var ok, CSRF ok, sanitization ok.
+			$postcode = isset( $_POST['calc_shipping_postcode'] ) ? wc_clean( wp_unslash( $_POST['calc_shipping_postcode'] ) ) : ''; // WPCS: input var ok, CSRF ok, sanitization ok.
+			$city     = isset( $_POST['calc_shipping_city'] ) ? wc_clean( wp_unslash( $_POST['calc_shipping_city'] ) ) : ''; // WPCS: input var ok, CSRF ok, sanitization ok.
 
 			if ( $postcode && ! WC_Validation::is_postcode( $postcode, $country ) ) {
 				throw new Exception( __( 'Please enter a valid postcode / ZIP.', 'woocommerce' ) );

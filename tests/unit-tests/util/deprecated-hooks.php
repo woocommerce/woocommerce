@@ -40,6 +40,7 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 
 	function setUp() {
 		add_filter( 'deprecated_function_trigger_error', '__return_false' );
+		add_filter( 'deprecated_hook_trigger_error', '__return_false' );
 		$this->handlers = WC()->deprecated_hook_handlers;
 	}
 

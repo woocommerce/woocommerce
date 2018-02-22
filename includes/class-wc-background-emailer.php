@@ -2,43 +2,35 @@
 /**
  * Background Emailer
  *
- * Uses https://github.com/A5hleyRich/wp-background-processing to handle emails
- * in the background.
- *
- * @class    WC_Background_Emailer
  * @version  3.0.1
  * @package  WooCommerce/Classes
- * @category Class
- * @author   WooCommerce
  */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WP_Async_Request', false ) ) {
-	include_once( dirname( __FILE__ ) . '/libraries/wp-async-request.php' );
-}
-
-if ( ! class_exists( 'WP_Background_Process', false ) ) {
-	include_once( dirname( __FILE__ ) . '/libraries/wp-background-process.php' );
+if ( ! class_exists( 'WC_Background_Process', false ) ) {
+	include_once dirname( __FILE__ ) . '/abstracts/class-wc-background-process.php';
 }
 
 /**
  * WC_Background_Emailer Class.
  */
-class WC_Background_Emailer extends WP_Background_Process {
+class WC_Background_Emailer extends WC_Background_Process {
 
 	/**
-	 * @var string
-	 */
-	protected $action = 'wc_emailer';
-
-	/**
-	 * Initiate new background process
+	 * Initiate new background process.
 	 */
 	public function __construct() {
+		// Uses unique prefix per blog so each blog has separate queue.
+		$this->prefix = 'wp_' . get_current_blog_id();
+		$this->action = 'wc_emailer';
+
+		// Dispatch queue after shutdown.
+		add_action( 'shutdown', array( $this, 'dispatch_queue' ), 100 );
+
 		parent::__construct();
-		add_action( 'shutdown', array( $this, 'dispatch_queue' ) );
 	}
 
 	/**
@@ -58,7 +50,7 @@ class WC_Background_Emailer extends WP_Background_Process {
 	 * in the next pass through. Or, return false to remove the
 	 * item from the queue.
 	 *
-	 * @param array $callback Update callback function
+	 * @param array $callback Update callback function.
 	 * @return mixed
 	 */
 	protected function task( $callback ) {
@@ -67,7 +59,7 @@ class WC_Background_Emailer extends WP_Background_Process {
 				WC_Emails::send_queued_transactional_email( $callback['filter'], $callback['args'] );
 			} catch ( Exception $e ) {
 				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-					trigger_error( 'Transactional email triggered fatal error for callback ' . $callback['filter'], E_USER_WARNING );
+					trigger_error( 'Transactional email triggered fatal error for callback ' . esc_html( $callback['filter'] ), E_USER_WARNING );
 				}
 			}
 		}
@@ -75,10 +67,39 @@ class WC_Background_Emailer extends WP_Background_Process {
 	}
 
 	/**
+	 * Finishes replying to the client, but keeps the process running for further (async) code execution.
+	 *
+	 * @see https://core.trac.wordpress.org/ticket/41358 .
+	 */
+	protected function close_http_connection() {
+		// Only 1 PHP process can access a session object at a time, close this so the next request isn't kept waiting.
+		// @codingStandardsIgnoreStart
+		if ( session_id() ) {
+			session_write_close();
+		}
+		// @codingStandardsIgnoreEnd
+
+		wc_set_time_limit( 0 );
+
+		// fastcgi_finish_request is the cleanest way to send the response and keep the script running, but not every server has it.
+		if ( is_callable( 'fastcgi_finish_request' ) ) {
+			fastcgi_finish_request();
+		} else {
+			// Fallback: send headers and flush buffers.
+			if ( ! headers_sent() ) {
+				header( 'Connection: close' );
+			}
+			@ob_end_flush();
+			flush();
+		}
+	}
+
+	/**
 	 * Save and run queue.
 	 */
 	public function dispatch_queue() {
 		if ( ! empty( $this->data ) ) {
+			$this->close_http_connection();
 			$this->save()->dispatch();
 		}
 	}
@@ -100,7 +121,10 @@ class WC_Background_Emailer extends WP_Background_Process {
 			if ( 'PHPSESSID' === $name ) {
 				continue;
 			}
-			$cookies[] = new WP_Http_Cookie( array( 'name' => $name, 'value' => $value ) );
+			$cookies[] = new WP_Http_Cookie( array(
+				'name'  => $name,
+				'value' => $value,
+			) );
 		}
 
 		return array(

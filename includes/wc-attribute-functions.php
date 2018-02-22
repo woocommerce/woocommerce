@@ -194,8 +194,19 @@ function wc_get_attribute_taxonomy_names() {
 function wc_get_attribute_types() {
 	return (array) apply_filters( 'product_attributes_type_selector', array(
 		'select' => __( 'Select', 'woocommerce' ),
-		'text'   => __( 'Text', 'woocommerce' ),
 	) );
+}
+
+/**
+ * Check if there are custom attribute types.
+ *
+ * @since  3.3.2
+ * @return bool True if there are custom types, otherwise false.
+ */
+function wc_has_custom_attribute_types() {
+	$types = wc_get_attribute_types();
+
+	return 1 < count( $types ) || ! array_key_exists( 'select', $types );
 }
 
 /**
@@ -208,7 +219,7 @@ function wc_get_attribute_types() {
 function wc_get_attribute_type_label( $type ) {
 	$types = wc_get_attribute_types();
 
-	return isset( $types[ $type ] ) ? $types[ $type ] : ucfirst( $type );
+	return isset( $types[ $type ] ) ? $types[ $type ] : __( 'Select', 'woocommerce' );
 }
 
 /**

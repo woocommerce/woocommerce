@@ -1,4 +1,10 @@
 <?php
+/**
+ * WC_Order_Data_Store_CPT class file.
+ *
+ * @package WooCommerce/Classes
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -14,6 +20,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 	/**
 	 * Data stored in meta keys, but not considered "meta" for an order.
+	 *
 	 * @since 3.0.0
 	 * @var array
 	 */
@@ -66,11 +73,14 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		'_shipping_address_index',
 		'_recorded_sales',
 		'_recorded_coupon_usage_counts',
+		'_download_permissions_granted',
+		'_order_stock_reduced',
 	);
 
 	/**
 	 * Method to create a new order in the database.
-	 * @param WC_Order $order
+	 *
+	 * @param WC_Order $order Order object.
 	 */
 	public function create( &$order ) {
 		$order->set_order_key( 'wc_' . apply_filters( 'woocommerce_generate_order_key', uniqid( 'order_' ) ) );
@@ -81,8 +91,8 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Read order data. Can be overridden by child classes to load other props.
 	 *
-	 * @param WC_Order $order
-	 * @param object   $post_object
+	 * @param WC_Order $order Order object.
+	 * @param object   $post_object Post object.
 	 * @since 3.0.0
 	 */
 	protected function read_order_data( &$order, $post_object ) {
@@ -99,45 +109,48 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$date_paid = get_post_meta( $id, '_paid_date', true );
 		}
 
-		$order->set_props( array(
-			'order_key'            => get_post_meta( $id, '_order_key', true ),
-			'customer_id'          => get_post_meta( $id, '_customer_user', true ),
-			'billing_first_name'   => get_post_meta( $id, '_billing_first_name', true ),
-			'billing_last_name'    => get_post_meta( $id, '_billing_last_name', true ),
-			'billing_company'      => get_post_meta( $id, '_billing_company', true ),
-			'billing_address_1'    => get_post_meta( $id, '_billing_address_1', true ),
-			'billing_address_2'    => get_post_meta( $id, '_billing_address_2', true ),
-			'billing_city'         => get_post_meta( $id, '_billing_city', true ),
-			'billing_state'        => get_post_meta( $id, '_billing_state', true ),
-			'billing_postcode'     => get_post_meta( $id, '_billing_postcode', true ),
-			'billing_country'      => get_post_meta( $id, '_billing_country', true ),
-			'billing_email'        => get_post_meta( $id, '_billing_email', true ),
-			'billing_phone'        => get_post_meta( $id, '_billing_phone', true ),
-			'shipping_first_name'  => get_post_meta( $id, '_shipping_first_name', true ),
-			'shipping_last_name'   => get_post_meta( $id, '_shipping_last_name', true ),
-			'shipping_company'     => get_post_meta( $id, '_shipping_company', true ),
-			'shipping_address_1'   => get_post_meta( $id, '_shipping_address_1', true ),
-			'shipping_address_2'   => get_post_meta( $id, '_shipping_address_2', true ),
-			'shipping_city'        => get_post_meta( $id, '_shipping_city', true ),
-			'shipping_state'       => get_post_meta( $id, '_shipping_state', true ),
-			'shipping_postcode'    => get_post_meta( $id, '_shipping_postcode', true ),
-			'shipping_country'     => get_post_meta( $id, '_shipping_country', true ),
-			'payment_method'       => get_post_meta( $id, '_payment_method', true ),
-			'payment_method_title' => get_post_meta( $id, '_payment_method_title', true ),
-			'transaction_id'       => get_post_meta( $id, '_transaction_id', true ),
-			'customer_ip_address'  => get_post_meta( $id, '_customer_ip_address', true ),
-			'customer_user_agent'  => get_post_meta( $id, '_customer_user_agent', true ),
-			'created_via'          => get_post_meta( $id, '_created_via', true ),
-			'date_completed'       => $date_completed,
-			'date_paid'            => $date_paid,
-			'cart_hash'            => get_post_meta( $id, '_cart_hash', true ),
-			'customer_note'        => $post_object->post_excerpt,
-		) );
+		$order->set_props(
+			array(
+				'order_key'            => get_post_meta( $id, '_order_key', true ),
+				'customer_id'          => get_post_meta( $id, '_customer_user', true ),
+				'billing_first_name'   => get_post_meta( $id, '_billing_first_name', true ),
+				'billing_last_name'    => get_post_meta( $id, '_billing_last_name', true ),
+				'billing_company'      => get_post_meta( $id, '_billing_company', true ),
+				'billing_address_1'    => get_post_meta( $id, '_billing_address_1', true ),
+				'billing_address_2'    => get_post_meta( $id, '_billing_address_2', true ),
+				'billing_city'         => get_post_meta( $id, '_billing_city', true ),
+				'billing_state'        => get_post_meta( $id, '_billing_state', true ),
+				'billing_postcode'     => get_post_meta( $id, '_billing_postcode', true ),
+				'billing_country'      => get_post_meta( $id, '_billing_country', true ),
+				'billing_email'        => get_post_meta( $id, '_billing_email', true ),
+				'billing_phone'        => get_post_meta( $id, '_billing_phone', true ),
+				'shipping_first_name'  => get_post_meta( $id, '_shipping_first_name', true ),
+				'shipping_last_name'   => get_post_meta( $id, '_shipping_last_name', true ),
+				'shipping_company'     => get_post_meta( $id, '_shipping_company', true ),
+				'shipping_address_1'   => get_post_meta( $id, '_shipping_address_1', true ),
+				'shipping_address_2'   => get_post_meta( $id, '_shipping_address_2', true ),
+				'shipping_city'        => get_post_meta( $id, '_shipping_city', true ),
+				'shipping_state'       => get_post_meta( $id, '_shipping_state', true ),
+				'shipping_postcode'    => get_post_meta( $id, '_shipping_postcode', true ),
+				'shipping_country'     => get_post_meta( $id, '_shipping_country', true ),
+				'payment_method'       => get_post_meta( $id, '_payment_method', true ),
+				'payment_method_title' => get_post_meta( $id, '_payment_method_title', true ),
+				'transaction_id'       => get_post_meta( $id, '_transaction_id', true ),
+				'customer_ip_address'  => get_post_meta( $id, '_customer_ip_address', true ),
+				'customer_user_agent'  => get_post_meta( $id, '_customer_user_agent', true ),
+				'created_via'          => get_post_meta( $id, '_created_via', true ),
+				'date_completed'       => $date_completed,
+				'date_paid'            => $date_paid,
+				'cart_hash'            => get_post_meta( $id, '_cart_hash', true ),
+				'customer_note'        => $post_object->post_excerpt,
+			)
+		);
 	}
 
 	/**
 	 * Method to update an order in the database.
-	 * @param WC_Order $order
+	 *
+	 * @param WC_Order $order Order object.
 	 */
 	public function update( &$order ) {
 		// Before updating, ensure date paid is set if missing.
@@ -154,7 +167,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Helper method that updates all the post meta for an order based on it's settings in the WC_Order class.
 	 *
-	 * @param WC_Order $order
+	 * @param WC_Order $order Order object.
 	 * @since 3.0.0
 	 */
 	protected function update_post_meta( &$order ) {
@@ -201,7 +214,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		}
 
 		$address_props = array(
-			'billing' => array(
+			'billing'  => array(
 				'_billing_first_name' => 'billing_first_name',
 				'_billing_last_name'  => 'billing_last_name',
 				'_billing_company'    => 'billing_company',
@@ -259,7 +272,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Excerpt for post.
 	 *
-	 * @param  WC_Order $order
+	 * @param  WC_Order $order Order object.
 	 * @return string
 	 */
 	protected function get_post_excerpt( $order ) {
@@ -269,40 +282,46 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Get amount already refunded.
 	 *
-	 * @param  WC_Order $order
-	 * @return string
+	 * @param  WC_Order $order Order object.
+	 * @return float
 	 */
 	public function get_total_refunded( $order ) {
 		global $wpdb;
 
-		$total = $wpdb->get_var( $wpdb->prepare( "
-			SELECT SUM( postmeta.meta_value )
-			FROM $wpdb->postmeta AS postmeta
-			INNER JOIN $wpdb->posts AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent = %d )
-			WHERE postmeta.meta_key = '_refund_amount'
-			AND postmeta.post_id = posts.ID
-		", $order->get_id() ) );
+		$total = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT SUM( postmeta.meta_value )
+				FROM $wpdb->postmeta AS postmeta
+				INNER JOIN $wpdb->posts AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent = %d )
+				WHERE postmeta.meta_key = '_refund_amount'
+				AND postmeta.post_id = posts.ID",
+				$order->get_id()
+			)
+		);
 
-		return $total;
+		return floatval( $total );
 	}
 
 	/**
 	 * Get the total tax refunded.
 	 *
-	 * @param  WC_Order $order
+	 * @param  WC_Order $order Order object.
 	 * @return float
 	 */
 	public function get_total_tax_refunded( $order ) {
 		global $wpdb;
 
-		$total = $wpdb->get_var( $wpdb->prepare( "
-			SELECT SUM( order_itemmeta.meta_value )
-			FROM {$wpdb->prefix}woocommerce_order_itemmeta AS order_itemmeta
-			INNER JOIN $wpdb->posts AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent = %d )
-			INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = posts.ID AND order_items.order_item_type = 'tax' )
-			WHERE order_itemmeta.order_item_id = order_items.order_item_id
-			AND order_itemmeta.meta_key IN ('tax_amount', 'shipping_tax_amount')
-		", $order->get_id() ) );
+		$total = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT SUM( order_itemmeta.meta_value )
+				FROM {$wpdb->prefix}woocommerce_order_itemmeta AS order_itemmeta
+				INNER JOIN $wpdb->posts AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent = %d )
+				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = posts.ID AND order_items.order_item_type = 'tax' )
+				WHERE order_itemmeta.order_item_id = order_items.order_item_id
+				AND order_itemmeta.meta_key IN ('tax_amount', 'shipping_tax_amount')",
+				$order->get_id()
+			)
+		);
 
 		return abs( $total );
 	}
@@ -310,20 +329,23 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Get the total shipping refunded.
 	 *
-	 * @param  WC_Order $order
+	 * @param  WC_Order $order Order object.
 	 * @return float
 	 */
 	public function get_total_shipping_refunded( $order ) {
 		global $wpdb;
 
-		$total = $wpdb->get_var( $wpdb->prepare( "
-			SELECT SUM( order_itemmeta.meta_value )
-			FROM {$wpdb->prefix}woocommerce_order_itemmeta AS order_itemmeta
-			INNER JOIN $wpdb->posts AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent = %d )
-			INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = posts.ID AND order_items.order_item_type = 'shipping' )
-			WHERE order_itemmeta.order_item_id = order_items.order_item_id
-			AND order_itemmeta.meta_key IN ('cost')
-		", $order->get_id() ) );
+		$total = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT SUM( order_itemmeta.meta_value )
+				FROM {$wpdb->prefix}woocommerce_order_itemmeta AS order_itemmeta
+				INNER JOIN $wpdb->posts AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent = %d )
+				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = posts.ID AND order_items.order_item_type = 'shipping' )
+				WHERE order_itemmeta.order_item_id = order_items.order_item_id
+				AND order_itemmeta.meta_key IN ('cost')",
+				$order->get_id()
+			)
+		);
 
 		return abs( $total );
 	}
@@ -331,7 +353,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Finds an Order ID based on an order key.
 	 *
-	 * @param string $order_key An order key has generated by
+	 * @param string $order_key An order key has generated by.
 	 * @return int The ID of an order, or 0 if the order could not be found
 	 */
 	public function get_order_id_by_order_key( $order_key ) {
@@ -342,7 +364,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Return count of orders with a specific status.
 	 *
-	 * @param  string $status
+	 * @param  string $status Order status. Function wc_get_order_statuses() returns a list of valid statuses.
 	 * @return int
 	 */
 	public function get_order_count( $status ) {
@@ -356,7 +378,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @deprecated 3.1.0 - Use wc_get_orders instead.
 	 * @see    wc_get_orders()
 	 *
-	 * @param  array $args
+	 * @param  array $args List of args passed to wc_get_orders().
 	 *
 	 * @return array|object
 	 */
@@ -368,19 +390,19 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Generate meta query for wc_get_orders.
 	 *
-	 * @param  array $values
-	 * @param  string $relation
+	 * @param  array  $values List of customers ids or emails.
+	 * @param  string $relation 'or' or 'and' relation used to build the WP meta_query.
 	 * @return array
 	 */
 	private function get_orders_generate_customer_meta_query( $values, $relation = 'or' ) {
 		$meta_query = array(
-			'relation' => strtoupper( $relation ),
+			'relation'        => strtoupper( $relation ),
 			'customer_emails' => array(
 				'key'     => '_billing_email',
 				'value'   => array(),
 				'compare' => 'IN',
 			),
-			'customer_ids' => array(
+			'customer_ids'    => array(
 				'key'     => '_customer_user',
 				'value'   => array(),
 				'compare' => 'IN',
@@ -418,19 +440,24 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Get unpaid orders after a certain date,
 	 *
-	 * @param  int $date timestamp
+	 * @param  int $date Timestamp.
 	 * @return array
 	 */
 	public function get_unpaid_orders( $date ) {
 		global $wpdb;
 
-		$unpaid_orders = $wpdb->get_col( $wpdb->prepare( "
-			SELECT posts.ID
-			FROM {$wpdb->posts} AS posts
-			WHERE   posts.post_type   IN ('" . implode( "','", wc_get_order_types() ) . "')
-			AND     posts.post_status = 'wc-pending'
-			AND     posts.post_modified < %s
-		", date( 'Y-m-d H:i:s', absint( $date ) ) ) );
+		$unpaid_orders = $wpdb->get_col(
+			$wpdb->prepare(
+				// @codingStandardsIgnoreStart
+				"SELECT posts.ID
+				FROM {$wpdb->posts} AS posts
+				WHERE   posts.post_type   IN ('" . implode( "','", wc_get_order_types() ) . "')
+				AND     posts.post_status = 'wc-pending'
+				AND     posts.post_modified < %s",
+				// @codingStandardsIgnoreEnd
+				date( 'Y-m-d H:i:s', absint( $date ) )
+			)
+		);
 
 		return $unpaid_orders;
 	}
@@ -438,7 +465,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Search order data for a term and return ids.
 	 *
-	 * @param  string $term
+	 * @param  string $term Searched term.
 	 * @return array of ids
 	 */
 	public function search_orders( $term ) {
@@ -448,36 +475,45 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		 * Searches on meta data can be slow - this lets you choose what fields to search.
 		 * 3.0.0 added _billing_address and _shipping_address meta which contains all address data to make this faster.
 		 * This however won't work on older orders unless updated, so search a few others (expand this using the filter if needed).
+		 *
 		 * @var array
 		 */
-		$search_fields = array_map( 'wc_clean', apply_filters( 'woocommerce_shop_order_search_fields', array(
-			'_billing_address_index',
-			'_shipping_address_index',
-			'_billing_last_name',
-			'_billing_email',
-		) ) );
-		$order_ids = array();
+		$search_fields = array_map(
+			'wc_clean', apply_filters(
+				'woocommerce_shop_order_search_fields', array(
+					'_billing_address_index',
+					'_shipping_address_index',
+					'_billing_last_name',
+					'_billing_email',
+				)
+			)
+		);
+		$order_ids     = array();
 
 		if ( is_numeric( $term ) ) {
 			$order_ids[] = absint( $term );
 		}
 
 		if ( ! empty( $search_fields ) ) {
-			$order_ids = array_unique( array_merge(
-				$order_ids,
-				$wpdb->get_col(
-					$wpdb->prepare( "SELECT DISTINCT p1.post_id FROM {$wpdb->postmeta} p1 WHERE p1.meta_value LIKE '%%%s%%'", $wpdb->esc_like( wc_clean( $term ) ) ) . " AND p1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', $search_fields ) ) . "')"
-				),
-				$wpdb->get_col(
-					$wpdb->prepare( "
-						SELECT order_id
-						FROM {$wpdb->prefix}woocommerce_order_items as order_items
-						WHERE order_item_name LIKE '%%%s%%'
-						",
-						$wpdb->esc_like( wc_clean( $term ) )
+			$order_ids = array_unique(
+				array_merge(
+					$order_ids,
+					$wpdb->get_col(
+						$wpdb->prepare(
+							"SELECT DISTINCT p1.post_id FROM {$wpdb->postmeta} p1 WHERE p1.meta_value LIKE %s AND p1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', $search_fields ) ) . "')", // @codingStandardsIgnoreLine
+							'%' . $wpdb->esc_like( wc_clean( $term ) ) . '%'
+						)
+					),
+					$wpdb->get_col(
+						$wpdb->prepare(
+							"SELECT order_id
+							FROM {$wpdb->prefix}woocommerce_order_items as order_items
+							WHERE order_item_name LIKE %s",
+							'%' . $wpdb->esc_like( wc_clean( $term ) ) . '%'
+						)
 					)
 				)
-			) );
+			);
 		}
 
 		return apply_filters( 'woocommerce_shop_order_search_results', $order_ids, $term, $search_fields );
@@ -486,7 +522,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Gets information about whether permissions were generated yet.
 	 *
-	 * @param WC_Order|int $order
+	 * @param WC_Order|int $order Order ID or order object.
 	 * @return bool
 	 */
 	public function get_download_permissions_granted( $order ) {
@@ -497,8 +533,8 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Stores information about whether permissions were generated yet.
 	 *
-	 * @param WC_Order|int $order
-	 * @param bool $set
+	 * @param WC_Order|int $order Order ID or order object.
+	 * @param bool         $set True or false.
 	 */
 	public function set_download_permissions_granted( $order, $set ) {
 		$order_id = WC_Order_Factory::get_order_id( $order );
@@ -508,7 +544,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Gets information about whether sales were recorded.
 	 *
-	 * @param WC_Order|int $order
+	 * @param WC_Order|int $order Order ID or order object.
 	 * @return bool
 	 */
 	public function get_recorded_sales( $order ) {
@@ -519,8 +555,8 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Stores information about whether sales were recorded.
 	 *
-	 * @param WC_Order|int $order
-	 * @param bool $set
+	 * @param WC_Order|int $order Order ID or order object.
+	 * @param bool         $set True or false.
 	 */
 	public function set_recorded_sales( $order, $set ) {
 		$order_id = WC_Order_Factory::get_order_id( $order );
@@ -530,7 +566,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Gets information about whether coupon counts were updated.
 	 *
-	 * @param WC_Order|int $order
+	 * @param WC_Order|int $order Order ID or order object.
 	 * @return bool
 	 */
 	public function get_recorded_coupon_usage_counts( $order ) {
@@ -541,8 +577,8 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Stores information about whether coupon counts were updated.
 	 *
-	 * @param WC_Order|int $order
-	 * @param bool $set
+	 * @param WC_Order|int $order Order ID or order object.
+	 * @param bool         $set True or false.
 	 */
 	public function set_recorded_coupon_usage_counts( $order, $set ) {
 		$order_id = WC_Order_Factory::get_order_id( $order );
@@ -552,7 +588,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Gets information about whether stock was reduced.
 	 *
-	 * @param WC_Order|int $order
+	 * @param WC_Order|int $order Order ID or order object.
 	 * @return bool
 	 */
 	public function get_stock_reduced( $order ) {
@@ -563,8 +599,8 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Stores information about whether stock was reduced.
 	 *
-	 * @param WC_Order|int $order
-	 * @param bool $set
+	 * @param WC_Order|int $order Order ID or order object.
+	 * @param bool         $set True or false.
 	 */
 	public function set_stock_reduced( $order, $set ) {
 		$order_id = WC_Order_Factory::get_order_id( $order );
@@ -575,7 +611,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * Get the order type based on Order ID.
 	 *
 	 * @since 3.0.0
-	 * @param int $order_id
+	 * @param int $order_id Order ID.
 	 * @return string
 	 */
 	public function get_order_type( $order_id ) {
@@ -586,7 +622,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * Get valid WP_Query args from a WC_Order_Query's query variables.
 	 *
 	 * @since 3.1.0
-	 * @param array $query_vars query vars from a WC_Order_Query
+	 * @param array $query_vars query vars from a WC_Order_Query.
 	 * @return array
 	 */
 	protected function get_wp_query_args( $query_vars ) {
@@ -654,7 +690,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		}
 
 		if ( isset( $query_vars['customer'] ) && '' !== $query_vars['customer'] && array() !== $query_vars['customer'] ) {
-			$values = is_array( $query_vars['customer'] ) ? $query_vars['customer'] : array( $query_vars['customer'] );
+			$values         = is_array( $query_vars['customer'] ) ? $query_vars['customer'] : array( $query_vars['customer'] );
 			$customer_query = $this->get_orders_generate_customer_meta_query( $values );
 			if ( is_wp_error( $customer_query ) ) {
 				$wp_query_args['errors'][] = $customer_query;
@@ -675,7 +711,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 *
 	 * @since 3.1.0
 	 *
-	 * @param array $query_vars query vars from a WC_Order_Query
+	 * @param array $query_vars query vars from a WC_Order_Query.
 	 *
 	 * @return array|object
 	 */
@@ -684,8 +720,8 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		if ( ! empty( $args['errors'] ) ) {
 			$query = (object) array(
-				'posts' => array(),
-				'found_posts' => 0,
+				'posts'         => array(),
+				'found_posts'   => 0,
 				'max_num_pages' => 0,
 			);
 		} else {

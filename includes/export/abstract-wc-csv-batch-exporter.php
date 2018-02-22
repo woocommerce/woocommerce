@@ -4,8 +4,6 @@
  *
  * Based on https://pippinsplugins.com/batch-processing-for-big-data/
  *
- * @author   Automattic
- * @category Admin
  * @package  WooCommerce/Export
  * @version  3.1.0
  */
@@ -26,13 +24,6 @@ if ( ! class_exists( 'WC_CSV_Exporter', false ) ) {
 abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 
 	/**
-	 * The file being exported to.
-	 *
-	 * @var string
-	 */
-	protected $file;
-
-	/**
 	 * Page being exported
 	 *
 	 * @var integer
@@ -43,9 +34,17 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$upload_dir         = wp_upload_dir();
-		$this->file         = trailingslashit( $upload_dir['basedir'] ) . $this->get_filename();
 		$this->column_names = $this->get_default_column_names();
+	}
+
+	/**
+	 * Get file path to export to.
+	 *
+	 * @return string
+	 */
+	protected function get_file_path() {
+		$upload_dir = wp_upload_dir();
+		return trailingslashit( $upload_dir['basedir'] ) . $this->get_filename();
 	}
 
 	/**
@@ -56,11 +55,11 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	 */
 	public function get_file() {
 		$file = '';
-		if ( @file_exists( $this->file ) ) {
-			$file = @file_get_contents( $this->file );
+		if ( @file_exists( $this->get_file_path() ) ) {
+			$file = @file_get_contents( $this->get_file_path() );
 		} else {
-			@file_put_contents( $this->file, '' );
-			@chmod( $this->file, 0664 );
+			@file_put_contents( $this->get_file_path(), '' );
+			@chmod( $this->get_file_path(), 0664 );
 		}
 		return $file;
 	}
@@ -73,7 +72,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	public function export() {
 		$this->send_headers();
 		$this->send_content( $this->get_file() );
-		@unlink( $this->file );
+		@unlink( $this->get_file_path() );
 		die();
 	}
 
@@ -84,7 +83,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	 */
 	public function generate_file() {
 		if ( 1 === $this->get_page() ) {
-			@unlink( $this->file );
+			@unlink( $this->get_file_path() );
 		}
 		$this->prepare_data_to_export();
 		$this->write_csv_data( $this->get_csv_data() );
@@ -105,7 +104,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 		}
 
 		$file .= $data;
-		@file_put_contents( $this->file, $file );
+		@file_put_contents( $this->get_file_path(), $file );
 	}
 
 	/**
@@ -135,7 +134,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	 * @return int
 	 */
 	public function get_total_exported() {
-		return ( $this->get_page() * $this->get_limit() ) + $this->exported_row_count;
+		return ( ( $this->get_page() - 1 ) * $this->get_limit() ) + $this->exported_row_count;
 	}
 
 	/**

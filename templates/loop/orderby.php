@@ -13,11 +13,11 @@
  * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     2.2.0
+ * @version     3.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 ?>
@@ -27,5 +27,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<option value="<?php echo esc_attr( $id ); ?>" <?php selected( $orderby, $id ); ?>><?php echo esc_html( $name ); ?></option>
 		<?php endforeach; ?>
 	</select>
-	<?php wc_query_string_form_fields( null, array( 'orderby', 'submit' ) ); ?>
+	<input type="hidden" name="paged" value="1" />
+	<?php wc_query_string_form_fields( null, array( 'orderby', 'submit', 'paged', 'product-page' ) ); ?>
 </form>

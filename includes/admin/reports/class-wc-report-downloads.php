@@ -115,8 +115,12 @@ class WC_Report_Downloads extends WP_List_Table {
 			$filter_list[] = $filter_names[ $key ] . ' ' . $display_value . ' <a href="' . esc_url( remove_query_arg( $key ) ) . '" class="woocommerce-reports-remove-filter">&times;</a>';
 		}
 
-		echo $filter_list ? ' - ' . wp_kses_post( implode( ', ', $filter_list ) ) : '';
 		echo '</h1>';
+
+		echo '<div id="active-filters" class="woocommerce-reports-wide"><h2>';
+		echo esc_html__( 'Active filters', 'woocommerce' ) . ': ';
+		echo $filter_list ? wp_kses_post( implode( ', ', $filter_list ) ) : '';
+		echo '</h2></div>';
 
 		echo '<div id="poststuff" class="woocommerce-reports-wide">';
 		$this->display();

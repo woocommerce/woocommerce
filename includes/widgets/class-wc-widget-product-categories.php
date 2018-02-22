@@ -136,13 +136,15 @@ class WC_Widget_Product_Categories extends WC_Widget {
 			$this->cat_ancestors = get_ancestors( $this->current_cat->term_id, 'product_cat' );
 
 		} elseif ( is_singular( 'product' ) ) {
-			$product_category = wc_get_product_terms( $post->ID, 'product_cat', apply_filters( 'woocommerce_product_categories_widget_product_terms_args', array(
+			$terms = wc_get_product_terms( $post->ID, 'product_cat', apply_filters( 'woocommerce_product_categories_widget_product_terms_args', array(
 				'orderby' => 'parent',
+				'order'   => 'DESC',
 			) ) );
 
-			if ( ! empty( $product_category ) ) {
-				$this->current_cat   = end( $product_category );
-				$this->cat_ancestors = get_ancestors( $this->current_cat->term_id, 'product_cat' );
+			if ( $terms ) {
+				$main_term = apply_filters( 'woocommerce_product_categories_widget_main_term', $terms[0], $terms );
+				$this->current_cat   = $main_term;
+				$this->cat_ancestors = get_ancestors( $main_term->term_id, 'product_cat' );
 			}
 		}
 

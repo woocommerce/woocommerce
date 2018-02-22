@@ -442,8 +442,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_customer_sessions() {
-		$customer = WC_Helper_Customer::create_customer();
-		$session  = WC_Helper_Customer::create_mock_customer(); // set into session....
+		$session = WC_Helper_Customer::create_mock_customer(); // set into session....
 
 		$this->assertEquals( '19123', $session->get_billing_postcode() );
 		$this->assertEquals( '123 South Street', $session->get_billing_address() );

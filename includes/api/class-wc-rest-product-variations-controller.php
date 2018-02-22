@@ -4,9 +4,7 @@
  *
  * Handles requests to the /products/<product_id>/variations endpoints.
  *
- * @author   WooThemes
- * @category API
- * @package  WooCommerce/API
+ * @package  WooCommerce\API
  * @since    3.0.0
  */
 
@@ -379,15 +377,17 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 
 				// Check ID for global attributes or name for product attributes.
 				if ( ! empty( $attribute['id'] ) ) {
-					$attribute_id   = absint( $attribute['id'] );
-					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
+					$attribute_id       = absint( $attribute['id'] );
+					$raw_attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
 				} elseif ( ! empty( $attribute['name'] ) ) {
-					$attribute_name = sanitize_title( $attribute['name'] );
+					$raw_attribute_name = sanitize_title( $attribute['name'] );
 				}
 
-				if ( ! $attribute_id && ! $attribute_name ) {
+				if ( ! $attribute_id && ! $raw_attribute_name ) {
 					continue;
 				}
+
+				$attribute_name = sanitize_title( $raw_attribute_name );
 
 				if ( ! isset( $parent_attributes[ $attribute_name ] ) || ! $parent_attributes[ $attribute_name ]->get_variation() ) {
 					continue;
@@ -398,9 +398,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 
 				if ( $parent_attributes[ $attribute_name ]->is_taxonomy() ) {
 					// If dealing with a taxonomy, we need to get the slug from the name posted to the API.
-					// @codingStandardsIgnoreStart
-					$term = get_term_by( 'name', $attribute_value, $attribute_name );
-					// @codingStandardsIgnoreEnd
+					$term = get_term_by( 'name', $attribute_value, $raw_attribute_name ); // @codingStandardsIgnoreLine
 
 					if ( $term && ! is_wp_error( $term ) ) {
 						$attribute_value = $term->slug;
@@ -676,7 +674,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 					'context'     => array( 'view', 'edit' ),
 				),
 				'date_on_sale_to_gmt' => array(
-					'description' => __( "End date of sale price, in the site's timezone.", 'woocommerce' ),
+					'description' => __( 'End date of sale price, as GMT.', 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 				),

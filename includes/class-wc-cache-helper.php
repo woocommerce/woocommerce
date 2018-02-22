@@ -118,14 +118,14 @@ class WC_Cache_Helper {
 	/**
 	 * Get transient version.
 	 *
-	 * When using transients with unpredictable names, e.g. those containing an md5.
+	 * When using transients with unpredictable names, e.g. those containing an md5
 	 * hash in the name, we need a way to invalidate them all at once.
 	 *
-	 * When using default WP transients we're able to do this with a DB query to.
+	 * When using default WP transients we're able to do this with a DB query to
 	 * delete transients manually.
 	 *
-	 * With external cache however, this isn't possible. Instead, this function is used.
-	 * to append a unique string (based on time()) to each transient. When transients.
+	 * With external cache however, this isn't possible. Instead, this function is used
+	 * to append a unique string (based on time()) to each transient. When transients
 	 * are invalidated, the transient version will increment and data will be regenerated.
 	 *
 	 * Raised in issue https://github.com/woocommerce/woocommerce/issues/5777.

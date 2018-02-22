@@ -286,7 +286,8 @@ class WC_Helper {
 				$data['_actions'][] = $action;
 			} else {
 				$action = array(
-					'message' => sprintf( __( 'To receive updates and support for this extension, you need to <strong>purchase</strong> a new subscription or <a href="%1$s" target="_blank">be added as a collaborator</a>.', 'woocommerce' ), 'https://docs.woocommerce.com/document/adding-collaborators/' ),
+					/* translators: 1: subscriptions docs 2: subscriptions docs */
+					'message' => sprintf( __( 'To receive updates and support for this extension, you need to <strong>purchase</strong> a new subscription or consolidate your extensions to one connected account by <strong><a href="%1$s" title="Sharing Docs">sharing</a> or <a href="%2$s" title="Transferring Docs">transferring</a></strong> this extension to this connected account.', 'woocommerce' ), 'https://docs.woocommerce.com/document/managing-woocommerce-com-subscriptions/#section-10', 'https://docs.woocommerce.com/document/managing-woocommerce-com-subscriptions/#section-5' ),
 					'button_label' => __( 'Purchase', 'woocommerce' ),
 					'button_url' => $data['_product_url'],
 					'status' => 'expired',
@@ -321,11 +322,9 @@ class WC_Helper {
 	/**
 	 * Get available subscriptions filters.
 	 *
-	 * @param array Optional subscriptions array to generate counts.
-	 *
 	 * @return array An array of filter keys and labels.
 	 */
-	public static function get_filters( $subscriptions = null ) {
+	public static function get_filters() {
 		$filters = array(
 			'all' => __( 'All', 'woocommerce' ),
 			'active' => __( 'Active', 'woocommerce' ),
@@ -1207,11 +1206,17 @@ class WC_Helper {
 	}
 
 	/**
-	 * Add a note about available extension updates if Woo core has an update available.
+	 * Various Helper-related admin notices.
 	 */
 	public static function admin_notices() {
+		if ( apply_filters( 'woocommerce_helper_suppress_admin_notices', false ) ) {
+			return;
+		}
+
 		$screen    = get_current_screen();
 		$screen_id = $screen ? $screen->id : '';
+
+		self::_prompt_helper_connect( $screen_id );
 
 		if ( 'update-core' !== $screen_id ) {
 			return;
@@ -1222,8 +1227,55 @@ class WC_Helper {
 			return;
 		}
 
+		// Add a note about available extension updates if Woo core has an update available.
 		$notice = self::_get_extensions_update_notice();
 		if ( ! empty( $notice ) ) {
+			echo '<div class="updated woocommerce-message"><p>' . $notice . '</p></div>';
+		}
+	}
+
+	/**
+	 * Prompt a Helper connection if the user has WooCommerce.com extensions.
+	 *
+	 * @param string $screen_id Current screen ID.
+	 */
+	private static function _prompt_helper_connect( $screen_id ) {
+		$screens   = wc_get_screen_ids();
+		$screens[] = 'plugins';
+
+		if ( ! in_array( $screen_id, $screens, true ) ) {
+			return;
+		}
+
+		// Don't show the notice on the Helper screens.
+		$screen_addons = sanitize_title( __( 'WooCommerce', 'woocommerce' ) ) . '_page_wc-addons';
+
+		if ( $screen_addons === $screen_id && ! empty( $_REQUEST['section'] ) && 'helper' === $_REQUEST['section'] ) {
+			return;
+		}
+
+		// We believe we have an active connection.
+		$auth = WC_Helper_Options::get( 'auth' );
+		if ( ! empty( $auth['access_token'] ) ) {
+			return;
+		}
+
+		$active_plugins = apply_filters( 'active_plugins', get_option( 'active_plugins' ) );
+		if ( empty( $active_plugins ) ) {
+			return;
+		}
+
+		$woo_plugins = self::get_local_woo_plugins();
+		if ( empty( $woo_plugins ) ) {
+			return;
+		}
+
+		$active_woo_plugins = array_intersect_key( $woo_plugins, array_flip( $active_plugins ) );
+
+		if ( count( $active_woo_plugins ) > 0 ) {
+			/* translators: %s: helper screen url */
+			$notice = __( '<a href="%s">Connect your store</a> to WooCommerce.com to receive extensions updates and support.', 'woocommerce' );
+			$notice = sprintf( $notice, admin_url( 'admin.php?page=wc-addons&section=helper' ) );
 			echo '<div class="updated woocommerce-message"><p>' . $notice . '</p></div>';
 		}
 	}

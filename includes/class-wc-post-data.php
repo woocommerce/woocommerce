@@ -31,6 +31,7 @@ class WC_Post_Data {
 		add_filter( 'post_type_link', array( __CLASS__, 'variation_post_link' ), 10, 2 );
 		add_action( 'shutdown', array( __CLASS__, 'do_deferred_product_sync' ), 10 );
 		add_action( 'set_object_terms', array( __CLASS__, 'set_object_terms' ), 10, 6 );
+		add_action( 'set_object_terms', array( __CLASS__, 'force_default_term' ), 10, 5 );
 
 		add_action( 'transition_post_status', array( __CLASS__, 'transition_post_status' ), 10, 3 );
 		add_action( 'woocommerce_product_set_stock_status', array( __CLASS__, 'delete_product_query_transients' ) );
@@ -499,6 +500,27 @@ class WC_Post_Data {
 	 */
 	public static function flush_object_meta_cache( $meta_id, $object_id, $meta_key, $meta_value ) {
 		WC_Cache_Helper::incr_cache_prefix( 'object_' . $object_id );
+	}
+
+	/**
+	 * Ensure default category gets set.
+	 *
+	 * @since 3.3.0
+	 * @param int    $object_id Product ID.
+	 * @param array  $terms Terms array.
+	 * @param array  $tt_ids Term ids array.
+	 * @param string $taxonomy Taxonomy name.
+	 * @param bool   $append Are we appending or setting terms.
+	 */
+	public static function force_default_term( $object_id, $terms, $tt_ids, $taxonomy, $append ) {
+		if ( ! $append && 'product_cat' === $taxonomy && empty( $tt_ids ) && 'product' === get_post_type( $object_id ) ) {
+			$default_term = absint( get_option( 'default_product_cat', 0 ) );
+			$tt_ids       = array_map( 'absint', $tt_ids );
+
+			if ( $default_term && ! in_array( $default_term, $tt_ids, true ) ) {
+				wp_set_post_terms( $object_id, array( $default_term ), 'product_cat', true );
+			}
+		}
 	}
 }
 

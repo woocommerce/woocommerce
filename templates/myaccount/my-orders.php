@@ -70,7 +70,7 @@ if ( $customer_orders ) : ?>
 							<?php elseif ( 'order-actions' === $column_id ) : ?>
 								<?php
 								$actions = wc_get_account_orders_actions( $order );
-								
+	
 								if ( ! empty( $actions ) ) {
 									foreach ( $actions as $key => $action ) {
 										echo '<a href="' . esc_url( $action['url'] ) . '" class="button ' . sanitize_html_class( $key ) . '">' . esc_html( $action['name'] ) . '</a>';

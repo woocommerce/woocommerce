@@ -109,7 +109,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						'wrapper_class' => 'form-row form-row-first',
 						'placeholder'   => __( 'Variation price (required)', 'woocommerce' ),
 					) );
-				
+
 					$label = sprintf(
 						/* translators: %s: currency symbol */
 						__( 'Sale price (%s)', 'woocommerce' ),
@@ -207,7 +207,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						'options'       => wc_get_product_stock_status_options(),
 						'desc_tip'      => true,
 						'description'   => __( 'Controls whether or not the product is listed as "in stock" or "out of stock" on the frontend.', 'woocommerce' ),
-						'wrapper_class' => 'form-row form-row-full',
+						'wrapper_class' => 'form-row form-row-full hide_if_variation_manage_stock',
 					) );
 
 					if ( wc_product_weight_enabled() ) {

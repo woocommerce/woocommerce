@@ -40,6 +40,7 @@ class WC_Helper_Product {
 		update_post_meta( $product, '_downloadable', 'no' );
 		update_post_meta( $product, '_virtual', 'no' );
 		update_post_meta( $product, '_stock_status', 'instock' );
+		update_post_meta( $product, '_weight', '1.1' );
 		wp_set_object_terms( $product, 'simple', 'product_type' );
 
 		return new WC_Product_Simple( $product );

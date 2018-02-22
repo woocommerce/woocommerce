@@ -1,4 +1,4 @@
-<<?php
+<?php
 
 /**
  * Class Functions.
@@ -84,7 +84,7 @@ class WC_Tests_Attributes_Functions extends WC_Unit_Test_Case {
 			'id'           => $id,
 			'name'         => 'Brand',
 			'slug'         => 'pa_brand',
-			'type'         => 'text',
+			'type'         => 'select',
 			'order_by'     => 'menu_order',
 			'has_archives' => true,
 		);

@@ -186,7 +186,11 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			break;
 		}
 
-		// Increments the transient version to invalidate cache
+		if ( $current_section ) {
+			do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section );
+		}
+
+		// Increments the transient version to invalidate cache.
 		WC_Cache_Helper::get_transient_version( 'shipping', true );
 	}
 

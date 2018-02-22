@@ -125,15 +125,19 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		$children                = get_transient( $children_transient_name );
 
 		if ( empty( $children ) || ! is_array( $children ) || ! isset( $children['all'] ) || ! isset( $children['visible'] ) || $force_read ) {
-			$all_args = $visible_only_args = array(
+			$all_args = array(
 				'post_parent' => $product->get_id(),
 				'post_type'   => 'product_variation',
-				'orderby'     => array( 'menu_order' => 'ASC', 'ID' => 'ASC' ),
+				'orderby'     => array(
+					'menu_order' => 'ASC',
+					'ID'         => 'ASC',
+				),
 				'fields'      => 'ids',
 				'post_status' => array( 'publish', 'private' ),
 				'numberposts' => -1,
 			);
 
+			$visible_only_args                = $all_args;
 			$visible_only_args['post_status'] = 'publish';
 
 			if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
@@ -230,10 +234,10 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 *
 	 * @since  3.0.0
 	 * @param  WC_Product $product Product object.
-	 * @param  bool       $include_taxes If taxes should be calculated or not.
+	 * @param  bool       $for_display If true, prices will be adapted for display based on the `woocommerce_tax_display_shop` setting (including or excluding taxes).
 	 * @return array of prices
 	 */
-	public function read_price_data( &$product, $include_taxes = false ) {
+	public function read_price_data( &$product, $for_display = false ) {
 
 		/**
 		 * Transient name for storing prices for this product (note: Max transient length is 45)
@@ -242,7 +246,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		 */
 		$transient_name = 'wc_var_prices_' . $product->get_id();
 
-		$price_hash = $this->get_price_hash( $product, $include_taxes );
+		$price_hash = $this->get_price_hash( $product, $for_display );
 
 		/**
 		 * $this->prices_array is an array of values which may have been modified from what is stored in transients - this may not match $transient_cached_prices_array.
@@ -279,7 +283,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 						}
 
 						// If we are getting prices for display, we need to account for taxes.
-						if ( $include_taxes ) {
+						if ( $for_display ) {
 							if ( 'incl' === get_option( 'woocommerce_tax_display_shop' ) ) {
 								$price         = '' === $price ? ''         : wc_get_price_including_tax( $variation, array( 'qty' => 1, 'price' => $price ) );
 								$regular_price = '' === $regular_price ? '' : wc_get_price_including_tax( $variation, array( 'qty' => 1, 'price' => $regular_price ) );
@@ -303,14 +307,14 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 					'sale_price'    => $sale_prices,
 				);
 
-				set_transient( $transient_name, json_encode( $transient_cached_prices_array ), DAY_IN_SECONDS * 30 );
+				set_transient( $transient_name, wp_json_encode( $transient_cached_prices_array ), DAY_IN_SECONDS * 30 );
 			}
 
 			/**
 			 * Give plugins one last chance to filter the variation prices array which has been generated and store locally to the class.
 			 * This value may differ from the transient cache. It is filtered once before storing locally.
 			 */
-			$this->prices_array[ $price_hash ] = apply_filters( 'woocommerce_variation_prices', $transient_cached_prices_array[ $price_hash ], $product, $include_taxes );
+			$this->prices_array[ $price_hash ] = apply_filters( 'woocommerce_variation_prices', $transient_cached_prices_array[ $price_hash ], $product, $for_display );
 		}
 		return $this->prices_array[ $price_hash ];
 	}
@@ -321,13 +325,13 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 *
 	 * @since  3.0.0
 	 * @param  WC_Product $product Product object.
-	 * @param  bool       $include_taxes If taxes should be calculated or not.
+	 * @param  bool       $for_display If taxes should be calculated or not.
 	 * @return string
 	 */
-	protected function get_price_hash( &$product, $include_taxes = false ) {
+	protected function get_price_hash( &$product, $for_display = false ) {
 		global $wp_filter;
 
-		$price_hash   = $include_taxes ? array( get_option( 'woocommerce_tax_display_shop', 'excl' ), WC_Tax::get_rates() ) : array( false );
+		$price_hash   = $for_display ? array( get_option( 'woocommerce_tax_display_shop', 'excl' ), WC_Tax::get_rates() ) : array( false );
 		$filter_names = array( 'woocommerce_variation_prices_price', 'woocommerce_variation_prices_regular_price', 'woocommerce_variation_prices_sale_price' );
 
 		foreach ( $filter_names as $filter_name ) {
@@ -341,7 +345,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		}
 
 		$price_hash[] = WC_Cache_Helper::get_transient_version( 'product' );
-		$price_hash   = md5( json_encode( apply_filters( 'woocommerce_get_variation_prices_hash', $price_hash, $product, $include_taxes ) ) );
+		$price_hash   = md5( json_encode( apply_filters( 'woocommerce_get_variation_prices_hash', $price_hash, $product, $for_display ) ) );
 
 		return $price_hash;
 	}
@@ -380,10 +384,24 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @return boolean
 	 */
 	public function child_is_in_stock( $product ) {
+		return $this->child_has_stock_status( $product, 'instock' );
+	}
+
+	/**
+	 * Does a child have a stock status?
+	 *
+	 * @since 3.3.0
+	 * @param WC_Product $product Product object.
+	 * @param string $status 'instock', 'outofstock', or 'onbackorder'.
+	 * @return boolean
+	 */
+	public function child_has_stock_status( $product, $status ) {
 		global $wpdb;
-		$children            = $product->get_children();
-		$oufofstock_children = $children ? $wpdb->get_var( "SELECT COUNT( post_id ) FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = 'outofstock' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )' ) : 0;
-		return count( $children ) > $oufofstock_children;
+
+		$children             = $product->get_children();
+		$children_with_status = $children ? $wpdb->get_var( "SELECT COUNT( post_id ) FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = '" . esc_sql( $status ) . "' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )' ) : 0;
+
+		return (bool) $children_with_status;
 	}
 
 	/**
@@ -474,7 +492,13 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @param WC_Product $product Product object.
 	 */
 	public function sync_stock_status( &$product ) {
-		$product->set_stock_status( $product->child_is_in_stock() ? 'instock' : 'outofstock' );
+		if ( $product->child_is_in_stock() ) {
+			$product->set_stock_status( 'instock' );
+		} elseif ( $product->child_is_on_backorder() ) {
+			$product->set_stock_status( 'onbackorder' );
+		} else {
+			$product->set_stock_status( 'outofstock' );
+		}
 	}
 
 	/**

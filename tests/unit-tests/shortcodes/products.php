@@ -14,7 +14,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 		$shortcode = new WC_Shortcode_Products();
 		$expected  = array(
 			'limit'          => '-1',
-			'columns'        => '4',
+			'columns'        => '3',
 			'orderby'        => 'title',
 			'order'          => 'ASC',
 			'ids'            => '',
@@ -26,6 +26,11 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'terms_operator' => 'IN',
 			'visibility'     => 'visible',
 			'class'          => '',
+			'rows'           => '',
+			'page'           => 1,
+			'paginate'       => false,
+			'cache'          => true,
+			'tag'            => '',
 		);
 		$this->assertEquals( $expected, $shortcode->get_attributes() );
 
@@ -35,7 +40,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 		) );
 		$expected2  = array(
 			'limit'          => '-1',
-			'columns'        => '4',
+			'columns'        => '3',
 			'orderby'        => 'id',
 			'order'          => 'DESC',
 			'ids'            => '',
@@ -47,6 +52,11 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'terms_operator' => 'IN',
 			'visibility'     => 'visible',
 			'class'          => '',
+			'rows'           => '',
+			'page'           => 1,
+			'paginate'       => false,
+			'cache'          => true,
+			'tag'            => '',
 		);
 		$this->assertEquals( $expected2, $shortcode2->get_attributes() );
 	}
@@ -67,7 +77,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'no_found_rows'       => true,
 			'orderby'             => 'title',
 			'order'               => 'ASC',
-			'posts_per_page'      => -1,
+			'posts_per_page'      => '-1',
 			'meta_query'          => $meta_query,
 			'tax_query'           => $tax_query,
 			'fields'              => 'ids',
@@ -86,7 +96,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'no_found_rows'       => true,
 			'orderby'             => 'id',
 			'order'               => 'DESC',
-			'posts_per_page'      => -1,
+			'posts_per_page'      => '-1',
 			'meta_query'          => $meta_query,
 			'tax_query'           => $tax_query,
 			'fields'              => 'ids',
@@ -104,7 +114,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'no_found_rows'       => true,
 			'orderby'             => 'title',
 			'order'               => 'ASC',
-			'posts_per_page'      => -1,
+			'posts_per_page'      => '-1',
 			'meta_query'          => $meta_query,
 			'tax_query'           => $tax_query,
 			'post__in'            => array( '1', '2', '3' ),
@@ -122,7 +132,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 		$shortcode4 = new WC_Shortcode_Products( array(
 			'per_page' => '12',
 			'columns'  => '4',
-			'orderby'  => 'menu_order title',
+			'orderby'  => 'title',
 			'order'    => 'ASC',
 			'category' => 'clothing',
 			'operator' => 'IN',
@@ -132,12 +142,11 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'post_status'         => 'publish',
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => true,
-			'orderby'             => 'menu_order title',
+			'orderby'             => 'title',
 			'order'               => 'ASC',
-			'posts_per_page'      => 12,
+			'posts_per_page'      => '12',
 			'meta_query'          => $meta_query,
 			'tax_query'           => $tax_query,
-			'meta_key'            => '',
 			'fields'              => 'ids',
 		);
 		$expected4['tax_query'][] = array(
@@ -163,9 +172,9 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'post_status'         => 'publish',
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => true,
-			'orderby'             => 'date',
+			'orderby'             => 'date ID',
 			'order'               => 'DESC',
-			'posts_per_page'      => 12,
+			'posts_per_page'      => '12',
 			'meta_query'          => $meta_query,
 			'tax_query'           => $tax_query,
 			'fields'              => 'ids',
@@ -185,7 +194,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'no_found_rows'       => true,
 			'orderby'             => 'title',
 			'order'               => 'ASC',
-			'posts_per_page'      => 1,
+			'posts_per_page'      => '1',
 			'meta_query'          => $meta_query,
 			'tax_query'           => $tax_query,
 			'p'                   => '1',
@@ -281,7 +290,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'post_status'         => 'publish',
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => true,
-			'orderby'             => 'date',
+			'orderby'             => 'date ID',
 			'order'               => 'DESC',
 			'posts_per_page'      => 12,
 			'meta_query'          => $meta_query,

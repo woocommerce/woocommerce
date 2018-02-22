@@ -314,6 +314,7 @@ function wc_rest_check_manager_permissions( $object, $context = 'read' ) {
 		'attributes'       => 'manage_product_terms',
 		'shipping_methods' => 'manage_woocommerce',
 		'payment_gateways' => 'manage_woocommerce',
+		'webhooks'         => 'manage_woocommerce',
 	);
 
 	$permission = current_user_can( $objects[ $object ] );

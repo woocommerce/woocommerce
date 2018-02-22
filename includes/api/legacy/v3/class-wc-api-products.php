@@ -1567,7 +1567,7 @@ class WC_API_Products extends WC_API_Resource {
 			$product->set_date_on_sale_to( $date_to );
 			$product->set_date_on_sale_from( $date_from );
 
-			if ( $product->is_on_sale() ) {
+			if ( $product->is_on_sale( 'edit' ) ) {
 				$product->set_price( $product->get_sale_price( 'edit' ) );
 			} else {
 				$product->set_price( $product->get_regular_price( 'edit' ) );
@@ -2031,7 +2031,7 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			$download = new WC_Product_Download();
-			$download->set_id( $key );
+			$download->set_id( $file['id'] ? $file['id'] : wp_generate_uuid4() );
 			$download->set_name( $file['name'] ? $file['name'] : wc_get_filename_from_url( $file['file'] ) );
 			$download->set_file( apply_filters( 'woocommerce_file_download_path', $file['file'], $product, $key ) );
 			$files[]  = $download;

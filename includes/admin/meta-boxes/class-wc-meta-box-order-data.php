@@ -188,9 +188,9 @@ class WC_Meta_Box_Order_Data {
 
 					if ( $transaction_id = $order->get_transaction_id() ) {
 						if ( isset( $payment_gateways[ $payment_method ] ) && ( $url = $payment_gateways[ $payment_method ]->get_transaction_url( $order ) ) ) {
-							$payment_method_string = ' (<a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $transaction_id ) . '</a>)';
+							$payment_method_string .= ' (<a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $transaction_id ) . '</a>)';
 						} else {
-							$payment_method_string = ' (' . esc_html( $transaction_id ) . ')';
+							$payment_method_string .= ' (' . esc_html( $transaction_id ) . ')';
 						}
 					}
 
@@ -219,13 +219,18 @@ class WC_Meta_Box_Order_Data {
 				?></p>
 				<div class="order_data_column_container">
 					<div class="order_data_column">
-						<h3><?php _e( 'General Details', 'woocommerce' ); ?></h3>
+						<h3><?php esc_html_e( 'General', 'woocommerce' ); ?></h3>
 
-						<p class="form-field form-field-wide"><label for="order_date"><?php _e( 'Order date:', 'woocommerce' ) ?></label>
-							<input type="text" class="date-picker" name="order_date" id="order_date" maxlength="10" value="<?php echo date_i18n( 'Y-m-d', strtotime( $post->post_date ) ); ?>" pattern="<?php echo esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ); ?>" />@&lrm;<input type="number" class="hour" placeholder="<?php esc_attr_e( 'h', 'woocommerce' ) ?>" name="order_date_hour" id="order_date_hour" min="0" max="23" step="1" value="<?php echo date_i18n( 'H', strtotime( $post->post_date ) ); ?>" pattern="([01]?[0-9]{1}|2[0-3]{1})" />:<input type="number" class="minute" placeholder="<?php esc_attr_e( 'm', 'woocommerce' ) ?>" name="order_date_minute" id="order_date_minute" min="0" max="59" step="1" value="<?php echo date_i18n( 'i', strtotime( $post->post_date ) ); ?>" pattern="[0-5]{1}[0-9]{1}" />&lrm;
+						<p class="form-field form-field-wide"><label for="order_date"><?php _e( 'Date created:', 'woocommerce' ) ?></label>
+							<input type="text" class="date-picker" name="order_date" maxlength="10" value="<?php echo esc_attr( date_i18n( 'Y-m-d', strtotime( $post->post_date ) ) ); ?>" pattern="<?php echo esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ); ?>" />@
+							&lrm;
+							<input type="number" class="hour" placeholder="<?php esc_attr_e( 'h', 'woocommerce' ) ?>" name="order_date_hour" min="0" max="23" step="1" value="<?php echo esc_attr( date_i18n( 'H', strtotime( $post->post_date ) ) ); ?>" pattern="([01]?[0-9]{1}|2[0-3]{1})" />:
+							<input type="number" class="minute" placeholder="<?php esc_attr_e( 'm', 'woocommerce' ) ?>" name="order_date_minute" min="0" max="59" step="1" value="<?php echo esc_attr( date_i18n( 'i', strtotime( $post->post_date ) ) ); ?>" pattern="[0-5]{1}[0-9]{1}" />
+							<input type="hidden" name="order_date_second" value="<?php echo esc_attr( date_i18n( 's', strtotime( $post->post_date ) ) ); ?>" />
+							&lrm;
 						</p>
 
-						<p class="form-field form-field-wide wc-order-status"><label for="order_status"><?php _e( 'Order status:', 'woocommerce' ) ?> <?php
+						<p class="form-field form-field-wide wc-order-status"><label for="order_status"><?php _e( 'Status:', 'woocommerce' ) ?> <?php
 							if ( $order->needs_payment() ) {
 								printf( '<a href="%s">%s</a>',
 									esc_url( $order->get_checkout_payment_url() ),
@@ -281,10 +286,10 @@ class WC_Meta_Box_Order_Data {
 					</div>
 					<div class="order_data_column">
 						<h3>
-							<?php _e( 'Billing details', 'woocommerce' ); ?>
-							<a href="#" class="edit_address"><?php _e( 'Edit', 'woocommerce' ); ?></a>
+							<?php esc_html_e( 'Billing', 'woocommerce' ); ?>
+							<a href="#" class="edit_address"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
 							<span>
-								<a href="#" class="load_customer_billing" style="display:none;"><?php _e( 'Load billing address', 'woocommerce' ); ?></a>
+								<a href="#" class="load_customer_billing" style="display:none;"><?php esc_html_e( 'Load billing address', 'woocommerce' ); ?></a>
 							</span>
 						</h3>
 						<?php
@@ -292,7 +297,7 @@ class WC_Meta_Box_Order_Data {
 							echo '<div class="address">';
 
 								if ( $order->get_formatted_billing_address() ) {
-									echo '<p><strong>' . __( 'Address:', 'woocommerce' ) . '</strong>' . wp_kses( $order->get_formatted_billing_address(), array( 'br' => array() ) ) . '</p>';
+									echo '<p>' . wp_kses( $order->get_formatted_billing_address(), array( 'br' => array() ) ) . '</p>';
 								} else {
 									echo '<p class="none_set"><strong>' . __( 'Address:', 'woocommerce' ) . '</strong> ' . __( 'No billing address set.', 'woocommerce' ) . '</p>';
 								}
@@ -342,9 +347,9 @@ class WC_Meta_Box_Order_Data {
 							}
 							?>
 							<p class="form-field form-field-wide">
-								<label><?php _e( 'Payment method:', 'woocommerce' ); ?></label>
+								<label><?php esc_html_e( 'Payment method:', 'woocommerce' ); ?></label>
 								<select name="_payment_method" id="_payment_method" class="first">
-									<option value=""><?php _e( 'N/A', 'woocommerce' ); ?></option>
+									<option value=""><?php esc_html_e( 'N/A', 'woocommerce' ); ?></option>
 									<?php
 										$found_method 	= false;
 
@@ -377,11 +382,11 @@ class WC_Meta_Box_Order_Data {
 					<div class="order_data_column">
 
 						<h3>
-							<?php _e( 'Shipping details', 'woocommerce' ); ?>
-							<a href="#" class="edit_address"><?php _e( 'Edit', 'woocommerce' ); ?></a>
+							<?php esc_html_e( 'Shipping', 'woocommerce' ); ?>
+							<a href="#" class="edit_address"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
 							<span>
-								<a href="#" class="load_customer_shipping" style="display:none;"><?php _e( 'Load shipping address', 'woocommerce' ); ?></a>
-								<a href="#" class="billing-same-as-shipping" style="display:none;"><?php _e( 'Copy billing address', 'woocommerce' ); ?></a>
+								<a href="#" class="load_customer_shipping" style="display:none;"><?php esc_html_e( 'Load shipping address', 'woocommerce' ); ?></a>
+								<a href="#" class="billing-same-as-shipping" style="display:none;"><?php esc_html_e( 'Copy billing address', 'woocommerce' ); ?></a>
 							</span>
 						</h3>
 						<?php
@@ -389,7 +394,7 @@ class WC_Meta_Box_Order_Data {
 							echo '<div class="address">';
 
 								if ( $order->get_formatted_shipping_address() ) {
-									echo '<p><strong>' . __( 'Address:', 'woocommerce' ) . '</strong>' . wp_kses( $order->get_formatted_shipping_address(), array( 'br' => array() ) ) . '</p>';
+									echo '<p>' . wp_kses( $order->get_formatted_shipping_address(), array( 'br' => array() ) ) . '</p>';
 								} else {
 									echo '<p class="none_set"><strong>' . __( 'Address:', 'woocommerce' ) . '</strong> ' . __( 'No shipping address set.', 'woocommerce' ) . '</p>';
 								}
@@ -547,7 +552,7 @@ class WC_Meta_Box_Order_Data {
 		if ( empty( $_POST['order_date'] ) ) {
 			$date = current_time( 'timestamp', true );
 		} else {
-			$date = gmdate( 'Y-m-d H:i:s', strtotime( $_POST['order_date'] . ' ' . (int) $_POST['order_date_hour'] . ':' . (int) $_POST['order_date_minute'] . ':00' ) );
+			$date = gmdate( 'Y-m-d H:i:s', strtotime( $_POST['order_date'] . ' ' . (int) $_POST['order_date_hour'] . ':' . (int) $_POST['order_date_minute'] . ':' . (int) $_POST['order_date_second'] ) );
 		}
 
 		$props['date_created'] = $date;

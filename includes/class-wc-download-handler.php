@@ -37,7 +37,7 @@ class WC_Download_Handler {
 		$product      = wc_get_product( $product_id );
 		$data_store   = WC_Data_Store::load( 'customer-download' );
 
-		if ( ! $product || ! isset( $_GET['key'], $_GET['order'] ) ) {
+		if ( ! $product || empty( $_GET['key'] ) || empty( $_GET['order'] ) ) {
 			self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
 		}
 

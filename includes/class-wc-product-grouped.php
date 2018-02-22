@@ -112,8 +112,13 @@ class WC_Product_Grouped extends WC_Product {
 		}
 
 		if ( '' !== $min_price ) {
-			$price   = $min_price !== $max_price ? sprintf( _x( '%1$s&ndash;%2$s', 'Price range: from-to', 'woocommerce' ), wc_price( $min_price ), wc_price( $max_price ) ) : wc_price( $min_price );
-			$is_free = ( 0 == $min_price && 0 == $max_price );
+			if ( $min_price !== $max_price ) {
+				$price = wc_format_price_range( $min_price, $max_price );
+			} else {
+				$price = wc_price( $min_price );
+			}
+
+			$is_free = 0 === $min_price && 0 === $max_price;
 
 			if ( $is_free ) {
 				$price = apply_filters( 'woocommerce_grouped_free_price_html', __( 'Free!', 'woocommerce' ), $this );

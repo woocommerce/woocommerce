@@ -135,7 +135,21 @@ class WC_Helper_Compat {
 
 		if ( is_plugin_active( 'woothemes-updater/woothemes-updater.php' ) ) {
 			deactivate_plugins( 'woothemes-updater/woothemes-updater.php' );
+
+			// Notify the user when the plugin is deactivated.
+			add_action( 'pre_current_active_plugins', array( __CLASS__, 'plugin_deactivation_notice' ) );
 		}
+	}
+
+	/**
+	 * Display admin notice directing the user where to go.
+	 */
+	public static function plugin_deactivation_notice() {
+		?>
+		<div id="message" class="error is-dismissible">
+			<p><?php printf( __( 'The WooCommerce Helper plugin is no longer needed. <a href="%s">Manage subscriptions</a> from the extensions tab instead.', 'woocommerce' ), esc_url( admin_url( 'admin.php?page=wc-addons&section=helper' ) ) ); ?></p>
+		</div>
+		<?php
 	}
 
 	/**

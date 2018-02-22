@@ -33,7 +33,7 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 	printf(
 		wp_kses(
 			/* translators: %1s item is the name of the site, %2s is a html link */
-			__( 'An order has been created for you on %1$s. To pay for this order please use the following link: %2$s', 'woocommerce' ),
+			__( 'An order has been created for you on %1$s. %2$s', 'woocommerce' ),
 			array(
 				'a' => array(
 					'href' => array(),
@@ -41,16 +41,16 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 			)
 		),
 		esc_html( get_bloginfo( 'name', 'display' ) ),
-		'<a href="' . esc_url( $order->get_checkout_payment_url() ) . '">' . esc_html__( 'Submit payment online.', 'woocommerce' ) . '</a>'
+		'<a href="' . esc_url( $order->get_checkout_payment_url() ) . '">' . esc_html__( 'Pay for this order', 'woocommerce' ) . '</a>'
 	);
 	?>
-				</p>
+	</p>
 <?php endif; ?>
 
 <?php
 
 /**
- * Hook for the woocommerce_email_order_details
+ * Hook for the woocommerce_email_order_details.
  *
  * @hooked WC_Emails::order_details() Shows the order details table.
  * @hooked WC_Structured_Data::generate_order_data() Generates structured data.
@@ -60,14 +60,14 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 do_action( 'woocommerce_email_order_details', $order, $sent_to_admin, $plain_text, $email );
 
 /**
- * Hook for the woocommerce_email_order_meta
+ * Hook for the woocommerce_email_order_meta.
  *
  * @hooked WC_Emails::order_meta() Shows order meta data.
  */
 do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, $email );
 
 /**
- * Hook for woocommerce_email_customer_details
+ * Hook for woocommerce_email_customer_details.
  *
  * @hooked WC_Emails::customer_details() Shows customer details
  * @hooked WC_Emails::email_address() Shows email address
@@ -75,7 +75,7 @@ do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, 
 do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email );
 
 /**
- * Executes the email footer
+ * Executes the email footer.
  *
  * @hooked WC_Emails::email_footer() Output the email footer
  */

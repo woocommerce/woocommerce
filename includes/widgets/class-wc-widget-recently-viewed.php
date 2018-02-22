@@ -33,7 +33,7 @@ class WC_Widget_Recently_Viewed extends WC_Widget {
 				'type'  => 'number',
 				'step'  => 1,
 				'min'   => 1,
-				'max'   => '',
+				'max'   => 15,
 				'std'   => 10,
 				'label' => __( 'Number of products to show', 'woocommerce' ),
 			),

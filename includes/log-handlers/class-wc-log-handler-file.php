@@ -340,9 +340,25 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 */
 	public static function get_log_file_path( $handle ) {
 		if ( function_exists( 'wp_hash' ) ) {
-			return trailingslashit( WC_LOG_DIR ) . sanitize_file_name( $handle . '-' . wp_hash( $handle ) . '.log' );
+			return trailingslashit( WC_LOG_DIR ) . self::get_log_file_name( $handle );
 		} else {
 			wc_doing_it_wrong( __METHOD__, __( 'This method should not be called before plugins_loaded.', 'woocommerce' ), '3.0' );
+			return false;
+		}
+	}
+
+	/**
+	 * Get a log file name.
+	 *
+	 * @since 3.3
+	 * @param string $handle Log name.
+	 * @return bool|string The log file name or false if cannot be determined.
+	 */
+	public static function get_log_file_name( $handle ) {
+		if ( function_exists( 'wp_hash' ) ) {
+			return sanitize_file_name( $handle . '-' . wp_hash( $handle ) . '.log' );
+		} else {
+			wc_doing_it_wrong( __METHOD__, __( 'This method should not be called before plugins_loaded.', 'woocommerce' ), '3.3' );
 			return false;
 		}
 	}
