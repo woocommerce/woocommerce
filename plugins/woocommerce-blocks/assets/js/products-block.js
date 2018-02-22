@@ -327,7 +327,7 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 			} else if ('category' === this.state.display) {
 				extra_settings = wp.element.createElement(_categorySelect.ProductsCategorySelect, this.props);
 			} else if ('attribute' === this.state.display) {
-				extra_settings = wp.element.createElement(_attributeSelect.ProductsAttributeSelect, null);
+				extra_settings = wp.element.createElement(_attributeSelect.ProductsAttributeSelect, this.props);
 			}
 
 			var menu = this.state.menu_visible ? wp.element.createElement(ProductsBlockSettingsEditorDisplayOptions, { existing: this.state.display ? true : false, update_display_callback: this.updateDisplay }) : null;
@@ -487,12 +487,17 @@ var ProductsBlockPreview = withAPIData(function (_ref) {
 		orderby: order
 	};
 
-	// @todo These will likely need to be modified to work with the final version of the category/product picker attributes.
 	if ('specific' === display) {
 		query.include = JSON.stringify(display_setting);
 		query.orderby = 'include';
 	} else if ('category' === display) {
 		query.category = display_setting.join(',');
+	} else if ('attribute' === display && display_setting.length) {
+		query.attribute = display_setting[0];
+
+		if (display_setting.length > 1) {
+			query.attribute_term = display_setting.slice(1).join(',');
+		}
 	}
 
 	var query_string = '?';
@@ -1601,30 +1606,451 @@ var _wp$components = wp.components,
     Dropdown = _wp$components.Dropdown;
 
 /**
+ * Attribute data cache. 
+ * Needed because it takes a lot of API calls to generate attribute info.
+ */
+
+var PRODUCT_ATTRIBUTE_DATA = {};
+
+/**
  * When the display mode is 'Attribute' search for and select product attributes to pull products from.
  */
 
 var ProductsAttributeSelect = exports.ProductsAttributeSelect = function (_React$Component) {
 	_inherits(ProductsAttributeSelect, _React$Component);
 
-	function ProductsAttributeSelect() {
+	/**
+  * Constructor.
+  */
+	function ProductsAttributeSelect(props) {
 		_classCallCheck(this, ProductsAttributeSelect);
 
-		return _possibleConstructorReturn(this, (ProductsAttributeSelect.__proto__ || Object.getPrototypeOf(ProductsAttributeSelect)).apply(this, arguments));
+		/** 
+   * The first item in props.selected_display_setting is the attribute slug.
+   * The rest are the term ids for any selected terms.
+   */
+		var _this = _possibleConstructorReturn(this, (ProductsAttributeSelect.__proto__ || Object.getPrototypeOf(ProductsAttributeSelect)).call(this, props));
+
+		_this.state = {
+			selectedAttribute: props.selected_display_setting.length ? props.selected_display_setting[0] : '',
+			selectedTerms: props.selected_display_setting.length > 1 ? props.selected_display_setting.slice(1) : [],
+			filterQuery: ''
+		};
+
+		_this.setSelectedAttribute = _this.setSelectedAttribute.bind(_this);
+		_this.addTerm = _this.addTerm.bind(_this);
+		_this.removeTerm = _this.removeTerm.bind(_this);
+		return _this;
 	}
 
+	/**
+  * Set the selected attribute.
+  *
+  * @param slug string Attribute slug.
+  */
+
+
 	_createClass(ProductsAttributeSelect, [{
-		key: "render",
+		key: 'setSelectedAttribute',
+		value: function setSelectedAttribute(slug) {
+			this.setState({
+				selectedAttribute: slug,
+				selectedTerms: []
+			});
+
+			this.props.update_display_setting_callback([slug]);
+		}
+
+		/**
+   * Add a term to the selected attribute's terms.
+   *
+   * @param id int Term id.
+   */
+
+	}, {
+		key: 'addTerm',
+		value: function addTerm(id) {
+			var terms = this.state.selectedTerms;
+			terms.push(id);
+			this.setState({
+				selectedTerms: terms
+			});
+
+			var displaySetting = [this.state.selectedAttribute];
+			displaySetting = displaySetting.concat(terms);
+			this.props.update_display_setting_callback(displaySetting);
+		}
+
+		/**
+   * Remove a term from the selected attribute's terms.
+   *
+   * @param id int Term id.
+   */
+
+	}, {
+		key: 'removeTerm',
+		value: function removeTerm(id) {
+			var newTerms = [];
+			var _iteratorNormalCompletion = true;
+			var _didIteratorError = false;
+			var _iteratorError = undefined;
+
+			try {
+				for (var _iterator = this.state.selectedTerms[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+					var termId = _step.value;
+
+					if (termId !== id) {
+						newTerms.push(termId);
+					}
+				}
+			} catch (err) {
+				_didIteratorError = true;
+				_iteratorError = err;
+			} finally {
+				try {
+					if (!_iteratorNormalCompletion && _iterator.return) {
+						_iterator.return();
+					}
+				} finally {
+					if (_didIteratorError) {
+						throw _iteratorError;
+					}
+				}
+			}
+
+			this.setState({
+				selectedTerms: newTerms
+			});
+
+			var displaySetting = [this.state.selectedAttribute];
+			displaySetting = displaySetting.concat(newTerms);
+			this.props.update_display_setting_callback(displaySetting);
+		}
+
+		/**
+   * Update the search results when typing in the attributes box.
+   *
+   * @param evt Event object
+   */
+
+	}, {
+		key: 'updateFilter',
+		value: function updateFilter(evt) {
+			this.setState({
+				filterQuery: evt.target.value
+			});
+		}
+
+		/**
+   * Render the whole section.
+   */
+
+	}, {
+		key: 'render',
 		value: function render() {
 			return wp.element.createElement(
-				"div",
-				{ className: "product-attribute-select" },
-				"TODO: Attribute select screen"
+				'div',
+				{ className: 'product-attribute-select' },
+				wp.element.createElement(ProductAttributeFilter, { updateFilter: this.updateFilter.bind(this) }),
+				wp.element.createElement(ProductAttributeList, {
+					selectedAttribute: this.state.selectedAttribute,
+					selectedTerms: this.state.selectedTerms,
+					filterQuery: this.state.filterQuery,
+					setSelectedAttribute: this.setSelectedAttribute.bind(this),
+					addTerm: this.addTerm.bind(this),
+					removeTerm: this.removeTerm.bind(this)
+				})
 			);
 		}
 	}]);
 
 	return ProductsAttributeSelect;
+}(React.Component);
+
+/**
+ * Search area for filtering through the attributes list.
+ */
+
+
+var ProductAttributeFilter = function ProductAttributeFilter(props) {
+	return wp.element.createElement(
+		'div',
+		null,
+		wp.element.createElement('input', { id: 'product-attribute-search', type: 'search', placeholder: __('Search for attributes'), onChange: props.updateFilter })
+	);
+};
+
+/**
+ * List of attributes.
+ */
+var ProductAttributeList = withAPIData(function (props) {
+	return {
+		attributes: '/wc/v2/products/attributes'
+	};
+})(function (_ref) {
+	var attributes = _ref.attributes,
+	    selectedAttribute = _ref.selectedAttribute,
+	    filterQuery = _ref.filterQuery,
+	    selectedTerms = _ref.selectedTerms,
+	    setSelectedAttribute = _ref.setSelectedAttribute,
+	    addTerm = _ref.addTerm,
+	    removeTerm = _ref.removeTerm;
+
+	if (!attributes.data) {
+		return __('Loading');
+	}
+
+	if (0 === attributes.data.length) {
+		return __('No attributes found');
+	}
+
+	var filter = filterQuery.toLowerCase();
+	var attributeElements = [];
+	var _iteratorNormalCompletion2 = true;
+	var _didIteratorError2 = false;
+	var _iteratorError2 = undefined;
+
+	try {
+		for (var _iterator2 = attributes.data[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+			var attribute = _step2.value;
+
+
+			// Filter out attributes that don't match the search query.
+			if (filter.length && -1 === attribute.name.toLowerCase().indexOf(filter)) {
+				continue;
+			}
+
+			if (PRODUCT_ATTRIBUTE_DATA.hasOwnProperty(attribute.slug)) {
+				attributeElements.push(wp.element.createElement(ProductAttributeElement, {
+					selectedAttribute: selectedAttribute,
+					selectedTerms: selectedTerms,
+					attribute: attribute,
+					setSelectedAttribute: setSelectedAttribute,
+					addTerm: addTerm,
+					removeTerm: removeTerm
+				}));
+			} else {
+				attributeElements.push(wp.element.createElement(UncachedProductAttributeElement, {
+					selectedAttribute: selectedAttribute,
+					selectedTerms: selectedTerms,
+					attribute: attribute,
+					setSelectedAttribute: setSelectedAttribute,
+					addTerm: addTerm,
+					removeTerm: removeTerm
+				}));
+			}
+		}
+	} catch (err) {
+		_didIteratorError2 = true;
+		_iteratorError2 = err;
+	} finally {
+		try {
+			if (!_iteratorNormalCompletion2 && _iterator2.return) {
+				_iterator2.return();
+			}
+		} finally {
+			if (_didIteratorError2) {
+				throw _iteratorError2;
+			}
+		}
+	}
+
+	return wp.element.createElement(
+		'div',
+		{ className: 'product-attributes-list' },
+		attributeElements
+	);
+});
+
+/**
+ * Caches then renders a product attribute term element.
+ */
+var UncachedProductAttributeElement = withAPIData(function (props) {
+	return {
+		terms: '/wc/v2/products/attributes/' + props.attribute.id + '/terms'
+	};
+})(function (_ref2) {
+	var terms = _ref2.terms,
+	    selectedAttribute = _ref2.selectedAttribute,
+	    selectedTerms = _ref2.selectedTerms,
+	    attribute = _ref2.attribute,
+	    setSelectedAttribute = _ref2.setSelectedAttribute,
+	    addTerm = _ref2.addTerm,
+	    removeTerm = _ref2.removeTerm;
+
+	if (!terms.data) {
+		return __('Loading');
+	}
+
+	if (0 === terms.data.length) {
+		return __('No attribute options found');
+	}
+
+	// Populate cache.
+	PRODUCT_ATTRIBUTE_DATA[attribute.slug] = { terms: [] };
+
+	var totalCount = 0;
+	var _iteratorNormalCompletion3 = true;
+	var _didIteratorError3 = false;
+	var _iteratorError3 = undefined;
+
+	try {
+		for (var _iterator3 = terms.data[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+			var term = _step3.value;
+
+			totalCount += term.count;
+			PRODUCT_ATTRIBUTE_DATA[attribute.slug].terms.push(term);
+		}
+	} catch (err) {
+		_didIteratorError3 = true;
+		_iteratorError3 = err;
+	} finally {
+		try {
+			if (!_iteratorNormalCompletion3 && _iterator3.return) {
+				_iterator3.return();
+			}
+		} finally {
+			if (_didIteratorError3) {
+				throw _iteratorError3;
+			}
+		}
+	}
+
+	PRODUCT_ATTRIBUTE_DATA[attribute.slug].count = totalCount;
+
+	return wp.element.createElement(ProductAttributeElement, {
+		selectedAttribute: selectedAttribute,
+		selectedTerms: selectedTerms,
+		attribute: attribute,
+		setSelectedAttribute: setSelectedAttribute,
+		addTerm: addTerm,
+		removeTerm: removeTerm
+	});
+});
+
+/**
+ * A product attribute term element.
+ */
+
+var ProductAttributeElement = function (_React$Component2) {
+	_inherits(ProductAttributeElement, _React$Component2);
+
+	/**
+  * Constructor.
+  */
+	function ProductAttributeElement(props) {
+		_classCallCheck(this, ProductAttributeElement);
+
+		var _this2 = _possibleConstructorReturn(this, (ProductAttributeElement.__proto__ || Object.getPrototypeOf(ProductAttributeElement)).call(this, props));
+
+		_this2.handleAttributeChange = _this2.handleAttributeChange.bind(_this2);
+		_this2.handleTermChange = _this2.handleTermChange.bind(_this2);
+		return _this2;
+	}
+
+	/**
+  * Propagate and reset values when the selected attribute is changed.
+  *
+  * @param evt Event object
+  */
+
+
+	_createClass(ProductAttributeElement, [{
+		key: 'handleAttributeChange',
+		value: function handleAttributeChange(evt) {
+			if (!evt.target.checked) {
+				return;
+			}
+
+			var slug = evt.target.value;
+			this.props.setSelectedAttribute(slug);
+		}
+
+		/**
+   * Add or remove selected terms.
+   *
+   * @param evt Event object
+   */
+
+	}, {
+		key: 'handleTermChange',
+		value: function handleTermChange(evt) {
+			if (evt.target.checked) {
+				this.props.addTerm(evt.target.value);
+			} else {
+				this.props.removeTerm(evt.target.value);
+			}
+		}
+
+		/**
+   * Render the details for one attribute.
+   */
+
+	}, {
+		key: 'render',
+		value: function render() {
+			var _this3 = this;
+
+			var attribute = PRODUCT_ATTRIBUTE_DATA[this.props.attribute.slug];
+			var isSelected = this.props.selectedAttribute === this.props.attribute.slug;
+
+			var attributeTerms = null;
+			if (isSelected) {
+				attributeTerms = wp.element.createElement(
+					'ul',
+					{ className: 'product-attribute-terms' },
+					attribute.terms.map(function (term) {
+						return wp.element.createElement(
+							'li',
+							{ className: 'product-attribute-term' },
+							wp.element.createElement(
+								'label',
+								null,
+								wp.element.createElement('input', { type: 'checkbox',
+									value: term.id,
+									onChange: _this3.handleTermChange,
+									checked: _this3.props.selectedTerms.includes(String(term.id))
+								}),
+								term.name,
+								wp.element.createElement(
+									'span',
+									{ className: 'product-attribute-count' },
+									term.count
+								)
+							)
+						);
+					})
+				);
+			}
+
+			return wp.element.createElement(
+				'div',
+				{ className: 'product-attribute' },
+				wp.element.createElement(
+					'div',
+					{ className: 'product-attribute-name' },
+					wp.element.createElement(
+						'label',
+						null,
+						wp.element.createElement('input', { type: 'radio',
+							value: this.props.attribute.slug,
+							onChange: this.handleAttributeChange,
+							checked: isSelected
+						}),
+						this.props.attribute.name,
+						wp.element.createElement(
+							'span',
+							{ className: 'product-attribute-count' },
+							attribute.count
+						)
+					)
+				),
+				attributeTerms
+			);
+		}
+	}]);
+
+	return ProductAttributeElement;
 }(React.Component);
 
 /***/ })

@@ -173,7 +173,7 @@ class ProductsBlockSettingsEditor extends React.Component {
 		} else if ( 'category' === this.state.display ) {
 			extra_settings = <ProductsCategorySelect { ...this.props } />;
 		} else if ( 'attribute' === this.state.display ) {
-			extra_settings = <ProductsAttributeSelect />
+			extra_settings = <ProductsAttributeSelect { ...this.props } />
 		}
 
 		const menu = this.state.menu_visible ? <ProductsBlockSettingsEditorDisplayOptions existing={ this.state.display ? true : false } update_display_callback={ this.updateDisplay } /> : null;
@@ -267,12 +267,17 @@ const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
 		orderby: order
 	};
 
-	// @todo These will likely need to be modified to work with the final version of the category/product picker attributes.
 	if ( 'specific' === display ) {
 		query.include = JSON.stringify( display_setting );
 		query.orderby = 'include';
 	} else if ( 'category' === display ) {
 		query.category = display_setting.join( ',' );
+	} else if ( 'attribute' === display && display_setting.length ) {
+		query.attribute = display_setting[0];
+
+		if ( display_setting.length > 1 ) {
+			query.attribute_term = display_setting.slice( 1 ).join( ',' );
+		}
 	}
 
 	let query_string = '?';
