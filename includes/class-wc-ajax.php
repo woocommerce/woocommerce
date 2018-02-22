@@ -1364,7 +1364,7 @@ class WC_AJAX {
 			$ids = array_slice( $ids, 0, absint( $_GET['limit'] ) );
 		}
 
-		$product_objects = array_filter( array_map( 'wc_get_product', $ids ), 'wc_products_array_filter_editable' );
+		$product_objects = array_filter( array_map( 'wc_get_product', $ids ), 'wc_products_array_filter_readable' );
 		$products        = array();
 
 		foreach ( $product_objects as $product_object ) {
@@ -1407,7 +1407,7 @@ class WC_AJAX {
 			$ids = array_slice( $ids, 0, absint( $_GET['limit'] ) );
 		}
 
-		$product_objects = array_filter( array_map( 'wc_get_product', $ids ), 'wc_products_array_filter_editable' );
+		$product_objects = array_filter( array_map( 'wc_get_product', $ids ), 'wc_products_array_filter_readable' );
 		$products        = array();
 
 		foreach ( $product_objects as $product_object ) {

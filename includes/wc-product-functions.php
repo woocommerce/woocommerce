@@ -1066,6 +1066,17 @@ function wc_products_array_filter_editable( $product ) {
 }
 
 /**
+ * Callback for array filter to get products the user can view only.
+ *
+ * @since  3.4.0
+ * @param  WC_Product $product WC_Product object.
+ * @return bool
+ */
+function wc_products_array_filter_readable( $product ) {
+	return $product && is_a( $product, 'WC_Product' ) && current_user_can( 'read_product', $product->get_id() );
+}
+
+/**
  * Sort an array of products by a value.
  *
  * @since  3.0.0
