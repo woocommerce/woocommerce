@@ -479,11 +479,11 @@ var ProductsBlockPreview = withAPIData(function (_ref) {
 	    order = attributes.order,
 	    display = attributes.display,
 	    display_setting = attributes.display_setting,
-	    layout = attributes.layout;
+	    block_layout = attributes.block_layout;
 
 
 	var query = {
-		per_page: 'list' === layout ? rows : rows * columns,
+		per_page: 'list' === block_layout ? rows : rows * columns,
 		orderby: order
 	};
 
@@ -542,7 +542,7 @@ var ProductsBlockPreview = withAPIData(function (_ref) {
 		return __('No products found');
 	}
 
-	var classes = "wc-products-block-preview " + attributes.layout + " cols-" + attributes.columns;
+	var classes = "wc-products-block-preview " + attributes.block_layout + " cols-" + attributes.columns;
 
 	return wp.element.createElement(
 		'div',
@@ -566,7 +566,7 @@ registerBlockType('woocommerce/products', {
 		/**
    * Layout to use. 'grid' or 'list'.
    */
-		layout: {
+		block_layout: {
 			type: 'string',
 			default: 'grid'
 		},
@@ -653,7 +653,7 @@ registerBlockType('woocommerce/products', {
 		    focus = props.focus,
 		    setAttributes = props.setAttributes,
 		    setFocus = props.setFocus;
-		var layout = attributes.layout,
+		var block_layout = attributes.block_layout,
 		    rows = attributes.rows,
 		    columns = attributes.columns,
 		    display_title = attributes.display_title,
@@ -746,16 +746,16 @@ registerBlockType('woocommerce/products', {
 				icon: 'list-view',
 				title: __('List View'),
 				onClick: function onClick() {
-					return setAttributes({ layout: 'list' });
+					return setAttributes({ block_layout: 'list' });
 				},
-				isActive: layout === 'list'
+				isActive: 'list' === block_layout
 			}, {
 				icon: 'grid-view',
 				title: __('Grid View'),
 				onClick: function onClick() {
-					return setAttributes({ layout: 'grid' });
+					return setAttributes({ block_layout: 'grid' });
 				},
-				isActive: layout === 'grid'
+				isActive: 'grid' === block_layout
 			}];
 
 			var editButton = [{
@@ -816,7 +816,7 @@ registerBlockType('woocommerce/products', {
   */
 	save: function save(props) {
 		var _props$attributes = props.attributes,
-		    layout = _props$attributes.layout,
+		    block_layout = _props$attributes.block_layout,
 		    rows = _props$attributes.rows,
 		    columns = _props$attributes.columns,
 		    display_title = _props$attributes.display_title,
@@ -830,10 +830,10 @@ registerBlockType('woocommerce/products', {
 
 		var shortcode_atts = new Map();
 		shortcode_atts.set('orderby', order);
-		shortcode_atts.set('limit', 'grid' === layout ? rows * columns : rows);
-		shortcode_atts.set('class', 'list' === layout ? className + ' list-layout' : className);
+		shortcode_atts.set('limit', 'grid' === block_layout ? rows * columns : rows);
+		shortcode_atts.set('class', 'list' === block_layout ? className + ' list-layout' : className);
 
-		if ('grid' === layout) {
+		if ('grid' === block_layout) {
 			shortcode_atts.set('columns', columns);
 		}
 
