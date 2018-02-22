@@ -80,6 +80,7 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 		$coupon = new WC_Coupon();
 		$coupon->set_code( $code );
 		$coupon->set_description( 'This is a test coupon.' );
+		$coupon->set_amount( '' );
 		$coupon->set_usage_count( 5 );
 		$coupon->save();
 		$coupon_id = $coupon->get_id();
@@ -88,6 +89,7 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 5, $coupon_read->get_usage_count() );
 		$this->assertEquals( $code, $coupon_read->get_code() );
+		$this->assertEquals( 0, $coupon->get_amount() );
 		$this->assertEquals( 'This is a test coupon.', $coupon_read->get_description() );
 	}
 
