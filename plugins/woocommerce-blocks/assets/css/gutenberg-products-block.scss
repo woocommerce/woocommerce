@@ -325,6 +325,7 @@
 			border: 1px solid #e6eaee;
 			text-align: left;
 			padding: .5em;
+			transition: opacity .7s;
 
 			img {
 				padding-top: .5em;
@@ -349,6 +350,7 @@
 
 		li {
 			margin: 0;
+			background: #FFFFFF;
 		}
 
 		.product-search-results {
@@ -360,6 +362,12 @@
 		.selected-products {
 			margin-top: 1em;
 			margin-bottom: 1em;
+		}
+
+		.components-button--transition-exit-active {
+			button {
+				opacity: 0;
+			}
 		}
 	}
 

@@ -29,7 +29,7 @@ function wgpb_register_products_block() {
 	wp_register_script(
 		'woocommerce-products-block-editor',
 		plugins_url( 'assets/js/products-block.js', __FILE__ ),
-		array( 'wp-blocks', 'wp-element' ),
+		array( 'wp-blocks', 'wp-element', 'react-transition-group' ),
 		rand() // @todo Change this to WC_VERSION when merged into WooCommerce.
 	);
 
@@ -45,3 +45,16 @@ function wgpb_register_products_block() {
 		'editor_style'  => 'woocommerce-products-block-editor',
 	) );
 }
+
+/**
+ * Register extra scripts needed.
+ */
+function wgpb_extra_gutenberg_scripts() {
+	wp_enqueue_script(
+		'react-transition-group',
+		plugins_url( 'assets/js/vendor/react-transition-group.js', __FILE__ ),
+		array( 'wp-blocks', 'wp-element' ),
+		'2.2.1'
+	);
+}
+add_action( 'enqueue_block_assets', 'wgpb_extra_gutenberg_scripts' );
