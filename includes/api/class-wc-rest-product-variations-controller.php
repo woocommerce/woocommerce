@@ -152,6 +152,27 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 	}
 
 	/**
+	 * Check if a given request has access to update an item.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function update_item_permissions_check( $request ) {
+		$object = $this->get_object( (int) $request['id'] );
+
+		if ( $object && 0 !== $object->get_id() && ! wc_rest_check_post_permissions( $this->post_type, 'edit', $object->get_id() ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		// Check if variation belongs to the correct parent product.
+		if ( 0 !== $object->get_parent_id() && absint( $request['product_id'] ) !== $object->get_parent_id() ) {
+			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Parent product does not match current variation.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
+	}
+
+	/**
 	 * Prepare a single variation output for response.
 	 *
 	 * @since  3.0.0
@@ -254,7 +275,10 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 			$variation = new WC_Product_Variation();
 		}
 
-		$variation->set_parent_id( absint( $request['product_id'] ) );
+		// Update parent ID just once.
+		if ( 0 === $variation->get_parent_id() ) {
+			$variation->set_parent_id( absint( $request['product_id'] ) );
+		}
 
 		// Status.
 		if ( isset( $request['visible'] ) ) {
