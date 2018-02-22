@@ -1330,6 +1330,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$post_statuses = current_user_can( 'edit_private_products' ) ? array( 'private', 'publish' ) : array( 'publish' );
 		$type_join     = '';
 		$type_where    = '';
+		$status_where  = '';
 
 		// Parse search terms.
 		if ( preg_match_all( '/".*?("|$)|((?<=[\t ",+])|^)[^\t ",+]+/', $term, $matches ) ) {
@@ -1337,7 +1338,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$count        = count( $search_terms );
 
 			// if the search string has only short terms or stopwords, or is 10+ terms long, match it as sentence.
-			if ( 9 > $count || 0 === $count ) {
+			if ( 9 < $count || 0 === $count ) {
 				$search_terms = array( $term );
 			}
 		} else {
