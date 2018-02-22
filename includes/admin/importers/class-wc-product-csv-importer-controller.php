@@ -245,25 +245,46 @@ class WC_Product_CSV_Importer_Controller {
 
 	/**
 	 * Handles the CSV upload and initial parsing of the file to prepare for
-	 * displaying author import options.
+	 * displaying other import options.
 	 *
 	 * @return string|WP_Error
 	 */
 	public function handle_upload() {
 		$valid_filetypes = apply_filters( 'woocommerce_csv_product_import_valid_filetypes', array( 'csv' => 'text/csv', 'txt' => 'text/plain' ) );
 
-		if ( empty( $_POST['file_url'] ) ) {
-			if ( ! isset( $_FILES['import'] ) ) {
-				return new WP_Error( 'woocommerce_product_csv_importer_upload_file_empty', __( 'File is empty. Please upload something more substantial. This error could also be caused by uploads being disabled in your php.ini or by post_max_size being defined as smaller than upload_max_filesize in php.ini.', 'woocommerce' ) );
+		// Importing sample products.
+		if ( isset( $_REQUEST['sample_products'] ) && $_REQUEST['sample_products'] ) {
+			if ( ! file_exists(  WC_ABSPATH . 'sample-data/sample_products.csv' ) ) {
+				return new WP_Error( 'woocommerce_product_csv_importer_sample_products_missing', __( 'The sample products CSV file is missing or cannot be read.', 'woocommerce' ) );
 			}
+
+			return WC_ABSPATH . 'sample-data/sample_products.csv';
+		}
+
+		// Importing file on the server.
+		if ( ! empty( $_POST['file_url'] ) ) {
+			if ( ! file_exists( ABSPATH . $_POST['file_url'] ) ) {
+				return new WP_Error( 'woocommerce_product_csv_importer_upload_file_not_found', __( 'File not found. Could not find the file on your server.', 'woocommerce' ) );
+			}
+
+			$filetype = wp_check_filetype( ABSPATH . $_POST['file_url'], $valid_filetypes );
+			if ( ! in_array( $filetype['type'], $valid_filetypes ) ) {
+				return new WP_Error( 'woocommerce_product_csv_importer_upload_file_invalid', __( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
+			}
+
+			return ABSPATH . $_POST['file_url'];
+		}
+
+		// Importing uploaded file.
+		if ( isset( $_FILES['import'] ) && 4 !== $_FILES['import']['error'] ) {
 
 			$filetype = wp_check_filetype( $_FILES['import']['name'], $valid_filetypes );
 			if ( ! in_array( $filetype['type'], $valid_filetypes ) ) {
 				return new WP_Error( 'woocommerce_product_csv_importer_upload_file_invalid', __( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
 			}
 
-			$overrides                 = array( 'test_form' => false, 'mimes' => $valid_filetypes );
-			$upload                    = wp_handle_upload( $_FILES['import'], $overrides );
+			$overrides = array( 'test_form' => false, 'mimes' => $valid_filetypes );
+			$upload    = wp_handle_upload( $_FILES['import'], $overrides );
 
 			if ( isset( $upload['error'] ) ) {
 				return new WP_Error( 'woocommerce_product_csv_importer_upload_error', $upload['error'] );
@@ -289,13 +310,6 @@ class WC_Product_CSV_Importer_Controller {
 			wp_schedule_single_event( time() + DAY_IN_SECONDS, 'importer_scheduled_cleanup', array( $id ) );
 
 			return $upload['file'];
-		} elseif ( file_exists( ABSPATH . $_POST['file_url'] ) ) {
-			$filetype = wp_check_filetype( ABSPATH . $_POST['file_url'], $valid_filetypes );
-			if ( ! in_array( $filetype['type'], $valid_filetypes ) ) {
-				return new WP_Error( 'woocommerce_product_csv_importer_upload_file_invalid', __( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
-			}
-
-			return ABSPATH . $_POST['file_url'];
 		}
 
 		return new WP_Error( 'woocommerce_product_csv_importer_upload_invalid_file', __( 'Please upload or provide the link to a valid CSV file.', 'woocommerce' ) );
