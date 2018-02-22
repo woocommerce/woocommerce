@@ -1326,12 +1326,36 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	public function search_products( $term, $type = '', $include_variations = false, $all_statuses = false ) {
 		global $wpdb;
 
-		$like_term     = '%' . $wpdb->esc_like( $term ) . '%';
 		$post_types    = $include_variations ? array( 'product', 'product_variation' ) : array( 'product' );
 		$post_statuses = current_user_can( 'edit_private_products' ) ? array( 'private', 'publish' ) : array( 'publish' );
 		$type_join     = '';
 		$type_where    = '';
-		$status_where  = '';
+
+		// Parse search terms.
+		if ( preg_match_all( '/".*?("|$)|((?<=[\t ",+])|^)[^\t ",+]+/', $term, $matches ) ) {
+			$search_terms = $this->get_valid_search_terms( $matches[0] );
+			$count        = count( $search_terms );
+
+			// if the search string has only short terms or stopwords, or is 10+ terms long, match it as sentence.
+			if ( 9 > $count || 0 === $count ) {
+				$search_terms = array( $term );
+			}
+		} else {
+			$search_terms = array( $term );
+		}
+
+		$search_where = '';
+		$searchand    = '';
+
+		foreach ( $search_terms as $search_term ) {
+			$like          = '%' . $wpdb->esc_like( $search_term ) . '%';
+			$search_where .= $wpdb->prepare( " {$searchand} ( ( posts.post_title LIKE %s) OR ( posts.post_content LIKE %s ) OR ( postmeta.meta_key = '_sku' AND postmeta.meta_value LIKE %s ) )", $like, $like, $like ); // @codingStandardsIgnoreLine.
+			$searchand     = ' AND ';
+		}
+
+		if ( $search_where ) {
+			$search_where = ' AND (' . $search_where . ') ';
+		}
 
 		if ( $type ) {
 			if ( in_array( $type, array( 'virtual', 'downloadable' ), true ) ) {
@@ -1347,25 +1371,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 		$search_results = $wpdb->get_results(
 			// phpcs:disable
-			$wpdb->prepare(
-				"SELECT DISTINCT posts.ID as product_id, posts.post_parent as parent_id FROM {$wpdb->posts} posts
-				LEFT JOIN {$wpdb->postmeta} postmeta ON posts.ID = postmeta.post_id
-				$type_join
-				WHERE (
-					posts.post_title LIKE %s
-					OR posts.post_content LIKE %s
-					OR (
-						postmeta.meta_key = '_sku' AND postmeta.meta_value LIKE %s
-					)
-				)
-				AND posts.post_type IN ('" . implode( "','", $post_types ) . "')
-				$status_where
-				$type_where
-				ORDER BY posts.post_parent ASC, posts.post_title ASC",
-				$like_term,
-				$like_term,
-				$like_term
-			)
+			"SELECT DISTINCT posts.ID as product_id, posts.post_parent as parent_id FROM {$wpdb->posts} posts
+			LEFT JOIN {$wpdb->postmeta} postmeta ON posts.ID = postmeta.post_id
+			$type_join
+			WHERE posts.post_type IN ('" . implode( "','", $post_types ) . "')
+			$search_where
+			$status_where
+			$type_where
+			ORDER BY posts.post_parent ASC, posts.post_title ASC"
 			// phpcs:enable
 		);
 
