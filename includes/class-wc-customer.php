@@ -753,7 +753,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @throws WC_Data_Exception
 	 */
 	public function set_display_name( $display_name ) {
-		$this->set_prop( 'display_name', $display_name );
+		$this->set_prop( 'display_name', is_email( $display_name ) ? sprintf( __( '%1$s %2$s', 'display name', 'woocommerce' ), $this->get_first_name(), $this->get_last_name() ) : $display_name );
 	}
 
 	/**

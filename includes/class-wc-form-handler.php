@@ -188,32 +188,36 @@ class WC_Form_Handler {
 			return;
 		}
 
-		$current_user       = get_user_by( 'id', $user_id );
-		$current_first_name = $current_user->first_name;
-		$current_last_name  = $current_user->last_name;
-		$current_email      = $current_user->user_email;
+		$current_user         = get_user_by( 'id', $user_id );
+		$current_first_name   = $current_user->first_name;
+		$current_last_name    = $current_user->last_name;
+		$current_email        = $current_user->user_email;
 
-		$account_first_name = ! empty( $_POST['account_first_name'] ) ? wc_clean( $_POST['account_first_name'] ): '';
-		$account_last_name  = ! empty( $_POST['account_last_name'] ) ? wc_clean( $_POST['account_last_name'] )  : '';
-		$account_email      = ! empty( $_POST['account_email'] ) ? wc_clean( $_POST['account_email'] )          : '';
-		$pass_cur           = ! empty( $_POST['password_current'] ) ? $_POST['password_current']                : '';
-		$pass1              = ! empty( $_POST['password_1'] ) ? $_POST['password_1']                            : '';
-		$pass2              = ! empty( $_POST['password_2'] ) ? $_POST['password_2']                            : '';
-		$save_pass          = true;
+		$account_first_name   = ! empty( $_POST['account_first_name'] ) ? wc_clean( $_POST['account_first_name'] ): '';
+		$account_last_name    = ! empty( $_POST['account_last_name'] ) ? wc_clean( $_POST['account_last_name'] ) : '';
+    $account_display_name = ! empty( $_POST['account_display_name'] ) ? wc_clean( $_POST['account_display_name'] ) : '';
+		$account_email        = ! empty( $_POST['account_email'] ) ? wc_clean( $_POST['account_email'] ) : '';
+		$pass_cur             = ! empty( $_POST['password_current'] ) ? $_POST['password_current'] : '';
+		$pass1                = ! empty( $_POST['password_1'] ) ? $_POST['password_1'] : '';
+		$pass2                = ! empty( $_POST['password_2'] ) ? $_POST['password_2'] : '';
+		$save_pass            = true;
 
-		$user               = new stdClass();
-		$user->ID           = $user_id;
-		$user->first_name   = $account_first_name;
-		$user->last_name    = $account_last_name;
-
-		// Prevent emails being displayed, or leave alone.
-		$user->display_name = is_email( $current_user->display_name ) ? $user->first_name : $current_user->display_name;
-
+		$user                 = new stdClass();
+		$user->ID             = $user_id;
+		$user->first_name     = $account_first_name;
+		$user->last_name      = $account_last_name;
+		
+    // Prevent display name to be changed to email
+		if ( is_email( $account_display_name ) ) {
+			wc_add_notice( __( 'Display name cannot be changed to email address due to privacy concern.', 'woocommerce' ), 'error' );
+		}
+    
 		// Handle required fields.
 		$required_fields = apply_filters( 'woocommerce_save_account_details_required_fields', array(
-			'account_first_name' => __( 'First name', 'woocommerce' ),
-			'account_last_name'  => __( 'Last name', 'woocommerce' ),
-			'account_email'      => __( 'Email address', 'woocommerce' ),
+			'account_first_name'    => __( 'First name', 'woocommerce' ),
+			'account_last_name'     => __( 'Last name', 'woocommerce' ),
+			'account_display_name'  => __( 'Display name', 'woocommerce' ),
+			'account_email'         => __( 'Email address', 'woocommerce' ),
 		) );
 
 		foreach ( $required_fields as $field_key => $field_name ) {
