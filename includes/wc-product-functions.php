@@ -940,7 +940,7 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 			 * If the customer is excempt from VAT, remove the taxes here.
 			 * Either remove the base or the user taxes depending on woocommerce_adjust_non_base_location_prices setting.
 			 */
-			if ( ! empty( WC()->customer ) && WC()->customer->get_is_vat_exempt() ) {
+			if ( ! empty( WC()->customer ) && WC()->customer->get_is_vat_exempt() ) { // @codingStandardsIgnoreLine.
 				$remove_taxes = apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ? WC_Tax::calc_tax( $line_price, $base_tax_rates, true ) : WC_Tax::calc_tax( $line_price, $tax_rates, true );
 				$remove_tax   = array_sum( $remove_taxes );
 				$return_price = round( $line_price - $remove_tax, wc_get_price_decimals() );
