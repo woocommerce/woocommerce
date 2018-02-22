@@ -93,6 +93,42 @@ class ProductsSpecificSearchField extends React.Component {
 		}
 
 		this.updateSearchResults = this.updateSearchResults.bind( this );
+		this.setWrapperRef = this.setWrapperRef.bind( this );
+		this.handleClickOutside = this.handleClickOutside.bind( this );
+	}
+
+	/**
+	 * Hook in the listener for closing menu when clicked outside.
+	 */
+	componentDidMount() {
+		document.addEventListener( 'mousedown', this.handleClickOutside );
+	}
+
+	/**
+	 * Remove the listener for closing menu when clicked outside.
+	 */
+	componentWillUnmount() {
+		document.removeEventListener( 'mousedown', this.handleClickOutside );
+	}
+
+	/**
+	 * Set the wrapper reference.
+	 *
+	 * @param node DOMNode
+	 */
+	setWrapperRef( node ) {
+		this.wrapperRef = node;
+	}
+
+	/**
+	 * Close the menu when user clicks outside the search area.
+	 */
+	handleClickOutside( evt ) {
+        if ( this.wrapperRef && ! this.wrapperRef.contains( event.target ) ) {
+            this.setState( {
+            	searchText: '',
+            } );
+        }
 	}
 
 	/**
@@ -110,14 +146,20 @@ class ProductsSpecificSearchField extends React.Component {
 	 * Render the product search UI.
 	 */
 	render() {
+
+		let cancelButton = null;
+		if ( this.state.searchText.length ) {
+			cancelButton = <span className="cancel" onClick={ () => { this.setState( { searchText: '' } ); } } >X</span>;
+		}
+
 		return (
-			<div className="product-search">
+			<div className="product-search" ref={ this.setWrapperRef }>
 				<input type="text"
 					value={ this.state.searchText }
 					placeholder={ __( 'Search for products to display' ) }
 					onChange={ this.updateSearchResults }
 				/>
-				<span className="cancel" onClick={ () => { this.setState( { searchText: '' } ); } } >X</span>
+				{ cancelButton }
 				<ProductSpecificSearchResults
 					searchString={ this.state.searchText }
 					addProductCallback={ this.props.addProductCallback }

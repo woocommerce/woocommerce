@@ -954,7 +954,7 @@ var ProductsSpecificSelect = exports.ProductsSpecificSelect = function (_React$C
 
 
 	_createClass(ProductsSpecificSelect, [{
-		key: "addProduct",
+		key: 'addProduct',
 		value: function addProduct(id) {
 			var selectedProducts = this.state.selectedProducts;
 			selectedProducts.push(id);
@@ -973,7 +973,7 @@ var ProductsSpecificSelect = exports.ProductsSpecificSelect = function (_React$C
    */
 
 	}, {
-		key: "removeProduct",
+		key: 'removeProduct',
 		value: function removeProduct(id) {
 			var oldProducts = this.state.selectedProducts;
 			var newProducts = [];
@@ -1017,11 +1017,11 @@ var ProductsSpecificSelect = exports.ProductsSpecificSelect = function (_React$C
    */
 
 	}, {
-		key: "render",
+		key: 'render',
 		value: function render() {
 			return wp.element.createElement(
-				"div",
-				{ className: "product-specific-select" },
+				'div',
+				{ className: 'product-specific-select' },
 				wp.element.createElement(ProductsSpecificSearchField, {
 					addProductCallback: this.addProduct.bind(this),
 					selectedProducts: this.state.selectedProducts
@@ -1058,18 +1058,66 @@ var ProductsSpecificSearchField = function (_React$Component2) {
 		};
 
 		_this2.updateSearchResults = _this2.updateSearchResults.bind(_this2);
+		_this2.setWrapperRef = _this2.setWrapperRef.bind(_this2);
+		_this2.handleClickOutside = _this2.handleClickOutside.bind(_this2);
 		return _this2;
 	}
 
 	/**
-  * Event handler for updating results when text is typed into the input.
-  *
-  * @param evt Event object.
+  * Hook in the listener for closing menu when clicked outside.
   */
 
 
 	_createClass(ProductsSpecificSearchField, [{
-		key: "updateSearchResults",
+		key: 'componentDidMount',
+		value: function componentDidMount() {
+			document.addEventListener('mousedown', this.handleClickOutside);
+		}
+
+		/**
+   * Remove the listener for closing menu when clicked outside.
+   */
+
+	}, {
+		key: 'componentWillUnmount',
+		value: function componentWillUnmount() {
+			document.removeEventListener('mousedown', this.handleClickOutside);
+		}
+
+		/**
+   * Set the wrapper reference.
+   *
+   * @param node DOMNode
+   */
+
+	}, {
+		key: 'setWrapperRef',
+		value: function setWrapperRef(node) {
+			this.wrapperRef = node;
+		}
+
+		/**
+   * Close the menu when user clicks outside the search area.
+   */
+
+	}, {
+		key: 'handleClickOutside',
+		value: function handleClickOutside(evt) {
+			if (this.wrapperRef && !this.wrapperRef.contains(event.target)) {
+				this.setState({
+					searchText: ''
+				});
+			}
+		}
+
+		/**
+   * Event handler for updating results when text is typed into the input.
+   *
+   * @param evt Event object.
+   */
+
+	}, {
+		key: 'updateSearchResults',
 		value: function updateSearchResults(evt) {
 			this.setState({
 				searchText: evt.target.value
@@ -1081,25 +1129,30 @@ var ProductsSpecificSearchField = function (_React$Component2) {
    */
 
 	}, {
-		key: "render",
+		key: 'render',
 		value: function render() {
 			var _this3 = this;
 
+			var cancelButton = null;
+			if (this.state.searchText.length) {
+				cancelButton = wp.element.createElement(
+					'span',
+					{ className: 'cancel', onClick: function onClick() {
+							_this3.setState({ searchText: '' });
+						} },
+					'X'
+				);
+			}
+
 			return wp.element.createElement(
-				"div",
-				{ className: "product-search" },
-				wp.element.createElement("input", { type: "text",
+				'div',
+				{ className: 'product-search', ref: this.setWrapperRef },
+				wp.element.createElement('input', { type: 'text',
 					value: this.state.searchText,
 					placeholder: __('Search for products to display'),
 					onChange: this.updateSearchResults
 				}),
-				wp.element.createElement(
-					"span",
-					{ className: "cancel", onClick: function onClick() {
-							_this3.setState({ searchText: '' });
-						} },
-					"X"
-				),
+				cancelButton,
 				wp.element.createElement(ProductSpecificSearchResults, {
 					searchString: this.state.searchText,
 					addProductCallback: this.props.addProductCallback,
@@ -1162,7 +1215,7 @@ var ProductSpecificSearchResultsDropdown = function (_React$Component3) {
 	}
 
 	_createClass(ProductSpecificSearchResultsDropdown, [{
-		key: "render",
+		key: 'render',
 
 
 		/**
@@ -1193,7 +1246,7 @@ var ProductSpecificSearchResultsDropdown = function (_React$Component3) {
 						CSSTransition,
 						{
 							key: product.slug,
-							classNames: "components-button--transition",
+							classNames: 'components-button--transition',
 							timeout: { exit: 700 }
 						},
 						wp.element.createElement(ProductSpecificSearchResultsDropdownElement, {
@@ -1218,10 +1271,10 @@ var ProductSpecificSearchResultsDropdown = function (_React$Component3) {
 			}
 
 			return wp.element.createElement(
-				"div",
-				{ role: "menu", className: "product-search-results", "aria-orientation": "vertical", "aria-label": "{ __( 'Products list' ) }" },
+				'div',
+				{ role: 'menu', className: 'product-search-results', 'aria-orientation': 'vertical', 'aria-label': '{ __( \'Products list\' ) }' },
 				wp.element.createElement(
-					"ul",
+					'ul',
 					null,
 					wp.element.createElement(
 						TransitionGroup,
@@ -1266,7 +1319,7 @@ var ProductSpecificSearchResultsDropdownElement = function (_React$Component4) {
 
 
 	_createClass(ProductSpecificSearchResultsDropdownElement, [{
-		key: "handleClick",
+		key: 'handleClick',
 		value: function handleClick() {
 			this.setState({ clicked: true });
 			this.props.addProductCallback(this.props.product.id);
@@ -1277,27 +1330,27 @@ var ProductSpecificSearchResultsDropdownElement = function (_React$Component4) {
    */
 
 	}, {
-		key: "render",
+		key: 'render',
 		value: function render() {
 			var product = this.props.product;
 
 			return wp.element.createElement(
-				"li",
+				'li',
 				null,
 				wp.element.createElement(
-					"button",
-					{ type: "button",
-						className: "components-button",
+					'button',
+					{ type: 'button',
+						className: 'components-button',
 						id: 'product-' + product.id,
 						onClick: this.handleClick },
-					wp.element.createElement("img", { src: product.images[0].src, width: "30px" }),
+					wp.element.createElement('img', { src: product.images[0].src, width: '30px' }),
 					wp.element.createElement(
-						"span",
-						{ className: "product-name" },
+						'span',
+						{ className: 'product-name' },
 						this.state.clicked ? __('Added') : product.name
 					),
 					wp.element.createElement(
-						"a",
+						'a',
 						null,
 						__('Add')
 					)
@@ -1338,26 +1391,26 @@ var ProductSpecificSelectedProducts = withAPIData(function (props) {
 	}
 
 	return wp.element.createElement(
-		"div",
-		{ role: "menu", className: "selected-products", "aria-orientation": "vertical", "aria-label": "{ __( 'Products list' ) }" },
+		'div',
+		{ role: 'menu', className: 'selected-products', 'aria-orientation': 'vertical', 'aria-label': '{ __( \'Products list\' ) }' },
 		wp.element.createElement(
-			"ul",
+			'ul',
 			null,
 			products.data.map(function (product) {
 				return wp.element.createElement(
-					"li",
+					'li',
 					null,
 					wp.element.createElement(
-						"button",
-						{ type: "button", className: "components-button", id: 'product-' + product.id },
-						wp.element.createElement("img", { src: product.images[0].src, width: "30px" }),
+						'button',
+						{ type: 'button', className: 'components-button', id: 'product-' + product.id },
+						wp.element.createElement('img', { src: product.images[0].src, width: '30px' }),
 						wp.element.createElement(
-							"span",
-							{ className: "product-name" },
+							'span',
+							{ className: 'product-name' },
 							product.name
 						),
 						wp.element.createElement(
-							"a",
+							'a',
 							{ onClick: function onClick() {
 									removeProductCallback(product.id);
 								} },
