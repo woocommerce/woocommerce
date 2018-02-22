@@ -670,7 +670,7 @@ final class WC_Cart_Totals {
 	 */
 	protected function calculate_item_subtotals() {
 		foreach ( $this->items as $item_key => $item ) {
-			if ( $item->price_includes_tax ) {
+			if ( $item->price_includes_tax && $item->product->is_taxable() ) {
 				if ( $this->cart->get_customer()->get_is_vat_exempt() ) {
 					$item = $this->remove_item_base_taxes( $item );
 				} elseif ( apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
