@@ -247,7 +247,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	 * Prepare table list items.
 	 */
 	public function prepare_items() {
-		$per_page     = $this->get_items_per_page( 'wc_webhooks_per_page' );
+		$per_page     = $this->get_items_per_page( 'woocommerce_webhooks_per_page' );
 		$current_page = $this->get_pagenum();
 
 		// Query args.

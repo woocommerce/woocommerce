@@ -227,7 +227,7 @@ class WC_Admin_Menus {
 	 * @param int      $value  The number of rows to use.
 	 */
 	public function set_screen_option( $status, $option, $value ) {
-		if ( in_array( $option, array( 'wc_keys_per_page', 'wc_webhooks_per_page' ), true ) ) {
+		if ( in_array( $option, array( 'woocommerce_keys_per_page', 'woocommerce_webhooks_per_page' ), true ) ) {
 			return $value;
 		}
 

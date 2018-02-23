@@ -278,7 +278,7 @@ class WC_Admin_Webhooks {
 			// Add screen option.
 			add_screen_option( 'per_page', array(
 				'default' => 10,
-				'option'  => 'wc_webhooks_per_page',
+				'option'  => 'woocommerce_webhooks_per_page',
 			) );
 		}
 	}

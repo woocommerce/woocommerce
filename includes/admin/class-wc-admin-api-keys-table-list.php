@@ -186,7 +186,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	public function prepare_items() {
 		global $wpdb;
 
-		$per_page     = $this->get_items_per_page( 'wc_keys_per_page' );
+		$per_page     = $this->get_items_per_page( 'woocommerce_keys_per_page' );
 		$current_page = $this->get_pagenum();
 
 		if ( 1 < $current_page ) {

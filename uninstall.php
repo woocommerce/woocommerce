@@ -58,7 +58,7 @@ if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_order_itemmeta" );
 
 	// Delete user meta data.
-	foreach ( array( 'wc_keys_per_page', 'wc_webhooks_per_page' ) as $meta_key ) {
+	foreach ( array( 'woocommerce_keys_per_page', 'woocommerce_webhooks_per_page' ) as $meta_key ) {
 		delete_metadata( 'user', 0, $meta_key, '', true );
 	}
 

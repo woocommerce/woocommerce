@@ -59,7 +59,7 @@ class WC_Admin_API_Keys {
 			// Add screen option.
 			add_screen_option( 'per_page', array(
 				'default' => 10,
-				'option'  => 'wc_api_keys_per_page',
+				'option'  => 'woocommerce_keys_per_page',
 			) );
 		}
 	}
