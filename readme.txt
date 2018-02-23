@@ -161,6 +161,21 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
+= 3.3.4 - 2018-03-xx =
+* Fix - Fixed undefined index after running setup wizard two times on fresh install.
+* Fix - wc_get_loop_class; force columns to be a minimum of 1.
+* Fix - Added loading spinner to WC panels in menu admin. 
+* Fix - Use relative scheme for AJAX endpoint to avoid errors when using a mix of HTTP and HTTPS.
+* Fix - Fix SelectWoo templateSelection property.
+* Fix - Layered nav support on unsupported theme archives.
+* Fix - Prevent full refresh when editing store notice in the customizer.
+* Fix - Only append tax label in email content if taxes are enabled.
+* Fix - More reliable Jetpack detection.
+* Fix - Check if product has weight before calculate weight total in cart.
+* Fix - Correctly handle default ordering on the search page.
+* Fix - Fix default product category handling in installer.
+* Tweak - Add extra data in order mobile view (status and date).
+
 = 3.3.3 - 2018-02-21 =
 * Fix - Fixed is_numeric check which was affecting order subtotals/totals when using comma decimal separator.
 * Fix - Add missing direct script access checks to loop templates.
