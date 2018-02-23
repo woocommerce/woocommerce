@@ -96,7 +96,8 @@ var _wp$blocks = wp.blocks,
 var _wp$components = wp.components,
     Toolbar = _wp$components.Toolbar,
     withAPIData = _wp$components.withAPIData,
-    Dropdown = _wp$components.Dropdown;
+    Dropdown = _wp$components.Dropdown,
+    Dashicon = _wp$components.Dashicon;
 var RangeControl = InspectorControls.RangeControl,
     ToggleControl = InspectorControls.ToggleControl,
     SelectControl = InspectorControls.SelectControl;
@@ -176,20 +177,35 @@ var ProductsBlockSettingsEditorDisplayOption = function (_React$Component) {
 		value: function render() {
 			var _this2 = this;
 
+			var icon = 'arrow-right-alt2';
+
+			if ('filter' === this.props.value && this.props.extended) {
+				icon = 'arrow-down-alt2';
+			}
+
 			return wp.element.createElement(
 				'div',
-				{ className: 'wc-products-display-option value-' + this.props.value, onClick: function onClick() {
+				{ className: 'wc-products-display-options__option wc-products-display-options__option--' + this.props.value, onClick: function onClick() {
 						_this2.props.update_display_callback(_this2.props.value);
 					} },
 				wp.element.createElement(
-					'h4',
-					null,
-					this.props.title
+					'div',
+					{ 'class': 'wc-products-display-options__option-content' },
+					wp.element.createElement(
+						'span',
+						{ className: 'wc-products-display-options__option-title' },
+						this.props.title
+					),
+					wp.element.createElement(
+						'p',
+						{ className: 'wc-products-display-options__option-description' },
+						this.props.description
+					)
 				),
 				wp.element.createElement(
-					'p',
-					null,
-					this.props.description
+					'div',
+					{ className: 'wc-products-display-options__icon' },
+					wp.element.createElement(Dashicon, { icon: icon })
 				)
 			);
 		}
@@ -215,29 +231,33 @@ var ProductsBlockSettingsEditorDisplayOptions = function (_React$Component2) {
 	_createClass(ProductsBlockSettingsEditorDisplayOptions, [{
 		key: 'render',
 		value: function render() {
-			var classes = 'display-settings-container';
+			var classes = 'wc-products-display-options';
+
+			if (this.props.extended) {
+				classes += ' wc-products-display-options--extended';
+			}
+
 			if (this.props.existing) {
-				classes += ' existing';
+				classes += ' wc-products-display-options--popover';
 			}
 
 			var display_settings = [];
 			for (var setting_key in PRODUCTS_BLOCK_DISPLAY_SETTINGS) {
-				display_settings.push(wp.element.createElement(ProductsBlockSettingsEditorDisplayOption, _extends({}, PRODUCTS_BLOCK_DISPLAY_SETTINGS[setting_key], { update_display_callback: this.props.update_display_callback })));
+				display_settings.push(wp.element.createElement(ProductsBlockSettingsEditorDisplayOption, _extends({}, PRODUCTS_BLOCK_DISPLAY_SETTINGS[setting_key], { update_display_callback: this.props.update_display_callback, extended: this.props.extended })));
 			}
 
-			var description = null;
-			if (!this.props.existing) {
-				description = wp.element.createElement(
-					'p',
-					null,
-					__('Choose which products you\'d like to display:')
-				);
-			}
+			var arrow = wp.element.createElement('span', { className: 'wc-products-display-options--popover__arrow' });
+			var description = wp.element.createElement(
+				'p',
+				{ className: 'wc-products-block-description' },
+				__('Choose which products you\'d like to display:')
+			);
 
 			return wp.element.createElement(
 				'div',
 				{ className: classes },
-				description,
+				this.props.existing && arrow,
+				!this.props.existing && description,
 				display_settings
 			);
 		}
@@ -330,33 +350,24 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 				extra_settings = wp.element.createElement(_attributeSelect.ProductsAttributeSelect, this.props);
 			}
 
-			var menu = this.state.menu_visible ? wp.element.createElement(ProductsBlockSettingsEditorDisplayOptions, { existing: this.state.display ? true : false, update_display_callback: this.updateDisplay }) : null;
+			var menu = this.state.menu_visible ? wp.element.createElement(ProductsBlockSettingsEditorDisplayOptions, { extended: this.state.expanded_group ? true : false, existing: this.state.display ? true : false, update_display_callback: this.updateDisplay }) : null;
 
 			var heading = null;
 			if (this.state.display) {
 				var menu_link = wp.element.createElement(
-					'a',
-					{ onClick: function onClick() {
-							_this5.setState({ menu_visible: true });
+					'button',
+					{ type: 'button', className: 'wc-products-settings-heading__change-button button-link', onClick: function onClick() {
+							_this5.setState({ menu_visible: !_this5.state.menu_visible });
 						} },
 					__('Display different products')
 				);
-				if (this.state.menu_visible) {
-					menu_link = wp.element.createElement(
-						'a',
-						{ onClick: function onClick() {
-								_this5.setState({ menu_visible: false });
-							} },
-						__('Cancel')
-					);
-				}
 
 				heading = wp.element.createElement(
 					'div',
-					{ className: 'settings-heading' },
+					{ className: 'wc-products-settings-heading' },
 					wp.element.createElement(
 						'div',
-						{ className: 'currently-displayed' },
+						{ className: 'wc-products-settings-heading__current' },
 						__('Displaying '),
 						wp.element.createElement(
 							'strong',
@@ -366,7 +377,7 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 					),
 					wp.element.createElement(
 						'div',
-						{ className: 'change-display' },
+						{ className: 'wc-products-settings-heading__change' },
 						menu_link
 					)
 				);
@@ -377,7 +388,7 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 				{ className: 'wc-product-display-settings ' + (this.state.expanded_group ? 'expanded-group-' + this.state.expanded_group : '') },
 				wp.element.createElement(
 					'h4',
-					null,
+					{ className: 'wc-products-block-title' },
 					__('Products')
 				),
 				heading,

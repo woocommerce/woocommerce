@@ -150,11 +150,6 @@
 		}
 	}
 
-	.settings-heading {
-		display: flex;
-		justify-content: space-between;
-	}
-
 	.display-select {
 		margin: 0 -1em 20px;
 		padding-bottom: 20px;
@@ -413,4 +408,192 @@
 			}
 		}
 	}
+}
+
+$font__sans-serif: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen-Sans, Ubuntu, Cantarell, Helvetica Neue, sans-serif;
+$color__link: #0073aa;
+$color__link--hover: #00a0d2;
+$color__border: #e6eaee;
+$color__option-description: #86909b;
+$color__option-icon: #b9bcc2;
+
+/* Block title */
+.wc-products-block-title {
+	margin-bottom: 1.66em;
+	text-align: center;
+}
+
+p.wc-products-block-description {
+	margin: 0 0 2em;
+	font-family: $font__sans-serif;
+	font-size: 1em;
+	text-align: center;
+}
+
+/* Select option */
+.wc-products-display-options {
+	margin: 0 0 2.5em;
+}
+
+.wc-products-display-options__option {
+	display: flex;
+	align-items: flex-start;
+	flex-wrap: wrap;
+	margin: 0 auto;
+	padding: 1.25em 1.5em;
+	max-width: 80%;
+	background: #fff;
+	border-width: 1px 1px 0;
+	border-style: solid;
+	border-color: $color__border;
+	cursor: pointer;
+
+	&:last-of-type {
+		border-bottom-width: 1px;
+	}
+
+	&--featured,
+	&--best_sellers,
+	&--best_rated,
+	&--on_sale,
+	&--attribute {
+		display: none;
+		background-color: #fdfdfd;
+		padding-top: 1em;
+		padding-bottom: 1em;
+
+		.wc-products-display-options__option-title {
+			font-size: 1.15em;
+		}
+
+		.wc-products-display-options__icon {
+			.dashicon {
+				height: 20px;
+				width: 20px;
+			}
+		}
+	}
+}
+
+.wc-products-display-options__option-content {
+	width: 85%;
+	align-self: center;
+}
+
+.wc-products-display-options__option-title {
+	display: block;
+	font-size: 1.25em;
+}
+
+p.wc-products-display-options__option-description {
+	margin: 0;
+	font-family: $font__sans-serif;
+	font-size: 1em;
+	color: $color__option-description;
+}
+
+.wc-products-display-options__icon {
+	align-self: center;
+	margin-left: auto;
+	color: $color__option-icon;
+
+	.dashicon {
+		height: 25px;
+		width: 25px;
+	}
+}
+
+/* Select options popover */
+.wc-products-display-options--popover {
+	position: absolute;
+	right: -2em;
+	max-width: 60%;
+	margin: 0;
+	z-index: 999;
+	box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.1);
+	margin-top: -36px;
+
+	.wc-products-display-options__option {
+		margin: 0;
+		max-width: none;
+	}
+}
+
+.wc-products-display-options--popover__arrow {
+    width: 2em;
+    height: 1.25em;
+	position: absolute;
+	top: -1.15em;
+	right: 30%;
+	overflow: hidden;
+
+	&:after {
+		content: '';
+		position: absolute;
+		width: 1.25em;
+		height: 1.25em;
+		background: #fff;
+		transform: rotate(45deg);
+		top: .625em;
+		left: .3125em;
+		box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.1);
+		border: 1px solid $color__border;
+	}
+}
+
+/* Select options extended */
+.wc-products-display-options--extended {
+	.wc-products-display-options__option {
+		&--featured,
+		&--best_sellers,
+		&--best_rated,
+		&--on_sale,
+		&--attribute {
+			display: flex;
+		}
+	}
+
+	&:not(.wc-products-display-options--popover) {
+		.wc-products-display-options__option {
+			&--category {
+				border-bottom-width: 1px;
+			}
+
+			&--filter {
+				margin-top: .5em;
+			}
+
+			&--attribute {
+				margin-bottom: .5em;
+				border-bottom-width: 1px;
+			}
+		}
+	}
+}
+
+/* Settings heading */
+.wc-products-settings-heading {
+	display: flex;
+	justify-content: space-between;
+	margin: 0 -1em 35px -1em;
+	padding: 1em 2em;
+	border-width: 1px 0;
+	border-style: solid;
+	border-color: $color__border;
+}
+
+.wc-products-settings-heading__current {
+
+}
+
+.wc-products-settings-heading__change {
+
+}
+
+.wc-products-settings-heading__change-button {
+
+}
+
+.wc-products-settings-heading__change-button--cancel {
+
 }
