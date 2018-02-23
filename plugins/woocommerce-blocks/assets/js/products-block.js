@@ -918,6 +918,7 @@ var ProductsSpecificSelect = exports.ProductsSpecificSelect = function (_React$C
 	_createClass(ProductsSpecificSelect, [{
 		key: 'addProduct',
 		value: function addProduct(id) {
+
 			var selectedProducts = this.state.selectedProducts;
 			selectedProducts.push(id);
 
@@ -925,7 +926,13 @@ var ProductsSpecificSelect = exports.ProductsSpecificSelect = function (_React$C
 				selectedProducts: selectedProducts
 			});
 
-			this.props.update_display_setting_callback(selectedProducts);
+			/**
+    * We need to copy the existing data into a new array.
+    * We can't just push the new product onto the end of the existing array because Gutenberg seems 
+    * to do some sort of check by reference to determine whether to *actually* update the attribute
+    * and will not update it if we just pass back the same array with an extra element on the end.
+    */
+			this.props.update_display_setting_callback(selectedProducts.slice());
 		}
 
 		/**

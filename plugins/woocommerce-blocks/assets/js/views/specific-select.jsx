@@ -26,6 +26,7 @@ export class ProductsSpecificSelect extends React.Component {
 	 * @param id int Product ID.
 	 */
 	addProduct( id ) {
+
 		let selectedProducts = this.state.selectedProducts;
 		selectedProducts.push( id );
 
@@ -33,7 +34,13 @@ export class ProductsSpecificSelect extends React.Component {
 			selectedProducts: selectedProducts
 		} );
 
-		this.props.update_display_setting_callback( selectedProducts );
+		/**
+		 * We need to copy the existing data into a new array.
+		 * We can't just push the new product onto the end of the existing array because Gutenberg seems 
+		 * to do some sort of check by reference to determine whether to *actually* update the attribute
+		 * and will not update it if we just pass back the same array with an extra element on the end.
+		 */
+		this.props.update_display_setting_callback( selectedProducts.slice() );
 	}
 
 	/**
