@@ -206,13 +206,73 @@ var ProductsBlockSettingsEditorDisplayOption = function (_React$Component) {
 var ProductsBlockSettingsEditorDisplayOptions = function (_React$Component2) {
 	_inherits(ProductsBlockSettingsEditorDisplayOptions, _React$Component2);
 
-	function ProductsBlockSettingsEditorDisplayOptions() {
+	/**
+  * Constructor.
+  */
+	function ProductsBlockSettingsEditorDisplayOptions(props) {
 		_classCallCheck(this, ProductsBlockSettingsEditorDisplayOptions);
 
-		return _possibleConstructorReturn(this, (ProductsBlockSettingsEditorDisplayOptions.__proto__ || Object.getPrototypeOf(ProductsBlockSettingsEditorDisplayOptions)).apply(this, arguments));
+		var _this3 = _possibleConstructorReturn(this, (ProductsBlockSettingsEditorDisplayOptions.__proto__ || Object.getPrototypeOf(ProductsBlockSettingsEditorDisplayOptions)).call(this, props));
+
+		_this3.setWrapperRef = _this3.setWrapperRef.bind(_this3);
+		_this3.handleClickOutside = _this3.handleClickOutside.bind(_this3);
+		return _this3;
 	}
 
+	/**
+  * Hook in the listener for closing menu when clicked outside.
+  */
+
+
 	_createClass(ProductsBlockSettingsEditorDisplayOptions, [{
+		key: 'componentDidMount',
+		value: function componentDidMount() {
+			if (this.props.existing) {
+				document.addEventListener('mousedown', this.handleClickOutside);
+			}
+		}
+
+		/**
+   * Remove the listener for closing menu when clicked outside.
+   */
+
+	}, {
+		key: 'componentWillUnmount',
+		value: function componentWillUnmount() {
+			if (this.props.existing) {
+				document.removeEventListener('mousedown', this.handleClickOutside);
+			}
+		}
+
+		/**
+   * Set the wrapper reference.
+   *
+   * @param node DOMNode
+   */
+
+	}, {
+		key: 'setWrapperRef',
+		value: function setWrapperRef(node) {
+			this.wrapperRef = node;
+		}
+
+		/**
+   * Close the menu when user clicks outside the search area.
+   */
+
+	}, {
+		key: 'handleClickOutside',
+		value: function handleClickOutside(evt) {
+			if (this.wrapperRef && !this.wrapperRef.contains(event.target) && 'close-menu' !== event.target.getAttribute('class')) {
+				this.props.closeMenu();
+			}
+		}
+
+		/**
+   * Render the list of options.
+   */
+
+	}, {
 		key: 'render',
 		value: function render() {
 			var classes = 'display-settings-container';
@@ -236,7 +296,7 @@ var ProductsBlockSettingsEditorDisplayOptions = function (_React$Component2) {
 
 			return wp.element.createElement(
 				'div',
-				{ className: classes },
+				{ className: classes, ref: this.setWrapperRef },
 				description,
 				display_settings
 			);
@@ -269,6 +329,7 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 		};
 
 		_this4.updateDisplay = _this4.updateDisplay.bind(_this4);
+		_this4.closeMenu = _this4.closeMenu.bind(_this4);
 		return _this4;
 	}
 
@@ -311,6 +372,13 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 				this.props.update_display_callback(value);
 			}
 		}
+	}, {
+		key: 'closeMenu',
+		value: function closeMenu() {
+			this.setState({
+				menu_visible: false
+			});
+		}
 
 		/**
    * Render the display settings dropdown and any extra contextual settings.
@@ -330,13 +398,13 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 				extra_settings = wp.element.createElement(_attributeSelect.ProductsAttributeSelect, this.props);
 			}
 
-			var menu = this.state.menu_visible ? wp.element.createElement(ProductsBlockSettingsEditorDisplayOptions, { existing: this.state.display ? true : false, update_display_callback: this.updateDisplay }) : null;
+			var menu = this.state.menu_visible ? wp.element.createElement(ProductsBlockSettingsEditorDisplayOptions, { existing: this.state.display ? true : false, closeMenu: this.closeMenu, update_display_callback: this.updateDisplay }) : null;
 
 			var heading = null;
 			if (this.state.display) {
 				var menu_link = wp.element.createElement(
 					'a',
-					{ onClick: function onClick() {
+					{ className: 'close-menu', onClick: function onClick() {
 							_this5.setState({ menu_visible: true });
 						} },
 					__('Display different products')
@@ -344,7 +412,7 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 				if (this.state.menu_visible) {
 					menu_link = wp.element.createElement(
 						'a',
-						{ onClick: function onClick() {
+						{ className: 'close-menu', onClick: function onClick() {
 								_this5.setState({ menu_visible: false });
 							} },
 						__('Cancel')
