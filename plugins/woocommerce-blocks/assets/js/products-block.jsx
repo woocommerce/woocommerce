@@ -285,27 +285,12 @@ class ProductPreview extends React.Component {
 			image = <img src={ product.images[0].src } />
 		}
 
-		let title = null;
-		if ( attributes.display_title ) {
-			title = <div className="product-title">{ product.name }</div>
-		}
-
-		let price = null;
-		if ( attributes.display_price ) {
-			price = <div className="product-price">{ product.price }</div>
-		}
-
-		let add_to_cart = null;
-		if ( attributes.display_add_to_cart ) {
-			add_to_cart = <span className="product-add-to-cart">{ __( 'Add to cart' ) }</span>
-		}
-
 		return (
 			<div className="product-preview">
 				{ image }
-				{ title }
-				{ price }
-				{ add_to_cart }
+				<div className="product-title">{ product.name }</div>
+				<div className="product-price">{ product.price }</div>
+				<span className="product-add-to-cart">{ __( 'Add to cart' ) }</span>
 			</div>
 		);
 	}
@@ -316,11 +301,10 @@ class ProductPreview extends React.Component {
  */
 const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
 
-	const { columns, rows, order, display, display_setting, block_layout } = attributes;
+	const { columns, rows, display, display_setting, block_layout } = attributes;
 
 	let query = {
 		per_page: ( 'list' === block_layout ) ? rows : rows * columns,
-		orderby: order
 	};
 
 	if ( 'specific' === display ) {
@@ -401,38 +385,6 @@ registerBlockType( 'woocommerce/products', {
 		},
 
 		/**
-		 * Whether to display product titles.
-		 */
-		display_title: {
-			type: 'boolean',
-			default: true,
-		},
-
-		/**
-		 * Whether to display prices.
-		 */
-		display_price: {
-			type: 'boolean',
-			default: true,
-		},
-
-		/**
-		 * Whether to display Add to Cart buttons.
-		 */
-		display_add_to_cart: {
-			type: 'boolean',
-			default: false,
-		},
-
-		/**
-		 * Order to use for products. 'date', or 'title'.
-		 */
-		order: {
-			type: 'string',
-			default: 'date',
-		},
-
-		/**
 		 * What types of products to display. 'all', 'specific', or 'category'.
 		 */
 		display: {
@@ -462,7 +414,7 @@ registerBlockType( 'woocommerce/products', {
 	 */
 	edit( props ) {
 		const { attributes, className, focus, setAttributes, setFocus } = props;
-		const { block_layout, rows, columns, display_title, display_price, display_add_to_cart, order, display, display_setting, edit_mode } = attributes;
+		const { block_layout, rows, columns, display, display_setting, edit_mode } = attributes;
 
 		/**
 		 * Get the components for the sidebar settings area that is rendered while focused on a Products block.
@@ -486,37 +438,6 @@ registerBlockType( 'woocommerce/products', {
 						onChange={ ( value ) => setAttributes( { rows: value } ) }
 						min={ 1 }
 						max={ 6 }
-					/>
-					<ToggleControl
-						label={ __( 'Display title' ) }
-						checked={ display_title }
-						onChange={ () => setAttributes( { display_title: ! display_title } ) }
-					/>
-					<ToggleControl
-						label={ __( 'Display price' ) }
-						checked={ display_price }
-						onChange={ () => setAttributes( { display_price: ! display_price } ) }
-					/>
-					<ToggleControl
-						label={ __( 'Display add to cart button' ) }
-						checked={ display_add_to_cart }
-						onChange={ () => setAttributes( { display_add_to_cart: ! display_add_to_cart } ) }
-					/>
-					<SelectControl
-						key="query-panel-select"
-						label={ __( 'Order' ) }
-						value={ order }
-						options={ [
-							{
-								label: __( 'Newness' ),
-								value: 'date',
-							},
-							{
-								label: __( 'Title' ),
-								value: 'title',
-							},
-						] }
-						onChange={ ( value ) => setAttributes( { order: value } ) }
 					/>
 				</InspectorControls>
 			);
@@ -599,27 +520,14 @@ registerBlockType( 'woocommerce/products', {
 	 * @return string
 	 */
 	save( props ) {
-		const { block_layout, rows, columns, display_title, display_price, display_add_to_cart, order, display, display_setting, className } = props.attributes;
+		const { block_layout, rows, columns, display, display_setting, className } = props.attributes;
 
 		let shortcode_atts = new Map();
-		shortcode_atts.set( 'orderby', order );
 		shortcode_atts.set( 'limit', 'grid' === block_layout ? rows * columns : rows );
 		shortcode_atts.set( 'class', 'list' === block_layout ? className + ' list-layout' : className );
 
 		if ( 'grid' === block_layout ) {
 			shortcode_atts.set( 'columns', columns );
-		}
-
-		if ( ! display_title ) {
-			shortcode_atts.set( 'show_title', 0 );
-		}
-
-		if ( ! display_price ) {
-			shortcode_atts.set( 'show_price', 0 );
-		}
-
-		if ( ! display_add_to_cart ) {
-			shortcode_atts.set( 'show_add_to_cart', 0 );
 		}
 
 		if ( 'specific' === display ) {

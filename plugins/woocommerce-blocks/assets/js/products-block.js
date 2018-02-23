@@ -494,40 +494,25 @@ var ProductPreview = function (_React$Component4) {
 				image = wp.element.createElement('img', { src: product.images[0].src });
 			}
 
-			var title = null;
-			if (attributes.display_title) {
-				title = wp.element.createElement(
-					'div',
-					{ className: 'product-title' },
-					product.name
-				);
-			}
-
-			var price = null;
-			if (attributes.display_price) {
-				price = wp.element.createElement(
-					'div',
-					{ className: 'product-price' },
-					product.price
-				);
-			}
-
-			var add_to_cart = null;
-			if (attributes.display_add_to_cart) {
-				add_to_cart = wp.element.createElement(
-					'span',
-					{ className: 'product-add-to-cart' },
-					__('Add to cart')
-				);
-			}
-
 			return wp.element.createElement(
 				'div',
 				{ className: 'product-preview' },
 				image,
-				title,
-				price,
-				add_to_cart
+				wp.element.createElement(
+					'div',
+					{ className: 'product-title' },
+					product.name
+				),
+				wp.element.createElement(
+					'div',
+					{ className: 'product-price' },
+					product.price
+				),
+				wp.element.createElement(
+					'span',
+					{ className: 'product-add-to-cart' },
+					__('Add to cart')
+				)
 			);
 		}
 	}]);
@@ -544,15 +529,13 @@ var ProductsBlockPreview = withAPIData(function (_ref) {
 	var attributes = _ref.attributes;
 	var columns = attributes.columns,
 	    rows = attributes.rows,
-	    order = attributes.order,
 	    display = attributes.display,
 	    display_setting = attributes.display_setting,
 	    block_layout = attributes.block_layout;
 
 
 	var query = {
-		per_page: 'list' === block_layout ? rows : rows * columns,
-		orderby: order
+		per_page: 'list' === block_layout ? rows : rows * columns
 	};
 
 	if ('specific' === display) {
@@ -656,38 +639,6 @@ registerBlockType('woocommerce/products', {
 		},
 
 		/**
-   * Whether to display product titles.
-   */
-		display_title: {
-			type: 'boolean',
-			default: true
-		},
-
-		/**
-   * Whether to display prices.
-   */
-		display_price: {
-			type: 'boolean',
-			default: true
-		},
-
-		/**
-   * Whether to display Add to Cart buttons.
-   */
-		display_add_to_cart: {
-			type: 'boolean',
-			default: false
-		},
-
-		/**
-   * Order to use for products. 'date', or 'title'.
-   */
-		order: {
-			type: 'string',
-			default: 'date'
-		},
-
-		/**
    * What types of products to display. 'all', 'specific', or 'category'.
    */
 		display: {
@@ -724,10 +675,6 @@ registerBlockType('woocommerce/products', {
 		var block_layout = attributes.block_layout,
 		    rows = attributes.rows,
 		    columns = attributes.columns,
-		    display_title = attributes.display_title,
-		    display_price = attributes.display_price,
-		    display_add_to_cart = attributes.display_add_to_cart,
-		    order = attributes.order,
 		    display = attributes.display,
 		    display_setting = attributes.display_setting,
 		    edit_mode = attributes.edit_mode;
@@ -764,42 +711,6 @@ registerBlockType('woocommerce/products', {
 					},
 					min: 1,
 					max: 6
-				}),
-				wp.element.createElement(ToggleControl, {
-					label: __('Display title'),
-					checked: display_title,
-					onChange: function onChange() {
-						return setAttributes({ display_title: !display_title });
-					}
-				}),
-				wp.element.createElement(ToggleControl, {
-					label: __('Display price'),
-					checked: display_price,
-					onChange: function onChange() {
-						return setAttributes({ display_price: !display_price });
-					}
-				}),
-				wp.element.createElement(ToggleControl, {
-					label: __('Display add to cart button'),
-					checked: display_add_to_cart,
-					onChange: function onChange() {
-						return setAttributes({ display_add_to_cart: !display_add_to_cart });
-					}
-				}),
-				wp.element.createElement(SelectControl, {
-					key: 'query-panel-select',
-					label: __('Order'),
-					value: order,
-					options: [{
-						label: __('Newness'),
-						value: 'date'
-					}, {
-						label: __('Title'),
-						value: 'title'
-					}],
-					onChange: function onChange(value) {
-						return setAttributes({ order: value });
-					}
 				})
 			);
 		};
@@ -887,34 +798,17 @@ registerBlockType('woocommerce/products', {
 		    block_layout = _props$attributes.block_layout,
 		    rows = _props$attributes.rows,
 		    columns = _props$attributes.columns,
-		    display_title = _props$attributes.display_title,
-		    display_price = _props$attributes.display_price,
-		    display_add_to_cart = _props$attributes.display_add_to_cart,
-		    order = _props$attributes.order,
 		    display = _props$attributes.display,
 		    display_setting = _props$attributes.display_setting,
 		    className = _props$attributes.className;
 
 
 		var shortcode_atts = new Map();
-		shortcode_atts.set('orderby', order);
 		shortcode_atts.set('limit', 'grid' === block_layout ? rows * columns : rows);
 		shortcode_atts.set('class', 'list' === block_layout ? className + ' list-layout' : className);
 
 		if ('grid' === block_layout) {
 			shortcode_atts.set('columns', columns);
-		}
-
-		if (!display_title) {
-			shortcode_atts.set('show_title', 0);
-		}
-
-		if (!display_price) {
-			shortcode_atts.set('show_price', 0);
-		}
-
-		if (!display_add_to_cart) {
-			shortcode_atts.set('show_add_to_cart', 0);
 		}
 
 		if ('specific' === display) {
