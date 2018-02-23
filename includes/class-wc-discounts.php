@@ -342,8 +342,7 @@ class WC_Discounts {
 			$limit_usage_qty = $coupon->get_limit_usage_to_x_items();
 		}
 
-		// Because get_amount() could return an empty string, let's be sure to set our local variable to a known good value.
-		$coupon_amount  = ( '' === $coupon->get_amount() ) ? 0 : $coupon->get_amount();
+		$coupon_amount = $coupon->get_amount();
 
 		foreach ( $items_to_apply as $item ) {
 			// Find out how much price is available to discount for the item.
@@ -400,7 +399,7 @@ class WC_Discounts {
 	 */
 	protected function apply_coupon_fixed_product( $coupon, $items_to_apply, $amount = null ) {
 		$total_discount  = 0;
-		$amount          = $amount ? $amount: wc_add_number_precision( $coupon->get_amount() );
+		$amount          = $amount ? $amount : wc_add_number_precision( $coupon->get_amount() );
 		$limit_usage_qty = 0;
 		$applied_count   = 0;
 
