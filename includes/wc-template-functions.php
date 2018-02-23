@@ -380,7 +380,7 @@ add_action( 'after_switch_theme', 'wc_reset_product_grid_settings' );
  */
 function wc_get_loop_class() {
 	$loop_index = wc_get_loop_prop( 'loop', 0 );
-	$columns    = wc_get_loop_prop( 'columns', wc_get_default_products_per_row() );
+	$columns    = absint( max( 1, wc_get_loop_prop( 'columns', wc_get_default_products_per_row() ) ) );
 
 	$loop_index ++;
 	wc_set_loop_prop( 'loop', $loop_index );
@@ -516,21 +516,6 @@ function wc_query_string_form_fields( $values = null, $exclude = array(), $curre
 	} else {
 		echo $html; // WPCS: XSS ok.
 	}
-}
-
-/**
- * Implode and escape HTML attributes for output.
- *
- * @since 3.3.0
- * @param array $raw_attributes Attribute name value pairs.
- * @return string
- */
-function wc_implode_html_attributes( $raw_attributes ) {
-	$attributes = array();
-	foreach ( $raw_attributes as $name => $value ) {
-		$attributes[] = esc_attr( $name ) . '="' . esc_attr( $value ) . '"';
-	}
-	return implode( ' ', $attributes );
 }
 
 /**
