@@ -82,6 +82,55 @@ class ProductsBlockSettingsEditorDisplayOption extends React.Component {
  */
 class ProductsBlockSettingsEditorDisplayOptions extends React.Component {
 
+	/**
+	 * Constructor.
+	 */
+	constructor( props ) {
+		super( props );
+
+		this.setWrapperRef = this.setWrapperRef.bind( this );
+		this.handleClickOutside = this.handleClickOutside.bind( this );
+	}
+
+	/**
+	 * Hook in the listener for closing menu when clicked outside.
+	 */
+	componentDidMount() {
+		if ( this.props.existing ) {
+			document.addEventListener( 'mousedown', this.handleClickOutside );
+		}
+	}
+
+	/**
+	 * Remove the listener for closing menu when clicked outside.
+	 */
+	componentWillUnmount() {
+		if ( this.props.existing ) {
+			document.removeEventListener( 'mousedown', this.handleClickOutside );
+		}
+	}
+
+	/**
+	 * Set the wrapper reference.
+	 *
+	 * @param node DOMNode
+	 */
+	setWrapperRef( node ) {
+		this.wrapperRef = node;
+	}
+
+	/**
+	 * Close the menu when user clicks outside the search area.
+	 */
+	handleClickOutside( evt ) {
+        if ( this.wrapperRef && ! this.wrapperRef.contains( event.target ) && 'close-menu' !== event.target.getAttribute( 'class' ) ) {
+            this.props.closeMenu();
+        }
+	}
+
+	/**
+	 * Render the list of options.
+	 */
 	render() {
 		let classes = 'display-settings-container';
 		if ( this.props.existing ) {
@@ -99,7 +148,7 @@ class ProductsBlockSettingsEditorDisplayOptions extends React.Component {
 		}
 
 		return (
-			<div className={ classes }>
+			<div className={ classes } ref={ this.setWrapperRef }>
 				{ description }
 				{ display_settings }
 			</div>
@@ -124,6 +173,7 @@ class ProductsBlockSettingsEditor extends React.Component {
 		}
 
 		this.updateDisplay = this.updateDisplay.bind( this );
+		this.closeMenu = this.closeMenu.bind( this );
 	}
 
 	/**
@@ -163,6 +213,12 @@ class ProductsBlockSettingsEditor extends React.Component {
 		}
 	}
 
+	closeMenu() {
+		this.setState( {
+			menu_visible: false
+		} );
+	}
+
 	/**
 	 * Render the display settings dropdown and any extra contextual settings.
 	 */
@@ -176,13 +232,13 @@ class ProductsBlockSettingsEditor extends React.Component {
 			extra_settings = <ProductsAttributeSelect { ...this.props } />
 		}
 
-		const menu = this.state.menu_visible ? <ProductsBlockSettingsEditorDisplayOptions existing={ this.state.display ? true : false } update_display_callback={ this.updateDisplay } /> : null;
+		const menu = this.state.menu_visible ? <ProductsBlockSettingsEditorDisplayOptions existing={ this.state.display ? true : false } closeMenu={ this.closeMenu } update_display_callback={ this.updateDisplay } /> : null;
 
 		let heading = null;
 		if ( this.state.display ) {
-			var menu_link = <a onClick={ () => { this.setState( { menu_visible: true } ) } }>{ __( 'Display different products' ) }</a>;
+			var menu_link = <a className="close-menu" onClick={ () => { this.setState( { menu_visible: true } ) } }>{ __( 'Display different products' ) }</a>;
 			if ( this.state.menu_visible ) {
-				menu_link = <a onClick={ () => { this.setState( { menu_visible: false } ) } }>{ __( 'Cancel' ) }</a>;
+				menu_link = <a className="close-menu" onClick={ () => { this.setState( { menu_visible: false } ) } }>{ __( 'Cancel' ) }</a>;
 			}
 
 			heading = (
