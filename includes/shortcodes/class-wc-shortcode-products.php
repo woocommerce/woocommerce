@@ -525,10 +525,8 @@ class WC_Shortcode_Products {
 				set_transient( $transient_name, $results, DAY_IN_SECONDS * 30 );
 			}
 		}
-		// Remove ordering query arguments.
-		if ( ! empty( $this->attributes['category'] ) ) {
-			WC()->query->remove_ordering_args();
-		}
+		// Remove ordering query arguments which may have been added by get_catalog_ordering_args.
+		WC()->query->remove_ordering_args();
 		return $results;
 	}
 

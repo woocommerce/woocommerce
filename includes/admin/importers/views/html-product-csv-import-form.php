@@ -41,7 +41,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								/* translators: %s: maximum upload size */
 								printf(
 									esc_html__( 'Maximum size: %s', 'woocommerce' ),
-									absint( $size )
+									$size
 								);
 								?>
 							</small>

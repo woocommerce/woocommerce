@@ -160,7 +160,40 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 == Changelog ==
 
 = 3.4.0 - 2018-XX-XX =
-
+* Feature - Added a new order widget to the dashboard (on multisite) so you can see your orders across multiple stores on the same WordPress network. #17598
+* Feature - Added "display name" input on the My Account page. #19078
+* Tweak - Made the system status tool which purges user carts also purge persistent carts.
+* Tweak - Fixed settings table styling on mobile.
+* Tweak - Don't call WC_Install::install() on downgrades.
+* Tweak - Added a function to return a list of custom tables to aid with cleanup.
+* Tweak - Display whether or not external object cache is enabled in system status report.
+* Tweak - Standardize stock update messages in admin and correctly log who performed the action. When an order note is added after modifying stock manually, update order notes display via AJAX.
+* Tweak - Added a santization function for flat rate costs to remove currency symbols.
+* Tweak - Display zero value when using shipping classes.
+* Tweak - Updated Flexslider to version 2.7.0.
+* Tweak - Make sure terms page exists and isn’t trashed before using it.
+* Tweak - Hash customer email address in download URLs to protect privacy.
+* Fix - Properly set orderby and order when calling WC_Customer_Download_Data_Store::get_downloads().
+* Fix - Set maxlength for order item meta key to avoid values disapearing if too long.
+* Fix - Remove hardcoded /wp-content check for downloads.
+* Fix - Prevent shortcode [product_page] redirecting to the actual product's page after add to cart.
+* Fix - Make the "main term" logic match for both the breadcrumb and product categories widget.
+* Fix - Check parent status too when seeing if variation is purchasable.
+* Fix - Made get_on_sale_products respect the setting to hide outofstock products.
+* Dev - Gallery meta box is now powered by CRUD.
+* Dev - Added support for additional HTML5 input types for settings/checkout forms.
+* Dev - Made 'woocommerce_email_downloads_column_' hook format aware.
+* Dev - Added extra params to `woocommerce_order_get_downloadable_items`.
+* Dev - Allow default value for single_select_country and multi_select_countries.
+* Dev - Added CSS classname to grouped product table.
+* Dev - Mini cart item link now respects value of $product_permalink.
+* Dev - Add missing `woocommerce_update_options__` actions for settings pages that override save method.
+* Dev - Added `woocommerce_persistent_cart_enabled` filter.
+* Dev - Refactor woocommerce_wp_select so it could be used for a multiselect.
+* Dev - Added ability to declare sanitize_callback in settings API.
+* Template - Update cart coupon button from input to button type.
+* Performance - Optimized saving of orders. Adds a transient for needs_processing, and only saves changes when saving order items.
+* Localization - Various spelling and grammar fixes.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 

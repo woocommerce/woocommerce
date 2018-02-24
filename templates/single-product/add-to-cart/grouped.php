@@ -12,7 +12,7 @@
  *
  * @see         https://docs.woocommerce.com/document/template-structure/
  * @package     WooCommerce/Templates
- * @version     3.3.0
+ * @version     3.4.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -21,7 +21,7 @@ global $product, $post;
 
 do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 
-<form class="cart grouped_form" action="<?php echo esc_url( get_permalink() ); ?>" method="post" enctype='multipart/form-data'>
+<form class="cart grouped_form" action="<?php echo esc_url( apply_filters( 'woocommerce_add_to_cart_form_action', $product->get_permalink() ) ); ?>" method="post" enctype='multipart/form-data'>
 	<table cellspacing="0" class="woocommerce-grouped-product-list group_table">
 		<tbody>
 			<?php
@@ -39,7 +39,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 				$post               = $post_object; // WPCS: override ok.
 				setup_postdata( $post );
 
-				echo '<tr id="product-' . esc_attr( get_the_ID() ) . '" class="woocommerce-grouped-product-list-item ' . esc_attr( implode( ' ', get_post_class() ) ) . '">';
+				echo '<tr id="product-' . esc_attr( $grouped_product->get_id() ) . '" class="woocommerce-grouped-product-list-item ' . esc_attr( implode( ' ', get_post_class( '', $grouped_product->get_id() ) ) ) . '">';
 
 				// Output columns for each product.
 				foreach ( $grouped_product_columns as $column_id ) {
@@ -70,7 +70,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 							break;
 						case 'label':
 							$value  = '<label for="product-' . esc_attr( $grouped_product->get_id() ) . '">';
-							$value .= $grouped_product->is_visible() ? '<a href="' . esc_url( apply_filters( 'woocommerce_grouped_product_list_link', get_permalink( $grouped_product->get_id() ), $grouped_product->get_id() ) ) . '">' . $grouped_product->get_name() . '</a>' : $grouped_product->get_name();
+							$value .= $grouped_product->is_visible() ? '<a href="' . esc_url( apply_filters( 'woocommerce_grouped_product_list_link', $grouped_product->get_permalink(), $grouped_product->get_id() ) ) . '">' . $grouped_product->get_name() . '</a>' : $grouped_product->get_name();
 							$value .= '</label>';
 							break;
 						case 'price':

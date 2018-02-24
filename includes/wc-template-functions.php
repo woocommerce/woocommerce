@@ -380,7 +380,7 @@ add_action( 'after_switch_theme', 'wc_reset_product_grid_settings' );
  */
 function wc_get_loop_class() {
 	$loop_index = wc_get_loop_prop( 'loop', 0 );
-	$columns    = wc_get_loop_prop( 'columns', wc_get_default_products_per_row() );
+	$columns    = absint( max( 1, wc_get_loop_prop( 'columns', wc_get_default_products_per_row() ) ) );
 
 	$loop_index ++;
 	wc_set_loop_prop( 'loop', $loop_index );
@@ -516,21 +516,6 @@ function wc_query_string_form_fields( $values = null, $exclude = array(), $curre
 	} else {
 		echo $html; // WPCS: XSS ok.
 	}
-}
-
-/**
- * Implode and escape HTML attributes for output.
- *
- * @since 3.3.0
- * @param array $raw_attributes Attribute name value pairs.
- * @return string
- */
-function wc_implode_html_attributes( $raw_attributes ) {
-	$attributes = array();
-	foreach ( $raw_attributes as $name => $value ) {
-		$attributes[] = esc_attr( $name ) . '="' . esc_attr( $value ) . '"';
-	}
-	return implode( ' ', $attributes );
 }
 
 /**
@@ -836,7 +821,7 @@ if ( ! function_exists( 'woocommerce_product_archive_description' ) ) {
 			return;
 		}
 
-		if ( is_post_type_archive( 'product' ) && 0 === absint( get_query_var( 'paged' ) ) ) {
+		if ( is_post_type_archive( 'product' ) && in_array( absint( get_query_var( 'paged' ) ), array( 0, 1 ), true ) ) {
 			$shop_page = get_post( wc_get_page_id( 'shop' ) );
 			if ( $shop_page ) {
 				$description = wc_format_content( $shop_page->post_content );
@@ -1048,6 +1033,37 @@ if ( ! function_exists( 'woocommerce_show_product_thumbnails' ) ) {
 	function woocommerce_show_product_thumbnails() {
 		wc_get_template( 'single-product/product-thumbnails.php' );
 	}
+}
+
+/**
+ * Get HTML for a gallery image.
+ *
+ * Woocommerce_gallery_thumbnail_size, woocommerce_gallery_image_size and woocommerce_gallery_full_size accept name based image sizes, or an array of width/height values.
+ *
+ * @since 3.3.2
+ * @param int  $attachment_id Attachment ID.
+ * @param bool $main_image Is this the main image or a thumbnail?.
+ * @return string
+ */
+function wc_get_gallery_image_html( $attachment_id, $main_image = false ) {
+	$flexslider        = (bool) apply_filters( 'woocommerce_single_product_flexslider_enabled', get_theme_support( 'wc-product-gallery-slider' ) );
+	$gallery_thumbnail = wc_get_image_size( 'gallery_thumbnail' );
+	$thumbnail_size    = apply_filters( 'woocommerce_gallery_thumbnail_size', array( $gallery_thumbnail['width'], $gallery_thumbnail['height'] ) );
+	$image_size        = apply_filters( 'woocommerce_gallery_image_size', $flexslider || $main_image ? 'woocommerce_single' : $thumbnail_size );
+	$full_size         = apply_filters( 'woocommerce_gallery_full_size', apply_filters( 'woocommerce_product_thumbnails_large_size', 'full' ) );
+	$thumbnail_src     = wp_get_attachment_image_src( $attachment_id, $thumbnail_size );
+	$full_src          = wp_get_attachment_image_src( $attachment_id, $full_size );
+	$image             = wp_get_attachment_image( $attachment_id, $image_size, false, array(
+		'title'                   => get_post_field( 'post_title', $attachment_id ),
+		'data-caption'            => get_post_field( 'post_excerpt', $attachment_id ),
+		'data-src'                => $full_src[0],
+		'data-large_image'        => $full_src[0],
+		'data-large_image_width'  => $full_src[1],
+		'data-large_image_height' => $full_src[2],
+		'class'                   => $main_image ? 'wp-post-image' : '',
+	) );
+
+	return '<div data-thumb="' . esc_url( $thumbnail_src[0] ) . '" class="woocommerce-product-gallery__image"><a href="' . esc_url( $full_src[0] ) . '">' . $image . '</a></div>';
 }
 
 if ( ! function_exists( 'woocommerce_output_product_data_tabs' ) ) {
@@ -1818,6 +1834,10 @@ if ( ! function_exists( 'woocommerce_maybe_show_product_subcategories' ) ) {
 	 * @return string
 	 */
 	function woocommerce_maybe_show_product_subcategories( $loop_html ) {
+		if ( wc_get_loop_prop( 'is_shortcode' ) && ! WC_Template_Loader::in_content_filter() ) {
+			return $loop_html;
+		}
+
 		$display_type = woocommerce_get_loop_display_mode();
 
 		// If displaying categories, append to the loop.

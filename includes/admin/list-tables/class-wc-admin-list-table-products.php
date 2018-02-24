@@ -38,6 +38,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		add_filter( 'disable_months_dropdown', '__return_true' );
 		add_filter( 'query_vars', array( $this, 'add_custom_query_var' ) );
 		add_filter( 'views_edit-product', array( $this, 'product_views' ) );
+		add_filter( 'get_search_query', array( $this, 'search_label' ) );
 	}
 
 	/**
@@ -456,10 +457,13 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		}
 
 		// Search using CRUD.
-		if ( isset( $query_vars['s'] ) ) {
+		if ( ! empty( $query_vars['s'] ) ) {
 			$data_store = WC_Data_Store::load( 'product' );
-			$ids        = $data_store->search_products( wc_clean( $query_vars['s'] ), '', true );
+			$ids        = $data_store->search_products( wc_clean( $query_vars['s'] ), '', true, true );
 			$query_vars['post__in'] = array_merge( $ids, array( 0 ) );
+			// So we know we are searching products.
+			$query_vars['product_search'] = true;
+			unset( $query_vars['s'] );
 		}
 
 		return $query_vars;
@@ -498,5 +502,21 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		}
 
 		return $views;
+	}
+
+	/**
+	 * Change the label when searching products
+	 *
+	 * @param string $query Search Query.
+	 * @return string
+	 */
+	public function search_label( $query ) {
+		global $pagenow, $typenow;
+
+		if ( 'edit.php' !== $pagenow || 'product' !== $typenow || ! get_query_var( 'product_search' ) || ! isset( $_GET['s'] ) ) { // WPCS: input var ok.
+			return $query;
+		}
+
+		return wc_clean( wp_unslash( $_GET['s'] ) ); // WPCS: input var ok, sanitization ok.
 	}
 }

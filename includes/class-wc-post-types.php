@@ -265,8 +265,8 @@ class WC_Post_types {
 		}
 
 		// If theme support changes, we may need to flush permalinks since some are changed based on this flag.
-		if ( update_option( 'current_theme_supports_woocommerce', current_theme_supports( 'woocommerce' ) ? 1 : 0 ) ) {
-			add_option( 'woocommerce_queue_flush_rewrite_rules', 'true' );
+		if ( update_option( 'current_theme_supports_woocommerce', current_theme_supports( 'woocommerce' ) ? 'yes' : 'no' ) ) {
+			update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
 		}
 
 		register_post_type( 'product',
@@ -511,8 +511,8 @@ class WC_Post_types {
 	 * @since 3.3.0
 	 */
 	public static function maybe_flush_rewrite_rules() {
-		if ( 'true' === get_option( 'woocommerce_queue_flush_rewrite_rules' ) ) {
-			delete_option( 'woocommerce_queue_flush_rewrite_rules' );
+		if ( 'yes' === get_option( 'woocommerce_queue_flush_rewrite_rules' ) ) {
+			update_option( 'woocommerce_queue_flush_rewrite_rules', 'no' );
 			self::flush_rewrite_rules();
 		}
 	}
