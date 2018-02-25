@@ -376,7 +376,7 @@ EOT;
 		$route                = $this->route;
 
 		foreach ( $this->get_supported_ids() as $id_name => $id_desc ) {
-			if ( strpos( $route, '<' . $id_name . '>' ) !== false && ! empty( $args ) ) {
+			if ( 'id' !== $id_name && strpos( $route, '<' . $id_name . '>' ) !== false && ! empty( $args ) ) {
 				$route                = str_replace( '(?P<' . $id_name . '>[\d]+)', $args[0], $route );
 				$supported_id_matched = true;
 			}
