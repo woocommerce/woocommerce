@@ -76,7 +76,7 @@ class ProductsBlockSettingsEditorDisplayOption extends React.Component {
 
 		return (
 			<div className={ 'wc-products-display-options__option wc-products-display-options__option--' + this.props.value } onClick={ () => { this.props.update_display_callback( this.props.value ) } } >
-				<div class="wc-products-display-options__option-content">
+				<div className="wc-products-display-options__option-content">
 					<span className="wc-products-display-options__option-title">{ this.props.title }</span>
 					<p className="wc-products-display-options__option-description">{ this.props.description }</p>
 				</div>
@@ -93,6 +93,55 @@ class ProductsBlockSettingsEditorDisplayOption extends React.Component {
  */
 class ProductsBlockSettingsEditorDisplayOptions extends React.Component {
 
+	/**
+	 * Constructor.
+	 */
+	constructor( props ) {
+		super( props );
+
+		this.setWrapperRef = this.setWrapperRef.bind( this );
+		this.handleClickOutside = this.handleClickOutside.bind( this );
+	}
+
+	/**
+	 * Hook in the listener for closing menu when clicked outside.
+	 */
+	componentDidMount() {
+		if ( this.props.existing ) {
+			document.addEventListener( 'mousedown', this.handleClickOutside );
+		}
+	}
+
+	/**
+	 * Remove the listener for closing menu when clicked outside.
+	 */
+	componentWillUnmount() {
+		if ( this.props.existing ) {
+			document.removeEventListener( 'mousedown', this.handleClickOutside );
+		}
+	}
+
+	/**
+	 * Set the wrapper reference.
+	 *
+	 * @param node DOMNode
+	 */
+	setWrapperRef( node ) {
+		this.wrapperRef = node;
+	}
+
+	/**
+	 * Close the menu when user clicks outside the search area.
+	 */
+	handleClickOutside( evt ) {
+        if ( this.wrapperRef && ! this.wrapperRef.contains( event.target ) && 'wc-products-settings-heading__change-button button-link' !== event.target.getAttribute( 'class' ) ) {
+            this.props.closeMenu();
+        }
+	}
+
+	/**
+	 * Render the list of options.
+	 */
 	render() {
 		let classes = 'wc-products-display-options';
 
@@ -113,7 +162,7 @@ class ProductsBlockSettingsEditorDisplayOptions extends React.Component {
 		let description = <p className="wc-products-block-description">{ __( 'Choose which products you\'d like to display:' ) }</p>;
 
 		return (
-			<div className={ classes }>
+			<div className={ classes } ref={ this.setWrapperRef }>
 				{ this.props.existing && arrow }
 				{ ! this.props.existing && description }
 				{ display_settings }
@@ -139,6 +188,7 @@ class ProductsBlockSettingsEditor extends React.Component {
 		}
 
 		this.updateDisplay = this.updateDisplay.bind( this );
+		this.closeMenu = this.closeMenu.bind( this );
 	}
 
 	/**
@@ -178,6 +228,12 @@ class ProductsBlockSettingsEditor extends React.Component {
 		}
 	}
 
+	closeMenu() {
+		this.setState( {
+			menu_visible: false
+		} );
+	}
+
 	/**
 	 * Render the display settings dropdown and any extra contextual settings.
 	 */
@@ -191,7 +247,7 @@ class ProductsBlockSettingsEditor extends React.Component {
 			extra_settings = <ProductsAttributeSelect { ...this.props } />
 		}
 
-		const menu = this.state.menu_visible ? <ProductsBlockSettingsEditorDisplayOptions extended={ this.state.expanded_group ? true : false } existing={ this.state.display ? true : false } update_display_callback={ this.updateDisplay } /> : null;
+		const menu = this.state.menu_visible ? <ProductsBlockSettingsEditorDisplayOptions extended={ this.state.expanded_group ? true : false } existing={ this.state.display ? true : false } closeMenu={ this.closeMenu } update_display_callback={ this.updateDisplay } /> : null;
 
 		let heading = null;
 		if ( this.state.display ) {
@@ -257,10 +313,10 @@ class ProductPreview extends React.Component {
  */
 const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
 
-	const { columns, rows, display, display_setting, layout } = attributes;
+	const { columns, rows, display, display_setting, block_layout } = attributes;
 
 	let query = {
-		per_page: ( 'list' === layout ) ? rows : rows * columns,
+		per_page: ( 'list' === block_layout ) ? rows : rows * columns,
 	};
 
 	if ( 'specific' === display ) {
@@ -295,7 +351,7 @@ const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
 		return __( 'No products found' );
 	}
 
-	const classes = "wc-products-block-preview " + attributes.layout + " cols-" + attributes.columns;
+	const classes = "wc-products-block-preview " + attributes.block_layout + " cols-" + attributes.columns;
 
 	return (
 		<div className={ classes }>
@@ -319,7 +375,7 @@ registerBlockType( 'woocommerce/products', {
 		/**
 		 * Layout to use. 'grid' or 'list'.
 		 */
-		layout: {
+		block_layout: {
 			type: 'string',
 			default: 'grid',
 		},
@@ -370,7 +426,7 @@ registerBlockType( 'woocommerce/products', {
 	 */
 	edit( props ) {
 		const { attributes, className, focus, setAttributes, setFocus } = props;
-		const { layout, rows, columns, display, display_setting, edit_mode } = attributes;
+		const { block_layout, rows, columns, display, display_setting, edit_mode } = attributes;
 
 		/**
 		 * Get the components for the sidebar settings area that is rendered while focused on a Products block.
@@ -409,14 +465,14 @@ registerBlockType( 'woocommerce/products', {
 				{
 					icon: 'list-view',
 					title: __( 'List View' ),
-					onClick: () => setAttributes( { layout: 'list' } ),
-					isActive: layout === 'list',
+					onClick: () => setAttributes( { block_layout: 'list' } ),
+					isActive: 'list' === block_layout,
 				},
 				{
 					icon: 'grid-view',
 					title: __( 'Grid View' ),
-					onClick: () => setAttributes( { layout: 'grid' } ),
-					isActive: layout === 'grid',
+					onClick: () => setAttributes( { block_layout: 'grid' } ),
+					isActive: 'grid' === block_layout,
 				},
 			];
 
@@ -476,13 +532,13 @@ registerBlockType( 'woocommerce/products', {
 	 * @return string
 	 */
 	save( props ) {
-		const { layout, rows, columns, display, display_setting, className } = props.attributes;
+		const { block_layout, rows, columns, display, display_setting, className } = props.attributes;
 
 		let shortcode_atts = new Map();
-		shortcode_atts.set( 'limit', 'grid' === layout ? rows * columns : rows );
-		shortcode_atts.set( 'class', 'list' === layout ? className + ' list-layout' : className );
+		shortcode_atts.set( 'limit', 'grid' === block_layout ? rows * columns : rows );
+		shortcode_atts.set( 'class', 'list' === block_layout ? className + ' list-layout' : className );
 
-		if ( 'grid' === layout ) {
+		if ( 'grid' === block_layout ) {
 			shortcode_atts.set( 'columns', columns );
 		}
 
