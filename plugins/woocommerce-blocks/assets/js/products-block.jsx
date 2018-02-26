@@ -1,4 +1,5 @@
 const { __ } = wp.i18n;
+const { RawHTML } = wp.element;
 const { registerBlockType, InspectorControls, BlockControls } = wp.blocks;
 const { Toolbar, withAPIData, Dropdown, Dashicon, RangeControl } = wp.components;
 const { ToggleControl, SelectControl } = InspectorControls;
@@ -541,13 +542,12 @@ registerBlockType( 'woocommerce/products', {
 	 */
 	save( props ) {
 		const { block_layout, rows, columns, display, display_setting } = props.attributes;
-		const className = props.attributes.hasOwnProperty( 'className' ) ? props.attributes.className : '';
 
 		let shortcode_atts = new Map();
 		shortcode_atts.set( 'limit', 'grid' === block_layout ? rows * columns : rows );
 
-		if ( className || 'list' === block_layout ) {
-			shortcode_atts.set( 'class', 'list' === block_layout ? className + ' list-layout' : className );
+		if ( 'list' === block_layout ) {
+			shortcode_atts.set( 'class', 'list-layout' );
 		}
 
 		if ( 'grid' === block_layout ) {
@@ -583,6 +583,6 @@ registerBlockType( 'woocommerce/products', {
 		}
 		shortcode += ']';
 
-		return shortcode;
+		return <RawHTML>{ shortcode }</RawHTML>;
 	},
 } );
