@@ -552,7 +552,7 @@ var ProductsBlockPreview = withAPIData(function (_ref) {
 	};
 
 	if ('specific' === display) {
-		query.include = JSON.stringify(display_setting);
+		query.include = display_setting.join(',');
 		query.orderby = 'include';
 	} else if ('category' === display) {
 		query.category = display_setting.join(',');
