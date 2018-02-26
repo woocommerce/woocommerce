@@ -443,9 +443,11 @@ registerBlockType( 'woocommerce/products', {
 		 * @return Component
 		 */
 		function getInspectorControls() {
-			return (
-				<InspectorControls key="inspector">
-					<h3>{ __( 'Layout' ) }</h3>
+
+			// Column controls don't make sense in a list layout.
+			let columnControl = null;
+			if ( 'list' !== block_layout ) {
+				columnControl = (
 					<RangeControl
 						label={ __( 'Columns' ) }
 						value={ columns }
@@ -453,6 +455,13 @@ registerBlockType( 'woocommerce/products', {
 						min={ 1 }
 						max={ 6 }
 					/>
+				);					
+			}
+
+			return (
+				<InspectorControls key="inspector">
+					<h3>{ __( 'Layout' ) }</h3>
+					{ columnControl }
 					<RangeControl
 						label={ __( 'Rows' ) }
 						value={ rows }

@@ -708,6 +708,21 @@ registerBlockType('woocommerce/products', {
    */
 
 		function getInspectorControls() {
+
+			// Column controls don't make sense in a list layout.
+			var columnControl = null;
+			if ('list' !== block_layout) {
+				columnControl = wp.element.createElement(RangeControl, {
+					label: __('Columns'),
+					value: columns,
+					onChange: function onChange(value) {
+						return setAttributes({ columns: value });
+					},
+					min: 1,
+					max: 6
+				});
+			}
+
 			return wp.element.createElement(
 				InspectorControls,
 				{ key: 'inspector' },
@@ -716,15 +731,7 @@ registerBlockType('woocommerce/products', {
 					null,
 					__('Layout')
 				),
-				wp.element.createElement(RangeControl, {
-					label: __('Columns'),
-					value: columns,
-					onChange: function onChange(value) {
-						return setAttributes({ columns: value });
-					},
-					min: 1,
-					max: 6
-				}),
+				columnControl,
 				wp.element.createElement(RangeControl, {
 					label: __('Rows'),
 					value: rows,
