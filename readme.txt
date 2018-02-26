@@ -175,6 +175,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Correctly handle default ordering on the search page.
 * Fix - Fix default product category handling in installer.
 * Tweak - Add extra data in order mobile view (status and date).
+* Tweak - Add profile link to order screen.
 
 = 3.3.3 - 2018-02-21 =
 * Fix - Fixed is_numeric check which was affecting order subtotals/totals when using comma decimal separator.

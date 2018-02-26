@@ -258,7 +258,11 @@ class WC_Meta_Box_Order_Data {
 									);
 									printf( '<a href="%s">%s</a>',
 										esc_url( add_query_arg( $args, admin_url( 'edit.php' ) ) ),
-										__( 'View other orders &rarr;', 'woocommerce' )
+										' ' . __( 'View other orders &rarr;', 'woocommerce' )
+									);
+									printf( '<a href="%s">%s</a>',
+										esc_url( add_query_arg( 'user_id', $order->get_user_id( 'edit' ), admin_url( 'user-edit.php' ) ) ),
+										' ' . __( 'Profile &rarr;', 'woocommerce' )
 									);
 								}
 							?></label>
