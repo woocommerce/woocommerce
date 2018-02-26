@@ -113,7 +113,7 @@ class WC_Tax {
 	/**
 	 * Calc tax from inclusive price.
 	 *
-	 * @param  float $price Price to calcualte tax for.
+	 * @param  float $price Price to calculate tax for.
 	 * @param  array $rates Array of tax rates.
 	 * @return array
 	 */
@@ -159,7 +159,7 @@ class WC_Tax {
 	/**
 	 * Calc tax from exclusive price.
 	 *
-	 * @param  float $price Price to calcualte tax for.
+	 * @param  float $price Price to calculate tax for.
 	 * @param  array $rates Array of tax rates.
 	 * @return array
 	 */
