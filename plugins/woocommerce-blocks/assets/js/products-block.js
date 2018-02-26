@@ -97,9 +97,9 @@ var _wp$components = wp.components,
     Toolbar = _wp$components.Toolbar,
     withAPIData = _wp$components.withAPIData,
     Dropdown = _wp$components.Dropdown,
-    Dashicon = _wp$components.Dashicon;
-var RangeControl = InspectorControls.RangeControl,
-    ToggleControl = InspectorControls.ToggleControl,
+    Dashicon = _wp$components.Dashicon,
+    RangeControl = _wp$components.RangeControl;
+var ToggleControl = InspectorControls.ToggleControl,
     SelectControl = InspectorControls.SelectControl;
 
 
@@ -562,6 +562,14 @@ var ProductsBlockPreview = withAPIData(function (_ref) {
 		if (display_setting.length > 1) {
 			query.attribute_term = display_setting.slice(1).join(',');
 		}
+	} else if ('featured' === display) {
+		query.featured = 1;
+	} else if ('best_sellers' === display) {
+		// @todo Not possible in the API yet.
+	} else if ('best_rated' === display) {
+		// @todo Not possible in the API yet.
+	} else if ('on_sale' === display) {
+		query.on_sale = 1;
 	}
 
 	var query_string = '?';
