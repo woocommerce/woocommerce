@@ -2,16 +2,10 @@
 /**
  * WC_Cache_Helper class.
  *
- * @class 		WC_Cache_Helper
- * @version		2.2.0
- * @package		WooCommerce/Classes
- * @category	Class
- * @author 		WooThemes
+ * @package WooCommerce/Classes
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Cache_Helper.
@@ -94,7 +88,7 @@ class WC_Cache_Helper {
 	public static function geolocation_ajax_redirect() {
 		if ( 'geolocation_ajax' === get_option( 'woocommerce_default_customer_address' ) && ! is_checkout() && ! is_cart() && ! is_account_page() && ! is_ajax() && empty( $_POST ) ) { // WPCS: CSRF ok, input var ok.
 			$location_hash = self::geolocation_ajax_get_location_hash();
-			$current_hash  = isset( $_GET['v'] ) ? wc_clean( wp_unslash( $_GET['v'] ) ) : ''; // WPCS: sanitization ok, input var ok.
+			$current_hash  = isset( $_GET['v'] ) ? wc_clean( wp_unslash( $_GET['v'] ) ) : ''; // WPCS: sanitization ok, input var ok, CSRF ok.
 			if ( empty( $current_hash ) || $current_hash !== $location_hash ) {
 				global $wp;
 
@@ -142,7 +136,10 @@ class WC_Cache_Helper {
 
 		if ( false === $transient_value || true === $refresh ) {
 			self::delete_version_transients( $transient_value );
-			set_transient( $transient_name, $transient_value = time() );
+
+			$transient_value = time();
+
+			set_transient( $transient_name, $transient_value );
 		}
 		return $transient_value;
 	}
@@ -197,7 +194,12 @@ class WC_Cache_Helper {
 		if ( $enabled && ! in_array( '_wc_session_', $settings, true ) ) {
 			?>
 			<div class="error">
-				<p><?php echo wp_kses_post( sprintf( __( 'In order for <strong>database caching</strong> to work with WooCommerce you must add %1$s to the "Ignored Query Strings" option in <a href="%2$s">W3 Total Cache settings</a>.', 'woocommerce' ), '<code>_wc_session_</code>', esc_url( admin_url( 'admin.php?page=w3tc_dbcache' ) ) ) ); ?></p>
+				<p>
+				<?php
+				/* translators: 1: key 2: URL */
+				echo wp_kses_post( sprintf( __( 'In order for <strong>database caching</strong> to work with WooCommerce you must add %1$s to the "Ignored Query Strings" option in <a href="%2$s">W3 Total Cache settings</a>.', 'woocommerce' ), '<code>_wc_session_</code>', esc_url( admin_url( 'admin.php?page=w3tc_dbcache' ) ) ) );
+				?>
+				</p>
 			</div>
 			<?php
 		}
@@ -207,7 +209,7 @@ class WC_Cache_Helper {
 	 * Clean term caches added by WooCommerce.
 	 *
 	 * @since 3.3.4
-	 * @param array $ids Array of ids to clear cache for.
+	 * @param array  $ids Array of ids to clear cache for.
 	 * @param string $taxonomy Taxonomy name.
 	 */
 	public static function clean_term_cache( $ids, $taxonomy ) {
