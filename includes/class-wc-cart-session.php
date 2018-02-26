@@ -89,6 +89,7 @@ final class WC_Cart_Session {
 
 			foreach ( $cart as $key => $values ) {
 				$product = wc_get_product( $values['variation_id'] ? $values['variation_id'] : $values['product_id'] );
+				$product = apply_filters( 'woocommerce_get_product_for_cart', $product, $values );
 
 				if ( ! empty( $product ) && $product->exists() && $values['quantity'] > 0 ) {
 

@@ -1043,6 +1043,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			}
 
 			$product_data = wc_get_product( $variation_id ? $variation_id : $product_id );
+			$product_data = apply_filters( 'woocommerce_get_product_for_cart', $product_data, $cart_item_data );
 			$quantity     = apply_filters( 'woocommerce_add_to_cart_quantity', $quantity, $product_id );
 
 			if ( $quantity <= 0 || ! $product_data || 'trash' === $product_data->get_status() ) {
@@ -1159,9 +1160,12 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function restore_cart_item( $cart_item_key ) {
 		if ( isset( $this->removed_cart_contents[ $cart_item_key ] ) ) {
-			$restore_item                                  = $this->removed_cart_contents[ $cart_item_key ];
+			$restore_item = $this->removed_cart_contents[ $cart_item_key ];
+			$product      = wc_get_product( $restore_item['variation_id'] ? $restore_item['variation_id'] : $restore_item['product_id'] )
+			$product      = apply_filters( 'woocommerce_get_product_for_cart', $product, $restore_item );
+
 			$this->cart_contents[ $cart_item_key ]         = $restore_item;
-			$this->cart_contents[ $cart_item_key ]['data'] = wc_get_product( $restore_item['variation_id'] ? $restore_item['variation_id'] : $restore_item['product_id'] );
+			$this->cart_contents[ $cart_item_key ]['data'] = $product;
 
 			do_action( 'woocommerce_restore_cart_item', $cart_item_key, $this );
 
