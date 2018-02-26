@@ -187,7 +187,6 @@
 			$qty           = form.$singleVariationWrap.find( '.quantity' ),
 			purchasable    = true,
 			variation_id   = '',
-			template       = false,
 			$template_html = '';
 
 		if ( variation.sku ) {
@@ -211,17 +210,14 @@
 		form.$form.wc_variations_image_update( variation );
 
 		if ( ! variation.variation_is_visible ) {
-			template = wp.template( 'unavailable-variation-template' );
+			$template_html = document.getElementById('tmpl-unavailable-variation-template').textContent;
 		} else {
-			template     = wp.template( 'variation-template' );
+			$template_html = document.getElementById('tmpl-variation-template').textContent
+								.replace('{{{ data.variation.variation_description }}}', variation.variation_description || '')
+								.replace('{{{ data.variation.price_html }}}', variation.price_html || '')
+								.replace('{{{ data.variation.availability_html }}}', variation.availability_html || '');
 			variation_id = variation.variation_id;
 		}
-
-		$template_html = template( {
-			variation: variation
-		} );
-		$template_html = $template_html.replace( '/*<![CDATA[*/', '' );
-		$template_html = $template_html.replace( '/*]]>*/', '' );
 
 		form.$singleVariation.html( $template_html );
 		form.$form.find( 'input[name="variation_id"], input.variation_id' ).val( variation.variation_id ).change();
