@@ -2,7 +2,7 @@ const { __ } = wp.i18n;
 const { Toolbar, withAPIData, Dropdown } = wp.components;
 
 /**
- * Attribute data cache. 
+ * Attribute data cache.
  * Needed because it takes a lot of API calls to generate attribute info.
  */
 const PRODUCT_ATTRIBUTE_DATA = {};
@@ -18,7 +18,7 @@ export class ProductsAttributeSelect extends React.Component {
 	constructor( props ) {
 		super( props );
 
-		/** 
+		/**
 		 * The first item in props.selected_display_setting is the attribute slug.
 		 * The rest are the term ids for any selected terms.
 		 */
@@ -102,7 +102,7 @@ export class ProductsAttributeSelect extends React.Component {
 	 */
 	render() {
 		return (
-			<div className="product-attribute-select">
+			<div className="wc-products-list-card wc-products-list-card--taxonomy wc-products-list-card--taxonomy-atributes">
 				<ProductAttributeFilter updateFilter={ this.updateFilter.bind( this ) } />
 				<ProductAttributeList
 					selectedAttribute={ this.state.selectedAttribute }
@@ -123,7 +123,7 @@ export class ProductsAttributeSelect extends React.Component {
 const ProductAttributeFilter = ( props ) => {
 	return (
 		<div>
-			<input id="product-attribute-search" type="search" placeholder={ __( 'Search for attributes' ) } onChange={ props.updateFilter } />
+			<input className="wc-products-list-card__search" type="search" placeholder={ __( 'Search for attributes' ) } onChange={ props.updateFilter } />
 		</div>
 	);
 }
@@ -155,28 +155,28 @@ const ProductAttributeList = withAPIData( ( props ) => {
 			}
 
 			if ( PRODUCT_ATTRIBUTE_DATA.hasOwnProperty( attribute.slug ) ) {
-				attributeElements.push( <ProductAttributeElement 
+				attributeElements.push( <ProductAttributeElement
 					selectedAttribute={ selectedAttribute }
 					selectedTerms={ selectedTerms }
-					attribute={attribute} 
-					setSelectedAttribute={ setSelectedAttribute } 
-					addTerm={ addTerm } 
-					removeTerm={ removeTerm } 
+					attribute={attribute}
+					setSelectedAttribute={ setSelectedAttribute }
+					addTerm={ addTerm }
+					removeTerm={ removeTerm }
 				/> );
 			} else {
-				attributeElements.push( <UncachedProductAttributeElement 
+				attributeElements.push( <UncachedProductAttributeElement
 					selectedAttribute={ selectedAttribute }
 					selectedTerms={ selectedTerms }
-					attribute={ attribute } 
-					setSelectedAttribute={ setSelectedAttribute } 
-					addTerm={ addTerm } 
-					removeTerm={ removeTerm } 
+					attribute={ attribute }
+					setSelectedAttribute={ setSelectedAttribute }
+					addTerm={ addTerm }
+					removeTerm={ removeTerm }
 				/> );
 			}
 		}
 
 		return (
-			<div className="product-attributes-list">
+			<div className="wc-products-list-card__results">
 				{ attributeElements }
 			</div>
 		);
@@ -210,13 +210,13 @@ const UncachedProductAttributeElement = withAPIData( ( props ) => {
 
 		PRODUCT_ATTRIBUTE_DATA[ attribute.slug ].count = totalCount;
 
-		return <ProductAttributeElement 
+		return <ProductAttributeElement
 			selectedAttribute={ selectedAttribute }
 			selectedTerms={ selectedTerms }
-			attribute={ attribute } 
-			setSelectedAttribute={ setSelectedAttribute } 
-			addTerm={ addTerm } 
-			removeTerm={ removeTerm } 
+			attribute={ attribute }
+			setSelectedAttribute={ setSelectedAttribute }
+			addTerm={ addTerm }
+			removeTerm={ removeTerm }
 		/>
 	}
 );
@@ -273,17 +273,17 @@ class ProductAttributeElement extends React.Component {
 		let attributeTerms = null;
 		if ( isSelected ) {
 			attributeTerms = (
-				<ul className="product-attribute-terms">
+				<ul>
 					{ attribute.terms.map( ( term ) => (
-						<li className="product-attribute-term">
-							<label>
-								<input type="checkbox" 
+						<li className="wc-products-list-card__item">
+							<label className="wc-products-list-card__content">
+								<input type="checkbox"
 									value={ term.id }
 									onChange={ this.handleTermChange }
 									checked={ this.props.selectedTerms.includes( String( term.id ) ) }
 								/>
-								{ term.name } 
-								<span className="product-attribute-count">{ term.count }</span>
+								{ term.name }
+								<span className="wc-products-list-card__taxonomy-count">{ term.count }</span>
 							</label>
 						</li>
 					) ) }
@@ -291,17 +291,23 @@ class ProductAttributeElement extends React.Component {
 			);
 		}
 
+		let cssClasses = [ 'wc-products-list-card--taxonomy-atributes__atribute' ];
+
+		if ( isSelected ) {
+			cssClasses.push( 'wc-products-list-card__accordion-open' );
+		}
+
 		return (
-			<div className="product-attribute">
-				<div className="product-attribute-name">
-					<label>
-						<input type="radio" 
-							value={ this.props.attribute.slug } 
-							onChange={ this.handleAttributeChange } 
+			<div className={ cssClasses.join( ' ' ) }>
+				<div>
+					<label className="wc-products-list-card__content">
+						<input type="radio"
+							value={ this.props.attribute.slug }
+							onChange={ this.handleAttributeChange }
 							checked={ isSelected }
 						/>
 						{ this.props.attribute.name }
-						<span className="product-attribute-count">{ attribute.count }</span>
+						<span className="wc-products-list-card__taxonomy-count">{ attribute.count }</span>
 					</label>
 				</div>
 				{ attributeTerms }

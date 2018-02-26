@@ -1,6 +1,6 @@
 const { __ } = wp.i18n;
 const { registerBlockType, InspectorControls, BlockControls } = wp.blocks;
-const { Toolbar, withAPIData, Dropdown } = wp.components;
+const { Toolbar, withAPIData, Dropdown, Dashicon } = wp.components;
 const { RangeControl, ToggleControl, SelectControl } = InspectorControls;
 
 import { ProductsSpecificSelect } from './views/specific-select.jsx';
@@ -68,10 +68,21 @@ const PRODUCTS_BLOCK_DISPLAY_SETTINGS = {
  */
 class ProductsBlockSettingsEditorDisplayOption extends React.Component {
 	render() {
+		let icon = 'arrow-right-alt2';
+
+		if ( 'filter' === this.props.value && this.props.extended ) {
+			icon = 'arrow-down-alt2';
+		}
+
 		return (
-			<div className={ 'wc-products-display-option value-' + this.props.value } onClick={ () => { this.props.update_display_callback( this.props.value ) } } >
-				<h4>{ this.props.title }</h4>
-				<p>{ this.props.description }</p>
+			<div className={ 'wc-products-display-options__option wc-products-display-options__option--' + this.props.value } onClick={ () => { this.props.update_display_callback( this.props.value ) } } >
+				<div class="wc-products-display-options__option-content">
+					<span className="wc-products-display-options__option-title">{ this.props.title }</span>
+					<p className="wc-products-display-options__option-description">{ this.props.description }</p>
+				</div>
+				<div className="wc-products-display-options__icon">
+					<Dashicon icon={ icon } />
+				</div>
 			</div>
 		);
 	}
@@ -83,24 +94,28 @@ class ProductsBlockSettingsEditorDisplayOption extends React.Component {
 class ProductsBlockSettingsEditorDisplayOptions extends React.Component {
 
 	render() {
-		let classes = 'display-settings-container';
+		let classes = 'wc-products-display-options';
+
+		if ( this.props.extended ) {
+			classes += ' wc-products-display-options--extended';
+		}
+
 		if ( this.props.existing ) {
-			classes += ' existing';
+			classes += ' wc-products-display-options--popover';
 		}
 
 		let display_settings = [];
 		for ( var setting_key in PRODUCTS_BLOCK_DISPLAY_SETTINGS ) {
-			display_settings.push( <ProductsBlockSettingsEditorDisplayOption { ...PRODUCTS_BLOCK_DISPLAY_SETTINGS[ setting_key ] } update_display_callback={ this.props.update_display_callback } /> );
+			display_settings.push( <ProductsBlockSettingsEditorDisplayOption { ...PRODUCTS_BLOCK_DISPLAY_SETTINGS[ setting_key ] } update_display_callback={ this.props.update_display_callback } extended={ this.props.extended } /> );
 		}
 
-		let description = null;
-		if ( ! this.props.existing ) {
-			description = <p>{ __( 'Choose which products you\'d like to display:' ) }</p>;
-		}
+		let arrow = <span className="wc-products-display-options--popover__arrow"></span>;
+		let description = <p className="wc-products-block-description">{ __( 'Choose which products you\'d like to display:' ) }</p>;
 
 		return (
 			<div className={ classes }>
-				{ description }
+				{ this.props.existing && arrow }
+				{ ! this.props.existing && description }
 				{ display_settings }
 			</div>
 		);
@@ -176,22 +191,19 @@ class ProductsBlockSettingsEditor extends React.Component {
 			extra_settings = <ProductsAttributeSelect { ...this.props } />
 		}
 
-		const menu = this.state.menu_visible ? <ProductsBlockSettingsEditorDisplayOptions existing={ this.state.display ? true : false } update_display_callback={ this.updateDisplay } /> : null;
+		const menu = this.state.menu_visible ? <ProductsBlockSettingsEditorDisplayOptions extended={ this.state.expanded_group ? true : false } existing={ this.state.display ? true : false } update_display_callback={ this.updateDisplay } /> : null;
 
 		let heading = null;
 		if ( this.state.display ) {
-			var menu_link = <a onClick={ () => { this.setState( { menu_visible: true } ) } }>{ __( 'Display different products' ) }</a>;
-			if ( this.state.menu_visible ) {
-				menu_link = <a onClick={ () => { this.setState( { menu_visible: false } ) } }>{ __( 'Cancel' ) }</a>;
-			}
+			let menu_link = <button type="button" className="wc-products-settings-heading__change-button button-link" onClick={ () => { this.setState( { menu_visible: ! this.state.menu_visible } ) } }>{ __( 'Display different products' ) }</button>;
 
 			heading = (
-				<div className="settings-heading">
-					<div className="currently-displayed">
+				<div className="wc-products-settings-heading">
+					<div className="wc-products-settings-heading__current">
 						{ __( 'Displaying ' ) }
 						<strong>{ __( PRODUCTS_BLOCK_DISPLAY_SETTINGS[ this.state.display ].title ) }</strong>
 					</div>
-					<div className="change-display">
+					<div className="wc-products-settings-heading__change">
 						{ menu_link }
 					</div>
 				</div>
@@ -199,8 +211,8 @@ class ProductsBlockSettingsEditor extends React.Component {
 		}
 
 		return (
-			<div className={ 'wc-product-display-settings ' + ( this.state.expanded_group ? 'expanded-group-' + this.state.expanded_group : '' ) }>
-				<h4>{ __( 'Products' ) }</h4>
+			<div className={ 'wc-products-settings ' + ( this.state.expanded_group ? 'expanded-group-' + this.state.expanded_group : '' ) }>
+				<h4 className="wc-products-settings__title"><Dashicon icon={ 'universal-access-alt' } /> { __( 'Products' ) }</h4>
 
 				{ heading }
 
@@ -208,8 +220,8 @@ class ProductsBlockSettingsEditor extends React.Component {
 
 				{ extra_settings }
 
-				<div className="block-footer">
-					<button type="button" className="button button-large" onClick={ this.props.done_callback }>{ __( 'Done' ) }</button>
+				<div className="wc-products-settings__footer">
+					<button type="button" className="button wc-products-settings__footer-button" onClick={ this.props.done_callback }>{ __( 'Done' ) }</button>
 				</div>
 			</div>
 		);
