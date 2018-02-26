@@ -96,7 +96,8 @@ var _wp$blocks = wp.blocks,
 var _wp$components = wp.components,
     Toolbar = _wp$components.Toolbar,
     withAPIData = _wp$components.withAPIData,
-    Dropdown = _wp$components.Dropdown;
+    Dropdown = _wp$components.Dropdown,
+    Dashicon = _wp$components.Dashicon;
 var RangeControl = InspectorControls.RangeControl,
     ToggleControl = InspectorControls.ToggleControl,
     SelectControl = InspectorControls.SelectControl;
@@ -176,20 +177,35 @@ var ProductsBlockSettingsEditorDisplayOption = function (_React$Component) {
 		value: function render() {
 			var _this2 = this;
 
+			var icon = 'arrow-right-alt2';
+
+			if ('filter' === this.props.value && this.props.extended) {
+				icon = 'arrow-down-alt2';
+			}
+
 			return wp.element.createElement(
 				'div',
-				{ className: 'wc-products-display-option value-' + this.props.value, onClick: function onClick() {
+				{ className: 'wc-products-display-options__option wc-products-display-options__option--' + this.props.value, onClick: function onClick() {
 						_this2.props.update_display_callback(_this2.props.value);
 					} },
 				wp.element.createElement(
-					'h4',
-					null,
-					this.props.title
+					'div',
+					{ className: 'wc-products-display-options__option-content' },
+					wp.element.createElement(
+						'span',
+						{ className: 'wc-products-display-options__option-title' },
+						this.props.title
+					),
+					wp.element.createElement(
+						'p',
+						{ className: 'wc-products-display-options__option-description' },
+						this.props.description
+					)
 				),
 				wp.element.createElement(
-					'p',
-					null,
-					this.props.description
+					'div',
+					{ className: 'wc-products-display-options__icon' },
+					wp.element.createElement(Dashicon, { icon: icon })
 				)
 			);
 		}
@@ -263,7 +279,7 @@ var ProductsBlockSettingsEditorDisplayOptions = function (_React$Component2) {
 	}, {
 		key: 'handleClickOutside',
 		value: function handleClickOutside(evt) {
-			if (this.wrapperRef && !this.wrapperRef.contains(event.target) && 'close-menu' !== event.target.getAttribute('class')) {
+			if (this.wrapperRef && !this.wrapperRef.contains(event.target) && 'wc-products-settings-heading__change-button button-link' !== event.target.getAttribute('class')) {
 				this.props.closeMenu();
 			}
 		}
@@ -275,29 +291,33 @@ var ProductsBlockSettingsEditorDisplayOptions = function (_React$Component2) {
 	}, {
 		key: 'render',
 		value: function render() {
-			var classes = 'display-settings-container';
+			var classes = 'wc-products-display-options';
+
+			if (this.props.extended) {
+				classes += ' wc-products-display-options--extended';
+			}
+
 			if (this.props.existing) {
-				classes += ' existing';
+				classes += ' wc-products-display-options--popover';
 			}
 
 			var display_settings = [];
 			for (var setting_key in PRODUCTS_BLOCK_DISPLAY_SETTINGS) {
-				display_settings.push(wp.element.createElement(ProductsBlockSettingsEditorDisplayOption, _extends({}, PRODUCTS_BLOCK_DISPLAY_SETTINGS[setting_key], { update_display_callback: this.props.update_display_callback })));
+				display_settings.push(wp.element.createElement(ProductsBlockSettingsEditorDisplayOption, _extends({}, PRODUCTS_BLOCK_DISPLAY_SETTINGS[setting_key], { update_display_callback: this.props.update_display_callback, extended: this.props.extended })));
 			}
 
-			var description = null;
-			if (!this.props.existing) {
-				description = wp.element.createElement(
-					'p',
-					null,
-					__('Choose which products you\'d like to display:')
-				);
-			}
+			var arrow = wp.element.createElement('span', { className: 'wc-products-display-options--popover__arrow' });
+			var description = wp.element.createElement(
+				'p',
+				{ className: 'wc-products-block-description' },
+				__('Choose which products you\'d like to display:')
+			);
 
 			return wp.element.createElement(
 				'div',
 				{ className: classes, ref: this.setWrapperRef },
-				description,
+				this.props.existing && arrow,
+				!this.props.existing && description,
 				display_settings
 			);
 		}
@@ -398,33 +418,24 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 				extra_settings = wp.element.createElement(_attributeSelect.ProductsAttributeSelect, this.props);
 			}
 
-			var menu = this.state.menu_visible ? wp.element.createElement(ProductsBlockSettingsEditorDisplayOptions, { existing: this.state.display ? true : false, closeMenu: this.closeMenu, update_display_callback: this.updateDisplay }) : null;
+			var menu = this.state.menu_visible ? wp.element.createElement(ProductsBlockSettingsEditorDisplayOptions, { extended: this.state.expanded_group ? true : false, existing: this.state.display ? true : false, closeMenu: this.closeMenu, update_display_callback: this.updateDisplay }) : null;
 
 			var heading = null;
 			if (this.state.display) {
 				var menu_link = wp.element.createElement(
-					'a',
-					{ className: 'close-menu', onClick: function onClick() {
-							_this5.setState({ menu_visible: true });
+					'button',
+					{ type: 'button', className: 'wc-products-settings-heading__change-button button-link', onClick: function onClick() {
+							_this5.setState({ menu_visible: !_this5.state.menu_visible });
 						} },
 					__('Display different products')
 				);
-				if (this.state.menu_visible) {
-					menu_link = wp.element.createElement(
-						'a',
-						{ className: 'close-menu', onClick: function onClick() {
-								_this5.setState({ menu_visible: false });
-							} },
-						__('Cancel')
-					);
-				}
 
 				heading = wp.element.createElement(
 					'div',
-					{ className: 'settings-heading' },
+					{ className: 'wc-products-settings-heading' },
 					wp.element.createElement(
 						'div',
-						{ className: 'currently-displayed' },
+						{ className: 'wc-products-settings-heading__current' },
 						__('Displaying '),
 						wp.element.createElement(
 							'strong',
@@ -434,7 +445,7 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 					),
 					wp.element.createElement(
 						'div',
-						{ className: 'change-display' },
+						{ className: 'wc-products-settings-heading__change' },
 						menu_link
 					)
 				);
@@ -442,10 +453,12 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 
 			return wp.element.createElement(
 				'div',
-				{ className: 'wc-product-display-settings ' + (this.state.expanded_group ? 'expanded-group-' + this.state.expanded_group : '') },
+				{ className: 'wc-products-settings ' + (this.state.expanded_group ? 'expanded-group-' + this.state.expanded_group : '') },
 				wp.element.createElement(
 					'h4',
-					null,
+					{ className: 'wc-products-settings__title' },
+					wp.element.createElement(Dashicon, { icon: 'universal-access-alt' }),
+					' ',
 					__('Products')
 				),
 				heading,
@@ -453,10 +466,10 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 				extra_settings,
 				wp.element.createElement(
 					'div',
-					{ className: 'block-footer' },
+					{ className: 'wc-products-settings__footer' },
 					wp.element.createElement(
 						'button',
-						{ type: 'button', className: 'button button-large', onClick: this.props.done_callback },
+						{ type: 'button', className: 'button wc-products-settings__footer-button', onClick: this.props.done_callback },
 						__('Done')
 					)
 				)
@@ -1540,7 +1553,7 @@ var ProductsCategorySelect = exports.ProductsCategorySelect = function (_React$C
 		value: function render() {
 			return wp.element.createElement(
 				"div",
-				{ className: "product-category-select" },
+				{ className: "wc-products-list-card wc-products-list-card--taxonomy wc-products-list-card--taxonomy-category" },
 				wp.element.createElement(ProductCategoryFilter, { filterResults: this.filterResults }),
 				wp.element.createElement(ProductCategoryList, {
 					filterQuery: this.state.filterQuery,
@@ -1569,7 +1582,7 @@ var ProductCategoryFilter = function ProductCategoryFilter(_ref) {
 	return wp.element.createElement(
 		"div",
 		null,
-		wp.element.createElement("input", { id: "product-category-search", type: "search", placeholder: __('Search for categories'), onChange: filterResults })
+		wp.element.createElement("input", { className: "wc-products-list-card__search", type: "search", placeholder: __('Search for categories'), onChange: filterResults })
 	);
 };
 
@@ -1689,7 +1702,7 @@ var ProductCategoryList = withAPIData(function (props) {
 			"button",
 			{ onClick: function onClick() {
 					return accordionToggle(category.id);
-				}, style: style, type: "button", className: "product-category-accordion-toggle" },
+				}, className: "wc-products-list-card__accordion-button", style: style, type: "button" },
 			wp.element.createElement(Dashicon, { icon: icon })
 		);
 	};
@@ -1746,10 +1759,10 @@ var ProductCategoryList = withAPIData(function (props) {
 			filteredCategories.map(function (category) {
 				return wp.element.createElement(
 					"li",
-					{ key: category.id, className: openAccordion.includes(category.id) ? 'product-category-accordion-open' : '' },
+					{ key: category.id, className: openAccordion.includes(category.id) ? 'wc-products-list-card__item wc-products-list-card__accordion-open' : 'wc-products-list-card__item' },
 					wp.element.createElement(
 						"label",
-						{ htmlFor: 'product-category-' + category.id },
+						{ className: 0 === category.parent ? 'wc-products-list-card__content' : '', htmlFor: 'product-category-' + category.id },
 						wp.element.createElement("input", { type: "checkbox",
 							id: 'product-category-' + category.id,
 							value: category.id,
@@ -1763,12 +1776,12 @@ var ProductCategoryList = withAPIData(function (props) {
 						}),
 						" ",
 						category.name,
+						0 === category.parent && wp.element.createElement(AccordionButton, { category: category, categories: categories }),
 						wp.element.createElement(
 							"span",
-							{ className: "product-category-count" },
+							{ className: "wc-products-list-card__taxonomy-count" },
 							category.count
-						),
-						0 === category.parent && wp.element.createElement(AccordionButton, { category: category, categories: categories })
+						)
 					),
 					wp.element.createElement(CategoryTree, { categories: categories, parent: category.id })
 				);
@@ -1786,7 +1799,7 @@ var ProductCategoryList = withAPIData(function (props) {
 
 	return wp.element.createElement(
 		"div",
-		{ className: "product-categories-list" },
+		{ className: "wc-products-list-card__results" },
 		wp.element.createElement(CategoryTree, { categories: categoriesData, parent: 0 })
 	);
 });
@@ -1817,7 +1830,7 @@ var _wp$components = wp.components,
     Dropdown = _wp$components.Dropdown;
 
 /**
- * Attribute data cache. 
+ * Attribute data cache.
  * Needed because it takes a lot of API calls to generate attribute info.
  */
 
@@ -1836,7 +1849,7 @@ var ProductsAttributeSelect = exports.ProductsAttributeSelect = function (_React
 	function ProductsAttributeSelect(props) {
 		_classCallCheck(this, ProductsAttributeSelect);
 
-		/** 
+		/**
    * The first item in props.selected_display_setting is the attribute slug.
    * The rest are the term ids for any selected terms.
    */
@@ -1961,7 +1974,7 @@ var ProductsAttributeSelect = exports.ProductsAttributeSelect = function (_React
 		value: function render() {
 			return wp.element.createElement(
 				'div',
-				{ className: 'product-attribute-select' },
+				{ className: 'wc-products-list-card wc-products-list-card--taxonomy wc-products-list-card--taxonomy-atributes' },
 				wp.element.createElement(ProductAttributeFilter, { updateFilter: this.updateFilter.bind(this) }),
 				wp.element.createElement(ProductAttributeList, {
 					selectedAttribute: this.state.selectedAttribute,
@@ -1987,7 +2000,7 @@ var ProductAttributeFilter = function ProductAttributeFilter(props) {
 	return wp.element.createElement(
 		'div',
 		null,
-		wp.element.createElement('input', { id: 'product-attribute-search', type: 'search', placeholder: __('Search for attributes'), onChange: props.updateFilter })
+		wp.element.createElement('input', { className: 'wc-products-list-card__search', type: 'search', placeholder: __('Search for attributes'), onChange: props.updateFilter })
 	);
 };
 
@@ -2068,7 +2081,7 @@ var ProductAttributeList = withAPIData(function (props) {
 
 	return wp.element.createElement(
 		'div',
-		{ className: 'product-attributes-list' },
+		{ className: 'wc-products-list-card__results' },
 		attributeElements
 	);
 });
@@ -2209,14 +2222,14 @@ var ProductAttributeElement = function (_React$Component2) {
 			if (isSelected) {
 				attributeTerms = wp.element.createElement(
 					'ul',
-					{ className: 'product-attribute-terms' },
+					null,
 					attribute.terms.map(function (term) {
 						return wp.element.createElement(
 							'li',
-							{ className: 'product-attribute-term' },
+							{ className: 'wc-products-list-card__item' },
 							wp.element.createElement(
 								'label',
-								null,
+								{ className: 'wc-products-list-card__content' },
 								wp.element.createElement('input', { type: 'checkbox',
 									value: term.id,
 									onChange: _this3.handleTermChange,
@@ -2225,7 +2238,7 @@ var ProductAttributeElement = function (_React$Component2) {
 								term.name,
 								wp.element.createElement(
 									'span',
-									{ className: 'product-attribute-count' },
+									{ className: 'wc-products-list-card__taxonomy-count' },
 									term.count
 								)
 							)
@@ -2234,15 +2247,21 @@ var ProductAttributeElement = function (_React$Component2) {
 				);
 			}
 
+			var cssClasses = ['wc-products-list-card--taxonomy-atributes__atribute'];
+
+			if (isSelected) {
+				cssClasses.push('wc-products-list-card__accordion-open');
+			}
+
 			return wp.element.createElement(
 				'div',
-				{ className: 'product-attribute' },
+				{ className: cssClasses.join(' ') },
 				wp.element.createElement(
 					'div',
-					{ className: 'product-attribute-name' },
+					null,
 					wp.element.createElement(
 						'label',
-						null,
+						{ className: 'wc-products-list-card__content' },
 						wp.element.createElement('input', { type: 'radio',
 							value: this.props.attribute.slug,
 							onChange: this.handleAttributeChange,
@@ -2251,7 +2270,7 @@ var ProductAttributeElement = function (_React$Component2) {
 						this.props.attribute.name,
 						wp.element.createElement(
 							'span',
-							{ className: 'product-attribute-count' },
+							{ className: 'wc-products-list-card__taxonomy-count' },
 							attribute.count
 						)
 					)

@@ -93,7 +93,7 @@ export class ProductsCategorySelect extends React.Component {
 	 */
 	render() {
 		return (
-			<div className="product-category-select">
+			<div className="wc-products-list-card wc-products-list-card--taxonomy wc-products-list-card--taxonomy-category">
 				<ProductCategoryFilter filterResults={ this.filterResults } />
 				<ProductCategoryList
 					filterQuery={ this.state.filterQuery }
@@ -115,7 +115,7 @@ export class ProductsCategorySelect extends React.Component {
 const ProductCategoryFilter = ( { filterResults } ) => {
 	return (
 		<div>
-			<input id="product-category-search" type="search" placeholder={ __( 'Search for categories' ) } onChange={ filterResults } />
+			<input className="wc-products-list-card__search" type="search" placeholder={ __( 'Search for categories' ) } onChange={ filterResults } />
 		</div>
 	);
 }
@@ -198,7 +198,7 @@ const ProductCategoryList = withAPIData( ( props ) => {
 			};
 
 			return (
-				<button onClick={ () => accordionToggle( category.id ) } style={ style } type="button" className="product-category-accordion-toggle">
+				<button onClick={ () => accordionToggle( category.id ) } className="wc-products-list-card__accordion-button" style={ style } type="button">
 					<Dashicon icon={ icon } />
 				</button>
 			);
@@ -225,8 +225,8 @@ const ProductCategoryList = withAPIData( ( props ) => {
 			return ( filteredCategories.length > 0 ) && (
 				<ul>
 					{ filteredCategories.map( ( category ) => (
-						<li key={ category.id } className={ ( openAccordion.includes( category.id ) ? 'product-category-accordion-open' : '' ) }>
-							<label htmlFor={ 'product-category-' + category.id }>
+						<li key={ category.id } className={ ( openAccordion.includes( category.id ) ? 'wc-products-list-card__item wc-products-list-card__accordion-open' : 'wc-products-list-card__item' ) }>
+							<label className={ ( 0 === category.parent ) ? 'wc-products-list-card__content' : ''  } htmlFor={ 'product-category-' + category.id }>
 								<input type="checkbox"
 								       id={ 'product-category-' + category.id }
 								       value={ category.id }
@@ -234,10 +234,10 @@ const ProductCategoryList = withAPIData( ( props ) => {
 								       onChange={ ( evt ) => handleCategoriesToCheck( evt, category, categories ) }
 								       ref={ el => el && ( el.indeterminate = isIndeterminate( category, categories ) ) }
 								/> { category.name }
-								<span className="product-category-count">{ category.count }</span>
 								{ 0 === category.parent &&
 									<AccordionButton category={ category } categories={ categories } />
 								}
+								<span className="wc-products-list-card__taxonomy-count">{ category.count }</span>
 							</label>
 							<CategoryTree categories={ categories } parent={ category.id } />
 						</li>
@@ -253,7 +253,7 @@ const ProductCategoryList = withAPIData( ( props ) => {
 		}
 
 		return (
-			<div className="product-categories-list">
+			<div className="wc-products-list-card__results">
 				<CategoryTree categories={ categoriesData } parent={ 0 } />
 			</div>
 		);
