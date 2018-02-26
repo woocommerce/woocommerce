@@ -211,8 +211,8 @@ class ProductsBlockSettingsEditor extends React.Component {
 		}
 
 		return (
-			<div className={ 'wc-product-display-settings ' + ( this.state.expanded_group ? 'expanded-group-' + this.state.expanded_group : '' ) }>
-				<h4 className="wc-products-block-title">{ __( 'Products' ) }</h4>
+			<div className={ 'wc-products-settings ' + ( this.state.expanded_group ? 'expanded-group-' + this.state.expanded_group : '' ) }>
+				<h4 className="wc-products-settings__title"><Dashicon icon={ 'universal-access-alt' } /> { __( 'Products' ) }</h4>
 
 				{ heading }
 
@@ -220,8 +220,8 @@ class ProductsBlockSettingsEditor extends React.Component {
 
 				{ extra_settings }
 
-				<div className="block-footer">
-					<button type="button" className="button button-large" onClick={ this.props.done_callback }>{ __( 'Done' ) }</button>
+				<div className="wc-products-settings__footer">
+					<button type="button" className="button wc-products-settings__footer-button" onClick={ this.props.done_callback }>{ __( 'Done' ) }</button>
 				</div>
 			</div>
 		);
