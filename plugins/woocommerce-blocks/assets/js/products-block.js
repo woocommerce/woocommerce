@@ -89,6 +89,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var __ = wp.i18n.__;
+var RawHTML = wp.element.RawHTML;
 var _wp$blocks = wp.blocks,
     registerBlockType = _wp$blocks.registerBlockType,
     InspectorControls = _wp$blocks.InspectorControls,
@@ -822,13 +823,12 @@ registerBlockType('woocommerce/products', {
 		    display = _props$attributes.display,
 		    display_setting = _props$attributes.display_setting;
 
-		var className = props.attributes.hasOwnProperty('className') ? props.attributes.className : '';
 
 		var shortcode_atts = new Map();
 		shortcode_atts.set('limit', 'grid' === block_layout ? rows * columns : rows);
 
-		if (className || 'list' === block_layout) {
-			shortcode_atts.set('class', 'list' === block_layout ? className + ' list-layout' : className);
+		if ('list' === block_layout) {
+			shortcode_atts.set('class', 'list-layout');
 		}
 
 		if ('grid' === block_layout) {
@@ -891,7 +891,11 @@ registerBlockType('woocommerce/products', {
 
 		shortcode += ']';
 
-		return shortcode;
+		return wp.element.createElement(
+			RawHTML,
+			null,
+			shortcode
+		);
 	}
 });
 
