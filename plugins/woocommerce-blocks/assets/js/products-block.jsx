@@ -1,7 +1,7 @@
 const { __ } = wp.i18n;
 const { registerBlockType, InspectorControls, BlockControls } = wp.blocks;
-const { Toolbar, withAPIData, Dropdown, Dashicon } = wp.components;
-const { RangeControl, ToggleControl, SelectControl } = InspectorControls;
+const { Toolbar, withAPIData, Dropdown, Dashicon, RangeControl } = wp.components;
+const { ToggleControl, SelectControl } = InspectorControls;
 
 import { ProductsSpecificSelect } from './views/specific-select.jsx';
 import { ProductsCategorySelect } from './views/category-select.jsx';
@@ -330,6 +330,14 @@ const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
 		if ( display_setting.length > 1 ) {
 			query.attribute_term = display_setting.slice( 1 ).join( ',' );
 		}
+	} else if ( 'featured' === display ) {
+		query.featured = 1;
+	} else if ( 'best_sellers' === display ) {
+		// @todo Not possible in the API yet.
+	} else if ( 'best_rated' === display ) {
+		// @todo Not possible in the API yet.
+	} else if ( 'on_sale' === display ) {
+		query.on_sale = 1;
 	}
 
 	let query_string = '?';
