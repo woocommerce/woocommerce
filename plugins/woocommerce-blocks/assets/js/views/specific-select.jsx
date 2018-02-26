@@ -1,5 +1,5 @@
 const { __ } = wp.i18n;
-const { Toolbar, withAPIData, Dropdown } = wp.components;
+const { Toolbar, withAPIData, Dropdown, Dashicon } = wp.components;
 const { TransitionGroup, CSSTransition } = ReactTransitionGroup;
 
 /**
@@ -36,7 +36,7 @@ export class ProductsSpecificSelect extends React.Component {
 
 		/**
 		 * We need to copy the existing data into a new array.
-		 * We can't just push the new product onto the end of the existing array because Gutenberg seems 
+		 * We can't just push the new product onto the end of the existing array because Gutenberg seems
 		 * to do some sort of check by reference to determine whether to *actually* update the attribute
 		 * and will not update it if we just pass back the same array with an extra element on the end.
 		 */
@@ -70,14 +70,14 @@ export class ProductsSpecificSelect extends React.Component {
 	 */
 	render() {
 		return (
-			<div className="product-specific-select">
-				<ProductsSpecificSearchField 
-					addProductCallback={ this.addProduct.bind( this ) } 
-					selectedProducts={ this.state.selectedProducts } 
+			<div className="wc-products-list-card wc-products-list-card--specific">
+				<ProductsSpecificSearchField
+					addProductCallback={ this.addProduct.bind( this ) }
+					selectedProducts={ this.state.selectedProducts }
 				/>
-				<ProductSpecificSelectedProducts 
-					products={ this.state.selectedProducts } 
-					removeProductCallback={ this.removeProduct.bind( this ) } 
+				<ProductSpecificSelectedProducts
+					products={ this.state.selectedProducts }
+					removeProductCallback={ this.removeProduct.bind( this ) }
 				/>
 			</div>
 		);
@@ -153,20 +153,14 @@ class ProductsSpecificSearchField extends React.Component {
 	 * Render the product search UI.
 	 */
 	render() {
-
-		let cancelButton = null;
-		if ( this.state.searchText.length ) {
-			cancelButton = <span className="cancel" onClick={ () => { this.setState( { searchText: '' } ); } } >X</span>;
-		}
-
 		return (
-			<div className="product-search" ref={ this.setWrapperRef }>
-				<input type="text"
+			<div className="wc-products-list-card__search-wrapper" ref={ this.setWrapperRef }>
+				<input type="search"
+					className="wc-products-list-card__search"
 					value={ this.state.searchText }
 					placeholder={ __( 'Search for products to display' ) }
 					onChange={ this.updateSearchResults }
 				/>
-				{ cancelButton }
 				<ProductSpecificSearchResults
 					searchString={ this.state.searchText }
 					addProductCallback={ this.props.addProductCallback }
@@ -200,7 +194,7 @@ const ProductSpecificSearchResults = withAPIData( ( props ) => {
 			return __( 'No products found' );
 		}
 
-		return <ProductSpecificSearchResultsDropdown 
+		return <ProductSpecificSearchResultsDropdown
 			products={ products.data }
 			addProductCallback={ addProductCallback }
 			selectedProducts={ selectedProducts }
@@ -232,21 +226,20 @@ class ProductSpecificSearchResultsDropdown extends React.Component {
 					classNames="components-button--transition"
 					timeout={ { exit: 700 } }
 				>
-					<ProductSpecificSearchResultsDropdownElement 
-						product={product} 
-						addProductCallback={ addProductCallback } 
+					<ProductSpecificSearchResultsDropdownElement
+						product={product}
+						addProductCallback={ addProductCallback }
 					/>
 				</CSSTransition>
 			);
 		}
 
 		return (
-			<div role="menu" className="product-search-results" aria-orientation="vertical" aria-label="{ __( 'Products list' ) }">
-				<ul>
+			<div role="menu" className="wc-products-list-card__search-results" aria-orientation="vertical" aria-label="{ __( 'Products list' ) }">
 					<TransitionGroup>
 						{ productElements }
 					</TransitionGroup>
-				</ul>
+
 			</div>
 		);
 	}
@@ -285,16 +278,16 @@ class ProductSpecificSearchResultsDropdownElement extends React.Component {
 		const product = this.props.product;
 
 		return (
-			<li>
-				<button type="button" 
-					className='components-button'
-					id={ 'product-' + product.id } 
+			<div className="wc-products-list-card__content">
+				<img src={ product.images[0].src } />
+				<span className="wc-products-list-card__content-item-name">{ this.state.clicked ? __( 'Added' ) : product.name }</span>
+				<button type="button"
+					className="button-link"
+					id={ 'product-' + product.id }
 					onClick={ this.handleClick } >
-						<img src={ product.images[0].src } width="30px" /> 
-						<span className="product-name">{ this.state.clicked ? __( 'Added' ) : product.name }</span>
-						<a>{ __( 'Add' ) }</a>
+						{ __( 'Add' ) }
 				</button>
-			</li>
+			</div>
 		);
 	}
 }
@@ -323,15 +316,20 @@ const ProductSpecificSelectedProducts = withAPIData( ( props ) => {
 		}
 
 		return (
-			<div role="menu" className="selected-products" aria-orientation="vertical" aria-label="{ __( 'Products list' ) }">
+			<div role="menu" className="wc-products-list-card__results" aria-orientation="vertical" aria-label="{ __( 'Products list' ) }">
 				<ul>
 					{ products.data.map( ( product ) => (
-						<li>
-							<button type="button" className="components-button" id={ 'product-' + product.id } >
-								<img src={ product.images[0].src } width="30px" /> 
-								<span className="product-name">{ product.name }</span>
-								<a onClick={ function() { removeProductCallback( product.id ) } } >{ __( 'X' ) }</a>
-							</button>
+						<li className="wc-products-list-card__item">
+							<div className="wc-products-list-card__content">
+								<img src={ product.images[0].src } />
+								<span className="wc-products-list-card__content-item-name">{ product.name }</span>
+								<button
+									type="button"
+									id={ 'product-' + product.id }
+									onClick={ function() { removeProductCallback( product.id ) } } >
+										<Dashicon icon={ 'no-alt' } />
+								</button>
+							</div>
 						</li>
 					) ) }
 				</ul>

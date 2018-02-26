@@ -893,7 +893,8 @@ var __ = wp.i18n.__;
 var _wp$components = wp.components,
     Toolbar = _wp$components.Toolbar,
     withAPIData = _wp$components.withAPIData,
-    Dropdown = _wp$components.Dropdown;
+    Dropdown = _wp$components.Dropdown,
+    Dashicon = _wp$components.Dashicon;
 var _ReactTransitionGroup = ReactTransitionGroup,
     TransitionGroup = _ReactTransitionGroup.TransitionGroup,
     CSSTransition = _ReactTransitionGroup.CSSTransition;
@@ -941,7 +942,7 @@ var ProductsSpecificSelect = exports.ProductsSpecificSelect = function (_React$C
 
 			/**
     * We need to copy the existing data into a new array.
-    * We can't just push the new product onto the end of the existing array because Gutenberg seems 
+    * We can't just push the new product onto the end of the existing array because Gutenberg seems
     * to do some sort of check by reference to determine whether to *actually* update the attribute
     * and will not update it if we just pass back the same array with an extra element on the end.
     */
@@ -1003,7 +1004,7 @@ var ProductsSpecificSelect = exports.ProductsSpecificSelect = function (_React$C
 		value: function render() {
 			return wp.element.createElement(
 				'div',
-				{ className: 'product-specific-select' },
+				{ className: 'wc-products-list-card wc-products-list-card--specific' },
 				wp.element.createElement(ProductsSpecificSearchField, {
 					addProductCallback: this.addProduct.bind(this),
 					selectedProducts: this.state.selectedProducts
@@ -1113,28 +1114,15 @@ var ProductsSpecificSearchField = function (_React$Component2) {
 	}, {
 		key: 'render',
 		value: function render() {
-			var _this3 = this;
-
-			var cancelButton = null;
-			if (this.state.searchText.length) {
-				cancelButton = wp.element.createElement(
-					'span',
-					{ className: 'cancel', onClick: function onClick() {
-							_this3.setState({ searchText: '' });
-						} },
-					'X'
-				);
-			}
-
 			return wp.element.createElement(
 				'div',
-				{ className: 'product-search', ref: this.setWrapperRef },
-				wp.element.createElement('input', { type: 'text',
+				{ className: 'wc-products-list-card__search-wrapper', ref: this.setWrapperRef },
+				wp.element.createElement('input', { type: 'search',
+					className: 'wc-products-list-card__search',
 					value: this.state.searchText,
 					placeholder: __('Search for products to display'),
 					onChange: this.updateSearchResults
 				}),
-				cancelButton,
 				wp.element.createElement(ProductSpecificSearchResults, {
 					searchString: this.state.searchText,
 					addProductCallback: this.props.addProductCallback,
@@ -1254,15 +1242,11 @@ var ProductSpecificSearchResultsDropdown = function (_React$Component3) {
 
 			return wp.element.createElement(
 				'div',
-				{ role: 'menu', className: 'product-search-results', 'aria-orientation': 'vertical', 'aria-label': '{ __( \'Products list\' ) }' },
+				{ role: 'menu', className: 'wc-products-list-card__search-results', 'aria-orientation': 'vertical', 'aria-label': '{ __( \'Products list\' ) }' },
 				wp.element.createElement(
-					'ul',
+					TransitionGroup,
 					null,
-					wp.element.createElement(
-						TransitionGroup,
-						null,
-						productElements
-					)
+					productElements
 				)
 			);
 		}
@@ -1285,14 +1269,14 @@ var ProductSpecificSearchResultsDropdownElement = function (_React$Component4) {
 	function ProductSpecificSearchResultsDropdownElement(props) {
 		_classCallCheck(this, ProductSpecificSearchResultsDropdownElement);
 
-		var _this5 = _possibleConstructorReturn(this, (ProductSpecificSearchResultsDropdownElement.__proto__ || Object.getPrototypeOf(ProductSpecificSearchResultsDropdownElement)).call(this, props));
+		var _this4 = _possibleConstructorReturn(this, (ProductSpecificSearchResultsDropdownElement.__proto__ || Object.getPrototypeOf(ProductSpecificSearchResultsDropdownElement)).call(this, props));
 
-		_this5.state = {
+		_this4.state = {
 			clicked: false
 		};
 
-		_this5.handleClick = _this5.handleClick.bind(_this5);
-		return _this5;
+		_this4.handleClick = _this4.handleClick.bind(_this4);
+		return _this4;
 	}
 
 	/**
@@ -1317,25 +1301,21 @@ var ProductSpecificSearchResultsDropdownElement = function (_React$Component4) {
 			var product = this.props.product;
 
 			return wp.element.createElement(
-				'li',
-				null,
+				'div',
+				{ className: 'wc-products-list-card__content' },
+				wp.element.createElement('img', { src: product.images[0].src }),
+				wp.element.createElement(
+					'span',
+					{ className: 'wc-products-list-card__content-item-name' },
+					this.state.clicked ? __('Added') : product.name
+				),
 				wp.element.createElement(
 					'button',
 					{ type: 'button',
-						className: 'components-button',
+						className: 'button-link',
 						id: 'product-' + product.id,
 						onClick: this.handleClick },
-					wp.element.createElement('img', { src: product.images[0].src, width: '30px' }),
-					wp.element.createElement(
-						'span',
-						{ className: 'product-name' },
-						this.state.clicked ? __('Added') : product.name
-					),
-					wp.element.createElement(
-						'a',
-						null,
-						__('Add')
-					)
+					__('Add')
 				)
 			);
 		}
@@ -1374,29 +1354,32 @@ var ProductSpecificSelectedProducts = withAPIData(function (props) {
 
 	return wp.element.createElement(
 		'div',
-		{ role: 'menu', className: 'selected-products', 'aria-orientation': 'vertical', 'aria-label': '{ __( \'Products list\' ) }' },
+		{ role: 'menu', className: 'wc-products-list-card__results', 'aria-orientation': 'vertical', 'aria-label': '{ __( \'Products list\' ) }' },
 		wp.element.createElement(
 			'ul',
 			null,
 			products.data.map(function (product) {
 				return wp.element.createElement(
 					'li',
-					null,
+					{ className: 'wc-products-list-card__item' },
 					wp.element.createElement(
-						'button',
-						{ type: 'button', className: 'components-button', id: 'product-' + product.id },
-						wp.element.createElement('img', { src: product.images[0].src, width: '30px' }),
+						'div',
+						{ className: 'wc-products-list-card__content' },
+						wp.element.createElement('img', { src: product.images[0].src }),
 						wp.element.createElement(
 							'span',
-							{ className: 'product-name' },
+							{ className: 'wc-products-list-card__content-item-name' },
 							product.name
 						),
 						wp.element.createElement(
-							'a',
-							{ onClick: function onClick() {
+							'button',
+							{
+								type: 'button',
+								id: 'product-' + product.id,
+								onClick: function onClick() {
 									removeProductCallback(product.id);
 								} },
-							__('X')
+							wp.element.createElement(Dashicon, { icon: 'no-alt' })
 						)
 					)
 				);
