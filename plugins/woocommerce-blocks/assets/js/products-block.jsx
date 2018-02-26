@@ -532,11 +532,15 @@ registerBlockType( 'woocommerce/products', {
 	 * @return string
 	 */
 	save( props ) {
-		const { block_layout, rows, columns, display, display_setting, className } = props.attributes;
+		const { block_layout, rows, columns, display, display_setting } = props.attributes;
+		const className = props.attributes.hasOwnProperty( 'className' ) ? props.attributes.className : '';
 
 		let shortcode_atts = new Map();
 		shortcode_atts.set( 'limit', 'grid' === block_layout ? rows * columns : rows );
-		shortcode_atts.set( 'class', 'list' === block_layout ? className + ' list-layout' : className );
+
+		if ( className || 'list' === block_layout ) {
+			shortcode_atts.set( 'class', 'list' === block_layout ? className + ' list-layout' : className );
+		}
 
 		if ( 'grid' === block_layout ) {
 			shortcode_atts.set( 'columns', columns );
@@ -544,10 +548,24 @@ registerBlockType( 'woocommerce/products', {
 
 		if ( 'specific' === display ) {
 			shortcode_atts.set( 'include', display_setting.join( ',' ) );
-		}
-
-		if ( 'category' === display ) {
+		} else if ( 'category' === display ) {
 			shortcode_atts.set( 'category', display_setting.join( ',' ) );
+		} else if ( 'featured' === display ) {
+			shortcode_atts.set( 'visibility', 'featured' );
+		} else if ( 'best_sellers' === display ) {
+			shortcode_atts.set( 'best_selling', '1' );
+		} else if ( 'best_rated' === display ) {
+			shortcode_atts.set( 'orderby', 'rating' );
+		} else if ( 'on_sale' === display ) {
+			shortcode_atts.set( 'on_sale', '1' );
+		} else if ( 'attribute' === display ) {
+			const attribute = display_setting.length ? display_setting[0] : '';
+			const terms = display_setting.length > 1 ? display_setting.slice( 1 ).join( ',' ) : '';
+
+			shortcode_atts.set( 'attribute', attribute );
+			if ( terms.length ) {
+				shortcode_atts.set( 'terms', terms );
+			}
 		}
 
 		// Build the shortcode string out of the set shortcode attributes.
