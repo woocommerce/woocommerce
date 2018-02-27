@@ -14,3 +14,8 @@ The source code is in the products-block.jsx file and the compiled code is in pr
 
 **Gutenberg Tutorial and Docs**: https://wordpress.org/gutenberg/handbook/blocks/
 **Using API in Gutenberg**: https://github.com/WordPress/gutenberg/tree/213c64bb495946deffa3b6fe260f95b87de5774a/components/higher-order/with-api-data
+
+
+### Vision for the Feature
+
+The Products block is essentially a visual wrapper for the `[products]` shortcode. Users should be able to insert a variety of products (specific products, products in a specific category, with assorted layouts and visual styles) into their post content using a simple and powerful visual editor
