@@ -32,7 +32,7 @@ class WC_AJAX {
 	 * @return string
 	 */
 	public static function get_endpoint( $request = '' ) {
-		return esc_url_raw( apply_filters( 'woocommerce_ajax_get_endpoint', add_query_arg( 'wc-ajax', $request, remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart' ), home_url( '/' ) ) ), $request ) );
+		return esc_url_raw( apply_filters( 'woocommerce_ajax_get_endpoint', add_query_arg( 'wc-ajax', $request, remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart' ), home_url( '/', 'relative' ) ) ), $request ) );
 	}
 
 	/**
@@ -458,7 +458,7 @@ class WC_AJAX {
 		}
 
 		wp_safe_redirect( wp_get_referer() ? remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids' ), wp_get_referer() ) : admin_url( 'edit.php?post_type=product' ) );
-		exit;
+		wp_die();
 	}
 
 	/**
@@ -479,7 +479,7 @@ class WC_AJAX {
 		}
 
 		wp_safe_redirect( wp_get_referer() ? wp_get_referer() : admin_url( 'edit.php?post_type=shop_order' ) );
-		exit;
+		wp_die();
 	}
 
 	/**
@@ -499,7 +499,7 @@ class WC_AJAX {
 
 			wp_send_json_success( WC_Admin_List_Table_Orders::order_preview_get_order_details( $order ) );
 		}
-		exit;
+		wp_die();
 	}
 
 	/**
@@ -2299,14 +2299,14 @@ class WC_AJAX {
 	public static function tax_rates_save_changes() {
 		if ( ! isset( $_POST['wc_tax_nonce'], $_POST['changes'] ) ) {
 			wp_send_json_error( 'missing_fields' );
-			exit;
+			wp_die();
 		}
 
 		$current_class = ! empty( $_POST['current_class'] ) ? $_POST['current_class'] : ''; // This is sanitized seven lines later.
 
 		if ( ! wp_verify_nonce( $_POST['wc_tax_nonce'], 'wc_tax_nonce-class:' . $current_class ) ) {
 			wp_send_json_error( 'bad_nonce' );
-			exit;
+			wp_die();
 		}
 
 		$current_class = WC_Tax::format_tax_rate_class( $current_class );
@@ -2314,7 +2314,7 @@ class WC_AJAX {
 		// Check User Caps
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			wp_send_json_error( 'missing_capabilities' );
-			exit;
+			wp_die();
 		}
 
 		$changes = $_POST['changes'];
@@ -2374,18 +2374,18 @@ class WC_AJAX {
 	public static function shipping_zones_save_changes() {
 		if ( ! isset( $_POST['wc_shipping_zones_nonce'], $_POST['changes'] ) ) {
 			wp_send_json_error( 'missing_fields' );
-			exit;
+			wp_die();
 		}
 
 		if ( ! wp_verify_nonce( $_POST['wc_shipping_zones_nonce'], 'wc_shipping_zones_nonce' ) ) {
 			wp_send_json_error( 'bad_nonce' );
-			exit;
+			wp_die();
 		}
 
 		// Check User Caps
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			wp_send_json_error( 'missing_capabilities' );
-			exit;
+			wp_die();
 		}
 
 		$changes = $_POST['changes'];
@@ -2427,18 +2427,18 @@ class WC_AJAX {
 	public static function shipping_zone_add_method() {
 		if ( ! isset( $_POST['wc_shipping_zones_nonce'], $_POST['zone_id'], $_POST['method_id'] ) ) {
 			wp_send_json_error( 'missing_fields' );
-			exit;
+			wp_die();
 		}
 
 		if ( ! wp_verify_nonce( $_POST['wc_shipping_zones_nonce'], 'wc_shipping_zones_nonce' ) ) {
 			wp_send_json_error( 'bad_nonce' );
-			exit;
+			wp_die();
 		}
 
 		// Check User Caps
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			wp_send_json_error( 'missing_capabilities' );
-			exit;
+			wp_die();
 		}
 
 		$zone_id     = wc_clean( $_POST['zone_id'] );
@@ -2459,17 +2459,17 @@ class WC_AJAX {
 	public static function shipping_zone_methods_save_changes() {
 		if ( ! isset( $_POST['wc_shipping_zones_nonce'], $_POST['zone_id'], $_POST['changes'] ) ) {
 			wp_send_json_error( 'missing_fields' );
-			exit;
+			wp_die();
 		}
 
 		if ( ! wp_verify_nonce( $_POST['wc_shipping_zones_nonce'], 'wc_shipping_zones_nonce' ) ) {
 			wp_send_json_error( 'bad_nonce' );
-			exit;
+			wp_die();
 		}
 
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			wp_send_json_error( 'missing_capabilities' );
-			exit;
+			wp_die();
 		}
 
 		global $wpdb;
@@ -2557,17 +2557,17 @@ class WC_AJAX {
 	public static function shipping_zone_methods_save_settings() {
 		if ( ! isset( $_POST['wc_shipping_zones_nonce'], $_POST['instance_id'], $_POST['data'] ) ) {
 			wp_send_json_error( 'missing_fields' );
-			exit;
+			wp_die();
 		}
 
 		if ( ! wp_verify_nonce( $_POST['wc_shipping_zones_nonce'], 'wc_shipping_zones_nonce' ) ) {
 			wp_send_json_error( 'bad_nonce' );
-			exit;
+			wp_die();
 		}
 
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			wp_send_json_error( 'missing_capabilities' );
-			exit;
+			wp_die();
 		}
 
 		$instance_id     = absint( $_POST['instance_id'] );
@@ -2590,17 +2590,17 @@ class WC_AJAX {
 	public static function shipping_classes_save_changes() {
 		if ( ! isset( $_POST['wc_shipping_classes_nonce'], $_POST['changes'] ) ) {
 			wp_send_json_error( 'missing_fields' );
-			exit;
+			wp_die();
 		}
 
 		if ( ! wp_verify_nonce( $_POST['wc_shipping_classes_nonce'], 'wc_shipping_classes_nonce' ) ) {
 			wp_send_json_error( 'bad_nonce' );
-			exit;
+			wp_die();
 		}
 
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			wp_send_json_error( 'missing_capabilities' );
-			exit;
+			wp_die();
 		}
 
 		$changes = $_POST['changes'];
