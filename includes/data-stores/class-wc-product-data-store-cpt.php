@@ -1332,30 +1332,46 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$type_where    = '';
 		$status_where  = '';
 
-		// Parse search terms.
-		if ( preg_match_all( '/".*?("|$)|((?<=[\t ",+])|^)[^\t ",+]+/', $term, $matches ) ) {
-			$search_terms = $this->get_valid_search_terms( $matches[0] );
-			$count        = count( $search_terms );
-
-			// if the search string has only short terms or stopwords, or is 10+ terms long, match it as sentence.
-			if ( 9 < $count || 0 === $count ) {
-				$search_terms = array( $term );
-			}
+		// See if search term contains OR keywords.
+		if ( stristr( $term, ' OR ' ) ) {
+			$term_groups = explode( ' OR ', $term );
 		} else {
-			$search_terms = array( $term );
+			$term_groups = array( $term );
 		}
 
-		$search_where = '';
-		$searchand    = '';
+		$search_where   = '';
+		$search_queries = array();
 
-		foreach ( $search_terms as $search_term ) {
-			$like          = '%' . $wpdb->esc_like( $search_term ) . '%';
-			$search_where .= $wpdb->prepare( " {$searchand} ( ( posts.post_title LIKE %s) OR ( posts.post_content LIKE %s ) OR ( postmeta.meta_key = '_sku' AND postmeta.meta_value LIKE %s ) )", $like, $like, $like ); // @codingStandardsIgnoreLine.
-			$searchand     = ' AND ';
+		foreach ( $term_groups as $term_group ) {
+			// Parse search terms.
+			if ( preg_match_all( '/".*?("|$)|((?<=[\t ",+])|^)[^\t ",+]+/', $term_group, $matches ) ) {
+				$search_terms = $this->get_valid_search_terms( $matches[0] );
+				$count        = count( $search_terms );
+
+				// if the search string has only short terms or stopwords, or is 10+ terms long, match it as sentence.
+				if ( 9 < $count || 0 === $count ) {
+					$search_terms = array( $term_group );
+				}
+			} else {
+				$search_terms = array( $term_group );
+			}
+
+			$term_group_query = '';
+			$searchand        = '';
+
+			foreach ( $search_terms as $search_term ) {
+				$like              = '%' . $wpdb->esc_like( $search_term ) . '%';
+				$term_group_query .= $wpdb->prepare( " {$searchand} ( ( posts.post_title LIKE %s) OR ( posts.post_content LIKE %s ) OR ( postmeta.meta_key = '_sku' AND postmeta.meta_value LIKE %s ) )", $like, $like, $like ); // @codingStandardsIgnoreLine.
+				$searchand         = ' AND ';
+			}
+
+			if ( $term_group_query ) {
+				$search_queries[] = $term_group_query;
+			}
 		}
 
-		if ( $search_where ) {
-			$search_where = ' AND (' . $search_where . ') ';
+		if ( $search_queries ) {
+			$search_where = 'AND (' . implode( ') OR (', $search_queries ) . ')';
 		}
 
 		if ( $type ) {
