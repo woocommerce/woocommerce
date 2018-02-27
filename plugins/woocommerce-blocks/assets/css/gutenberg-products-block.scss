@@ -570,10 +570,11 @@ p.wc-products-display-options__option-description {
 	width: 100%;
 	z-index: 999;
 	list-style: none;
+	background: #ffffff;
 	box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.1);
 
 	.wc-products-list-card__content {
-		border-width: 1px 1px 0;
+		border-width: 1px 0 0;
 		border-style: solid;
 		border-color: $color__border;
 		transition: opacity .7s;
