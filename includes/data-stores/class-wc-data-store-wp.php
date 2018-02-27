@@ -487,6 +487,6 @@ class WC_Data_Store_WP {
 			)
 		) ) );
 
-		return apply_filters( 'woocommerce_search_stopwords', $stopwords );
+		return apply_filters( 'wp_search_stopwords', $stopwords );
 	}
 }
