@@ -316,23 +316,25 @@ const ProductSpecificSelectedProducts = withAPIData( ( props ) => {
 		}
 
 		return (
-			<div role="menu" className="wc-products-list-card__results" aria-orientation="vertical" aria-label="{ __( 'Products list' ) }">
-				<ul>
-					{ products.data.map( ( product ) => (
-						<li className="wc-products-list-card__item">
-							<div className="wc-products-list-card__content">
-								<img src={ product.images[0].src } />
-								<span className="wc-products-list-card__content-item-name">{ product.name }</span>
-								<button
-									type="button"
-									id={ 'product-' + product.id }
-									onClick={ function() { removeProductCallback( product.id ) } } >
-										<Dashicon icon={ 'no-alt' } />
-								</button>
-							</div>
-						</li>
-					) ) }
-				</ul>
+			<div className="wc-products-list-card__results-wrapper">
+				<div role="menu" className="wc-products-list-card__results" aria-orientation="vertical" aria-label="{ __( 'Products list' ) }">
+					<ul>
+						{ products.data.map( ( product ) => (
+							<li className="wc-products-list-card__item">
+								<div className="wc-products-list-card__content">
+									<img src={ product.images[0].src } />
+									<span className="wc-products-list-card__content-item-name">{ product.name }</span>
+									<button
+										type="button"
+										id={ 'product-' + product.id }
+										onClick={ function() { removeProductCallback( product.id ) } } >
+											<Dashicon icon={ 'no-alt' } />
+									</button>
+								</div>
+							</li>
+						) ) }
+					</ul>
+				</div>
 			</div>
 		);
 	}

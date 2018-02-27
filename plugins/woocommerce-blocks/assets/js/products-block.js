@@ -1354,36 +1354,40 @@ var ProductSpecificSelectedProducts = withAPIData(function (props) {
 
 	return wp.element.createElement(
 		'div',
-		{ role: 'menu', className: 'wc-products-list-card__results', 'aria-orientation': 'vertical', 'aria-label': '{ __( \'Products list\' ) }' },
+		{ className: 'wc-products-list-card__results-wrapper' },
 		wp.element.createElement(
-			'ul',
-			null,
-			products.data.map(function (product) {
-				return wp.element.createElement(
-					'li',
-					{ className: 'wc-products-list-card__item' },
-					wp.element.createElement(
-						'div',
-						{ className: 'wc-products-list-card__content' },
-						wp.element.createElement('img', { src: product.images[0].src }),
+			'div',
+			{ role: 'menu', className: 'wc-products-list-card__results', 'aria-orientation': 'vertical', 'aria-label': '{ __( \'Products list\' ) }' },
+			wp.element.createElement(
+				'ul',
+				null,
+				products.data.map(function (product) {
+					return wp.element.createElement(
+						'li',
+						{ className: 'wc-products-list-card__item' },
 						wp.element.createElement(
-							'span',
-							{ className: 'wc-products-list-card__content-item-name' },
-							product.name
-						),
-						wp.element.createElement(
-							'button',
-							{
-								type: 'button',
-								id: 'product-' + product.id,
-								onClick: function onClick() {
-									removeProductCallback(product.id);
-								} },
-							wp.element.createElement(Dashicon, { icon: 'no-alt' })
+							'div',
+							{ className: 'wc-products-list-card__content' },
+							wp.element.createElement('img', { src: product.images[0].src }),
+							wp.element.createElement(
+								'span',
+								{ className: 'wc-products-list-card__content-item-name' },
+								product.name
+							),
+							wp.element.createElement(
+								'button',
+								{
+									type: 'button',
+									id: 'product-' + product.id,
+									onClick: function onClick() {
+										removeProductCallback(product.id);
+									} },
+								wp.element.createElement(Dashicon, { icon: 'no-alt' })
+							)
 						)
-					)
-				);
-			})
+					);
+				})
+			)
 		)
 	);
 });
