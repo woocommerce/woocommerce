@@ -103,6 +103,16 @@ class WC_Shop_Customizer {
 					$( '.woocommerce-cropping-control' ).find( 'input:checked' ).change();
 				} );
 
+				wp.customize( 'woocommerce_demo_store_notice', function( setting ) {
+					setting.bind( function( value ) {
+						var checkbox = wp.customize( 'woocommerce_demo_store' );
+
+						if ( checkbox.get() ) {
+							$( '.woocommerce-store-notice' ).text( value );
+						}
+					} );
+				} );
+
 				wp.customize.section( 'woocommerce_product_catalog', function( section ) {
 					section.expanded.bind( function( isExpanded ) {
 						if ( isExpanded ) {
@@ -253,6 +263,7 @@ class WC_Shop_Customizer {
 				'type'              => 'option',
 				'capability'        => 'manage_woocommerce',
 				'sanitize_callback' => 'wp_kses_post',
+				'transport'         => 'postMessage',
 			)
 		);
 
@@ -276,6 +287,16 @@ class WC_Shop_Customizer {
 				'type'     => 'checkbox',
 			)
 		);
+
+		if ( isset( $wp_customize->selective_refresh ) ) {
+			$wp_customize->selective_refresh->add_partial(
+				'woocommerce_demo_store_notice', array(
+					'selector'            => '.woocommerce-store-notice',
+					'container_inclusive' => true,
+					'render_callback'     => 'woocommerce_demo_store',
+				)
+			);
+		}
 	}
 
 	/**
@@ -448,9 +469,11 @@ class WC_Shop_Customizer {
 		} elseif ( apply_filters( 'woocommerce_background_image_regeneration', true ) && ! is_multisite() ) {
 			$regen_description = __( 'After publishing your changes, new image sizes will be generated automatically.', 'woocommerce' );
 		} elseif ( apply_filters( 'woocommerce_background_image_regeneration', true ) && is_multisite() ) {
+			/* translators: 1: tools URL 2: regen thumbs url */
 			$regen_description = sprintf( __( 'After publishing your changes, new image sizes may not be shown until you regenerate thumbnails. You can do this from the <a href="%1$s" target="_blank">tools section in WooCommerce</a> or by using a plugin such as <a href="%2$s" target="_blank">Regenerate Thumbnails</a>.', 'woocommerce' ), admin_url( 'admin.php?page=wc-status&tab=tools' ), 'https://en-gb.wordpress.org/plugins/regenerate-thumbnails/' );
 		} else {
-			$regen_description = sprintf( __( 'After publishing your changes, new image sizes may not be shown until you <a href="%2$s" target="_blank">Regenerate Thumbnails</a>.', 'woocommerce' ), 'https://en-gb.wordpress.org/plugins/regenerate-thumbnails/' );
+			/* translators: %s: regen thumbs url */
+			$regen_description = sprintf( __( 'After publishing your changes, new image sizes may not be shown until you <a href="%s" target="_blank">Regenerate Thumbnails</a>.', 'woocommerce' ), 'https://en-gb.wordpress.org/plugins/regenerate-thumbnails/' );
 		}
 
 		$wp_customize->add_section(
