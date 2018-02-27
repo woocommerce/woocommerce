@@ -9,10 +9,7 @@ if [ $1 == 'before' ]; then
 		phpenv config-rm xdebug.ini
 	fi
 
-	if [[ ${RUN_PHPCS} == 1 ]]; then
-		composer install
-	fi
-
+	composer install
 fi
 
 if [ $1 == 'after' ]; then
