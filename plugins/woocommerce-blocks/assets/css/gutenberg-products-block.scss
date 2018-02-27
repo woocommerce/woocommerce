@@ -290,9 +290,9 @@ p.wc-products-display-options__option-description {
 
 .wc-products-list-card {
 	position: relative;
-	max-width: 480px;
 	margin-left: auto;
 	margin-right: auto;
+	padding: 0 1em;
 	overflow: hidden;
 	box-sizing: border-box;
 
@@ -305,15 +305,10 @@ p.wc-products-display-options__option-description {
 	}
 
 	.wc-products-list-card__results {
-		width: 600px;
 		max-height: 200px;
 		overflow-y: scroll;
 		box-sizing: border-box;
 		padding: 0 0 1em;
-
-		> ul {
-			max-width: 480px;
-		}
 
 		ul {
 			list-style: none;
@@ -605,4 +600,24 @@ p.wc-products-display-options__option-description {
 .wc-products-list-card__results-wrapper {
 	position: relative;
 	overflow: hidden;
+}
+
+@media only screen and (min-width: 700px) {
+	.wc-products-list-card {
+		max-width: 480px;
+
+		.wc-products-list-card__results {
+			width: 150%;
+
+			> ul {
+				max-width: 68%;
+			}
+		}
+	}
+
+	.wc-products-list-card--taxonomy-atributes {
+		&__atribute {
+			max-width: 480px;
+		}
+	}
 }
