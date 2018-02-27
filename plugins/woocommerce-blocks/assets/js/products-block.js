@@ -89,6 +89,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var __ = wp.i18n.__;
+var RawHTML = wp.element.RawHTML;
 var _wp$blocks = wp.blocks,
     registerBlockType = _wp$blocks.registerBlockType,
     InspectorControls = _wp$blocks.InspectorControls,
@@ -97,9 +98,9 @@ var _wp$components = wp.components,
     Toolbar = _wp$components.Toolbar,
     withAPIData = _wp$components.withAPIData,
     Dropdown = _wp$components.Dropdown,
-    Dashicon = _wp$components.Dashicon;
-var RangeControl = InspectorControls.RangeControl,
-    ToggleControl = InspectorControls.ToggleControl,
+    Dashicon = _wp$components.Dashicon,
+    RangeControl = _wp$components.RangeControl;
+var ToggleControl = InspectorControls.ToggleControl,
     SelectControl = InspectorControls.SelectControl;
 
 
@@ -562,6 +563,14 @@ var ProductsBlockPreview = withAPIData(function (_ref) {
 		if (display_setting.length > 1) {
 			query.attribute_term = display_setting.slice(1).join(',');
 		}
+	} else if ('featured' === display) {
+		query.featured = 1;
+	} else if ('best_sellers' === display) {
+		// @todo Not possible in the API yet.
+	} else if ('best_rated' === display) {
+		// @todo Not possible in the API yet.
+	} else if ('on_sale' === display) {
+		query.on_sale = 1;
 	}
 
 	var query_string = '?';
@@ -699,6 +708,21 @@ registerBlockType('woocommerce/products', {
    */
 
 		function getInspectorControls() {
+
+			// Column controls don't make sense in a list layout.
+			var columnControl = null;
+			if ('list' !== block_layout) {
+				columnControl = wp.element.createElement(RangeControl, {
+					label: __('Columns'),
+					value: columns,
+					onChange: function onChange(value) {
+						return setAttributes({ columns: value });
+					},
+					min: 1,
+					max: 6
+				});
+			}
+
 			return wp.element.createElement(
 				InspectorControls,
 				{ key: 'inspector' },
@@ -707,15 +731,7 @@ registerBlockType('woocommerce/products', {
 					null,
 					__('Layout')
 				),
-				wp.element.createElement(RangeControl, {
-					label: __('Columns'),
-					value: columns,
-					onChange: function onChange(value) {
-						return setAttributes({ columns: value });
-					},
-					min: 1,
-					max: 6
-				}),
+				columnControl,
 				wp.element.createElement(RangeControl, {
 					label: __('Rows'),
 					value: rows,
@@ -812,13 +828,15 @@ registerBlockType('woocommerce/products', {
 		    rows = _props$attributes.rows,
 		    columns = _props$attributes.columns,
 		    display = _props$attributes.display,
-		    display_setting = _props$attributes.display_setting,
-		    className = _props$attributes.className;
+		    display_setting = _props$attributes.display_setting;
 
 
 		var shortcode_atts = new Map();
 		shortcode_atts.set('limit', 'grid' === block_layout ? rows * columns : rows);
-		shortcode_atts.set('class', 'list' === block_layout ? className + ' list-layout' : className);
+
+		if ('list' === block_layout) {
+			shortcode_atts.set('class', 'list-layout');
+		}
 
 		if ('grid' === block_layout) {
 			shortcode_atts.set('columns', columns);
@@ -826,10 +844,24 @@ registerBlockType('woocommerce/products', {
 
 		if ('specific' === display) {
 			shortcode_atts.set('include', display_setting.join(','));
-		}
-
-		if ('category' === display) {
+		} else if ('category' === display) {
 			shortcode_atts.set('category', display_setting.join(','));
+		} else if ('featured' === display) {
+			shortcode_atts.set('visibility', 'featured');
+		} else if ('best_sellers' === display) {
+			shortcode_atts.set('best_selling', '1');
+		} else if ('best_rated' === display) {
+			shortcode_atts.set('orderby', 'rating');
+		} else if ('on_sale' === display) {
+			shortcode_atts.set('on_sale', '1');
+		} else if ('attribute' === display) {
+			var attribute = display_setting.length ? display_setting[0] : '';
+			var terms = display_setting.length > 1 ? display_setting.slice(1).join(',') : '';
+
+			shortcode_atts.set('attribute', attribute);
+			if (terms.length) {
+				shortcode_atts.set('terms', terms);
+			}
 		}
 
 		// Build the shortcode string out of the set shortcode attributes.
@@ -866,7 +898,11 @@ registerBlockType('woocommerce/products', {
 
 		shortcode += ']';
 
-		return shortcode;
+		return wp.element.createElement(
+			RawHTML,
+			null,
+			shortcode
+		);
 	}
 });
 
