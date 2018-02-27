@@ -165,7 +165,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 		}
 
 		// Check if variation belongs to the correct parent product.
-		if ( 0 !== $object->get_parent_id() && absint( $request['product_id'] ) !== $object->get_parent_id() ) {
+		if ( $object && 0 !== $object->get_parent_id() && absint( $request['product_id'] ) !== $object->get_parent_id() ) {
 			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Parent product does not match current variation.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
