@@ -9,7 +9,12 @@ if [ $1 == 'before' ]; then
 		phpenv config-rm xdebug.ini
 	fi
 
-	composer install
+	composer global require "phpunit/phpunit=6.*"
+
+	if [[ ${RUN_PHPCS} == 1 ]]; then
+		composer install
+	fi
+
 fi
 
 if [ $1 == 'after' ]; then
