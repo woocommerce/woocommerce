@@ -126,6 +126,16 @@ class WC_Discounts {
 	}
 
 	/**
+	 * Get the object concerned.
+	 *
+	 * @since  3.3.2
+	 * @return object
+	 */
+	public function get_object() {
+		return $this->object;
+	}
+
+	/**
 	 * Get items.
 	 *
 	 * @since  3.2.0
@@ -133,6 +143,16 @@ class WC_Discounts {
 	 */
 	public function get_items() {
 		return $this->items;
+	}
+
+	/**
+	 * Get items to validate.
+	 *
+	 * @since  3.3.2
+	 * @return object[]
+	 */
+	public function get_items_to_validate() {
+		return apply_filters( 'woocommerce_coupon_get_items_to_validate', $this->get_items(), $this );
 	}
 
 	/**
@@ -307,7 +327,7 @@ class WC_Discounts {
 	protected function get_items_to_apply_coupon( $coupon ) {
 		$items_to_apply  = array();
 
-		foreach ( $this->items as $item ) {
+		foreach ( $this->get_items_to_validate() as $item ) {
 			$item_to_apply = clone $item; // Clone the item so changes to this item do not affect the originals.
 
 			if ( 0 === $this->get_discounted_price_in_cents( $item_to_apply ) || 0 >= $item_to_apply->quantity ) {
@@ -655,7 +675,7 @@ class WC_Discounts {
 		if ( count( $coupon->get_product_ids() ) > 0 ) {
 			$valid = false;
 
-			foreach ( $this->items as $item ) {
+			foreach ( $this->get_items_to_validate() as $item ) {
 				if ( $item->product && in_array( $item->product->get_id(), $coupon->get_product_ids(), true ) || in_array( $item->product->get_parent_id(), $coupon->get_product_ids(), true ) ) {
 					$valid = true;
 					break;
@@ -682,7 +702,7 @@ class WC_Discounts {
 		if ( count( $coupon->get_product_categories() ) > 0 ) {
 			$valid = false;
 
-			foreach ( $this->items as $item ) {
+			foreach ( $this->get_items_to_validate() as $item ) {
 				if ( $coupon->get_exclude_sale_items() && $item->product && $item->product->is_on_sale() ) {
 					continue;
 				}
@@ -720,7 +740,7 @@ class WC_Discounts {
 		if ( $coupon->get_exclude_sale_items() ) {
 			$valid = false;
 
-			foreach ( $this->items as $item ) {
+			foreach ( $this->get_items_to_validate() as $item ) {
 				if ( $item->product && ! $item->product->is_on_sale() ) {
 					$valid = true;
 					break;
@@ -744,10 +764,10 @@ class WC_Discounts {
 	 * @return bool
 	 */
 	protected function validate_coupon_excluded_items( $coupon ) {
-		if ( ! empty( $this->items ) && $coupon->is_type( wc_get_product_coupon_types() ) ) {
+		if ( ! empty( $this->get_items_to_validate() ) && $coupon->is_type( wc_get_product_coupon_types() ) ) {
 			$valid = false;
 
-			foreach ( $this->items as $item ) {
+			foreach ( $this->get_items_to_validate() as $item ) {
 				if ( $item->product && $coupon->is_valid_for_product( $item->product, $item->object ) ) {
 					$valid = true;
 					break;
@@ -792,7 +812,7 @@ class WC_Discounts {
 		if ( count( $coupon->get_excluded_product_ids() ) > 0 ) {
 			$products = array();
 
-			foreach ( $this->items as $item ) {
+			foreach ( $this->get_items_to_validate() as $item ) {
 				if ( $item->product && in_array( $item->product->get_id(), $coupon->get_excluded_product_ids(), true ) || in_array( $item->product->get_parent_id(), $coupon->get_excluded_product_ids(), true ) ) {
 					$products[] = $item->product->get_name();
 				}
@@ -819,7 +839,7 @@ class WC_Discounts {
 		if ( count( $coupon->get_excluded_product_categories() ) > 0 ) {
 			$categories = array();
 
-			foreach ( $this->items as $item ) {
+			foreach ( $this->get_items_to_validate() as $item ) {
 				if ( ! $item->product ) {
 					continue;
 				}
