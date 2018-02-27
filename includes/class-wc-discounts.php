@@ -280,6 +280,10 @@ class WC_Discounts {
 					// Store code and discount amount per item.
 					$this->discounts[ $coupon->get_code() ][ $item->key ] += $discount;
 				}
+
+				// Allow post-processing for custom coupon types (e.g. calculating discrepancy, etc)
+				$this->discounts[ $coupon->get_code() ] = apply_filters( 'woocommerce_coupon_custom_discounts_array', $this->discounts[ $coupon->get_code() ], $coupon );
+
 				break;
 		}
 
