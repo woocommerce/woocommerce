@@ -318,7 +318,7 @@ class WC_Template_Loader {
 		$wp_query->is_page       = true;
 		$wp_query->is_single     = true;
 		$wp_query->is_archive    = false;
-		$wp_query->is_tax        = false;
+		$wp_query->is_tax        = true;
 		$wp_query->max_num_pages = 0;
 
 		// Prepare everything for rendering.
