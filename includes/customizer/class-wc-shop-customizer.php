@@ -20,6 +20,7 @@ class WC_Shop_Customizer {
 		add_action( 'customize_register', array( $this, 'add_sections' ) );
 		add_action( 'customize_controls_print_styles', array( $this, 'add_styles' ) );
 		add_action( 'customize_controls_print_scripts', array( $this, 'add_scripts' ), 30 );
+		add_action( 'wp_enqueue_scripts', array( $this, 'add_frontend_scripts' ) );
 	}
 
 	/**
@@ -38,6 +39,18 @@ class WC_Shop_Customizer {
 		$this->add_store_notice_section( $wp_customize );
 		$this->add_product_catalog_section( $wp_customize );
 		$this->add_product_images_section( $wp_customize );
+	}
+
+	/**
+	 * Frontend CSS styles.
+	 */
+	public function add_frontend_scripts() {
+		if ( ! is_customize_preview() || ! is_store_notice_showing() ) {
+			return;
+		}
+
+		$css = '.woocommerce-store-notice, p.demo_store { display: block !important; }';
+		wp_add_inline_style( 'customize-preview', $css );
 	}
 
 	/**
@@ -101,6 +114,18 @@ class WC_Shop_Customizer {
 
 				wp.customize.bind( 'ready', function() { // Ready?
 					$( '.woocommerce-cropping-control' ).find( 'input:checked' ).change();
+				} );
+
+				wp.customize( 'woocommerce_demo_store', function( setting ) {
+					setting.bind( function( value ) {
+						var notice = wp.customize( 'woocommerce_demo_store_notice' );
+
+						if ( value && ! notice.callbacks.has( notice.preview ) ) {
+							notice.bind( notice.preview );
+						} else if ( ! value ) {
+							notice.unbind( notice.preview );
+						}
+					} );
 				} );
 
 				wp.customize( 'woocommerce_demo_store_notice', function( setting ) {
