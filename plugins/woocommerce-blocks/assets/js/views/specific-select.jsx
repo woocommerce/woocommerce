@@ -223,7 +223,7 @@ class ProductSpecificSearchResultsDropdown extends React.Component {
 			productElements.push(
 				<CSSTransition
 					key={ product.slug }
-					classNames="components-button--transition"
+					classNames="wc-products-list-card__content--transition"
 					timeout={ { exit: 700 } }
 				>
 					<ProductSpecificSearchResultsDropdownElement

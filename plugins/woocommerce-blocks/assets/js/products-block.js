@@ -1252,7 +1252,7 @@ var ProductSpecificSearchResultsDropdown = function (_React$Component3) {
 						CSSTransition,
 						{
 							key: product.slug,
-							classNames: 'components-button--transition',
+							classNames: 'wc-products-list-card__content--transition',
 							timeout: { exit: 700 }
 						},
 						wp.element.createElement(ProductSpecificSearchResultsDropdownElement, {

@@ -581,6 +581,11 @@ p.wc-products-display-options__option-description {
 		border-width: 1px 1px 0;
 		border-style: solid;
 		border-color: $color__border;
+		transition: opacity .7s;
+
+		&--transition-exit-active {
+			opacity: 0;
+		}
 
 		&:last-child {
 			border-bottom-width: 1px;
