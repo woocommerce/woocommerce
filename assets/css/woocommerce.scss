@@ -1369,9 +1369,11 @@ p.demo_store,
 			list-style: none outside;
 			input {
 				margin: 3px 0.5ex;
+				vertical-align: middle;
 			}
 			label {
 				display: inline;
+				vertical-align: middle;
 			}
 		}
 
@@ -1949,6 +1951,10 @@ button.pswp__button--zoom:hover {
 
 				input {
 					margin: 0 1em 0 0;
+					vertical-align: middle;
+				}
+				
+				label {
 					vertical-align: middle;
 				}
 
