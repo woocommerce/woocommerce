@@ -357,8 +357,8 @@ class WC_Product_CSV_Importer_Controller {
 		}
 
 		if ( ! empty( $_POST['map_to'] ) ) {
-			$mapping_from = wp_unslash( $_POST['map_from'] );
-			$mapping_to   = wp_unslash( $_POST['map_to'] );
+			$mapping_from = wc_clean( wp_unslash( $_POST['map_from'] ) );
+			$mapping_to   = wc_clean( wp_unslash( $_POST['map_to'] ) );
 
 			// Save mapping preferences for future imports.
 			update_user_option( get_current_user_id(), 'woocommerce_product_import_mapping', $mapping_to );
