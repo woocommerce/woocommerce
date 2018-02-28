@@ -1300,7 +1300,7 @@ p.demo_store,
 			width: 100%;
 			margin: 0;
 			outline: 0;
-			line-height: 1;
+			line-height: normal;
 		}
 
 		textarea {
@@ -1807,13 +1807,11 @@ button.pswp__button--zoom:hover {
 			padding: 6px 6px 5px;
 			margin: 0 4px 0 0;
 			outline: 0;
-			line-height: 1;
 		}
 
 		input {
 			margin: 0;
 			vertical-align: middle;
-			line-height: 1;
 		}
 	}
 
