@@ -513,7 +513,7 @@ class WC_Product_CSV_Importer_Controller {
 	public function auto_map_user_preferences( $headers ) {
 		$mapping_preferences = get_user_option( 'woocommerce_product_import_mapping' );
 
-		if ( ! empty( $mapping_preferences ) ) {
+		if ( ! empty( $mapping_preferences ) && is_array( $mapping_preferences ) ) {
 			return $mapping_preferences;
 		}
 
