@@ -20,7 +20,7 @@ class WC_Cache_Helper {
 		add_action( 'admin_notices', array( __CLASS__, 'notices' ) );
 		add_action( 'delete_version_transients', array( __CLASS__, 'delete_version_transients' ) );
 		add_action( 'wp', array( __CLASS__, 'prevent_caching' ) );
-		add_action( 'clean_term_cache', array( __CLASS__, 'clean_term_cache' ), 10, 2 );
+		add_action( 'clean_taxonomy_cache', array( __CLASS__, 'clean_taxonomy_cache' ) );
 	}
 
 	/**
@@ -209,14 +209,11 @@ class WC_Cache_Helper {
 	 * Clean term caches added by WooCommerce.
 	 *
 	 * @since 3.3.4
-	 * @param array  $ids Array of ids to clear cache for.
 	 * @param string $taxonomy Taxonomy name.
 	 */
-	public static function clean_term_cache( $ids, $taxonomy ) {
+	public static function clean_taxonomy_cache( $taxonomy ) {
 		if ( 'product_cat' === $taxonomy ) {
-			foreach ( $ids as $id ) {
-				wp_cache_delete( 'product-categories-' . $id, 'product_cat' );
-			}
+			wp_cache_delete( 'product-category-hierarchy', 'product_cat' );
 		}
 	}
 }
