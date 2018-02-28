@@ -757,10 +757,11 @@ class WC_Discounts {
 	 * @return bool
 	 */
 	protected function validate_coupon_excluded_items( $coupon ) {
-		if ( ! empty( $this->get_items_to_validate() ) && $coupon->is_type( wc_get_product_coupon_types() ) ) {
+		$items = $this->get_items_to_validate();
+		if ( ! empty( $items ) && $coupon->is_type( wc_get_product_coupon_types() ) ) {
 			$valid = false;
 
-			foreach ( $this->get_items_to_validate() as $item ) {
+			foreach ( $items as $item ) {
 				if ( $item->product && $coupon->is_valid_for_product( $item->product, $item->object ) ) {
 					$valid = true;
 					break;
