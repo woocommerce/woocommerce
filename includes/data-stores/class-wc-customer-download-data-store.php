@@ -79,6 +79,10 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	public function read( &$download ) {
 		global $wpdb;
 
+		if ( ! $download->get_id() ) {
+			throw new Exception( __( 'Invalid download.', 'woocommerce' ) );
+		}
+
 		$download->set_defaults();
 		$raw_download = $wpdb->get_row(
 			$wpdb->prepare(
@@ -87,7 +91,7 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 			)
 		);
 
-		if ( ! $download->get_id() || ! $raw_download ) {
+		if ( ! $raw_download ) {
 			throw new Exception( __( 'Invalid download.', 'woocommerce' ) );
 		}
 
