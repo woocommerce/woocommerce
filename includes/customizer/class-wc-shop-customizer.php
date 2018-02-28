@@ -138,6 +138,21 @@ class WC_Shop_Customizer {
 					} );
 				} );
 
+				wp.customize.section( 'woocommerce_store_notice', function( section ) {
+					section.expanded.bind( function( isExpanded ) {
+						if ( isExpanded ) {
+							var notice   = wp.customize( 'woocommerce_demo_store_notice' ),
+								checkbox = wp.customize( 'woocommerce_demo_store' );
+
+							if ( checkbox.get() && ! notice.callbacks.has( notice.preview ) ) {
+								notice.bind( notice.preview );
+							} else if ( ! checkbox.get() ) {
+								notice.unbind( notice.preview );
+							}
+						}
+					} );
+				} );
+
 				wp.customize.section( 'woocommerce_product_catalog', function( section ) {
 					section.expanded.bind( function( isExpanded ) {
 						if ( isExpanded ) {
