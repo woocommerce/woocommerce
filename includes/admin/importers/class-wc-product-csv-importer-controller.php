@@ -361,7 +361,7 @@ class WC_Product_CSV_Importer_Controller {
 			$mapping_to   = wp_unslash( $_POST['map_to'] );
 
 			// Save mapping preferences for future imports.
-			update_user_option( get_current_user_id(), 'product_import_mapping_preferences', $mapping_to );
+			update_user_option( get_current_user_id(), 'woocommerce_product_import_mapping', $mapping_to );
 		} else {
 			wp_redirect( esc_url_raw( $this->get_next_step_link( 'upload' ) ) );
 			exit;
@@ -511,7 +511,7 @@ class WC_Product_CSV_Importer_Controller {
 	 * @return array
 	 */
 	public function auto_map_user_preferences( $headers ) {
-		$mapping_preferences = get_user_option( 'product_import_mapping_preferences' );
+		$mapping_preferences = get_user_option( 'woocommerce_product_import_mapping' );
 
 		if ( ! empty( $mapping_preferences ) ) {
 			return $mapping_preferences;
