@@ -113,6 +113,10 @@ class WC_Product_CSV_Importer_Controller {
 		$this->update_existing = isset( $_REQUEST['update_existing'] ) ? (bool) $_REQUEST['update_existing'] : false;
 		$this->delimiter       = ! empty( $_REQUEST['delimiter'] ) ? wc_clean( $_REQUEST['delimiter'] ) : ',';
 		$this->map_preferences = isset( $_REQUEST['map_preferences'] ) ? (bool) $_REQUEST['map_preferences'] : false;
+
+		if ( $this->map_preferences ) {
+			add_filter( 'woocommerce_csv_product_import_mapped_columns', array( $this, 'auto_map_user_preferences' ), 9999 );
+		}
 	}
 
 	/**
@@ -318,10 +322,6 @@ class WC_Product_CSV_Importer_Controller {
 			'lines'     => 1,
 			'delimiter' => $this->delimiter,
 		);
-
-		if ( $this->map_preferences ) {
-			add_filter( 'woocommerce_csv_product_import_mapped_columns', array( $this, 'auto_map_user_preferences' ), 99 );
-		}
 
 		$importer     = self::get_importer( $this->file, $args );
 		$headers      = $importer->get_raw_keys();
