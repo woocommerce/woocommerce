@@ -223,8 +223,13 @@ class WC_Structured_Data {
 
 				if ( $lowest === $highest ) {
 					$markup_offer = array(
-						'@type' => 'Offer',
-						'price' => wc_format_decimal( $lowest, wc_get_price_decimals() ),
+						'@type'              => 'Offer',
+						'price'              => wc_format_decimal( $lowest, wc_get_price_decimals() ),
+						'priceSpecification' => array(
+							'price'                 => wc_format_decimal( $lowest, wc_get_price_decimals() ),
+							'priceCurrency'         => $currency,
+							'valueAddedTaxIncluded' => wc_prices_include_tax() ? 'true' : 'false',
+						),
 					);
 				} else {
 					$markup_offer = array(
@@ -237,6 +242,11 @@ class WC_Structured_Data {
 				$markup_offer = array(
 					'@type' => 'Offer',
 					'price' => wc_format_decimal( $product->get_price(), wc_get_price_decimals() ),
+					'priceSpecification' => array(
+						'price'                 => wc_format_decimal( $product->get_price(), wc_get_price_decimals() ),
+						'priceCurrency'         => $currency,
+						'valueAddedTaxIncluded' => wc_prices_include_tax() ? 'true' : 'false',
+					),
 				);
 			}
 
@@ -254,11 +264,10 @@ class WC_Structured_Data {
 			$markup['offers'] = array( apply_filters( 'woocommerce_structured_data_product_offer', $markup_offer, $product ) );
 		}
 
-		if ( $product->get_rating_count() ) {
+		if ( $product->get_review_count() ) {
 			$markup['aggregateRating'] = array(
 				'@type'       => 'AggregateRating',
 				'ratingValue' => $product->get_average_rating(),
-				'ratingCount' => $product->get_rating_count(),
 				'reviewCount' => $product->get_review_count(),
 			);
 		}
@@ -391,7 +400,7 @@ class WC_Structured_Data {
 				continue;
 			}
 
-			$product        = apply_filters( 'woocommerce_order_item_product', $order->get_product_from_item( $item ), $item );
+			$product        = $order->get_product_from_item( $item );
 			$product_exists = is_object( $product );
 			$is_visible     = $product_exists && $product->is_visible();
 
@@ -436,7 +445,7 @@ class WC_Structured_Data {
 		$markup['priceSpecification'] = array(
 			'price'                 => $order->get_total(),
 			'priceCurrency'         => $order->get_currency(),
-			'valueAddedTaxIncluded' => true,
+			'valueAddedTaxIncluded' => 'true',
 		);
 		$markup['billingAddress']     = array(
 			'@type'           => 'PostalAddress',

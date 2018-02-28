@@ -99,7 +99,13 @@ function wc_get_endpoint_url( $endpoint, $value = '', $permalink = '' ) {
 		} else {
 			$query_string = '';
 		}
-		$url = trailingslashit( $permalink ) . $endpoint . '/' . $value . $query_string;
+		$url = trailingslashit( $permalink ) . trailingslashit( $endpoint );
+
+		if ( $value ) {
+			$url .= trailingslashit( $value );
+		}
+
+		$url .= $query_string;
 	} else {
 		$url = add_query_arg( $endpoint, $value, $permalink );
 	}

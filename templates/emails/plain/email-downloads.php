@@ -10,39 +10,36 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see 	https://docs.woocommerce.com/document/template-structure/
- * @author  WooThemes
+ * @see https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce/Templates
- * @version 3.2.0
+ * @version 3.4.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
-echo strtoupper( __( 'Downloads', 'woocommerce' ) ) . "\n\n";
+echo esc_html( wc_strtoupper( __( 'Downloads', 'woocommerce' ) ) ) . "\n\n";
 
 foreach ( $downloads as $download ) {
 	foreach ( $columns as $column_id => $column_name ) {
-		echo $column_name . ": ";
+		echo wp_kses_post( $column_name ) . ': ';
 
 		if ( has_action( 'woocommerce_email_downloads_column_' . $column_id ) ) {
-			do_action( 'woocommerce_email_downloads_column_' . $column_id, $download );
+			do_action( 'woocommerce_email_downloads_column_' . $column_id, $download, $plain_text );
 		} else {
 			switch ( $column_id ) {
-				case 'download-product' :
+				case 'download-product':
 					echo esc_html( $download['product_name'] );
-				break;
-				case 'download-file' :
+					break;
+				case 'download-file':
 					echo esc_html( $download['download_name'] ) . ' - ' . esc_url( $download['download_url'] );
-				break;
-				case 'download-expires' :
+					break;
+				case 'download-expires':
 					if ( ! empty( $download['access_expires'] ) ) {
-						echo date_i18n( get_option( 'date_format' ), strtotime( $download['access_expires'] ) );
+						echo esc_html( date_i18n( get_option( 'date_format' ), strtotime( $download['access_expires'] ) ) );
 					} else {
-						_e( 'Never', 'woocommerce' );
+						esc_html_e( 'Never', 'woocommerce' );
 					}
-				break;
+					break;
 			}
 		}
 		echo "\n";

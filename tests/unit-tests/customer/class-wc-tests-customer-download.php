@@ -87,14 +87,19 @@ class WC_Tests_Customer_Download extends WC_Unit_Test_Case {
 		$download_2 = new WC_Customer_Download();
 		$download_2->set_user_id( $this->customer_id );
 		$download_2->set_user_email( $this->customer_email );
-		$download_2->set_order_id( 1 );
+		$download_2->set_order_id( 2 );
 		$download_2->set_access_granted( '2018-01-22 00:00:00' );
 		$download_2->save();
 
 		$data_store = WC_Data_Store::load( 'customer-download' );
-		$downloads  = $data_store->get_downloads( array( 'user_email' => $this->customer_email ) );
-		$this->assertEquals( 2, count( $downloads ) );
-		$this->assertEquals( array( $this->download, $download_2 ), $downloads );
+		$downloads  = $data_store->get_downloads(
+			array(
+				'user_email' => $this->customer_email,
+				'orderby'    => 'order_id',
+				'order'      => 'DESC',
+			)
+		);
+		$this->assertEquals( array( $download_2, $this->download ), $downloads );
 
 		$downloads = $data_store->get_downloads( array( 'user_email' => 'test2@example.com' ) );
 		$this->assertEquals( array(), $downloads );
