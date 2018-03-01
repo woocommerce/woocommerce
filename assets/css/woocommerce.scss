@@ -1621,6 +1621,18 @@ p.demo_store,
 	}
 }
 
+.no-js {
+	form.woocommerce-form-login,
+	form.woocommerce-form-coupon {
+		display: block !important;
+	}
+	.woocommerce-form-login-toggle,
+	.woocommerce-form-coupon-toggle,
+	.showcoupon {
+		display: none !important;
+	}
+}
+
 /**
  * Photoswipe
  * 1. These styles are required to overwrite default theme button styles (Twenty Twelve adds gradients via background-image).
