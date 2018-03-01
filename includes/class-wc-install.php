@@ -93,6 +93,7 @@ class WC_Install {
 			'wc_update_320_db_version',
 		),
 		'3.3.0' => array(
+			'wc_update_330_order_product_lookup',
 			'wc_update_330_image_options',
 			'wc_update_330_webhooks',
 			'wc_update_330_product_stock_status',
@@ -696,6 +697,16 @@ CREATE TABLE {$wpdb->prefix}woocommerce_log (
   context longtext NULL,
   PRIMARY KEY (log_id),
   KEY level (level)
+) $collate;
+CREATE TABLE {$wpdb->prefix}woocommerce_order_product_lookup (
+  lookup_id BIGINT UNSIGNED NOT NULL auto_increment,
+  user_email varchar(200) NOT NULL,
+  order_id bigint(20) NOT NULL DEFAULT 0,
+  user_id bigint(20) NOT NULL DEFAULT 0,
+  product_id bigint(20) NOT NULL DEFAULT 0,
+  parent_order_item_id bigint(20) DEFAULT NULL,
+  PRIMARY KEY (lookup_id),
+  KEY order_id (order_id)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}wc_webhooks (
   webhook_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,

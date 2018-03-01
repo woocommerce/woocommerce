@@ -175,21 +175,29 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 		$order_1 = WC_Helper_Order::create_order( $customer_id_1, $product_1 );
 		$order_1->set_billing_email( 'test@example.com' );
 		$order_1->set_status( 'completed' );
+		$order_1->set_date_paid( current_time( 'timestamp', true ) );
 		$order_1->save();
+
 		$order_2 = WC_Helper_Order::create_order( $customer_id_2, $product_2 );
 		$order_2->set_billing_email( 'test2@example.com' );
 		$order_2->set_status( 'completed' );
+		$order_2->set_date_paid( current_time( 'timestamp', true ) );
 		$order_2->save();
+
 		$order_3 = WC_Helper_Order::create_order( $customer_id_1, $product_2 );
 		$order_3->set_billing_email( 'test@example.com' );
 		$order_3->set_status( 'pending' );
 		$order_3->save();
 
-		$this->assertTrue( wc_customer_bought_product( 'test@example.com', $customer_id_1, $product_id_1 ) );
 		$this->assertTrue( wc_customer_bought_product( '', $customer_id_1, $product_id_1 ) );
-		$this->assertTrue( wc_customer_bought_product( 'test@example.com', 0, $product_id_1 ) );
-		$this->assertFalse( wc_customer_bought_product( 'test@example.com', $customer_id_1, $product_id_2 ) );
-		$this->assertFalse( wc_customer_bought_product( 'test2@example.com', $customer_id_2, $product_id_1 ) );
+		$this->assertTrue( wc_customer_bought_product( 'test@example.com', '', $product_id_1 ) );
+		$this->assertTrue( wc_customer_bought_product( '', $customer_id_2, $product_id_2 ) );
+		$this->assertTrue( wc_customer_bought_product( 'test2@example.com', '', $product_id_2 ) );
+
+		$this->assertFalse( wc_customer_bought_product( '', $customer_id_2, $product_id_1 ) );
+		$this->assertFalse( wc_customer_bought_product( 'test2@example.com', '', $product_id_1 ) );
+		$this->assertFalse( wc_customer_bought_product( '', $customer_id_1, $product_id_2 ) );
+		$this->assertFalse( wc_customer_bought_product( 'test@example.com', '', $product_id_2 ) );
 	}
 
 	/**
@@ -404,11 +412,9 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 	function test_wc_get_customer_last_order() {
 		$customer_id = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
 
-		$order_1 = new WC_Order;
-		$order_1->set_customer_id( $customer_id );
+		$order_1 = WC_Helper_Order::create_order( $customer_id );
 		$order_1->save();
-		$order_2 = new WC_Order;
-		$order_2->set_customer_id( $customer_id );
+		$order_2 = WC_Helper_Order::create_order( $customer_id );
 		$order_2->save();
 
 		$last_order = wc_get_customer_last_order( $customer_id );

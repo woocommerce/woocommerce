@@ -1456,6 +1456,38 @@ function wc_update_320_db_version() {
 }
 
 /**
+ * Synchronize order product lookup database table from order meta.
+ *
+ * @since 3.3.0
+ */
+function wc_update_330_order_product_lookup() {
+	global $wpdb;
+
+	$statuses = array_map( 'esc_sql', wc_get_is_paid_statuses() );
+
+	$wpdb->query( "
+		INSERT INTO {$wpdb->prefix}woocommerce_order_product_lookup
+		SELECT
+		'' AS lookup_id,
+		pm.meta_value AS user_email,
+		p.id AS order_id,
+		pm2.meta_value AS user_id,
+		im.meta_value AS product_id,
+		i.order_item_id AS parent_order_item_id
+		FROM {$wpdb->posts} AS p
+		INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
+		INNER JOIN {$wpdb->postmeta} AS pm2 ON p.ID = pm2.post_id
+		INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
+		INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
+		WHERE p.post_status IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
+		AND pm.meta_key = '_billing_email'
+		AND pm2.meta_key = '_customer_user'
+		AND im.meta_key IN ( '_product_id', '_variation_id' )
+		AND im.meta_value != 0
+	" );
+}
+
+/*
  * Update image settings to use new aspect ratios and widths.
  */
 function wc_update_330_image_options() {

@@ -318,6 +318,7 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/class-wc-countries.php';
 		include_once WC_ABSPATH . 'includes/class-wc-integrations.php';
 		include_once WC_ABSPATH . 'includes/class-wc-cache-helper.php';
+		include_once WC_ABSPATH . 'includes/class-wc-order-product-lookup-helper.php';
 		include_once WC_ABSPATH . 'includes/class-wc-https.php';
 		include_once WC_ABSPATH . 'includes/class-wc-deprecated-action-hooks.php';
 		include_once WC_ABSPATH . 'includes/class-wc-deprecated-filter-hooks.php';
