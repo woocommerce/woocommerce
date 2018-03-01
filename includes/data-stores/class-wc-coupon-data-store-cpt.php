@@ -73,6 +73,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			$this->update_post_meta( $coupon );
 			$coupon->save_meta_data();
 			$coupon->apply_changes();
+			delete_transient( 'wc_gacc_' . WC_Cache_Helper::get_transient_version( 'coupons' ) );
 			do_action( 'woocommerce_new_coupon', $coupon_id );
 		}
 	}
@@ -161,6 +162,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		}
 		$this->update_post_meta( $coupon );
 		$coupon->apply_changes();
+		delete_transient( 'wc_gacc_' . WC_Cache_Helper::get_transient_version( 'coupons' ) );
 		do_action( 'woocommerce_update_coupon', $coupon->get_id() );
 	}
 
@@ -182,6 +184,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		if ( ! $id ) {
 			return;
 		}
+
+		delete_transient( 'wc_gacc_' . WC_Cache_Helper::get_transient_version( 'coupons' ) );
 
 		if ( $args['force_delete'] ) {
 			wp_delete_post( $id );

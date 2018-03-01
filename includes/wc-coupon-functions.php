@@ -90,7 +90,14 @@ function wc_get_coupon_code_by_id( $id ) {
  */
 function wc_get_active_coupon_count() {
 	global $wpdb;
-	return $wpdb->get_var( "SELECT COUNT( id ) FROM {$wpdb->posts} WHERE post_type = 'shop_coupon' AND post_status = 'publish'" );
+	$transient_name = 'wc_gacc_' . WC_Cache_Helper::get_transient_version( 'coupons' );
+
+	if ( false === ( $result = get_transient( $transient_name ) ) ) {
+		$result = $wpdb->get_var( "SELECT COUNT( id ) FROM {$wpdb->posts} WHERE post_type = 'shop_coupon' AND post_status = 'publish'" );
+		set_transient( $transient_name, $result, DAY_IN_SECONDS * 30 );
+	}
+
+	return $result;
 }
 
 /**
