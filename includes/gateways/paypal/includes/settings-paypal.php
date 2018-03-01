@@ -130,7 +130,8 @@ return array(
 	'api_details' => array(
 		'title'       => __( 'API credentials', 'woocommerce' ),
 		'type'        => 'title',
-		'description' => sprintf( __( 'Enter your PayPal API credentials to process refunds via PayPal. Learn how to access your <a href="%s">PayPal API Credentials</a>.', 'woocommerce' ), 'https://developer.paypal.com/webapps/developer/docs/classic/api/apiCredentials/#creating-an-api-signature' ),
+		/* translators: %s: URL */
+		'description' => sprintf( __( 'Enter your PayPal API credentials to process refunds via PayPal. Learn how to access your <a href="%s">PayPal API Credentials</a>.', 'woocommerce' ), 'https://developer.paypal.com/webapps/developer/docs/classic/api/apiCredentials/#create-an-api-signature' ),
 	),
 	'api_username' => array(
 		'title'       => __( 'Live API username', 'woocommerce' ),
