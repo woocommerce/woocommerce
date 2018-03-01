@@ -162,7 +162,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 		if ( in_array( $this->requires, array( 'min_amount', 'either', 'both' ) ) ) {
 			$total = WC()->cart->get_displayed_subtotal();
 
-			if ( 'incl' === WC()->cart->tax_display_cart ) {
+			if ( WC()->cart->display_prices_including_tax() ) {
 				$total = round( $total - ( WC()->cart->get_discount_total() + WC()->cart->get_discount_tax() ), wc_get_price_decimals() );
 			} else {
 				$total = round( $total - WC()->cart->get_discount_total(), wc_get_price_decimals() );

@@ -2,14 +2,11 @@
 /**
  * Regular order
  *
- * @author  Automattic
  * @package WooCommerce\Classes
  * @version 2.2.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Order Class.
@@ -1339,7 +1336,7 @@ class WC_Order extends WC_Abstract_Order {
 			if ( $item->is_type( 'line_item' ) ) {
 				$product = $item->get_product();
 
-				if ( $product->has_file() ) {
+				if ( $product && $product->has_file() ) {
 					return true;
 				}
 			}
@@ -1377,6 +1374,10 @@ class WC_Order extends WC_Abstract_Order {
 							'order_key'           => $this->get_order_key(),
 							'downloads_remaining' => $file['downloads_remaining'],
 							'access_expires'      => $file['access_expires'],
+							'file'                => array(
+								'name' => $file['name'],
+								'file' => $file['file'],
+							),
 						);
 					}
 				}
@@ -1402,31 +1403,42 @@ class WC_Order extends WC_Abstract_Order {
 	 * Orders which only contain virtual, downloadable items do not need admin
 	 * intervention.
 	 *
+	 * Uses a transient so these calls are not repeated multiple times, and because
+	 * once the order is processed this code/transient does not need to persist.
+	 *
 	 * @since 3.0.0
 	 * @return bool
 	 */
 	public function needs_processing() {
-		$needs_processing = false;
+		$transient_name   = 'wc_order_' . $this->get_id() . '_needs_processing';
+		$needs_processing = get_transient( $transient_name );
 
-		if ( count( $this->get_items() ) > 0 ) {
-			foreach ( $this->get_items() as $item ) {
-				if ( $item->is_type( 'line_item' ) ) {
-					$product = $item->get_product();
-					if ( ! $product ) {
-						continue;
-					}
+		if ( false === $needs_processing ) {
+			$needs_processing = 0;
 
-					$virtual_downloadable_item = $product->is_downloadable() && $product->is_virtual();
+			if ( count( $this->get_items() ) > 0 ) {
+				foreach ( $this->get_items() as $item ) {
+					if ( $item->is_type( 'line_item' ) ) {
+						$product = $item->get_product();
 
-					if ( apply_filters( 'woocommerce_order_item_needs_processing', ! $virtual_downloadable_item, $product, $this->get_id() ) ) {
-						$needs_processing = true;
-						break;
+						if ( ! $product ) {
+							continue;
+						}
+
+						$virtual_downloadable_item = $product->is_downloadable() && $product->is_virtual();
+
+						if ( apply_filters( 'woocommerce_order_item_needs_processing', ! $virtual_downloadable_item, $product, $this->get_id() ) ) {
+							$needs_processing = 1;
+							break;
+						}
 					}
 				}
 			}
+
+			set_transient( $transient_name, $needs_processing, DAY_IN_SECONDS );
 		}
 
-		return $needs_processing;
+		return 1 === absint( $needs_processing );
 	}
 
 	/*
@@ -1533,6 +1545,16 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function get_view_order_url() {
 		return apply_filters( 'woocommerce_get_view_order_url', wc_get_endpoint_url( 'view-order', $this->get_id(), wc_get_page_permalink( 'myaccount' ) ), $this );
+	}
+
+	/**
+	 * Get's the URL to edit the order in the backend.
+	 *
+	 * @since 3.3.0
+	 * @return string
+	 */
+	public function get_edit_order_url() {
+		return apply_filters( 'woocommerce_get_edit_order_url', get_admin_url( null, 'post.php?post=' . $this->get_id() . '&action=edit' ), $this );
 	}
 
 	/*

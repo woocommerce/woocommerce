@@ -54,7 +54,7 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 				'title'   => __( 'Enable/Disable', 'woocommerce' ),
 				'type'    => 'checkbox',
 				'label'   => __( 'Enable check payments', 'woocommerce' ),
-				'default' => 'yes',
+				'default' => 'no',
 			),
 			'title' => array(
 				'title'       => __( 'Title', 'woocommerce' ),

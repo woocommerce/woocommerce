@@ -2,8 +2,6 @@
 /**
  * Handles CSV export.
  *
- * @author   Automattic
- * @category Admin
  * @package  WooCommerce/Export
  * @version  3.1.0
  */
@@ -23,6 +21,13 @@ abstract class WC_CSV_Exporter {
 	 * @var string
 	 */
 	protected $export_type = '';
+
+	/**
+	 * Filename to export to.
+	 *
+	 * @var string
+	 */
+	protected $filename = 'wc-export.csv';
 
 	/**
 	 * Batch limit.
@@ -184,12 +189,22 @@ abstract class WC_CSV_Exporter {
 	}
 
 	/**
+	 * Set filename to export to.
+	 *
+	 * @param  string $filename Filename to export to.
+	 * @return string
+	 */
+	public function set_filename( $filename ) {
+		$this->filename = sanitize_file_name( str_replace( '.csv', '', $filename ) . '.csv' );
+	}
+
+	/**
 	 * Generate and return a filename.
 	 *
 	 * @return string
 	 */
 	public function get_filename() {
-		return sanitize_file_name( 'wc-' . $this->export_type . '-export-' . date_i18n( 'Y-m-d', current_time( 'timestamp' ) ) . '.csv' );
+		return sanitize_file_name( apply_filters( "woocommerce_{$this->export_type}_export_get_filename", $this->filename ) );
 	}
 
 	/**
@@ -296,7 +311,7 @@ abstract class WC_CSV_Exporter {
 	 * @return int
 	 */
 	public function get_limit() {
-		return $this->limit;
+		return apply_filters( "woocommerce_{$this->export_type}_export_batch_limit", $this->limit, $this );
 	}
 
 	/**
@@ -363,9 +378,14 @@ abstract class WC_CSV_Exporter {
 			$data = $data ? 1 : 0;
 		}
 
+		$use_mb   = function_exists( 'mb_convert_encoding' );
 		$data     = (string) urldecode( $data );
-		$encoding = mb_detect_encoding( $data, 'UTF-8, ISO-8859-1', true );
-		$data     = 'UTF-8' === $encoding ? $data : utf8_encode( $data );
+
+		if ( $use_mb ) {
+			$encoding = mb_detect_encoding( $data, 'UTF-8, ISO-8859-1', true );
+			$data     = 'UTF-8' === $encoding ? $data : utf8_encode( $data );
+		}
+
 		return $this->escape_data( $data );
 	}
 

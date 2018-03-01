@@ -2,8 +2,6 @@
 /**
  * Installation related functions and actions.
  *
- * @author   WooThemes
- * @category Admin
  * @package  WooCommerce/Classes
  * @version  3.0.0
  */
@@ -100,6 +98,7 @@ class WC_Install {
 			'wc_update_330_product_stock_status',
 			'wc_update_330_set_default_product_cat',
 			'wc_update_330_clear_transients',
+			'wc_update_330_set_paypal_sandbox_credentials',
 			'wc_update_330_db_version',
 		),
 	);
@@ -140,7 +139,7 @@ class WC_Install {
 	 * This check is done on all requests and runs if the versions do not match.
 	 */
 	public static function check_version() {
-		if ( ! defined( 'IFRAME_REQUEST' ) && get_option( 'woocommerce_version' ) !== WC()->version ) {
+		if ( ! defined( 'IFRAME_REQUEST' ) && version_compare( get_option( 'woocommerce_version' ), WC()->version, '<' ) ) {
 			self::install();
 			do_action( 'woocommerce_updated' );
 		}
@@ -402,8 +401,6 @@ class WC_Install {
 		foreach ( $pages as $key => $page ) {
 			wc_create_page( esc_sql( $page['name'] ), 'woocommerce_' . $key . '_page_id', $page['title'], $page['content'], ! empty( $page['parent'] ) ? wc_get_page_id( $page['parent'] ) : '' );
 		}
-
-		delete_transient( 'woocommerce_cache_excluded_uris' );
 	}
 
 	/**
@@ -541,6 +538,8 @@ class WC_Install {
 	 *
 	 * Changing indexes may cause duplicate index notices in logs due to https://core.trac.wordpress.org/ticket/34870 but dropping
 	 * indexes first causes too much load on some servers/larger DB.
+	 *
+	 * When adding or removing a table, make sure to update the list of tables in WC_Install::get_tables().
 	 *
 	 * @return string
 	 */
@@ -746,6 +745,67 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 		}
 
 		return $tables;
+	}
+
+	/**
+	 * Return a list of WooCommerce tables. Used to make sure all WC tables are dropped when uninstalling the plugin
+	 * in a single site or multi site environment.
+	 *
+	 * @return array WC tables.
+	 */
+	public static function get_tables() {
+		global $wpdb;
+
+		$tables = array(
+			"{$wpdb->prefix}wc_download_log",
+			"{$wpdb->prefix}wc_webhooks",
+			"{$wpdb->prefix}woocommerce_api_keys",
+			"{$wpdb->prefix}woocommerce_attribute_taxonomies",
+			"{$wpdb->prefix}woocommerce_downloadable_product_permissions",
+			"{$wpdb->prefix}woocommerce_log",
+			"{$wpdb->prefix}woocommerce_order_itemmeta",
+			"{$wpdb->prefix}woocommerce_order_items",
+			"{$wpdb->prefix}woocommerce_payment_tokenmeta",
+			"{$wpdb->prefix}woocommerce_payment_tokens",
+			"{$wpdb->prefix}woocommerce_sessions",
+			"{$wpdb->prefix}woocommerce_shipping_zone_locations",
+			"{$wpdb->prefix}woocommerce_shipping_zone_methods",
+			"{$wpdb->prefix}woocommerce_shipping_zones",
+			"{$wpdb->prefix}woocommerce_tax_rate_locations",
+			"{$wpdb->prefix}woocommerce_tax_rates",
+		);
+
+		if ( ! function_exists( 'get_term_meta' ) ) {
+			// This table is only needed for old installs and is now @deprecated by WordPress term meta.
+			$tables[] = "{$wpdb->prefix}woocommerce_termmeta";
+		}
+
+		return $tables;
+	}
+
+	/**
+	 * Drop WooCommerce tables.
+	 *
+	 * @return void
+	 */
+	public static function drop_tables() {
+		global $wpdb;
+
+		$tables = self::get_tables();
+
+		foreach ( $tables as $table ) {
+			$wpdb->query( "DROP TABLE IF EXISTS {$table}" ); // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+		}
+	}
+
+	/**
+	 * Uninstall tables when MU blog is deleted.
+	 *
+	 * @param  array $tables List of tables that will be deleted by WP.
+	 * @return string[]
+	 */
+	public static function wpmu_drop_tables( $tables ) {
+		return array_merge( $tables, self::get_tables() );
 	}
 
 	/**
@@ -982,32 +1042,6 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 		}
 
 		return (array) $links;
-	}
-
-	/**
-	 * Uninstall tables when MU blog is deleted.
-	 *
-	 * @param  array $tables List of tables that will be deleted by WP.
-	 * @return string[]
-	 */
-	public static function wpmu_drop_tables( $tables ) {
-		global $wpdb;
-
-		$tables[] = $wpdb->prefix . 'woocommerce_sessions';
-		$tables[] = $wpdb->prefix . 'woocommerce_api_keys';
-		$tables[] = $wpdb->prefix . 'woocommerce_attribute_taxonomies';
-		$tables[] = $wpdb->prefix . 'woocommerce_downloadable_product_permissions';
-		$tables[] = $wpdb->prefix . 'woocommerce_termmeta';
-		$tables[] = $wpdb->prefix . 'woocommerce_tax_rates';
-		$tables[] = $wpdb->prefix . 'woocommerce_tax_rate_locations';
-		$tables[] = $wpdb->prefix . 'woocommerce_order_items';
-		$tables[] = $wpdb->prefix . 'woocommerce_order_itemmeta';
-		$tables[] = $wpdb->prefix . 'woocommerce_payment_tokens';
-		$tables[] = $wpdb->prefix . 'woocommerce_shipping_zones';
-		$tables[] = $wpdb->prefix . 'woocommerce_shipping_zone_locations';
-		$tables[] = $wpdb->prefix . 'woocommerce_shipping_zone_methods';
-
-		return $tables;
 	}
 
 	/**

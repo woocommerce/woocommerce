@@ -331,6 +331,92 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests updating an order and adding a coupon.
+	 *
+	 * @since 3.3.0
+	 */
+	public function test_update_order_add_coupons() {
+		wp_set_current_user( $this->user );
+		$order = WC_Helper_Order::create_order();
+		$order_item = current( $order->get_items() );
+		$coupon = WC_Helper_Coupon::create_coupon( 'fake-coupon' );
+		$coupon->set_amount( 5 );
+		$coupon->save();
+		$request = new WP_REST_Request( 'PUT', '/wc/v2/orders/' . $order->get_id() );
+		$request->set_body_params( array(
+			'coupon_lines' => array(
+				array(
+					'code'           => 'fake-coupon',
+					'discount_total' => '5',
+					'discount_tax'   => '0',
+				),
+			),
+			'line_items' => array(
+				array(
+					'id' => $order_item->get_id(),
+					'product_id' => $order_item->get_product_id(),
+					'total' => '35.00',
+				),
+			),
+		) );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $data['coupon_lines'] );
+		$this->assertEquals( '45.00', $data['total'] );
+
+		WC_Helper_Order::delete_order( $order->get_id() );
+	}
+
+	/**
+	 * Tests updating an order and removing a coupon.
+	 *
+	 * @since 3.3.0
+	 */
+	public function test_update_order_remove_coupons() {
+		wp_set_current_user( $this->user );
+		$order  = WC_Helper_Order::create_order();
+		$order_item = current( $order->get_items() );
+		$coupon = WC_Helper_Coupon::create_coupon( 'fake-coupon' );
+		$coupon->set_amount( 5 );
+		$coupon->save();
+
+		$order->apply_coupon( $coupon );
+		$order->save();
+
+		// Check that the coupon is applied.
+		$this->assertEquals( '45.00', $order->get_total() );
+
+		$request     = new WP_REST_Request( 'PUT', '/wc/v2/orders/' . $order->get_id() );
+		$coupon_data = current( $order->get_items( 'coupon' ) );
+
+		$request->set_body_params( array(
+			'coupon_lines' => array(
+				array(
+					'id'   => $coupon_data->get_id(),
+					'code' => null,
+				),
+			),
+			'line_items' => array(
+				array(
+					'id' => $order_item->get_id(),
+					'product_id' => $order_item->get_product_id(),
+					'total' => '40.00',
+				),
+			),
+		) );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertTrue( empty( $data['coupon_lines'] ) );
+		$this->assertEquals( '50.00', $data['total'] );
+
+		WC_Helper_Order::delete_order( $order->get_id() );
+	}
+
+	/**
 	 * Tests updating an order without the correct permissions.
 	 *
 	 * @since 3.0.0

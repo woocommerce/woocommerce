@@ -170,7 +170,7 @@ class WC_Frontend_Scripts {
 			'flexslider' => array(
 				'src'     => self::get_asset_url( 'assets/js/flexslider/jquery.flexslider' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
-				'version' => '2.6.1',
+				'version' => '2.7.0',
 			),
 			'js-cookie' => array(
 				'src'     => self::get_asset_url( 'assets/js/js-cookie/js.cookie' . $suffix . '.js' ),
@@ -220,7 +220,7 @@ class WC_Frontend_Scripts {
 			'selectWoo' => array(
 				'src'     => self::get_asset_url( 'assets/js/selectWoo/selectWoo.full' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
-				'version' => '1.0.2',
+				'version' => '1.0.3',
 			),
 			'wc-address-i18n' => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/address-i18n' . $suffix . '.js' ),
@@ -470,6 +470,7 @@ class WC_Frontend_Scripts {
 						'allowOneSlide'  => false,
 					) ),
 					'zoom_enabled'       => apply_filters( 'woocommerce_single_product_zoom_enabled', get_theme_support( 'wc-product-gallery-zoom' ) ),
+					'zoom_options'       => apply_filters( 'woocommerce_single_product_zoom_options', array() ),
 					'photoswipe_enabled' => apply_filters( 'woocommerce_single_product_photoswipe_enabled', get_theme_support( 'wc-product-gallery-lightbox' ) ),
 					'photoswipe_options' => apply_filters( 'woocommerce_single_product_photoswipe_options', array(
 						'shareEl'               => false,
@@ -515,6 +516,7 @@ class WC_Frontend_Scripts {
 				$params = array(
 					'ajax_url'      => WC()->ajax_url(),
 					'wc_ajax_url'   => WC_AJAX::get_endpoint( "%%endpoint%%" ),
+					'cart_hash_key' => apply_filters( 'woocommerce_cart_hash_key', 'wc_cart_hash_' . md5( get_current_blog_id() . '_' . get_site_url( get_current_blog_id(), '/' ) ) ),
 					'fragment_name' => apply_filters( 'woocommerce_cart_fragment_name', 'wc_fragments_' . md5( get_current_blog_id() . '_' . get_site_url( get_current_blog_id(), '/' ) ) ),
 				);
 			break;

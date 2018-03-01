@@ -1177,7 +1177,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			if ( is_a( $download, 'WC_Product_Download' ) ) {
 				$download_object = $download;
 			} else {
-				$download_object           = new WC_Product_Download();
+				$download_object = new WC_Product_Download();
 
 				// If we don't have a previous hash, generate UUID for download.
 				if ( empty( $download['download_id'] ) ) {
@@ -1808,7 +1808,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		} else {
 			$image = '';
 		}
-		return apply_filters( 'woocommerce_product_get_image', wc_get_relative_url( $image ), $this, $size, $attr, $placeholder );
+
+		return apply_filters( 'woocommerce_product_get_image', wc_get_relative_url( $image ), $this, $size, $attr, $placeholder, $image );
 	}
 
 	/**
