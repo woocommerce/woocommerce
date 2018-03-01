@@ -118,7 +118,6 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		$show_columns['product_cat']  = __( 'Categories', 'woocommerce' );
 		$show_columns['product_tag']  = __( 'Tags', 'woocommerce' );
 		$show_columns['featured']     = '<span class="wc-featured parent-tips" data-tip="' . esc_attr__( 'Featured', 'woocommerce' ) . '">' . __( 'Featured', 'woocommerce' ) . '</span>';
-		$show_columns['product_type'] = '<span class="wc-type parent-tips" data-tip="' . esc_attr__( 'Type', 'woocommerce' ) . '">' . __( 'Type', 'woocommerce' ) . '</span>';
 		$show_columns['date']         = __( 'Date', 'woocommerce' );
 
 		return array_merge( $show_columns, $columns );
@@ -197,31 +196,6 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 */
 	protected function render_sku_column() {
 		echo $this->object->get_sku() ? esc_html( $this->object->get_sku() ) : '<span class="na">&ndash;</span>';
-	}
-
-	/**
-	 * Render columm: product_type.
-	 */
-	protected function render_product_type_column() {
-		if ( $this->object->is_type( 'grouped' ) ) {
-			echo '<span class="product-type tips grouped" data-tip="' . esc_attr__( 'Grouped', 'woocommerce' ) . '"></span>';
-		} elseif ( $this->object->is_type( 'external' ) ) {
-			echo '<span class="product-type tips external" data-tip="' . esc_attr__( 'External/Affiliate', 'woocommerce' ) . '"></span>';
-		} elseif ( $this->object->is_type( 'simple' ) ) {
-
-			if ( $this->object->is_virtual() ) {
-				echo '<span class="product-type tips virtual" data-tip="' . esc_attr__( 'Virtual', 'woocommerce' ) . '"></span>';
-			} elseif ( $this->object->is_downloadable() ) {
-				echo '<span class="product-type tips downloadable" data-tip="' . esc_attr__( 'Downloadable', 'woocommerce' ) . '"></span>';
-			} else {
-				echo '<span class="product-type tips simple" data-tip="' . esc_attr__( 'Simple', 'woocommerce' ) . '"></span>';
-			}
-		} elseif ( $this->object->is_type( 'variable' ) ) {
-			echo '<span class="product-type tips variable" data-tip="' . esc_attr__( 'Variable', 'woocommerce' ) . '"></span>';
-		} else {
-			// Assuming that we have other types in future.
-			echo '<span class="product-type tips ' . esc_attr( sanitize_html_class( $this->object->get_type() ) ) . '" data-tip="' . esc_attr( ucfirst( $this->object->get_type() ) ) . '"></span>';
-		}
 	}
 
 	/**
