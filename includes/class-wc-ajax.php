@@ -32,7 +32,7 @@ class WC_AJAX {
 	 * @return string
 	 */
 	public static function get_endpoint( $request = '' ) {
-		return esc_url_raw( apply_filters( 'woocommerce_ajax_get_endpoint', add_query_arg( 'wc-ajax', $request, remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart' ), home_url( '/' ) ) ), $request ) );
+		return esc_url_raw( apply_filters( 'woocommerce_ajax_get_endpoint', add_query_arg( 'wc-ajax', $request, remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart' ), home_url( '/', 'relative' ) ) ), $request ) );
 	}
 
 	/**
@@ -360,11 +360,20 @@ class WC_AJAX {
 		ob_start();
 
 		$product_id        = apply_filters( 'woocommerce_add_to_cart_product_id', absint( $_POST['product_id'] ) );
+		$product           = wc_get_product( $product_id );
 		$quantity          = empty( $_POST['quantity'] ) ? 1 : wc_stock_amount( $_POST['quantity'] );
 		$passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
 		$product_status    = get_post_status( $product_id );
+		$variation_id      = 0;
+		$variation         = array();
 
-		if ( $passed_validation && false !== WC()->cart->add_to_cart( $product_id, $quantity ) && 'publish' === $product_status ) {
+		if ( $product && 'variation' === $product->get_type() ) {
+			$variation_id = $product_id;
+			$product_id   = $product->get_parent_id();
+			$variation    = $product->get_variation_attributes();
+		}
+
+		if ( $passed_validation && false !== WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variation ) && 'publish' === $product_status ) {
 
 			do_action( 'woocommerce_ajax_added_to_cart', $product_id );
 
@@ -449,7 +458,7 @@ class WC_AJAX {
 		}
 
 		wp_safe_redirect( wp_get_referer() ? remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids' ), wp_get_referer() ) : admin_url( 'edit.php?post_type=product' ) );
-		exit;
+		wp_die();
 	}
 
 	/**
@@ -470,7 +479,7 @@ class WC_AJAX {
 		}
 
 		wp_safe_redirect( wp_get_referer() ? wp_get_referer() : admin_url( 'edit.php?post_type=shop_order' ) );
-		exit;
+		wp_die();
 	}
 
 	/**
@@ -490,7 +499,7 @@ class WC_AJAX {
 
 			wp_send_json_success( WC_Admin_List_Table_Orders::order_preview_get_order_details( $order ) );
 		}
-		exit;
+		wp_die();
 	}
 
 	/**
@@ -1117,19 +1126,25 @@ class WC_AJAX {
 				if ( $_product && $_product->exists() && $_product->managing_stock() && isset( $order_item_qty[ $item_id ] ) && $order_item_qty[ $item_id ] > 0 ) {
 					$stock_change = apply_filters( 'woocommerce_reduce_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
 					$new_stock    = wc_update_product_stock( $_product, $stock_change, 'decrease' );
-					$item_name    = $_product->get_sku() ? $_product->get_sku() : $_product->get_id();
-					$note         = sprintf( __( 'Item %1$s stock reduced from %2$s to %3$s.', 'woocommerce' ), $item_name, $new_stock + $stock_change, $new_stock );
-					$return[]     = $note;
-					$order->add_order_note( $note );
+					$item_name    = $_product->get_formatted_name();
+					$return[]     = array(
+						'note'    => sprintf( wp_kses_post( __( '%1$s stock reduced from %2$s to %3$s.', 'woocommerce' ) ), $item_name, $new_stock + $stock_change, $new_stock ),
+						'success' => true,
+					);
 				}
 			}
 			do_action( 'woocommerce_reduce_order_stock', $order );
+
 			if ( empty( $return ) ) {
-				$return[] = __( 'No products had their stock reduced - they may not have stock management enabled.', 'woocommerce' );
+				$return[] = array(
+					'note'    => wp_kses_post( __( 'No products had their stock reduced - they may not have stock management enabled.', 'woocommerce' ) ),
+					'success' => false,
+				);
 			}
-			echo wp_kses_post( implode( ', ', $return ) );
+
+			wp_send_json_success( $return );
 		}
-		wp_die();
+		wp_send_json_error();
 	}
 
 	/**
@@ -1157,19 +1172,24 @@ class WC_AJAX {
 					$old_stock    = $_product->get_stock_quantity();
 					$stock_change = apply_filters( 'woocommerce_restore_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
 					$new_quantity = wc_update_product_stock( $_product, $stock_change, 'increase' );
-					$item_name    = $_product->get_sku() ? $_product->get_sku() : $_product->get_id();
-					$note         = sprintf( __( 'Item %1$s stock increased from %2$s to %3$s.', 'woocommerce' ), $item_name, $old_stock, $new_quantity );
-					$return[]     = $note;
-					$order->add_order_note( $note );
+					$item_name    = $_product->get_formatted_name();
+					$return[]     = array(
+						'note'    => sprintf( wp_kses_post( __( '%1$s stock increased from %2$s to %3$s.', 'woocommerce' ) ), $item_name, $old_stock, $new_quantity ),
+						'success' => true,
+					);
 				}
 			}
 			do_action( 'woocommerce_restore_order_stock', $order );
 			if ( empty( $return ) ) {
-				$return[] = __( 'No products had their stock increased - they may not have stock management enabled.', 'woocommerce' );
+				$return[] = array(
+					'note'    => wp_kses_post( __( 'No products had their stock increased - they may not have stock management enabled.', 'woocommerce' ) ),
+					'success' => false,
+				);
 			}
-			echo wp_kses_post( implode( ', ', $return ) );
+
+			wp_send_json_success( $return );
 		}
-		wp_die();
+		wp_send_json_error();
 	}
 
 	/**
@@ -1417,17 +1437,19 @@ class WC_AJAX {
 			wp_die();
 		}
 
+		$ids = array();
 		// Search by ID.
 		if ( is_numeric( $term ) ) {
 			$customer = new WC_Customer( intval( $term ) );
 
 			// Customer does not exists.
-			if ( 0 === $customer->get_id() ) {
-				wp_die();
+			if ( 0 !== $customer->get_id() ) {
+				$ids = array( $customer->get_id() );
 			}
+		}
 
-			$ids = array( $customer->get_id() );
-		} else {
+		// Usernames can be numeric so we first check that no users was found by ID before searching for numeric username, this prevents performance issues with ID lookups.
+		if ( empty( $ids ) ) {
 			$data_store = WC_Data_Store::load( 'customer' );
 
 			// If search is smaller than 3 characters, limit result set to avoid
@@ -2277,14 +2299,14 @@ class WC_AJAX {
 	public static function tax_rates_save_changes() {
 		if ( ! isset( $_POST['wc_tax_nonce'], $_POST['changes'] ) ) {
 			wp_send_json_error( 'missing_fields' );
-			exit;
+			wp_die();
 		}
 
 		$current_class = ! empty( $_POST['current_class'] ) ? $_POST['current_class'] : ''; // This is sanitized seven lines later.
 
 		if ( ! wp_verify_nonce( $_POST['wc_tax_nonce'], 'wc_tax_nonce-class:' . $current_class ) ) {
 			wp_send_json_error( 'bad_nonce' );
-			exit;
+			wp_die();
 		}
 
 		$current_class = WC_Tax::format_tax_rate_class( $current_class );
@@ -2292,7 +2314,7 @@ class WC_AJAX {
 		// Check User Caps
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			wp_send_json_error( 'missing_capabilities' );
-			exit;
+			wp_die();
 		}
 
 		$changes = $_POST['changes'];
@@ -2338,6 +2360,9 @@ class WC_AJAX {
 			}
 		}
 
+		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
+		WC_Cache_Helper::get_transient_version( 'shipping', true );
+
 		wp_send_json_success( array(
 			'rates' => WC_Tax::get_rates_for_tax_class( $current_class ),
 		) );
@@ -2349,18 +2374,18 @@ class WC_AJAX {
 	public static function shipping_zones_save_changes() {
 		if ( ! isset( $_POST['wc_shipping_zones_nonce'], $_POST['changes'] ) ) {
 			wp_send_json_error( 'missing_fields' );
-			exit;
+			wp_die();
 		}
 
 		if ( ! wp_verify_nonce( $_POST['wc_shipping_zones_nonce'], 'wc_shipping_zones_nonce' ) ) {
 			wp_send_json_error( 'bad_nonce' );
-			exit;
+			wp_die();
 		}
 
 		// Check User Caps
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			wp_send_json_error( 'missing_capabilities' );
-			exit;
+			wp_die();
 		}
 
 		$changes = $_POST['changes'];
@@ -2402,18 +2427,18 @@ class WC_AJAX {
 	public static function shipping_zone_add_method() {
 		if ( ! isset( $_POST['wc_shipping_zones_nonce'], $_POST['zone_id'], $_POST['method_id'] ) ) {
 			wp_send_json_error( 'missing_fields' );
-			exit;
+			wp_die();
 		}
 
 		if ( ! wp_verify_nonce( $_POST['wc_shipping_zones_nonce'], 'wc_shipping_zones_nonce' ) ) {
 			wp_send_json_error( 'bad_nonce' );
-			exit;
+			wp_die();
 		}
 
 		// Check User Caps
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			wp_send_json_error( 'missing_capabilities' );
-			exit;
+			wp_die();
 		}
 
 		$zone_id     = wc_clean( $_POST['zone_id'] );
@@ -2424,7 +2449,7 @@ class WC_AJAX {
 			'instance_id' => $instance_id,
 			'zone_id'     => $zone->get_id(),
 			'zone_name'   => $zone->get_zone_name(),
-			'methods'     => $zone->get_shipping_methods(),
+			'methods'     => $zone->get_shipping_methods( false, 'json' ),
 		) );
 	}
 
@@ -2434,17 +2459,17 @@ class WC_AJAX {
 	public static function shipping_zone_methods_save_changes() {
 		if ( ! isset( $_POST['wc_shipping_zones_nonce'], $_POST['zone_id'], $_POST['changes'] ) ) {
 			wp_send_json_error( 'missing_fields' );
-			exit;
+			wp_die();
 		}
 
 		if ( ! wp_verify_nonce( $_POST['wc_shipping_zones_nonce'], 'wc_shipping_zones_nonce' ) ) {
 			wp_send_json_error( 'bad_nonce' );
-			exit;
+			wp_die();
 		}
 
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			wp_send_json_error( 'missing_capabilities' );
-			exit;
+			wp_die();
 		}
 
 		global $wpdb;
@@ -2522,7 +2547,7 @@ class WC_AJAX {
 		wp_send_json_success( array(
 			'zone_id'   => $zone->get_id(),
 			'zone_name' => $zone->get_zone_name(),
-			'methods'   => $zone->get_shipping_methods(),
+			'methods'   => $zone->get_shipping_methods( false, 'json' ),
 		) );
 	}
 
@@ -2532,17 +2557,17 @@ class WC_AJAX {
 	public static function shipping_zone_methods_save_settings() {
 		if ( ! isset( $_POST['wc_shipping_zones_nonce'], $_POST['instance_id'], $_POST['data'] ) ) {
 			wp_send_json_error( 'missing_fields' );
-			exit;
+			wp_die();
 		}
 
 		if ( ! wp_verify_nonce( $_POST['wc_shipping_zones_nonce'], 'wc_shipping_zones_nonce' ) ) {
 			wp_send_json_error( 'bad_nonce' );
-			exit;
+			wp_die();
 		}
 
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			wp_send_json_error( 'missing_capabilities' );
-			exit;
+			wp_die();
 		}
 
 		$instance_id     = absint( $_POST['instance_id'] );
@@ -2554,7 +2579,7 @@ class WC_AJAX {
 		wp_send_json_success( array(
 			'zone_id'   => $zone->get_id(),
 			'zone_name' => $zone->get_zone_name(),
-			'methods'   => $zone->get_shipping_methods(),
+			'methods'   => $zone->get_shipping_methods( false, 'json' ),
 			'errors'    => $shipping_method->get_errors(),
 		) );
 	}
@@ -2565,17 +2590,17 @@ class WC_AJAX {
 	public static function shipping_classes_save_changes() {
 		if ( ! isset( $_POST['wc_shipping_classes_nonce'], $_POST['changes'] ) ) {
 			wp_send_json_error( 'missing_fields' );
-			exit;
+			wp_die();
 		}
 
 		if ( ! wp_verify_nonce( $_POST['wc_shipping_classes_nonce'], 'wc_shipping_classes_nonce' ) ) {
 			wp_send_json_error( 'bad_nonce' );
-			exit;
+			wp_die();
 		}
 
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			wp_send_json_error( 'missing_capabilities' );
-			exit;
+			wp_die();
 		}
 
 		$changes = $_POST['changes'];

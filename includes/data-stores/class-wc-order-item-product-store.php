@@ -48,20 +48,23 @@ class WC_Order_Item_Product_Data_Store extends Abstract_WC_Order_Item_Type_Data_
 	 * @param WC_Order_Item_Product $item
 	 */
 	public function save_item_data( &$item ) {
-		$id          = $item->get_id();
-		$save_values = array(
-			'_product_id'        => $item->get_product_id( 'edit' ),
-			'_variation_id'      => $item->get_variation_id( 'edit' ),
-			'_qty'               => $item->get_quantity( 'edit' ),
-			'_tax_class'         => $item->get_tax_class( 'edit' ),
-			'_line_subtotal'     => $item->get_subtotal( 'edit' ),
-			'_line_subtotal_tax' => $item->get_subtotal_tax( 'edit' ),
-			'_line_total'        => $item->get_total( 'edit' ),
-			'_line_tax'          => $item->get_total_tax( 'edit' ),
-			'_line_tax_data'     => $item->get_taxes( 'edit' ),
+		$id                = $item->get_id();
+		$changes           = $item->get_changes();
+		$meta_key_to_props = array(
+			'_product_id'        => 'product_id',
+			'_variation_id'      => 'variation_id',
+			'_qty'               => 'quantity',
+			'_tax_class'         => 'tax_class',
+			'_line_subtotal'     => 'subtotal',
+			'_line_subtotal_tax' => 'subtotal_tax',
+			'_line_total'        => 'total',
+			'_line_tax'          => 'total_tax',
+			'_line_tax_data'     => 'taxes',
 		);
-		foreach ( $save_values as $key => $value ) {
-			update_metadata( 'order_item', $id, $key, $value );
+		$props_to_update = $this->get_props_to_update( $item, $meta_key_to_props, 'order_item' );
+
+		foreach ( $props_to_update as $meta_key => $prop ) {
+			update_metadata( 'order_item', $id, $meta_key, $item->{"get_$prop"}( 'edit' ) );
 		}
 	}
 

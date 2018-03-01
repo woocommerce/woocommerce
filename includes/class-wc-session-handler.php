@@ -141,20 +141,28 @@ class WC_Session_Handler extends WC_Session {
 	 *
 	 * Uses Portable PHP password hashing framework to generate a unique cryptographically strong ID.
 	 *
-	 * @return int|string
+	 * @return string
 	 */
 	public function generate_customer_id() {
+		$customer_id = '';
+
 		if ( is_user_logged_in() ) {
-			return get_current_user_id();
-		} else {
-			require_once ABSPATH . 'wp-includes/class-phpass.php';
-			$hasher = new PasswordHash( 8, false );
-			return md5( $hasher->get_random_bytes( 32 ) );
+			$customer_id = get_current_user_id();
 		}
+
+		if ( empty( $customer_id ) ) {
+			require_once ABSPATH . 'wp-includes/class-phpass.php';
+			$hasher      = new PasswordHash( 8, false );
+			$customer_id = md5( $hasher->get_random_bytes( 32 ) );
+		}
+
+		return $customer_id;
 	}
 
 	/**
-	 * Get session cookie.
+	 * Get the session cookie, if set. Otherwise return false.
+	 *
+	 * Session cookies without a customer ID are invalid.
 	 *
 	 * @return bool|array
 	 */
@@ -166,6 +174,10 @@ class WC_Session_Handler extends WC_Session {
 		}
 
 		list( $customer_id, $session_expiration, $session_expiring, $cookie_hash ) = explode( '||', $cookie_value );
+
+		if ( empty( $customer_id ) ) {
+			return false;
+		}
 
 		// Validate hash.
 		$to_hash = $customer_id . '|' . $session_expiration;

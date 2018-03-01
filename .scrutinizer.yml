@@ -24,7 +24,7 @@ checks:
 filter:
   excluded_paths:
     - apigen/
-    - dummy-data/
+    - sample-data/
     - i18n/
     - includes/api/legacy/
     - includes/gateways/simplify-commerce/includes/

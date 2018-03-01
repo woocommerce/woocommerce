@@ -455,16 +455,16 @@ function get_woocommerce_price_format() {
 
 	switch ( $currency_pos ) {
 		case 'left' :
-			$format = '%1$s&#x200e;%2$s';
+			$format = '%1$s%2$s';
 		break;
 		case 'right' :
-			$format = '%2$s%1$s&#x200f;';
+			$format = '%2$s%1$s';
 		break;
 		case 'left_space' :
-			$format = '%1$s&#x200e;&nbsp;%2$s';
+			$format = '%1$s&nbsp;%2$s';
 		break;
 		case 'right_space' :
-			$format = '%2$s&nbsp;%1$s&#x200f;';
+			$format = '%2$s&nbsp;%1$s';
 		break;
 	}
 
@@ -1308,4 +1308,19 @@ function wc_array_merge_recursive_numeric() {
 	}
 
 	return $final;
+}
+
+/**
+ * Implode and escape HTML attributes for output.
+ *
+ * @since 3.3.0
+ * @param array $raw_attributes Attribute name value pairs.
+ * @return string
+ */
+function wc_implode_html_attributes( $raw_attributes ) {
+	$attributes = array();
+	foreach ( $raw_attributes as $name => $value ) {
+		$attributes[] = esc_attr( $name ) . '="' . esc_attr( $value ) . '"';
+	}
+	return implode( ' ', $attributes );
 }

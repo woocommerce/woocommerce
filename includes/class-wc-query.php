@@ -71,7 +71,6 @@ class WC_Query {
 	public function init_query_vars() {
 		// Query vars to add to WP.
 		$this->query_vars = array(
-			'product-page'               => '',
 			// Checkout actions.
 			'order-pay'                  => get_option( 'woocommerce_checkout_pay_endpoint', 'order-pay' ),
 			'order-received'             => get_option( 'woocommerce_checkout_order_received_endpoint', 'order-received' ),
@@ -277,14 +276,20 @@ class WC_Query {
 			}
 		}
 
-		// When orderby is set, WordPress shows posts. Get around that here.
+		// When orderby is set, WordPress shows posts on the front-page. Get around that here.
 		if ( $this->is_showing_page_on_front( $q ) && $this->page_on_front_is( wc_get_page_id( 'shop' ) ) ) {
 			$_query = wp_parse_args( $q->query );
 			if ( empty( $_query ) || ! array_diff( array_keys( $_query ), array( 'preview', 'page', 'paged', 'cpage', 'orderby' ) ) ) {
+				$q->set( 'page_id', (int) get_option( 'page_on_front' ) );
 				$q->is_page = true;
 				$q->is_home = false;
-				$q->set( 'page_id', (int) get_option( 'page_on_front' ) );
-				$q->set( 'post_type', 'product' );
+
+				// WP supporting themes show post type archive.
+				if ( current_theme_supports( 'woocommerce' ) ) {
+					$q->set( 'post_type', 'product' );
+				} else {
+					$q->is_singular = true;
+				}
 			}
 		}
 
@@ -293,8 +298,8 @@ class WC_Query {
 			$q->is_comment_feed = false;
 		}
 
-		// Special check for shops with the product archive on front.
-		if ( $q->is_page() && 'page' === get_option( 'show_on_front' ) && absint( $q->get( 'page_id' ) ) === wc_get_page_id( 'shop' ) ) {
+		// Special check for shops with the PRODUCT POST TYPE ARCHIVE on front.
+		if ( current_theme_supports( 'woocommerce' ) && $q->is_page() && 'page' === get_option( 'show_on_front' ) && absint( $q->get( 'page_id' ) ) === wc_get_page_id( 'shop' ) ) {
 			// This is a front-page shop.
 			$q->set( 'post_type', 'product' );
 			$q->set( 'page_id', '' );

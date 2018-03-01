@@ -234,7 +234,7 @@ function wc_save_order_items( $order_id, $items ) {
 
 			if ( isset( $items['meta_key'][ $item_id ], $items['meta_value'][ $item_id ] ) ) {
 				foreach ( $items['meta_key'][ $item_id ] as $meta_id => $meta_key ) {
-					$meta_key   = wp_unslash( $meta_key );
+					$meta_key   = substr( wp_unslash( $meta_key ), 0, 255 );
 					$meta_value = isset( $items['meta_value'][ $item_id ][ $meta_id ] ) ? wp_unslash( $items['meta_value'][ $item_id ][ $meta_id ] ): '';
 
 					if ( '' === $meta_key && '' === $meta_value ) {
@@ -324,7 +324,7 @@ function wc_render_action_buttons( $actions ) {
 		if ( isset( $action['group'] ) ) {
 			$actions_html .= '<div class="wc-action-button-group"><label>' . $action['group'] . '</label> <span class="wc-action-button-group__items">' . wc_render_action_buttons( $action['actions'] ) . '</span></div>';
 		} elseif ( isset( $action['action'], $action['url'], $action['name'] ) ) {
-			$actions_html .= sprintf( '<a class="button wc-action-button wc-action-button-%s %s" href="%s" title="%s">%s</a>', esc_attr( $action['action'] ), esc_attr( $action['action'] ), esc_url( $action['url'] ), esc_attr( $action['name'] ), esc_attr( $action['name'] ) );
+			$actions_html .= sprintf( '<a class="button wc-action-button wc-action-button-%1$s %1$s" href="%2$s" aria-label="%3$s" title="%3$s">%4$s</a>', esc_attr( $action['action'] ), esc_url( $action['url'] ), esc_attr( isset( $action['title'] ) ? $action['title'] : $action['name'] ), esc_html( $action['name'] ) );
 		}
 	}
 

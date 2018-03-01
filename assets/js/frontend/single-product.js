@@ -166,7 +166,7 @@ jQuery( function( $ ) {
 			}
 		} ).each( function() {
 			if ( this.complete ) {
-				$( this ).load();
+				$( this ).trigger( 'load' );
 			}
 		} );
 	};
@@ -200,9 +200,9 @@ jQuery( function( $ ) {
 
 		// But only zoom if the img is larger than its container.
 		if ( zoomEnabled ) {
-			var zoom_options = {
+			var zoom_options = $.extend( {
 				touch: false
-			};
+			}, wc_single_product_params.zoom_options );
 
 			if ( 'ontouchstart' in window ) {
 				zoom_options.on = 'click';

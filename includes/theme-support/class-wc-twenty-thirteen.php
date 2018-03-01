@@ -1,14 +1,16 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 /**
  * Twenty Thirteen support.
  *
  * @class   WC_Twenty_Thirteen
  * @since   3.3.0
  * @package WooCommerce/Classes
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * WC_Twenty_Thirteen class.
  */
 class WC_Twenty_Thirteen {
 
@@ -29,8 +31,8 @@ class WC_Twenty_Thirteen {
 		add_theme_support( 'wc-product-gallery-lightbox' );
 		add_theme_support( 'wc-product-gallery-slider' );
 		add_theme_support( 'woocommerce', array(
-			'thumbnail_image_width' => 140,
-			'single_image_width'    => 290,
+			'thumbnail_image_width' => 200,
+			'single_image_width'    => 300,
 		) );
 	}
 

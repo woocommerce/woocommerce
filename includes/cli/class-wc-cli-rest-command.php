@@ -157,6 +157,10 @@ class WC_CLI_REST_Command {
 			$body = self::limit_item_to_fields( $body, $assoc_args['fields'] );
 		}
 
+		if ( empty( $assoc_args['format'] ) ) {
+			$assoc_args['format'] = 'table';
+		}
+
 		if ( 'headers' === $assoc_args['format'] ) {
 			echo json_encode( $headers );
 		} elseif ( 'body' === $assoc_args['format'] ) {
@@ -199,6 +203,10 @@ class WC_CLI_REST_Command {
 			foreach ( $items as $key => $item ) {
 				$items[ $key ] = self::limit_item_to_fields( $item, $assoc_args['fields'] );
 			}
+		}
+
+		if ( empty( $assoc_args['format'] ) ) {
+			$assoc_args['format'] = 'table';
 		}
 
 		if ( ! empty( $assoc_args['format'] ) && 'count' === $assoc_args['format'] ) {
