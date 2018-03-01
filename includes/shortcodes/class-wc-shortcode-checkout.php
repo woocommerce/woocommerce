@@ -118,7 +118,7 @@ class WC_Shortcode_Checkout {
 					if ( $item && is_callable( array( $item, 'get_product' ) ) ) {
 						$product = $item->get_product();
 
-						if ( $product && ! $product->is_in_stock() ) {
+						if ( $product && ! apply_filters( 'woocommerce_pay_order_product_in_stock', $product->is_in_stock(), $product, $order ) ) {
 							/* translators: %s: product name */
 							throw new Exception( sprintf( __( 'Sorry, "%s" is no longer in stock so this order cannot be paid for. We apologize for any inconvenience caused.', 'woocommerce' ), $product->get_name() ) );
 						}

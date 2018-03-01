@@ -28,12 +28,13 @@ class WC_Admin_Notices {
 	 * @var array
 	 */
 	private static $core_notices = array(
-		'install'             => 'install_notice',
-		'update'              => 'update_notice',
-		'template_files'      => 'template_file_check_notice',
-		'legacy_shipping'     => 'legacy_shipping_notice',
-		'no_shipping_methods' => 'no_shipping_methods_notice',
-		'simplify_commerce'   => 'simplify_commerce_notice',
+		'install'                 => 'install_notice',
+		'update'                  => 'update_notice',
+		'template_files'          => 'template_file_check_notice',
+		'legacy_shipping'         => 'legacy_shipping_notice',
+		'no_shipping_methods'     => 'no_shipping_methods_notice',
+		'simplify_commerce'       => 'simplify_commerce_notice',
+		'regenerating_thumbnails' => 'regenerating_thumbnails_notice',
 	);
 
 	/**
@@ -124,11 +125,15 @@ class WC_Admin_Notices {
 			}
 
 			if ( ! current_user_can( 'manage_woocommerce' ) ) {
-				wp_die( __( 'Cheatin&#8217; huh?', 'woocommerce' ) );
+				wp_die( __( 'You don&#8217;t have permission to do this.', 'woocommerce' ) );
 			}
 
 			$hide_notice = sanitize_text_field( $_GET['wc-hide-notice'] );
+
 			self::remove_notice( $hide_notice );
+
+			update_user_meta( get_current_user_id(), 'dismissed_' . $hide_notice . '_notice', true );
+
 			do_action( 'woocommerce_hide_' . $hide_notice . '_notice' );
 		}
 	}
@@ -310,6 +315,13 @@ class WC_Admin_Notices {
 		if ( empty( $_GET['action'] ) ) {
 			include( 'views/html-notice-simplify-commerce.php' );
 		}
+	}
+
+	/**
+	 * Notice shown when regenerating thumbnails background process is running.
+	 */
+	public static function regenerating_thumbnails_notice() {
+		include( 'views/html-notice-regenerating-thumbnails.php' );
 	}
 }
 

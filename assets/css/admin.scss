@@ -692,6 +692,16 @@ table.wc_status_table--tools {
 	}
 }
 
+.taxonomy-product_cat {
+	.column-thumb .woocommerce-help-tip {
+		font-size: 1.5em;
+		margin: 0 0 0 -34px;
+		padding: 0px 2px 5px;
+		display: block;
+		position: absolute;
+	}
+}
+
 #debug-report {
 	display: none;
 	margin: 10px 0;
@@ -903,8 +913,7 @@ ul.wc_coupon_list {
 		&.code {
 			display: inline-block;
 			position: relative;
-			padding-right: 2em;
-			padding-left: .5em;
+			padding: 0 .5em;
 			background-color: #fff;
 			border: 1px solid #aaa;
 			-webkit-box-shadow: 0 1px 0 #dfdfdf;
@@ -913,6 +922,10 @@ ul.wc_coupon_list {
 			border-radius: 4px;
 			margin-right: 5px;
 			margin-top: 5px;
+
+			&.editable {
+				padding-right: 2em;
+			}
 
 			.tips {
 				cursor: pointer;
@@ -1139,6 +1152,7 @@ ul.wc_coupon_list_block {
 		.wc-customer-user, .wc-order-status {
 			label a {
 				float: right;
+				margin-left: 8px;
 			}
 		}
 
@@ -1976,6 +1990,7 @@ ul.wc_coupon_list_block {
 		}
 
 		a.link::after {
+			font-family: 'WooCommerce';
 			content: '\e00d';
 		}
 
@@ -2044,8 +2059,11 @@ ul.wc_coupon_list_block {
 		tbody tr {
 			border-top: 1px solid #f5f5f5;
 		}
-		tbody tr:hover:not(.status-trash) td {
+		tbody tr:hover:not(.status-trash):not(.no-link) td {
 			cursor: pointer;
+		}
+		.no-link {
+			cursor: default !important;
 		}
 
 		// Columns.
@@ -2068,7 +2086,7 @@ ul.wc_coupon_list_block {
 			}
 		}
 		.column-order_number {
-			width: 35ch;
+			width: 20ch;
 		}
 		.column-order_total {
 			width: 8ch;
@@ -2135,7 +2153,6 @@ ul.wc_coupon_list_block {
 
 .order-status {
 	display: inline-flex;
-	padding: 0px 1em;
 	line-height: 2.5em;
 	color: #777;
 	background: #E5E5E5;
@@ -2144,6 +2161,7 @@ ul.wc_coupon_list_block {
 	margin: -.25em 0;
 	cursor: inherit !important;
 	white-space: nowrap;
+	max-width: 100%;
 
 	&.status-completed {
 		background: #C8D7E1;
@@ -2169,6 +2187,12 @@ ul.wc_coupon_list_block {
 		background: #eba3a3;
 		color: #761919;
 	}
+
+	> span {
+		margin: 0 1em;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
 }
 
 .wc-order-preview {
@@ -2185,7 +2209,6 @@ ul.wc_coupon_list_block {
 	.wc-order-preview-table {
 		width: 100%;
 		margin: 0;
-		border-bottom: 1px solid #ccc;
 		th, td {
 			padding: 1em 1.5em;
 			text-align: left;
@@ -2224,11 +2247,14 @@ ul.wc_coupon_list_block {
 		}
 	}
 	.wc-order-preview-addresses {
-		overflow:hidden;
-		.wc-order-preview-address {
+		overflow: hidden;
+		padding-bottom: 1.5em;
+
+		.wc-order-preview-address,
+		.wc-order-preview-note {
 			width: 50%;
 			float: left;
-			padding: 1.5em;
+			padding: 1.5em 1.5em 0;
 			box-sizing: border-box;
 			word-wrap: break-word;
 
@@ -2237,22 +2263,28 @@ ul.wc_coupon_list_block {
 			}
 			strong {
 				display: block;
-				margin-top: 1em;
+				margin-top: 1.5em;
+			}
+			strong:first-child {
+				margin-top: 0;
 			}
 		}
 	}
-	.wc-action-button,
-	.wc-action-button-group {
-		float: left;
-		margin-right: 4px;
-	}
-}
-
-@media screen and (max-width: 782px) {
-	.wc-action-button-group {
-		label {
-			display: none;
+	footer {
+		.wc-action-button-group {
+			display: inline-block;
+			float: left;
 		}
+		.button.button-large {
+			margin-left: 10px;
+			padding: 0 10px !important;
+			line-height: 28px;
+			height: auto;
+			display: inline-block;
+		}
+	}
+	.wc-action-button-group label {
+		display: none;
 	}
 }
 
@@ -2260,25 +2292,34 @@ ul.wc_coupon_list_block {
 	vertical-align: middle;
 	line-height: 26px;
 	text-align: left;
-	margin-bottom: 4px;
 	label {
 		margin-right: 6px;
 		cursor: default;
 		font-weight: bold;
+		line-height: 28px;
 	}
 	.wc-action-button-group__items {
-		white-space: nowrap;
+		display: inline-flex;
+		flex-flow: row wrap;
+		align-content: flex-start;
+		justify-content: flex-start;
 	}
 	.wc-action-button {
-		margin: -1px !important;
+		margin: 0 0 0 -1px !important;
 		border: 1px solid #ccc;
-		padding: 1px 10px !important;
+		padding: 0 10px !important;
 		border-radius: 0 !important;
 		float: none;
 		line-height: 28px;
 		height: auto;
 		z-index: 1;
 		position:relative;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		flex: 1 0 auto;
+		box-sizing: border-box;
+		text-align: center;
+		white-space: nowrap;
 	}
 	.wc-action-button:hover,
 	.wc-action-button:focus {
@@ -2286,12 +2327,49 @@ ul.wc_coupon_list_block {
 		z-index: 2;
 	}
 	.wc-action-button:first-child {
+		margin-left: 0 !important;
 		border-top-left-radius: 3px !important;
 		border-bottom-left-radius: 3px !important;
 	}
 	.wc-action-button:last-child {
 		border-top-right-radius: 3px !important;
 		border-bottom-right-radius: 3px !important;
+	}
+}
+@media screen and (max-width: 782px) {
+	.wc-order-preview footer {
+		.wc-action-button-group .wc-action-button-group__items {
+			display: flex;
+		}
+		.wc-action-button-group {
+			float: none;
+			display: block;
+			margin-bottom: 4px;
+		}
+		.button.button-large {
+			width: 100%;
+			float: none;
+			text-align: center;
+			margin: 0;
+			display: block;
+		}
+	}
+
+	.post-type-shop_order .wp-list-table {
+		td.column-order_number {
+			padding-bottom: .5em;
+		}
+		td.column-order_status,
+		td.column-order_date {
+			display: inline-block !important;
+			padding: 0 1em 1em 1em !important;
+			&:before {
+				display: none !important;
+			}
+		}
+		td.column-order_status {
+			float: right;
+		}
 	}
 }
 
@@ -2391,20 +2469,20 @@ ul.order_notes {
 			border-color: #efefef transparent;
 		}
 	}
-	li.customer-note {
-		.note_content {
-			background: #a7cedc;
-		}
-		.note_content::after {
-			border-color: #a7cedc transparent;
-		}
-	}
 	li.system-note {
 		.note_content {
 			background: #d7cad2;
 		}
 		.note_content::after {
 			border-color: #d7cad2 transparent;
+		}
+	}
+	li.customer-note {
+		.note_content {
+			background: #a7cedc;
+		}
+		.note_content::after {
+			border-color: #a7cedc transparent;
 		}
 	}
 }
@@ -2432,6 +2510,7 @@ table.wp-list-table {
 
 	.column-handle {
 		width: 17px;
+		display: none;
 	}
 
 	tbody {
@@ -2682,9 +2761,18 @@ a.import_rates {
 	}
 }
 
+.wc_input_table_wrapper {
+	overflow-x: auto;
+	display: block;
+}
+
 table.wc_tax_rates,
 table.wc_input_table {
 	width: 100%;
+
+	th, td {
+		display: table-cell !important;
+	}
 
 	span.tips {
 		color: $blue;
@@ -2703,9 +2791,10 @@ table.wc_input_table {
 		background: #fff;
 		cursor: default;
 
-		input[type='text'],
-		input[type='number'] {
-			width: 100%;
+		input[type=text],
+		input[type=number] {
+			width: 100% !important;
+			min-width: 100px;
 			padding: 8px 10px;
 			margin: 0;
 			border: 0;
@@ -2820,6 +2909,10 @@ table.wc_emails,
 table.wc_shipping {
 	position: relative;
 
+	th, td {
+		display: table-cell !important;
+	}
+
 	td {
 		vertical-align: middle;
 		padding: 7px;
@@ -2912,7 +3005,6 @@ table.wc_shipping {
 		padding: 24px 24px 24px 0;
 	}
 	td.forminp {
-		padding: 15px 10px;
 		input, textarea {
 			padding: 8px;
 			width: 448px;
@@ -2979,6 +3071,7 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 		padding: 1em !important;
 		font-size: 14px;
 		background: #fff;
+		display: table-cell !important;
 		li {
 			line-height: 24px;
 			font-size: 14px;
@@ -3395,6 +3488,7 @@ img.help_tip {
 	table.form-table {
 		margin: 0;
 		position: relative;
+		table-layout: fixed;
 
 		.forminp-radio ul {
 			margin: 0;
@@ -5669,7 +5763,8 @@ table.bar_chart {
 		left: 50%;
 		top: 50%;
 		transform: translate(-50%, -50%);
-		width: 500px;
+		max-width: 100%;
+		min-width: 500px;
 		article {
 			overflow: auto;
 		}
@@ -5893,7 +5988,7 @@ table.bar_chart {
 	}
 	.select2-container {
 		float: left;
-		width: 200px !important;
+		width: 240px !important;
 		font-size: 14px;
 		vertical-align: middle;
 		margin: 1px 6px 4px 1px;

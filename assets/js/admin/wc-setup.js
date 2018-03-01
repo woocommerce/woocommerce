@@ -48,7 +48,7 @@ jQuery( function( $ ) {
 		$checkbox.prop( 'checked', ! $checkbox.prop( 'checked' ) ).change();
 	} );
 
-	$( '.wc-wizard-services-list-toggle' ).on( 'change', '.wc-wizard-service-enable input', function() {
+	$( '.wc-wizard-services-list-toggle' ).on( 'click', function() {
 		$( this ).closest( '.wc-wizard-services-list-toggle' ).toggleClass( 'closed' );
 		$( this ).closest( '.wc-wizard-services' ).find( '.wc-wizard-service-item' )
 			.slideToggle()
@@ -74,7 +74,7 @@ jQuery( function( $ ) {
 			.removeClass( 'hide' )
 			.find( '.shipping-method-required-field' )
 			.prop( 'required', true );
-	} );
+	} ).find( '.wc-wizard-shipping-method-select .method' ).change();
 
 	$( '.wc-wizard-services' ).on( 'change', '.wc-wizard-shipping-method-enable', function() {
 		var checked = $( this ).is( ':checked' );
