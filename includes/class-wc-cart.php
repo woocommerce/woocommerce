@@ -1450,7 +1450,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				// Limit to defined email addresses.
 				$restrictions = $coupon->get_email_restrictions();
 
-				if ( is_array( $restrictions ) && 0 < count( $restrictions ) && 0 === count( array_intersect( $check_emails, $restrictions ) ) ) {
+				if ( is_array( $restrictions ) && 0 < count( $restrictions ) && !$this->email_is_accepted( $check_emails, $restrictions ) ) {
 					$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED );
 					$this->remove_coupon( $code );
 				}
@@ -1496,6 +1496,41 @@ class WC_Cart extends WC_Legacy_Cart {
 			}
 		}
 	}
+
+
+	/**
+	 * Checks if the given email address(es) matches the ones specified on the coupon.
+	 * This function got support for asterisk (*) as a wildcard
+	 * 
+	 * @param 	array 	$check_emails 	The address(es) of the customer
+	 * @param 	array 	$restrictions 	The allowed email(s)
+	 * @return  bool
+	 */
+	public function email_is_accepted( $check_emails, $restrictions ){
+		
+		foreach( $check_emails as $check_email ){
+			
+			// With a direct match we return true
+			if( in_array( $check_email, $restrictions ) ) return true;
+			
+			// Go through the allowed ones and return true if the email matches
+			foreach( $restrictions as $restriction ){
+
+				// Convert to PHP-regex syntax
+				$regex = '/'.str_replace( '*', '(.+)?', $restriction ).'/';
+
+				preg_match( $regex, $check_email, $match );
+
+				if (  !empty( $match ) ) {
+					return true;
+				}
+			}
+		}
+
+		// No matches, this one isn't allowed
+		return false;
+	}
+
 
 	/**
 	 * Returns whether or not a discount has been applied.
