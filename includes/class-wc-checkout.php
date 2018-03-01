@@ -439,7 +439,8 @@ class WC_Checkout {
 				$item->legacy_package_key = $package_key; // @deprecated For legacy actions.
 				$item->set_props( array(
 					'method_title' => $shipping_rate->label,
-					'method_id'    => $shipping_rate->id,
+					'method_id'    => $shipping_rate->method_id,
+					'instance_id'  => $shipping_rate->instance_id,
 					'total'        => wc_format_decimal( $shipping_rate->cost ),
 					'taxes'        => array(
 						'total' => $shipping_rate->taxes,
