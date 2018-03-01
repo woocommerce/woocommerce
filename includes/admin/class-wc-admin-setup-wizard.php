@@ -468,9 +468,17 @@ class WC_Admin_Setup_Wizard {
 			</label>
 
 			<?php if ( 'unknown' === get_option( 'woocommerce_allow_tracking', 'unknown' ) ) : ?>
-				<div class="allow-tracking">
-					<input type="checkbox" id="wc_tracker_optin" name="wc_tracker_optin" value="yes" checked />
-					<label for="wc_tracker_optin"><?php esc_html_e( 'Allow WooCommerce to collect non-sensitive diagnostic data and usage information.', 'woocommerce' ); ?></label>
+				<div class="woocommerce-tracker">
+					<p class="checkbox">
+						<input type="checkbox" id="wc_tracker_optin" name="wc_tracker_optin" value="yes" />
+						<label for="wc_tracker_optin"><?php esc_html_e( 'Help WooCommerce improve by enabling usage tracking.', 'woocommerce' ); ?></label>
+					</p>
+					<p>
+					<?php
+					esc_html_e( 'Checking this box means making WooCommerce better &mdash; your store will be considered as we evaluate new features, judge the quality of an update, or determine if an improvement makes sense. If you do not check this box, WooCommerce will not know this store exists.', 'woocommerce' );
+					echo ' <a target="_blank" href="https://woocommerce.com/usage-tracking/">' . esc_html__( 'Read more about what we collect.', 'woocommerce' ) . '</a>';
+					?>
+					</p>
 				</div>
 			<?php endif; ?>
 			<p class="wc-setup-actions step">
