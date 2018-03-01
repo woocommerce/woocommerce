@@ -25,7 +25,12 @@ class WC_Admin_Dashboard {
 	public function __construct() {
 		// Only hook in admin parts if the user has admin access
 		if ( current_user_can( 'view_woocommerce_reports' ) || current_user_can( 'manage_woocommerce' ) || current_user_can( 'publish_shop_orders' ) ) {
-			add_action( 'wp_dashboard_setup', array( $this, 'init' ) );
+			// If on network admin, only load the widget that works in that context and skip the rest.
+			if ( is_multisite() && is_network_admin() ) {
+				add_action( 'wp_network_dashboard_setup', array( $this, 'register_network_order_widget' ) );
+			} else {
+				add_action( 'wp_dashboard_setup', array( $this, 'init' ) );
+			}
 		}
 	}
 
@@ -33,10 +38,22 @@ class WC_Admin_Dashboard {
 	 * Init dashboard widgets.
 	 */
 	public function init() {
-		if ( current_user_can( 'publish_shop_orders' ) ) {
+		if ( current_user_can( 'publish_shop_orders' ) && post_type_supports( 'product', 'comments' ) ) {
 			wp_add_dashboard_widget( 'woocommerce_dashboard_recent_reviews', __( 'WooCommerce recent reviews', 'woocommerce' ), array( $this, 'recent_reviews' ) );
 		}
 		wp_add_dashboard_widget( 'woocommerce_dashboard_status', __( 'WooCommerce status', 'woocommerce' ), array( $this, 'status_widget' ) );
+
+		// Network Order Widget.
+		if ( is_multisite() ) {
+			$this->register_network_order_widget();
+		}
+	}
+
+	/**
+	 * Register the network order dashboard widget.
+	 */
+	public function register_network_order_widget() {
+		wp_add_dashboard_widget( 'woocommerce_network_orders', __( 'WooCommerce network orders', 'woocommerce' ), array( $this, 'network_orders' ) );
 	}
 
 	/**
@@ -246,16 +263,21 @@ class WC_Admin_Dashboard {
 	 */
 	public function recent_reviews() {
 		global $wpdb;
-		$comments = $wpdb->get_results( "
-			SELECT posts.ID, posts.post_title, comments.comment_author, comments.comment_ID, SUBSTRING(comments.comment_content,1,100) AS comment_excerpt
-			FROM $wpdb->comments comments
-			LEFT JOIN $wpdb->posts posts ON (comments.comment_post_ID = posts.ID)
+
+		$query_from = apply_filters( 'woocommerce_report_recent_reviews_query_from', "FROM {$wpdb->comments} comments
+			LEFT JOIN {$wpdb->posts} posts ON (comments.comment_post_ID = posts.ID)
 			WHERE comments.comment_approved = '1'
 			AND comments.comment_type = ''
 			AND posts.post_password = ''
 			AND posts.post_type = 'product'
+			AND comments.comment_parent = 0
 			ORDER BY comments.comment_date_gmt DESC
 			LIMIT 5
+		" );
+
+		$comments = $wpdb->get_results( "
+			SELECT posts.ID, posts.post_title, comments.comment_author, comments.comment_ID, comments.comment_content
+			{$query_from};
 		" );
 
 		if ( $comments ) {
@@ -273,7 +295,7 @@ class WC_Admin_Dashboard {
 
 				/* translators: %s: review author */
 				echo '<h4 class="meta"><a href="' . get_permalink( $comment->ID ) . '#comment-' . absint( $comment->comment_ID ) . '">' . esc_html( apply_filters( 'woocommerce_admin_dashboard_recent_reviews', $comment->post_title, $comment ) ) . '</a> ' . sprintf( __( 'reviewed by %s', 'woocommerce' ), esc_html( $comment->comment_author ) ) . '</h4>';
-				echo '<blockquote>' . wp_kses_data( $comment->comment_excerpt ) . ' [...]</blockquote></li>';
+				echo '<blockquote>' . wp_kses_data( $comment->comment_content ) . '</blockquote></li>';
 
 			}
 			echo '</ul>';
@@ -281,6 +303,72 @@ class WC_Admin_Dashboard {
 			echo '<p>' . __( 'There are no product reviews yet.', 'woocommerce' ) . '</p>';
 		}
 	}
+
+	/**
+	 * Network orders widget.
+	 */
+	public function network_orders() {
+		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+
+		wp_enqueue_style( 'wc-network-orders', WC()->plugin_url() . '/assets/css/network-order-widget.css', array(), WC_VERSION );
+
+		wp_enqueue_script( 'wc-network-orders', WC()->plugin_url() . '/assets/js/admin/network-orders' . $suffix . '.js', array( 'jquery', 'underscore' ), WC_VERSION, true );
+
+		$user = wp_get_current_user();
+		$blogs = get_blogs_of_user( $user->ID );
+		$blog_ids = wp_list_pluck( $blogs, 'userblog_id' );
+
+		wp_localize_script( 'wc-network-orders', 'woocommerce_network_orders', array(
+			'nonce' => wp_create_nonce( 'wp_rest' ),
+			'sites' => array_values( $blog_ids ),
+			'order_endpoint' => get_rest_url( null, 'wc/v2/orders/network' ),
+		) );
+		?>
+		<div class="post-type-shop_order">
+			<div id="woocommerce-network-order-table-loading" class="woocommerce-network-order-table-loading is-active">
+				<p>
+					<span class="spinner is-active"></span> <?php esc_html_e( 'Loading network orders', 'woocommerce' ); ?>
+				</p>
+
+			</div>
+			<table id="woocommerce-network-order-table" class="woocommerce-network-order-table">
+				<thead>
+					<tr>
+						<td><?php esc_html_e( 'Order', 'woocommerce' ); ?></td>
+						<td><?php esc_html_e( 'Status', 'woocommerce' ); ?></td>
+						<td><?php esc_html_e( 'Total', 'woocommerce' ); ?></td>
+					</tr>
+				</thead>
+				<tbody id="network-orders-tbody">
+
+				</tbody>
+			</table>
+			<div id="woocommerce-network-orders-no-orders" class="woocommerce-network-orders-no-orders">
+				<p>
+					<?php esc_html_e( 'No orders found', 'woocommerce' ); ?>
+				</p>
+			</div>
+			<script type="text/template" id="network-orders-row-template">
+				<tr>
+					<td>
+						<a href="<%- edit_url %>" class="order-view"><strong>#<%- id %> <%- customer %></strong></a>
+						<br>
+						<em>
+							<%- blog.blogname %>
+						</em>
+					</td>
+					<td>
+						<mark class="order-status status-<%- status %>"><span><%- status_name %></span></mark>
+					</td>
+					<td>
+						<%= formatted_total %>
+					</td>
+				</tr>
+			</script>
+		</div>
+		<?php
+	}
+
 }
 
 endif;

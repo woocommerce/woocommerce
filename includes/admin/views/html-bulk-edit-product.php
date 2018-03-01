@@ -97,10 +97,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 						$tax_classes = WC_Tax::get_tax_classes();
 
-						if ( ! empty( $tax_classes ) )
+						if ( ! empty( $tax_classes ) ) {
 							foreach ( $tax_classes as $class ) {
 								$options[ sanitize_title( $class ) ] = esc_html( $class );
 							}
+						}
 
 						foreach ( $options as $key => $value ) {
 							echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
@@ -307,6 +308,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php do_action( 'woocommerce_product_bulk_edit_end' ); ?>
 
 		<input type="hidden" name="woocommerce_bulk_edit" value="1" />
-		<input type="hidden" name="woocommerce_bulk_edit_nonce" value="<?php echo wp_create_nonce( 'woocommerce_bulk_edit_nonce' ); ?>" />
+		<input type="hidden" name="woocommerce_quick_edit_nonce" value="<?php echo wp_create_nonce( 'woocommerce_quick_edit_nonce' ); ?>" />
 	</div>
 </fieldset>

@@ -1,9 +1,33 @@
 /* global woocommerce_admin */
-
-/**
- * WooCommerce Admin JS
- */
 jQuery( function ( $ ) {
+
+	if ( 'undefined' === typeof woocommerce_admin ) {
+		return;
+	}
+
+	// Add buttons to product screen.
+	var $product_screen = $( '.edit-php.post-type-product' ),
+		$title_action   = $product_screen.find( '.page-title-action:first' ),
+		$blankslate     = $product_screen.find( '.woocommerce-BlankState' );
+
+	if ( 0 === $blankslate.length ) {
+		$title_action.after( '<a href="' + woocommerce_admin.urls.export_products + '" class="page-title-action">' + woocommerce_admin.strings.export_products + '</a>' );
+		$title_action.after( '<a href="' + woocommerce_admin.urls.import_products + '" class="page-title-action">' + woocommerce_admin.strings.import_products + '</a>' );
+	} else {
+		$title_action.hide();
+	}
+
+	// Progress indicators when showing steps.
+	$( '.woocommerce-progress-form-wrapper .button-next' ).on( 'click', function() {
+		$('.wc-progress-form-content').block({
+			message: null,
+			overlayCSS: {
+				background: '#fff',
+				opacity: 0.6
+			}
+		});
+		return true;
+	} );
 
 	// Field validation error tips
 	$( document.body )
@@ -110,18 +134,28 @@ jQuery( function ( $ ) {
 		})
 
 		.on( 'init_tooltips', function() {
-			var tiptip_args = {
+
+			$( '.tips, .help_tip, .woocommerce-help-tip' ).tipTip( {
 				'attribute': 'data-tip',
 				'fadeIn': 50,
 				'fadeOut': 50,
 				'delay': 200
-			};
+			} );
 
-			$( '.tips, .help_tip, .woocommerce-help-tip' ).tipTip( tiptip_args );
+			$( '.column-wc_actions .wc-action-button' ).tipTip( {
+				'fadeIn': 50,
+				'fadeOut': 50,
+				'delay': 200
+			} );
 
 			// Add tiptip to parent element for widefat tables
 			$( '.parent-tips' ).each( function() {
-				$( this ).closest( 'a, th' ).attr( 'data-tip', $( this ).data( 'tip' ) ).tipTip( tiptip_args ).css( 'cursor', 'help' );
+				$( this ).closest( 'a, th' ).attr( 'data-tip', $( this ).data( 'tip' ) ).tipTip( {
+					'attribute': 'data-tip',
+					'fadeIn': 50,
+					'fadeOut': 50,
+					'delay': 200
+				} ).css( 'cursor', 'help' );
 			});
 		});
 
@@ -145,6 +179,10 @@ jQuery( function ( $ ) {
 			ui.item.removeAttr( 'style' );
 		}
 	});
+	// Focus on inputs within the table if clicked instead of trying to sort.
+	$( '.wc_input_table.sortable tbody input' ).on( 'click', function() {
+		$( this ).focus();
+	} );
 
 	$( '.wc_input_table .remove_rows' ).click( function() {
 		var $tbody = $( this ).closest( '.wc_input_table' ).find( 'tbody' );
@@ -244,22 +282,15 @@ jQuery( function ( $ ) {
 		}).change();
 	});
 
-	// Demo store notice
-	$( 'input#woocommerce_demo_store' ).change(function() {
+	// Reviews.
+	$( 'input#woocommerce_enable_reviews' ).change(function() {
 		if ( $( this ).is( ':checked' ) ) {
-			$( '#woocommerce_demo_store_notice' ).closest( 'tr' ).show();
+			$( '#woocommerce_enable_review_rating' ).closest( 'tr' ).show();
 		} else {
-			$( '#woocommerce_demo_store_notice' ).closest( 'tr' ).hide();
+			$( '#woocommerce_enable_review_rating' ).closest( 'tr' ).hide();
 		}
 	}).change();
 
 	// Attribute term table
 	$( 'table.attributes-table tbody tr:nth-child(odd)' ).addClass( 'alternate' );
-
-	// Load videos when help button is clicked.
-	$( '#contextual-help-link' ).on( 'click', function() {
-		var frame = $( '#tab-panel-woocommerce_guided_tour_tab iframe' );
-
-		frame.attr( 'src', frame.data( 'src' ) );
-	});
 });

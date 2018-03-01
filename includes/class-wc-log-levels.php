@@ -25,7 +25,7 @@ abstract class WC_Log_Levels {
 	 *     'error': Error conditions.
 	 *     'warning': Warning conditions.
 	 *     'notice': Normal but significant condition.
-	 *     'informational': Informational messages.
+	 *     'info': Informational messages.
 	 *     'debug': Debug-level messages.
 	 *
 	 * @see @link {https://tools.ietf.org/html/rfc5424}

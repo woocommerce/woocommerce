@@ -57,6 +57,7 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 			$current_range = 'last_month';
 		}
 
+		$this->check_current_range_nonce( $current_range );
 		$this->calculate_current_range( $current_range );
 
 		$hide_sidebar = true;
@@ -66,8 +67,6 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 
 	/**
 	 * Get the main chart.
-	 *
-	 * @return string
 	 */
 	public function get_main_chart() {
 		global $wpdb;

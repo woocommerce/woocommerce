@@ -17,11 +17,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Returns the url to the lost password endpoint url.
  *
- * @access public
- * @param  string $default_url
+ * @param  string $default_url Default lost password URL.
  * @return string
  */
 function wc_lostpassword_url( $default_url = '' ) {
+	// Avoid loading too early.
+	if ( ! did_action( 'init' ) ) {
+		return $default_url;
+	}
+
+	// Don't redirect to the woocommerce endpoint on global network admin lost passwords.
+	if ( is_multisite() && isset( $_GET['redirect_to'] ) && false !== strpos( wp_unslash( $_GET['redirect_to'] ), network_admin_url() ) ) { // WPCS: input var ok, sanitization ok.
+		return $default_url;
+	}
+
 	$wc_account_page_url    = wc_get_page_permalink( 'myaccount' );
 	$wc_account_page_exists = wc_get_page_id( 'myaccount' ) > 0;
 	$lost_password_endpoint = get_option( 'woocommerce_myaccount_lost_password_endpoint' );
@@ -164,6 +173,10 @@ function wc_get_account_endpoint_url( $endpoint ) {
 		return wc_get_page_permalink( 'myaccount' );
 	}
 
+	if ( 'customer-logout' === $endpoint ) {
+		return wc_logout_url();
+	}
+
 	return wc_get_endpoint_url( $endpoint, '', wc_get_page_permalink( 'myaccount' ) );
 }
 
@@ -179,7 +192,7 @@ function wc_get_account_orders_columns() {
 		'order-date'    => __( 'Date', 'woocommerce' ),
 		'order-status'  => __( 'Status', 'woocommerce' ),
 		'order-total'   => __( 'Total', 'woocommerce' ),
-		'order-actions' => '&nbsp;',
+		'order-actions' => __( 'Actions', 'woocommerce' ),
 	) );
 
 	// Deprecated filter since 2.6.0.
@@ -197,7 +210,7 @@ function wc_get_account_downloads_columns() {
 		'download-product'   => __( 'Product', 'woocommerce' ),
 		'download-remaining' => __( 'Downloads remaining', 'woocommerce' ),
 		'download-expires'   => __( 'Expires', 'woocommerce' ),
-		'download-file'      => __( 'File', 'woocommerce' ),
+		'download-file'      => __( 'Download', 'woocommerce' ),
 		'download-actions'   => '&nbsp;',
 	) );
 
@@ -233,6 +246,74 @@ function wc_get_account_payment_methods_types() {
 		'cc'     => __( 'Credit card', 'woocommerce' ),
 		'echeck' => __( 'eCheck', 'woocommerce' ),
 	) );
+}
+
+/**
+ * Get account orders actions.
+ *
+ * @since  3.2.0
+ * @param  int|WC_Order $order
+ * @return array
+ */
+function wc_get_account_orders_actions( $order ) {
+	if ( ! is_object( $order ) ) {
+		$order_id = absint( $order );
+		$order    = wc_get_order( $order_id );
+	}
+
+	$actions = array(
+		'pay'    => array(
+			'url'  => $order->get_checkout_payment_url(),
+			'name' => __( 'Pay', 'woocommerce' ),
+		),
+		'view'   => array(
+			'url'  => $order->get_view_order_url(),
+			'name' => __( 'View', 'woocommerce' ),
+		),
+		'cancel' => array(
+			'url'  => $order->get_cancel_order_url( wc_get_page_permalink( 'myaccount' ) ),
+			'name' => __( 'Cancel', 'woocommerce' ),
+		),
+	);
+
+	if ( ! $order->needs_payment() ) {
+		unset( $actions['pay'] );
+	}
+
+	if ( ! in_array( $order->get_status(), apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( 'pending', 'failed' ), $order ) ) ) {
+		unset( $actions['cancel'] );
+	}
+
+	return apply_filters( 'woocommerce_my_account_my_orders_actions', $actions, $order );
+}
+
+/**
+ * Get account formatted address.
+ *
+ * @since  3.2.0
+ * @param  string $address_type Address type.
+ *                              Accepts: 'billing' or 'shipping'.
+ *                              Default to 'billing'.
+ * @param  int    $customer_id  Customer ID.
+ *                              Default to 0.
+ * @return string
+ */
+function wc_get_account_formatted_address( $address_type = 'billing', $customer_id = 0 ) {
+	$getter  = "get_{$address_type}";
+	$address = array();
+
+	if ( 0 === $customer_id ) {
+		$customer_id = get_current_user_id();
+	}
+
+	$customer = new WC_Customer( $customer_id );
+
+	if ( is_callable( array( $customer, $getter ) ) ) {
+		$address = $customer->$getter();
+		unset( $address['email'], $address['tel'] );
+	}
+
+	return WC()->countries->get_formatted_address( apply_filters( 'woocommerce_my_account_my_address_formatted_address', $address, $customer->get_id(), $address_type ) );
 }
 
 /**

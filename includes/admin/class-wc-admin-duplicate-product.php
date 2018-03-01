@@ -12,7 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @version     3.0.0
  */
 
-if ( ! class_exists( 'WC_Admin_Duplicate_Product', false ) ) :
+if ( class_exists( 'WC_Admin_Duplicate_Product', false ) ) {
+	return new WC_Admin_Duplicate_Product();
+}
 
 /**
  * WC_Admin_Duplicate_Product Class.
@@ -30,17 +32,35 @@ class WC_Admin_Duplicate_Product {
 
 	/**
 	 * Show the "Duplicate" link in admin products list.
-	 * @param  array   $actions
-	 * @param  WP_Post $post Post object
+	 *
+	 * @param array   $actions Array of actions.
+	 * @param WP_Post $post Post object.
 	 * @return array
 	 */
 	public function dupe_link( $actions, $post ) {
+		global $the_product;
+
 		if ( ! current_user_can( apply_filters( 'woocommerce_duplicate_product_capability', 'manage_woocommerce' ) ) ) {
 			return $actions;
 		}
 
 		if ( 'product' !== $post->post_type ) {
 			return $actions;
+		}
+
+		// Add Class to Delete Permanently link in row actions.
+		if ( empty( $the_product ) || $the_product->get_id() !== $post->ID ) {
+			$the_product = wc_get_product( $post );
+		}
+
+		if ( 'publish' === $post->post_status && $the_product && 0 < $the_product->get_total_sales() ) {
+			$actions['trash'] = sprintf(
+				'<a href="%s" class="submitdelete trash-product" aria-label="%s">%s</a>',
+				get_delete_post_link( $the_product->get_id(), '', false ),
+				/* translators: %s: post title */
+				esc_attr( sprintf( __( 'Move &#8220;%s&#8221; to the Trash', 'woocommerce' ), $the_product->get_name() ) ),
+				__( 'Trash', 'woocommerce' )
+			);
 		}
 
 		$actions['duplicate'] = '<a href="' . wp_nonce_url( admin_url( 'edit.php?post_type=product&action=duplicate_product&amp;post=' . $post->ID ), 'woocommerce-duplicate-product_' . $post->ID ) . '" aria-label="' . esc_attr__( 'Make a duplicate from this product', 'woocommerce' )
@@ -117,11 +137,17 @@ class WC_Admin_Duplicate_Product {
 
 		$duplicate = clone $product;
 		$duplicate->set_id( 0 );
+		$duplicate->set_name( sprintf( __( '%s (Copy)', 'woocommerce' ), $duplicate->get_name() ) );
 		$duplicate->set_total_sales( 0 );
 		if ( '' !== $product->get_sku( 'edit' ) ) {
 			$duplicate->set_sku( wc_product_generate_unique_sku( 0, $product->get_sku( 'edit' ) ) );
 		}
 		$duplicate->set_status( 'draft' );
+		$duplicate->set_date_created( null );
+		$duplicate->set_slug( '' );
+		$duplicate->set_rating_counts( 0 );
+		$duplicate->set_average_rating( 0 );
+		$duplicate->set_review_count( 0 );
 
 		foreach ( $meta_to_exclude as $meta_key ) {
 			$duplicate->delete_meta_data( $meta_key );
@@ -133,7 +159,8 @@ class WC_Admin_Duplicate_Product {
 		// Save parent product.
 		$duplicate->save();
 
-		if ( ! apply_filters( 'woocommerce_duplicate_product_exclude_children', false ) && ( $product->is_type( 'variable' ) || $product->is_type( 'grouped' ) ) ) {
+		// Duplicate children of a variable product.
+		if ( ! apply_filters( 'woocommerce_duplicate_product_exclude_children', false, $product ) && $product->is_type( 'variable' ) ) {
 			foreach ( $product->get_children() as $child_id ) {
 				$child           = wc_get_product( $child_id );
 				$child_duplicate = clone $child;
@@ -153,6 +180,9 @@ class WC_Admin_Duplicate_Product {
 
 				$child_duplicate->save();
 			}
+
+			// Get new object to reflect new children.
+			$duplicate = wc_get_product( $duplicate->get_id() );
 		}
 
 		return $duplicate;
@@ -163,7 +193,7 @@ class WC_Admin_Duplicate_Product {
 	 *
 	 * @deprecated 3.0.0
 	 * @param mixed $id
-	 * @return WP_Post|bool
+	 * @return object|bool
 	 * @see duplicate_product
 	 */
 	private function get_product_to_duplicate( $id ) {
@@ -185,7 +215,5 @@ class WC_Admin_Duplicate_Product {
 		return $post;
 	}
 }
-
-endif;
 
 return new WC_Admin_Duplicate_Product();

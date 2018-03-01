@@ -64,7 +64,7 @@ function wc_get_cart_coupon_types() {
  *
  * @since  2.5.0
  *
- * @return array
+ * @return bool
  */
 function wc_coupons_enabled() {
 	return apply_filters( 'woocommerce_coupons_enabled', 'yes' === get_option( 'woocommerce_enable_coupons' ) );
@@ -87,7 +87,7 @@ function wc_get_coupon_code_by_id( $id ) {
  *
  * @since 3.0.0
  * @param string $code
- * @param int $exclude Used to exclude an ID from the check if you're checking existance.
+ * @param int $exclude Used to exclude an ID from the check if you're checking existence.
  * @return int
  */
 function wc_get_coupon_id_by_code( $code, $exclude = 0 ) {

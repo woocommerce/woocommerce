@@ -9,6 +9,10 @@
  */
 global $states;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 $states['CA'] = array(
 	'AB' => __( 'Alberta', 'woocommerce' ),
 	'BC' => __( 'British Columbia', 'woocommerce' ),

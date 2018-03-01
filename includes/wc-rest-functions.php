@@ -162,7 +162,7 @@ function wc_rest_set_uploaded_image_as_attachment( $upload, $id = 0 ) {
 		'post_mime_type' => $info['type'],
 		'guid'           => $upload['url'],
 		'post_parent'    => $id,
-		'post_title'     => $title,
+		'post_title'     => $title ? $title : basename( $upload['file'] ),
 		'post_content'   => $content,
 	);
 
@@ -218,8 +218,7 @@ function wc_rest_urlencode_rfc3986( $value ) {
 	if ( is_array( $value ) ) {
 		return array_map( 'wc_rest_urlencode_rfc3986', $value );
 	} else {
-		// Percent symbols (%) must be double-encoded.
-		return str_replace( '%', '%25', rawurlencode( rawurldecode( $value ) ) );
+		return str_replace( array( '+', '%7E' ), array( ' ', '~' ), rawurlencode( $value ) );
 	}
 }
 
@@ -315,6 +314,7 @@ function wc_rest_check_manager_permissions( $object, $context = 'read' ) {
 		'attributes'       => 'manage_product_terms',
 		'shipping_methods' => 'manage_woocommerce',
 		'payment_gateways' => 'manage_woocommerce',
+		'webhooks'         => 'manage_woocommerce',
 	);
 
 	$permission = current_user_can( $objects[ $object ] );

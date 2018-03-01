@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Abstract Rest Controler Class
+ * Abstract Rest Controller Class
  *
  * @author   WooThemes
  * @category API
@@ -35,6 +35,8 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 * The type of object is inferred from the passed schema.
 	 *
 	 * @param array $schema Schema array.
+	 *
+	 * @return array
 	 */
 	protected function add_additional_fields_schema( $schema ) {
 		if ( empty( $schema['title'] ) ) {
@@ -203,7 +205,6 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	public function validate_setting_text_field( $value, $setting ) {
 		$value = is_null( $value ) ? '' : $value;
 		return wp_kses_post( trim( stripslashes( $value ) ) );
-		return $value;
 	}
 
 	/**
@@ -228,7 +229,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 * @since 3.0.0
 	 * @param array $values
 	 * @param array  $setting
-	 * @return string|WP_Error
+	 * @return array|WP_Error
 	 */
 	public function validate_setting_multiselect_field( $values, $setting ) {
 		if ( empty( $values ) ) {
@@ -253,7 +254,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 * Validate image_width based settings.
 	 *
 	 * @since 3.0.0
-	 * @param array $value
+	 * @param array $values
 	 * @param array $setting
 	 * @return string|WP_Error
 	 */

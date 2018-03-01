@@ -153,7 +153,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 		// Add SKU and PRICE to products.
 		if ( is_callable( array( $item, 'get_product' ) ) ) {
 			$data['sku']   = $item->get_product() ? $item->get_product()->get_sku(): null;
-			$data['price'] = $item->get_total() / max( 1, $item->get_quantity() );
+			$data['price'] = $item->get_quantity() ? $item->get_total() / $item->get_quantity() : 0;
 		}
 
 		// Format taxes.
@@ -281,12 +281,13 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
-		$this->request = $request;
-		$data          = $this->get_formatted_item_data( $object );
-		$context       = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data          = $this->add_additional_fields_to_object( $data, $request );
-		$data          = $this->filter_response_by_context( $data, $context );
-		$response      = rest_ensure_response( $data );
+		$this->request       = $request;
+		$this->request['dp'] = is_null( $this->request['dp'] ) ? wc_get_price_decimals() : absint( $this->request['dp'] );
+		$data                = $this->get_formatted_item_data( $object );
+		$context             = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$data                = $this->add_additional_fields_to_object( $data, $request );
+		$data                = $this->filter_response_by_context( $data, $context );
+		$response            = rest_ensure_response( $data );
 		$response->add_links( $this->prepare_links( $object, $request ) );
 
 		/**
@@ -353,7 +354,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 			$args['post_status'] = 'any';
 		}
 
-		if ( ! empty( $request['customer'] ) ) {
+		if ( isset( $request['customer'] ) ) {
 			if ( ! empty( $args['meta_query'] ) ) {
 				$args['meta_query'] = array();
 			}
@@ -390,11 +391,21 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 			}
 		}
 
+		/**
+		 * Filter the query arguments for a request.
+		 *
+		 * Enables adding extra arguments or setting defaults for an order collection request.
+		 *
+		 * @param array           $args    Key value array of query var to query value.
+		 * @param WP_REST_Request $request The request used.
+		 */
+		$args = apply_filters( 'woocommerce_rest_orders_prepare_object_query', $args, $request );
+
 		return $args;
 	}
 
 	/**
-	 * Only reutrn writeable props from schema.
+	 * Only return writable props from schema.
 	 *
 	 * @param  array $schema
 	 * @return bool
@@ -422,6 +433,9 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 
 			if ( ! is_null( $value ) ) {
 				switch ( $key ) {
+					case 'status' :
+						// Status change should be done later so transitions have new data.
+						break;
 					case 'billing' :
 					case 'shipping' :
 						$this->update_address( $order, $value, $key );
@@ -487,33 +501,40 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 				return $object;
 			}
 
-			if ( $creating ) {
+			if ( ! is_null( $request['customer_id'] ) && 0 !== $request['customer_id'] ) {
 				// Make sure customer exists.
-				if ( ! is_null( $request['customer_id'] ) && 0 !== $request['customer_id'] && false === get_user_by( 'id', $request['customer_id'] ) ) {
+				if ( false === get_user_by( 'id', $request['customer_id'] ) ) {
 					throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id',__( 'Customer ID is invalid.', 'woocommerce' ), 400 );
 				}
 
+				// Make sure customer is part of blog.
+				if ( is_multisite() && ! is_user_member_of_blog( $request['customer_id'] ) ) {
+					throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id_network',__( 'Customer ID does not belong to this site.', 'woocommerce' ), 400 );
+				}
+			}
+
+			if ( $creating ) {
 				$object->set_created_via( 'rest-api' );
 				$object->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
 				$object->calculate_totals();
+			} else {
+				// If items have changed, recalculate order totals.
+				if ( isset( $request['billing'] ) || isset( $request['shipping'] ) || isset( $request['line_items'] ) || isset( $request['shipping_lines'] ) || isset( $request['fee_lines'] ) || isset( $request['coupon_lines'] ) ) {
+					$object->calculate_totals();
+				}
+			}
+
+			// Set status.
+			if ( ! empty( $request['status'] ) ) {
+				$object->set_status( $request['status'] );
 			}
 
 			$object->save();
 
 			// Actions for after the order is saved.
-			if ( $creating ) {
-				if ( true === $request['set_paid'] ) {
+			if ( true === $request['set_paid'] ) {
+				if ( $creating || $object->needs_payment() ) {
 					$object->payment_complete( $request['transaction_id'] );
-				}
-			} else {
-				// Handle set paid.
-				if ( $object->needs_payment() && true === $request['set_paid'] ) {
-					$object->payment_complete( $request['transaction_id'] );
-				}
-
-				// If items have changed, recalculate order totals.
-				if ( isset( $request['billing'] ) || isset( $request['shipping'] ) || isset( $request['line_items'] ) || isset( $request['shipping_lines'] ) || isset( $request['fee_lines'] ) || isset( $request['coupon_lines'] ) ) {
-					$object->calculate_totals();
 				}
 			}
 
@@ -544,7 +565,9 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 	 * Gets the product ID from the SKU or posted ID.
 	 *
 	 * @param array $posted Request data
+	 *
 	 * @return int
+	 * @throws WC_REST_Exception
 	 */
 	protected function get_product_id( $posted ) {
 		if ( ! empty( $posted['sku'] ) ) {
@@ -594,8 +617,9 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 	protected function maybe_set_item_meta_data( $item, $posted ) {
 		if ( ! empty( $posted['meta_data'] ) && is_array( $posted['meta_data'] ) ) {
 			foreach ( $posted['meta_data'] as $meta ) {
-				if ( isset( $meta['key'], $meta['value'] ) ) {
-					$item->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
+				if ( isset( $meta['key'] ) ) {
+					$value = isset( $meta['value'] ) ? $meta['value'] : null;
+					$item->update_meta_data( $meta['key'], $value, isset( $meta['id'] ) ? $meta['id'] : '' );
 				}
 			}
 		}
@@ -604,12 +628,14 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 	/**
 	 * Create or update a line item.
 	 *
-	 * @param array $posted Line item data.
+	 * @param array  $posted Line item data.
 	 * @param string $action 'create' to add line item or 'update' to update it.
+	 * @param object $item Passed when updating an item. Null during creation.
+	 * @return WC_Order_Item_Product
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
-	protected function prepare_line_items( $posted, $action = 'create' ) {
-		$item    = new WC_Order_Item_Product( ! empty( $posted['id'] ) ? $posted['id'] : '' );
+	protected function prepare_line_items( $posted, $action = 'create', $item = null ) {
+		$item    = is_null( $item ) ? new WC_Order_Item_Product( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
 		$product = wc_get_product( $this->get_product_id( $posted ) );
 
 		if ( $product !== $item->get_product() ) {
@@ -632,12 +658,14 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 	/**
 	 * Create or update an order shipping method.
 	 *
-	 * @param $posted $shipping Item data.
+	 * @param array  $posted $shipping Item data.
 	 * @param string $action 'create' to add shipping or 'update' to update it.
+	 * @param object $item Passed when updating an item. Null during creation.
+	 * @return WC_Order_Item_Shipping
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
-	protected function prepare_shipping_lines( $posted, $action ) {
-		$item = new WC_Order_Item_Shipping( ! empty( $posted['id'] ) ? $posted['id'] : '' );
+	protected function prepare_shipping_lines( $posted, $action = 'create', $item = null ) {
+		$item = is_null( $item ) ? new WC_Order_Item_Shipping( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
 
 		if ( 'create' === $action ) {
 			if ( empty( $posted['method_id'] ) ) {
@@ -654,12 +682,14 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 	/**
 	 * Create or update an order fee.
 	 *
-	 * @param array $posted Item data.
+	 * @param array  $posted Item data.
 	 * @param string $action 'create' to add fee or 'update' to update it.
+	 * @param object $item Passed when updating an item. Null during creation.
+	 * @return WC_Order_Item_Fee
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
-	protected function prepare_fee_lines( $posted, $action ) {
-		$item = new WC_Order_Item_Fee( ! empty( $posted['id'] ) ? $posted['id'] : '' );
+	protected function prepare_fee_lines( $posted, $action = 'create', $item = null ) {
+		$item = is_null( $item ) ? new WC_Order_Item_Fee( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
 
 		if ( 'create' === $action ) {
 			if ( empty( $posted['name'] ) ) {
@@ -676,12 +706,14 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 	/**
 	 * Create or update an order coupon.
 	 *
-	 * @param array $posted Item data.
+	 * @param array  $posted Item data.
 	 * @param string $action 'create' to add coupon or 'update' to update it.
+	 * @param object $item Passed when updating an item. Null during creation.
+	 * @return WC_Order_Item_Coupon
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
-	protected function prepare_coupon_lines( $posted, $action ) {
-		$item = new WC_Order_Item_Coupon( ! empty( $posted['id'] ) ? $posted['id'] : '' );
+	protected function prepare_coupon_lines( $posted, $action = 'create', $item = null ) {
+		$item = is_null( $item ) ? new WC_Order_Item_Coupon( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
 
 		if ( 'create' === $action ) {
 			if ( empty( $posted['code'] ) ) {
@@ -700,10 +732,10 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 	 * When updating, the item ID provided is checked to ensure it is associated
 	 * with the order.
 	 *
-	 * @param WC_Order $order order
-	 * @param string $item_type
-	 * @param array $posted item provided in the request body
-	 * @throws WC_REST_Exception If item ID is not associated with order
+	 * @param WC_Order $order order object.
+	 * @param string   $item_type The item type.
+	 * @param array    $posted item provided in the request body.
+	 * @throws WC_REST_Exception If item ID is not associated with order.
 	 */
 	protected function set_item( $order, $item_type, $posted ) {
 		global $wpdb;
@@ -715,29 +747,23 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 		}
 
 		$method = 'prepare_' . $item_type;
+		$item   = null;
 
 		// Verify provided line item ID is associated with order.
 		if ( 'update' === $action ) {
-			$result = $wpdb->get_row(
-				$wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d AND order_id = %d",
-				absint( $posted['id'] ),
-				absint( $order->get_id() )
-			) );
-			if ( is_null( $result ) ) {
+			$item = $order->get_item( absint( $posted['id'] ), false );
+
+			if ( ! $item ) {
 				throw new WC_REST_Exception( 'woocommerce_rest_invalid_item_id', __( 'Order item ID provided is not associated with order.', 'woocommerce' ), 400 );
 			}
 		}
 
-		// Prepare item data
-		$item = $this->$method( $posted, $action );
+		// Prepare item data.
+		$item = $this->$method( $posted, $action, $item );
 
-		/**
-		 * Action hook to adjust item before save.
-		 * @since 3.0.0
-		 */
 		do_action( 'woocommerce_rest_set_order_item', $item, $posted );
 
-		// Save or add to order
+		// If creating the order, add the item to it.
 		if ( 'create' === $action ) {
 			$order->add_item( $item );
 		} else {
@@ -1113,7 +1139,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 							),
 							'value' => array(
 								'description' => __( 'Meta value.', 'woocommerce' ),
-								'type'        => 'string',
+								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
 						),
@@ -1134,12 +1160,12 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 							),
 							'name' => array(
 								'description' => __( 'Product name.', 'woocommerce' ),
-								'type'        => 'string',
+								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'product_id' => array(
 								'description' => __( 'Product ID.', 'woocommerce' ),
-								'type'        => 'integer',
+								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'variation_id' => array(
@@ -1154,7 +1180,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 							),
 							'tax_class' => array(
 								'description' => __( 'Tax class of product.', 'woocommerce' ),
-								'type'        => 'integer',
+								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'subtotal' => array(
@@ -1225,7 +1251,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 										),
 										'value' => array(
 											'description' => __( 'Meta value.', 'woocommerce' ),
-											'type'        => 'string',
+											'type'        => 'mixed',
 											'context'     => array( 'view', 'edit' ),
 										),
 									),
@@ -1239,7 +1265,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 							),
 							'price' => array(
 								'description' => __( 'Product price.', 'woocommerce' ),
-								'type'        => 'string',
+								'type'        => 'number',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
@@ -1316,7 +1342,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 										),
 										'value' => array(
 											'description' => __( 'Meta value.', 'woocommerce' ),
-											'type'        => 'string',
+											'type'        => 'mixed',
 											'context'     => array( 'view', 'edit' ),
 										),
 									),
@@ -1340,12 +1366,12 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 							),
 							'method_title' => array(
 								'description' => __( 'Shipping method name.', 'woocommerce' ),
-								'type'        => 'string',
+								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'method_id' => array(
 								'description' => __( 'Shipping method ID.', 'woocommerce' ),
-								'type'        => 'string',
+								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'total' => array(
@@ -1402,7 +1428,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 										),
 										'value' => array(
 											'description' => __( 'Meta value.', 'woocommerce' ),
-											'type'        => 'string',
+											'type'        => 'mixed',
 											'context'     => array( 'view', 'edit' ),
 										),
 									),
@@ -1426,7 +1452,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 							),
 							'name' => array(
 								'description' => __( 'Fee name.', 'woocommerce' ),
-								'type'        => 'string',
+								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'tax_class' => array(
@@ -1500,7 +1526,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 										),
 										'value' => array(
 											'description' => __( 'Meta value.', 'woocommerce' ),
-											'type'        => 'string',
+											'type'        => 'mixed',
 											'context'     => array( 'view', 'edit' ),
 										),
 									),
@@ -1524,7 +1550,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 							),
 							'code' => array(
 								'description' => __( 'Coupon code.', 'woocommerce' ),
-								'type'        => 'string',
+								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'discount' => array(
@@ -1558,7 +1584,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 										),
 										'value' => array(
 											'description' => __( 'Meta value.', 'woocommerce' ),
-											'type'        => 'string',
+											'type'        => 'mixed',
 											'context'     => array( 'view', 'edit' ),
 										),
 									),
@@ -1637,7 +1663,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['dp'] = array(
-			'default'           => 2,
+			'default'           => wc_get_price_decimals(),
 			'description'       => __( 'Number of decimal points to use in each resource.', 'woocommerce' ),
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',

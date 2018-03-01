@@ -171,19 +171,49 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Controller {
 				$option           = get_option( $option_key[0] );
 				$setting['value'] = isset( $option[ $option_key[1] ] ) ? $option[ $option_key[1] ] : $default;
 			} else {
-				$admin_setting_value = WC_Admin_Settings::get_option( $option_key );
-				$setting['value']    = empty( $admin_setting_value ) ? $default : $admin_setting_value;
+				$admin_setting_value = WC_Admin_Settings::get_option( $option_key, $default );
+				$setting['value']    = $admin_setting_value;
 			}
 
 			if ( 'multi_select_countries' === $setting['type'] ) {
 				$setting['options'] = WC()->countries->get_countries();
 				$setting['type']    = 'multiselect';
+			} elseif ( 'single_select_country' === $setting['type'] ) {
+				$setting['type']    = 'select';
+				$setting['options'] = $this->get_countries_and_states();
 			}
 
 			$filtered_settings[] = $setting;
 		}
 
 		return $filtered_settings;
+	}
+
+	/**
+	 * Returns a list of countries and states for use in the base location setting.
+	 *
+	 * @since  3.0.7
+	 * @return array Array of states and countries.
+	 */
+	private function get_countries_and_states() {
+		$countries = WC()->countries->get_countries();
+		if ( ! $countries ) {
+			return array();
+		}
+
+		$output = array();
+
+		foreach ( $countries as $key => $value ) {
+			if ( $states = WC()->countries->get_states( $key ) ) {
+				foreach ( $states as $state_key => $state_value ) {
+					$output[ $key . ':' . $state_key ] = $value . ' - ' . $state_value;
+				}
+			} else {
+				$output[ $key ] = $value;
+			}
+		}
+
+		return $output;
 	}
 
 	/**
@@ -388,6 +418,7 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Controller {
 	 * For image_width, Crop can return "0" instead of false -- so we want
 	 * to make sure we return these consistently the same we accept them.
 	 *
+	 * @todo remove in 4.0
 	 * @since 3.0.0
 	 * @param  array $setting
 	 * @return array
@@ -445,6 +476,7 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Controller {
 			'radio',        // Validates with validate_setting_radio_field (-> validate_setting_select_field).
 			'checkbox',     // Validates with validate_setting_checkbox_field.
 			'image_width',  // Validates with validate_setting_image_width_field.
+			'thumbnail_cropping', // Validates with validate_setting_text_field.
 		) );
 	}
 
@@ -523,7 +555,7 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Controller {
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 					'context'      => array( 'view', 'edit' ),
-					'enum'         => array( 'text', 'email', 'number', 'color', 'password', 'textarea', 'select', 'multiselect', 'radio', 'image_width', 'checkbox' ),
+					'enum'         => array( 'text', 'email', 'number', 'color', 'password', 'textarea', 'select', 'multiselect', 'radio', 'image_width', 'checkbox', 'thumbnail_cropping' ),
 					'readonly'     => true,
 				),
 				'options'          => array(

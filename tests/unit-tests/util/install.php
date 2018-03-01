@@ -11,33 +11,40 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 	 */
 	public function test_check_version() {
 		update_option( 'woocommerce_version', ( (float) WC()->version - 1 ) );
-		update_option( 'woocommerce_db_version', WC()->version );
 		WC_Install::check_version();
 
 		$this->assertTrue( did_action( 'woocommerce_updated' ) === 1 );
 
 		update_option( 'woocommerce_version', WC()->version );
-		update_option( 'woocommerce_db_version', WC()->version );
 		WC_Install::check_version();
 
 		$this->assertTrue( did_action( 'woocommerce_updated' ) === 1 );
+
+		update_option( 'woocommerce_version', (float) WC()->version + 1 );
+		WC_Install::check_version();
+
+		$this->assertTrue(
+			did_action( 'woocommerce_updated' ) === 1,
+			'WC_Install::check_version() should not call install routine when the WC version stored in the database is bigger than the version in the code as downgrades are not supported.'
+		);
 	}
 
 	/**
 	 * Test - install.
 	 */
 	public function test_install() {
-		// clean existing install first
+		// clean existing install first.
 		if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 			define( 'WP_UNINSTALL_PLUGIN', true );
 			define( 'WC_REMOVE_ALL_DATA', true );
 		}
 
-		include( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) . '/uninstall.php' );
+		include dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) . '/uninstall.php';
+		delete_transient( 'wc_installing' );
 
 		WC_Install::install();
 
-		$this->assertTrue( get_option( 'woocommerce_version' ) === WC()->version );
+		$this->assertEquals( WC()->version, get_option( 'woocommerce_version' ) );
 	}
 
 	/**
@@ -86,7 +93,7 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 			define( 'WP_UNINSTALL_PLUGIN', true );
 			define( 'WC_REMOVE_ALL_DATA', true );
 		}
-		include( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) . '/uninstall.php' );
+		include dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) . '/uninstall.php';
 
 		WC_Install::create_roles();
 
@@ -105,12 +112,17 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test - in_plugin_update_message.
+	 * Make sure the list of tables returned by WC_Install::get_tables() and used when uninstalling the plugin
+	 * or deleting a site in a multi site install is not missing any of the WC tables. If a table is added to
+	 * WC_Install:get_schema() but not to WC_Install::get_tables(), this test will fail.
 	 */
-	public function test_in_plugin_update_message() {
-		ob_start();
-		WC_install::in_plugin_update_message( array( 'Version' => '2.0.0', 'new_version' => '2.0.0' ) );
-		$result = ob_get_clean();
-		$this->assertTrue( is_string( $result ) );
+	public function test_get_tables() {
+		global $wpdb;
+
+		$tables = $wpdb->get_col(
+			"SHOW TABLES WHERE `Tables_in_{$wpdb->dbname}` LIKE '{$wpdb->prefix}woocommerce\_%' OR `Tables_in_{$wpdb->dbname}` LIKE '{$wpdb->prefix}wc\_%'"
+		);
+
+		$this->assertEquals( $tables, WC_Install::get_tables() );
 	}
 }

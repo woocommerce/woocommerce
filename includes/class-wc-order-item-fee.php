@@ -18,12 +18,14 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 
 	/**
 	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
+	 *
 	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $extra_data = array(
 		'tax_class'  => '',
 		'tax_status' => 'taxable',
+		'amount'     => '',
 		'total'      => '',
 		'total_tax'  => '',
 		'taxes'      => array(
@@ -31,11 +33,92 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 		),
 	);
 
+	/**
+	 * Get item costs grouped by tax class.
+	 *
+	 * @since  3.2.0
+	 * @param  WC_Order $order Order object.
+	 * @return array
+	 */
+	protected function get_tax_class_costs( $order ) {
+		$order_item_tax_classes = $order->get_items_tax_classes();
+		$costs                  = array_fill_keys( $order_item_tax_classes, 0 );
+		$costs['non-taxable']   = 0;
+
+		foreach ( $order->get_items( array( 'line_item', 'fee', 'shipping' ) ) as $item ) {
+			if ( 0 > $item->get_total() ) {
+				continue;
+			}
+			if ( 'taxable' !== $item->get_tax_status() ) {
+				$costs['non-taxable'] += $item->get_total();
+			} elseif ( 'inherit' === $item->get_tax_class() ) {
+				$inherit_class = reset( $order_item_tax_classes );
+				$costs[ $inherit_class ] += $item->get_total();
+			} else {
+				$costs[ $item->get_tax_class() ] += $item->get_total();
+			}
+		}
+
+		return array_filter( $costs );
+	}
+	/**
+	 * Calculate item taxes.
+	 *
+	 * @since  3.2.0
+	 * @param  array $calculate_tax_for Location data to get taxes for. Required.
+	 * @return bool  True if taxes were calculated.
+	 */
+	public function calculate_taxes( $calculate_tax_for = array() ) {
+		if ( ! isset( $calculate_tax_for['country'], $calculate_tax_for['state'], $calculate_tax_for['postcode'], $calculate_tax_for['city'] ) ) {
+			return false;
+		}
+		// Use regular calculation unless the fee is negative.
+		if ( 0 <= $this->get_total() ) {
+			return parent::calculate_taxes( $calculate_tax_for );
+		}
+		if ( wc_tax_enabled() && ( $order = $this->get_order() ) ) {
+			// Apportion taxes to order items, shipping, and fees.
+			$order           = $this->get_order();
+			$tax_class_costs = $this->get_tax_class_costs( $order );
+			$total_costs     = array_sum( $tax_class_costs );
+			$discount_taxes  = array();
+			if ( $total_costs ) {
+				foreach ( $tax_class_costs as $tax_class => $tax_class_cost ) {
+					if ( 'non-taxable' === $tax_class ) {
+						continue;
+					}
+					$proportion                     = $tax_class_cost / $total_costs;
+					$cart_discount_proportion       = $this->get_total() * $proportion;
+					$calculate_tax_for['tax_class'] = $tax_class;
+					$tax_rates                      = WC_Tax::find_rates( $calculate_tax_for );
+					$discount_taxes                 = wc_array_merge_recursive_numeric( $discount_taxes, WC_Tax::calc_tax( $cart_discount_proportion, $tax_rates ) );
+				}
+			}
+			$this->set_taxes( array( 'total' => $discount_taxes ) );
+		} else {
+			$this->set_taxes( false );
+		}
+
+		do_action( 'woocommerce_order_item_fee_after_calculate_taxes', $this, $calculate_tax_for );
+
+		return true;
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Setters
 	|--------------------------------------------------------------------------
 	*/
+
+	/**
+	 * Set fee amount.
+	 *
+	 * @param string $value
+	 * @throws WC_Data_Exception
+	 */
+	public function set_amount( $value ) {
+		$this->set_prop( 'amount', wc_format_decimal( $value ) );
+	}
 
 	/**
 	 * Set tax class.
@@ -108,6 +191,16 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	| Getters
 	|--------------------------------------------------------------------------
 	*/
+
+	/**
+	 * Get fee amount.
+	 *
+	 * @param  string $context
+	 * @return string
+	 */
+	public function get_amount( $context = 'view' ) {
+		return $this->get_prop( 'amount', $context );
+	}
 
 	/**
 	 * Get order item name.
@@ -188,7 +281,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	| Array Access Methods
 	|--------------------------------------------------------------------------
 	|
-	| For backwards compat with legacy arrays.
+	| For backwards compatibility with legacy arrays.
 	|
 	*/
 

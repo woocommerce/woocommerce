@@ -70,15 +70,16 @@ class WC_API_Reports extends WC_API_Resource {
 	 * @since 2.1
 	 * @param string $fields fields to include in response
 	 * @param array $filter date filtering
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function get_sales_report( $fields = null, $filter = array() ) {
 
 		// check user permissions
 		$check = $this->validate_request();
 
-		if ( is_wp_error( $check ) )
+		if ( is_wp_error( $check ) ) {
 			return $check;
+		}
 
 		// set date filtering
 		$this->setup_report( $filter );
@@ -161,8 +162,9 @@ class WC_API_Reports extends WC_API_Resource {
 		$customers = $users_query->get_results();
 
 		foreach ( $customers as $key => $customer ) {
-			if ( strtotime( $customer->user_registered ) < $this->report->start_date || strtotime( $customer->user_registered ) > $this->report->end_date )
+			if ( strtotime( $customer->user_registered ) < $this->report->start_date || strtotime( $customer->user_registered ) > $this->report->end_date ) {
 				unset( $customers[ $key ] );
+			}
 		}
 
 		$total_customers = count( $customers );
@@ -303,8 +305,9 @@ class WC_API_Reports extends WC_API_Resource {
 
 			$time = ( 'day' === $this->report->chart_groupby ) ? date( 'Y-m-d', strtotime( $order->post_date ) ) : date( 'Y-m', strtotime( $order->post_date ) );
 
-			if ( ! isset( $period_totals[ $time ] ) )
+			if ( ! isset( $period_totals[ $time ] ) ) {
 				continue;
+			}
 
 			$period_totals[ $time ]['sales']    = wc_format_decimal( $order->total_sales, 2 );
 			$period_totals[ $time ]['orders']   = (int) $order->total_orders;
@@ -317,8 +320,9 @@ class WC_API_Reports extends WC_API_Resource {
 
 			$time = ( 'day' === $this->report->chart_groupby ) ? date( 'Y-m-d', strtotime( $order_item->post_date ) ) : date( 'Y-m', strtotime( $order_item->post_date ) );
 
-			if ( ! isset( $period_totals[ $time ] ) )
+			if ( ! isset( $period_totals[ $time ] ) ) {
 				continue;
+			}
 
 			$period_totals[ $time ]['items'] = (int) $order_item->order_item_count;
 		}
@@ -328,8 +332,9 @@ class WC_API_Reports extends WC_API_Resource {
 
 			$time = ( 'day' === $this->report->chart_groupby ) ? date( 'Y-m-d', strtotime( $discount->post_date ) ) : date( 'Y-m', strtotime( $discount->post_date ) );
 
-			if ( ! isset( $period_totals[ $time ] ) )
+			if ( ! isset( $period_totals[ $time ] ) ) {
 				continue;
+			}
 
 			$period_totals[ $time ]['discount'] = wc_format_decimal( $discount->discount_amount, 2 );
 		}
@@ -356,7 +361,7 @@ class WC_API_Reports extends WC_API_Resource {
 	 * @since 2.1
 	 * @param string $fields fields to include in response
 	 * @param array $filter date filtering
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function get_top_sellers_report( $fields = null, $filter = array() ) {
 
@@ -461,7 +466,7 @@ class WC_API_Reports extends WC_API_Resource {
 	 * @param null $id unused
 	 * @param null $type unused
 	 * @param null $context unused
-	 * @return bool true if the request is valid and should be processed, false otherwise
+	 * @return true|WP_Error
 	 */
 	protected function validate_request( $id = null, $type = null, $context = null ) {
 

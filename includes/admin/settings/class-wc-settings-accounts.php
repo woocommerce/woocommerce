@@ -23,13 +23,10 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 	 * Constructor.
 	 */
 	public function __construct() {
-
 		$this->id    = 'account';
 		$this->label = __( 'Accounts', 'woocommerce' );
 
-		add_filter( 'woocommerce_settings_tabs_array', array( $this, 'add_settings_page' ), 20 );
-		add_action( 'woocommerce_settings_' . $this->id, array( $this, 'output' ) );
-		add_action( 'woocommerce_settings_save_' . $this->id, array( $this, 'save' ) );
+		parent::__construct();
 	}
 
 	/**
@@ -48,7 +45,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'id'       => 'woocommerce_myaccount_page_id',
 				'type'     => 'single_select_page',
 				'default'  => '',
-				'class'    => 'wc-enhanced-select',
+				'class'    => 'wc-enhanced-select-nostd',
 				'css'      => 'min-width:300px;',
 				'desc_tip' => true,
 			),

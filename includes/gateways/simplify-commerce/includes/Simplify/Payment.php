@@ -1,4 +1,8 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /*
  * Copyright (c) 2013 - 2015 MasterCard International Incorporated
  * All rights reserved.

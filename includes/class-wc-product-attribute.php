@@ -73,11 +73,12 @@ class WC_Product_Attribute implements ArrayAccess {
 			if ( is_int( $option ) ) {
 				$term = get_term_by( 'id', $option, $this->get_name() );
 			} else {
+				// Term names get escaped in WP. See sanitize_term_field.
 				$term = get_term_by( 'name', $option, $this->get_name() );
 
 				if ( ! $term || is_wp_error( $term ) ) {
 					$new_term = wp_insert_term( $option, $this->get_name() );
-					$term     = get_term_by( 'id', $new_term['term_id'], $this->get_name() );
+					$term     = is_wp_error( $new_term ) ? false : get_term_by( 'id', $new_term['term_id'], $this->get_name() );
 				}
 			}
 			if ( $term && ! is_wp_error( $term ) ) {
@@ -105,7 +106,7 @@ class WC_Product_Attribute implements ArrayAccess {
 
 				if ( ! $term || is_wp_error( $term ) ) {
 					$new_term = wp_insert_term( $option, $this->get_name() );
-					$term     = get_term_by( 'id', $new_term['term_id'], $this->get_name() );
+					$term     = is_wp_error( $new_term ) ? false : get_term_by( 'id', $new_term['term_id'], $this->get_name() );
 				}
 			}
 			if ( $term && ! is_wp_error( $term ) ) {

@@ -1,4 +1,8 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /*
  * Copyright (c) 2013 - 2015 MasterCard International Incorporated
  * All rights reserved.
@@ -54,13 +58,13 @@ class Simplify_InvoiceItem extends Simplify_Object {
 	}
 
 
-
-
-	   /**
-		* Deletes an Simplify_InvoiceItem object.
-		*
-		* @param     $authentication -  information used for the API call.  If no value is passed the global keys Simplify::public_key and Simplify::private_key are used.  <i>For backwards compatibility the public and private keys may be passed instead of the authentication object.</i>
-		*/
+	/**
+	 * Deletes an Simplify_InvoiceItem object.
+	 *
+	 * @param     $authentication -  information used for the API call.  If no value is passed the global keys Simplify::public_key and Simplify::private_key are used.  <i>For backwards compatibility the public and private keys may be passed instead of the authentication object.</i>
+	 *
+	 * @return true
+	 */
 		public function deleteInvoiceItem($authentication = null) {
 
 			$args = func_get_args();

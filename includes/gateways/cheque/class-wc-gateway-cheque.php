@@ -25,7 +25,7 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 		$this->icon               = apply_filters( 'woocommerce_cheque_icon', '' );
 		$this->has_fields         = false;
 		$this->method_title       = _x( 'Check payments', 'Check payment method', 'woocommerce' );
-		$this->method_description = __( 'Allows check payments. Why would you take checks in this day and age? Well you probably wouldn\'t but it does allow you to make test purchases for testing order emails and the \'success\' pages etc.', 'woocommerce' );
+		$this->method_description = __( 'Allows check payments. Why would you take checks in this day and age? Well you probably would not, but it does allow you to make test purchases for testing order emails and the success pages.', 'woocommerce' );
 
 		// Load the settings.
 		$this->init_form_fields();
@@ -54,7 +54,7 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 				'title'   => __( 'Enable/Disable', 'woocommerce' ),
 				'type'    => 'checkbox',
 				'label'   => __( 'Enable check payments', 'woocommerce' ),
-				'default' => 'yes',
+				'default' => 'no',
 			),
 			'title' => array(
 				'title'       => __( 'Title', 'woocommerce' ),
@@ -84,8 +84,9 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 	 * Output for the order received page.
 	 */
 	public function thankyou_page() {
-		if ( $this->instructions )
+		if ( $this->instructions ) {
 			echo wpautop( wptexturize( $this->instructions ) );
+		}
 	}
 
 	/**
@@ -112,8 +113,12 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 
 		$order = wc_get_order( $order_id );
 
-		// Mark as on-hold (we're awaiting the cheque)
-		$order->update_status( 'on-hold', _x( 'Awaiting check payment', 'Check payment method', 'woocommerce' ) );
+		if ( $order->get_total() > 0 ) {
+			// Mark as on-hold (we're awaiting the cheque)
+			$order->update_status( 'on-hold', _x( 'Awaiting check payment', 'Check payment method', 'woocommerce' ) );
+		} else {
+			$order->payment_complete();
+		}
 
 		// Reduce stock levels
 		wc_reduce_stock_levels( $order_id );

@@ -19,7 +19,6 @@ class WC_API_Authentication {
 	 * Setup class
 	 *
 	 * @since 2.1
-	 * @return WC_API_Authentication
 	 */
 	public function __construct() {
 
@@ -186,8 +185,10 @@ class WC_API_Authentication {
 	 * Get user by ID
 	 *
 	 * @since  2.4.0
+	 *
 	 * @param  int $user_id
-	 * @return WC_User
+	 *
+	 * @return WP_User
 	 * @throws Exception
 	 */
 	private function get_user_by_id( $user_id ) {
@@ -288,7 +289,7 @@ class WC_API_Authentication {
 	 *
 	 * @since 2.1
 	 * @see rawurlencode()
-	 * @param array $parameters un-normalized pararmeters
+	 * @param array $parameters un-normalized parameters
 	 * @return array normalized parameters
 	 */
 	private function normalize_parameters( $parameters ) {

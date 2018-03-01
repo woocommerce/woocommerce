@@ -29,6 +29,8 @@ function wc_get_screen_ids() {
 		$wc_screen_id . '_page_wc-addons',
 		'toplevel_page_wc-reports',
 		'product_page_product_attributes',
+		'product_page_product_exporter',
+		'product_page_product_importer',
 		'edit-product',
 		'product',
 		'edit-shop_coupon',
@@ -42,6 +44,12 @@ function wc_get_screen_ids() {
 	foreach ( wc_get_order_types() as $type ) {
 		$screen_ids[] = $type;
 		$screen_ids[] = 'edit-' . $type;
+	}
+
+	if ( $attributes = wc_get_attribute_taxonomies() ) {
+		foreach ( $attributes as $attribute ) {
+			$screen_ids[] = 'edit-' . wc_attribute_taxonomy_name( $attribute->attribute_name );
+		}
 	}
 
 	return apply_filters( 'woocommerce_screen_ids', $screen_ids );
@@ -178,12 +186,10 @@ function woocommerce_settings_get_option( $option_name, $default = '' ) {
  * @param array $items Order items to save
  */
 function wc_save_order_items( $order_id, $items ) {
-	// Allow other plugins to check change in order items before they are saved
+	// Allow other plugins to check change in order items before they are saved.
 	do_action( 'woocommerce_before_save_order_items', $order_id, $items );
 
-	$order = wc_get_order( $order_id );
-
-	// Line items and fees
+	// Line items and fees.
 	if ( isset( $items['order_item_id'] ) ) {
 		$data_keys = array(
 			'line_tax'             => array(),
@@ -195,7 +201,7 @@ function wc_save_order_items( $order_id, $items ) {
 			'line_subtotal'        => null,
 		);
 		foreach ( $items['order_item_id'] as $item_id ) {
-			if ( ! $item = $order->get_item( absint( $item_id ) ) ) {
+			if ( ! $item = WC_Order_Factory::get_order_item( absint( $item_id ) ) ) {
 				continue;
 			}
 
@@ -222,9 +228,14 @@ function wc_save_order_items( $order_id, $items ) {
 				),
 			) );
 
+			if ( 'fee' === $item->get_type() ) {
+				$item->set_amount( $item_data['line_total'] );
+			}
+
 			if ( isset( $items['meta_key'][ $item_id ], $items['meta_value'][ $item_id ] ) ) {
 				foreach ( $items['meta_key'][ $item_id ] as $meta_id => $meta_key ) {
-					$meta_value = isset( $items['meta_value'][ $item_id ][ $meta_id ] ) ? $items['meta_value'][ $item_id ][ $meta_id ] : '';
+					$meta_key   = substr( wp_unslash( $meta_key ), 0, 255 );
+					$meta_value = isset( $items['meta_value'][ $item_id ][ $meta_id ] ) ? wp_unslash( $items['meta_value'][ $item_id ][ $meta_id ] ): '';
 
 					if ( '' === $meta_key && '' === $meta_value ) {
 						if ( ! strstr( $meta_id, 'new-' ) ) {
@@ -250,15 +261,16 @@ function wc_save_order_items( $order_id, $items ) {
 			'shipping_cost'         => 0,
 			'shipping_taxes'        => array(),
 		);
+
 		foreach ( $items['shipping_method_id'] as $item_id ) {
-			if ( ! $item = $order->get_item( absint( $item_id ) ) ) {
+			if ( ! $item = WC_Order_Factory::get_order_item( absint( $item_id ) ) ) {
 				continue;
 			}
 
 			$item_data = array();
 
 			foreach ( $data_keys as $key => $default ) {
-				$item_data[ $key ] = isset( $items[ $key ][ $item_id ] ) ? $items[ $key ][ $item_id ] : $default;
+				$item_data[ $key ] = isset( $items[ $key ][ $item_id ] ) ? wc_clean( wp_unslash( $items[ $key ][ $item_id ] ) ) : $default;
 			}
 
 			$item->set_props( array(
@@ -272,7 +284,7 @@ function wc_save_order_items( $order_id, $items ) {
 
 			if ( isset( $items['meta_key'][ $item_id ], $items['meta_value'][ $item_id ] ) ) {
 				foreach ( $items['meta_key'][ $item_id ] as $meta_id => $meta_key ) {
-					$meta_value = isset( $items['meta_value'][ $item_id ][ $meta_id ] ) ? $items['meta_value'][ $item_id ][ $meta_id ] : '';
+					$meta_value = isset( $items['meta_value'][ $item_id ][ $meta_id ] ) ? wp_unslash( $items['meta_value'][ $item_id ][ $meta_id ] ) : '';
 
 					if ( '' === $meta_key && '' === $meta_value ) {
 						if ( ! strstr( $meta_id, 'new-' ) ) {
@@ -290,12 +302,31 @@ function wc_save_order_items( $order_id, $items ) {
 		}
 	}
 
-	// Updates tax totals
+	$order = wc_get_order( $order_id );
 	$order->update_taxes();
-
-	// Calc totals - this also triggers save
 	$order->calculate_totals( false );
 
 	// Inform other plugins that the items have been saved
 	do_action( 'woocommerce_saved_order_items', $order_id, $items );
+}
+
+/**
+ * Get HTML for some action buttons. Used in list tables.
+ *
+ * @since 3.3.0
+ * @param array $actions Actions to output.
+ * @return string
+ */
+function wc_render_action_buttons( $actions ) {
+	$actions_html = '';
+
+	foreach ( $actions as $action ) {
+		if ( isset( $action['group'] ) ) {
+			$actions_html .= '<div class="wc-action-button-group"><label>' . $action['group'] . '</label> <span class="wc-action-button-group__items">' . wc_render_action_buttons( $action['actions'] ) . '</span></div>';
+		} elseif ( isset( $action['action'], $action['url'], $action['name'] ) ) {
+			$actions_html .= sprintf( '<a class="button wc-action-button wc-action-button-%1$s %1$s" href="%2$s" aria-label="%3$s" title="%3$s">%4$s</a>', esc_attr( $action['action'] ), esc_url( $action['url'] ), esc_attr( isset( $action['title'] ) ? $action['title'] : $action['name'] ), esc_html( $action['name'] ) );
+		}
+	}
+
+	return $actions_html;
 }

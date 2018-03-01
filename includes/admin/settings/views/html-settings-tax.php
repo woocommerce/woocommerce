@@ -68,7 +68,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</td>
 
 		<td class="rate">
-			<input type="number" step="any" min="0" value="{{ data.tax_rate }}" placeholder="0" name="tax_rate[{{ data.tax_rate_id }}]" data-attribute="tax_rate" />
+			<input type="text" value="{{ data.tax_rate }}" placeholder="0" name="tax_rate[{{ data.tax_rate_id }}]" data-attribute="tax_rate" />
 		</td>
 
 		<td class="name">

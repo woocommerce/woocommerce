@@ -2,8 +2,6 @@
 /**
  * Debug/Status page
  *
- * @author      WooThemes
- * @category    Admin
  * @package     WooCommerce/Admin/System Status
  * @version     2.2.0
  */
@@ -35,8 +33,6 @@ class WC_Admin_Status {
 	 * Handles output of tools.
 	 */
 	public static function status_tools() {
-		global $wpdb;
-
 		$tools = self::get_tools();
 
 		if ( ! empty( $_GET['action'] ) && ! empty( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) ) {
@@ -117,7 +113,7 @@ class WC_Admin_Status {
 		}
 
 		// Bulk actions
-		if ( isset( $_GET['action'] ) && isset( $_GET['log'] ) ) {
+		if ( isset( $_REQUEST['action'] ) && isset( $_REQUEST['log'] ) ) {
 			self::log_table_bulk_actions();
 		}
 
@@ -153,8 +149,9 @@ class WC_Admin_Status {
 		$file_data = str_replace( "\r", "\n", $file_data );
 		$version   = '';
 
-		if ( preg_match( '/^[ \t\/*#@]*' . preg_quote( '@version', '/' ) . '(.*)$/mi', $file_data, $match ) && $match[1] )
+		if ( preg_match( '/^[ \t\/*#@]*' . preg_quote( '@version', '/' ) . '(.*)$/mi', $file_data, $match ) && $match[1] ) {
 			$version = _cleanup_header_comment( $match[1] );
+		}
 
 		return $version ;
 	}
@@ -316,9 +313,9 @@ class WC_Admin_Status {
 			wp_die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
 		}
 
-		$log_ids = array_map( 'absint', (array) $_GET['log'] );
+		$log_ids = array_map( 'absint', (array) $_REQUEST['log'] );
 
-		if ( 'delete' === $_GET['action'] || 'delete' === $_GET['action2'] ) {
+		if ( 'delete' === $_REQUEST['action'] || 'delete' === $_REQUEST['action2'] ) {
 			WC_Log_Handler_DB::delete( $log_ids );
 			wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=wc-status&tab=logs' ) ) );
 			exit();

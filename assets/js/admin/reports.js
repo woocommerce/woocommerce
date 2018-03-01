@@ -110,14 +110,14 @@ jQuery(function( $ ) {
 		defaultDate: '',
 		dateFormat: 'yy-mm-dd',
 		numberOfMonths: 1,
-		maxDate: '+0D',
+		minDate: '-20Y',
+		maxDate: '+1D',
 		showButtonPanel: true,
 		showOn: 'focus',
 		buttonImageOnly: true,
-		onSelect: function( selectedDate ) {
+		onSelect: function() {
 			var option = $( this ).is( '.from' ) ? 'minDate' : 'maxDate',
-				instance = $( this ).data( 'datepicker' ),
-				date = $.datepicker.parseDate( instance.settings.dateFormat || $.datepicker._defaults.dateFormat, selectedDate, instance.settings );
+				date   = $( this ).datepicker( 'getDate' );
 
 			dates.not( this ).datepicker( 'option', option, date );
 		}
@@ -138,7 +138,7 @@ jQuery(function( $ ) {
 		var groupby       = $( this ) .data( 'groupby' );
 		var index_type    = $( this ).data( 'index_type' );
 		var export_format = $( this ).data( 'export' );
-		var csv_data      = 'data:application/csv;charset=utf-8,';
+		var csv_data      = 'data:text/csv;charset=utf-8,\uFEFF';
 		var s, series_data, d;
 
 		if ( 'table' === export_format ) {

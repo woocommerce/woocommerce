@@ -75,6 +75,8 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 				),
 			),
 		), $product_reviews );
+
+		$product->delete( true );
 	}
 
 	/**
@@ -87,6 +89,7 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products/' . $product->get_id() . '/reviews' ) );
 		$this->assertEquals( 401, $response->get_status() );
+		$product->delete( true );
 	}
 
 	/**
@@ -124,6 +127,7 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 			'email'            => 'woo@woo.local',
 			'verified'         => false,
 		), $data );
+		$product->delete( true );
 	}
 
 	/**
@@ -137,6 +141,7 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 		$product_review_id = WC_Helper_Product::create_product_review( $product->get_id() );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products/' . $product->get_id() . '/reviews/' . $product_review_id ) );
 		$this->assertEquals( 401, $response->get_status() );
+		$product->delete( true );
 	}
 
 	/**
@@ -149,6 +154,7 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products/' . $product->get_id() . '/reviews/0' ) );
 		$this->assertEquals( 404, $response->get_status() );
+		$product->delete( true );
 	}
 
 	/**
@@ -180,6 +186,7 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 			'email'            => 'woo@woo.local',
 			'verified'         => false,
 		), $data );
+		$product->delete( true );
 	}
 
 	/**
@@ -223,6 +230,7 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 
 		$this->assertEquals( 400, $response->get_status() );
+		$product->delete( true );
 	}
 
 	/**
@@ -255,6 +263,7 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'Justin', $data['name'] );
 		$this->assertEquals( 'woo2@woo.local', $data['email'] );
 		$this->assertEquals( 3, $data['rating'] );
+		$product->delete( true );
 	}
 
 	/**
@@ -277,6 +286,7 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 
 		$this->assertEquals( 401, $response->get_status() );
+		$product->delete( true );
 	}
 
 	/**
@@ -298,6 +308,7 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 
 		$this->assertEquals( 404, $response->get_status() );
+		$product->delete( true );
 	}
 
 	/**
@@ -314,6 +325,7 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
+		$product->delete( true );
 	}
 
 	/**
@@ -330,6 +342,7 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( 401, $response->get_status() );
+		$product->delete( true );
 	}
 
 	/**
@@ -347,6 +360,7 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( 404, $response->get_status() );
+		$product->delete( true );
 	}
 
 	/**
@@ -394,6 +408,7 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 
 		$this->assertEquals( 3, count( $data ) );
+		$product->delete( true );
 	}
 
 	/**
@@ -418,5 +433,6 @@ class Product_Reviews extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'name', $properties );
 		$this->assertArrayHasKey( 'email', $properties );
 		$this->assertArrayHasKey( 'verified', $properties );
+		$product->delete( true );
 	}
 }

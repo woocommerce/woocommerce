@@ -32,9 +32,9 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Product_Categories_V
 	/**
 	 * Prepare a single product category output for response.
 	 *
-	 * @param WP_Term $item Term object.
-	 * @param WP_REST_Request $request
-	 * @return WP_REST_Response $response
+	 * @param WP_Term         $item    Term object.
+	 * @param WP_REST_Request $request Request instance.
+	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 		// Get category display type.
@@ -50,13 +50,14 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Product_Categories_V
 			'parent'      => (int) $item->parent,
 			'description' => $item->description,
 			'display'     => $display_type ? $display_type : 'default',
-			'image'       => array(),
+			'image'       => null,
 			'menu_order'  => (int) $menu_order,
 			'count'       => (int) $item->count,
 		);
 
 		// Get category image.
-		if ( $image_id = get_woocommerce_term_meta( $item->term_id, 'thumbnail_id' ) ) {
+		$image_id = get_woocommerce_term_meta( $item->term_id, 'thumbnail_id' );
+		if ( $image_id ) {
 			$attachment = get_post( $image_id );
 
 			$data['image'] = array(
@@ -161,7 +162,7 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Product_Categories_V
 							'readonly'    => true,
 						),
 						'date_created_gmt' => array(
-							'description' => __( 'The date the image was created, as GMT', 'woocommerce' ),
+							'description' => __( 'The date the image was created, as GMT.', 'woocommerce' ),
 							'type'        => 'date-time',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
@@ -184,7 +185,7 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Product_Categories_V
 							'format'      => 'uri',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'name' => array(
+						'title' => array(
 							'description' => __( 'Image name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),

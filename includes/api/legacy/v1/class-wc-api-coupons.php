@@ -75,8 +75,9 @@ class WC_API_Coupons extends WC_API_Resource {
 
 		foreach ( $query->posts as $coupon_id ) {
 
-			if ( ! $this->is_readable( $coupon_id ) )
+			if ( ! $this->is_readable( $coupon_id ) ) {
 				continue;
+			}
 
 			$coupons[] = current( $this->get_coupon( $coupon_id, $fields ) );
 		}
@@ -90,9 +91,12 @@ class WC_API_Coupons extends WC_API_Resource {
 	 * Get the coupon for the given ID
 	 *
 	 * @since 2.1
+	 *
 	 * @param int $id the coupon ID
 	 * @param string $fields fields to include in response
+	 *
 	 * @return array|WP_Error
+	 * @throws WC_API_Exception
 	 */
 	public function get_coupon( $id, $fields = null ) {
 		$id = $this->validate_request( $id, 'shop_coupon', 'read' );
@@ -137,15 +141,18 @@ class WC_API_Coupons extends WC_API_Resource {
 	 * Get the total number of coupons
 	 *
 	 * @since 2.1
+	 *
 	 * @param array $filter
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function get_coupons_count( $filter = array() ) {
 
 		$query = $this->query_coupons( $filter );
 
-		if ( ! current_user_can( 'read_private_shop_coupons' ) )
+		if ( ! current_user_can( 'read_private_shop_coupons' ) ) {
 			return new WP_Error( 'woocommerce_api_user_cannot_read_coupons_count', __( 'You do not have permission to read the coupons count', 'woocommerce' ), array( 'status' => 401 ) );
+		}
 
 		return array( 'count' => (int) $query->found_posts );
 	}
@@ -163,8 +170,9 @@ class WC_API_Coupons extends WC_API_Resource {
 
 		$id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish' ORDER BY post_date DESC LIMIT 1;", $code ) );
 
-		if ( is_null( $id ) )
+		if ( is_null( $id ) ) {
 			return new WP_Error( 'woocommerce_api_invalid_coupon_code', __( 'Invalid coupon code', 'woocommerce' ), array( 'status' => 404 ) );
+		}
 
 		return $this->get_coupon( $id, $fields );
 	}
@@ -185,14 +193,15 @@ class WC_API_Coupons extends WC_API_Resource {
 	 *
 	 * @param int $id the coupon ID
 	 * @param array $data
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function edit_coupon( $id, $data ) {
 
 		$id = $this->validate_request( $id, 'shop_coupon', 'edit' );
 
-		if ( is_wp_error( $id ) )
+		if ( is_wp_error( $id ) ) {
 			return $id;
+		}
 
 		return $this->get_coupon( $id );
 	}
@@ -202,14 +211,15 @@ class WC_API_Coupons extends WC_API_Resource {
 	 *
 	 * @param int $id the coupon ID
 	 * @param bool $force true to permanently delete coupon, false to move to trash
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function delete_coupon( $id, $force = false ) {
 
 		$id = $this->validate_request( $id, 'shop_coupon', 'delete' );
 
-		if ( is_wp_error( $id ) )
+		if ( is_wp_error( $id ) ) {
 			return $id;
+		}
 
 		return $this->delete( $id, 'shop_coupon', ( 'true' === $force ) );
 	}

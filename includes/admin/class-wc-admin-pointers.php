@@ -138,7 +138,7 @@ class WC_Admin_Pointers {
 					),
 					'options' => array(
 						'content'  => '<h3>' . esc_html__( 'Prices', 'woocommerce' ) . '</h3>' .
-										'<p>' . esc_html__( 'Next you\'ll need to give your product a price.', 'woocommerce' ) . '</p>',
+										'<p>' . esc_html__( 'Next you need to give your product a price.', 'woocommerce' ) . '</p>',
 						'position' => array(
 							'edge'  => 'bottom',
 							'align' => 'middle',
@@ -166,7 +166,7 @@ class WC_Admin_Pointers {
 					'next'         => 'product_tag',
 					'options' => array(
 						'content'  => '<h3>' . esc_html__( 'Product images', 'woocommerce' ) . '</h3>' .
-										'<p>' . esc_html__( 'Upload or assign an image to your product here. This image will be shown in your store\'s catalog.', 'woocommerce' ) . '</p>',
+										'<p>' . esc_html__( "Upload or assign an image to your product here. This image will be shown in your store's catalog.", 'woocommerce' ) . '</p>',
 						'position' => array(
 							'edge'  => 'right',
 							'align' => 'middle',
@@ -178,7 +178,7 @@ class WC_Admin_Pointers {
 					'next'         => 'product_catdiv',
 					'options' => array(
 						'content'  => '<h3>' . esc_html__( 'Product tags', 'woocommerce' ) . '</h3>' .
-										'<p>' . esc_html__( 'You can optionally "tag" your products here. Tags as a method of labeling your products to make them easier for customers to find.', 'woocommerce' ) . '</p>',
+										'<p>' . esc_html__( 'You can optionally "tag" your products here. Tags are a method of labeling your products to make them easier for customers to find.', 'woocommerce' ) . '</p>',
 						'position' => array(
 							'edge'  => 'right',
 							'align' => 'middle',
@@ -239,11 +239,34 @@ class WC_Admin_Pointers {
 				function show_wc_pointer( id ) {
 					var pointer = wc_pointers.pointers[ id ];
 					var options = $.extend( pointer.options, {
+						pointerClass: 'wp-pointer wc-pointer',
 						close: function() {
 							if ( pointer.next ) {
 								show_wc_pointer( pointer.next );
 							}
-						}
+						},
+						buttons: function( event, t ) {
+							var close   = '" . esc_js( __( 'Dismiss', 'woocommerce' ) ) . "',
+								next    = '" . esc_js( __( 'Next', 'woocommerce' ) ) . "',
+								button  = $( '<a class=\"close\" href=\"#\">' + close + '</a>' ),
+								button2 = $( '<a class=\"button button-primary\" href=\"#\">' + next + '</a>' ),
+								wrapper = $( '<div class=\"wc-pointer-buttons\" />' );
+
+							button.bind( 'click.pointer', function(e) {
+								e.preventDefault();
+								t.element.pointer('destroy');
+							});
+
+							button2.bind( 'click.pointer', function(e) {
+								e.preventDefault();
+								t.element.pointer('close');
+							});
+
+							wrapper.append( button );
+							wrapper.append( button2 );
+
+							return wrapper;
+						},
 					} );
 					var this_pointer = $( pointer.target ).pointer( options );
 					this_pointer.pointer( 'open' );

@@ -24,8 +24,8 @@ class WC_Report_Customer_List extends WP_List_Table {
 	public function __construct() {
 
 		parent::__construct( array(
-			'singular'  => __( 'Customer', 'woocommerce' ),
-			'plural'    => __( 'Customers', 'woocommerce' ),
+			'singular'  => 'customer',
+			'plural'    => 'customers',
 			'ajax'      => false,
 		) );
 	}
@@ -78,8 +78,6 @@ class WC_Report_Customer_List extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_default( $user, $column_name ) {
-		global $wpdb;
-
 		switch ( $column_name ) {
 
 			case 'customer_name' :
@@ -140,7 +138,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 
 			break;
 
-			case 'user_actions' :
+			case 'wc_actions' :
 				ob_start();
 				?><p>
 					<?php
@@ -212,7 +210,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 			'orders'          => __( 'Orders', 'woocommerce' ),
 			'spent'           => __( 'Money spent', 'woocommerce' ),
 			'last_order'      => __( 'Last order', 'woocommerce' ),
-			'user_actions'    => __( 'Actions', 'woocommerce' ),
+			'wc_actions'      => __( 'Actions', 'woocommerce' ),
 		);
 
 		return $columns;
@@ -222,6 +220,8 @@ class WC_Report_Customer_List extends WP_List_Table {
 	 * Order users by name.
 	 *
 	 * @param WP_User_Query $query
+	 *
+	 * @return WP_User_Query
 	 */
 	public function order_by_last_name( $query ) {
 		global $wpdb;
@@ -245,8 +245,6 @@ class WC_Report_Customer_List extends WP_List_Table {
 	 * Prepare customer list items.
 	 */
 	public function prepare_items() {
-		global $wpdb;
-
 		$current_page = absint( $this->get_pagenum() );
 		$per_page     = 20;
 

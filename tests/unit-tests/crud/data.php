@@ -18,7 +18,7 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		update_option( 'timezone_string', '' );
 	}
 
-	public function onNotSuccessfulTest( $e ) {
+	public function onNotSuccessfulTest( Throwable $e ) {
 		// @codingStandardsIgnoreStart
 		date_default_timezone_set( 'UTC' );
 		// @codingStandardsIgnoreEnd
@@ -116,6 +116,62 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that the meta data cache is not shared among instances.
+	 */
+	function test_get_meta_data_shared_bug() {
+		$object  = new WC_Order;
+		$object->add_meta_data( 'test_meta_key', 'val1', true );
+		$object->add_meta_data( 'test_multi_meta_key', 'val2' );
+		$object->add_meta_data( 'test_multi_meta_key', 'val3' );
+		$object->save();
+
+		$order = new WC_Order( $object->get_id() );
+		$metas = $order->get_meta_data();
+		$metas[0]->value = 'wrong value';
+
+		$order = new WC_Order( $object->get_id() );
+		$metas = $order->get_meta_data();
+		$this->assertNotEquals( 'wrong value', $metas[0]->value );
+	}
+
+	/**
+	 * Tests the cache invalidation after an order is saved
+	 */
+	function test_get_meta_data_cache_invalidation() {
+		$object  = new WC_Order;
+		$object->add_meta_data( 'test_meta_key', 'val1', true );
+		$object->add_meta_data( 'test_multi_meta_key', 'val2' );
+		$object->add_meta_data( 'test_multi_meta_key', 'val3' );
+		$object->save();
+
+		$order = new WC_Order( $object->get_id() );
+		$metas = $order->get_meta_data();
+		$metas[0]->value = 'updated value';
+		$order->save();
+
+		$order = new WC_Order( $object->get_id() );
+		$metas = $order->get_meta_data();
+		$this->assertEquals( 'updated value', $metas[0]->value );
+	}
+
+	function test_get_meta_data_cache_invalidation_array_to_scalar() {
+		$object  = new WC_Order;
+		$object->add_meta_data( 'test_meta_key', array( 'val1' ), true );
+		$object->add_meta_data( 'test_multi_meta_key', 'val2' );
+		$object->add_meta_data( 'test_multi_meta_key', 'val3' );
+		$object->save();
+
+		$order = new WC_Order( $object->get_id() );
+		$metas = $order->get_meta_data();
+		$metas[0]->value = 'updated value';
+		$order->save();
+
+		$order = new WC_Order( $object->get_id() );
+		$metas = $order->get_meta_data();
+		$this->assertEquals( 'updated value', $metas[0]->value );
+	}
+
+	/**
 	 * Test getting meta by ID.
 	 */
 	function test_get_meta() {
@@ -202,7 +258,12 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		$object = new WC_Mock_WC_Data();
 		$object->set_meta_data( $metadata );
 
-		$this->assertEquals( $metadata, $object->get_meta_data() );
+		foreach ( $object->get_meta_data() as $id => $meta ) {
+			$this->assertEquals( $metadata[ $id ]->id, $meta->id );
+			$this->assertEquals( $metadata[ $id ]->key, $meta->key );
+			$this->assertEquals( $metadata[ $id ]->value, $meta->value );
+		}
+
 	}
 
 	/**

@@ -26,7 +26,7 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 	 * Register the routes for Shipping Zone Methods.
 	 */
 	public function register_routes() {
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<zone_id>[\d-]+)/methods', array(
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<zone_id>[\d]+)/methods', array(
 			'args' => array(
 				'zone_id' => array(
 					'description' => __( 'Unique ID for the zone.', 'woocommerce' ),
@@ -53,7 +53,7 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
 
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<zone_id>[\d-]+)/methods/(?P<instance_id>[\d-]+)', array(
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<zone_id>[\d]+)/methods/(?P<instance_id>[\d]+)', array(
 			'args' => array(
 				'zone_id' => array(
 					'description' => __( 'Unique ID for the zone.', 'woocommerce' ),
@@ -155,8 +155,6 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 	 * @return WP_REST_Request|WP_Error
 	 */
 	public function create_item( $request ) {
-		global $wpdb;
-
 		$method_id = $request['method_id'];
 		$zone      = $this->get_zone( $request['zone_id'] );
 		if ( is_wp_error( $zone ) ) {
@@ -193,8 +191,6 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 	 * @return WP_Error|boolean
 	 */
 	public function delete_item( $request ) {
-		global $wpdb;
-
 		$zone = $this->get_zone( $request['zone_id'] );
 		if ( is_wp_error( $zone ) ) {
 			return $zone;
@@ -251,8 +247,6 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function update_item( $request ) {
-		global $wpdb;
-
 		$zone = $this->get_zone( $request['zone_id'] );
 		if ( is_wp_error( $zone ) ) {
 			return $zone;
@@ -285,10 +279,11 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 	/**
 	 * Updates settings, order, and enabled status on create.
 	 *
-	 * @param $instance_id integer
-	 * @param $method
+	 * @param int $instance_id integer
+	 * @param WC_Shipping_Method $method
 	 * @param WP_REST_Request $request
-	 * @return $method
+	 *
+	 * @return WC_Shipping_Method
 	 */
 	public function update_fields( $instance_id, $method, $request ) {
 		global $wpdb;
@@ -346,6 +341,7 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 		$method = array(
+			'id'                 => $item->instance_id,
 			'instance_id'        => $item->instance_id,
 			'title'              => $item->instance_settings['title'],
 			'order'              => $item->method_order,
@@ -372,6 +368,10 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 
 	/**
 	 * Return settings associated with this shipping zone method instance.
+	 *
+	 * @param WC_Shipping_Method $item
+	 *
+	 * @return array
 	 */
 	public function get_settings( $item ) {
 		$item->init_instance_settings();
@@ -430,6 +430,12 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 			'title'      => 'shipping_zone_method',
 			'type'       => 'object',
 			'properties' => array(
+				'id' => array(
+					'description' => __( 'Shipping method instance ID.', 'woocommerce' ),
+					'type'        => 'integer',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
 				'instance_id' => array(
 					'description' => __( 'Shipping method instance ID.', 'woocommerce' ),
 					'type'        => 'integer',

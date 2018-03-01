@@ -111,7 +111,6 @@ class WC_API_Server {
 	 *
 	 * @since 2.1
 	 * @param $path
-	 * @return WC_API_Server
 	 */
 	public function __construct( $path ) {
 
@@ -380,8 +379,9 @@ class WC_API_Server {
 	 * urldecode deep.
 	 *
 	 * @since  2.2
-	 * @param  string/array $value Data to decode with urldecode.
-	 * @return string/array        Decoded data.
+	 * @param  string|array $value Data to decode with urldecode.
+	 *
+	 * @return string|array        Decoded data.
 	 */
 	protected function urldecode_deep( $value ) {
 		if ( is_array( $value ) ) {
@@ -398,9 +398,11 @@ class WC_API_Server {
 	 * by the parameters the method actually needs, using the Reflection API
 	 *
 	 * @since 2.2
+	 *
 	 * @param callable|array $callback the endpoint callback
 	 * @param array $provided the provided request parameters
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	protected function sort_callback_params( $callback, $provided ) {
 		if ( is_array( $callback ) ) {
@@ -656,7 +658,8 @@ class WC_API_Server {
 	 * @return string
 	 */
 	public function get_raw_data() {
-		// $HTTP_RAW_POST_DATA is deprecated on PHP 5.6
+		// @codingStandardsIgnoreStart
+		// $HTTP_RAW_POST_DATA is deprecated on PHP 5.6.
 		if ( function_exists( 'phpversion' ) && version_compare( phpversion(), '5.6', '>=' ) ) {
 			return file_get_contents( 'php://input' );
 		}
@@ -670,6 +673,7 @@ class WC_API_Server {
 		}
 
 		return $HTTP_RAW_POST_DATA;
+		// @codingStandardsIgnoreEnd
 	}
 
 	/**

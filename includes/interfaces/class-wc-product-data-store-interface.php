@@ -95,7 +95,7 @@ interface WC_Product_Data_Store_Interface {
 	 *
 	 * Uses queries rather than update_post_meta so we can do this in one query (to avoid stock issues).
 	 *
-	 * @param  int
+	 * @param  int $product_id_with_stock
 	 * @param  int|null $stock_quantity
 	 * @param  string $operation set, increase and decrease.
 	 */
@@ -107,7 +107,7 @@ interface WC_Product_Data_Store_Interface {
 	 * Uses queries rather than update_post_meta so we can do this in one query for performance.
 	 *
 	 * @since  3.0.0 this supports set, increase and decrease.
-	 * @param  int
+	 * @param  int $product_id
 	 * @param  int|null $quantity
 	 * @param  string $operation set, increase and decrease.
 	 */
@@ -115,7 +115,7 @@ interface WC_Product_Data_Store_Interface {
 
 	/**
 	 * Get shipping class ID by slug.
-	 * @param $slug string
+	 * @param string $slug
 	 * @return int|false
 	 */
 	public function get_shipping_class_id_by_slug( $slug );

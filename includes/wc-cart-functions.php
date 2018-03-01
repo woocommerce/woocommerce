@@ -48,7 +48,13 @@ function wc_empty_cart() {
  * @deprecated 2.3
  */
 function wc_load_persistent_cart( $user_login, $user ) {
-	if ( ! $user || ! ( $saved_cart = get_user_meta( $user->ID, '_woocommerce_persistent_cart', true ) ) ) {
+	if ( ! $user || ! apply_filters( 'woocommerce_persistent_cart_enabled', true ) ) {
+		return;
+	}
+
+	$saved_cart = get_user_meta( $user->ID, '_woocommerce_persistent_cart_' . get_current_blog_id(), true );
+
+	if ( ! $saved_cart ) {
 		return;
 	}
 
@@ -85,6 +91,8 @@ function wc_get_raw_referer() {
  * @param int|array $products
  * @param bool $show_qty Should qty's be shown? Added in 2.6.0
  * @param bool $return Return message rather than add it.
+ *
+ * @return mixed|void
  */
 function wc_add_to_cart_message( $products, $show_qty = false, $return = false ) {
 	$titles = array();
@@ -166,7 +174,7 @@ function wc_clear_cart_after_payment() {
 		if ( $order_id > 0 ) {
 			$order = wc_get_order( $order_id );
 
-			if ( $order->get_order_key() === $order_key ) {
+			if ( $order && $order->get_order_key() === $order_key ) {
 				WC()->cart->empty_cart();
 			}
 		}
@@ -189,7 +197,6 @@ add_action( 'get_header', 'wc_clear_cart_after_payment' );
  * Get the subtotal.
  *
  * @access public
- * @return string
  */
 function wc_cart_totals_subtotal_html() {
 	echo WC()->cart->get_cart_subtotal();
@@ -202,6 +209,7 @@ function wc_cart_totals_subtotal_html() {
  */
 function wc_cart_totals_shipping_html() {
 	$packages = WC()->shipping->get_packages();
+	$first    = true;
 
 	foreach ( $packages as $i => $package ) {
 		$chosen_method = isset( WC()->session->chosen_shipping_methods[ $i ] ) ? WC()->session->chosen_shipping_methods[ $i ] : '';
@@ -215,16 +223,19 @@ function wc_cart_totals_shipping_html() {
 		}
 
 		wc_get_template( 'cart/cart-shipping.php', array(
-			'package'              => $package,
-			'available_methods'    => $package['rates'],
-			'show_package_details' => sizeof( $packages ) > 1,
-			'package_details'      => implode( ', ', $product_names ),
+			'package'                  => $package,
+			'available_methods'        => $package['rates'],
+			'show_package_details'     => sizeof( $packages ) > 1,
+			'show_shipping_calculator' => is_cart() && $first,
+			'package_details'          => implode( ', ', $product_names ),
 			// @codingStandardsIgnoreStart
-			'package_name'         => apply_filters( 'woocommerce_shipping_package_name', sprintf( _nx( 'Shipping', 'Shipping %d', ( $i + 1 ), 'shipping packages', 'woocommerce' ), ( $i + 1 ) ), $i, $package ),
+			'package_name'             => apply_filters( 'woocommerce_shipping_package_name', sprintf( _nx( 'Shipping', 'Shipping %d', ( $i + 1 ), 'shipping packages', 'woocommerce' ), ( $i + 1 ) ), $i, $package ),
 			// @codingStandardsIgnoreEnd
-			'index'                => $i,
-			'chosen_method'        => $chosen_method,
+			'index'                    => $i,
+			'chosen_method'            => $chosen_method,
 		) );
+
+		$first = false;
 	}
 }
 
@@ -241,8 +252,11 @@ function wc_cart_totals_taxes_total_html() {
  * Get a coupon label.
  *
  * @access public
+ *
  * @param string $coupon
  * @param bool $echo or return
+ *
+ * @return string
  */
 function wc_cart_totals_coupon_label( $coupon, $echo = true ) {
 	if ( is_string( $coupon ) ) {
@@ -268,6 +282,8 @@ function wc_cart_totals_coupon_html( $coupon ) {
 		$coupon = new WC_Coupon( $coupon );
 	}
 
+	$discount_amount_html = '';
+
 	if ( $amount = WC()->cart->get_coupon_discount_amount( $coupon->get_code(), WC()->cart->display_cart_ex_tax ) ) {
 		$discount_amount_html = '-' . wc_price( $amount );
 	} elseif ( $coupon->get_free_shipping() ) {
@@ -288,14 +304,16 @@ function wc_cart_totals_coupon_html( $coupon ) {
 function wc_cart_totals_order_total_html() {
 	$value = '<strong>' . WC()->cart->get_total() . '</strong> ';
 
-	// If prices are tax inclusive, show taxes here
-	if ( wc_tax_enabled() && WC()->cart->tax_display_cart == 'incl' ) {
+	// If prices are tax inclusive, show taxes here.
+	if ( wc_tax_enabled() && WC()->cart->display_prices_including_tax() ) {
 		$tax_string_array = array();
+		$cart_tax_totals  = WC()->cart->get_tax_totals();
 
 		if ( get_option( 'woocommerce_tax_total_display' ) == 'itemized' ) {
-			foreach ( WC()->cart->get_tax_totals() as $code => $tax )
+			foreach ( $cart_tax_totals as $code => $tax ) {
 				$tax_string_array[] = sprintf( '%s %s', $tax->formatted_amount, $tax->label );
-		} else {
+			}
+		} elseif ( ! empty( $cart_tax_totals ) ) {
 			$tax_string_array[] = sprintf( '%s %s', wc_price( WC()->cart->get_taxes_total( true, true ) ), WC()->countries->tax_or_vat() );
 		}
 
@@ -317,7 +335,7 @@ function wc_cart_totals_order_total_html() {
  * @param object $fee
  */
 function wc_cart_totals_fee_html( $fee ) {
-	$cart_totals_fee_html = ( 'excl' == WC()->cart->tax_display_cart ) ? wc_price( $fee->amount ) : wc_price( $fee->amount + $fee->tax );
+	$cart_totals_fee_html = WC()->cart->display_prices_including_tax() ? wc_price( $fee->total + $fee->tax ) : wc_price( $fee->total );
 
 	echo apply_filters( 'woocommerce_cart_totals_fee_html', $cart_totals_fee_html, $fee );
 }
@@ -330,16 +348,16 @@ function wc_cart_totals_fee_html( $fee ) {
 function wc_cart_totals_shipping_method_label( $method ) {
 	$label = $method->get_label();
 
-	if ( $method->cost > 0 ) {
-		if ( WC()->cart->tax_display_cart == 'excl' ) {
-			$label .= ': ' . wc_price( $method->cost );
-			if ( $method->get_shipping_tax() > 0 && WC()->cart->prices_include_tax ) {
-				$label .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
+	if ( $method->cost >= 0 && $method->get_method_id() !== 'free_shipping' ) {
+		if ( WC()->cart->display_prices_including_tax() ) {
+			$label .= ': ' . wc_price( $method->cost + $method->get_shipping_tax() );
+			if ( $method->get_shipping_tax() > 0 && ! wc_prices_include_tax() ) {
+				$label .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
 			}
 		} else {
-			$label .= ': ' . wc_price( $method->cost + $method->get_shipping_tax() );
-			if ( $method->get_shipping_tax() > 0 && ! WC()->cart->prices_include_tax ) {
-				$label .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
+			$label .= ': ' . wc_price( $method->cost );
+			if ( $method->get_shipping_tax() > 0 && wc_prices_include_tax() ) {
+				$label .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 			}
 		}
 	}
@@ -350,13 +368,15 @@ function wc_cart_totals_shipping_method_label( $method ) {
 /**
  * Round discount.
  *
- * @param  float $value
- * @param  int $precision
+ * @param  double $value Amount to round.
+ * @param  int    $precision DP to round.
  * @return float
  */
 function wc_cart_round_discount( $value, $precision ) {
 	if ( version_compare( PHP_VERSION, '5.3.0', '>=' ) ) {
 		return round( $value, $precision, WC_DISCOUNT_ROUNDING_MODE );
+	} elseif ( 2 === WC_DISCOUNT_ROUNDING_MODE ) {
+		return wc_legacy_round_half_down( $value, $precision );
 	} else {
 		return round( $value, $precision );
 	}
@@ -364,6 +384,7 @@ function wc_cart_round_discount( $value, $precision ) {
 
 /**
  * Gets chosen shipping method IDs from chosen_shipping_methods session, without instance IDs.
+ *
  * @since  2.6.2
  * @return string[]
  */
@@ -375,4 +396,87 @@ function wc_get_chosen_shipping_method_ids() {
 		$method_ids[]  = current( $chosen_method );
 	}
 	return $method_ids;
+}
+
+/**
+ * Get chosen method for package from session.
+ *
+ * @since  3.2.0
+ * @param  int   $key Key of package.
+ * @param  array $package Package data array.
+ * @return string|bool
+ */
+function wc_get_chosen_shipping_method_for_package( $key, $package ) {
+	$chosen_methods = WC()->session->get( 'chosen_shipping_methods' );
+	$chosen_method  = isset( $chosen_methods[ $key ] ) ? $chosen_methods[ $key ] : false;
+	$changed        = wc_shipping_methods_have_changed( $key, $package );
+
+	// This is deprecated but here for BW compat. TODO: Remove in 4.0.0
+	$method_counts  = WC()->session->get( 'shipping_method_counts' );
+
+	if ( ! empty( $method_counts[ $key ] ) ) {
+		$method_count = absint( $method_counts[ $key ] );
+	} else {
+		$method_count = 0;
+	}
+
+	// If not set, not available, or available methods have changed, set to the DEFAULT option.
+	if ( ! $chosen_method || $changed || ! isset( $package['rates'][ $chosen_method ] ) || sizeof( $package['rates'] ) !== $method_count ) {
+		$chosen_method          = wc_get_default_shipping_method_for_package( $key, $package, $chosen_method );
+		$chosen_methods[ $key ] = $chosen_method;
+		$method_counts[ $key ]  = sizeof( $package['rates'] );
+
+		WC()->session->set( 'chosen_shipping_methods', $chosen_methods );
+		WC()->session->set( 'shipping_method_counts', $method_counts );
+
+		do_action( 'woocommerce_shipping_method_chosen', $chosen_method );
+	}
+	return $chosen_method;
+}
+
+/**
+ * Choose the default method for a package.
+ *
+ * @since  3.2.0
+ * @param  int    $key Key of package.
+ * @param  array  $package Package data array.
+ * @param  string $chosen_method Chosen method id.
+ * @return string
+ */
+function wc_get_default_shipping_method_for_package( $key, $package, $chosen_method ) {
+	$rate_keys = array_keys( $package['rates'] );
+	$default   = current( $rate_keys );
+	$coupons   = WC()->cart->get_coupons();
+	foreach ( $coupons as $coupon ) {
+		if ( $coupon->get_free_shipping() ) {
+			foreach ( $rate_keys as $rate_key ) {
+				if ( 0 === stripos( $rate_key, 'free_shipping' ) ) {
+					$default = $rate_key;
+					break;
+				}
+			}
+			break;
+		}
+	}
+	return apply_filters( 'woocommerce_shipping_chosen_method', $default, $package['rates'], $chosen_method );
+}
+
+/**
+ * See if the methods have changed since the last request.
+ *
+ * @since  3.2.0
+ * @param  int   $key Key of package.
+ * @param  array $package Package data array.
+ * @return bool
+ */
+function wc_shipping_methods_have_changed( $key, $package ) {
+	// Lookup previous methods from session.
+	$previous_shipping_methods = WC()->session->get( 'previous_shipping_methods' );
+	// Get new and old rates.
+	$new_rates  = array_keys( $package['rates'] );
+	$prev_rates = isset( $previous_shipping_methods[ $key ] ) ? $previous_shipping_methods[ $key ] : false;
+	// Update session.
+	$previous_shipping_methods[ $key ] = $new_rates;
+	WC()->session->set( 'previous_shipping_methods', $previous_shipping_methods );
+	return $new_rates !== $prev_rates;
 }

@@ -21,9 +21,9 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 	 */
 	public function __construct() {
 		$this->widget_cssclass    = 'woocommerce widget_rating_filter';
-		$this->widget_description = __( 'Filter products by rating when viewing product archives and categories.', 'woocommerce' );
+		$this->widget_description = __( 'Display a list of star ratings to filter products in your store.', 'woocommerce' );
 		$this->widget_id          = 'woocommerce_rating_filter';
-		$this->widget_name        = __( 'WooCommerce average rating filter', 'woocommerce' );
+		$this->widget_name        = __( 'Filter Products by Rating', 'woocommerce' );
 		$this->settings           = array(
 			'title'  => array(
 				'type'  => 'text',
@@ -35,63 +35,7 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 	}
 
 	/**
-	 * Get current page URL for layered nav items.
-	 * @return string
-	 */
-	protected function get_page_base_url() {
-		if ( defined( 'SHOP_IS_ON_FRONT' ) ) {
-			$link = home_url();
-		} elseif ( is_post_type_archive( 'product' ) || is_page( wc_get_page_id( 'shop' ) ) ) {
-			$link = get_post_type_archive_link( 'product' );
-		} else {
-			$link = get_term_link( get_query_var( 'term' ), get_query_var( 'taxonomy' ) );
-		}
-
-		// Min/Max
-		if ( isset( $_GET['min_price'] ) ) {
-			$link = add_query_arg( 'min_price', wc_clean( $_GET['min_price'] ), $link );
-		}
-
-		if ( isset( $_GET['max_price'] ) ) {
-			$link = add_query_arg( 'max_price', wc_clean( $_GET['max_price'] ), $link );
-		}
-
-		// Orderby
-		if ( isset( $_GET['orderby'] ) ) {
-			$link = add_query_arg( 'orderby', wc_clean( $_GET['orderby'] ), $link );
-		}
-
-		/**
-		 * Search Arg.
-		 * To support quote characters, first they are decoded from &quot; entities, then URL encoded.
-		 */
-		if ( get_search_query() ) {
-			$link = add_query_arg( 's', rawurlencode( htmlspecialchars_decode( get_search_query() ) ), $link );
-		}
-
-		// Post Type Arg
-		if ( isset( $_GET['post_type'] ) ) {
-			$link = add_query_arg( 'post_type', wc_clean( $_GET['post_type'] ), $link );
-		}
-
-		// All current filters
-		if ( $_chosen_attributes = WC_Query::get_layered_nav_chosen_attributes() ) {
-			foreach ( $_chosen_attributes as $name => $data ) {
-				$filter_name = sanitize_title( str_replace( 'pa_', '', $name ) );
-				if ( ! empty( $data['terms'] ) ) {
-					$link = add_query_arg( 'filter_' . $filter_name, implode( ',', $data['terms'] ), $link );
-				}
-				if ( 'or' == $data['query_type'] ) {
-					$link = add_query_arg( 'query_type_' . $filter_name, 'or', $link );
-				}
-			}
-		}
-
-		return $link;
-	}
-
-	/**
-	 * Count products after other filters have occured by adjusting the main query.
+	 * Count products after other filters have occurred by adjusting the main query.
 	 * @param  int $rating
 	 * @return int
 	 */
@@ -145,13 +89,11 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 	 * @param array $instance
 	 */
 	public function widget( $args, $instance ) {
-		global $wp_the_query;
-
-		if ( ! is_post_type_archive( 'product' ) && ! is_tax( get_object_taxonomies( 'product' ) ) ) {
+		if ( ! is_shop() && ! is_product_taxonomy() ) {
 			return;
 		}
 
-		if ( ! $wp_the_query->post_count ) {
+		if ( ! wc()->query->get_main_query()->post_count ) {
 			return;
 		}
 
@@ -170,7 +112,7 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 				continue;
 			}
 			$found = true;
-			$link  = $this->get_page_base_url();
+			$link  = $this->get_current_page_url();
 
 			if ( in_array( $rating, $rating_filter ) ) {
 				$link_ratings = implode( ',', array_diff( $rating_filter, array( $rating ) ) );
@@ -178,19 +120,12 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 				$link_ratings = implode( ',', array_merge( $rating_filter, array( $rating ) ) );
 			}
 
-			$link  = $link_ratings ? add_query_arg( 'rating_filter', $link_ratings ) : remove_query_arg( 'rating_filter' );
+			$class       = in_array( $rating, $rating_filter ) ? 'wc-layered-nav-rating chosen' : 'wc-layered-nav-rating';
+			$link        = apply_filters( 'woocommerce_rating_filter_link', $link_ratings ? add_query_arg( 'rating_filter', $link_ratings ) : remove_query_arg( 'rating_filter' ) );
+			$rating_html = wc_get_star_rating_html( $rating );
+			$count_html  = esc_html( apply_filters( 'woocommerce_rating_filter_count', "({$count})", $count, $rating ) );
 
-			echo '<li class="wc-layered-nav-rating ' . ( in_array( $rating, $rating_filter ) ? 'chosen' : '' ) . '">';
-
-			echo '<a href="' . esc_url( apply_filters( 'woocommerce_rating_filter_link', $link ) ) . '">';
-
-			echo '<span class="star-rating">
-					<span style="width:' . esc_attr( ( $rating / 5 ) * 100 ) . '%">' . sprintf( esc_html__( 'Rated %s out of 5', 'woocommerce' ), $rating ) . '</span>
-				</span> (' . esc_html( $count ) . ')';
-
-			echo '</a>';
-
-			echo '</li>';
+			printf( '<li class="%s"><a href="%s"><span class="star-rating">%s</span> %s</a></li>', esc_attr( $class ), esc_url( $link ), $rating_html, $count_html );
 		}
 
 		echo '</ul>';

@@ -4,11 +4,15 @@
 
 1) Install [PHPUnit](http://phpunit.de/) by following their [installation guide](https://phpunit.de/getting-started.html). If you've installed it correctly, this should display the version:
 
+    ```
     $ phpunit --version
+    ```
 
 2) Install WordPress and the WP Unit Test lib using the `install.sh` script. Change to the plugin root directory and type:
 
+    ```
     $ tests/bin/install.sh <db-name> <db-user> <db-password> [db-host]
+    ```
 
 Sample usage:
 
@@ -26,7 +30,7 @@ The tests will execute and you'll be presented with a summary. Code coverage doc
 
 You can run specific tests by providing the path and filename to the test class:
 
-    $ phpunit tests/unit-tests/api/webhooks
+    $ phpunit tests/unit-tests/api/orders
 
 A text code coverage summary can be displayed using the `--coverage-text` option:
 
@@ -47,8 +51,8 @@ A text code coverage summary can be displayed using the `--coverage-text` option
 
 ## Automated Tests
 
-Tests are automatically run with [Travis-CI](https://travis-ci.org) for each commit and pull request.
+Tests are automatically run with [Travis-CI](https://travis-ci.org/woocommerce/woocommerce) for each commit and pull request.
 
 ## Code Coverage
 
-Code coverage is available on [Coveralls](https://coveralls.io/) which receives updated data after each Travis build.
+Code coverage is available on [Scrutinizer](https://scrutinizer-ci.com/g/woocommerce/woocommerce/) and [Code Climate](https://codeclimate.com/github/woocommerce/woocommerce) which receives updated data after each Travis build.

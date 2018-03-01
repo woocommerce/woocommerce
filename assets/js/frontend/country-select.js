@@ -10,7 +10,8 @@ jQuery( function( $ ) {
 		return {
 			'language': {
 				errorLoading: function() {
-					return wc_country_select_params.i18n_ajax_error;
+					// Workaround for https://github.com/select2/select2/issues/4355 instead of i18n_ajax_error.
+					return wc_country_select_params.i18n_searching;
 				},
 				inputTooLong: function( args ) {
 					var overChars = args.input.length - args.maximum;
@@ -51,7 +52,7 @@ jQuery( function( $ ) {
 	}
 
 	// Select2 Enhancement if it exists
-	if ( $().select2 ) {
+	if ( $().selectWoo ) {
 		var wc_country_select_select2 = function() {
 			$( 'select.country_select:visible, select.state_select:visible' ).each( function() {
 				var select2_args = $.extend({
@@ -59,7 +60,7 @@ jQuery( function( $ ) {
 					width: '100%'
 				}, getEnhancedSelectFormatString() );
 
-				$( this ).select2( select2_args );
+				$( this ).selectWoo( select2_args );
 				// Maintain focus after select https://github.com/select2/select2/issues/4384
 				$( this ).on( 'select2:select', function() {
 					$( this ).focus();

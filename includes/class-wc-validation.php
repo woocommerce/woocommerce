@@ -32,7 +32,7 @@ class WC_Validation {
 	 * @return  bool
 	 */
 	public static function is_phone( $phone ) {
-		if ( 0 < strlen( trim( preg_replace( '/[\s\#0-9_\-\+\(\)]/', '', $phone ) ) ) ) {
+		if ( 0 < strlen( trim( preg_replace( '/[\s\#0-9_\-\+\/\(\)]/', '', $phone ) ) ) ) {
 			return false;
 		}
 
@@ -65,6 +65,7 @@ class WC_Validation {
 				$valid = (bool) preg_match( '/^([0]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{3}$/', $postcode );
 				break;
 			case 'ES' :
+			case 'FR' :
 				$valid = (bool) preg_match( '/^([0-9]{5})$/i', $postcode );
 				break;
 			case 'GB' :
@@ -85,6 +86,10 @@ class WC_Validation {
 				break;
 			case 'PL':
 				$valid = (bool) preg_match( '/^([0-9]{2})([-])([0-9]{3})$/', $postcode );
+				break;
+			case 'CZ':
+			case 'SK':
+				$valid = (bool) preg_match( '/^([0-9]{3})(\s?)([0-9]{2})$/', $postcode );
 				break;
 
 			default :

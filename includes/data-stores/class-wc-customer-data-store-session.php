@@ -17,6 +17,8 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	 * @var array
 	 */
 	protected $session_keys = array(
+		'id',
+		'date_modified',
 		'billing_postcode',
 		'billing_city',
 		'billing_address_1',
@@ -46,7 +48,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	/**
 	 * Simply update the session.
 	 *
-	 * @param WC_Customer
+	 * @param WC_Customer $customer
 	 */
 	public function create( &$customer ) {
 		$this->save_to_session( $customer );
@@ -55,7 +57,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	/**
 	 * Simply update the session.
 	 *
-	 * @param WC_Customer
+	 * @param WC_Customer $customer
 	 */
 	public function update( &$customer ) {
 		$this->save_to_session( $customer );
@@ -64,7 +66,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	/**
 	 * Saves all customer data to the session.
 	 *
-	 * @param WC_Customer
+	 * @param WC_Customer $customer
 	 */
 	public function save_to_session( $customer ) {
 		$data = array();
@@ -73,29 +75,37 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 			if ( 'billing_' === substr( $session_key, 0, 8 ) ) {
 				$session_key = str_replace( 'billing_', '', $session_key );
 			}
-			$data[ $session_key ] = $customer->{"get_$function_key"}( 'edit' );
+			$data[ $session_key ] = (string) $customer->{"get_$function_key"}( 'edit' );
 		}
-		if ( WC()->session->get( 'customer' ) !== $data ) {
-			WC()->session->set( 'customer', $data );
-		}
+		WC()->session->set( 'customer', $data );
 	}
 
 	/**
-	 * Read customer data from the session.
+	 * Read customer data from the session unless the user has logged in, in
+	 * which case the stored ID will differ from the actual ID.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Customer
+	 * @param WC_Customer $customer
 	 */
 	public function read( &$customer ) {
 		$data = (array) WC()->session->get( 'customer' );
-		if ( ! empty( $data ) ) {
+
+		/**
+		 * There is a valid session if $data is not empty, and the ID matches the logged in user ID.
+		 *
+		 * If the user object has been updated since the session was created (based on date_modified) we should not load the session - data should be reloaded.
+		 */
+		if ( isset( $data['id'], $data['date_modified'] ) && $data['id'] === (string) $customer->get_id() && $data['date_modified'] === (string) $customer->get_date_modified( 'edit' ) ) {
 			foreach ( $this->session_keys as $session_key ) {
+				if ( in_array( $session_key, array( 'id', 'date_modified' ), true ) ) {
+					continue;
+				}
 				$function_key = $session_key;
 				if ( 'billing_' === substr( $session_key, 0, 8 ) ) {
 					$session_key = str_replace( 'billing_', '', $session_key );
 				}
 				if ( ! empty( $data[ $session_key ] ) && is_callable( array( $customer, "set_{$function_key}" ) ) ) {
-					$customer->{"set_{$function_key}"}( $data[ $session_key ] );
+					$customer->{"set_{$function_key}"}( wp_unslash( $data[ $session_key ] ) );
 				}
 			}
 		}
@@ -106,38 +116,40 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	/**
 	 * Load default values if props are unset.
 	 *
-	 * @param WC_Customer
+	 * @param WC_Customer $customer
 	 */
 	protected function set_defaults( &$customer ) {
-		$default = wc_get_customer_default_location();
+		try {
+			$default = wc_get_customer_default_location();
 
-		if ( ! $customer->get_billing_country() ) {
-			$customer->set_billing_country( $default['country'] );
-		}
+			if ( ! $customer->get_billing_country() ) {
+				$customer->set_billing_country( $default['country'] );
+			}
 
-		if ( ! $customer->get_shipping_country() ) {
-			$customer->set_shipping_country( $customer->get_billing_country() );
-		}
+			if ( ! $customer->get_shipping_country() ) {
+				$customer->set_shipping_country( $customer->get_billing_country() );
+			}
 
-		if ( ! $customer->get_billing_state() ) {
-			$customer->set_billing_state( $default['state'] );
-		}
+			if ( ! $customer->get_billing_state() ) {
+				$customer->set_billing_state( $default['state'] );
+			}
 
-		if ( ! $customer->get_shipping_state() ) {
-			$customer->set_shipping_state( $customer->get_billing_state() );
-		}
+			if ( ! $customer->get_shipping_state() ) {
+				$customer->set_shipping_state( $customer->get_billing_state() );
+			}
 
-		if ( ! $customer->get_billing_email() && is_user_logged_in() ) {
-			$current_user = wp_get_current_user();
-			$customer->set_billing_email( $current_user->user_email );
-		}
+			if ( ! $customer->get_billing_email() && is_user_logged_in() ) {
+				$current_user = wp_get_current_user();
+				$customer->set_billing_email( $current_user->user_email );
+			}
+		} catch ( WC_Data_Exception $e ) {}
 	}
 
 	/**
 	 * Deletes a customer from the database.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Customer
+	 * @param WC_Customer $customer
 	 * @param array $args Array of args to pass to the delete method.
 	 */
 	public function delete( &$customer, $args = array() ) {

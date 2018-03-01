@@ -40,6 +40,7 @@ class WC_Helper_Product {
 		update_post_meta( $product, '_downloadable', 'no' );
 		update_post_meta( $product, '_virtual', 'no' );
 		update_post_meta( $product, '_stock_status', 'instock' );
+		update_post_meta( $product, '_weight', '1.1' );
 		wp_set_object_terms( $product, 'simple', 'product_type' );
 
 		return new WC_Product_Simple( $product );
@@ -325,5 +326,13 @@ class WC_Helper_Product {
 		);
 
 		return wp_insert_comment( $data );
+	}
+
+	/**
+	 * A helper function for hooking into save_post during the test_product_meta_save_post test.
+	 * @since 3.0.1
+	 */
+	public static function save_post_test_update_meta_data_direct( $id ) {
+		update_post_meta( $id, '_test2', 'world' );
 	}
 }

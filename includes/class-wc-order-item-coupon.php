@@ -117,6 +117,9 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 
 	/**
 	 * Get discounted tax amount.
+	 *
+	 * @param string $context
+	 *
 	 * @return string
 	 */
 	public function get_discount_tax( $context = 'view' ) {
@@ -128,7 +131,7 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	| Array Access Methods
 	|--------------------------------------------------------------------------
 	|
-	| For backwards compat with legacy arrays.
+	| For backwards compatibility with legacy arrays.
 	|
 	*/
 

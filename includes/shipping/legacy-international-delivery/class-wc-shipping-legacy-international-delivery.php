@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * International Delivery - Based on the Flat Rate Shipping Method.
  *
- * This class is here for backwards commpatility for methods existing before zones existed.
+ * This class is here for backwards compatibility for methods existing before zones existed.
  *
  * @deprecated  2.6.0
  * @version		2.4.0
@@ -73,6 +73,6 @@ class WC_Shipping_Legacy_International_Delivery extends WC_Shipping_Legacy_Flat_
 				return false;
 			}
 		}
-		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true, $package );
+		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true, $package, $this );
 	}
 }

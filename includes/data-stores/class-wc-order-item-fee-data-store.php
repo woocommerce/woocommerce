@@ -14,10 +14,11 @@ class WC_Order_Item_Fee_Data_Store extends Abstract_WC_Order_Item_Type_Data_Stor
 
 	/**
 	 * Data stored in meta keys.
+	 *
 	 * @since 3.0.0
 	 * @var array
 	 */
-	protected $internal_meta_keys = array( '_tax_class', '_tax_status', '_line_subtotal', '_line_subtotal_tax', '_line_total', '_line_tax', '_line_tax_data' );
+	protected $internal_meta_keys = array( '_fee_amount', '_tax_class', '_tax_status', '_line_subtotal', '_line_subtotal_tax', '_line_total', '_line_tax', '_line_tax_data' );
 
 	/**
 	 * Read/populate data properties specific to this order item.
@@ -29,6 +30,7 @@ class WC_Order_Item_Fee_Data_Store extends Abstract_WC_Order_Item_Type_Data_Stor
 		parent::read( $item );
 		$id = $item->get_id();
 		$item->set_props( array(
+			'amount'     => get_metadata( 'order_item', $id, '_fee_amount', true ),
 			'tax_class'  => get_metadata( 'order_item', $id, '_tax_class', true ),
 			'tax_status' => get_metadata( 'order_item', $id, '_tax_status', true ),
 			'total'      => get_metadata( 'order_item', $id, '_line_total', true ),
@@ -47,6 +49,7 @@ class WC_Order_Item_Fee_Data_Store extends Abstract_WC_Order_Item_Type_Data_Stor
 	public function save_item_data( &$item ) {
 		$id          = $item->get_id();
 		$save_values = array(
+			'_fee_amount'    => $item->get_amount( 'edit' ),
 			'_tax_class'     => $item->get_tax_class( 'edit' ),
 			'_tax_status'    => $item->get_tax_status( 'edit' ),
 			'_line_total'    => $item->get_total( 'edit' ),

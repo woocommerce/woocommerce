@@ -16,7 +16,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	 * Method to create a new shipping zone.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Shipping_Zone
+	 * @param WC_Shipping_Zone $zone
 	 */
 	public function create( &$zone ) {
 		global $wpdb;
@@ -36,7 +36,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	 * Update zone in the database.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Shipping_Zone
+	 * @param WC_Shipping_Zone $zone
 	 */
 	public function update( &$zone ) {
 		global $wpdb;
@@ -57,13 +57,14 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	 * Method to read a shipping zone from the database.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Shipping_Zone
+	 * @param WC_Shipping_Zone $zone
+	 * @throws Exception
 	 */
 	public function read( &$zone ) {
 		global $wpdb;
 		if ( 0 === $zone->get_id() || "0" === $zone->get_id() ) {
 			$this->read_zone_locations( $zone );
-			$zone->set_zone_name( __( 'Rest of the World', 'woocommerce' ) );
+			$zone->set_zone_name( __( 'Locations not covered by your other zones', 'woocommerce' ) );
 			$zone->read_meta_data();
 			$zone->set_object_read( true );
 			do_action( 'woocommerce_shipping_zone_loaded', $zone );
@@ -83,7 +84,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	 * Deletes a shipping zone from the database.
 	 *
 	 * @since  3.0.0
-	 * @param  WC_Shipping_Zone
+	 * @param  WC_Shipping_Zone $zone
 	 * @param  array $args Array of args to pass to the delete method.
 	 * @return bool result
 	 */
@@ -219,7 +220,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 			SELECT zones.zone_id FROM {$wpdb->prefix}woocommerce_shipping_zones as zones
 			LEFT OUTER JOIN {$wpdb->prefix}woocommerce_shipping_zone_locations as locations ON zones.zone_id = locations.zone_id AND location_type != 'postcode'
 			WHERE " . implode( ' ', $criteria ) . "
-			ORDER BY zone_order ASC LIMIT 1
+			ORDER BY zone_order ASC, zone_id ASC LIMIT 1
 		" );
 	}
 
@@ -231,7 +232,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	 */
 	public function get_zones() {
 		global $wpdb;
-		return $wpdb->get_results( "SELECT zone_id, zone_name, zone_order FROM {$wpdb->prefix}woocommerce_shipping_zones order by zone_order ASC;" );
+		return $wpdb->get_results( "SELECT zone_id, zone_name, zone_order FROM {$wpdb->prefix}woocommerce_shipping_zones order by zone_order ASC, zone_id ASC;" );
 	}
 
 
@@ -266,10 +267,12 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	 * This function clears old locations, then re-inserts new if any changes are found.
 	 *
 	 * @since 3.0.0
+	 *
 	 * @param WC_Shipping_Zone
+	 *
+	 * @return bool|void
 	 */
 	private function save_locations( &$zone ) {
-		$updated_props = array();
 		$changed_props = array_keys( $zone->get_changes() );
 		if ( ! in_array( 'zone_locations', $changed_props ) ) {
 			return false;

@@ -165,32 +165,6 @@ class Settings extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/settings/invalid' ) );
 		$this->assertEquals( 404, $response->get_status() );
 
-		// test getting a valid group
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/settings/general' ) );
-		$data = $response->get_data();
-
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertContains( array(
-    		'id' => 'woocommerce_demo_store',
-			'label' => 'Store notice',
-			'description' => 'Enable site-wide store notice text',
-			'type' => 'checkbox',
-			'default' => 'no',
-			'value' => 'no',
-			'_links' => array(
-				'self' => array(
-					array(
-						'href' => rest_url( '/wc/v2/settings/general/woocommerce_demo_store' ),
-					),
-				),
-				'collection' => array(
-					array(
-						'href' => rest_url( '/wc/v2/settings/general' ),
-					),
-				),
-			),
-		), $data );
-
 		// test getting a valid group with settings attached to it
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/settings/test' ) );
 		$data = $response->get_data();
@@ -539,10 +513,10 @@ class Settings extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( array(
 			'id'          => 'subject',
 			'label'       => 'Subject',
-			'description' => 'This controls the email subject line. Leave blank to use the default subject: <code>[{site_title}] New customer order ({order_number}) - {order_date}</code>.',
+			'description' => 'Available placeholders: <code>{site_title}, {order_date}, {order_number}</code>',
 			'type'        => 'text',
 			'default'     => '',
-			'tip'         => 'This controls the email subject line. Leave blank to use the default subject: <code>[{site_title}] New customer order ({order_number}) - {order_date}</code>.',
+			'tip'         => 'Available placeholders: <code>{site_title}, {order_date}, {order_number}</code>',
 			'value'       => '',
 		), $setting );
 
@@ -557,10 +531,10 @@ class Settings extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( array(
 			'id'          => 'subject',
 			'label'       => 'Subject',
-			'description' => 'This controls the email subject line. Leave blank to use the default subject: <code>[{site_title}] New customer order ({order_number}) - {order_date}</code>.',
+			'description' => 'Available placeholders: <code>{site_title}, {order_date}, {order_number}</code>',
 			'type'        => 'text',
 			'default'     => '',
-			'tip'         => 'This controls the email subject line. Leave blank to use the default subject: <code>[{site_title}] New customer order ({order_number}) - {order_date}</code>.',
+			'tip'         => 'Available placeholders: <code>{site_title}, {order_date}, {order_number}</code>',
 			'value'       => 'This is my subject',
 		), $setting );
 
@@ -698,41 +672,147 @@ class Settings extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test validation of image_width.
+	 * Test to make sure the 'base location' setting is present in the response.
+	 * That it is returned as 'select' and not 'single_select_country',
+	 * and that both state and country options are returned.
 	 *
-	 * @since 3.0.0
+	 * @since 3.0.7
 	 */
-	public function test_validation_image_width() {
+	public function test_woocommerce_default_country() {
 		wp_set_current_user( $this->user );
-
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', sprintf( '/wc/v2/settings/%s/%s', 'products', 'shop_thumbnail_image_size' ) ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/settings/general/woocommerce_default_country' ) );
 		$setting  = $response->get_data();
-		$this->assertEquals( array( 'width' => 180, 'height' => 180, 'crop' => true ), $setting['value'] );
 
-		// test bogus
-		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v2/settings/%s/%s', 'products', 'shop_thumbnail_image_size' ) );
-		$request->set_body_params( array(
-			'value' => array(
-				'width'  => 400,
-				'height' => 200,
-				'crop'   => 'asdasdasd',
-			),
-		) );
-		$response = $this->server->dispatch( $request );
-		$setting  = $response->get_data();
-		$this->assertEquals( array( 'width' => 400, 'height' => 200, 'crop' => true ), $setting['value'] );
-
-		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v2/settings/%s/%s', 'products', 'shop_thumbnail_image_size' ) );
-		$request->set_body_params( array(
-			'value' => array(
-				'width'  => 200,
-				'height' => 100,
-				'crop'   => false,
-			),
-		) );
-		$response = $this->server->dispatch( $request );
-		$setting  = $response->get_data();
-		$this->assertEquals( array( 'width' => 200, 'height' => 100, 'crop' => false ), $setting['value'] );
+		$this->assertEquals( 'select', $setting['type'] );
+		$this->assertArrayHasKey( 'GB', $setting['options'] );
+		$this->assertArrayHasKey( 'US:OR', $setting['options'] );
 	}
 
+	/**
+	 * Test to make sure the store address setting can be fetched and updated.
+	 *
+	 * @since 3.1.1
+	 */
+	public function test_woocommerce_store_address() {
+		wp_set_current_user( $this->user );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/settings/general/woocommerce_store_address' ) );
+		$setting  = $response->get_data();
+		$this->assertEquals( 'text', $setting['type'] );
+
+		// Repalce the old value with something uniquely new
+		$old_value = $setting['value'];
+		$new_value = $old_value . ' ' . rand( 1000, 9999 );
+		$request = new WP_REST_Request( 'PUT', '/wc/v2/settings/general/woocommerce_store_address' );
+		$request->set_body_params( array(
+			'value' => $new_value,
+		) );
+		$response = $this->server->dispatch( $request );
+		$setting  = $response->get_data();
+		$this->assertEquals( $new_value, $setting['value'] );
+
+		// Put the original value back
+		$request = new WP_REST_Request( 'PUT', '/wc/v2/settings/general/woocommerce_store_address' );
+		$request->set_body_params( array(
+			'value' => $old_value,
+		) );
+		$response = $this->server->dispatch( $request );
+		$setting  = $response->get_data();
+		$this->assertEquals( $old_value, $setting['value'] );
+	}
+
+	/**
+	 * Test to make sure the store address 2 (line 2) setting can be fetched and updated.
+	 *
+	 * @since 3.1.1
+	 */
+	public function test_woocommerce_store_address_2() {
+		wp_set_current_user( $this->user );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/settings/general/woocommerce_store_address_2' ) );
+		$setting  = $response->get_data();
+		$this->assertEquals( 'text', $setting['type'] );
+
+		// Repalce the old value with something uniquely new
+		$old_value = $setting['value'];
+		$new_value = $old_value . ' ' . rand( 1000, 9999 );
+		$request = new WP_REST_Request( 'PUT', '/wc/v2/settings/general/woocommerce_store_address_2' );
+		$request->set_body_params( array(
+			'value' => $new_value,
+		) );
+		$response = $this->server->dispatch( $request );
+		$setting  = $response->get_data();
+		$this->assertEquals( $new_value, $setting['value'] );
+
+		// Put the original value back
+		$request = new WP_REST_Request( 'PUT', '/wc/v2/settings/general/woocommerce_store_address_2' );
+		$request->set_body_params( array(
+			'value' => $old_value,
+		) );
+		$response = $this->server->dispatch( $request );
+		$setting  = $response->get_data();
+		$this->assertEquals( $old_value, $setting['value'] );
+	}
+
+	/**
+	 * Test to make sure the store city setting can be fetched and updated.
+	 *
+	 * @since 3.1.1
+	 */
+	public function test_woocommerce_store_city() {
+		wp_set_current_user( $this->user );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/settings/general/woocommerce_store_city' ) );
+		$setting  = $response->get_data();
+		$this->assertEquals( 'text', $setting['type'] );
+
+		// Repalce the old value with something uniquely new
+		$old_value = $setting['value'];
+		$new_value = $old_value . ' ' . rand( 1000, 9999 );
+		$request = new WP_REST_Request( 'PUT', '/wc/v2/settings/general/woocommerce_store_city' );
+		$request->set_body_params( array(
+			'value' => $new_value,
+		) );
+		$response = $this->server->dispatch( $request );
+		$setting  = $response->get_data();
+		$this->assertEquals( $new_value, $setting['value'] );
+
+		// Put the original value back
+		$request = new WP_REST_Request( 'PUT', '/wc/v2/settings/general/woocommerce_store_city' );
+		$request->set_body_params( array(
+			'value' => $old_value,
+		) );
+		$response = $this->server->dispatch( $request );
+		$setting  = $response->get_data();
+		$this->assertEquals( $old_value, $setting['value'] );
+	}
+
+	/**
+	 * Test to make sure the store postcode setting can be fetched and updated.
+	 *
+	 * @since 3.1.1
+	 */
+	public function test_woocommerce_store_postcode() {
+		wp_set_current_user( $this->user );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/settings/general/woocommerce_store_postcode' ) );
+		$setting  = $response->get_data();
+		$this->assertEquals( 'text', $setting['type'] );
+
+		// Repalce the old value with something uniquely new
+		$old_value = $setting['value'];
+		$new_value = $old_value . ' ' . rand( 1000, 9999 );
+		$request = new WP_REST_Request( 'PUT', '/wc/v2/settings/general/woocommerce_store_postcode' );
+		$request->set_body_params( array(
+			'value' => $new_value,
+		) );
+		$response = $this->server->dispatch( $request );
+		$setting  = $response->get_data();
+		$this->assertEquals( $new_value, $setting['value'] );
+
+		// Put the original value back
+		$request = new WP_REST_Request( 'PUT', '/wc/v2/settings/general/woocommerce_store_postcode' );
+		$request->set_body_params( array(
+			'value' => $old_value,
+		) );
+		$response = $this->server->dispatch( $request );
+		$setting  = $response->get_data();
+		$this->assertEquals( $old_value, $setting['value'] );
+	}
 }
