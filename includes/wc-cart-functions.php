@@ -48,7 +48,13 @@ function wc_empty_cart() {
  * @deprecated 2.3
  */
 function wc_load_persistent_cart( $user_login, $user ) {
-	if ( ! $user || ! ( $saved_cart = get_user_meta( $user->ID, '_woocommerce_persistent_cart_' . get_current_blog_id(), true ) ) ) {
+	if ( ! $user || ! apply_filters( 'woocommerce_persistent_cart_enabled', true ) ) {
+		return;
+	}
+
+	$saved_cart = get_user_meta( $user->ID, '_woocommerce_persistent_cart_' . get_current_blog_id(), true );
+
+	if ( ! $saved_cart ) {
 		return;
 	}
 
@@ -342,7 +348,7 @@ function wc_cart_totals_fee_html( $fee ) {
 function wc_cart_totals_shipping_method_label( $method ) {
 	$label = $method->get_label();
 
-	if ( $method->cost > 0 ) {
+	if ( $method->cost >= 0 && $method->get_method_id() !== 'free_shipping' ) {
 		if ( WC()->cart->display_prices_including_tax() ) {
 			$label .= ': ' . wc_price( $method->cost + $method->get_shipping_tax() );
 			if ( $method->get_shipping_tax() > 0 && ! wc_prices_include_tax() ) {

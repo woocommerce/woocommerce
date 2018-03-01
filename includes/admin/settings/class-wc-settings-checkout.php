@@ -373,6 +373,10 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 				}
 			}
 		}
+
+		if ( $current_section ) {
+			do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section );
+		}
 	}
 }
 

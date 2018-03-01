@@ -98,8 +98,11 @@ if ( wc_tax_enabled() ) {
 		<button type="button" class="button bulk-delete-items"><?php esc_html_e( 'Delete selected row(s)', 'woocommerce' ); ?></button>
 	<?php endif; ?>
 
-	<button type="button" class="button bulk-decrease-stock"><?php esc_html_e( 'Reduce stock', 'woocommerce' ); ?></button>
-	<button type="button" class="button bulk-increase-stock"><?php esc_html_e( 'Increase stock', 'woocommerce' ); ?></button>
+	<?php if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) : ?>
+		<button type="button" class="button bulk-decrease-stock"><?php esc_html_e( 'Reduce stock', 'woocommerce' ); ?></button>
+		<button type="button" class="button bulk-increase-stock"><?php esc_html_e( 'Increase stock', 'woocommerce' ); ?></button>
+	<?php endif; ?>
+
 	<?php do_action( 'woocommerce_admin_order_item_bulk_actions', $order ); ?>
 </div>
 <div class="wc-order-data-row wc-order-totals-items wc-order-items-editable">

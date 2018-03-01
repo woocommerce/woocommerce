@@ -15,6 +15,13 @@ jQuery( function( $ ) {
 
 	$( table_selector ).find( '.column-handle' ).show();
 
+	$( document ).ajaxComplete( function( event, request, options ) {
+		if ( request && 4 === request.readyState && 200 === request.status && options.data && 0 <= options.data.indexOf( '_inline_edit' ) ) {
+			$( table_selector ).find( '.column-handle' ).show();
+			$( document.body ).trigger( 'init_tooltips' );
+		}
+	} );
+
 	$( table_selector ).sortable({
 		items: item_selector,
 		cursor: 'move',

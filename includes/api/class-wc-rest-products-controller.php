@@ -1740,7 +1740,7 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 				),
 				'shipping_class_id'     => array(
 					'description' => __( 'Shipping class ID.', 'woocommerce' ),
-					'type'        => 'string',
+					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),

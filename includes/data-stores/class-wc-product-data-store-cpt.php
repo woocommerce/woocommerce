@@ -809,14 +809,28 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	public function get_on_sale_products() {
 		global $wpdb;
 
-		$decimals = absint( wc_get_price_decimals() );
+		$decimals                    = absint( wc_get_price_decimals() );
+		$exclude_term_ids            = array();
+		$outofstock_join             = '';
+		$outofstock_where            = '';
+		$product_visibility_term_ids = wc_get_product_visibility_term_ids();
 
-		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
+		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && $product_visibility_term_ids['outofstock'] ) {
+			$exclude_term_ids[] = $product_visibility_term_ids['outofstock'];
+		}
+
+		if ( count( $exclude_term_ids ) ) {
+			$outofstock_join  = " LEFT JOIN ( SELECT object_id FROM {$wpdb->term_relationships} WHERE term_taxonomy_id IN ( " . implode( ',', array_map( 'absint', $exclude_term_ids ) ) . ' ) ) AS exclude_join ON exclude_join.object_id = id';
+			$outofstock_where = ' AND exclude_join.object_id IS NULL';
+		}
+
+		// @codingStandardsIgnoreStart.
 		return $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT post.ID as id, post.post_parent as parent_id FROM `$wpdb->posts` AS post
 				LEFT JOIN `$wpdb->postmeta` AS meta ON post.ID = meta.post_id
 				LEFT JOIN `$wpdb->postmeta` AS meta2 ON post.ID = meta2.post_id
+				$outofstock_join
 				WHERE post.post_type IN ( 'product', 'product_variation' )
 					AND post.post_status = 'publish'
 					AND meta.meta_key = '_sale_price'
@@ -824,11 +838,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					AND CAST( meta.meta_value AS DECIMAL ) >= 0
 					AND CAST( meta.meta_value AS CHAR ) != ''
 					AND CAST( meta.meta_value AS DECIMAL( 10, %d ) ) = CAST( meta2.meta_value AS DECIMAL( 10, %d ) )
+					$outofstock_where
 				GROUP BY post.ID",
 				$decimals,
 				$decimals
 			)
 		);
+		// @codingStandardsIgnoreEnd.
 	}
 
 	/**
@@ -1304,9 +1320,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @param  string $term Search term.
 	 * @param  string $type Type of product.
 	 * @param  bool   $include_variations Include variations in search or not.
+	 * @param  bool   $all_statuses Should we search all statuses or limit to published.
 	 * @return array of ids
 	 */
-	public function search_products( $term, $type = '', $include_variations = false ) {
+	public function search_products( $term, $type = '', $include_variations = false, $all_statuses = false ) {
 		global $wpdb;
 
 		$like_term     = '%' . $wpdb->esc_like( $term ) . '%';
@@ -1314,6 +1331,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$post_statuses = current_user_can( 'edit_private_products' ) ? array( 'private', 'publish' ) : array( 'publish' );
 		$type_join     = '';
 		$type_where    = '';
+		$status_where  = '';
 
 		if ( $type ) {
 			if ( in_array( $type, array( 'virtual', 'downloadable' ), true ) ) {
@@ -1322,11 +1340,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
+		if ( ! $all_statuses ) {
+			$status_where = " AND posts.post_status IN ('" . implode( "','", $post_statuses ) . "') ";
+		}
+
 		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
-		$product_ids = $wpdb->get_col(
+		$search_results = $wpdb->get_results(
 			// phpcs:disable
 			$wpdb->prepare(
-				"SELECT DISTINCT posts.ID FROM {$wpdb->posts} posts
+				"SELECT DISTINCT posts.ID as product_id, posts.post_parent as parent_id FROM {$wpdb->posts} posts
 				LEFT JOIN {$wpdb->postmeta} postmeta ON posts.ID = postmeta.post_id
 				$type_join
 				WHERE (
@@ -1337,7 +1359,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					)
 				)
 				AND posts.post_type IN ('" . implode( "','", $post_types ) . "')
-				AND posts.post_status IN ('" . implode( "','", $post_statuses ) . "')
+				$status_where
 				$type_where
 				ORDER BY posts.post_parent ASC, posts.post_title ASC",
 				$like_term,
@@ -1346,6 +1368,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			)
 			// phpcs:enable
 		);
+
+		$product_ids = wp_parse_id_list( array_merge( wp_list_pluck( $search_results, 'product_id' ), wp_list_pluck( $search_results, 'parent_id' ) ) );
 
 		if ( is_numeric( $term ) ) {
 			$post_id   = absint( $term );

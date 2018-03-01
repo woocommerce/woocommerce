@@ -170,7 +170,7 @@ class WC_Frontend_Scripts {
 			'flexslider' => array(
 				'src'     => self::get_asset_url( 'assets/js/flexslider/jquery.flexslider' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
-				'version' => '2.6.1',
+				'version' => '2.7.0',
 			),
 			'js-cookie' => array(
 				'src'     => self::get_asset_url( 'assets/js/js-cookie/js.cookie' . $suffix . '.js' ),
@@ -220,7 +220,7 @@ class WC_Frontend_Scripts {
 			'selectWoo' => array(
 				'src'     => self::get_asset_url( 'assets/js/selectWoo/selectWoo.full' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
-				'version' => '1.0.2',
+				'version' => '1.0.3',
 			),
 			'wc-address-i18n' => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/address-i18n' . $suffix . '.js' ),
