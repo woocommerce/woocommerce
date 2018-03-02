@@ -1,7 +1,7 @@
 Feature plugin for the Gutenberg Products block.
 
 **Getting Started:**
-1. Make sure you have Gutenberg 2.2+ and WooCommerce 3.3.1+ installed and active. There were some changes in the way gutenblock scripts are enqueued in Gutenberg 2.2, so this won't work with earlier versions.
+1. Make sure you have Gutenberg 2.2+ and WooCommerce 3.3.1+ installed and active.
 2. Get a copy of this plugin using the green "Clone or download" button on the right. Activate the plugin.
 3. On Gutenberg posts you should now have a Products block available.
 
@@ -18,4 +18,4 @@ The source code is in the products-block.jsx file and the compiled code is in pr
 
 ### Vision for the Feature
 
-The Products block is essentially a visual wrapper for the `[products]` shortcode. Users should be able to insert a variety of products (specific products, products in a specific category, with assorted layouts and visual styles) into their post content using a simple and powerful visual editor
+Users should be able to insert a variety of products from their store (specific products, products in a category, with assorted layouts and visual styles, etc.) into their post content using a simple and powerful visual editor.
