@@ -1,7 +1,7 @@
 const { __ } = wp.i18n;
 const { RawHTML } = wp.element;
 const { registerBlockType, InspectorControls, BlockControls } = wp.blocks;
-const { Toolbar, withAPIData, Dropdown, Dashicon, RangeControl } = wp.components;
+const { Toolbar, withAPIData, Dropdown, Dashicon, RangeControl, Tooltip } = wp.components;
 const { ToggleControl, SelectControl } = InspectorControls;
 
 import { ProductsSpecificSelect } from './views/specific-select.jsx';
@@ -267,6 +267,22 @@ class ProductsBlockSettingsEditor extends React.Component {
 			);
 		}
 
+		let done_button = <button type="button" className="button wc-products-settings__footer-button" onClick={ this.props.done_callback }>{ __( 'Done' ) }</button>;
+		if ( [ 'specific', 'category', 'attribute' ].includes( this.state.display ) && ! this.props.selected_display_setting.length ) {
+			const done_tooltips = {
+				specific: __( 'Please search for and select products to display' ),
+				category: __( 'Please select at least one category to display' ),
+				attribute: __( 'Please select an attribute' ),
+			}
+
+			done_button = (
+				<Tooltip text={ done_tooltips[ this.state.display ] } >
+					<button type="button" className="button wc-products-settings__footer-button disabled">{ __( 'Done' ) }</button>
+				</Tooltip>
+			);
+		}
+
+
 		return (
 			<div className={ 'wc-products-settings ' + ( this.state.expanded_group ? 'expanded-group-' + this.state.expanded_group : '' ) }>
 				<h4 className="wc-products-settings__title"><Dashicon icon={ 'universal-access-alt' } /> { __( 'Products' ) }</h4>
@@ -278,7 +294,7 @@ class ProductsBlockSettingsEditor extends React.Component {
 				{ extra_settings }
 
 				<div className="wc-products-settings__footer">
-					<button type="button" className="button wc-products-settings__footer-button" onClick={ this.props.done_callback }>{ __( 'Done' ) }</button>
+					{ done_button }
 				</div>
 			</div>
 		);
