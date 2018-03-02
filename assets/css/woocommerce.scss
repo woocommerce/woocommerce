@@ -188,6 +188,10 @@ p.demo_store,
 				background-color: #fff;
 			}
 
+			.woocommerce-product-gallery__image--placeholder {
+				border: 1px solid #F2F2F2;
+			}
+
 			.woocommerce-product-gallery__image:nth-child(n+2) {
 				width: 25%;
 				display: inline-block;
@@ -564,6 +568,21 @@ p.demo_store,
 			display: block;
 			margin: 0 0 1em;
 			box-shadow: none;
+		}
+
+		.woocommerce-placeholder-wrapper {
+			display: block;
+			position: relative;
+			overflow: hidden;
+			border: 1px solid #F2F2F2;
+			margin: 0 0 1em;
+
+			img {
+				position: absolute;
+				top: 0;
+				top: 50%;
+  				transform: translateY(-50%);
+			}
 		}
 
 		strong {

@@ -232,7 +232,26 @@ ul.products {
 			@include link();
 			margin-left: .5em;
 		}
+
+		.woocommerce-placeholder-wrapper {
+			display: block;
+			position: relative;
+			overflow: hidden;
+			border: 1px solid #F2F2F2;
+			margin: 0 0 1em;
+
+			img {
+				position: absolute;
+				top: 0;
+				top: 50%;
+  				transform: translateY(-50%);
+			}
+		}
 	}
+}
+
+.woocommerce-product-gallery__image--placeholder {
+	border: 1px solid #F2F2F2;
 }
 
 .star-rating {
