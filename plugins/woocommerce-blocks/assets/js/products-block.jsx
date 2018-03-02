@@ -526,11 +526,21 @@ registerBlockType( 'woocommerce/products', {
 		 * @return Component
 		 */
 		function getSettingsEditor() {
+
+			const update_display_callback = ( value ) => {
+				if ( display !== value ) {
+					setAttributes( {
+						display: value,
+						display_setting: [],
+					} );
+				}
+			};
+
 			return (
 				<ProductsBlockSettingsEditor
 					selected_display={ display }
 					selected_display_setting={ display_setting }
-					update_display_callback={ ( value ) => setAttributes( { display: value } ) }
+					update_display_callback={ update_display_callback }
 					update_display_setting_callback={ ( value ) => setAttributes( { display_setting: value } ) }
 					done_callback={ () => setAttributes( { edit_mode: false } ) }
 				/>
