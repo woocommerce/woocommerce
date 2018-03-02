@@ -191,12 +191,8 @@ const UncachedProductAttributeElement = withAPIData( ( props ) => {
 			terms: '/wc/v2/products/attributes/' + props.attribute.id + '/terms'
 		};
 	} )( ( { terms, selectedAttribute, selectedTerms, attribute, setSelectedAttribute, addTerm, removeTerm } ) => {
-		if ( ! terms.data ) {
-			return __( 'Loading' );
-		}
-
-		if ( 0 === terms.data.length ) {
-			return __( 'No attribute options found' );
+		if ( ! terms.data || 0 === terms.data.length ) {
+			return null;
 		}
 
 		// Populate cache.

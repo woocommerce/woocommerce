@@ -2125,12 +2125,8 @@ var UncachedProductAttributeElement = withAPIData(function (props) {
 	    addTerm = _ref2.addTerm,
 	    removeTerm = _ref2.removeTerm;
 
-	if (!terms.data) {
-		return __('Loading');
-	}
-
-	if (0 === terms.data.length) {
-		return __('No attribute options found');
+	if (!terms.data || 0 === terms.data.length) {
+		return null;
 	}
 
 	// Populate cache.
