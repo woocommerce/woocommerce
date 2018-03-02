@@ -99,7 +99,8 @@ var _wp$components = wp.components,
     withAPIData = _wp$components.withAPIData,
     Dropdown = _wp$components.Dropdown,
     Dashicon = _wp$components.Dashicon,
-    RangeControl = _wp$components.RangeControl;
+    RangeControl = _wp$components.RangeControl,
+    Tooltip = _wp$components.Tooltip;
 var ToggleControl = InspectorControls.ToggleControl,
     SelectControl = InspectorControls.SelectControl;
 
@@ -452,6 +453,29 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 				);
 			}
 
+			var done_button = wp.element.createElement(
+				'button',
+				{ type: 'button', className: 'button wc-products-settings__footer-button', onClick: this.props.done_callback },
+				__('Done')
+			);
+			if (['specific', 'category', 'attribute'].includes(this.state.display) && !this.props.selected_display_setting.length) {
+				var done_tooltips = {
+					specific: __('Please search for and select products to display'),
+					category: __('Please select at least one category to display'),
+					attribute: __('Please select an attribute')
+				};
+
+				done_button = wp.element.createElement(
+					Tooltip,
+					{ text: done_tooltips[this.state.display] },
+					wp.element.createElement(
+						'button',
+						{ type: 'button', className: 'button wc-products-settings__footer-button disabled' },
+						__('Done')
+					)
+				);
+			}
+
 			return wp.element.createElement(
 				'div',
 				{ className: 'wc-products-settings ' + (this.state.expanded_group ? 'expanded-group-' + this.state.expanded_group : '') },
@@ -468,11 +492,7 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 				wp.element.createElement(
 					'div',
 					{ className: 'wc-products-settings__footer' },
-					wp.element.createElement(
-						'button',
-						{ type: 'button', className: 'button wc-products-settings__footer-button', onClick: this.props.done_callback },
-						__('Done')
-					)
+					done_button
 				)
 			);
 		}
