@@ -3,6 +3,12 @@ const { Toolbar, withAPIData, Dropdown, Dashicon } = wp.components;
 const { TransitionGroup, CSSTransition } = ReactTransitionGroup;
 
 /**
+ * Product data cache.
+ * Reduces the number of API calls and makes UI smoother and faster.
+ */
+const PRODUCT_DATA = {};
+
+/**
  * When the display mode is 'Specific products' search for and add products to the block.
  *
  * @todo Add the functionality and everything.
@@ -76,7 +82,7 @@ export class ProductsSpecificSelect extends React.Component {
 					selectedProducts={ this.state.selectedProducts }
 				/>
 				<ProductSpecificSelectedProducts
-					products={ this.state.selectedProducts }
+					productIds={ this.state.selectedProducts }
 					removeProductCallback={ this.removeProduct.bind( this ) }
 				/>
 			</div>
@@ -194,6 +200,11 @@ const ProductSpecificSearchResults = withAPIData( ( props ) => {
 			return __( 'No products found' );
 		}
 
+		// Populate the cache.
+		for ( let product of products.data ) {
+			PRODUCT_DATA[ product.id ] = product;
+		}
+
 		return <ProductSpecificSearchResultsDropdown
 			products={ products.data }
 			addProductCallback={ addProductCallback }
@@ -297,42 +308,68 @@ class ProductSpecificSearchResultsDropdownElement extends React.Component {
  */
 const ProductSpecificSelectedProducts = withAPIData( ( props ) => {
 
-		if ( ! props.products.length ) {
+		if ( ! props.productIds.length ) {
 			return {
 				products: []
 			};
 		}
 
-		return {
-			products: '/wc/v2/products?include=' + props.products.join( ',' )
-		};
-	} )( ( { products, removeProductCallback } ) => {
-		if ( ! products.data ) {
-			return null;
+		// Determine which products are not already in the cache and only fetch uncached products.
+		let uncachedProducts = [];
+		for( const productId of props.productIds ) {
+			if ( ! PRODUCT_DATA.hasOwnProperty( productId ) ) {
+				uncachedProducts.push( productId );
+			}
 		}
 
-		if ( 0 === products.data.length ) {
+		return {
+			products: uncachedProducts.length ? '/wc/v2/products?include=' + uncachedProducts.join( ',' ) : []
+		};
+	} )( ( { productIds, products, removeProductCallback } ) => {
+
+		// Add new products to cache.
+		if ( products.data ) {
+			for ( const product of products.data ) {
+				PRODUCT_DATA[ product.id ] = product;
+			}
+		}
+
+		if ( 0 === productIds.length ) {
 			return __( 'No products selected' );
+		}
+
+		const productElements = [];
+
+		for ( const productId of productIds ) {
+
+			// Skip products that aren't in the cache yet or failed to fetch.
+			if ( ! PRODUCT_DATA.hasOwnProperty( productId ) ) {
+				continue;
+			}
+
+			const productData = PRODUCT_DATA[ productId ];
+
+			productElements.push(
+				<li className="wc-products-list-card__item">
+					<div className="wc-products-list-card__content">
+						<img src={ productData.images[0].src } />
+						<span className="wc-products-list-card__content-item-name">{ productData.name }</span>
+						<button
+							type="button"
+							id={ 'product-' + productData.id }
+							onClick={ function() { removeProductCallback( productData.id ) } } >
+								<Dashicon icon={ 'no-alt' } />
+						</button>
+					</div>
+				</li>
+			);
 		}
 
 		return (
 			<div className="wc-products-list-card__results-wrapper">
 				<div role="menu" className="wc-products-list-card__results" aria-orientation="vertical" aria-label="{ __( 'Products list' ) }">
 					<ul>
-						{ products.data.map( ( product ) => (
-							<li className="wc-products-list-card__item">
-								<div className="wc-products-list-card__content">
-									<img src={ product.images[0].src } />
-									<span className="wc-products-list-card__content-item-name">{ product.name }</span>
-									<button
-										type="button"
-										id={ 'product-' + product.id }
-										onClick={ function() { removeProductCallback( product.id ) } } >
-											<Dashicon icon={ 'no-alt' } />
-									</button>
-								</div>
-							</li>
-						) ) }
+						{ productElements }
 					</ul>
 				</div>
 			</div>

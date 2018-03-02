@@ -590,7 +590,7 @@ registerBlockType( 'woocommerce/products', {
 		}
 
 		if ( 'specific' === display ) {
-			shortcode_atts.set( 'include', display_setting.join( ',' ) );
+			shortcode_atts.set( 'ids', display_setting.join( ',' ) );
 		} else if ( 'category' === display ) {
 			shortcode_atts.set( 'category', display_setting.join( ',' ) );
 		} else if ( 'featured' === display ) {
