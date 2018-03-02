@@ -475,7 +475,7 @@ class WC_Admin_Setup_Wizard {
 					</p>
 					<p>
 					<?php
-					esc_html_e( 'Checking this box means making WooCommerce better &mdash; your store will be considered as we evaluate new features, judge the quality of an update, or determine if an improvement makes sense. If you do not check this box, WooCommerce will not know this store exists.', 'woocommerce' );
+					esc_html_e( 'Checking this box means making WooCommerce better &mdash; your store will be considered as we evaluate new features, judge the quality of an update, or determine if an improvement makes sense. If you do not check this box, we will not know this store exists.', 'woocommerce' );
 					echo ' <a target="_blank" href="https://woocommerce.com/usage-tracking/">' . esc_html__( 'Read more about what we collect.', 'woocommerce' ) . '</a>';
 					?>
 					</p>
