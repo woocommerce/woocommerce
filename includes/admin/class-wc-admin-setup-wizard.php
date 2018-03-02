@@ -427,7 +427,12 @@ class WC_Admin_Setup_Wizard {
 			>
 				<option value=""><?php esc_html_e( 'Choose a currency&hellip;', 'woocommerce' ); ?></option>
 				<?php foreach ( get_woocommerce_currencies() as $code => $name ) : ?>
-					<option value="<?php echo esc_attr( $code ); ?>" <?php selected( $currency, $code ); ?>><?php printf( esc_html__( '%1$s (%2$s)', 'woocommerce' ), $name, get_woocommerce_currency_symbol( $code ) ); ?></option>
+					<option value="<?php echo esc_attr( $code ); ?>" <?php selected( $currency, $code ); ?>>
+						<?php
+							/* translators: 1: currency name 2: currency code */
+							echo esc_html( sprintf( __( '%1$s (%2$s)', 'woocommerce' ), $name, get_woocommerce_currency_symbol( $code ) ) );
+						?>
+					</option>
 				<?php endforeach; ?>
 			</select>
 			<script type="text/javascript">
@@ -904,9 +909,9 @@ class WC_Admin_Setup_Wizard {
 
 		// @codingStandardsIgnoreStart
 		$setup_domestic   = isset( $_POST['shipping_zones']['domestic']['enabled'] ) && ( 'yes' === $_POST['shipping_zones']['domestic']['enabled'] );
-		$domestic_method  = sanitize_text_field( wp_unslash( $_POST['shipping_zones']['domestic']['method'] ) );
+		$domestic_method  = isset( $_POST['shipping_zones']['domestic']['method'] ) ? sanitize_text_field( wp_unslash( $_POST['shipping_zones']['domestic']['method'] ) ) : '';
 		$setup_intl       = isset( $_POST['shipping_zones']['intl']['enabled'] ) && ( 'yes' === $_POST['shipping_zones']['intl']['enabled'] );
-		$intl_method      = sanitize_text_field( wp_unslash( $_POST['shipping_zones']['intl']['method'] ) );
+		$intl_method      = isset( $_POST['shipping_zones']['intl']['method'] ) ? sanitize_text_field( wp_unslash( $_POST['shipping_zones']['intl']['method'] ) ) : '';
 		$weight_unit      = sanitize_text_field( wp_unslash( $_POST['weight_unit'] ) );
 		$dimension_unit   = sanitize_text_field( wp_unslash( $_POST['dimension_unit'] ) );
 		$existing_zones   = WC_Shipping_Zones::get_zones();
@@ -1109,12 +1114,12 @@ class WC_Admin_Setup_Wizard {
 		$klarna_checkout_description = '<p>' . sprintf(
 			/* translators: %s: URL */
 			__( 'Full checkout experience with pay now, pay later and slice it. No credit card numbers, no passwords, no worries. <a href="%s" target="_blank">Learn more about Klarna</a>.', 'woocommerce' ),
-			'https://woocommerce.com/products/klarna/'
+			'https://woocommerce.com/products/klarna-checkout/'
 		) . '</p>';
 		$klarna_payments_description = '<p>' . sprintf(
 			/* translators: %s: URL */
 			__( 'Choose the payment that you want, pay now, pay later or slice it. No credit card numbers, no passwords, no worries. <a href="%s" target="_blank">Learn more about Klarna</a>.', 'woocommerce' ),
-			'https://woocommerce.com/products/klarna/'
+			'https://woocommerce.com/products/klarna-payments/ '
 		) . '</p>';
 		$square_description = '<p>' . sprintf(
 			/* translators: %s: URL */
@@ -1304,7 +1309,7 @@ class WC_Admin_Setup_Wizard {
 		// Show the user-saved state if it was previously saved.
 		// Otherwise, rely on the item info.
 		if ( is_array( $previously_saved_settings ) ) {
-			$should_enable_toggle = 'yes' === $previously_saved_settings['enabled'];
+			$should_enable_toggle = isset( $previously_saved_settings['enabled'] ) && 'yes' === $previously_saved_settings['enabled'];
 		} else {
 			$should_enable_toggle = isset( $item_info['enabled'] ) && $item_info['enabled'];
 		}
@@ -1884,8 +1889,8 @@ class WC_Admin_Setup_Wizard {
 			<li class="wc-wizard-next-step-item">
 				<div class="wc-wizard-next-step-description">
 					<p class="next-step-heading"><?php esc_html_e( 'Next step', 'woocommerce' ); ?></p>
-					<h3 class="next-step-description"><?php esc_html_e( 'Create your first product', 'woocommerce' ); ?></h3>
-					<p class="next-step-extra-info"><?php esc_html_e( "You're ready to add your first product.", 'woocommerce' ); ?></p>
+					<h3 class="next-step-description"><?php esc_html_e( 'Create some products', 'woocommerce' ); ?></h3>
+					<p class="next-step-extra-info"><?php esc_html_e( "You're ready to add products to your store.", 'woocommerce' ); ?></p>
 				</div>
 				<div class="wc-wizard-next-step-action">
 					<p class="wc-setup-actions step">

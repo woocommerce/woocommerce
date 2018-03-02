@@ -2,15 +2,11 @@
 /**
  * WooCommerce setup
  *
- * @author   Automattic
- * @category API
  * @package  WooCommerce
  * @since    3.2.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Main WooCommerce Class.
@@ -127,7 +123,7 @@ final class WooCommerce {
 	 * @since 2.1
 	 */
 	public function __clone() {
-		wc_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, __( 'Cloning is forbidden.', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -136,7 +132,7 @@ final class WooCommerce {
 	 * @since 2.1
 	 */
 	public function __wakeup() {
-		wc_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, __( 'Unserializing instances of this class is forbidden.', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -208,7 +204,7 @@ final class WooCommerce {
 		$this->define( 'WC_PLUGIN_BASENAME', plugin_basename( WC_PLUGIN_FILE ) );
 		$this->define( 'WC_VERSION', $this->version );
 		$this->define( 'WOOCOMMERCE_VERSION', $this->version );
-		$this->define( 'WC_ROUNDING_PRECISION', 4 );
+		$this->define( 'WC_ROUNDING_PRECISION', 6 );
 		$this->define( 'WC_DISCOUNT_ROUNDING_MODE', 2 );
 		$this->define( 'WC_TAX_ROUNDING_MODE', 'yes' === get_option( 'woocommerce_prices_include_tax', 'no' ) ? 2 : 1 );
 		$this->define( 'WC_DELIMITER', '|' );
@@ -255,124 +251,124 @@ final class WooCommerce {
 		/**
 		 * Class autoloader.
 		 */
-		include_once( WC_ABSPATH . 'includes/class-wc-autoloader.php' );
+		include_once WC_ABSPATH . 'includes/class-wc-autoloader.php';
 
 		/**
 		 * Interfaces.
 		 */
-		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-abstract-order-data-store-interface.php' );
-		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-coupon-data-store-interface.php' );
-		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-customer-data-store-interface.php' );
-		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-customer-download-data-store-interface.php' );
-		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-customer-download-log-data-store-interface.php' );
-		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-object-data-store-interface.php' );
-		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-order-data-store-interface.php' );
-		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-order-item-data-store-interface.php' );
-		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-order-item-product-data-store-interface.php' );
-		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-order-item-type-data-store-interface.php' );
-		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-order-refund-data-store-interface.php' );
-		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-payment-token-data-store-interface.php' );
-		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-product-data-store-interface.php' );
-		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-product-variable-data-store-interface.php' );
-		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-shipping-zone-data-store-interface.php' );
-		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-logger-interface.php' );
-		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-log-handler-interface.php' );
-		include_once( WC_ABSPATH . 'includes/interfaces/class-wc-webhooks-data-store-interface.php' );
+		include_once WC_ABSPATH . 'includes/interfaces/class-wc-abstract-order-data-store-interface.php';
+		include_once WC_ABSPATH . 'includes/interfaces/class-wc-coupon-data-store-interface.php';
+		include_once WC_ABSPATH . 'includes/interfaces/class-wc-customer-data-store-interface.php';
+		include_once WC_ABSPATH . 'includes/interfaces/class-wc-customer-download-data-store-interface.php';
+		include_once WC_ABSPATH . 'includes/interfaces/class-wc-customer-download-log-data-store-interface.php';
+		include_once WC_ABSPATH . 'includes/interfaces/class-wc-object-data-store-interface.php';
+		include_once WC_ABSPATH . 'includes/interfaces/class-wc-order-data-store-interface.php';
+		include_once WC_ABSPATH . 'includes/interfaces/class-wc-order-item-data-store-interface.php';
+		include_once WC_ABSPATH . 'includes/interfaces/class-wc-order-item-product-data-store-interface.php';
+		include_once WC_ABSPATH . 'includes/interfaces/class-wc-order-item-type-data-store-interface.php';
+		include_once WC_ABSPATH . 'includes/interfaces/class-wc-order-refund-data-store-interface.php';
+		include_once WC_ABSPATH . 'includes/interfaces/class-wc-payment-token-data-store-interface.php';
+		include_once WC_ABSPATH . 'includes/interfaces/class-wc-product-data-store-interface.php';
+		include_once WC_ABSPATH . 'includes/interfaces/class-wc-product-variable-data-store-interface.php';
+		include_once WC_ABSPATH . 'includes/interfaces/class-wc-shipping-zone-data-store-interface.php';
+		include_once WC_ABSPATH . 'includes/interfaces/class-wc-logger-interface.php';
+		include_once WC_ABSPATH . 'includes/interfaces/class-wc-log-handler-interface.php';
+		include_once WC_ABSPATH . 'includes/interfaces/class-wc-webhooks-data-store-interface.php';
 
 		/**
 		 * Abstract classes.
 		 */
-		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-data.php' ); // WC_Data for CRUD.
-		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-object-query.php' ); // WC_Object_Query for CRUD.
-		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-payment-token.php' ); // Payment Tokens.
-		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-product.php' ); // Products.
-		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-order.php' ); // Orders.
-		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-settings-api.php' ); // Settings API (for gateways, shipping, and integrations).
-		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-shipping-method.php' ); // A Shipping method.
-		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-payment-gateway.php' ); // A Payment gateway.
-		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-integration.php' ); // An integration with a service.
-		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-log-handler.php' );
-		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-deprecated-hooks.php' );
-		include_once( WC_ABSPATH . 'includes/abstracts/abstract-wc-session.php' );
+		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-data.php';
+		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-object-query.php';
+		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-payment-token.php';
+		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-product.php';
+		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-order.php';
+		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-settings-api.php';
+		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-shipping-method.php';
+		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-payment-gateway.php';
+		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-integration.php';
+		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-log-handler.php';
+		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-deprecated-hooks.php';
+		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-session.php';
 
 		/**
 		 * Core classes.
 		 */
-		include_once( WC_ABSPATH . 'includes/wc-core-functions.php' );
-		include_once( WC_ABSPATH . 'includes/class-wc-datetime.php' );
-		include_once( WC_ABSPATH . 'includes/class-wc-post-types.php' ); // Registers post types.
-		include_once( WC_ABSPATH . 'includes/class-wc-install.php' );
-		include_once( WC_ABSPATH . 'includes/class-wc-geolocation.php' );
-		include_once( WC_ABSPATH . 'includes/class-wc-download-handler.php' );
-		include_once( WC_ABSPATH . 'includes/class-wc-comments.php' );
-		include_once( WC_ABSPATH . 'includes/class-wc-post-data.php' );
-		include_once( WC_ABSPATH . 'includes/class-wc-ajax.php' );
-		include_once( WC_ABSPATH . 'includes/class-wc-emails.php' );
-		include_once( WC_ABSPATH . 'includes/class-wc-data-exception.php' );
-		include_once( WC_ABSPATH . 'includes/class-wc-query.php' );
-		include_once( WC_ABSPATH . 'includes/class-wc-meta-data.php' ); // Meta data internal object.
-		include_once( WC_ABSPATH . 'includes/class-wc-order-factory.php' ); // Order factory.
-		include_once( WC_ABSPATH . 'includes/class-wc-order-query.php' ); // Order query.
-		include_once( WC_ABSPATH . 'includes/class-wc-product-factory.php' ); // Product factory.
-		include_once( WC_ABSPATH . 'includes/class-wc-product-query.php' ); // Product query.
-		include_once( WC_ABSPATH . 'includes/class-wc-payment-tokens.php' ); // Payment tokens controller.
-		include_once( WC_ABSPATH . 'includes/class-wc-shipping-zone.php' );
-		include_once( WC_ABSPATH . 'includes/gateways/class-wc-payment-gateway-cc.php' ); // CC Payment Gateway.
-		include_once( WC_ABSPATH . 'includes/gateways/class-wc-payment-gateway-echeck.php' ); // eCheck Payment Gateway.
-		include_once( WC_ABSPATH . 'includes/class-wc-countries.php' ); // Defines countries and states.
-		include_once( WC_ABSPATH . 'includes/class-wc-integrations.php' ); // Loads integrations.
-		include_once( WC_ABSPATH . 'includes/class-wc-cache-helper.php' ); // Cache Helper.
-		include_once( WC_ABSPATH . 'includes/class-wc-https.php' ); // https Helper.
-		include_once( WC_ABSPATH . 'includes/class-wc-deprecated-action-hooks.php' );
-		include_once( WC_ABSPATH . 'includes/class-wc-deprecated-filter-hooks.php' );
-		include_once( WC_ABSPATH . 'includes/class-wc-background-emailer.php' );
-		include_once( WC_ABSPATH . 'includes/class-wc-discounts.php' );
-		include_once( WC_ABSPATH . 'includes/class-wc-cart-totals.php' );
-		include_once( WC_ABSPATH . 'includes/customizer/class-wc-shop-customizer.php' );
-		include_once( WC_ABSPATH . 'includes/class-wc-regenerate-images.php' ); // Image regeneration class.
+		include_once WC_ABSPATH . 'includes/wc-core-functions.php';
+		include_once WC_ABSPATH . 'includes/class-wc-datetime.php';
+		include_once WC_ABSPATH . 'includes/class-wc-post-types.php';
+		include_once WC_ABSPATH . 'includes/class-wc-install.php';
+		include_once WC_ABSPATH . 'includes/class-wc-geolocation.php';
+		include_once WC_ABSPATH . 'includes/class-wc-download-handler.php';
+		include_once WC_ABSPATH . 'includes/class-wc-comments.php';
+		include_once WC_ABSPATH . 'includes/class-wc-post-data.php';
+		include_once WC_ABSPATH . 'includes/class-wc-ajax.php';
+		include_once WC_ABSPATH . 'includes/class-wc-emails.php';
+		include_once WC_ABSPATH . 'includes/class-wc-data-exception.php';
+		include_once WC_ABSPATH . 'includes/class-wc-query.php';
+		include_once WC_ABSPATH . 'includes/class-wc-meta-data.php';
+		include_once WC_ABSPATH . 'includes/class-wc-order-factory.php';
+		include_once WC_ABSPATH . 'includes/class-wc-order-query.php';
+		include_once WC_ABSPATH . 'includes/class-wc-product-factory.php';
+		include_once WC_ABSPATH . 'includes/class-wc-product-query.php';
+		include_once WC_ABSPATH . 'includes/class-wc-payment-tokens.php';
+		include_once WC_ABSPATH . 'includes/class-wc-shipping-zone.php';
+		include_once WC_ABSPATH . 'includes/gateways/class-wc-payment-gateway-cc.php';
+		include_once WC_ABSPATH . 'includes/gateways/class-wc-payment-gateway-echeck.php';
+		include_once WC_ABSPATH . 'includes/class-wc-countries.php';
+		include_once WC_ABSPATH . 'includes/class-wc-integrations.php';
+		include_once WC_ABSPATH . 'includes/class-wc-cache-helper.php';
+		include_once WC_ABSPATH . 'includes/class-wc-https.php';
+		include_once WC_ABSPATH . 'includes/class-wc-deprecated-action-hooks.php';
+		include_once WC_ABSPATH . 'includes/class-wc-deprecated-filter-hooks.php';
+		include_once WC_ABSPATH . 'includes/class-wc-background-emailer.php';
+		include_once WC_ABSPATH . 'includes/class-wc-discounts.php';
+		include_once WC_ABSPATH . 'includes/class-wc-cart-totals.php';
+		include_once WC_ABSPATH . 'includes/customizer/class-wc-shop-customizer.php';
+		include_once WC_ABSPATH . 'includes/class-wc-regenerate-images.php';
 
 		/**
 		 * Data stores - used to store and retrieve CRUD object data from the database.
 		 */
-		include_once( WC_ABSPATH . 'includes/class-wc-data-store.php' );
-		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-data-store-wp.php' );
-		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-coupon-data-store-cpt.php' );
-		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-product-data-store-cpt.php' );
-		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-product-grouped-data-store-cpt.php' );
-		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-product-variable-data-store-cpt.php' );
-		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-product-variation-data-store-cpt.php' );
-		include_once( WC_ABSPATH . 'includes/data-stores/abstract-wc-order-item-type-data-store.php' );
-		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-item-data-store.php' );
-		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-item-coupon-data-store.php' );
-		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-item-fee-data-store.php' );
-		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-item-product-store.php' );
-		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-item-shipping-data-store.php' );
-		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-item-tax-data-store.php' );
-		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-payment-token-data-store.php' );
-		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-customer-data-store.php' );
-		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-customer-data-store-session.php' );
-		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-customer-download-data-store.php' );
-		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-customer-download-log-data-store.php' );
-		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-shipping-zone-data-store.php' );
-		include_once( WC_ABSPATH . 'includes/data-stores/abstract-wc-order-data-store-cpt.php' );
-		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-data-store-cpt.php' );
-		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-order-refund-data-store-cpt.php' );
-		include_once( WC_ABSPATH . 'includes/data-stores/class-wc-webhook-data-store.php' );
+		include_once WC_ABSPATH . 'includes/class-wc-data-store.php';
+		include_once WC_ABSPATH . 'includes/data-stores/class-wc-data-store-wp.php';
+		include_once WC_ABSPATH . 'includes/data-stores/class-wc-coupon-data-store-cpt.php';
+		include_once WC_ABSPATH . 'includes/data-stores/class-wc-product-data-store-cpt.php';
+		include_once WC_ABSPATH . 'includes/data-stores/class-wc-product-grouped-data-store-cpt.php';
+		include_once WC_ABSPATH . 'includes/data-stores/class-wc-product-variable-data-store-cpt.php';
+		include_once WC_ABSPATH . 'includes/data-stores/class-wc-product-variation-data-store-cpt.php';
+		include_once WC_ABSPATH . 'includes/data-stores/abstract-wc-order-item-type-data-store.php';
+		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-item-data-store.php';
+		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-item-coupon-data-store.php';
+		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-item-fee-data-store.php';
+		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-item-product-store.php';
+		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-item-shipping-data-store.php';
+		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-item-tax-data-store.php';
+		include_once WC_ABSPATH . 'includes/data-stores/class-wc-payment-token-data-store.php';
+		include_once WC_ABSPATH . 'includes/data-stores/class-wc-customer-data-store.php';
+		include_once WC_ABSPATH . 'includes/data-stores/class-wc-customer-data-store-session.php';
+		include_once WC_ABSPATH . 'includes/data-stores/class-wc-customer-download-data-store.php';
+		include_once WC_ABSPATH . 'includes/data-stores/class-wc-customer-download-log-data-store.php';
+		include_once WC_ABSPATH . 'includes/data-stores/class-wc-shipping-zone-data-store.php';
+		include_once WC_ABSPATH . 'includes/data-stores/abstract-wc-order-data-store-cpt.php';
+		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-data-store-cpt.php';
+		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-refund-data-store-cpt.php';
+		include_once WC_ABSPATH . 'includes/data-stores/class-wc-webhook-data-store.php';
 
 		/**
 		 * REST API.
 		 */
-		include_once( WC_ABSPATH . 'includes/legacy/class-wc-legacy-api.php' );
-		include_once( WC_ABSPATH . 'includes/class-wc-api.php' ); // API Class.
-		include_once( WC_ABSPATH . 'includes/class-wc-auth.php' ); // Auth Class.
-		include_once( WC_ABSPATH . 'includes/class-wc-register-wp-admin-settings.php' );
+		include_once WC_ABSPATH . 'includes/legacy/class-wc-legacy-api.php';
+		include_once WC_ABSPATH . 'includes/class-wc-api.php';
+		include_once WC_ABSPATH . 'includes/class-wc-auth.php';
+		include_once WC_ABSPATH . 'includes/class-wc-register-wp-admin-settings.php';
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
-			include_once( WC_ABSPATH . 'includes/class-wc-cli.php' );
+			include_once WC_ABSPATH . 'includes/class-wc-cli.php';
 		}
 
 		if ( $this->is_request( 'admin' ) ) {
-			include_once( WC_ABSPATH . 'includes/admin/class-wc-admin.php' );
+			include_once WC_ABSPATH . 'includes/admin/class-wc-admin.php';
 		}
 
 		if ( $this->is_request( 'frontend' ) ) {
@@ -380,7 +376,7 @@ final class WooCommerce {
 		}
 
 		if ( $this->is_request( 'cron' ) && 'yes' === get_option( 'woocommerce_allow_tracking', 'no' ) ) {
-			include_once( WC_ABSPATH . 'includes/class-wc-tracker.php' );
+			include_once WC_ABSPATH . 'includes/class-wc-tracker.php';
 		}
 
 		$this->theme_support_includes();
@@ -397,28 +393,28 @@ final class WooCommerce {
 		if ( wc_is_active_theme( array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' ) ) ) {
 			switch ( get_template() ) {
 				case 'twentyten':
-					include_once( WC_ABSPATH . 'includes/theme-support/class-wc-twenty-ten.php' );
+					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-ten.php';
 					break;
 				case 'twentyeleven':
-					include_once( WC_ABSPATH . 'includes/theme-support/class-wc-twenty-eleven.php' );
+					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-eleven.php';
 					break;
 				case 'twentytwelve':
-					include_once( WC_ABSPATH . 'includes/theme-support/class-wc-twenty-twelve.php' );
+					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-twelve.php';
 					break;
 				case 'twentythirteen':
-					include_once( WC_ABSPATH . 'includes/theme-support/class-wc-twenty-thirteen.php' );
+					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-thirteen.php';
 					break;
 				case 'twentyfourteen':
-					include_once( WC_ABSPATH . 'includes/theme-support/class-wc-twenty-fourteen.php' );
+					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-fourteen.php';
 					break;
 				case 'twentyfifteen':
-					include_once( WC_ABSPATH . 'includes/theme-support/class-wc-twenty-fifteen.php' );
+					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-fifteen.php';
 					break;
 				case 'twentysixteen':
-					include_once( WC_ABSPATH . 'includes/theme-support/class-wc-twenty-sixteen.php' );
+					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-sixteen.php';
 					break;
 				case 'twentyseventeen':
-					include_once( WC_ABSPATH . 'includes/theme-support/class-wc-twenty-seventeen.php' );
+					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-seventeen.php';
 					break;
 			}
 		}
@@ -428,27 +424,27 @@ final class WooCommerce {
 	 * Include required frontend files.
 	 */
 	public function frontend_includes() {
-		include_once( WC_ABSPATH . 'includes/wc-cart-functions.php' );
-		include_once( WC_ABSPATH . 'includes/wc-notice-functions.php' );
-		include_once( WC_ABSPATH . 'includes/wc-template-hooks.php' );
-		include_once( WC_ABSPATH . 'includes/class-wc-template-loader.php' );  // Template Loader.
-		include_once( WC_ABSPATH . 'includes/class-wc-frontend-scripts.php' ); // Frontend Scripts.
-		include_once( WC_ABSPATH . 'includes/class-wc-form-handler.php' );     // Form Handlers.
-		include_once( WC_ABSPATH . 'includes/class-wc-cart.php' );             // The main cart class.
-		include_once( WC_ABSPATH . 'includes/class-wc-tax.php' );              // Tax class.
-		include_once( WC_ABSPATH . 'includes/class-wc-shipping-zones.php' );   // Shipping Zones class.
-		include_once( WC_ABSPATH . 'includes/class-wc-customer.php' );         // Customer class.
-		include_once( WC_ABSPATH . 'includes/class-wc-shortcodes.php' );       // Shortcodes class.
-		include_once( WC_ABSPATH . 'includes/class-wc-embed.php' );            // Embeds.
-		include_once( WC_ABSPATH . 'includes/class-wc-structured-data.php' );  // Structured Data class.
-		include_once( WC_ABSPATH . 'includes/class-wc-session-handler.php' );  // Session handler class.
+		include_once WC_ABSPATH . 'includes/wc-cart-functions.php';
+		include_once WC_ABSPATH . 'includes/wc-notice-functions.php';
+		include_once WC_ABSPATH . 'includes/wc-template-hooks.php';
+		include_once WC_ABSPATH . 'includes/class-wc-template-loader.php';
+		include_once WC_ABSPATH . 'includes/class-wc-frontend-scripts.php';
+		include_once WC_ABSPATH . 'includes/class-wc-form-handler.php';
+		include_once WC_ABSPATH . 'includes/class-wc-cart.php';
+		include_once WC_ABSPATH . 'includes/class-wc-tax.php';
+		include_once WC_ABSPATH . 'includes/class-wc-shipping-zones.php';
+		include_once WC_ABSPATH . 'includes/class-wc-customer.php';
+		include_once WC_ABSPATH . 'includes/class-wc-shortcodes.php';
+		include_once WC_ABSPATH . 'includes/class-wc-embed.php';
+		include_once WC_ABSPATH . 'includes/class-wc-structured-data.php';
+		include_once WC_ABSPATH . 'includes/class-wc-session-handler.php';
 	}
 
 	/**
 	 * Function used to Init WooCommerce Template Functions - This makes them pluggable by plugins and themes.
 	 */
 	public function include_template_functions() {
-		include_once( WC_ABSPATH . 'includes/wc-template-functions.php' );
+		include_once WC_ABSPATH . 'includes/wc-template-functions.php';
 	}
 
 	/**
@@ -462,11 +458,11 @@ final class WooCommerce {
 		$this->load_plugin_textdomain();
 
 		// Load class instances.
-		$this->product_factory                     = new WC_Product_Factory(); // Product Factory to create new product instances.
-		$this->order_factory                       = new WC_Order_Factory(); // Order Factory to create new order instances.
-		$this->countries                           = new WC_Countries(); // Countries class.
-		$this->integrations                        = new WC_Integrations(); // Integrations class.
-		$this->structured_data                     = new WC_Structured_Data(); // Structured Data class, generates and handles structured data.
+		$this->product_factory                     = new WC_Product_Factory();
+		$this->order_factory                       = new WC_Order_Factory();
+		$this->countries                           = new WC_Countries();
+		$this->integrations                        = new WC_Integrations();
+		$this->structured_data                     = new WC_Structured_Data();
 		$this->deprecated_hook_handlers['actions'] = new WC_Deprecated_Action_Hooks();
 		$this->deprecated_hook_handlers['filters'] = new WC_Deprecated_Filter_Hooks();
 
@@ -477,10 +473,11 @@ final class WooCommerce {
 			$this->session = new $session_class();
 			$this->session->init();
 
-			$this->cart     = new WC_Cart();                                  // Cart class, stores the cart contents.
-			$this->customer = new WC_Customer( get_current_user_id(), true ); // Customer class, handles data such as customer location.
+			$this->cart     = new WC_Cart();
+			$this->customer = new WC_Customer( get_current_user_id(), true );
 
-			add_action( 'shutdown', array( $this->customer, 'save' ), 10 );   // Customer should be saved during shutdown.
+			// Customer should be saved during shutdown.
+			add_action( 'shutdown', array( $this->customer, 'save' ), 10 );
 		}
 
 		$this->load_webhooks();
@@ -536,22 +533,24 @@ final class WooCommerce {
 	 *
 	 * 3.3 sizes:
 	 *
-	 * thumbnail - Used in product listings.
-	 * single - Used on single product pages for the main image.
-	 *
-	 * shop_thumbnail, shop_single, shop_catalog registered for bw compat. @todo remove in 4.0.
+	 * woocommerce_thumbnail - Used in product listings. We assume these work for a 3 column grid layout.
+	 * woocommerce_single - Used on single product pages for the main image.
 	 *
 	 * @since 2.3
 	 */
 	public function add_image_sizes() {
-		$thumbnail = wc_get_image_size( 'thumbnail' );
-		$single    = wc_get_image_size( 'single' );
+		$thumbnail         = wc_get_image_size( 'thumbnail' );
+		$single            = wc_get_image_size( 'single' );
+		$gallery_thumbnail = wc_get_image_size( 'gallery_thumbnail' );
 
 		add_image_size( 'woocommerce_thumbnail', $thumbnail['width'], $thumbnail['height'], $thumbnail['crop'] );
 		add_image_size( 'woocommerce_single', $single['width'], $single['height'], $single['crop'] );
-		add_image_size( 'shop_thumbnail', $thumbnail['width'], $thumbnail['height'], $thumbnail['crop'] );
+		add_image_size( 'woocommerce_gallery_thumbnail', $gallery_thumbnail['width'], $gallery_thumbnail['height'], $gallery_thumbnail['crop'] );
+
+		// Registered for bw compat. @todo remove in 4.0.
 		add_image_size( 'shop_catalog', $thumbnail['width'], $thumbnail['height'], $thumbnail['crop'] );
 		add_image_size( 'shop_single', $single['width'], $single['height'], $single['crop'] );
+		add_image_size( 'shop_thumbnail', $gallery_thumbnail['width'], $gallery_thumbnail['height'], $gallery_thumbnail['crop'] );
 	}
 
 	/**
@@ -599,7 +598,7 @@ final class WooCommerce {
 	 */
 	public function api_request_url( $request, $ssl = null ) {
 		if ( is_null( $ssl ) ) {
-			$scheme = parse_url( home_url(), PHP_URL_SCHEME );
+			$scheme = wp_parse_url( home_url(), PHP_URL_SCHEME );
 		} elseif ( $ssl ) {
 			$scheme = 'https';
 		} else {
@@ -636,10 +635,10 @@ final class WooCommerce {
 	 */
 	public function wpdb_table_fix() {
 		global $wpdb;
-		$wpdb->payment_tokenmeta    = $wpdb->prefix . 'woocommerce_payment_tokenmeta';
-		$wpdb->order_itemmeta       = $wpdb->prefix . 'woocommerce_order_itemmeta';
-		$wpdb->tables[]             = 'woocommerce_payment_tokenmeta';
-		$wpdb->tables[]             = 'woocommerce_order_itemmeta';
+		$wpdb->payment_tokenmeta = $wpdb->prefix . 'woocommerce_payment_tokenmeta';
+		$wpdb->order_itemmeta    = $wpdb->prefix . 'woocommerce_order_itemmeta';
+		$wpdb->tables[]          = 'woocommerce_payment_tokenmeta';
+		$wpdb->tables[]          = 'woocommerce_order_itemmeta';
 
 		if ( get_option( 'db_version' ) < 34370 ) {
 			$wpdb->woocommerce_termmeta = $wpdb->prefix . 'woocommerce_termmeta';

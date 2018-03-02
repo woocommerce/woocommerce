@@ -975,15 +975,18 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 		return 0.0;
 	}
 
+	$line_price = $price * $qty;
+
 	if ( $product->is_taxable() && wc_prices_include_tax() ) {
-		$tax_rates  = WC_Tax::get_base_tax_rates( $product->get_tax_class( 'unfiltered' ) );
-		$taxes      = WC_Tax::calc_tax( $price * $qty, $tax_rates, true );
-		$price      = WC_Tax::round( $price * $qty - array_sum( $taxes ) );
+		$tax_rates      = WC_Tax::get_rates( $product->get_tax_class() );
+		$base_tax_rates = WC_Tax::get_base_tax_rates( $product->get_tax_class( 'unfiltered' ) );
+		$remove_taxes   = apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ? WC_Tax::calc_tax( $line_price, $base_tax_rates, true ) : WC_Tax::calc_tax( $line_price, $tax_rates, true );
+		$return_price   = WC_Tax::round( $line_price - wc_round_tax_total( array_sum( $remove_taxes ) ) );
 	} else {
-		$price = $price * $qty;
+		$return_price = $line_price;
 	}
 
-	return apply_filters( 'woocommerce_get_price_excluding_tax', $price, $qty, $product );
+	return apply_filters( 'woocommerce_get_price_excluding_tax', $return_price, $qty, $product );
 }
 
 /**

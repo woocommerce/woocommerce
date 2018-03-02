@@ -4,10 +4,8 @@
  *
  * Functions for updating data, used by the background updater.
  *
- * @author   WooThemes
- * @category Core
- * @package  WooCommerce/Functions
- * @version  2.6.0
+ * @package WooCommerce/Functions
+ * @version 3.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -1465,15 +1463,38 @@ function wc_update_330_image_options() {
 	$old_single_size    = get_option( 'shop_single_image_size', array() );
 
 	if ( ! empty( $old_thumbnail_size['width'] ) ) {
-		update_option( 'woocommerce_thumbnail_image_width', absint( $old_thumbnail_size['width'] ) );
+		$width     = absint( $old_thumbnail_size['width'] );
+		$height    = absint( $old_thumbnail_size['height'] );
+		$hard_crop = ! empty( $old_thumbnail_size['crop'] );
+
+		if ( ! $width ) {
+			$width = 300;
+		}
+
+		if ( ! $height ) {
+			$height = $width;
+		}
+
+		update_option( 'woocommerce_thumbnail_image_width', $width );
+
+		// Calculate cropping mode from old image options.
+		if ( ! $hard_crop ) {
+			update_option( 'woocommerce_thumbnail_cropping', 'uncropped' );
+		} elseif ( $width === $height ) {
+			update_option( 'woocommerce_thumbnail_cropping', '1:1' );
+		} else {
+			$ratio    = $width / $height;
+			$fraction = wc_decimal_to_fraction( $ratio );
+
+			if ( $fraction ) {
+				update_option( 'woocommerce_thumbnail_cropping', 'custom' );
+				update_option( 'woocommerce_thumbnail_cropping_custom_width', $fraction[0] );
+				update_option( 'woocommerce_thumbnail_cropping_custom_height', $fraction[1] );
+			}
+		}
 	}
 
-	if ( ! empty( $old_thumbnail_size['crop'] ) ) {
-		update_option( 'woocommerce_thumbnail_cropping', '1:1' );
-	} elseif ( isset( $old_thumbnail_size['crop'] ) ) {
-		update_option( 'woocommerce_thumbnail_cropping', 'uncropped' );
-	}
-
+	// Single is uncropped.
 	if ( ! empty( $old_single_size['width'] ) ) {
 		update_option( 'woocommerce_single_image_width', absint( $old_single_size['width'] ) );
 	}
@@ -1506,6 +1527,7 @@ function wc_update_330_webhooks() {
 		$webhook->set_secret( get_post_meta( $post->ID, '_secret', true ) );
 		$webhook->set_topic( get_post_meta( $post->ID, '_topic', true ) );
 		$webhook->set_api_version( get_post_meta( $post->ID, '_api_version', true ) );
+		$webhook->set_user_id( $post->post_author );
 		$webhook->set_pending_delivery( false );
 		$webhook->save();
 
@@ -1582,13 +1604,6 @@ function wc_update_330_product_stock_status() {
 }
 
 /**
- * Update DB Version.
- */
-function wc_update_330_db_version() {
-	WC_Install::update_db_version( '3.3.0' );
-}
-
-/**
  * Clear addons page transients
  */
 function wc_update_330_clear_transients() {
@@ -1612,4 +1627,11 @@ function wc_update_330_set_paypal_sandbox_credentials() {
 
 		update_option( 'woocommerce_paypal_settings', $paypal_settings );
 	}
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_330_db_version() {
+	WC_Install::update_db_version( '3.3.0' );
 }

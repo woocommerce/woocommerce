@@ -84,7 +84,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		$this->widget_start( $args, $instance );
 
 		if ( '' === get_option( 'permalink_structure' ) ) {
-			$form_action = remove_query_arg( array( 'page', 'paged' ), add_query_arg( $wp->query_string, '', home_url( $wp->request ) ) );
+			$form_action = remove_query_arg( array( 'page', 'paged', 'product-page' ), add_query_arg( $wp->query_string, '', home_url( $wp->request ) ) );
 		} else {
 			$form_action = preg_replace( '%\/page/[0-9]+%', '', home_url( trailingslashit( $wp->request ) ) );
 		}

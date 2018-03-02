@@ -423,7 +423,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 	 * Test the rounding method.
 	 */
 	public function test_round() {
-		$this->assertEquals( WC_Tax::round( '2.1234567' ), '2.1235' );
+		$this->assertEquals( WC_Tax::round( '2.123456789' ), '2.123457' );
 	}
 
 	/**

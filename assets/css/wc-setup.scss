@@ -639,6 +639,8 @@ body {
 
 // Toggle display a list of services.
 .wc-wizard-services-list-toggle {
+	cursor: pointer;
+
 	.wc-wizard-service-enable::before {
 		content: "\f343"; // up chevron
 		font-family: "dashicons";
@@ -658,7 +660,6 @@ body {
 	.wc-wizard-service-enable input {
 		visibility: hidden;
 		position: relative;
-		cursor: pointer;
 	}
 }
 
