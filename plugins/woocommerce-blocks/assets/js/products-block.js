@@ -798,12 +798,20 @@ registerBlockType('woocommerce/products', {
    * @return Component
    */
 		function getSettingsEditor() {
+
+			var update_display_callback = function update_display_callback(value) {
+				if (display !== value) {
+					setAttributes({
+						display: value,
+						display_setting: []
+					});
+				}
+			};
+
 			return wp.element.createElement(ProductsBlockSettingsEditor, {
 				selected_display: display,
 				selected_display_setting: display_setting,
-				update_display_callback: function update_display_callback(value) {
-					return setAttributes({ display: value });
-				},
+				update_display_callback: update_display_callback,
 				update_display_setting_callback: function update_display_setting_callback(value) {
 					return setAttributes({ display_setting: value });
 				},
