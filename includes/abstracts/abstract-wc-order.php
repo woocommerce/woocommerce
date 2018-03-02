@@ -1619,7 +1619,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 			$subtotal = wc_price( $subtotal, array( 'currency' => $this->get_currency() ) );
 
-			if ( 'excl' === $tax_display && $this->get_prices_include_tax() ) {
+			if ( 'excl' === $tax_display && $this->get_prices_include_tax() && wc_tax_enabled() ) {
 				$subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 			}
 		} else {
