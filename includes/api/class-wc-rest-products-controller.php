@@ -154,7 +154,7 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 	public function prepare_object_for_response( $object, $request ) {
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 
-		$fields = ! empty( $request['fields'] ) ? explode( ',', $request['fields'] ) : [];
+		$fields = ! empty( $request['fields'] ) ? explode( ',', $request['fields'] ) : array();
 
 		$data    = $this->get_product_data( $object, $context, $fields );
 
@@ -570,9 +570,10 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 	 * @param WC_Product $product Product instance.
 	 * @param string     $context Request context.
 	 *                            Options: 'view' and 'edit'.
+	 * @param array      $fields  Fields to include in the response.
 	 * @return array
 	 */
-	protected function get_product_data( $product, $context = 'view', $fields = [] ) {
+	protected function get_product_data( $product, $context = 'view', $fields = array() ) {
 		$data = array(
 			'id'                    => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'id', $fields ) ) ) ? $product->get_id() : null,
 			'name'                  => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'name', $fields ) ) ) ? $product->get_name( $context ) : null,

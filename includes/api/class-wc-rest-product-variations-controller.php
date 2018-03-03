@@ -181,7 +181,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 	 * @return WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
-		$fields = ( $request['fields'] ) ? explode( ',', $request['fields'] ) : [];
+		$fields = ( $request['fields'] ) ? explode( ',', $request['fields'] ) : array();
 
 		$data = array(
 			'id'                    => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'id', $fields ) ) ) ? $object->get_id() : null,
