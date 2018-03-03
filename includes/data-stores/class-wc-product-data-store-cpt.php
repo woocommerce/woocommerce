@@ -1349,14 +1349,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			// phpcs:disable
 			$wpdb->prepare(
 				"SELECT DISTINCT posts.ID as product_id, posts.post_parent as parent_id FROM {$wpdb->posts} posts
-				LEFT JOIN {$wpdb->postmeta} postmeta ON posts.ID = postmeta.post_id
 				$type_join
 				WHERE (
 					posts.post_title LIKE %s
 					OR posts.post_content LIKE %s
-					OR (
-						postmeta.meta_key = '_sku' AND postmeta.meta_value LIKE %s
-					)
+					OR posts.ID IN (SELECT postmeta.post_id FROM {$wpdb->postmeta} postmeta WHERE postmeta.meta_key = '_sku' AND postmeta.meta_value LIKE %s)
 				)
 				AND posts.post_type IN ('" . implode( "','", $post_types ) . "')
 				$status_where
