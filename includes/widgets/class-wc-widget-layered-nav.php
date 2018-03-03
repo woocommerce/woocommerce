@@ -371,13 +371,21 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 		// We have a query - let's see if cached results of this query already exist.
 		$query_hash    = md5( $query );
-		$cached_counts = (array) get_transient( 'wc_layered_nav_counts' );
+
+		// Maybe store a transient of the count values.
+		$cache = apply_filters( 'woocommerce_layered_nav_count_maybe_cache', true );
+
+		if ( true === $cache ) {
+			$cached_counts = (array) get_transient( 'wc_layered_nav_counts_' . $taxonomy );	
+		}
 
 		if ( ! isset( $cached_counts[ $query_hash ] ) ) {
 			$results                      = $wpdb->get_results( $query, ARRAY_A ); // @codingStandardsIgnoreLine
 			$counts                       = array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
 			$cached_counts[ $query_hash ] = $counts;
-			set_transient( 'wc_layered_nav_counts', $cached_counts, DAY_IN_SECONDS );
+			if ( true === $cache ) {
+				set_transient( 'wc_layered_nav_counts_' . $taxonomy, $cached_counts, DAY_IN_SECONDS );
+			}
 		}
 
 		return array_map( 'absint', (array) $cached_counts[ $query_hash ] );
