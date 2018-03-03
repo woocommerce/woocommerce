@@ -181,51 +181,61 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 	 * @return WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
+		$fields = ( $request['fields'] ) ? explode( ',', $request['fields'] ) : [];
+
 		$data = array(
-			'id'                    => $object->get_id(),
-			'date_created'          => wc_rest_prepare_date_response( $object->get_date_created(), false ),
-			'date_created_gmt'      => wc_rest_prepare_date_response( $object->get_date_created() ),
-			'date_modified'         => wc_rest_prepare_date_response( $object->get_date_modified(), false ),
-			'date_modified_gmt'     => wc_rest_prepare_date_response( $object->get_date_modified() ),
-			'description'           => wc_format_content( $object->get_description() ),
-			'permalink'             => $object->get_permalink(),
-			'sku'                   => $object->get_sku(),
-			'price'                 => $object->get_price(),
-			'regular_price'         => $object->get_regular_price(),
-			'sale_price'            => $object->get_sale_price(),
-			'date_on_sale_from'     => wc_rest_prepare_date_response( $object->get_date_on_sale_from(), false ),
-			'date_on_sale_from_gmt' => wc_rest_prepare_date_response( $object->get_date_on_sale_from() ),
-			'date_on_sale_to'       => wc_rest_prepare_date_response( $object->get_date_on_sale_to(), false ),
-			'date_on_sale_to_gmt'   => wc_rest_prepare_date_response( $object->get_date_on_sale_to() ),
-			'on_sale'               => $object->is_on_sale(),
-			'visible'               => $object->is_visible(),
-			'purchasable'           => $object->is_purchasable(),
-			'virtual'               => $object->is_virtual(),
-			'downloadable'          => $object->is_downloadable(),
-			'downloads'             => $this->get_downloads( $object ),
-			'download_limit'        => '' !== $object->get_download_limit() ? (int) $object->get_download_limit() : -1,
-			'download_expiry'       => '' !== $object->get_download_expiry() ? (int) $object->get_download_expiry() : -1,
-			'tax_status'            => $object->get_tax_status(),
-			'tax_class'             => $object->get_tax_class(),
-			'manage_stock'          => $object->managing_stock(),
-			'stock_quantity'        => $object->get_stock_quantity(),
-			'in_stock'              => $object->is_in_stock(),
-			'backorders'            => $object->get_backorders(),
-			'backorders_allowed'    => $object->backorders_allowed(),
-			'backordered'           => $object->is_on_backorder(),
-			'weight'                => $object->get_weight(),
-			'dimensions'            => array(
+			'id'                    => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'id', $fields ) ) ) ? $object->get_id() : null,
+			'date_created'          => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'date_created', $fields ) ) ) ? wc_rest_prepare_date_response( $object->get_date_created(), false ) : null,
+			'date_created_gmt'      => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'date_created_gmt', $fields ) ) ) ? wc_rest_prepare_date_response( $object->get_date_created() ) : null,
+			'date_modified'         => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'date_modified', $fields ) ) ) ? wc_rest_prepare_date_response( $object->get_date_modified(), false ) : null,
+			'date_modified_gmt'     => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'date_modified_gmt', $fields ) ) ) ? wc_rest_prepare_date_response( $object->get_date_modified() ) : null,
+			'description'           => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'description', $fields ) ) ) ? wc_format_content( $object->get_description() ) : null,
+			'permalink'             => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'permalink', $fields ) ) ) ? $object->get_permalink() : null,
+			'sku'                   => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'sku', $fields ) ) ) ? $object->get_sku() : null,
+			'price'                 => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'price', $fields ) ) ) ? $object->get_price() : null,
+			'regular_price'         => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'regular_price', $fields ) ) ) ? $object->get_regular_price() : null,
+			'sale_price'            => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'sale_price', $fields ) ) ) ? $object->get_sale_price() : null,
+			'date_on_sale_from'     => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'date_on_sale_from', $fields ) ) ) ? wc_rest_prepare_date_response( $object->get_date_on_sale_from(), false ) : null,
+			'date_on_sale_from_gmt' => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'date_on_sale_from_gmt', $fields ) ) ) ? wc_rest_prepare_date_response( $object->get_date_on_sale_from() ) : null,
+			'date_on_sale_to'       => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'date_on_sale_to', $fields ) ) ) ? wc_rest_prepare_date_response( $object->get_date_on_sale_to(), false ) : null,
+			'date_on_sale_to_gmt'   => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'date_on_sale_to_gmt', $fields ) ) ) ? wc_rest_prepare_date_response( $object->get_date_on_sale_to() ) : null,
+			'on_sale'               => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'on_sale', $fields ) ) ) ? $object->is_on_sale() : null,
+			'visible'               => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'visible', $fields ) ) ) ? $object->is_visible() : null,
+			'purchasable'           => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'purchasable', $fields ) ) ) ? $object->is_purchasable() : null,
+			'virtual'               => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'virtual', $fields ) ) ) ? $object->is_virtual() : null,
+			'downloadable'          => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'downloadable', $fields ) ) ) ? $object->is_downloadable() : null,
+			'downloads'             => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'downloads', $fields ) ) ) ? $this->get_downloads( $object ) : null,
+			'download_limit'        => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'download_limit', $fields ) ) ) ? ( '' !== $object->get_download_limit() ? (int) $object->get_download_limit() : - 1 ) : null,
+			'download_expiry'       => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'download_expiry', $fields ) ) ) ? ( '' !== $object->get_download_expiry() ? (int) $object->get_download_expiry() : - 1 ) : null,
+			'tax_status'            => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'tax_status', $fields ) ) ) ? $object->get_tax_status() : null,
+			'tax_class'             => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'tax_class', $fields ) ) ) ? $object->get_tax_class() : null,
+			'manage_stock'          => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'manage_stock', $fields ) ) ) ? $object->managing_stock() : null,
+			'stock_quantity'        => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'stock_quantity', $fields ) ) ) ? $object->get_stock_quantity() : null,
+			'in_stock'              => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'in_stock', $fields ) ) ) ? $object->is_in_stock() : null,
+			'backorders'            => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'backorders', $fields ) ) ) ? $object->get_backorders() : null,
+			'backorders_allowed'    => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'backorders_allowed', $fields ) ) ) ? $object->backorders_allowed() : null,
+			'backordered'           => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'backordered', $fields ) ) ) ? $object->is_on_backorder() : null,
+			'weight'                => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'weight', $fields ) ) ) ? $object->get_weight() : null,
+			'dimensions'            => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'dimensions', $fields ) ) ) ? array(
 				'length' => $object->get_length(),
 				'width'  => $object->get_width(),
 				'height' => $object->get_height(),
-			),
-			'shipping_class'        => $object->get_shipping_class(),
-			'shipping_class_id'     => $object->get_shipping_class_id(),
-			'image'                 => current( $this->get_images( $object ) ),
-			'attributes'            => $this->get_attributes( $object ),
-			'menu_order'            => $object->get_menu_order(),
-			'meta_data'             => $object->get_meta_data(),
+			) : null,
+			'shipping_class'        => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'shipping_class', $fields ) ) ) ? $object->get_shipping_class() : null,
+			'shipping_class_id'     => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'shipping_class_id', $fields ) ) ) ? $object->get_shipping_class_id() : null,
+			'image'                 => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'image', $fields ) ) ) ? current( $this->get_images( $object ) ) : null,
+			'attributes'            => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'attributes', $fields ) ) ) ? $this->get_attributes( $object ) : null,
+			'menu_order'            => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'menu_order', $fields ) ) ) ? $object->get_menu_order() : null,
+			'meta_data'             => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'meta_data', $fields ) ) ) ? $object->get_meta_data() : null,
 		);
+
+		if ( ! empty( $fields ) ) {
+			foreach ( $data as $key => $value ) {
+				if ( $value === null && ! in_array( $key, $fields ) ) {
+					unset( $data[ $key ] );
+				}
+			}
+		}
 
 		$context  = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data     = $this->add_additional_fields_to_object( $data, $request );
