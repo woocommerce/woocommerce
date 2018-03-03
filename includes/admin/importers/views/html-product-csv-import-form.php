@@ -60,7 +60,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</tr>
 				<tr class="woocommerce-importer-advanced hidden">
 					<th>
-						<label for="woocommerce-importer-file-url"><?php esc_html_e( '<em>or</em> enter the path to a CSV file on your server:', 'woocommerce' ); ?></label>
+						<label for="woocommerce-importer-file-url"><?php esc_html_e( 'Alternatively, enter the path to a CSV file on your server:', 'woocommerce' ); ?></label>
 					</th>
 					<td>
 						<label for="woocommerce-importer-file-url" class="woocommerce-importer-file-url-field-wrapper">
@@ -71,6 +71,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<tr class="woocommerce-importer-advanced hidden">
 					<th><label><?php esc_html_e( 'CSV Delimiter', 'woocommerce' ); ?></label><br/></th>
 					<td><input type="text" name="delimiter" placeholder="," size="2" /></td>
+				</tr>
+				<tr class="woocommerce-importer-advanced hidden">
+					<th><label><?php esc_html_e( 'Use previous column mapping preferences?', 'woocommerce' ); ?></label><br/></th>
+					<td><input type="checkbox" id="woocommerce-importer-map-preferences" name="map_preferences" value="1" /></td>
 				</tr>
 			</tbody>
 		</table>
