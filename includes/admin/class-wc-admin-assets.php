@@ -33,9 +33,8 @@ class WC_Admin_Assets {
 	public function admin_styles() {
 		global $wp_scripts;
 
-		$screen         = get_current_screen();
-		$screen_id      = $screen ? $screen->id : '';
-		$jquery_version = isset( $wp_scripts->registered['jquery-ui-core']->ver ) ? $wp_scripts->registered['jquery-ui-core']->ver : '1.11.4';
+		$screen    = get_current_screen();
+		$screen_id = $screen ? $screen->id : '';
 
 		// Register admin styles
 		wp_register_style( 'woocommerce_admin_menu_styles', WC()->plugin_url() . '/assets/css/menu.css', array(), WC_VERSION );
