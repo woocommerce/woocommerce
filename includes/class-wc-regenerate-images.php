@@ -84,7 +84,7 @@ class WC_Regenerate_Images {
 		// See if the image size has changed from our settings.
 		if ( ! self::image_size_matches_settings( $data, $size ) ) {
 			// If Photon is running we can just return false and let Jetpack handle regeneration.
-			if ( class_exists( 'Jetpack' ) && Jetpack::is_module_active( 'photon' ) ) {
+			if ( method_exists('Jetpack', 'is_module_active') && Jetpack::is_module_active( 'photon' ) ) {
 				return false;
 			} else {
 				// If we get here, Jetpack is not running and we don't have the correct image sized stored. Try to return closest match.
