@@ -11,9 +11,7 @@
 
 global $states;
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 $states['JP'] = array(
 	'JP01' => __( 'Hokkaido', 'woocommerce' ),

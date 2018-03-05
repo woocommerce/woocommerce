@@ -8,9 +8,7 @@
 
 global $states;
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 $states['ES'] = array(
 	'C'  => __( 'A Coru&ntilde;a', 'woocommerce' ),

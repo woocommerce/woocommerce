@@ -8,9 +8,7 @@
  * @version 2.5.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 return array(
 	'AF' => array(

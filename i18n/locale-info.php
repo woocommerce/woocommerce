@@ -6,9 +6,7 @@
  * @version 3.4.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 return array(
 	'AU' => array(
