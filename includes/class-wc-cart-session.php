@@ -61,6 +61,7 @@ final class WC_Cart_Session {
 	 * @since 3.2.0
 	 */
 	public function get_cart_from_session() {
+		// Flag to indicate the stored cart should be updated.
 		$update_cart_session = false;
 		$totals              = WC()->session->get( 'cart_totals', null );
 		$cart                = WC()->session->get( 'cart', null );
@@ -99,15 +100,15 @@ final class WC_Cart_Session {
 				if ( ! empty( $product ) && $product->exists() && $values['quantity'] > 0 ) {
 
 					if ( ! $product->is_purchasable() ) {
-						$update_cart_session = true; // Flag to indicate the stored cart should be updated.
+						$update_cart_session = true;
 						/* translators: %s: product name */
 						wc_add_notice( sprintf( __( '%s has been removed from your cart because it can no longer be purchased. Please contact us if you need assistance.', 'woocommerce' ), $product->get_name() ), 'error' );
 						do_action( 'woocommerce_remove_cart_item_from_session', $key, $values );
 
-					} elseif ( isset( $values['date_modified'] ) && $values['date_modified'] instanceof WC_DateTime && $values['date_modified']->getTimestamp() !== $product->get_date_modified()->getTimestamp() ) {
-						$update_cart_session = true; // Flag to indicate the stored cart should be updated.
+					} elseif ( ! empty( $values['data_hash'] ) && ! hash_equals( $values['data_hash'], wc_get_cart_item_data_hash( $product ) ) ) {
+						$update_cart_session = true;
 						/* translators: %1$s: product name. %2$s product permalink */
-						wc_add_notice( sprintf( __( 'Product %1$s has been removed from your cart because its contents have changed. Please add it to your cart again by <a href="%2$s">clicking here</a>.', 'woocommerce' ), $product->get_name(), $product->get_permalink() ), 'error' );
+						wc_add_notice( sprintf( __( '%1$s has been removed from your cart because it has since been modified. You can add it back to your cart <a href="%2$s">here</a>.', 'woocommerce' ), $product->get_name(), $product->get_permalink() ), 'notice' );
 						do_action( 'woocommerce_remove_cart_item_from_session', $key, $values );
 
 					} else {
