@@ -241,7 +241,7 @@ class WC_REST_Authentication {
 
 		if ( ! empty( $header ) ) {
 			// Trim leading spaces.
-			$header = trim( $header );
+			$header        = trim( $header );
 			$header_params = $this->parse_header( $header );
 
 			if ( ! empty( $header_params ) ) {
@@ -344,7 +344,7 @@ class WC_REST_Authentication {
 	 * this ensures the consumer has a valid key/secret.
 	 *
 	 * @param stdClass $user
-	 * @param array $params The request parameters.
+	 * @param array    $params The request parameters.
 	 * @return true|WP_Error
 	 */
 	private function check_oauth_signature( $user, $params ) {
@@ -402,7 +402,7 @@ class WC_REST_Authentication {
 			if ( is_array( $param_value ) ) {
 				$query_params = $this->join_with_equals_sign( $param_value, $query_params, $param_key );
 			} else {
-				$string = $param_key . '=' . $param_value; // Join with equals sign.
+				$string         = $param_key . '=' . $param_value; // Join with equals sign.
 				$query_params[] = wc_rest_urlencode_rfc3986( $string );
 			}
 		}
@@ -445,8 +445,8 @@ class WC_REST_Authentication {
 	 * - A nonce is valid if it has not been used within the last 15 minutes.
 	 *
 	 * @param stdClass $user
-	 * @param int $timestamp the unix timestamp for when the request was made
-	 * @param string $nonce a unique (for the given user) 32 alphanumeric string, consumer-generated
+	 * @param int      $timestamp the unix timestamp for when the request was made
+	 * @param string   $nonce a unique (for the given user) 32 alphanumeric string, consumer-generated
 	 * @return bool|WP_Error
 	 */
 	private function check_oauth_timestamp_and_nonce( $user, $timestamp, $nonce ) {
@@ -500,11 +500,15 @@ class WC_REST_Authentication {
 		global $wpdb;
 
 		$consumer_key = wc_api_hash( sanitize_text_field( $consumer_key ) );
-		$user         = $wpdb->get_row( $wpdb->prepare( "
+		$user         = $wpdb->get_row(
+			$wpdb->prepare(
+				"
 			SELECT key_id, user_id, permissions, consumer_key, consumer_secret, nonces
 			FROM {$wpdb->prefix}woocommerce_api_keys
 			WHERE consumer_key = %s
-		", $consumer_key ) );
+		", $consumer_key
+			)
+		);
 
 		return $user;
 	}
@@ -519,24 +523,24 @@ class WC_REST_Authentication {
 		$permissions = $this->user->permissions;
 
 		switch ( $method ) {
-			case 'HEAD' :
-			case 'GET' :
+			case 'HEAD':
+			case 'GET':
 				if ( 'read' !== $permissions && 'read_write' !== $permissions ) {
 					return new WP_Error( 'woocommerce_rest_authentication_error', __( 'The API key provided does not have read permissions.', 'woocommerce' ), array( 'status' => 401 ) );
 				}
 				break;
-			case 'POST' :
-			case 'PUT' :
-			case 'PATCH' :
-			case 'DELETE' :
+			case 'POST':
+			case 'PUT':
+			case 'PATCH':
+			case 'DELETE':
 				if ( 'write' !== $permissions && 'read_write' !== $permissions ) {
 					return new WP_Error( 'woocommerce_rest_authentication_error', __( 'The API key provided does not have write permissions.', 'woocommerce' ), array( 'status' => 401 ) );
 				}
 				break;
-			case 'OPTIONS' :
+			case 'OPTIONS':
 				return true;
 
-			default :
+			default:
 				return new WP_Error( 'woocommerce_rest_authentication_error', __( 'Unknown request method.', 'woocommerce' ), array( 'status' => 401 ) );
 		}
 

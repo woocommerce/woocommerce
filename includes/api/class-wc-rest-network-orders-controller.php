@@ -27,15 +27,17 @@ class WC_REST_Network_Orders_Controller extends WC_REST_Orders_Controller {
 	 */
 	public function register_routes() {
 		if ( is_multisite() ) {
-			register_rest_route( $this->namespace, '/' . $this->rest_base . '/network', array(
-				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'network_orders' ),
-					'permission_callback' => array( $this, 'network_orders_permissions_check' ),
-					'args'                => $this->get_collection_params(),
-				),
-				'schema' => array( $this, 'get_public_item_schema' ),
-			) );
+			register_rest_route(
+				$this->namespace, '/' . $this->rest_base . '/network', array(
+					array(
+						'methods'             => WP_REST_Server::READABLE,
+						'callback'            => array( $this, 'network_orders' ),
+						'permission_callback' => array( $this, 'network_orders_permissions_check' ),
+						'args'                => $this->get_collection_params(),
+					),
+					'schema' => array( $this, 'get_public_item_schema' ),
+				)
+			);
 		}
 	}
 
@@ -49,25 +51,25 @@ class WC_REST_Network_Orders_Controller extends WC_REST_Orders_Controller {
 	public function get_public_item_schema() {
 		$schema = parent::get_public_item_schema();
 
-		$schema['properties']['blog'] = array(
+		$schema['properties']['blog']              = array(
 			'description' => __( 'Blog id of the record on the multisite.', 'woocommerce' ),
 			'type'        => 'integer',
 			'context'     => array( 'view' ),
 			'readonly'    => true,
 		);
-		$schema['properties']['edit_url'] = array(
+		$schema['properties']['edit_url']          = array(
 			'description' => __( 'URL to edit the order', 'woocommerce' ),
 			'type'        => 'string',
 			'context'     => array( 'view' ),
 			'readonly'    => true,
 		);
-		$schema['properties']['customer'][] = array(
+		$schema['properties']['customer'][]        = array(
 			'description' => __( 'Name of the customer for the order', 'woocommerce' ),
 			'type'        => 'string',
 			'context'     => array( 'view' ),
 			'readonly'    => true,
 		);
-		$schema['properties']['status_name'][] = array(
+		$schema['properties']['status_name'][]     = array(
 			'description' => __( 'Order Status', 'woocommerce' ),
 			'type'        => 'string',
 			'context'     => array( 'view' ),
@@ -123,11 +125,11 @@ class WC_REST_Network_Orders_Controller extends WC_REST_Orders_Controller {
 		foreach ( $items->data as &$current_order ) {
 			$order = wc_get_order( $current_order['id'] );
 
-			$current_order['blog'] = get_blog_details( get_current_blog_id() );
+			$current_order['blog']     = get_blog_details( get_current_blog_id() );
 			$current_order['edit_url'] = get_admin_url( $blog_id, 'post.php?post=' . absint( $order->get_id() ) . '&action=edit' );
 			/* translators: 1: first name 2: last name */
-			$current_order['customer'] = trim( sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), $order->get_billing_first_name(), $order->get_billing_last_name() ) );
-			$current_order['status_name'] = wc_get_order_status_name( $order->get_status() );
+			$current_order['customer']        = trim( sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), $order->get_billing_first_name(), $order->get_billing_last_name() ) );
+			$current_order['status_name']     = wc_get_order_status_name( $order->get_status() );
 			$current_order['formatted_total'] = $order->get_formatted_order_total();
 		}
 

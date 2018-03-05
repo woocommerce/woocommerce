@@ -34,36 +34,40 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 	 * Register the routes for /system_status/tools/*.
 	 */
 	public function register_routes() {
-		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
-			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_items' ),
-				'permission_callback' => array( $this, 'get_items_permissions_check' ),
-				'args'                => $this->get_collection_params(),
-			),
-			'schema' => array( $this, 'get_public_item_schema' ),
-		) );
-
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\w-]+)', array(
-			'args'   => array(
-				'id' => array(
-					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
-					'type'        => 'string',
+		register_rest_route(
+			$this->namespace, '/' . $this->rest_base, array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_items' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => $this->get_collection_params(),
 				),
-			),
-			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_item' ),
-				'permission_callback' => array( $this, 'get_item_permissions_check' ),
-			),
-			array(
-				'methods'             => WP_REST_Server::EDITABLE,
-				'callback'            => array( $this, 'update_item' ),
-				'permission_callback' => array( $this, 'update_item_permissions_check' ),
-				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
-			),
-			'schema' => array( $this, 'get_public_item_schema' ),
-		) );
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace, '/' . $this->rest_base . '/(?P<id>[\w-]+)', array(
+				'args'   => array(
+					'id' => array(
+						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+						'type'        => 'string',
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_item' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+				),
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'update_item' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
 	}
 
 	/**
@@ -179,7 +183,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 				'name'   => __( 'Regenerate shop thumbnails', 'woocommerce' ),
 				'button' => __( 'Regenerate', 'woocommerce' ),
 				'desc'   => __( 'This will regenerate all shop thumbnails to match your theme and/or image settings.', 'woocommerce' ),
-			)
+			),
 		);
 
 		// Jetpack does the image resizing heavy lifting so you don't have to.
@@ -199,12 +203,16 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 	public function get_items( $request ) {
 		$tools = array();
 		foreach ( $this->get_tools() as $id => $tool ) {
-			$tools[] = $this->prepare_response_for_collection( $this->prepare_item_for_response( array(
-				'id'          => $id,
-				'name'        => $tool['name'],
-				'action'      => $tool['button'],
-				'description' => $tool['desc'],
-			), $request ) );
+			$tools[] = $this->prepare_response_for_collection(
+				$this->prepare_item_for_response(
+					array(
+						'id'          => $id,
+						'name'        => $tool['name'],
+						'action'      => $tool['button'],
+						'description' => $tool['desc'],
+					), $request
+				)
+			);
 		}
 
 		$response = rest_ensure_response( $tools );
@@ -223,12 +231,16 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 			return new WP_Error( 'woocommerce_rest_system_status_tool_invalid_id', __( 'Invalid tool ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 		$tool = $tools[ $request['id'] ];
-		return rest_ensure_response( $this->prepare_item_for_response( array(
-			'id'          => $request['id'],
-			'name'        => $tool['name'],
-			'action'      => $tool['button'],
-			'description' => $tool['desc'],
-		), $request ) );
+		return rest_ensure_response(
+			$this->prepare_item_for_response(
+				array(
+					'id'          => $request['id'],
+					'name'        => $tool['name'],
+					'action'      => $tool['button'],
+					'description' => $tool['desc'],
+				), $request
+			)
+		);
 	}
 
 	/**
@@ -402,10 +414,14 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 				/**
 				 * Delete orphans
 				 */
-				$result  = absint( $wpdb->query( "DELETE products
+				$result  = absint(
+					$wpdb->query(
+						"DELETE products
 					FROM {$wpdb->posts} products
 					LEFT JOIN {$wpdb->posts} wp ON wp.ID = products.post_parent
-					WHERE wp.ID IS NULL AND products.post_type = 'product_variation';" ) );
+					WHERE wp.ID IS NULL AND products.post_type = 'product_variation';"
+					)
+				);
 				$message = sprintf( __( '%d orphaned variations deleted', 'woocommerce' ), $result );
 				break;
 
@@ -436,15 +452,19 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 				break;
 
 			case 'recount_terms':
-				$product_cats = get_terms( 'product_cat', array(
-					'hide_empty' => false,
-					'fields'     => 'id=>parent',
-				) );
+				$product_cats = get_terms(
+					'product_cat', array(
+						'hide_empty' => false,
+						'fields'     => 'id=>parent',
+					)
+				);
 				_wc_term_recount( $product_cats, get_taxonomy( 'product_cat' ), true, false );
-				$product_tags = get_terms( 'product_tag', array(
-					'hide_empty' => false,
-					'fields'     => 'id=>parent',
-				) );
+				$product_tags = get_terms(
+					'product_tag', array(
+						'hide_empty' => false,
+						'fields'     => 'id=>parent',
+					)
+				);
 				_wc_term_recount( $product_tags, get_taxonomy( 'product_tag' ), true, false );
 				$message = __( 'Terms successfully recounted', 'woocommerce' );
 				break;

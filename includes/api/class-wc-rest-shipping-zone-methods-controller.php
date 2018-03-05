@@ -26,69 +26,75 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 	 * Register the routes for Shipping Zone Methods.
 	 */
 	public function register_routes() {
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<zone_id>[\d]+)/methods', array(
-			'args' => array(
-				'zone_id' => array(
-					'description' => __( 'Unique ID for the zone.', 'woocommerce' ),
-					'type'        => 'integer',
-				),
-			),
-			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_items' ),
-				'permission_callback' => array( $this, 'get_items_permissions_check' ),
-			),
-			array(
-				'methods'             => WP_REST_Server::CREATABLE,
-				'callback'            => array( $this, 'create_item' ),
-				'permission_callback' => array( $this, 'create_item_permissions_check' ),
-				'args'                => array_merge( $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
-					'method_id' => array(
-						'required'    => true,
-						'readonly'    => false,
-						'description' => __( 'Shipping method ID.', 'woocommerce' ),
+		register_rest_route(
+			$this->namespace, '/' . $this->rest_base . '/(?P<zone_id>[\d]+)/methods', array(
+				'args'   => array(
+					'zone_id' => array(
+						'description' => __( 'Unique ID for the zone.', 'woocommerce' ),
+						'type'        => 'integer',
 					),
-				) ),
-			),
-			'schema' => array( $this, 'get_public_item_schema' ),
-		) );
+				),
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_items' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				),
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'create_item' ),
+					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+					'args'                => array_merge(
+						$this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
+							'method_id' => array(
+								'required'    => true,
+								'readonly'    => false,
+								'description' => __( 'Shipping method ID.', 'woocommerce' ),
+							),
+						)
+					),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
 
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<zone_id>[\d]+)/methods/(?P<instance_id>[\d]+)', array(
-			'args' => array(
-				'zone_id' => array(
-					'description' => __( 'Unique ID for the zone.', 'woocommerce' ),
-					'type'        => 'integer',
-				),
-				'instance_id' => array(
-					'description' => __( 'Unique ID for the instance.', 'woocommerce' ),
-					'type'        => 'integer',
-				),
-			),
-			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_item' ),
-				'permission_callback' => array( $this, 'get_items_permissions_check' ),
-			),
-			array(
-				'methods'             => WP_REST_Server::EDITABLE,
-				'callback'            => array( $this, 'update_item' ),
-				'permission_callback' => array( $this, 'update_items_permissions_check' ),
-				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
-			),
-			array(
-				'methods'             => WP_REST_Server::DELETABLE,
-				'callback'            => array( $this, 'delete_item' ),
-				'permission_callback' => array( $this, 'delete_items_permissions_check' ),
-				'args'                => array(
-					'force' => array(
-						'default'     => false,
-						'type'        => 'boolean',
-						'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce' ),
+		register_rest_route(
+			$this->namespace, '/' . $this->rest_base . '/(?P<zone_id>[\d]+)/methods/(?P<instance_id>[\d]+)', array(
+				'args'   => array(
+					'zone_id'     => array(
+						'description' => __( 'Unique ID for the zone.', 'woocommerce' ),
+						'type'        => 'integer',
+					),
+					'instance_id' => array(
+						'description' => __( 'Unique ID for the instance.', 'woocommerce' ),
+						'type'        => 'integer',
 					),
 				),
-			),
-			'schema' => array( $this, 'get_public_item_schema' ),
-		) );
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_item' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				),
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'update_item' ),
+					'permission_callback' => array( $this, 'update_items_permissions_check' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+				),
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'delete_item' ),
+					'permission_callback' => array( $this, 'delete_items_permissions_check' ),
+					'args'                => array(
+						'force' => array(
+							'default'     => false,
+							'type'        => 'boolean',
+							'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce' ),
+						),
+					),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
 	}
 
 	/**
@@ -199,8 +205,8 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 		$instance_id = (int) $request['instance_id'];
 		$force       = $request['force'];
 
-		$methods     = $zone->get_shipping_methods();
-		$method      = false;
+		$methods = $zone->get_shipping_methods();
+		$method  = false;
 
 		foreach ( $methods as $method_obj ) {
 			if ( $instance_id === $method_obj->instance_id ) {
@@ -279,9 +285,9 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 	/**
 	 * Updates settings, order, and enabled status on create.
 	 *
-	 * @param int $instance_id integer
+	 * @param int                $instance_id integer
 	 * @param WC_Shipping_Method $method
-	 * @param WP_REST_Request $request
+	 * @param WP_REST_Request    $request
 	 *
 	 * @return WC_Shipping_Method
 	 */
@@ -335,7 +341,7 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 	/**
 	 * Prepare the Shipping Zone Method for the REST response.
 	 *
-	 * @param array $item Shipping Zone Method.
+	 * @param array           $item Shipping Zone Method.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response
 	 */
@@ -405,7 +411,7 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 	protected function prepare_links( $zone_id, $instance_id ) {
 		$base  = '/' . $this->namespace . '/' . $this->rest_base . '/' . $zone_id;
 		$links = array(
-			'self' => array(
+			'self'       => array(
 				'href' => rest_url( $base . '/methods/' . $instance_id ),
 			),
 			'collection' => array(
@@ -430,41 +436,41 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 			'title'      => 'shipping_zone_method',
 			'type'       => 'object',
 			'properties' => array(
-				'id' => array(
+				'id'                 => array(
 					'description' => __( 'Shipping method instance ID.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'instance_id' => array(
+				'instance_id'        => array(
 					'description' => __( 'Shipping method instance ID.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'title' => array(
+				'title'              => array(
 					'description' => __( 'Shipping method customer facing title.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'order' => array(
+				'order'              => array(
 					'description' => __( 'Shipping method sort order.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'enabled' => array(
+				'enabled'            => array(
 					'description' => __( 'Shipping method enabled status.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'method_id' => array(
+				'method_id'          => array(
 					'description' => __( 'Shipping method ID.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'method_title' => array(
+				'method_title'       => array(
 					'description' => __( 'Shipping method title.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
@@ -476,18 +482,18 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'settings' => array(
+				'settings'           => array(
 					'description' => __( 'Shipping method settings.', 'woocommerce' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
-					'properties' => array(
-						'id' => array(
+					'properties'  => array(
+						'id'          => array(
 							'description' => __( 'A unique identifier for the setting.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
-						'label' => array(
+						'label'       => array(
 							'description' => __( 'A human readable label for the setting used in interfaces.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
@@ -499,25 +505,25 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
-						'type' => array(
+						'type'        => array(
 							'description' => __( 'Type of setting.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 							'enum'        => array( 'text', 'email', 'number', 'color', 'password', 'textarea', 'select', 'multiselect', 'radio', 'image_width', 'checkbox' ),
 							'readonly'    => true,
 						),
-						'value' => array(
+						'value'       => array(
 							'description' => __( 'Setting value.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'default' => array(
+						'default'     => array(
 							'description' => __( 'Default value for the setting.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
-						'tip' => array(
+						'tip'         => array(
 							'description' => __( 'Additional help text shown to the user about the setting.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),

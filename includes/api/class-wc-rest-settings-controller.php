@@ -40,14 +40,16 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 	 * @since 3.0.0
 	 */
 	public function register_routes() {
-		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
-			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_items' ),
-				'permission_callback' => array( $this, 'get_items_permissions_check' ),
-			),
-			'schema' => array( $this, 'get_public_item_schema' ),
-		) );
+		register_rest_route(
+			$this->namespace, '/' . $this->rest_base, array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_items' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
 	}
 
 	/**
@@ -109,7 +111,7 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 	 * Prepare a report sales object for serialization.
 	 *
 	 * @since  3.0.0
-	 * @param array $item Group object.
+	 * @param array           $item Group object.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
@@ -194,13 +196,13 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 			'title'      => 'setting_group',
 			'type'       => 'object',
 			'properties' => array(
-				'id' => array(
+				'id'          => array(
 					'description' => __( 'A unique identifier that can be used to link settings together.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'label' => array(
+				'label'       => array(
 					'description' => __( 'A human readable label for the setting used in interfaces.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
@@ -212,13 +214,13 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'parent_id' => array(
+				'parent_id'   => array(
 					'description' => __( 'ID of parent grouping.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'sub_groups' => array(
+				'sub_groups'  => array(
 					'description' => __( 'IDs for settings sub groups.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
