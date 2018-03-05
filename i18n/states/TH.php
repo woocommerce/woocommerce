@@ -1,9 +1,9 @@
-<?php // @codingStandardsIgnoreLine.
+<?php
 /**
  * Thailand states
  *
  * @package WooCommerce/i18n
- * @version 2.0.0
+ * @version 3.4.0
  */
 
 global $states;
