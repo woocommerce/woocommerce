@@ -2,11 +2,10 @@
 /**
  * Spain states
  *
- * @author      WooThemes
- * @category    i18n
- * @package     WooCommerce/i18n
- * @version     2.0.11
+ * @package WooCommerce/i18n
+ * @version 2.0.11
  */
+
 global $states;
 
 if ( ! defined( 'ABSPATH' ) ) {

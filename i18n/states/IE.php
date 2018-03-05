@@ -2,11 +2,10 @@
 /**
  * Republic of Ireland
  *
- * @author      WooThemes
- * @category    i18n
- * @package     WooCommerce/i18n
- * @version     3.0.0
+ * @package WooCommerce/i18n
+ * @version 3.0.0
  */
+
 global $states;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -39,5 +38,5 @@ $states['IE'] = array(
 	'WD' => __( 'Waterford', 'woocommerce' ),
 	'WH' => __( 'Westmeath', 'woocommerce' ),
 	'WX' => __( 'Wexford', 'woocommerce' ),
-	'WW' => __( 'Wicklow', 'woocommerce' )
+	'WW' => __( 'Wicklow', 'woocommerce' ),
 );
