@@ -335,8 +335,12 @@ body {
 		border-bottom: 4px solid #ccc;
 		line-height: 1.4em;
 		a {
-			color: inherit;
-			text-decoration: none;
+			color: #a16696;
+			text-decoration: underline;
+			padding: 1.5em;
+			margin: -1.5em;
+			position: relative;
+			z-index: 1;
 			&:hover, &:focus {
 				color: #111;
 			}
@@ -358,6 +362,7 @@ body {
 	li.active {
 		border-color: #a16696;
 		color: #a16696;
+		font-weight: bold;
 		&::before {
 			border-color: #a16696;
 		}
@@ -374,6 +379,7 @@ body {
 .wc-setup .wc-setup-actions {
 	overflow: hidden;
 	margin: 20px 0 0;
+	position: relative;
 	.button {
 		font-size: 1.25em;
 		padding: 0.5em 1em;
@@ -979,7 +985,7 @@ h3.jetpack-reasons {
 		align-items: center;
 
 		.button {
-			margin: 1em;
+			margin: 1em 1.5em;
 		}
 	}
 
@@ -1016,6 +1022,10 @@ h3.jetpack-reasons {
 
 			.button {
 				font-size: 15px;
+				margin: 1em 0 1em 1.5em;
+			}
+			.button::last-child {
+				margin-right: 1.5em;
 			}
 		}
 	}
