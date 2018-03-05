@@ -373,6 +373,8 @@ class WC_Post_Data {
 		} elseif ( 'product' === $post_type ) {
 			$data_store = WC_Data_Store::load( 'product-variable' );
 			$data_store->delete_variations( $id, false );
+		} elseif ( 'shop_coupon' === $post_type ) {
+			delete_transient( 'wc_gacc_' . WC_Cache_Helper::get_transient_version( 'coupons' ) );
 		}
 	}
 
@@ -404,6 +406,8 @@ class WC_Post_Data {
 			$data_store->untrash_variations( $id );
 
 			wc_product_force_unique_sku( $id );
+		} elseif ( 'shop_coupon' === $post_type ) {
+			delete_transient( 'wc_gacc_' . WC_Cache_Helper::get_transient_version( 'coupons' ) );
 		}
 	}
 

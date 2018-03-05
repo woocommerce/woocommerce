@@ -67,7 +67,7 @@ function wc_get_cart_coupon_types() {
  * @return bool
  */
 function wc_coupons_enabled() {
-	return apply_filters( 'woocommerce_coupons_enabled', 'yes' === get_option( 'woocommerce_enable_coupons' ) );
+	return apply_filters( 'woocommerce_coupons_enabled', 0 < wc_get_active_coupon_count() && 'yes' === get_option( 'woocommerce_enable_coupons' ) );
 }
 
 /**
@@ -80,6 +80,29 @@ function wc_coupons_enabled() {
 function wc_get_coupon_code_by_id( $id ) {
 	$data_store = WC_Data_Store::load( 'coupon' );
 	return (string) $data_store->get_code_by_id( $id );
+}
+
+/**
+ * Get the number of uses for a coupon by user ID.
+ *
+ * @since 3.3.3
+ * @return int
+ */
+function wc_get_active_coupon_count() {
+	$transient_name = 'wc_gacc_' . WC_Cache_Helper::get_transient_version( 'coupons' );
+
+	if ( false === ( $result = get_transient( $transient_name ) ) ) {
+		$count = wp_count_posts( 'shop_coupon' );
+
+		$result = 0;
+		if ( isset( $count->publish ) ) {
+			$result = $count->publish;
+		}
+
+		set_transient( $transient_name, $result, DAY_IN_SECONDS * 30 );
+	}
+
+	return $result;
 }
 
 /**
