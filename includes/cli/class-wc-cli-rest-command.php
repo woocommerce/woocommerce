@@ -67,7 +67,7 @@ class WC_CLI_REST_Command {
 	 * @param array  $schema Schema object
 	 */
 	public function __construct( $name, $route, $schema ) {
-		$this->name   = $name;
+		$this->name = $name;
 
 		preg_match_all( '#\([^\)]+\)#', $route, $matches );
 		$first_match  = $matches[0];
@@ -111,7 +111,7 @@ class WC_CLI_REST_Command {
 	 * @param array $assoc_args
 	 */
 	public function create_item( $args, $assoc_args ) {
-		$assoc_args = self::decode_json( $assoc_args );
+		$assoc_args            = self::decode_json( $assoc_args );
 		list( $status, $body ) = $this->do_request( 'POST', $this->get_filled_route( $args ), $assoc_args );
 		if ( \WP_CLI\Utils\get_flag_value( $assoc_args, 'porcelain' ) ) {
 			WP_CLI::line( $body['id'] );
@@ -150,7 +150,7 @@ class WC_CLI_REST_Command {
 	 * @param array $assoc_args
 	 */
 	public function get_item( $args, $assoc_args ) {
-		$route = $this->get_filled_route( $args );
+		$route                           = $this->get_filled_route( $args );
 		list( $status, $body, $headers ) = $this->do_request( 'GET', $route, $assoc_args );
 
 		if ( ! empty( $assoc_args['fields'] ) ) {
@@ -166,11 +166,13 @@ class WC_CLI_REST_Command {
 		} elseif ( 'body' === $assoc_args['format'] ) {
 			echo json_encode( $body );
 		} elseif ( 'envelope' === $assoc_args['format'] ) {
-			echo json_encode( array(
-				'body'    => $body,
-				'headers' => $headers,
-				'status'  => $status,
-			) );
+			echo json_encode(
+				array(
+					'body'    => $body,
+					'headers' => $headers,
+					'status'  => $status,
+				)
+			);
 		} else {
 			$formatter = $this->get_formatter( $assoc_args );
 			$formatter->display_item( $body );
@@ -216,12 +218,14 @@ class WC_CLI_REST_Command {
 		} elseif ( 'body' === $assoc_args['format'] ) {
 			echo json_encode( $body );
 		} elseif ( 'envelope' === $assoc_args['format'] ) {
-			echo json_encode( array(
-				'body'    => $body,
-				'headers' => $headers,
-				'status'  => $status,
-				'api_url' => $this->api_url,
-			) );
+			echo json_encode(
+				array(
+					'body'    => $body,
+					'headers' => $headers,
+					'status'  => $status,
+					'api_url' => $this->api_url,
+				)
+			);
 		} else {
 			$formatter = $this->get_formatter( $assoc_args );
 			$formatter->display_items( $items );
@@ -237,7 +241,7 @@ class WC_CLI_REST_Command {
 	 * @param array $assoc_args
 	 */
 	public function update_item( $args, $assoc_args ) {
-		$assoc_args = self::decode_json( $assoc_args );
+		$assoc_args            = self::decode_json( $assoc_args );
 		list( $status, $body ) = $this->do_request( 'POST', $this->get_filled_route( $args ), $assoc_args );
 		if ( \WP_CLI\Utils\get_flag_value( $assoc_args, 'porcelain' ) ) {
 			WP_CLI::line( $body['id'] );
@@ -278,14 +282,16 @@ class WC_CLI_REST_Command {
 				}
 				$performed_queries[] = $query;
 			}
-			usort( $performed_queries, function( $a, $b ) {
-				if ( $a[1] === $b[1] ) {
-					return 0;
+			usort(
+				$performed_queries, function( $a, $b ) {
+					if ( $a[1] === $b[1] ) {
+						return 0;
+					}
+					return ( $a[1] > $b[1] ) ? -1 : 1;
 				}
-				return ( $a[1] > $b[1] ) ? -1 : 1;
-			});
+			);
 
-			$query_count = count( $performed_queries );
+			$query_count      = count( $performed_queries );
 			$query_total_time = 0;
 			foreach ( $performed_queries as $query ) {
 				$query_total_time += $query[1];
@@ -295,9 +301,9 @@ class WC_CLI_REST_Command {
 				$slow_query_message .= '. Ordered by slowness, the queries are:' . PHP_EOL;
 				foreach ( $performed_queries as $i => $query ) {
 					$i++;
-					$bits = explode( ', ', $query[2] );
-					$backtrace = implode( ', ', array_slice( $bits, 13 ) );
-					$seconds = round( $query[1], 6 );
+					$bits                = explode( ', ', $query[2] );
+					$backtrace           = implode( ', ', array_slice( $bits, 13 ) );
+					$seconds             = round( $query[1], 6 );
 					$slow_query_message .= <<<EOT
 {$i}:
 - {$seconds} seconds
@@ -411,7 +417,7 @@ EOT;
 	/**
 	 * Output a line that's appropriately nested
 	 *
-	 * @param string $line
+	 * @param string      $line
 	 * @param bool|string $change
 	 */
 	private function nested_line( $line, $change = false ) {
@@ -425,7 +431,7 @@ EOT;
 
 		$spaces = ( $this->output_nesting_level * 2 ) + 2;
 		if ( $label ) {
-			$line = $label . $line;
+			$line   = $label . $line;
 			$spaces = $spaces - 2;
 		}
 		WP_CLI::line( str_pad( ' ', $spaces ) . $line );

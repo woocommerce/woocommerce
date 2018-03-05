@@ -27,8 +27,8 @@ class WC_CLI_Update_Command {
 
 		$wpdb->hide_errors();
 
-		include_once( WC_ABSPATH . 'includes/class-wc-install.php' );
-		include_once( WC_ABSPATH . 'includes/wc-update-functions.php' );
+		include_once WC_ABSPATH . 'includes/class-wc-install.php';
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
 
 		$current_db_version = get_option( 'woocommerce_db_version' );
 		$update_count       = 0;
