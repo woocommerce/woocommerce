@@ -75,7 +75,7 @@ class WC_Product_CSV_Importer_Controller {
 	 */
 	public static function get_importer( $file, $args = array() ) {
 		$importer_class = apply_filters( 'woocommerce_product_csv_importer_class', 'WC_Product_CSV_Importer' );
-		$args = apply_filters( 'woocommerce_product_csv_importer_args', $args, $importer_class );
+		$args           = apply_filters( 'woocommerce_product_csv_importer_args', $args, $importer_class );
 		return new $importer_class( $file, $args );
 	}
 
@@ -84,7 +84,7 @@ class WC_Product_CSV_Importer_Controller {
 	 */
 	public function __construct() {
 		$default_steps = array(
-			'upload' => array(
+			'upload'  => array(
 				'name'    => __( 'Upload CSV file', 'woocommerce' ),
 				'view'    => array( $this, 'upload_form' ),
 				'handler' => array( $this, 'upload_form_handler' ),
@@ -94,12 +94,12 @@ class WC_Product_CSV_Importer_Controller {
 				'view'    => array( $this, 'mapping_form' ),
 				'handler' => '',
 			),
-			'import' => array(
+			'import'  => array(
 				'name'    => __( 'Import', 'woocommerce' ),
 				'view'    => array( $this, 'import' ),
 				'handler' => '',
 			),
-			'done' => array(
+			'done'    => array(
 				'name'    => __( 'Done!', 'woocommerce' ),
 				'view'    => array( $this, 'done' ),
 				'handler' => '',
@@ -121,6 +121,7 @@ class WC_Product_CSV_Importer_Controller {
 
 	/**
 	 * Get the URL for the next step's screen.
+	 *
 	 * @param string step   slug (default: current step)
 	 * @return string       URL for next step if a next step exists.
 	 *                      Admin URL if it's the last step.
@@ -159,21 +160,21 @@ class WC_Product_CSV_Importer_Controller {
 	 * Output header view.
 	 */
 	protected function output_header() {
-		include( dirname( __FILE__ ) . '/views/html-csv-import-header.php' );
+		include dirname( __FILE__ ) . '/views/html-csv-import-header.php';
 	}
 
 	/**
 	 * Output steps view.
 	 */
 	protected function output_steps() {
-		include( dirname( __FILE__ ) . '/views/html-csv-import-steps.php' );
+		include dirname( __FILE__ ) . '/views/html-csv-import-steps.php';
 	}
 
 	/**
 	 * Output footer view.
 	 */
 	protected function output_footer() {
-		include( dirname( __FILE__ ) . '/views/html-csv-import-footer.php' );
+		include dirname( __FILE__ ) . '/views/html-csv-import-footer.php';
 	}
 
 	/**
@@ -234,7 +235,7 @@ class WC_Product_CSV_Importer_Controller {
 		$size       = size_format( $bytes );
 		$upload_dir = wp_upload_dir();
 
-		include( dirname( __FILE__ ) . '/views/html-product-csv-import-form.php' );
+		include dirname( __FILE__ ) . '/views/html-product-csv-import-form.php';
 	}
 
 	/**
@@ -263,7 +264,12 @@ class WC_Product_CSV_Importer_Controller {
 	 * @return string|WP_Error
 	 */
 	public function handle_upload() {
-		$valid_filetypes = apply_filters( 'woocommerce_csv_product_import_valid_filetypes', array( 'csv' => 'text/csv', 'txt' => 'text/plain' ) );
+		$valid_filetypes = apply_filters(
+			'woocommerce_csv_product_import_valid_filetypes', array(
+				'csv' => 'text/csv',
+				'txt' => 'text/plain',
+			)
+		);
 
 		if ( empty( $_POST['file_url'] ) ) {
 			if ( ! isset( $_FILES['import'] ) ) {
@@ -275,8 +281,11 @@ class WC_Product_CSV_Importer_Controller {
 				return new WP_Error( 'woocommerce_product_csv_importer_upload_file_invalid', __( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
 			}
 
-			$overrides                 = array( 'test_form' => false, 'mimes' => $valid_filetypes );
-			$upload                    = wp_handle_upload( $_FILES['import'], $overrides );
+			$overrides = array(
+				'test_form' => false,
+				'mimes'     => $valid_filetypes,
+			);
+			$upload    = wp_handle_upload( $_FILES['import'], $overrides );
 
 			if ( isset( $upload['error'] ) ) {
 				return new WP_Error( 'woocommerce_product_csv_importer_upload_error', $upload['error'] );
@@ -318,7 +327,7 @@ class WC_Product_CSV_Importer_Controller {
 	 * Mapping step.
 	 */
 	protected function mapping_form() {
-		$args         = array(
+		$args = array(
 			'lines'     => 1,
 			'delimiter' => $this->delimiter,
 		);
@@ -344,7 +353,7 @@ class WC_Product_CSV_Importer_Controller {
 			return;
 		}
 
-		include_once( dirname( __FILE__ ) . '/views/html-csv-import-mapping.php' );
+		include_once dirname( __FILE__ ) . '/views/html-csv-import-mapping.php';
 	}
 
 	/**
@@ -367,19 +376,21 @@ class WC_Product_CSV_Importer_Controller {
 			exit;
 		}
 
-		wp_localize_script( 'wc-product-import', 'wc_product_import_params', array(
-			'import_nonce'    => wp_create_nonce( 'wc-product-import' ),
-			'mapping'         => array(
-				'from' => $mapping_from,
-				'to'   => $mapping_to,
-			),
-			'file'            => $this->file,
-			'update_existing' => $this->update_existing,
-			'delimiter'       => $this->delimiter,
-		) );
+		wp_localize_script(
+			'wc-product-import', 'wc_product_import_params', array(
+				'import_nonce'    => wp_create_nonce( 'wc-product-import' ),
+				'mapping'         => array(
+					'from' => $mapping_from,
+					'to'   => $mapping_to,
+				),
+				'file'            => $this->file,
+				'update_existing' => $this->update_existing,
+				'delimiter'       => $this->delimiter,
+			)
+		);
 		wp_enqueue_script( 'wc-product-import' );
 
-		include_once( dirname( __FILE__ ) . '/views/html-csv-import-progress.php' );
+		include_once dirname( __FILE__ ) . '/views/html-csv-import-progress.php';
 	}
 
 	/**
@@ -392,7 +403,7 @@ class WC_Product_CSV_Importer_Controller {
 		$skipped  = isset( $_GET['products-skipped'] ) ? absint( $_GET['products-skipped'] ) : 0;
 		$errors   = array_filter( (array) get_user_option( 'product_import_error_log' ) );
 
-		include_once( dirname( __FILE__ ) . '/views/html-csv-import-done.php' );
+		include_once dirname( __FILE__ ) . '/views/html-csv-import-done.php';
 	}
 
 	/**
@@ -419,69 +430,78 @@ class WC_Product_CSV_Importer_Controller {
 	 * @return array
 	 */
 	protected function auto_map_columns( $raw_headers, $num_indexes = true ) {
-		$weight_unit     = get_option( 'woocommerce_weight_unit' );
-		$dimension_unit  = get_option( 'woocommerce_dimension_unit' );
+		$weight_unit    = get_option( 'woocommerce_weight_unit' );
+		$dimension_unit = get_option( 'woocommerce_dimension_unit' );
 
-		include( dirname( __FILE__ ) . '/mappings/mappings.php' );
+		include dirname( __FILE__ ) . '/mappings/mappings.php';
 
 		/**
 		 * @hooked wc_importer_generic_mappings - 10
 		 * @hooked wc_importer_wordpress_mappings - 10
 		 * @hooked wc_importer_default_english_mappings - 100
 		 */
-		$default_columns = $this->normalize_columns_names( apply_filters( 'woocommerce_csv_product_import_mapping_default_columns', array(
-			__( 'ID', 'woocommerce' )                                      => 'id',
-			__( 'Type', 'woocommerce' )                                    => 'type',
-			__( 'SKU', 'woocommerce' )                                     => 'sku',
-			__( 'Name', 'woocommerce' )                                    => 'name',
-			__( 'Published', 'woocommerce' )                               => 'published',
-			__( 'Is featured?', 'woocommerce' )                            => 'featured',
-			__( 'Visibility in catalog', 'woocommerce' )                   => 'catalog_visibility',
-			__( 'Short description', 'woocommerce' )                       => 'short_description',
-			__( 'Description', 'woocommerce' )                             => 'description',
-			__( 'Date sale price starts', 'woocommerce' )                  => 'date_on_sale_from',
-			__( 'Date sale price ends', 'woocommerce' )                    => 'date_on_sale_to',
-			__( 'Tax status', 'woocommerce' )                              => 'tax_status',
-			__( 'Tax class', 'woocommerce' )                               => 'tax_class',
-			__( 'In stock?', 'woocommerce' )                               => 'stock_status',
-			__( 'Stock', 'woocommerce' )                                   => 'stock_quantity',
-			__( 'Backorders allowed?', 'woocommerce' )                     => 'backorders',
-			__( 'Sold individually?', 'woocommerce' )                      => 'sold_individually',
-			sprintf( __( 'Weight (%s)', 'woocommerce' ), $weight_unit )    => 'weight',
-			sprintf( __( 'Length (%s)', 'woocommerce' ), $dimension_unit ) => 'length',
-			sprintf( __( 'Width (%s)', 'woocommerce' ), $dimension_unit )  => 'width',
-			sprintf( __( 'Height (%s)', 'woocommerce' ), $dimension_unit ) => 'height',
-			__( 'Allow customer reviews?', 'woocommerce' )                 => 'reviews_allowed',
-			__( 'Purchase note', 'woocommerce' )                           => 'purchase_note',
-			__( 'Sale price', 'woocommerce' )                              => 'sale_price',
-			__( 'Regular price', 'woocommerce' )                           => 'regular_price',
-			__( 'Categories', 'woocommerce' )                              => 'category_ids',
-			__( 'Tags', 'woocommerce' )                                    => 'tag_ids',
-			__( 'Shipping class', 'woocommerce' )                          => 'shipping_class_id',
-			__( 'Images', 'woocommerce' )                                  => 'images',
-			__( 'Download limit', 'woocommerce' )                          => 'download_limit',
-			__( 'Download expiry days', 'woocommerce' )                    => 'download_expiry',
-			__( 'Parent', 'woocommerce' )                                  => 'parent_id',
-			__( 'Upsells', 'woocommerce' )                                 => 'upsell_ids',
-			__( 'Cross-sells', 'woocommerce' )                             => 'cross_sell_ids',
-			__( 'Grouped products', 'woocommerce' )                        => 'grouped_products',
-			__( 'External URL', 'woocommerce' )                            => 'product_url',
-			__( 'Button text', 'woocommerce' )                             => 'button_text',
-			__( 'Position', 'woocommerce' )                                => 'menu_order',
-		) ) );
-
-		$special_columns = $this->get_special_columns( $this->normalize_columns_names( apply_filters( 'woocommerce_csv_product_import_mapping_special_columns',
-			array(
-				__( 'Attribute %d name', 'woocommerce' )     => 'attributes:name',
-				__( 'Attribute %d value(s)', 'woocommerce' ) => 'attributes:value',
-				__( 'Attribute %d visible', 'woocommerce' )  => 'attributes:visible',
-				__( 'Attribute %d global', 'woocommerce' )   => 'attributes:taxonomy',
-				__( 'Attribute %d default', 'woocommerce' )  => 'attributes:default',
-				__( 'Download %d name', 'woocommerce' )      => 'downloads:name',
-				__( 'Download %d URL', 'woocommerce' )       => 'downloads:url',
-				__( 'Meta: %s', 'woocommerce' )              => 'meta:',
+		$default_columns = $this->normalize_columns_names(
+			apply_filters(
+				'woocommerce_csv_product_import_mapping_default_columns', array(
+					__( 'ID', 'woocommerce' )             => 'id',
+					__( 'Type', 'woocommerce' )           => 'type',
+					__( 'SKU', 'woocommerce' )            => 'sku',
+					__( 'Name', 'woocommerce' )           => 'name',
+					__( 'Published', 'woocommerce' )      => 'published',
+					__( 'Is featured?', 'woocommerce' )   => 'featured',
+					__( 'Visibility in catalog', 'woocommerce' ) => 'catalog_visibility',
+					__( 'Short description', 'woocommerce' ) => 'short_description',
+					__( 'Description', 'woocommerce' )    => 'description',
+					__( 'Date sale price starts', 'woocommerce' ) => 'date_on_sale_from',
+					__( 'Date sale price ends', 'woocommerce' ) => 'date_on_sale_to',
+					__( 'Tax status', 'woocommerce' )     => 'tax_status',
+					__( 'Tax class', 'woocommerce' )      => 'tax_class',
+					__( 'In stock?', 'woocommerce' )      => 'stock_status',
+					__( 'Stock', 'woocommerce' )          => 'stock_quantity',
+					__( 'Backorders allowed?', 'woocommerce' ) => 'backorders',
+					__( 'Sold individually?', 'woocommerce' ) => 'sold_individually',
+					sprintf( __( 'Weight (%s)', 'woocommerce' ), $weight_unit ) => 'weight',
+					sprintf( __( 'Length (%s)', 'woocommerce' ), $dimension_unit ) => 'length',
+					sprintf( __( 'Width (%s)', 'woocommerce' ), $dimension_unit ) => 'width',
+					sprintf( __( 'Height (%s)', 'woocommerce' ), $dimension_unit ) => 'height',
+					__( 'Allow customer reviews?', 'woocommerce' ) => 'reviews_allowed',
+					__( 'Purchase note', 'woocommerce' )  => 'purchase_note',
+					__( 'Sale price', 'woocommerce' )     => 'sale_price',
+					__( 'Regular price', 'woocommerce' )  => 'regular_price',
+					__( 'Categories', 'woocommerce' )     => 'category_ids',
+					__( 'Tags', 'woocommerce' )           => 'tag_ids',
+					__( 'Shipping class', 'woocommerce' ) => 'shipping_class_id',
+					__( 'Images', 'woocommerce' )         => 'images',
+					__( 'Download limit', 'woocommerce' ) => 'download_limit',
+					__( 'Download expiry days', 'woocommerce' ) => 'download_expiry',
+					__( 'Parent', 'woocommerce' )         => 'parent_id',
+					__( 'Upsells', 'woocommerce' )        => 'upsell_ids',
+					__( 'Cross-sells', 'woocommerce' )    => 'cross_sell_ids',
+					__( 'Grouped products', 'woocommerce' ) => 'grouped_products',
+					__( 'External URL', 'woocommerce' )   => 'product_url',
+					__( 'Button text', 'woocommerce' )    => 'button_text',
+					__( 'Position', 'woocommerce' )       => 'menu_order',
+				)
 			)
-		) ) );
+		);
+
+		$special_columns = $this->get_special_columns(
+			$this->normalize_columns_names(
+				apply_filters(
+					'woocommerce_csv_product_import_mapping_special_columns',
+					array(
+						__( 'Attribute %d name', 'woocommerce' ) => 'attributes:name',
+						__( 'Attribute %d value(s)', 'woocommerce' ) => 'attributes:value',
+						__( 'Attribute %d visible', 'woocommerce' ) => 'attributes:visible',
+						__( 'Attribute %d global', 'woocommerce' ) => 'attributes:taxonomy',
+						__( 'Attribute %d default', 'woocommerce' ) => 'attributes:default',
+						__( 'Download %d name', 'woocommerce' ) => 'downloads:name',
+						__( 'Download %d URL', 'woocommerce' ) => 'downloads:url',
+						__( 'Meta: %s', 'woocommerce' ) => 'meta:',
+					)
+				)
+			)
+		);
 
 		$headers = array();
 		foreach ( $raw_headers as $key => $field ) {
@@ -599,11 +619,11 @@ class WC_Product_CSV_Importer_Controller {
 				'name'    => __( 'Dimensions', 'woocommerce' ),
 				'options' => array(
 					/* translators: %s: dimension unit */
-					'length'             => sprintf( __( 'Length (%s)', 'woocommerce' ), $dimension_unit ),
+					'length' => sprintf( __( 'Length (%s)', 'woocommerce' ), $dimension_unit ),
 					/* translators: %s: dimension unit */
-					'width'              => sprintf( __( 'Width (%s)', 'woocommerce' ), $dimension_unit ),
+					'width'  => sprintf( __( 'Width (%s)', 'woocommerce' ), $dimension_unit ),
 					/* translators: %s: dimension unit */
-					'height'             => sprintf( __( 'Height (%s)', 'woocommerce' ), $dimension_unit ),
+					'height' => sprintf( __( 'Height (%s)', 'woocommerce' ), $dimension_unit ),
 				),
 			),
 			'category_ids'       => __( 'Categories', 'woocommerce' ),
@@ -617,8 +637,8 @@ class WC_Product_CSV_Importer_Controller {
 			'external'           => array(
 				'name'    => __( 'External product', 'woocommerce' ),
 				'options' => array(
-					'product_url'  => __( 'External URL', 'woocommerce' ),
-					'button_text'  => __( 'Button text', 'woocommerce' ),
+					'product_url' => __( 'External URL', 'woocommerce' ),
+					'button_text' => __( 'Button text', 'woocommerce' ),
 				),
 			),
 			'downloads'          => array(
