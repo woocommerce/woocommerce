@@ -271,15 +271,7 @@ class WC_Discounts {
 				$this->apply_coupon_fixed_cart( $coupon, $items_to_apply );
 				break;
 			default:
-				foreach ( $items_to_apply as $item ) {
-					$discounted_price  = $this->get_discounted_price_in_cents( $item );
-					$price_to_discount = wc_remove_number_precision( ( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ) ? $discounted_price : $item->price );
-					$discount          = wc_add_number_precision( $coupon->get_discount_amount( $price_to_discount / $item->quantity, $item->object, true ) ) * $item->quantity;
-					$discount          = min( $discounted_price, $discount );
-
-					// Store code and discount amount per item.
-					$this->discounts[ $coupon->get_code() ][ $item->key ] += $discount;
-				}
+				$this->apply_coupon_custom( $coupon, $items_to_apply );
 				break;
 		}
 
@@ -499,6 +491,31 @@ class WC_Discounts {
 	}
 
 	/**
+	 * Apply custom coupon discount to items.
+	 *
+	 * @since  3.3
+	 * @param  WC_Coupon $coupon Coupon object. Passed through filters.
+	 * @param  array     $items_to_apply Array of items to apply the coupon to.
+	 * @return int Total discounted.
+	 */
+	protected function apply_coupon_custom( $coupon, $items_to_apply ) {
+		foreach ( $items_to_apply as $item ) {
+			$discounted_price  = $this->get_discounted_price_in_cents( $item );
+			$price_to_discount = wc_remove_number_precision( ( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ) ? $discounted_price : $item->price );
+			$discount          = wc_add_number_precision( $coupon->get_discount_amount( $price_to_discount / $item->quantity, $item->object, true ) ) * $item->quantity;
+			$discount          = min( $discounted_price, $discount );
+
+			// Store code and discount amount per item.
+			$this->discounts[ $coupon->get_code() ][ $item->key ] += $discount;
+		}
+
+		// Allow post-processing for custom coupon types (e.g. calculating discrepancy, etc)
+		$this->discounts[ $coupon->get_code() ] = apply_filters( 'woocommerce_coupon_custom_discounts_array', $this->discounts[ $coupon->get_code() ], $coupon );
+
+		return array_sum( $this->discounts[ $coupon->get_code() ] );
+	}
+
+	/**
 	 * Deal with remaining fractional discounts by splitting it over items
 	 * until the amount is expired, discounting 1 cent at a time.
 	 *
@@ -613,7 +630,7 @@ class WC_Discounts {
 	 * @return bool
 	 */
 	protected function validate_coupon_expiry_date( $coupon ) {
-		if ( $coupon->get_date_expires() && current_time( 'timestamp', true ) > $coupon->get_date_expires()->getTimestamp() ) {
+		if ( $coupon->get_date_expires() && apply_filters( 'woocommerce_coupon_validate_expiry_date', current_time( 'timestamp', true ) > $coupon->get_date_expires()->getTimestamp(), $coupon, $this ) ) {
 			throw new Exception( __( 'This coupon has expired.', 'woocommerce' ), 107 );
 		}
 
