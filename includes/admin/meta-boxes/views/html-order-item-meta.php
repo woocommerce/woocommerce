@@ -3,18 +3,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$hidden_order_itemmeta = apply_filters( 'woocommerce_hidden_order_itemmeta', array(
-	'_qty',
-	'_tax_class',
-	'_product_id',
-	'_variation_id',
-	'_line_subtotal',
-	'_line_subtotal_tax',
-	'_line_total',
-	'_line_tax',
-	'method_id',
-	'cost',
-) );
+$hidden_order_itemmeta = apply_filters(
+	'woocommerce_hidden_order_itemmeta', array(
+		'_qty',
+		'_tax_class',
+		'_product_id',
+		'_variation_id',
+		'_line_subtotal',
+		'_line_subtotal_tax',
+		'_line_total',
+		'_line_tax',
+		'method_id',
+		'cost',
+	)
+);
 ?><div class="view">
 	<?php if ( $meta_data = $item->get_formatted_meta_data( '' ) ) : ?>
 		<table cellspacing="0" class="display_meta">
@@ -44,7 +46,7 @@ $hidden_order_itemmeta = apply_filters( 'woocommerce_hidden_order_itemmeta', arr
 					?>
 					<tr data-meta_id="<?php echo esc_attr( $meta_id ); ?>">
 						<td>
-							<input type="text" placeholder="<?php esc_attr_e( 'Name (required)', 'woocommerce' ); ?>" name="meta_key[<?php echo esc_attr( $item_id ); ?>][<?php echo esc_attr( $meta_id ); ?>]" value="<?php echo esc_attr( $meta->key ); ?>" />
+							<input type="text" maxlength="255" placeholder="<?php esc_attr_e( 'Name (required)', 'woocommerce' ); ?>" name="meta_key[<?php echo esc_attr( $item_id ); ?>][<?php echo esc_attr( $meta_id ); ?>]" value="<?php echo esc_attr( $meta->key ); ?>" />
 							<textarea placeholder="<?php esc_attr_e( 'Value (required)', 'woocommerce' ); ?>" name="meta_value[<?php echo esc_attr( $item_id ); ?>][<?php echo esc_attr( $meta_id ); ?>]"><?php echo esc_textarea( rawurldecode( $meta->value ) ); ?></textarea>
 						</td>
 						<td width="1%"><button class="remove_order_item_meta button">&times;</button></td>

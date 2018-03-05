@@ -36,6 +36,10 @@ class WC_Admin_Taxonomies {
 		add_filter( 'manage_edit-product_cat_columns', array( $this, 'product_cat_columns' ) );
 		add_filter( 'manage_product_cat_custom_column', array( $this, 'product_cat_column' ), 10, 3 );
 
+		// Add row actions.
+		add_filter( 'product_cat_row_actions', array( $this, 'product_cat_row_actions' ), 10, 2 );
+		add_filter( 'admin_init', array( $this, 'handle_product_cat_row_actions' ) );
+
 		// Taxonomy page descriptions
 		add_action( 'product_cat_pre_add_form', array( $this, 'product_cat_description' ) );
 		add_action( 'after-product_cat-table', array( $this, 'product_cat_notes' ) );
@@ -55,8 +59,8 @@ class WC_Admin_Taxonomies {
 	/**
 	 * Order term when created (put in position 0).
 	 *
-	 * @param mixed $term_id
-	 * @param mixed $tt_id
+	 * @param mixed  $term_id
+	 * @param mixed  $tt_id
 	 * @param string $taxonomy
 	 */
 	public function create_term( $term_id, $tt_id = '', $taxonomy = '' ) {
@@ -128,9 +132,9 @@ class WC_Admin_Taxonomies {
 
 					// Create the media frame.
 					file_frame = wp.media.frames.downloadable_file = wp.media({
-						title: '<?php _e( "Choose an image", "woocommerce" ); ?>',
+						title: '<?php _e( 'Choose an image', 'woocommerce' ); ?>',
 						button: {
-							text: '<?php _e( "Use image", "woocommerce" ); ?>'
+							text: '<?php _e( 'Use image', 'woocommerce' ); ?>'
 						},
 						multiple: false
 					});
@@ -238,9 +242,9 @@ class WC_Admin_Taxonomies {
 
 						// Create the media frame.
 						file_frame = wp.media.frames.downloadable_file = wp.media({
-							title: '<?php _e( "Choose an image", "woocommerce" ); ?>',
+							title: '<?php _e( 'Choose an image', 'woocommerce' ); ?>',
 							button: {
-								text: '<?php _e( "Use image", "woocommerce" ); ?>'
+								text: '<?php _e( 'Use image', 'woocommerce' ); ?>'
 							},
 							multiple: false
 						});
@@ -276,8 +280,8 @@ class WC_Admin_Taxonomies {
 	/**
 	 * save_category_fields function.
 	 *
-	 * @param mixed $term_id Term ID being saved
-	 * @param mixed $tt_id
+	 * @param mixed  $term_id Term ID being saved
+	 * @param mixed  $tt_id
 	 * @param string $taxonomy
 	 */
 	public function save_category_fields( $term_id, $tt_id = '', $taxonomy = '' ) {
@@ -306,7 +310,7 @@ class WC_Admin_Taxonomies {
 		?>
 		<div class="form-wrap edit-term-notes">
 			<p>
-				<strong><?php _e( 'Note:', 'woocommerce' ) ?></strong><br>
+				<strong><?php _e( 'Note:', 'woocommerce' ); ?></strong><br>
 				<?php
 					printf(
 						/* translators: %s: default category */
@@ -342,10 +346,46 @@ class WC_Admin_Taxonomies {
 
 		$new_columns['thumb'] = __( 'Image', 'woocommerce' );
 
-		$columns = array_merge( $new_columns, $columns );
+		$columns           = array_merge( $new_columns, $columns );
 		$columns['handle'] = '';
 
 		return $columns;
+	}
+
+	/**
+	 * Adjust row actions.
+	 *
+	 * @param array  $actions Array of actions.
+	 * @param object $term Term object.
+	 * @return array
+	 */
+	public function product_cat_row_actions( $actions = array(), $term ) {
+		$default_category_id = absint( get_option( 'default_product_cat', 0 ) );
+
+		if ( $default_category_id !== $term->term_id && current_user_can( 'edit_term', $term->term_id ) ) {
+			$actions['make_default'] = sprintf(
+				'<a href="%s" aria-label="%s">%s</a>',
+				wp_nonce_url( 'edit-tags.php?action=make_default&amp;taxonomy=product_cat&amp;tag_ID=' . absint( $term->term_id ), 'make_default_' . absint( $term->term_id ) ),
+				/* translators: %s: taxonomy term name */
+				esc_attr( sprintf( __( 'Make &#8220;%s&#8221; the default category', 'woocommerce' ), $term->name ) ),
+				__( 'Make default', 'woocommerce' )
+			);
+		}
+
+		return $actions;
+	}
+
+	/**
+	 * Handle custom row actions.
+	 */
+	public function handle_product_cat_row_actions() {
+		if ( isset( $_GET['action'], $_GET['tag_ID'], $_GET['_wpnonce'] ) && 'make_default' === $_GET['action'] ) {
+			$make_default_id = absint( $_GET['tag_ID'] );
+
+			if ( wp_verify_nonce( $_GET['_wpnonce'], 'make_default_' . $make_default_id ) && current_user_can( 'edit_term', $make_default_id ) ) {
+				update_option( 'default_product_cat', $make_default_id );
+			}
+		}
 	}
 
 	/**
@@ -353,7 +393,7 @@ class WC_Admin_Taxonomies {
 	 *
 	 * @param string $columns
 	 * @param string $column
-	 * @param int $id
+	 * @param int    $id
 	 *
 	 * @return string
 	 */

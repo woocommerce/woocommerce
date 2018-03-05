@@ -3,8 +3,6 @@
  * List tables: orders.
  *
  * @author   WooCommerce
- * @category Admin
- * @package  WooCommerce/Admin
  * @version  3.3.0
  */
 
@@ -225,7 +223,8 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	protected function render_order_date_column() {
 		$order_timestamp = $this->object->get_date_created()->getTimestamp();
 
-		if ( $order_timestamp > strtotime( '-1 day', current_time( 'timestamp', true ) ) ) {
+		// Check if the order was created within the last 24 hours, and not in the future.
+		if ( $order_timestamp > strtotime( '-1 day', current_time( 'timestamp', true ) ) && $order_timestamp <= current_time( 'timestamp', true ) ) {
 			$show_date = sprintf(
 				/* translators: %s: human-readable time difference */
 				_x( '%s ago', '%s = human-readable time difference', 'woocommerce' ),
@@ -375,15 +374,17 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 											<a href="{{ data.shipping_address_map_url }}" target="_blank">{{{ data.formatted_shipping_address }}}</a>
 										<# } #>
 
-										<# if ( data.data.customer_note ) { #>
-											<strong><?php esc_html_e( 'Note', 'woocommerce' ); ?></strong>
-											{{ data.data.customer_note }}
-										<# } #>
-
 										<# if ( data.shipping_via ) { #>
 											<strong><?php esc_html_e( 'Shipping method', 'woocommerce' ); ?></strong>
 											{{ data.shipping_via }}
 										<# } #>
+									</div>
+								<# } #>
+
+								<# if ( data.data.customer_note ) { #>
+									<div class="wc-order-preview-note">
+										<strong><?php esc_html_e( 'Note', 'woocommerce' ); ?></strong>
+										{{ data.data.customer_note }}
 									</div>
 								<# } #>
 							</div>
@@ -396,7 +397,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 							<div class="inner">
 								{{{ data.actions_html }}}
 
-								<a class="button button-primary button-large" href="<?php echo esc_url( admin_url( 'post.php?action=edit' ) ); ?>&post={{ data.data.id }}"><?php esc_html_e( 'Edit order', 'woocommerce' ); ?></a>
+								<a class="button button-primary button-large" aria-label="<?php esc_attr_e( 'Edit this order', 'woocommerce' ); ?>" href="<?php echo esc_url( admin_url( 'post.php?action=edit' ) ); ?>&post={{ data.data.id }}"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
 							</div>
 						</footer>
 					</section>
@@ -530,6 +531,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			$status_actions['on-hold'] = array(
 				'url'    => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=on-hold&order_id=' . $order->get_id() ), 'woocommerce-mark-order-status' ),
 				'name'   => __( 'On-hold', 'woocommerce' ),
+				'title'  => __( 'Change order status to on-hold', 'woocommerce' ),
 				'action' => 'on-hold',
 			);
 		}
@@ -538,6 +540,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			$status_actions['processing'] = array(
 				'url'    => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=processing&order_id=' . $order->get_id() ), 'woocommerce-mark-order-status' ),
 				'name'   => __( 'Processing', 'woocommerce' ),
+				'title'  => __( 'Change order status to processing', 'woocommerce' ),
 				'action' => 'processing',
 			);
 		}
@@ -546,6 +549,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			$status_actions['complete'] = array(
 				'url'    => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=completed&order_id=' . $order->get_id() ), 'woocommerce-mark-order-status' ),
 				'name'   => __( 'Completed', 'woocommerce' ),
+				'title'  => __( 'Change order status to completed', 'woocommerce' ),
 				'action' => 'complete',
 			);
 		}
