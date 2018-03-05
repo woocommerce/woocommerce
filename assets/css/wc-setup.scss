@@ -336,13 +336,14 @@ body {
 		line-height: 1.4em;
 		a {
 			color: #a16696;
-			text-decoration: underline;
+			text-decoration: none;
 			padding: 1.5em;
 			margin: -1.5em;
 			position: relative;
 			z-index: 1;
 			&:hover, &:focus {
 				color: #111;
+				text-decoration: underline;
 			}
 		}
 	}
