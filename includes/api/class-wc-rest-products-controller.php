@@ -153,7 +153,10 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 	 */
 	public function prepare_object_for_response( $object, $request ) {
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->get_product_data( $object, $context );
+
+		$fields = ! empty( $request['fields'] ) ? explode( ',', $request['fields'] ) : array();
+
+		$data    = $this->get_product_data( $object, $context, $fields );
 
 		// Add variations to variable products.
 		if ( $object->is_type( 'variable' ) && $object->has_child() ) {
@@ -567,80 +570,89 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 	 * @param WC_Product $product Product instance.
 	 * @param string     $context Request context.
 	 *                            Options: 'view' and 'edit'.
+	 * @param array      $fields  Fields to include in the response.
 	 * @return array
 	 */
-	protected function get_product_data( $product, $context = 'view' ) {
+	protected function get_product_data( $product, $context = 'view', $fields = array() ) {
 		$data = array(
-			'id'                    => $product->get_id(),
-			'name'                  => $product->get_name( $context ),
-			'slug'                  => $product->get_slug( $context ),
-			'permalink'             => $product->get_permalink(),
-			'date_created'          => wc_rest_prepare_date_response( $product->get_date_created( $context ), false ),
-			'date_created_gmt'      => wc_rest_prepare_date_response( $product->get_date_created( $context ) ),
-			'date_modified'         => wc_rest_prepare_date_response( $product->get_date_modified( $context ), false ),
-			'date_modified_gmt'     => wc_rest_prepare_date_response( $product->get_date_modified( $context ) ),
-			'type'                  => $product->get_type(),
-			'status'                => $product->get_status( $context ),
-			'featured'              => $product->is_featured(),
-			'catalog_visibility'    => $product->get_catalog_visibility( $context ),
-			'description'           => 'view' === $context ? wpautop( do_shortcode( $product->get_description() ) ) : $product->get_description( $context ),
-			'short_description'     => 'view' === $context ? apply_filters( 'woocommerce_short_description', $product->get_short_description() ) : $product->get_short_description( $context ),
-			'sku'                   => $product->get_sku( $context ),
-			'price'                 => $product->get_price( $context ),
-			'regular_price'         => $product->get_regular_price( $context ),
-			'sale_price'            => $product->get_sale_price( $context ) ? $product->get_sale_price( $context ) : '',
-			'date_on_sale_from'     => wc_rest_prepare_date_response( $product->get_date_on_sale_from( $context ), false ),
-			'date_on_sale_from_gmt' => wc_rest_prepare_date_response( $product->get_date_on_sale_from( $context ) ),
-			'date_on_sale_to'       => wc_rest_prepare_date_response( $product->get_date_on_sale_to( $context ), false ),
-			'date_on_sale_to_gmt'   => wc_rest_prepare_date_response( $product->get_date_on_sale_to( $context ) ),
-			'price_html'            => $product->get_price_html(),
-			'on_sale'               => $product->is_on_sale( $context ),
-			'purchasable'           => $product->is_purchasable(),
-			'total_sales'           => $product->get_total_sales( $context ),
-			'virtual'               => $product->is_virtual(),
-			'downloadable'          => $product->is_downloadable(),
-			'downloads'             => $this->get_downloads( $product ),
-			'download_limit'        => $product->get_download_limit( $context ),
-			'download_expiry'       => $product->get_download_expiry( $context ),
-			'external_url'          => $product->is_type( 'external' ) ? $product->get_product_url( $context ) : '',
-			'button_text'           => $product->is_type( 'external' ) ? $product->get_button_text( $context ) : '',
-			'tax_status'            => $product->get_tax_status( $context ),
-			'tax_class'             => $product->get_tax_class( $context ),
-			'manage_stock'          => $product->managing_stock(),
-			'stock_quantity'        => $product->get_stock_quantity( $context ),
-			'in_stock'              => $product->is_in_stock(),
-			'backorders'            => $product->get_backorders( $context ),
-			'backorders_allowed'    => $product->backorders_allowed(),
-			'backordered'           => $product->is_on_backorder(),
-			'sold_individually'     => $product->is_sold_individually(),
-			'weight'                => $product->get_weight( $context ),
-			'dimensions'            => array(
+			'id'                    => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'id', $fields ) ) ) ? $product->get_id() : null,
+			'name'                  => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'name', $fields ) ) ) ? $product->get_name( $context ) : null,
+			'slug'                  => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'slug', $fields ) ) ) ? $product->get_slug( $context ) : null,
+			'permalink'             => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'permalink', $fields ) ) ) ? $product->get_permalink() : null,
+			'date_created'          => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'date_created', $fields ) ) ) ? wc_rest_prepare_date_response( $product->get_date_created( $context ), false ) : null,
+			'date_created_gmt'      => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'date_created_gmt', $fields ) ) ) ? wc_rest_prepare_date_response( $product->get_date_created( $context ) ) : null,
+			'date_modified'         => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'date_modified', $fields ) ) ) ? wc_rest_prepare_date_response( $product->get_date_modified( $context ), false ) : null,
+			'date_modified_gmt'     => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'date_modified_gmt', $fields ) ) ) ? wc_rest_prepare_date_response( $product->get_date_modified( $context ) ) : null,
+			'type'                  => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'type', $fields ) ) ) ? $product->get_type() : null,
+			'status'                => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'status', $fields ) ) ) ? $product->get_status( $context ) : null,
+			'featured'              => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'featured', $fields ) ) ) ? $product->is_featured() : null,
+			'catalog_visibility'    => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'catalog_visibility', $fields ) ) ) ? $product->get_catalog_visibility( $context ) : null,
+			'description'           => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'description', $fields ) ) ) ? 'view' === $context ? wpautop( do_shortcode( $product->get_description() ) ) : $product->get_description( $context ) : null,
+			'short_description'     => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'short_description', $fields ) ) ) ? ( 'view' === $context ? apply_filters( 'woocommerce_short_description', $product->get_short_description() ) : $product->get_short_description( $context ) ) : null,
+			'sku'                   => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'sku', $fields ) ) ) ? $product->get_sku( $context ) : null,
+			'price'                 => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'price', $fields ) ) ) ? $product->get_price( $context ) : null,
+			'regular_price'         => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'regular_price', $fields ) ) ) ? $product->get_regular_price( $context ) : null,
+			'sale_price'            => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'sale_price', $fields ) ) ) ? $product->get_sale_price( $context ) ? $product->get_sale_price( $context ) : '' : null,
+			'date_on_sale_from'     => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'date_on_sale_from', $fields ) ) ) ? wc_rest_prepare_date_response( $product->get_date_on_sale_from( $context ), false ) : null,
+			'date_on_sale_from_gmt' => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'date_on_sale_from_gmt', $fields ) ) ) ? wc_rest_prepare_date_response( $product->get_date_on_sale_from( $context ) ) : null,
+			'date_on_sale_to'       => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'date_on_sale_to', $fields ) ) ) ? wc_rest_prepare_date_response( $product->get_date_on_sale_to( $context ), false ) : null,
+			'date_on_sale_to_gmt'   => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'date_on_sale_to_gmt', $fields ) ) ) ? wc_rest_prepare_date_response( $product->get_date_on_sale_to( $context ) ) : null,
+			'price_html'            => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'price_html', $fields ) ) ) ? $product->get_price_html() : null,
+			'on_sale'               => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'on_sale', $fields ) ) ) ? $product->is_on_sale( $context ) : null,
+			'purchasable'           => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'purchasable', $fields ) ) ) ? $product->is_purchasable() : null,
+			'total_sales'           => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'total_sales', $fields ) ) ) ? $product->get_total_sales( $context ) : null,
+			'virtual'               => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'virtual', $fields ) ) ) ? $product->is_virtual() : null,
+			'downloadable'          => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'downloadable', $fields ) ) ) ? $product->is_downloadable() : null,
+			'downloads'             => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'downloads', $fields ) ) ) ? $this->get_downloads( $product ) : null,
+			'download_limit'        => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'download_limit', $fields ) ) ) ? $product->get_download_limit( $context ) : null,
+			'download_expiry'       => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'download_expiry', $fields ) ) ) ? $product->get_download_expiry( $context ) : null,
+			'external_url'          => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'external_url', $fields ) ) ) ? $product->is_type( 'external' ) ? $product->get_product_url( $context ) : '' : null,
+			'button_text'           => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'button_text', $fields ) ) ) ? $product->is_type( 'external' ) ? $product->get_button_text( $context ) : '' : null,
+			'tax_status'            => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'tax_status', $fields ) ) ) ? $product->get_tax_status( $context ) : null,
+			'tax_class'             => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'tax_class', $fields ) ) ) ? $product->get_tax_class( $context ) : null,
+			'manage_stock'          => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'manage_stock', $fields ) ) ) ? $product->managing_stock() : null,
+			'stock_quantity'        => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'stock_quantity', $fields ) ) ) ? $product->get_stock_quantity( $context ) : null,
+			'in_stock'              => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'in_stock', $fields ) ) ) ? $product->is_in_stock() : null,
+			'backorders'            => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'backorders', $fields ) ) ) ? $product->get_backorders( $context ) : null,
+			'backorders_allowed'    => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'backorders_allowed', $fields ) ) ) ? $product->backorders_allowed() : null,
+			'backordered'           => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'backordered', $fields ) ) ) ? $product->is_on_backorder() : null,
+			'sold_individually'     => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'sold_individually', $fields ) ) ) ? $product->is_sold_individually() : null,
+			'weight'                => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'weight', $fields ) ) ) ? $product->get_weight( $context ) : null,
+			'dimensions'            => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'dimensions', $fields ) ) ) ? array(
 				'length' => $product->get_length( $context ),
 				'width'  => $product->get_width( $context ),
 				'height' => $product->get_height( $context ),
-			),
-			'shipping_required'     => $product->needs_shipping(),
-			'shipping_taxable'      => $product->is_shipping_taxable(),
-			'shipping_class'        => $product->get_shipping_class(),
-			'shipping_class_id'     => $product->get_shipping_class_id( $context ),
-			'reviews_allowed'       => $product->get_reviews_allowed( $context ),
-			'average_rating'        => 'view' === $context ? wc_format_decimal( $product->get_average_rating(), 2 ) : $product->get_average_rating( $context ),
-			'rating_count'          => $product->get_rating_count(),
-			'related_ids'           => array_map( 'absint', array_values( wc_get_related_products( $product->get_id() ) ) ),
-			'upsell_ids'            => array_map( 'absint', $product->get_upsell_ids( $context ) ),
-			'cross_sell_ids'        => array_map( 'absint', $product->get_cross_sell_ids( $context ) ),
-			'parent_id'             => $product->get_parent_id( $context ),
-			'purchase_note'         => 'view' === $context ? wpautop( do_shortcode( wp_kses_post( $product->get_purchase_note() ) ) ) : $product->get_purchase_note( $context ),
-			'categories'            => $this->get_taxonomy_terms( $product ),
-			'tags'                  => $this->get_taxonomy_terms( $product, 'tag' ),
-			'images'                => $this->get_images( $product ),
-			'attributes'            => $this->get_attributes( $product ),
-			'default_attributes'    => $this->get_default_attributes( $product ),
-			'variations'            => array(),
-			'grouped_products'      => array(),
-			'menu_order'            => $product->get_menu_order( $context ),
-			'meta_data'             => $product->get_meta_data(),
+			) : null,
+			'shipping_required'     => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'shipping_required', $fields ) ) ) ? $product->needs_shipping() : null,
+			'shipping_taxable'      => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'shipping_taxable', $fields ) ) ) ? $product->is_shipping_taxable() : null,
+			'shipping_class'        => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'shipping_class', $fields ) ) ) ? $product->get_shipping_class() : null,
+			'shipping_class_id'     => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'shipping_class_id', $fields ) ) ) ? $product->get_shipping_class_id( $context ) : null,
+			'reviews_allowed'       => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'reviews_allowed', $fields ) ) ) ? $product->get_reviews_allowed( $context ) : null,
+			'average_rating'        => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'average_rating', $fields ) ) ) ? ( 'view' === $context ? wc_format_decimal( $product->get_average_rating(), 2 ) : $product->get_average_rating( $context ) ) : null,
+			'rating_count'          => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'rating_count', $fields ) ) ) ? $product->get_rating_count() : null,
+			'related_ids'           => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'related_ids', $fields ) ) ) ? array_map( 'absint', array_values( wc_get_related_products( $product->get_id() ) ) ) : null,
+			'upsell_ids'            => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'upsell_ids', $fields ) ) ) ? array_map( 'absint', $product->get_upsell_ids( $context ) ) : null,
+			'cross_sell_ids'        => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'cross_sell_ids', $fields ) ) ) ? array_map( 'absint', $product->get_cross_sell_ids( $context ) ) : null,
+			'parent_id'             => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'parent_id', $fields ) ) ) ? $product->get_parent_id( $context ) : null,
+			'purchase_note'         => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'purchase_note', $fields ) ) ) ? ( 'view' === $context ? wpautop( do_shortcode( wp_kses_post( $product->get_purchase_note() ) ) ) : $product->get_purchase_note( $context ) ) : null,
+			'categories'            => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'categories', $fields ) ) ) ? $this->get_taxonomy_terms( $product ) : null,
+			'tags'                  => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'tags', $fields ) ) ) ? $this->get_taxonomy_terms( $product, 'tag' ) : null,
+			'images'                => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'images', $fields ) ) ) ? $this->get_images( $product ) : null,
+			'attributes'            => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'attributes', $fields ) ) ) ? $this->get_attributes( $product ) : null,
+			'default_attributes'    => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'default_attributes', $fields ) ) ) ? $this->get_default_attributes( $product ) : null,
+			'variations'            => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'variations', $fields ) ) ) ? array() : null,
+			'grouped_products'      => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'grouped_products', $fields ) ) ) ? array() : null,
+			'menu_order'            => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'menu_order', $fields ) ) ) ? $product->get_menu_order( $context ) : null,
+			'meta_data'             => ( empty( $fields ) or ( ! empty( $fields ) && in_array( 'meta_data', $fields ) ) ) ? $product->get_meta_data() : null,
 		);
+
+		if ( ! empty( $fields ) ) {
+			foreach ( $data as $key => $value ) {
+				if ( $value === null && ! in_array( $key, $fields ) ) {
+					unset( $data[ $key ] );
+				}
+			}
+		}
 
 		return $data;
 	}
