@@ -45,6 +45,8 @@ do_action( 'woocommerce_before_shipping_calculator' ); ?>
 			</select>
 		</p>
 
+		<?php if ( apply_filters( 'woocommerce_shipping_calculator_enable_state', true ) ) : ?>
+
 		<p class="form-row form-row-wide" id="calc_shipping_state_field">
 			<?php
 			$current_cc = WC()->customer->get_shipping_country();
@@ -69,6 +71,8 @@ do_action( 'woocommerce_before_shipping_calculator' ); ?>
 			}
 			?>
 		</p>
+
+		<?php endif; ?>
 
 		<?php if ( apply_filters( 'woocommerce_shipping_calculator_enable_city', true ) ) : ?>
 
