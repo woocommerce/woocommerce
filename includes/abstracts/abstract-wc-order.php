@@ -1,4 +1,4 @@
-<?php // @codingStandardsIgnoreLine
+<?php
 /**
  * Abstract Order
  *
