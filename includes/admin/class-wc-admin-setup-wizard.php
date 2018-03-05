@@ -88,16 +88,18 @@ class WC_Admin_Setup_Wizard {
 	 * @return boolean
 	 */
 	protected function is_default_theme() {
-		return wc_is_active_theme( array(
-			'twentyseventeen',
-			'twentysixteen',
-			'twentyfifteen',
-			'twentyfourteen',
-			'twentythirteen',
-			'twentyeleven',
-			'twentytwelve',
-			'twentyten',
-		) );
+		return wc_is_active_theme(
+			array(
+				'twentyseventeen',
+				'twentysixteen',
+				'twentyfifteen',
+				'twentyfourteen',
+				'twentythirteen',
+				'twentyeleven',
+				'twentytwelve',
+				'twentyten',
+			)
+		);
 	}
 
 	/**
@@ -185,28 +187,36 @@ class WC_Admin_Setup_Wizard {
 		wp_register_script( 'jquery-blockui', WC()->plugin_url() . '/assets/js/jquery-blockui/jquery.blockUI' . $suffix . '.js', array( 'jquery' ), '2.70', true );
 		wp_register_script( 'selectWoo', WC()->plugin_url() . '/assets/js/selectWoo/selectWoo.full' . $suffix . '.js', array( 'jquery' ), '1.0.0' );
 		wp_register_script( 'wc-enhanced-select', WC()->plugin_url() . '/assets/js/admin/wc-enhanced-select' . $suffix . '.js', array( 'jquery', 'selectWoo' ), WC_VERSION );
-		wp_localize_script( 'wc-enhanced-select', 'wc_enhanced_select_params', array(
-			'i18n_no_matches'           => _x( 'No matches found', 'enhanced select', 'woocommerce' ),
-			'i18n_ajax_error'           => _x( 'Loading failed', 'enhanced select', 'woocommerce' ),
-			'i18n_input_too_short_1'    => _x( 'Please enter 1 or more characters', 'enhanced select', 'woocommerce' ),
-			'i18n_input_too_short_n'    => _x( 'Please enter %qty% or more characters', 'enhanced select', 'woocommerce' ),
-			'i18n_input_too_long_1'     => _x( 'Please delete 1 character', 'enhanced select', 'woocommerce' ),
-			'i18n_input_too_long_n'     => _x( 'Please delete %qty% characters', 'enhanced select', 'woocommerce' ),
-			'i18n_selection_too_long_1' => _x( 'You can only select 1 item', 'enhanced select', 'woocommerce' ),
-			'i18n_selection_too_long_n' => _x( 'You can only select %qty% items', 'enhanced select', 'woocommerce' ),
-			'i18n_load_more'            => _x( 'Loading more results&hellip;', 'enhanced select', 'woocommerce' ),
-			'i18n_searching'            => _x( 'Searching&hellip;', 'enhanced select', 'woocommerce' ),
-			'ajax_url'                  => admin_url( 'admin-ajax.php' ),
-			'search_products_nonce'     => wp_create_nonce( 'search-products' ),
-			'search_customers_nonce'    => wp_create_nonce( 'search-customers' ),
-		) );
+		wp_localize_script(
+			'wc-enhanced-select',
+			'wc_enhanced_select_params',
+			array(
+				'i18n_no_matches'           => _x( 'No matches found', 'enhanced select', 'woocommerce' ),
+				'i18n_ajax_error'           => _x( 'Loading failed', 'enhanced select', 'woocommerce' ),
+				'i18n_input_too_short_1'    => _x( 'Please enter 1 or more characters', 'enhanced select', 'woocommerce' ),
+				'i18n_input_too_short_n'    => _x( 'Please enter %qty% or more characters', 'enhanced select', 'woocommerce' ),
+				'i18n_input_too_long_1'     => _x( 'Please delete 1 character', 'enhanced select', 'woocommerce' ),
+				'i18n_input_too_long_n'     => _x( 'Please delete %qty% characters', 'enhanced select', 'woocommerce' ),
+				'i18n_selection_too_long_1' => _x( 'You can only select 1 item', 'enhanced select', 'woocommerce' ),
+				'i18n_selection_too_long_n' => _x( 'You can only select %qty% items', 'enhanced select', 'woocommerce' ),
+				'i18n_load_more'            => _x( 'Loading more results&hellip;', 'enhanced select', 'woocommerce' ),
+				'i18n_searching'            => _x( 'Searching&hellip;', 'enhanced select', 'woocommerce' ),
+				'ajax_url'                  => admin_url( 'admin-ajax.php' ),
+				'search_products_nonce'     => wp_create_nonce( 'search-products' ),
+				'search_customers_nonce'    => wp_create_nonce( 'search-customers' ),
+			)
+		);
 		wp_enqueue_style( 'woocommerce_admin_styles', WC()->plugin_url() . '/assets/css/admin.css', array(), WC_VERSION );
 		wp_enqueue_style( 'wc-setup', WC()->plugin_url() . '/assets/css/wc-setup.css', array( 'dashicons', 'install' ), WC_VERSION );
 
 		wp_register_script( 'wc-setup', WC()->plugin_url() . '/assets/js/admin/wc-setup' . $suffix . '.js', array( 'jquery', 'wc-enhanced-select', 'jquery-blockui', 'wp-util' ), WC_VERSION );
-		wp_localize_script( 'wc-setup', 'wc_setup_params', array(
-			'pending_jetpack_install' => $pending_jetpack ? 'yes' : 'no',
-		) );
+		wp_localize_script(
+			'wc-setup',
+			'wc_setup_params',
+			array(
+				'pending_jetpack_install' => $pending_jetpack ? 'yes' : 'no',
+			)
+		);
 
 		// @codingStandardsIgnoreStart
 		if ( ! empty( $_POST['save_step'] ) && isset( $this->steps[ $this->step ]['handler'] ) ) {
@@ -601,10 +611,13 @@ class WC_Admin_Setup_Wizard {
 			add_action( 'shutdown', array( $this, 'run_deferred_actions' ) );
 		}
 
-		array_push( $this->deferred_actions, array(
-			'func' => array( 'WC_Install', 'background_installer' ),
-			'args' => array( $plugin_id, $plugin_info ),
-		) );
+		array_push(
+			$this->deferred_actions,
+			array(
+				'func' => array( 'WC_Install', 'background_installer' ),
+				'args' => array( $plugin_id, $plugin_info ),
+			)
+		);
 
 		// Set the background installation flag for this plugin.
 		update_option( 'woocommerce_setup_background_installing_' . $plugin_id, true );
@@ -620,21 +633,27 @@ class WC_Admin_Setup_Wizard {
 		if ( empty( $this->deferred_actions ) ) {
 			add_action( 'shutdown', array( $this, 'run_deferred_actions' ) );
 		}
-		array_push( $this->deferred_actions, array(
-			'func' => array( 'WC_Install', 'theme_background_installer' ),
-			'args' => array( $theme_id ),
-		) );
+		array_push(
+			$this->deferred_actions,
+			array(
+				'func' => array( 'WC_Install', 'theme_background_installer' ),
+				'args' => array( $theme_id ),
+			)
+		);
 	}
 
 	/**
 	 * Helper method to install Jetpack.
 	 */
 	protected function install_jetpack() {
-		$this->install_plugin( 'jetpack', array(
-			'file'      => 'jetpack/jetpack.php',
-			'name'      => __( 'Jetpack', 'woocommerce' ),
-			'repo-slug' => 'jetpack',
-		) );
+		$this->install_plugin(
+			'jetpack',
+			array(
+				'file'      => 'jetpack/jetpack.php',
+				'name'      => __( 'Jetpack', 'woocommerce' ),
+				'repo-slug' => 'jetpack',
+			)
+		);
 	}
 
 	/**
@@ -642,11 +661,14 @@ class WC_Admin_Setup_Wizard {
 	 */
 	protected function install_woocommerce_services() {
 		$this->install_jetpack();
-		$this->install_plugin( 'woocommerce-services', array(
-			'file'      => 'woocommerce-services/woocommerce-services.php',
-			'name'      => __( 'WooCommerce Services', 'woocommerce' ),
-			'repo-slug' => 'woocommerce-services',
-		) );
+		$this->install_plugin(
+			'woocommerce-services',
+			array(
+				'file'      => 'woocommerce-services/woocommerce-services.php',
+				'name'      => __( 'WooCommerce Services', 'woocommerce' ),
+				'repo-slug' => 'woocommerce-services',
+			)
+		);
 	}
 
 	/**
@@ -853,10 +875,12 @@ class WC_Admin_Setup_Wizard {
 					<p>
 						<label for="weight_unit">
 							<?php
-								printf( wp_kses(
-									__( '<strong>Weight unit</strong>—used to calculate shipping rates, and more.', 'woocommerce' ),
-									array( 'strong' => array() )
-								) );
+								printf(
+									wp_kses(
+										__( '<strong>Weight unit</strong>—used to calculate shipping rates, and more.', 'woocommerce' ),
+										array( 'strong' => array() )
+									)
+								);
 							?>
 						</label>
 					</p>
@@ -871,10 +895,12 @@ class WC_Admin_Setup_Wizard {
 					<p>
 						<label for="dimension_unit">
 							<?php
-								printf( wp_kses(
-									__( '<strong>Dimension unit</strong>—helps for accurate package selection.', 'woocommerce' ),
-									array( 'strong' => array() )
-								) );
+								printf(
+									wp_kses(
+										__( '<strong>Dimension unit</strong>—helps for accurate package selection.', 'woocommerce' ),
+										array( 'strong' => array() )
+									)
+								);
 							?>
 						</label>
 					</p>

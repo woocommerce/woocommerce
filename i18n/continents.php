@@ -4,10 +4,8 @@
  *
  * Returns an array of continents.
  *
- * @author      WooThemes
- * @category    i18n
- * @package     WooCommerce/i18n
- * @version     2.5.0
+ * @package WooCommerce/i18n
+ * @version 2.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

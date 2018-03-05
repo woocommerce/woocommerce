@@ -18,30 +18,35 @@ class WC_Plugin_Updates {
 
 	/**
 	 * This is the header used by extensions to show requirements.
+	 *
 	 * @var string
 	 */
 	const VERSION_REQUIRED_HEADER = 'WC requires at least';
 
 	/**
 	 * This is the header used by extensions to show testing.
+	 *
 	 * @var string
 	 */
 	const VERSION_TESTED_HEADER = 'WC tested up to';
 
 	/**
 	 * The version for the update to WooCommerce.
+	 *
 	 * @var string
 	 */
 	protected $new_version = '';
 
 	/**
 	 * Array of plugins lacking testing with the major version.
+	 *
 	 * @var array
 	 */
 	protected $major_untested_plugins = array();
 
 	/**
 	 * Array of plugins lacking testing with the minor version.
+	 *
 	 * @var array
 	 */
 	protected $minor_untested_plugins = array();
@@ -116,7 +121,7 @@ class WC_Plugin_Updates {
 		$message = sprintf( __( "<strong>Heads up!</strong> The versions of the following plugins you're running haven't been tested with the latest version of WooCommerce (%s).", 'woocommerce' ), $new_version );
 
 		ob_start();
-		include( 'views/html-notice-untested-extensions-inline.php' );
+		include 'views/html-notice-untested-extensions-inline.php';
 		return ob_get_clean();
 	}
 
@@ -139,7 +144,7 @@ class WC_Plugin_Updates {
 		$message = sprintf( __( "<strong>Heads up!</strong> The versions of the following plugins you're running haven't been tested with WooCommerce %s. Please update them or confirm compatibility before updating WooCommerce, or you may experience issues:", 'woocommerce' ), $new_version );
 
 		ob_start();
-		include( 'views/html-notice-untested-extensions-inline.php' );
+		include 'views/html-notice-untested-extensions-inline.php';
 		return ob_get_clean();
 	}
 
@@ -154,7 +159,7 @@ class WC_Plugin_Updates {
 		$plugins       = $this->major_untested_plugins;
 
 		ob_start();
-		include( 'views/html-notice-untested-extensions-modal.php' );
+		include 'views/html-notice-untested-extensions-modal.php';
 		return ob_get_clean();
 	}
 
@@ -214,7 +219,7 @@ class WC_Plugin_Updates {
 				}
 			} else {
 				$plugin[ self::VERSION_TESTED_HEADER ] = __( 'unknown', 'woocommerce' );
-				$untested[ $file ] = $plugin;
+				$untested[ $file ]                     = $plugin;
 			}
 		}
 

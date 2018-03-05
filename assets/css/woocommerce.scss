@@ -2114,6 +2114,13 @@ button.pswp__button--zoom:hover {
 	background: rgba(0,0,0,.05);
 }
 
+.woocommerce-invalid {
+	#terms {
+		outline: 2px solid red;
+		outline-offset: 2px;
+	}
+}
+
 /**
  * Password strength meter
  */
