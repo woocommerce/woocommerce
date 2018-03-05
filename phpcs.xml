@@ -66,4 +66,7 @@
 	<rule ref="PEAR.Functions.FunctionCallSignature.EmptyLine">
 		<exclude-pattern>tests/e2e-tests/</exclude-pattern>
 	</rule>
+	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
+		<exclude-pattern>i18n/</exclude-pattern>
+	</rule>
 </ruleset>

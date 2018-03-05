@@ -2,14 +2,13 @@
 /**
  * Japan States
  *
- * @author      WooThemes
- * @category    i18n
- * @package     WooCommerce/i18n
- * @version     2.0.0
+ * @package WooCommerce/i18n
+ * @version 2.0.0
  *
  * English notation of prefectures conform to the notation of Japan Post.
  * The suffix corresponds with the Japanese translation file.
  */
+
 global $states;
 
 if ( ! defined( 'ABSPATH' ) ) {
