@@ -43,7 +43,7 @@ class WC_Regenerate_Images {
 		}
 
 		// Not required when Jetpack Photon is in use.
-		if ( class_exists( 'Jetpack' ) && Jetpack::is_module_active( 'photon' ) ) {
+		if ( method_exists('Jetpack', 'is_module_active') && Jetpack::is_module_active( 'photon' ) ) {
 			return;
 		}
 
