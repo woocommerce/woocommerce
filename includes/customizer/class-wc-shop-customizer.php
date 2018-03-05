@@ -530,7 +530,7 @@ class WC_Shop_Customizer {
 			$wp_customize->add_setting(
 				'woocommerce_single_image_width',
 				array(
-					'default'              => 600,
+					'default'              => apply_filters('woocommerce_single_image_default_width',600),
 					'type'                 => 'option',
 					'capability'           => 'manage_woocommerce',
 					'sanitize_callback'    => 'absint',
@@ -558,7 +558,7 @@ class WC_Shop_Customizer {
 			$wp_customize->add_setting(
 				'woocommerce_thumbnail_image_width',
 				array(
-					'default'              => 300,
+					'default'              => apply_filters('woocommerce_thumbnail_image_default_width',300),
 					'type'                 => 'option',
 					'capability'           => 'manage_woocommerce',
 					'sanitize_callback'    => 'absint',
@@ -587,7 +587,7 @@ class WC_Shop_Customizer {
 		$wp_customize->add_setting(
 			'woocommerce_thumbnail_cropping',
 			array(
-				'default'           => '1:1',
+				'default'           => apply_filters('woocommerce_default_thumbnail_cropping','1:1'),
 				'type'              => 'option',
 				'capability'        => 'manage_woocommerce',
 				'sanitize_callback' => 'wc_clean',
@@ -597,7 +597,7 @@ class WC_Shop_Customizer {
 		$wp_customize->add_setting(
 			'woocommerce_thumbnail_cropping_custom_width',
 			array(
-				'default'              => '4',
+				'default'              => apply_filters('woocommerce_thumbnail_cropping_default_custom_width','4'),
 				'type'                 => 'option',
 				'capability'           => 'manage_woocommerce',
 				'sanitize_callback'    => 'absint',
@@ -608,7 +608,7 @@ class WC_Shop_Customizer {
 		$wp_customize->add_setting(
 			'woocommerce_thumbnail_cropping_custom_height',
 			array(
-				'default'              => '3',
+				'default'              => apply_filters('woocommerce_thumbnail_cropping_default_custom_height','3'),
 				'type'                 => 'option',
 				'capability'           => 'manage_woocommerce',
 				'sanitize_callback'    => 'absint',
