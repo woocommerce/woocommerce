@@ -31,9 +31,9 @@ function wc_importer_default_english_mappings( $mappings ) {
 		return $mappings;
 	}
 
-	$weight_unit      = get_option( 'woocommerce_weight_unit' );
-	$dimension_unit   = get_option( 'woocommerce_dimension_unit' );
-	$new_mappings = array(
+	$weight_unit    = get_option( 'woocommerce_weight_unit' );
+	$dimension_unit = get_option( 'woocommerce_dimension_unit' );
+	$new_mappings   = array(
 		'ID'                                      => 'id',
 		'Type'                                    => 'type',
 		'SKU'                                     => 'sku',

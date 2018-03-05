@@ -26,10 +26,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<td>
 						<?php
 						if ( ! empty( $upload_dir['error'] ) ) {
-							?><div class="inline error">
+							?>
+							<div class="inline error">
 								<p><?php esc_html_e( 'Before you can upload your import file, you will need to fix the following error:', 'woocommerce' ); ?></p>
 								<p><strong><?php echo esc_html( $upload_dir['error'] ); ?></strong></p>
-							</div><?php
+							</div>
+							<?php
 						} else {
 							?>
 							<input type="file" id="upload" name="import" size="25" />

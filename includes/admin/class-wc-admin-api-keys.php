@@ -57,10 +57,12 @@ class WC_Admin_API_Keys {
 			$keys_table_list = new WC_Admin_API_Keys_Table_List();
 
 			// Add screen option.
-			add_screen_option( 'per_page', array(
-				'default' => 10,
-				'option'  => 'woocommerce_keys_per_page',
-			) );
+			add_screen_option(
+				'per_page', array(
+					'default' => 10,
+					'option'  => 'woocommerce_keys_per_page',
+				)
+			);
 		}
 	}
 
@@ -117,11 +119,14 @@ class WC_Admin_API_Keys {
 			return $empty;
 		}
 
-		$key = $wpdb->get_row( $wpdb->prepare( "
-			SELECT key_id, user_id, description, permissions, truncated_key, last_access
-			FROM {$wpdb->prefix}woocommerce_api_keys
-			WHERE key_id = %d
-		", $key_id ), ARRAY_A );
+		$key = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT key_id, user_id, description, permissions, truncated_key, last_access
+				FROM {$wpdb->prefix}woocommerce_api_keys
+				WHERE key_id = %d",
+				$key_id
+			), ARRAY_A
+		);
 
 		if ( is_null( $key ) ) {
 			return $empty;

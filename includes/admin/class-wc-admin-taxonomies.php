@@ -59,8 +59,8 @@ class WC_Admin_Taxonomies {
 	/**
 	 * Order term when created (put in position 0).
 	 *
-	 * @param mixed $term_id
-	 * @param mixed $tt_id
+	 * @param mixed  $term_id
+	 * @param mixed  $tt_id
 	 * @param string $taxonomy
 	 */
 	public function create_term( $term_id, $tt_id = '', $taxonomy = '' ) {
@@ -132,9 +132,9 @@ class WC_Admin_Taxonomies {
 
 					// Create the media frame.
 					file_frame = wp.media.frames.downloadable_file = wp.media({
-						title: '<?php _e( "Choose an image", "woocommerce" ); ?>',
+						title: '<?php _e( 'Choose an image', 'woocommerce' ); ?>',
 						button: {
-							text: '<?php _e( "Use image", "woocommerce" ); ?>'
+							text: '<?php _e( 'Use image', 'woocommerce' ); ?>'
 						},
 						multiple: false
 					});
@@ -242,9 +242,9 @@ class WC_Admin_Taxonomies {
 
 						// Create the media frame.
 						file_frame = wp.media.frames.downloadable_file = wp.media({
-							title: '<?php _e( "Choose an image", "woocommerce" ); ?>',
+							title: '<?php _e( 'Choose an image', 'woocommerce' ); ?>',
 							button: {
-								text: '<?php _e( "Use image", "woocommerce" ); ?>'
+								text: '<?php _e( 'Use image', 'woocommerce' ); ?>'
 							},
 							multiple: false
 						});
@@ -280,8 +280,8 @@ class WC_Admin_Taxonomies {
 	/**
 	 * save_category_fields function.
 	 *
-	 * @param mixed $term_id Term ID being saved
-	 * @param mixed $tt_id
+	 * @param mixed  $term_id Term ID being saved
+	 * @param mixed  $tt_id
 	 * @param string $taxonomy
 	 */
 	public function save_category_fields( $term_id, $tt_id = '', $taxonomy = '' ) {
@@ -310,7 +310,7 @@ class WC_Admin_Taxonomies {
 		?>
 		<div class="form-wrap edit-term-notes">
 			<p>
-				<strong><?php _e( 'Note:', 'woocommerce' ) ?></strong><br>
+				<strong><?php _e( 'Note:', 'woocommerce' ); ?></strong><br>
 				<?php
 					printf(
 						/* translators: %s: default category */
@@ -346,7 +346,7 @@ class WC_Admin_Taxonomies {
 
 		$new_columns['thumb'] = __( 'Image', 'woocommerce' );
 
-		$columns = array_merge( $new_columns, $columns );
+		$columns           = array_merge( $new_columns, $columns );
 		$columns['handle'] = '';
 
 		return $columns;
@@ -355,7 +355,7 @@ class WC_Admin_Taxonomies {
 	/**
 	 * Adjust row actions.
 	 *
-	 * @param array $actions Array of actions.
+	 * @param array  $actions Array of actions.
 	 * @param object $term Term object.
 	 * @return array
 	 */
@@ -393,7 +393,7 @@ class WC_Admin_Taxonomies {
 	 *
 	 * @param string $columns
 	 * @param string $column
-	 * @param int $id
+	 * @param int    $id
 	 *
 	 * @return string
 	 */

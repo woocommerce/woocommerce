@@ -26,13 +26,25 @@ $plugin_updates   = new WC_Plugin_Updates();
 $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor' );
 ?>
 <div class="updated woocommerce-message inline">
-	<p><?php esc_html_e( 'Please copy and paste this information in your ticket when contacting support:', 'woocommerce' ); ?> </p>
-	<p class="submit"><a href="#" class="button-primary debug-report"><?php esc_html_e( 'Get system report', 'woocommerce' ); ?></a>
-	<a class="button-secondary docs" href="https://docs.woocommerce.com/document/understanding-the-woocommerce-system-status-report/" target="_blank"><?php esc_html_e( 'Understanding the status report', 'woocommerce' ); ?></a></p>
+	<p>
+		<?php esc_html_e( 'Please copy and paste this information in your ticket when contacting support:', 'woocommerce' ); ?>
+	</p>
+	<p class="submit">
+		<a href="#" class="button-primary debug-report"><?php esc_html_e( 'Get system report', 'woocommerce' ); ?></a>
+		<a class="button-secondary docs" href="https://docs.woocommerce.com/document/understanding-the-woocommerce-system-status-report/" target="_blank">
+			<?php esc_html_e( 'Understanding the status report', 'woocommerce' ); ?>
+		</a>
+	</p>
 	<div id="debug-report">
 		<textarea readonly="readonly"></textarea>
-		<p class="submit"><button id="copy-for-support" class="button-primary" href="#" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>"><?php esc_html_e( 'Copy for support', 'woocommerce' ); ?></button></p>
-		<p class="copy-error hidden"><?php esc_html_e( 'Copying to clipboard failed. Please press Ctrl/Cmd+C to copy.', 'woocommerce' ); ?></p>
+		<p class="submit">
+			<button id="copy-for-support" class="button-primary" href="#" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>">
+				<?php esc_html_e( 'Copy for support', 'woocommerce' ); ?>
+			</button>
+		</p>
+		<p class="copy-error hidden">
+			<?php esc_html_e( 'Copying to clipboard failed. Please press Ctrl/Cmd+C to copy.', 'woocommerce' ); ?>
+		</p>
 	</div>
 </div>
 <table class="wc_status_table widefat" cellspacing="0" id="status">
@@ -184,13 +196,17 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 				<td class="help"><?php echo wc_help_tip( __( 'Suhosin is an advanced protection system for PHP installations. It was designed to protect your servers on the one hand against a number of well known problems in PHP applications and on the other hand against potential unknown vulnerabilities within these applications or the PHP core itself. If enabled on your server, Suhosin may need to be configured to increase its data submission limits.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 				<td><?php echo $environment['suhosin_installed'] ? '<span class="dashicons dashicons-yes"></span>' : '&ndash;'; ?></td>
 			</tr>
-		<?php endif;
+		<?php endif; ?>
+
+		<?php
+
 		if ( $wpdb->use_mysqli ) {
 			$ver = mysqli_get_server_info( $wpdb->dbh );
 		} else {
 			$ver = mysql_get_server_info(); // @codingStandardsIgnoreLine
 		}
-		if ( ! empty( $wpdb->is_mysql ) && ! stristr( $ver, 'MariaDB' ) ) : ?>
+		if ( ! empty( $wpdb->is_mysql ) && ! stristr( $ver, 'MariaDB' ) ) :
+			?>
 			<tr>
 				<td data-export-label="MySQL Version"><?php esc_html_e( 'MySQL version', 'woocommerce' ); ?>:</td>
 				<td class="help"><?php echo wc_help_tip( __( 'The version of MySQL installed on your hosting server.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
@@ -377,7 +393,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 						printf( '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'The MaxMind GeoIP Database does not exist - Geolocation will not function. You can download and install it manually from %1$s to the path: %2$s. Scroll down to "Downloads" and download the "Binary / gzip" file next to "GeoLite Country". Please remember to uncompress GeoIP.dat.gz and upload the GeoIP.dat file only.', 'woocommerce' ), make_clickable( 'http://dev.maxmind.com/geoip/legacy/geolite/' ), '<code class="private">' . $database['maxmind_geoip_database'] . '</code>' ) . '</mark>', WC_LOG_DIR );
 					}
 					?>
-					</td>
+				</td>
 			</tr>
 		<?php } ?>
 
@@ -400,18 +416,18 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 		</tr>
 
 		<?php foreach ( $database['database_tables']['woocommerce'] as $table => $table_data ) { ?>
-		<tr>
-			<td><?php echo esc_html( $table ); ?></td>
-			<td class="help">&nbsp;</td>
-			<td>
-				<?php
-				if ( ! $table_data ) {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . __( 'Table does not exist', 'woocommerce' ) . '</mark>';
-				} else {
-					printf( __( 'Data: %1$.2fMB + Index: %2$.2fMB', 'woocommerce' ), wc_format_decimal( $table_data['data'], 2 ), wc_format_decimal( $table_data['index'], 2 ) );
-				}
-				?>
-			</td>
+			<tr>
+				<td><?php echo esc_html( $table ); ?></td>
+				<td class="help">&nbsp;</td>
+				<td>
+					<?php
+					if ( ! $table_data ) {
+						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . __( 'Table does not exist', 'woocommerce' ) . '</mark>';
+					} else {
+						printf( __( 'Data: %1$.2fMB + Index: %2$.2fMB', 'woocommerce' ), wc_format_decimal( $table_data['data'], 2 ), wc_format_decimal( $table_data['index'], 2 ) );
+					}
+					?>
+				</td>
 			</tr>
 		<?php } ?>
 
@@ -740,7 +756,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 			<td><?php esc_html_e( 'Your theme has a woocommerce.php file, you will not be able to override the woocommerce/archive-product.php custom template since woocommerce.php has priority over archive-product.php. This is intended to prevent display issues.', 'woocommerce' ); ?></td>
 		</tr>
 		<?php endif ?>
-		<?php if ( ! empty( $theme['overrides'] ) ) { ?>
+		<?php if ( ! empty( $theme['overrides'] ) ) : ?>
 			<tr>
 				<td data-export-label="Overrides"><?php esc_html_e( 'Overrides', 'woocommerce' ); ?></td>
 				<td class="help">&nbsp;</td>
@@ -768,26 +784,28 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 					?>
 				</td>
 			</tr>
-			<?php
-		} else { ?>
+		<?php else : ?>
 			<tr>
 				<td data-export-label="Overrides"><?php esc_html_e( 'Overrides', 'woocommerce' ); ?>:</td>
 				<td class="help">&nbsp;</td>
 				<td>&ndash;</td>
 			</tr>
-			<?php
-		}
+		<?php endif; ?>
 
-		if ( true === $theme['has_outdated_templates'] ) {
-			?>
+		<?php if ( true === $theme['has_outdated_templates'] ) : ?>
 			<tr>
 				<td data-export-label="Outdated Templates"><?php esc_html_e( 'Outdated templates', 'woocommerce' ); ?>:</td>
 				<td class="help">&nbsp;</td>
-				<td><mark class="error"><span class="dashicons dashicons-warning"></span></mark><a href="https://docs.woocommerce.com/document/fix-outdated-templates-woocommerce/" target="_blank"><?php esc_html_e( 'Learn how to update', 'woocommerce' ); ?></a></td>
-			</tr>
-			<?php
-		}
-		?>
+				<td>
+					<mark class="error">
+						<span class="dashicons dashicons-warning"></span>
+					</mark>
+					<a href="https://docs.woocommerce.com/document/fix-outdated-templates-woocommerce/" target="_blank">
+						<?php esc_html_e( 'Learn how to update', 'woocommerce' ); ?>
+					</a>
+				</td>
+			/tr>
+		<?php endif; ?>
 	</tbody>
 </table>
 
