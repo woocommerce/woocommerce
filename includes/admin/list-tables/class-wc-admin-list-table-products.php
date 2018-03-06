@@ -55,7 +55,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	/**
 	 * Define primary column.
 	 *
-	 * @return array
+	 * @return string
 	 */
 	protected function get_primary_column() {
 		return 'name';
@@ -405,35 +405,31 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	protected function query_filters( $query_vars ) {
 		if ( isset( $query_vars['orderby'] ) ) {
 			if ( 'price' === $query_vars['orderby'] ) {
-				// @codingStandardsIgnoreStart
 				$query_vars = array_merge( $query_vars, array(
-					'meta_key'  => '_price',
-					'orderby'   => 'meta_value_num',
+					// phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_key
+					'meta_key' => '_price',
+					'orderby'  => 'meta_value_num',
 				) );
-				// @codingStandardsIgnoreEnd
 			}
 			if ( 'sku' === $query_vars['orderby'] ) {
-				// @codingStandardsIgnoreStart
 				$query_vars = array_merge( $query_vars, array(
-					'meta_key'  => '_sku',
-					'orderby'   => 'meta_value',
+					// phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_key
+					'meta_key' => '_sku',
+					'orderby'  => 'meta_value',
 				) );
-				// @codingStandardsIgnoreEnd
 			}
 		}
 
 		if ( isset( $query_vars['product_type'] ) ) {
-			// @codingStandardsIgnoreStart
 			if ( 'downloadable' === $query_vars['product_type'] ) {
 				$query_vars['product_type'] = '';
-				$query_vars['meta_value']   = 'yes';
-				$query_vars['meta_key']     = '_downloadable';
+				$query_vars['meta_value']   = 'yes'; // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_value
+				$query_vars['meta_key']     = '_downloadable'; // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_key
 			} elseif ( 'virtual' === $query_vars['product_type'] ) {
 				$query_vars['product_type'] = '';
-				$query_vars['meta_value']   = 'yes';
-				$query_vars['meta_key']     = '_virtual';
+				$query_vars['meta_value']   = 'yes'; // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_value
+				$query_vars['meta_key']     = '_virtual'; // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_key
 			}
-			// @codingStandardsIgnoreEnd
 		}
 
 		if ( isset( $_GET['product_shipping_class'] ) && '0' === $_GET['product_shipping_class'] ) { // WPCS: input var ok.
@@ -447,7 +443,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 
 		if ( ! empty( $_GET['stock_status'] ) ) {
 			if ( ! isset( $query_vars['meta_query'] ) ) {
-				$query_vars['meta_query'] = array();
+				$query_vars['meta_query'] = array(); // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_query
 			}
 
 			$query_vars['meta_query'][] = array(
