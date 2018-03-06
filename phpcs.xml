@@ -74,4 +74,7 @@
 	<rule ref="PHPCompatibility.PHP.NewFunctions.array_columnFound">
 		<exclude-pattern>includes/cli/</exclude-pattern>
 	</rule>
+	<rule ref="PHPCompatibility.PHP.NewClosure.Found">
+		<exclude-pattern>includes/cli/</exclude-pattern>
+	</rule>
 </ruleset>
