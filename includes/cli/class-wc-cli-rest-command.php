@@ -162,11 +162,11 @@ class WC_CLI_REST_Command {
 		}
 
 		if ( 'headers' === $assoc_args['format'] ) {
-			echo json_encode( $headers );
+			echo wp_json_encode( $headers );
 		} elseif ( 'body' === $assoc_args['format'] ) {
-			echo json_encode( $body );
+			echo wp_json_encode( $body );
 		} elseif ( 'envelope' === $assoc_args['format'] ) {
-			echo json_encode(
+			echo wp_json_encode(
 				array(
 					'body'    => $body,
 					'headers' => $headers,
@@ -214,11 +214,11 @@ class WC_CLI_REST_Command {
 		if ( ! empty( $assoc_args['format'] ) && 'count' === $assoc_args['format'] ) {
 			echo (int) $headers['X-WP-Total'];
 		} elseif ( 'headers' === $assoc_args['format'] ) {
-			echo json_encode( $headers );
+			echo wp_json_encode( $headers );
 		} elseif ( 'body' === $assoc_args['format'] ) {
-			echo json_encode( $body );
+			echo wp_json_encode( $body );
 		} elseif ( 'envelope' === $assoc_args['format'] ) {
-			echo json_encode(
+			echo wp_json_encode(
 				array(
 					'body'    => $body,
 					'headers' => $headers,
