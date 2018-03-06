@@ -4,13 +4,11 @@
  *
  * Handles requests to the /webhooks endpoint.
  *
- * @package  WooCommerce/API
- * @since    2.6.0
+ * @package WooCommerce/API
+ * @since   2.6.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * REST API Webhooks controller class.

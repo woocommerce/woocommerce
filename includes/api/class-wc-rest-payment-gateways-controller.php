@@ -4,17 +4,15 @@
  *
  * Handles requests to the /payment_gateways endpoint.
  *
- * @author   WooThemes
- * @category API
- * @package  WooCommerce/API
- * @since    3.0.0
+ * @package WooCommerce/API
+ * @since   3.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
+ * Paymenga gateways controller class.
+ *
  * @package WooCommerce/API
  * @extends WC_REST_Controller
  */
@@ -136,7 +134,7 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 	/**
 	 * Get a single payment gateway.
 	 *
-	 * @param WP_REST_Request $request
+	 * @param WP_REST_Request $request Request data.
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_item( $request ) {
@@ -153,7 +151,7 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 	/**
 	 * Update A Single Payment Method.
 	 *
-	 * @param WP_REST_Request $request
+	 * @param WP_REST_Request $request Request data.
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function update_item( $request ) {
@@ -192,24 +190,27 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 
 		// Update if this method is enabled or not.
 		if ( isset( $request['enabled'] ) ) {
-			$gateway->enabled = $settings['enabled'] = wc_bool_to_string( $request['enabled'] );
+			$settings['enabled'] = wc_bool_to_string( $request['enabled'] );
+			$gateway->enabled    = $settings['enabled'];
 		}
 
 		// Update title.
 		if ( isset( $request['title'] ) ) {
-			$gateway->title = $settings['title'] = $request['title'];
+			$settings['title'] = $request['title'];
+			$gateway->title    = $settings['title'];
 		}
 
 		// Update description.
 		if ( isset( $request['description'] ) ) {
-			$gateway->description = $settings['description'] = $request['description'];
+			$settings['description'] = $request['description'];
+			$gateway->description    = $settings['description'];
 		}
 
 		// Update options.
 		$gateway->settings = $settings;
 		update_option( $gateway->get_option_key(), apply_filters( 'woocommerce_gateway_' . $gateway->id . '_settings_values', $settings, $gateway ) );
 
-		// Update order
+		// Update order.
 		if ( isset( $request['order'] ) ) {
 			$order                 = (array) get_option( 'woocommerce_gateway_order' );
 			$order[ $gateway->id ] = $request['order'];
@@ -224,7 +225,7 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 	/**
 	 * Get a gateway based on the current request object.
 	 *
-	 * @param WP_REST_Request $request
+	 * @param WP_REST_Request $request Request data.
 	 * @return WP_REST_Response|null
 	 */
 	public function get_gateway( $request ) {
@@ -280,7 +281,7 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 	/**
 	 * Return settings associated with this payment gateway.
 	 *
-	 * @param WC_Payment_Gateway $gateway
+	 * @param WC_Payment_Gateway $gateway Gateway data.
 	 *
 	 * @return array
 	 */
@@ -288,16 +289,16 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 		$settings = array();
 		$gateway->init_form_fields();
 		foreach ( $gateway->form_fields as $id => $field ) {
-			// Make sure we at least have a title and type
+			// Make sure we at least have a title and type.
 			if ( empty( $field['title'] ) || empty( $field['type'] ) ) {
 				continue;
 			}
-			// Ignore 'title' settings/fields -- they are UI only
+			// Ignore 'title' settings/fields -- they are UI only.
 			if ( 'title' === $field['type'] ) {
 				continue;
 			}
 			// Ignore 'enabled' and 'description' which get included elsewhere.
-			if ( in_array( $id, array( 'enabled', 'description' ) ) ) {
+			if ( in_array( $id, array( 'enabled', 'description' ), true ) ) {
 				continue;
 			}
 			$data = array(

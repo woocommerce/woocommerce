@@ -4,15 +4,11 @@
  *
  * Handles requests to the /coupons endpoint.
  *
- * @author   WooThemes
- * @category API
- * @package  WooCommerce/API
- * @since    2.6.0
+ * @package WooCommerce/API
+ * @since   2.6.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * REST API Coupons controller class.
@@ -250,7 +246,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Legacy_Coupons_Controller {
 	/**
 	 * Only return writable props from schema.
 	 *
-	 * @param  array $schema
+	 * @param  array $schema Schema.
 	 * @return bool
 	 */
 	protected function filter_writable_props( $schema ) {

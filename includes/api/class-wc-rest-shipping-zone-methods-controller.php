@@ -4,15 +4,11 @@
  *
  * Handles requests to the /shipping/zones/<id>/methods endpoint.
  *
- * @author   WooThemes
- * @category API
- * @package  WooCommerce/API
- * @since    3.0.0
+ * @package WooCommerce/API
+ * @since   3.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * REST API Shipping Zone Methods class.
@@ -100,7 +96,7 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 	/**
 	 * Get a single Shipping Zone Method.
 	 *
-	 * @param WP_REST_Request $request
+	 * @param WP_REST_Request $request Request data.
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_item( $request ) {
@@ -133,7 +129,7 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 	/**
 	 * Get all Shipping Zone Methods.
 	 *
-	 * @param WP_REST_Request $request
+	 * @param WP_REST_Request $request Request data.
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_items( $request ) {
@@ -193,7 +189,7 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 	/**
 	 * Delete a shipping method instance.
 	 *
-	 * @param WP_REST_Request $request Full details about the request
+	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function delete_item( $request ) {
@@ -227,7 +223,7 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 		$request->set_param( 'context', 'view' );
 		$response = $this->prepare_item_for_response( $method, $request );
 
-		// Actually delete
+		// Actually delete.
 		if ( $force ) {
 			$zone->delete_shipping_method( $instance_id );
 		} else {
@@ -249,7 +245,7 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 	/**
 	 * Update A Single Shipping Zone Method.
 	 *
-	 * @param WP_REST_Request $request
+	 * @param WP_REST_Request $request Request data.
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function update_item( $request ) {
@@ -285,16 +281,16 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 	/**
 	 * Updates settings, order, and enabled status on create.
 	 *
-	 * @param int                $instance_id integer
-	 * @param WC_Shipping_Method $method
-	 * @param WP_REST_Request    $request
+	 * @param int                $instance_id Instance ID.
+	 * @param WC_Shipping_Method $method      Shipping method data.
+	 * @param WP_REST_Request    $request     Request data.
 	 *
 	 * @return WC_Shipping_Method
 	 */
 	public function update_fields( $instance_id, $method, $request ) {
 		global $wpdb;
 
-		// Update settings if present
+		// Update settings if present.
 		if ( isset( $request['settings'] ) ) {
 			$method->init_instance_settings();
 			$instance_settings = $method->instance_settings;
@@ -321,7 +317,7 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 			update_option( $method->get_instance_option_key(), apply_filters( 'woocommerce_shipping_' . $method->id . '_instance_settings_values', $instance_settings, $method ) );
 		}
 
-		// Update order
+		// Update order.
 		if ( isset( $request['order'] ) ) {
 			$wpdb->update( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'method_order' => absint( $request['order'] ) ), array( 'instance_id' => absint( $instance_id ) ) );
 			$method->method_order = absint( $request['order'] );
@@ -375,7 +371,7 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 	/**
 	 * Return settings associated with this shipping zone method instance.
 	 *
-	 * @param WC_Shipping_Method $item
+	 * @param WC_Shipping_Method $item Shipping method data.
 	 *
 	 * @return array
 	 */

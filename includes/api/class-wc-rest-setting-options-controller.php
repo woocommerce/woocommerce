@@ -4,15 +4,11 @@
  *
  * Handles requests to the /settings/$group/$setting endpoints.
  *
- * @author   WooThemes
- * @category API
- * @package  WooCommerce/API
- * @since    3.0.0
+ * @package WooCommerce/API
+ * @since   3.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * REST API Setting Options controller class.
@@ -24,6 +20,8 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Controller {
 
 	/**
 	 * WP REST API namespace/version.
+	 *
+	 * @var string
 	 */
 	protected $namespace = 'wc/v2';
 
@@ -107,7 +105,7 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Controller {
 	 * Return a single setting.
 	 *
 	 * @since  3.0.0
-	 * @param  WP_REST_Request $request
+	 * @param  WP_REST_Request $request Request data.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
@@ -126,7 +124,7 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Controller {
 	 * Return all settings in a group.
 	 *
 	 * @since  3.0.0
-	 * @param  WP_REST_Request $request
+	 * @param  WP_REST_Request $request Request data.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
@@ -172,7 +170,7 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Controller {
 			$option_key = $setting['option_key'];
 			$setting    = $this->filter_setting( $setting );
 			$default    = isset( $setting['default'] ) ? $setting['default'] : '';
-			// Get the option value
+			// Get the option value.
 			if ( is_array( $option_key ) ) {
 				$option           = get_option( $option_key[0] );
 				$setting['value'] = isset( $option[ $option_key[1] ] ) ? $option[ $option_key[1] ] : $default;
@@ -210,7 +208,8 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Controller {
 		$output = array();
 
 		foreach ( $countries as $key => $value ) {
-			if ( $states = WC()->countries->get_states( $key ) ) {
+			$states = WC()->countries->get_states( $key );
+			if ( $states ) {
 				foreach ( $states as $state_key => $state_value ) {
 					$output[ $key . ':' . $state_key ] = $value . ' - ' . $state_value;
 				}
@@ -287,7 +286,7 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Controller {
 	 * Update a single setting in a group.
 	 *
 	 * @since  3.0.0
-	 * @param  WP_REST_Request $request
+	 * @param  WP_REST_Request $request Request data.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
@@ -400,7 +399,7 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Controller {
 	 * only return known values via the API.
 	 *
 	 * @since 3.0.0
-	 * @param  array $setting
+	 * @param  array $setting Settings.
 	 * @return array
 	 */
 	public function filter_setting( $setting ) {
@@ -426,7 +425,7 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Controller {
 	 *
 	 * @todo remove in 4.0
 	 * @since 3.0.0
-	 * @param  array $setting
+	 * @param  array $setting Settings.
 	 * @return array
 	 */
 	public function cast_image_width( $setting ) {
@@ -444,7 +443,7 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Controller {
 	 * Callback for allowed keys for each setting response.
 	 *
 	 * @since  3.0.0
-	 * @param  string $key Key to check
+	 * @param  string $key Key to check.
 	 * @return boolean
 	 */
 	public function allowed_setting_keys( $key ) {
@@ -468,7 +467,7 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Controller {
 	 * Boolean for if a setting type is a valid supported setting type.
 	 *
 	 * @since  3.0.0
-	 * @param  string $type
+	 * @param  string $type Type.
 	 * @return bool
 	 */
 	public function is_setting_type_valid( $type ) {

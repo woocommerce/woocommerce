@@ -4,13 +4,15 @@
  *
  * Handles requests to the /system_status/tools/* endpoints.
  *
- * @package  WooCommerce/API
- * @since    3.0.0
+ * @package WooCommerce/API
+ * @since   3.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
 
 /**
+ * System status tools controller.
+ *
  * @package WooCommerce/API
  * @extends WC_REST_Controller
  */
@@ -222,7 +224,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 	/**
 	 * Return a single tool.
 	 *
-	 * @param  WP_REST_Request $request
+	 * @param  WP_REST_Request $request Request data.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
@@ -246,7 +248,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 	/**
 	 * Update (execute) a tool.
 	 *
-	 * @param  WP_REST_Request $request
+	 * @param  WP_REST_Request $request Request data.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
@@ -363,7 +365,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param string $id
+	 * @param string $id ID.
 	 * @return array
 	 */
 	protected function prepare_links( $id ) {
@@ -390,9 +392,9 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * Actually executes a a tool.
+	 * Actually executes a tool.
 	 *
-	 * @param  string $tool
+	 * @param  string $tool Tool.
 	 * @return array
 	 */
 	public function execute_tool( $tool ) {
@@ -407,14 +409,13 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 				break;
 
 			case 'clear_expired_transients':
+				/* translators: %d: amount of expired transients */
 				$message = sprintf( __( '%d transients rows cleared', 'woocommerce' ), wc_delete_expired_transients() );
 				break;
 
 			case 'delete_orphaned_variations':
-				/**
-				 * Delete orphans
-				 */
-				$result  = absint(
+				// Delete orphans.
+				$result = absint(
 					$wpdb->query(
 						"DELETE products
 					FROM {$wpdb->posts} products
@@ -422,11 +423,12 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 					WHERE wp.ID IS NULL AND products.post_type = 'product_variation';"
 					)
 				);
+				/* translators: %d: amount of orphaned variations */
 				$message = sprintf( __( '%d orphaned variations deleted', 'woocommerce' ), $result );
 				break;
 
 			case 'add_order_indexes':
-				/**
+				/*
 				 * Add billing and shipping address indexes containing the customer name for orders
 				 * that don't have address indexes yet.
 				 */
@@ -438,14 +440,15 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 						WHERE post_id NOT IN ( SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key='%s' )
 						AND post_id IN ( SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key='%s' ) )
 					GROUP BY post_id";
-				$rows  = $wpdb->query( $wpdb->prepare( $sql, '_billing_address_index', '_billing_first_name', '_billing_last_name', '_billing_address_index', '_billing_last_name' ) );
-				$rows += $wpdb->query( $wpdb->prepare( $sql, '_shipping_address_index', '_shipping_first_name', '_shipping_last_name', '_shipping_address_index', '_shipping_last_name' ) );
+				$rows  = $wpdb->query( $wpdb->prepare( $sql, '_billing_address_index', '_billing_first_name', '_billing_last_name', '_billing_address_index', '_billing_last_name' ) ); // WPCS: unprepared SQL ok.
+				$rows += $wpdb->query( $wpdb->prepare( $sql, '_shipping_address_index', '_shipping_first_name', '_shipping_last_name', '_shipping_address_index', '_shipping_last_name' ) ); // WPCS: unprepared SQL ok.
 
+				/* translators: %d: amount of indexes */
 				$message = sprintf( __( '%d indexes added', 'woocommerce' ), $rows );
 				break;
 
 			case 'reset_roles':
-				// Remove then re-add caps and roles
+				// Remove then re-add caps and roles.
 				WC_Install::remove_roles();
 				WC_Install::create_roles();
 				$message = __( 'Roles successfully reset', 'woocommerce' );
@@ -471,8 +474,9 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 
 			case 'clear_sessions':
 				$wpdb->query( "TRUNCATE {$wpdb->prefix}woocommerce_sessions" );
-				$result = absint( $wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key='_woocommerce_persistent_cart_" . get_current_blog_id() . "';" ) );
+				$result = absint( $wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key='_woocommerce_persistent_cart_" . get_current_blog_id() . "';" ) ); // WPCS: unprepared SQL ok.
 				wp_cache_flush();
+				/* translators: %d: amount of sessions */
 				$message = sprintf( __( 'Deleted all active sessions, and %d saved carts.', 'woocommerce' ), absint( $result ) );
 				break;
 
@@ -509,7 +513,8 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 					} elseif ( false === $return ) {
 						$callback_string = is_array( $callback ) ? get_class( $callback[0] ) . '::' . $callback[1] : $callback;
 						$ran             = false;
-						$message         = sprintf( __( 'There was an error calling %s', 'woocommerce' ), $callback_string );
+						/* translators: %s: callback string */
+						$message = sprintf( __( 'There was an error calling %s', 'woocommerce' ), $callback_string );
 					} else {
 						$message = __( 'Tool ran.', 'woocommerce' );
 					}

@@ -4,17 +4,15 @@
  *
  * Handles requests to the /shipping_methods endpoint.
  *
- * @author   WooThemes
- * @category API
- * @package  WooCommerce/API
- * @since    3.0.0
+ * @package WooCommerce/API
+ * @since   3.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
+ * Shipping methods controller class.
+ *
  * @package WooCommerce/API
  * @extends WC_REST_Controller
  */
@@ -116,7 +114,7 @@ class WC_REST_Shipping_Methods_Controller extends WC_REST_Controller {
 	/**
 	 * Get a single Shipping Method.
 	 *
-	 * @param WP_REST_Request $request
+	 * @param WP_REST_Request $request Request data.
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_item( $request ) {

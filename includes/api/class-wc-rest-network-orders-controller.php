@@ -4,15 +4,11 @@
  *
  * Handles requests to the /orders/network endpoint
  *
- * @author   WooThemes
- * @category API
  * @package  WooCommerce/API
- * @since    3.3
+ * @since    3.4.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * REST API Network Orders controller class.

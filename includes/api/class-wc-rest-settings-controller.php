@@ -4,15 +4,11 @@
  *
  * Handles requests to the /settings endpoints.
  *
- * @author   WooThemes
- * @category API
- * @package  WooCommerce/API
- * @since    3.0.0
+ * @package WooCommerce/API
+ * @since   3.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * REST API Settings controller class.
@@ -24,6 +20,8 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 
 	/**
 	 * WP REST API namespace/version.
+	 *
+	 * @var string
 	 */
 	protected $namespace = 'wc/v2';
 
@@ -56,7 +54,7 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 	 * Get all settings groups items.
 	 *
 	 * @since  3.0.0
-	 * @param  WP_REST_Request $request
+	 * @param  WP_REST_Request $request Request data.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
@@ -132,7 +130,7 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 	 * only return known values via the API.
 	 *
 	 * @since 3.0.0
-	 * @param  array $group
+	 * @param  array $group Group.
 	 * @return array
 	 */
 	public function filter_group( $group ) {
@@ -146,7 +144,7 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 	 * Callback for allowed keys for each group response.
 	 *
 	 * @since  3.0.0
-	 * @param  string $key Key to check
+	 * @param  string $key Key to check.
 	 * @return boolean
 	 */
 	public function allowed_group_keys( $key ) {

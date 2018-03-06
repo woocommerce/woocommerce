@@ -4,15 +4,11 @@
  *
  * Handles requests to the /orders endpoint.
  *
- * @author   WooThemes
- * @category API
  * @package  WooCommerce/API
  * @since    2.6.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * REST API Orders controller class.
@@ -144,7 +140,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 	/**
 	 * Expands an order item to get its data.
 	 *
-	 * @param WC_Order_item $item
+	 * @param WC_Order_item $item Order item data.
 	 * @return array
 	 */
 	protected function get_order_item_data( $item ) {
@@ -364,7 +360,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 
 		if ( isset( $request['customer'] ) ) {
 			if ( ! empty( $args['meta_query'] ) ) {
-				$args['meta_query'] = array();
+				$args['meta_query'] = array(); // WPCS: slow query ok.
 			}
 
 			$args['meta_query'][] = array(
@@ -419,7 +415,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 	/**
 	 * Only return writable props from schema.
 	 *
-	 * @param  array $schema
+	 * @param  array $schema Schema.
 	 * @return bool
 	 */
 	protected function filter_writable_props( $schema ) {
@@ -501,6 +497,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 	 * Save an object data.
 	 *
 	 * @since  3.0.0
+	 * @throws WC_REST_Exception But all errors are validated before returning any data.
 	 * @param  WP_REST_Request $request  Full details about the request.
 	 * @param  bool            $creating If is creating a new object.
 	 * @return WC_Data|WP_Error
@@ -561,9 +558,9 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 	/**
 	 * Update address.
 	 *
-	 * @param WC_Order $order
-	 * @param array    $posted
-	 * @param string   $type
+	 * @param WC_Order $order  Order data.
+	 * @param array    $posted Posted data.
+	 * @param string   $type   Address type.
 	 */
 	protected function update_address( $order, $posted, $type = 'billing' ) {
 		foreach ( $posted as $key => $value ) {
@@ -576,10 +573,9 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 	/**
 	 * Gets the product ID from the SKU or posted ID.
 	 *
-	 * @param array $posted Request data
-	 *
+	 * @throws WC_REST_Exception When SKU or ID is not valid.
+	 * @param array $posted Request data.
 	 * @return int
-	 * @throws WC_REST_Exception
 	 */
 	protected function get_product_id( $posted ) {
 		if ( ! empty( $posted['sku'] ) ) {
@@ -597,8 +593,8 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 	/**
 	 * Maybe set an item prop if the value was posted.
 	 *
-	 * @param WC_Order_Item $item
-	 * @param string        $prop
+	 * @param WC_Order_Item $item   Order item.
+	 * @param string        $prop   Order property.
 	 * @param array         $posted Request data.
 	 */
 	protected function maybe_set_item_prop( $item, $prop, $posted ) {
@@ -610,8 +606,8 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 	/**
 	 * Maybe set item props if the values were posted.
 	 *
-	 * @param WC_Order_Item $item
-	 * @param string[]      $props
+	 * @param WC_Order_Item $item   Order item data.
+	 * @param string[]      $props  Properties.
 	 * @param array         $posted Request data.
 	 */
 	protected function maybe_set_item_props( $item, $props, $posted ) {
@@ -623,7 +619,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 	/**
 	 * Maybe set item meta if posted.
 	 *
-	 * @param WC_Order_Item $item
+	 * @param WC_Order_Item $item   Order item data.
 	 * @param array         $posted Request data.
 	 */
 	protected function maybe_set_item_meta_data( $item, $posted ) {

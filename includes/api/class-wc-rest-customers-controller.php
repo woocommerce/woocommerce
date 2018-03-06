@@ -4,15 +4,11 @@
  *
  * Handles requests to the /customers endpoint.
  *
- * @author   WooThemes
- * @category API
- * @package  WooCommerce/API
- * @since    2.6.0
+ * @package WooCommerce/API
+ * @since   2.6.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * REST API Customers controller class.
@@ -97,8 +93,8 @@ class WC_REST_Customers_Controller extends WC_REST_Customers_V1_Controller {
 	/**
 	 * Update customer meta fields.
 	 *
-	 * @param WC_Customer     $customer
-	 * @param WP_REST_Request $request
+	 * @param WC_Customer     $customer Cusotmer data.
+	 * @param WP_REST_Request $request  Request data.
 	 */
 	protected function update_customer_meta_fields( $customer, $request ) {
 		parent::update_customer_meta_fields( $customer, $request );
