@@ -50,11 +50,6 @@ class WC_CLI_REST_Command {
 	private $schema;
 
 	/**
-	 * Nesting level.
-	 */
-	private $output_nesting_level = 0;
-
-	/**
 	 * List of supported IDs and their description (name => desc).
 	 */
 	private $supported_ids = array();
@@ -388,60 +383,6 @@ EOT;
 		}
 
 		return rtrim( $route );
-	}
-
-	/**
-	 * Output a line to be added
-	 *
-	 * @param string
-	 */
-	private function add_line( $line ) {
-		$this->nested_line( $line, 'add' );
-	}
-
-	/**
-	 * Output a line to be removed
-	 *
-	 * @param string
-	 */
-	private function remove_line( $line ) {
-		$this->nested_line( $line, 'remove' );
-	}
-
-	/**
-	 * Output a line that's appropriately nested
-	 *
-	 * @param string $line
-	 * @param bool|string $change
-	 */
-	private function nested_line( $line, $change = false ) {
-		if ( 'add' == $change ) {
-			$label = '+ ';
-		} elseif ( 'remove' == $change ) {
-			$label = '- ';
-		} else {
-			$label = false;
-		}
-
-		$spaces = ( $this->output_nesting_level * 2 ) + 2;
-		if ( $label ) {
-			$line = $label . $line;
-			$spaces = $spaces - 2;
-		}
-		WP_CLI::line( str_pad( ' ', $spaces ) . $line );
-	}
-
-	/**
-	 * Whether or not this is an associative array
-	 *
-	 * @param array
-	 * @return bool
-	 */
-	private function is_assoc_array( $array ) {
-		if ( ! is_array( $array ) ) {
-			return false;
-		}
-		return array_keys( $array ) !== range( 0, count( $array ) - 1 );
 	}
 
 	/**
