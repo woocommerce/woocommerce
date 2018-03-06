@@ -1,9 +1,9 @@
 <?php
 /**
- * Abstract Order Data Store
+ * Order Data Store Interface
  *
  * @version 3.0.0
- * @package WooCommerce/Data Stores
+ * @package WooCommerce/Interfaces
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
