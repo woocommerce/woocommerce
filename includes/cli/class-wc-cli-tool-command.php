@@ -1,4 +1,9 @@
 <?php
+/**
+ * WC_CLI_Tool_Command class file.
+ *
+ * @package WooCommerce\CLI
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
