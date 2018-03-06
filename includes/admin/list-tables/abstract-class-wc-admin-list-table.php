@@ -2,8 +2,6 @@
 /**
  * List tables.
  *
- * @author   WooCommerce
- * @category Admin
  * @package  WooCommerce/Admin
  * @version  3.3.0
  */
