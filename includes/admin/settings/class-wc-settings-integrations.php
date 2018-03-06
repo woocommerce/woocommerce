@@ -14,64 +14,64 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 if ( ! class_exists( 'WC_Settings_Integrations', false ) ) :
 
-/**
- * WC_Settings_Integrations.
- */
-class WC_Settings_Integrations extends WC_Settings_Page {
-
 	/**
-	 * Constructor.
+	 * WC_Settings_Integrations.
 	 */
-	public function __construct() {
-		$this->id    = 'integration';
-		$this->label = __( 'Integration', 'woocommerce' );
+	class WC_Settings_Integrations extends WC_Settings_Page {
 
-		if ( isset( WC()->integrations ) && WC()->integrations->get_integrations() ) {
-			parent::__construct();
-		}
-	}
+		/**
+		 * Constructor.
+		 */
+		public function __construct() {
+			$this->id    = 'integration';
+			$this->label = __( 'Integration', 'woocommerce' );
 
-	/**
-	 * Get sections.
-	 *
-	 * @return array
-	 */
-	public function get_sections() {
-		global $current_section;
-
-		$sections = array();
-
-		if ( ! defined( 'WC_INSTALLING' ) ) {
-			$integrations = WC()->integrations->get_integrations();
-
-			if ( ! $current_section && ! empty( $integrations ) ) {
-				$current_section = current( $integrations )->id;
+			if ( isset( WC()->integrations ) && WC()->integrations->get_integrations() ) {
+				parent::__construct();
 			}
+		}
 
-			if ( sizeof( $integrations ) > 1 ) {
-				foreach ( $integrations as $integration ) {
-					$title = empty( $integration->method_title ) ? ucfirst( $integration->id ) : $integration->method_title;
-					$sections[ strtolower( $integration->id ) ] = esc_html( $title );
+		/**
+		 * Get sections.
+		 *
+		 * @return array
+		 */
+		public function get_sections() {
+			global $current_section;
+
+			$sections = array();
+
+			if ( ! defined( 'WC_INSTALLING' ) ) {
+				$integrations = WC()->integrations->get_integrations();
+
+				if ( ! $current_section && ! empty( $integrations ) ) {
+					$current_section = current( $integrations )->id;
+				}
+
+				if ( sizeof( $integrations ) > 1 ) {
+					foreach ( $integrations as $integration ) {
+						$title                                      = empty( $integration->method_title ) ? ucfirst( $integration->id ) : $integration->method_title;
+						$sections[ strtolower( $integration->id ) ] = esc_html( $title );
+					}
 				}
 			}
+
+			return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
 		}
 
-		return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
-	}
+		/**
+		 * Output the settings.
+		 */
+		public function output() {
+			global $current_section;
 
-	/**
-	 * Output the settings.
-	 */
-	public function output() {
-		global $current_section;
+			$integrations = WC()->integrations->get_integrations();
 
-		$integrations = WC()->integrations->get_integrations();
-
-		if ( isset( $integrations[ $current_section ] ) ) {
-			$integrations[ $current_section ]->admin_options();
+			if ( isset( $integrations[ $current_section ] ) ) {
+				$integrations[ $current_section ]->admin_options();
+			}
 		}
 	}
-}
 
 endif;
 

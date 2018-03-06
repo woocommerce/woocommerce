@@ -2,16 +2,13 @@
 /**
  * Cantons of Switzerland
  *
- * @author   WooCommerce
- * @category i18n
  * @package  WooCommerce/i18n
  * @version  3.2.0
  */
+
 global $states;
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 $states['CH'] = array(
 	'AG' => __( 'Aargau', 'woocommerce' ),

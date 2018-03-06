@@ -13,13 +13,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! class_exists( 'WC_Plugin_Updates' ) ) {
-	include_once( dirname( __FILE__ ) . '/class-wc-plugin-updates.php' );
+	include_once dirname( __FILE__ ) . '/class-wc-plugin-updates.php';
 }
 
 class WC_Plugins_Screen_Updates extends WC_Plugin_Updates {
 
 	/**
 	 * The upgrade notice shown inline.
+	 *
 	 * @var string
 	 */
 	protected $upgrade_notice = '';
