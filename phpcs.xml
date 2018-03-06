@@ -66,4 +66,8 @@
 	<rule ref="PEAR.Functions.FunctionCallSignature.EmptyLine">
 		<exclude-pattern>tests/e2e-tests/</exclude-pattern>
 	</rule>
+	<!-- CLI commands require PHP >= 5.3 instead of 5.2 -->
+	<rule ref="PHPCompatibility.PHP.NewLanguageConstructs.t_ns_separatorFound">
+		<exclude-pattern>includes/cli/</exclude-pattern>
+	</rule>
 </ruleset>
