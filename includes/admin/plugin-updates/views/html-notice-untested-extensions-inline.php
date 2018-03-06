@@ -1,7 +1,10 @@
 <?php
 /**
  * Admin View: Notice - Untested extensions.
+ *
+ * @package WooCommerce\Admin
  */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
