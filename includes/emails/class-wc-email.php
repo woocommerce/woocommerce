@@ -23,24 +23,28 @@ class WC_Email extends WC_Settings_API {
 
 	/**
 	 * Email method ID.
+	 *
 	 * @var String
 	 */
 	public $id;
 
 	/**
 	 * Email method title.
+	 *
 	 * @var string
 	 */
 	public $title;
 
 	/**
 	 * 'yes' if the method is enabled.
+	 *
 	 * @var string yes, no
 	 */
 	public $enabled;
 
 	/**
 	 * Description for the email.
+	 *
 	 * @var string
 	 */
 	public $description;
@@ -67,60 +71,70 @@ class WC_Email extends WC_Settings_API {
 
 	/**
 	 * Plain text template path.
+	 *
 	 * @var string
 	 */
 	public $template_plain;
 
 	/**
 	 * HTML template path.
+	 *
 	 * @var string
 	 */
 	public $template_html;
 
 	/**
 	 * Template path.
+	 *
 	 * @var string
 	 */
 	public $template_base;
 
 	/**
 	 * Recipients for the email.
+	 *
 	 * @var string
 	 */
 	public $recipient;
 
 	/**
 	 * Object this email is for, for example a customer, product, or email.
+	 *
 	 * @var object|bool
 	 */
 	public $object;
 
 	/**
 	 * Mime boundary (for multipart emails).
+	 *
 	 * @var string
 	 */
 	public $mime_boundary;
 
 	/**
 	 * Mime boundary header (for multipart emails).
+	 *
 	 * @var string
 	 */
 	public $mime_boundary_header;
 
 	/**
 	 * True when email is being sent.
+	 *
 	 * @var bool
 	 */
 	public $sending;
 
 	/**
 	 * True when the email notification is sent manually only.
+	 *
 	 * @var bool
 	 */
 	protected $manual = false;
 
 	/**
 	 * True when the email notification is sent to customers.
+	 *
 	 * @var bool
 	 */
 	protected $customer_email = false;
@@ -129,56 +143,58 @@ class WC_Email extends WC_Settings_API {
 	 *  List of preg* regular expression patterns to search for,
 	 *  used in conjunction with $plain_replace.
 	 *  https://raw.github.com/ushahidi/wp-silcc/master/class.html2text.inc
+	 *
 	 *  @var array $plain_search
 	 *  @see $plain_replace
 	 */
 	public $plain_search = array(
-		"/\r/",                                                  // Non-legal carriage return
-		'/&(nbsp|#0*160);/i',                                    // Non-breaking space
-		'/&(quot|rdquo|ldquo|#0*8220|#0*8221|#0*147|#0*148);/i', // Double quotes
-		'/&(apos|rsquo|lsquo|#0*8216|#0*8217);/i',               // Single quotes
-		'/&gt;/i',                                               // Greater-than
-		'/&lt;/i',                                               // Less-than
-		'/&#0*38;/i',                                            // Ampersand
-		'/&amp;/i',                                              // Ampersand
-		'/&(copy|#0*169);/i',                                    // Copyright
-		'/&(trade|#0*8482|#0*153);/i',                           // Trademark
-		'/&(reg|#0*174);/i',                                     // Registered
-		'/&(mdash|#0*151|#0*8212);/i',                           // mdash
-		'/&(ndash|minus|#0*8211|#0*8722);/i',                    // ndash
-		'/&(bull|#0*149|#0*8226);/i',                            // Bullet
-		'/&(pound|#0*163);/i',                                   // Pound sign
-		'/&(euro|#0*8364);/i',                                   // Euro sign
-		'/&(dollar|#0*36);/i',                                   // Dollar sign
-		'/&[^&\s;]+;/i',                                         // Unknown/unhandled entities
-		'/[ ]{2,}/',                                             // Runs of spaces, post-handling
+		"/\r/",                                                  // Non-legal carriage return.
+		'/&(nbsp|#0*160);/i',                                    // Non-breaking space.
+		'/&(quot|rdquo|ldquo|#0*8220|#0*8221|#0*147|#0*148);/i', // Double quotes.
+		'/&(apos|rsquo|lsquo|#0*8216|#0*8217);/i',               // Single quotes.
+		'/&gt;/i',                                               // Greater-than.
+		'/&lt;/i',                                               // Less-than.
+		'/&#0*38;/i',                                            // Ampersand.
+		'/&amp;/i',                                              // Ampersand.
+		'/&(copy|#0*169);/i',                                    // Copyright.
+		'/&(trade|#0*8482|#0*153);/i',                           // Trademark.
+		'/&(reg|#0*174);/i',                                     // Registered.
+		'/&(mdash|#0*151|#0*8212);/i',                           // mdash.
+		'/&(ndash|minus|#0*8211|#0*8722);/i',                    // ndash.
+		'/&(bull|#0*149|#0*8226);/i',                            // Bullet.
+		'/&(pound|#0*163);/i',                                   // Pound sign.
+		'/&(euro|#0*8364);/i',                                   // Euro sign.
+		'/&(dollar|#0*36);/i',                                   // Dollar sign.
+		'/&[^&\s;]+;/i',                                         // Unknown/unhandled entities.
+		'/[ ]{2,}/',                                             // Runs of spaces, post-handling.
 	);
 
 	/**
 	 *  List of pattern replacements corresponding to patterns searched.
+	 *
 	 *  @var array $plain_replace
 	 *  @see $plain_search
 	 */
 	public $plain_replace = array(
-		'',                                             // Non-legal carriage return
-		' ',                                            // Non-breaking space
-		'"',                                            // Double quotes
-		"'",                                            // Single quotes
-		'>',                                            // Greater-than
-		'<',                                            // Less-than
-		'&',                                            // Ampersand
-		'&',                                            // Ampersand
-		'(c)',                                          // Copyright
-		'(tm)',                                         // Trademark
-		'(R)',                                          // Registered
-		'--',                                           // mdash
-		'-',                                            // ndash
-		'*',                                            // Bullet
-		'£',                                            // Pound sign
-		'EUR',                                          // Euro sign. € ?
-		'$',                                            // Dollar sign
-		'',                                             // Unknown/unhandled entities
-		' ',                                             // Runs of spaces, post-handling
+		'',                                             // Non-legal carriage return.
+		' ',                                            // Non-breaking space.
+		'"',                                            // Double quotes.
+		"'",                                            // Single quotes.
+		'>',                                            // Greater-than.
+		'<',                                            // Less-than.
+		'&',                                            // Ampersand.
+		'&',                                            // Ampersand.
+		'(c)',                                          // Copyright.
+		'(tm)',                                         // Trademark.
+		'(R)',                                          // Registered.
+		'--',                                           // mdash.
+		'-',                                            // ndash.
+		'*',                                            // Bullet.
+		'£',                                            // Pound sign.
+		'EUR',                                          // Euro sign. € ?.
+		'$',                                            // Dollar sign.
+		'',                                             // Unknown/unhandled entities.
+		' ',                                             // Runs of spaces, post-handling.
 	);
 
 	/**
@@ -188,7 +204,7 @@ class WC_Email extends WC_Settings_API {
 	 */
 	protected $placeholders = array();
 
- 	/**
+	/**
 	 * Strings to find in subjects/headings.
 	 *
 	 * @deprecated 3.2.0 in favour of placeholders
@@ -208,18 +224,18 @@ class WC_Email extends WC_Settings_API {
 	 * Constructor.
 	 */
 	public function __construct() {
-		// Find/replace
+		// Find/replace.
 		if ( empty( $this->placeholders ) ) {
 			$this->placeholders = array(
 				'{site_title}' => $this->get_blogname(),
 			);
 		}
 
-		// Init settings
+		// Init settings.
 		$this->init_form_fields();
 		$this->init_settings();
 
-		// Default template base if not declared in child constructor
+		// Default template base if not declared in child constructor.
 		if ( is_null( $this->template_base ) ) {
 			$this->template_base = WC()->plugin_path() . '/templates/';
 		}
@@ -343,6 +359,7 @@ class WC_Email extends WC_Settings_API {
 
 	/**
 	 * Get valid recipients.
+	 *
 	 * @return string
 	 */
 	public function get_recipient() {
@@ -358,7 +375,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_headers() {
-		$header = "Content-Type: " . $this->get_content_type() . "\r\n";
+		$header = 'Content-Type: ' . $this->get_content_type() . "\r\n";
 
 		if ( 'new_order' === $this->id && $this->object && $this->object->get_billing_email() && ( $this->object->get_billing_first_name() || $this->object->get_billing_last_name() ) ) {
 			$header .= 'Reply-to: ' . $this->object->get_billing_first_name() . ' ' . $this->object->get_billing_last_name() . ' <' . $this->object->get_billing_email() . ">\r\n";
@@ -392,17 +409,18 @@ class WC_Email extends WC_Settings_API {
 	 */
 	public function get_content_type() {
 		switch ( $this->get_email_type() ) {
-			case 'html' :
+			case 'html':
 				return 'text/html';
-			case 'multipart' :
+			case 'multipart':
 				return 'multipart/alternative';
-			default :
+			default:
 				return 'text/plain';
 		}
 	}
 
 	/**
 	 * Return the email's title
+	 *
 	 * @return string
 	 */
 	public function get_title() {
@@ -411,6 +429,7 @@ class WC_Email extends WC_Settings_API {
 
 	/**
 	 * Return the email's description
+	 *
 	 * @return string
 	 */
 	public function get_description() {
@@ -431,6 +450,7 @@ class WC_Email extends WC_Settings_API {
 
 	/**
 	 * Checks if this email is enabled and will be sent.
+	 *
 	 * @return bool
 	 */
 	public function is_enabled() {
@@ -439,6 +459,7 @@ class WC_Email extends WC_Settings_API {
 
 	/**
 	 * Checks if this email is manually sent
+	 *
 	 * @return bool
 	 */
 	public function is_manual() {
@@ -447,6 +468,7 @@ class WC_Email extends WC_Settings_API {
 
 	/**
 	 * Checks if this email is customer focussed.
+	 *
 	 * @return bool
 	 */
 	public function is_customer_email() {
@@ -486,13 +508,13 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function style_inline( $content ) {
-		// make sure we only inline CSS for html emails
+		// make sure we only inline CSS for html emails.
 		if ( in_array( $this->get_content_type(), array( 'text/html', 'multipart/alternative' ) ) && class_exists( 'DOMDocument' ) ) {
 			ob_start();
 			wc_get_template( 'emails/email-styles.php' );
 			$css = apply_filters( 'woocommerce_email_styles', ob_get_clean() );
 
-			// apply CSS styles inline for picky email clients
+			// apply CSS styles inline for picky email clients.
 			try {
 				$emogrifier = new Emogrifier( $content, $css );
 				$content    = $emogrifier->emogrify();
@@ -506,18 +528,23 @@ class WC_Email extends WC_Settings_API {
 
 	/**
 	 * Get the email content in plain text format.
+	 *
 	 * @return string
 	 */
-	public function get_content_plain() { return ''; }
+	public function get_content_plain() {
+		return ''; }
 
 	/**
 	 * Get the email content in HTML format.
+	 *
 	 * @return string
 	 */
-	public function get_content_html() { return ''; }
+	public function get_content_html() {
+		return ''; }
 
 	/**
 	 * Get the from name for outgoing emails.
+	 *
 	 * @return string
 	 */
 	public function get_from_name() {
@@ -527,6 +554,7 @@ class WC_Email extends WC_Settings_API {
 
 	/**
 	 * Get the from address for outgoing emails.
+	 *
 	 * @return string
 	 */
 	public function get_from_address() {
@@ -536,6 +564,7 @@ class WC_Email extends WC_Settings_API {
 
 	/**
 	 * Send an email.
+	 *
 	 * @param string $to
 	 * @param string $subject
 	 * @param string $message
@@ -562,32 +591,32 @@ class WC_Email extends WC_Settings_API {
 	 * Initialise Settings Form Fields - these are generic email options most will use.
 	 */
 	public function init_form_fields() {
-		$this->form_fields    = array(
-			'enabled'         => array(
-				'title'       => __( 'Enable/Disable', 'woocommerce' ),
-				'type'        => 'checkbox',
-				'label'       => __( 'Enable this email notification', 'woocommerce' ),
-				'default'     => 'yes',
+		$this->form_fields = array(
+			'enabled'    => array(
+				'title'   => __( 'Enable/Disable', 'woocommerce' ),
+				'type'    => 'checkbox',
+				'label'   => __( 'Enable this email notification', 'woocommerce' ),
+				'default' => 'yes',
 			),
-			'subject'         => array(
+			'subject'    => array(
 				'title'       => __( 'Subject', 'woocommerce' ),
 				'type'        => 'text',
-				'desc_tip'      => true,
+				'desc_tip'    => true,
 				/* translators: %s: list of placeholders */
-				'description'   => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>' . implode( '</code>, <code>', array_keys( $this->placeholders ) ) . '</code>' ),
+				'description' => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>' . implode( '</code>, <code>', array_keys( $this->placeholders ) ) . '</code>' ),
 				'placeholder' => $this->get_default_subject(),
 				'default'     => '',
 			),
-			'heading'         => array(
+			'heading'    => array(
 				'title'       => __( 'Email heading', 'woocommerce' ),
 				'type'        => 'text',
-				'desc_tip'      => true,
+				'desc_tip'    => true,
 				/* translators: %s: list of placeholders */
-				'description'   => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>' . implode( '</code>, <code>', array_keys( $this->placeholders ) ) . '</code>' ),
+				'description' => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>' . implode( '</code>, <code>', array_keys( $this->placeholders ) ) . '</code>' ),
 				'placeholder' => $this->get_default_heading(),
 				'default'     => '',
 			),
-			'email_type'      => array(
+			'email_type' => array(
 				'title'       => __( 'Email type', 'woocommerce' ),
 				'type'        => 'select',
 				'description' => __( 'Choose which format of email to send.', 'woocommerce' ),
@@ -601,6 +630,7 @@ class WC_Email extends WC_Settings_API {
 
 	/**
 	 * Email type options.
+	 *
 	 * @return array
 	 */
 	public function get_email_type_options() {
@@ -618,12 +648,12 @@ class WC_Email extends WC_Settings_API {
 	 * Admin Panel Options Processing.
 	 */
 	public function process_admin_options() {
-		// Save regular options
+		// Save regular options.
 		parent::process_admin_options();
 
 		$post_data = $this->get_post_data();
 
-		// Save templates
+		// Save templates.
 		if ( isset( $post_data['template_html_code'] ) ) {
 			$this->save_template( $post_data['template_html_code'], $this->template_html );
 		}
@@ -658,9 +688,9 @@ class WC_Email extends WC_Settings_API {
 	 */
 	protected function save_template( $template_code, $template_path ) {
 		if ( current_user_can( 'edit_themes' ) && ! empty( $template_code ) && ! empty( $template_path ) ) {
-			$saved  = false;
-			$file   = get_stylesheet_directory() . '/' . WC()->template_path() . $template_path;
-			$code   = wp_unslash( $template_code );
+			$saved = false;
+			$file  = get_stylesheet_directory() . '/' . WC()->template_path() . $template_path;
+			$code  = wp_unslash( $template_code );
 
 			if ( is_writeable( $file ) ) {
 				$f = fopen( $file, 'w+' );
@@ -704,11 +734,11 @@ class WC_Email extends WC_Settings_API {
 
 				if ( wp_mkdir_p( dirname( $theme_file ) ) && ! file_exists( $theme_file ) ) {
 
-					// Locate template file
+					// Locate template file.
 					$core_file     = $this->template_base . $template;
 					$template_file = apply_filters( 'woocommerce_locate_core_template', $core_file, $template, $this->template_base, $this->id );
 
-					// Copy template file
+					// Copy template file.
 					copy( $template_file, $theme_file );
 
 					/**
@@ -758,7 +788,7 @@ class WC_Email extends WC_Settings_API {
 	 * Admin actions.
 	 */
 	protected function admin_actions() {
-		// Handle any actions
+		// Handle any actions.
 		if (
 			( ! empty( $this->template_html ) || ! empty( $this->template_plain ) )
 			&& ( ! empty( $_GET['move_template'] ) || ! empty( $_GET['delete_template'] ) )
@@ -799,11 +829,12 @@ class WC_Email extends WC_Settings_API {
 		<?php echo wpautop( wp_kses_post( $this->get_description() ) ); ?>
 
 		<?php
-			/**
-			 * woocommerce_email_settings_before action hook.
-			 * @param string $email The email object
-			 */
-			do_action( 'woocommerce_email_settings_before', $this );
+		/**
+		 * woocommerce_email_settings_before action hook.
+		 *
+		 * @param string $email The email object
+		 */
+		do_action( 'woocommerce_email_settings_before', $this );
 		?>
 
 		<table class="form-table">
@@ -811,16 +842,20 @@ class WC_Email extends WC_Settings_API {
 		</table>
 
 		<?php
-			/**
-			 * woocommerce_email_settings_after action hook.
-			 * @param string $email The email object
-			 */
-			do_action( 'woocommerce_email_settings_after', $this );
+		/**
+		 * woocommerce_email_settings_after action hook.
+		 *
+		 * @param string $email The email object
+		 */
+		do_action( 'woocommerce_email_settings_after', $this );
 		?>
 
-		<?php if ( current_user_can( 'edit_themes' ) && ( ! empty( $this->template_html ) || ! empty( $this->template_plain ) ) ) { ?>
+		<?php
+
+		if ( current_user_can( 'edit_themes' ) && ( ! empty( $this->template_html ) || ! empty( $this->template_plain ) ) ) {
+			?>
 			<div id="template">
-			<?php
+				<?php
 				$templates = array(
 					'template_html'  => __( 'HTML template', 'woocommerce' ),
 					'template_plain' => __( 'Plain text template', 'woocommerce' ),
@@ -839,11 +874,9 @@ class WC_Email extends WC_Settings_API {
 					$template_dir  = apply_filters( 'woocommerce_template_directory', 'woocommerce', $template );
 					?>
 					<div class="template <?php echo $template_type; ?>">
-
 						<h4><?php echo wp_kses_post( $title ); ?></h4>
 
-						<?php if ( file_exists( $local_file ) ) { ?>
-
+						<?php if ( file_exists( $local_file ) ) : ?>
 							<p>
 								<a href="#" class="button toggle_editor"></a>
 
@@ -855,33 +888,35 @@ class WC_Email extends WC_Settings_API {
 							</p>
 
 							<div class="editor" style="display:none">
-								<textarea class="code" cols="25" rows="20" <?php if ( ! is_writable( $local_file ) ) : ?>readonly="readonly" disabled="disabled"<?php else : ?>data-name="<?php echo $template_type . '_code'; ?>"<?php endif; ?>><?php echo file_get_contents( $local_file ); ?></textarea>
+								<textarea class="code" cols="25" rows="20"
+								<?php
+								if ( ! is_writable( $local_file ) ) :
+									?>
+									readonly="readonly" disabled="disabled"
+								<?php else : ?>
+									data-name="<?php echo $template_type . '_code'; ?>"<?php endif; ?>><?php echo file_get_contents( $local_file ); ?></textarea>
 							</div>
-
-						<?php } elseif ( file_exists( $template_file ) ) { ?>
-
+						<?php elseif ( file_exists( $template_file ) ) : ?>
 							<p>
 								<a href="#" class="button toggle_editor"></a>
 
 								<?php
-									$emails_dir    = get_stylesheet_directory() . '/' . $template_dir . '/emails';
-									$templates_dir = get_stylesheet_directory() . '/' . $template_dir;
-									$theme_dir     = get_stylesheet_directory();
+								$emails_dir    = get_stylesheet_directory() . '/' . $template_dir . '/emails';
+								$templates_dir = get_stylesheet_directory() . '/' . $template_dir;
+								$theme_dir     = get_stylesheet_directory();
 
-									if ( is_dir( $emails_dir ) ) {
-										$target_dir = $emails_dir;
-									} elseif ( is_dir( $templates_dir ) ) {
-										$target_dir = $templates_dir;
-									} else {
-										$target_dir = $theme_dir;
-									}
+								if ( is_dir( $emails_dir ) ) {
+									$target_dir = $emails_dir;
+								} elseif ( is_dir( $templates_dir ) ) {
+									$target_dir = $templates_dir;
+								} else {
+									$target_dir = $theme_dir;
+								}
 
-									if ( is_writable( $target_dir ) ) {
-										?>
-										<a href="<?php echo esc_url( wp_nonce_url( remove_query_arg( array( 'delete_template', 'saved' ), add_query_arg( 'move_template', $template_type ) ), 'woocommerce_email_template_nonce', '_wc_email_nonce' ) ); ?>" class="button"><?php _e( 'Copy file to theme', 'woocommerce' ); ?></a>
-										<?php
-									}
-								?>
+								if ( is_writable( $target_dir ) ) :
+									?>
+									<a href="<?php echo esc_url( wp_nonce_url( remove_query_arg( array( 'delete_template', 'saved' ), add_query_arg( 'move_template', $template_type ) ), 'woocommerce_email_template_nonce', '_wc_email_nonce' ) ); ?>" class="button"><?php _e( 'Copy file to theme', 'woocommerce' ); ?></a>
+								<?php endif; ?>
 
 								<?php printf( __( 'To override and edit this email template copy %1$s to your theme folder: %2$s.', 'woocommerce' ), '<code>' . plugin_basename( $template_file ) . '</code>', '<code>' . trailingslashit( basename( get_stylesheet_directory() ) ) . $template_dir . '/' . $template . '</code>' ); ?>
 							</p>
@@ -889,21 +924,16 @@ class WC_Email extends WC_Settings_API {
 							<div class="editor" style="display:none">
 								<textarea class="code" readonly="readonly" disabled="disabled" cols="25" rows="20"><?php echo file_get_contents( $template_file ); ?></textarea>
 							</div>
-
-						<?php } else { ?>
-
+						<?php else : ?>
 							<p><?php _e( 'File was not found.', 'woocommerce' ); ?></p>
-
-						<?php } ?>
-
+						<?php endif; ?>
 					</div>
-					<?php
-				endforeach;
-			?>
+				<?php endforeach; ?>
 			</div>
+
 			<?php
-			wc_enqueue_js( "
-				jQuery( 'select.email_type' ).change( function() {
+			wc_enqueue_js(
+				"jQuery( 'select.email_type' ).change( function() {
 
 					var val = jQuery( this ).val();
 
@@ -944,8 +974,8 @@ class WC_Email extends WC_Settings_API {
 					if ( name ) {
 						jQuery( this ).attr( 'name', name );
 					}
-				});
-			" );
+				});"
+			);
 		}
 	}
 }
