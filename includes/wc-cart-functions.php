@@ -492,7 +492,7 @@ function wc_shipping_methods_have_changed( $key, $package ) {
  */
 function wc_get_cart_item_data_hash( $product ) {
 	return md5( wp_json_encode( apply_filters( 'woocommerce_cart_item_data_to_validate', array(
-		'price'      => $product->get_type(),
+		'type'       => $product->get_type(),
 		'attributes' => 'variation' === $product->get_type() ? $product->get_variation_attributes() : '',
 	) ) ) );
 }
