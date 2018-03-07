@@ -353,12 +353,14 @@ class WC_Admin_Menus {
 		}
 
 		// Add an option to visit the store.
-		$wp_admin_bar->add_node( array(
-			'parent' => 'site-name',
-			'id'     => 'view-store',
-			'title'  => __( 'Visit Store', 'woocommerce' ),
-			'href'   => wc_get_page_permalink( 'shop' ),
-		) );
+		$wp_admin_bar->add_node(
+			array(
+				'parent' => 'site-name',
+				'id'     => 'view-store',
+				'title'  => __( 'Visit Store', 'woocommerce' ),
+				'href'   => wc_get_page_permalink( 'shop' ),
+			)
+		);
 	}
 }
 

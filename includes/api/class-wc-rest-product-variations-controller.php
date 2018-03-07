@@ -4,13 +4,11 @@
  *
  * Handles requests to the /products/<product_id>/variations endpoints.
  *
- * @package  WooCommerce\API
- * @since    3.0.0
+ * @package WooCommerce\API
+ * @since   3.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * REST API variations controller class.

@@ -248,14 +248,16 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 
 		$action = 'admin.php?import=woocommerce_tax_rate_csv&step=1';
 
-		$bytes = apply_filters( 'import_upload_size_limit', wp_max_upload_size() );
-		$size = size_format( $bytes );
+		$bytes      = apply_filters( 'import_upload_size_limit', wp_max_upload_size() );
+		$size       = size_format( $bytes );
 		$upload_dir = wp_upload_dir();
 		if ( ! empty( $upload_dir['error'] ) ) :
-			?><div class="error"><p><?php esc_html_e( 'Before you can upload your import file, you will need to fix the following error:', 'woocommerce' ); ?></p>
-			<p><strong><?php echo esc_html( $upload_dir['error'] ); ?></strong></p></div><?php
-		else :
 			?>
+			<div class="error">
+				<p><?php esc_html_e( 'Before you can upload your import file, you will need to fix the following error:', 'woocommerce' ); ?></p>
+				<p><strong><?php echo esc_html( $upload_dir['error'] ); ?></strong></p>
+			</div>
+		<?php else : ?>
 			<form enctype="multipart/form-data" id="import-upload-form" method="post" action="<?php echo esc_attr( wp_nonce_url( $action, 'import-upload' ) ); ?>">
 				<table class="form-table">
 					<tbody>

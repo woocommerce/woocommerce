@@ -402,6 +402,18 @@ body {
 		position: relative;
 		border-bottom: 4px solid #ccc;
 		line-height: 1.4em;
+		a {
+			color: #a16696;
+			text-decoration: none;
+			padding: 1.5em;
+			margin: -1.5em;
+			position: relative;
+			z-index: 1;
+			&:hover, &:focus {
+				color: #111;
+				text-decoration: underline;
+			}
+		}
 	}
 	li::before {
 		content: '';
@@ -419,6 +431,7 @@ body {
 	li.active {
 		border-color: #a16696;
 		color: #a16696;
+		font-weight: bold;
 		&::before {
 			border-color: #a16696;
 		}
@@ -435,6 +448,7 @@ body {
 .wc-setup .wc-setup-actions {
 	overflow: hidden;
 	margin: 20px 0 0;
+	position: relative;
 	.button {
 		font-size: 1.25em;
 		padding: 0.5em 1em;
@@ -468,7 +482,7 @@ body {
 	margin-top: 0;
 }
 
-.wc-return-to-dashboard {
+.wc-setup-footer-links {
 	font-size: 0.85em;
 	color: #b5b5b5;
 	margin: 1.18em auto;
@@ -1040,7 +1054,7 @@ h3.jetpack-reasons {
 		align-items: center;
 
 		.button {
-			margin: 1em;
+			margin: 1em 1.5em;
 		}
 	}
 
@@ -1062,6 +1076,26 @@ h3.jetpack-reasons {
 			margin: 0;
 			font-size: 16px;
 			font-weight: 600;
+		}
+	}
+
+	.wc-wizard-additional-steps {
+		border-top: 1px solid #eee;
+
+		.wc-wizard-next-step-description {
+			margin-bottom: 0;
+		}
+
+		.wc-setup-actions {
+			margin: 0 0 1.5em 0;
+
+			.button {
+				font-size: 15px;
+				margin: 1em 0 1em 1.5em;
+			}
+			.button::last-child {
+				margin-right: 1.5em;
+			}
 		}
 	}
 }
