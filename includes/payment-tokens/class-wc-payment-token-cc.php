@@ -8,12 +8,12 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Representation of a payment token for credit cards.
  *
- * @class 		WC_Payment_Token_CC
+ * @class       WC_Payment_Token_CC
  * @version     3.0.0
- * @since		2.6.0
- * @category 	PaymentTokens
- * @package 	WooCommerce/PaymentTokens
- * @author		WooThemes
+ * @since       2.6.0
+ * @category    PaymentTokens
+ * @package     WooCommerce/PaymentTokens
+ * @author      WooThemes
  */
 class WC_Payment_Token_CC extends WC_Payment_Token {
 
@@ -117,6 +117,7 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 
 	/**
 	 * Set the card type (mastercard, visa, ...).
+	 *
 	 * @since 2.6.0
 	 * @param string $type
 	 */
@@ -137,6 +138,7 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 
 	/**
 	 * Set the expiration year for the card (YYYY format).
+	 *
 	 * @since 2.6.0
 	 * @param string $year
 	 */
@@ -157,6 +159,7 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 
 	/**
 	 * Set the expiration month for the card (formats into MM format).
+	 *
 	 * @since 2.6.0
 	 * @param string $month
 	 */
@@ -177,6 +180,7 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 
 	/**
 	 * Set the last four digits.
+	 *
 	 * @since 2.6.0
 	 * @param string $last4
 	 */

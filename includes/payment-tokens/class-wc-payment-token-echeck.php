@@ -9,12 +9,12 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Representation of a payment token for eChecks.
  *
- * @class 		WC_Payment_Token_eCheck
+ * @class       WC_Payment_Token_eCheck
  * @version     3.0.0
- * @since		2.6.0
- * @category 	PaymentTokens
- * @package 	WooCommerce/PaymentTokens
- * @author		WooThemes
+ * @since       2.6.0
+ * @category    PaymentTokens
+ * @package     WooCommerce/PaymentTokens
+ * @author      WooThemes
  */
 class WC_Payment_Token_eCheck extends WC_Payment_Token {
 
@@ -83,6 +83,7 @@ class WC_Payment_Token_eCheck extends WC_Payment_Token {
 
 	/**
 	 * Set the last four digits.
+	 *
 	 * @since 2.6.0
 	 * @param string $last4
 	 */
