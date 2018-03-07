@@ -1,4 +1,10 @@
 <?php
+/**
+ * Class WC_Shipping_Free_Shipping file.
+ *
+ * @package WooCommerce\Shipping
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -11,7 +17,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @class   WC_Shipping_Free_Shipping
  * @version 2.6.0
  * @package WooCommerce/Classes/Shipping
- * @author  WooThemes
  */
 class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 
@@ -148,8 +153,10 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 		$has_coupon         = false;
 		$has_met_min_amount = false;
 
-		if ( in_array( $this->requires, array( 'coupon', 'either', 'both' ) ) ) {
-			if ( $coupons = WC()->cart->get_coupons() ) {
+		if ( in_array( $this->requires, array( 'coupon', 'either', 'both' ), true ) ) {
+			$coupons = WC()->cart->get_coupons();
+
+			if ( $coupons ) {
 				foreach ( $coupons as $code => $coupon ) {
 					if ( $coupon->is_valid() && $coupon->get_free_shipping() ) {
 						$has_coupon = true;
@@ -159,7 +166,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 			}
 		}
 
-		if ( in_array( $this->requires, array( 'min_amount', 'either', 'both' ) ) ) {
+		if ( in_array( $this->requires, array( 'min_amount', 'either', 'both' ), true ) ) {
 			$total = WC()->cart->get_displayed_subtotal();
 
 			if ( WC()->cart->display_prices_including_tax() ) {
