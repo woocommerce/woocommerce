@@ -1,4 +1,9 @@
 <?php
+/**
+ * Class WC_Email_Cancelled_Order file.
+ *
+ * @package WooCommerce\Emails
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -14,7 +19,6 @@ if ( ! class_exists( 'WC_Email_Cancelled_Order', false ) ) :
 	 * @class       WC_Email_Cancelled_Order
 	 * @version     2.2.7
 	 * @package     WooCommerce/Classes/Emails
-	 * @author      WooThemes
 	 * @extends     WC_Email
 	 */
 	class WC_Email_Cancelled_Order extends WC_Email {
@@ -34,14 +38,14 @@ if ( ! class_exists( 'WC_Email_Cancelled_Order', false ) ) :
 				'{order_number}' => '',
 			);
 
-			// Triggers for this email
+			// Triggers for this email.
 			add_action( 'woocommerce_order_status_processing_to_cancelled_notification', array( $this, 'trigger' ), 10, 2 );
 			add_action( 'woocommerce_order_status_on-hold_to_cancelled_notification', array( $this, 'trigger' ), 10, 2 );
 
-			// Call parent constructor
+			// Call parent constructor.
 			parent::__construct();
 
-			// Other settings
+			// Other settings.
 			$this->recipient = $this->get_option( 'recipient', get_option( 'admin_email' ) );
 		}
 
@@ -68,8 +72,8 @@ if ( ! class_exists( 'WC_Email_Cancelled_Order', false ) ) :
 		/**
 		 * Trigger the sending of this email.
 		 *
-		 * @param int      $order_id The order ID.
-		 * @param WC_Order $order Order object.
+		 * @param int            $order_id The order ID.
+		 * @param WC_Order|false $order Order object.
 		 */
 		public function trigger( $order_id, $order = false ) {
 			$this->setup_locale();
