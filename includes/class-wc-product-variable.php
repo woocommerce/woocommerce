@@ -308,7 +308,7 @@ class WC_Product_Variable extends WC_Product {
 		if ( is_numeric( $variation ) ) {
 			$variation = wc_get_product( $variation );
 		}
-		if ( ! $variation instanceof WC_Product ) {
+		if ( ! $variation instanceof WC_Product_Variation ) {
 			return false;
 		}
 		// See if prices should be shown for each variation after selection.
