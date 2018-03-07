@@ -1,4 +1,9 @@
 <?php
+/**
+ * Class WC_Email_Customer_Refunded_Order file.
+ *
+ * @package WooCommerce\Emails
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -14,7 +19,6 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 	 * @class    WC_Email_Customer_Refunded_Order
 	 * @version  2.4.0
 	 * @package  WooCommerce/Classes/Emails
-	 * @author   WooThemes
 	 * @extends  WC_Email
 	 */
 	class WC_Email_Customer_Refunded_Order extends WC_Email {
@@ -60,6 +64,7 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 		/**
 		 * Get email subject.
 		 *
+		 * @param bool $partial Whether it is a partial refund or a full refund.
 		 * @since  3.1.0
 		 * @return string
 		 */
@@ -74,6 +79,7 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 		/**
 		 * Get email heading.
 		 *
+		 * @param bool $partial Whether it is a partial refund or a full refund.
 		 * @since  3.1.0
 		 * @return string
 		 */
@@ -118,6 +124,7 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 		/**
 		 * Set email strings.
 		 *
+		 * @param bool $partial_refund Whether it is a partial refund or a full refund.
 		 * @deprecated 3.1.0 Unused.
 		 */
 		public function set_email_strings( $partial_refund = false ) {}
@@ -125,8 +132,8 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 		/**
 		 * Full refund notification.
 		 *
-		 * @param int $order_id
-		 * @param int $refund_id
+		 * @param int $order_id Order ID.
+		 * @param int $refund_id Refund ID.
 		 */
 		public function trigger_full( $order_id, $refund_id = null ) {
 			$this->trigger( $order_id, false, $refund_id );
@@ -135,8 +142,8 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 		/**
 		 * Partial refund notification.
 		 *
-		 * @param int $order_id
-		 * @param int $refund_id
+		 * @param int $order_id Order ID.
+		 * @param int $refund_id Refund ID.
 		 */
 		public function trigger_partial( $order_id, $refund_id = null ) {
 			$this->trigger( $order_id, true, $refund_id );
@@ -145,9 +152,9 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 		/**
 		 * Trigger.
 		 *
-		 * @param int  $order_id
-		 * @param bool $partial_refund
-		 * @param int  $refund_id
+		 * @param int  $order_id Order ID.
+		 * @param bool $partial_refund Whether it is a partial refund or a full refund.
+		 * @param int  $refund_id Refund ID.
 		 */
 		public function trigger( $order_id, $partial_refund = false, $refund_id = null ) {
 			$this->setup_locale();
