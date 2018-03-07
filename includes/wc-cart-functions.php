@@ -481,3 +481,18 @@ function wc_shipping_methods_have_changed( $key, $package ) {
 	WC()->session->set( 'previous_shipping_methods', $previous_shipping_methods );
 	return $new_rates !== $prev_rates;
 }
+
+/**
+ * Gets a hash of important product data that when changed should cause cart items to be invalidated.
+ *
+ * The woocommerce_cart_item_data_to_validate filter can be used to add custom properties.
+ *
+ * @param WC_Product $product Product object.
+ * @return string
+ */
+function wc_get_cart_item_data_hash( $product ) {
+	return md5( wp_json_encode( apply_filters( 'woocommerce_cart_item_data_to_validate', array(
+		'type'       => $product->get_type(),
+		'attributes' => 'variation' === $product->get_type() ? $product->get_variation_attributes() : '',
+	) ) ) );
+}
