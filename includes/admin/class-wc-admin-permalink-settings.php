@@ -73,7 +73,7 @@ class WC_Admin_Permalink_Settings {
 	 */
 	public function product_category_slug_input() {
 		?>
-		<input name="woocommerce_product_category_slug" type="text" class="regular-text code" value="<?php echo esc_attr( $this->permalinks['category_base'] ); ?>" placeholder="<?php echo esc_attr_x( 'product-category', 'slug', 'woocommerce' ) ?>" />
+		<input name="woocommerce_product_category_slug" type="text" class="regular-text code" value="<?php echo esc_attr( $this->permalinks['category_base'] ); ?>" placeholder="<?php echo esc_attr_x( 'product-category', 'slug', 'woocommerce' ); ?>" />
 		<?php
 	}
 
@@ -82,7 +82,7 @@ class WC_Admin_Permalink_Settings {
 	 */
 	public function product_tag_slug_input() {
 		?>
-		<input name="woocommerce_product_tag_slug" type="text" class="regular-text code" value="<?php echo esc_attr( $this->permalinks['tag_base'] ); ?>" placeholder="<?php echo esc_attr_x( 'product-tag', 'slug', 'woocommerce' ) ?>" />
+		<input name="woocommerce_product_tag_slug" type="text" class="regular-text code" value="<?php echo esc_attr( $this->permalinks['tag_base'] ); ?>" placeholder="<?php echo esc_attr_x( 'product-tag', 'slug', 'woocommerce' ); ?>" />
 		<?php
 	}
 
@@ -102,9 +102,9 @@ class WC_Admin_Permalink_Settings {
 		/* translators: %s: Home URL */
 		echo wp_kses_post( wpautop( sprintf( __( 'If you like, you may enter custom structures for your product URLs here. For example, using <code>shop</code> would make your product links like <code>%sshop/sample-product/</code>. This setting affects product URLs only, not things such as product categories.', 'woocommerce' ), esc_url( home_url( '/' ) ) ) ) );
 
-		$shop_page_id   = wc_get_page_id( 'shop' );
-		$base_slug      = urldecode( ( $shop_page_id > 0 && get_post( $shop_page_id ) ) ? get_page_uri( $shop_page_id ) : _x( 'shop', 'default-slug', 'woocommerce' ) );
-		$product_base   = _x( 'product', 'default-slug', 'woocommerce' );
+		$shop_page_id = wc_get_page_id( 'shop' );
+		$base_slug    = urldecode( ( $shop_page_id > 0 && get_post( $shop_page_id ) ) ? get_page_uri( $shop_page_id ) : _x( 'shop', 'default-slug', 'woocommerce' ) );
+		$product_base = _x( 'product', 'default-slug', 'woocommerce' );
 
 		$structures = array(
 			0 => '',
