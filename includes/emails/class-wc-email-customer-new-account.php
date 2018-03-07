@@ -1,4 +1,9 @@
 <?php
+/**
+ * Class WC_Email_Customer_New_Account file.
+ *
+ * @package WooCommerce\Emails
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -14,7 +19,6 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 	 * @class       WC_Email_Customer_New_Account
 	 * @version     2.3.0
 	 * @package     WooCommerce/Classes/Emails
-	 * @author      WooThemes
 	 * @extends     WC_Email
 	 */
 	class WC_Email_Customer_New_Account extends WC_Email {
@@ -85,9 +89,9 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 		/**
 		 * Trigger.
 		 *
-		 * @param int    $user_id
-		 * @param string $user_pass
-		 * @param bool   $password_generated
+		 * @param int    $user_id User ID.
+		 * @param string $user_pass User password.
+		 * @param bool   $password_generated Whether the password was generated automatically or not.
 		 */
 		public function trigger( $user_id, $user_pass = '', $password_generated = false ) {
 			$this->setup_locale();
