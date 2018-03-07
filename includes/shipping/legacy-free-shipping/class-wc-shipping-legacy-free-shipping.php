@@ -1,7 +1,12 @@
 <?php
+/**
+ * Class WC_Shipping_Legacy_Free_Shipping file.
+ *
+ * @package WooCommerce\Shipping
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit; // Exit if accessed directly.
 }
 
 /**
@@ -12,22 +17,30 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @deprecated  2.6.0
  * @version 2.4.0
  * @package WooCommerce/Classes/Shipping
- * @author  WooThemes
  */
 class WC_Shipping_Legacy_Free_Shipping extends WC_Shipping_Method {
 
-	/** @var float Min amount to be valid */
+	/**
+	 * Min amount to be valid.
+	 *
+	 * @var float
+	 */
 	public $min_amount;
 
-	/** @var string Requires option */
+	/**
+	 * Requires option.
+	 *
+	 * @var string
+	 */
 	public $requires;
 
 	/**
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->id                 = 'legacy_free_shipping';
-		$this->method_title       = __( 'Free shipping (legacy)', 'woocommerce' );
+		$this->id           = 'legacy_free_shipping';
+		$this->method_title = __( 'Free shipping (legacy)', 'woocommerce' );
+		/* translators: %s: Admin shipping settings URL */
 		$this->method_description = '<strong>' . sprintf( __( 'This method is deprecated in 2.6.0 and will be removed in future versions - we recommend disabling it and instead setting up a new rate within your <a href="%s">Shipping zones</a>.', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=shipping' ) ) . '</strong>';
 		$this->init();
 	}
@@ -51,11 +64,11 @@ class WC_Shipping_Legacy_Free_Shipping extends WC_Shipping_Method {
 	 * @return string
 	 */
 	public function get_option_key() {
-		return $this->plugin_id . 'free_shipping' . '_settings';
+		return $this->plugin_id . 'free_shipping_settings';
 	}
 
 	/**
-	 * init function.
+	 * Init function.
 	 */
 	public function init() {
 
@@ -63,7 +76,7 @@ class WC_Shipping_Legacy_Free_Shipping extends WC_Shipping_Method {
 		$this->init_form_fields();
 		$this->init_settings();
 
-		// Define user set variables
+		// Define user set variables.
 		$this->enabled      = $this->get_option( 'enabled' );
 		$this->title        = $this->get_option( 'title' );
 		$this->min_amount   = $this->get_option( 'min_amount', 0 );
@@ -71,7 +84,7 @@ class WC_Shipping_Legacy_Free_Shipping extends WC_Shipping_Method {
 		$this->countries    = $this->get_option( 'countries' );
 		$this->requires     = $this->get_option( 'requires' );
 
-		// Actions
+		// Actions.
 		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
 	}
 
@@ -139,34 +152,35 @@ class WC_Shipping_Legacy_Free_Shipping extends WC_Shipping_Method {
 	}
 
 	/**
-	 * is_available function.
+	 * Check if package is available.
 	 *
-	 * @param array $package
+	 * @param array $package Package information.
 	 * @return bool
 	 */
 	public function is_available( $package ) {
-		if ( 'no' == $this->enabled ) {
+		if ( 'no' === $this->enabled ) {
 			return false;
 		}
 
-		if ( 'specific' == $this->availability ) {
+		if ( 'specific' === $this->availability ) {
 			$ship_to_countries = $this->countries;
 		} else {
 			$ship_to_countries = array_keys( WC()->countries->get_shipping_countries() );
 		}
 
-		if ( is_array( $ship_to_countries ) && ! in_array( $package['destination']['country'], $ship_to_countries ) ) {
+		if ( is_array( $ship_to_countries ) && ! in_array( $package['destination']['country'], $ship_to_countries, true ) ) {
 			return false;
 		}
 
-		// Enabled logic
+		// Enabled logic.
 		$is_available       = false;
 		$has_coupon         = false;
 		$has_met_min_amount = false;
 
-		if ( in_array( $this->requires, array( 'coupon', 'either', 'both' ) ) ) {
+		if ( in_array( $this->requires, array( 'coupon', 'either', 'both' ), true ) ) {
+			$coupons = WC()->cart->get_coupons();
 
-			if ( $coupons = WC()->cart->get_coupons() ) {
+			if ( $coupons ) {
 				foreach ( $coupons as $code => $coupon ) {
 					if ( $coupon->is_valid() && $coupon->get_free_shipping() ) {
 						$has_coupon = true;
@@ -175,7 +189,7 @@ class WC_Shipping_Legacy_Free_Shipping extends WC_Shipping_Method {
 			}
 		}
 
-		if ( in_array( $this->requires, array( 'min_amount', 'either', 'both' ) ) ) {
+		if ( in_array( $this->requires, array( 'min_amount', 'either', 'both' ), true ) ) {
 			$total = WC()->cart->get_displayed_subtotal();
 
 			if ( WC()->cart->display_prices_including_tax() ) {
@@ -219,7 +233,9 @@ class WC_Shipping_Legacy_Free_Shipping extends WC_Shipping_Method {
 	}
 
 	/**
-	 * calculate_shipping function.
+	 * Calculate shipping.
+	 *
+	 * @param array $package Package information.
 	 */
 	public function calculate_shipping( $package = array() ) {
 		$args = array(
