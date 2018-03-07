@@ -14,6 +14,7 @@ class WC_Order_Item_Coupon_Data_Store extends Abstract_WC_Order_Item_Type_Data_S
 
 	/**
 	 * Data stored in meta keys.
+	 *
 	 * @since 3.0.0
 	 * @var array
 	 */
@@ -28,10 +29,12 @@ class WC_Order_Item_Coupon_Data_Store extends Abstract_WC_Order_Item_Type_Data_S
 	public function read( &$item ) {
 		parent::read( $item );
 		$id = $item->get_id();
-		$item->set_props( array(
-			'discount'     => get_metadata( 'order_item', $id, 'discount_amount', true ),
-			'discount_tax' => get_metadata( 'order_item', $id, 'discount_amount_tax', true ),
-		) );
+		$item->set_props(
+			array(
+				'discount'     => get_metadata( 'order_item', $id, 'discount_amount', true ),
+				'discount_tax' => get_metadata( 'order_item', $id, 'discount_amount_tax', true ),
+			)
+		);
 		$item->set_object_read( true );
 	}
 

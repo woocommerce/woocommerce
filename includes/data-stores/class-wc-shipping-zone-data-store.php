@@ -20,10 +20,12 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	 */
 	public function create( &$zone ) {
 		global $wpdb;
-		$wpdb->insert( $wpdb->prefix . 'woocommerce_shipping_zones', array(
-			'zone_name'  => $zone->get_zone_name(),
-			'zone_order' => $zone->get_zone_order(),
-		) );
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_shipping_zones', array(
+				'zone_name'  => $zone->get_zone_name(),
+				'zone_order' => $zone->get_zone_order(),
+			)
+		);
 		$zone->set_id( $wpdb->insert_id );
 		$zone->save_meta_data();
 		$this->save_locations( $zone );
@@ -41,10 +43,12 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	public function update( &$zone ) {
 		global $wpdb;
 		if ( $zone->get_id() ) {
-			$wpdb->update( $wpdb->prefix . 'woocommerce_shipping_zones', array(
-				'zone_name'  => $zone->get_zone_name(),
-				'zone_order' => $zone->get_zone_order(),
-			), array( 'zone_id' => $zone->get_id() ) );
+			$wpdb->update(
+				$wpdb->prefix . 'woocommerce_shipping_zones', array(
+					'zone_name'  => $zone->get_zone_name(),
+					'zone_order' => $zone->get_zone_order(),
+				), array( 'zone_id' => $zone->get_id() )
+			);
 		}
 		$zone->save_meta_data();
 		$this->save_locations( $zone );
@@ -62,7 +66,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	 */
 	public function read( &$zone ) {
 		global $wpdb;
-		if ( 0 === $zone->get_id() || "0" === $zone->get_id() ) {
+		if ( 0 === $zone->get_id() || '0' === $zone->get_id() ) {
 			$this->read_zone_locations( $zone );
 			$zone->set_zone_name( __( 'Locations not covered by your other zones', 'woocommerce' ) );
 			$zone->read_meta_data();
@@ -85,7 +89,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	 *
 	 * @since  3.0.0
 	 * @param  WC_Shipping_Zone $zone
-	 * @param  array $args Array of args to pass to the delete method.
+	 * @param  array            $args Array of args to pass to the delete method.
 	 * @return bool result
 	 */
 	public function delete( &$zone, $args = array() ) {
@@ -107,8 +111,8 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	 * Get a list of shipping methods for a specific zone.
 	 *
 	 * @since  3.0.0
-	 * @param  int   $zone_id      Zone ID
-	 * @param  bool  $enabled_only True to request enabled methods only.
+	 * @param  int  $zone_id      Zone ID
+	 * @param  bool $enabled_only True to request enabled methods only.
 	 * @return array               Array of objects containing method_id, method_order, instance_id, is_enabled
 	 */
 	public function get_methods( $zone_id, $enabled_only ) {
@@ -190,17 +194,17 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	public function get_zone_id_from_package( $package ) {
 		global $wpdb;
 
-		$country          = strtoupper( wc_clean( $package['destination']['country'] ) );
-		$state            = strtoupper( wc_clean( $package['destination']['state'] ) );
-		$continent        = strtoupper( wc_clean( WC()->countries->get_continent_code_for_country( $country ) ) );
-		$postcode         = wc_normalize_postcode( wc_clean( $package['destination']['postcode'] ) );
+		$country   = strtoupper( wc_clean( $package['destination']['country'] ) );
+		$state     = strtoupper( wc_clean( $package['destination']['state'] ) );
+		$continent = strtoupper( wc_clean( WC()->countries->get_continent_code_for_country( $country ) ) );
+		$postcode  = wc_normalize_postcode( wc_clean( $package['destination']['postcode'] ) );
 
 		// Work out criteria for our zone search
 		$criteria   = array();
 		$criteria[] = $wpdb->prepare( "( ( location_type = 'country' AND location_code = %s )", $country );
 		$criteria[] = $wpdb->prepare( "OR ( location_type = 'state' AND location_code = %s )", $country . ':' . $state );
 		$criteria[] = $wpdb->prepare( "OR ( location_type = 'continent' AND location_code = %s )", $continent );
-		$criteria[] = "OR ( location_type IS NULL ) )";
+		$criteria[] = 'OR ( location_type IS NULL ) )';
 
 		// Postcode range and wildcard matching
 		$postcode_locations = $wpdb->get_results( "SELECT zone_id, location_code FROM {$wpdb->prefix}woocommerce_shipping_zone_locations WHERE location_type = 'postcode';" );
@@ -211,17 +215,17 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 			$do_not_match                 = array_unique( array_diff( $zone_ids_with_postcode_rules, array_keys( $matches ) ) );
 
 			if ( ! empty( $do_not_match ) ) {
-				$criteria[] = "AND zones.zone_id NOT IN (" . implode( ',', $do_not_match ) . ")";
+				$criteria[] = 'AND zones.zone_id NOT IN (' . implode( ',', $do_not_match ) . ')';
 			}
 		}
 
 		// Get matching zones
-		return $wpdb->get_var( "
-			SELECT zones.zone_id FROM {$wpdb->prefix}woocommerce_shipping_zones as zones
+		return $wpdb->get_var(
+			"SELECT zones.zone_id FROM {$wpdb->prefix}woocommerce_shipping_zones as zones
 			LEFT OUTER JOIN {$wpdb->prefix}woocommerce_shipping_zone_locations as locations ON zones.zone_id = locations.zone_id AND location_type != 'postcode'
-			WHERE " . implode( ' ', $criteria ) . "
-			ORDER BY zone_order ASC, zone_id ASC LIMIT 1
-		" );
+			WHERE " . implode( ' ', $criteria ) . '
+			ORDER BY zone_order ASC, zone_id ASC LIMIT 1'
+		);
 	}
 
 	/**
@@ -282,11 +286,13 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 		$wpdb->delete( $wpdb->prefix . 'woocommerce_shipping_zone_locations', array( 'zone_id' => $zone->get_id() ) );
 
 		foreach ( $zone->get_zone_locations( 'edit' ) as $location ) {
-			$wpdb->insert( $wpdb->prefix . 'woocommerce_shipping_zone_locations', array(
-				'zone_id'       => $zone->get_id(),
-				'location_code' => $location->code,
-				'location_type' => $location->type,
-			) );
+			$wpdb->insert(
+				$wpdb->prefix . 'woocommerce_shipping_zone_locations', array(
+					'zone_id'       => $zone->get_id(),
+					'location_code' => $location->code,
+					'location_type' => $location->type,
+				)
+			);
 		}
 	}
 }

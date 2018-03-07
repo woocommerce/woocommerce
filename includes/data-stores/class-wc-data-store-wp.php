@@ -26,12 +26,14 @@ class WC_Data_Store_WP {
 	 * This only needs set if you are using a custom metadata type (for example payment tokens.
 	 * This should be the name of the field your table uses for associating meta with objects.
 	 * For example, in payment_tokenmeta, this would be payment_token_id.
+	 *
 	 * @var string
 	 */
 	protected $object_id_field_for_meta = '';
 
 	/**
 	 * Data stored in meta keys, but not considered "meta" for an object.
+	 *
 	 * @since 3.0.0
 	 * @var array
 	 */
@@ -42,7 +44,7 @@ class WC_Data_Store_WP {
 	 *
 	 * @since  3.0.0
 	 * @param  WC_Data|integer $object
-	 * @param  string $taxonomy Taxonomy name e.g. product_cat
+	 * @param  string          $taxonomy Taxonomy name e.g. product_cat
 	 * @return array of terms
 	 */
 	protected function get_term_ids( $object, $taxonomy ) {
@@ -68,12 +70,15 @@ class WC_Data_Store_WP {
 	public function read_meta( &$object ) {
 		global $wpdb;
 		$db_info       = $this->get_db_info();
-		$raw_meta_data = $wpdb->get_results( $wpdb->prepare( "
-			SELECT {$db_info['meta_id_field']} as meta_id, meta_key, meta_value
-			FROM {$db_info['table']}
-			WHERE {$db_info['object_id_field']} = %d
-			ORDER BY {$db_info['meta_id_field']}
-		", $object->get_id() ) );
+		$raw_meta_data = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT {$db_info['meta_id_field']} as meta_id, meta_key, meta_value
+				FROM {$db_info['table']}
+				WHERE {$db_info['object_id_field']} = %d
+				ORDER BY {$db_info['meta_id_field']}",
+				$object->get_id()
+			)
+		);
 
 		$this->internal_meta_keys = array_merge( array_map( array( $this, 'prefix_key' ), $object->get_data_keys() ), $this->internal_meta_keys );
 		$meta_data                = array_filter( $raw_meta_data, array( $this, 'exclude_internal_meta_keys' ) );
@@ -123,8 +128,8 @@ class WC_Data_Store_WP {
 	protected function get_db_info() {
 		global $wpdb;
 
-		$meta_id_field   = 'meta_id'; // for some reason users calls this umeta_id so we need to track this as well.
-		$table           = $wpdb->prefix;
+		$meta_id_field = 'meta_id'; // for some reason users calls this umeta_id so we need to track this as well.
+		$table         = $wpdb->prefix;
 
 		// If we are dealing with a type of metadata that is not a core type, the table should be prefixed.
 		if ( ! in_array( $this->meta_type, array( 'post', 'user', 'comment', 'term' ) ) ) {
@@ -154,6 +159,7 @@ class WC_Data_Store_WP {
 	/**
 	 * Internal meta keys we don't want exposed as part of meta_data. This is in
 	 * addition to all data props with _ prefix.
+	 *
 	 * @since 2.6.0
 	 *
 	 * @param string $key
@@ -207,7 +213,7 @@ class WC_Data_Store_WP {
 	protected function get_wp_query_args( $query_vars ) {
 
 		$skipped_values = array( '', array(), null );
-		$wp_query_args = array(
+		$wp_query_args  = array(
 			'errors'     => array(),
 			'meta_query' => array(),
 		);
@@ -224,8 +230,7 @@ class WC_Data_Store_WP {
 					'value'   => $value,
 					'compare' => '=',
 				);
-			// Other vars get mapped to wp_query args or just left alone.
-			} else {
+			} else { // Other vars get mapped to wp_query args or just left alone.
 				$key_mapping = array(
 					'parent'         => 'post_parent',
 					'parent_exclude' => 'post_parent__not_in',
@@ -252,9 +257,9 @@ class WC_Data_Store_WP {
 	 * Also accepts a WC_DateTime object.
 	 *
 	 * @since 3.2.0
-	 * @param mixed $query_var A valid date format
+	 * @param mixed  $query_var A valid date format
 	 * @param string $key meta or db column key
-	 * @param array $wp_query_args WP_Query args
+	 * @param array  $wp_query_args WP_Query args
 	 * @return array Modified $wp_query_args
 	 */
 	public function parse_date_for_wp_query( $query_var, $key, $wp_query_args = array() ) {
@@ -271,27 +276,21 @@ class WC_Data_Store_WP {
 			// Specific time query with a WC_DateTime.
 			if ( is_a( $query_var, 'WC_DateTime' ) ) {
 				$dates[] = $query_var;
-
-			// Specific time query with a timestamp.
-			} elseif ( is_numeric( $query_var ) ) {
+			} elseif ( is_numeric( $query_var ) ) { // Specific time query with a timestamp.
 				$dates[] = new WC_DateTime( "@{$query_var}", new DateTimeZone( 'UTC' ) );
-
-			// Query with operators and possible range of dates.
-			} elseif ( preg_match( $query_parse_regex, $query_var, $sections ) ) {
+			} elseif ( preg_match( $query_parse_regex, $query_var, $sections ) ) { // Query with operators and possible range of dates.
 				if ( ! empty( $sections[1] ) ) {
 					$dates[] = is_numeric( $sections[1] ) ? new WC_DateTime( "@{$sections[1]}", new DateTimeZone( 'UTC' ) ) : wc_string_to_datetime( $sections[1] );
 				}
 
 				$operator = in_array( $sections[2], $valid_operators ) ? $sections[2] : '';
-				$dates[] = is_numeric( $sections[3] ) ? new WC_DateTime( "@{$sections[3]}", new DateTimeZone( 'UTC' ) ) : wc_string_to_datetime( $sections[3] );
+				$dates[]  = is_numeric( $sections[3] ) ? new WC_DateTime( "@{$sections[3]}", new DateTimeZone( 'UTC' ) ) : wc_string_to_datetime( $sections[3] );
 
 				if ( ! is_numeric( $sections[1] ) && ! is_numeric( $sections[3] ) ) {
 					$precision = 'day';
 				}
-
-			// Specific time query with a string.
-			} else {
-				$dates[] = wc_string_to_datetime( $query_var );
+			} else { // Specific time query with a string.
+				$dates[]   = wc_string_to_datetime( $query_var );
 				$precision = 'day';
 			}
 		} catch ( Exception $e ) {
@@ -324,20 +323,21 @@ class WC_Data_Store_WP {
 			}
 
 			foreach ( $comparisons as $index => $comparison ) {
-				/**
-				 * WordPress doesn't generate the correct SQL for inclusive day queries with both a 'before' and
-				 * 'after' string query, so we have to use the array format in 'day' precision.
-				 * @see https://core.trac.wordpress.org/ticket/29908
-				 */
 				if ( 'day' === $precision ) {
+					/**
+					 * WordPress doesn't generate the correct SQL for inclusive day queries with both a 'before' and
+					 * 'after' string query, so we have to use the array format in 'day' precision.
+					 *
+					 * @see https://core.trac.wordpress.org/ticket/29908
+					 */
 					$query_arg[ $comparison ]['year']  = $dates[ $index ]->date( 'Y' );
 					$query_arg[ $comparison ]['month'] = $dates[ $index ]->date( 'n' );
 					$query_arg[ $comparison ]['day']   = $dates[ $index ]->date( 'j' );
-				/**
-				 * WordPress doesn't support 'hour'/'second'/'minute' in array format 'before'/'after' queries,
-				 * so we have to use a string query.
-				 */
 				} else {
+					/**
+					 * WordPress doesn't support 'hour'/'second'/'minute' in array format 'before'/'after' queries,
+					 * so we have to use a string query.
+					 */
 					$query_arg[ $comparison ] = gmdate( 'm/d/Y H:i:s', $dates[ $index ]->getTimestamp() );
 				}
 			}
@@ -365,7 +365,7 @@ class WC_Data_Store_WP {
 		// Check against beginning/end-of-day timestamps when using 'day' precision.
 		if ( 'day' === $precision ) {
 			$start_timestamp = strtotime( gmdate( 'm/d/Y 00:00:00', $dates[0]->getTimestamp() ) );
-			$end_timestamp = '...' !== $operator ? ( $start_timestamp + DAY_IN_SECONDS ) : strtotime( gmdate( 'm/d/Y 00:00:00', $dates[1]->getTimestamp() ) );
+			$end_timestamp   = '...' !== $operator ? ( $start_timestamp + DAY_IN_SECONDS ) : strtotime( gmdate( 'm/d/Y 00:00:00', $dates[1]->getTimestamp() ) );
 			switch ( $operator ) {
 				case '>':
 				case '<=':
@@ -374,7 +374,7 @@ class WC_Data_Store_WP {
 						'value'   => $end_timestamp,
 						'compare' => $operator,
 					);
-				break;
+					break;
 
 				case '<':
 				case '>=':
@@ -383,7 +383,7 @@ class WC_Data_Store_WP {
 						'value'   => $start_timestamp,
 						'compare' => $operator,
 					);
-				break;
+					break;
 
 				default:
 					$wp_query_args['meta_query'][] = array(

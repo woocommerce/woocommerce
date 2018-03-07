@@ -14,6 +14,7 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 
 	/**
 	 * Data stored in meta keys, but not considered "meta" for an order.
+	 *
 	 * @since 3.0.0
 	 * @var array
 	 */
@@ -35,8 +36,9 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 
 	/**
 	 * Delete a refund - no trash is supported.
+	 *
 	 * @param WC_Order $order
-	 * @param array $args Array of args to pass to the delete method.
+	 * @param array    $args Array of args to pass to the delete method.
 	 */
 	public function delete( &$order, $args = array() ) {
 		$id = $order->get_id();
@@ -54,17 +56,19 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 	 * Read refund data. Can be overridden by child classes to load other props.
 	 *
 	 * @param WC_Order $refund
-	 * @param object $post_object
+	 * @param object   $post_object
 	 * @since 3.0.0
 	 */
 	protected function read_order_data( &$refund, $post_object ) {
 		parent::read_order_data( $refund, $post_object );
 		$id = $refund->get_id();
-		$refund->set_props( array(
-			'amount'      => get_post_meta( $id, '_refund_amount', true ),
-			'refunded_by' => metadata_exists( 'post', $id, '_refunded_by' ) ? get_post_meta( $id, '_refunded_by', true ) : absint( $post_object->post_author ),
-			'reason'      => metadata_exists( 'post', $id, '_refund_reason' ) ? get_post_meta( $id, '_refund_reason', true ) : $post_object->post_excerpt,
-		) );
+		$refund->set_props(
+			array(
+				'amount'      => get_post_meta( $id, '_refund_amount', true ),
+				'refunded_by' => metadata_exists( 'post', $id, '_refunded_by' ) ? get_post_meta( $id, '_refunded_by', true ) : absint( $post_object->post_author ),
+				'reason'      => metadata_exists( 'post', $id, '_refund_reason' ) ? get_post_meta( $id, '_refund_reason', true ) : $post_object->post_excerpt,
+			)
+		);
 	}
 
 	/**

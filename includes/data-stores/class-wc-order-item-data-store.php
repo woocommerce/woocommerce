@@ -23,11 +23,11 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	public function add_order_item( $order_id, $item ) {
 		global $wpdb;
 		$wpdb->insert(
-			$wpdb->prefix . "woocommerce_order_items",
+			$wpdb->prefix . 'woocommerce_order_items',
 			array(
-				'order_item_name'       => $item['order_item_name'],
-				'order_item_type'       => $item['order_item_type'],
-				'order_id'              => $order_id,
+				'order_item_name' => $item['order_item_name'],
+				'order_item_type' => $item['order_item_type'],
+				'order_id'        => $order_id,
 			),
 			array(
 				'%s',
@@ -56,7 +56,7 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	 * Delete an order item.
 	 *
 	 * @since  3.0.0
-	 * @param  int   $item_id
+	 * @param  int $item_id
 	 */
 	public function delete_order_item( $item_id ) {
 		global $wpdb;
@@ -128,10 +128,12 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	 */
 	function get_order_id_by_order_item_id( $item_id ) {
 		global $wpdb;
-		return (int) $wpdb->get_var( $wpdb->prepare(
-			"SELECT order_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d",
-			$item_id
-		) );
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT order_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d",
+				$item_id
+			)
+		);
 	}
 
 	/**

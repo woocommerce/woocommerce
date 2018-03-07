@@ -14,6 +14,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 
 	/**
 	 * Keys which are also stored in a session (so we can make sure they get updated...)
+	 *
 	 * @var array
 	 */
 	protected $session_keys = array(
@@ -142,7 +143,8 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 				$current_user = wp_get_current_user();
 				$customer->set_billing_email( $current_user->user_email );
 			}
-		} catch ( WC_Data_Exception $e ) {}
+		} catch ( WC_Data_Exception $e ) {
+		}
 	}
 
 	/**
@@ -150,7 +152,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	 *
 	 * @since 3.0.0
 	 * @param WC_Customer $customer
-	 * @param array $args Array of args to pass to the delete method.
+	 * @param array       $args Array of args to pass to the delete method.
 	 */
 	public function delete( &$customer, $args = array() ) {
 		WC()->session->set( 'customer', null );

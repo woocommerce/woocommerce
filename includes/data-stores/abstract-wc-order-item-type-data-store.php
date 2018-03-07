@@ -23,6 +23,7 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 	 * This only needs set if you are using a custom metadata type (for example payment tokens.
 	 * This should be the name of the field your table uses for associating meta with objects.
 	 * For example, in payment_tokenmeta, this would be payment_token_id.
+	 *
 	 * @var string
 	 */
 	protected $object_id_field_for_meta = 'order_item_id';
@@ -36,11 +37,13 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 	public function create( &$item ) {
 		global $wpdb;
 
-		$wpdb->insert( $wpdb->prefix . 'woocommerce_order_items', array(
-			'order_item_name' => $item->get_name(),
-			'order_item_type' => $item->get_type(),
-			'order_id'        => $item->get_order_id(),
-		) );
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_order_items', array(
+				'order_item_name' => $item->get_name(),
+				'order_item_type' => $item->get_type(),
+				'order_id'        => $item->get_order_id(),
+			)
+		);
 		$item->set_id( $wpdb->insert_id );
 		$this->save_item_data( $item );
 		$item->save_meta_data();
@@ -62,11 +65,13 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 		$changes = $item->get_changes();
 
 		if ( array_intersect( array( 'name', 'order_id' ), array_keys( $changes ) ) ) {
-			$wpdb->update( $wpdb->prefix . 'woocommerce_order_items', array(
-				'order_item_name' => $item->get_name(),
-				'order_item_type' => $item->get_type(),
-				'order_id'        => $item->get_order_id(),
-			), array( 'order_item_id' => $item->get_id() ) );
+			$wpdb->update(
+				$wpdb->prefix . 'woocommerce_order_items', array(
+					'order_item_name' => $item->get_name(),
+					'order_item_type' => $item->get_type(),
+					'order_id'        => $item->get_order_id(),
+				), array( 'order_item_id' => $item->get_id() )
+			);
 		}
 
 		$this->save_item_data( $item );
@@ -82,7 +87,7 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 	 *
 	 * @since 3.0.0
 	 * @param WC_Order_Item $item
-	 * @param array $args Array of args to pass to the delete method.
+	 * @param array         $args Array of args to pass to the delete method.
 	 */
 	public function delete( &$item, $args = array() ) {
 		if ( $item->get_id() ) {
@@ -121,10 +126,12 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 			throw new Exception( __( 'Invalid order item.', 'woocommerce' ) );
 		}
 
-		$item->set_props( array(
-			'order_id' => $data->order_id,
-			'name'     => $data->order_item_name,
-		) );
+		$item->set_props(
+			array(
+				'order_id' => $data->order_id,
+				'name'     => $data->order_item_name,
+			)
+		);
 		$item->read_meta_data();
 	}
 

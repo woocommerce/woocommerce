@@ -14,6 +14,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 
 	/**
 	 * Meta type. Payment tokens are a new object type.
+	 *
 	 * @var string
 	 */
 	protected $meta_type = 'payment_token';
@@ -83,16 +84,16 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 
 		global $wpdb;
 
-		$updated_props      = array();
-		$core_props         = array( 'gateway_id', 'token', 'user_id', 'type' );
-		$changed_props      = array_keys( $token->get_changes() );
+		$updated_props = array();
+		$core_props    = array( 'gateway_id', 'token', 'user_id', 'type' );
+		$changed_props = array_keys( $token->get_changes() );
 
 		foreach ( $changed_props as $prop ) {
 			if ( ! in_array( $prop, $core_props ) ) {
 				continue;
 			}
 			$updated_props[]             = $prop;
-			$payment_token_data[ $prop ] = $token->{"get_" . $prop}( 'edit' );
+			$payment_token_data[ $prop ] = $token->{'get_' . $prop}( 'edit' );
 		}
 
 		if ( ! empty( $payment_token_data ) ) {
@@ -122,7 +123,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	 *
 	 * @since 3.0.0
 	 * @param WC_Payment_Token $token
-	 * @param bool $force_delete
+	 * @param bool             $force_delete
 	 */
 	public function delete( &$token, $force_delete = false ) {
 		global $wpdb;
@@ -143,12 +144,14 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	public function read( &$token ) {
 		global $wpdb;
 		if ( $data = $wpdb->get_row( $wpdb->prepare( "SELECT token, user_id, gateway_id, is_default FROM {$wpdb->prefix}woocommerce_payment_tokens WHERE token_id = %d LIMIT 1;", $token->get_id() ) ) ) {
-			$token->set_props( array(
-				'token'      => $data->token,
-				'user_id'    => $data->user_id,
-				'gateway_id' => $data->gateway_id,
-				'default'    => $data->is_default,
-			) );
+			$token->set_props(
+				array(
+					'token'      => $data->token,
+					'user_id'    => $data->user_id,
+					'gateway_id' => $data->gateway_id,
+					'default'    => $data->is_default,
+				)
+			);
 			$this->read_extra_data( $token );
 			$token->read_meta_data();
 			$token->set_object_read( true );
@@ -217,12 +220,14 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	 */
 	public function get_tokens( $args ) {
 		global $wpdb;
-		$args = wp_parse_args( $args, array(
-			'token_id'   => '',
-			'user_id'    => '',
-			'gateway_id' => '',
-			'type'       => '',
-		) );
+		$args = wp_parse_args(
+			$args, array(
+				'token_id'   => '',
+				'user_id'    => '',
+				'gateway_id' => '',
+				'type'       => '',
+			)
+		);
 
 		$sql   = "SELECT * FROM {$wpdb->prefix}woocommerce_payment_tokens";
 		$where = array( '1=1' );
@@ -265,10 +270,12 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	 */
 	public function get_users_default_token( $user_id ) {
 		global $wpdb;
-		return $wpdb->get_row( $wpdb->prepare(
-			"SELECT * FROM {$wpdb->prefix}woocommerce_payment_tokens WHERE user_id = %d AND is_default = 1",
-			$user_id
-		) );
+		return $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM {$wpdb->prefix}woocommerce_payment_tokens WHERE user_id = %d AND is_default = 1",
+				$user_id
+			)
+		);
 	}
 
 	/**
@@ -281,10 +288,12 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	 */
 	public function get_token_by_id( $token_id ) {
 		global $wpdb;
-		return $wpdb->get_row( $wpdb->prepare(
-			"SELECT * FROM {$wpdb->prefix}woocommerce_payment_tokens WHERE token_id = %d",
-			$token_id
-		) );
+		return $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM {$wpdb->prefix}woocommerce_payment_tokens WHERE token_id = %d",
+				$token_id
+			)
+		);
 	}
 
 	/**
@@ -307,10 +316,12 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	 */
 	public function get_token_type_by_id( $token_id ) {
 		global $wpdb;
-		return $wpdb->get_var( $wpdb->prepare(
-			"SELECT type FROM {$wpdb->prefix}woocommerce_payment_tokens WHERE token_id = %d",
-			$token_id
-		) );
+		return $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT type FROM {$wpdb->prefix}woocommerce_payment_tokens WHERE token_id = %d",
+				$token_id
+			)
+		);
 	}
 
 	/**
@@ -320,7 +331,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	 *
 	 * @since 3.0.0
 	 *
-	 * @param id $token_id
+	 * @param id   $token_id
 	 * @param bool $status
 	 *
 	 * @return string

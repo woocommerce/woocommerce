@@ -29,13 +29,15 @@ class WC_Order_Item_Fee_Data_Store extends Abstract_WC_Order_Item_Type_Data_Stor
 	public function read( &$item ) {
 		parent::read( $item );
 		$id = $item->get_id();
-		$item->set_props( array(
-			'amount'     => get_metadata( 'order_item', $id, '_fee_amount', true ),
-			'tax_class'  => get_metadata( 'order_item', $id, '_tax_class', true ),
-			'tax_status' => get_metadata( 'order_item', $id, '_tax_status', true ),
-			'total'      => get_metadata( 'order_item', $id, '_line_total', true ),
-			'taxes'      => get_metadata( 'order_item', $id, '_line_tax_data', true ),
-		) );
+		$item->set_props(
+			array(
+				'amount'     => get_metadata( 'order_item', $id, '_fee_amount', true ),
+				'tax_class'  => get_metadata( 'order_item', $id, '_tax_class', true ),
+				'tax_status' => get_metadata( 'order_item', $id, '_tax_status', true ),
+				'total'      => get_metadata( 'order_item', $id, '_line_total', true ),
+				'taxes'      => get_metadata( 'order_item', $id, '_line_tax_data', true ),
+			)
+		);
 		$item->set_object_read( true );
 	}
 

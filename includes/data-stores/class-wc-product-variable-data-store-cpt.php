@@ -37,14 +37,16 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			$attributes   = array();
 			$force_update = false;
 			foreach ( $meta_attributes as $meta_attribute_key => $meta_attribute_value ) {
-				$meta_value = array_merge( array(
-					'name'         => '',
-					'value'        => '',
-					'position'     => 0,
-					'is_visible'   => 0,
-					'is_variation' => 0,
-					'is_taxonomy'  => 0,
-				), (array) $meta_attribute_value );
+				$meta_value = array_merge(
+					array(
+						'name'         => '',
+						'value'        => '',
+						'position'     => 0,
+						'is_visible'   => 0,
+						'is_variation' => 0,
+						'is_taxonomy'  => 0,
+					), (array) $meta_attribute_value
+				);
 
 				// Maintain data integrity. 4.9 changed sanitization functions - update the values here so variations function correctly.
 				if ( $meta_value['is_variation'] && strstr( $meta_value['name'], '/' ) && sanitize_title( $meta_value['name'] ) !== $meta_attribute_key ) {
@@ -187,10 +189,14 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				}
 
 				// Get possible values for this attribute, for only visible variations.
-				$values = array_unique( $wpdb->get_col( $wpdb->prepare(
-					"SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN (" . implode( ',', array_map( 'absint', $child_ids ) ) . ')',
-					wc_variation_attribute_name( $attribute['name'] )
-				) ) );
+				$values = array_unique(
+					$wpdb->get_col(
+						$wpdb->prepare(
+							"SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN (" . implode( ',', array_map( 'absint', $child_ids ) ) . ')',
+							wc_variation_attribute_name( $attribute['name'] )
+						)
+					)
+				);
 
 				// Empty value indicates that all options for given attribute are available.
 				if ( in_array( '', $values ) || empty( $values ) ) {
@@ -285,13 +291,43 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 						// If we are getting prices for display, we need to account for taxes.
 						if ( $for_display ) {
 							if ( 'incl' === get_option( 'woocommerce_tax_display_shop' ) ) {
-								$price         = '' === $price ? ''         : wc_get_price_including_tax( $variation, array( 'qty' => 1, 'price' => $price ) );
-								$regular_price = '' === $regular_price ? '' : wc_get_price_including_tax( $variation, array( 'qty' => 1, 'price' => $regular_price ) );
-								$sale_price    = '' === $sale_price ? ''    : wc_get_price_including_tax( $variation, array( 'qty' => 1, 'price' => $sale_price ) );
+								$price         = '' === $price ? '' : wc_get_price_including_tax(
+									$variation, array(
+										'qty'   => 1,
+										'price' => $price,
+									)
+								);
+								$regular_price = '' === $regular_price ? '' : wc_get_price_including_tax(
+									$variation, array(
+										'qty'   => 1,
+										'price' => $regular_price,
+									)
+								);
+								$sale_price    = '' === $sale_price ? '' : wc_get_price_including_tax(
+									$variation, array(
+										'qty'   => 1,
+										'price' => $sale_price,
+									)
+								);
 							} else {
-								$price         = '' === $price ? ''         : wc_get_price_excluding_tax( $variation, array( 'qty' => 1, 'price' => $price ) );
-								$regular_price = '' === $regular_price ? '' : wc_get_price_excluding_tax( $variation, array( 'qty' => 1, 'price' => $regular_price ) );
-								$sale_price    = '' === $sale_price ? ''    : wc_get_price_excluding_tax( $variation, array( 'qty' => 1, 'price' => $sale_price ) );
+								$price         = '' === $price ? '' : wc_get_price_excluding_tax(
+									$variation, array(
+										'qty'   => 1,
+										'price' => $price,
+									)
+								);
+								$regular_price = '' === $regular_price ? '' : wc_get_price_excluding_tax(
+									$variation, array(
+										'qty'   => 1,
+										'price' => $regular_price,
+									)
+								);
+								$sale_price    = '' === $sale_price ? '' : wc_get_price_excluding_tax(
+									$variation, array(
+										'qty'   => 1,
+										'price' => $sale_price,
+									)
+								);
 							}
 						}
 
@@ -392,7 +428,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 *
 	 * @since 3.3.0
 	 * @param WC_Product $product Product object.
-	 * @param string $status 'instock', 'outofstock', or 'onbackorder'.
+	 * @param string     $status 'instock', 'outofstock', or 'onbackorder'.
 	 * @return boolean
 	 */
 	public function child_has_stock_status( $product, $status ) {
@@ -416,17 +452,17 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		if ( $new_name !== $previous_name ) {
 			global $wpdb;
 
-			$wpdb->query( $wpdb->prepare(
-				"
-					UPDATE {$wpdb->posts}
+			$wpdb->query(
+				$wpdb->prepare(
+					"UPDATE {$wpdb->posts}
 					SET post_title = REPLACE( post_title, %s, %s )
 					WHERE post_type = 'product_variation'
-					AND post_parent = %d
-				",
-				$previous_name ? $previous_name : 'AUTO-DRAFT',
-				$new_name,
-				$product->get_id()
-			) );
+					AND post_parent = %d",
+					$previous_name ? $previous_name : 'AUTO-DRAFT',
+					$new_name,
+					$product->get_id()
+				)
+			);
 		}
 	}
 
@@ -513,13 +549,17 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			return;
 		}
 
-		$variation_ids = wp_parse_id_list( get_posts( array(
-			'post_parent' => $product_id,
-			'post_type'   => 'product_variation',
-			'fields'      => 'ids',
-			'post_status' => array( 'any', 'trash', 'auto-draft' ),
-			'numberposts' => -1,
-		) ) );
+		$variation_ids = wp_parse_id_list(
+			get_posts(
+				array(
+					'post_parent' => $product_id,
+					'post_type'   => 'product_variation',
+					'fields'      => 'ids',
+					'post_status' => array( 'any', 'trash', 'auto-draft' ),
+					'numberposts' => -1,
+				)
+			)
+		);
 
 		if ( ! empty( $variation_ids ) ) {
 			foreach ( $variation_ids as $variation_id ) {
@@ -540,13 +580,17 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @param int $product_id Product ID.
 	 */
 	public function untrash_variations( $product_id ) {
-		$variation_ids = wp_parse_id_list( get_posts( array(
-			'post_parent' => $product_id,
-			'post_type'   => 'product_variation',
-			'fields'      => 'ids',
-			'post_status' => 'trash',
-			'numberposts' => -1,
-		) ) );
+		$variation_ids = wp_parse_id_list(
+			get_posts(
+				array(
+					'post_parent' => $product_id,
+					'post_type'   => 'product_variation',
+					'fields'      => 'ids',
+					'post_status' => 'trash',
+					'numberposts' => -1,
+				)
+			)
+		);
 
 		if ( ! empty( $variation_ids ) ) {
 			foreach ( $variation_ids as $variation_id ) {
