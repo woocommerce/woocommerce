@@ -1,7 +1,12 @@
 <?php
+/**
+ * Class WC_Shipping_Legacy_Local_Delivery file.
+ *
+ * @package WooCommerce\Shipping
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit; // Exit if accessed directly.
 }
 
 /**
@@ -12,7 +17,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @deprecated  2.6.0
  * @version     2.3.0
  * @package     WooCommerce/Classes/Shipping
- * @author      WooThemes
  */
 class WC_Shipping_Legacy_Local_Delivery extends WC_Shipping_Local_Pickup {
 
@@ -20,8 +24,9 @@ class WC_Shipping_Legacy_Local_Delivery extends WC_Shipping_Local_Pickup {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->id                 = 'legacy_local_delivery';
-		$this->method_title       = __( 'Local delivery (legacy)', 'woocommerce' );
+		$this->id           = 'legacy_local_delivery';
+		$this->method_title = __( 'Local delivery (legacy)', 'woocommerce' );
+		/* translators: %s: Admin shipping settings URL */
 		$this->method_description = '<strong>' . sprintf( __( 'This method is deprecated in 2.6.0 and will be removed in future versions - we recommend disabling it and instead setting up a new rate within your <a href="%s">Shipping zones</a>.', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=shipping' ) ) . '</strong>';
 		$this->init();
 	}
@@ -45,11 +50,11 @@ class WC_Shipping_Legacy_Local_Delivery extends WC_Shipping_Local_Pickup {
 	 * @return string
 	 */
 	public function get_option_key() {
-		return $this->plugin_id . 'local_delivery' . '_settings';
+		return $this->plugin_id . 'local_delivery_settings';
 	}
 
 	/**
-	 * init function.
+	 * Init function.
 	 */
 	public function init() {
 
@@ -57,7 +62,7 @@ class WC_Shipping_Legacy_Local_Delivery extends WC_Shipping_Local_Pickup {
 		$this->init_form_fields();
 		$this->init_settings();
 
-		// Define user set variables
+		// Define user set variables.
 		$this->title        = $this->get_option( 'title' );
 		$this->type         = $this->get_option( 'type' );
 		$this->fee          = $this->get_option( 'fee' );
@@ -70,9 +75,9 @@ class WC_Shipping_Legacy_Local_Delivery extends WC_Shipping_Local_Pickup {
 	}
 
 	/**
-	 * calculate_shipping function.
+	 * Calculate_shipping function.
 	 *
-	 * @param array $package (default: array())
+	 * @param array $package (default: array()).
 	 */
 	public function calculate_shipping( $package = array() ) {
 		$shipping_total = 0;
