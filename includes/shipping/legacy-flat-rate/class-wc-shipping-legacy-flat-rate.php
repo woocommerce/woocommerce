@@ -9,9 +9,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * This class is here for backwards compatibility for methods existing before zones existed.
  *
  * @deprecated  2.6.0
- * @version		2.4.0
- * @package		WooCommerce/Classes/Shipping
- * @author 		WooThemes
+ * @version     2.4.0
+ * @package     WooCommerce/Classes/Shipping
+ * @author      WooThemes
  */
 class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 
@@ -45,6 +45,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 
 	/**
 	 * Return the name of the option in the WP DB.
+	 *
 	 * @since 2.6.0
 	 * @return string
 	 */
@@ -74,17 +75,18 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 	 * Initialise Settings Form Fields.
 	 */
 	public function init_form_fields() {
-		$this->form_fields = include( 'includes/settings-flat-rate.php' );
+		$this->form_fields = include 'includes/settings-flat-rate.php';
 	}
 
 	/**
 	 * Evaluate a cost from a sum/string.
+	 *
 	 * @param  string $sum
 	 * @param  array  $args
 	 * @return string
 	 */
 	protected function evaluate_cost( $sum, $args = array() ) {
-		include_once( WC()->plugin_path() . '/includes/libraries/class-wc-eval-math.php' );
+		include_once WC()->plugin_path() . '/includes/libraries/class-wc-eval-math.php';
 
 		$locale   = localeconv();
 		$decimals = array( wc_get_price_decimal_separator(), $locale['decimal_point'], $locale['mon_decimal_point'] );
@@ -94,17 +96,19 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 		// Expand shortcodes
 		add_shortcode( 'fee', array( $this, 'fee' ) );
 
-		$sum = do_shortcode( str_replace(
-			array(
-				'[qty]',
-				'[cost]',
-			),
-			array(
-				$args['qty'],
-				$args['cost'],
-			),
-			$sum
-		) );
+		$sum = do_shortcode(
+			str_replace(
+				array(
+					'[qty]',
+					'[cost]',
+				),
+				array(
+					$args['qty'],
+					$args['cost'],
+				),
+				$sum
+			)
+		);
 
 		remove_shortcode( 'fee', array( $this, 'fee' ) );
 
@@ -123,14 +127,17 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 
 	/**
 	 * Work out fee (shortcode).
+	 *
 	 * @param  array $atts
 	 * @return string
 	 */
 	public function fee( $atts ) {
-		$atts = shortcode_atts( array(
-			'percent' => '',
-			'min_fee' => '',
-		), $atts, 'fee' );
+		$atts = shortcode_atts(
+			array(
+				'percent' => '',
+				'min_fee' => '',
+			), $atts, 'fee'
+		);
 
 		$calculated_fee = 0;
 
@@ -164,10 +171,12 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 
 		if ( '' !== $cost ) {
 			$has_costs    = true;
-			$rate['cost'] = $this->evaluate_cost( $cost, array(
-				'qty'  => $this->get_package_item_qty( $package ),
-				'cost' => $package['contents_cost'],
-			) );
+			$rate['cost'] = $this->evaluate_cost(
+				$cost, array(
+					'qty'  => $this->get_package_item_qty( $package ),
+					'cost' => $package['contents_cost'],
+				)
+			);
 		}
 
 		// Add shipping class costs
@@ -184,10 +193,12 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 			}
 
 			$has_costs  = true;
-			$class_cost = $this->evaluate_cost( $class_cost_string, array(
-				'qty'  => array_sum( wp_list_pluck( $products, 'quantity' ) ),
-				'cost' => array_sum( wp_list_pluck( $products, 'line_total' ) ),
-			) );
+			$class_cost = $this->evaluate_cost(
+				$class_cost_string, array(
+					'qty'  => array_sum( wp_list_pluck( $products, 'quantity' ) ),
+					'cost' => array_sum( wp_list_pluck( $products, 'line_total' ) ),
+				)
+			);
 
 			if ( 'class' === $this->type ) {
 				$rate['cost'] += $class_cost;
@@ -215,23 +226,24 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 		 *
 		 * This example shows how you can add an extra rate based on this flat rate via custom function:
 		 *
-		 * 		add_action( 'woocommerce_flat_rate_shipping_add_rate', 'add_another_custom_flat_rate', 10, 2 );
+		 *      add_action( 'woocommerce_flat_rate_shipping_add_rate', 'add_another_custom_flat_rate', 10, 2 );
 		 *
-		 * 		function add_another_custom_flat_rate( $method, $rate ) {
-		 * 			$new_rate          = $rate;
-		 * 			$new_rate['id']    .= ':' . 'custom_rate_name'; // Append a custom ID.
-		 * 			$new_rate['label'] = 'Rushed Shipping'; // Rename to 'Rushed Shipping'.
-		 * 			$new_rate['cost']  += 2; // Add $2 to the cost.
+		 *      function add_another_custom_flat_rate( $method, $rate ) {
+		 *          $new_rate          = $rate;
+		 *          $new_rate['id']    .= ':' . 'custom_rate_name'; // Append a custom ID.
+		 *          $new_rate['label'] = 'Rushed Shipping'; // Rename to 'Rushed Shipping'.
+		 *          $new_rate['cost']  += 2; // Add $2 to the cost.
 		 *
-		 * 			// Add it to WC.
-		 * 			$method->add_rate( $new_rate );
-		 * 		}.
+		 *          // Add it to WC.
+		 *          $method->add_rate( $new_rate );
+		 *      }.
 		 */
 		do_action( 'woocommerce_flat_rate_shipping_add_rate', $this, $rate );
 	}
 
 	/**
 	 * Get items in package.
+	 *
 	 * @param  array $package
 	 * @return int
 	 */
@@ -247,6 +259,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 
 	/**
 	 * Finds and returns shipping classes and the products with said class.
+	 *
 	 * @param mixed $package
 	 * @return array
 	 */
@@ -274,7 +287,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 	 * @deprecated 2.4.0
 	 *
 	 * Additional rates defined like this:
-	 * 	Option Name | Additional Cost [+- Percents%] | Per Cost Type (order, class, or item).
+	 *  Option Name | Additional Cost [+- Percents%] | Per Cost Type (order, class, or item).
 	 */
 	public function calculate_extra_shipping( $method, $rate ) {
 		if ( $this->options ) {
@@ -325,7 +338,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 	 * @deprecated 2.4.0
 	 * @param  string $cost_string
 	 * @param  string $type
-	 * @param  array $package
+	 * @param  array  $package
 	 * @return float
 	 */
 	public function get_extra_cost( $cost_string, $type, $package ) {
@@ -347,33 +360,33 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 			$cost          = $this_cost_matches[1];
 		}
 		switch ( $type ) {
-			case 'class' :
+			case 'class':
 				$cost = $cost * sizeof( $this->find_shipping_classes( $package ) );
-			break;
-			case 'item' :
+				break;
+			case 'item':
 				$cost = $cost * $this->get_package_item_qty( $package );
-			break;
+				break;
 		}
 		if ( $cost_percent ) {
 			switch ( $type ) {
-				case 'class' :
+				case 'class':
 					$shipping_classes = $this->find_shipping_classes( $package );
 					foreach ( $shipping_classes as $shipping_class => $items ) {
 						foreach ( $items as $item_id => $values ) {
 							$cost = $this->calc_percentage_adjustment( $cost, $cost_percent, $cost_operator, $values['line_total'] );
 						}
 					}
-				break;
-				case 'item' :
+					break;
+				case 'item':
 					foreach ( $package['contents'] as $item_id => $values ) {
 						if ( $values['data']->needs_shipping() ) {
 							$cost = $this->calc_percentage_adjustment( $cost, $cost_percent, $cost_operator, $values['line_total'] );
 						}
 					}
-				break;
-				case  'order' :
+					break;
+				case 'order':
 					$cost = $this->calc_percentage_adjustment( $cost, $cost_percent, $cost_operator, $package['contents_cost'] );
-				break;
+					break;
 			}
 		}
 		return $cost;

@@ -9,9 +9,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * This class is here for backwards compatibility for methods existing before zones existed.
  *
  * @deprecated  2.6.0
- * @version		2.4.0
- * @package		WooCommerce/Classes/Shipping
- * @author 		WooThemes
+ * @version     2.4.0
+ * @package     WooCommerce/Classes/Shipping
+ * @author      WooThemes
  */
 class WC_Shipping_Legacy_International_Delivery extends WC_Shipping_Legacy_Flat_Rate {
 
@@ -29,6 +29,7 @@ class WC_Shipping_Legacy_International_Delivery extends WC_Shipping_Legacy_Flat_
 
 	/**
 	 * Return the name of the option in the WP DB.
+	 *
 	 * @since 2.6.0
 	 * @return string
 	 */
@@ -42,12 +43,12 @@ class WC_Shipping_Legacy_International_Delivery extends WC_Shipping_Legacy_Flat_
 	public function init_form_fields() {
 		parent::init_form_fields();
 		$this->form_fields['availability'] = array(
-			'title'			=> __( 'Availability', 'woocommerce' ),
-			'type'			=> 'select',
-			'class'         => 'wc-enhanced-select',
-			'description'	=> '',
-			'default'		=> 'including',
-			'options'		=> array(
+			'title'       => __( 'Availability', 'woocommerce' ),
+			'type'        => 'select',
+			'class'       => 'wc-enhanced-select',
+			'description' => '',
+			'default'     => 'including',
+			'options'     => array(
 				'including' => __( 'Selected countries', 'woocommerce' ),
 				'excluding' => __( 'Excluding selected countries', 'woocommerce' ),
 			),
@@ -61,7 +62,7 @@ class WC_Shipping_Legacy_International_Delivery extends WC_Shipping_Legacy_Flat_
 	 * @return bool
 	 */
 	public function is_available( $package ) {
-		if ( "no" === $this->enabled ) {
+		if ( 'no' === $this->enabled ) {
 			return false;
 		}
 		if ( 'including' === $this->availability ) {

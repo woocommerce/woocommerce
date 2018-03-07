@@ -10,9 +10,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * This class is here for backwards compatibility for methods existing before zones existed.
  *
  * @deprecated  2.6.0
- * @version		2.3.0
- * @package		WooCommerce/Classes/Shipping
- * @author 		WooThemes
+ * @version     2.3.0
+ * @package     WooCommerce/Classes/Shipping
+ * @author      WooThemes
  */
 class WC_Shipping_Legacy_Local_Delivery extends WC_Shipping_Local_Pickup {
 
@@ -40,6 +40,7 @@ class WC_Shipping_Legacy_Local_Delivery extends WC_Shipping_Local_Pickup {
 
 	/**
 	 * Return the name of the option in the WP DB.
+	 *
 	 * @since 2.6.0
 	 * @return string
 	 */
@@ -77,19 +78,19 @@ class WC_Shipping_Legacy_Local_Delivery extends WC_Shipping_Local_Pickup {
 		$shipping_total = 0;
 
 		switch ( $this->type ) {
-			case 'fixed' :
+			case 'fixed':
 				$shipping_total = $this->fee;
-			break;
-			case 'percent' :
+				break;
+			case 'percent':
 				$shipping_total = $package['contents_cost'] * ( $this->fee / 100 );
-			break;
-			case 'product' :
+				break;
+			case 'product':
 				foreach ( $package['contents'] as $item_id => $values ) {
 					if ( $values['quantity'] > 0 && $values['data']->needs_shipping() ) {
 						$shipping_total += $this->fee * $values['quantity'];
 					}
 				}
-			break;
+				break;
 		}
 
 		$rate = array(
@@ -107,33 +108,33 @@ class WC_Shipping_Legacy_Local_Delivery extends WC_Shipping_Local_Pickup {
 	 */
 	public function init_form_fields() {
 		$this->form_fields = array(
-			'enabled' => array(
+			'enabled'      => array(
 				'title'   => __( 'Enable', 'woocommerce' ),
 				'type'    => 'checkbox',
 				'label'   => __( 'Once disabled, this legacy method will no longer be available.', 'woocommerce' ),
 				'default' => 'no',
 			),
-			'title' => array(
+			'title'        => array(
 				'title'       => __( 'Title', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
 				'default'     => __( 'Local delivery', 'woocommerce' ),
 				'desc_tip'    => true,
 			),
-			'type' => array(
+			'type'         => array(
 				'title'       => __( 'Fee type', 'woocommerce' ),
 				'type'        => 'select',
 				'class'       => 'wc-enhanced-select',
 				'description' => __( 'How to calculate delivery charges', 'woocommerce' ),
 				'default'     => 'fixed',
 				'options'     => array(
-				'fixed'       => __( 'Fixed amount', 'woocommerce' ),
-					'percent'     => __( 'Percentage of cart total', 'woocommerce' ),
-					'product'     => __( 'Fixed amount per product', 'woocommerce' ),
+					'fixed'   => __( 'Fixed amount', 'woocommerce' ),
+					'percent' => __( 'Percentage of cart total', 'woocommerce' ),
+					'product' => __( 'Fixed amount per product', 'woocommerce' ),
 				),
 				'desc_tip'    => true,
 			),
-			'fee' => array(
+			'fee'          => array(
 				'title'       => __( 'Delivery fee', 'woocommerce' ),
 				'type'        => 'price',
 				'description' => __( 'What fee do you want to charge for local delivery, disregarded if you choose free. Leave blank to disable.', 'woocommerce' ),
@@ -141,7 +142,7 @@ class WC_Shipping_Legacy_Local_Delivery extends WC_Shipping_Local_Pickup {
 				'desc_tip'    => true,
 				'placeholder' => wc_format_localized_price( 0 ),
 			),
-			'codes' => array(
+			'codes'        => array(
 				'title'       => __( 'Allowed ZIP/post codes', 'woocommerce' ),
 				'type'        => 'text',
 				'desc_tip'    => __( 'What ZIP/post codes are available for local delivery?', 'woocommerce' ),
@@ -150,22 +151,22 @@ class WC_Shipping_Legacy_Local_Delivery extends WC_Shipping_Local_Pickup {
 				'placeholder' => 'e.g. 12345, 56789',
 			),
 			'availability' => array(
-				'title'       => __( 'Method availability', 'woocommerce' ),
-				'type'        => 'select',
-				'default'     => 'all',
-				'class'       => 'availability wc-enhanced-select',
-				'options'     => array(
-					'all'         => __( 'All allowed countries', 'woocommerce' ),
-					'specific'    => __( 'Specific Countries', 'woocommerce' ),
+				'title'   => __( 'Method availability', 'woocommerce' ),
+				'type'    => 'select',
+				'default' => 'all',
+				'class'   => 'availability wc-enhanced-select',
+				'options' => array(
+					'all'      => __( 'All allowed countries', 'woocommerce' ),
+					'specific' => __( 'Specific Countries', 'woocommerce' ),
 				),
 			),
-			'countries' => array(
-				'title'       => __( 'Specific countries', 'woocommerce' ),
-				'type'        => 'multiselect',
-				'class'       => 'wc-enhanced-select',
-				'css'         => 'width: 400px;',
-				'default'     => '',
-				'options'     => WC()->countries->get_shipping_countries(),
+			'countries'    => array(
+				'title'             => __( 'Specific countries', 'woocommerce' ),
+				'type'              => 'multiselect',
+				'class'             => 'wc-enhanced-select',
+				'css'               => 'width: 400px;',
+				'default'           => '',
+				'options'           => WC()->countries->get_shipping_countries(),
 				'custom_attributes' => array(
 					'data-placeholder' => __( 'Select some countries', 'woocommerce' ),
 				),
