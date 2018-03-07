@@ -1,4 +1,10 @@
 <?php
+/**
+ * Class WC_Shipping_Legacy_International_Delivery file.
+ *
+ * @package WooCommerce\Shipping
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -11,7 +17,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @deprecated  2.6.0
  * @version     2.4.0
  * @package     WooCommerce/Classes/Shipping
- * @author      WooThemes
  */
 class WC_Shipping_Legacy_International_Delivery extends WC_Shipping_Legacy_Flat_Rate {
 
@@ -19,8 +24,9 @@ class WC_Shipping_Legacy_International_Delivery extends WC_Shipping_Legacy_Flat_
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->id                 = 'legacy_international_delivery';
-		$this->method_title       = __( 'International flat rate (legacy)', 'woocommerce' );
+		$this->id           = 'legacy_international_delivery';
+		$this->method_title = __( 'International flat rate (legacy)', 'woocommerce' );
+		/* translators: %s: Admin shipping settings URL */
 		$this->method_description = '<strong>' . sprintf( __( 'This method is deprecated in 2.6.0 and will be removed in future versions - we recommend disabling it and instead setting up a new rate within your <a href="%s">Shipping zones</a>.', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=shipping' ) ) . '</strong>';
 		$this->init();
 
@@ -34,7 +40,7 @@ class WC_Shipping_Legacy_International_Delivery extends WC_Shipping_Legacy_Flat_
 	 * @return string
 	 */
 	public function get_option_key() {
-		return $this->plugin_id . 'international_delivery' . '_settings';
+		return $this->plugin_id . 'international_delivery_settings';
 	}
 
 	/**
@@ -56,9 +62,9 @@ class WC_Shipping_Legacy_International_Delivery extends WC_Shipping_Legacy_Flat_
 	}
 
 	/**
-	 * is_available function.
+	 * Check if package is available.
 	 *
-	 * @param array $package
+	 * @param array $package Package information.
 	 * @return bool
 	 */
 	public function is_available( $package ) {
@@ -66,11 +72,11 @@ class WC_Shipping_Legacy_International_Delivery extends WC_Shipping_Legacy_Flat_
 			return false;
 		}
 		if ( 'including' === $this->availability ) {
-			if ( is_array( $this->countries ) && ! in_array( $package['destination']['country'], $this->countries ) ) {
+			if ( is_array( $this->countries ) && ! in_array( $package['destination']['country'], $this->countries, true ) ) {
 				return false;
 			}
 		} else {
-			if ( is_array( $this->countries ) && ( in_array( $package['destination']['country'], $this->countries ) || ! $package['destination']['country'] ) ) {
+			if ( is_array( $this->countries ) && ( in_array( $package['destination']['country'], $this->countries, true ) || ! $package['destination']['country'] ) ) {
 				return false;
 			}
 		}
