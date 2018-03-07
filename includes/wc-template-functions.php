@@ -225,6 +225,18 @@ function wc_set_loop_prop( $prop, $value = '' ) {
 }
 
 /**
+ * Should the WooCommerce loop be displayed?
+ *
+ * This will return true if we have posts (products) or if we have subcats to display.
+ *
+ * @since 3.4.0
+ * @return bool
+ */
+function woocommerce_product_loop() {
+	return have_posts() || 'products' !== woocommerce_get_loop_display_mode();
+}
+
+/**
  * Output generator tag to aid debugging.
  *
  * @access public
@@ -551,7 +563,7 @@ if ( ! function_exists( 'woocommerce_content' ) ) {
 
 			<?php do_action( 'woocommerce_archive_description' ); ?>
 
-			<?php if ( have_posts() ) : ?>
+			<?php if ( woocommerce_product_loop() ) : ?>
 
 				<?php do_action( 'woocommerce_before_shop_loop' ); ?>
 
@@ -1833,7 +1845,7 @@ if ( ! function_exists( 'woocommerce_maybe_show_product_subcategories' ) ) {
 	 * @param string $loop_html HTML.
 	 * @return string
 	 */
-	function woocommerce_maybe_show_product_subcategories( $loop_html ) {
+	function woocommerce_maybe_show_product_subcategories( $loop_html = '' ) {
 		if ( wc_get_loop_prop( 'is_shortcode' ) && ! WC_Template_Loader::in_content_filter() ) {
 			return $loop_html;
 		}
@@ -2582,7 +2594,7 @@ if ( ! function_exists( 'woocommerce_account_edit_account' ) ) {
 if ( ! function_exists( 'wc_no_products_found' ) ) {
 
 	/**
-	 * Show no products found message.
+	 * Handles the loop when no products were found/no product exist.
 	 */
 	function wc_no_products_found() {
 		wc_get_template( 'loop/no-products-found.php' );
