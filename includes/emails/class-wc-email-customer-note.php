@@ -1,4 +1,9 @@
 <?php
+/**
+ * Class WC_Email_Customer_Note file.
+ *
+ * @package WooCommerce\Emails
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -14,7 +19,6 @@ if ( ! class_exists( 'WC_Email_Customer_Note', false ) ) :
 	 * @class       WC_Email_Customer_Note
 	 * @version     2.3.0
 	 * @package     WooCommerce/Classes/Emails
-	 * @author      WooThemes
 	 * @extends     WC_Email
 	 */
 	class WC_Email_Customer_Note extends WC_Email {
@@ -72,7 +76,7 @@ if ( ! class_exists( 'WC_Email_Customer_Note', false ) ) :
 		/**
 		 * Trigger.
 		 *
-		 * @param array $args
+		 * @param array $args Email arguments.
 		 */
 		public function trigger( $args ) {
 			$this->setup_locale();
@@ -85,13 +89,18 @@ if ( ! class_exists( 'WC_Email_Customer_Note', false ) ) :
 
 				$args = wp_parse_args( $args, $defaults );
 
-				extract( $args );
+				$order_id      = $args['order_id'];
+				$customer_note = $args['customer_note'];
 
-				if ( $order_id && ( $this->object = wc_get_order( $order_id ) ) ) {
-					$this->recipient                      = $this->object->get_billing_email();
-					$this->customer_note                  = $customer_note;
-					$this->placeholders['{order_date}']   = wc_format_datetime( $this->object->get_date_created() );
-					$this->placeholders['{order_number}'] = $this->object->get_order_number();
+				if ( $order_id ) {
+					$this->object = wc_get_order( $order_id );
+
+					if ( $this->object ) {
+						$this->recipient                      = $this->object->get_billing_email();
+						$this->customer_note                  = $customer_note;
+						$this->placeholders['{order_date}']   = wc_format_datetime( $this->object->get_date_created() );
+						$this->placeholders['{order_number}'] = $this->object->get_order_number();
+					}
 				}
 			}
 
