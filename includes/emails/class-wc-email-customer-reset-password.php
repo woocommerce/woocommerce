@@ -1,4 +1,9 @@
 <?php
+/**
+ * Class WC_Email_Customer_Reset_Password file.
+ *
+ * @package WooCommerce\Emails
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -14,7 +19,6 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 	 * @class       WC_Email_Customer_Reset_Password
 	 * @version     2.3.0
 	 * @package     WooCommerce/Classes/Emails
-	 * @author      WooThemes
 	 * @extends     WC_Email
 	 */
 	class WC_Email_Customer_Reset_Password extends WC_Email {
@@ -91,8 +95,8 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 		/**
 		 * Trigger.
 		 *
-		 * @param string $user_login
-		 * @param string $reset_key
+		 * @param string $user_login User login.
+		 * @param string $reset_key Password reset key.
 		 */
 		public function trigger( $user_login = '', $reset_key = '' ) {
 			$this->setup_locale();
