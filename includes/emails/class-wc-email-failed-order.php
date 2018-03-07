@@ -1,4 +1,9 @@
 <?php
+/**
+ * Class WC_Email_Failed_Order file.
+ *
+ * @package WooCommerce\Emails
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -14,7 +19,6 @@ if ( ! class_exists( 'WC_Email_Failed_Order', false ) ) :
 	 * @class       WC_Email_Failed_Order
 	 * @version     2.5.0
 	 * @package     WooCommerce/Classes/Emails
-	 * @author      WooThemes
 	 * @extends     WC_Email
 	 */
 	class WC_Email_Failed_Order extends WC_Email {
@@ -68,8 +72,8 @@ if ( ! class_exists( 'WC_Email_Failed_Order', false ) ) :
 		/**
 		 * Trigger the sending of this email.
 		 *
-		 * @param int      $order_id The order ID.
-		 * @param WC_Order $order Order object.
+		 * @param int            $order_id The order ID.
+		 * @param WC_Order|false $order Order object.
 		 */
 		public function trigger( $order_id, $order = false ) {
 			$this->setup_locale();
@@ -140,6 +144,7 @@ if ( ! class_exists( 'WC_Email_Failed_Order', false ) ) :
 				'recipient'  => array(
 					'title'       => __( 'Recipient(s)', 'woocommerce' ),
 					'type'        => 'text',
+					/* translators: %s: WP admin email */
 					'description' => sprintf( __( 'Enter recipients (comma separated) for this email. Defaults to %s.', 'woocommerce' ), '<code>' . esc_attr( get_option( 'admin_email' ) ) . '</code>' ),
 					'placeholder' => '',
 					'default'     => '',
