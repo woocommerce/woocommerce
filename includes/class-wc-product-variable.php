@@ -292,6 +292,7 @@ class WC_Product_Variable extends WC_Product {
 
 			$available_variations[] = $this->get_available_variation( $variation );
 		}
+		$available_variations = array_filter( $available_variations );
 
 		return $available_variations;
 	}
@@ -302,7 +303,7 @@ class WC_Product_Variable extends WC_Product {
 	 *
 	 * @param  WC_Product $variation Variation product object or ID
 	 *
-	 * @return array
+	 * @return array|bool
 	 */
 	public function get_available_variation( $variation ) {
 		if ( is_numeric( $variation ) ) {
