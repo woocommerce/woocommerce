@@ -17,11 +17,11 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 	/**
 	 * Handle a log entry.
 	 *
-	 * @param int $timestamp Log timestamp.
+	 * @param int    $timestamp Log timestamp.
 	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
 	 * @param string $message Log message.
-	 * @param array $context {
-	 *     Additional information for log handlers.
+	 * @param array  $context {
+	 *      Additional information for log handlers.
 	 *
 	 *     @type string $source Optional. Source will be available in log table.
 	 *                  If no source is provided, attempt to provide sensible default.
@@ -45,13 +45,13 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 	/**
 	 * Add a log entry to chosen file.
 	 *
-	 * @param int $timestamp Log timestamp.
+	 * @param int    $timestamp Log timestamp.
 	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
 	 * @param string $message Log message.
 	 * @param string $source Log source. Useful for filtering and sorting.
-	 * @param array $context {
-	 *     Context will be serialized and stored in database.
-	 * }
+	 * @param array  $context {
+	 *      Context will be serialized and stored in database.
+	 *  }
 	 *
 	 * @return bool True if write was successful.
 	 */
@@ -60,9 +60,9 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 
 		$insert = array(
 			'timestamp' => date( 'Y-m-d H:i:s', $timestamp ),
-			'level' => WC_Log_Levels::get_level_severity( $level ),
-			'message' => $message,
-			'source' => $source,
+			'level'     => WC_Log_Levels::get_level_severity( $level ),
+			'message'   => $message,
+			'source'    => $source,
 		);
 
 		$format = array(
@@ -129,6 +129,7 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 
 		/**
 		 * PHP < 5.3.6 correct behavior
+		 *
 		 * @see http://php.net/manual/en/function.debug-backtrace.php#refsect1-function.debug-backtrace-parameters
 		 */
 		if ( defined( 'DEBUG_BACKTRACE_IGNORE_ARGS' ) ) {

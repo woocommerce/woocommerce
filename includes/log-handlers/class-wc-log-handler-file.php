@@ -70,11 +70,11 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	/**
 	 * Handle a log entry.
 	 *
-	 * @param int $timestamp Log timestamp.
+	 * @param int    $timestamp Log timestamp.
 	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
 	 * @param string $message Log message.
-	 * @param array $context {
-	 *     Additional information for log handlers.
+	 * @param array  $context {
+	 *      Additional information for log handlers.
 	 *
 	 *     @type string $source Optional. Determines log file to write to. Default 'log'.
 	 *     @type bool $_legacy Optional. Default false. True to use outdated log format
@@ -99,10 +99,10 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	/**
 	 * Builds a log entry text from timestamp, level and message.
 	 *
-	 * @param int $timestamp Log timestamp.
+	 * @param int    $timestamp Log timestamp.
 	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
 	 * @param string $message Log message.
-	 * @param array $context Additional information for log handlers.
+	 * @param array  $context Additional information for log handlers.
 	 *
 	 * @return string Formatted log entry.
 	 */
@@ -115,8 +115,8 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 				$handle = 'log';
 			}
 			$message = apply_filters( 'woocommerce_logger_add_message', $message, $handle );
-			$time = date_i18n( 'm-d-Y @ H:i:s' );
-			$entry = "{$time} - {$message}";
+			$time    = date_i18n( 'm-d-Y @ H:i:s' );
+			$entry   = "{$time} - {$message}";
 		} else {
 			$entry = parent::format_entry( $timestamp, $level, $message, $context );
 		}
@@ -304,21 +304,21 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	/**
 	 * Increment a log file suffix.
 	 *
-	 * @param string $handle Log handle
+	 * @param string   $handle Log handle
 	 * @param null|int $number Optional. Default null. Log suffix number to be incremented.
 	 * @return bool True if increment was successful, otherwise false.
 	 */
 	protected function increment_log_infix( $handle, $number = null ) {
 		if ( null === $number ) {
-			$suffix = '';
+			$suffix      = '';
 			$next_suffix = '.0';
 		} else {
-			$suffix = '.' . $number;
-			$next_suffix = '.' . ($number + 1);
+			$suffix      = '.' . $number;
+			$next_suffix = '.' . ( $number + 1 );
 		}
 
 		$rename_from = self::get_log_file_path( "{$handle}{$suffix}" );
-		$rename_to = self::get_log_file_path( "{$handle}{$next_suffix}" );
+		$rename_to   = self::get_log_file_path( "{$handle}{$next_suffix}" );
 
 		if ( $this->is_open( $rename_from ) ) {
 			$this->close( $rename_from );
@@ -371,7 +371,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 */
 	protected function cache_log( $entry, $handle ) {
 		$this->cached_logs[] = array(
-			'entry' => $entry,
+			'entry'  => $entry,
 			'handle' => $handle,
 		);
 	}
