@@ -2,11 +2,10 @@
 /**
  * Class for displaying plugin warning notifications and determining 3rd party plugin compatibility.
  *
- * @author      Automattic
- * @category    Admin
  * @package     WooCommerce/Admin
  * @version     3.2.0
  */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -174,7 +173,7 @@ class WC_Plugin_Updates {
 	/**
 	 * Get active plugins that have a tested version lower than the input version.
 	 *
-	 * @param string $new_version
+	 * @param string $new_version WooCommerce version to test against.
 	 * @param string $release 'major' or 'minor'.
 	 * @return array of plugin info arrays
 	 */
@@ -229,8 +228,8 @@ class WC_Plugin_Updates {
 	/**
 	 * Get plugins that have a valid value for a specific header.
 	 *
-	 * @param string $header
-	 * @return array of plugin info arrays
+	 * @param string $header Plugin header to search for.
+	 * @return array Array of plugins that contain the searched header.
 	 */
 	protected function get_plugins_with_header( $header ) {
 		$plugins = get_plugins();
@@ -255,7 +254,7 @@ class WC_Plugin_Updates {
 		$matches = array();
 
 		foreach ( $plugins as $file => $plugin ) {
-			if ( $plugin['Name'] !== 'WooCommerce' && ( stristr( $plugin['Name'], 'woocommerce' ) || stristr( $plugin['Description'], 'woocommerce' ) ) ) {
+			if ( 'WooCommerce' !== $plugin['Name'] && ( stristr( $plugin['Name'], 'woocommerce' ) || stristr( $plugin['Description'], 'woocommerce' ) ) ) {
 				$matches[ $file ] = $plugin;
 			}
 		}
