@@ -9,14 +9,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Representation of a payment token for eChecks.
  *
- * @class       WC_Payment_Token_eCheck
+ * @class       WC_Payment_Token_ECheck
  * @version     3.0.0
  * @since       2.6.0
  * @category    PaymentTokens
  * @package     WooCommerce/PaymentTokens
  * @author      WooThemes
  */
-class WC_Payment_Token_eCheck extends WC_Payment_Token {
+class WC_Payment_Token_ECheck extends WC_Payment_Token {
 
 	/** @protected string Token Type String. */
 	protected $type = 'eCheck';

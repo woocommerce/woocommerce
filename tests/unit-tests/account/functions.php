@@ -243,7 +243,7 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_get_account_saved_payment_methods_list_item_echeck() {
-		$token = new WC_Payment_Token_eCheck();
+		$token = new WC_Payment_Token_ECheck();
 		$token->set_token( '1234' );
 		$token->set_gateway_id( 'bacs' );
 		$token->set_last4( '1234' );
