@@ -1,4 +1,9 @@
 <?php
+/**
+ * Class WC_Email_Customer_On_Hold_Order file.
+ *
+ * @package WooCommerce\Emails
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -14,7 +19,6 @@ if ( ! class_exists( 'WC_Email_Customer_On_Hold_Order', false ) ) :
 	 * @class       WC_Email_Customer_On_Hold_Order
 	 * @version     2.6.0
 	 * @package     WooCommerce/Classes/Emails
-	 * @author      WooThemes
 	 * @extends     WC_Email
 	 */
 	class WC_Email_Customer_On_Hold_Order extends WC_Email {
@@ -66,8 +70,8 @@ if ( ! class_exists( 'WC_Email_Customer_On_Hold_Order', false ) ) :
 		/**
 		 * Trigger the sending of this email.
 		 *
-		 * @param int      $order_id The order ID.
-		 * @param WC_Order $order Order object.
+		 * @param int            $order_id The order ID.
+		 * @param WC_Order|false $order Order object.
 		 */
 		public function trigger( $order_id, $order = false ) {
 			$this->setup_locale();
