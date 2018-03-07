@@ -1,4 +1,9 @@
 <?php
+/**
+ * Class WC_Email_Customer_Invoice file.
+ *
+ * @package WooCommerce\Emails
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -14,7 +19,6 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 	 * @class       WC_Email_Customer_Invoice
 	 * @version     2.3.0
 	 * @package     WooCommerce/Classes/Emails
-	 * @author      WooThemes
 	 * @extends     WC_Email
 	 */
 	class WC_Email_Customer_Invoice extends WC_Email {
@@ -44,6 +48,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		/**
 		 * Get email subject.
 		 *
+		 * @param bool $paid Whether the order has been paid or not.
 		 * @since  3.1.0
 		 * @return string
 		 */
@@ -58,6 +63,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		/**
 		 * Get email heading.
 		 *
+		 * @param bool $paid Whether the order has been paid or not.
 		 * @since  3.1.0
 		 * @return string
 		 */
