@@ -1,4 +1,10 @@
 <?php
+/**
+ * Class WC_Shipping_Local_Pickup file.
+ *
+ * @package WooCommerce\Shipping
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -11,14 +17,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @class       WC_Shipping_Local_Pickup
  * @version     2.6.0
  * @package     WooCommerce/Classes/Shipping
- * @author      WooThemes
  */
 class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 
 	/**
 	 * Constructor.
 	 *
-	 * @param int $instance_id
+	 * @param int $instance_id Instance ID.
 	 */
 	public function __construct( $instance_id = 0 ) {
 		$this->id                 = 'local_pickup';
@@ -42,20 +47,19 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 		$this->init_form_fields();
 		$this->init_settings();
 
-		// Define user set variables
+		// Define user set variables.
 		$this->title      = $this->get_option( 'title' );
 		$this->tax_status = $this->get_option( 'tax_status' );
 		$this->cost       = $this->get_option( 'cost' );
 
-		// Actions
+		// Actions.
 		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
 	}
 
 	/**
-	 * calculate_shipping function.
 	 * Calculate local pickup shipping.
 	 *
-	 * @param array $package
+	 * @param array $package Package information.
 	 */
 	public function calculate_shipping( $package = array() ) {
 		$this->add_rate(
