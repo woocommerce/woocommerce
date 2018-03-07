@@ -200,12 +200,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 
 		<?php
 
-		if ( $wpdb->use_mysqli ) {
-			$ver = mysqli_get_server_info( $wpdb->dbh );
-		} else {
-			$ver = mysql_get_server_info(); // @codingStandardsIgnoreLine
-		}
-		if ( ! empty( $wpdb->is_mysql ) && ! stristr( $ver, 'MariaDB' ) ) :
+		if ( ! empty( $wpdb->is_mysql ) ) :
 			?>
 			<tr>
 				<td data-export-label="MySQL Version"><?php esc_html_e( 'MySQL version', 'woocommerce' ); ?>:</td>
