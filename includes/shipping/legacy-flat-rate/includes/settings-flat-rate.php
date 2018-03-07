@@ -1,4 +1,9 @@
 <?php
+/**
+ * Legacy flat rate settings.
+ *
+ * @package WooCommerce\Shipping
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -71,6 +76,7 @@ if ( ! empty( $shipping_classes ) ) {
 		'title'       => __( 'Shipping class costs', 'woocommerce' ),
 		'type'        => 'title',
 		'default'     => '',
+		/* translators: %s: Admin shipping settings URL */
 		'description' => sprintf( __( 'These costs can optionally be added based on the <a href="%s">product shipping class</a>.', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=shipping&section=classes' ) ),
 	);
 	foreach ( $shipping_classes as $shipping_class ) {
@@ -83,7 +89,7 @@ if ( ! empty( $shipping_classes ) ) {
 			'type'        => 'text',
 			'placeholder' => __( 'N/A', 'woocommerce' ),
 			'description' => $cost_desc,
-			'default'     => $this->get_option( 'class_cost_' . $shipping_class->slug ), // Before 2.5.0, we used slug here which caused issues with long setting names
+			'default'     => $this->get_option( 'class_cost_' . $shipping_class->slug ), // Before 2.5.0, we used slug here which caused issues with long setting names.
 			'desc_tip'    => true,
 		);
 	}
