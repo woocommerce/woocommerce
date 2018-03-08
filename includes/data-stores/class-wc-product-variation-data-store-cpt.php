@@ -1,4 +1,10 @@
 <?php
+/**
+ * Class WC_Product_Variation_Data_Store_CPT file.
+ *
+ * @package WooCommerce\DataStores
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -7,19 +13,17 @@ if ( ! defined( 'ABSPATH' ) ) {
  * WC Variation Product Data Store: Stored in CPT.
  *
  * @version  3.0.0
- * @category Class
- * @author   WooThemes
  */
 class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT implements WC_Object_Data_Store_Interface {
 
 	/**
 	 * Callback to remove unwanted meta data.
 	 *
-	 * @param object $meta
+	 * @param object $meta Meta object.
 	 * @return bool false if excluded.
 	 */
 	protected function exclude_internal_meta_keys( $meta ) {
-		return ! in_array( $meta->meta_key, $this->internal_meta_keys ) && 0 !== stripos( $meta->meta_key, 'attribute_' ) && 0 !== stripos( $meta->meta_key, 'wp_' );
+		return ! in_array( $meta->meta_key, $this->internal_meta_keys, true ) && 0 !== stripos( $meta->meta_key, 'attribute_' ) && 0 !== stripos( $meta->meta_key, 'wp_' );
 	}
 
 	/*
@@ -32,13 +36,18 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * Reads a product from the database and sets its data to the class.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Product $product
-	 * @throws Exception
+	 * @param WC_Product $product Product object. $product Product object.
 	 */
 	public function read( &$product ) {
 		$product->set_defaults();
 
-		if ( ! $product->get_id() || ! ( $post_object = get_post( $product->get_id() ) ) || ! in_array( $post_object->post_type, array( 'product', 'product_variation' ) ) ) {
+		if ( ! $product->get_id() ) {
+			return;
+		}
+
+		$post_object = get_post( $product->get_id() );
+
+		if ( ! $post_object || ! in_array( $post_object->post_type, array( 'product', 'product_variation' ), true ) ) {
 			return;
 		}
 
@@ -84,7 +93,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * Create a new product.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Product $product
+	 * @param WC_Product $product Product object.
 	 */
 	public function create( &$product ) {
 		if ( ! $product->get_date_created() ) {
@@ -145,7 +154,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * Updates an existing product.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Product $product
+	 * @param WC_Product $product Product object.
 	 */
 	public function update( &$product ) {
 		$product->save_meta_data();
@@ -226,7 +235,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * Products will get a title of the form "Name - Value, Value" or just "Name".
 	 *
 	 * @since 3.0.0
-	 * @param WC_Product
+	 * @param WC_Product $product Product object.
 	 * @return string
 	 */
 	protected function generate_product_title( $product ) {
@@ -257,7 +266,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	/**
 	 * Make sure we store the product version (to track data changes).
 	 *
-	 * @param WC_Product
+	 * @param WC_Product $product Product object.
 	 * @since 3.0.0
 	 */
 	protected function update_version_and_type( &$product ) {
@@ -269,7 +278,8 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * Read post data.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Product
+	 * @param WC_Product $product Product object.
+	 * @throws WC_Data_Exception If WC_Product::set_tax_status() is called with an invalid tax status.
 	 */
 	protected function read_product_data( &$product ) {
 		$id = $product->get_id();
@@ -310,8 +320,8 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$parent_object   = get_post( $product->get_parent_id() );
 		$terms           = get_the_terms( $product->get_parent_id(), 'product_visibility' );
 		$term_names      = is_array( $terms ) ? wp_list_pluck( $terms, 'name' ) : array();
-		$exclude_search  = in_array( 'exclude-from-search', $term_names );
-		$exclude_catalog = in_array( 'exclude-from-catalog', $term_names );
+		$exclude_search  = in_array( 'exclude-from-search', $term_names, true );
+		$exclude_catalog = in_array( 'exclude-from-catalog', $term_names, true );
 
 		if ( $exclude_search && $exclude_catalog ) {
 			$catalog_visibility = 'hidden';
@@ -353,8 +363,8 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * For all stored terms in all taxonomies, save them to the DB.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Product
-	 * @param bool Force update. Used during create.
+	 * @param WC_Product $product Product object.
+	 * @param bool       $force Force update. Used during create.
 	 */
 	protected function update_terms( &$product, $force = false ) {
 		$changes = $product->get_changes();
@@ -369,7 +379,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 *
 	 * @since 3.0.0
 	 *
-	 * @param WC_Product $product
+	 * @param WC_Product $product Product object.
 	 * @param bool       $force Force update. Used during create.
 	 */
 	protected function update_visibility( &$product, $force = false ) {
@@ -390,8 +400,8 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * Update attribute meta values.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Product
-	 * @param bool Force update. Used during create.
+	 * @param WC_Product $product Product object.
+	 * @param bool       $force Force update. Used during create.
 	 */
 	protected function update_attributes( &$product, $force = false ) {
 		$changes = $product->get_changes();
@@ -406,7 +416,13 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			}
 
 			// Remove old taxonomies attributes so data is kept up to date - first get attribute key names.
-			$delete_attribute_keys = $wpdb->get_col( $wpdb->prepare( "SELECT meta_key FROM {$wpdb->postmeta} WHERE meta_key LIKE 'attribute_%%' AND meta_key NOT IN ( '" . implode( "','", array_map( 'esc_sql', $updated_attribute_keys ) ) . "' ) AND post_id = %d;", $product->get_id() ) );
+			$delete_attribute_keys = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT meta_key FROM {$wpdb->postmeta} WHERE meta_key LIKE %s AND meta_key NOT IN ( '" . implode( "','", array_map( 'esc_sql', $updated_attribute_keys ) ) . "' ) AND post_id = %d", // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.QuotedDynamicPlaceholderGeneration
+					$wpdb->esc_like( 'attribute_' ) . '%',
+					$product->get_id()
+				)
+			);
 
 			foreach ( $delete_attribute_keys as $key ) {
 				delete_post_meta( $product->get_id(), $key );
@@ -418,8 +434,8 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * Helper method that updates all the post meta for a product based on it's settings in the WC_Product class.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Product
-	 * @param bool Force update. Used during create.
+	 * @param WC_Product $product Product object.
+	 * @param bool       $force Force update. Used during create.
 	 */
 	public function update_post_meta( &$product, $force = false ) {
 		$meta_key_to_props = array(
