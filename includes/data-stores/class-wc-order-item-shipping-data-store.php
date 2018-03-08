@@ -28,6 +28,7 @@ class WC_Order_Item_Shipping_Data_Store extends Abstract_WC_Order_Item_Type_Data
 	 *
 	 * @since 3.0.0
 	 * @param WC_Order_Item_Shipping $item Item to read to.
+	 * @throws Exception If invalid shipping order item.
 	 */
 	public function read( &$item ) {
 		parent::read( $item );
