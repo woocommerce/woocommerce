@@ -4,8 +4,6 @@
  *
  * @version  3.3.0
  * @package  WooCommerce/Classes/Data_Store
- * @category Class
- * @author   Automattic
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
