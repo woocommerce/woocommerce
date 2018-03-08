@@ -138,10 +138,14 @@ function wc_attribute_label( $name, $product = '' ) {
 		if ( $product->is_type( 'variation' ) ) {
 			$product = wc_get_product( $product->get_parent_id() );
 		}
-		$attributes = $product->get_attributes();
+		$attributes = array();
+
+		if ( false !== $product ) {
+			$attributes = $product->get_attributes();
+		}
 
 		// Attempt to get label from product, as entered by the user.
-		if ( false !== $product && $attributes && isset( $attributes[ sanitize_title( $name ) ] ) ) {
+		if ( $attributes && isset( $attributes[ sanitize_title( $name ) ] ) ) {
 			$label = $attributes[ sanitize_title( $name ) ]->get_name();
 		} else {
 			$label = $name;
