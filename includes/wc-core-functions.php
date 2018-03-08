@@ -2060,3 +2060,20 @@ function wc_decimal_to_fraction( $decimal ) {
 
 	return array( $numerator, $denominator );
 }
+
+/**
+ * Round discount.
+ *
+ * @param  double $value Amount to round.
+ * @param  int    $precision DP to round.
+ * @return float
+ */
+function wc_round_discount( $value, $precision ) {
+	if ( version_compare( PHP_VERSION, '5.3.0', '>=' ) ) {
+		return round( $value, $precision, WC_DISCOUNT_ROUNDING_MODE );
+	} elseif ( 2 === WC_DISCOUNT_ROUNDING_MODE ) {
+		return wc_legacy_round_half_down( $value, $precision );
+	} else {
+		return round( $value, $precision );
+	}
+}
