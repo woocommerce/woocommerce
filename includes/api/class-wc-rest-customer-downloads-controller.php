@@ -4,15 +4,11 @@
  *
  * Handles requests to the /customers/<customer_id>/downloads endpoint.
  *
- * @author   WooThemes
- * @category API
- * @package  WooCommerce/API
- * @since    2.6.0
+ * @package WooCommerce/API
+ * @since   2.6.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * REST API Customers controller class.
@@ -32,7 +28,7 @@ class WC_REST_Customer_Downloads_Controller extends WC_REST_Customer_Downloads_V
 	/**
 	 * Prepare a single download output for response.
 	 *
-	 * @param stdClass $download Download object.
+	 * @param stdClass        $download Download object.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
@@ -81,43 +77,43 @@ class WC_REST_Customer_Downloads_Controller extends WC_REST_Customer_Downloads_V
 			'title'      => 'customer_download',
 			'type'       => 'object',
 			'properties' => array(
-				'download_id' => array(
+				'download_id'         => array(
 					'description' => __( 'Download ID.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'download_url' => array(
+				'download_url'        => array(
 					'description' => __( 'Download file URL.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'product_id' => array(
+				'product_id'          => array(
 					'description' => __( 'Downloadable product ID.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'product_name' => array(
+				'product_name'        => array(
 					'description' => __( 'Product name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'download_name' => array(
+				'download_name'       => array(
 					'description' => __( 'Downloadable file name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'order_id' => array(
+				'order_id'            => array(
 					'description' => __( 'Order ID.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'order_key' => array(
+				'order_key'           => array(
 					'description' => __( 'Order key.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
@@ -129,24 +125,24 @@ class WC_REST_Customer_Downloads_Controller extends WC_REST_Customer_Downloads_V
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'access_expires' => array(
+				'access_expires'      => array(
 					'description' => __( "The date when download access expires, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'access_expires_gmt' => array(
-					'description' => __( "The date when download access expires, as GMT.", 'woocommerce' ),
+				'access_expires_gmt'  => array(
+					'description' => __( 'The date when download access expires, as GMT.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'file' => array(
+				'file'                => array(
 					'description' => __( 'File details.', 'woocommerce' ),
 					'type'        => 'object',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
-					'properties' => array(
+					'properties'  => array(
 						'name' => array(
 							'description' => __( 'File name.', 'woocommerce' ),
 							'type'        => 'string',

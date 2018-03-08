@@ -13,27 +13,27 @@ $who_refunded = new WP_User( $refund->get_refunded_by() );
 
 	<td class="name">
 		<?php
-			if ( $who_refunded->exists() ) {
-				printf(
-					/* translators: 1: refund id 2: refund date 3: username */
-					esc_html__( 'Refund #%1$s - %2$s by %3$s', 'woocommerce' ),
-					$refund->get_id(),
-					wc_format_datetime( $refund->get_date_created(), get_option( 'date_format' ) . ', ' . get_option( 'time_format' ) ),
-					sprintf(
-						'<abbr class="refund_by" title="%1$s">%2$s</abbr>',
-						/* translators: 1: ID who refunded */
-						sprintf( esc_attr__( 'ID: %d', 'woocommerce' ), absint( $who_refunded->ID ) ),
-						esc_html( $who_refunded->display_name )
-					)
-				);
-			} else {
-				printf(
-					/* translators: 1: refund id 2: refund date */
-					esc_html__( 'Refund #%1$s - %2$s', 'woocommerce' ),
-					$refund->get_id(),
-					wc_format_datetime( $refund->get_date_created(), get_option( 'date_format' ) . ', ' . get_option( 'time_format' ) )
-				);
-			}
+		if ( $who_refunded->exists() ) {
+			printf(
+				/* translators: 1: refund id 2: refund date 3: username */
+				esc_html__( 'Refund #%1$s - %2$s by %3$s', 'woocommerce' ),
+				$refund->get_id(),
+				wc_format_datetime( $refund->get_date_created(), get_option( 'date_format' ) . ', ' . get_option( 'time_format' ) ),
+				sprintf(
+					'<abbr class="refund_by" title="%1$s">%2$s</abbr>',
+					/* translators: 1: ID who refunded */
+					sprintf( esc_attr__( 'ID: %d', 'woocommerce' ), absint( $who_refunded->ID ) ),
+					esc_html( $who_refunded->display_name )
+				)
+			);
+		} else {
+			printf(
+				/* translators: 1: refund id 2: refund date */
+				esc_html__( 'Refund #%1$s - %2$s', 'woocommerce' ),
+				$refund->get_id(),
+				wc_format_datetime( $refund->get_date_created(), get_option( 'date_format' ) . ', ' . get_option( 'time_format' ) )
+			);
+		}
 		?>
 		<?php if ( $refund->get_reason() ) : ?>
 			<p class="description"><?php echo esc_html( $refund->get_reason() ); ?></p>
@@ -52,7 +52,10 @@ $who_refunded = new WP_User( $refund->get_refunded_by() );
 		</div>
 	</td>
 
-	<?php if ( wc_tax_enabled() ) : $total_taxes = count( $order_taxes ); ?>
+	<?php
+	if ( wc_tax_enabled() ) :
+		$total_taxes = count( $order_taxes );
+		?>
 		<?php for ( $i = 0;  $i < $total_taxes; $i++ ) : ?>
 			<td class="line_tax" width="1%"></td>
 		<?php endfor; ?>

@@ -2,16 +2,13 @@
 /**
  * Hungary states
  *
- * @author      WooThemes
- * @category    i18n
- * @package     WooCommerce/i18n
- * @version     2.0.0
+ * @package WooCommerce/i18n
+ * @version 2.0.0
  */
+
 global $states;
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 $states['HU'] = array(
 	'BK' => __( 'Bács-Kiskun', 'woocommerce' ),

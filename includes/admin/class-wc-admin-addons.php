@@ -52,8 +52,8 @@ class WC_Admin_Addons {
 
 		$paramters = array(
 			'category' => $category,
-			'term' => $term,
-			'country' => $country,
+			'term'     => $term,
+			'country'  => $country,
 		);
 
 		return '?' . http_build_query( $paramters );
@@ -69,7 +69,7 @@ class WC_Admin_Addons {
 	 * @return array of extensions
 	 */
 	public static function get_extension_data( $category, $term, $country ) {
-		$parameters = self::build_parameter_string( $category, $term, $country );
+		$parameters     = self::build_parameter_string( $category, $term, $country );
 		$raw_extensions = wp_remote_get(
 			'https://woocommerce.com/wp-json/wccom-extensions/1.0/search' . $parameters
 		);
@@ -166,12 +166,14 @@ class WC_Admin_Addons {
 			$utm_content = 'nostorefront';
 		}
 
-		$url = add_query_arg( array(
-			'utm_source'   => 'addons',
-			'utm_medium'   => 'product',
-			'utm_campaign' => 'woocommerceplugin',
-			'utm_content'  => $utm_content,
-		), $url );
+		$url = add_query_arg(
+			array(
+				'utm_source'   => 'addons',
+				'utm_medium'   => 'product',
+				'utm_campaign' => 'woocommerceplugin',
+				'utm_content'  => $utm_content,
+			), $url
+		);
 
 		echo '<a href="' . esc_url( $url ) . '" class="add-new-h2">' . esc_html( $text ) . '</a>' . "\n";
 	}
@@ -284,7 +286,7 @@ class WC_Admin_Addons {
 	public static function output_small_light_block( $block ) {
 		?>
 		<div class="addons-small-light-block">
-			<img class="addons-img" src="<?php echo esc_url( $block->image ) ?>" />
+			<img class="addons-img" src="<?php echo esc_url( $block->image ); ?>" />
 			<div class="addons-small-light-block-content">
 				<h1><?php echo esc_html( $block->title ); ?></h1>
 				<p><?php echo esc_html( $block->description ); ?></p>
@@ -355,9 +357,11 @@ class WC_Admin_Addons {
 		}
 
 		$button_url = wp_nonce_url(
-			add_query_arg( array(
-				'install-addon' => 'woocommerce-services',
-			) ),
+			add_query_arg(
+				array(
+					'install-addon' => 'woocommerce-services',
+				)
+			),
 			'install-addon_woocommerce-services'
 		);
 
@@ -377,22 +381,26 @@ class WC_Admin_Addons {
 					'image'       => WC()->plugin_url() . '/assets/images/wcs-truck-banner-3x.png',
 					'title'       => __( 'Show Canada Post shipping rates', 'woocommerce' ),
 					'description' => __( 'Display live rates from Canada Post at checkout to make shipping a breeze. Powered by WooCommerce Services.', 'woocommerce' ),
-					'logos'       => array_merge( $defaults['logos'], array(
-						array(
-							'link' => WC()->plugin_url() . '/assets/images/wcs-canada-post-logo.jpg',
-							'alt'  => 'Canada Post logo',
-						),
-					) ),
+					'logos'       => array_merge(
+						$defaults['logos'], array(
+							array(
+								'link' => WC()->plugin_url() . '/assets/images/wcs-canada-post-logo.jpg',
+								'alt'  => 'Canada Post logo',
+							),
+						)
+					),
 				);
 				break;
 			case 'US':
 				$local_defaults = array(
-					'logos'       => array_merge( $defaults['logos'], array(
-						array(
-							'link' => WC()->plugin_url() . '/assets/images/wcs-usps-logo.png',
-							'alt'  => 'USPS logo',
-						),
-					) ),
+					'logos' => array_merge(
+						$defaults['logos'], array(
+							array(
+								'link' => WC()->plugin_url() . '/assets/images/wcs-usps-logo.png',
+								'alt'  => 'USPS logo',
+							),
+						)
+					),
 				);
 				break;
 			default:
@@ -479,7 +487,7 @@ class WC_Admin_Addons {
 	public static function output_button( $url, $text, $theme, $plugin = '' ) {
 		$theme = __( 'Free', 'woocommerce' ) === $text ? 'addons-button-outline-green' : $theme;
 		$theme = is_plugin_active( $plugin ) ? 'addons-button-installed' : $theme;
-		$text = is_plugin_active( $plugin ) ? __( 'Installed', 'woocommerce' ) : $text;
+		$text  = is_plugin_active( $plugin ) ? __( 'Installed', 'woocommerce' ) : $text;
 		?>
 		<a
 			class="addons-button <?php echo esc_attr( $theme ); ?>"
@@ -506,13 +514,13 @@ class WC_Admin_Addons {
 		$sections        = self::get_sections();
 		$theme           = wp_get_theme();
 		$current_section = isset( $_GET['section'] ) ? sanitize_text_field( $_GET['section'] ) : '_featured';
-		$addons = array();
+		$addons          = array();
 
 		if ( '_featured' !== $current_section ) {
 			$category = isset( $_GET['section'] ) ? $_GET['section'] : null;
-			$term =  isset( $_GET['search'] ) ? $_GET['search'] : null;
-			$country = WC()->countries->get_base_country();
-			$addons = self::get_extension_data( $category, $term, $country );
+			$term     = isset( $_GET['search'] ) ? $_GET['search'] : null;
+			$country  = WC()->countries->get_base_country();
+			$addons   = self::get_extension_data( $category, $term, $country );
 		}
 
 		/**
@@ -523,7 +531,7 @@ class WC_Admin_Addons {
 		 * @uses $theme
 		 * @uses $current_section
 		 */
-		include_once( dirname( __FILE__ ) . '/views/html-admin-page-addons.php' );
+		include_once dirname( __FILE__ ) . '/views/html-admin-page-addons.php';
 	}
 
 	/**

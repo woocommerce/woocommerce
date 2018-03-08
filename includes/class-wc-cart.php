@@ -1112,6 +1112,7 @@ class WC_Cart extends WC_Legacy_Cart {
 					'variation'    => $variation,
 					'quantity'     => $quantity,
 					'data'         => $product_data,
+					'data_hash'    => wc_get_cart_item_data_hash( $product_data ),
 				) ), $cart_item_key );
 			}
 

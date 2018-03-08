@@ -1045,15 +1045,16 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	}
 
 	/**
-	 * Get slug from path
+	 * Get slug from path and associate it with the path.
 	 *
-	 * @param  string $key Plugin relative path. Example: woocommerce/woocommerce.php.
-	 * @return string
+	 * @param array  $plugins Associative array of plugin slugs to paths.
+	 * @param string $key Plugin relative path. Example: woocommerce/woocommerce.php.
 	 */
-	private static function format_plugin_slug( $key ) {
+	private static function associate_plugin_slug( $plugins, $key ) {
 		$slug = explode( '/', $key );
 		$slug = explode( '.', end( $slug ) );
-		return $slug[0];
+		$plugins[ $slug[0] ] = $key;
+		return $plugins;
 	}
 
 	/**
@@ -1079,16 +1080,15 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 
 			$skin              = new Automatic_Upgrader_Skin();
 			$upgrader          = new WP_Upgrader( $skin );
-			$installed_plugins = array_map( array( __CLASS__, 'format_plugin_slug' ), array_keys( get_plugins() ) );
+			$installed_plugins = array_reduce( array_keys( get_plugins() ), array( __CLASS__, 'associate_plugin_slug' ), array() );
 			$plugin_slug       = $plugin_to_install['repo-slug'];
-			$plugin            = $plugin_slug . '/' . $plugin_slug . '.php';
 			$installed         = false;
 			$activate          = false;
 
 			// See if the plugin is installed already.
-			if ( in_array( $plugin_to_install['repo-slug'], $installed_plugins ) ) {
+			if ( isset( $installed_plugins[ $plugin_slug ] ) ) {
 				$installed = true;
-				$activate  = ! is_plugin_active( $plugin );
+				$activate  = ! is_plugin_active( $installed_plugins[ $plugin_slug ] );
 			}
 
 			// Install this thing!
@@ -1178,7 +1178,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			// Activate this thing.
 			if ( $activate ) {
 				try {
-					$result = activate_plugin( $plugin );
+					$result = activate_plugin( $installed_plugins[ $plugin_slug ] );
 
 					if ( is_wp_error( $result ) ) {
 						throw new Exception( $result->get_error_message() );
