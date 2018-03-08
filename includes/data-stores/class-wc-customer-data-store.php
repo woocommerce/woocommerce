@@ -1,4 +1,10 @@
 <?php
+/**
+ * Class WC_Customer_Data_Store file.
+ *
+ * @package WooCommerce\DataStores
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -7,8 +13,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * WC Customer Data Store.
  *
  * @version  3.0.0
- * @category Class
- * @author   WooThemes
  */
 class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Data_Store_Interface, WC_Object_Data_Store_Interface {
 
@@ -72,7 +76,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	/**
 	 * Callback to remove unwanted meta data.
 	 *
-	 * @param object $meta
+	 * @param object $meta Meta object.
 	 * @return bool
 	 */
 	protected function exclude_internal_meta_keys( $meta ) {
@@ -80,7 +84,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 		$table_prefix = $wpdb->prefix ? $wpdb->prefix : 'wp_';
 
-		return ! in_array( $meta->meta_key, $this->internal_meta_keys )
+		return ! in_array( $meta->meta_key, $this->internal_meta_keys, true )
 			&& 0 !== strpos( $meta->meta_key, '_woocommerce_persistent_cart' )
 			&& 0 !== strpos( $meta->meta_key, 'closedpostboxes_' )
 			&& 0 !== strpos( $meta->meta_key, 'metaboxhidden_' )
@@ -94,9 +98,9 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 *
 	 * @since 3.0.0
 	 *
-	 * @param WC_Data $customer
+	 * @param WC_Customer $customer Customer object.
 	 *
-	 * @throws WC_Data_Exception
+	 * @throws WC_Data_Exception If unable to create new customer.
 	 */
 	public function create( &$customer ) {
 		$id = wc_create_new_customer( $customer->get_email(), $customer->get_username(), $customer->get_password() );
@@ -108,7 +112,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		$customer->set_id( $id );
 		$this->update_user_meta( $customer );
 
-		// Prevent wp_update_user calls in the same request and customer trigger the 'Notice of Password Changed' email
+		// Prevent wp_update_user calls in the same request and customer trigger the 'Notice of Password Changed' email.
 		$customer->set_password( '' );
 
 		wp_update_user(
@@ -132,12 +136,14 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * Method to read a customer object.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Customer $customer
-	 * @throws Exception
+	 * @param WC_Customer $customer Customer object.
+	 * @throws Exception If invalid customer.
 	 */
 	public function read( &$customer ) {
+		$user_object = get_user_by( 'id', $customer->get_id() );
+
 		// User object is required.
-		if ( ! $customer->get_id() || ! ( $user_object = get_user_by( 'id', $customer->get_id() ) ) || empty( $user_object->ID ) ) {
+		if ( ! $customer->get_id() || ! $user_object || empty( $user_object->ID ) ) {
 			throw new Exception( __( 'Invalid customer.', 'woocommerce' ) );
 		}
 
@@ -170,7 +176,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * Updates a customer in the database.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Customer $customer
+	 * @param WC_Customer $customer Customer object.
 	 */
 	public function update( &$customer ) {
 		wp_update_user(
@@ -203,7 +209,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * Deletes a customer from the database.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Customer $customer
+	 * @param WC_Customer $customer Customer object.
 	 * @param array       $args Array of args to pass to the delete method.
 	 */
 	public function delete( &$customer, $args = array() ) {
@@ -226,7 +232,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * Helper method that updates all the meta for a customer. Used for update & create.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Customer
+	 * @param WC_Customer $customer Customer object.
 	 */
 	private function update_user_meta( $customer ) {
 		$updated_props = array();
@@ -301,13 +307,14 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * Gets the customers last order.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Customer
+	 * @param WC_Customer $customer Customer object.
 	 * @return WC_Order|false
 	 */
 	public function get_last_order( &$customer ) {
 		global $wpdb;
 
 		$last_order = $wpdb->get_var(
+			// phpcs:disable WordPress.WP.PreparedSQL.NotPrepared
 			"SELECT posts.ID
 			FROM $wpdb->posts AS posts
 			LEFT JOIN {$wpdb->postmeta} AS meta on posts.ID = meta.post_id
@@ -316,6 +323,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			AND   posts.post_type = 'shop_order'
 			AND   posts.post_status IN ( '" . implode( "','", array_map( 'esc_sql', array_keys( wc_get_order_statuses() ) ) ) . "' )
 			ORDER BY posts.ID DESC"
+			// phpcs:enable
 		);
 
 		if ( $last_order ) {
@@ -329,7 +337,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * Return the number of orders this customer has.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Customer
+	 * @param WC_Customer $customer Customer object.
 	 * @return integer
 	 */
 	public function get_order_count( &$customer ) {
@@ -339,6 +347,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			global $wpdb;
 
 			$count = $wpdb->get_var(
+				// phpcs:disable WordPress.WP.PreparedSQL.NotPrepared
 				"SELECT COUNT(*)
 				FROM $wpdb->posts as posts
 				LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
@@ -346,6 +355,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				AND     posts.post_type = 'shop_order'
 				AND     posts.post_status IN ( '" . implode( "','", array_map( 'esc_sql', array_keys( wc_get_order_statuses() ) ) ) . "' )
 				AND     meta_value = '" . esc_sql( $customer->get_id() ) . "'"
+				// phpcs:enable
 			);
 			update_user_meta( $customer->get_id(), '_order_count', $count );
 		}
@@ -357,7 +367,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * Return how much money this customer has spent.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Customer
+	 * @param WC_Customer $customer Customer object.
 	 * @return float
 	 */
 	public function get_total_spent( &$customer ) {
@@ -368,18 +378,21 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 			$statuses = array_map( 'esc_sql', wc_get_is_paid_statuses() );
 			$spent    = $wpdb->get_var(
+				// phpcs:disable WordPress.WP.PreparedSQL.NotPrepared
 				apply_filters(
-					'woocommerce_customer_get_total_spent_query', "SELECT SUM(meta2.meta_value)
-				FROM $wpdb->posts as posts
-				LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
-				LEFT JOIN {$wpdb->postmeta} AS meta2 ON posts.ID = meta2.post_id
-				WHERE   meta.meta_key       = '_customer_user'
-				AND     meta.meta_value     = '" . esc_sql( $customer->get_id() ) . "'
-				AND     posts.post_type     = 'shop_order'
-				AND     posts.post_status   IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
-				AND     meta2.meta_key      = '_order_total'
-			", $customer
+					'woocommerce_customer_get_total_spent_query',
+					"SELECT SUM(meta2.meta_value)
+					FROM $wpdb->posts as posts
+					LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
+					LEFT JOIN {$wpdb->postmeta} AS meta2 ON posts.ID = meta2.post_id
+					WHERE   meta.meta_key       = '_customer_user'
+					AND     meta.meta_value     = '" . esc_sql( $customer->get_id() ) . "'
+					AND     posts.post_type     = 'shop_order'
+					AND     posts.post_status   IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
+					AND     meta2.meta_key      = '_order_total'",
+					$customer
 				)
+				// phpcs:enable
 			);
 
 			if ( ! $spent ) {
@@ -394,8 +407,9 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	/**
 	 * Search customers and return customer IDs.
 	 *
-	 * @param  string     $term
-	 * @param  int|string $limit @since 3.0.7
+	 * @param  string     $term Search term.
+	 * @param  int|string $limit Limit search results.
+	 * @since 3.0.7
 	 *
 	 * @return array
 	 */
