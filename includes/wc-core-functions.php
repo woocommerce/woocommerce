@@ -4,8 +4,6 @@
  *
  * General core functions available on both the front-end and admin.
  *
- * @author   Automattic
- * @category Core
  * @package  WooCommerce\Functions
  * @version  3.3.0
  */
@@ -1221,15 +1219,16 @@ function wc_array_cartesian( $input ) {
  *
  * @since 2.5.0
  * @param string $type Types: start (default), commit, rollback.
+ * @param bool   $force use of transactions.
  */
-function wc_transaction_query( $type = 'start' ) {
+function wc_transaction_query( $type = 'start', $force = false ) {
 	global $wpdb;
 
 	$wpdb->hide_errors();
 
 	wc_maybe_define_constant( 'WC_USE_TRANSACTIONS', true );
 
-	if ( WC_USE_TRANSACTIONS ) {
+	if ( WC_USE_TRANSACTIONS || $force ) {
 		switch ( $type ) {
 			case 'commit':
 				$wpdb->query( 'COMMIT' );
@@ -1624,9 +1623,12 @@ function wc_remove_number_precision_deep( $value ) {
  */
 function wc_get_logger() {
 	static $logger = null;
-	if ( null === $logger ) {
-		$class = apply_filters( 'woocommerce_logging_class', 'WC_Logger' );
+
+	$class = apply_filters( 'woocommerce_logging_class', 'WC_Logger' );
+
+	if ( null === $logger || ! is_a( $logger, $class ) ) {
 		$implements = class_implements( $class );
+
 		if ( is_array( $implements ) && in_array( 'WC_Logger_Interface', $implements ) ) {
 			if ( is_object( $class ) ) {
 				$logger = $class;
@@ -1645,7 +1647,7 @@ function wc_get_logger() {
 				),
 				'3.0'
 			);
-			$logger = new WC_Logger();
+			$logger = is_a( $logger, 'WC_Logger' ) ? $logger : new WC_Logger();
 		}
 	}
 	return $logger;
