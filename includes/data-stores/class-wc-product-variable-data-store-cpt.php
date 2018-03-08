@@ -13,8 +13,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * WC Variable Product Data Store: Stored in CPT.
  *
  * @version  3.0.0
- * @category Class
- * @author   WooThemes
  */
 class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT implements WC_Object_Data_Store_Interface, WC_Product_Variable_Data_Store_Interface {
 
@@ -136,7 +134,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				),
 				'fields'      => 'ids',
 				'post_status' => array( 'publish', 'private' ),
-				'numberposts' => -1,
+				'numberposts' => -1, // phpcs:ignore WordPress.VIP.PostsPerPage.posts_per_page_numberposts
 			);
 
 			$visible_only_args                = $all_args;
@@ -192,14 +190,14 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				$values = array_unique(
 					$wpdb->get_col(
 						$wpdb->prepare(
-							"SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN (" . implode( ',', array_map( 'absint', $child_ids ) ) . ')',
+							"SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN (" . implode( ',', array_map( 'absint', $child_ids ) ) . ')', // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
 							wc_variation_attribute_name( $attribute['name'] )
 						)
 					)
 				);
 
 				// Empty value indicates that all options for given attribute are available.
-				if ( in_array( '', $values ) || empty( $values ) ) {
+				if ( in_array( '', $values, true ) || empty( $values ) ) {
 					$values = $attribute['is_taxonomy'] ? wc_get_object_terms( $product->get_id(), $attribute['name'], 'slug' ) : wc_get_text_attributes( $attribute['value'] );
 					// Get custom attributes (non taxonomy) as defined.
 				} elseif ( ! $attribute['is_taxonomy'] ) {
@@ -211,13 +209,13 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 					if ( version_compare( get_post_meta( $product->get_id(), '_product_version', true ), '2.4.0', '<' ) ) {
 						$assigned_text_attributes = array_map( 'sanitize_title', $assigned_text_attributes );
 						foreach ( $text_attributes as $text_attribute ) {
-							if ( in_array( sanitize_title( $text_attribute ), $assigned_text_attributes ) ) {
+							if ( in_array( sanitize_title( $text_attribute ), $assigned_text_attributes, true ) ) {
 								$values[] = $text_attribute;
 							}
 						}
 					} else {
 						foreach ( $text_attributes as $text_attribute ) {
-							if ( in_array( $text_attribute, $assigned_text_attributes ) ) {
+							if ( in_array( $text_attribute, $assigned_text_attributes, true ) ) {
 								$values[] = $text_attribute;
 							}
 						}
@@ -273,7 +271,9 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				$sale_prices    = array();
 				$variation_ids  = $product->get_visible_children();
 				foreach ( $variation_ids as $variation_id ) {
-					if ( $variation = wc_get_product( $variation_id ) ) {
+					$variation = wc_get_product( $variation_id );
+
+					if ( $variation ) {
 						$price         = apply_filters( 'woocommerce_variation_prices_price', $variation->get_price( 'edit' ), $variation, $product );
 						$regular_price = apply_filters( 'woocommerce_variation_prices_regular_price', $variation->get_regular_price( 'edit' ), $variation, $product );
 						$sale_price    = apply_filters( 'woocommerce_variation_prices_sale_price', $variation->get_sale_price( 'edit' ), $variation, $product );
@@ -381,7 +381,11 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		}
 
 		$price_hash[] = WC_Cache_Helper::get_transient_version( 'product' );
-		$price_hash   = md5( json_encode( apply_filters( 'woocommerce_get_variation_prices_hash', $price_hash, $product, $for_display ) ) );
+		$price_hash   = md5(
+			wp_json_encode(
+				apply_filters( 'woocommerce_get_variation_prices_hash', $price_hash, $product, $for_display )
+			)
+		);
 
 		return $price_hash;
 	}
@@ -396,7 +400,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	public function child_has_weight( $product ) {
 		global $wpdb;
 		$children = $product->get_visible_children();
-		return $children ? null !== $wpdb->get_var( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_weight' AND meta_value > 0 AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )' ) : false;
+		return $children ? null !== $wpdb->get_var( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_weight' AND meta_value > 0 AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )' ) : false; // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
 	}
 
 	/**
@@ -409,7 +413,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	public function child_has_dimensions( $product ) {
 		global $wpdb;
 		$children = $product->get_visible_children();
-		return $children ? null !== $wpdb->get_var( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key IN ( '_length', '_width', '_height' ) AND meta_value > 0 AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )' ) : false;
+		return $children ? null !== $wpdb->get_var( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key IN ( '_length', '_width', '_height' ) AND meta_value > 0 AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )' ) : false; // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
 	}
 
 	/**
@@ -434,8 +438,18 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	public function child_has_stock_status( $product, $status ) {
 		global $wpdb;
 
-		$children             = $product->get_children();
-		$children_with_status = $children ? $wpdb->get_var( "SELECT COUNT( post_id ) FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = '" . esc_sql( $status ) . "' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )' ) : 0;
+		$children = $product->get_children();
+
+		if ( $children ) {
+			$children_with_status = $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COUNT( post_id ) FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = %s AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )', // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+					$status
+				)
+			);
+		} else {
+			$children_with_status = 0;
+		}
 
 		return (bool) $children_with_status;
 	}
@@ -479,7 +493,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		if ( $product->get_manage_stock() ) {
 			$status           = $product->get_stock_status();
 			$children         = $product->get_children();
-			$managed_children = $children ? array_unique( $wpdb->get_col( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_manage_stock' AND meta_value != 'yes' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )' ) ) : array();
+			$managed_children = $children ? array_unique( $wpdb->get_col( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_manage_stock' AND meta_value != 'yes' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )' ) ) : array(); // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
 			$changed          = false;
 			foreach ( $managed_children as $managed_child ) {
 				if ( update_post_meta( $managed_child, '_stock_status', $status ) ) {
@@ -504,7 +518,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		global $wpdb;
 
 		$children = $product->get_visible_children();
-		$prices   = $children ? array_unique( $wpdb->get_col( "SELECT meta_value FROM $wpdb->postmeta WHERE meta_key = '_price' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )' ) ) : array();
+		$prices   = $children ? array_unique( $wpdb->get_col( "SELECT meta_value FROM $wpdb->postmeta WHERE meta_key = '_price' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )' ) ) : array(); // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
 
 		delete_post_meta( $product->get_id(), '_price' );
 
@@ -556,7 +570,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 					'post_type'   => 'product_variation',
 					'fields'      => 'ids',
 					'post_status' => array( 'any', 'trash', 'auto-draft' ),
-					'numberposts' => -1,
+					'numberposts' => -1, // phpcs:ignore WordPress.VIP.PostsPerPage.posts_per_page_numberposts
 				)
 			)
 		);
@@ -587,7 +601,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 					'post_type'   => 'product_variation',
 					'fields'      => 'ids',
 					'post_status' => 'trash',
-					'numberposts' => -1,
+					'numberposts' => -1, // phpcs:ignore WordPress.VIP.PostsPerPage.posts_per_page_numberposts
 				)
 			)
 		);
