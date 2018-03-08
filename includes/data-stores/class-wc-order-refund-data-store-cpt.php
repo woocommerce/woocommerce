@@ -1,4 +1,10 @@
 <?php
+/**
+ * Class WC_Order_Refund_Data_Store_CPT file.
+ *
+ * @package WooCommerce\DataStores
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -7,8 +13,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * WC Order Refund Data Store: Stored in CPT.
  *
  * @version  3.0.0
- * @category Class
- * @author   WooThemes
  */
 class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implements WC_Object_Data_Store_Interface, WC_Order_Refund_Data_Store_Interface {
 
@@ -37,7 +41,7 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 	/**
 	 * Delete a refund - no trash is supported.
 	 *
-	 * @param WC_Order $order
+	 * @param WC_Order $order Order object.
 	 * @param array    $args Array of args to pass to the delete method.
 	 */
 	public function delete( &$order, $args = array() ) {
@@ -55,8 +59,8 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 	/**
 	 * Read refund data. Can be overridden by child classes to load other props.
 	 *
-	 * @param WC_Order $refund
-	 * @param object   $post_object
+	 * @param WC_Order $refund Refund object.
+	 * @param object   $post_object Post object.
 	 * @since 3.0.0
 	 */
 	protected function read_order_data( &$refund, $post_object ) {
@@ -74,8 +78,7 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 	/**
 	 * Helper method that updates all the post meta for an order based on it's settings in the WC_Order class.
 	 *
-	 * @param WC_Order
-	 * @param WC_Order $refund
+	 * @param WC_Order $refund Refund object.
 	 * @since 3.0.0
 	 */
 	protected function update_post_meta( &$refund ) {
@@ -104,9 +107,10 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 	 * @return string
 	 */
 	protected function get_post_title() {
-		// @codingStandardsIgnoreStart
-		/* translators: %s: Order date */
-		return sprintf( __( 'Refund &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
-		// @codingStandardsIgnoreEnd
+		return sprintf(
+			/* translators: %s: Order date */
+			__( 'Refund &ndash; %s', 'woocommerce' ),
+			strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) // phpcs:ignore WordPress.WP.I18n.MissingTranslatorsComment, WordPress.WP.I18n.UnorderedPlaceholdersText
+		);
 	}
 }
