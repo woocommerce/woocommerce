@@ -353,4 +353,27 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'success', $properties );
 		$this->assertArrayHasKey( 'message', $properties );
 	}
+
+	/**
+	 * Test execute_tool() with the "add_order_indexes" tool.
+	 */
+	public function test_execute_system_tool_add_order_indexes() {
+		wp_set_current_user( $this->user );
+
+		$order1 = WC_Helper_Order::create_order();
+		$order2 = WC_Helper_Order::create_order();
+		delete_post_meta( $order1->get_id(), '_billing_address_index' );
+		delete_post_meta( $order2->get_id(), '_billing_address_index' );
+		delete_post_meta( $order2->get_id(), '_shipping_address_index' );
+
+		$controller = new WC_REST_System_Status_Tools_Controller();
+		$response   = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v2/system_status/tools/add_order_indexes' ) );
+		$data       = $response->get_data();
+
+		$this->assertTrue( $data['success'] );
+		$this->assertNotEmpty( get_post_meta( $order1->get_id(), '_billing_address_index', true ) );
+		$this->assertNotEmpty( get_post_meta( $order2->get_id(), '_billing_address_index', true ) );
+		$this->assertNotEmpty( get_post_meta( $order2->get_id(), '_shipping_address_index', true ) );
+
+	}
 }

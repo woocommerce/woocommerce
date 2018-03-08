@@ -223,8 +223,13 @@ class WC_Structured_Data {
 
 				if ( $lowest === $highest ) {
 					$markup_offer = array(
-						'@type' => 'Offer',
-						'price' => wc_format_decimal( $lowest, wc_get_price_decimals() ),
+						'@type'              => 'Offer',
+						'price'              => wc_format_decimal( $lowest, wc_get_price_decimals() ),
+						'priceSpecification' => array(
+							'price'                 => wc_format_decimal( $lowest, wc_get_price_decimals() ),
+							'priceCurrency'         => $currency,
+							'valueAddedTaxIncluded' => wc_prices_include_tax() ? 'true' : 'false',
+						),
 					);
 				} else {
 					$markup_offer = array(
@@ -237,6 +242,11 @@ class WC_Structured_Data {
 				$markup_offer = array(
 					'@type' => 'Offer',
 					'price' => wc_format_decimal( $product->get_price(), wc_get_price_decimals() ),
+					'priceSpecification' => array(
+						'price'                 => wc_format_decimal( $product->get_price(), wc_get_price_decimals() ),
+						'priceCurrency'         => $currency,
+						'valueAddedTaxIncluded' => wc_prices_include_tax() ? 'true' : 'false',
+					),
 				);
 			}
 
@@ -435,7 +445,7 @@ class WC_Structured_Data {
 		$markup['priceSpecification'] = array(
 			'price'                 => $order->get_total(),
 			'priceCurrency'         => $order->get_currency(),
-			'valueAddedTaxIncluded' => true,
+			'valueAddedTaxIncluded' => 'true',
 		);
 		$markup['billingAddress']     = array(
 			'@type'           => 'PostalAddress',

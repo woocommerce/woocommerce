@@ -7,6 +7,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-include( dirname( __FILE__ ) . '/default.php' );
-include( dirname( __FILE__ ) . '/generic.php' );
-include( dirname( __FILE__ ) . '/wordpress.php' );
+require dirname( __FILE__ ) . '/default.php';
+require dirname( __FILE__ ) . '/generic.php';
+require dirname( __FILE__ ) . '/wordpress.php';

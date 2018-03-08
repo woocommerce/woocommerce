@@ -81,7 +81,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<ul class="chart-widgets">
 						<?php foreach ( $this->get_chart_widgets() as $widget ) : ?>
 							<li class="chart-widget">
-								<?php if ( $widget['title'] ) : ?><h4><?php echo esc_html( $widget['title'] ); ?></h4><?php endif; ?>
+								<?php if ( $widget['title'] ) : ?>
+									<h4><?php echo esc_html( $widget['title'] ); ?></h4>
+								<?php endif; ?>
 								<?php call_user_func( $widget['callback'] ); ?>
 							</li>
 						<?php endforeach; ?>

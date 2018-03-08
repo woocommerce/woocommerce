@@ -2,8 +2,6 @@
 /**
  * Abstract Product importer
  *
- * @author   Automattic
- * @category Admin
  * @package  WooCommerce/Import
  * @version  3.1.0
  */

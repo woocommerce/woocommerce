@@ -284,9 +284,10 @@ function wc_cart_totals_coupon_html( $coupon ) {
 
 	$discount_amount_html = '';
 
-	if ( $amount = WC()->cart->get_coupon_discount_amount( $coupon->get_code(), WC()->cart->display_cart_ex_tax ) ) {
-		$discount_amount_html = '-' . wc_price( $amount );
-	} elseif ( $coupon->get_free_shipping() ) {
+	$amount = WC()->cart->get_coupon_discount_amount( $coupon->get_code(), WC()->cart->display_cart_ex_tax );
+	$discount_amount_html = '-' . wc_price( $amount );
+
+	if ( $coupon->get_free_shipping() ) {
 		$discount_amount_html = __( 'Free shipping coupon', 'woocommerce' );
 	}
 
@@ -373,13 +374,7 @@ function wc_cart_totals_shipping_method_label( $method ) {
  * @return float
  */
 function wc_cart_round_discount( $value, $precision ) {
-	if ( version_compare( PHP_VERSION, '5.3.0', '>=' ) ) {
-		return round( $value, $precision, WC_DISCOUNT_ROUNDING_MODE );
-	} elseif ( 2 === WC_DISCOUNT_ROUNDING_MODE ) {
-		return wc_legacy_round_half_down( $value, $precision );
-	} else {
-		return round( $value, $precision );
-	}
+	return wc_round_discount( $value, $precision );
 }
 
 /**
@@ -479,4 +474,19 @@ function wc_shipping_methods_have_changed( $key, $package ) {
 	$previous_shipping_methods[ $key ] = $new_rates;
 	WC()->session->set( 'previous_shipping_methods', $previous_shipping_methods );
 	return $new_rates !== $prev_rates;
+}
+
+/**
+ * Gets a hash of important product data that when changed should cause cart items to be invalidated.
+ *
+ * The woocommerce_cart_item_data_to_validate filter can be used to add custom properties.
+ *
+ * @param WC_Product $product Product object.
+ * @return string
+ */
+function wc_get_cart_item_data_hash( $product ) {
+	return md5( wp_json_encode( apply_filters( 'woocommerce_cart_item_data_to_validate', array(
+		'type'       => $product->get_type(),
+		'attributes' => 'variation' === $product->get_type() ? $product->get_variation_attributes() : '',
+	) ) ) );
 }

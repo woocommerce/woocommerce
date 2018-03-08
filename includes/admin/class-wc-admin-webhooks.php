@@ -2,15 +2,11 @@
 /**
  * WooCommerce Admin Webhooks Class
  *
- * @author   Automattic
- * @category Admin
- * @package  WooCommerce/Admin
- * @version  3.3.0
+ * @package WooCommerce\Admin
+ * @version 3.3.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Webhooks.
@@ -21,8 +17,9 @@ class WC_Admin_Webhooks {
 	 * Initialize the webhooks admin actions.
 	 */
 	public function __construct() {
-		add_action( 'woocommerce_save_settings_api_webhooks', array( $this, 'allow_save_settings' ) );
 		add_action( 'admin_init', array( $this, 'actions' ) );
+		add_action( 'woocommerce_settings_page_init', array( $this, 'screen_option' ) );
+		add_filter( 'woocommerce_save_settings_api_webhooks', array( $this, 'allow_save_settings' ) );
 	}
 
 	/**
@@ -270,9 +267,31 @@ class WC_Admin_Webhooks {
 	}
 
 	/**
+	 * Add screen option.
+	 */
+	public function screen_option() {
+		global $webhooks_table_list;
+
+		if ( ! isset( $_GET['edit-webhook'] ) && $this->is_webhook_settings_page() ) { // WPCS: input var okay, CSRF ok.
+			$webhooks_table_list = new WC_Admin_Webhooks_Table_List();
+
+			// Add screen option.
+			add_screen_option(
+				'per_page',
+				array(
+					'default' => 10,
+					'option'  => 'woocommerce_webhooks_per_page',
+				)
+			);
+		}
+	}
+
+	/**
 	 * Table list output.
 	 */
 	private static function table_list_output() {
+		global $webhooks_table_list;
+
 		echo '<h2>' . esc_html__( 'Webhooks', 'woocommerce' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=0' ) ) . '" class="add-new-h2">' . esc_html__( 'Add webhook', 'woocommerce' ) . '</a></h2>';
 
 		// Get the webhooks count.
@@ -280,7 +299,6 @@ class WC_Admin_Webhooks {
 		$count      = count( $data_store->get_webhooks_ids() );
 
 		if ( 0 < $count ) {
-			$webhooks_table_list = new WC_Admin_Webhooks_Table_List();
 			$webhooks_table_list->prepare_items();
 
 			echo '<input type="hidden" name="page" value="wc-settings" />';
@@ -295,9 +313,8 @@ class WC_Admin_Webhooks {
 			?>
 			<h2 class="woocommerce-BlankState-message"><?php esc_html_e( 'Webhooks are event notifications sent to URLs of your choice. They can be used to integrate with third-party services which support them.', 'woocommerce' ); ?></h2>
 			<a class="woocommerce-BlankState-cta button-primary button" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=0' ) ); ?>"><?php esc_html_e( 'Create a new webhook', 'woocommerce' ); ?></a>
-
+			<style type="text/css">#posts-filter .wp-list-table, #posts-filter .tablenav.top, .tablenav.bottom .actions { display: none; }</style>
 			<?php
-				echo '<style type="text/css">#posts-filter .wp-list-table, #posts-filter .tablenav.top, .tablenav.bottom .actions  { display: none; } </style></div>';
 		}
 	}
 
