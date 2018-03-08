@@ -4,10 +4,8 @@
  *
  * Widget related functions and widget registration.
  *
- * @author 		WooThemes
- * @category 	Core
- * @package 	WooCommerce/Functions
- * @version     2.3.0
+ * @package WooCommerce/Functions
+ * @version 2.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -15,19 +13,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Include widget classes.
-include_once( dirname( __FILE__ ) . '/abstracts/abstract-wc-widget.php' );
-include_once( dirname( __FILE__ ) . '/widgets/class-wc-widget-cart.php' );
-include_once( dirname( __FILE__ ) . '/widgets/class-wc-widget-layered-nav-filters.php' );
-include_once( dirname( __FILE__ ) . '/widgets/class-wc-widget-layered-nav.php' );
-include_once( dirname( __FILE__ ) . '/widgets/class-wc-widget-price-filter.php' );
-include_once( dirname( __FILE__ ) . '/widgets/class-wc-widget-product-categories.php' );
-include_once( dirname( __FILE__ ) . '/widgets/class-wc-widget-product-search.php' );
-include_once( dirname( __FILE__ ) . '/widgets/class-wc-widget-product-tag-cloud.php' );
-include_once( dirname( __FILE__ ) . '/widgets/class-wc-widget-products.php' );
-include_once( dirname( __FILE__ ) . '/widgets/class-wc-widget-rating-filter.php' );
-include_once( dirname( __FILE__ ) . '/widgets/class-wc-widget-recent-reviews.php' );
-include_once( dirname( __FILE__ ) . '/widgets/class-wc-widget-recently-viewed.php' );
-include_once( dirname( __FILE__ ) . '/widgets/class-wc-widget-top-rated-products.php' );
+require_once dirname( __FILE__ ) . '/abstracts/abstract-wc-widget.php';
+require_once dirname( __FILE__ ) . '/widgets/class-wc-widget-cart.php';
+require_once dirname( __FILE__ ) . '/widgets/class-wc-widget-layered-nav-filters.php';
+require_once dirname( __FILE__ ) . '/widgets/class-wc-widget-layered-nav.php';
+require_once dirname( __FILE__ ) . '/widgets/class-wc-widget-price-filter.php';
+require_once dirname( __FILE__ ) . '/widgets/class-wc-widget-product-categories.php';
+require_once dirname( __FILE__ ) . '/widgets/class-wc-widget-product-search.php';
+require_once dirname( __FILE__ ) . '/widgets/class-wc-widget-product-tag-cloud.php';
+require_once dirname( __FILE__ ) . '/widgets/class-wc-widget-products.php';
+require_once dirname( __FILE__ ) . '/widgets/class-wc-widget-rating-filter.php';
+require_once dirname( __FILE__ ) . '/widgets/class-wc-widget-recent-reviews.php';
+require_once dirname( __FILE__ ) . '/widgets/class-wc-widget-recently-viewed.php';
+require_once dirname( __FILE__ ) . '/widgets/class-wc-widget-top-rated-products.php';
 
 /**
  * Register Widgets.
