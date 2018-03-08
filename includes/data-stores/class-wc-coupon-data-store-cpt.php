@@ -1,4 +1,10 @@
 <?php
+/**
+ * Class WC_Coupon_Data_Store_CPT file.
+ *
+ * @package WooCommerce\DataStore
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -7,8 +13,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * WC Coupon Data Store: Custom Post Type.
  *
  * @version  3.0.0
- * @category Class
- * @author   WooThemes
  */
 class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Data_Store_Interface, WC_Object_Data_Store_Interface {
 
@@ -54,7 +58,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * Method to create a new coupon in the database.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Coupon $coupon
+	 * @param WC_Coupon $coupon Coupon object.
 	 */
 	public function create( &$coupon ) {
 		$coupon->set_date_created( current_time( 'timestamp', true ) );
@@ -89,14 +93,16 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 *
 	 * @since 3.0.0
 	 *
-	 * @param WC_Data $coupon
+	 * @param WC_Coupon $coupon Coupon object.
 	 *
-	 * @throws Exception
+	 * @throws Exception If invalid coupon.
 	 */
 	public function read( &$coupon ) {
 		$coupon->set_defaults();
 
-		if ( ! $coupon->get_id() || ! ( $post_object = get_post( $coupon->get_id() ) ) || 'shop_coupon' !== $post_object->post_type ) {
+		$post_object = get_post( $coupon->get_id() );
+
+		if ( ! $coupon->get_id() || ! $post_object || 'shop_coupon' !== $post_object->post_type ) {
 			throw new Exception( __( 'Invalid coupon.', 'woocommerce' ) );
 		}
 
@@ -136,7 +142,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * Updates a coupon in the database.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Coupon $coupon
+	 * @param WC_Coupon $coupon Coupon object.
 	 */
 	public function update( &$coupon ) {
 		$coupon->save_meta_data();
@@ -178,7 +184,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 *
 	 * @since 3.0.0
 	 *
-	 * @param WC_Coupon $coupon
+	 * @param WC_Coupon $coupon Coupon object.
 	 * @param array     $args Array of args to pass to the delete method.
 	 */
 	public function delete( &$coupon, $args = array() ) {
@@ -210,7 +216,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	/**
 	 * Helper method that updates all the post meta for a coupon based on it's settings in the WC_Coupon class.
 	 *
-	 * @param WC_Coupon
+	 * @param WC_Coupon $coupon Coupon object.
 	 * @since 3.0.0
 	 */
 	private function update_post_meta( &$coupon ) {
@@ -275,9 +281,9 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * Increase usage count for current coupon.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Coupon
-	 * @param string    $used_by Either user ID or billing email
-	 * @return int New usage count
+	 * @param WC_Coupon $coupon Coupon object.
+	 * @param string    $used_by Either user ID or billing email.
+	 * @return int New usage count.
 	 */
 	public function increase_usage_count( &$coupon, $used_by = '' ) {
 		$new_count = $this->update_usage_count_meta( $coupon, 'increase' );
@@ -292,9 +298,9 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * Decrease usage count for current coupon.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Coupon
-	 * @param string    $used_by Either user ID or billing email
-	 * @return int New usage count
+	 * @param WC_Coupon $coupon Coupon object.
+	 * @param string    $used_by Either user ID or billing email.
+	 * @return int New usage count.
 	 */
 	public function decrease_usage_count( &$coupon, $used_by = '' ) {
 		global $wpdb;
@@ -317,8 +323,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * Increase or decrease the usage count for a coupon by 1.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Coupon
-	 * @param string    $operation 'increase' or 'decrease'
+	 * @param WC_Coupon $coupon Coupon object.
+	 * @param string    $operation 'increase' or 'decrease'.
 	 * @return int New usage count
 	 */
 	private function update_usage_count_meta( &$coupon, $operation = 'increase' ) {
@@ -327,7 +333,12 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		$operator = ( 'increase' === $operation ) ? '+' : '-';
 
 		add_post_meta( $id, 'usage_count', $coupon->get_usage_count( 'edit' ), true );
-		$wpdb->query( $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_value = meta_value {$operator} 1 WHERE meta_key = 'usage_count' AND post_id = %d;", $id ) );
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE $wpdb->postmeta SET meta_value = meta_value {$operator} 1 WHERE meta_key = 'usage_count' AND post_id = %d;", // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+				$id
+			)
+		);
 
 		// Get the latest value direct from the DB, instead of possibly the WP meta cache.
 		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT meta_value FROM $wpdb->postmeta WHERE meta_key = 'usage_count' AND post_id = %d;", $id ) );
@@ -337,8 +348,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * Get the number of uses for a coupon by user ID.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Coupon
-	 * @param id        $user_id
+	 * @param WC_Coupon $coupon Coupon object.
+	 * @param id        $user_id User ID.
 	 * @return int
 	 */
 	public function get_usage_by_user_id( &$coupon, $user_id ) {
@@ -350,7 +361,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * Return a coupon code for a specific ID.
 	 *
 	 * @since 3.0.0
-	 * @param int $id
+	 * @param int $id Coupon ID.
 	 * @return string Coupon Code
 	 */
 	public function get_code_by_id( $id ) {
@@ -372,7 +383,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * Can return multiple to check for existence.
 	 *
 	 * @since 3.0.0
-	 * @param string $code
+	 * @param string $code Coupon code.
 	 * @return array Array of IDs.
 	 */
 	public function get_ids_by_code( $code ) {
