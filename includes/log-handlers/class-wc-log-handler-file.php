@@ -1,6 +1,12 @@
 <?php
+/**
+ * Class WC_Log_Handler_File file.
+ *
+ * @package WooCommerce\Log Handlers
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit; // Exit if accessed directly.
 }
 
 /**
@@ -9,8 +15,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @class          WC_Log_Handler_File
  * @version        1.0.0
  * @package        WooCommerce/Classes/Log_Handlers
- * @category       Class
- * @author         WooThemes
  */
 class WC_Log_Handler_File extends WC_Log_Handler {
 
@@ -70,11 +74,11 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	/**
 	 * Handle a log entry.
 	 *
-	 * @param int $timestamp Log timestamp.
-	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
+	 * @param int    $timestamp Log timestamp.
+	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug.
 	 * @param string $message Log message.
-	 * @param array $context {
-	 *     Additional information for log handlers.
+	 * @param array  $context {
+	 *      Additional information for log handlers.
 	 *
 	 *     @type string $source Optional. Determines log file to write to. Default 'log'.
 	 *     @type bool $_legacy Optional. Default false. True to use outdated log format
@@ -99,10 +103,10 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	/**
 	 * Builds a log entry text from timestamp, level and message.
 	 *
-	 * @param int $timestamp Log timestamp.
-	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
+	 * @param int    $timestamp Log timestamp.
+	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug.
 	 * @param string $message Log message.
-	 * @param array $context Additional information for log handlers.
+	 * @param array  $context Additional information for log handlers.
 	 *
 	 * @return string Formatted log entry.
 	 */
@@ -115,8 +119,8 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 				$handle = 'log';
 			}
 			$message = apply_filters( 'woocommerce_logger_add_message', $message, $handle );
-			$time = date_i18n( 'm-d-Y @ H:i:s' );
-			$entry = "{$time} - {$message}";
+			$time    = date_i18n( 'm-d-Y @ H:i:s' );
+			$entry   = "{$time} - {$message}";
 		} else {
 			$entry = parent::format_entry( $timestamp, $level, $message, $context );
 		}
@@ -144,11 +148,13 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 				@fclose( $temphandle );
 
 				if ( defined( 'FS_CHMOD_FILE' ) ) {
-					@chmod( $file, FS_CHMOD_FILE );
+					@chmod( $file, FS_CHMOD_FILE ); // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.chmod_chmod
 				}
 			}
 
-			if ( $resource = @fopen( $file, $mode ) ) {
+			$resource = @fopen( $file, $mode );
+
+			if ( $resource ) {
 				$this->handles[ $handle ] = $resource;
 				return true;
 			}
@@ -170,7 +176,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	/**
 	 * Close a handle.
 	 *
-	 * @param string $handle
+	 * @param string $handle Log handle.
 	 * @return bool success
 	 */
 	protected function close( $handle ) {
@@ -187,8 +193,8 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	/**
 	 * Add a log entry to chosen file.
 	 *
-	 * @param string $entry Log entry text
-	 * @param string $handle Log entry handle
+	 * @param string $entry Log entry text.
+	 * @param string $handle Log entry handle.
 	 *
 	 * @return bool True if write was successful.
 	 */
@@ -211,7 +217,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	/**
 	 * Clear entries from chosen file.
 	 *
-	 * @param string $handle
+	 * @param string $handle Log handle.
 	 *
 	 * @return bool
 	 */
@@ -237,7 +243,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	/**
 	 * Remove/delete the chosen file.
 	 *
-	 * @param string $handle
+	 * @param string $handle Log handle.
 	 *
 	 * @return bool
 	 */
@@ -246,9 +252,9 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 		$file    = self::get_log_file_path( $handle );
 
 		if ( $file ) {
-			if ( is_file( $file ) && is_writable( $file ) ) {
+			if ( is_file( $file ) && is_writable( $file ) ) { // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_is_writable
 				$this->close( $handle ); // Close first to be certain no processes keep it alive after it is unlinked.
-				$removed = unlink( $file );
+				$removed = unlink( $file ); // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_unlink
 			}
 			do_action( 'woocommerce_log_remove', $handle, $removed );
 		}
@@ -261,7 +267,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 *
 	 * Compares the size of the log file to determine whether it is over the size limit.
 	 *
-	 * @param string $handle Log handle
+	 * @param string $handle Log handle.
 	 * @return bool True if if should be rotated.
 	 */
 	protected function should_rotate( $handle ) {
@@ -292,7 +298,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 *     base.0.log -> base.1.log
 	 *     base.log   -> base.0.log
 	 *
-	 * @param string $handle Log handle
+	 * @param string $handle Log handle.
 	 */
 	protected function log_rotate( $handle ) {
 		for ( $i = 8; $i >= 0; $i-- ) {
@@ -304,28 +310,28 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	/**
 	 * Increment a log file suffix.
 	 *
-	 * @param string $handle Log handle
+	 * @param string   $handle Log handle.
 	 * @param null|int $number Optional. Default null. Log suffix number to be incremented.
 	 * @return bool True if increment was successful, otherwise false.
 	 */
 	protected function increment_log_infix( $handle, $number = null ) {
 		if ( null === $number ) {
-			$suffix = '';
+			$suffix      = '';
 			$next_suffix = '.0';
 		} else {
-			$suffix = '.' . $number;
-			$next_suffix = '.' . ($number + 1);
+			$suffix      = '.' . $number;
+			$next_suffix = '.' . ( $number + 1 );
 		}
 
 		$rename_from = self::get_log_file_path( "{$handle}{$suffix}" );
-		$rename_to = self::get_log_file_path( "{$handle}{$next_suffix}" );
+		$rename_to   = self::get_log_file_path( "{$handle}{$next_suffix}" );
 
 		if ( $this->is_open( $rename_from ) ) {
 			$this->close( $rename_from );
 		}
 
-		if ( is_writable( $rename_from ) ) {
-			return rename( $rename_from, $rename_to );
+		if ( is_writable( $rename_from ) ) { // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_is_writable
+			return rename( $rename_from, $rename_to ); // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_rename
 		} else {
 			return false;
 		}
@@ -366,12 +372,12 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	/**
 	 * Cache log to write later.
 	 *
-	 * @param string $entry Log entry text
-	 * @param string $handle Log entry handle
+	 * @param string $entry Log entry text.
+	 * @param string $handle Log entry handle.
 	 */
 	protected function cache_log( $entry, $handle ) {
 		$this->cached_logs[] = array(
-			'entry' => $entry,
+			'entry'  => $entry,
 			'handle' => $handle,
 		);
 	}
