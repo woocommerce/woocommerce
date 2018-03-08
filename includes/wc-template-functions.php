@@ -287,7 +287,26 @@ function wc_body_class( $classes ) {
 		}
 	}
 
+	$classes[] = 'woocommerce-no-js';
+
+	add_action( 'wp_footer', 'wc_no_js' );
+
 	return array_unique( $classes );
+}
+
+/**
+ * NO JS handling.
+ *
+ * @since 3.4.0
+ */
+function wc_no_js() {
+	?>
+	<script type="text/javascript">
+		var c = document.body.className;
+		c = c.replace(/woocommerce-no-js/, 'woocommerce-js');
+		document.body.className = c;
+	</script>
+	<?php
 }
 
 /**

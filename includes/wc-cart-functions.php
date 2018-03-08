@@ -374,13 +374,7 @@ function wc_cart_totals_shipping_method_label( $method ) {
  * @return float
  */
 function wc_cart_round_discount( $value, $precision ) {
-	if ( version_compare( PHP_VERSION, '5.3.0', '>=' ) ) {
-		return round( $value, $precision, WC_DISCOUNT_ROUNDING_MODE );
-	} elseif ( 2 === WC_DISCOUNT_ROUNDING_MODE ) {
-		return wc_legacy_round_half_down( $value, $precision );
-	} else {
-		return round( $value, $precision );
-	}
+	return wc_round_discount( $value, $precision );
 }
 
 /**
