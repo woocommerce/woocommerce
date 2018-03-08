@@ -102,7 +102,7 @@ function wc_reduce_stock_levels( $order_id ) {
 
 			$product = $item->get_product();
 
-			if ( $product->managing_stock() ) {
+			if ( $product && $product->managing_stock() ) {
 				$qty       = apply_filters( 'woocommerce_order_item_quantity', $item->get_quantity(), $order, $item );
 				$item_name = $product->get_formatted_name();
 				$new_stock = wc_update_product_stock( $product, $qty, 'decrease' );
