@@ -1,4 +1,10 @@
 <?php
+/**
+ * Class WC_Customer_Download_Log_Data_Store file.
+ *
+ * @package WooCommerce\DataStores
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -7,8 +13,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * WC Customer Download Log Data Store.
  *
  * @version  3.3.0
- * @category Class
- * @author   WooThemes
  */
 class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Data_Store_Interface {
 
@@ -27,7 +31,7 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 	/**
 	 * Create download log entry.
 	 *
-	 * @param WC_Customer_Download_Log $download_log
+	 * @param WC_Customer_Download_Log $download_log Customer download log object.
 	 */
 	public function create( WC_Customer_Download_Log &$download_log ) {
 		global $wpdb;
@@ -63,16 +67,16 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 			$download_log->set_id( $wpdb->insert_id );
 			$download_log->apply_changes();
 		} else {
-			wp_die( __( 'Unable to insert download log entry in database.', 'woocommerce' ) );
+			wp_die( esc_html__( 'Unable to insert download log entry in database.', 'woocommerce' ) );
 		}
 	}
 
 	/**
 	 * Method to read a download log from the database.
 	 *
-	 * @param $download_log
+	 * @param WC_Customer_Download_Log $download_log Customer download log object.
 	 *
-	 * @throws Exception
+	 * @throws Exception If invalid download log.
 	 */
 	public function read( &$download_log ) {
 		global $wpdb;
@@ -85,10 +89,12 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 		}
 
 		// Query the DB for the download log.
-		$raw_download_log_query = $wpdb->prepare(
-			"SELECT * FROM {$wpdb->prefix}" . self::get_table_name() . ' WHERE download_log_id = %d', $download_log->get_id()
+		$raw_download_log = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM {$wpdb->prefix}" . self::get_table_name() . ' WHERE download_log_id = %d', // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+				$download_log->get_id()
+			)
 		);
-		$raw_download_log       = $wpdb->get_row( $raw_download_log_query );
 		if ( ! $raw_download_log ) {
 			throw new Exception( __( 'Invalid download log: not found.', 'woocommerce' ) );
 		}
@@ -108,7 +114,7 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 	/**
 	 * Method to update a download log in the database.
 	 *
-	 * @param WC_Customer_Download_Log $download_log
+	 * @param WC_Customer_Download_Log $download_log Customer download log object.
 	 */
 	public function update( &$download_log ) {
 		global $wpdb;
@@ -151,7 +157,7 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 	/**
 	 * Get array of download log ids by specified args.
 	 *
-	 * @param  array $args
+	 * @param  array $args Arguments to define download logs to retrieve.
 	 * @return array
 	 */
 	public function get_download_logs( $args = array() ) {
@@ -185,7 +191,7 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 		}
 
 		$allowed_orders = array( 'download_log_id', 'timestamp', 'permission_id', 'user_id' );
-		$order          = in_array( $args['order'], $allowed_orders ) ? $args['order'] : 'download_log_id';
+		$order          = in_array( $args['order'], $allowed_orders, true ) ? $args['order'] : 'download_log_id';
 		$orderby        = 'DESC' === strtoupper( $args['orderby'] ) ? 'DESC' : 'ASC';
 		$orderby_sql    = sanitize_sql_orderby( "{$order} {$orderby}" );
 		$query[]        = "ORDER BY {$orderby_sql}";
@@ -194,7 +200,7 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 			$query[] = $wpdb->prepare( 'LIMIT %d', $args['limit'] );
 		}
 
-		$raw_download_logs = $wpdb->get_results( implode( ' ', $query ) );
+		$raw_download_logs = $wpdb->get_results( implode( ' ', $query ) ); // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
 
 		switch ( $args['return'] ) {
 			case 'ids':
@@ -207,7 +213,7 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 	/**
 	 * Get download logs for a given download permission.
 	 *
-	 * @param  int $permission_id
+	 * @param  int $permission_id Permission ID.
 	 * @return array
 	 */
 	public function get_download_logs_for_permission( $permission_id ) {
