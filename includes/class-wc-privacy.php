@@ -101,7 +101,8 @@ class WC_Privacy {
 			$personal_data['orders'] = array();
 			foreach ( $orders as $order ) {
 				$order_data = array(
-					'Transaction ID'           => $order->get_order_number(),
+					'Order ID'                 => $order->get_id(),
+					'Order Number'             => $order->get_order_number(),
 					'IP Address'               => $order->get_customer_ip_address(),
 					'User Agent'               => $order->get_customer_user_agent(),
 					'Billing First Name'       => $order->get_billing_first_name(),
