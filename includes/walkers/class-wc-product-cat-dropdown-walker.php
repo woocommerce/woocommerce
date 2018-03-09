@@ -2,19 +2,19 @@
 /**
  * WC_Product_Cat_Dropdown_Walker class
  *
- * @extends 	Walker
- * @class 		WC_Product_Cat_Dropdown_Walker
- * @version		1.6.4
- * @package		WooCommerce/Classes/Walkers
- * @author 		WooThemes
+ * @package WooCommerce/Classes/Walkers
+ * @version 1.6.4
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+defined( 'ABSPATH' ) || exit;
+
+if ( class_exists( 'WC_Product_Cat_Dropdown_Walker', false ) ) {
+	return;
 }
 
-if ( ! class_exists( 'WC_Product_Cat_Dropdown_Walker', false ) ) :
-
+/**
+ * Product category dropdown walker class.
+ */
 class WC_Product_Cat_Dropdown_Walker extends Walker {
 
 	/**
@@ -41,11 +41,11 @@ class WC_Product_Cat_Dropdown_Walker extends Walker {
 	 * @see Walker::start_el()
 	 * @since 2.1.0
 	 *
-	 * @param string $output Passed by reference. Used to append additional content.
-	 * @param object $cat
-	 * @param int $depth Depth of category in reference to parents.
-	 * @param array $args
-	 * @param int $current_object_id
+	 * @param string $output            Passed by reference. Used to append additional content.
+	 * @param object $cat               Category.
+	 * @param int    $depth             Depth of category in reference to parents.
+	 * @param array  $args              Arguments.
+	 * @param int    $current_object_id Current object ID.
 	 */
 	public function start_el( &$output, $cat, $depth = 0, $args = array(), $current_object_id = 0 ) {
 
@@ -57,14 +57,14 @@ class WC_Product_Cat_Dropdown_Walker extends Walker {
 
 		$cat_name = apply_filters( 'list_product_cats', $cat->name, $cat );
 		$value    = ( isset( $args['value'] ) && 'id' === $args['value'] ) ? $cat->term_id : $cat->slug;
-		$output  .= "\t<option class=\"level-$depth\" value=\"" . esc_attr( $value ) . "\"";
+		$output  .= "\t<option class=\"level-$depth\" value=\"" . esc_attr( $value ) . '"';
 
-		if ( $value === $args['selected'] || ( is_array( $args['selected'] ) && in_array( $value, $args['selected'] ) ) ) {
+		if ( $value === $args['selected'] || ( is_array( $args['selected'] ) && in_array( $value, $args['selected'], true ) ) ) {
 			$output .= ' selected="selected"';
 		}
 
 		$output .= '>';
-		$output .= esc_html( $pad . _x( $cat_name, 'product category name', 'woocommerce' ) );
+		$output .= esc_html( $pad . $cat_name );
 
 		if ( ! empty( $args['show_count'] ) ) {
 			$output .= '&nbsp;(' . absint( $cat->count ) . ')';
@@ -85,12 +85,12 @@ class WC_Product_Cat_Dropdown_Walker extends Walker {
 	 *
 	 * @since 2.5.0
 	 *
-	 * @param object $element Data object
-	 * @param array $children_elements List of elements to continue traversing.
-	 * @param int $max_depth Max depth to traverse.
-	 * @param int $depth Depth of current element.
-	 * @param array $args
-	 * @param string $output Passed by reference. Used to append additional content.
+	 * @param object $element           Data object.
+	 * @param array  $children_elements List of elements to continue traversing.
+	 * @param int    $max_depth         Max depth to traverse.
+	 * @param int    $depth             Depth of current element.
+	 * @param array  $args              Arguments.
+	 * @param string $output            Passed by reference. Used to append additional content.
 	 * @return null Null on failure with no changes to parameters.
 	 */
 	public function display_element( $element, &$children_elements, $max_depth, $depth = 0, $args, &$output ) {
@@ -100,5 +100,3 @@ class WC_Product_Cat_Dropdown_Walker extends Walker {
 		parent::display_element( $element, $children_elements, $max_depth, $depth, $args, $output );
 	}
 }
-
-endif;
