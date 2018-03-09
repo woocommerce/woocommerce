@@ -17,7 +17,7 @@
 			paginationTemplate = wp.template( 'wc-tax-table-pagination' ),
 			$table             = $( '.wc_tax_rates' ),
 			$tbody             = $( '#rates' ),
-			$save_button       = $( 'input[name="save"]' ),
+			$save_button       = $( ':input[name="save"]' ),
 			$pagination        = $( '#rates-pagination' ),
 			$search_field      = $( '#rates-search .wc-tax-rates-search-field' ),
 			$submit            = $( '.submit .button-primary[type=submit]' ),
@@ -84,14 +84,14 @@
 					Backbone.ajax({
 						method: 'POST',
 						dataType: 'json',
-						url: ajaxurl + '?action=woocommerce_tax_rates_save_changes',
+						url: ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_tax_rates_save_changes',
 						data: {
 							current_class: data.current_class,
 							wc_tax_nonce: data.wc_tax_nonce,
 							changes: self.changes
 						},
 						success: function( response, textStatus ) {
-							if ( 'success' === textStatus ) {
+							if ( 'success' === textStatus && response.success ) {
 								WCTaxTableModelInstance.set( 'rates', response.data.rates );
 								WCTaxTableModelInstance.trigger( 'change:rates' );
 
@@ -120,13 +120,12 @@
 					this.listenTo( this.model, 'change:rates', this.setUnloadConfirmation );
 					this.listenTo( this.model, 'saved:rates', this.clearUnloadConfirmation );
 					$tbody.on( 'change autocompletechange', ':input', { view: this }, this.updateModelOnChange );
-					$tbody.on( 'sortupdate', { view: this }, this.updateModelOnSort );
 					$search_field.on( 'keyup search', { view: this }, this.onSearchField );
 					$pagination.on( 'click', 'a', { view: this }, this.onPageChange );
 					$pagination.on( 'change', 'input', { view: this }, this.onPageChange );
 					$( window ).on( 'beforeunload', { view: this }, this.unloadConfirmation );
 					$submit.on( 'click', { view: this }, this.onSubmit );
-					$save_button.attr( 'disabled','disabled' );
+					$save_button.prop( 'disabled', true );
 
 					// Can bind these directly to the buttons, as they won't get overwritten.
 					$table.find( '.insert' ).on( 'click', { view: this }, this.onAddNewRow );
@@ -181,13 +180,6 @@
 					} else {
 						$pagination.empty();
 						view.page = 1;
-					}
-
-					// Disable sorting if there is a search term filtering the items.
-					if ( $search_field.val() ) {
-						$tbody.sortable( 'disable' );
-					} else {
-						$tbody.sortable( 'enable' );
 					}
 				},
 				updateUrl: function() {
@@ -327,11 +319,11 @@
 				},
 				setUnloadConfirmation: function() {
 					this.needsUnloadConfirm = true;
-					$save_button.removeAttr( 'disabled' );
+					$save_button.prop( 'disabled', false );
 				},
 				clearUnloadConfirmation: function() {
 					this.needsUnloadConfirm = false;
-					$save_button.attr( 'disabled', 'disabled' );
+					$save_button.prop( 'disabled', true );
 				},
 				unloadConfirmation: function( event ) {
 					if ( event.data.view.needsUnloadConfirm ) {
@@ -363,31 +355,6 @@
 					}
 
 					model.setRateAttribute( id, attribute, val );
-				},
-				updateModelOnSort: function( event ) {
-					var view         = event.data.view,
-						model        = view.model,
-						rates        = _.indexBy( model.get( 'rates' ), 'tax_rate_id' ),
-						changes      = {};
-
-					_.each( rates, function( rate ) {
-						var new_position = 0;
-						var old_position = parseInt( rate.tax_rate_order, 10 );
-
-						if ( $table.find( 'tr[data-id="' + rate.tax_rate_id + '"]').length ) {
-							new_position = parseInt( $table.find( 'tr[data-id="' + rate.tax_rate_id + '"]').index(), 10 ) + parseInt( ( view.page - 1 ) * view.per_page, 10 );
-						} else {
-							new_position = old_position;
-						}
-
-						if ( old_position !== new_position ) {
-							changes[ rate.tax_rate_id ] = _.extend( changes[ rate.tax_rate_id ] || {}, { tax_rate_order : new_position } );
-						}
-					} );
-
-					if ( _.size( changes ) ) {
-						model.logChanges( changes );
-					}
 				},
 				sanitizePage: function( page_num ) {
 					page_num = parseInt( page_num, 10 );

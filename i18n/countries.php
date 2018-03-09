@@ -4,15 +4,11 @@
  *
  * Returns an array of countries and codes.
  *
- * @author      WooThemes
- * @category    i18n
- * @package     WooCommerce/i18n
- * @version     2.5.0
+ * @package WooCommerce/i18n
+ * @version 2.5.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 return array(
 	'AF' => __( 'Afghanistan', 'woocommerce' ),
@@ -73,7 +69,7 @@ return array(
 	'CR' => __( 'Costa Rica', 'woocommerce' ),
 	'HR' => __( 'Croatia', 'woocommerce' ),
 	'CU' => __( 'Cuba', 'woocommerce' ),
-	'CW' => __( 'Cura&Ccedil;ao', 'woocommerce' ),
+	'CW' => __( 'Cura&ccedil;ao', 'woocommerce' ),
 	'CY' => __( 'Cyprus', 'woocommerce' ),
 	'CZ' => __( 'Czech Republic', 'woocommerce' ),
 	'DK' => __( 'Denmark', 'woocommerce' ),
@@ -121,7 +117,7 @@ return array(
 	'ID' => __( 'Indonesia', 'woocommerce' ),
 	'IR' => __( 'Iran', 'woocommerce' ),
 	'IQ' => __( 'Iraq', 'woocommerce' ),
-	'IE' => __( 'Republic of Ireland', 'woocommerce' ),
+	'IE' => __( 'Ireland', 'woocommerce' ),
 	'IM' => __( 'Isle of Man', 'woocommerce' ),
 	'IL' => __( 'Israel', 'woocommerce' ),
 	'IT' => __( 'Italy', 'woocommerce' ),
@@ -171,7 +167,6 @@ return array(
 	'NR' => __( 'Nauru', 'woocommerce' ),
 	'NP' => __( 'Nepal', 'woocommerce' ),
 	'NL' => __( 'Netherlands', 'woocommerce' ),
-	'AN' => __( 'Netherlands Antilles', 'woocommerce' ),
 	'NC' => __( 'New Caledonia', 'woocommerce' ),
 	'NZ' => __( 'New Zealand', 'woocommerce' ),
 	'NI' => __( 'Nicaragua', 'woocommerce' ),
@@ -261,8 +256,8 @@ return array(
 	'VN' => __( 'Vietnam', 'woocommerce' ),
 	'WF' => __( 'Wallis and Futuna', 'woocommerce' ),
 	'EH' => __( 'Western Sahara', 'woocommerce' ),
-	'WS' => __( 'Western Samoa', 'woocommerce' ),
+	'WS' => __( 'Samoa', 'woocommerce' ),
 	'YE' => __( 'Yemen', 'woocommerce' ),
 	'ZM' => __( 'Zambia', 'woocommerce' ),
-	'ZW' => __( 'Zimbabwe', 'woocommerce' )
+	'ZW' => __( 'Zimbabwe', 'woocommerce' ),
 );

@@ -10,7 +10,7 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see 	    http://docs.woothemes.com/document/template-structure/
+ * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates/Auth
  * @version 2.4.0
@@ -22,11 +22,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <?php do_action( 'woocommerce_auth_page_header' ); ?>
 
-<h1><?php printf( __( '%s would like to connect to your store' , 'woocommerce' ), esc_html( $app_name ) ); ?></h1>
+<h1><?php printf( __( '%s would like to connect to your store', 'woocommerce' ), esc_html( $app_name ) ); ?></h1>
 
 <?php wc_print_notices(); ?>
 
-<p><?php printf( __( 'This will give "%s" <strong>%s</strong> access which will allow it to:' , 'woocommerce' ), esc_html( $app_name ), esc_html( $scope ) ); ?></p>
+<p><?php printf( __( 'This will give "%1$s" %2$s access which will allow it to:', 'woocommerce' ), '<strong>' . esc_html( $app_name ) . '</strong>', '<strong>' . esc_html( $scope ) . '</strong>' ); ?></p>
 
 <ul class="wc-auth-permissions">
 	<?php foreach ( $permissions as $permission ) : ?>

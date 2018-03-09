@@ -4,15 +4,11 @@
  *
  * Action/filter hooks used for WooCommerce functions/templates.
  *
- * @author 		WooThemes
- * @category 	Core
- * @package 	WooCommerce/Templates
- * @version     2.1.0
+ * @package WooCommerce/Templates
+ * @version 2.1.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
+defined( 'ABSPATH' ) || exit;
 
 add_filter( 'body_class', 'wc_body_class' );
 add_filter( 'post_class', 'wc_product_post_class', 20, 3 );
@@ -20,10 +16,8 @@ add_filter( 'post_class', 'wc_product_post_class', 20, 3 );
 /**
  * WP Header.
  *
- * @see  wc_products_rss_feed()
- * @see  wc_generator_tag()
+ * @see wc_generator_tag()
  */
-add_action( 'wp_head', 'wc_products_rss_feed' );
 add_action( 'get_the_generator_html', 'wc_generator_tag', 10, 2 );
 add_action( 'get_the_generator_xhtml', 'wc_generator_tag', 10, 2 );
 
@@ -69,6 +63,11 @@ add_action( 'woocommerce_archive_description', 'woocommerce_taxonomy_archive_des
 add_action( 'woocommerce_archive_description', 'woocommerce_product_archive_description', 10 );
 
 /**
+ * Product loop start.
+ */
+add_filter( 'woocommerce_product_loop_start', 'woocommerce_maybe_show_product_subcategories' );
+
+/**
  * Products Loop.
  *
  * @see woocommerce_result_count()
@@ -76,6 +75,7 @@ add_action( 'woocommerce_archive_description', 'woocommerce_product_archive_desc
  */
 add_action( 'woocommerce_before_shop_loop', 'woocommerce_result_count', 20 );
 add_action( 'woocommerce_before_shop_loop', 'woocommerce_catalog_ordering', 30 );
+add_action( 'woocommerce_no_products_found', 'wc_no_products_found' );
 
 /**
  * Product Loop Items.
@@ -194,6 +194,13 @@ add_filter( 'woocommerce_product_tabs', 'woocommerce_default_product_tabs' );
 add_filter( 'woocommerce_product_tabs', 'woocommerce_sort_product_tabs', 99 );
 
 /**
+ * Additional Information tab.
+ *
+ * @see wc_display_product_attributes()
+ */
+add_action( 'woocommerce_product_additional_information', 'wc_display_product_attributes', 10 );
+
+/**
  * Checkout.
  *
  * @see woocommerce_checkout_login_form()
@@ -206,6 +213,11 @@ add_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_for
 add_action( 'woocommerce_checkout_order_review', 'woocommerce_order_review', 10 );
 add_action( 'woocommerce_checkout_order_review', 'woocommerce_checkout_payment', 20 );
 
+/**
+ * Cart widget
+ */
+add_action( 'woocommerce_widget_shopping_cart_buttons', 'woocommerce_widget_shopping_cart_button_view_cart', 10 );
+add_action( 'woocommerce_widget_shopping_cart_buttons', 'woocommerce_widget_shopping_cart_proceed_to_checkout', 20 );
 
 /**
  * Cart.
@@ -217,6 +229,7 @@ add_action( 'woocommerce_checkout_order_review', 'woocommerce_checkout_payment',
 add_action( 'woocommerce_cart_collaterals', 'woocommerce_cross_sell_display' );
 add_action( 'woocommerce_cart_collaterals', 'woocommerce_cart_totals', 10 );
 add_action( 'woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20 );
+add_action( 'woocommerce_cart_is_empty', 'wc_empty_cart_message', 10 );
 
 /**
  * Footer.
@@ -238,6 +251,13 @@ add_action( 'woocommerce_thankyou', 'woocommerce_order_details_table', 10 );
 add_action( 'woocommerce_order_details_after_order_table', 'woocommerce_order_again_button' );
 
 /**
+ * Order downloads.
+ *
+ * @see woocommerce_order_downloads_table()
+ */
+add_action( 'woocommerce_available_downloads', 'woocommerce_order_downloads_table', 10 );
+
+/**
  * Auth.
  *
  * @see woocommerce_output_auth_header()
@@ -256,6 +276,8 @@ add_filter( 'jetpack_comment_form_enabled_for_product', '__return_false' );
 /**
  * My Account.
  */
+add_action( 'woocommerce_account_navigation', 'woocommerce_account_navigation' );
+add_action( 'woocommerce_account_content', 'woocommerce_account_content' );
 add_action( 'woocommerce_account_orders_endpoint', 'woocommerce_account_orders' );
 add_action( 'woocommerce_account_view-order_endpoint', 'woocommerce_account_view_order' );
 add_action( 'woocommerce_account_downloads_endpoint', 'woocommerce_account_downloads' );
@@ -263,5 +285,3 @@ add_action( 'woocommerce_account_edit-address_endpoint', 'woocommerce_account_ed
 add_action( 'woocommerce_account_payment-methods_endpoint', 'woocommerce_account_payment_methods' );
 add_action( 'woocommerce_account_add-payment-method_endpoint', 'woocommerce_account_add_payment_method' );
 add_action( 'woocommerce_account_edit-account_endpoint', 'woocommerce_account_edit_account' );
-add_action( 'woocommerce_account_set-default-payment-method_endpoint', array( 'WC_Shortcode_My_Account', 'set_default_payment_method' ) );
-add_action( 'woocommerce_account_delete-payment-method_endpoint', array( 'WC_Shortcode_My_Account', 'delete_payment_method' ) );

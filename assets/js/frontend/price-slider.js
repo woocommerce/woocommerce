@@ -1,4 +1,4 @@
-/* global woocommerce_price_slider_params */
+/* global woocommerce_price_slider_params, accounting */
 jQuery( function( $ ) {
 
 	// woocommerce_price_slider_params is required to continue, ensure the object exists
@@ -6,73 +6,75 @@ jQuery( function( $ ) {
 		return false;
 	}
 
-	// Get markup ready for slider
-	$( 'input#min_price, input#max_price' ).hide();
-	$( '.price_slider, .price_label' ).show();
-
-	// Price slider uses jquery ui
-	var min_price = $( '.price_slider_amount #min_price' ).data( 'min' ),
-		max_price = $( '.price_slider_amount #max_price' ).data( 'max' ),
-		current_min_price = parseInt( min_price, 10 ),
-		current_max_price = parseInt( max_price, 10 );
-
-	if ( woocommerce_price_slider_params.min_price ) {
-		current_min_price = parseInt( woocommerce_price_slider_params.min_price, 10 );
-	}
-	if ( woocommerce_price_slider_params.max_price ) {
-		current_max_price = parseInt( woocommerce_price_slider_params.max_price, 10 );
-	}
-
 	$( document.body ).bind( 'price_slider_create price_slider_slide', function( event, min, max ) {
-		if ( woocommerce_price_slider_params.currency_pos === 'left' ) {
 
-			$( '.price_slider_amount span.from' ).html( woocommerce_price_slider_params.currency_symbol + min );
-			$( '.price_slider_amount span.to' ).html( woocommerce_price_slider_params.currency_symbol + max );
+		$( '.price_slider_amount span.from' ).html( accounting.formatMoney( min, {
+			symbol:    woocommerce_price_slider_params.currency_format_symbol,
+			decimal:   woocommerce_price_slider_params.currency_format_decimal_sep,
+			thousand:  woocommerce_price_slider_params.currency_format_thousand_sep,
+			precision: woocommerce_price_slider_params.currency_format_num_decimals,
+			format:    woocommerce_price_slider_params.currency_format
+		} ) );
 
-		} else if ( woocommerce_price_slider_params.currency_pos === 'left_space' ) {
-
-			$( '.price_slider_amount span.from' ).html( woocommerce_price_slider_params.currency_symbol + ' ' + min );
-			$( '.price_slider_amount span.to' ).html( woocommerce_price_slider_params.currency_symbol + ' ' + max );
-
-		} else if ( woocommerce_price_slider_params.currency_pos === 'right' ) {
-
-			$( '.price_slider_amount span.from' ).html( min + woocommerce_price_slider_params.currency_symbol );
-			$( '.price_slider_amount span.to' ).html( max + woocommerce_price_slider_params.currency_symbol );
-
-		} else if ( woocommerce_price_slider_params.currency_pos === 'right_space' ) {
-
-			$( '.price_slider_amount span.from' ).html( min + ' ' + woocommerce_price_slider_params.currency_symbol );
-			$( '.price_slider_amount span.to' ).html( max + ' ' + woocommerce_price_slider_params.currency_symbol );
-
-		}
+		$( '.price_slider_amount span.to' ).html( accounting.formatMoney( max, {
+			symbol:    woocommerce_price_slider_params.currency_format_symbol,
+			decimal:   woocommerce_price_slider_params.currency_format_decimal_sep,
+			thousand:  woocommerce_price_slider_params.currency_format_thousand_sep,
+			precision: woocommerce_price_slider_params.currency_format_num_decimals,
+			format:    woocommerce_price_slider_params.currency_format
+		} ) );
 
 		$( document.body ).trigger( 'price_slider_updated', [ min, max ] );
 	});
 
-	$( '.price_slider' ).slider({
-		range: true,
-		animate: true,
-		min: min_price,
-		max: max_price,
-		values: [ current_min_price, current_max_price ],
-		create: function() {
+	function init_price_filter() {
+		$( 'input#min_price, input#max_price' ).hide();
+		$( '.price_slider, .price_label' ).show();
 
-			$( '.price_slider_amount #min_price' ).val( current_min_price );
-			$( '.price_slider_amount #max_price' ).val( current_max_price );
+		var min_price = $( '.price_slider_amount #min_price' ).data( 'min' ),
+			max_price = $( '.price_slider_amount #max_price' ).data( 'max' ),
+			current_min_price = $( '.price_slider_amount #min_price' ).val(),
+			current_max_price = $( '.price_slider_amount #max_price' ).val();
 
-			$( document.body ).trigger( 'price_slider_create', [ current_min_price, current_max_price ] );
-		},
-		slide: function( event, ui ) {
+		$( '.price_slider:not(.ui-slider)' ).slider({
+			range: true,
+			animate: true,
+			min: min_price,
+			max: max_price,
+			values: [ current_min_price, current_max_price ],
+			create: function() {
 
-			$( 'input#min_price' ).val( ui.values[0] );
-			$( 'input#max_price' ).val( ui.values[1] );
+				$( '.price_slider_amount #min_price' ).val( current_min_price );
+				$( '.price_slider_amount #max_price' ).val( current_max_price );
 
-			$( document.body ).trigger( 'price_slider_slide', [ ui.values[0], ui.values[1] ] );
-		},
-		change: function( event, ui ) {
+				$( document.body ).trigger( 'price_slider_create', [ current_min_price, current_max_price ] );
+			},
+			slide: function( event, ui ) {
 
-			$( document.body ).trigger( 'price_slider_change', [ ui.values[0], ui.values[1] ] );
-		}
-	});
+				$( 'input#min_price' ).val( ui.values[0] );
+				$( 'input#max_price' ).val( ui.values[1] );
 
+				$( document.body ).trigger( 'price_slider_slide', [ ui.values[0], ui.values[1] ] );
+			},
+			change: function( event, ui ) {
+
+				$( document.body ).trigger( 'price_slider_change', [ ui.values[0], ui.values[1] ] );
+			}
+		});
+	}
+
+	init_price_filter();
+
+	var hasSelectiveRefresh = (
+		'undefined' !== typeof wp &&
+		wp.customize &&
+		wp.customize.selectiveRefresh &&
+		wp.customize.widgetsPreview &&
+		wp.customize.widgetsPreview.WidgetPartial
+	);
+	if ( hasSelectiveRefresh ) {
+		wp.customize.selectiveRefresh.bind( 'partial-content-rendered', function() {
+			init_price_filter();
+		} );
+	}
 });

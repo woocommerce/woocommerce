@@ -6,13 +6,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Top Rated Products Widget.
- *
  * Gets and displays top rated products in an unordered list.
  *
  * @author   WooThemes
  * @category Widgets
  * @package  WooCommerce/Widgets
- * @version  2.3.0
+ * @version  3.3.0
  * @extends  WC_Widget
  */
 class WC_Widget_Top_Rated_Products extends WC_Widget {
@@ -22,14 +21,14 @@ class WC_Widget_Top_Rated_Products extends WC_Widget {
 	 */
 	public function __construct() {
 		$this->widget_cssclass    = 'woocommerce widget_top_rated_products';
-		$this->widget_description = __( 'Display a list of your top rated products on your site.', 'woocommerce' );
+		$this->widget_description = __( "A list of your store's top-rated products.", 'woocommerce' );
 		$this->widget_id          = 'woocommerce_top_rated_products';
-		$this->widget_name        = __( 'WooCommerce Top Rated Products', 'woocommerce' );
+		$this->widget_name        = __( 'Products by Rating', 'woocommerce' );
 		$this->settings           = array(
 			'title'  => array(
 				'type'  => 'text',
-				'std'   => __( 'Top Rated Products', 'woocommerce' ),
-				'label' => __( 'Title', 'woocommerce' )
+				'std'   => __( 'Top rated products', 'woocommerce' ),
+				'label' => __( 'Title', 'woocommerce' ),
 			),
 			'number' => array(
 				'type'  => 'number',
@@ -37,8 +36,8 @@ class WC_Widget_Top_Rated_Products extends WC_Widget {
 				'min'   => 1,
 				'max'   => '',
 				'std'   => 5,
-				'label' => __( 'Number of products to show', 'woocommerce' )
-			)
+				'label' => __( 'Number of products to show', 'woocommerce' ),
+			),
 		);
 
 		parent::__construct();
@@ -62,11 +61,17 @@ class WC_Widget_Top_Rated_Products extends WC_Widget {
 
 		$number = ! empty( $instance['number'] ) ? absint( $instance['number'] ) : $this->settings['number']['std'];
 
-		add_filter( 'posts_clauses',  array( WC()->query, 'order_by_rating_post_clauses' ) );
-
-		$query_args = array( 'posts_per_page' => $number, 'no_found_rows' => 1, 'post_status' => 'publish', 'post_type' => 'product' );
-
-		$query_args['meta_query'] = WC()->query->get_meta_query();
+		$query_args = array(
+			'posts_per_page' => $number,
+			'no_found_rows'  => 1,
+			'post_status'    => 'publish',
+			'post_type'      => 'product',
+			'meta_key'       => '_wc_average_rating',
+			'orderby'        => 'meta_value_num',
+			'order'          => 'DESC',
+			'meta_query'     => WC()->query->get_meta_query(),
+			'tax_query'      => WC()->query->get_tax_query(),
+		);
 
 		$r = new WP_Query( $query_args );
 
@@ -74,19 +79,22 @@ class WC_Widget_Top_Rated_Products extends WC_Widget {
 
 			$this->widget_start( $args, $instance );
 
-			echo '<ul class="product_list_widget">';
+			echo wp_kses_post( apply_filters( 'woocommerce_before_widget_product_list', '<ul class="product_list_widget">' ) );
+
+			$template_args = array(
+				'widget_id'   => $args['widget_id'],
+				'show_rating' => true,
+			);
 
 			while ( $r->have_posts() ) {
 				$r->the_post();
-				wc_get_template( 'content-widget-product.php', array( 'show_rating' => true ) );
+				wc_get_template( 'content-widget-product.php', $template_args );
 			}
 
-			echo '</ul>';
+			echo wp_kses_post( apply_filters( 'woocommerce_after_widget_product_list', '</ul>' ) );
 
 			$this->widget_end( $args );
 		}
-
-		remove_filter( 'posts_clauses', array( WC()->query, 'order_by_rating_post_clauses' ) );
 
 		wp_reset_postdata();
 

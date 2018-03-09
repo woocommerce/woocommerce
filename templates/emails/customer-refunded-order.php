@@ -10,7 +10,7 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see      http://docs.woothemes.com/document/template-structure/
+ * @see      https://docs.woocommerce.com/document/template-structure/
  * @author   WooThemes
  * @package  WooCommerce/Templates/Emails
  * @version  2.5.0
@@ -28,8 +28,7 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 <p><?php
 	if ( $partial_refund ) {
 		printf( __( 'Hi there. Your order on %s has been partially refunded.', 'woocommerce' ), get_option( 'blogname' ) );
-	}
-	else {
+	} else {
 		printf( __( 'Hi there. Your order on %s has been refunded.', 'woocommerce' ), get_option( 'blogname' ) );
 	}
 ?></p>
@@ -38,6 +37,8 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 
 /**
  * @hooked WC_Emails::order_details() Shows the order details table.
+ * @hooked WC_Structured_Data::generate_order_data() Generates structured data.
+ * @hooked WC_Structured_Data::output_structured_data() Outputs structured data.
  * @since 2.5.0
  */
 do_action( 'woocommerce_email_order_details', $order, $sent_to_admin, $plain_text, $email );

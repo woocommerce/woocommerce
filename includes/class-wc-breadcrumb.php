@@ -31,7 +31,7 @@ class WC_Breadcrumb {
 	public function add_crumb( $name, $link = '' ) {
 		$this->crumbs[] = array(
 			strip_tags( $name ),
-			$link
+			$link,
 		);
 	}
 
@@ -71,10 +71,10 @@ class WC_Breadcrumb {
 			'is_tag',
 			'is_author',
 			'is_date',
-			'is_tax'
+			'is_tax',
 		);
 
-		if ( ( ! is_front_page() && ! ( is_post_type_archive() && get_option( 'page_on_front' ) == wc_get_page_id( 'shop' ) ) ) || is_paged() ) {
+		if ( ( ! is_front_page() && ! ( is_post_type_archive() && intval( get_option( 'page_on_front' ) ) === wc_get_page_id( 'shop' ) ) ) || is_paged() ) {
 			foreach ( $conditionals as $conditional ) {
 				if ( call_user_func( $conditional ) ) {
 					call_user_func( array( $this, 'add_crumbs_' . substr( $conditional, 3 ) ) );
@@ -95,7 +95,7 @@ class WC_Breadcrumb {
 	 * Prepend the shop page to shop breadcrumbs.
 	 */
 	private function prepend_shop_page() {
-		$permalinks   = get_option( 'woocommerce_permalinks' );
+		$permalinks   = wc_get_permalink_structure();
 		$shop_page_id = wc_get_page_id( 'shop' );
 		$shop_page    = get_post( $shop_page_id );
 
@@ -144,18 +144,27 @@ class WC_Breadcrumb {
 
 		if ( 'product' === get_post_type( $post ) ) {
 			$this->prepend_shop_page();
-			if ( $terms = wc_get_product_terms( $post->ID, 'product_cat', array( 'orderby' => 'parent', 'order' => 'DESC' ) ) ) {
+
+			$terms = wc_get_product_terms( $post->ID, 'product_cat', apply_filters( 'woocommerce_breadcrumb_product_terms_args', array(
+				'orderby' => 'parent',
+				'order'   => 'DESC',
+			) ) );
+
+			if ( $terms ) {
 				$main_term = apply_filters( 'woocommerce_breadcrumb_main_term', $terms[0], $terms );
 				$this->term_ancestors( $main_term->term_id, 'product_cat' );
 				$this->add_crumb( $main_term->name, get_term_link( $main_term ) );
 			}
-		} elseif ( 'post' != get_post_type( $post ) ) {
+		} elseif ( 'post' !== get_post_type( $post ) ) {
 			$post_type = get_post_type_object( get_post_type( $post ) );
-			$this->add_crumb( $post_type->labels->singular_name, get_post_type_archive_link( get_post_type( $post ) ) );
+
+			if ( ! empty( $post_type->has_archive ) ) {
+				$this->add_crumb( $post_type->labels->singular_name, get_post_type_archive_link( get_post_type( $post ) ) );
+			}
 		} else {
 			$cat = current( get_the_category( $post ) );
 			if ( $cat ) {
-				$this->term_ancestors( $cat->term_id, 'post_category' );
+				$this->term_ancestors( $cat->term_id, 'category' );
 				$this->add_crumb( $cat->name, get_term_link( $cat ) );
 			}
 		}
@@ -247,8 +256,7 @@ class WC_Breadcrumb {
 		$this_category = get_category( $GLOBALS['wp_query']->get_queried_object() );
 
 		if ( 0 != $this_category->parent ) {
-			$this->term_ancestors( $this_category->parent, 'post_category' );
-			$this->add_crumb( $this_category->name, get_category_link( $this_category->term_id ) );
+			$this->term_ancestors( $this_category->term_id, 'category' );
 		}
 
 		$this->add_crumb( single_cat_title( '', false ), get_category_link( $this_category->term_id ) );
@@ -305,6 +313,8 @@ class WC_Breadcrumb {
 
 	/**
 	 * Add crumbs for a term.
+	 *
+	 * @param int    $term_id
 	 * @param string $taxonomy
 	 */
 	private function term_ancestors( $term_id, $taxonomy ) {

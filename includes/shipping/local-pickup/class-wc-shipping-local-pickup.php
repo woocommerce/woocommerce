@@ -1,4 +1,10 @@
 <?php
+/**
+ * Class WC_Shipping_Local_Pickup file.
+ *
+ * @package WooCommerce\Shipping
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -8,24 +14,26 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * A simple shipping method allowing free pickup as a shipping method.
  *
- * @class 		WC_Shipping_Local_Pickup
- * @version		2.6.0
- * @package		WooCommerce/Classes/Shipping
- * @author 		WooThemes
+ * @class       WC_Shipping_Local_Pickup
+ * @version     2.6.0
+ * @package     WooCommerce/Classes/Shipping
  */
 class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 
 	/**
 	 * Constructor.
+	 *
+	 * @param int $instance_id Instance ID.
 	 */
 	public function __construct( $instance_id = 0 ) {
-		$this->id                    = 'local_pickup';
-		$this->instance_id 			 = absint( $instance_id );
-		$this->method_title          = __( 'Local Pickup', 'woocommerce' );
-		$this->method_description    = __( 'Allow customers to pick up orders themselves. By default, when using local pickup store base taxes will apply regardless of customer address.', 'woocommerce' );
-		$this->supports              = array(
+		$this->id                 = 'local_pickup';
+		$this->instance_id        = absint( $instance_id );
+		$this->method_title       = __( 'Local pickup', 'woocommerce' );
+		$this->method_description = __( 'Allow customers to pick up orders themselves. By default, when using local pickup store base taxes will apply regardless of customer address.', 'woocommerce' );
+		$this->supports           = array(
 			'shipping-zones',
-			'instance-settings'
+			'instance-settings',
+			'instance-settings-modal',
 		);
 		$this->init();
 	}
@@ -39,26 +47,28 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 		$this->init_form_fields();
 		$this->init_settings();
 
-		// Define user set variables
-		$this->enabled		= $this->get_option( 'enabled' );
-		$this->title		= $this->get_option( 'title' );
-		$this->codes		= $this->get_option( 'codes' );
-		$this->availability	= $this->get_option( 'availability' );
-		$this->countries	= $this->get_option( 'countries' );
+		// Define user set variables.
+		$this->title      = $this->get_option( 'title' );
+		$this->tax_status = $this->get_option( 'tax_status' );
+		$this->cost       = $this->get_option( 'cost' );
 
-		// Actions
+		// Actions.
 		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
 	}
 
 	/**
-	 * calculate_shipping function.
 	 * Calculate local pickup shipping.
+	 *
+	 * @param array $package Package information.
 	 */
 	public function calculate_shipping( $package = array() ) {
-		$this->add_rate( array(
-			'id' 		=> $this->id . $this->instance_id,
-			'label' 	=> $this->title,
-		) );
+		$this->add_rate(
+			array(
+				'label'   => $this->title,
+				'package' => $package,
+				'cost'    => $this->cost,
+			)
+		);
 	}
 
 	/**
@@ -66,110 +76,31 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 	 */
 	public function init_form_fields() {
 		$this->instance_form_fields = array(
-			'enabled' => array(
-				'title'   => __( 'Enable', 'woocommerce' ),
-				'type'    => 'checkbox',
-				'label'   => __( 'Enable local pickup', 'woocommerce' ),
-				'default' => 'yes'
-			),
-			'title' => array(
+			'title'      => array(
 				'title'       => __( 'Title', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
-				'default'     => __( 'Local Pickup', 'woocommerce' ),
+				'default'     => __( 'Local pickup', 'woocommerce' ),
 				'desc_tip'    => true,
-			)
+			),
+			'tax_status' => array(
+				'title'   => __( 'Tax status', 'woocommerce' ),
+				'type'    => 'select',
+				'class'   => 'wc-enhanced-select',
+				'default' => 'taxable',
+				'options' => array(
+					'taxable' => __( 'Taxable', 'woocommerce' ),
+					'none'    => _x( 'None', 'Tax status', 'woocommerce' ),
+				),
+			),
+			'cost'       => array(
+				'title'       => __( 'Cost', 'woocommerce' ),
+				'type'        => 'text',
+				'placeholder' => '0',
+				'description' => __( 'Optional cost for local pickup.', 'woocommerce' ),
+				'default'     => '',
+				'desc_tip'    => true,
+			),
 		);
-	}
-
-	/**
-	 * Get postcodes for this method.
-	 * @return array
-	 */
-	public function get_valid_postcodes() {
-		$codes = array();
-
-		if ( $this->codes != '' ) {
-			foreach( explode( ',', $this->codes ) as $code ) {
-				$codes[] = strtoupper( trim( $code ) );
-			}
-		}
-
-		return $codes;
-	}
-
-	/**
-	 * See if a given postcode matches valid postcodes.
-	 * @param  string postcode
-	 * @param  string country code
-	 * @return boolean
-	 */
-	public function is_valid_postcode( $postcode, $country ) {
-		$codes              = $this->get_valid_postcodes();
-		$postcode           = $this->clean( $postcode );
-		$formatted_postcode = wc_format_postcode( $postcode, $country );
-
-		if ( in_array( $postcode, $codes ) || in_array( $formatted_postcode, $codes ) ) {
-			return true;
-		}
-
-		// Pattern matching
-		foreach ( $codes as $c ) {
-			$pattern = '/^' . str_replace( '_', '[0-9a-zA-Z]', preg_quote( $c ) ) . '$/i';
-			if ( preg_match( $pattern, $postcode ) ) {
-				return true;
-			}
-		}
-
-		// Wildcard search
-		$wildcard_postcode = $formatted_postcode . '*';
-		$postcode_length   = strlen( $formatted_postcode );
-
-		for ( $i = 0; $i < $postcode_length; $i++ ) {
-			if ( in_array( $wildcard_postcode, $codes ) ) {
-				return true;
-			}
-			$wildcard_postcode = substr( $wildcard_postcode, 0, -2 ) . '*';
-		}
-
-		return false;
-	}
-
-	/**
-	 * See if the method is available.
-	 *
-	 * @param array $package
-	 * @return bool
-	 */
-	public function is_available( $package ) {
-		$is_available = "yes" === $this->enabled;
-
-		if ( $is_available && $this->get_valid_postcodes() ) {
-			$is_available = $this->is_valid_postcode( $package['destination']['postcode'], $package['destination']['country'] );
-		}
-
-		if ( $is_available ) {
-			if ( $this->availability === 'specific' ) {
-				$ship_to_countries = $this->countries;
-			} else {
-				$ship_to_countries = array_keys( WC()->countries->get_shipping_countries() );
-			}
-			if ( is_array( $ship_to_countries ) && ! in_array( $package['destination']['country'], $ship_to_countries ) ) {
-				$is_available = false;
-			}
-		}
-
-		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', $is_available, $package );
-	}
-
-	/**
-	 * Clean code string.
-	 *
-	 * @access public
-	 * @param mixed $code
-	 * @return string
-	 */
-	public function clean( $code ) {
-		return str_replace( '-', '', sanitize_title( $code ) ) . ( strstr( $code, '*' ) ? '*' : '' );
 	}
 }

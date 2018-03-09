@@ -12,20 +12,17 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see     http://docs.woothemes.com/document/template-structure/
+ * @see     https://docs.woocommerce.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates
- * @version 2.5.0
+ * @version 2.6.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
-
-
-
 ?>
-<li itemprop="review" itemscope itemtype="http://schema.org/Review" <?php comment_class(); ?> id="li-comment-<?php comment_ID() ?>">
+<li <?php comment_class(); ?> id="li-comment-<?php comment_ID() ?>">
 
 	<div id="comment-<?php comment_ID(); ?>" class="comment_container">
 
@@ -52,6 +49,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			 * The woocommerce_review_meta hook.
 			 *
 			 * @hooked woocommerce_review_display_meta - 10
+			 * @hooked WC_Structured_Data::generate_review_data() - 20
 			 */
 			do_action( 'woocommerce_review_meta', $comment );
 

@@ -20,14 +20,14 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 	 */
 	public function __construct() {
 		$this->widget_cssclass    = 'woocommerce widget_recent_reviews';
-		$this->widget_description = __( 'Display a list of your most recent reviews on your site.', 'woocommerce' );
+		$this->widget_description = __( 'Display a list of recent reviews from your store.', 'woocommerce' );
 		$this->widget_id          = 'woocommerce_recent_reviews';
-		$this->widget_name        = __( 'WooCommerce Recent Reviews', 'woocommerce' );
+		$this->widget_name        = __( 'Recent Product Reviews', 'woocommerce' );
 		$this->settings           = array(
 			'title'  => array(
 				'type'  => 'text',
-				'std'   => __( 'Recent Reviews', 'woocommerce' ),
-				'label' => __( 'Title', 'woocommerce' )
+				'std'   => __( 'Recent reviews', 'woocommerce' ),
+				'label' => __( 'Title', 'woocommerce' ),
 			),
 			'number' => array(
 				'type'  => 'number',
@@ -35,8 +35,8 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 				'min'   => 1,
 				'max'   => '',
 				'std'   => 10,
-				'label' => __( 'Number of reviews to show', 'woocommerce' )
-			)
+				'label' => __( 'Number of reviews to show', 'woocommerce' ),
+			),
 		);
 
 		parent::__construct();
@@ -60,7 +60,7 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 		ob_start();
 
 		$number   = ! empty( $instance['number'] ) ? absint( $instance['number'] ) : $this->settings['number']['std'];
-		$comments = get_comments( array( 'number' => $number, 'status' => 'approve', 'post_status' => 'publish', 'post_type' => 'product' ) );
+		$comments = get_comments( array( 'number' => $number, 'status' => 'approve', 'post_status' => 'publish', 'post_type' => 'product', 'parent' => 0 ) );
 
 		if ( $comments ) {
 			$this->widget_start( $args, $instance );
@@ -73,17 +73,16 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 
 				$rating = intval( get_comment_meta( $comment->comment_ID, 'rating', true ) );
 
-				$rating_html = $_product->get_rating_html( $rating );
+				$rating_html = wc_get_rating_html( $rating );
 
 				echo '<li><a href="' . esc_url( get_comment_link( $comment->comment_ID ) ) . '">';
 
-				echo $_product->get_image();
-
-				echo $_product->get_title() . '</a>';
+				echo $_product->get_image() . wp_kses_post( $_product->get_name() ) . '</a>';
 
 				echo $rating_html;
 
-				printf( '<span class="reviewer">' . _x( 'by %1$s', 'by comment author', 'woocommerce' ) . '</span>', get_comment_author() );
+				/* translators: %s: review author */
+				echo '<span class="reviewer">' . sprintf( esc_html__( 'by %s', 'woocommerce' ), get_comment_author() ) . '</span>';
 
 				echo '</li>';
 			}

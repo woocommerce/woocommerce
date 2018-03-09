@@ -2,12 +2,13 @@
 /**
  * Bangladeshi states (districts)
  *
- * @author      WooThemes
- * @category    i18n
- * @package     WooCommerce/i18n
- * @version     2.0.0
+ * @package WooCommerce/i18n
+ * @version 2.0.0
  */
+
 global $states;
+
+defined( 'ABSPATH' ) || exit;
 
 $states['BD'] = array(
 	'BAG'  => __( 'Bagerhat', 'woocommerce' ),
@@ -21,7 +22,7 @@ $states['BD'] = array(
 	'CHI'  => __( 'Chittagong', 'woocommerce' ),
 	'CHU'  => __( 'Chuadanga', 'woocommerce' ),
 	'COM'  => __( 'Comilla', 'woocommerce' ),
-	'COX'  => __( 'Cox\'s Bazar', 'woocommerce' ),
+	'COX'  => __( "Cox's Bazar", 'woocommerce' ),
 	'DHA'  => __( 'Dhaka', 'woocommerce' ),
 	'DIN'  => __( 'Dinajpur', 'woocommerce' ),
 	'FAR'  => __( 'Faridpur ', 'woocommerce' ),
@@ -73,5 +74,5 @@ $states['BD'] = array(
 	'SUN'  => __( 'Sunamganj', 'woocommerce' ),
 	'SYL'  => __( 'Sylhet', 'woocommerce' ),
 	'TAN'  => __( 'Tangail', 'woocommerce' ),
-	'THA'  => __( 'Thakurgaon', 'woocommerce' )
+	'THA'  => __( 'Thakurgaon', 'woocommerce' ),
 );

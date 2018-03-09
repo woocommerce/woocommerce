@@ -1,4 +1,4 @@
-/*global ajaxurl, inlineEditPost, inlineEditL10n */
+/*global inlineEditPost, woocommerce_admin, woocommerce_quick_edit */
 jQuery(function( $ ) {
 	$( '#the-list' ).on( 'click', '.editinline', function() {
 
@@ -28,9 +28,12 @@ jQuery(function( $ ) {
 			tax_class      = $wc_inline_data.find( '.tax_class' ).text(),
 			backorders     = $wc_inline_data.find( '.backorders' ).text();
 
+		var formatted_regular_price = regular_price.replace('.', woocommerce_admin.mon_decimal_point ),
+			formatted_sale_price	= sale_price.replace('.', woocommerce_admin.mon_decimal_point );
+
 		$( 'input[name="_sku"]', '.inline-edit-row' ).val( sku );
-		$( 'input[name="_regular_price"]', '.inline-edit-row' ).val( regular_price );
-		$( 'input[name="_sale_price"]', '.inline-edit-row' ).val( sale_price );
+		$( 'input[name="_regular_price"]', '.inline-edit-row' ).val( formatted_regular_price );
+		$( 'input[name="_sale_price"]', '.inline-edit-row' ).val( formatted_sale_price );
 		$( 'input[name="_weight"]', '.inline-edit-row' ).val( weight );
 		$( 'input[name="_length"]', '.inline-edit-row' ).val( length );
 		$( 'input[name="_width"]', '.inline-edit-row' ).val( width );
@@ -57,10 +60,12 @@ jQuery(function( $ ) {
 		}
 
 		if ( 'yes' === manage_stock ) {
-			$( '.stock_qty_field', '.inline-edit-row' ).show().removeAttr( 'style' );
+			$( '.stock_qty_field, .backorder_field', '.inline-edit-row' ).show().removeAttr( 'style' );
+			$( '.stock_status_field' ).hide();
 			$( 'input[name="_manage_stock"]', '.inline-edit-row' ).attr( 'checked', 'checked' );
 		} else {
-			$( '.stock_qty_field', '.inline-edit-row' ).hide();
+			$( '.stock_qty_field, .backorder_field', '.inline-edit-row' ).hide();
+			$( '.stock_status_field' ).show().removeAttr( 'style' );
 			$( 'input[name="_manage_stock"]', '.inline-edit-row' ).removeAttr( 'checked' );
 		}
 
@@ -85,14 +90,19 @@ jQuery(function( $ ) {
 		} else {
 			$( '.stock_fields', '.inline-edit-row' ).show().removeAttr( 'style' );
 		}
+
+		// Rename core strings
+		$( 'input[name="comment_status"]' ).parent().find( '.checkbox-title' ).text( woocommerce_quick_edit.strings.allow_reviews );
 	});
 
 	$( '#the-list' ).on( 'change', '.inline-edit-row input[name="_manage_stock"]', function() {
 
 		if ( $( this ).is( ':checked' ) ) {
-			$( '.stock_qty_field', '.inline-edit-row' ).show().removeAttr( 'style' );
+			$( '.stock_qty_field, .backorder_field', '.inline-edit-row' ).show().removeAttr( 'style' );
+			$( '.stock_status_field' ).hide();
 		} else {
-			$( '.stock_qty_field', '.inline-edit-row' ).hide();
+			$( '.stock_qty_field, .backorder_field', '.inline-edit-row' ).hide();
+			$( '.stock_status_field' ).show().removeAttr( 'style' );
 		}
 
 	});
@@ -101,10 +111,6 @@ jQuery(function( $ ) {
 		$( 'input.text', '.inline-edit-row' ).val( '' );
 		$( '#woocommerce-fields' ).find( 'select' ).prop( 'selectedIndex', 0 );
 		$( '#woocommerce-fields-bulk' ).find( '.inline-edit-group .change-input' ).hide();
-
-		// Autosuggest product tags on bulk edit
-		var tax = 'product_tag';
-		$( 'tr.inline-editor textarea[name="tax_input[' + tax + ']"]' ).suggest( ajaxurl + '?action=ajax-tag-search&tax=' + tax, { delay: 500, minchars: 2, multiple: true, multipleSep: inlineEditL10n.comma } );
 	});
 
 	$( '#wpbody' ).on( 'change', '#woocommerce-fields-bulk .inline-edit-group .change_to', function() {
@@ -115,5 +121,9 @@ jQuery(function( $ ) {
 			$( this ).closest( 'div' ).find( '.change-input' ).hide();
 		}
 
+	});
+
+	$( '#wpbody' ).on( 'click', '.trash-product', function() {
+		return window.confirm( woocommerce_admin.i18_delete_product_notice );
 	});
 });

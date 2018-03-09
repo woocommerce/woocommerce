@@ -24,10 +24,10 @@ class WC_Integrations {
 	 */
 	public $integrations = array();
 
-    /**
-     * Initialize integrations.
-     */
-    public function __construct() {
+	/**
+	 * Initialize integrations.
+	 */
+	public function __construct() {
 
 		do_action( 'woocommerce_integrations_init' );
 

@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @author   WooThemes
  * @category Widgets
  * @package  WooCommerce/Widgets
- * @version  2.3.0
+ * @version  3.3.0
  * @extends  WC_Widget
  */
 class WC_Widget_Products extends WC_Widget {
@@ -20,14 +20,14 @@ class WC_Widget_Products extends WC_Widget {
 	 */
 	public function __construct() {
 		$this->widget_cssclass    = 'woocommerce widget_products';
-		$this->widget_description = __( 'Display a list of your products on your site.', 'woocommerce' );
+		$this->widget_description = __( "A list of your store's products.", 'woocommerce' );
 		$this->widget_id          = 'woocommerce_products';
-		$this->widget_name        = __( 'WooCommerce Products', 'woocommerce' );
+		$this->widget_name        = __( 'Products', 'woocommerce' );
 		$this->settings           = array(
 			'title'  => array(
 				'type'  => 'text',
 				'std'   => __( 'Products', 'woocommerce' ),
-				'label' => __( 'Title', 'woocommerce' )
+				'label' => __( 'Title', 'woocommerce' ),
 			),
 			'number' => array(
 				'type'  => 'number',
@@ -35,17 +35,17 @@ class WC_Widget_Products extends WC_Widget {
 				'min'   => 1,
 				'max'   => '',
 				'std'   => 5,
-				'label' => __( 'Number of products to show', 'woocommerce' )
+				'label' => __( 'Number of products to show', 'woocommerce' ),
 			),
 			'show' => array(
 				'type'  => 'select',
 				'std'   => '',
 				'label' => __( 'Show', 'woocommerce' ),
 				'options' => array(
-					''         => __( 'All Products', 'woocommerce' ),
-					'featured' => __( 'Featured Products', 'woocommerce' ),
-					'onsale'   => __( 'On-sale Products', 'woocommerce' ),
-				)
+					''         => __( 'All products', 'woocommerce' ),
+					'featured' => __( 'Featured products', 'woocommerce' ),
+					'onsale'   => __( 'On-sale products', 'woocommerce' ),
+				),
 			),
 			'orderby' => array(
 				'type'  => 'select',
@@ -56,7 +56,7 @@ class WC_Widget_Products extends WC_Widget {
 					'price'  => __( 'Price', 'woocommerce' ),
 					'rand'   => __( 'Random', 'woocommerce' ),
 					'sales'  => __( 'Sales', 'woocommerce' ),
-				)
+				),
 			),
 			'order' => array(
 				'type'  => 'select',
@@ -65,18 +65,18 @@ class WC_Widget_Products extends WC_Widget {
 				'options' => array(
 					'asc'  => __( 'ASC', 'woocommerce' ),
 					'desc' => __( 'DESC', 'woocommerce' ),
-				)
+				),
 			),
 			'hide_free' => array(
 				'type'  => 'checkbox',
 				'std'   => 0,
-				'label' => __( 'Hide free products', 'woocommerce' )
+				'label' => __( 'Hide free products', 'woocommerce' ),
 			),
 			'show_hidden' => array(
 				'type'  => 'checkbox',
 				'std'   => 0,
-				'label' => __( 'Show hidden products', 'woocommerce' )
-			)
+				'label' => __( 'Show hidden products', 'woocommerce' ),
+			),
 		);
 
 		parent::__construct();
@@ -89,10 +89,11 @@ class WC_Widget_Products extends WC_Widget {
 	 * @return WP_Query
 	 */
 	public function get_products( $args, $instance ) {
-		$number  = ! empty( $instance['number'] ) ? absint( $instance['number'] ) : $this->settings['number']['std'];
-		$show    = ! empty( $instance['show'] ) ? sanitize_title( $instance['show'] ) : $this->settings['show']['std'];
-		$orderby = ! empty( $instance['orderby'] ) ? sanitize_title( $instance['orderby'] ) : $this->settings['orderby']['std'];
-		$order   = ! empty( $instance['order'] ) ? sanitize_title( $instance['order'] ) : $this->settings['order']['std'];
+		$number                      = ! empty( $instance['number'] ) ? absint( $instance['number'] )           : $this->settings['number']['std'];
+		$show                        = ! empty( $instance['show'] ) ? sanitize_title( $instance['show'] )       : $this->settings['show']['std'];
+		$orderby                     = ! empty( $instance['orderby'] ) ? sanitize_title( $instance['orderby'] ) : $this->settings['orderby']['std'];
+		$order                       = ! empty( $instance['order'] ) ? sanitize_title( $instance['order'] )     : $this->settings['order']['std'];
+		$product_visibility_term_ids = wc_get_product_visibility_term_ids();
 
 		$query_args = array(
 			'posts_per_page' => $number,
@@ -100,11 +101,19 @@ class WC_Widget_Products extends WC_Widget {
 			'post_type'      => 'product',
 			'no_found_rows'  => 1,
 			'order'          => $order,
-			'meta_query'     => array()
+			'meta_query'     => array(),
+			'tax_query'      => array(
+				'relation' => 'AND',
+			),
 		);
 
 		if ( empty( $instance['show_hidden'] ) ) {
-			$query_args['meta_query'][] = WC()->query->visibility_meta_query();
+			$query_args['tax_query'][] = array(
+				'taxonomy' => 'product_visibility',
+				'field'    => 'term_taxonomy_id',
+				'terms'    => is_search() ? $product_visibility_term_ids['exclude-from-search'] : $product_visibility_term_ids['exclude-from-catalog'],
+				'operator' => 'NOT IN',
+			);
 			$query_args['post_parent']  = 0;
 		}
 
@@ -117,14 +126,23 @@ class WC_Widget_Products extends WC_Widget {
 			);
 		}
 
-		$query_args['meta_query'][] = WC()->query->stock_status_meta_query();
-		$query_args['meta_query']   = array_filter( $query_args['meta_query'] );
+		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+			$query_args['tax_query'] = array(
+				array(
+					'taxonomy' => 'product_visibility',
+					'field'    => 'term_taxonomy_id',
+					'terms'    => $product_visibility_term_ids['outofstock'],
+					'operator' => 'NOT IN',
+				),
+			);
+		}
 
 		switch ( $show ) {
 			case 'featured' :
-				$query_args['meta_query'][] = array(
-					'key'   => '_featured',
-					'value' => 'yes'
+				$query_args['tax_query'][] = array(
+					'taxonomy' => 'product_visibility',
+					'field'    => 'term_taxonomy_id',
+					'terms'    => $product_visibility_term_ids['featured'],
 				);
 				break;
 			case 'onsale' :
@@ -171,14 +189,19 @@ class WC_Widget_Products extends WC_Widget {
 		if ( ( $products = $this->get_products( $args, $instance ) ) && $products->have_posts() ) {
 			$this->widget_start( $args, $instance );
 
-			echo apply_filters( 'woocommerce_before_widget_product_list', '<ul class="product_list_widget">' );
+			echo wp_kses_post( apply_filters( 'woocommerce_before_widget_product_list', '<ul class="product_list_widget">' ) );
+
+			$template_args = array(
+				'widget_id'   => $args['widget_id'],
+				'show_rating' => true,
+			);
 
 			while ( $products->have_posts() ) {
 				$products->the_post();
-				wc_get_template( 'content-widget-product.php', array( 'show_rating' => false ) );
+				wc_get_template( 'content-widget-product.php', $template_args );
 			}
 
-			echo apply_filters( 'woocommerce_after_widget_product_list', '</ul>' );
+			echo wp_kses_post( apply_filters( 'woocommerce_after_widget_product_list', '</ul>' ) );
 
 			$this->widget_end( $args );
 		}

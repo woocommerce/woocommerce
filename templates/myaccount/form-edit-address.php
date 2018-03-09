@@ -10,48 +10,53 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see     http://docs.woothemes.com/document/template-structure/
+ * @see     https://docs.woocommerce.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates
- * @version 2.6.0
+ * @version 3.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$page_title = ( $load_address === 'billing' ) ? __( 'Billing Address', 'woocommerce' ) : __( 'Shipping Address', 'woocommerce' );
+$page_title = ( 'billing' === $load_address ) ? __( 'Billing address', 'woocommerce' ) : __( 'Shipping address', 'woocommerce' );
 
-wc_print_notices();
+do_action( 'woocommerce_before_edit_account_address_form' ); ?>
 
-wc_get_template( 'myaccount/navigation.php' ); ?>
+<?php if ( ! $load_address ) : ?>
+	<?php wc_get_template( 'myaccount/my-address.php' ); ?>
+<?php else : ?>
 
-<div class="my-account-content">
-	<?php if ( ! $load_address ) : ?>
-		<?php wc_get_template( 'myaccount/my-address.php' ); ?>
-	<?php else : ?>
+	<form method="post">
 
-		<form method="post">
+		<h3><?php echo apply_filters( 'woocommerce_my_account_edit_address_title', $page_title, $load_address ); ?></h3><?php // @codingStandardsIgnoreLine ?>
 
-			<h3><?php echo apply_filters( 'woocommerce_my_account_edit_address_title', $page_title ); ?></h3>
-
+		<div class="woocommerce-address-fields">
 			<?php do_action( "woocommerce_before_edit_address_form_{$load_address}" ); ?>
 
-			<?php foreach ( $address as $key => $field ) : ?>
-
-				<?php woocommerce_form_field( $key, $field, ! empty( $_POST[ $key ] ) ? wc_clean( $_POST[ $key ] ) : $field['value'] ); ?>
-
-			<?php endforeach; ?>
+			<div class="woocommerce-address-fields__field-wrapper">
+				<?php
+				foreach ( $address as $key => $field ) {
+					if ( isset( $field['country_field'], $address[ $field['country_field'] ] ) ) {
+						$field['country'] = wc_get_post_data_by_key( $field['country_field'], $address[ $field['country_field'] ]['value'] );
+					}
+					woocommerce_form_field( $key, $field, wc_get_post_data_by_key( $key, $field['value'] ) );
+				}
+				?>
+			</div>
 
 			<?php do_action( "woocommerce_after_edit_address_form_{$load_address}" ); ?>
 
 			<p>
-				<input type="submit" class="button" name="save_address" value="<?php esc_attr_e( 'Save Address', 'woocommerce' ); ?>" />
+				<button type="submit" class="button" name="save_address" value="<?php esc_attr_e( 'Save address', 'woocommerce' ); ?>"><?php esc_html_e( 'Save address', 'woocommerce' ); ?></button>
 				<?php wp_nonce_field( 'woocommerce-edit_address' ); ?>
 				<input type="hidden" name="action" value="edit_address" />
 			</p>
+		</div>
 
-		</form>
+	</form>
 
-	<?php endif; ?>
-</div>
+<?php endif; ?>
+
+<?php do_action( 'woocommerce_after_edit_account_address_form' ); ?>

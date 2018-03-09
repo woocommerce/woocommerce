@@ -10,7 +10,7 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see 	    http://docs.woothemes.com/document/template-structure/
+ * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates/Emails/Plain
  * @version     2.0.0
@@ -22,10 +22,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 echo "= " . $email_heading . " =\n\n";
 
-echo sprintf( __( "Thanks for creating an account on %s. Your username is <strong>%s</strong>", 'woocommerce' ), $blogname, $user_login ) . "\n\n";
+echo sprintf( __( 'Thanks for creating an account on %1$s. Your username is %2$s', 'woocommerce' ), $blogname, '<strong>' . $user_login . '</strong>' ) . "\n\n";
 
-if ( 'yes' === get_option( 'woocommerce_registration_generate_password' ) && $password_generated )
-	echo sprintf( __( "Your password is <strong>%s</strong>.", 'woocommerce' ), $user_pass ) . "\n\n";
+if ( 'yes' === get_option( 'woocommerce_registration_generate_password' ) && $password_generated ) {
+	echo sprintf( __( 'Your password is %s.', 'woocommerce' ), '<strong>' . $user_pass . '</strong>' ) . "\n\n";
+}
 
 echo sprintf( __( 'You can access your account area to view your orders and change your password here: %s.', 'woocommerce' ), wc_get_page_permalink( 'myaccount' ) ) . "\n\n";
 

@@ -2,12 +2,13 @@
 /**
  * Italy Provinces
  *
- * @author      WooThemes
- * @category    i18n
- * @package     WooCommerce/i18n
- * @version     2.0.0
+ * @package WooCommerce/i18n
+ * @version 2.0.0
  */
+
 global $states;
+
+defined( 'ABSPATH' ) || exit;
 
 $states['IT'] = array(
 	'AG' => __( 'Agrigento', 'woocommerce' ),
@@ -54,7 +55,7 @@ $states['IT'] = array(
 	'IM' => __( 'Imperia', 'woocommerce' ),
 	'IS' => __( 'Isernia', 'woocommerce' ),
 	'SP' => __( 'La Spezia', 'woocommerce' ),
-	'AQ' => __( 'L&apos;Aquila', 'woocommerce' ),
+	'AQ' => __( "L'Aquila", 'woocommerce' ),
 	'LT' => __( 'Latina', 'woocommerce' ),
 	'LE' => __( 'Lecce', 'woocommerce' ),
 	'LC' => __( 'Lecco', 'woocommerce' ),
@@ -119,5 +120,5 @@ $states['IT'] = array(
 	'VR' => __( 'Verona', 'woocommerce' ),
 	'VV' => __( 'Vibo Valentia', 'woocommerce' ),
 	'VI' => __( 'Vicenza', 'woocommerce' ),
-	'VT' => __( 'Viterbo', 'woocommerce' )
+	'VT' => __( 'Viterbo', 'woocommerce' ),
 );

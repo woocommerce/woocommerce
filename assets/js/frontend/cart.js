@@ -28,7 +28,7 @@ jQuery( function( $ ) {
 	 * @return {bool} True if the DOM Element is UI Blocked, false if not.
 	 */
 	var is_blocked = function( $node ) {
-		return $node.is( '.processing' );
+		return $node.is( '.processing' ) || $node.parents( '.processing' ).length;
 	};
 
 	/**
@@ -37,13 +37,15 @@ jQuery( function( $ ) {
 	 * @param {JQuery Object} $node
 	 */
 	var block = function( $node ) {
-		$node.addClass( 'processing' ).block( {
-			message: null,
-			overlayCSS: {
-				background: '#fff',
-				opacity: 0.6
-			}
-		} );
+		if ( ! is_blocked( $node ) ) {
+			$node.addClass( 'processing' ).block( {
+				message: null,
+				overlayCSS: {
+					background: '#fff',
+					opacity: 0.6
+				}
+			} );
+		}
 	};
 
 	/**
@@ -59,11 +61,67 @@ jQuery( function( $ ) {
 	 * Update the .woocommerce div with a string of html.
 	 *
 	 * @param {String} html_str The HTML string with which to replace the div.
+	 * @param {bool} preserve_notices Should notices be kept? False by default.
 	 */
-	var update_wc_div = function( html_str ) {
-		var $html = $.parseHTML( html_str );
-		var $new_div = $( 'div.woocommerce', $html );
-		$( 'div.woocommerce' ).replaceWith( $new_div );
+	var update_wc_div = function( html_str, preserve_notices ) {
+		var $html       = $.parseHTML( html_str );
+		var $new_form   = $( '.woocommerce-cart-form', $html );
+		var $new_totals = $( '.cart_totals', $html );
+		var $notices    = $( '.woocommerce-error, .woocommerce-message, .woocommerce-info', $html );
+
+		// No form, cannot do this.
+		if ( $( '.woocommerce-cart-form' ).length === 0 ) {
+			window.location.href = window.location.href;
+			return;
+		}
+
+		// Remove errors
+		if ( ! preserve_notices ) {
+			$( '.woocommerce-error, .woocommerce-message, .woocommerce-info' ).remove();
+		}
+
+		if ( $new_form.length === 0 ) {
+			// If the checkout is also displayed on this page, trigger reload instead.
+			if ( $( '.woocommerce-checkout' ).length ) {
+				window.location.href = window.location.href;
+				return;
+			}
+
+			// No items to display now! Replace all cart content.
+			var $cart_html = $( '.cart-empty', $html ).closest( '.woocommerce' );
+			$( '.woocommerce-cart-form__contents' ).closest( '.woocommerce' ).replaceWith( $cart_html );
+
+			// Display errors
+			if ( $notices.length > 0 ) {
+				show_notice( $notices, $( '.cart-empty' ).closest( '.woocommerce' ) );
+			}
+		} else {
+			// If the checkout is also displayed on this page, trigger update event.
+			if ( $( '.woocommerce-checkout' ).length ) {
+				$( document.body ).trigger( 'update_checkout' );
+			}
+
+			$( '.woocommerce-cart-form' ).replaceWith( $new_form );
+			$( '.woocommerce-cart-form' ).find( ':input[name="update_cart"]' ).prop( 'disabled', true );
+
+			if ( $notices.length > 0 ) {
+				show_notice( $notices );
+			}
+
+			update_cart_totals_div( $new_totals );
+		}
+
+		$( document.body ).trigger( 'updated_wc_div' );
+	};
+
+	/**
+	 * Update the .cart_totals div with a string of html.
+	 *
+	 * @param {String} html_str The HTML string with which to replace the div.
+	 */
+	var update_cart_totals_div = function( html_str ) {
+		$( '.cart_totals' ).replaceWith( html_str );
+		$( document.body ).trigger( 'updated_cart_totals' );
 	};
 
 	/**
@@ -71,11 +129,11 @@ jQuery( function( $ ) {
 	 *
 	 * @param {Object} The Notice HTML Element in string or object form.
 	 */
-	var show_notice = function( html_element ) {
-		var $form = $( 'div.woocommerce > form' );
-
-		$( '.woocommerce-error, .woocommerce-message' ).remove();
-		$form.before( html_element );
+	var show_notice = function( html_element, $target ) {
+		if ( ! $target ) {
+			$target = $( '.woocommerce-cart-form' );
+		}
+		$target.before( html_element );
 	};
 
 
@@ -87,9 +145,10 @@ jQuery( function( $ ) {
 		/**
 		 * Initialize event handlers and UI state.
 		 */
-		init: function() {
-			this.toggle_shipping = this.toggle_shipping.bind( this );
-			this.shipping_method_selected = this.shipping_method_selected.bind( this );
+		init: function( cart ) {
+			this.cart                       = cart;
+			this.toggle_shipping            = this.toggle_shipping.bind( this );
+			this.shipping_method_selected   = this.shipping_method_selected.bind( this );
 			this.shipping_calculator_submit = this.shipping_calculator_submit.bind( this );
 
 			$( document ).on(
@@ -99,7 +158,7 @@ jQuery( function( $ ) {
 			);
 			$( document ).on(
 				'change',
-				'select.shipping_method, input[name^=shipping_method]',
+				'select.shipping_method, :input[name^=shipping_method]',
 				this.shipping_method_selected
 			);
 			$( document ).on(
@@ -116,21 +175,18 @@ jQuery( function( $ ) {
 		 */
 		toggle_shipping: function() {
 			$( '.shipping-calculator-form' ).slideToggle( 'slow' );
+			$( document.body ).trigger( 'country_to_state_changed' ); // Trigger select2 to load.
 			return false;
 		},
 
 		/**
 		 * Handles when a shipping method is selected.
-		 *
-		 * @param {Object} evt The JQuery event.
 		 */
-		shipping_method_selected: function( evt ) {
-			var target = evt.target;
+		shipping_method_selected: function() {
+			var shipping_methods = {};
 
-			var shipping_methods = [];
-
-			$( 'select.shipping_method, input[name^=shipping_method][type=radio]:checked, input[name^=shipping_method][type=hidden]' ).each( function() {
-				shipping_methods[ $( target ).data( 'index' ) ] = $( target ).val();
+			$( 'select.shipping_method, :input[name^=shipping_method][type=radio]:checked, :input[name^=shipping_method][type=hidden]' ).each( function() {
+				shipping_methods[ $( this ).data( 'index' ) ] = $( this ).val();
 			} );
 
 			block( $( 'div.cart_totals' ) );
@@ -140,9 +196,18 @@ jQuery( function( $ ) {
 				shipping_method: shipping_methods
 			};
 
-			$.post( get_url( 'update_shipping_method' ), data, function( response ) {
-				$( 'div.cart_totals' ).replaceWith( response );
-				$( document.body ).trigger( 'updated_shipping_method' );
+			$.ajax( {
+				type:     'post',
+				url:      get_url( 'update_shipping_method' ),
+				data:     data,
+				dataType: 'html',
+				success:  function( response ) {
+					update_cart_totals_div( response );
+				},
+				complete: function() {
+					unblock( $( 'div.cart_totals' ) );
+					$( document.body ).trigger( 'updated_shipping_method' );
+				}
 			} );
 		},
 
@@ -154,15 +219,16 @@ jQuery( function( $ ) {
 		shipping_calculator_submit: function( evt ) {
 			evt.preventDefault();
 
-			var $form = $( evt.target );
+			var $form = $( evt.currentTarget );
 
+			block( $( 'div.cart_totals' ) );
 			block( $form );
 
 			// Provide the submit button value because wc-form-handler expects it.
 			$( '<input />' ).attr( 'type', 'hidden' )
-											.attr( 'name', 'calc_shipping' )
-											.attr( 'value', 'x' )
-											.appendTo( $form );
+							.attr( 'name', 'calc_shipping' )
+							.attr( 'value', 'x' )
+							.appendTo( $form );
 
 			// Make call to actual form post URL.
 			$.ajax( {
@@ -171,10 +237,11 @@ jQuery( function( $ ) {
 				data:     $form.serialize(),
 				dataType: 'html',
 				success:  function( response ) {
-					update_wc_div(response );
+					update_wc_div( response );
 				},
 				complete: function() {
 					unblock( $form );
+					unblock( $( 'div.cart_totals' ) );
 				}
 			} );
 		}
@@ -188,16 +255,31 @@ jQuery( function( $ ) {
 		 * Initialize cart UI events.
 		 */
 		init: function() {
-			this.update_cart_totals = this.update_cart_totals.bind( this );
-			this.cart_submit = this.cart_submit.bind( this );
-			this.apply_coupon = this.apply_coupon.bind( this );
+			this.update_cart_totals    = this.update_cart_totals.bind( this );
+			this.input_keypress        = this.input_keypress.bind( this );
+			this.cart_submit           = this.cart_submit.bind( this );
+			this.submit_click          = this.submit_click.bind( this );
+			this.apply_coupon          = this.apply_coupon.bind( this );
 			this.remove_coupon_clicked = this.remove_coupon_clicked.bind( this );
-			this.quantity_update = this.quantity_update.bind( this );
-			this.item_remove_clicked = this.item_remove_clicked.bind( this );
+			this.quantity_update       = this.quantity_update.bind( this );
+			this.item_remove_clicked   = this.item_remove_clicked.bind( this );
+			this.item_restore_clicked  = this.item_restore_clicked.bind( this );
+			this.update_cart           = this.update_cart.bind( this );
 
 			$( document ).on(
+				'wc_update_cart',
+				function() { cart.update_cart.apply( cart, [].slice.call( arguments, 1 ) ); } );
+			$( document ).on(
+				'click',
+				'.woocommerce-cart-form :input[type=submit]',
+				this.submit_click );
+			$( document ).on(
+				'keypress',
+				'.woocommerce-cart-form :input[type=number]',
+				this.input_keypress );
+			$( document ).on(
 				'submit',
-				'div.woocommerce > form',
+				'.woocommerce-cart-form',
 				this.cart_submit );
 			$( document ).on(
 				'click',
@@ -205,8 +287,50 @@ jQuery( function( $ ) {
 				this.remove_coupon_clicked );
 			$( document ).on(
 				'click',
-				'td.product-remove > a',
+				'.woocommerce-cart-form .product-remove > a',
 				this.item_remove_clicked );
+			$( document ).on(
+				'click',
+				'.woocommerce-cart .restore-item',
+				this.item_restore_clicked );
+			$( document ).on(
+				'change input',
+				'.woocommerce-cart-form .cart_item :input',
+				this.input_changed );
+
+			$( '.woocommerce-cart-form :input[name="update_cart"]' ).prop( 'disabled', true );
+		},
+
+		/**
+		 * After an input is changed, enable the update cart button.
+		 */
+		input_changed: function() {
+			$( '.woocommerce-cart-form :input[name="update_cart"]' ).prop( 'disabled', false );
+		},
+
+		/**
+		 * Update entire cart via ajax.
+		 */
+		update_cart: function( preserve_notices ) {
+			var $form = $( '.woocommerce-cart-form' );
+
+			block( $form );
+			block( $( 'div.cart_totals' ) );
+
+			// Make call to actual form post URL.
+			$.ajax( {
+				type:     $form.attr( 'method' ),
+				url:      $form.attr( 'action' ),
+				data:     $form.serialize(),
+				dataType: 'html',
+				success:  function( response ) {
+					update_wc_div( response, preserve_notices );
+				},
+				complete: function() {
+					unblock( $form );
+					unblock( $( 'div.cart_totals' ) );
+				}
+			} );
 		},
 
 		/**
@@ -218,10 +342,32 @@ jQuery( function( $ ) {
 			$.ajax( {
 				url:      get_url( 'get_cart_totals' ),
 				dataType: 'html',
-				success: function( response ) {
-					$( 'div.cart_totals' ).replaceWith( response );
+				success:  function( response ) {
+					update_cart_totals_div( response );
+				},
+				complete: function() {
+					unblock( $( 'div.cart_totals' ) );
 				}
 			} );
+		},
+
+		/**
+		 * Handle the <ENTER> key for quantity fields.
+		 *
+		 * @param {Object} evt The JQuery event
+		 *
+		 * For IE, if you hit enter on a quantity field, it makes the
+		 * document.activeElement the first submit button it finds.
+		 * For us, that is the Apply Coupon button. This is required
+		 * to catch the event before that happens.
+		 */
+		input_keypress: function( evt ) {
+
+			// Catch the enter key and don't let it submit the form.
+			if ( 13 === evt.keyCode ) {
+				evt.preventDefault();
+				this.cart_submit( evt );
+			}
 		},
 
 		/**
@@ -230,21 +376,42 @@ jQuery( function( $ ) {
 		 * @param {Object} evt The JQuery event
 		 */
 		cart_submit: function( evt ) {
-			evt.preventDefault();
+			var $submit  = $( document.activeElement ),
+				$clicked = $( ':input[type=submit][clicked=true]' ),
+				$form    = $( evt.currentTarget );
 
-			var $form = $( evt.target );
-			var $submit = $( document.activeElement );
+			// For submit events, currentTarget is form.
+			// For keypress events, currentTarget is input.
+			if ( ! $form.is( 'form' ) ) {
+				$form = $( evt.currentTarget ).parents( 'form' );
+			}
+
+			if ( 0 === $form.find( '.woocommerce-cart-form__contents' ).length ) {
+				return;
+			}
 
 			if ( is_blocked( $form ) ) {
 				return false;
 			}
 
-			if ( $submit.is( '[name="update_cart"]' ) || $submit.is( 'input.qty' ) ) {
+			if ( $clicked.is( ':input[name="update_cart"]' ) || $submit.is( 'input.qty' ) ) {
+				evt.preventDefault();
 				this.quantity_update( $form );
 
-			} else if ( $submit.is( '[name="apply_coupon"]' ) || $submit.is( '#coupon_code' ) ) {
+			} else if ( $clicked.is( ':input[name="apply_coupon"]' ) || $submit.is( '#coupon_code' ) ) {
+				evt.preventDefault();
 				this.apply_coupon( $form );
 			}
+		},
+
+		/**
+		 * Special handling to identify which submit button was clicked.
+		 *
+		 * @param {Object} evt The JQuery event
+		 */
+		submit_click: function( evt ) {
+			$( ':input[type=submit]', $( evt.target ).parents( 'form' ) ).removeAttr( 'clicked' );
+			$( evt.target ).attr( 'clicked', 'true' );
 		},
 
 		/**
@@ -270,12 +437,14 @@ jQuery( function( $ ) {
 				data:     data,
 				dataType: 'html',
 				success: function( response ) {
+					$( '.woocommerce-error, .woocommerce-message, .woocommerce-info' ).remove();
 					show_notice( response );
+					$( document.body ).trigger( 'applied_coupon', [ coupon_code ] );
 				},
 				complete: function() {
 					unblock( $form );
 					$text_field.val( '' );
-					cart.update_cart_totals();
+					cart.update_cart( true );
 				}
 			} );
 		},
@@ -288,11 +457,11 @@ jQuery( function( $ ) {
 		remove_coupon_clicked: function( evt ) {
 			evt.preventDefault();
 
-			var cart = this;
-			var $tr = $( evt.target ).parents( 'tr' );
-			var coupon = $( evt.target ).attr( 'data-coupon' );
+			var cart     = this;
+			var $wrapper = $( evt.currentTarget ).closest( '.cart_totals' );
+			var coupon   = $( evt.currentTarget ).attr( 'data-coupon' );
 
-			block( $tr.parents( 'table' ) );
+			block( $wrapper );
 
 			var data = {
 				security: wc_cart_params.remove_coupon_nonce,
@@ -305,11 +474,13 @@ jQuery( function( $ ) {
 				data:     data,
 				dataType: 'html',
 				success: function( response ) {
+					$( '.woocommerce-error, .woocommerce-message, .woocommerce-info' ).remove();
 					show_notice( response );
-					unblock( $tr.parents( 'table' ) );
+					$( document.body ).trigger( 'removed_coupon', [ coupon ] );
+					unblock( $wrapper );
 				},
 				complete: function() {
-					cart.update_cart_totals();
+					cart.update_cart( true );
 				}
 			} );
 		},
@@ -320,14 +491,14 @@ jQuery( function( $ ) {
 		 * @param {JQuery Object} $form The cart form.
 		 */
 		quantity_update: function( $form ) {
+			block( $form );
+			block( $( 'div.cart_totals' ) );
 
 			// Provide the submit button value because wc-form-handler expects it.
 			$( '<input />' ).attr( 'type', 'hidden' )
-											.attr( 'name', 'update_cart' )
-											.attr( 'value', 'Update Cart' )
-											.appendTo( $form );
-
-			block( $form );
+							.attr( 'name', 'update_cart' )
+							.attr( 'value', 'Update Cart' )
+							.appendTo( $form );
 
 			// Make call to actual form post URL.
 			$.ajax( {
@@ -335,9 +506,12 @@ jQuery( function( $ ) {
 				url:      $form.attr( 'action' ),
 				data:     $form.serialize(),
 				dataType: 'html',
-				success:  update_wc_div,
+				success:  function( response ) {
+					update_wc_div( response );
+				},
 				complete: function() {
 					unblock( $form );
+					unblock( $( 'div.cart_totals' ) );
 				}
 			} );
 		},
@@ -350,23 +524,55 @@ jQuery( function( $ ) {
 		item_remove_clicked: function( evt ) {
 			evt.preventDefault();
 
-			var $a = $( evt.target );
+			var $a = $( evt.currentTarget );
 			var $form = $a.parents( 'form' );
 
 			block( $form );
+			block( $( 'div.cart_totals' ) );
 
 			$.ajax( {
 				type:     'GET',
 				url:      $a.attr( 'href' ),
 				dataType: 'html',
-				success: update_wc_div,
+				success:  function( response ) {
+					update_wc_div( response );
+				},
 				complete: function() {
 					unblock( $form );
+					unblock( $( 'div.cart_totals' ) );
+				}
+			} );
+		},
+
+		/**
+		 * Handle when a restore item link is clicked.
+		 *
+		 * @param {Object} evt The JQuery event
+		 */
+		item_restore_clicked: function( evt ) {
+			evt.preventDefault();
+
+			var $a = $( evt.currentTarget );
+			var $form = $( 'form.woocommerce-cart-form' );
+
+			block( $form );
+			block( $( 'div.cart_totals' ) );
+
+			$.ajax( {
+				type:     'GET',
+				url:      $a.attr( 'href' ),
+				dataType: 'html',
+				success:  function( response ) {
+					update_wc_div( response );
+				},
+				complete: function() {
+					unblock( $form );
+					unblock( $( 'div.cart_totals' ) );
 				}
 			} );
 		}
 	};
 
-	cart_shipping.init();
+	cart_shipping.init( cart );
 	cart.init();
 } );

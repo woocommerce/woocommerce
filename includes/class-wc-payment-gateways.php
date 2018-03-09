@@ -48,7 +48,7 @@ class WC_Payment_Gateways {
 	 * @since 2.1
 	 */
 	public function __clone() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, __( 'Cloning is forbidden.', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -57,7 +57,7 @@ class WC_Payment_Gateways {
 	 * @since 2.1
 	 */
 	public function __wakeup() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, __( 'Unserializing instances of this class is forbidden.', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -78,17 +78,18 @@ class WC_Payment_Gateways {
 			'WC_Gateway_Paypal',
 		);
 
-		$simplify_countries = (array) apply_filters( 'woocommerce_gateway_simplify_commerce_supported_countries', array( 'US', 'IE' ) );
+		/**
+		 * Simplify Commerce is @deprecated in 2.6.0. Only load when enabled.
+		 */
+		if ( ! class_exists( 'WC_Gateway_Simplify_Commerce_Loader' ) && in_array( WC()->countries->get_base_country(), apply_filters( 'woocommerce_gateway_simplify_commerce_supported_countries', array( 'US', 'IE' ) ) ) ) {
+			$simplify_options = get_option( 'woocommerce_simplify_commerce_settings', array() );
 
-		if ( in_array( WC()->countries->get_base_country(), $simplify_countries ) ) {
-			if ( class_exists( 'WC_Subscriptions_Order' ) || class_exists( 'WC_Pre_Orders_Order' ) ) {
-				if ( ! function_exists( 'wcs_create_renewal_order' ) ) { // Subscriptions < 2.0
-					$load_gateways[] = 'WC_Addons_Gateway_Simplify_Commerce_Deprecated';
-				} else {
+			if ( ! empty( $simplify_options['enabled'] ) && 'yes' === $simplify_options['enabled'] ) {
+				if ( function_exists( 'wcs_create_renewal_order' ) ) {
 					$load_gateways[] = 'WC_Addons_Gateway_Simplify_Commerce';
+				} else {
+					$load_gateways[] = 'WC_Gateway_Simplify_Commerce';
 				}
-			} else {
-				$load_gateways[] = 'WC_Gateway_Simplify_Commerce';
 			}
 		}
 
@@ -118,8 +119,6 @@ class WC_Payment_Gateways {
 
 	/**
 	 * Get gateways.
-	 *
-	 * @access public
 	 * @return array
 	 */
 	public function payment_gateways() {
@@ -135,6 +134,15 @@ class WC_Payment_Gateways {
 	}
 
 	/**
+	 * Get array of registered gateway ids
+	 * @since 2.6.0
+	 * @return array of strings
+	 */
+	public function get_payment_gateway_ids() {
+		return wp_list_pluck( $this->payment_gateways, 'id' );
+	}
+
+	/**
 	 * Get available gateways.
 	 *
 	 * @return array
@@ -146,9 +154,7 @@ class WC_Payment_Gateways {
 			if ( $gateway->is_available() ) {
 				if ( ! is_add_payment_method_page() ) {
 					$_available_gateways[ $gateway->id ] = $gateway;
-				} else if( $gateway->supports( 'add_payment_method' ) ) {
-					$_available_gateways[ $gateway->id ] = $gateway;
-				} else if ( $gateway->supports( 'tokenization' ) ) {
+				} elseif ( $gateway->supports( 'add_payment_method' ) || $gateway->supports( 'tokenization' ) ) {
 					$_available_gateways[ $gateway->id ] = $gateway;
 				}
 			}
@@ -160,7 +166,7 @@ class WC_Payment_Gateways {
 	/**
 	 * Set the current, active gateway.
 	 *
-	 * @param array $gateway Available payment gateways.
+	 * @param array $gateways Available payment gateways.
 	 */
 	public function set_current_gateway( $gateways ) {
 		// Be on the defensive

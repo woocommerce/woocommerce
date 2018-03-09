@@ -1,13 +1,11 @@
 <?php
 
-namespace WooCommerce\Tests\Util;
-
 /**
  * Class Notice_Functions.
  * @package WooCommerce\Tests\Util
  * @since 2.2
  */
-class Notice_Functions extends \WC_Unit_Test_Case {
+class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 
 	/**
 	 * Clear out notices after each test.
@@ -37,10 +35,24 @@ class Notice_Functions extends \WC_Unit_Test_Case {
 		wc_add_notice( 'Bogus Error Notice', 'error' );
 		$this->assertEquals( 1, wc_notice_count( 'error' ) );
 
-		// multiple notices of different types
-		wc_add_notice( 'Bogus Notice 2', 'success' );
+		// multiple notices of different types.
+		wc_clear_notices();
+		wc_add_notice( 'Bogus 1', 'success' );
+		wc_add_notice( 'Bogus 2', 'success' );
+		wc_add_notice( 'Bogus Notice 1', 'notice' );
+		wc_add_notice( 'Bogus Notice 2', 'notice' );
+		wc_add_notice( 'Bogus Error Notice 1', 'error' );
 		wc_add_notice( 'Bogus Error Notice 2', 'error' );
-		$this->assertEquals( 4, wc_notice_count() );
+		$this->assertEquals( 6, wc_notice_count() );
+
+		// repeat with duplicates.
+		wc_add_notice( 'Bogus 1', 'success' );
+		wc_add_notice( 'Bogus 2', 'success' );
+		wc_add_notice( 'Bogus Notice 1', 'notice' );
+		wc_add_notice( 'Bogus Notice 2', 'notice' );
+		wc_add_notice( 'Bogus Error Notice 1', 'error' );
+		wc_add_notice( 'Bogus Error Notice 2', 'error' );
+		$this->assertEquals( 12, wc_notice_count() );
 	}
 
 	/**
@@ -128,7 +140,7 @@ class Notice_Functions extends \WC_Unit_Test_Case {
 	 */
 	public function test_wc_print_success_notice() {
 
-		$this->expectOutputString( '<div class="woocommerce-message">Success!</div>' );
+		$this->expectOutputString( '<div class="woocommerce-message" role="alert">Success!</div>' );
 
 		wc_print_notice( 'Success!' );
 	}
@@ -153,7 +165,7 @@ class Notice_Functions extends \WC_Unit_Test_Case {
 	public function test_wc_print_error_notice() {
 
 		// specific type
-		$this->expectOutputString( '<ul class="woocommerce-error"><li>Error!</li></ul>' );
+		$this->expectOutputString( '<ul class="woocommerce-error" role="alert"><li>Error!</li></ul>' );
 
 		wc_print_notice( 'Error!', 'error' );
 	}
@@ -183,5 +195,4 @@ class Notice_Functions extends \WC_Unit_Test_Case {
 		$this->assertInternalType( 'array', $notices );
 		$this->assertEmpty( $notices );
 	}
-
 }

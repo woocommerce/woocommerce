@@ -29,6 +29,8 @@ function wc_get_screen_ids() {
 		$wc_screen_id . '_page_wc-addons',
 		'toplevel_page_wc-reports',
 		'product_page_product_attributes',
+		'product_page_product_exporter',
+		'product_page_product_importer',
 		'edit-product',
 		'product',
 		'edit-shop_coupon',
@@ -36,12 +38,18 @@ function wc_get_screen_ids() {
 		'edit-product_cat',
 		'edit-product_tag',
 		'profile',
-		'user-edit'
+		'user-edit',
 	);
 
 	foreach ( wc_get_order_types() as $type ) {
 		$screen_ids[] = $type;
 		$screen_ids[] = 'edit-' . $type;
+	}
+
+	if ( $attributes = wc_get_attribute_taxonomies() ) {
+		foreach ( $attributes as $attribute ) {
+			$screen_ids[] = 'edit-' . wc_attribute_taxonomy_name( $attribute->attribute_name );
+		}
 	}
 
 	return apply_filters( 'woocommerce_screen_ids', $screen_ids );
@@ -50,21 +58,19 @@ function wc_get_screen_ids() {
 /**
  * Create a page and store the ID in an option.
  *
- * @param mixed $slug Slug for the new page
+ * @param mixed  $slug Slug for the new page
  * @param string $option Option name to store the page's ID
  * @param string $page_title (default: '') Title for the new page
  * @param string $page_content (default: '') Content for the new page
- * @param int $post_parent (default: 0) Parent for the new page
+ * @param int    $post_parent (default: 0) Parent for the new page
  * @return int page ID
  */
 function wc_create_page( $slug, $option = '', $page_title = '', $page_content = '', $post_parent = 0 ) {
 	global $wpdb;
 
-	$option_value     = get_option( $option );
+	$option_value = get_option( $option );
 
-	if ( $option_value > 0 ) {
-		$page_object = get_post( $option_value );
-
+	if ( $option_value > 0 && ( $page_object = get_post( $option_value ) ) ) {
 		if ( 'page' === $page_object->post_type && ! in_array( $page_object->post_status, array( 'pending', 'trash', 'future', 'auto-draft' ) ) ) {
 			// Valid page is already in place
 			return $page_object->ID;
@@ -100,10 +106,10 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 	if ( $trashed_page_found ) {
 		$page_id   = $trashed_page_found;
 		$page_data = array(
-			'ID'             => $page_id,
-			'post_status'    => 'publish',
+			'ID'          => $page_id,
+			'post_status' => 'publish',
 		);
-	 	wp_update_post( $page_data );
+		wp_update_post( $page_data );
 	} else {
 		$page_data = array(
 			'post_status'    => 'publish',
@@ -113,9 +119,9 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 			'post_title'     => $page_title,
 			'post_content'   => $page_content,
 			'post_parent'    => $post_parent,
-			'comment_status' => 'closed'
+			'comment_status' => 'closed',
 		);
-		$page_id = wp_insert_post( $page_data );
+		$page_id   = wp_insert_post( $page_data );
 	}
 
 	if ( $option ) {
@@ -134,8 +140,8 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
  */
 function woocommerce_admin_fields( $options ) {
 
-	if ( ! class_exists( 'WC_Admin_Settings' ) ) {
-		include 'class-wc-admin-settings.php';
+	if ( ! class_exists( 'WC_Admin_Settings', false ) ) {
+		include dirname( __FILE__ ) . '/class-wc-admin-settings.php';
 	}
 
 	WC_Admin_Settings::output_fields( $options );
@@ -145,14 +151,15 @@ function woocommerce_admin_fields( $options ) {
  * Update all settings which are passed.
  *
  * @param array $options
+ * @param array $data
  */
-function woocommerce_update_options( $options ) {
+function woocommerce_update_options( $options, $data = null ) {
 
-	if ( ! class_exists( 'WC_Admin_Settings' ) ) {
-		include 'class-wc-admin-settings.php';
+	if ( ! class_exists( 'WC_Admin_Settings', false ) ) {
+		include dirname( __FILE__ ) . '/class-wc-admin-settings.php';
 	}
 
-	WC_Admin_Settings::save_fields( $options );
+	WC_Admin_Settings::save_fields( $options, $data );
 }
 
 /**
@@ -164,235 +171,166 @@ function woocommerce_update_options( $options ) {
  */
 function woocommerce_settings_get_option( $option_name, $default = '' ) {
 
-	if ( ! class_exists( 'WC_Admin_Settings' ) ) {
-		include 'class-wc-admin-settings.php';
+	if ( ! class_exists( 'WC_Admin_Settings', false ) ) {
+		include dirname( __FILE__ ) . '/class-wc-admin-settings.php';
 	}
 
 	return WC_Admin_Settings::get_option( $option_name, $default );
 }
 
 /**
- * Save order items.
+ * Save order items. Uses the CRUD.
  *
  * @since 2.2
- * @param int $order_id Order ID
+ * @param int   $order_id Order ID
  * @param array $items Order items to save
  */
 function wc_save_order_items( $order_id, $items ) {
-	global $wpdb;
+	// Allow other plugins to check change in order items before they are saved.
+	do_action( 'woocommerce_before_save_order_items', $order_id, $items );
 
-	// Order items + fees
-	$subtotal     = 0;
-	$total        = 0;
-	$subtotal_tax = 0;
-	$total_tax    = 0;
-	$taxes        = array( 'items' => array(), 'shipping' => array() );
-
+	// Line items and fees.
 	if ( isset( $items['order_item_id'] ) ) {
-		$line_total = $line_subtotal = $line_tax = $line_subtotal_tax = array();
-
+		$data_keys = array(
+			'line_tax'             => array(),
+			'line_subtotal_tax'    => array(),
+			'order_item_name'      => null,
+			'order_item_qty'       => null,
+			'order_item_tax_class' => null,
+			'line_total'           => null,
+			'line_subtotal'        => null,
+		);
 		foreach ( $items['order_item_id'] as $item_id ) {
-
-			$item_id = absint( $item_id );
-
-			if ( isset( $items['order_item_name'][ $item_id ] ) ) {
-				$wpdb->update(
-					$wpdb->prefix . 'woocommerce_order_items',
-					array( 'order_item_name' => wc_clean( wp_unslash( $items['order_item_name'][ $item_id ] ) ) ),
-					array( 'order_item_id' => $item_id ),
-					array( '%s' ),
-					array( '%d' )
-				);
+			if ( ! $item = WC_Order_Factory::get_order_item( absint( $item_id ) ) ) {
+				continue;
 			}
 
-			if ( isset( $items['order_item_qty'][ $item_id ] ) ) {
-				wc_update_order_item_meta( $item_id, '_qty', wc_stock_amount( $items['order_item_qty'][ $item_id ] ) );
+			$item_data = array();
+
+			foreach ( $data_keys as $key => $default ) {
+				$item_data[ $key ] = isset( $items[ $key ][ $item_id ] ) ? wc_clean( wp_unslash( $items[ $key ][ $item_id ] ) ) : $default;
 			}
 
-			if ( isset( $items['order_item_tax_class'][ $item_id ] ) ) {
-				wc_update_order_item_meta( $item_id, '_tax_class', wc_clean( $items['order_item_tax_class'][ $item_id ] ) );
+			if ( '0' === $item_data['order_item_qty'] ) {
+				$item->delete();
+				continue;
 			}
 
-			// Get values. Subtotals might not exist, in which case copy value from total field
-			$line_total[ $item_id ]        = isset( $items['line_total'][ $item_id ] ) ? $items['line_total'][ $item_id ] : 0;
-			$line_subtotal[ $item_id ]     = isset( $items['line_subtotal'][ $item_id ] ) ? $items['line_subtotal'][ $item_id ] : $line_total[ $item_id ];
-			$line_tax[ $item_id ]          = isset( $items['line_tax'][ $item_id ] ) ? $items['line_tax'][ $item_id ] : array();
-			$line_subtotal_tax[ $item_id ] = isset( $items['line_subtotal_tax'][ $item_id ] ) ? $items['line_subtotal_tax'][ $item_id ] : $line_tax[ $item_id ];
-
-			// Format taxes
-			$line_taxes          = array_map( 'wc_format_decimal', $line_tax[ $item_id ] );
-			$line_subtotal_taxes = array_map( 'wc_format_decimal', $line_subtotal_tax[ $item_id ] );
-
-			// Update values
-			wc_update_order_item_meta( $item_id, '_line_subtotal', wc_format_decimal( $line_subtotal[ $item_id ] ) );
-			wc_update_order_item_meta( $item_id, '_line_total', wc_format_decimal( $line_total[ $item_id ] ) );
-			wc_update_order_item_meta( $item_id, '_line_subtotal_tax', array_sum( $line_subtotal_taxes ) );
-			wc_update_order_item_meta( $item_id, '_line_tax', array_sum( $line_taxes ) );
-
-			// Save line tax data - Since 2.2
-			wc_update_order_item_meta( $item_id, '_line_tax_data', array( 'total' => $line_taxes, 'subtotal' => $line_subtotal_taxes ) );
-			$taxes['items'][] = $line_taxes;
-
-			// Total up
-			$subtotal     += wc_format_decimal( $line_subtotal[ $item_id ] );
-			$total        += wc_format_decimal( $line_total[ $item_id ] );
-			$subtotal_tax += array_sum( $line_subtotal_taxes );
-			$total_tax    += array_sum( $line_taxes );
-
-			// Clear meta cache
-			wp_cache_delete( $item_id, 'order_item_meta' );
-		}
-	}
-
-	// Save meta
-	$meta_keys   = isset( $items['meta_key'] ) ? $items['meta_key'] : array();
-	$meta_values = isset( $items['meta_value'] ) ? $items['meta_value'] : array();
-
-	foreach ( $meta_keys as $id => $meta_key ) {
-		$meta_value = ( empty( $meta_values[ $id ] ) && ! is_numeric( $meta_values[ $id ] ) ) ? '' : $meta_values[ $id ];
-
-		// Delele blank item meta entries
-		if ( $meta_key === '' && $meta_value === '' ) {
-			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE meta_id = %d", $id ) );
-		} else {
-
-			$wpdb->update(
-				$wpdb->prefix . 'woocommerce_order_itemmeta',
+			$item->set_props(
 				array(
-					'meta_key'   => wp_unslash( $meta_key ),
-					'meta_value' => wp_unslash( $meta_value )
-				),
-				array( 'meta_id' => $id ),
-				array( '%s', '%s' ),
-				array( '%d' )
+					'name'      => $item_data['order_item_name'],
+					'quantity'  => $item_data['order_item_qty'],
+					'tax_class' => $item_data['order_item_tax_class'],
+					'total'     => $item_data['line_total'],
+					'subtotal'  => $item_data['line_subtotal'],
+					'taxes'     => array(
+						'total'    => $item_data['line_tax'],
+						'subtotal' => $item_data['line_subtotal_tax'],
+					),
+				)
 			);
+
+			if ( 'fee' === $item->get_type() ) {
+				$item->set_amount( $item_data['line_total'] );
+			}
+
+			if ( isset( $items['meta_key'][ $item_id ], $items['meta_value'][ $item_id ] ) ) {
+				foreach ( $items['meta_key'][ $item_id ] as $meta_id => $meta_key ) {
+					$meta_key   = substr( wp_unslash( $meta_key ), 0, 255 );
+					$meta_value = isset( $items['meta_value'][ $item_id ][ $meta_id ] ) ? wp_unslash( $items['meta_value'][ $item_id ][ $meta_id ] ) : '';
+
+					if ( '' === $meta_key && '' === $meta_value ) {
+						if ( ! strstr( $meta_id, 'new-' ) ) {
+							$item->delete_meta_data_by_mid( $meta_id );
+						}
+					} elseif ( strstr( $meta_id, 'new-' ) ) {
+						$item->add_meta_data( $meta_key, $meta_value, false );
+					} else {
+						$item->update_meta_data( $meta_key, $meta_value, $meta_id );
+					}
+				}
+			}
+
+			$item->save();
 		}
 	}
 
 	// Shipping Rows
-	$order_shipping = 0;
-
 	if ( isset( $items['shipping_method_id'] ) ) {
+		$data_keys = array(
+			'shipping_method'       => null,
+			'shipping_method_title' => null,
+			'shipping_cost'         => 0,
+			'shipping_taxes'        => array(),
+		);
 
 		foreach ( $items['shipping_method_id'] as $item_id ) {
-			$item_id      = absint( $item_id );
-			$method_id    = isset( $items['shipping_method'][ $item_id ] ) ? wc_clean( $items['shipping_method'][ $item_id ] ) : '';
-			$method_title = isset( $items['shipping_method_title'][ $item_id ] ) ? wc_clean( wp_unslash( $items['shipping_method_title'][ $item_id ] ) ) : '';
-			$cost         = isset( $items['shipping_cost'][ $item_id ] ) ? wc_format_decimal( $items['shipping_cost'][ $item_id ] ) : '';
-			$ship_taxes   = isset( $items['shipping_taxes'][ $item_id ] ) ? array_map( 'wc_format_decimal', $items['shipping_taxes'][ $item_id ] ) : array();
+			if ( ! $item = WC_Order_Factory::get_order_item( absint( $item_id ) ) ) {
+				continue;
+			}
 
-			$wpdb->update(
-				$wpdb->prefix . 'woocommerce_order_items',
-				array( 'order_item_name' => $method_title ),
-				array( 'order_item_id' => $item_id ),
-				array( '%s' ),
-				array( '%d' )
+			$item_data = array();
+
+			foreach ( $data_keys as $key => $default ) {
+				$item_data[ $key ] = isset( $items[ $key ][ $item_id ] ) ? wc_clean( wp_unslash( $items[ $key ][ $item_id ] ) ) : $default;
+			}
+
+			$item->set_props(
+				array(
+					'method_id'    => $item_data['shipping_method'],
+					'method_title' => $item_data['shipping_method_title'],
+					'total'        => $item_data['shipping_cost'],
+					'taxes'        => array(
+						'total' => $item_data['shipping_taxes'],
+					),
+				)
 			);
 
-			wc_update_order_item_meta( $item_id, 'method_id', $method_id );
-			wc_update_order_item_meta( $item_id, 'cost', $cost );
-			wc_update_order_item_meta( $item_id, 'taxes', $ship_taxes );
+			if ( isset( $items['meta_key'][ $item_id ], $items['meta_value'][ $item_id ] ) ) {
+				foreach ( $items['meta_key'][ $item_id ] as $meta_id => $meta_key ) {
+					$meta_value = isset( $items['meta_value'][ $item_id ][ $meta_id ] ) ? wp_unslash( $items['meta_value'][ $item_id ][ $meta_id ] ) : '';
 
-			$taxes['shipping'][] = $ship_taxes;
-
-			$order_shipping += $cost;
-		}
-	}
-
-	// Taxes
-	$order_taxes        = isset( $items['order_taxes'] ) ? $items['order_taxes'] : array();
-	$taxes_items        = array();
-	$taxes_shipping     = array();
-	$total_tax          = 0;
-	$total_shipping_tax = 0;
-
-	// Sum items taxes
-	foreach ( $taxes['items'] as $rates ) {
-
-		foreach ( $rates as $id => $value ) {
-
-			if ( isset( $taxes_items[ $id ] ) ) {
-				$taxes_items[ $id ] += $value;
-			} else {
-				$taxes_items[ $id ] = $value;
+					if ( '' === $meta_key && '' === $meta_value ) {
+						if ( ! strstr( $meta_id, 'new-' ) ) {
+							$item->delete_meta_data_by_mid( $meta_id );
+						}
+					} elseif ( strstr( $meta_id, 'new-' ) ) {
+						$item->add_meta_data( $meta_key, $meta_value, false );
+					} else {
+						$item->update_meta_data( $meta_key, $meta_value, $meta_id );
+					}
+				}
 			}
+
+			$item->save();
 		}
 	}
 
-	// Sum shipping taxes
-	foreach ( $taxes['shipping'] as $rates ) {
+	$order = wc_get_order( $order_id );
+	$order->update_taxes();
+	$order->calculate_totals( false );
 
-		foreach ( $rates as $id => $value ) {
-
-			if ( isset( $taxes_shipping[ $id ] ) ) {
-				$taxes_shipping[ $id ] += $value;
-			} else {
-				$taxes_shipping[ $id ] = $value;
-			}
-		}
-	}
-
-	// Update order taxes
-	foreach ( $order_taxes as $item_id => $rate_id ) {
-
-		if ( isset( $taxes_items[ $rate_id ] ) ) {
-			$_total = wc_format_decimal( $taxes_items[ $rate_id ] );
-			wc_update_order_item_meta( $item_id, 'tax_amount', $_total );
-
-			$total_tax += $_total;
-		}
-
-		if ( isset( $taxes_shipping[ $rate_id ] ) ) {
-			$_total = wc_format_decimal( $taxes_shipping[ $rate_id ] );
-			wc_update_order_item_meta( $item_id, 'shipping_tax_amount', $_total );
-
-			$total_shipping_tax += $_total;
-		}
-	}
-
-	// Update order shipping total
-	update_post_meta( $order_id, '_order_shipping', $order_shipping );
-
-	// Update cart discount from item totals
-	update_post_meta( $order_id, '_cart_discount', $subtotal - $total );
-	update_post_meta( $order_id, '_cart_discount_tax', $subtotal_tax - $total_tax );
-
-	// Update totals
-	update_post_meta( $order_id, '_order_total', wc_format_decimal( $items['_order_total'] ) );
-
-	// Update tax
-	update_post_meta( $order_id, '_order_tax', wc_format_decimal( $total_tax ) );
-	update_post_meta( $order_id, '_order_shipping_tax', wc_format_decimal( $total_shipping_tax ) );
-
-	// Remove old values
-	delete_post_meta( $order_id, '_shipping_method' );
-	delete_post_meta( $order_id, '_shipping_method_title' );
-
-	// Set the currency
-	add_post_meta( $order_id, '_order_currency', get_woocommerce_currency(), true );
-
-	// Update version after saving
-	update_post_meta( $order_id, '_order_version', WC_VERSION );
-
-	// inform other plugins that the items have been saved
+	// Inform other plugins that the items have been saved
 	do_action( 'woocommerce_saved_order_items', $order_id, $items );
 }
 
 /**
- * Display a WooCommerce help tip.
+ * Get HTML for some action buttons. Used in list tables.
  *
- * @since  2.5.0
- *
- * @param  string $tip        Help tip text
- * @param  bool   $allow_html Allow sanitized HTML if true or escape
+ * @since 3.3.0
+ * @param array $actions Actions to output.
  * @return string
  */
-function wc_help_tip( $tip, $allow_html = false ) {
-	if ( $allow_html ) {
-		$tip = wc_sanitize_tooltip( $tip );
-	} else {
-		$tip = esc_attr( $tip );
+function wc_render_action_buttons( $actions ) {
+	$actions_html = '';
+
+	foreach ( $actions as $action ) {
+		if ( isset( $action['group'] ) ) {
+			$actions_html .= '<div class="wc-action-button-group"><label>' . $action['group'] . '</label> <span class="wc-action-button-group__items">' . wc_render_action_buttons( $action['actions'] ) . '</span></div>';
+		} elseif ( isset( $action['action'], $action['url'], $action['name'] ) ) {
+			$actions_html .= sprintf( '<a class="button wc-action-button wc-action-button-%1$s %1$s" href="%2$s" aria-label="%3$s" title="%3$s">%4$s</a>', esc_attr( $action['action'] ), esc_url( $action['url'] ), esc_attr( isset( $action['title'] ) ? $action['title'] : $action['name'] ), esc_html( $action['name'] ) );
+		}
 	}
 
-	return '<span class="woocommerce-help-tip" data-tip="' . $tip . '"></span>';
+	return $actions_html;
 }

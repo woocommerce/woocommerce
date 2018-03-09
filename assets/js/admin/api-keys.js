@@ -1,4 +1,4 @@
-/*global jQuery, Backbone, _, woocommerce_admin_api_keys */
+/*global jQuery, Backbone, _, woocommerce_admin_api_keys, wcSetClipboard, wcClearClipboard */
 (function( $ ) {
 
 	var APIView = Backbone.View.extend({
@@ -49,8 +49,19 @@
 		 * Init TipTip
 		 */
 		initTipTip: function( css_class ) {
-			$( document.body ).on( 'aftercopy', css_class, function( e ) {
-				if ( true === e.success['text/plain'] ) {
+			$( document.body )
+				.on( 'click', css_class, function( evt ) {
+					evt.preventDefault();
+					if ( ! document.queryCommandSupported( 'copy' ) ) {
+						$( css_class ).parent().find( 'input' ).focus().select();
+						$( '#copy-error' ).text( woocommerce_admin_api_keys.clipboard_failed );
+					} else {
+						$( '#copy-error' ).text( '' );
+						wcClearClipboard();
+						wcSetClipboard( $.trim( $( this ).prev( 'input' ).val() ), $( css_class ) );
+					}
+				} )
+				.on( 'aftercopy', css_class, function() {
 					$( '#copy-error' ).text( '' );
 					$( css_class ).tipTip( {
 						'attribute':  'data-tip',
@@ -59,23 +70,11 @@
 						'fadeOut':    50,
 						'delay':      0
 					} ).focus();
-				} else {
+				} )
+				.on( 'aftercopyerror', css_class, function() {
 					$( css_class ).parent().find( 'input' ).focus().select();
 					$( '#copy-error' ).text( woocommerce_admin_api_keys.clipboard_failed );
-				}
-			} );
-
-			$( document.body ).on( 'click', css_class, function() {
-				$( css_class ).parent().find( 'input' ).focus().select();
-				$( '#copy-error' ).text( woocommerce_admin_api_keys.clipboard_failed );
-			} );
-
-			$( document.body ).on( 'copy', css_class, function( e ) {
-				$( '#copy-error' ).text( '' );
-				e.clipboardData.clearData();
-				e.clipboardData.setData( 'text/plain', $.trim( $( this ).prev( 'input' ).val() ) );
-				e.preventDefault();
-			} );
+				} );
 		},
 
 		/**

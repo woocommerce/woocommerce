@@ -20,15 +20,15 @@ class WC_Widget_Product_Tag_Cloud extends WC_Widget {
 	 */
 	public function __construct() {
 		$this->widget_cssclass    = 'woocommerce widget_product_tag_cloud';
-		$this->widget_description = __( 'Your most used product tags in cloud format.', 'woocommerce' );
+		$this->widget_description = __( 'A cloud of your most used product tags.', 'woocommerce' );
 		$this->widget_id          = 'woocommerce_product_tag_cloud';
-		$this->widget_name        = __( 'WooCommerce Product Tags', 'woocommerce' );
+		$this->widget_name        = __( 'Product Tag Cloud', 'woocommerce' );
 		$this->settings           = array(
 			'title'  => array(
 				'type'  => 'text',
-				'std'   => __( 'Product Tags', 'woocommerce' ),
-				'label' => __( 'Title', 'woocommerce' )
-			)
+				'std'   => __( 'Product tags', 'woocommerce' ),
+				'label' => __( 'Title', 'woocommerce' ),
+			),
 		);
 
 		parent::__construct();
@@ -54,7 +54,10 @@ class WC_Widget_Product_Tag_Cloud extends WC_Widget {
 
 		echo '<div class="tagcloud">';
 
-		wp_tag_cloud( apply_filters( 'woocommerce_product_tag_cloud_widget_args', array( 'taxonomy' => $current_taxonomy ) ) );
+		wp_tag_cloud( apply_filters( 'woocommerce_product_tag_cloud_widget_args', array(
+			'taxonomy' => $current_taxonomy,
+			'topic_count_text_callback' => array( $this, '_topic_count_text' ),
+		) ) );
 
 		echo '</div>';
 
@@ -69,5 +72,17 @@ class WC_Widget_Product_Tag_Cloud extends WC_Widget {
 	 */
 	public function _get_current_taxonomy( $instance ) {
 		return 'product_tag';
+	}
+
+	/**
+	 * Returns topic count text.
+	 *
+	 * @since 2.6.0
+	 * @param int $count
+	 * @return string
+	 */
+	public function _topic_count_text( $count ) {
+		/* translators: %s: product count */
+		return sprintf( _n( '%s product', '%s products', $count, 'woocommerce' ), number_format_i18n( $count ) );
 	}
 }

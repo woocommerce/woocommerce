@@ -3,23 +3,27 @@
 
 if [ $1 == 'before' ]; then
 
-	# composer install fails in PHP 5.2
-	[ $TRAVIS_PHP_VERSION == '5.2' ] && exit;
+	# Remove Xdebug from PHP runtime for all PHP version except 7.1 to speed up builds.
+	# We need Xdebug enabled in the PHP 7.1 build job as it is used to generate code coverage.
+	if [[ ${RUN_CODE_COVERAGE} != 1 ]]; then
+		phpenv config-rm xdebug.ini
+	fi
 
-	# install php-coveralls to send coverage info
-	composer init --require=satooshi/php-coveralls:0.7.0 -n
-	composer install --no-interaction
+	composer global require "phpunit/phpunit=6.*"
 
-elif [ $1 == 'after' ]; then
+	if [[ ${RUN_PHPCS} == 1 ]]; then
+		composer install
+	fi
 
-	# no Xdebug and therefore no coverage in PHP 5.2
-	[ $TRAVIS_PHP_VERSION == '5.2' ] && exit;
+fi
 
-	# send coverage data to coveralls
-	php vendor/bin/coveralls --verbose --exclude-no-stmt
+if [ $1 == 'after' ]; then
 
-	# get scrutinizer ocular and run it
-	wget https://scrutinizer-ci.com/ocular.phar
-	ocular.phar code-coverage:upload --format=php-clover ./tmp/clover.xml
+	if [[ ${RUN_CODE_COVERAGE} == 1 ]]; then
+		bash <(curl -s https://codecov.io/bash)
+		wget https://scrutinizer-ci.com/ocular.phar
+		chmod +x ocular.phar
+		php ocular.phar code-coverage:upload --format=php-clover coverage.clover
+	fi
 
 fi

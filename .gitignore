@@ -6,9 +6,14 @@ project.properties
 .project
 .settings*
 .idea
+.vscode
+*.sublime-project
+*.sublime-workspace
+.sublimelinterrc
 
 # Grunt
 /node_modules/
+none
 
 # Sass
 .sass-cache/
@@ -22,9 +27,20 @@ Thumbs.db
 # ApiGen
 /wc-apidocs/
 
+# Behat/CLI Tests
+tests/cli/installer
+tests/cli/composer.phar
+tests/cli/composer.lock
+tests/cli/composer.json
+tests/cli/vendor
+
 # Unit tests
 /tmp
 /tests/bin/tmp
+/tests/e2e-tests/config/local-*.json
 
 # Logs
 /logs
+
+# Composer
+/vendor/
