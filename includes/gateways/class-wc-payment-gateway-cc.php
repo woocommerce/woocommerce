@@ -1,4 +1,10 @@
 <?php
+/**
+ * Class WC_Payment_Gateway_CC file.
+ *
+ * @package WooCommerce\Gateways
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -8,7 +14,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since       2.6.0
  * @package     WooCommerce/Classes
- * @author      WooThemes
  */
 class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
 
@@ -35,7 +40,7 @@ class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
 	 * Gateways which support tokenization do not require names - we don't want the data to post to the server.
 	 *
 	 * @since  2.6.0
-	 * @param  string $name
+	 * @param  string $name Field name.
 	 * @return string
 	 */
 	public function field_name( $name ) {
@@ -79,7 +84,7 @@ class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
 			<?php do_action( 'woocommerce_credit_card_form_start', $this->id ); ?>
 			<?php
 			foreach ( $fields as $field ) {
-				echo $field;
+				echo $field; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 			}
 			?>
 			<?php do_action( 'woocommerce_credit_card_form_end', $this->id ); ?>
@@ -88,7 +93,7 @@ class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
 		<?php
 
 		if ( $this->supports( 'credit_card_form_cvc_on_saved_method' ) ) {
-			echo '<fieldset>' . $cvc_field . '</fieldset>';
+			echo '<fieldset>' . $cvc_field . '</fieldset>'; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 		}
 	}
 }
