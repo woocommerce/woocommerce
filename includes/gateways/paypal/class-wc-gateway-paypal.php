@@ -8,7 +8,6 @@
  * @extends     WC_Payment_Gateway
  * @version     2.3.0
  * @package     WooCommerce/Classes/Payment
- * @author      WooThemes
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -20,20 +19,29 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
-	/** @var bool Whether or not logging is enabled */
+	/**
+	 * Whether or not logging is enabled
+	 *
+	 * @var bool
+	 */
 	public static $log_enabled = false;
 
-	/** @var WC_Logger Logger instance */
+	/**
+	 * Logger instance
+	 *
+	 * @var WC_Logger
+	 */
 	public static $log = false;
 
 	/**
 	 * Constructor for the gateway.
 	 */
 	public function __construct() {
-		$this->id                 = 'paypal';
-		$this->has_fields         = false;
-		$this->order_button_text  = __( 'Proceed to PayPal', 'woocommerce' );
-		$this->method_title       = __( 'PayPal', 'woocommerce' );
+		$this->id                = 'paypal';
+		$this->has_fields        = false;
+		$this->order_button_text = __( 'Proceed to PayPal', 'woocommerce' );
+		$this->method_title      = __( 'PayPal', 'woocommerce' );
+		/* translators: %s: Link to WC system status page */
 		$this->method_description = sprintf( __( 'PayPal Standard sends customers to PayPal to enter their payment information. PayPal IPN requires fsockopen/cURL support to update order statuses after payment. Check the <a href="%s">system status</a> page for more details.', 'woocommerce' ), admin_url( 'admin.php?page=wc-status' ) );
 		$this->supports           = array(
 			'products',
@@ -56,6 +64,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		self::$log_enabled = $this->debug;
 
 		if ( $this->testmode ) {
+			/* translators: %s: Link to PayPal sandbox testing guide page */
 			$this->description .= ' ' . sprintf( __( 'SANDBOX ENABLED. You can use sandbox testing accounts only. See the <a href="%s">PayPal Sandbox Testing Guide</a> for more details.', 'woocommerce' ), 'https://developer.paypal.com/docs/classic/lifecycle/ug_sandbox/' );
 			$this->description  = trim( $this->description );
 		}
@@ -82,8 +91,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * Logging method.
 	 *
 	 * @param string $message Log message.
-	 * @param string $level   Optional. Default 'info'.
-	 *     emergency|alert|critical|error|warning|notice|info|debug
+	 * @param string $level Optional. Default 'info'. Possible values:
+	 *                      emergency|alert|critical|error|warning|notice|info|debug.
 	 */
 	public static function log( $message, $level = 'info' ) {
 		if ( self::$log_enabled ) {
@@ -115,7 +124,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	/**
 	 * Get the link for an icon based on country.
 	 *
-	 * @param  string $country
+	 * @param  string $country Country two letter code.
 	 * @return string
 	 */
 	protected function get_icon_url( $country ) {
@@ -123,9 +132,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$home_counties = array( 'BE', 'CZ', 'DK', 'HU', 'IT', 'JP', 'NL', 'NO', 'ES', 'SE', 'TR', 'IN' );
 		$countries     = array( 'DZ', 'AU', 'BH', 'BQ', 'BW', 'CA', 'CN', 'CW', 'FI', 'FR', 'DE', 'GR', 'HK', 'ID', 'JO', 'KE', 'KW', 'LU', 'MY', 'MA', 'OM', 'PH', 'PL', 'PT', 'QA', 'IE', 'RU', 'BL', 'SX', 'MF', 'SA', 'SG', 'SK', 'KR', 'SS', 'TW', 'TH', 'AE', 'GB', 'US', 'VN' );
 
-		if ( in_array( $country, $home_counties ) ) {
+		if ( in_array( $country, $home_counties, true ) ) {
 			return $url . '/webapps/mpp/home';
-		} elseif ( in_array( $country, $countries ) ) {
+		} elseif ( in_array( $country, $countries, true ) ) {
 			return $url . '/webapps/mpp/paypal-popup';
 		} else {
 			return $url . '/cgi-bin/webscr?cmd=xpt/Marketing/general/WIPaypal-outside';
@@ -208,7 +217,14 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return bool
 	 */
 	public function is_valid_for_use() {
-		return in_array( get_woocommerce_currency(), apply_filters( 'woocommerce_paypal_supported_currencies', array( 'AUD', 'BRL', 'CAD', 'MXN', 'NZD', 'HKD', 'SGD', 'USD', 'EUR', 'JPY', 'TRY', 'NOK', 'CZK', 'DKK', 'HUF', 'ILS', 'MYR', 'PHP', 'PLN', 'SEK', 'CHF', 'TWD', 'THB', 'GBP', 'RMB', 'RUB', 'INR' ) ) );
+		return in_array(
+			get_woocommerce_currency(),
+			apply_filters(
+				'woocommerce_paypal_supported_currencies',
+				array( 'AUD', 'BRL', 'CAD', 'MXN', 'NZD', 'HKD', 'SGD', 'USD', 'EUR', 'JPY', 'TRY', 'NOK', 'CZK', 'DKK', 'HUF', 'ILS', 'MYR', 'PHP', 'PLN', 'SEK', 'CHF', 'TWD', 'THB', 'GBP', 'RMB', 'RUB', 'INR' )
+			),
+			true
+		);
 	}
 
 	/**
@@ -222,7 +238,11 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			parent::admin_options();
 		} else {
 			?>
-			<div class="inline error"><p><strong><?php _e( 'Gateway disabled', 'woocommerce' ); ?></strong>: <?php _e( 'PayPal does not support your store currency.', 'woocommerce' ); ?></p></div>
+			<div class="inline error">
+				<p>
+					<strong><?php esc_html_e( 'Gateway disabled', 'woocommerce' ); ?></strong>: <?php esc_html_e( 'PayPal does not support your store currency.', 'woocommerce' ); ?>
+				</p>
+			</div>
 			<?php
 		}
 	}
@@ -237,7 +257,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	/**
 	 * Get the transaction URL.
 	 *
-	 * @param  WC_Order $order
+	 * @param  WC_Order $order Order object.
 	 * @return string
 	 */
 	public function get_transaction_url( $order ) {
@@ -252,7 +272,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	/**
 	 * Process the payment and return the result.
 	 *
-	 * @param  int $order_id
+	 * @param  int $order_id Order ID.
 	 * @return array
 	 */
 	public function process_payment( $order_id ) {
@@ -270,7 +290,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	/**
 	 * Can the order be refunded via PayPal?
 	 *
-	 * @param  WC_Order $order
+	 * @param  WC_Order $order Order object.
 	 * @return bool
 	 */
 	public function can_refund_order( $order ) {
@@ -292,9 +312,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	/**
 	 * Process a refund if supported.
 	 *
-	 * @param  int    $order_id
-	 * @param  float  $amount
-	 * @param  string $reason
+	 * @param  int    $order_id Order ID.
+	 * @param  float  $amount Refund amount.
+	 * @param  string $reason Refund reason.
 	 * @return bool|WP_Error
 	 */
 	public function process_refund( $order_id, $amount = null, $reason = '' ) {
@@ -316,21 +336,23 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		$this->log( 'Refund Result: ' . wc_print_r( $result, true ) );
 
-		switch ( strtolower( $result->ACK ) ) {
+		switch ( strtolower( $result->ACK ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
 			case 'success':
 			case 'successwithwarning':
-				$order->add_order_note( sprintf( __( 'Refunded %1$s - Refund ID: %2$s', 'woocommerce' ), $result->GROSSREFUNDAMT, $result->REFUNDTRANSACTIONID ) );
+				$order->add_order_note(
+					/* translators: 1: Refund amount, 2: Refund ID */
+					sprintf( __( 'Refunded %1$s - Refund ID: %2$s', 'woocommerce' ), $result->GROSSREFUNDAMT, $result->REFUNDTRANSACTIONID ) // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+				);
 				return true;
-			break;
 		}
 
-		return isset( $result->L_LONGMESSAGE0 ) ? new WP_Error( 'error', $result->L_LONGMESSAGE0 ) : false;
+		return isset( $result->L_LONGMESSAGE0 ) ? new WP_Error( 'error', $result->L_LONGMESSAGE0 ) : false; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
 	}
 
 	/**
 	 * Capture payment when the order is changed from on-hold to complete or processing
 	 *
-	 * @param  int $order_id
+	 * @param  int $order_id Order ID.
 	 */
 	public function capture_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
@@ -341,24 +363,29 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 			if ( is_wp_error( $result ) ) {
 				$this->log( 'Capture Failed: ' . $result->get_error_message(), 'error' );
+				/* translators: %s: Paypal gateway error message */
 				$order->add_order_note( sprintf( __( 'Payment could not captured: %s', 'woocommerce' ), $result->get_error_message() ) );
 				return;
 			}
 
 			$this->log( 'Capture Result: ' . wc_print_r( $result, true ) );
 
+			// phpcs:disable WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
 			if ( ! empty( $result->PAYMENTSTATUS ) ) {
 				switch ( $result->PAYMENTSTATUS ) {
 					case 'Completed':
+						/* translators: 1: Amount, 2: Authorization ID, 3: Transaction ID */
 						$order->add_order_note( sprintf( __( 'Payment of %1$s was captured - Auth ID: %2$s, Transaction ID: %3$s', 'woocommerce' ), $result->AMT, $result->AUTHORIZATIONID, $result->TRANSACTIONID ) );
 						update_post_meta( $order->get_id(), '_paypal_status', $result->PAYMENTSTATUS );
 						update_post_meta( $order->get_id(), '_transaction_id', $result->TRANSACTIONID );
 						break;
 					default:
+						/* translators: 1: Authorization ID, 2: Payment status */
 						$order->add_order_note( sprintf( __( 'Payment could not captured - Auth ID: %1$s, Status: %2$s', 'woocommerce' ), $result->AUTHORIZATIONID, $result->PAYMENTSTATUS ) );
 						break;
 				}
 			}
+			// phpcs:enable
 		}
 	}
 
