@@ -458,8 +458,9 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 				{ type: 'button', className: 'button wc-products-settings__footer-button', onClick: this.props.done_callback },
 				__('Done')
 			);
-			if (['specific', 'category', 'attribute'].includes(this.state.display) && !this.props.selected_display_setting.length) {
+			if (['', 'specific', 'category', 'attribute'].includes(this.state.display) && !this.props.selected_display_setting.length) {
 				var done_tooltips = {
+					'': __('Please make a selection'),
 					specific: __('Please search for and select products to display'),
 					category: __('Please select at least one category to display'),
 					attribute: __('Please select an attribute')
