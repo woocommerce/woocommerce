@@ -110,26 +110,28 @@ class WC_Shortcode_Products {
 	protected function parse_attributes( $attributes ) {
 		$attributes = $this->parse_legacy_attributes( $attributes );
 
-		$attributes = shortcode_atts( array(
-			'limit'          => '-1',      // Results limit.
-			'columns'        => '3',       // Number of columns.
-			'rows'           => '',        // Number of rows. If defined, limit will be ignored.
-			'orderby'        => 'title',   // menu_order, title, date, rand, price, popularity, rating, or id.
-			'order'          => 'ASC',     // ASC or DESC.
-			'ids'            => '',        // Comma separated IDs.
-			'skus'           => '',        // Comma separated SKUs.
-			'category'       => '',        // Comma separated category slugs or ids.
-			'cat_operator'   => 'IN',      // Operator to compare categories. Possible values are 'IN', 'NOT IN', 'AND'.
-			'attribute'      => '',        // Single attribute slug.
-			'terms'          => '',        // Comma separated term slugs or ids.
-			'terms_operator' => 'IN',      // Operator to compare terms. Possible values are 'IN', 'NOT IN', 'AND'.
-			'tag'            => '',        // Comma separated tag slugs.
-			'visibility'     => 'visible', // Possible values are 'visible', 'catalog', 'search', 'hidden'.
-			'class'          => '',        // HTML class.
-			'page'           => 1,         // Page for pagination.
-			'paginate'       => false,     // Should results be paginated.
-			'cache'          => true,      // Should shortcode output be cached.
-		), $attributes, $this->type );
+		$attributes = shortcode_atts(
+			array(
+				'limit'          => '-1',      // Results limit.
+				'columns'        => '3',       // Number of columns.
+				'rows'           => '',        // Number of rows. If defined, limit will be ignored.
+				'orderby'        => 'title',   // menu_order, title, date, rand, price, popularity, rating, or id.
+				'order'          => 'ASC',     // ASC or DESC.
+				'ids'            => '',        // Comma separated IDs.
+				'skus'           => '',        // Comma separated SKUs.
+				'category'       => '',        // Comma separated category slugs or ids.
+				'cat_operator'   => 'IN',      // Operator to compare categories. Possible values are 'IN', 'NOT IN', 'AND'.
+				'attribute'      => '',        // Single attribute slug.
+				'terms'          => '',        // Comma separated term slugs or ids.
+				'terms_operator' => 'IN',      // Operator to compare terms. Possible values are 'IN', 'NOT IN', 'AND'.
+				'tag'            => '',        // Comma separated tag slugs.
+				'visibility'     => 'visible', // Possible values are 'visible', 'catalog', 'search', 'hidden'.
+				'class'          => '',        // HTML class.
+				'page'           => 1,         // Page for pagination.
+				'paginate'       => false,     // Should results be paginated.
+				'cache'          => true,      // Should shortcode output be cached.
+			), $attributes, $this->type
+		);
 
 		if ( ! absint( $attributes['columns'] ) ) {
 			$attributes['columns'] = 3;
@@ -276,8 +278,8 @@ class WC_Shortcode_Products {
 	protected function set_attributes_query_args( &$query_args ) {
 		if ( ! empty( $this->attributes['attribute'] ) || ! empty( $this->attributes['terms'] ) ) {
 			$taxonomy = strstr( $this->attributes['attribute'], 'pa_' ) ? sanitize_title( $this->attributes['attribute'] ) : 'pa_' . sanitize_title( $this->attributes['attribute'] );
-			$terms = $this->attributes['terms'] ? array_map( 'sanitize_title', explode( ',', $this->attributes['terms'] ) ) : array();
-			$field = 'slug';
+			$terms    = $this->attributes['terms'] ? array_map( 'sanitize_title', explode( ',', $this->attributes['terms'] ) ) : array();
+			$field    = 'slug';
 
 			if ( $terms && is_numeric( $terms[0] ) ) {
 				$terms = array_map( 'absint', $terms );
@@ -286,10 +288,12 @@ class WC_Shortcode_Products {
 
 			// If no terms were specified get all products that are in the attribute taxonomy.
 			if ( ! $terms ) {
-				$terms = get_terms( array(
-					'taxonomy' => $taxonomy,
-					'fields' => 'ids',
-				) );
+				$terms = get_terms(
+					array(
+						'taxonomy' => $taxonomy,
+						'fields'   => 'ids',
+					)
+				);
 				$field = 'term_id';
 			}
 
@@ -311,11 +315,11 @@ class WC_Shortcode_Products {
 	protected function set_categories_query_args( &$query_args ) {
 		if ( ! empty( $this->attributes['category'] ) ) {
 			$categories = array_map( 'sanitize_title', explode( ',', $this->attributes['category'] ) );
-			$field = 'slug';
+			$field      = 'slug';
 
 			if ( is_numeric( $categories[0] ) ) {
 				$categories = array_map( 'absint', $categories );
-				$field = 'term_id';
+				$field      = 'term_id';
 			}
 
 			$query_args['tax_query'][] = array(
@@ -575,17 +579,19 @@ class WC_Shortcode_Products {
 			update_object_term_cache( $products->ids, 'product' );
 
 			// Setup the loop.
-			wc_setup_loop( array(
-				'columns'      => $columns,
-				'name'         => $this->type,
-				'is_shortcode' => true,
-				'is_search'    => false,
-				'is_paginated' => wc_string_to_bool( $this->attributes['paginate'] ),
-				'total'        => $products->total,
-				'total_pages'  => $products->total_pages,
-				'per_page'     => $products->per_page,
-				'current_page' => $products->current_page,
-			) );
+			wc_setup_loop(
+				array(
+					'columns'      => $columns,
+					'name'         => $this->type,
+					'is_shortcode' => true,
+					'is_search'    => false,
+					'is_paginated' => wc_string_to_bool( $this->attributes['paginate'] ),
+					'total'        => $products->total,
+					'total_pages'  => $products->total_pages,
+					'per_page'     => $products->per_page,
+					'current_page' => $products->current_page,
+				)
+			);
 
 			$original_post = $GLOBALS['post'];
 
