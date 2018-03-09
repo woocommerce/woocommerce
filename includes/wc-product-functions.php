@@ -688,17 +688,36 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
 		'srcset'  => false,
 		'sizes'   => false,
 	);
-	if ( $attachment = get_post( $attachment_id ) ) {
-		$props['title']   = trim( strip_tags( $attachment->post_title ) );
-		$props['caption'] = trim( strip_tags( $attachment->post_excerpt ) );
+	$attachment = get_post( $attachment_id );
+
+	if ( $attachment ) {
+		$props['title']   = wp_strip_all_tags( $attachment->post_title );
+		$props['caption'] = wp_strip_all_tags( $attachment->post_excerpt );
 		$props['url']     = wp_get_attachment_url( $attachment_id );
-		$props['alt']     = trim( strip_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) );
+
+		// Alt text.
+		$alt_text = array( wp_strip_all_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ), $props['caption'], wp_strip_all_tags( $attachment->post_title ) );
+
+		if ( $product ) {
+			$alt_text[] = wp_strip_all_tags( get_the_title( $product->ID ) );
+		}
+
+		$alt_text     = array_filter( $alt_text );
+		$props['alt'] = isset( $alt_text[0] ) ? $alt_text[0] : '';
 
 		// Large version.
 		$src                 = wp_get_attachment_image_src( $attachment_id, 'full' );
 		$props['full_src']   = $src[0];
 		$props['full_src_w'] = $src[1];
 		$props['full_src_h'] = $src[2];
+
+		// Gallery thumbnail.
+		$gallery_thumbnail                = wc_get_image_size( 'gallery_thumbnail' );
+		$gallery_thumbnail_size           = apply_filters( 'woocommerce_gallery_thumbnail_size', array( $gallery_thumbnail['width'], $gallery_thumbnail['height'] ) );
+		$src                              = wp_get_attachment_image_src( $attachment_id, $gallery_thumbnail_size );
+		$props['gallery_thumbnail_src']   = $src[0];
+		$props['gallery_thumbnail_src_w'] = $src[1];
+		$props['gallery_thumbnail_src_h'] = $src[2];
 
 		// Thumbnail version.
 		$src                 = wp_get_attachment_image_src( $attachment_id, 'woocommerce_thumbnail' );
@@ -713,11 +732,6 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
 		$props['src_h']  = $src[2];
 		$props['srcset'] = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $attachment_id, 'woocommerce_single' ) : false;
 		$props['sizes']  = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $attachment_id, 'woocommerce_single' ) : false;
-
-		// Alt text fallbacks.
-		$props['alt'] = empty( $props['alt'] ) ? $props['caption']                                               : $props['alt'];
-		$props['alt'] = empty( $props['alt'] ) ? trim( strip_tags( $attachment->post_title ) )                   : $props['alt'];
-		$props['alt'] = empty( $props['alt'] ) && $product ? trim( strip_tags( get_the_title( $product->ID ) ) ) : $props['alt'];
 	}
 	return $props;
 }

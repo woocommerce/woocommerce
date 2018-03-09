@@ -175,6 +175,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Correctly handle default ordering on the search page.
 * Fix - Fix default product category handling in installer.
 * Fix - Properly check slugs when updating attributes.
+* Fix - Use gallery thumbnail size for variation image switcher.
 * Tweak - Add extra data in order mobile view (status and date).
 * Tweak - Add profile link to order screen.
 
