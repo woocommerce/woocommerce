@@ -33,6 +33,14 @@ function wgpb_register_products_block() {
 		rand() // @todo Change this to WC_VERSION when merged into WooCommerce.
 	);
 
+	// Make the theme's column settings available.
+	$column_data = array(
+		'min_columns' => wc_get_theme_support( 'product_grid::min_columns', 1 ),
+		'max_columns' => wc_get_theme_support( 'product_grid::max_columns', 6 ),
+		'default_columns' => wc_get_default_products_per_row(),
+	);
+	wp_localize_script( 'woocommerce-products-block-editor', 'wc_theme_column_settings', $column_data );
+
 	wp_register_style(
 		'woocommerce-products-block-editor',
 		plugins_url( 'assets/css/gutenberg-products-block.css', __FILE__ ),
