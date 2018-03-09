@@ -3,7 +3,7 @@
  * Tag Cloud Widget.
  *
  * @package WooCommerce/Widgets
- * @version 2.3.0
+ * @version 3.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
