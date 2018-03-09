@@ -670,7 +670,7 @@ registerBlockType('woocommerce/products', {
    */
 		columns: {
 			type: 'number',
-			default: 3
+			default: wc_theme_column_settings.default_columns
 		},
 
 		/**
@@ -739,8 +739,8 @@ registerBlockType('woocommerce/products', {
 					onChange: function onChange(value) {
 						return setAttributes({ columns: value });
 					},
-					min: 1,
-					max: 6
+					min: wc_theme_column_settings.min_columns,
+					max: wc_theme_column_settings.max_columns
 				});
 			}
 
@@ -771,6 +771,7 @@ registerBlockType('woocommerce/products', {
    * @return Component
    */
 		function getToolbarControls() {
+
 			var layoutControls = [{
 				icon: 'list-view',
 				title: __('List View'),
@@ -790,16 +791,16 @@ registerBlockType('woocommerce/products', {
 			var editButton = [{
 				icon: 'edit',
 				title: __('Edit'),
-				onClick: function onClick() {
+				onClick: display ? function () {
 					return setAttributes({ edit_mode: !edit_mode });
-				},
+				} : function () {},
 				isActive: edit_mode
 			}];
 
 			return wp.element.createElement(
 				BlockControls,
 				{ key: 'controls' },
-				wp.element.createElement(Toolbar, { controls: layoutControls }),
+				wp.element.createElement(Toolbar, { controls: display ? layoutControls : [] }),
 				wp.element.createElement(Toolbar, { controls: editButton })
 			);
 		}

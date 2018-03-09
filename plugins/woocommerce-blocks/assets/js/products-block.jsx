@@ -411,7 +411,7 @@ registerBlockType( 'woocommerce/products', {
 		 */
 		columns: {
 			type: 'number',
-			default: 3,
+			default: wc_theme_column_settings.default_columns,
 		},
 
 		/**
@@ -469,8 +469,8 @@ registerBlockType( 'woocommerce/products', {
 						label={ __( 'Columns' ) }
 						value={ columns }
 						onChange={ ( value ) => setAttributes( { columns: value } ) }
-						min={ 1 }
-						max={ 6 }
+						min={ wc_theme_column_settings.min_columns }
+						max={ wc_theme_column_settings.max_columns }
 					/>
 				);					
 			}
@@ -496,6 +496,7 @@ registerBlockType( 'woocommerce/products', {
 		 * @return Component
 		 */
 		function getToolbarControls() {
+
 			const layoutControls = [
 				{
 					icon: 'list-view',
@@ -515,14 +516,14 @@ registerBlockType( 'woocommerce/products', {
 				{
 					icon: 'edit',
 					title: __( 'Edit' ),
-					onClick: () => setAttributes( { edit_mode: ! edit_mode } ),
+					onClick: display ? () => setAttributes( { edit_mode: ! edit_mode } ) : function(){},
 					isActive: edit_mode,
 				},
 			];
 
 			return (
 				<BlockControls key="controls">
-					<Toolbar controls={ layoutControls } />
+					<Toolbar controls={ display ? layoutControls : [] } />
 					<Toolbar controls={ editButton } />
 				</BlockControls>
 			);
