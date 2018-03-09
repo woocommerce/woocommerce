@@ -45,6 +45,8 @@ class WC_Privacy {
 		 * Carts for user ID/Sessions
 		 * File based logs containing their email e.g. from webhooks
 		 * Payment tokens?
+		 *
+		 * Ping tracker to anonomize data there as well.
 		 */
 	}
 
