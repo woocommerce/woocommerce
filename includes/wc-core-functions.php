@@ -1636,7 +1636,7 @@ function wc_get_logger() {
 	if ( null === $logger || ! is_a( $logger, $class ) ) {
 		$implements = class_implements( $class );
 
-		if ( is_array( $implements ) && in_array( 'WC_Logger_Interface', $implements ) ) {
+		if ( is_array( $implements ) && in_array( 'WC_Logger_Interface', $implements, true ) ) {
 			if ( is_object( $class ) ) {
 				$logger = $class;
 			} else {
@@ -2081,7 +2081,7 @@ function wc_decimal_to_fraction( $decimal ) {
  */
 function wc_round_discount( $value, $precision ) {
 	if ( version_compare( PHP_VERSION, '5.3.0', '>=' ) ) {
-		return round( $value, $precision, WC_DISCOUNT_ROUNDING_MODE );
+		return round( $value, $precision, WC_DISCOUNT_ROUNDING_MODE ); // phpcs:ignore PHPCompatibility.PHP.NewFunctionParameters.round_modeFound
 	} elseif ( 2 === WC_DISCOUNT_ROUNDING_MODE ) {
 		return wc_legacy_round_half_down( $value, $precision );
 	} else {
