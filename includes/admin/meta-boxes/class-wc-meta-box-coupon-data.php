@@ -257,7 +257,7 @@ class WC_Meta_Box_Coupon_Data {
 						'id'                => 'customer_email',
 						'label'             => __( 'Email restrictions', 'woocommerce' ),
 						'placeholder'       => __( 'No restrictions', 'woocommerce' ),
-						'description'       => __( 'List of allowed emails to check against the customer billing email when an order is placed. Separate email addresses with commas.', 'woocommerce' ),
+						'description'       => __( 'List of allowed emails to check against the customer billing email when an order is placed. Separate email addresses with commas. You can also use an asterisk (*) to match parts of an email. For example "*@gmail.com" would match all gmail addresses.', 'woocommerce' ),
 						'value'             => implode( ', ', (array) $coupon->get_email_restrictions() ),
 						'desc_tip'          => true,
 						'type'              => 'email',
