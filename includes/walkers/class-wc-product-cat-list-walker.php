@@ -2,19 +2,19 @@
 /**
  * WC_Product_Cat_List_Walker class
  *
- * @extends 	Walker
- * @class 		WC_Product_Cat_Dropdown_Walker
- * @version		2.3.0
- * @package		WooCommerce/Classes/Walkers
- * @author 		WooThemes
+ * @package WooCommerce/Classes/Walkers
+ * @version 2.3.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+defined( 'ABSPATH' ) || exit;
+
+if ( class_exists( 'WC_Product_Cat_List_Walker', false ) ) {
+	return;
 }
 
-if ( ! class_exists( 'WC_Product_Cat_List_Walker', false ) ) :
-
+/**
+ * Product cat list walker class.
+ */
 class WC_Product_Cat_List_Walker extends Walker {
 
 	/**
@@ -42,15 +42,15 @@ class WC_Product_Cat_List_Walker extends Walker {
 	 * @since 2.1.0
 	 *
 	 * @param string $output Passed by reference. Used to append additional content.
-	 * @param int $depth Depth of category. Used for tab indentation.
-	 * @param array $args Will only append content if style argument value is 'list'.
+	 * @param int    $depth Depth of category. Used for tab indentation.
+	 * @param array  $args Will only append content if style argument value is 'list'.
 	 */
 	public function start_lvl( &$output, $depth = 0, $args = array() ) {
-		if ( 'list' != $args['style'] ) {
+		if ( 'list' !== $args['style'] ) {
 			return;
 		}
 
-		$indent = str_repeat( "\t", $depth );
+		$indent  = str_repeat( "\t", $depth );
 		$output .= "$indent<ul class='children'>\n";
 	}
 
@@ -61,15 +61,15 @@ class WC_Product_Cat_List_Walker extends Walker {
 	 * @since 2.1.0
 	 *
 	 * @param string $output Passed by reference. Used to append additional content.
-	 * @param int $depth Depth of category. Used for tab indentation.
-	 * @param array $args Will only append content if style argument value is 'list'.
+	 * @param int    $depth Depth of category. Used for tab indentation.
+	 * @param array  $args Will only append content if style argument value is 'list'.
 	 */
 	public function end_lvl( &$output, $depth = 0, $args = array() ) {
-		if ( 'list' != $args['style'] ) {
+		if ( 'list' !== $args['style'] ) {
 			return;
 		}
 
-		$indent = str_repeat( "\t", $depth );
+		$indent  = str_repeat( "\t", $depth );
 		$output .= "$indent</ul>\n";
 	}
 
@@ -79,16 +79,18 @@ class WC_Product_Cat_List_Walker extends Walker {
 	 * @see Walker::start_el()
 	 * @since 2.1.0
 	 *
-	 * @param string $output Passed by reference. Used to append additional content.
-	 * @param object $cat
-	 * @param int $depth Depth of category in reference to parents.
-	 * @param array $args
-	 * @param integer $current_object_id
+	 * @param string  $output            Passed by reference. Used to append additional content.
+	 * @param object  $cat               Category.
+	 * @param int     $depth             Depth of category in reference to parents.
+	 * @param array   $args              Arguments.
+	 * @param integer $current_object_id Current object ID.
 	 */
 	public function start_el( &$output, $cat, $depth = 0, $args = array(), $current_object_id = 0 ) {
-		$output .= '<li class="cat-item cat-item-' . $cat->term_id;
+		$cat_id = intval( $cat->term_id );
 
-		if ( $args['current_category'] == $cat->term_id ) {
+		$output .= '<li class="cat-item cat-item-' . $cat_id;
+
+		if ( $args['current_category'] === $cat_id ) {
 			$output .= ' current-cat';
 		}
 
@@ -96,11 +98,11 @@ class WC_Product_Cat_List_Walker extends Walker {
 			$output .= ' cat-parent';
 		}
 
-		if ( $args['current_category_ancestors'] && $args['current_category'] && in_array( $cat->term_id, $args['current_category_ancestors'] ) ) {
+		if ( $args['current_category_ancestors'] && $args['current_category'] && in_array( $cat_id, $args['current_category_ancestors'], true ) ) {
 			$output .= ' current-cat-parent';
 		}
 
-		$output .= '"><a href="' . get_term_link( (int) $cat->term_id, $this->tree_type ) . '">' . _x( $cat->name, 'product category name', 'woocommerce' ) . '</a>';
+		$output .= '"><a href="' . get_term_link( $cat_id, $this->tree_type ) . '">' . apply_filters( 'list_product_cats', $cat->name, $cat ) . '</a>';
 
 		if ( $args['show_count'] ) {
 			$output .= ' <span class="count">(' . $cat->count . ')</span>';
@@ -114,9 +116,9 @@ class WC_Product_Cat_List_Walker extends Walker {
 	 * @since 2.1.0
 	 *
 	 * @param string $output Passed by reference. Used to append additional content.
-	 * @param object $cat
-	 * @param int $depth Depth of category. Not used.
-	 * @param array $args Only uses 'list' for whether should append to output.
+	 * @param object $cat    Category.
+	 * @param int    $depth  Depth of category. Not used.
+	 * @param array  $args   Only uses 'list' for whether should append to output.
 	 */
 	public function end_el( &$output, $cat, $depth = 0, $args = array() ) {
 		$output .= "</li>\n";
@@ -134,12 +136,12 @@ class WC_Product_Cat_List_Walker extends Walker {
 	 *
 	 * @since 2.5.0
 	 *
-	 * @param object $element Data object
-	 * @param array $children_elements List of elements to continue traversing.
-	 * @param int $max_depth Max depth to traverse.
-	 * @param int $depth Depth of current element.
-	 * @param array $args
-	 * @param string $output Passed by reference. Used to append additional content.
+	 * @param object $element           Data object.
+	 * @param array  $children_elements List of elements to continue traversing.
+	 * @param int    $max_depth         Max depth to traverse.
+	 * @param int    $depth             Depth of current element.
+	 * @param array  $args              Arguments.
+	 * @param string $output            Passed by reference. Used to append additional content.
 	 * @return null Null on failure with no changes to parameters.
 	 */
 	public function display_element( $element, &$children_elements, $max_depth, $depth = 0, $args, &$output ) {
@@ -149,5 +151,3 @@ class WC_Product_Cat_List_Walker extends Walker {
 		parent::display_element( $element, $children_elements, $max_depth, $depth, $args, $output );
 	}
 }
-
-endif;
