@@ -4,15 +4,11 @@
  *
  * Functions for REST specific things.
  *
- * @author   WooThemes
- * @category Core
- * @package  WooCommerce/Functions
- * @version  2.6.0
+ * @package WooCommerce/Functions
+ * @version 2.6.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Parses and formats a date for ISO8601/RFC3339.
@@ -21,8 +17,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * See https://developer.wordpress.org/reference/functions/mysql_to_rfc3339/
  *
  * @since  2.6.0
- * @param  string|null|WC_DateTime $date
- * @param  bool Send false to get local/offset time.
+ * @param  string|null|WC_DateTime $date Date.
+ * @param  bool                    $utc  Send false to get local/offset time.
  * @return string|null ISO8601/RFC3339 formatted datetime.
  */
 function wc_rest_prepare_date_response( $date, $utc = true ) {
@@ -44,33 +40,37 @@ function wc_rest_prepare_date_response( $date, $utc = true ) {
 
 /**
  * Returns image mime types users are allowed to upload via the API.
+ *
  * @since  2.6.4
  * @return array
  */
 function wc_rest_allowed_image_mime_types() {
-	return apply_filters( 'woocommerce_rest_allowed_image_mime_types', array(
-		'jpg|jpeg|jpe' => 'image/jpeg',
-		'gif'          => 'image/gif',
-		'png'          => 'image/png',
-		'bmp'          => 'image/bmp',
-		'tiff|tif'     => 'image/tiff',
-		'ico'          => 'image/x-icon',
-	) );
+	return apply_filters(
+		'woocommerce_rest_allowed_image_mime_types', array(
+			'jpg|jpeg|jpe' => 'image/jpeg',
+			'gif'          => 'image/gif',
+			'png'          => 'image/png',
+			'bmp'          => 'image/bmp',
+			'tiff|tif'     => 'image/tiff',
+			'ico'          => 'image/x-icon',
+		)
+	);
 }
 
 /**
  * Upload image from URL.
  *
  * @since 2.6.0
- * @param string $image_url
+ * @param string $image_url Image URL.
  * @return array|WP_Error Attachment data or error message.
  */
 function wc_rest_upload_image_from_url( $image_url ) {
 	$file_name  = basename( current( explode( '?', $image_url ) ) );
-	$parsed_url = @parse_url( $image_url );
+	$parsed_url = wp_parse_url( $image_url );
 
 	// Check parsed URL.
 	if ( ! $parsed_url || ! is_array( $parsed_url ) ) {
+		/* translators: %s: image URL */
 		return new WP_Error( 'woocommerce_rest_invalid_image_url', sprintf( __( 'Invalid URL %s.', 'woocommerce' ), $image_url ), array( 'status' => 400 ) );
 	}
 
@@ -78,13 +78,21 @@ function wc_rest_upload_image_from_url( $image_url ) {
 	$image_url = esc_url_raw( $image_url );
 
 	// Get the file.
-	$response = wp_safe_remote_get( $image_url, array(
-		'timeout' => 10,
-	) );
+	$response = wp_safe_remote_get(
+		$image_url, array(
+			'timeout' => 10,
+		)
+	);
 
 	if ( is_wp_error( $response ) ) {
-		return new WP_Error( 'woocommerce_rest_invalid_remote_image_url', sprintf( __( 'Error getting remote image %s.', 'woocommerce' ), $image_url ) . ' ' . sprintf( __( 'Error: %s.', 'woocommerce' ), $response->get_error_message() ), array( 'status' => 400 ) );
+		return new WP_Error( 'woocommerce_rest_invalid_remote_image_url',
+			/* translators: %s: image URL */
+			sprintf( __( 'Error getting remote image %s.', 'woocommerce' ), $image_url ) . ' '
+			/* translators: %s: error message */
+			. sprintf( __( 'Error: %s.', 'woocommerce' ), $response->get_error_message() ), array( 'status' => 400 )
+		);
 	} elseif ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
+		/* translators: %s: image URL */
 		return new WP_Error( 'woocommerce_rest_invalid_remote_image_url', sprintf( __( 'Error getting remote image %s.', 'woocommerce' ), $image_url ), array( 'status' => 400 ) );
 	}
 
@@ -102,7 +110,7 @@ function wc_rest_upload_image_from_url( $image_url ) {
 		}
 		unset( $headers );
 
-		// Recheck filetype
+		// Recheck filetype.
 		$wp_filetype = wp_check_filetype( $file_name, wc_rest_allowed_image_mime_types() );
 
 		if ( ! $wp_filetype['type'] ) {
@@ -120,8 +128,8 @@ function wc_rest_upload_image_from_url( $image_url ) {
 	// Get filesize.
 	$filesize = filesize( $upload['file'] );
 
-	if ( 0 == $filesize ) {
-		@unlink( $upload['file'] );
+	if ( ! $filesize ) {
+		@unlink( $upload['file'] ); // @codingStandardsIgnoreLine
 		unset( $upload );
 
 		return new WP_Error( 'woocommerce_rest_image_upload_file_error', __( 'Zero size file downloaded.', 'woocommerce' ), array( 'status' => 400 ) );
@@ -137,7 +145,7 @@ function wc_rest_upload_image_from_url( $image_url ) {
  *
  * @since 2.6.0
  * @param array $upload Upload information from wp_upload_bits.
- * @param int $id Post ID. Default to 0.
+ * @param int   $id Post ID. Default to 0.
  * @return int Attachment ID
  */
 function wc_rest_set_uploaded_image_as_attachment( $upload, $id = 0 ) {
@@ -146,10 +154,11 @@ function wc_rest_set_uploaded_image_as_attachment( $upload, $id = 0 ) {
 	$content = '';
 
 	if ( ! function_exists( 'wp_generate_attachment_metadata' ) ) {
-		include_once( ABSPATH . 'wp-admin/includes/image.php' );
+		include_once ABSPATH . 'wp-admin/includes/image.php';
 	}
 
-	if ( $image_meta = wp_read_image_metadata( $upload['file'] ) ) {
+	$image_meta = wp_read_image_metadata( $upload['file'] );
+	if ( $image_meta ) {
 		if ( trim( $image_meta['title'] ) && ! is_numeric( sanitize_title( $image_meta['title'] ) ) ) {
 			$title = wc_clean( $image_meta['title'] );
 		}
@@ -178,9 +187,9 @@ function wc_rest_set_uploaded_image_as_attachment( $upload, $id = 0 ) {
  * Validate reports request arguments.
  *
  * @since 2.6.0
- * @param mixed $value
- * @param WP_REST_Request $request
- * @param string $param
+ * @param mixed           $value   Value to valdate.
+ * @param WP_REST_Request $request Request instance.
+ * @param string          $param   Param to validate.
  * @return WP_Error|boolean
  */
 function wc_rest_validate_reports_request_arg( $value, $request, $param ) {
@@ -192,6 +201,7 @@ function wc_rest_validate_reports_request_arg( $value, $request, $param ) {
 	$args = $attributes['args'][ $param ];
 
 	if ( 'string' === $args['type'] && ! is_string( $value ) ) {
+		/* translators: 1: param 2: type */
 		return new WP_Error( 'woocommerce_rest_invalid_param', sprintf( __( '%1$s is not of type %2$s', 'woocommerce' ), $param, 'string' ) );
 	}
 
@@ -243,9 +253,9 @@ function wc_rest_check_post_permissions( $post_type, $context = 'read', $object_
 	if ( 'revision' === $post_type ) {
 		$permission = false;
 	} else {
-		$cap = $contexts[ $context ];
+		$cap              = $contexts[ $context ];
 		$post_type_object = get_post_type_object( $post_type );
-		$permission = current_user_can( $post_type_object->cap->$cap, $object_id );
+		$permission       = current_user_can( $post_type_object->cap->$cap, $object_id );
 	}
 
 	return apply_filters( 'woocommerce_rest_check_permissions', $permission, $context, $object_id, $post_type );
@@ -291,9 +301,9 @@ function wc_rest_check_product_term_permissions( $taxonomy, $context = 'read', $
 		'batch'  => 'edit_terms',
 	);
 
-	$cap = $contexts[ $context ];
+	$cap             = $contexts[ $context ];
 	$taxonomy_object = get_taxonomy( $taxonomy );
-	$permission = current_user_can( $taxonomy_object->cap->$cap, $object_id );
+	$permission      = current_user_can( $taxonomy_object->cap->$cap, $object_id );
 
 	return apply_filters( 'woocommerce_rest_check_permissions', $permission, $context, $object_id, $taxonomy );
 }

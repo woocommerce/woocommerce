@@ -824,8 +824,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$outofstock_where = ' AND exclude_join.object_id IS NULL';
 		}
 
-		// @codingStandardsIgnoreStart.
 		return $wpdb->get_results(
+			// phpcs:disable WordPress.WP.PreparedSQL.NotPrepared
 			$wpdb->prepare(
 				"SELECT post.ID as id, post.post_parent as parent_id FROM `$wpdb->posts` AS post
 				LEFT JOIN `$wpdb->postmeta` AS meta ON post.ID = meta.post_id
@@ -843,8 +843,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				$decimals,
 				$decimals
 			)
+			// phpcs:enable
 		);
-		// @codingStandardsIgnoreEnd.
 	}
 
 	/**

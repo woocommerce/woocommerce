@@ -13,6 +13,7 @@
 		this.variationData        = $form.data( 'product_variations' );
 		this.useAjax              = false === this.variationData;
 		this.xhr                  = false;
+		this.loading              = true;
 
 		// Initial state.
 		this.$singleVariationWrap.show();
@@ -41,6 +42,7 @@
 		setTimeout( function() {
 			$form.trigger( 'check_variations' );
 			$form.trigger( 'wc_variation_form' );
+			$form.loading = loading;
 		}, 100 );
 	};
 
@@ -145,8 +147,12 @@
 							form.$form.trigger( 'found_variation', [ variation ] );
 						} else {
 							form.$form.trigger( 'reset_data' );
-							form.$form.find( '.single_variation' ).after( '<p class="wc-no-matching-variations woocommerce-info">' + wc_add_to_cart_variation_params.i18n_no_matching_variations_text + '</p>' );
-							form.$form.find( '.wc-no-matching-variations' ).slideDown( 200 );
+							attributes.chosenCount = 0;
+
+							if ( ! form.loading ) {
+								form.$form.find( '.single_variation' ).after( '<p class="wc-no-matching-variations woocommerce-info">' + wc_add_to_cart_variation_params.i18n_no_matching_variations_text + '</p>' );
+								form.$form.find( '.wc-no-matching-variations' ).slideDown( 200 );
+							}
 						}
 					},
 					complete: function() {
@@ -163,8 +169,12 @@
 					form.$form.trigger( 'found_variation', [ variation ] );
 				} else {
 					form.$form.trigger( 'reset_data' );
-					form.$form.find( '.single_variation' ).after( '<p class="wc-no-matching-variations woocommerce-info">' + wc_add_to_cart_variation_params.i18n_no_matching_variations_text + '</p>' );
-					form.$form.find( '.wc-no-matching-variations' ).slideDown( 200 );
+					attributes.chosenCount = 0;
+
+					if ( ! form.loading ) {
+						form.$form.find( '.single_variation' ).after( '<p class="wc-no-matching-variations woocommerce-info">' + wc_add_to_cart_variation_params.i18n_no_matching_variations_text + '</p>' );
+						form.$form.find( '.wc-no-matching-variations' ).slideDown( 200 );
+					}
 				}
 			}
 		} else {
