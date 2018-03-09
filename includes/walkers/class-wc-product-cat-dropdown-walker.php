@@ -3,7 +3,7 @@
  * WC_Product_Cat_Dropdown_Walker class
  *
  * @package WooCommerce/Classes/Walkers
- * @version 1.6.4
+ * @version 3.4.0
  */
 
 defined( 'ABSPATH' ) || exit;

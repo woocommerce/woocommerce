@@ -3,7 +3,7 @@
  * WC_Product_Cat_List_Walker class
  *
  * @package WooCommerce/Classes/Walkers
- * @version 2.3.0
+ * @version 3.4.0
  */
 
 defined( 'ABSPATH' ) || exit;
