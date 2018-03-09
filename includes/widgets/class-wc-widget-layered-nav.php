@@ -3,7 +3,7 @@
  * Layered nav widget
  *
  * @package WooCommerce/Widgets
- * @version  2.6.0
+ * @version 2.6.0
  */
 
 defined( 'ABSPATH' ) || exit;
