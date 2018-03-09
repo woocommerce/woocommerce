@@ -240,7 +240,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 				});
 			" );
 		} else {
-			include_once( WC()->plugin_path() . '/includes/walkers/class-product-cat-list-walker.php' );
+			include_once( WC()->plugin_path() . '/includes/walkers/class-wc-product-cat-list-walker.php' );
 
 			$list_args['walker']                     = new WC_Product_Cat_List_Walker;
 			$list_args['title_li']                   = '';
