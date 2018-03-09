@@ -1,23 +1,24 @@
 <?php
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 /**
  * Cart Shortcode
  *
  * Used on the cart page, the cart shortcode displays the cart contents and interface for coupon codes and other cart bits and pieces.
  *
- * @author 		WooThemes
- * @category 	Shortcodes
- * @package 	WooCommerce/Shortcodes/Cart
- * @version     2.3.0
+ * @package WooCommerce/Shortcodes/Cart
+ * @version 2.3.0
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Shortcode cart class.
  */
 class WC_Shortcode_Cart {
 
 	/**
 	 * Calculate shipping for the cart.
+	 *
+	 * @throws Exception When some data is invalid.
 	 */
 	public static function calculate_shipping() {
 		try {
@@ -59,7 +60,7 @@ class WC_Shortcode_Cart {
 	/**
 	 * Output the cart shortcode.
 	 *
-	 * @param array $atts
+	 * @param array $atts Shortcode attributes.
 	 */
 	public static function output( $atts ) {
 		// Constants.
@@ -67,18 +68,18 @@ class WC_Shortcode_Cart {
 
 		$atts = shortcode_atts( array(), $atts, 'woocommerce_cart' );
 
-		// Update Shipping
-		if ( ! empty( $_POST['calc_shipping'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-cart' ) ) {
+		// Update Shipping.
+		if ( ! empty( $_POST['calc_shipping'] ) && ! empty( $_POST['_wpnonce'] ) && wp_verify_nonce( wc_clean( wp_unslash( $_POST['_wpnonce'] ) ), 'woocommerce-cart' ) ) { // WPCS: input var ok.
 			self::calculate_shipping();
 
-			// Also calc totals before we check items so subtotals etc are up to date
+			// Also calc totals before we check items so subtotals etc are up to date.
 			WC()->cart->calculate_totals();
 		}
 
-		// Check cart items are valid
+		// Check cart items are valid.
 		do_action( 'woocommerce_check_cart_items' );
 
-		// Calc totals
+		// Calc totals.
 		WC()->cart->calculate_totals();
 
 		if ( WC()->cart->is_empty() ) {
