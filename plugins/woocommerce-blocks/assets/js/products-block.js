@@ -538,11 +538,7 @@ var ProductPreview = function (_React$Component4) {
 					{ className: 'product-title' },
 					product.name
 				),
-				wp.element.createElement(
-					'div',
-					{ className: 'product-price' },
-					product.price
-				),
+				wp.element.createElement('div', { className: 'product-price', dangerouslySetInnerHTML: { __html: product.price_html } }),
 				wp.element.createElement(
 					'span',
 					{ className: 'product-add-to-cart' },
@@ -670,7 +666,7 @@ registerBlockType('woocommerce/products', {
    */
 		columns: {
 			type: 'number',
-			default: wc_theme_column_settings.default_columns
+			default: wc_product_block_data.default_columns
 		},
 
 		/**
@@ -739,8 +735,8 @@ registerBlockType('woocommerce/products', {
 					onChange: function onChange(value) {
 						return setAttributes({ columns: value });
 					},
-					min: wc_theme_column_settings.min_columns,
-					max: wc_theme_column_settings.max_columns
+					min: wc_product_block_data.min_columns,
+					max: wc_product_block_data.max_columns
 				});
 			}
 

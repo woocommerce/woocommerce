@@ -319,7 +319,7 @@ class ProductPreview extends React.Component {
 			<div className="product-preview">
 				{ image }
 				<div className="product-title">{ product.name }</div>
-				<div className="product-price">{ product.price }</div>
+				<div className="product-price" dangerouslySetInnerHTML={ { __html: product.price_html } } />
 				<span className="product-add-to-cart">{ __( 'Add to cart' ) }</span>
 			</div>
 		);
@@ -411,7 +411,7 @@ registerBlockType( 'woocommerce/products', {
 		 */
 		columns: {
 			type: 'number',
-			default: wc_theme_column_settings.default_columns,
+			default: wc_product_block_data.default_columns,
 		},
 
 		/**
@@ -469,8 +469,8 @@ registerBlockType( 'woocommerce/products', {
 						label={ __( 'Columns' ) }
 						value={ columns }
 						onChange={ ( value ) => setAttributes( { columns: value } ) }
-						min={ wc_theme_column_settings.min_columns }
-						max={ wc_theme_column_settings.max_columns }
+						min={ wc_product_block_data.min_columns }
+						max={ wc_product_block_data.max_columns }
 					/>
 				);					
 			}
