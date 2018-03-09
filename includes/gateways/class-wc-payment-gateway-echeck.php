@@ -1,14 +1,19 @@
 <?php
+/**
+ * Class WC_Payment_Gateway_eCheck file.
+ *
+ * @package WooCommerce\Gateways
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 /**
- * eCheck Payment Gateway
+ * Class for eCheck Payment Gateway
  *
  * @since       2.6.0
  * @package     WooCommerce/Classes
- * @author      WooThemes
  */
 class WC_Payment_Gateway_ECheck extends WC_Payment_Gateway {
 
@@ -55,7 +60,7 @@ class WC_Payment_Gateway_ECheck extends WC_Payment_Gateway {
 			<?php do_action( 'woocommerce_echeck_form_start', $this->id ); ?>
 			<?php
 			foreach ( $fields as $field ) {
-				echo $field;
+				echo $field; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 			}
 			?>
 			<?php do_action( 'woocommerce_echeck_form_end', $this->id ); ?>
