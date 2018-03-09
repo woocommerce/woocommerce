@@ -14,6 +14,7 @@ abstract class WC_Gateway_Paypal_Response {
 
 	/**
 	 * Get the order from the PayPal 'Custom' variable.
+	 *
 	 * @param  string $raw_custom JSON Data passed back by PayPal
 	 * @return bool|WC_Order object
 	 */
@@ -22,9 +23,8 @@ abstract class WC_Gateway_Paypal_Response {
 		if ( ( $custom = json_decode( $raw_custom ) ) && is_object( $custom ) ) {
 			$order_id  = $custom->order_id;
 			$order_key = $custom->order_key;
-
-		// Nothing was found.
 		} else {
+			// Nothing was found.
 			WC_Gateway_Paypal::log( 'Order ID and key were not found in "custom".', 'error' );
 			return false;
 		}
@@ -45,6 +45,7 @@ abstract class WC_Gateway_Paypal_Response {
 
 	/**
 	 * Complete order, add transaction ID and note.
+	 *
 	 * @param  WC_Order $order
 	 * @param  string   $txn_id
 	 * @param  string   $note
@@ -56,6 +57,7 @@ abstract class WC_Gateway_Paypal_Response {
 
 	/**
 	 * Hold order and add note.
+	 *
 	 * @param  WC_Order $order
 	 * @param  string   $reason
 	 */

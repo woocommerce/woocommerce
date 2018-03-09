@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-include_once( dirname( __FILE__ ) . '/class-wc-gateway-paypal-response.php' );
+require_once dirname( __FILE__ ) . '/class-wc-gateway-paypal-response.php';
 
 /**
  * Handle PDT Responses from PayPal.
@@ -17,7 +17,7 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * Constructor.
 	 *
-	 * @param bool $sandbox
+	 * @param bool   $sandbox
 	 * @param string $identity_token
 	 */
 	public function __construct( $sandbox = false, $identity_token = '' ) {
@@ -35,20 +35,20 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 	 */
 	protected function validate_transaction( $transaction ) {
 		$pdt = array(
-			'body' 			=> array(
+			'body'        => array(
 				'cmd' => '_notify-synch',
 				'tx'  => $transaction,
 				'at'  => $this->identity_token,
 			),
-			'timeout' 		=> 60,
-			'httpversion'   => '1.1',
-			'user-agent'	=> 'WooCommerce/' . WC_VERSION,
+			'timeout'     => 60,
+			'httpversion' => '1.1',
+			'user-agent'  => 'WooCommerce/' . WC_VERSION,
 		);
 
 		// Post back to get a response.
 		$response = wp_safe_remote_post( $this->sandbox ? 'https://www.sandbox.paypal.com/cgi-bin/webscr' : 'https://www.paypal.com/cgi-bin/webscr', $pdt );
 
-		if ( is_wp_error( $response ) || strpos( $response['body'], "SUCCESS" ) !== 0 ) {
+		if ( is_wp_error( $response ) || strpos( $response['body'], 'SUCCESS' ) !== 0 ) {
 			return false;
 		}
 
@@ -57,7 +57,7 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 		$transaction_results = array();
 
 		foreach ( $transaction_result as $line ) {
-			$line                            = explode( "=", $line );
+			$line                            = explode( '=', $line );
 			$transaction_results[ $line[0] ] = isset( $line[1] ) ? $line[1] : '';
 		}
 
@@ -95,12 +95,12 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 			update_post_meta( $order->get_id(), '_paypal_status', $status );
 			update_post_meta( $order->get_id(), '_transaction_id', $transaction );
 
-	 		if ( 'completed' === $status ) {
+			if ( 'completed' === $status ) {
 				if ( $order->get_total() != $amount ) {
 					WC_Gateway_Paypal::log( 'Payment error: Amounts do not match (amt ' . $amount . ')', 'error' );
 					$this->payment_on_hold( $order, sprintf( __( 'Validation error: PayPal amounts do not match (amt %s).', 'woocommerce' ), $amount ) );
 				} else {
-					$this->payment_complete( $order, $transaction,  __( 'PDT payment completed', 'woocommerce' ) );
+					$this->payment_complete( $order, $transaction, __( 'PDT payment completed', 'woocommerce' ) );
 
 					// Log paypal transaction fee and other meta data.
 					if ( ! empty( $transaction_result['mc_fee'] ) ) {

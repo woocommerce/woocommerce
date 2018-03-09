@@ -7,14 +7,15 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Credit Card Payment Gateway
  *
  * @since       2.6.0
- * @package		WooCommerce/Classes
- * @author 		WooThemes
+ * @package     WooCommerce/Classes
+ * @author      WooThemes
  */
 class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
 
 	/**
 	 * Builds our payment fields area - including tokenization fields for logged
 	 * in users, and the actual payment fields.
+	 *
 	 * @since 2.6.0
 	 */
 	public function payment_fields() {
@@ -43,6 +44,7 @@ class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
 
 	/**
 	 * Outputs fields for entering credit card information.
+	 *
 	 * @since 2.6.0
 	 */
 	public function form() {
@@ -76,9 +78,9 @@ class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
 		<fieldset id="wc-<?php echo esc_attr( $this->id ); ?>-cc-form" class='wc-credit-card-form wc-payment-form'>
 			<?php do_action( 'woocommerce_credit_card_form_start', $this->id ); ?>
 			<?php
-				foreach ( $fields as $field ) {
+			foreach ( $fields as $field ) {
 				echo $field;
-				}
+			}
 			?>
 			<?php do_action( 'woocommerce_credit_card_form_end', $this->id ); ?>
 			<div class="clear"></div>

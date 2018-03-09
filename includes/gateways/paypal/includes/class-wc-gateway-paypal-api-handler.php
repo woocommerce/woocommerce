@@ -6,6 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Handles Refunds and other API requests such as capture.
+ *
  * @since 3.0.0
  */
 class WC_Gateway_Paypal_API_Handler {
@@ -25,6 +26,7 @@ class WC_Gateway_Paypal_API_Handler {
 	/**
 	 * Get capture request args.
 	 * See https://developer.paypal.com/docs/classic/api/merchant/DoCapture_API_Operation_NVP/.
+	 *
 	 * @param  WC_Order $order
 	 * @param  float    $amount
 	 * @return array
@@ -46,6 +48,7 @@ class WC_Gateway_Paypal_API_Handler {
 
 	/**
 	 * Get refund request args.
+	 *
 	 * @param  WC_Order $order
 	 * @param  float    $amount
 	 * @param  string   $reason
@@ -72,8 +75,9 @@ class WC_Gateway_Paypal_API_Handler {
 
 	/**
 	 * Capture an authorization.
+	 *
 	 * @param  WC_Order $order
-	 * @param  float $amount
+	 * @param  float    $amount
 	 * @return object Either an object of name value pairs for a success, or a WP_ERROR object.
 	 */
 	public static function do_capture( $order, $amount = null ) {
@@ -103,6 +107,7 @@ class WC_Gateway_Paypal_API_Handler {
 
 	/**
 	 * Refund an order via PayPal.
+	 *
 	 * @param  WC_Order $order
 	 * @param  float    $amount
 	 * @param  string   $reason
@@ -136,6 +141,7 @@ class WC_Gateway_Paypal_API_Handler {
 
 /**
  * Here for backwards compatibility.
+ *
  * @since 3.0.0
  */
 class WC_Gateway_Paypal_Refund extends WC_Gateway_Paypal_API_Handler {

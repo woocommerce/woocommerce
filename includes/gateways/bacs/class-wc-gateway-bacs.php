@@ -41,7 +41,8 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		$this->instructions = $this->get_option( 'instructions' );
 
 		// BACS account fields shown on the thanks page and in emails
-		$this->account_details = get_option( 'woocommerce_bacs_accounts',
+		$this->account_details = get_option(
+			'woocommerce_bacs_accounts',
 			array(
 				array(
 					'account_name'   => $this->get_option( 'account_name' ),
@@ -69,27 +70,27 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 	public function init_form_fields() {
 
 		$this->form_fields = array(
-			'enabled' => array(
+			'enabled'         => array(
 				'title'   => __( 'Enable/Disable', 'woocommerce' ),
 				'type'    => 'checkbox',
 				'label'   => __( 'Enable bank transfer', 'woocommerce' ),
 				'default' => 'no',
 			),
-			'title' => array(
+			'title'           => array(
 				'title'       => __( 'Title', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
 				'default'     => __( 'Direct bank transfer', 'woocommerce' ),
 				'desc_tip'    => true,
 			),
-			'description' => array(
+			'description'     => array(
 				'title'       => __( 'Description', 'woocommerce' ),
 				'type'        => 'textarea',
 				'description' => __( 'Payment method description that the customer will see on your checkout.', 'woocommerce' ),
 				'default'     => __( 'Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order will not be shipped until the funds have cleared in our account.', 'woocommerce' ),
 				'desc_tip'    => true,
 			),
-			'instructions' => array(
+			'instructions'    => array(
 				'title'       => __( 'Instructions', 'woocommerce' ),
 				'type'        => 'textarea',
 				'description' => __( 'Instructions that will be added to the thank you page and emails.', 'woocommerce' ),
@@ -97,7 +98,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 				'desc_tip'    => true,
 			),
 			'account_details' => array(
-				'type'        => 'account_details',
+				'type' => 'account_details',
 			),
 		);
 
@@ -112,8 +113,8 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 
 		ob_start();
 
-		$country 	= WC()->countries->get_base_country();
-		$locale		= $this->get_country_locale();
+		$country = WC()->countries->get_base_country();
+		$locale  = $this->get_country_locale();
 
 		// Get sortcode label in the $locale array and use appropriate one
 		$sortcode = isset( $locale[ $country ]['sortcode']['label'] ) ? $locale[ $country ]['sortcode']['label'] : __( 'Sort code', 'woocommerce' );
@@ -243,8 +244,8 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 	 * Add content to the WC emails.
 	 *
 	 * @param WC_Order $order
-	 * @param bool $sent_to_admin
-	 * @param bool $plain_text
+	 * @param bool     $sent_to_admin
+	 * @param bool     $plain_text
 	 */
 	public function email_instructions( $order, $sent_to_admin, $plain_text = false ) {
 
@@ -269,11 +270,11 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		}
 
 		// Get order and store in $order
-		$order 		= wc_get_order( $order_id );
+		$order = wc_get_order( $order_id );
 
 		// Get the order country and country $locale
-		$country 	= $order->get_billing_country();
-		$locale		= $this->get_country_locale();
+		$country = $order->get_billing_country();
+		$locale  = $this->get_country_locale();
 
 		// Get sortcode label in the $locale array and use appropriate one
 		$sortcode = isset( $locale[ $country ]['sortcode']['label'] ) ? $locale[ $country ]['sortcode']['label'] : __( 'Sort code', 'woocommerce' );
@@ -294,28 +295,30 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 				$account_html .= '<ul class="wc-bacs-bank-details order_details bacs_details">' . PHP_EOL;
 
 				// BACS account fields shown on the thanks page and in emails
-				$account_fields = apply_filters( 'woocommerce_bacs_account_fields', array(
-					'bank_name' => array(
-						'label' => __( 'Bank', 'woocommerce' ),
-						'value' => $bacs_account->bank_name,
-					),
-					'account_number' => array(
-						'label' => __( 'Account number', 'woocommerce' ),
-						'value' => $bacs_account->account_number,
-					),
-					'sort_code'     => array(
-						'label' => $sortcode,
-						'value' => $bacs_account->sort_code,
-					),
-					'iban'          => array(
-						'label' => __( 'IBAN', 'woocommerce' ),
-						'value' => $bacs_account->iban,
-					),
-					'bic'           => array(
-						'label' => __( 'BIC', 'woocommerce' ),
-						'value' => $bacs_account->bic,
-					),
-				), $order_id );
+				$account_fields = apply_filters(
+					'woocommerce_bacs_account_fields', array(
+						'bank_name'      => array(
+							'label' => __( 'Bank', 'woocommerce' ),
+							'value' => $bacs_account->bank_name,
+						),
+						'account_number' => array(
+							'label' => __( 'Account number', 'woocommerce' ),
+							'value' => $bacs_account->account_number,
+						),
+						'sort_code'      => array(
+							'label' => $sortcode,
+							'value' => $bacs_account->sort_code,
+						),
+						'iban'           => array(
+							'label' => __( 'IBAN', 'woocommerce' ),
+							'value' => $bacs_account->iban,
+						),
+						'bic'            => array(
+							'label' => __( 'BIC', 'woocommerce' ),
+							'value' => $bacs_account->bic,
+						),
+					), $order_id
+				);
 
 				foreach ( $account_fields as $field_key => $field ) {
 					if ( ! empty( $field['value'] ) ) {
@@ -359,8 +362,8 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 
 		// Return thankyou redirect
 		return array(
-			'result'    => 'success',
-			'redirect'  => $this->get_return_url( $order ),
+			'result'   => 'success',
+			'redirect' => $this->get_return_url( $order ),
 		);
 
 	}
@@ -375,48 +378,50 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		if ( empty( $this->locale ) ) {
 
 			// Locale information to be used - only those that are not 'Sort Code'
-			$this->locale = apply_filters( 'woocommerce_get_bacs_locale', array(
-				'AU' => array(
-					'sortcode'	=> array(
-						'label'		=> __( 'BSB', 'woocommerce' ),
+			$this->locale = apply_filters(
+				'woocommerce_get_bacs_locale', array(
+					'AU' => array(
+						'sortcode' => array(
+							'label' => __( 'BSB', 'woocommerce' ),
+						),
 					),
-				),
-				'CA' => array(
-					'sortcode'	=> array(
-						'label'		=> __( 'Bank transit number', 'woocommerce' ),
+					'CA' => array(
+						'sortcode' => array(
+							'label' => __( 'Bank transit number', 'woocommerce' ),
+						),
 					),
-				),
-				'IN' => array(
-					'sortcode'	=> array(
-						'label'		=> __( 'IFSC', 'woocommerce' ),
+					'IN' => array(
+						'sortcode' => array(
+							'label' => __( 'IFSC', 'woocommerce' ),
+						),
 					),
-				),
-				'IT' => array(
-					'sortcode'	=> array(
-						'label'		=> __( 'Branch sort', 'woocommerce' ),
+					'IT' => array(
+						'sortcode' => array(
+							'label' => __( 'Branch sort', 'woocommerce' ),
+						),
 					),
-				),
-				'NZ' => array(
-					'sortcode'	=> array(
-						'label'		=> __( 'Bank code', 'woocommerce' ),
+					'NZ' => array(
+						'sortcode' => array(
+							'label' => __( 'Bank code', 'woocommerce' ),
+						),
 					),
-				),
-				'SE' => array(
-					'sortcode'	=> array(
-						'label'		=> __( 'Bank code', 'woocommerce' ),
+					'SE' => array(
+						'sortcode' => array(
+							'label' => __( 'Bank code', 'woocommerce' ),
+						),
 					),
-				),
-				'US' => array(
-					'sortcode'	=> array(
-						'label'		=> __( 'Routing number', 'woocommerce' ),
+					'US' => array(
+						'sortcode' => array(
+							'label' => __( 'Routing number', 'woocommerce' ),
+						),
 					),
-				),
-				'ZA' => array(
-					'sortcode'	=> array(
-						'label'		=> __( 'Branch code', 'woocommerce' ),
+					'ZA' => array(
+						'sortcode' => array(
+							'label' => __( 'Branch code', 'woocommerce' ),
+						),
 					),
-				),
-			) );
+				)
+			);
 
 		}
 
