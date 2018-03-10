@@ -1,4 +1,10 @@
 <?php
+/**
+ * Class WC_Payment_Gateway_CC file.
+ *
+ * @package WooCommerce\Gateways
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -7,14 +13,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Credit Card Payment Gateway
  *
  * @since       2.6.0
- * @package		WooCommerce/Classes
- * @author 		WooThemes
+ * @package     WooCommerce/Classes
  */
 class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
 
 	/**
 	 * Builds our payment fields area - including tokenization fields for logged
 	 * in users, and the actual payment fields.
+	 *
 	 * @since 2.6.0
 	 */
 	public function payment_fields() {
@@ -34,7 +40,7 @@ class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
 	 * Gateways which support tokenization do not require names - we don't want the data to post to the server.
 	 *
 	 * @since  2.6.0
-	 * @param  string $name
+	 * @param  string $name Field name.
 	 * @return string
 	 */
 	public function field_name( $name ) {
@@ -43,6 +49,7 @@ class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
 
 	/**
 	 * Outputs fields for entering credit card information.
+	 *
 	 * @since 2.6.0
 	 */
 	public function form() {
@@ -76,9 +83,9 @@ class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
 		<fieldset id="wc-<?php echo esc_attr( $this->id ); ?>-cc-form" class='wc-credit-card-form wc-payment-form'>
 			<?php do_action( 'woocommerce_credit_card_form_start', $this->id ); ?>
 			<?php
-				foreach ( $fields as $field ) {
-				echo $field;
-				}
+			foreach ( $fields as $field ) {
+				echo $field; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+			}
 			?>
 			<?php do_action( 'woocommerce_credit_card_form_end', $this->id ); ?>
 			<div class="clear"></div>
@@ -86,7 +93,7 @@ class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
 		<?php
 
 		if ( $this->supports( 'credit_card_form_cvc_on_saved_method' ) ) {
-			echo '<fieldset>' . $cvc_field . '</fieldset>';
+			echo '<fieldset>' . $cvc_field . '</fieldset>'; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 		}
 	}
 }
