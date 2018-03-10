@@ -1,4 +1,10 @@
 <?php
+/**
+ * Class WC_Product_CSV_Importer_Controller file.
+ *
+ * @package WooCommerce\Admin\Importers
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -10,8 +16,6 @@ if ( ! class_exists( 'WP_Importer' ) ) {
 /**
  * Product importer controller - handles file upload and forms in admin.
  *
- * @author      Automattic
- * @category    Admin
  * @package     WooCommerce/Admin/Importers
  * @version     3.1.0
  */
@@ -108,11 +112,13 @@ class WC_Product_CSV_Importer_Controller {
 
 		$this->steps = apply_filters( 'woocommerce_product_csv_importer_steps', $default_steps );
 
+		// phpcs:disable WordPress.CSRF.NonceVerification.NoNonceVerification
 		$this->step            = isset( $_REQUEST['step'] ) ? sanitize_key( $_REQUEST['step'] ) : current( array_keys( $this->steps ) );
-		$this->file            = isset( $_REQUEST['file'] ) ? wc_clean( $_REQUEST['file'] ) : '';
+		$this->file            = isset( $_REQUEST['file'] ) ? wc_clean( wp_unslash( $_REQUEST['file'] ) ) : '';
 		$this->update_existing = isset( $_REQUEST['update_existing'] ) ? (bool) $_REQUEST['update_existing'] : false;
-		$this->delimiter       = ! empty( $_REQUEST['delimiter'] ) ? wc_clean( $_REQUEST['delimiter'] ) : ',';
+		$this->delimiter       = ! empty( $_REQUEST['delimiter'] ) ? wc_clean( wp_unslash( $_REQUEST['delimiter'] ) ) : ',';
 		$this->map_preferences = isset( $_REQUEST['map_preferences'] ) ? (bool) $_REQUEST['map_preferences'] : false;
+		// phpcs:enable
 
 		if ( $this->map_preferences ) {
 			add_filter( 'woocommerce_csv_product_import_mapped_columns', array( $this, 'auto_map_user_preferences' ), 9999 );
@@ -122,7 +128,7 @@ class WC_Product_CSV_Importer_Controller {
 	/**
 	 * Get the URL for the next step's screen.
 	 *
-	 * @param string step   slug (default: current step)
+	 * @param string $step  slug (default: current step).
 	 * @return string       URL for next step if a next step exists.
 	 *                      Admin URL if it's the last step.
 	 *                      Empty string on failure.
@@ -138,7 +144,7 @@ class WC_Product_CSV_Importer_Controller {
 			return admin_url();
 		}
 
-		$step_index = array_search( $step, $keys );
+		$step_index = array_search( $step, $keys, true );
 
 		if ( false === $step_index ) {
 			return '';
@@ -217,6 +223,7 @@ class WC_Product_CSV_Importer_Controller {
 	 * Dispatch current step and show correct view.
 	 */
 	public function dispatch() {
+		// phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
 		if ( ! empty( $_POST['save_step'] ) && ! empty( $this->steps[ $this->step ]['handler'] ) ) {
 			call_user_func( $this->steps[ $this->step ]['handler'], $this );
 		}
@@ -271,13 +278,16 @@ class WC_Product_CSV_Importer_Controller {
 			)
 		);
 
-		if ( empty( $_POST['file_url'] ) ) {
+		// phpcs:disable WordPress.CSRF.NonceVerification.NoNonceVerification -- Nonce already verified in WC_Product_CSV_Importer_Controller::upload_form_handler()
+		$file_url = isset( $_POST['file_url'] ) ? esc_url_raw( wp_unslash( $_POST['file_url'] ) ) : '';
+
+		if ( empty( $file_url ) ) {
 			if ( ! isset( $_FILES['import'] ) ) {
 				return new WP_Error( 'woocommerce_product_csv_importer_upload_file_empty', __( 'File is empty. Please upload something more substantial. This error could also be caused by uploads being disabled in your php.ini or by post_max_size being defined as smaller than upload_max_filesize in php.ini.', 'woocommerce' ) );
 			}
 
-			$filetype = wp_check_filetype( $_FILES['import']['name'], $valid_filetypes );
-			if ( ! in_array( $filetype['type'], $valid_filetypes ) ) {
+			$filetype = wp_check_filetype( wc_clean( wp_unslash( $_FILES['import']['name'] ) ), $valid_filetypes );
+			if ( ! in_array( $filetype['type'], $valid_filetypes, true ) ) {
 				return new WP_Error( 'woocommerce_product_csv_importer_upload_file_invalid', __( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
 			}
 
@@ -285,7 +295,7 @@ class WC_Product_CSV_Importer_Controller {
 				'test_form' => false,
 				'mimes'     => $valid_filetypes,
 			);
-			$upload    = wp_handle_upload( $_FILES['import'], $overrides );
+			$upload    = wp_handle_upload( wp_unslash( $_FILES['import'] ), $overrides );
 
 			if ( isset( $upload['error'] ) ) {
 				return new WP_Error( 'woocommerce_product_csv_importer_upload_error', $upload['error'] );
@@ -311,14 +321,15 @@ class WC_Product_CSV_Importer_Controller {
 			wp_schedule_single_event( time() + DAY_IN_SECONDS, 'importer_scheduled_cleanup', array( $id ) );
 
 			return $upload['file'];
-		} elseif ( file_exists( ABSPATH . $_POST['file_url'] ) ) {
-			$filetype = wp_check_filetype( ABSPATH . $_POST['file_url'], $valid_filetypes );
-			if ( ! in_array( $filetype['type'], $valid_filetypes ) ) {
+		} elseif ( file_exists( ABSPATH . $file_url ) ) {
+			$filetype = wp_check_filetype( ABSPATH . $file_url, $valid_filetypes );
+			if ( ! in_array( $filetype['type'], $valid_filetypes, true ) ) {
 				return new WP_Error( 'woocommerce_product_csv_importer_upload_file_invalid', __( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
 			}
 
-			return ABSPATH . $_POST['file_url'];
+			return ABSPATH . $file_url;
 		}
+		// phpcs:enable
 
 		return new WP_Error( 'woocommerce_product_csv_importer_upload_invalid_file', __( 'Please upload or provide the link to a valid CSV file.', 'woocommerce' ) );
 	}
@@ -365,7 +376,8 @@ class WC_Product_CSV_Importer_Controller {
 			return;
 		}
 
-		if ( ! empty( $_POST['map_to'] ) ) {
+		// phpcs:disable WordPress.CSRF.NonceVerification.NoNonceVerification -- Nonce already verified in WC_Admin_Importers::do_ajax_product_import()
+		if ( ! empty( $_POST['map_from'] ) && ! empty( $_POST['map_to'] ) ) {
 			$mapping_from = wc_clean( wp_unslash( $_POST['map_from'] ) );
 			$mapping_to   = wc_clean( wp_unslash( $_POST['map_to'] ) );
 
@@ -375,6 +387,7 @@ class WC_Product_CSV_Importer_Controller {
 			wp_redirect( esc_url_raw( $this->get_next_step_link( 'upload' ) ) );
 			exit;
 		}
+		// phpcs:enable
 
 		wp_localize_script(
 			'wc-product-import', 'wc_product_import_params', array(
@@ -397,11 +410,13 @@ class WC_Product_CSV_Importer_Controller {
 	 * Done step.
 	 */
 	protected function done() {
+		// phpcs:disable WordPress.CSRF.NonceVerification.NoNonceVerification
 		$imported = isset( $_GET['products-imported'] ) ? absint( $_GET['products-imported'] ) : 0;
 		$updated  = isset( $_GET['products-updated'] ) ? absint( $_GET['products-updated'] ) : 0;
 		$failed   = isset( $_GET['products-failed'] ) ? absint( $_GET['products-failed'] ) : 0;
 		$skipped  = isset( $_GET['products-skipped'] ) ? absint( $_GET['products-skipped'] ) : 0;
 		$errors   = array_filter( (array) get_user_option( 'product_import_error_log' ) );
+		// phpcs:enable
 
 		include_once dirname( __FILE__ ) . '/views/html-csv-import-done.php';
 	}
@@ -435,7 +450,7 @@ class WC_Product_CSV_Importer_Controller {
 
 		include dirname( __FILE__ ) . '/mappings/mappings.php';
 
-		/**
+		/*
 		 * @hooked wc_importer_generic_mappings - 10
 		 * @hooked wc_importer_wordpress_mappings - 10
 		 * @hooked wc_importer_default_english_mappings - 100
@@ -460,9 +475,13 @@ class WC_Product_CSV_Importer_Controller {
 					__( 'Stock', 'woocommerce' )          => 'stock_quantity',
 					__( 'Backorders allowed?', 'woocommerce' ) => 'backorders',
 					__( 'Sold individually?', 'woocommerce' ) => 'sold_individually',
+					/* translators: %s: Weight unit */
 					sprintf( __( 'Weight (%s)', 'woocommerce' ), $weight_unit ) => 'weight',
+					/* translators: %s: Length unit */
 					sprintf( __( 'Length (%s)', 'woocommerce' ), $dimension_unit ) => 'length',
+					/* translators: %s: Width unit */
 					sprintf( __( 'Width (%s)', 'woocommerce' ), $dimension_unit ) => 'width',
+					/* translators: %s: Height unit */
 					sprintf( __( 'Height (%s)', 'woocommerce' ), $dimension_unit ) => 'height',
 					__( 'Allow customer reviews?', 'woocommerce' ) => 'reviews_allowed',
 					__( 'Purchase note', 'woocommerce' )  => 'purchase_note',
@@ -490,13 +509,21 @@ class WC_Product_CSV_Importer_Controller {
 				apply_filters(
 					'woocommerce_csv_product_import_mapping_special_columns',
 					array(
+						/* translators: %d: Attribute number */
 						__( 'Attribute %d name', 'woocommerce' ) => 'attributes:name',
+						/* translators: %d: Attribute number */
 						__( 'Attribute %d value(s)', 'woocommerce' ) => 'attributes:value',
+						/* translators: %d: Attribute number */
 						__( 'Attribute %d visible', 'woocommerce' ) => 'attributes:visible',
+						/* translators: %d: Attribute number */
 						__( 'Attribute %d global', 'woocommerce' ) => 'attributes:taxonomy',
+						/* translators: %d: Attribute number */
 						__( 'Attribute %d default', 'woocommerce' ) => 'attributes:default',
+						/* translators: %d: Download number */
 						__( 'Download %d name', 'woocommerce' ) => 'downloads:name',
+						/* translators: %d: Download number */
 						__( 'Download %d URL', 'woocommerce' ) => 'downloads:url',
+						/* translators: %d: Meta number */
 						__( 'Meta: %s', 'woocommerce' ) => 'meta:',
 					)
 				)
@@ -571,7 +598,7 @@ class WC_Product_CSV_Importer_Controller {
 	/**
 	 * Get mapping options.
 	 *
-	 * @param  string $item Item name
+	 * @param  string $item Item name.
 	 * @return array
 	 */
 	protected function get_mapping_options( $item = '' ) {
