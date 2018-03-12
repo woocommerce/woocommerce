@@ -427,6 +427,7 @@ class WC_Post_types {
 						'supports'            => array( 'title' ),
 						'show_in_nav_menus'   => false,
 						'show_in_admin_bar'   => true,
+						'menu_icon'           => 'data:image/svg+xml;base64,' . base64_encode( str_replace( '<svg', '<svg fill="gray"', get_gridicon( 'gridicons-coupon' ) ) ), // SVG 'fill' attribute must be set for menu colors to apply correctly.
 					)
 				)
 			);
