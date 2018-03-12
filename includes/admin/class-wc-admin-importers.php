@@ -89,8 +89,8 @@ class WC_Admin_Importers {
 			exit;
 		}
 
-		include_once( WC_ABSPATH . 'includes/import/class-wc-product-csv-importer.php' );
-		include_once( WC_ABSPATH . 'includes/admin/importers/class-wc-product-csv-importer-controller.php' );
+		include_once WC_ABSPATH . 'includes/import/class-wc-product-csv-importer.php';
+		include_once WC_ABSPATH . 'includes/admin/importers/class-wc-product-csv-importer-controller.php';
 
 		$importer = new WC_Product_CSV_Importer_Controller();
 		$importer->dispatch();
@@ -102,7 +102,7 @@ class WC_Admin_Importers {
 	public function register_importers() {
 		if ( defined( 'WP_LOAD_IMPORTERS' ) ) {
 			add_action( 'import_start', array( $this, 'post_importer_compatibility' ) );
-			register_importer( 'woocommerce_product_csv',  __( 'WooCommerce products (CSV)', 'woocommerce' ),  __( 'Import <strong>products</strong> to your store via a csv file.', 'woocommerce' ),  array( $this, 'product_importer' ) );
+			register_importer( 'woocommerce_product_csv', __( 'WooCommerce products (CSV)', 'woocommerce' ), __( 'Import <strong>products</strong> to your store via a csv file.', 'woocommerce' ), array( $this, 'product_importer' ) );
 			register_importer( 'woocommerce_tax_rate_csv', __( 'WooCommerce tax rates (CSV)', 'woocommerce' ), __( 'Import <strong>tax rates</strong> to your store via a csv file.', 'woocommerce' ), array( $this, 'tax_rates_importer' ) );
 		}
 	}
@@ -123,7 +123,7 @@ class WC_Admin_Importers {
 		}
 
 		// includes
-		require( dirname( __FILE__ ) . '/importers/class-wc-tax-rate-importer.php' );
+		require dirname( __FILE__ ) . '/importers/class-wc-tax-rate-importer.php';
 
 		// Dispatch
 		$importer = new WC_Tax_Rate_Importer();
@@ -158,25 +158,29 @@ class WC_Admin_Importers {
 
 								// Create the taxonomy
 								if ( ! in_array( $attribute_name, wc_get_attribute_taxonomies() ) ) {
-									wc_create_attribute( array(
-										'name'         => $attribute_name,
-										'slug'         => $attribute_name,
-										'type'         => 'select',
-										'order_by'     => 'menu_order',
-										'has_archives' => false,
-									) );
+									wc_create_attribute(
+										array(
+											'name'         => $attribute_name,
+											'slug'         => $attribute_name,
+											'type'         => 'select',
+											'order_by'     => 'menu_order',
+											'has_archives' => false,
+										)
+									);
 								}
 
 								// Register the taxonomy now so that the import works!
 								register_taxonomy(
 									$term['domain'],
 									apply_filters( 'woocommerce_taxonomy_objects_' . $term['domain'], array( 'product' ) ),
-									apply_filters( 'woocommerce_taxonomy_args_' . $term['domain'], array(
-										'hierarchical' => true,
-										'show_ui'      => false,
-										'query_var'    => true,
-										'rewrite'      => false,
-									) )
+									apply_filters(
+										'woocommerce_taxonomy_args_' . $term['domain'], array(
+											'hierarchical' => true,
+											'show_ui'      => false,
+											'query_var'    => true,
+											'rewrite'      => false,
+										)
+									)
 								);
 							}
 						}
@@ -198,8 +202,8 @@ class WC_Admin_Importers {
 			wp_die( -1 );
 		}
 
-		include_once( WC_ABSPATH . 'includes/admin/importers/class-wc-product-csv-importer-controller.php' );
-		include_once( WC_ABSPATH . 'includes/import/class-wc-product-csv-importer.php' );
+		include_once WC_ABSPATH . 'includes/admin/importers/class-wc-product-csv-importer-controller.php';
+		include_once WC_ABSPATH . 'includes/import/class-wc-product-csv-importer.php';
 
 		$file   = wc_clean( $_POST['file'] );
 		$params = array(
@@ -228,36 +232,40 @@ class WC_Admin_Importers {
 		if ( 100 === $percent_complete ) {
 			// Clear temp meta.
 			$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_original_id' ) );
-			$wpdb->query( "
-				DELETE {$wpdb->posts}, {$wpdb->postmeta}, {$wpdb->term_relationships}
+			$wpdb->query(
+				"DELETE {$wpdb->posts}, {$wpdb->postmeta}, {$wpdb->term_relationships}
 				FROM {$wpdb->posts}
 				LEFT JOIN {$wpdb->term_relationships} ON ( {$wpdb->posts}.ID = {$wpdb->term_relationships}.object_id )
 				LEFT JOIN {$wpdb->postmeta} ON ( {$wpdb->posts}.ID = {$wpdb->postmeta}.post_id )
 				LEFT JOIN {$wpdb->term_taxonomy} ON ( {$wpdb->term_taxonomy}.term_taxonomy_id = {$wpdb->term_relationships}.term_taxonomy_id )
 				LEFT JOIN {$wpdb->terms} ON ( {$wpdb->terms}.term_id = {$wpdb->term_taxonomy}.term_id )
 				WHERE {$wpdb->posts}.post_type IN ( 'product', 'product_variation' )
-				AND {$wpdb->posts}.post_status = 'importing'
-			" );
+				AND {$wpdb->posts}.post_status = 'importing'"
+			);
 
 			// Send success.
-			wp_send_json_success( array(
-				'position'   => 'done',
-				'percentage' => 100,
-				'url'        => add_query_arg( array( 'nonce' => wp_create_nonce( 'product-csv' ) ), admin_url( 'edit.php?post_type=product&page=product_importer&step=done' ) ),
-				'imported'   => count( $results['imported'] ),
-				'failed'     => count( $results['failed'] ),
-				'updated'    => count( $results['updated'] ),
-				'skipped'    => count( $results['skipped'] ),
-			) );
+			wp_send_json_success(
+				array(
+					'position'   => 'done',
+					'percentage' => 100,
+					'url'        => add_query_arg( array( 'nonce' => wp_create_nonce( 'product-csv' ) ), admin_url( 'edit.php?post_type=product&page=product_importer&step=done' ) ),
+					'imported'   => count( $results['imported'] ),
+					'failed'     => count( $results['failed'] ),
+					'updated'    => count( $results['updated'] ),
+					'skipped'    => count( $results['skipped'] ),
+				)
+			);
 		} else {
-			wp_send_json_success( array(
-				'position'   => $importer->get_file_position(),
-				'percentage' => $percent_complete,
-				'imported'   => count( $results['imported'] ),
-				'failed'     => count( $results['failed'] ),
-				'updated'    => count( $results['updated'] ),
-				'skipped'    => count( $results['skipped'] ),
-			) );
+			wp_send_json_success(
+				array(
+					'position'   => $importer->get_file_position(),
+					'percentage' => $percent_complete,
+					'imported'   => count( $results['imported'] ),
+					'failed'     => count( $results['failed'] ),
+					'updated'    => count( $results['updated'] ),
+					'skipped'    => count( $results['skipped'] ),
+				)
+			);
 		}
 	}
 }

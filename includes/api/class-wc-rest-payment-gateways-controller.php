@@ -4,17 +4,15 @@
  *
  * Handles requests to the /payment_gateways endpoint.
  *
- * @author   WooThemes
- * @category API
- * @package  WooCommerce/API
- * @since    3.0.0
+ * @package WooCommerce/API
+ * @since   3.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
+ * Paymenga gateways controller class.
+ *
  * @package WooCommerce/API
  * @extends WC_REST_Controller
  */
@@ -38,38 +36,42 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 	 * Register the route for /payment_gateways and /payment_gateways/<id>
 	 */
 	public function register_routes() {
-		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
-			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_items' ),
-				'permission_callback' => array( $this, 'get_items_permissions_check' ),
-				'args'                => $this->get_collection_params(),
-			),
-			'schema' => array( $this, 'get_public_item_schema' ),
-		) );
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\w-]+)', array(
-			'args' => array(
-				'id' => array(
-					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
-					'type'        => 'string',
+		register_rest_route(
+			$this->namespace, '/' . $this->rest_base, array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_items' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => $this->get_collection_params(),
 				),
-			),
-			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_item' ),
-				'permission_callback' => array( $this, 'get_item_permissions_check' ),
-				'args'                => array(
-					'context' => $this->get_context_param( array( 'default' => 'view' ) ),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
+		register_rest_route(
+			$this->namespace, '/' . $this->rest_base . '/(?P<id>[\w-]+)', array(
+				'args'   => array(
+					'id' => array(
+						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+						'type'        => 'string',
+					),
 				),
-			),
-			array(
-				'methods'             => WP_REST_Server::EDITABLE,
-				'callback'            => array( $this, 'update_item' ),
-				'permission_callback' => array( $this, 'update_items_permissions_check' ),
-				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
-			),
-			'schema' => array( $this, 'get_public_item_schema' ),
-		) );
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_item' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+					'args'                => array(
+						'context' => $this->get_context_param( array( 'default' => 'view' ) ),
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'update_item' ),
+					'permission_callback' => array( $this, 'update_items_permissions_check' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
 	}
 
 	/**
@@ -132,7 +134,7 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 	/**
 	 * Get a single payment gateway.
 	 *
-	 * @param WP_REST_Request $request
+	 * @param WP_REST_Request $request Request data.
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_item( $request ) {
@@ -149,7 +151,7 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 	/**
 	 * Update A Single Payment Method.
 	 *
-	 * @param WP_REST_Request $request
+	 * @param WP_REST_Request $request Request data.
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function update_item( $request ) {
@@ -188,26 +190,29 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 
 		// Update if this method is enabled or not.
 		if ( isset( $request['enabled'] ) ) {
-			$gateway->enabled = $settings['enabled'] = wc_bool_to_string( $request['enabled'] );
+			$settings['enabled'] = wc_bool_to_string( $request['enabled'] );
+			$gateway->enabled    = $settings['enabled'];
 		}
 
 		// Update title.
 		if ( isset( $request['title'] ) ) {
-			$gateway->title = $settings['title'] = $request['title'];
+			$settings['title'] = $request['title'];
+			$gateway->title    = $settings['title'];
 		}
 
 		// Update description.
 		if ( isset( $request['description'] ) ) {
-			$gateway->description = $settings['description'] = $request['description'];
+			$settings['description'] = $request['description'];
+			$gateway->description    = $settings['description'];
 		}
 
 		// Update options.
 		$gateway->settings = $settings;
 		update_option( $gateway->get_option_key(), apply_filters( 'woocommerce_gateway_' . $gateway->id . '_settings_values', $settings, $gateway ) );
 
-		// Update order
+		// Update order.
 		if ( isset( $request['order'] ) ) {
-			$order  = (array) get_option( 'woocommerce_gateway_order' );
+			$order                 = (array) get_option( 'woocommerce_gateway_order' );
 			$order[ $gateway->id ] = $request['order'];
 			update_option( 'woocommerce_gateway_order', $order );
 			$gateway->order = absint( $request['order'] );
@@ -220,7 +225,7 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 	/**
 	 * Get a gateway based on the current request object.
 	 *
-	 * @param WP_REST_Request $request
+	 * @param WP_REST_Request $request Request data.
 	 * @return WP_REST_Response|null
 	 */
 	public function get_gateway( $request ) {
@@ -244,8 +249,8 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 	 * @return WP_REST_Response   $response   Response data.
 	 */
 	public function prepare_item_for_response( $gateway, $request ) {
-		$order  = (array) get_option( 'woocommerce_gateway_order' );
-		$item = array(
+		$order = (array) get_option( 'woocommerce_gateway_order' );
+		$item  = array(
 			'id'                 => $gateway->id,
 			'title'              => $gateway->title,
 			'description'        => $gateway->description,
@@ -276,7 +281,7 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 	/**
 	 * Return settings associated with this payment gateway.
 	 *
-	 * @param WC_Payment_Gateway $gateway
+	 * @param WC_Payment_Gateway $gateway Gateway data.
 	 *
 	 * @return array
 	 */
@@ -284,16 +289,16 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 		$settings = array();
 		$gateway->init_form_fields();
 		foreach ( $gateway->form_fields as $id => $field ) {
-			// Make sure we at least have a title and type
+			// Make sure we at least have a title and type.
 			if ( empty( $field['title'] ) || empty( $field['type'] ) ) {
 				continue;
 			}
-			// Ignore 'title' settings/fields -- they are UI only
+			// Ignore 'title' settings/fields -- they are UI only.
 			if ( 'title' === $field['type'] ) {
 				continue;
 			}
 			// Ignore 'enabled' and 'description' which get included elsewhere.
-			if ( in_array( $id, array( 'enabled', 'description' ) ) ) {
+			if ( in_array( $id, array( 'enabled', 'description' ), true ) ) {
 				continue;
 			}
 			$data = array(
@@ -322,8 +327,8 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 	 * @return array
 	 */
 	protected function prepare_links( $gateway, $request ) {
-		$links      = array(
-			'self' => array(
+		$links = array(
+			'self'       => array(
 				'href' => rest_url( sprintf( '/%s/%s/%s', $this->namespace, $this->rest_base, $gateway->id ) ),
 			),
 			'collection' => array(
@@ -334,7 +339,7 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 		return $links;
 	}
 
-    /**
+	/**
 	 * Get the payment gateway schema, conforming to JSON Schema.
 	 *
 	 * @return array
@@ -345,23 +350,23 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 			'title'      => 'payment_gateway',
 			'type'       => 'object',
 			'properties' => array(
-				'id' => array(
+				'id'                 => array(
 					'description' => __( 'Payment gateway ID.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'title' => array(
+				'title'              => array(
 					'description' => __( 'Payment gateway title on checkout.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'description' => array(
+				'description'        => array(
 					'description' => __( 'Payment gateway description on checkout.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'order' => array(
+				'order'              => array(
 					'description' => __( 'Payment gateway sort order.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
@@ -369,12 +374,12 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 						'sanitize_callback' => 'absint',
 					),
 				),
-				'enabled' => array(
+				'enabled'            => array(
 					'description' => __( 'Payment gateway enabled status.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'method_title' => array(
+				'method_title'       => array(
 					'description' => __( 'Payment gateway method title.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
@@ -386,18 +391,18 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'settings' => array(
+				'settings'           => array(
 					'description' => __( 'Payment gateway settings.', 'woocommerce' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
-					'properties' => array(
-						'id' => array(
+					'properties'  => array(
+						'id'          => array(
 							'description' => __( 'A unique identifier for the setting.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
-						'label' => array(
+						'label'       => array(
 							'description' => __( 'A human readable label for the setting used in interfaces.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
@@ -409,25 +414,25 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Controller {
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
-						'type' => array(
+						'type'        => array(
 							'description' => __( 'Type of setting.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 							'enum'        => array( 'text', 'email', 'number', 'color', 'password', 'textarea', 'select', 'multiselect', 'radio', 'image_width', 'checkbox' ),
 							'readonly'    => true,
 						),
-						'value' => array(
+						'value'       => array(
 							'description' => __( 'Setting value.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'default' => array(
+						'default'     => array(
 							'description' => __( 'Default value for the setting.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
-						'tip' => array(
+						'tip'         => array(
 							'description' => __( 'Additional help text shown to the user about the setting.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),

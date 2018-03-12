@@ -4,13 +4,11 @@
  *
  * Handles requests to the /webhooks endpoint.
  *
- * @package  WooCommerce/API
- * @since    2.6.0
+ * @package WooCommerce/API
+ * @since   2.6.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * REST API Webhooks controller class.
@@ -41,7 +39,7 @@ class WC_REST_Webhooks_Controller extends WC_REST_Webhooks_V1_Controller {
 			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
-		$data    = array(
+		$data = array(
 			'id'                => $webhook->get_id(),
 			'name'              => $webhook->get_name(),
 			'status'            => $webhook->get_status(),

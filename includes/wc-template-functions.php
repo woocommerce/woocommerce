@@ -287,7 +287,26 @@ function wc_body_class( $classes ) {
 		}
 	}
 
+	$classes[] = 'woocommerce-no-js';
+
+	add_action( 'wp_footer', 'wc_no_js' );
+
 	return array_unique( $classes );
+}
+
+/**
+ * NO JS handling.
+ *
+ * @since 3.4.0
+ */
+function wc_no_js() {
+	?>
+	<script type="text/javascript">
+		var c = document.body.className;
+		c = c.replace(/woocommerce-no-js/, 'woocommerce-js');
+		document.body.className = c;
+	</script>
+	<?php
 }
 
 /**
@@ -1930,8 +1949,8 @@ if ( ! function_exists( 'woocommerce_output_product_categories' ) ) {
 	 */
 	function woocommerce_output_product_categories( $args = array() ) {
 		$args = wp_parse_args( $args, array(
-			'before'    => '',
-			'after'     => '',
+			'before'    => apply_filters( woocommerce_before_output_product_categories, '' ),
+			'after'     => apply_filters( woocommerce_after_output_product_categories, '' ),
 			'parent_id' => 0,
 		) );
 

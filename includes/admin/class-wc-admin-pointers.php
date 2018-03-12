@@ -33,9 +33,9 @@ class WC_Admin_Pointers {
 		}
 
 		switch ( $screen->id ) {
-			case 'product' :
+			case 'product':
 				$this->create_product_tutorial();
-			break;
+				break;
 		}
 	}
 
@@ -49,8 +49,8 @@ class WC_Admin_Pointers {
 		// These pointers will chain - they will not be shown at once.
 		$pointers = array(
 			'pointers' => array(
-				'title' => array(
-					'target'       => "#title",
+				'title'          => array(
+					'target'       => '#title',
 					'next'         => 'content',
 					'next_trigger' => array(
 						'target' => '#title',
@@ -65,8 +65,8 @@ class WC_Admin_Pointers {
 						),
 					),
 				),
-				'content' => array(
-					'target'       => "#wp-content-editor-container",
+				'content'        => array(
+					'target'       => '#wp-content-editor-container',
 					'next'         => 'product-type',
 					'next_trigger' => array(),
 					'options'      => array(
@@ -78,14 +78,14 @@ class WC_Admin_Pointers {
 						),
 					),
 				),
-				'product-type' => array(
-					'target'       => "#product-type",
+				'product-type'   => array(
+					'target'       => '#product-type',
 					'next'         => 'virtual',
 					'next_trigger' => array(
-						'target' => "#product-type",
+						'target' => '#product-type',
 						'event'  => 'change blur click',
 					),
-					'options'  => array(
+					'options'      => array(
 						'content'  => '<h3>' . esc_html__( 'Choose product type', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'Choose a type for this product. Simple is suitable for most physical goods and services (we recommend setting up a simple product for now).', 'woocommerce' ) . '</p>' .
 										'<p>' . esc_html__( 'Variable is for more complex products such as t-shirts with multiple sizes.', 'woocommerce' ) . '</p>' .
@@ -97,14 +97,14 @@ class WC_Admin_Pointers {
 						),
 					),
 				),
-				'virtual' => array(
-					'target'       => "#_virtual",
+				'virtual'        => array(
+					'target'       => '#_virtual',
 					'next'         => 'downloadable',
 					'next_trigger' => array(
-						'target' => "#_virtual",
+						'target' => '#_virtual',
 						'event'  => 'change',
 					),
-					'options' => array(
+					'options'      => array(
 						'content'  => '<h3>' . esc_html__( 'Virtual products', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'Check the "Virtual" box if this is a non-physical item, for example a service, which does not need shipping.', 'woocommerce' ) . '</p>',
 						'position' => array(
@@ -113,14 +113,14 @@ class WC_Admin_Pointers {
 						),
 					),
 				),
-				'downloadable' => array(
-					'target'       => "#_downloadable",
+				'downloadable'   => array(
+					'target'       => '#_downloadable',
 					'next'         => 'regular_price',
 					'next_trigger' => array(
-						'target' => "#_downloadable",
+						'target' => '#_downloadable',
 						'event'  => 'change',
 					),
-					'options' => array(
+					'options'      => array(
 						'content'  => '<h3>' . esc_html__( 'Downloadable products', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'If purchasing this product gives a customer access to a downloadable file, e.g. software, check this box.', 'woocommerce' ) . '</p>',
 						'position' => array(
@@ -129,14 +129,14 @@ class WC_Admin_Pointers {
 						),
 					),
 				),
-				'regular_price' => array(
-					'target'       => "#_regular_price",
+				'regular_price'  => array(
+					'target'       => '#_regular_price',
 					'next'         => 'postexcerpt',
 					'next_trigger' => array(
-						'target' => "#_regular_price",
+						'target' => '#_regular_price',
 						'event'  => 'input',
 					),
-					'options' => array(
+					'options'      => array(
 						'content'  => '<h3>' . esc_html__( 'Prices', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'Next you need to give your product a price.', 'woocommerce' ) . '</p>',
 						'position' => array(
@@ -145,14 +145,14 @@ class WC_Admin_Pointers {
 						),
 					),
 				),
-				'postexcerpt' => array(
-					'target'       => "#postexcerpt",
+				'postexcerpt'    => array(
+					'target'       => '#postexcerpt',
 					'next'         => 'postimagediv',
 					'next_trigger' => array(
-						'target' => "#postexcerpt",
+						'target' => '#postexcerpt',
 						'event'  => 'input',
 					),
-					'options' => array(
+					'options'      => array(
 						'content'  => '<h3>' . esc_html__( 'Product short description', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'Add a quick summary for your product here. This will appear on the product page under the product name.', 'woocommerce' ) . '</p>',
 						'position' => array(
@@ -161,9 +161,9 @@ class WC_Admin_Pointers {
 						),
 					),
 				),
-				'postimagediv' => array(
-					'target'       => "#postimagediv",
-					'next'         => 'product_tag',
+				'postimagediv'   => array(
+					'target'  => '#postimagediv',
+					'next'    => 'product_tag',
 					'options' => array(
 						'content'  => '<h3>' . esc_html__( 'Product images', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( "Upload or assign an image to your product here. This image will be shown in your store's catalog.", 'woocommerce' ) . '</p>',
@@ -173,9 +173,9 @@ class WC_Admin_Pointers {
 						),
 					),
 				),
-				'product_tag' => array(
-					'target'       => "#tagsdiv-product_tag",
-					'next'         => 'product_catdiv',
+				'product_tag'    => array(
+					'target'  => '#tagsdiv-product_tag',
+					'next'    => 'product_catdiv',
 					'options' => array(
 						'content'  => '<h3>' . esc_html__( 'Product tags', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'You can optionally "tag" your products here. Tags are a method of labeling your products to make them easier for customers to find.', 'woocommerce' ) . '</p>',
@@ -186,8 +186,8 @@ class WC_Admin_Pointers {
 					),
 				),
 				'product_catdiv' => array(
-					'target'       => "#product_catdiv",
-					'next'         => 'submitdiv',
+					'target'  => '#product_catdiv',
+					'next'    => 'submitdiv',
 					'options' => array(
 						'content'  => '<h3>' . esc_html__( 'Product categories', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'Optionally assign categories to your products to make them easier to browse through and find in your store.', 'woocommerce' ) . '</p>',
@@ -197,9 +197,9 @@ class WC_Admin_Pointers {
 						),
 					),
 				),
-				'submitdiv' => array(
-					'target'       => "#submitdiv",
-					'next'         => '',
+				'submitdiv'      => array(
+					'target'  => '#submitdiv',
+					'next'    => '',
 					'options' => array(
 						'content'  => '<h3>' . esc_html__( 'Publish your product!', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'When you are finished editing your product, hit the "Publish" button to publish your product to your store.', 'woocommerce' ) . '</p>',
@@ -217,14 +217,15 @@ class WC_Admin_Pointers {
 
 	/**
 	 * Enqueue pointers and add script to page.
+	 *
 	 * @param array $pointers
 	 */
 	public function enqueue_pointers( $pointers ) {
 		$pointers = wp_json_encode( $pointers );
 		wp_enqueue_style( 'wp-pointer' );
 		wp_enqueue_script( 'wp-pointer' );
-		wc_enqueue_js( "
-			jQuery( function( $ ) {
+		wc_enqueue_js(
+			"jQuery( function( $ ) {
 				var wc_pointers = {$pointers};
 
 				setTimeout( init_wc_pointers, 800 );
@@ -277,8 +278,8 @@ class WC_Admin_Pointers {
 						});
 					}
 				}
-			});
-		" );
+			});"
+		);
 	}
 }
 
