@@ -368,6 +368,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		$product    = $this->get_product();
 		$order      = $this->get_order();
 		$product_id = $this->get_variation_id() ? $this->get_variation_id() : $this->get_product_id();
+		$email_hash = function_exists( 'hash' ) ? hash( 'sha256', $order->get_billing_email() ) : sha1( $order->get_billing_email() );
 
 		if ( $product && $order && $product->is_downloadable() && $order->is_download_permitted() ) {
 			$data_store         = WC_Data_Store::load( 'customer-download' );
@@ -387,7 +388,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 					$files[ $download_id ]['download_url']        = add_query_arg( array(
 						'download_file' => $product_id,
 						'order'         => $order->get_order_key(),
-						'uid'         	=> hash( 'sha256', $order->get_billing_email() ),
+						'uid'           => $email_hash,
 						'key'           => $download_id,
 					), trailingslashit( home_url() ) );
 				}
