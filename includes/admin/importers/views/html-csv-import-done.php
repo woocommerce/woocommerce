@@ -1,7 +1,10 @@
 <?php
 /**
  * Admin View: Importer - Done!
+ *
+ * @package WooCommerce\Admin\Importers
  */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
