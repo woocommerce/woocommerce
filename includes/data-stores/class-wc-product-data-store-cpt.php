@@ -1331,10 +1331,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$type_join     = '';
 		$type_where    = '';
 		$status_where  = '';
+		$term          = wc_strtolower( $term );
 
 		// See if search term contains OR keywords.
-		if ( stristr( $term, ' OR ' ) ) {
-			$term_groups = explode( ' OR ', $term );
+		if ( strstr( $term, ' or ' ) ) {
+			$term_groups = explode( ' or ', $term );
 		} else {
 			$term_groups = array( $term );
 		}
