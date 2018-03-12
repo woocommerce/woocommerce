@@ -174,6 +174,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Check if product has weight before calculate weight total in cart.
 * Fix - Correctly handle default ordering on the search page.
 * Fix - Fix default product category handling in installer.
+* Fix - Properly check slugs when updating attributes.
 * Tweak - Add extra data in order mobile view (status and date).
 * Tweak - Add profile link to order screen.
 
