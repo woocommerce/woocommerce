@@ -319,7 +319,7 @@ class ProductPreview extends React.Component {
 			<div className="product-preview">
 				{ image }
 				<div className="product-title">{ product.name }</div>
-				<div className="product-price">{ product.price }</div>
+				<div className="product-price" dangerouslySetInnerHTML={ { __html: product.price_html } } />
 				<span className="product-add-to-cart">{ __( 'Add to cart' ) }</span>
 			</div>
 		);
@@ -411,7 +411,7 @@ registerBlockType( 'woocommerce/products', {
 		 */
 		columns: {
 			type: 'number',
-			default: 3,
+			default: wc_product_block_data.default_columns,
 		},
 
 		/**
@@ -469,8 +469,8 @@ registerBlockType( 'woocommerce/products', {
 						label={ __( 'Columns' ) }
 						value={ columns }
 						onChange={ ( value ) => setAttributes( { columns: value } ) }
-						min={ 1 }
-						max={ 6 }
+						min={ wc_product_block_data.min_columns }
+						max={ wc_product_block_data.max_columns }
 					/>
 				);					
 			}
@@ -496,6 +496,7 @@ registerBlockType( 'woocommerce/products', {
 		 * @return Component
 		 */
 		function getToolbarControls() {
+
 			const layoutControls = [
 				{
 					icon: 'list-view',
@@ -511,18 +512,21 @@ registerBlockType( 'woocommerce/products', {
 				},
 			];
 
+			// Edit button should not do anything if valid product selection has not been made.
+			const shouldDisableEditButton = ['', 'specific', 'category', 'attribute'].includes( display ) && ! display_setting.length;
+
 			const editButton = [
 				{
 					icon: 'edit',
 					title: __( 'Edit' ),
-					onClick: () => setAttributes( { edit_mode: ! edit_mode } ),
+					onClick: shouldDisableEditButton ? function(){} : () => setAttributes( { edit_mode: ! edit_mode } ),
 					isActive: edit_mode,
 				},
 			];
 
 			return (
 				<BlockControls key="controls">
-					<Toolbar controls={ layoutControls } />
+					<Toolbar controls={ edit_mode ? [] : layoutControls } />
 					<Toolbar controls={ editButton } />
 				</BlockControls>
 			);

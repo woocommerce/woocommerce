@@ -538,11 +538,7 @@ var ProductPreview = function (_React$Component4) {
 					{ className: 'product-title' },
 					product.name
 				),
-				wp.element.createElement(
-					'div',
-					{ className: 'product-price' },
-					product.price
-				),
+				wp.element.createElement('div', { className: 'product-price', dangerouslySetInnerHTML: { __html: product.price_html } }),
 				wp.element.createElement(
 					'span',
 					{ className: 'product-add-to-cart' },
@@ -670,7 +666,7 @@ registerBlockType('woocommerce/products', {
    */
 		columns: {
 			type: 'number',
-			default: 3
+			default: wc_product_block_data.default_columns
 		},
 
 		/**
@@ -739,8 +735,8 @@ registerBlockType('woocommerce/products', {
 					onChange: function onChange(value) {
 						return setAttributes({ columns: value });
 					},
-					min: 1,
-					max: 6
+					min: wc_product_block_data.min_columns,
+					max: wc_product_block_data.max_columns
 				});
 			}
 
@@ -771,6 +767,7 @@ registerBlockType('woocommerce/products', {
    * @return Component
    */
 		function getToolbarControls() {
+
 			var layoutControls = [{
 				icon: 'list-view',
 				title: __('List View'),
@@ -787,10 +784,13 @@ registerBlockType('woocommerce/products', {
 				isActive: 'grid' === block_layout
 			}];
 
+			// Edit button should not do anything if valid product selection has not been made.
+			var shouldDisableEditButton = ['', 'specific', 'category', 'attribute'].includes(display) && !display_setting.length;
+
 			var editButton = [{
 				icon: 'edit',
 				title: __('Edit'),
-				onClick: function onClick() {
+				onClick: shouldDisableEditButton ? function () {} : function () {
 					return setAttributes({ edit_mode: !edit_mode });
 				},
 				isActive: edit_mode
@@ -799,7 +799,7 @@ registerBlockType('woocommerce/products', {
 			return wp.element.createElement(
 				BlockControls,
 				{ key: 'controls' },
-				wp.element.createElement(Toolbar, { controls: layoutControls }),
+				wp.element.createElement(Toolbar, { controls: edit_mode ? [] : layoutControls }),
 				wp.element.createElement(Toolbar, { controls: editButton })
 			);
 		}
