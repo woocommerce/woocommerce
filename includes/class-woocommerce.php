@@ -379,6 +379,8 @@ final class WooCommerce {
 			include_once WC_ABSPATH . 'includes/class-wc-tracker.php';
 		}
 
+		include_once WC_ABSPATH . 'includes/libraries/gridicons.php';
+
 		$this->theme_support_includes();
 		$this->query = new WC_Query();
 		$this->api   = new WC_API();
