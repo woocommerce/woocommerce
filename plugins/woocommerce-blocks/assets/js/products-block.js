@@ -784,19 +784,22 @@ registerBlockType('woocommerce/products', {
 				isActive: 'grid' === block_layout
 			}];
 
+			// Edit button should not do anything if valid product selection has not been made.
+			var shouldDisableEditButton = ['', 'specific', 'category', 'attribute'].includes(display) && !display_setting.length;
+
 			var editButton = [{
 				icon: 'edit',
 				title: __('Edit'),
-				onClick: display ? function () {
+				onClick: shouldDisableEditButton ? function () {} : function () {
 					return setAttributes({ edit_mode: !edit_mode });
-				} : function () {},
+				},
 				isActive: edit_mode
 			}];
 
 			return wp.element.createElement(
 				BlockControls,
 				{ key: 'controls' },
-				wp.element.createElement(Toolbar, { controls: display ? layoutControls : [] }),
+				wp.element.createElement(Toolbar, { controls: edit_mode ? [] : layoutControls }),
 				wp.element.createElement(Toolbar, { controls: editButton })
 			);
 		}

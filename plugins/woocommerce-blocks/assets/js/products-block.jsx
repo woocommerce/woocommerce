@@ -512,18 +512,21 @@ registerBlockType( 'woocommerce/products', {
 				},
 			];
 
+			// Edit button should not do anything if valid product selection has not been made.
+			const shouldDisableEditButton = ['', 'specific', 'category', 'attribute'].includes( display ) && ! display_setting.length;
+
 			const editButton = [
 				{
 					icon: 'edit',
 					title: __( 'Edit' ),
-					onClick: display ? () => setAttributes( { edit_mode: ! edit_mode } ) : function(){},
+					onClick: shouldDisableEditButton ? function(){} : () => setAttributes( { edit_mode: ! edit_mode } ),
 					isActive: edit_mode,
 				},
 			];
 
 			return (
 				<BlockControls key="controls">
-					<Toolbar controls={ display ? layoutControls : [] } />
+					<Toolbar controls={ edit_mode ? [] : layoutControls } />
 					<Toolbar controls={ editButton } />
 				</BlockControls>
 			);
