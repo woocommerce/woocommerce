@@ -312,7 +312,7 @@ class WC_Post_types {
 					'has_archive'         => $has_archive,
 					'show_in_nav_menus'   => true,
 					'show_in_rest'        => true,
-					'menu_icon'           => 'data:image/svg+xml;base64,' . base64_encode( str_replace( '<svg', '<svg fill="black"', get_gridicon( 'gridicons-product' ) ) ), // SVG 'fill' attribute must be set for menu colors to apply correctly.
+					'menu_icon'           => 'data:image/svg+xml;base64,' . base64_encode( str_replace( '<svg', '<svg fill="gray"', get_gridicon( 'gridicons-product' ) ) ), // SVG 'fill' attribute must be set for menu colors to apply correctly.
 				)
 			)
 		);

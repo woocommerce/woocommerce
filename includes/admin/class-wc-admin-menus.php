@@ -68,7 +68,7 @@ class WC_Admin_Menus {
 		if ( current_user_can( 'manage_woocommerce' ) ) {
 			add_submenu_page( 'woocommerce', __( 'Reports', 'woocommerce' ), __( 'Reports', 'woocommerce' ), 'view_woocommerce_reports', 'wc-reports', array( $this, 'reports_page' ) );
 		} else {
-			$icon_url = 'data:image/svg+xml;base64,' . base64_encode( str_replace( '<svg', '<svg fill="black"', get_gridicon( 'gridicons-stats-alt' ) ) ); // SVG 'fill' attribute must be set for menu colors to apply correctly.
+			$icon_url = 'data:image/svg+xml;base64,' . base64_encode( str_replace( '<svg', '<svg fill="gray"', get_gridicon( 'gridicons-stats-alt' ) ) ); // SVG 'fill' attribute must be set for menu colors to apply correctly.
 			add_menu_page( __( 'Sales reports', 'woocommerce' ), __( 'Sales reports', 'woocommerce' ), 'view_woocommerce_reports', 'wc-reports', array( $this, 'reports_page' ), $icon_url, '55.6' );
 		}
 	}
