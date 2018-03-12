@@ -144,6 +144,7 @@ class WC_Shipping_Rate {
 	/**
 	 * Set rate cost.
 	 *
+	 * @todo 4.0 Prevent negative value being set. #19293
 	 * @since 3.2.0
 	 * @param string $cost
 	 */
