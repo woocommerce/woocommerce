@@ -722,10 +722,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 						'is_variation' => $attribute->get_variation() ? 1 : 0,
 						'is_taxonomy'  => $attribute->is_taxonomy() ? 1 : 0,
 					);
+
+					delete_transient( 'wc_layered_nav_counts_' . $attribute_key );
 				}
 			}
 			update_post_meta( $product->get_id(), '_product_attributes', $meta_values );
-			delete_transient( 'wc_layered_nav_counts' );
 		}
 	}
 
