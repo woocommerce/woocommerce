@@ -28,16 +28,19 @@ class WC_Order_Item_Shipping_Data_Store extends Abstract_WC_Order_Item_Type_Data
 	 *
 	 * @since 3.0.0
 	 * @param WC_Order_Item_Shipping $item Item to read to.
+	 * @throws Exception If invalid shipping order item.
 	 */
 	public function read( &$item ) {
 		parent::read( $item );
 		$id = $item->get_id();
-		$item->set_props( array(
-			'method_id'   => get_metadata( 'order_item', $id, 'method_id', true ),
-			'instance_id' => get_metadata( 'order_item', $id, 'instance_id', true ),
-			'total'       => get_metadata( 'order_item', $id, 'cost', true ),
-			'taxes'       => get_metadata( 'order_item', $id, 'taxes', true ),
-		) );
+		$item->set_props(
+			array(
+				'method_id'   => get_metadata( 'order_item', $id, 'method_id', true ),
+				'instance_id' => get_metadata( 'order_item', $id, 'instance_id', true ),
+				'total'       => get_metadata( 'order_item', $id, 'cost', true ),
+				'taxes'       => get_metadata( 'order_item', $id, 'taxes', true ),
+			)
+		);
 
 		// BW compat.
 		if ( '' === $item->get_instance_id() && strstr( $item->get_method_id(), ':' ) ) {
