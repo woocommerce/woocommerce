@@ -673,7 +673,9 @@ class WC_Cart extends WC_Legacy_Cart {
 		$weight = 0;
 
 		foreach ( $this->get_cart() as $cart_item_key => $values ) {
-			$weight += (float) $values['data']->get_weight() * $values['quantity'];
+			if ( $values['data']->has_weight() ) {
+				$weight += (float) $values['data']->get_weight() * $values['quantity'];
+			}
 		}
 
 		return apply_filters( 'woocommerce_cart_contents_weight', $weight );
@@ -1112,6 +1114,7 @@ class WC_Cart extends WC_Legacy_Cart {
 					'variation'    => $variation,
 					'quantity'     => $quantity,
 					'data'         => $product_data,
+					'data_hash'    => wc_get_cart_item_data_hash( $product_data ),
 				) ), $cart_item_key );
 			}
 

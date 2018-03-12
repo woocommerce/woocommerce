@@ -1152,6 +1152,7 @@ ul.wc_coupon_list_block {
 		.wc-customer-user, .wc-order-status {
 			label a {
 				float: right;
+				margin-left: 8px;
 			}
 		}
 
@@ -2351,6 +2352,23 @@ ul.wc_coupon_list_block {
 			text-align: center;
 			margin: 0;
 			display: block;
+		}
+	}
+
+	.post-type-shop_order .wp-list-table {
+		td.column-order_number {
+			padding-bottom: .5em;
+		}
+		td.column-order_status,
+		td.column-order_date {
+			display: inline-block !important;
+			padding: 0 1em 1em 1em !important;
+			&:before {
+				display: none !important;
+			}
+		}
+		td.column-order_status {
+			float: right;
 		}
 	}
 }

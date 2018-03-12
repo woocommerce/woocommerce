@@ -1300,7 +1300,7 @@ p.demo_store,
 			width: 100%;
 			margin: 0;
 			outline: 0;
-			line-height: 1;
+			line-height: normal;
 		}
 
 		textarea {
@@ -1621,6 +1621,18 @@ p.demo_store,
 	}
 }
 
+.woocommerce-no-js {
+	form.woocommerce-form-login,
+	form.woocommerce-form-coupon {
+		display: block !important;
+	}
+	.woocommerce-form-login-toggle,
+	.woocommerce-form-coupon-toggle,
+	.showcoupon {
+		display: none !important;
+	}
+}
+
 /**
  * Photoswipe
  * 1. These styles are required to overwrite default theme button styles (Twenty Twelve adds gradients via background-image).
@@ -1807,13 +1819,11 @@ button.pswp__button--zoom:hover {
 			padding: 6px 6px 5px;
 			margin: 0 4px 0 0;
 			outline: 0;
-			line-height: 1;
 		}
 
 		input {
 			margin: 0;
 			vertical-align: middle;
-			line-height: 1;
 		}
 	}
 
@@ -2112,6 +2122,13 @@ button.pswp__button--zoom:hover {
 	border: 1px solid rgba(0,0,0,.2);
 	box-shadow: inset 0 1px 2px rgba(0,0,0,.1);
 	background: rgba(0,0,0,.05);
+}
+
+.woocommerce-invalid {
+	#terms {
+		outline: 2px solid red;
+		outline-offset: 2px;
+	}
 }
 
 /**

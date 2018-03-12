@@ -7,7 +7,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<h3 class="fixed">
 		<button type="button" data-permission_id="<?php echo esc_attr( $download->get_id() ); ?>" rel="<?php echo esc_attr( $download->get_product_id() ) . ',' . esc_attr( $download->get_download_id() ); ?>" class="revoke_access button"><?php esc_html_e( 'Revoke access', 'woocommerce' ); ?></button>
 		<div class="handlediv" aria-label="<?php esc_attr_e( 'Click to toggle', 'woocommerce' ); ?>"></div>
-		<strong><?php
+		<strong>
+			<?php
 			printf(
 				'#%s &mdash; %s &mdash; %s: %s &mdash; ',
 				esc_html( $product->get_id() ),
@@ -16,7 +17,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				esc_html( wc_get_filename_from_url( $product->get_file_download_path( $download->get_download_id() ) ) )
 			);
 			printf( _n( 'Downloaded %s time', 'Downloaded %s times', $download->get_download_count(), 'woocommerce' ), esc_html( $download->get_download_count() ) )
-			?></strong>
+			?>
+		</strong>
 	</h3>
 	<table cellpadding="0" cellspacing="0" class="wc-metabox-content">
 		<tbody>
@@ -33,14 +35,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<td>
 					<label><?php esc_html_e( 'Customer download link', 'woocommerce' ); ?></label>
 					<?php
-						$download_link = add_query_arg( array(
-							'download_file' => $download->get_product_id(),
-							'order'         => $download->get_order_key(),
-							'email'         => urlencode( $download->get_user_email() ),
-							'key'           => $download->get_download_id(),
-						), trailingslashit( home_url() ) );
+						$download_link = add_query_arg(
+							array(
+								'download_file' => $download->get_product_id(),
+								'order'         => $download->get_order_key(),
+								'email'         => urlencode( $download->get_user_email() ),
+								'key'           => $download->get_download_id(),
+							), trailingslashit( home_url() )
+						);
 					?>
-					<a id="copy-download-link" class="button" href="<?php echo esc_url( $download_link ) ?>" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>" data-tip-failed="<?php esc_attr_e( 'Copying to clipboard failed. You should be able to right-click the button and copy.', 'woocommerce' ); ?>"><?php esc_html_e( 'Copy link', 'woocommerce' ); ?></a>
+					<a id="copy-download-link" class="button" href="<?php echo esc_url( $download_link ); ?>" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>" data-tip-failed="<?php esc_attr_e( 'Copying to clipboard failed. You should be able to right-click the button and copy.', 'woocommerce' ); ?>"><?php esc_html_e( 'Copy link', 'woocommerce' ); ?></a>
 				</td>
 				<td>
 					<label><?php esc_html_e( 'Customer download log', 'woocommerce' ); ?></label>

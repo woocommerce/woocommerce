@@ -46,7 +46,7 @@ class WC_Data_Store_WP {
 	 * Get and store terms from a taxonomy.
 	 *
 	 * @since  3.0.0
-	 * @param  WC_Data|integer $object Post object.
+	 * @param  WC_Data|integer $object WC_Data object or object ID.
 	 * @param  string          $taxonomy Taxonomy name e.g. product_cat.
 	 * @return array of terms
 	 */
@@ -67,20 +67,23 @@ class WC_Data_Store_WP {
 	 * Returns an array of meta for an object.
 	 *
 	 * @since  3.0.0
-	 * @param  WC_Data $object CRUD object.
+	 * @param  WC_Data $object WC_Data object.
 	 * @return array
 	 */
 	public function read_meta( &$object ) {
 		global $wpdb;
-		$db_info = $this->get_db_info();
-		// phpcs:disable
-		$raw_meta_data = $wpdb->get_results( $wpdb->prepare( "
-			SELECT {$db_info['meta_id_field']} as meta_id, meta_key, meta_value
-			FROM {$db_info['table']}
-			WHERE {$db_info['object_id_field']} = %d
-			ORDER BY {$db_info['meta_id_field']}
-		", $object->get_id() ) );
-		// phpcs:enable
+		$db_info       = $this->get_db_info();
+		$raw_meta_data = $wpdb->get_results(
+			$wpdb->prepare(
+				// phpcs:disable WordPress.WP.PreparedSQL.NotPrepared
+				"SELECT {$db_info['meta_id_field']} as meta_id, meta_key, meta_value
+				FROM {$db_info['table']}
+				WHERE {$db_info['object_id_field']} = %d
+				ORDER BY {$db_info['meta_id_field']}",
+				// phpcs:enable
+				$object->get_id()
+			)
+		);
 
 		$this->internal_meta_keys = array_merge( array_map( array( $this, 'prefix_key' ), $object->get_data_keys() ), $this->internal_meta_keys );
 		$meta_data                = array_filter( $raw_meta_data, array( $this, 'exclude_internal_meta_keys' ) );
@@ -91,8 +94,8 @@ class WC_Data_Store_WP {
 	 * Deletes meta based on meta ID.
 	 *
 	 * @since  3.0.0
-	 * @param  WC_Data  $object CRUD object.
-	 * @param  stdClass $meta Object (containing ->key and ->value).
+	 * @param  WC_Data  $object WC_Data object.
+	 * @param  stdClass $meta (containing at least ->id).
 	 */
 	public function delete_meta( &$object, $meta ) {
 		delete_metadata_by_mid( $this->meta_type, $meta->id );
@@ -102,8 +105,8 @@ class WC_Data_Store_WP {
 	 * Add new piece of meta.
 	 *
 	 * @since  3.0.0
-	 * @param  WC_Data  $object CRUD object.
-	 * @param  stdClass $meta Object (containing ->key and ->value).
+	 * @param  WC_Data  $object WC_Data object.
+	 * @param  stdClass $meta (containing ->key and ->value).
 	 * @return int meta ID
 	 */
 	public function add_meta( &$object, $meta ) {
@@ -114,8 +117,8 @@ class WC_Data_Store_WP {
 	 * Update meta.
 	 *
 	 * @since  3.0.0
-	 * @param  WC_Data  $object CRUD object.
-	 * @param  stdClass $meta Object (containing ->key and ->value).
+	 * @param  WC_Data  $object WC_Data object.
+	 * @param  stdClass $meta (containing ->id, ->key and ->value).
 	 */
 	public function update_meta( &$object, $meta ) {
 		update_metadata_by_mid( $this->meta_type, $meta->id, $meta->value, $meta->key );
@@ -163,7 +166,8 @@ class WC_Data_Store_WP {
 	 * addition to all data props with _ prefix.
 	 *
 	 * @since 2.6.0
-	 * @param string $key Key to prefix.
+	 *
+	 * @param string $key Prefix to be added to meta keys.
 	 * @return string
 	 */
 	protected function prefix_key( $key ) {
@@ -173,7 +177,7 @@ class WC_Data_Store_WP {
 	/**
 	 * Callback to remove unwanted meta data.
 	 *
-	 * @param object $meta Object.
+	 * @param object $meta Meta object to check if it should be excluded or not.
 	 * @return bool
 	 */
 	protected function exclude_internal_meta_keys( $meta ) {
@@ -215,7 +219,7 @@ class WC_Data_Store_WP {
 		$skipped_values = array( '', array(), null );
 		$wp_query_args  = array(
 			'errors'     => array(),
-			'meta_query' => array(), // @codingStandardsIgnoreLine.
+			'meta_query' => array(), // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_query
 		);
 
 		foreach ( $query_vars as $key => $value ) {
@@ -230,8 +234,7 @@ class WC_Data_Store_WP {
 					'value'   => $value,
 					'compare' => '=',
 				);
-			} else {
-				// Other vars get mapped to wp_query args or just left alone.
+			} else { // Other vars get mapped to wp_query args or just left alone.
 				$key_mapping = array(
 					'parent'         => 'post_parent',
 					'parent_exclude' => 'post_parent__not_in',
@@ -277,11 +280,9 @@ class WC_Data_Store_WP {
 			// Specific time query with a WC_DateTime.
 			if ( is_a( $query_var, 'WC_DateTime' ) ) {
 				$dates[] = $query_var;
-			} elseif ( is_numeric( $query_var ) ) {
-				// Specific time query with a timestamp.
+			} elseif ( is_numeric( $query_var ) ) { // Specific time query with a timestamp.
 				$dates[] = new WC_DateTime( "@{$query_var}", new DateTimeZone( 'UTC' ) );
-			} elseif ( preg_match( $query_parse_regex, $query_var, $sections ) ) {
-				// Query with operators and possible range of dates.
+			} elseif ( preg_match( $query_parse_regex, $query_var, $sections ) ) { // Query with operators and possible range of dates.
 				if ( ! empty( $sections[1] ) ) {
 					$dates[] = is_numeric( $sections[1] ) ? new WC_DateTime( "@{$sections[1]}", new DateTimeZone( 'UTC' ) ) : wc_string_to_datetime( $sections[1] );
 				}
@@ -292,8 +293,7 @@ class WC_Data_Store_WP {
 				if ( ! is_numeric( $sections[1] ) && ! is_numeric( $sections[3] ) ) {
 					$precision = 'day';
 				}
-			} else {
-				// Specific time query with a string.
+			} else { // Specific time query with a string.
 				$dates[]   = wc_string_to_datetime( $query_var );
 				$precision = 'day';
 			}
@@ -327,13 +327,13 @@ class WC_Data_Store_WP {
 			}
 
 			foreach ( $comparisons as $index => $comparison ) {
-				/**
-				 * WordPress doesn't generate the correct SQL for inclusive day queries with both a 'before' and
-				 * 'after' string query, so we have to use the array format in 'day' precision.
-				 *
-				 * @see https://core.trac.wordpress.org/ticket/29908
-				 */
 				if ( 'day' === $precision ) {
+					/**
+					 * WordPress doesn't generate the correct SQL for inclusive day queries with both a 'before' and
+					 * 'after' string query, so we have to use the array format in 'day' precision.
+					 *
+					 * @see https://core.trac.wordpress.org/ticket/29908
+					 */
 					$query_arg[ $comparison ]['year']  = $dates[ $index ]->date( 'Y' );
 					$query_arg[ $comparison ]['month'] = $dates[ $index ]->date( 'n' );
 					$query_arg[ $comparison ]['day']   = $dates[ $index ]->date( 'j' );
@@ -362,7 +362,7 @@ class WC_Data_Store_WP {
 
 		// Build meta query for unrecognized keys.
 		if ( ! isset( $wp_query_args['meta_query'] ) ) {
-			$wp_query_args['meta_query'] = array(); // @codingStandardsIgnoreLine.
+			$wp_query_args['meta_query'] = array(); // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_query
 		}
 
 		// Meta dates are stored as timestamps in the db.
