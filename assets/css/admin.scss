@@ -53,7 +53,7 @@
 		}
 	}
 
-	.update-plugins .update-count  {
+	.update-plugins .update-count {
 		background-color: #d54e21;
 		border-radius: 10px;
 		color: #fff;
@@ -270,14 +270,14 @@
 	}
 
 	.addons-banner-block-item,
-	.addons-column-block-item  {
+	.addons-column-block-item {
 		display: none;
 	}
 
 	.addons-banner-block-item:nth-child(-n+3) {
 		display: block;
 	}
-	.addons-column-block-item:nth-of-type(-n+3)  {
+	.addons-column-block-item:nth-of-type(-n+3) {
 		display: flex;
 	}
 
@@ -598,18 +598,18 @@ mark.amount {
  * Help Tip
  */
 .woocommerce-help-tip {
-  display: inline-block;
-  height: 16px;
-  line-height: 16px;
-  vertical-align: middle;
-  width: 16px;
+	display: inline-block;
+	height: 16px;
+	line-height: 16px;
+	vertical-align: middle;
+	width: 16px;
 
-  svg {
-    cursor: help;
-    fill: #666;
-    height: 16px;
-    width: 16px;
-  }
+	svg {
+		cursor: help;
+		fill: #666;
+		height: 16px;
+		width: 16px;
+	}
 }
 
 h2 .woocommerce-help-tip {
@@ -5960,7 +5960,7 @@ table.bar_chart {
 			height: 30px;
 		}
 	}
-	.select2-selection--multiple  {
+	.select2-selection--multiple {
 		min-height: 28px;
 		border-radius: 0;
 		line-height: 1.5;
