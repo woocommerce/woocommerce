@@ -1421,4 +1421,16 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 		update_option( 'woocommerce_calc_taxes', 'no' );
 	}
+
+	/**
+	 * Test is_coupon_emails_allowed function on the cart, specifically test wildcard emails.
+	 *
+	 * @return void
+	 */
+	public function test_is_coupon_emails_allowed() {
+		$this->assertEquals( true, WC()->cart->is_coupon_emails_allowed( array( 'customer@wc.local' ), array( '*.local' ) ) );
+		$this->assertEquals( false, WC()->cart->is_coupon_emails_allowed( array( 'customer@wc.local' ), array( '*.test' ) ) );
+		$this->assertEquals( true, WC()->cart->is_coupon_emails_allowed( array( 'customer@wc.local' ), array( 'customer@wc.local' ) ) );
+		$this->assertEquals( false, WC()->cart->is_coupon_emails_allowed( array( 'customer@wc.local' ), array( 'customer2@wc.local' ) ) );
+	}
 }
