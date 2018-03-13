@@ -1,7 +1,10 @@
 <?php
 /**
  * Admin View: Steps
+ *
+ * @package WooCommerce\Admin\Importers
  */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -11,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php
 		if ( $step_key === $this->step ) {
 			$step_class = 'active';
-		} elseif ( array_search( $this->step, array_keys( $this->steps ) ) > array_search( $step_key, array_keys( $this->steps ) ) ) {
+		} elseif ( array_search( $this->step, array_keys( $this->steps ), true ) > array_search( $step_key, array_keys( $this->steps ), true ) ) {
 			$step_class = 'done';
 		}
 		?>

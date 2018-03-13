@@ -214,6 +214,7 @@ function woocommerce_wp_select( $field ) {
 	$field_attributes['style'] = $field['style'];
 	$field_attributes['id']    = $field['id'];
 	$field_attributes['name']  = $field['name'];
+	$field_attributes['class'] = $field['class'];
 
 	$tooltip     = ! empty( $field['description'] ) && false !== $field['desc_tip'] ? $field['description'] : '';
 	$description = ! empty( $field['description'] ) && false === $field['desc_tip'] ? $field['description'] : '';
