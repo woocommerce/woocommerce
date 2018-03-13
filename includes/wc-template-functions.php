@@ -1961,8 +1961,8 @@ if ( ! function_exists( 'woocommerce_output_product_categories' ) ) {
 	 */
 	function woocommerce_output_product_categories( $args = array() ) {
 		$args = wp_parse_args( $args, array(
-			'before'    => apply_filters( woocommerce_before_output_product_categories, '' ),
-			'after'     => apply_filters( woocommerce_after_output_product_categories, '' ),
+			'before'    => apply_filters( 'woocommerce_before_output_product_categories', '' ),
+			'after'     => apply_filters( 'woocommerce_after_output_product_categories', '' ),
 			'parent_id' => 0,
 		) );
 
