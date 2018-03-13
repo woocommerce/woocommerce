@@ -377,8 +377,8 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		if ( true === $cache ) {
 			$cached_counts = (array) get_transient( 'wc_layered_nav_counts_' . $taxonomy );	
 		} else {
-            $cached_counts = array();
-        }
+			$cached_counts = array();
+		}
 
 		if ( ! isset( $cached_counts[ $query_hash ] ) ) {
 			$results                      = $wpdb->get_results( $query, ARRAY_A ); // @codingStandardsIgnoreLine
