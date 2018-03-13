@@ -88,6 +88,31 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	}
 
 	/**
+	 * Check if a gateway supports a given feature.
+	 *
+	 * Gateways should override this to declare support (or lack of support) for a feature.
+	 * For backward compatibility, gateways support 'products' by default, but nothing else.
+	 *
+	 * @param string $feature string The name of a feature to test support for.
+	 * @return bool True if the gateway supports the feature, false otherwise.
+	 */
+	public function supports( $feature ) {
+		if ( 'refunds' === $feature ) {
+			// Ensure the gateway has API credentials.
+			$has_api_creds = false;
+
+			if ( $this->testmode ) {
+				$has_api_creds = $this->get_option( 'sandbox_api_username' ) && $this->get_option( 'sandbox_api_password' ) && $this->get_option( 'sandbox_api_signature' );
+			} else {
+				$has_api_creds = $this->get_option( 'api_username' ) && $this->get_option( 'api_password' ) && $this->get_option( 'api_signature' );
+			}
+
+			return $has_api_creds;
+		}
+		return parent::supports( $feature );
+	}
+
+	/**
 	 * Logging method.
 	 *
 	 * @param string $message Log message.
