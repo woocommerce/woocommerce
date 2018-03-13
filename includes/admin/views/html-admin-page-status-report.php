@@ -77,7 +77,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 				if ( $environment['log_directory_writable'] ) {
 					echo '<mark class="yes">' . get_gridicon( 'gridicons-checkmark' ) . ' <code class="private">' . esc_html( $environment['log_directory'] ) . '</code></mark> ';
 				} else {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'To allow logging, make %1$s writable or define a custom %2$s.', 'woocommerce' ), '<code>' . $environment['log_directory'] . '</code>', '<code>WC_LOG_DIR</code>' ) . '</mark>';
+					echo '<mark class="error">' . get_gridicon( 'gridicons-notice' ) . ' ' . sprintf( __( 'To allow logging, make %1$s writable or define a custom %2$s.', 'woocommerce' ), '<code>' . $environment['log_directory'] . '</code>', '<code>WC_LOG_DIR</code>' ) . '</mark>';
 				}
 				?>
 			</td>
@@ -104,7 +104,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 			<td>
 				<?php
 				if ( $environment['wp_memory_limit'] < 67108864 ) {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%1$s - We recommend setting memory to at least 64MB. See: %2$s', 'woocommerce' ), size_format( $environment['wp_memory_limit'] ), '<a href="https://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP" target="_blank">' . __( 'Increasing memory allocated to PHP', 'woocommerce' ) . '</a>' ) . '</mark>';
+					echo '<mark class="error">' . get_gridicon( 'gridicons-notice' ) . ' ' . sprintf( __( '%1$s - We recommend setting memory to at least 64MB. See: %2$s', 'woocommerce' ), size_format( $environment['wp_memory_limit'] ), '<a href="https://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP" target="_blank">' . __( 'Increasing memory allocated to PHP', 'woocommerce' ) . '</a>' ) . '</mark>';
 				} else {
 					echo '<mark class="yes">' . size_format( $environment['wp_memory_limit'] ) . '</mark>';
 				}
@@ -169,7 +169,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 			<td>
 				<?php
 				if ( version_compare( $environment['php_version'], '5.6', '<' ) ) {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%1$s - We recommend a minimum PHP version of 5.6. See: %2$s', 'woocommerce' ), esc_html( $environment['php_version'] ), '<a href="https://docs.woocommerce.com/document/how-to-update-your-php-version/" target="_blank">' . __( 'How to update your PHP version', 'woocommerce' ) . '</a>' ) . '</mark>';
+					echo '<mark class="error">' . get_gridicon( 'gridicons-notice' ) . ' ' . sprintf( __( '%1$s - We recommend a minimum PHP version of 5.6. See: %2$s', 'woocommerce' ), esc_html( $environment['php_version'] ), '<a href="https://docs.woocommerce.com/document/how-to-update-your-php-version/" target="_blank">' . __( 'How to update your PHP version', 'woocommerce' ) . '</a>' ) . '</mark>';
 				} else {
 					echo '<mark class="yes">' . esc_html( $environment['php_version'] ) . '</mark>';
 				}
@@ -220,7 +220,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 				<td>
 					<?php
 					if ( version_compare( $environment['mysql_version'], '5.6', '<' ) ) {
-						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%1$s - We recommend a minimum MySQL version of 5.6. See: %2$s', 'woocommerce' ), esc_html( $environment['mysql_version'] ), '<a href="https://wordpress.org/about/requirements/" target="_blank">' . __( 'WordPress requirements', 'woocommerce' ) . '</a>' ) . '</mark>';
+						echo '<mark class="error">' . get_gridicon( 'gridicons-notice' ) . ' ' . sprintf( __( '%1$s - We recommend a minimum MySQL version of 5.6. See: %2$s', 'woocommerce' ), esc_html( $environment['mysql_version'] ), '<a href="https://wordpress.org/about/requirements/" target="_blank">' . __( 'WordPress requirements', 'woocommerce' ) . '</a>' ) . '</mark>';
 					} else {
 						echo '<mark class="yes">' . esc_html( $environment['mysql_version'] ) . '</mark>';
 					}
@@ -239,7 +239,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 			<td>
 				<?php
 				if ( 'UTC' !== $environment['default_timezone'] ) {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'Default timezone is %s - it should be UTC', 'woocommerce' ), $environment['default_timezone'] ) . '</mark>';
+					echo '<mark class="error">' . get_gridicon( 'gridicons-notice' ) . ' ' . sprintf( __( 'Default timezone is %s - it should be UTC', 'woocommerce' ), $environment['default_timezone'] ) . '</mark>';
 				} else {
 					echo '<mark class="yes">' . get_gridicon( 'gridicons-checkmark' ) . '</mark>';
 				}
@@ -254,7 +254,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 				if ( $environment['fsockopen_or_curl_enabled'] ) {
 					echo '<mark class="yes">' . get_gridicon( 'gridicons-checkmark' ) . '</mark>';
 				} else {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . __( 'Your server does not have fsockopen or cURL enabled - PayPal IPN and other scripts which communicate with other servers will not work. Contact your hosting provider.', 'woocommerce' ) . '</mark>';
+					echo '<mark class="error">' . get_gridicon( 'gridicons-notice' ) . ' ' . __( 'Your server does not have fsockopen or cURL enabled - PayPal IPN and other scripts which communicate with other servers will not work. Contact your hosting provider.', 'woocommerce' ) . '</mark>';
 				}
 				?>
 			</td>
@@ -267,7 +267,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 				if ( $environment['soapclient_enabled'] ) {
 					echo '<mark class="yes">' . get_gridicon( 'gridicons-checkmark' ) . '</mark>';
 				} else {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'Your server does not have the %s class enabled - some gateway plugins which use SOAP may not work as expected.', 'woocommerce' ), '<a href="https://php.net/manual/en/class.soapclient.php">SoapClient</a>' ) . '</mark>';
+					echo '<mark class="error">' . get_gridicon( 'gridicons-notice' ) . ' ' . sprintf( __( 'Your server does not have the %s class enabled - some gateway plugins which use SOAP may not work as expected.', 'woocommerce' ), '<a href="https://php.net/manual/en/class.soapclient.php">SoapClient</a>' ) . '</mark>';
 				}
 				?>
 			</td>
@@ -280,7 +280,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 				if ( $environment['domdocument_enabled'] ) {
 					echo '<mark class="yes">' . get_gridicon( 'gridicons-checkmark' ) . '</mark>';
 				} else {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'Your server does not have the %s class enabled - HTML/Multipart emails, and also some extensions, will not work without DOMDocument.', 'woocommerce' ), '<a href="https://php.net/manual/en/class.domdocument.php">DOMDocument</a>' ) . '</mark>';
+					echo '<mark class="error">' . get_gridicon( 'gridicons-notice' ) . ' ' . sprintf( __( 'Your server does not have the %s class enabled - HTML/Multipart emails, and also some extensions, will not work without DOMDocument.', 'woocommerce' ), '<a href="https://php.net/manual/en/class.domdocument.php">DOMDocument</a>' ) . '</mark>';
 				}
 				?>
 			</td>
@@ -293,7 +293,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 				if ( $environment['gzip_enabled'] ) {
 					echo '<mark class="yes">' . get_gridicon( 'gridicons-checkmark' ) . '</mark>';
 				} else {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'Your server does not support the %s function - this is required to use the GeoIP database from MaxMind.', 'woocommerce' ), '<a href="https://php.net/manual/en/zlib.installation.php">gzopen</a>' ) . '</mark>';
+					echo '<mark class="error">' . get_gridicon( 'gridicons-notice' ) . ' ' . sprintf( __( 'Your server does not support the %s function - this is required to use the GeoIP database from MaxMind.', 'woocommerce' ), '<a href="https://php.net/manual/en/zlib.installation.php">gzopen</a>' ) . '</mark>';
 				}
 				?>
 			</td>
@@ -306,7 +306,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 				if ( $environment['mbstring_enabled'] ) {
 					echo '<mark class="yes">' . get_gridicon( 'gridicons-checkmark' ) . '</mark>';
 				} else {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'Your server does not support the %s functions - this is required for better character encoding. Some fallbacks will be used instead for it.', 'woocommerce' ), '<a href="https://php.net/manual/en/mbstring.installation.php">mbstring</a>' ) . '</mark>';
+					echo '<mark class="error">' . get_gridicon( 'gridicons-notice' ) . ' ' . sprintf( __( 'Your server does not support the %s functions - this is required for better character encoding. Some fallbacks will be used instead for it.', 'woocommerce' ), '<a href="https://php.net/manual/en/mbstring.installation.php">mbstring</a>' ) . '</mark>';
 				}
 				?>
 			</td>
@@ -319,7 +319,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 				if ( $environment['remote_post_successful'] ) {
 					echo '<mark class="yes">' . get_gridicon( 'gridicons-checkmark' ) . '</mark>';
 				} else {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%s failed. Contact your hosting provider.', 'woocommerce' ), 'wp_remote_post()' ) . ' ' . esc_html( $environment['remote_post_response'] ) . '</mark>';
+					echo '<mark class="error">' . get_gridicon( 'gridicons-notice' ) . ' ' . sprintf( __( '%s failed. Contact your hosting provider.', 'woocommerce' ), 'wp_remote_post()' ) . ' ' . esc_html( $environment['remote_post_response'] ) . '</mark>';
 				}
 				?>
 			</td>
@@ -332,7 +332,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 				if ( $environment['remote_get_successful'] ) {
 					echo '<mark class="yes">' . get_gridicon( 'gridicons-checkmark' ) . '</mark>';
 				} else {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%s failed. Contact your hosting provider.', 'woocommerce' ), 'wp_remote_get()' ) . ' ' . esc_html( $environment['remote_get_response'] ) . '</mark>';
+					echo '<mark class="error">' . get_gridicon( 'gridicons-notice' ) . ' ' . sprintf( __( '%s failed. Contact your hosting provider.', 'woocommerce' ), 'wp_remote_get()' ) . ' ' . esc_html( $environment['remote_get_response'] ) . '</mark>';
 				}
 				?>
 			</td>
@@ -380,7 +380,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 			<td>
 				<?php
 				if ( strlen( $database['database_prefix'] ) > 20 ) {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%1$s - We recommend using a prefix with less than 20 characters. See: %2$s', 'woocommerce' ), esc_html( $database['database_prefix'] ), '<a href="https://docs.woocommerce.com/document/completed-order-email-doesnt-contain-download-links/#section-2" target="_blank">' . __( 'How to update your database table prefix', 'woocommerce' ) . '</a>' ) . '</mark>';
+					echo '<mark class="error">' . get_gridicon( 'gridicons-notice' ) . ' ' . sprintf( __( '%1$s - We recommend using a prefix with less than 20 characters. See: %2$s', 'woocommerce' ), esc_html( $database['database_prefix'] ), '<a href="https://docs.woocommerce.com/document/completed-order-email-doesnt-contain-download-links/#section-2" target="_blank">' . __( 'How to update your database table prefix', 'woocommerce' ) . '</a>' ) . '</mark>';
 				} else {
 					echo '<mark class="yes">' . esc_html( $database['database_prefix'] ) . '</mark>';
 				}
@@ -397,7 +397,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 					if ( file_exists( $database['maxmind_geoip_database'] ) ) {
 						echo '<mark class="yes">' . get_gridicon( 'gridicons-checkmark' ) . ' <code class="private">' . esc_html( $database['maxmind_geoip_database'] ) . '</code></mark> ';
 					} else {
-						printf( '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'The MaxMind GeoIP Database does not exist - Geolocation will not function. You can download and install it manually from %1$s to the path: %2$s. Scroll down to "Downloads" and download the "Binary / gzip" file next to "GeoLite Country". Please remember to uncompress GeoIP.dat.gz and upload the GeoIP.dat file only.', 'woocommerce' ), make_clickable( 'http://dev.maxmind.com/geoip/legacy/geolite/' ), '<code class="private">' . $database['maxmind_geoip_database'] . '</code>' ) . '</mark>', WC_LOG_DIR );
+						printf( '<mark class="error">' . get_gridicon( 'gridicons-notice' ) . ' ' . sprintf( __( 'The MaxMind GeoIP Database does not exist - Geolocation will not function. You can download and install it manually from %1$s to the path: %2$s. Scroll down to "Downloads" and download the "Binary / gzip" file next to "GeoLite Country". Please remember to uncompress GeoIP.dat.gz and upload the GeoIP.dat file only.', 'woocommerce' ), make_clickable( 'http://dev.maxmind.com/geoip/legacy/geolite/' ), '<code class="private">' . $database['maxmind_geoip_database'] . '</code>' ) . '</mark>', WC_LOG_DIR );
 					}
 					?>
 				</td>
@@ -429,7 +429,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 				<td>
 					<?php
 					if ( ! $table_data ) {
-						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . __( 'Table does not exist', 'woocommerce' ) . '</mark>';
+						echo '<mark class="error">' . get_gridicon( 'gridicons-notice' ) . ' ' . __( 'Table does not exist', 'woocommerce' ) . '</mark>';
 					} else {
 						printf( __( 'Data: %1$.2fMB + Index: %2$.2fMB', 'woocommerce' ), wc_format_decimal( $table_data['data'], 2 ), wc_format_decimal( $table_data['index'], 2 ) );
 					}
@@ -483,7 +483,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 				<?php if ( $security['secure_connection'] ) : ?>
 					<mark class="yes"><?php echo get_gridicon( 'gridicons-checkmark' ); ?></mark>
 				<?php else : ?>
-					<mark class="error"><span class="dashicons dashicons-warning"></span><?php printf( __( 'Your store is not using HTTPS. <a href="%s" target="_blank">Learn more about HTTPS and SSL Certificates</a>.', 'woocommerce' ), 'https://docs.woocommerce.com/document/ssl-and-https/' ); ?></mark>
+					<mark class="error"><?php echo get_gridicon( 'gridicons-notice' ); ?><?php printf( __( 'Your store is not using HTTPS. <a href="%s" target="_blank">Learn more about HTTPS and SSL Certificates</a>.', 'woocommerce' ), 'https://docs.woocommerce.com/document/ssl-and-https/' ); ?></mark>
 				<?php endif; ?>
 			</td>
 		</tr>
@@ -494,7 +494,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 				<?php if ( $security['hide_errors'] ) : ?>
 					<mark class="yes"><?php echo get_gridicon( 'gridicons-checkmark' ); ?></mark>
 				<?php else : ?>
-					<mark class="error"><span class="dashicons dashicons-warning"></span><?php esc_html_e( 'Error messages should not be shown to visitors.', 'woocommerce' ); ?></mark>
+					<mark class="error"><?php echo get_gridicon( 'gridicons-notice' ); ?><?php esc_html_e( 'Error messages should not be shown to visitors.', 'woocommerce' ); ?></mark>
 				<?php endif; ?>
 			</td>
 		</tr>
@@ -645,19 +645,19 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 
 			// Page ID check.
 			if ( ! $page['page_set'] ) {
-				echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . __( 'Page not set', 'woocommerce' ) . '</mark>';
+				echo '<mark class="error">' . get_gridicon( 'gridicons-notice' ) . ' ' . __( 'Page not set', 'woocommerce' ) . '</mark>';
 				$error = true;
 			} elseif ( ! $page['page_exists'] ) {
-				echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . __( 'Page ID is set, but the page does not exist', 'woocommerce' ) . '</mark>';
+				echo '<mark class="error">' . get_gridicon( 'gridicons-notice' ) . ' ' . __( 'Page ID is set, but the page does not exist', 'woocommerce' ) . '</mark>';
 				$error = true;
 			} elseif ( ! $page['page_visible'] ) {
-				echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'Page visibility should be <a href="%s" target="_blank">public</a>', 'woocommerce' ), 'https://codex.wordpress.org/Content_Visibility' ) . '</mark>';
+				echo '<mark class="error">' . get_gridicon( 'gridicons-notice' ) . ' ' . sprintf( __( 'Page visibility should be <a href="%s" target="_blank">public</a>', 'woocommerce' ), 'https://codex.wordpress.org/Content_Visibility' ) . '</mark>';
 				$error = true;
 			} else {
 				// Shortcode check
 				if ( $page['shortcode_required'] ) {
 					if ( ! $page['shortcode_present'] ) {
-						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'Page does not contain the shortcode.', 'woocommerce' ), $page['shortcode'] ) . '</mark>';
+						echo '<mark class="error">' . get_gridicon( 'gridicons-notice' ) . ' ' . sprintf( __( 'Page does not contain the shortcode.', 'woocommerce' ), $page['shortcode'] ) . '</mark>';
 						$error = true;
 					}
 				}
@@ -740,7 +740,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 			<td>
 				<?php
 				if ( ! $theme['has_woocommerce_support'] ) {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . __( 'Not declared', 'woocommerce' ) . '</mark>';
+					echo '<mark class="error">' . get_gridicon( 'gridicons-notice' ) . ' ' . __( 'Not declared', 'woocommerce' ) . '</mark>';
 				} else {
 					echo '<mark class="yes">' . get_gridicon( 'gridicons-checkmark' ) . '</mark>';
 				}
@@ -805,7 +805,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 				<td class="help">&nbsp;</td>
 				<td>
 					<mark class="error">
-						<span class="dashicons dashicons-warning"></span>
+						<?php echo get_gridicon( 'gridicons-notice' ); ?>
 					</mark>
 					<a href="https://docs.woocommerce.com/document/fix-outdated-templates-woocommerce/" target="_blank">
 						<?php esc_html_e( 'Learn how to update', 'woocommerce' ); ?>
