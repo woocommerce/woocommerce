@@ -72,7 +72,7 @@ class WC_Validation {
 				$valid = (bool) preg_match( '/^([0-9]{5})$/i', $postcode );
 				break;
 			case 'GB':
-				$valid = self::is_GB_postcode( $postcode );
+				$valid = self::is_gb_postcode( $postcode );
 				break;
 			case 'JP':
 				$valid = (bool) preg_match( '/^([0-9]{3})([-])([0-9]{4})$/', $postcode );
@@ -109,7 +109,7 @@ class WC_Validation {
 	 * @param  string $to_check A postcode.
 	 * @return bool
 	 */
-	public static function is_GB_postcode( $to_check ) {
+	public static function is_gb_postcode( $to_check ) {
 
 		// Permitted letters depend upon their position in the postcode.
 		// https://en.wikipedia.org/wiki/Postcodes_in_the_United_Kingdom#Validation.
