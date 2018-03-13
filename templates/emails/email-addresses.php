@@ -28,6 +28,9 @@ $text_align = is_rtl() ? 'right' : 'left';
 			<h2><?php _e( 'Billing address', 'woocommerce' ); ?></h2>
 
 			<address class="address">
+				<?php // allow other plugins to add additional billing information here
+				do_action( 'woocommerce_email_billing_address_start', $order );
+				?>
 				<?php echo ( $address = $order->get_formatted_billing_address() ) ? $address : __( 'N/A', 'woocommerce' ); ?>
 				<?php if ( $order->get_billing_phone() ) : ?>
 					<br/><?php echo esc_html( $order->get_billing_phone() ); ?>
@@ -35,13 +38,24 @@ $text_align = is_rtl() ? 'right' : 'left';
 				<?php if ( $order->get_billing_email() ) : ?>
 					<p><?php echo esc_html( $order->get_billing_email() ); ?></p>
 				<?php endif; ?>
+				<?php // allow other plugins to add additional billing information here
+				do_action( 'woocommerce_email_billing_address_end', $order );
+				?>
 			</address>
 		</td>
 		<?php if ( ! wc_ship_to_billing_address_only() && $order->needs_shipping_address() && ( $shipping = $order->get_formatted_shipping_address() ) ) : ?>
 			<td style="text-align:<?php echo $text_align; ?>; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif; padding:0;" valign="top" width="50%">
 				<h2><?php _e( 'Shipping address', 'woocommerce' ); ?></h2>
 
-				<address class="address"><?php echo $shipping; ?></address>
+				<address class="address">
+				<?php // allow other plugins to add additional shipping information here
+				do_action( 'woocommerce_email_shipping_address_start', $order );
+				?>
+					<?php echo $shipping; ?>
+				<?php // allow other plugins to add additional shipping information here
+				do_action( 'woocommerce_email_shipping_address_end', $order );
+				?>
+				</address>
 			</td>
 		<?php endif; ?>
 	</tr>
