@@ -345,7 +345,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 				$icon      = get_gridicon( 'gridicons-checkmark' );
 			} else {
 				$css_class = 'error';
-				$icon      = '<span class="dashicons dashicons-no-alt"></span>';
+				$icon      = get_gridicon( 'gridicons-cross' );
 			}
 			?>
 			<tr>
@@ -706,7 +706,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 			<td data-export-label="Child Theme"><?php esc_html_e( 'Child theme', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( __( 'Displays whether or not the current theme is a child theme.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td>
-				<?php echo $theme['is_child_theme'] ? '<mark class="yes">' . get_gridicon( 'gridicons-checkmark' ) . '</mark>' : '<span class="dashicons dashicons-no-alt"></span> &ndash; ' . sprintf( __( 'If you are modifying WooCommerce on a parent theme that you did not build personally we recommend using a child theme. See: <a href="%s" target="_blank">How to create a child theme</a>', 'woocommerce' ), 'https://codex.wordpress.org/Child_Themes' ); ?>
+				<?php echo $theme['is_child_theme'] ? '<mark class="yes">' . get_gridicon( 'gridicons-checkmark' ) . '</mark>' : get_gridicon( 'gridicons-cross' ) . ' &ndash; ' . sprintf( __( 'If you are modifying WooCommerce on a parent theme that you did not build personally we recommend using a child theme. See: <a href="%s" target="_blank">How to create a child theme</a>', 'woocommerce' ), 'https://codex.wordpress.org/Child_Themes' ); ?>
 			</td>
 		</tr>
 		<?php if ( $theme['is_child_theme'] ) : ?>

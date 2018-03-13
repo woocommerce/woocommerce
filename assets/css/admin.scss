@@ -660,13 +660,6 @@ table.wc_status_table {
 
 		mark {
 			background: transparent none;
-
-			svg {
-				fill: currentColor;
-				height: 18px;
-				width: 18px;
-				vertical-align: text-bottom;
-			}
 		}
 
 		mark.yes {
@@ -683,6 +676,15 @@ table.wc_status_table {
 
 		ul {
 			margin: 0;
+		}
+	}
+
+	td:not(.help) {
+		svg {
+			fill: currentColor;
+			height: 18px;
+			width: 18px;
+			vertical-align: text-bottom;
 		}
 	}
 
