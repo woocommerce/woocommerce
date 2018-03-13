@@ -20,7 +20,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 echo "\n" . esc_html( wc_strtoupper( __( 'Billing address', 'woocommerce' ) ) ) . "\n\n";
+do_action( 'woocommerce_plain_email_billing_address_start', $order );
 echo preg_replace( '#<br\s*/?>#i', "\n", $order->get_formatted_billing_address() ) . "\n"; // WPCS: XSS ok.
+do_action( 'woocommerce_plain_email_billing_address_end', $order );
 
 if ( $order->get_billing_phone() ) {
 	echo $order->get_billing_phone() . "\n"; // WPCS: XSS ok.
@@ -35,6 +37,8 @@ if ( ! wc_ship_to_billing_address_only() && $order->needs_shipping_address() ) {
 
 	if ( $shipping ) {
 		echo "\n" . esc_html( wc_strtoupper( __( 'Shipping address', 'woocommerce' ) ) ) . "\n\n";
+		do_action( 'woocommerce_plain_email_shipping_address_start', $order );
 		echo preg_replace( '#<br\s*/?>#i', "\n", $shipping ) . "\n"; // WPCS: XSS ok.
+		do_action( 'woocommerce_plain_email_shipping_address_end', $order );
 	}
 }
