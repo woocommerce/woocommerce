@@ -1355,7 +1355,7 @@ function wc_help_tip( $tip, $allow_html = false ) {
 		$tip = esc_attr( $tip );
 	}
 
-	return '<span class="woocommerce-help-tip" data-tip="' . $tip . '"></span>';
+	return '<span class="woocommerce-help-tip" data-tip="' . $tip . '">' . get_gridicon( 'gridicons-info-outline' ) . '</span>';
 }
 
 /**

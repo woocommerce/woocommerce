@@ -598,20 +598,18 @@ mark.amount {
  * Help Tip
  */
 .woocommerce-help-tip {
-	color: #666;
-	display: inline-block;
-	font-size: 1.1em;
-	font-style: normal;
-	height: 16px;
-	line-height: 16px;
-	position: relative;
-	vertical-align: middle;
-	width: 16px;
+  display: inline-block;
+  height: 16px;
+  line-height: 16px;
+  vertical-align: middle;
+  width: 16px;
 
-	&::after {
-		@include icon_dashicons( '\f223' );
-		cursor: help;
-	}
+  svg {
+    cursor: help;
+    fill: #666;
+    height: 16px;
+    width: 16px;
+  }
 }
 
 h2 .woocommerce-help-tip {
@@ -694,11 +692,17 @@ table.wc_status_table--tools {
 
 .taxonomy-product_cat {
 	.column-thumb .woocommerce-help-tip {
-		font-size: 1.5em;
+		display: block;
 		margin: 0 0 0 -34px;
 		padding: 0px 2px 5px;
-		display: block;
 		position: absolute;
+		height: 18px;
+		width: 18px;
+
+		svg {
+			height: 18px;
+			width: 18px;
+		}
 	}
 }
 
@@ -2978,6 +2982,10 @@ table.wc_shipping {
 			font-weight: normal;
 			color: #999;
 			margin: 0 0 0 4px !important;
+
+			svg {
+				fill: #999
+			}
 		}
 	}
 	.wc-email-settings-table-status {
@@ -3420,8 +3428,17 @@ img.help_tip {
 	margin-top: 0;
 }
 
-.postbox .woocommerce-help-tip {
-	margin: 0 0 0 9px;
+.postbox {
+	.woocommerce-help-tip {
+		margin: 0 0 0 9px;
+	}
+
+	label,
+	h2 {
+		.woocommerce-help-tip {
+			margin-top: -4px;
+		}
+	}
 }
 
 .status-enabled,
@@ -4048,10 +4065,6 @@ img.help_tip {
 .panel {
 	padding: 9px;
 	color: #555;
-
-	.form-field .woocommerce-help-tip {
-		font-size: 1.4em;
-	}
 }
 
 .woocommerce_page_settings .woocommerce_options_panel,
@@ -4105,8 +4118,7 @@ img.help_tip {
 			}
 
 			.woocommerce-help-tip {
-				font-size: 1.1em;
-				margin-left: 0;
+				margin: -3px 0 0 0;
 			}
 		}
 
