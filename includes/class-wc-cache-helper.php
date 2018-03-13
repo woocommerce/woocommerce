@@ -20,8 +20,8 @@ class WC_Cache_Helper {
 		add_action( 'admin_notices', array( __CLASS__, 'notices' ) );
 		add_action( 'delete_version_transients', array( __CLASS__, 'delete_version_transients' ) );
 		add_action( 'wp', array( __CLASS__, 'prevent_caching' ) );
-		add_action( 'clean_taxonomy_cache', array( __CLASS__, 'clean_taxonomy_cache' ) );
 		add_action( 'clean_term_cache', array( __CLASS__, 'clean_term_cache' ), 10, 2 );
+		add_action( 'edit_terms', array( __CLASS__, 'clean_term_cache' ), 10, 2 );
 	}
 
 	/**
@@ -210,24 +210,23 @@ class WC_Cache_Helper {
 	 * Clean term caches added by WooCommerce.
 	 *
 	 * @since 3.3.4
-	 * @param string $taxonomy Taxonomy name.
-	 */
-	public static function clean_taxonomy_cache( $taxonomy ) {
-		if ( 'product_cat' === $taxonomy ) {
-			wp_cache_delete( 'product-category-hierarchy', 'product_cat' );
-		}
-	}
-
-	/**
-	 * Clean term caches added by WooCommerce.
-	 *
-	 * @since 3.3.4
-	 * @param array  $ids Array of ids to clear cache for.
-	 * @param string $taxonomy Taxonomy name.
+	 * @param array|int $ids Array of ids or single ID to clear cache for.
+	 * @param string    $taxonomy Taxonomy name.
 	 */
 	public static function clean_term_cache( $ids, $taxonomy ) {
 		if ( 'product_cat' === $taxonomy ) {
-			wp_cache_delete( 'product-category-hierarchy', 'product_cat' );
+			$ids = is_array( $ids ) ? $ids : array( $ids );
+
+			foreach ( $ids as $id ) {
+				$clear_ids[] = $id;
+				$clear_ids   = array_merge( $clear_ids, get_ancestors( $id, 'product_cat', 'taxonomy' ) );
+			}
+
+			$clear_ids = array_unique( $clear_ids );
+
+			foreach ( $clear_ids as $id ) {
+				wp_cache_delete( 'product-category-hierarchy-' . $id, 'product_cat' );
+			}
 		}
 	}
 }
