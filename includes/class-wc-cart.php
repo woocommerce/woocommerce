@@ -1505,7 +1505,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param array $restrictions Array of allowed email addresses.
 	 * @return bool
 	 */
-	public function is_coupon_emails_allowed( $check_emails, $restrictions ){
+	public function is_coupon_emails_allowed( $check_emails, $restrictions ) {
 
 		foreach ( $check_emails as $check_email ) {
 			// With a direct match we return true.
