@@ -943,7 +943,9 @@ class WC_Checkout {
 	 */
 	public function process_checkout() {
 		try {
-			if ( empty( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-process_checkout' ) ) {
+			$nonce_value = wc_get_var( $_REQUEST['woocommerce-process-checkout-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // @codingStandardsIgnoreLine.
+
+			if ( empty( $nonce_value ) || ! wp_verify_nonce( $nonce_value, 'woocommerce-process_checkout' ) ) {
 				WC()->session->set( 'refresh_totals', true );
 				throw new Exception( __( 'We were unable to process your order, please try again.', 'woocommerce' ) );
 			}
