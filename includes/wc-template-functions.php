@@ -2326,7 +2326,17 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			$field           = sprintf( $field_container, $container_class, $container_id, $field_html );
 		}
 
+		/**
+		 * Filter by type.
+		 */
 		$field = apply_filters( 'woocommerce_form_field_' . $args['type'], $field, $key, $args, $value );
+
+		/**
+		 * General filter on form fields.
+		 *
+		 * @since 3.4.0
+		 */
+		$field = apply_filters( 'woocommerce_form_field', $field, $key, $args, $value );
 
 		if ( $args['return'] ) {
 			return $field;
