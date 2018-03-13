@@ -6,15 +6,11 @@
  *
  * This product includes GeoLite data created by MaxMind, available from http://www.maxmind.com.
  *
- * @author   WooThemes
- * @category Admin
- * @package  WooCommerce/Classes
- * @version  2.4.0
+ * @package WooCommerce/Classes
+ * @version 3.4.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Geolocation Class.
@@ -23,13 +19,24 @@ class WC_Geolocation {
 
 	/**
 	 * GeoLite IPv4 DB.
+	 *
+	 * @deprecated 3.4.0
 	 */
 	const GEOLITE_DB = 'http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz';
 
 	/**
 	 * GeoLite IPv6 DB.
+	 *
+	 * @deprecated 3.4.0
 	 */
 	const GEOLITE_IPV6_DB = 'http://geolite.maxmind.com/download/geoip/database/GeoIPv6.dat.gz';
+
+	/**
+	 * GeoLite2 DB.
+	 *
+	 * @since 3.4.0
+	 */
+	const GEOLITE2_DB = 'http://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.tar.gz';
 
 	/**
 	 * API endpoints for looking up user IP address.
@@ -191,14 +198,13 @@ class WC_Geolocation {
 	/**
 	 * Path to our local db.
 	 *
-	 * @param  string $version Version.
+	 * @param  string $deprecated Deprecated since 3.4.0.
 	 * @return string
 	 */
-	public static function get_local_database_path( $version = 'v4' ) {
-		$version    = 'v4' === $version ? '' : 'v6';
+	public static function get_local_database_path( $deprecated = '2' ) {
 		$upload_dir = wp_upload_dir();
 
-		return apply_filters( 'woocommerce_geolocation_local_database_path', $upload_dir['basedir'] . '/GeoIP' . $version . '.dat', $version );
+		return apply_filters( 'woocommerce_geolocation_local_database_path', $upload_dir['basedir'] . '/GeoLite2-Country.mmdb', $deprecated );
 	}
 
 	/**
@@ -215,8 +221,7 @@ class WC_Geolocation {
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 
 		$tmp_databases = array(
-			'v4' => download_url( self::GEOLITE_DB ),
-			'v6' => download_url( self::GEOLITE_IPV6_DB ),
+			'2' => download_url( self::GEOLITE2_DB ),
 		);
 
 		foreach ( $tmp_databases as $tmp_database_version => $tmp_database_path ) {
