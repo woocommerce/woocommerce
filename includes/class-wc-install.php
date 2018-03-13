@@ -463,7 +463,7 @@ class WC_Install {
 			}
 		}
 
-		$woocommerce_default_category = get_option( 'default_product_cat', 0 );
+		$woocommerce_default_category = (int) get_option( 'default_product_cat', 0 );
 
 		if ( ! $woocommerce_default_category || ! term_exists( $woocommerce_default_category, 'product_cat' ) ) {
 			$default_product_cat_id   = 0;
