@@ -660,6 +660,13 @@ table.wc_status_table {
 
 		mark {
 			background: transparent none;
+
+			svg {
+				fill: currentColor;
+				height: 18px;
+				width: 18px;
+				vertical-align: middle;
+			}
 		}
 
 		mark.yes {

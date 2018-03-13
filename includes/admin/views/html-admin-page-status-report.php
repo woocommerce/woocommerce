@@ -75,7 +75,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 			<td>
 				<?php
 				if ( $environment['log_directory_writable'] ) {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> <code class="private">' . esc_html( $environment['log_directory'] ) . '</code></mark> ';
+					echo '<mark class="yes">' . get_gridicon( 'gridicons-checkmark' ) . ' <code class="private">' . esc_html( $environment['log_directory'] ) . '</code></mark> ';
 				} else {
 					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'To allow logging, make %1$s writable or define a custom %2$s.', 'woocommerce' ), '<code>' . $environment['log_directory'] . '</code>', '<code>WC_LOG_DIR</code>' ) . '</mark>';
 				}
@@ -90,7 +90,13 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 		<tr>
 			<td data-export-label="WP Multisite"><?php esc_html_e( 'WP multisite', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( __( 'Whether or not you have WordPress Multisite enabled.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
-			<td><?php echo ( $environment['wp_multisite'] ) ? '<span class="dashicons dashicons-yes"></span>' : '&ndash;'; ?></td>
+			<td>
+				<?php if ( $environment['wp_multisite'] ): ?>
+					<mark class="yes"><?php get_gridicon( 'gridicons-checkmark' ); ?></mark>
+				<?php else: ?>
+					<mark class="no">&ndash;</mark>
+				<?php endif; ?>
+			</td>
 		</tr>
 		<tr>
 			<td data-export-label="WP Memory Limit"><?php esc_html_e( 'WP memory limit', 'woocommerce' ); ?>:</td>
@@ -110,7 +116,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 			<td class="help"><?php echo wc_help_tip( __( 'Displays whether or not WordPress is in Debug Mode.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td>
 				<?php if ( $environment['wp_debug_mode'] ) : ?>
-					<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>
+					<mark class="yes"><?php echo get_gridicon( 'gridicons-checkmark' ); ?></mark>
 				<?php else : ?>
 					<mark class="no">&ndash;</mark>
 				<?php endif; ?>
@@ -121,7 +127,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 			<td class="help"><?php echo wc_help_tip( __( 'Displays whether or not WP Cron Jobs are enabled.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td>
 				<?php if ( $environment['wp_cron'] ) : ?>
-					<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>
+					<mark class="yes"><?php echo get_gridicon( 'gridicons-checkmark' ); ?></mark>
 				<?php else : ?>
 					<mark class="no">&ndash;</mark>
 				<?php endif; ?>
@@ -137,7 +143,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 			<td class="help"><?php echo wc_help_tip( __( 'Displays whether or not WordPress is using an external object cache.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php if ( $environment['external_object_cache'] ) : ?>
-					<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>
+					<mark class="yes"><?php echo get_gridicon( 'gridicons-checkmark' ); ?></mark>
 				<?php else : ?>
 					<mark class="no">&ndash;</mark>
 				<?php endif; ?>
@@ -194,7 +200,13 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 			<tr>
 				<td data-export-label="SUHOSIN Installed"><?php esc_html_e( 'SUHOSIN installed', 'woocommerce' ); ?>:</td>
 				<td class="help"><?php echo wc_help_tip( __( 'Suhosin is an advanced protection system for PHP installations. It was designed to protect your servers on the one hand against a number of well known problems in PHP applications and on the other hand against potential unknown vulnerabilities within these applications or the PHP core itself. If enabled on your server, Suhosin may need to be configured to increase its data submission limits.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
-				<td><?php echo $environment['suhosin_installed'] ? '<span class="dashicons dashicons-yes"></span>' : '&ndash;'; ?></td>
+				<td>
+					<?php if ( $environment['suhosin_installed'] ): ?>
+						<mark class="yes"><?php echo get_gridicon( 'gridicons-checkmark' ); ?></mark>
+					<?php else: ?>
+						<mark class="no">&ndash;</mark>
+					<?php endif; ?>
+				</td>
 			</tr>
 		<?php endif; ?>
 
@@ -229,7 +241,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 				if ( 'UTC' !== $environment['default_timezone'] ) {
 					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'Default timezone is %s - it should be UTC', 'woocommerce' ), $environment['default_timezone'] ) . '</mark>';
 				} else {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>';
+					echo '<mark class="yes">' . get_gridicon( 'gridicons-checkmark' ) . '</mark>';
 				}
 				?>
 			</td>
@@ -240,7 +252,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 			<td>
 				<?php
 				if ( $environment['fsockopen_or_curl_enabled'] ) {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>';
+					echo '<mark class="yes">' . get_gridicon( 'gridicons-checkmark' ) . '</mark>';
 				} else {
 					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . __( 'Your server does not have fsockopen or cURL enabled - PayPal IPN and other scripts which communicate with other servers will not work. Contact your hosting provider.', 'woocommerce' ) . '</mark>';
 				}
@@ -253,7 +265,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 			<td>
 				<?php
 				if ( $environment['soapclient_enabled'] ) {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>';
+					echo '<mark class="yes">' . get_gridicon( 'gridicons-checkmark' ) . '</mark>';
 				} else {
 					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'Your server does not have the %s class enabled - some gateway plugins which use SOAP may not work as expected.', 'woocommerce' ), '<a href="https://php.net/manual/en/class.soapclient.php">SoapClient</a>' ) . '</mark>';
 				}
@@ -266,7 +278,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 			<td>
 				<?php
 				if ( $environment['domdocument_enabled'] ) {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>';
+					echo '<mark class="yes">' . get_gridicon( 'gridicons-checkmark' ) . '</mark>';
 				} else {
 					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'Your server does not have the %s class enabled - HTML/Multipart emails, and also some extensions, will not work without DOMDocument.', 'woocommerce' ), '<a href="https://php.net/manual/en/class.domdocument.php">DOMDocument</a>' ) . '</mark>';
 				}
@@ -279,7 +291,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 			<td>
 				<?php
 				if ( $environment['gzip_enabled'] ) {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>';
+					echo '<mark class="yes">' . get_gridicon( 'gridicons-checkmark' ) . '</mark>';
 				} else {
 					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'Your server does not support the %s function - this is required to use the GeoIP database from MaxMind.', 'woocommerce' ), '<a href="https://php.net/manual/en/zlib.installation.php">gzopen</a>' ) . '</mark>';
 				}
@@ -292,7 +304,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 			<td>
 				<?php
 				if ( $environment['mbstring_enabled'] ) {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>';
+					echo '<mark class="yes">' . get_gridicon( 'gridicons-checkmark' ) . '</mark>';
 				} else {
 					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'Your server does not support the %s functions - this is required for better character encoding. Some fallbacks will be used instead for it.', 'woocommerce' ), '<a href="https://php.net/manual/en/mbstring.installation.php">mbstring</a>' ) . '</mark>';
 				}
@@ -305,7 +317,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 			<td>
 				<?php
 				if ( $environment['remote_post_successful'] ) {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>';
+					echo '<mark class="yes">' . get_gridicon( 'gridicons-checkmark' ) . '</mark>';
 				} else {
 					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%s failed. Contact your hosting provider.', 'woocommerce' ), 'wp_remote_post()' ) . ' ' . esc_html( $environment['remote_post_response'] ) . '</mark>';
 				}
@@ -318,7 +330,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 			<td>
 				<?php
 				if ( $environment['remote_get_successful'] ) {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>';
+					echo '<mark class="yes">' . get_gridicon( 'gridicons-checkmark' ) . '</mark>';
 				} else {
 					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%s failed. Contact your hosting provider.', 'woocommerce' ), 'wp_remote_get()' ) . ' ' . esc_html( $environment['remote_get_response'] ) . '</mark>';
 				}
@@ -330,7 +342,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 		foreach ( $rows as $row ) {
 			if ( ! empty( $row['success'] ) ) {
 				$css_class = 'yes';
-				$icon      = '<span class="dashicons dashicons-yes"></span>';
+				$icon      = get_gridicon( 'gridicons-checkmark' );
 			} else {
 				$css_class = 'error';
 				$icon      = '<span class="dashicons dashicons-no-alt"></span>';
@@ -383,7 +395,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 				<td>
 					<?php
 					if ( file_exists( $database['maxmind_geoip_database'] ) ) {
-						echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> <code class="private">' . esc_html( $database['maxmind_geoip_database'] ) . '</code></mark> ';
+						echo '<mark class="yes">' . get_gridicon( 'gridicons-checkmark' ) . ' <code class="private">' . esc_html( $database['maxmind_geoip_database'] ) . '</code></mark> ';
 					} else {
 						printf( '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'The MaxMind GeoIP Database does not exist - Geolocation will not function. You can download and install it manually from %1$s to the path: %2$s. Scroll down to "Downloads" and download the "Binary / gzip" file next to "GeoLite Country". Please remember to uncompress GeoIP.dat.gz and upload the GeoIP.dat file only.', 'woocommerce' ), make_clickable( 'http://dev.maxmind.com/geoip/legacy/geolite/' ), '<code class="private">' . $database['maxmind_geoip_database'] . '</code>' ) . '</mark>', WC_LOG_DIR );
 					}
@@ -469,7 +481,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 			<td class="help"><?php echo wc_help_tip( __( 'Is the connection to your store secure?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td>
 				<?php if ( $security['secure_connection'] ) : ?>
-					<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>
+					<mark class="yes"><?php echo get_gridicon( 'gridicons-checkmark' ); ?></mark>
 				<?php else : ?>
 					<mark class="error"><span class="dashicons dashicons-warning"></span><?php printf( __( 'Your store is not using HTTPS. <a href="%s" target="_blank">Learn more about HTTPS and SSL Certificates</a>.', 'woocommerce' ), 'https://docs.woocommerce.com/document/ssl-and-https/' ); ?></mark>
 				<?php endif; ?>
@@ -480,7 +492,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 			<td class="help"><?php echo wc_help_tip( __( 'Error messages can contain sensitive information about your store environment. These should be hidden from untrusted visitors.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td>
 				<?php if ( $security['hide_errors'] ) : ?>
-					<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>
+					<mark class="yes"><?php echo get_gridicon( 'gridicons-checkmark' ); ?></mark>
 				<?php else : ?>
 					<mark class="error"><span class="dashicons dashicons-warning"></span><?php esc_html_e( 'Error messages should not be shown to visitors.', 'woocommerce' ); ?></mark>
 				<?php endif; ?>
@@ -550,12 +562,12 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 		<tr>
 			<td data-export-label="API Enabled"><?php esc_html_e( 'API enabled', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( __( 'Does your site have REST API enabled?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
-			<td><?php echo $settings['api_enabled'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
+			<td><?php echo $settings['api_enabled'] ? '<mark class="yes">' . get_gridicon( 'gridicons-checkmark' ) . '</mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Force SSL"><?php esc_html_e( 'Force SSL', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( __( 'Does your site force a SSL Certificate for transactions?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
-			<td><?php echo $settings['force_ssl'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
+			<td><?php echo $settings['force_ssl'] ? '<mark class="yes">' . get_gridicon( 'gridicons-checkmark' ) . '</mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Currency"><?php esc_html_e( 'Currency', 'woocommerce' ); ?></td>
@@ -694,7 +706,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 			<td data-export-label="Child Theme"><?php esc_html_e( 'Child theme', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( __( 'Displays whether or not the current theme is a child theme.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td>
-				<?php echo $theme['is_child_theme'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<span class="dashicons dashicons-no-alt"></span> &ndash; ' . sprintf( __( 'If you are modifying WooCommerce on a parent theme that you did not build personally we recommend using a child theme. See: <a href="%s" target="_blank">How to create a child theme</a>', 'woocommerce' ), 'https://codex.wordpress.org/Child_Themes' ); ?>
+				<?php echo $theme['is_child_theme'] ? '<mark class="yes">' . get_gridicon( 'gridicons-checkmark' ) . '</mark>' : '<span class="dashicons dashicons-no-alt"></span> &ndash; ' . sprintf( __( 'If you are modifying WooCommerce on a parent theme that you did not build personally we recommend using a child theme. See: <a href="%s" target="_blank">How to create a child theme</a>', 'woocommerce' ), 'https://codex.wordpress.org/Child_Themes' ); ?>
 			</td>
 		</tr>
 		<?php if ( $theme['is_child_theme'] ) : ?>
@@ -730,7 +742,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 				if ( ! $theme['has_woocommerce_support'] ) {
 					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . __( 'Not declared', 'woocommerce' ) . '</mark>';
 				} else {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>';
+					echo '<mark class="yes">' . get_gridicon( 'gridicons-checkmark' ) . '</mark>';
 				}
 				?>
 			</td>
