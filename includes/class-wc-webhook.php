@@ -8,9 +8,7 @@
  *
  * @version  3.2.0
  * @package  WooCommerce/Webhooks
- * @category Webhooks
  * @since    2.2.0
- * @author   Automattic
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
