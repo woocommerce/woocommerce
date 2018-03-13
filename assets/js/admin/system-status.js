@@ -43,8 +43,8 @@ jQuery( function ( $ ) {
 						// Find value
 						var $value_html = $( this ).find( 'td:eq(2)' ).clone();
 						$value_html.find( '.private' ).remove();
-						$value_html.find( '.dashicons-yes' ).replaceWith( '&#10004;' );
-						$value_html.find( '.dashicons-no-alt, .dashicons-warning' ).replaceWith( '&#10060;' );
+						$value_html.find( '.dashicons-yes, .gridicons-checkmark' ).replaceWith( '&#10004;' );
+						$value_html.find( '.dashicons-no-alt, .dashicons-warning, .gridicons-notice, .gridicons-cross' ).replaceWith( '&#10060;' );
 
 						// Format value
 						var the_value   = $.trim( $value_html.text() );
