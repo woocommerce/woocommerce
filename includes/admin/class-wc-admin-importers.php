@@ -235,6 +235,14 @@ class WC_Admin_Importers {
 				AND {$wpdb->posts}.post_status = 'importing'"
 			);
 
+			// Clear orphan variations.
+			$wpdb->query(
+				"DELETE products
+				FROM {$wpdb->posts} products
+				LEFT JOIN {$wpdb->posts} wp ON wp.ID = products.post_parent
+				WHERE wp.ID IS NULL AND products.post_type = 'product_variation';"
+			);
+
 			// Send success.
 			wp_send_json_success(
 				array(
