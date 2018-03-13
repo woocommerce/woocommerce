@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, claudiulodro,
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
 Requires at least: 4.7
 Tested up to: 4.9
-Stable tag: 3.3.3
+Stable tag: 3.3.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -176,6 +176,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Fix default product category handling in installer.
 * Fix - Properly check slugs when updating attributes.
 * Fix - Use gallery thumbnail size for variation image switcher.
+* Tweak - Update the description of the user tracking notice in the onboarding wizard.
 * Tweak - Add extra data in order mobile view (status and date).
 * Tweak - Add profile link to order screen.
 
