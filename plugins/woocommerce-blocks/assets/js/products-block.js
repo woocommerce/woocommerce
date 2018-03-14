@@ -432,7 +432,7 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 			var heading = null;
 			if (this.state.display) {
 				var group_options = ['featured', 'best_sellers', 'best_rated', 'on_sale', 'attribute'];
-				var should_group_expand = group_options.includes(this.state.display ? this.state.display : '');
+				var should_group_expand = group_options.includes(this.state.display) ? this.state.display : '';
 				var menu_link = wp.element.createElement(
 					'button',
 					{ type: 'button', className: 'wc-products-settings-heading__change-button button-link', onClick: function onClick() {
