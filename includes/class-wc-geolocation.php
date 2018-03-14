@@ -64,11 +64,20 @@ class WC_Geolocation {
 	);
 
 	/**
+	 * Check if server supports MaxMind GeoLite2 Reader.
+	 *
+	 * @return bool
+	 */
+	public static function supports_geolite2() {
+		return version_compare( PHP_VERSION, '5.4.0', '>=' );
+	}
+
+	/**
 	 * Hook in tabs.
 	 */
 	public static function init() {
 		// Only download the database from MaxMind if the geolocation function is enabled, or a plugin specifically requests it.
-		if ( 'geolocation' === get_option( 'woocommerce_default_customer_address' ) || apply_filters( 'woocommerce_geolocation_update_database_periodically', false ) ) {
+		if ( self::supports_geolite2() && 'geolocation' === get_option( 'woocommerce_default_customer_address' ) || apply_filters( 'woocommerce_geolocation_update_database_periodically', false ) ) {
 			add_action( 'woocommerce_geoip_updater', array( __CLASS__, 'update_database' ) );
 		}
 		add_filter( 'pre_update_option_woocommerce_default_customer_address', array( __CLASS__, 'maybe_update_database' ), 10, 2 );
@@ -82,7 +91,7 @@ class WC_Geolocation {
 	 * @return string
 	 */
 	public static function maybe_update_database( $new_value, $old_value ) {
-		if ( $new_value !== $old_value && 'geolocation' === $new_value ) {
+		if ( self::supports_geolite2() && $new_value !== $old_value && 'geolocation' === $new_value ) {
 			self::update_database();
 		}
 		return $new_value;
@@ -169,7 +178,7 @@ class WC_Geolocation {
 				$ip_address = $ip_address ? $ip_address : self::get_ip_address();
 				$database   = self::get_local_database_path();
 
-				if ( file_exists( $database ) ) {
+				if ( self::supports_geolite2() && file_exists( $database ) ) {
 					$country_code = self::geolocate_via_db( $ip_address, $database );
 				} elseif ( $api_fallback ) {
 					$country_code = self::geolocate_via_api( $ip_address );
