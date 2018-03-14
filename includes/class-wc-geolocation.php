@@ -251,6 +251,10 @@ class WC_Geolocation {
 				@chmod( $dest_path, 0644 ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.VIP.FileSystemWritesDisallow.chmod_chmod
 			} catch ( Exception $e ) {
 				$logger->notice( $e->getMessage(), array( 'source' => 'geolocation' ) );
+
+				// Reschedule download of DB.
+				wp_clear_scheduled_hook( 'woocommerce_geoip_updater' );
+				wp_schedule_event( strtotime( 'first tuesday of next month' ), 'monthly', 'woocommerce_geoip_updater' );
 			}
 
 			@unlink( $tmp_database_path ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.VIP.FileSystemWritesDisallow.file_ops_unlink
