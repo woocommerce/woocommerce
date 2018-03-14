@@ -75,8 +75,15 @@ class ProductsBlockSettingsEditorDisplayOption extends React.Component {
 			icon = 'arrow-down-alt2';
 		}
 
+		let classes = 'wc-products-display-options__option wc-products-display-options__option--' + this.props.value;
+
+		if ( this.props.current === this.props.value ) {
+			icon    = 'yes';
+			classes += ' wc-products-display-options__option--current';
+		}
+
 		return (
-			<div className={ 'wc-products-display-options__option wc-products-display-options__option--' + this.props.value } onClick={ () => { this.props.update_display_callback( this.props.value ) } } >
+			<div className={ classes } onClick={ () => { this.props.update_display_callback( this.props.value ) } } >
 				<div className="wc-products-display-options__option-content">
 					<span className="wc-products-display-options__option-title">{ this.props.title }</span>
 					<p className="wc-products-display-options__option-description">{ this.props.description }</p>
@@ -156,7 +163,7 @@ class ProductsBlockSettingsEditorDisplayOptions extends React.Component {
 
 		let display_settings = [];
 		for ( var setting_key in PRODUCTS_BLOCK_DISPLAY_SETTINGS ) {
-			display_settings.push( <ProductsBlockSettingsEditorDisplayOption { ...PRODUCTS_BLOCK_DISPLAY_SETTINGS[ setting_key ] } update_display_callback={ this.props.update_display_callback } extended={ this.props.extended } /> );
+			display_settings.push( <ProductsBlockSettingsEditorDisplayOption { ...PRODUCTS_BLOCK_DISPLAY_SETTINGS[ setting_key ] } update_display_callback={ this.props.update_display_callback } extended={ this.props.extended } current={ this.props.current } /> );
 		}
 
 		let arrow = <span className="wc-products-display-options--popover__arrow"></span>;
@@ -248,11 +255,13 @@ class ProductsBlockSettingsEditor extends React.Component {
 			extra_settings = <ProductsAttributeSelect { ...this.props } />
 		}
 
-		const menu = this.state.menu_visible ? <ProductsBlockSettingsEditorDisplayOptions extended={ this.state.expanded_group ? true : false } existing={ this.state.display ? true : false } closeMenu={ this.closeMenu } update_display_callback={ this.updateDisplay } /> : null;
+		const menu = this.state.menu_visible ? <ProductsBlockSettingsEditorDisplayOptions extended={ this.state.expanded_group ? true : false } existing={ this.state.display ? true : false } current={ this.state.display } closeMenu={ this.closeMenu } update_display_callback={ this.updateDisplay } /> : null;
 
 		let heading = null;
 		if ( this.state.display ) {
-			let menu_link = <button type="button" className="wc-products-settings-heading__change-button button-link" onClick={ () => { this.setState( { menu_visible: ! this.state.menu_visible } ) } }>{ __( 'Display different products' ) }</button>;
+			const group_options     = [ 'featured', 'best_sellers', 'best_rated', 'on_sale', 'attribute' ];
+			let should_group_expand = group_options.includes( this.state.display ? this.state.display : '' );
+			let menu_link           = <button type="button" className="wc-products-settings-heading__change-button button-link" onClick={ () => { this.setState( { menu_visible: ! this.state.menu_visible, expanded_group: should_group_expand } ) } }>{ __( 'Display different products' ) }</button>;
 
 			heading = (
 				<div className="wc-products-settings-heading">
@@ -472,7 +481,7 @@ registerBlockType( 'woocommerce/products', {
 						min={ wc_product_block_data.min_columns }
 						max={ wc_product_block_data.max_columns }
 					/>
-				);					
+				);
 			}
 
 			return (

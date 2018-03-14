@@ -185,9 +185,16 @@ var ProductsBlockSettingsEditorDisplayOption = function (_React$Component) {
 				icon = 'arrow-down-alt2';
 			}
 
+			var classes = 'wc-products-display-options__option wc-products-display-options__option--' + this.props.value;
+
+			if (this.props.current === this.props.value) {
+				icon = 'yes';
+				classes += ' wc-products-display-options__option--current';
+			}
+
 			return wp.element.createElement(
 				'div',
-				{ className: 'wc-products-display-options__option wc-products-display-options__option--' + this.props.value, onClick: function onClick() {
+				{ className: classes, onClick: function onClick() {
 						_this2.props.update_display_callback(_this2.props.value);
 					} },
 				wp.element.createElement(
@@ -305,7 +312,7 @@ var ProductsBlockSettingsEditorDisplayOptions = function (_React$Component2) {
 
 			var display_settings = [];
 			for (var setting_key in PRODUCTS_BLOCK_DISPLAY_SETTINGS) {
-				display_settings.push(wp.element.createElement(ProductsBlockSettingsEditorDisplayOption, _extends({}, PRODUCTS_BLOCK_DISPLAY_SETTINGS[setting_key], { update_display_callback: this.props.update_display_callback, extended: this.props.extended })));
+				display_settings.push(wp.element.createElement(ProductsBlockSettingsEditorDisplayOption, _extends({}, PRODUCTS_BLOCK_DISPLAY_SETTINGS[setting_key], { update_display_callback: this.props.update_display_callback, extended: this.props.extended, current: this.props.current })));
 			}
 
 			var arrow = wp.element.createElement('span', { className: 'wc-products-display-options--popover__arrow' });
@@ -420,14 +427,16 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 				extra_settings = wp.element.createElement(_attributeSelect.ProductsAttributeSelect, this.props);
 			}
 
-			var menu = this.state.menu_visible ? wp.element.createElement(ProductsBlockSettingsEditorDisplayOptions, { extended: this.state.expanded_group ? true : false, existing: this.state.display ? true : false, closeMenu: this.closeMenu, update_display_callback: this.updateDisplay }) : null;
+			var menu = this.state.menu_visible ? wp.element.createElement(ProductsBlockSettingsEditorDisplayOptions, { extended: this.state.expanded_group ? true : false, existing: this.state.display ? true : false, current: this.state.display, closeMenu: this.closeMenu, update_display_callback: this.updateDisplay }) : null;
 
 			var heading = null;
 			if (this.state.display) {
+				var group_options = ['featured', 'best_sellers', 'best_rated', 'on_sale', 'attribute'];
+				var should_group_expand = group_options.includes(this.state.display ? this.state.display : '');
 				var menu_link = wp.element.createElement(
 					'button',
 					{ type: 'button', className: 'wc-products-settings-heading__change-button button-link', onClick: function onClick() {
-							_this5.setState({ menu_visible: !_this5.state.menu_visible });
+							_this5.setState({ menu_visible: !_this5.state.menu_visible, expanded_group: should_group_expand });
 						} },
 					__('Display different products')
 				);
