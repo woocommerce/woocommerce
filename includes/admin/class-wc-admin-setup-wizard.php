@@ -300,19 +300,27 @@ class WC_Admin_Setup_Wizard {
 	public function setup_wizard_steps() {
 		?>
 		<ol class="wc-setup-steps">
-			<?php foreach ( $this->steps as $step_key => $step ) :
+			<?php
+			foreach ( $this->steps as $step_key => $step ) {
 				$is_completed = array_search( $this->step, array_keys( $this->steps ), true ) > array_search( $step_key, array_keys( $this->steps ), true );
 
-				if ( $step_key === $this->step ) : ?>
+				if ( $step_key === $this->step ) {
+					?>
 					<li class="active"><?php echo esc_html( $step['name'] ); ?></li>
-				<?php elseif ( $is_completed ) : ?>
+					<?php
+				} elseif ( $is_completed ) {
+					?>
 					<li class="done">
-						<a href="<?php echo esc_url( add_query_arg( 'step', $step_key, remove_query_arg( 'activate_error' ) ) ) ?>"><?php echo esc_html( $step['name'] ); ?></a>
+						<a href="<?php echo esc_url( add_query_arg( 'step', $step_key, remove_query_arg( 'activate_error' ) ) ); ?>"><?php echo esc_html( $step['name'] ); ?></a>
 					</li>
-				<?php else : ?>
+					<?php
+				} else {
+					?>
 					<li><?php echo esc_html( $step['name'] ); ?></li>
-				<?php endif; ?>
-			<?php endforeach; ?>
+					<?php
+				}
+			}
+			?>
 		</ol>
 		<?php
 	}
@@ -476,10 +484,23 @@ class WC_Admin_Setup_Wizard {
 				<?php esc_html_e( 'I will also be selling products or services in person.', 'woocommerce' ); ?>
 			</label>
 
-			<?php if ( 'unknown' === get_option( 'woocommerce_allow_tracking', 'unknown' ) ) : ?>
+			<?php
+			if ( 'unknown' === get_option( 'woocommerce_allow_tracking', 'unknown' ) ) {
+				$tracking_opt_out = true;
+
+				// EU should be opt-in.
+				if ( in_array( $country, WC()->countries->get_european_union_countries(), true ) ) {
+					$tracking_opt_out = false;
+				}
+
+				// Respect the DNT header.
+				if ( ! empty( $_SERVER['HTTP_DNT'] ) ) { // WPCS: input var ok.
+					$tracking_opt_out = false;
+				}
+				?>
 				<div class="woocommerce-tracker">
 					<p class="checkbox">
-						<input type="checkbox" id="wc_tracker_optin" name="wc_tracker_optin" value="yes" checked />
+						<input type="checkbox" id="wc_tracker_optin" name="wc_tracker_optin" value="yes" <?php $tracking_opt_out ? 'checked' : ''; ?> />
 						<label for="wc_tracker_optin"><?php esc_html_e( 'Help WooCommerce improve by enabling usage tracking.', 'woocommerce' ); ?></label>
 					</p>
 					<p>
@@ -489,7 +510,9 @@ class WC_Admin_Setup_Wizard {
 					?>
 					</p>
 				</div>
-			<?php endif; ?>
+				<?php
+			}
+			?>
 			<p class="wc-setup-actions step">
 				<button type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( "Let's go!", 'woocommerce' ); ?>" name="save_step"><?php esc_html_e( "Let's go!", 'woocommerce' ); ?></button>
 			</p>
