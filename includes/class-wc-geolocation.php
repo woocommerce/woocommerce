@@ -217,47 +217,48 @@ class WC_Geolocation {
 	public static function update_database() {
 		$logger = wc_get_logger();
 
-		if ( ! is_callable( 'gzopen' ) ) {
-			$logger->notice( 'Server does not support gzopen', array( 'source' => 'geolocation' ) );
+		if ( ! self::supports_geolite2() ) {
+			$logger->notice( 'Required PHP 5.4 to be able to download MaxMind GeoLite2 database', array( 'source' => 'geolocation' ) );
 			return;
 		}
 
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 
-		$tmp_databases = array(
-			'2' => download_url( self::GEOLITE2_DB ),
-		);
+		$upload_dir        = wp_upload_dir();
+		$tmp_database_path = download_url( self::GEOLITE2_DB );
 
-		foreach ( $tmp_databases as $tmp_database_version => $tmp_database_path ) {
-			if ( ! is_wp_error( $tmp_database_path ) ) {
-				$gzhandle = @gzopen( $tmp_database_path, 'r' ); // @codingStandardsIgnoreLine
-				$handle   = @fopen( self::get_local_database_path( $tmp_database_version ), 'w' ); // @codingStandardsIgnoreLine
+		if ( ! is_wp_error( $tmp_database_path ) ) {
+			try {
+				// GeoLite2 database name.
+				$database  = 'GeoLite2-Country.mmdb';
+				$dest_path = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . $database;
 
-				if ( $gzhandle && $handle ) {
-					while ( $string = gzread( $gzhandle, 4096 ) ) { // @codingStandardsIgnoreLine
-						fwrite( $handle, $string, strlen( $string ) ); // @codingStandardsIgnoreLine
-					}
-					gzclose( $gzhandle );
-					$s_array = fstat( $handle );
-					fclose( $handle ); // @codingStandardsIgnoreLine
-					if ( ! isset( $s_array['size'] ) || 0 === $s_array['size'] ) {
-						$logger->notice( 'Empty database file, deleting local copy.', array( 'source' => 'geolocation' ) );
-						// Delete empty DB, we do not want to keep empty files around.
-						@unlink( self::get_local_database_path( $tmp_database_version ) ); // @codingStandardsIgnoreLine
-						// Reschedule download of DB.
-						wp_clear_scheduled_hook( 'woocommerce_geoip_updater' );
-						wp_schedule_event( strtotime( 'first tuesday of next month' ), 'monthly', 'woocommerce_geoip_updater' );
-					}
-				} else {
-					$logger->notice( 'Unable to open database file', array( 'source' => 'geolocation' ) );
-				}
-				@unlink( $tmp_database_path ); // @codingStandardsIgnoreLine
-			} else {
-				$logger->notice(
-					'Unable to download GeoIP Database: ' . $tmp_database_path->get_error_message(),
-					array( 'source' => 'geolocation' )
-				);
+				// Extract files with PharData. Tool built into PHP since 5.3.
+				$file      = new PharData( $tmp_database_path ); // phpcs:ignore PHPCompatibility.PHP.NewClasses.phardataFound
+				$file_path = $file->current()->getFileName() . DIRECTORY_SEPARATOR . $database;
+
+				// Extract under uploads directory.
+				$file->extractTo( $upload_dir['basedir'], $file_path, true );
+
+				// Remove old database.
+				@unlink( $dest_path ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.VIP.FileSystemWritesDisallow.file_ops_unlink
+
+				// Copy database and delete tmp directories.
+				@rename( $upload_dir['basedir'] . DIRECTORY_SEPARATOR . $file_path, $dest_path ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.VIP.FileSystemWritesDisallow.file_ops_rename
+				@rmdir( $upload_dir['basedir'] . DIRECTORY_SEPARATOR . $file->current()->getFileName() ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.VIP.FileSystemWritesDisallow.directory_rmdir
+
+				// Set correct file permission.
+				@chmod( $dest_path, 0644 ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.VIP.FileSystemWritesDisallow.chmod_chmod
+			} catch ( Exception $e ) {
+				$logger->notice( $e->getMessage(), array( 'source' => 'geolocation' ) );
 			}
+
+			@unlink( $tmp_database_path ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.VIP.FileSystemWritesDisallow.file_ops_unlink
+		} else {
+			$logger->notice(
+				'Unable to download GeoIP Database: ' . $tmp_database_path->get_error_message(),
+				array( 'source' => 'geolocation' )
+			);
 		}
 	}
 
