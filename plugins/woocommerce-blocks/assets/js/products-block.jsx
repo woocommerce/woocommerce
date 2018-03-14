@@ -260,7 +260,7 @@ class ProductsBlockSettingsEditor extends React.Component {
 		let heading = null;
 		if ( this.state.display ) {
 			const group_options     = [ 'featured', 'best_sellers', 'best_rated', 'on_sale', 'attribute' ];
-			let should_group_expand = group_options.includes( this.state.display ? this.state.display : '' );
+			let should_group_expand = group_options.includes( this.state.display ) ? this.state.display : '';
 			let menu_link           = <button type="button" className="wc-products-settings-heading__change-button button-link" onClick={ () => { this.setState( { menu_visible: ! this.state.menu_visible, expanded_group: should_group_expand } ) } }>{ __( 'Display different products' ) }</button>;
 
 			heading = (
