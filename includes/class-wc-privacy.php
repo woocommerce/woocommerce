@@ -63,6 +63,7 @@ class WC_Privacy {
 			} else {
 				$order_query['billing_email'] = $email_address;
 			}
+
 			$orders = wc_get_orders( $order_query );
 
 			if ( 0 < count( $orders ) ) {
@@ -70,6 +71,10 @@ class WC_Privacy {
 
 				foreach ( $orders as $order ) {
 					$personal_data['orders'][] = self::get_order_personal_data( $order );
+				}
+
+				if ( 10 > count( $orders ) ) {
+					$done = true;
 				}
 			} else {
 				$done = true;
@@ -103,6 +108,7 @@ class WC_Privacy {
 			$personal_data['Billing State']            = $customer->get_billing_state();
 			$personal_data['Billing Country']          = $customer->get_billing_country();
 			$personal_data['Billing Phone']            = $customer->get_billing_phone();
+			$personal_data['Billing Email']            = $customer->get_billing_email();
 			$personal_data['Shipping First Name']      = $customer->get_shipping_first_name();
 			$personal_data['Shipping Last Name']       = $customer->get_shipping_last_name();
 			$personal_data['Shipping Company']         = $customer->get_shipping_company();
@@ -114,7 +120,7 @@ class WC_Privacy {
 			$personal_data['Shipping Country']         = $customer->get_shipping_country();
 		}
 
-		return $personal_data;
+		return array_filter( $personal_data );
 	}
 
 	/**
@@ -124,7 +130,7 @@ class WC_Privacy {
 	 * @return array
 	 */
 	protected static function get_order_personal_data( $order ) {
-		return array(
+		return array_filter( array(
 			'Order ID'                 => $order->get_id(),
 			'Order Number'             => $order->get_order_number(),
 			'IP Address'               => $order->get_customer_ip_address(),
@@ -139,6 +145,7 @@ class WC_Privacy {
 			'Billing State'            => $order->get_billing_state(),
 			'Billing Country'          => $order->get_billing_country(),
 			'Billing Phone'            => $order->get_billing_phone(),
+			'Billing Email'            => $order->get_billing_email(),
 			'Shipping First Name'      => $order->get_shipping_first_name(),
 			'Shipping Last Name'       => $order->get_shipping_last_name(),
 			'Shipping Company'         => $order->get_shipping_company(),
@@ -148,7 +155,7 @@ class WC_Privacy {
 			'Shipping Postal/Zip Code' => $order->get_shipping_postcode(),
 			'Shipping State'           => $order->get_shipping_state(),
 			'Shipping Country'         => $order->get_shipping_country(),
-		);
+		) );
 	}
 
 	/**
