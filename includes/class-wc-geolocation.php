@@ -253,17 +253,6 @@ class WC_Geolocation {
 	}
 
 	/**
-	 * Require geolite library.
-	 */
-	private static function require_geolite_library() {
-		require_once WC_ABSPATH . 'includes/libraries/geolite2/Reader/Decoder.php';
-		require_once WC_ABSPATH . 'includes/libraries/geolite2/Reader/InvalidDatabaseException.php';
-		require_once WC_ABSPATH . 'includes/libraries/geolite2/Reader/Metadata.php';
-		require_once WC_ABSPATH . 'includes/libraries/geolite2/Reader/Util.php';
-		require_once WC_ABSPATH . 'includes/libraries/geolite2/Reader.php';
-	}
-
-	/**
 	 * Use MAXMIND GeoLite database to geolocation the user.
 	 *
 	 * @param  string $ip_address IP address.
@@ -271,25 +260,13 @@ class WC_Geolocation {
 	 * @return string
 	 */
 	private static function geolocate_via_db( $ip_address, $database ) {
-		if ( ! class_exists( 'MaxMind\\Db\\Reader', false ) ) {
-			self::require_geolite_library();
+		if ( ! class_exists( 'WC_Geolite_Integration', false ) ) {
+			require_once WC_ABSPATH . 'includes/class-wc-geolite-integration.php';
 		}
 
-		$country_code = '';
+		$geolite = new WC_Geolite_Integration( $database );
 
-		try {
-			$reader = new MaxMind\Db\Reader( $database ); // phpcs:ignore PHPCompatibility.PHP.NewLanguageConstructs.t_ns_separatorFound
-
-			$data         = $reader->get( $ip_address );
-			$country_code = $data['country']['iso_code'];
-
-			$reader->close();
-		} catch ( Exception $e ) {
-			$log = wc_get_logger();
-			$log->log( 'error', $e->getMessage(), array( 'source' => 'geoip' ) );
-		}
-
-		return sanitize_text_field( strtoupper( $country_code ) );
+		return $geolite->get_country_iso( $ip_address );
 	}
 
 	/**
