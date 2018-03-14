@@ -4,17 +4,15 @@
  *
  * Handles requests to the /system_status/tools/* endpoints.
  *
- * @author   WooThemes
- * @category API
- * @package  WooCommerce/API
- * @since    3.0.0
+ * @package WooCommerce/API
+ * @since   3.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
+ * System status tools controller.
+ *
  * @package WooCommerce/API
  * @extends WC_REST_Controller
  */
@@ -38,36 +36,40 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 	 * Register the routes for /system_status/tools/*.
 	 */
 	public function register_routes() {
-		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
-			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_items' ),
-				'permission_callback' => array( $this, 'get_items_permissions_check' ),
-				'args'                => $this->get_collection_params(),
-			),
-			'schema' => array( $this, 'get_public_item_schema' ),
-		) );
-
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\w-]+)', array(
-			'args'   => array(
-				'id' => array(
-					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
-					'type'        => 'string',
+		register_rest_route(
+			$this->namespace, '/' . $this->rest_base, array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_items' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => $this->get_collection_params(),
 				),
-			),
-			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_item' ),
-				'permission_callback' => array( $this, 'get_item_permissions_check' ),
-			),
-			array(
-				'methods'             => WP_REST_Server::EDITABLE,
-				'callback'            => array( $this, 'update_item' ),
-				'permission_callback' => array( $this, 'update_item_permissions_check' ),
-				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
-			),
-			'schema' => array( $this, 'get_public_item_schema' ),
-		) );
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace, '/' . $this->rest_base . '/(?P<id>[\w-]+)', array(
+				'args'   => array(
+					'id' => array(
+						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+						'type'        => 'string',
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_item' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+				),
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'update_item' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
 	}
 
 	/**
@@ -179,7 +181,17 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 				'button' => __( 'Reset', 'woocommerce' ),
 				'desc'   => __( 'This will reset your usage tracking settings, causing it to show the opt-in banner again and not sending any data.', 'woocommerce' ),
 			),
+			'regenerate_thumbnails'      => array(
+				'name'   => __( 'Regenerate shop thumbnails', 'woocommerce' ),
+				'button' => __( 'Regenerate', 'woocommerce' ),
+				'desc'   => __( 'This will regenerate all shop thumbnails to match your theme and/or image settings.', 'woocommerce' ),
+			),
 		);
+
+		// Jetpack does the image resizing heavy lifting so you don't have to.
+		if ( ( class_exists( 'Jetpack' ) && Jetpack::is_module_active( 'photon' ) ) || ! apply_filters( 'woocommerce_background_image_regeneration', true ) ) {
+			unset( $tools['regenerate_thumbnails'] );
+		}
 
 		return apply_filters( 'woocommerce_debug_tools', $tools );
 	}
@@ -193,12 +205,16 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 	public function get_items( $request ) {
 		$tools = array();
 		foreach ( $this->get_tools() as $id => $tool ) {
-			$tools[] = $this->prepare_response_for_collection( $this->prepare_item_for_response( array(
-				'id'          => $id,
-				'name'        => $tool['name'],
-				'action'      => $tool['button'],
-				'description' => $tool['desc'],
-			), $request ) );
+			$tools[] = $this->prepare_response_for_collection(
+				$this->prepare_item_for_response(
+					array(
+						'id'          => $id,
+						'name'        => $tool['name'],
+						'action'      => $tool['button'],
+						'description' => $tool['desc'],
+					), $request
+				)
+			);
 		}
 
 		$response = rest_ensure_response( $tools );
@@ -208,7 +224,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 	/**
 	 * Return a single tool.
 	 *
-	 * @param  WP_REST_Request $request
+	 * @param  WP_REST_Request $request Request data.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
@@ -217,18 +233,22 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 			return new WP_Error( 'woocommerce_rest_system_status_tool_invalid_id', __( 'Invalid tool ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 		$tool = $tools[ $request['id'] ];
-		return rest_ensure_response( $this->prepare_item_for_response( array(
-			'id'          => $request['id'],
-			'name'        => $tool['name'],
-			'action'      => $tool['button'],
-			'description' => $tool['desc'],
-		), $request ) );
+		return rest_ensure_response(
+			$this->prepare_item_for_response(
+				array(
+					'id'          => $request['id'],
+					'name'        => $tool['name'],
+					'action'      => $tool['button'],
+					'description' => $tool['desc'],
+				), $request
+			)
+		);
 	}
 
 	/**
 	 * Update (execute) a tool.
 	 *
-	 * @param  WP_REST_Request $request
+	 * @param  WP_REST_Request $request Request data.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
@@ -345,7 +365,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param string $id
+	 * @param string $id ID.
 	 * @return array
 	 */
 	protected function prepare_links( $id ) {
@@ -372,9 +392,9 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * Actually executes a a tool.
+	 * Actually executes a tool.
 	 *
-	 * @param  string $tool
+	 * @param  string $tool Tool.
 	 * @return array
 	 */
 	public function execute_tool( $tool ) {
@@ -389,22 +409,26 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 				break;
 
 			case 'clear_expired_transients':
+				/* translators: %d: amount of expired transients */
 				$message = sprintf( __( '%d transients rows cleared', 'woocommerce' ), wc_delete_expired_transients() );
 				break;
 
 			case 'delete_orphaned_variations':
-				/**
-				 * Delete orphans
-				 */
-				$result  = absint( $wpdb->query( "DELETE products
+				// Delete orphans.
+				$result = absint(
+					$wpdb->query(
+						"DELETE products
 					FROM {$wpdb->posts} products
 					LEFT JOIN {$wpdb->posts} wp ON wp.ID = products.post_parent
-					WHERE wp.ID IS NULL AND products.post_type = 'product_variation';" ) );
+					WHERE wp.ID IS NULL AND products.post_type = 'product_variation';"
+					)
+				);
+				/* translators: %d: amount of orphaned variations */
 				$message = sprintf( __( '%d orphaned variations deleted', 'woocommerce' ), $result );
 				break;
 
 			case 'add_order_indexes':
-				/**
+				/*
 				 * Add billing and shipping address indexes containing the customer name for orders
 				 * that don't have address indexes yet.
 				 */
@@ -416,37 +440,43 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 						WHERE post_id NOT IN ( SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key='%s' )
 						AND post_id IN ( SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key='%s' ) )
 					GROUP BY post_id";
-				$rows  = $wpdb->query( $wpdb->prepare( $sql, '_billing_address_index', '_billing_first_name', '_billing_last_name', '_billing_address_index', '_billing_last_name' ) );
-				$rows += $wpdb->query( $wpdb->prepare( $sql, '_shipping_address_index', '_shipping_first_name', '_shipping_last_name', '_shipping_address_index', '_shipping_last_name' ) );
+				$rows  = $wpdb->query( $wpdb->prepare( $sql, '_billing_address_index', '_billing_first_name', '_billing_last_name', '_billing_address_index', '_billing_last_name' ) ); // WPCS: unprepared SQL ok.
+				$rows += $wpdb->query( $wpdb->prepare( $sql, '_shipping_address_index', '_shipping_first_name', '_shipping_last_name', '_shipping_address_index', '_shipping_last_name' ) ); // WPCS: unprepared SQL ok.
 
+				/* translators: %d: amount of indexes */
 				$message = sprintf( __( '%d indexes added', 'woocommerce' ), $rows );
 				break;
 
 			case 'reset_roles':
-				// Remove then re-add caps and roles
+				// Remove then re-add caps and roles.
 				WC_Install::remove_roles();
 				WC_Install::create_roles();
 				$message = __( 'Roles successfully reset', 'woocommerce' );
 				break;
 
 			case 'recount_terms':
-				$product_cats = get_terms( 'product_cat', array(
-					'hide_empty' => false,
-					'fields'     => 'id=>parent',
-				) );
+				$product_cats = get_terms(
+					'product_cat', array(
+						'hide_empty' => false,
+						'fields'     => 'id=>parent',
+					)
+				);
 				_wc_term_recount( $product_cats, get_taxonomy( 'product_cat' ), true, false );
-				$product_tags = get_terms( 'product_tag', array(
-					'hide_empty' => false,
-					'fields'     => 'id=>parent',
-				) );
+				$product_tags = get_terms(
+					'product_tag', array(
+						'hide_empty' => false,
+						'fields'     => 'id=>parent',
+					)
+				);
 				_wc_term_recount( $product_tags, get_taxonomy( 'product_tag' ), true, false );
 				$message = __( 'Terms successfully recounted', 'woocommerce' );
 				break;
 
 			case 'clear_sessions':
 				$wpdb->query( "TRUNCATE {$wpdb->prefix}woocommerce_sessions" );
-				$result = absint( $wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key='_woocommerce_persistent_cart_" . get_current_blog_id() . "';" ) );
+				$result = absint( $wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key='_woocommerce_persistent_cart_" . get_current_blog_id() . "';" ) ); // WPCS: unprepared SQL ok.
 				wp_cache_flush();
+				/* translators: %d: amount of sessions */
 				$message = sprintf( __( 'Deleted all active sessions, and %d saved carts.', 'woocommerce' ), absint( $result ) );
 				break;
 
@@ -468,6 +498,11 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 				$message = __( 'Usage tracking settings successfully reset.', 'woocommerce' );
 				break;
 
+			case 'regenerate_thumbnails':
+				WC_Regenerate_Images::queue_image_regeneration();
+				$message = __( 'Thumbnail regeneration has been scheduled to run in the background.', 'woocommerce' );
+				break;
+
 			default:
 				$tools = $this->get_tools();
 				if ( isset( $tools[ $tool ]['callback'] ) ) {
@@ -478,7 +513,8 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 					} elseif ( false === $return ) {
 						$callback_string = is_array( $callback ) ? get_class( $callback[0] ) . '::' . $callback[1] : $callback;
 						$ran             = false;
-						$message         = sprintf( __( 'There was an error calling %s', 'woocommerce' ), $callback_string );
+						/* translators: %s: callback string */
+						$message = sprintf( __( 'There was an error calling %s', 'woocommerce' ), $callback_string );
 					} else {
 						$message = __( 'Tool ran.', 'woocommerce' );
 					}

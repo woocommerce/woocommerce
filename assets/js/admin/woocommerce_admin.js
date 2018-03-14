@@ -160,10 +160,6 @@ jQuery( function ( $ ) {
 		});
 
 	// Tooltips
-	$( document ).ajaxComplete( function() {
-		$( document.body ).trigger( 'init_tooltips' );
-	} );
-
 	$( document.body ).trigger( 'init_tooltips' );
 
 	// wc_input_table tables

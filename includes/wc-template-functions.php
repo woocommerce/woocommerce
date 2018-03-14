@@ -225,6 +225,18 @@ function wc_set_loop_prop( $prop, $value = '' ) {
 }
 
 /**
+ * Should the WooCommerce loop be displayed?
+ *
+ * This will return true if we have posts (products) or if we have subcats to display.
+ *
+ * @since 3.4.0
+ * @return bool
+ */
+function woocommerce_product_loop() {
+	return have_posts() || 'products' !== woocommerce_get_loop_display_mode();
+}
+
+/**
  * Output generator tag to aid debugging.
  *
  * @access public
@@ -287,7 +299,26 @@ function wc_body_class( $classes ) {
 		}
 	}
 
+	$classes[] = 'woocommerce-no-js';
+
+	add_action( 'wp_footer', 'wc_no_js' );
+
 	return array_unique( $classes );
+}
+
+/**
+ * NO JS handling.
+ *
+ * @since 3.4.0
+ */
+function wc_no_js() {
+	?>
+	<script type="text/javascript">
+		var c = document.body.className;
+		c = c.replace(/woocommerce-no-js/, 'woocommerce-js');
+		document.body.className = c;
+	</script>
+	<?php
 }
 
 /**
@@ -380,7 +411,7 @@ add_action( 'after_switch_theme', 'wc_reset_product_grid_settings' );
  */
 function wc_get_loop_class() {
 	$loop_index = wc_get_loop_prop( 'loop', 0 );
-	$columns    = wc_get_loop_prop( 'columns', wc_get_default_products_per_row() );
+	$columns    = absint( max( 1, wc_get_loop_prop( 'columns', wc_get_default_products_per_row() ) ) );
 
 	$loop_index ++;
 	wc_set_loop_prop( 'loop', $loop_index );
@@ -519,21 +550,6 @@ function wc_query_string_form_fields( $values = null, $exclude = array(), $curre
 }
 
 /**
- * Implode and escape HTML attributes for output.
- *
- * @since 3.3.0
- * @param array $raw_attributes Attribute name value pairs.
- * @return string
- */
-function wc_implode_html_attributes( $raw_attributes ) {
-	$attributes = array();
-	foreach ( $raw_attributes as $name => $value ) {
-		$attributes[] = esc_attr( $name ) . '="' . esc_attr( $value ) . '"';
-	}
-	return implode( ' ', $attributes );
-}
-
-/**
  * Template pages
  */
 
@@ -566,7 +582,7 @@ if ( ! function_exists( 'woocommerce_content' ) ) {
 
 			<?php do_action( 'woocommerce_archive_description' ); ?>
 
-			<?php if ( have_posts() ) : ?>
+			<?php if ( woocommerce_product_loop() ) : ?>
 
 				<?php do_action( 'woocommerce_before_shop_loop' ); ?>
 
@@ -836,7 +852,7 @@ if ( ! function_exists( 'woocommerce_product_archive_description' ) ) {
 			return;
 		}
 
-		if ( is_post_type_archive( 'product' ) && 0 === absint( get_query_var( 'paged' ) ) ) {
+		if ( is_post_type_archive( 'product' ) && in_array( absint( get_query_var( 'paged' ) ), array( 0, 1 ), true ) ) {
 			$shop_page = get_post( wc_get_page_id( 'shop' ) );
 			if ( $shop_page ) {
 				$description = wc_format_content( $shop_page->post_content );
@@ -966,7 +982,6 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 		if ( ! wc_get_loop_prop( 'is_paginated' ) || ! woocommerce_products_will_display() ) {
 			return;
 		}
-		$orderby                 = isset( $_GET['orderby'] ) ? wc_clean( wp_unslash( $_GET['orderby'] ) ) : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) ); // WPCS: sanitization ok, input var ok, CSRF ok.
 		$show_default_orderby    = 'menu_order' === apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
 		$catalog_orderby_options = apply_filters( 'woocommerce_catalog_orderby', array(
 			'menu_order' => __( 'Default sorting', 'woocommerce' ),
@@ -977,12 +992,13 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 			'price-desc' => __( 'Sort by price: high to low', 'woocommerce' ),
 		) );
 
+		$default_orderby = wc_get_loop_prop( 'is_search' ) ? 'relevance' : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
+		$orderby         = isset( $_GET['orderby'] ) ? wc_clean( wp_unslash( $_GET['orderby'] ) ) : $default_orderby; // WPCS: sanitization ok, input var ok, CSRF ok.
+
 		if ( wc_get_loop_prop( 'is_search' ) ) {
 			$catalog_orderby_options = array_merge( array( 'relevance' => __( 'Relevance', 'woocommerce' ) ), $catalog_orderby_options );
+
 			unset( $catalog_orderby_options['menu_order'] );
-			if ( 'menu_order' === $orderby ) {
-				$orderby = 'relevance';
-			}
 		}
 
 		if ( ! $show_default_orderby ) {
@@ -991,6 +1007,10 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 
 		if ( 'no' === get_option( 'woocommerce_enable_review_rating' ) ) {
 			unset( $catalog_orderby_options['rating'] );
+		}
+
+		if ( ! array_key_exists( $orderby, $catalog_orderby_options ) ) {
+			$orderby = current( array_keys( $catalog_orderby_options ) );
 		}
 
 		wc_get_template( 'loop/orderby.php', array(
@@ -1048,6 +1068,37 @@ if ( ! function_exists( 'woocommerce_show_product_thumbnails' ) ) {
 	function woocommerce_show_product_thumbnails() {
 		wc_get_template( 'single-product/product-thumbnails.php' );
 	}
+}
+
+/**
+ * Get HTML for a gallery image.
+ *
+ * Woocommerce_gallery_thumbnail_size, woocommerce_gallery_image_size and woocommerce_gallery_full_size accept name based image sizes, or an array of width/height values.
+ *
+ * @since 3.3.2
+ * @param int  $attachment_id Attachment ID.
+ * @param bool $main_image Is this the main image or a thumbnail?.
+ * @return string
+ */
+function wc_get_gallery_image_html( $attachment_id, $main_image = false ) {
+	$flexslider        = (bool) apply_filters( 'woocommerce_single_product_flexslider_enabled', get_theme_support( 'wc-product-gallery-slider' ) );
+	$gallery_thumbnail = wc_get_image_size( 'gallery_thumbnail' );
+	$thumbnail_size    = apply_filters( 'woocommerce_gallery_thumbnail_size', array( $gallery_thumbnail['width'], $gallery_thumbnail['height'] ) );
+	$image_size        = apply_filters( 'woocommerce_gallery_image_size', $flexslider || $main_image ? 'woocommerce_single' : $thumbnail_size );
+	$full_size         = apply_filters( 'woocommerce_gallery_full_size', apply_filters( 'woocommerce_product_thumbnails_large_size', 'full' ) );
+	$thumbnail_src     = wp_get_attachment_image_src( $attachment_id, $thumbnail_size );
+	$full_src          = wp_get_attachment_image_src( $attachment_id, $full_size );
+	$image             = wp_get_attachment_image( $attachment_id, $image_size, false, array(
+		'title'                   => get_post_field( 'post_title', $attachment_id ),
+		'data-caption'            => get_post_field( 'post_excerpt', $attachment_id ),
+		'data-src'                => $full_src[0],
+		'data-large_image'        => $full_src[0],
+		'data-large_image_width'  => $full_src[1],
+		'data-large_image_height' => $full_src[2],
+		'class'                   => $main_image ? 'wp-post-image' : '',
+	) );
+
+	return '<div data-thumb="' . esc_url( $thumbnail_src[0] ) . '" class="woocommerce-product-gallery__image"><a href="' . esc_url( $full_src[0] ) . '">' . $image . '</a></div>';
 }
 
 if ( ! function_exists( 'woocommerce_output_product_data_tabs' ) ) {
@@ -1817,7 +1868,7 @@ if ( ! function_exists( 'woocommerce_maybe_show_product_subcategories' ) ) {
 	 * @param string $loop_html HTML.
 	 * @return string
 	 */
-	function woocommerce_maybe_show_product_subcategories( $loop_html ) {
+	function woocommerce_maybe_show_product_subcategories( $loop_html = '' ) {
 		if ( wc_get_loop_prop( 'is_shortcode' ) && ! WC_Template_Loader::in_content_filter() ) {
 			return $loop_html;
 		}
@@ -1914,8 +1965,8 @@ if ( ! function_exists( 'woocommerce_output_product_categories' ) ) {
 	 */
 	function woocommerce_output_product_categories( $args = array() ) {
 		$args = wp_parse_args( $args, array(
-			'before'    => '',
-			'after'     => '',
+			'before'    => apply_filters( 'woocommerce_before_output_product_categories', '' ),
+			'after'     => apply_filters( 'woocommerce_after_output_product_categories', '' ),
 			'parent_id' => 0,
 		) );
 
@@ -2279,7 +2330,17 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			$field           = sprintf( $field_container, $container_class, $container_id, $field_html );
 		}
 
+		/**
+		 * Filter by type.
+		 */
 		$field = apply_filters( 'woocommerce_form_field_' . $args['type'], $field, $key, $args, $value );
+
+		/**
+		 * General filter on form fields.
+		 *
+		 * @since 3.4.0
+		 */
+		$field = apply_filters( 'woocommerce_form_field', $field, $key, $args, $value );
 
 		if ( $args['return'] ) {
 			return $field;
@@ -2566,7 +2627,7 @@ if ( ! function_exists( 'woocommerce_account_edit_account' ) ) {
 if ( ! function_exists( 'wc_no_products_found' ) ) {
 
 	/**
-	 * Show no products found message.
+	 * Handles the loop when no products were found/no product exist.
 	 */
 	function wc_no_products_found() {
 		wc_get_template( 'loop/no-products-found.php' );

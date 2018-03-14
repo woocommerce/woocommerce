@@ -110,4 +110,19 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 		$this->assertNull( get_role( 'customer' ) );
 		$this->assertNull( get_role( 'shop_manager' ) );
 	}
+
+	/**
+	 * Make sure the list of tables returned by WC_Install::get_tables() and used when uninstalling the plugin
+	 * or deleting a site in a multi site install is not missing any of the WC tables. If a table is added to
+	 * WC_Install:get_schema() but not to WC_Install::get_tables(), this test will fail.
+	 */
+	public function test_get_tables() {
+		global $wpdb;
+
+		$tables = $wpdb->get_col(
+			"SHOW TABLES WHERE `Tables_in_{$wpdb->dbname}` LIKE '{$wpdb->prefix}woocommerce\_%' OR `Tables_in_{$wpdb->dbname}` LIKE '{$wpdb->prefix}wc\_%'"
+		);
+
+		$this->assertEquals( $tables, WC_Install::get_tables() );
+	}
 }

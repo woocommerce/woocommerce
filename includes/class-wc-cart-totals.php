@@ -379,6 +379,9 @@ final class WC_Cart_Totals {
 					$coupon->sort = 0;
 					break;
 			}
+
+			// Allow plugins to override the default order.
+			$coupon->sort = apply_filters( 'woocommerce_coupon_sort', $coupon->sort, $coupon );
 		}
 
 		uasort( $this->coupons, array( $this, 'sort_coupons_callback' ) );

@@ -7,12 +7,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Simplify Commerce Gateway for subscriptions.
  *
- * @class 		WC_Addons_Gateway_Simplify_Commerce
- * @extends		WC_Gateway_Simplify_Commerce
+ * @class       WC_Addons_Gateway_Simplify_Commerce
+ * @extends     WC_Gateway_Simplify_Commerce
  * @since       2.2.0
- * @version		1.0.0
- * @package		WooCommerce/Classes/Payment
- * @author 		WooThemes
+ * @version     1.0.0
+ * @package     WooCommerce/Classes/Payment
+ * @author      WooThemes
  */
 class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 
@@ -101,12 +101,14 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 			}
 
 			// Create customer
-			$customer = Simplify_Customer::createCustomer( array(
-				'token'     => $cart_token,
-				'email'     => $order->get_billing_email(),
-				'name'      => trim( $order->get_formatted_billing_full_name() ),
-				'reference' => $order->get_id(),
-			) );
+			$customer = Simplify_Customer::createCustomer(
+				array(
+					'token'     => $cart_token,
+					'email'     => $order->get_billing_email(),
+					'name'      => trim( $order->get_formatted_billing_full_name() ),
+					'reference' => $order->get_id(),
+				)
+			);
 
 			if ( is_object( $customer ) && '' != $customer->id ) {
 				$this->save_subscription_meta( $order->get_id(), $customer->id );
@@ -149,7 +151,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	/**
 	 * Store the customer and card IDs on the order and subscriptions in the order.
 	 *
-	 * @param int $order_id
+	 * @param int    $order_id
 	 * @param string $customer_id
 	 */
 	protected function save_subscription_meta( $order_id, $customer_id ) {
@@ -194,12 +196,14 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 				}
 
 				// Create customer
-				$customer = Simplify_Customer::createCustomer( array(
-					'token'     => $cart_token,
-					'email'     => $order->get_billing_email(),
-					'name'      => trim( $order->get_formatted_billing_full_name() ),
-					'reference' => $order->get_id(),
-				) );
+				$customer = Simplify_Customer::createCustomer(
+					array(
+						'token'     => $cart_token,
+						'email'     => $order->get_billing_email(),
+						'name'      => trim( $order->get_formatted_billing_full_name() ),
+						'reference' => $order->get_id(),
+					)
+				);
 
 				if ( is_object( $customer ) && '' != $customer->id ) {
 					$customer_id = wc_clean( $customer->id );
@@ -241,7 +245,6 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 					'redirect' => '',
 				);
 			}
-
 		} else {
 			return parent::process_standard_payments( $order, $cart_token );
 		}
@@ -261,12 +264,11 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 		if ( 'standard' == $this->mode && ( $this->order_contains_subscription( $order->get_id() ) || ( function_exists( 'wcs_is_subscription' ) && wcs_is_subscription( $order_id ) ) ) ) {
 			return $this->process_subscription( $order, $cart_token );
 
-		// Processing pre-order
 		} elseif ( 'standard' == $this->mode && $this->order_contains_pre_order( $order->get_id() ) ) {
+			// Processing pre-order.
 			return $this->process_pre_order( $order, $cart_token );
-
-		// Processing regular product
 		} else {
+			// Processing regular product.
 			return parent::process_payment( $order_id );
 		}
 	}
@@ -275,7 +277,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	 * process_subscription_payment function.
 	 *
 	 * @param WC_order $order
-	 * @param int $amount (default: 0)
+	 * @param int      $amount (default: 0)
 	 * @uses  Simplify_BadRequestException
 	 * @return bool|WP_Error
 	 */
@@ -299,13 +301,15 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 
 		try {
 			// Charge the customer
-			$payment = Simplify_Payment::createPayment( array(
-				'amount'              => $amount * 100, // In cents.
-				'customer'            => $customer_id,
-				'description'         => sprintf( __( '%1$s - Order #%2$s', 'woocommerce' ), esc_html( get_bloginfo( 'name', 'display' ) ), $order->get_order_number() ),
-				'currency'            => strtoupper( get_woocommerce_currency() ),
-				'reference'           => $order->get_id(),
-			) );
+			$payment = Simplify_Payment::createPayment(
+				array(
+					'amount'      => $amount * 100, // In cents.
+					'customer'    => $customer_id,
+					'description' => sprintf( __( '%1$s - Order #%2$s', 'woocommerce' ), esc_html( get_bloginfo( 'name', 'display' ) ), $order->get_order_number() ),
+					'currency'    => strtoupper( get_woocommerce_currency() ),
+					'reference'   => $order->get_id(),
+				)
+			);
 
 		} catch ( Exception $e ) {
 
@@ -341,7 +345,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	/**
 	 * scheduled_subscription_payment function.
 	 *
-	 * @param float $amount_to_charge The amount to charge.
+	 * @param float    $amount_to_charge The amount to charge.
 	 * @param WC_Order $renewal_order A WC_Order object created to record the renewal payment.
 	 */
 	public function scheduled_subscription_payment( $amount_to_charge, $renewal_order ) {
@@ -357,7 +361,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	 * an automatic renewal payment which previously failed.
 	 *
 	 * @param WC_Subscription $subscription The subscription for which the failing payment method relates.
-	 * @param WC_Order $renewal_order The order which recorded the successful payment (to make up for the failed automatic payment).
+	 * @param WC_Order        $renewal_order The order which recorded the successful payment (to make up for the failed automatic payment).
 	 */
 	public function update_failing_payment_method( $subscription, $renewal_order ) {
 		update_post_meta( $subscription->id, '_simplify_customer_id', get_post_meta( $renewal_order->get_id(), '_simplify_customer_id', true ) );
@@ -368,7 +372,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	 * manually set up automatic recurring payments for a customer via the Edit Subscription screen in Subscriptions v2.0+.
 	 *
 	 * @since 2.4
-	 * @param array $payment_meta associative array of meta data required for automatic payments
+	 * @param array           $payment_meta associative array of meta data required for automatic payments
 	 * @param WC_Subscription $subscription An instance of a subscription object
 	 * @return array
 	 */
@@ -392,7 +396,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	 *
 	 * @since  2.4
 	 * @param  string $payment_method_id The ID of the payment method to validate
-	 * @param  array $payment_meta associative array of meta data required for automatic payments
+	 * @param  array  $payment_meta associative array of meta data required for automatic payments
 	 * @throws Exception
 	 */
 	public function validate_subscription_payment_meta( $payment_method_id, $payment_meta ) {
@@ -423,8 +427,8 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	public function process_pre_order_release_payment( $order ) {
 
 		try {
-			$order_items    = $order->get_items();
-			$order_item     = array_shift( $order_items );
+			$order_items = $order->get_items();
+			$order_item  = array_shift( $order_items );
 			/* translators: 1: site name 2: product name 3: order number */
 			$pre_order_name = sprintf(
 				__( '%1$s - Pre-order for "%2$s" (Order #%3$s)', 'woocommerce' ),
@@ -440,13 +444,15 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 			}
 
 			// Charge the customer
-			$payment = Simplify_Payment::createPayment( array(
-				'amount'              => $order->get_total() * 100, // In cents.
-				'customer'            => $customer_id,
-				'description'         => trim( substr( $pre_order_name, 0, 1024 ) ),
-				'currency'            => strtoupper( get_woocommerce_currency() ),
-				'reference'           => $order->get_id(),
-			) );
+			$payment = Simplify_Payment::createPayment(
+				array(
+					'amount'      => $order->get_total() * 100, // In cents.
+					'customer'    => $customer_id,
+					'description' => trim( substr( $pre_order_name, 0, 1024 ) ),
+					'currency'    => strtoupper( get_woocommerce_currency() ),
+					'reference'   => $order->get_id(),
+				)
+			);
 
 			if ( 'APPROVED' == $payment->paymentStatus ) {
 				// Payment complete

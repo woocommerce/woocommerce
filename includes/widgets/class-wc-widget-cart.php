@@ -1,19 +1,17 @@
 <?php
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 /**
  * Shopping Cart Widget.
  *
  * Displays shopping cart widget.
  *
- * @author   WooThemes
- * @category Widgets
- * @package  WooCommerce/Widgets
- * @version  2.3.0
- * @extends  WC_Widget
+ * @package WooCommerce/Widgets
+ * @version 2.3.0
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Widget cart class.
  */
 class WC_Widget_Cart extends WC_Widget {
 
@@ -22,11 +20,11 @@ class WC_Widget_Cart extends WC_Widget {
 	 */
 	public function __construct() {
 		$this->widget_cssclass    = 'woocommerce widget_shopping_cart';
-		$this->widget_description = __( "Display the customer shopping cart.", 'woocommerce' );
+		$this->widget_description = __( 'Display the customer shopping cart.', 'woocommerce' );
 		$this->widget_id          = 'woocommerce_widget_cart';
 		$this->widget_name        = __( 'Cart', 'woocommerce' );
 		$this->settings           = array(
-			'title'  => array(
+			'title'         => array(
 				'type'  => 'text',
 				'std'   => __( 'Cart', 'woocommerce' ),
 				'label' => __( 'Title', 'woocommerce' ),
@@ -46,8 +44,8 @@ class WC_Widget_Cart extends WC_Widget {
 	 *
 	 * @see WP_Widget
 	 *
-	 * @param array $args
-	 * @param array $instance
+	 * @param array $args     Arguments.
+	 * @param array $instance Widget instance.
 	 */
 	public function widget( $args, $instance ) {
 		if ( apply_filters( 'woocommerce_widget_cart_is_hidden', is_cart() || is_checkout() ) ) {
@@ -62,7 +60,7 @@ class WC_Widget_Cart extends WC_Widget {
 			echo '<div class="hide_cart_widget_if_empty">';
 		}
 
-		// Insert cart widget placeholder - code in woocommerce.js will update this on page load
+		// Insert cart widget placeholder - code in woocommerce.js will update this on page load.
 		echo '<div class="widget_shopping_cart_content"></div>';
 
 		if ( $hide_if_empty ) {

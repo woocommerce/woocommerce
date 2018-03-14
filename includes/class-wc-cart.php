@@ -673,7 +673,9 @@ class WC_Cart extends WC_Legacy_Cart {
 		$weight = 0;
 
 		foreach ( $this->get_cart() as $cart_item_key => $values ) {
-			$weight += (float) $values['data']->get_weight() * $values['quantity'];
+			if ( $values['data']->has_weight() ) {
+				$weight += (float) $values['data']->get_weight() * $values['quantity'];
+			}
 		}
 
 		return apply_filters( 'woocommerce_cart_contents_weight', $weight );
@@ -1112,6 +1114,7 @@ class WC_Cart extends WC_Legacy_Cart {
 					'variation'    => $variation,
 					'quantity'     => $quantity,
 					'data'         => $product_data,
+					'data_hash'    => wc_get_cart_item_data_hash( $product_data ),
 				) ), $cart_item_key );
 			}
 
@@ -1450,7 +1453,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				// Limit to defined email addresses.
 				$restrictions = $coupon->get_email_restrictions();
 
-				if ( is_array( $restrictions ) && 0 < count( $restrictions ) && 0 === count( array_intersect( $check_emails, $restrictions ) ) ) {
+				if ( is_array( $restrictions ) && 0 < count( $restrictions ) && ! $this->is_coupon_emails_allowed( $check_emails, $restrictions ) ) {
 					$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED );
 					$this->remove_coupon( $code );
 				}
@@ -1496,6 +1499,37 @@ class WC_Cart extends WC_Legacy_Cart {
 			}
 		}
 	}
+
+	/**
+	 * Checks if the given email address(es) matches the ones specified on the coupon.
+	 *
+	 * @param array $check_emails Array of customer email addresses.
+	 * @param array $restrictions Array of allowed email addresses.
+	 * @return bool
+	 */
+	public function is_coupon_emails_allowed( $check_emails, $restrictions ) {
+
+		foreach ( $check_emails as $check_email ) {
+			// With a direct match we return true.
+			if ( in_array( $check_email, $restrictions ) ) {
+				return true;
+			}
+
+			// Go through the allowed emails and return true if the email matches a wildcard.
+			foreach ( $restrictions as $restriction ) {
+				// Convert to PHP-regex syntax.
+				$regex = '/' . str_replace( '*', '(.+)?', $restriction ) . '/';
+				preg_match( $regex, $check_email, $match );
+				if ( ! empty( $match ) ) {
+					return true;
+				}
+			}
+		}
+
+		// No matches, this one isn't allowed.
+		return false;
+	}
+
 
 	/**
 	 * Returns whether or not a discount has been applied.

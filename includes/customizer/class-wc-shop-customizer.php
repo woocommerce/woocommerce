@@ -20,6 +20,7 @@ class WC_Shop_Customizer {
 		add_action( 'customize_register', array( $this, 'add_sections' ) );
 		add_action( 'customize_controls_print_styles', array( $this, 'add_styles' ) );
 		add_action( 'customize_controls_print_scripts', array( $this, 'add_scripts' ), 30 );
+		add_action( 'wp_enqueue_scripts', array( $this, 'add_frontend_scripts' ) );
 	}
 
 	/**
@@ -38,6 +39,18 @@ class WC_Shop_Customizer {
 		$this->add_store_notice_section( $wp_customize );
 		$this->add_product_catalog_section( $wp_customize );
 		$this->add_product_images_section( $wp_customize );
+	}
+
+	/**
+	 * Frontend CSS styles.
+	 */
+	public function add_frontend_scripts() {
+		if ( ! is_customize_preview() || ! is_store_notice_showing() ) {
+			return;
+		}
+
+		$css = '.woocommerce-store-notice, p.demo_store { display: block !important; }';
+		wp_add_inline_style( 'customize-preview', $css );
 	}
 
 	/**
@@ -103,6 +116,43 @@ class WC_Shop_Customizer {
 					$( '.woocommerce-cropping-control' ).find( 'input:checked' ).change();
 				} );
 
+				wp.customize( 'woocommerce_demo_store', function( setting ) {
+					setting.bind( function( value ) {
+						var notice = wp.customize( 'woocommerce_demo_store_notice' );
+
+						if ( value && ! notice.callbacks.has( notice.preview ) ) {
+							notice.bind( notice.preview );
+						} else if ( ! value ) {
+							notice.unbind( notice.preview );
+						}
+					} );
+				} );
+
+				wp.customize( 'woocommerce_demo_store_notice', function( setting ) {
+					setting.bind( function( value ) {
+						var checkbox = wp.customize( 'woocommerce_demo_store' );
+
+						if ( checkbox.get() ) {
+							$( '.woocommerce-store-notice' ).text( value );
+						}
+					} );
+				} );
+
+				wp.customize.section( 'woocommerce_store_notice', function( section ) {
+					section.expanded.bind( function( isExpanded ) {
+						if ( isExpanded ) {
+							var notice   = wp.customize( 'woocommerce_demo_store_notice' ),
+								checkbox = wp.customize( 'woocommerce_demo_store' );
+
+							if ( checkbox.get() && ! notice.callbacks.has( notice.preview ) ) {
+								notice.bind( notice.preview );
+							} else if ( ! checkbox.get() ) {
+								notice.unbind( notice.preview );
+							}
+						}
+					} );
+				} );
+
 				wp.customize.section( 'woocommerce_product_catalog', function( section ) {
 					section.expanded.bind( function( isExpanded ) {
 						if ( isExpanded ) {
@@ -156,7 +206,7 @@ class WC_Shop_Customizer {
 					setting.bind( function( value ) {
 						var min = parseInt( '<?php echo esc_js( $min_rows ); ?>', 10 );
 						var max = parseInt( '<?php echo esc_js( $max_rows ); ?>', 10 );
-						
+
 						value = parseInt( value, 10 );
 
 						if ( max && value > max ) {
@@ -253,6 +303,7 @@ class WC_Shop_Customizer {
 				'type'              => 'option',
 				'capability'        => 'manage_woocommerce',
 				'sanitize_callback' => 'wp_kses_post',
+				'transport'         => 'postMessage',
 			)
 		);
 
@@ -276,6 +327,16 @@ class WC_Shop_Customizer {
 				'type'     => 'checkbox',
 			)
 		);
+
+		if ( isset( $wp_customize->selective_refresh ) ) {
+			$wp_customize->selective_refresh->add_partial(
+				'woocommerce_demo_store_notice', array(
+					'selector'            => '.woocommerce-store-notice',
+					'container_inclusive' => true,
+					'render_callback'     => 'woocommerce_demo_store',
+				)
+			);
+		}
 	}
 
 	/**
@@ -443,12 +504,25 @@ class WC_Shop_Customizer {
 	 * @param WP_Customize_Manager $wp_customize Theme Customizer object.
 	 */
 	private function add_product_images_section( $wp_customize ) {
+		if ( class_exists( 'Jetpack' ) && Jetpack::is_module_active( 'photon' ) ) {
+			$regen_description = ''; // Nothing to report; Jetpack will handle magically.
+		} elseif ( apply_filters( 'woocommerce_background_image_regeneration', true ) && ! is_multisite() ) {
+			$regen_description = __( 'After publishing your changes, new image sizes will be generated automatically.', 'woocommerce' );
+		} elseif ( apply_filters( 'woocommerce_background_image_regeneration', true ) && is_multisite() ) {
+			/* translators: 1: tools URL 2: regen thumbs url */
+			$regen_description = sprintf( __( 'After publishing your changes, new image sizes may not be shown until you regenerate thumbnails. You can do this from the <a href="%1$s" target="_blank">tools section in WooCommerce</a> or by using a plugin such as <a href="%2$s" target="_blank">Regenerate Thumbnails</a>.', 'woocommerce' ), admin_url( 'admin.php?page=wc-status&tab=tools' ), 'https://en-gb.wordpress.org/plugins/regenerate-thumbnails/' );
+		} else {
+			/* translators: %s: regen thumbs url */
+			$regen_description = sprintf( __( 'After publishing your changes, new image sizes may not be shown until you <a href="%s" target="_blank">Regenerate Thumbnails</a>.', 'woocommerce' ), 'https://en-gb.wordpress.org/plugins/regenerate-thumbnails/' );
+		}
+
 		$wp_customize->add_section(
 			'woocommerce_product_images',
 			array(
-				'title'    => __( 'Product Images', 'woocommerce' ),
-				'priority' => 20,
-				'panel'    => 'woocommerce',
+				'title'       => __( 'Product Images', 'woocommerce' ),
+				'description' => $regen_description,
+				'priority'    => 20,
+				'panel'       => 'woocommerce',
 			)
 		);
 
@@ -496,7 +570,7 @@ class WC_Shop_Customizer {
 				'woocommerce_thumbnail_image_width',
 				array(
 					'label'       => __( 'Thumbnail width', 'woocommerce' ),
-					'description' => __( 'Image size used for products in the catalog and product gallery thumbnails.', 'woocommerce' ),
+					'description' => __( 'Image size used for products in the catalog.', 'woocommerce' ),
 					'section'     => 'woocommerce_product_images',
 					'settings'    => 'woocommerce_thumbnail_image_width',
 					'type'        => 'number',

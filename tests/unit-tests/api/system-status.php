@@ -19,9 +19,11 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	public function setUp() {
 		parent::setUp();
 		$this->endpoint = new WC_REST_System_Status_Controller();
-		$this->user     = $this->factory->user->create( array(
-			'role' => 'administrator',
-		) );
+		$this->user     = $this->factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
 	}
 
 	/**
@@ -76,8 +78,8 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$data        = $response->get_data();
 		$environment = (array) $data['environment'];
 
-		// Make sure all expected data is present.
-		$this->assertEquals( 30, count( $environment ) );
+		// Make sure all expected data is present
+		$this->assertEquals( 31, count( $environment ) );
 
 		// Test some responses to make sure they match up.
 		$this->assertEquals( get_option( 'home' ), $environment['home_url'] );
@@ -138,10 +140,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$theme    = (array) $data['theme'];
 
 		$this->assertEquals( 13, count( $theme ) );
-
-		// phpcs:disable WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
-		$this->assertEquals( $active_theme->Name, $theme['name'] );
-		// phpcs:enable
+		$this->assertEquals( $active_theme->Name, $theme['name'] ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
 	}
 
 	/**
@@ -234,20 +233,23 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( count( $raw_tools ), count( $data ) );
-		$this->assertContains( array(
-			'id'          => 'reset_tracking',
-			'name'        => 'Reset usage tracking',
-			'action'      => 'Reset',
-			'description' => 'This will reset your usage tracking settings, causing it to show the opt-in banner again and not sending any data.',
-			'_links'      => array(
-				'item' => array(
-					array(
-						'href'       => rest_url( '/wc/v2/system_status/tools/reset_tracking' ),
-						'embeddable' => true,
+		$this->assertContains(
+			array(
+				'id'          => 'reset_tracking',
+				'name'        => 'Reset usage tracking',
+				'action'      => 'Reset',
+				'description' => 'This will reset your usage tracking settings, causing it to show the opt-in banner again and not sending any data.',
+				'_links'      => array(
+					'item' => array(
+						array(
+							'href'       => rest_url( '/wc/v2/system_status/tools/reset_tracking' ),
+							'embeddable' => true,
+						),
 					),
 				),
 			),
-		), $data );
+			$data
+		);
 	}
 
 	/**
@@ -350,5 +352,28 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'description', $properties );
 		$this->assertArrayHasKey( 'success', $properties );
 		$this->assertArrayHasKey( 'message', $properties );
+	}
+
+	/**
+	 * Test execute_tool() with the "add_order_indexes" tool.
+	 */
+	public function test_execute_system_tool_add_order_indexes() {
+		wp_set_current_user( $this->user );
+
+		$order1 = WC_Helper_Order::create_order();
+		$order2 = WC_Helper_Order::create_order();
+		delete_post_meta( $order1->get_id(), '_billing_address_index' );
+		delete_post_meta( $order2->get_id(), '_billing_address_index' );
+		delete_post_meta( $order2->get_id(), '_shipping_address_index' );
+
+		$controller = new WC_REST_System_Status_Tools_Controller();
+		$response   = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v2/system_status/tools/add_order_indexes' ) );
+		$data       = $response->get_data();
+
+		$this->assertTrue( $data['success'] );
+		$this->assertNotEmpty( get_post_meta( $order1->get_id(), '_billing_address_index', true ) );
+		$this->assertNotEmpty( get_post_meta( $order2->get_id(), '_billing_address_index', true ) );
+		$this->assertNotEmpty( get_post_meta( $order2->get_id(), '_shipping_address_index', true ) );
+
 	}
 }

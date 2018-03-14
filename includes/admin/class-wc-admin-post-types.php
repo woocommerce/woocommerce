@@ -28,10 +28,10 @@ class WC_Admin_Post_Types {
 	 * Constructor.
 	 */
 	public function __construct() {
-		include_once( dirname( __FILE__ ) . '/class-wc-admin-meta-boxes.php' );
+		include_once dirname( __FILE__ ) . '/class-wc-admin-meta-boxes.php';
 
 		if ( ! function_exists( 'duplicate_post_plugin_activation' ) ) {
-			include_once( 'class-wc-admin-duplicate-product.php' );
+			include_once 'class-wc-admin-duplicate-product.php';
 		}
 
 		// Load correct list table classes for current screen.
@@ -65,7 +65,7 @@ class WC_Admin_Post_Types {
 
 		// Bulk / quick edit.
 		add_action( 'bulk_edit_custom_box', array( $this, 'bulk_edit' ), 10, 2 );
-		add_action( 'quick_edit_custom_box',  array( $this, 'quick_edit' ), 10, 2 );
+		add_action( 'quick_edit_custom_box', array( $this, 'quick_edit' ), 10, 2 );
 		add_action( 'save_post', array( $this, 'bulk_and_quick_edit_hook' ), 10, 2 );
 		add_action( 'woocommerce_product_bulk_and_quick_edit', array( $this, 'bulk_and_quick_edit_save_post' ), 10, 2 );
 	}
@@ -88,16 +88,16 @@ class WC_Admin_Post_Types {
 		}
 
 		switch ( $screen_id ) {
-			case 'edit-shop_order' :
-				include_once( 'list-tables/class-wc-admin-list-table-orders.php' );
+			case 'edit-shop_order':
+				include_once 'list-tables/class-wc-admin-list-table-orders.php';
 				new WC_Admin_List_Table_Orders();
 				break;
-			case 'edit-shop_coupon' :
-				include_once( 'list-tables/class-wc-admin-list-table-coupons.php' );
+			case 'edit-shop_coupon':
+				include_once 'list-tables/class-wc-admin-list-table-coupons.php';
 				new WC_Admin_List_Table_Coupons();
 				break;
-			case 'edit-product' :
-				include_once( 'list-tables/class-wc-admin-list-table-products.php' );
+			case 'edit-product':
+				include_once 'list-tables/class-wc-admin-list-table-products.php';
 				new WC_Admin_List_Table_Products();
 				break;
 		}
@@ -117,18 +117,18 @@ class WC_Admin_Post_Types {
 		global $post;
 
 		$messages['product'] = array(
-			0 => '', // Unused. Messages start at index 1.
-			1 => sprintf( __( 'Product updated. <a href="%s">View Product</a>', 'woocommerce' ), esc_url( get_permalink( $post->ID ) ) ),
-			2 => __( 'Custom field updated.', 'woocommerce' ),
-			3 => __( 'Custom field deleted.', 'woocommerce' ),
-			4 => __( 'Product updated.', 'woocommerce' ),
-			5 => __( 'Revision restored.', 'woocommerce' ),
+			0  => '', // Unused. Messages start at index 1.
+			1  => sprintf( __( 'Product updated. <a href="%s">View Product</a>', 'woocommerce' ), esc_url( get_permalink( $post->ID ) ) ),
+			2  => __( 'Custom field updated.', 'woocommerce' ),
+			3  => __( 'Custom field deleted.', 'woocommerce' ),
+			4  => __( 'Product updated.', 'woocommerce' ),
+			5  => __( 'Revision restored.', 'woocommerce' ),
 			/* translators: %s: product url */
-			6 => sprintf( __( 'Product published. <a href="%s">View Product</a>', 'woocommerce' ), esc_url( get_permalink( $post->ID ) ) ),
-			7 => __( 'Product saved.', 'woocommerce' ),
+			6  => sprintf( __( 'Product published. <a href="%s">View Product</a>', 'woocommerce' ), esc_url( get_permalink( $post->ID ) ) ),
+			7  => __( 'Product saved.', 'woocommerce' ),
 			/* translators: %s: product url */
-			8 => sprintf( __( 'Product submitted. <a target="_blank" href="%s">Preview product</a>', 'woocommerce' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ) ) ),
-			9 => sprintf(
+			8  => sprintf( __( 'Product submitted. <a target="_blank" href="%s">Preview product</a>', 'woocommerce' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ) ) ),
+			9  => sprintf(
 				/* translators: 1: date 2: product url */
 				__( 'Product scheduled for: %1$s. <a target="_blank" href="%2$s">Preview product</a>', 'woocommerce' ),
 				'<strong>' . date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ), esc_url( get_permalink( $post->ID ) ) . '</strong>'
@@ -138,16 +138,16 @@ class WC_Admin_Post_Types {
 		);
 
 		$messages['shop_order'] = array(
-			0 => '', // Unused. Messages start at index 1.
-			1 => __( 'Order updated.', 'woocommerce' ),
-			2 => __( 'Custom field updated.', 'woocommerce' ),
-			3 => __( 'Custom field deleted.', 'woocommerce' ),
-			4 => __( 'Order updated.', 'woocommerce' ),
-			5 => __( 'Revision restored.', 'woocommerce' ),
-			6 => __( 'Order updated.', 'woocommerce' ),
-			7 => __( 'Order saved.', 'woocommerce' ),
-			8 => __( 'Order submitted.', 'woocommerce' ),
-			9 => sprintf(
+			0  => '', // Unused. Messages start at index 1.
+			1  => __( 'Order updated.', 'woocommerce' ),
+			2  => __( 'Custom field updated.', 'woocommerce' ),
+			3  => __( 'Custom field deleted.', 'woocommerce' ),
+			4  => __( 'Order updated.', 'woocommerce' ),
+			5  => __( 'Revision restored.', 'woocommerce' ),
+			6  => __( 'Order updated.', 'woocommerce' ),
+			7  => __( 'Order saved.', 'woocommerce' ),
+			8  => __( 'Order submitted.', 'woocommerce' ),
+			9  => sprintf(
 				/* translators: %s: date */
 				__( 'Order scheduled for: %s.', 'woocommerce' ),
 				'<strong>' . date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ) . '</strong>'
@@ -157,16 +157,16 @@ class WC_Admin_Post_Types {
 		);
 
 		$messages['shop_coupon'] = array(
-			0 => '', // Unused. Messages start at index 1.
-			1 => __( 'Coupon updated.', 'woocommerce' ),
-			2 => __( 'Custom field updated.', 'woocommerce' ),
-			3 => __( 'Custom field deleted.', 'woocommerce' ),
-			4 => __( 'Coupon updated.', 'woocommerce' ),
-			5 => __( 'Revision restored.', 'woocommerce' ),
-			6 => __( 'Coupon updated.', 'woocommerce' ),
-			7 => __( 'Coupon saved.', 'woocommerce' ),
-			8 => __( 'Coupon submitted.', 'woocommerce' ),
-			9 => sprintf(
+			0  => '', // Unused. Messages start at index 1.
+			1  => __( 'Coupon updated.', 'woocommerce' ),
+			2  => __( 'Custom field updated.', 'woocommerce' ),
+			3  => __( 'Custom field deleted.', 'woocommerce' ),
+			4  => __( 'Coupon updated.', 'woocommerce' ),
+			5  => __( 'Revision restored.', 'woocommerce' ),
+			6  => __( 'Coupon updated.', 'woocommerce' ),
+			7  => __( 'Coupon saved.', 'woocommerce' ),
+			8  => __( 'Coupon submitted.', 'woocommerce' ),
+			9  => sprintf(
 				/* translators: %s: date */
 				__( 'Coupon scheduled for: %s.', 'woocommerce' ),
 				'<strong>' . date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ) . '</strong>'
@@ -238,11 +238,13 @@ class WC_Admin_Post_Types {
 			return;
 		}
 
-		$shipping_class = get_terms( 'product_shipping_class', array(
-			'hide_empty' => false,
-		) );
+		$shipping_class = get_terms(
+			'product_shipping_class', array(
+				'hide_empty' => false,
+			)
+		);
 
-		include( WC()->plugin_path() . '/includes/admin/views/html-bulk-edit-product.php' );
+		include WC()->plugin_path() . '/includes/admin/views/html-bulk-edit-product.php';
 	}
 
 	/**
@@ -256,11 +258,13 @@ class WC_Admin_Post_Types {
 			return;
 		}
 
-		$shipping_class = get_terms( 'product_shipping_class', array(
-			'hide_empty' => false,
-		) );
+		$shipping_class = get_terms(
+			'product_shipping_class', array(
+				'hide_empty' => false,
+			)
+		);
 
-		include( WC()->plugin_path() . '/includes/admin/views/html-quick-edit-product.php' );
+		include WC()->plugin_path() . '/includes/admin/views/html-quick-edit-product.php';
 	}
 
 	/**
@@ -497,7 +501,7 @@ class WC_Admin_Post_Types {
 		}
 
 		// Handle price - remove dates and set to lowest.
-		$change_price_product_types = apply_filters( 'woocommerce_bulk_edit_save_price_product_types', array( 'simple', 'external' ) );
+		$change_price_product_types    = apply_filters( 'woocommerce_bulk_edit_save_price_product_types', array( 'simple', 'external' ) );
 		$can_product_type_change_price = false;
 		foreach ( $change_price_product_types as $product_type ) {
 			if ( $product->is_type( $product_type ) ) {
@@ -521,7 +525,7 @@ class WC_Admin_Post_Types {
 						break;
 					case 2:
 						if ( $is_percentage ) {
-							$percent = $regular_price / 100;
+							$percent   = $regular_price / 100;
 							$new_price = $old_regular_price + ( round( $old_regular_price * $percent, wc_get_price_decimals() ) );
 						} else {
 							$new_price = $old_regular_price + $regular_price;
@@ -529,7 +533,7 @@ class WC_Admin_Post_Types {
 						break;
 					case 3:
 						if ( $is_percentage ) {
-							$percent = $regular_price / 100;
+							$percent   = $regular_price / 100;
 							$new_price = max( 0, $old_regular_price - ( round( $old_regular_price * $percent, wc_get_price_decimals() ) ) );
 						} else {
 							$new_price = max( 0, $old_regular_price - $regular_price );
@@ -542,7 +546,7 @@ class WC_Admin_Post_Types {
 
 				if ( isset( $new_price ) && $new_price !== $old_regular_price ) {
 					$price_changed = true;
-					$new_price = round( $new_price, wc_get_price_decimals() );
+					$new_price     = round( $new_price, wc_get_price_decimals() );
 					$product->set_regular_price( $new_price );
 				}
 			}
@@ -559,7 +563,7 @@ class WC_Admin_Post_Types {
 						break;
 					case 2:
 						if ( $is_percentage ) {
-							$percent = $sale_price / 100;
+							$percent   = $sale_price / 100;
 							$new_price = $old_sale_price + ( $old_sale_price * $percent );
 						} else {
 							$new_price = $old_sale_price + $sale_price;
@@ -567,7 +571,7 @@ class WC_Admin_Post_Types {
 						break;
 					case 3:
 						if ( $is_percentage ) {
-							$percent = $sale_price / 100;
+							$percent   = $sale_price / 100;
 							$new_price = max( 0, $old_sale_price - ( $old_sale_price * $percent ) );
 						} else {
 							$new_price = max( 0, $old_sale_price - $sale_price );
@@ -575,7 +579,7 @@ class WC_Admin_Post_Types {
 						break;
 					case 4:
 						if ( $is_percentage ) {
-							$percent = $sale_price / 100;
+							$percent   = $sale_price / 100;
 							$new_price = max( 0, $product->regular_price - ( $product->regular_price * $percent ) );
 						} else {
 							$new_price = max( 0, $product->regular_price - $sale_price );
@@ -588,7 +592,7 @@ class WC_Admin_Post_Types {
 
 				if ( isset( $new_price ) && $new_price !== $old_sale_price ) {
 					$price_changed = true;
-					$new_price = ! empty( $new_price ) || '0' === $new_price ? round( $new_price, wc_get_price_decimals() ) : '';
+					$new_price     = ! empty( $new_price ) || '0' === $new_price ? round( $new_price, wc_get_price_decimals() ) : '';
 					$product->set_sale_price( $new_price );
 				}
 			}
@@ -732,14 +736,17 @@ class WC_Admin_Post_Types {
 		$visibility_options = wc_get_product_visibility_options();
 		?>
 		<div class="misc-pub-section" id="catalog-visibility">
-			<?php esc_html_e( 'Catalog visibility:', 'woocommerce' ); ?> <strong id="catalog-visibility-display"><?php
+			<?php esc_html_e( 'Catalog visibility:', 'woocommerce' ); ?>
+			<strong id="catalog-visibility-display">
+				<?php
 
-			echo isset( $visibility_options[ $current_visibility ] ) ? esc_html( $visibility_options[ $current_visibility ] ) : esc_html( $current_visibility );
+				echo isset( $visibility_options[ $current_visibility ] ) ? esc_html( $visibility_options[ $current_visibility ] ) : esc_html( $current_visibility );
 
-			if ( 'yes' === $current_featured ) {
-				echo ', ' . esc_html__( 'Featured', 'woocommerce' );
-			}
-			?></strong>
+				if ( 'yes' === $current_featured ) {
+					echo ', ' . esc_html__( 'Featured', 'woocommerce' );
+				}
+				?>
+			</strong>
 
 			<a href="#catalog-visibility" class="edit-catalog-visibility hide-if-no-js"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
 

@@ -115,6 +115,7 @@ class WC_Countries {
 			'GF' => array(),
 			'IS' => array(),
 			'IL' => array(),
+			'IM' => array(),
 			'KR' => array(),
 			'KW' => array(),
 			'LB' => array(),
@@ -922,6 +923,11 @@ class WC_Countries {
 						'postcode' => array(
 							'priority' => 65,
 						),
+						'state'    => array(
+							'required' => false,
+						),
+					),
+					'IM' => array(
 						'state'    => array(
 							'required' => false,
 						),

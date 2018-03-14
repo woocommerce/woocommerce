@@ -61,6 +61,7 @@ final class WC_Cart_Session {
 	 * @since 3.2.0
 	 */
 	public function get_cart_from_session() {
+		// Flag to indicate the stored cart should be updated.
 		$update_cart_session = false;
 		$totals              = WC()->session->get( 'cart_totals', null );
 		$cart                = WC()->session->get( 'cart', null );
@@ -71,12 +72,18 @@ final class WC_Cart_Session {
 		$this->cart->set_coupon_discount_tax_totals( WC()->session->get( 'coupon_discount_tax_totals', array() ) );
 		$this->cart->set_removed_cart_contents( WC()->session->get( 'removed_cart_contents', array() ) );
 
-		if ( is_null( $cart ) && ( $saved_cart = get_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id(), true ) ) ) { // @codingStandardsIgnoreLine
+		if ( apply_filters( 'woocommerce_persistent_cart_enabled', true ) ) {
+			$saved_cart = get_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id(), true );
+		} else {
+			$saved_cart = false;
+		}
+
+		if ( is_null( $cart ) && $saved_cart ) {
 			$cart                = $saved_cart['cart'];
 			$update_cart_session = true;
 		} elseif ( is_null( $cart ) ) {
 			$cart = array();
-		} elseif ( is_array( $cart ) && ( $saved_cart = get_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id(), true ) ) ) { // @codingStandardsIgnoreLine
+		} elseif ( is_array( $cart ) && $saved_cart ) {
 			$cart                = array_merge( $saved_cart['cart'], $cart );
 			$update_cart_session = true;
 		}
@@ -93,9 +100,15 @@ final class WC_Cart_Session {
 				if ( ! empty( $product ) && $product->exists() && $values['quantity'] > 0 ) {
 
 					if ( ! $product->is_purchasable() ) {
-						$update_cart_session = true; // Flag to indicate the stored cart should be updated.
+						$update_cart_session = true;
 						/* translators: %s: product name */
 						wc_add_notice( sprintf( __( '%s has been removed from your cart because it can no longer be purchased. Please contact us if you need assistance.', 'woocommerce' ), $product->get_name() ), 'error' );
+						do_action( 'woocommerce_remove_cart_item_from_session', $key, $values );
+
+					} elseif ( ! empty( $values['data_hash'] ) && ! hash_equals( $values['data_hash'], wc_get_cart_item_data_hash( $product ) ) ) {
+						$update_cart_session = true;
+						/* translators: %1$s: product name. %2$s product permalink */
+						wc_add_notice( sprintf( __( '%1$s has been removed from your cart because it has since been modified. You can add it back to your cart <a href="%2$s">here</a>.', 'woocommerce' ), $product->get_name(), $product->get_permalink() ), 'notice' );
 						do_action( 'woocommerce_remove_cart_item_from_session', $key, $values );
 
 					} else {
@@ -184,7 +197,7 @@ final class WC_Cart_Session {
 	 * Save the persistent cart when the cart is updated.
 	 */
 	public function persistent_cart_update() {
-		if ( get_current_user_id() ) {
+		if ( get_current_user_id() && apply_filters( 'woocommerce_persistent_cart_enabled', true ) ) {
 			update_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id(), array(
 				'cart' => $this->get_cart_for_session(),
 			) );
@@ -195,7 +208,7 @@ final class WC_Cart_Session {
 	 * Delete the persistent cart permanently.
 	 */
 	public function persistent_cart_destroy() {
-		if ( get_current_user_id() ) {
+		if ( get_current_user_id() && apply_filters( 'woocommerce_persistent_cart_enabled', true ) ) {
 			delete_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id() );
 		}
 	}

@@ -3,7 +3,6 @@
  * Handles storage and retrieval of shipping zones
  *
  * @package WooCommerce/Classes
- * @author  Automattic
  * @version 3.3.0
  * @since   2.6.0
  */
@@ -29,11 +28,11 @@ class WC_Shipping_Zones {
 		$zones      = array();
 
 		foreach ( $raw_zones as $raw_zone ) {
-			$zone                                                = new WC_Shipping_Zone( $raw_zone );
-			$zones[ $zone->get_id() ]                            = $zone->get_data();
-			$zones[ $zone->get_id() ]['zone_id']                 = $zone->get_id();
+			$zone                                = new WC_Shipping_Zone( $raw_zone );
+			$zones[ $zone->get_id() ]            = $zone->get_data();
+			$zones[ $zone->get_id() ]['zone_id'] = $zone->get_id();
 			$zones[ $zone->get_id() ]['formatted_zone_location'] = $zone->get_formatted_location();
-			$zones[ $zone->get_id() ]['shipping_methods']        = $zone->get_shipping_methods();
+			$zones[ $zone->get_id() ]['shipping_methods']        = $zone->get_shipping_methods( false, 'json' );
 		}
 
 		return $zones;

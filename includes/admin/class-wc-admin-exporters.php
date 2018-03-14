@@ -73,17 +73,21 @@ class WC_Admin_Exporters {
 	public function admin_scripts() {
 		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 		wp_register_script( 'wc-product-export', WC()->plugin_url() . '/assets/js/admin/wc-product-export' . $suffix . '.js', array( 'jquery' ), WC_VERSION );
-		wp_localize_script( 'wc-product-export', 'wc_product_export_params', array(
-			'export_nonce' => wp_create_nonce( 'wc-product-export' ),
-		) );
+		wp_localize_script(
+			'wc-product-export',
+			'wc_product_export_params',
+			array(
+				'export_nonce' => wp_create_nonce( 'wc-product-export' ),
+			)
+		);
 	}
 
 	/**
 	 * Export page UI.
 	 */
 	public function product_exporter() {
-		include_once( WC_ABSPATH . 'includes/export/class-wc-product-csv-exporter.php' );
-		include_once( dirname( __FILE__ ) . '/views/html-admin-page-product-export.php' );
+		include_once WC_ABSPATH . 'includes/export/class-wc-product-csv-exporter.php';
+		include_once dirname( __FILE__ ) . '/views/html-admin-page-product-export.php';
 	}
 
 	/**
@@ -91,7 +95,7 @@ class WC_Admin_Exporters {
 	 */
 	public function download_export_file() {
 		if ( isset( $_GET['action'], $_GET['nonce'] ) && wp_verify_nonce( wp_unslash( $_GET['nonce'] ), 'product-csv' ) && 'download_product_csv' === wp_unslash( $_GET['action'] ) ) { // WPCS: input var ok, sanitization ok.
-			include_once( WC_ABSPATH . 'includes/export/class-wc-product-csv-exporter.php' );
+			include_once WC_ABSPATH . 'includes/export/class-wc-product-csv-exporter.php';
 			$exporter = new WC_Product_CSV_Exporter();
 
 			if ( ! empty( $_GET['filename'] ) ) { // WPCS: input var ok.
@@ -112,7 +116,7 @@ class WC_Admin_Exporters {
 			wp_die( -1 );
 		}
 
-		include_once( WC_ABSPATH . 'includes/export/class-wc-product-csv-exporter.php' );
+		include_once WC_ABSPATH . 'includes/export/class-wc-product-csv-exporter.php';
 
 		$step     = isset( $_POST['step'] ) ? absint( $_POST['step'] ) : 1; // WPCS: input var ok, sanitization ok.
 		$exporter = new WC_Product_CSV_Exporter();
@@ -140,20 +144,31 @@ class WC_Admin_Exporters {
 		$exporter->set_page( $step );
 		$exporter->generate_file();
 
-		$query_args = apply_filters( 'woocommerce_export_get_ajax_query_args', array( 'nonce' => wp_create_nonce( 'product-csv' ), 'action' => 'download_product_csv', 'filename' => $exporter->get_filename() ) );
+		$query_args = apply_filters(
+			'woocommerce_export_get_ajax_query_args',
+			array(
+				'nonce'    => wp_create_nonce( 'product-csv' ),
+				'action'   => 'download_product_csv',
+				'filename' => $exporter->get_filename(),
+			)
+		);
 
 		if ( 100 === $exporter->get_percent_complete() ) {
-			wp_send_json_success( array(
-				'step'       => 'done',
-				'percentage' => 100,
-				'url'        => add_query_arg( $query_args, admin_url( 'edit.php?post_type=product&page=product_exporter' ) ),
-			) );
+			wp_send_json_success(
+				array(
+					'step'       => 'done',
+					'percentage' => 100,
+					'url'        => add_query_arg( $query_args, admin_url( 'edit.php?post_type=product&page=product_exporter' ) ),
+				)
+			);
 		} else {
-			wp_send_json_success( array(
-				'step'       => ++$step,
-				'percentage' => $exporter->get_percent_complete(),
-				'columns'    => $exporter->get_column_names(),
-			) );
+			wp_send_json_success(
+				array(
+					'step'       => ++$step,
+					'percentage' => $exporter->get_percent_complete(),
+					'columns'    => $exporter->get_column_names(),
+				)
+			);
 		}
 	}
 }
