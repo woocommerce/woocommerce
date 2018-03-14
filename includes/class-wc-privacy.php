@@ -45,7 +45,7 @@ class WC_Privacy {
 	public static function data_exporter( $email_address, $page ) {
 		$personal_data = array();
 		$done          = false;
-		$user          = get_user_by( 'email', $email ); // Check if user has an ID in the DB to load stored personal data.
+		$user          = get_user_by( 'email', $email_address ); // Check if user has an ID in the DB to load stored personal data.
 
 		// Export customer data first.
 		if ( 0 === $page ) {
@@ -59,9 +59,9 @@ class WC_Privacy {
 			);
 
 			if ( $user instanceof WP_User ) {
-				$order_query['customer_id']   = $user->ID;
+				$order_query['customer_id'] = $user->ID;
 			} else {
-				$order_query['billing_email'] = $email;
+				$order_query['billing_email'] = $email_address;
 			}
 			$orders = wc_get_orders( $order_query );
 
@@ -112,7 +112,6 @@ class WC_Privacy {
 			$personal_data['Shipping Postal/Zip Code'] = $customer->get_shipping_postcode();
 			$personal_data['Shipping State']           = $customer->get_shipping_state();
 			$personal_data['Shipping Country']         = $customer->get_shipping_country();
-			$personal_data['Shipping Phone']           = $customer->get_shipping_phone();
 		}
 
 		return $personal_data;
@@ -149,7 +148,6 @@ class WC_Privacy {
 			'Shipping Postal/Zip Code' => $order->get_shipping_postcode(),
 			'Shipping State'           => $order->get_shipping_state(),
 			'Shipping Country'         => $order->get_shipping_country(),
-			'Shipping Phone'           => $order->get_shipping_phone(),
 		);
 	}
 
