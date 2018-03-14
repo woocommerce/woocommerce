@@ -241,31 +241,6 @@ class WC_Shipping {
 	}
 
 	/**
-	 * Get the default method.
-	 *
-	 * @param  array   $available_methods
-	 * @param  boolean $current_chosen_method
-	 * @return string
-	 */
-	private function get_default_method( $available_methods, $current_chosen_method = false ) {
-		if ( ! empty( $available_methods ) ) {
-			if ( ! empty( $current_chosen_method ) ) {
-				if ( isset( $available_methods[ $current_chosen_method ] ) ) {
-					return $available_methods[ $current_chosen_method ]->id;
-				} else {
-					foreach ( $available_methods as $method_key => $method ) {
-						if ( strpos( $method->id, $current_chosen_method ) === 0 ) {
-							return $method->id;
-						}
-					}
-				}
-			}
-			return current( $available_methods )->id;
-		}
-		return '';
-	}
-
-	/**
 	 * Calculate shipping for (multiple) packages of cart items.
 	 *
 	 * @param array $packages multi-dimensional array of cart items to calc shipping for.
