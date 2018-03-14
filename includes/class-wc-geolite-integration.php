@@ -61,7 +61,7 @@ class WC_Geolite_Integration {
 
 			$reader->close();
 		} catch ( Exception $e ) {
-			$this->log( $e->getMessage(), 'error' );
+			$this->log( $e->getMessage(), 'warning' );
 		}
 
 		return sanitize_text_field( strtoupper( $iso_code ) );
