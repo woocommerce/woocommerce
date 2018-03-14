@@ -167,15 +167,10 @@ class WC_Geolocation {
 				$country_code = strtoupper( sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_COUNTRY_CODE'] ) ) ); // WPCS: input var ok, CSRF ok.
 			} else {
 				$ip_address = $ip_address ? $ip_address : self::get_ip_address();
-
-				if ( self::is_ipv6( $ip_address ) ) {
-					$database = self::get_local_database_path( 'v6' );
-				} else {
-					$database = self::get_local_database_path();
-				}
+				$database   = self::get_local_database_path();
 
 				if ( file_exists( $database ) ) {
-					$country_code = self::geolocate_via_db( $ip_address );
+					$country_code = self::geolocate_via_db( $ip_address, $database );
 				} elseif ( $api_fallback ) {
 					$country_code = self::geolocate_via_api( $ip_address );
 				} else {
@@ -258,35 +253,41 @@ class WC_Geolocation {
 	}
 
 	/**
+	 * Require geolite library.
+	 */
+	private static function require_geolite_library() {
+		require_once WC_ABSPATH . 'includes/libraries/geolite2/Reader/Decoder.php';
+		require_once WC_ABSPATH . 'includes/libraries/geolite2/Reader/InvalidDatabaseException.php';
+		require_once WC_ABSPATH . 'includes/libraries/geolite2/Reader/Metadata.php';
+		require_once WC_ABSPATH . 'includes/libraries/geolite2/Reader/Util.php';
+		require_once WC_ABSPATH . 'includes/libraries/geolite2/Reader.php';
+	}
+
+	/**
 	 * Use MAXMIND GeoLite database to geolocation the user.
 	 *
 	 * @param  string $ip_address IP address.
+	 * @param  string $database   Database path.
 	 * @return string
 	 */
-	private static function geolocate_via_db( $ip_address ) {
-		if ( ! class_exists( 'WC_Geo_IP', false ) ) {
-			include_once WC_ABSPATH . 'includes/class-wc-geo-ip.php';
+	private static function geolocate_via_db( $ip_address, $database ) {
+		if ( ! class_exists( 'MaxMind\\Db\\Reader', false ) ) {
+			self::require_geolite_library();
 		}
 
-		$gi = new WC_Geo_IP();
+		$country_code = '';
 
-		if ( self::is_ipv6( $ip_address ) ) {
-			$database = self::get_local_database_path( 'v6' );
-			if ( ! self::get_file_size( $database ) ) {
-				return false;
-			}
-			$gi->geoip_open( $database, 0 );
-			$country_code = $gi->geoip_country_code_by_addr_v6( $ip_address );
-		} else {
-			$database = self::get_local_database_path();
-			if ( ! self::get_file_size( $database ) ) {
-				return false;
-			}
-			$gi->geoip_open( $database, 0 );
-			$country_code = $gi->geoip_country_code_by_addr( $ip_address );
+		try {
+			$reader = new MaxMind\Db\Reader( $database ); // phpcs:ignore PHPCompatibility.PHP.NewLanguageConstructs.t_ns_separatorFound
+
+			$data         = $reader->get( $ip_address );
+			$country_code = $data['country']['iso_code'];
+
+			$reader->close();
+		} catch ( Exception $e ) {
+			$log = wc_get_logger();
+			$log->log( 'error', $e->getMessage(), array( 'source' => 'geoip' ) );
 		}
-
-		$gi->geoip_close();
 
 		return sanitize_text_field( strtoupper( $country_code ) );
 	}
