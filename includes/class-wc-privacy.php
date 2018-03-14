@@ -73,9 +73,7 @@ class WC_Privacy {
 					$personal_data['orders'][] = self::get_order_personal_data( $order );
 				}
 
-				if ( 10 > count( $orders ) ) {
-					$done = true;
-				}
+				$done = 10 > count( $orders );
 			} else {
 				$done = true;
 			}
@@ -165,27 +163,18 @@ class WC_Privacy {
 	 */
 	public static function remove_personal_data( $email ) {
 		/**
-		 * Order Data:
+		 * Personal Data:
 		 *
-		 * Transaction ID
-		 * Customer's IP Address and User Agent
-		 * Billing Address First Name, Last Name, Company, Address Line 1, Address Line 2, City, Postcode/ZIP, Country, State/County, Phone, Email Address
-		 * "Billing Fields" (_billing_address_index)
-		 * Same as above for shipping
-		 *
-		 * Customer Data (meta):
-		 *
-		 * Billing and shipping addresses
+		 *   - Everything exported above for orders and customers
+		 *   - _billing_address_index - just an index for searching which needs clearing?
+		 *   - _shipping_address_index - just an index for searching which needs clearing?
 		 *
 		 * Misc:
 		 *
-		 * Downloadable Product User Email
-		 * Download Log Entry User IP Address
-		 * Carts for user ID/Sessions
-		 * File based logs containing their email e.g. from webhooks
-		 * Payment tokens?
-		 *
-		 * Ping tracker to anonomize data there as well.
+		 *   - Downloadable Product User Email (does not export becasue it matches order/user data).
+		 *   - Download logs by user ID and IP address.
+		 *   - File based logs containing email? Do search and clear if found.
+		 *   - Payment tokens? Check if these need exporting/clearing. Based on User ID.
 		 */
 	}
 }

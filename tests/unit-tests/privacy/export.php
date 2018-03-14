@@ -70,20 +70,13 @@ class WC_Test_Privacy_Export extends WC_Unit_Test_Case {
 		$response = WC_Privacy::data_exporter( 'test1@test.com', 0 );
 		$this->assertFalse( $response['done'] );
 		$this->assertEquals( array(
-			// 'Billing First Name'       => '',
-			// 'Billing Last Name',       => '',
-			// 'Billing Company',         => '',
 			'Billing Address 1'        => '123 South Street',
 			'Billing Address 2'        => 'Apt 1',
 			'Billing City'             => 'Philadelphia',
 			'Billing Postal/Zip Code'  => '19123',
 			'Billing State'            => 'PA',
 			'Billing Country'          => 'US',
-			// 'Billing Phone'            => '',
 			'Billing Email'            => 'customer1@test.com',
-			// 'Shipping First Name'      => '',
-			// 'Shipping Last Name',      => '',
-			// 'Shipping Company',        => '',
 			'Shipping Address 1'       => '123 South Street',
 			'Shipping Address 2'       => 'Apt 1',
 			'Shipping City'            => 'Philadelphia',
@@ -96,7 +89,7 @@ class WC_Test_Privacy_Export extends WC_Unit_Test_Case {
 		$response = WC_Privacy::data_exporter( 'test1@test.com', 1 );
 		$this->assertFalse( $response['done'] );
 		$this->assertArrayHasKey( 'orders', $response['data'] );
-		$this->assertTrue( 10 === count( $response['data']['orders'] ), print_r( $response, true ) );
+		$this->assertTrue( 10 === count( $response['data']['orders'] ) );
 		$this->assertArrayHasKey( 'Order ID', $response['data']['orders'][0] );
 		$this->assertArrayHasKey( 'Order Number', $response['data']['orders'][0] );
 		$this->assertArrayHasKey( 'IP Address', $response['data']['orders'][0] );
