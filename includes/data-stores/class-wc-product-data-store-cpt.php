@@ -700,6 +700,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				foreach ( $attributes as $attribute_key => $attribute ) {
 					$value = '';
 
+					delete_transient( 'wc_layered_nav_counts_' . $attribute_key );
+					
 					if ( is_null( $attribute ) ) {
 						if ( taxonomy_exists( $attribute_key ) ) {
 							// Handle attributes that have been unset.
@@ -725,7 +727,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				}
 			}
 			update_post_meta( $product->get_id(), '_product_attributes', $meta_values );
-			delete_transient( 'wc_layered_nav_counts' );
 		}
 	}
 
