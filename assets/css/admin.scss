@@ -5446,9 +5446,9 @@ table.bar_chart {
 
 	svg {
 		fill: #ddd;
-    margin: 0 0 .875rem;
-    height: 10rem;
-    width: 10rem;
+		margin: 0 0 .875rem;
+		height: 10rem;
+		width: 10rem;
 	}
 
 	.woocommerce-BlankState-message {
@@ -5545,17 +5545,17 @@ table.bar_chart {
 
 	#woocommerce-coupon-data ul.coupon_data_tabs li a,
 	#woocommerce-product-data ul.product_data_tabs li a {
-    padding: 10px 0;
-    text-align: center;
+		padding: 10px 0;
+		text-align: center;
 
-    svg {
-      margin-right: 0;
-    }
+		svg {
+			margin-right: 0;
+		}
 
-    span {
-      position: absolute;
-      left: -999px;
-    }
+		span {
+			position: absolute;
+			left: -999px;
+		}
 	}
 }
 
