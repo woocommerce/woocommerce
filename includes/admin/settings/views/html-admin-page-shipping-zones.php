@@ -21,7 +21,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<tbody class="wc-shipping-zone-rows"></tbody>
 	<tbody>
 		<tr data-id="0" class="wc-shipping-zone-worldwide">
-			<td width="1%" class="wc-shipping-zone-worldwide"></td>
+			<td width="1%" class="wc-shipping-zone-worldwide">
+				<?php echo get_gridicon( 'gridicons-globe' ); ?>
+			</td>
 			<td class="wc-shipping-zone-name">
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=0' ) ); ?>"><?php esc_html_e( 'Locations not covered by your other zones', 'woocommerce' ); ?></a>
 				<div class="row-actions">

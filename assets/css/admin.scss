@@ -3218,17 +3218,12 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 	}
 	td.wc-shipping-zone-worldwide {
 		text-align: center;
-		&::before {
-			content: '\f319';
-			font-family: 'dashicons';
-			text-align: center;
-			line-height: 1;
-			color: #999;
-			display: block;
-			width: 17px;
-			float: left;
-			height: 100%;
-			line-height: 24px;
+
+		svg {
+			fill: #999;
+			height: 18px;
+			width: 18px;
+			margin-top: 3px;
 		}
 	}
 	.wc-shipping-zone-name,
