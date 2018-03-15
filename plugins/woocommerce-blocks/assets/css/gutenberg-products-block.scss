@@ -220,6 +220,14 @@ p.wc-products-block-description {
 			}
 		}
 	}
+
+	&--current {
+		cursor: default;
+
+		.wc-products-display-options__option-title {
+			color: $color__option-description;
+		}
+	}
 }
 
 .wc-products-display-options__option-content {
