@@ -49,7 +49,6 @@ class WC_Geolocation {
 		'ipecho'            => 'http://ipecho.net/plain',
 		'ident'             => 'http://ident.me',
 		'whatismyipaddress' => 'http://bot.whatismyipaddress.com',
-		'ip.appspot'        => 'http://ip.appspot.com',
 	);
 
 	/**
@@ -140,7 +139,7 @@ class WC_Geolocation {
 				$service_endpoint = $ip_lookup_services[ $service_name ];
 				$response         = wp_safe_remote_get( $service_endpoint, array( 'timeout' => 2 ) );
 
-				if ( ! is_wp_error( $response ) && $response['body'] ) {
+				if ( ! is_wp_error( $response ) && rest_is_ip_address( $response['body'] ) ) {
 					$external_ip_address = apply_filters( 'woocommerce_geolocation_ip_lookup_api_response', wc_clean( $response['body'] ), $service_name );
 					break;
 				}
