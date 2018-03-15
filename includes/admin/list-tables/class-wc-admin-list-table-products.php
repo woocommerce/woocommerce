@@ -103,7 +103,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 
 		$show_columns          = array();
 		$show_columns['cb']    = '<input type="checkbox" />';
-		$show_columns['thumb'] = '<span class="wc-image tips" data-tip="' . esc_attr__( 'Image', 'woocommerce' ) . '">' . __( 'Image', 'woocommerce' ) . '</span>';
+		$show_columns['thumb'] = '';
 		$show_columns['name']  = __( 'Name', 'woocommerce' );
 
 		if ( wc_product_sku_enabled() ) {
