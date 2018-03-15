@@ -117,7 +117,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		$show_columns['price']        = __( 'Price', 'woocommerce' );
 		$show_columns['product_cat']  = __( 'Categories', 'woocommerce' );
 		$show_columns['product_tag']  = __( 'Tags', 'woocommerce' );
-		$show_columns['featured']     = '<span class="wc-featured parent-tips" data-tip="' . esc_attr__( 'Featured', 'woocommerce' ) . '">' . __( 'Featured', 'woocommerce' ) . '</span>';
+		$show_columns['featured']     = '<span class="wc-featured parent-tips" data-tip="' . esc_attr__( 'Featured', 'woocommerce' ) . '">' . get_gridicon( 'gridicons-star' ) . __( 'Featured', 'woocommerce' ) . '</span>';
 		$show_columns['product_type'] = '<span class="wc-type parent-tips" data-tip="' . esc_attr__( 'Type', 'woocommerce' ) . '">' . __( 'Type', 'woocommerce' ) . '</span>';
 		$show_columns['date']         = __( 'Date', 'woocommerce' );
 
@@ -272,9 +272,9 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		$url = wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_feature_product&product_id=' . $this->object->get_id() ), 'woocommerce-feature-product' );
 		echo '<a href="' . esc_url( $url ) . '" aria-label="' . esc_attr__( 'Toggle featured', 'woocommerce' ) . '">';
 		if ( $this->object->is_featured() ) {
-			echo '<span class="wc-featured tips" data-tip="' . esc_attr__( 'Yes', 'woocommerce' ) . '">' . esc_html__( 'Yes', 'woocommerce' ) . '</span>';
+			echo '<span class="wc-featured tips" data-tip="' . esc_attr__( 'Yes', 'woocommerce' ) . '">' . get_gridicon( 'gridicons-star' ) . esc_html__( 'Yes', 'woocommerce' ) . '</span>';
 		} else {
-			echo '<span class="wc-featured not-featured tips" data-tip="' . esc_attr__( 'No', 'woocommerce' ) . '">' . esc_html__( 'No', 'woocommerce' ) . '</span>';
+			echo '<span class="wc-featured not-featured tips" data-tip="' . esc_attr__( 'No', 'woocommerce' ) . '">' . get_gridicon( 'gridicons-star-outline' ) . esc_html__( 'No', 'woocommerce' ) . '</span>';
 		}
 		echo '</a>';
 	}

@@ -2615,34 +2615,39 @@ table.wp-list-table {
 		width: 12ch;
 	}
 
-	span.wc-image,
-	span.wc-featured,
+	span.wc-featured {
+		display: block;
+		height: 18px;
+		width: 18px;
+		margin: 0 auto;
+		overflow: hidden;
+
+		svg {
+			height: 18px;
+			width: 18px;
+		}
+	}
+
 	span.wc-type {
 		@include ir();
 		margin: 0 auto;
 
 		&::before {
 			@include icon_dashicons( '\f128' );
-		}
-	}
-
-	span.wc-featured {
-		&::before {
-			content: '\f155';
-		}
-		&.not-featured::before {
-			content: '\f154';
+			font-family: 'WooCommerce';
+			content: '\e006';
 		}
 	}
 
 	td.column-featured span.wc-featured {
-		font-size: 1.6em;
 		cursor: pointer;
-	}
+		height: 24px;
+		width: 24px;
 
-	span.wc-type::before {
-		font-family: 'WooCommerce';
-		content: '\e006';
+		svg {
+			height: 24px;
+			width: 24px;
+		}
 	}
 
 	span.product-type {
