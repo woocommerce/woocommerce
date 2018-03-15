@@ -219,7 +219,7 @@ function wc_walk_category_dropdown_tree() {
 	$args = func_get_args();
 
 	if ( ! class_exists( 'WC_Product_Cat_Dropdown_Walker', false ) ) {
-		include_once WC()->plugin_path() . '/includes/walkers/class-product-cat-dropdown-walker.php';
+		include_once WC()->plugin_path() . '/includes/walkers/class-wc-product-cat-dropdown-walker.php';
 	}
 
 	// The user's options are the third parameter.

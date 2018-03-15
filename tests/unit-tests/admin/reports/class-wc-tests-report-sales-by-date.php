@@ -11,14 +11,12 @@
 class WC_Tests_Report_Sales_By_Date extends WC_Unit_Test_Case {
 
 	/**
-	 * Additional files, relative to the plugin's root directory, that should be explicitly included.
-	 *
-	 * @var array
+	 * Load the necessary files, as they're not automatically loaded by WooCommerce.
 	 */
-	protected static $includes = array(
-		'includes/admin/reports/class-wc-admin-report.php',
-		'includes/admin/reports/class-wc-report-sales-by-date.php',
-	);
+	public static function setUpBeforeClass() {
+		include_once WC_Unit_Tests_Bootstrap::instance()->plugin_dir . '/includes/admin/reports/class-wc-admin-report.php';
+		include_once WC_Unit_Tests_Bootstrap::instance()->plugin_dir . '/includes/admin/reports/class-wc-report-sales-by-date.php';
+	}
 
 	/**
 	 * Clear cached report data.

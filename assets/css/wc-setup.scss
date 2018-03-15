@@ -13,6 +13,9 @@ body {
 		max-width: 30%;
 	}
 }
+.wc-setup {
+	text-align: center;
+}
 .wc-setup-content {
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.13);
 	padding: 2em;
@@ -20,6 +23,7 @@ body {
 	background: #fff;
 	overflow: hidden;
 	zoom: 1;
+	text-align: left;
 
 	h1, h2, h3, table {
 		margin: 0 0 20px;
@@ -297,7 +301,6 @@ body {
 		}
 	}
 	.woocommerce-newsletter,
-	.woocommerce-tracker,
 	.updated {
 		padding: 24px 24px 0;
 		margin: 0 0 24px;
@@ -312,9 +315,74 @@ body {
 			margin: 0 0 24px;
 		}
 	}
-	.woocommerce-tracker + .woocommerce-newsletter {
-		margin-top: -24px;
-		border-top: 2px dashed #ddd;
+	.woocommerce-tracker {
+		margin: 24px 0;
+		border: 1px solid #eee;
+		padding: 20px;
+		border-radius: 4px;
+		overflow: hidden;
+
+		p {
+			font-size: 14px;
+			line-height: 1.5em;
+		}
+		.checkbox {
+			line-height: 24px;
+			font-weight: 500;
+			font-size: 1em;
+			margin-top: 0;
+			margin-bottom: 20px;
+
+			input[type="checkbox"] {
+				opacity: 0;
+				position: absolute;
+				left: -9999px;
+			}
+			label {
+				position: relative;
+				display: inline-block;
+				padding-left: 28px;
+				&:before,
+				&:after {
+					position: absolute;
+					content: "";
+					display: inline-block;
+				}
+				&:before {
+					height: 16px;
+					width: 16px;
+					left: 0px;
+					top: 3px;
+					border: 1px solid #aaa;
+					background-color: #fff;
+					border-radius: 3px;
+				}
+				&:after {
+					height: 5px;
+					width: 9px;
+					border-left: 2px solid;
+					border-bottom: 2px solid;
+					transform: rotate(-45deg);
+					left: 4px;
+					top: 7px;
+					color: #fff;
+				}
+			}
+			input[type="checkbox"] + label::after {
+				content: none;
+			}
+			input[type="checkbox"]:checked + label::after {
+				content: "";
+			}
+			input[type="checkbox"]:focus + label::before {
+				outline: rgb(59, 153, 252) auto 5px;
+			}
+			input[type="checkbox"]:checked + label::before {
+				background: #935687;
+				border-color: #935687;
+				outline: none;
+			}
+		}
 	}
 }
 .wc-setup-steps {
@@ -417,8 +485,8 @@ body {
 .wc-setup-footer-links {
 	font-size: 0.85em;
 	color: #b5b5b5;
-	margin: 1.18em 0;
-	display: block;
+	margin: 1.18em auto;
+	display: inline-block;
 	text-align: center;
 }
 
@@ -828,10 +896,20 @@ h3.jetpack-reasons {
 	font-size: 14px;
 }
 
-.jetpack-logo {
+.jetpack-logo, .wcs-notice {
 	display: block;
 	margin: 1.75em auto 2em auto;
 	max-height: 175px;
+}
+.activate-splash {
+	.jetpack-logo {
+		width: 170px;
+		margin-bottom: 0;
+	}
+	.wcs-notice {
+		margin-top: 1em;
+		padding-left: 57px;
+	}
 }
 
 .step {
@@ -1070,15 +1148,6 @@ p.jetpack-terms {
 	.wc-setup-actions .button {
 		font-size: 14px;
 	}
-}
-
-.allow-tracking {
-	color: #9f9f9f;
-	margin-top: 1em;
-	text-align: center;
-	font-size: 0.9em;
-	padding-top: 2em;
-	border-top: 1px solid #ccc;
 }
 
 .wc-wizard-service-setting-stripe_create_account, .wc-wizard-service-setting-ppec_paypal_reroute_requests {
