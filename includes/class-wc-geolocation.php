@@ -67,7 +67,7 @@ class WC_Geolocation {
 	 *
 	 * @return bool
 	 */
-	public static function supports_geolite2() {
+	private static function supports_geolite2() {
 		return version_compare( PHP_VERSION, '5.4.0', '>=' );
 	}
 
@@ -283,27 +283,6 @@ class WC_Geolocation {
 	}
 
 	/**
-	 * Check file size
-	 * Check the file size, if empty file also delete it.
-	 *
-	 * @param string $filename Name of the file to check.
-	 * @return bool|int
-	 */
-	private static function get_file_size( $filename ) {
-		$handle   = @fopen( $filename, 'r' );  // @codingStandardsIgnoreLine
-		$s_array  = fstat( $handle );  // @codingStandardsIgnoreLine
-		@fclose( $handle );  // @codingStandardsIgnoreLine
-		if ( ! isset( $s_array['size'] ) || 0 === $s_array['size'] ) {
-			$logger = wc_get_logger();
-			$logger->notice( 'Empty database file, deleting local copy.', array( 'source' => 'geolocation' ) );
-			// Delete the file as we do not want to keep empty files around.
-			@unlink( $filename ); // @codingStandardsIgnoreLine
-			return false;
-		}
-		return $s_array['size'];
-	}
-
-	/**
 	 * Use APIs to Geolocate the user.
 	 *
 	 * @param  string $ip_address IP address.
@@ -352,18 +331,6 @@ class WC_Geolocation {
 		}
 
 		return $country_code;
-	}
-
-	/**
-	 * Test if is IPv6.
-	 *
-	 * @since  2.4.0
-	 *
-	 * @param  string $ip_address IP Address.
-	 * @return bool
-	 */
-	private static function is_ipv6( $ip_address ) {
-		return false !== filter_var( $ip_address, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 );
 	}
 }
 
