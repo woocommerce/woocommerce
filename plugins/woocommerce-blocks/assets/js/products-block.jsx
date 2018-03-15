@@ -83,7 +83,7 @@ class ProductsBlockSettingsEditorDisplayOption extends React.Component {
 		}
 
 		return (
-			<div className={ classes } onClick={ () => { this.props.update_display_callback( this.props.value ) } } >
+			<div className={ classes } onClick={ () => { this.props.current !== this.props.value && this.props.update_display_callback( this.props.value ) } } >
 				<div className="wc-products-display-options__option-content">
 					<span className="wc-products-display-options__option-title">{ this.props.title }</span>
 					<p className="wc-products-display-options__option-description">{ this.props.description }</p>
