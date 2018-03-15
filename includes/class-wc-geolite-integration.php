@@ -38,6 +38,10 @@ class WC_Geolite_Integration {
 	 */
 	public function __construct( $database ) {
 		$this->database = $database;
+
+		if ( ! class_exists( 'MaxMind\\Db\\Reader', false ) ) {
+			$this->require_geolite_library();
+		}
 	}
 
 	/**
@@ -48,10 +52,6 @@ class WC_Geolite_Integration {
 	 * @return string
 	 */
 	public function get_country_iso( $ip_address ) {
-		if ( ! class_exists( 'MaxMind\\Db\\Reader', false ) ) {
-			$this->require_geolite_library();
-		}
-
 		$iso_code = '';
 
 		try {
