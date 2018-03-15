@@ -33,8 +33,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<ul class="product_data_tabs wc-tabs">
 		<?php foreach ( self::get_product_data_tabs() as $key => $tab ) : ?>
+			<?php $gridicon = isset( $tab['gridicon'] ) ? sanitize_key( $tab['gridicon'] ) : 'gridicons-cog'; ?>
 			<li class="<?php echo esc_attr( $key ); ?>_options <?php echo esc_attr( $key ); ?>_tab <?php echo esc_attr( isset( $tab['class'] ) ? implode( ' ', (array) $tab['class'] ) : '' ); ?>">
-				<a href="#<?php echo esc_attr( $tab['target'] ); ?>"><span><?php echo esc_html( $tab['label'] ); ?></span></a>
+				<a href="#<?php echo esc_attr( $tab['target'] ); ?>"><?php echo get_gridicon( $gridicon ); ?><span><?php echo esc_html( $tab['label'] ); ?></span></a>
 			</li>
 		<?php endforeach; ?>
 		<?php do_action( 'woocommerce_product_write_panel_tabs' ); ?>

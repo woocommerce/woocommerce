@@ -3973,59 +3973,17 @@ img.help_tip {
 				line-height: 20px !important;
 				border-bottom: 1px solid #eee;
 
+				svg {
+					fill: currentColor;
+					height: 16px;
+					width: 16px;
+					margin: 2px 8px 2px 0;
+					vertical-align: middle;
+				}
+
 				span {
-					margin-left: 0.618em;
-					margin-right: 0.618em;
+					vertical-align: middle;
 				}
-
-				&::before {
-					@include iconbeforedashicons( '\f107' );
-				}
-			}
-
-			&.general_options a::before {
-				content: '\f107';
-			}
-
-			&.inventory_options a::before {
-				content: '\f481';
-			}
-
-			&.shipping_options a::before {
-				font-family: 'WooCommerce';
-				content: '\e01a';
-			}
-
-			&.linked_product_options a::before {
-				content: '\f103';
-			}
-
-			&.attribute_options a::before {
-				content: '\f175';
-			}
-
-			&.advanced_options a::before {
-				font-family: 'Dashicons';
-				content: '\f111';
-			}
-
-			&.variations_options a::before {
-				content: '\f509';
-			}
-
-			&.usage_restriction_options a::before {
-				font-family: 'WooCommerce';
-				content: '\e602';
-			}
-
-			&.usage_limit_options a::before {
-				font-family: 'WooCommerce';
-				content: '\e601';
-			}
-
-			&.general_coupon_data a::before {
-				font-family: 'WooCommerce';
-				content: '\e600';
 			}
 
 			&.active a {
@@ -5622,22 +5580,17 @@ table.bar_chart {
 
 	#woocommerce-coupon-data ul.coupon_data_tabs li a,
 	#woocommerce-product-data ul.product_data_tabs li a {
-		position: relative;
-		text-indent: -999px;
-		padding: 10px;
+    padding: 10px 0;
+    text-align: center;
 
-		&::before {
-			position: absolute;
-			top: 0;
-			right: 0;
-			bottom: 0;
-			left: 0;
-			text-indent: 0;
-			text-align: center;
-			line-height: 40px;
-			width: 100%;
-			height: 40px;
-		}
+    svg {
+      margin-right: 0;
+    }
+
+    span {
+      position: absolute;
+      left: -999px;
+    }
 	}
 }
 
