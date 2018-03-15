@@ -1,8 +1,7 @@
 const { __ } = wp.i18n;
 const { RawHTML } = wp.element;
 const { registerBlockType, InspectorControls, BlockControls } = wp.blocks;
-const { Toolbar, withAPIData, Dropdown, Dashicon, RangeControl, Tooltip } = wp.components;
-const { ToggleControl, SelectControl } = InspectorControls;
+const { Toolbar, withAPIData, Dropdown, Dashicon, RangeControl, Tooltip, SelectControl } = wp.components;
 
 import { ProductsSpecificSelect } from './views/specific-select.jsx';
 import { ProductsCategorySelect } from './views/category-select.jsx';
@@ -36,16 +35,6 @@ const PRODUCTS_BLOCK_DISPLAY_SETTINGS = {
 		title: __( 'Featured products' ),
 		description: '',
 		value: 'featured',
-	},
-	'best_sellers' : {
-		title: __( 'Best sellers' ),
-		description: '',
-		value: 'best_sellers',
-	},
-	'best_rated' : {
-		title: __( 'Best rated' ),
-		description: '',
-		value: 'best_rated',
 	},
 	'on_sale' : {
 		title: __( 'On sale' ),
@@ -259,7 +248,7 @@ class ProductsBlockSettingsEditor extends React.Component {
 
 		let heading = null;
 		if ( this.state.display ) {
-			const group_options     = [ 'featured', 'best_sellers', 'best_rated', 'on_sale', 'attribute' ];
+			const group_options     = [ 'featured', 'on_sale', 'attribute' ];
 			let should_group_expand = group_options.includes( this.state.display ) ? this.state.display : '';
 			let menu_link           = <button type="button" className="wc-products-settings-heading__change-button button-link" onClick={ () => { this.setState( { menu_visible: ! this.state.menu_visible, expanded_group: should_group_expand } ) } }>{ __( 'Display different products' ) }</button>;
 
@@ -340,7 +329,7 @@ class ProductPreview extends React.Component {
  */
 const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
 
-	const { columns, rows, display, display_setting, block_layout } = attributes;
+	const { columns, rows, display, display_setting, orderby, block_layout } = attributes;
 
 	let query = {
 		per_page: ( 'list' === block_layout ) ? rows : rows * columns,
@@ -359,12 +348,17 @@ const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
 		}
 	} else if ( 'featured' === display ) {
 		query.featured = 1;
-	} else if ( 'best_sellers' === display ) {
-		// @todo Not possible in the API yet.
-	} else if ( 'best_rated' === display ) {
-		// @todo Not possible in the API yet.
 	} else if ( 'on_sale' === display ) {
 		query.on_sale = 1;
+	}
+
+	// @todo Add support for orderby by sales, rating, and random to the API.
+	if ( 'specific' !== display && ( 'title' === orderby || 'date' === orderby ) ) {
+		query.orderby = orderby;
+
+		if ( 'title' === orderby ) {
+			query.order = 'asc';
+		}
 	}
 
 	let query_string = '?';
@@ -448,6 +442,14 @@ registerBlockType( 'woocommerce/products', {
 		},
 
 		/**
+		 * How to order the products: 'date', 'popularity', 'rand', 'rating', 'title'.
+		 */
+		orderby: {
+			type: 'string',
+			default: 'date',
+		},
+
+		/**
 		 * Whether the block is in edit or preview mode.
 		 */
 		edit_mode: {
@@ -461,7 +463,7 @@ registerBlockType( 'woocommerce/products', {
 	 */
 	edit( props ) {
 		const { attributes, className, focus, setAttributes, setFocus } = props;
-		const { block_layout, rows, columns, display, display_setting, edit_mode } = attributes;
+		const { block_layout, rows, columns, display, display_setting, orderby, edit_mode } = attributes;
 
 		/**
 		 * Get the components for the sidebar settings area that is rendered while focused on a Products block.
@@ -484,6 +486,41 @@ registerBlockType( 'woocommerce/products', {
 				);
 			}
 
+			// Orderby settings don't make sense for specific-selected products display.
+			let orderControl = null;
+			if ( 'specific' !== display ) {
+				orderControl = (
+					<SelectControl
+						key="query-panel-select"
+						label={ __( 'Products Order' ) }
+						value={ orderby }
+						options={ [
+							{
+								label: __( 'Newness' ),
+								value: 'date',
+							},
+							{
+								label: __( 'Title' ),
+								value: 'title',
+							},
+							{
+								label: __( 'Sales' ),
+								value: 'popularity',
+							},
+							{
+								label: __( 'Rating' ),
+								value: 'rating',
+							},
+							{
+								label: __( 'Random' ),
+								value: 'rand',
+							},
+						] }
+						onChange={ ( value ) => setAttributes( { orderby: value } ) }
+					/>
+				);
+			}
+
 			return (
 				<InspectorControls key="inspector">
 					<h3>{ __( 'Layout' ) }</h3>
@@ -495,6 +532,7 @@ registerBlockType( 'woocommerce/products', {
 						min={ 1 }
 						max={ 6 }
 					/>
+					{ orderControl }
 				</InspectorControls>
 			);
 		};
@@ -590,7 +628,7 @@ registerBlockType( 'woocommerce/products', {
 	 * @return string
 	 */
 	save( props ) {
-		const { block_layout, rows, columns, display, display_setting } = props.attributes;
+		const { block_layout, rows, columns, display, display_setting, orderby } = props.attributes;
 
 		let shortcode_atts = new Map();
 		shortcode_atts.set( 'limit', 'grid' === block_layout ? rows * columns : rows );
@@ -609,10 +647,6 @@ registerBlockType( 'woocommerce/products', {
 			shortcode_atts.set( 'category', display_setting.join( ',' ) );
 		} else if ( 'featured' === display ) {
 			shortcode_atts.set( 'visibility', 'featured' );
-		} else if ( 'best_sellers' === display ) {
-			shortcode_atts.set( 'best_selling', '1' );
-		} else if ( 'best_rated' === display ) {
-			shortcode_atts.set( 'orderby', 'rating' );
 		} else if ( 'on_sale' === display ) {
 			shortcode_atts.set( 'on_sale', '1' );
 		} else if ( 'attribute' === display ) {
@@ -623,6 +657,10 @@ registerBlockType( 'woocommerce/products', {
 			if ( terms.length ) {
 				shortcode_atts.set( 'terms', terms );
 			}
+		}
+
+		if ( 'specific' !== display ) {
+			shortcode_atts.set( 'orderby', orderby );
 		}
 
 		// Build the shortcode string out of the set shortcode attributes.
