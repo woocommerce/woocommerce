@@ -2529,20 +2529,15 @@ table.wp-list-table {
 	tbody {
 		td.column-handle {
 			cursor: move;
-			width: 17px;
+			width: 16px;
 			text-align: center;
-			vertical-align: text-top;
 
 			&::before {
-				content: '\f333';
-				font-family: 'Dashicons';
-				text-align: center;
-				line-height: 1;
-				color: #999;
+				content: url('../images/icons/gridicons/gridicons-menu.svg');
 				display: block;
-				width: 17px;
-				height: 100%;
-				margin: 4px 0 0 0;
+				width: 14px;
+				height: 14px;
+				margin-top: 2px;
 			}
 		}
 	}
@@ -5640,6 +5635,10 @@ table.bar_chart {
 				top: -28px;
 			}
 		}
+	}
+
+	table.wp-list-table tbody td.column-handle svg {
+		display: none;
 	}
 
 	.post-type-shop_order {
