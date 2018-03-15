@@ -5454,10 +5454,6 @@ table.bar_chart {
 	@include icon( '\e01d' );
 }
 
-.post-type-shop_coupon .woocommerce-BlankState-message::before {
-	@include icon( '\e600' );
-}
-
 .post-type-product .woocommerce-BlankState-message::before {
 	@include icon( '\e006' );
 }
@@ -5473,6 +5469,13 @@ table.bar_chart {
 .woocommerce-BlankState {
 	text-align: center;
 	padding: 5em 0 0;
+
+	svg {
+		fill: #ddd;
+    margin: 0 0 .875rem;
+    height: 10rem;
+    width: 10rem;
+	}
 
 	.woocommerce-BlankState-message {
 		color: #aaa;
