@@ -107,7 +107,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <script type="text/html" id="tmpl-wc-shipping-zone-method-row">
 	<tr data-id="{{ data.instance_id }}" data-enabled="{{ data.enabled }}">
-		<td width="1%" class="wc-shipping-zone-method-sort"></td>
+		<td width="1%" class="wc-shipping-zone-method-sort">
+			<?php echo get_gridicon( 'gridicons-menu' ); ?>
+		</td>
 		<td class="wc-shipping-zone-method-title">
 			<a class="wc-shipping-zone-method-settings" href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id={{ data.instance_id }}">{{{ data.title }}}</a>
 			<div class="row-actions">

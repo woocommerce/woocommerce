@@ -73,7 +73,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <script type="text/html" id="tmpl-wc-shipping-zone-row">
 	<tr data-id="{{ data.zone_id }}">
-		<td width="1%" class="wc-shipping-zone-sort"></td>
+		<td width="1%" class="wc-shipping-zone-sort">
+			<?php echo get_gridicon( 'gridicons-menu' ); ?>
+		</td>
 		<td class="wc-shipping-zone-name">
 			<a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}">{{ data.zone_name }}</a>
 			<div class="row-actions">
