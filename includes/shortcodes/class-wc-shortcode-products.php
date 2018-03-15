@@ -113,7 +113,7 @@ class WC_Shortcode_Products {
 		$attributes = shortcode_atts(
 			array(
 				'limit'          => '-1',      // Results limit.
-				'columns'        => '3',       // Number of columns.
+				'columns'        => wc_get_default_products_per_row(), // Number of columns.
 				'rows'           => '',        // Number of rows. If defined, limit will be ignored.
 				'orderby'        => 'title',   // menu_order, title, date, rand, price, popularity, rating, or id.
 				'order'          => 'ASC',     // ASC or DESC.
