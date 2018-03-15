@@ -195,7 +195,7 @@ var ProductsBlockSettingsEditorDisplayOption = function (_React$Component) {
 			return wp.element.createElement(
 				'div',
 				{ className: classes, onClick: function onClick() {
-						_this2.props.update_display_callback(_this2.props.value);
+						_this2.props.current !== _this2.props.value && _this2.props.update_display_callback(_this2.props.value);
 					} },
 				wp.element.createElement(
 					'div',
