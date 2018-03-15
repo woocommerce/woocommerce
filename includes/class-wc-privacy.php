@@ -45,6 +45,7 @@ class WC_Privacy {
 	public static function data_exporter( $email_address, $page ) {
 		$personal_data = array();
 		$done          = false;
+		$page          = (int) $page;
 		$user          = get_user_by( 'email', $email_address ); // Check if user has an ID in the DB to load stored personal data.
 
 		// Export customer data first.
@@ -67,12 +68,9 @@ class WC_Privacy {
 			$orders = wc_get_orders( $order_query );
 
 			if ( 0 < count( $orders ) ) {
-				$personal_data['orders'] = array();
-
 				foreach ( $orders as $order ) {
-					$personal_data['orders'][] = self::get_order_personal_data( $order );
+					$personal_data = array_merge( $personal_data, self::get_order_personal_data( $order ) );
 				}
-
 				$done = 10 > count( $orders );
 			} else {
 				$done = true;
@@ -92,33 +90,52 @@ class WC_Privacy {
 	 * @return array
 	 */
 	protected static function get_user_personal_data( $user ) {
-		$personal_data = array();
-		$customer      = new WC_Customer( $user->ID );
+		$personal_data   = array();
+		$customer        = new WC_Customer( $user->ID );
+		$props_to_export = array(
+			'billing_first_name'  => 'Billing First Name',
+			'billing_last_name'   => 'Billing Last Name',
+			'billing_company'     => 'Billing Company',
+			'billing_address_1'   => 'Billing Address 1',
+			'billing_address_2'   => 'Billing Address 2',
+			'billing_city'        => 'Billing City',
+			'billing_postcode'    => 'Billing Postal/Zip Code',
+			'billing_state'       => 'Billing State',
+			'billing_country'     => 'Billing Country',
+			'billing_phone'       => 'Billing Phone',
+			'billing_email'       => 'Billing Email',
+			'shipping_first_name' => 'Shipping First Name',
+			'shipping_last_name'  => 'Shipping Last Name',
+			'shipping_company'    => 'Shipping Company',
+			'shipping_address_1'  => 'Shipping Address 1',
+			'shipping_address_2'  => 'Shipping Address 2',
+			'shipping_city'       => 'Shipping City',
+			'shipping_postcode'   => 'Shipping Postal/Zip Code',
+			'shipping_state'      => 'Shipping State',
+			'shipping_country'    => 'Shipping Country',
+		);
 
-		if ( $customer ) {
-			$personal_data['Billing First Name']       = $customer->get_billing_first_name();
-			$personal_data['Billing Last Name']        = $customer->get_billing_last_name();
-			$personal_data['Billing Company']          = $customer->get_billing_company();
-			$personal_data['Billing Address 1']        = $customer->get_billing_address_1();
-			$personal_data['Billing Address 2']        = $customer->get_billing_address_2();
-			$personal_data['Billing City']             = $customer->get_billing_city();
-			$personal_data['Billing Postal/Zip Code']  = $customer->get_billing_postcode();
-			$personal_data['Billing State']            = $customer->get_billing_state();
-			$personal_data['Billing Country']          = $customer->get_billing_country();
-			$personal_data['Billing Phone']            = $customer->get_billing_phone();
-			$personal_data['Billing Email']            = $customer->get_billing_email();
-			$personal_data['Shipping First Name']      = $customer->get_shipping_first_name();
-			$personal_data['Shipping Last Name']       = $customer->get_shipping_last_name();
-			$personal_data['Shipping Company']         = $customer->get_shipping_company();
-			$personal_data['Shipping Address 1']       = $customer->get_shipping_address_1();
-			$personal_data['Shipping Address 2']       = $customer->get_shipping_address_2();
-			$personal_data['Shipping City']            = $customer->get_shipping_city();
-			$personal_data['Shipping Postal/Zip Code'] = $customer->get_shipping_postcode();
-			$personal_data['Shipping State']           = $customer->get_shipping_state();
-			$personal_data['Shipping Country']         = $customer->get_shipping_country();
+		foreach ( $props_to_export as $prop => $description ) {
+			$value = $customer->{"get_$prop"}( 'edit' );
+
+			if ( $value ) {
+				$personal_data[] = array(
+					'name'  => $description,
+					'value' => $value,
+				);
+			}
 		}
 
-		return array_filter( $personal_data );
+		/**
+		 * Allow extensions to register their own personal data for this customer for the export.
+		 *
+		 * @since 3.4.0
+		 * @param array    $personal_data Array of name value pairs.
+		 * @param WC_Order $order A customer object.
+		 */
+		$personal_data = apply_filters( 'woocommerce_personal_data_export_customer', $personal_data, $customer );
+
+		return $personal_data;
 	}
 
 	/**
@@ -128,32 +145,39 @@ class WC_Privacy {
 	 * @return array
 	 */
 	protected static function get_order_personal_data( $order ) {
-		return array_filter( array(
-			'Order ID'                 => $order->get_id(),
-			'Order Number'             => $order->get_order_number(),
-			'IP Address'               => $order->get_customer_ip_address(),
-			'User Agent'               => $order->get_customer_user_agent(),
-			'Billing First Name'       => $order->get_billing_first_name(),
-			'Billing Last Name'        => $order->get_billing_last_name(),
-			'Billing Company'          => $order->get_billing_company(),
-			'Billing Address 1'        => $order->get_billing_address_1(),
-			'Billing Address 2'        => $order->get_billing_address_2(),
-			'Billing City'             => $order->get_billing_city(),
-			'Billing Postal/Zip Code'  => $order->get_billing_postcode(),
-			'Billing State'            => $order->get_billing_state(),
-			'Billing Country'          => $order->get_billing_country(),
-			'Billing Phone'            => $order->get_billing_phone(),
-			'Billing Email'            => $order->get_billing_email(),
-			'Shipping First Name'      => $order->get_shipping_first_name(),
-			'Shipping Last Name'       => $order->get_shipping_last_name(),
-			'Shipping Company'         => $order->get_shipping_company(),
-			'Shipping Address 1'       => $order->get_shipping_address_1(),
-			'Shipping Address 2'       => $order->get_shipping_address_2(),
-			'Shipping City'            => $order->get_shipping_city(),
-			'Shipping Postal/Zip Code' => $order->get_shipping_postcode(),
-			'Shipping State'           => $order->get_shipping_state(),
-			'Shipping Country'         => $order->get_shipping_country(),
-		) );
+		$personal_data   = array();
+		$props_to_export = array(
+			'customer_ip_address'        => 'IP Address',
+			'customer_user_agent'        => 'User Agent',
+			'formatted_billing_address'  => 'Billing Address',
+			'formatted_shipping_address' => 'Shipping Address',
+			'billing_phone'              => 'Billing Phone',
+			'billing_email'              => 'Billing Email',
+		);
+
+		foreach ( $props_to_export as $prop => $description ) {
+			/* translators: %1$d: ID of an order, %2$s: Description of an order field */
+			$name  = sprintf( __( 'Order %1$d: %2$s', 'woocommerce' ), $order->get_id(), $description );
+			$value = $order->{"get_$prop"}( 'edit' );
+
+			if ( $value ) {
+				$personal_data[] = array(
+					'name'  => $name,
+					'value' => $value,
+				);
+			}
+		}
+
+		/**
+		 * Allow extensions to register their own personal data for this order for the export.
+		 *
+		 * @since 3.4.0
+		 * @param array    $personal_data Array of name value pairs.
+		 * @param WC_Order $order An order object.
+		 */
+		$personal_data = apply_filters( 'woocommerce_personal_data_export_order', $personal_data, $order );
+
+		return $personal_data;
 	}
 
 	/**

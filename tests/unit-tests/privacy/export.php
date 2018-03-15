@@ -70,42 +70,74 @@ class WC_Test_Privacy_Export extends WC_Unit_Test_Case {
 		$response = WC_Privacy::data_exporter( 'test1@test.com', 0 );
 		$this->assertFalse( $response['done'] );
 		$this->assertEquals( array(
-			'Billing Address 1'        => '123 South Street',
-			'Billing Address 2'        => 'Apt 1',
-			'Billing City'             => 'Philadelphia',
-			'Billing Postal/Zip Code'  => '19123',
-			'Billing State'            => 'PA',
-			'Billing Country'          => 'US',
-			'Billing Email'            => 'customer1@test.com',
-			'Shipping Address 1'       => '123 South Street',
-			'Shipping Address 2'       => 'Apt 1',
-			'Shipping City'            => 'Philadelphia',
-			'Shipping Postal/Zip Code' => '19123',
-			'Shipping State'           => 'PA',
-			'Shipping Country'         => 'US',
+			array(
+				'name'  => 'Billing Address 1',
+				'value' => '123 South Street',
+			),
+			array(
+				'name'  => 'Billing Address 2',
+				'value' => 'Apt 1',
+			),
+			array(
+				'name'  => 'Billing City',
+				'value' => 'Philadelphia',
+			),
+			array(
+				'name'  => 'Billing Postal/Zip Code',
+				'value' => '19123',
+			),
+			array(
+				'name'  => 'Billing State',
+				'value' => 'PA',
+			),
+			array(
+				'name'  => 'Billing Country',
+				'value' => 'US',
+			),
+			array(
+				'name'  => 'Billing Email',
+				'value' => 'customer1@test.com',
+			),
+			array(
+				'name'  => 'Shipping Address 1',
+				'value' => '123 South Street',
+			),
+			array(
+				'name'  => 'Shipping Address 2',
+				'value' => 'Apt 1',
+			),
+			array(
+				'name'  => 'Shipping City',
+				'value' => 'Philadelphia',
+			),
+			array(
+				'name'  => 'Shipping Postal/Zip Code',
+				'value' => '19123',
+			),
+			array(
+				'name'  => 'Shipping State',
+				'value' => 'PA',
+			),
+			array(
+				'name'  => 'Shipping Country',
+				'value' => 'US',
+			),
 		), $response['data'] );
 
 		// Next page should be orders.
 		$response = WC_Privacy::data_exporter( 'test1@test.com', 1 );
-		$this->assertFalse( $response['done'] );
-		$this->assertArrayHasKey( 'orders', $response['data'] );
-		$this->assertTrue( 10 === count( $response['data']['orders'] ) );
-		$this->assertArrayHasKey( 'Order ID', $response['data']['orders'][0] );
-		$this->assertArrayHasKey( 'Order Number', $response['data']['orders'][0] );
-		$this->assertArrayHasKey( 'IP Address', $response['data']['orders'][0] );
-		$this->assertArrayHasKey( 'Billing First Name', $response['data']['orders'][0] );
-		$this->assertArrayHasKey( 'Billing Last Name', $response['data']['orders'][0] );
-		$this->assertArrayHasKey( 'Billing Company', $response['data']['orders'][0] );
-		$this->assertArrayHasKey( 'Billing Address 1', $response['data']['orders'][0] );
-		$this->assertArrayHasKey( 'Billing City', $response['data']['orders'][0] );
-		$this->assertArrayHasKey( 'Billing Postal/Zip Code', $response['data']['orders'][0] );
-		$this->assertArrayHasKey( 'Billing State', $response['data']['orders'][0] );
-		$this->assertArrayHasKey( 'Billing Country', $response['data']['orders'][0] );
+		$this->assertTrue( 50 === count( $response['data'] ) );
+		$this->assertArrayHasKey( 'name', $response['data'][0] );
+		$this->assertArrayHasKey( 'value', $response['data'][0] );
+		$this->assertContains( 'IP Address', $response['data'][0]['name'] );
+		$this->assertContains( 'Billing Address', $response['data'][1]['name'] );
+		$this->assertContains( 'Shipping Address', $response['data'][2]['name'] );
+		$this->assertContains( 'Billing Phone', $response['data'][3]['name'] );
+		$this->assertContains( 'Billing Email', $response['data'][4]['name'] );
 
 		// Next page should be orders.
 		$response = WC_Privacy::data_exporter( 'test1@test.com', 2 );
 		$this->assertTrue( $response['done'] );
-		$this->assertArrayHasKey( 'orders', $response['data'] );
-		$this->assertTrue( 1 === count( $response['data']['orders'] ), count( $response['data']['orders'] ) );
+		$this->assertTrue( 5 === count( $response['data'] ) );
 	}
 }
