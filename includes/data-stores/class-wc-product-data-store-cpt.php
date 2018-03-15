@@ -1337,6 +1337,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				$type_join
 				WHERE (
 					posts.post_title LIKE %s
+					OR posts.post_excerpt LIKE %s
 					OR posts.post_content LIKE %s
 					OR (
 						postmeta.meta_key = '_sku' AND postmeta.meta_value LIKE %s
@@ -1346,6 +1347,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				$status_where
 				$type_where
 				ORDER BY posts.post_parent ASC, posts.post_title ASC",
+				$like_term,
 				$like_term,
 				$like_term,
 				$like_term
