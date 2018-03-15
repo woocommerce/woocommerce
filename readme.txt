@@ -176,6 +176,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Fix default product category handling in installer.
 * Fix - Properly check slugs when updating attributes.
 * Fix - Use gallery thumbnail size for variation image switcher.
+* Fix - Clear subcategory cache when updating product categories.
 * Tweak - Update the description of the user tracking notice in the onboarding wizard.
 * Tweak - Add extra data in order mobile view (status and date).
 * Tweak - Add profile link to order screen.
