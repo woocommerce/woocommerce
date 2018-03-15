@@ -5450,10 +5450,6 @@ table.bar_chart {
 	}
 }
 
-.woocommerce-BlankState--api .woocommerce-BlankState-message::before {
-	@include icon( '\e01c' );
-}
-
 .woocommerce-BlankState--webhooks .woocommerce-BlankState-message::before {
 	@include icon( '\e01b' );
 }
