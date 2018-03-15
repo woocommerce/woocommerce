@@ -364,6 +364,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 			WC_Admin_Settings::save_fields( $this->get_settings() );
 			$wc_payment_gateways->process_admin_options();
+			$wc_payment_gateways->init();
 
 		} else {
 			foreach ( $wc_payment_gateways->payment_gateways() as $gateway ) {
