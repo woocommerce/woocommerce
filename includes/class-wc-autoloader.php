@@ -1,16 +1,15 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 /**
  * WooCommerce Autoloader.
  *
- * @class 		WC_Autoloader
- * @version		2.3.0
- * @package		WooCommerce/Classes
- * @category	Class
- * @author 		WooThemes
+ * @package WooCommerce/Classes
+ * @version 2.3.0
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Autoloader class.
  */
 class WC_Autoloader {
 
@@ -25,8 +24,8 @@ class WC_Autoloader {
 	 * The Constructor.
 	 */
 	public function __construct() {
-		if ( function_exists( "__autoload" ) ) {
-			spl_autoload_register( "__autoload" );
+		if ( function_exists( '__autoload' ) ) {
+			spl_autoload_register( '__autoload' );
 		}
 
 		spl_autoload_register( array( $this, 'autoload' ) );
@@ -37,7 +36,7 @@ class WC_Autoloader {
 	/**
 	 * Take a class name and turn it into a file name.
 	 *
-	 * @param  string $class
+	 * @param  string $class Class name.
 	 * @return string
 	 */
 	private function get_file_name_from_class( $class ) {
@@ -47,12 +46,12 @@ class WC_Autoloader {
 	/**
 	 * Include a class file.
 	 *
-	 * @param  string $path
-	 * @return bool successful or not
+	 * @param  string $path File path.
+	 * @return bool Successful or not.
 	 */
 	private function load_file( $path ) {
 		if ( $path && is_readable( $path ) ) {
-			include_once( $path );
+			include_once $path;
 			return true;
 		}
 		return false;
@@ -61,7 +60,7 @@ class WC_Autoloader {
 	/**
 	 * Auto-load WC classes on demand to reduce memory consumption.
 	 *
-	 * @param string $class
+	 * @param string $class Class name.
 	 */
 	public function autoload( $class ) {
 		$class = strtolower( $class );
@@ -70,14 +69,14 @@ class WC_Autoloader {
 			return;
 		}
 
-		$file  = $this->get_file_name_from_class( $class );
-		$path  = '';
+		$file = $this->get_file_name_from_class( $class );
+		$path = '';
 
-		if ( 0 === strpos( $class, 'wc_addons_gateway_' )  ) {
+		if ( 0 === strpos( $class, 'wc_addons_gateway_' ) ) {
 			$path = $this->include_path . 'gateways/' . substr( str_replace( '_', '-', $class ), 18 ) . '/';
-		} elseif ( 0 ===  strpos( $class, 'wc_gateway_' ) ) {
+		} elseif ( 0 === strpos( $class, 'wc_gateway_' ) ) {
 			$path = $this->include_path . 'gateways/' . substr( str_replace( '_', '-', $class ), 11 ) . '/';
-		} elseif ( 0 ===  strpos( $class, 'wc_shipping_' ) ) {
+		} elseif ( 0 === strpos( $class, 'wc_shipping_' ) ) {
 			$path = $this->include_path . 'shipping/' . substr( str_replace( '_', '-', $class ), 12 ) . '/';
 		} elseif ( 0 === strpos( $class, 'wc_shortcode_' ) ) {
 			$path = $this->include_path . 'shortcodes/';
