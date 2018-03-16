@@ -936,9 +936,16 @@ registerBlockType('woocommerce/products', {
 			}
 		}
 
-		// @todo Add support for price_desc and price_asc to shortcode.
-		if (!['specific', 'price_desc', 'price_asc'].includes(display)) {
-			shortcode_atts.set('orderby', orderby);
+		if ('specific' !== display) {
+			if ('price_desc' === orderby) {
+				shortcode_atts.set('orderby', 'price');
+				shortcode_atts.set('order', 'DESC');
+			} else if ('price_asc' === orderby) {
+				shortcode_atts.set('orderby', 'price');
+				shortcode_atts.set('order', 'ASC');
+			} else {
+				shortcode_atts.set('orderby', orderby);
+			}
 		}
 
 		// Build the shortcode string out of the set shortcode attributes.
