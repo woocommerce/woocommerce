@@ -352,7 +352,7 @@ const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
 		query.on_sale = 1;
 	}
 
-	// @todo Add support for orderby by sales, rating, and random to the API.
+	// @todo Add support for orderby by sales, rating, and price to the API.
 	if ( 'specific' !== display && ( 'title' === orderby || 'date' === orderby ) ) {
 		query.orderby = orderby;
 
@@ -442,7 +442,7 @@ registerBlockType( 'woocommerce/products', {
 		},
 
 		/**
-		 * How to order the products: 'date', 'popularity', 'rand', 'rating', 'title'.
+		 * How to order the products: 'date', 'popularity', 'price_asc', 'price_desc' 'rating', 'title'.
 		 */
 		orderby: {
 			type: 'string',
@@ -512,8 +512,12 @@ registerBlockType( 'woocommerce/products', {
 								value: 'rating',
 							},
 							{
-								label: __( 'Random' ),
-								value: 'rand',
+								label: __( 'Increasing Price' ),
+								value: 'price_asc',
+							},
+							{
+								label: __( 'Decreasing Price' ),
+								value: 'price_desc',
 							},
 						] }
 						onChange={ ( value ) => setAttributes( { orderby: value } ) }
@@ -659,7 +663,8 @@ registerBlockType( 'woocommerce/products', {
 			}
 		}
 
-		if ( 'specific' !== display ) {
+		// @todo Add support for price_desc and price_asc to shortcode.
+		if ( ! ['specific', 'price_desc', 'price_asc'].includes( display ) ) {
 			shortcode_atts.set( 'orderby', orderby );
 		}
 
