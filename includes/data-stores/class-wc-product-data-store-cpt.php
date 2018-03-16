@@ -700,6 +700,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				foreach ( $attributes as $attribute_key => $attribute ) {
 					$value = '';
 
+					delete_transient( 'wc_layered_nav_counts_' . $attribute_key );
+
 					if ( is_null( $attribute ) ) {
 						if ( taxonomy_exists( $attribute_key ) ) {
 							// Handle attributes that have been unset.
@@ -725,7 +727,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				}
 			}
 			update_post_meta( $product->get_id(), '_product_attributes', $meta_values );
-			delete_transient( 'wc_layered_nav_counts' );
 		}
 	}
 
@@ -1362,7 +1363,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 			foreach ( $search_terms as $search_term ) {
 				$like              = '%' . $wpdb->esc_like( $search_term ) . '%';
-				$term_group_query .= $wpdb->prepare( " {$searchand} ( ( posts.post_title LIKE %s) OR ( posts.post_content LIKE %s ) OR ( postmeta.meta_key = '_sku' AND postmeta.meta_value LIKE %s ) )", $like, $like, $like ); // @codingStandardsIgnoreLine.
+				$term_group_query .= $wpdb->prepare( " {$searchand} ( ( posts.post_title LIKE %s) OR ( posts.post_excerpt LIKE %s) OR ( posts.post_content LIKE %s ) OR ( postmeta.meta_key = '_sku' AND postmeta.meta_value LIKE %s ) )", $like, $like, $like ); // @codingStandardsIgnoreLine.
 				$searchand         = ' AND ';
 			}
 

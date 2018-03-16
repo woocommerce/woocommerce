@@ -379,6 +379,9 @@ final class WC_Cart_Totals {
 					$coupon->sort = 0;
 					break;
 			}
+
+			// Allow plugins to override the default order.
+			$coupon->sort = apply_filters( 'woocommerce_coupon_sort', $coupon->sort, $coupon );
 		}
 
 		uasort( $this->coupons, array( $this, 'sort_coupons_callback' ) );
@@ -453,7 +456,7 @@ final class WC_Cart_Totals {
 				$new_taxes   = WC_Tax::calc_tax( $item->price - array_sum( $taxes ), $item->tax_rates, false );
 
 				// Now we have a new item price.
-				$item->price = $item->price - array_sum( $taxes ) + array_sum( $new_taxes );
+				$item->price = round( $item->price - array_sum( $taxes ) + array_sum( $new_taxes ) );
 			}
 		}
 		return $item;
