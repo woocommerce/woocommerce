@@ -605,6 +605,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			data-exclude_series="2"
 			data-groupby="<?php echo $this->chart_groupby; ?>"
 		>
+			<?php echo get_gridicon( 'gridicons-cloud-download' ); ?>
 			<?php _e( 'Export CSV', 'woocommerce' ); ?>
 		</a>
 		<?php

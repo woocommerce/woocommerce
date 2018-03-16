@@ -367,6 +367,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 			data-xaxes="<?php esc_attr_e( 'Date', 'woocommerce' ); ?>"
 			data-groupby="<?php echo esc_attr( $this->chart_groupby ); ?>"
 		>
+			<?php echo get_gridicon( 'gridicons-cloud-download' ); ?>
 			<?php esc_html_e( 'Export CSV', 'woocommerce' ); ?>
 		</a>
 		<?php

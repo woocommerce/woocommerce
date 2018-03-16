@@ -406,6 +406,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 			data-xaxes="<?php esc_attr_e( 'Date', 'woocommerce' ); ?>"
 			data-groupby="<?php echo $this->chart_groupby; ?>"<?php // @codingStandardsIgnoreLine ?>
 		>
+			<?php echo get_gridicon( 'gridicons-cloud-download' ); ?>
 			<?php esc_html_e( 'Export CSV', 'woocommerce' ); ?>
 		</a>
 		<?php

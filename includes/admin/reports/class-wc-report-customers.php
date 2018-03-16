@@ -232,6 +232,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 			data-xaxes="<?php esc_attr_e( 'Date', 'woocommerce' ); ?>"
 			data-groupby="<?php echo $this->chart_groupby; ?>"
 		>
+			<?php echo get_gridicon( 'gridicons-cloud-download' ); ?>
 			<?php _e( 'Export CSV', 'woocommerce' ); ?>
 		</a>
 		<?php

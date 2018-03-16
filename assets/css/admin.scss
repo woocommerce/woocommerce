@@ -4956,9 +4956,12 @@ img.ui-datepicker-trigger {
 				display: block;
 				text-decoration: none;
 
-				&::before {
-					@include iconbeforedashicons( '\f346' );
+				svg {
+					fill: currentColor;
+					height: 18px;
+					width: 18px;
 					margin-right: 4px;
+					vertical-align: middle;
 				}
 			}
 
