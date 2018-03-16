@@ -15,7 +15,15 @@ $row_class    = apply_filters( 'woocommerce_admin_html_order_item_class', ! empt
 ?>
 <tr class="item <?php echo esc_attr( $row_class ); ?>" data-order_item_id="<?php echo esc_attr( $item_id ); ?>">
 	<td class="thumb">
-		<?php echo '<div class="wc-order-item-thumbnail">' . wp_kses_post( $thumbnail ) . '</div>'; ?>
+		<div class="wc-order-item-thumbnail">
+			<?php
+			if ( $thumbnail ) {
+				echo wp_kses_post( $thumbnail );
+			} else {
+				printf( '<img src="%s" alt="%s" class="wp-post-image" />', esc_url( wc_placeholder_img_src() ), esc_html__( 'Awaiting product image', 'woocommerce' ) );
+			}
+			?>
+		</div>
 	</td>
 	<td class="name" data-sort-value="<?php echo esc_attr( $item->get_name() ); ?>">
 		<?php

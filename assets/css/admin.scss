@@ -1485,12 +1485,7 @@ ul.wc_coupon_list_block {
 					font-size: 21px;
 					display: block;
 					text-align: center;
-					&::before {
-						@include icon_dashicons( '\f128' );
-						width: 38px;
-						line-height: 38px;
-						display: block;
-					}
+
 					img {
 						width: 100%;
 						height: 100%;
