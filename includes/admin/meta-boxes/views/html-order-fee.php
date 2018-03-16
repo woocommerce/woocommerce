@@ -11,7 +11,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 <tr class="fee <?php echo ( ! empty( $class ) ) ? esc_attr( $class ) : ''; ?>" data-order_item_id="<?php echo esc_attr( $item_id ); ?>">
-	<td class="thumb"><div></div></td>
+	<td class="thumb">
+		<div>
+			<?php echo get_gridicon( 'gridicons-add-outline' ); ?>
+		</div>
+	</td>
 
 	<td class="name">
 		<div class="view">

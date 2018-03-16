@@ -1706,45 +1706,21 @@ ul.wc_coupon_list_block {
 				border-bottom: 1px dotted #999;
 			}
 
-			tr.fee .thumb div {
-				@include ir();
-				font-size: 1.5em;
-				line-height: 1em;
-				vertical-align: middle;
+			tr.fee .thumb div,
+			tr.refund .thumb div,
+			tr.shipping .thumb div {
+				height: 24px;
+				width: 24px;
 				margin: 0 auto;
 
-				&::before {
-					@include icon( '\e007' );
-					color: #ccc;
+				svg {
+					fill: #ccc;
+					vertical-align: middle;
 				}
 			}
 
-			tr.refund .thumb div {
-				@include ir();
-				font-size: 1.5em;
-				line-height: 1em;
-				vertical-align: middle;
-				margin: 0 auto;
-
-				&::before {
-					@include icon( '\e014' );
-					color: #ccc;
-				}
-			}
 
 			tr.shipping {
-				.thumb div {
-					@include ir();
-					font-size: 1.5em;
-					line-height: 1em;
-					vertical-align: middle;
-					margin: 0 auto;
-
-					&::before {
-						@include icon( '\e01a' );
-						color: #ccc;
-					}
-				}
 				.shipping_method_name,
 				.shipping_method {
 					width: 100%;
