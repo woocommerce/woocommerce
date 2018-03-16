@@ -298,11 +298,11 @@ if ( ! class_exists( 'WC_Settings_Emails', false ) ) :
 											echo '<td class="wc-email-settings-table-' . esc_attr( $key ) . '">';
 
 											if ( $email->is_manual() ) {
-												echo '<span class="status-manual tips" data-tip="' . esc_attr__( 'Manually sent', 'woocommerce' ) . '">' . esc_html__( 'Manual', 'woocommerce' ) . '</span>';
+												echo '<span class="status-manual tips" data-tip="' . esc_attr__( 'Manually sent', 'woocommerce' ) . '">' . get_gridicon( 'gridicons-arrow-right' ) . esc_html__( 'Manual', 'woocommerce' ) . '</span>';
 											} elseif ( $email->is_enabled() ) {
-												echo '<span class="status-enabled tips" data-tip="' . esc_attr__( 'Enabled', 'woocommerce' ) . '">' . esc_html__( 'Yes', 'woocommerce' ) . '</span>';
+												echo '<span class="status-enabled tips" data-tip="' . esc_attr__( 'Enabled', 'woocommerce' ) . '">' . get_gridicon( 'gridicons-checkmark-circle' ) . esc_html__( 'Yes', 'woocommerce' ) . '</span>';
 											} else {
-												echo '<span class="status-disabled tips" data-tip="' . esc_attr__( 'Disabled', 'woocommerce' ) . '">-</span>';
+												echo '<span class="status-disabled tips" data-tip="' . esc_attr__( 'Disabled', 'woocommerce' ) . '">' . get_gridicon( 'gridicons-cross-circle' ) . '-</span>';
 											}
 
 											echo '</td>';

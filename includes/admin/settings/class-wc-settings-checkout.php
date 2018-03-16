@@ -338,7 +338,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 									case 'status':
 										echo '<td class="status">';
-										echo ( 'yes' === $gateway->enabled ) ? '<span class="status-enabled tips" data-tip="' . esc_attr__( 'Yes', 'woocommerce' ) . '">' . esc_html__( 'Yes', 'woocommerce' ) . '</span>' : '-';
+										echo ( 'yes' === $gateway->enabled ) ? '<span class="status-enabled tips" data-tip="' . esc_attr__( 'Yes', 'woocommerce' ) . '">' . get_gridicon( 'gridicons-checkmark-circle' ) . esc_html__( 'Yes', 'woocommerce' ) . '</span>' : '-';
 										echo '</td>';
 										break;
 

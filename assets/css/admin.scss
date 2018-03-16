@@ -3435,23 +3435,22 @@ img.help_tip {
 .status-enabled,
 .status-manual,
 .status-disabled {
-	font-size: 1.4em;
-	@include ir();
+	display: block;
+	height: 24px;
+	width: 24px;
+	overflow: hidden;
 }
 
-.status-manual::before {
-	@include icon( '\e008' );
-	color: #999;
+.status-enabled	svg {
+	fill: $woocommerce;
 }
 
-.status-enabled::before {
-	@include icon( '\e015' );
-	color: $woocommerce;
+.status-manual svg {
+	fill: #999;
 }
 
-.status-disabled::before {
-	@include icon( '\e013' );
-	color: #ccc;
+.status-disabled svg {
+	fill: #ccc;
 }
 
 .woocommerce {
