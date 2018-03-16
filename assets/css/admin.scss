@@ -997,19 +997,6 @@ ul.wc_coupon_list_block {
 	}
 }
 
-.button.wc-reload {
-	@include ir();
-	padding: 0;
-	height: 28px;
-	width: 28px !important;
-	display: inline-block;
-
-	&::after {
-		@include icon_dashicons( '\f345' );
-		line-height: 28px;
-	}
-}
-
 #woocommerce-order-data {
 	.hndle,
 	.handlediv {
@@ -1244,18 +1231,16 @@ ul.wc_coupon_list_block {
 		}
 
 		&#actions {
+			display: flex;
 			overflow: hidden;
 
 			.button {
-				width: 24px;
-				box-sizing: border-box;
 				float: right;
 			}
 
 			select {
-				width: 225px;
-				box-sizing: border-box;
-				float: left;
+				margin-right: 4px;
+				width: 100%;
 			}
 		}
 	}
@@ -5581,6 +5566,10 @@ table.bar_chart {
 				top: -15px;
 			}
 		}
+	}
+
+	.order_actions li#actions .button {
+		height: 36px;
 	}
 }
 
