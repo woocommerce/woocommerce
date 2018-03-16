@@ -2969,20 +2969,13 @@ table.wc_shipping {
 	td.sort {
 		padding: 0 7px;
 		cursor: move;
-		font-size: 15px;
 		text-align: center;
-		vertical-align: middle;
 
-		&::before {
-			content: '\f333';
-			font-family: 'Dashicons';
-			text-align: center;
-			line-height: 1;
-			color: #999;
-			display: block;
-			width: 17px;
-			float: left;
-			height: 100%;
+		svg {
+			fill: #999;
+			height: 16px;
+			width: 16px;
+			margin-top: 10px;
 		}
 	}
 	.wc-email-settings-table-name {

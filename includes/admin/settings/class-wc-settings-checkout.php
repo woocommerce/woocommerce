@@ -319,8 +319,9 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 								switch ( $key ) {
 
 									case 'sort':
-										echo '<td width="1%" class="sort">
-										<input type="hidden" name="gateway_order[]" value="' . esc_attr( $gateway->id ) . '" />
+										echo '<td width="1%" class="sort">';
+										echo get_gridicon( 'gridicons-menu' );
+										echo '<input type="hidden" name="gateway_order[]" value="' . esc_attr( $gateway->id ) . '" />
 									</td>';
 										break;
 
