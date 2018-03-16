@@ -2068,30 +2068,36 @@ ul.wc_coupon_list_block {
 		}
 		.order-preview {
 			float:right;
-			width: 16px;
-			padding: 20px 4px 4px 4px;
-			height: 0;
+			width: 24px;
+			height: 24px;
+			padding: 0;
 			overflow: hidden;
 			position: relative;
 			border: 2px solid transparent;
 			border-radius: 4px;
 
-			&::before {
-				@include icon( '\e010' );
-				line-height: 16px;
-				font-size: 14px;
-				vertical-align:middle;
-				top: 4px;
-
-			}
 			&:hover {
 				border: 2px solid #00a0d2;
+			}
+
+			svg {
+				fill: currentColor;
 			}
 		}
 		.order-preview.disabled {
 			&::before {
 				content: '';
 				background: url('../images/wpspin.gif') no-repeat center top;
+				position: absolute;
+				top: 4px;
+				left: 0;
+				height: 16px;
+				width: 100%;
+				text-align: center;
+			}
+
+			svg {
+				fill-opacity: 0;
 			}
 		}
 	}
