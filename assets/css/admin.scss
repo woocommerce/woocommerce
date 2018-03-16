@@ -2997,18 +2997,6 @@ table.wc_shipping {
 			margin: 0 auto;
 		}
 	}
-	.wc-email-settings-table-actions a {
-		@include ir();
-		padding: 0 !important;
-		height: 2em !important;
-		width: 2em;
-
-		&::after {
-			@include icon('\f111');
-			font-family: 'Dashicons';
-			line-height: 1.85;
-		}
-	}
 }
 .wc-shipping-zone-settings {
 	th {

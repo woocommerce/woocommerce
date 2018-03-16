@@ -314,7 +314,7 @@ if ( ! class_exists( 'WC_Settings_Emails', false ) ) :
 											break;
 										case 'actions':
 											echo '<td class="wc-email-settings-table-' . esc_attr( $key ) . '">
-											<a class="button alignright tips" data-tip="' . esc_attr__( 'Configure', 'woocommerce' ) . '" href="' . admin_url( 'admin.php?page=wc-settings&tab=email&section=' . strtolower( $email_key ) ) . '">' . esc_html__( 'Configure', 'woocommerce' ) . '</a>
+											<a class="button alignright" href="' . admin_url( 'admin.php?page=wc-settings&tab=email&section=' . strtolower( $email_key ) ) . '">' . esc_html__( 'Configure', 'woocommerce' ) . '</a>
 										</td>';
 											break;
 										default:
