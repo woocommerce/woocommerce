@@ -1170,33 +1170,22 @@ ul.wc_coupon_list_block {
 		}
 
 		a.edit_address {
-			width: 14px;
-			height: 0;
-			padding: 14px 0 0;
-			margin: 0 0 0 6px;
+			width: 16px;
+			height: 16px;
+			margin-left: 6px;
 			overflow: hidden;
-			position: relative;
-			color: #999;
-			border: 0;
 			float: right;
-			&:hover, &:focus {
-				color: #000;
+
+			svg {
+				fill: #999;
+				height: 16px;
+				width: 16px;
 			}
-			&::after {
-				font-family: 'WooCommerce';
-				position: absolute;
-				top: 0;
-				left: 0;
-				text-align: center;
-				vertical-align: top;
-				line-height: 14px;
-				font-size: 14px;
-				font-weight: 400;
+
+			&:hover svg,
+			&:focus svg {
+				fill: #000;
 			}
-		}
-		a.edit_address::after {
-			font-family: 'Dashicons';
-			content: '\f464';
 		}
 
 		.billing-same-as-shipping,
@@ -1827,36 +1816,24 @@ ul.wc_coupon_list_block {
 			line-height: 16px;
 			width: 16px;
 			overflow: hidden;
-			&::before {
-				margin: 0;
-				padding: 0;
-				font-size: 16px;
-				width: 16px;
-				height: 16px;
-			}
-			&:hover {
-				&::before {
-					color: #999;
-				}
+			&:hover svg {
+				fill: #999;
 			}
 			&:first-child {
 				margin-left: 0;
 			}
-		}
 
-		.edit-order-item::before {
-			@include icon_dashicons( '\f464' );
-			position: relative;
+			svg {
+				fill: #ccc;
+				height: 16px;
+				width: 16px;
+			}
 		}
 
 		.delete-order-item,
 		.delete_refund {
-			&::before {
-				@include icon_dashicons( '\f158' );
-				position: relative;
-			}
-			&:hover::before {
-				color: $red;
+			&:hover svg {
+				fill: $red;
 			}
 		}
 	}

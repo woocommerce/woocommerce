@@ -310,7 +310,9 @@ class WC_Meta_Box_Order_Data {
 					<div class="order_data_column">
 						<h3>
 							<?php esc_html_e( 'Billing', 'woocommerce' ); ?>
-							<a href="#" class="edit_address"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
+							<a href="#" class="edit_address">
+								<?php echo get_gridicon( 'gridicons-pencil' ); ?>
+								<?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
 							<span>
 								<a href="#" class="load_customer_billing" style="display:none;"><?php esc_html_e( 'Load billing address', 'woocommerce' ); ?></a>
 							</span>
@@ -419,7 +421,10 @@ class WC_Meta_Box_Order_Data {
 					<div class="order_data_column">
 						<h3>
 							<?php esc_html_e( 'Shipping', 'woocommerce' ); ?>
-							<a href="#" class="edit_address"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
+							<a href="#" class="edit_address">
+								<?php echo get_gridicon( 'gridicons-pencil' ); ?>
+								<?php esc_html_e( 'Edit', 'woocommerce' ); ?>
+							</a>
 							<span>
 								<a href="#" class="load_customer_shipping" style="display:none;"><?php esc_html_e( 'Load shipping address', 'woocommerce' ); ?></a>
 								<a href="#" class="billing-same-as-shipping" style="display:none;"><?php esc_html_e( 'Copy billing address', 'woocommerce' ); ?></a>
