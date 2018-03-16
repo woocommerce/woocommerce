@@ -976,7 +976,7 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 			'price-desc' => __( 'Sort by price: high to low', 'woocommerce' ),
 		) );
 
-		$default_orderby = wc_get_loop_prop( 'is_search' ) ? 'relevance' : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
+		$default_orderby = wc_get_loop_prop( 'is_search' ) ? 'relevance' : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby', '' ) );
 		$orderby         = isset( $_GET['orderby'] ) ? wc_clean( wp_unslash( $_GET['orderby'] ) ) : $default_orderby; // WPCS: sanitization ok, input var ok, CSRF ok.
 
 		if ( wc_get_loop_prop( 'is_search' ) ) {
