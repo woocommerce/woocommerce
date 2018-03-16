@@ -1866,7 +1866,7 @@ function wc_restore_locale() {
 function wc_make_phone_clickable( $phone ) {
 	$number = trim( preg_replace( '/[^\d|\+]/', '', $phone ) );
 
-	return '<a href="tel:' . esc_attr( $number ) . '">' . esc_html( $phone ) . '</a>';
+	return $number ? '<a href="tel:' . esc_attr( $number ) . '">' . esc_html( $phone ) . '</a>' : '';
 }
 
 /**

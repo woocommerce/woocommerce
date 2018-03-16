@@ -17,6 +17,7 @@ class WC_Privacy {
 	 */
 	public static function init() {
 		add_filter( 'wp_privacy_personal_data_exporters', array( __CLASS__, 'register_data_exporter' ), 10 );
+		add_action( 'woocommerce_remove_order_personal_data', array( __CLASS__, 'remove_order_personal_data' ) );
 	}
 
 	/**
@@ -84,6 +85,28 @@ class WC_Privacy {
 	}
 
 	/**
+	 * Anonymize/remove personal data for a given email address.
+	 *
+	 * @param string $email Email address.
+	 */
+	public static function remove_personal_data( $email ) {
+		/**
+		 * Personal Data:
+		 *
+		 *   - Everything exported above for orders and customers
+		 *   - _billing_address_index - just an index for searching which needs clearing?
+		 *   - _shipping_address_index - just an index for searching which needs clearing?
+		 *
+		 * Misc:
+		 *
+		 *   - Downloadable Product User Email (does not export becasue it matches order/user data).
+		 *   - Download logs by user ID and IP address.
+		 *   - File based logs containing email? Do search and clear if found.
+		 *   - Payment tokens? Check if these need exporting/clearing. Based on User ID.
+		 */
+	}
+
+	/**
 	 * Get personal data (key/value pairs) for a user object.
 	 *
 	 * @param WP_User $user user object.
@@ -133,7 +156,7 @@ class WC_Privacy {
 		 * @param array    $personal_data Array of name value pairs.
 		 * @param WC_Order $order A customer object.
 		 */
-		$personal_data = apply_filters( 'woocommerce_personal_data_export_customer', $personal_data, $customer );
+		$personal_data = apply_filters( 'woocommerce_privacy_export_personal_data_customer', $personal_data, $customer );
 
 		return $personal_data;
 	}
@@ -175,31 +198,129 @@ class WC_Privacy {
 		 * @param array    $personal_data Array of name value pairs.
 		 * @param WC_Order $order An order object.
 		 */
-		$personal_data = apply_filters( 'woocommerce_personal_data_export_order', $personal_data, $order );
+		$personal_data = apply_filters( 'woocommerce_privacy_export_personal_data_order', $personal_data, $order );
 
 		return $personal_data;
 	}
 
 	/**
-	 * Anonymize/remove personal data for a given email address.
+	 * Remove personal data specific to WooCommerce from a user object.
 	 *
-	 * @param string $email Email address.
+	 * @param WP_User $user user object.
 	 */
-	public static function remove_personal_data( $email ) {
+	protected static function remove_user_personal_data( $user ) {
+		$customer        = new WC_Customer( $user->ID );
+		$props_to_remove = array(
+			'billing_first_name'  => '__return_empty_string',
+			'billing_last_name'   => '__return_empty_string',
+			'billing_company'     => '__return_empty_string',
+			'billing_address_1'   => '__return_empty_string',
+			'billing_address_2'   => '__return_empty_string',
+			'billing_city'        => '__return_empty_string',
+			'billing_postcode'    => '__return_empty_string',
+			'billing_state'       => '__return_empty_string',
+			'billing_country'     => '__return_empty_string',
+			'billing_phone'       => '__return_empty_string',
+			'billing_email'       => '__return_empty_string',
+			'shipping_first_name' => '__return_empty_string',
+			'shipping_last_name'  => '__return_empty_string',
+			'shipping_company'    => '__return_empty_string',
+			'shipping_address_1'  => '__return_empty_string',
+			'shipping_address_2'  => '__return_empty_string',
+			'shipping_city'       => '__return_empty_string',
+			'shipping_postcode'   => '__return_empty_string',
+			'shipping_state'      => '__return_empty_string',
+			'shipping_country'    => '__return_empty_string',
+		);
+		foreach ( $props_to_remove as $prop => $callback ) {
+			$customer->{"set_$prop"}( call_user_func( $callback, $customer->{"get_$prop"} ) );
+		}
+
 		/**
-		 * Personal Data:
+		 * Allow extensions to remove their own personal data for this customer.
 		 *
-		 *   - Everything exported above for orders and customers
-		 *   - _billing_address_index - just an index for searching which needs clearing?
-		 *   - _shipping_address_index - just an index for searching which needs clearing?
-		 *
-		 * Misc:
-		 *
-		 *   - Downloadable Product User Email (does not export becasue it matches order/user data).
-		 *   - Download logs by user ID and IP address.
-		 *   - File based logs containing email? Do search and clear if found.
-		 *   - Payment tokens? Check if these need exporting/clearing. Based on User ID.
+		 * @since 3.4.0
+		 * @param WC_Order $order A customer object.
 		 */
+		do_action( 'woocommerce_privacy_remove_personal_data_customer', $customer );
+
+		$customer->save();
+	}
+
+	/**
+	 * Remove personal data specific to WooCommerce from an order object.
+	 *
+	 * Note; this will hinder order processing for obvious reasons!
+	 *
+	 * @param WC_Order $order Order object.
+	 */
+	public static function remove_order_personal_data( $order ) {
+		$props_to_remove = array(
+			'customer_ip_address' => '__return_empty_string',
+			'customer_user_agent' => '__return_empty_string',
+			'billing_first_name'  => '__return_empty_string',
+			'billing_last_name'   => '__return_empty_string',
+			'billing_company'     => '__return_empty_string',
+			'billing_address_1'   => '__return_empty_string',
+			'billing_address_2'   => '__return_empty_string',
+			'billing_city'        => '__return_empty_string',
+			'billing_postcode'    => '__return_empty_string',
+			'billing_state'       => '__return_empty_string',
+			'billing_country'     => '__return_empty_string',
+			'billing_phone'       => '__return_empty_string',
+			'billing_email'       => array( __CLASS__, 'mask_email' ),
+			'shipping_first_name' => '__return_empty_string',
+			'shipping_last_name'  => '__return_empty_string',
+			'shipping_company'    => '__return_empty_string',
+			'shipping_address_1'  => '__return_empty_string',
+			'shipping_address_2'  => '__return_empty_string',
+			'shipping_city'       => '__return_empty_string',
+			'shipping_postcode'   => '__return_empty_string',
+			'shipping_state'      => '__return_empty_string',
+			'shipping_country'    => '__return_empty_string',
+		);
+		foreach ( $props_to_remove as $prop => $callback ) {
+			$order->{"set_$prop"}( call_user_func( $callback, $order->{"get_$prop"}( 'edit' ) ) );
+		}
+
+		/**
+		 * Allow extensions to remove their own personal data for this order.
+		 *
+		 * @since 3.4.0
+		 * @param WC_Order $order A customer object.
+		 */
+		do_action( 'woocommerce_privacy_remove_personal_data_order', $order );
+
+		$order->save();
+		$order->add_order_note( __( 'Personal data removed.', 'woocommerce' ) );
+	}
+
+	/**
+	 * Mask an email address.
+	 *
+	 * @param string $email Email to mask.
+	 * @return string
+	 */
+	protected static function mask_email( $email ) {
+		if ( ! $email ) {
+			return '';
+		}
+
+		$min_length = 3;
+		$max_length = 10;
+		$mask       = "***";
+		$at_pos     = strrpos( $email, '@' );
+		$name       = substr( $email, 0, $at_pos );
+		$length     = strlen( $name );
+		$domain     = substr( $email, $at_pos );
+
+		if ( ( $length / 2 ) < $max_length ) {
+			$max_length = $length / 2;
+		}
+
+		$masked_email = $length > $min_length ? substr( $name, 0, $max_length ) : '';
+
+		return "{$masked_email}{$mask}{$domain}";
 	}
 }
 
