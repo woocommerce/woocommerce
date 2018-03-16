@@ -1,4 +1,10 @@
 <?php
+/**
+ * Class WC_Product_Grouped file.
+ *
+ * @package WooCommerce\Classes\Products
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -8,11 +14,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Grouped products cannot be purchased - they are wrappers for other products.
  *
- * @class 		WC_Product_Grouped
- * @version		3.0.0
- * @package		WooCommerce/Classes/Products
- * @category	Class
- * @author 		WooThemes
+ * @class       WC_Product_Grouped
+ * @version     3.0.0
+ * @package     WooCommerce/Classes/Products
  */
 class WC_Product_Grouped extends WC_Product {
 
@@ -27,6 +31,7 @@ class WC_Product_Grouped extends WC_Product {
 
 	/**
 	 * Get internal type.
+	 *
 	 * @return string
 	 */
 	public function get_type() {
@@ -87,7 +92,7 @@ class WC_Product_Grouped extends WC_Product {
 	 * Returns the price in html format.
 	 *
 	 * @access public
-	 * @param string $price (default: '')
+	 * @param string $price (default: '').
 	 * @return string
 	 */
 	public function get_price_html( $price = '' ) {
@@ -141,7 +146,7 @@ class WC_Product_Grouped extends WC_Product {
 	/**
 	 * Return the children of this product.
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return array
 	 */
 	public function get_children( $context = 'view' ) {
@@ -159,7 +164,7 @@ class WC_Product_Grouped extends WC_Product {
 	/**
 	 * Return the children of this product.
 	 *
-	 * @param array $children
+	 * @param array $children List of product children.
 	 */
 	public function set_children( $children ) {
 		$this->set_prop( 'children', array_filter( wp_parse_id_list( (array) $children ) ) );
@@ -176,7 +181,7 @@ class WC_Product_Grouped extends WC_Product {
 	 * upwards (from child to parent) when the variation is saved.
 	 *
 	 * @param WC_Product|int $product Product object or ID for which you wish to sync.
-	 * @param bool $save If true, the product object will be saved to the DB before returning it.
+	 * @param bool           $save If true, the product object will be saved to the DB before returning it.
 	 * @return WC_Product Synced product object.
 	 */
 	public static function sync( $product, $save = true ) {
