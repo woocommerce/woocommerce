@@ -56,5 +56,5 @@ if ( $available_gateways = WC()->payment_gateways->get_available_payment_gateway
 		</div>
 	</form>
 <?php else : ?>
-	<p class="woocommerce-notice woocommerce-notice--info woocommerce-info"><?php esc_html_e( 'New payment methods can only be added during checkout. Please contact us if you require assistance.', 'woocommerce' ); ?></p>
+	<p class="woocommerce-notice woocommerce-notice--info woocommerce-info"><?php echo get_gridicon( 'gridicons-info' ); ?><?php esc_html_e( 'New payment methods can only be added during checkout. Please contact us if you require assistance.', 'woocommerce' ); ?></p>
 <?php endif; ?>

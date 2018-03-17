@@ -1681,13 +1681,14 @@ button.pswp__button--zoom:hover {
 	width: auto;
 	word-wrap: break-word;
 
-	&::before {
-		font-family: 'WooCommerce';
-		content: '\e028';
-		display: inline-block;
+	svg {
+		fill: currentColor;
+		flex: 0 0 auto;
+		height: 1.5em;
+		width: 1.5em;
 		position: absolute;
 		top: 1em;
-		left: 1.5em;
+		left: 1.25em;
 	}
 
 	.button {
@@ -1711,26 +1712,24 @@ button.pswp__button--zoom:hover {
 .woocommerce-message {
 	border-top-color: #8fae1b;
 
-	&::before {
-		content: '\e015';
-		color: #8fae1b;
+	svg {
+		fill: #8fae1b;
 	}
 }
 
 .woocommerce-info {
 	border-top-color: #1e85be;
 
-	&::before {
-		color: #1e85be;
+	svg {
+		fill: #1e85be;
 	}
 }
 
 .woocommerce-error {
 	border-top-color: #b81c23;
 
-	&::before {
-		content: '\e016';
-		color: #b81c23;
+	svg {
+		fill: #b81c23;
 	}
 }
 

@@ -115,7 +115,7 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 
 		wc_add_notice( 'One True Notice', 'notice' );
 
-		$this->expectOutputString( '<div class="woocommerce-info">One True Notice</div>' );
+		$this->expectOutputString( '<div class="woocommerce-info">' . get_gridicon( 'gridicons-info' ) . 'One True Notice</div>' );
 
 		wc_print_notices();
 
@@ -140,7 +140,7 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_print_success_notice() {
 
-		$this->expectOutputString( '<div class="woocommerce-message" role="alert">Success!</div>' );
+		$this->expectOutputString( '<div class="woocommerce-message" role="alert">' . get_gridicon( 'gridicons-checkmark-circle' ) . 'Success!</div>' );
 
 		wc_print_notice( 'Success!' );
 	}
@@ -152,7 +152,7 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_print_info_notice() {
 
-		$this->expectOutputString( '<div class="woocommerce-info">Info!</div>' );
+		$this->expectOutputString( '<div class="woocommerce-info">' . get_gridicon( 'gridicons-info' ) . 'Info!</div>' );
 
 		wc_print_notice( 'Info!', 'notice' );
 	}
@@ -165,7 +165,7 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	public function test_wc_print_error_notice() {
 
 		// specific type
-		$this->expectOutputString( '<ul class="woocommerce-error" role="alert"><li>Error!</li></ul>' );
+		$this->expectOutputString( '<ul class="woocommerce-error" role="alert">' . get_gridicon( 'gridicons-notice' ) . '<li>Error!</li></ul>' );
 
 		wc_print_notice( 'Error!', 'error' );
 	}
