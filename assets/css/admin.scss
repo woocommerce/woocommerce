@@ -4569,32 +4569,57 @@ img.help_tip {
 			display: none;
 		}
 
-		&::before {
-			content: '\f128';
-			font-family: 'Dashicons';
+		svg {
+			fill: currentColor;
+			height: 64px;
+			width: 64px;
 			position: absolute;
 			top: 0;
 			left: 0;
-			right: 0;
-			bottom: 0;
-			text-align: center;
-			line-height: 64px;
-			font-size: 64px;
-			font-weight: 400;
-			-webkit-font-smoothing: antialiased;
 		}
+
+		.gridicons-image {
+			display: block;
+		}
+
+		.gridicons-cross {
+			display: none;
+		}
+
+		// &::before {
+		// 	content: '\f128';
+		// 	font-family: 'Dashicons';
+		// 	position: absolute;
+		// 	top: 0;
+		// 	left: 0;
+		// 	right: 0;
+		// 	bottom: 0;
+		// 	text-align: center;
+		// 	line-height: 64px;
+		// 	font-size: 64px;
+		// 	font-weight: 400;
+		// 	-webkit-font-smoothing: antialiased;
+		// }
 
 		&.remove {
 			img {
 				display: block;
 			}
 
-			&::before {
-				content: '\f335';
+			// &::before {
+			// 	content: '\f335';
+			// 	display: none;
+			// }
+
+			// &:hover::before {
+			// 	display: block;
+			// }
+
+			.gridicons-image {
 				display: none;
 			}
 
-			&:hover::before {
+			&:hover .gridicons-cross {
 				display: block;
 			}
 		}
