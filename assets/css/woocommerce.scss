@@ -687,27 +687,26 @@ p.demo_store,
 		box-shadow: none;
 		text-shadow: none;
 
+		&::after {
+			display: inline-block;
+			height: 1em;
+			width: 1em;
+			margin-left: 0.53em;
+			vertical-align: bottom;
+		}
+
 		&.loading {
 			opacity: 0.25;
-			padding-right: 2.618em;
 
 			&::after {
-				font-family: 'WooCommerce';
-				content: '\e01c';
-				vertical-align: top;
-				font-weight: 400;
-				position: absolute;
-				top: 0.618em;
-				right: 1em;
+				content: url('../images/icons/gridicons/gridicons-cog.svg');
 				animation: spin 2s linear infinite;
 			}
 		}
 
 		&.added::after {
-			font-family: 'WooCommerce';
-			content: '\e017';
-			margin-left: 0.53em;
-			vertical-align: bottom;
+			content: url('../images/icons/gridicons/gridicons-checkmark.svg');
+			opacity: .8;
 		}
 
 		&:hover {
