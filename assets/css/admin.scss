@@ -3058,19 +3058,13 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 			margin-left: 1em;
 			list-style: circle inside;
 		}
-		&::before {
-			content: '\e01b';
-			font-family: 'WooCommerce';
-			text-align: center;
-			line-height: 1;
-			color: #eee2ec;
-			display: block;
-			width: 1em;
-			font-size: 40em;
-			top: 50%;
-			right: -3.75%;
-			margin-top: -0.1875em;
-			position: absolute;
+		svg {
+			height: 50em;
+	    width: 50em;
+	    position: absolute;
+	    fill: #eee2ec;
+	    top: 30%;
+	    right: -10%;
 		}
 		.button-primary {
 			background-color: #804877;
