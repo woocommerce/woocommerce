@@ -2801,23 +2801,21 @@ table.wc_input_table {
 		cursor: move;
 		font-size: 15px;
 		background: #f9f9f9;
-		text-align: center;
 		vertical-align: middle;
+		width: 18px;
 
 		&::before {
-			content: '\f333';
-			font-family: 'Dashicons';
-			text-align: center;
+			content: url('../images/icons/gridicons/gridicons-menu.svg');
 			line-height: 1;
-			color: #999;
+			margin: 0 auto;
 			display: block;
-			width: 17px;
-			float: left;
-			height: 100%;
+			width: 14px;
+			height: 14px;
+			opacity: .4;
 		}
 
 		&:hover::before {
-			color: #333;
+			opacity: .8;
 		}
 	}
 
