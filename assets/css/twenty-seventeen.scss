@@ -242,7 +242,6 @@ ul.products {
 	font-size: 1em;
 	height: 1.375em;
 	width: 6.875em;
-	vertical-align: text-bottom;
 
 	svg {
 		height: 1.375em;
@@ -255,10 +254,9 @@ ul.products {
 		position: absolute;
 		top: 0;
 		left: 0;
-		display: flex;
+		white-space: nowrap;
 
 		svg {
-			flex: 0 0 auto;
 			fill-opacity: 1;
 		}
 	}
