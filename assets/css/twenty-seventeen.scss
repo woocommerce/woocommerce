@@ -238,34 +238,29 @@ ul.products {
 .star-rating {
 	overflow: hidden;
 	position: relative;
-	height: 1em;
 	line-height: 1;
 	font-size: 1em;
-	width: 5.4em;
-	font-family: 'star';
+	height: 1.375em;
+	width: 6.875em;
+	vertical-align: text-bottom;
 
-	&::before {
-		content: '\73\73\73\73\73';
-		float: left;
-		top: 0;
-		left: 0;
-		position: absolute;
+	svg {
+		height: 1.375em;
+		width: 1.375em;
+		fill-opacity: .25;
 	}
 
-	span {
+	.star-rating__rating {
 		overflow: hidden;
-		float: left;
+		position: absolute;
 		top: 0;
 		left: 0;
-		position: absolute;
-		padding-top: 1.5em;
-	}
+		display: flex;
 
-	span::before {
-		content: '\53\53\53\53\53';
-		top: 0;
-		position: absolute;
-		left: 0;
+		svg {
+			flex: 0 0 auto;
+			fill-opacity: 1;
+		}
 	}
 }
 
@@ -337,7 +332,6 @@ dl.variation, .wc-item-meta {
 
 	.woocommerce-product-rating {
 		margin-bottom: 2em;
-		line-height: 1;
 
 		.star-rating {
 			float: left;
@@ -519,17 +513,15 @@ table.variations {
 					position: absolute;
 					top: 0;
 					left: 0;
-					width: 1em;
-					height: 1em;
-					line-height: 1;
-					font-family: 'WooCommerce';
-					content: '\e021';
+					width: 1.375em;
+					height: 1.375em;
+					content: url('../images/icons/gridicons/gridicons-star-outline.svg');
 					text-indent: 0;
 				}
 
 				&:hover {
 					~ a::before {
-						content: '\e021';
+						content: url('../images/icons/gridicons/gridicons-star-outline.svg');
 					}
 				}
 			}
@@ -537,7 +529,7 @@ table.variations {
 			&:hover {
 				a {
 					&::before {
-						content: '\e020';
+						content: url('../images/icons/gridicons/gridicons-star.svg');
 					}
 				}
 			}
@@ -545,17 +537,17 @@ table.variations {
 			&.selected {
 				a.active {
 					&::before {
-						content: '\e020';
+						content: url('../images/icons/gridicons/gridicons-star.svg');
 					}
 
 					~ a::before {
-						content: '\e021';
+						content: url('../images/icons/gridicons/gridicons-star-outline.svg');
 					}
 				}
 
 				a:not( .active ) {
 					&::before {
-						content: '\e020';
+						content: url('../images/icons/gridicons/gridicons-star.svg');
 					}
 				}
 			}

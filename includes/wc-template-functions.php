@@ -2851,7 +2851,19 @@ function wc_get_rating_html( $rating, $count = 0 ) {
  * @return string
  */
 function wc_get_star_rating_html( $rating, $count = 0 ) {
-	$html = '<span style="width:' . ( ( $rating / 5 ) * 100 ) . '%">';
+	$html = get_gridicon( 'gridicons-star' ) .
+					get_gridicon( 'gridicons-star' ) .
+					get_gridicon( 'gridicons-star' ) .
+					get_gridicon( 'gridicons-star' ) .
+					get_gridicon( 'gridicons-star' );
+
+	$html .= '<span class="star-rating__rating" style="width:' . ( ( $rating / 5 ) * 100 ) . '%">';
+
+	$html .= get_gridicon( 'gridicons-star' ) .
+					 get_gridicon( 'gridicons-star' ) .
+					 get_gridicon( 'gridicons-star' ) .
+					 get_gridicon( 'gridicons-star' ) .
+					 get_gridicon( 'gridicons-star' );
 
 	if ( 0 < $count ) {
 		/* translators: 1: rating 2: rating count */
