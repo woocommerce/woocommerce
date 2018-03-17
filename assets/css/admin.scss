@@ -4029,58 +4029,50 @@ img.help_tip {
 		}
 
 		td.sort {
-			width: 17px;
+			width: 18px;
 			cursor: move;
-			font-size: 15px;
 			text-align: center;
 			background: #f9f9f9;
 			padding-right: 7px !important;
 
 			&::before {
-				content: '\f333';
-				font-family: 'Dashicons';
-				text-align: center;
+				content: url('../images/icons/gridicons/gridicons-menu.svg');
+				margin: 0 auto;
 				line-height: 1;
-				color: #999;
 				display: block;
-				width: 17px;
-				float: left;
-				height: 100%;
+				width: 16px;
+				height: 16px;
+				opacity: .4;
 			}
 
 			&:hover::before {
-				color: #333;
+				opacity: .8;
 			}
 		}
 	}
 }
 .woocommerce_variation {
 	h3 .sort {
-		width: 17px;
+		width: 18px;
 		height: 26px;
 		cursor: move;
 		float: right;
-		font-size: 15px;
-		font-weight: 400;
 		margin-right: 0.5em;
 		visibility: hidden;
 		text-align: center;
 		vertical-align: middle;
 
 		&::before {
-			content: '\f333';
-			font-family: 'Dashicons';
-			text-align: center;
-			line-height: 28px;
-			color: #999;
+			content: url('../images/icons/gridicons/gridicons-menu.svg');
+			margin: 7px auto;
 			display: block;
-			width: 17px;
-			float: left;
-			height: 100%;
+			width: 16px;
+			height: 16px;
+			opacity: .4;
 		}
 
 		&:hover::before {
-			color: #777;
+			opacity: .8;
 		}
 	}
 	h3:hover, &.ui-sortable-helper {
