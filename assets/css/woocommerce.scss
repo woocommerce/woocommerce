@@ -1437,19 +1437,14 @@ p.demo_store,
 		.woocommerce-customer-details--phone,
 		.woocommerce-customer-details--email {
 			margin-bottom: 0;
-			padding-left: 1.5em;
-		}
-		.woocommerce-customer-details--phone::before {
-			@include iconbefore( '\e037' );
-			margin-left: -1.5em;
-			line-height: 1.75;
-			position: absolute;
-		}
-		.woocommerce-customer-details--email::before {
-			@include iconbefore( '\e02d' );
-			margin-left: -1.5em;
-			line-height: 1.75;
-			position: absolute;
+
+			svg {
+				height: 1.2em;
+				width: 1.2em;
+				margin-right: .375em;
+				vertical-align: text-bottom;
+				fill: currentColor;
+			}
 		}
 	}
 
