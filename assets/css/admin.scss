@@ -936,9 +936,9 @@ ul.wc_coupon_list {
 			margin-right: 5px;
 			margin-top: 5px;
 
-			&.editable {
-				padding-right: 2em;
-			}
+			// &.editable {
+			// 	padding-right: 2em;
+			// }
 
 			.tips {
 				cursor: pointer;
@@ -954,21 +954,39 @@ ul.wc_coupon_list {
 
 			.remove-coupon {
 				text-decoration: none;
-				color: #888;
-				position: absolute;
-				top: 7px;
-				right: 20px;
+				display: inline-block;
+				height: 13px;
+				width: 13px;
+				position: relative;
+				vertical-align: middle;
+
+				svg {
+					fill: #888;
+					height: 13px;
+					width: 13px;
+					position: absolute;
+					top: 0;
+					left: 0;
+				}
+
+				&:hover svg {
+					fill: $red;
+				}
+				// color: #888;
+				// position: absolute;
+				// top: 7px;
+				// right: 20px;
 
 				/*rtl:raw:
 				left: 7px;
 				*/
 
-				&::before {
-					@include icon_dashicons( '\f158' );
-				}
-				&:hover::before {
-					color: $red;
-				}
+				// &::before {
+				// 	@include icon_dashicons( '\f158' );
+				// }
+				// &:hover::before {
+				// 	color: $red;
+				// }
 			}
 		}
 	}
