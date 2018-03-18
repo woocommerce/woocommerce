@@ -936,10 +936,6 @@ ul.wc_coupon_list {
 			margin-right: 5px;
 			margin-top: 5px;
 
-			// &.editable {
-			// 	padding-right: 2em;
-			// }
-
 			.tips {
 				cursor: pointer;
 
@@ -972,21 +968,6 @@ ul.wc_coupon_list {
 				&:hover svg {
 					fill: $red;
 				}
-				// color: #888;
-				// position: absolute;
-				// top: 7px;
-				// right: 20px;
-
-				/*rtl:raw:
-				left: 7px;
-				*/
-
-				// &::before {
-				// 	@include icon_dashicons( '\f158' );
-				// }
-				// &:hover::before {
-				// 	color: $red;
-				// }
 			}
 		}
 	}
