@@ -1602,9 +1602,12 @@ p.demo_store,
 			}
 		}
 
-		li.chosen a::before {
-			@include iconbefore( '\e013' );
-			color: $red;
+		li.chosen a .remove svg {
+			fill: $red;
+			height: 1.25em;
+			width: 1.25em;
+			margin-right: .375em;
+			vertical-align: text-bottom;
 		}
 	}
 }
