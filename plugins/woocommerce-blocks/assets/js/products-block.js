@@ -758,26 +758,26 @@ registerBlockType('woocommerce/products', {
 			if ('specific' !== display) {
 				orderControl = wp.element.createElement(SelectControl, {
 					key: 'query-panel-select',
-					label: __('Products Order'),
+					label: __('Order Products By'),
 					value: orderby,
 					options: [{
-						label: __('Newness'),
+						label: __('Newness - newest first'),
 						value: 'date'
 					}, {
-						label: __('Title'),
-						value: 'title'
-					}, {
-						label: __('Sales'),
-						value: 'popularity'
-					}, {
-						label: __('Rating'),
-						value: 'rating'
-					}, {
-						label: __('Increasing Price'),
+						label: __('Price - low to high'),
 						value: 'price_asc'
 					}, {
-						label: __('Decreasing Price'),
+						label: __('Price - high to low'),
 						value: 'price_desc'
+					}, {
+						label: __('Rating - highest first'),
+						value: 'rating'
+					}, {
+						label: __('Sales - most first'),
+						value: 'popularity'
+					}, {
+						label: __('Title - alphabetical'),
+						value: 'title'
 					}],
 					onChange: function onChange(value) {
 						return setAttributes({ orderby: value });
