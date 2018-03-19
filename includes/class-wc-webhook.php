@@ -166,7 +166,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			} elseif ( 'updated' === $this->get_event() && $resource_created ) {
 				$should_deliver = false;
 			}
-		} // End if().
+		}
 
 		/*
 		 * Let other plugins intercept deliver for some messages queue like rabbit/zeromq.
