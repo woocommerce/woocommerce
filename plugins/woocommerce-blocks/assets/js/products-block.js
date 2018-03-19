@@ -100,9 +100,8 @@ var _wp$components = wp.components,
     Dropdown = _wp$components.Dropdown,
     Dashicon = _wp$components.Dashicon,
     RangeControl = _wp$components.RangeControl,
-    Tooltip = _wp$components.Tooltip;
-var ToggleControl = InspectorControls.ToggleControl,
-    SelectControl = InspectorControls.SelectControl;
+    Tooltip = _wp$components.Tooltip,
+    SelectControl = _wp$components.SelectControl;
 
 
 /**
@@ -133,16 +132,6 @@ var PRODUCTS_BLOCK_DISPLAY_SETTINGS = {
 		title: __('Featured products'),
 		description: '',
 		value: 'featured'
-	},
-	'best_sellers': {
-		title: __('Best sellers'),
-		description: '',
-		value: 'best_sellers'
-	},
-	'best_rated': {
-		title: __('Best rated'),
-		description: '',
-		value: 'best_rated'
 	},
 	'on_sale': {
 		title: __('On sale'),
@@ -431,7 +420,7 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 
 			var heading = null;
 			if (this.state.display) {
-				var group_options = ['featured', 'best_sellers', 'best_rated', 'on_sale', 'attribute'];
+				var group_options = ['featured', 'on_sale', 'attribute'];
 				var should_group_expand = group_options.includes(this.state.display) ? this.state.display : '';
 				var menu_link = wp.element.createElement(
 					'button',
@@ -571,6 +560,7 @@ var ProductsBlockPreview = withAPIData(function (_ref) {
 	    rows = attributes.rows,
 	    display = attributes.display,
 	    display_setting = attributes.display_setting,
+	    orderby = attributes.orderby,
 	    block_layout = attributes.block_layout;
 
 
@@ -591,12 +581,17 @@ var ProductsBlockPreview = withAPIData(function (_ref) {
 		}
 	} else if ('featured' === display) {
 		query.featured = 1;
-	} else if ('best_sellers' === display) {
-		// @todo Not possible in the API yet.
-	} else if ('best_rated' === display) {
-		// @todo Not possible in the API yet.
 	} else if ('on_sale' === display) {
 		query.on_sale = 1;
+	}
+
+	// @todo Add support for orderby by sales, rating, and price to the API.
+	if ('specific' !== display && ('title' === orderby || 'date' === orderby)) {
+		query.orderby = orderby;
+
+		if ('title' === orderby) {
+			query.order = 'asc';
+		}
 	}
 
 	var query_string = '?';
@@ -703,6 +698,14 @@ registerBlockType('woocommerce/products', {
 		},
 
 		/**
+   * How to order the products: 'date', 'popularity', 'price_asc', 'price_desc' 'rating', 'title'.
+   */
+		orderby: {
+			type: 'string',
+			default: 'date'
+		},
+
+		/**
    * Whether the block is in edit or preview mode.
    */
 		edit_mode: {
@@ -725,6 +728,7 @@ registerBlockType('woocommerce/products', {
 		    columns = attributes.columns,
 		    display = attributes.display,
 		    display_setting = attributes.display_setting,
+		    orderby = attributes.orderby,
 		    edit_mode = attributes.edit_mode;
 
 		/**
@@ -749,6 +753,38 @@ registerBlockType('woocommerce/products', {
 				});
 			}
 
+			// Orderby settings don't make sense for specific-selected products display.
+			var orderControl = null;
+			if ('specific' !== display) {
+				orderControl = wp.element.createElement(SelectControl, {
+					key: 'query-panel-select',
+					label: __('Order Products By'),
+					value: orderby,
+					options: [{
+						label: __('Newness - newest first'),
+						value: 'date'
+					}, {
+						label: __('Price - low to high'),
+						value: 'price_asc'
+					}, {
+						label: __('Price - high to low'),
+						value: 'price_desc'
+					}, {
+						label: __('Rating - highest first'),
+						value: 'rating'
+					}, {
+						label: __('Sales - most first'),
+						value: 'popularity'
+					}, {
+						label: __('Title - alphabetical'),
+						value: 'title'
+					}],
+					onChange: function onChange(value) {
+						return setAttributes({ orderby: value });
+					}
+				});
+			}
+
 			return wp.element.createElement(
 				InspectorControls,
 				{ key: 'inspector' },
@@ -766,7 +802,8 @@ registerBlockType('woocommerce/products', {
 					},
 					min: 1,
 					max: 6
-				})
+				}),
+				orderControl
 			);
 		};
 
@@ -866,7 +903,8 @@ registerBlockType('woocommerce/products', {
 		    rows = _props$attributes.rows,
 		    columns = _props$attributes.columns,
 		    display = _props$attributes.display,
-		    display_setting = _props$attributes.display_setting;
+		    display_setting = _props$attributes.display_setting,
+		    orderby = _props$attributes.orderby;
 
 
 		var shortcode_atts = new Map();
@@ -886,10 +924,6 @@ registerBlockType('woocommerce/products', {
 			shortcode_atts.set('category', display_setting.join(','));
 		} else if ('featured' === display) {
 			shortcode_atts.set('visibility', 'featured');
-		} else if ('best_sellers' === display) {
-			shortcode_atts.set('best_selling', '1');
-		} else if ('best_rated' === display) {
-			shortcode_atts.set('orderby', 'rating');
 		} else if ('on_sale' === display) {
 			shortcode_atts.set('on_sale', '1');
 		} else if ('attribute' === display) {
@@ -899,6 +933,18 @@ registerBlockType('woocommerce/products', {
 			shortcode_atts.set('attribute', attribute);
 			if (terms.length) {
 				shortcode_atts.set('terms', terms);
+			}
+		}
+
+		if ('specific' !== display) {
+			if ('price_desc' === orderby) {
+				shortcode_atts.set('orderby', 'price');
+				shortcode_atts.set('order', 'DESC');
+			} else if ('price_asc' === orderby) {
+				shortcode_atts.set('orderby', 'price');
+				shortcode_atts.set('order', 'ASC');
+			} else {
+				shortcode_atts.set('orderby', orderby);
 			}
 		}
 
