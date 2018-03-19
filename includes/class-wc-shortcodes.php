@@ -200,6 +200,7 @@ class WC_Shortcodes {
 		$columns = absint( $atts['columns'] );
 
 		wc_set_loop_prop( 'columns', $columns );
+		wc_set_loop_prop( 'is_shortcode', true );
 
 		ob_start();
 
