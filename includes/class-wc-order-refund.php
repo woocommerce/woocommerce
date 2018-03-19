@@ -1,16 +1,16 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 /**
  * Order refund. Refunds are based on orders (essentially negative orders) and
  * contain much of the same data.
  *
- * @version  3.0.0
- * @package  WooCommerce/Classes
- * @category Class
- * @author   WooThemes
+ * @version 3.0.0
+ * @package WooCommerce/Classes
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * WC_Order_Refund class.
  */
 class WC_Order_Refund extends WC_Abstract_Order {
 
@@ -23,6 +23,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 
 	/**
 	 * This is the name of this object type.
+	 *
 	 * @var string
 	 */
 	protected $object_type = 'order_refund';
@@ -41,6 +42,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 
 	/**
 	 * Get internal type (post type.)
+	 *
 	 * @return string
 	 */
 	public function get_type() {
@@ -50,7 +52,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	/**
 	 * Get status - always completed for refunds.
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_status( $context = 'view' ) {
@@ -69,7 +71,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	/**
 	 * Get refunded amount.
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return int|float
 	 */
 	public function get_amount( $context = 'view' ) {
@@ -80,7 +82,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * Get refund reason.
 	 *
 	 * @since 2.2
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return int|float
 	 */
 	public function get_reason( $context = 'view' ) {
@@ -91,7 +93,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * Get ID of user who did the refund.
 	 *
 	 * @since 3.0
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return int
 	 */
 	public function get_refunded_by( $context = 'view' ) {
@@ -102,7 +104,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * Return if the payment was refunded via API.
 	 *
 	 * @since  3.3
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return bool
 	 */
 	public function get_refunded_payment( $context = 'view' ) {
@@ -122,8 +124,8 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	/**
 	 * Set refunded amount.
 	 *
-	 * @param string $value
-	 * @throws WC_Data_Exception
+	 * @param string $value Value to set.
+	 * @throws WC_Data_Exception Exception if the amount is invalid.
 	 */
 	public function set_amount( $value ) {
 		$this->set_prop( 'amount', wc_format_decimal( $value ) );
@@ -132,8 +134,8 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	/**
 	 * Set refund reason.
 	 *
-	 * @param string $value
-	 * @throws WC_Data_Exception
+	 * @param string $value Value to set.
+	 * @throws WC_Data_Exception Exception if the amount is invalid.
 	 */
 	public function set_reason( $value ) {
 		$this->set_prop( 'reason', $value );
@@ -142,8 +144,8 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	/**
 	 * Set refunded by.
 	 *
-	 * @param int $value
-	 * @throws WC_Data_Exception
+	 * @param int $value Value to set.
+	 * @throws WC_Data_Exception Exception if the amount is invalid.
 	 */
 	public function set_refunded_by( $value ) {
 		$this->set_prop( 'refunded_by', absint( $value ) );
@@ -153,7 +155,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * Set if the payment was refunded via API.
 	 *
 	 * @since 3.3
-	 * @param bool $value
+	 * @param bool $value Value to set.
 	 */
 	public function set_refunded_payment( $value ) {
 		$this->set_prop( 'refunded_payment', (bool) $value );
@@ -162,7 +164,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	/**
 	 * Magic __get method for backwards compatibility.
 	 *
-	 * @param string $key
+	 * @param string $key Value to get.
 	 * @return mixed
 	 */
 	public function __get( $key ) {
@@ -180,24 +182,31 @@ class WC_Order_Refund extends WC_Abstract_Order {
 
 	/**
 	 * Gets an refund from the database.
+	 *
 	 * @deprecated 3.0
 	 * @param int $id (default: 0).
 	 * @return bool
 	 */
 	public function get_refund( $id = 0 ) {
 		wc_deprecated_function( 'get_refund', '3.0', 'read' );
+
 		if ( ! $id ) {
 			return false;
 		}
-		if ( $result = get_post( $id ) ) {
+
+		$result = get_post( $id );
+
+		if ( $result ) {
 			$this->populate( $result );
 			return true;
 		}
+
 		return false;
 	}
 
 	/**
 	 * Get refund amount.
+	 *
 	 * @deprecated 3.0
 	 * @return int|float
 	 */
@@ -208,6 +217,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 
 	/**
 	 * Get refund reason.
+	 *
 	 * @deprecated 3.0
 	 * @return int|float
 	 */
