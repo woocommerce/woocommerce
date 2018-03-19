@@ -780,6 +780,15 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			$tables[] = "{$wpdb->prefix}woocommerce_termmeta";
 		}
 
+		/**
+		 * Filter the list of known WooCommerce tables.
+		 *
+		 * If WooCommerce plugins need to add new tables, they can inject them here.
+		 *
+		 * @param array $tables An array of WooCommerce-specific database table names.
+		 */
+		$tables = apply_filters( 'woocommerce_install_get_tables', $tables );
+
 		return $tables;
 	}
 
