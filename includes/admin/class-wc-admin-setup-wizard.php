@@ -500,7 +500,7 @@ class WC_Admin_Setup_Wizard {
 				?>
 				<div class="woocommerce-tracker">
 					<p class="checkbox">
-						<input type="checkbox" id="wc_tracker_optin" name="wc_tracker_optin" value="yes" <?php $tracking_opt_out ? 'checked' : ''; ?> />
+						<input type="checkbox" id="wc_tracker_optin" name="wc_tracker_optin" value="yes" <?php echo $tracking_opt_out ? 'checked' : ''; ?> />
 						<label for="wc_tracker_optin"><?php esc_html_e( 'Help WooCommerce improve by enabling usage tracking.', 'woocommerce' ); ?></label>
 					</p>
 					<p>
