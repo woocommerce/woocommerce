@@ -10,15 +10,12 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see     https://docs.woocommerce.com/document/template-structure/
- * @author  WooThemes
+ * @see https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce/Templates
- * @version 3.3.0
+ * @version 3.4.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 do_action( 'woocommerce_before_edit_account_form' ); ?>
 
@@ -68,7 +65,7 @@ do_action( 'woocommerce_before_edit_account_form' ); ?>
 	<?php do_action( 'woocommerce_edit_account_form' ); ?>
 
 	<p>
-		<?php wp_nonce_field( 'save_account_details' ); ?>
+		<?php wp_nonce_field( 'save_account_details', 'save-account-details-nonce' ); ?>
 		<button type="submit" class="woocommerce-Button button" name="save_account_details" value="<?php esc_attr_e( 'Save changes', 'woocommerce' ); ?>"><?php esc_html_e( 'Save changes', 'woocommerce' ); ?></button>
 		<input type="hidden" name="action" value="save_account_details" />
 	</p>
