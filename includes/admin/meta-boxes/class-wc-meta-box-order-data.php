@@ -360,6 +360,15 @@ class WC_Meta_Box_Order_Data {
 								if ( ! isset( $field['id'] ) ) {
 									$field['id'] = '_billing_' . $key;
 								}
+
+								$field_name = 'billing_' . $key;
+
+								if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
+									$field['value'] = $order->{"get_$field_name"}( 'edit' );
+								} else {
+									$field['value'] = $order->get_meta( '_' . $field_name );
+								}
+
 								switch ( $field['type'] ) {
 									case 'select':
 										woocommerce_wp_select( $field );
@@ -460,6 +469,14 @@ class WC_Meta_Box_Order_Data {
 									}
 									if ( ! isset( $field['id'] ) ) {
 										$field['id'] = '_shipping_' . $key;
+									}
+
+									$field_name = 'shipping_' . $key;
+
+									if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
+										$field['value'] = $order->{"get_$field_name"}( 'edit' );
+									} else {
+										$field['value'] = $order->get_meta( '_' . $field_name );
 									}
 
 									switch ( $field['type'] ) {

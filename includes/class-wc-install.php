@@ -463,7 +463,7 @@ class WC_Install {
 			}
 		}
 
-		$woocommerce_default_category = get_option( 'default_product_cat', 0 );
+		$woocommerce_default_category = (int) get_option( 'default_product_cat', 0 );
 
 		if ( ! $woocommerce_default_category || ! term_exists( $woocommerce_default_category, 'product_cat' ) ) {
 			$default_product_cat_id   = 0;
@@ -475,7 +475,7 @@ class WC_Install {
 			} else {
 				$result = wp_insert_term( _x( 'Uncategorized', 'Default category slug', 'woocommerce' ), 'product_cat', array( 'slug' => $default_product_cat_slug ) );
 
-				if ( ! empty( $result['term_taxonomy_id'] ) ) {
+				if ( ! is_wp_error( $result ) && ! empty( $result['term_taxonomy_id'] ) ) {
 					$default_product_cat_id = absint( $result['term_taxonomy_id'] );
 				}
 			}
@@ -779,6 +779,15 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			// This table is only needed for old installs and is now @deprecated by WordPress term meta.
 			$tables[] = "{$wpdb->prefix}woocommerce_termmeta";
 		}
+
+		/**
+		 * Filter the list of known WooCommerce tables.
+		 *
+		 * If WooCommerce plugins need to add new tables, they can inject them here.
+		 *
+		 * @param array $tables An array of WooCommerce-specific database table names.
+		 */
+		$tables = apply_filters( 'woocommerce_install_get_tables', $tables );
 
 		return $tables;
 	}
