@@ -4,15 +4,11 @@
  *
  * Functions related to pages and menus.
  *
- * @author   Automattic
- * @category Core
  * @package  WooCommerce\Functions
  * @version  2.6.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Replace a page title with the endpoint title.
@@ -176,8 +172,8 @@ function wc_nav_menu_item_classes( $menu_items ) {
 			} elseif ( is_shop() && $shop_page === $menu_id && 'page' === $menu_item->object ) {
 				// Set active state if this is the shop page link.
 				$menu_items[ $key ]->current = true;
-				$classes[] = 'current-menu-item';
-				$classes[] = 'current_page_item';
+				$classes[]                   = 'current-menu-item';
+				$classes[]                   = 'current_page_item';
 
 			} elseif ( is_singular( 'product' ) && $shop_page === $menu_id ) {
 				// Set parent state if this is a product page.

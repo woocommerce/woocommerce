@@ -4,15 +4,11 @@
  *
  * Handles requests to the /orders/<order_id>/notes endpoint.
  *
- * @author   WooThemes
- * @category API
- * @package  WooCommerce/API
- * @since    2.6.0
+ * @package WooCommerce/API
+ * @since   2.6.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * REST API Order Notes controller class.
@@ -32,7 +28,7 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Order_Notes_V1_Controller {
 	/**
 	 * Get order notes from an order.
 	 *
-	 * @param WP_REST_Request $request
+	 * @param WP_REST_Request $request Request data.
 	 *
 	 * @return array|WP_Error
 	 */
@@ -51,7 +47,7 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Order_Notes_V1_Controller {
 
 		// Allow filter by order note type.
 		if ( 'customer' === $request['type'] ) {
-			$args['meta_query'] = array(
+			$args['meta_query'] = array( // WPCS: slow query ok.
 				array(
 					'key'     => 'is_customer_note',
 					'value'   => 1,
@@ -59,7 +55,7 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Order_Notes_V1_Controller {
 				),
 			);
 		} elseif ( 'internal' === $request['type'] ) {
-			$args['meta_query'] = array(
+			$args['meta_query'] = array( // WPCS: slow query ok.
 				array(
 					'key'     => 'is_customer_note',
 					'compare' => 'NOT EXISTS',
@@ -86,7 +82,7 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Order_Notes_V1_Controller {
 	/**
 	 * Prepare a single order note output for response.
 	 *
-	 * @param WP_Comment $note Order note object.
+	 * @param WP_Comment      $note Order note object.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
@@ -129,30 +125,30 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Order_Notes_V1_Controller {
 			'title'      => 'order_note',
 			'type'       => 'object',
 			'properties' => array(
-				'id' => array(
+				'id'               => array(
 					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'date_created' => array(
+				'date_created'     => array(
 					'description' => __( "The date the order note was created, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'date_created_gmt' => array(
-					'description' => __( "The date the order note was created, as GMT.", 'woocommerce' ),
+					'description' => __( 'The date the order note was created, as GMT.', 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'note' => array(
+				'note'             => array(
 					'description' => __( 'Order note content.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'customer_note' => array(
+				'customer_note'    => array(
 					'description' => __( 'If true, the note will be shown to customers and they will be notified. If false, the note will be for admin reference only.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'default'     => false,

@@ -62,27 +62,29 @@ class WC_Settings_Rest_API extends WC_Settings_Page {
 		$settings = array();
 
 		if ( '' === $current_section ) {
-			$settings = apply_filters( 'woocommerce_settings_rest_api', array(
-				array(
-					'title' => __( 'General options', 'woocommerce' ),
-					'type'  => 'title',
-					'desc'  => '',
-					'id'    => 'general_options',
-				),
+			$settings = apply_filters(
+				'woocommerce_settings_rest_api', array(
+					array(
+						'title' => __( 'General options', 'woocommerce' ),
+						'type'  => 'title',
+						'desc'  => '',
+						'id'    => 'general_options',
+					),
 
-				array(
-					'title'   => __( 'Legacy API', 'woocommerce' ),
-					'desc'    => __( 'Enable the legacy REST API', 'woocommerce' ),
-					'id'      => 'woocommerce_api_enabled',
-					'type'    => 'checkbox',
-					'default' => 'no',
-				),
+					array(
+						'title'   => __( 'Legacy API', 'woocommerce' ),
+						'desc'    => __( 'Enable the legacy REST API', 'woocommerce' ),
+						'id'      => 'woocommerce_api_enabled',
+						'type'    => 'checkbox',
+						'default' => 'no',
+					),
 
-				array(
-					'type' => 'sectionend',
-					'id'   => 'general_options',
-				),
-			) );
+					array(
+						'type' => 'sectionend',
+						'id'   => 'general_options',
+					),
+				)
+			);
 		}
 
 		return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings, $current_section );

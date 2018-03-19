@@ -4,15 +4,11 @@
  *
  * Handles requests to the /shipping/zones endpoint.
  *
- * @author   WooThemes
- * @category API
- * @package  WooCommerce/API
- * @since    3.0.0
+ * @package WooCommerce/API
+ * @since   3.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * REST API Shipping Zones class.
@@ -26,65 +22,71 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Shipping_Zones_Controlle
 	 * Register the routes for Shipping Zones.
 	 */
 	public function register_routes() {
-		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
-			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_items' ),
-				'permission_callback' => array( $this, 'get_items_permissions_check' ),
-			),
-			array(
-				'methods'             => WP_REST_Server::CREATABLE,
-				'callback'            => array( $this, 'create_item' ),
-				'permission_callback' => array( $this, 'create_item_permissions_check' ),
-				'args'                => array_merge( $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
-					'name' => array(
-						'required'    => true,
-						'type'        => 'string',
-						'description' => __( 'Shipping zone name.', 'woocommerce' ),
+		register_rest_route(
+			$this->namespace, '/' . $this->rest_base, array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_items' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				),
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'create_item' ),
+					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+					'args'                => array_merge(
+						$this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
+							'name' => array(
+								'required'    => true,
+								'type'        => 'string',
+								'description' => __( 'Shipping zone name.', 'woocommerce' ),
+							),
+						)
 					),
-				) ),
-			),
-			'schema' => array( $this, 'get_public_item_schema' ),
-		) );
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
 
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d-]+)', array(
-			'args' => array(
-				'id' => array(
-					'description' => __( 'Unique ID for the resource.', 'woocommerce' ),
-					'type'        => 'integer',
-				),
-			),
-			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_item' ),
-				'permission_callback' => array( $this, 'get_items_permissions_check' ),
-			),
-			array(
-				'methods'             => WP_REST_Server::EDITABLE,
-				'callback'            => array( $this, 'update_item' ),
-				'permission_callback' => array( $this, 'update_items_permissions_check' ),
-				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
-			),
-			array(
-				'methods'             => WP_REST_Server::DELETABLE,
-				'callback'            => array( $this, 'delete_item' ),
-				'permission_callback' => array( $this, 'delete_items_permissions_check' ),
-				'args'                => array(
-					'force' => array(
-						'default'     => false,
-						'type'        => 'boolean',
-						'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce' ),
+		register_rest_route(
+			$this->namespace, '/' . $this->rest_base . '/(?P<id>[\d-]+)', array(
+				'args'   => array(
+					'id' => array(
+						'description' => __( 'Unique ID for the resource.', 'woocommerce' ),
+						'type'        => 'integer',
 					),
 				),
-			),
-			'schema' => array( $this, 'get_public_item_schema' ),
-		) );
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_item' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				),
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'update_item' ),
+					'permission_callback' => array( $this, 'update_items_permissions_check' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+				),
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'delete_item' ),
+					'permission_callback' => array( $this, 'delete_items_permissions_check' ),
+					'args'                => array(
+						'force' => array(
+							'default'     => false,
+							'type'        => 'boolean',
+							'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce' ),
+						),
+					),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
 	}
 
 	/**
 	 * Get a single Shipping Zone.
 	 *
-	 * @param WP_REST_Request $request
+	 * @param WP_REST_Request $request Request data.
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_item( $request ) {
@@ -104,7 +106,7 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Shipping_Zones_Controlle
 	/**
 	 * Get all Shipping Zones.
 	 *
-	 * @param WP_REST_Request $request
+	 * @param WP_REST_Request $request Request data.
 	 * @return WP_REST_Response
 	 */
 	public function get_items( $request ) {
@@ -112,7 +114,7 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Shipping_Zones_Controlle
 
 		$zones = WC_Shipping_Zones::get_zones();
 		array_unshift( $zones, $rest_of_the_world->get_data() );
-		$data  = array();
+		$data = array();
 
 		foreach ( $zones as $zone_obj ) {
 			$zone   = $this->prepare_item_for_response( $zone_obj, $request );
@@ -167,7 +169,7 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Shipping_Zones_Controlle
 		}
 
 		if ( 0 === $zone->get_id() ) {
-			return new WP_Error( "woocommerce_rest_shipping_zone_invalid_zone", __( 'The "locations not covered by your other zones" zone cannot be updated.', 'woocommerce' ), array( 'status' => 403 ) );
+			return new WP_Error( 'woocommerce_rest_shipping_zone_invalid_zone', __( 'The "locations not covered by your other zones" zone cannot be updated.', 'woocommerce' ), array( 'status' => 403 ) );
 		}
 
 		$zone_changed = false;
@@ -218,7 +220,7 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Shipping_Zones_Controlle
 	/**
 	 * Prepare the Shipping Zone for the REST response.
 	 *
-	 * @param array $item Shipping Zone.
+	 * @param array           $item Shipping Zone.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response
 	 */
@@ -250,10 +252,10 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Shipping_Zones_Controlle
 	protected function prepare_links( $zone_id ) {
 		$base  = '/' . $this->namespace . '/' . $this->rest_base;
 		$links = array(
-			'self'       => array(
+			'self'        => array(
 				'href' => rest_url( trailingslashit( $base ) . $zone_id ),
 			),
-			'collection' => array(
+			'collection'  => array(
 				'href' => rest_url( $base ),
 			),
 			'describedby' => array(
@@ -275,13 +277,13 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Shipping_Zones_Controlle
 			'title'      => 'shipping_zone',
 			'type'       => 'object',
 			'properties' => array(
-				'id' => array(
+				'id'    => array(
 					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'name' => array(
+				'name'  => array(
 					'description' => __( 'Shipping zone name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),

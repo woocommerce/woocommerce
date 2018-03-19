@@ -4,13 +4,11 @@
  *
  * Handles requests to the /orders/<order_id>/refunds endpoint.
  *
- * @package  WooCommerce/API
- * @since    2.6.0
+ * @package WooCommerce/API
+ * @since   2.6.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * REST API Order Refunds controller class.

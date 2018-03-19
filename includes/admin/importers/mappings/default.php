@@ -1,4 +1,9 @@
 <?php
+/**
+ * Default mappings
+ *
+ * @package WooCommerce\Admin\Importers
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -23,7 +28,7 @@ function wc_importer_current_locale() {
  * Add English mapping placeholders when not using English as current language.
  *
  * @since 3.1.0
- * @param array $mappings
+ * @param array $mappings Importer columns mappings.
  * @return array
  */
 function wc_importer_default_english_mappings( $mappings ) {
@@ -31,9 +36,9 @@ function wc_importer_default_english_mappings( $mappings ) {
 		return $mappings;
 	}
 
-	$weight_unit      = get_option( 'woocommerce_weight_unit' );
-	$dimension_unit   = get_option( 'woocommerce_dimension_unit' );
-	$new_mappings = array(
+	$weight_unit    = get_option( 'woocommerce_weight_unit' );
+	$dimension_unit = get_option( 'woocommerce_dimension_unit' );
+	$new_mappings   = array(
 		'ID'                                      => 'id',
 		'Type'                                    => 'type',
 		'SKU'                                     => 'sku',
@@ -82,7 +87,7 @@ add_filter( 'woocommerce_csv_product_import_mapping_default_columns', 'wc_import
  * Add English special mapping placeholders when not using English as current language.
  *
  * @since 3.1.0
- * @param array $mappings
+ * @param array $mappings Importer columns mappings.
  * @return array
  */
 function wc_importer_default_special_english_mappings( $mappings ) {

@@ -1,4 +1,10 @@
 <?php
+/**
+ * Class WC_Product_Grouped_Data_Store_CPT file.
+ *
+ * @package WooCommerce\DataStores
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -7,16 +13,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  * WC Grouped Product Data Store: Stored in CPT.
  *
  * @version  3.0.0
- * @category Class
- * @author   WooThemes
  */
 class WC_Product_Grouped_Data_Store_CPT extends WC_Product_Data_Store_CPT implements WC_Object_Data_Store_Interface {
 
 	/**
 	 * Helper method that updates all the post meta for a grouped product.
 	 *
-	 * @param WC_Product
-	 * @param bool Force update. Used during create.
+	 * @param WC_Product $product Product object.
+	 * @param bool       $force Force update. Used during create.
 	 * @since 3.0.0
 	 */
 	protected function update_post_meta( &$product, $force = false ) {
@@ -41,10 +45,10 @@ class WC_Product_Grouped_Data_Store_CPT extends WC_Product_Data_Store_CPT implem
 	 * Handle updated meta props after updating meta data.
 	 *
 	 * @since  3.0.0
-	 * @param  WC_Product $product
+	 * @param  WC_Product $product Product object.
 	 */
 	protected function handle_updated_props( &$product ) {
-		if ( in_array( 'children', $this->updated_props ) ) {
+		if ( in_array( 'children', $this->updated_props, true ) ) {
 			$this->update_prices_from_children( $product );
 		}
 		parent::handle_updated_props( $product );
@@ -54,7 +58,7 @@ class WC_Product_Grouped_Data_Store_CPT extends WC_Product_Data_Store_CPT implem
 	 * Sync grouped product prices with children.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Product|int $product
+	 * @param WC_Product|int $product Product object or product ID.
 	 */
 	public function sync_price( &$product ) {
 		$this->update_prices_from_children( $product );
