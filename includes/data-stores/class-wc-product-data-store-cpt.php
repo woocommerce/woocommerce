@@ -1363,7 +1363,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 			foreach ( $search_terms as $search_term ) {
 				$like              = '%' . $wpdb->esc_like( $search_term ) . '%';
-				$term_group_query .= $wpdb->prepare( " {$searchand} ( ( posts.post_title LIKE %s) OR ( posts.post_excerpt LIKE %s) OR ( posts.post_content LIKE %s ) OR ( postmeta.meta_key = '_sku' AND postmeta.meta_value LIKE %s ) )", $like, $like, $like ); // @codingStandardsIgnoreLine.
+				$term_group_query .= $wpdb->prepare( " {$searchand} ( ( posts.post_title LIKE %s) OR ( posts.post_excerpt LIKE %s) OR ( posts.post_content LIKE %s ) OR ( postmeta.meta_key = '_sku' AND postmeta.meta_value LIKE %s ) )", $like, $like, $like, $like ); // @codingStandardsIgnoreLine.
 				$searchand         = ' AND ';
 			}
 
@@ -1376,11 +1376,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$search_where = 'AND (' . implode( ') OR (', $search_queries ) . ')';
 		}
 
-		if ( $type ) {
-			if ( in_array( $type, array( 'virtual', 'downloadable' ), true ) ) {
-				$type_join  = " LEFT JOIN {$wpdb->postmeta} postmeta_type ON posts.ID = postmeta_type.post_id ";
-				$type_where = " AND ( postmeta_type.meta_key = '_{$type}' AND postmeta_type.meta_value = 'yes' ) ";
-			}
+		if ( $type && in_array( $type, array( 'virtual', 'downloadable' ), true ) ) {
+			$type_join  = " LEFT JOIN {$wpdb->postmeta} postmeta_type ON posts.ID = postmeta_type.post_id ";
+			$type_where = " AND ( postmeta_type.meta_key = '_{$type}' AND postmeta_type.meta_value = 'yes' ) ";
 		}
 
 		if ( ! $all_statuses ) {
