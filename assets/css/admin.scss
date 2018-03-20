@@ -74,14 +74,6 @@
 		margin: -2px 0 12px;
 	}
 
-	.subsubsub li::after {
-		content: '|';
-	}
-
-	.subsubsub li:last-child::after {
-		content: '';
-	}
-
 	.addons-banner-block-item-icon,
 	.addons-column-block-item-icon {
 		align-items: center;
