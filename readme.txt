@@ -161,7 +161,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 
 == Changelog ==
 
-= 3.3.4 - 2018-03-xx =
+= 3.3.4 - 2018-03-20 =
 * Fix - Fixed undefined index after running setup wizard two times on fresh install.
 * Fix - wc_get_loop_class; force columns to be a minimum of 1.
 * Fix - Added loading spinner to WC panels in menu admin. 
@@ -177,6 +177,12 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Properly check slugs when updating attributes.
 * Fix - Use gallery thumbnail size for variation image switcher.
 * Fix - Clear subcategory cache when updating product categories.
+* Fix - Round fractional cents when out of base.
+* Fix - Inherit 'is variation' from existing attribute during csv import.
+* Fix - Set is_shortcode loop prop when outputting subcategories.
+* Fix - Reload gateways after updating the order.
+* Tweak - Use wc_get_default_products_per_row as the default for product shortcodes.
+* Tweak - Add post_excerpt to product search.
 * Tweak - Update the description of the user tracking notice in the onboarding wizard.
 * Tweak - Add extra data in order mobile view (status and date).
 * Tweak - Add profile link to order screen.
