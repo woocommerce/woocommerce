@@ -530,7 +530,7 @@ class WC_Admin_Addons {
 		 * @uses $addons
 		 * @uses $sections
 		 * @uses $theme
-		 * @uses $section_key
+		 * @uses $section_keys
 		 * @uses $current_section
 		 */
 		include_once dirname( __FILE__ ) . '/views/html-admin-page-addons.php';
