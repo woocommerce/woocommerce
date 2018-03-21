@@ -10,7 +10,7 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * WC_Order_Refund class.
+ * Order refund class.
  */
 class WC_Order_Refund extends WC_Abstract_Order {
 

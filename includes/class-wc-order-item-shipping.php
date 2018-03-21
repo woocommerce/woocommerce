@@ -1,18 +1,16 @@
 <?php
 /**
- * Order Line Item (shipping).
+ * Order Line Item (shipping)
  *
- * @version     3.0.0
- * @since       3.0.0
- * @package     WooCommerce/Classes
+ * @package WooCommerce/Classes
+ * @version 3.0.0
+ * @since   3.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
- * WC_Order_Item_Shipping class.
+ * Order item shipping class.
  */
 class WC_Order_Item_Shipping extends WC_Order_Item {
 
