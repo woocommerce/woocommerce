@@ -8,16 +8,12 @@
  * @class    WC_Session_Handler
  * @version  2.5.0
  * @package  WooCommerce/Classes
- * @category Class
- * @author   Automattic
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
- * WC_Session_Handler
+ * Session handler class.
  */
 class WC_Session_Handler extends WC_Session {
 
