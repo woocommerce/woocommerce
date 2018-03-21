@@ -436,7 +436,7 @@ class WC_Query {
 				if ( is_search() ) {
 					$orderby_value = 'relevance';
 				} else {
-					$orderby_value = apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
+					$orderby_value = apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby', 'menu_order' ) );
 				}
 			}
 
