@@ -1,28 +1,23 @@
 <?php
 /**
- * Class WC_Validation file
+ * General user data validation methods
  *
  * @package WooCommerce\Classes
+ * @version  2.4.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
- * Contains Validation functions
- *
- * @class    WC_Validation
- * @version  2.4.0
- * @package  WooCommerce/Classes
+ * Validation class.
  */
 class WC_Validation {
 
 	/**
 	 * Validates an email using WordPress native is_email function.
 	 *
-	 * @param   string $email Email address to validate.
-	 * @return  bool
+	 * @param  string $email Email address to validate.
+	 * @return bool
 	 */
 	public static function is_email( $email ) {
 		return is_email( $email );
@@ -31,8 +26,8 @@ class WC_Validation {
 	/**
 	 * Validates a phone number using a regular expression.
 	 *
-	 * @param   string $phone Phone number to validate.
-	 * @return  bool
+	 * @param  string $phone Phone number to validate.
+	 * @return bool
 	 */
 	public static function is_phone( $phone ) {
 		if ( 0 < strlen( trim( preg_replace( '/[\s\#0-9_\-\+\/\(\)]/', '', $phone ) ) ) ) {
@@ -45,9 +40,9 @@ class WC_Validation {
 	/**
 	 * Checks for a valid postcode.
 	 *
-	 * @param   string $postcode Postcode to validate.
-	 * @param   string $country Country to validate the postcode for.
-	 * @return  bool
+	 * @param  string $postcode Postcode to validate.
+	 * @param  string $country Country to validate the postcode for.
+	 * @return bool
 	 */
 	public static function is_postcode( $postcode, $country ) {
 		if ( strlen( trim( preg_replace( '/[\s\-A-Za-z0-9]/', '', $postcode ) ) ) > 0 ) {
@@ -161,9 +156,9 @@ class WC_Validation {
 	/**
 	 * Format the postcode according to the country and length of the postcode.
 	 *
-	 * @param   string $postcode Postcode to format.
-	 * @param   string $country Country to format the postcode for.
-	 * @return  string  Formatted postcode.
+	 * @param  string $postcode Postcode to format.
+	 * @param  string $country Country to format the postcode for.
+	 * @return string  Formatted postcode.
 	 */
 	public static function format_postcode( $postcode, $country ) {
 		return wc_format_postcode( $postcode, $country );
@@ -172,7 +167,7 @@ class WC_Validation {
 	/**
 	 * Format a given phone number.
 	 *
-	 * @param mixed $tel Phone number to format.
+	 * @param  mixed $tel Phone number to format.
 	 * @return string
 	 */
 	public static function format_phone( $tel ) {
