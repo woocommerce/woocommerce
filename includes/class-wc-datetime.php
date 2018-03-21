@@ -1,18 +1,16 @@
 <?php
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 /**
  * WC Wrapper for PHP DateTime which adds support for gmt/utc offset when a
- * timezone is absent.
+ * timezone is absent
  *
- * @class    WC_DateTime
- * @since    3.0.0
- * @package  WooCommerce/Classes
- * @category Class
- * @author   WooThemes
+ * @since   3.0.0
+ * @package WooCommerce/Classes
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Datetime class.
  */
 class WC_DateTime extends DateTime {
 
@@ -37,7 +35,7 @@ class WC_DateTime extends DateTime {
 	/**
 	 * Set UTC offset - this is a fixed offset instead of a timezone.
 	 *
-	 * @param int $offset
+	 * @param int $offset Offset.
 	 */
 	public function set_utc_offset( $offset ) {
 		$this->utc_offset = intval( $offset );
@@ -57,8 +55,7 @@ class WC_DateTime extends DateTime {
 	/**
 	 * Set timezone.
 	 *
-	 * @param DateTimeZone $timezone
-	 *
+	 * @param DateTimeZone $timezone DateTimeZone instance.
 	 * @return DateTime
 	 */
 	public function setTimezone( $timezone ) {
@@ -90,7 +87,7 @@ class WC_DateTime extends DateTime {
 	 * Format a date based on the offset timestamp.
 	 *
 	 * @since  3.0.0
-	 * @param  string $format
+	 * @param  string $format Date format.
 	 * @return string
 	 */
 	public function date( $format ) {
@@ -101,7 +98,7 @@ class WC_DateTime extends DateTime {
 	 * Return a localised date based on offset timestamp. Wrapper for date_i18n function.
 	 *
 	 * @since  3.0.0
-	 * @param  string $format
+	 * @param  string $format Date format.
 	 * @return string
 	 */
 	public function date_i18n( $format = 'Y-m-d' ) {
