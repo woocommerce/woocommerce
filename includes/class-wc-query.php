@@ -47,8 +47,7 @@ class WC_Query {
 			add_filter( 'query_vars', array( $this, 'add_query_vars' ), 0 );
 			add_action( 'parse_request', array( $this, 'parse_request' ), 0 );
 			add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
-			//add_action( 'wp', array( $this, 'remove_product_query' ) );
-			//add_action( 'wp', array( $this, 'remove_ordering_args' ) );
+			add_filter( 'the_posts', array( $this, 'remove_product_query_filters' ) );
 			add_filter( 'get_pagenum_link', array( $this, 'remove_add_to_cart_pagination' ), 10, 1 );
 		}
 		$this->init_query_vars();
@@ -343,9 +342,20 @@ class WC_Query {
 		}
 
 		$this->product_query( $q );
+	}
 
-		// And remove the pre_get_posts hook.
-		//$this->remove_product_query();
+	/**
+	 * Pre_get_posts above may adjust the main query to add WooCommerce logic. When this query is done, we need to ensure
+	 * all custom filters are removed.
+	 *
+	 * This is done here during the_posts filter. The input is not changed.
+	 *
+	 * @param array $posts Posts from WP Query.
+	 * @return array
+	 */
+	public function remove_product_query_filters( $posts ) {
+		$this->remove_ordering_args();
+		return $posts;
 	}
 
 	/**
