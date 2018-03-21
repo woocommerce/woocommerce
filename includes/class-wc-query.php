@@ -4,12 +4,9 @@
  *
  * @version 3.2.0
  * @package WooCommerce\Classes
- * @author  Automattic
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Query Class.
@@ -379,7 +376,7 @@ class WC_Query {
 	 */
 	public function product_query( $q ) {
 		if ( ! is_feed() ) {
-			$ordering  = $this->get_catalog_ordering_args();
+			$ordering = $this->get_catalog_ordering_args();
 			$q->set( 'orderby', $ordering['orderby'] );
 			$q->set( 'order', $ordering['order'] );
 
@@ -430,7 +427,7 @@ class WC_Query {
 	public function get_catalog_ordering_args( $orderby = '', $order = '' ) {
 		// Get ordering from query string unless defined.
 		if ( ! $orderby ) {
-			$orderby_value = isset( $_GET['orderby'] ) ? wc_clean( (string) wp_unslash( $_GET['orderby'] ) ) : ''; // WPCS: sanitization ok, input var ok.
+			$orderby_value = isset( $_GET['orderby'] ) ? wc_clean( (string) wp_unslash( $_GET['orderby'] ) ) : ''; // WPCS: sanitization ok, input var ok, CSRF ok.
 
 			if ( ! $orderby_value ) {
 				if ( is_search() ) {
@@ -456,7 +453,7 @@ class WC_Query {
 
 		switch ( $orderby ) {
 			case 'menu_order':
-				$args['orderby']  = 'menu_order title';
+				$args['orderby'] = 'menu_order title';
 				break;
 			case 'title':
 				$args['orderby'] = 'title';
@@ -510,7 +507,7 @@ class WC_Query {
 		if ( isset( $wp_query->queried_object, $wp_query->queried_object->term_taxonomy_id, $wp_query->queried_object->taxonomy ) && is_a( $wp_query->queried_object, 'WP_Term' ) ) {
 			$search_within_terms   = get_term_children( $wp_query->queried_object->term_taxonomy_id, $wp_query->queried_object->taxonomy );
 			$search_within_terms[] = $wp_query->queried_object->term_taxonomy_id;
-			$args['join'] .= " INNER JOIN (
+			$args['join']         .= " INNER JOIN (
 				SELECT post_id, max( meta_value+0 ) price
 				FROM $wpdb->postmeta
 				INNER JOIN (
@@ -521,7 +518,7 @@ class WC_Query {
 				) as products_within_terms ON $wpdb->postmeta.post_id = products_within_terms.object_id
 				WHERE meta_key='_price' GROUP BY post_id ) as price_query ON $wpdb->posts.ID = price_query.post_id ";
 		} else {
-			$args['join']    .= " INNER JOIN ( SELECT post_id, min( meta_value+0 ) price FROM $wpdb->postmeta WHERE meta_key='_price' GROUP BY post_id ) as price_query ON $wpdb->posts.ID = price_query.post_id ";
+			$args['join'] .= " INNER JOIN ( SELECT post_id, min( meta_value+0 ) price FROM $wpdb->postmeta WHERE meta_key='_price' GROUP BY post_id ) as price_query ON $wpdb->posts.ID = price_query.post_id ";
 		}
 		$args['orderby'] = " price_query.price ASC, $wpdb->posts.ID ASC ";
 		return $args;
@@ -539,7 +536,7 @@ class WC_Query {
 		if ( isset( $wp_query->queried_object, $wp_query->queried_object->term_taxonomy_id, $wp_query->queried_object->taxonomy ) && is_a( $wp_query->queried_object, 'WP_Term' ) ) {
 			$search_within_terms   = get_term_children( $wp_query->queried_object->term_taxonomy_id, $wp_query->queried_object->taxonomy );
 			$search_within_terms[] = $wp_query->queried_object->term_taxonomy_id;
-			$args['join'] .= " INNER JOIN (
+			$args['join']         .= " INNER JOIN (
 				SELECT post_id, max( meta_value+0 ) price
 				FROM $wpdb->postmeta
 				INNER JOIN (
@@ -582,7 +579,7 @@ class WC_Query {
 		if ( ! is_array( $meta_query ) ) {
 			$meta_query = array();
 		}
-		$meta_query['price_filter']  = $this->price_filter_meta_query();
+		$meta_query['price_filter'] = $this->price_filter_meta_query();
 		return array_filter( apply_filters( 'woocommerce_product_query_meta_query', $meta_query, $this ) );
 	}
 
@@ -660,7 +657,7 @@ class WC_Query {
 	 */
 	private function price_filter_meta_query() {
 		if ( isset( $_GET['max_price'] ) || isset( $_GET['min_price'] ) ) { // WPCS: input var ok, CSRF ok.
-			$meta_query = wc_get_min_max_price_meta_query( $_GET ); // WPCS: input var ok, CSRF ok.
+			$meta_query                 = wc_get_min_max_price_meta_query( $_GET ); // WPCS: input var ok, CSRF ok.
 			$meta_query['price_filter'] = true;
 
 			return $meta_query;
@@ -749,14 +746,14 @@ class WC_Query {
 				foreach ( $attribute_taxonomies as $tax ) {
 					$attribute    = wc_sanitize_taxonomy_name( $tax->attribute_name );
 					$taxonomy     = wc_attribute_taxonomy_name( $attribute );
-					$filter_terms = ! empty( $_GET[ 'filter_' . $attribute ] ) ? explode( ',', wc_clean( wp_unslash( $_GET[ 'filter_' . $attribute ] ) ) ) : array(); // WPCS: sanitization ok, input var ok.
+					$filter_terms = ! empty( $_GET[ 'filter_' . $attribute ] ) ? explode( ',', wc_clean( wp_unslash( $_GET[ 'filter_' . $attribute ] ) ) ) : array(); // WPCS: sanitization ok, input var ok, CSRF ok.
 
 					if ( empty( $filter_terms ) || ! taxonomy_exists( $taxonomy ) ) {
 						continue;
 					}
 
-					$query_type = ! empty( $_GET[ 'query_type_' . $attribute ] ) && in_array( $_GET[ 'query_type_' . $attribute ], array( 'and', 'or' ), true ) ? wc_clean( wp_unslash( $_GET[ 'query_type_' . $attribute ] ) ) : ''; // WPCS: sanitization ok, input var ok.
-					self::$_chosen_attributes[ $taxonomy ]['terms']      = array_map( 'sanitize_title', $filter_terms ); // Ensures correct encoding.
+					$query_type                                     = ! empty( $_GET[ 'query_type_' . $attribute ] ) && in_array( $_GET[ 'query_type_' . $attribute ], array( 'and', 'or' ), true ) ? wc_clean( wp_unslash( $_GET[ 'query_type_' . $attribute ] ) ) : ''; // WPCS: sanitization ok, input var ok, CSRF ok.
+					self::$_chosen_attributes[ $taxonomy ]['terms'] = array_map( 'sanitize_title', $filter_terms ); // Ensures correct encoding.
 					self::$_chosen_attributes[ $taxonomy ]['query_type'] = $query_type ? $query_type : apply_filters( 'woocommerce_layered_nav_default_query_type', 'and' );
 				}
 			}

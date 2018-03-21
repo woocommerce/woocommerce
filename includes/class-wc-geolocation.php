@@ -6,15 +6,11 @@
  *
  * This product includes GeoLite data created by MaxMind, available from http://www.maxmind.com.
  *
- * @author   WooThemes
- * @category Admin
- * @package  WooCommerce/Classes
- * @version  2.4.0
+ * @package WooCommerce/Classes
+ * @version 2.4.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Geolocation Class.

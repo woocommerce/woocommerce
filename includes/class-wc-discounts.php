@@ -509,7 +509,7 @@ class WC_Discounts {
 			$this->discounts[ $coupon->get_code() ][ $item->key ] += $discount;
 		}
 
-		// Allow post-processing for custom coupon types (e.g. calculating discrepancy, etc)
+		// Allow post-processing for custom coupon types (e.g. calculating discrepancy, etc).
 		$this->discounts[ $coupon->get_code() ] = apply_filters( 'woocommerce_coupon_custom_discounts_array', $this->discounts[ $coupon->get_code() ], $coupon );
 
 		return array_sum( $this->discounts[ $coupon->get_code() ] );
