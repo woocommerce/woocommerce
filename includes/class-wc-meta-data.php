@@ -7,16 +7,12 @@
  *
  * @version 3.2.0
  * @package WooCommerce
- * @category Class
- * @author crodas
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
- * WC_Meta_Data class.
+ * Meta data class.
  */
 class WC_Meta_Data implements JsonSerializable {
 
@@ -39,7 +35,7 @@ class WC_Meta_Data implements JsonSerializable {
 	/**
 	 * Constructor.
 	 *
-	 * @param array	$meta Data to wrap behind this function.
+	 * @param array $meta Data to wrap behind this function.
 	 */
 	public function __construct( $meta = array() ) {
 		$this->current_data = $meta;
