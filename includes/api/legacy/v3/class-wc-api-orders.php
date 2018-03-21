@@ -1316,7 +1316,7 @@ class WC_API_Orders extends WC_API_Resource {
 				'id'            => $note->comment_ID,
 				'created_at'    => $this->server->format_datetime( $note->comment_date_gmt ),
 				'note'          => $note->comment_content,
-				'customer_note' => get_comment_meta( $note->comment_ID, 'is_customer_note', true ) ? true : false,
+				'customer_note' => (bool) get_comment_meta( $note->comment_ID, 'is_customer_note', true ),
 			);
 
 			return array( 'order_note' => apply_filters( 'woocommerce_api_order_note_response', $order_note, $id, $fields, $note, $order_id, $this ) );

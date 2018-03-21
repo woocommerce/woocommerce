@@ -1876,7 +1876,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return bool
 	 */
 	public function has_status( $status ) {
-		return apply_filters( 'woocommerce_order_has_status', ( is_array( $status ) && in_array( $this->get_status(), $status, true ) ) || $this->get_status() === $status ? true : false, $this, $status );
+		return apply_filters( 'woocommerce_order_has_status', ( is_array( $status ) && in_array( $this->get_status(), $status, true ) ) || $this->get_status() === $status, $this, $status );
 	}
 
 	/**

@@ -1360,7 +1360,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @since 2.5.0
 	 */
 	public function supports( $feature ) {
-		return apply_filters( 'woocommerce_product_supports', in_array( $feature, $this->supports ) ? true : false, $feature, $this );
+		return apply_filters( 'woocommerce_product_supports', in_array( $feature, $this->supports ), $feature, $this );
 	}
 
 	/**
@@ -1577,7 +1577,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			return true;
 		}
 
-		return $this->managing_stock() && $this->backorders_allowed() && ( $this->get_stock_quantity() - $qty_in_cart ) < 0 ? true : false;
+		return $this->managing_stock() && $this->backorders_allowed() && ( $this->get_stock_quantity() - $qty_in_cart ) < 0;
 	}
 
 	/**
