@@ -1,12 +1,11 @@
 <?php
 /**
- * WooCommerce Shipping Class
+ * WooCommerce Shipping
  *
  * Handles shipping and loads shipping methods via hooks.
  *
- * @class       WC_Shipping
- * @version     2.6.0
- * @package     WooCommerce/Classes/Shipping
+ * @version 2.6.0
+ * @package WooCommerce/Classes/Shipping
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -14,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Shipping
+ * Shipping class.
  */
 class WC_Shipping {
 
@@ -60,7 +59,6 @@ class WC_Shipping {
 	 * Ensures only one instance of WC_Shipping is loaded or can be loaded.
 	 *
 	 * @since 2.1
-	 * @static
 	 * @return WC_Shipping Main instance
 	 */
 	public static function instance() {
