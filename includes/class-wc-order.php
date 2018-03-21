@@ -130,10 +130,12 @@ class WC_Order extends WC_Abstract_Order {
 			wc_transaction_query( 'rollback' );
 
 			$logger = wc_get_logger();
-			$logger->error( sprintf( 'Payment complete of order #%d failed!', $this->get_id() ), array(
-				'order' => $this,
-				'error' => $e,
-			) );
+			$logger->error(
+				sprintf( 'Payment complete of order #%d failed!', $this->get_id() ), array(
+					'order' => $this,
+					'error' => $e,
+				)
+			);
 			$this->add_order_note( __( 'Payment complete event failed.', 'woocommerce' ) . ' ' . $e->getMessage() );
 
 			return false;
@@ -232,10 +234,12 @@ class WC_Order extends WC_Abstract_Order {
 			$this->status_transition();
 		} catch ( Exception $e ) {
 			$logger = wc_get_logger();
-			$logger->error( sprintf( 'Error saving order #%d', $this->get_id() ), array(
-				'order' => $this,
-				'error' => $e,
-			) );
+			$logger->error(
+				sprintf( 'Error saving order #%d', $this->get_id() ), array(
+					'order' => $this,
+					'error' => $e,
+				)
+			);
 			$this->add_order_note( __( 'Error saving order.', 'woocommerce' ) . ' ' . $e->getMessage() );
 		}
 
@@ -326,10 +330,12 @@ class WC_Order extends WC_Abstract_Order {
 			wc_transaction_query( 'rollback' );
 
 			$logger = wc_get_logger();
-			$logger->error( sprintf( 'Update status of order #%d failed!', $this->get_id() ), array(
-				'order' => $this,
-				'error' => $e,
-			) );
+			$logger->error(
+				sprintf( 'Update status of order #%d failed!', $this->get_id() ), array(
+					'order' => $this,
+					'error' => $e,
+				)
+			);
 			$this->add_order_note( __( 'Update status event failed.', 'woocommerce' ) . ' ' . $e->getMessage() );
 			return false;
 		}
@@ -364,10 +370,12 @@ class WC_Order extends WC_Abstract_Order {
 				$this->add_order_note( trim( $status_transition['note'] . ' ' . $transition_note ), 0, $status_transition['manual'] );
 			} catch ( Exception $e ) {
 				$logger = wc_get_logger();
-				$logger->error( sprintf( 'Status transition of order #%d errored!', $this->get_id() ), array(
-					'order' => $this,
-					'error' => $e,
-				) );
+				$logger->error(
+					sprintf( 'Status transition of order #%d errored!', $this->get_id() ), array(
+						'order' => $this,
+						'error' => $e,
+					)
+				);
 				$this->add_order_note( __( 'Error during status transition.', 'woocommerce' ) . ' ' . $e->getMessage() );
 			}
 		}
@@ -1497,10 +1505,12 @@ class WC_Order extends WC_Abstract_Order {
 		if ( $on_checkout ) {
 			$pay_url = add_query_arg( 'key', $this->get_order_key(), $pay_url );
 		} else {
-			$pay_url = add_query_arg( array(
-				'pay_for_order' => 'true',
-				'key'           => $this->get_order_key(),
-			), $pay_url );
+			$pay_url = add_query_arg(
+				array(
+					'pay_for_order' => 'true',
+					'key'           => $this->get_order_key(),
+				), $pay_url
+			);
 		}
 
 		return apply_filters( 'woocommerce_get_checkout_payment_url', $pay_url, $this );
@@ -1530,12 +1540,18 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_cancel_order_url( $redirect = '' ) {
-		return apply_filters( 'woocommerce_get_cancel_order_url', wp_nonce_url( add_query_arg( array(
-			'cancel_order' => 'true',
-			'order'        => $this->get_order_key(),
-			'order_id'     => $this->get_id(),
-			'redirect'     => $redirect,
-		), $this->get_cancel_endpoint() ), 'woocommerce-cancel_order' ) );
+		return apply_filters(
+			'woocommerce_get_cancel_order_url', wp_nonce_url(
+				add_query_arg(
+					array(
+						'cancel_order' => 'true',
+						'order'        => $this->get_order_key(),
+						'order_id'     => $this->get_id(),
+						'redirect'     => $redirect,
+					), $this->get_cancel_endpoint()
+				), 'woocommerce-cancel_order'
+			)
+		);
 	}
 
 	/**
@@ -1545,13 +1561,17 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string The unescaped cancel-order URL.
 	 */
 	public function get_cancel_order_url_raw( $redirect = '' ) {
-		return apply_filters( 'woocommerce_get_cancel_order_url_raw', add_query_arg( array(
-			'cancel_order' => 'true',
-			'order'        => $this->get_order_key(),
-			'order_id'     => $this->get_id(),
-			'redirect'     => $redirect,
-			'_wpnonce'     => wp_create_nonce( 'woocommerce-cancel_order' ),
-		), $this->get_cancel_endpoint() ) );
+		return apply_filters(
+			'woocommerce_get_cancel_order_url_raw', add_query_arg(
+				array(
+					'cancel_order' => 'true',
+					'order'        => $this->get_order_key(),
+					'order_id'     => $this->get_id(),
+					'redirect'     => $redirect,
+					'_wpnonce'     => wp_create_nonce( 'woocommerce-cancel_order' ),
+				), $this->get_cancel_endpoint()
+			)
+		);
 	}
 
 	/**
@@ -1620,7 +1640,8 @@ class WC_Order extends WC_Abstract_Order {
 			$comment_author_email .= isset( $_SERVER['HTTP_HOST'] ) ? str_replace( 'www.', '', sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) ) : 'noreply.com'; // WPCS: input var ok.
 			$comment_author_email  = sanitize_email( $comment_author_email );
 		}
-		$commentdata = apply_filters( 'woocommerce_new_order_note_data',
+		$commentdata = apply_filters(
+			'woocommerce_new_order_note_data',
 			array(
 				'comment_post_ID'      => $this->get_id(),
 				'comment_author'       => $comment_author,
@@ -1643,10 +1664,12 @@ class WC_Order extends WC_Abstract_Order {
 		if ( $is_customer_note ) {
 			add_comment_meta( $comment_id, 'is_customer_note', 1 );
 
-			do_action( 'woocommerce_new_customer_note', array(
-				'order_id'      => $this->get_id(),
-				'customer_note' => $commentdata['comment_content'],
-			) );
+			do_action(
+				'woocommerce_new_customer_note', array(
+					'order_id'      => $this->get_id(),
+					'customer_note' => $commentdata['comment_content'],
+				)
+			);
 		}
 
 		return $comment_id;
@@ -1702,11 +1725,13 @@ class WC_Order extends WC_Abstract_Order {
 			return $cached_data;
 		}
 
-		$this->refunds = wc_get_orders( array(
-			'type'   => 'shop_order_refund',
-			'parent' => $this->get_id(),
-			'limit'  => -1,
-		) );
+		$this->refunds = wc_get_orders(
+			array(
+				'type'   => 'shop_order_refund',
+				'parent' => $this->get_id(),
+				'limit'  => -1,
+			)
+		);
 
 		wp_cache_set( $cache_key, $this->refunds, $this->cache_group );
 
