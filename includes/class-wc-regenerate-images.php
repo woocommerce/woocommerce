@@ -6,7 +6,7 @@
  *
  * @package WooCommerce/Classes
  * @version 3.3.0
- * @since 3.3.0
+ * @since   3.3.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -159,7 +159,8 @@ class WC_Regenerate_Images {
 			self::$background_process->kill_process();
 
 			$log = wc_get_logger();
-			$log->info( __( 'Cancelled product image regeneration job.', 'woocommerce' ),
+			$log->info(
+				__( 'Cancelled product image regeneration job.', 'woocommerce' ),
 				array(
 					'source' => 'wc-image-regeneration',
 				)
@@ -174,11 +175,15 @@ class WC_Regenerate_Images {
 	 * @return void
 	 */
 	public static function maybe_regenerate_images() {
-		$size_hash = md5( wp_json_encode( array(
-			wc_get_image_size( 'thumbnail' ),
-			wc_get_image_size( 'single' ),
-			wc_get_image_size( 'gallery_thumbnail' ),
-		) ) );
+		$size_hash = md5(
+			wp_json_encode(
+				array(
+					wc_get_image_size( 'thumbnail' ),
+					wc_get_image_size( 'single' ),
+					wc_get_image_size( 'gallery_thumbnail' ),
+				)
+			)
+		);
 
 		if ( update_option( 'woocommerce_maybe_regenerate_images_hash', $size_hash ) ) {
 			// Size settings have changed. Trigger regen.
@@ -271,8 +276,8 @@ class WC_Regenerate_Images {
 		}
 
 		list( , , , , $dst_w, $dst_h ) = $dimensions;
-		$suffix   = "{$dst_w}x{$dst_h}";
-		$file_ext = strtolower( pathinfo( $fullsizepath, PATHINFO_EXTENSION ) );
+		$suffix                        = "{$dst_w}x{$dst_h}";
+		$file_ext                      = strtolower( pathinfo( $fullsizepath, PATHINFO_EXTENSION ) );
 
 		return array(
 			'filename' => $editor->generate_filename( $suffix, null, $file_ext ),
@@ -291,11 +296,11 @@ class WC_Regenerate_Images {
 	 * @return string
 	 */
 	private static function resize_and_return_image( $attachment_id, $image, $size, $icon ) {
-		$image_size           = wc_get_image_size( $size );
-		$wp_uploads           = wp_upload_dir( null, false );
-		$wp_uploads_dir       = $wp_uploads['basedir'];
-		$wp_uploads_url       = $wp_uploads['baseurl'];
-		$attachment           = get_post( $attachment_id );
+		$image_size     = wc_get_image_size( $size );
+		$wp_uploads     = wp_upload_dir( null, false );
+		$wp_uploads_dir = $wp_uploads['basedir'];
+		$wp_uploads_url = $wp_uploads['baseurl'];
+		$attachment     = get_post( $attachment_id );
 
 		if ( ! $attachment || 'attachment' !== $attachment->post_type || ! self::is_regeneratable( $attachment ) ) {
 			return $image;
@@ -378,9 +383,11 @@ class WC_Regenerate_Images {
 			ORDER BY ID DESC"
 		);
 		foreach ( $images as $image ) {
-			self::$background_process->push_to_queue( array(
-				'attachment_id' => $image->ID,
-			) );
+			self::$background_process->push_to_queue(
+				array(
+					'attachment_id' => $image->ID,
+				)
+			);
 		}
 
 		// Lets dispatch the queue to start processing.

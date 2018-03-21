@@ -27,6 +27,7 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 		'_cart_discount',
 		'_refund_amount',
 		'_refunded_by',
+		'_refunded_payment',
 		'_refund_reason',
 		'_cart_discount_tax',
 		'_order_shipping',
@@ -68,9 +69,10 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 		$id = $refund->get_id();
 		$refund->set_props(
 			array(
-				'amount'      => get_post_meta( $id, '_refund_amount', true ),
-				'refunded_by' => metadata_exists( 'post', $id, '_refunded_by' ) ? get_post_meta( $id, '_refunded_by', true ) : absint( $post_object->post_author ),
-				'reason'      => metadata_exists( 'post', $id, '_refund_reason' ) ? get_post_meta( $id, '_refund_reason', true ) : $post_object->post_excerpt,
+				'amount'           => get_post_meta( $id, '_refund_amount', true ),
+				'refunded_by'      => metadata_exists( 'post', $id, '_refunded_by' ) ? get_post_meta( $id, '_refunded_by', true )    : absint( $post_object->post_author ),
+				'refunded_payment' => wc_string_to_bool( get_post_meta( $id, '_refunded_payment', true ) ),
+				'reason'           => metadata_exists( 'post', $id, '_refund_reason' ) ? get_post_meta( $id, '_refund_reason', true ): $post_object->post_excerpt,
 			)
 		);
 	}
@@ -86,9 +88,10 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 
 		$updated_props     = array();
 		$meta_key_to_props = array(
-			'_refund_amount' => 'amount',
-			'_refunded_by'   => 'refunded_by',
-			'_refund_reason' => 'reason',
+			'_refund_amount'    => 'amount',
+			'_refunded_by'      => 'refunded_by',
+			'_refunded_payment' => 'refunded_payment',
+			'_refund_reason'    => 'reason',
 		);
 
 		$props_to_update = $this->get_props_to_update( $refund, $meta_key_to_props );

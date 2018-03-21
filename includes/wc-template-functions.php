@@ -982,7 +982,6 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 		if ( ! wc_get_loop_prop( 'is_paginated' ) || ! woocommerce_products_will_display() ) {
 			return;
 		}
-		$orderby                 = isset( $_GET['orderby'] ) ? wc_clean( wp_unslash( $_GET['orderby'] ) ) : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) ); // WPCS: sanitization ok, input var ok, CSRF ok.
 		$show_default_orderby    = 'menu_order' === apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
 		$catalog_orderby_options = apply_filters( 'woocommerce_catalog_orderby', array(
 			'menu_order' => __( 'Default sorting', 'woocommerce' ),
@@ -993,12 +992,13 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 			'price-desc' => __( 'Sort by price: high to low', 'woocommerce' ),
 		) );
 
+		$default_orderby = wc_get_loop_prop( 'is_search' ) ? 'relevance' : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby', '' ) );
+		$orderby         = isset( $_GET['orderby'] ) ? wc_clean( wp_unslash( $_GET['orderby'] ) ) : $default_orderby; // WPCS: sanitization ok, input var ok, CSRF ok.
+
 		if ( wc_get_loop_prop( 'is_search' ) ) {
 			$catalog_orderby_options = array_merge( array( 'relevance' => __( 'Relevance', 'woocommerce' ) ), $catalog_orderby_options );
+
 			unset( $catalog_orderby_options['menu_order'] );
-			if ( 'menu_order' === $orderby ) {
-				$orderby = 'relevance';
-			}
 		}
 
 		if ( ! $show_default_orderby ) {
@@ -1007,6 +1007,10 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 
 		if ( 'no' === get_option( 'woocommerce_enable_review_rating' ) ) {
 			unset( $catalog_orderby_options['rating'] );
+		}
+
+		if ( ! array_key_exists( $orderby, $catalog_orderby_options ) ) {
+			$orderby = current( array_keys( $catalog_orderby_options ) );
 		}
 
 		wc_get_template( 'loop/orderby.php', array(
@@ -1995,7 +1999,7 @@ if ( ! function_exists( 'woocommerce_get_product_subcategories' ) ) {
 	 */
 	function woocommerce_get_product_subcategories( $parent_id = 0 ) {
 		$parent_id          = absint( $parent_id );
-		$product_categories = wp_cache_get( 'product-categories-' . $parent_id, 'product_cat' );
+		$product_categories = wp_cache_get( 'product-category-hierarchy-' . $parent_id, 'product_cat' );
 
 		if ( false === $product_categories ) {
 			// NOTE: using child_of instead of parent - this is not ideal but due to a WP bug ( https://core.trac.wordpress.org/ticket/15626 ) pad_counts won't work.
@@ -2007,7 +2011,8 @@ if ( ! function_exists( 'woocommerce_get_product_subcategories' ) ) {
 				'taxonomy'     => 'product_cat',
 				'pad_counts'   => 1,
 			) ) );
-			wp_cache_set( 'product-categories-' . $parent_id, $product_categories, 'product_cat' );
+
+			wp_cache_set( 'product-category-hierarchy-' . $parent_id, $product_categories, 'product_cat' );
 		}
 
 		if ( apply_filters( 'woocommerce_product_subcategories_hide_empty', true ) ) {

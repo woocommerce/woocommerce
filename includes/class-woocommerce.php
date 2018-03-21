@@ -2,8 +2,8 @@
 /**
  * WooCommerce setup
  *
- * @package  WooCommerce
- * @since    3.2.0
+ * @package WooCommerce
+ * @since   3.2.0
  */
 
 defined( 'ABSPATH' ) || exit;

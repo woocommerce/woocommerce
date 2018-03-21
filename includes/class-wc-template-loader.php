@@ -2,16 +2,13 @@
 /**
  * Template Loader
  *
- * @class WC_Template
  * @package WooCommerce/Classes
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
- * WC_Template_Loader.
+ * Template loader class.
  */
 class WC_Template_Loader {
 
