@@ -1,22 +1,17 @@
 <?php
 /**
- * Class WC_Product_Grouped file.
- *
- * @package WooCommerce\Classes\Products
- */
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
-/**
- * Grouped Product Class.
+ * Grouped Product
  *
  * Grouped products cannot be purchased - they are wrappers for other products.
  *
- * @class       WC_Product_Grouped
- * @version     3.0.0
- * @package     WooCommerce/Classes/Products
+ * @package WooCommerce\Classes\Products
+ * @version 3.0.0
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Product grouped class.
  */
 class WC_Product_Grouped extends WC_Product {
 
@@ -41,7 +36,6 @@ class WC_Product_Grouped extends WC_Product {
 	/**
 	 * Get the add to cart button text.
 	 *
-	 * @access public
 	 * @return string
 	 */
 	public function add_to_cart_text() {
@@ -91,7 +85,6 @@ class WC_Product_Grouped extends WC_Product {
 	/**
 	 * Returns the price in html format.
 	 *
-	 * @access public
 	 * @param string $price (default: '').
 	 * @return string
 	 */
