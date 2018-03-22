@@ -232,27 +232,35 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 		// wc_tax_enabled() === get_option( 'woocommerce_calc_taxes' ) === 'yes'
 		// wc_prices_include_tax() === wc_tax_enabled() && 'yes' === get_option( 'woocommerce_prices_include_tax' );.
 		$correct_options = array(
-			[ 'no', 'no', false ],
-			[ 'yes', 'no', false ],
-			// ['no',  'yes',  false], // this is not a valid option due to definition of wc_prices_include_tax
-			[ 'yes', 'yes', true ],
+			array( 'no', 'no', false ),
+			array( 'yes', 'no', false ),
+			// array( 'no',  'yes',  false ), // this is not a valid option due to definition of wc_prices_include_tax
+			array( 'yes', 'yes', true ),
 		);
-		foreach ( array( true, false ) as $testmode ) {
-			foreach ( $correct_options as $values ) {
-				update_option( 'woocommerce_calc_taxes', $values[0] );
-				update_option( 'woocommerce_prices_include_tax', $values[1] );
-				$shipping_tax_included = $values[2];
 
-				// Test order with < 9 items (URL shorter than limit).
-				$this->check_small_order( 5, $shipping_tax_included, $testmode );
+		// One test without sandbox.
+		$testmode = false;
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+		$shipping_tax_included = false;
+		$this->check_small_order( 5, $shipping_tax_included, $testmode );
 
-				// Test order with >9 items with URL shorter than limit.
-				$this->check_small_order( 11, $shipping_tax_included, $testmode );
+		// Other tests with sandbox active.
+		$testmode = true;
+		foreach ( $correct_options as $values ) {
+			update_option( 'woocommerce_calc_taxes', $values[0] );
+			update_option( 'woocommerce_prices_include_tax', $values[1] );
+			$shipping_tax_included = $values[2];
 
-				// Test order with URL longer than limit.
-				$this->check_large_order( $shipping_tax_included, $testmode );
+			// Test order with < 9 items (URL shorter than limit).
+			$this->check_small_order( 5, $shipping_tax_included, $testmode );
 
-			}
+			// Test order with >9 items with URL shorter than limit.
+			$this->check_small_order( 11, $shipping_tax_included, $testmode );
+
+			// Test order with URL longer than limit.
+			$this->check_large_order( $shipping_tax_included, $testmode );
+
 		}
 
 	}
