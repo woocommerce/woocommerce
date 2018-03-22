@@ -181,7 +181,7 @@ class WC_CLI_Runner {
 						'name'        => $name,
 						'type'        => 'assoc',
 						'description' => ! empty( $args['description'] ) ? $args['description'] : '',
-						'optional'    => empty( $args['required'] ) ? true : false,
+						'optional'    => empty( $args['required'] ),
 					);
 				}
 			}
