@@ -108,7 +108,7 @@ class WC_Payment_Gateways {
 			$load_gateway = is_string( $gateway ) ? new $gateway() : $gateway;
 
 			if ( isset( $ordering[ $load_gateway->id ] ) && is_numeric( $ordering[ $load_gateway->id ] ) ) {
-				// Add in .
+				// Add in position.
 				$this->payment_gateways[ $ordering[ $load_gateway->id ] ] = $load_gateway;
 			} else {
 				// Add to end of the array.
