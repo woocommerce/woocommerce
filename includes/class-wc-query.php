@@ -508,7 +508,7 @@ class WC_Query {
 			$search_within_terms   = get_term_children( $wp_query->queried_object->term_taxonomy_id, $wp_query->queried_object->taxonomy );
 			$search_within_terms[] = $wp_query->queried_object->term_taxonomy_id;
 			$args['join']         .= " INNER JOIN (
-				SELECT post_id, max( meta_value+0 ) price
+				SELECT post_id, min( meta_value+0 ) price
 				FROM $wpdb->postmeta
 				INNER JOIN (
 					SELECT $wpdb->term_relationships.object_id
