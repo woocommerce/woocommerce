@@ -11,9 +11,8 @@
  * the readme will list any important changes.
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
- * @author  WooThemes
  * @package WooCommerce/Templates
- * @version 3.3.0
+ * @version 3.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -74,7 +73,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<h2><?php esc_html_e( 'Register', 'woocommerce' ); ?></h2>
 
-		<form method="post" class="register">
+		<form method="post" class="woocommerce-form woocommerce-form-register register">
 
 			<?php do_action( 'woocommerce_register_form_start' ); ?>
 
