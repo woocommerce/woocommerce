@@ -513,7 +513,8 @@ class WC_Admin_Addons {
 
 		$sections        = self::get_sections();
 		$theme           = wp_get_theme();
-		$current_section = isset( $_GET['section'] ) ? sanitize_text_field( $_GET['section'] ) : '_featured';
+		$section_keys    = wp_list_pluck( $sections, 'slug' );
+		$current_section = isset( $_GET['section'] ) ? sanitize_text_field( $_GET['section'] ) : current( $section_keys );
 		$addons          = array();
 
 		if ( '_featured' !== $current_section ) {
@@ -529,6 +530,7 @@ class WC_Admin_Addons {
 		 * @uses $addons
 		 * @uses $sections
 		 * @uses $theme
+		 * @uses $section_keys
 		 * @uses $current_section
 		 */
 		include_once dirname( __FILE__ ) . '/views/html-admin-page-addons.php';

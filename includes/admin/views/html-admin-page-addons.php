@@ -26,12 +26,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<?php if ( $sections ) : ?>
 		<ul class="subsubsub">
 			<?php foreach ( $sections as $section ) : ?>
-				<li>
-					<a
-						class="<?php echo $current_section === $section->slug ? 'current' : ''; ?>"
-						href="<?php echo admin_url( 'admin.php?page=wc-addons&section=' . esc_attr( $section->slug ) ); ?>">
+				<li class="<?php echo esc_attr( $section->slug ); ?>">
+					<a class="<?php echo $current_section === $section->slug ? 'current' : ''; ?>" href="<?php echo admin_url( 'admin.php?page=wc-addons&section=' . esc_attr( $section->slug ) ); ?>">
 						<?php echo esc_html( $section->label ); ?>
 					</a>
+					<?php echo ( end( $section_keys ) !== $section->slug ) ? ' |' : ''; ?>
 				</li>
 			<?php endforeach; ?>
 		</ul>
