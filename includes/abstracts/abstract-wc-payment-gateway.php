@@ -273,7 +273,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @return bool
 	 */
 	public function has_fields() {
-		return $this->has_fields ? true : false;
+		return (bool) $this->has_fields;
 	}
 
 	/**
@@ -385,7 +385,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @since 1.5.7
 	 */
 	public function supports( $feature ) {
-		return apply_filters( 'woocommerce_payment_gateway_supports', in_array( $feature, $this->supports ) ? true : false, $feature, $this );
+		return apply_filters( 'woocommerce_payment_gateway_supports', in_array( $feature, $this->supports ), $feature, $this );
 	}
 
 	/**

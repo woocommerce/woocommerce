@@ -43,7 +43,7 @@ abstract class WC_Background_Process extends WP_Background_Process {
 
 		$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE {$column} LIKE %s", $key ) ); // @codingStandardsIgnoreLine.
 
-		return ( $count > 0 ) ? false : true;
+		return ! ( $count > 0 );
 	}
 
 	/**

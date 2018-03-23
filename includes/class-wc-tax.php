@@ -603,7 +603,7 @@ class WC_Tax {
 			$compound  = $key_or_rate->tax_rate_compound;
 		} else {
 			$key 	   = $key_or_rate;
-			$compound  = $wpdb->get_var( $wpdb->prepare( "SELECT tax_rate_compound FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $key ) ) ? true : false;
+			$compound  = (bool) $wpdb->get_var( $wpdb->prepare( "SELECT tax_rate_compound FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $key ) );
 		}
 
 		return (bool) apply_filters( 'woocommerce_rate_compound', $compound, $key );
