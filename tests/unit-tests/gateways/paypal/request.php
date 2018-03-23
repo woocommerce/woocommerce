@@ -228,13 +228,16 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 
 		// Paths through code changed by:
-		// $sandbox (true/false)
-		// wc_tax_enabled() === get_option( 'woocommerce_calc_taxes' ) === 'yes'
-		// wc_prices_include_tax() === wc_tax_enabled() && 'yes' === get_option( 'woocommerce_prices_include_tax' );.
+		// - $sandbox (true/false)
+		// - wc_tax_enabled()
+		// - wc_prices_include_tax().
+		// wc_tax_enabled() and wc_prices_include_tax() determine if shipping tax should be included,
+		// these are the correct options.
 		$correct_options = array(
+			// woocommerce_calc_taxes, woocommerce_prices_include_tax, $shipping_tax_included values.
 			array( 'no', 'no', false ),
 			array( 'yes', 'no', false ),
-			// array( 'no',  'yes',  false ), // this is not a valid option due to definition of wc_prices_include_tax
+			// array( 'no',  'yes',  false ), // this is not a valid option due to definition of wc_prices_include_tax()
 			array( 'yes', 'yes', true ),
 		);
 
