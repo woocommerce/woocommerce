@@ -502,7 +502,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return $value ? 'yes' : 'no';
 		}
 
-		return '';
+		return 'no';
 	}
 
 	/**
