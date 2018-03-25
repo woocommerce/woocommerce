@@ -217,6 +217,8 @@ class WC_Cache_Helper {
 		if ( 'product_cat' === $taxonomy ) {
 			$ids = is_array( $ids ) ? $ids : array( $ids );
 
+			$clear_ids = array();
+
 			foreach ( $ids as $id ) {
 				$clear_ids[] = $id;
 				$clear_ids   = array_merge( $clear_ids, get_ancestors( $id, 'product_cat', 'taxonomy' ) );
