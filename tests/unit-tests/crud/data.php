@@ -66,6 +66,11 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		$object = $this->create_test_post();
 		$object_id = $object->get_id();
 		$meta_id = add_metadata( 'post', $object_id, 'test_meta_key', 'val1', true );
+
+		$object = new WC_Mock_WC_Data( $object_id );
+
+		$this->assertEquals( 'val1', $object->get_meta( 'test_meta_key' ) );
+
 		$object->delete_meta_data_by_mid( $meta_id );
 		$this->assertEmpty( $object->get_meta( 'test_meta_key' ) );
 	}

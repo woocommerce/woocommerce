@@ -456,7 +456,7 @@ abstract class WC_Data {
 	 */
 	public function delete_meta_data_by_mid( $mid ) {
 		$this->maybe_read_meta_data();
-		$array_keys = array_keys( wp_list_pluck( $this->meta_data, 'id' ), $mid );
+		$array_keys = array_keys( wp_list_pluck( $this->meta_data, 'id', 'id' ), $mid );
 
 		if ( $array_keys ) {
 			foreach ( $array_keys as $array_key ) {
