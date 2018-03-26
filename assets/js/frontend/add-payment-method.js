@@ -6,9 +6,7 @@ jQuery( function( $ ) {
 	}
 
 	$( '#add_payment_method' )
-
-	/* Payment option selection */
-
+		// Payment option selection
 		.on( 'click init_add_payment_method', '.payment_methods input.input-radio', function() {
 			if ( $( 1 < '.payment_methods input.input-radio' ).length ) {
 				var targetPaymentBox = $( 'div.payment_box.' + $( this ).attr( 'ID' ) );
@@ -22,7 +20,6 @@ jQuery( function( $ ) {
 				$( 'div.payment_box' ).show();
 			}
 		} )
-
 		// Trigger initial click
 		.find( 'input[name=payment_method]:checked' ).click();
 

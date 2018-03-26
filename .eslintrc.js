@@ -13,6 +13,7 @@ module.exports = {
 		Backbone: false,
 		jQuery: false,
 		JSON: false,
-		wp: false
+		woocommerce_params: false,
+		wp: false,
 	},
 }
