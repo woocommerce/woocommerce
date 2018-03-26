@@ -1,5 +1,6 @@
 jQuery( function( $ ) {
 	// woocommerce_params is required to continue, ensure the object exists
+	// eslint-disable-next-line camelcase
 	if ( 'undefined' === typeof woocommerce_params ) {
 		return false;
 	}
