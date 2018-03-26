@@ -992,7 +992,7 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 	if ( $product->is_taxable() && wc_prices_include_tax() ) {
 		$tax_rates  = WC_Tax::get_base_tax_rates( $product->get_tax_class( 'unfiltered' ) );
 		$taxes      = WC_Tax::calc_tax( $price * $qty, $tax_rates, true );
-		$price      = WC_Tax::round( $price * $qty - wc_round_tax_total( array_sum( $taxes ) ) );
+		$price      = $price * $qty - array_sum( $taxes );
 	} else {
 		$price = $price * $qty;
 	}
