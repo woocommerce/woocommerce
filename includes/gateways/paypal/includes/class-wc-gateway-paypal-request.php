@@ -105,7 +105,7 @@ class WC_Gateway_Paypal_Request {
 		// If URL is longer than 2,083 chars, ignore line items and send cart to Paypal as a single item.
 		// One item's name can only be 127 characters long, so the URL should not be longer than limit.
 		// URL character limit via:
-		// https://support.microsoft.com/en-us/help/208427/maximum-url-length-is-2-083-characters-in-internet-explorer
+		// https://support.microsoft.com/en-us/help/208427/maximum-url-length-is-2-083-characters-in-internet-explorer.
 		if ( strlen( $this->endpoint . $query_candidate ) <= $max_paypal_length ) {
 			return $paypal_args;
 		}
