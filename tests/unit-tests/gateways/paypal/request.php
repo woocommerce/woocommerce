@@ -167,6 +167,10 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 		// Check that there is actually only one item for order with URL length > limit.
 		$this->assertFalse( array_key_exists( 'item_name_2', $query_array ) );
 
+		// Check that non-line item parameters are included.
+		$this->assertTrue( array_key_exists( 'cmd', $query_array ) );
+		$this->assertEquals( '_cart', $query_array['cmd'] );
+
 		$this->check_shipping_tax( $query_array, $shipping_tax_included );
 
 		// Remove order and created products.
@@ -205,6 +209,11 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 			$this->assertTrue( array_key_exists( 'quantity_' . $i, $query_array ) );
 			$this->assertTrue( array_key_exists( 'amount_' . $i, $query_array ) );
 			$this->assertTrue( array_key_exists( 'item_number_' . $i, $query_array ) );
+
+			// Check that non-line item parameters are included.
+			$this->assertTrue( array_key_exists( 'cmd', $query_array ) );
+			$this->assertEquals( '_cart', $query_array['cmd'] );
+
 
 			$this->assertLessThanOrEqual( 127, strlen( $query_array[ 'item_name_' . $i ] ) );
 			$this->assertLessThanOrEqual( 127, strlen( $query_array[ 'item_number_' . $i ] ) );

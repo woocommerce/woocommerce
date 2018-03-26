@@ -36,7 +36,7 @@ class WC_Gateway_Paypal_Request {
 	protected $notify_url;
 
 	/**
-	 * Endpoint for requests from PayPal.
+	 * Endpoint for requests to PayPal.
 	 *
 	 * @var string
 	 */
@@ -92,6 +92,52 @@ class WC_Gateway_Paypal_Request {
 	}
 
 	/**
+	 * Get args for paypal request, except for line item args.
+	 *
+	 * @param WC_Order $order Order object.
+	 *
+	 * @return array
+	 */
+	protected function get_non_line_item_args( $order ) {
+		return array_merge(
+			array(
+				'cmd'           => '_cart',
+				'business'      => $this->gateway->get_option( 'email' ),
+				'no_note'       => 1,
+				'currency_code' => get_woocommerce_currency(),
+				'charset'       => 'utf-8',
+				'rm'            => is_ssl() ? 2 : 1,
+				'upload'        => 1,
+				'return'        => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $this->gateway->get_return_url( $order ) ) ),
+				'cancel_return' => esc_url_raw( $order->get_cancel_order_url_raw() ),
+				'page_style'    => $this->gateway->get_option( 'page_style' ),
+				'image_url'     => esc_url_raw( $this->gateway->get_option( 'image_url' ) ),
+				'paymentaction' => $this->gateway->get_option( 'paymentaction' ),
+				'bn'            => 'WooThemes_Cart',
+				'invoice'       => $this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), 127 ),
+				'custom'        => wp_json_encode(
+					array(
+						'order_id'  => $order->get_id(),
+						'order_key' => $order->get_order_key(),
+					)
+				),
+				'notify_url'    => $this->limit_length( $this->notify_url, 255 ),
+				'first_name'    => $this->limit_length( $order->get_billing_first_name(), 32 ),
+				'last_name'     => $this->limit_length( $order->get_billing_last_name(), 64 ),
+				'address1'      => $this->limit_length( $order->get_billing_address_1(), 100 ),
+				'address2'      => $this->limit_length( $order->get_billing_address_2(), 100 ),
+				'city'          => $this->limit_length( $order->get_billing_city(), 40 ),
+				'state'         => $this->get_paypal_state( $order->get_billing_country(), $order->get_billing_state() ),
+				'zip'           => $this->limit_length( wc_format_postcode( $order->get_billing_postcode(), $order->get_billing_country() ), 32 ),
+				'country'       => $this->limit_length( $order->get_billing_country(), 2 ),
+				'email'         => $this->limit_length( $order->get_billing_email() ),
+			),
+			$this->get_phone_number_args( $order ),
+			$this->get_shipping_args( $order )
+		);
+	}
+
+	/**
 	 * If the default request with line items is too long, generate a new one with only one line item.
 	 *
 	 * @param WC_Order $order Order to be sent to Paypal.
@@ -99,7 +145,7 @@ class WC_Gateway_Paypal_Request {
 	 *
 	 * @return array
 	 */
-	protected function fix_request_legth( $order, $paypal_args ) {
+	protected function fix_request_length( $order, $paypal_args ) {
 		$max_paypal_length = 2083;
 		$query_candidate   = http_build_query( $paypal_args, '', '&' );
 		// If URL is longer than 2,083 chars, ignore line items and send cart to Paypal as a single item.
@@ -112,40 +158,7 @@ class WC_Gateway_Paypal_Request {
 
 		return apply_filters(
 			'woocommerce_paypal_args', array_merge(
-				array(
-					'cmd'           => '_cart',
-					'business'      => $this->gateway->get_option( 'email' ),
-					'no_note'       => 1,
-					'currency_code' => get_woocommerce_currency(),
-					'charset'       => 'utf-8',
-					'rm'            => is_ssl() ? 2 : 1,
-					'upload'        => 1,
-					'return'        => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $this->gateway->get_return_url( $order ) ) ),
-					'cancel_return' => esc_url_raw( $order->get_cancel_order_url_raw() ),
-					'page_style'    => $this->gateway->get_option( 'page_style' ),
-					'image_url'     => esc_url_raw( $this->gateway->get_option( 'image_url' ) ),
-					'paymentaction' => $this->gateway->get_option( 'paymentaction' ),
-					'bn'            => 'WooThemes_Cart',
-					'invoice'       => $this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), 127 ),
-					'custom'        => wp_json_encode(
-						array(
-							'order_id'  => $order->get_id(),
-							'order_key' => $order->get_order_key(),
-						)
-					),
-					'notify_url'    => $this->limit_length( $this->notify_url, 255 ),
-					'first_name'    => $this->limit_length( $order->get_billing_first_name(), 32 ),
-					'last_name'     => $this->limit_length( $order->get_billing_last_name(), 64 ),
-					'address1'      => $this->limit_length( $order->get_billing_address_1(), 100 ),
-					'address2'      => $this->limit_length( $order->get_billing_address_2(), 100 ),
-					'city'          => $this->limit_length( $order->get_billing_city(), 40 ),
-					'state'         => $this->get_paypal_state( $order->get_billing_country(), $order->get_billing_state() ),
-					'zip'           => $this->limit_length( wc_format_postcode( $order->get_billing_postcode(), $order->get_billing_country() ), 32 ),
-					'country'       => $this->limit_length( $order->get_billing_country(), 2 ),
-					'email'         => $this->limit_length( $order->get_billing_email() ),
-				),
-				$this->get_phone_number_args( $order ),
-				$this->get_shipping_args( $order ),
+				$this->get_non_line_item_args( $order ),
 				$this->get_line_item_args( $order, true )
 			), $order
 		);
@@ -163,45 +176,12 @@ class WC_Gateway_Paypal_Request {
 
 		$paypal_args = apply_filters(
 			'woocommerce_paypal_args', array_merge(
-				array(
-					'cmd'           => '_cart',
-					'business'      => $this->gateway->get_option( 'email' ),
-					'no_note'       => 1,
-					'currency_code' => get_woocommerce_currency(),
-					'charset'       => 'utf-8',
-					'rm'            => is_ssl() ? 2 : 1,
-					'upload'        => 1,
-					'return'        => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $this->gateway->get_return_url( $order ) ) ),
-					'cancel_return' => esc_url_raw( $order->get_cancel_order_url_raw() ),
-					'page_style'    => $this->gateway->get_option( 'page_style' ),
-					'image_url'     => esc_url_raw( $this->gateway->get_option( 'image_url' ) ),
-					'paymentaction' => $this->gateway->get_option( 'paymentaction' ),
-					'bn'            => 'WooThemes_Cart',
-					'invoice'       => $this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), 127 ),
-					'custom'        => wp_json_encode(
-						array(
-							'order_id'  => $order->get_id(),
-							'order_key' => $order->get_order_key(),
-						)
-					),
-					'notify_url'    => $this->limit_length( $this->notify_url, 255 ),
-					'first_name'    => $this->limit_length( $order->get_billing_first_name(), 32 ),
-					'last_name'     => $this->limit_length( $order->get_billing_last_name(), 64 ),
-					'address1'      => $this->limit_length( $order->get_billing_address_1(), 100 ),
-					'address2'      => $this->limit_length( $order->get_billing_address_2(), 100 ),
-					'city'          => $this->limit_length( $order->get_billing_city(), 40 ),
-					'state'         => $this->get_paypal_state( $order->get_billing_country(), $order->get_billing_state() ),
-					'zip'           => $this->limit_length( wc_format_postcode( $order->get_billing_postcode(), $order->get_billing_country() ), 32 ),
-					'country'       => $this->limit_length( $order->get_billing_country(), 2 ),
-					'email'         => $this->limit_length( $order->get_billing_email() ),
-				),
-				$this->get_phone_number_args( $order ),
-				$this->get_shipping_args( $order ),
+				$this->get_non_line_item_args( $order ),
 				$this->get_line_item_args( $order )
 			), $order
 		);
 
-		return $this->fix_request_legth( $order, $paypal_args );
+		return $this->fix_request_length( $order, $paypal_args );
 	}
 
 	/**
