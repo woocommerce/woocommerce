@@ -214,7 +214,6 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 			$this->assertTrue( array_key_exists( 'cmd', $query_array ) );
 			$this->assertEquals( '_cart', $query_array['cmd'] );
 
-
 			$this->assertLessThanOrEqual( 127, strlen( $query_array[ 'item_name_' . $i ] ) );
 			$this->assertLessThanOrEqual( 127, strlen( $query_array[ 'item_number_' . $i ] ) );
 
