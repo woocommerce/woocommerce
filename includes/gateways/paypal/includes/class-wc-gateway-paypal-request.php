@@ -92,13 +92,12 @@ class WC_Gateway_Paypal_Request {
 	}
 
 	/**
-	 * Get args for paypal request, except for line item args.
+	 * Get transaction args for paypal request, except for line item args.
 	 *
 	 * @param WC_Order $order Order object.
-	 *
 	 * @return array
 	 */
-	protected function get_non_line_item_args( $order ) {
+	protected function get_transaction_args( $order ) {
 		return array_merge(
 			array(
 				'cmd'           => '_cart',
@@ -140,25 +139,26 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * If the default request with line items is too long, generate a new one with only one line item.
 	 *
+	 * If URL is longer than 2,083 chars, ignore line items and send cart to Paypal as a single item.
+	 * One item's name can only be 127 characters long, so the URL should not be longer than limit.
+	 * URL character limit via:
+	 * https://support.microsoft.com/en-us/help/208427/maximum-url-length-is-2-083-characters-in-internet-explorer.
+	 *
 	 * @param WC_Order $order Order to be sent to Paypal.
 	 * @param array    $paypal_args Arguments sent to Paypal in the request.
-	 *
 	 * @return array
 	 */
 	protected function fix_request_length( $order, $paypal_args ) {
 		$max_paypal_length = 2083;
 		$query_candidate   = http_build_query( $paypal_args, '', '&' );
-		// If URL is longer than 2,083 chars, ignore line items and send cart to Paypal as a single item.
-		// One item's name can only be 127 characters long, so the URL should not be longer than limit.
-		// URL character limit via:
-		// https://support.microsoft.com/en-us/help/208427/maximum-url-length-is-2-083-characters-in-internet-explorer.
+
 		if ( strlen( $this->endpoint . $query_candidate ) <= $max_paypal_length ) {
 			return $paypal_args;
 		}
 
 		return apply_filters(
 			'woocommerce_paypal_args', array_merge(
-				$this->get_non_line_item_args( $order ),
+				$this->get_transaction_args( $order ),
 				$this->get_line_item_args( $order, true )
 			), $order
 		);
@@ -176,7 +176,7 @@ class WC_Gateway_Paypal_Request {
 
 		$paypal_args = apply_filters(
 			'woocommerce_paypal_args', array_merge(
-				$this->get_non_line_item_args( $order ),
+				$this->get_transaction_args( $order ),
 				$this->get_line_item_args( $order )
 			), $order
 		);
@@ -293,29 +293,31 @@ class WC_Gateway_Paypal_Request {
 		 * Try passing a line item per product if supported.
 		 */
 		if ( ( ! wc_tax_enabled() || ! wc_prices_include_tax() ) && $this->prepare_line_items( $order ) ) {
-			$line_item_args       = array();
 			$include_shipping_tax = false;
-			if ( $force_one_line_item ) {
-				$line_item_args = $this->get_line_item_args_single_item( $order, $include_shipping_tax );
-			} else {
-				$line_item_args['tax_cart'] = $this->number_format( $order->get_total_tax(), $order );
-
-				if ( $order->get_total_discount() > 0 ) {
-					$line_item_args['discount_amount_cart'] = $this->number_format( $this->round( $order->get_total_discount(), $order ), $order );
-				}
-
-				$line_item_args = array_merge( $line_item_args, $this->get_shipping_cost_line_item( $order, $include_shipping_tax ) );
-				$line_item_args = array_merge( $line_item_args, $this->get_line_items() );
-
-			}
 		} else {
+			$include_shipping_tax = true;
+		}
+
+		$line_item_args = array();
+		if ( $force_one_line_item || $include_shipping_tax ) {
 			/**
 			 * Send order as a single item.
 			 *
 			 * For shipping, we longer use shipping_1 because paypal ignores it if *any* shipping rules are within paypal, and paypal ignores anything over 5 digits (999.99 is the max).
 			 */
-			$include_shipping_tax = true;
 			$line_item_args = $this->get_line_item_args_single_item( $order, $include_shipping_tax );
+		} else {
+			/**
+			 * Passing a line item per product if supported.
+			 */
+			$line_item_args['tax_cart'] = $this->number_format( $order->get_total_tax(), $order );
+
+			if ( $order->get_total_discount() > 0 ) {
+				$line_item_args['discount_amount_cart'] = $this->number_format( $this->round( $order->get_total_discount(), $order ), $order );
+			}
+
+			$line_item_args = array_merge( $line_item_args, $this->get_shipping_cost_line_item( $order, $include_shipping_tax ) );
+			$line_item_args = array_merge( $line_item_args, $this->get_line_items() );
 
 		}
 
