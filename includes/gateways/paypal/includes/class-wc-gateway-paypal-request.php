@@ -289,9 +289,6 @@ class WC_Gateway_Paypal_Request {
 	 */
 	protected function get_line_item_args( $order, $force_one_line_item = false ) {
 
-		/**
-		 * Try passing a line item per product if supported.
-		 */
 		if ( ( ! wc_tax_enabled() || ! wc_prices_include_tax() ) && $this->prepare_line_items( $order ) ) {
 			$include_shipping_tax = false;
 		} else {
