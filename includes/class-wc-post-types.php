@@ -26,6 +26,7 @@ class WC_Post_Types {
 		add_filter( 'rest_api_allowed_post_types', array( __CLASS__, 'rest_api_allowed_post_types' ) );
 		add_action( 'woocommerce_after_register_post_type', array( __CLASS__, 'maybe_flush_rewrite_rules' ) );
 		add_action( 'woocommerce_flush_rewrite_rules', array( __CLASS__, 'flush_rewrite_rules' ) );
+		add_filter( 'gutenberg_can_edit_post_type', array( __CLASS__, 'gutenberg_can_edit_post_type' ), 10, 2 );
 	}
 
 	/**
@@ -565,6 +566,17 @@ class WC_Post_Types {
 	 */
 	public static function flush_rewrite_rules() {
 		flush_rewrite_rules();
+	}
+
+	/**
+	 * Disable Gutenberg for products.
+	 *
+	 * @param bool   $can_edit Whether the post type can be edited or not.
+	 * @param string $post_type The post type being checked.
+	 * @return bool
+	 */
+	public static function gutenberg_can_edit_post_type( $can_edit, $post_type ) {
+		return 'product' === $post_type ? false : $can_edit;
 	}
 
 	/**
