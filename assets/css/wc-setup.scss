@@ -19,6 +19,9 @@ body {
 	.select2-container {
 		text-align: left;
 	}
+	.hidden {
+		display: none;
+	}
 }
 .wc-setup-content {
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.13);
@@ -970,8 +973,6 @@ h3.jetpack-reasons {
 }
 
 .store-address-container {
-	margin-top: 4px;
-
 	.city-and-postcode {
 		display: flex;
 
@@ -984,9 +985,11 @@ h3.jetpack-reasons {
 			}
 		}
 	}
-}
-.store-currency-container {
-	margin-top: 10px;
+	input[type="text"],
+	select,
+	.select2-container {
+		margin-bottom: 10px;
+	}
 }
 .product-type-container {
 	margin-top: 14px;
