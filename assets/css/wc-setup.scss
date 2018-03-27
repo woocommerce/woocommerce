@@ -15,6 +15,10 @@ body {
 }
 .wc-setup {
 	text-align: center;
+
+	.select2-container {
+		text-align: left;
+	}
 }
 .wc-setup-content {
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.13);
