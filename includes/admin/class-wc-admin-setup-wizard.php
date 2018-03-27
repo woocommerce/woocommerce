@@ -436,7 +436,7 @@ class WC_Admin_Setup_Wizard {
 
 			<div class="store-currency-container">
 			<label class="location-prompt" for="currency_code">
-				<?php esc_html_e( 'What currency do you use?', 'woocommerce' ); ?>
+				<?php esc_html_e( 'What currency do you accept payments in?', 'woocommerce' ); ?>
 			</label>
 			<select
 				id="currency_code"
