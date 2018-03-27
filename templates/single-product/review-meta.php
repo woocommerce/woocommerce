@@ -13,7 +13,7 @@
  * @see     https://docs.woocommerce.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates
- * @version 3.0.0
+ * @version 3.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -36,7 +36,10 @@ if ( '0' === $comment->comment_approved ) { ?>
 			echo '<em class="woocommerce-review__verified verified">(' . esc_attr__( 'verified owner', 'woocommerce' ) . ')</em> ';
 		}
 
-		?><span class="woocommerce-review__dash">&ndash;</span> <time class="woocommerce-review__published-date" datetime="<?php echo get_comment_date( 'c' ); ?>"><?php echo get_comment_date( wc_date_format() ); ?></time>
+		?><span class="woocommerce-review__dash">&ndash;</span>
+		<time class="woocommerce-review__published-date" datetime="<?php echo esc_attr( get_comment_date( 'c' ) ); ?>">
+			<?php echo esc_html( get_comment_date( wc_date_format() ) ); ?>
+		</time>
 	</p>
 
 <?php }
