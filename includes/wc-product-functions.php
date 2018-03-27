@@ -999,7 +999,7 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 		$tax_rates      = WC_Tax::get_rates( $product->get_tax_class() );
 		$base_tax_rates = WC_Tax::get_base_tax_rates( $product->get_tax_class( 'unfiltered' ) );
 		$remove_taxes   = apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ? WC_Tax::calc_tax( $line_price, $base_tax_rates, true ) : WC_Tax::calc_tax( $line_price, $tax_rates, true );
-		$return_price   = WC_Tax::round( $line_price - wc_round_tax_total( array_sum( $remove_taxes ) ) );
+		$return_price   = $line_price - array_sum( $remove_taxes );
 	} else {
 		$return_price = $line_price;
 	}
