@@ -209,6 +209,10 @@ class WC_CLI_REST_Command {
 			$assoc_args['format'] = 'table';
 		}
 
+		if ( empty( $assoc_args['per_page'] ) ) {
+			$assoc_args['per_page'] = '-1';
+		}
+
 		if ( ! empty( $assoc_args['format'] ) && 'count' === $assoc_args['format'] ) {
 			echo (int) $headers['X-WP-Total'];
 		} elseif ( 'headers' === $assoc_args['format'] ) {
