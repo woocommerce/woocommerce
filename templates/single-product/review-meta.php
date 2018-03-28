@@ -11,14 +11,11 @@
  * the readme will list any important changes.
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
- * @author  WooThemes
  * @package WooCommerce/Templates
- * @version 3.0.0
+ * @version 3.4.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
-}
+defined( 'ABSPATH' ) || exit;
 
 global $comment;
 $verified = wc_review_is_from_verified_owner( $comment->comment_ID );
@@ -34,13 +31,14 @@ if ( '0' === $comment->comment_approved ) { ?>
 <?php } else { ?>
 
 	<p class="meta">
-		<strong class="woocommerce-review__author"><?php comment_author(); ?></strong> <?php
-
+		<strong class="woocommerce-review__author"><?php comment_author(); ?> </strong>
+		<?php
 		if ( 'yes' === get_option( 'woocommerce_review_rating_verification_label' ) && $verified ) {
 			echo '<em class="woocommerce-review__verified verified">(' . esc_attr__( 'verified owner', 'woocommerce' ) . ')</em> ';
 		}
-
-		?><span class="woocommerce-review__dash">&ndash;</span> <time class="woocommerce-review__published-date" datetime="<?php echo get_comment_date( 'c' ); ?>"><?php echo get_comment_date( wc_date_format() ); ?></time>
+		?>
+		<span class="woocommerce-review__dash">&ndash;</span> <time class="woocommerce-review__published-date" datetime="<?php echo get_comment_date( 'c' ); ?>"><?php echo get_comment_date( wc_date_format() ); ?></time>
 	</p>
 
-<?php }
+<?php
+}
