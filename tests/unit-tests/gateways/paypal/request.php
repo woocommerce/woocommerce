@@ -356,7 +356,8 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 			$this->check_small_order( 11, $shipping_tax_included, $testmode );
 
 			// Test order with URL longer than limit.
-			$this->check_large_order( $shipping_tax_included, $testmode );
+			// Many items in order -> forced to use one line item -> shipping tax included.
+			$this->check_large_order( true, $testmode );
 
 			// Test amount < 0.
 			$this->check_negative_amount( $testmode );

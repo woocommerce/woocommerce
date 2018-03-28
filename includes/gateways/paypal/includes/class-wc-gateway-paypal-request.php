@@ -240,12 +240,13 @@ class WC_Gateway_Paypal_Request {
 	 * Get shipping cost line item args for paypal request.
 	 *
 	 * @param  WC_Order $order Order object.
+	 * @param  bool     $force_one_line_item Whether one line item was forced by validation or URL length.
 	 * @return array
 	 */
-	protected function get_shipping_cost_line_item( $order ) {
+	protected function get_shipping_cost_line_item( $order, $force_one_line_item ) {
 		$line_item_args = array();
 		$shipping_total = $order->get_shipping_total();
-		if ( wc_tax_enabled() && wc_prices_include_tax() || ! $this->line_items_valid( $order ) ) {
+		if ( $force_one_line_item ) {
 			$shipping_total += $order->get_shipping_tax();
 		}
 
@@ -273,7 +274,7 @@ class WC_Gateway_Paypal_Request {
 
 		$all_items_name = $this->get_order_item_names( $order );
 		$this->add_line_item( $all_items_name ? $all_items_name : __( 'Order', 'woocommerce' ), 1, $this->number_format( $order->get_total() - $this->round( $order->get_shipping_total() + $order->get_shipping_tax(), $order ), $order ), $order->get_order_number() );
-		$line_item_args = $this->get_shipping_cost_line_item( $order );
+		$line_item_args = $this->get_shipping_cost_line_item( $order, true );
 
 		return array_merge( $line_item_args, $this->get_line_items() );
 	}
@@ -309,7 +310,7 @@ class WC_Gateway_Paypal_Request {
 				$line_item_args['discount_amount_cart'] = $this->number_format( $this->round( $order->get_total_discount(), $order ), $order );
 			}
 
-			$line_item_args = array_merge( $line_item_args, $this->get_shipping_cost_line_item( $order ) );
+			$line_item_args = array_merge( $line_item_args, $this->get_shipping_cost_line_item( $order, false ) );
 			$line_item_args = array_merge( $line_item_args, $this->get_line_items() );
 
 		}
