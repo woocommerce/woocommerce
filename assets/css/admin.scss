@@ -2603,8 +2603,7 @@ table.wp-list-table {
 	}
 
 	span.wc-image,
-	span.wc-featured,
-	span.wc-type {
+	span.wc-featured {
 		@include ir();
 		margin: 0 auto;
 
@@ -2625,11 +2624,6 @@ table.wp-list-table {
 	td.column-featured span.wc-featured {
 		font-size: 1.6em;
 		cursor: pointer;
-	}
-
-	span.wc-type::before {
-		font-family: 'WooCommerce';
-		content: '\e006';
 	}
 
 	span.product-type {
