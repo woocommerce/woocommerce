@@ -893,7 +893,7 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 
 			$args = apply_filters( 'woocommerce_loop_add_to_cart_args', wp_parse_args( $args, $defaults ), $product );
 
-			if ( array_key_exists( 'attributes', $args ) && array_key_exists( 'aria-label', $args['attributes'] ) ) {
+			if ( isset( $args['attributes']['aria-label'] ) ) {
 				$args['attributes']['aria-label'] = strip_tags( $args['attributes']['aria-label'] );
 			}
 
