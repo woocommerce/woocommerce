@@ -215,9 +215,8 @@ class WC_Structured_Data {
 
 		if ( '' !== $product->get_price() ) {
 			if ( $product->is_type( 'variable' ) ) {
-				$prices  = $product->get_variation_prices();
-				$lowest  = reset( $prices['price'] );
-				$highest = end( $prices['price'] );
+				$lowest  = $product->get_variation_price( 'min', false );
+				$highest = $product->get_variation_price( 'max', false );
 
 				if ( $lowest === $highest ) {
 					$markup_offer = array(
