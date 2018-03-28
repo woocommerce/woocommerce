@@ -72,6 +72,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 				);
 			}
 			?>
+			<?php if ( has_action( 'woocommerce_variation_before_options' ) ) { ?>
+				<div class="form-row before-options">
+					<?php do_action( 'woocommerce_variation_before_options' ); ?>
+				</div>
+			<?php } ?>
 			<p class="form-row form-row-full options">
 				<label>
 					<?php esc_html_e( 'Enabled', 'woocommerce' ); ?>:
