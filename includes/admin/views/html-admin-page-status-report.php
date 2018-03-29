@@ -426,7 +426,9 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 				<td class="help"><?php echo wc_help_tip( esc_html__( 'The GeoIP database from MaxMind is used to geolocate customers.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 				<td>
 					<?php
-					if ( file_exists( $database['maxmind_geoip_database'] ) ) {
+					if ( version_compare( $environment['php_version'], '5.4', '<' ) ) {
+						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . wp_kses_post( __( 'MaxMind GeoIP database requires at least PHP 5.4.', 'woocommerce' ) ) . '</mark>';
+					} elseif ( file_exists( $database['maxmind_geoip_database'] ) ) {
 						echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> <code class="private">' . esc_html( $database['maxmind_geoip_database'] ) . '</code></mark> ';
 					} else {
 						/* Translators: %1$s: Library url, %2$s: install path. */
