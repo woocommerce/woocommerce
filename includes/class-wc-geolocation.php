@@ -72,14 +72,31 @@ class WC_Geolocation {
 	}
 
 	/**
-	 * Hook in tabs.
+	 * Prevent geolocation via MaxMind when using legacy versions of php.
+	 *
+	 * @param string $default_customer_address current value.
+	 * @return string
+	 */
+	public static function disable_geolocation_on_legacy_php( $default_customer_address ) {
+		if ( in_array( $default_customer_address, array( 'geolocation', 'geolocation_ajax' ), true ) ) {
+			$default_customer_address = 'base';
+		}
+		return $default_customer_address;
+	}
+
+	/**
+	 * Hook in geolocation functionality.
 	 */
 	public static function init() {
-		// Only download the database from MaxMind if the geolocation function is enabled, or a plugin specifically requests it.
-		if ( self::supports_geolite2() && 'geolocation' === get_option( 'woocommerce_default_customer_address' ) || apply_filters( 'woocommerce_geolocation_update_database_periodically', false ) ) {
-			add_action( 'woocommerce_geoip_updater', array( __CLASS__, 'update_database' ) );
+		if ( self::supports_geolite2() ) {
+			// Only download the database from MaxMind if the geolocation function is enabled, or a plugin specifically requests it.
+			if ( in_array( get_option( 'woocommerce_default_customer_address' ), array( 'geolocation', 'geolocation_ajax' ), true ) || apply_filters( 'woocommerce_geolocation_update_database_periodically', false ) ) {
+				add_action( 'woocommerce_geoip_updater', array( __CLASS__, 'update_database' ) );
+			}
+			add_filter( 'pre_update_option_woocommerce_default_customer_address', array( __CLASS__, 'maybe_update_database' ), 10, 2 );
+		} else {
+			add_filter( 'pre_option_woocommerce_default_customer_address', array( __CLASS__, 'disable_geolocation_on_legacy_php' ) );
 		}
-		add_filter( 'pre_update_option_woocommerce_default_customer_address', array( __CLASS__, 'maybe_update_database' ), 10, 2 );
 	}
 
 	/**
@@ -90,7 +107,7 @@ class WC_Geolocation {
 	 * @return string
 	 */
 	public static function maybe_update_database( $new_value, $old_value ) {
-		if ( self::supports_geolite2() && $new_value !== $old_value && 'geolocation' === $new_value ) {
+		if ( $new_value !== $old_value && in_array( $new_value, array( 'geolocation', 'geolocation_ajax' ), true ) ) {
 			self::update_database();
 		}
 		return $new_value;
@@ -217,7 +234,7 @@ class WC_Geolocation {
 		$logger = wc_get_logger();
 
 		if ( ! self::supports_geolite2() ) {
-			$logger->notice( 'Required PHP 5.4 to be able to download MaxMind GeoLite2 database', array( 'source' => 'geolocation' ) );
+			$logger->notice( 'Requires PHP 5.4 to be able to download MaxMind GeoLite2 database', array( 'source' => 'geolocation' ) );
 			return;
 		}
 
