@@ -217,7 +217,7 @@ class WC_Geolocation {
 		$logger = wc_get_logger();
 
 		if ( ! self::supports_geolite2() ) {
-			$logger->notice( 'Required PHP 5.4 to be able to download MaxMind GeoLite2 database', array( 'source' => 'geolocation' ) );
+			$logger->notice( 'Requires PHP 5.4 to be able to download MaxMind GeoLite2 database', array( 'source' => 'geolocation' ) );
 			return;
 		}
 
