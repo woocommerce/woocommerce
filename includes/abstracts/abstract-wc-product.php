@@ -2,7 +2,7 @@
 /**
  * WooCommerce product base class.
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce/Abstracts
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Legacy product contains all deprecated methods for this class and can be
  * removed in the future.
  */
-include_once( WC_ABSPATH . 'includes/legacy/abstract-wc-legacy-product.php' );
+require_once WC_ABSPATH . 'includes/legacy/abstract-wc-legacy-product.php';
 
 /**
  * Abstract Product Class
@@ -22,8 +22,6 @@ include_once( WC_ABSPATH . 'includes/legacy/abstract-wc-legacy-product.php' );
  *
  * @version  3.0.0
  * @package  WooCommerce/Abstracts
- * @category Abstract Class
- * @author   WooThemes
  */
 class WC_Product extends WC_Abstract_Legacy_Product {
 
@@ -1069,13 +1067,13 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Set product attributes.
 	 *
 	 * Attributes are made up of:
-	 * 		id - 0 for product level attributes. ID for global attributes.
-	 * 		name - Attribute name.
-	 * 		options - attribute value or array of term ids/names.
-	 * 		position - integer sort order.
-	 * 		visible - If visible on frontend.
-	 * 		variation - If used for variations.
-	 * 	Indexed by unqiue key to allow clearing old ones after a set.
+	 *     id - 0 for product level attributes. ID for global attributes.
+	 *     name - Attribute name.
+	 *     options - attribute value or array of term ids/names.
+	 *     position - integer sort order.
+	 *     visible - If visible on frontend.
+	 *     variation - If used for variations.
+	 * Indexed by unqiue key to allow clearing old ones after a set.
 	 *
 	 * @since 3.0.0
 	 * @param array $raw_attributes Array of WC_Product_Attribute objects.
@@ -1194,6 +1192,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			// Validate the file extension.
 			if ( ! $download_object->is_allowed_filetype() ) {
 				if ( $this->get_object_read() ) {
+					/* translators: %1$s: Downloadable file */
 					$errors[] = sprintf( __( 'The downloadable file %1$s cannot be used as it does not have an allowed file type. Allowed types include: %2$s', 'woocommerce' ), '<code>' . basename( $download_object->get_file() ) . '</code>', '<code>' . implode( ', ', array_keys( $download_object->get_allowed_mime_types() ) ) . '</code>' );
 				}
 				continue;
@@ -1202,6 +1201,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			// Validate the file exists.
 			if ( ! $download_object->file_exists() ) {
 				if ( $this->get_object_read() ) {
+					/* translators: %s: Downloadable file */
 					$errors[] = sprintf( __( 'The downloadable file %s cannot be used as it does not exist on the server.', 'woocommerce' ), '<code>' . $download_object->get_file() . '</code>' );
 				}
 				continue;
@@ -1362,7 +1362,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @since 2.5.0
 	 */
 	public function supports( $feature ) {
-		return apply_filters( 'woocommerce_product_supports', in_array( $feature, $this->supports ) ? true : false, $feature, $this );
+		return apply_filters( 'woocommerce_product_supports', in_array( $feature, $this->supports ), $feature, $this );
 	}
 
 	/**
@@ -1579,7 +1579,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			return true;
 		}
 
-		return $this->managing_stock() && $this->backorders_allowed() && ( $this->get_stock_quantity() - $qty_in_cart ) < 0 ? true : false;
+		return $this->managing_stock() && $this->backorders_allowed() && ( $this->get_stock_quantity() - $qty_in_cart ) < 0;
 	}
 
 	/**
@@ -1803,7 +1803,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	public function get_image( $size = 'woocommerce_thumbnail', $attr = array(), $placeholder = true ) {
 		if ( has_post_thumbnail( $this->get_id() ) ) {
 			$image = get_the_post_thumbnail( $this->get_id(), $size, $attr );
-		} elseif ( ( $parent_id = wp_get_post_parent_id( $this->get_id() ) ) && has_post_thumbnail( $parent_id ) ) {
+		} elseif ( ( $parent_id = wp_get_post_parent_id( $this->get_id() ) ) && has_post_thumbnail( $parent_id ) ) { // @phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found
 			$image = get_the_post_thumbnail( $parent_id, $size, $attr );
 		} elseif ( $placeholder ) {
 			$image = wc_placeholder_img( $size );
@@ -1820,7 +1820,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return string
 	 */
 	public function get_shipping_class() {
-		if ( $class_id = $this->get_shipping_class_id() ) {
+		if ( $class_id = $this->get_shipping_class_id() ) { // @phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found
 			$term = get_term_by( 'id', $class_id, 'product_shipping_class' );
 
 			if ( $term && ! is_wp_error( $term ) ) {
@@ -1912,13 +1912,13 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	public function get_price_suffix( $price = '', $qty = 1 ) {
 		$html = '';
 
-		if ( ( $suffix = get_option( 'woocommerce_price_display_suffix' ) ) && wc_tax_enabled() && 'taxable' === $this->get_tax_status() ) {
+		if ( ( $suffix = get_option( 'woocommerce_price_display_suffix' ) ) && wc_tax_enabled() && 'taxable' === $this->get_tax_status() ) { // @phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found
 			if ( '' === $price ) {
 				$price = $this->get_price();
 			}
 			$replacements = array(
-				'{price_including_tax}' => wc_price( wc_get_price_including_tax( $this, array( 'qty' => $qty, 'price' => $price ) ) ),
-				'{price_excluding_tax}' => wc_price( wc_get_price_excluding_tax( $this, array( 'qty' => $qty, 'price' => $price ) ) ),
+				'{price_including_tax}' => wc_price( wc_get_price_including_tax( $this, array( 'qty' => $qty, 'price' => $price ) ) ), // @phpcs:ignore WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine, WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
+				'{price_excluding_tax}' => wc_price( wc_get_price_excluding_tax( $this, array( 'qty' => $qty, 'price' => $price ) ) ), // @phpcs:ignore WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
 			);
 			$html = str_replace( array_keys( $replacements ), array_values( $replacements ), ' <small class="woocommerce-price-suffix">' . wp_kses_post( $suffix ) . '</small>' );
 		}

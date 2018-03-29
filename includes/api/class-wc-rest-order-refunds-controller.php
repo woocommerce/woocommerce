@@ -4,13 +4,11 @@
  *
  * Handles requests to the /orders/<order_id>/refunds endpoint.
  *
- * @package  WooCommerce/API
- * @since    2.6.0
+ * @package WooCommerce/API
+ * @since   2.6.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * REST API Order Refunds controller class.
@@ -168,6 +166,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 			'amount'           => $data['amount'],
 			'reason'           => $data['reason'],
 			'refunded_by'      => $data['refunded_by'],
+			'refunded_payment' => $data['refunded_payment'],
 			'meta_data'        => $data['meta_data'],
 			'line_items'       => $data['line_items'],
 		);
@@ -384,6 +383,11 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Orders_Controller {
 					'description' => __( 'User ID of user who created the refund.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
+				),
+				'refunded_payment' => array(
+					'description' => __( 'If the payment was refunded via the API.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'context'     => array( 'view' ),
 				),
 				'meta_data'        => array(
 					'description' => __( 'Meta data.', 'woocommerce' ),

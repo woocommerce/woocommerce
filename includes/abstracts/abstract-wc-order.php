@@ -1,4 +1,4 @@
-<?php // @codingStandardsIgnoreLine
+<?php
 /**
  * Abstract Order
  *
@@ -1649,7 +1649,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 			$subtotal = wc_price( $subtotal, array( 'currency' => $this->get_currency() ) );
 
-			if ( 'excl' === $tax_display && $this->get_prices_include_tax() ) {
+			if ( 'excl' === $tax_display && $this->get_prices_include_tax() && wc_tax_enabled() ) {
 				$subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 			}
 		} else {
@@ -1876,7 +1876,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return bool
 	 */
 	public function has_status( $status ) {
-		return apply_filters( 'woocommerce_order_has_status', ( is_array( $status ) && in_array( $this->get_status(), $status, true ) ) || $this->get_status() === $status ? true : false, $this, $status );
+		return apply_filters( 'woocommerce_order_has_status', ( is_array( $status ) && in_array( $this->get_status(), $status, true ) ) || $this->get_status() === $status, $this, $status );
 	}
 
 	/**

@@ -21,7 +21,7 @@ if ( $terms_page && 'publish' === $terms_page->post_status && apply_filters( 'wo
 		echo '<div class="woocommerce-terms-and-conditions" style="display: none; max-height: 200px; overflow: auto;">' . $terms_content . '</div>';
 	}
 	?>
-	<p class="form-row terms wc-terms-and-conditions">
+	<p class="form-row terms wc-terms-and-conditions validate-required">
 		<label class="woocommerce-form__label woocommerce-form__label-for-checkbox checkbox">
 			<input type="checkbox" class="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox" name="terms" <?php checked( apply_filters( 'woocommerce_terms_is_checked_default', isset( $_POST['terms'] ) ), true ); ?> id="terms" /> <span><?php printf( __( 'I&rsquo;ve read and accept the <a href="%s" target="_blank" class="woocommerce-terms-and-conditions-link">terms &amp; conditions</a>', 'woocommerce' ), esc_url( wc_get_page_permalink( 'terms' ) ) ); ?></span> <span class="required">*</span>
 		</label>

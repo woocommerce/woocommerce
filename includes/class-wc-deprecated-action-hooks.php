@@ -7,9 +7,7 @@
  * @version 3.3.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Handles deprecation notices and triggering of legacy action hooks.

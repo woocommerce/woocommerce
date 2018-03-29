@@ -491,7 +491,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 */
 	public function parse_backorders_field( $value ) {
 		if ( empty( $value ) ) {
-			return '';
+			return 'no';
 		}
 
 		$value = $this->parse_bool_field( $value );
@@ -502,7 +502,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return $value ? 'yes' : 'no';
 		}
 
-		return '';
+		return 'no';
 	}
 
 	/**

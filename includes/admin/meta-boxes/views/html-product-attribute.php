@@ -39,7 +39,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								?>
 								<select multiple="multiple" data-placeholder="<?php esc_attr_e( 'Select terms', 'woocommerce' ); ?>" class="multiselect attribute_values wc-enhanced-select" name="attribute_values[<?php echo esc_attr( $i ); ?>][]">
 									<?php
-									$args = array(
+									$args      = array(
 										'orderby'    => 'name',
 										'hide_empty' => 0,
 									);
@@ -62,7 +62,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 							do_action( 'woocommerce_product_option_terms', $attribute_taxonomy, $i );
 						} else {
 							/* translators: %s: WC_DELIMITER */
-							?><textarea name="attribute_values[<?php echo esc_attr( $i ); ?>]" cols="5" rows="5" placeholder="<?php printf( esc_attr__( 'Enter some text, or some attributes by "%s" separating values.', 'woocommerce' ), WC_DELIMITER ); ?>"><?php echo esc_textarea( wc_implode_text_attributes( $attribute->get_options() ) ); ?></textarea><?php
+							?>
+							<textarea name="attribute_values[<?php echo esc_attr( $i ); ?>]" cols="5" rows="5" placeholder="<?php printf( esc_attr__( 'Enter some text, or some attributes by "%s" separating values.', 'woocommerce' ), WC_DELIMITER ); ?>"><?php echo esc_textarea( wc_implode_text_attributes( $attribute->get_options() ) ); ?></textarea>
+							<?php
 						}
 						?>
 					</td>

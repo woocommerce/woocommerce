@@ -4,15 +4,11 @@
  *
  * Handles requests to /products/<product_id>/reviews.
  *
- * @author   WooThemes
- * @category API
- * @package  WooCommerce/API
- * @since    2.6.0
+ * @package WooCommerce/API
+ * @since   2.6.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * REST API Product Reviews Controller Class.
@@ -42,21 +38,23 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Product_Reviews_V1_Cont
 	public function register_routes() {
 		parent::register_routes();
 
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/batch', array(
-			'args' => array(
-				'product_id' => array(
-					'description' => __( 'Unique identifier for the variable product.', 'woocommerce' ),
-					'type'        => 'integer',
+		register_rest_route(
+			$this->namespace, '/' . $this->rest_base . '/batch', array(
+				'args'   => array(
+					'product_id' => array(
+						'description' => __( 'Unique identifier for the variable product.', 'woocommerce' ),
+						'type'        => 'integer',
+					),
 				),
-			),
-			array(
-				'methods'             => WP_REST_Server::EDITABLE,
-				'callback'            => array( $this, 'batch_items' ),
-				'permission_callback' => array( $this, 'batch_items_permissions_check' ),
-				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
-			),
-			'schema' => array( $this, 'get_public_batch_schema' ),
-		) );
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'batch_items' ),
+					'permission_callback' => array( $this, 'batch_items_permissions_check' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+				),
+				'schema' => array( $this, 'get_public_batch_schema' ),
+			)
+		);
 	}
 
 	/**
@@ -75,7 +73,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Product_Reviews_V1_Cont
 	/**
 	 * Prepare a single product review output for response.
 	 *
-	 * @param WP_Comment $review Product review object.
+	 * @param WP_Comment      $review Product review object.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
@@ -151,43 +149,43 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Product_Reviews_V1_Cont
 			'title'      => 'product_review',
 			'type'       => 'object',
 			'properties' => array(
-				'id' => array(
+				'id'               => array(
 					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'review' => array(
+				'review'           => array(
 					'description' => __( 'The content of the review.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'date_created' => array(
+				'date_created'     => array(
 					'description' => __( "The date the review was created, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'date_created_gmt' => array(
-					'description' => __( "The date the review was created, as GMT.", 'woocommerce' ),
+					'description' => __( 'The date the review was created, as GMT.', 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'rating' => array(
+				'rating'           => array(
 					'description' => __( 'Review rating (0 to 5).', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'name' => array(
+				'name'             => array(
 					'description' => __( 'Reviewer name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'email' => array(
+				'email'            => array(
 					'description' => __( 'Reviewer email.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'verified' => array(
+				'verified'         => array(
 					'description' => __( 'Shows if the reviewer bought the product or not.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),

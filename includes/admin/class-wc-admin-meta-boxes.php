@@ -31,7 +31,7 @@ class WC_Admin_Meta_Boxes {
 	 *
 	 * @var array
 	 */
-	public static $meta_box_errors  = array();
+	public static $meta_box_errors = array();
 
 	/**
 	 * Constructor.
@@ -74,6 +74,7 @@ class WC_Admin_Meta_Boxes {
 
 	/**
 	 * Add an error message.
+	 *
 	 * @param string $text
 	 */
 	public static function add_error( $text ) {
@@ -177,7 +178,7 @@ class WC_Admin_Meta_Boxes {
 	/**
 	 * Check if we're saving, the trigger an action based on the post type.
 	 *
-	 * @param  int $post_id
+	 * @param  int    $post_id
 	 * @param  object $post
 	 */
 	public function save_meta_boxes( $post_id, $post ) {
