@@ -24,8 +24,8 @@ class WC_Product_Download implements ArrayAccess {
 		'id'     => '',
 		'name'   => '',
 		'file'   => '',
-		'limit'  => '',
-		'expiry' => '',
+		'limit'  => '', // Since 3.4.0.
+		'expiry' => '', // Since 3.4.0.
 	);
 
 	/**
@@ -165,8 +165,9 @@ class WC_Product_Download implements ArrayAccess {
 	}
 
 	/**
-	 * Set Download limit.
+	 * Set download limit.
 	 *
+	 * @since 3.4.0
 	 * @param string|int $value Download limit.
 	 */
 	public function set_limit( $value ) {
@@ -174,8 +175,9 @@ class WC_Product_Download implements ArrayAccess {
 	}
 
 	/**
-	 * Set Download Expiry
+	 * Set download expiry.
 	 *
+	 * @since 3.4.0
 	 * @param string|int $value Days after download expires.
 	 */
 	public function set_expiry( $value ) {
@@ -229,6 +231,7 @@ class WC_Product_Download implements ArrayAccess {
 	/**
 	 * Get download limit.
 	 *
+	 * @since 3.4.0
 	 * @return int Download Limit.
 	 */
 	public function get_limit() {
@@ -238,6 +241,7 @@ class WC_Product_Download implements ArrayAccess {
 	/**
 	 * Get download expiry.
 	 *
+	 * @since 3.4.0
 	 * @return int Download expiry days.
 	 */
 	public function get_expiry() {
