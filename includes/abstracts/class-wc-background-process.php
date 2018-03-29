@@ -72,7 +72,7 @@ abstract class WC_Background_Process extends WP_Background_Process {
 
 		$batch       = new stdClass();
 		$batch->key  = $query->$column;
-		$batch->data = maybe_unserialize( $query->$value_column );
+		$batch->data = array_filter( (array) maybe_unserialize( $query->$value_column ) );
 
 		return $batch;
 	}
