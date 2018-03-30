@@ -1899,63 +1899,7 @@ ul.wc_coupon_list_block {
 		width: 110px;
 
 		a.button {
-			@include ir();
-			display: inline-block;
 			margin: 2px 4px 2px 0;
-			padding: 0 !important;
-			height: 2em !important;
-			width: 2em;
-			overflow: hidden;
-
-			&::after {
-				font-family: 'Dashicons';
-				speak: none;
-				font-weight: normal;
-				font-variant: normal;
-				text-transform: none;
-				margin: 0;
-				text-indent: 0;
-				position: absolute;
-				top: 0;
-				left: 0;
-				width: 100%;
-				height: 100%;
-				text-align: center;
-				line-height: 1.85;
-			}
-
-			img {
-				display: block;
-				width: 12px;
-				height: auto;
-			}
-		}
-
-		a.edit::after {
-			content: '\f464';
-		}
-
-		a.link::after {
-			font-family: 'WooCommerce';
-			content: '\e00d';
-		}
-
-		a.view::after {
-			content: '\f177';
-		}
-
-		a.refresh::after {
-			font-family: 'WooCommerce';
-			content: '\e031';
-		}
-
-		a.processing::after {
-			font-family: 'WooCommerce';
-			content: '\e00f';
-		}
-
-		a.complete::after {
-			content: '\f147';
 		}
 	}
 
@@ -2062,7 +2006,6 @@ ul.wc_coupon_list_block {
 			text-align: right;
 
 			a.button {
-				text-indent: 9999px;
 				margin: 2px 0 2px 4px;
 			}
 		}

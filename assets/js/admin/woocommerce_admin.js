@@ -142,12 +142,6 @@ jQuery( function ( $ ) {
 				'delay': 200
 			} );
 
-			$( '.column-wc_actions .wc-action-button' ).tipTip( {
-				'fadeIn': 50,
-				'fadeOut': 50,
-				'delay': 200
-			} );
-
 			// Add tiptip to parent element for widefat tables
 			$( '.parent-tips' ).each( function() {
 				$( this ).closest( 'a, th' ).attr( 'data-tip', $( this ).data( 'tip' ) ).tipTip( {
