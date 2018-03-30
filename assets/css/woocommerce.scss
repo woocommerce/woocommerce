@@ -882,43 +882,46 @@ p.demo_store,
 		float: right;
 		overflow: hidden;
 		position: relative;
+		height: 1em;
 		line-height: 1;
 		font-size: 1em;
-		height: 1.375em;
-		width: 6.875em;
-		vertical-align: text-bottom;
+		width: 5.4em;
+		font-family: 'star';
 
-		svg {
-			height: 1.375em;
-			width: 1.375em;
-			fill: darken( $secondary, 10% );
-			fill-opacity: .75;
-		}
-
-		.star-rating__rating {
-			overflow: hidden;
-			position: absolute;
+		&::before {
+			content: '\73\73\73\73\73';
+			color: darken( $secondary, 10% );
+			float: left;
 			top: 0;
 			left: 0;
-			display: flex;
+			position: absolute;
+		}
 
-			svg {
-				flex: 0 0 auto;
-				fill: currentColor;
-				fill-opacity: 1;
-			}
+		span {
+			overflow: hidden;
+			float: left;
+			top: 0;
+			left: 0;
+			position: absolute;
+			padding-top: 1.5em;
+		}
+
+		span::before {
+			content: '\53\53\53\53\53';
+			top: 0;
+			position: absolute;
+			left: 0;
 		}
 	}
 
 	.woocommerce-product-rating {
 		@include clearfix();
 		line-height: 2;
-		display: flex;
+		display: block;
 
 		.star-rating {
-			flex: 0 0 auto;
-			float: none;
-			margin: .3em 4px 0 0;
+			margin: 0.5em 4px 0 0;
+			float: left;
 		}
 	}
 
@@ -958,47 +961,47 @@ p.demo_store,
 	p.stars {
 		a {
 			position: relative;
-			height: 1.375em;
-			width: 1.375em;
+			height: 1em;
+			width: 1em;
 			text-indent: -999em;
 			display: inline-block;
 			text-decoration: none;
-			box-shadow: none;
-			border: none;
 
 			&::before {
 				display: block;
 				position: absolute;
 				top: 0;
 				left: 0;
-				width: 1.375em;
-				height: 1.375em;
-				content: url('../images/icons/gridicons/gridicons-star-outline.svg');
+				width: 1em;
+				height: 1em;
+				line-height: 1;
+				font-family: 'WooCommerce';
+				content: '\e021';
 				text-indent: 0;
 			}
 
 			&:hover ~ a::before {
-				content: url('../images/icons/gridicons/gridicons-star-outline.svg');
+				content: '\e021';
 			}
 		}
 
 		&:hover a::before {
-			content: url('../images/icons/gridicons/gridicons-star.svg');
+			content: '\e020';
 		}
 
 		&.selected {
 			a.active {
 				&::before {
-					content: url('../images/icons/gridicons/gridicons-star.svg');
+					content: '\e020';
 				}
 
 				~ a::before {
-					content: url('../images/icons/gridicons/gridicons-star-outline.svg');
+					content: '\e021';
 				}
 			}
 
 			a:not( .active )::before {
-				content: url('../images/icons/gridicons/gridicons-star.svg');
+				content: '\e020';
 			}
 		}
 	}
@@ -2209,11 +2212,4 @@ body:not( .search-results ) .twentysixteen .entry-summary {
 .twentysixteen .price ins {
 	background: inherit;
 	color: inherit;
-}
-
-/**
- * IE 9 support
- */
-@supports not (display: flex) {
-
 }
