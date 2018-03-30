@@ -3653,10 +3653,12 @@ img.help_tip {
 				position: relative;
 
 				&::after {
-					@include icon_dashicons( '\f161' );
-					font-size: 2.618em;
-					line-height: 72px;
-					color: #ddd;
+					content: url('../images/icons/gridicons/gridicons-image.svg');
+					display: block;
+					height: 36px;
+					width: 36px;
+					padding: 20px;
+					opacity: .15;
 				}
 			}
 
