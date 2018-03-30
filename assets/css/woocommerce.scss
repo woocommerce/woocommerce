@@ -1467,9 +1467,12 @@ p.demo_store,
 				padding: 1px 0;
 			}
 		}
-		.woocommerce-widget-layered-nav-list__item--chosen a::before {
-			@include iconbefore( '\e013' );
-			color: $red;
+		.woocommerce-widget-layered-nav-list__item--chosen a svg {
+			fill: $red;
+			height: 1.25em;
+			width: 1.25em;
+			margin-right: .375em;
+			vertical-align: text-bottom;
 		}
 	}
 	.woocommerce-widget-layered-nav-dropdown__submit {
@@ -1492,11 +1495,12 @@ p.demo_store,
 			a {
 				text-decoration: none;
 
-				&::before {
-					@include iconbefore( '\e013' );
-					color: $red;
-					vertical-align: inherit;
-					margin-right: .5em;
+				.remove svg {
+					fill: $red;
+					height: 1.25em;
+					width: 1.25em;
+					margin-right: .375em;
+					vertical-align: text-bottom;
 				}
 			}
 		}
