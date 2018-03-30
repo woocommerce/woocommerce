@@ -3685,21 +3685,19 @@ img.help_tip {
 					}
 
 					a.delete {
-						@include ir();
-						font-size: 1.4em;
+						display: block;
+						height: 18px;
+						width: 18px;
+						overflow: hidden;
 
-						&::before {
-							@include icon_dashicons( '\f153' );
-							color: #999;
-							background: #fff;
-							border-radius: 50%;
-							height: 1em;
-							width: 1em;
-							line-height: 1em;
+						svg {
+							fill: #999;
+							height: 18px;
+							width: 18px;
 						}
 
-						&:hover::before {
-							color: $red;
+						&:hover svg {
+							fill: $red;
 						}
 					}
 				}
