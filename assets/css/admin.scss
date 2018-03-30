@@ -1711,22 +1711,25 @@ ul.wc_coupon_list_block {
 				white-space: nowrap;
 			}
 
-			th.line_tax,
-			td.line_tax {
-				.delete-order-tax {
-					@include ir();
-					float: right;
-					font-size: 14px;
-					visibility: hidden;
-					margin: 3px -18px 0 0;
+			th.line_tax {
+				position: relative;
 
-					&::before {
-						@include icon_dashicons( '\f153' );
-						color: #999;
+				.delete-order-tax {
+					display: block;
+					position: absolute;
+					left: calc(100% - .75em);
+					top: calc(50% - 7px);
+					visibility: hidden;
+					z-index: 1;
+
+					svg {
+						fill: #999;
+						height: 14px;
+						width: 14px;
 					}
 
-					&:hover::before {
-						color: $red;
+					&:hover svg {
+						fill: $red;
 					}
 				}
 
