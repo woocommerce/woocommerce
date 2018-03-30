@@ -258,6 +258,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		if ( $args['force_delete'] ) {
+			do_action( 'woocommerce_before_delete_' . $post_type, $id );
 			wp_delete_post( $id );
 			$product->set_id( 0 );
 			do_action( 'woocommerce_delete_' . $post_type, $id );
