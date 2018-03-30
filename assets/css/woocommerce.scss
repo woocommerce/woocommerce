@@ -40,11 +40,11 @@ p.demo_store,
 
 .screen-reader-text {
 	clip: rect(1px, 1px, 1px, 1px);
-	height: 1px;
-	overflow: hidden;
-	position: absolute !important;
-	width: 1px;
-	word-wrap: normal !important;
+    height: 1px;
+    overflow: hidden;
+    position: absolute !important;
+    width: 1px;
+    word-wrap: normal !important;
 }
 
 .admin-bar p.demo_store {
@@ -886,6 +886,7 @@ p.demo_store,
 		font-size: 1em;
 		height: 1.375em;
 		width: 6.875em;
+		vertical-align: text-bottom;
 
 		svg {
 			height: 1.375em;
@@ -899,9 +900,10 @@ p.demo_store,
 			position: absolute;
 			top: 0;
 			left: 0;
-			white-space: nowrap;
+			display: flex;
 
 			svg {
+				flex: 0 0 auto;
 				fill: currentColor;
 				fill-opacity: 1;
 			}
@@ -911,9 +913,11 @@ p.demo_store,
 	.woocommerce-product-rating {
 		@include clearfix();
 		line-height: 2;
+		display: flex;
 
 		.star-rating {
-			float: left;
+			flex: 0 0 auto;
+			float: none;
 			margin: .3em 4px 0 0;
 		}
 	}
@@ -1602,7 +1606,6 @@ p.demo_store,
 			.star-rating {
 				float: none;
 				display: inline-block;
-				vertical-align: text-bottom;
 			}
 		}
 
@@ -2206,4 +2209,11 @@ body:not( .search-results ) .twentysixteen .entry-summary {
 .twentysixteen .price ins {
 	background: inherit;
 	color: inherit;
+}
+
+/**
+ * IE 9 support
+ */
+@supports not (display: flex) {
+
 }
