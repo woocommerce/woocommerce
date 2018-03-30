@@ -4011,17 +4011,20 @@ img.help_tip {
 			}
 
 			.delete {
-				@include ir();
-				font-size: 1.2em;
+				display: block;
+				height: 16px;
+				width: 16px;
+				overflow: hidden;
 
-				&::before {
-					@include icon_dashicons( '\f153' );
-					color: #999;
+				svg {
+					fill: #999;
+					height: 16px;
+					width: 16px;
 				}
 
 				&:hover {
-					&::before {
-						color: $red;
+					svg {
+						fill: $red;
 					}
 				}
 			}
