@@ -2031,7 +2031,8 @@ ul.wc_coupon_list_block {
 		.order-preview.disabled {
 			&::before {
 				content: '';
-				background: url('../images/wpspin.gif') no-repeat center top;
+				background: url('../images/wpspin-2x.gif') no-repeat center top;
+				background-size: contain;
 				position: absolute;
 				top: 4px;
 				left: 0;
