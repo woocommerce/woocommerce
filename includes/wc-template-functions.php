@@ -893,6 +893,10 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 
 			$args = apply_filters( 'woocommerce_loop_add_to_cart_args', wp_parse_args( $args, $defaults ), $product );
 
+			if ( isset( $args['attributes']['aria-label'] ) ) {
+				$args['attributes']['aria-label'] = strip_tags( $args['attributes']['aria-label'] );
+			}
+
 			wc_get_template( 'loop/add-to-cart.php', $args );
 		}
 	}
@@ -992,7 +996,7 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 			'price-desc' => __( 'Sort by price: high to low', 'woocommerce' ),
 		) );
 
-		$default_orderby = wc_get_loop_prop( 'is_search' ) ? 'relevance' : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
+		$default_orderby = wc_get_loop_prop( 'is_search' ) ? 'relevance' : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby', '' ) );
 		$orderby         = isset( $_GET['orderby'] ) ? wc_clean( wp_unslash( $_GET['orderby'] ) ) : $default_orderby; // WPCS: sanitization ok, input var ok, CSRF ok.
 
 		if ( wc_get_loop_prop( 'is_search' ) ) {
@@ -1999,7 +2003,7 @@ if ( ! function_exists( 'woocommerce_get_product_subcategories' ) ) {
 	 */
 	function woocommerce_get_product_subcategories( $parent_id = 0 ) {
 		$parent_id          = absint( $parent_id );
-		$product_categories = wp_cache_get( 'product-categories-' . $parent_id, 'product_cat' );
+		$product_categories = wp_cache_get( 'product-category-hierarchy-' . $parent_id, 'product_cat' );
 
 		if ( false === $product_categories ) {
 			// NOTE: using child_of instead of parent - this is not ideal but due to a WP bug ( https://core.trac.wordpress.org/ticket/15626 ) pad_counts won't work.
@@ -2011,7 +2015,8 @@ if ( ! function_exists( 'woocommerce_get_product_subcategories' ) ) {
 				'taxonomy'     => 'product_cat',
 				'pad_counts'   => 1,
 			) ) );
-			wp_cache_set( 'product-categories-' . $parent_id, $product_categories, 'product_cat' );
+
+			wp_cache_set( 'product-category-hierarchy-' . $parent_id, $product_categories, 'product_cat' );
 		}
 
 		if ( apply_filters( 'woocommerce_product_subcategories_hide_empty', true ) ) {
@@ -2455,7 +2460,7 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 		$name                  = $args['name'] ? $args['name'] : 'attribute_' . sanitize_title( $attribute );
 		$id                    = $args['id'] ? $args['id'] : sanitize_title( $attribute );
 		$class                 = $args['class'];
-		$show_option_none      = $args['show_option_none'] ? true : false;
+		$show_option_none      = (bool) $args['show_option_none'];
 		$show_option_none_text = $args['show_option_none'] ? $args['show_option_none'] : __( 'Choose an option', 'woocommerce' ); // We'll do our best to hide the placeholder, but we'll need to show something when resetting options.
 
 		if ( empty( $options ) && ! empty( $product ) && ! empty( $attribute ) ) {

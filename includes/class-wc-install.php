@@ -2,13 +2,11 @@
 /**
  * Installation related functions and actions.
  *
- * @package  WooCommerce/Classes
- * @version  3.0.0
+ * @package WooCommerce/Classes
+ * @version 3.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Install Class.
@@ -151,11 +149,11 @@ class WC_Install {
 	 * This function is hooked into admin_init to affect admin only.
 	 */
 	public static function install_actions() {
-		if ( ! empty( $_GET['do_update_woocommerce'] ) ) {
+		if ( ! empty( $_GET['do_update_woocommerce'] ) ) { // WPCS: input var ok, CSRF ok.
 			self::update();
 			WC_Admin_Notices::add_notice( 'update' );
 		}
-		if ( ! empty( $_GET['force_update_woocommerce'] ) ) {
+		if ( ! empty( $_GET['force_update_woocommerce'] ) ) { // WPCS: input var ok, CSRF ok.
 			do_action( 'wp_' . get_current_blog_id() . '_wc_updater_cron' );
 			wp_safe_redirect( admin_url( 'admin.php?page=wc-settings' ) );
 			exit;
@@ -358,7 +356,7 @@ class WC_Install {
 
 		$held_duration = get_option( 'woocommerce_hold_stock_minutes', '60' );
 
-		if ( '' != $held_duration ) {
+		if ( '' !== $held_duration ) {
 			wp_schedule_single_event( time() + ( absint( $held_duration ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
 		}
 
@@ -780,6 +778,15 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			$tables[] = "{$wpdb->prefix}woocommerce_termmeta";
 		}
 
+		/**
+		 * Filter the list of known WooCommerce tables.
+		 *
+		 * If WooCommerce plugins need to add new tables, they can inject them here.
+		 *
+		 * @param array $tables An array of WooCommerce-specific database table names.
+		 */
+		$tables = apply_filters( 'woocommerce_install_get_tables', $tables );
+
 		return $tables;
 	}
 
@@ -1000,10 +1007,10 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 
 		foreach ( $files as $file ) {
 			if ( wp_mkdir_p( $file['base'] ) && ! file_exists( trailingslashit( $file['base'] ) . $file['file'] ) ) {
-				$file_handle = @fopen( trailingslashit( $file['base'] ) . $file['file'], 'w' );
+				$file_handle = @fopen( trailingslashit( $file['base'] ) . $file['file'], 'w' ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
 				if ( $file_handle ) {
-					fwrite( $file_handle, $file['content'] );
-					fclose( $file_handle );
+					fwrite( $file_handle, $file['content'] ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fwrite
+					fclose( $file_handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fclose
 				}
 			}
 		}
@@ -1031,7 +1038,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	 * @return  array
 	 */
 	public static function plugin_row_meta( $links, $file ) {
-		if ( WC_PLUGIN_BASENAME == $file ) {
+		if ( WC_PLUGIN_BASENAME === $file ) {
 			$row_meta = array(
 				'docs'    => '<a href="' . esc_url( apply_filters( 'woocommerce_docs_url', 'https://docs.woocommerce.com/documentation/plugins/woocommerce/' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce documentation', 'woocommerce' ) . '">' . esc_html__( 'Docs', 'woocommerce' ) . '</a>',
 				'apidocs' => '<a href="' . esc_url( apply_filters( 'woocommerce_apidocs_url', 'https://docs.woocommerce.com/wc-apidocs/' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce API docs', 'woocommerce' ) . '">' . esc_html__( 'API docs', 'woocommerce' ) . '</a>',
@@ -1051,8 +1058,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	 * @param string $key Plugin relative path. Example: woocommerce/woocommerce.php.
 	 */
 	private static function associate_plugin_slug( $plugins, $key ) {
-		$slug = explode( '/', $key );
-		$slug = explode( '.', end( $slug ) );
+		$slug                = explode( '/', $key );
+		$slug                = explode( '.', end( $slug ) );
 		$plugins[ $slug[0] ] = $key;
 		return $plugins;
 	}

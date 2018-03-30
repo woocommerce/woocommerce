@@ -2,7 +2,7 @@
 /**
  * Represents a single shipping zone
  *
- * @since 2.6.0
+ * @since   2.6.0
  * @version 3.0.0
  * @package WooCommerce/Classes
  */

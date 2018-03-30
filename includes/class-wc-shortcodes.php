@@ -2,13 +2,11 @@
 /**
  * Shortcodes
  *
- * @package  WooCommerce/Classes
- * @version  3.2.0
+ * @package WooCommerce/Classes
+ * @version 3.2.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WooCommerce Shortcodes class.
@@ -200,6 +198,7 @@ class WC_Shortcodes {
 		$columns = absint( $atts['columns'] );
 
 		wc_set_loop_prop( 'columns', $columns );
+		wc_set_loop_prop( 'is_shortcode', true );
 
 		ob_start();
 
@@ -510,7 +509,7 @@ class WC_Shortcodes {
 		// Check if sku is a variation.
 		if ( isset( $atts['sku'] ) && $single_product->have_posts() && 'product_variation' === $single_product->post->post_type ) {
 
-			$variation = new WC_Product_Variation( $single_product->post->ID );
+			$variation  = new WC_Product_Variation( $single_product->post->ID );
 			$attributes = $variation->get_attributes();
 
 			// Set preselected id to be used by JS to provide context.

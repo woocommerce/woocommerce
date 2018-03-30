@@ -303,19 +303,27 @@ class WC_Admin_Setup_Wizard {
 
 		?>
 		<ol class="wc-setup-steps">
-			<?php foreach ( $output_steps as $step_key => $step ) :
+			<?php
+			foreach ( $output_steps as $step_key => $step ) {
 				$is_completed = array_search( $this->step, array_keys( $this->steps ), true ) > array_search( $step_key, array_keys( $this->steps ), true );
 
-				if ( $step_key === $this->step ) : ?>
+				if ( $step_key === $this->step ) {
+					?>
 					<li class="active"><?php echo esc_html( $step['name'] ); ?></li>
-				<?php elseif ( $is_completed ) : ?>
+					<?php
+				} elseif ( $is_completed ) {
+					?>
 					<li class="done">
-						<a href="<?php echo esc_url( add_query_arg( 'step', $step_key, remove_query_arg( 'activate_error' ) ) ) ?>"><?php echo esc_html( $step['name'] ); ?></a>
+						<a href="<?php echo esc_url( add_query_arg( 'step', $step_key, remove_query_arg( 'activate_error' ) ) ); ?>"><?php echo esc_html( $step['name'] ); ?></a>
 					</li>
-				<?php else : ?>
+					<?php
+				} else {
+					?>
 					<li><?php echo esc_html( $step['name'] ); ?></li>
-				<?php endif; ?>
-			<?php endforeach; ?>
+					<?php
+				}
+			}
+			?>
 		</ol>
 		<?php
 	}
@@ -479,20 +487,24 @@ class WC_Admin_Setup_Wizard {
 				<?php esc_html_e( 'I will also be selling products or services in person.', 'woocommerce' ); ?>
 			</label>
 
-			<?php if ( 'unknown' === get_option( 'woocommerce_allow_tracking', 'unknown' ) ) : ?>
+			<?php
+			if ( 'unknown' === get_option( 'woocommerce_allow_tracking', 'unknown' ) ) {
+				?>
 				<div class="woocommerce-tracker">
 					<p class="checkbox">
-						<input type="checkbox" id="wc_tracker_optin" name="wc_tracker_optin" value="yes" checked />
-						<label for="wc_tracker_optin"><?php esc_html_e( 'Help WooCommerce improve by enabling usage tracking.', 'woocommerce' ); ?></label>
+						<input type="checkbox" id="wc_tracker_checkbox" name="wc_tracker_checkbox" value="yes" checked />
+						<label for="wc_tracker_checkbox"><?php esc_html_e( 'Help WooCommerce improve with usage tracking.', 'woocommerce' ); ?></label>
 					</p>
 					<p>
 					<?php
-					esc_html_e( 'Checking this box means making WooCommerce better &mdash; your store will be considered as we evaluate new features, judge the quality of an update, or determine if an improvement makes sense. If you do not check this box, we will not know this store exists and we will not collect any usage data.', 'woocommerce' );
+					esc_html_e( 'Gathering usage data allows us to make WooCommerce better &mdash; your store will be considered as we evaluate new features, judge the quality of an update, or determine if an improvement makes sense. If you would rather opt-out, and do not check this box, we will not know this store exists and we will not collect any usage data.', 'woocommerce' );
 					echo ' <a target="_blank" href="https://woocommerce.com/usage-tracking/">' . esc_html__( 'Read more about what we collect.', 'woocommerce' ) . '</a>';
 					?>
 					</p>
 				</div>
-			<?php endif; ?>
+				<?php
+			}
+			?>
 			<p class="wc-setup-actions step">
 				<button type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( "Let's go!", 'woocommerce' ); ?>" name="save_step"><?php esc_html_e( "Let's go!", 'woocommerce' ); ?></button>
 			</p>
@@ -514,7 +526,7 @@ class WC_Admin_Setup_Wizard {
 		$currency_code  = sanitize_text_field( $_POST['currency_code'] );
 		$product_type   = sanitize_text_field( $_POST['product_type'] );
 		$sell_in_person = isset( $_POST['sell_in_person'] ) && ( 'yes' === sanitize_text_field( $_POST['sell_in_person'] ) );
-		$tracking       = isset( $_POST['wc_tracker_optin'] ) && ( 'yes' === sanitize_text_field( $_POST['wc_tracker_optin'] ) );
+		$tracking       = isset( $_POST['wc_tracker_checkbox'] ) && ( 'yes' === sanitize_text_field( $_POST['wc_tracker_checkbox'] ) );
 		// @codingStandardsIgnoreEnd
 		update_option( 'woocommerce_store_address', $address );
 		update_option( 'woocommerce_store_address_2', $address_2 );

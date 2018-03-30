@@ -1,18 +1,17 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 /**
- * External Product Class.
+ * External Product
  *
  * External products cannot be bought; they link offsite. Extends simple products.
  *
- * @class 		WC_Product_External
- * @version		3.0.0
- * @package		WooCommerce/Classes/Products
- * @category	Class
- * @author 		WooThemes
+ * @package WooCommerce/Classes/Products
+ * @version 3.0.0
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Product external class.
  */
 class WC_Product_External extends WC_Product {
 
@@ -28,6 +27,7 @@ class WC_Product_External extends WC_Product {
 
 	/**
 	 * Get internal type.
+	 *
 	 * @return string
 	 */
 	public function get_type() {
@@ -45,7 +45,7 @@ class WC_Product_External extends WC_Product {
 	/**
 	 * Get product url.
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_product_url( $context = 'view' ) {
@@ -55,7 +55,7 @@ class WC_Product_External extends WC_Product {
 	/**
 	 * Get button text.
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_button_text( $context = 'view' ) {
@@ -96,7 +96,7 @@ class WC_Product_External extends WC_Product {
 	 * External products cannot be stock managed.
 	 *
 	 * @since 3.0.0
-	 * @param bool
+	 * @param bool $manage_stock If manage stock.
 	 */
 	public function set_manage_stock( $manage_stock ) {
 		$this->set_prop( 'manage_stock', false );
@@ -111,7 +111,7 @@ class WC_Product_External extends WC_Product {
 	 *
 	 * @since 3.0.0
 	 *
-	 * @param string $stock_status
+	 * @param string $stock_status Stock status.
 	 */
 	public function set_stock_status( $stock_status = '' ) {
 		$this->set_prop( 'stock_status', 'instock' );

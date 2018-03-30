@@ -820,6 +820,7 @@ table.wc_status_table--tools {
 	pre {
 		font-family: monospace;
 		white-space: pre-wrap;
+		word-wrap: break-word;
 	}
 }
 
@@ -2505,17 +2506,6 @@ table.wp-list-table {
 		}
 	}
 
-	span.wc-type {
-		@include ir();
-		margin: 0 auto;
-
-		&::before {
-			@include icon_dashicons( '\f128' );
-			font-family: 'WooCommerce';
-			content: '\e006';
-		}
-	}
-
 	td.column-featured span.wc-featured {
 		cursor: pointer;
 		height: 24px;
@@ -2524,37 +2514,6 @@ table.wp-list-table {
 		svg {
 			height: 24px;
 			width: 24px;
-		}
-	}
-
-	span.product-type {
-		@include ir();
-		font-size: 1.6em;
-		margin: 0 auto;
-		-moz-osx-font-smoothing: grayscale;
-
-		&::before {
-			@include icon( '\e006' );
-		}
-
-		&.grouped::before {
-			content: '\e002';
-		}
-
-		&.external::before {
-			content: '\e034';
-		}
-
-		&.variable::before {
-			content: '\e003';
-		}
-
-		&.downloadable::before {
-			content: '\e001';
-		}
-
-		&.virtual::before {
-			content: '\e000';
 		}
 	}
 

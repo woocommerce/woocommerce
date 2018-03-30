@@ -499,7 +499,7 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			$product->delete( true );
-			$result = $product->get_id() > 0 ? false : true;
+			$result = ! ( $product->get_id() > 0 );
 		} else {
 			$product->delete();
 			$result = 'trash' === $product->get_status();
