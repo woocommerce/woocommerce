@@ -6184,14 +6184,12 @@ table.bar_chart {
 			font-size: 1.5em;
 			line-height: 1.75em;
 
-			&::before {
-				@include icon( '\e015' );
-				color: #A16696;
-				position: static;
-				font-size: 100px;
+			svg {
+				fill: #a16696;
+				height: 128px;
+				width: 128px;
 				display: block;
-				float: none;
-				margin: 0 0 24px;
+				margin: 0 auto 24px;
 			}
 		}
 	}

@@ -11,6 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 <div class="wc-progress-form-content woocommerce-importer">
 	<section class="woocommerce-importer-done">
+		<?php echo get_gridicon( 'gridicons-checkmark-circle' ); ?>
 		<?php
 		$results = array();
 
