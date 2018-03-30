@@ -71,7 +71,7 @@ $row_class    = apply_filters( 'woocommerce_admin_html_order_item_class', ! empt
 				echo '<small class="times">&times;</small> ' . esc_html( $item->get_quantity() );
 
 			if ( $refunded_qty = $order->get_qty_refunded_for_item( $item_id ) ) {
-				echo '<small class="refunded">' . get_gridicon( 'gridicons-reply' ) . ( $refunded_qty * -1 ) . '</small>';
+				echo '<small class="refunded">' . get_gridicon( 'gridicons-reply' ) . ' -' . ( $refunded_qty * -1 ) . '</small>';
 			}
 			?>
 		</div>
@@ -92,7 +92,7 @@ $row_class    = apply_filters( 'woocommerce_admin_html_order_item_class', ! empt
 			}
 
 			if ( $refunded = $order->get_total_refunded_for_item( $item_id ) ) {
-				echo '<small class="refunded">' . get_gridicon( 'gridicons-reply' ) . wc_price( $refunded, array( 'currency' => $order->get_currency() ) ) . '</small>';
+				echo '<small class="refunded">' . get_gridicon( 'gridicons-reply' ) . ' -' . wc_price( $refunded, array( 'currency' => $order->get_currency() ) ) . '</small>';
 			}
 			?>
 		</div>
@@ -138,7 +138,7 @@ $row_class    = apply_filters( 'woocommerce_admin_html_order_item_class', ! empt
 					}
 
 					if ( $refunded = $order->get_tax_refunded_for_item( $item_id, $tax_item_id ) ) {
-						echo '<small class="refunded">' . get_gridicon( 'gridicons-reply' ) . wc_price( $refunded, array( 'currency' => $order->get_currency() ) ) . '</small>';
+						echo '<small class="refunded">' . get_gridicon( 'gridicons-reply' ) . ' -' . wc_price( $refunded, array( 'currency' => $order->get_currency() ) ) . '</small>';
 					}
 					?>
 				</div>
