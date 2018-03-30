@@ -5008,18 +5008,19 @@ img.ui-datepicker-trigger {
 					span {
 						display: block;
 
-						&::after {
-							@include iconafter( '\e035' );
+						svg {
 							float: right;
-							font-size: 0.9em;
-							line-height: 1.618;
+							fill: currentColor;
+							height: 18px;
+							width: 18px;
+							margin-left: .618em;
 						}
 					}
 
 					&.open {
 						color: #333;
 
-						span::after {
+						span svg {
 							display: none;
 						}
 					}

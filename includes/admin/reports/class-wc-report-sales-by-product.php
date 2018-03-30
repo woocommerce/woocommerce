@@ -211,7 +211,12 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	 */
 	public function products_widget() {
 		?>
-		<h4 class="section_title"><span><?php esc_html_e( 'Product search', 'woocommerce' ); ?></span></h4>
+		<h4 class="section_title">
+			<span>
+				<?php esc_html_e( 'Product search', 'woocommerce' ); ?>
+				<?php echo get_gridicon( 'gridicons-resize' ); ?>
+			</span>
+		</h4>
 		<div class="section">
 			<form method="GET">
 				<div>
@@ -229,7 +234,12 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 				</div>
 			</form>
 		</div>
-		<h4 class="section_title"><span><?php esc_html_e( 'Top sellers', 'woocommerce' ); ?></span></h4>
+		<h4 class="section_title">
+			<span>
+				<?php esc_html_e( 'Top sellers', 'woocommerce' ); ?>
+				<?php echo get_gridicon( 'gridicons-resize' ); ?>
+			</span>
+		</h4>
 		<div class="section">
 			<table cellspacing="0">
 				<?php
@@ -273,7 +283,12 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 				?>
 			</table>
 		</div>
-		<h4 class="section_title"><span><?php esc_html_e( 'Top freebies', 'woocommerce' ); ?></span></h4>
+		<h4 class="section_title">
+			<span>
+				<?php esc_html_e( 'Top freebies', 'woocommerce' ); ?>
+				<?php echo get_gridicon( 'gridicons-resize' ); ?>
+			</span>
+		</h4>
 		<div class="section">
 			<table cellspacing="0">
 				<?php
@@ -325,7 +340,12 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 				?>
 			</table>
 		</div>
-		<h4 class="section_title"><span><?php esc_html_e( 'Top earners', 'woocommerce' ); ?></span></h4>
+		<h4 class="section_title">
+			<span>
+				<?php esc_html_e( 'Top earners', 'woocommerce' ); ?>
+				<?php echo get_gridicon( 'gridicons-resize' ); ?>
+			</span>
+		</h4>
 		<div class="section">
 			<table cellspacing="0">
 				<?php

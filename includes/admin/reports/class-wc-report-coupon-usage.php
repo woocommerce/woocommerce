@@ -176,7 +176,12 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 	 */
 	public function coupons_widget() {
 		?>
-		<h4 class="section_title"><span><?php esc_html_e( 'Filter by coupon', 'woocommerce' ); ?></span></h4>
+		<h4 class="section_title">
+			<span>
+				<?php esc_html_e( 'Filter by coupon', 'woocommerce' ); ?>
+				<?php echo get_gridicon( 'gridicons-resize' ); ?>
+			</span>
+		</h4>
 		<div class="section">
 			<form method="GET">
 				<div>
@@ -229,7 +234,12 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 				</div>
 			</form>
 		</div>
-		<h4 class="section_title"><span><?php esc_html_e( 'Most popular', 'woocommerce' ); ?></span></h4>
+		<h4 class="section_title">
+			<span>
+				<?php esc_html_e( 'Most popular', 'woocommerce' ); ?>
+				<?php echo get_gridicon( 'gridicons-resize' ); ?>
+			</span>
+		</h4>
 		<div class="section">
 			<table cellspacing="0">
 				<?php
@@ -278,7 +288,12 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 				?>
 			</table>
 		</div>
-		<h4 class="section_title"><span><?php esc_html_e( 'Most discount', 'woocommerce' ); ?></span></h4>
+		<h4 class="section_title">
+			<span>
+				<?php esc_html_e( 'Most discount', 'woocommerce' ); ?>
+				<?php echo get_gridicon( 'gridicons-resize' ); ?>
+			</span>
+		</h4>
 		<div class="section">
 			<table cellspacing="0">
 				<?php
