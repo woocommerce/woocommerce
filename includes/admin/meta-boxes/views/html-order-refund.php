@@ -11,7 +11,7 @@ $who_refunded = new WP_User( $refund->get_refunded_by() );
 <tr class="refund <?php echo ( ! empty( $class ) ) ? esc_attr( $class ) : ''; ?>" data-order_refund_id="<?php echo esc_attr( $refund->get_id() ); ?>">
 	<td class="thumb">
 		<div>
-			<?php echo get_gridicon( 'gridicons-redo' ); ?>
+			<?php echo get_gridicon( 'gridicons-reply' ); ?>
 		</div>
 	</td>
 

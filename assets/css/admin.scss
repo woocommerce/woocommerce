@@ -1400,7 +1400,7 @@ ul.wc_coupon_list_block {
 					position: relative;
 					margin-right: -1em;
 				}
-		}
+			}
 
 			tbody th, td {
 				padding: 1.5em 1em 1em;
@@ -1740,14 +1740,12 @@ ul.wc_coupon_list_block {
 				color: $red;
 				white-space: nowrap;
 				margin-top: 0.5em;
-				&::before {
-					@include icon_dashicons( '\f171' );
-					position: relative;
-					top: auto;
-					left: auto;
-					margin: -1px 4px 0 0;
-					vertical-align: middle;
-					line-height: 1em;
+
+				svg {
+					fill: $red;
+					height: 12px;
+					width: 12px;
+					vertical-align: text-bottom;
 				}
 			}
 		}
