@@ -11,99 +11,84 @@ $color__alt-background: #fdfdfd;
  */
 
 .wc-products-block-preview {
-	&.grid {
-		overflow: hidden;
+	overflow: hidden;
 
-		.product-preview {
-			float: left;
-			text-align: center;
-			margin-right: 3.8%;
-		}
+	.product-preview {
+		float: left;
+		text-align: center;
+		margin-right: 3.8%;
+	}
 
-		&.cols-1 .product-preview {
-			float: none;
+	&.cols-1 .product-preview {
+		float: none;
+		margin-right: 0;
+	}
+
+	&.cols-2 .product-preview {
+		width: 48%;
+
+		&:nth-of-type(2n) {
 			margin-right: 0;
 		}
 
-		&.cols-2 .product-preview {
-			width: 48%;
-
-			&:nth-of-type(2n) {
-				margin-right: 0;
-			}
-
-			&:nth-of-type(2n+1) {
-				clear: both;
-			}
-		}
-
-		&.cols-3 .product-preview {
-			width: 30.75%;
-
-			&:nth-of-type(3n) {
-				margin-right: 0;
-			}
-
-			&:nth-of-type(3n+1) {
-				clear: both;
-			}
-		}
-
-		&.cols-4 .product-preview {
-			width: 22.05%;
-
-			&:nth-of-type(4n) {
-				margin-right: 0;
-			}
-
-			&:nth-of-type(4n+1) {
-				clear: both;
-			}
-		}
-
-		&.cols-5 .product-preview {
-			width: 16.9%;
-
-			&:nth-of-type(5n) {
-				margin-right: 0;
-			}
-
-			&:nth-of-type(5n+1) {
-				clear: both;
-			}
-
-			.product-add-to-cart {
-				font-size: .75em;
-			}
-		}
-
-		&.cols-6 .product-preview {
-			width: 13.5%;
-
-			&:nth-of-type(6n) {
-				margin-right: 0;
-			}
-
-			&:nth-of-type(6n+1) {
-				clear: both;
-			}
-
-			.product-add-to-cart {
-				font-size: .75em;
-			}
+		&:nth-of-type(2n+1) {
+			clear: both;
 		}
 	}
 
-	&.list {
-		.product-preview {
-			overflow: hidden;
+	&.cols-3 .product-preview {
+		width: 30.75%;
+
+		&:nth-of-type(3n) {
+			margin-right: 0;
 		}
 
-		img {
-			float: left;
-			width: 50%;
-			margin-right: 2em;
-			margin-bottom: 2em;
+		&:nth-of-type(3n+1) {
+			clear: both;
+		}
+	}
+
+	&.cols-4 .product-preview {
+		width: 22.05%;
+
+		&:nth-of-type(4n) {
+			margin-right: 0;
+		}
+
+		&:nth-of-type(4n+1) {
+			clear: both;
+		}
+	}
+
+	&.cols-5 .product-preview {
+		width: 16.9%;
+
+		&:nth-of-type(5n) {
+			margin-right: 0;
+		}
+
+		&:nth-of-type(5n+1) {
+			clear: both;
+		}
+
+		.product-add-to-cart {
+			font-size: .75em;
+		}
+	}
+
+	&.cols-6 .product-preview {
+		width: 13.5%;
+
+		&:nth-of-type(6n) {
+			margin-right: 0;
+		}
+
+		&:nth-of-type(6n+1) {
+			clear: both;
+		}
+
+		.product-add-to-cart {
+			font-size: .75em;
 		}
 	}
 
