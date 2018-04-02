@@ -401,7 +401,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 
 		$product = wc_get_product( $product->get_id() );
 
-		$store = new WC_Product_Variable_Data_Store_CPT();
+		$store = WC_Data_Store::load( 'product-variable' );
 
 		$this->assertTrue( $store->child_has_dimensions( $product ) );
 	}
@@ -416,13 +416,13 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 
 		$product = wc_get_product( $product->get_id() );
 
-		$store = new WC_Product_Variable_Data_Store_CPT();
+		$store = WC_Data_Store::load( 'product-variable' );
 
 		$this->assertFalse( $store->child_has_dimensions( $product ) );
 	}
 
 	public function test_get_on_sale_products() {
-		$product_store = new WC_Product_Data_Store_CPT();
+		$product_store = WC_Data_Store::load( 'product' );
 
 		$sale_product = WC_Helper_Product::create_simple_product();
 		$sale_product->set_sale_price( 3.49 );
