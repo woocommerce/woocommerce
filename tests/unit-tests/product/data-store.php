@@ -11,6 +11,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	 * Make sure the default product store loads.
 	 *
 	 * @since 3.0.0
+	 * @group core-only
 	 */
 	public function test_product_store_loads() {
 		$product_store = new WC_Data_Store( 'product' );
