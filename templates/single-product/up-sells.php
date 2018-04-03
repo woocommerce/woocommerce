@@ -31,7 +31,7 @@ if ( $upsells ) : ?>
 			<?php foreach ( $upsells as $upsell ) : ?>
 
 				<?php
-				 	$post_object = get_post( $upsell->get_id() );
+					$post_object = get_post( $upsell->get_id() );
 
 					setup_postdata( $GLOBALS['post'] =& $post_object );
 

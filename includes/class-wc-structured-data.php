@@ -2,17 +2,15 @@
 /**
  * Structured data's handler and generator using JSON-LD format.
  *
+ * @package WooCommerce/Classes
  * @since   3.0.0
  * @version 3.0.0
- * @package WooCommerce/Classes
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
- * WC_Structured_Data class.
+ * Structured data class.
  */
 class WC_Structured_Data {
 
@@ -217,9 +215,8 @@ class WC_Structured_Data {
 
 		if ( '' !== $product->get_price() ) {
 			if ( $product->is_type( 'variable' ) ) {
-				$prices  = $product->get_variation_prices();
-				$lowest  = reset( $prices['price'] );
-				$highest = end( $prices['price'] );
+				$lowest  = $product->get_variation_price( 'min', false );
+				$highest = $product->get_variation_price( 'max', false );
 
 				if ( $lowest === $highest ) {
 					$markup_offer = array(
@@ -240,8 +237,8 @@ class WC_Structured_Data {
 				}
 			} else {
 				$markup_offer = array(
-					'@type' => 'Offer',
-					'price' => wc_format_decimal( $product->get_price(), wc_get_price_decimals() ),
+					'@type'              => 'Offer',
+					'price'              => wc_format_decimal( $product->get_price(), wc_get_price_decimals() ),
 					'priceSpecification' => array(
 						'price'                 => wc_format_decimal( $product->get_price(), wc_get_price_decimals() ),
 						'priceCurrency'         => $currency,

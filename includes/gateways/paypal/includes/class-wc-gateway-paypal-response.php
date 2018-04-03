@@ -65,6 +65,7 @@ abstract class WC_Gateway_Paypal_Response {
 	protected function payment_complete( $order, $txn_id = '', $note = '' ) {
 		$order->add_order_note( $note );
 		$order->payment_complete( $txn_id );
+		WC()->cart->empty_cart();
 	}
 
 	/**

@@ -603,7 +603,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 			'site_url'                  => get_option( 'siteurl' ),
 			'version'                   => WC()->version,
 			'log_directory'             => WC_LOG_DIR,
-			'log_directory_writable'    => ( @fopen( WC_LOG_DIR . 'test-log.log', 'a' ) ? true : false ),
+			'log_directory_writable'    => (bool) @fopen( WC_LOG_DIR . 'test-log.log', 'a' ),
 			'wp_version'                => get_bloginfo( 'version' ),
 			'wp_multisite'              => is_multisite(),
 			'wp_memory_limit'           => $wp_memory_limit,

@@ -42,7 +42,7 @@
 		setTimeout( function() {
 			$form.trigger( 'check_variations' );
 			$form.trigger( 'wc_variation_form' );
-			$form.loading = loading;
+			$form.loading = false;
 		}, 100 );
 	};
 

@@ -2,13 +2,11 @@
 /**
  * Background Updater
  *
- * @version  2.6.0
- * @package  WooCommerce/Classes
+ * @version 2.6.0
+ * @package WooCommerce/Classes
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 if ( ! class_exists( 'WC_Background_Process', false ) ) {
 	include_once dirname( __FILE__ ) . '/abstracts/class-wc-background-process.php';

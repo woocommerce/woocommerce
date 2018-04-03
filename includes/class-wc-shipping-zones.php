@@ -94,7 +94,7 @@ class WC_Shipping_Zones {
 		$wc_shipping         = WC_Shipping::instance();
 		$allowed_classes     = $wc_shipping->get_shipping_method_class_names();
 
-		if ( ! empty( $raw_shipping_method ) && in_array( $raw_shipping_method->method_id, array_keys( $allowed_classes ) ) ) {
+		if ( ! empty( $raw_shipping_method ) && in_array( $raw_shipping_method->method_id, array_keys( $allowed_classes ), true ) ) {
 			$class_name = $allowed_classes[ $raw_shipping_method->method_id ];
 			if ( is_object( $class_name ) ) {
 				$class_name = get_class( $class_name );
