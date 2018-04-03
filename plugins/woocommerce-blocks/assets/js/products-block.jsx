@@ -284,7 +284,7 @@ class ProductsBlockSettingsEditor extends React.Component {
 
 		return (
 			<div className={ 'wc-products-settings ' + ( this.state.expanded_group ? 'expanded-group-' + this.state.expanded_group : '' ) }>
-				<h4 className="wc-products-settings__title"><Dashicon icon={ 'universal-access-alt' } /> { __( 'Products' ) }</h4>
+				<h4 className="wc-products-settings__title"><Dashicon icon={ 'screenoptions' } /> { __( 'Products' ) }</h4>
 
 				{ heading }
 
@@ -396,7 +396,7 @@ const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
  */
 registerBlockType( 'woocommerce/products', {
 	title: __( 'Products' ),
-	icon: 'universal-access-alt', // @todo Needs a good icon.
+	icon: 'screenoptions',
 	category: 'widgets',
 
 	attributes: {

@@ -481,7 +481,7 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 				wp.element.createElement(
 					'h4',
 					{ className: 'wc-products-settings__title' },
-					wp.element.createElement(Dashicon, { icon: 'universal-access-alt' }),
+					wp.element.createElement(Dashicon, { icon: 'screenoptions' }),
 					' ',
 					__('Products')
 				),
@@ -651,7 +651,7 @@ var ProductsBlockPreview = withAPIData(function (_ref) {
  */
 registerBlockType('woocommerce/products', {
 	title: __('Products'),
-	icon: 'universal-access-alt', // @todo Needs a good icon.
+	icon: 'screenoptions',
 	category: 'widgets',
 
 	attributes: {
