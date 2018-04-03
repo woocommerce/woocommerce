@@ -2627,37 +2627,6 @@ table.wp-list-table {
 		cursor: pointer;
 	}
 
-	span.product-type {
-		@include ir();
-		font-size: 1.6em;
-		margin: 0 auto;
-		-moz-osx-font-smoothing: grayscale;
-
-		&::before {
-			@include icon( '\e006' );
-		}
-
-		&.grouped::before {
-			content: '\e002';
-		}
-
-		&.external::before {
-			content: '\e034';
-		}
-
-		&.variable::before {
-			content: '\e003';
-		}
-
-		&.downloadable::before {
-			content: '\e001';
-		}
-
-		&.virtual::before {
-			content: '\e000';
-		}
-	}
-
 	mark {
 		&.instock,
 		&.outofstock,
