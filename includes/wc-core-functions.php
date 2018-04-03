@@ -440,7 +440,7 @@ function get_woocommerce_currencies() {
 					'TZS' => __( 'Tanzanian shilling', 'woocommerce' ),
 					'UAH' => __( 'Ukrainian hryvnia', 'woocommerce' ),
 					'UGX' => __( 'Ugandan shilling', 'woocommerce' ),
-					'USD' => __( 'United States dollar', 'woocommerce' ),
+					'USD' => __( 'United States (US) dollar', 'woocommerce' ),
 					'UYU' => __( 'Uruguayan peso', 'woocommerce' ),
 					'UZS' => __( 'Uzbekistani som', 'woocommerce' ),
 					'VEF' => __( 'Venezuelan bol&iacute;var', 'woocommerce' ),

@@ -209,6 +209,7 @@ class WC_Admin_Setup_Wizard {
 			'wc_setup_params',
 			array(
 				'pending_jetpack_install' => $pending_jetpack ? 'yes' : 'no',
+				'states'                  => WC()->countries->get_states(),
 			)
 		);
 
@@ -358,8 +359,6 @@ class WC_Admin_Setup_Wizard {
 			$user_location = WC_Geolocation::geolocate_ip();
 			$country       = $user_location['country'];
 			$state         = $user_location['state'];
-		} elseif ( empty( $state ) ) {
-			$state = '*';
 		}
 
 		$locale_info         = include WC()->plugin_path() . '/i18n/locale-info.php';
@@ -368,75 +367,44 @@ class WC_Admin_Setup_Wizard {
 		<form method="post" class="address-step">
 			<?php wp_nonce_field( 'wc-setup' ); ?>
 			<p class="store-setup"><?php esc_html_e( 'The following wizard will help you configure your store and get you started quickly.', 'woocommerce' ); ?></p>
-			<label for="store_country_state" class="location-prompt">
-				<?php esc_html_e( 'Where is your store based?', 'woocommerce' ); ?>
-			</label>
-			<select
-				id="store_country_state"
-				name="store_country_state"
-				required
-				data-placeholder="<?php esc_attr_e( 'Choose a country&hellip;', 'woocommerce' ); ?>"
-				aria-label="<?php esc_attr_e( 'Country', 'woocommerce' ); ?>"
-				class="location-input wc-enhanced-select dropdown"
-			>
-					<?php WC()->countries->country_dropdown_options( $country, $state ); ?>
-			</select>
 
 			<div class="store-address-container">
-			<label class="location-prompt" for="store_address">
-				<?php esc_html_e( 'Address', 'woocommerce' ); ?>
-			</label>
-			<input
-				type="text"
-				id="store_address"
-				class="location-input"
-				name="store_address"
-				required
-				value="<?php echo esc_attr( $address ); ?>"
-			/>
-			<label class="location-prompt" for="store_address_2">
-				<?php esc_html_e( 'Address line 2', 'woocommerce' ); ?>
-			</label>
-			<input
-				type="text"
-				id="store_address_2"
-				class="location-input"
-				name="store_address_2"
-				value="<?php echo esc_attr( $address_2 ); ?>"
-			/>
-			<div class="city-and-postcode">
-				<div>
-					<label class="location-prompt" for="store_city">
-						<?php esc_html_e( 'City', 'woocommerce' ); ?>
+
+				<label for="store_country" class="location-prompt"><?php esc_html_e( 'Where is your store based?', 'woocommerce' ); ?></label>
+				<select id="store_country" name="store_country" required data-placeholder="<?php esc_attr_e( 'Choose a country&hellip;', 'woocommerce' ); ?>" aria-label="<?php esc_attr_e( 'Country', 'woocommerce' ); ?>" class="location-input wc-enhanced-select dropdown">
+					<?php foreach ( WC()->countries->get_countries() as $code => $label ) : ?>
+						<option <?php selected( $code, $country ); ?> value="<?php echo esc_attr( $code ); ?>"><?php echo esc_html( $label ); ?></option>
+					<?php endforeach; ?>
+				</select>
+
+				<label class="location-prompt" for="store_address"><?php esc_html_e( 'Address', 'woocommerce' ); ?></label>
+				<input type="text" id="store_address" class="location-input" name="store_address" required value="<?php echo esc_attr( $address ); ?>" />
+
+				<label class="location-prompt" for="store_address_2"><?php esc_html_e( 'Address line 2', 'woocommerce' ); ?></label>
+				<input type="text" id="store_address_2" class="location-input" name="store_address_2" value="<?php echo esc_attr( $address_2 ); ?>" />
+
+				<div class="store-state-container hidden">
+					<label for="store_state" class="location-prompt">
+						<?php esc_html_e( 'State', 'woocommerce' ); ?>
 					</label>
-					<input
-						type="text"
-						id="store_city"
-						class="location-input"
-						name="store_city"
-						required
-						value="<?php echo esc_attr( $city ); ?>"
-					/>
+					<select id="store_state" name="store_state" data-placeholder="<?php esc_attr_e( 'Choose a state&hellip;', 'woocommerce' ); ?>" aria-label="<?php esc_attr_e( 'State', 'woocommerce' ); ?>" class="location-input wc-enhanced-select dropdown"></select>
 				</div>
-				<div>
-					<label class="location-prompt" for="store_postcode">
-						<?php esc_html_e( 'Postcode / ZIP', 'woocommerce' ); ?>
-					</label>
-					<input
-						type="text"
-						id="store_postcode"
-						class="location-input"
-						name="store_postcode"
-						required
-						value="<?php echo esc_attr( $postcode ); ?>"
-					/>
+
+				<div class="city-and-postcode">
+					<div>
+						<label class="location-prompt" for="store_city"><?php esc_html_e( 'City', 'woocommerce' ); ?></label>
+						<input type="text" id="store_city" class="location-input" name="store_city" required value="<?php echo esc_attr( $city ); ?>" />
+					</div>
+					<div>
+						<label class="location-prompt" for="store_postcode"><?php esc_html_e( 'Postcode / ZIP', 'woocommerce' ); ?></label>
+						<input type="text" id="store_postcode" class="location-input" name="store_postcode" required value="<?php echo esc_attr( $postcode ); ?>" />
+					</div>
 				</div>
 			</div>
-		</div>
 
 			<div class="store-currency-container">
 			<label class="location-prompt" for="currency_code">
-				<?php esc_html_e( 'What currency do you use?', 'woocommerce' ); ?>
+				<?php esc_html_e( 'What currency do you accept payments in?', 'woocommerce' ); ?>
 			</label>
 			<select
 				id="currency_code"
@@ -449,27 +417,30 @@ class WC_Admin_Setup_Wizard {
 				<?php foreach ( get_woocommerce_currencies() as $code => $name ) : ?>
 					<option value="<?php echo esc_attr( $code ); ?>" <?php selected( $currency, $code ); ?>>
 						<?php
+						$symbol = get_woocommerce_currency_symbol( $code );
+
+						if ( $symbol === $code ) {
 							/* translators: 1: currency name 2: currency code */
-							echo esc_html( sprintf( __( '%1$s (%2$s)', 'woocommerce' ), $name, get_woocommerce_currency_symbol( $code ) ) );
+							echo esc_html( sprintf( __( '%1$s (%2$s)', 'woocommerce' ), $name, $code ) );
+						} else {
+							/* translators: 1: currency name 2: currency symbol, 3: currency code */
+							echo esc_html( sprintf( __( '%1$s (%2$s / %3$s)', 'woocommerce' ), $name, get_woocommerce_currency_symbol( $code ), $code ) );
+						}
 						?>
 					</option>
 				<?php endforeach; ?>
 			</select>
 			<script type="text/javascript">
 				var wc_setup_currencies = <?php echo wp_json_encode( $currency_by_country ); ?>;
+				var wc_base_state       = "<?php echo esc_js( $state ); ?>";
 			</script>
 			</div>
 
 			<div class="product-type-container">
 			<label class="location-prompt" for="product_type">
-				<?php esc_html_e( 'What type of product do you plan to sell?', 'woocommerce' ); ?>
+				<?php esc_html_e( 'What type of products do you plan to sell?', 'woocommerce' ); ?>
 			</label>
-			<select
-				id="product_type"
-				name="product_type"
-				required
-				class="location-input wc-enhanced-select dropdown"
-			>
+			<select id="product_type" name="product_type" required class="location-input wc-enhanced-select dropdown">
 				<option value="both" <?php selected( $product_type, 'both' ); ?>><?php esc_html_e( 'I plan to sell both physical and digital products', 'woocommerce' ); ?></option>
 				<option value="physical" <?php selected( $product_type, 'physical' ); ?>><?php esc_html_e( 'I plan to sell physical products', 'woocommerce' ); ?></option>
 				<option value="virtual" <?php selected( $product_type, 'virtual' ); ?>><?php esc_html_e( 'I plan to sell digital products', 'woocommerce' ); ?></option>
@@ -521,24 +492,29 @@ class WC_Admin_Setup_Wizard {
 		$address        = sanitize_text_field( $_POST['store_address'] );
 		$address_2      = sanitize_text_field( $_POST['store_address_2'] );
 		$city           = sanitize_text_field( $_POST['store_city'] );
-		$country_state  = sanitize_text_field( $_POST['store_country_state'] );
+		$country        = sanitize_text_field( $_POST['store_country'] );
+		$state          = sanitize_text_field( $_POST['store_state'] );
 		$postcode       = sanitize_text_field( $_POST['store_postcode'] );
 		$currency_code  = sanitize_text_field( $_POST['currency_code'] );
 		$product_type   = sanitize_text_field( $_POST['product_type'] );
 		$sell_in_person = isset( $_POST['sell_in_person'] ) && ( 'yes' === sanitize_text_field( $_POST['sell_in_person'] ) );
 		$tracking       = isset( $_POST['wc_tracker_checkbox'] ) && ( 'yes' === sanitize_text_field( $_POST['wc_tracker_checkbox'] ) );
 		// @codingStandardsIgnoreEnd
+
+		if ( ! $state ) {
+			$state = '*';
+		}
+
 		update_option( 'woocommerce_store_address', $address );
 		update_option( 'woocommerce_store_address_2', $address_2 );
 		update_option( 'woocommerce_store_city', $city );
-		update_option( 'woocommerce_default_country', $country_state );
+		update_option( 'woocommerce_default_country', $country . ':' . $state );
 		update_option( 'woocommerce_store_postcode', $postcode );
 		update_option( 'woocommerce_currency', $currency_code );
 		update_option( 'woocommerce_product_type', $product_type );
 		update_option( 'woocommerce_sell_in_person', $sell_in_person );
 
 		$locale_info = include WC()->plugin_path() . '/i18n/locale-info.php';
-		$country     = WC()->countries->get_base_country();
 
 		// Set currency formatting options based on chosen location and currency.
 		if (
