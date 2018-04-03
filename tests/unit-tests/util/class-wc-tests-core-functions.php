@@ -177,7 +177,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 			'TZS' => 'Tanzanian shilling',
 			'UAH' => 'Ukrainian hryvnia',
 			'UGX' => 'Ugandan shilling',
-			'USD' => 'United States dollar',
+			'USD' => 'United States (US) dollar',
 			'UYU' => 'Uruguayan peso',
 			'UZS' => 'Uzbekistani som',
 			'VEF' => 'Venezuelan bol&iacute;var',
