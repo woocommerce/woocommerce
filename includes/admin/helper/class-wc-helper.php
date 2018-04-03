@@ -1318,6 +1318,10 @@ class WC_Helper {
 	 * @param string $screen_id Current screen ID.
 	 */
 	private static function _prompt_helper_connect( $screen_id ) {
+		if ( apply_filters( 'woocommerce_helper_suppress_connect_notice', false ) ) {
+			return;
+		}
+
 		$screens   = wc_get_screen_ids();
 		$screens[] = 'plugins';
 
