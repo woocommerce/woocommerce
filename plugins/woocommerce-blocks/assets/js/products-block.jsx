@@ -48,7 +48,7 @@ const PRODUCTS_BLOCK_DISPLAY_SETTINGS = {
 	},
 	'all' : {
 		title: __( 'All products' ),
-		description: __( 'Display all products ordered chronologically' ),
+		description: __( 'Display all products ordered chronologically, alphabetically, by price, by rating or by sales' ),
 		value: 'all',
 	}
 };
