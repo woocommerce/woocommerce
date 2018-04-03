@@ -669,7 +669,7 @@ registerBlockType('woocommerce/products', {
    */
 		rows: {
 			type: 'number',
-			default: 1
+			default: wc_product_block_data.default_rows
 		},
 
 		/**
@@ -791,7 +791,15 @@ registerBlockType('woocommerce/products', {
 					__('Layout')
 				),
 				columnControl,
-				rowControl,
+				wp.element.createElement(RangeControl, {
+					label: __('Rows'),
+					value: rows,
+					onChange: function onChange(value) {
+						return setAttributes({ rows: value });
+					},
+					min: wc_product_block_data.min_rows,
+					max: wc_product_block_data.max_rows
+				}),
 				orderControl
 			);
 		};

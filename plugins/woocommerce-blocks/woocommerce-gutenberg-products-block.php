@@ -37,6 +37,9 @@ function wgpb_register_products_block() {
 		'min_columns' => wc_get_theme_support( 'product_grid::min_columns', 1 ),
 		'max_columns' => wc_get_theme_support( 'product_grid::max_columns', 6 ),
 		'default_columns' => wc_get_default_products_per_row(),
+		'min_rows' => wc_get_theme_support( 'product_grid::min_rows', 1 ),
+		'max_rows' => wc_get_theme_support( 'product_grid::max_rows', 6 ),
+		'default_rows' => wc_get_default_product_rows_per_page(),
 	);
 	wp_localize_script( 'woocommerce-products-block-editor', 'wc_product_block_data', $product_block_data );
 
