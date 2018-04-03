@@ -2,13 +2,11 @@
 /**
  * Background Emailer
  *
- * @version  3.0.1
- * @package  WooCommerce/Classes
+ * @version 3.0.1
+ * @package WooCommerce/Classes
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 if ( ! class_exists( 'WC_Background_Process', false ) ) {
 	include_once dirname( __FILE__ ) . '/abstracts/class-wc-background-process.php';
@@ -59,7 +57,7 @@ class WC_Background_Emailer extends WC_Background_Process {
 				WC_Emails::send_queued_transactional_email( $callback['filter'], $callback['args'] );
 			} catch ( Exception $e ) {
 				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-					trigger_error( 'Transactional email triggered fatal error for callback ' . esc_html( $callback['filter'] ), E_USER_WARNING );
+					trigger_error( 'Transactional email triggered fatal error for callback ' . esc_html( $callback['filter'] ), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 				}
 			}
 		}
@@ -89,7 +87,7 @@ class WC_Background_Emailer extends WC_Background_Process {
 			if ( ! headers_sent() ) {
 				header( 'Connection: close' );
 			}
-			@ob_end_flush();
+			@ob_end_flush(); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
 			flush();
 		}
 	}
@@ -117,7 +115,7 @@ class WC_Background_Emailer extends WC_Background_Process {
 		// Pass cookies through with the request so nonces function.
 		$cookies = array();
 
-		foreach ( $_COOKIE as $name => $value ) {
+		foreach ( $_COOKIE as $name => $value ) { // WPCS: input var ok.
 			if ( 'PHPSESSID' === $name ) {
 				continue;
 			}

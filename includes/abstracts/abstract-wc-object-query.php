@@ -1,4 +1,10 @@
 <?php
+/**
+ * Query abstraction layer functionality.
+ *
+ * @package  WooCommerce/Abstracts
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -10,19 +16,19 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @version  3.1.0
  * @package  WooCommerce/Abstracts
- * @category Abstract Class
- * @author   Automattic
  */
 abstract class WC_Object_Query {
 
 	/**
 	 * Stores query data.
+	 *
 	 * @var array
 	 */
 	protected $query_vars = array();
 
 	/**
 	 * Create a new query.
+	 *
 	 * @param array $args Criteria to query on in a format similar to WP_Query.
 	 */
 	public function __construct( $args = array() ) {
@@ -31,6 +37,7 @@ abstract class WC_Object_Query {
 
 	/**
 	 * Get the current query vars.
+	 *
 	 * @return array
 	 */
 	public function get_query_vars() {
@@ -39,8 +46,9 @@ abstract class WC_Object_Query {
 
 	/**
 	 * Get the value of a query variable.
+	 *
 	 * @param string $query_var Query variable to get value for.
-	 * @param mixed $default Default value if query variable is not set.
+	 * @param mixed  $default Default value if query variable is not set.
 	 * @return mixed Query variable value if set, otherwise default.
 	 */
 	public function get( $query_var, $default = '' ) {
@@ -52,8 +60,9 @@ abstract class WC_Object_Query {
 
 	/**
 	 * Set a query variable.
+	 *
 	 * @param string $query_var Query variable to set.
-	 * @param mixed $value Value to set for query variable.
+	 * @param mixed  $value Value to set for query variable.
 	 */
 	public function set( $query_var, $value ) {
 		$this->query_vars[ $query_var ] = $value;
@@ -61,6 +70,7 @@ abstract class WC_Object_Query {
 
 	/**
 	 * Get the default allowed query vars.
+	 *
 	 * @return array
 	 */
 	protected function get_default_query_vars() {

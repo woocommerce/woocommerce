@@ -4,10 +4,8 @@
  *
  * General core functions available on both the front-end and admin.
  *
- * @author   Automattic
- * @category Core
- * @package  WooCommerce\Functions
- * @version  3.3.0
+ * @package WooCommerce\Functions
+ * @version 3.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -15,22 +13,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Include core functions (available in both admin and frontend).
-include WC_ABSPATH . 'includes/wc-conditional-functions.php';
-include WC_ABSPATH . 'includes/wc-coupon-functions.php';
-include WC_ABSPATH . 'includes/wc-user-functions.php';
-include WC_ABSPATH . 'includes/wc-deprecated-functions.php';
-include WC_ABSPATH . 'includes/wc-formatting-functions.php';
-include WC_ABSPATH . 'includes/wc-order-functions.php';
-include WC_ABSPATH . 'includes/wc-order-item-functions.php';
-include WC_ABSPATH . 'includes/wc-page-functions.php';
-include WC_ABSPATH . 'includes/wc-product-functions.php';
-include WC_ABSPATH . 'includes/wc-stock-functions.php';
-include WC_ABSPATH . 'includes/wc-account-functions.php';
-include WC_ABSPATH . 'includes/wc-term-functions.php';
-include WC_ABSPATH . 'includes/wc-attribute-functions.php';
-include WC_ABSPATH . 'includes/wc-rest-functions.php';
-include WC_ABSPATH . 'includes/wc-widget-functions.php';
-include WC_ABSPATH . 'includes/wc-webhook-functions.php';
+require WC_ABSPATH . 'includes/wc-conditional-functions.php';
+require WC_ABSPATH . 'includes/wc-coupon-functions.php';
+require WC_ABSPATH . 'includes/wc-user-functions.php';
+require WC_ABSPATH . 'includes/wc-deprecated-functions.php';
+require WC_ABSPATH . 'includes/wc-formatting-functions.php';
+require WC_ABSPATH . 'includes/wc-order-functions.php';
+require WC_ABSPATH . 'includes/wc-order-item-functions.php';
+require WC_ABSPATH . 'includes/wc-page-functions.php';
+require WC_ABSPATH . 'includes/wc-product-functions.php';
+require WC_ABSPATH . 'includes/wc-stock-functions.php';
+require WC_ABSPATH . 'includes/wc-account-functions.php';
+require WC_ABSPATH . 'includes/wc-term-functions.php';
+require WC_ABSPATH . 'includes/wc-attribute-functions.php';
+require WC_ABSPATH . 'includes/wc-rest-functions.php';
+require WC_ABSPATH . 'includes/wc-widget-functions.php';
+require WC_ABSPATH . 'includes/wc-webhook-functions.php';
 
 /**
  * Filters on data used in admin and frontend.
@@ -291,7 +289,8 @@ function get_woocommerce_currencies() {
 
 	if ( ! isset( $currencies ) ) {
 		$currencies = array_unique(
-			apply_filters( 'woocommerce_currencies',
+			apply_filters(
+				'woocommerce_currencies',
 				array(
 					'AED' => __( 'United Arab Emirates dirham', 'woocommerce' ),
 					'AFN' => __( 'Afghan afghani', 'woocommerce' ),
@@ -441,7 +440,7 @@ function get_woocommerce_currencies() {
 					'TZS' => __( 'Tanzanian shilling', 'woocommerce' ),
 					'UAH' => __( 'Ukrainian hryvnia', 'woocommerce' ),
 					'UGX' => __( 'Ugandan shilling', 'woocommerce' ),
-					'USD' => __( 'United States dollar', 'woocommerce' ),
+					'USD' => __( 'United States (US) dollar', 'woocommerce' ),
 					'UYU' => __( 'Uruguayan peso', 'woocommerce' ),
 					'UZS' => __( 'Uzbekistani som', 'woocommerce' ),
 					'VEF' => __( 'Venezuelan bol&iacute;var', 'woocommerce' ),
@@ -475,171 +474,173 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		$currency = get_woocommerce_currency();
 	}
 
-	$symbols = apply_filters( 'woocommerce_currency_symbols', array(
-		'AED' => '&#x62f;.&#x625;',
-		'AFN' => '&#x60b;',
-		'ALL' => 'L',
-		'AMD' => 'AMD',
-		'ANG' => '&fnof;',
-		'AOA' => 'Kz',
-		'ARS' => '&#36;',
-		'AUD' => '&#36;',
-		'AWG' => 'Afl.',
-		'AZN' => 'AZN',
-		'BAM' => 'KM',
-		'BBD' => '&#36;',
-		'BDT' => '&#2547;&nbsp;',
-		'BGN' => '&#1083;&#1074;.',
-		'BHD' => '.&#x62f;.&#x628;',
-		'BIF' => 'Fr',
-		'BMD' => '&#36;',
-		'BND' => '&#36;',
-		'BOB' => 'Bs.',
-		'BRL' => '&#82;&#36;',
-		'BSD' => '&#36;',
-		'BTC' => '&#3647;',
-		'BTN' => 'Nu.',
-		'BWP' => 'P',
-		'BYR' => 'Br',
-		'BYN' => 'Br',
-		'BZD' => '&#36;',
-		'CAD' => '&#36;',
-		'CDF' => 'Fr',
-		'CHF' => '&#67;&#72;&#70;',
-		'CLP' => '&#36;',
-		'CNY' => '&yen;',
-		'COP' => '&#36;',
-		'CRC' => '&#x20a1;',
-		'CUC' => '&#36;',
-		'CUP' => '&#36;',
-		'CVE' => '&#36;',
-		'CZK' => '&#75;&#269;',
-		'DJF' => 'Fr',
-		'DKK' => 'DKK',
-		'DOP' => 'RD&#36;',
-		'DZD' => '&#x62f;.&#x62c;',
-		'EGP' => 'EGP',
-		'ERN' => 'Nfk',
-		'ETB' => 'Br',
-		'EUR' => '&euro;',
-		'FJD' => '&#36;',
-		'FKP' => '&pound;',
-		'GBP' => '&pound;',
-		'GEL' => '&#x10da;',
-		'GGP' => '&pound;',
-		'GHS' => '&#x20b5;',
-		'GIP' => '&pound;',
-		'GMD' => 'D',
-		'GNF' => 'Fr',
-		'GTQ' => 'Q',
-		'GYD' => '&#36;',
-		'HKD' => '&#36;',
-		'HNL' => 'L',
-		'HRK' => 'Kn',
-		'HTG' => 'G',
-		'HUF' => '&#70;&#116;',
-		'IDR' => 'Rp',
-		'ILS' => '&#8362;',
-		'IMP' => '&pound;',
-		'INR' => '&#8377;',
-		'IQD' => '&#x639;.&#x62f;',
-		'IRR' => '&#xfdfc;',
-		'IRT' => '&#x062A;&#x0648;&#x0645;&#x0627;&#x0646;',
-		'ISK' => 'kr.',
-		'JEP' => '&pound;',
-		'JMD' => '&#36;',
-		'JOD' => '&#x62f;.&#x627;',
-		'JPY' => '&yen;',
-		'KES' => 'KSh',
-		'KGS' => '&#x441;&#x43e;&#x43c;',
-		'KHR' => '&#x17db;',
-		'KMF' => 'Fr',
-		'KPW' => '&#x20a9;',
-		'KRW' => '&#8361;',
-		'KWD' => '&#x62f;.&#x643;',
-		'KYD' => '&#36;',
-		'KZT' => 'KZT',
-		'LAK' => '&#8365;',
-		'LBP' => '&#x644;.&#x644;',
-		'LKR' => '&#xdbb;&#xdd4;',
-		'LRD' => '&#36;',
-		'LSL' => 'L',
-		'LYD' => '&#x644;.&#x62f;',
-		'MAD' => '&#x62f;.&#x645;.',
-		'MDL' => 'MDL',
-		'MGA' => 'Ar',
-		'MKD' => '&#x434;&#x435;&#x43d;',
-		'MMK' => 'Ks',
-		'MNT' => '&#x20ae;',
-		'MOP' => 'P',
-		'MRO' => 'UM',
-		'MUR' => '&#x20a8;',
-		'MVR' => '.&#x783;',
-		'MWK' => 'MK',
-		'MXN' => '&#36;',
-		'MYR' => '&#82;&#77;',
-		'MZN' => 'MT',
-		'NAD' => '&#36;',
-		'NGN' => '&#8358;',
-		'NIO' => 'C&#36;',
-		'NOK' => '&#107;&#114;',
-		'NPR' => '&#8360;',
-		'NZD' => '&#36;',
-		'OMR' => '&#x631;.&#x639;.',
-		'PAB' => 'B/.',
-		'PEN' => 'S/.',
-		'PGK' => 'K',
-		'PHP' => '&#8369;',
-		'PKR' => '&#8360;',
-		'PLN' => '&#122;&#322;',
-		'PRB' => '&#x440;.',
-		'PYG' => '&#8370;',
-		'QAR' => '&#x631;.&#x642;',
-		'RMB' => '&yen;',
-		'RON' => 'lei',
-		'RSD' => '&#x434;&#x438;&#x43d;.',
-		'RUB' => '&#8381;',
-		'RWF' => 'Fr',
-		'SAR' => '&#x631;.&#x633;',
-		'SBD' => '&#36;',
-		'SCR' => '&#x20a8;',
-		'SDG' => '&#x62c;.&#x633;.',
-		'SEK' => '&#107;&#114;',
-		'SGD' => '&#36;',
-		'SHP' => '&pound;',
-		'SLL' => 'Le',
-		'SOS' => 'Sh',
-		'SRD' => '&#36;',
-		'SSP' => '&pound;',
-		'STD' => 'Db',
-		'SYP' => '&#x644;.&#x633;',
-		'SZL' => 'L',
-		'THB' => '&#3647;',
-		'TJS' => '&#x405;&#x41c;',
-		'TMT' => 'm',
-		'TND' => '&#x62f;.&#x62a;',
-		'TOP' => 'T&#36;',
-		'TRY' => '&#8378;',
-		'TTD' => '&#36;',
-		'TWD' => '&#78;&#84;&#36;',
-		'TZS' => 'Sh',
-		'UAH' => '&#8372;',
-		'UGX' => 'UGX',
-		'USD' => '&#36;',
-		'UYU' => '&#36;',
-		'UZS' => 'UZS',
-		'VEF' => 'Bs F',
-		'VND' => '&#8363;',
-		'VUV' => 'Vt',
-		'WST' => 'T',
-		'XAF' => 'CFA',
-		'XCD' => '&#36;',
-		'XOF' => 'CFA',
-		'XPF' => 'Fr',
-		'YER' => '&#xfdfc;',
-		'ZAR' => '&#82;',
-		'ZMW' => 'ZK',
-	) );
+	$symbols         = apply_filters(
+		'woocommerce_currency_symbols', array(
+			'AED' => '&#x62f;.&#x625;',
+			'AFN' => '&#x60b;',
+			'ALL' => 'L',
+			'AMD' => 'AMD',
+			'ANG' => '&fnof;',
+			'AOA' => 'Kz',
+			'ARS' => '&#36;',
+			'AUD' => '&#36;',
+			'AWG' => 'Afl.',
+			'AZN' => 'AZN',
+			'BAM' => 'KM',
+			'BBD' => '&#36;',
+			'BDT' => '&#2547;&nbsp;',
+			'BGN' => '&#1083;&#1074;.',
+			'BHD' => '.&#x62f;.&#x628;',
+			'BIF' => 'Fr',
+			'BMD' => '&#36;',
+			'BND' => '&#36;',
+			'BOB' => 'Bs.',
+			'BRL' => '&#82;&#36;',
+			'BSD' => '&#36;',
+			'BTC' => '&#3647;',
+			'BTN' => 'Nu.',
+			'BWP' => 'P',
+			'BYR' => 'Br',
+			'BYN' => 'Br',
+			'BZD' => '&#36;',
+			'CAD' => '&#36;',
+			'CDF' => 'Fr',
+			'CHF' => '&#67;&#72;&#70;',
+			'CLP' => '&#36;',
+			'CNY' => '&yen;',
+			'COP' => '&#36;',
+			'CRC' => '&#x20a1;',
+			'CUC' => '&#36;',
+			'CUP' => '&#36;',
+			'CVE' => '&#36;',
+			'CZK' => '&#75;&#269;',
+			'DJF' => 'Fr',
+			'DKK' => 'DKK',
+			'DOP' => 'RD&#36;',
+			'DZD' => '&#x62f;.&#x62c;',
+			'EGP' => 'EGP',
+			'ERN' => 'Nfk',
+			'ETB' => 'Br',
+			'EUR' => '&euro;',
+			'FJD' => '&#36;',
+			'FKP' => '&pound;',
+			'GBP' => '&pound;',
+			'GEL' => '&#x10da;',
+			'GGP' => '&pound;',
+			'GHS' => '&#x20b5;',
+			'GIP' => '&pound;',
+			'GMD' => 'D',
+			'GNF' => 'Fr',
+			'GTQ' => 'Q',
+			'GYD' => '&#36;',
+			'HKD' => '&#36;',
+			'HNL' => 'L',
+			'HRK' => 'Kn',
+			'HTG' => 'G',
+			'HUF' => '&#70;&#116;',
+			'IDR' => 'Rp',
+			'ILS' => '&#8362;',
+			'IMP' => '&pound;',
+			'INR' => '&#8377;',
+			'IQD' => '&#x639;.&#x62f;',
+			'IRR' => '&#xfdfc;',
+			'IRT' => '&#x062A;&#x0648;&#x0645;&#x0627;&#x0646;',
+			'ISK' => 'kr.',
+			'JEP' => '&pound;',
+			'JMD' => '&#36;',
+			'JOD' => '&#x62f;.&#x627;',
+			'JPY' => '&yen;',
+			'KES' => 'KSh',
+			'KGS' => '&#x441;&#x43e;&#x43c;',
+			'KHR' => '&#x17db;',
+			'KMF' => 'Fr',
+			'KPW' => '&#x20a9;',
+			'KRW' => '&#8361;',
+			'KWD' => '&#x62f;.&#x643;',
+			'KYD' => '&#36;',
+			'KZT' => 'KZT',
+			'LAK' => '&#8365;',
+			'LBP' => '&#x644;.&#x644;',
+			'LKR' => '&#xdbb;&#xdd4;',
+			'LRD' => '&#36;',
+			'LSL' => 'L',
+			'LYD' => '&#x644;.&#x62f;',
+			'MAD' => '&#x62f;.&#x645;.',
+			'MDL' => 'MDL',
+			'MGA' => 'Ar',
+			'MKD' => '&#x434;&#x435;&#x43d;',
+			'MMK' => 'Ks',
+			'MNT' => '&#x20ae;',
+			'MOP' => 'P',
+			'MRO' => 'UM',
+			'MUR' => '&#x20a8;',
+			'MVR' => '.&#x783;',
+			'MWK' => 'MK',
+			'MXN' => '&#36;',
+			'MYR' => '&#82;&#77;',
+			'MZN' => 'MT',
+			'NAD' => '&#36;',
+			'NGN' => '&#8358;',
+			'NIO' => 'C&#36;',
+			'NOK' => '&#107;&#114;',
+			'NPR' => '&#8360;',
+			'NZD' => '&#36;',
+			'OMR' => '&#x631;.&#x639;.',
+			'PAB' => 'B/.',
+			'PEN' => 'S/.',
+			'PGK' => 'K',
+			'PHP' => '&#8369;',
+			'PKR' => '&#8360;',
+			'PLN' => '&#122;&#322;',
+			'PRB' => '&#x440;.',
+			'PYG' => '&#8370;',
+			'QAR' => '&#x631;.&#x642;',
+			'RMB' => '&yen;',
+			'RON' => 'lei',
+			'RSD' => '&#x434;&#x438;&#x43d;.',
+			'RUB' => '&#8381;',
+			'RWF' => 'Fr',
+			'SAR' => '&#x631;.&#x633;',
+			'SBD' => '&#36;',
+			'SCR' => '&#x20a8;',
+			'SDG' => '&#x62c;.&#x633;.',
+			'SEK' => '&#107;&#114;',
+			'SGD' => '&#36;',
+			'SHP' => '&pound;',
+			'SLL' => 'Le',
+			'SOS' => 'Sh',
+			'SRD' => '&#36;',
+			'SSP' => '&pound;',
+			'STD' => 'Db',
+			'SYP' => '&#x644;.&#x633;',
+			'SZL' => 'L',
+			'THB' => '&#3647;',
+			'TJS' => '&#x405;&#x41c;',
+			'TMT' => 'm',
+			'TND' => '&#x62f;.&#x62a;',
+			'TOP' => 'T&#36;',
+			'TRY' => '&#8378;',
+			'TTD' => '&#36;',
+			'TWD' => '&#78;&#84;&#36;',
+			'TZS' => 'Sh',
+			'UAH' => '&#8372;',
+			'UGX' => 'UGX',
+			'USD' => '&#36;',
+			'UYU' => '&#36;',
+			'UZS' => 'UZS',
+			'VEF' => 'Bs F',
+			'VND' => '&#8363;',
+			'VUV' => 'Vt',
+			'WST' => 'T',
+			'XAF' => 'CFA',
+			'XCD' => '&#36;',
+			'XOF' => 'CFA',
+			'XPF' => 'Fr',
+			'YER' => '&#xfdfc;',
+			'ZAR' => '&#82;',
+			'ZMW' => 'ZK',
+		)
+	);
 	$currency_symbol = isset( $symbols[ $currency ] ) ? $symbols[ $currency ] : '';
 
 	return apply_filters( 'woocommerce_currency_symbol', $currency_symbol, $currency );
@@ -723,7 +724,7 @@ function wc_get_image_size( $image_size ) {
 	);
 
 	if ( is_array( $image_size ) ) {
-		$size = array(
+		$size       = array(
 			'width'  => isset( $image_size[0] ) ? absint( $image_size[0] ) : 600,
 			'height' => isset( $image_size[1] ) ? absint( $image_size[1] ) : 600,
 			'crop'   => isset( $image_size[2] ) ? absint( $image_size[2] ) : 1,
@@ -830,7 +831,7 @@ function wc_setcookie( $name, $value, $expire = 0, $secure = false ) {
 		setcookie( $name, $value, $expire, COOKIEPATH ? COOKIEPATH : '/', COOKIE_DOMAIN, $secure, apply_filters( 'woocommerce_cookie_httponly', false, $name, $value, $expire, $secure ) );
 	} elseif ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 		headers_sent( $file, $line );
-		trigger_error( "{$name} cookie cannot be set - headers already sent by {$file} on line {$line}", E_USER_NOTICE ); // WPCS: XSS ok.
+		trigger_error( "{$name} cookie cannot be set - headers already sent by {$file} on line {$line}", E_USER_NOTICE ); // @codingStandardsIgnoreLine
 	}
 }
 
@@ -842,7 +843,7 @@ function wc_setcookie( $name, $value, $expire = 0, $secure = false ) {
  * @return string the URL.
  */
 function get_woocommerce_api_url( $path ) {
-	$version  = defined( 'WC_API_REQUEST_VERSION' ) ? WC_API_REQUEST_VERSION : substr( WC_API::VERSION, 0, 1 );
+	$version = defined( 'WC_API_REQUEST_VERSION' ) ? WC_API_REQUEST_VERSION : substr( WC_API::VERSION, 0, 1 );
 
 	$url = get_home_url( null, "wc-api/v{$version}/", is_ssl() ? 'https' : 'http' );
 
@@ -884,13 +885,15 @@ function wc_get_log_file_name( $handle ) {
  * @return int[]
  */
 function wc_get_page_children( $page_id ) {
-	$page_ids = get_posts( array(
-		'post_parent' => $page_id,
-		'post_type'   => 'page',
-		'numberposts' => -1, // @codingStandardsIgnoreLine
-		'post_status' => 'any',
-		'fields'      => 'ids',
-	) );
+	$page_ids = get_posts(
+		array(
+			'post_parent' => $page_id,
+			'post_type'   => 'page',
+			'numberposts' => -1, // @codingStandardsIgnoreLine
+			'post_status' => 'any',
+			'fields'      => 'ids',
+		)
+	);
 
 	if ( ! empty( $page_ids ) ) {
 		foreach ( $page_ids as $page_id ) {
@@ -914,14 +917,14 @@ function flush_rewrite_rules_on_shop_page_save() {
 	}
 
 	// Check if page is edited.
-	if ( empty( $_GET['post'] ) || empty( $_GET['action'] ) || ( isset( $_GET['action'] ) && 'edit' !== $_GET['action'] ) ) {
+	if ( empty( $_GET['post'] ) || empty( $_GET['action'] ) || ( isset( $_GET['action'] ) && 'edit' !== $_GET['action'] ) ) { // WPCS: input var ok, CSRF ok.
 		return;
 	}
 
-	$post_id      = intval( $_GET['post'] );
+	$post_id      = intval( $_GET['post'] ); // WPCS: input var ok, CSRF ok.
 	$shop_page_id = wc_get_page_id( 'shop' );
 
-	if ( $shop_page_id === $post_id || in_array( $post_id, wc_get_page_children( $shop_page_id ) ) ) {
+	if ( $shop_page_id === $post_id || in_array( $post_id, wc_get_page_children( $shop_page_id ), true ) ) {
 		do_action( 'woocommerce_flush_rewrite_rules' );
 	}
 }
@@ -1092,7 +1095,7 @@ function wc_get_customer_default_location() {
  * @return string
  */
 function wc_get_user_agent() {
-	return isset( $_SERVER['HTTP_USER_AGENT'] ) ? strtolower( wc_clean( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) ) : '';
+	return isset( $_SERVER['HTTP_USER_AGENT'] ) ? strtolower( wc_clean( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) ) : ''; // @codingStandardsIgnoreLine
 }
 
 // This function can be removed when WP 3.9.2 or greater is required.
@@ -1221,15 +1224,16 @@ function wc_array_cartesian( $input ) {
  *
  * @since 2.5.0
  * @param string $type Types: start (default), commit, rollback.
+ * @param bool   $force use of transactions.
  */
-function wc_transaction_query( $type = 'start' ) {
+function wc_transaction_query( $type = 'start', $force = false ) {
 	global $wpdb;
 
 	$wpdb->hide_errors();
 
 	wc_maybe_define_constant( 'WC_USE_TRANSACTIONS', true );
 
-	if ( WC_USE_TRANSACTIONS ) {
+	if ( WC_USE_TRANSACTIONS || $force ) {
 		switch ( $type ) {
 			case 'commit':
 				$wpdb->query( 'COMMIT' );
@@ -1311,14 +1315,16 @@ function wc_get_credit_card_type_label( $type ) {
 	$type = str_replace( '-', ' ', $type );
 	$type = str_replace( '_', ' ', $type );
 
-	$labels = apply_filters( 'woocommerce_credit_card_type_labels', array(
-		'mastercard'       => __( 'MasterCard', 'woocommerce' ),
-		'visa'             => __( 'Visa', 'woocommerce' ),
-		'discover'         => __( 'Discover', 'woocommerce' ),
-		'american express' => __( 'American Express', 'woocommerce' ),
-		'diners'           => __( 'Diners', 'woocommerce' ),
-		'jcb'              => __( 'JCB', 'woocommerce' ),
-	) );
+	$labels = apply_filters(
+		'woocommerce_credit_card_type_labels', array(
+			'mastercard'       => __( 'MasterCard', 'woocommerce' ),
+			'visa'             => __( 'Visa', 'woocommerce' ),
+			'discover'         => __( 'Discover', 'woocommerce' ),
+			'american express' => __( 'American Express', 'woocommerce' ),
+			'diners'           => __( 'Diners', 'woocommerce' ),
+			'jcb'              => __( 'JCB', 'woocommerce' ),
+		)
+	);
 
 	return apply_filters( 'woocommerce_get_credit_card_type_label', ( array_key_exists( $type, $labels ) ? $labels[ $type ] : ucfirst( $type ) ) );
 }
@@ -1471,7 +1477,7 @@ function wc_get_shipping_method_count( $include_legacy = false ) {
  * @param int $limit Time limit.
  */
 function wc_set_time_limit( $limit = 0 ) {
-	if ( function_exists( 'set_time_limit' ) && false === strpos( ini_get( 'disable_functions' ), 'set_time_limit' ) && ! ini_get( 'safe_mode' ) ) {
+	if ( function_exists( 'set_time_limit' ) && false === strpos( ini_get( 'disable_functions' ), 'set_time_limit' ) && ! ini_get( 'safe_mode' ) ) { // phpcs:ignore PHPCompatibility.PHP.DeprecatedIniDirectives.safe_modeDeprecatedRemoved
 		@set_time_limit( $limit ); // @codingStandardsIgnoreLine
 	}
 }
@@ -1624,10 +1630,13 @@ function wc_remove_number_precision_deep( $value ) {
  */
 function wc_get_logger() {
 	static $logger = null;
-	if ( null === $logger ) {
-		$class = apply_filters( 'woocommerce_logging_class', 'WC_Logger' );
+
+	$class = apply_filters( 'woocommerce_logging_class', 'WC_Logger' );
+
+	if ( null === $logger || ! is_a( $logger, $class ) ) {
 		$implements = class_implements( $class );
-		if ( is_array( $implements ) && in_array( 'WC_Logger_Interface', $implements ) ) {
+
+		if ( is_array( $implements ) && in_array( 'WC_Logger_Interface', $implements, true ) ) {
 			if ( is_object( $class ) ) {
 				$logger = $class;
 			} else {
@@ -1645,7 +1654,7 @@ function wc_get_logger() {
 				),
 				'3.0'
 			);
-			$logger = new WC_Logger();
+			$logger = is_a( $logger, 'WC_Logger' ) ? $logger : new WC_Logger();
 		}
 	}
 	return $logger;
@@ -1711,7 +1720,7 @@ function wc_print_r( $expression, $return = false ) {
 function wc_register_default_log_handler( $handlers ) {
 
 	if ( defined( 'WC_LOG_HANDLER' ) && class_exists( WC_LOG_HANDLER ) ) {
-		$handler_class = WC_LOG_HANDLER;
+		$handler_class   = WC_LOG_HANDLER;
 		$default_handler = new $handler_class();
 	} else {
 		$default_handler = new WC_Log_Handler_File();
@@ -1798,13 +1807,15 @@ function wc_list_pluck( $list, $callback_or_field, $index_key = null ) {
  */
 function wc_get_permalink_structure() {
 	$saved_permalinks = (array) get_option( 'woocommerce_permalinks', array() );
-	$permalinks       = wp_parse_args( array_filter( $saved_permalinks ), array(
-		'product_base'           => _x( 'product', 'slug', 'woocommerce' ),
-		'category_base'          => _x( 'product-category', 'slug', 'woocommerce' ),
-		'tag_base'               => _x( 'product-tag', 'slug', 'woocommerce' ),
-		'attribute_base'         => '',
-		'use_verbose_page_rules' => false,
-	) );
+	$permalinks       = wp_parse_args(
+		array_filter( $saved_permalinks ), array(
+			'product_base'           => _x( 'product', 'slug', 'woocommerce' ),
+			'category_base'          => _x( 'product-category', 'slug', 'woocommerce' ),
+			'tag_base'               => _x( 'product-tag', 'slug', 'woocommerce' ),
+			'attribute_base'         => '',
+			'use_verbose_page_rules' => false,
+		)
+	);
 
 	if ( $saved_permalinks !== $permalinks ) {
 		update_option( 'woocommerce_permalinks', $permalinks );
@@ -1902,7 +1913,7 @@ function wc_get_var( &$var, $default = null ) {
  */
 function wc_enable_wc_plugin_headers( $headers ) {
 	if ( ! class_exists( 'WC_Plugin_Updates' ) ) {
-		include_once( dirname( __FILE__ ) . '/admin/plugin-updates/class-wc-plugin-updates.php' );
+		include_once dirname( __FILE__ ) . '/admin/plugin-updates/class-wc-plugin-updates.php';
 	}
 
 	$headers['WCRequires'] = WC_Plugin_Updates::VERSION_REQUIRED_HEADER;
@@ -1954,14 +1965,14 @@ add_filter( 'auto_update_plugin', 'wc_prevent_dangerous_auto_updates', 99, 2 );
 function wc_delete_expired_transients() {
 	global $wpdb;
 
-	$sql = "DELETE a, b FROM $wpdb->options a, $wpdb->options b
+	$sql  = "DELETE a, b FROM $wpdb->options a, $wpdb->options b
 		WHERE a.option_name LIKE %s
 		AND a.option_name NOT LIKE %s
 		AND b.option_name = CONCAT( '_transient_timeout_', SUBSTRING( a.option_name, 12 ) )
 		AND b.option_value < %d";
 	$rows = $wpdb->query( $wpdb->prepare( $sql, $wpdb->esc_like( '_transient_' ) . '%', $wpdb->esc_like( '_transient_timeout_' ) . '%', time() ) ); // WPCS: unprepared SQL ok.
 
-	$sql = "DELETE a, b FROM $wpdb->options a, $wpdb->options b
+	$sql   = "DELETE a, b FROM $wpdb->options a, $wpdb->options b
 		WHERE a.option_name LIKE %s
 		AND a.option_name NOT LIKE %s
 		AND b.option_name = CONCAT( '_site_transient_timeout_', SUBSTRING( a.option_name, 17 ) )
@@ -2059,4 +2070,21 @@ function wc_decimal_to_fraction( $decimal ) {
 	} while ( abs( $decimal - $numerator / $denominator ) > $decimal * $tolerance );
 
 	return array( $numerator, $denominator );
+}
+
+/**
+ * Round discount.
+ *
+ * @param  double $value Amount to round.
+ * @param  int    $precision DP to round.
+ * @return float
+ */
+function wc_round_discount( $value, $precision ) {
+	if ( version_compare( PHP_VERSION, '5.3.0', '>=' ) ) {
+		return round( $value, $precision, WC_DISCOUNT_ROUNDING_MODE ); // phpcs:ignore PHPCompatibility.PHP.NewFunctionParameters.round_modeFound
+	} elseif ( 2 === WC_DISCOUNT_ROUNDING_MODE ) {
+		return wc_legacy_round_half_down( $value, $precision );
+	} else {
+		return round( $value, $precision );
+	}
 }

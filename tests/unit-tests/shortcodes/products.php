@@ -14,7 +14,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 		$shortcode = new WC_Shortcode_Products();
 		$expected  = array(
 			'limit'          => '-1',
-			'columns'        => '3',
+			'columns'        => '4',
 			'orderby'        => 'title',
 			'order'          => 'ASC',
 			'ids'            => '',
@@ -40,7 +40,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 		) );
 		$expected2  = array(
 			'limit'          => '-1',
-			'columns'        => '3',
+			'columns'        => '4',
 			'orderby'        => 'id',
 			'order'          => 'DESC',
 			'ids'            => '',

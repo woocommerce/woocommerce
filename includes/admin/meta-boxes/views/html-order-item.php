@@ -19,28 +19,28 @@ $row_class    = apply_filters( 'woocommerce_admin_html_order_item_class', ! empt
 	</td>
 	<td class="name" data-sort-value="<?php echo esc_attr( $item->get_name() ); ?>">
 		<?php
-			echo $product_link ? '<a href="' . esc_url( $product_link ) . '" class="wc-order-item-name">' . esc_html( $item->get_name() ) . '</a>' : '<div class="wc-order-item-name">' . esc_html( $item->get_name() ) . '</div>';
+		echo $product_link ? '<a href="' . esc_url( $product_link ) . '" class="wc-order-item-name">' . esc_html( $item->get_name() ) . '</a>' : '<div class="wc-order-item-name">' . esc_html( $item->get_name() ) . '</div>';
 
-			if ( $product && $product->get_sku() ) {
-				echo '<div class="wc-order-item-sku"><strong>' . esc_html__( 'SKU:', 'woocommerce' ) . '</strong> ' . esc_html( $product->get_sku() ) . '</div>';
-			}
+		if ( $product && $product->get_sku() ) {
+			echo '<div class="wc-order-item-sku"><strong>' . esc_html__( 'SKU:', 'woocommerce' ) . '</strong> ' . esc_html( $product->get_sku() ) . '</div>';
+		}
 
-			if ( $item->get_variation_id() ) {
-				echo '<div class="wc-order-item-variation"><strong>' . esc_html__( 'Variation ID:', 'woocommerce' ) . '</strong> ';
-				if ( 'product_variation' === get_post_type( $item->get_variation_id() ) ) {
-					echo esc_html( $item->get_variation_id() );
-				} else {
-					/* translators: %s: variation id */
-					printf( esc_html__( '%s (No longer exists)', 'woocommerce' ), $item->get_variation_id() );
-				}
-				echo '</div>';
+		if ( $item->get_variation_id() ) {
+			echo '<div class="wc-order-item-variation"><strong>' . esc_html__( 'Variation ID:', 'woocommerce' ) . '</strong> ';
+			if ( 'product_variation' === get_post_type( $item->get_variation_id() ) ) {
+				echo esc_html( $item->get_variation_id() );
+			} else {
+				/* translators: %s: variation id */
+				printf( esc_html__( '%s (No longer exists)', 'woocommerce' ), $item->get_variation_id() );
 			}
+			echo '</div>';
+		}
 		?>
 		<input type="hidden" class="order_item_id" name="order_item_id[]" value="<?php echo esc_attr( $item_id ); ?>" />
 		<input type="hidden" name="order_item_tax_class[<?php echo absint( $item_id ); ?>]" value="<?php echo esc_attr( $item->get_tax_class() ); ?>" />
 
 		<?php do_action( 'woocommerce_before_order_itemmeta', $item_id, $item, $product ); ?>
-		<?php include( 'html-order-item-meta.php' ); ?>
+		<?php require 'html-order-item-meta.php'; ?>
 		<?php do_action( 'woocommerce_after_order_itemmeta', $item_id, $item, $product ); ?>
 	</td>
 
@@ -51,9 +51,9 @@ $row_class    = apply_filters( 'woocommerce_admin_html_order_item_class', ! empt
 			<?php
 				echo wc_price( $order->get_item_total( $item, false, true ), array( 'currency' => $order->get_currency() ) );
 
-				if ( $item->get_subtotal() !== $item->get_total() ) {
-					echo '<span class="wc-order-item-discount">-' . wc_price( wc_format_decimal( $order->get_item_subtotal( $item, false, false ) - $order->get_item_total( $item, false, false ), '' ), array( 'currency' => $order->get_currency() ) ) . '</span>';
-				}
+			if ( $item->get_subtotal() !== $item->get_total() ) {
+				echo '<span class="wc-order-item-discount">-' . wc_price( wc_format_decimal( $order->get_item_subtotal( $item, false, false ) - $order->get_item_total( $item, false, false ), '' ), array( 'currency' => $order->get_currency() ) ) . '</span>';
+			}
 			?>
 		</div>
 	</td>
@@ -62,9 +62,9 @@ $row_class    = apply_filters( 'woocommerce_admin_html_order_item_class', ! empt
 			<?php
 				echo '<small class="times">&times;</small> ' . esc_html( $item->get_quantity() );
 
-				if ( $refunded_qty = $order->get_qty_refunded_for_item( $item_id ) ) {
-					echo '<small class="refunded">' . ( $refunded_qty * -1 ) . '</small>';
-				}
+			if ( $refunded_qty = $order->get_qty_refunded_for_item( $item_id ) ) {
+				echo '<small class="refunded">-' . ( $refunded_qty * -1 ) . '</small>';
+			}
 			?>
 		</div>
 		<div class="edit" style="display: none;">
@@ -77,15 +77,15 @@ $row_class    = apply_filters( 'woocommerce_admin_html_order_item_class', ! empt
 	<td class="line_cost" width="1%" data-sort-value="<?php echo esc_attr( $item->get_total() ); ?>">
 		<div class="view">
 			<?php
-				echo wc_price( $item->get_total(), array( 'currency' => $order->get_currency() ) );
+			echo wc_price( $item->get_total(), array( 'currency' => $order->get_currency() ) );
 
-				if ( $item->get_subtotal() !== $item->get_total() ) {
-					echo '<span class="wc-order-item-discount">-' . wc_price( wc_format_decimal( $item->get_subtotal() - $item->get_total(), '' ), array( 'currency' => $order->get_currency() ) ) . '</span>';
-				}
+			if ( $item->get_subtotal() !== $item->get_total() ) {
+				echo '<span class="wc-order-item-discount">-' . wc_price( wc_format_decimal( $item->get_subtotal() - $item->get_total(), '' ), array( 'currency' => $order->get_currency() ) ) . '</span>';
+			}
 
-				if ( $refunded = $order->get_total_refunded_for_item( $item_id ) ) {
-					echo '<small class="refunded">' . wc_price( $refunded, array( 'currency' => $order->get_currency() ) ) . '</small>';
-				}
+			if ( $refunded = $order->get_total_refunded_for_item( $item_id ) ) {
+				echo '<small class="refunded">-' . wc_price( $refunded, array( 'currency' => $order->get_currency() ) ) . '</small>';
+			}
 			?>
 		</div>
 		<div class="edit" style="display: none;">
@@ -106,53 +106,53 @@ $row_class    = apply_filters( 'woocommerce_admin_html_order_item_class', ! empt
 	</td>
 
 	<?php
-		if ( ( $tax_data = $item->get_taxes() ) && wc_tax_enabled() ) {
-			foreach ( $order_taxes as $tax_item ) {
-				$tax_item_id       = $tax_item->get_rate_id();
-				$tax_item_total    = isset( $tax_data['total'][ $tax_item_id ] ) ? $tax_data['total'][ $tax_item_id ] : '';
-				$tax_item_subtotal = isset( $tax_data['subtotal'][ $tax_item_id ] ) ? $tax_data['subtotal'][ $tax_item_id ] : '';
-				?>
-				<td class="line_tax" width="1%">
-					<div class="view">
-						<?php
-							if ( '' !== $tax_item_total ) {
-								echo wc_price( wc_round_tax_total( $tax_item_total ), array( 'currency' => $order->get_currency() ) );
-							} else {
-								echo '&ndash;';
-							}
+	if ( ( $tax_data = $item->get_taxes() ) && wc_tax_enabled() ) {
+		foreach ( $order_taxes as $tax_item ) {
+			$tax_item_id       = $tax_item->get_rate_id();
+			$tax_item_total    = isset( $tax_data['total'][ $tax_item_id ] ) ? $tax_data['total'][ $tax_item_id ] : '';
+			$tax_item_subtotal = isset( $tax_data['subtotal'][ $tax_item_id ] ) ? $tax_data['subtotal'][ $tax_item_id ] : '';
+			?>
+			<td class="line_tax" width="1%">
+				<div class="view">
+					<?php
+					if ( '' !== $tax_item_total ) {
+						echo wc_price( wc_round_tax_total( $tax_item_total ), array( 'currency' => $order->get_currency() ) );
+					} else {
+						echo '&ndash;';
+					}
 
-							if ( $item->get_subtotal() !== $item->get_total() ) {
-								if ( '' === $tax_item_total ) {
-									echo '<span class="wc-order-item-discount">&ndash;</span>';
-								} else {
-									echo '<span class="wc-order-item-discount">-' . wc_price( wc_round_tax_total( $tax_item_subtotal - $tax_item_total ), array( 'currency' => $order->get_currency() ) ) . '</span>';
-								}
-							}
+					if ( $item->get_subtotal() !== $item->get_total() ) {
+						if ( '' === $tax_item_total ) {
+							echo '<span class="wc-order-item-discount">&ndash;</span>';
+						} else {
+							echo '<span class="wc-order-item-discount">-' . wc_price( wc_round_tax_total( $tax_item_subtotal - $tax_item_total ), array( 'currency' => $order->get_currency() ) ) . '</span>';
+						}
+					}
 
-							if ( $refunded = $order->get_tax_refunded_for_item( $item_id, $tax_item_id ) ) {
-								echo '<small class="refunded">' . wc_price( $refunded, array( 'currency' => $order->get_currency() ) ) . '</small>';
-							}
-						?>
-					</div>
-					<div class="edit" style="display: none;">
-						<div class="split-input">
-							<div class="input">
-								<label><?php esc_attr_e( 'Pre-discount:', 'woocommerce' ); ?></label>
-								<input type="text" name="line_subtotal_tax[<?php echo absint( $item_id ); ?>][<?php echo esc_attr( $tax_item_id ); ?>]" placeholder="<?php echo esc_attr( wc_format_localized_price( 0 ) ); ?>" value="<?php echo esc_attr( wc_format_localized_price( $tax_item_subtotal ) ); ?>" class="line_subtotal_tax wc_input_price" data-subtotal_tax="<?php echo esc_attr( wc_format_localized_price( $tax_item_subtotal ) ); ?>" data-tax_id="<?php echo esc_attr( $tax_item_id ); ?>" />
-							</div>
-							<div class="input">
-								<label><?php esc_attr_e( 'Total:', 'woocommerce' ); ?></label>
-								<input type="text" name="line_tax[<?php echo absint( $item_id ); ?>][<?php echo esc_attr( $tax_item_id ); ?>]" placeholder="<?php echo esc_attr( wc_format_localized_price( 0 ) ); ?>" value="<?php echo esc_attr( wc_format_localized_price( $tax_item_total ) ); ?>" class="line_tax wc_input_price" data-total_tax="<?php echo esc_attr( wc_format_localized_price( $tax_item_total ) ); ?>" data-tax_id="<?php echo esc_attr( $tax_item_id ); ?>" />
-							</div>
+					if ( $refunded = $order->get_tax_refunded_for_item( $item_id, $tax_item_id ) ) {
+						echo '<small class="refunded">-' . wc_price( $refunded, array( 'currency' => $order->get_currency() ) ) . '</small>';
+					}
+					?>
+				</div>
+				<div class="edit" style="display: none;">
+					<div class="split-input">
+						<div class="input">
+							<label><?php esc_attr_e( 'Pre-discount:', 'woocommerce' ); ?></label>
+							<input type="text" name="line_subtotal_tax[<?php echo absint( $item_id ); ?>][<?php echo esc_attr( $tax_item_id ); ?>]" placeholder="<?php echo esc_attr( wc_format_localized_price( 0 ) ); ?>" value="<?php echo esc_attr( wc_format_localized_price( $tax_item_subtotal ) ); ?>" class="line_subtotal_tax wc_input_price" data-subtotal_tax="<?php echo esc_attr( wc_format_localized_price( $tax_item_subtotal ) ); ?>" data-tax_id="<?php echo esc_attr( $tax_item_id ); ?>" />
+						</div>
+						<div class="input">
+							<label><?php esc_attr_e( 'Total:', 'woocommerce' ); ?></label>
+							<input type="text" name="line_tax[<?php echo absint( $item_id ); ?>][<?php echo esc_attr( $tax_item_id ); ?>]" placeholder="<?php echo esc_attr( wc_format_localized_price( 0 ) ); ?>" value="<?php echo esc_attr( wc_format_localized_price( $tax_item_total ) ); ?>" class="line_tax wc_input_price" data-total_tax="<?php echo esc_attr( wc_format_localized_price( $tax_item_total ) ); ?>" data-tax_id="<?php echo esc_attr( $tax_item_id ); ?>" />
 						</div>
 					</div>
-					<div class="refund" style="display: none;">
-						<input type="text" name="refund_line_tax[<?php echo absint( $item_id ); ?>][<?php echo esc_attr( $tax_item_id ); ?>]" placeholder="<?php echo esc_attr( wc_format_localized_price( 0 ) ); ?>" class="refund_line_tax wc_input_price" data-tax_id="<?php echo esc_attr( $tax_item_id ); ?>" />
-					</div>
-				</td>
-				<?php
-			}
+				</div>
+				<div class="refund" style="display: none;">
+					<input type="text" name="refund_line_tax[<?php echo absint( $item_id ); ?>][<?php echo esc_attr( $tax_item_id ); ?>]" placeholder="<?php echo esc_attr( wc_format_localized_price( 0 ) ); ?>" class="refund_line_tax wc_input_price" data-tax_id="<?php echo esc_attr( $tax_item_id ); ?>" />
+				</div>
+			</td>
+			<?php
 		}
+	}
 	?>
 	<td class="wc-order-edit-line-item" width="1%">
 		<div class="wc-order-edit-line-item-actions">

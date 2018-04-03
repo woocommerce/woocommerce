@@ -24,21 +24,21 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 	 *
 	 * @var array
 	 */
-	public $chart_colours         = array();
+	public $chart_colours = array();
 
 	/**
 	 * Categories ids.
 	 *
 	 * @var array
 	 */
-	public $show_categories       = array();
+	public $show_categories = array();
 
 	/**
 	 * Item sales.
 	 *
 	 * @var array
 	 */
-	private $item_sales           = array();
+	private $item_sales = array();
 
 	/**
 	 * Item sales and times.
@@ -116,10 +116,10 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 	public function output_report() {
 
 		$ranges = array(
-			'year'         => __( 'Year', 'woocommerce' ),
-			'last_month'   => __( 'Last month', 'woocommerce' ),
-			'month'        => __( 'This month', 'woocommerce' ),
-			'7day'         => __( 'Last 7 days', 'woocommerce' ),
+			'year'       => __( 'Year', 'woocommerce' ),
+			'last_month' => __( 'Last month', 'woocommerce' ),
+			'month'      => __( 'This month', 'woocommerce' ),
+			'7day'       => __( 'Last 7 days', 'woocommerce' ),
 		);
 
 		$this->chart_colours = array( '#3498db', '#34495e', '#1abc9c', '#2ecc71', '#f1c40f', '#e67e22', '#e74c3c', '#2980b9', '#8e44ad', '#2c3e50', '#16a085', '#27ae60', '#f39c12', '#d35400', '#c0392b' );
@@ -135,30 +135,32 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 
 		// Get item sales data.
 		if ( ! empty( $this->show_categories ) ) {
-			$order_items = $this->get_order_report_data( array(
-				'data' => array(
-					'_product_id' => array(
-						'type'            => 'order_item_meta',
-						'order_item_type' => 'line_item',
-						'function'        => '',
-						'name'            => 'product_id',
+			$order_items = $this->get_order_report_data(
+				array(
+					'data'         => array(
+						'_product_id' => array(
+							'type'            => 'order_item_meta',
+							'order_item_type' => 'line_item',
+							'function'        => '',
+							'name'            => 'product_id',
+						),
+						'_line_total' => array(
+							'type'            => 'order_item_meta',
+							'order_item_type' => 'line_item',
+							'function'        => 'SUM',
+							'name'            => 'order_item_amount',
+						),
+						'post_date'   => array(
+							'type'     => 'post_data',
+							'function' => '',
+							'name'     => 'post_date',
+						),
 					),
-					'_line_total' => array(
-						'type'            => 'order_item_meta',
-						'order_item_type' => 'line_item',
-						'function'        => 'SUM',
-						'name'            => 'order_item_amount',
-					),
-					'post_date' => array(
-						'type'     => 'post_data',
-						'function' => '',
-						'name'     => 'post_date',
-					),
-				),
-				'group_by'     => 'ID, product_id, post_date',
-				'query_type'   => 'get_results',
-				'filter_range' => true,
-			) );
+					'group_by'     => 'ID, product_id, post_date',
+					'query_type'   => 'get_results',
+					'filter_range' => true,
+				)
+			);
 
 			$this->item_sales           = array();
 			$this->item_sales_and_times = array();
@@ -168,13 +170,13 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 				foreach ( $order_items as $order_item ) {
 
 					switch ( $this->chart_groupby ) {
-						case 'day' :
+						case 'day':
 							$time = strtotime( date( 'Ymd', strtotime( $order_item->post_date ) ) ) * 1000;
-						break;
-						case 'month' :
-						default :
+							break;
+						case 'month':
+						default:
 							$time = strtotime( date( 'Ym', strtotime( $order_item->post_date ) ) . '01' ) * 1000;
-						break;
+							break;
 					}
 
 					$this->item_sales_and_times[ $time ][ $order_item->product_id ] = isset( $this->item_sales_and_times[ $time ][ $order_item->product_id ] ) ? $this->item_sales_and_times[ $time ][ $order_item->product_id ] + $order_item->order_item_amount : $order_item->order_item_amount;
@@ -184,7 +186,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 			}
 		}
 
-		include( WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php' );
+		include WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php';
 	}
 
 	/**
@@ -213,14 +215,14 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 			<div>
 				<select multiple="multiple" data-placeholder="<?php esc_attr_e( 'Select categories&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select" id="show_categories" name="show_categories[]" style="width: 205px;">
 					<?php
-						$r = array();
-						$r['pad_counts'] 	= 1;
-						$r['hierarchical'] 	= 1;
-						$r['hide_empty'] 	= 1;
-						$r['value']			= 'id';
-						$r['selected'] 		= $this->show_categories;
+						$r                 = array();
+						$r['pad_counts']   = 1;
+						$r['hierarchical'] = 1;
+						$r['hide_empty']   = 1;
+						$r['value']        = 'id';
+						$r['selected']     = $this->show_categories;
 
-						include_once( WC()->plugin_path() . '/includes/walkers/class-product-cat-dropdown-walker.php' );
+						include_once WC()->plugin_path() . '/includes/walkers/class-wc-product-cat-dropdown-walker.php';
 
 						echo wc_walk_category_dropdown_tree( $categories, 0, $r ); // @codingStandardsIgnoreLine
 					?>
@@ -304,13 +306,13 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 					$interval_total = 0;
 
 					switch ( $this->chart_groupby ) {
-						case 'day' :
+						case 'day':
 							$time = strtotime( date( 'Ymd', strtotime( "+{$i} DAY", $this->start_date ) ) ) * 1000;
-						break;
-						case 'month' :
-						default :
+							break;
+						case 'month':
+						default:
 							$time = strtotime( date( 'Ym', strtotime( "+{$i} MONTH", $this->start_date ) ) . '01' ) * 1000;
-						break;
+							break;
 					}
 
 					foreach ( $product_ids as $id ) {
@@ -324,7 +326,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 				}
 
 				$chart_data[ $category->term_id ]['category'] = $category->name;
-				$chart_data[ $category->term_id ]['data'] = $category_chart_data;
+				$chart_data[ $category->term_id ]['data']     = $category_chart_data;
 
 				$index++;
 			}
@@ -350,22 +352,22 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 										$series[ $key ][0] = $series_data[0] + $offset;
 									}
 									echo '{
-										label: "' . esc_js( $data['category'] ) . '",
-										data: jQuery.parseJSON( "' . json_encode( $series ) . '" ),
-										color: "' . $color . '",
-										bars: {
-											fillColor: "' . $color . '",
-											fill: true,
-											show: true,
-											lineWidth: 1,
-											align: "center",
-											barWidth: ' . $width * 0.75 . ',
-											stack: false
-										},
-										' . $this->get_currency_tooltip() . ',
-										enable_tooltip: true,
-										prepend_label: true
-									},';
+											label: "' . esc_js( $data['category'] ) . '",
+											data: jQuery.parseJSON( "' . json_encode( $series ) . '" ),
+											color: "' . $color . '",
+											bars: {
+												fillColor: "' . $color . '",
+												fill: true,
+												show: true,
+												lineWidth: 1,
+												align: "center",
+												barWidth: ' . $width * 0.75 . ',
+												stack: false
+											},
+											' . $this->get_currency_tooltip() . ',
+											enable_tooltip: true,
+											prepend_label: true
+										},';
 									$index++;
 								}
 							?>

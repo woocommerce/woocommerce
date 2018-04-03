@@ -26,10 +26,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<td>
 						<?php
 						if ( ! empty( $upload_dir['error'] ) ) {
-							?><div class="inline error">
+							?>
+							<div class="inline error">
 								<p><?php esc_html_e( 'Before you can upload your import file, you will need to fix the following error:', 'woocommerce' ); ?></p>
 								<p><strong><?php echo esc_html( $upload_dir['error'] ); ?></strong></p>
-							</div><?php
+							</div>
+							<?php
 						} else {
 							?>
 							<input type="file" id="upload" name="import" size="25" />
@@ -38,10 +40,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<br>
 							<small>
 								<?php
-								/* translators: %s: maximum upload size */
 								printf(
+									/* translators: %s: maximum upload size */
 									esc_html__( 'Maximum size: %s', 'woocommerce' ),
-									$size
+									esc_html( $size )
 								);
 								?>
 							</small>
@@ -60,7 +62,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</tr>
 				<tr class="woocommerce-importer-advanced hidden">
 					<th>
-						<label for="woocommerce-importer-file-url"><?php esc_html_e( '<em>or</em> enter the path to a CSV file on your server:', 'woocommerce' ); ?></label>
+						<label for="woocommerce-importer-file-url"><?php esc_html_e( 'Alternatively, enter the path to a CSV file on your server:', 'woocommerce' ); ?></label>
 					</th>
 					<td>
 						<label for="woocommerce-importer-file-url" class="woocommerce-importer-file-url-field-wrapper">
@@ -71,6 +73,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<tr class="woocommerce-importer-advanced hidden">
 					<th><label><?php esc_html_e( 'CSV Delimiter', 'woocommerce' ); ?></label><br/></th>
 					<td><input type="text" name="delimiter" placeholder="," size="2" /></td>
+				</tr>
+				<tr class="woocommerce-importer-advanced hidden">
+					<th><label><?php esc_html_e( 'Use previous column mapping preferences?', 'woocommerce' ); ?></label><br/></th>
+					<td><input type="checkbox" id="woocommerce-importer-map-preferences" name="map_preferences" value="1" /></td>
 				</tr>
 			</tbody>
 		</table>

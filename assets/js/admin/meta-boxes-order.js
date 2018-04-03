@@ -112,9 +112,6 @@ jQuery( function ( $ ) {
 
 			if ( ! $country_input.val() ) {
 				$country_input.val( woocommerce_admin_meta_boxes_order.default_country ).change();
-			}
-
-			if ( ! $state_input.val() ) {
 				$state_input.val( woocommerce_admin_meta_boxes_order.default_state ).change();
 			}
 

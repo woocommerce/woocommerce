@@ -2,17 +2,13 @@
 /**
  * Nigerian provinces
  *
- * @author   hoshomoh
- * @category i18n
- * @package  WooCommerce/i18n
- * @version  3.0.0
+ * @package WooCommerce/i18n
+ * @version 3.0.0
  */
 
 global $states;
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 $states['NG'] = array(
 	'AB' => __( 'Abia', 'woocommerce' ),

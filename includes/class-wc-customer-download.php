@@ -1,20 +1,22 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 /**
  * Class for customer download permissions.
  *
- * @version     3.0.0
- * @since       3.0.0
- * @package     WooCommerce/Classes
- * @author      WooThemes
+ * @package WooCommerce/Classes
+ * @version 3.0.0
+ * @since   3.0.0
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Customer download class.
  */
 class WC_Customer_Download extends WC_Data implements ArrayAccess {
 
 	/**
 	 * This is the name of this object type.
+	 *
 	 * @var string
 	 */
 	protected $object_type = 'customer_download';
@@ -41,9 +43,9 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	/**
 	 * Constructor.
 	 *
-	 * @param int|object|array $download
+	 * @param int|object|array $download Download ID, instance or data.
 	 */
-	 public function __construct( $download = 0 ) {
+	public function __construct( $download = 0 ) {
 		parent::__construct( $download );
 
 		if ( is_numeric( $download ) && $download > 0 ) {
@@ -63,7 +65,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 		if ( $this->get_id() > 0 ) {
 			$this->data_store->read( $this );
 		}
- 	}
+	}
 
 	/*
 	|--------------------------------------------------------------------------
@@ -74,7 +76,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	/**
 	 * Get download id.
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_download_id( $context = 'view' ) {
@@ -84,7 +86,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	/**
 	 * Get product id.
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return integer
 	 */
 	public function get_product_id( $context = 'view' ) {
@@ -94,7 +96,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	/**
 	 * Get user id.
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return integer
 	 */
 	public function get_user_id( $context = 'view' ) {
@@ -104,7 +106,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	/**
 	 * Get user_email.
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_user_email( $context = 'view' ) {
@@ -114,7 +116,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	/**
 	 * Get order_id.
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return integer
 	 */
 	public function get_order_id( $context = 'view' ) {
@@ -124,7 +126,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	/**
 	 * Get order_key.
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_order_key( $context = 'view' ) {
@@ -134,7 +136,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	/**
 	 * Get downloads_remaining.
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return integer|string
 	 */
 	public function get_downloads_remaining( $context = 'view' ) {
@@ -144,7 +146,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	/**
 	 * Get access_granted.
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return WC_DateTime|null Object if the date is set or null if there is no date.
 	 */
 	public function get_access_granted( $context = 'view' ) {
@@ -154,7 +156,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	/**
 	 * Get access_expires.
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return WC_DateTime|null Object if the date is set or null if there is no date.
 	 */
 	public function get_access_expires( $context = 'view' ) {
@@ -164,12 +166,12 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	/**
 	 * Get download_count.
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return integer
 	 */
 	public function get_download_count( $context = 'view' ) {
 		// Check for count of download logs.
-		$data_store = WC_Data_Store::load( 'customer-download-log' );
+		$data_store       = WC_Data_Store::load( 'customer-download-log' );
 		$download_log_ids = $data_store->get_download_logs_for_permission( $this->get_id() );
 
 		$download_log_count = 0;
@@ -195,7 +197,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	/**
 	 * Set download id.
 	 *
-	 * @param string $value
+	 * @param string $value Download ID.
 	 */
 	public function set_download_id( $value ) {
 		$this->set_prop( 'download_id', $value );
@@ -203,7 +205,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	/**
 	 * Set product id.
 	 *
-	 * @param int $value
+	 * @param int $value Product ID.
 	 */
 	public function set_product_id( $value ) {
 		$this->set_prop( 'product_id', absint( $value ) );
@@ -212,7 +214,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	/**
 	 * Set user id.
 	 *
-	 * @param int $value
+	 * @param int $value User ID.
 	 */
 	public function set_user_id( $value ) {
 		$this->set_prop( 'user_id', absint( $value ) );
@@ -221,7 +223,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	/**
 	 * Set user_email.
 	 *
-	 * @param int $value
+	 * @param int $value User email.
 	 */
 	public function set_user_email( $value ) {
 		$this->set_prop( 'user_email', sanitize_email( $value ) );
@@ -230,7 +232,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	/**
 	 * Set order_id.
 	 *
-	 * @param int $value
+	 * @param int $value Order ID.
 	 */
 	public function set_order_id( $value ) {
 		$this->set_prop( 'order_id', absint( $value ) );
@@ -239,7 +241,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	/**
 	 * Set order_key.
 	 *
-	 * @param string $value
+	 * @param string $value Order key.
 	 */
 	public function set_order_key( $value ) {
 		$this->set_prop( 'order_key', $value );
@@ -248,7 +250,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	/**
 	 * Set downloads_remaining.
 	 *
-	 * @param integer|string $value
+	 * @param integer|string $value Amount of downloads remaining.
 	 */
 	public function set_downloads_remaining( $value ) {
 		$this->set_prop( 'downloads_remaining', '' === $value ? '' : absint( $value ) );
@@ -275,7 +277,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	/**
 	 * Set download_count.
 	 *
-	 * @param int $value
+	 * @param int $value Download count.
 	 */
 	public function set_download_count( $value ) {
 		$this->set_prop( 'download_count', absint( $value ) );
@@ -285,8 +287,9 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	 * Track a download on this permission.
 	 *
 	 * @since 3.3.0
-	 * @param int user_id Id of the user performing the download
-	 * @param string user_ip_address IP Address of the user performing the download
+	 * @throws Exception When permission ID is invalid.
+	 * @param int    $user_id         Id of the user performing the download.
+	 * @param string $user_ip_address IP Address of the user performing the download.
 	 */
 	public function track_download( $user_id = null, $user_ip_address = null ) {
 		global $wpdb;
@@ -300,15 +303,16 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 		// Use SQL to avoid possible issues with downloads in quick succession.
 		// If downloads_remaining is blank, leave it blank (unlimited).
 		// Also, ensure downloads_remaining doesn't drop below zero.
-		$query = $wpdb->prepare( "
+		$query = $wpdb->prepare(
+			"
 UPDATE {$wpdb->prefix}woocommerce_downloadable_product_permissions
 SET download_count = download_count + 1,
 downloads_remaining = IF( downloads_remaining = '', '', GREATEST( 0, downloads_remaining - 1 ) )
 WHERE permission_id = %d",
 			$this->get_id()
 		);
-		$wpdb->query( $query );
-		
+		$wpdb->query( $query ); // WPCS: unprepared SQL ok.
+
 		// Re-read this download from the data store to pull updated counts.
 		$this->data_store->read( $this );
 
@@ -336,6 +340,7 @@ WHERE permission_id = %d",
 
 	/**
 	 * Save data to the database.
+	 *
 	 * @since 3.0.0
 	 * @return int Item ID
 	 */
@@ -360,8 +365,9 @@ WHERE permission_id = %d",
 	*/
 
 	/**
-	 * offsetGet
-	 * @param string $offset
+	 * OffsetGet.
+	 *
+	 * @param string $offset Offset.
 	 * @return mixed
 	 */
 	public function offsetGet( $offset ) {
@@ -371,9 +377,10 @@ WHERE permission_id = %d",
 	}
 
 	/**
-	 * offsetSet
-	 * @param string $offset
-	 * @param mixed $value
+	 * OffsetSet.
+	 *
+	 * @param string $offset Offset.
+	 * @param mixed  $value  Value.
 	 */
 	public function offsetSet( $offset, $value ) {
 		if ( is_callable( array( $this, "set_$offset" ) ) ) {
@@ -382,8 +389,9 @@ WHERE permission_id = %d",
 	}
 
 	/**
-	 * offsetUnset
-	 * @param string $offset
+	 * OffsetUnset
+	 *
+	 * @param string $offset Offset.
 	 */
 	public function offsetUnset( $offset ) {
 		if ( is_callable( array( $this, "set_$offset" ) ) ) {
@@ -392,12 +400,13 @@ WHERE permission_id = %d",
 	}
 
 	/**
-	 * offsetExists
-	 * @param string $offset
+	 * OffsetExists.
+	 *
+	 * @param string $offset Offset.
 	 * @return bool
 	 */
 	public function offsetExists( $offset ) {
-		return in_array( $offset, array_keys( $this->data ) );
+		return in_array( $offset, array_keys( $this->data ), true );
 	}
 
 	/**
@@ -407,7 +416,7 @@ WHERE permission_id = %d",
 	 * @return bool
 	 */
 	public function __isset( $key ) {
-		return in_array( $key, array_keys( $this->data ) );
+		return in_array( $key, array_keys( $this->data ), true );
 	}
 
 	/**

@@ -4,17 +4,15 @@
  *
  * Handles requests to the /system_status endpoint.
  *
- * @author   WooThemes
- * @category API
- * @package  WooCommerce/API
- * @since    3.0.0
+ * @package WooCommerce/API
+ * @since   3.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
+ * System status controller class.
+ *
  * @package WooCommerce/API
  * @extends WC_REST_Controller
  */
@@ -569,13 +567,13 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 			$curl_version = $curl_version['version'] . ', ' . $curl_version['ssl_version'];
 		}
 
-		// WP memory limit
+		// WP memory limit.
 		$wp_memory_limit = wc_let_to_num( WP_MEMORY_LIMIT );
 		if ( function_exists( 'memory_get_usage' ) ) {
 			$wp_memory_limit = max( $wp_memory_limit, wc_let_to_num( @ini_get( 'memory_limit' ) ) );
 		}
 
-		// Test POST requests
+		// Test POST requests.
 		$post_response            = wp_safe_remote_post(
 			'https://www.paypal.com/cgi-bin/webscr',
 			array(
@@ -592,7 +590,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 			$post_response_successful = true;
 		}
 
-		// Test GET requests
+		// Test GET requests.
 		$get_response            = wp_safe_remote_get( 'https://woocommerce.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ) );
 		$get_response_successful = false;
 		if ( ! is_wp_error( $post_response ) && $post_response['response']['code'] >= 200 && $post_response['response']['code'] < 300 ) {
@@ -605,7 +603,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 			'site_url'                  => get_option( 'siteurl' ),
 			'version'                   => WC()->version,
 			'log_directory'             => WC_LOG_DIR,
-			'log_directory_writable'    => ( @fopen( WC_LOG_DIR . 'test-log.log', 'a' ) ? true : false ),
+			'log_directory_writable'    => (bool) @fopen( WC_LOG_DIR . 'test-log.log', 'a' ),
 			'wp_version'                => get_bloginfo( 'version' ),
 			'wp_multisite'              => is_multisite(),
 			'wp_memory_limit'           => $wp_memory_limit,
@@ -613,7 +611,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 			'wp_cron'                   => ! ( defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ),
 			'language'                  => get_locale(),
 			'external_object_cache'     => wp_using_ext_object_cache(),
-			'server_info'               => $_SERVER['SERVER_SOFTWARE'],
+			'server_info'               => isset( $_SERVER['SERVER_SOFTWARE'] ) ? wc_clean( wp_unslash( $_SERVER['SERVER_SOFTWARE'] ) ) : '',
 			'php_version'               => phpversion(),
 			'php_post_max_size'         => wc_let_to_num( ini_get( 'post_max_size' ) ),
 			'php_max_execution_time'    => ini_get( 'max_execution_time' ),
@@ -638,7 +636,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 	/**
 	 * Add prefix to table.
 	 *
-	 * @param string $table table name
+	 * @param string $table Table name.
 	 * @return stromg
 	 */
 	protected function add_db_table_prefix( $table ) {
@@ -667,7 +665,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 			)
 		);
 
-		// WC Core tables to check existence of
+		// WC Core tables to check existence of.
 		$core_tables = apply_filters(
 			'woocommerce_database_tables',
 			array(
@@ -762,7 +760,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 			return array();
 		}
 
-		// Get both site plugins and network plugins
+		// Get both site plugins and network plugins.
 		$active_plugins = (array) get_option( 'active_plugins', array() );
 		if ( is_multisite() ) {
 			$network_activated_plugins = array_keys( get_site_option( 'active_sitewide_plugins', array() ) );
@@ -781,7 +779,8 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 			$slug           = $slug[0];
 
 			if ( 'woocommerce' !== $slug && ( strstr( $data['PluginURI'], 'woothemes.com' ) || strstr( $data['PluginURI'], 'woocommerce.com' ) ) ) {
-				if ( false === ( $version_data = get_transient( md5( $plugin ) . '_version_data' ) ) ) {
+				$version_data = get_transient( md5( $plugin ) . '_version_data' );
+				if ( false === $version_data ) {
 					$changelog = wp_safe_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $dirname . '/changelog.txt' );
 					$cl_lines  = explode( "\n", wp_remote_retrieve_body( $changelog ) );
 					if ( ! empty( $cl_lines ) ) {
@@ -835,10 +834,10 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 		// Get parent theme info if this theme is a child theme, otherwise
 		// pass empty info in the response.
 		if ( is_child_theme() ) {
-			$parent_theme      = wp_get_theme( $active_theme->Template );
+			$parent_theme      = wp_get_theme( $active_theme->template );
 			$parent_theme_info = array(
-				'parent_name'           => $parent_theme->Name,
-				'parent_version'        => $parent_theme->Version,
+				'parent_name'           => $parent_theme->name,
+				'parent_version'        => $parent_theme->version,
 				'parent_version_latest' => WC_Admin_Status::get_latest_theme_version( $parent_theme ),
 				'parent_author_url'     => $parent_theme->{'Author URI'},
 			);
@@ -892,8 +891,8 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 		}
 
 		$active_theme_info = array(
-			'name'                    => $active_theme->Name,
-			'version'                 => $active_theme->Version,
+			'name'                    => $active_theme->name,
+			'version'                 => $active_theme->version,
 			'version_latest'          => WC_Admin_Status::get_latest_theme_version( $active_theme ),
 			'author_url'              => esc_url_raw( $active_theme->{'Author URI'} ),
 			'is_child_theme'          => is_child_theme(),
@@ -913,7 +912,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 	 * @return array
 	 */
 	public function get_settings() {
-		// Get a list of terms used for product/order taxonomies
+		// Get a list of terms used for product/order taxonomies.
 		$term_response = array();
 		$terms         = get_terms( 'product_type', array( 'hide_empty' => 0 ) );
 		foreach ( $terms as $term ) {
@@ -963,7 +962,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 	 * @return array
 	 */
 	public function get_pages() {
-		// WC pages to check against
+		// WC pages to check against.
 		$check_pages = array(
 			_x( 'Shop base', 'Page setting', 'woocommerce' ) => array(
 				'option'    => 'woocommerce_shop_page_id',
@@ -989,11 +988,14 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 
 		$pages_output = array();
 		foreach ( $check_pages as $page_name => $values ) {
-			$page_id           = get_option( $values['option'] );
-			$page_set          = $page_exists = $page_visible = false;
-			$shortcode_present = $shortcode_required = false;
+			$page_id            = get_option( $values['option'] );
+			$page_set           = false;
+			$page_exists        = false;
+			$page_visible       = false;
+			$shortcode_present  = false;
+			$shortcode_required = false;
 
-			// Page checks
+			// Page checks.
 			if ( $page_id ) {
 				$page_set = true;
 			}
@@ -1004,7 +1006,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 				$page_visible = true;
 			}
 
-			// Shortcode checks
+			// Shortcode checks.
 			if ( $values['shortcode'] && get_post( $page_id ) ) {
 				$shortcode_required = true;
 				$page               = get_post( $page_id );
@@ -1013,7 +1015,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 				}
 			}
 
-			// Wrap up our findings into an output array
+			// Wrap up our findings into an output array.
 			$pages_output[] = array(
 				'page_name'          => $page_name,
 				'page_id'            => $page_id,
@@ -1043,9 +1045,9 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare the system status response
 	 *
-	 * @param array           $system_status
-	 * @param WP_REST_Request $request Request object.
-	 * @return WP_REST_Response $response Response data.
+	 * @param  array           $system_status System status data.
+	 * @param  WP_REST_Request $request       Request object.
+	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $system_status, $request ) {
 		$data = $this->add_additional_fields_to_object( $system_status, $request );

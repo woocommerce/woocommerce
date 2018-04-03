@@ -3225,16 +3225,16 @@
         },
         {
             "name": "symfony/console",
-            "version": "v2.8.34",
+            "version": "v2.8.35",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/console.git",
-                "reference": "162ca7d0ea597599967aa63b23418e747da0896b"
+                "reference": "a6ff8b2ffa4eb43046828b303af2e3fedadacc27"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/console/zipball/162ca7d0ea597599967aa63b23418e747da0896b",
-                "reference": "162ca7d0ea597599967aa63b23418e747da0896b",
+                "url": "https://api.github.com/repos/symfony/console/zipball/a6ff8b2ffa4eb43046828b303af2e3fedadacc27",
+                "reference": "a6ff8b2ffa4eb43046828b303af2e3fedadacc27",
                 "shasum": ""
             },
             "require": {
@@ -3282,7 +3282,7 @@
             ],
             "description": "Symfony Console Component",
             "homepage": "https://symfony.com",
-            "time": "2018-01-29T08:54:45+00:00"
+            "time": "2018-02-26T15:33:21+00:00"
         },
         {
             "name": "symfony/debug",
@@ -3457,7 +3457,7 @@
         },
         {
             "name": "symfony/yaml",
-            "version": "v2.8.34",
+            "version": "v2.8.35",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
@@ -3546,16 +3546,16 @@
         },
         {
             "name": "tracy/tracy",
-            "version": "v2.4.11",
+            "version": "v2.4.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nette/tracy.git",
-                "reference": "bcb93a9d4347be8779c83b200b64ea6f52d6f9ed"
+                "reference": "4182ce7b92f67002509b7fa2fc34bd84deea0b24"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nette/tracy/zipball/bcb93a9d4347be8779c83b200b64ea6f52d6f9ed",
-                "reference": "bcb93a9d4347be8779c83b200b64ea6f52d6f9ed",
+                "url": "https://api.github.com/repos/nette/tracy/zipball/4182ce7b92f67002509b7fa2fc34bd84deea0b24",
+                "reference": "4182ce7b92f67002509b7fa2fc34bd84deea0b24",
                 "shasum": ""
             },
             "require": {
@@ -3607,7 +3607,7 @@
                 "nette",
                 "profiler"
             ],
-            "time": "2018-02-01T18:11:38+00:00"
+            "time": "2018-02-28T00:49:47+00:00"
         },
         {
             "name": "webmozart/assert",

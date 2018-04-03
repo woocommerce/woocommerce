@@ -2,13 +2,11 @@
 /**
  * WooCommerce countries
  *
- * @version  3.3.0
- * @package  WooCommerce\l10n
+ * @package WooCommerce\l10n
+ * @version 3.3.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * The WooCommerce countries class stores country/state data.
@@ -84,7 +82,7 @@ class WC_Countries {
 		$continents         = $this->get_continents();
 		$continents_and_ccs = wp_list_pluck( $continents, 'countries' );
 		foreach ( $continents_and_ccs as $continent_code => $countries ) {
-			if ( false !== array_search( $cc, $countries ) ) {
+			if ( false !== array_search( $cc, $countries, true ) ) {
 				return $continent_code;
 			}
 		}
@@ -376,7 +374,7 @@ class WC_Countries {
 	public function shipping_to_prefix( $country_code = '' ) {
 		$country_code = $country_code ? $country_code : WC()->customer->get_shipping_country();
 		$countries    = array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' );
-		$return       = in_array( $country_code, $countries ) ? __( 'to the', 'woocommerce' ) : __( 'to', 'woocommerce' );
+		$return       = in_array( $country_code, $countries, true ) ? __( 'to the', 'woocommerce' ) : __( 'to', 'woocommerce' );
 
 		return apply_filters( 'woocommerce_countries_shipping_to_prefix', $return, $country_code );
 	}
@@ -390,7 +388,7 @@ class WC_Countries {
 	public function estimated_for_prefix( $country_code = '' ) {
 		$country_code = $country_code ? $country_code : $this->get_base_country();
 		$countries    = array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' );
-		$return       = in_array( $country_code, $countries ) ? __( 'the', 'woocommerce' ) . ' ' : '';
+		$return       = in_array( $country_code, $countries, true ) ? __( 'the', 'woocommerce' ) . ' ' : '';
 
 		return apply_filters( 'woocommerce_countries_estimated_for_prefix', $return, $country_code );
 	}
@@ -401,7 +399,7 @@ class WC_Countries {
 	 * @return string
 	 */
 	public function tax_or_vat() {
-		$return = in_array( $this->get_base_country(), array_merge( $this->get_european_union_countries( 'eu_vat' ), array( 'NO' ) ) ) ? __( 'VAT', 'woocommerce' ) : __( 'Tax', 'woocommerce' );
+		$return = in_array( $this->get_base_country(), array_merge( $this->get_european_union_countries( 'eu_vat' ), array( 'NO' ) ), true ) ? __( 'VAT', 'woocommerce' ) : __( 'Tax', 'woocommerce' );
 
 		return apply_filters( 'woocommerce_countries_tax_or_vat', $return );
 	}
@@ -412,7 +410,7 @@ class WC_Countries {
 	 * @return string
 	 */
 	public function inc_tax_or_vat() {
-		$return = in_array( $this->get_base_country(), array_merge( $this->get_european_union_countries( 'eu_vat' ), array( 'NO' ) ) ) ? __( '(incl. VAT)', 'woocommerce' ) : __( '(incl. tax)', 'woocommerce' );
+		$return = in_array( $this->get_base_country(), array_merge( $this->get_european_union_countries( 'eu_vat' ), array( 'NO' ) ), true ) ? __( '(incl. VAT)', 'woocommerce' ) : __( '(incl. tax)', 'woocommerce' );
 
 		return apply_filters( 'woocommerce_countries_inc_tax_or_vat', $return );
 	}
@@ -423,7 +421,7 @@ class WC_Countries {
 	 * @return string
 	 */
 	public function ex_tax_or_vat() {
-		$return = in_array( $this->get_base_country(), array_merge( $this->get_european_union_countries( 'eu_vat' ), array( 'NO' ) ) ) ? __( '(ex. VAT)', 'woocommerce' ) : __( '(ex. tax)', 'woocommerce' );
+		$return = in_array( $this->get_base_country(), array_merge( $this->get_european_union_countries( 'eu_vat' ), array( 'NO' ) ), true ) ? __( '(ex. VAT)', 'woocommerce' ) : __( '(ex. tax)', 'woocommerce' );
 
 		return apply_filters( 'woocommerce_countries_ex_tax_or_vat', $return );
 	}
@@ -928,7 +926,7 @@ class WC_Countries {
 						),
 					),
 					'IM' => array(
-						'state'    => array(
+						'state' => array(
 							'required' => false,
 						),
 					),

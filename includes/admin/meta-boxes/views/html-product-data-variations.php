@@ -48,6 +48,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="clear"></div>
 			</div>
 
+			<?php do_action( 'woocommerce_variable_product_before_variations' ); ?>
+
 			<div class="toolbar toolbar-top">
 				<select id="field_to_edit" class="variation_actions">
 					<option data-global="true" value="add_variation"><?php esc_html_e( 'Add variation', 'woocommerce' ); ?></option>

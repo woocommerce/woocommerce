@@ -106,33 +106,33 @@ class WC_Tests_Validation extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Data provider for test_is_GB_postcode.
+	 * Data provider for test_is_gb_postcode.
 	 *
 	 * @since 2.4
 	 */
-	public function data_provider_test_is_GB_postcode() {
+	public function data_provider_test_is_gb_postcode() {
 		return array(
-			array( true, WC_Validation::is_GB_postcode( 'AA9A 9AA' ) ),
-			array( true, WC_Validation::is_GB_postcode( 'A9A 9AA' ) ),
-			array( true, WC_Validation::is_GB_postcode( 'A9 9AA' ) ),
-			array( true, WC_Validation::is_GB_postcode( 'A99 9AA' ) ),
-			array( true, WC_Validation::is_GB_postcode( 'AA99 9AA' ) ),
-			array( true, WC_Validation::is_GB_postcode( 'BFPO 801' ) ),
-			array( false, WC_Validation::is_GB_postcode( '99999' ) ),
-			array( false, WC_Validation::is_GB_postcode( '9999 999' ) ),
-			array( false, WC_Validation::is_GB_postcode( '999 999' ) ),
-			array( false, WC_Validation::is_GB_postcode( '99 999' ) ),
-			array( false, WC_Validation::is_GB_postcode( '9A A9A' ) ),
+			array( true, WC_Validation::is_gb_postcode( 'AA9A 9AA' ) ),
+			array( true, WC_Validation::is_gb_postcode( 'A9A 9AA' ) ),
+			array( true, WC_Validation::is_gb_postcode( 'A9 9AA' ) ),
+			array( true, WC_Validation::is_gb_postcode( 'A99 9AA' ) ),
+			array( true, WC_Validation::is_gb_postcode( 'AA99 9AA' ) ),
+			array( true, WC_Validation::is_gb_postcode( 'BFPO 801' ) ),
+			array( false, WC_Validation::is_gb_postcode( '99999' ) ),
+			array( false, WC_Validation::is_gb_postcode( '9999 999' ) ),
+			array( false, WC_Validation::is_gb_postcode( '999 999' ) ),
+			array( false, WC_Validation::is_gb_postcode( '99 999' ) ),
+			array( false, WC_Validation::is_gb_postcode( '9A A9A' ) ),
 		);
 	}
 
 	/**
-	 * Test is_GB_postcode().
+	 * Test is_gb_postcode().
 	 *
-	 * @dataProvider data_provider_test_is_GB_postcode
+	 * @dataProvider data_provider_test_is_gb_postcode
 	 * @since 2.4
 	 */
-	public function test_is_GB_postcode( $assert, $values ) {
+	public function test_is_gb_postcode( $assert, $values ) {
 		$this->assertEquals( $assert, $values );
 	}
 

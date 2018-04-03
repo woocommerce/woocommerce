@@ -2,8 +2,8 @@
 /**
  * Cart session handling class.
  *
- * @author  Automattic
  * @package WooCommerce/Classes
+ * @version 3.2.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -61,6 +61,7 @@ final class WC_Cart_Session {
 	 * @since 3.2.0
 	 */
 	public function get_cart_from_session() {
+		// Flag to indicate the stored cart should be updated.
 		$update_cart_session = false;
 		$totals              = WC()->session->get( 'cart_totals', null );
 		$cart                = WC()->session->get( 'cart', null );
@@ -99,16 +100,24 @@ final class WC_Cart_Session {
 				if ( ! empty( $product ) && $product->exists() && $values['quantity'] > 0 ) {
 
 					if ( ! $product->is_purchasable() ) {
-						$update_cart_session = true; // Flag to indicate the stored cart should be updated.
+						$update_cart_session = true;
 						/* translators: %s: product name */
 						wc_add_notice( sprintf( __( '%s has been removed from your cart because it can no longer be purchased. Please contact us if you need assistance.', 'woocommerce' ), $product->get_name() ), 'error' );
 						do_action( 'woocommerce_remove_cart_item_from_session', $key, $values );
 
+					} elseif ( ! empty( $values['data_hash'] ) && ! hash_equals( $values['data_hash'], wc_get_cart_item_data_hash( $product ) ) ) { // phpcs:ignore PHPCompatibility.PHP.NewFunctions.hash_equalsFound
+						$update_cart_session = true;
+						/* translators: %1$s: product name. %2$s product permalink */
+						wc_add_notice( sprintf( __( '%1$s has been removed from your cart because it has since been modified. You can add it back to your cart <a href="%2$s">here</a>.', 'woocommerce' ), $product->get_name(), $product->get_permalink() ), 'notice' );
+						do_action( 'woocommerce_remove_cart_item_from_session', $key, $values );
+
 					} else {
 						// Put session data into array. Run through filter so other plugins can load their own session data.
-						$session_data          = array_merge( $values, array(
-							'data' => $product,
-						) );
+						$session_data          = array_merge(
+							$values, array(
+								'data' => $product,
+							)
+						);
 						$cart_contents[ $key ] = apply_filters( 'woocommerce_get_cart_item_from_session', $session_data, $values, $key );
 
 						// Add to cart right away so the product is visible in woocommerce_get_cart_item_from_session hook.
@@ -150,7 +159,7 @@ final class WC_Cart_Session {
 		if ( ! headers_sent() && did_action( 'wp_loaded' ) ) {
 			if ( ! $this->cart->is_empty() ) {
 				$this->set_cart_cookies( true );
-			} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) {
+			} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) { // WPCS: input var ok.
 				$this->set_cart_cookies( false );
 			}
 		}
@@ -191,9 +200,11 @@ final class WC_Cart_Session {
 	 */
 	public function persistent_cart_update() {
 		if ( get_current_user_id() && apply_filters( 'woocommerce_persistent_cart_enabled', true ) ) {
-			update_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id(), array(
-				'cart' => $this->get_cart_for_session(),
-			) );
+			update_user_meta(
+				get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id(), array(
+					'cart' => $this->get_cart_for_session(),
+				)
+			);
 		}
 	}
 
@@ -216,7 +227,7 @@ final class WC_Cart_Session {
 		if ( $set ) {
 			wc_setcookie( 'woocommerce_items_in_cart', 1 );
 			wc_setcookie( 'woocommerce_cart_hash', md5( wp_json_encode( $this->get_cart_for_session() ) ) );
-		} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) {
+		} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) { // WPCS: input var ok.
 			wc_setcookie( 'woocommerce_items_in_cart', 0, time() - HOUR_IN_SECONDS );
 			wc_setcookie( 'woocommerce_cart_hash', '', time() - HOUR_IN_SECONDS );
 		}

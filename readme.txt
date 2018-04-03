@@ -88,7 +88,7 @@ And, finally, consider joining or spearheading a WooCommerce Meetup locally, mor
 
 = Minimum Requirements =
 
-* PHP version 5.2.4 or greater (PHP 5.6 or greater is recommended)
+* PHP version 5.2.4 or greater (PHP 7.2 or greater is recommended)
 * MySQL version 5.0 or greater (MySQL 5.6 or greater is recommended)
 * Some payment gateways require fsockopen support (for IPN access)
 
@@ -146,7 +146,7 @@ You can find the documentation of our REST API on the [WooCommerce REST API Docs
 
 = WooCommerce is awesome! Can I contribute? =
 
-Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/woocommerce/) :)
+Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/woocommerce/) :)
 
 == Screenshots ==
 

@@ -1,6 +1,12 @@
 <?php
+/**
+ * Class WC_Log_Handler_Email file.
+ *
+ * @package WooCommerce\Log Handlers
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit; // Exit if accessed directly.
 }
 
 /**
@@ -23,8 +29,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @class          WC_Log_Handler_Email
  * @version        1.0.0
  * @package        WooCommerce/Classes/Log_Handlers
- * @category       Class
- * @author         WooThemes
  */
 class WC_Log_Handler_Email extends WC_Log_Handler {
 
@@ -60,8 +64,8 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	 * Constructor for log handler.
 	 *
 	 * @param string|array $recipients Optional. Email(s) to receive log messages. Defaults to site admin email.
-	 * @param string $threshold Optional. Minimum level that should receive log messages.
-	 *     Default 'alert'. One of: emergency|alert|critical|error|warning|notice|info|debug
+	 * @param string       $threshold Optional. Minimum level that should receive log messages.
+	 *           Default 'alert'. One of: emergency|alert|critical|error|warning|notice|info|debug.
 	 */
 	public function __construct( $recipients = null, $threshold = 'alert' ) {
 		if ( null === $recipients ) {
@@ -83,7 +87,7 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	/**
 	 * Set handler severity threshold.
 	 *
-	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
+	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug.
 	 */
 	public function set_threshold( $level ) {
 		$this->threshold = WC_Log_Levels::get_level_severity( $level );
@@ -92,7 +96,7 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	/**
 	 * Determine whether handler should handle log.
 	 *
-	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
+	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug.
 	 * @return bool True if the log should be handled.
 	 */
 	protected function should_handle( $level ) {
@@ -102,10 +106,10 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	/**
 	 * Handle a log entry.
 	 *
-	 * @param int $timestamp Log timestamp.
-	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
+	 * @param int    $timestamp Log timestamp.
+	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug.
 	 * @param string $message Log message.
-	 * @param array $context Optional. Additional information for log handlers.
+	 * @param array  $context Optional. Additional information for log handlers.
 	 *
 	 * @return bool False if value was not handled and true if value was handled.
 	 */
@@ -129,8 +133,8 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 
 		if ( ! empty( $this->logs ) ) {
 			$subject = $this->get_subject();
-			$body = $this->get_body();
-			$result = wp_mail( $this->recipients, $subject, $body );
+			$body    = $this->get_body();
+			$result  = wp_mail( $this->recipients, $subject, $body );
 			$this->clear_logs();
 		}
 
@@ -148,6 +152,7 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 		$log_count = count( $this->logs );
 
 		return sprintf(
+			/* translators: 1: Site name 2: Maximum level 3: Log count */
 			_n(
 				'[%1$s] %2$s: %3$s WooCommerce log message',
 				'[%1$s] %2$s: %3$s WooCommerce log messages',
@@ -167,19 +172,19 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	 */
 	protected function get_body() {
 		$site_name = get_bloginfo( 'name' );
-		$entries = implode( PHP_EOL, $this->logs );
+		$entries   = implode( PHP_EOL, $this->logs );
 		$log_count = count( $this->logs );
 		return _n(
-				'You have received the following WooCommerce log message:',
-				'You have received the following WooCommerce log messages:',
-				$log_count,
-				'woocommerce'
-			)
-			. PHP_EOL
+			'You have received the following WooCommerce log message:',
+			'You have received the following WooCommerce log messages:',
+			$log_count,
+			'woocommerce'
+		) . PHP_EOL
 			. PHP_EOL
 			. $entries
 			. PHP_EOL
 			. PHP_EOL
+			/* translators: %s: Site name */
 			. sprintf( __( 'Visit %s admin area:', 'woocommerce' ), $site_name )
 			. PHP_EOL
 			. admin_url();
@@ -188,7 +193,7 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	/**
 	 * Adds an email to the list of recipients.
 	 *
-	 * @param string email Email address to add
+	 * @param string $email Email address to add.
 	 */
 	public function add_email( $email ) {
 		array_push( $this->recipients, $email );
@@ -197,10 +202,10 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	/**
 	 * Add log message.
 	 *
-	 * @param int $timestamp Log timestamp.
-	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
+	 * @param int    $timestamp Log timestamp.
+	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug.
 	 * @param string $message Log message.
-	 * @param array $context Additional information for log handlers.
+	 * @param array  $context Additional information for log handlers.
 	 */
 	protected function add_log( $timestamp, $level, $message, $context ) {
 		$this->logs[] = $this->format_entry( $timestamp, $level, $message, $context );
