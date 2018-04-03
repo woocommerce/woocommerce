@@ -19,7 +19,7 @@ ratings:
 exclude_paths:
 - "tests/"
 - "apigen/"
-- "dummy-data/"
+- "sample-data/"
 - "i18n/"
 - "includes/api/legacy/"
 - "includes/libraries/"

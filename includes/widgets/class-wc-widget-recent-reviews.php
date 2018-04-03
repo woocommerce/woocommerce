@@ -1,17 +1,15 @@
 <?php
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 /**
  * Recent Reviews Widget.
  *
- * @author   WooThemes
- * @category Widgets
- * @package  WooCommerce/Widgets
- * @version  2.3.0
- * @extends  WC_Widget
+ * @package WooCommerce/Widgets
+ * @version 2.3.0
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Widget recent reviews class.
  */
 class WC_Widget_Recent_Reviews extends WC_Widget {
 
@@ -46,11 +44,10 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 	 * Output widget.
 	 *
 	 * @see WP_Widget
-	 *
-	 * @param array $args
-	 * @param array $instance
+	 * @param array $args     Arguments.
+	 * @param array $instance Widget instance.
 	 */
-	 public function widget( $args, $instance ) {
+	public function widget( $args, $instance ) {
 		global $comments, $comment;
 
 		if ( $this->get_cached_widget( $args ) ) {
@@ -60,7 +57,15 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 		ob_start();
 
 		$number   = ! empty( $instance['number'] ) ? absint( $instance['number'] ) : $this->settings['number']['std'];
-		$comments = get_comments( array( 'number' => $number, 'status' => 'approve', 'post_status' => 'publish', 'post_type' => 'product', 'parent' => 0 ) );
+		$comments = get_comments(
+			array(
+				'number'      => $number,
+				'status'      => 'approve',
+				'post_status' => 'publish',
+				'post_type'   => 'product',
+				'parent'      => 0,
+			)
+		); // WPCS: override ok.
 
 		if ( $comments ) {
 			$this->widget_start( $args, $instance );
@@ -77,12 +82,12 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 
 				echo '<li><a href="' . esc_url( get_comment_link( $comment->comment_ID ) ) . '">';
 
-				echo $_product->get_image() . wp_kses_post( $_product->get_name() ) . '</a>';
+				echo $_product->get_image() . wp_kses_post( $_product->get_name() ) . '</a>'; // WPCS: XSS ok.
 
-				echo $rating_html;
+				echo $rating_html; // WPCS: XSS ok.
 
 				/* translators: %s: review author */
-				echo '<span class="reviewer">' . sprintf( esc_html__( 'by %s', 'woocommerce' ), get_comment_author() ) . '</span>';
+				echo '<span class="reviewer">' . sprintf( esc_html__( 'by %s', 'woocommerce' ), get_comment_author() ) . '</span>'; // WPCS: XSS ok.
 
 				echo '</li>';
 			}
@@ -94,7 +99,7 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 
 		$content = ob_get_clean();
 
-		echo $content;
+		echo $content; // WPCS: XSS ok.
 
 		$this->cache_widget( $args, $content );
 	}

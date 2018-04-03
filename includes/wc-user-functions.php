@@ -4,23 +4,18 @@
  *
  * Functions for customers.
  *
- * @author 		WooThemes
- * @category 	Core
- * @package 	WooCommerce/Functions
- * @version 	2.2.0
+ * @package WooCommerce/Functions
+ * @version 2.2.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Prevent any user who cannot 'edit_posts' (subscribers, customers etc) from seeing the admin bar.
  *
  * Note: get_option( 'woocommerce_lock_down_admin', true ) is a deprecated option here for backwards compatibility. Defaults to true.
  *
- * @access public
- * @param bool $show_admin_bar
+ * @param bool $show_admin_bar If should display admin bar.
  * @return bool
  */
 function wc_disable_admin_bar( $show_admin_bar ) {
@@ -30,7 +25,7 @@ function wc_disable_admin_bar( $show_admin_bar ) {
 
 	return $show_admin_bar;
 }
-add_filter( 'show_admin_bar', 'wc_disable_admin_bar', 10, 1 );
+add_filter( 'show_admin_bar', 'wc_disable_admin_bar', 10, 1 ); // phpcs:ignore WordPress.VIP.AdminBarRemoval.RemovalDetected
 
 if ( ! function_exists( 'wc_create_new_customer' ) ) {
 
@@ -98,12 +93,14 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 			return $errors;
 		}
 
-		$new_customer_data = apply_filters( 'woocommerce_new_customer_data', array(
-			'user_login' => $username,
-			'user_pass'  => $password,
-			'user_email' => $email,
-			'role'       => 'customer',
-		) );
+		$new_customer_data = apply_filters(
+			'woocommerce_new_customer_data', array(
+				'user_login' => $username,
+				'user_pass'  => $password,
+				'user_email' => $email,
+				'role'       => 'customer',
+			)
+		);
 
 		$customer_id = wp_insert_user( $new_customer_data );
 
@@ -120,12 +117,12 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 /**
  * Login a customer (set auth cookie and set global user object).
  *
- * @param int $customer_id
+ * @param int $customer_id Customer ID.
  */
 function wc_set_customer_auth_cookie( $customer_id ) {
 	global $current_user;
 
-	$current_user = get_user_by( 'id', $customer_id );
+	$current_user = get_user_by( 'id', $customer_id ); // WPCS: override ok.
 
 	wp_set_auth_cookie( $customer_id, true );
 }
@@ -133,18 +130,20 @@ function wc_set_customer_auth_cookie( $customer_id ) {
 /**
  * Get past orders (by email) and update them.
  *
- * @param  int $customer_id
+ * @param  int $customer_id Customer ID.
  * @return int
  */
 function wc_update_new_customer_past_orders( $customer_id ) {
 	$linked          = 0;
 	$complete        = 0;
 	$customer        = get_user_by( 'id', absint( $customer_id ) );
-	$customer_orders = wc_get_orders( array(
-		'limit'    => -1,
-		'customer' => array( array( 0, $customer->user_email ) ),
-		'return'   => 'ids',
-	) );
+	$customer_orders = wc_get_orders(
+		array(
+			'limit'    => -1,
+			'customer' => array( array( 0, $customer->user_email ) ),
+			'return'   => 'ids',
+		)
+	);
 
 	if ( ! empty( $customer_orders ) ) {
 		foreach ( $customer_orders as $order_id ) {
@@ -184,8 +183,7 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 /**
  * Order Status completed - This is a paying customer.
  *
- * @access public
- * @param int $order_id
+ * @param int $order_id Order ID.
  */
 function wc_paying_customer( $order_id ) {
 	$order       = wc_get_order( $order_id );
@@ -217,8 +215,9 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 	}
 
 	$transient_name = 'wc_cbp_' . md5( $customer_email . $user_id . WC_Cache_Helper::get_transient_version( 'orders' ) );
+	$result         = get_transient( $transient_name );
 
-	if ( false === ( $result = get_transient( $transient_name ) ) ) {
+	if ( false === $result ) {
 		$customer_data = array( $user_id );
 
 		if ( $user_id ) {
@@ -236,11 +235,12 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 		$customer_data = array_map( 'esc_sql', array_filter( array_unique( $customer_data ) ) );
 		$statuses      = array_map( 'esc_sql', wc_get_is_paid_statuses() );
 
-		if ( sizeof( $customer_data ) == 0 ) {
+		if ( count( $customer_data ) === 0 ) {
 			return false;
 		}
 
-		$result = $wpdb->get_col( "
+		$result = $wpdb->get_col(
+			"
 			SELECT im.meta_value FROM {$wpdb->posts} AS p
 			INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
 			INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
@@ -250,40 +250,40 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 			AND im.meta_key IN ( '_product_id', '_variation_id' )
 			AND im.meta_value != 0
 			AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )
-		" );
+		"
+		); // WPCS: unprepared SQL ok.
 		$result = array_map( 'absint', $result );
 
 		set_transient( $transient_name, $result, DAY_IN_SECONDS * 30 );
 	}
-	return in_array( absint( $product_id ), $result );
+	return in_array( absint( $product_id ), $result, true );
 }
 
 /**
  * Checks if a user has a certain capability.
  *
- * @access public
- * @param array $allcaps
- * @param array $caps
- * @param array $args
+ * @param array $allcaps All capabilities.
+ * @param array $caps    Capabilities.
+ * @param array $args    Arguments.
  * @return bool
  */
 function wc_customer_has_capability( $allcaps, $caps, $args ) {
 	if ( isset( $caps[0] ) ) {
 		switch ( $caps[0] ) {
-			case 'view_order' :
-				$user_id = $args[1];
+			case 'view_order':
+				$user_id = intval( $args[1] );
 				$order   = wc_get_order( $args[2] );
 
-				if ( $order && $user_id == $order->get_user_id() ) {
+				if ( $order && $user_id === $order->get_user_id() ) {
 					$allcaps['view_order'] = true;
 				}
-			break;
-			case 'pay_for_order' :
-				$user_id  = $args[1];
+				break;
+			case 'pay_for_order':
+				$user_id  = intval( $args[1] );
 				$order_id = isset( $args[2] ) ? $args[2] : null;
 
 				// When no order ID, we assume it's a new order
-				// and thus, customer can pay for it
+				// and thus, customer can pay for it.
 				if ( ! $order_id ) {
 					$allcaps['pay_for_order'] = true;
 					break;
@@ -291,34 +291,34 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 
 				$order = wc_get_order( $order_id );
 
-				if ( $order && ( $user_id == $order->get_user_id() || ! $order->get_user_id() ) ) {
+				if ( $order && ( $user_id === $order->get_user_id() || ! $order->get_user_id() ) ) {
 					$allcaps['pay_for_order'] = true;
 				}
-			break;
-			case 'order_again' :
-				$user_id = $args[1];
+				break;
+			case 'order_again':
+				$user_id = intval( $args[1] );
 				$order   = wc_get_order( $args[2] );
 
-				if ( $order && $user_id == $order->get_user_id() ) {
+				if ( $order && $user_id === $order->get_user_id() ) {
 					$allcaps['order_again'] = true;
 				}
-			break;
-			case 'cancel_order' :
-				$user_id = $args[1];
+				break;
+			case 'cancel_order':
+				$user_id = intval( $args[1] );
 				$order   = wc_get_order( $args[2] );
 
-				if ( $order && $user_id == $order->get_user_id() ) {
+				if ( $order && $user_id === $order->get_user_id() ) {
 					$allcaps['cancel_order'] = true;
 				}
-			break;
-			case 'download_file' :
-				$user_id  = $args[1];
+				break;
+			case 'download_file':
+				$user_id  = intval( $args[1] );
 				$download = $args[2];
 
-				if ( $download && $user_id == $download->get_user_id() ) {
+				if ( $download && $user_id === $download->get_user_id() ) {
 					$allcaps['download_file'] = true;
 				}
-			break;
+				break;
 		}
 	}
 	return $allcaps;
@@ -327,7 +327,8 @@ add_filter( 'user_has_cap', 'wc_customer_has_capability', 10, 3 );
 
 /**
  * Modify the list of editable roles to prevent non-admin adding admin users.
- * @param  array $roles
+ *
+ * @param  array $roles Roles.
  * @return array
  */
 function wc_modify_editable_roles( $roles ) {
@@ -343,18 +344,18 @@ add_filter( 'editable_roles', 'wc_modify_editable_roles' );
  *
  * $args[0] will be the user being edited in this case.
  *
- * @param  array $caps Array of caps
- * @param  string $cap Name of the cap we are checking
- * @param  int $user_id ID of the user being checked against
- * @param  array $args
+ * @param  array  $caps    Array of caps.
+ * @param  string $cap     Name of the cap we are checking.
+ * @param  int    $user_id ID of the user being checked against.
+ * @param  array  $args    Arguments.
  * @return array
  */
 function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
 	switch ( $cap ) {
-		case 'edit_user' :
-		case 'remove_user' :
-		case 'promote_user' :
-		case 'delete_user' :
+		case 'edit_user':
+		case 'remove_user':
+		case 'promote_user':
+		case 'delete_user':
 			if ( ! isset( $args[0] ) || $args[0] === $user_id ) {
 				break;
 			} else {
@@ -362,7 +363,7 @@ function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
 					$caps[] = 'do_not_allow';
 				}
 			}
-		break;
+			break;
 	}
 	return $caps;
 }
@@ -371,7 +372,7 @@ add_filter( 'map_meta_cap', 'wc_modify_map_meta_cap', 10, 4 );
 /**
  * Get customer download permissions from the database.
  *
- * @param int $customer_id Customer/User ID
+ * @param int $customer_id Customer/User ID.
  * @return array
  */
 function wc_get_customer_download_permissions( $customer_id ) {
@@ -382,7 +383,7 @@ function wc_get_customer_download_permissions( $customer_id ) {
 /**
  * Get customer available downloads.
  *
- * @param int $customer_id Customer/User ID
+ * @param int $customer_id Customer/User ID.
  * @return array
  */
 function wc_get_customer_available_downloads( $customer_id ) {
@@ -391,36 +392,38 @@ function wc_get_customer_available_downloads( $customer_id ) {
 	$order       = null;
 	$file_number = 0;
 
-	// Get results from valid orders only
+	// Get results from valid orders only.
 	$results = wc_get_customer_download_permissions( $customer_id );
 
 	if ( $results ) {
 		foreach ( $results as $result ) {
-			if ( ! $order || $order->get_id() != $result->order_id ) {
-				// new order
-				$order    = wc_get_order( $result->order_id );
+			$order_id = intval( $result->order_id );
+
+			if ( ! $order || $order->get_id() !== $order_id ) {
+				// New order.
+				$order    = wc_get_order( $order_id );
 				$_product = null;
 			}
 
-			// Make sure the order exists for this download
+			// Make sure the order exists for this download.
 			if ( ! $order ) {
 				continue;
 			}
 
-			// Downloads permitted?
+			// Check if downloads are permitted.
 			if ( ! $order->is_download_permitted() ) {
 				continue;
 			}
 
 			$product_id = intval( $result->product_id );
 
-			if ( ! $_product || $_product->get_id() != $product_id ) {
-				// new product
+			if ( ! $_product || $_product->get_id() !== $product_id ) {
+				// New product.
 				$file_number = 0;
 				$_product    = wc_get_product( $product_id );
 			}
 
-			// Check product exists and has the file
+			// Check product exists and has the file.
 			if ( ! $_product || ! $_product->exists() || ! $_product->has_file( $result->download_id ) ) {
 				continue;
 			}
@@ -437,25 +440,25 @@ function wc_get_customer_available_downloads( $customer_id ) {
 			);
 
 			$downloads[] = array(
-				'download_url'          => add_query_arg(
+				'download_url'        => add_query_arg(
 					array(
 						'download_file' => $product_id,
 						'order'         => $result->order_key,
-						'email'         => urlencode( $result->user_email ),
+						'email'         => rawurlencode( $result->user_email ),
 						'key'           => $result->download_id,
 					),
 					home_url( '/' )
 				),
-				'download_id'           => $result->download_id,
-				'product_id'            => $_product->get_id(),
-				'product_name'          => $_product->get_name(),
-				'product_url'           => $_product->is_visible() ? $_product->get_permalink() : '', // Since 3.3.0.
-				'download_name'         => $download_name,
-				'order_id'              => $order->get_id(),
-				'order_key'             => $order->get_order_key(),
-				'downloads_remaining'   => $result->downloads_remaining,
-				'access_expires'        => $result->access_expires,
-				'file'                  => array(
+				'download_id'         => $result->download_id,
+				'product_id'          => $_product->get_id(),
+				'product_name'        => $_product->get_name(),
+				'product_url'         => $_product->is_visible() ? $_product->get_permalink() : '', // Since 3.3.0.
+				'download_name'       => $download_name,
+				'order_id'            => $order->get_id(),
+				'order_key'           => $order->get_order_key(),
+				'downloads_remaining' => $result->downloads_remaining,
+				'access_expires'      => $result->access_expires,
+				'file'                => array(
 					'name' => $download_file->get_name(),
 					'file' => $download_file->get_file(),
 				),
@@ -470,7 +473,8 @@ function wc_get_customer_available_downloads( $customer_id ) {
 
 /**
  * Get total spent by customer.
- * @param  int $user_id
+ *
+ * @param  int $user_id User ID.
  * @return string
  */
 function wc_get_customer_total_spent( $user_id ) {
@@ -480,7 +484,8 @@ function wc_get_customer_total_spent( $user_id ) {
 
 /**
  * Get total orders by customer.
- * @param  int $user_id
+ *
+ * @param  int $user_id User ID.
  * @return int
  */
 function wc_get_customer_order_count( $user_id ) {
@@ -490,19 +495,26 @@ function wc_get_customer_order_count( $user_id ) {
 
 /**
  * Reset _customer_user on orders when a user is deleted.
- * @param int $user_id
+ *
+ * @param int $user_id User ID.
  */
 function wc_reset_order_customer_id_on_deleted_user( $user_id ) {
 	global $wpdb;
 
-	$wpdb->update( $wpdb->postmeta, array( 'meta_value' => 0 ), array( 'meta_key' => '_customer_user', 'meta_value' => $user_id ) );
+	$wpdb->update(
+		$wpdb->postmeta, array( 'meta_value' => 0 ), array(
+			'meta_key'   => '_customer_user',
+			'meta_value' => $user_id,
+		)
+	); // WPCS: slow query ok.
 }
 
 add_action( 'deleted_user', 'wc_reset_order_customer_id_on_deleted_user' );
 
 /**
  * Get review verification status.
- * @param  int $comment_id
+ *
+ * @param  int $comment_id Comment ID.
  * @return bool
  */
 function wc_review_is_from_verified_owner( $comment_id ) {
@@ -560,7 +572,7 @@ add_action( 'profile_update', 'wc_update_profile_last_update_time', 10, 2 );
 function wc_meta_update_last_update_time( $meta_id, $user_id, $meta_key, $_meta_value ) {
 	$keys_to_track = apply_filters( 'woocommerce_user_last_update_fields', array( 'first_name', 'last_name' ) );
 	$update_time   = false;
-	if ( in_array( $meta_key, $keys_to_track ) ) {
+	if ( in_array( $meta_key, $keys_to_track, true ) ) {
 		$update_time = true;
 	}
 	if ( 'billing_' === substr( $meta_key, 0, 8 ) ) {
@@ -591,7 +603,7 @@ function wc_set_user_last_update_time( $user_id ) {
  * Get customer saved payment methods list.
  *
  * @since 2.6.0
- * @param int $customer_id
+ * @param int $customer_id Customer ID.
  * @return array
  */
 function wc_get_customer_saved_methods_list( $customer_id ) {
@@ -603,24 +615,12 @@ function wc_get_customer_saved_methods_list( $customer_id ) {
  *
  * @since 2.6.0
  * @param int $customer_id Customer ID.
- * @return WC_Order Order object if successful or false.
+ * @return WC_Order|bool Order object if successful or false.
  */
 function wc_get_customer_last_order( $customer_id ) {
-	global $wpdb;
+	$customer = new WC_Customer( $customer_id );
 
-	$customer_id = absint( $customer_id );
-
-	$id = $wpdb->get_var( "SELECT id
-		FROM $wpdb->posts AS posts
-		LEFT JOIN {$wpdb->postmeta} AS meta on posts.ID = meta.post_id
-		WHERE meta.meta_key = '_customer_user'
-		AND   meta.meta_value = {$customer_id}
-		AND   posts.post_type = 'shop_order'
-		AND   posts.post_status IN ( '" . implode( "','", array_keys( wc_get_order_statuses() ) ) . "' )
-		ORDER BY posts.ID DESC
-	" );
-
-	return wc_get_order( $id );
+	return $customer->get_last_order();
 }
 
 /**

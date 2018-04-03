@@ -134,6 +134,7 @@ jQuery( function ( $ ) {
 		})
 
 		.on( 'init_tooltips', function() {
+
 			$( '.tips, .help_tip, .woocommerce-help-tip' ).tipTip( {
 				'attribute': 'data-tip',
 				'fadeIn': 50,
@@ -281,15 +282,6 @@ jQuery( function ( $ ) {
 		}).change();
 	});
 
-	// Demo store notice
-	$( 'input#woocommerce_demo_store' ).change(function() {
-		if ( $( this ).is( ':checked' ) ) {
-			$( '#woocommerce_demo_store_notice' ).closest( 'tr' ).show();
-		} else {
-			$( '#woocommerce_demo_store_notice' ).closest( 'tr' ).hide();
-		}
-	}).change();
-
 	// Reviews.
 	$( 'input#woocommerce_enable_reviews' ).change(function() {
 		if ( $( this ).is( ':checked' ) ) {
@@ -301,12 +293,4 @@ jQuery( function ( $ ) {
 
 	// Attribute term table
 	$( 'table.attributes-table tbody tr:nth-child(odd)' ).addClass( 'alternate' );
-
-	// Load videos when help button is clicked.
-	$( '#contextual-help-link' ).on( 'click', function() {
-		$( '.wc-guided-tour-embed' ).each( function() {
-			var video_id = $( this ).data( 'video_id' );
-			$( this ).replaceWith( '<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/' + video_id + '" frameborder="0" allowfullscreen></iframe>' );
-		} );
-	});
 });

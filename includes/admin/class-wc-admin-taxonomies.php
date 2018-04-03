@@ -36,8 +36,13 @@ class WC_Admin_Taxonomies {
 		add_filter( 'manage_edit-product_cat_columns', array( $this, 'product_cat_columns' ) );
 		add_filter( 'manage_product_cat_custom_column', array( $this, 'product_cat_column' ), 10, 3 );
 
+		// Add row actions.
+		add_filter( 'product_cat_row_actions', array( $this, 'product_cat_row_actions' ), 10, 2 );
+		add_filter( 'admin_init', array( $this, 'handle_product_cat_row_actions' ) );
+
 		// Taxonomy page descriptions
 		add_action( 'product_cat_pre_add_form', array( $this, 'product_cat_description' ) );
+		add_action( 'after-product_cat-table', array( $this, 'product_cat_notes' ) );
 
 		$attribute_taxonomies = wc_get_attribute_taxonomies();
 
@@ -54,8 +59,8 @@ class WC_Admin_Taxonomies {
 	/**
 	 * Order term when created (put in position 0).
 	 *
-	 * @param mixed $term_id
-	 * @param mixed $tt_id
+	 * @param mixed  $term_id
+	 * @param mixed  $tt_id
 	 * @param string $taxonomy
 	 */
 	public function create_term( $term_id, $tt_id = '', $taxonomy = '' ) {
@@ -127,9 +132,9 @@ class WC_Admin_Taxonomies {
 
 					// Create the media frame.
 					file_frame = wp.media.frames.downloadable_file = wp.media({
-						title: '<?php _e( "Choose an image", "woocommerce" ); ?>',
+						title: '<?php _e( 'Choose an image', 'woocommerce' ); ?>',
 						button: {
-							text: '<?php _e( "Use image", "woocommerce" ); ?>'
+							text: '<?php _e( 'Use image', 'woocommerce' ); ?>'
 						},
 						multiple: false
 					});
@@ -237,9 +242,9 @@ class WC_Admin_Taxonomies {
 
 						// Create the media frame.
 						file_frame = wp.media.frames.downloadable_file = wp.media({
-							title: '<?php _e( "Choose an image", "woocommerce" ); ?>',
+							title: '<?php _e( 'Choose an image', 'woocommerce' ); ?>',
 							button: {
-								text: '<?php _e( "Use image", "woocommerce" ); ?>'
+								text: '<?php _e( 'Use image', 'woocommerce' ); ?>'
 							},
 							multiple: false
 						});
@@ -275,8 +280,8 @@ class WC_Admin_Taxonomies {
 	/**
 	 * save_category_fields function.
 	 *
-	 * @param mixed $term_id Term ID being saved
-	 * @param mixed $tt_id
+	 * @param mixed  $term_id Term ID being saved
+	 * @param mixed  $tt_id
 	 * @param string $taxonomy
 	 */
 	public function save_category_fields( $term_id, $tt_id = '', $taxonomy = '' ) {
@@ -293,6 +298,29 @@ class WC_Admin_Taxonomies {
 	 */
 	public function product_cat_description() {
 		echo wpautop( __( 'Product categories for your store can be managed here. To change the order of categories on the front-end you can drag and drop to sort them. To see more categories listed click the "screen options" link at the top-right of this page.', 'woocommerce' ) );
+	}
+
+	/**
+	 * Add some notes to describe the behavior of the default category.
+	 */
+	public function product_cat_notes() {
+		$category_id   = get_option( 'default_product_cat', 0 );
+		$category      = get_term( $category_id, 'product_cat' );
+		$category_name = ( ! $category || is_wp_error( $category ) ) ? _x( 'Uncategorized', 'Default category slug', 'woocommerce' ) : $category->name;
+		?>
+		<div class="form-wrap edit-term-notes">
+			<p>
+				<strong><?php _e( 'Note:', 'woocommerce' ); ?></strong><br>
+				<?php
+					printf(
+						/* translators: %s: default category */
+						__( 'Deleting a category does not delete the products in that category. Instead, products that were only assigned to the deleted category are set to the category %s.', 'woocommerce' ),
+						'<strong>' . esc_html( $category_name ) . '</strong>'
+					);
+				?>
+			</p>
+		</div>
+		<?php
 	}
 
 	/**
@@ -318,7 +346,46 @@ class WC_Admin_Taxonomies {
 
 		$new_columns['thumb'] = __( 'Image', 'woocommerce' );
 
-		return array_merge( $new_columns, $columns );
+		$columns           = array_merge( $new_columns, $columns );
+		$columns['handle'] = '';
+
+		return $columns;
+	}
+
+	/**
+	 * Adjust row actions.
+	 *
+	 * @param array  $actions Array of actions.
+	 * @param object $term Term object.
+	 * @return array
+	 */
+	public function product_cat_row_actions( $actions = array(), $term ) {
+		$default_category_id = absint( get_option( 'default_product_cat', 0 ) );
+
+		if ( $default_category_id !== $term->term_id && current_user_can( 'edit_term', $term->term_id ) ) {
+			$actions['make_default'] = sprintf(
+				'<a href="%s" aria-label="%s">%s</a>',
+				wp_nonce_url( 'edit-tags.php?action=make_default&amp;taxonomy=product_cat&amp;tag_ID=' . absint( $term->term_id ), 'make_default_' . absint( $term->term_id ) ),
+				/* translators: %s: taxonomy term name */
+				esc_attr( sprintf( __( 'Make &#8220;%s&#8221; the default category', 'woocommerce' ), $term->name ) ),
+				__( 'Make default', 'woocommerce' )
+			);
+		}
+
+		return $actions;
+	}
+
+	/**
+	 * Handle custom row actions.
+	 */
+	public function handle_product_cat_row_actions() {
+		if ( isset( $_GET['action'], $_GET['tag_ID'], $_GET['_wpnonce'] ) && 'make_default' === $_GET['action'] ) {
+			$make_default_id = absint( $_GET['tag_ID'] );
+
+			if ( wp_verify_nonce( $_GET['_wpnonce'], 'make_default_' . $make_default_id ) && current_user_can( 'edit_term', $make_default_id ) ) {
+				update_option( 'default_product_cat', $make_default_id );
+			}
+		}
 	}
 
 	/**
@@ -326,13 +393,18 @@ class WC_Admin_Taxonomies {
 	 *
 	 * @param string $columns
 	 * @param string $column
-	 * @param int $id
+	 * @param int    $id
 	 *
 	 * @return string
 	 */
 	public function product_cat_column( $columns, $column, $id ) {
+		if ( 'thumb' === $column ) {
+			// Prepend tooltip for default category.
+			$default_category_id = absint( get_option( 'default_product_cat', 0 ) );
 
-		if ( 'thumb' == $column ) {
+			if ( $default_category_id === $id ) {
+				$columns .= wc_help_tip( __( 'This is the default category and it cannot be deleted. It will be automatically assigned to products with no category.', 'woocommerce' ) );
+			}
 
 			$thumbnail_id = get_woocommerce_term_meta( $id, 'thumbnail_id', true );
 
@@ -342,14 +414,13 @@ class WC_Admin_Taxonomies {
 				$image = wc_placeholder_img_src();
 			}
 
-			// Prevent esc_url from breaking spaces in urls for image embeds
-			// Ref: https://core.trac.wordpress.org/ticket/23605
-			$image = str_replace( ' ', '%20', $image );
-
+			// Prevent esc_url from breaking spaces in urls for image embeds. Ref: https://core.trac.wordpress.org/ticket/23605
+			$image    = str_replace( ' ', '%20', $image );
 			$columns .= '<img src="' . esc_url( $image ) . '" alt="' . esc_attr__( 'Thumbnail', 'woocommerce' ) . '" class="wp-post-image" height="48" width="48" />';
-
 		}
-
+		if ( 'handle' === $column ) {
+			$columns .= '<input type="hidden" name="term_id" value="' . esc_attr( $id ) . '" />';
+		}
 		return $columns;
 	}
 

@@ -1,26 +1,29 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+/**
+ * Order Line Item (shipping)
+ *
+ * @package WooCommerce/Classes
+ * @version 3.0.0
+ * @since   3.0.0
+ */
+
+defined( 'ABSPATH' ) || exit;
 
 /**
- * Order Line Item (shipping).
- *
- * @version     3.0.0
- * @since       3.0.0
- * @package     WooCommerce/Classes
- * @author      WooThemes
+ * Order item shipping class.
  */
 class WC_Order_Item_Shipping extends WC_Order_Item {
 
 	/**
 	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
+	 *
 	 * @since 3.0.0
 	 * @var array
 	 */
 	protected $extra_data = array(
 		'method_title' => '',
 		'method_id'    => '',
+		'instance_id'  => '',
 		'total'        => 0,
 		'total_tax'    => 0,
 		'taxes'        => array(
@@ -61,8 +64,8 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	/**
 	 * Set order item name.
 	 *
-	 * @param string $value
-	 * @throws WC_Data_Exception
+	 * @param string $value Value to set.
+	 * @throws WC_Data_Exception May throw exception if data is invalid.
 	 */
 	public function set_name( $value ) {
 		$this->set_method_title( $value );
@@ -71,8 +74,8 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	/**
 	 * Set method title.
 	 *
-	 * @param string $value
-	 * @throws WC_Data_Exception
+	 * @param string $value Value to set.
+	 * @throws WC_Data_Exception May throw exception if data is invalid.
 	 */
 	public function set_method_title( $value ) {
 		$this->set_prop( 'name', wc_clean( $value ) );
@@ -82,18 +85,28 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	/**
 	 * Set shipping method id.
 	 *
-	 * @param string $value
-	 * @throws WC_Data_Exception
+	 * @param string $value Value to set.
+	 * @throws WC_Data_Exception May throw exception if data is invalid.
 	 */
 	public function set_method_id( $value ) {
 		$this->set_prop( 'method_id', wc_clean( $value ) );
 	}
 
 	/**
+	 * Set shipping instance id.
+	 *
+	 * @param string $value Value to set.
+	 * @throws WC_Data_Exception May throw exception if data is invalid.
+	 */
+	public function set_instance_id( $value ) {
+		$this->set_prop( 'instance_id', wc_clean( $value ) );
+	}
+
+	/**
 	 * Set total.
 	 *
-	 * @param string $value
-	 * @throws WC_Data_Exception
+	 * @param string $value Value to set.
+	 * @throws WC_Data_Exception May throw exception if data is invalid.
 	 */
 	public function set_total( $value ) {
 		$this->set_prop( 'total', wc_format_decimal( $value ) );
@@ -102,8 +115,8 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	/**
 	 * Set total tax.
 	 *
-	 * @param string $value
-	 * @throws WC_Data_Exception
+	 * @param string $value Value to set.
+	 * @throws WC_Data_Exception May throw exception if data is invalid.
 	 */
 	protected function set_total_tax( $value ) {
 		$this->set_prop( 'total_tax', wc_format_decimal( $value ) );
@@ -113,19 +126,20 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 * Set taxes.
 	 *
 	 * This is an array of tax ID keys with total amount values.
-	 * @param array $raw_tax_data
-	 * @throws WC_Data_Exception
+	 *
+	 * @param array $raw_tax_data Value to set.
+	 * @throws WC_Data_Exception May throw exception if data is invalid.
 	 */
 	public function set_taxes( $raw_tax_data ) {
 		$raw_tax_data = maybe_unserialize( $raw_tax_data );
 		$tax_data     = array(
-			'total'    => array(),
+			'total' => array(),
 		);
 		if ( isset( $raw_tax_data['total'] ) ) {
-			$tax_data['total']    = array_map( 'wc_format_decimal', $raw_tax_data['total'] );
+			$tax_data['total'] = array_map( 'wc_format_decimal', $raw_tax_data['total'] );
 		} elseif ( ! empty( $raw_tax_data ) && is_array( $raw_tax_data ) ) {
 			// Older versions just used an array.
-			$tax_data['total']    = array_map( 'wc_format_decimal', $raw_tax_data );
+			$tax_data['total'] = array_map( 'wc_format_decimal', $raw_tax_data );
 		}
 		$this->set_prop( 'taxes', $tax_data );
 		$this->set_total_tax( array_sum( $tax_data['total'] ) );
@@ -134,13 +148,14 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	/**
 	 * Set properties based on passed in shipping rate object.
 	 *
-	 * @param WC_Shipping_Rate $shipping_rate
+	 * @param WC_Shipping_Rate $shipping_rate Shipping rate to set.
 	 */
 	public function set_shipping_rate( $shipping_rate ) {
-		$this->set_method_title( $shipping_rate->label );
-		$this->set_method_id( $shipping_rate->id );
-		$this->set_total( $shipping_rate->cost );
-		$this->set_taxes( $shipping_rate->taxes );
+		$this->set_method_title( $shipping_rate->get_label() );
+		$this->set_method_id( $shipping_rate->get_method_id() );
+		$this->set_instance_id( $shipping_rate->get_instance_id() );
+		$this->set_total( $shipping_rate->get_cost() );
+		$this->set_taxes( $shipping_rate->get_taxes() );
 		$this->set_meta_data( $shipping_rate->get_meta_data() );
 	}
 
@@ -162,7 +177,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	/**
 	 * Get order item name.
 	 *
-	 * @param  string $context
+	 * @param  string $context View or edit context.
 	 * @return string
 	 */
 	public function get_name( $context = 'view' ) {
@@ -172,7 +187,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	/**
 	 * Get title.
 	 *
-	 * @param  string $context
+	 * @param  string $context View or edit context.
 	 * @return string
 	 */
 	public function get_method_title( $context = 'view' ) {
@@ -187,7 +202,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	/**
 	 * Get method ID.
 	 *
-	 * @param  string $context
+	 * @param  string $context View or edit context.
 	 * @return string
 	 */
 	public function get_method_id( $context = 'view' ) {
@@ -195,9 +210,19 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	}
 
 	/**
+	 * Get instance ID.
+	 *
+	 * @param  string $context View or edit context.
+	 * @return string
+	 */
+	public function get_instance_id( $context = 'view' ) {
+		return $this->get_prop( 'instance_id', $context );
+	}
+
+	/**
 	 * Get total cost.
 	 *
-	 * @param  string $context
+	 * @param  string $context View or edit context.
 	 * @return string
 	 */
 	public function get_total( $context = 'view' ) {
@@ -207,7 +232,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	/**
 	 * Get total tax.
 	 *
-	 * @param  string $context
+	 * @param  string $context View or edit context.
 	 * @return string
 	 */
 	public function get_total_tax( $context = 'view' ) {
@@ -217,7 +242,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	/**
 	 * Get taxes.
 	 *
-	 * @param  string $context
+	 * @param  string $context View or edit context.
 	 * @return array
 	 */
 	public function get_taxes( $context = 'view' ) {
@@ -227,7 +252,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	/**
 	 * Get tax class.
 	 *
-	 * @param  string $context
+	 * @param  string $context View or edit context.
 	 * @return string
 	 */
 	public function get_tax_class( $context = 'view' ) {
@@ -244,9 +269,10 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	*/
 
 	/**
-	 * offsetGet for ArrayAccess/Backwards compatibility.
+	 * Offset get: for ArrayAccess/Backwards compatibility.
+	 *
 	 * @deprecated Add deprecation notices in future release.
-	 * @param string $offset
+	 * @param string $offset Key.
 	 * @return mixed
 	 */
 	public function offsetGet( $offset ) {
@@ -257,10 +283,11 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	}
 
 	/**
-	 * offsetSet for ArrayAccess/Backwards compatibility.
+	 * Offset set: for ArrayAccess/Backwards compatibility.
+	 *
 	 * @deprecated Add deprecation notices in future release.
-	 * @param string $offset
-	 * @param mixed $value
+	 * @param string $offset Key.
+	 * @param mixed  $value Value to set.
 	 */
 	public function offsetSet( $offset, $value ) {
 		if ( 'cost' === $offset ) {
@@ -270,12 +297,13 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	}
 
 	/**
-	 * offsetExists for ArrayAccess
-	 * @param string $offset
+	 * Offset exists: for ArrayAccess.
+	 *
+	 * @param string $offset Key.
 	 * @return bool
 	 */
 	public function offsetExists( $offset ) {
-		if ( in_array( $offset, array( 'cost' ) ) ) {
+		if ( in_array( $offset, array( 'cost' ), true ) ) {
 			return true;
 		}
 		return parent::offsetExists( $offset );

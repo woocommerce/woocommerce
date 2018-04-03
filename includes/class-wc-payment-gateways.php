@@ -1,28 +1,32 @@
 <?php
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 /**
- * WooCommerce Payment Gateways class
+ * WooCommerce Payment Gateways
  *
  * Loads payment gateways via hooks for use in the store.
  *
- * @class 		WC_Payment_Gateways
- * @version		2.2.0
- * @package		WooCommerce/Classes/Payment
- * @category	Class
- * @author 		WooThemes
+ * @version 2.2.0
+ * @package WooCommerce/Classes/Payment
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Payment gateways class.
  */
 class WC_Payment_Gateways {
 
-	/** @var array Array of payment gateway classes. */
-	public $payment_gateways;
+	/**
+	 * Payment gateway classes.
+	 *
+	 * @var array
+	 */
+	public $payment_gateways = array();
 
 	/**
-	 * @var WC_Payment_Gateways The single instance of the class
-	 * @since 2.1
+	 * The single instance of the class.
+	 *
+	 * @var WC_Payment_Gateways
+	 * @since 2.1.0
 	 */
 	protected static $_instance = null;
 
@@ -32,7 +36,6 @@ class WC_Payment_Gateways {
 	 * Ensures only one instance of WC_Payment_Gateways is loaded or can be loaded.
 	 *
 	 * @since 2.1
-	 * @static
 	 * @return WC_Payment_Gateways Main instance
 	 */
 	public static function instance() {
@@ -48,7 +51,7 @@ class WC_Payment_Gateways {
 	 * @since 2.1
 	 */
 	public function __clone() {
-		wc_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, __( 'Cloning is forbidden.', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -57,7 +60,7 @@ class WC_Payment_Gateways {
 	 * @since 2.1
 	 */
 	public function __wakeup() {
-		wc_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, __( 'Unserializing instances of this class is forbidden.', 'woocommerce' ), '2.1' );
 	}
 
 	/**
@@ -81,7 +84,7 @@ class WC_Payment_Gateways {
 		/**
 		 * Simplify Commerce is @deprecated in 2.6.0. Only load when enabled.
 		 */
-		if ( ! class_exists( 'WC_Gateway_Simplify_Commerce_Loader' ) && in_array( WC()->countries->get_base_country(), apply_filters( 'woocommerce_gateway_simplify_commerce_supported_countries', array( 'US', 'IE' ) ) ) ) {
+		if ( ! class_exists( 'WC_Gateway_Simplify_Commerce_Loader' ) && in_array( WC()->countries->get_base_country(), apply_filters( 'woocommerce_gateway_simplify_commerce_supported_countries', array( 'US', 'IE' ) ), true ) ) {
 			$simplify_options = get_option( 'woocommerce_simplify_commerce_settings', array() );
 
 			if ( ! empty( $simplify_options['enabled'] ) && 'yes' === $simplify_options['enabled'] ) {
@@ -93,22 +96,22 @@ class WC_Payment_Gateways {
 			}
 		}
 
-		// Filter
+		// Filter.
 		$load_gateways = apply_filters( 'woocommerce_payment_gateways', $load_gateways );
 
-		// Get sort order option
+		// Get sort order option.
 		$ordering  = (array) get_option( 'woocommerce_gateway_order' );
 		$order_end = 999;
 
-		// Load gateways in order
+		// Load gateways in order.
 		foreach ( $load_gateways as $gateway ) {
 			$load_gateway = is_string( $gateway ) ? new $gateway() : $gateway;
 
 			if ( isset( $ordering[ $load_gateway->id ] ) && is_numeric( $ordering[ $load_gateway->id ] ) ) {
-				// Add in position
+				// Add in position.
 				$this->payment_gateways[ $ordering[ $load_gateway->id ] ] = $load_gateway;
 			} else {
-				// Add to end of the array
+				// Add to end of the array.
 				$this->payment_gateways[ $order_end ] = $load_gateway;
 				$order_end++;
 			}
@@ -119,12 +122,13 @@ class WC_Payment_Gateways {
 
 	/**
 	 * Get gateways.
+	 *
 	 * @return array
 	 */
 	public function payment_gateways() {
 		$_available_gateways = array();
 
-		if ( sizeof( $this->payment_gateways ) > 0 ) {
+		if ( count( $this->payment_gateways ) > 0 ) {
 			foreach ( $this->payment_gateways as $gateway ) {
 				$_available_gateways[ $gateway->id ] = $gateway;
 			}
@@ -135,6 +139,7 @@ class WC_Payment_Gateways {
 
 	/**
 	 * Get array of registered gateway ids
+	 *
 	 * @since 2.6.0
 	 * @return array of strings
 	 */
@@ -169,7 +174,7 @@ class WC_Payment_Gateways {
 	 * @param array $gateways Available payment gateways.
 	 */
 	public function set_current_gateway( $gateways ) {
-		// Be on the defensive
+		// Be on the defensive.
 		if ( ! is_array( $gateways ) || empty( $gateways ) ) {
 			return;
 		}
@@ -190,7 +195,7 @@ class WC_Payment_Gateways {
 			$current_gateway = current( $gateways );
 		}
 
-		// Ensure we can make a call to set_current() without triggering an error
+		// Ensure we can make a call to set_current() without triggering an error.
 		if ( $current_gateway && is_callable( array( $current_gateway, 'set_current' ) ) ) {
 			$current_gateway->set_current();
 		}
@@ -200,10 +205,10 @@ class WC_Payment_Gateways {
 	 * Save options in admin.
 	 */
 	public function process_admin_options() {
-		$gateway_order = isset( $_POST['gateway_order'] ) ? $_POST['gateway_order'] : '';
+		$gateway_order = isset( $_POST['gateway_order'] ) ? wc_clean( wp_unslash( $_POST['gateway_order'] ) ) : ''; // WPCS: input var ok, CSRF ok.
 		$order         = array();
 
-		if ( is_array( $gateway_order ) && sizeof( $gateway_order ) > 0 ) {
+		if ( is_array( $gateway_order ) && count( $gateway_order ) > 0 ) {
 			$loop = 0;
 			foreach ( $gateway_order as $gateway_id ) {
 				$order[ esc_attr( $gateway_id ) ] = $loop;

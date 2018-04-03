@@ -2,13 +2,11 @@
 /**
  * Installation related functions and actions.
  *
- * @package  WooCommerce/Classes
- * @version  3.0.0
+ * @package WooCommerce/Classes
+ * @version 3.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Install Class.
@@ -98,6 +96,7 @@ class WC_Install {
 			'wc_update_330_product_stock_status',
 			'wc_update_330_set_default_product_cat',
 			'wc_update_330_clear_transients',
+			'wc_update_330_set_paypal_sandbox_credentials',
 			'wc_update_330_db_version',
 		),
 		'3.4.0' => array(
@@ -141,7 +140,7 @@ class WC_Install {
 	 * This check is done on all requests and runs if the versions do not match.
 	 */
 	public static function check_version() {
-		if ( ! defined( 'IFRAME_REQUEST' ) && get_option( 'woocommerce_version' ) !== WC()->version ) {
+		if ( ! defined( 'IFRAME_REQUEST' ) && version_compare( get_option( 'woocommerce_version' ), WC()->version, '<' ) ) {
 			self::install();
 			do_action( 'woocommerce_updated' );
 		}
@@ -153,11 +152,11 @@ class WC_Install {
 	 * This function is hooked into admin_init to affect admin only.
 	 */
 	public static function install_actions() {
-		if ( ! empty( $_GET['do_update_woocommerce'] ) ) {
+		if ( ! empty( $_GET['do_update_woocommerce'] ) ) { // WPCS: input var ok, CSRF ok.
 			self::update();
 			WC_Admin_Notices::add_notice( 'update' );
 		}
-		if ( ! empty( $_GET['force_update_woocommerce'] ) ) {
+		if ( ! empty( $_GET['force_update_woocommerce'] ) ) { // WPCS: input var ok, CSRF ok.
 			do_action( 'wp_' . get_current_blog_id() . '_wc_updater_cron' );
 			wp_safe_redirect( admin_url( 'admin.php?page=wc-settings' ) );
 			exit;
@@ -360,7 +359,7 @@ class WC_Install {
 
 		$held_duration = get_option( 'woocommerce_hold_stock_minutes', '60' );
 
-		if ( '' != $held_duration ) {
+		if ( '' !== $held_duration ) {
 			wp_schedule_single_event( time() + ( absint( $held_duration ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
 		}
 
@@ -465,7 +464,7 @@ class WC_Install {
 			}
 		}
 
-		$woocommerce_default_category = get_option( 'default_product_cat', 0 );
+		$woocommerce_default_category = (int) get_option( 'default_product_cat', 0 );
 
 		if ( ! $woocommerce_default_category || ! term_exists( $woocommerce_default_category, 'product_cat' ) ) {
 			$default_product_cat_id   = 0;
@@ -477,7 +476,7 @@ class WC_Install {
 			} else {
 				$result = wp_insert_term( _x( 'Uncategorized', 'Default category slug', 'woocommerce' ), 'product_cat', array( 'slug' => $default_product_cat_slug ) );
 
-				if ( ! empty( $result['term_taxonomy_id'] ) ) {
+				if ( ! is_wp_error( $result ) && ! empty( $result['term_taxonomy_id'] ) ) {
 					$default_product_cat_id = absint( $result['term_taxonomy_id'] );
 				}
 			}
@@ -540,6 +539,8 @@ class WC_Install {
 	 *
 	 * Changing indexes may cause duplicate index notices in logs due to https://core.trac.wordpress.org/ticket/34870 but dropping
 	 * indexes first causes too much load on some servers/larger DB.
+	 *
+	 * When adding or removing a table, make sure to update the list of tables in WC_Install::get_tables().
 	 *
 	 * @return string
 	 */
@@ -748,6 +749,76 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	}
 
 	/**
+	 * Return a list of WooCommerce tables. Used to make sure all WC tables are dropped when uninstalling the plugin
+	 * in a single site or multi site environment.
+	 *
+	 * @return array WC tables.
+	 */
+	public static function get_tables() {
+		global $wpdb;
+
+		$tables = array(
+			"{$wpdb->prefix}wc_download_log",
+			"{$wpdb->prefix}wc_webhooks",
+			"{$wpdb->prefix}woocommerce_api_keys",
+			"{$wpdb->prefix}woocommerce_attribute_taxonomies",
+			"{$wpdb->prefix}woocommerce_downloadable_product_permissions",
+			"{$wpdb->prefix}woocommerce_log",
+			"{$wpdb->prefix}woocommerce_order_itemmeta",
+			"{$wpdb->prefix}woocommerce_order_items",
+			"{$wpdb->prefix}woocommerce_payment_tokenmeta",
+			"{$wpdb->prefix}woocommerce_payment_tokens",
+			"{$wpdb->prefix}woocommerce_sessions",
+			"{$wpdb->prefix}woocommerce_shipping_zone_locations",
+			"{$wpdb->prefix}woocommerce_shipping_zone_methods",
+			"{$wpdb->prefix}woocommerce_shipping_zones",
+			"{$wpdb->prefix}woocommerce_tax_rate_locations",
+			"{$wpdb->prefix}woocommerce_tax_rates",
+		);
+
+		if ( ! function_exists( 'get_term_meta' ) ) {
+			// This table is only needed for old installs and is now @deprecated by WordPress term meta.
+			$tables[] = "{$wpdb->prefix}woocommerce_termmeta";
+		}
+
+		/**
+		 * Filter the list of known WooCommerce tables.
+		 *
+		 * If WooCommerce plugins need to add new tables, they can inject them here.
+		 *
+		 * @param array $tables An array of WooCommerce-specific database table names.
+		 */
+		$tables = apply_filters( 'woocommerce_install_get_tables', $tables );
+
+		return $tables;
+	}
+
+	/**
+	 * Drop WooCommerce tables.
+	 *
+	 * @return void
+	 */
+	public static function drop_tables() {
+		global $wpdb;
+
+		$tables = self::get_tables();
+
+		foreach ( $tables as $table ) {
+			$wpdb->query( "DROP TABLE IF EXISTS {$table}" ); // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+		}
+	}
+
+	/**
+	 * Uninstall tables when MU blog is deleted.
+	 *
+	 * @param  array $tables List of tables that will be deleted by WP.
+	 * @return string[]
+	 */
+	public static function wpmu_drop_tables( $tables ) {
+		return array_merge( $tables, self::get_tables() );
+	}
+
+	/**
 	 * Create roles and capabilities.
 	 */
 	public static function create_roles() {
@@ -939,10 +1010,10 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 
 		foreach ( $files as $file ) {
 			if ( wp_mkdir_p( $file['base'] ) && ! file_exists( trailingslashit( $file['base'] ) . $file['file'] ) ) {
-				$file_handle = @fopen( trailingslashit( $file['base'] ) . $file['file'], 'w' );
+				$file_handle = @fopen( trailingslashit( $file['base'] ) . $file['file'], 'w' ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
 				if ( $file_handle ) {
-					fwrite( $file_handle, $file['content'] );
-					fclose( $file_handle );
+					fwrite( $file_handle, $file['content'] ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fwrite
+					fclose( $file_handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fclose
 				}
 			}
 		}
@@ -970,7 +1041,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	 * @return  array
 	 */
 	public static function plugin_row_meta( $links, $file ) {
-		if ( WC_PLUGIN_BASENAME == $file ) {
+		if ( WC_PLUGIN_BASENAME === $file ) {
 			$row_meta = array(
 				'docs'    => '<a href="' . esc_url( apply_filters( 'woocommerce_docs_url', 'https://docs.woocommerce.com/documentation/plugins/woocommerce/' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce documentation', 'woocommerce' ) . '">' . esc_html__( 'Docs', 'woocommerce' ) . '</a>',
 				'apidocs' => '<a href="' . esc_url( apply_filters( 'woocommerce_apidocs_url', 'https://docs.woocommerce.com/wc-apidocs/' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce API docs', 'woocommerce' ) . '">' . esc_html__( 'API docs', 'woocommerce' ) . '</a>',
@@ -984,41 +1055,16 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	}
 
 	/**
-	 * Uninstall tables when MU blog is deleted.
+	 * Get slug from path and associate it with the path.
 	 *
-	 * @param  array $tables List of tables that will be deleted by WP.
-	 * @return string[]
+	 * @param array  $plugins Associative array of plugin slugs to paths.
+	 * @param string $key Plugin relative path. Example: woocommerce/woocommerce.php.
 	 */
-	public static function wpmu_drop_tables( $tables ) {
-		global $wpdb;
-
-		$tables[] = $wpdb->prefix . 'woocommerce_sessions';
-		$tables[] = $wpdb->prefix . 'woocommerce_api_keys';
-		$tables[] = $wpdb->prefix . 'woocommerce_attribute_taxonomies';
-		$tables[] = $wpdb->prefix . 'woocommerce_downloadable_product_permissions';
-		$tables[] = $wpdb->prefix . 'woocommerce_termmeta';
-		$tables[] = $wpdb->prefix . 'woocommerce_tax_rates';
-		$tables[] = $wpdb->prefix . 'woocommerce_tax_rate_locations';
-		$tables[] = $wpdb->prefix . 'woocommerce_order_items';
-		$tables[] = $wpdb->prefix . 'woocommerce_order_itemmeta';
-		$tables[] = $wpdb->prefix . 'woocommerce_payment_tokens';
-		$tables[] = $wpdb->prefix . 'woocommerce_shipping_zones';
-		$tables[] = $wpdb->prefix . 'woocommerce_shipping_zone_locations';
-		$tables[] = $wpdb->prefix . 'woocommerce_shipping_zone_methods';
-
-		return $tables;
-	}
-
-	/**
-	 * Get slug from path
-	 *
-	 * @param  string $key Plugin relative path. Example: woocommerce/woocommerce.php.
-	 * @return string
-	 */
-	private static function format_plugin_slug( $key ) {
-		$slug = explode( '/', $key );
-		$slug = explode( '.', end( $slug ) );
-		return $slug[0];
+	private static function associate_plugin_slug( $plugins, $key ) {
+		$slug                = explode( '/', $key );
+		$slug                = explode( '.', end( $slug ) );
+		$plugins[ $slug[0] ] = $key;
+		return $plugins;
 	}
 
 	/**
@@ -1044,16 +1090,15 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 
 			$skin              = new Automatic_Upgrader_Skin();
 			$upgrader          = new WP_Upgrader( $skin );
-			$installed_plugins = array_map( array( __CLASS__, 'format_plugin_slug' ), array_keys( get_plugins() ) );
+			$installed_plugins = array_reduce( array_keys( get_plugins() ), array( __CLASS__, 'associate_plugin_slug' ), array() );
 			$plugin_slug       = $plugin_to_install['repo-slug'];
-			$plugin            = $plugin_slug . '/' . $plugin_slug . '.php';
 			$installed         = false;
 			$activate          = false;
 
 			// See if the plugin is installed already.
-			if ( in_array( $plugin_to_install['repo-slug'], $installed_plugins ) ) {
+			if ( isset( $installed_plugins[ $plugin_slug ] ) ) {
 				$installed = true;
-				$activate  = ! is_plugin_active( $plugin );
+				$activate  = ! is_plugin_active( $installed_plugins[ $plugin_slug ] );
 			}
 
 			// Install this thing!
@@ -1143,7 +1188,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			// Activate this thing.
 			if ( $activate ) {
 				try {
-					$result = activate_plugin( $plugin );
+					$result = activate_plugin( $installed_plugins[ $plugin_slug ] );
 
 					if ( is_wp_error( $result ) ) {
 						throw new Exception( $result->get_error_message() );

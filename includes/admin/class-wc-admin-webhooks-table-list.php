@@ -2,18 +2,14 @@
 /**
  * WooCommerce Webhooks Table List
  *
- * @author   Automattic
- * @category Admin
- * @package  WooCommerce/Admin
- * @version  3.3.0
+ * @package WooCommerce\Admin
+ * @version 3.3.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
-}
+defined( 'ABSPATH' ) || exit;
 
 if ( ! class_exists( 'WP_List_Table' ) ) {
-	require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
+	require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
 }
 
 /**
@@ -25,11 +21,20 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	 * Initialize the webhook table list.
 	 */
 	public function __construct() {
-		parent::__construct( array(
-			'singular' => 'webhook',
-			'plural'   => 'webhooks',
-			'ajax'     => false,
-		) );
+		parent::__construct(
+			array(
+				'singular' => 'webhook',
+				'plural'   => 'webhooks',
+				'ajax'     => false,
+			)
+		);
+	}
+
+	/**
+	 * No items found text.
+	 */
+	public function no_items() {
+		esc_html_e( 'No webhooks found.', 'woocommerce' );
 	}
 
 	/**
@@ -76,9 +81,15 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 			'id'     => sprintf( __( 'ID: %d', 'woocommerce' ), $webhook->get_id() ),
 			'edit'   => '<a href="' . esc_url( $edit_link ) . '">' . esc_html__( 'Edit', 'woocommerce' ) . '</a>',
 			/* translators: %s: webhook name */
-			'delete' => '<a class="submitdelete" aria-label="' . esc_attr( sprintf( __( 'Delete "%s" permanently', 'woocommerce' ), $webhook->get_name() ) ) . '" href="' . esc_url( wp_nonce_url( add_query_arg( array(
-				'delete' => $webhook->get_id(),
-			), admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks' ) ), 'delete-webhook' ) ) . '">' . esc_html__( 'Delete permanently', 'woocommerce' ) . '</a>',
+			'delete' => '<a class="submitdelete" aria-label="' . esc_attr( sprintf( __( 'Delete "%s" permanently', 'woocommerce' ), $webhook->get_name() ) ) . '" href="' . esc_url(
+				wp_nonce_url(
+					add_query_arg(
+						array(
+							'delete' => $webhook->get_id(),
+						), admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks' )
+					), 'delete-webhook'
+				)
+			) . '">' . esc_html__( 'Delete permanently', 'woocommerce' ) . '</a>',
 		);
 
 		$actions     = apply_filters( 'webhook_row_actions', $actions, $webhook );
@@ -234,9 +245,12 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 		echo '<p class="search-box">';
 		echo '<label class="screen-reader-text" for="' . esc_attr( $input_id ) . '">' . esc_html( $text ) . ':</label>';
 		echo '<input type="search" id="' . esc_attr( $input_id ) . '" name="s" value="' . esc_attr( $search_query ) . '" />';
-		submit_button( $text, '', '', false, array(
-			'id' => 'search-submit',
-		) );
+		submit_button(
+			$text, '', '', false,
+			array(
+				'id' => 'search-submit',
+			)
+		);
 		echo '</p>';
 	}
 
@@ -244,15 +258,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	 * Prepare table list items.
 	 */
 	public function prepare_items() {
-		$per_page = absint( apply_filters( 'woocommerce_webhooks_settings_posts_per_page', 10 ) );
-		$per_page = 0 === $per_page ? 10 : $per_page;
-		$columns  = $this->get_columns();
-		$hidden   = array();
-		$sortable = $this->get_sortable_columns();
-
-		// Column headers.
-		$this->_column_headers = array( $columns, $hidden, $sortable );
-
+		$per_page     = $this->get_items_per_page( 'woocommerce_webhooks_per_page' );
 		$current_page = $this->get_pagenum();
 
 		// Query args.
@@ -278,13 +284,15 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 		// Get total items.
 		$args['limit']  = -1;
 		$args['offset'] = 0;
-		$total_items = count( $data_store->search_webhooks( $args ) );
+		$total_items    = count( $data_store->search_webhooks( $args ) );
 
 		// Set the pagination.
-		$this->set_pagination_args( array(
-			'total_items' => $total_items,
-			'per_page'    => $per_page,
-			'total_pages' => ceil( $total_items / $per_page ),
-		) );
+		$this->set_pagination_args(
+			array(
+				'total_items' => $total_items,
+				'per_page'    => $per_page,
+				'total_pages' => ceil( $total_items / $per_page ),
+			)
+		);
 	}
 }

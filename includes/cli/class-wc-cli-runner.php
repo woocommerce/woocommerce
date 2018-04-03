@@ -1,4 +1,9 @@
 <?php
+/**
+ * WP_CLI_Runner class file.
+ *
+ * @package WooCommerce\CLI
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -21,6 +26,8 @@ class WC_CLI_Runner {
 	 * Endpoints to disable (meaning they will not be available as CLI commands).
 	 * Some of these can either be done via WP already, or are offered with
 	 * some other changes (like tools).
+	 *
+	 * @var array
 	 */
 	private static $disabled_endpoints = array(
 		'settings',
@@ -38,6 +45,8 @@ class WC_CLI_Runner {
 	/**
 	 * The version of the REST API we should target to
 	 * generate commands.
+	 *
+	 * @var string
 	 */
 	private static $target_rest_version = 'v2';
 
@@ -46,7 +55,7 @@ class WC_CLI_Runner {
 	 */
 	public static function after_wp_load() {
 		global $wp_rest_server;
-		$wp_rest_server = new WP_REST_Server;
+		$wp_rest_server = new WP_REST_Server();
 		do_action( 'rest_api_init', $wp_rest_server );
 
 		$request = new WP_REST_Request( 'GET', '/' );
@@ -64,19 +73,20 @@ class WC_CLI_Runner {
 				continue;
 			}
 
-			// Only register endpoints with schemas
+			// Only register endpoints with schemas.
 			if ( empty( $route_data['schema']['title'] ) ) {
+				/* translators: %s: Route to a given WC-API endpoint */
 				WP_CLI::debug( sprintf( __( 'No schema title found for %s, skipping REST command registration.', 'woocommerce' ), $route ), 'wc' );
 				continue;
 			}
-			// Ignore batch endpoints
+			// Ignore batch endpoints.
 			if ( 'batch' === $route_data['schema']['title'] ) {
 				continue;
 			}
-			// Disable specific endpoints
+			// Disable specific endpoints.
 			$route_pieces   = explode( '/', $route );
 			$endpoint_piece = str_replace( '/wc/' . $route_pieces[2] . '/', '', $route );
-			if ( in_array( $endpoint_piece, self::$disabled_endpoints ) ) {
+			if ( in_array( $endpoint_piece, self::$disabled_endpoints, true ) ) {
 				continue;
 			}
 
@@ -88,27 +98,27 @@ class WC_CLI_Runner {
 	 * Generates command information and tells WP CLI about all
 	 * commands available from a route.
 	 *
-	 * @param string $rest_command
-	 * @param string $route
-	 * @param array  $route_data
-	 * @param array  $command_args
+	 * @param string $rest_command WC-API command.
+	 * @param string $route Path to route endpoint.
+	 * @param array  $route_data Command data.
+	 * @param array  $command_args WP-CLI command arguments.
 	 */
 	private static function register_route_commands( $rest_command, $route, $route_data, $command_args = array() ) {
 		// Define IDs that we are looking for in the routes (in addition to id)
 		// so that we can pass it to the rest command, and use it here to generate documentation.
 		$supported_ids = array(
-				'id'           => __( 'ID.', 'woocommerce' ),
-				'product_id'   => __( 'Product ID.', 'woocommerce' ),
-				'customer_id'  => __( 'Customer ID.', 'woocommerce' ),
-				'order_id'     => __( 'Order ID.', 'woocommerce' ),
-				'refund_id'    => __( 'Refund ID.', 'woocommerce' ),
-				'attribute_id' => __( 'Attribute ID.', 'woocommerce' ),
-				'zone_id'      => __( 'Zone ID.', 'woocommerce' ),
+			'product_id'   => __( 'Product ID.', 'woocommerce' ),
+			'customer_id'  => __( 'Customer ID.', 'woocommerce' ),
+			'order_id'     => __( 'Order ID.', 'woocommerce' ),
+			'refund_id'    => __( 'Refund ID.', 'woocommerce' ),
+			'attribute_id' => __( 'Attribute ID.', 'woocommerce' ),
+			'zone_id'      => __( 'Zone ID.', 'woocommerce' ),
+			'id'           => __( 'ID.', 'woocommerce' ),
 		);
 		$rest_command->set_supported_ids( $supported_ids );
 		$positional_args = array_keys( $supported_ids );
 
-		$parent			 = "wc {$route_data['schema']['title']}";
+		$parent             = "wc {$route_data['schema']['title']}";
 		$supported_commands = array();
 
 		// Get a list of supported commands for each route.
@@ -118,24 +128,24 @@ class WC_CLI_Runner {
 			$trimmed_route = rtrim( $route );
 			$is_singular   = substr( $trimmed_route, - strlen( $resource_id ) ) === $resource_id;
 
-			// List a collection
-			if ( array( 'GET' ) == $endpoint['methods'] && ! $is_singular ) {
+			// List a collection.
+			if ( array( 'GET' ) === $endpoint['methods'] && ! $is_singular ) {
 				$supported_commands['list'] = ! empty( $endpoint['args'] ) ? $endpoint['args'] : array();
 			}
-			// Create a specific resource
-			if ( array( 'POST' ) == $endpoint['methods'] && ! $is_singular ) {
+			// Create a specific resource.
+			if ( array( 'POST' ) === $endpoint['methods'] && ! $is_singular ) {
 				$supported_commands['create'] = ! empty( $endpoint['args'] ) ? $endpoint['args'] : array();
 			}
-			// Get a specific resource
-			if ( array( 'GET' ) == $endpoint['methods'] && $is_singular ) {
+			// Get a specific resource.
+			if ( array( 'GET' ) === $endpoint['methods'] && $is_singular ) {
 				$supported_commands['get'] = ! empty( $endpoint['args'] ) ? $endpoint['args'] : array();
 			}
-			// Update a specific resource
-			if ( in_array( 'POST', $endpoint['methods'] ) && $is_singular ) {
+			// Update a specific resource.
+			if ( in_array( 'POST', $endpoint['methods'], true ) && $is_singular ) {
 				$supported_commands['update'] = ! empty( $endpoint['args'] ) ? $endpoint['args'] : array();
 			}
-			// Delete a specific resource
-			if ( array( 'DELETE' ) == $endpoint['methods'] && $is_singular ) {
+			// Delete a specific resource.
+			if ( array( 'DELETE' ) === $endpoint['methods'] && $is_singular ) {
 				$supported_commands['delete'] = ! empty( $endpoint['args'] ) ? $endpoint['args'] : array();
 			}
 		}
@@ -153,25 +163,25 @@ class WC_CLI_Runner {
 						'description' => $id_desc,
 						'optional'    => false,
 					);
-					$ids[] = $id_name;
+					$ids[]      = $id_name;
 				}
 			}
-			if ( in_array( $command, array( 'delete', 'get', 'update' ) ) && ! in_array( 'id', $ids )  ) {
+			if ( in_array( $command, array( 'delete', 'get', 'update' ), true ) && ! in_array( 'id', $ids, true ) ) {
 				$synopsis[] = array(
-					'name'		  => 'id',
-					'type'		  => 'positional',
+					'name'        => 'id',
+					'type'        => 'positional',
 					'description' => __( 'The id for the resource.', 'woocommerce' ),
-					'optional'	  => false,
+					'optional'    => false,
 				);
 			}
 
 			foreach ( $endpoint_args as $name => $args ) {
-				if ( ! in_array( $name, $positional_args ) || strpos( $route, '<' . $id_name . '>' ) === false ) {
+				if ( ! in_array( $name, $positional_args, true ) || strpos( $route, '<' . $id_name . '>' ) === false ) {
 					$arg_regs[] = array(
-						'name'		  => $name,
-						'type'		  => 'assoc',
+						'name'        => $name,
+						'type'        => 'assoc',
 						'description' => ! empty( $args['description'] ) ? $args['description'] : '',
-						'optional'	  => empty( $args['required'] ) ? true : false,
+						'optional'    => empty( $args['required'] ),
 					);
 				}
 			}
@@ -180,26 +190,26 @@ class WC_CLI_Runner {
 				$synopsis[] = $arg_reg;
 			}
 
-			if ( in_array( $command, array( 'list', 'get' ) ) ) {
+			if ( in_array( $command, array( 'list', 'get' ), true ) ) {
 				$synopsis[] = array(
-					'name'		  => 'fields',
-					'type'		  => 'assoc',
+					'name'        => 'fields',
+					'type'        => 'assoc',
 					'description' => __( 'Limit response to specific fields. Defaults to all fields.', 'woocommerce' ),
-					'optional'	  => true,
+					'optional'    => true,
 				);
 				$synopsis[] = array(
-					'name'		  => 'field',
-					'type'		  => 'assoc',
+					'name'        => 'field',
+					'type'        => 'assoc',
 					'description' => __( 'Get the value of an individual field.', 'woocommerce' ),
-					'optional'	  => true,
+					'optional'    => true,
 				);
 				$synopsis[] = array(
-					'name'		  => 'format',
-					'type'		  => 'assoc',
+					'name'        => 'format',
+					'type'        => 'assoc',
 					'description' => __( 'Render response in a particular format.', 'woocommerce' ),
-					'optional'	  => true,
-					'default'	  => 'table',
-					'options'	  => array(
+					'optional'    => true,
+					'default'     => 'table',
+					'options'     => array(
 						'table',
 						'json',
 						'csv',
@@ -213,12 +223,12 @@ class WC_CLI_Runner {
 				);
 			}
 
-			if ( in_array( $command, array( 'create', 'update', 'delete' ) ) ) {
+			if ( in_array( $command, array( 'create', 'update', 'delete' ), true ) ) {
 				$synopsis[] = array(
-					'name'		  => 'porcelain',
-					'type'		  => 'flag',
+					'name'        => 'porcelain',
+					'type'        => 'flag',
 					'description' => __( 'Output just the id when the operation is successful.', 'woocommerce' ),
-					'optional'	  => true,
+					'optional'    => true,
 				);
 			}
 
@@ -226,7 +236,7 @@ class WC_CLI_Runner {
 				'list'   => 'list_items',
 				'create' => 'create_item',
 				'delete' => 'delete_item',
-				'get'	 => 'get_item',
+				'get'    => 'get_item',
 				'update' => 'update_item',
 			);
 
@@ -237,11 +247,15 @@ class WC_CLI_Runner {
 				};
 			}
 
-			WP_CLI::add_command( "{$parent} {$command}", array( $rest_command, $methods[ $command ] ), array(
-				'synopsis'	    => $synopsis,
-				'when'		    => ! empty( $command_args['when'] ) ? $command_args['when'] : '',
-				'before_invoke' => $before_invoke,
-			) );
+			WP_CLI::add_command(
+				"{$parent} {$command}",
+				array( $rest_command, $methods[ $command ] ),
+				array(
+					'synopsis'      => $synopsis,
+					'when'          => ! empty( $command_args['when'] ) ? $command_args['when'] : '',
+					'before_invoke' => $before_invoke,
+				)
+			);
 		}
 	}
 }

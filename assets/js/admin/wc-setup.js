@@ -1,5 +1,6 @@
 /*global wc_setup_params */
 /*global wc_setup_currencies */
+/*global wc_base_state */
 jQuery( function( $ ) {
 	function blockWizardUI() {
 		$('.wc-setup-content').block({
@@ -20,6 +21,35 @@ jQuery( function( $ ) {
 
 		return true;
 	} );
+
+	$( '#store_country' ).on( 'change', function() {
+		// Prevent if we don't have the metabox data
+		if ( wc_setup_params.states === null ){
+			return;
+		}
+
+		var $this         = $( this ),
+			country       = $this.val(),
+			$state_select = $( '#store_state' );
+
+		if ( ! $.isEmptyObject( wc_setup_params.states[ country ] ) ) {
+			var states = wc_setup_params.states[ country ];
+
+			$state_select.empty();
+
+			$.each( states, function( index ) {
+				$state_select.append( $( '<option value="' + index + '">' + states[ index ] + '</option>' ) );
+			} );
+
+			$( '.store-state-container' ).show();
+			$state_select.selectWoo().val( wc_base_state ).change().prop( 'required', true );
+		} else {
+			$( '.store-state-container' ).hide();
+			$state_select.empty().val( '' ).change().prop( 'required', false );
+		}
+	} );
+
+	$( '#store_country' ).change();
 
 	$( '.wc-wizard-services' ).on( 'change', '.wc-wizard-service-enable input', function() {
 		if ( $( this ).is( ':checked' ) ) {
@@ -48,7 +78,7 @@ jQuery( function( $ ) {
 		$checkbox.prop( 'checked', ! $checkbox.prop( 'checked' ) ).change();
 	} );
 
-	$( '.wc-wizard-services-list-toggle' ).on( 'change', '.wc-wizard-service-enable input', function() {
+	$( '.wc-wizard-services-list-toggle' ).on( 'click', function() {
 		$( this ).closest( '.wc-wizard-services-list-toggle' ).toggleClass( 'closed' );
 		$( this ).closest( '.wc-wizard-services' ).find( '.wc-wizard-service-item' )
 			.slideToggle()
@@ -74,7 +104,7 @@ jQuery( function( $ ) {
 			.removeClass( 'hide' )
 			.find( '.shipping-method-required-field' )
 			.prop( 'required', true );
-	} );
+	} ).find( '.wc-wizard-shipping-method-select .method' ).change();
 
 	$( '.wc-wizard-services' ).on( 'change', '.wc-wizard-shipping-method-enable', function() {
 		var checked = $( this ).is( ':checked' );
@@ -142,8 +172,8 @@ jQuery( function( $ ) {
 		}
 	} ).find( 'input#stripe_create_account, input#ppec_paypal_reroute_requests' ).change();
 
-	$( 'select#store_country_state' ).on( 'change', function() {
-		var countryCode = this.value.split( ':' )[ 0 ];
+	$( 'select#store_country' ).on( 'change', function() {
+		var countryCode = $( this ).val();
 		$( 'select#currency_code' ).val( wc_setup_currencies[ countryCode ] ).change();
 	} );
 } );

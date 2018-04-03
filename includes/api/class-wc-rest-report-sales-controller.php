@@ -4,15 +4,11 @@
  *
  * Handles requests to the reports/sales endpoint.
  *
- * @author   WooThemes
- * @category API
- * @package  WooCommerce/API
- * @since    2.6.0
+ * @package WooCommerce/API
+ * @since   2.6.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * REST API Report Sales controller class.

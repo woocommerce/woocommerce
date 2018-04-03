@@ -71,6 +71,8 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		'_shipping_address_index',
 		'_recorded_sales',
 		'_recorded_coupon_usage_counts',
+		'_download_permissions_granted',
+		'_order_stock_reduced',
 	);
 
 	/**
@@ -256,10 +258,10 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		parent::update_post_meta( $order );
 
 		// If address changed, store concatenated version to make searches faster.
-		if ( in_array( 'billing', $updated_props ) || ! metadata_exists( 'post', $id, '_billing_address_index' ) ) {
+		if ( in_array( 'billing', $updated_props, true ) || ! metadata_exists( 'post', $id, '_billing_address_index' ) ) {
 			update_post_meta( $id, '_billing_address_index', implode( ' ', $order->get_address( 'billing' ) ) );
 		}
-		if ( in_array( 'shipping', $updated_props ) || ! metadata_exists( 'post', $id, '_shipping_address_index' ) ) {
+		if ( in_array( 'shipping', $updated_props, true ) || ! metadata_exists( 'post', $id, '_shipping_address_index' ) ) {
 			update_post_meta( $id, '_shipping_address_index', implode( ' ', $order->get_address( 'shipping' ) ) );
 		}
 
@@ -285,7 +287,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * Get amount already refunded.
 	 *
 	 * @param  WC_Order $order Order object.
-	 * @return string
+	 * @return float
 	 */
 	public function get_total_refunded( $order ) {
 		global $wpdb;
@@ -301,7 +303,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			)
 		);
 
-		return $total;
+		return floatval( $total );
 	}
 
 	/**
@@ -682,7 +684,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 				// Remove any existing meta queries for the same keys to prevent conflicts.
 				$existing_queries = wp_list_pluck( $wp_query_args['meta_query'], 'key', true );
-				$meta_query_index = array_search( $db_key, $existing_queries );
+				$meta_query_index = array_search( $db_key, $existing_queries, true );
 				if ( false !== $meta_query_index ) {
 					unset( $wp_query_args['meta_query'][ $meta_query_index ] );
 				}

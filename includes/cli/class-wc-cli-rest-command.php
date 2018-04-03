@@ -1,4 +1,9 @@
 <?php
+/**
+ * WP_CLI_Rest_Command class file.
+ *
+ * @package WooCommerce\Cli
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -21,6 +26,8 @@ class WC_CLI_REST_Command {
 	/**
 	 * Endpoints that have a parent ID.
 	 * Ex: Product reviews, which has a product ID and a review ID.
+	 *
+	 * @var array
 	 */
 	protected $routes_with_parent_id = array(
 		'customer_download',
@@ -31,43 +38,48 @@ class WC_CLI_REST_Command {
 
 	/**
 	 * Name of command/endpoint object.
+	 *
+	 * @var string
 	 */
 	private $name;
 
 	/**
 	 * Endpoint route.
+	 *
+	 * @var string
 	 */
 	private $route;
 
 	/**
 	 * Main resource ID.
+	 *
+	 * @var int
 	 */
 	private $resource_identifier;
 
 	/**
 	 * Schema for command.
+	 *
+	 * @var array
 	 */
 	private $schema;
 
 	/**
-	 * Nesting level.
-	 */
-	private $output_nesting_level = 0;
-
-	/**
 	 * List of supported IDs and their description (name => desc).
+	 *
+	 * @var array
 	 */
 	private $supported_ids = array();
 
 	/**
 	 * Sets up REST Command.
 	 *
-	 * @param string $name   Name of endpoint object (comes from schema)
-	 * @param string $route  Path to route of this endpoint
-	 * @param array  $schema Schema object
+	 * @param string $name   Name of endpoint object (comes from schema).
+	 * @param string $route  Path to route of this endpoint.
+	 * @param array  $schema Schema object.
 	 */
 	public function __construct( $name, $route, $schema ) {
-		$this->name   = $name;
+		$this->name = $name;
 
 		preg_match_all( '#\([^\)]+\)#', $route, $matches );
 		$first_match  = $matches[0];
@@ -76,7 +88,7 @@ class WC_CLI_REST_Command {
 		$this->schema = $schema;
 
 		$this->resource_identifier = $resource_id;
-		if ( in_array( $name, $this->routes_with_parent_id ) ) {
+		if ( in_array( $name, $this->routes_with_parent_id, true ) ) {
 			$is_singular = substr( $this->route, - strlen( $resource_id ) ) === $resource_id;
 			if ( ! $is_singular ) {
 				$this->resource_identifier = $first_match[0];
@@ -87,7 +99,7 @@ class WC_CLI_REST_Command {
 	/**
 	 * Passes supported ID arguments (things like product_id, order_id, etc) that we should look for in addition to id.
 	 *
-	 * @param array $supported_ids
+	 * @param array $supported_ids List of supported IDs.
 	 */
 	public function set_supported_ids( $supported_ids = array() ) {
 		$this->supported_ids = $supported_ids;
@@ -107,11 +119,11 @@ class WC_CLI_REST_Command {
 	 *
 	 * @subcommand create
 	 *
-	 * @param array $args
-	 * @param array $assoc_args
+	 * @param array $args WP-CLI positional arguments.
+	 * @param array $assoc_args WP-CLI associative arguments.
 	 */
 	public function create_item( $args, $assoc_args ) {
-		$assoc_args = self::decode_json( $assoc_args );
+		$assoc_args            = self::decode_json( $assoc_args );
 		list( $status, $body ) = $this->do_request( 'POST', $this->get_filled_route( $args ), $assoc_args );
 		if ( \WP_CLI\Utils\get_flag_value( $assoc_args, 'porcelain' ) ) {
 			WP_CLI::line( $body['id'] );
@@ -125,8 +137,8 @@ class WC_CLI_REST_Command {
 	 *
 	 * @subcommand delete
 	 *
-	 * @param array $args
-	 * @param array $assoc_args
+	 * @param array $args WP-CLI positional arguments.
+	 * @param array $assoc_args WP-CLI associative arguments.
 	 */
 	public function delete_item( $args, $assoc_args ) {
 		list( $status, $body ) = $this->do_request( 'DELETE', $this->get_filled_route( $args ), $assoc_args );
@@ -146,27 +158,33 @@ class WC_CLI_REST_Command {
 	 *
 	 * @subcommand get
 	 *
-	 * @param array $args
-	 * @param array $assoc_args
+	 * @param array $args WP-CLI positional arguments.
+	 * @param array $assoc_args WP-CLI associative arguments.
 	 */
 	public function get_item( $args, $assoc_args ) {
-		$route = $this->get_filled_route( $args );
+		$route                           = $this->get_filled_route( $args );
 		list( $status, $body, $headers ) = $this->do_request( 'GET', $route, $assoc_args );
 
 		if ( ! empty( $assoc_args['fields'] ) ) {
 			$body = self::limit_item_to_fields( $body, $assoc_args['fields'] );
 		}
 
+		if ( empty( $assoc_args['format'] ) ) {
+			$assoc_args['format'] = 'table';
+		}
+
 		if ( 'headers' === $assoc_args['format'] ) {
-			echo json_encode( $headers );
+			echo wp_json_encode( $headers );
 		} elseif ( 'body' === $assoc_args['format'] ) {
-			echo json_encode( $body );
+			echo wp_json_encode( $body );
 		} elseif ( 'envelope' === $assoc_args['format'] ) {
-			echo json_encode( array(
-				'body'    => $body,
-				'headers' => $headers,
-				'status'  => $status,
-			) );
+			echo wp_json_encode(
+				array(
+					'body'    => $body,
+					'headers' => $headers,
+					'status'  => $status,
+				)
+			);
 		} else {
 			$formatter = $this->get_formatter( $assoc_args );
 			$formatter->display_item( $body );
@@ -178,14 +196,18 @@ class WC_CLI_REST_Command {
 	 *
 	 * @subcommand list
 	 *
-	 * @param array $args
-	 * @param array $assoc_args
+	 * @param array $args WP-CLI positional arguments.
+	 * @param array $assoc_args WP-CLI associative arguments.
 	 */
 	public function list_items( $args, $assoc_args ) {
 		if ( ! empty( $assoc_args['format'] ) && 'count' === $assoc_args['format'] ) {
 			$method = 'HEAD';
 		} else {
 			$method = 'GET';
+		}
+
+		if ( ! isset( $assoc_args['per_page'] ) || empty( $assoc_args['per_page'] ) ) {
+			$assoc_args['per_page'] = '100';
 		}
 
 		list( $status, $body, $headers ) = $this->do_request( $method, $this->get_filled_route( $args ), $assoc_args );
@@ -201,19 +223,25 @@ class WC_CLI_REST_Command {
 			}
 		}
 
+		if ( empty( $assoc_args['format'] ) ) {
+			$assoc_args['format'] = 'table';
+		}
+
 		if ( ! empty( $assoc_args['format'] ) && 'count' === $assoc_args['format'] ) {
 			echo (int) $headers['X-WP-Total'];
 		} elseif ( 'headers' === $assoc_args['format'] ) {
-			echo json_encode( $headers );
+			echo wp_json_encode( $headers );
 		} elseif ( 'body' === $assoc_args['format'] ) {
-			echo json_encode( $body );
+			echo wp_json_encode( $body );
 		} elseif ( 'envelope' === $assoc_args['format'] ) {
-			echo json_encode( array(
-				'body'    => $body,
-				'headers' => $headers,
-				'status'  => $status,
-				'api_url' => $this->api_url,
-			) );
+			echo wp_json_encode(
+				array(
+					'body'    => $body,
+					'headers' => $headers,
+					'status'  => $status,
+					'api_url' => $this->api_url,
+				)
+			);
 		} else {
 			$formatter = $this->get_formatter( $assoc_args );
 			$formatter->display_items( $items );
@@ -225,11 +253,11 @@ class WC_CLI_REST_Command {
 	 *
 	 * @subcommand update
 	 *
-	 * @param array $args
-	 * @param array $assoc_args
+	 * @param array $args WP-CLI positional arguments.
+	 * @param array $assoc_args WP-CLI associative arguments.
 	 */
 	public function update_item( $args, $assoc_args ) {
-		$assoc_args = self::decode_json( $assoc_args );
+		$assoc_args            = self::decode_json( $assoc_args );
 		list( $status, $body ) = $this->do_request( 'POST', $this->get_filled_route( $args ), $assoc_args );
 		if ( \WP_CLI\Utils\get_flag_value( $assoc_args, 'porcelain' ) ) {
 			WP_CLI::line( $body['id'] );
@@ -241,9 +269,9 @@ class WC_CLI_REST_Command {
 	/**
 	 * Do a REST Request
 	 *
-	 * @param string $method
-	 * @param string $route
-	 * @param array  $assoc_args
+	 * @param string $method Request method. Examples: 'POST', 'PUT', 'DELETE' or 'GET'.
+	 * @param string $route Resource route.
+	 * @param array  $assoc_args Associative arguments passed to the originating WP-CLI command.
 	 *
 	 * @return array
 	 */
@@ -251,7 +279,7 @@ class WC_CLI_REST_Command {
 		wc_maybe_define_constant( 'REST_REQUEST', true );
 
 		$request = new WP_REST_Request( $method, $route );
-		if ( in_array( $method, array( 'POST', 'PUT' ) ) ) {
+		if ( in_array( $method, array( 'POST', 'PUT' ), true ) ) {
 			$request->set_body_params( $assoc_args );
 		} else {
 			foreach ( $assoc_args as $key => $value ) {
@@ -265,19 +293,21 @@ class WC_CLI_REST_Command {
 		if ( defined( 'SAVEQUERIES' ) && SAVEQUERIES ) {
 			$performed_queries = array();
 			foreach ( (array) $GLOBALS['wpdb']->queries as $key => $query ) {
-				if ( in_array( $key, $original_queries ) ) {
+				if ( in_array( $key, $original_queries, true ) ) {
 					continue;
 				}
 				$performed_queries[] = $query;
 			}
-			usort( $performed_queries, function( $a, $b ) {
-				if ( $a[1] === $b[1] ) {
-					return 0;
+			usort(
+				$performed_queries, function( $a, $b ) {
+					if ( $a[1] === $b[1] ) {
+						return 0;
+					}
+					return ( $a[1] > $b[1] ) ? -1 : 1;
 				}
-				return ( $a[1] > $b[1] ) ? -1 : 1;
-			});
+			);
 
-			$query_count = count( $performed_queries );
+			$query_count      = count( $performed_queries );
 			$query_total_time = 0;
 			foreach ( $performed_queries as $query ) {
 				$query_total_time += $query[1];
@@ -287,9 +317,9 @@ class WC_CLI_REST_Command {
 				$slow_query_message .= '. Ordered by slowness, the queries are:' . PHP_EOL;
 				foreach ( $performed_queries as $i => $query ) {
 					$i++;
-					$bits = explode( ', ', $query[2] );
-					$backtrace = implode( ', ', array_slice( $bits, 13 ) );
-					$seconds = round( $query[1], 6 );
+					$bits                = explode( ', ', $query[2] );
+					$backtrace           = implode( ', ', array_slice( $bits, 13 ) );
+					$seconds             = round( $query[1], 6 );
 					$slow_query_message .= <<<EOT
 {$i}:
 - {$seconds} seconds
@@ -305,7 +335,9 @@ EOT;
 			WP_CLI::debug( "wc command executed {$query_count} queries in {$query_total_time} seconds{$slow_query_message}", 'wc' );
 		}
 
-		if ( $error = $response->as_error() ) {
+		$error = $response->as_error();
+
+		if ( $error ) {
 			// For authentication errors (status 401), include a reminder to set the --user flag.
 			// WP_CLI::error will only return the first message from WP_Error, so we will pass a string containing both instead.
 			if ( 401 === $response->get_status() ) {
@@ -344,13 +376,13 @@ EOT;
 	/**
 	 * Get a list of fields present in a given context
 	 *
-	 * @param string $context
+	 * @param string $context Scope under which the request is made. Determines fields present in response.
 	 * @return array
 	 */
 	private function get_context_fields( $context ) {
 		$fields = array();
 		foreach ( $this->schema['properties'] as $key => $args ) {
-			if ( empty( $args['context'] ) || in_array( $context, $args['context'] ) ) {
+			if ( empty( $args['context'] ) || in_array( $context, $args['context'], true ) ) {
 				$fields[] = $key;
 			}
 		}
@@ -360,7 +392,7 @@ EOT;
 	/**
 	 * Get the route for this resource
 	 *
-	 * @param  array $args
+	 * @param  array $args Positional arguments passed to the originating WP-CLI command.
 	 * @return string
 	 */
 	private function get_filled_route( $args = array() ) {
@@ -368,7 +400,7 @@ EOT;
 		$route                = $this->route;
 
 		foreach ( $this->get_supported_ids() as $id_name => $id_desc ) {
-			if ( strpos( $route, '<' . $id_name . '>' ) !== false && ! empty( $args ) ) {
+			if ( 'id' !== $id_name && strpos( $route, '<' . $id_name . '>' ) !== false && ! empty( $args ) ) {
 				$route                = str_replace( '(?P<' . $id_name . '>[\d]+)', $args[0], $route );
 				$supported_id_matched = true;
 			}
@@ -383,64 +415,10 @@ EOT;
 	}
 
 	/**
-	 * Output a line to be added
-	 *
-	 * @param string
-	 */
-	private function add_line( $line ) {
-		$this->nested_line( $line, 'add' );
-	}
-
-	/**
-	 * Output a line to be removed
-	 *
-	 * @param string
-	 */
-	private function remove_line( $line ) {
-		$this->nested_line( $line, 'remove' );
-	}
-
-	/**
-	 * Output a line that's appropriately nested
-	 *
-	 * @param string $line
-	 * @param bool|string $change
-	 */
-	private function nested_line( $line, $change = false ) {
-		if ( 'add' == $change ) {
-			$label = '+ ';
-		} elseif ( 'remove' == $change ) {
-			$label = '- ';
-		} else {
-			$label = false;
-		}
-
-		$spaces = ( $this->output_nesting_level * 2 ) + 2;
-		if ( $label ) {
-			$line = $label . $line;
-			$spaces = $spaces - 2;
-		}
-		WP_CLI::line( str_pad( ' ', $spaces ) . $line );
-	}
-
-	/**
-	 * Whether or not this is an associative array
-	 *
-	 * @param array
-	 * @return bool
-	 */
-	private function is_assoc_array( $array ) {
-		if ( ! is_array( $array ) ) {
-			return false;
-		}
-		return array_keys( $array ) !== range( 0, count( $array ) - 1 );
-	}
-
-	/**
 	 * Reduce an item to specific fields.
 	 *
-	 * @param  array $item
-	 * @param  array $fields
+	 * @param  array $item Item to reduce.
+	 * @param  array $fields Fields to keep.
 	 * @return array
 	 */
 	private static function limit_item_to_fields( $item, $fields ) {
@@ -451,7 +429,7 @@ EOT;
 			$fields = explode( ',', $fields );
 		}
 		foreach ( $item as $i => $field ) {
-			if ( ! in_array( $i, $fields ) ) {
+			if ( ! in_array( $i, $fields, true ) ) {
 				unset( $item[ $i ] );
 			}
 		}
@@ -462,7 +440,7 @@ EOT;
 	 * JSON can be passed in some more complicated objects, like the payment gateway settings array.
 	 * This function decodes the json (if present) and tries to get it's value.
 	 *
-	 * @param array $arr
+	 * @param array $arr Array that will be scanned for JSON encoded values.
 	 *
 	 * @return array
 	 */

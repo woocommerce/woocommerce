@@ -28,9 +28,11 @@ class WC_Meta_Box_Product_Reviews {
 		$current = get_comment_meta( $comment->comment_ID, 'rating', true );
 		?>
 		<select name="rating" id="rating">
-			<?php for ( $rating = 1; $rating <= 5; $rating ++ ) {
+			<?php
+			for ( $rating = 1; $rating <= 5; $rating ++ ) {
 				printf( '<option value="%1$s"%2$s>%1$s</option>', $rating, selected( $current, $rating, false ) );
-			} ?>
+			}
+			?>
 		</select>
 		<?php
 	}
@@ -39,7 +41,7 @@ class WC_Meta_Box_Product_Reviews {
 	 * Save meta box data
 	 *
 	 * @param mixed $location
-	 * @param int $comment_id
+	 * @param int   $comment_id
 	 *
 	 * @return mixed
 	 */

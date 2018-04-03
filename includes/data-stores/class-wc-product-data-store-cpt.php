@@ -221,6 +221,19 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				wp_update_post( array_merge( array( 'ID' => $product->get_id() ), $post_data ) );
 			}
 			$product->read_meta_data( true ); // Refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
+
+		} else { // Only update post modified time to record this save event.
+			$GLOBALS['wpdb']->update(
+				$GLOBALS['wpdb']->posts,
+				array(
+					'post_modified'     => current_time( 'mysql' ),
+					'post_modified_gmt' => current_time( 'mysql', 1 ),
+				),
+				array(
+					'ID' => $product->get_id(),
+				)
+			);
+			clean_post_cache( $product->get_id() );
 		}
 
 		$this->update_post_meta( $product );
@@ -258,6 +271,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		if ( $args['force_delete'] ) {
+			do_action( 'woocommerce_before_delete_' . $post_type, $id );
 			wp_delete_post( $id );
 			$product->set_id( 0 );
 			do_action( 'woocommerce_delete_' . $post_type, $id );
@@ -700,6 +714,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				foreach ( $attributes as $attribute_key => $attribute ) {
 					$value = '';
 
+					delete_transient( 'wc_layered_nav_counts_' . $attribute_key );
+
 					if ( is_null( $attribute ) ) {
 						if ( taxonomy_exists( $attribute_key ) ) {
 							// Handle attributes that have been unset.
@@ -725,7 +741,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				}
 			}
 			update_post_meta( $product->get_id(), '_product_attributes', $meta_values );
-			delete_transient( 'wc_layered_nav_counts' );
 		}
 	}
 
@@ -809,14 +824,28 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	public function get_on_sale_products() {
 		global $wpdb;
 
-		$decimals = absint( wc_get_price_decimals() );
+		$decimals                    = absint( wc_get_price_decimals() );
+		$exclude_term_ids            = array();
+		$outofstock_join             = '';
+		$outofstock_where            = '';
+		$product_visibility_term_ids = wc_get_product_visibility_term_ids();
 
-		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
+		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && $product_visibility_term_ids['outofstock'] ) {
+			$exclude_term_ids[] = $product_visibility_term_ids['outofstock'];
+		}
+
+		if ( count( $exclude_term_ids ) ) {
+			$outofstock_join  = " LEFT JOIN ( SELECT object_id FROM {$wpdb->term_relationships} WHERE term_taxonomy_id IN ( " . implode( ',', array_map( 'absint', $exclude_term_ids ) ) . ' ) ) AS exclude_join ON exclude_join.object_id = id';
+			$outofstock_where = ' AND exclude_join.object_id IS NULL';
+		}
+
 		return $wpdb->get_results(
+			// phpcs:disable WordPress.WP.PreparedSQL.NotPrepared
 			$wpdb->prepare(
 				"SELECT post.ID as id, post.post_parent as parent_id FROM `$wpdb->posts` AS post
 				LEFT JOIN `$wpdb->postmeta` AS meta ON post.ID = meta.post_id
 				LEFT JOIN `$wpdb->postmeta` AS meta2 ON post.ID = meta2.post_id
+				$outofstock_join
 				WHERE post.post_type IN ( 'product', 'product_variation' )
 					AND post.post_status = 'publish'
 					AND meta.meta_key = '_sale_price'
@@ -824,10 +853,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					AND CAST( meta.meta_value AS DECIMAL ) >= 0
 					AND CAST( meta.meta_value AS CHAR ) != ''
 					AND CAST( meta.meta_value AS DECIMAL( 10, %d ) ) = CAST( meta2.meta_value AS DECIMAL( 10, %d ) )
+					$outofstock_where
 				GROUP BY post.ID",
 				$decimals,
 				$decimals
 			)
+			// phpcs:enable
 		);
 	}
 
@@ -1304,48 +1335,85 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @param  string $term Search term.
 	 * @param  string $type Type of product.
 	 * @param  bool   $include_variations Include variations in search or not.
+	 * @param  bool   $all_statuses Should we search all statuses or limit to published.
 	 * @return array of ids
 	 */
-	public function search_products( $term, $type = '', $include_variations = false ) {
+	public function search_products( $term, $type = '', $include_variations = false, $all_statuses = false ) {
 		global $wpdb;
 
-		$like_term     = '%' . $wpdb->esc_like( $term ) . '%';
 		$post_types    = $include_variations ? array( 'product', 'product_variation' ) : array( 'product' );
 		$post_statuses = current_user_can( 'edit_private_products' ) ? array( 'private', 'publish' ) : array( 'publish' );
 		$type_join     = '';
 		$type_where    = '';
+		$status_where  = '';
+		$term          = wc_strtolower( $term );
 
-		if ( $type ) {
-			if ( in_array( $type, array( 'virtual', 'downloadable' ), true ) ) {
-				$type_join  = " LEFT JOIN {$wpdb->postmeta} postmeta_type ON posts.ID = postmeta_type.post_id ";
-				$type_where = " AND ( postmeta_type.meta_key = '_{$type}' AND postmeta_type.meta_value = 'yes' ) ";
+		// See if search term contains OR keywords.
+		if ( strstr( $term, ' or ' ) ) {
+			$term_groups = explode( ' or ', $term );
+		} else {
+			$term_groups = array( $term );
+		}
+
+		$search_where   = '';
+		$search_queries = array();
+
+		foreach ( $term_groups as $term_group ) {
+			// Parse search terms.
+			if ( preg_match_all( '/".*?("|$)|((?<=[\t ",+])|^)[^\t ",+]+/', $term_group, $matches ) ) {
+				$search_terms = $this->get_valid_search_terms( $matches[0] );
+				$count        = count( $search_terms );
+
+				// if the search string has only short terms or stopwords, or is 10+ terms long, match it as sentence.
+				if ( 9 < $count || 0 === $count ) {
+					$search_terms = array( $term_group );
+				}
+			} else {
+				$search_terms = array( $term_group );
+			}
+
+			$term_group_query = '';
+			$searchand        = '';
+
+			foreach ( $search_terms as $search_term ) {
+				$like              = '%' . $wpdb->esc_like( $search_term ) . '%';
+				$term_group_query .= $wpdb->prepare( " {$searchand} ( ( posts.post_title LIKE %s) OR ( posts.post_excerpt LIKE %s) OR ( posts.post_content LIKE %s ) OR ( postmeta.meta_key = '_sku' AND postmeta.meta_value LIKE %s ) )", $like, $like, $like, $like ); // @codingStandardsIgnoreLine.
+				$searchand         = ' AND ';
+			}
+
+			if ( $term_group_query ) {
+				$search_queries[] = $term_group_query;
 			}
 		}
 
+		if ( $search_queries ) {
+			$search_where = 'AND (' . implode( ') OR (', $search_queries ) . ')';
+		}
+
+		if ( $type && in_array( $type, array( 'virtual', 'downloadable' ), true ) ) {
+			$type_join  = " LEFT JOIN {$wpdb->postmeta} postmeta_type ON posts.ID = postmeta_type.post_id ";
+			$type_where = " AND ( postmeta_type.meta_key = '_{$type}' AND postmeta_type.meta_value = 'yes' ) ";
+		}
+
+		if ( ! $all_statuses ) {
+			$status_where = " AND posts.post_status IN ('" . implode( "','", $post_statuses ) . "') ";
+		}
+
 		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
-		$product_ids = $wpdb->get_col(
+		$search_results = $wpdb->get_results(
 			// phpcs:disable
-			$wpdb->prepare(
-				"SELECT DISTINCT posts.ID FROM {$wpdb->posts} posts
-				LEFT JOIN {$wpdb->postmeta} postmeta ON posts.ID = postmeta.post_id
-				$type_join
-				WHERE (
-					posts.post_title LIKE %s
-					OR posts.post_content LIKE %s
-					OR (
-						postmeta.meta_key = '_sku' AND postmeta.meta_value LIKE %s
-					)
-				)
-				AND posts.post_type IN ('" . implode( "','", $post_types ) . "')
-				AND posts.post_status IN ('" . implode( "','", $post_statuses ) . "')
-				$type_where
-				ORDER BY posts.post_parent ASC, posts.post_title ASC",
-				$like_term,
-				$like_term,
-				$like_term
-			)
+			"SELECT DISTINCT posts.ID as product_id, posts.post_parent as parent_id FROM {$wpdb->posts} posts
+			LEFT JOIN {$wpdb->postmeta} postmeta ON posts.ID = postmeta.post_id
+			$type_join
+			WHERE posts.post_type IN ('" . implode( "','", $post_types ) . "')
+			$search_where
+			$status_where
+			$type_where
+			ORDER BY posts.post_parent ASC, posts.post_title ASC"
 			// phpcs:enable
 		);
+
+		$product_ids = wp_parse_id_list( array_merge( wp_list_pluck( $search_results, 'product_id' ), wp_list_pluck( $search_results, 'parent_id' ) ) );
 
 		if ( is_numeric( $term ) ) {
 			$post_id   = absint( $term );

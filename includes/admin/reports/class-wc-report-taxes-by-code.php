@@ -16,6 +16,7 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 
 	/**
 	 * Get the legend for the main chart sidebar.
+	 *
 	 * @return array
 	 */
 	public function get_chart_legend() {
@@ -46,9 +47,9 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 	public function output_report() {
 
 		$ranges = array(
-			'year'         => __( 'Year', 'woocommerce' ),
-			'last_month'   => __( 'Last month', 'woocommerce' ),
-			'month'        => __( 'This month', 'woocommerce' ),
+			'year'       => __( 'Year', 'woocommerce' ),
+			'last_month' => __( 'Last month', 'woocommerce' ),
+			'month'      => __( 'This month', 'woocommerce' ),
 		);
 
 		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( $_GET['range'] ) : 'last_month';
@@ -62,7 +63,7 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 
 		$hide_sidebar = true;
 
-		include( WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php' );
+		include WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php';
 	}
 
 	/**
@@ -72,12 +73,12 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 		global $wpdb;
 
 		$query_data = array(
-			'order_item_name' => array(
+			'order_item_name'     => array(
 				'type'     => 'order_item',
 				'function' => '',
 				'name'     => 'tax_rate',
 			),
-			'tax_amount' => array(
+			'tax_amount'          => array(
 				'type'            => 'order_item_meta',
 				'order_item_type' => 'tax',
 				'function'        => '',
@@ -89,13 +90,13 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 				'function'        => '',
 				'name'            => 'shipping_tax_amount',
 			),
-			'rate_id' => array(
+			'rate_id'             => array(
 				'type'            => 'order_item_meta',
 				'order_item_type' => 'tax',
 				'function'        => '',
 				'name'            => 'rate_id',
 			),
-			'ID' => array(
+			'ID'                  => array(
 				'type'     => 'post_data',
 				'function' => '',
 				'name'     => 'post_id',
@@ -115,29 +116,35 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 			),
 		);
 
-		$tax_rows_orders = $this->get_order_report_data( array(
-			'data'                => $query_data,
-			'where'               => $query_where,
-			'order_by'            => 'posts.post_date ASC',
-			'query_type'          => 'get_results',
-			'filter_range'        => true,
-			'order_types'         => array_merge( wc_get_order_types( 'sales-reports' ), array( 'shop_order_refund' ) ),
-			'order_status'        => array( 'completed', 'processing', 'on-hold' ),
-			'parent_order_status' => array( 'completed', 'processing', 'on-hold' ), // Partial refunds inside refunded orders should be ignored
-		) );
+		$tax_rows_orders = $this->get_order_report_data(
+			array(
+				'data'                => $query_data,
+				'where'               => $query_where,
+				'order_by'            => 'posts.post_date ASC',
+				'query_type'          => 'get_results',
+				'filter_range'        => true,
+				'order_types'         => array_merge( wc_get_order_types( 'sales-reports' ), array( 'shop_order_refund' ) ),
+				'order_status'        => array( 'completed', 'processing', 'on-hold' ),
+				'parent_order_status' => array( 'completed', 'processing', 'on-hold' ), // Partial refunds inside refunded orders should be ignored
+			)
+		);
 
 		// Merge
 		$tax_rows = array();
 
 		foreach ( $tax_rows_orders as $tax_row ) {
 			$key              = $tax_row->rate_id;
-			$tax_rows[ $key ] = isset( $tax_rows[ $key ] ) ? $tax_rows[ $key ] : (object) array( 'tax_amount' => 0, 'shipping_tax_amount' => 0, 'total_orders' => 0 );
+			$tax_rows[ $key ] = isset( $tax_rows[ $key ] ) ? $tax_rows[ $key ] : (object) array(
+				'tax_amount'          => 0,
+				'shipping_tax_amount' => 0,
+				'total_orders'        => 0,
+			);
 
 			if ( 'shop_order_refund' !== get_post_type( $tax_row->post_id ) ) {
-				$tax_rows[ $key ]->total_orders        += 1;
+				$tax_rows[ $key ]->total_orders += 1;
 			}
 
-			$tax_rows[ $key ]->tax_rate            = $tax_row->tax_rate;
+			$tax_rows[ $key ]->tax_rate             = $tax_row->tax_rate;
 			$tax_rows[ $key ]->tax_amount          += wc_round_tax_total( $tax_row->tax_amount );
 			$tax_rows[ $key ]->shipping_tax_amount += wc_round_tax_total( $tax_row->shipping_tax_amount );
 		}

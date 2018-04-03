@@ -1,5 +1,11 @@
 language: php
 
+addons:
+  chrome: stable
+  apt:
+    packages:
+      - nginx
+
 sudo: false
 
 # Test main supported versions of PHP against latest WP.
@@ -21,7 +27,7 @@ matrix:
   - php: 5.2
     dist: precise
   - php: 7.2
-    env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
+    env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1 RUN_E2E=1
   - php: 7.2
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
   allow_failures:
@@ -35,6 +41,7 @@ before_script:
 script:
   - bash tests/bin/phpunit.sh
   - bash tests/bin/phpcs.sh
+  - bash tests/bin/run-e2e-CI.sh
 
 after_script:
   - bash tests/bin/travis.sh after

@@ -31,7 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top">
 				<th scope="row" class="titledesc">
 					<label for="webhook_status"><?php esc_html_e( 'Status', 'woocommerce' ); ?></label>
-					<?php wc_help_tip( __( 'The options are &quot;Active&quot; (delivers payload), &quot;Paused&quot; (does not deliver), or &quot;Disabled&quot; (does not deliver due delivery failures).', 'woocommerce' ) ); ?>
+					<?php echo wc_help_tip( __( 'The options are &quot;Active&quot; (delivers payload), &quot;Paused&quot; (does not deliver), or &quot;Disabled&quot; (does not deliver due delivery failures).', 'woocommerce' ) ); ?>
 				</th>
 				<td class="forminp">
 					<select name="webhook_status" id="webhook_status" class="wc-enhanced-select">
@@ -56,25 +56,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<?php
 							$topic_data = WC_Admin_Webhooks::get_topic_data( $webhook );
 
-							$topics = apply_filters( 'woocommerce_webhook_topics', array(
-								''                 => __( 'Select an option&hellip;', 'woocommerce' ),
-								'coupon.created'   => __( 'Coupon created', 'woocommerce' ),
-								'coupon.updated'   => __( 'Coupon updated', 'woocommerce' ),
-								'coupon.deleted'   => __( 'Coupon deleted', 'woocommerce' ),
-								'coupon.restored'  => __( 'Coupon restored', 'woocommerce' ),
-								'customer.created' => __( 'Customer created', 'woocommerce' ),
-								'customer.updated' => __( 'Customer updated', 'woocommerce' ),
-								'customer.deleted' => __( 'Customer deleted', 'woocommerce' ),
-								'order.created'    => __( 'Order created', 'woocommerce' ),
-								'order.updated'    => __( 'Order updated', 'woocommerce' ),
-								'order.deleted'    => __( 'Order deleted', 'woocommerce' ),
-								'order.restored'   => __( 'Order restored', 'woocommerce' ),
-								'product.created'  => __( 'Product created', 'woocommerce' ),
-								'product.updated'  => __( 'Product updated', 'woocommerce' ),
-								'product.deleted'  => __( 'Product deleted', 'woocommerce' ),
-								'product.restored' => __( 'Product restored', 'woocommerce' ),
-								'action'           => __( 'Action', 'woocommerce' ),
-							) );
+							$topics = apply_filters(
+								'woocommerce_webhook_topics', array(
+									''                 => __( 'Select an option&hellip;', 'woocommerce' ),
+									'coupon.created'   => __( 'Coupon created', 'woocommerce' ),
+									'coupon.updated'   => __( 'Coupon updated', 'woocommerce' ),
+									'coupon.deleted'   => __( 'Coupon deleted', 'woocommerce' ),
+									'coupon.restored'  => __( 'Coupon restored', 'woocommerce' ),
+									'customer.created' => __( 'Customer created', 'woocommerce' ),
+									'customer.updated' => __( 'Customer updated', 'woocommerce' ),
+									'customer.deleted' => __( 'Customer deleted', 'woocommerce' ),
+									'order.created'    => __( 'Order created', 'woocommerce' ),
+									'order.updated'    => __( 'Order updated', 'woocommerce' ),
+									'order.deleted'    => __( 'Order deleted', 'woocommerce' ),
+									'order.restored'   => __( 'Order restored', 'woocommerce' ),
+									'product.created'  => __( 'Product created', 'woocommerce' ),
+									'product.updated'  => __( 'Product updated', 'woocommerce' ),
+									'product.deleted'  => __( 'Product deleted', 'woocommerce' ),
+									'product.restored' => __( 'Product restored', 'woocommerce' ),
+									'action'           => __( 'Action', 'woocommerce' ),
+								)
+							);
 
 							foreach ( $topics as $topic_slug => $topic_name ) :
 								?>
@@ -168,9 +170,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<button type="submit" class="button button-primary button-large" name="save" id="publish" accesskey="p"><?php esc_html_e( 'Save webhook', 'woocommerce' ); ?></button>
 						<?php
 						if ( $webhook->get_id() ) :
-							$delete_url = wp_nonce_url( add_query_arg( array(
-								'delete' => $webhook->get_id(),
-							), admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks' ) ), 'delete-webhook' );
+							$delete_url = wp_nonce_url(
+								add_query_arg(
+									array(
+										'delete' => $webhook->get_id(),
+									), admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks' )
+								), 'delete-webhook'
+							);
 							?>
 							<a style="color: #a00; text-decoration: none; margin-left: 10px;" href="<?php echo esc_url( $delete_url ); ?>"><?php esc_html_e( 'Delete permanently', 'woocommerce' ); ?></a>
 						<?php endif; ?>

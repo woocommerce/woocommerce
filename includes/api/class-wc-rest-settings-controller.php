@@ -4,15 +4,11 @@
  *
  * Handles requests to the /settings endpoints.
  *
- * @author   WooThemes
- * @category API
- * @package  WooCommerce/API
- * @since    3.0.0
+ * @package WooCommerce/API
+ * @since   3.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * REST API Settings controller class.
@@ -24,6 +20,8 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 
 	/**
 	 * WP REST API namespace/version.
+	 *
+	 * @var string
 	 */
 	protected $namespace = 'wc/v2';
 
@@ -40,21 +38,23 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 	 * @since 3.0.0
 	 */
 	public function register_routes() {
-		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
-			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_items' ),
-				'permission_callback' => array( $this, 'get_items_permissions_check' ),
-			),
-			'schema' => array( $this, 'get_public_item_schema' ),
-		) );
+		register_rest_route(
+			$this->namespace, '/' . $this->rest_base, array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_items' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
 	}
 
 	/**
 	 * Get all settings groups items.
 	 *
 	 * @since  3.0.0
-	 * @param  WP_REST_Request $request
+	 * @param  WP_REST_Request $request Request data.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
@@ -109,7 +109,7 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 	 * Prepare a report sales object for serialization.
 	 *
 	 * @since  3.0.0
-	 * @param array $item Group object.
+	 * @param array           $item Group object.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
@@ -130,7 +130,7 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 	 * only return known values via the API.
 	 *
 	 * @since 3.0.0
-	 * @param  array $group
+	 * @param  array $group Group.
 	 * @return array
 	 */
 	public function filter_group( $group ) {
@@ -144,7 +144,7 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 	 * Callback for allowed keys for each group response.
 	 *
 	 * @since  3.0.0
-	 * @param  string $key Key to check
+	 * @param  string $key Key to check.
 	 * @return boolean
 	 */
 	public function allowed_group_keys( $key ) {
@@ -194,13 +194,13 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 			'title'      => 'setting_group',
 			'type'       => 'object',
 			'properties' => array(
-				'id' => array(
+				'id'          => array(
 					'description' => __( 'A unique identifier that can be used to link settings together.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'label' => array(
+				'label'       => array(
 					'description' => __( 'A human readable label for the setting used in interfaces.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
@@ -212,13 +212,13 @@ class WC_REST_Settings_Controller extends WC_REST_Controller {
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'parent_id' => array(
+				'parent_id'   => array(
 					'description' => __( 'ID of parent grouping.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'sub_groups' => array(
+				'sub_groups'  => array(
 					'description' => __( 'IDs for settings sub groups.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),

@@ -1,6 +1,13 @@
 <?php
 /**
- * System Status REST Tests
+ * Class WC_Tests_REST_System_Status file.
+ *
+ * @package WooCommerce/Tests
+ */
+
+/**
+ * System Status REST Tests.
+ *
  * @package WooCommerce\Tests\API
  * @since 3.0
  */
@@ -12,9 +19,11 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	public function setUp() {
 		parent::setUp();
 		$this->endpoint = new WC_REST_System_Status_Controller();
-		$this->user = $this->factory->user->create( array(
-			'role' => 'administrator',
-		) );
+		$this->user     = $this->factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
 	}
 
 	/**
@@ -47,7 +56,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	public function test_get_system_status_info_returns_root_properties() {
 		wp_set_current_user( $this->user );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
-		$data = $response->get_data();
+		$data     = $response->get_data();
 
 		$this->assertArrayHasKey( 'environment', $data );
 		$this->assertArrayHasKey( 'database', $data );
@@ -70,9 +79,9 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$environment = (array) $data['environment'];
 
 		// Make sure all expected data is present
-		$this->assertEquals( 30, count( $environment ) );
+		$this->assertEquals( 31, count( $environment ) );
 
-		// Test some responses to make sure they match up
+		// Test some responses to make sure they match up.
 		$this->assertEquals( get_option( 'home' ), $environment['home_url'] );
 		$this->assertEquals( get_option( 'siteurl' ), $environment['site_url'] );
 		$this->assertEquals( WC()->version, $environment['version'] );
@@ -131,7 +140,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$theme    = (array) $data['theme'];
 
 		$this->assertEquals( 13, count( $theme ) );
-		$this->assertEquals( $active_theme->Name, $theme['name'] );
+		$this->assertEquals( $active_theme->Name, $theme['name'] ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
 	}
 
 	/**
@@ -194,9 +203,9 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_system_status_schema() {
-		$request = new WP_REST_Request( 'OPTIONS', '/wc/v2/system_status' );
-		$response = $this->server->dispatch( $request );
-		$data = $response->get_data();
+		$request    = new WP_REST_Request( 'OPTIONS', '/wc/v2/system_status' );
+		$response   = $this->server->dispatch( $request );
+		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 		$this->assertEquals( 7, count( $properties ) );
 		$this->assertArrayHasKey( 'environment', $properties );
@@ -216,7 +225,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	public function test_get_system_tools() {
 		wp_set_current_user( $this->user );
 
-		$tools_controller = new WC_REST_System_Status_Tools_Controller;
+		$tools_controller = new WC_REST_System_Status_Tools_Controller();
 		$raw_tools        = $tools_controller->get_tools();
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status/tools' ) );
@@ -224,20 +233,23 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( count( $raw_tools ), count( $data ) );
-		$this->assertContains( array(
-			'id'          => 'reset_tracking',
-			'name'        => 'Reset usage tracking',
-			'action'      => 'Reset',
-			'description' => 'This will reset your usage tracking settings, causing it to show the opt-in banner again and not sending any data.',
-			'_links'      => array(
-				'item' => array(
-					array(
-						'href'       => rest_url( '/wc/v2/system_status/tools/reset_tracking' ),
-						'embeddable' => true,
+		$this->assertContains(
+			array(
+				'id'          => 'reset_tracking',
+				'name'        => 'Reset usage tracking',
+				'action'      => 'Reset',
+				'description' => 'This will reset your usage tracking settings, causing it to show the opt-in banner again and not sending any data.',
+				'_links'      => array(
+					'item' => array(
+						array(
+							'href'       => rest_url( '/wc/v2/system_status/tools/reset_tracking' ),
+							'embeddable' => true,
+						),
 					),
 				),
 			),
-		), $data );
+			$data
+		);
 	}
 
 	/**
@@ -259,7 +271,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	public function test_get_system_tool() {
 		wp_set_current_user( $this->user );
 
-		$tools_controller = new WC_REST_System_Status_Tools_Controller;
+		$tools_controller = new WC_REST_System_Status_Tools_Controller();
 		$raw_tools        = $tools_controller->get_tools();
 		$raw_tool         = $raw_tools['recount_terms'];
 
@@ -293,7 +305,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	public function test_execute_system_tool() {
 		wp_set_current_user( $this->user );
 
-		$tools_controller = new WC_REST_System_Status_Tools_Controller;
+		$tools_controller = new WC_REST_System_Status_Tools_Controller();
 		$raw_tools        = $tools_controller->get_tools();
 		$raw_tool         = $raw_tools['recount_terms'];
 
@@ -305,6 +317,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'Recount terms', $data['action'] );
 		$this->assertEquals( 'This tool will recount product terms - useful when changing your settings in a way which hides products from the catalog.', $data['description'] );
 		$this->assertTrue( $data['success'] );
+		$this->assertEquals( 1, did_action( 'woocommerce_rest_insert_system_status_tool' ) );
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v2/system_status/tools/not_a_real_tool' ) );
 		$this->assertEquals( 404, $response->get_status() );
@@ -327,10 +340,11 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_system_status_tool_schema() {
-		$request = new WP_REST_Request( 'OPTIONS', '/wc/v2/system_status/tools' );
-		$response = $this->server->dispatch( $request );
-		$data = $response->get_data();
+		$request    = new WP_REST_Request( 'OPTIONS', '/wc/v2/system_status/tools' );
+		$response   = $this->server->dispatch( $request );
+		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
+
 		$this->assertEquals( 6, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'name', $properties );
@@ -338,5 +352,28 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'description', $properties );
 		$this->assertArrayHasKey( 'success', $properties );
 		$this->assertArrayHasKey( 'message', $properties );
+	}
+
+	/**
+	 * Test execute_tool() with the "add_order_indexes" tool.
+	 */
+	public function test_execute_system_tool_add_order_indexes() {
+		wp_set_current_user( $this->user );
+
+		$order1 = WC_Helper_Order::create_order();
+		$order2 = WC_Helper_Order::create_order();
+		delete_post_meta( $order1->get_id(), '_billing_address_index' );
+		delete_post_meta( $order2->get_id(), '_billing_address_index' );
+		delete_post_meta( $order2->get_id(), '_shipping_address_index' );
+
+		$controller = new WC_REST_System_Status_Tools_Controller();
+		$response   = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v2/system_status/tools/add_order_indexes' ) );
+		$data       = $response->get_data();
+
+		$this->assertTrue( $data['success'] );
+		$this->assertNotEmpty( get_post_meta( $order1->get_id(), '_billing_address_index', true ) );
+		$this->assertNotEmpty( get_post_meta( $order2->get_id(), '_billing_address_index', true ) );
+		$this->assertNotEmpty( get_post_meta( $order2->get_id(), '_shipping_address_index', true ) );
+
 	}
 }
