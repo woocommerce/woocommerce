@@ -836,10 +836,15 @@ registerBlockType('woocommerce/products', {
 		function getSettingsEditor() {
 
 			var update_display_callback = function update_display_callback(value) {
+
+				// These options have setting screens that need further input from the user, so keep edit mode open.
+				var needsFurtherSettings = ['specific', 'attribute', 'category'];
+
 				if (display !== value) {
 					setAttributes({
 						display: value,
-						display_setting: []
+						display_setting: [],
+						edit_mode: needsFurtherSettings.includes(value)
 					});
 				}
 			};
