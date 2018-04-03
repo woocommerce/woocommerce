@@ -389,6 +389,18 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	}
 
 	/**
+	 * Can the order be refunded via this gateway?
+	 *
+	 * Should be extended by gateways to do their own checks.
+	 *
+	 * @param  WC_Order $order Order object.
+	 * @return bool If false, the automatic refund button is hidden in the UI.
+	 */
+	public function can_refund_order( $order ) {
+		return $order && $this->supports( 'refunds' );
+	}
+
+	/**
 	 * Core credit card form which gateways can used if needed. Deprecated - inherit WC_Payment_Gateway_CC instead.
 	 *
 	 * @param  array $args Arguments.
