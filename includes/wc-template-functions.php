@@ -893,6 +893,10 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 
 			$args = apply_filters( 'woocommerce_loop_add_to_cart_args', wp_parse_args( $args, $defaults ), $product );
 
+			if ( isset( $args['attributes']['aria-label'] ) ) {
+				$args['attributes']['aria-label'] = strip_tags( $args['attributes']['aria-label'] );
+			}
+
 			wc_get_template( 'loop/add-to-cart.php', $args );
 		}
 	}

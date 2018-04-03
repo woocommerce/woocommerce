@@ -460,26 +460,15 @@ class WC_Admin_Setup_Wizard {
 
 			<?php
 			if ( 'unknown' === get_option( 'woocommerce_allow_tracking', 'unknown' ) ) {
-				$tracking_opt_out = true;
-
-				// EU should be opt-in.
-				if ( in_array( $country, WC()->countries->get_european_union_countries(), true ) ) {
-					$tracking_opt_out = false;
-				}
-
-				// Respect the DNT header.
-				if ( ! empty( $_SERVER['HTTP_DNT'] ) ) { // WPCS: input var ok.
-					$tracking_opt_out = false;
-				}
 				?>
 				<div class="woocommerce-tracker">
 					<p class="checkbox">
-						<input type="checkbox" id="wc_tracker_optin" name="wc_tracker_optin" value="yes" <?php echo $tracking_opt_out ? 'checked' : ''; ?> />
-						<label for="wc_tracker_optin"><?php esc_html_e( 'Help WooCommerce improve by enabling usage tracking.', 'woocommerce' ); ?></label>
+						<input type="checkbox" id="wc_tracker_checkbox" name="wc_tracker_checkbox" value="yes" checked />
+						<label for="wc_tracker_checkbox"><?php esc_html_e( 'Help WooCommerce improve with usage tracking.', 'woocommerce' ); ?></label>
 					</p>
 					<p>
 					<?php
-					esc_html_e( 'Checking this box means making WooCommerce better &mdash; your store will be considered as we evaluate new features, judge the quality of an update, or determine if an improvement makes sense. If you do not check this box, we will not know this store exists and we will not collect any usage data.', 'woocommerce' );
+					esc_html_e( 'Gathering usage data allows us to make WooCommerce better &mdash; your store will be considered as we evaluate new features, judge the quality of an update, or determine if an improvement makes sense. If you would rather opt-out, and do not check this box, we will not know this store exists and we will not collect any usage data.', 'woocommerce' );
 					echo ' <a target="_blank" href="https://woocommerce.com/usage-tracking/">' . esc_html__( 'Read more about what we collect.', 'woocommerce' ) . '</a>';
 					?>
 					</p>
@@ -508,8 +497,8 @@ class WC_Admin_Setup_Wizard {
 		$postcode       = sanitize_text_field( $_POST['store_postcode'] );
 		$currency_code  = sanitize_text_field( $_POST['currency_code'] );
 		$product_type   = sanitize_text_field( $_POST['product_type'] );
-		$sell_in_person = isset( $_POST['sell_in_person'] ) && ( 'yes'   === sanitize_text_field( $_POST['sell_in_person'] ) );
-		$tracking       = isset( $_POST['wc_tracker_optin'] ) && ( 'yes' === sanitize_text_field( $_POST['wc_tracker_optin'] ) );
+		$sell_in_person = isset( $_POST['sell_in_person'] ) && ( 'yes' === sanitize_text_field( $_POST['sell_in_person'] ) );
+		$tracking       = isset( $_POST['wc_tracker_checkbox'] ) && ( 'yes' === sanitize_text_field( $_POST['wc_tracker_checkbox'] ) );
 		// @codingStandardsIgnoreEnd
 
 		if ( ! $state ) {

@@ -25,11 +25,11 @@ wc_print_notices(); ?>
 
 	<p class="woocommerce-form-row woocommerce-form-row--first form-row form-row-first">
 		<label for="password_1"><?php esc_html_e( 'New password', 'woocommerce' ); ?> <span class="required">*</span></label>
-		<input type="password" class="woocommerce-Input woocommerce-Input--text input-text" name="password_1" id="password_1" />
+		<input type="password" class="woocommerce-Input woocommerce-Input--text input-text" name="password_1" id="password_1" autocomplete="new-password" />
 	</p>
 	<p class="woocommerce-form-row woocommerce-form-row--last form-row form-row-last">
 		<label for="password_2"><?php esc_html_e( 'Re-enter new password', 'woocommerce' ); ?> <span class="required">*</span></label>
-		<input type="password" class="woocommerce-Input woocommerce-Input--text input-text" name="password_2" id="password_2" />
+		<input type="password" class="woocommerce-Input woocommerce-Input--text input-text" name="password_2" id="password_2" autocomplete="new-password" />
 	</p>
 
 	<input type="hidden" name="reset_key" value="<?php echo esc_attr( $args['key'] ); ?>" />
