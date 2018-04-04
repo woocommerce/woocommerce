@@ -836,7 +836,7 @@ class WC_Admin_Post_Types {
 	public function show_cpt_archive_notice( $post ) {
 		$shop_page_id = wc_get_page_id( 'shop' );
 
-		if ( $post && absint( $shop_page_id ) === absint( $post->ID ) ) {
+		if ( $post && intval( $shop_page_id ) === intval( $post->ID ) ) {
 			echo '<div class="notice notice-info">';
 			echo '<p>' . sprintf( wp_kses_post( __( 'This is the WooCommerce shop page. The shop page is a special archive that lists your products. <a href="%s">You can read more about this here</a>.', 'woocommerce' ) ), 'https://docs.woocommerce.com/document/woocommerce-pages/#section-4' ) . '</p>';
 			echo '</div>';
