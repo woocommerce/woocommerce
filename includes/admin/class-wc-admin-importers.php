@@ -23,6 +23,10 @@ class WC_Admin_Importers {
 	 * Constructor.
 	 */
 	public function __construct() {
+		if ( ! $this->import_allowed() ) {
+			return;
+		}
+
 		add_action( 'admin_menu', array( $this, 'add_to_menus' ) );
 		add_action( 'admin_init', array( $this, 'register_importers' ) );
 		add_action( 'admin_head', array( $this, 'hide_from_menus' ) );
@@ -36,6 +40,15 @@ class WC_Admin_Importers {
 			'capability' => 'import',
 			'callback'   => array( $this, 'product_importer' ),
 		);
+	}
+
+	/**
+	 * Return true if WooCommerce imports are allowed for current user, false otherwise.
+	 *
+	 * @return bool Whether current user can perform imports.
+	 */
+	protected function import_allowed() {
+		return current_user_can( 'edit_products' ) && current_user_can( 'import' );
 	}
 
 	/**
@@ -190,8 +203,8 @@ class WC_Admin_Importers {
 
 		check_ajax_referer( 'wc-product-import', 'security' );
 
-		if ( ! ( current_user_can( 'edit_products' ) && current_user_can( 'import' ) ) || ! isset( $_POST['file'] ) ) { // PHPCS: input var ok.
-			wp_die( -1 );
+		if ( ! $this->import_allowed() || ! isset( $_POST['file'] ) ) { // PHPCS: input var ok.
+			wp_send_json_error( array( 'message' => __( 'Insufficient privileges to import products.', 'woocommerce' ) ) );
 		}
 
 		include_once WC_ABSPATH . 'includes/admin/importers/class-wc-product-csv-importer-controller.php';

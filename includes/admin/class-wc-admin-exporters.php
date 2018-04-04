@@ -26,6 +26,10 @@ class WC_Admin_Exporters {
 	 * Constructor.
 	 */
 	public function __construct() {
+		if ( ! $this->export_allowed() ) {
+			return;
+		}
+
 		add_action( 'admin_menu', array( $this, 'add_to_menus' ) );
 		add_action( 'admin_head', array( $this, 'hide_from_menus' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
@@ -39,6 +43,15 @@ class WC_Admin_Exporters {
 			'capability' => 'export',
 			'callback'   => array( $this, 'product_exporter' ),
 		);
+	}
+
+	/**
+	 * Return true if WooCommerce export is allowed for current user, false otherwise.
+	 *
+	 * @return bool Whether current user can perform export.
+	 */
+	protected function export_allowed() {
+		return current_user_can( 'edit_products' ) && current_user_can( 'export' );
 	}
 
 	/**
@@ -112,8 +125,8 @@ class WC_Admin_Exporters {
 	public function do_ajax_product_export() {
 		check_ajax_referer( 'wc-product-export', 'security' );
 
-		if ( ! ( current_user_can( 'edit_products' ) && current_user_can( 'export' ) ) ) {
-			wp_die( -1 );
+		if ( ! $this->export_allowed() ) {
+			wp_send_json_error( array( 'message' => __( 'Insufficient privileges to export products.', 'woocommerce' ) ) );
 		}
 
 		include_once WC_ABSPATH . 'includes/export/class-wc-product-csv-exporter.php';
