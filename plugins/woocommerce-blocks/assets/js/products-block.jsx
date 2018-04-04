@@ -227,7 +227,7 @@ class ProductsBlockSettingsEditor extends React.Component {
 
 	closeMenu() {
 		this.setState( {
-			menu_visible: false
+			menu_visible: false,
 		} );
 	}
 
@@ -392,12 +392,222 @@ const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
 } );
 
 /**
+ * The main products block UI.
+ */
+class ProductsBlock extends React.Component {
+
+	/**
+	 * Constructor.
+	 */
+	constructor( props ) {
+		super( props );
+
+		this.getInspectorControls = this.getInspectorControls.bind( this );
+		this.getToolbarControls = this.getToolbarControls.bind( this );
+		this.getBlockDescription = this.getBlockDescription.bind( this );
+		this.getPreview = this.getPreview.bind( this );
+		this.getSettingsEditor = this.getSettingsEditor.bind( this );
+	}
+
+	/**
+	 * Get the components for the sidebar settings area that is rendered while focused on a Products block.
+	 *
+	 * @return Component
+	 */
+	getInspectorControls() {
+		const { attributes, setAttributes } = this.props;
+		const { rows, columns, display, display_setting, orderby, edit_mode } = attributes;
+
+		let columnControl = (
+			<RangeControl
+				label={ __( 'Columns' ) }
+				value={ columns }
+				onChange={ ( value ) => setAttributes( { columns: value } ) }
+				min={ wc_product_block_data.min_columns }
+				max={ wc_product_block_data.max_columns }
+			/>
+		);
+			
+		// Orderby settings don't make sense for specific-selected products display.
+		let orderControl = null;
+		if ( 'specific' !== display ) {
+			orderControl = (
+				<SelectControl
+					key="query-panel-select"
+					label={ __( 'Order Products By' ) }
+					value={ orderby }
+					options={ [
+						{
+							label: __( 'Newness - newest first' ),
+							value: 'date',
+						},
+						{
+							label: __( 'Price - low to high' ),
+							value: 'price_asc',
+						},
+						{
+							label: __( 'Price - high to low' ),
+							value: 'price_desc',
+						},
+						{
+							label: __( 'Rating - highest first' ),
+							value: 'rating',
+						},
+						{
+							label: __( 'Sales - most first' ),
+							value: 'popularity',
+						},
+						{
+							label: __( 'Title - alphabetical' ),
+							value: 'title',
+						},
+					] }
+					onChange={ ( value ) => setAttributes( { orderby: value } ) }
+				/>
+			);
+		}
+
+		return (
+			<InspectorControls key="inspector">
+				<h3>{ __( 'Layout' ) }</h3>
+				{ columnControl }
+				<RangeControl
+					label={ __( 'Rows' ) }
+					value={ rows }
+					onChange={ ( value ) => setAttributes( { rows: value } ) }
+					min={ wc_product_block_data.min_rows }
+					max={ wc_product_block_data.max_rows }
+				/>
+				{ orderControl }
+			</InspectorControls>
+		);
+	}
+
+	/**
+	 * Get the components for the toolbar area that appears on top of the block when focused.
+	 *
+	 * @return Component
+	 */
+	getToolbarControls() {
+		let props = this.props;
+		const { attributes, setAttributes } = props;
+		const { display, display_setting, edit_mode } = attributes;
+
+		// Edit button should not do anything if valid product selection has not been made.
+		const shouldDisableEditButton = ['', 'specific', 'category', 'attribute'].includes( display ) && ! display_setting.length;
+
+		const editButton = [
+			{
+				icon: 'edit',
+				title: __( 'Edit' ),
+				onClick: shouldDisableEditButton ? function(){} : () => setAttributes( { edit_mode: ! edit_mode } ),
+				isActive: edit_mode,
+			},
+		];
+
+		return (
+			<BlockControls key="controls">
+				<Toolbar controls={ editButton } />
+			</BlockControls>
+		);
+	}
+
+	/**
+	 * Get a description of the current block settings.
+	 *
+	 * @return Component
+	 */
+	getBlockDescription() {
+		const { attributes, setAttributes } = this.props;
+		const { display, display_setting, edit_mode } = attributes;
+
+		if ( ! display.length ) {
+			return null;
+		}
+
+		let editLink = null;
+		if ( ! edit_mode ) {
+			// @todo needs to center in view also
+			editLink = <a className="change-quicklink" onClick={ () => { setAttributes( { edit_mode: true } ); } } >{ __( 'Edit' ) }</a>;
+		}
+
+		return (
+			<InspectorControls key="description-inspector">
+				<h3>{ __( 'Current Source' ) }</h3>
+				<div className="wc-products-selected-scope-description">
+					<span className="selected-scope">
+						{ PRODUCTS_BLOCK_DISPLAY_SETTINGS[ display ].title }
+					</span>
+					{ editLink }
+				</div>
+			</InspectorControls>
+		);
+	}
+
+	/**
+	 * Get the block preview component for preview mode.
+	 *
+	 * @return Component
+	 */
+	getPreview() {
+		return <ProductsBlockPreview attributes={ this.props.attributes } />;
+	}
+
+	/**
+	 * Get the block edit component for edit mode.
+	 *
+	 * @return Component
+	 */
+	getSettingsEditor() {
+		const { attributes, setAttributes } = this.props;
+		const { display, display_setting } = attributes;
+
+		const update_display_callback = ( value ) => {
+
+			// These options have setting screens that need further input from the user, so keep edit mode open.
+			const needsFurtherSettings = [ 'specific', 'attribute', 'category' ];
+
+			if ( display !== value ) {
+				setAttributes( {
+					display: value,
+					display_setting: [],
+					edit_mode: needsFurtherSettings.includes( value ),
+				} );
+			}
+		};
+
+		return (
+			<ProductsBlockSettingsEditor
+				selected_display={ display }
+				selected_display_setting={ display_setting }
+				update_display_callback={ update_display_callback }
+				update_display_setting_callback={ ( value ) => setAttributes( { display_setting: value } ) }
+				done_callback={ () => setAttributes( { edit_mode: false } ) }
+			/>
+		);
+	}
+
+	render() {
+		const { attributes, focus } = this.props;
+		const { edit_mode } = attributes;
+
+		return [
+			( !! focus ) ? this.getBlockDescription() : null,
+			( !! focus ) ? this.getInspectorControls() : null,
+			( !! focus ) ? this.getToolbarControls() : null,
+			edit_mode ? this.getSettingsEditor() : this.getPreview(),
+		];
+	}
+}
+
+/**
  * Register and run the products block.
  */
 registerBlockType( 'woocommerce/products', {
 	title: __( 'Products' ),
 	icon: 'screenoptions',
 	category: 'widgets',
+	description: __( 'Display a grid of products from a variety of sources.' ),
 
 	attributes: {
 
@@ -454,153 +664,7 @@ registerBlockType( 'woocommerce/products', {
 	 * Renders and manages the block.
 	 */
 	edit( props ) {
-		const { attributes, className, focus, setAttributes, setFocus } = props;
-		const { rows, columns, display, display_setting, orderby, edit_mode } = attributes;
-
-		/**
-		 * Get the components for the sidebar settings area that is rendered while focused on a Products block.
-		 *
-		 * @return Component
-		 */
-		function getInspectorControls() {
-
-			let columnControl = (
-				<RangeControl
-					label={ __( 'Columns' ) }
-					value={ columns }
-					onChange={ ( value ) => setAttributes( { columns: value } ) }
-					min={ wc_product_block_data.min_columns }
-					max={ wc_product_block_data.max_columns }
-				/>
-			);
-			
-			// Orderby settings don't make sense for specific-selected products display.
-			let orderControl = null;
-			if ( 'specific' !== display ) {
-				orderControl = (
-					<SelectControl
-						key="query-panel-select"
-						label={ __( 'Order Products By' ) }
-						value={ orderby }
-						options={ [
-							{
-								label: __( 'Newness - newest first' ),
-								value: 'date',
-							},
-							{
-								label: __( 'Price - low to high' ),
-								value: 'price_asc',
-							},
-							{
-								label: __( 'Price - high to low' ),
-								value: 'price_desc',
-							},
-							{
-								label: __( 'Rating - highest first' ),
-								value: 'rating',
-							},
-							{
-								label: __( 'Sales - most first' ),
-								value: 'popularity',
-							},
-							{
-								label: __( 'Title - alphabetical' ),
-								value: 'title',
-							},
-						] }
-						onChange={ ( value ) => setAttributes( { orderby: value } ) }
-					/>
-				);
-			}
-
-			return (
-				<InspectorControls key="inspector">
-					<h3>{ __( 'Layout' ) }</h3>
-					{ columnControl }
-					<RangeControl
-						label={ __( 'Rows' ) }
-						value={ rows }
-						onChange={ ( value ) => setAttributes( { rows: value } ) }
-						min={ wc_product_block_data.min_rows }
-						max={ wc_product_block_data.max_rows }
-					/>
-					{ orderControl }
-				</InspectorControls>
-			);
-		};
-
-		/**
-		 * Get the components for the toolbar area that appears on top of the block when focused.
-		 *
-		 * @return Component
-		 */
-		function getToolbarControls() {
-
-			// Edit button should not do anything if valid product selection has not been made.
-			const shouldDisableEditButton = ['', 'specific', 'category', 'attribute'].includes( display ) && ! display_setting.length;
-
-			const editButton = [
-				{
-					icon: 'edit',
-					title: __( 'Edit' ),
-					onClick: shouldDisableEditButton ? function(){} : () => setAttributes( { edit_mode: ! edit_mode } ),
-					isActive: edit_mode,
-				},
-			];
-
-			return (
-				<BlockControls key="controls">
-					<Toolbar controls={ editButton } />
-				</BlockControls>
-			);
-		}
-
-		/**
-		 * Get the block preview component for preview mode.
-		 *
-		 * @return Component
-		 */
-		function getPreview() {
-			return <ProductsBlockPreview attributes={ attributes } />;
-		}
-
-		/**
-		 * Get the block edit component for edit mode.
-		 *
-		 * @return Component
-		 */
-		function getSettingsEditor() {
-
-			const update_display_callback = ( value ) => {
-
-				// These options have setting screens that need further input from the user, so keep edit mode open.
-				const needsFurtherSettings = [ 'specific', 'attribute', 'category' ];
-
-				if ( display !== value ) {
-					setAttributes( {
-						display: value,
-						display_setting: [],
-						edit_mode: needsFurtherSettings.includes( value ),
-					} );
-				}
-			};
-
-			return (
-				<ProductsBlockSettingsEditor
-					selected_display={ display }
-					selected_display_setting={ display_setting }
-					update_display_callback={ update_display_callback }
-					update_display_setting_callback={ ( value ) => setAttributes( { display_setting: value } ) }
-					done_callback={ () => setAttributes( { edit_mode: false } ) }
-				/>
-			);
-		}
-
-		return [
-			( !! focus ) ? getInspectorControls() : null,
-			( !! focus ) ? getToolbarControls() : null,
-			edit_mode ? getSettingsEditor() : getPreview(),
-		];
+		return <ProductsBlock { ...props } />
 	},
 
 	/**

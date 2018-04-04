@@ -647,87 +647,48 @@ var ProductsBlockPreview = withAPIData(function (_ref) {
 });
 
 /**
- * Register and run the products block.
+ * The main products block UI.
  */
-registerBlockType('woocommerce/products', {
-	title: __('Products'),
-	icon: 'screenoptions',
-	category: 'widgets',
 
-	attributes: {
-
-		/**
-   * Number of columns.
-   */
-		columns: {
-			type: 'number',
-			default: wc_product_block_data.default_columns
-		},
-
-		/**
-   * Number of rows.
-   */
-		rows: {
-			type: 'number',
-			default: wc_product_block_data.default_rows
-		},
-
-		/**
-   * What types of products to display. 'all', 'specific', or 'category'.
-   */
-		display: {
-			type: 'string',
-			default: ''
-		},
-
-		/**
-   * Which products to display if 'display' is 'specific' or 'category'. Array of product ids or category slugs depending on setting.
-   */
-		display_setting: {
-			type: 'array',
-			default: []
-		},
-
-		/**
-   * How to order the products: 'date', 'popularity', 'price_asc', 'price_desc' 'rating', 'title'.
-   */
-		orderby: {
-			type: 'string',
-			default: 'date'
-		},
-
-		/**
-   * Whether the block is in edit or preview mode.
-   */
-		edit_mode: {
-			type: 'boolean',
-			default: true
-		}
-	},
+var ProductsBlock = function (_React$Component5) {
+	_inherits(ProductsBlock, _React$Component5);
 
 	/**
-  * Renders and manages the block.
+  * Constructor.
   */
-	edit: function edit(props) {
-		var attributes = props.attributes,
-		    className = props.className,
-		    focus = props.focus,
-		    setAttributes = props.setAttributes,
-		    setFocus = props.setFocus;
-		var rows = attributes.rows,
-		    columns = attributes.columns,
-		    display = attributes.display,
-		    display_setting = attributes.display_setting,
-		    orderby = attributes.orderby,
-		    edit_mode = attributes.edit_mode;
+	function ProductsBlock(props) {
+		_classCallCheck(this, ProductsBlock);
 
-		/**
-   * Get the components for the sidebar settings area that is rendered while focused on a Products block.
-   *
-   * @return Component
-   */
+		var _this7 = _possibleConstructorReturn(this, (ProductsBlock.__proto__ || Object.getPrototypeOf(ProductsBlock)).call(this, props));
 
-		function getInspectorControls() {
+		_this7.getInspectorControls = _this7.getInspectorControls.bind(_this7);
+		_this7.getToolbarControls = _this7.getToolbarControls.bind(_this7);
+		_this7.getBlockDescription = _this7.getBlockDescription.bind(_this7);
+		_this7.getPreview = _this7.getPreview.bind(_this7);
+		_this7.getSettingsEditor = _this7.getSettingsEditor.bind(_this7);
+		return _this7;
+	}
+
+	/**
+  * Get the components for the sidebar settings area that is rendered while focused on a Products block.
+  *
+  * @return Component
+  */
+
+
+	_createClass(ProductsBlock, [{
+		key: 'getInspectorControls',
+		value: function getInspectorControls() {
+			var _props2 = this.props,
+			    attributes = _props2.attributes,
+			    setAttributes = _props2.setAttributes;
+			var rows = attributes.rows,
+			    columns = attributes.columns,
+			    display = attributes.display,
+			    display_setting = attributes.display_setting,
+			    orderby = attributes.orderby,
+			    edit_mode = attributes.edit_mode;
+
 
 			var columnControl = wp.element.createElement(RangeControl, {
 				label: __('Columns'),
@@ -791,16 +752,26 @@ registerBlockType('woocommerce/products', {
 				}),
 				orderControl
 			);
-		};
+		}
 
 		/**
    * Get the components for the toolbar area that appears on top of the block when focused.
    *
    * @return Component
    */
-		function getToolbarControls() {
+
+	}, {
+		key: 'getToolbarControls',
+		value: function getToolbarControls() {
+			var props = this.props;
+			var attributes = props.attributes,
+			    setAttributes = props.setAttributes;
+			var display = attributes.display,
+			    display_setting = attributes.display_setting,
+			    edit_mode = attributes.edit_mode;
 
 			// Edit button should not do anything if valid product selection has not been made.
+
 			var shouldDisableEditButton = ['', 'specific', 'category', 'attribute'].includes(display) && !display_setting.length;
 
 			var editButton = [{
@@ -820,12 +791,69 @@ registerBlockType('woocommerce/products', {
 		}
 
 		/**
+   * Get a description of the current block settings.
+   *
+   * @return Component
+   */
+
+	}, {
+		key: 'getBlockDescription',
+		value: function getBlockDescription() {
+			var _props3 = this.props,
+			    attributes = _props3.attributes,
+			    setAttributes = _props3.setAttributes;
+			var display = attributes.display,
+			    display_setting = attributes.display_setting,
+			    edit_mode = attributes.edit_mode;
+
+
+			if (!display.length) {
+				return null;
+			}
+
+			var editLink = null;
+			if (!edit_mode) {
+				// @todo needs to center in view also
+				editLink = wp.element.createElement(
+					'a',
+					{ className: 'change-quicklink', onClick: function onClick() {
+							setAttributes({ edit_mode: true });
+						} },
+					__('Edit')
+				);
+			}
+
+			return wp.element.createElement(
+				InspectorControls,
+				{ key: 'description-inspector' },
+				wp.element.createElement(
+					'h3',
+					null,
+					__('Current Source')
+				),
+				wp.element.createElement(
+					'div',
+					{ className: 'wc-products-selected-scope-description' },
+					wp.element.createElement(
+						'span',
+						{ className: 'selected-scope' },
+						PRODUCTS_BLOCK_DISPLAY_SETTINGS[display].title
+					),
+					editLink
+				)
+			);
+		}
+
+		/**
    * Get the block preview component for preview mode.
    *
    * @return Component
    */
-		function getPreview() {
-			return wp.element.createElement(ProductsBlockPreview, { attributes: attributes });
+
+	}, {
+		key: 'getPreview',
+		value: function getPreview() {
+			return wp.element.createElement(ProductsBlockPreview, { attributes: this.props.attributes });
 		}
 
 		/**
@@ -833,7 +861,16 @@ registerBlockType('woocommerce/products', {
    *
    * @return Component
    */
-		function getSettingsEditor() {
+
+	}, {
+		key: 'getSettingsEditor',
+		value: function getSettingsEditor() {
+			var _props4 = this.props,
+			    attributes = _props4.attributes,
+			    setAttributes = _props4.setAttributes;
+			var display = attributes.display,
+			    display_setting = attributes.display_setting;
+
 
 			var update_display_callback = function update_display_callback(value) {
 
@@ -861,8 +898,89 @@ registerBlockType('woocommerce/products', {
 				}
 			});
 		}
+	}, {
+		key: 'render',
+		value: function render() {
+			var _props5 = this.props,
+			    attributes = _props5.attributes,
+			    focus = _props5.focus;
+			var edit_mode = attributes.edit_mode;
 
-		return [!!focus ? getInspectorControls() : null, !!focus ? getToolbarControls() : null, edit_mode ? getSettingsEditor() : getPreview()];
+
+			return [!!focus ? this.getBlockDescription() : null, !!focus ? this.getInspectorControls() : null, !!focus ? this.getToolbarControls() : null, edit_mode ? this.getSettingsEditor() : this.getPreview()];
+		}
+	}]);
+
+	return ProductsBlock;
+}(React.Component);
+
+/**
+ * Register and run the products block.
+ */
+
+
+registerBlockType('woocommerce/products', {
+	title: __('Products'),
+	icon: 'screenoptions',
+	category: 'widgets',
+	description: __('Display a grid of products from a variety of sources.'),
+
+	attributes: {
+
+		/**
+   * Number of columns.
+   */
+		columns: {
+			type: 'number',
+			default: wc_product_block_data.default_columns
+		},
+
+		/**
+   * Number of rows.
+   */
+		rows: {
+			type: 'number',
+			default: wc_product_block_data.default_rows
+		},
+
+		/**
+   * What types of products to display. 'all', 'specific', or 'category'.
+   */
+		display: {
+			type: 'string',
+			default: ''
+		},
+
+		/**
+   * Which products to display if 'display' is 'specific' or 'category'. Array of product ids or category slugs depending on setting.
+   */
+		display_setting: {
+			type: 'array',
+			default: []
+		},
+
+		/**
+   * How to order the products: 'date', 'popularity', 'price_asc', 'price_desc' 'rating', 'title'.
+   */
+		orderby: {
+			type: 'string',
+			default: 'date'
+		},
+
+		/**
+   * Whether the block is in edit or preview mode.
+   */
+		edit_mode: {
+			type: 'boolean',
+			default: true
+		}
+	},
+
+	/**
+  * Renders and manages the block.
+  */
+	edit: function edit(props) {
+		return wp.element.createElement(ProductsBlock, props);
 	},
 
 
