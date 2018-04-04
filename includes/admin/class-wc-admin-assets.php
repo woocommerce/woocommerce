@@ -65,9 +65,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wp_enqueue_style( 'woocommerce_admin_print_reports_styles' );
 			}
 
-			/**
-			 * @deprecated 2.3
-			 */
+			// @deprecated 2.3.
 			if ( has_action( 'woocommerce_admin_css' ) ) {
 				do_action( 'woocommerce_admin_css' );
 				wc_deprecated_function( 'The woocommerce_admin_css action', '2.3', 'admin_enqueue_scripts' );
