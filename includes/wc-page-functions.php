@@ -154,7 +154,7 @@ function wc_nav_menu_item_classes( $menu_items ) {
 		return $menu_items;
 	}
 
-	$shop_page      = (int) wc_get_page_id( 'shop' );
+	$shop_page      = wc_get_page_id( 'shop' );
 	$page_for_posts = (int) get_option( 'page_for_posts' );
 
 	if ( ! empty( $menu_items ) && is_array( $menu_items ) ) {
