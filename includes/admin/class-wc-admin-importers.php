@@ -33,7 +33,7 @@ class WC_Admin_Importers {
 		$this->importers['product_importer'] = array(
 			'menu'       => 'edit.php?post_type=product',
 			'name'       => __( 'Product Import', 'woocommerce' ),
-			'capability' => 'edit_products',
+			'capability' => 'import',
 			'callback'   => array( $this, 'product_importer' ),
 		);
 	}
@@ -190,7 +190,7 @@ class WC_Admin_Importers {
 
 		check_ajax_referer( 'wc-product-import', 'security' );
 
-		if ( ! current_user_can( 'edit_products' ) || ! isset( $_POST['file'] ) ) { // PHPCS: input var ok.
+		if ( ! ( current_user_can( 'edit_products' ) && current_user_can( 'import' ) ) || ! isset( $_POST['file'] ) ) { // PHPCS: input var ok.
 			wp_die( -1 );
 		}
 

@@ -178,8 +178,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 						'export_products' => __( 'Export', 'woocommerce' ),
 					),
 					'urls'                             => array(
-						'import_products' => esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_importer' ) ),
-						'export_products' => esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_exporter' ) ),
+						'import_products' => current_user_can( 'import' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_importer' ) ) : null,
+						'export_products' => current_user_can( 'export' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_exporter' ) ) : null,
 					),
 				);
 

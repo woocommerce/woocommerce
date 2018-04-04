@@ -36,7 +36,7 @@ class WC_Admin_Exporters {
 		$this->exporters['product_exporter'] = array(
 			'menu'       => 'edit.php?post_type=product',
 			'name'       => __( 'Product Export', 'woocommerce' ),
-			'capability' => 'edit_products',
+			'capability' => 'export',
 			'callback'   => array( $this, 'product_exporter' ),
 		);
 	}
@@ -112,7 +112,7 @@ class WC_Admin_Exporters {
 	public function do_ajax_product_export() {
 		check_ajax_referer( 'wc-product-export', 'security' );
 
-		if ( ! current_user_can( 'edit_products' ) ) {
+		if ( ! ( current_user_can( 'edit_products' ) && current_user_can( 'export' ) ) ) {
 			wp_die( -1 );
 		}
 

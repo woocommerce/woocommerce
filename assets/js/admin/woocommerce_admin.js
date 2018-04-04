@@ -11,8 +11,12 @@ jQuery( function ( $ ) {
 		$blankslate     = $product_screen.find( '.woocommerce-BlankState' );
 
 	if ( 0 === $blankslate.length ) {
-		$title_action.after( '<a href="' + woocommerce_admin.urls.export_products + '" class="page-title-action">' + woocommerce_admin.strings.export_products + '</a>' );
-		$title_action.after( '<a href="' + woocommerce_admin.urls.import_products + '" class="page-title-action">' + woocommerce_admin.strings.import_products + '</a>' );
+		if ( woocommerce_admin.urls.export_products ) {
+			$title_action.after('<a href="' + woocommerce_admin.urls.export_products + '" class="page-title-action">' + woocommerce_admin.strings.export_products + '</a>');
+		}
+		if ( woocommerce_admin.urls.import_products ) {
+			$title_action.after( '<a href="' + woocommerce_admin.urls.import_products + '" class="page-title-action">' + woocommerce_admin.strings.import_products + '</a>' );
+		}
 	} else {
 		$title_action.hide();
 	}
