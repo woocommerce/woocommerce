@@ -1284,8 +1284,14 @@ p.demo_store,
 		.required {
 			color: red;
 			font-weight: 700;
-			border: 0;
+			border: 0 !important;
+			text-decoration: none;
+			visibility: hidden; // Only show optional by default.
 		}
+
+		.optional {
+			visibility: visible;
+ 		}
 
 		.input-checkbox {
 			display: inline;

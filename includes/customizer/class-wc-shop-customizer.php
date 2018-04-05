@@ -170,6 +170,14 @@ class WC_Shop_Customizer {
 					} );
 				} );
 
+				wp.customize.section( 'woocommerce_checkout', function( section ) {
+					section.expanded.bind( function( isExpanded ) {
+						if ( isExpanded ) {
+							wp.customize.previewer.previewUrl.set( '<?php echo esc_js( wc_get_page_permalink( 'checkout' ) ); ?>' );
+						}
+					} );
+				} );
+
 				wp.customize( 'woocommerce_catalog_columns', function( setting ) {
 					setting.bind( function( value ) {
 						var min = parseInt( '<?php echo esc_js( $min_columns ); ?>', 10 );
@@ -657,10 +665,36 @@ class WC_Shop_Customizer {
 		$wp_customize->add_section(
 			'woocommerce_checkout',
 			array(
-				'title'       => __( 'Checkout Form Options', 'woocommerce' ),
+				'title'       => __( 'Checkout', 'woocommerce' ),
 				'priority'    => 20,
 				'panel'       => 'woocommerce',
-				'description' => __( 'These options let you change the appearance of certain parts of the WooCommerce checkout form.', 'woocommerce' ),
+				'description' => __( 'These options let you change the appearance of certain parts of the WooCommerce checkout.', 'woocommerce' ),
+			)
+		);
+
+		// Register settings.
+		$wp_customize->add_setting(
+			'woocommerce_checkout_label_required_fields',
+			array(
+				'default'    => 'yes',
+				'type'       => 'option',
+				'capability' => 'manage_woocommerce',
+			)
+		);
+
+		// Register controls.
+		$wp_customize->add_control(
+			'woocommerce_checkout_label_required_fields',
+			array(
+				'label'       => __( 'Label required fields', 'woocommerce' ),
+				'description' => __( 'Choose if required fields should be labeled with an asterisk, or if optional fields should be clearly marked instead.', 'woocommerce' ),
+				'section'     => 'woocommerce_checkout',
+				'settings'    => 'woocommerce_checkout_label_required_fields',
+				'type'        => 'radio',
+				'choices'     => array(
+					'yes' => __( 'Label required fields', 'woocommerce' ),
+					'no'  => __( 'Label optional fields', 'woocommerce' ),
+				),
 			)
 		);
 	}

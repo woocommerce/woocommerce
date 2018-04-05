@@ -139,11 +139,17 @@
 
 .required {
 	color: firebrick;
+	text-decoration: none;
+	visibility: hidden; // Only show optional by default.
 
 	&[title] {
-		border-bottom: none;
+		border: 0 !important;
 	}
 }
+
+.optional {
+	visibility: visible;
+ }
 
 .woocommerce-message,
 .woocommerce-error,
