@@ -785,6 +785,20 @@ registerBlockType('woocommerce/products', {
 				});
 			}
 
+			// Row settings don't make sense for specific-selected products display.
+			var rowControl = null;
+			if ('specific' !== display) {
+				rowControl = wp.element.createElement(RangeControl, {
+					label: __('Rows'),
+					value: rows,
+					onChange: function onChange(value) {
+						return setAttributes({ rows: value });
+					},
+					min: 1,
+					max: 6
+				});
+			}
+
 			return wp.element.createElement(
 				InspectorControls,
 				{ key: 'inspector' },
@@ -794,15 +808,7 @@ registerBlockType('woocommerce/products', {
 					__('Layout')
 				),
 				columnControl,
-				wp.element.createElement(RangeControl, {
-					label: __('Rows'),
-					value: rows,
-					onChange: function onChange(value) {
-						return setAttributes({ rows: value });
-					},
-					min: 1,
-					max: 6
-				}),
+				rowControl,
 				orderControl
 			);
 		};
