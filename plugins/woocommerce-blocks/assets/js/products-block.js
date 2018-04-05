@@ -647,6 +647,111 @@ var ProductsBlockPreview = withAPIData(function (_ref) {
 });
 
 /**
+ * Information about current block settings rendered in the sidebar.
+ */
+var ProductsBlockSidebarInfo = withAPIData(function (_ref3) {
+	var attributes = _ref3.attributes;
+	var display = attributes.display,
+	    display_setting = attributes.display_setting;
+
+	// @todo This needs improvements to the WC API before it's possible to do correctly.
+
+	if ('attribute' === display && display_setting.length) {
+		var att = display_setting[0];
+		var terms = display_setting.slice(1).join(', ');
+
+		return {
+			attributeinfo: '/wp/v2/taxonomies/' + att
+		};
+	} else if ('category' === display && display_setting.length) {
+		return {
+			categories: '/wc/v2/products/categories?include=' + display_setting.join(',')
+		};
+	}
+
+	return {};
+})(function (_ref4) {
+	var attributes = _ref4.attributes,
+	    setAttributes = _ref4.setAttributes,
+	    categories = _ref4.categories,
+	    attributeinfo = _ref4.attributeinfo;
+
+
+	var description = PRODUCTS_BLOCK_DISPLAY_SETTINGS[attributes.display].title;
+
+	if (categories && categories.data && categories.data.length) {
+		description = 'Product categories: ';
+		var selected = [];
+		var _iteratorNormalCompletion2 = true;
+		var _didIteratorError2 = false;
+		var _iteratorError2 = undefined;
+
+		try {
+			for (var _iterator2 = categories.data[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+				var category = _step2.value;
+
+				selected.push(category.name);
+			}
+		} catch (err) {
+			_didIteratorError2 = true;
+			_iteratorError2 = err;
+		} finally {
+			try {
+				if (!_iteratorNormalCompletion2 && _iterator2.return) {
+					_iterator2.return();
+				}
+			} finally {
+				if (_didIteratorError2) {
+					throw _iteratorError2;
+				}
+			}
+		}
+
+		description += selected.join(', ');
+
+		// @todo This needs improvements to the WC API before it's possible to do correctly.
+	} else if (attributeinfo && attributeinfo.data && attributeinfo.data.length) {
+		description = 'Attribute: ' + attributes.display_setting[0];
+		var terms = attributes.display_setting.slice(1);
+		if (terms.length) {
+			description += terms.join(', ');
+		}
+	}
+
+	function editQuicklinkHandler() {
+		setAttributes({
+			edit_mode: true
+		});
+
+		//@todo center in view
+	}
+
+	var editQuickLink = null;
+	if (!attributes.edit_mode) {
+		editQuickLink = wp.element.createElement(
+			'span',
+			{ className: 'edit-quicklink' },
+			wp.element.createElement(
+				'a',
+				{ onClick: editQuicklinkHandler },
+				__('Edit')
+			)
+		);
+	}
+
+	return wp.element.createElement(
+		'div',
+		{ className: 'wc-products-selected-description' },
+		wp.element.createElement(
+			'span',
+			{ className: 'selected-description' },
+			description
+		),
+		editQuickLink
+	);
+});
+
+/**
  * The main products block UI.
  */
 
@@ -816,12 +921,14 @@ var ProductsBlock = function (_React$Component5) {
 				// @todo needs to center in view also
 				editLink = wp.element.createElement(
 					'a',
-					{ className: 'change-quicklink', onClick: function onClick() {
+					{ className: 'edit-quicklink', onClick: function onClick() {
 							setAttributes({ edit_mode: true });
 						} },
 					__('Edit')
 				);
 			}
+
+			var title = PRODUCTS_BLOCK_DISPLAY_SETTINGS[display].title;
 
 			return wp.element.createElement(
 				InspectorControls,
@@ -831,16 +938,7 @@ var ProductsBlock = function (_React$Component5) {
 					null,
 					__('Current Source')
 				),
-				wp.element.createElement(
-					'div',
-					{ className: 'wc-products-selected-scope-description' },
-					wp.element.createElement(
-						'span',
-						{ className: 'selected-scope' },
-						PRODUCTS_BLOCK_DISPLAY_SETTINGS[display].title
-					),
-					editLink
-				)
+				wp.element.createElement(ProductsBlockSidebarInfo, { attributes: attributes, setAttributes: setAttributes })
 			);
 		}
 
@@ -1034,32 +1132,32 @@ registerBlockType('woocommerce/products', {
 
 		// Build the shortcode string out of the set shortcode attributes.
 		var shortcode = '[products';
-		var _iteratorNormalCompletion2 = true;
-		var _didIteratorError2 = false;
-		var _iteratorError2 = undefined;
+		var _iteratorNormalCompletion3 = true;
+		var _didIteratorError3 = false;
+		var _iteratorError3 = undefined;
 
 		try {
-			for (var _iterator2 = shortcode_atts[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-				var _ref3 = _step2.value;
+			for (var _iterator3 = shortcode_atts[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+				var _ref5 = _step3.value;
 
-				var _ref4 = _slicedToArray(_ref3, 2);
+				var _ref6 = _slicedToArray(_ref5, 2);
 
-				var key = _ref4[0];
-				var value = _ref4[1];
+				var key = _ref6[0];
+				var value = _ref6[1];
 
 				shortcode += ' ' + key + '="' + value + '"';
 			}
 		} catch (err) {
-			_didIteratorError2 = true;
-			_iteratorError2 = err;
+			_didIteratorError3 = true;
+			_iteratorError3 = err;
 		} finally {
 			try {
-				if (!_iteratorNormalCompletion2 && _iterator2.return) {
-					_iterator2.return();
+				if (!_iteratorNormalCompletion3 && _iterator3.return) {
+					_iterator3.return();
 				}
 			} finally {
-				if (_didIteratorError2) {
-					throw _iteratorError2;
+				if (_didIteratorError3) {
+					throw _iteratorError3;
 				}
 			}
 		}
