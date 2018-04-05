@@ -697,6 +697,50 @@ class WC_Shop_Customizer {
 				),
 			)
 		);
+
+		// Checkout field controls.
+		$fields = array(
+			'company'   => __( 'Company name', 'woocommerce' ),
+			'address_2' => __( 'Address line 2', 'woocommerce' ),
+			'phone'     => __( 'Phone', 'woocommerce' ),
+		);
+		foreach ( $fields as $field => $label ) {
+			$wp_customize->add_setting(
+				'woocommerce_checkout_' . $field . '_field',
+				array(
+					'default'           => 'optional',
+					'type'              => 'option',
+					'capability'        => 'manage_woocommerce',
+					'sanitize_callback' => array( $this, 'sanitize_checkout_field_display' ),
+				)
+			);
+			$wp_customize->add_control(
+				'woocommerce_checkout_' . $field . '_field',
+				array(
+					/* Translators: %s field name. */
+					'label'       => sprintf( __( '%s field', 'woocommerce' ), $label ),
+					'section'     => 'woocommerce_checkout',
+					'settings'    => 'woocommerce_checkout_' . $field . '_field',
+					'type'        => 'select',
+					'choices'     => array(
+						'hidden'   => __( 'Hidden', 'woocommerce' ),
+						'optional' => __( 'Optional', 'woocommerce' ),
+						'required' => __( 'Required', 'woocommerce' ),
+					),
+				)
+			);
+		}
+	}
+
+	/**
+	 * Sanitize field display.
+	 *
+	 * @param string $value '', 'subcategories', or 'both'.
+	 * @return string
+	 */
+	public function sanitize_checkout_field_display( $value ) {
+		$options = array( 'hidden', 'optional', 'required' );
+		return in_array( $value, $options, true ) ? $value : '';
 	}
 }
 
