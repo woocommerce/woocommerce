@@ -2187,6 +2187,10 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			$args['custom_attributes']['autofocus'] = 'autofocus';
 		}
 
+		if ( $args['description'] ) {
+			$args['custom_attributes']['aria-describedby'] = $args['id'] . '-description';
+		}
+
 		if ( ! empty( $args['custom_attributes'] ) && is_array( $args['custom_attributes'] ) ) {
 			foreach ( $args['custom_attributes'] as $attribute => $attribute_value ) {
 				$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $attribute_value ) . '"';
@@ -2324,11 +2328,13 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 				$field_html .= '<label for="' . esc_attr( $label_id ) . '" class="' . esc_attr( implode( ' ', $args['label_class'] ) ) . '">' . $args['label'] . $required . '</label>';
 			}
 
-			$field_html .= $field;
+			$field_html .= '<span class="woocommerce-input-wrapper">' . $field;
 
 			if ( $args['description'] ) {
-				$field_html .= '<span class="description">' . esc_html( $args['description'] ) . '</span>';
+				$field_html .= '<span class="description" id="' . esc_attr( $args['id'] ) . '-description" aria-hidden="true">' . wp_kses_post( $args['description'] ) . '</span>';
 			}
+
+			$field_html .= '</span>';
 
 			$container_class = esc_attr( implode( ' ', $args['class'] ) );
 			$container_id    = esc_attr( $args['id'] ) . '_field';

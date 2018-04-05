@@ -943,6 +943,40 @@ button.pswp__button--zoom:hover {
 }
 
 .woocommerce-checkout {
+	.woocommerce-input-wrapper {
+		.description {
+			background: royalblue;
+			color: #fff;
+			border-radius: 3px;
+			padding: 1em;
+			margin: .5em 0 0;
+			clear: both;
+			display: none;
+			position: relative;
+
+			a {
+				color: #fff;
+				text-decoration: underline;
+				border: 0;
+				box-shadow: none;
+			}
+
+			&:before {
+				left: 50%;
+				top: 0%;
+				margin-top: -4px;
+				transform: translatex(-50%) rotate(180deg);
+				content: "";
+				position: absolute;
+				border-width: 4px 6px 0 6px;
+				border-style: solid;
+				border-color: royalblue transparent transparent transparent;
+				z-index: 100;
+				display: block;
+			}
+		}
+	}
+
 	.select2-choice,
 	.select2-choice:hover {
 		box-shadow: none !important;
