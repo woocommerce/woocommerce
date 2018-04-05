@@ -570,7 +570,6 @@ var ProductsBlockPreview = withAPIData(function (_ref) {
 
 	if ('specific' === display) {
 		query.include = display_setting.join(',');
-		query.orderby = 'include';
 	} else if ('category' === display) {
 		query.category = display_setting.join(',');
 	} else if ('attribute' === display && display_setting.length) {
@@ -586,7 +585,7 @@ var ProductsBlockPreview = withAPIData(function (_ref) {
 	}
 
 	// @todo Add support for orderby by sales, rating, and price to the API.
-	if ('specific' !== display && ('title' === orderby || 'date' === orderby)) {
+	if ('title' === orderby || 'date' === orderby) {
 		query.orderby = orderby;
 
 		if ('title' === orderby) {
@@ -753,37 +752,34 @@ registerBlockType('woocommerce/products', {
 				});
 			}
 
-			// Orderby settings don't make sense for specific-selected products display.
-			var orderControl = null;
-			if ('specific' !== display) {
-				orderControl = wp.element.createElement(SelectControl, {
-					key: 'query-panel-select',
-					label: __('Order Products By'),
-					value: orderby,
-					options: [{
-						label: __('Newness - newest first'),
-						value: 'date'
-					}, {
-						label: __('Price - low to high'),
-						value: 'price_asc'
-					}, {
-						label: __('Price - high to low'),
-						value: 'price_desc'
-					}, {
-						label: __('Rating - highest first'),
-						value: 'rating'
-					}, {
-						label: __('Sales - most first'),
-						value: 'popularity'
-					}, {
-						label: __('Title - alphabetical'),
-						value: 'title'
-					}],
-					onChange: function onChange(value) {
-						return setAttributes({ orderby: value });
-					}
-				});
-			}
+			// Order controls
+			var orderControl = wp.element.createElement(SelectControl, {
+				key: 'query-panel-select',
+				label: __('Order Products By'),
+				value: orderby,
+				options: [{
+					label: __('Newness - newest first'),
+					value: 'date'
+				}, {
+					label: __('Price - low to high'),
+					value: 'price_asc'
+				}, {
+					label: __('Price - high to low'),
+					value: 'price_desc'
+				}, {
+					label: __('Rating - highest first'),
+					value: 'rating'
+				}, {
+					label: __('Sales - most first'),
+					value: 'popularity'
+				}, {
+					label: __('Title - alphabetical'),
+					value: 'title'
+				}],
+				onChange: function onChange(value) {
+					return setAttributes({ orderby: value });
+				}
+			});
 
 			// Row settings don't make sense for specific-selected products display.
 			var rowControl = null;
