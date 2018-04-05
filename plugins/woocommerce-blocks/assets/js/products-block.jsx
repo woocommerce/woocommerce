@@ -48,7 +48,7 @@ const PRODUCTS_BLOCK_DISPLAY_SETTINGS = {
 	},
 	'all' : {
 		title: __( 'All products' ),
-		description: __( 'Display all products ordered chronologically' ),
+		description: __( 'Display all products ordered chronologically, alphabetically, by price, by rating or by sales' ),
 		value: 'all',
 	}
 };
@@ -284,7 +284,7 @@ class ProductsBlockSettingsEditor extends React.Component {
 
 		return (
 			<div className={ 'wc-products-settings ' + ( this.state.expanded_group ? 'expanded-group-' + this.state.expanded_group : '' ) }>
-				<h4 className="wc-products-settings__title"><Dashicon icon={ 'universal-access-alt' } /> { __( 'Products' ) }</h4>
+				<h4 className="wc-products-settings__title"><Dashicon icon={ 'screenoptions' } /> { __( 'Products' ) }</h4>
 
 				{ heading }
 
@@ -329,10 +329,10 @@ class ProductPreview extends React.Component {
  */
 const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
 
-	const { columns, rows, display, display_setting, orderby, block_layout } = attributes;
+	const { columns, rows, display, display_setting, orderby } = attributes;
 
 	let query = {
-		per_page: ( 'list' === block_layout ) ? rows : rows * columns,
+		per_page: rows * columns,
 	};
 
 	if ( 'specific' === display ) {
@@ -380,7 +380,7 @@ const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
 		return __( 'No products found' );
 	}
 
-	const classes = "wc-products-block-preview " + attributes.block_layout + " cols-" + attributes.columns;
+	const classes = "wc-products-block-preview cols-" + attributes.columns;
 
 	return (
 		<div className={ classes }>
@@ -396,18 +396,10 @@ const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
  */
 registerBlockType( 'woocommerce/products', {
 	title: __( 'Products' ),
-	icon: 'universal-access-alt', // @todo Needs a good icon.
+	icon: 'screenoptions',
 	category: 'widgets',
 
 	attributes: {
-
-		/**
-		 * Layout to use. 'grid' or 'list'.
-		 */
-		block_layout: {
-			type: 'string',
-			default: 'grid',
-		},
 
 		/**
 		 * Number of columns.
@@ -422,7 +414,7 @@ registerBlockType( 'woocommerce/products', {
 		 */
 		rows: {
 			type: 'number',
-			default: 1,
+			default: wc_product_block_data.default_rows,
 		},
 
 		/**
@@ -463,7 +455,7 @@ registerBlockType( 'woocommerce/products', {
 	 */
 	edit( props ) {
 		const { attributes, className, focus, setAttributes, setFocus } = props;
-		const { block_layout, rows, columns, display, display_setting, orderby, edit_mode } = attributes;
+		const { rows, columns, display, display_setting, orderby, edit_mode } = attributes;
 
 		/**
 		 * Get the components for the sidebar settings area that is rendered while focused on a Products block.
@@ -472,20 +464,16 @@ registerBlockType( 'woocommerce/products', {
 		 */
 		function getInspectorControls() {
 
-			// Column controls don't make sense in a list layout.
-			let columnControl = null;
-			if ( 'list' !== block_layout ) {
-				columnControl = (
-					<RangeControl
-						label={ __( 'Columns' ) }
-						value={ columns }
-						onChange={ ( value ) => setAttributes( { columns: value } ) }
-						min={ wc_product_block_data.min_columns }
-						max={ wc_product_block_data.max_columns }
-					/>
-				);
-			}
-
+			let columnControl = (
+				<RangeControl
+					label={ __( 'Columns' ) }
+					value={ columns }
+					onChange={ ( value ) => setAttributes( { columns: value } ) }
+					min={ wc_product_block_data.min_columns }
+					max={ wc_product_block_data.max_columns }
+				/>
+			);
+			
 			// Orderby settings don't make sense for specific-selected products display.
 			let orderControl = null;
 			if ( 'specific' !== display ) {
@@ -533,8 +521,8 @@ registerBlockType( 'woocommerce/products', {
 						label={ __( 'Rows' ) }
 						value={ rows }
 						onChange={ ( value ) => setAttributes( { rows: value } ) }
-						min={ 1 }
-						max={ 6 }
+						min={ wc_product_block_data.min_rows }
+						max={ wc_product_block_data.max_rows }
 					/>
 					{ orderControl }
 				</InspectorControls>
@@ -547,21 +535,6 @@ registerBlockType( 'woocommerce/products', {
 		 * @return Component
 		 */
 		function getToolbarControls() {
-
-			const layoutControls = [
-				{
-					icon: 'list-view',
-					title: __( 'List View' ),
-					onClick: () => setAttributes( { block_layout: 'list' } ),
-					isActive: 'list' === block_layout,
-				},
-				{
-					icon: 'grid-view',
-					title: __( 'Grid View' ),
-					onClick: () => setAttributes( { block_layout: 'grid' } ),
-					isActive: 'grid' === block_layout,
-				},
-			];
 
 			// Edit button should not do anything if valid product selection has not been made.
 			const shouldDisableEditButton = ['', 'specific', 'category', 'attribute'].includes( display ) && ! display_setting.length;
@@ -577,7 +550,6 @@ registerBlockType( 'woocommerce/products', {
 
 			return (
 				<BlockControls key="controls">
-					<Toolbar controls={ edit_mode ? [] : layoutControls } />
 					<Toolbar controls={ editButton } />
 				</BlockControls>
 			);
@@ -600,10 +572,15 @@ registerBlockType( 'woocommerce/products', {
 		function getSettingsEditor() {
 
 			const update_display_callback = ( value ) => {
+
+				// These options have setting screens that need further input from the user, so keep edit mode open.
+				const needsFurtherSettings = [ 'specific', 'attribute', 'category' ];
+
 				if ( display !== value ) {
 					setAttributes( {
 						display: value,
 						display_setting: [],
+						edit_mode: needsFurtherSettings.includes( value ),
 					} );
 				}
 			};
@@ -632,18 +609,11 @@ registerBlockType( 'woocommerce/products', {
 	 * @return string
 	 */
 	save( props ) {
-		const { block_layout, rows, columns, display, display_setting, orderby } = props.attributes;
+		const { rows, columns, display, display_setting, orderby } = props.attributes;
 
 		let shortcode_atts = new Map();
-		shortcode_atts.set( 'limit', 'grid' === block_layout ? rows * columns : rows );
-
-		if ( 'list' === block_layout ) {
-			shortcode_atts.set( 'class', 'list-layout' );
-		}
-
-		if ( 'grid' === block_layout ) {
-			shortcode_atts.set( 'columns', columns );
-		}
+		shortcode_atts.set( 'limit', rows * columns );
+		shortcode_atts.set( 'columns', columns );
 
 		if ( 'specific' === display ) {
 			shortcode_atts.set( 'ids', display_setting.join( ',' ) );
