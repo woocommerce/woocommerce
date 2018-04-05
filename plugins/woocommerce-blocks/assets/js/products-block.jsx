@@ -525,10 +525,10 @@ registerBlockType( 'woocommerce/products', {
 				);
 			}
 
-			return (
-				<InspectorControls key="inspector">
-					<h3>{ __( 'Layout' ) }</h3>
-					{ columnControl }
+			// Row settings don't make sense for specific-selected products display.
+			let rowControl = null;
+			if ( 'specific' !== display ) {
+				rowControl = (
 					<RangeControl
 						label={ __( 'Rows' ) }
 						value={ rows }
@@ -536,6 +536,14 @@ registerBlockType( 'woocommerce/products', {
 						min={ 1 }
 						max={ 6 }
 					/>
+				);
+			}
+
+			return (
+				<InspectorControls key="inspector">
+					<h3>{ __( 'Layout' ) }</h3>
+					{ columnControl }
+					{ rowControl }
 					{ orderControl }
 				</InspectorControls>
 			);
