@@ -37,11 +37,11 @@ do_action( 'woocommerce_auth_page_header' ); ?>
 
 <form method="post" class="wc-auth-login">
 	<p class="form-row form-row-wide">
-		<label for="username"><?php esc_html_e( 'Username or email address', 'woocommerce' ); ?> <span class="required">*</span></label>
+		<label for="username"><?php esc_html_e( 'Username or email address', 'woocommerce' ); ?>&nbsp;<span class="required">*</span></label>
 		<input type="text" class="input-text" name="username" id="username" value="<?php echo ( ! empty( $_POST['username'] ) ) ? esc_attr( $_POST['username'] ) : ''; ?>" /><?php //@codingStandardsIgnoreLine ?>
 	</p>
 	<p class="form-row form-row-wide">
-		<label for="password"><?php esc_html_e( 'Password', 'woocommerce' ); ?> <span class="required">*</span></label>
+		<label for="password"><?php esc_html_e( 'Password', 'woocommerce' ); ?>&nbsp;<span class="required">*</span></label>
 		<input class="input-text" type="password" name="password" id="password" />
 	</p>
 	<p class="wc-auth-actions">

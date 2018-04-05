@@ -12,7 +12,7 @@ jQuery( function( $ ) {
 		function field_is_required( field, is_required ) {
 			if ( is_required ) {
 				if ( field.find( 'label abbr.required' ).length === 0 ) {
-					field.find( 'label' ).append( ' <abbr class="required" title="' + wc_address_i18n_params.i18n_required_text + '">*</abbr>' );
+					field.find( 'label' ).append( '&nbsp;<abbr class="required" title="' + wc_address_i18n_params.i18n_required_text + '">*</abbr>' );
 					field.addClass( 'validate-required' );
 				}
 			} else {
