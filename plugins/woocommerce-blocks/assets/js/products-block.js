@@ -1455,7 +1455,7 @@ var ProductSpecificSearchResultsDropdownElement = function (_React$Component4) {
 
 			return wp.element.createElement(
 				'div',
-				{ className: 'wc-products-list-card__content' },
+				{ className: 'wc-products-list-card__content', onClick: this.handleClick },
 				wp.element.createElement('img', { src: product.images[0].src }),
 				wp.element.createElement(
 					'span',
@@ -1466,8 +1466,7 @@ var ProductSpecificSearchResultsDropdownElement = function (_React$Component4) {
 					'button',
 					{ type: 'button',
 						className: 'button-link',
-						id: 'product-' + product.id,
-						onClick: this.handleClick },
+						id: 'product-' + product.id },
 					__('Add')
 				)
 			);

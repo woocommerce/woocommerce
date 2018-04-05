@@ -289,13 +289,12 @@ class ProductSpecificSearchResultsDropdownElement extends React.Component {
 		const product = this.props.product;
 
 		return (
-			<div className="wc-products-list-card__content">
+			<div className="wc-products-list-card__content" onClick={ this.handleClick }>
 				<img src={ product.images[0].src } />
 				<span className="wc-products-list-card__content-item-name">{ this.state.clicked ? __( 'Added' ) : product.name }</span>
 				<button type="button"
 					className="button-link"
-					id={ 'product-' + product.id }
-					onClick={ this.handleClick } >
+					id={ 'product-' + product.id } >
 						{ __( 'Add' ) }
 				</button>
 			</div>
