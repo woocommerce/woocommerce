@@ -392,6 +392,78 @@ const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
 } );
 
 /**
+ * Information about current block settings rendered in the sidebar.
+ */
+const ProductsBlockSidebarInfo = withAPIData( ( { attributes } ) => {
+
+	const { display, display_setting } = attributes;
+
+	// @todo This needs improvements to the WC API before it's possible to do correctly.
+	if ( 'attribute' === display && display_setting.length ) {
+		const att = display_setting[0];
+		const terms = display_setting.slice( 1 ).join( ', ' );
+
+		return {
+			attributeinfo: '/wp/v2/taxonomies/'+att,
+		};
+
+	} else if ( 'category' === display && display_setting.length ) {
+		return {
+			categories: '/wc/v2/products/categories?include=' + display_setting.join( ',' ),
+		};
+	}
+
+	return {};
+
+} )( ( { attributes, setAttributes, categories, attributeinfo } ) => {
+
+	let description = PRODUCTS_BLOCK_DISPLAY_SETTINGS[ attributes.display ].title;
+
+	if ( categories && categories.data && categories.data.length ) {
+		description          = 'Product categories: ';
+		const selected = [];
+		for ( let category of categories.data ) {
+			selected.push( category.name );
+		}
+		description += selected.join( ', ' );
+
+		// @todo This needs improvements to the WC API before it's possible to do correctly.
+	} else if ( attributeinfo && attributeinfo.data && attributeinfo.data.length ) {
+		description       = 'Attribute: ' + attributes.display_setting[0];
+		const terms = attributes.display_setting.slice( 1 );
+		if ( terms.length ) {
+			description += terms.join( ', ' );
+		}
+	}
+
+	function editQuicklinkHandler() {
+		setAttributes( {
+			edit_mode: true,
+		} );
+
+		//@todo center in view
+	}
+
+	let editQuickLink = null;
+	if ( ! attributes.edit_mode ) {
+		editQuickLink = (
+			<span className="edit-quicklink">
+				<a onClick={ editQuicklinkHandler }>{ __( 'Edit' ) }</a>
+			</span>
+		);
+	}
+
+	return (
+		<div className="wc-products-selected-description">
+			<span className="selected-description">
+				{ description }
+			</span>
+			{ editQuickLink }
+		</div>
+	);
+} );
+
+/**
  * The main products block UI.
  */
 class ProductsBlock extends React.Component {
@@ -528,18 +600,15 @@ class ProductsBlock extends React.Component {
 		let editLink = null;
 		if ( ! edit_mode ) {
 			// @todo needs to center in view also
-			editLink = <a className="change-quicklink" onClick={ () => { setAttributes( { edit_mode: true } ); } } >{ __( 'Edit' ) }</a>;
+			editLink = <a className="edit-quicklink" onClick={ () => { setAttributes( { edit_mode: true } ); } } >{ __( 'Edit' ) }</a>;
 		}
+
+		let title = PRODUCTS_BLOCK_DISPLAY_SETTINGS[ display ].title;
 
 		return (
 			<InspectorControls key="description-inspector">
 				<h3>{ __( 'Current Source' ) }</h3>
-				<div className="wc-products-selected-scope-description">
-					<span className="selected-scope">
-						{ PRODUCTS_BLOCK_DISPLAY_SETTINGS[ display ].title }
-					</span>
-					{ editLink }
-				</div>
+				<ProductsBlockSidebarInfo attributes={ attributes } setAttributes={ setAttributes } />
 			</InspectorControls>
 		);
 	}
