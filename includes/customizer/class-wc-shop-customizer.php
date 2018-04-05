@@ -39,6 +39,7 @@ class WC_Shop_Customizer {
 		$this->add_store_notice_section( $wp_customize );
 		$this->add_product_catalog_section( $wp_customize );
 		$this->add_product_images_section( $wp_customize );
+		$this->add_checkout_section( $wp_customize );
 	}
 
 	/**
@@ -643,6 +644,23 @@ class WC_Shop_Customizer {
 						),
 					),
 				)
+			)
+		);
+	}
+
+	/**
+	 * Checkout section.
+	 *
+	 * @param WP_Customize_Manager $wp_customize Theme Customizer object.
+	 */
+	public function add_checkout_section( $wp_customize ) {
+		$wp_customize->add_section(
+			'woocommerce_checkout',
+			array(
+				'title'       => __( 'Checkout Form Options', 'woocommerce' ),
+				'priority'    => 20,
+				'panel'       => 'woocommerce',
+				'description' => __( 'These options let you change the appearance of certain parts of the WooCommerce checkout form.', 'woocommerce' ),
 			)
 		);
 	}
