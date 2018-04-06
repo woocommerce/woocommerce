@@ -724,7 +724,8 @@ p.wc-products-display-options__option-description {
 			margin: 0 1em 0 0;
 		}
 
-		button {
+		.dashicon {
+			color: $color__link;
 			margin-left: auto;
 		}
 	}
