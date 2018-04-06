@@ -1418,13 +1418,7 @@ var ProductSpecificSearchResultsDropdownElement = function (_React$Component4) {
 					{ className: 'wc-products-list-card__content-item-name' },
 					product.name
 				),
-				wp.element.createElement(
-					'button',
-					{ type: 'button',
-						className: 'button-link',
-						id: 'product-' + product.id },
-					icon
-				)
+				icon
 			);
 		}
 	}]);
