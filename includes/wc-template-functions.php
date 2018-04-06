@@ -550,6 +550,52 @@ function wc_query_string_form_fields( $values = null, $exclude = array(), $curre
 }
 
 /**
+ * Output t&c text. This is custom text which can be added via the customizer.
+ *
+ * @since 3.4.0
+ */
+function woocommerce_output_terms_and_conditions_text() {
+	echo wp_kses_post( wpautop( get_option( 'woocommerce_checkout_terms_and_conditions_text', '' ) ) );
+}
+
+/**
+ * Output t&c page's content (if set). The page can be set from checkout settings.
+ *
+ * @since 3.4.0
+ */
+function woocommerce_output_terms_and_conditions_page_content() {
+	$terms_page = wc_get_page_id( 'terms' ) > 0 ? get_post( wc_get_page_id( 'terms' ) ) : false;
+
+	if ( $terms_page && 'publish' === $terms_page->post_status && $terms_page->post_content && ! has_shortcode( $terms_page->post_content, 'woocommerce_checkout' ) ) {
+		echo wp_kses_post( wc_format_content( $terms_page->post_content ) );
+	}
+}
+
+/**
+ * Output t&c checkbox text.
+ *
+ * @since 3.4.0
+ */
+function woocommerce_output_terms_and_conditions_checkbox_text() {
+	$default_text = __( 'I have read and agree to the website [terms]', 'woocommerce' );
+	$text         = get_option( 'woocommerce_checkout_terms_and_conditions_checkbox_text' );
+
+	if ( ! $text ) {
+		$text = $default_text;
+	}
+
+	$terms_permalink = wc_get_page_permalink( 'terms', '' );
+
+	if ( $terms_permalink ) {
+		$terms_link = '<a href="' . esc_url( $terms_permalink ) . '" class="woocommerce-terms-and-conditions-link" target="_blank">' . __( 'terms and conditions', 'woocommerce' ) . '</a>';
+	} else {
+		$terms_link = __( 'terms and conditions', 'woocommerce' );
+	}
+
+	echo wp_kses_post( str_replace( '[terms]', $terms_link, $text ) );
+}
+
+/**
  * Template pages
  */
 
@@ -2160,7 +2206,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			$args['class'][] = 'validate-required';
 			$required        = '&nbsp;<abbr class="required" title="' . esc_attr__( 'required', 'woocommerce' ) . '">*</abbr>';
 		} else {
-			$required        = '&nbsp;<span class="optional">(' . esc_html__( 'optional', 'woocommerce' ) . ')</span>';
+			$required = '&nbsp;<span class="optional">(' . esc_html__( 'optional', 'woocommerce' ) . ')</span>';
 		}
 
 		if ( is_string( $args['label_class'] ) ) {

@@ -657,6 +657,27 @@ class WC_Shop_Customizer {
 	}
 
 	/**
+	 * Get pages to show in settings.
+	 *
+	 * @return array
+	 */
+	protected function get_page_choices() {
+		return wc_list_pluck( get_pages( array(
+			'depth'    => 0,
+			'child_of' => 0,
+		) ), 'post_title', 'ID' );
+	}
+
+	/**
+	 * See if checkbox is active or not.
+	 *
+	 * @return boolean
+	 */
+	public function is_terms_and_conditions_checkbox_active() {
+		return wc_string_to_bool( get_option( 'woocommerce_checkout_terms_and_conditions_checkbox' ) );
+	}
+
+	/**
 	 * Checkout section.
 	 *
 	 * @param WP_Customize_Manager $wp_customize Theme Customizer object.
@@ -669,32 +690,6 @@ class WC_Shop_Customizer {
 				'priority'    => 20,
 				'panel'       => 'woocommerce',
 				'description' => __( 'These options let you change the appearance of certain parts of the WooCommerce checkout.', 'woocommerce' ),
-			)
-		);
-
-		// Register settings.
-		$wp_customize->add_setting(
-			'woocommerce_checkout_label_required_fields',
-			array(
-				'default'    => 'yes',
-				'type'       => 'option',
-				'capability' => 'manage_woocommerce',
-			)
-		);
-
-		// Register controls.
-		$wp_customize->add_control(
-			'woocommerce_checkout_label_required_fields',
-			array(
-				'label'       => __( 'Label required fields', 'woocommerce' ),
-				'description' => __( 'Choose if required fields should be labeled with an asterisk, or if optional fields should be clearly marked instead.', 'woocommerce' ),
-				'section'     => 'woocommerce_checkout',
-				'settings'    => 'woocommerce_checkout_label_required_fields',
-				'type'        => 'radio',
-				'choices'     => array(
-					'yes' => __( 'Label required fields', 'woocommerce' ),
-					'no'  => __( 'Label optional fields', 'woocommerce' ),
-				),
 			)
 		);
 
@@ -718,15 +713,128 @@ class WC_Shop_Customizer {
 				'woocommerce_checkout_' . $field . '_field',
 				array(
 					/* Translators: %s field name. */
-					'label'       => sprintf( __( '%s field', 'woocommerce' ), $label ),
-					'section'     => 'woocommerce_checkout',
-					'settings'    => 'woocommerce_checkout_' . $field . '_field',
-					'type'        => 'select',
-					'choices'     => array(
+					'label'    => sprintf( __( '%s field', 'woocommerce' ), $label ),
+					'section'  => 'woocommerce_checkout',
+					'settings' => 'woocommerce_checkout_' . $field . '_field',
+					'type'     => 'select',
+					'choices'  => array(
 						'hidden'   => __( 'Hidden', 'woocommerce' ),
 						'optional' => __( 'Optional', 'woocommerce' ),
 						'required' => __( 'Required', 'woocommerce' ),
 					),
+				)
+			);
+		}
+
+		// Register settings.
+		$wp_customize->add_setting(
+			'woocommerce_checkout_label_required_fields',
+			array(
+				'default'    => 'yes',
+				'type'       => 'option',
+				'capability' => 'manage_woocommerce',
+			)
+		);
+
+		$wp_customize->add_setting(
+			'woocommerce_checkout_terms_and_conditions_checkbox',
+			array(
+				'default'              => 'no',
+				'type'                 => 'option',
+				'capability'           => 'manage_woocommerce',
+				'sanitize_callback'    => 'wc_bool_to_string',
+				'sanitize_js_callback' => 'wc_string_to_bool',
+			)
+		);
+
+		$wp_customize->add_setting(
+			'woocommerce_checkout_terms_and_conditions_checkbox_text',
+			array(
+				'default'           => '',
+				'type'              => 'option',
+				'capability'        => 'manage_woocommerce',
+				'sanitize_callback' => 'wp_kses_post',
+				'transport'         => 'postMessage',
+			)
+		);
+
+		$wp_customize->add_setting(
+			'woocommerce_checkout_terms_and_conditions_text',
+			array(
+				'default'           => '',
+				'type'              => 'option',
+				'capability'        => 'manage_woocommerce',
+				'sanitize_callback' => 'wp_kses_post',
+				'transport'         => 'postMessage',
+			)
+		);
+
+		// Register controls.
+		$wp_customize->add_control(
+			'woocommerce_checkout_label_required_fields',
+			array(
+				'label'       => __( 'Label required fields', 'woocommerce' ),
+				'description' => __( 'Choose if required fields should be labeled with an asterisk, or if optional fields should be clearly marked instead.', 'woocommerce' ),
+				'section'     => 'woocommerce_checkout',
+				'settings'    => 'woocommerce_checkout_label_required_fields',
+				'type'        => 'radio',
+				'choices'     => array(
+					'yes' => __( 'Label required fields', 'woocommerce' ),
+					'no'  => __( 'Label optional fields', 'woocommerce' ),
+				),
+			)
+		);
+
+		$wp_customize->add_control(
+			'woocommerce_checkout_terms_and_conditions_text',
+			array(
+				'label'       => __( 'Terms and conditions', 'woocommerce' ),
+				'description' => __( 'Optionally include some text describing your terms and conditions, privacy and shipping policies, or anything else.', 'woocommerce' ),
+				'section'     => 'woocommerce_checkout',
+				'settings'    => 'woocommerce_checkout_terms_and_conditions_text',
+				'type'        => 'textarea',
+			)
+		);
+
+		$wp_customize->add_control(
+			'woocommerce_checkout_terms_and_conditions_checkbox',
+			array(
+				'label'       => __( 'Enable terms and conditions checkbox', 'woocommerce' ),
+				'description' => __( 'Customers must accept your terms and conditions before they can place an order.', 'woocommerce' ),
+				'section'     => 'woocommerce_checkout',
+				'settings'    => 'woocommerce_checkout_terms_and_conditions_checkbox',
+				'type'        => 'checkbox',
+			)
+		);
+
+		$wp_customize->add_control(
+			'woocommerce_checkout_terms_and_conditions_checkbox_text',
+			array(
+				'label'           => __( 'Checkbox label', 'woocommerce' ),
+				'description'     => __( 'Optionally change the default terms and conditions checkbox label.', 'woocommerce' ),
+				'section'         => 'woocommerce_checkout',
+				'settings'        => 'woocommerce_checkout_terms_and_conditions_checkbox_text',
+				'active_callback' => array( $this, 'is_terms_and_conditions_checkbox_active' ),
+				'type'            => 'textarea',
+				'input_attrs'     => array(
+					'placeholder' => __( 'I have read and agree to the website [terms]', 'woocommerce' ),
+				),
+			)
+		);
+
+		if ( isset( $wp_customize->selective_refresh ) ) {
+			$wp_customize->selective_refresh->add_partial(
+				'woocommerce_checkout_terms_and_conditions_text', array(
+					'selector'            => '.woocommerce-terms-and-conditions-text',
+					'container_inclusive' => false,
+					'render_callback'     => 'woocommerce_output_terms_and_conditions_text',
+				)
+			);
+			$wp_customize->selective_refresh->add_partial(
+				'woocommerce_checkout_terms_and_conditions_checkbox_text', array(
+					'selector'            => '.woocommerce-terms-and-conditions-checkbox-text',
+					'container_inclusive' => false,
+					'render_callback'     => 'woocommerce_output_terms_and_conditions_checkbox_text',
 				)
 			);
 		}

@@ -942,6 +942,24 @@ button.pswp__button--zoom:hover {
 	background: rgba(0,0,0,.05);
 }
 
+.woocommerce-terms-and-conditions-link {
+	display: inline-block;
+
+	&:after {
+		content: "";
+		display: inline-block;
+		border-style: solid;
+		margin-bottom: 2px;
+		margin-left: .25em;
+		border-width: 6px 6px 0 6px;
+		border-color: #111 transparent transparent transparent;
+	}
+	&.woocommerce-terms-and-conditions-link--open:after {
+		border-width: 0 6px 6px 6px;
+		border-color: transparent transparent #111 transparent;
+	}
+}
+
 .woocommerce-checkout {
 	.woocommerce-input-wrapper {
 		.description {
