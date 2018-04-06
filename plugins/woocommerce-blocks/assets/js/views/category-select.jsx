@@ -114,7 +114,8 @@ export class ProductsCategorySelect extends React.Component {
  */
 const ProductCategoryFilter = ( { filterResults } ) => {
 	return (
-		<div>
+		<div className="wc-products-list-card__input-wrapper">
+			<Dashicon icon="search" />
 			<input className="wc-products-list-card__search" type="search" placeholder={ __( 'Search for categories' ) } onChange={ filterResults } />
 		</div>
 	);

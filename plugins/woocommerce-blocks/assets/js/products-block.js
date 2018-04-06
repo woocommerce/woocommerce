@@ -867,7 +867,6 @@ registerBlockType('woocommerce/products', {
    * @return Component
    */
 		function getSettingsEditor() {
-
 			var update_display_callback = function update_display_callback(value) {
 				if (display !== value) {
 					setAttributes({
@@ -878,6 +877,7 @@ registerBlockType('woocommerce/products', {
 			};
 
 			return wp.element.createElement(ProductsBlockSettingsEditor, {
+				attributes: attributes,
 				selected_display: display,
 				selected_display_setting: display_setting,
 				update_display_callback: update_display_callback,
@@ -1017,9 +1017,6 @@ var _wp$components = wp.components,
     withAPIData = _wp$components.withAPIData,
     Dropdown = _wp$components.Dropdown,
     Dashicon = _wp$components.Dashicon;
-var _ReactTransitionGroup = ReactTransitionGroup,
-    TransitionGroup = _ReactTransitionGroup.TransitionGroup,
-    CSSTransition = _ReactTransitionGroup.CSSTransition;
 
 /**
  * Product data cache.
@@ -1059,11 +1056,17 @@ var ProductsSpecificSelect = exports.ProductsSpecificSelect = function (_React$C
 
 
 	_createClass(ProductsSpecificSelect, [{
-		key: 'addProduct',
-		value: function addProduct(id) {
-
+		key: 'addOrRemoveProduct',
+		value: function addOrRemoveProduct(id) {
 			var selectedProducts = this.state.selectedProducts;
-			selectedProducts.push(id);
+
+			if (!selectedProducts.includes(id)) {
+				selectedProducts.push(id);
+			} else {
+				selectedProducts = selectedProducts.filter(function (product) {
+					return product !== id;
+				});
+			}
 
 			this.setState({
 				selectedProducts: selectedProducts
@@ -1079,52 +1082,6 @@ var ProductsSpecificSelect = exports.ProductsSpecificSelect = function (_React$C
 		}
 
 		/**
-   * Remove a product from the list of selected products.
-   *
-   * @param id int Product ID.
-   */
-
-	}, {
-		key: 'removeProduct',
-		value: function removeProduct(id) {
-			var oldProducts = this.state.selectedProducts;
-			var newProducts = [];
-
-			var _iteratorNormalCompletion = true;
-			var _didIteratorError = false;
-			var _iteratorError = undefined;
-
-			try {
-				for (var _iterator = oldProducts[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-					var productId = _step.value;
-
-					if (productId !== id) {
-						newProducts.push(productId);
-					}
-				}
-			} catch (err) {
-				_didIteratorError = true;
-				_iteratorError = err;
-			} finally {
-				try {
-					if (!_iteratorNormalCompletion && _iterator.return) {
-						_iterator.return();
-					}
-				} finally {
-					if (_didIteratorError) {
-						throw _iteratorError;
-					}
-				}
-			}
-
-			this.setState({
-				selectedProducts: newProducts
-			});
-
-			this.props.update_display_setting_callback(newProducts);
-		}
-
-		/**
    * Render the product specific select screen.
    */
 
@@ -1135,12 +1092,13 @@ var ProductsSpecificSelect = exports.ProductsSpecificSelect = function (_React$C
 				'div',
 				{ className: 'wc-products-list-card wc-products-list-card--specific' },
 				wp.element.createElement(ProductsSpecificSearchField, {
-					addProductCallback: this.addProduct.bind(this),
+					addOrRemoveProductCallback: this.addOrRemoveProduct.bind(this),
 					selectedProducts: this.state.selectedProducts
 				}),
 				wp.element.createElement(ProductSpecificSelectedProducts, {
+					columns: this.props.attributes.columns,
 					productIds: this.state.selectedProducts,
-					removeProductCallback: this.removeProduct.bind(this)
+					addOrRemoveProduct: this.addOrRemoveProduct.bind(this)
 				})
 			);
 		}
@@ -1246,15 +1204,20 @@ var ProductsSpecificSearchField = function (_React$Component2) {
 			return wp.element.createElement(
 				'div',
 				{ className: 'wc-products-list-card__search-wrapper', ref: this.setWrapperRef },
-				wp.element.createElement('input', { type: 'search',
-					className: 'wc-products-list-card__search',
-					value: this.state.searchText,
-					placeholder: __('Search for products to display'),
-					onChange: this.updateSearchResults
-				}),
+				wp.element.createElement(
+					'div',
+					{ className: 'wc-products-list-card__input-wrapper' },
+					wp.element.createElement(Dashicon, { icon: 'search' }),
+					wp.element.createElement('input', { type: 'search',
+						className: 'wc-products-list-card__search',
+						value: this.state.searchText,
+						placeholder: __('Search for products to display'),
+						onChange: this.updateSearchResults
+					})
+				),
 				wp.element.createElement(ProductSpecificSearchResults, {
 					searchString: this.state.searchText,
-					addProductCallback: this.props.addProductCallback,
+					addOrRemoveProductCallback: this.props.addOrRemoveProductCallback,
 					selectedProducts: this.props.selectedProducts
 				})
 			);
@@ -1282,7 +1245,7 @@ var ProductSpecificSearchResults = withAPIData(function (props) {
 	};
 })(function (_ref) {
 	var products = _ref.products,
-	    addProductCallback = _ref.addProductCallback,
+	    addOrRemoveProductCallback = _ref.addOrRemoveProductCallback,
 	    selectedProducts = _ref.selectedProducts;
 
 	if (!products.data) {
@@ -1290,38 +1253,44 @@ var ProductSpecificSearchResults = withAPIData(function (props) {
 	}
 
 	if (0 === products.data.length) {
-		return __('No products found');
+		return wp.element.createElement(
+			'span',
+			{ className: 'wc-products-list-card__search-no-results' },
+			' ',
+			__('No products found'),
+			' '
+		);
 	}
 
 	// Populate the cache.
-	var _iteratorNormalCompletion2 = true;
-	var _didIteratorError2 = false;
-	var _iteratorError2 = undefined;
+	var _iteratorNormalCompletion = true;
+	var _didIteratorError = false;
+	var _iteratorError = undefined;
 
 	try {
-		for (var _iterator2 = products.data[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-			var product = _step2.value;
+		for (var _iterator = products.data[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+			var product = _step.value;
 
 			PRODUCT_DATA[product.id] = product;
 		}
 	} catch (err) {
-		_didIteratorError2 = true;
-		_iteratorError2 = err;
+		_didIteratorError = true;
+		_iteratorError = err;
 	} finally {
 		try {
-			if (!_iteratorNormalCompletion2 && _iterator2.return) {
-				_iterator2.return();
+			if (!_iteratorNormalCompletion && _iterator.return) {
+				_iterator.return();
 			}
 		} finally {
-			if (_didIteratorError2) {
-				throw _iteratorError2;
+			if (_didIteratorError) {
+				throw _iteratorError;
 			}
 		}
 	}
 
 	return wp.element.createElement(ProductSpecificSearchResultsDropdown, {
 		products: products.data,
-		addProductCallback: addProductCallback,
+		addOrRemoveProductCallback: addOrRemoveProductCallback,
 		selectedProducts: selectedProducts
 	});
 });
@@ -1349,57 +1318,46 @@ var ProductSpecificSearchResultsDropdown = function (_React$Component3) {
 		value: function render() {
 			var _props = this.props,
 			    products = _props.products,
-			    addProductCallback = _props.addProductCallback,
+			    addOrRemoveProductCallback = _props.addOrRemoveProductCallback,
 			    selectedProducts = _props.selectedProducts;
 
 
 			var productElements = [];
 
-			var _iteratorNormalCompletion3 = true;
-			var _didIteratorError3 = false;
-			var _iteratorError3 = undefined;
+			var _iteratorNormalCompletion2 = true;
+			var _didIteratorError2 = false;
+			var _iteratorError2 = undefined;
 
 			try {
-				for (var _iterator3 = products[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-					var product = _step3.value;
+				for (var _iterator2 = products[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+					var product = _step2.value;
 
-					if (selectedProducts.includes(product.id)) {
-						continue;
-					}
-
-					productElements.push(wp.element.createElement(
-						CSSTransition,
-						{
-							key: product.slug,
-							classNames: 'wc-products-list-card__content--transition',
-							timeout: { exit: 700 }
-						},
-						wp.element.createElement(ProductSpecificSearchResultsDropdownElement, {
-							product: product,
-							addProductCallback: addProductCallback
-						})
-					));
+					productElements.push(wp.element.createElement(ProductSpecificSearchResultsDropdownElement, {
+						product: product,
+						addOrRemoveProductCallback: addOrRemoveProductCallback,
+						selected: selectedProducts.includes(product.id)
+					}));
 				}
 			} catch (err) {
-				_didIteratorError3 = true;
-				_iteratorError3 = err;
+				_didIteratorError2 = true;
+				_iteratorError2 = err;
 			} finally {
 				try {
-					if (!_iteratorNormalCompletion3 && _iterator3.return) {
-						_iterator3.return();
+					if (!_iteratorNormalCompletion2 && _iterator2.return) {
+						_iterator2.return();
 					}
 				} finally {
-					if (_didIteratorError3) {
-						throw _iteratorError3;
+					if (_didIteratorError2) {
+						throw _iteratorError2;
 					}
 				}
 			}
 
 			return wp.element.createElement(
 				'div',
-				{ role: 'menu', className: 'wc-products-list-card__search-results', 'aria-orientation': 'vertical', 'aria-label': '{ __( \'Products list\' ) }' },
+				{ role: 'menu', className: 'wc-products-list-card__search-results', 'aria-orientation': 'vertical', 'aria-label': __('Products list') },
 				wp.element.createElement(
-					TransitionGroup,
+					'div',
 					null,
 					productElements
 				)
@@ -1426,10 +1384,6 @@ var ProductSpecificSearchResultsDropdownElement = function (_React$Component4) {
 
 		var _this4 = _possibleConstructorReturn(this, (ProductSpecificSearchResultsDropdownElement.__proto__ || Object.getPrototypeOf(ProductSpecificSearchResultsDropdownElement)).call(this, props));
 
-		_this4.state = {
-			clicked: false
-		};
-
 		_this4.handleClick = _this4.handleClick.bind(_this4);
 		return _this4;
 	}
@@ -1442,8 +1396,7 @@ var ProductSpecificSearchResultsDropdownElement = function (_React$Component4) {
 	_createClass(ProductSpecificSearchResultsDropdownElement, [{
 		key: 'handleClick',
 		value: function handleClick() {
-			this.setState({ clicked: true });
-			this.props.addProductCallback(this.props.product.id);
+			this.props.addOrRemoveProductCallback(this.props.product.id);
 		}
 
 		/**
@@ -1454,22 +1407,23 @@ var ProductSpecificSearchResultsDropdownElement = function (_React$Component4) {
 		key: 'render',
 		value: function render() {
 			var product = this.props.product;
+			var icon = this.props.selected ? wp.element.createElement(Dashicon, { icon: 'yes' }) : null;
 
 			return wp.element.createElement(
 				'div',
-				{ className: 'wc-products-list-card__content', onClick: this.handleClick },
+				{ className: 'wc-products-list-card__content' + (this.props.selected ? ' wc-products-list-card__content--added' : ''), onClick: this.handleClick },
 				wp.element.createElement('img', { src: product.images[0].src }),
 				wp.element.createElement(
 					'span',
 					{ className: 'wc-products-list-card__content-item-name' },
-					this.state.clicked ? __('Added') : product.name
+					product.name
 				),
 				wp.element.createElement(
 					'button',
 					{ type: 'button',
 						className: 'button-link',
 						id: 'product-' + product.id },
-					__('Add')
+					icon
 				)
 			);
 		}
@@ -1484,7 +1438,6 @@ var ProductSpecificSearchResultsDropdownElement = function (_React$Component4) {
 
 
 var ProductSpecificSelectedProducts = withAPIData(function (props) {
-
 	if (!props.productIds.length) {
 		return {
 			products: []
@@ -1493,29 +1446,29 @@ var ProductSpecificSelectedProducts = withAPIData(function (props) {
 
 	// Determine which products are not already in the cache and only fetch uncached products.
 	var uncachedProducts = [];
-	var _iteratorNormalCompletion4 = true;
-	var _didIteratorError4 = false;
-	var _iteratorError4 = undefined;
+	var _iteratorNormalCompletion3 = true;
+	var _didIteratorError3 = false;
+	var _iteratorError3 = undefined;
 
 	try {
-		for (var _iterator4 = props.productIds[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-			var productId = _step4.value;
+		for (var _iterator3 = props.productIds[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+			var productId = _step3.value;
 
 			if (!PRODUCT_DATA.hasOwnProperty(productId)) {
 				uncachedProducts.push(productId);
 			}
 		}
 	} catch (err) {
-		_didIteratorError4 = true;
-		_iteratorError4 = err;
+		_didIteratorError3 = true;
+		_iteratorError3 = err;
 	} finally {
 		try {
-			if (!_iteratorNormalCompletion4 && _iterator4.return) {
-				_iterator4.return();
+			if (!_iteratorNormalCompletion3 && _iterator3.return) {
+				_iterator3.return();
 			}
 		} finally {
-			if (_didIteratorError4) {
-				throw _iteratorError4;
+			if (_didIteratorError3) {
+				throw _iteratorError3;
 			}
 		}
 	}
@@ -1526,39 +1479,36 @@ var ProductSpecificSelectedProducts = withAPIData(function (props) {
 })(function (_ref2) {
 	var productIds = _ref2.productIds,
 	    products = _ref2.products,
-	    removeProductCallback = _ref2.removeProductCallback;
+	    columns = _ref2.columns,
+	    addOrRemoveProduct = _ref2.addOrRemoveProduct;
 
 
 	// Add new products to cache.
 	if (products.data) {
-		var _iteratorNormalCompletion5 = true;
-		var _didIteratorError5 = false;
-		var _iteratorError5 = undefined;
+		var _iteratorNormalCompletion4 = true;
+		var _didIteratorError4 = false;
+		var _iteratorError4 = undefined;
 
 		try {
-			for (var _iterator5 = products.data[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-				var product = _step5.value;
+			for (var _iterator4 = products.data[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+				var product = _step4.value;
 
 				PRODUCT_DATA[product.id] = product;
 			}
 		} catch (err) {
-			_didIteratorError5 = true;
-			_iteratorError5 = err;
+			_didIteratorError4 = true;
+			_iteratorError4 = err;
 		} finally {
 			try {
-				if (!_iteratorNormalCompletion5 && _iterator5.return) {
-					_iterator5.return();
+				if (!_iteratorNormalCompletion4 && _iterator4.return) {
+					_iterator4.return();
 				}
 			} finally {
-				if (_didIteratorError5) {
-					throw _iteratorError5;
+				if (_didIteratorError4) {
+					throw _iteratorError4;
 				}
 			}
 		}
-	}
-
-	if (0 === productIds.length) {
-		return __('No products selected');
 	}
 
 	var productElements = [];
@@ -1590,7 +1540,7 @@ var ProductSpecificSelectedProducts = withAPIData(function (props) {
 						type: 'button',
 						id: 'product-' + productData.id,
 						onClick: function onClick() {
-							removeProductCallback(productData.id);
+							addOrRemoveProduct(productData.id);
 						} },
 					wp.element.createElement(Dashicon, { icon: 'no-alt' })
 				)
@@ -1598,39 +1548,49 @@ var ProductSpecificSelectedProducts = withAPIData(function (props) {
 		));
 	};
 
-	var _iteratorNormalCompletion6 = true;
-	var _didIteratorError6 = false;
-	var _iteratorError6 = undefined;
+	var _iteratorNormalCompletion5 = true;
+	var _didIteratorError5 = false;
+	var _iteratorError5 = undefined;
 
 	try {
-		for (var _iterator6 = productIds[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-			var productId = _step6.value;
+		for (var _iterator5 = productIds[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+			var productId = _step5.value;
 
 			var _ret = _loop(productId);
 
 			if (_ret === 'continue') continue;
 		}
 	} catch (err) {
-		_didIteratorError6 = true;
-		_iteratorError6 = err;
+		_didIteratorError5 = true;
+		_iteratorError5 = err;
 	} finally {
 		try {
-			if (!_iteratorNormalCompletion6 && _iterator6.return) {
-				_iterator6.return();
+			if (!_iteratorNormalCompletion5 && _iterator5.return) {
+				_iterator5.return();
 			}
 		} finally {
-			if (_didIteratorError6) {
-				throw _iteratorError6;
+			if (_didIteratorError5) {
+				throw _iteratorError5;
 			}
 		}
 	}
 
 	return wp.element.createElement(
 		'div',
-		{ className: 'wc-products-list-card__results-wrapper' },
+		{ className: 'wc-products-list-card__results-wrapper wc-products-list-card__results-wrapper--cols-' + columns },
 		wp.element.createElement(
 			'div',
-			{ role: 'menu', className: 'wc-products-list-card__results', 'aria-orientation': 'vertical', 'aria-label': '{ __( \'Products list\' ) }' },
+			{ role: 'menu', className: 'wc-products-list-card__results', 'aria-orientation': 'vertical', 'aria-label': __('Selected products') },
+			wp.element.createElement(
+				'h3',
+				null,
+				__('Selected products')
+			),
+			!productElements.length && wp.element.createElement(
+				'span',
+				{ className: 'wc-products-list-card__search-no-selected' },
+				__('No products selected')
+			),
 			wp.element.createElement(
 				'ul',
 				null,
@@ -1816,7 +1776,8 @@ var ProductCategoryFilter = function ProductCategoryFilter(_ref) {
 
 	return wp.element.createElement(
 		"div",
-		null,
+		{ className: "wc-products-list-card__input-wrapper" },
+		wp.element.createElement(Dashicon, { icon: "search" }),
 		wp.element.createElement("input", { className: "wc-products-list-card__search", type: "search", placeholder: __('Search for categories'), onChange: filterResults })
 	);
 };
@@ -2062,7 +2023,8 @@ var __ = wp.i18n.__;
 var _wp$components = wp.components,
     Toolbar = _wp$components.Toolbar,
     withAPIData = _wp$components.withAPIData,
-    Dropdown = _wp$components.Dropdown;
+    Dropdown = _wp$components.Dropdown,
+    Dashicon = _wp$components.Dashicon;
 
 /**
  * Attribute data cache.
@@ -2234,7 +2196,8 @@ var ProductsAttributeSelect = exports.ProductsAttributeSelect = function (_React
 var ProductAttributeFilter = function ProductAttributeFilter(props) {
 	return wp.element.createElement(
 		'div',
-		null,
+		{ className: 'wc-products-list-card__input-wrapper' },
+		wp.element.createElement(Dashicon, { icon: 'search' }),
 		wp.element.createElement('input', { className: 'wc-products-list-card__search', type: 'search', placeholder: __('Search for attributes'), onChange: props.updateFilter })
 	);
 };
