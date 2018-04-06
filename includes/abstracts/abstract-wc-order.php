@@ -802,7 +802,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Get an order item object, based on it's type.
+	 * Get an order item object, based on its type.
 	 *
 	 * @since  3.0.0
 	 * @param  int  $item_id ID of item to get.
@@ -1134,7 +1134,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Add a product line item to the order. This is the only line item type with
-	 * it's own method because it saves looking up order amounts (costs are added up for you).
+	 * its own method because it saves looking up order amounts (costs are added up for you).
 	 *
 	 * @param  WC_Product $product Product object.
 	 * @param  int        $qty Quantity to add.
