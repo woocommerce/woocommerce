@@ -294,7 +294,15 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return bool
 	 */
 	public function can_refund_order( $order ) {
-		return $order && $order->get_transaction_id();
+		$has_api_creds = false;
+
+		if ( $this->testmode ) {
+			$has_api_creds = $this->get_option( 'sandbox_api_username' ) && $this->get_option( 'sandbox_api_password' ) && $this->get_option( 'sandbox_api_signature' );
+		} else {
+			$has_api_creds = $this->get_option( 'api_username' ) && $this->get_option( 'api_password' ) && $this->get_option( 'api_signature' );
+		}
+
+		return $order && $order->get_transaction_id() && $has_api_creds;
 	}
 
 	/**
@@ -321,8 +329,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$order = wc_get_order( $order_id );
 
 		if ( ! $this->can_refund_order( $order ) ) {
-			$this->log( 'Refund Failed: No transaction ID', 'error' );
-			return new WP_Error( 'error', __( 'Refund failed: No transaction ID', 'woocommerce' ) );
+			return new WP_Error( 'error', __( 'Refund failed.', 'woocommerce' ) );
 		}
 
 		$this->init_api();
