@@ -5,7 +5,7 @@ const { Toolbar, withAPIData, Dropdown, Dashicon, RangeControl, Tooltip, SelectC
 
 import { ProductsSpecificSelect } from './views/specific-select.jsx';
 import { ProductsCategorySelect } from './views/category-select.jsx';
-import { ProductsAttributeSelect } from './views/attribute-select.jsx';
+import { ProductsAttributeSelect, getAttributeSlug, getAttributeID } from './views/attribute-select.jsx';
 
 /**
  * A setting has the following properties:
@@ -341,7 +341,7 @@ const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
 	} else if ( 'category' === display ) {
 		query.category = display_setting.join( ',' );
 	} else if ( 'attribute' === display && display_setting.length ) {
-		query.attribute = display_setting[0];
+		query.attribute = getAttributeSlug( display_setting[0] );
 
 		if ( display_setting.length > 1 ) {
 			query.attribute_term = display_setting.slice( 1 ).join( ',' );
@@ -398,67 +398,69 @@ const ProductsBlockSidebarInfo = withAPIData( ( { attributes } ) => {
 
 	const { display, display_setting } = attributes;
 
-	// @todo This needs improvements to the WC API before it's possible to do correctly.
 	if ( 'attribute' === display && display_setting.length ) {
-		const att = display_setting[0];
-		const terms = display_setting.slice( 1 ).join( ', ' );
+		const ID        = getAttributeID( display_setting[0] );
+		const terms     = display_setting.slice( 1 ).join( ', ' );
+		const endpoints = {
+			attributeInfo: '/wc/v2/products/attributes/' + ID,
+		}
 
-		return {
-			attributeinfo: '/wp/v2/taxonomies/'+att,
-		};
+		if ( terms.length ) {
+			endpoints.termInfo = '/wc/v2/products/attributes/' + ID + '/terms?include=' + terms;
+		}
+
+		return endpoints;
 
 	} else if ( 'category' === display && display_setting.length ) {
 		return {
-			categories: '/wc/v2/products/categories?include=' + display_setting.join( ',' ),
+			categoriesInfo: '/wc/v2/products/categories?include=' + display_setting.join( ',' ),
 		};
 	}
 
 	return {};
 
-} )( ( { attributes, setAttributes, categories, attributeinfo } ) => {
+} )( ( { attributes, categoriesInfo, attributeInfo, termInfo } ) => {
 
-	let description = PRODUCTS_BLOCK_DISPLAY_SETTINGS[ attributes.display ].title;
+	let descriptions = [
+		// Standard description of selected scope.
+		PRODUCTS_BLOCK_DISPLAY_SETTINGS[ attributes.display ].title
+	];
 
-	if ( categories && categories.data && categories.data.length ) {
-		description          = 'Product categories: ';
-		const selected = [];
-		for ( let category of categories.data ) {
-			selected.push( category.name );
+	// Description of categories selected scope.
+	if ( categoriesInfo && categoriesInfo.data && categoriesInfo.data.length ) {
+		let descriptionText = __( 'Product categories: ' );
+		const categories = [];
+		for ( let category of categoriesInfo.data ) {
+			categories.push( category.name );
 		}
-		description += selected.join( ', ' );
+		descriptionText += categories.join( ', ' );
 
-		// @todo This needs improvements to the WC API before it's possible to do correctly.
-	} else if ( attributeinfo && attributeinfo.data && attributeinfo.data.length ) {
-		description       = 'Attribute: ' + attributes.display_setting[0];
-		const terms = attributes.display_setting.slice( 1 );
-		if ( terms.length ) {
-			description += terms.join( ', ' );
+		descriptions = [
+			descriptionText
+		];
+
+		// Description of attributes selected scope.
+	} else if ( attributeInfo && attributeInfo.data ) {
+		descriptions = [
+			__( 'Attribute: ' ) + attributeInfo.data.name
+		];
+
+		if ( termInfo && termInfo.data && termInfo.data.length ) {
+			let termDescriptionText = __( "Terms: " );
+			const terms = []
+			for ( const term of termInfo.data ) {
+				terms.push( term.name );
+			}
+			termDescriptionText += terms.join( ', ' );
+			descriptions.push( termDescriptionText );
 		}
-	}
-
-	function editQuicklinkHandler() {
-		setAttributes( {
-			edit_mode: true,
-		} );
-
-		//@todo center in view
-	}
-
-	let editQuickLink = null;
-	if ( ! attributes.edit_mode ) {
-		editQuickLink = (
-			<span className="edit-quicklink">
-				<a onClick={ editQuicklinkHandler }>{ __( 'Edit' ) }</a>
-			</span>
-		);
 	}
 
 	return (
-		<div className="wc-products-selected-description">
-			<span className="selected-description">
-				{ description }
-			</span>
-			{ editQuickLink }
+		<div className="wc-products-scope-descriptions">
+			{ descriptions.map( ( description ) => (
+				<div className="scope-description">{ description }</div>
+			) ) }
 		</div>
 	);
 } );
@@ -597,18 +599,28 @@ class ProductsBlock extends React.Component {
 			return null;
 		}
 
-		let editLink = null;
-		if ( ! edit_mode ) {
-			// @todo needs to center in view also
-			editLink = <a className="edit-quicklink" onClick={ () => { setAttributes( { edit_mode: true } ); } } >{ __( 'Edit' ) }</a>;
+		function editQuicklinkHandler() {
+			setAttributes( {
+				edit_mode: true,
+			} );
+
+			// @todo center in view
 		}
 
-		let title = PRODUCTS_BLOCK_DISPLAY_SETTINGS[ display ].title;
+		let editQuickLink = null;
+		if ( ! attributes.edit_mode ) {
+			editQuickLink = (
+				<div className="edit-quicklink">
+					<a onClick={ editQuicklinkHandler }>{ __( 'Edit' ) }</a>
+				</div>
+			);
+		}
 
 		return (
 			<InspectorControls key="description-inspector">
 				<h3>{ __( 'Current Source' ) }</h3>
-				<ProductsBlockSidebarInfo attributes={ attributes } setAttributes={ setAttributes } />
+				{ editQuickLink }
+				<ProductsBlockSidebarInfo attributes={ attributes } />
 			</InspectorControls>
 		);
 	}
@@ -757,7 +769,7 @@ registerBlockType( 'woocommerce/products', {
 		} else if ( 'on_sale' === display ) {
 			shortcode_atts.set( 'on_sale', '1' );
 		} else if ( 'attribute' === display ) {
-			const attribute = display_setting.length ? display_setting[0] : '';
+			const attribute = display_setting.length ? getAttributeSlug( display_setting[0] ) : '';
 			const terms = display_setting.length > 1 ? display_setting.slice( 1 ).join( ',' ) : '';
 
 			shortcode_atts.set( 'attribute', attribute );

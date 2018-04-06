@@ -573,7 +573,7 @@ var ProductsBlockPreview = withAPIData(function (_ref) {
 	} else if ('category' === display) {
 		query.category = display_setting.join(',');
 	} else if ('attribute' === display && display_setting.length) {
-		query.attribute = display_setting[0];
+		query.attribute = (0, _attributeSelect.getAttributeSlug)(display_setting[0]);
 
 		if (display_setting.length > 1) {
 			query.attribute_term = display_setting.slice(1).join(',');
@@ -654,43 +654,50 @@ var ProductsBlockSidebarInfo = withAPIData(function (_ref3) {
 	var display = attributes.display,
 	    display_setting = attributes.display_setting;
 
-	// @todo This needs improvements to the WC API before it's possible to do correctly.
 
 	if ('attribute' === display && display_setting.length) {
-		var att = display_setting[0];
+		var ID = (0, _attributeSelect.getAttributeID)(display_setting[0]);
 		var terms = display_setting.slice(1).join(', ');
-
-		return {
-			attributeinfo: '/wp/v2/taxonomies/' + att
+		var endpoints = {
+			attributeInfo: '/wc/v2/products/attributes/' + ID
 		};
+
+		if (terms.length) {
+			endpoints.termInfo = '/wc/v2/products/attributes/' + ID + '/terms?include=' + terms;
+		}
+
+		return endpoints;
 	} else if ('category' === display && display_setting.length) {
 		return {
-			categories: '/wc/v2/products/categories?include=' + display_setting.join(',')
+			categoriesInfo: '/wc/v2/products/categories?include=' + display_setting.join(',')
 		};
 	}
 
 	return {};
 })(function (_ref4) {
 	var attributes = _ref4.attributes,
-	    setAttributes = _ref4.setAttributes,
-	    categories = _ref4.categories,
-	    attributeinfo = _ref4.attributeinfo;
+	    categoriesInfo = _ref4.categoriesInfo,
+	    attributeInfo = _ref4.attributeInfo,
+	    termInfo = _ref4.termInfo;
 
 
-	var description = PRODUCTS_BLOCK_DISPLAY_SETTINGS[attributes.display].title;
+	var descriptions = [
+	// Standard description of selected scope.
+	PRODUCTS_BLOCK_DISPLAY_SETTINGS[attributes.display].title];
 
-	if (categories && categories.data && categories.data.length) {
-		description = 'Product categories: ';
-		var selected = [];
+	// Description of categories selected scope.
+	if (categoriesInfo && categoriesInfo.data && categoriesInfo.data.length) {
+		var descriptionText = __('Product categories: ');
+		var categories = [];
 		var _iteratorNormalCompletion2 = true;
 		var _didIteratorError2 = false;
 		var _iteratorError2 = undefined;
 
 		try {
-			for (var _iterator2 = categories.data[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+			for (var _iterator2 = categoriesInfo.data[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
 				var category = _step2.value;
 
-				selected.push(category.name);
+				categories.push(category.name);
 			}
 		} catch (err) {
 			_didIteratorError2 = true;
@@ -707,47 +714,57 @@ var ProductsBlockSidebarInfo = withAPIData(function (_ref3) {
 			}
 		}
 
-		description += selected.join(', ');
+		descriptionText += categories.join(', ');
 
-		// @todo This needs improvements to the WC API before it's possible to do correctly.
-	} else if (attributeinfo && attributeinfo.data && attributeinfo.data.length) {
-		description = 'Attribute: ' + attributes.display_setting[0];
-		var terms = attributes.display_setting.slice(1);
-		if (terms.length) {
-			description += terms.join(', ');
+		descriptions = [descriptionText];
+
+		// Description of attributes selected scope.
+	} else if (attributeInfo && attributeInfo.data) {
+		descriptions = [__('Attribute: ') + attributeInfo.data.name];
+
+		if (termInfo && termInfo.data && termInfo.data.length) {
+			var termDescriptionText = __("Terms: ");
+			var terms = [];
+			var _iteratorNormalCompletion3 = true;
+			var _didIteratorError3 = false;
+			var _iteratorError3 = undefined;
+
+			try {
+				for (var _iterator3 = termInfo.data[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+					var term = _step3.value;
+
+					terms.push(term.name);
+				}
+			} catch (err) {
+				_didIteratorError3 = true;
+				_iteratorError3 = err;
+			} finally {
+				try {
+					if (!_iteratorNormalCompletion3 && _iterator3.return) {
+						_iterator3.return();
+					}
+				} finally {
+					if (_didIteratorError3) {
+						throw _iteratorError3;
+					}
+				}
+			}
+
+			termDescriptionText += terms.join(', ');
+			descriptions.push(termDescriptionText);
 		}
-	}
-
-	function editQuicklinkHandler() {
-		setAttributes({
-			edit_mode: true
-		});
-
-		//@todo center in view
-	}
-
-	var editQuickLink = null;
-	if (!attributes.edit_mode) {
-		editQuickLink = wp.element.createElement(
-			'span',
-			{ className: 'edit-quicklink' },
-			wp.element.createElement(
-				'a',
-				{ onClick: editQuicklinkHandler },
-				__('Edit')
-			)
-		);
 	}
 
 	return wp.element.createElement(
 		'div',
-		{ className: 'wc-products-selected-description' },
-		wp.element.createElement(
-			'span',
-			{ className: 'selected-description' },
-			description
-		),
-		editQuickLink
+		{ className: 'wc-products-scope-descriptions' },
+		descriptions.map(function (description) {
+			return wp.element.createElement(
+				'div',
+				{ className: 'scope-description' },
+				description
+			);
+		})
 	);
 });
 
@@ -916,19 +933,26 @@ var ProductsBlock = function (_React$Component5) {
 				return null;
 			}
 
-			var editLink = null;
-			if (!edit_mode) {
-				// @todo needs to center in view also
-				editLink = wp.element.createElement(
-					'a',
-					{ className: 'edit-quicklink', onClick: function onClick() {
-							setAttributes({ edit_mode: true });
-						} },
-					__('Edit')
-				);
+			function editQuicklinkHandler() {
+				setAttributes({
+					edit_mode: true
+				});
+
+				// @todo center in view
 			}
 
-			var title = PRODUCTS_BLOCK_DISPLAY_SETTINGS[display].title;
+			var editQuickLink = null;
+			if (!attributes.edit_mode) {
+				editQuickLink = wp.element.createElement(
+					'div',
+					{ className: 'edit-quicklink' },
+					wp.element.createElement(
+						'a',
+						{ onClick: editQuicklinkHandler },
+						__('Edit')
+					)
+				);
+			}
 
 			return wp.element.createElement(
 				InspectorControls,
@@ -938,7 +962,8 @@ var ProductsBlock = function (_React$Component5) {
 					null,
 					__('Current Source')
 				),
-				wp.element.createElement(ProductsBlockSidebarInfo, { attributes: attributes, setAttributes: setAttributes })
+				editQuickLink,
+				wp.element.createElement(ProductsBlockSidebarInfo, { attributes: attributes })
 			);
 		}
 
@@ -1109,7 +1134,7 @@ registerBlockType('woocommerce/products', {
 		} else if ('on_sale' === display) {
 			shortcode_atts.set('on_sale', '1');
 		} else if ('attribute' === display) {
-			var attribute = display_setting.length ? display_setting[0] : '';
+			var attribute = display_setting.length ? (0, _attributeSelect.getAttributeSlug)(display_setting[0]) : '';
 			var terms = display_setting.length > 1 ? display_setting.slice(1).join(',') : '';
 
 			shortcode_atts.set('attribute', attribute);
@@ -1132,13 +1157,13 @@ registerBlockType('woocommerce/products', {
 
 		// Build the shortcode string out of the set shortcode attributes.
 		var shortcode = '[products';
-		var _iteratorNormalCompletion3 = true;
-		var _didIteratorError3 = false;
-		var _iteratorError3 = undefined;
+		var _iteratorNormalCompletion4 = true;
+		var _didIteratorError4 = false;
+		var _iteratorError4 = undefined;
 
 		try {
-			for (var _iterator3 = shortcode_atts[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-				var _ref5 = _step3.value;
+			for (var _iterator4 = shortcode_atts[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+				var _ref5 = _step4.value;
 
 				var _ref6 = _slicedToArray(_ref5, 2);
 
@@ -1148,16 +1173,16 @@ registerBlockType('woocommerce/products', {
 				shortcode += ' ' + key + '="' + value + '"';
 			}
 		} catch (err) {
-			_didIteratorError3 = true;
-			_iteratorError3 = err;
+			_didIteratorError4 = true;
+			_iteratorError4 = err;
 		} finally {
 			try {
-				if (!_iteratorNormalCompletion3 && _iterator3.return) {
-					_iterator3.return();
+				if (!_iteratorNormalCompletion4 && _iterator4.return) {
+					_iterator4.return();
 				}
 			} finally {
-				if (_didIteratorError3) {
-					throw _iteratorError3;
+				if (_didIteratorError4) {
+					throw _iteratorError4;
 				}
 			}
 		}
@@ -2233,6 +2258,10 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+exports.getAttributeIdentifier = getAttributeIdentifier;
+exports.getAttributeSlug = getAttributeSlug;
+exports.getAttributeID = getAttributeID;
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -2253,6 +2282,37 @@ var _wp$components = wp.components,
 var PRODUCT_ATTRIBUTE_DATA = {};
 
 /**
+ * Get the identifier for an attribute. The identifier can be used to determine
+ * the slug or the ID of the attribute.
+ *
+ * @param string slug The attribute slug.
+ * @param int|numeric string id The attribute ID.
+ */
+function getAttributeIdentifier(slug, id) {
+	return slug + ',' + id;
+}
+
+/**
+ * Get the attribute slug from an identifier.
+ *
+ * @param string identifier The attribute identifier.
+ * @return string
+ */
+function getAttributeSlug(identifier) {
+	return identifier.split(',')[0];
+}
+
+/**
+ * Get the attribute ID from an identifier.
+ *
+ * @param string identifier The attribute identifier.
+ * @return numeric string
+ */
+function getAttributeID(identifier) {
+	return identifier.split(',')[1];
+}
+
+/**
  * When the display mode is 'Attribute' search for and select product attributes to pull products from.
  */
 
@@ -2266,8 +2326,9 @@ var ProductsAttributeSelect = exports.ProductsAttributeSelect = function (_React
 		_classCallCheck(this, ProductsAttributeSelect);
 
 		/**
-   * The first item in props.selected_display_setting is the attribute slug.
-   * The rest are the term ids for any selected terms.
+   * The first item in props.selected_display_setting is the attribute slug and id separated by a comma.
+   * This is to work around limitations in the API which sometimes requires a slug and sometimes an id.
+   * The rest of the elements in selected_display_setting are the term ids for any selected terms.
    */
 		var _this = _possibleConstructorReturn(this, (ProductsAttributeSelect.__proto__ || Object.getPrototypeOf(ProductsAttributeSelect)).call(this, props));
 
@@ -2286,19 +2347,19 @@ var ProductsAttributeSelect = exports.ProductsAttributeSelect = function (_React
 	/**
   * Set the selected attribute.
   *
-  * @param slug string Attribute slug.
+  * @param identifier string Attribute slug and id separated by a comma.
   */
 
 
 	_createClass(ProductsAttributeSelect, [{
 		key: 'setSelectedAttribute',
-		value: function setSelectedAttribute(slug) {
+		value: function setSelectedAttribute(identifier) {
 			this.setState({
-				selectedAttribute: slug,
+				selectedAttribute: identifier,
 				selectedTerms: []
 			});
 
-			this.props.update_display_setting_callback([slug]);
+			this.props.update_display_setting_callback([identifier]);
 		}
 
 		/**
@@ -2598,8 +2659,7 @@ var ProductAttributeElement = function (_React$Component2) {
 				return;
 			}
 
-			var slug = evt.target.value;
-			this.props.setSelectedAttribute(slug);
+			this.props.setSelectedAttribute(evt.target.value);
 		}
 
 		/**
@@ -2628,7 +2688,7 @@ var ProductAttributeElement = function (_React$Component2) {
 			var _this3 = this;
 
 			var attribute = PRODUCT_ATTRIBUTE_DATA[this.props.attribute.slug];
-			var isSelected = this.props.selectedAttribute === this.props.attribute.slug;
+			var isSelected = this.props.selectedAttribute === getAttributeIdentifier(this.props.attribute.slug, this.props.attribute.id);
 
 			var attributeTerms = null;
 			if (isSelected) {
@@ -2675,7 +2735,7 @@ var ProductAttributeElement = function (_React$Component2) {
 						'label',
 						{ className: 'wc-products-list-card__content' },
 						wp.element.createElement('input', { type: 'radio',
-							value: this.props.attribute.slug,
+							value: getAttributeIdentifier(this.props.attribute.slug, this.props.attribute.id),
 							onChange: this.handleAttributeChange,
 							checked: isSelected
 						}),
