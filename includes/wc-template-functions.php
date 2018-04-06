@@ -550,6 +550,18 @@ function wc_query_string_form_fields( $values = null, $exclude = array(), $curre
 }
 
 /**
+ * See if the checkbox is enabled or not.
+ *
+ * Defaults to yes or no based on existance of a terms page for backwards compatibilty.
+ *
+ * @since 3.4.0
+ * @return bool
+ */
+function woocommerce_terms_and_conditions_checkbox_enabled() {
+	return wc_string_to_bool( get_option( 'woocommerce_checkout_terms_and_conditions_checkbox', 0 < wc_get_page_id( 'terms' ) ? 'yes' : 'no' ) );
+}
+
+/**
  * Output t&c text. This is custom text which can be added via the customizer.
  *
  * @since 3.4.0
@@ -564,7 +576,7 @@ function woocommerce_output_terms_and_conditions_text() {
  * @since 3.4.0
  */
 function woocommerce_output_terms_and_conditions_page_content() {
-	$terms_page = wc_get_page_id( 'terms' ) > 0 ? get_post( wc_get_page_id( 'terms' ) ) : false;
+	$terms_page = 0 < wc_get_page_id( 'terms' ) ? get_post( wc_get_page_id( 'terms' ) ) : false;
 
 	if ( $terms_page && 'publish' === $terms_page->post_status && $terms_page->post_content && ! has_shortcode( $terms_page->post_content, 'woocommerce_checkout' ) ) {
 		echo wp_kses_post( wc_format_content( $terms_page->post_content ) );

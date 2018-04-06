@@ -657,27 +657,6 @@ class WC_Shop_Customizer {
 	}
 
 	/**
-	 * Get pages to show in settings.
-	 *
-	 * @return array
-	 */
-	protected function get_page_choices() {
-		return wc_list_pluck( get_pages( array(
-			'depth'    => 0,
-			'child_of' => 0,
-		) ), 'post_title', 'ID' );
-	}
-
-	/**
-	 * See if checkbox is active or not.
-	 *
-	 * @return boolean
-	 */
-	public function is_terms_and_conditions_checkbox_active() {
-		return wc_string_to_bool( get_option( 'woocommerce_checkout_terms_and_conditions_checkbox' ) );
-	}
-
-	/**
 	 * Checkout section.
 	 *
 	 * @param WP_Customize_Manager $wp_customize Theme Customizer object.
@@ -739,7 +718,7 @@ class WC_Shop_Customizer {
 		$wp_customize->add_setting(
 			'woocommerce_checkout_terms_and_conditions_checkbox',
 			array(
-				'default'              => 'no',
+				'default'              => woocommerce_terms_and_conditions_checkbox_enabled() ? 'yes' : 'no',
 				'type'                 => 'option',
 				'capability'           => 'manage_woocommerce',
 				'sanitize_callback'    => 'wc_bool_to_string',
@@ -814,7 +793,7 @@ class WC_Shop_Customizer {
 				'description'     => __( 'Optionally change the default terms and conditions checkbox label.', 'woocommerce' ),
 				'section'         => 'woocommerce_checkout',
 				'settings'        => 'woocommerce_checkout_terms_and_conditions_checkbox_text',
-				'active_callback' => array( $this, 'is_terms_and_conditions_checkbox_active' ),
+				'active_callback' => 'woocommerce_terms_and_conditions_checkbox_enabled',
 				'type'            => 'textarea',
 				'input_attrs'     => array(
 					'placeholder' => __( 'I have read and agree to the website [terms]', 'woocommerce' ),

@@ -8,9 +8,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$terms_checkbox_enabled = wc_string_to_bool( get_option( 'woocommerce_checkout_terms_and_conditions_checkbox' ) );
-
-if ( apply_filters( 'woocommerce_checkout_show_terms', true ) ) {
+if ( apply_filters( 'woocommerce_checkout_show_terms', true ) && function_exists( 'woocommerce_terms_and_conditions_checkbox_enabled' ) ) {
 	do_action( 'woocommerce_checkout_before_terms_and_conditions' );
 
 	?>
@@ -25,7 +23,7 @@ if ( apply_filters( 'woocommerce_checkout_show_terms', true ) ) {
 		</div>
 		<?php endif; ?>
 
-		<?php if ( $terms_checkbox_enabled ) : ?>
+		<?php if ( woocommerce_terms_and_conditions_checkbox_enabled() ) : ?>
 		<p class="form-row validate-required">
 			<label class="woocommerce-form__label woocommerce-form__label-for-checkbox checkbox">
 			<input type="checkbox" class="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox" name="terms" <?php checked( apply_filters( 'woocommerce_terms_is_checked_default', isset( $_POST['terms'] ) ), true ); // WPCS: input var ok, csrf ok. ?> id="terms" />
