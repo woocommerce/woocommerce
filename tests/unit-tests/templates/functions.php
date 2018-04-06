@@ -37,5 +37,7 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 		);
 
 		$this->assertEquals( $expected, array_values( wc_get_product_class( 'foo', $product ) ) );
+
+		$product->delete( true );
 	}
 }
