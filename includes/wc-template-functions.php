@@ -627,7 +627,7 @@ function wc_get_product_class( $class = '', $product_id = null ) {
  * @param int|WP_Post|WC_Product $product_id Product ID or product object.
  */
 function wc_product_class( $class = '', $product_id = null ) {
-	echo 'class="' . join( ' ', wc_get_product_class( $classes, $product_id ) ) . '"'; // WPCS: XSS ok.
+	echo 'class="' . join( ' ', wc_get_product_class( $class, $product_id ) ) . '"'; // WPCS: XSS ok.
 }
 
 /**
