@@ -457,7 +457,7 @@ const ProductsBlockSidebarInfo = withAPIData( ( { attributes } ) => {
 	}
 
 	return (
-		<div className="wc-products-scope-descriptions">
+		<div>
 			{ descriptions.map( ( description ) => (
 				<div className="scope-description">{ description }</div>
 			) ) }
@@ -543,6 +543,7 @@ class ProductsBlock extends React.Component {
 
 		return (
 			<InspectorControls key="inspector">
+				{ this.getBlockDescription() }
 				<h3>{ __( 'Layout' ) }</h3>
 				{ columnControl }
 				<RangeControl
@@ -610,18 +611,18 @@ class ProductsBlock extends React.Component {
 		let editQuickLink = null;
 		if ( ! attributes.edit_mode ) {
 			editQuickLink = (
-				<div className="edit-quicklink">
+				<div className="wc-products-scope-description--edit-quicklink">
 					<a onClick={ editQuicklinkHandler }>{ __( 'Edit' ) }</a>
 				</div>
 			);
 		}
 
 		return (
-			<InspectorControls key="description-inspector">
+			<div className="wc-products-scope-descriptions">
 				<h3>{ __( 'Current Source' ) }</h3>
 				{ editQuickLink }
 				<ProductsBlockSidebarInfo attributes={ attributes } />
-			</InspectorControls>
+			</div>
 		);
 	}
 
@@ -673,7 +674,6 @@ class ProductsBlock extends React.Component {
 		const { edit_mode } = attributes;
 
 		return [
-			( !! focus ) ? this.getBlockDescription() : null,
 			( !! focus ) ? this.getInspectorControls() : null,
 			( !! focus ) ? this.getToolbarControls() : null,
 			edit_mode ? this.getSettingsEditor() : this.getPreview(),

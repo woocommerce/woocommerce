@@ -757,7 +757,7 @@ var ProductsBlockSidebarInfo = withAPIData(function (_ref3) {
 
 	return wp.element.createElement(
 		'div',
-		{ className: 'wc-products-scope-descriptions' },
+		null,
 		descriptions.map(function (description) {
 			return wp.element.createElement(
 				'div',
@@ -868,6 +868,7 @@ var ProductsBlock = function (_React$Component5) {
 			return wp.element.createElement(
 				InspectorControls,
 				{ key: 'inspector' },
+				this.getBlockDescription(),
 				wp.element.createElement(
 					'h3',
 					null,
@@ -956,7 +957,7 @@ var ProductsBlock = function (_React$Component5) {
 			if (!attributes.edit_mode) {
 				editQuickLink = wp.element.createElement(
 					'div',
-					{ className: 'edit-quicklink' },
+					{ className: 'wc-products-scope-description--edit-quicklink' },
 					wp.element.createElement(
 						'a',
 						{ onClick: editQuicklinkHandler },
@@ -966,8 +967,8 @@ var ProductsBlock = function (_React$Component5) {
 			}
 
 			return wp.element.createElement(
-				InspectorControls,
-				{ key: 'description-inspector' },
+				'div',
+				{ className: 'wc-products-scope-descriptions' },
 				wp.element.createElement(
 					'h3',
 					null,
@@ -1042,7 +1043,7 @@ var ProductsBlock = function (_React$Component5) {
 			var edit_mode = attributes.edit_mode;
 
 
-			return [!!focus ? this.getBlockDescription() : null, !!focus ? this.getInspectorControls() : null, !!focus ? this.getToolbarControls() : null, edit_mode ? this.getSettingsEditor() : this.getPreview()];
+			return [!!focus ? this.getInspectorControls() : null, !!focus ? this.getToolbarControls() : null, edit_mode ? this.getSettingsEditor() : this.getPreview()];
 		}
 	}]);
 
