@@ -657,3 +657,19 @@ p.wc-products-display-options__option-description {
 		max-width: 480px;
 	}
 }
+
+/**
+ * Sidebar area
+ */
+ .wc-products-scope-descriptions {
+ 	margin-bottom: 2em;
+ 	position: relative;
+ }
+
+ .wc-products-scope-description--edit-quicklink {
+ 	position: absolute;
+ 	top: 0;
+ 	right: 0;
+ 	cursor: pointer;
+ 	text-decoration: underline;
+ }
