@@ -40,16 +40,17 @@ class WC_Meta_Box_Product_Reviews {
 	/**
 	 * Save meta box data
 	 *
-	 * @param mixed $location
-	 * @param int   $comment_id
+	 * @param mixed $data
 	 *
 	 * @return mixed
 	 */
-	public static function save( $location, $comment_id ) {
+	public static function save( $data ) {
 		// Not allowed, return regular value without updating meta
 		if ( ! wp_verify_nonce( $_POST['woocommerce_meta_nonce'], 'woocommerce_save_data' ) && ! isset( $_POST['rating'] ) ) {
-			return $location;
+			return;
 		}
+
+		$comment_id = $data['comment_ID'];
 
 		// Update meta
 		update_comment_meta(
@@ -59,6 +60,6 @@ class WC_Meta_Box_Product_Reviews {
 		);
 
 		// Return regular value after updating
-		return $location;
+		return $data;
 	}
 }
