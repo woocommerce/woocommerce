@@ -692,6 +692,7 @@ p.wc-products-display-options__option-description {
 	background: #ffffff;
 	margin: -1px 0 0;
 	border: 1px solid $color__border;
+	box-shadow: 0 1px 3px $color__border;
 
 	> div {
 		max-height: 175px;
@@ -705,10 +706,14 @@ p.wc-products-display-options__option-description {
 		border-color: $color__border;
 		transition: opacity .7s;
 		cursor: pointer;
+		color: $color__link--hover;
 
 		&--added {
 			background-color: lighten( $color__link, 65% );
-			color: $color__link--hover;
+		}
+
+		&:hover {
+			background-color: lighten( $color__link, 65% );
 		}
 
 		&--transition-exit-active {
