@@ -959,12 +959,16 @@ var ProductsBlock = function (_React$Component5) {
 				'div',
 				{ className: 'wc-products-scope-descriptions' },
 				wp.element.createElement(
-					'h3',
-					null,
-					__('Current Source')
+					'div',
+					{ className: 'wc-products-scope-details' },
+					wp.element.createElement(
+						'h3',
+						null,
+						__('Current Source')
+					),
+					wp.element.createElement(ProductsBlockSidebarInfo, { attributes: attributes })
 				),
-				editQuickLink,
-				wp.element.createElement(ProductsBlockSidebarInfo, { attributes: attributes })
+				editQuickLink
 			);
 		}
 

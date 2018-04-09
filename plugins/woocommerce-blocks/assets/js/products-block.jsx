@@ -501,7 +501,7 @@ class ProductsBlock extends React.Component {
 				max={ wc_product_block_data.max_columns }
 			/>
 		);
-			
+
 		// Orderby settings don't make sense for specific-selected products display.
 		let orderControl = null;
 		if ( 'specific' !== display ) {
@@ -619,9 +619,11 @@ class ProductsBlock extends React.Component {
 
 		return (
 			<div className="wc-products-scope-descriptions">
-				<h3>{ __( 'Current Source' ) }</h3>
+				<div className="wc-products-scope-details">
+					<h3>{ __( 'Current Source' ) }</h3>
+					<ProductsBlockSidebarInfo attributes={ attributes } />
+				</div>
 				{ editQuickLink }
-				<ProductsBlockSidebarInfo attributes={ attributes } />
 			</div>
 		);
 	}
