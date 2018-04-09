@@ -1575,15 +1575,10 @@ var ProductSpecificSelectedProducts = withAPIData(function (props) {
 		wp.element.createElement(
 			'div',
 			{ role: 'menu', className: 'wc-products-list-card__results', 'aria-orientation': 'vertical', 'aria-label': __('Selected products') },
-			wp.element.createElement(
+			productElements.length > 0 && wp.element.createElement(
 				'h3',
 				null,
 				__('Selected products')
-			),
-			!productElements.length && wp.element.createElement(
-				'span',
-				{ className: 'wc-products-list-card__search-no-selected' },
-				__('No products selected')
 			),
 			wp.element.createElement(
 				'ul',

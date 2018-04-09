@@ -329,9 +329,8 @@ const ProductSpecificSelectedProducts = withAPIData( ( props ) => {
 		return (
 			<div className={ 'wc-products-list-card__results-wrapper wc-products-list-card__results-wrapper--cols-' + columns }>
 				<div role="menu" className="wc-products-list-card__results" aria-orientation="vertical" aria-label={ __( 'Selected products' ) }>
-					<h3>{ __( 'Selected products' ) }</h3>
 
-					{ ! productElements.length && <span className="wc-products-list-card__search-no-selected">{ __( 'No products selected' ) }</span> }
+					{ productElements.length > 0 && <h3>{ __( 'Selected products' ) }</h3> }
 
 					<ul>
 						{ productElements }
