@@ -50,6 +50,10 @@ class WC_Meta_Box_Product_Reviews {
 			return $data;
 		}
 
+		if ( $_POST['rating'] > 5 || $_POST['rating'] < 0 ) {
+			return $data;
+		}
+
 		$comment_id = $data['comment_ID'];
 
 		// Update meta
