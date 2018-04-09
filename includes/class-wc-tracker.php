@@ -114,7 +114,7 @@ class WC_Tracker {
 		// Store count info
 		$data['users']              = self::get_user_counts();
 		$data['products']           = self::get_product_counts();
-		$data['orders']             = self::get_order_counts();
+		$data['orders']             = self::get_orders();
 
 		// Payment gateway info
 		$data['gateways']           = self::get_active_payment_gateways();
@@ -280,7 +280,23 @@ class WC_Tracker {
 	}
 
 	/**
+	 * Combine all order data.
+	 *
+	 * @return array
+	 */
+	private static function get_orders() {
+		$orders = array();
+
+		$orders['last']  = self::get_last_order_date();
+		$orders['gross'] = self::get_orders_gross();
+		$order_counts    = self::get_order_counts();
+
+		return array_merge( $orders, $order_counts );
+	}
+
+	/**
 	 * Get order counts based on order status.
+	 *
 	 * @return array
 	 */
 	private static function get_order_counts() {
@@ -395,6 +411,57 @@ class WC_Tracker {
 	 */
 	private static function get_admin_user_agents() {
 		return array_filter( (array) get_option( 'woocommerce_tracker_ua', array() ) );
+	}
+
+	/**
+	 * Get gross total.
+	 *
+	 * @return int
+	 */
+	private static function get_orders_gross() {
+		$gross_total = get_option( 'wc_gross_total', '' );
+		if ( '' === $gross_total ) {
+			$orders = wc_get_orders(
+				array(
+					'limit'  => -1,
+					'status' => array_map( 'wc_get_order_status_name', wc_get_is_paid_statuses() ),
+					'fields' => 'ids',
+				)
+			);
+			if ( ! empty( $orders ) ) {
+				$gross_total = 0;
+				foreach ( $orders as $order_id ) {
+					$order = wc_get_order( $order_id );
+					if ( is_a( $order, 'WC_Order' ) ) {
+						$gross_total += $order->get_subtotal();
+					}
+				}
+			} else {
+				$gross_total = 0;
+				update_option( 'wc_gross_total', '0' );
+			}
+		}
+		return $gross_total;
+	}
+
+	/**
+	 * Get last order date
+	 *
+	 * @return string
+	 */
+	private static function get_last_order_date() {
+		$orders = wc_get_orders(
+			array(
+				'limit'    => 1,
+				'status'   => array_map( 'wc_get_order_status_name', wc_get_is_paid_statuses() ),
+			)
+		);
+		if ( ! empty( $orders ) ) {
+			$order = $orders[0];
+			return $order->get_date_created();
+		} else {
+			return '-';
+		}
 	}
 }
 
