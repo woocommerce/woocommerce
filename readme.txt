@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, claudiulodro,
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
 Requires at least: 4.7
 Tested up to: 4.9
-Stable tag: 3.3.4
+Stable tag: 3.3.5
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -160,6 +160,20 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 6. A product archive (grid).
 
 == Changelog ==
+
+= 3.3.5 - 2018-04-10 =
+* Fix - Shop page notice should not appear when edting the "Hello World!" page (PRs #19607 and #19611)
+* Fix - Inconsistent order item refund sign (PR #19582)
+* Fix - Change `wc_get_price_excluding_tax` to not round the return value so calculations in admin are not pre-rounded (PR #19526)
+* Fix - Use minimum price instead of maximum price when ordering variable products from low to high on term archives (PR #19515)
+* Fix - Check query var for orderby when using WP rewrite rules if not found in $_GET (PR #19510)
+* Fix - Ajax loading spinner when using twentyseventeen theme (PR #19507)
+* Fix - Out of Stock products change stock to On Backorder when imported to update existing products (PR #19504)
+* Tweak - Define array before attempting to append to it (PR #19520)
+* Tweak - Change WC WP-CLI commands default per_page value to 100 (PR #19555)
+* Tweak - Ensure background process class returns `data` as an array (PR #19567)
+* Tweak - Increase orders table checkbox column size on small devices (PR #19618)
+* Tweak - Better support for infinite scroll in Jetpack (PR #19477)
 
 = 3.3.4 - 2018-03-20 =
 * Fix - Fixed undefined index after running setup wizard two times on fresh install.
