@@ -288,6 +288,7 @@ class WC_Tracker {
 		$orders = array();
 
 		$order_counts       = self::get_order_counts();
+		$orders['first']    = self::get_first_order_date();
 		$orders['last']     = self::get_last_order_date();
 		$orders['gross']    = self::get_orders_gross();
 		$orders['shipping'] = self::get_orders_shipping();
@@ -512,6 +513,27 @@ class WC_Tracker {
 			array(
 				'limit'    => 1,
 				'status'   => array_map( 'wc_get_order_status_name', wc_get_is_paid_statuses() ),
+			)
+		);
+		if ( ! empty( $orders ) ) {
+			$order = $orders[0];
+			return $order->get_date_created();
+		} else {
+			return '-';
+		}
+	}
+
+	/**
+	 * Get first order date.
+	 *
+	 * @return string
+	 */
+	private static function get_first_order_date() {
+		$orders = wc_get_orders(
+			array(
+				'limit'  => 1,
+				'order'  => 'ASC',
+				'status' => array_map( 'wc_get_order_status_name', wc_get_is_paid_statuses() ),
 			)
 		);
 		if ( ! empty( $orders ) ) {
