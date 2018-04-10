@@ -294,6 +294,7 @@ class WC_Tracker {
 		$orders['net']      = self::get_orders_net();
 		$orders['shipping'] = self::get_orders_shipping();
 		$orders['tax']      = self::get_orders_tax();
+		$orders['discount'] = self::get_orders_discount();
 
 		return array_merge( $orders, $order_counts );
 	}
@@ -529,6 +530,35 @@ class WC_Tracker {
 				}
 			}
 			update_option( 'wc_tax_total', $tax_total );
+		}
+		return $tax_total;
+	}
+
+	/**
+	 * Get discount total.
+	 *
+	 * @return int
+	 */
+	private static function get_orders_discount() {
+		$discount_total = get_option( 'wc_discount_total', '' );
+		if ( '' === $discount_total ) {
+			$orders = wc_get_orders(
+				array(
+					'limit'  => -1,
+					'status' => array_map( 'wc_get_order_status_name', wc_get_is_paid_statuses() ),
+					'fields' => 'ids',
+				)
+			);
+			$discount_total = 0;
+			if ( ! empty( $orders ) ) {
+				foreach ( $orders as $order_id ) {
+					$order = wc_get_order( $order_id );
+					if ( is_a( $order, 'WC_Order' ) ) {
+						$discount_total += $order->get_discount_total( 'edit' );
+					}
+				}
+			}
+			update_option( 'wc_discount_total', $discount_total );
 		}
 		return $tax_total;
 	}
