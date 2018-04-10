@@ -99,6 +99,10 @@ class WC_Install {
 			'wc_update_330_set_paypal_sandbox_credentials',
 			'wc_update_330_db_version',
 		),
+		'3.4.0' => array(
+			'wc_update_340_irish_states',
+			'wc_update_340_db_version',
+		),
 	);
 
 	/**
