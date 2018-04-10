@@ -825,6 +825,11 @@ table.wc_status_table--tools {
 		margin-left: 10px;
 	}
 
+	label.stock_status_field {
+	  clear: both;
+	  float: left;
+	}
+
 	.dimensions div {
 		display: block;
 		margin: 0.2em 0;
