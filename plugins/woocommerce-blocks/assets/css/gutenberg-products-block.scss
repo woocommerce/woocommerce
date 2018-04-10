@@ -613,7 +613,8 @@ p.wc-products-display-options__option-description {
 
 		img {
 			margin: 0;
-			border: 4px solid $color__link--hover;
+			outline: 4px solid $color__link--hover;
+			outline-offset: -4px;
 		}
 
 		button {
@@ -732,6 +733,19 @@ p.wc-products-display-options__option-description {
 		.dashicon {
 			color: $color__link;
 			margin-left: auto;
+		}
+	}
+}
+
+.wc-products-list-card__search-wrapper--with-results +
+.wc-products-list-card__results-wrapper {
+	.wc-products-list-card__item {
+		img {
+			outline: none;
+		}
+
+		button {
+			display: none;
 		}
 	}
 }
