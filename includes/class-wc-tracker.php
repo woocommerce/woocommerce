@@ -287,9 +287,10 @@ class WC_Tracker {
 	private static function get_orders() {
 		$orders = array();
 
-		$orders['last']  = self::get_last_order_date();
-		$orders['gross'] = self::get_orders_gross();
-		$order_counts    = self::get_order_counts();
+		$orders['last']     = self::get_last_order_date();
+		$orders['gross']    = self::get_orders_gross();
+		$orders['shipping'] = self::get_orders_shipping();
+		$order_counts       = self::get_order_counts();
 
 		return array_merge( $orders, $order_counts );
 	}
@@ -428,20 +429,47 @@ class WC_Tracker {
 					'fields' => 'ids',
 				)
 			);
+			$gross_total = 0;
 			if ( ! empty( $orders ) ) {
-				$gross_total = 0;
 				foreach ( $orders as $order_id ) {
 					$order = wc_get_order( $order_id );
 					if ( is_a( $order, 'WC_Order' ) ) {
-						$gross_total += $order->get_subtotal();
+						$gross_total += $order->get_subtotal( 'edit' );
 					}
 				}
-			} else {
-				$gross_total = 0;
-				update_option( 'wc_gross_total', '0' );
 			}
+			update_option( 'wc_gross_total', $gross_total );
 		}
 		return $gross_total;
+	}
+
+	/**
+	 * Get shipping total.
+	 *
+	 * @return int
+	 */
+	private static function get_orders_shipping() {
+		$shipping_total = get_option( 'wc_shipping_total', '' );
+		if ( '' === $shipping_total ) {
+			$orders = wc_get_orders(
+				array(
+					'limit'  => -1,
+					'status' => array_map( 'wc_get_order_status_name', wc_get_is_paid_statuses() ),
+					'fields' => 'ids',
+				)
+			);
+			$shipping_total = 0;
+			if ( ! empty( $orders ) ) {
+				foreach ( $orders as $order_id ) {
+					$order = wc_get_order( $order_id );
+					if ( is_a( $order, 'WC_Order' ) ) {
+						$shipping_total += $order->get_shipping_total( 'edit' );
+					}
+				}
+			}
+			update_option( 'wc_shipping_total', $shipping_total );
+		}
+		return $shipping_total;
 	}
 
 	/**
