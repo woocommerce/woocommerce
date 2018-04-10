@@ -510,6 +510,9 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 				return $object;
 			}
 
+			// Make sure gateways are loaded so hooks from gateways fire on save/create.
+			WC()->payment_gateways();
+
 			if ( ! is_null( $request['customer_id'] ) && 0 !== $request['customer_id'] ) {
 				// Make sure customer exists.
 				if ( false === get_user_by( 'id', $request['customer_id'] ) ) {
