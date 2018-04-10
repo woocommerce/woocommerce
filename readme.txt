@@ -172,6 +172,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 * Fix - Visibility dropdown not responding in quick edit when stock management is disabled.
 * Fix - Featured paramenter in products endpoint on REST API.
 * Fix - Linebreaks in order item meta.
+* Fix - Product rating count when updated by admin.
 * Tweak - Define array before attempting to append to it.
 * Tweak - Change WC WP-CLI commands default per_page value to 100.
 * Tweak - Ensure background process class returns `data` as an array.
