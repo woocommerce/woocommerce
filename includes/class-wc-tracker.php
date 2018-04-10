@@ -287,10 +287,11 @@ class WC_Tracker {
 	private static function get_orders() {
 		$orders = array();
 
+		$order_counts       = self::get_order_counts();
 		$orders['last']     = self::get_last_order_date();
 		$orders['gross']    = self::get_orders_gross();
 		$orders['shipping'] = self::get_orders_shipping();
-		$order_counts       = self::get_order_counts();
+		$orders['tax']      = self::get_orders_tax();
 
 		return array_merge( $orders, $order_counts );
 	}
@@ -470,6 +471,35 @@ class WC_Tracker {
 			update_option( 'wc_shipping_total', $shipping_total );
 		}
 		return $shipping_total;
+	}
+
+	/**
+	 * Get tax total
+	 *
+	 * @return int
+	 */
+	private static function get_orders_tax() {
+		$tax_total = get_option( 'wc_tax_total', '' );
+		if ( '' === $tax_total ) {
+			$orders = wc_get_orders(
+				array(
+					'limit'  => -1,
+					'status' => array_map( 'wc_get_order_status_name', wc_get_is_paid_statuses() ),
+					'fields' => 'ids',
+				)
+			);
+			$tax_total = 0;
+			if ( ! empty( $orders ) ) {
+				foreach ( $orders as $order_id ) {
+					$order = wc_get_order( $order_id );
+					if ( is_a( $order, 'WC_Order' ) ) {
+						$tax_total += $order->get_total_tax( 'edit' );
+					}
+				}
+			}
+			update_option( 'wc_tax_total', $tax_total );
+		}
+		return $tax_total;
 	}
 
 	/**
