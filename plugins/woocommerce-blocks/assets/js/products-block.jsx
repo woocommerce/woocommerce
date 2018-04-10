@@ -337,6 +337,7 @@ const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
 
 	if ( 'specific' === display ) {
 		query.include = display_setting.join( ',' );
+		query.per_page = display_setting.length;
 	} else if ( 'category' === display ) {
 		query.category = display_setting.join( ',' );
 	} else if ( 'attribute' === display && display_setting.length ) {
