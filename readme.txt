@@ -162,18 +162,21 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 == Changelog ==
 
 = 3.3.5 - 2018-04-10 =
-* Fix - Shop page notice should not appear when edting the "Hello World!" page
-* Fix - Inconsistent order item refund sign
-* Fix - Change `wc_get_price_excluding_tax` to not round the return value so calculations in admin are not pre-rounded
-* Fix - Use minimum price instead of maximum price when ordering variable products from low to high on term archives
-* Fix - Check query var for orderby when using WP rewrite rules if not found in $_GET
-* Fix - Ajax loading spinner when using twentyseventeen theme
-* Fix - Out of Stock products change stock to On Backorder when imported to update existing products
-* Tweak - Define array before attempting to append to it
-* Tweak - Change WC WP-CLI commands default per_page value to 100
-* Tweak - Ensure background process class returns `data` as an array
-* Tweak - Increase orders table checkbox column size on small devices
-* Tweak - Better support for infinite scroll in Jetpack
+* Fix - Shop page notice should not appear when edting the "Hello World!" page.
+* Fix - Inconsistent order item refund sign.
+* Fix - Change `wc_get_price_excluding_tax` to not round the return value so calculations in admin are not pre-rounded.
+* Fix - Use minimum price instead of maximum price when ordering variable products from low to high on term archives.
+* Fix - `order` and `orderby` on shop page when using rewrite rules.
+* Fix - Ajax loading spinner when using twentyseventeen theme.
+* Fix - Out of Stock products change stock to On Backorder when imported to update existing products.
+* Fix - Visibility dropdown not responding in quick edit when stock management is disabled.
+* Fix - Featured paramenter in products endpoint on REST API.
+* Fix - Linebreaks in order item meta.
+* Tweak - Define array before attempting to append to it.
+* Tweak - Change WC WP-CLI commands default per_page value to 100.
+* Tweak - Ensure background process class returns `data` as an array.
+* Tweak - Increase orders table checkbox column size on small devices.
+* Tweak - Better support for infinite scroll in Jetpack.
 
 = 3.3.4 - 2018-03-20 =
 * Fix - Fixed undefined index after running setup wizard two times on fresh install.
