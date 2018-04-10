@@ -613,14 +613,14 @@ p.wc-products-display-options__option-description {
 
 		img {
 			margin: 0;
-			border: 4px solid $color__link;
+			border: 4px solid $color__link--hover;
 		}
 
 		button {
 			position: absolute;
 			top: 0;
 			right: 0;
-			background: $color__link;
+			background: $color__link--hover;
 			padding: 0;
 			margin: 0;
 			border: none;
