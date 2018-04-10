@@ -85,11 +85,13 @@ class ProductsSpecificSearchField extends React.Component {
 
 		this.state = {
 			searchText: '',
+			dropdownOpen: false,
 		}
 
 		this.updateSearchResults = this.updateSearchResults.bind( this );
 		this.setWrapperRef = this.setWrapperRef.bind( this );
 		this.handleClickOutside = this.handleClickOutside.bind( this );
+		this.isDropdownOpen = this.isDropdownOpen.bind( this );
 	}
 
 	/**
@@ -126,6 +128,12 @@ class ProductsSpecificSearchField extends React.Component {
         }
 	}
 
+	isDropdownOpen( isOpen ) {
+		this.setState( {
+			dropdownOpen: !! isOpen,
+		} );
+	}
+
 	/**
 	 * Event handler for updating results when text is typed into the input.
 	 *
@@ -141,8 +149,10 @@ class ProductsSpecificSearchField extends React.Component {
 	 * Render the product search UI.
 	 */
 	render() {
+		const divClass = 'wc-products-list-card__search-wrapper';
+
 		return (
-			<div className="wc-products-list-card__search-wrapper" ref={ this.setWrapperRef }>
+			<div className={ divClass + ( this.state.dropdownOpen ? ' ' + divClass + '--with-results' : '' ) } ref={ this.setWrapperRef }>
 				<div className="wc-products-list-card__input-wrapper">
 					<Dashicon icon="search" />
 					<input type="search"
@@ -156,6 +166,7 @@ class ProductsSpecificSearchField extends React.Component {
 					searchString={ this.state.searchText }
 					addOrRemoveProductCallback={ this.props.addOrRemoveProductCallback }
 					selectedProducts={ this.props.selectedProducts }
+					isDropdownOpenCallback={ this.isDropdownOpen }
 				/>
 			</div>
 		);
@@ -176,7 +187,7 @@ const ProductSpecificSearchResults = withAPIData( ( props ) => {
 		return {
 			products: '/wc/v2/products?per_page=10&search=' + props.searchString,
 		};
-	} )( ( { products, addOrRemoveProductCallback, selectedProducts } ) => {
+	} )( ( { products, addOrRemoveProductCallback, selectedProducts, isDropdownOpenCallback } ) => {
 		if ( ! products.data ) {
 			return null;
 		}
@@ -194,6 +205,7 @@ const ProductSpecificSearchResults = withAPIData( ( props ) => {
 			products={ products.data }
 			addOrRemoveProductCallback={ addOrRemoveProductCallback }
 			selectedProducts={ selectedProducts }
+			isDropdownOpenCallback={ isDropdownOpenCallback }
 		/>
 	}
 );
@@ -202,6 +214,20 @@ const ProductSpecificSearchResults = withAPIData( ( props ) => {
  * The dropdown of search results.
  */
 class ProductSpecificSearchResultsDropdown extends React.Component {
+
+	/**
+	 * Set the state of the dropdown to open.
+	 */
+	componentDidMount() {
+		this.props.isDropdownOpenCallback( true );
+	}
+
+	/**
+	 * Set the state of the dropdown to closed.
+	 */
+	componentWillUnmount() {
+		this.props.isDropdownOpenCallback( false );
+	}
 
 	/**
 	 * Render dropdown.
