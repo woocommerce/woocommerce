@@ -1125,12 +1125,14 @@ var ProductsSpecificSearchField = function (_React$Component2) {
 		var _this2 = _possibleConstructorReturn(this, (ProductsSpecificSearchField.__proto__ || Object.getPrototypeOf(ProductsSpecificSearchField)).call(this, props));
 
 		_this2.state = {
-			searchText: ''
+			searchText: '',
+			dropdownOpen: false
 		};
 
 		_this2.updateSearchResults = _this2.updateSearchResults.bind(_this2);
 		_this2.setWrapperRef = _this2.setWrapperRef.bind(_this2);
 		_this2.handleClickOutside = _this2.handleClickOutside.bind(_this2);
+		_this2.isDropdownOpen = _this2.isDropdownOpen.bind(_this2);
 		return _this2;
 	}
 
@@ -1180,6 +1182,13 @@ var ProductsSpecificSearchField = function (_React$Component2) {
 				});
 			}
 		}
+	}, {
+		key: 'isDropdownOpen',
+		value: function isDropdownOpen(isOpen) {
+			this.setState({
+				dropdownOpen: !!isOpen
+			});
+		}
 
 		/**
    * Event handler for updating results when text is typed into the input.
@@ -1202,9 +1211,11 @@ var ProductsSpecificSearchField = function (_React$Component2) {
 	}, {
 		key: 'render',
 		value: function render() {
+			var divClass = 'wc-products-list-card__search-wrapper';
+
 			return wp.element.createElement(
 				'div',
-				{ className: 'wc-products-list-card__search-wrapper', ref: this.setWrapperRef },
+				{ className: divClass + (this.state.dropdownOpen ? ' ' + divClass + '--with-results' : ''), ref: this.setWrapperRef },
 				wp.element.createElement(
 					'div',
 					{ className: 'wc-products-list-card__input-wrapper' },
@@ -1219,7 +1230,8 @@ var ProductsSpecificSearchField = function (_React$Component2) {
 				wp.element.createElement(ProductSpecificSearchResults, {
 					searchString: this.state.searchText,
 					addOrRemoveProductCallback: this.props.addOrRemoveProductCallback,
-					selectedProducts: this.props.selectedProducts
+					selectedProducts: this.props.selectedProducts,
+					isDropdownOpenCallback: this.isDropdownOpen
 				})
 			);
 		}
@@ -1247,7 +1259,8 @@ var ProductSpecificSearchResults = withAPIData(function (props) {
 })(function (_ref) {
 	var products = _ref.products,
 	    addOrRemoveProductCallback = _ref.addOrRemoveProductCallback,
-	    selectedProducts = _ref.selectedProducts;
+	    selectedProducts = _ref.selectedProducts,
+	    isDropdownOpenCallback = _ref.isDropdownOpenCallback;
 
 	if (!products.data) {
 		return null;
@@ -1292,7 +1305,8 @@ var ProductSpecificSearchResults = withAPIData(function (props) {
 	return wp.element.createElement(ProductSpecificSearchResultsDropdown, {
 		products: products.data,
 		addOrRemoveProductCallback: addOrRemoveProductCallback,
-		selectedProducts: selectedProducts
+		selectedProducts: selectedProducts,
+		isDropdownOpenCallback: isDropdownOpenCallback
 	});
 });
 
@@ -1310,12 +1324,32 @@ var ProductSpecificSearchResultsDropdown = function (_React$Component3) {
 	}
 
 	_createClass(ProductSpecificSearchResultsDropdown, [{
-		key: 'render',
+		key: 'componentDidMount',
 
+
+		/**
+   * Set the state of the dropdown to open.
+   */
+		value: function componentDidMount() {
+			this.props.isDropdownOpenCallback(true);
+		}
+
+		/**
+   * Set the state of the dropdown to closed.
+   */
+
+	}, {
+		key: 'componentWillUnmount',
+		value: function componentWillUnmount() {
+			this.props.isDropdownOpenCallback(false);
+		}
 
 		/**
    * Render dropdown.
    */
+
+	}, {
+		key: 'render',
 		value: function render() {
 			var _props = this.props,
 			    products = _props.products,
