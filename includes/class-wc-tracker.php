@@ -419,148 +419,45 @@ class WC_Tracker {
 	}
 
 	/**
-	 * Get gross total.
+	 * Get order totals
 	 *
-	 * @return int
+	 * @return array
 	 */
-	private static function get_orders_gross() {
-		$gross_total = get_option( 'wc_gross_total', '' );
-		if ( '' === $gross_total ) {
-			$orders = wc_get_orders(
-				array(
-					'limit'  => -1,
-					'status' => array_map( 'wc_get_order_status_name', wc_get_is_paid_statuses() ),
-					'fields' => 'ids',
-				)
-			);
-			$gross_total = 0;
-			if ( ! empty( $orders ) ) {
-				foreach ( $orders as $order_id ) {
-					$order = wc_get_order( $order_id );
-					if ( is_a( $order, 'WC_Order' ) ) {
-						$gross_total += $order->get_subtotal( 'edit' );
-					}
-				}
-			}
-			update_option( 'wc_gross_total', $gross_total );
-		}
-		return $gross_total;
-	}
+	private static function get_order_totals() {
+		$gross_total    = 0;
+		$net_total      = 0;
+		$shipping_total = 0;
+		$tax_total      = 0;
+		$discount_total = 0;
 
-	/**
-	 * Get net total.
-	 *
-	 * @return int
-	 */
-	private static function get_orders_net() {
-		$net_total = get_option( 'wc_net_total', '' );
-		if ( '' === $wc_net_total ) {
-			$orders = wc_get_orders(
-				array(
-					'limit'  => -1,
-					'status' => array_map( 'wc_get_order_status_name', wc_get_is_paid_statuses() ),
-					'fields' => 'ids',
-				)
-			);
-			$net_total = 0;
-			if ( ! empty( $orders ) ) {
-				foreach ( $orders as $order_id ) {
-					$order = wc_get_order( $order_id );
-					if ( is_a( $order, 'WC_Order' ) ) {
-						$net_total += $order->get_total( 'edit' );
-					}
-				}
-			}
-			update_option( 'wc_net_total', $net_total );
-		}
-		return $net_total;
-	}
+		$orders = wc_get_orders(
+			array(
+				'limit'  => -1,
+				'status' => array_map( 'wc_get_order_status_name', wc_get_is_paid_statuses() ),
+				'fields' => 'ids',
+			)
+		);
 
-	/**
-	 * Get shipping total.
-	 *
-	 * @return int
-	 */
-	private static function get_orders_shipping() {
-		$shipping_total = get_option( 'wc_shipping_total', '' );
-		if ( '' === $shipping_total ) {
-			$orders = wc_get_orders(
-				array(
-					'limit'  => -1,
-					'status' => array_map( 'wc_get_order_status_name', wc_get_is_paid_statuses() ),
-					'fields' => 'ids',
-				)
-			);
-			$shipping_total = 0;
-			if ( ! empty( $orders ) ) {
-				foreach ( $orders as $order_id ) {
-					$order = wc_get_order( $order_id );
-					if ( is_a( $order, 'WC_Order' ) ) {
-						$shipping_total += $order->get_shipping_total( 'edit' );
-					}
+		if ( ! empty( $orders ) ) {
+			foreach ( $orders as $order_id ) {
+				$order = wc_get_order( $order_id );
+				if ( is_a( $order, 'WC_Order' ) ) {
+					$gross_total    += $order->get_subtotal( 'edit' );
+					$net_total      += $order->get_total( 'edit' );
+					$shipping_total += $order->get_shipping_total( 'edit' );
+					$tax_total      += $order->get_total_tax( 'edit' );
+					$discount_total += $order->get_discount_total( 'edit' );
 				}
 			}
-			update_option( 'wc_shipping_total', $shipping_total );
 		}
-		return $shipping_total;
-	}
 
-	/**
-	 * Get tax total
-	 *
-	 * @return int
-	 */
-	private static function get_orders_tax() {
-		$tax_total = get_option( 'wc_tax_total', '' );
-		if ( '' === $tax_total ) {
-			$orders = wc_get_orders(
-				array(
-					'limit'  => -1,
-					'status' => array_map( 'wc_get_order_status_name', wc_get_is_paid_statuses() ),
-					'fields' => 'ids',
-				)
-			);
-			$tax_total = 0;
-			if ( ! empty( $orders ) ) {
-				foreach ( $orders as $order_id ) {
-					$order = wc_get_order( $order_id );
-					if ( is_a( $order, 'WC_Order' ) ) {
-						$tax_total += $order->get_total_tax( 'edit' );
-					}
-				}
-			}
-			update_option( 'wc_tax_total', $tax_total );
-		}
-		return $tax_total;
-	}
-
-	/**
-	 * Get discount total.
-	 *
-	 * @return int
-	 */
-	private static function get_orders_discount() {
-		$discount_total = get_option( 'wc_discount_total', '' );
-		if ( '' === $discount_total ) {
-			$orders = wc_get_orders(
-				array(
-					'limit'  => -1,
-					'status' => array_map( 'wc_get_order_status_name', wc_get_is_paid_statuses() ),
-					'fields' => 'ids',
-				)
-			);
-			$discount_total = 0;
-			if ( ! empty( $orders ) ) {
-				foreach ( $orders as $order_id ) {
-					$order = wc_get_order( $order_id );
-					if ( is_a( $order, 'WC_Order' ) ) {
-						$discount_total += $order->get_discount_total( 'edit' );
-					}
-				}
-			}
-			update_option( 'wc_discount_total', $discount_total );
-		}
-		return $tax_total;
+		return array(
+			'gross'    => $gross_total,
+			'net'      => $net_total,
+			'shipping' => $shipping_total,
+			'tax'      => $tax_total,
+			'discount' => $discount_total,
+		);
 	}
 
 	/**
