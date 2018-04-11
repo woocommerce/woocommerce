@@ -290,13 +290,9 @@ class WC_Tracker {
 		$order_counts       = self::get_order_counts();
 		$orders['first']    = self::get_first_order_date();
 		$orders['last']     = self::get_last_order_date();
-		$orders['gross']    = self::get_orders_gross();
-		$orders['net']      = self::get_orders_net();
-		$orders['shipping'] = self::get_orders_shipping();
-		$orders['tax']      = self::get_orders_tax();
-		$orders['discount'] = self::get_orders_discount();
+		$order_totals       = self::get_order_totals();
 
-		return array_merge( $orders, $order_counts );
+		return array_merge( $orders, $order_counts, $order_totals );
 	}
 
 	/**
