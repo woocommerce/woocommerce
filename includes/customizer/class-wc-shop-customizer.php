@@ -825,6 +825,49 @@ class WC_Shop_Customizer {
 			)
 		);
 
+		$choose_pages = array(
+			'woocommerce_terms_page_id'  => __( 'Terms and conditions', 'woocommerce' ),
+			'wp_page_for_privacy_policy' => __( 'Privacy policy', 'woocommerce' ),
+		);
+		$pages = get_pages( array(
+			'post_type'   => 'page',
+			'post_status' => 'publish,private,draft',
+			'child_of'    => 0,
+			'parent'      => -1,
+			'exclude'     => array(
+				wc_get_page_id( 'cart' ),
+				wc_get_page_id( 'checkout' ),
+				wc_get_page_id( 'myaccount' ),
+			),
+			'sort_order'  => 'asc',
+			'sort_column' => 'post_title',
+		) );
+		$page_choices = array( '' => __( 'No page set', 'woocommerce' ) ) + array_combine( array_map( 'strval', wp_list_pluck( $pages, 'ID' ) ), wp_list_pluck( $pages, 'post_title' ) );
+
+		foreach ( $choose_pages as $id => $name ) {
+			$wp_customize->add_setting(
+				$id,
+				array(
+					'default'           => '',
+					'type'              => 'option',
+					'capability'        => 'manage_woocommerce',
+				)
+			);
+			$wp_customize->add_control(
+				$id,
+				array(
+					/* Translators: %s: page name. */
+					'label'       => sprintf( __( '%s page', 'woocommerce' ), $name ),
+					/* Translators: %s: page name. */
+					'description' => sprintf( __( 'Choose a "%s" page so WooCommerce can link to it.', 'woocommerce' ), $name ),
+					'section'     => 'woocommerce_checkout',
+					'settings'    => $id,
+					'type'        => 'select',
+					'choices'     => $page_choices,
+				)
+			);
+		}
+
 		if ( isset( $wp_customize->selective_refresh ) ) {
 			$wp_customize->selective_refresh->add_partial(
 				'woocommerce_checkout_terms_and_conditions_text', array(
