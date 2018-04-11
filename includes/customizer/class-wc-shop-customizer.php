@@ -799,28 +799,27 @@ class WC_Shop_Customizer {
 		);
 
 		$wp_customize->add_control(
-			'woocommerce_checkout_terms_and_conditions_checkbox',
+			'woocommerce_checkout_terms_and_conditions_checkbox_text',
 			array(
-				'label'       => __( 'Enable terms and conditions checkbox', 'woocommerce' ),
-				'description' => __( 'Customers must accept your terms and conditions before they can place an order.', 'woocommerce' ),
-				'section'     => 'woocommerce_checkout',
-				'settings'    => 'woocommerce_checkout_terms_and_conditions_checkbox',
-				'type'        => 'checkbox',
+				'label'           => __( 'Terms and conditions checkbox', 'woocommerce' ),
+				'description'     => __( 'If enabled, this controls the wording of the terms and conditions checkbox which customers must accept before they can place an order.', 'woocommerce' ),
+				'section'         => 'woocommerce_checkout',
+				'settings'        => 'woocommerce_checkout_terms_and_conditions_checkbox_text',
+				'active_callback' => 'woocommerce_terms_and_conditions_checkbox_enabled',
+				'type'            => 'text',
+				'input_attrs'     => array(
+					'placeholder' => __( 'I have read and agree to the website [terms]', 'woocommerce' ),
+				),
 			)
 		);
 
 		$wp_customize->add_control(
-			'woocommerce_checkout_terms_and_conditions_checkbox_text',
+			'woocommerce_checkout_terms_and_conditions_checkbox',
 			array(
-				'label'           => __( 'Checkbox label', 'woocommerce' ),
-				'description'     => __( 'Optionally change the default terms and conditions checkbox label.', 'woocommerce' ),
-				'section'         => 'woocommerce_checkout',
-				'settings'        => 'woocommerce_checkout_terms_and_conditions_checkbox_text',
-				'active_callback' => 'woocommerce_terms_and_conditions_checkbox_enabled',
-				'type'            => 'textarea',
-				'input_attrs'     => array(
-					'placeholder' => __( 'I have read and agree to the website [terms]', 'woocommerce' ),
-				),
+				'label'    => __( 'Enable terms and conditions checkbox', 'woocommerce' ),
+				'section'  => 'woocommerce_checkout',
+				'settings' => 'woocommerce_checkout_terms_and_conditions_checkbox',
+				'type'     => 'checkbox',
 			)
 		);
 
