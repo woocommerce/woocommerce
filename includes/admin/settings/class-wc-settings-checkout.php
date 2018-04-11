@@ -157,19 +157,6 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 					),
 
 					array(
-						'title'    => __( 'Terms and conditions', 'woocommerce' ),
-						'desc'     => __( 'This lets WooCommerce know where to send users to view your website terms and conditions.', 'woocommerce' ),
-						'id'       => 'woocommerce_terms_page_id',
-						'default'  => '',
-						'class'    => 'wc-enhanced-select-nostd',
-						'css'      => 'min-width:300px;',
-						'type'     => 'single_select_page',
-						'args'     => array( 'exclude' => wc_get_page_id( 'checkout' ) ),
-						'desc_tip' => true,
-						'autoload' => false,
-					),
-
-					array(
 						'type' => 'sectionend',
 						'id'   => 'checkout_page_options',
 					),
