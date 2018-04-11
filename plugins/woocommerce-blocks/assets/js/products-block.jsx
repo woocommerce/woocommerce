@@ -5,7 +5,7 @@ const { Toolbar, withAPIData, Dropdown, Dashicon, RangeControl, Tooltip, SelectC
 
 import { ProductsSpecificSelect } from './views/specific-select.jsx';
 import { ProductsCategorySelect } from './views/category-select.jsx';
-import { ProductsAttributeSelect } from './views/attribute-select.jsx';
+import { ProductsAttributeSelect, getAttributeSlug, getAttributeID } from './views/attribute-select.jsx';
 
 /**
  * A setting has the following properties:
@@ -48,7 +48,7 @@ const PRODUCTS_BLOCK_DISPLAY_SETTINGS = {
 	},
 	'all' : {
 		title: __( 'All products' ),
-		description: __( 'Display all products ordered chronologically' ),
+		description: __( 'Display all products ordered chronologically, alphabetically, by price, by rating or by sales' ),
 		value: 'all',
 	}
 };
@@ -227,7 +227,7 @@ class ProductsBlockSettingsEditor extends React.Component {
 
 	closeMenu() {
 		this.setState( {
-			menu_visible: false
+			menu_visible: false,
 		} );
 	}
 
@@ -284,7 +284,7 @@ class ProductsBlockSettingsEditor extends React.Component {
 
 		return (
 			<div className={ 'wc-products-settings ' + ( this.state.expanded_group ? 'expanded-group-' + this.state.expanded_group : '' ) }>
-				<h4 className="wc-products-settings__title"><Dashicon icon={ 'universal-access-alt' } /> { __( 'Products' ) }</h4>
+				<h4 className="wc-products-settings__title"><Dashicon icon={ 'screenoptions' } /> { __( 'Products' ) }</h4>
 
 				{ heading }
 
@@ -329,10 +329,10 @@ class ProductPreview extends React.Component {
  */
 const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
 
-	const { columns, rows, display, display_setting, orderby, block_layout } = attributes;
+	const { columns, rows, display, display_setting, orderby } = attributes;
 
 	let query = {
-		per_page: ( 'list' === block_layout ) ? rows : rows * columns,
+		per_page: rows * columns,
 	};
 
 	if ( 'specific' === display ) {
@@ -341,7 +341,7 @@ const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
 	} else if ( 'category' === display ) {
 		query.category = display_setting.join( ',' );
 	} else if ( 'attribute' === display && display_setting.length ) {
-		query.attribute = display_setting[0];
+		query.attribute = getAttributeSlug( display_setting[0] );
 
 		if ( display_setting.length > 1 ) {
 			query.attribute_term = display_setting.slice( 1 ).join( ',' );
@@ -380,7 +380,7 @@ const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
 		return __( 'No products found' );
 	}
 
-	const classes = "wc-products-block-preview " + attributes.block_layout + " cols-" + attributes.columns;
+	const classes = "wc-products-block-preview cols-" + attributes.columns;
 
 	return (
 		<div className={ classes }>
@@ -392,22 +392,312 @@ const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
 } );
 
 /**
+ * Information about current block settings rendered in the sidebar.
+ */
+const ProductsBlockSidebarInfo = withAPIData( ( { attributes } ) => {
+
+	const { display, display_setting } = attributes;
+
+	if ( 'attribute' === display && display_setting.length ) {
+		const ID        = getAttributeID( display_setting[0] );
+		const terms     = display_setting.slice( 1 ).join( ', ' );
+		const endpoints = {
+			attributeInfo: '/wc/v2/products/attributes/' + ID,
+		}
+
+		if ( terms.length ) {
+			endpoints.termInfo = '/wc/v2/products/attributes/' + ID + '/terms?include=' + terms;
+		}
+
+		return endpoints;
+
+	} else if ( 'category' === display && display_setting.length ) {
+		return {
+			categoriesInfo: '/wc/v2/products/categories?include=' + display_setting.join( ',' ),
+		};
+	}
+
+	return {};
+
+} )( ( { attributes, categoriesInfo, attributeInfo, termInfo } ) => {
+
+	let descriptions = [
+		// Standard description of selected scope.
+		PRODUCTS_BLOCK_DISPLAY_SETTINGS[ attributes.display ].title
+	];
+
+	// Description of categories selected scope.
+	if ( categoriesInfo && categoriesInfo.data && categoriesInfo.data.length ) {
+		let descriptionText = __( 'Product categories: ' );
+		const categories = [];
+		for ( let category of categoriesInfo.data ) {
+			categories.push( category.name );
+		}
+		descriptionText += categories.join( ', ' );
+
+		descriptions = [
+			descriptionText
+		];
+
+		// Description of attributes selected scope.
+	} else if ( attributeInfo && attributeInfo.data ) {
+		descriptions = [
+			__( 'Attribute: ' ) + attributeInfo.data.name
+		];
+
+		if ( termInfo && termInfo.data && termInfo.data.length ) {
+			let termDescriptionText = __( "Terms: " );
+			const terms = []
+			for ( const term of termInfo.data ) {
+				terms.push( term.name );
+			}
+			termDescriptionText += terms.join( ', ' );
+			descriptions.push( termDescriptionText );
+		}
+	}
+
+	return (
+		<div>
+			{ descriptions.map( ( description ) => (
+				<div className="scope-description">{ description }</div>
+			) ) }
+		</div>
+	);
+} );
+
+/**
+ * The main products block UI.
+ */
+class ProductsBlock extends React.Component {
+
+	/**
+	 * Constructor.
+	 */
+	constructor( props ) {
+		super( props );
+
+		this.getInspectorControls = this.getInspectorControls.bind( this );
+		this.getToolbarControls = this.getToolbarControls.bind( this );
+		this.getBlockDescription = this.getBlockDescription.bind( this );
+		this.getPreview = this.getPreview.bind( this );
+		this.getSettingsEditor = this.getSettingsEditor.bind( this );
+	}
+
+	/**
+	 * Get the components for the sidebar settings area that is rendered while focused on a Products block.
+	 *
+	 * @return Component
+	 */
+	getInspectorControls() {
+		const { attributes, setAttributes } = this.props;
+		const { rows, columns, display, display_setting, orderby, edit_mode } = attributes;
+
+		let columnControl = (
+			<RangeControl
+				label={ __( 'Columns' ) }
+				value={ columns }
+				onChange={ ( value ) => setAttributes( { columns: value } ) }
+				min={ wc_product_block_data.min_columns }
+				max={ wc_product_block_data.max_columns }
+			/>
+		);
+
+		let orderControl = (
+			<SelectControl
+				key="query-panel-select"
+				label={ __( 'Order Products By' ) }
+				value={ orderby }
+				options={ [
+					{
+						label: __( 'Newness - newest first' ),
+						value: 'date',
+					},
+					{
+						label: __( 'Price - low to high' ),
+						value: 'price_asc',
+					},
+					{
+						label: __( 'Price - high to low' ),
+						value: 'price_desc',
+					},
+					{
+						label: __( 'Rating - highest first' ),
+						value: 'rating',
+					},
+					{
+						label: __( 'Sales - most first' ),
+						value: 'popularity',
+					},
+					{
+						label: __( 'Title - alphabetical' ),
+						value: 'title',
+					},
+				] }
+				onChange={ ( value ) => setAttributes( { orderby: value } ) }
+			/>
+		);
+
+		// Row settings don't make sense for specific-selected products display.
+		let rowControl = null;
+		if ( 'specific' !== display ) {
+			rowControl = (
+				<RangeControl
+					label={ __( 'Rows' ) }
+					value={ rows }
+					onChange={ ( value ) => setAttributes( { rows: value } ) }
+					min={ wc_product_block_data.min_rows }
+					max={ wc_product_block_data.max_rows }
+				/>
+			);
+		}
+
+		return (
+			<InspectorControls key="inspector">
+				{ this.getBlockDescription() }
+				<h3>{ __( 'Layout' ) }</h3>
+				{ columnControl }
+				{ rowControl }
+				{ orderControl }
+			</InspectorControls>
+		);
+	}
+
+	/**
+	 * Get the components for the toolbar area that appears on top of the block when focused.
+	 *
+	 * @return Component
+	 */
+	getToolbarControls() {
+		let props = this.props;
+		const { attributes, setAttributes } = props;
+		const { display, display_setting, edit_mode } = attributes;
+
+		// Edit button should not do anything if valid product selection has not been made.
+		const shouldDisableEditButton = ['', 'specific', 'category', 'attribute'].includes( display ) && ! display_setting.length;
+
+		const editButton = [
+			{
+				icon: 'edit',
+				title: __( 'Edit' ),
+				onClick: shouldDisableEditButton ? function(){} : () => setAttributes( { edit_mode: ! edit_mode } ),
+				isActive: edit_mode,
+			},
+		];
+
+		return (
+			<BlockControls key="controls">
+				<Toolbar controls={ editButton } />
+			</BlockControls>
+		);
+	}
+
+	/**
+	 * Get a description of the current block settings.
+	 *
+	 * @return Component
+	 */
+	getBlockDescription() {
+		const { attributes, setAttributes } = this.props;
+		const { display, display_setting, edit_mode } = attributes;
+
+		if ( ! display.length ) {
+			return null;
+		}
+
+		function editQuicklinkHandler() {
+			setAttributes( {
+				edit_mode: true,
+			} );
+
+			// @todo center in view
+		}
+
+		let editQuickLink = null;
+		if ( ! attributes.edit_mode ) {
+			editQuickLink = (
+				<div className="wc-products-scope-description--edit-quicklink">
+					<a onClick={ editQuicklinkHandler }>{ __( 'Edit' ) }</a>
+				</div>
+			);
+		}
+
+		return (
+			<div className="wc-products-scope-descriptions">
+				<div className="wc-products-scope-details">
+					<h3>{ __( 'Current Source' ) }</h3>
+					<ProductsBlockSidebarInfo attributes={ attributes } />
+				</div>
+				{ editQuickLink }
+			</div>
+		);
+	}
+
+	/**
+	 * Get the block preview component for preview mode.
+	 *
+	 * @return Component
+	 */
+	getPreview() {
+		return <ProductsBlockPreview attributes={ this.props.attributes } />;
+	}
+
+	/**
+	 * Get the block edit component for edit mode.
+	 *
+	 * @return Component
+	 */
+	getSettingsEditor() {
+		const { attributes, setAttributes } = this.props;
+		const { display, display_setting } = attributes;
+
+		const update_display_callback = ( value ) => {
+
+			// These options have setting screens that need further input from the user, so keep edit mode open.
+			const needsFurtherSettings = [ 'specific', 'attribute', 'category' ];
+
+			if ( display !== value ) {
+				setAttributes( {
+					display: value,
+					display_setting: [],
+					edit_mode: needsFurtherSettings.includes( value ),
+				} );
+			}
+		};
+
+		return (
+			<ProductsBlockSettingsEditor
+				attributes={ attributes }
+				selected_display={ display }
+				selected_display_setting={ display_setting }
+				update_display_callback={ update_display_callback }
+				update_display_setting_callback={ ( value ) => setAttributes( { display_setting: value } ) }
+				done_callback={ () => setAttributes( { edit_mode: false } ) }
+			/>
+		);
+	}
+
+	render() {
+		const { attributes, focus } = this.props;
+		const { edit_mode } = attributes;
+
+		return [
+			( !! focus ) ? this.getInspectorControls() : null,
+			( !! focus ) ? this.getToolbarControls() : null,
+			edit_mode ? this.getSettingsEditor() : this.getPreview(),
+		];
+	}
+}
+
+/**
  * Register and run the products block.
  */
 registerBlockType( 'woocommerce/products', {
 	title: __( 'Products' ),
-	icon: 'universal-access-alt', // @todo Needs a good icon.
+	icon: 'screenoptions',
 	category: 'widgets',
+	description: __( 'Display a grid of products from a variety of sources.' ),
 
 	attributes: {
-
-		/**
-		 * Layout to use. 'grid' or 'list'.
-		 */
-		block_layout: {
-			type: 'string',
-			default: 'grid',
-		},
 
 		/**
 		 * Number of columns.
@@ -422,7 +712,7 @@ registerBlockType( 'woocommerce/products', {
 		 */
 		rows: {
 			type: 'number',
-			default: 1,
+			default: wc_product_block_data.default_rows,
 		},
 
 		/**
@@ -462,173 +752,7 @@ registerBlockType( 'woocommerce/products', {
 	 * Renders and manages the block.
 	 */
 	edit( props ) {
-		const { attributes, className, focus, setAttributes, setFocus } = props;
-		const { block_layout, rows, columns, display, display_setting, orderby, edit_mode } = attributes;
-
-		/**
-		 * Get the components for the sidebar settings area that is rendered while focused on a Products block.
-		 *
-		 * @return Component
-		 */
-		function getInspectorControls() {
-
-			// Column controls don't make sense in a list layout.
-			let columnControl = null;
-			if ( 'list' !== block_layout ) {
-				columnControl = (
-					<RangeControl
-						label={ __( 'Columns' ) }
-						value={ columns }
-						onChange={ ( value ) => setAttributes( { columns: value } ) }
-						min={ wc_product_block_data.min_columns }
-						max={ wc_product_block_data.max_columns }
-					/>
-				);
-			}
-
-			// Order controls
-			let orderControl = (
-				<SelectControl
-					key="query-panel-select"
-					label={ __( 'Order Products By' ) }
-					value={ orderby }
-					options={ [
-						{
-							label: __( 'Newness - newest first' ),
-							value: 'date',
-						},
-						{
-							label: __( 'Price - low to high' ),
-							value: 'price_asc',
-						},
-						{
-							label: __( 'Price - high to low' ),
-							value: 'price_desc',
-						},
-						{
-							label: __( 'Rating - highest first' ),
-							value: 'rating',
-						},
-						{
-							label: __( 'Sales - most first' ),
-							value: 'popularity',
-						},
-						{
-							label: __( 'Title - alphabetical' ),
-							value: 'title',
-						},
-					] }
-					onChange={ ( value ) => setAttributes( { orderby: value } ) }
-				/>
-			);
-
-			// Row settings don't make sense for specific-selected products display.
-			let rowControl = null;
-			if ( 'specific' !== display ) {
-				rowControl = (
-					<RangeControl
-						label={ __( 'Rows' ) }
-						value={ rows }
-						onChange={ ( value ) => setAttributes( { rows: value } ) }
-						min={ 1 }
-						max={ 6 }
-					/>
-				);
-			}
-
-			return (
-				<InspectorControls key="inspector">
-					<h3>{ __( 'Layout' ) }</h3>
-					{ columnControl }
-					{ rowControl }
-					{ orderControl }
-				</InspectorControls>
-			);
-		};
-
-		/**
-		 * Get the components for the toolbar area that appears on top of the block when focused.
-		 *
-		 * @return Component
-		 */
-		function getToolbarControls() {
-
-			const layoutControls = [
-				{
-					icon: 'list-view',
-					title: __( 'List View' ),
-					onClick: () => setAttributes( { block_layout: 'list' } ),
-					isActive: 'list' === block_layout,
-				},
-				{
-					icon: 'grid-view',
-					title: __( 'Grid View' ),
-					onClick: () => setAttributes( { block_layout: 'grid' } ),
-					isActive: 'grid' === block_layout,
-				},
-			];
-
-			// Edit button should not do anything if valid product selection has not been made.
-			const shouldDisableEditButton = ['', 'specific', 'category', 'attribute'].includes( display ) && ! display_setting.length;
-
-			const editButton = [
-				{
-					icon: 'edit',
-					title: __( 'Edit' ),
-					onClick: shouldDisableEditButton ? function(){} : () => setAttributes( { edit_mode: ! edit_mode } ),
-					isActive: edit_mode,
-				},
-			];
-
-			return (
-				<BlockControls key="controls">
-					<Toolbar controls={ edit_mode ? [] : layoutControls } />
-					<Toolbar controls={ editButton } />
-				</BlockControls>
-			);
-		}
-
-		/**
-		 * Get the block preview component for preview mode.
-		 *
-		 * @return Component
-		 */
-		function getPreview() {
-			return <ProductsBlockPreview attributes={ attributes } />;
-		}
-
-		/**
-		 * Get the block edit component for edit mode.
-		 *
-		 * @return Component
-		 */
-		function getSettingsEditor() {
-			const update_display_callback = ( value ) => {
-				if ( display !== value ) {
-					setAttributes( {
-						display: value,
-						display_setting: [],
-					} );
-				}
-			};
-
-			return (
-				<ProductsBlockSettingsEditor
-					attributes={ attributes }
-					selected_display={ display }
-					selected_display_setting={ display_setting }
-					update_display_callback={ update_display_callback }
-					update_display_setting_callback={ ( value ) => setAttributes( { display_setting: value } ) }
-					done_callback={ () => setAttributes( { edit_mode: false } ) }
-				/>
-			);
-		}
-
-		return [
-			( !! focus ) ? getInspectorControls() : null,
-			( !! focus ) ? getToolbarControls() : null,
-			edit_mode ? getSettingsEditor() : getPreview(),
-		];
+		return <ProductsBlock { ...props } />
 	},
 
 	/**
@@ -637,18 +761,13 @@ registerBlockType( 'woocommerce/products', {
 	 * @return string
 	 */
 	save( props ) {
-		const { block_layout, rows, columns, display, display_setting, orderby } = props.attributes;
+		const { rows, columns, display, display_setting, orderby } = props.attributes;
 
 		let shortcode_atts = new Map();
-		shortcode_atts.set( 'limit', 'grid' === block_layout ? rows * columns : rows );
-
-		if ( 'list' === block_layout ) {
-			shortcode_atts.set( 'class', 'list-layout' );
+		if ( 'specific' !== display ) {
+			shortcode_atts.set( 'limit', rows * columns );
 		}
-
-		if ( 'grid' === block_layout ) {
-			shortcode_atts.set( 'columns', columns );
-		}
+		shortcode_atts.set( 'columns', columns );
 
 		if ( 'specific' === display ) {
 			shortcode_atts.set( 'ids', display_setting.join( ',' ) );
@@ -659,7 +778,7 @@ registerBlockType( 'woocommerce/products', {
 		} else if ( 'on_sale' === display ) {
 			shortcode_atts.set( 'on_sale', '1' );
 		} else if ( 'attribute' === display ) {
-			const attribute = display_setting.length ? display_setting[0] : '';
+			const attribute = display_setting.length ? getAttributeSlug( display_setting[0] ) : '';
 			const terms = display_setting.length > 1 ? display_setting.slice( 1 ).join( ',' ) : '';
 
 			shortcode_atts.set( 'attribute', attribute );
