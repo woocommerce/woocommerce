@@ -8,6 +8,37 @@ const { Toolbar, withAPIData, Dropdown } = wp.components;
 const PRODUCT_ATTRIBUTE_DATA = {};
 
 /**
+ * Get the identifier for an attribute. The identifier can be used to determine
+ * the slug or the ID of the attribute.
+ *
+ * @param string slug The attribute slug.
+ * @param int|numeric string id The attribute ID.
+ */
+export function getAttributeIdentifier( slug, id ) {
+	return slug + ',' + id;
+}
+
+/**
+ * Get the attribute slug from an identifier.
+ *
+ * @param string identifier The attribute identifier.
+ * @return string
+ */
+export function getAttributeSlug( identifier ) {
+	return identifier.split( ',' )[0];
+}
+
+/**
+ * Get the attribute ID from an identifier.
+ *
+ * @param string identifier The attribute identifier.
+ * @return numeric string
+ */
+export function getAttributeID( identifier ) {
+	return identifier.split( ',' )[1];
+}
+
+/**
  * When the display mode is 'Attribute' search for and select product attributes to pull products from.
  */
 export class ProductsAttributeSelect extends React.Component {
@@ -19,8 +50,9 @@ export class ProductsAttributeSelect extends React.Component {
 		super( props );
 
 		/**
-		 * The first item in props.selected_display_setting is the attribute slug.
-		 * The rest are the term ids for any selected terms.
+		 * The first item in props.selected_display_setting is the attribute slug and id separated by a comma.
+		 * This is to work around limitations in the API which sometimes requires a slug and sometimes an id.
+		 * The rest of the elements in selected_display_setting are the term ids for any selected terms.
 		 */
 		this.state = {
 			selectedAttribute: props.selected_display_setting.length ? props.selected_display_setting[0] : '',
@@ -36,15 +68,15 @@ export class ProductsAttributeSelect extends React.Component {
 	/**
 	 * Set the selected attribute.
 	 *
-	 * @param slug string Attribute slug.
+	 * @param identifier string Attribute slug and id separated by a comma.
 	 */
-	setSelectedAttribute( slug ) {
+	setSelectedAttribute( identifier ) {
 		this.setState( {
-			selectedAttribute: slug,
+			selectedAttribute: identifier,
 			selectedTerms: [],
 		} );
 
-		this.props.update_display_setting_callback( [ slug ] );
+		this.props.update_display_setting_callback( [ identifier ] );
 	}
 
 	/**
@@ -242,8 +274,7 @@ class ProductAttributeElement extends React.Component {
 			return;
 		}
 
-		const slug = evt.target.value;
-		this.props.setSelectedAttribute( slug );
+		this.props.setSelectedAttribute( evt.target.value );
 	}
 
 	/**
@@ -264,7 +295,7 @@ class ProductAttributeElement extends React.Component {
 	 */
 	render() {
 		const attribute = PRODUCT_ATTRIBUTE_DATA[ this.props.attribute.slug ];
-		const isSelected = this.props.selectedAttribute === this.props.attribute.slug;
+		const isSelected = this.props.selectedAttribute === getAttributeIdentifier( this.props.attribute.slug, this.props.attribute.id );
 
 		let attributeTerms = null;
 		if ( isSelected ) {
@@ -298,7 +329,7 @@ class ProductAttributeElement extends React.Component {
 				<div>
 					<label className="wc-products-list-card__content">
 						<input type="radio"
-							value={ this.props.attribute.slug }
+							value={ getAttributeIdentifier( this.props.attribute.slug, this.props.attribute.id ) }
 							onChange={ this.handleAttributeChange }
 							checked={ isSelected }
 						/>

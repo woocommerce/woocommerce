@@ -657,3 +657,38 @@ p.wc-products-display-options__option-description {
 		max-width: 480px;
 	}
 }
+
+/**
+ * Sidebar area
+ */
+.edit-post-sidebar {
+	.wc-products-scope-descriptions {
+		margin-bottom: 1.5em;
+		position: relative;
+		padding-left: 46px;
+		padding-top: 1em;
+		padding-bottom: 1.5em;
+		border-bottom: 1px solid $color__border;
+		display: flex;
+		justify-content: space-between;
+	}
+
+	h3 {
+		font-weight: 500;
+		margin-bottom: 5px;
+		color: #555d66;
+	}
+
+	.scope-description {
+		font-size: 12px;
+	}
+
+	.wc-products-scope-description--edit-quicklink {
+		margin-left: 1em;
+		min-width: 24px;
+
+		a {
+			cursor: pointer;
+		}
+	}
+}

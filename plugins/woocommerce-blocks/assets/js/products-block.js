@@ -573,7 +573,7 @@ var ProductsBlockPreview = withAPIData(function (_ref) {
 	} else if ('category' === display) {
 		query.category = display_setting.join(',');
 	} else if ('attribute' === display && display_setting.length) {
-		query.attribute = display_setting[0];
+		query.attribute = (0, _attributeSelect.getAttributeSlug)(display_setting[0]);
 
 		if (display_setting.length > 1) {
 			query.attribute_term = display_setting.slice(1).join(',');
@@ -647,12 +647,411 @@ var ProductsBlockPreview = withAPIData(function (_ref) {
 });
 
 /**
+ * Information about current block settings rendered in the sidebar.
+ */
+var ProductsBlockSidebarInfo = withAPIData(function (_ref3) {
+	var attributes = _ref3.attributes;
+	var display = attributes.display,
+	    display_setting = attributes.display_setting;
+
+
+	if ('attribute' === display && display_setting.length) {
+		var ID = (0, _attributeSelect.getAttributeID)(display_setting[0]);
+		var terms = display_setting.slice(1).join(', ');
+		var endpoints = {
+			attributeInfo: '/wc/v2/products/attributes/' + ID
+		};
+
+		if (terms.length) {
+			endpoints.termInfo = '/wc/v2/products/attributes/' + ID + '/terms?include=' + terms;
+		}
+
+		return endpoints;
+	} else if ('category' === display && display_setting.length) {
+		return {
+			categoriesInfo: '/wc/v2/products/categories?include=' + display_setting.join(',')
+		};
+	}
+
+	return {};
+})(function (_ref4) {
+	var attributes = _ref4.attributes,
+	    categoriesInfo = _ref4.categoriesInfo,
+	    attributeInfo = _ref4.attributeInfo,
+	    termInfo = _ref4.termInfo;
+
+
+	var descriptions = [
+	// Standard description of selected scope.
+	PRODUCTS_BLOCK_DISPLAY_SETTINGS[attributes.display].title];
+
+	// Description of categories selected scope.
+	if (categoriesInfo && categoriesInfo.data && categoriesInfo.data.length) {
+		var descriptionText = __('Product categories: ');
+		var categories = [];
+		var _iteratorNormalCompletion2 = true;
+		var _didIteratorError2 = false;
+		var _iteratorError2 = undefined;
+
+		try {
+			for (var _iterator2 = categoriesInfo.data[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+				var category = _step2.value;
+
+				categories.push(category.name);
+			}
+		} catch (err) {
+			_didIteratorError2 = true;
+			_iteratorError2 = err;
+		} finally {
+			try {
+				if (!_iteratorNormalCompletion2 && _iterator2.return) {
+					_iterator2.return();
+				}
+			} finally {
+				if (_didIteratorError2) {
+					throw _iteratorError2;
+				}
+			}
+		}
+
+		descriptionText += categories.join(', ');
+
+		descriptions = [descriptionText];
+
+		// Description of attributes selected scope.
+	} else if (attributeInfo && attributeInfo.data) {
+		descriptions = [__('Attribute: ') + attributeInfo.data.name];
+
+		if (termInfo && termInfo.data && termInfo.data.length) {
+			var termDescriptionText = __("Terms: ");
+			var terms = [];
+			var _iteratorNormalCompletion3 = true;
+			var _didIteratorError3 = false;
+			var _iteratorError3 = undefined;
+
+			try {
+				for (var _iterator3 = termInfo.data[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+					var term = _step3.value;
+
+					terms.push(term.name);
+				}
+			} catch (err) {
+				_didIteratorError3 = true;
+				_iteratorError3 = err;
+			} finally {
+				try {
+					if (!_iteratorNormalCompletion3 && _iterator3.return) {
+						_iterator3.return();
+					}
+				} finally {
+					if (_didIteratorError3) {
+						throw _iteratorError3;
+					}
+				}
+			}
+
+			termDescriptionText += terms.join(', ');
+			descriptions.push(termDescriptionText);
+		}
+	}
+
+	return wp.element.createElement(
+		'div',
+		null,
+		descriptions.map(function (description) {
+			return wp.element.createElement(
+				'div',
+				{ className: 'scope-description' },
+				description
+			);
+		})
+	);
+});
+
+/**
+ * The main products block UI.
+ */
+
+var ProductsBlock = function (_React$Component5) {
+	_inherits(ProductsBlock, _React$Component5);
+
+	/**
+  * Constructor.
+  */
+	function ProductsBlock(props) {
+		_classCallCheck(this, ProductsBlock);
+
+		var _this7 = _possibleConstructorReturn(this, (ProductsBlock.__proto__ || Object.getPrototypeOf(ProductsBlock)).call(this, props));
+
+		_this7.getInspectorControls = _this7.getInspectorControls.bind(_this7);
+		_this7.getToolbarControls = _this7.getToolbarControls.bind(_this7);
+		_this7.getBlockDescription = _this7.getBlockDescription.bind(_this7);
+		_this7.getPreview = _this7.getPreview.bind(_this7);
+		_this7.getSettingsEditor = _this7.getSettingsEditor.bind(_this7);
+		return _this7;
+	}
+
+	/**
+  * Get the components for the sidebar settings area that is rendered while focused on a Products block.
+  *
+  * @return Component
+  */
+
+
+	_createClass(ProductsBlock, [{
+		key: 'getInspectorControls',
+		value: function getInspectorControls() {
+			var _props2 = this.props,
+			    attributes = _props2.attributes,
+			    setAttributes = _props2.setAttributes;
+			var rows = attributes.rows,
+			    columns = attributes.columns,
+			    display = attributes.display,
+			    display_setting = attributes.display_setting,
+			    orderby = attributes.orderby,
+			    edit_mode = attributes.edit_mode;
+
+
+			var columnControl = wp.element.createElement(RangeControl, {
+				label: __('Columns'),
+				value: columns,
+				onChange: function onChange(value) {
+					return setAttributes({ columns: value });
+				},
+				min: wc_product_block_data.min_columns,
+				max: wc_product_block_data.max_columns
+			});
+
+			// Orderby settings don't make sense for specific-selected products display.
+			var orderControl = null;
+			if ('specific' !== display) {
+				orderControl = wp.element.createElement(SelectControl, {
+					key: 'query-panel-select',
+					label: __('Order Products By'),
+					value: orderby,
+					options: [{
+						label: __('Newness - newest first'),
+						value: 'date'
+					}, {
+						label: __('Price - low to high'),
+						value: 'price_asc'
+					}, {
+						label: __('Price - high to low'),
+						value: 'price_desc'
+					}, {
+						label: __('Rating - highest first'),
+						value: 'rating'
+					}, {
+						label: __('Sales - most first'),
+						value: 'popularity'
+					}, {
+						label: __('Title - alphabetical'),
+						value: 'title'
+					}],
+					onChange: function onChange(value) {
+						return setAttributes({ orderby: value });
+					}
+				});
+			}
+
+			return wp.element.createElement(
+				InspectorControls,
+				{ key: 'inspector' },
+				this.getBlockDescription(),
+				wp.element.createElement(
+					'h3',
+					null,
+					__('Layout')
+				),
+				columnControl,
+				wp.element.createElement(RangeControl, {
+					label: __('Rows'),
+					value: rows,
+					onChange: function onChange(value) {
+						return setAttributes({ rows: value });
+					},
+					min: wc_product_block_data.min_rows,
+					max: wc_product_block_data.max_rows
+				}),
+				orderControl
+			);
+		}
+
+		/**
+   * Get the components for the toolbar area that appears on top of the block when focused.
+   *
+   * @return Component
+   */
+
+	}, {
+		key: 'getToolbarControls',
+		value: function getToolbarControls() {
+			var props = this.props;
+			var attributes = props.attributes,
+			    setAttributes = props.setAttributes;
+			var display = attributes.display,
+			    display_setting = attributes.display_setting,
+			    edit_mode = attributes.edit_mode;
+
+			// Edit button should not do anything if valid product selection has not been made.
+
+			var shouldDisableEditButton = ['', 'specific', 'category', 'attribute'].includes(display) && !display_setting.length;
+
+			var editButton = [{
+				icon: 'edit',
+				title: __('Edit'),
+				onClick: shouldDisableEditButton ? function () {} : function () {
+					return setAttributes({ edit_mode: !edit_mode });
+				},
+				isActive: edit_mode
+			}];
+
+			return wp.element.createElement(
+				BlockControls,
+				{ key: 'controls' },
+				wp.element.createElement(Toolbar, { controls: editButton })
+			);
+		}
+
+		/**
+   * Get a description of the current block settings.
+   *
+   * @return Component
+   */
+
+	}, {
+		key: 'getBlockDescription',
+		value: function getBlockDescription() {
+			var _props3 = this.props,
+			    attributes = _props3.attributes,
+			    setAttributes = _props3.setAttributes;
+			var display = attributes.display,
+			    display_setting = attributes.display_setting,
+			    edit_mode = attributes.edit_mode;
+
+
+			if (!display.length) {
+				return null;
+			}
+
+			function editQuicklinkHandler() {
+				setAttributes({
+					edit_mode: true
+				});
+
+				// @todo center in view
+			}
+
+			var editQuickLink = null;
+			if (!attributes.edit_mode) {
+				editQuickLink = wp.element.createElement(
+					'div',
+					{ className: 'wc-products-scope-description--edit-quicklink' },
+					wp.element.createElement(
+						'a',
+						{ onClick: editQuicklinkHandler },
+						__('Edit')
+					)
+				);
+			}
+
+			return wp.element.createElement(
+				'div',
+				{ className: 'wc-products-scope-descriptions' },
+				wp.element.createElement(
+					'div',
+					{ className: 'wc-products-scope-details' },
+					wp.element.createElement(
+						'h3',
+						null,
+						__('Current Source')
+					),
+					wp.element.createElement(ProductsBlockSidebarInfo, { attributes: attributes })
+				),
+				editQuickLink
+			);
+		}
+
+		/**
+   * Get the block preview component for preview mode.
+   *
+   * @return Component
+   */
+
+	}, {
+		key: 'getPreview',
+		value: function getPreview() {
+			return wp.element.createElement(ProductsBlockPreview, { attributes: this.props.attributes });
+		}
+
+		/**
+   * Get the block edit component for edit mode.
+   *
+   * @return Component
+   */
+
+	}, {
+		key: 'getSettingsEditor',
+		value: function getSettingsEditor() {
+			var _props4 = this.props,
+			    attributes = _props4.attributes,
+			    setAttributes = _props4.setAttributes;
+			var display = attributes.display,
+			    display_setting = attributes.display_setting;
+
+
+			var update_display_callback = function update_display_callback(value) {
+
+				// These options have setting screens that need further input from the user, so keep edit mode open.
+				var needsFurtherSettings = ['specific', 'attribute', 'category'];
+
+				if (display !== value) {
+					setAttributes({
+						display: value,
+						display_setting: [],
+						edit_mode: needsFurtherSettings.includes(value)
+					});
+				}
+			};
+
+			return wp.element.createElement(ProductsBlockSettingsEditor, {
+				selected_display: display,
+				selected_display_setting: display_setting,
+				update_display_callback: update_display_callback,
+				update_display_setting_callback: function update_display_setting_callback(value) {
+					return setAttributes({ display_setting: value });
+				},
+				done_callback: function done_callback() {
+					return setAttributes({ edit_mode: false });
+				}
+			});
+		}
+	}, {
+		key: 'render',
+		value: function render() {
+			var _props5 = this.props,
+			    attributes = _props5.attributes,
+			    focus = _props5.focus;
+			var edit_mode = attributes.edit_mode;
+
+
+			return [!!focus ? this.getInspectorControls() : null, !!focus ? this.getToolbarControls() : null, edit_mode ? this.getSettingsEditor() : this.getPreview()];
+		}
+	}]);
+
+	return ProductsBlock;
+}(React.Component);
+
+/**
  * Register and run the products block.
  */
+
+
 registerBlockType('woocommerce/products', {
 	title: __('Products'),
 	icon: 'screenoptions',
 	category: 'widgets',
+	description: __('Display a grid of products from a variety of sources.'),
 
 	attributes: {
 
@@ -709,160 +1108,7 @@ registerBlockType('woocommerce/products', {
   * Renders and manages the block.
   */
 	edit: function edit(props) {
-		var attributes = props.attributes,
-		    className = props.className,
-		    focus = props.focus,
-		    setAttributes = props.setAttributes,
-		    setFocus = props.setFocus;
-		var rows = attributes.rows,
-		    columns = attributes.columns,
-		    display = attributes.display,
-		    display_setting = attributes.display_setting,
-		    orderby = attributes.orderby,
-		    edit_mode = attributes.edit_mode;
-
-		/**
-   * Get the components for the sidebar settings area that is rendered while focused on a Products block.
-   *
-   * @return Component
-   */
-
-		function getInspectorControls() {
-
-			var columnControl = wp.element.createElement(RangeControl, {
-				label: __('Columns'),
-				value: columns,
-				onChange: function onChange(value) {
-					return setAttributes({ columns: value });
-				},
-				min: wc_product_block_data.min_columns,
-				max: wc_product_block_data.max_columns
-			});
-
-			// Orderby settings don't make sense for specific-selected products display.
-			var orderControl = null;
-			if ('specific' !== display) {
-				orderControl = wp.element.createElement(SelectControl, {
-					key: 'query-panel-select',
-					label: __('Order Products By'),
-					value: orderby,
-					options: [{
-						label: __('Newness - newest first'),
-						value: 'date'
-					}, {
-						label: __('Price - low to high'),
-						value: 'price_asc'
-					}, {
-						label: __('Price - high to low'),
-						value: 'price_desc'
-					}, {
-						label: __('Rating - highest first'),
-						value: 'rating'
-					}, {
-						label: __('Sales - most first'),
-						value: 'popularity'
-					}, {
-						label: __('Title - alphabetical'),
-						value: 'title'
-					}],
-					onChange: function onChange(value) {
-						return setAttributes({ orderby: value });
-					}
-				});
-			}
-
-			return wp.element.createElement(
-				InspectorControls,
-				{ key: 'inspector' },
-				wp.element.createElement(
-					'h3',
-					null,
-					__('Layout')
-				),
-				columnControl,
-				wp.element.createElement(RangeControl, {
-					label: __('Rows'),
-					value: rows,
-					onChange: function onChange(value) {
-						return setAttributes({ rows: value });
-					},
-					min: wc_product_block_data.min_rows,
-					max: wc_product_block_data.max_rows
-				}),
-				orderControl
-			);
-		};
-
-		/**
-   * Get the components for the toolbar area that appears on top of the block when focused.
-   *
-   * @return Component
-   */
-		function getToolbarControls() {
-
-			// Edit button should not do anything if valid product selection has not been made.
-			var shouldDisableEditButton = ['', 'specific', 'category', 'attribute'].includes(display) && !display_setting.length;
-
-			var editButton = [{
-				icon: 'edit',
-				title: __('Edit'),
-				onClick: shouldDisableEditButton ? function () {} : function () {
-					return setAttributes({ edit_mode: !edit_mode });
-				},
-				isActive: edit_mode
-			}];
-
-			return wp.element.createElement(
-				BlockControls,
-				{ key: 'controls' },
-				wp.element.createElement(Toolbar, { controls: editButton })
-			);
-		}
-
-		/**
-   * Get the block preview component for preview mode.
-   *
-   * @return Component
-   */
-		function getPreview() {
-			return wp.element.createElement(ProductsBlockPreview, { attributes: attributes });
-		}
-
-		/**
-   * Get the block edit component for edit mode.
-   *
-   * @return Component
-   */
-		function getSettingsEditor() {
-
-			var update_display_callback = function update_display_callback(value) {
-
-				// These options have setting screens that need further input from the user, so keep edit mode open.
-				var needsFurtherSettings = ['specific', 'attribute', 'category'];
-
-				if (display !== value) {
-					setAttributes({
-						display: value,
-						display_setting: [],
-						edit_mode: needsFurtherSettings.includes(value)
-					});
-				}
-			};
-
-			return wp.element.createElement(ProductsBlockSettingsEditor, {
-				selected_display: display,
-				selected_display_setting: display_setting,
-				update_display_callback: update_display_callback,
-				update_display_setting_callback: function update_display_setting_callback(value) {
-					return setAttributes({ display_setting: value });
-				},
-				done_callback: function done_callback() {
-					return setAttributes({ edit_mode: false });
-				}
-			});
-		}
-
-		return [!!focus ? getInspectorControls() : null, !!focus ? getToolbarControls() : null, edit_mode ? getSettingsEditor() : getPreview()];
+		return wp.element.createElement(ProductsBlock, props);
 	},
 
 
@@ -893,7 +1139,7 @@ registerBlockType('woocommerce/products', {
 		} else if ('on_sale' === display) {
 			shortcode_atts.set('on_sale', '1');
 		} else if ('attribute' === display) {
-			var attribute = display_setting.length ? display_setting[0] : '';
+			var attribute = display_setting.length ? (0, _attributeSelect.getAttributeSlug)(display_setting[0]) : '';
 			var terms = display_setting.length > 1 ? display_setting.slice(1).join(',') : '';
 
 			shortcode_atts.set('attribute', attribute);
@@ -916,32 +1162,32 @@ registerBlockType('woocommerce/products', {
 
 		// Build the shortcode string out of the set shortcode attributes.
 		var shortcode = '[products';
-		var _iteratorNormalCompletion2 = true;
-		var _didIteratorError2 = false;
-		var _iteratorError2 = undefined;
+		var _iteratorNormalCompletion4 = true;
+		var _didIteratorError4 = false;
+		var _iteratorError4 = undefined;
 
 		try {
-			for (var _iterator2 = shortcode_atts[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-				var _ref3 = _step2.value;
+			for (var _iterator4 = shortcode_atts[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+				var _ref5 = _step4.value;
 
-				var _ref4 = _slicedToArray(_ref3, 2);
+				var _ref6 = _slicedToArray(_ref5, 2);
 
-				var key = _ref4[0];
-				var value = _ref4[1];
+				var key = _ref6[0];
+				var value = _ref6[1];
 
 				shortcode += ' ' + key + '="' + value + '"';
 			}
 		} catch (err) {
-			_didIteratorError2 = true;
-			_iteratorError2 = err;
+			_didIteratorError4 = true;
+			_iteratorError4 = err;
 		} finally {
 			try {
-				if (!_iteratorNormalCompletion2 && _iterator2.return) {
-					_iterator2.return();
+				if (!_iteratorNormalCompletion4 && _iterator4.return) {
+					_iterator4.return();
 				}
 			} finally {
-				if (_didIteratorError2) {
-					throw _iteratorError2;
+				if (_didIteratorError4) {
+					throw _iteratorError4;
 				}
 			}
 		}
@@ -2017,6 +2263,10 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+exports.getAttributeIdentifier = getAttributeIdentifier;
+exports.getAttributeSlug = getAttributeSlug;
+exports.getAttributeID = getAttributeID;
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -2037,6 +2287,37 @@ var _wp$components = wp.components,
 var PRODUCT_ATTRIBUTE_DATA = {};
 
 /**
+ * Get the identifier for an attribute. The identifier can be used to determine
+ * the slug or the ID of the attribute.
+ *
+ * @param string slug The attribute slug.
+ * @param int|numeric string id The attribute ID.
+ */
+function getAttributeIdentifier(slug, id) {
+	return slug + ',' + id;
+}
+
+/**
+ * Get the attribute slug from an identifier.
+ *
+ * @param string identifier The attribute identifier.
+ * @return string
+ */
+function getAttributeSlug(identifier) {
+	return identifier.split(',')[0];
+}
+
+/**
+ * Get the attribute ID from an identifier.
+ *
+ * @param string identifier The attribute identifier.
+ * @return numeric string
+ */
+function getAttributeID(identifier) {
+	return identifier.split(',')[1];
+}
+
+/**
  * When the display mode is 'Attribute' search for and select product attributes to pull products from.
  */
 
@@ -2050,8 +2331,9 @@ var ProductsAttributeSelect = exports.ProductsAttributeSelect = function (_React
 		_classCallCheck(this, ProductsAttributeSelect);
 
 		/**
-   * The first item in props.selected_display_setting is the attribute slug.
-   * The rest are the term ids for any selected terms.
+   * The first item in props.selected_display_setting is the attribute slug and id separated by a comma.
+   * This is to work around limitations in the API which sometimes requires a slug and sometimes an id.
+   * The rest of the elements in selected_display_setting are the term ids for any selected terms.
    */
 		var _this = _possibleConstructorReturn(this, (ProductsAttributeSelect.__proto__ || Object.getPrototypeOf(ProductsAttributeSelect)).call(this, props));
 
@@ -2070,19 +2352,19 @@ var ProductsAttributeSelect = exports.ProductsAttributeSelect = function (_React
 	/**
   * Set the selected attribute.
   *
-  * @param slug string Attribute slug.
+  * @param identifier string Attribute slug and id separated by a comma.
   */
 
 
 	_createClass(ProductsAttributeSelect, [{
 		key: 'setSelectedAttribute',
-		value: function setSelectedAttribute(slug) {
+		value: function setSelectedAttribute(identifier) {
 			this.setState({
-				selectedAttribute: slug,
+				selectedAttribute: identifier,
 				selectedTerms: []
 			});
 
-			this.props.update_display_setting_callback([slug]);
+			this.props.update_display_setting_callback([identifier]);
 		}
 
 		/**
@@ -2382,8 +2664,7 @@ var ProductAttributeElement = function (_React$Component2) {
 				return;
 			}
 
-			var slug = evt.target.value;
-			this.props.setSelectedAttribute(slug);
+			this.props.setSelectedAttribute(evt.target.value);
 		}
 
 		/**
@@ -2412,7 +2693,7 @@ var ProductAttributeElement = function (_React$Component2) {
 			var _this3 = this;
 
 			var attribute = PRODUCT_ATTRIBUTE_DATA[this.props.attribute.slug];
-			var isSelected = this.props.selectedAttribute === this.props.attribute.slug;
+			var isSelected = this.props.selectedAttribute === getAttributeIdentifier(this.props.attribute.slug, this.props.attribute.id);
 
 			var attributeTerms = null;
 			if (isSelected) {
@@ -2459,7 +2740,7 @@ var ProductAttributeElement = function (_React$Component2) {
 						'label',
 						{ className: 'wc-products-list-card__content' },
 						wp.element.createElement('input', { type: 'radio',
-							value: this.props.attribute.slug,
+							value: getAttributeIdentifier(this.props.attribute.slug, this.props.attribute.id),
 							onChange: this.handleAttributeChange,
 							checked: isSelected
 						}),
