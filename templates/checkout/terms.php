@@ -13,15 +13,17 @@ if ( apply_filters( 'woocommerce_checkout_show_terms', true ) && function_exists
 
 	?>
 	<div class="woocommerce-terms-and-conditions-wrapper">
-		<div class="woocommerce-terms-and-conditions-text">
-			<?php woocommerce_output_terms_and_conditions_text(); ?>
-		</div>
-
-		<?php if ( 0 < wc_get_page_id( 'terms' ) ) : ?>
-			<div class="woocommerce-terms-and-conditions" style="display: none; max-height: 200px; overflow: auto;">
-				<?php woocommerce_output_terms_and_conditions_page_content(); ?>
-			</div>
-		<?php endif; ?>
+		<?php
+		/**
+		 * Terms and conditions hook used to inject content.
+		 *
+		 * @since 3.4.0.
+		 * @hooked woocommerce_output_terms_and_conditions_text() Shows custom t&c text. Priority 20.
+		 * @hooked woocommerce_output_terms_and_conditions_page_content() Shows t&c page content. Priority 30.
+		 * @hooked woocommerce_output_privacy_policy_page_content() Shows privacy page content. Priority 40.
+		 */
+		do_action( 'woocommerce_checkout_terms_and_conditions' );
+		?>
 
 		<?php if ( woocommerce_terms_and_conditions_checkbox_enabled() ) : ?>
 			<p class="form-row validate-required">

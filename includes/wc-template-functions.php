@@ -567,7 +567,25 @@ function woocommerce_terms_and_conditions_checkbox_enabled() {
  * @since 3.4.0
  */
 function woocommerce_output_terms_and_conditions_text() {
-	echo wp_kses_post( wpautop( get_option( 'woocommerce_checkout_terms_and_conditions_text', '' ) ) );
+	$terms_permalink   = wc_get_page_permalink( 'terms', '' );
+	$terms_link        = $terms_permalink ? '<a href="' . esc_url( $terms_permalink ) . '" class="woocommerce-terms-and-conditions-link" target="_blank">' . __( 'terms and conditions', 'woocommerce' ) . '</a>' : __( 'terms and conditions', 'woocommerce' );
+	$privacy_page_id   = get_option( 'wp_page_for_privacy_policy', 0 );
+	$privacy_permalink = get_permalink( $privacy_page_id );
+	$privacy_link      = $privacy_permalink ? '<a href="' . esc_url( $privacy_permalink ) . '" class="woocommerce-privacy-policy-link" target="_blank">' . __( 'privacy policy', 'woocommerce' ) . '</a>' : __( 'privacy policy', 'woocommerce' );
+
+	$find_replace = array(
+		'[terms]'          => $terms_link,
+		'[privacy_policy]' => $privacy_link,
+	);
+
+	$default_text = __( 'Your personal data will be used to process your order and to support your experience throughout this website. Please take a look at our [privacy_policy] for more information on how we handle your personal data.', 'woocommerce' );
+	$text         = get_option( 'woocommerce_checkout_terms_and_conditions_checkbox_text' );
+
+	if ( ! $text && $privacy_link ) {
+		$text = $default_text;
+	}
+
+	echo $text ? '<div class="woocommerce-terms-and-conditions-text">' . wp_kses_post( wpautop( str_replace( array_keys( $find_replace ), array_values( $find_replace ), $text ) ) ) . '</div>' : '';
 }
 
 /**
@@ -576,10 +594,10 @@ function woocommerce_output_terms_and_conditions_text() {
  * @since 3.4.0
  */
 function woocommerce_output_terms_and_conditions_page_content() {
-	$terms_page = 0 < wc_get_page_id( 'terms' ) ? get_post( wc_get_page_id( 'terms' ) ) : false;
+	$page = 0 < wc_get_page_id( 'terms' ) ? get_post( wc_get_page_id( 'terms' ) ) : false;
 
-	if ( $terms_page && 'publish' === $terms_page->post_status && $terms_page->post_content && ! has_shortcode( $terms_page->post_content, 'woocommerce_checkout' ) ) {
-		echo wp_kses_post( wc_format_content( $terms_page->post_content ) );
+	if ( $page && 'publish' === $page->post_status && $page->post_content && ! has_shortcode( $page->post_content, 'woocommerce_checkout' ) ) {
+		echo '<div class="woocommerce-terms-and-conditions" style="display: none; max-height: 200px; overflow: auto;">' . wp_kses_post( wc_format_content( $page->post_content ) ) . '</div>';
 	}
 }
 
@@ -596,15 +614,18 @@ function woocommerce_output_terms_and_conditions_checkbox_text() {
 		$text = $default_text;
 	}
 
-	$terms_permalink = wc_get_page_permalink( 'terms', '' );
+	$terms_permalink   = wc_get_page_permalink( 'terms', '' );
+	$terms_link        = $terms_permalink ? '<a href="' . esc_url( $terms_permalink ) . '" class="woocommerce-terms-and-conditions-link" target="_blank">' . __( 'terms and conditions', 'woocommerce' ) . '</a>' : __( 'terms and conditions', 'woocommerce' );
+	$privacy_page_id   = get_option( 'wp_page_for_privacy_policy', 0 );
+	$privacy_permalink = get_permalink( $privacy_page_id );
+	$privacy_link      = $privacy_permalink ? '<a href="' . esc_url( $privacy_permalink ) . '" class="woocommerce-privacy-policy-link" target="_blank">' . __( 'privacy policy', 'woocommerce' ) . '</a>' : __( 'privacy policy', 'woocommerce' );
 
-	if ( $terms_permalink ) {
-		$terms_link = '<a href="' . esc_url( $terms_permalink ) . '" class="woocommerce-terms-and-conditions-link" target="_blank">' . __( 'terms and conditions', 'woocommerce' ) . '</a>';
-	} else {
-		$terms_link = __( 'terms and conditions', 'woocommerce' );
-	}
+	$find_replace = array(
+		'[terms]'          => $terms_link,
+		'[privacy_policy]' => $privacy_link,
+	);
 
-	echo wp_kses_post( str_replace( '[terms]', $terms_link, $text ) );
+	echo wp_kses_post( str_replace( array_keys( $find_replace ), array_values( $find_replace ), $text ) );
 }
 
 /**

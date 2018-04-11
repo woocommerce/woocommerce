@@ -694,7 +694,7 @@ class WC_Shop_Customizer {
 				'title'       => __( 'Checkout', 'woocommerce' ),
 				'priority'    => 20,
 				'panel'       => 'woocommerce',
-				'description' => __( 'These options let you change the appearance of certain parts of the WooCommerce checkout.', 'woocommerce' ),
+				'description' => __( 'These options let you change the appearance of the WooCommerce checkout.', 'woocommerce' ),
 			)
 		);
 
@@ -791,11 +791,12 @@ class WC_Shop_Customizer {
 			'woocommerce_checkout_terms_and_conditions_text',
 			array(
 				'label'       => __( 'Terms and conditions', 'woocommerce' ),
+				'description' => __( 'Optionally add some text about your store terms and conditions and privacy policies.', 'woocommerce' ),
 				'section'     => 'woocommerce_checkout',
 				'settings'    => 'woocommerce_checkout_terms_and_conditions_text',
 				'type'        => 'textarea',
 				'input_attrs'     => array(
-					'placeholder' => __( 'Optionally add some text about your store terms and conditions and privacy policies.', 'woocommerce' ),
+					'placeholder' => __( 'Your personal data will be used to process your order and to support your experience throughout this website. Please take a look at our [privacy_policy] for more information on how we handle your personal data.', 'woocommerce' ),
 				),
 			)
 		);
@@ -857,13 +858,11 @@ class WC_Shop_Customizer {
 				$id,
 				array(
 					/* Translators: %s: page name. */
-					'label'       => sprintf( __( '%s page', 'woocommerce' ), $name ),
-					/* Translators: %s: page name. */
-					'description' => sprintf( __( 'Choose a "%s" page so WooCommerce can link to it.', 'woocommerce' ), $name ),
-					'section'     => 'woocommerce_checkout',
-					'settings'    => $id,
-					'type'        => 'select',
-					'choices'     => $page_choices,
+					'label'    => sprintf( __( '%s page', 'woocommerce' ), $name ),
+					'section'  => 'woocommerce_checkout',
+					'settings' => $id,
+					'type'     => 'select',
+					'choices'  => $page_choices,
 				)
 			);
 		}
