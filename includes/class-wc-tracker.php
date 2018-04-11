@@ -303,7 +303,7 @@ class WC_Tracker {
 	 *
 	 * @return array
 	 */
-	private static function get_orders() {
+	public static function get_orders() {
 		$orders = array();
 
 		$order_counts       = self::get_order_counts();
@@ -500,7 +500,7 @@ class WC_Tracker {
 		);
 		if ( ! empty( $orders ) ) {
 			$order = $orders[0];
-			return $order->get_date_created();
+			return $order->get_date_created()->format( 'Y-m-d' );
 		} else {
 			return '-';
 		}
@@ -521,7 +521,7 @@ class WC_Tracker {
 		);
 		if ( ! empty( $orders ) ) {
 			$order = $orders[0];
-			return $order->get_date_created();
+			return $order->get_date_created()->format( 'Y-m-d' );
 		} else {
 			return '-';
 		}
