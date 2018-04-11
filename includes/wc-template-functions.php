@@ -578,7 +578,7 @@ function woocommerce_output_terms_and_conditions_text() {
 		'[privacy_policy]' => $privacy_link,
 	);
 
-	$default_text = __( 'Your personal data will be used to process your order and to support your experience throughout this website. Please take a look at our [privacy_policy] for more information on how we handle your personal data.', 'woocommerce' );
+	$default_text = __( 'Your personal data will be used to process your order and to support your experience throughout this website. Please take a look at our [privacy_policy] for more information on how we handle this data.', 'woocommerce' );
 	$text         = get_option( 'woocommerce_checkout_terms_and_conditions_checkbox_text' );
 
 	if ( ! $text && $privacy_link ) {

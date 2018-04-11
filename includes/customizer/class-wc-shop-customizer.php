@@ -796,7 +796,7 @@ class WC_Shop_Customizer {
 				'settings'    => 'woocommerce_checkout_terms_and_conditions_text',
 				'type'        => 'textarea',
 				'input_attrs'     => array(
-					'placeholder' => __( 'Your personal data will be used to process your order and to support your experience throughout this website. Please take a look at our [privacy_policy] for more information on how we handle your personal data.', 'woocommerce' ),
+					'placeholder' => __( 'Your personal data will be used to process your order and to support your experience throughout this website. Please take a look at our [privacy_policy] for more information on how we handle this data.', 'woocommerce' ),
 				),
 			)
 		);
