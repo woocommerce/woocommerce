@@ -306,28 +306,11 @@ class WC_Tracker {
 	public static function get_orders() {
 		$orders = array();
 
-		$order_counts       = self::get_order_counts();
 		$orders['first']    = self::get_first_order_date();
 		$orders['last']     = self::get_last_order_date();
 		$order_totals       = self::get_order_totals();
 
 		return array_merge( $orders, $order_counts, $order_totals );
-	}
-
-	/**
-	 * Get order counts based on order status.
-	 *
-	 * @return array
-	 */
-	private static function get_order_counts() {
-		$order_count      = array();
-		$order_count_data = wp_count_posts( 'shop_order' );
-
-		foreach ( wc_get_order_statuses() as $status_slug => $status_name ) {
-			$order_count[ $status_slug ] = $order_count_data->{ $status_slug };
-		}
-
-		return $order_count;
 	}
 
 	/**
@@ -456,11 +439,11 @@ class WC_Tracker {
 		$tax_total      = 0;
 		$discount_total = 0;
 		$gateways       = array();
+		$statuses       = array();
 
 		$orders = wc_get_orders(
 			array(
 				'limit'  => -1,
-				'status' => array_map( 'wc_get_order_status_name', wc_get_is_paid_statuses() ),
 				'fields' => 'ids',
 			)
 		);
@@ -469,29 +452,42 @@ class WC_Tracker {
 			foreach ( $orders as $order_id ) {
 				$order = wc_get_order( $order_id );
 				if ( is_a( $order, 'WC_Order' ) ) {
-					$gross_total    += $order->get_total( 'edit' );
-					$net_total      += ( $order->get_total( 'edit' ) - $order->get_shipping_total( 'edit' ) - $order->get_total_tax( 'edit' ) );
-					$shipping_total += $order->get_shipping_total( 'edit' );
-					$tax_total      += $order->get_total_tax( 'edit' );
-					$discount_total += $order->get_discount_total( 'edit' );
+					// Skip orders that was placed by admin.
+					if ( $order->get_billing_email( 'edit' ) === get_option( 'admin_email' ) ) {
+						continue;
+					}
 
-					if ( isset( $gateways[ $order->get_payment_method() ] ) ) {
-						$gateways[ $order->get_payment_method() ] += $order->get_total( 'edit' );
+					if ( in_array( $order->get_status(), wc_get_is_paid_statuses(), true ) ) {
+						$gross_total    += $order->get_total( 'edit' );
+						$net_total      += ( $order->get_total( 'edit' ) - $order->get_shipping_total( 'edit' ) - $order->get_total_tax( 'edit' ) );
+						$shipping_total += $order->get_shipping_total( 'edit' );
+						$tax_total      += $order->get_total_tax( 'edit' );
+						$discount_total += $order->get_discount_total( 'edit' );
+
+						if ( isset( $gateways[ $order->get_payment_method() ] ) ) {
+							$gateways[ $order->get_payment_method() ] += $order->get_total( 'edit' );
+						} else {
+							$gateways[ $order->get_payment_method() ] = $order->get_total( 'edit' );
+						}
+					}
+
+					if ( isset( $statuses[ $order->get_status( 'edit' ) ] ) ) {
+						$statuses[ $order->get_status( 'edit' ) ] += 1;
 					} else {
-						$gateways[ $order->get_payment_method() ] = $order->get_total( 'edit' );
+						$statuses[ $order->get_status( 'edit' ) ] = 1;
 					}
 				}
 			}
 		}
 
-		return array(
+		return array_merge( array(
 			'gross'    => $gross_total,
 			'net'      => $net_total,
 			'shipping' => $shipping_total,
 			'tax'      => $tax_total,
 			'discount' => $discount_total,
 			'gateways' => $gateways,
-		);
+		), $statuses ); // Merging to keep backward compatibility with old status counts.
 	}
 
 	/**
