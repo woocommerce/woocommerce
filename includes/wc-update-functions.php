@@ -1564,31 +1564,6 @@ function wc_update_330_set_default_product_cat() {
 }
 
 /**
- * Copy order customer_id from post meta to post_author and set post_author to 0 for refunds.
- */
-function wc_update_340_order_customer_id() {
-	global $wpdb;
-
-	$post_types = (array) apply_filters( 'woocommerce_update_340_order_customer_id_post_types', array( 'shop_order' ) );
-	$query_placeholders = implode( ', ', array_fill( 0, count( $post_types ), '%s' ) );
-
-	$orders_to_update = $wpdb->get_results(
-		$wpdb->prepare(
-			"SELECT post_id, meta_value AS customer_id FROM {$wpdb->postmeta} pm
-			LEFT JOIN {$wpdb->posts} p ON p.ID = pm.post_id
-			WHERE meta_key = '_customer_user' AND p.post_type IN ({$query_placeholders})", // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
-			$post_types
-		)
-	);
-
-	foreach ( $orders_to_update as $order ) {
-		$wpdb->update( $wpdb->posts, array( 'post_author' => $order->customer_id ), array( 'ID' => $order->post_id ) );
-	}
-
-	$wpdb->update( $wpdb->posts, array( 'post_author' => 0 ), array( 'post_type' => 'shop_order_refund' ) );
-}
-
-/**
  * Update product stock status to use the new onbackorder status.
  */
 function wc_update_330_product_stock_status() {
@@ -1701,6 +1676,31 @@ function wc_update_340_irish_states() {
 			)
 		);
 	}
+}
+
+/**
+ * Copy order customer_id from post meta to post_author and set post_author to 0 for refunds.
+ */
+function wc_update_340_order_customer_id() {
+	global $wpdb;
+
+	$post_types = (array) apply_filters( 'woocommerce_update_340_order_customer_id_post_types', array( 'shop_order' ) );
+	$query_placeholders = implode( ', ', array_fill( 0, count( $post_types ), '%s' ) );
+
+	$orders_to_update = $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT post_id, meta_value AS customer_id FROM {$wpdb->postmeta} pm
+			LEFT JOIN {$wpdb->posts} p ON p.ID = pm.post_id
+			WHERE meta_key = '_customer_user' AND p.post_type IN ({$query_placeholders})", // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+			$post_types
+		)
+	);
+
+	foreach ( $orders_to_update as $order ) {
+		$wpdb->update( $wpdb->posts, array( 'post_author' => $order->customer_id ), array( 'ID' => $order->post_id ) );
+	}
+
+	$wpdb->update( $wpdb->posts, array( 'post_author' => 0 ), array( 'post_type' => 'shop_order_refund' ) );
 }
 
 /**
