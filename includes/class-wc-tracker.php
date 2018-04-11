@@ -455,6 +455,7 @@ class WC_Tracker {
 		$shipping_total = 0;
 		$tax_total      = 0;
 		$discount_total = 0;
+		$gateways       = array();
 
 		$orders = wc_get_orders(
 			array(
@@ -473,6 +474,12 @@ class WC_Tracker {
 					$shipping_total += $order->get_shipping_total( 'edit' );
 					$tax_total      += $order->get_total_tax( 'edit' );
 					$discount_total += $order->get_discount_total( 'edit' );
+
+					if ( isset( $gateways[ $order->get_payment_method() ] ) ) {
+						$gateways[ $order->get_payment_method() ] += $order->get_total( 'edit' );
+					} else {
+						$gateways[ $order->get_payment_method() ] = $order->get_total( 'edit' );
+					}
 				}
 			}
 		}
@@ -483,6 +490,7 @@ class WC_Tracker {
 			'shipping' => $shipping_total,
 			'tax'      => $tax_total,
 			'discount' => $discount_total,
+			'gateways' => $gateways,
 		);
 	}
 
