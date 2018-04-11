@@ -468,8 +468,8 @@ class WC_Tracker {
 			foreach ( $orders as $order_id ) {
 				$order = wc_get_order( $order_id );
 				if ( is_a( $order, 'WC_Order' ) ) {
-					$gross_total    += $order->get_subtotal( 'edit' );
-					$net_total      += $order->get_total( 'edit' );
+					$gross_total    += $order->get_total( 'edit' );
+					$net_total      += ( $order->get_total( 'edit' ) - $order->get_shipping_total( 'edit' ) - $order->get_total_tax( 'edit' ) );
 					$shipping_total += $order->get_shipping_total( 'edit' );
 					$tax_total      += $order->get_total_tax( 'edit' );
 					$discount_total += $order->get_discount_total( 'edit' );
