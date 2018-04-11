@@ -101,6 +101,8 @@ class WC_Install {
 		),
 		'3.4.0' => array(
 			'wc_update_340_order_customer_id',
+			'wc_update_340_irish_states',
+			'wc_update_340_db_version',
 		),
 	);
 

@@ -2660,6 +2660,8 @@ class WC_AJAX {
 		$shipping_method->set_post_data( $_POST['data'] );
 		$shipping_method->process_admin_options();
 
+		WC_Cache_Helper::get_transient_version( 'shipping', true );
+
 		wp_send_json_success(
 			array(
 				'zone_id'   => $zone->get_id(),

@@ -409,6 +409,7 @@ class WC_Meta_Box_Order_Data {
 								array(
 									'id'    => '_transaction_id',
 									'label' => __( 'Transaction ID', 'woocommerce' ),
+									'value' => $order->get_transaction_id( 'edit' ),
 								)
 							);
 							?>
