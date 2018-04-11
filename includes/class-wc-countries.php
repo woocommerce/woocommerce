@@ -653,7 +653,7 @@ class WC_Countries {
 				'priority'     => 50,
 			),
 			'address_2'  => array(
-				'placeholder'  => esc_attr__( 'Apartment, suite, unit etc.', 'woocommerce' ),
+				'placeholder'  => esc_attr__( 'Apartment, suite, unit etc. (optional)', 'woocommerce' ),
 				'class'        => array( 'form-row-wide', 'address-field' ),
 				'required'     => false,
 				'autocomplete' => 'address-line2',
@@ -692,9 +692,7 @@ class WC_Countries {
 
 		$address_2_visibility = get_option( 'woocommerce_checkout_address_2_field', 'optional' );
 
-		if ( 'optional' === $address_2_visibility && false === wc_string_to_bool( get_option( 'woocommerce_checkout_label_required_fields', 'yes' ) ) ) {
-			$fields['address_2']['placeholder'] .= ' (' . esc_html__( 'optional', 'woocommerce' ) . ')';
-		} elseif ( 'hidden' === $address_2_visibility ) {
+		if ( 'hidden' === $address_2_visibility ) {
 			unset( $fields['address_2'] );
 		}
 

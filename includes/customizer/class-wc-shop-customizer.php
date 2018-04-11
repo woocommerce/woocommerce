@@ -733,11 +733,13 @@ class WC_Shop_Customizer {
 
 		// Register settings.
 		$wp_customize->add_setting(
-			'woocommerce_checkout_label_required_fields',
+			'woocommerce_checkout_highlight_required_fields',
 			array(
-				'default'    => 'yes',
-				'type'       => 'option',
-				'capability' => 'manage_woocommerce',
+				'default'              => 'yes',
+				'type'                 => 'option',
+				'capability'           => 'manage_woocommerce',
+				'sanitize_callback'    => 'wc_bool_to_string',
+				'sanitize_js_callback' => 'wc_string_to_bool',
 			)
 		);
 
@@ -776,17 +778,12 @@ class WC_Shop_Customizer {
 
 		// Register controls.
 		$wp_customize->add_control(
-			'woocommerce_checkout_label_required_fields',
+			'woocommerce_checkout_highlight_required_fields',
 			array(
-				'label'       => __( 'Label required fields', 'woocommerce' ),
-				'description' => __( 'Choose if required fields should be labeled with an asterisk, or if optional fields should be clearly marked instead.', 'woocommerce' ),
-				'section'     => 'woocommerce_checkout',
-				'settings'    => 'woocommerce_checkout_label_required_fields',
-				'type'        => 'radio',
-				'choices'     => array(
-					'yes' => __( 'Label required fields', 'woocommerce' ),
-					'no'  => __( 'Label optional fields', 'woocommerce' ),
-				),
+				'label'    => __( 'Highlight required fields with an asterisk', 'woocommerce' ),
+				'section'  => 'woocommerce_checkout',
+				'settings' => 'woocommerce_checkout_highlight_required_fields',
+				'type'     => 'checkbox',
 			)
 		);
 

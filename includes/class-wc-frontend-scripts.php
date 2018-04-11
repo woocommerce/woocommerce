@@ -413,10 +413,10 @@ class WC_Frontend_Scripts {
 			}
 		}
 
-		if ( true === wc_string_to_bool( get_option( 'woocommerce_checkout_label_required_fields', 'yes' ) ) ) {
-			wp_add_inline_style( 'woocommerce-general', '.woocommerce form .form-row .required { visibility: visible; } .woocommerce form .form-row .optional { visibility: hidden; }' );
+		if ( true === wc_string_to_bool( get_option( 'woocommerce_checkout_highlight_required_fields', 'yes' ) ) ) {
+			wp_add_inline_style( 'woocommerce-general', '.woocommerce form .form-row .required { visibility: visible; }' );
 		} else {
-			wp_add_inline_style( 'woocommerce-general', '.woocommerce form .form-row .required { visibility: hidden; } .woocommerce form .form-row .optional { visibility: visible; }' );
+			wp_add_inline_style( 'woocommerce-general', '.woocommerce form .form-row .required { visibility: hidden; }' );
 		}
 	}
 
