@@ -310,7 +310,7 @@ class WC_Tracker {
 		$orders['last']     = self::get_last_order_date();
 		$order_totals       = self::get_order_totals();
 
-		return array_merge( $orders, $order_counts, $order_totals );
+		return array_merge( $orders, $order_totals );
 	}
 
 	/**
