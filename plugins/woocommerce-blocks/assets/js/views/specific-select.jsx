@@ -1,6 +1,5 @@
 const { __ } = wp.i18n;
 const { Toolbar, withAPIData, Dropdown, Dashicon } = wp.components;
-const { TransitionGroup, CSSTransition } = ReactTransitionGroup;
 
 /**
  * Product data cache.
@@ -31,10 +30,14 @@ export class ProductsSpecificSelect extends React.Component {
 	 *
 	 * @param id int Product ID.
 	 */
-	addProduct( id ) {
-
+	addOrRemoveProduct( id ) {
 		let selectedProducts = this.state.selectedProducts;
-		selectedProducts.push( id );
+
+		if ( ! selectedProducts.includes( id ) ) {
+			selectedProducts.push( id );
+		} else {
+			selectedProducts = selectedProducts.filter( product => product !== id );
+		}
 
 		this.setState( {
 			selectedProducts: selectedProducts
@@ -50,40 +53,19 @@ export class ProductsSpecificSelect extends React.Component {
 	}
 
 	/**
-	 * Remove a product from the list of selected products.
-	 *
-	 * @param id int Product ID.
-	 */
-	removeProduct( id ) {
-		let oldProducts = this.state.selectedProducts;
-		let newProducts = [];
-
-		for ( let productId of oldProducts ) {
-			if ( productId !== id ) {
-				newProducts.push( productId );
-			}
-		}
-
-		this.setState( {
-			selectedProducts: newProducts
-		} );
-
-		this.props.update_display_setting_callback( newProducts );
-	}
-
-	/**
 	 * Render the product specific select screen.
 	 */
 	render() {
 		return (
 			<div className="wc-products-list-card wc-products-list-card--specific">
 				<ProductsSpecificSearchField
-					addProductCallback={ this.addProduct.bind( this ) }
+					addOrRemoveProductCallback={ this.addOrRemoveProduct.bind( this ) }
 					selectedProducts={ this.state.selectedProducts }
 				/>
 				<ProductSpecificSelectedProducts
+					columns={ this.props.attributes.columns }
 					productIds={ this.state.selectedProducts }
-					removeProductCallback={ this.removeProduct.bind( this ) }
+					addOrRemoveProduct={ this.addOrRemoveProduct.bind( this ) }
 				/>
 			</div>
 		);
@@ -103,11 +85,13 @@ class ProductsSpecificSearchField extends React.Component {
 
 		this.state = {
 			searchText: '',
+			dropdownOpen: false,
 		}
 
 		this.updateSearchResults = this.updateSearchResults.bind( this );
 		this.setWrapperRef = this.setWrapperRef.bind( this );
 		this.handleClickOutside = this.handleClickOutside.bind( this );
+		this.isDropdownOpen = this.isDropdownOpen.bind( this );
 	}
 
 	/**
@@ -144,6 +128,12 @@ class ProductsSpecificSearchField extends React.Component {
         }
 	}
 
+	isDropdownOpen( isOpen ) {
+		this.setState( {
+			dropdownOpen: !! isOpen,
+		} );
+	}
+
 	/**
 	 * Event handler for updating results when text is typed into the input.
 	 *
@@ -159,18 +149,24 @@ class ProductsSpecificSearchField extends React.Component {
 	 * Render the product search UI.
 	 */
 	render() {
+		const divClass = 'wc-products-list-card__search-wrapper';
+
 		return (
-			<div className="wc-products-list-card__search-wrapper" ref={ this.setWrapperRef }>
-				<input type="search"
-					className="wc-products-list-card__search"
-					value={ this.state.searchText }
-					placeholder={ __( 'Search for products to display' ) }
-					onChange={ this.updateSearchResults }
-				/>
+			<div className={ divClass + ( this.state.dropdownOpen ? ' ' + divClass + '--with-results' : '' ) } ref={ this.setWrapperRef }>
+				<div className="wc-products-list-card__input-wrapper">
+					<Dashicon icon="search" />
+					<input type="search"
+						className="wc-products-list-card__search"
+						value={ this.state.searchText }
+						placeholder={ __( 'Search for products to display' ) }
+						onChange={ this.updateSearchResults }
+					/>
+				</div>
 				<ProductSpecificSearchResults
 					searchString={ this.state.searchText }
-					addProductCallback={ this.props.addProductCallback }
+					addOrRemoveProductCallback={ this.props.addOrRemoveProductCallback }
 					selectedProducts={ this.props.selectedProducts }
+					isDropdownOpenCallback={ this.isDropdownOpen }
 				/>
 			</div>
 		);
@@ -191,13 +187,13 @@ const ProductSpecificSearchResults = withAPIData( ( props ) => {
 		return {
 			products: '/wc/v2/products?per_page=10&search=' + props.searchString,
 		};
-	} )( ( { products, addProductCallback, selectedProducts } ) => {
+	} )( ( { products, addOrRemoveProductCallback, selectedProducts, isDropdownOpenCallback } ) => {
 		if ( ! products.data ) {
 			return null;
 		}
 
 		if ( 0 === products.data.length ) {
-			return __( 'No products found' );
+			return <span className="wc-products-list-card__search-no-results"> { __( 'No products found' ) } </span>;
 		}
 
 		// Populate the cache.
@@ -207,8 +203,9 @@ const ProductSpecificSearchResults = withAPIData( ( props ) => {
 
 		return <ProductSpecificSearchResultsDropdown
 			products={ products.data }
-			addProductCallback={ addProductCallback }
+			addOrRemoveProductCallback={ addOrRemoveProductCallback }
 			selectedProducts={ selectedProducts }
+			isDropdownOpenCallback={ isDropdownOpenCallback }
 		/>
 	}
 );
@@ -219,38 +216,42 @@ const ProductSpecificSearchResults = withAPIData( ( props ) => {
 class ProductSpecificSearchResultsDropdown extends React.Component {
 
 	/**
+	 * Set the state of the dropdown to open.
+	 */
+	componentDidMount() {
+		this.props.isDropdownOpenCallback( true );
+	}
+
+	/**
+	 * Set the state of the dropdown to closed.
+	 */
+	componentWillUnmount() {
+		this.props.isDropdownOpenCallback( false );
+	}
+
+	/**
 	 * Render dropdown.
 	 */
 	render() {
-		const { products, addProductCallback, selectedProducts } = this.props;
+		const { products, addOrRemoveProductCallback, selectedProducts } = this.props;
 
 		let productElements = [];
 
 		for ( let product of products ) {
-			if ( selectedProducts.includes( product.id ) ) {
-				continue;
-			}
-
 			productElements.push(
-				<CSSTransition
-					key={ product.slug }
-					classNames="wc-products-list-card__content--transition"
-					timeout={ { exit: 700 } }
-				>
-					<ProductSpecificSearchResultsDropdownElement
-						product={product}
-						addProductCallback={ addProductCallback }
-					/>
-				</CSSTransition>
+				<ProductSpecificSearchResultsDropdownElement
+					product={product}
+					addOrRemoveProductCallback={ addOrRemoveProductCallback }
+					selected={ selectedProducts.includes( product.id ) }
+				/>
 			);
 		}
 
 		return (
-			<div role="menu" className="wc-products-list-card__search-results" aria-orientation="vertical" aria-label="{ __( 'Products list' ) }">
-					<TransitionGroup>
-						{ productElements }
-					</TransitionGroup>
-
+			<div role="menu" className="wc-products-list-card__search-results" aria-orientation="vertical" aria-label={ __( 'Products list' ) }>
+				<div>
+					{ productElements }
+				</div>
 			</div>
 		);
 	}
@@ -267,10 +268,6 @@ class ProductSpecificSearchResultsDropdownElement extends React.Component {
 	constructor( props ) {
 		super( props );
 
-		this.state = {
-			clicked: false,
-		}
-
 		this.handleClick = this.handleClick.bind( this );
 	}
 
@@ -278,8 +275,7 @@ class ProductSpecificSearchResultsDropdownElement extends React.Component {
 	 * Add product to main list and change UI to show it was added.
 	 */
 	handleClick() {
-		this.setState( { clicked: true } );
-		this.props.addProductCallback( this.props.product.id );
+		this.props.addOrRemoveProductCallback( this.props.product.id );
 	}
 
 	/**
@@ -287,17 +283,13 @@ class ProductSpecificSearchResultsDropdownElement extends React.Component {
 	 */
 	render() {
 		const product = this.props.product;
+		let icon = this.props.selected ? <Dashicon icon="yes" /> : null;
 
 		return (
-			<div className="wc-products-list-card__content">
+			<div className={ 'wc-products-list-card__content' + ( this.props.selected ? ' wc-products-list-card__content--added' : '' ) } onClick={ this.handleClick }>
 				<img src={ product.images[0].src } />
-				<span className="wc-products-list-card__content-item-name">{ this.state.clicked ? __( 'Added' ) : product.name }</span>
-				<button type="button"
-					className="button-link"
-					id={ 'product-' + product.id }
-					onClick={ this.handleClick } >
-						{ __( 'Add' ) }
-				</button>
+				<span className="wc-products-list-card__content-item-name">{ product.name }</span>
+				{ icon }
 			</div>
 		);
 	}
@@ -307,7 +299,6 @@ class ProductSpecificSearchResultsDropdownElement extends React.Component {
  * List preview of selected products.
  */
 const ProductSpecificSelectedProducts = withAPIData( ( props ) => {
-
 		if ( ! props.productIds.length ) {
 			return {
 				products: []
@@ -325,17 +316,13 @@ const ProductSpecificSelectedProducts = withAPIData( ( props ) => {
 		return {
 			products: uncachedProducts.length ? '/wc/v2/products?include=' + uncachedProducts.join( ',' ) : []
 		};
-	} )( ( { productIds, products, removeProductCallback } ) => {
+	} )( ( { productIds, products, columns, addOrRemoveProduct } ) => {
 
 		// Add new products to cache.
 		if ( products.data ) {
 			for ( const product of products.data ) {
 				PRODUCT_DATA[ product.id ] = product;
 			}
-		}
-
-		if ( 0 === productIds.length ) {
-			return __( 'No products selected' );
 		}
 
 		const productElements = [];
@@ -357,8 +344,8 @@ const ProductSpecificSelectedProducts = withAPIData( ( props ) => {
 						<button
 							type="button"
 							id={ 'product-' + productData.id }
-							onClick={ function() { removeProductCallback( productData.id ) } } >
-								<Dashicon icon={ 'no-alt' } />
+							onClick={ function() { addOrRemoveProduct( productData.id ) } } >
+								<Dashicon icon="no-alt" />
 						</button>
 					</div>
 				</li>
@@ -366,8 +353,11 @@ const ProductSpecificSelectedProducts = withAPIData( ( props ) => {
 		}
 
 		return (
-			<div className="wc-products-list-card__results-wrapper">
-				<div role="menu" className="wc-products-list-card__results" aria-orientation="vertical" aria-label="{ __( 'Products list' ) }">
+			<div className={ 'wc-products-list-card__results-wrapper wc-products-list-card__results-wrapper--cols-' + columns }>
+				<div role="menu" className="wc-products-list-card__results" aria-orientation="vertical" aria-label={ __( 'Selected products' ) }>
+
+					{ productElements.length > 0 && <h3>{ __( 'Selected products' ) }</h3> }
+
 					<ul>
 						{ productElements }
 					</ul>

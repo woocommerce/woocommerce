@@ -1,5 +1,5 @@
 const { __ } = wp.i18n;
-const { Toolbar, withAPIData, Dropdown } = wp.components;
+const { Toolbar, withAPIData, Dropdown, Dashicon } = wp.components;
 
 /**
  * Attribute data cache.
@@ -154,7 +154,8 @@ export class ProductsAttributeSelect extends React.Component {
  */
 const ProductAttributeFilter = ( props ) => {
 	return (
-		<div>
+		<div className="wc-products-list-card__input-wrapper">
+			<Dashicon icon="search" />
 			<input className="wc-products-list-card__search" type="search" placeholder={ __( 'Search for attributes' ) } onChange={ props.updateFilter } />
 		</div>
 	);
