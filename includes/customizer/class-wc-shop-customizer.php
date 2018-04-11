@@ -791,10 +791,12 @@ class WC_Shop_Customizer {
 			'woocommerce_checkout_terms_and_conditions_text',
 			array(
 				'label'       => __( 'Terms and conditions', 'woocommerce' ),
-				'description' => __( 'Optionally include some text describing your terms and conditions, privacy and shipping policies, or anything else.', 'woocommerce' ),
 				'section'     => 'woocommerce_checkout',
 				'settings'    => 'woocommerce_checkout_terms_and_conditions_text',
 				'type'        => 'textarea',
+				'input_attrs'     => array(
+					'placeholder' => __( 'Optionally add some text about your store terms and conditions and privacy policies.', 'woocommerce' ),
+				),
 			)
 		);
 
