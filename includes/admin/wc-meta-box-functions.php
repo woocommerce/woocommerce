@@ -227,8 +227,9 @@ function woocommerce_wp_select( $field ) {
 		<select <?php echo wc_implode_html_attributes( $field_attributes ); // WPCS: XSS ok. ?>>
 			<?php
 			foreach ( $field['options'] as $key => $value ) {
-				// In case the value is an array, the $key from options might have been converted to int automatically by PHP,
-				// thus the comparison needs to check both $key and (string)$key.
+				// The $key from $field['options'] could have been converted to integer automatically by PHP,
+				// thus the comparison needs to check both $key and (string) $key in case $field['value'] is an array
+				// with string values.
 				echo '<option value="' . esc_attr( $key ) . '" ' . selected( $field['value'] === $key || ( is_array( $field['value'] ) && ( in_array( $key, $field['value'], true ) || in_array( (string) $key, $field['value'], true ) ) ), true, false ) . '>' . esc_html( $value ) . '</option>';
 			}
 			?>
