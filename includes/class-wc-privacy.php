@@ -44,20 +44,25 @@ class WC_Privacy {
 	 * @return array An array of personal data in name value pairs
 	 */
 	public static function data_exporter( $email_address, $page ) {
-		$personal_data = array();
-		$done          = false;
-		$page          = (int) $page;
-		$user          = get_user_by( 'email', $email_address ); // Check if user has an ID in the DB to load stored personal data.
+		$done           = false;
+		$page           = (int) $page;
+		$user           = get_user_by( 'email', $email_address ); // Check if user has an ID in the DB to load stored personal data.
+		$data_to_export = array();
 
 		// Export customer data first.
-		if ( 0 === $page ) {
+		if ( 1 === $page ) {
 			if ( $user instanceof WP_User ) {
-				$personal_data = self::get_user_personal_data( $user );
+				$data_to_export[] = array(
+					'group_id'    => 'woocommerce_customer',
+					'group_label' => __( 'Customer Data', 'woocommerce' ),
+					'item_id'     => 'user',
+					'data'        => self::get_user_personal_data( $user ),
+				);
 			}
 		} else { // Export orders - 10 at a time.
 			$order_query = array(
 				'limit' => 10,
-				'page'  => $page,
+				'page'  => $page - 1,
 			);
 
 			if ( $user instanceof WP_User ) {
@@ -70,7 +75,12 @@ class WC_Privacy {
 
 			if ( 0 < count( $orders ) ) {
 				foreach ( $orders as $order ) {
-					$personal_data = array_merge( $personal_data, self::get_order_personal_data( $order ) );
+					$data_to_export[] = array(
+						'group_id'    => 'woocommerce_orders',
+						'group_label' => __( 'Orders', 'woocommerce' ),
+						'item_id'     => 'order-' . $order->get_id(),
+						'data'        => self::get_order_personal_data( $order ),
+					);
 				}
 				$done = 10 > count( $orders );
 			} else {
@@ -79,7 +89,7 @@ class WC_Privacy {
 		}
 
 		return array(
-			'data' => $personal_data,
+			'data' => $data_to_export,
 			'done' => $done,
 		);
 	}
@@ -125,8 +135,8 @@ class WC_Privacy {
 			'billing_postcode'    => 'Billing Postal/Zip Code',
 			'billing_state'       => 'Billing State',
 			'billing_country'     => 'Billing Country',
-			'billing_phone'       => 'Billing Phone',
-			'billing_email'       => 'Billing Email',
+			'billing_phone'       => 'Phone Number',
+			'billing_email'       => 'Email Address',
 			'shipping_first_name' => 'Shipping First Name',
 			'shipping_last_name'  => 'Shipping Last Name',
 			'shipping_company'    => 'Shipping Company',
@@ -308,7 +318,7 @@ class WC_Privacy {
 
 		$min_length = 3;
 		$max_length = 10;
-		$mask       = "***";
+		$mask       = '***';
 		$at_pos     = strrpos( $email, '@' );
 		$name       = substr( $email, 0, $at_pos );
 		$length     = strlen( $name );
