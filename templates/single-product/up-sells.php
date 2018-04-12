@@ -44,5 +44,3 @@ if ( $upsells ) : ?>
 	</section>
 
 <?php endif;
-
-wp_reset_postdata();
