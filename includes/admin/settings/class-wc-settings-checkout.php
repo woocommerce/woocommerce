@@ -22,7 +22,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	 */
 	public function __construct() {
 		$this->id    = 'checkout';
-		$this->label = _x( 'Checkout', 'Settings tab label', 'woocommerce' );
+		$this->label = _x( 'Payments', 'Settings tab label', 'woocommerce' );
 
 		add_action( 'woocommerce_admin_field_payment_gateways', array( $this, 'payment_gateways_setting' ) );
 		parent::__construct();

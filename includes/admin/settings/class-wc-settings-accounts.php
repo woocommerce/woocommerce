@@ -1,16 +1,12 @@
 <?php
 /**
- * WooCommerce Account Settings
+ * WooCommerce Account Settings.
  *
- * @author      WooThemes
- * @category    Admin
- * @package     WooCommerce/Admin
- * @version     2.1.0
+ * @package WooCommerce/Admin
+ * @version 2.1.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
+defined( 'ABSPATH' ) || exit;
 
 if ( ! class_exists( 'WC_Settings_Accounts', false ) ) :
 
@@ -24,7 +20,7 @@ if ( ! class_exists( 'WC_Settings_Accounts', false ) ) :
 		 */
 		public function __construct() {
 			$this->id    = 'account';
-			$this->label = __( 'Accounts', 'woocommerce' );
+			$this->label = __( 'Accounts &amp; Privacy', 'woocommerce' );
 
 			parent::__construct();
 		}
@@ -47,6 +43,7 @@ if ( ! class_exists( 'WC_Settings_Accounts', false ) ) :
 
 					array(
 						'title'    => __( 'My account page', 'woocommerce' ),
+						/* Translators: %s Page contents. */
 						'desc'     => sprintf( __( 'Page contents: [%s]', 'woocommerce' ), apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) ),
 						'id'       => 'woocommerce_myaccount_page_id',
 						'type'     => 'single_select_page',

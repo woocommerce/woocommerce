@@ -2,8 +2,6 @@
 /**
  * WooCommerce API Settings
  *
- * @author   Automattic
- * @category Admin
  * @package  WooCommerce/Admin
  * @version  3.3.0
  */
@@ -29,7 +27,7 @@ class WC_Settings_Rest_API extends WC_Settings_Page {
 	 */
 	public function __construct() {
 		$this->id    = 'api';
-		$this->label = __( 'API', 'woocommerce' );
+		$this->label = __( 'Advanced', 'woocommerce' );
 
 		add_action( 'woocommerce_settings_form_method_tab_' . $this->id, array( $this, 'form_method' ) );
 		parent::__construct();
