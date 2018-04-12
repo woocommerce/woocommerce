@@ -371,6 +371,11 @@ class WC_AJAX {
 	 * AJAX add to cart.
 	 */
 	public static function add_to_cart() {
+		$nonce_active = apply_filters( 'woocommerce_add_to_cart_nonce_active', false );
+		if ( $nonce_active ) {
+			check_ajax_referer( 'woocommerce-cart', 'woocommerce-cart-nonce' );
+		}
+
 		ob_start();
 
 		$product_id        = apply_filters( 'woocommerce_add_to_cart_product_id', absint( $_POST['product_id'] ) );
@@ -414,6 +419,8 @@ class WC_AJAX {
 	 * AJAX remove from cart.
 	 */
 	public static function remove_from_cart() {
+		check_ajax_referer( 'woocommerce-cart', 'woocommerce-cart-nonce' );
+
 		ob_start();
 
 		$cart_item_key = wc_clean( $_POST['cart_item_key'] );

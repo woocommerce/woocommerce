@@ -38,6 +38,7 @@ jQuery( function( $ ) {
 			$.each( $thisbutton.data(), function( key, value ) {
 				data[ key ] = value;
 			});
+			data['woocommerce-cart-nonce'] = wc_add_to_cart_params.add_to_cart_nonce;
 
 			// Trigger event.
 			$( document.body ).trigger( 'adding_to_cart', [ $thisbutton, data ] );
@@ -80,6 +81,7 @@ jQuery( function( $ ) {
 				opacity: 0.6
 			}
 		});
+		data['woocommerce-cart-nonce'] = wc_add_to_cart_params.add_to_cart_nonce;
 
 		$.post( wc_add_to_cart_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'remove_from_cart' ), { cart_item_key : $thisbutton.data( 'cart_item_key' ) }, function( response ) {
 			if ( ! response || ! response.fragments ) {

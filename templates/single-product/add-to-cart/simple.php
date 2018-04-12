@@ -51,6 +51,14 @@ if ( $product->is_in_stock() ) : ?>
 			 * @since 3.0.0.
 			 */
 			do_action( 'woocommerce_after_add_to_cart_quantity' );
+
+			/**
+			 * @since 3.4.0.
+			 */
+			$nonce_active = apply_filters( 'woocommerce_add_to_cart_nonce_active', false );
+			if ( $nonce_active ) {
+				wp_nonce_field( 'woocommerce-cart', 'woocommerce-cart-nonce' );
+			}
 		?>
 
 		<button type="submit" name="add-to-cart" value="<?php echo esc_attr( $product->get_id() ); ?>" class="single_add_to_cart_button button alt"><?php echo esc_html( $product->single_add_to_cart_text() ); ?></button>

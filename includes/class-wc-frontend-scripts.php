@@ -536,6 +536,7 @@ class WC_Frontend_Scripts {
 					'cart_url'                => apply_filters( 'woocommerce_add_to_cart_redirect', wc_get_cart_url() ),
 					'is_cart'                 => is_cart(),
 					'cart_redirect_after_add' => get_option( 'woocommerce_cart_redirect_after_add' ),
+					'add_to_cart_nonce'       => wp_create_nonce( 'woocommerce-cart' ),
 				);
 				break;
 			case 'wc-add-to-cart-variation':

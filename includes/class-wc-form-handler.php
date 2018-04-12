@@ -540,10 +540,10 @@ class WC_Form_Handler {
 
 		$nonce_value = wc_get_var( $_REQUEST['woocommerce-cart-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // @codingStandardsIgnoreLine.
 
-		if ( ! empty( $_POST['apply_coupon'] ) && ! empty( $_POST['coupon_code'] ) ) {
+		if ( ! empty( $_POST['apply_coupon'] ) && ! empty( $_POST['coupon_code'] ) && wp_verify_nonce( $nonce_value, 'woocommerce-cart' ) ) {
 			WC()->cart->add_discount( sanitize_text_field( wp_unslash( $_POST['coupon_code'] ) ) );
 
-		} elseif ( isset( $_GET['remove_coupon'] ) ) {
+		} elseif ( isset( $_GET['remove_coupon'] ) && wp_verify_nonce( $nonce_value, 'woocommerce-cart' ) ) {
 			WC()->cart->remove_coupon( wc_clean( wp_unslash( $_GET['remove_coupon'] ) ) );
 
 		} elseif ( ! empty( $_GET['remove_item'] ) && wp_verify_nonce( $nonce_value, 'woocommerce-cart' ) ) {
@@ -794,6 +794,21 @@ class WC_Form_Handler {
 		}
 
 		wc_nocache_headers();
+
+		$nonce_active = apply_filters( 'woocommerce_add_to_cart_nonce_active', false );
+		if ( $nonce_active ) {
+
+			if ( ! isset( $_REQUEST['woocommerce-cart-nonce'] ) ) {
+				//Include notice to confirm an add to cart event should the nonce be missing (simply forwards the link with nonce appended).
+				//TODO
+			}
+
+			$nonce_value = wc_get_var( $_REQUEST['woocommerce-cart-nonce'], '' );
+
+			if ( ! wp_verify_nonce( $nonce_value, 'woocommerce-cart' ) ) {
+				return;
+			}
+		}
 
 		$product_id          = apply_filters( 'woocommerce_add_to_cart_product_id', absint( $_REQUEST['add-to-cart'] ) );
 		$was_added_to_cart   = false;
