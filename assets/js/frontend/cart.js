@@ -329,6 +329,7 @@ jQuery( function( $ ) {
 				complete: function() {
 					unblock( $form );
 					unblock( $( 'div.cart_totals' ) );
+					$.scroll_to_notices( $( '[role="alert"]' ) );
 				}
 			} );
 		},
@@ -445,7 +446,6 @@ jQuery( function( $ ) {
 					unblock( $form );
 					$text_field.val( '' );
 					cart.update_cart( true );
-					$.scroll_to_notices( $( '.cart_totals' ) );
 				}
 			} );
 		},
@@ -482,7 +482,6 @@ jQuery( function( $ ) {
 				},
 				complete: function() {
 					cart.update_cart( true );
-					$.scroll_to_notices( $( '[role="alert"]' ) );
 				}
 			} );
 		},
