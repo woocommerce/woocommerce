@@ -189,11 +189,34 @@ class WC_Settings_General extends WC_Settings_Page {
 				),
 
 				array(
-					'title'   => __( 'Enable taxes', 'woocommerce' ),
-					'desc'    => __( 'Enable taxes and tax calculations', 'woocommerce' ),
-					'id'      => 'woocommerce_calc_taxes',
-					'default' => 'no',
-					'type'    => 'checkbox',
+					'title'    => __( 'Enable taxes', 'woocommerce' ),
+					'desc'     => __( 'Enable tax rates and calculations', 'woocommerce' ),
+					'id'       => 'woocommerce_calc_taxes',
+					'default'  => 'no',
+					'type'     => 'checkbox',
+					'desc_tip' => __( 'Rates will be configurable and taxes will be calculated during checkout.', 'woocommerce' ),
+				),
+
+				array(
+					'title'           => __( 'Enable coupons', 'woocommerce' ),
+					'desc'            => __( 'Enable the use of coupon codes', 'woocommerce' ),
+					'id'              => 'woocommerce_enable_coupons',
+					'default'         => 'yes',
+					'type'            => 'checkbox',
+					'checkboxgroup'   => 'start',
+					'show_if_checked' => 'option',
+					'desc_tip'        => __( 'Coupons can be applied from the cart and checkout pages.', 'woocommerce' ),
+				),
+
+				array(
+					'desc'            => __( 'Calculate coupon discounts sequentially', 'woocommerce' ),
+					'id'              => 'woocommerce_calc_discounts_sequentially',
+					'default'         => 'no',
+					'type'            => 'checkbox',
+					'desc_tip'        => __( 'When applying multiple coupons, apply the first coupon to the full price and the second coupon to the discounted price and so on.', 'woocommerce' ),
+					'show_if_checked' => 'yes',
+					'checkboxgroup'   => 'end',
+					'autoload'        => false,
 				),
 
 				array(
