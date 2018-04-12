@@ -2,8 +2,7 @@
 /**
  * WooCommerce General Settings
  *
- * @package     WooCommerce/Admin
- * @version     2.1.0
+ * @package WooCommerce/Admin
  */
 
 defined( 'ABSPATH' ) || exit;

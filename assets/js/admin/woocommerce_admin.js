@@ -297,4 +297,50 @@ jQuery( function ( $ ) {
 
 	// Attribute term table
 	$( 'table.attributes-table tbody tr:nth-child(odd)' ).addClass( 'alternate' );
+
+
+	// Toggle gateway on/off.
+	$( '.wc_gateways' ).on( 'click', '.wc-payment-gateway-method-toggle-enabled', function() {
+		var $link   = $( this ),
+		    $row    = $link.closest( 'tr' ),
+			$table  = $row.closest( 'div' ),
+			$toggle = $link.find( '.woocommerce-input-toggle' );
+
+		var data = {
+			action: 'woocommerce_toggle_gateway_enabled',
+			security: woocommerce_admin.nonces.gateway_toggle,
+			gateway_id: $row.data( 'gateway_id' )
+		};
+
+		$table.block({
+			message: null,
+			overlayCSS: {
+				background: '#fff',
+				opacity: 0.6
+			}
+		});
+
+		$.ajax( {
+			url:      woocommerce_admin.ajax_url,
+			data:     data,
+			dataType : 'json',
+			type     : 'POST',
+			success:  function( response ) {
+				if ( true === response.data ) {
+					$toggle.removeClass( 'woocommerce-input-toggle--enabled, woocommerce-input-toggle--disabled' );
+					$toggle.addClass( 'woocommerce-input-toggle--enabled' );
+				} else if ( false === response.data ) {
+					$toggle.removeClass( 'woocommerce-input-toggle--enabled, woocommerce-input-toggle--disabled' );
+					$toggle.addClass( 'woocommerce-input-toggle--disabled' );
+				} else if ( 'needs_setup' === response.data ) {
+					window.location.href = $link.attr( 'href' );
+				}
+			},
+			complete: function() {
+				$table.unblock();
+			}
+		} );
+
+		return false;
+	});
 });
