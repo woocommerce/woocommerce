@@ -640,8 +640,6 @@ function wc_delete_user_data( $user_id ) {
 		)
 	);
 
-	wp_cache_delete( WC_Cache_Helper::get_cache_prefix( WC_SESSION_CACHE_GROUP ) . $user_id, WC_SESSION_CACHE_GROUP );
-
 	// Revoke API keys.
 	$wpdb->delete(
 		$wpdb->prefix . 'woocommerce_api_keys',
@@ -649,10 +647,6 @@ function wc_delete_user_data( $user_id ) {
 			'user_id' => $user_id,
 		)
 	);
-
-	// Revoke download permissioons.
-	$data_store = WC_Data_Store::load( 'customer-download' );
-	$data_store->delete_by_user_id( $user_id );
 
 	// Clean up payment tokens.
 	$payment_tokens = WC_Payment_Tokens::get_customer_tokens( $user_id );

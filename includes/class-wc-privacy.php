@@ -21,9 +21,15 @@ class WC_Privacy {
 		if ( ! function_exists( 'wp_privacy_anonymize_data' ) ) {
 			return;
 		}
+
+		// This hook registers WooCommerce data exporters.
 		add_filter( 'wp_privacy_personal_data_exporters', array( __CLASS__, 'register_data_exporters' ), 10 );
+
+		// When this is fired, data is removed in a given order. Called from bulk actions.
 		add_action( 'woocommerce_remove_order_personal_data', array( __CLASS__, 'remove_order_personal_data' ) );
-		add_filter( 'wp_privacy_anonymize_data', array( __CLASS__, 'privacy_anonymize_data_custom_types' ), 10, 3 );
+
+		// Handles custom anonomization types not included in core.
+		add_filter( 'wp_privacy_anonymize_data', array( __CLASS__, 'anonymize_custom_data_types' ), 10, 3 );
 	}
 
 	/**
@@ -355,6 +361,7 @@ class WC_Privacy {
 	 * This logic is simply to clean up data for guest users.
 	 *
 	 * @todo Add option to determine if order data should be left alone when removing personal data for a user.
+	 * @todo Hook into core UI.
 	 *
 	 * @param string $email_address Customer email address.
 	 */
@@ -362,32 +369,38 @@ class WC_Privacy {
 		$user        = get_user_by( 'email', $email_address ); // Check if user has an ID in the DB.
 		$has_account = $user instanceof WP_User;
 
-		// Remove personal data from the user's orders.
-		$order_query = array(
-			'limit' => -1,
-		);
+		/**
+		 * Allow 3rd parties to modify this behavior. If true, orders belonging to this user will be anonyimized.
+		 *
+		 * @since 3.4.0
+		 */
+		if ( apply_filters( 'woocommerce_privacy_remove_personal_data_includes_orders', true, $email_address ) ) {
+			$order_query = array(
+				'limit' => -1,
+			);
 
-		if ( $has_account ) {
-			$order_query['customer_id'] = (int) $user->ID;
-		} else {
-			$order_query['billing_email'] = $email_address;
-		}
+			if ( $user instanceof WP_User ) {
+				$order_query['customer_id'] = (int) $user->ID;
+			} else {
+				$order_query['billing_email'] = $email_address;
+			}
 
-		$orders = wc_get_orders( $order_query );
+			$orders = wc_get_orders( $order_query );
 
-		if ( 0 < count( $orders ) ) {
-			foreach ( $orders as $order ) {
-				self::remove_order_personal_data( $order );
+			if ( 0 < count( $orders ) ) {
+				foreach ( $orders as $order ) {
+					self::remove_order_personal_data( $order );
+				}
 			}
 		}
 
-		if ( ! $has_account ) {
-			// Revoke things such as download permissions for this email if it's a guest account. This is handled elsewhere for user accounts on delete.
-			$data_store = WC_Data_Store::load( 'customer-download' );
-			$data_store->delete_by_user_email( $email_address );
+		// Revoke download permissions.
+		$data_store = WC_Data_Store::load( 'customer-download' );
+
+		if ( $user instanceof WP_User ) {
+			$data_store->delete_by_user_id( (int) $user->ID );
 		} else {
-			// Remove address data from the user object. This is in case the user is not deleted for whatever reason.
-			self::remove_customer_personal_data( $user );
+			$data_store->delete_by_user_email( $email_address );
 		}
 
 		/**
@@ -397,82 +410,6 @@ class WC_Privacy {
 		 * @param string $email_address Customer email address.
 		 */
 		do_action( 'woocommerce_privacy_remove_personal_data', $email_address );
-	}
-
-	/**
-	 * Remove personal data specific to WooCommerce from a user object.
-	 *
-	 * @param WP_User $user user object.
-	 */
-	protected static function remove_customer_personal_data( $user ) {
-		$customer        = new WC_Customer( $user->ID );
-		$anonymized_data = array();
-
-		/**
-		 * Expose props and data types we'll be removing.
-		 *
-		 * @since 3.4.0
-		 * @param array       $props A list of props we're removing from the user object.
-		 * @param WC_Customer $customer A customer object.
-		 */
-		$props_to_remove = apply_filters( 'woocommerce_privacy_remove_customer_personal_data_props', array(
-			'billing_first_name',
-			'billing_last_name',
-			'billing_company',
-			'billing_address_1',
-			'billing_address_2',
-			'billing_city',
-			'billing_postcode',
-			'billing_state',
-			'billing_country',
-			'billing_phone',
-			'billing_email',
-			'shipping_first_name',
-			'shipping_last_name',
-			'shipping_company',
-			'shipping_address_1',
-			'shipping_address_2',
-			'shipping_city',
-			'shipping_postcode',
-			'shipping_state',
-			'shipping_country',
-		), $customer );
-
-		if ( ! empty( $props_to_remove ) && is_array( $props_to_remove ) ) {
-			foreach ( $props_to_remove as $prop ) {
-				// Get the current value in edit context.
-				$value = $customer->{"get_$prop"}( 'edit' );
-
-				// If the value is empty, it does not need to be anonymized.
-				if ( empty( $value ) ) {
-					continue;
-				}
-
-				/**
-				 * Expose a way to control the anonymized value of a prop via 3rd party code.
-				 *
-				 * @since 3.4.0
-				 * @param bool        $anonymized_data Value of this prop after anonymization.
-				 * @param string      $prop Name of the prop being removed.
-				 * @param string      $value Current value of the data.
-				 * @param WC_Customer $customer A customer object.
-				 */
-				$anonymized_data[ $prop ] = apply_filters( 'woocommerce_privacy_remove_personal_data_customer_prop_value', '', $prop, $value, $customer );
-			}
-		}
-
-		// Set all new props and persist the new data to the database.
-		$customer->set_props( $anonymized_data );
-		$customer->save();
-
-		/**
-		 * Allow extensions to remove their own personal data for this customer.
-		 *
-		 * @since 3.4.0
-		 * @param WC_Customer $customer A customer object.
-		 * @param WP_User     $user User object.
-		 */
-		do_action( 'woocommerce_privacy_remove_customer_personal_data', $customer, $user );
 	}
 
 	/**
@@ -565,7 +502,7 @@ class WC_Privacy {
 	 * @param string $data The data being anonymized.
 	 * @return string Anonymized string.
 	 */
-	public static function privacy_anonymize_data_custom_types( $anonymous, $type, $data ) {
+	public static function anonymize_custom_data_types( $anonymous, $type, $data ) {
 		switch ( $type ) {
 			case 'address_state':
 			case 'address_country':
