@@ -5,6 +5,18 @@ jQuery( function( $ ) {
 		return false;
 	}
 
+	$.wc_clear_prepend_and_scroll_to_notices = function( notices, element_after_notices, scroll_to_element ) {
+		if ( notices ) {
+			// Remove notices from all sources
+			$( '.woocommerce-error, .woocommerce-message, .woocommerce-info' ).remove();
+
+			// Add notices returned by AJAX add_to_cart call
+			element_after_notices.prepend( notices );
+
+			$.scroll_to_notices( scroll_to_element );
+		}
+	};
+
 	/**
 	 * AddToCartHandler class.
 	 */
@@ -60,6 +72,8 @@ jQuery( function( $ ) {
 					return;
 				}
 
+				$.wc_clear_prepend_and_scroll_to_notices( response.notices, $( '.site-main' ), $( '[role="alert"]' ) );
+
 				// Trigger event so themes can refresh other areas.
 				$( document.body ).trigger( 'added_to_cart', [ response.fragments, response.cart_hash, $thisbutton ] );
 			});
@@ -81,13 +95,21 @@ jQuery( function( $ ) {
 				opacity: 0.6
 			}
 		});
-		data['woocommerce-cart-nonce'] = wc_add_to_cart_params.add_to_cart_nonce;
 
-		$.post( wc_add_to_cart_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'remove_from_cart' ), { cart_item_key : $thisbutton.data( 'cart_item_key' ) }, function( response ) {
+		var data = {
+			cart_item_key: $thisbutton.data('cart_item_key'),
+			'woocommerce-cart-nonce': wc_add_to_cart_params.add_to_cart_nonce
+		};
+
+
+		$.post( wc_add_to_cart_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'remove_from_cart' ), data, function( response ) {
 			if ( ! response || ! response.fragments ) {
 				window.location = $thisbutton.attr( 'href' );
 				return;
 			}
+
+			$.wc_clear_prepend_and_scroll_to_notices( response.notices, $( '.site-main' ), $( '[role="alert"]' ) );
+
 			$( document.body ).trigger( 'removed_from_cart', [ response.fragments, response.cart_hash ] );
 		}).fail( function() {
 			window.location = $thisbutton.attr( 'href' );

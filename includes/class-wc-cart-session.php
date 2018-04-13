@@ -53,6 +53,13 @@ final class WC_Cart_Session {
 		add_action( 'woocommerce_cart_loaded_from_session', array( $this, 'set_session' ) );
 		add_action( 'woocommerce_removed_coupon', array( $this, 'set_session' ) );
 		add_action( 'woocommerce_cart_updated', array( $this, 'persistent_cart_update' ) );
+
+		// Set cart's dirty bit.
+		add_action( 'woocommerce_checkout_init', array( $this, 'maybe_clear_cart_dirty_cookie' ) );
+		add_action( 'woocommerce_add_to_cart', array( $this, 'maybe_set_cart_dirty_cookie' ) );
+		add_action( 'woocommerce_cart_item_removed', array( $this, 'maybe_set_cart_dirty_cookie' ) );
+		add_action( 'woocommerce_cart_item_restored', array( $this, 'maybe_set_cart_dirty_cookie' ) );
+
 	}
 
 	/**
@@ -232,5 +239,31 @@ final class WC_Cart_Session {
 			wc_setcookie( 'woocommerce_cart_hash', '', time() - HOUR_IN_SECONDS );
 		}
 		do_action( 'woocommerce_set_cart_cookies', $set );
+	}
+
+	/**
+	 * Will clear cart's dirty bit cookie if needed and when possible.
+	 *
+	 * @since 3.4.0
+	 */
+	public function maybe_clear_cart_dirty_cookie() {
+		if ( ! headers_sent() && did_action( 'wp_loaded' ) ) {
+			if ( ! $this->cart->is_empty() ) {
+				wc_setcookie( 'woocommerce_cart_dirty', 0, 0, false, true );
+			}
+		}
+	}
+
+	/**
+	 * Will set cart's dirty bit cookie if needed and when possible.
+	 *
+	 * @since 3.4.0
+	 */
+	public function maybe_set_cart_dirty_cookie() {
+		if ( ! headers_sent() && did_action( 'wp_loaded' ) ) {
+			if ( ! $this->cart->is_empty() ) {
+				wc_setcookie( 'woocommerce_cart_dirty', 1, 0, false, true );
+			}
+		}
 	}
 }

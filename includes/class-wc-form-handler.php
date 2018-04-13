@@ -336,7 +336,13 @@ class WC_Form_Handler {
 
 			wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
 
-			WC()->checkout()->process_checkout();
+			// If cart has been modified since the user arrived to the checkout page and
+			// the page has not been updated, print notice for the user and don't process checkout.
+			if ( $_COOKIE['woocommerce_cart_dirty'] !== '0' && empty( $_POST['woocommerce_checkout_update_totals'] ) ) {
+				wc_add_notice( __( 'Cart has been updated. Please check your order before proceeding.', 'woocommerce' ), 'error' );
+			} else {
+				WC()->checkout()->process_checkout();
+			}
 		}
 	}
 
@@ -795,27 +801,29 @@ class WC_Form_Handler {
 
 		wc_nocache_headers();
 
-		$nonce_active = apply_filters( 'woocommerce_add_to_cart_nonce_active', false );
-		if ( $nonce_active ) {
-
-			if ( ! isset( $_REQUEST['woocommerce-cart-nonce'] ) ) {
-				//Include notice to confirm an add to cart event should the nonce be missing (simply forwards the link with nonce appended).
-				//TODO
-			}
-
-			$nonce_value = wc_get_var( $_REQUEST['woocommerce-cart-nonce'], '' );
-
-			if ( ! wp_verify_nonce( $nonce_value, 'woocommerce-cart' ) ) {
-				return;
-			}
-		}
-
 		$product_id          = apply_filters( 'woocommerce_add_to_cart_product_id', absint( $_REQUEST['add-to-cart'] ) );
 		$was_added_to_cart   = false;
 		$adding_to_cart      = wc_get_product( $product_id );
 
 		if ( ! $adding_to_cart ) {
 			return;
+		}
+
+		$nonce_active = apply_filters( 'woocommerce_add_to_cart_nonce_active', false );
+		if ( $nonce_active ) {
+
+			if ( ! isset( $_REQUEST['woocommerce-cart-nonce'] ) && ! isset( $_REQUEST['_wpnonce'] ) ) {
+				//Include notice to confirm an add to cart event should the nonce be missing (simply forwards the link with nonce appended).
+				$missing_nonce_notice = sprintf( _x( 'Do you want to add &ldquo;%s&rdquo; to your cart?', 'Item name in quotes', 'woocommerce' ), $adding_to_cart->get_name() );
+				$missing_nonce_notice .= ' <a href="' . esc_url( $adding_to_cart->add_to_cart_url() ) . '" class="restore-item">' . __( 'Click here to confirm!', 'woocommerce' ) . '</a>';
+				wc_add_notice( $missing_nonce_notice );
+			}
+
+			$nonce_value = wc_get_var( $_REQUEST['woocommerce-cart-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) );
+
+			if ( ! wp_verify_nonce( $nonce_value, 'woocommerce-cart' ) ) {
+				return;
+			}
 		}
 
 		$add_to_cart_handler = apply_filters( 'woocommerce_add_to_cart_handler', $adding_to_cart->get_type(), $adding_to_cart );

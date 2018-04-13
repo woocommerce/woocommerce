@@ -170,6 +170,13 @@ class WC_AJAX {
 
 		$mini_cart = ob_get_clean();
 
+		ob_start();
+
+		wc_print_notices();
+
+		$notices = ob_get_clean();
+
+
 		$data = array(
 			'fragments' => apply_filters(
 				'woocommerce_add_to_cart_fragments', array(
@@ -177,6 +184,7 @@ class WC_AJAX {
 				)
 			),
 			'cart_hash' => apply_filters( 'woocommerce_add_to_cart_hash', WC()->cart->get_cart_for_session() ? md5( json_encode( WC()->cart->get_cart_for_session() ) ) : '', WC()->cart->get_cart_for_session() ),
+			'notices'   => $notices,
 		);
 
 		wp_send_json( $data );
@@ -400,6 +408,9 @@ class WC_AJAX {
 				wc_add_to_cart_message( array( $product_id => $quantity ), true );
 			}
 
+			$added_text = sprintf( __( '%s has been added to your cart.', 'woocommerce' ), $product->get_name() );
+			wc_add_notice( $added_text );
+
 			// Return fragments
 			self::get_refreshed_fragments();
 
@@ -425,6 +436,14 @@ class WC_AJAX {
 
 		$cart_item_key = wc_clean( $_POST['cart_item_key'] );
 
+		if ( $cart_item_key ) {
+			$cart_item = WC()->cart->get_cart_item( $cart_item_key );
+			$product = wc_get_product( $cart_item['product_id'] );
+
+			$item_removed_title = apply_filters( 'woocommerce_cart_item_removed_title', $product ? sprintf( _x( '&ldquo;%s&rdquo;', 'Item name in quotes', 'woocommerce' ), $product->get_name() ) : __( 'Item', 'woocommerce' ), $cart_item );
+			$removed_text = sprintf( __( '%s has been removed from your cart.', 'woocommerce' ), $item_removed_title );
+			wc_add_notice( $removed_text );
+		}
 		if ( $cart_item_key && false !== WC()->cart->remove_cart_item( $cart_item_key ) ) {
 			self::get_refreshed_fragments();
 		} else {
@@ -437,8 +456,48 @@ class WC_AJAX {
 	 */
 	public static function checkout() {
 		wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
-		WC()->checkout()->process_checkout();
-		wp_die( 0 );
+
+		if ( $_COOKIE['woocommerce_cart_dirty'] !== '0' ) {
+			wc_add_notice( __( 'Cart has been updated. Please check the order again.', 'woocommerce' ) );
+
+			// Get order review fragment
+			ob_start();
+			woocommerce_order_review();
+			$woocommerce_order_review = ob_get_clean();
+
+			// Get checkout payment fragment
+			ob_start();
+			woocommerce_checkout_payment();
+			$woocommerce_checkout_payment = ob_get_clean();
+
+			// Get messages if reload checkout is not true
+			$messages = '';
+			if ( ! isset( WC()->session->reload_checkout ) ) {
+				ob_start();
+				wc_print_notices();
+				$messages = ob_get_clean();
+			}
+
+			unset( WC()->session->refresh_totals, WC()->session->reload_checkout );
+
+			wp_send_json(
+				array(
+					'result'    => empty( $messages ) ? 'success' : 'failure',
+					'messages'  => $messages,
+					'reload'    => isset( WC()->session->reload_checkout ) ? 'true' : 'false',
+					'refresh'   => true,
+					'fragments' => apply_filters(
+						'woocommerce_update_order_review_fragments', array(
+							'.woocommerce-checkout-review-order-table' => $woocommerce_order_review,
+							'.woocommerce-checkout-payment' => $woocommerce_checkout_payment,
+						)
+					),
+				)
+			);
+		} else {
+			WC()->checkout()->process_checkout();
+			wp_die( 0 );
+		}
 	}
 
 	/**
