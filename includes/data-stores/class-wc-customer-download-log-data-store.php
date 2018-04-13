@@ -160,10 +160,11 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 			'permission_id'   => '',
 			'user_id'         => '',
 			'user_ip_address' => '',
-			'orderby'     => 'download_log_id',
-			'order'       => 'DESC',
-			'limit'       => -1,
-			'return'      => 'objects',
+			'orderby'         => 'download_log_id',
+			'order'           => 'DESC',
+			'limit'           => -1,
+			'page'            => 1,
+			'return'          => 'objects',
 		) );
 
 		$query   = array();
@@ -188,7 +189,7 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 		$query[]        = "ORDER BY {$orderby_sql}";
 
 		if ( 0 < $args['limit'] ) {
-			$query[] = $wpdb->prepare( "LIMIT %d", $args['limit'] );
+			$query[] = $wpdb->prepare( 'LIMIT %d, %d', absint( $args['limit'] ) * absint( $args['page'] - 1 ), absint( $args['limit'] ) );
 		}
 
 		$raw_download_logs = $wpdb->get_results( implode( ' ', $query ) );

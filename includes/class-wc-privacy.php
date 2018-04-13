@@ -43,8 +43,8 @@ class WC_Privacy {
 			'callback'               => array( __CLASS__, 'order_data_exporter' ),
 		);
 		$exporters[] = array(
-			'exporter_friendly_name' => __( 'WooCommerce Download Logs', 'woocommerce' ),
-			'callback'               => array( __CLASS__, 'download_log_data_exporter' ),
+			'exporter_friendly_name' => __( 'WooCommerce Downloads', 'woocommerce' ),
+			'callback'               => array( __CLASS__, 'download_data_exporter' ),
 		);
 		return $exporters;
 	}
@@ -132,11 +132,100 @@ class WC_Privacy {
 	 * @param int    $page  Page.
 	 * @return array An array of personal data in name value pairs
 	 */
-	public static function download_log_data_exporter( $email_address, $page ) {
-		// @todo
+	public static function download_data_exporter( $email_address, $page ) {
+		$done            = false;
+		$page            = (int) $page;
+		$user            = get_user_by( 'email', $email_address ); // Check if user has an ID in the DB to load stored personal data.
+		$data_to_export  = array();
+		$downloads_query = array(
+			'limit' => 10,
+			'page'  => $page,
+		);
+
+		if ( $user instanceof WP_User ) {
+			$downloads_query['user_id'] = (int) $user->ID;
+		} else {
+			$downloads_query['user_email'] = $email_address;
+		}
+
+		$customer_download_data_store     = WC_Data_Store::load( 'customer-download' );
+		$customer_download_log_data_store = WC_Data_Store::load( 'customer-download-log' );
+		$downloads                        = $customer_download_data_store->get_downloads( $downloads_query );
+
+		if ( 0 < count( $downloads ) ) {
+			foreach ( $downloads as $download ) {
+				$data_to_export[] = array(
+					'group_id'    => 'woocommerce_downloads',
+					'group_label' => __( 'Order Downloads', 'woocommerce' ),
+					'item_id'     => 'download-' . $download->get_id(),
+					'data'        => array(
+						array(
+							'name'  => __( 'Download ID', 'woocommerce' ),
+							'value' => $download->get_id(),
+						),
+						array(
+							'name'  => __( 'Order ID', 'woocommerce' ),
+							'value' => $download->get_order_id(),
+						),
+						array(
+							'name'  => __( 'Product', 'woocommerce' ),
+							'value' => get_the_title( $download->get_product_id() ),
+						),
+						array(
+							'name'  => __( 'User email', 'woocommerce' ),
+							'value' => $download->get_user_email(),
+						),
+						array(
+							'name'  => __( 'Downloads remaining', 'woocommerce' ),
+							'value' => $download->get_downloads_remaining(),
+						),
+						array(
+							'name'  => __( 'Download count', 'woocommerce' ),
+							'value' => $download->get_download_count(),
+						),
+						array(
+							'name'  => __( 'Access granted', 'woocommerce' ),
+							'value' => date( 'Y-m-d', $download->get_access_granted( 'edit' )->getTimestamp() ),
+						),
+						array(
+							'name'  => __( 'Access expires', 'woocommerce' ),
+							'value' => ! is_null( $download->get_access_expires( 'edit' ) ) ? date( 'Y-m-d', $download->get_access_expires( 'edit' )->getTimestamp() ) : null,
+						),
+					),
+				);
+
+				$download_logs = $customer_download_log_data_store->get_download_logs_for_permission( $download->get_id() );
+
+				foreach ( $download_logs as $download_log ) {
+					$data_to_export[] = array(
+						'group_id'    => 'woocommerce_download_logs',
+						'group_label' => __( 'Download Logs', 'woocommerce' ),
+						'item_id'     => 'download-log-' . $download_log->get_id(),
+						'data'        => array(
+							array(
+								'name'  => __( 'Download ID', 'woocommerce' ),
+								'value' => $download_log->get_permission_id(),
+							),
+							array(
+								'name'  => __( 'Timestamp', 'woocommerce' ),
+								'value' => $download_log->get_timestamp(),
+							),
+							array(
+								'name'  => __( 'IP Address', 'woocommerce' ),
+								'value' => $download_log->get_user_ip_address(),
+							),
+						),
+					);
+				}
+			}
+			$done = 10 > count( $downloads );
+		} else {
+			$done = true;
+		}
+
 		return array(
-			'data' => array(),
-			'done' => true,
+			'data' => $data_to_export,
+			'done' => $done,
 		);
 	}
 
@@ -265,13 +354,15 @@ class WC_Privacy {
 	 * Note; this is separate to account deletion. WooCommerce handles account deletion/cleanup elsewhere.
 	 * This logic is simply to clean up data for guest users.
 	 *
+	 * @todo Add option to determine if order data should be left alone when removing personal data for a user.
+	 *
 	 * @param string $email_address Customer email address.
 	 */
 	public static function remove_personal_data( $email_address ) {
 		$user        = get_user_by( 'email', $email_address ); // Check if user has an ID in the DB.
 		$has_account = $user instanceof WP_User;
 
-		// Remove personal data from the user's orders. @todo add option for this.
+		// Remove personal data from the user's orders.
 		$order_query = array(
 			'limit' => -1,
 		);
@@ -290,11 +381,12 @@ class WC_Privacy {
 			}
 		}
 
-		// Revoke things such as download permissions for this email if it's a guest account. This is handled elsewhere for user accounts on delete.
 		if ( ! $has_account ) {
+			// Revoke things such as download permissions for this email if it's a guest account. This is handled elsewhere for user accounts on delete.
 			$data_store = WC_Data_Store::load( 'customer-download' );
 			$data_store->delete_by_user_email( $email_address );
 		} else {
+			// Remove address data from the user object. This is in case the user is not deleted for whatever reason.
 			self::remove_customer_personal_data( $user );
 		}
 
@@ -317,37 +409,37 @@ class WC_Privacy {
 		$anonymized_data = array();
 
 		/**
-		 * Expose props and data types we'll be anonymizing.
+		 * Expose props and data types we'll be removing.
 		 *
 		 * @since 3.4.0
-		 * @param array       $props Keys are the prop names, values are the data type we'll be passing to wp_privacy_anonymize_data().
+		 * @param array       $props A list of props we're removing from the user object.
 		 * @param WC_Customer $customer A customer object.
 		 */
 		$props_to_remove = apply_filters( 'woocommerce_privacy_remove_customer_personal_data_props', array(
-			'billing_first_name'  => 'address',
-			'billing_last_name'   => 'address',
-			'billing_company'     => 'address',
-			'billing_address_1'   => 'address',
-			'billing_address_2'   => 'address',
-			'billing_city'        => 'address',
-			'billing_postcode'    => 'address',
-			'billing_state'       => 'address',
-			'billing_country'     => 'address',
-			'billing_phone'       => 'phone',
-			'billing_email'       => 'email',
-			'shipping_first_name' => 'address',
-			'shipping_last_name'  => 'address',
-			'shipping_company'    => 'address',
-			'shipping_address_1'  => 'address',
-			'shipping_address_2'  => 'address',
-			'shipping_city'       => 'address',
-			'shipping_postcode'   => 'address',
-			'shipping_state'      => 'address',
-			'shipping_country'    => 'address',
+			'billing_first_name',
+			'billing_last_name',
+			'billing_company',
+			'billing_address_1',
+			'billing_address_2',
+			'billing_city',
+			'billing_postcode',
+			'billing_state',
+			'billing_country',
+			'billing_phone',
+			'billing_email',
+			'shipping_first_name',
+			'shipping_last_name',
+			'shipping_company',
+			'shipping_address_1',
+			'shipping_address_2',
+			'shipping_city',
+			'shipping_postcode',
+			'shipping_state',
+			'shipping_country',
 		), $customer );
 
 		if ( ! empty( $props_to_remove ) && is_array( $props_to_remove ) ) {
-			foreach ( $props_to_remove as $prop => $data_type ) {
+			foreach ( $props_to_remove as $prop ) {
 				// Get the current value in edit context.
 				$value = $customer->{"get_$prop"}( 'edit' );
 
@@ -363,10 +455,9 @@ class WC_Privacy {
 				 * @param bool        $anonymized_data Value of this prop after anonymization.
 				 * @param string      $prop Name of the prop being removed.
 				 * @param string      $value Current value of the data.
-				 * @param string      $data_type Type of data.
 				 * @param WC_Customer $customer A customer object.
 				 */
-				$anonymized_data[ $prop ] = apply_filters( 'woocommerce_privacy_remove_personal_data_customer_prop_value', wp_privacy_anonymize_data( $data_type, $value ), $prop, $value, $data_type, $customer );
+				$anonymized_data[ $prop ] = apply_filters( 'woocommerce_privacy_remove_personal_data_customer_prop_value', '', $prop, $value, $customer );
 			}
 		}
 

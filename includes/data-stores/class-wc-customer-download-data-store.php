@@ -281,6 +281,7 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 		$args = wp_parse_args(
 			$args, array(
 				'user_email'  => '',
+				'user_id'     => '',
 				'order_id'    => '',
 				'order_key'   => '',
 				'product_id'  => '',
@@ -288,6 +289,7 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 				'orderby'     => 'permission_id',
 				'order'       => 'ASC',
 				'limit'       => -1,
+				'page'        => 1,
 				'return'      => 'objects',
 			)
 		);
@@ -312,6 +314,10 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 			$query[] = $wpdb->prepare( 'AND user_email = %s', sanitize_email( $args['user_email'] ) );
 		}
 
+		if ( $args['user_id'] ) {
+			$query[] = $wpdb->prepare( 'AND user_id = %d', absint( $args['user_id'] ) );
+		}
+
 		if ( $args['order_id'] ) {
 			$query[] = $wpdb->prepare( 'AND order_id = %d', $args['order_id'] );
 		}
@@ -334,7 +340,7 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 		$query[]     = "ORDER BY {$orderby_sql}";
 
 		if ( 0 < $args['limit'] ) {
-			$query[] = $wpdb->prepare( 'LIMIT %d', $args['limit'] );
+			$query[] = $wpdb->prepare( 'LIMIT %d, %d', absint( $args['limit'] ) * absint( $args['page'] - 1 ), absint( $args['limit'] ) );
 		}
 
 		// phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
