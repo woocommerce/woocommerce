@@ -243,6 +243,23 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	}
 
 	/**
+	 * Method to delete a download permission from the database by user email.
+	 *
+	 * @since 3.4.0
+	 * @param string $email email of the downloads that will be deleted.
+	 */
+	public function delete_by_user_email( $email ) {
+		global $wpdb;
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
+				WHERE user_email = %s",
+				$email
+			)
+		);
+	}
+
+	/**
 	 * Get a download object.
 	 *
 	 * @param  array $data From the DB.
