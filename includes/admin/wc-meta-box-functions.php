@@ -186,8 +186,8 @@ function woocommerce_wp_checkbox( $field ) {
  * Return true if stringified $value is found in array of stringified $options or if stringified $value
  * is the same as stringified $options.
  *
- * @param mixed $value   Value to find within options.
- * @param mixed $options Options to go through when looking for value.
+ * @param string|int       $value   Value to find within options.
+ * @param string|int|array $options Options to go through when looking for value.
  * @return bool
  */
 function wc_is_value_in_options( $value, $options ) {
