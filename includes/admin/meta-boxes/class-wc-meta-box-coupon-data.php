@@ -27,7 +27,8 @@ class WC_Meta_Box_Coupon_Data {
 	public static function output( $post ) {
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
 
-		$coupon = new WC_Coupon( $post->ID );
+		$coupon_id = absint( $post->ID );
+		$coupon    = new WC_Coupon( $coupon_id );
 
 		?>
 
