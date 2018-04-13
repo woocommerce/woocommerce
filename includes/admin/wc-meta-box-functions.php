@@ -190,7 +190,7 @@ function woocommerce_wp_checkbox( $field ) {
  * @param mixed $options Options to go through when looking for value.
  * @return bool
  */
-function is_value_in_options( $value, $options ) {
+function wc_is_value_in_options( $value, $options ) {
 	$value = (string) $value;
 	if ( is_array( $options ) ) {
 		$options = array_map( 'strval', $options );
@@ -247,7 +247,7 @@ function woocommerce_wp_select( $field ) {
 		<select <?php echo wc_implode_html_attributes( $field_attributes ); // WPCS: XSS ok. ?>>
 			<?php
 			foreach ( $field['options'] as $key => $value ) {
-				echo '<option value="' . esc_attr( $key ) . '" ' . selected( is_value_in_options( $key, $field['value'] ), true, false ) . '>' . esc_html( $value ) . '</option>';
+				echo '<option value="' . esc_attr( $key ) . '" ' . selected( wc_is_value_in_options( $key, $field['value'] ), true, false ) . '>' . esc_html( $value ) . '</option>';
 			}
 			?>
 		</select>
