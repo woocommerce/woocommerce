@@ -231,7 +231,7 @@ class WC_Frontend_Scripts {
 			),
 			'wc-cart'                    => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/cart' . $suffix . '.js' ),
-				'deps'    => array( 'jquery', 'wc-country-select', 'wc-address-i18n' ),
+				'deps'    => array( 'jquery', 'woocommerce', 'wc-country-select', 'wc-address-i18n' ),
 				'version' => WC_VERSION,
 			),
 			'wc-cart-fragments'          => array(
