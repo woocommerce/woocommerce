@@ -303,7 +303,7 @@ class WC_Tracker {
 	 *
 	 * @return array
 	 */
-	public static function get_orders() {
+	private static function get_orders() {
 		$orders = array();
 
 		$orders['first']    = self::get_first_order_date();
