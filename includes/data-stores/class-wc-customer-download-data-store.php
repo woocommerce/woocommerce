@@ -226,6 +226,23 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	}
 
 	/**
+	 * Method to delete a download permission from the database by user ID.
+	 *
+	 * @since 3.4.0
+	 * @param int $id user ID of the downloads that will be deleted.
+	 */
+	public function delete_by_user_id( $id ) {
+		global $wpdb;
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
+				WHERE user_id = %d",
+				$id
+			)
+		);
+	}
+
+	/**
 	 * Get a download object.
 	 *
 	 * @param  array $data From the DB.
