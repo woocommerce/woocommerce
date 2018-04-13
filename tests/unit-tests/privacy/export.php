@@ -21,21 +21,9 @@ class WC_Test_Privacy_Export extends WC_Unit_Test_Case {
 	protected $customers = array();
 
 	/**
-	 * Clean up after test.
+	 * Load up the importer classes since they aren't loaded by default.
 	 */
-	public function tearDown() {
-		foreach ( $this->orders as $object ) {
-			$object->delete( true );
-		}
-		foreach ( $this->customers as $object ) {
-			$object->delete( true );
-		}
-	}
-
-	/**
-	 * Test: Data exporter.
-	 */
-	public function test_data_exporter() {
+	public function setUp() {
 		$customer1 = WC_Helper_Customer::create_customer( 'customer1', 'password', 'test1@test.com' );
 		$customer1->set_billing_email( 'customer1@test.com' );
 		$customer1->save();
@@ -61,83 +49,109 @@ class WC_Test_Privacy_Export extends WC_Unit_Test_Case {
 		$this->orders[] = WC_Helper_Order::create_order( $customer1->get_id() );
 		$this->orders[] = WC_Helper_Order::create_order( $customer2->get_id() );
 		$this->orders[] = WC_Helper_Order::create_order( $customer2->get_id() );
+	}
 
+	/**
+	 * Clean up after test.
+	 */
+	public function tearDown() {
+		foreach ( $this->orders as $object ) {
+			$object->delete( true );
+		}
+		foreach ( $this->customers as $object ) {
+			$object->delete( true );
+		}
+	}
+
+	/**
+	 * Test: Customer data exporter.
+	 */
+	public function test_customer_data_exporter() {
 		// Test a non existing user.
-		$response = WC_Privacy::data_exporter( 'doesnotexist@test.com', 0 );
+		$response = WC_Privacy::customer_data_exporter( 'doesnotexist@test.com', 1 );
 		$this->assertEquals( array(), $response['data'] );
 
 		// Do a test export and check response.
-		$response = WC_Privacy::data_exporter( 'test1@test.com', 0 );
-		$this->assertFalse( $response['done'] );
+		$response = WC_Privacy::customer_data_exporter( 'test1@test.com', 1 );
+		$this->assertTrue( $response['done'] );
 		$this->assertEquals( array(
 			array(
-				'name'  => 'Billing Address 1',
-				'value' => '123 South Street',
-			),
-			array(
-				'name'  => 'Billing Address 2',
-				'value' => 'Apt 1',
-			),
-			array(
-				'name'  => 'Billing City',
-				'value' => 'Philadelphia',
-			),
-			array(
-				'name'  => 'Billing Postal/Zip Code',
-				'value' => '19123',
-			),
-			array(
-				'name'  => 'Billing State',
-				'value' => 'PA',
-			),
-			array(
-				'name'  => 'Billing Country',
-				'value' => 'US',
-			),
-			array(
-				'name'  => 'Billing Email',
-				'value' => 'customer1@test.com',
-			),
-			array(
-				'name'  => 'Shipping Address 1',
-				'value' => '123 South Street',
-			),
-			array(
-				'name'  => 'Shipping Address 2',
-				'value' => 'Apt 1',
-			),
-			array(
-				'name'  => 'Shipping City',
-				'value' => 'Philadelphia',
-			),
-			array(
-				'name'  => 'Shipping Postal/Zip Code',
-				'value' => '19123',
-			),
-			array(
-				'name'  => 'Shipping State',
-				'value' => 'PA',
-			),
-			array(
-				'name'  => 'Shipping Country',
-				'value' => 'US',
+				'group_id'    => 'woocommerce_customer',
+				'group_label' => 'Customer Data',
+				'item_id'     => 'user',
+				'data'        => array(
+					array(
+						'name'  => 'Billing Address 1',
+						'value' => '123 South Street',
+					),
+					array(
+						'name'  => 'Billing Address 2',
+						'value' => 'Apt 1',
+					),
+					array(
+						'name'  => 'Billing City',
+						'value' => 'Philadelphia',
+					),
+					array(
+						'name'  => 'Billing Postal/Zip Code',
+						'value' => '19123',
+					),
+					array(
+						'name'  => 'Billing State',
+						'value' => 'PA',
+					),
+					array(
+						'name'  => 'Billing Country',
+						'value' => 'US',
+					),
+					array(
+						'name'  => 'Email Address',
+						'value' => 'customer1@test.com',
+					),
+					array(
+						'name'  => 'Shipping Address 1',
+						'value' => '123 South Street',
+					),
+					array(
+						'name'  => 'Shipping Address 2',
+						'value' => 'Apt 1',
+					),
+					array(
+						'name'  => 'Shipping City',
+						'value' => 'Philadelphia',
+					),
+					array(
+						'name'  => 'Shipping Postal/Zip Code',
+						'value' => '19123',
+					),
+					array(
+						'name'  => 'Shipping State',
+						'value' => 'PA',
+					),
+					array(
+						'name'  => 'Shipping Country',
+						'value' => 'US',
+					),
+				),
 			),
 		), $response['data'] );
+	}
+
+	/**
+	 * Test: Order data exporter.
+	 */
+	public function test_order_data_exporter() {
+		$response = WC_Privacy::order_data_exporter( 'test1@test.com', 1 );
+
+		$this->assertEquals( 'woocommerce_orders', $response['data'][0]['group_id'] );
+		$this->assertEquals( 'Orders', $response['data'][0]['group_label'] );
+		$this->assertContains( 'order-', $response['data'][0]['item_id'] );
+		$this->assertArrayHasKey( 'data', $response['data'][0] );
+		$this->assertTrue( 8 === count( $response['data'][0]['data'] ), count( $response['data'][0]['data'] ) );
 
 		// Next page should be orders.
-		$response = WC_Privacy::data_exporter( 'test1@test.com', 1 );
-		$this->assertTrue( 50 === count( $response['data'] ) );
-		$this->assertArrayHasKey( 'name', $response['data'][0] );
-		$this->assertArrayHasKey( 'value', $response['data'][0] );
-		$this->assertContains( 'IP Address', $response['data'][0]['name'] );
-		$this->assertContains( 'Billing Address', $response['data'][1]['name'] );
-		$this->assertContains( 'Shipping Address', $response['data'][2]['name'] );
-		$this->assertContains( 'Billing Phone', $response['data'][3]['name'] );
-		$this->assertContains( 'Billing Email', $response['data'][4]['name'] );
-
-		// Next page should be orders.
-		$response = WC_Privacy::data_exporter( 'test1@test.com', 2 );
+		$response = WC_Privacy::order_data_exporter( 'test1@test.com', 2 );
 		$this->assertTrue( $response['done'] );
-		$this->assertTrue( 5 === count( $response['data'] ) );
+		$this->assertTrue( 8 === count( $response['data'][0]['data'] ), count( $response['data'][0]['data'] ) );
 	}
 }
