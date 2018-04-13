@@ -1,7 +1,8 @@
 <?php
 /**
- * Privacy/GDPR related functionality.
+ * Privacy/GDPR related functionality which ties into WordPress functionality.
  *
+ * @since 3.4.0
  * @package WooCommerce\Classes
  */
 
@@ -37,7 +38,7 @@ class WC_Privacy {
 	/**
 	 * Finds and exports data which could be used to identify a person from WooCommerce data assocated with an email address.
 	 *
-	 * To split the export into manangeable chunks we'll export customer profile data on page 0, and orders from then on until done.
+	 * Orders are exported in blocks of 10 to avoid timeouts.
 	 *
 	 * @param string $email_address The user email address.
 	 * @param int    $page  Page, zero based.
@@ -66,7 +67,7 @@ class WC_Privacy {
 			);
 
 			if ( $user instanceof WP_User ) {
-				$order_query['customer_id'] = $user->ID;
+				$order_query['customer_id'] = (int) $user->ID;
 			} else {
 				$order_query['billing_email'] = $email_address;
 			}
@@ -126,26 +127,26 @@ class WC_Privacy {
 		$personal_data   = array();
 		$customer        = new WC_Customer( $user->ID );
 		$props_to_export = array(
-			'billing_first_name'  => 'Billing First Name',
-			'billing_last_name'   => 'Billing Last Name',
-			'billing_company'     => 'Billing Company',
-			'billing_address_1'   => 'Billing Address 1',
-			'billing_address_2'   => 'Billing Address 2',
-			'billing_city'        => 'Billing City',
-			'billing_postcode'    => 'Billing Postal/Zip Code',
-			'billing_state'       => 'Billing State',
-			'billing_country'     => 'Billing Country',
-			'billing_phone'       => 'Phone Number',
-			'billing_email'       => 'Email Address',
-			'shipping_first_name' => 'Shipping First Name',
-			'shipping_last_name'  => 'Shipping Last Name',
-			'shipping_company'    => 'Shipping Company',
-			'shipping_address_1'  => 'Shipping Address 1',
-			'shipping_address_2'  => 'Shipping Address 2',
-			'shipping_city'       => 'Shipping City',
-			'shipping_postcode'   => 'Shipping Postal/Zip Code',
-			'shipping_state'      => 'Shipping State',
-			'shipping_country'    => 'Shipping Country',
+			'billing_first_name'  => __( 'Billing First Name', 'woocommerce' ),
+			'billing_last_name'   => __( 'Billing Last Name', 'woocommerce' ),
+			'billing_company'     => __( 'Billing Company', 'woocommerce' ),
+			'billing_address_1'   => __( 'Billing Address 1', 'woocommerce' ),
+			'billing_address_2'   => __( 'Billing Address 2', 'woocommerce' ),
+			'billing_city'        => __( 'Billing City', 'woocommerce' ),
+			'billing_postcode'    => __( 'Billing Postal/Zip Code', 'woocommerce' ),
+			'billing_state'       => __( 'Billing State', 'woocommerce' ),
+			'billing_country'     => __( 'Billing Country', 'woocommerce' ),
+			'billing_phone'       => __( 'Phone Number', 'woocommerce' ),
+			'billing_email'       => __( 'Email Address', 'woocommerce' ),
+			'shipping_first_name' => __( 'Shipping First Name', 'woocommerce' ),
+			'shipping_last_name'  => __( 'Shipping Last Name', 'woocommerce' ),
+			'shipping_company'    => __( 'Shipping Company', 'woocommerce' ),
+			'shipping_address_1'  => __( 'Shipping Address 1', 'woocommerce' ),
+			'shipping_address_2'  => __( 'Shipping Address 2', 'woocommerce' ),
+			'shipping_city'       => __( 'Shipping City', 'woocommerce' ),
+			'shipping_postcode'   => __( 'Shipping Postal/Zip Code', 'woocommerce' ),
+			'shipping_state'      => __( 'Shipping State', 'woocommerce' ),
+			'shipping_country'    => __( 'Shipping Country', 'woocommerce' ),
 		);
 
 		foreach ( $props_to_export as $prop => $description ) {
@@ -180,18 +181,38 @@ class WC_Privacy {
 	protected static function get_order_personal_data( $order ) {
 		$personal_data   = array();
 		$props_to_export = array(
-			'customer_ip_address'        => 'IP Address',
-			'customer_user_agent'        => 'User Agent',
-			'formatted_billing_address'  => 'Billing Address',
-			'formatted_shipping_address' => 'Shipping Address',
-			'billing_phone'              => 'Billing Phone',
-			'billing_email'              => 'Billing Email',
+			'order_number'               => __( 'Order Number', 'woocommerce' ),
+			'date_created'               => __( 'Order Date', 'woocommerce' ),
+			'total'                      => __( 'Order Total', 'woocommerce' ),
+			'items'                      => __( 'Items Purchased', 'woocommerce' ),
+			'customer_ip_address'        => __( 'IP Address', 'woocommerce' ),
+			'customer_user_agent'        => __( 'Browser User Agent', 'woocommerce' ),
+			'formatted_billing_address'  => __( 'Billing Address', 'woocommerce' ),
+			'formatted_shipping_address' => __( 'Shipping Address', 'woocommerce' ),
+			'billing_phone'              => __( 'Phone Number', 'woocommerce' ),
+			'billing_email'              => __( 'Email Address', 'woocommerce' ),
 		);
 
-		foreach ( $props_to_export as $prop => $description ) {
-			/* translators: %1$d: ID of an order, %2$s: Description of an order field */
-			$name  = sprintf( __( 'Order %1$d: %2$s', 'woocommerce' ), $order->get_id(), $description );
-			$value = $order->{"get_$prop"}( 'edit' );
+		foreach ( $props_to_export as $prop => $name ) {
+			switch ( $prop ) {
+				case 'items':
+					$item_names = array();
+					foreach ( $order->get_items() as $item ) {
+						$item_names[] = $item->get_name() . ' x ' . $item->get_quantity();
+					}
+					$value = implode( ', ', $item_names );
+					break;
+				case 'date_created':
+					$value = wc_format_datetime( $order->get_date_created(), get_option( 'date_format' ) . ', ' . get_option( 'time_format' ) );
+					break;
+				case 'formatted_billing_address':
+				case 'formatted_shipping_address':
+					$value = preg_replace( '#<br\s*/?>#i', ', ', $order->{"get_$prop"}() );
+					break;
+				default:
+					$value = $order->{"get_$prop"}();
+					break;
+			}
 
 			if ( $value ) {
 				$personal_data[] = array(
@@ -205,7 +226,7 @@ class WC_Privacy {
 		 * Allow extensions to register their own personal data for this order for the export.
 		 *
 		 * @since 3.4.0
-		 * @param array    $personal_data Array of name value pairs.
+		 * @param array    $personal_data Array of name value pairs to expose in the export.
 		 * @param WC_Order $order An order object.
 		 */
 		$personal_data = apply_filters( 'woocommerce_privacy_export_personal_data_order', $personal_data, $order );
