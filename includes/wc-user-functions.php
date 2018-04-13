@@ -623,3 +623,42 @@ function wc_user_search_columns( $search_columns ) {
 	return $search_columns;
 }
 add_filter( 'user_search_columns', 'wc_user_search_columns' );
+
+/**
+ * When a user is deleted in WordPress, delete corresponding WooCommerce data.
+ *
+ * @param int $user_id User ID being deleted.
+ */
+function wc_delete_user_data( $user_id ) {
+	global $wpdb;
+
+	// Clean up sessions.
+	$wpdb->delete(
+		$wpdb->prefix . 'woocommerce_sessions',
+		array(
+			'session_key' => $user_id,
+		)
+	);
+
+	wp_cache_delete( WC_Cache_Helper::get_cache_prefix( WC_SESSION_CACHE_GROUP ) . $user_id, WC_SESSION_CACHE_GROUP );
+
+	// Revoke API keys.
+	$wpdb->delete(
+		$wpdb->prefix . 'woocommerce_api_keys',
+		array(
+			'user_id' => $user_id,
+		)
+	);
+
+	// Revoke download permissioons.
+	$data_store = WC_Data_Store::load( 'customer-download' );
+	$data_store->delete_by_user_id( $user_id );
+
+	// Clean up payment tokens.
+	$payment_tokens = WC_Payment_Tokens::get_customer_tokens( $user_id );
+
+	foreach ( $payment_tokens as $payment_token ) {
+		$payment_token->delete();
+	}
+}
+add_action( 'delete_user', 'wc_delete_user_data' );
