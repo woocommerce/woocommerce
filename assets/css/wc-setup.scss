@@ -1239,6 +1239,12 @@ p.jetpack-terms {
 			max-height: 1.75em;
 			padding: ( 3.5em - 1.75em ) / 2;
 		}
+
+		&.recommended-item-icon-mailchimp {
+			background-color: #209bbb;
+			height: 2em;
+			padding: ( 3.5em - 2em ) / 2;
+		}
 	}
 
 	.recommended-item-description-container {
