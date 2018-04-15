@@ -1233,6 +1233,12 @@ p.jetpack-terms {
 			max-width: 3em;
 			padding: ( 3.5em - 3em ) / 2;
 		}
+
+		&.recommended-item-icon-automated_taxes {
+			background-color: #d0011b;
+			max-height: 1.75em;
+			padding: ( 3.5em - 1.75em ) / 2;
+		}
 	}
 
 	.recommended-item-description-container {

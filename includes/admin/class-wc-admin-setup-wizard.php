@@ -1611,20 +1611,6 @@ class WC_Admin_Setup_Wizard {
 		?>
 		<h1><?php esc_html_e( 'Recommended for All WooCommerce Stores', 'woocommerce' ); ?></h1>
 		<form method="post">
-			<?php if ( $this->should_show_automated_tax_extra() ) : ?>
-				<ul class="wc-wizard-services featured">
-					<li class="wc-wizard-service-item <?php echo get_option( 'woocommerce_setup_automated_taxes' ) ? 'checked' : ''; ?>">
-						<div class="wc-wizard-service-description">
-							<h3><?php esc_html_e( 'Automated Taxes (powered by WooCommerce Services)', 'woocommerce' ); ?></h3>
-							<p>
-								<?php esc_html_e( 'Automatically calculate and charge the correct rate of tax for each time a customer checks out. If toggled on, WooCommerce Services and Jetpack will be installed and activated for you.', 'woocommerce' ); ?>
-							</p>
-							<p class="wc-wizard-service-learn-more">
-								<a href="<?php echo esc_url( 'https://wordpress.org/plugins/woocommerce-services/' ); ?>" target="_blank">
-									<?php esc_html_e( 'Learn more about WooCommerce Services', 'woocommerce' ); ?>
-								</a>
-							</p>
-						</div>
 			<ul class="recommended-step">
 				<?php
 				if ( $this->should_show_theme() ) :
@@ -1642,21 +1628,15 @@ class WC_Admin_Setup_Wizard {
 					) );
 				endif;
 
-						<div class="wc-wizard-service-enable">
-						<span class="wc-wizard-service-toggle <?php echo get_option( 'woocommerce_setup_automated_taxes' ) ? '' : 'disabled'; ?>">
-							<input
-								id="setup_automated_taxes"
-								type="checkbox"
-								name="setup_automated_taxes"
-								value="yes"
-								<?php checked( get_option( 'woocommerce_setup_automated_taxes', 'no' ), 'yes' ); ?>
-							/>
-							<label for="setup_automated_taxes">
-						</span>
-						</div>
-					</li>
-				</ul>
-			<?php endif; ?>
+				if ( $this->should_show_automated_tax() ) :
+					$this->display_recommended_item( array(
+						'type'        => 'automated_taxes',
+						'title'       => __( 'Automated Taxes', 'woocommerce' ),
+						'description' => __( 'Save time and errors with automated tax calculation and collection at checkout. Powered by WooCommerce Services and Jetpack.', 'woocommerce' ),
+						'img_url'     => WC()->plugin_url() . '/assets/images/obw-taxes-icon.svg',
+						'img_alt'     => __( 'automated taxes icon', 'woocommerce' ),
+					) );
+				endif;
 			?>
 		</ul>
 			<p class="wc-setup-actions step">
@@ -1674,17 +1654,17 @@ class WC_Admin_Setup_Wizard {
 		check_admin_referer( 'wc-setup' );
 
 		$setup_storefront       = isset( $_POST['setup_storefront_theme'] ) && 'yes' === $_POST['setup_storefront_theme'];
-		$setup_automated_tax = isset( $_POST['setup_automated_taxes'] ) && 'yes' === $_POST['setup_automated_taxes'];
+		$setup_automated_tax    = isset( $_POST['setup_automated_taxes'] ) && 'yes' === $_POST['setup_automated_taxes'];
 
 		update_option( 'woocommerce_calc_taxes', $setup_automated_tax ? 'yes' : 'no' );
 		update_option( 'woocommerce_setup_automated_taxes', $setup_automated_tax );
 
 		if ( $setup_storefront ) {
 			$this->install_theme( 'storefront' );
-		if ( $setup_automated_tax ) {
-			$this->install_woocommerce_services();
 		}
 
+		if ( $setup_automated_tax ) {
+			$this->install_woocommerce_services();
 		}
 
 		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
