@@ -1621,6 +1621,20 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_recommended() {
 		?>
 		<h1><?php esc_html_e( 'Recommended for All WooCommerce Stores', 'woocommerce' ); ?></h1>
+		<p><?php
+			// If we're displaying all of the recommended features, show the full description. Otherwise, display a placeholder.
+			// We're not translating all of the different permutations to save on translations,
+			// and the default is the most common.
+			if (
+					$this->should_show_theme()
+					&& $this->should_show_automated_tax()
+					&& $this->should_show_mailchimp()
+					) :
+				esc_html_e( 'Select from the list below to enable automated taxes and MailChimp’s best-in-class email services — and design your store with our official, free WooCommerce theme.', 'woocommerce' );
+			else :
+				esc_html_e( 'Enhance your store with these recommended features.', 'woocommerce' );
+			endif;
+		?></p>
 		<form method="post">
 			<ul class="recommended-step">
 				<?php
