@@ -1569,6 +1569,41 @@ class WC_Admin_Setup_Wizard {
 		exit;
 	}
 
+	protected function display_recommended_item( $item_info ) {
+		$type        = $item_info['type'];
+		$title       = $item_info['title'];
+		$description = $item_info['description'];
+		$img_url     = $item_info['img_url'];
+		$img_alt     = $item_info['img_alt'];
+		?>
+		<li>
+			<label class="recommended-item">
+				<input
+					class="recommended-item-checkbox"
+					type="checkbox"
+					name="<?php echo esc_attr( 'setup_' . $type ); ?>"
+					value="yes"
+					checked />
+				<img
+					src="<?php echo esc_url( $img_url ); ?>"
+					class="<?php echo esc_attr( 'recommended-item-icon-' . $type ); ?> recommended-item-icon"
+					alt="<?php echo esc_attr( $img_alt ); ?>" />
+				<div class="recommended-item-description-container">
+					<h3><?php echo esc_html( $title ); ?></h3>
+					<p><?php echo wp_kses( $description, array(
+						'a' => array(
+							'href'   => array(),
+							'target' => array(),
+							'rel'    => array(),
+						),
+						'em' => array(),
+					) ); ?></p>
+				</div>
+			</label>
+		</li>
+		<?php
+	}
+
 	/**
 	 * Recommended step
 	 */
@@ -1576,37 +1611,6 @@ class WC_Admin_Setup_Wizard {
 		?>
 		<h1><?php esc_html_e( 'Recommended for All WooCommerce Stores', 'woocommerce' ); ?></h1>
 		<form method="post">
-			<?php if ( $this->should_show_theme_extra() ) : ?>
-			<ul class="wc-wizard-services featured">
-				<li class="wc-wizard-service-item">
-					<div class="wc-wizard-service-description">
-						<h3><?php esc_html_e( 'Storefront Theme', 'woocommerce' ); ?></h3>
-						<p>
-							<?php
-							$theme      = wp_get_theme();
-							$theme_name = $theme['Name'];
-
-							if ( $this->is_default_theme() ) {
-								echo wp_kses_post( sprintf( __( 'The theme you are currently using is not optimized for WooCommerce. We recommend you switch to <a href="%s" title="Learn more about Storefront" target="_blank">Storefront</a>; our official, free, WooCommerce theme.', 'woocommerce' ), esc_url( 'https://woocommerce.com/storefront/' ) ) );
-							} else {
-								echo wp_kses_post( sprintf( __( 'The theme you are currently using does not fully support WooCommerce. We recommend you switch to <a href="%s" title="Learn more about Storefront" target="_blank">Storefront</a>; our official, free, WooCommerce theme.', 'woocommerce' ), esc_url( 'https://woocommerce.com/storefront/' ) ) );
-							}
-							?>
-						</p>
-						<p>
-							<?php echo wp_kses_post( sprintf( __( 'If toggled on, Storefront will be installed for you, and <em>%s</em> theme will be deactivated.', 'woocommerce' ), esc_html( $theme_name ) ) ); ?>
-						</p>
-					</div>
-
-					<div class="wc-wizard-service-enable">
-						<span class="wc-wizard-service-toggle">
-							<input id="setup_storefront_theme" type="checkbox" name="setup_storefront_theme" value="yes" checked="checked" />
-							<label for="setup_storefront_theme">
-						</span>
-					</div>
-				</li>
-			</ul>
-			<?php endif; ?>
 			<?php if ( $this->should_show_automated_tax_extra() ) : ?>
 				<ul class="wc-wizard-services featured">
 					<li class="wc-wizard-service-item <?php echo get_option( 'woocommerce_setup_automated_taxes' ) ? 'checked' : ''; ?>">
@@ -1621,6 +1625,22 @@ class WC_Admin_Setup_Wizard {
 								</a>
 							</p>
 						</div>
+			<ul class="recommended-step">
+				<?php
+				if ( $this->should_show_theme() ) :
+					$theme      = wp_get_theme();
+					$theme_name = $theme['Name'];
+					$this->display_recommended_item( array(
+						'type'        => 'storefront_theme',
+						'title'       => __( 'Storefront Theme', 'woocommerce' ),
+						'description' => sprintf( __(
+								'Design your store with deep WooCommerce integration. If toggled on, we’ll install <a href="https://woocommerce.com/storefront/" target="_blank" rel="noopener noreferrer">Storefront</a>, and your current theme <em>%s</em> will be deactivated.', 'woocommerce' ),
+								$theme_name
+						),
+						'img_url'     => WC()->plugin_url() . '/assets/images/obw-storefront-icon.svg',
+						'img_alt'     => __( 'Storefront icon', 'woocommerce' ),
+					) );
+				endif;
 
 						<div class="wc-wizard-service-enable">
 						<span class="wc-wizard-service-toggle <?php echo get_option( 'woocommerce_setup_automated_taxes' ) ? '' : 'disabled'; ?>">
@@ -1637,6 +1657,8 @@ class WC_Admin_Setup_Wizard {
 					</li>
 				</ul>
 			<?php endif; ?>
+			?>
+		</ul>
 			<p class="wc-setup-actions step">
 				<button type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step"><?php esc_html_e( 'Continue', 'woocommerce' ); ?></button>
 				<?php wp_nonce_field( 'wc-setup' ); ?>
@@ -1651,18 +1673,18 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_recommended_save() {
 		check_admin_referer( 'wc-setup' );
 
+		$setup_storefront       = isset( $_POST['setup_storefront_theme'] ) && 'yes' === $_POST['setup_storefront_theme'];
 		$setup_automated_tax = isset( $_POST['setup_automated_taxes'] ) && 'yes' === $_POST['setup_automated_taxes'];
-		$install_storefront  = isset( $_POST['setup_storefront_theme'] ) && 'yes' === $_POST['setup_storefront_theme'];
 
 		update_option( 'woocommerce_calc_taxes', $setup_automated_tax ? 'yes' : 'no' );
 		update_option( 'woocommerce_setup_automated_taxes', $setup_automated_tax );
 
+		if ( $setup_storefront ) {
+			$this->install_theme( 'storefront' );
 		if ( $setup_automated_tax ) {
 			$this->install_woocommerce_services();
 		}
 
-		if ( $install_storefront ) {
-			$this->install_theme( 'storefront' );
 		}
 
 		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
