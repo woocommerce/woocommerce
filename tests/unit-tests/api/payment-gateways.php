@@ -49,7 +49,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 			'order'              => '',
 			'enabled'            => false,
 			'method_title'       => 'Check payments',
-			'method_description' => 'Allows check payments. Why would you take checks in this day and age? Well you probably would not, but it does allow you to make test purchases for testing order emails and the success pages.',
+			'method_description' => 'Take payments in-person via checks. This offline gateway can also be useful to test purchases.',
 			'settings'           => array_diff_key( $this->get_settings( 'WC_Gateway_Cheque' ), array( 'enabled' => false, 'description' => false ) ),
 			'_links' => array(
 				'self'       => array(
