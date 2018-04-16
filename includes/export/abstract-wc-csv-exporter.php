@@ -245,7 +245,7 @@ abstract class WC_CSV_Exporter {
 			$export_row[] = $this->format_data( $column_name );
 		}
 
-		fputcsv( $buffer, $export_row ); // @codingStandardsIgnoreLine
+		$this->fputcsv( $buffer, $export_row );
 
 		return ob_get_clean();
 	}
@@ -299,7 +299,8 @@ abstract class WC_CSV_Exporter {
 			}
 		}
 
-		fputcsv( $buffer, $export_row ); // @codingStandardsIgnoreLine
+		$this->fputcsv( $buffer, $export_row );
+
 		++ $this->exported_row_count;
 	}
 
@@ -455,5 +456,33 @@ abstract class WC_CSV_Exporter {
 		}
 
 		return implode( ', ', $values_to_implode );
+	}
+
+	/**
+	 * Write to the CSV file, ensuring escaping works across versions of
+	 * PHP.
+	 *
+	 * PHP 5.5.4 uses '\' as the default escape character. This is not RFC-4180 compliant.
+	 * \0 disables the escape character.
+	 *
+	 * @see https://bugs.php.net/bug.php?id=43225
+	 * @see https://bugs.php.net/bug.php?id=50686
+	 * @see https://github.com/woocommerce/woocommerce/issues/19514
+	 * @since 3.4.0
+	 * @param resource $buffer Resource we are writing to.
+	 * @param array    $export_row Row to export.
+	 */
+	protected function fputcsv( $buffer, $export_row ) {
+		if ( version_compare( PHP_VERSION, '5.5.4', '<' ) ) {
+			ob_start();
+			$temp = fopen( 'php://output', 'w' ); // @codingStandardsIgnoreLine
+    		fputcsv( $temp, $export_row, ",", '"' ); // @codingStandardsIgnoreLine
+			fclose( $temp ); // @codingStandardsIgnoreLine
+			$row = ob_get_clean();
+			$row = str_replace( '\\"', '\\""', $row );
+			fwrite( $buffer, $row ); // @codingStandardsIgnoreLine
+		} else {
+			fputcsv( $buffer, $export_row, ",", '"', "\0" ); // @codingStandardsIgnoreLine
+		}
 	}
 }

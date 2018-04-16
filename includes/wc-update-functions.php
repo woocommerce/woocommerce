@@ -1633,3 +1633,54 @@ function wc_update_330_set_paypal_sandbox_credentials() {
 function wc_update_330_db_version() {
 	WC_Install::update_db_version( '3.3.0' );
 }
+
+/**
+ * Update state codes for Ireland.
+ */
+function wc_update_340_irish_states() {
+	global $wpdb;
+
+	$ie_states = array(
+		'CK'    => 'CO',
+		'DN'    => 'D',
+		'GY'    => 'G',
+		'TY'    => 'TA',
+	);
+
+	foreach ( $ie_states as $old => $new ) {
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE $wpdb->postmeta
+				SET meta_value = %s
+				WHERE meta_key IN ( '_billing_state', '_shipping_state' )
+				AND meta_value = %s",
+				$new, $old
+			)
+		);
+		$wpdb->update(
+			"{$wpdb->prefix}woocommerce_shipping_zone_locations",
+			array(
+				'location_code' => 'IE:' . $new,
+			),
+			array(
+				'location_code' => 'IE:' . $old,
+			)
+		);
+		$wpdb->update(
+			"{$wpdb->prefix}woocommerce_tax_rates",
+			array(
+				'tax_rate_state' => strtoupper( $new ),
+			),
+			array(
+				'tax_rate_state' => strtoupper( $old ),
+			)
+		);
+	}
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_340_db_version() {
+	WC_Install::update_db_version( '3.4.0' );
+}

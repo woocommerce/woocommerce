@@ -530,7 +530,11 @@ class WC_Checkout {
 					'discount_tax' => $cart->get_coupon_discount_tax_amount( $code ),
 				)
 			);
-			$item->add_meta_data( 'coupon_data', $coupon->get_data() );
+
+			// Avoid storing used_by - it's not needed and can get large.
+			$coupon_data = $coupon->get_data();
+			unset( $coupon_data['used_by'] );
+			$item->add_meta_data( 'coupon_data', $coupon_data );
 
 			/**
 			 * Action hook to adjust item before save.

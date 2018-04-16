@@ -63,4 +63,21 @@ jQuery( function( $ ) {
 
 			parent.removeClass( 'currentTarget' );
 		} );
+
+	// Common scroll to element code.
+	$.scroll_to_notices = function( scrollElement ) {
+		var isSmoothScrollSupported = 'scrollBehavior' in document.documentElement.style;
+
+		if ( scrollElement.length ) {
+			if ( isSmoothScrollSupported ) {
+				scrollElement[0].scrollIntoView({
+					behavior: 'smooth'
+				});
+			} else {
+				$( 'html, body' ).animate( {
+					scrollTop: ( scrollElement.offset().top - 100 )
+				}, 1000 );
+			}
+		}
+	};
 });

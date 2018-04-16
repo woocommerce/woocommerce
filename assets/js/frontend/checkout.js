@@ -512,24 +512,12 @@ jQuery( function( $ ) {
 			$( document.body ).trigger( 'checkout_error' );
 		},
 		scroll_to_notices: function() {
-			var scrollElement           = $( '.woocommerce-NoticeGroup-updateOrderReview, .woocommerce-NoticeGroup-checkout' ),
-				isSmoothScrollSupported = 'scrollBehavior' in document.documentElement.style;
+			var scrollElement           = $( '.woocommerce-NoticeGroup-updateOrderReview, .woocommerce-NoticeGroup-checkout' );
 
 			if ( ! scrollElement.length ) {
 				scrollElement = $( '.form.checkout' );
 			}
-
-			if ( scrollElement.length ) {
-				if ( isSmoothScrollSupported ) {
-					scrollElement[0].scrollIntoView({
-						behavior: 'smooth'
-					});
-				} else {
-					$( 'html, body' ).animate( {
-						scrollTop: ( scrollElement.offset().top - 100 )
-					}, 1000 );
-				}
-			}
+			$.scroll_to_notices( scrollElement );
 		}
 	};
 
