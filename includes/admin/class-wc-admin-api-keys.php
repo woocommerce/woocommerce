@@ -27,7 +27,7 @@ class WC_Admin_API_Keys {
 	 * @return bool
 	 */
 	private function is_api_keys_settings_page() {
-		return isset( $_GET['page'], $_GET['tab'], $_GET['section'] ) && 'wc-settings' === $_GET['page'] && 'api' === $_GET['tab'] && 'keys' === $_GET['section']; // WPCS: input var okay, CSRF ok.
+		return isset( $_GET['page'], $_GET['tab'], $_GET['section'] ) && 'wc-settings' === $_GET['page'] && 'advanced' === $_GET['tab'] && 'keys' === $_GET['section']; // WPCS: input var okay, CSRF ok.
 	}
 
 	/**
@@ -72,7 +72,7 @@ class WC_Admin_API_Keys {
 	private static function table_list_output() {
 		global $wpdb, $keys_table_list;
 
-		echo '<h2>' . esc_html__( 'Keys/Apps', 'woocommerce' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=keys&create-key=1' ) ) . '" class="add-new-h2">' . esc_html__( 'Add key', 'woocommerce' ) . '</a></h2>';
+		echo '<h2>' . esc_html__( 'REST API', 'woocommerce' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys&create-key=1' ) ) . '" class="add-new-h2">' . esc_html__( 'Add key', 'woocommerce' ) . '</a></h2>';
 
 		// Get the API keys count.
 		$count = $wpdb->get_var( "SELECT COUNT(key_id) FROM {$wpdb->prefix}woocommerce_api_keys WHERE 1 = 1;" );
@@ -91,7 +91,7 @@ class WC_Admin_API_Keys {
 			echo '<div class="woocommerce-BlankState woocommerce-BlankState--api">';
 			?>
 			<h2 class="woocommerce-BlankState-message"><?php esc_html_e( 'The WooCommerce REST API allows external apps to view and manage store data. Access is granted only to those with valid API keys.', 'woocommerce' ); ?></h2>
-			<a class="woocommerce-BlankState-cta button-primary button" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=keys&create-key=1' ) ); ?>"><?php esc_html_e( 'Create an API key', 'woocommerce' ); ?></a>
+			<a class="woocommerce-BlankState-cta button-primary button" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys&create-key=1' ) ); ?>"><?php esc_html_e( 'Create an API key', 'woocommerce' ); ?></a>
 			<style type="text/css">#posts-filter .wp-list-table, #posts-filter .tablenav.top, .tablenav.bottom .actions { display: none; }</style>
 			<?php
 		}
@@ -175,7 +175,7 @@ class WC_Admin_API_Keys {
 			}
 		}
 
-		wp_redirect( esc_url_raw( add_query_arg( array( 'revoked' => 1 ), admin_url( 'admin.php?page=wc-settings&tab=api&section=keys' ) ) ) );
+		wp_redirect( esc_url_raw( add_query_arg( array( 'revoked' => 1 ), admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys' ) ) ) );
 		exit();
 	}
 

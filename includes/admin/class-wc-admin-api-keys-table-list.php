@@ -70,7 +70,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_title( $key ) {
-		$url = admin_url( 'admin.php?page=wc-settings&tab=api&section=keys&edit-key=' . $key['key_id'] );
+		$url = admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys&edit-key=' . $key['key_id'] );
 
 		$output  = '<strong>';
 		$output .= '<a href="' . esc_url( $url ) . '" class="row-title">';
@@ -92,7 +92,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 					add_query_arg(
 						array(
 							'revoke-key' => $key['key_id'],
-						), admin_url( 'admin.php?page=wc-settings&tab=api&section=keys' )
+						), admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys' )
 					), 'revoke'
 				)
 			) . '">' . esc_html__( 'Revoke', 'woocommerce' ) . '</a>',

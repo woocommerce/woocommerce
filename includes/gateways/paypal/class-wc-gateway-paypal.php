@@ -42,7 +42,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->order_button_text = __( 'Proceed to PayPal', 'woocommerce' );
 		$this->method_title      = __( 'PayPal', 'woocommerce' );
 		/* translators: %s: Link to WC system status page */
-		$this->method_description = sprintf( __( 'PayPal Standard sends customers to PayPal to enter their payment information. PayPal IPN requires fsockopen/cURL support to update order statuses after payment. Check the <a href="%s">system status</a> page for more details.', 'woocommerce' ), admin_url( 'admin.php?page=wc-status' ) );
+		$this->method_description = __( 'PayPal Standard redirects customers to PayPal to enter their payment information.', 'woocommerce' );
 		$this->supports           = array(
 			'products',
 			'refunds',
@@ -85,6 +85,19 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				new WC_Gateway_Paypal_PDT_Handler( $this->testmode, $this->identity_token );
 			}
 		}
+	}
+
+	/**
+	 * Return whether or not this gateway still requires setup to function.
+	 *
+	 * When this gateway is toggled on via AJAX, if this returns true a
+	 * redirect will occur to the settings page instead.
+	 *
+	 * @since 3.4.0
+	 * @return bool
+	 */
+	public function needs_setup() {
+		return ! is_email( $this->email );
 	}
 
 	/**
