@@ -3,7 +3,6 @@
  * WooCommerce Account Settings.
  *
  * @package WooCommerce/Admin
- * @version 2.1.0
  */
 
 defined( 'ABSPATH' ) || exit;

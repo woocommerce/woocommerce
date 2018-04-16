@@ -3,7 +3,6 @@
  * WooCommerce advanced settings
  *
  * @package  WooCommerce/Admin
- * @version  3.4.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -63,7 +62,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				'woocommerce_settings_pages', array(
 
 					array(
-						'title' => __( 'WooCommerce pages', 'woocommerce' ),
+						'title' => __( 'Page setup', 'woocommerce' ),
 						'desc'  => __( 'These pages need to be set so that WooCommerce knows where to send users to checkout.', 'woocommerce' ),
 						'type'  => 'title',
 						'id'    => 'advanced_page_options',
@@ -129,7 +128,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 						'id'    => 'checkout_process_options',
 					),
 
-					'force_ssl_checkout' => array(
+					'force_ssl_checkout'   => array(
 						'title'           => __( 'Secure checkout', 'woocommerce' ),
 						'desc'            => __( 'Force secure checkout', 'woocommerce' ),
 						'id'              => 'woocommerce_force_ssl_checkout',
@@ -213,7 +212,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 					),
 
 					array(
-						'title' => __( 'My account endpoints', 'woocommerce' ),
+						'title' => __( 'Account endpoints', 'woocommerce' ),
 						'type'  => 'title',
 						'desc'  => __( 'Endpoints are appended to your page URLs to handle specific actions on the accounts pages. They should be unique and can be left blank to disable the endpoint.', 'woocommerce' ),
 						'id'    => 'account_endpoint_options',
@@ -305,12 +304,11 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 			$settings = apply_filters(
 				'woocommerce_settings_rest_api', array(
 					array(
-						'title' => __( 'General options', 'woocommerce' ),
+						'title' => '',
 						'type'  => 'title',
 						'desc'  => '',
-						'id'    => 'general_options',
+						'id'    => 'legacy_api_options',
 					),
-
 					array(
 						'title'   => __( 'Legacy API', 'woocommerce' ),
 						'desc'    => __( 'Enable the legacy REST API', 'woocommerce' ),
@@ -318,10 +316,9 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 						'type'    => 'checkbox',
 						'default' => 'no',
 					),
-
 					array(
 						'type' => 'sectionend',
-						'id'   => 'general_options',
+						'id'   => 'legacy_api_options',
 					),
 				)
 			);
@@ -400,5 +397,13 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 		}
 	}
 }
+
+/**
+ * WC_Settings_Rest_API class.
+ *
+ * @deprecated 3.4 in favour of WC_Settings_Advanced.
+ * @todo remove in 4.0.
+ */
+class WC_Settings_Rest_API extends WC_Settings_Advanced {} // @codingStandardsIgnoreLine.
 
 return new WC_Settings_Advanced();
