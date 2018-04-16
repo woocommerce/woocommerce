@@ -670,7 +670,6 @@ class WC_AJAX {
 			wp_die();
 		}
 
-		$variations = array();
 		$product    = wc_get_product( $post_id );
 		$attributes = wc_list_pluck( array_filter( $product->get_attributes(), 'wc_attributes_array_filter_variation' ), 'get_slugs' );
 
