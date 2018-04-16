@@ -721,7 +721,7 @@ class WC_Checkout {
 		$this->check_cart_items();
 
 		if ( empty( $data['woocommerce_checkout_update_totals'] ) && ! empty( $_POST['terms-field'] ) && empty( $data['terms'] ) && apply_filters( 'woocommerce_checkout_show_terms', wc_get_page_id( 'terms' ) > 0 ) ) { // WPCS: input var ok, CSRF ok.
-			$errors->add( 'terms', __( 'You must accept our Terms &amp; Conditions.', 'woocommerce' ) );
+			$errors->add( 'terms', __( 'Please read and accept the terms and conditions to proceed with your order.', 'woocommerce' ) );
 		}
 
 		if ( WC()->cart->needs_shipping() ) {

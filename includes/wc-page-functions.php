@@ -58,12 +58,18 @@ function wc_get_page_id( $page ) {
 /**
  * Retrieve page permalink.
  *
- * @param string $page page slug.
+ * @param string      $page page slug.
+ * @param string|bool $fallback Fallback URL if page is not set. Defaults to home URL. @since 3.4.0.
  * @return string
  */
-function wc_get_page_permalink( $page ) {
+function wc_get_page_permalink( $page, $fallback = null ) {
 	$page_id   = wc_get_page_id( $page );
-	$permalink = 0 < $page_id ? get_permalink( $page_id ) : get_home_url();
+	$permalink = 0 < $page_id ? get_permalink( $page_id ) : '';
+
+	if ( ! $permalink ) {
+		$permalink = is_null( $fallback ) ? get_home_url() : $fallback;
+	}
+
 	return apply_filters( 'woocommerce_get_' . $page . '_page_permalink', $permalink );
 }
 

@@ -550,6 +550,132 @@ function wc_query_string_form_fields( $values = null, $exclude = array(), $curre
 }
 
 /**
+ * Get the terms and conditons page ID.
+ *
+ * @since 3.4.0
+ * @return int
+ */
+function wc_terms_and_conditions_page_id() {
+	$page_id = wc_get_page_id( 'terms' );
+	return apply_filters( 'woocommerce_terms_and_conditions_page_id', 0 < $page_id ? absint( $page_id ) : 0 );
+}
+
+/**
+ * Get the privacy policy page ID.
+ *
+ * @since 3.4.0
+ * @return int
+ */
+function wc_privacy_policy_page_id() {
+	$page_id = get_option( 'wp_page_for_privacy_policy', 0 );
+	return apply_filters( 'woocommerce_privacy_policy_page_id', 0 < $page_id ? absint( $page_id ) : 0 );
+}
+
+/**
+ * See if the checkbox is enabled or not based on the existance of the terms page and checkbox text.
+ *
+ * @since 3.4.0
+ * @return bool
+ */
+function wc_terms_and_conditions_checkbox_enabled() {
+	return wc_terms_and_conditions_page_id() && wc_get_terms_and_conditions_checkbox_text();
+}
+
+/**
+ * Get the terms and conditons checkbox text, if set.
+ *
+ * @since 3.4.0
+ * @return string
+ */
+function wc_get_terms_and_conditions_checkbox_text() {
+	return trim( apply_filters( 'woocommerce_get_terms_and_conditions_checkbox_text', get_option( 'woocommerce_checkout_terms_and_conditions_checkbox_text', __( 'I have read and agree to the website [terms]', 'woocommerce' ) ) ) );
+}
+
+/**
+ * Get the privacy policy text, if set.
+ *
+ * @since 3.4.0
+ * @return string
+ */
+function wc_get_privacy_policy_text() {
+	return trim( apply_filters( 'woocommerce_get_privacy_policy_text', get_option( 'woocommerce_checkout_privacy_policy_text', __( 'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our [privacy_policy].', 'woocommerce' ) ) ) );
+}
+
+/**
+ * Output t&c checkbox text.
+ *
+ * @since 3.4.0
+ */
+function wc_terms_and_conditions_checkbox_text() {
+	$text = wc_get_terms_and_conditions_checkbox_text();
+
+	if ( ! $text ) {
+		return;
+	}
+
+	echo wp_kses_post( wc_replace_policy_page_link_placeholders( $text ) );
+}
+
+/**
+ * Output t&c page's content (if set). The page can be set from checkout settings.
+ *
+ * @since 3.4.0
+ */
+function wc_terms_and_conditions_page_content() {
+	$terms_page_id = wc_terms_and_conditions_page_id();
+
+	if ( ! $terms_page_id ) {
+		return;
+	}
+
+	$page = get_post( $terms_page_id );
+
+	if ( $page && 'publish' === $page->post_status && $page->post_content && ! has_shortcode( $page->post_content, 'woocommerce_checkout' ) ) {
+		echo '<div class="woocommerce-terms-and-conditions" style="display: none; max-height: 200px; overflow: auto;">' . wp_kses_post( wc_format_content( $page->post_content ) ) . '</div>';
+	}
+}
+
+/**
+ * Output t&c text. This is custom text which can be added via the customizer.
+ *
+ * @since 3.4.0
+ */
+function wc_privacy_policy_text() {
+	if ( ! wc_privacy_policy_page_id() ) {
+		return;
+	}
+
+	$text = wc_get_privacy_policy_text();
+
+	if ( ! $text ) {
+		return;
+	}
+
+	echo '<div class="woocommerce-terms-and-conditions-text">' . wp_kses_post( wpautop( wc_replace_policy_page_link_placeholders( $text ) ) ) . '</div>';
+}
+
+/**
+ * Replaces placeholders with links to WooCommerce policy pages.
+ *
+ * @since 3.4.0
+ * @param string $text Text to find/replace within.
+ * @return string
+ */
+function wc_replace_policy_page_link_placeholders( $text ) {
+	$privacy_page_id = wc_privacy_policy_page_id( $text );
+	$terms_page_id   = wc_terms_and_conditions_page_id();
+	$privacy_link    = $privacy_page_id ? '<a href="' . esc_url( get_permalink( $privacy_page_id ) ) . '" class="woocommerce-privacy-policy-link" target="_blank">' . __( 'privacy policy', 'woocommerce' ) . '</a>' : __( 'privacy policy', 'woocommerce' );
+	$terms_link      = $terms_page_id ? '<a href="' . esc_url( get_permalink( $terms_page_id ) ) . '" class="woocommerce-terms-and-conditions-link" target="_blank">' . __( 'terms and conditions', 'woocommerce' ) . '</a>' : __( 'terms and conditions', 'woocommerce' );
+
+	$find_replace = array(
+		'[terms]'          => $terms_link,
+		'[privacy_policy]' => $privacy_link,
+	);
+
+	return str_replace( array_keys( $find_replace ), array_values( $find_replace ), $text );
+}
+
+/**
  * Template pages
  */
 
@@ -2160,7 +2286,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			$args['class'][] = 'validate-required';
 			$required        = '&nbsp;<abbr class="required" title="' . esc_attr__( 'required', 'woocommerce' ) . '">*</abbr>';
 		} else {
-			$required = '';
+			$required = '&nbsp;<span class="optional">(' . esc_html__( 'optional', 'woocommerce' ) . ')</span>';
 		}
 
 		if ( is_string( $args['label_class'] ) ) {
@@ -2185,6 +2311,10 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 		if ( true === $args['autofocus'] ) {
 			$args['custom_attributes']['autofocus'] = 'autofocus';
+		}
+
+		if ( $args['description'] ) {
+			$args['custom_attributes']['aria-describedby'] = $args['id'] . '-description';
 		}
 
 		if ( ! empty( $args['custom_attributes'] ) && is_array( $args['custom_attributes'] ) ) {
@@ -2324,11 +2454,13 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 				$field_html .= '<label for="' . esc_attr( $label_id ) . '" class="' . esc_attr( implode( ' ', $args['label_class'] ) ) . '">' . $args['label'] . $required . '</label>';
 			}
 
-			$field_html .= $field;
+			$field_html .= '<span class="woocommerce-input-wrapper">' . $field;
 
 			if ( $args['description'] ) {
-				$field_html .= '<span class="description">' . esc_html( $args['description'] ) . '</span>';
+				$field_html .= '<span class="description" id="' . esc_attr( $args['id'] ) . '-description" aria-hidden="true">' . wp_kses_post( $args['description'] ) . '</span>';
 			}
+
+			$field_html .= '</span>';
 
 			$container_class = esc_attr( implode( ' ', $args['class'] ) );
 			$container_id    = esc_attr( $args['id'] ) . '_field';
