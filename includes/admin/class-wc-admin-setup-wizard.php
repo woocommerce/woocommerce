@@ -648,7 +648,6 @@ class WC_Admin_Setup_Wizard {
 		$this->install_plugin(
 			'jetpack',
 			array(
-				'file'      => 'jetpack/jetpack.php',
 				'name'      => __( 'Jetpack', 'woocommerce' ),
 				'repo-slug' => 'jetpack',
 			)
@@ -663,7 +662,6 @@ class WC_Admin_Setup_Wizard {
 		$this->install_plugin(
 			'woocommerce-services',
 			array(
-				'file'      => 'woocommerce-services/woocommerce-services.php',
 				'name'      => __( 'WooCommerce Services', 'woocommerce' ),
 				'repo-slug' => 'woocommerce-services',
 			)
@@ -1892,7 +1890,6 @@ class WC_Admin_Setup_Wizard {
 		}
 
 		WC_Install::background_installer( 'jetpack', array(
-			'file'      => 'jetpack/jetpack.php',
 			'name'      => __( 'Jetpack', 'woocommerce' ),
 			'repo-slug' => 'jetpack',
 		) );
