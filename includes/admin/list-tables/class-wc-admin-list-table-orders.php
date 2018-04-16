@@ -751,7 +751,8 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		if ( ! empty( $_GET['_customer_user'] ) ) { // WPCS: input var ok.
 			$customer_id = (int) $_GET['_customer_user'];  // WPCS: input var ok, sanitization ok.
 
-			if ( version_compare( get_option( 'woocommerce_db_version' ), '3.4.0', '>=' ) ) {
+			// On WC 3.5.0 the ID of the user that placed the order was moved from the post meta _customer_user to the post_author field in the wp_posts table.
+			if ( version_compare( get_option( 'woocommerce_db_version' ), '3.5.0', '>=' ) ) {
 				$query_vars['author'] = $customer_id;
 			} else {
 				// @codingStandardsIgnoreStart

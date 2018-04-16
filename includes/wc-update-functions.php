@@ -1679,14 +1679,21 @@ function wc_update_340_irish_states() {
 }
 
 /**
+ * Update DB Version.
+ */
+function wc_update_340_db_version() {
+	WC_Install::update_db_version( '3.4.0' );
+}
+
+/**
  * Copy order customer_id from post meta to post_author and set post_author to 0 for refunds.
  *
  * @param WC_Background_Updater $updater Background updater instance.
  */
-function wc_update_340_order_customer_id( $updater ) {
+function wc_update_350_order_customer_id( $updater ) {
 	global $wpdb;
 
-	$post_types              = (array) apply_filters( 'woocommerce_update_340_order_customer_id_post_types', array( 'shop_order' ) );
+	$post_types              = (array) apply_filters( 'woocommerce_update_350_order_customer_id_post_types', array( 'shop_order' ) );
 	$post_types_placeholders = implode( ', ', array_fill( 0, count( $post_types ), '%s' ) );
 	$admin_orders_sql        = '';
 
@@ -1760,11 +1767,4 @@ function wc_update_340_order_customer_id( $updater ) {
 			break;
 		}
 	}
-}
-
-/**
- * Update DB Version.
- */
-function wc_update_340_db_version() {
-	WC_Install::update_db_version( '3.4.0' );
 }
