@@ -593,7 +593,7 @@ class WC_Admin_Setup_Wizard {
 	 * Helper method to queue the background install of a plugin.
 	 *
 	 * @param string $plugin_id  Plugin id used for background install.
-	 * @param array  $plugin_info Plugin info array containing at least main file and repo slug.
+	 * @param array  $plugin_info Plugin info array containing name and repo-slug, and optionally file if different from [repo-slug].php.
 	 */
 	protected function install_plugin( $plugin_id, $plugin_info ) {
 		// Make sure we don't trigger multiple simultaneous installs.
@@ -601,7 +601,8 @@ class WC_Admin_Setup_Wizard {
 			return;
 		}
 
-		if ( ! empty( $plugin_info['file'] ) && is_plugin_active( $plugin_info['file'] ) ) {
+		$plugin_file = isset( $plugin_info['file'] ) ? $plugin_info['file'] : $plugin_info['repo-slug'] . '.php';
+		if ( is_plugin_active( $plugin_info['repo-slug'] . '/' . $plugin_file ) ) {
 			return;
 		}
 
