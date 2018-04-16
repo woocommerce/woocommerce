@@ -1680,27 +1680,86 @@ function wc_update_340_irish_states() {
 
 /**
  * Copy order customer_id from post meta to post_author and set post_author to 0 for refunds.
+ *
+ * @param WC_Background_Updater $updater Background updater instance.
  */
-function wc_update_340_order_customer_id() {
+function wc_update_340_order_customer_id( $updater ) {
 	global $wpdb;
 
-	$post_types = (array) apply_filters( 'woocommerce_update_340_order_customer_id_post_types', array( 'shop_order' ) );
-	$query_placeholders = implode( ', ', array_fill( 0, count( $post_types ), '%s' ) );
+	$post_types              = (array) apply_filters( 'woocommerce_update_340_order_customer_id_post_types', array( 'shop_order' ) );
+	$post_types_placeholders = implode( ', ', array_fill( 0, count( $post_types ), '%s' ) );
+	$admin_orders_sql        = '';
 
-	$orders_to_update = $wpdb->get_results(
+	// Get the list of orders that we don't want to change as they belong to user ID 1.
+	$admin_orders = $wpdb->get_col(
 		$wpdb->prepare(
-			"SELECT post_id, meta_value AS customer_id FROM {$wpdb->postmeta} pm
-			LEFT JOIN {$wpdb->posts} p ON p.ID = pm.post_id
-			WHERE meta_key = '_customer_user' AND p.post_type IN ({$query_placeholders})", // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+			"SELECT ID FROM wp_posts p
+			INNER JOIN wp_postmeta pm ON p.ID = pm.post_id
+			WHERE post_type IN ({$post_types_placeholders}) AND meta_key = '_customer_user' AND meta_value = 1", // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
 			$post_types
 		)
 	);
 
-	foreach ( $orders_to_update as $order ) {
-		$wpdb->update( $wpdb->posts, array( 'post_author' => $order->customer_id ), array( 'ID' => $order->post_id ) );
+	if ( ! empty( $admin_orders ) ) {
+		$admin_orders_sql .= ' AND ID NOT IN (' . implode( ', ', $admin_orders ) . ') ';
 	}
 
-	$wpdb->update( $wpdb->posts, array( 'post_author' => 0 ), array( 'post_type' => 'shop_order_refund' ) );
+	// Query to get a batch of orders IDs to change.
+	$query = $wpdb->prepare(
+		// phpcs:disable WordPress.WP.PreparedSQL.NotPrepared
+		"SELECT ID FROM {$wpdb->posts}
+ 		WHERE post_author = 1 AND post_type IN ({$post_types_placeholders}) $admin_orders_sql
+		LIMIT 1000",
+		$post_types
+		// phpcs:enable
+	);
+
+	while ( true ) {
+		// phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+		$orders_to_update = $wpdb->get_col( $query );
+
+		// Exit loop if no more orders to update.
+		if ( ! $orders_to_update ) {
+			break;
+		}
+
+		$orders_meta_data = $wpdb->get_results(
+			// phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+			"SELECT post_id, meta_value as customer_id FROM {$wpdb->postmeta} WHERE meta_key = '_customer_user' AND post_id IN (" . implode( ', ', $orders_to_update ) . ')'
+		);
+
+		// Exit loop if no _customer_user metas exist for the list of orders to update.
+		if ( ! $orders_meta_data ) {
+			break;
+		}
+
+		// Update post_author for a batch of orders.
+		foreach ( $orders_meta_data as $order_meta ) {
+			// Stop update execution and re-enqueue it if near memory and timeout limits.
+			if ( $updater->is_batch_limit_exceeded() ) {
+				return -1;
+			}
+
+			$wpdb->update( $wpdb->posts, array( 'post_author' => $order_meta->customer_id ), array( 'ID' => $order_meta->post_id ) );
+
+			wp_cache_delete( $order_meta->post_id, 'posts' );
+			wp_cache_delete( $order_meta->post_id, 'post_meta' );
+		}
+	}
+
+	// Set post_author to 0 instead of 1 to all shop_order_refunds.
+	while ( true ) {
+		// Stop update execution and re-enqueue it if near memory and timeout limits.
+		if ( $updater->is_batch_limit_exceeded() ) {
+			return -1;
+		}
+
+		$updated_rows = $wpdb->query( "UPDATE {$wpdb->posts} SET post_author = 0 WHERE post_type = 'shop_order_refund' LIMIT 1000" );
+
+		if ( ! $updated_rows ) {
+			break;
+		}
+	}
 }
 
 /**
