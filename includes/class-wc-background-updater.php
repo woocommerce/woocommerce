@@ -99,18 +99,26 @@ class WC_Background_Updater extends WC_Background_Process {
 		wc_maybe_define_constant( 'WC_UPDATING', true );
 
 		$logger = wc_get_logger();
+		$result = null;
 
 		include_once dirname( __FILE__ ) . '/wc-update-functions.php';
 
 		if ( is_callable( $callback ) ) {
 			$logger->info( sprintf( 'Running %s callback', $callback ), array( 'source' => 'wc_db_updates' ) );
-			call_user_func( $callback );
-			$logger->info( sprintf( 'Finished %s callback', $callback ), array( 'source' => 'wc_db_updates' ) );
+			$result = call_user_func( $callback, $this );
+
+			if ( -1 === $result ) {
+				$message = sprintf( 'Requeuing %s callback.', $callback );
+			} else {
+				$message = sprintf( 'Finished %s callback.', $callback );
+			}
+
+			$logger->info( $message, array( 'source' => 'wc_db_updates' ) );
 		} else {
 			$logger->notice( sprintf( 'Could not find %s callback', $callback ), array( 'source' => 'wc_db_updates' ) );
 		}
 
-		return false;
+		return -1 === $result ? $callback : false;
 	}
 
 	/**
@@ -124,5 +132,14 @@ class WC_Background_Updater extends WC_Background_Process {
 		$logger->info( 'Data update complete', array( 'source' => 'wc_db_updates' ) );
 		WC_Install::update_db_version();
 		parent::complete();
+	}
+
+	/**
+	 * See if the batch limit has been exceeded.
+	 *
+	 * @return bool
+	 */
+	public function is_batch_limit_exceeded() {
+		return $this->batch_limit_exceeded();
 	}
 }
