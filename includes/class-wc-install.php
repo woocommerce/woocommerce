@@ -1058,13 +1058,12 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	/**
 	 * Get slug from path and associate it with the path.
 	 *
-	 * @param array  $plugins Associative array of plugin slugs to paths.
+	 * @param array  $plugins Associative array of plugin files to paths.
 	 * @param string $key Plugin relative path. Example: woocommerce/woocommerce.php.
 	 */
-	private static function associate_plugin_slug( $plugins, $key ) {
-		$slug                = explode( '/', $key );
-		$slug                = explode( '.', end( $slug ) );
-		$plugins[ $slug[0] ] = $key;
+	private static function associate_plugin_file( $plugins, $key ) {
+		$path                = explode( '/', $key );
+		$plugins[ $path[1] ] = $key;
 		return $plugins;
 	}
 
@@ -1091,15 +1090,16 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 
 			$skin              = new Automatic_Upgrader_Skin();
 			$upgrader          = new WP_Upgrader( $skin );
-			$installed_plugins = array_reduce( array_keys( get_plugins() ), array( __CLASS__, 'associate_plugin_slug' ), array() );
+			$installed_plugins = array_reduce( array_keys( get_plugins() ), array( __CLASS__, 'associate_plugin_file' ), array() );
 			$plugin_slug       = $plugin_to_install['repo-slug'];
+			$plugin_file       = isset( $plugin_to_install['file'] ) ? $plugin_to_install['file'] : $plugin_slug . '.php';
 			$installed         = false;
 			$activate          = false;
 
 			// See if the plugin is installed already.
-			if ( isset( $installed_plugins[ $plugin_slug ] ) ) {
+			if ( isset( $installed_plugins[ $plugin_file ] ) ) {
 				$installed = true;
-				$activate  = ! is_plugin_active( $installed_plugins[ $plugin_slug ] );
+				$activate  = ! is_plugin_active( $installed_plugins[ $plugin_file ] );
 			}
 
 			// Install this thing!
@@ -1111,7 +1111,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 					$plugin_information = plugins_api(
 						'plugin_information',
 						array(
-							'slug'   => $plugin_to_install['repo-slug'],
+							'slug'   => $plugin_slug,
 							'fields' => array(
 								'short_description' => false,
 								'sections'          => false,
@@ -1175,7 +1175,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 							__( '%1$s could not be installed (%2$s). <a href="%3$s">Please install it manually by clicking here.</a>', 'woocommerce' ),
 							$plugin_to_install['name'],
 							$e->getMessage(),
-							esc_url( admin_url( 'index.php?wc-install-plugin-redirect=' . $plugin_to_install['repo-slug'] ) )
+							esc_url( admin_url( 'index.php?wc-install-plugin-redirect=' . $plugin_slug ) )
 						)
 					);
 				}
@@ -1189,7 +1189,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			// Activate this thing.
 			if ( $activate ) {
 				try {
-					$result = activate_plugin( $installed_plugins[ $plugin_slug ] );
+					$result = activate_plugin( $installed_plugins[ $plugin_file ] );
 
 					if ( is_wp_error( $result ) ) {
 						throw new Exception( $result->get_error_message() );
