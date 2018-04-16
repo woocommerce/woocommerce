@@ -550,55 +550,55 @@ function wc_query_string_form_fields( $values = null, $exclude = array(), $curre
 }
 
 /**
- * See if the checkbox is enabled or not.
+ * Get the terms and conditons page ID.
  *
- * Defaults to yes or no based on existance of a terms page for backwards compatibilty.
+ * @since 3.4.0
+ * @return int
+ */
+function wc_terms_and_conditions_page_id() {
+	$page_id = wc_get_page_id( 'terms' );
+	return apply_filters( 'woocommerce_terms_and_conditions_page_id', 0 < $page_id ? absint( $page_id ) : 0 );
+}
+
+/**
+ * Get the privacy policy page ID.
+ *
+ * @since 3.4.0
+ * @return int
+ */
+function wc_privacy_policy_page_id() {
+	$page_id = get_option( 'wp_page_for_privacy_policy', 0 );
+	return apply_filters( 'woocommerce_privacy_policy_page_id', 0 < $page_id ? absint( $page_id ) : 0 );
+}
+
+/**
+ * See if the checkbox is enabled or not based on the existance of the terms page and checkbox text.
  *
  * @since 3.4.0
  * @return bool
  */
-function woocommerce_terms_and_conditions_checkbox_enabled() {
-	return wc_string_to_bool( get_option( 'woocommerce_checkout_terms_and_conditions_checkbox', 0 < wc_get_page_id( 'terms' ) ? 'yes' : 'no' ) );
+function wc_terms_and_conditions_checkbox_enabled() {
+	return wc_terms_and_conditions_page_id() && wc_get_terms_and_conditions_checkbox_text();
 }
 
 /**
- * Output t&c text. This is custom text which can be added via the customizer.
+ * Get the terms and conditons checkbox text, if set.
  *
  * @since 3.4.0
+ * @return string
  */
-function woocommerce_output_terms_and_conditions_text() {
-	$terms_permalink   = wc_get_page_permalink( 'terms', '' );
-	$terms_link        = $terms_permalink ? '<a href="' . esc_url( $terms_permalink ) . '" class="woocommerce-terms-and-conditions-link" target="_blank">' . __( 'terms and conditions', 'woocommerce' ) . '</a>' : __( 'terms and conditions', 'woocommerce' );
-	$privacy_page_id   = get_option( 'wp_page_for_privacy_policy', 0 );
-	$privacy_permalink = get_permalink( $privacy_page_id );
-	$privacy_link      = $privacy_permalink ? '<a href="' . esc_url( $privacy_permalink ) . '" class="woocommerce-privacy-policy-link" target="_blank">' . __( 'privacy policy', 'woocommerce' ) . '</a>' : __( 'privacy policy', 'woocommerce' );
-
-	$find_replace = array(
-		'[terms]'          => $terms_link,
-		'[privacy_policy]' => $privacy_link,
-	);
-
-	$default_text = __( 'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our [privacy_policy].', 'woocommerce' );
-	$text         = get_option( 'woocommerce_checkout_terms_and_conditions_checkbox_text' );
-
-	if ( ! $text && $privacy_link ) {
-		$text = $default_text;
-	}
-
-	echo $text ? '<div class="woocommerce-terms-and-conditions-text">' . wp_kses_post( wpautop( str_replace( array_keys( $find_replace ), array_values( $find_replace ), $text ) ) ) . '</div>' : '';
+function wc_get_terms_and_conditions_checkbox_text() {
+	return trim( apply_filters( 'woocommerce_get_terms_and_conditions_checkbox_text', get_option( 'woocommerce_checkout_terms_and_conditions_checkbox_text', __( 'I have read and agree to the website [terms]', 'woocommerce' ) ) ) );
 }
 
 /**
- * Output t&c page's content (if set). The page can be set from checkout settings.
+ * Get the privacy policy text, if set.
  *
  * @since 3.4.0
+ * @return string
  */
-function woocommerce_output_terms_and_conditions_page_content() {
-	$page = 0 < wc_get_page_id( 'terms' ) ? get_post( wc_get_page_id( 'terms' ) ) : false;
-
-	if ( $page && 'publish' === $page->post_status && $page->post_content && ! has_shortcode( $page->post_content, 'woocommerce_checkout' ) ) {
-		echo '<div class="woocommerce-terms-and-conditions" style="display: none; max-height: 200px; overflow: auto;">' . wp_kses_post( wc_format_content( $page->post_content ) ) . '</div>';
-	}
+function wc_get_privacy_policy_text() {
+	return trim( apply_filters( 'woocommerce_get_privacy_policy_text', get_option( 'woocommerce_checkout_privacy_policy_text', __( 'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our [privacy_policy].', 'woocommerce' ) ) ) );
 }
 
 /**
@@ -606,26 +606,73 @@ function woocommerce_output_terms_and_conditions_page_content() {
  *
  * @since 3.4.0
  */
-function woocommerce_output_terms_and_conditions_checkbox_text() {
-	$default_text = __( 'I have read and agree to the website [terms]', 'woocommerce' );
-	$text         = get_option( 'woocommerce_checkout_terms_and_conditions_checkbox_text' );
+function wc_terms_and_conditions_checkbox_text() {
+	$text = wc_get_terms_and_conditions_checkbox_text();
 
 	if ( ! $text ) {
-		$text = $default_text;
+		return;
 	}
 
-	$terms_permalink   = wc_get_page_permalink( 'terms', '' );
-	$terms_link        = $terms_permalink ? '<a href="' . esc_url( $terms_permalink ) . '" class="woocommerce-terms-and-conditions-link" target="_blank">' . __( 'terms and conditions', 'woocommerce' ) . '</a>' : __( 'terms and conditions', 'woocommerce' );
-	$privacy_page_id   = get_option( 'wp_page_for_privacy_policy', 0 );
-	$privacy_permalink = get_permalink( $privacy_page_id );
-	$privacy_link      = $privacy_permalink ? '<a href="' . esc_url( $privacy_permalink ) . '" class="woocommerce-privacy-policy-link" target="_blank">' . __( 'privacy policy', 'woocommerce' ) . '</a>' : __( 'privacy policy', 'woocommerce' );
+	echo wp_kses_post( wc_replace_policy_page_link_placeholders( $text ) );
+}
+
+/**
+ * Output t&c page's content (if set). The page can be set from checkout settings.
+ *
+ * @since 3.4.0
+ */
+function wc_terms_and_conditions_page_content() {
+	$terms_page_id = wc_terms_and_conditions_page_id();
+
+	if ( ! $terms_page_id ) {
+		return;
+	}
+
+	$page = get_post( $terms_page_id );
+
+	if ( $page && 'publish' === $page->post_status && $page->post_content && ! has_shortcode( $page->post_content, 'woocommerce_checkout' ) ) {
+		echo '<div class="woocommerce-terms-and-conditions" style="display: none; max-height: 200px; overflow: auto;">' . wp_kses_post( wc_format_content( $page->post_content ) ) . '</div>';
+	}
+}
+
+/**
+ * Output t&c text. This is custom text which can be added via the customizer.
+ *
+ * @since 3.4.0
+ */
+function wc_privacy_policy_text() {
+	if ( ! wc_privacy_policy_page_id() ) {
+		return;
+	}
+
+	$text = wc_get_privacy_policy_text();
+
+	if ( ! $text ) {
+		return;
+	}
+
+	echo '<div class="woocommerce-terms-and-conditions-text">' . wp_kses_post( wpautop( wc_replace_policy_page_link_placeholders( $text ) ) ) . '</div>';
+}
+
+/**
+ * Replaces placeholders with links to WooCommerce policy pages.
+ *
+ * @since 3.4.0
+ * @param string $text Text to find/replace within.
+ * @return string
+ */
+function wc_replace_policy_page_link_placeholders( $text ) {
+	$privacy_page_id = wc_privacy_policy_page_id( $text );
+	$terms_page_id   = wc_terms_and_conditions_page_id();
+	$privacy_link    = $privacy_page_id ? '<a href="' . esc_url( get_permalink( $privacy_page_id ) ) . '" class="woocommerce-privacy-policy-link" target="_blank">' . __( 'privacy policy', 'woocommerce' ) . '</a>' : __( 'privacy policy', 'woocommerce' );
+	$terms_link      = $terms_page_id ? '<a href="' . esc_url( get_permalink( $terms_page_id ) ) . '" class="woocommerce-terms-and-conditions-link" target="_blank">' . __( 'terms and conditions', 'woocommerce' ) . '</a>' : __( 'terms and conditions', 'woocommerce' );
 
 	$find_replace = array(
 		'[terms]'          => $terms_link,
 		'[privacy_policy]' => $privacy_link,
 	);
 
-	echo wp_kses_post( str_replace( array_keys( $find_replace ), array_values( $find_replace ), $text ) );
+	return str_replace( array_keys( $find_replace ), array_values( $find_replace ), $text );
 }
 
 /**

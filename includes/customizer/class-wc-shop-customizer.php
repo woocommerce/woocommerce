@@ -744,20 +744,9 @@ class WC_Shop_Customizer {
 		);
 
 		$wp_customize->add_setting(
-			'woocommerce_checkout_terms_and_conditions_checkbox',
-			array(
-				'default'              => woocommerce_terms_and_conditions_checkbox_enabled() ? 'yes' : 'no',
-				'type'                 => 'option',
-				'capability'           => 'manage_woocommerce',
-				'sanitize_callback'    => 'wc_bool_to_string',
-				'sanitize_js_callback' => 'wc_string_to_bool',
-			)
-		);
-
-		$wp_customize->add_setting(
 			'woocommerce_checkout_terms_and_conditions_checkbox_text',
 			array(
-				'default'           => '',
+				'default'           => __( 'I have read and agree to the website [terms]', 'woocommerce' ),
 				'type'              => 'option',
 				'capability'        => 'manage_woocommerce',
 				'sanitize_callback' => 'wp_kses_post',
@@ -766,9 +755,9 @@ class WC_Shop_Customizer {
 		);
 
 		$wp_customize->add_setting(
-			'woocommerce_checkout_terms_and_conditions_text',
+			'woocommerce_checkout_privacy_policy_text',
 			array(
-				'default'           => '',
+				'default'           => __( 'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our [privacy_policy].', 'woocommerce' ),
 				'type'              => 'option',
 				'capability'        => 'manage_woocommerce',
 				'sanitize_callback' => 'wp_kses_post',
@@ -787,50 +776,11 @@ class WC_Shop_Customizer {
 			)
 		);
 
-		$wp_customize->add_control(
-			'woocommerce_checkout_terms_and_conditions_text',
-			array(
-				'label'       => __( 'Terms and conditions', 'woocommerce' ),
-				'description' => __( 'Optionally add some text about your store terms and conditions and privacy policies.', 'woocommerce' ),
-				'section'     => 'woocommerce_checkout',
-				'settings'    => 'woocommerce_checkout_terms_and_conditions_text',
-				'type'        => 'textarea',
-				'input_attrs'     => array(
-					'placeholder' => __( 'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our [privacy_policy].', 'woocommerce' ),
-				),
-			)
-		);
-
-		$wp_customize->add_control(
-			'woocommerce_checkout_terms_and_conditions_checkbox_text',
-			array(
-				'label'           => __( 'Terms and conditions checkbox', 'woocommerce' ),
-				'description'     => __( 'If enabled, this controls the wording of the terms and conditions checkbox which customers must accept before they can place an order.', 'woocommerce' ),
-				'section'         => 'woocommerce_checkout',
-				'settings'        => 'woocommerce_checkout_terms_and_conditions_checkbox_text',
-				'active_callback' => 'woocommerce_terms_and_conditions_checkbox_enabled',
-				'type'            => 'text',
-				'input_attrs'     => array(
-					'placeholder' => __( 'I have read and agree to the website [terms]', 'woocommerce' ),
-				),
-			)
-		);
-
-		$wp_customize->add_control(
-			'woocommerce_checkout_terms_and_conditions_checkbox',
-			array(
-				'label'    => __( 'Enable terms and conditions checkbox', 'woocommerce' ),
-				'section'  => 'woocommerce_checkout',
-				'settings' => 'woocommerce_checkout_terms_and_conditions_checkbox',
-				'type'     => 'checkbox',
-			)
-		);
-
 		$choose_pages = array(
-			'woocommerce_terms_page_id'  => __( 'Terms and conditions', 'woocommerce' ),
 			'wp_page_for_privacy_policy' => __( 'Privacy policy', 'woocommerce' ),
+			'woocommerce_terms_page_id'  => __( 'Terms and conditions', 'woocommerce' ),
 		);
-		$pages = get_pages( array(
+		$pages        = get_pages( array(
 			'post_type'   => 'page',
 			'post_status' => 'publish,private,draft',
 			'child_of'    => 0,
@@ -849,9 +799,9 @@ class WC_Shop_Customizer {
 			$wp_customize->add_setting(
 				$id,
 				array(
-					'default'           => '',
-					'type'              => 'option',
-					'capability'        => 'manage_woocommerce',
+					'default'    => '',
+					'type'       => 'option',
+					'capability' => 'manage_woocommerce',
 				)
 			);
 			$wp_customize->add_control(
@@ -867,19 +817,43 @@ class WC_Shop_Customizer {
 			);
 		}
 
+		$wp_customize->add_control(
+			'woocommerce_checkout_privacy_policy_text',
+			array(
+				'label'           => __( 'Privacy policy', 'woocommerce' ),
+				'description'     => __( 'Optionally add some text about your store privacy policy to show during checkout.', 'woocommerce' ),
+				'section'         => 'woocommerce_checkout',
+				'settings'        => 'woocommerce_checkout_privacy_policy_text',
+				'active_callback' => 'wc_privacy_policy_page_id',
+				'type'            => 'textarea',
+			)
+		);
+
+		$wp_customize->add_control(
+			'woocommerce_checkout_terms_and_conditions_checkbox_text',
+			array(
+				'label'           => __( 'Terms and conditions', 'woocommerce' ),
+				'description'     => __( 'Optionally add some text for the terms checkbox that customers must accept.', 'woocommerce' ),
+				'section'         => 'woocommerce_checkout',
+				'settings'        => 'woocommerce_checkout_terms_and_conditions_checkbox_text',
+				'active_callback' => 'wc_terms_and_conditions_page_id',
+				'type'            => 'text',
+			)
+		);
+
 		if ( isset( $wp_customize->selective_refresh ) ) {
 			$wp_customize->selective_refresh->add_partial(
-				'woocommerce_checkout_terms_and_conditions_text', array(
+				'woocommerce_checkout_privacy_policy_text', array(
 					'selector'            => '.woocommerce-terms-and-conditions-text',
 					'container_inclusive' => false,
-					'render_callback'     => 'woocommerce_output_terms_and_conditions_text',
+					'render_callback'     => 'wc_privacy_policy_text',
 				)
 			);
 			$wp_customize->selective_refresh->add_partial(
 				'woocommerce_checkout_terms_and_conditions_checkbox_text', array(
 					'selector'            => '.woocommerce-terms-and-conditions-checkbox-text',
 					'container_inclusive' => false,
-					'render_callback'     => 'woocommerce_output_terms_and_conditions_checkbox_text',
+					'render_callback'     => 'wc_terms_and_conditions_checkbox_text',
 				)
 			);
 		}
