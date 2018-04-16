@@ -413,10 +413,14 @@ class WC_Frontend_Scripts {
 			}
 		}
 
+		// Placeholder style.
+		wp_register_style( 'woocommerce-inline', false );
+		wp_enqueue_style( 'woocommerce-inline' );
+
 		if ( true === wc_string_to_bool( get_option( 'woocommerce_checkout_highlight_required_fields', 'yes' ) ) ) {
-			wp_add_inline_style( 'woocommerce-general', '.woocommerce form .form-row .required { visibility: visible; }' );
+			wp_add_inline_style( 'woocommerce-inline', '.woocommerce form .form-row .required { visibility: visible; }' );
 		} else {
-			wp_add_inline_style( 'woocommerce-general', '.woocommerce form .form-row .required { visibility: hidden; }' );
+			wp_add_inline_style( 'woocommerce-inline', '.woocommerce form .form-row .required { visibility: hidden; }' );
 		}
 	}
 
