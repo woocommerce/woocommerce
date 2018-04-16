@@ -84,7 +84,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 					$this->raw_data[]                                 = $row;
 					$this->file_positions[ count( $this->raw_data ) ] = ftell( $handle );
 
-					if ( ( $this->params['end_pos'] > 0 && ftell( $handle ) >= $this->params['end_pos'] ) || 0 === --$this->params['lines'] ) {
+					if ( ( $this->params['end_pos'] > 0 && ftell( $handle ) >= $this->params['end_pos'] ) || 0 === $this->params['lines'] ) {
 						break;
 					}
 				} else {
@@ -537,6 +537,23 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Parse download limit and expired field value
+	 *
+	 * @param string $value Field value.
+	 * @return string
+	 */
+	public function parse_download_limit_and_expired_field( $value ) {
+		if ( '' === $value ) {
+			return $value;
+		}
+
+		// Remove the ' prepended to fields that start with - if needed
+		$value = $this->unescape_negative_number( $value );
+
+		return intval( $value );
+	}
+
+	/**
 	 * Get formatting callback.
 	 *
 	 * @return array
@@ -578,8 +595,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'grouped_products'  => array( $this, 'parse_relative_comma_field' ),
 			'upsell_ids'        => array( $this, 'parse_relative_comma_field' ),
 			'cross_sell_ids'    => array( $this, 'parse_relative_comma_field' ),
-			'download_limit'    => 'intval',
-			'download_expiry'   => 'intval',
+			'download_limit'    => array( $this, 'parse_download_limit_and_expired_field' ),
+			'download_expiry'   => array( $this, 'parse_download_limit_and_expired_field' ),
 			'product_url'       => 'esc_url_raw',
 			'menu_order'        => 'intval',
 		);
