@@ -537,16 +537,12 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
-	 * Parse download limit and expired field value
+	 * Parse an int value field
 	 *
-	 * @param string $value Field value.
-	 * @return string
+	 * @param int $value field value.
+	 * @return int
 	 */
-	public function parse_download_limit_and_expired_field( $value ) {
-		if ( '' === $value ) {
-			return $value;
-		}
-
+	public function parse_int_field( $value ) {
 		// Remove the ' prepended to fields that start with - if needed
 		$value = $this->unescape_negative_number( $value );
 
@@ -595,8 +591,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'grouped_products'  => array( $this, 'parse_relative_comma_field' ),
 			'upsell_ids'        => array( $this, 'parse_relative_comma_field' ),
 			'cross_sell_ids'    => array( $this, 'parse_relative_comma_field' ),
-			'download_limit'    => array( $this, 'parse_download_limit_and_expired_field' ),
-			'download_expiry'   => array( $this, 'parse_download_limit_and_expired_field' ),
+			'download_limit'    => array( $this, 'parse_int_field' ),
+			'download_expiry'   => array( $this, 'parse_int_field' ),
 			'product_url'       => 'esc_url_raw',
 			'menu_order'        => 'intval',
 		);
