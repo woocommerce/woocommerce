@@ -652,6 +652,78 @@ body {
 			color: #999;
 		}
 	}
+
+	.wc-wizard-service-enable {
+		flex-basis: 0;
+		min-width: 75px;
+		text-align: center;
+		cursor: pointer;
+		padding: 2em 0;
+		position: relative;
+		max-height: 1.5em;
+		align-self: flex-start;
+	}
+
+	.wc-wizard-service-toggle {
+		height: 16px;
+		width: 32px;
+		border: 2px solid #935687;
+		background-color: #935687;
+		display: inline-block;
+		text-indent: -9999px;
+		border-radius: 10em;
+		position: relative;
+
+		input[type=checkbox] {
+			display: none;
+		}
+
+		&:before {
+			content: "";
+			display: block;
+			width: 16px;
+			height: 16px;
+			background: #fff;
+			position: absolute;
+			top: 0;
+			right: 0;
+			border-radius: 100%;
+		}
+
+		&.disabled {
+			border-color: #999;
+			background-color: #999;
+
+			&:before {
+				right: auto;
+				left: 0;
+			}
+		}
+	}
+
+	.wc-wizard-service-settings {
+		display: none;
+		margin-bottom: 0;
+		cursor: default;
+
+		&.hide {
+			display: none;
+		}
+	}
+
+	&.checked {
+		.wc-wizard-service-settings {
+			display: inline-block;
+
+			&.hide {
+				display: none;
+			}
+		}
+	}
+
+	&.closed {
+		border-bottom: 0;
+	}
 }
 
 // Toggle display a list of services.
