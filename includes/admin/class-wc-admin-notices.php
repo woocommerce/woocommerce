@@ -37,6 +37,7 @@ class WC_Admin_Notices {
 		'no_shipping_methods'     => 'no_shipping_methods_notice',
 		'simplify_commerce'       => 'simplify_commerce_notice',
 		'regenerating_thumbnails' => 'regenerating_thumbnails_notice',
+		'no_secure_connection'    => 'secure_connection_notice',
 	);
 
 	/**
@@ -329,6 +330,13 @@ class WC_Admin_Notices {
 	 */
 	public static function regenerating_thumbnails_notice() {
 		include 'views/html-notice-regenerating-thumbnails.php';
+	}
+
+	/**
+	 * Notice about secure connection.
+	 */
+	public static function secure_connection_notice() {
+		include dirname( __FILE__ ) . '/views/html-notice-secure-connection.php';
 	}
 }
 
