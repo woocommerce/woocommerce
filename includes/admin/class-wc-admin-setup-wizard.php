@@ -1133,6 +1133,19 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
+	 * Is eWAY Payments country supported
+	 *
+	 * @param string $country_code Country code.
+	 */
+	protected function is_eway_payments_supported_country( $country_code ) {
+		$supported_countries = array(
+			'AU', // Australia.
+			'NZ', // New Zealand.
+		);
+		return in_array( $country_code, $supported_countries, true );
+	}
+
+	/**
 	 * Helper method to retrieve the current user's email address.
 	 *
 	 * @return string Email address
@@ -1266,6 +1279,14 @@ class WC_Admin_Setup_Wizard {
 				'enabled'     => true,
 				'repo-slug'   => 'woocommerce-square',
 			),
+			'eway'            => array(
+				'name'        => __( 'eWAY', 'woocommerce' ),
+				'description' => __( 'The eWAY extension for WooCommerce allows you to take credit card payments directly on your store without redirecting your customers to a third party site to make payment.', 'woocommerce' ),
+				'image'       => WC()->plugin_url() . '/assets/images/eway-logo.jpg',
+				'enabled'     => false,
+				'class'       => 'eway-logo',
+				'repo-slug'   => 'woocommerce-gateway-eway',
+			),
 		);
 	}
 
@@ -1283,6 +1304,7 @@ class WC_Admin_Setup_Wizard {
 
 		$country    = WC()->countries->get_base_country();
 		$can_stripe = $this->is_stripe_supported_country( $country );
+		$can_eway   = $this->is_eway_payments_supported_country( $country );
 
 		if ( $this->is_klarna_checkout_supported_country( $country ) ) {
 			$spotlight = 'klarna_checkout';
@@ -1297,19 +1319,32 @@ class WC_Admin_Setup_Wizard {
 				$spotlight    => $gateways[ $spotlight ],
 				'ppec_paypal' => $gateways['ppec_paypal'],
 			);
+
 			if ( $can_stripe ) {
 				$offered_gateways += array( 'stripe' => $gateways['stripe'] );
 			}
+
+			if ( $can_eway ) {
+				$offered_gateways += array( 'eway' => $gateways['eway'] );
+			}
+
 			return $offered_gateways;
 		}
 
 		$offered_gateways = array();
+
 		if ( $can_stripe ) {
 			$gateways['stripe']['enabled']  = true;
 			$gateways['stripe']['featured'] = true;
 			$offered_gateways              += array( 'stripe' => $gateways['stripe'] );
 		}
+
 		$offered_gateways += array( 'ppec_paypal' => $gateways['ppec_paypal'] );
+
+		if ( $can_eway ) {
+			$offered_gateways += array( 'eway' => $gateways['eway'] );
+		}
+
 		return $offered_gateways;
 	}
 

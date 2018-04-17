@@ -634,6 +634,10 @@ body {
 	}
 	}
 
+	&.eway-logo .wc-wizard-service-name img {
+		max-width: 87px;
+	}
+
 	.wc-wizard-service-description {
 	flex-grow: 1;
 	padding: 20px;
