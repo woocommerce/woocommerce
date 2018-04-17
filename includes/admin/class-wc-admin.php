@@ -28,6 +28,7 @@ class WC_Admin {
 		add_action( 'admin_init', array( $this, 'preview_emails' ) );
 		add_action( 'admin_init', array( $this, 'prevent_admin_access' ) );
 		add_action( 'admin_init', array( $this, 'admin_redirects' ) );
+		add_action( 'admin_init', array( $this, 'add_privacy_policy_content' ) );
 		add_action( 'admin_footer', 'wc_print_js', 25 );
 		add_filter( 'admin_footer_text', array( $this, 'admin_footer_text' ), 1 );
 		add_action( 'wp_ajax_setup_wizard_check_jetpack', array( $this, 'setup_wizard_check_jetpack' ) );
@@ -269,6 +270,23 @@ class WC_Admin {
 				'is_active' => $jetpack_active ? 'yes' : 'no',
 			)
 		);
+	}
+
+	/**
+	 * Add privacy policy content for the privacy policy page.
+	 *
+	 * @since 3.4.0
+	 */
+	public function add_privacy_policy_content() {
+		if ( ! function_exists( 'wp_add_privacy_policy_content' ) ) {
+			return;
+		}
+
+		$content  = '<p>' . __( 'Lorem ipsum dolor sit amet consectetuer id elit enim neque est. Sodales tincidunt Nulla leo penatibus Vestibulum adipiscing est cursus Nam Vestibulum. Orci Vivamus mollis eget pretium dictumst Donec Integer auctor sociis rutrum. Mauris felis Donec neque cursus tellus odio adipiscing netus elit Donec. Vestibulum Cras ligula vitae pretium Curabitur eros Nam Lorem eros non. Sed id mauris justo tristique orci neque eleifend lacus lorem.', 'woocommerce' ) . "</p>\n";
+		$content .= '<p>' . __( 'Sed consequat Nullam et vel platea semper id mauris Nam eget. Sem neque a amet eu ipsum id dignissim neque eu pulvinar. Mauris nulla egestas et laoreet penatibus ipsum lobortis convallis congue libero. Tortor nibh pellentesque tellus odio Morbi cursus eros tincidunt tincidunt sociis. Egestas at In Donec mi dignissim Nam rutrum felis metus Maecenas. Sed tellus consectetuer.', 'woocommerce' ) . "</p>\n";
+		$content = apply_filters( 'wc_privacy_policy_content', $content );
+
+		wp_add_privacy_policy_content( 'WooCommerce', $content );
 	}
 }
 
