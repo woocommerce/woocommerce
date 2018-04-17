@@ -43,7 +43,6 @@ const externals = {
 	tinymce: 'tinymce',
 	moment: 'moment',
 	jquery: 'jQuery',
-	lodash: 'lodash',
 };
 
 coreGlobals.forEach( ( name ) => {
@@ -58,7 +57,7 @@ const webpackConfig = {
 	output: {
 		path: path.resolve( 'js' ),
 		filename: 'index.js',
-		library: [ 'wp', '[name]' ],
+		library: [ 'wp', 'woodash' ],
 		libraryTarget: 'this',
 	},
 	externals,
@@ -82,5 +81,9 @@ const webpackConfig = {
 		new ExtractTextPlugin( 'style.css' ),
 	],
 };
+
+if ( webpackConfig.mode !== 'production' ) {
+	webpackConfig.devtool = process.env.SOURCEMAP || 'source-map';
+}
 
 module.exports = webpackConfig;

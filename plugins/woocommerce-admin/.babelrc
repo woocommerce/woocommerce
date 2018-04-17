@@ -1,17 +1,21 @@
 {
-	"env": {},
-	"ignore": [],
-	"plugins": [
-		"transform-object-rest-spread"
-	],
 	"presets": [
-		"react",
-		[ "env", {
-			"targets": {
-				"browsers": ["last 2 versions", "not ie <= 10"],
-				"node": "current"
-			},
-			"useBuiltIns": true
-	} ]
-	]
+		"@wordpress/default"
+	],
+	"plugins": [
+		"transform-async-generator-functions"
+	],
+	"env": {
+		"production": {
+			"plugins": [
+				[
+					"@wordpress/babel-plugin-makepot",
+					{
+						"output": "languages/woo-dash.pot"
+					}
+				],
+				"transform-async-generator-functions"
+			]
+		}
+	}
 }

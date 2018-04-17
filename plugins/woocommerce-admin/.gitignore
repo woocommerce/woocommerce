@@ -7,4 +7,10 @@ node_modules/
 *.sql
 *.tar.gz
 *.zip
+
 js/index.js
+js/index.js.map
+js/style.css
+js/style.css.map
+languages/*
+!languages/README.md

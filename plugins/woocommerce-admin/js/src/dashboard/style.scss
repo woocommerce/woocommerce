@@ -1,0 +1,12 @@
+.wd_widget {
+	display: flex;
+	background: white;
+	border: 1px solid rgba( black, 0.2 );
+	padding: 2em;
+	align-items: center;
+	text-align: center;
+}
+
+.wd_widget-item {
+	flex: 1;
+}
