@@ -303,7 +303,7 @@ class WC_Admin_Setup_Wizard {
 		?>
 			<?php if ( 'store_setup' === $this->step ) : ?>
 				<a class="wc-setup-footer-links" href="<?php echo esc_url( admin_url() ); ?>"><?php esc_html_e( 'Not right now', 'woocommerce' ); ?></a>
-			<?php elseif ( 'activate' === $this->step ) : ?>
+			<?php elseif ( 'recommended' === $this->step || 'activate' === $this->step ) : ?>
 				<a class="wc-setup-footer-links" href="<?php echo esc_url( $this->get_next_step_link() ); ?>"><?php esc_html_e( 'Skip this step', 'woocommerce' ); ?></a>
 			<?php endif; ?>
 			</body>
