@@ -595,10 +595,20 @@ function wc_get_terms_and_conditions_checkbox_text() {
  * Get the privacy policy text, if set.
  *
  * @since 3.4.0
+ * @param string $type Type of policy to load. Valid values include registration and checkout.
  * @return string
  */
-function wc_get_privacy_policy_text() {
-	return trim( apply_filters( 'woocommerce_get_privacy_policy_text', get_option( 'woocommerce_checkout_privacy_policy_text', __( 'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our [privacy_policy].', 'woocommerce' ) ) ) );
+function wc_get_privacy_policy_text( $type = '' ) {
+	switch ( $type ) {
+		case 'checkout':
+			$text = get_option( 'woocommerce_checkout_privacy_policy_text', __( 'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our [privacy_policy].', 'woocommerce' ) );
+			break;
+		case 'registration':
+			$text = get_option( 'woocommerce_registration_privacy_policy_text', __( 'Your personal data will be used to support your experience throughout this website, to manage access to your account, and for other purposes described in our [privacy_policy].', 'woocommerce' ) );
+			break;
+	}
+
+	return trim( apply_filters( 'woocommerce_get_privacy_policy_text', $text, $type ) );
 }
 
 /**
@@ -636,16 +646,23 @@ function wc_terms_and_conditions_page_content() {
 }
 
 /**
- * Output t&c text. This is custom text which can be added via the customizer.
+ * Output privacy policy text. This is custom text which can be added via the customizer/privacy settings section.
+ *
+ * Loads the relevent policy for the current page unless a specfic policy text is required.
  *
  * @since 3.4.0
+ * @param string $type Type of policy to load. Valid values include registration and checkout.
  */
-function wc_privacy_policy_text() {
+function wc_privacy_policy_text( $type = '' ) {
 	if ( ! wc_privacy_policy_page_id() ) {
 		return;
 	}
 
-	$text = wc_get_privacy_policy_text();
+	if ( ! $type ) {
+		$type = is_checkout() ? 'checkout' : 'registration';
+	}
+
+	$text = wc_get_privacy_policy_text( $type );
 
 	if ( ! $text ) {
 		return;
