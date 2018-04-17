@@ -1704,6 +1704,9 @@ class WC_Admin_Setup_Wizard {
 		}
 
 		if ( $setup_mailchimp ) {
+			// Prevent MailChimp from redirecting to its settings page during the OBW flow.
+			add_option( 'mailchimp_woocommerce_plugin_do_activation_redirect', false );
+
 			$this->install_plugin(
 				'mailchimp-for-woocommerce',
 				array(
