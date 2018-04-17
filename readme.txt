@@ -88,7 +88,7 @@ And, finally, consider joining or spearheading a WooCommerce Meetup locally, mor
 
 = Minimum Requirements =
 
-* PHP version 5.2.4 or greater (PHP 5.6 or greater is recommended)
+* PHP version 5.2.4 or greater (PHP 7.2 or greater is recommended)
 * MySQL version 5.0 or greater (MySQL 5.6 or greater is recommended)
 * Some payment gateways require fsockopen support (for IPN access)
 
@@ -146,7 +146,7 @@ You can find the documentation of our REST API on the [WooCommerce REST API Docs
 
 = WooCommerce is awesome! Can I contribute? =
 
-Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/woocommerce/) :)
+Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/woocommerce/) :)
 
 == Screenshots ==
 
@@ -162,38 +162,124 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woocommerce/wo
 = 3.4.0 - 2018-XX-XX =
 * Feature - Added a new order widget to the dashboard (on multisite) so you can see your orders across multiple stores on the same WordPress network. #17598
 * Feature - Added "display name" input on the My Account page. #19078
-* Tweak - Made the system status tool which purges user carts also purge persistent carts.
-* Tweak - Fixed settings table styling on mobile.
-* Tweak - Don't call WC_Install::install() on downgrades.
-* Tweak - Added a function to return a list of custom tables to aid with cleanup.
-* Tweak - Display whether or not external object cache is enabled in system status report.
-* Tweak - Standardize stock update messages in admin and correctly log who performed the action. When an order note is added after modifying stock manually, update order notes display via AJAX.
-* Tweak - Added a santization function for flat rate costs to remove currency symbols.
-* Tweak - Display zero value when using shipping classes.
-* Tweak - Updated Flexslider to version 2.7.0.
-* Tweak - Make sure terms page exists and isn’t trashed before using it.
-* Tweak - Hash customer email address in download URLs to protect privacy.
-* Fix - Properly set orderby and order when calling WC_Customer_Download_Data_Store::get_downloads().
-* Fix - Set maxlength for order item meta key to avoid values disapearing if too long.
-* Fix - Remove hardcoded /wp-content check for downloads.
-* Fix - Prevent shortcode [product_page] redirecting to the actual product's page after add to cart.
-* Fix - Make the "main term" logic match for both the breadcrumb and product categories widget.
-* Fix - Check parent status too when seeing if variation is purchasable.
-* Fix - Made get_on_sale_products respect the setting to hide outofstock products.
-* Dev - Gallery meta box is now powered by CRUD.
-* Dev - Added support for additional HTML5 input types for settings/checkout forms.
-* Dev - Made 'woocommerce_email_downloads_column_' hook format aware.
-* Dev - Added extra params to `woocommerce_order_get_downloadable_items`.
-* Dev - Allow default value for single_select_country and multi_select_countries.
-* Dev - Added CSS classname to grouped product table.
-* Dev - Mini cart item link now respects value of $product_permalink.
-* Dev - Add missing `woocommerce_update_options__` actions for settings pages that override save method.
-* Dev - Added `woocommerce_persistent_cart_enabled` filter.
-* Dev - Refactor woocommerce_wp_select so it could be used for a multiselect.
-* Dev - Added ability to declare sanitize_callback in settings API.
-* Template - Update cart coupon button from input to button type.
-* Performance - Optimized saving of orders. Adds a transient for needs_processing, and only saves changes when saving order items.
-* Localization - Various spelling and grammar fixes.
+* Feature - Product search improvements including stopword support and support for searching for multiple products at the same time. #19096
+* Feature - Cash on Delivery gateway can be enabled/disabled for specific shipping methods instead of only method types. #19221
+* Feature - Add wildcard email support for coupons. #19331
+* Feature - Added support for the GeoLite2 library as a replacement for the deprecated MaxMind GeoIP library. #19419
+* Tweak - Standardize stock update messages in admin and correctly log who performed the action. When an order note is added after modifying stock manually, update order notes display via AJAX. #18080
+* Tweak - Rollback if payment complete or update status fails to prevent partial order updates on failure. #18175
+* Tweak - Made the system status tool which purges user carts also purge persistent carts. #18492
+* Tweak - Display whether or not external object cache is enabled in system status report. #18595
+* Tweak - Display zero value when using shipping classes. #18624
+* Tweak - Fixed settings table styling on mobile. #18655
+* Tweak - Updated Flexslider to version 2.7.0. #18779
+* Tweak - Enable screen options for list screens. #18817
+* Tweak - Don't call WC_Install::install() on downgrades. #18818
+* Tweak - Remove user login from reset password link to protect personally identifying info. #18820
+* Tweak - Added a function to return a list of custom tables to aid with cleanup. #18831
+* Tweak - Enable going backwards in the setup wizard. #18921
+* Tweak - Hash customer email address in download URLs to protect privacy. #18957
+* Tweak - Make sure terms page exists and isn’t trashed before using it. #18993
+* Tweak - Toggle when clicking anywhere in toggle row during setup wizard. #19035
+* Tweak - Use `read_product` permissions instead of `edit_product` for ajax product search. #19087
+* Tweak - Add `priceSpecification` property with `valueAddedTaxIncluded` to product structured data. #19091
+* Tweak - Importer remembers mappings across imports. #19110
+* Tweak - Made coupon total displayed in cart more consistent. #19166
+* Tweak - Remove forced CSS line-heights to improve text input displays across different browers. #19174
+* Tweak - Add highlight to T&C checkbox if not checked to show it needs to be checked. #19177
+* Tweak - When loading default attributes/variation, if there is no longer a match, reset the form and hide the notice #19190
+* Tweak - Removed admin product type column from core and made it into a free feature plugin. #19192
+* Tweak - Use `woocommerce-no-js` class to hide JavaScript-only forms and content. #19199
+* Tweak - Activate plugins during installation process even if directory doesn't match slug. #19200
+* Tweak - Allow category and attribute ids in the `products` shortcode instead of only slugs. #19204
+* Tweak - Invalidate cart items when important props like product type are updated. #19255
+* Tweak - Don't use mysql functions directly on system status page to prevent errors if they are disabled. #19281
+* Tweak - Replaces `have_posts` with `woocommerce_product_loop` which looks to see if there are products, or if the loop is going to be showing something else. #19288
+* Tweak - Delete widget options and order notes on uninstall. #19371
+* Tweak - Add unique names to all nonces in template fields and forms. #19387
+* Tweak - Enable using the tab key to select elements in selectWoo dropdowns. #19416
+* Tweak - Added autocomplete attributes to form elements for better autocomplete support. #19426
+* Tweak - Removed PayPal line item limit and ensured URLs are shorter than maximum length. #19493
+* Tweak - Disable Gutenberg editor on products posts. #19543
+* Tweak - Improvements around UI and wording of store setup step in setup wizard. #19550
+* Tweak - Only push images to lightbox if an image is found. #19568
+* Tweak - Added and improved notices around old PHP versions and disabled geolocation on PHP 5.4 or lower. #19573
+* Tweak - The `manage_stock` field in the product API can return a `mixed` type instead of `boolean` for variations. #19598
+* Tweak - Link product import/export to WordPress import/export capabilities. #19602
+* Tweak - Use `&nbsp;` to separate asterisks in required fields to prevent awkward line breaks. #19610
+* Tweak - Load meta box input values using CRUD and edit context. #19670
+* Tweak - Scroll to notices on cart/checkout for better mobile visibility. #19699
+* Fix - Properly set orderby and order when calling WC_Customer_Download_Data_Store::get_downloads(). #18620
+* Fix - Set maxlength for order item meta key to avoid values disapearing if too long. #18918
+* Fix - Remove hardcoded /wp-content check for downloads. #18961
+* Fix - Made get_on_sale_products respect the setting to hide outofstock products. #18984
+* Fix - Prevent shortcode [product_page] redirecting to the actual product's page after add to cart. #19043
+* Fix - Make the "main term" logic match for both the breadcrumb and product categories widget. #19044
+* Fix - Check parent status too when seeing if variation is purchasable. #19045
+* Fix - Fix uppercasing of accented characters. #19086
+* Fix - Do not allow updating parent ID from variations after created. #19097
+* Fix - Ensure coupon amount is not empty to prevent non-numeric value errors. #19098
+* Fix - Ensure shop archive works correctly when `paged=1` is in the URL. #19104
+* Fix - Ensure orders created with `woocommerce_adjust_non_base_location_prices` filter active have the same cost on frontend and admin. #19109
+* Fix - Handling in the CLI to prevent `Resource does not exist` errors when using commands of a certain format. #19123
+* Fix - Use subtotal when calculating discounts in admin/orders to ensure prices are the same as on the frontend. #19159
+* Fix - Use `kses` to process download names to prevent escaped HTML displaying in emails.
+* Fix - Remove translation from Thailand state file to prevent PayPal errors around unsupported characters. #19219
+* Fix - Fix auto-select variation URLs with special characters in them. #19283
+* Fix - Introduced `wc_round_discount` and improved consistency of discount rounding. #19291
+* Fix - Only add schema for ratings to structured data when ratings are enabled. #19310
+* Fix - Prevent default state applying unless the country was also unset in JS state/country inputs. #19338
+* Fix - Escape quantity labels correctly to prevent broken html. #19375
+* Fix - Delete orphaned variations after product import. #19378
+* Fix - Ensure API credentials exist before defining PayPal refund support. #19380
+* Fix - Force word-wrapping in the log viewer to prevent layout-breaking long lines. #19503
+* Fix - Removes permission checks that were preventing webhooks from displaying properly when no post object existed. #19508 
+* Fix - Empty cart after completing PayPal payment. #19509
+* Fix - Strip tags on aria-labels in Add to Cart template to prevent broken HTML. #19522
+* Fix - Update post_modified date when saving products and variations but no other product data. #19595
+* Fix - Clear comment count transient when cleaning product transients to prevent incorrect comment count displays. #19664
+* Fix - Load gateways before order is saved/email is triggered to ensure all information gets sent/processed. #19667
+* Fix - Clear shipping transient when saving shipping method on zones screen. #19668
+* Dev - Added refunded_payment prop to orders for determining if payment was refunded via API. #18196
+* Dev - Added extra params to `woocommerce_order_get_downloadable_items`. #18408
+* Dev - Store shipping method ID and instance ID in separate fields instead of both in one serialized field. #18483
+* Dev - Add `woocommerce_rest_insert_system_status_tool` hook that fires after executing a REST system status tool. #18505
+* Dev - Gallery meta box is now powered by CRUD. #18511
+* Dev - Refactor woocommerce_wp_select so it could be used for a multiselect. #18536
+* Dev - Added ability to declare sanitize_callback in settings API. #18554
+* Dev - Added support for additional HTML5 input types for settings/checkout forms. #18594
+* Dev - Made 'woocommerce_email_downloads_column_' hook format aware. #18600
+* Dev - Add missing `woocommerce_update_options__` actions for settings pages that override save method. #18609
+* Dev - Allow default value for single_select_country and multi_select_countries. #18754 #18756
+* Dev - Added `grouped_form` class to grouped product `form` element. #18786
+* Dev - Mini cart item link now respects value of $product_permalink. #18979
+* Dev - Added `woocommerce_coupon_get_items_to_validate` filter to enable excluding products from coupon validation. #19002
+* Dev - Added `woocommerce_persistent_cart_enabled` filter. #19027
+* Dev - Replaced calls to `exit` with `wp_die` in the ajax methods to enable unit testing of those methods.
+* Dev - Introduce `woocommerce_coupon_custom_discounts_array` filter to allow post processing on custom coupons. #19148 
+* Dev - Move jQuery UI styles into WooCommerce assets folder and load them from there. #19173
+* Dev - Added `woocommerce_coupon_validate_expiry_date` filter to enable modifying the coupon expiry date check. #19228
+* Dev - Added `woocommerce_shipping_calculator_enable_state` filter to enable disabling state section in shipping calculator. #19241
+* Dev - Added `woocommerce_bacs_process_payment_order_status` filter allowing plugins to change the order status to the BACS gateway. #19311
+* Dev - Added `woocommerce_coupon_sort` filter to allow plugins to override the default coupon apply order. #19339
+* Dev - Added `woocommerce_before_output_product_categories` and `woocommerce_after_output_product_categories` filters. #19363
+* Dev - Added general `woocommerce_form_field` filter to make it easier to filter all of the form fields. #19388
+* Dev - Added `woocommerce_install_get_tables` filter to enable plugins to register new, WooCommerce-specific tables. $19436
+* Dev - Use `get_variation_price` method in structured data to grab min/max so filters are ran. #19527
+* Dev - Added `woocommerce_helper_suppress_connect_notice` filter to enable suppressing the admin WordPress.com connection message. #19599
+* Dev - Moved all photoswipe styles to `photoswipe.css` to make it easy to dequeue all the photoswipe styles. #19673
+* Performance - Optimized saving of orders. Adds a transient for needs_processing, and only saves changes when saving order items. #18538
+* Performance - Refactored the SQL query for `WC_Customer_Download_Data_Store::get_downloads()` to fetch available downloads faster. #18559
+* Performance - Split the layered nav counts into multiple transient records by taxonomy and added a filter to allow bypassing caching. #19225
+* Performance - Removed duplicate `SET SESSION SQL_BIG_SELECTS=1` queries. #19502
+* Performance - Avoid storing coupon `_used_by` data to prevent DB bloat. #19669
+* Template - Update cart coupon button from input to button type. #19059
+* Template - Added `woocommerce-form-register` class to registration form. #19486
+* Template - Added escaping to publish date. #19530
+* Localization - Switched Georgian Lari symbol to new UTF symbol. #19603
+* Localization - Use ISO county codes for Irish states. #19658
+* Localization - Various spelling, and grammar fixes.
+* Localization - Various phrasing improvements.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 

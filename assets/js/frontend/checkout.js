@@ -512,24 +512,12 @@ jQuery( function( $ ) {
 			$( document.body ).trigger( 'checkout_error' );
 		},
 		scroll_to_notices: function() {
-			var scrollElement           = $( '.woocommerce-NoticeGroup-updateOrderReview, .woocommerce-NoticeGroup-checkout' ),
-				isSmoothScrollSupported = 'scrollBehavior' in document.documentElement.style;
+			var scrollElement           = $( '.woocommerce-NoticeGroup-updateOrderReview, .woocommerce-NoticeGroup-checkout' );
 
 			if ( ! scrollElement.length ) {
 				scrollElement = $( '.form.checkout' );
 			}
-
-			if ( scrollElement.length ) {
-				if ( isSmoothScrollSupported ) {
-					scrollElement[0].scrollIntoView({
-						behavior: 'smooth'
-					});
-				} else {
-					$( 'html, body' ).animate( {
-						scrollTop: ( scrollElement.offset().top - 100 )
-					}, 1000 );
-				}
-			}
+			$.scroll_to_notices( scrollElement );
 		}
 	};
 
@@ -649,7 +637,18 @@ jQuery( function( $ ) {
 
 		toggle_terms: function() {
 			if ( $( '.woocommerce-terms-and-conditions' ).length ) {
-				$( '.woocommerce-terms-and-conditions' ).slideToggle();
+				$( '.woocommerce-terms-and-conditions' ).slideToggle( function() {
+					var link_toggle = $( '.woocommerce-terms-and-conditions-link' );
+
+					if ( $( '.woocommerce-terms-and-conditions' ).is( ':visible' ) ) {
+						link_toggle.addClass( 'woocommerce-terms-and-conditions-link--open' );
+						link_toggle.removeClass( 'woocommerce-terms-and-conditions-link--closed' );
+					} else {
+						link_toggle.removeClass( 'woocommerce-terms-and-conditions-link--open' );
+						link_toggle.addClass( 'woocommerce-terms-and-conditions-link--closed' );
+					}
+				} );
+
 				return false;
 			}
 		}

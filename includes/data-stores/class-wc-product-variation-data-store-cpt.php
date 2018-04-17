@@ -207,6 +207,19 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 				wp_update_post( array_merge( array( 'ID' => $product->get_id() ), $post_data ) );
 			}
 			$product->read_meta_data( true ); // Refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
+
+		} else { // Only update post modified time to record this save event.
+			$GLOBALS['wpdb']->update(
+				$GLOBALS['wpdb']->posts,
+				array(
+					'post_modified'     => current_time( 'mysql' ),
+					'post_modified_gmt' => current_time( 'mysql', 1 ),
+				),
+				array(
+					'ID' => $product->get_id(),
+				)
+			);
+			clean_post_cache( $product->get_id() );
 		}
 
 		$this->update_post_meta( $product );

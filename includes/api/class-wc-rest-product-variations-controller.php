@@ -335,7 +335,11 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 
 		// Stock handling.
 		if ( isset( $request['manage_stock'] ) ) {
-			$variation->set_manage_stock( $request['manage_stock'] );
+			if ( 'parent' === $request['manage_stock'] ) {
+				$variation->set_manage_stock( false ); // This just indicates the variation does not manage stock, but the parent does.
+			} else {
+				$variation->set_manage_stock( wc_string_to_bool( $request['manage_stock'] ) );
+			}
 		}
 
 		if ( isset( $request['in_stock'] ) ) {
@@ -802,7 +806,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 				),
 				'manage_stock'          => array(
 					'description' => __( 'Stock management at variation level.', 'woocommerce' ),
-					'type'        => 'boolean',
+					'type'        => 'mixed',
 					'default'     => false,
 					'context'     => array( 'view', 'edit' ),
 				),

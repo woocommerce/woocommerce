@@ -117,7 +117,7 @@ class WC_Order_Factory {
 		global $post;
 
 		if ( false === $order && is_a( $post, 'WP_Post' ) && 'shop_order' === get_post_type( $post ) ) {
-			return $post->ID;
+			return absint( $post->ID );
 		} elseif ( is_numeric( $order ) ) {
 			return $order;
 		} elseif ( $order instanceof WC_Abstract_Order ) {
