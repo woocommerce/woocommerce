@@ -21,6 +21,7 @@ class WC_Shop_Customizer {
 		add_action( 'customize_controls_print_styles', array( $this, 'add_styles' ) );
 		add_action( 'customize_controls_print_scripts', array( $this, 'add_scripts' ), 30 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'add_frontend_scripts' ) );
+		add_action( 'woocommerce_cart_loaded_from_session', array( $this, 'populate_cart' ) );
 	}
 
 	/**
@@ -39,6 +40,7 @@ class WC_Shop_Customizer {
 		$this->add_store_notice_section( $wp_customize );
 		$this->add_product_catalog_section( $wp_customize );
 		$this->add_product_images_section( $wp_customize );
+		$this->add_checkout_section( $wp_customize );
 	}
 
 	/**
@@ -51,6 +53,31 @@ class WC_Shop_Customizer {
 
 		$css = '.woocommerce-store-notice, p.demo_store { display: block !important; }';
 		wp_add_inline_style( 'customize-preview', $css );
+	}
+
+	/**
+	 * Make sure the cart has something inside when we're customizing.
+	 *
+	 * @return void
+	 */
+	public function populate_cart() {
+		if ( ! is_customize_preview() ) {
+			return;
+		}
+		if ( WC()->cart->is_empty() ) {
+			$dummy_product = new WC_Product();
+			$dummy_product->set_name( 'Sample' );
+			$dummy_product->set_price( 0 );
+			$dummy_product->set_status( 'publish' );
+			$cart_contents['customize-preview'] = array(
+				'data'         => $dummy_product,
+				'product_id'   => 0,
+				'variation_id' => 0,
+				'data_hash'    => false,
+				'quantity'     => 1,
+			);
+			WC()->cart->set_cart_contents( $cart_contents );
+		}
 	}
 
 	/**
@@ -165,6 +192,14 @@ class WC_Shop_Customizer {
 					section.expanded.bind( function( isExpanded ) {
 						if ( isExpanded ) {
 							wp.customize.previewer.previewUrl.set( '<?php echo esc_js( wc_get_page_permalink( 'shop' ) ); ?>' );
+						}
+					} );
+				} );
+
+				wp.customize.section( 'woocommerce_checkout', function( section ) {
+					section.expanded.bind( function( isExpanded ) {
+						if ( isExpanded ) {
+							wp.customize.previewer.previewUrl.set( '<?php echo esc_js( wc_get_page_permalink( 'checkout' ) ); ?>' );
 						}
 					} );
 				} );
@@ -645,6 +680,194 @@ class WC_Shop_Customizer {
 				)
 			)
 		);
+	}
+
+	/**
+	 * Checkout section.
+	 *
+	 * @param WP_Customize_Manager $wp_customize Theme Customizer object.
+	 */
+	public function add_checkout_section( $wp_customize ) {
+		$wp_customize->add_section(
+			'woocommerce_checkout',
+			array(
+				'title'       => __( 'Checkout', 'woocommerce' ),
+				'priority'    => 20,
+				'panel'       => 'woocommerce',
+				'description' => __( 'These options let you change the appearance of the WooCommerce checkout.', 'woocommerce' ),
+			)
+		);
+
+		// Checkout field controls.
+		$fields = array(
+			'company'   => __( 'Company name', 'woocommerce' ),
+			'address_2' => __( 'Address line 2', 'woocommerce' ),
+			'phone'     => __( 'Phone', 'woocommerce' ),
+		);
+		foreach ( $fields as $field => $label ) {
+			$wp_customize->add_setting(
+				'woocommerce_checkout_' . $field . '_field',
+				array(
+					'default'           => 'optional',
+					'type'              => 'option',
+					'capability'        => 'manage_woocommerce',
+					'sanitize_callback' => array( $this, 'sanitize_checkout_field_display' ),
+				)
+			);
+			$wp_customize->add_control(
+				'woocommerce_checkout_' . $field . '_field',
+				array(
+					/* Translators: %s field name. */
+					'label'    => sprintf( __( '%s field', 'woocommerce' ), $label ),
+					'section'  => 'woocommerce_checkout',
+					'settings' => 'woocommerce_checkout_' . $field . '_field',
+					'type'     => 'select',
+					'choices'  => array(
+						'hidden'   => __( 'Hidden', 'woocommerce' ),
+						'optional' => __( 'Optional', 'woocommerce' ),
+						'required' => __( 'Required', 'woocommerce' ),
+					),
+				)
+			);
+		}
+
+		// Register settings.
+		$wp_customize->add_setting(
+			'woocommerce_checkout_highlight_required_fields',
+			array(
+				'default'              => 'yes',
+				'type'                 => 'option',
+				'capability'           => 'manage_woocommerce',
+				'sanitize_callback'    => 'wc_bool_to_string',
+				'sanitize_js_callback' => 'wc_string_to_bool',
+			)
+		);
+
+		$wp_customize->add_setting(
+			'woocommerce_checkout_terms_and_conditions_checkbox_text',
+			array(
+				'default'           => __( 'I have read and agree to the website [terms]', 'woocommerce' ),
+				'type'              => 'option',
+				'capability'        => 'manage_woocommerce',
+				'sanitize_callback' => 'wp_kses_post',
+				'transport'         => 'postMessage',
+			)
+		);
+
+		$wp_customize->add_setting(
+			'woocommerce_checkout_privacy_policy_text',
+			array(
+				'default'           => __( 'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our [privacy_policy].', 'woocommerce' ),
+				'type'              => 'option',
+				'capability'        => 'manage_woocommerce',
+				'sanitize_callback' => 'wp_kses_post',
+				'transport'         => 'postMessage',
+			)
+		);
+
+		// Register controls.
+		$wp_customize->add_control(
+			'woocommerce_checkout_highlight_required_fields',
+			array(
+				'label'    => __( 'Highlight required fields with an asterisk', 'woocommerce' ),
+				'section'  => 'woocommerce_checkout',
+				'settings' => 'woocommerce_checkout_highlight_required_fields',
+				'type'     => 'checkbox',
+			)
+		);
+
+		$choose_pages = array(
+			'wp_page_for_privacy_policy' => __( 'Privacy policy', 'woocommerce' ),
+			'woocommerce_terms_page_id'  => __( 'Terms and conditions', 'woocommerce' ),
+		);
+		$pages        = get_pages( array(
+			'post_type'   => 'page',
+			'post_status' => 'publish,private,draft',
+			'child_of'    => 0,
+			'parent'      => -1,
+			'exclude'     => array(
+				wc_get_page_id( 'cart' ),
+				wc_get_page_id( 'checkout' ),
+				wc_get_page_id( 'myaccount' ),
+			),
+			'sort_order'  => 'asc',
+			'sort_column' => 'post_title',
+		) );
+		$page_choices = array( '' => __( 'No page set', 'woocommerce' ) ) + array_combine( array_map( 'strval', wp_list_pluck( $pages, 'ID' ) ), wp_list_pluck( $pages, 'post_title' ) );
+
+		foreach ( $choose_pages as $id => $name ) {
+			$wp_customize->add_setting(
+				$id,
+				array(
+					'default'    => '',
+					'type'       => 'option',
+					'capability' => 'manage_woocommerce',
+				)
+			);
+			$wp_customize->add_control(
+				$id,
+				array(
+					/* Translators: %s: page name. */
+					'label'    => sprintf( __( '%s page', 'woocommerce' ), $name ),
+					'section'  => 'woocommerce_checkout',
+					'settings' => $id,
+					'type'     => 'select',
+					'choices'  => $page_choices,
+				)
+			);
+		}
+
+		$wp_customize->add_control(
+			'woocommerce_checkout_privacy_policy_text',
+			array(
+				'label'           => __( 'Privacy policy', 'woocommerce' ),
+				'description'     => __( 'Optionally add some text about your store privacy policy to show during checkout.', 'woocommerce' ),
+				'section'         => 'woocommerce_checkout',
+				'settings'        => 'woocommerce_checkout_privacy_policy_text',
+				'active_callback' => 'wc_privacy_policy_page_id',
+				'type'            => 'textarea',
+			)
+		);
+
+		$wp_customize->add_control(
+			'woocommerce_checkout_terms_and_conditions_checkbox_text',
+			array(
+				'label'           => __( 'Terms and conditions', 'woocommerce' ),
+				'description'     => __( 'Optionally add some text for the terms checkbox that customers must accept.', 'woocommerce' ),
+				'section'         => 'woocommerce_checkout',
+				'settings'        => 'woocommerce_checkout_terms_and_conditions_checkbox_text',
+				'active_callback' => 'wc_terms_and_conditions_page_id',
+				'type'            => 'text',
+			)
+		);
+
+		if ( isset( $wp_customize->selective_refresh ) ) {
+			$wp_customize->selective_refresh->add_partial(
+				'woocommerce_checkout_privacy_policy_text', array(
+					'selector'            => '.woocommerce-terms-and-conditions-text',
+					'container_inclusive' => false,
+					'render_callback'     => 'wc_privacy_policy_text',
+				)
+			);
+			$wp_customize->selective_refresh->add_partial(
+				'woocommerce_checkout_terms_and_conditions_checkbox_text', array(
+					'selector'            => '.woocommerce-terms-and-conditions-checkbox-text',
+					'container_inclusive' => false,
+					'render_callback'     => 'wc_terms_and_conditions_checkbox_text',
+				)
+			);
+		}
+	}
+
+	/**
+	 * Sanitize field display.
+	 *
+	 * @param string $value '', 'subcategories', or 'both'.
+	 * @return string
+	 */
+	public function sanitize_checkout_field_display( $value ) {
+		$options = array( 'hidden', 'optional', 'required' );
+		return in_array( $value, $options, true ) ? $value : '';
 	}
 }
 

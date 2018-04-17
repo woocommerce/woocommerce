@@ -178,6 +178,24 @@ abstract class WC_Settings_API {
 	}
 
 	/**
+	 * Update a single option.
+	 *
+	 * @since 3.4.0
+	 * @param string $key Option key.
+	 * @param mixed  $value Value to set.
+	 * @return bool was anything saved?
+	 */
+	public function update_option( $key, $value = '' ) {
+		if ( empty( $this->settings ) ) {
+			$this->init_settings();
+		}
+
+		$this->settings[ $key ] = $value;
+
+		return update_option( $this->get_option_key(), apply_filters( 'woocommerce_settings_api_sanitized_fields_' . $this->id, $this->settings ) );
+	}
+
+	/**
 	 * Processes and saves options.
 	 * If there is an error thrown, will continue to save and validate fields, but will leave the erroring field out.
 	 *

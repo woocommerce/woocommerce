@@ -329,6 +329,7 @@ jQuery( function( $ ) {
 				complete: function() {
 					unblock( $form );
 					unblock( $( 'div.cart_totals' ) );
+					$.scroll_to_notices( $( '[role="alert"]' ) );
 				}
 			} );
 		},
@@ -512,6 +513,7 @@ jQuery( function( $ ) {
 				complete: function() {
 					unblock( $form );
 					unblock( $( 'div.cart_totals' ) );
+					$.scroll_to_notices( $( '[role="alert"]' ) );
 				}
 			} );
 		},
@@ -540,6 +542,7 @@ jQuery( function( $ ) {
 				complete: function() {
 					unblock( $form );
 					unblock( $( 'div.cart_totals' ) );
+					$.scroll_to_notices( $( '[role="alert"]' ) );
 				}
 			} );
 		},
