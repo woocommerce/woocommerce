@@ -139,7 +139,7 @@ class WC_Background_Updater extends WC_Background_Process {
 	 *
 	 * @return bool
 	 */
-	public function is_batch_limit_exceeded() {
-		return $this->batch_limit_exceeded();
+	public function is_memory_exceeded() {
+		return $this->memory_exceeded();
 	}
 }

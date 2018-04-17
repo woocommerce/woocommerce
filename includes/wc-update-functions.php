@@ -1723,7 +1723,7 @@ function wc_update_350_order_customer_id( $updater = false ) {
 
 		$wpdb->update( $wpdb->posts, array( 'post_author' => 0 ), array( 'post_type' => 'shop_order_refund' ) );
 	} else {
-		// If running the update from the wp-admin, copy data in batches being careful not to use more memory than allowed and respecting PHP time limit.
+		// If running the update from the wp-admin, copy data in batches being careful not to use more memory than allowed.
 		$admin_orders_sql = '';
 
 		// Get the list of orders that we don't want to change as they belong to user ID 1.
@@ -1771,8 +1771,8 @@ function wc_update_350_order_customer_id( $updater = false ) {
 
 			// Update post_author for a batch of orders.
 			foreach ( $orders_meta_data as $order_meta ) {
-				// Stop update execution and re-enqueue it if near memory and timeout limits.
-				if ( $updater instanceof WC_Background_Updater && $updater->is_batch_limit_exceeded() ) {
+				// Stop update execution and re-enqueue it if near memory limit.
+				if ( $updater instanceof WC_Background_Updater && $updater->is_memory_exceeded() ) {
 					return -1;
 				}
 
@@ -1782,8 +1782,8 @@ function wc_update_350_order_customer_id( $updater = false ) {
 
 		// Set post_author to 0 instead of 1 on all shop_order_refunds.
 		while ( true ) {
-			// Stop update execution and re-enqueue it if near memory and timeout limits.
-			if ( $updater instanceof WC_Background_Updater && $updater->is_batch_limit_exceeded() ) {
+			// Stop update execution and re-enqueue it if near memory limit.
+			if ( $updater instanceof WC_Background_Updater && $updater->is_memory_exceeded() ) {
 				return -1;
 			}
 
