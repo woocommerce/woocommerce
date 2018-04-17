@@ -409,6 +409,7 @@ class WC_Meta_Box_Order_Data {
 								array(
 									'id'    => '_transaction_id',
 									'label' => __( 'Transaction ID', 'woocommerce' ),
+									'value' => $order->get_transaction_id( 'edit' ),
 								)
 							);
 							?>
@@ -599,6 +600,11 @@ class WC_Meta_Box_Order_Data {
 		}
 
 		$props['date_created'] = $date;
+
+		// Set created via prop if new post.
+		if ( isset( $_POST['original_post_status'] ) && $_POST['original_post_status'] === 'auto-draft' ) {
+			$props['created_via'] = 'admin';
+		}
 
 		// Save order data.
 		$order->set_props( $props );
