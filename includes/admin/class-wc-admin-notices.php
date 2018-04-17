@@ -81,9 +81,14 @@ class WC_Admin_Notices {
 	public static function reset_admin_notices() {
 		$simplify_options = get_option( 'woocommerce_simplify_commerce_settings', array() );
 		$location         = wc_get_base_location();
+		$shop_page        = 0 < wc_get_page_id( 'shop' ) ? get_permalink( wc_get_page_id( 'shop' ) ) : get_home_url();
 
 		if ( ! class_exists( 'WC_Gateway_Simplify_Commerce_Loader' ) && ! empty( $simplify_options['enabled'] ) && 'yes' === $simplify_options['enabled'] && in_array( $location['country'], apply_filters( 'woocommerce_gateway_simplify_commerce_supported_countries', array( 'US', 'IE' ) ), true ) ) {
 			WC_Admin_Notices::add_notice( 'simplify_commerce' );
+		}
+
+		if ( ! is_ssl() || 'https' !== substr( $shop_page, 0, 5 ) ) {
+			WC_Admin_Notices::add_notice( 'no_secure_connection' );
 		}
 
 		self::add_notice( 'template_files' );
@@ -332,6 +337,10 @@ class WC_Admin_Notices {
 	 * Notice about secure connection.
 	 */
 	public static function secure_connection_notice() {
+		if ( get_user_meta( get_current_user_id(), 'dismissed_no_secure_connection_notice', true ) ) {
+			return;
+		}
+
 		include dirname( __FILE__ ) . '/views/html-notice-secure-connection.php';
 	}
 }
