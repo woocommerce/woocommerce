@@ -183,22 +183,29 @@ function woocommerce_wp_checkbox( $field ) {
 
 
 /**
- * Return true if stringified $value is found in array of stringified $options or if stringified $value
- * is the same as stringified $options.
+ * Return the html selected attribute if stringified $value is found in array of stringified $options
+ * or if stringified $value is the same as scalar stringified $options.
  *
  * @param string|int       $value   Value to find within options.
  * @param string|int|array $options Options to go through when looking for value.
- * @return bool
+ * @return string
  */
-function wc_is_value_in_options( $value, $options ) {
+function wc_selected( $value, $options ) {
 	$value = (string) $value;
 	if ( is_array( $options ) ) {
 		$options = array_map( 'strval', $options );
-		return in_array( $value, $options, true );
+		$is_value_in_options = in_array( $value, $options, true );
 	} else {
 		$options = (string) $options;
-		return $value === $options;
+		$is_value_in_options = ( $value === $options );
 	}
+
+	if ( $is_value_in_options ) {
+		return " selected='selected'";
+	} else {
+		return '';
+	}
+
 }
 
 /**
@@ -247,7 +254,7 @@ function woocommerce_wp_select( $field ) {
 		<select <?php echo wc_implode_html_attributes( $field_attributes ); // WPCS: XSS ok. ?>>
 			<?php
 			foreach ( $field['options'] as $key => $value ) {
-				echo '<option value="' . esc_attr( $key ) . '" ' . selected( wc_is_value_in_options( $key, $field['value'] ), true, false ) . '>' . esc_html( $value ) . '</option>';
+				echo '<option value="' . esc_attr( $key ) . '"' . wc_selected( $key, $field['value'] ) . '>' . esc_html( $value ) . '</option>';
 			}
 			?>
 		</select>
