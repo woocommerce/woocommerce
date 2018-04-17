@@ -537,6 +537,19 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Parse an int value field
+	 *
+	 * @param int $value field value.
+	 * @return int
+	 */
+	public function parse_int_field( $value ) {
+		// Remove the ' prepended to fields that start with - if needed
+		$value = $this->unescape_negative_number( $value );
+
+		return intval( $value );
+	}
+
+	/**
 	 * Get formatting callback.
 	 *
 	 * @return array
@@ -578,8 +591,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'grouped_products'  => array( $this, 'parse_relative_comma_field' ),
 			'upsell_ids'        => array( $this, 'parse_relative_comma_field' ),
 			'cross_sell_ids'    => array( $this, 'parse_relative_comma_field' ),
-			'download_limit'    => 'intval',
-			'download_expiry'   => 'intval',
+			'download_limit'    => array( $this, 'parse_int_field' ),
+			'download_expiry'   => array( $this, 'parse_int_field' ),
 			'product_url'       => 'esc_url_raw',
 			'menu_order'        => 'intval',
 		);
