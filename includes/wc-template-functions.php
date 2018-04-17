@@ -513,6 +513,148 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
 }
 
 /**
+ * Get product taxonomy HTML classes.
+ *
+ * @since 3.4.0
+ * @param array  $term_ids Array of terms IDs or objects.
+ * @param string $taxonomy Taxonomy.
+ * @return array
+ */
+function wc_get_product_taxonomy_class( $term_ids, $taxonomy ) {
+	$classes = array();
+
+	foreach ( $term_ids as $term_id ) {
+		$term = get_term( $term_id, $taxonomy );
+
+		if ( empty( $term->slug ) ) {
+			continue;
+		}
+
+		$term_class = sanitize_html_class( $term->slug, $term->term_id );
+		if ( is_numeric( $term_class ) || ! trim( $term_class, '-' ) ) {
+			$term_class = $term->term_id;
+		}
+
+		// 'post_tag' uses the 'tag' prefix for backward compatibility.
+		if ( 'post_tag' === $taxonomy ) {
+			$classes[] = 'tag-' . $term_class;
+		} else {
+			$classes[] = sanitize_html_class( $taxonomy . '-' . $term_class, $taxonomy . '-' . $term->term_id );
+		}
+	}
+
+	return $classes;
+}
+
+/**
+ * Retrieves the classes for the post div as an array.
+ *
+ * This method is clone from WordPress's get_post_class(), allowing removing taxonomies.
+ *
+ * @since 3.4.0
+ * @param string|array           $class      One or more classes to add to the class list.
+ * @param int|WP_Post|WC_Product $product_id Product ID or product object.
+ * @return array
+ */
+function wc_get_product_class( $class = '', $product_id = null ) {
+	if ( is_a( $product_id, 'WC_Product' ) ) {
+		$product    = $product_id;
+		$product_id = $product_id->get_id();
+		$post       = get_post( $product_id );
+	} else {
+		$post    = get_post( $product_id );
+		$product = wc_get_product( $post->ID );
+	}
+
+	$classes = array();
+
+	if ( $class ) {
+		if ( ! is_array( $class ) ) {
+			$class = preg_split( '#\s+#', $class );
+		}
+		$classes = array_map( 'esc_attr', $class );
+	} else {
+		// Ensure that we always coerce class to being an array.
+		$class = array();
+	}
+
+	if ( ! $post || ! $product ) {
+		return $classes;
+	}
+
+	$classes[] = 'post-' . $post->ID;
+	if ( ! is_admin() ) {
+		$classes[] = $post->post_type;
+	}
+	$classes[] = 'type-' . $post->post_type;
+	$classes[] = 'status-' . $post->post_status;
+
+	// Post format.
+	if ( post_type_supports( $post->post_type, 'post-formats' ) ) {
+		$post_format = get_post_format( $post->ID );
+
+		if ( $post_format && ! is_wp_error( $post_format ) ) {
+			$classes[] = 'format-' . sanitize_html_class( $post_format );
+		} else {
+			$classes[] = 'format-standard';
+		}
+	}
+
+	// Post requires password.
+	$post_password_required = post_password_required( $post->ID );
+	if ( $post_password_required ) {
+		$classes[] = 'post-password-required';
+	} elseif ( ! empty( $post->post_password ) ) {
+		$classes[] = 'post-password-protected';
+	}
+
+	// Post thumbnails.
+	if ( current_theme_supports( 'post-thumbnails' ) && has_post_thumbnail( $post->ID ) && ! is_attachment( $post ) && ! $post_password_required ) {
+		$classes[] = 'has-post-thumbnail';
+	}
+
+	// Sticky for Sticky Posts.
+	if ( is_sticky( $post->ID ) ) {
+		if ( is_home() && ! is_paged() ) {
+			$classes[] = 'sticky';
+		} elseif ( is_admin() ) {
+			$classes[] = 'status-sticky';
+		}
+	}
+
+	// Hentry for hAtom compliance.
+	$classes[] = 'hentry';
+
+	// Include attributes and any extra taxonomy.
+	if ( apply_filters( 'woocommerce_get_product_class_include_taxonomies', false ) ) {
+		$taxonomies = get_taxonomies( array( 'public' => true ) );
+		foreach ( (array) $taxonomies as $taxonomy ) {
+			if ( is_object_in_taxonomy( $post->post_type, $taxonomy ) && in_array( $taxonomy, array( 'product_cat', 'product_tag' ), true ) ) {
+				$classes = array_merge( $classes, wc_get_product_taxonomy_class( (array) get_the_terms( $post->ID, $taxonomy ), $taxonomy ) );
+			}
+		}
+	}
+	// Categories.
+	$classes = array_merge( $classes, wc_get_product_taxonomy_class( $product->get_category_ids(), 'product_cat' ) );
+
+	// Tags.
+	$classes = array_merge( $classes, wc_get_product_taxonomy_class( $product->get_tag_ids(), 'product_tag' ) );
+
+	return array_filter( array_unique( apply_filters( 'post_class', $classes, $class, $post->ID ) ) );
+}
+
+/**
+ * Display the classes for the product div.
+ *
+ * @since 3.4.0
+ * @param string|array           $class      One or more classes to add to the class list.
+ * @param int|WP_Post|WC_Product $product_id Product ID or product object.
+ */
+function wc_product_class( $class = '', $product_id = null ) {
+	echo 'class="' . esc_attr( join( ' ', wc_get_product_class( $class, $product_id ) ) ) . '"';
+}
+
+/**
  * Outputs hidden form inputs for each query string variable.
  *
  * @since 3.0.0
