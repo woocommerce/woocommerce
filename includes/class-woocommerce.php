@@ -2,8 +2,8 @@
 /**
  * WooCommerce setup
  *
- * @package  WooCommerce
- * @since    3.2.0
+ * @package WooCommerce
+ * @since   3.2.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -20,7 +20,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '3.3.0';
+	public $version = '3.4.0';
 
 	/**
 	 * The single instance of the class.
@@ -342,7 +342,7 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-item-data-store.php';
 		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-item-coupon-data-store.php';
 		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-item-fee-data-store.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-item-product-store.php';
+		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-item-product-data-store.php';
 		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-item-shipping-data-store.php';
 		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-item-tax-data-store.php';
 		include_once WC_ABSPATH . 'includes/data-stores/class-wc-payment-token-data-store.php';

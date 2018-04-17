@@ -2,13 +2,11 @@
 /**
  * Installation related functions and actions.
  *
- * @package  WooCommerce/Classes
- * @version  3.0.0
+ * @package WooCommerce/Classes
+ * @version 3.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Install Class.
@@ -101,6 +99,10 @@ class WC_Install {
 			'wc_update_330_set_paypal_sandbox_credentials',
 			'wc_update_330_db_version',
 		),
+		'3.4.0' => array(
+			'wc_update_340_states',
+			'wc_update_340_db_version',
+		),
 	);
 
 	/**
@@ -151,11 +153,11 @@ class WC_Install {
 	 * This function is hooked into admin_init to affect admin only.
 	 */
 	public static function install_actions() {
-		if ( ! empty( $_GET['do_update_woocommerce'] ) ) {
+		if ( ! empty( $_GET['do_update_woocommerce'] ) ) { // WPCS: input var ok, CSRF ok.
 			self::update();
 			WC_Admin_Notices::add_notice( 'update' );
 		}
-		if ( ! empty( $_GET['force_update_woocommerce'] ) ) {
+		if ( ! empty( $_GET['force_update_woocommerce'] ) ) { // WPCS: input var ok, CSRF ok.
 			do_action( 'wp_' . get_current_blog_id() . '_wc_updater_cron' );
 			wp_safe_redirect( admin_url( 'admin.php?page=wc-settings' ) );
 			exit;
@@ -358,7 +360,7 @@ class WC_Install {
 
 		$held_duration = get_option( 'woocommerce_hold_stock_minutes', '60' );
 
-		if ( '' != $held_duration ) {
+		if ( '' !== $held_duration ) {
 			wp_schedule_single_event( time() + ( absint( $held_duration ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
 		}
 
@@ -463,7 +465,7 @@ class WC_Install {
 			}
 		}
 
-		$woocommerce_default_category = get_option( 'default_product_cat', 0 );
+		$woocommerce_default_category = (int) get_option( 'default_product_cat', 0 );
 
 		if ( ! $woocommerce_default_category || ! term_exists( $woocommerce_default_category, 'product_cat' ) ) {
 			$default_product_cat_id   = 0;
@@ -475,7 +477,7 @@ class WC_Install {
 			} else {
 				$result = wp_insert_term( _x( 'Uncategorized', 'Default category slug', 'woocommerce' ), 'product_cat', array( 'slug' => $default_product_cat_slug ) );
 
-				if ( ! empty( $result['term_taxonomy_id'] ) ) {
+				if ( ! is_wp_error( $result ) && ! empty( $result['term_taxonomy_id'] ) ) {
 					$default_product_cat_id = absint( $result['term_taxonomy_id'] );
 				}
 			}
@@ -783,6 +785,15 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			$tables[] = "{$wpdb->prefix}woocommerce_termmeta";
 		}
 
+		/**
+		 * Filter the list of known WooCommerce tables.
+		 *
+		 * If WooCommerce plugins need to add new tables, they can inject them here.
+		 *
+		 * @param array $tables An array of WooCommerce-specific database table names.
+		 */
+		$tables = apply_filters( 'woocommerce_install_get_tables', $tables );
+
 		return $tables;
 	}
 
@@ -1003,10 +1014,10 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 
 		foreach ( $files as $file ) {
 			if ( wp_mkdir_p( $file['base'] ) && ! file_exists( trailingslashit( $file['base'] ) . $file['file'] ) ) {
-				$file_handle = @fopen( trailingslashit( $file['base'] ) . $file['file'], 'w' );
+				$file_handle = @fopen( trailingslashit( $file['base'] ) . $file['file'], 'w' ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
 				if ( $file_handle ) {
-					fwrite( $file_handle, $file['content'] );
-					fclose( $file_handle );
+					fwrite( $file_handle, $file['content'] ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fwrite
+					fclose( $file_handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fclose
 				}
 			}
 		}
@@ -1034,7 +1045,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	 * @return  array
 	 */
 	public static function plugin_row_meta( $links, $file ) {
-		if ( WC_PLUGIN_BASENAME == $file ) {
+		if ( WC_PLUGIN_BASENAME === $file ) {
 			$row_meta = array(
 				'docs'    => '<a href="' . esc_url( apply_filters( 'woocommerce_docs_url', 'https://docs.woocommerce.com/documentation/plugins/woocommerce/' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce documentation', 'woocommerce' ) . '">' . esc_html__( 'Docs', 'woocommerce' ) . '</a>',
 				'apidocs' => '<a href="' . esc_url( apply_filters( 'woocommerce_apidocs_url', 'https://docs.woocommerce.com/wc-apidocs/' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce API docs', 'woocommerce' ) . '">' . esc_html__( 'API docs', 'woocommerce' ) . '</a>',
@@ -1048,15 +1059,15 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	}
 
 	/**
-	 * Get slug from path
+	 * Get slug from path and associate it with the path.
 	 *
-	 * @param  string $key Plugin relative path. Example: woocommerce/woocommerce.php.
-	 * @return string
+	 * @param array  $plugins Associative array of plugin files to paths.
+	 * @param string $key Plugin relative path. Example: woocommerce/woocommerce.php.
 	 */
-	private static function format_plugin_slug( $key ) {
-		$slug = explode( '/', $key );
-		$slug = explode( '.', end( $slug ) );
-		return $slug[0];
+	private static function associate_plugin_file( $plugins, $key ) {
+		$path                = explode( '/', $key );
+		$plugins[ $path[1] ] = $key;
+		return $plugins;
 	}
 
 	/**
@@ -1082,16 +1093,16 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 
 			$skin              = new Automatic_Upgrader_Skin();
 			$upgrader          = new WP_Upgrader( $skin );
-			$installed_plugins = array_map( array( __CLASS__, 'format_plugin_slug' ), array_keys( get_plugins() ) );
+			$installed_plugins = array_reduce( array_keys( get_plugins() ), array( __CLASS__, 'associate_plugin_file' ), array() );
 			$plugin_slug       = $plugin_to_install['repo-slug'];
-			$plugin            = $plugin_slug . '/' . $plugin_slug . '.php';
+			$plugin_file       = isset( $plugin_to_install['file'] ) ? $plugin_to_install['file'] : $plugin_slug . '.php';
 			$installed         = false;
 			$activate          = false;
 
 			// See if the plugin is installed already.
-			if ( in_array( $plugin_to_install['repo-slug'], $installed_plugins ) ) {
+			if ( isset( $installed_plugins[ $plugin_file ] ) ) {
 				$installed = true;
-				$activate  = ! is_plugin_active( $plugin );
+				$activate  = ! is_plugin_active( $installed_plugins[ $plugin_file ] );
 			}
 
 			// Install this thing!
@@ -1103,7 +1114,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 					$plugin_information = plugins_api(
 						'plugin_information',
 						array(
-							'slug'   => $plugin_to_install['repo-slug'],
+							'slug'   => $plugin_slug,
 							'fields' => array(
 								'short_description' => false,
 								'sections'          => false,
@@ -1167,7 +1178,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 							__( '%1$s could not be installed (%2$s). <a href="%3$s">Please install it manually by clicking here.</a>', 'woocommerce' ),
 							$plugin_to_install['name'],
 							$e->getMessage(),
-							esc_url( admin_url( 'index.php?wc-install-plugin-redirect=' . $plugin_to_install['repo-slug'] ) )
+							esc_url( admin_url( 'index.php?wc-install-plugin-redirect=' . $plugin_slug ) )
 						)
 					);
 				}
@@ -1181,7 +1192,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			// Activate this thing.
 			if ( $activate ) {
 				try {
-					$result = activate_plugin( $plugin );
+					$result = activate_plugin( $installed ? $installed_plugins[ $plugin_file ] : $plugin_slug . '/' . $plugin_file );
 
 					if ( is_wp_error( $result ) ) {
 						throw new Exception( $result->get_error_message() );

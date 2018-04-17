@@ -9,17 +9,23 @@ jQuery( function( $ ) {
 		var locale_json = wc_address_i18n_params.locale.replace( /&quot;/g, '"' ),
 			locale = $.parseJSON( locale_json );
 
-		function field_is_required( field, is_required ) {
-			if ( is_required ) {
-				if ( field.find( 'label abbr.required' ).length === 0 ) {
-					field.find( 'label' ).append( ' <abbr class="required" title="' + wc_address_i18n_params.i18n_required_text + '">*</abbr>' );
+			function field_is_required( field, is_required ) {
+				if ( is_required ) {
+					field.find( 'label .optional' ).remove();
 					field.addClass( 'validate-required' );
+
+					if ( field.find( 'label .required' ).length === 0 ) {
+						field.find( 'label' ).append( '&nbsp;<abbr class="required" title="' + wc_address_i18n_params.i18n_required_text + '">*</abbr>' );
+					}
+				} else {
+					field.find( 'label .required' ).remove();
+					field.removeClass( 'validate-required' );
+
+					if ( field.find( 'label .required' ).length === 0 ) {
+						field.find( 'label' ).append( '&nbsp;<span class="optional">(' + wc_address_i18n_params.i18n_optional_text + ')</span>' );
+					}
 				}
-			} else {
-				field.find( 'label abbr' ).remove();
-				field.removeClass( 'validate-required' );
 			}
-		}
 
 		$( document.body )
 

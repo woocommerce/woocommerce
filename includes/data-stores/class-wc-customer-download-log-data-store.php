@@ -1,6 +1,6 @@
 <?php
 /**
- * WC Customer Download Log Data Store.
+ * Class WC_Customer_Download_Log_Data_Store file.
  *
  * @version  3.3.0
  * @package WooCommerce\Classes
@@ -28,7 +28,7 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 	/**
 	 * Create download log entry.
 	 *
-	 * @param WC_Customer_Download_Log $download_log Download log object.
+	 * @param WC_Customer_Download_Log $download_log Customer download log object.
 	 */
 	public function create( WC_Customer_Download_Log &$download_log ) {
 		global $wpdb;
@@ -93,12 +93,14 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 			throw new Exception( __( 'Invalid download log: not found.', 'woocommerce' ) );
 		}
 
-		$download_log->set_props( array(
-			'timestamp'       => strtotime( $raw_download_log->timestamp ),
-			'permission_id'   => $raw_download_log->permission_id,
-			'user_id'         => $raw_download_log->user_id,
-			'user_ip_address' => $raw_download_log->user_ip_address,
-		) );
+		$download_log->set_props(
+			array(
+				'timestamp'       => strtotime( $raw_download_log->timestamp ),
+				'permission_id'   => $raw_download_log->permission_id,
+				'user_id'         => $raw_download_log->user_id,
+				'user_ip_address' => $raw_download_log->user_ip_address,
+			)
+		);
 
 		$download_log->set_object_read( true );
 	}
@@ -149,7 +151,7 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 	/**
 	 * Get array of download log ids by specified args.
 	 *
-	 * @param  array $args Args to query.
+	 * @param  array $args Arguments to define download logs to retrieve.
 	 * @return array
 	 */
 	public function get_download_logs( $args = array() ) {
@@ -214,9 +216,11 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 			return array();
 		}
 
-		return $this->get_download_logs( array(
-			'permission_id' => $permission_id,
-		) );
+		return $this->get_download_logs(
+			array(
+				'permission_id' => $permission_id,
+			)
+		);
 	}
 
 	/**

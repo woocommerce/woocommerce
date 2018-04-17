@@ -1276,6 +1276,40 @@ p.demo_store,
 			display: inline;
 		}
 
+		.woocommerce-input-wrapper {
+			.description {
+				background: #1e85be;
+				color: #fff;
+				border-radius: 3px;
+				padding: 1em;
+				margin: .5em 0 0;
+				clear: both;
+				display: none;
+				position: relative;
+
+				a {
+					color: #fff;
+					text-decoration: underline;
+					border: 0;
+					box-shadow: none;
+				}
+
+				&:before {
+					left: 50%;
+					top: 0%;
+					margin-top: -4px;
+					transform: translatex(-50%) rotate(180deg);
+					content: "";
+					position: absolute;
+					border-width: 4px 6px 0 6px;
+					border-style: solid;
+					border-color: #1e85be transparent transparent transparent;
+					z-index: 100;
+					display: block;
+				}
+			}
+		}
+
 		select {
 			cursor: pointer;
 			margin: 0;
@@ -1284,8 +1318,14 @@ p.demo_store,
 		.required {
 			color: red;
 			font-weight: 700;
-			border: 0;
+			border: 0 !important;
+			text-decoration: none;
+			visibility: hidden; // Only show optional by default.
 		}
+
+		.optional {
+			visibility: visible;
+ 		}
 
 		.input-checkbox {
 			display: inline;
@@ -1300,7 +1340,7 @@ p.demo_store,
 			width: 100%;
 			margin: 0;
 			outline: 0;
-			line-height: 1;
+			line-height: normal;
 		}
 
 		textarea {
@@ -1621,45 +1661,16 @@ p.demo_store,
 	}
 }
 
-/**
- * Photoswipe
- * 1. These styles are required to overwrite default theme button styles (Twenty Twelve adds gradients via background-image).
- * 2. For zooming on mobile.
- */
-.pswp {
-	z-index: 999999;
-}
-
-.woocommerce img.pswp__img,
-.woocommerce-page img.pswp__img {
-	max-width: none; /* 2 */
-}
-
-button.pswp__button {
-	box-shadow: none !important;
-	background-image: url('photoswipe/default-skin/default-skin.png') !important;
-}
-
-button.pswp__button,
-button.pswp__button:hover,
-button.pswp__button--arrow--left::before,
-button.pswp__button--arrow--right::before {
-	background-color: transparent !important; /* 1 */
-}
-
-button.pswp__button--arrow--left,
-button.pswp__button--arrow--right,
-button.pswp__button--arrow--left:hover,
-button.pswp__button--arrow--right:hover {
-	background-image: none !important; /* 1 */
-}
-
-button.pswp__button--close:hover {
-	background-position: 0 -44px;
-}
-
-button.pswp__button--zoom:hover {
-	background-position: -88px 0;
+.woocommerce-no-js {
+	form.woocommerce-form-login,
+	form.woocommerce-form-coupon {
+		display: block !important;
+	}
+	.woocommerce-form-login-toggle,
+	.woocommerce-form-coupon-toggle,
+	.showcoupon {
+		display: none !important;
+	}
 }
 
 .woocommerce-message,
@@ -1807,13 +1818,11 @@ button.pswp__button--zoom:hover {
 			padding: 6px 6px 5px;
 			margin: 0 4px 0 0;
 			outline: 0;
-			line-height: 1;
 		}
 
 		input {
 			margin: 0;
 			vertical-align: middle;
-			line-height: 1;
 		}
 	}
 

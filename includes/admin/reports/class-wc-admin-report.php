@@ -332,8 +332,13 @@ class WC_Admin_Report {
 		}
 
 		if ( $debug || $nocache || false === $cached_results || ! isset( $cached_results[ $query_hash ] ) ) {
-			// Enable big selects for reports
-			$wpdb->query( 'SET SESSION SQL_BIG_SELECTS=1' );
+			static $big_selects = false;
+			// Enable big selects for reports, just once for this session
+			if ( ! $big_selects ) {
+				$wpdb->query( 'SET SESSION SQL_BIG_SELECTS=1' );
+				$big_selects = true;
+			}
+			
 			$cached_results[ $query_hash ] = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
 			set_transient( strtolower( get_class( $this ) ), $cached_results, DAY_IN_SECONDS );
 		}

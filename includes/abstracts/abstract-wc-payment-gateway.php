@@ -178,7 +178,9 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * Output the gateway settings screen.
 	 */
 	public function admin_options() {
-		echo '<h2>' . esc_html( $this->get_method_title() ) . '</h2>';
+		echo '<h2>' . esc_html( $this->get_method_title() );
+		wc_back_link( __( 'Return to payments', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=checkout' ) );
+		echo '</h2>';
 		echo wp_kses_post( wpautop( $this->get_method_description() ) );
 		parent::admin_options();
 	}
@@ -189,6 +191,19 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	public function init_settings() {
 		parent::init_settings();
 		$this->enabled  = ! empty( $this->settings['enabled'] ) && 'yes' === $this->settings['enabled'] ? 'yes' : 'no';
+	}
+
+	/**
+	 * Return whether or not this gateway still requires setup to function.
+	 *
+	 * When this gateway is toggled on via AJAX, if this returns true a
+	 * redirect will occur to the settings page instead.
+	 *
+	 * @since 3.4.0
+	 * @return bool
+	 */
+	public function needs_setup() {
+		return false;
 	}
 
 	/**
@@ -273,7 +288,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @return bool
 	 */
 	public function has_fields() {
-		return $this->has_fields ? true : false;
+		return (bool) $this->has_fields;
 	}
 
 	/**
@@ -385,7 +400,19 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @since 1.5.7
 	 */
 	public function supports( $feature ) {
-		return apply_filters( 'woocommerce_payment_gateway_supports', in_array( $feature, $this->supports ) ? true : false, $feature, $this );
+		return apply_filters( 'woocommerce_payment_gateway_supports', in_array( $feature, $this->supports ), $feature, $this );
+	}
+
+	/**
+	 * Can the order be refunded via this gateway?
+	 *
+	 * Should be extended by gateways to do their own checks.
+	 *
+	 * @param  WC_Order $order Order object.
+	 * @return bool If false, the automatic refund button is hidden in the UI.
+	 */
+	public function can_refund_order( $order ) {
+		return $order && $this->supports( 'refunds' );
 	}
 
 	/**

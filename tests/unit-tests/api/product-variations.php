@@ -382,4 +382,59 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$product->delete( true );
 	}
 
+	/**
+	 * Test updating a variation stock.
+	 *
+	 * @since 3.0.0
+	 */
+	public function test_update_variation_manage_stock() {
+		wp_set_current_user( $this->user );
+
+		$product      = WC_Helper_Product::create_variation_product();
+		$product->set_manage_stock( false );
+		$product->save();
+
+		$children     = $product->get_children();
+		$variation_id = $children[0];
+
+		// Set stock to true.
+		$request = new WP_REST_Request( 'PUT', '/wc/v2/products/' . $product->get_id() . '/variations/' . $variation_id );
+		$request->set_body_params( array(
+			'manage_stock' => true,
+		) );
+
+		$response  = $this->server->dispatch( $request );
+		$variation = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( true, $variation['manage_stock'] );
+
+		// Set stock to false.
+		$request = new WP_REST_Request( 'PUT', '/wc/v2/products/' . $product->get_id() . '/variations/' . $variation_id );
+		$request->set_body_params( array(
+			'manage_stock' => false,
+		) );
+
+		$response  = $this->server->dispatch( $request );
+		$variation = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( false, $variation['manage_stock'] );
+
+		// Set stock to false but parent is managing stock.
+		$product->set_manage_stock( true );
+		$product->save();
+		$request = new WP_REST_Request( 'PUT', '/wc/v2/products/' . $product->get_id() . '/variations/' . $variation_id );
+		$request->set_body_params( array(
+			'manage_stock' => false,
+		) );
+
+		$response  = $this->server->dispatch( $request );
+		$variation = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'parent', $variation['manage_stock'] );
+
+		$product->delete( true );
+	}
 }

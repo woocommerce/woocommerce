@@ -1,33 +1,32 @@
 <?php
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 /**
  * Simple Product Class.
  *
  * The default product type kinda product.
  *
- * @class 		WC_Product_Simple
- * @package		WooCommerce/Classes/Products
- * @category	Class
- * @author 		WooThemes
+ * @package WooCommerce/Classes/Products
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Simple product class.
  */
 class WC_Product_Simple extends WC_Product {
 
 	/**
 	 * Initialize simple product.
 	 *
-	 * @param mixed $product
+	 * @param WC_Product|int $product Product instance or ID.
 	 */
 	public function __construct( $product = 0 ) {
-		$this->supports[]   = 'ajax_add_to_cart';
+		$this->supports[] = 'ajax_add_to_cart';
 		parent::__construct( $product );
 	}
 
 	/**
 	 * Get internal type.
+	 *
 	 * @return string
 	 */
 	public function get_type() {

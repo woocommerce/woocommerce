@@ -379,7 +379,7 @@ class WC_Discounts {
 				}
 			}
 
-			$discount       = wc_cart_round_discount( min( $discounted_price, $discount ), 0 );
+			$discount       = wc_round_discount( min( $discounted_price, $discount ), 0 );
 			$cart_total     = $cart_total + $price_to_discount;
 			$total_discount = $total_discount + $discount;
 			$applied_count  = $applied_count + $apply_quantity;
@@ -389,7 +389,7 @@ class WC_Discounts {
 		}
 
 		// Work out how much discount would have been given to the cart as a whole and compare to what was discounted on all line items.
-		$cart_total_discount = wc_cart_round_discount( $cart_total * ( $coupon_amount / 100 ), 0 );
+		$cart_total_discount = wc_round_discount( $cart_total * ( $coupon_amount / 100 ), 0 );
 
 		if ( $total_discount < $cart_total_discount && $adjust_final_discount ) {
 			$total_discount += $this->apply_coupon_remainder( $coupon, $items_to_apply, $cart_total_discount - $total_discount );
@@ -509,7 +509,7 @@ class WC_Discounts {
 			$this->discounts[ $coupon->get_code() ][ $item->key ] += $discount;
 		}
 
-		// Allow post-processing for custom coupon types (e.g. calculating discrepancy, etc)
+		// Allow post-processing for custom coupon types (e.g. calculating discrepancy, etc).
 		$this->discounts[ $coupon->get_code() ] = apply_filters( 'woocommerce_coupon_custom_discounts_array', $this->discounts[ $coupon->get_code() ], $coupon );
 
 		return array_sum( $this->discounts[ $coupon->get_code() ] );

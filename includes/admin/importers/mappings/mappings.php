@@ -1,6 +1,8 @@
 <?php
 /**
  * Load up extra automatic mappings for the CSV importer.
+ *
+ * @package WooCommerce\Admin\Importers
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

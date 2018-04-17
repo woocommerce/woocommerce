@@ -4,8 +4,6 @@
  *
  * Functions for determining the current query/page.
  *
- * @author      WooThemes
- * @category    Core
  * @package     WooCommerce/Functions
  * @version     2.3.0
  */
@@ -20,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return bool
  */
 function is_woocommerce() {
-	return apply_filters( 'is_woocommerce', ( is_shop() || is_product_taxonomy() || is_product() ) ? true : false );
+	return apply_filters( 'is_woocommerce', is_shop() || is_product_taxonomy() || is_product() );
 }
 
 if ( ! function_exists( 'is_shop' ) ) {
@@ -128,7 +126,7 @@ if ( ! function_exists( 'is_wc_endpoint_url' ) ) {
 	/**
 	 * Is_wc_endpoint_url - Check if an endpoint is showing.
 	 *
-	 * @param string $endpoint Whether endpoint.
+	 * @param string|false $endpoint Whether endpoint.
 	 * @return bool
 	 */
 	function is_wc_endpoint_url( $endpoint = false ) {
@@ -272,7 +270,7 @@ if ( ! function_exists( 'is_filtered' ) ) {
 	 * @return bool
 	 */
 	function is_filtered() {
-		return apply_filters( 'woocommerce_is_filtered', ( count( WC_Query::get_layered_nav_chosen_attributes() ) > 0 || isset( $_GET['max_price'] ) || isset( $_GET['min_price'] ) || isset( $_GET['rating_filter'] ) ) );
+		return apply_filters( 'woocommerce_is_filtered', ( count( WC_Query::get_layered_nav_chosen_attributes() ) > 0 || isset( $_GET['max_price'] ) || isset( $_GET['min_price'] ) || isset( $_GET['rating_filter'] ) ) ); // WPCS: CSRF ok.
 	}
 }
 
@@ -308,7 +306,7 @@ if ( ! function_exists( 'meta_is_product_attribute' ) ) {
 		if ( $product && method_exists( $product, 'get_variation_attributes' ) ) {
 			$variation_attributes = $product->get_variation_attributes();
 			$attributes           = $product->get_attributes();
-			return ( in_array( $name, array_keys( $attributes ) ) && in_array( $value, $variation_attributes[ $attributes[ $name ]['name'] ] ) );
+			return ( in_array( $name, array_keys( $attributes ), true ) && in_array( $value, $variation_attributes[ $attributes[ $name ]['name'] ], true ) );
 		} else {
 			return false;
 		}

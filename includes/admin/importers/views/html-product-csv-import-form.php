@@ -40,10 +40,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<br>
 							<small>
 								<?php
-								/* translators: %s: maximum upload size */
 								printf(
+									/* translators: %s: maximum upload size */
 									esc_html__( 'Maximum size: %s', 'woocommerce' ),
-									$size
+									esc_html( $size )
 								);
 								?>
 							</small>
