@@ -1287,6 +1287,15 @@ class WC_Admin_Setup_Wizard {
 				'class'       => 'eway-logo',
 				'repo-slug'   => 'woocommerce-gateway-eway',
 			),
+			'payfast'         => array(
+				'name'        => __( 'PayFast', 'woocommerce' ),
+				'description' => __( 'The PayFast extension for WooCommerce enables you to accept payments by Credit Card and EFT via one of South Africa’s most popular payment gateways. No setup fees or monthly subscription costs.', 'woocommerce' ),
+				'image'       => WC()->plugin_url() . '/assets/images/payfast.png',
+				'class'       => 'payfast-logo',
+				'enabled'     => false,
+				'repo-slug'   => 'woocommerce-gateway-payfast',
+				'file'        => 'gateway-payfast.php',
+			),
 		);
 	}
 
@@ -1302,9 +1311,10 @@ class WC_Admin_Setup_Wizard {
 			return array( 'paypal' => $gateways['paypal'] );
 		}
 
-		$country    = WC()->countries->get_base_country();
-		$can_stripe = $this->is_stripe_supported_country( $country );
-		$can_eway   = $this->is_eway_payments_supported_country( $country );
+		$country     = WC()->countries->get_base_country();
+		$can_stripe  = $this->is_stripe_supported_country( $country );
+		$can_eway    = $this->is_eway_payments_supported_country( $country );
+		$can_payfast = ( 'ZA' === $country ); // South Africa.
 
 		if ( $this->is_klarna_checkout_supported_country( $country ) ) {
 			$spotlight = 'klarna_checkout';
@@ -1328,6 +1338,10 @@ class WC_Admin_Setup_Wizard {
 				$offered_gateways += array( 'eway' => $gateways['eway'] );
 			}
 
+			if ( $can_payfast ) {
+				$offered_gateways += array( 'payfast' => $gateways['payfast'] );
+			}
+
 			return $offered_gateways;
 		}
 
@@ -1343,6 +1357,10 @@ class WC_Admin_Setup_Wizard {
 
 		if ( $can_eway ) {
 			$offered_gateways += array( 'eway' => $gateways['eway'] );
+		}
+
+		if ( $can_payfast ) {
+			$offered_gateways += array( 'payfast' => $gateways['payfast'] );
 		}
 
 		return $offered_gateways;
