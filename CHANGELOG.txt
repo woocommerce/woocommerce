@@ -1,7 +1,7 @@
 == Changelog ==
 
 = 3.3.5 - 2018-04-10 =
-* Fix - Shop page notice should not appear when edting the "Hello World!" page.
+* Fix - Shop page notice should not appear when editing the "Hello World!" page.
 * Fix - Inconsistent order item refund sign.
 * Fix - Change `wc_get_price_excluding_tax` to not round the return value so calculations in admin are not pre-rounded.
 * Fix - Use minimum price instead of maximum price when ordering variable products from low to high on term archives.
