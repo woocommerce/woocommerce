@@ -639,10 +639,7 @@ function wc_get_product_class( $class = '', $product_id = null ) {
 	// Tags.
 	$classes = array_merge( $classes, wc_get_product_taxonomy_class( $product->get_tag_ids(), 'product_tag' ) );
 
-	$classes = array_map( 'esc_attr', $classes );
-	$classes = apply_filters( 'post_class', $classes, $class, $post->ID );
-
-	return array_unique( $classes );
+	return array_unique( apply_filters( 'post_class', $classes, $class, $post->ID ) );
 }
 
 /**
@@ -653,7 +650,7 @@ function wc_get_product_class( $class = '', $product_id = null ) {
  * @param int|WP_Post|WC_Product $product_id Product ID or product object.
  */
 function wc_product_class( $class = '', $product_id = null ) {
-	echo 'class="' . join( ' ', wc_get_product_class( $class, $product_id ) ) . '"'; // WPCS: XSS ok.
+	echo 'class="' . join( ' ', array_map( 'esc_attr', wc_get_product_class( $class, $product_id ) ) ) . '"';
 }
 
 /**
