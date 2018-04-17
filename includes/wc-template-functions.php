@@ -640,7 +640,7 @@ function wc_get_product_class( $class = '', $product_id = null ) {
 	// Tags.
 	$classes = array_merge( $classes, wc_get_product_taxonomy_class( $product->get_tag_ids(), 'product_tag' ) );
 
-	return array_unique( apply_filters( 'post_class', $classes, $class, $post->ID ) );
+	return array_filter( array_unique( apply_filters( 'post_class', $classes, $class, $post->ID ) ) );
 }
 
 /**
