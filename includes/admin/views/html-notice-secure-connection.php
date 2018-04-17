@@ -13,10 +13,11 @@ defined( 'ABSPATH' ) || exit;
 
 	<p>
 	<?php
-		echo sprintf(
+		echo wp_kses_post( sprintf(
 			/* translators: %s: documentation URL */
-			esc_html__( 'Your store is not using HTTPS, this is requeried to sell in some countries and to protect your customer data. <a href="%s">Learn more about HTTPS and SSL Certificates.</a>', 'woocommerce' )
-		);
+			__( 'Your store is not using HTTPS, this is requeried to sell in some countries and to protect your customer data. <a href="%s">Learn more about HTTPS and SSL Certificates.</a>', 'woocommerce' ),
+			'https://docs.woocommerce.com/document/ssl-and-https/'
+		) );
 	?>
 	</p>
 </div>
