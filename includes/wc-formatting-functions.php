@@ -1350,7 +1350,7 @@ function wc_implode_html_attributes( $raw_attributes ) {
  *
  * @since 3.4.0
  * @param mixed $raw_value Value stored in DB.
- * @return object Nicely formatted value with number and unit values.
+ * @return array Nicely formatted array with number and unit values.
  */
 function wc_parse_relative_date_option( $raw_value ) {
 	$periods = array(
@@ -1371,5 +1371,5 @@ function wc_parse_relative_date_option( $raw_value ) {
 		$value['unit'] = 'days';
 	}
 
-	return (object) $value;
+	return $value;
 }

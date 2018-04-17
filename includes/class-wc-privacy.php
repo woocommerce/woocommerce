@@ -37,7 +37,7 @@ class WC_Privacy {
 	 * @param array $query Query array to pass to wc_get_orders().
 	 * @return int Count of orders that were trashed.
 	 */
-	protected function trash_orders_query( $query ) {
+	protected static function trash_orders_query( $query ) {
 		$orders = wc_get_orders( $query );
 		$count  = 0;
 
@@ -58,12 +58,13 @@ class WC_Privacy {
 	 * @param array $query Query array to pass to wc_get_orders().
 	 * @return int Count of orders that were anonymized.
 	 */
-	protected function anonymize_orders_query( $query ) {
+	protected static function anonymize_orders_query( $query ) {
 		$orders = wc_get_orders( $query );
 		$count  = 0;
 
 		if ( $orders ) {
 			foreach ( $orders as $order ) {
+				error_log( 'Anon ' . $order->get_id() ); // @codingStandardsIgnoreLine temp until implemented.
 				// self::remove_order_personal_data( $order ); @todo Integrate with #19330 and set _anonymized meta after complete.
 				$count ++;
 			}
@@ -79,7 +80,8 @@ class WC_Privacy {
 		self::$background_process->push_to_queue( array( 'task' => 'trash_pending_orders' ) );
 		self::$background_process->push_to_queue( array( 'task' => 'trash_failed_orders' ) );
 		self::$background_process->push_to_queue( array( 'task' => 'trash_cancelled_orders' ) );
-		self::$background_process->push_to_queue( array( 'task' => 'anonymize_completed_orders' ) );
+		//self::$background_process->push_to_queue( array( 'task' => 'anonymize_completed_orders' ) );
+		self::$background_process->save()->dispatch();
 	}
 
 	/**
@@ -95,12 +97,12 @@ class WC_Privacy {
 			'unit'   => 'days',
 		) ) );
 
-		if ( empty( $option->number ) ) {
+		if ( empty( $option['number'] ) ) {
 			return 0;
 		}
 
 		return self::trash_orders_query( array(
-			'date_created' => '<' . strtotime( '-' . $option->number . ' ' . $option->unit ),
+			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
 			'limit'        => $limit, // Batches of 20.
 			'status'       => 'wc-pending',
 		) );
@@ -119,12 +121,12 @@ class WC_Privacy {
 			'unit'   => 'days',
 		) ) );
 
-		if ( empty( $option->number ) ) {
+		if ( empty( $option['number'] ) ) {
 			return 0;
 		}
 
 		return self::trash_orders_query( array(
-			'date_created' => '<' . strtotime( '-' . $option->number . ' ' . $option->unit ),
+			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
 			'limit'        => $limit, // Batches of 20.
 			'status'       => 'wc-failed',
 		) );
@@ -143,12 +145,12 @@ class WC_Privacy {
 			'unit'   => 'days',
 		) ) );
 
-		if ( empty( $option->number ) ) {
+		if ( empty( $option['number'] ) ) {
 			return 0;
 		}
 
 		return self::trash_orders_query( array(
-			'date_created' => '<' . strtotime( '-' . $option->number . ' ' . $option->unit ),
+			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
 			'limit'        => $limit, // Batches of 20.
 			'status'       => 'wc-cancelled',
 		) );
@@ -165,12 +167,12 @@ class WC_Privacy {
 	public static function anonymize_completed_orders( $limit = 20, $page = 1 ) {
 		$option = wc_parse_relative_date_option( get_option( 'woocommerce_anonymize_completed_orders' ) );
 
-		if ( empty( $option->number ) ) {
+		if ( empty( $option['number'] ) ) {
 			return 0;
 		}
 
 		return self::anonymize_orders_query( array(
-			'date_created' => '<' . strtotime( '-' . $option->number . ' ' . $option->unit ),
+			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
 			'limit'        => $limit, // Batches of 20.
 			'status'       => 'wc-completed',
 			'anonymized'   => false,

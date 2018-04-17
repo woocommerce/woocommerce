@@ -635,7 +635,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 									id="<?php echo esc_attr( $value['id'] ); ?>"
 									type="number"
 									style="width: 80px;"
-									value="<?php echo esc_attr( $option_value->number ); ?>"
+									value="<?php echo esc_attr( $option_value['number'] ); ?>"
 									class="<?php echo esc_attr( $value['class'] ); ?>"
 									placeholder="<?php echo esc_attr( $value['placeholder'] ); ?>"
 									step="1"
@@ -644,7 +644,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 								<select name="<?php echo esc_attr( $value['id'] ); ?>[unit]" style="width: auto;">
 									<?php
 									foreach ( $periods as $value => $label ) {
-										echo '<option value="' . esc_attr( $value ) . '"' . selected( $option_value->unit, $value, false ) . '>' . esc_html( $label ) . '</option>';
+										echo '<option value="' . esc_attr( $value ) . '"' . selected( $option_value['unit'], $value, false ) . '>' . esc_html( $label ) . '</option>';
 									}
 									?>
 								</select> <?php echo ( $description ) ? $description : ''; // WPCS: XSS ok. ?>
