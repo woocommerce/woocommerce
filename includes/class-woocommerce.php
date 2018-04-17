@@ -326,6 +326,7 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/class-wc-cart-totals.php';
 		include_once WC_ABSPATH . 'includes/customizer/class-wc-shop-customizer.php';
 		include_once WC_ABSPATH . 'includes/class-wc-regenerate-images.php';
+		include_once WC_ABSPATH . 'includes/class-wc-privacy.php';
 
 		/**
 		 * Data stores - used to store and retrieve CRUD object data from the database.
