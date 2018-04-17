@@ -1,0 +1,11 @@
+{
+  "name": "woo-dash",
+  "version": "0.1.0",
+  "main": "Gruntfile.js",
+  "author": "YOUR NAME HERE",
+  "devDependencies": {
+    "grunt": "~0.4.5",
+    "grunt-wp-i18n": "~0.5.0",
+    "grunt-wp-readme-to-markdown": "~1.0.0"
+  }
+}
