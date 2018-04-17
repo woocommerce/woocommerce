@@ -616,20 +616,14 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						break;
 
 					// Days/months/years selector.
-					case 'relative_time_selector':
+					case 'relative_date_selector':
 						$periods      = array(
 							'days'   => __( 'Day(s)', 'woocommerce' ),
 							'weeks'  => __( 'Week(s)', 'woocommerce' ),
 							'months' => __( 'Month(s)', 'woocommerce' ),
 							'years'  => __( 'Year(s)', 'woocommerce' ),
 						);
-						$option_value = (array) self::get_option( $value['id'], $value['default'] );
-						$number_value = ! empty( $option_value['number'] ) ? absint( $option_value['number'] ) : '';
-						$unit_value   = ! empty( $option_value['unit'] ) ? $option_value['unit'] : 'days';
-
-						if ( ! in_array( $unit_value, array_keys( $periods ), true ) ) {
-							$unit_value = 'days';
-						}
+						$option_value = wc_parse_relative_date_option( self::get_option( $value['id'], $value['default'] ) );
 						?>
 						<tr valign="top">
 							<th scope="row" class="titledesc">
@@ -641,7 +635,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 									id="<?php echo esc_attr( $value['id'] ); ?>"
 									type="number"
 									style="width: 80px;"
-									value="<?php echo esc_attr( $number_value ); ?>"
+									value="<?php echo esc_attr( $option_value->number ); ?>"
 									class="<?php echo esc_attr( $value['class'] ); ?>"
 									placeholder="<?php echo esc_attr( $value['placeholder'] ); ?>"
 									step="1"
@@ -650,7 +644,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 								<select name="<?php echo esc_attr( $value['id'] ); ?>[unit]" style="width: auto;">
 									<?php
 									foreach ( $periods as $value => $label ) {
-										echo '<option value="' . esc_attr( $value ) . '"' . selected( $unit_value, $value, false ) . '>' . esc_html( $label ) . '</option>';
+										echo '<option value="' . esc_attr( $value ) . '"' . selected( $option_value->unit, $value, false ) . '>' . esc_html( $label ) . '</option>';
 									}
 									?>
 								</select> <?php echo ( $description ) ? $description : ''; // WPCS: XSS ok. ?>
@@ -779,23 +773,8 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						$default = ( empty( $option['default'] ) ? $allowed_values[0] : $option['default'] );
 						$value   = in_array( $raw_value, $allowed_values, true ) ? $raw_value : $default;
 						break;
-					case 'relative_time_selector':
-						$periods      = array(
-							'days'   => __( 'Day(s)', 'woocommerce' ),
-							'weeks'  => __( 'Week(s)', 'woocommerce' ),
-							'months' => __( 'Month(s)', 'woocommerce' ),
-							'years'  => __( 'Year(s)', 'woocommerce' ),
-						);
-						$value        = wp_parse_args( (array) $raw_value, array(
-							'unit'   => 'days',
-							'number' => '',
-						) );
-
-						$value['number'] = ! empty( $value['number'] ) ? absint( $value['number'] ) : '';
-
-						if ( ! in_array( $value['unit'], array_keys( $periods ), true ) ) {
-							$value['unit'] = 'days';
-						}
+					case 'relative_date_selector':
+						$value = wc_parse_relative_date_option( $raw_value );
 						break;
 					default:
 						$value = wc_clean( $raw_value );

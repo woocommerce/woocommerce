@@ -697,6 +697,13 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			}
 		}
 
+		if ( isset( $query_vars['anonymized'] ) ) {
+			$query['meta_query'][] = array(
+				'key'   => '_anonymized',
+				'value' => wc_bool_to_string( $query_vars['anonymized'] ),
+			);
+		}
+
 		if ( ! isset( $query_vars['paginate'] ) || ! $query_vars['paginate'] ) {
 			$wp_query_args['no_found_rows'] = true;
 		}
