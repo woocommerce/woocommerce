@@ -622,6 +622,51 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						<?php
 						break;
 
+					// Days/months/years selector.
+					case 'relative_time_selector':
+						$periods      = array(
+							'days'   => __( 'Day(s)', 'woocommerce' ),
+							'weeks'  => __( 'Week(s)', 'woocommerce' ),
+							'months' => __( 'Month(s)', 'woocommerce' ),
+							'years'  => __( 'Year(s)', 'woocommerce' ),
+						);
+						$option_value = (array) self::get_option( $value['id'], $value['default'] );
+						$number_value = ! empty( $option_value['number'] ) ? absint( $option_value['number'] ) : '';
+						$unit_value   = ! empty( $option_value['unit'] ) ? $option_value['unit'] : 'days';
+
+						if ( ! in_array( $unit_value, array_keys( $periods ), true ) ) {
+							$unit_value = 'days';
+						}
+						?>
+						<tr valign="top">
+							<th scope="row" class="titledesc">
+								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
+								<?php echo $tooltip_html; // WPCS: XSS ok. ?>
+							</th>
+							<td class="forminp">
+							<input
+									name="<?php echo esc_attr( $value['id'] ); ?>[number]"
+									id="<?php echo esc_attr( $value['id'] ); ?>"
+									type="number"
+									style="width: 80px;"
+									value="<?php echo esc_attr( $number_value ); ?>"
+									class="<?php echo esc_attr( $value['class'] ); ?>"
+									placeholder="<?php echo esc_attr( $value['placeholder'] ); ?>"
+									step="1"
+									<?php echo implode( ' ', $custom_attributes ); // WPCS: XSS ok. ?>
+								/>&nbsp;
+								<select name="<?php echo esc_attr( $value['id'] ); ?>[unit]" style="width: auto;">
+									<?php
+									foreach ( $periods as $value => $label ) {
+										echo '<option value="' . esc_attr( $value ) . '"' . selected( $unit_value, $value, false ) . '>' . esc_html( $label ) . '</option>';
+									}
+									?>
+								</select> <?php echo ( $description ) ? $description : ''; // WPCS: XSS ok. ?>
+							</td>
+						</tr>
+						<?php
+						break;
+
 					// Default: run an action.
 					default:
 						do_action( 'woocommerce_admin_field_' . $value['type'], $value );
@@ -741,6 +786,24 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						}
 						$default = ( empty( $option['default'] ) ? $allowed_values[0] : $option['default'] );
 						$value   = in_array( $raw_value, $allowed_values, true ) ? $raw_value : $default;
+						break;
+					case 'relative_time_selector':
+						$periods      = array(
+							'days'   => __( 'Day(s)', 'woocommerce' ),
+							'weeks'  => __( 'Week(s)', 'woocommerce' ),
+							'months' => __( 'Month(s)', 'woocommerce' ),
+							'years'  => __( 'Year(s)', 'woocommerce' ),
+						);
+						$value        = wp_parse_args( (array) $raw_value, array(
+							'unit'   => 'days',
+							'number' => '',
+						) );
+
+						$value['number'] = ! empty( $value['number'] ) ? absint( $value['number'] ) : '';
+
+						if ( ! in_array( $value['unit'], array_keys( $periods ), true ) ) {
+							$value['unit'] = 'days';
+						}
 						break;
 					default:
 						$value = wc_clean( $raw_value );

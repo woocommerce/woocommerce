@@ -3476,7 +3476,7 @@ img.help_tip {
 			margin: 0;
 			padding: 6px;
 			box-sizing: border-box;
-			vertical-align: top;
+			vertical-align: middle;
 		}
 
 		select {
@@ -3485,7 +3485,7 @@ img.help_tip {
 			box-sizing: border-box;
 			height: 32px;
 			line-height: 32px;
-			vertical-align: top;
+			vertical-align: middle;
 		}
 
 		input[size] {
@@ -3538,10 +3538,10 @@ img.help_tip {
 
 		th img.help_tip,
 		th .woocommerce-help-tip {
-			margin: 2px 0 0 0;
+			margin: -8px 0 0 0;
 			position: absolute;
 			right: 0;
-			top: 20px;
+			top: 50%;
 		}
 
 		.wp-list-table .woocommerce-help-tip {
