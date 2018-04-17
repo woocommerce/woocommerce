@@ -7,3 +7,4 @@ node_modules/
 *.sql
 *.tar.gz
 *.zip
+js/index.js

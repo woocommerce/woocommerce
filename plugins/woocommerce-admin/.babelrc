@@ -1,0 +1,17 @@
+{
+	"env": {},
+	"ignore": [],
+	"plugins": [
+		"transform-object-rest-spread"
+	],
+	"presets": [
+		"react",
+		[ "env", {
+			"targets": {
+				"browsers": ["last 2 versions", "not ie <= 10"],
+				"node": "current"
+			},
+			"useBuiltIns": true
+	} ]
+	]
+}

@@ -2,10 +2,39 @@
   "name": "woo-dash",
   "version": "0.1.0",
   "main": "Gruntfile.js",
-  "author": "YOUR NAME HERE",
+  "author": "Automattic",
+  "engines": {
+    "node": "8.11.0",
+    "npm": "5.6.0"
+  },
+  "scripts": {
+    "build": "NODE_ENV=production webpack",
+    "dev": "webpack",
+    "watch": "webpack --watch",
+    "lint": "eslint js --ext=js,jsx",
+    "readme": "grunt readme",
+    "i18n": "grunt i18n"
+  },
   "devDependencies": {
-    "grunt": "~0.4.5",
-    "grunt-wp-i18n": "~0.5.0",
-    "grunt-wp-readme-to-markdown": "~1.0.0"
+    "babel-eslint": "^8.2.3",
+    "babel-loader": "^7.1.4",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-react": "^6.24.1",
+    "css-loader": "^0.28.11",
+    "eslint": "^4.18.2",
+    "eslint-config-wpcalypso": "^2.0.0",
+    "eslint-loader": "^2.0.0",
+    "eslint-plugin-react": "^7.7.0",
+    "eslint-plugin-wpcalypso": "^4.0.1",
+    "extract-text-webpack-plugin": "^4.0.0-beta.0",
+    "grunt": "^1.0.2",
+    "grunt-wp-i18n": "^1.0.2",
+    "grunt-wp-readme-to-markdown": "^2.0.1",
+    "prettier": "github:automattic/calypso-prettier#c56b4251",
+    "sass-loader": "^7.0.1",
+    "style-loader": "^0.20.3",
+    "webpack": "^4.6.0",
+    "webpack-cli": "^2.0.14"
   }
 }
