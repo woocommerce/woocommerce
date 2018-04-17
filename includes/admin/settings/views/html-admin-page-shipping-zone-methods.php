@@ -22,8 +22,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php if ( 0 !== $zone->get_id() ) : ?>
 			<tr valign="top" class="">
 				<th scope="row" class="titledesc">
-					<label for="zone_name"><?php esc_html_e( 'Zone name', 'woocommerce' ); ?></label>
-					<?php echo wc_help_tip( __( 'This is the name of the zone for your reference.', 'woocommerce' ) ); // @codingStandardsIgnoreLine ?>
+					<label for="zone_name">
+						<?php esc_html_e( 'Zone name', 'woocommerce' ); ?>
+						<?php echo wc_help_tip( __( 'This is the name of the zone for your reference.', 'woocommerce' ) ); // @codingStandardsIgnoreLine ?>
+					</label>
 				</th>
 				<td class="forminp">
 					<input type="text" data-attribute="zone_name" name="zone_name" id="zone_name" value="<?php echo esc_attr( $zone->get_zone_name( 'edit' ) ); ?>" placeholder="<?php esc_attr_e( 'Zone name', 'woocommerce' ); ?>">
@@ -31,8 +33,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</tr>
 			<tr valign="top" class="">
 				<th scope="row" class="titledesc">
-					<label for="zone_locations"><?php esc_html_e( 'Zone regions', 'woocommerce' ); ?></label>
-					<?php echo wc_help_tip( __( 'These are regions inside this zone. Customers will be matched against these regions.', 'woocommerce' ) ); // @codingStandardsIgnoreLine ?>
+					<label for="zone_locations">
+						<?php esc_html_e( 'Zone regions', 'woocommerce' ); ?>
+						<?php echo wc_help_tip( __( 'These are regions inside this zone. Customers will be matched against these regions.', 'woocommerce' ) ); // @codingStandardsIgnoreLine ?>
+					</label>
 				</th>
 				<td class="forminp">
 					<select multiple="multiple" data-attribute="zone_locations" id="zone_locations" name="zone_locations" data-placeholder="<?php esc_html_e( 'Select regions within this zone', 'woocommerce' ); ?>" class="wc-shipping-zone-region-select chosen_select">
@@ -67,8 +71,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tr>
 		<tr valign="top" class="">
 			<th scope="row" class="titledesc">
-				<label><?php esc_html_e( 'Shipping methods', 'woocommerce' ); ?></label>
-				<?php echo wc_help_tip( __( 'The following shipping methods apply to customers with shipping addresses within this zone.', 'woocommerce' ) ); // @codingStandardsIgnoreLine ?>
+				<label>
+					<?php esc_html_e( 'Shipping methods', 'woocommerce' ); ?>
+					<?php echo wc_help_tip( __( 'The following shipping methods apply to customers with shipping addresses within this zone.', 'woocommerce' ) ); // @codingStandardsIgnoreLine ?>
+				</label>
 			</th>
 			<td class="">
 				<table class="wc-shipping-zone-methods widefat">
