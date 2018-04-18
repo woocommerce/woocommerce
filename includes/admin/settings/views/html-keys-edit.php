@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top">
 				<th scope="row" class="titledesc">
 					<label for="key_description">
-						<?php esc_htmlesc_html_e( 'Description', 'woocommerce' ); ?>
+						<?php esc_html_e( 'Description', 'woocommerce' ); ?>
 						<?php echo wc_help_tip( __( 'Friendly name for identifying this key.', 'woocommerce' ) ); ?>
 					</label>
 				</th>
@@ -42,7 +42,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						$user->user_email
 					);
 					?>
-					<select class="wc-customer-search" id="key_user" data-placeholder="<?php esc_attresc_html_e( 'Search for a user&hellip;', 'woocommerce' ); ?>" data-allow_clear="true">
+					<select class="wc-customer-search" id="key_user" data-placeholder="<?php esc_attr_e( 'Search for a user&hellip;', 'woocommerce' ); ?>" data-allow_clear="true">
 						<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo $user_string; ?><option>
 					</select>
 				</td>
@@ -128,7 +128,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<?php esc_html_e( 'Consumer key', 'woocommerce' ); ?>
 				</th>
 				<td class="forminp">
-					<input id="key_consumer_key" type="text" value="{{ data.consumer_key }}" size="55" readonly="readonly"> <button type="button" class="button-secondary copy-key" data-tip="<?php esc_attresc_html_e( 'Copied!', 'woocommerce' ); ?>"><?php esc_html_e( 'Copy', 'woocommerce' ); ?></button>
+					<input id="key_consumer_key" type="text" value="{{ data.consumer_key }}" size="55" readonly="readonly"> <button type="button" class="button-secondary copy-key" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>"><?php esc_html_e( 'Copy', 'woocommerce' ); ?></button>
 				</td>
 			</tr>
 			<tr valign="top">
@@ -136,7 +136,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<?php esc_html_e( 'Consumer secret', 'woocommerce' ); ?>
 				</th>
 				<td class="forminp">
-					<input id="key_consumer_secret" type="text" value="{{ data.consumer_secret }}" size="55" readonly="readonly"> <button type="button" class="button-secondary copy-secret" data-tip="<?php esc_attresc_html_e( 'Copied!', 'woocommerce' ); ?>"><?php esc_html_e( 'Copy', 'woocommerce' ); ?></button>
+					<input id="key_consumer_secret" type="text" value="{{ data.consumer_secret }}" size="55" readonly="readonly"> <button type="button" class="button-secondary copy-secret" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>"><?php esc_html_e( 'Copy', 'woocommerce' ); ?></button>
 				</td>
 			</tr>
 			<tr valign="top">
