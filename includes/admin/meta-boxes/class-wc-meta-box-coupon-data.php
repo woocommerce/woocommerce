@@ -232,7 +232,7 @@ class WC_Meta_Box_Coupon_Data {
 
 						if ( $categories ) {
 							foreach ( $categories as $cat ) {
-								echo '<option value="' . esc_attr( $cat->term_id ) . '"' . selected( in_array( $cat->term_id, $category_ids ), true, false ) . '>' . esc_html( $cat->name ) . '</option>';
+								echo '<option value="' . esc_attr( $cat->term_id ) . '"' . wc_selected( $cat->term_id, $category_ids ) . '>' . esc_html( $cat->name ) . '</option>';
 							}
 						}
 						?>
@@ -249,7 +249,7 @@ class WC_Meta_Box_Coupon_Data {
 
 						if ( $categories ) {
 							foreach ( $categories as $cat ) {
-								echo '<option value="' . esc_attr( $cat->term_id ) . '"' . selected( in_array( $cat->term_id, $category_ids ), true, false ) . '>' . esc_html( $cat->name ) . '</option>';
+								echo '<option value="' . esc_attr( $cat->term_id ) . '"' . wc_selected( $cat->term_id, $category_ids ) . '>' . esc_html( $cat->name ) . '</option>';
 							}
 						}
 						?>

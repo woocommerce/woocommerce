@@ -527,6 +527,9 @@ class WC_Install {
 			// used by WC_Comments::wp_count_comments() to get the number of comments by type.
 			$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_type (comment_type)" );
 		}
+
+		// Add constraint to download logs.
+		$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log ADD FOREIGN KEY (permission_id) REFERENCES {$wpdb->prefix}woocommerce_downloadable_product_permissions(permission_id) ON DELETE CASCADE" );
 	}
 
 	/**
