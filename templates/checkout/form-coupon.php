@@ -17,7 +17,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-if ( ! wc_coupons_enabled() || ! empty( WC()->cart->applied_coupons ) ) { // @codingStandardsIgnoreLine.
+if ( ! wc_coupons_enabled() ) {
 	return;
 }
 
