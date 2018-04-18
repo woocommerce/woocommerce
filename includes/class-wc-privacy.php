@@ -37,6 +37,9 @@ class WC_Privacy {
 
 		// Handles custom anonomization types not included in core.
 		add_filter( 'wp_privacy_anonymize_data', array( __CLASS__, 'anonymize_custom_data_types' ), 10, 3 );
+
+		// Privacy page content.
+		add_action( 'admin_init', array( __CLASS__, 'add_privacy_policy_content' ) );
 	}
 
 	/**
@@ -667,6 +670,40 @@ class WC_Privacy {
 				break;
 		}
 		return $anonymous;
+	}
+
+	/**
+	 * Add privacy policy content for the privacy policy page.
+	 *
+	 * @since 3.4.0
+	 */
+	public static function add_privacy_policy_content() {
+		if ( ! function_exists( 'wp_add_privacy_policy_content' ) ) {
+			return;
+		}
+
+		$content = wp_kses_post( apply_filters( 'wc_privacy_policy_content', wpautop( __( '
+We collect information about you during the checkout process on our store. This information may include, but is not limited to, your name, billing address, shipping address, email address, phone number, credit card/payment details and any other details that might be requested from you for the purpose of processing your orders.
+
+Handling this data also allows us to:
+
+- Send you important account/order/service information.
+- Respond to your queries, refund requests, or complaints.
+- Process payments and to prevent fraudulent transactions. We do this on the basis of our legitimate business interests.
+- Set up and administer your account, provide technical and customer support, and to verify your identity.
+
+Additionally we may also collect the following information:
+
+- Location and traffic data (including IP address and browser type) if you place an order, or if we need to estimate taxes and shipping costs based on your location.
+- Product pages visited and content viewed whist your session is active.
+- Your comments and product reviews if you choose to leave them on our website.
+- Shipping address if you request shipping rates from us before checkout whist your session is active.
+- Cookies which are essential to keep track of the contents of your cart whist your session is active.
+- Account email/password to allow you to access your account, if you have one.
+- If you choose to create an account with us, your name, address, email and phone number, which will be used to populate the checkout for future orders.
+', 'woocommerce' ) ) ) );
+
+		wp_add_privacy_policy_content( 'WooCommerce', $content );
 	}
 }
 

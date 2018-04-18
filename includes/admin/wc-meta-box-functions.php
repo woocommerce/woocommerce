@@ -227,7 +227,7 @@ function woocommerce_wp_select( $field ) {
 		<select <?php echo wc_implode_html_attributes( $field_attributes ); // WPCS: XSS ok. ?>>
 			<?php
 			foreach ( $field['options'] as $key => $value ) {
-				echo '<option value="' . esc_attr( $key ) . '" ' . selected( $field['value'] === $key || ( is_array( $field['value'] ) && in_array( $key, $field['value'], true ) ), true, false ) . '>' . esc_html( $value ) . '</option>';
+				echo '<option value="' . esc_attr( $key ) . '"' . wc_selected( $key, $field['value'] ) . '>' . esc_html( $value ) . '</option>';
 			}
 			?>
 		</select>

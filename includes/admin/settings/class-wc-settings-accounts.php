@@ -94,6 +94,45 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 					'id'   => 'account_registration_options',
 				),
 				array(
+					'title' => __( 'Privacy policy', 'woocommerce' ),
+					'type'  => 'title',
+					'id'    => 'privacy_policy_options',
+					'desc'  => __( 'This section controls the display of your website privacy policy. The privacy notices below will not show up unless a privacy page is first set.', 'woocommerce' ),
+				),
+
+				array(
+					'title'    => __( 'Privacy page', 'woocommerce' ),
+					'desc'     => __( 'Choose a page to act as your privacy policy.', 'woocommerce' ),
+					'id'       => 'wp_page_for_privacy_policy',
+					'type'     => 'single_select_page',
+					'default'  => '',
+					'class'    => 'wc-enhanced-select-nostd',
+					'css'      => 'min-width:300px;',
+					'desc_tip' => true,
+				),
+
+				array(
+					'title'    => __( 'Registration privacy policy', 'woocommerce' ),
+					'desc_tip' => __( 'Optionally add some text about your store privacy policy to show on account registration forms.', 'woocommerce' ),
+					'id'       => 'woocommerce_registration_privacy_policy_text',
+					'default'  => __( 'Your personal data will be used to support your experience throughout this website, to manage access to your account, and for other purposes described in our [privacy_policy].', 'woocommerce' ),
+					'type'     => 'textarea',
+					'css'      => 'min-width: 50%; height: 75px;',
+				),
+
+				array(
+					'title'    => __( 'Checkout privacy policy', 'woocommerce' ),
+					'desc_tip' => __( 'Optionally add some text about your store privacy policy to show during checkout.', 'woocommerce' ),
+					'id'       => 'woocommerce_checkout_privacy_policy_text',
+					'default'  => __( 'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our [privacy_policy].', 'woocommerce' ),
+					'type'     => 'textarea',
+					'css'      => 'min-width: 50%; height: 75px;',
+				),
+				array(
+					'type' => 'sectionend',
+					'id'   => 'privacy_policy_options',
+				),
+				array(
 					'title' => __( 'Personal data cleanup', 'woocommerce' ),
 					'desc'  => __( 'These tools let you clean up personal data when it\'s no longer needed for processing.', 'woocommerce' ),
 					'type'  => 'title',

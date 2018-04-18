@@ -287,3 +287,4 @@ add_action( 'woocommerce_account_edit-address_endpoint', 'woocommerce_account_ed
 add_action( 'woocommerce_account_payment-methods_endpoint', 'woocommerce_account_payment_methods' );
 add_action( 'woocommerce_account_add-payment-method_endpoint', 'woocommerce_account_add_payment_method' );
 add_action( 'woocommerce_account_edit-account_endpoint', 'woocommerce_account_edit_account' );
+add_action( 'woocommerce_register_form', 'wc_privacy_policy_text', 20 );
