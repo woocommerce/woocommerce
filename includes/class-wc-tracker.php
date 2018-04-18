@@ -318,13 +318,11 @@ class WC_Tracker {
 	 * @return array
 	 */
 	private static function get_orders() {
-		$orders = array();
-
 		$orders_dates = self::get_order_dates();
 		$order_counts = self::get_order_counts();
 		$order_totals = self::get_order_totals();
 
-		return array_merge( $orders, $order_counts, $order_totals );
+		return array_merge( $orders_dates, $order_counts, $order_totals );
 	}
 
 	/**
