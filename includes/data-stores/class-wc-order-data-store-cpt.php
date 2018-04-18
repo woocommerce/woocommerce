@@ -698,10 +698,17 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		}
 
 		if ( isset( $query_vars['anonymized'] ) ) {
-			$query['meta_query'][] = array(
-				'key'   => '_anonymized',
-				'value' => wc_bool_to_string( $query_vars['anonymized'] ),
-			);
+			if ( $query_vars['anonymized'] ) {
+				$wp_query_args['meta_query'][] = array(
+					'key'   => '_anonymized',
+					'value' => 'yes',
+				);
+			} else {
+				$wp_query_args['meta_query'][] = array(
+					'key'     => '_anonymized',
+					'compare' => 'NOT EXISTS',
+				);
+			}
 		}
 
 		if ( ! isset( $query_vars['paginate'] ) || ! $query_vars['paginate'] ) {

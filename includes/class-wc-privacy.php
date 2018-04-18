@@ -633,7 +633,7 @@ class WC_Privacy {
 
 		// Set all new props and persist the new data to the database.
 		$order->set_props( $anonymized_data );
-		$order->add_meta_data( '_anonymized', 'yes' );
+		$order->update_meta_data( '_anonymized', 'yes' );
 		$order->save();
 
 		// Add note that this event occured.
