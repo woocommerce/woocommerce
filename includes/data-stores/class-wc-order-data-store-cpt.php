@@ -476,32 +476,30 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		 *
 		 * @var array
 		 */
-		$search_fields = array_map(
-			'wc_clean', apply_filters(
-				'woocommerce_shop_order_search_fields', array(
-					'_billing_address_index',
-					'_shipping_address_index',
-					'_billing_last_name',
-					'_billing_email',
-				)
+		$search_fields = array_fill_keys( apply_filters(
+			'woocommerce_shop_order_search_fields', array(
+				'billing_address_index',
+				'shipping_address_index',
+				'billing_last_name',
+				'billing_email',
 			)
-		);
+		), wc_clean( $term ) );
 		$order_ids     = array();
+
+		add_filter( 'woocommerce_get_wp_query_args', array( $this, 'search_orders_args' ), 10, 2 );
 
 		if ( is_numeric( $term ) ) {
 			$order_ids[] = absint( $term );
 		}
 
+		// Make sure we only return ids with the crud search.
+		$search_fields['return'] = 'ids';
+
 		if ( ! empty( $search_fields ) ) {
 			$order_ids = array_unique(
 				array_merge(
 					$order_ids,
-					$wpdb->get_col(
-						$wpdb->prepare(
-							"SELECT DISTINCT p1.post_id FROM {$wpdb->postmeta} p1 WHERE p1.meta_value LIKE %s AND p1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', $search_fields ) ) . "')", // @codingStandardsIgnoreLine
-							'%' . $wpdb->esc_like( wc_clean( $term ) ) . '%'
-						)
-					),
+					wc_get_orders( $search_fields ),
 					$wpdb->get_col(
 						$wpdb->prepare(
 							"SELECT order_id
@@ -514,7 +512,26 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			);
 		}
 
+		remove_filter( 'woocommerce_get_wp_query_args', array( $this, 'search_orders_args' ), 10, 2 );
+
 		return apply_filters( 'woocommerce_shop_order_search_results', $order_ids, $term, $search_fields );
+	}
+
+	/**
+	 * Replace get order query args with search friendly ones.
+	 *
+	 * @param array $wp_query_args Query args.
+	 * @param array $query_vars Original query vars.
+	 * @return array of arguments.
+	 */
+	public function search_orders_args( $wp_query_args, $query_vars ) {
+		if ( isset( $wp_query_args['meta_query'] ) ) {
+			foreach ( $wp_query_args['meta_query'] as $meta_query_key => $meta_query ) {
+				$wp_query_args['meta_query'][ $meta_query_key ]['compare'] = 'LIKE';
+			}
+			$wp_query_args['meta_query']['relation'] = 'OR';
+		}
+		return $wp_query_args;
 	}
 
 	/**
