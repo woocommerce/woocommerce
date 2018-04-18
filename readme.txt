@@ -176,6 +176,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - GDPR: Improved the checkout (payments) settings screen, moved page options to a new "advanced" section, and made an "Accounts and Privacy" section. #19703
 * Tweak - GDPR: Hash customer email address in download URLs to protect privacy. #18957
 * Tweak - GDPR: Add highlight to T&C checkbox if not checked to show it needs to be checked. #19177
+* Tweak - Only show admin notices on WooCommerce screens/plugins/dashboard. #19772
 * Tweak - Standardize stock update messages in admin and correctly log who performed the action. When an order note is added after modifying stock manually, update order notes display via AJAX. #18080
 * Tweak - Rollback if payment complete or update status fails to prevent partial order updates on failure. #18175
 * Tweak - Made the system status tool which purges user carts also purge persistent carts. #18492
