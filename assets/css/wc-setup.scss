@@ -638,6 +638,10 @@ body {
 		max-width: 87px;
 	}
 
+	&.payfast-logo .wc-wizard-service-name img {
+		max-width: 140px;
+	}
+
 	.wc-wizard-service-description {
 	flex-grow: 1;
 	padding: 20px;
