@@ -82,7 +82,7 @@ abstract class WC_Object_Query {
 			'exclude'        => '',
 
 			'limit'          => get_option( 'posts_per_page' ),
-			'page'           => 1,
+			'paged'          => 1,
 			'offset'         => '',
 			'paginate'       => false,
 
