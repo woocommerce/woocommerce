@@ -279,6 +279,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Added `woocommerce_helper_suppress_connect_notice` filter to enable suppressing the admin WordPress.com connection message. #19599
 * Dev - Moved all photoswipe styles to `photoswipe.css` to make it easy to dequeue all the photoswipe styles. #19673
 * Dev - Slash meta values before updating values in the data stores. #19675
+* Dev - New wc_selected method to handle array key conversion to int. #19705
 * Performance - Optimized saving of orders. Adds a transient for needs_processing, and only saves changes when saving order items. #18538
 * Performance - Refactored the SQL query for `WC_Customer_Download_Data_Store::get_downloads()` to fetch available downloads faster. #18559
 * Performance - Split the layered nav counts into multiple transient records by taxonomy and added a filter to allow bypassing caching. #19225
