@@ -537,15 +537,17 @@ class WC_Admin_Setup_Wizard {
 
 		$locale_info = include WC()->plugin_path() . '/i18n/locale-info.php';
 
-		// Set currency formatting options based on chosen location and currency.
-		if (
-			isset( $locale_info[ $country ] ) &&
-			$locale_info[ $country ]['currency_code'] === $currency_code
-		) {
-			update_option( 'woocommerce_currency_pos', $locale_info[ $country ]['currency_pos'] );
-			update_option( 'woocommerce_price_decimal_sep', $locale_info[ $country ]['decimal_sep'] );
-			update_option( 'woocommerce_price_num_decimals', $locale_info[ $country ]['num_decimals'] );
-			update_option( 'woocommerce_price_thousand_sep', $locale_info[ $country ]['thousand_sep'] );
+		if ( isset( $locale_info[ $country ] ) ) {
+			update_option( 'woocommerce_weight_unit', $locale_info[ $country ]['weight_unit'] );
+			update_option( 'woocommerce_dimension_unit', $locale_info[ $country ]['dimension_unit'] );
+
+			// Set currency formatting options based on chosen location and currency.
+			if ( $locale_info[ $country ]['currency_code'] === $currency_code ) {
+				update_option( 'woocommerce_currency_pos', $locale_info[ $country ]['currency_pos'] );
+				update_option( 'woocommerce_price_decimal_sep', $locale_info[ $country ]['decimal_sep'] );
+				update_option( 'woocommerce_price_num_decimals', $locale_info[ $country ]['num_decimals'] );
+				update_option( 'woocommerce_price_thousand_sep', $locale_info[ $country ]['thousand_sep'] );
+			}
 		}
 
 		if ( $tracking ) {
@@ -818,19 +820,6 @@ class WC_Admin_Setup_Wizard {
 		$existing_zones        = WC_Shipping_Zones::get_zones();
 		$dimension_unit        = get_option( 'woocommerce_dimension_unit' );
 		$weight_unit           = get_option( 'woocommerce_weight_unit' );
-		$locale_info           = include WC()->plugin_path() . '/i18n/locale-info.php';
-
-		if ( ! $weight_unit && isset( $locale_info[ $country_code ] ) ) {
-			$weight_unit = $locale_info[ $country_code ]['weight_unit'];
-		} else {
-			$weight_unit = $weight_unit ? $weight_unit : 'kg';
-		}
-
-		if ( ! $dimension_unit && isset( $locale_info[ $country_code ] ) ) {
-			$dimension_unit = $locale_info[ $country_code ]['dimension_unit'];
-		} else {
-			$dimension_unit = $dimension_unit ? $dimension_unit : 'cm';
-		}
 
 		if ( ! empty( $existing_zones ) ) {
 			$intro_text = __( 'How would you like units on your store displayed?', 'woocommerce' );
