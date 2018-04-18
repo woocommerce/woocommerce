@@ -405,17 +405,16 @@ class WC_Admin_Setup_Wizard {
 				<label class="location-prompt" for="store_address_2"><?php esc_html_e( 'Address line 2', 'woocommerce' ); ?></label>
 				<input type="text" id="store_address_2" class="location-input" name="store_address_2" value="<?php echo esc_attr( $address_2 ); ?>" />
 
-				<div class="store-state-container hidden">
-					<label for="store_state" class="location-prompt">
-						<?php esc_html_e( 'State', 'woocommerce' ); ?>
-					</label>
-					<select id="store_state" name="store_state" data-placeholder="<?php esc_attr_e( 'Choose a state&hellip;', 'woocommerce' ); ?>" aria-label="<?php esc_attr_e( 'State', 'woocommerce' ); ?>" class="location-input wc-enhanced-select dropdown"></select>
-				</div>
-
 				<div class="city-and-postcode">
 					<div>
 						<label class="location-prompt" for="store_city"><?php esc_html_e( 'City', 'woocommerce' ); ?></label>
 						<input type="text" id="store_city" class="location-input" name="store_city" required value="<?php echo esc_attr( $city ); ?>" />
+					</div>
+					<div class="store-state-container hidden">
+						<label for="store_state" class="location-prompt">
+							<?php esc_html_e( 'State', 'woocommerce' ); ?>
+						</label>
+						<select id="store_state" name="store_state" data-placeholder="<?php esc_attr_e( 'Choose a state&hellip;', 'woocommerce' ); ?>" aria-label="<?php esc_attr_e( 'State', 'woocommerce' ); ?>" class="location-input wc-enhanced-select dropdown"></select>
 					</div>
 					<div>
 						<label class="location-prompt" for="store_postcode"><?php esc_html_e( 'Postcode / ZIP', 'woocommerce' ); ?></label>
