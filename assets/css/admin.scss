@@ -3476,12 +3476,16 @@ img.help_tip {
 			margin: 0;
 			padding: 6px;
 			box-sizing: border-box;
+			vertical-align: top;
 		}
 
 		select {
 			width: 400px;
 			margin: 0;
 			box-sizing: border-box;
+			height: 32px;
+			line-height: 32px;
+			vertical-align: top;
 		}
 
 		input[size] {
@@ -3523,6 +3527,11 @@ img.help_tip {
 			padding-right: 24px;
 		}
 
+		th label {
+			position: relative;
+			display: block;
+		}
+
 		.select2-container {
 			vertical-align: top;
 			margin-bottom: 3px;
@@ -3534,8 +3543,10 @@ img.help_tip {
 
 		th img.help_tip,
 		th .woocommerce-help-tip {
-			margin: 2px -24px 0 0;
-			float: right;
+			margin: -8px -24px 0 0;
+			position: absolute;
+			right: 0;
+			top: 50%;
 		}
 
 		.wp-list-table .woocommerce-help-tip {

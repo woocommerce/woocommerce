@@ -351,6 +351,7 @@ class WC_Install {
 		wp_clear_scheduled_hook( 'woocommerce_scheduled_sales' );
 		wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
 		wp_clear_scheduled_hook( 'woocommerce_cleanup_sessions' );
+		wp_clear_scheduled_hook( 'woocommerce_cleanup_orders' );
 		wp_clear_scheduled_hook( 'woocommerce_geoip_updater' );
 		wp_clear_scheduled_hook( 'woocommerce_tracker_send_event' );
 
@@ -364,6 +365,7 @@ class WC_Install {
 			wp_schedule_single_event( time() + ( absint( $held_duration ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
 		}
 
+		wp_schedule_event( time(), 'daily', 'woocommerce_cleanup_orders' );
 		wp_schedule_event( time(), 'twicedaily', 'woocommerce_cleanup_sessions' );
 		wp_schedule_event( strtotime( 'first tuesday of next month' ), 'monthly', 'woocommerce_geoip_updater' );
 		wp_schedule_event( time(), apply_filters( 'woocommerce_tracker_event_recurrence', 'daily' ), 'woocommerce_tracker_send_event' );

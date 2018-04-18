@@ -31,13 +31,13 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 		public function admin_styles() {
 			global $wp_scripts;
 
-			$screen         = get_current_screen();
-			$screen_id      = $screen ? $screen->id : '';
+			$screen    = get_current_screen();
+			$screen_id = $screen ? $screen->id: '';
 
 			// Register admin styles.
 			wp_register_style( 'woocommerce_admin_menu_styles', WC()->plugin_url() . '/assets/css/menu.css', array(), WC_VERSION );
 			wp_register_style( 'woocommerce_admin_styles', WC()->plugin_url() . '/assets/css/admin.css', array(), WC_VERSION );
-			wp_register_style( 'jquery-ui-style', WC()->plugin_url() . '/assets/css/jquery-ui.min.css', array(), WC_VERSION );
+			wp_register_style( 'jquery-ui-style', WC()->plugin_url() . '/assets/css/jquery-ui/jquery-ui.min.css', array(), WC_VERSION );
 			wp_register_style( 'woocommerce_admin_dashboard_styles', WC()->plugin_url() . '/assets/css/dashboard.css', array(), WC_VERSION );
 			wp_register_style( 'woocommerce_admin_print_reports_styles', WC()->plugin_url() . '/assets/css/reports-print.css', array(), WC_VERSION, 'print' );
 

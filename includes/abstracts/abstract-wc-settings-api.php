@@ -423,8 +423,7 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?>
-				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?></label>
 			</th>
 			<td class="forminp">
 				<fieldset>
@@ -467,8 +466,7 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?>
-				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?></label>
 			</th>
 			<td class="forminp">
 				<fieldset>
@@ -511,8 +509,7 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?>
-				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?></label>
 			</th>
 			<td class="forminp">
 				<fieldset>
@@ -567,8 +564,7 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?>
-				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?></label>
 			</th>
 			<td class="forminp">
 				<fieldset>
@@ -613,8 +609,7 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?>
-				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?></label>
 			</th>
 			<td class="forminp">
 				<fieldset>
@@ -661,8 +656,7 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?>
-				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?></label>
 			</th>
 			<td class="forminp">
 				<fieldset>
@@ -707,8 +701,7 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?>
-				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?></label>
 			</th>
 			<td class="forminp">
 				<fieldset>
@@ -758,8 +751,7 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?>
-				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?></label>
 			</th>
 			<td class="forminp">
 				<fieldset>

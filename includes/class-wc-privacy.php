@@ -14,13 +14,20 @@ defined( 'ABSPATH' ) || exit;
 class WC_Privacy {
 
 	/**
+	 * Background process to clean up orders.
+	 *
+	 * @var WC_Privacy_Background_Process
+	 */
+	protected static $background_process;
+
+	/**
 	 * Init - hook into events.
 	 */
 	public static function init() {
-		// We need to ensure we're using a version of WP with GDPR support.
-		if ( ! function_exists( 'wp_privacy_anonymize_data' ) ) {
-			return;
-		}
+		self::$background_process = new WC_Privacy_Background_Process();
+
+		// Cleanup orders daily - this is a callback on a daily cron event.
+		add_action( 'woocommerce_cleanup_orders', array( __CLASS__, 'order_cleanup_process' ) );
 
 		// This hook registers WooCommerce data exporters.
 		add_filter( 'wp_privacy_personal_data_exporters', array( __CLASS__, 'register_data_exporters' ), 10 );
@@ -33,6 +40,146 @@ class WC_Privacy {
 
 		// Privacy page content.
 		add_action( 'admin_init', array( __CLASS__, 'add_privacy_policy_content' ) );
+	}
+
+	/**
+	 * For a given query trash all matches.
+	 *
+	 * @since 3.4.0
+	 * @param array $query Query array to pass to wc_get_orders().
+	 * @return int Count of orders that were trashed.
+	 */
+	protected static function trash_orders_query( $query ) {
+		$orders = wc_get_orders( $query );
+		$count  = 0;
+
+		if ( $orders ) {
+			foreach ( $orders as $order ) {
+				$order->delete( false );
+				$count ++;
+			}
+		}
+
+		return $count;
+	}
+
+	/**
+	 * For a given query, anonymize all matches.
+	 *
+	 * @since 3.4.0
+	 * @param array $query Query array to pass to wc_get_orders().
+	 * @return int Count of orders that were anonymized.
+	 */
+	protected static function anonymize_orders_query( $query ) {
+		$orders = wc_get_orders( $query );
+		$count  = 0;
+
+		if ( $orders ) {
+			foreach ( $orders as $order ) {
+				self::remove_order_personal_data( $order );
+				$count ++;
+			}
+		}
+
+		return $count;
+	}
+
+	/**
+	 * Spawn events for order cleanup.
+	 */
+	public static function order_cleanup_process() {
+		self::$background_process->push_to_queue( array( 'task' => 'trash_pending_orders' ) );
+		self::$background_process->push_to_queue( array( 'task' => 'trash_failed_orders' ) );
+		self::$background_process->push_to_queue( array( 'task' => 'trash_cancelled_orders' ) );
+		self::$background_process->push_to_queue( array( 'task' => 'anonymize_completed_orders' ) );
+		self::$background_process->save()->dispatch();
+	}
+
+	/**
+	 * Find and trash old orders.
+	 *
+	 * @since 3.4.0
+	 * @param  int $limit Limit orders to process per batch.
+	 * @return int Number of orders processed.
+	 */
+	public static function trash_pending_orders( $limit = 20 ) {
+		$option = wc_parse_relative_date_option( get_option( 'woocommerce_trash_pending_orders' ) );
+
+		if ( empty( $option['number'] ) ) {
+			return 0;
+		}
+
+		return self::trash_orders_query( array(
+			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
+			'limit'        => $limit, // Batches of 20.
+			'status'       => 'wc-pending',
+		) );
+	}
+
+	/**
+	 * Find and trash old orders.
+	 *
+	 * @since 3.4.0
+	 * @param  int $limit Limit orders to process per batch.
+	 * @return int Number of orders processed.
+	 */
+	public static function trash_failed_orders( $limit = 20 ) {
+		$option = wc_parse_relative_date_option( get_option( 'woocommerce_trash_failed_orders' ) );
+
+		if ( empty( $option['number'] ) ) {
+			return 0;
+		}
+
+		return self::trash_orders_query( array(
+			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
+			'limit'        => $limit, // Batches of 20.
+			'status'       => 'wc-failed',
+		) );
+	}
+
+	/**
+	 * Find and trash old orders.
+	 *
+	 * @since 3.4.0
+	 * @param  int $limit Limit orders to process per batch.
+	 * @return int Number of orders processed.
+	 */
+	public static function trash_cancelled_orders( $limit = 20 ) {
+		$option = wc_parse_relative_date_option( get_option( 'woocommerce_trash_cancelled_orders' ) );
+
+		if ( empty( $option['number'] ) ) {
+			return 0;
+		}
+
+		return self::trash_orders_query( array(
+			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
+			'limit'        => $limit, // Batches of 20.
+			'status'       => 'wc-cancelled',
+		) );
+	}
+
+	/**
+	 * Anonymize old completed orders from guests.
+	 *
+	 * @since 3.4.0
+	 * @param  int $limit Limit orders to process per batch.
+	 * @param  int $page Page to process.
+	 * @return int Number of orders processed.
+	 */
+	public static function anonymize_completed_orders( $limit = 20, $page = 1 ) {
+		$option = wc_parse_relative_date_option( get_option( 'woocommerce_anonymize_completed_orders' ) );
+
+		if ( empty( $option['number'] ) ) {
+			return 0;
+		}
+
+		return self::anonymize_orders_query( array(
+			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
+			'limit'        => $limit, // Batches of 20.
+			'status'       => 'wc-completed',
+			'anonymized'   => false,
+			'customer_id'  => 0,
+		) );
 	}
 
 	/**
@@ -467,6 +614,12 @@ class WC_Privacy {
 					continue;
 				}
 
+				if ( function_exists( 'wp_privacy_anonymize_data' ) ) {
+					$anon_value = wp_privacy_anonymize_data( $data_type, $value );
+				} else {
+					$anon_value = '';
+				}
+
 				/**
 				 * Expose a way to control the anonymized value of a prop via 3rd party code.
 				 *
@@ -477,13 +630,17 @@ class WC_Privacy {
 				 * @param string   $data_type Type of data.
 				 * @param WC_Order $order An order object.
 				 */
-				$anonymized_data[ $prop ] = apply_filters( 'woocommerce_privacy_remove_order_personal_data_prop_value', wp_privacy_anonymize_data( $data_type, $value ), $prop, $value, $data_type, $order );
+				$anonymized_data[ $prop ] = apply_filters( 'woocommerce_privacy_remove_order_personal_data_prop_value', $anon_value, $prop, $value, $data_type, $order );
 			}
 		}
 
 		// Set all new props and persist the new data to the database.
 		$order->set_props( $anonymized_data );
+		$order->update_meta_data( '_anonymized', 'yes' );
 		$order->save();
+
+		// Add note that this event occured.
+		$order->add_order_note( __( 'Personal data removed.', 'woocommerce' ) );
 
 		/**
 		 * Allow extensions to remove their own personal data for this order.
@@ -492,9 +649,6 @@ class WC_Privacy {
 		 * @param WC_Order $order A customer object.
 		 */
 		do_action( 'woocommerce_privacy_remove_order_personal_data', $order );
-
-		// Add note that this event occured.
-		$order->add_order_note( __( 'Personal data removed.', 'woocommerce' ) );
 	}
 
 	/**
