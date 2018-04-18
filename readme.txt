@@ -267,6 +267,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Mini cart item link now respects value of $product_permalink. #18979
 * Dev - Added `woocommerce_coupon_get_items_to_validate` filter to enable excluding products from coupon validation. #19002
 * Dev - Added `woocommerce_persistent_cart_enabled` filter. #19027
+* Dev - Added `woocommerce_admin_order_item_coupon_url` filter. #19777
 * Dev - Replaced calls to `exit` with `wp_die` in the ajax methods to enable unit testing of those methods.
 * Dev - Introduce `woocommerce_coupon_custom_discounts_array` filter to allow post processing on custom coupons. #19148
 * Dev - Move jQuery UI styles into WooCommerce assets folder and load them from there. #19173
