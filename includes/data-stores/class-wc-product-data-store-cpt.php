@@ -532,6 +532,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		foreach ( $props_to_update as $meta_key => $prop ) {
 			$value = $product->{"get_$prop"}( 'edit' );
+			$value = is_string( $value ) ? wp_slash( $value ) : $value;
 			switch ( $prop ) {
 				case 'virtual':
 				case 'downloadable':
@@ -566,12 +567,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		// Update extra data associated with the product like button text or product URL for external products.
 		if ( ! $this->extra_data_saved ) {
 			foreach ( $extra_data_keys as $key ) {
-				if ( ! array_key_exists( $key, $props_to_update ) ) {
+				if ( ! array_key_exists( '_' . $key, $props_to_update ) ) {
 					continue;
 				}
 				$function = 'get_' . $key;
 				if ( is_callable( array( $product, $function ) ) ) {
-					if ( update_post_meta( $product->get_id(), '_' . $key, $product->{$function}( 'edit' ) ) ) {
+					$value = $product->{$function}( 'edit' );
+					$value = is_string( $value ) ? wp_slash( $value ) : $value;
+
+					if ( update_post_meta( $product->get_id(), '_' . $key, $value ) ) {
 						$this->updated_props[] = $key;
 					}
 				}
