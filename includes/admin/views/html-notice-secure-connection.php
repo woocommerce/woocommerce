@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
 	<?php
 		echo wp_kses_post( sprintf(
 			/* translators: %s: documentation URL */
-			__( 'Your store does not appear to be using a secure connection. We highly recommend serving your entire website over a https connection to help keep customer data secure. <a href="%s">Learn more here.</a>', 'woocommerce' ),
+			__( 'Your store does not appear to be using a secure connection. We highly recommend serving your entire website over an HTTPS connection to help keep customer data secure. <a href="%s">Learn more here.</a>', 'woocommerce' ),
 			'https://docs.woocommerce.com/document/ssl-and-https/'
 		) );
 	?>
