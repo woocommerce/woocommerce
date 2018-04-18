@@ -191,21 +191,12 @@ function woocommerce_wp_checkbox( $field ) {
  * @return string
  */
 function wc_selected( $value, $options ) {
-	$value = (string) $value;
 	if ( is_array( $options ) ) {
 		$options = array_map( 'strval', $options );
-		$is_value_in_options = in_array( $value, $options, true );
-	} else {
-		$options = (string) $options;
-		$is_value_in_options = ( $value === $options );
+		return selected( in_array( (string) $value, $options, true ), true, false );
 	}
 
-	if ( $is_value_in_options ) {
-		return " selected='selected'";
-	} else {
-		return '';
-	}
-
+	return selected( $value, $options, false );
 }
 
 /**
