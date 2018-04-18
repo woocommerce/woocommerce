@@ -221,7 +221,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Load meta box input values using CRUD and edit context. #19670
 * Tweak - Scroll to notices on cart/checkout for better mobile visibility. #19699
 * Fix - Properly set orderby and order when calling WC_Customer_Download_Data_Store::get_downloads(). #18620
-* Fix - Set maxlength for order item meta key to avoid values disapearing if too long. #18918
+* Fix - Set maxlength for order item meta key to avoid values disappearing if too long. #18918
 * Fix - Remove hardcoded /wp-content check for downloads. #18961
 * Fix - Made get_on_sale_products respect the setting to hide outofstock products. #18984
 * Fix - Prevent shortcode [product_page] redirecting to the actual product's page after add to cart. #19043
