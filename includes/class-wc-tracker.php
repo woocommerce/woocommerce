@@ -299,6 +299,20 @@ class WC_Tracker {
 	}
 
 	/**
+	 * Get order counts
+	 *
+	 * @return array
+	 */
+	private static function get_order_counts() {
+		$order_count      = array();
+		$order_count_data = wp_count_posts( 'shop_order' );
+		foreach ( wc_get_order_statuses() as $status_slug => $status_name ) {
+			$order_count[ $status_slug ] = $order_count_data->{ $status_slug };
+		}
+		return $order_count;
+	}
+
+	/**
 	 * Combine all order data.
 	 *
 	 * @return array
@@ -306,11 +320,12 @@ class WC_Tracker {
 	private static function get_orders() {
 		$orders = array();
 
-		$orders['first']    = self::get_first_order_date();
-		$orders['last']     = self::get_last_order_date();
-		$order_totals       = self::get_order_totals();
+		$orders['first'] = self::get_first_order_date();
+		$orders['last']  = self::get_last_order_date();
+		$order_counts    = self::get_order_counts();
+		$order_totals    = self::get_order_totals();
 
-		return array_merge( $orders, $order_totals );
+		return array_merge( $orders, $order_counts, $order_totals );
 	}
 
 	/**
