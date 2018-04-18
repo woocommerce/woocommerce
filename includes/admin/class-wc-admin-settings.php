@@ -640,7 +640,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 									class="<?php echo esc_attr( $value['class'] ); ?>"
 									placeholder="<?php echo esc_attr( $value['placeholder'] ); ?>"
 									step="1"
-									min="0"
+									min="1"
 									<?php echo implode( ' ', $custom_attributes ); // WPCS: XSS ok. ?>
 								/>&nbsp;
 								<select name="<?php echo esc_attr( $value['id'] ); ?>[unit]" style="width: auto;">
