@@ -599,6 +599,8 @@ function wc_get_terms_and_conditions_checkbox_text() {
  * @return string
  */
 function wc_get_privacy_policy_text( $type = '' ) {
+	$text = '';
+
 	switch ( $type ) {
 		case 'checkout':
 			$text = get_option( 'woocommerce_checkout_privacy_policy_text', __( 'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our [privacy_policy].', 'woocommerce' ) );
