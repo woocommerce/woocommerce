@@ -73,8 +73,7 @@ class WC_Privacy {
 
 		if ( $orders ) {
 			foreach ( $orders as $order ) {
-				error_log( 'Anon ' . $order->get_id() ); // @codingStandardsIgnoreLine temp until implemented.
-				// self::remove_order_personal_data( $order ); @todo Integrate with #19330 and set _anonymized meta after complete.
+				self::remove_order_personal_data( $order );
 				$count ++;
 			}
 		}
@@ -89,7 +88,7 @@ class WC_Privacy {
 		self::$background_process->push_to_queue( array( 'task' => 'trash_pending_orders' ) );
 		self::$background_process->push_to_queue( array( 'task' => 'trash_failed_orders' ) );
 		self::$background_process->push_to_queue( array( 'task' => 'trash_cancelled_orders' ) );
-		// self::$background_process->push_to_queue( array( 'task' => 'anonymize_completed_orders' ) );.
+		self::$background_process->push_to_queue( array( 'task' => 'anonymize_completed_orders' ) );
 		self::$background_process->save()->dispatch();
 	}
 
@@ -634,7 +633,11 @@ class WC_Privacy {
 
 		// Set all new props and persist the new data to the database.
 		$order->set_props( $anonymized_data );
+		$order->add_meta_data( '_anonymized', 'yes' );
 		$order->save();
+
+		// Add note that this event occured.
+		$order->add_order_note( __( 'Personal data removed.', 'woocommerce' ) );
 
 		/**
 		 * Allow extensions to remove their own personal data for this order.
@@ -643,9 +646,6 @@ class WC_Privacy {
 		 * @param WC_Order $order A customer object.
 		 */
 		do_action( 'woocommerce_privacy_remove_order_personal_data', $order );
-
-		// Add note that this event occured.
-		$order->add_order_note( __( 'Personal data removed.', 'woocommerce' ) );
 	}
 
 	/**
