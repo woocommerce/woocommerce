@@ -1,5 +1,6 @@
 ## Prerequisites
 
+<!-- Your Pull Request is more likely to be accepted if you go through all the prerequisites. -->
 <!-- Mark completed items with an [x] -->
 
 - [ ] I have followed the [WooCommerce Contributing guideline](https://github.com/woocommerce/woocommerce/blob/master/.github/CONTRIBUTING.md)?
