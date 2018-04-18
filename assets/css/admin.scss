@@ -2887,21 +2887,17 @@ table.wc_shipping {
 
 	th, td {
 		display: table-cell !important;
+		padding: 1em !important;
+		vertical-align: top;
+		line-height: 1.75em;
 	}
 
-	td {
+	&.wc_emails td {
 		vertical-align: middle;
-		padding: 7px;
-		line-height: 2em;
 	}
 
 	tr:nth-child( odd ) td {
 		background: #f9f9f9;
-	}
-
-	th {
-		padding: 9px 7px !important;
-		vertical-align: middle;
 	}
 
 	td.name {
@@ -2925,16 +2921,10 @@ table.wc_shipping {
 			margin: 0;
 		}
 	}
-	th.sort {
-		width: 28px;
-		padding: 0;
-	}
 	td.sort {
-		padding: 0 7px;
 		cursor: move;
 		font-size: 15px;
 		text-align: center;
-		vertical-align: middle;
 
 		&::before {
 			content: '\f333';
@@ -2946,7 +2936,11 @@ table.wc_shipping {
 			width: 17px;
 			float: left;
 			height: 100%;
+			line-height: 24px;
 		}
+	}
+	.wc-payment-gateway-method-name {
+		display: block;
 	}
 	.wc-email-settings-table-name {
 		font-weight: 700;
@@ -2961,18 +2955,6 @@ table.wc_shipping {
 		width: 1em;
 		.tips {
 			margin: 0 auto;
-		}
-	}
-	.wc-email-settings-table-actions a {
-		@include ir();
-		padding: 0 !important;
-		height: 2em !important;
-		width: 2em;
-
-		&::after {
-			@include icon('\f111');
-			font-family: 'Dashicons';
-			line-height: 1.85;
 		}
 	}
 }
@@ -3063,9 +3045,6 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 		.wc-shipping-zone-sort {
 			text-align: center;
 		}
-	}
-	tbody td {
-		padding: 1.5em 1em !important;
 	}
 	td.wc-shipping-zones-blank-state, td.wc-shipping-zone-method-blank-state {
 		background: #f7f1f6 !important;
@@ -3303,6 +3282,8 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 	text-indent: -9999px;
 	border-radius: 10em;
 	position: relative;
+	margin-top: -1px;
+	vertical-align: text-top;
 
 	&:before {
 		content: "";
@@ -3630,6 +3611,7 @@ img.help_tip {
 			}
 		}
 
+		.wc_payment_gateways_wrapper,
 		.wc_emails_wrapper {
 			padding: 0 15px 10px 0;
 		}

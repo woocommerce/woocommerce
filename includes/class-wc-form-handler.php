@@ -382,7 +382,7 @@ class WC_Form_Handler {
 
 				// Terms
 				if ( ! empty( $_POST['terms-field'] ) && empty( $_POST['terms'] ) ) {
-					wc_add_notice( __( 'You must accept our Terms &amp; Conditions.', 'woocommerce' ), 'error' );
+					wc_add_notice( __( 'Please read and accept the terms and conditions to proceed with your order.', 'woocommerce' ), 'error' );
 					return;
 				}
 

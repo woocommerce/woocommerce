@@ -70,31 +70,19 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 		if ( $comments ) {
 			$this->widget_start( $args, $instance );
 
-			echo '<ul class="product_list_widget">';
+			echo wp_kses_post( apply_filters( 'woocommerce_before_widget_product_review_list', '<ul class="product_list_widget">' ) );
 
 			foreach ( (array) $comments as $comment ) {
-
-				$_product = wc_get_product( $comment->comment_post_ID );
-
-				$rating = intval( get_comment_meta( $comment->comment_ID, 'rating', true ) );
-
-				$rating_html = wc_get_rating_html( $rating );
-
-				echo '<li><a href="' . esc_url( get_comment_link( $comment->comment_ID ) ) . '">';
-
-				echo $_product->get_image() . wp_kses_post( $_product->get_name() ) . '</a>'; // WPCS: XSS ok.
-
-				echo $rating_html; // WPCS: XSS ok.
-
-				/* translators: %s: review author */
-				echo '<span class="reviewer">' . sprintf( esc_html__( 'by %s', 'woocommerce' ), get_comment_author() ) . '</span>'; // WPCS: XSS ok.
-
-				echo '</li>';
+				wc_get_template( 'content-widget-reviews.php', array(
+					'comment' => $comment,
+					'product' => wc_get_product( $comment->comment_post_ID ),
+				) );
 			}
 
-			echo '</ul>';
+			echo wp_kses_post( apply_filters( 'woocommerce_after_widget_product_review_list', '</ul>' ) );
 
 			$this->widget_end( $args );
+
 		}
 
 		$content = ob_get_clean();

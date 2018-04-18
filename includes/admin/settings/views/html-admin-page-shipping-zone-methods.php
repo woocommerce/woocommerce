@@ -75,7 +75,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<thead>
 						<tr>
 							<th class="wc-shipping-zone-method-sort"></th>
-							<th class="wc-shipping-zone-method-title"><?php esc_html_e( 'Shipping method title', 'woocommerce' ); ?></th>
+							<th class="wc-shipping-zone-method-title"><?php esc_html_e( 'Title', 'woocommerce' ); ?></th>
 							<th class="wc-shipping-zone-method-enabled"><?php esc_html_e( 'Enabled', 'woocommerce' ); ?></th>
 							<th class="wc-shipping-zone-method-description"><?php esc_html_e( 'Description', 'woocommerce' ); ?></th>
 						</tr>

@@ -513,6 +513,148 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
 }
 
 /**
+ * Get product taxonomy HTML classes.
+ *
+ * @since 3.4.0
+ * @param array  $term_ids Array of terms IDs or objects.
+ * @param string $taxonomy Taxonomy.
+ * @return array
+ */
+function wc_get_product_taxonomy_class( $term_ids, $taxonomy ) {
+	$classes = array();
+
+	foreach ( $term_ids as $term_id ) {
+		$term = get_term( $term_id, $taxonomy );
+
+		if ( empty( $term->slug ) ) {
+			continue;
+		}
+
+		$term_class = sanitize_html_class( $term->slug, $term->term_id );
+		if ( is_numeric( $term_class ) || ! trim( $term_class, '-' ) ) {
+			$term_class = $term->term_id;
+		}
+
+		// 'post_tag' uses the 'tag' prefix for backward compatibility.
+		if ( 'post_tag' === $taxonomy ) {
+			$classes[] = 'tag-' . $term_class;
+		} else {
+			$classes[] = sanitize_html_class( $taxonomy . '-' . $term_class, $taxonomy . '-' . $term->term_id );
+		}
+	}
+
+	return $classes;
+}
+
+/**
+ * Retrieves the classes for the post div as an array.
+ *
+ * This method is clone from WordPress's get_post_class(), allowing removing taxonomies.
+ *
+ * @since 3.4.0
+ * @param string|array           $class      One or more classes to add to the class list.
+ * @param int|WP_Post|WC_Product $product_id Product ID or product object.
+ * @return array
+ */
+function wc_get_product_class( $class = '', $product_id = null ) {
+	if ( is_a( $product_id, 'WC_Product' ) ) {
+		$product    = $product_id;
+		$product_id = $product_id->get_id();
+		$post       = get_post( $product_id );
+	} else {
+		$post    = get_post( $product_id );
+		$product = wc_get_product( $post->ID );
+	}
+
+	$classes = array();
+
+	if ( $class ) {
+		if ( ! is_array( $class ) ) {
+			$class = preg_split( '#\s+#', $class );
+		}
+		$classes = array_map( 'esc_attr', $class );
+	} else {
+		// Ensure that we always coerce class to being an array.
+		$class = array();
+	}
+
+	if ( ! $post || ! $product ) {
+		return $classes;
+	}
+
+	$classes[] = 'post-' . $post->ID;
+	if ( ! is_admin() ) {
+		$classes[] = $post->post_type;
+	}
+	$classes[] = 'type-' . $post->post_type;
+	$classes[] = 'status-' . $post->post_status;
+
+	// Post format.
+	if ( post_type_supports( $post->post_type, 'post-formats' ) ) {
+		$post_format = get_post_format( $post->ID );
+
+		if ( $post_format && ! is_wp_error( $post_format ) ) {
+			$classes[] = 'format-' . sanitize_html_class( $post_format );
+		} else {
+			$classes[] = 'format-standard';
+		}
+	}
+
+	// Post requires password.
+	$post_password_required = post_password_required( $post->ID );
+	if ( $post_password_required ) {
+		$classes[] = 'post-password-required';
+	} elseif ( ! empty( $post->post_password ) ) {
+		$classes[] = 'post-password-protected';
+	}
+
+	// Post thumbnails.
+	if ( current_theme_supports( 'post-thumbnails' ) && has_post_thumbnail( $post->ID ) && ! is_attachment( $post ) && ! $post_password_required ) {
+		$classes[] = 'has-post-thumbnail';
+	}
+
+	// Sticky for Sticky Posts.
+	if ( is_sticky( $post->ID ) ) {
+		if ( is_home() && ! is_paged() ) {
+			$classes[] = 'sticky';
+		} elseif ( is_admin() ) {
+			$classes[] = 'status-sticky';
+		}
+	}
+
+	// Hentry for hAtom compliance.
+	$classes[] = 'hentry';
+
+	// Include attributes and any extra taxonomy.
+	if ( apply_filters( 'woocommerce_get_product_class_include_taxonomies', false ) ) {
+		$taxonomies = get_taxonomies( array( 'public' => true ) );
+		foreach ( (array) $taxonomies as $taxonomy ) {
+			if ( is_object_in_taxonomy( $post->post_type, $taxonomy ) && in_array( $taxonomy, array( 'product_cat', 'product_tag' ), true ) ) {
+				$classes = array_merge( $classes, wc_get_product_taxonomy_class( (array) get_the_terms( $post->ID, $taxonomy ), $taxonomy ) );
+			}
+		}
+	}
+	// Categories.
+	$classes = array_merge( $classes, wc_get_product_taxonomy_class( $product->get_category_ids(), 'product_cat' ) );
+
+	// Tags.
+	$classes = array_merge( $classes, wc_get_product_taxonomy_class( $product->get_tag_ids(), 'product_tag' ) );
+
+	return array_filter( array_unique( apply_filters( 'post_class', $classes, $class, $post->ID ) ) );
+}
+
+/**
+ * Display the classes for the product div.
+ *
+ * @since 3.4.0
+ * @param string|array           $class      One or more classes to add to the class list.
+ * @param int|WP_Post|WC_Product $product_id Product ID or product object.
+ */
+function wc_product_class( $class = '', $product_id = null ) {
+	echo 'class="' . esc_attr( join( ' ', wc_get_product_class( $class, $product_id ) ) ) . '"';
+}
+
+/**
  * Outputs hidden form inputs for each query string variable.
  *
  * @since 3.0.0
@@ -547,6 +689,132 @@ function wc_query_string_form_fields( $values = null, $exclude = array(), $curre
 	} else {
 		echo $html; // WPCS: XSS ok.
 	}
+}
+
+/**
+ * Get the terms and conditons page ID.
+ *
+ * @since 3.4.0
+ * @return int
+ */
+function wc_terms_and_conditions_page_id() {
+	$page_id = wc_get_page_id( 'terms' );
+	return apply_filters( 'woocommerce_terms_and_conditions_page_id', 0 < $page_id ? absint( $page_id ) : 0 );
+}
+
+/**
+ * Get the privacy policy page ID.
+ *
+ * @since 3.4.0
+ * @return int
+ */
+function wc_privacy_policy_page_id() {
+	$page_id = get_option( 'wp_page_for_privacy_policy', 0 );
+	return apply_filters( 'woocommerce_privacy_policy_page_id', 0 < $page_id ? absint( $page_id ) : 0 );
+}
+
+/**
+ * See if the checkbox is enabled or not based on the existance of the terms page and checkbox text.
+ *
+ * @since 3.4.0
+ * @return bool
+ */
+function wc_terms_and_conditions_checkbox_enabled() {
+	return wc_terms_and_conditions_page_id() && wc_get_terms_and_conditions_checkbox_text();
+}
+
+/**
+ * Get the terms and conditons checkbox text, if set.
+ *
+ * @since 3.4.0
+ * @return string
+ */
+function wc_get_terms_and_conditions_checkbox_text() {
+	return trim( apply_filters( 'woocommerce_get_terms_and_conditions_checkbox_text', get_option( 'woocommerce_checkout_terms_and_conditions_checkbox_text', __( 'I have read and agree to the website [terms]', 'woocommerce' ) ) ) );
+}
+
+/**
+ * Get the privacy policy text, if set.
+ *
+ * @since 3.4.0
+ * @return string
+ */
+function wc_get_privacy_policy_text() {
+	return trim( apply_filters( 'woocommerce_get_privacy_policy_text', get_option( 'woocommerce_checkout_privacy_policy_text', __( 'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our [privacy_policy].', 'woocommerce' ) ) ) );
+}
+
+/**
+ * Output t&c checkbox text.
+ *
+ * @since 3.4.0
+ */
+function wc_terms_and_conditions_checkbox_text() {
+	$text = wc_get_terms_and_conditions_checkbox_text();
+
+	if ( ! $text ) {
+		return;
+	}
+
+	echo wp_kses_post( wc_replace_policy_page_link_placeholders( $text ) );
+}
+
+/**
+ * Output t&c page's content (if set). The page can be set from checkout settings.
+ *
+ * @since 3.4.0
+ */
+function wc_terms_and_conditions_page_content() {
+	$terms_page_id = wc_terms_and_conditions_page_id();
+
+	if ( ! $terms_page_id ) {
+		return;
+	}
+
+	$page = get_post( $terms_page_id );
+
+	if ( $page && 'publish' === $page->post_status && $page->post_content && ! has_shortcode( $page->post_content, 'woocommerce_checkout' ) ) {
+		echo '<div class="woocommerce-terms-and-conditions" style="display: none; max-height: 200px; overflow: auto;">' . wp_kses_post( wc_format_content( $page->post_content ) ) . '</div>';
+	}
+}
+
+/**
+ * Output t&c text. This is custom text which can be added via the customizer.
+ *
+ * @since 3.4.0
+ */
+function wc_privacy_policy_text() {
+	if ( ! wc_privacy_policy_page_id() ) {
+		return;
+	}
+
+	$text = wc_get_privacy_policy_text();
+
+	if ( ! $text ) {
+		return;
+	}
+
+	echo '<div class="woocommerce-terms-and-conditions-text">' . wp_kses_post( wpautop( wc_replace_policy_page_link_placeholders( $text ) ) ) . '</div>';
+}
+
+/**
+ * Replaces placeholders with links to WooCommerce policy pages.
+ *
+ * @since 3.4.0
+ * @param string $text Text to find/replace within.
+ * @return string
+ */
+function wc_replace_policy_page_link_placeholders( $text ) {
+	$privacy_page_id = wc_privacy_policy_page_id( $text );
+	$terms_page_id   = wc_terms_and_conditions_page_id();
+	$privacy_link    = $privacy_page_id ? '<a href="' . esc_url( get_permalink( $privacy_page_id ) ) . '" class="woocommerce-privacy-policy-link" target="_blank">' . __( 'privacy policy', 'woocommerce' ) . '</a>' : __( 'privacy policy', 'woocommerce' );
+	$terms_link      = $terms_page_id ? '<a href="' . esc_url( get_permalink( $terms_page_id ) ) . '" class="woocommerce-terms-and-conditions-link" target="_blank">' . __( 'terms and conditions', 'woocommerce' ) . '</a>' : __( 'terms and conditions', 'woocommerce' );
+
+	$find_replace = array(
+		'[terms]'          => $terms_link,
+		'[privacy_policy]' => $privacy_link,
+	);
+
+	return str_replace( array_keys( $find_replace ), array_values( $find_replace ), $text );
 }
 
 /**
@@ -2160,7 +2428,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			$args['class'][] = 'validate-required';
 			$required        = '&nbsp;<abbr class="required" title="' . esc_attr__( 'required', 'woocommerce' ) . '">*</abbr>';
 		} else {
-			$required = '';
+			$required = '&nbsp;<span class="optional">(' . esc_html__( 'optional', 'woocommerce' ) . ')</span>';
 		}
 
 		if ( is_string( $args['label_class'] ) ) {
@@ -2185,6 +2453,10 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 		if ( true === $args['autofocus'] ) {
 			$args['custom_attributes']['autofocus'] = 'autofocus';
+		}
+
+		if ( $args['description'] ) {
+			$args['custom_attributes']['aria-describedby'] = $args['id'] . '-description';
 		}
 
 		if ( ! empty( $args['custom_attributes'] ) && is_array( $args['custom_attributes'] ) ) {
@@ -2324,11 +2596,13 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 				$field_html .= '<label for="' . esc_attr( $label_id ) . '" class="' . esc_attr( implode( ' ', $args['label_class'] ) ) . '">' . $args['label'] . $required . '</label>';
 			}
 
-			$field_html .= $field;
+			$field_html .= '<span class="woocommerce-input-wrapper">' . $field;
 
 			if ( $args['description'] ) {
-				$field_html .= '<span class="description">' . esc_html( $args['description'] ) . '</span>';
+				$field_html .= '<span class="description" id="' . esc_attr( $args['id'] ) . '-description" aria-hidden="true">' . wp_kses_post( $args['description'] ) . '</span>';
 			}
+
+			$field_html .= '</span>';
 
 			$container_class = esc_attr( implode( ' ', $args['class'] ) );
 			$container_id    = esc_attr( $args['id'] ) . '_field';

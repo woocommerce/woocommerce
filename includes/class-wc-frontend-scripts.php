@@ -412,6 +412,16 @@ class WC_Frontend_Scripts {
 				self::enqueue_style( $handle, $args['src'], $args['deps'], $args['version'], $args['media'], $args['has_rtl'] );
 			}
 		}
+
+		// Placeholder style.
+		wp_register_style( 'woocommerce-inline', false );
+		wp_enqueue_style( 'woocommerce-inline' );
+
+		if ( true === wc_string_to_bool( get_option( 'woocommerce_checkout_highlight_required_fields', 'yes' ) ) ) {
+			wp_add_inline_style( 'woocommerce-inline', '.woocommerce form .form-row .required { visibility: visible; }' );
+		} else {
+			wp_add_inline_style( 'woocommerce-inline', '.woocommerce form .form-row .required { visibility: hidden; }' );
+		}
 	}
 
 	/**
@@ -509,6 +519,7 @@ class WC_Frontend_Scripts {
 					'locale'             => wp_json_encode( WC()->countries->get_country_locale() ),
 					'locale_fields'      => wp_json_encode( WC()->countries->get_country_locale_field_selectors() ),
 					'i18n_required_text' => esc_attr__( 'required', 'woocommerce' ),
+					'i18n_optional_text' => esc_html__( 'optional', 'woocommerce' ),
 				);
 				break;
 			case 'wc-cart':

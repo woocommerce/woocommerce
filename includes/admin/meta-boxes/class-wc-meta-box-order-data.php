@@ -344,7 +344,9 @@ class WC_Meta_Box_Order_Data {
 									$field_value = make_clickable( esc_html( $field_value ) );
 								}
 
-								echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . wp_kses_post( $field_value ) . '</p>';
+								if ( $field_value ) {
+									echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . wp_kses_post( $field_value ) . '</p>';
+								}
 							}
 							?>
 						</div>
@@ -450,7 +452,9 @@ class WC_Meta_Box_Order_Data {
 										$field_value = $order->get_meta( '_' . $field_name );
 									}
 
-									echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( $field_value ) ) . '</p>';
+									if ( $field_value ) {
+										echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . wp_kses_post( $field_value ) . '</p>';
+									}
 								}
 							}
 
@@ -600,6 +604,11 @@ class WC_Meta_Box_Order_Data {
 		}
 
 		$props['date_created'] = $date;
+
+		// Set created via prop if new post.
+		if ( isset( $_POST['original_post_status'] ) && $_POST['original_post_status'] === 'auto-draft' ) {
+			$props['created_via'] = 'admin';
+		}
 
 		// Save order data.
 		$order->set_props( $props );

@@ -104,6 +104,10 @@ final class WC_Cart_Session {
 			foreach ( $cart as $key => $values ) {
 				$product = wc_get_product( $values['variation_id'] ? $values['variation_id'] : $values['product_id'] );
 
+				if ( ! is_customize_preview() && 'customize-preview' === $key ) {
+					continue;
+				}
+
 				if ( ! empty( $product ) && $product->exists() && $values['quantity'] > 0 ) {
 
 					if ( ! $product->is_purchasable() ) {
