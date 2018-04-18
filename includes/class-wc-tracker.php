@@ -433,61 +433,25 @@ class WC_Tracker {
 	 * @return array
 	 */
 	private static function get_order_totals() {
-		$gross_total    = 0;
-		$net_total      = 0;
-		$shipping_total = 0;
-		$tax_total      = 0;
-		$discount_total = 0;
-		$gateways       = array();
-		$statuses       = array();
+		global $wpdb;
 
-		$orders = wc_get_orders(
-			array(
-				'limit'  => -1,
-				'fields' => 'ids',
-			)
-		);
+		$gross_total = $wpdb->get_var( "
+			SELECT
+				SUM( order_meta.meta_value ) AS 'gross_total'
+			FROM {$wpdb->prefix}posts AS orders
+			LEFT JOIN {$wpdb->prefix}postmeta AS order_meta ON order_meta.post_id = orders.ID
+			WHERE order_meta.meta_key =  '_order_total'
+				AND orders.post_status =  'wc-completed'
+			GROUP BY order_meta.meta_key
+		" );
 
-		if ( ! empty( $orders ) ) {
-			foreach ( $orders as $order_id ) {
-				$order = wc_get_order( $order_id );
-				if ( is_a( $order, 'WC_Order' ) ) {
-					// Skip orders that was placed by admin.
-					if ( $order->get_billing_email( 'edit' ) === get_option( 'admin_email' ) ) {
-						continue;
-					}
-
-					if ( in_array( $order->get_status(), wc_get_is_paid_statuses(), true ) ) {
-						$gross_total    += $order->get_total( 'edit' );
-						$net_total      += ( $order->get_total( 'edit' ) - $order->get_shipping_total( 'edit' ) - $order->get_total_tax( 'edit' ) );
-						$shipping_total += $order->get_shipping_total( 'edit' );
-						$tax_total      += $order->get_total_tax( 'edit' );
-						$discount_total += $order->get_discount_total( 'edit' );
-
-						if ( isset( $gateways[ $order->get_payment_method() ] ) ) {
-							$gateways[ $order->get_payment_method() ] += $order->get_total( 'edit' );
-						} else {
-							$gateways[ $order->get_payment_method() ] = $order->get_total( 'edit' );
-						}
-					}
-
-					if ( isset( $statuses[ $order->get_status( 'edit' ) ] ) ) {
-						$statuses[ $order->get_status( 'edit' ) ] += 1;
-					} else {
-						$statuses[ $order->get_status( 'edit' ) ] = 1;
-					}
-				}
-			}
+		if ( is_null( $gross_total ) ) {
+			$gross_total = 0;
 		}
 
-		return array_merge( array(
-			'gross'    => $gross_total,
-			'net'      => $net_total,
-			'shipping' => $shipping_total,
-			'tax'      => $tax_total,
-			'discount' => $discount_total,
-			'gateways' => $gateways,
-		), $statuses ); // Merging to keep backward compatibility with old status counts.
+		return array(
+			'gross' => $gross_total,
+		);
 	}
 
 	/**
