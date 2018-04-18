@@ -320,10 +320,9 @@ class WC_Tracker {
 	private static function get_orders() {
 		$orders = array();
 
-		$orders['first'] = self::get_first_order_date();
-		$orders['last']  = self::get_last_order_date();
-		$order_counts    = self::get_order_counts();
-		$order_totals    = self::get_order_totals();
+		$orders_dates = self::get_order_dates();
+		$order_counts = self::get_order_counts();
+		$order_totals = self::get_order_totals();
 
 		return array_merge( $orders, $order_counts, $order_totals );
 	}
@@ -474,19 +473,24 @@ class WC_Tracker {
 	 *
 	 * @return string
 	 */
-	private static function get_last_order_date() {
-		$orders = wc_get_orders(
-			array(
-				'limit'    => 1,
-				'status'   => array_map( 'wc_get_order_status_name', wc_get_is_paid_statuses() ),
-			)
-		);
-		if ( ! empty( $orders ) ) {
-			$order = $orders[0];
-			return $order->get_date_created()->format( 'Y-m-d' );
-		} else {
-			return '-';
+	private static function get_order_dates() {
+		global $wpdb;
+
+		$min_max = $wpdb->get_row( "
+			SELECT
+				MIN( post_date_gmt ) as 'first', MAX( post_date_gmt ) as 'last'
+			FROM {$wpdb->prefix}posts
+			WHERE post_type = 'shop_order'
+		", ARRAY_A );
+
+		if ( is_null( $min_max ) ) {
+			$min_max = array(
+				'first' => '-',
+				'last'  => '-',
+			);
 		}
+
+		return $min_max;
 	}
 
 	/**
