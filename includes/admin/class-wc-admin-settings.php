@@ -548,6 +548,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 							'class'            => $value['class'],
 							'echo'             => false,
 							'selected'         => absint( self::get_option( $value['id'], $value['default'] ) ),
+							'post_status'      => 'publish,private,draft',
 						);
 
 						if ( isset( $value['args'] ) ) {
