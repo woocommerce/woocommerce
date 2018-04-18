@@ -105,10 +105,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 					'id'          => 'woocommerce_trash_pending_orders',
 					'type'        => 'relative_date_selector',
 					'placeholder' => __( 'N/A', 'woocommerce' ),
-					'default'     => array(
-						'number' => 30,
-						'unit'   => 'days',
-					),
+					'default'     => '',
 					'autoload'    => false,
 				),
 				array(
@@ -117,10 +114,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 					'id'          => 'woocommerce_trash_failed_orders',
 					'type'        => 'relative_date_selector',
 					'placeholder' => __( 'N/A', 'woocommerce' ),
-					'default'     => array(
-						'number' => 30,
-						'unit'   => 'days',
-					),
+					'default'     => '',
 					'autoload'    => false,
 				),
 				array(
@@ -129,10 +123,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 					'id'          => 'woocommerce_trash_cancelled_orders',
 					'type'        => 'relative_date_selector',
 					'placeholder' => __( 'N/A', 'woocommerce' ),
-					'default'     => array(
-						'number' => 30,
-						'unit'   => 'days',
-					),
+					'default'     => '',
 					'autoload'    => false,
 				),
 				array(

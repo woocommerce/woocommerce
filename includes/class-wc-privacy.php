@@ -89,7 +89,7 @@ class WC_Privacy {
 		self::$background_process->push_to_queue( array( 'task' => 'trash_pending_orders' ) );
 		self::$background_process->push_to_queue( array( 'task' => 'trash_failed_orders' ) );
 		self::$background_process->push_to_queue( array( 'task' => 'trash_cancelled_orders' ) );
-		//self::$background_process->push_to_queue( array( 'task' => 'anonymize_completed_orders' ) );
+		// self::$background_process->push_to_queue( array( 'task' => 'anonymize_completed_orders' ) );.
 		self::$background_process->save()->dispatch();
 	}
 
@@ -101,10 +101,7 @@ class WC_Privacy {
 	 * @return int Number of orders processed.
 	 */
 	public static function trash_pending_orders( $limit = 20 ) {
-		$option = wc_parse_relative_date_option( get_option( 'woocommerce_trash_pending_orders', array(
-			'number' => 30,
-			'unit'   => 'days',
-		) ) );
+		$option = wc_parse_relative_date_option( get_option( 'woocommerce_trash_pending_orders' ) );
 
 		if ( empty( $option['number'] ) ) {
 			return 0;
@@ -125,10 +122,7 @@ class WC_Privacy {
 	 * @return int Number of orders processed.
 	 */
 	public static function trash_failed_orders( $limit = 20 ) {
-		$option = wc_parse_relative_date_option( get_option( 'woocommerce_trash_failed_orders', array(
-			'number' => 30,
-			'unit'   => 'days',
-		) ) );
+		$option = wc_parse_relative_date_option( get_option( 'woocommerce_trash_failed_orders' ) );
 
 		if ( empty( $option['number'] ) ) {
 			return 0;
@@ -149,10 +143,7 @@ class WC_Privacy {
 	 * @return int Number of orders processed.
 	 */
 	public static function trash_cancelled_orders( $limit = 20 ) {
-		$option = wc_parse_relative_date_option( get_option( 'woocommerce_trash_cancelled_orders', array(
-			'number' => 30,
-			'unit'   => 'days',
-		) ) );
+		$option = wc_parse_relative_date_option( get_option( 'woocommerce_trash_cancelled_orders' ) );
 
 		if ( empty( $option['number'] ) ) {
 			return 0;
