@@ -183,7 +183,8 @@ class WC_Product_Variation extends WC_Product_Simple {
 						'add-to-cart'  => $this->get_parent_id(),
 					), $this->get_permalink()
 				)
-			)
+			),
+			'woocommerce-cart'
 		) : $this->get_permalink();
 		return apply_filters( 'woocommerce_product_add_to_cart_url', $url, $this );
 	}

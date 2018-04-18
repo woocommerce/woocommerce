@@ -5,15 +5,15 @@ jQuery( function( $ ) {
 		return false;
 	}
 
-	$.wc_clear_prepend_and_scroll_to_notices = function( notices, element_after_notices, scroll_to_element ) {
+	$.wc_clear_prepend_and_scroll_to_notices = function( notices, elementAfterNotices, scrollToElementSelector ) {
 		if ( notices ) {
 			// Remove notices from all sources
 			$( '.woocommerce-error, .woocommerce-message, .woocommerce-info' ).remove();
 
 			// Add notices returned by AJAX add_to_cart call
-			element_after_notices.prepend( notices );
-
-			$.scroll_to_notices( scroll_to_element );
+			elementAfterNotices.prepend( notices );
+			var scrollToElement = $( scrollToElementSelector );
+			$.scroll_to_notices( scrollToElement );
 		}
 	};
 
@@ -72,7 +72,7 @@ jQuery( function( $ ) {
 					return;
 				}
 
-				$.wc_clear_prepend_and_scroll_to_notices( response.notices, $( '.site-main' ), $( '[role="alert"]' ) );
+				$.wc_clear_prepend_and_scroll_to_notices( response.notices, $( '.site-main' ), '[role="alert"]' );
 
 				// Trigger event so themes can refresh other areas.
 				$( document.body ).trigger( 'added_to_cart', [ response.fragments, response.cart_hash, $thisbutton ] );
@@ -108,7 +108,7 @@ jQuery( function( $ ) {
 				return;
 			}
 
-			$.wc_clear_prepend_and_scroll_to_notices( response.notices, $( '.site-main' ), $( '[role="alert"]' ) );
+			$.wc_clear_prepend_and_scroll_to_notices( response.notices, $( '.site-main' ), '[role="alert"]' );
 
 			$( document.body ).trigger( 'removed_from_cart', [ response.fragments, response.cart_hash ] );
 		}).fail( function() {

@@ -814,9 +814,17 @@ class WC_Form_Handler {
 
 			if ( ! isset( $_REQUEST['woocommerce-cart-nonce'] ) && ! isset( $_REQUEST['_wpnonce'] ) ) {
 				//Include notice to confirm an add to cart event should the nonce be missing (simply forwards the link with nonce appended).
+
+				// To get correct add_to_cart_url, we need variation object.
+				$variation_id = empty( $_REQUEST['variation_id'] ) ? null : absint( wp_unslash( $_REQUEST['variation_id'] ) );
+				if ( $variation_id ) {
+					$adding_to_cart = wc_get_product( $variation_id );
+				}
+
 				$missing_nonce_notice = sprintf( _x( 'Do you want to add &ldquo;%s&rdquo; to your cart?', 'Item name in quotes', 'woocommerce' ), $adding_to_cart->get_name() );
 				$missing_nonce_notice .= ' <a href="' . esc_url( $adding_to_cart->add_to_cart_url() ) . '" class="restore-item">' . __( 'Click here to confirm!', 'woocommerce' ) . '</a>';
 				wc_add_notice( $missing_nonce_notice );
+				return;
 			}
 
 			$nonce_value = wc_get_var( $_REQUEST['woocommerce-cart-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) );
