@@ -164,6 +164,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Feature - GDPR: Tools to turn off company/address-2/phone checkout fields to avoid unnecessary data collection, and a toggle to choose how required fields are presented. This is available via the Customizer. #19637
 * Feature - GDPR: Tools in the Customizer to change the terms and conditions checkbox label on the checkout. #19637
 * Feature - GDPR: Tools to define a privacy policy for the account page and checkout page in "account privacy" settings and within the Customizer. #19747
+* Feature - GDPR: Tools to automatically clean up and remove order personal data after a set time period. #19743
 * Feature - GDPR: Added privacy snippet which works with the new privacy page functionality in WordPress 4.9.6. #19749
 * Feature - Added a new order widget to the dashboard (on multisite) so you can see your orders across multiple stores on the same WordPress network. #17598
 * Feature - Added "display name" input on the My Account page. #19078
