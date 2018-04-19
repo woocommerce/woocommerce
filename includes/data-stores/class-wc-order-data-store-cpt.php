@@ -474,19 +474,19 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		if ( strpos( $term, ':' ) ) {
 			$term_array = explode( ' ', $term );
 			foreach ( $term_array as $the_term ) {
-				preg_match_all( '/(.*)[:](.*)/i', $the_term, $matches );
+				preg_match( '/(.*)[:](.*)/i', $the_term, $matches );
 				// Make sure we have one of the allowed special search terms present.
 				if (
-					! empty( $matches[1][0] )
-					&& ! empty( $matches[2][0] )
-					&& in_array( strtolower( $matches[1][0] ), array( 'date_created', 'date_modified', 'date_completed', 'date_paid' ), true )
+					! empty( $matches[1] )
+					&& ! empty( $matches[2] )
+					&& in_array( strtolower( $matches[1] ), array( 'date_created', 'date_modified', 'date_completed', 'date_paid' ), true )
 				) {
-					preg_match_all( '/(\.{3}|<=|>=|<|>)/i', $matches[2][0], $allowed_operators );
+					preg_match( '/(\.{3}|<=|>=|<|>)/i', $matches[2], $allowed_operators );
 					// If any of the allowed operators >, <, >=, <=, ... are present we can add it to the search fields.
 					if ( ! empty( $allowed_operators[0] ) ) {
-						$special_terms[ strtolower( $matches[1][0] ) ] = $matches[2][0];
+						$special_terms[ strtolower( $matches[1] ) ] = $matches[2];
 						// Remove the special term from the search term.
-						$term = str_replace( $matches[0][0], '', $term );
+						$term = str_replace( $matches[0], '', $term );
 					}
 				}
 			}
