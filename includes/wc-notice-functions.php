@@ -119,8 +119,10 @@ function wc_clear_notices() {
  * Prints messages and errors which are stored in the session, then clears them.
  *
  * @since 2.1
+ * @param bool $return true to return rather than echo. @since 3.5.0.
+ * @return string|null
  */
-function wc_print_notices() {
+function wc_print_notices( $return = false ) {
 	if ( ! did_action( 'woocommerce_init' ) ) {
 		wc_doing_it_wrong( __FUNCTION__, __( 'This function should not be called before woocommerce_init.', 'woocommerce' ), '2.3' );
 		return;
@@ -128,6 +130,9 @@ function wc_print_notices() {
 
 	$all_notices  = WC()->session->get( 'wc_notices', array() );
 	$notice_types = apply_filters( 'woocommerce_notice_types', array( 'error', 'success', 'notice' ) );
+
+	// Buffer output.
+	ob_start();
 
 	foreach ( $notice_types as $notice_type ) {
 		if ( wc_notice_count( $notice_type ) > 0 ) {
@@ -138,10 +143,24 @@ function wc_print_notices() {
 	}
 
 	wc_clear_notices();
+
+	$notices = ob_get_clean();
+
+	if ( $return ) {
+		return '<div class="woocommerce-notices-wrapper">' . $notices . '</div>';
+	} else {
+		echo '<div class="woocommerce-notices-wrapper">';
+		echo wp_kses_post( $notices );
+		echo '</div>';
+	}
 }
-add_action( 'woocommerce_shortcode_before_product_cat_loop', 'wc_print_notices', 10 );
-add_action( 'woocommerce_before_shop_loop', 'wc_print_notices', 10 );
-add_action( 'woocommerce_before_single_product', 'wc_print_notices', 10 );
+add_action( 'woocommerce_cart_is_empty', 'wc_print_notices', 10, 0 );
+add_action( 'woocommerce_shortcode_before_product_cat_loop', 'wc_print_notices', 10, 0 );
+add_action( 'woocommerce_before_shop_loop', 'wc_print_notices', 10, 0 );
+add_action( 'woocommerce_before_single_product', 'wc_print_notices', 10, 0 );
+add_action( 'woocommerce_before_cart', 'wc_print_notices', 10, 0 );
+add_action( 'woocommerce_before_checkout_form', 'wc_print_notices', 10, 0 );
+add_action( 'woocommerce_account_content', 'wc_print_notices', 10, 0 );
 
 /**
  * Print a single notice immediately.
