@@ -380,14 +380,17 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		// Revive the product from the database and analyze results
 		$product            = wc_get_product( $product_id );
 		$default_attributes = $product->get_default_attributes();
-		$this->assertEquals( $default_attributes, array(
-			'sample-attribute-true-0'  => '0',
-			'sample-attribute-true-1'  => 1,
-			'sample-attribute-true-2'  => 'true',
-			'sample-attribute-true-3'  => 'false',
-			'sample-attribute-true-4'  => array( 'exists' => 'false' ),
-			'sample-attribute-false-4' => $test_object,
-		));
+		$this->assertEquals(
+			array(
+				'sample-attribute-true-0'  => '0',
+				'sample-attribute-true-1'  => 1,
+				'sample-attribute-true-2'  => 'true',
+				'sample-attribute-true-3'  => 'false',
+				'sample-attribute-true-4'  => array( 'exists' => 'false' ),
+				'sample-attribute-false-4' => $test_object,
+			),
+			$default_attributes
+		);
 	}
 
 	public function test_variable_child_has_dimensions() {
