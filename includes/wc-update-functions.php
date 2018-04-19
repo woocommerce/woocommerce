@@ -1725,16 +1725,22 @@ function wc_update_350_order_customer_id( $updater = false ) {
 	} else {
 		// If running the update from the wp-admin, copy data in batches being careful not to use more memory than allowed.
 		$admin_orders_sql = '';
+		$admin_orders     = get_transient( 'wc_update_350_admin_orders' );
 
-		// Get the list of orders that we don't want to change as they belong to user ID 1.
-		$admin_orders = $wpdb->get_col(
-			$wpdb->prepare(
-				"SELECT ID FROM wp_posts p
-				INNER JOIN wp_postmeta pm ON p.ID = pm.post_id
-				WHERE post_type IN ({$post_types_placeholders}) AND meta_key = '_customer_user' AND meta_value = 1", // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
-				$post_types
-			)
-		);
+		if ( false === $admin_orders ) {
+			// Get the list of orders that we don't want to change as they belong to user ID 1.
+			$admin_orders = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT ID FROM wp_posts p
+					INNER JOIN wp_postmeta pm ON p.ID = pm.post_id
+					WHERE post_type IN ({$post_types_placeholders}) AND meta_key = '_customer_user' AND meta_value = 1", // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+					$post_types
+				)
+			);
+
+			// Cache the list of orders placed by the user ID 1 as to large stores this query can be slow.
+			set_transient( 'wc_update_350_admin_orders', $admin_orders, DAY_IN_SECONDS );
+		}
 
 		if ( ! empty( $admin_orders ) ) {
 			$admin_orders_sql .= ' AND ID NOT IN (' . implode( ', ', $admin_orders ) . ') ';
