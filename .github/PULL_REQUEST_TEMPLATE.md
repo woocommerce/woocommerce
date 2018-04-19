@@ -1,41 +1,33 @@
-## Prerequisites
+### All Submissions:
 
-<!-- Your Pull Request is more likely to be accepted if you go through all the prerequisites. -->
+* [ ] Have you followed the [WooCommerce Contributing guideline](https://github.com/woocommerce/woocommerce/blob/master/.github/CONTRIBUTING.md)?
+* [ ] Does your code follow the [WordPress' coding standards](https://make.wordpress.org/core/handbook/best-practices/coding-standards/)?
+* [ ] Have you checked to ensure there aren't other open [Pull Requests](../../pulls) for the same update/change?
+
 <!-- Mark completed items with an [x] -->
 
-- [ ] I have followed the [WooCommerce Contributing guideline](https://github.com/woocommerce/woocommerce/blob/master/.github/CONTRIBUTING.md)?
-- [ ] My code follows the [WordPress' coding standards](https://make.wordpress.org/core/handbook/best-practices/coding-standards/).
-- [ ] I have added tests to cover my changes.
-- [ ] All new and existing tests passed.
+<!-- You can erase any parts of this template not applicable to your Pull Request. -->
 
-## Changes proposed in this Pull Request
+### Changes proposed in this Pull Request:
 
 <!-- Describe the changes made to this Pull Request, and the reason for such changes. -->
 
 Closes # .
 
-
-
-## Steps to reproduce or test
-
-<!-- We need to be able to reproduce or test, so please be descriptive! -->
+### How to test the changes in this Pull Request:
 
 1.
 2.
 3.
 
-## Type of changes
+### Other information:
 
-<!-- What types of changes does your code introduce? -->
+* [ ] Have you added an explanation of what your changes do and why you'd like us to include them?
+* [ ] Have you written new tests for your changes, as applicable?
+* [ ] Have you successfully ran tests with your changes locally?
+
 <!-- Mark completed items with an [x] -->
 
-- [ ] Bug fix (non-breaking change which fixes an issue)
-- [ ] New feature (non-breaking change which adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to change)
-- [ ] My change requires a change to the documentation.
+### Changelog entry
 
-## Changelog entry
-
-<!-- Enter a short summary of all changes on this Pull Request, this will appear in the changelog if this Pull Request is accepted. -->
-
-- 
+> Enter a short summary of all changes on this Pull Request. This will appear in the changelog if accepted.
