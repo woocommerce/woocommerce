@@ -469,6 +469,29 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	public function search_orders( $term ) {
 		global $wpdb;
 
+		// First see if we have any special search terms.
+		$special_terms = array();
+		if ( strpos( $term, ':' ) ) {
+			$term_array = explode( ' ', $term );
+			foreach ( $term_array as $the_term ) {
+				preg_match_all( '/(.*)[:](.*)/i', $the_term, $matches );
+				// Make sure we have one of the allowed special search terms present.
+				if (
+					! empty( $matches[1][0] )
+					&& ! empty( $matches[2][0] )
+					&& in_array( strtolower( $matches[1][0] ), array( 'date_created', 'date_modified', 'date_completed', 'date_paid' ), true )
+				) {
+					preg_match_all( '/(\.{3}|<=|>=|<|>)/i', $matches[2][0], $allowed_operators );
+					// If any of the allowed operators >, <, >=, <=, ... are present we can add it to the search fields.
+					if ( ! empty( $allowed_operators[0] ) ) {
+						$special_terms[ strtolower( $matches[1][0] ) ] = $matches[2][0];
+						// Remove the special term from the search term.
+						$term = str_replace( $matches[0][0], '', $term );
+					}
+				}
+			}
+		}
+
 		/**
 		 * Searches on meta data can be slow - this lets you choose what fields to search.
 		 * 3.0.0 added _billing_address and _shipping_address meta which contains all address data to make this faster.
@@ -476,14 +499,19 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		 *
 		 * @var array
 		 */
-		$search_fields = array_fill_keys( apply_filters(
-			'woocommerce_shop_order_search_fields', array(
-				'billing_address_index',
-				'shipping_address_index',
-				'billing_last_name',
-				'billing_email',
-			)
-		), wc_clean( $term ) );
+		$meta_fields = array();
+		if ( ! empty( $term ) ) {
+			$meta_fields = array_fill_keys( apply_filters(
+				'woocommerce_shop_order_search_fields', array(
+					'billing_address_index',
+					'shipping_address_index',
+					'billing_last_name',
+					'billing_email',
+				)
+			), wc_clean( $term ) );
+		}
+		$search_fields = array_merge( $meta_fields, $special_terms );
+
 		$order_ids     = array();
 
 		add_filter( 'woocommerce_get_wp_query_args', array( $this, 'search_orders_args' ), 10, 2 );
@@ -499,17 +527,26 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$order_ids = array_unique(
 				array_merge(
 					$order_ids,
-					wc_get_orders( $search_fields ),
-					$wpdb->get_col(
-						$wpdb->prepare(
-							"SELECT order_id
-							FROM {$wpdb->prefix}woocommerce_order_items as order_items
-							WHERE order_item_name LIKE %s",
-							'%' . $wpdb->esc_like( wc_clean( $term ) ) . '%'
-						)
-					)
+					wc_get_orders( $search_fields )
 				)
 			);
+
+			// There are cases where you can only use a special search terms which will result in the keywords being empty, make sure we only run this query if there are keywords.
+			if ( ! empty( $term ) ) {
+				$order_ids = array_unique(
+					array_merge(
+						$order_ids,
+						$wpdb->get_col(
+							$wpdb->prepare(
+								"SELECT order_id
+								FROM {$wpdb->prefix}woocommerce_order_items as order_items
+								WHERE order_item_name LIKE %s",
+								'%' . $wpdb->esc_like( wc_clean( $term ) ) . '%'
+							)
+						)
+					)
+				);
+			}
 		}
 
 		remove_filter( 'woocommerce_get_wp_query_args', array( $this, 'search_orders_args' ), 10, 2 );
