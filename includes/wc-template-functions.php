@@ -3329,6 +3329,17 @@ function wc_get_cart_undo_url( $cart_item_key ) {
 }
 
 /**
+ * Outputs all queued notices on WC pages.
+ *
+ * @since 3.5.0
+ */
+function woocommerce_output_all_notices() {
+	echo '<div class="woocommerce-notices-wrapper">';
+	wc_print_notices();
+	echo '</div>';
+}
+
+/**
  * Products RSS Feed.
  *
  * @deprecated 2.6

@@ -144,23 +144,14 @@ function wc_print_notices( $return = false ) {
 
 	wc_clear_notices();
 
-	$notices = ob_get_clean();
+	$notices = wp_kses_post( ob_get_clean() );
 
 	if ( $return ) {
-		return '<div class="woocommerce-notices-wrapper">' . $notices . '</div>';
-	} else {
-		echo '<div class="woocommerce-notices-wrapper">';
-		echo wp_kses_post( $notices );
-		echo '</div>';
+		return $notices;
 	}
+
+	echo $notices; // WPCS: XSS ok.
 }
-add_action( 'woocommerce_cart_is_empty', 'wc_print_notices', 10, 0 );
-add_action( 'woocommerce_shortcode_before_product_cat_loop', 'wc_print_notices', 10, 0 );
-add_action( 'woocommerce_before_shop_loop', 'wc_print_notices', 10, 0 );
-add_action( 'woocommerce_before_single_product', 'wc_print_notices', 10, 0 );
-add_action( 'woocommerce_before_cart', 'wc_print_notices', 10, 0 );
-add_action( 'woocommerce_before_checkout_form', 'wc_print_notices', 10, 0 );
-add_action( 'woocommerce_account_content', 'wc_print_notices', 10, 0 );
 
 /**
  * Print a single notice immediately.
