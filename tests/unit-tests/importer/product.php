@@ -17,6 +17,8 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	 * Load up the importer classes since they aren't loaded by default.
 	 */
 	public function setUp() {
+		parent::setUp();
+
 		$this->csv_file = dirname( __FILE__ ) . '/sample.csv';
 
 		$bootstrap = WC_Unit_Tests_Bootstrap::instance();
@@ -97,11 +99,6 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		$this->assertEquals( 0, count( $results['failed'] ) );
 		$this->assertEquals( 0, count( $results['updated'] ) );
 		$this->assertEquals( 0, count( $results['skipped'] ) );
-
-		// Exclude imported products.
-		foreach ( $results['imported'] as $id ) {
-			wp_delete_post( $id, true );
-		}
 	}
 
 	/**
@@ -575,17 +572,5 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		}
 
 		$this->assertEquals( $items, $parsed_data );
-
-		// Remove temporary products.
-		$temp_products = get_posts(
-			array(
-				'post_status' => 'importing',
-				'post_type'   => 'product',
-				'fields'      => 'ids',
-			)
-		);
-		foreach ( $temp_products as $id ) {
-			wp_delete_post( $id, true );
-		}
 	}
 }
