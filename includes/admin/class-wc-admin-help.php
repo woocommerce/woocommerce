@@ -78,7 +78,7 @@ class WC_Admin_Help {
 				'content' =>
 					'<h2>' . __( 'Education', 'woocommerce' ) . '</h2>' .
 					'<p>' . __( 'If you would like to learn about using WooCommerce from an expert, consider a WooCommerce course to further your education.', 'woocommerce' ) . '</p>' .
-					'<p><a href="https://docs.woocommerce.com/document/further-education/?utm_source=helptab&utm_medium=product&utm_content=edupartners&utm_campaign=woocommerceplugin" class="button button-primary">' . __( 'Further eduction', 'woocommerce' ) . '</a></p>',
+					'<p><a href="https://docs.woocommerce.com/document/further-education/?utm_source=helptab&utm_medium=product&utm_content=edupartners&utm_campaign=woocommerceplugin" class="button button-primary">' . __( 'Further education', 'woocommerce' ) . '</a></p>',
 			)
 		);
 
