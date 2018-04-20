@@ -29,7 +29,7 @@ class WC_Tests_Order_Item_Meta extends WC_Unit_Test_Case {
 		$expected = array();
 		foreach ( $item->get_meta_data() as $metadata ) {
 			$expected[ $metadata->id ] = array(
-				'key' => $metadata->key,
+				'key'   => $metadata->key,
 				'label' => wc_attribute_label( $metadata->key, null ),
 				'value' => $metadata->value,
 			);
@@ -60,8 +60,11 @@ class WC_Tests_Order_Item_Meta extends WC_Unit_Test_Case {
 
 		$meta = new WC_Order_Item_Meta( $item );
 
-		$expected = array( 'regularkey' => '1', 'category' => 'Testing Categories' );
-		$actual = wp_list_pluck( $meta->get_formatted(), 'value', 'key' );
+		$expected = array(
+			'regularkey' => '1',
+			'category'   => 'Testing Categories',
+		);
+		$actual   = wp_list_pluck( $meta->get_formatted(), 'value', 'key' );
 		$this->assertEquals( $expected, $actual );
 
 		// Clean up.
@@ -84,7 +87,7 @@ class WC_Tests_Order_Item_Meta extends WC_Unit_Test_Case {
 		$meta = new WC_Order_Item_Meta( $item );
 
 		$expected = "regularkey: 1, \ncategory: Testing Categories";
-		$flat = $meta->display( true, true );
+		$flat     = $meta->display( true, true );
 		$this->assertEquals( $expected, $flat );
 
 		$not_flat = $meta->display( false, true );

@@ -135,7 +135,13 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	 * @since 3.1.0
 	 */
 	public function test_get_raw_data() {
-		$importer = new WC_Product_CSV_Importer( $this->csv_file, array( 'parse' => false, 'lines' => 2 ) );
+		$importer = new WC_Product_CSV_Importer(
+			$this->csv_file,
+			array(
+				'parse' => false,
+				'lines' => 2,
+			)
+		);
 		$items    = array(
 			array(
 				'simple',
@@ -433,40 +439,40 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'menu_order'            => 3,
 			),
 			array(
-				'type'                  => 'variation',
-				'sku'                   => '',
-				'name'                  => '',
-				'featured'              => '',
-				'catalog_visibility'    => 'visible',
-				'short_description'     => '',
-				'description'           => 'Lorem ipsum dolor sit amet, at exerci civibus appetere sit, iuvaret hendrerit mea no. Eam integre feugait liberavisse an.',
-				'date_on_sale_from'     => null,
-				'date_on_sale_to'       => null,
-				'tax_status'            => 'taxable',
-				'tax_class'             => 'standard',
-				'stock_status'          => 'instock',
-				'stock_quantity'        => 6,
-				'backorders'            => 'no',
-				'sold_individually'     => '',
-				'weight'                => 1.0,
-				'length'                => 2.0,
-				'width'                 => 25.0,
-				'height'                => 55.0,
-				'reviews_allowed'       => '',
-				'purchase_note'         => '',
-				'sale_price'            => '',
-				'regular_price'         => '20',
-				'shipping_class_id'     => 0,
-				'download_limit'        => 0,
-				'download_expiry'       => 0,
-				'product_url'           => '',
-				'button_text'           => '',
-				'status'                => 'publish',
-				'raw_image_id'          => 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_4_front.jpg',
-				'virtual'               => false,
-				'downloadable'          => false,
-				'manage_stock'          => true,
-				'raw_attributes'        => array(
+				'type'               => 'variation',
+				'sku'                => '',
+				'name'               => '',
+				'featured'           => '',
+				'catalog_visibility' => 'visible',
+				'short_description'  => '',
+				'description'        => 'Lorem ipsum dolor sit amet, at exerci civibus appetere sit, iuvaret hendrerit mea no. Eam integre feugait liberavisse an.',
+				'date_on_sale_from'  => null,
+				'date_on_sale_to'    => null,
+				'tax_status'         => 'taxable',
+				'tax_class'          => 'standard',
+				'stock_status'       => 'instock',
+				'stock_quantity'     => 6,
+				'backorders'         => 'no',
+				'sold_individually'  => '',
+				'weight'             => 1.0,
+				'length'             => 2.0,
+				'width'              => 25.0,
+				'height'             => 55.0,
+				'reviews_allowed'    => '',
+				'purchase_note'      => '',
+				'sale_price'         => '',
+				'regular_price'      => '20',
+				'shipping_class_id'  => 0,
+				'download_limit'     => 0,
+				'download_expiry'    => 0,
+				'product_url'        => '',
+				'button_text'        => '',
+				'status'             => 'publish',
+				'raw_image_id'       => 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_4_front.jpg',
+				'virtual'            => false,
+				'downloadable'       => false,
+				'manage_stock'       => true,
+				'raw_attributes'     => array(
 					array(
 						'name' => 'Color',
 					),
@@ -475,7 +481,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 						'name'  => 'Size',
 					),
 				),
-				'menu_order'            => 1,
+				'menu_order'         => 1,
 			),
 			array(
 				'type'               => 'variation',
@@ -520,7 +526,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 						'name'  => 'Size',
 					),
 				),
-				'menu_order'            => 2,
+				'menu_order'         => 2,
 			),
 			array(
 				'type'                  => 'grouped',
@@ -571,11 +577,13 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		$this->assertEquals( $items, $parsed_data );
 
 		// Remove temporary products.
-		$temp_products = get_posts( array(
-			'post_status' => 'importing',
-			'post_type'   => 'product',
-			'fields'      => 'ids',
-		) );
+		$temp_products = get_posts(
+			array(
+				'post_status' => 'importing',
+				'post_type'   => 'product',
+				'fields'      => 'ids',
+			)
+		);
 		foreach ( $temp_products as $id ) {
 			wp_delete_post( $id, true );
 		}

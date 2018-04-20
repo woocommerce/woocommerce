@@ -74,67 +74,70 @@ class WC_Test_Privacy_Export extends WC_Unit_Test_Case {
 		// Do a test export and check response.
 		$response = WC_Privacy::customer_data_exporter( 'test1@test.com', 1 );
 		$this->assertTrue( $response['done'] );
-		$this->assertEquals( array(
+		$this->assertEquals(
 			array(
-				'group_id'    => 'woocommerce_customer',
-				'group_label' => 'Customer Data',
-				'item_id'     => 'user',
-				'data'        => array(
-					array(
-						'name'  => 'Billing Address 1',
-						'value' => '123 South Street',
-					),
-					array(
-						'name'  => 'Billing Address 2',
-						'value' => 'Apt 1',
-					),
-					array(
-						'name'  => 'Billing City',
-						'value' => 'Philadelphia',
-					),
-					array(
-						'name'  => 'Billing Postal/Zip Code',
-						'value' => '19123',
-					),
-					array(
-						'name'  => 'Billing State',
-						'value' => 'PA',
-					),
-					array(
-						'name'  => 'Billing Country',
-						'value' => 'US',
-					),
-					array(
-						'name'  => 'Email Address',
-						'value' => 'customer1@test.com',
-					),
-					array(
-						'name'  => 'Shipping Address 1',
-						'value' => '123 South Street',
-					),
-					array(
-						'name'  => 'Shipping Address 2',
-						'value' => 'Apt 1',
-					),
-					array(
-						'name'  => 'Shipping City',
-						'value' => 'Philadelphia',
-					),
-					array(
-						'name'  => 'Shipping Postal/Zip Code',
-						'value' => '19123',
-					),
-					array(
-						'name'  => 'Shipping State',
-						'value' => 'PA',
-					),
-					array(
-						'name'  => 'Shipping Country',
-						'value' => 'US',
+				array(
+					'group_id'    => 'woocommerce_customer',
+					'group_label' => 'Customer Data',
+					'item_id'     => 'user',
+					'data'        => array(
+						array(
+							'name'  => 'Billing Address 1',
+							'value' => '123 South Street',
+						),
+						array(
+							'name'  => 'Billing Address 2',
+							'value' => 'Apt 1',
+						),
+						array(
+							'name'  => 'Billing City',
+							'value' => 'Philadelphia',
+						),
+						array(
+							'name'  => 'Billing Postal/Zip Code',
+							'value' => '19123',
+						),
+						array(
+							'name'  => 'Billing State',
+							'value' => 'PA',
+						),
+						array(
+							'name'  => 'Billing Country',
+							'value' => 'US',
+						),
+						array(
+							'name'  => 'Email Address',
+							'value' => 'customer1@test.com',
+						),
+						array(
+							'name'  => 'Shipping Address 1',
+							'value' => '123 South Street',
+						),
+						array(
+							'name'  => 'Shipping Address 2',
+							'value' => 'Apt 1',
+						),
+						array(
+							'name'  => 'Shipping City',
+							'value' => 'Philadelphia',
+						),
+						array(
+							'name'  => 'Shipping Postal/Zip Code',
+							'value' => '19123',
+						),
+						array(
+							'name'  => 'Shipping State',
+							'value' => 'PA',
+						),
+						array(
+							'name'  => 'Shipping Country',
+							'value' => 'US',
+						),
 					),
 				),
 			),
-		), $response['data'] );
+			$response['data']
+		);
 	}
 
 	/**

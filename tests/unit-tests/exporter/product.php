@@ -69,12 +69,24 @@ class WC_Tests_Product_CSV_Exporter extends WC_Unit_Test_Case {
 		$expected = 'cat1, cat2, cat3';
 		$this->assertEquals( $expected, $exporter->format_term_ids( array( $term1, $term2, $term3 ), 'category' ) );
 
-		wp_insert_category( array( 'cat_ID' => $term2, 'cat_name' => 'cat2', 'category_parent' => $term1 ) );
+		wp_insert_category(
+			array(
+				'cat_ID'          => $term2,
+				'cat_name'        => 'cat2',
+				'category_parent' => $term1,
+			)
+		);
 
 		$expected = 'cat1, cat1 > cat2, cat3';
 		$this->assertEquals( $expected, $exporter->format_term_ids( array( $term1, $term2, $term3 ), 'category' ) );
 
-		wp_insert_category( array( 'cat_ID' => $term3, 'cat_name' => 'cat3', 'category_parent' => $term2 ) );
+		wp_insert_category(
+			array(
+				'cat_ID'          => $term3,
+				'cat_name'        => 'cat3',
+				'category_parent' => $term2,
+			)
+		);
 		$expected = 'cat1, cat1 > cat2, cat1 > cat2 > cat3';
 		$this->assertEquals( $expected, $exporter->format_term_ids( array( $term1, $term2, $term3 ), 'category' ) );
 	}
@@ -96,7 +108,7 @@ class WC_Tests_Product_CSV_Exporter extends WC_Unit_Test_Case {
 		$product->set_width( 1 );
 
 		$sale_start = time();
-		$sale_end = $sale_start + DAY_IN_SECONDS;
+		$sale_end   = $sale_start + DAY_IN_SECONDS;
 		$product->set_date_on_sale_from( $sale_start );
 		$product->set_date_on_sale_to( $sale_end );
 
@@ -136,9 +148,9 @@ class WC_Tests_Product_CSV_Exporter extends WC_Unit_Test_Case {
 		$this->assertContains( $row['backorders'], array( 1, 0, 'notify' ) );
 
 		$expected_parent = '';
-		$parent_id = $product->get_parent_id();
+		$parent_id       = $product->get_parent_id();
 		if ( $parent_id ) {
-			$parent = wc_get_product( $parent_id );
+			$parent          = wc_get_product( $parent_id );
 			$expected_parent = $parent->get_sku() ? $parent->get_sku() : 'id:' . $parent->get_id();
 		}
 		$this->assertEquals( $expected_parent, $row['parent_id'] );
