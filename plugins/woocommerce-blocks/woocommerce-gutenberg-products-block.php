@@ -2,10 +2,12 @@
 /**
  * Plugin Name: WooCommerce Gutenberg Products Block
  * Plugin URI: https://github.com/woocommerce/woocommerce-gutenberg-products-block
- * Description: Prototype of the WooCommerce Gutenberg Products block.
+ * Description: WooCommerce Products block for the Gutenberg editor.
  * Version: 1.0.0
  * Author: Automattic
  * Author URI: https://woocommerce.com
+ * Text Domain:  woocommerce
+ * Domain Path:  /languages
  */
 
 defined( 'ABSPATH' ) || die();
