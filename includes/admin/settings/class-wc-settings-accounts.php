@@ -133,10 +133,29 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 					'id'   => 'privacy_policy_options',
 				),
 				array(
-					'title' => __( 'Personal data cleanup', 'woocommerce' ),
-					'desc'  => __( 'These tools let you clean up personal data when it\'s no longer needed for processing.', 'woocommerce' ),
+					'title' => __( 'Personal data handling', 'woocommerce' ),
+					'desc'  => __( 'These tools let you clean up personal data when it\'s no longer needed for processing, or a user requests account erasure.', 'woocommerce' ),
 					'type'  => 'title',
-					'id'    => 'order_cleanup_options',
+					'id'    => 'personal_data_handling',
+				),
+				array(
+					'title'         => __( 'Erasure requests', 'woocommerce' ),
+					'desc'          => __( 'Remove personal data from orders', 'woocommerce' ),
+					'desc_tip'      => __( 'When processing a request for erasure, should the order data be retained or removed?', 'woocommerce' ),
+					'id'            => 'woocommerce_erasure_request_removes_order_data',
+					'type'          => 'checkbox',
+					'default'       => 'no',
+					'checkboxgroup' => 'start',
+					'autoload'      => false,
+				),
+				array(
+					'desc'          => __( 'Remove access to downloads', 'woocommerce' ),
+					'desc_tip'      => __( 'When processing a request for erasure, should access to downloadable files be revoked and download logs cleared?', 'woocommerce' ),
+					'id'            => 'woocommerce_erasure_request_removes_download_data',
+					'type'          => 'checkbox',
+					'default'       => 'no',
+					'checkboxgroup' => 'end',
+					'autoload'      => false,
 				),
 				array(
 					'title'       => __( 'Trash pending orders after: ', 'woocommerce' ),
@@ -176,7 +195,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				),
 				array(
 					'type' => 'sectionend',
-					'id'   => 'order_cleanup_options',
+					'id'   => 'personal_data_handling',
 				),
 			)
 		);
