@@ -792,7 +792,7 @@ function wc_terms_and_conditions_page_content() {
 /**
  * Output privacy policy text. This is custom text which can be added via the customizer/privacy settings section.
  *
- * Loads the relevent policy for the current page unless a specfic policy text is required.
+ * Loads the relevant policy for the current page unless a specific policy text is required.
  *
  * @since 3.4.0
  * @param string $type Type of policy to load. Valid values include registration and checkout.
