@@ -24,6 +24,8 @@ class WC_Test_Privacy_Export extends WC_Unit_Test_Case {
 	 * Load up the importer classes since they aren't loaded by default.
 	 */
 	public function setUp() {
+		parent::setUp();
+
 		$customer1 = WC_Helper_Customer::create_customer( 'customer1', 'password', 'test1@test.com' );
 		$customer1->set_billing_email( 'customer1@test.com' );
 		$customer1->save();
@@ -49,18 +51,6 @@ class WC_Test_Privacy_Export extends WC_Unit_Test_Case {
 		$this->orders[] = WC_Helper_Order::create_order( $customer1->get_id() );
 		$this->orders[] = WC_Helper_Order::create_order( $customer2->get_id() );
 		$this->orders[] = WC_Helper_Order::create_order( $customer2->get_id() );
-	}
-
-	/**
-	 * Clean up after test.
-	 */
-	public function tearDown() {
-		foreach ( $this->orders as $object ) {
-			$object->delete( true );
-		}
-		foreach ( $this->customers as $object ) {
-			$object->delete( true );
-		}
 	}
 
 	/**

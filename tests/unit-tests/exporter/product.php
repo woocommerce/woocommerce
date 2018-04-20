@@ -10,6 +10,8 @@ class WC_Tests_Product_CSV_Exporter extends WC_Unit_Test_Case {
 	 * Load up the exporter classes since they aren't loaded by default.
 	 */
 	public function setUp() {
+		parent::setUp();
+
 		$bootstrap = WC_Unit_Tests_Bootstrap::instance();
 		require_once $bootstrap->plugin_dir . '/includes/export/class-wc-product-csv-exporter.php';
 	}
