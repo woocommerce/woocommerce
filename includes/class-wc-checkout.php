@@ -1017,6 +1017,10 @@ class WC_Checkout {
 					throw new Exception( $order_id->get_error_message() );
 				}
 
+				if ( ! $order ) {
+					throw new Exception( __( 'Unable to create order.', 'woocommerce' ) );
+				}
+
 				do_action( 'woocommerce_checkout_order_processed', $order_id, $posted_data, $order );
 
 				if ( WC()->cart->needs_payment() ) {
