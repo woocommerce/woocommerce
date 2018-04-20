@@ -792,7 +792,7 @@ function wc_terms_and_conditions_page_content() {
 /**
  * Output privacy policy text. This is custom text which can be added via the customizer/privacy settings section.
  *
- * Loads the relevent policy for the current page unless a specfic policy text is required.
+ * Loads the relevant policy for the current page unless a specific policy text is required.
  *
  * @since 3.4.0
  * @param string $type Type of policy to load. Valid values include registration and checkout.
@@ -823,7 +823,7 @@ function wc_privacy_policy_text( $type = '' ) {
  * @return string
  */
 function wc_replace_policy_page_link_placeholders( $text ) {
-	$privacy_page_id = wc_privacy_policy_page_id( $text );
+	$privacy_page_id = wc_privacy_policy_page_id();
 	$terms_page_id   = wc_terms_and_conditions_page_id();
 	$privacy_link    = $privacy_page_id ? '<a href="' . esc_url( get_permalink( $privacy_page_id ) ) . '" class="woocommerce-privacy-policy-link" target="_blank">' . __( 'privacy policy', 'woocommerce' ) . '</a>' : __( 'privacy policy', 'woocommerce' );
 	$terms_link      = $terms_page_id ? '<a href="' . esc_url( get_permalink( $terms_page_id ) ) . '" class="woocommerce-terms-and-conditions-link" target="_blank">' . __( 'terms and conditions', 'woocommerce' ) . '</a>' : __( 'terms and conditions', 'woocommerce' );
