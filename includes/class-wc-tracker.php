@@ -490,27 +490,6 @@ class WC_Tracker {
 
 		return $min_max;
 	}
-
-	/**
-	 * Get first order date.
-	 *
-	 * @return string
-	 */
-	private static function get_first_order_date() {
-		$orders = wc_get_orders(
-			array(
-				'limit'  => 1,
-				'order'  => 'ASC',
-				'status' => array_map( 'wc_get_order_status_name', wc_get_is_paid_statuses() ),
-			)
-		);
-		if ( ! empty( $orders ) ) {
-			$order = $orders[0];
-			return $order->get_date_created()->format( 'Y-m-d' );
-		} else {
-			return '-';
-		}
-	}
 }
 
 WC_Tracker::init();
