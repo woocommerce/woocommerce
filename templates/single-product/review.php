@@ -60,9 +60,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 			 *
 			 * @hooked woocommerce_review_display_comment_text - 10
 			 */
-			do_action( 'woocommerce_review_comment_text', $comment );
-
-			do_action( 'woocommerce_review_after_comment_text', $comment ); ?>
+			do_action( 'woocommerce_review_comment_text', $comment );			
 
 		</div>
+			
+		do_action( 'woocommerce_review_after_comment_text', $comment ); ?>
 	</div>
