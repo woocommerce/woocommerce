@@ -6,18 +6,14 @@
  * No personal information is tracked, only general WooCommerce settings, general product, order and user counts and admin email for discount code.
  *
  * @class WC_Tracker
- * @version 2.3.0
+ * @since 2.3.0
  * @package WooCommerce/Classes
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WooCommerce Tracker Class
- *
- * @version 2.3.0
  */
 class WC_Tracker {
 
@@ -70,8 +66,8 @@ class WC_Tracker {
 			'redirection' => 5,
 			'httpversion' => '1.0',
 			'blocking'    => false,
-			'headers'     => array( 'user-agent' => 'WooCommerceTracker/' . md5( esc_url( home_url( '/' ) ) ) . ';' ),
-			'body'        => json_encode( $params ),
+			'headers'     => array( 'user-agent' => 'WooCommerceTracker/' . md5( esc_url_raw( home_url( '/' ) ) ) . ';' ),
+			'body'        => wp_json_encode( $params ),
 			'cookies'     => array(),
 		) );
 	}
@@ -146,8 +142,8 @@ class WC_Tracker {
 	 */
 	public static function get_theme_info() {
 		$theme_data        = wp_get_theme();
-		$theme_child_theme = is_child_theme() ? 'Yes' : 'No';
-		$theme_wc_support  = ! current_theme_supports( 'woocommerce' ) ? 'No' : 'Yes';
+		$theme_child_theme = wc_bool_to_string( is_child_theme() );
+		$theme_wc_support  = wc_bool_to_string( current_theme_supports( 'woocommerce' ) );
 
 		return array(
 			'name'        => $theme_data->Name, // @phpcs:ignore
@@ -189,7 +185,7 @@ class WC_Tracker {
 	private static function get_server_info() {
 		$server_data = array();
 
-		if ( isset( $_SERVER['SERVER_SOFTWARE'] ) && ! empty( $_SERVER['SERVER_SOFTWARE'] ) ) {
+		if ( ! empty( $_SERVER['SERVER_SOFTWARE'] ) ) {
 			$server_data['software'] = $_SERVER['SERVER_SOFTWARE']; // @phpcs:ignore
 		}
 
@@ -318,11 +314,11 @@ class WC_Tracker {
 	 * @return array
 	 */
 	private static function get_orders() {
-		$orders_dates = self::get_order_dates();
+		$order_dates  = self::get_order_dates();
 		$order_counts = self::get_order_counts();
 		$order_totals = self::get_order_totals();
 
-		return array_merge( $orders_dates, $order_counts, $order_totals );
+		return array_merge( $order_dates, $order_counts, $order_totals );
 	}
 
 	/**
@@ -479,6 +475,7 @@ class WC_Tracker {
 				MIN( post_date_gmt ) as 'first', MAX( post_date_gmt ) as 'last'
 			FROM {$wpdb->prefix}posts
 			WHERE post_type = 'shop_order'
+			AND post_status = 'wc-completed'
 		", ARRAY_A );
 
 		if ( is_null( $min_max ) ) {
