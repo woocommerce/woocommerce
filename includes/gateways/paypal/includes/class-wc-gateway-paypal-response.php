@@ -29,7 +29,7 @@ abstract class WC_Gateway_Paypal_Response {
 	 */
 	protected function get_paypal_order( $raw_custom ) {
 		// We have the data in the correct format, so get the order.
-		$custom = wp_json_decode( $raw_custom );
+		$custom = json_decode( $raw_custom );
 		if ( $custom && is_object( $custom ) ) {
 			$order_id  = $custom->order_id;
 			$order_key = $custom->order_key;
