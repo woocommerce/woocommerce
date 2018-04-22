@@ -125,10 +125,10 @@ function wc_add_to_cart_message( $products, $show_qty = false, $return = false )
 
 	if ( has_filter( 'wc_add_to_cart_message' ) ) {
 		wc_deprecated_function( 'The wc_add_to_cart_message filter', '3.0', 'wc_add_to_cart_message_html' );
-		$message = apply_filters( 'wc_add_to_cart_message', $message, $product_id );
+		$message = apply_filters( 'wc_add_to_cart_message', $message, $product_id, $show_qty );
 	}
 
-	$message = apply_filters( 'wc_add_to_cart_message_html', $message, $products );
+	$message = apply_filters( 'wc_add_to_cart_message_html', $message, $products, $show_qty );
 
 	if ( $return ) {
 		return $message;
