@@ -2,13 +2,17 @@
 /**
  * Plugin Name: WooCommerce Gutenberg Products Block
  * Plugin URI: https://github.com/woocommerce/woocommerce-gutenberg-products-block
- * Description: Prototype of the WooCommerce Gutenberg Products block.
+ * Description: WooCommerce Products block for the Gutenberg editor.
  * Version: 1.0.0
  * Author: Automattic
  * Author URI: https://woocommerce.com
+ * Text Domain:  woocommerce
+ * Domain Path:  /languages
  */
 
 defined( 'ABSPATH' ) || die();
+
+define( 'WGPB_VERSION', '1.0.0' );
 
 /**
  * Load up the assets if Gutenberg is active.
@@ -30,7 +34,7 @@ function wgpb_register_products_block() {
 		'woocommerce-products-block-editor',
 		plugins_url( 'assets/js/products-block.js', __FILE__ ),
 		array( 'wp-blocks', 'wp-element', 'react-transition-group' ),
-		rand() // @todo Change this to WC_VERSION when merged into WooCommerce.
+		WGPB_VERSION
 	);
 
 	$product_block_data = array(
@@ -47,7 +51,7 @@ function wgpb_register_products_block() {
 		'woocommerce-products-block-editor',
 		plugins_url( 'assets/css/gutenberg-products-block.css', __FILE__ ),
 		array( 'wp-edit-blocks' ),
-		rand() // @todo Change this to WC_VERSION when merged into WooCommerce.
+		WGPB_VERSION
 	);
 
 	register_block_type( 'woocommerce/products', array(
@@ -68,3 +72,90 @@ function wgpb_extra_gutenberg_scripts() {
 	);
 }
 add_action( 'enqueue_block_assets', 'wgpb_extra_gutenberg_scripts' );
+
+/**
+ * Brings some extra required shortcode features from WC core 3.4+ to this feature plugin.
+ *
+ * @todo Remove this function when merging into core because it won't be necessary.
+ *
+ * @param array $args WP_Query args.
+ * @param array $attributes Shortcode attributes.
+ * @param string $type Type of shortcode currently processing.
+ */
+function wgpb_extra_shortcode_features( $args, $attributes, $type ) {
+	if ( 'products' !== $type ) {
+		return $args;
+	}
+
+	// Enable term ids in the category shortcode.
+	if ( ! empty( $attributes['category'] ) ) {
+		$categories = array_map( 'sanitize_title', explode( ',', $attributes['category'] ) );
+		$field      = 'slug';
+
+		if ( empty( $args['tax_query'] ) ) {
+			$args['tax_query'] = array();
+		}
+
+		// Unset old category tax query.
+		foreach ( $args['tax_query'] as $index => $tax_query ) {
+			if ( 'product_cat' === $tax_query['taxonomy'] ) {
+				unset( $args['tax_query'][ $index ] );
+			}
+		}
+
+		if ( is_numeric( $categories[0] ) ) {
+			$categories = array_map( 'absint', $categories );
+			$field      = 'term_id';
+		}
+		$args['tax_query'][] = array(
+			'taxonomy' => 'product_cat',
+			'terms'    => $categories,
+			'field'    => $field,
+			'operator' => $attributes['cat_operator'],
+		);
+	}
+
+	// Enable term ids in the attributes shortcode and just-attribute queries.
+	if ( ! empty( $attributes['attribute'] ) || ! empty( $attributes['terms'] ) ) {
+		$taxonomy = strstr( $attributes['attribute'], 'pa_' ) ? sanitize_title( $attributes['attribute'] ) : 'pa_' . sanitize_title( $attributes['attribute'] );
+		$terms    = $attributes['terms'] ? array_map( 'sanitize_title', explode( ',', $attributes['terms'] ) ) : array();
+		$field    = 'slug';
+
+		if ( empty( $args['tax_query'] ) ) {
+			$args['tax_query'] = array();
+		}
+
+		// Unset old attribute tax query.
+		foreach ( $args['tax_query'] as $index => $tax_query ) {
+			if ( $taxonomy === $tax_query['taxonomy'] ) {
+				unset( $args['tax_query'][ $index ] );
+			}
+		}
+
+		if ( $terms && is_numeric( $terms[0] ) ) {
+			$terms = array_map( 'absint', $terms );
+			$field = 'term_id';
+		}
+
+		// If no terms were specified get all products that are in the attribute taxonomy.
+		if ( ! $terms ) {
+			$terms = get_terms(
+				array(
+					'taxonomy' => $taxonomy,
+					'fields'   => 'ids',
+				)
+			);
+			$field = 'term_id';
+		}
+
+		$args['tax_query'][] = array(
+			'taxonomy' => $taxonomy,
+			'terms'    => $terms,
+			'field'    => $field,
+			'operator' => $attributes['terms_operator'],
+		);
+	}
+
+	return $args;
+}
+add_filter( 'woocommerce_shortcode_products_query', 'wgpb_extra_shortcode_features', 10, 3 );
