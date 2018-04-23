@@ -247,7 +247,7 @@ class WC_Geolocation {
 			try {
 				// GeoLite2 database name.
 				$database  = 'GeoLite2-Country.mmdb';
-				$dest_path = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . $database;
+				$dest_path = trailingslashit( $upload_dir['basedir'] ) . $database;
 
 				// Extract files with PharData. Tool built into PHP since 5.3.
 				$file      = new PharData( $tmp_database_path ); // phpcs:ignore PHPCompatibility.PHP.NewClasses.phardataFound
@@ -260,8 +260,8 @@ class WC_Geolocation {
 				@unlink( $dest_path ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.VIP.FileSystemWritesDisallow.file_ops_unlink
 
 				// Copy database and delete tmp directories.
-				@rename( $upload_dir['basedir'] . DIRECTORY_SEPARATOR . $file_path, $dest_path ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.VIP.FileSystemWritesDisallow.file_ops_rename
-				@rmdir( $upload_dir['basedir'] . DIRECTORY_SEPARATOR . $file->current()->getFileName() ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.VIP.FileSystemWritesDisallow.directory_rmdir
+				@rename( trailingslashit( $upload_dir['basedir'] ) . $file_path, $dest_path ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.VIP.FileSystemWritesDisallow.file_ops_rename
+				@rmdir( trailingslashit( $upload_dir['basedir'] ) . $file->current()->getFileName() ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.VIP.FileSystemWritesDisallow.directory_rmdir
 
 				// Set correct file permission.
 				@chmod( $dest_path, 0644 ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.VIP.FileSystemWritesDisallow.chmod_chmod
