@@ -35,17 +35,19 @@ p.woocommerce-actions,
 	}
 
 	a.woocommerce-message-close {
-		position: absolute;
+		position: static;
+		float: right;
 		top: 0;
 		right: 0;
-		padding: 10px 15px 10px 21px;
+		padding: 0px 15px 10px 28px;
+		margin-top: -10px;
 		font-size: 13px;
 		line-height: 1.23076923;
 		text-decoration: none;
 		&::before {
-			position: absolute;
-			top: 8px;
-			left: 0;
+			position: relative;
+			top: 18px;
+			left: -20px;
 			transition: all 0.1s ease-in-out;
 		}
 	}
