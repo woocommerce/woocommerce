@@ -100,7 +100,7 @@ class WC_Order_Item_Meta {
 			}
 		}
 
-		$output = apply_filters( 'woocommerce_order_items_meta_display', $output, $this );
+		$output = apply_filters( 'woocommerce_order_items_meta_display', $output, $this, $flat );
 
 		if ( $return ) {
 			return $output;
