@@ -251,7 +251,7 @@ class WC_Geolocation {
 
 				// Extract files with PharData. Tool built into PHP since 5.3.
 				$file      = new PharData( $tmp_database_path ); // phpcs:ignore PHPCompatibility.PHP.NewClasses.phardataFound
-				$file_path = $file->current()->getFileName() . '/' . $database;
+				$file_path = trailingslashit( $file->current()->getFileName() ) . $database;
 
 				// Extract under uploads directory.
 				$file->extractTo( $upload_dir['basedir'], $file_path, true );
