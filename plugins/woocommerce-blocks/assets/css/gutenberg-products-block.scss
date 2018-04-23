@@ -347,11 +347,11 @@ p.wc-products-display-options__option-description {
 		}
 	}
 
-	.wc-products-list-card__search {
+	input[type="search"] {
 		position: relative;
 		width: 100%;
 		margin: 0;
-		padding: 1em 1.25em 1em 3em!important; // Override Gutenberg input style.
+		padding: 1em 1.25em 1em 3em; // Override Gutenberg input style.
 		border-radius: 0;
 		background: transparent;
 		border-color: $color__border;
