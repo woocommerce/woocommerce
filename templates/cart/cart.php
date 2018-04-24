@@ -105,8 +105,9 @@ do_action( 'woocommerce_before_cart' ); ?>
 							$product_quantity = woocommerce_quantity_input( array(
 								'input_name'   => "cart[{$cart_item_key}][qty]",
 								'input_value'  => $cart_item['quantity'],
-								'max_value'    => $_product->get_max_purchase_quantity(),
-								'min_value'    => '0',
+								'max_value'   => apply_filters( 'woocommerce_quantity_input_max', $_product->get_max_purchase_quantity(), $_product ),
+								'min_value'   => apply_filters( 'woocommerce_quantity_input_min', $_product->get_min_purchase_quantity(), $_product ),
+								'step'        => apply_filters( 'woocommerce_quantity_input_step', 1, $_product ),
 								'product_name' => $_product->get_name(),
 							), $_product, false );
 						}
