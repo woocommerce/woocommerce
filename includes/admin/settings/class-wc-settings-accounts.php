@@ -139,7 +139,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 					'id'    => 'personal_data_handling',
 				),
 				array(
-					'title'         => __( 'Erasure requests', 'woocommerce' ),
+					'title'         => __( 'Erasure request handling', 'woocommerce' ),
 					'desc'          => __( 'Remove personal data from orders', 'woocommerce' ),
 					'desc_tip'      => __( 'When processing a request for erasure, should the order data be retained or removed?', 'woocommerce' ),
 					'id'            => 'woocommerce_erasure_request_removes_order_data',
@@ -158,8 +158,8 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 					'autoload'      => false,
 				),
 				array(
-					'title'       => __( 'Trash pending orders after: ', 'woocommerce' ),
-					'desc_tip'    => __( 'Automatically trash orders with this status after a certain period of time. Leave blank to disable.', 'woocommerce' ),
+					'title'       => __( 'Retain pending orders ', 'woocommerce' ),
+					'desc_tip'    => __( 'Retain orders with this status for a specified duration before trashing them. Leave blank to retain these orders forever.', 'woocommerce' ),
 					'id'          => 'woocommerce_trash_pending_orders',
 					'type'        => 'relative_date_selector',
 					'placeholder' => __( 'N/A', 'woocommerce' ),
@@ -167,8 +167,8 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 					'autoload'    => false,
 				),
 				array(
-					'title'       => __( 'Trash failed orders after: ', 'woocommerce' ),
-					'desc_tip'    => __( 'Automatically trash orders with this status after a certain period of time. Leave blank to disable.', 'woocommerce' ),
+					'title'       => __( 'Retain failed orders', 'woocommerce' ),
+					'desc_tip'    => __( 'Retain orders with this status for a specified duration before trashing them. Leave blank to retain these orders forever.', 'woocommerce' ),
 					'id'          => 'woocommerce_trash_failed_orders',
 					'type'        => 'relative_date_selector',
 					'placeholder' => __( 'N/A', 'woocommerce' ),
@@ -176,8 +176,8 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 					'autoload'    => false,
 				),
 				array(
-					'title'       => __( 'Trash cancelled orders after: ', 'woocommerce' ),
-					'desc_tip'    => __( 'Automatically trash orders with this status after a certain period of time. Leave blank to disable.', 'woocommerce' ),
+					'title'       => __( 'Retain cancelled orders', 'woocommerce' ),
+					'desc_tip'    => __( 'Retain orders with this status for a specified duration before trashing them. Leave blank to retain these orders forever.', 'woocommerce' ),
 					'id'          => 'woocommerce_trash_cancelled_orders',
 					'type'        => 'relative_date_selector',
 					'placeholder' => __( 'N/A', 'woocommerce' ),
@@ -185,12 +185,15 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 					'autoload'    => false,
 				),
 				array(
-					'title'       => __( 'Anonymize completed guest orders after: ', 'woocommerce' ),
-					'desc_tip'    => __( 'Remove personal data from guest orders after a certain period of time. Leave blank to disable.', 'woocommerce' ),
+					'title'       => __( 'Retain completed orders', 'woocommerce' ),
+					'desc_tip'    => __( 'Retain completed orders for a specified duration before anonymizing the personal data within them. Leave blank to retain these orders forever.', 'woocommerce' ),
 					'id'          => 'woocommerce_anonymize_completed_orders',
 					'type'        => 'relative_date_selector',
 					'placeholder' => __( 'N/A', 'woocommerce' ),
-					'default'     => '',
+					'default'     => array(
+						'number' => '',
+						'unit'   => 'years',
+					),
 					'autoload'    => false,
 				),
 				array(

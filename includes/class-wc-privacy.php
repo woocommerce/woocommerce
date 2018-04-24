@@ -157,6 +157,7 @@ Additionally we may also collect the following information:
 
 		// Set all new props and persist the new data to the database.
 		$order->set_props( $anonymized_data );
+		$order->set_customer_id( 0 );
 		$order->update_meta_data( '_anonymized', 'yes' );
 		$order->save();
 
@@ -289,7 +290,7 @@ Additionally we may also collect the following information:
 	}
 
 	/**
-	 * Anonymize old completed orders from guests.
+	 * Anonymize old completed orders.
 	 *
 	 * @since 3.4.0
 	 * @param  int $limit Limit orders to process per batch.
@@ -308,7 +309,6 @@ Additionally we may also collect the following information:
 			'limit'        => $limit, // Batches of 20.
 			'status'       => 'wc-completed',
 			'anonymized'   => false,
-			'customer_id'  => 0,
 		) );
 	}
 
