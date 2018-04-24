@@ -1162,8 +1162,12 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 		global $product;
 
 		if ( $product ) {
+			$qty = apply_filters( 'woocommerce_quantity_input_min', 1, $product );
+			if (0 == $qty || empty($qty)) {
+				$qty = 1;
+			}
 			$defaults = array(
-				'quantity'   => 1,
+				'quantity'   => $qty,
 				'class'      => implode( ' ', array_filter( array(
 					'button',
 					'product_type_' . $product->get_type(),
