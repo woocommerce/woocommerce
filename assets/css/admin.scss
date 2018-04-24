@@ -2922,21 +2922,67 @@ table.wc_shipping {
 		}
 	}
 	td.sort {
-		cursor: move;
-		font-size: 15px;
-		text-align: center;
-
-		&::before {
-			content: '\f333';
-			font-family: 'Dashicons';
-			text-align: center;
-			line-height: 1;
-			color: #999;
-			display: block;
-			width: 17px;
-			float: left;
-			height: 100%;
-			line-height: 24px;
+		padding: 0 0 0 10px !important;
+		.wc-item-reorder-nav {
+			white-space: nowrap;
+			width: 90px;
+			&:before {
+				content: '\f333';
+				font: normal 20px/2.75em dashicons;
+				text-align: center;
+				color: #999;
+				display: block;
+				width: 30px;
+				height: 3em;
+				float: left;
+				cursor: move;
+				-webkit-font-smoothing: antialiased;
+				-moz-osx-font-smoothing: grayscale;
+			}
+			button {
+				position: relative;
+				overflow: hidden;
+				float: left;
+				display: block;
+				width: 30px;
+				height: 3.75em;
+				margin: 0;
+				background: transparent;
+				border: none;
+				box-shadow: none;
+				color: #82878c;
+				text-indent: -9999px;
+				cursor: pointer;
+				outline: none;
+			}
+			button:before {
+				display: inline-block;
+				position: absolute;
+				top: 0;
+				right: 0;
+				width: 100%;
+				height: 100%;
+				font: normal 20px/2.75em dashicons;
+				text-align: center;
+				text-indent: 0;
+				-webkit-font-smoothing: antialiased;
+				-moz-osx-font-smoothing: grayscale;
+			}
+			button:hover,
+			button:focus {
+				color: #191e23;
+			}
+			.wc-move-down:before {
+				content: "\f347";
+			}
+			.wc-move-up:before {
+				content: "\f343";
+			}
+			.wc-move-disabled {
+				color: #d5d5d5 !important;
+				cursor: default;
+				pointer-events: none;
+			}
 		}
 	}
 	.wc-payment-gateway-method-name {
