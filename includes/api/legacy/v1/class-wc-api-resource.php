@@ -258,7 +258,11 @@ class WC_API_Resource {
 
 				list( $name, $value ) = explode( '.', $field );
 
-				$sub_fields[ $name ] = $value;
+				if ( ! in_array( $name, array_keys( $sub_fields ) ) ) {
+					$sub_fields[ $name ] = array();
+				}
+
+				array_push( $sub_fields[ $name ], $value );
 			}
 		}
 
@@ -272,7 +276,7 @@ class WC_API_Resource {
 				foreach ( $data_value as $sub_field => $sub_field_value ) {
 
 					// remove non-matching sub-fields
-					if ( ! in_array( $sub_field, $sub_fields ) ) {
+					if ( ! in_array( $sub_field, $sub_fields[ $data_field ] ) ) {
 						unset( $data[ $data_field ][ $sub_field ] );
 					}
 				}
