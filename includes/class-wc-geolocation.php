@@ -57,7 +57,6 @@ class WC_Geolocation {
 	 * @var array
 	 */
 	private static $geoip_apis = array(
-		'freegeoip'  => 'https://freegeoip.net/json/%s',
 		'ipinfo.io'  => 'https://ipinfo.io/%s/json',
 		'ip-api.com' => 'http://ip-api.com/json/%s',
 	);
@@ -302,15 +301,27 @@ class WC_Geolocation {
 	/**
 	 * Use APIs to Geolocate the user.
 	 *
+	 * Geolocation APIs can be added through the use of the woocommerce_geolocation_geoip_apis filter.
+	 * Provide a name=>value pair for service-slug=>endpoint.
+	 *
+	 * If APIs are defined, one will be chosen at random to fulfil the request. After completing, the result
+	 * will be cached in a transient.
+	 *
 	 * @param  string $ip_address IP address.
-	 * @return string|bool
+	 * @return string
 	 */
 	private static function geolocate_via_api( $ip_address ) {
 		$country_code = get_transient( 'geoip_' . $ip_address );
 
 		if ( false === $country_code ) {
-			$geoip_services      = apply_filters( 'woocommerce_geolocation_geoip_apis', self::$geoip_apis );
+			$geoip_services = apply_filters( 'woocommerce_geolocation_geoip_apis', self::$geoip_apis );
+
+			if ( empty( $geoip_services ) ) {
+				return '';
+			}
+
 			$geoip_services_keys = array_keys( $geoip_services );
+
 			shuffle( $geoip_services_keys );
 
 			foreach ( $geoip_services_keys as $service_name ) {
@@ -326,10 +337,6 @@ class WC_Geolocation {
 						case 'ip-api.com':
 							$data         = json_decode( $response['body'] );
 							$country_code = isset( $data->countryCode ) ? $data->countryCode : ''; // @codingStandardsIgnoreLine
-							break;
-						case 'freegeoip':
-							$data         = json_decode( $response['body'] );
-							$country_code = isset( $data->country_code ) ? $data->country_code : '';
 							break;
 						default:
 							$country_code = apply_filters( 'woocommerce_geolocation_geoip_response_' . $service_name, '', $response['body'] );
