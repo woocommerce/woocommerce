@@ -210,7 +210,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 							<option value=""><?php esc_html_e( 'All coupons', 'woocommerce' ); ?></option>
 							<?php
 							foreach ( $used_coupons as $coupon ) {
-								echo '<option value="' . esc_attr( $coupon ) . '" ' . selected( in_array( $coupon, $this->coupon_codes ), true, false ) . '>' . esc_html( $coupon ) . '</option>';
+								echo '<option value="' . esc_attr( $coupon ) . '"' . wc_selected( $coupon, $this->coupon_codes ) . '>' . esc_html( $coupon ) . '</option>';
 							}
 							?>
 						</select>

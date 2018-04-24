@@ -1,5 +1,49 @@
 == Changelog ==
 
+= 3.3.5 - 2018-04-10 =
+* Fix - Shop page notice should not appear when editing the "Hello World!" page.
+* Fix - Inconsistent order item refund sign.
+* Fix - Change `wc_get_price_excluding_tax` to not round the return value so calculations in admin are not pre-rounded.
+* Fix - Use minimum price instead of maximum price when ordering variable products from low to high on term archives.
+* Fix - `order` and `orderby` on shop page when using rewrite rules.
+* Fix - Ajax loading spinner when using twentyseventeen theme.
+* Fix - Out of Stock products change stock to On Backorder when imported to update existing products.
+* Fix - Visibility dropdown not responding in quick edit when stock management is disabled.
+* Fix - Featured paramenter in products endpoint on REST API.
+* Fix - Linebreaks in order item meta.
+* Fix - Product rating count when updated by admin.
+* Tweak - Define array before attempting to append to it.
+* Tweak - Change WC WP-CLI commands default per_page value to 100.
+* Tweak - Ensure background process class returns `data` as an array.
+* Tweak - Increase orders table checkbox column size on small devices.
+* Tweak - Better support for infinite scroll in Jetpack.
+
+= 3.3.4 - 2018-03-20 =
+* Fix - Fixed undefined index after running setup wizard two times on fresh install.
+* Fix - wc_get_loop_class; force columns to be a minimum of 1.
+* Fix - Added loading spinner to WC panels in menu admin.
+* Fix - Use relative scheme for AJAX endpoint to avoid errors when using a mix of HTTP and HTTPS.
+* Fix - Fix SelectWoo templateSelection property.
+* Fix - Layered nav support on unsupported theme archives.
+* Fix - Prevent full refresh when editing store notice in the customizer.
+* Fix - Only append tax label in email content if taxes are enabled.
+* Fix - More reliable Jetpack detection.
+* Fix - Check if product has weight before calculate weight total in cart.
+* Fix - Correctly handle default ordering on the search page.
+* Fix - Fix default product category handling in installer.
+* Fix - Properly check slugs when updating attributes.
+* Fix - Use gallery thumbnail size for variation image switcher.
+* Fix - Clear subcategory cache when updating product categories.
+* Fix - Round fractional cents when out of base.
+* Fix - Inherit 'is variation' from existing attribute during csv import.
+* Fix - Set is_shortcode loop prop when outputting subcategories.
+* Fix - Reload gateways after updating the order.
+* Tweak - Use wc_get_default_products_per_row as the default for product shortcodes.
+* Tweak - Add post_excerpt to product search.
+* Tweak - Update the description of the user tracking notice in the onboarding wizard.
+* Tweak - Add extra data in order mobile view (status and date).
+* Tweak - Add profile link to order screen.
+
 = 3.3.3 - 2018-02-21 =
 * Fix - Fixed is_numeric check which was affecting order subtotals/totals when using comma decimal separator.
 * Fix - Add missing direct script access checks to loop templates.

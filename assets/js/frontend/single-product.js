@@ -240,17 +240,20 @@ jQuery( function( $ ) {
 
 		if ( $slides.length > 0 ) {
 			$slides.each( function( i, el ) {
-				var img = $( el ).find( 'img' ),
-					large_image_src = img.attr( 'data-large_image' ),
-					large_image_w   = img.attr( 'data-large_image_width' ),
-					large_image_h   = img.attr( 'data-large_image_height' ),
-					item            = {
-						src  : large_image_src,
-						w    : large_image_w,
-						h    : large_image_h,
-						title: img.attr( 'data-caption' ) ? img.attr( 'data-caption' ) : img.attr( 'title' )
-					};
-				items.push( item );
+				var img = $( el ).find( 'img' );
+
+				if ( img.length ) {
+					var large_image_src = img.attr( 'data-large_image' ),
+						large_image_w   = img.attr( 'data-large_image_width' ),
+						large_image_h   = img.attr( 'data-large_image_height' ),
+						item            = {
+							src  : large_image_src,
+							w    : large_image_w,
+							h    : large_image_h,
+							title: img.attr( 'data-caption' ) ? img.attr( 'data-caption' ) : img.attr( 'title' )
+						};
+					items.push( item );
+				}
 			} );
 		}
 

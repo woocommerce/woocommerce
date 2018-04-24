@@ -530,7 +530,11 @@ class WC_Checkout {
 					'discount_tax' => $cart->get_coupon_discount_tax_amount( $code ),
 				)
 			);
-			$item->add_meta_data( 'coupon_data', $coupon->get_data() );
+
+			// Avoid storing used_by - it's not needed and can get large.
+			$coupon_data = $coupon->get_data();
+			unset( $coupon_data['used_by'] );
+			$item->add_meta_data( 'coupon_data', $coupon_data );
 
 			/**
 			 * Action hook to adjust item before save.
@@ -717,7 +721,7 @@ class WC_Checkout {
 		$this->check_cart_items();
 
 		if ( empty( $data['woocommerce_checkout_update_totals'] ) && ! empty( $_POST['terms-field'] ) && empty( $data['terms'] ) && apply_filters( 'woocommerce_checkout_show_terms', wc_get_page_id( 'terms' ) > 0 ) ) { // WPCS: input var ok, CSRF ok.
-			$errors->add( 'terms', __( 'You must accept our Terms &amp; Conditions.', 'woocommerce' ) );
+			$errors->add( 'terms', __( 'Please read and accept the terms and conditions to proceed with your order.', 'woocommerce' ) );
 		}
 
 		if ( WC()->cart->needs_shipping() ) {
@@ -1011,6 +1015,10 @@ class WC_Checkout {
 
 				if ( is_wp_error( $order_id ) ) {
 					throw new Exception( $order_id->get_error_message() );
+				}
+
+				if ( ! $order ) {
+					throw new Exception( __( 'Unable to create order.', 'woocommerce' ) );
 				}
 
 				do_action( 'woocommerce_checkout_order_processed', $order_id, $posted_data, $order );

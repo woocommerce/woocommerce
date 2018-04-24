@@ -440,7 +440,7 @@ function get_woocommerce_currencies() {
 					'TZS' => __( 'Tanzanian shilling', 'woocommerce' ),
 					'UAH' => __( 'Ukrainian hryvnia', 'woocommerce' ),
 					'UGX' => __( 'Ugandan shilling', 'woocommerce' ),
-					'USD' => __( 'United States dollar', 'woocommerce' ),
+					'USD' => __( 'United States (US) dollar', 'woocommerce' ),
 					'UYU' => __( 'Uruguayan peso', 'woocommerce' ),
 					'UZS' => __( 'Uzbekistani som', 'woocommerce' ),
 					'VEF' => __( 'Venezuelan bol&iacute;var', 'woocommerce' ),
@@ -525,7 +525,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 			'FJD' => '&#36;',
 			'FKP' => '&pound;',
 			'GBP' => '&pound;',
-			'GEL' => '&#x10da;',
+			'GEL' => '&#x20be;',
 			'GGP' => '&pound;',
 			'GHS' => '&#x20b5;',
 			'GIP' => '&pound;',
@@ -1877,7 +1877,7 @@ function wc_restore_locale() {
 function wc_make_phone_clickable( $phone ) {
 	$number = trim( preg_replace( '/[^\d|\+]/', '', $phone ) );
 
-	return '<a href="tel:' . esc_attr( $number ) . '">' . esc_html( $phone ) . '</a>';
+	return $number ? '<a href="tel:' . esc_attr( $number ) . '">' . esc_html( $phone ) . '</a>' : '';
 }
 
 /**
@@ -2087,4 +2087,21 @@ function wc_round_discount( $value, $precision ) {
 	} else {
 		return round( $value, $precision );
 	}
+}
+
+/**
+ * Return the html selected attribute if stringified $value is found in array of stringified $options
+ * or if stringified $value is the same as scalar stringified $options.
+ *
+ * @param string|int       $value   Value to find within options.
+ * @param string|int|array $options Options to go through when looking for value.
+ * @return string
+ */
+function wc_selected( $value, $options ) {
+	if ( is_array( $options ) ) {
+		$options = array_map( 'strval', $options );
+		return selected( in_array( (string) $value, $options, true ), true, false );
+	}
+
+	return selected( $value, $options, false );
 }

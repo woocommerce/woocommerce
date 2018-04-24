@@ -221,6 +221,19 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				wp_update_post( array_merge( array( 'ID' => $product->get_id() ), $post_data ) );
 			}
 			$product->read_meta_data( true ); // Refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
+
+		} else { // Only update post modified time to record this save event.
+			$GLOBALS['wpdb']->update(
+				$GLOBALS['wpdb']->posts,
+				array(
+					'post_modified'     => current_time( 'mysql' ),
+					'post_modified_gmt' => current_time( 'mysql', 1 ),
+				),
+				array(
+					'ID' => $product->get_id(),
+				)
+			);
+			clean_post_cache( $product->get_id() );
 		}
 
 		$this->update_post_meta( $product );
@@ -258,6 +271,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		if ( $args['force_delete'] ) {
+			do_action( 'woocommerce_before_delete_' . $post_type, $id );
 			wp_delete_post( $id );
 			$product->set_id( 0 );
 			do_action( 'woocommerce_delete_' . $post_type, $id );
@@ -518,6 +532,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		foreach ( $props_to_update as $meta_key => $prop ) {
 			$value = $product->{"get_$prop"}( 'edit' );
+			$value = is_string( $value ) ? wp_slash( $value ) : $value;
 			switch ( $prop ) {
 				case 'virtual':
 				case 'downloadable':
@@ -552,12 +567,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		// Update extra data associated with the product like button text or product URL for external products.
 		if ( ! $this->extra_data_saved ) {
 			foreach ( $extra_data_keys as $key ) {
-				if ( ! array_key_exists( $key, $props_to_update ) ) {
+				if ( ! array_key_exists( '_' . $key, $props_to_update ) ) {
 					continue;
 				}
 				$function = 'get_' . $key;
 				if ( is_callable( array( $product, $function ) ) ) {
-					if ( update_post_meta( $product->get_id(), '_' . $key, $product->{$function}( 'edit' ) ) ) {
+					$value = $product->{$function}( 'edit' );
+					$value = is_string( $value ) ? wp_slash( $value ) : $value;
+
+					if ( update_post_meta( $product->get_id(), '_' . $key, $value ) ) {
 						$this->updated_props[] = $key;
 					}
 				}

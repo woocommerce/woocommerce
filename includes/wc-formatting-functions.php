@@ -1344,3 +1344,32 @@ function wc_implode_html_attributes( $raw_attributes ) {
 	}
 	return implode( ' ', $attributes );
 }
+
+/**
+ * Parse a relative date option from the settings API into a standard format.
+ *
+ * @since 3.4.0
+ * @param mixed $raw_value Value stored in DB.
+ * @return array Nicely formatted array with number and unit values.
+ */
+function wc_parse_relative_date_option( $raw_value ) {
+	$periods = array(
+		'days'   => __( 'Day(s)', 'woocommerce' ),
+		'weeks'  => __( 'Week(s)', 'woocommerce' ),
+		'months' => __( 'Month(s)', 'woocommerce' ),
+		'years'  => __( 'Year(s)', 'woocommerce' ),
+	);
+
+	$value = wp_parse_args( (array) $raw_value, array(
+		'number' => '',
+		'unit'   => 'days',
+	) );
+
+	$value['number'] = ! empty( $value['number'] ) ? absint( $value['number'] ) : '';
+
+	if ( ! in_array( $value['unit'], array_keys( $periods ), true ) ) {
+		$value['unit'] = 'days';
+	}
+
+	return $value;
+}

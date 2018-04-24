@@ -15,6 +15,13 @@ body {
 }
 .wc-setup {
 	text-align: center;
+
+	.select2-container {
+		text-align: left;
+	}
+	.hidden {
+		display: none;
+	}
 }
 .wc-setup-content {
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.13);
@@ -484,7 +491,7 @@ body {
 
 .wc-setup-footer-links {
 	font-size: 0.85em;
-	color: #b5b5b5;
+	color: #7b7b7b;
 	margin: 1.18em auto;
 	display: inline-block;
 	text-align: center;
@@ -625,6 +632,14 @@ body {
 			max-width: 95px;
 			padding: 12px 0;
 		}
+	}
+
+	&.eway-logo .wc-wizard-service-name img {
+		max-width: 87px;
+	}
+
+	&.payfast-logo .wc-wizard-service-name img {
+		max-width: 140px;
 	}
 
 	.wc-wizard-service-description {
@@ -966,8 +981,6 @@ h3.jetpack-reasons {
 }
 
 .store-address-container {
-	margin-top: 4px;
-
 	.city-and-postcode {
 		display: flex;
 
@@ -980,9 +993,11 @@ h3.jetpack-reasons {
 			}
 		}
 	}
-}
-.store-currency-container {
-	margin-top: 10px;
+	input[type="text"],
+	select,
+	.select2-container {
+		margin-bottom: 10px;
+	}
 }
 .product-type-container {
 	margin-top: 14px;
@@ -1191,5 +1206,66 @@ p.jetpack-terms {
 
 	.wc-wizard-service-settings-description {
 		margin-left: 1.5em;
+	}
+}
+
+.recommended-step {
+	border: 1px solid #ebebeb;
+	border-radius: 4px;
+	padding: 2.5em;
+
+	li {
+		list-style: none;
+
+		&:last-child .recommended-item {
+			margin-bottom: 0; // Avoid extra space at the end of the list.
+		}
+	}
+
+	.recommended-item {
+		display: flex;
+		align-items: center;
+		margin-bottom: 1.5em;
+	}
+
+	.recommended-item-icon {
+		border: 1px solid #fff;
+		border-radius: 7px;
+		height: 3.5em;
+		margin-right: 1em;
+		margin-left: 1em;
+
+		&.recommended-item-icon-storefront_theme {
+			background-color: #f4a224;
+			max-height: 3em;
+			max-width: 3em;
+			padding: ( 3.5em - 3em ) / 2;
+		}
+
+		&.recommended-item-icon-automated_taxes {
+			background-color: #d0011b;
+			max-height: 1.75em;
+			padding: ( 3.5em - 1.75em ) / 2;
+		}
+
+		&.recommended-item-icon-mailchimp {
+			background-color: #209bbb;
+			height: 2em;
+			padding: ( 3.5em - 2em ) / 2;
+		}
+	}
+
+	.recommended-item-description-container {
+		h3 {
+			font-size: 15px;
+			font-weight: bold;
+			letter-spacing: 0.5px;
+			margin-bottom: 0;
+		}
+
+		p {
+			margin-top: 0;
+			line-height: 1.5em;
+		}
 	}
 }

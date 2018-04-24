@@ -51,11 +51,11 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				$settings[] = include 'settings/class-wc-settings-products.php';
 				$settings[] = include 'settings/class-wc-settings-tax.php';
 				$settings[] = include 'settings/class-wc-settings-shipping.php';
-				$settings[] = include 'settings/class-wc-settings-checkout.php';
+				$settings[] = include 'settings/class-wc-settings-payment-gateways.php';
 				$settings[] = include 'settings/class-wc-settings-accounts.php';
 				$settings[] = include 'settings/class-wc-settings-emails.php';
 				$settings[] = include 'settings/class-wc-settings-integrations.php';
-				$settings[] = include 'settings/class-wc-settings-rest-api.php';
+				$settings[] = include 'settings/class-wc-settings-advanced.php';
 
 				self::$settings = apply_filters( 'woocommerce_get_settings_pages', $settings );
 			}
@@ -285,8 +285,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 						?><tr valign="top">
 							<th scope="row" class="titledesc">
-								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
-								<?php echo $tooltip_html; // WPCS: XSS ok. ?>
+								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
 							<td class="forminp forminp-<?php echo esc_attr( sanitize_title( $value['type'] ) ); ?>">
 								<input
@@ -311,8 +310,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						?>
 						<tr valign="top">
 							<th scope="row" class="titledesc">
-								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
-								<?php echo $tooltip_html; // WPCS: XSS ok. ?>
+								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
 							<td class="forminp forminp-<?php echo esc_attr( sanitize_title( $value['type'] ) ); ?>">&lrm;
 								<span class="colorpickpreview" style="background: <?php echo esc_attr( $option_value ); ?>"></span>
@@ -340,8 +338,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						?>
 						<tr valign="top">
 							<th scope="row" class="titledesc">
-								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
-								<?php echo $tooltip_html; // WPCS: XSS ok. ?>
+								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
 							<td class="forminp forminp-<?php echo esc_attr( sanitize_title( $value['type'] ) ); ?>">
 								<?php echo $description; // WPCS: XSS ok. ?>
@@ -367,8 +364,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						?>
 						<tr valign="top">
 							<th scope="row" class="titledesc">
-								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
-								<?php echo $tooltip_html; // WPCS: XSS ok. ?>
+								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
 							<td class="forminp forminp-<?php echo esc_attr( sanitize_title( $value['type'] ) ); ?>">
 								<select
@@ -410,8 +406,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						?>
 						<tr valign="top">
 							<th scope="row" class="titledesc">
-								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
-								<?php echo $tooltip_html; // WPCS: XSS ok. ?>
+								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
 							<td class="forminp forminp-<?php echo esc_attr( sanitize_title( $value['type'] ) ); ?>">
 								<fieldset>
@@ -548,6 +543,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 							'class'            => $value['class'],
 							'echo'             => false,
 							'selected'         => absint( self::get_option( $value['id'], $value['default'] ) ),
+							'post_status'      => 'publish,private,draft',
 						);
 
 						if ( isset( $value['args'] ) ) {
@@ -579,8 +575,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						?>
 						<tr valign="top">
 							<th scope="row" class="titledesc">
-								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
-								<?php echo $tooltip_html; // WPCS: XSS ok. ?>
+								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
 							<td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" data-placeholder="<?php esc_attr_e( 'Choose a country&hellip;', 'woocommerce' ); ?>" aria-label="<?php esc_attr_e( 'Country', 'woocommerce' ); ?>" class="wc-enhanced-select">
 								<?php WC()->countries->country_dropdown_options( $country, $state ); ?>
@@ -604,19 +599,57 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						?>
 						<tr valign="top">
 							<th scope="row" class="titledesc">
-								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
-								<?php echo $tooltip_html; // WPCS: XSS ok. ?>
+								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
 							<td class="forminp">
 								<select multiple="multiple" name="<?php echo esc_attr( $value['id'] ); ?>[]" style="width:350px" data-placeholder="<?php esc_attr_e( 'Choose countries&hellip;', 'woocommerce' ); ?>" aria-label="<?php esc_attr_e( 'Country', 'woocommerce' ); ?>" class="wc-enhanced-select">
 									<?php
 									if ( ! empty( $countries ) ) {
 										foreach ( $countries as $key => $val ) {
-											echo '<option value="' . esc_attr( $key ) . '" ' . selected( in_array( $key, $selections, true ), true, false ) . '>' . esc_html( $val ) . '</option>';
+											echo '<option value="' . esc_attr( $key ) . '"' . wc_selected( $key, $selections ) . '>' . esc_html( $val ) . '</option>';
 										}
 									}
 									?>
 								</select> <?php echo ( $description ) ? $description : ''; // WPCS: XSS ok. ?> <br /><a class="select_all button" href="#"><?php esc_html_e( 'Select all', 'woocommerce' ); ?></a> <a class="select_none button" href="#"><?php esc_html_e( 'Select none', 'woocommerce' ); ?></a>
+							</td>
+						</tr>
+						<?php
+						break;
+
+					// Days/months/years selector.
+					case 'relative_date_selector':
+						$periods      = array(
+							'days'   => __( 'Day(s)', 'woocommerce' ),
+							'weeks'  => __( 'Week(s)', 'woocommerce' ),
+							'months' => __( 'Month(s)', 'woocommerce' ),
+							'years'  => __( 'Year(s)', 'woocommerce' ),
+						);
+						$option_value = wc_parse_relative_date_option( self::get_option( $value['id'], $value['default'] ) );
+						?>
+						<tr valign="top">
+							<th scope="row" class="titledesc">
+								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
+							</th>
+							<td class="forminp">
+							<input
+									name="<?php echo esc_attr( $value['id'] ); ?>[number]"
+									id="<?php echo esc_attr( $value['id'] ); ?>"
+									type="number"
+									style="width: 80px;"
+									value="<?php echo esc_attr( $option_value['number'] ); ?>"
+									class="<?php echo esc_attr( $value['class'] ); ?>"
+									placeholder="<?php echo esc_attr( $value['placeholder'] ); ?>"
+									step="1"
+									min="1"
+									<?php echo implode( ' ', $custom_attributes ); // WPCS: XSS ok. ?>
+								/>&nbsp;
+								<select name="<?php echo esc_attr( $value['id'] ); ?>[unit]" style="width: auto;">
+									<?php
+									foreach ( $periods as $value => $label ) {
+										echo '<option value="' . esc_attr( $value ) . '"' . selected( $option_value['unit'], $value, false ) . '>' . esc_html( $label ) . '</option>';
+									}
+									?>
+								</select> <?php echo ( $description ) ? $description : ''; // WPCS: XSS ok. ?>
 							</td>
 						</tr>
 						<?php
@@ -741,6 +774,9 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						}
 						$default = ( empty( $option['default'] ) ? $allowed_values[0] : $option['default'] );
 						$value   = in_array( $raw_value, $allowed_values, true ) ? $raw_value : $default;
+						break;
+					case 'relative_date_selector':
+						$value = wc_parse_relative_date_option( $raw_value );
 						break;
 					default:
 						$value = wc_clean( $raw_value );

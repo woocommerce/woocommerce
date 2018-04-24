@@ -27,7 +27,8 @@ class WC_Meta_Box_Coupon_Data {
 	public static function output( $post ) {
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
 
-		$coupon = new WC_Coupon( $post->ID );
+		$coupon_id = absint( $post->ID );
+		$coupon    = new WC_Coupon( $coupon_id );
 
 		?>
 
@@ -78,6 +79,7 @@ class WC_Meta_Box_Coupon_Data {
 						'id'      => 'discount_type',
 						'label'   => __( 'Discount type', 'woocommerce' ),
 						'options' => wc_get_coupon_types(),
+						'value'   => $coupon->get_discount_type( 'edit' ),
 					)
 				);
 
@@ -90,6 +92,7 @@ class WC_Meta_Box_Coupon_Data {
 						'description' => __( 'Value of the coupon.', 'woocommerce' ),
 						'data_type'   => 'price',
 						'desc_tip'    => true,
+						'value'       => $coupon->get_amount( 'edit' ),
 					)
 				);
 
@@ -100,12 +103,13 @@ class WC_Meta_Box_Coupon_Data {
 							'id'          => 'free_shipping',
 							'label'       => __( 'Allow free shipping', 'woocommerce' ),
 							'description' => sprintf( __( 'Check this box if the coupon grants free shipping. A <a href="%s" target="_blank">free shipping method</a> must be enabled in your shipping zone and be set to require "a valid free shipping coupon" (see the "Free Shipping Requires" setting).', 'woocommerce' ), 'https://docs.woocommerce.com/document/free-shipping/' ),
+							'value'       => wc_bool_to_string( $coupon->get_free_shipping( 'edit' ) ),
 						)
 					);
 				}
 
 				// Expiry date.
-				$expiry_date = $coupon->get_date_expires() ? $coupon->get_date_expires()->date( 'Y-m-d' ) : '';
+				$expiry_date = $coupon->get_date_expires( 'edit' ) ? $coupon->get_date_expires( 'edit' )->date( 'Y-m-d' ) : '';
 				woocommerce_wp_text_input(
 					array(
 						'id'                => 'expiry_date',
@@ -138,6 +142,7 @@ class WC_Meta_Box_Coupon_Data {
 						'description' => __( 'This field allows you to set the minimum spend (subtotal) allowed to use the coupon.', 'woocommerce' ),
 						'data_type'   => 'price',
 						'desc_tip'    => true,
+						'value'       => $coupon->get_minimum_amount( 'edit' ),
 					)
 				);
 
@@ -150,6 +155,7 @@ class WC_Meta_Box_Coupon_Data {
 						'description' => __( 'This field allows you to set the maximum spend (subtotal) allowed when using the coupon.', 'woocommerce' ),
 						'data_type'   => 'price',
 						'desc_tip'    => true,
+						'value'       => $coupon->get_maximum_amount( 'edit' ),
 					)
 				);
 
@@ -159,6 +165,7 @@ class WC_Meta_Box_Coupon_Data {
 						'id'          => 'individual_use',
 						'label'       => __( 'Individual use only', 'woocommerce' ),
 						'description' => __( 'Check this box if the coupon cannot be used in conjunction with other coupons.', 'woocommerce' ),
+						'value'       => wc_bool_to_string( $coupon->get_individual_use( 'edit' ) ),
 					)
 				);
 
@@ -168,6 +175,7 @@ class WC_Meta_Box_Coupon_Data {
 						'id'          => 'exclude_sale_items',
 						'label'       => __( 'Exclude sale items', 'woocommerce' ),
 						'description' => __( 'Check this box if the coupon should not apply to items on sale. Per-item coupons will only work if the item is not on sale. Per-cart coupons will only work if there are items in the cart that are not on sale.', 'woocommerce' ),
+						'value'       => wc_bool_to_string( $coupon->get_exclude_sale_items( 'edit' ) ),
 					)
 				);
 
@@ -179,7 +187,7 @@ class WC_Meta_Box_Coupon_Data {
 					<label><?php _e( 'Products', 'woocommerce' ); ?></label>
 					<select class="wc-product-search" multiple="multiple" style="width: 50%;" name="product_ids[]" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations">
 						<?php
-						$product_ids = $coupon->get_product_ids();
+						$product_ids = $coupon->get_product_ids( 'edit' );
 
 						foreach ( $product_ids as $product_id ) {
 							$product = wc_get_product( $product_id );
@@ -197,7 +205,7 @@ class WC_Meta_Box_Coupon_Data {
 					<label><?php _e( 'Exclude products', 'woocommerce' ); ?></label>
 					<select class="wc-product-search" multiple="multiple" style="width: 50%;" name="exclude_product_ids[]" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations">
 						<?php
-						$product_ids = $coupon->get_excluded_product_ids();
+						$product_ids = $coupon->get_excluded_product_ids( 'edit' );
 
 						foreach ( $product_ids as $product_id ) {
 							$product = wc_get_product( $product_id );
@@ -219,12 +227,12 @@ class WC_Meta_Box_Coupon_Data {
 					<label for="product_categories"><?php _e( 'Product categories', 'woocommerce' ); ?></label>
 					<select id="product_categories" name="product_categories[]" style="width: 50%;"  class="wc-enhanced-select" multiple="multiple" data-placeholder="<?php esc_attr_e( 'Any category', 'woocommerce' ); ?>">
 						<?php
-						$category_ids = $coupon->get_product_categories();
+						$category_ids = $coupon->get_product_categories( 'edit' );
 						$categories   = get_terms( 'product_cat', 'orderby=name&hide_empty=0' );
 
 						if ( $categories ) {
 							foreach ( $categories as $cat ) {
-								echo '<option value="' . esc_attr( $cat->term_id ) . '"' . selected( in_array( $cat->term_id, $category_ids ), true, false ) . '>' . esc_html( $cat->name ) . '</option>';
+								echo '<option value="' . esc_attr( $cat->term_id ) . '"' . wc_selected( $cat->term_id, $category_ids ) . '>' . esc_html( $cat->name ) . '</option>';
 							}
 						}
 						?>
@@ -236,12 +244,12 @@ class WC_Meta_Box_Coupon_Data {
 					<label for="exclude_product_categories"><?php _e( 'Exclude categories', 'woocommerce' ); ?></label>
 					<select id="exclude_product_categories" name="exclude_product_categories[]" style="width: 50%;"  class="wc-enhanced-select" multiple="multiple" data-placeholder="<?php esc_attr_e( 'No categories', 'woocommerce' ); ?>">
 						<?php
-						$category_ids = $coupon->get_excluded_product_categories();
+						$category_ids = $coupon->get_excluded_product_categories( 'edit' );
 						$categories   = get_terms( 'product_cat', 'orderby=name&hide_empty=0' );
 
 						if ( $categories ) {
 							foreach ( $categories as $cat ) {
-								echo '<option value="' . esc_attr( $cat->term_id ) . '"' . selected( in_array( $cat->term_id, $category_ids ), true, false ) . '>' . esc_html( $cat->name ) . '</option>';
+								echo '<option value="' . esc_attr( $cat->term_id ) . '"' . wc_selected( $cat->term_id, $category_ids ) . '>' . esc_html( $cat->name ) . '</option>';
 							}
 						}
 						?>
@@ -258,7 +266,7 @@ class WC_Meta_Box_Coupon_Data {
 						'label'             => __( 'Email restrictions', 'woocommerce' ),
 						'placeholder'       => __( 'No restrictions', 'woocommerce' ),
 						'description'       => __( 'List of allowed emails to check against the customer billing email when an order is placed. Separate email addresses with commas. You can also use an asterisk (*) to match parts of an email. For example "*@gmail.com" would match all gmail addresses.', 'woocommerce' ),
-						'value'             => implode( ', ', (array) $coupon->get_email_restrictions() ),
+						'value'             => implode( ', ', (array) $coupon->get_email_restrictions( 'edit' ) ),
 						'desc_tip'          => true,
 						'type'              => 'email',
 						'class'             => '',
@@ -288,7 +296,7 @@ class WC_Meta_Box_Coupon_Data {
 								'step' => 1,
 								'min'  => 0,
 							),
-							'value'             => $coupon->get_usage_limit() ? $coupon->get_usage_limit() : '',
+							'value'             => $coupon->get_usage_limit( 'edit' ) ? $coupon->get_usage_limit( 'edit' ) : '',
 						)
 					);
 
@@ -306,7 +314,7 @@ class WC_Meta_Box_Coupon_Data {
 								'step' => 1,
 								'min'  => 0,
 							),
-							'value'             => $coupon->get_limit_usage_to_x_items() ? $coupon->get_limit_usage_to_x_items() : '',
+							'value'             => $coupon->get_limit_usage_to_x_items( 'edit' ) ? $coupon->get_limit_usage_to_x_items( 'edit' ) : '',
 						)
 					);
 
@@ -324,7 +332,7 @@ class WC_Meta_Box_Coupon_Data {
 								'step' => 1,
 								'min'  => 0,
 							),
-							'value'             => $coupon->get_usage_limit_per_user() ? $coupon->get_usage_limit_per_user() : '',
+							'value'             => $coupon->get_usage_limit_per_user( 'edit' ) ? $coupon->get_usage_limit_per_user( 'edit' ) : '',
 						)
 					);
 					?>
