@@ -132,11 +132,13 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 			do_action( 'woocommerce_settings_start' );
 
-			wp_enqueue_script( 'woocommerce_settings', WC()->plugin_url() . '/assets/js/admin/settings' . $suffix . '.js', array( 'jquery', 'jquery-ui-datepicker', 'jquery-ui-sortable', 'iris', 'selectWoo' ), WC()->version, true );
+			wp_enqueue_script( 'woocommerce_settings', WC()->plugin_url() . '/assets/js/admin/settings' . $suffix . '.js', array( 'jquery', 'wp-util', 'jquery-ui-datepicker', 'jquery-ui-sortable', 'iris', 'selectWoo' ), WC()->version, true );
 
 			wp_localize_script(
 				'woocommerce_settings', 'woocommerce_settings_params', array(
 					'i18n_nav_warning' => __( 'The changes you made will be lost if you navigate away from this page.', 'woocommerce' ),
+					'i18n_moved_up'    => __( 'Item moved up', 'woocommerce' ),
+					'i18n_moved_down'  => __( 'Item moved down', 'woocommerce' ),
 				)
 			);
 
@@ -249,7 +251,9 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 							echo '<h2>' . esc_html( $value['title'] ) . '</h2>';
 						}
 						if ( ! empty( $value['desc'] ) ) {
+							echo '<div id="' . esc_attr( sanitize_title( $value['id'] ) ) . '-description">';
 							echo wp_kses_post( wpautop( wptexturize( $value['desc'] ) ) );
+							echo '</div>';
 						}
 						echo '<table class="form-table">' . "\n\n";
 						if ( ! empty( $value['id'] ) ) {
