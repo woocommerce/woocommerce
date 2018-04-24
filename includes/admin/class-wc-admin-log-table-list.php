@@ -151,13 +151,13 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 			'debug'     => __( 'Debug', 'woocommerce' ),
 		);
 
-		if ( isset( $levels[ $level_key ] ) ) {
-			$level       = $levels[ $level_key ];
-			$level_class = sanitize_html_class( 'log-level--' . $level_key );
-			return '<span class="log-level ' . $level_class . '">' . esc_html( $level ) . '</span>';
-		} else {
+		if ( ! isset( $levels[ $level_key ] ) ) {
 			return '';
 		}
+
+		$level       = $levels[ $level_key ];
+		$level_class = sanitize_html_class( 'log-level--' . $level_key );
+		return '<span class="log-level ' . $level_class . '">' . esc_html( $level ) . '</span>';
 	}
 
 	/**
