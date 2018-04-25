@@ -185,8 +185,8 @@ p.wc-products-block-description {
 	}
 
 	&--featured,
-	&--best_sellers,
-	&--best_rated,
+	&--best_selling,
+	&--top_rated,
 	&--on_sale,
 	&--attribute {
 		display: none;
@@ -285,8 +285,8 @@ p.wc-products-display-options__option-description {
 .wc-products-display-options--extended {
 	.wc-products-display-options__option {
 		&--featured,
-		&--best_sellers,
-		&--best_rated,
+		&--best_selling,
+		&--top_rated,
 		&--on_sale,
 		&--attribute {
 			display: flex;
