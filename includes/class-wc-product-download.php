@@ -24,8 +24,6 @@ class WC_Product_Download implements ArrayAccess {
 		'id'     => '',
 		'name'   => '',
 		'file'   => '',
-		'limit'  => '', // Since 3.4.0.
-		'expiry' => '', // Since 3.4.0.
 	);
 
 	/**
