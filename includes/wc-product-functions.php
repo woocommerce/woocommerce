@@ -537,9 +537,9 @@ function wc_product_has_unique_sku( $product_id, $sku ) {
 
 	if ( apply_filters( 'wc_product_has_unique_sku', $sku_found, $product_id, $sku ) ) {
 		return false;
-	} else {
-		return true;
 	}
+
+	return true;
 }
 
 /**
