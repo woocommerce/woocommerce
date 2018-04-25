@@ -13,6 +13,7 @@ import { ProductsAttributeSelect, getAttributeSlug, getAttributeID } from './vie
  *    description - Display description of the setting.
  *    value - Display setting slug to set when selected.
  *    group_container - (optional) If set the setting is a parent container.
+ *    no_orderby - (optional) If set the setting does not allow orderby settings.
  */
 const PRODUCTS_BLOCK_DISPLAY_SETTINGS = {
 	'specific' : {
@@ -41,6 +42,18 @@ const PRODUCTS_BLOCK_DISPLAY_SETTINGS = {
 		description: '',
 		value: 'on_sale',
 	},
+	'best_selling' : {
+		title: __( 'Best sellers' ),
+		description: '',
+		value: 'best_selling',
+		no_orderby: true,
+	},
+	'top_rated' : {
+		title: __( 'Top rated' ),
+		description: '',
+		value: 'top_rated',
+		no_orderby: true,
+	},
 	'attribute' : {
 		title: __( 'Attribute' ),
 		description: '',
@@ -52,6 +65,18 @@ const PRODUCTS_BLOCK_DISPLAY_SETTINGS = {
 		value: 'all',
 	}
 };
+
+/**
+ * Returns whether or not a display scope supports orderby options.
+ *
+ * @param string display The display scope slug.
+ * @return bool
+ */
+function supportsOrderby( display ) {
+	return ! ( PRODUCTS_BLOCK_DISPLAY_SETTINGS.hasOwnProperty( display ) 
+	&& PRODUCTS_BLOCK_DISPLAY_SETTINGS[ display ].hasOwnProperty( 'no_orderby' ) 
+	&& PRODUCTS_BLOCK_DISPLAY_SETTINGS[ display ].no_orderby );
+}
 
 /**
  * One option from the list of all available ways to display products.
@@ -248,7 +273,7 @@ class ProductsBlockSettingsEditor extends React.Component {
 
 		let heading = null;
 		if ( this.state.display ) {
-			const group_options     = [ 'featured', 'on_sale', 'attribute' ];
+			const group_options     = [ 'featured', 'on_sale', 'attribute', 'best_selling', 'top_rated' ];
 			let should_group_expand = group_options.includes( this.state.display ) ? this.state.display : '';
 			let menu_link           = <button type="button" className="wc-products-settings-heading__change-button button-link" onClick={ () => { this.setState( { menu_visible: ! this.state.menu_visible, expanded_group: should_group_expand } ) } }>{ __( 'Display different products' ) }</button>;
 
@@ -352,8 +377,8 @@ const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
 		query.on_sale = 1;
 	}
 
-	// @todo Add support for orderby by sales, rating, and price to the API.
-	if ( 'title' === orderby || 'date' === orderby ) {
+	// @todo Add support for orderby by sales, rating, and price here when we switch to V3 API.
+	if ( supportsOrderby( display ) && ( 'title' === orderby || 'date' === orderby ) ) {
 		query.orderby = orderby;
 
 		if ( 'title' === orderby ) {
@@ -502,40 +527,43 @@ class ProductsBlock extends React.Component {
 			/>
 		);
 
-		let orderControl = (
-			<SelectControl
-				key="query-panel-select"
-				label={ __( 'Order Products By' ) }
-				value={ orderby }
-				options={ [
-					{
-						label: __( 'Newness - newest first' ),
-						value: 'date',
-					},
-					{
-						label: __( 'Price - low to high' ),
-						value: 'price_asc',
-					},
-					{
-						label: __( 'Price - high to low' ),
-						value: 'price_desc',
-					},
-					{
-						label: __( 'Rating - highest first' ),
-						value: 'rating',
-					},
-					{
-						label: __( 'Sales - most first' ),
-						value: 'popularity',
-					},
-					{
-						label: __( 'Title - alphabetical' ),
-						value: 'title',
-					},
-				] }
-				onChange={ ( value ) => setAttributes( { orderby: value } ) }
-			/>
-		);
+		let orderControl = null;
+		if ( supportsOrderby( display ) ) {
+			orderControl = (
+				<SelectControl
+					key="query-panel-select"
+					label={ __( 'Order Products By' ) }
+					value={ orderby }
+					options={ [
+						{
+							label: __( 'Newness - newest first' ),
+							value: 'date',
+						},
+						{
+							label: __( 'Price - low to high' ),
+							value: 'price_asc',
+						},
+						{
+							label: __( 'Price - high to low' ),
+							value: 'price_desc',
+						},
+						{
+							label: __( 'Rating - highest first' ),
+							value: 'rating',
+						},
+						{
+							label: __( 'Sales - most first' ),
+							value: 'popularity',
+						},
+						{
+							label: __( 'Title - alphabetical' ),
+							value: 'title',
+						},
+					] }
+					onChange={ ( value ) => setAttributes( { orderby: value } ) }
+				/>
+			);
+		}
 
 		// Row settings don't make sense for specific-selected products display.
 		let rowControl = null;
@@ -777,6 +805,10 @@ registerBlockType( 'woocommerce/products', {
 			shortcode_atts.set( 'visibility', 'featured' );
 		} else if ( 'on_sale' === display ) {
 			shortcode_atts.set( 'on_sale', '1' );
+		} else if ( 'best_selling' === display ) {
+			shortcode_atts.set( 'best_selling', '1' );
+		} else if ( 'top_rated' === display ) {
+			shortcode_atts.set( 'top_rated', '1' );
 		} else if ( 'attribute' === display ) {
 			const attribute = display_setting.length ? getAttributeSlug( display_setting[0] ) : '';
 			const terms = display_setting.length > 1 ? display_setting.slice( 1 ).join( ',' ) : '';
@@ -787,7 +819,7 @@ registerBlockType( 'woocommerce/products', {
 			}
 		}
 
-		if ( 'specific' !== display ) {
+		if ( supportsOrderby( display ) ) {
 			if ( 'price_desc' === orderby ) {
 				shortcode_atts.set( 'orderby', 'price' );
 				shortcode_atts.set( 'order', 'DESC' )

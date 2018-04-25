@@ -110,6 +110,7 @@ var _wp$components = wp.components,
  *    description - Display description of the setting.
  *    value - Display setting slug to set when selected.
  *    group_container - (optional) If set the setting is a parent container.
+ *    no_orderby - (optional) If set the setting does not allow orderby settings.
  */
 var PRODUCTS_BLOCK_DISPLAY_SETTINGS = {
 	'specific': {
@@ -138,6 +139,18 @@ var PRODUCTS_BLOCK_DISPLAY_SETTINGS = {
 		description: '',
 		value: 'on_sale'
 	},
+	'best_selling': {
+		title: __('Best sellers'),
+		description: '',
+		value: 'best_selling',
+		no_orderby: true
+	},
+	'top_rated': {
+		title: __('Top rated'),
+		description: '',
+		value: 'top_rated',
+		no_orderby: true
+	},
 	'attribute': {
 		title: __('Attribute'),
 		description: '',
@@ -149,6 +162,16 @@ var PRODUCTS_BLOCK_DISPLAY_SETTINGS = {
 		value: 'all'
 	}
 };
+
+/**
+ * Returns whether or not a display scope supports orderby options.
+ *
+ * @param string display The display scope slug.
+ * @return bool
+ */
+function supportsOrderby(display) {
+	return !(PRODUCTS_BLOCK_DISPLAY_SETTINGS.hasOwnProperty(display) && PRODUCTS_BLOCK_DISPLAY_SETTINGS[display].hasOwnProperty('no_orderby') && PRODUCTS_BLOCK_DISPLAY_SETTINGS[display].no_orderby);
+}
 
 /**
  * One option from the list of all available ways to display products.
@@ -420,7 +443,7 @@ var ProductsBlockSettingsEditor = function (_React$Component3) {
 
 			var heading = null;
 			if (this.state.display) {
-				var group_options = ['featured', 'on_sale', 'attribute'];
+				var group_options = ['featured', 'on_sale', 'attribute', 'best_selling', 'top_rated'];
 				var should_group_expand = group_options.includes(this.state.display) ? this.state.display : '';
 				var menu_link = wp.element.createElement(
 					'button',
@@ -584,8 +607,8 @@ var ProductsBlockPreview = withAPIData(function (_ref) {
 		query.on_sale = 1;
 	}
 
-	// @todo Add support for orderby by sales, rating, and price to the API.
-	if ('title' === orderby || 'date' === orderby) {
+	// @todo Add support for orderby by sales, rating, and price here when we switch to V3 API.
+	if (supportsOrderby(display) && ('title' === orderby || 'date' === orderby)) {
 		query.orderby = orderby;
 
 		if ('title' === orderby) {
@@ -822,33 +845,36 @@ var ProductsBlock = function (_React$Component5) {
 				max: wc_product_block_data.max_columns
 			});
 
-			var orderControl = wp.element.createElement(SelectControl, {
-				key: 'query-panel-select',
-				label: __('Order Products By'),
-				value: orderby,
-				options: [{
-					label: __('Newness - newest first'),
-					value: 'date'
-				}, {
-					label: __('Price - low to high'),
-					value: 'price_asc'
-				}, {
-					label: __('Price - high to low'),
-					value: 'price_desc'
-				}, {
-					label: __('Rating - highest first'),
-					value: 'rating'
-				}, {
-					label: __('Sales - most first'),
-					value: 'popularity'
-				}, {
-					label: __('Title - alphabetical'),
-					value: 'title'
-				}],
-				onChange: function onChange(value) {
-					return setAttributes({ orderby: value });
-				}
-			});
+			var orderControl = null;
+			if (supportsOrderby(display)) {
+				orderControl = wp.element.createElement(SelectControl, {
+					key: 'query-panel-select',
+					label: __('Order Products By'),
+					value: orderby,
+					options: [{
+						label: __('Newness - newest first'),
+						value: 'date'
+					}, {
+						label: __('Price - low to high'),
+						value: 'price_asc'
+					}, {
+						label: __('Price - high to low'),
+						value: 'price_desc'
+					}, {
+						label: __('Rating - highest first'),
+						value: 'rating'
+					}, {
+						label: __('Sales - most first'),
+						value: 'popularity'
+					}, {
+						label: __('Title - alphabetical'),
+						value: 'title'
+					}],
+					onChange: function onChange(value) {
+						return setAttributes({ orderby: value });
+					}
+				});
+			}
 
 			// Row settings don't make sense for specific-selected products display.
 			var rowControl = null;
@@ -1143,6 +1169,10 @@ registerBlockType('woocommerce/products', {
 			shortcode_atts.set('visibility', 'featured');
 		} else if ('on_sale' === display) {
 			shortcode_atts.set('on_sale', '1');
+		} else if ('best_selling' === display) {
+			shortcode_atts.set('best_selling', '1');
+		} else if ('top_rated' === display) {
+			shortcode_atts.set('top_rated', '1');
 		} else if ('attribute' === display) {
 			var attribute = display_setting.length ? (0, _attributeSelect.getAttributeSlug)(display_setting[0]) : '';
 			var terms = display_setting.length > 1 ? display_setting.slice(1).join(',') : '';
@@ -1153,7 +1183,7 @@ registerBlockType('woocommerce/products', {
 			}
 		}
 
-		if ('specific' !== display) {
+		if (supportsOrderby(display)) {
 			if ('price_desc' === orderby) {
 				shortcode_atts.set('orderby', 'price');
 				shortcode_atts.set('order', 'DESC');
