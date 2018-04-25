@@ -11,42 +11,45 @@ defined( 'ABSPATH' ) || exit;
 /**
  * WC_Privacy Class.
  */
-class WC_Privacy {
+class WC_Privacy extends WC_Abstract_Privacy {
 
 	/**
 	 * Background process to clean up orders.
 	 *
 	 * @var WC_Privacy_Background_Process
 	 */
-	protected static $background_process;
+	protected $background_process;
 
 	/**
 	 * Init - hook into events.
 	 */
-	public static function init() {
-		self::$background_process = new WC_Privacy_Background_Process();
+	public function __construct() {
+		parent::__construct( 'WooCommerce' );
+
+		$this->background_process = new WC_Privacy_Background_Process();
 
 		// Include supporting classes.
 		include_once 'class-wc-privacy-erasers.php';
 		include_once 'class-wc-privacy-exporters.php';
 
 		// This hook registers WooCommerce data exporters.
-		add_filter( 'wp_privacy_personal_data_exporters', array( 'WC_Privacy_Exporters', 'register' ), 10 );
+		$this->add_exporter( __( 'Customer Data', 'woocommerce' ), array( 'WC_Privacy_Exporters', 'customer_data_exporter' ) );
+		$this->add_exporter( __( 'Customer Orders', 'woocommerce' ), array( 'WC_Privacy_Exporters', 'order_data_exporter' ) );
+		$this->add_exporter( __( 'Customer Downloads', 'woocommerce' ), array( 'WC_Privacy_Exporters', 'download_data_exporter' ) );
 
 		// This hook registers WooCommerce data erasers.
-		add_filter( 'wp_privacy_personal_data_erasers', array( 'WC_Privacy_Erasers', 'register' ), 10 );
-
-		// Privacy page content.
-		add_action( 'admin_init', array( __CLASS__, 'add_privacy_policy_content' ) );
+		$this->add_eraser( __( 'Customer Data', 'woocommerce' ), array( 'WC_Privacy_Erasers', 'customer_data_eraser' ) );
+		$this->add_eraser( __( 'Customer Orders', 'woocommerce' ), array( 'WC_Privacy_Erasers', 'order_data_eraser' ) );
+		$this->add_eraser( __( 'Customer Downloads', 'woocommerce' ), array( 'WC_Privacy_Erasers', 'download_data_eraser' ) );
 
 		// Cleanup orders daily - this is a callback on a daily cron event.
-		add_action( 'woocommerce_cleanup_orders', array( __CLASS__, 'order_cleanup_process' ) );
+		add_action( 'woocommerce_cleanup_orders', array( $this, 'order_cleanup_process' ) );
 
 		// When this is fired, data is removed in a given order. Called from bulk actions.
-		add_action( 'woocommerce_remove_order_personal_data', array( __CLASS__, 'remove_order_personal_data' ) );
+		add_action( 'woocommerce_remove_order_personal_data', array( 'WC_Privacy_Erasers', 'remove_order_personal_data' ) );
 
 		// Handles custom anonomization types not included in core.
-		add_filter( 'wp_privacy_anonymize_data', array( __CLASS__, 'anonymize_custom_data_types' ), 10, 3 );
+		add_filter( 'wp_privacy_anonymize_data', array( $this, 'anonymize_custom_data_types' ), 10, 3 );
 	}
 
 	/**
@@ -54,11 +57,7 @@ class WC_Privacy {
 	 *
 	 * @since 3.4.0
 	 */
-	public static function add_privacy_policy_content() {
-		if ( ! function_exists( 'wp_add_privacy_policy_content' ) ) {
-			return;
-		}
-
+	public function get_message() {
 		$content = wp_kses_post( apply_filters( 'wc_privacy_policy_content', wpautop( __( '
 We collect information about you during the checkout process on our store. This information may include, but is not limited to, your name, billing address, shipping address, email address, phone number, credit card/payment details and any other details that might be requested from you for the purpose of processing your orders.
 
@@ -80,97 +79,7 @@ Additionally we may also collect the following information:
 - If you choose to create an account with us, your name, address, email and phone number, which will be used to populate the checkout for future orders.
 ', 'woocommerce' ) ) ) );
 
-		wp_add_privacy_policy_content( 'WooCommerce', $content );
-	}
-
-	/**
-	 * Remove personal data specific to WooCommerce from an order object.
-	 *
-	 * Note; this will hinder order processing for obvious reasons!
-	 *
-	 * @param WC_Order $order Order object.
-	 */
-	public static function remove_order_personal_data( $order ) {
-		$anonymized_data = array();
-
-		/**
-		 * Expose props and data types we'll be anonymizing.
-		 *
-		 * @since 3.4.0
-		 * @param array    $props Keys are the prop names, values are the data type we'll be passing to wp_privacy_anonymize_data().
-		 * @param WC_Order $order A customer object.
-		 */
-		$props_to_remove = apply_filters( 'woocommerce_privacy_remove_order_personal_data_props', array(
-			'customer_ip_address' => 'ip',
-			'customer_user_agent' => 'text',
-			'billing_first_name'  => 'text',
-			'billing_last_name'   => 'text',
-			'billing_company'     => 'text',
-			'billing_address_1'   => 'text',
-			'billing_address_2'   => 'text',
-			'billing_city'        => 'text',
-			'billing_postcode'    => 'text',
-			'billing_state'       => 'address_state',
-			'billing_country'     => 'address_country',
-			'billing_phone'       => 'phone',
-			'billing_email'       => 'email',
-			'shipping_first_name' => 'text',
-			'shipping_last_name'  => 'text',
-			'shipping_company'    => 'text',
-			'shipping_address_1'  => 'text',
-			'shipping_address_2'  => 'text',
-			'shipping_city'       => 'text',
-			'shipping_postcode'   => 'text',
-			'shipping_state'      => 'address_state',
-			'shipping_country'    => 'address_country',
-		), $order );
-
-		if ( ! empty( $props_to_remove ) && is_array( $props_to_remove ) ) {
-			foreach ( $props_to_remove as $prop => $data_type ) {
-				// Get the current value in edit context.
-				$value = $order->{"get_$prop"}( 'edit' );
-
-				// If the value is empty, it does not need to be anonymized.
-				if ( empty( $value ) || empty( $data_type ) ) {
-					continue;
-				}
-
-				if ( function_exists( 'wp_privacy_anonymize_data' ) ) {
-					$anon_value = wp_privacy_anonymize_data( $data_type, $value );
-				} else {
-					$anon_value = '';
-				}
-
-				/**
-				 * Expose a way to control the anonymized value of a prop via 3rd party code.
-				 *
-				 * @since 3.4.0
-				 * @param bool     $anonymized_data Value of this prop after anonymization.
-				 * @param string   $prop Name of the prop being removed.
-				 * @param string   $value Current value of the data.
-				 * @param string   $data_type Type of data.
-				 * @param WC_Order $order An order object.
-				 */
-				$anonymized_data[ $prop ] = apply_filters( 'woocommerce_privacy_remove_order_personal_data_prop_value', $anon_value, $prop, $value, $data_type, $order );
-			}
-		}
-
-		// Set all new props and persist the new data to the database.
-		$order->set_props( $anonymized_data );
-		$order->set_customer_id( 0 );
-		$order->update_meta_data( '_anonymized', 'yes' );
-		$order->save();
-
-		// Add note that this event occured.
-		$order->add_order_note( __( 'Personal data removed.', 'woocommerce' ) );
-
-		/**
-		 * Allow extensions to remove their own personal data for this order.
-		 *
-		 * @since 3.4.0
-		 * @param WC_Order $order A customer object.
-		 */
-		do_action( 'woocommerce_privacy_remove_order_personal_data', $order );
+		return $content;
 	}
 
 	/**
@@ -180,7 +89,7 @@ Additionally we may also collect the following information:
 	 * @param array $query Query array to pass to wc_get_orders().
 	 * @return int Count of orders that were trashed.
 	 */
-	protected static function trash_orders_query( $query ) {
+	protected function trash_orders_query( $query ) {
 		$orders = wc_get_orders( $query );
 		$count  = 0;
 
@@ -201,13 +110,13 @@ Additionally we may also collect the following information:
 	 * @param array $query Query array to pass to wc_get_orders().
 	 * @return int Count of orders that were anonymized.
 	 */
-	protected static function anonymize_orders_query( $query ) {
+	protected function anonymize_orders_query( $query ) {
 		$orders = wc_get_orders( $query );
 		$count  = 0;
 
 		if ( $orders ) {
 			foreach ( $orders as $order ) {
-				self::remove_order_personal_data( $order );
+				WC_Privacy_Erasers::remove_order_personal_data( $order );
 				$count ++;
 			}
 		}
@@ -218,12 +127,12 @@ Additionally we may also collect the following information:
 	/**
 	 * Spawn events for order cleanup.
 	 */
-	public static function order_cleanup_process() {
-		self::$background_process->push_to_queue( array( 'task' => 'trash_pending_orders' ) );
-		self::$background_process->push_to_queue( array( 'task' => 'trash_failed_orders' ) );
-		self::$background_process->push_to_queue( array( 'task' => 'trash_cancelled_orders' ) );
-		self::$background_process->push_to_queue( array( 'task' => 'anonymize_completed_orders' ) );
-		self::$background_process->save()->dispatch();
+	public function order_cleanup_process() {
+		$this->background_process->push_to_queue( array( 'task' => 'trash_pending_orders' ) );
+		$this->background_process->push_to_queue( array( 'task' => 'trash_failed_orders' ) );
+		$this->background_process->push_to_queue( array( 'task' => 'trash_cancelled_orders' ) );
+		$this->background_process->push_to_queue( array( 'task' => 'anonymize_completed_orders' ) );
+		$this->background_process->save()->dispatch();
 	}
 
 	/**
@@ -233,14 +142,14 @@ Additionally we may also collect the following information:
 	 * @param  int $limit Limit orders to process per batch.
 	 * @return int Number of orders processed.
 	 */
-	public static function trash_pending_orders( $limit = 20 ) {
+	public function trash_pending_orders( $limit = 20 ) {
 		$option = wc_parse_relative_date_option( get_option( 'woocommerce_trash_pending_orders' ) );
 
 		if ( empty( $option['number'] ) ) {
 			return 0;
 		}
 
-		return self::trash_orders_query( array(
+		return $this->trash_orders_query( array(
 			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
 			'limit'        => $limit, // Batches of 20.
 			'status'       => 'wc-pending',
@@ -254,14 +163,14 @@ Additionally we may also collect the following information:
 	 * @param  int $limit Limit orders to process per batch.
 	 * @return int Number of orders processed.
 	 */
-	public static function trash_failed_orders( $limit = 20 ) {
+	public function trash_failed_orders( $limit = 20 ) {
 		$option = wc_parse_relative_date_option( get_option( 'woocommerce_trash_failed_orders' ) );
 
 		if ( empty( $option['number'] ) ) {
 			return 0;
 		}
 
-		return self::trash_orders_query( array(
+		return $this->trash_orders_query( array(
 			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
 			'limit'        => $limit, // Batches of 20.
 			'status'       => 'wc-failed',
@@ -275,14 +184,14 @@ Additionally we may also collect the following information:
 	 * @param  int $limit Limit orders to process per batch.
 	 * @return int Number of orders processed.
 	 */
-	public static function trash_cancelled_orders( $limit = 20 ) {
+	public function trash_cancelled_orders( $limit = 20 ) {
 		$option = wc_parse_relative_date_option( get_option( 'woocommerce_trash_cancelled_orders' ) );
 
 		if ( empty( $option['number'] ) ) {
 			return 0;
 		}
 
-		return self::trash_orders_query( array(
+		return $this->trash_orders_query( array(
 			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
 			'limit'        => $limit, // Batches of 20.
 			'status'       => 'wc-cancelled',
@@ -297,14 +206,14 @@ Additionally we may also collect the following information:
 	 * @param  int $page Page to process.
 	 * @return int Number of orders processed.
 	 */
-	public static function anonymize_completed_orders( $limit = 20, $page = 1 ) {
+	public function anonymize_completed_orders( $limit = 20, $page = 1 ) {
 		$option = wc_parse_relative_date_option( get_option( 'woocommerce_anonymize_completed_orders' ) );
 
 		if ( empty( $option['number'] ) ) {
 			return 0;
 		}
 
-		return self::anonymize_orders_query( array(
+		return $this->anonymize_orders_query( array(
 			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
 			'limit'        => $limit, // Batches of 20.
 			'status'       => 'wc-completed',
@@ -320,7 +229,7 @@ Additionally we may also collect the following information:
 	 * @param string $data The data being anonymized.
 	 * @return string Anonymized string.
 	 */
-	public static function anonymize_custom_data_types( $anonymous, $type, $data ) {
+	public function anonymize_custom_data_types( $anonymous, $type, $data ) {
 		switch ( $type ) {
 			case 'address_state':
 			case 'address_country':
@@ -334,4 +243,4 @@ Additionally we may also collect the following information:
 	}
 }
 
-WC_Privacy::init();
+new WC_Privacy();

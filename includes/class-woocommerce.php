@@ -290,6 +290,7 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-log-handler.php';
 		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-deprecated-hooks.php';
 		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-session.php';
+		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-privacy.php';
 
 		/**
 		 * Core classes.

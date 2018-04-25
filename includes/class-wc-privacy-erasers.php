@@ -13,29 +13,6 @@ defined( 'ABSPATH' ) || exit;
  */
 class WC_Privacy_Erasers {
 	/**
-	 * Registers the personal data eraser for WooCommerce data.
-	 *
-	 * @since 3.4.0
-	 * @param array $erasers An array of personal data erasers.
-	 * @return array An array of personal data erasers.
-	 */
-	public static function register( $erasers ) {
-		$erasers[] = array(
-			'eraser_friendly_name' => __( 'Customer Data', 'woocommerce' ),
-			'callback'             => array( __CLASS__, 'customer_data_eraser' ),
-		);
-		$erasers[] = array(
-			'eraser_friendly_name' => __( 'Customer Orders', 'woocommerce' ),
-			'callback'             => array( __CLASS__, 'order_data_eraser' ),
-		);
-		$erasers[] = array(
-			'eraser_friendly_name' => __( 'Customer Downloads', 'woocommerce' ),
-			'callback'             => array( __CLASS__, 'download_data_eraser' ),
-		);
-		return $erasers;
-	}
-
-	/**
 	 * Finds and erases customer data by email address.
 	 *
 	 * @since 3.4.0
@@ -226,5 +203,95 @@ class WC_Privacy_Erasers {
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Remove personal data specific to WooCommerce from an order object.
+	 *
+	 * Note; this will hinder order processing for obvious reasons!
+	 *
+	 * @param WC_Order $order Order object.
+	 */
+	public static function remove_order_personal_data( $order ) {
+		$anonymized_data = array();
+
+		/**
+		 * Expose props and data types we'll be anonymizing.
+		 *
+		 * @since 3.4.0
+		 * @param array    $props Keys are the prop names, values are the data type we'll be passing to wp_privacy_anonymize_data().
+		 * @param WC_Order $order A customer object.
+		 */
+		$props_to_remove = apply_filters( 'woocommerce_privacy_remove_order_personal_data_props', array(
+			'customer_ip_address' => 'ip',
+			'customer_user_agent' => 'text',
+			'billing_first_name'  => 'text',
+			'billing_last_name'   => 'text',
+			'billing_company'     => 'text',
+			'billing_address_1'   => 'text',
+			'billing_address_2'   => 'text',
+			'billing_city'        => 'text',
+			'billing_postcode'    => 'text',
+			'billing_state'       => 'address_state',
+			'billing_country'     => 'address_country',
+			'billing_phone'       => 'phone',
+			'billing_email'       => 'email',
+			'shipping_first_name' => 'text',
+			'shipping_last_name'  => 'text',
+			'shipping_company'    => 'text',
+			'shipping_address_1'  => 'text',
+			'shipping_address_2'  => 'text',
+			'shipping_city'       => 'text',
+			'shipping_postcode'   => 'text',
+			'shipping_state'      => 'address_state',
+			'shipping_country'    => 'address_country',
+		), $order );
+
+		if ( ! empty( $props_to_remove ) && is_array( $props_to_remove ) ) {
+			foreach ( $props_to_remove as $prop => $data_type ) {
+				// Get the current value in edit context.
+				$value = $order->{"get_$prop"}( 'edit' );
+
+				// If the value is empty, it does not need to be anonymized.
+				if ( empty( $value ) || empty( $data_type ) ) {
+					continue;
+				}
+
+				if ( function_exists( 'wp_privacy_anonymize_data' ) ) {
+					$anon_value = wp_privacy_anonymize_data( $data_type, $value );
+				} else {
+					$anon_value = '';
+				}
+
+				/**
+				 * Expose a way to control the anonymized value of a prop via 3rd party code.
+				 *
+				 * @since 3.4.0
+				 * @param bool     $anonymized_data Value of this prop after anonymization.
+				 * @param string   $prop Name of the prop being removed.
+				 * @param string   $value Current value of the data.
+				 * @param string   $data_type Type of data.
+				 * @param WC_Order $order An order object.
+				 */
+				$anonymized_data[ $prop ] = apply_filters( 'woocommerce_privacy_remove_order_personal_data_prop_value', $anon_value, $prop, $value, $data_type, $order );
+			}
+		}
+
+		// Set all new props and persist the new data to the database.
+		$order->set_props( $anonymized_data );
+		$order->set_customer_id( 0 );
+		$order->update_meta_data( '_anonymized', 'yes' );
+		$order->save();
+
+		// Add note that this event occured.
+		$order->add_order_note( __( 'Personal data removed.', 'woocommerce' ) );
+
+		/**
+		 * Allow extensions to remove their own personal data for this order.
+		 *
+		 * @since 3.4.0
+		 * @param WC_Order $order A customer object.
+		 */
+		do_action( 'woocommerce_privacy_remove_order_personal_data', $order );
 	}
 }
