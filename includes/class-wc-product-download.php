@@ -162,26 +162,6 @@ class WC_Product_Download implements ArrayAccess {
 		}
 	}
 
-	/**
-	 * Set download limit.
-	 *
-	 * @since 3.4.0
-	 * @param int $value Download limit.
-	 */
-	public function set_limit( $value ) {
-		$this->data['limit'] = absint( $value );
-	}
-
-	/**
-	 * Set download expiry.
-	 *
-	 * @since 3.4.0
-	 * @param int $value Days after download expires.
-	 */
-	public function set_expiry( $value ) {
-		$this->data['expiry'] = absint( $value );
-	}
-
 	/*
 	|--------------------------------------------------------------------------
 	| Getters
@@ -224,26 +204,6 @@ class WC_Product_Download implements ArrayAccess {
 	 */
 	public function get_file() {
 		return $this->data['file'];
-	}
-
-	/**
-	 * Get download limit.
-	 *
-	 * @since 3.4.0
-	 * @return int Download Limit.
-	 */
-	public function get_limit() {
-		return $this->data['limit'];
-	}
-
-	/**
-	 * Get download expiry.
-	 *
-	 * @since 3.4.0
-	 * @return int Download expiry days.
-	 */
-	public function get_expiry() {
-		return $this->data['expiry'];
 	}
 
 	/*
