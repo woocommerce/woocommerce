@@ -42,7 +42,7 @@ test.describe( 'Checkout Page', function() {
 			baseLocation: [ 'United States', 'United States (US) — California' ],
 			sellingLocation: 'Sell to all countries',
 			enableTaxes: true,
-			currency: [ 'United States', 'United States dollar ($)' ],
+			currency: [ 'United States', 'United States (US) dollar ($)' ],
 		} );
 
 		// Make sure payment method is set in setting.
