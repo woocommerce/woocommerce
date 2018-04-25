@@ -168,20 +168,20 @@ class WC_Product_Download implements ArrayAccess {
 	 * Set download limit.
 	 *
 	 * @since 3.4.0
-	 * @param string|int $value Download limit.
+	 * @param int $value Download limit.
 	 */
 	public function set_limit( $value ) {
-		$this->data['limit'] = ( -1 === (int) $value || '' === $value ? -1 : absint( $value ) );
+		$this->data['limit'] = absint( $value );
 	}
 
 	/**
 	 * Set download expiry.
 	 *
 	 * @since 3.4.0
-	 * @param string|int $value Days after download expires.
+	 * @param int $value Days after download expires.
 	 */
 	public function set_expiry( $value ) {
-		$this->data['expiry'] = ( -1 === (int) $value || '' === $value ? -1 : absint( $value ) );
+		$this->data['expiry'] = absint( $value );
 	}
 
 	/*
