@@ -177,7 +177,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 			'TZS' => 'Tanzanian shilling',
 			'UAH' => 'Ukrainian hryvnia',
 			'UGX' => 'Ugandan shilling',
-			'USD' => 'United States dollar',
+			'USD' => 'United States (US) dollar',
 			'UYU' => 'Uruguayan peso',
 			'UZS' => 'Uzbekistani som',
 			'VEF' => 'Venezuelan bol&iacute;var',
@@ -643,5 +643,54 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 				'option_name' => 'transaction_test',
 			)
 		);
+	}
+
+	/**
+	 * Test: wc_selected
+	 */
+	public function test_wc_selected() {
+		$test_cases = array(
+			// both value and options int.
+			array( 0, 0, true ),
+			array( 0, 1, false ),
+			array( 1, 0, false ),
+
+			// value string, options int.
+			array( '0', 0, true ),
+			array( '0', 1, false ),
+			array( '1', 0, false ),
+
+			// value int, options string.
+			array( 0, '0', true ),
+			array( 0, '1', false ),
+			array( 1, '0', false ),
+
+			// both value and options str.
+			array( '0', '0', true ),
+			array( '0', '1', false ),
+			array( '1', '0', false ),
+
+			// both value and options int.
+			array( 0, array( 0, 1, 2 ), true ),
+			array( 0, array( 1, 1, 1 ), false ),
+
+			// value string, options int.
+			array( '0', array( 0, 1, 2 ), true ),
+			array( '0', array( 1, 1, 1 ), false ),
+
+			// value int, options string.
+			array( 0, array( '0', '1', '2' ), true ),
+			array( 0, array( '1', '1', '1' ), false ),
+
+			// both value and options str.
+			array( '0', array( '0', '1', '2' ), true ),
+			array( '0', array( '1', '1', '1' ), false ),
+		);
+
+		foreach ( $test_cases as $test_case ) {
+			list( $value, $options, $result ) = $test_case;
+			$actual_result = $result ? " selected='selected'" : '';
+			$this->assertEquals( wc_selected( $value, $options ), $actual_result );
+		}
 	}
 }

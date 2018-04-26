@@ -103,6 +103,7 @@ function wc_delete_product_transients( $post_id = 0 ) {
 		'wc_featured_products',
 		'wc_outofstock_count',
 		'wc_low_stock_count',
+		'wc_count_comments',
 	);
 
 	// Transient names that include an ID.

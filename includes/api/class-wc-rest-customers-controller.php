@@ -93,7 +93,7 @@ class WC_REST_Customers_Controller extends WC_REST_Customers_V1_Controller {
 	/**
 	 * Update customer meta fields.
 	 *
-	 * @param WC_Customer     $customer Cusotmer data.
+	 * @param WC_Customer     $customer Customer data.
 	 * @param WP_REST_Request $request  Request data.
 	 */
 	protected function update_customer_meta_fields( $customer, $request ) {

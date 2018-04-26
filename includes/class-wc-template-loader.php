@@ -193,7 +193,7 @@ class WC_Template_Loader {
 	 * @since 3.3.0
 	 */
 	public static function unsupported_theme_init() {
-		if ( self::$shop_page_id ) {
+		if ( 0 < self::$shop_page_id ) {
 			if ( is_product_taxonomy() ) {
 				self::unsupported_theme_tax_archive_init();
 			} elseif ( is_product() ) {

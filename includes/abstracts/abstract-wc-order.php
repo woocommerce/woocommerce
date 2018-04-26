@@ -706,7 +706,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Return an array of items/products within this order.
 	 *
 	 * @param string|array $types Types of line items to get (array or string).
-	 * @return Array of WC_Order_item
+	 * @return WC_Order_Item[]
 	 */
 	public function get_items( $types = 'line_item' ) {
 		$items = array();
@@ -730,7 +730,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Return an array of fees within this order.
 	 *
-	 * @return array
+	 * @return WC_Order_item_Fee[]
 	 */
 	public function get_fees() {
 		return $this->get_items( 'fee' );
@@ -739,7 +739,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Return an array of taxes within this order.
 	 *
-	 * @return array
+	 * @return WC_Order_Item_Tax[]
 	 */
 	public function get_taxes() {
 		return $this->get_items( 'tax' );
@@ -748,7 +748,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Return an array of shipping costs within this order.
 	 *
-	 * @return array
+	 * @return WC_Order_Item_Shipping[]
 	 */
 	public function get_shipping_methods() {
 		return $this->get_items( 'shipping' );
@@ -788,7 +788,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Gets the count of order items of a certain type.
 	 *
 	 * @param string $item_type Item type to lookup.
-	 * @return string
+	 * @return int|string
 	 */
 	public function get_item_count( $item_type = '' ) {
 		$items = $this->get_items( empty( $item_type ) ? 'line_item' : $item_type );
@@ -802,7 +802,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Get an order item object, based on it's type.
+	 * Get an order item object, based on its type.
 	 *
 	 * @since  3.0.0
 	 * @param  int  $item_id ID of item to get.
@@ -1062,7 +1062,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * After applying coupons via the WC_Disounts class, update line items.
+	 * After applying coupons via the WC_Discounts class, update line items.
 	 *
 	 * @since 3.2.0
 	 * @param WC_Discounts $discounts Discounts class.
@@ -1087,7 +1087,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * After applying coupons via the WC_Disounts class, update or create coupon items.
+	 * After applying coupons via the WC_Discounts class, update or create coupon items.
 	 *
 	 * @since 3.2.0
 	 * @param WC_Discounts $discounts Discounts class.
@@ -1134,7 +1134,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Add a product line item to the order. This is the only line item type with
-	 * it's own method because it saves looking up order amounts (costs are added up for you).
+	 * its own method because it saves looking up order amounts (costs are added up for you).
 	 *
 	 * @param  WC_Product $product Product object.
 	 * @param  int        $qty Quantity to add.

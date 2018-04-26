@@ -77,8 +77,8 @@ class WC_Admin_Help {
 				'title'   => __( 'Education', 'woocommerce' ),
 				'content' =>
 					'<h2>' . __( 'Education', 'woocommerce' ) . '</h2>' .
-					'<p>' . __( 'If you would like to learn about using WooCommerce from an expert, consider following a WooCommerce course offered by one of our educational partners.', 'woocommerce' ) . '</p>' .
-					'<p><a href="https://woocommerce.com/educational-partners/?utm_source=helptab&utm_medium=product&utm_content=edupartners&utm_campaign=woocommerceplugin" class="button button-primary">' . __( 'View education partners', 'woocommerce' ) . '</a></p>',
+					'<p>' . __( 'If you would like to learn about using WooCommerce from an expert, consider a WooCommerce course to further your education.', 'woocommerce' ) . '</p>' .
+					'<p><a href="https://docs.woocommerce.com/document/further-education/?utm_source=helptab&utm_medium=product&utm_content=edupartners&utm_campaign=woocommerceplugin" class="button button-primary">' . __( 'Further education', 'woocommerce' ) . '</a></p>',
 			)
 		);
 
@@ -98,7 +98,7 @@ class WC_Admin_Help {
 			'<p><strong>' . __( 'For more information:', 'woocommerce' ) . '</strong></p>' .
 			'<p><a href="https://woocommerce.com/?utm_source=helptab&utm_medium=product&utm_content=about&utm_campaign=woocommerceplugin" target="_blank">' . __( 'About WooCommerce', 'woocommerce' ) . '</a></p>' .
 			'<p><a href="https://wordpress.org/plugins/woocommerce/" target="_blank">' . __( 'WordPress.org project', 'woocommerce' ) . '</a></p>' .
-			'<p><a href="https://github.com/woocommerce/woocommerce" target="_blank">' . __( 'Github project', 'woocommerce' ) . '</a></p>' .
+			'<p><a href="https://github.com/woocommerce/woocommerce/" target="_blank">' . __( 'Github project', 'woocommerce' ) . '</a></p>' .
 			'<p><a href="https://woocommerce.com/storefront/?utm_source=helptab&utm_medium=product&utm_content=wcthemes&utm_campaign=woocommerceplugin" target="_blank">' . __( 'Official theme', 'woocommerce' ) . '</a></p>' .
 			'<p><a href="https://woocommerce.com/product-category/woocommerce-extensions/?utm_source=helptab&utm_medium=product&utm_content=wcextensions&utm_campaign=woocommerceplugin" target="_blank">' . __( 'Official extensions', 'woocommerce' ) . '</a></p>'
 		);

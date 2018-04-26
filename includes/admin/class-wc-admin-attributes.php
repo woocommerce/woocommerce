@@ -2,17 +2,13 @@
 /**
  * Attributes Page
  *
- * The attributes section lets users add custom attributes to assign to products - they can also be used in the layered nav widget.
+ * The attributes section lets users add custom attributes to assign to products - they can also be used in the "Filter Products by Attribute" widget.
  *
- * @author      WooThemes
- * @category    Admin
- * @package     WooCommerce/Admin
- * @version     2.3.0
+ * @package WooCommerce/Admin
+ * @version 2.3.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Attributes Class.

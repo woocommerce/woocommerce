@@ -121,13 +121,13 @@ if ( wc_tax_enabled() ) {
 					<li class="<?php echo $class; ?>">
 						<?php if ( $post_id ) : ?>
 							<?php
-							$post_url = add_query_arg(
+							$post_url = apply_filters( 'woocommerce_admin_order_item_coupon_url', add_query_arg(
 								array(
 									'post'   => $post_id,
 									'action' => 'edit',
 								),
 								admin_url( 'post.php' )
-							);
+							), $item, $order );
 							?>
 							<a href="<?php echo esc_url( $post_url ); ?>" class="tips" data-tip="<?php echo esc_attr( wc_price( $item->get_discount(), array( 'currency' => $order->get_currency() ) ) ); ?>">
 								<span><?php echo esc_html( $item->get_code() ); ?></span>
@@ -292,12 +292,14 @@ if ( wc_tax_enabled() ) {
 	<div class="clear"></div>
 	<div class="refund-actions">
 		<?php
-		$refund_amount            = '<span class="wc-order-refund-amount">' . wc_price( 0, array( 'currency' => $order->get_currency() ) ) . '</span>';
-		$gateway_supports_refunds = false !== $payment_gateway && $payment_gateway->supports( 'refunds' );
-		$gateway_name             = false !== $payment_gateway ? ( ! empty( $payment_gateway->method_title ) ? $payment_gateway->method_title : $payment_gateway->get_title() ) : __( 'Payment gateway', 'woocommerce' );
+		$refund_amount = '<span class="wc-order-refund-amount">' . wc_price( 0, array( 'currency' => $order->get_currency() ) ) . '</span>';
+		$gateway_name  = false !== $payment_gateway ? ( ! empty( $payment_gateway->method_title ) ? $payment_gateway->method_title : $payment_gateway->get_title() ) : __( 'Payment gateway', 'woocommerce' );
+
+		if ( false !== $payment_gateway && $payment_gateway->can_refund_order( $order ) ) {
+			/* translators: refund amount, gateway name */
+			echo '<button type="button" class="button button-primary do-api-refund">' . sprintf( esc_html__( 'Refund %1$s via %2$s', 'woocommerce' ), wp_kses_post( $refund_amount ), esc_html( $gateway_name ) ) . '</button>';
+		}
 		?>
-		<?php /* translators: refund amount, gateway name  */ ?>
-		<button type="button" class="button <?php echo $gateway_supports_refunds ? 'button-primary do-api-refund' : 'tips disabled'; ?>" <?php echo $gateway_supports_refunds ? '' : 'data-tip="' . esc_attr__( 'The payment gateway used to place this order does not support automatic refunds.', 'woocommerce' ) . '"'; ?>><?php printf( esc_html__( 'Refund %1$s via %2$s', 'woocommerce' ), $refund_amount, $gateway_name ); ?></button>
 		<?php /* translators: refund amount  */ ?>
 		<button type="button" class="button button-primary do-manual-refund tips" data-tip="<?php esc_attr_e( 'You will need to manually issue a refund through your payment gateway after using this.', 'woocommerce' ); ?>"><?php printf( esc_html__( 'Refund %s manually', 'woocommerce' ), $refund_amount ); ?></button>
 		<button type="button" class="button cancel-action"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></button>
