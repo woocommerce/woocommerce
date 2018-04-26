@@ -3596,18 +3596,12 @@ img.help_tip {
 		}
 
 		.colorpickpreview {
-			padding: 6px;
-			padding-left: 20px;
+			padding: 7px 0;
+			line-height: 1em;
+			display: inline-block;
+			width: 26px;
 			border: 1px solid #ddd;
-			/* rtl:ignore */
-			border-right: 0;
-			/* rtl:ignore */
-			margin-left: -3px;
-		}
-
-		.colorpick {
-			/* rtl:ignore */
-			border-left: 0;
+			font-size: 14px;
 		}
 
 		.image_width_settings {

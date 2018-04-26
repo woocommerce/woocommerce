@@ -313,7 +313,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
 							<td class="forminp forminp-<?php echo esc_attr( sanitize_title( $value['type'] ) ); ?>">&lrm;
-								<span class="colorpickpreview" style="background: <?php echo esc_attr( $option_value ); ?>"></span>
+								<span class="colorpickpreview" style="background: <?php echo esc_attr( $option_value ); ?>">&nbsp;</span>
 								<input
 									name="<?php echo esc_attr( $value['id'] ); ?>"
 									id="<?php echo esc_attr( $value['id'] ); ?>"
