@@ -1058,24 +1058,24 @@ class WC_Checkout {
 	 * @return string
 	 */
 	public function get_value( $input ) {
-		if ( ! empty( $_POST[ $input ] ) ) { // WPCS: input var ok, CSRF OK.
-			return wc_clean( wp_unslash( $_POST[ $input ] ) ); // WPCS: input var ok, CSRF OK.
-
-		} else {
-
-			$value = apply_filters( 'woocommerce_checkout_get_value', null, $input );
-
-			if ( null !== $value ) {
-				return $value;
-			}
-
-			if ( is_callable( array( WC()->customer, "get_$input" ) ) ) {
-				$value = WC()->customer->{"get_$input"}() ? WC()->customer->{"get_$input"}() : null;
-			} elseif ( WC()->customer->meta_exists( $input ) ) {
-				$value = WC()->customer->get_meta( $input, true );
-			}
-
-			return apply_filters( 'default_checkout_' . $input, $value, $input );
+		// WPCS: input var ok, CSRF OK.
+		if ( ! empty( $_POST[ $input ] ) ) {
+			// WPCS: input var ok, CSRF OK.
+			return wc_clean( wp_unslash( $_POST[ $input ] ) );
 		}
+
+		$value = apply_filters( 'woocommerce_checkout_get_value', null, $input );
+
+		if ( null !== $value ) {
+			return $value;
+		}
+
+		if ( is_callable( array( WC()->customer, "get_$input" ) ) ) {
+			$value = WC()->customer->{"get_$input"}() ? WC()->customer->{"get_$input"}() : null;
+		} elseif ( WC()->customer->meta_exists( $input ) ) {
+			$value = WC()->customer->get_meta( $input, true );
+		}
+
+		return apply_filters( 'default_checkout_' . $input, $value, $input );
 	}
 }
