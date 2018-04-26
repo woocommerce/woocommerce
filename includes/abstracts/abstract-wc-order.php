@@ -1247,7 +1247,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		$this->set_shipping_total( $shipping_total );
-
 		$this->save();
 
 		return $this->get_shipping_total();
