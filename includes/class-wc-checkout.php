@@ -1043,12 +1043,16 @@ class WC_Checkout {
 	 * @return string
 	 */
 	public function get_posted_address_data( $key, $type = 'billing' ) {
-		if ( 'billing' === $type || false === $this->legacy_posted_data['ship_to_different_address'] ) {
-			$return = isset( $this->legacy_posted_data[ 'billing_' . $key ] ) ? $this->legacy_posted_data[ 'billing_' . $key ] : '';
-		} else {
-			$return = isset( $this->legacy_posted_data[ 'shipping_' . $key ] ) ? $this->legacy_posted_data[ 'shipping_' . $key ] : '';
+		if (
+			'billing' === $type
+			|| ! $this->legacy_posted_data['ship_to_different_address']
+		) {
+			$billing = $this->legacy_posted_data[ 'billing_' . $key ];
+			return empty( $billing ) ? '' : $billing;
 		}
-		return $return;
+
+		$shipping = $this->legacy_posted_data[ 'shipping_' . $key ];
+		return empty( $shipping ) ? '' : $shipping;
 	}
 
 	/**
