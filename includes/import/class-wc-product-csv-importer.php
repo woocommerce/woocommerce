@@ -543,7 +543,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @return int
 	 */
 	public function parse_int_field( $value ) {
-		// Remove the ' prepended to fields that start with - if needed
+		// Remove the ' prepended to fields that start with - if needed.
 		$value = $this->unescape_negative_number( $value );
 
 		return intval( $value );
@@ -682,6 +682,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$data['status'] = isset( $statuses[ $data['published'] ] ) ? $statuses[ $data['published'] ] : -1;
 
 			unset( $data['published'] );
+		} else {
+			$data['status'] = 'publish';
 		}
 
 		if ( isset( $data['stock_quantity'] ) ) {
