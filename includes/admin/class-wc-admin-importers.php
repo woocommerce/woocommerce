@@ -235,26 +235,34 @@ class WC_Admin_Importers {
 		update_user_option( get_current_user_id(), 'product_import_error_log', $error_log );
 
 		if ( 100 === $percent_complete ) {
-			// Clear temp meta.
-			$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_original_id' ) ); // @codingStandardsIgnoreLine.
-			$wpdb->query(
-				"DELETE {$wpdb->posts}, {$wpdb->postmeta}, {$wpdb->term_relationships}
-				FROM {$wpdb->posts}
-				LEFT JOIN {$wpdb->term_relationships} ON ( {$wpdb->posts}.ID = {$wpdb->term_relationships}.object_id )
-				LEFT JOIN {$wpdb->postmeta} ON ( {$wpdb->posts}.ID = {$wpdb->postmeta}.post_id )
-				LEFT JOIN {$wpdb->term_taxonomy} ON ( {$wpdb->term_taxonomy}.term_taxonomy_id = {$wpdb->term_relationships}.term_taxonomy_id )
-				LEFT JOIN {$wpdb->terms} ON ( {$wpdb->terms}.term_id = {$wpdb->term_taxonomy}.term_id )
-				WHERE {$wpdb->posts}.post_type IN ( 'product', 'product_variation' )
-				AND {$wpdb->posts}.post_status = 'importing'"
-			);
+			// @codingStandardsIgnoreStart.
+			$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_original_id' ) );
+			$wpdb->delete( $wpdb->posts, array(
+				'post_type'   => 'product',
+				'post_status' => 'importing',
+			) );
+			$wpdb->delete( $wpdb->posts, array(
+				'post_type'   => 'product_variation',
+				'post_status' => 'importing',
+			) );
+			// @codingStandardsIgnoreEnd.
 
-			// Clear orphan variations.
-			$wpdb->query(
-				"DELETE products
-				FROM {$wpdb->posts} products
-				LEFT JOIN {$wpdb->posts} wp ON wp.ID = products.post_parent
-				WHERE wp.ID IS NULL AND products.post_type = 'product_variation';"
-			);
+			// Clean up orphanned data.
+			$wpdb->query( "
+				DELETE {$wpdb->posts}.* FROM {$wpdb->posts}
+				LEFT JOIN {$wpdb->posts} wp ON wp.ID = {$wpdb->posts}.post_parent
+				WHERE wp.ID IS NULL AND {$wpdb->posts}.post_type = 'product_variation'
+			" );
+			$wpdb->query( "
+				DELETE {$wpdb->postmeta}.* FROM {$wpdb->postmeta}
+				LEFT JOIN {$wpdb->posts} wp ON wp.ID = {$wpdb->postmeta}.post_id
+				WHERE wp.ID IS NULL
+			" );
+			$wpdb->query( "
+				DELETE {$wpdb->term_relationships}.* FROM {$wpdb->term_relationships}
+				LEFT JOIN {$wpdb->posts} wp ON wp.ID = {$wpdb->term_relationships}.object_id
+				WHERE wp.ID IS NULL
+			" );
 
 			// Send success.
 			wp_send_json_success(
