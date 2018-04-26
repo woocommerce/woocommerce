@@ -1247,6 +1247,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		$this->set_shipping_total( $shipping_total );
+
 		$this->save();
 
 		return $this->get_shipping_total();
@@ -1349,7 +1350,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Update tax lines for the order based on the line item taxes themselves.
 	 */
-	public function update_taxes() {
+	public function update_taxes( $save = true ) {
 		$cart_taxes     = array();
 		$shipping_taxes = array();
 		$existing_taxes = $this->get_taxes();
@@ -1400,7 +1401,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->set_cart_tax( wc_round_tax_total( array_sum( $cart_taxes ) ) );
 		}
 
-		$this->save();
+		if ( $save ) {
+			$this->save();
+		}
+
 	}
 
 	/**
@@ -1408,9 +1412,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @since 2.2
 	 * @param  bool $and_taxes Calc taxes if true.
+	 * @param  bool $save Save order after calculating if true
 	 * @return float calculated grand total.
 	 */
-	public function calculate_totals( $and_taxes = true ) {
+	public function calculate_totals( $and_taxes = true, $save = true ) {
 		do_action( 'woocommerce_order_before_calculate_totals', $and_taxes, $this );
 
 		$cart_subtotal     = 0;
@@ -1466,7 +1471,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		do_action( 'woocommerce_order_after_calculate_totals', $and_taxes, $this );
 
-		$this->save();
+		if ( $save ) {
+			$this->save();
+		}
 
 		return $this->get_total();
 	}
