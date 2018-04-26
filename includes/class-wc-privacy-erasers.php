@@ -22,10 +22,10 @@ class WC_Privacy_Erasers {
 	 */
 	public static function customer_data_eraser( $email_address, $page ) {
 		$response = array(
-			'messages'           => array(),
-			'num_items_removed'  => 0,
-			'num_items_retained' => 0,
-			'done'               => true,
+			'items_removed'  => false,
+			'items_retained' => false,
+			'messages'       => array(),
+			'done'           => true,
 		);
 
 		$user = get_user_by( 'email', $email_address ); // Check if user has an ID in the DB to load stored personal data.
@@ -80,8 +80,8 @@ class WC_Privacy_Erasers {
 
 				if ( $erased ) {
 					/* Translators: %s Prop name. */
-					$response['messages'][] = sprintf( __( 'Removed customer "%s"', 'woocommerce' ), $label );
-					$response['num_items_removed'] ++;
+					$response['messages'][]    = sprintf( __( 'Removed customer "%s"', 'woocommerce' ), $label );
+					$response['items_removed'] = true;
 				}
 			}
 
@@ -113,10 +113,10 @@ class WC_Privacy_Erasers {
 		$user            = get_user_by( 'email', $email_address ); // Check if user has an ID in the DB to load stored personal data.
 		$erasure_enabled = wc_string_to_bool( get_option( 'woocommerce_erasure_request_removes_order_data', 'no' ) );
 		$response        = array(
-			'messages'           => array(),
-			'num_items_removed'  => 0,
-			'num_items_retained' => 0,
-			'done'               => false,
+			'items_removed'  => false,
+			'items_retained' => false,
+			'messages'       => array(),
+			'done'           => true,
 		);
 
 		$order_query = array(
@@ -137,12 +137,12 @@ class WC_Privacy_Erasers {
 					WC_Privacy::remove_order_personal_data( $order );
 
 					/* Translators: %s Order number. */
-					$response['messages'][] = sprintf( __( 'Removed personal data from order %s.', 'woocommerce' ), $order->get_order_number() );
-					$response['num_items_removed'] ++;
+					$response['messages'][]    = sprintf( __( 'Removed personal data from order %s.', 'woocommerce' ), $order->get_order_number() );
+					$response['items_removed'] = true;
 				} else {
 					/* Translators: %s Order number. */
-					$response['messages'][] = sprintf( __( 'Retained personal data in order %s due to settings.', 'woocommerce' ), $order->get_order_number() );
-					$response['num_items_retained'] ++;
+					$response['messages'][]     = sprintf( __( 'Retained personal data in order %s due to settings.', 'woocommerce' ), $order->get_order_number() );
+					$response['items_retained'] = true;
 				}
 			}
 			$response['done'] = 10 > count( $orders );
@@ -166,10 +166,10 @@ class WC_Privacy_Erasers {
 		$user            = get_user_by( 'email', $email_address ); // Check if user has an ID in the DB to load stored personal data.
 		$erasure_enabled = wc_string_to_bool( get_option( 'woocommerce_erasure_request_removes_download_data', 'no' ) );
 		$response        = array(
-			'messages'           => array(),
-			'num_items_removed'  => 0,
-			'num_items_retained' => 0,
-			'done'               => true,
+			'items_removed'  => false,
+			'items_retained' => false,
+			'messages'       => array(),
+			'done'           => true,
 		);
 
 		$downloads_query = array(
@@ -195,11 +195,11 @@ class WC_Privacy_Erasers {
 			} else {
 				$customer_download_data_store->delete_by_user_email( $email_address );
 			}
-			$response['messages'][]        = __( 'Removed access to downloadable files.', 'woocommerce' );
-			$response['num_items_removed'] = count( $downloads );
+			$response['messages'][]    = __( 'Removed access to downloadable files.', 'woocommerce' );
+			$response['items_removed'] = true;
 		} else {
-			$response['messages'][]         = __( 'Retained access to downloadable files due to settings.', 'woocommerce' );
-			$response['num_items_retained'] = count( $downloads );
+			$response['messages'][]     = __( 'Retained access to downloadable files due to settings.', 'woocommerce' );
+			$response['items_retained'] = true;
 		}
 
 		return $response;

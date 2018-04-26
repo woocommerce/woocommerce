@@ -18,7 +18,7 @@ class WC_Privacy extends WC_Abstract_Privacy {
 	 *
 	 * @var WC_Privacy_Background_Process
 	 */
-	protected $background_process;
+	protected static $background_process;
 
 	/**
 	 * Init - hook into events.
@@ -26,7 +26,9 @@ class WC_Privacy extends WC_Abstract_Privacy {
 	public function __construct() {
 		parent::__construct( 'WooCommerce' );
 
-		$this->background_process = new WC_Privacy_Background_Process();
+		if ( ! self::$background_process ) {
+			self::$background_process = new WC_Privacy_Background_Process();
+		}
 
 		// Include supporting classes.
 		include_once 'class-wc-privacy-erasers.php';
@@ -45,11 +47,11 @@ class WC_Privacy extends WC_Abstract_Privacy {
 		// Cleanup orders daily - this is a callback on a daily cron event.
 		add_action( 'woocommerce_cleanup_orders', array( $this, 'order_cleanup_process' ) );
 
-		// When this is fired, data is removed in a given order. Called from bulk actions.
-		add_action( 'woocommerce_remove_order_personal_data', array( 'WC_Privacy_Erasers', 'remove_order_personal_data' ) );
-
 		// Handles custom anonomization types not included in core.
 		add_filter( 'wp_privacy_anonymize_data', array( $this, 'anonymize_custom_data_types' ), 10, 3 );
+
+		// When this is fired, data is removed in a given order. Called from bulk actions.
+		add_action( 'woocommerce_remove_order_personal_data', array( 'WC_Privacy_Erasers', 'remove_order_personal_data' ) );
 	}
 
 	/**
@@ -57,7 +59,7 @@ class WC_Privacy extends WC_Abstract_Privacy {
 	 *
 	 * @since 3.4.0
 	 */
-	public function get_message() {
+	public function get_privacy_message() {
 		$content = wp_kses_post( apply_filters( 'wc_privacy_policy_content', wpautop( __( '
 We collect information about you during the checkout process on our store. This information may include, but is not limited to, your name, billing address, shipping address, email address, phone number, credit card/payment details and any other details that might be requested from you for the purpose of processing your orders.
 
@@ -83,142 +85,14 @@ Additionally we may also collect the following information:
 	}
 
 	/**
-	 * For a given query trash all matches.
-	 *
-	 * @since 3.4.0
-	 * @param array $query Query array to pass to wc_get_orders().
-	 * @return int Count of orders that were trashed.
-	 */
-	protected function trash_orders_query( $query ) {
-		$orders = wc_get_orders( $query );
-		$count  = 0;
-
-		if ( $orders ) {
-			foreach ( $orders as $order ) {
-				$order->delete( false );
-				$count ++;
-			}
-		}
-
-		return $count;
-	}
-
-	/**
-	 * For a given query, anonymize all matches.
-	 *
-	 * @since 3.4.0
-	 * @param array $query Query array to pass to wc_get_orders().
-	 * @return int Count of orders that were anonymized.
-	 */
-	protected function anonymize_orders_query( $query ) {
-		$orders = wc_get_orders( $query );
-		$count  = 0;
-
-		if ( $orders ) {
-			foreach ( $orders as $order ) {
-				WC_Privacy_Erasers::remove_order_personal_data( $order );
-				$count ++;
-			}
-		}
-
-		return $count;
-	}
-
-	/**
 	 * Spawn events for order cleanup.
 	 */
 	public function order_cleanup_process() {
-		$this->background_process->push_to_queue( array( 'task' => 'trash_pending_orders' ) );
-		$this->background_process->push_to_queue( array( 'task' => 'trash_failed_orders' ) );
-		$this->background_process->push_to_queue( array( 'task' => 'trash_cancelled_orders' ) );
-		$this->background_process->push_to_queue( array( 'task' => 'anonymize_completed_orders' ) );
-		$this->background_process->save()->dispatch();
-	}
-
-	/**
-	 * Find and trash old orders.
-	 *
-	 * @since 3.4.0
-	 * @param  int $limit Limit orders to process per batch.
-	 * @return int Number of orders processed.
-	 */
-	public function trash_pending_orders( $limit = 20 ) {
-		$option = wc_parse_relative_date_option( get_option( 'woocommerce_trash_pending_orders' ) );
-
-		if ( empty( $option['number'] ) ) {
-			return 0;
-		}
-
-		return $this->trash_orders_query( array(
-			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
-			'limit'        => $limit, // Batches of 20.
-			'status'       => 'wc-pending',
-		) );
-	}
-
-	/**
-	 * Find and trash old orders.
-	 *
-	 * @since 3.4.0
-	 * @param  int $limit Limit orders to process per batch.
-	 * @return int Number of orders processed.
-	 */
-	public function trash_failed_orders( $limit = 20 ) {
-		$option = wc_parse_relative_date_option( get_option( 'woocommerce_trash_failed_orders' ) );
-
-		if ( empty( $option['number'] ) ) {
-			return 0;
-		}
-
-		return $this->trash_orders_query( array(
-			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
-			'limit'        => $limit, // Batches of 20.
-			'status'       => 'wc-failed',
-		) );
-	}
-
-	/**
-	 * Find and trash old orders.
-	 *
-	 * @since 3.4.0
-	 * @param  int $limit Limit orders to process per batch.
-	 * @return int Number of orders processed.
-	 */
-	public function trash_cancelled_orders( $limit = 20 ) {
-		$option = wc_parse_relative_date_option( get_option( 'woocommerce_trash_cancelled_orders' ) );
-
-		if ( empty( $option['number'] ) ) {
-			return 0;
-		}
-
-		return $this->trash_orders_query( array(
-			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
-			'limit'        => $limit, // Batches of 20.
-			'status'       => 'wc-cancelled',
-		) );
-	}
-
-	/**
-	 * Anonymize old completed orders.
-	 *
-	 * @since 3.4.0
-	 * @param  int $limit Limit orders to process per batch.
-	 * @param  int $page Page to process.
-	 * @return int Number of orders processed.
-	 */
-	public function anonymize_completed_orders( $limit = 20, $page = 1 ) {
-		$option = wc_parse_relative_date_option( get_option( 'woocommerce_anonymize_completed_orders' ) );
-
-		if ( empty( $option['number'] ) ) {
-			return 0;
-		}
-
-		return $this->anonymize_orders_query( array(
-			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
-			'limit'        => $limit, // Batches of 20.
-			'status'       => 'wc-completed',
-			'anonymized'   => false,
-		) );
+		self::$background_process->push_to_queue( array( 'task' => 'trash_pending_orders' ) );
+		self::$background_process->push_to_queue( array( 'task' => 'trash_failed_orders' ) );
+		self::$background_process->push_to_queue( array( 'task' => 'trash_cancelled_orders' ) );
+		self::$background_process->push_to_queue( array( 'task' => 'anonymize_completed_orders' ) );
+		self::$background_process->save()->dispatch();
 	}
 
 	/**
@@ -240,6 +114,134 @@ Additionally we may also collect the following information:
 				break;
 		}
 		return $anonymous;
+	}
+
+	/**
+	 * For a given query trash all matches.
+	 *
+	 * @since 3.4.0
+	 * @param array $query Query array to pass to wc_get_orders().
+	 * @return int Count of orders that were trashed.
+	 */
+	protected static function trash_orders_query( $query ) {
+		$orders = wc_get_orders( $query );
+		$count  = 0;
+
+		if ( $orders ) {
+			foreach ( $orders as $order ) {
+				$order->delete( false );
+				$count ++;
+			}
+		}
+
+		return $count;
+	}
+
+	/**
+	 * For a given query, anonymize all matches.
+	 *
+	 * @since 3.4.0
+	 * @param array $query Query array to pass to wc_get_orders().
+	 * @return int Count of orders that were anonymized.
+	 */
+	protected static function anonymize_orders_query( $query ) {
+		$orders = wc_get_orders( $query );
+		$count  = 0;
+
+		if ( $orders ) {
+			foreach ( $orders as $order ) {
+				WC_Privacy_Erasers::remove_order_personal_data( $order );
+				$count ++;
+			}
+		}
+
+		return $count;
+	}
+
+	/**
+	 * Find and trash old orders.
+	 *
+	 * @since 3.4.0
+	 * @param  int $limit Limit orders to process per batch.
+	 * @return int Number of orders processed.
+	 */
+	public static function trash_pending_orders( $limit = 20 ) {
+		$option = wc_parse_relative_date_option( get_option( 'woocommerce_trash_pending_orders' ) );
+
+		if ( empty( $option['number'] ) ) {
+			return 0;
+		}
+
+		return self::trash_orders_query( array(
+			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
+			'limit'        => $limit, // Batches of 20.
+			'status'       => 'wc-pending',
+		) );
+	}
+
+	/**
+	 * Find and trash old orders.
+	 *
+	 * @since 3.4.0
+	 * @param  int $limit Limit orders to process per batch.
+	 * @return int Number of orders processed.
+	 */
+	public static function trash_failed_orders( $limit = 20 ) {
+		$option = wc_parse_relative_date_option( get_option( 'woocommerce_trash_failed_orders' ) );
+
+		if ( empty( $option['number'] ) ) {
+			return 0;
+		}
+
+		return self::trash_orders_query( array(
+			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
+			'limit'        => $limit, // Batches of 20.
+			'status'       => 'wc-failed',
+		) );
+	}
+
+	/**
+	 * Find and trash old orders.
+	 *
+	 * @since 3.4.0
+	 * @param  int $limit Limit orders to process per batch.
+	 * @return int Number of orders processed.
+	 */
+	public static function trash_cancelled_orders( $limit = 20 ) {
+		$option = wc_parse_relative_date_option( get_option( 'woocommerce_trash_cancelled_orders' ) );
+
+		if ( empty( $option['number'] ) ) {
+			return 0;
+		}
+
+		return self::trash_orders_query( array(
+			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
+			'limit'        => $limit, // Batches of 20.
+			'status'       => 'wc-cancelled',
+		) );
+	}
+
+	/**
+	 * Anonymize old completed orders.
+	 *
+	 * @since 3.4.0
+	 * @param  int $limit Limit orders to process per batch.
+	 * @param  int $page Page to process.
+	 * @return int Number of orders processed.
+	 */
+	public static function anonymize_completed_orders( $limit = 20, $page = 1 ) {
+		$option = wc_parse_relative_date_option( get_option( 'woocommerce_anonymize_completed_orders' ) );
+
+		if ( empty( $option['number'] ) ) {
+			return 0;
+		}
+
+		return self::anonymize_orders_query( array(
+			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
+			'limit'        => $limit, // Batches of 20.
+			'status'       => 'wc-completed',
+			'anonymized'   => false,
+		) );
 	}
 }
 

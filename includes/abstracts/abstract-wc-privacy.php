@@ -2,12 +2,11 @@
 /**
  * WooCommerce abstract privacy class.
  *
+ * @since 3.4.0
  * @package WooCommerce/Abstracts
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Abstract class that is intended to be extended by
@@ -24,32 +23,36 @@ abstract class WC_Abstract_Privacy {
 	 *
 	 * @var string
 	 */
-	public $privacy_name;
+	public $name;
 
 	/**
 	 * This is a list of exporters.
 	 *
 	 * @var array
 	 */
-	protected $exporters;
+	protected $exporters = array();
 
 	/**
 	 * This is a list of erasers.
 	 *
 	 * @var array
 	 */
-	protected $erasers;
+	protected $erasers = array();
 
 	/**
 	 * Constructor
 	 *
-	 * @param string $privacy_name Privacy identifier
+	 * @param string $name Plugin identifier.
 	 */
-	public function __construct( $privacy_name = '' ) {
-		$this->privacy_name = $privacy_name;
-		$this->exporters    = array();
-		$this->erasers      = array();
+	public function __construct( $name = '' ) {
+		$this->name = $name;
+		$this->init();
+	}
 
+	/**
+	 * Hook in events.
+	 */
+	protected function init() {
 		add_action( 'admin_init', array( $this, 'add_privacy_message' ) );
 		add_filter( 'wp_privacy_personal_data_exporters', array( $this, 'register_exporters' ) );
 		add_filter( 'wp_privacy_personal_data_erasers', array( $this, 'register_erasers' ) );
@@ -60,7 +63,11 @@ abstract class WC_Abstract_Privacy {
 	 */
 	public function add_privacy_message() {
 		if ( function_exists( 'wp_add_privacy_policy_content' ) ) {
-			wp_add_privacy_policy_content( $this->privacy_name, $this->get_message() );
+			$content = $this->get_privacy_message();
+
+			if ( $content ) {
+				wp_add_privacy_policy_content( $this->name, $this->get_privacy_message() );
+			}
 		}
 	}
 
@@ -70,7 +77,9 @@ abstract class WC_Abstract_Privacy {
 	 *
 	 * @return string
 	 */
-	abstract public function get_message();
+	public function get_privacy_message() {
+		return '';
+	}
 
 	/**
 	 * Integrate this exporter implementation within the WordPress core exporters.
@@ -95,110 +104,28 @@ abstract class WC_Abstract_Privacy {
 	/**
 	 * Add exporter to list of exporters.
 	 *
-	 * @param string $name Exporter name
-	 * @param string $callback Exporter callback
+	 * @param string $name Exporter name.
+	 * @param string $callback Exporter callback.
 	 */
 	public function add_exporter( $name, $callback ) {
 		$this->exporters[] = array(
 			'exporter_friendly_name' => $name,
 			'callback'               => $callback,
 		);
-
 		return $this->exporters;
 	}
 
 	/**
 	 * Add eraser to list of exporters.
 	 *
-	 * @param string $name Exporter name
-	 * @param string $callback Exporter callback
+	 * @param string $name Exporter name.
+	 * @param string $callback Exporter callback.
 	 */
 	public function add_eraser( $name, $callback ) {
 		$this->erasers[] = array(
 			'eraser_friendly_name' => $name,
 			'callback'             => $callback,
 		);
-
 		return $this->erasers;
 	}
-
-	/**
-	 * Example implementation of an exporter.
-	 *
-	 * Plugins can add as many items in the item data array as they want. Example:
-	 *
-	 *     $data = array(
-	 *       array(
-	 *         'name'  => __( 'Commenter Latitude' ),
-	 *         'value' => $latitude
-	 *       ),
-	 *       array(
-	 *         'name'  => __( 'Commenter Longitude' ),
-	 *         'value' => $longitude
-	 *       )
-	 *     );
-	 *
-	 *     $export_items[] = array(
-	 *       'group_id'    => $group_id,
-	 *       'group_label' => $group_label,
-	 *       'item_id'     => $item_id,
-	 *       'data'        => $data,
-	 *     );
-	 *   }
-	 * }
-	 *
-	 * Tell core if we have more comments to work on still. Example:
-	 * $done = count( $comments ) < $number;
-	 *
-	 * return array(
-	 *   'data' => $export_items,
-	 *   'done' => $done,
-	 * );
-	 *
-	 * @param string $email_address E-mail address to export.
-	 * @param int    $page          Pagination of data.
-	 *
-	 * @return array
-	 */
-	public final function example_exporter( $email_address, $page = 1 ) {}
-
-	/**
-	 * Example implementation of an eraser.
-	 *
-	 * Plugins can add as many items in the item data array as they want. Example:
-	 *
-	 *     $data = array(
-	 *       array(
-	 *         'name'  => __( 'Commenter Latitude' ),
-	 *         'value' => $latitude
-	 *       ),
-	 *       array(
-	 *         'name'  => __( 'Commenter Longitude' ),
-	 *         'value' => $longitude
-	 *       )
-	 *     );
-	 *
-	 *     $export_items[] = array(
-	 *       'group_id'    => $group_id,
-	 *       'group_label' => $group_label,
-	 *       'item_id'     => $item_id,
-	 *       'data'        => $data,
-	 *     );
-	 *   }
-	 * }
-	 *
-	 * Tell core if we have more comments to work on still. Example:
-	 * $done = count( $comments ) < $number;
-	 *
-	 * return array(
-	 *   'data' => $export_items,
-	 *   'done' => $done,
-	 * );
-	 *
-	 * @param string $email_address E-mail address to export.
-	 * @param int    $page          Pagination of data.
-	 *
-	 * @return array
-	 */
-	public final function example_eraser( $email_address, $page = 1 ) {}
 }
