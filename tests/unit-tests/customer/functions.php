@@ -35,13 +35,13 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 
 		// Username with auto-generation.
 		update_option( 'woocommerce_registration_generate_username', 'yes' );
-		$id = wc_create_new_customer( 'fred@example.com', '', 'testpassword' );
+		$id       = wc_create_new_customer( 'fred@example.com', '', 'testpassword' );
 		$userdata = get_userdata( $id );
 		$this->assertEquals( 'fred', $userdata->user_login );
-		$id = wc_create_new_customer( 'fred@mail.com', '', 'testpassword' );
+		$id       = wc_create_new_customer( 'fred@mail.com', '', 'testpassword' );
 		$userdata = get_userdata( $id );
 		$this->assertEquals( 'fred1', $userdata->user_login );
-		$id = wc_create_new_customer( 'fred@test.com', '', 'testpassword' );
+		$id       = wc_create_new_customer( 'fred@test.com', '', 'testpassword' );
 		$userdata = get_userdata( $id );
 		$this->assertEquals( 'fred2', $userdata->user_login );
 
@@ -60,31 +60,33 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 	 *
 	 * @since 3.1
 	 */
-	function test_wc_update_new_customer_past_orders() {
+	public function test_wc_update_new_customer_past_orders() {
 		$customer_id = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
-		$order1 = new WC_Order;
+		$order1      = new WC_Order();
 		$order1->set_billing_email( 'test@example.com' );
 		$order1->set_status( 'completed' );
 		$order1->save();
-		$order2 = new WC_Order;
+		$order2 = new WC_Order();
 		$order2->save();
 
 		// Test download permissions
-		$prod_download = new WC_Product_Download;
+		$prod_download = new WC_Product_Download();
 		$prod_download->set_file( plugin_dir_url( __FILE__ ) . '/assets/images/help.png' );
 		$prod_download->set_id( 'download' );
 
-		$product = new WC_Product_Simple;
+		$product = new WC_Product_Simple();
 		$product->set_downloadable( 'yes' );
 		$product->set_downloads( array( $prod_download ) );
 		$product->save();
 
-		$order3 = new WC_Order;
+		$order3 = new WC_Order();
 		$item   = new WC_Order_Item_Product();
-		$item->set_props( array(
-			'product'  => $product,
-			'quantity' => 1,
-		) );
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+			)
+		);
 		$order3->set_billing_email( 'test@example.com' );
 		$order3->set_status( 'completed' );
 		$order3->add_item( $item );
@@ -115,18 +117,28 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 	 *
 	 * @since 3.1
 	 */
-	function test_wc_update_new_customer_past_orders_invalid_changed_email() {
+	public function test_wc_update_new_customer_past_orders_invalid_changed_email() {
 		$customer_id = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
-		$order1 = new WC_Order;
+		$order1      = new WC_Order();
 		$order1->set_billing_email( 'test@example.com' );
 		$order1->set_status( 'completed' );
 		$order1->save();
 
-		wp_update_user( array( 'ID' => $customer_id, 'user_email' => 'invalid' ) );
+		wp_update_user(
+			array(
+				'ID'         => $customer_id,
+				'user_email' => 'invalid',
+			)
+		);
 		$linked = wc_update_new_customer_past_orders( $customer_id );
 		$this->assertEquals( 0, $linked );
 
-		wp_update_user( array( 'ID' => $customer_id, 'user_email' => 'new@example.com' ) );
+		wp_update_user(
+			array(
+				'ID'         => $customer_id,
+				'user_email' => 'new@example.com',
+			)
+		);
 		$linked = wc_update_new_customer_past_orders( $customer_id );
 		$this->assertEquals( 0, $linked );
 	}
@@ -136,14 +148,14 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 	 *
 	 * @since 3.1
 	 */
-	function test_wc_paying_customer() {
+	public function test_wc_paying_customer() {
 		$customer_id = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
 
 		$customer = new WC_Customer( $customer_id );
 		$this->assertFalse( $customer->get_is_paying_customer() );
 
 		// Test after new order created.
-		$order1 = new WC_Order;
+		$order1 = new WC_Order();
 		$order1->set_customer_id( $customer_id );
 		$order1->set_status( 'completed' );
 		$order1->save();
@@ -162,13 +174,13 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 	 *
 	 * @since 3.1
 	 */
-	function test_wc_customer_bought_product() {
+	public function test_wc_customer_bought_product() {
 		$customer_id_1 = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
 		$customer_id_2 = wc_create_new_customer( 'test2@example.com', 'testuser2', 'testpassword2' );
-		$product_1 = new WC_Product_Simple;
+		$product_1     = new WC_Product_Simple();
 		$product_1->save();
 		$product_id_1 = $product_1->get_id();
-		$product_2 = new WC_Product_Simple;
+		$product_2    = new WC_Product_Simple();
 		$product_2->save();
 		$product_id_2 = $product_2->get_id();
 
@@ -197,10 +209,10 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 	 *
 	 * @since 3.1
 	 */
-	function test_wc_customer_has_capability() {
+	public function test_wc_customer_has_capability() {
 		$customer_id = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
 
-		$order = new WC_Order;
+		$order = new WC_Order();
 		$order->set_customer_id( $customer_id );
 		$order->save();
 
@@ -240,7 +252,7 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 		$allcaps = wc_customer_has_capability( array(), array( 'cancel_order' ), array( 'cancel_order', 99, $order->get_id() ) );
 		$this->assertTrue( empty( $allcaps['cancel_order'] ) );
 
-		$download = new WC_Customer_Download;
+		$download = new WC_Customer_Download();
 		$download->set_user_id( $customer_id );
 		$download->save();
 
@@ -258,15 +270,15 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 	 *
 	 * @since 3.1
 	 */
-	function test_wc_get_customer_download_permissions() {
+	public function test_wc_get_customer_download_permissions() {
 		$customer_id_1 = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
 		$customer_id_2 = wc_create_new_customer( 'test2@example.com', 'testuser2', 'testpassword2' );
 
-		$download_1 = new WC_Customer_Download;
+		$download_1 = new WC_Customer_Download();
 		$download_1->set_user_id( $customer_id_1 );
 		$download_1->set_order_id( 1 );
 		$download_1->save();
-		$download_2 = new WC_Customer_Download;
+		$download_2 = new WC_Customer_Download();
 		$download_2->set_user_id( $customer_id_2 );
 		$download_2->set_order_id( 2 );
 		$download_2->save();
@@ -285,25 +297,25 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 	 *
 	 * @since 3.1
 	 */
-	function test_wc_get_customer_available_downloads() {
+	public function test_wc_get_customer_available_downloads() {
 		$customer_id = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
 
-		$prod_download = new WC_Product_Download;
+		$prod_download = new WC_Product_Download();
 		$prod_download->set_file( plugin_dir_url( __FILE__ ) . '/assets/images/help.png' );
 		$prod_download->set_id( 'download' );
 
-		$product = new WC_Product_Simple;
+		$product = new WC_Product_Simple();
 		$product->set_downloadable( 'yes' );
 		$product->set_downloads( array( $prod_download ) );
 		$product->save();
 
-		$cust_download = new WC_Customer_Download;
+		$cust_download = new WC_Customer_Download();
 		$cust_download->set_user_id( $customer_id );
 		$cust_download->set_product_id( $product->get_id() );
 		$cust_download->set_download_id( $prod_download->get_id() );
 		$cust_download->save();
 
-		$order = new WC_Order;
+		$order = new WC_Order();
 		$order->set_customer_id( $customer_id );
 		$order->set_status( 'completed' );
 		$order->save();
@@ -325,26 +337,26 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 	 *
 	 * @since 3.1
 	 */
-	function test_wc_get_customer_total_spent() {
+	public function test_wc_get_customer_total_spent() {
 		$customer_id_1 = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
 		$customer_id_2 = wc_create_new_customer( 'test2@example.com', 'testuser2', 'testpassword2' );
 
-		$order_1 = new WC_Order;
+		$order_1 = new WC_Order();
 		$order_1->set_status( 'completed' );
 		$order_1->set_total( '100.00' );
 		$order_1->set_customer_id( $customer_id_1 );
 		$order_1->save();
-		$order_2 = new WC_Order;
+		$order_2 = new WC_Order();
 		$order_2->set_status( 'completed' );
 		$order_2->set_total( '15.50' );
 		$order_2->set_customer_id( $customer_id_1 );
 		$order_2->save();
-		$order_3 = new WC_Order;
+		$order_3 = new WC_Order();
 		$order_3->set_status( 'completed' );
 		$order_3->set_total( '50.01' );
 		$order_3->set_customer_id( $customer_id_2 );
 		$order_3->save();
-		$order_4 = new WC_Order;
+		$order_4 = new WC_Order();
 		$order_4->set_status( 'pending' );
 		$order_4->set_total( '1.00' );
 		$order_4->set_customer_id( $customer_id_2 );
@@ -359,17 +371,17 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 	 *
 	 * @since 3.1
 	 */
-	function test_wc_get_customer_order_count() {
+	public function test_wc_get_customer_order_count() {
 		$customer_id_1 = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
 		$customer_id_2 = wc_create_new_customer( 'test2@example.com', 'testuser2', 'testpassword2' );
 
-		$order_1 = new WC_Order;
+		$order_1 = new WC_Order();
 		$order_1->set_customer_id( $customer_id_1 );
 		$order_1->save();
-		$order_2 = new WC_Order;
+		$order_2 = new WC_Order();
 		$order_2->set_customer_id( $customer_id_1 );
 		$order_2->save();
-		$order_3 = new WC_Order;
+		$order_3 = new WC_Order();
 		$order_3->set_customer_id( $customer_id_2 );
 		$order_3->save();
 
@@ -382,11 +394,11 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 	 *
 	 * @since 3.1
 	 */
-	function test_wc_reset_order_customer_id_on_deleted_user() {
+	public function test_wc_reset_order_customer_id_on_deleted_user() {
 		$customer_id = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
-		$customer = new WC_Customer( $customer_id );
+		$customer    = new WC_Customer( $customer_id );
 
-		$order = new WC_Order;
+		$order = new WC_Order();
 		$order->set_customer_id( $customer_id );
 		$order->save();
 
@@ -401,13 +413,13 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 	 *
 	 * @since 3.1
 	 */
-	function test_wc_get_customer_last_order() {
+	public function test_wc_get_customer_last_order() {
 		$customer_id = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
 
-		$order_1 = new WC_Order;
+		$order_1 = new WC_Order();
 		$order_1->set_customer_id( $customer_id );
 		$order_1->save();
-		$order_2 = new WC_Order;
+		$order_2 = new WC_Order();
 		$order_2->set_customer_id( $customer_id );
 		$order_2->save();
 
