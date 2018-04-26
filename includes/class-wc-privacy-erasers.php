@@ -216,6 +216,14 @@ class WC_Privacy_Erasers {
 		$anonymized_data = array();
 
 		/**
+		 * Allow extensions to remove their own personal data for this order first, so order data is still available.
+		 *
+		 * @since 3.4.0
+		 * @param WC_Order $order A customer object.
+		 */
+		do_action( 'woocommerce_privacy_before_remove_order_personal_data', $order );
+
+		/**
 		 * Expose props and data types we'll be anonymizing.
 		 *
 		 * @since 3.4.0
@@ -245,6 +253,8 @@ class WC_Privacy_Erasers {
 			'shipping_postcode'   => 'text',
 			'shipping_state'      => 'address_state',
 			'shipping_country'    => 'address_country',
+			'customer_id'         => 'numeric_id',
+			'transaction_id'      => 'numeric_id',
 		), $order );
 
 		if ( ! empty( $props_to_remove ) && is_array( $props_to_remove ) ) {
@@ -279,7 +289,6 @@ class WC_Privacy_Erasers {
 
 		// Set all new props and persist the new data to the database.
 		$order->set_props( $anonymized_data );
-		$order->set_customer_id( 0 );
 		$order->update_meta_data( '_anonymized', 'yes' );
 		$order->save();
 

@@ -112,6 +112,9 @@ Additionally we may also collect the following information:
 			case 'phone':
 				$anonymous = preg_replace( '/\d/u', '0', $data );
 				break;
+			case 'numeric_id':
+				$anonymous = 0;
+				break;
 		}
 		return $anonymous;
 	}
