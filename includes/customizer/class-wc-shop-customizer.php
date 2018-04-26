@@ -844,9 +844,9 @@ class WC_Shop_Customizer {
 		if ( isset( $wp_customize->selective_refresh ) ) {
 			$wp_customize->selective_refresh->add_partial(
 				'woocommerce_checkout_privacy_policy_text', array(
-					'selector'            => '.woocommerce-terms-and-conditions-text',
-					'container_inclusive' => false,
-					'render_callback'     => 'wc_privacy_policy_text',
+					'selector'            => '.woocommerce-privacy-policy-text',
+					'container_inclusive' => true,
+					'render_callback'     => 'wc_checkout_privacy_policy_text',
 				)
 			);
 			$wp_customize->selective_refresh->add_partial(
