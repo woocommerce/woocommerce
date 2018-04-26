@@ -129,6 +129,7 @@ class WC_Checkout {
 		if ( in_array( $key, array( 'posted', 'shipping_method', 'payment_method' ), true ) && empty( $this->legacy_posted_data ) ) {
 			$this->legacy_posted_data = $this->get_posted_data();
 		}
+
 		switch ( $key ) {
 			case 'enable_signup':
 				return $this->is_registration_enabled();
@@ -387,6 +388,7 @@ class WC_Checkout {
 					'taxes'        => $values['line_tax_data'],
 				)
 			);
+
 			if ( $product ) {
 				$item->set_props(
 					array(
@@ -397,6 +399,7 @@ class WC_Checkout {
 					)
 				);
 			}
+
 			$item->set_backorder_meta();
 
 			/**
@@ -569,9 +572,11 @@ class WC_Checkout {
 		if ( 'shipping' === $fieldset_key && ( ! $data['ship_to_different_address'] || ! WC()->cart->needs_shipping_address() ) ) {
 			return true;
 		}
+
 		if ( 'account' === $fieldset_key && ( is_user_logged_in() || ( ! $this->is_registration_required() && empty( $data['createaccount'] ) ) ) ) {
 			return true;
 		}
+
 		return false;
 	}
 
@@ -596,6 +601,7 @@ class WC_Checkout {
 				$skipped[] = $fieldset_key;
 				continue;
 			}
+
 			foreach ( $fieldset as $key => $field ) {
 				$type = sanitize_title( isset( $field['type'] ) ? $field['type'] : 'text' );
 
@@ -642,6 +648,7 @@ class WC_Checkout {
 			if ( $this->maybe_skip_fieldset( $fieldset_key, $data ) ) {
 				continue;
 			}
+
 			foreach ( $fieldset as $key => $field ) {
 				if ( ! isset( $data[ $key ] ) ) {
 					continue;
@@ -778,6 +785,7 @@ class WC_Checkout {
 			WC()->customer->{"set_billing_{$field}"}( $data[ "billing_{$field}" ] );
 			WC()->customer->{"set_shipping_{$field}"}( $data[ "billing_{$field}" ] );
 		}
+
 		if ( isset( $data[ "shipping_{$field}" ] ) ) {
 			WC()->customer->{"set_shipping_{$field}"}( $data[ "shipping_{$field}" ] );
 		}
