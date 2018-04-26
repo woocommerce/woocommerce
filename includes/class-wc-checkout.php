@@ -855,19 +855,19 @@ class WC_Checkout {
 		$order->payment_complete();
 		wc_empty_cart();
 
-		if ( is_ajax() ) {
-			wp_send_json(
-				array(
-					'result'   => 'success',
-					'redirect' => apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $order->get_checkout_order_received_url(), $order ),
-				)
-			);
-		} else {
+		if ( ! is_ajax() ) {
 			wp_safe_redirect(
 				apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $order->get_checkout_order_received_url(), $order )
 			);
 			exit;
 		}
+
+		wp_send_json(
+			array(
+				'result'   => 'success',
+				'redirect' => apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $order->get_checkout_order_received_url(), $order ),
+			)
+		);
 	}
 
 	/**
