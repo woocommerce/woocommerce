@@ -89,7 +89,7 @@ jQuery( function( $ ) {
 
 		var country     = $( this ).val(),
 			$statebox   = $wrapper.find( '#billing_state, #shipping_state, #calc_shipping_state' ),
-			$parent     = $statebox.parent(),
+			$parent     = $statebox.closest( 'p.form-row' ),
 			input_name  = $statebox.attr( 'name' ),
 			input_id    = $statebox.attr( 'id' ),
 			value       = $statebox.val(),
@@ -98,7 +98,7 @@ jQuery( function( $ ) {
 		if ( states[ country ] ) {
 			if ( $.isEmptyObject( states[ country ] ) ) {
 
-				$statebox.parent().hide().find( '.select2-container' ).remove();
+				$statebox.closest( 'p.form-row' ).hide().find( '.select2-container' ).remove();
 				$statebox.replaceWith( '<input type="hidden" class="hidden" name="' + input_name + '" id="' + input_id + '" value="" placeholder="' + placeholder + '" />' );
 
 				$( document.body ).trigger( 'country_to_state_changed', [ country, $wrapper ] );
@@ -114,7 +114,7 @@ jQuery( function( $ ) {
 					}
 				}
 
-				$statebox.parent().show();
+				$statebox.closest( 'p.form-row' ).show();
 
 				if ( $statebox.is( 'input' ) ) {
 					// Change for select
