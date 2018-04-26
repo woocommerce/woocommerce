@@ -220,6 +220,10 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Use `&nbsp;` to separate asterisks in required fields to prevent awkward line breaks. #19610
 * Tweak - Load meta box input values using CRUD and edit context. #19670
 * Tweak - Scroll to notices on cart/checkout for better mobile visibility. #19699
+* Tweak - Add filter to coupon URL on "Edit order" screen. #19777
+* Tweak - Throw error if order can't be loaded on checkout. #19802
+* Tweak - Remove deprecated freegeoip service from geolocation. #19841
+* Tweak - Allow arrays of query vars in wc_get_orders and wc_get_products. #19848
 * Fix - Properly set orderby and order when calling WC_Customer_Download_Data_Store::get_downloads(). #18620
 * Fix - Set maxlength for order item meta key to avoid values disappearing if too long. #18918
 * Fix - Remove hardcoded /wp-content check for downloads. #18961
@@ -254,6 +258,9 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Handle escape characters for fputcsv to work around PHP standards issues. #19678
 * Fix - Cast post IDs to integers in admin meta boxes. #19710
 * Fix - Fix CSV unescaping of negative numbers in download expiry/limit columns. #19732
+* Fix - Don't load unsupported theme functionality if shop page ID is -1. #19822
+* Fix - Select and display "Downloadable" option in product admin filter when selected. #19876
+* Fix - Add sort handle column when adding new tags. #19875
 * Dev - Added refunded_payment prop to orders for determining if payment was refunded via API. #18196
 * Dev - Added extra params to `woocommerce_order_get_downloadable_items`. #18408
 * Dev - Store shipping method ID and instance ID in separate fields instead of both in one serialized field. #18483
