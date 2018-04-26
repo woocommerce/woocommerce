@@ -835,12 +835,12 @@ class WC_Checkout {
 		if ( isset( $result['result'] ) && 'success' === $result['result'] ) {
 			$result = apply_filters( 'woocommerce_payment_successful_result', $result, $order_id );
 
-			if ( is_ajax() ) {
-				wp_send_json( $result );
-			} else {
+			if ( ! is_ajax() ) {
 				wp_redirect( $result['redirect'] );
 				exit;
 			}
+
+			wp_send_json( $result );
 		}
 	}
 
