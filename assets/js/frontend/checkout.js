@@ -333,7 +333,7 @@ jQuery( function( $ ) {
 
 					// Save payment details to a temporary object
 					var paymentDetails = {};
-					$( '.payment_box input' ).each( function() {
+                    $( '.payment_box :input' ).each( function() {
 						var ID = $( this ).attr( 'id' );
 
 						if ( ID ) {
@@ -360,7 +360,7 @@ jQuery( function( $ ) {
 
 					// Fill in the payment details if possible without overwriting data if set.
 					if ( ! $.isEmptyObject( paymentDetails ) ) {
-						$( '.payment_box input' ).each( function() {
+                        $( '.payment_box :input' ).each( function() {
 							var ID = $( this ).attr( 'id' );
 
 							if ( ID ) {
