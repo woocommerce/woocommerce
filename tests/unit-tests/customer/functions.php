@@ -302,7 +302,7 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 
 		$prod_download = new WC_Product_Download();
 		$prod_download->set_file( plugin_dir_url( __FILE__ ) . '/assets/images/help.png' );
-		$prod_download->set_id( 'download' );
+		$prod_download->set_id( 1 );
 
 		$product = new WC_Product_Simple();
 		$product->set_downloadable( 'yes' );
