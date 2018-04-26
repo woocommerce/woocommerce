@@ -682,8 +682,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$data['status'] = isset( $statuses[ $data['published'] ] ) ? $statuses[ $data['published'] ] : -1;
 
 			unset( $data['published'] );
-		} else {
-			$data['status'] = 'publish';
 		}
 
 		if ( isset( $data['stock_quantity'] ) ) {
