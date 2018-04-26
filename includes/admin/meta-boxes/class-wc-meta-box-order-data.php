@@ -459,7 +459,7 @@ class WC_Meta_Box_Order_Data {
 							}
 
 							if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' == get_option( 'woocommerce_enable_order_comments', 'yes' ) ) && $post->post_excerpt ) {
-								echo '<p><strong>' . __( 'Customer provided note:', 'woocommerce' ) . '</strong> ' . nl2br( esc_html( $post->post_excerpt ) ) . '</p>';
+								echo '<p><strong>' . __( 'Customer provided note:', 'woocommerce' ) . '</strong> <span class="' . apply_filters( 'woocommerce_order_notes_class', '' ) . '">' . nl2br( esc_html( $post->post_excerpt ) ) . '</span></p>';
 							}
 							?>
 						</div>
