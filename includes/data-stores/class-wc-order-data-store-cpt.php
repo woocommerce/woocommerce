@@ -711,24 +711,6 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			}
 		}
 
-		if ( ! empty( $query_vars['payment_method__in'] ) ) {
-			if ( ! is_array( $query_vars['payment_method__in'] ) ) {
-				$query_vars['payment_method__in'] = array( $query_vars['payment_method__in'] );
-			}
-
-			$payment_methods = array();
-
-			foreach ( $query_vars['payment_method__in'] as $value ) {
-				$payment_methods[] = array(
-					'key'     => '_payment_method',
-					'value'   => $value,
-					'compare' => '=',
-				);
-			}
-
-			$wp_query_args['meta_query'][] = array_merge( array( 'relation' => 'OR' ), $payment_methods );
-		}
-
 		if ( ! isset( $query_vars['paginate'] ) || ! $query_vars['paginate'] ) {
 			$wp_query_args['no_found_rows'] = true;
 		}
