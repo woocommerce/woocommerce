@@ -232,7 +232,7 @@ class WC_Data_Store_WP {
 				$wp_query_args['meta_query'][] = array(
 					'key'     => '_' . $key,
 					'value'   => $value,
-					'compare' => '=',
+					'compare' => is_array( $value ) ? 'IN' : '=',
 				);
 			} else { // Other vars get mapped to wp_query args or just left alone.
 				$key_mapping = array(
