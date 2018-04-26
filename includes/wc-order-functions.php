@@ -546,8 +546,8 @@ function wc_create_refund( $args = array() ) {
 			}
 		}
 
-		$refund->update_taxes();
-		$refund->calculate_totals( false );
+		$refund->update_taxes( false );
+		$refund->calculate_totals( false, false );
 		$refund->set_total( $args['amount'] * -1 );
 
 		// this should remain after update_taxes(), as this will save the order, and write the current date to the db
