@@ -13,29 +13,6 @@ defined( 'ABSPATH' ) || exit;
  */
 class WC_Privacy_Exporters {
 	/**
-	 * Registers the personal data exporter for WooCommerce data.
-	 *
-	 * @since 3.4.0
-	 * @param array $exporters An array of personal data exporters.
-	 * @return array An array of personal data exporters.
-	 */
-	public static function register( $exporters ) {
-		$exporters[] = array(
-			'exporter_friendly_name' => __( 'Customer Data', 'woocommerce' ),
-			'callback'               => array( __CLASS__, 'customer_data_exporter' ),
-		);
-		$exporters[] = array(
-			'exporter_friendly_name' => __( 'Customer Orders', 'woocommerce' ),
-			'callback'               => array( __CLASS__, 'order_data_exporter' ),
-		);
-		$exporters[] = array(
-			'exporter_friendly_name' => __( 'Customer Downloads', 'woocommerce' ),
-			'callback'               => array( __CLASS__, 'download_data_exporter' ),
-		);
-		return $exporters;
-	}
-
-	/**
 	 * Finds and exports customer data by email address.
 	 *
 	 * @since 3.4.0
