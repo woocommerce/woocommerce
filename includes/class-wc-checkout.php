@@ -193,45 +193,54 @@ class WC_Checkout {
 	 * @return array
 	 */
 	public function get_checkout_fields( $fieldset = '' ) {
-		if ( is_null( $this->fields ) ) {
-			$this->fields = array(
-				'billing'  => WC()->countries->get_address_fields( $this->get_value( 'billing_country' ), 'billing_' ),
-				'shipping' => WC()->countries->get_address_fields( $this->get_value( 'shipping_country' ), 'shipping_' ),
-				'account'  => array(),
-				'order'    => array(
-					'order_comments' => array(
-						'type'        => 'textarea',
-						'class'       => array( 'notes' ),
-						'label'       => __( 'Order notes', 'woocommerce' ),
-						'placeholder' => esc_attr__( 'Notes about your order, e.g. special notes for delivery.', 'woocommerce' ),
+		if ( ! is_null( $this->fields ) ) {
+			return $fieldset ? $this->fields[ $fieldset ] : $this->fields;
+		}
+
+		$this->fields = array(
+			'billing'  => WC()->countries->get_address_fields(
+				$this->get_value( 'billing_country' ),
+				'billing_'
+			),
+			'shipping' => WC()->countries->get_address_fields(
+				$this->get_value( 'shipping_country' ),
+				'shipping_'
+			),
+			'account'  => array(),
+			'order'    => array(
+				'order_comments' => array(
+					'type'        => 'textarea',
+					'class'       => array( 'notes' ),
+					'label'       => __( 'Order notes', 'woocommerce' ),
+					'placeholder' => esc_attr__(
+						'Notes about your order, e.g. special notes for delivery.',
+						'woocommerce'
 					),
 				),
+			),
+		);
+
+		if ( 'no' === get_option( 'woocommerce_registration_generate_username' ) ) {
+			$this->fields['account']['account_username'] = array(
+				'type'        => 'text',
+				'label'       => __( 'Account username', 'woocommerce' ),
+				'required'    => true,
+				'placeholder' => esc_attr__( 'Username', 'woocommerce' ),
 			);
-			if ( 'no' === get_option( 'woocommerce_registration_generate_username' ) ) {
-				$this->fields['account']['account_username'] = array(
-					'type'        => 'text',
-					'label'       => __( 'Account username', 'woocommerce' ),
-					'required'    => true,
-					'placeholder' => esc_attr__( 'Username', 'woocommerce' ),
-				);
-			}
-
-			if ( 'no' === get_option( 'woocommerce_registration_generate_password' ) ) {
-				$this->fields['account']['account_password'] = array(
-					'type'        => 'password',
-					'label'       => __( 'Create account password', 'woocommerce' ),
-					'required'    => true,
-					'placeholder' => esc_attr__( 'Password', 'woocommerce' ),
-				);
-			}
-
-			$this->fields = apply_filters( 'woocommerce_checkout_fields', $this->fields );
 		}
-		if ( $fieldset ) {
-			return $this->fields[ $fieldset ];
-		} else {
-			return $this->fields;
+
+		if ( 'no' === get_option( 'woocommerce_registration_generate_password' ) ) {
+			$this->fields['account']['account_password'] = array(
+				'type'        => 'password',
+				'label'       => __( 'Create account password', 'woocommerce' ),
+				'required'    => true,
+				'placeholder' => esc_attr__( 'Password', 'woocommerce' ),
+			);
 		}
+
+		$this->fields = apply_filters( 'woocommerce_checkout_fields', $this->fields );
+
+		return $fieldset ? $this->fields[ $fieldset ] : $this->fields;
 	}
 
 	/**
