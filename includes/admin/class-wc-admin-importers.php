@@ -247,7 +247,7 @@ class WC_Admin_Importers {
 			) );
 			// @codingStandardsIgnoreEnd.
 
-			// Clean up orphanned data.
+			// Clean up orphaned data.
 			$wpdb->query( "
 				DELETE {$wpdb->posts}.* FROM {$wpdb->posts}
 				LEFT JOIN {$wpdb->posts} wp ON wp.ID = {$wpdb->posts}.post_parent
