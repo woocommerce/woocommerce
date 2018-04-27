@@ -30,7 +30,8 @@ class WC_Privacy {
 		add_action( 'woocommerce_cleanup_orders', array( __CLASS__, 'order_cleanup_process' ) );
 
 		// This hook registers WooCommerce data exporters.
-		add_filter( 'wp_privacy_personal_data_exporters', array( __CLASS__, 'register_data_exporters' ), 10 );
+		// We set priority to 5 to help WooCommerce's findings appear before those from extensions in exported items
+		add_filter( 'wp_privacy_personal_data_exporters', array( __CLASS__, 'register_data_exporters' ), 5 );
 
 		// When this is fired, data is removed in a given order. Called from bulk actions.
 		add_action( 'woocommerce_remove_order_personal_data', array( __CLASS__, 'remove_order_personal_data' ) );
