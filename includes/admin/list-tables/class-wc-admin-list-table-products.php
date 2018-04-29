@@ -39,6 +39,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		add_filter( 'query_vars', array( $this, 'add_custom_query_var' ) );
 		add_filter( 'views_edit-product', array( $this, 'product_views' ) );
 		add_filter( 'get_search_query', array( $this, 'search_label' ) );
+		add_filter( 'posts_orderby', array( $this, 'featured_products_orderby' ), 10, 2 );
 	}
 
 	/**
@@ -81,9 +82,10 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 */
 	public function define_sortable_columns( $columns ) {
 		$custom = array(
-			'price' => 'price',
-			'sku'   => 'sku',
-			'name'  => 'title',
+			'price'    => 'price',
+			'sku'      => 'sku',
+			'name'     => 'title',
+			'featured' => 'featured',
 		);
 		return wp_parse_args( $custom, $columns );
 	}
@@ -386,6 +388,11 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 					'orderby'  => 'meta_value',
 				) );
 			}
+			if ( 'featured' === $query_vars['orderby'] ) {
+				$query_vars = array_merge( $query_vars, array(
+					'orderby' => 'featured',
+				) );
+			}
 		}
 
 		if ( isset( $query_vars['product_type'] ) ) {
@@ -430,6 +437,25 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		}
 
 		return $query_vars;
+	}
+
+	/**
+	 * Change SQL query to order by featured produts.
+	 *
+	 * @param  string   $orderby Original ORDER BY state.
+	 * @param  WP_Query $query   Query object.
+	 * @return string            modified ORDER BY state
+	 */
+	public function featured_products_orderby( $orderby, $query ) {
+		global $wpdb;
+		if ( 'featured' === $query->get( 'orderby' ) ) {
+			$featured_product_ids = (array) wc_get_featured_product_ids();
+			if ( count( $featured_product_ids ) ) {
+				$string_of_ids = '(' . implode( ',', $featured_product_ids ) . ')';
+				$orderby       = "( {$wpdb->posts}.ID IN {$string_of_ids} ) " . $query->get( 'order' );
+			}
+		}
+		return $orderby;
 	}
 
 	/**
