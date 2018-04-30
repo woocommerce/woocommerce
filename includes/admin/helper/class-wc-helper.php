@@ -1217,7 +1217,7 @@ class WC_Helper {
 		}
 
 		if ( ! $activated ) {
-			self::log( 'Could not activate a subscription upon plugin activation: ' . $$filename );
+			self::log( 'Could not activate a subscription upon plugin activation: ' . $filename );
 			return;
 		}
 
