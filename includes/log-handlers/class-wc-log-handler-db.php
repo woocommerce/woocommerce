@@ -94,6 +94,23 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 	}
 
 	/**
+	 * Clear entries for a chosen handle/source.
+	 *
+	 * @param string $source Log source.
+	 * @return bool
+	 */
+	public function clear( $source ) {
+		global $wpdb;
+
+		return $wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->prefix}woocommerce_log WHERE source = %s",
+				$source
+			)
+		);
+	}
+
+	/**
 	 * Delete selected logs from DB.
 	 *
 	 * @param int|string|array $log_ids Log ID or array of Log IDs to be deleted.

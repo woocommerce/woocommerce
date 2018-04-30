@@ -260,17 +260,20 @@ class WC_Logger implements WC_Logger_Interface {
 	}
 
 	/**
-	 * Clear entries from chosen file.
+	 * Clear entries for a chosen file/source.
 	 *
-	 * @deprecated 3.0.0
-	 *
-	 * @param string $handle
-	 *
+	 * @param string $source
 	 * @return bool
 	 */
-	public function clear( $handle ) {
-		wc_deprecated_function( 'WC_Logger::clear', '3.0', 'WC_Log_Handler_File::clear' );
-		$handler = new WC_Log_Handler_File();
-		return $handler->clear( $handle );
+	public function clear( $source = '' ) {
+		if ( ! $source ) {
+			return false;
+		}
+		foreach ( $this->handlers as $handler ) {
+			if ( is_callable( array( $handler, 'clear' ) ) ) {
+				$handler->clear( $source );
+			}
+		}
+		return true;
 	}
 }
