@@ -45,7 +45,7 @@ class WC_Privacy extends WC_Abstract_Privacy {
 		$this->add_eraser( __( 'Customer Downloads', 'woocommerce' ), array( 'WC_Privacy_Erasers', 'download_data_eraser' ) );
 
 		// Cleanup orders daily - this is a callback on a daily cron event.
-		add_action( 'woocommerce_cleanup_orders', array( $this, 'order_cleanup_process' ) );
+		add_action( 'woocommerce_cleanup_personal_data', array( $this, 'queue_cleanup_personal_data' ) );
 
 		// Handles custom anonomization types not included in core.
 		add_filter( 'wp_privacy_anonymize_data', array( $this, 'anonymize_custom_data_types' ), 10, 3 );
@@ -87,11 +87,12 @@ Additionally we may also collect the following information:
 	/**
 	 * Spawn events for order cleanup.
 	 */
-	public function order_cleanup_process() {
+	public function queue_cleanup_personal_data() {
 		self::$background_process->push_to_queue( array( 'task' => 'trash_pending_orders' ) );
 		self::$background_process->push_to_queue( array( 'task' => 'trash_failed_orders' ) );
 		self::$background_process->push_to_queue( array( 'task' => 'trash_cancelled_orders' ) );
 		self::$background_process->push_to_queue( array( 'task' => 'anonymize_completed_orders' ) );
+		self::$background_process->push_to_queue( array( 'task' => 'delete_inactive_accounts' ) );
 		self::$background_process->save()->dispatch();
 	}
 
@@ -117,48 +118,6 @@ Additionally we may also collect the following information:
 				break;
 		}
 		return $anonymous;
-	}
-
-	/**
-	 * For a given query trash all matches.
-	 *
-	 * @since 3.4.0
-	 * @param array $query Query array to pass to wc_get_orders().
-	 * @return int Count of orders that were trashed.
-	 */
-	protected static function trash_orders_query( $query ) {
-		$orders = wc_get_orders( $query );
-		$count  = 0;
-
-		if ( $orders ) {
-			foreach ( $orders as $order ) {
-				$order->delete( false );
-				$count ++;
-			}
-		}
-
-		return $count;
-	}
-
-	/**
-	 * For a given query, anonymize all matches.
-	 *
-	 * @since 3.4.0
-	 * @param array $query Query array to pass to wc_get_orders().
-	 * @return int Count of orders that were anonymized.
-	 */
-	protected static function anonymize_orders_query( $query ) {
-		$orders = wc_get_orders( $query );
-		$count  = 0;
-
-		if ( $orders ) {
-			foreach ( $orders as $order ) {
-				WC_Privacy_Erasers::remove_order_personal_data( $order );
-				$count ++;
-			}
-		}
-
-		return $count;
 	}
 
 	/**
@@ -225,14 +184,34 @@ Additionally we may also collect the following information:
 	}
 
 	/**
+	 * For a given query trash all matches.
+	 *
+	 * @since 3.4.0
+	 * @param array $query Query array to pass to wc_get_orders().
+	 * @return int Count of orders that were trashed.
+	 */
+	protected static function trash_orders_query( $query ) {
+		$orders = wc_get_orders( $query );
+		$count  = 0;
+
+		if ( $orders ) {
+			foreach ( $orders as $order ) {
+				$order->delete( false );
+				$count ++;
+			}
+		}
+
+		return $count;
+	}
+
+	/**
 	 * Anonymize old completed orders.
 	 *
 	 * @since 3.4.0
 	 * @param  int $limit Limit orders to process per batch.
-	 * @param  int $page Page to process.
 	 * @return int Number of orders processed.
 	 */
-	public static function anonymize_completed_orders( $limit = 20, $page = 1 ) {
+	public static function anonymize_completed_orders( $limit = 20 ) {
 		$option = wc_parse_relative_date_option( get_option( 'woocommerce_anonymize_completed_orders' ) );
 
 		if ( empty( $option['number'] ) ) {
@@ -245,6 +224,90 @@ Additionally we may also collect the following information:
 			'status'       => 'wc-completed',
 			'anonymized'   => false,
 		) );
+	}
+
+	/**
+	 * For a given query, anonymize all matches.
+	 *
+	 * @since 3.4.0
+	 * @param array $query Query array to pass to wc_get_orders().
+	 * @return int Count of orders that were anonymized.
+	 */
+	protected static function anonymize_orders_query( $query ) {
+		$orders = wc_get_orders( $query );
+		$count  = 0;
+
+		if ( $orders ) {
+			foreach ( $orders as $order ) {
+				WC_Privacy_Erasers::remove_order_personal_data( $order );
+				$count ++;
+			}
+		}
+
+		return $count;
+	}
+
+	/**
+	 * Delete inactive accounts.
+	 *
+	 * @since 3.4.0
+	 * @param  int $limit Limit users to process per batch.
+	 * @return int Number of users processed.
+	 */
+	public static function delete_inactive_accounts( $limit = 20 ) {
+		$option = wc_parse_relative_date_option( get_option( 'woocommerce_delete_inactive_accounts' ) );
+
+		if ( empty( $option['number'] ) ) {
+			return 0;
+		}
+
+		return self::delete_inactive_accounts_query( strtotime( '-' . $option['number'] . ' ' . $option['unit'] ), $limit );
+	}
+
+	/**
+	 * Delete inactive accounts.
+	 *
+	 * @since 3.4.0
+	 * @param int $timestamp Timestamp to delete customers before.
+	 * @param int $limit     Limit number of users to delete per run.
+	 * @return int Count of customers that were deleted.
+	 */
+	protected static function delete_inactive_accounts_query( $timestamp, $limit = 20 ) {
+		$count      = 0;
+		$user_query = new WP_User_Query( array(
+			'fields'     => 'ID',
+			'number'     => $limit,
+			'role__in'   => apply_filters( 'woocommerce_delete_inactive_account_roles', array(
+				'Customer',
+				'Subscriber',
+			) ),
+			'meta_query' => array(
+				'relation' => 'AND',
+				array(
+					'key'     => 'wc_last_active',
+					'value'   => (string) $timestamp,
+					'compare' => '<',
+					'type'    => 'NUMERIC',
+				),
+				array(
+					'key'     => 'wc_last_active',
+					'value'   => '0',
+					'compare' => '>',
+					'type'    => 'NUMERIC',
+				),
+			),
+		) );
+
+		$user_ids = $user_query->get_results();
+
+		if ( $user_ids ) {
+			foreach ( $user_ids as $user_id ) {
+				wp_delete_user( $user_id );
+				$count ++;
+			}
+		}
+
+		return $count;
 	}
 }
 

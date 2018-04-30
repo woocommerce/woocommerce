@@ -55,6 +55,9 @@ class WC_Privacy_Background_Process extends WC_Background_Process {
 			case 'anonymize_completed_orders':
 				$process_count = WC_Privacy::anonymize_completed_orders( $process_limit );
 				break;
+			case 'delete_inactive_accounts':
+				$process_count = WC_Privacy::delete_inactive_accounts( $process_limit );
+				break;
 		}
 
 		if ( $process_limit === $process_count ) {
