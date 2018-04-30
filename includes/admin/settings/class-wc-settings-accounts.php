@@ -92,7 +92,8 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				array(
 					'title'         => __( 'Account erasure requests', 'woocommerce' ),
 					'desc'          => __( 'Remove personal data from orders', 'woocommerce' ),
-					'desc_tip'      => __( 'When handling an account erasure request, should personal data within orders be retained or removed?', 'woocommerce' ),
+					/* Translators: %s URL to erasure request screen. */
+					'desc_tip'      => sprintf( __( 'When handling an <a href="%s">account erasure request</a>, should personal data within orders be retained or removed?', 'woocommerce' ), esc_url( admin_url( 'tools.php?page=remove_personal_data' ) ) ),
 					'id'            => 'woocommerce_erasure_request_removes_order_data',
 					'type'          => 'checkbox',
 					'default'       => 'no',
@@ -101,7 +102,8 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				),
 				array(
 					'desc'          => __( 'Remove access to downloads', 'woocommerce' ),
-					'desc_tip'      => __( 'When handling an account erasure request, should access to downloadable files be revoked and download logs cleared?', 'woocommerce' ),
+					/* Translators: %s URL to erasure request screen. */
+					'desc_tip'      => sprintf( __( 'When handling an <a href="%s">account erasure request</a>, should access to downloadable files be revoked and download logs cleared?', 'woocommerce' ), esc_url( admin_url( 'tools.php?page=remove_personal_data' ) ) ),
 					'id'            => 'woocommerce_erasure_request_removes_download_data',
 					'type'          => 'checkbox',
 					'default'       => 'no',
