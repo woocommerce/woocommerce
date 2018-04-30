@@ -224,7 +224,8 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Throw error if order can't be loaded on checkout. #19802
 * Tweak - Remove deprecated freegeoip service from geolocation. #19841
 * Tweak - Allow arrays of query vars in wc_get_orders and wc_get_products. #19848
-* Fix - Properly set orderby and order when calling WC_Customer_Download_Data_Store::get_downloads(). #18620
+* Tweak - Invalidate fragment cache on theme switch.
+* Fix - Properly set orderby and order when calling WC_Customer_Download_Data_Store::get_downloads(). #1862
 * Fix - Set maxlength for order item meta key to avoid values disappearing if too long. #18918
 * Fix - Remove hardcoded /wp-content check for downloads. #18961
 * Fix - Made get_on_sale_products respect the setting to hide outofstock products. #18984
