@@ -46,7 +46,7 @@ class WC_Meta_Box_Product_Reviews {
 	 */
 	public static function save( $data ) {
 		// Not allowed, return regular value without updating meta
-		if ( ! wp_verify_nonce( $_POST['woocommerce_meta_nonce'], 'woocommerce_save_data' ) && ! isset( $_POST['rating'] ) ) {
+		if ( ! isset( $_POST['woocommerce_meta_nonce'] ) || ! wp_verify_nonce( $_POST['woocommerce_meta_nonce'], 'woocommerce_save_data' ) && ! isset( $_POST['rating'] ) ) {
 			return $data;
 		}
 
