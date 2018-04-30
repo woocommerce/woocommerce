@@ -292,6 +292,15 @@ class WC_Privacy_Erasers {
 		$order->update_meta_data( '_anonymized', 'yes' );
 		$order->save();
 
+		// Delete order notes which can contain PII.
+		$notes = wc_get_order_notes( array(
+			'order_id' => $order->get_id(),
+		) );
+
+		foreach ( $notes as $note ) {
+			wc_delete_order_note( $note->id );
+		}
+
 		// Add note that this event occured.
 		$order->add_order_note( __( 'Personal data removed.', 'woocommerce' ) );
 
