@@ -61,16 +61,26 @@ class WC_Gateway_Paypal_Request {
 	 * @return string
 	 */
 	public function get_request_url( $order, $sandbox = false ) {
-		if ( $sandbox ) {
-			$this->endpoint = 'https://www.sandbox.paypal.com/cgi-bin/webscr?test_ipn=1&';
-		} else {
-			$this->endpoint = 'https://www.paypal.com/cgi-bin/webscr?';
-		}
-		$paypal_args = http_build_query( $this->get_paypal_args( $order ), '', '&' );
+		$this->endpoint = $sandbox ? 'https://www.sandbox.paypal.com/cgi-bin/webscr?test_ipn=1&' : 'https://www.paypal.com/cgi-bin/webscr?';
+		$paypal_args    = $this->get_paypal_args( $order );
+		$mask           = array(
+			'first_name'    => '***',
+			'last_name'     => '***',
+			'address1'      => '***',
+			'address2'      => '***',
+			'city'          => '***',
+			'state'         => '***',
+			'zip'           => '***',
+			'country'       => '***',
+			'email'         => '***@***',
+			'night_phone_a' => '***',
+			'night_phone_b' => '***',
+			'night_phone_c' => '***',
+		);
 
-		WC_Gateway_Paypal::log( 'PayPal Request Args for order ' . $order->get_order_number() . ': ' . wc_print_r( $paypal_args, true ) );
+		WC_Gateway_Paypal::log( 'PayPal Request Args for order ' . $order->get_order_number() . ': ' . wc_print_r( array_merge( $paypal_args, array_intersect_key( $mask, $paypal_args ) ), true ) );
 
-		return $this->endpoint . $paypal_args;
+		return $this->endpoint . http_build_query( $paypal_args, '', '&' );
 	}
 
 	/**
