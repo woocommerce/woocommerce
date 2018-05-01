@@ -1661,6 +1661,20 @@ function wc_get_logger() {
 }
 
 /**
+ * Trigger logging cleanup using the logging class.
+ *
+ * @since 3.4.0
+ */
+function wc_cleanup_logs() {
+	$logger = wc_get_logger();
+
+	if ( is_callable( array( $logger, 'clear_expired_logs' ) ) ) {
+		$logger->clear_expired_logs();
+	}
+}
+add_action( 'woocommerce_cleanup_logs', 'wc_cleanup_logs' );
+
+/**
  * Prints human-readable information about a variable.
  *
  * Some server environments blacklist some debugging functions. This function provides a safe way to
