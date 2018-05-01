@@ -305,6 +305,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Performance - Removed duplicate `SET SESSION SQL_BIG_SELECTS=1` queries. #19502
 * Performance - Avoid storing coupon `_used_by` data to prevent database bloat. #19669
 * Performance - Introduced new wc_get_product_class() and wc_product_class() functions. #19639
+* Performance - Series of tweaks aimed at reducing the number of queries performed #19918
 * Template - Update cart coupon button from input to button type. #19059
 * Template - Added `woocommerce-form-register` class to registration form. #19486
 * Template - Added escaping to publish date. #19530
