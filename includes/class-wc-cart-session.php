@@ -91,8 +91,10 @@ final class WC_Cart_Session {
 		if ( is_array( $cart ) ) {
 			$cart_contents = array();
 
-			update_meta_cache( 'post', wp_list_pluck( $cart, 'product_id' ) ); // Prime meta cache to reduce future queries.
-			update_object_term_cache( wp_list_pluck( $cart, 'product_id' ), 'product' );
+			// Prime caches to reduce future queries.
+			if ( is_callable( '_prime_post_caches' ) ) {
+				_prime_post_caches( wp_list_pluck( $cart, 'product_id' ) );
+			}
 
 			foreach ( $cart as $key => $values ) {
 				$product = wc_get_product( $values['variation_id'] ? $values['variation_id'] : $values['product_id'] );

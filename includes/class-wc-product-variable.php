@@ -20,21 +20,21 @@ class WC_Product_Variable extends WC_Product {
 	 *
 	 * @var array
 	 */
-	protected $children = array();
+	protected $children = null;
 
 	/**
 	 * Array of visible children variation IDs. Determined by children.
 	 *
 	 * @var array
 	 */
-	protected $visible_children = array();
+	protected $visible_children = null;
 
 	/**
 	 * Array of variation attributes IDs. Determined by children.
 	 *
 	 * @var array
 	 */
-	protected $variation_attributes = array();
+	protected $variation_attributes = null;
 
 	/**
 	 * Get internal type.
@@ -194,6 +194,8 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Return a products child ids.
 	 *
+	 * This is lazy loaded as it's not used often and does require several queries.
+	 *
 	 * @param bool|string $visible_only Visible only.
 	 * @return array Children ids
 	 */
@@ -204,25 +206,43 @@ class WC_Product_Variable extends WC_Product {
 			return $visible_only ? $this->get_visible_children() : $this->get_children();
 		}
 
+		if ( null === $this->children ) {
+			$children = $this->data_store->read_children( $this );
+			$this->set_children( $children['all'] );
+			$this->set_visible_children( $children['visible'] );
+		}
+
 		return apply_filters( 'woocommerce_get_children', $this->children, $this, false );
 	}
 
 	/**
 	 * Return a products child ids - visible only.
 	 *
+	 * This is lazy loaded as it's not used often and does require several queries.
+	 *
 	 * @since 3.0.0
 	 * @return array Children ids
 	 */
 	public function get_visible_children() {
+		if ( null === $this->visible_children ) {
+			$children = $this->data_store->read_children( $this );
+			$this->set_children( $children['all'] );
+			$this->set_visible_children( $children['visible'] );
+		}
 		return apply_filters( 'woocommerce_get_children', $this->visible_children, $this, true );
 	}
 
 	/**
 	 * Return an array of attributes used for variations, as well as their possible values.
 	 *
+	 * This is lazy loaded as it's not used often and does require several queries.
+	 *
 	 * @return array Attributes and their available values
 	 */
 	public function get_variation_attributes() {
+		if ( null === $this->variation_attributes ) {
+			$this->variation_attributes = $this->data_store->read_variation_attributes( $this );
+		}
 		return $this->variation_attributes;
 	}
 

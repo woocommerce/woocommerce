@@ -1,8 +1,11 @@
 <?php
+/**
+ * Tax settings.
+ *
+ * @package Settings.
+ */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 $settings = array(
 
@@ -65,6 +68,7 @@ $settings = array(
 		'id'       => 'woocommerce_tax_classes',
 		'css'      => 'width:100%; height: 65px;',
 		'type'     => 'textarea',
+		/* Translators: %s New line char. */
 		'default'  => sprintf( __( 'Reduced rate%sZero rate', 'woocommerce' ), PHP_EOL ),
 	),
 
@@ -81,16 +85,15 @@ $settings = array(
 	),
 
 	array(
-		'title'    => __( 'Display prices during cart and checkout', 'woocommerce' ),
-		'id'       => 'woocommerce_tax_display_cart',
-		'default'  => 'excl',
-		'type'     => 'select',
-		'class'    => 'wc-enhanced-select',
-		'options'  => array(
+		'title'   => __( 'Display prices during cart and checkout', 'woocommerce' ),
+		'id'      => 'woocommerce_tax_display_cart',
+		'default' => 'excl',
+		'type'    => 'select',
+		'class'   => 'wc-enhanced-select',
+		'options' => array(
 			'incl' => __( 'Including tax', 'woocommerce' ),
 			'excl' => __( 'Excluding tax', 'woocommerce' ),
 		),
-		'autoload' => false,
 	),
 
 	array(

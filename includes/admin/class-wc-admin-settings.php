@@ -606,7 +606,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 									<?php
 									if ( ! empty( $countries ) ) {
 										foreach ( $countries as $key => $val ) {
-											echo '<option value="' . esc_attr( $key ) . '"' . wc_selected( $key, $selections ) . '>' . esc_html( $val ) . '</option>';
+											echo '<option value="' . esc_attr( $key ) . '"' . wc_selected( $key, $selections ) . '>' . esc_html( $val ) . '</option>'; // WPCS: XSS ok.
 										}
 									}
 									?>
@@ -722,7 +722,8 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 			}
 
 			// Options to update will be stored here and saved later.
-			$update_options = array();
+			$update_options   = array();
+			$autoload_options = array();
 
 			// Loop options and get values to save.
 			foreach ( $options as $option ) {
@@ -825,6 +826,8 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					$update_options[ $option_name ] = $value;
 				}
 
+				$autoload_options[ $option_name ] = isset( $option['autoload'] ) ? (bool) $option['autoload'] : true;
+
 				/**
 				 * Fire an action before saved.
 				 *
@@ -835,7 +838,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 			// Save all options in our array.
 			foreach ( $update_options as $name => $value ) {
-				update_option( $name, $value );
+				update_option( $name, $value, $autoload_options[ $name ] ? 'yes' : 'no' );
 			}
 
 			return true;
