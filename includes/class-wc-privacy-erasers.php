@@ -154,7 +154,7 @@ class WC_Privacy_Erasers {
 	}
 
 	/**
-	 * Finds and exports customer download logs by email address.
+	 * Finds and removes customer download logs by email address.
 	 *
 	 * @since 3.4.0
 	 * @param string $email_address The user email address.
@@ -184,9 +184,7 @@ class WC_Privacy_Erasers {
 			$downloads_query['user_email'] = $email_address;
 		}
 
-		$customer_download_data_store     = WC_Data_Store::load( 'customer-download' );
-		$customer_download_log_data_store = WC_Data_Store::load( 'customer-download-log' );
-		$downloads                        = $customer_download_data_store->get_downloads( $downloads_query );
+		$customer_download_data_store = WC_Data_Store::load( 'customer-download' );
 
 		// Revoke download permissions.
 		if ( apply_filters( 'woocommerce_privacy_erase_download_personal_data', $erasure_enabled, $email_address ) ) {

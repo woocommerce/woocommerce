@@ -173,7 +173,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				),
 				array(
 					'title'       => __( 'Retain pending orders ', 'woocommerce' ),
-					'desc_tip'    => __( 'Pending orders are unpaid and may have been abadonned by the customer. They will be trashed after the specified duration.', 'woocommerce' ),
+					'desc_tip'    => __( 'Pending orders are unpaid and may have been abandoned by the customer. They will be trashed after the specified duration.', 'woocommerce' ),
 					'id'          => 'woocommerce_trash_pending_orders',
 					'type'        => 'relative_date_selector',
 					'placeholder' => __( 'N/A', 'woocommerce' ),
@@ -182,7 +182,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				),
 				array(
 					'title'       => __( 'Retain failed orders', 'woocommerce' ),
-					'desc_tip'    => __( 'Failed orders are unpaid and may have been abadonned by the customer. They will be trashed after the specified duration.', 'woocommerce' ),
+					'desc_tip'    => __( 'Failed orders are unpaid and may have been abandoned by the customer. They will be trashed after the specified duration.', 'woocommerce' ),
 					'id'          => 'woocommerce_trash_failed_orders',
 					'type'        => 'relative_date_selector',
 					'placeholder' => __( 'N/A', 'woocommerce' ),
