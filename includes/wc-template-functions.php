@@ -498,9 +498,6 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
 			if ( ! $product->get_default_attributes() ) {
 				$classes[] = 'has-default-attributes';
 			}
-			if ( $product->has_child() ) {
-				$classes[] = 'has-children';
-			}
 		}
 	}
 
