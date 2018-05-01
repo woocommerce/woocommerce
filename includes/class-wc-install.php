@@ -436,6 +436,12 @@ class WC_Install {
 				}
 			}
 		}
+
+		// Define other defaults if not in setting screens.
+		add_option( 'woocommerce_single_image_width', '600', '', 'yes' );
+		add_option( 'woocommerce_thumbnail_image_width', '300', '', 'yes' );
+		add_option( 'woocommerce_checkout_highlight_required_fields', 'no', '', 'yes' );
+		add_option( 'woocommerce_demo_store', 'no', '', 'no' );
 	}
 
 	/**
