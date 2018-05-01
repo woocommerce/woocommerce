@@ -480,10 +480,12 @@ function wc_get_cart_item_data_hash( $product ) {
 	return md5(
 		wp_json_encode(
 			apply_filters(
-				'woocommerce_cart_item_data_to_validate', array(
+				'woocommerce_cart_item_data_to_validate',
+				array(
 					'type'       => $product->get_type(),
 					'attributes' => 'variation' === $product->get_type() ? $product->get_variation_attributes() : '',
-				)
+				),
+				$product
 			)
 		)
 	);
