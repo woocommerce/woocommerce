@@ -61,24 +61,52 @@ class WC_Privacy extends WC_Abstract_Privacy {
 	 */
 	public function get_privacy_message() {
 		$content = wp_kses_post( apply_filters( 'wc_privacy_policy_content', wpautop( __( '
-We collect information about you during the checkout process on our store. This information may include, but is not limited to, your name, billing address, shipping address, email address, phone number, credit card/payment details and any other details that might be requested from you for the purpose of processing your orders.
+We collect information about you during the checkout process on our store.
 
-Handling this data also allows us to:
+<h3>What we collect and store</h3>
 
-- Send you important account/order/service information.
-- Respond to your queries, refund requests, or complaints.
-- Process payments and to prevent fraudulent transactions. We do this on the basis of our legitimate business interests.
-- Set up and administer your account, provide technical and customer support, and to verify your identity.
+While you visit our site, we’ll track:
 
-Additionally we may also collect the following information:
+<ul>
+	<li>Products you’ve viewed: to show you products you’ve recently viewed.</li>
+	<li>Location, IP address and browser type: to estimate taxes and shipping.</li>
+	<li>Shipping address: we’ll ask you to enter this so we can estimate shipping before you place an order.</li>
+</ul>
 
-- Location and traffic data (including IP address and browser type) if you place an order, or if we need to estimate taxes and shipping costs based on your location.
-- Product pages visited and content viewed whilst your session is active.
-- Your comments and product reviews if you choose to leave them on our website.
-- Shipping address if you request shipping rates from us before checkout whilst your session is active.
-- Cookies which are essential to keep track of the contents of your cart whilst your session is active.
-- Account email/password to allow you to access your account, if you have one.
-- If you choose to create an account with us, your name, address, email and phone number, which will be used to populate the checkout for future orders.
+We’ll also use cookies to keep track of cart contents while you’re browsing our site.
+
+When you purchase from us, we’ll ask you to provide information including your name, billing address, shipping address, email address, phone number, credit card/payment details and optional account information like username and password. We’ll use this information to:
+
+<ul>
+	<li>Send you information about your account and order.</li>
+	<li>Respond to your requests, including refunds and complaints.</li>
+	<li>Process payments and prevent fraud.</li>
+	<li>Set up your account for our store.</li>
+</ul>
+
+If you create an account, we will store your name, address, email and phone number, which will be used to populate the checkout for future orders.
+
+We will store order information for XXX years for tax and accounting purposes. This includes your name, email address and billing and shipping addresses.
+
+We will also store comments or reviews, if you chose to leave them.
+
+<h3>Who on our team has access</h3>
+
+Members of our team have access to the information you provide us. Both Administrators and Shop Managers can access:
+
+<ul>
+	<li>Order information like what was purchased, when it was purchased and where it should be sent, and</li>
+	<li>Customer information like your name, email address, and billing and shipping information.</li>
+</ul>
+
+Our team members have access to this information to help fulfill orders, process refunds, and support you.
+
+<h3>What we share with others</h3>
+
+<h4>Payments</h4>
+We accept payments through PayPal. When processing payments, some of your data will be passed to PayPal, including information required to process or support the payment, such as the purchase total and billing information.
+
+Please see the <a href="https://www.paypal.com/us/webapps/mpp/ua/privacy-full">PayPal Privacy Policy</a> for more details.
 ', 'woocommerce' ) ) ) );
 
 		return $content;
