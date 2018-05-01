@@ -2,13 +2,11 @@
 /**
  * Debug/Status page
  *
- * @package     WooCommerce/Admin/System Status
- * @version     2.2.0
+ * @package WooCommerce/Admin/System Status
+ * @version 2.2.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Status Class.
@@ -35,9 +33,9 @@ class WC_Admin_Status {
 	public static function status_tools() {
 		$tools = self::get_tools();
 
-		if ( ! empty( $_GET['action'] ) && ! empty( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) ) {
+		if ( ! empty( $_GET['action'] ) && ! empty( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( wp_unslash( $_REQUEST['_wpnonce'] ), 'debug_action' ) ) { // WPCS: input var ok, sanitization ok.
 			$tools_controller = new WC_REST_System_Status_Tools_Controller();
-			$action           = wc_clean( $_GET['action'] );
+			$action           = wc_clean( wp_unslash( $_GET['action'] ) ); // WPCS: input var ok.
 
 			if ( array_key_exists( $action, $tools ) ) {
 				$response = $tools_controller->execute_tool( $action );
@@ -55,9 +53,9 @@ class WC_Admin_Status {
 			}
 		}
 
-		// Display message if settings settings have been saved
-		if ( isset( $_REQUEST['settings-updated'] ) ) {
-			echo '<div class="updated inline"><p>' . __( 'Your changes have been saved.', 'woocommerce' ) . '</p></div>';
+		// Display message if settings settings have been saved.
+		if ( isset( $_REQUEST['settings-updated'] ) ) { // WPCS: input var ok.
+			echo '<div class="updated inline"><p>' . esc_html__( 'Your changes have been saved.', 'woocommerce' ) . '</p></div>';
 		}
 
 		include_once dirname( __FILE__ ) . '/views/html-admin-page-status-tools.php';
@@ -88,18 +86,17 @@ class WC_Admin_Status {
 	 * Show the log page contents for file log handler.
 	 */
 	public static function status_logs_file() {
-
 		$logs = self::scan_log_files();
 
-		if ( ! empty( $_REQUEST['log_file'] ) && isset( $logs[ sanitize_title( $_REQUEST['log_file'] ) ] ) ) {
-			$viewed_log = $logs[ sanitize_title( $_REQUEST['log_file'] ) ];
+		if ( ! empty( $_REQUEST['log_file'] ) && isset( $logs[ sanitize_title( wp_unslash( $_REQUEST['log_file'] ) ) ] ) ) { // WPCS: input var ok, CSRF ok.
+			$viewed_log = $logs[ sanitize_title( wp_unslash( $_REQUEST['log_file'] ) ) ]; // WPCS: input var ok, CSRF ok.
 		} elseif ( ! empty( $logs ) ) {
 			$viewed_log = current( $logs );
 		}
 
 		$handle = ! empty( $viewed_log ) ? self::get_log_file_handle( $viewed_log ) : '';
 
-		if ( ! empty( $_REQUEST['handle'] ) ) {
+		if ( ! empty( $_REQUEST['handle'] ) ) { // WPCS: input var ok, CSRF ok.
 			self::remove_log();
 		}
 
@@ -110,14 +107,11 @@ class WC_Admin_Status {
 	 * Show the log page contents for db log handler.
 	 */
 	public static function status_logs_db() {
-
-		// Flush
-		if ( ! empty( $_REQUEST['flush-logs'] ) ) {
+		if ( ! empty( $_REQUEST['flush-logs'] ) ) { // WPCS: input var ok, CSRF ok.
 			self::flush_db_logs();
 		}
 
-		// Bulk actions
-		if ( isset( $_REQUEST['action'] ) && isset( $_REQUEST['log'] ) ) {
+		if ( isset( $_REQUEST['action'] ) && isset( $_REQUEST['log'] ) ) { // WPCS: input var ok, CSRF ok.
 			self::log_table_bulk_actions();
 		}
 
@@ -131,24 +125,24 @@ class WC_Admin_Status {
 	 * Retrieve metadata from a file. Based on WP Core's get_file_data function.
 	 *
 	 * @since  2.1.1
-	 * @param  string $file Path to the file
+	 * @param  string $file Path to the file.
 	 * @return string
 	 */
 	public static function get_file_version( $file ) {
 
-		// Avoid notices if file does not exist
+		// Avoid notices if file does not exist.
 		if ( ! file_exists( $file ) ) {
 			return '';
 		}
 
 		// We don't need to write to the file, so just open for reading.
-		$fp = fopen( $file, 'r' );
+		$fp = fopen( $file, 'r' ); // @codingStandardsIgnoreLine.
 
 		// Pull only the first 8kiB of the file in.
-		$file_data = fread( $fp, 8192 );
+		$file_data = fread( $fp, 8192 ); // @codingStandardsIgnoreLine.
 
 		// PHP will close file handle, but we are good citizens.
-		fclose( $fp );
+		fclose( $fp ); // @codingStandardsIgnoreLine.
 
 		// Make sure we catch CR-only line endings.
 		$file_data = str_replace( "\r", "\n", $file_data );
@@ -164,7 +158,7 @@ class WC_Admin_Status {
 	/**
 	 * Return the log file handle.
 	 *
-	 * @param string $filename
+	 * @param string $filename Filename to get the handle for.
 	 * @return string
 	 */
 	public static function get_log_file_handle( $filename ) {
@@ -174,19 +168,18 @@ class WC_Admin_Status {
 	/**
 	 * Scan the template files.
 	 *
-	 * @param  string $template_path
+	 * @param  string $template_path Path to the template directory.
 	 * @return array
 	 */
 	public static function scan_template_files( $template_path ) {
-
-		$files  = @scandir( $template_path );
+		$files  = @scandir( $template_path ); // @codingStandardsIgnoreLine.
 		$result = array();
 
 		if ( ! empty( $files ) ) {
 
 			foreach ( $files as $key => $value ) {
 
-				if ( ! in_array( $value, array( '.', '..' ) ) ) {
+				if ( ! in_array( $value, array( '.', '..' ), true ) ) {
 
 					if ( is_dir( $template_path . DIRECTORY_SEPARATOR . $value ) ) {
 						$sub_files = self::scan_template_files( $template_path . DIRECTORY_SEPARATOR . $value );
@@ -208,22 +201,7 @@ class WC_Admin_Status {
 	 * @return array
 	 */
 	public static function scan_log_files() {
-		$files  = @scandir( WC_LOG_DIR );
-		$result = array();
-
-		if ( ! empty( $files ) ) {
-
-			foreach ( $files as $key => $value ) {
-
-				if ( ! in_array( $value, array( '.', '..' ) ) ) {
-					if ( ! is_dir( $value ) && strstr( $value, '.log' ) ) {
-						$result[ sanitize_title( $value ) ] = $value;
-					}
-				}
-			}
-		}
-
-		return $result;
+		return WC_Log_Handler_File::get_log_files();
 	}
 
 	/**
@@ -252,9 +230,10 @@ class WC_Admin_Status {
 		if ( is_object( $api ) && ! is_wp_error( $api ) ) {
 			$update_theme_version = $api->version;
 		} elseif ( strstr( $theme->{'Author URI'}, 'woothemes' ) ) { // Check WooThemes Theme Version.
-			$theme_dir = substr( strtolower( str_replace( ' ', '', $theme->Name ) ), 0, 45 );
+			$theme_dir          = substr( strtolower( str_replace( ' ', '', $theme->Name ) ), 0, 45 ); // @codingStandardsIgnoreLine.
+			$theme_version_data = get_transient( $theme_dir . '_version_data' );
 
-			if ( false === ( $theme_version_data = get_transient( $theme_dir . '_version_data' ) ) ) {
+			if ( false === $theme_version_data ) {
 				$theme_changelog = wp_safe_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $theme_dir . '/changelog.txt' );
 				$cl_lines        = explode( "\n", wp_remote_retrieve_body( $theme_changelog ) );
 				if ( ! empty( $cl_lines ) ) {
@@ -288,13 +267,13 @@ class WC_Admin_Status {
 	 * Remove/delete the chosen file.
 	 */
 	public static function remove_log() {
-		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'remove_log' ) ) {
-			wp_die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
+		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( wp_unslash( $_REQUEST['_wpnonce'] ), 'remove_log' ) ) { // WPCS: input var ok, sanitization ok.
+			wp_die( esc_html__( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
 		}
 
-		if ( ! empty( $_REQUEST['handle'] ) ) {
+		if ( ! empty( $_REQUEST['handle'] ) ) {  // WPCS: input var ok.
 			$log_handler = new WC_Log_Handler_File();
-			$log_handler->remove( $_REQUEST['handle'] );
+			$log_handler->remove( wp_unslash( $_REQUEST['handle'] ) ); // WPCS: input var ok, sanitization ok.
 		}
 
 		wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=wc-status&tab=logs' ) ) );
@@ -307,8 +286,8 @@ class WC_Admin_Status {
 	 * @since 3.0.0
 	 */
 	private static function flush_db_logs() {
-		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce-status-logs' ) ) {
-			wp_die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
+		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce-status-logs' ) ) { // WPCS: input var ok, sanitization ok.
+			wp_die( esc_html__( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
 		}
 
 		WC_Log_Handler_DB::flush();
@@ -323,13 +302,13 @@ class WC_Admin_Status {
 	 * @since 3.0.0
 	 */
 	private static function log_table_bulk_actions() {
-		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce-status-logs' ) ) {
-			wp_die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
+		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce-status-logs' ) ) { // WPCS: input var ok, sanitization ok.
+			wp_die( esc_html__( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
 		}
 
-		$log_ids = array_map( 'absint', (array) $_REQUEST['log'] );
+		$log_ids = array_map( 'absint', (array) isset( $_REQUEST['log'] ) ? wp_unslash( $_REQUEST['log'] ) : array() ); // WPCS: input var ok, sanitization ok.
 
-		if ( 'delete' === $_REQUEST['action'] || 'delete' === $_REQUEST['action2'] ) {
+		if ( ( isset( $_REQUEST['action'] ) && 'delete' === $_REQUEST['action'] ) || ( isset( $_REQUEST['action2'] ) && 'delete' === $_REQUEST['action2'] ) ) { // WPCS: input var ok, sanitization ok.
 			WC_Log_Handler_DB::delete( $log_ids );
 			wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=wc-status&tab=logs' ) ) );
 			exit();
