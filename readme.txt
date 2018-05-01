@@ -226,6 +226,9 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Allow arrays of query vars in wc_get_orders and wc_get_products. #19848
 * Tweak - Invalidate fragment cache on theme switch.
 * Tweak - Include select tags when saving payment details temporarily in checkout.js. #19854
+* Tweak - GDPR: Automatically purge old logs after 30 days. #19920
+* Tweak - GDPR: Only log Webhook body if WP_DEBUG is enabled. #19914
+* Tweak - GDPR: Store less PII in PayPal standard. #19914
 * Fix - Properly set orderby and order when calling WC_Customer_Download_Data_Store::get_downloads(). #1862
 * Fix - Set maxlength for order item meta key to avoid values disappearing if too long. #18918
 * Fix - Remove hardcoded /wp-content check for downloads. #18961
