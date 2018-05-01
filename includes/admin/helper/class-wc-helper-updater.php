@@ -307,17 +307,8 @@ class WC_Helper_Updater {
 	public static function flush_updates_cache() {
 		delete_transient( '_woocommerce_helper_updates' );
 		delete_transient( '_woocommerce_helper_updates_count' );
-
-		// Refresh update transients
-		$update_plugins = get_site_transient( 'update_plugins' );
-		if ( ! empty( $update_plugins ) ) {
-			set_site_transient( 'update_plugins', $update_plugins );
-		}
-
-		$update_themes = get_site_transient( 'update_themes' );
-		if ( ! empty( $update_themes ) ) {
-			set_site_transient( 'update_themes', $update_themes );
-		}
+		delete_site_transient( 'update_plugins' );
+		delete_site_transient( 'update_themes' );
 	}
 
 	/**

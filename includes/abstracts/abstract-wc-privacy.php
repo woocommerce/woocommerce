@@ -54,7 +54,8 @@ abstract class WC_Abstract_Privacy {
 	 */
 	protected function init() {
 		add_action( 'admin_init', array( $this, 'add_privacy_message' ) );
-		add_filter( 'wp_privacy_personal_data_exporters', array( $this, 'register_exporters' ) );
+		// We set priority to 5 to help WooCommerce's findings appear before those from extensions in exported items.
+		add_filter( 'wp_privacy_personal_data_exporters', array( $this, 'register_exporters' ), 5 );
 		add_filter( 'wp_privacy_personal_data_erasers', array( $this, 'register_erasers' ) );
 	}
 

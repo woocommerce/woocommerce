@@ -790,6 +790,28 @@ function wc_terms_and_conditions_page_content() {
 }
 
 /**
+ * Render privacy policy text on the checkout.
+ *
+ * @since 3.4.0
+ */
+function wc_checkout_privacy_policy_text() {
+	echo '<div class="woocommerce-privacy-policy-text">';
+	wc_privacy_policy_text( 'checkout' );
+	echo '</div>';
+}
+
+/**
+ * Render privacy policy text on the register forms.
+ *
+ * @since 3.4.0
+ */
+function wc_registration_privacy_policy_text() {
+	echo '<div class="woocommerce-privacy-policy-text">';
+	wc_privacy_policy_text( 'registration' );
+	echo '</div>';
+}
+
+/**
  * Output privacy policy text. This is custom text which can be added via the customizer/privacy settings section.
  *
  * Loads the relevant policy for the current page unless a specific policy text is required.
@@ -797,22 +819,11 @@ function wc_terms_and_conditions_page_content() {
  * @since 3.4.0
  * @param string $type Type of policy to load. Valid values include registration and checkout.
  */
-function wc_privacy_policy_text( $type = '' ) {
+function wc_privacy_policy_text( $type = 'checkout' ) {
 	if ( ! wc_privacy_policy_page_id() ) {
 		return;
 	}
-
-	if ( ! $type ) {
-		$type = is_checkout() ? 'checkout' : 'registration';
-	}
-
-	$text = wc_get_privacy_policy_text( $type );
-
-	if ( ! $text ) {
-		return;
-	}
-
-	echo '<div class="woocommerce-terms-and-conditions-text">' . wp_kses_post( wpautop( wc_replace_policy_page_link_placeholders( $text ) ) ) . '</div>';
+	echo wp_kses_post( wpautop( wc_replace_policy_page_link_placeholders( wc_get_privacy_policy_text( $type ) ) ) );
 }
 
 /**

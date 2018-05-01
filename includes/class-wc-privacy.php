@@ -73,10 +73,10 @@ Handling this data also allows us to:
 Additionally we may also collect the following information:
 
 - Location and traffic data (including IP address and browser type) if you place an order, or if we need to estimate taxes and shipping costs based on your location.
-- Product pages visited and content viewed whist your session is active.
+- Product pages visited and content viewed whilst your session is active.
 - Your comments and product reviews if you choose to leave them on our website.
-- Shipping address if you request shipping rates from us before checkout whist your session is active.
-- Cookies which are essential to keep track of the contents of your cart whist your session is active.
+- Shipping address if you request shipping rates from us before checkout whilst your session is active.
+- Cookies which are essential to keep track of the contents of your cart whilst your session is active.
 - Account email/password to allow you to access your account, if you have one.
 - If you choose to create an account with us, your name, address, email and phone number, which will be used to populate the checkout for future orders.
 ', 'woocommerce' ) ) ) );
