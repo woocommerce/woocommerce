@@ -381,23 +381,24 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 			$args['slug'] = $request['slug'];
 		}
 
-		if ( isset( $request['parent'] ) && 0 === $request['parent'] ) {
-			unset( $request['parent'] );
-		}
-
 		if ( isset( $request['parent'] ) ) {
 			if ( ! is_taxonomy_hierarchical( $taxonomy ) ) {
 				return new WP_Error( 'woocommerce_rest_taxonomy_not_hierarchical', __( 'Can not set resource parent, taxonomy is not hierarchical.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 
-			$parent = get_term( (int) $request['parent'], $taxonomy );
+			$parent_id = (int) $request['parent'];
+			if ( 0 === $parent_id ) {
+				$args['parent'] = $parent_id;
+			} else {
+				$parent = get_term( $parent_id, $taxonomy );
 
-			// If is null or WP_Error is invalid parent term.
-			if ( ! $parent || is_wp_error( $parent ) ) {
-				return new WP_Error( 'woocommerce_rest_term_invalid', __( 'Parent resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
+				// If is null or WP_Error is invalid parent term.
+				if ( ! $parent || is_wp_error( $parent ) ) {
+					return new WP_Error( 'woocommerce_rest_term_invalid', __( 'Parent resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
+				}
+
+				$args['parent'] = $parent->term_id;
 			}
-
-			$args['parent'] = $parent->term_id;
 		}
 
 		$term = wp_insert_term( $name, $taxonomy, $args );
@@ -489,10 +490,6 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		}
 		if ( isset( $request['slug'] ) ) {
 			$prepared_args['slug'] = $request['slug'];
-		}
-
-		if ( isset( $request['parent'] ) && 0 === $request['parent'] ) {
-			unset( $request['parent'] );
 		}
 
 		if ( isset( $request['parent'] ) ) {
