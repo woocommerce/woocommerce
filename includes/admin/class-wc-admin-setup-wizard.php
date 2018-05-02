@@ -1281,7 +1281,7 @@ class WC_Admin_Setup_Wizard {
 				'image'       => WC()->plugin_url() . '/assets/images/payfast.png',
 				'class'       => 'payfast-logo',
 				'enabled'     => false,
-				'repo-slug'   => 'woocommerce-gateway-payfast',
+				'repo-slug'   => 'woocommerce-payfast-gateway',
 				'file'        => 'gateway-payfast.php',
 			),
 		);
