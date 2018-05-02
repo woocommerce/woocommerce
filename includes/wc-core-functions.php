@@ -1998,17 +1998,6 @@ function wc_delete_expired_transients() {
 add_action( 'woocommerce_installed', 'wc_delete_expired_transients' );
 
 /**
- * Make a URL relative, if possible.
- *
- * @since 3.2.0
- * @param string $url URL to make relative.
- * @return string
- */
-function wc_get_relative_url( $url ) {
-	return wc_is_external_resource( $url ) ? $url : str_replace( array( 'http://', 'https://' ), '//', $url );
-}
-
-/**
  * See if a resource is remote.
  *
  * @since 3.2.0
