@@ -1619,7 +1619,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
-							'reason' => array(
+							'refund' => array(
 								'description' => __( 'Refund reason.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
