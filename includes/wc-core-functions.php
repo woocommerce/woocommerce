@@ -1998,19 +1998,6 @@ function wc_delete_expired_transients() {
 add_action( 'woocommerce_installed', 'wc_delete_expired_transients' );
 
 /**
- * See if a resource is remote.
- *
- * @since 3.2.0
- * @param string $url URL to check.
- * @return bool
- */
-function wc_is_external_resource( $url ) {
-	$wp_base = str_replace( array( 'http://', 'https://' ), '//', get_home_url( null, '/', 'http' ) );
-
-	return strstr( $url, '://' ) && ! strstr( $url, $wp_base );
-}
-
-/**
  * See if theme/s is activate or not.
  *
  * @since 3.3.0
