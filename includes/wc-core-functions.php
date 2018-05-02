@@ -2008,7 +2008,6 @@ function wc_get_relative_url( $url ) {
 	return wc_is_external_resource( $url ) ? $url : str_replace( array( 'http://', 'https://' ), '//', $url );
 }
 
-
 /**
  * See if a resource is remote.
  *
