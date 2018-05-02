@@ -947,6 +947,27 @@ h3.jetpack-reasons {
 	}
 }
 
+.wc-setup .wc-setup-actions .plugin-install-info {
+	display: block;
+	font-style: italic;
+	color: #999;
+	font-size: 14px;
+	line-height: 1.5em;
+	margin: 5px 0;
+
+	& > * {
+		display: block;
+	}
+
+	a {
+		white-space: nowrap;
+
+		&:not(:hover):not(:focus) {
+			color: inherit;
+		}
+	}
+}
+
 .location-prompt {
 	color: #666;
 	font-size: 13px;

@@ -1406,6 +1406,8 @@ class WC_Admin_Setup_Wizard {
 			$should_enable_toggle = isset( $item_info['enabled'] ) && $item_info['enabled'];
 		}
 
+		$plugins = isset( $item_info['repo-slug'] ) ? array( array( 'slug' => $item_info['repo-slug'], 'name' => $item_info['name'] ) ) : null;
+
 		?>
 		<li class="<?php echo esc_attr( $item_class ); ?>">
 			<div class="wc-wizard-service-name">
@@ -1468,6 +1470,7 @@ class WC_Admin_Setup_Wizard {
 						type="checkbox"
 						name="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>-enabled"
 						value="yes" <?php checked( $should_enable_toggle ); ?>
+						data-plugins="<?php echo esc_attr( json_encode( $plugins ) ); ?>"
 					/>
 					<label for="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>">
 				</span>
@@ -1494,6 +1497,15 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function is_not_featured_service( $service ) {
 		return ! $this->is_featured_service( $service );
+	}
+
+	public function plugin_install_info() {
+		?>
+		<span class="plugin-install-info">
+			<span class="plugin-install-info-label"><?php esc_html_e( 'The following plugins will be installed and activated for you:', 'woocommerce' ); ?></span>
+			<span class="plugin-install-info-list"></span>
+		</span>
+		<?php
 	}
 
 	/**
@@ -1561,6 +1573,7 @@ class WC_Admin_Setup_Wizard {
 				?>
 			</ul>
 			<p class="wc-setup-actions step">
+				<?php $this->plugin_install_info(); ?>
 				<button type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step"><?php esc_html_e( 'Continue', 'woocommerce' ); ?></button>
 				<?php wp_nonce_field( 'wc-setup' ); ?>
 			</p>
