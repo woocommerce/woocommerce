@@ -74,7 +74,8 @@ class WC_AJAX {
 
 		if ( $action ) {
 			self::wc_ajax_headers();
-			do_action( 'wc_ajax_' . sanitize_text_field( $action ) );
+			$action = sanitize_text_field( $action );
+			do_action( 'wc_ajax_' . $action );
 			wp_die();
 		}
 	}
