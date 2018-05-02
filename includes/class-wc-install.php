@@ -158,7 +158,8 @@ class WC_Install {
 			WC_Admin_Notices::add_notice( 'update' );
 		}
 		if ( ! empty( $_GET['force_update_woocommerce'] ) ) { // WPCS: input var ok, CSRF ok.
-			do_action( 'wp_' . get_current_blog_id() . '_wc_updater_cron' );
+			$blog_id = get_current_blog_id();
+			do_action( 'wp_' . $blog_id . '_wc_updater_cron' );
 			wp_safe_redirect( admin_url( 'admin.php?page=wc-settings' ) );
 			exit;
 		}
