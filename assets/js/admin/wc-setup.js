@@ -196,6 +196,12 @@ jQuery( function( $ ) {
 			} );
 		} );
 
+		$( '.wc-wizard-shipping-method-select .method' ).each( function() {
+			if ( 'live_rates' === $( this ).val() ) {
+				addPlugins( $( this ).data( 'plugins' ) );
+			}
+		} );
+
 		// Render list of plugins.
 		if ( Object.keys( pluginLinkBySlug ).length ) {
 			var pluginLinks = [];

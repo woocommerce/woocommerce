@@ -772,7 +772,12 @@ class WC_Admin_Setup_Wizard {
 		?>
 		<div class="wc-wizard-shipping-method-select">
 			<div class="wc-wizard-shipping-method-dropdown">
-				<select id="<?php echo esc_attr( "{$input_prefix}[method]" ); ?>" name="<?php echo esc_attr( "{$input_prefix}[method]" ); ?>" class="method wc-enhanced-select">
+				<select
+					id="<?php echo esc_attr( "{$input_prefix}[method]" ); ?>"
+					name="<?php echo esc_attr( "{$input_prefix}[method]" ); ?>"
+					class="method wc-enhanced-select"
+					data-plugins="<?php echo esc_attr( json_encode( $this->get_wcs_requisite_plugins() ) ); ?>"
+				>
 				<?php foreach ( $shipping_methods as $method_id => $method ) : ?>
 					<option value="<?php echo esc_attr( $method_id ); ?>" <?php selected( $selected, $method_id ); ?>><?php echo esc_html( $method['name'] ); ?></option>
 				<?php endforeach; ?>
@@ -935,6 +940,7 @@ class WC_Admin_Setup_Wizard {
 			</div>
 
 			<p class="wc-setup-actions step">
+				<?php $this->plugin_install_info(); ?>
 				<button type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step"><?php esc_html_e( 'Continue', 'woocommerce' ); ?></button>
 				<?php wp_nonce_field( 'wc-setup' ); ?>
 			</p>
