@@ -89,7 +89,10 @@ abstract class WC_Abstract_Privacy {
 	 * @return array
 	 */
 	public function register_exporters( $exporters = array() ) {
-		return array_merge( $exporters, $this->exporters );
+		foreach ( $this->exporters as $exporter ) {
+			$exporters[] = $exporter;
+		}
+		return $exporters;
 	}
 
 	/**
@@ -99,7 +102,10 @@ abstract class WC_Abstract_Privacy {
 	 * @return array
 	 */
 	public function register_erasers( $erasers = array() ) {
-		return array_merge( $erasers, $this->erasers );
+		foreach ( $this->erasers as $eraser ) {
+			$erasers[] = $eraser;
+		}
+		return $erasers;
 	}
 
 	/**

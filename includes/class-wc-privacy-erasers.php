@@ -40,53 +40,51 @@ class WC_Privacy_Erasers {
 			return $response;
 		}
 
-		if ( 1 === $page ) {
-			$props_to_erase = apply_filters( 'woocommerce_privacy_erase_customer_personal_data_props', array(
-				'billing_first_name'  => __( 'Billing First Name', 'woocommerce' ),
-				'billing_last_name'   => __( 'Billing Last Name', 'woocommerce' ),
-				'billing_company'     => __( 'Billing Company', 'woocommerce' ),
-				'billing_address_1'   => __( 'Billing Address 1', 'woocommerce' ),
-				'billing_address_2'   => __( 'Billing Address 2', 'woocommerce' ),
-				'billing_city'        => __( 'Billing City', 'woocommerce' ),
-				'billing_postcode'    => __( 'Billing Postal/Zip Code', 'woocommerce' ),
-				'billing_state'       => __( 'Billing State', 'woocommerce' ),
-				'billing_country'     => __( 'Billing Country', 'woocommerce' ),
-				'billing_phone'       => __( 'Phone Number', 'woocommerce' ),
-				'billing_email'       => __( 'Email Address', 'woocommerce' ),
-				'shipping_first_name' => __( 'Shipping First Name', 'woocommerce' ),
-				'shipping_last_name'  => __( 'Shipping Last Name', 'woocommerce' ),
-				'shipping_company'    => __( 'Shipping Company', 'woocommerce' ),
-				'shipping_address_1'  => __( 'Shipping Address 1', 'woocommerce' ),
-				'shipping_address_2'  => __( 'Shipping Address 2', 'woocommerce' ),
-				'shipping_city'       => __( 'Shipping City', 'woocommerce' ),
-				'shipping_postcode'   => __( 'Shipping Postal/Zip Code', 'woocommerce' ),
-				'shipping_state'      => __( 'Shipping State', 'woocommerce' ),
-				'shipping_country'    => __( 'Shipping Country', 'woocommerce' ),
-			), $customer );
+		$props_to_erase = apply_filters( 'woocommerce_privacy_erase_customer_personal_data_props', array(
+			'billing_first_name'  => __( 'Billing First Name', 'woocommerce' ),
+			'billing_last_name'   => __( 'Billing Last Name', 'woocommerce' ),
+			'billing_company'     => __( 'Billing Company', 'woocommerce' ),
+			'billing_address_1'   => __( 'Billing Address 1', 'woocommerce' ),
+			'billing_address_2'   => __( 'Billing Address 2', 'woocommerce' ),
+			'billing_city'        => __( 'Billing City', 'woocommerce' ),
+			'billing_postcode'    => __( 'Billing Postal/Zip Code', 'woocommerce' ),
+			'billing_state'       => __( 'Billing State', 'woocommerce' ),
+			'billing_country'     => __( 'Billing Country', 'woocommerce' ),
+			'billing_phone'       => __( 'Phone Number', 'woocommerce' ),
+			'billing_email'       => __( 'Email Address', 'woocommerce' ),
+			'shipping_first_name' => __( 'Shipping First Name', 'woocommerce' ),
+			'shipping_last_name'  => __( 'Shipping Last Name', 'woocommerce' ),
+			'shipping_company'    => __( 'Shipping Company', 'woocommerce' ),
+			'shipping_address_1'  => __( 'Shipping Address 1', 'woocommerce' ),
+			'shipping_address_2'  => __( 'Shipping Address 2', 'woocommerce' ),
+			'shipping_city'       => __( 'Shipping City', 'woocommerce' ),
+			'shipping_postcode'   => __( 'Shipping Postal/Zip Code', 'woocommerce' ),
+			'shipping_state'      => __( 'Shipping State', 'woocommerce' ),
+			'shipping_country'    => __( 'Shipping Country', 'woocommerce' ),
+		), $customer );
 
-			foreach ( $props_to_erase as $prop => $label ) {
-				$erased = false;
+		foreach ( $props_to_erase as $prop => $label ) {
+			$erased = false;
 
-				if ( is_callable( array( $customer, 'get_' . $prop ) ) && is_callable( array( $customer, 'set_' . $prop ) ) ) {
-					$value = $customer->{"get_$prop"}( 'edit' );
+			if ( is_callable( array( $customer, 'get_' . $prop ) ) && is_callable( array( $customer, 'set_' . $prop ) ) ) {
+				$value = $customer->{"get_$prop"}( 'edit' );
 
-					if ( $value ) {
-						$customer->{"set_$prop"}( '' );
-						$erased = true;
-					}
-				}
-
-				$erased = apply_filters( 'woocommerce_privacy_erase_customer_personal_data_prop', $erased, $prop, $customer );
-
-				if ( $erased ) {
-					/* Translators: %s Prop name. */
-					$response['messages'][]    = sprintf( __( 'Removed customer "%s"', 'woocommerce' ), $label );
-					$response['items_removed'] = true;
+				if ( $value ) {
+					$customer->{"set_$prop"}( '' );
+					$erased = true;
 				}
 			}
 
-			$customer->save();
+			$erased = apply_filters( 'woocommerce_privacy_erase_customer_personal_data_prop', $erased, $prop, $customer );
+
+			if ( $erased ) {
+				/* Translators: %s Prop name. */
+				$response['messages'][]    = sprintf( __( 'Removed customer "%s"', 'woocommerce' ), $label );
+				$response['items_removed'] = true;
+			}
 		}
+
+		$customer->save();
 
 		/**
 		 * Allow extensions to remove data for this customer and adjust the response.
@@ -134,7 +132,7 @@ class WC_Privacy_Erasers {
 		if ( 0 < count( $orders ) ) {
 			foreach ( $orders as $order ) {
 				if ( apply_filters( 'woocommerce_privacy_erase_order_personal_data', $erasure_enabled, $order ) ) {
-					WC_Privacy::remove_order_personal_data( $order );
+					self::remove_order_personal_data( $order );
 
 					/* Translators: %s Order number. */
 					$response['messages'][]    = sprintf( __( 'Removed personal data from order %s.', 'woocommerce' ), $order->get_order_number() );
@@ -189,12 +187,14 @@ class WC_Privacy_Erasers {
 		// Revoke download permissions.
 		if ( apply_filters( 'woocommerce_privacy_erase_download_personal_data', $erasure_enabled, $email_address ) ) {
 			if ( $user instanceof WP_User ) {
-				$customer_download_data_store->delete_by_user_id( (int) $user->ID );
+				$result = $customer_download_data_store->delete_by_user_id( (int) $user->ID );
 			} else {
-				$customer_download_data_store->delete_by_user_email( $email_address );
+				$result = $customer_download_data_store->delete_by_user_email( $email_address );
 			}
-			$response['messages'][]    = __( 'Removed access to downloadable files.', 'woocommerce' );
-			$response['items_removed'] = true;
+			if ( $result ) {
+				$response['messages'][]    = __( 'Removed access to downloadable files.', 'woocommerce' );
+				$response['items_removed'] = true;
+			}
 		} else {
 			$response['messages'][]     = __( 'Retained access to downloadable files due to settings.', 'woocommerce' );
 			$response['items_retained'] = true;
