@@ -172,12 +172,16 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Feature - Cash on Delivery gateway can be enabled/disabled for specific shipping methods instead of only method types. #19221
 * Feature - Add wildcard email support for coupons. #19331
 * Feature - Added support for the GeoLite2 library as a replacement for the deprecated MaxMind GeoIP library. #19419
+* Feature - Added tool for cleaning up download permissions table. #19922
 * Tweak - GDPR: Improved appearance of checkout field 'descriptions' (if used) to make them more useful for privacy notices. #19637
 * Tweak - GDPR: Improved related data cleanup when deleting users/orders. #19330
 * Tweak - GDPR: Notice about HTTPS as a requirement in admin if missing. #19756
 * Tweak - GDPR: Improved the checkout (payments) settings screen, moved page options to a new "advanced" section, and made an "Accounts and Privacy" section. #19703
 * Tweak - GDPR: Hash customer email address in download URLs to protect privacy. #18957
 * Tweak - GDPR: Add highlight to T&C checkbox if not checked to show it needs to be checked. #19177
+* Tweak - GDPR: Automatically purge old logs after 30 days. #19920
+* Tweak - GDPR: Only log Webhook body if WP_DEBUG is enabled. #19914
+* Tweak - GDPR: Store less PII in PayPal standard. #19914
 * Tweak - Only show admin notices on WooCommerce screens/plugins/dashboard. #19772
 * Tweak - Standardize stock update messages in admin and correctly log who performed the action. When an order note is added after modifying stock manually, update order notes display via AJAX. #18080
 * Tweak - Rollback if payment complete or update status fails to prevent partial order updates on failure. #18175
@@ -226,9 +230,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Allow arrays of query vars in wc_get_orders and wc_get_products. #19848
 * Tweak - Invalidate fragment cache on theme switch.
 * Tweak - Include select tags when saving payment details temporarily in checkout.js. #19854
-* Tweak - GDPR: Automatically purge old logs after 30 days. #19920
-* Tweak - GDPR: Only log Webhook body if WP_DEBUG is enabled. #19914
-* Tweak - GDPR: Store less PII in PayPal standard. #19914
+* Tweak - Update - Include pending products in export. #19928
 * Fix - Properly set orderby and order when calling WC_Customer_Download_Data_Store::get_downloads(). #1862
 * Fix - Set maxlength for order item meta key to avoid values disappearing if too long. #18918
 * Fix - Remove hardcoded /wp-content check for downloads. #18961
