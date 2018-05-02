@@ -191,6 +191,9 @@ jQuery( function( $ ) {
 
 		$( '.wc-wizard-service-enable input:checked' ).each( function() {
 			addPlugins( $( this ).data( 'plugins' ) );
+			$( this ).closest( '.wc-wizard-service-item' ).find( 'input.payment-checkbox-input:checked' ).each( function() {
+				addPlugins( $( this ).data( 'plugins' ) );
+			} );
 		} );
 
 		// Render list of plugins.

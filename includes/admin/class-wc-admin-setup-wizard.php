@@ -691,6 +691,13 @@ class WC_Admin_Setup_Wizard {
 		);
 	}
 
+	protected function get_wcs_requisite_plugins() {
+		return array(
+			array( 'name' => __( 'WooCommerce Services', 'woocommerce' ), 'slug' => 'woocommerce-services' ),
+			array( 'name' => __( 'Jetpack', 'woocommerce' ), 'slug' => 'jetpack' ),
+		);
+	}
+
 	/**
 	 * Get the WCS shipping carrier for a given country code.
 	 *
@@ -1193,6 +1200,7 @@ class WC_Admin_Setup_Wizard {
 						'value'       => 'yes',
 						'placeholder' => '',
 						'required'    => false,
+						'plugins'     => $this->get_wcs_requisite_plugins(),
 					),
 					'email'          => array(
 						'label'       => __( 'Stripe email address:', 'woocommerce' ),
@@ -1218,6 +1226,7 @@ class WC_Admin_Setup_Wizard {
 						'value'       => 'yes',
 						'placeholder' => '',
 						'required'    => false,
+						'plugins'     => $this->get_wcs_requisite_plugins(),
 					),
 					'email'            => array(
 						'label'       => __( 'Direct payments to email address:', 'woocommerce' ),
@@ -1454,6 +1463,7 @@ class WC_Admin_Setup_Wizard {
 									placeholder="<?php echo esc_attr( $setting['placeholder'] ); ?>"
 									<?php echo ( $setting['required'] ) ? 'required' : ''; ?>
 									<?php echo $is_checkbox ? checked( isset( $checked ) && $checked, true, false ) : ''; ?>
+									data-plugins="<?php echo esc_attr( json_encode( isset( $setting['plugins'] ) ? $setting['plugins'] : null ) ); ?>"
 								/>
 								<?php if ( ! empty( $setting['description'] ) ) : ?>
 									<span class="wc-wizard-service-settings-description"><?php echo esc_html( $setting['description'] ); ?></span>
