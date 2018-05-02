@@ -226,7 +226,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 		foreach ( $object->get_refunds() as $refund ) {
 			$data['refunds'][] = array(
 				'id'     => $refund->get_id(),
-				'refund' => $refund->get_reason() ? $refund->get_reason() : '',
+				'reason' => $refund->get_reason() ? $refund->get_reason() : '',
 				'total'  => '-' . wc_format_decimal( $refund->get_amount(), $this->request['dp'] ),
 			);
 		}
@@ -1619,7 +1619,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
-							'refund' => array(
+							'reason' => array(
 								'description' => __( 'Refund reason.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
