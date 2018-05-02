@@ -2,6 +2,10 @@
 
 This is a feature plugin for a modern, javascript-driven dashboard for WooCommerce.
 
+## Prerequisites
+
+[Gutenberg](https://wordpress.org/plugins/gutenberg/) and [WooCommerce](https://wordpress.org/plugins/woocommerce/) should be installed prior to activating the WooCommerce Dashboard feature plugin.
+
 ## Development
 
 After cloning the repo, install dependencies with `npm install`. Now you can build the files using one of these commands:
