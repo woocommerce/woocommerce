@@ -48,12 +48,11 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 * @param int $log_size_limit Optional. Size limit for log files. Default 5mb.
 	 */
 	public function __construct( $log_size_limit = null ) {
-
 		if ( null === $log_size_limit ) {
 			$log_size_limit = 5 * 1024 * 1024;
 		}
 
-		$this->log_size_limit = $log_size_limit;
+		$this->log_size_limit = apply_filters( 'woocommerce_log_file_size_limit', $log_size_limit );
 
 		add_action( 'plugins_loaded', array( $this, 'write_cached_logs' ) );
 	}
@@ -66,7 +65,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	public function __destruct() {
 		foreach ( $this->handles as $handle ) {
 			if ( is_resource( $handle ) ) {
-				fclose( $handle );
+				fclose( $handle ); // @codingStandardsIgnoreLine.
 			}
 		}
 	}
@@ -144,15 +143,15 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 
 		if ( $file ) {
 			if ( ! file_exists( $file ) ) {
-				$temphandle = @fopen( $file, 'w+' );
-				@fclose( $temphandle );
+				$temphandle = @fopen( $file, 'w+' ); // @codingStandardsIgnoreLine.
+				@fclose( $temphandle ); // @codingStandardsIgnoreLine.
 
 				if ( defined( 'FS_CHMOD_FILE' ) ) {
-					@chmod( $file, FS_CHMOD_FILE ); // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.chmod_chmod
+					@chmod( $file, FS_CHMOD_FILE ); // @codingStandardsIgnoreLine.
 				}
 			}
 
-			$resource = @fopen( $file, $mode );
+			$resource = @fopen( $file, $mode ); // @codingStandardsIgnoreLine.
 
 			if ( $resource ) {
 				$this->handles[ $handle ] = $resource;
@@ -183,7 +182,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 		$result = false;
 
 		if ( $this->is_open( $handle ) ) {
-			$result = fclose( $this->handles[ $handle ] );
+			$result = fclose( $this->handles[ $handle ] ); // @codingStandardsIgnoreLine.
 			unset( $this->handles[ $handle ] );
 		}
 
@@ -206,7 +205,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 		}
 
 		if ( $this->open( $handle ) && is_resource( $this->handles[ $handle ] ) ) {
-			$result = fwrite( $this->handles[ $handle ], $entry . PHP_EOL );
+			$result = fwrite( $this->handles[ $handle ], $entry . PHP_EOL ); // @codingStandardsIgnoreLine.
 		} else {
 			$this->cache_log( $entry, $handle );
 		}
@@ -356,13 +355,17 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	/**
 	 * Get a log file name.
 	 *
+	 * File names consist of the handle, followed by the date, followed by a hash, .log.
+	 *
 	 * @since 3.3
 	 * @param string $handle Log name.
 	 * @return bool|string The log file name or false if cannot be determined.
 	 */
 	public static function get_log_file_name( $handle ) {
 		if ( function_exists( 'wp_hash' ) ) {
-			return sanitize_file_name( $handle . '-' . wp_hash( $handle ) . '.log' );
+			$date_suffix = date( 'Y-m-d', current_time( 'timestamp', true ) );
+			$hash_suffix = wp_hash( $handle );
+			return sanitize_file_name( implode( '-', array( $handle, $date_suffix, $hash_suffix ) ) . '.log' );
 		} else {
 			wc_doing_it_wrong( __METHOD__, __( 'This method should not be called before plugins_loaded.', 'woocommerce' ), '3.3' );
 			return false;
@@ -391,4 +394,48 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 		}
 	}
 
+	/**
+	 * Delete all logs older than a defined timestamp.
+	 *
+	 * @since 3.4.0
+	 * @param integer $timestamp Timestamp to delete logs before.
+	 */
+	public static function delete_logs_before_timestamp( $timestamp = 0 ) {
+		if ( ! $timestamp ) {
+			return;
+		}
+
+		$log_files = self::get_log_files();
+
+		foreach ( $log_files as $log_file ) {
+			$last_modified = filemtime( trailingslashit( WC_LOG_DIR ) . $log_file );
+
+			if ( $last_modified < $timestamp ) {
+				@unlink( trailingslashit( WC_LOG_DIR ) . $log_file ); // @codingStandardsIgnoreLine.
+			}
+		}
+	}
+
+	/**
+	 * Get all log files in the log directory.
+	 *
+	 * @since 3.4.0
+	 * @return array
+	 */
+	public static function get_log_files() {
+		$files  = @scandir( WC_LOG_DIR ); // @codingStandardsIgnoreLine.
+		$result = array();
+
+		if ( ! empty( $files ) ) {
+			foreach ( $files as $key => $value ) {
+				if ( ! in_array( $value, array( '.', '..' ), true ) ) {
+					if ( ! is_dir( $value ) && strstr( $value, '.log' ) ) {
+						$result[ sanitize_title( $value ) ] = $value;
+					}
+				}
+			}
+		}
+
+		return $result;
+	}
 }
