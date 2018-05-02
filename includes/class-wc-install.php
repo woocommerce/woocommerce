@@ -101,6 +101,7 @@ class WC_Install {
 		),
 		'3.4.0' => array(
 			'wc_update_340_states',
+			'wc_update_340_last_active',
 			'wc_update_340_db_version',
 		),
 	);
@@ -351,7 +352,7 @@ class WC_Install {
 		wp_clear_scheduled_hook( 'woocommerce_scheduled_sales' );
 		wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
 		wp_clear_scheduled_hook( 'woocommerce_cleanup_sessions' );
-		wp_clear_scheduled_hook( 'woocommerce_cleanup_orders' );
+		wp_clear_scheduled_hook( 'woocommerce_cleanup_personal_data' );
 		wp_clear_scheduled_hook( 'woocommerce_cleanup_logs' );
 		wp_clear_scheduled_hook( 'woocommerce_geoip_updater' );
 		wp_clear_scheduled_hook( 'woocommerce_tracker_send_event' );
@@ -366,7 +367,7 @@ class WC_Install {
 			wp_schedule_single_event( time() + ( absint( $held_duration ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
 		}
 
-		wp_schedule_event( time(), 'daily', 'woocommerce_cleanup_orders' );
+		wp_schedule_event( time(), 'daily', 'woocommerce_cleanup_personal_data' );
 		wp_schedule_event( time() + ( 3 * HOUR_IN_SECONDS ), 'daily', 'woocommerce_cleanup_logs' );
 		wp_schedule_event( time() + ( 6 * HOUR_IN_SECONDS ), 'twicedaily', 'woocommerce_cleanup_sessions' );
 		wp_schedule_event( strtotime( 'first tuesday of next month' ), 'monthly', 'woocommerce_geoip_updater' );
@@ -849,10 +850,16 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			$wp_roles = new WP_Roles(); // @codingStandardsIgnoreLine
 		}
 
+		// Dummy gettext calls to get strings in the catalog.
+		/* translators: user role */
+		_x( 'Customer', 'User role', 'woocommerce' );
+		/* translators: user role */
+		_x( 'Shop manager', 'User role', 'woocommerce' );
+
 		// Customer role.
 		add_role(
 			'customer',
-			__( 'Customer', 'woocommerce' ),
+			'Customer',
 			array(
 				'read' => true,
 			)
@@ -861,7 +868,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 		// Shop manager role.
 		add_role(
 			'shop_manager',
-			__( 'Shop manager', 'woocommerce' ),
+			'Shop manager',
 			array(
 				'level_9'                => true,
 				'level_8'                => true,

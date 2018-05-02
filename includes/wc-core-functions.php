@@ -1732,7 +1732,6 @@ function wc_print_r( $expression, $return = false ) {
  * @return array
  */
 function wc_register_default_log_handler( $handlers ) {
-
 	if ( defined( 'WC_LOG_HANDLER' ) && class_exists( WC_LOG_HANDLER ) ) {
 		$handler_class   = WC_LOG_HANDLER;
 		$default_handler = new $handler_class();
@@ -1745,22 +1744,6 @@ function wc_register_default_log_handler( $handlers ) {
 	return $handlers;
 }
 add_filter( 'woocommerce_register_log_handlers', 'wc_register_default_log_handler' );
-
-/**
- * Store user agents. Used for tracker.
- *
- * @since 3.0.0
- * @param string     $user_login User login.
- * @param int|object $user       User.
- */
-function wc_maybe_store_user_agent( $user_login, $user ) {
-	if ( 'yes' === get_option( 'woocommerce_allow_tracking', 'no' ) && user_can( $user, 'manage_woocommerce' ) ) {
-		$admin_user_agents   = array_filter( (array) get_option( 'woocommerce_tracker_ua', array() ) );
-		$admin_user_agents[] = wc_get_user_agent();
-		update_option( 'woocommerce_tracker_ua', array_unique( $admin_user_agents ) );
-	}
-}
-add_action( 'wp_login', 'wc_maybe_store_user_agent', 10, 2 );
 
 /**
  * Based on wp_list_pluck, this calls a method instead of returning a property.
