@@ -1664,7 +1664,9 @@ class WC_Admin_Setup_Wizard {
 					type="checkbox"
 					name="<?php echo esc_attr( 'setup_' . $type ); ?>"
 					value="yes"
-					checked />
+					checked
+					data-plugins="<?php echo esc_attr( json_encode( isset( $item_info['plugins'] ) ? $item_info['plugins'] : null ) ); ?>"
+				/>
 				<img
 					src="<?php echo esc_url( $img_url ); ?>"
 					class="<?php echo esc_attr( 'recommended-item-icon-' . $type ); ?> recommended-item-icon"
@@ -1730,6 +1732,7 @@ class WC_Admin_Setup_Wizard {
 						'description' => __( 'Save time and errors with automated tax calculation and collection at checkout. Powered by WooCommerce Services and Jetpack.', 'woocommerce' ),
 						'img_url'     => WC()->plugin_url() . '/assets/images/obw-taxes-icon.svg',
 						'img_alt'     => __( 'automated taxes icon', 'woocommerce' ),
+						'plugins'     => $this->get_wcs_requisite_plugins(),
 					) );
 				endif;
 
@@ -1740,11 +1743,13 @@ class WC_Admin_Setup_Wizard {
 						'description' => __( 'Join the 16 million customers who use MailChimp. Sync list and store data to send automated emails, and targeted campaigns.', 'woocommerce' ),
 						'img_url'     => WC()->plugin_url() . '/assets/images/obw-mailchimp-icon.svg',
 						'img_alt'     => __( 'MailChimp icon', 'woocommerce' ),
+						'plugins'     => array( array( 'name' => __( 'MailChimp for WooCommerce', 'woocommerce' ), 'slug' => 'mailchimp-for-woocommerce' ) ),
 					) );
 				endif;
 			?>
 		</ul>
 			<p class="wc-setup-actions step">
+				<?php $this->plugin_install_info(); ?>
 				<button type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step"><?php esc_html_e( 'Continue', 'woocommerce' ); ?></button>
 				<?php wp_nonce_field( 'wc-setup' ); ?>
 			</p>

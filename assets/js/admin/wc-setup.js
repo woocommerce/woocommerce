@@ -202,6 +202,10 @@ jQuery( function( $ ) {
 			}
 		} );
 
+		$( '.recommended-item-checkbox:checked' ).each( function() {
+			addPlugins( $( this ).data( 'plugins' ) );
+		} );
+
 		// Render list of plugins.
 		if ( Object.keys( pluginLinkBySlug ).length ) {
 			var pluginLinks = [];
