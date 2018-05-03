@@ -711,6 +711,7 @@ body {
 
 	.wc-wizard-service-settings {
 		display: none;
+		margin-top: 0.75em;
 		margin-bottom: 0;
 		cursor: default;
 
@@ -1202,7 +1203,6 @@ p.jetpack-terms {
 .wc-wizard-service-setting-stripe_create_account, .wc-wizard-service-setting-ppec_paypal_reroute_requests {
 	display: flex;
 	align-items: flex-start;
-	margin-top: 0.75em;
 
 	.payment-checkbox-input {
 		order: 1;
@@ -1220,6 +1220,7 @@ p.jetpack-terms {
 
 .wc-wizard-service-setting-stripe_email, .wc-wizard-service-setting-ppec_paypal_email {
 	margin-top: 0.75em;
+	margin-left: 1.5em;
 
 	label.stripe_email, label.ppec_paypal_email {
 		position: absolute;
@@ -1233,13 +1234,10 @@ p.jetpack-terms {
 	}
 
 	input.payment-email-input {
-		margin-left: 1.5em;
+		box-sizing: border-box;
 		margin-bottom: .5em;
 		width: 100%;
-	}
-
-	.wc-wizard-service-settings-description {
-		margin-left: 1.5em;
+		height: 32px;
 	}
 }
 
