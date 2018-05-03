@@ -118,7 +118,8 @@ class WC_Privacy_Exporters {
 			foreach ( $downloads as $download ) {
 				$data_to_export[] = array(
 					'group_id'    => 'woocommerce_downloads',
-					'group_label' => __( 'Order Downloads', 'woocommerce' ),
+					/* translators: This is the headline for a list of downloads purchased from the store for a given user. */
+					'group_label' => __( 'Purchased Downloads', 'woocommerce' ),
 					'item_id'     => 'download-' . $download->get_id(),
 					'data'        => self::get_download_personal_data( $download ),
 				);
@@ -128,7 +129,8 @@ class WC_Privacy_Exporters {
 				foreach ( $download_logs as $download_log ) {
 					$data_to_export[] = array(
 						'group_id'    => 'woocommerce_download_logs',
-						'group_label' => __( 'Download Logs', 'woocommerce' ),
+						/* translators: This is the headline for a list of access logs for downloads purchased from the store for a given user. */
+						'group_label' => __( 'Access to Purchased Downloads', 'woocommerce' ),
 						'item_id'     => 'download-log-' . $download_log->get_id(),
 						'data'        => array(
 							array(
