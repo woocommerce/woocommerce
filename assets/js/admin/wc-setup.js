@@ -207,16 +207,17 @@ jQuery( function( $ ) {
 
 		$( '.wc-wizard-service-enable input:checked' ).each( function() {
 			addPlugins( $( this ), '.wc-wizard-service-item' );
-			$( this ).closest( '.wc-wizard-service-item' ).find( 'input.payment-checkbox-input:checked' ).each( function() {
+
+			var $container = $( this ).closest( '.wc-wizard-service-item' );
+			$container.find( 'input.payment-checkbox-input:checked' ).each( function() {
 				addPlugins( $( this ), '.wc-wizard-service-settings' );
 			} );
-		} );
-
-		$( '.wc-wizard-shipping-method-select .method' ).each( function() {
-			var $this = $( this );
-			if ( 'live_rates' === $this.val() ) {
-				addPlugins( $this, '.wc-wizard-service-item' );
-			}
+			$container.find( '.wc-wizard-shipping-method-select .method' ).each( function() {
+				var $this = $( this );
+				if ( 'live_rates' === $this.val()  ) {
+					addPlugins( $this, '.wc-wizard-service-item' );
+				}
+			} );
 		} );
 
 		$( '.recommended-item-checkbox:checked' ).each( function() {
