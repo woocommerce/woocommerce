@@ -78,14 +78,14 @@ abstract class WC_Widget extends WP_Widget {
 	 * @return bool true if the widget is cached otherwise false
 	 */
 	public function get_cached_widget( $args ) {
-		$cache = wp_cache_get( apply_filters( 'woocommerce_cached_widget_id', $this->widget_id ), 'widget' );
+		$cache = wp_cache_get( apply_filters( 'woocommerce_cached_widget_id', $this->get_widget_id_for_cache( $this->widget_id ) ), 'widget' );
 
 		if ( ! is_array( $cache ) ) {
 			$cache = array();
 		}
 
-		if ( isset( $cache[ $args['widget_id'] ] ) ) {
-			echo $cache[ $args['widget_id'] ]; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+		if ( isset( $cache[ $this->get_widget_id_for_cache( $args['widget_id'] ) ] ) ) {
+			echo $cache[ $this->get_widget_id_for_cache( $args['widget_id'] ) ]; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 			return true;
 		}
 
@@ -100,15 +100,15 @@ abstract class WC_Widget extends WP_Widget {
 	 * @return string the content that was cached
 	 */
 	public function cache_widget( $args, $content ) {
-		$cache = wp_cache_get( apply_filters( 'woocommerce_cached_widget_id', $this->widget_id ), 'widget' );
+		$cache = wp_cache_get( apply_filters( 'woocommerce_cached_widget_id', $this->get_widget_id_for_cache( $this->widget_id ) ), 'widget' );
 
 		if ( ! is_array( $cache ) ) {
 			$cache = array();
 		}
 
-		$cache[ $args['widget_id'] ] = $content;
+		$cache[ $this->get_widget_id_for_cache( $args['widget_id'] ) ] = $content;
 
-		wp_cache_set( apply_filters( 'woocommerce_cached_widget_id', $this->widget_id ), $cache, 'widget' );
+		wp_cache_set( apply_filters( 'woocommerce_cached_widget_id', $this->get_widget_id_for_cache( $this->widget_id ) ), $cache, 'widget' );
 
 		return $content;
 	}
@@ -117,7 +117,9 @@ abstract class WC_Widget extends WP_Widget {
 	 * Flush the cache.
 	 */
 	public function flush_widget_cache() {
-		wp_cache_delete( apply_filters( 'woocommerce_cached_widget_id', $this->widget_id ), 'widget' );
+		foreach ( array( '-https', '-http' ) as $scheme ) {
+			wp_cache_delete( apply_filters( 'woocommerce_cached_widget_id', $this->widget_id . $scheme ), 'widget' );
+		}
 	}
 
 	/**
@@ -346,5 +348,15 @@ abstract class WC_Widget extends WP_Widget {
 		}
 
 		return $link;
+	}
+
+	/**
+	 * Get widget id plus scheme/protocol to prevent serving mixed content from (persistently) cached widgets.
+	 *
+	 * @param string $widget_id Id of the cached widget.
+	 * @return string Widget id including scheme/protocol.
+	 */
+	protected function get_widget_id_for_cache( $widget_id ) {
+		return $widget_id . ( is_ssl() ? '-https' : '-http' );
 	}
 }
