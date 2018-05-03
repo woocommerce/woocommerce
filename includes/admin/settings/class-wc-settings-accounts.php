@@ -136,7 +136,8 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 					'title'    => __( 'Registration privacy policy', 'woocommerce' ),
 					'desc_tip' => __( 'Optionally add some text about your store privacy policy to show on account registration forms.', 'woocommerce' ),
 					'id'       => 'woocommerce_registration_privacy_policy_text',
-					'default'  => __( 'Your personal data will be used to support your experience throughout this website, to manage access to your account, and for other purposes described in our [privacy_policy].', 'woocommerce' ),
+					/* translators: %s privacy policy page name and link */
+					'default'  => sprintf( __( 'Your personal data will be used to support your experience throughout this website, to manage access to your account, and for other purposes described in our %s.', 'woocommerce' ), '[privacy_policy]' ),
 					'type'     => 'textarea',
 					'css'      => 'min-width: 50%; height: 75px;',
 				),
@@ -145,7 +146,8 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 					'title'    => __( 'Checkout privacy policy', 'woocommerce' ),
 					'desc_tip' => __( 'Optionally add some text about your store privacy policy to show during checkout.', 'woocommerce' ),
 					'id'       => 'woocommerce_checkout_privacy_policy_text',
-					'default'  => __( 'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our [privacy_policy].', 'woocommerce' ),
+					/* translators: %s privacy policy page name and link */
+					'default'  => sprintf( __( 'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our %s.', 'woocommerce' ), '[privacy_policy]' ),
 					'type'     => 'textarea',
 					'css'      => 'min-width: 50%; height: 75px;',
 				),

@@ -727,7 +727,8 @@ function wc_terms_and_conditions_checkbox_enabled() {
  * @return string
  */
 function wc_get_terms_and_conditions_checkbox_text() {
-	return trim( apply_filters( 'woocommerce_get_terms_and_conditions_checkbox_text', get_option( 'woocommerce_checkout_terms_and_conditions_checkbox_text', __( 'I have read and agree to the website [terms]', 'woocommerce' ) ) ) );
+	/* translators: %s terms and conditions page name and link */
+	return trim( apply_filters( 'woocommerce_get_terms_and_conditions_checkbox_text', get_option( 'woocommerce_checkout_terms_and_conditions_checkbox_text', sprintf( __( 'I have read and agree to the website %s', 'woocommerce' ), '[terms]' ) ) ) );
 }
 
 /**
@@ -742,10 +743,12 @@ function wc_get_privacy_policy_text( $type = '' ) {
 
 	switch ( $type ) {
 		case 'checkout':
-			$text = get_option( 'woocommerce_checkout_privacy_policy_text', __( 'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our [privacy_policy].', 'woocommerce' ) );
+			/* translators: %s privacy policy page name and link */
+			$text = get_option( 'woocommerce_checkout_privacy_policy_text', sprintf( __( 'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our %s.', 'woocommerce' ), '[privacy_policy]' ) );
 			break;
 		case 'registration':
-			$text = get_option( 'woocommerce_registration_privacy_policy_text', __( 'Your personal data will be used to support your experience throughout this website, to manage access to your account, and for other purposes described in our [privacy_policy].', 'woocommerce' ) );
+			/* translators: %s privacy policy page name and link */
+			$text = get_option( 'woocommerce_registration_privacy_policy_text', sprintf( __( 'Your personal data will be used to support your experience throughout this website, to manage access to your account, and for other purposes described in our %s.', 'woocommerce' ), '[privacy_policy]' ) );
 			break;
 	}
 

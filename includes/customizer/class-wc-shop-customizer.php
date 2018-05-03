@@ -746,7 +746,8 @@ class WC_Shop_Customizer {
 		$wp_customize->add_setting(
 			'woocommerce_checkout_terms_and_conditions_checkbox_text',
 			array(
-				'default'           => __( 'I have read and agree to the website [terms]', 'woocommerce' ),
+				/* translators: %s terms and conditions page name and link */
+				'default'           => sprintf( __( 'I have read and agree to the website %s', 'woocommerce' ), '[terms]' ),
 				'type'              => 'option',
 				'capability'        => 'manage_woocommerce',
 				'sanitize_callback' => 'wp_kses_post',
@@ -757,7 +758,8 @@ class WC_Shop_Customizer {
 		$wp_customize->add_setting(
 			'woocommerce_checkout_privacy_policy_text',
 			array(
-				'default'           => __( 'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our [privacy_policy].', 'woocommerce' ),
+				/* translators: %s privacy policy page name and link */
+				'default'           => sprintf( __( 'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our %s.', 'woocommerce' ), '[privacy_policy]' ),
 				'type'              => 'option',
 				'capability'        => 'manage_woocommerce',
 				'sanitize_callback' => 'wp_kses_post',
