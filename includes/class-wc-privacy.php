@@ -62,56 +62,57 @@ class WC_Privacy extends WC_Abstract_Privacy {
 	 * @since 3.4.0
 	 */
 	public function get_privacy_message() {
-		$content = wp_kses_post( apply_filters( 'wc_privacy_policy_content', wpautop( __( '
-We collect information about you during the checkout process on our store.
+		$content = '
+			<div contenteditable="false">' .
+				'<p class="wp-policy-help">' .
+					__( 'This sample language includes the basics around what personal data your store may be collecting, storing and sharing, as well as who may have access to that data. Depending on what settings are enabled and which additional plugins are used, the specific information shared by your store will vary. We recommend consulting with a lawyer when deciding what information to disclose on your privacy policy.', 'woocommerce' ) .
+				'</p>' .
+			'</div>' .
+			'<p>' . __( 'We collect information about you during the checkout process on our store.', 'woocommerce' ) . '</p>' .
+			'<h2>' . __( 'What we collect and store', 'woocommerce' ) . '</h2>' .
+			'<p>' . __( 'While you visit our site, we’ll track:', 'woocommerce' ) . '</p>' .
+			'<ul>' .
+				'<li>' . __( 'Products you’ve viewed:  we’ll use this to, for example, show you products you’ve recently viewed', 'woocommerce' ) . '</li>' .
+				'<li>' . __( 'Location, IP address and browser type: we’ll use this for purposes like estimating taxes and shipping', 'woocommerce' ) . '</li>' .
+				'<li>' . __( 'Shipping address: we’ll ask you to enter this so we can, for instance, estimate shipping before you place an order, and send you the order!', 'woocommerce' ) . '</li>' .
+			'</ul>' .
+			'<p>' . __( 'We’ll also use cookies to keep track of cart contents while you’re browsing our site.', 'woocommerce' ) . '</p>' .
+			'<div contenteditable="false">' .
+				'<p class="wp-policy-help">' . __( 'Note: you may want to further detail your cookie policy, and link to that section from here.', 'woocommerce' ) . '</p>' .
+			'</div>' .
+			'<p>' . __( 'When you purchase from us, we’ll ask you to provide information including your name, billing address, shipping address, email address, phone number, credit card/payment details and optional account information like username and password. We’ll use this information for purposes, such as, to:', 'woocommerce' ) . '</p>' .
+			'<ul>' .
+				'<li>' . __( 'Send you information about your account and order', 'woocommerce' ) . '</li>' .
+				'<li>' . __( 'Respond to your requests, including refunds and complaints', 'woocommerce' ) . '</li>' .
+				'<li>' . __( 'Process payments and prevent fraud', 'woocommerce' ) . '</li>' .
+				'<li>' . __( 'Set up your account for our store', 'woocommerce' ) . '</li>' .
+				'<li>' . __( 'Comply with any legal obligations we have, such as calculating taxes', 'woocommerce' ) . '</li>' .
+				'<li>' . __( 'Improve our store offerings', 'woocommerce' ) . '</li>' .
+				'<li>' . __( 'Send you marketing messages, if you choose to receive them', 'woocommerce' ) . '</li>' .
+			'</ul>' .
+			'<p>' . __( 'If you create an account, we will store your name, address, email and phone number, which will be used to populate the checkout for future orders.', 'woocommerce' ) . '</p>' .
+			'<p>' . __( 'We generally store information about you for as long as we need the information for the purposes for which we collect and use it, and we are not legally required to continue to keep it. For example, we will store order information for XXX years for tax and accounting purposes. This includes your name, email address and billing and shipping addresses.', 'woocommerce' ) . '</p>' .
+			'<p>' . __( 'We will also store comments or reviews, if you chose to leave them.', 'woocommerce' ) . '</p>' .
+			'<h2>' . __( 'Who on our team has access', 'woocommerce' ) . '</h2>' .
+			'<p>' . __( 'Members of our team have access to the information you provide us. For example, both Administrators and Shop Managers can access:', 'woocommerce' ) . '</p>' .
+			'<ul>' .
+				'<li>' . __( 'Order information like what was purchased, when it was purchased and where it should be sent, and', 'woocommerce' ) . '</li>' .
+				'<li>' . __( 'Customer information like your name, email address, and billing and shipping information.', 'woocommerce' ) . '</li>' .
+			'</ul>' .
+			'<p>' . __( 'Our team members have access to this information to help fulfill orders, process refunds and support you.', 'woocommerce' ) . '</p>' .
+			'<h2>' . __( 'What we share with others', 'woocommerce' ) . '</h2>' .
+			'<div contenteditable="false">' .
+				'<p class="wp-policy-help">' . __( 'In this section you should list who you’re sharing data with, and for what purpose. This could include, but may not be limited to, analytics, marketing, payment gateways, shipping providers, and third party embeds.', 'woocommerce' ) . '</p>' .
+			'</div>' .
+			'<p>' . __( 'We share information with third parties who help us provide our orders and store services to you; for example --', 'woocommerce' ) . '</p>' .
+			'<h3>' . __( 'Payments', 'woocommerce' ) . '</h3>' .
+			'<div contenteditable="false">' .
+				'<p class="wp-policy-help">' . __( 'In this subsection you should list which third party payment processors you’re using to take payments on your store since these may handle customer data. We’ve included PayPal as an example, but you should remove this if you’re not using PayPal.', 'woocommerce' ) . '</p>' .
+			'</div>' .
+			'<p>' . __( 'We accept payments through PayPal. When processing payments, some of your data will be passed to PayPal, including information required to process or support the payment, such as the purchase total and billing information.', 'woocommerce' ) . '</p>' .
+			'<p>' . __( 'Please see the <a href="https://www.paypal.com/us/webapps/mpp/ua/privacy-full">PayPal Privacy Policy</a> for more details.', 'woocommerce' ) . '</p>';
 
-<h3>What we collect and store</h3>
-
-While you visit our site, we’ll track:
-
-<ul>
-	<li>Products you’ve viewed: to show you products you’ve recently viewed.</li>
-	<li>Location, IP address and browser type: to estimate taxes and shipping.</li>
-	<li>Shipping address: we’ll ask you to enter this so we can estimate shipping before you place an order.</li>
-</ul>
-
-We’ll also use cookies to keep track of cart contents while you’re browsing our site.
-
-When you purchase from us, we’ll ask you to provide information including your name, billing address, shipping address, email address, phone number, credit card/payment details and optional account information like username and password. We’ll use this information to:
-
-<ul>
-	<li>Send you information about your account and order.</li>
-	<li>Respond to your requests, including refunds and complaints.</li>
-	<li>Process payments and prevent fraud.</li>
-	<li>Set up your account for our store.</li>
-</ul>
-
-If you create an account, we will store your name, address, email and phone number, which will be used to populate the checkout for future orders.
-
-We will store order information for XXX years for tax and accounting purposes. This includes your name, email address and billing and shipping addresses.
-
-We will also store comments or reviews, if you chose to leave them.
-
-<h3>Who on our team has access</h3>
-
-Members of our team have access to the information you provide us. Both Administrators and Shop Managers can access:
-
-<ul>
-	<li>Order information like what was purchased, when it was purchased and where it should be sent, and</li>
-	<li>Customer information like your name, email address, and billing and shipping information.</li>
-</ul>
-
-Our team members have access to this information to help fulfill orders, process refunds, and support you.
-
-<h3>What we share with others</h3>
-
-<h4>Payments</h4>
-We accept payments through PayPal. When processing payments, some of your data will be passed to PayPal, including information required to process or support the payment, such as the purchase total and billing information.
-
-Please see the <a href="https://www.paypal.com/us/webapps/mpp/ua/privacy-full">PayPal Privacy Policy</a> for more details.
-', 'woocommerce' ) ) ) );
-
-		return $content;
+		return apply_filters( 'wc_privacy_policy_content', $content );
 	}
 
 	/**
