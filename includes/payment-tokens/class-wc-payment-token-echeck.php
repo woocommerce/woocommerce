@@ -45,7 +45,12 @@ class WC_Payment_Token_ECheck extends WC_Payment_Token {
 	 * @return string
 	 */
 	public function get_display_name( $deprecated = '' ) {
-		return __( 'eCheck', 'woocommerce' );
+		$display = sprintf(
+			/* translators: 1: credit card type 2: last 4 digits 3: expiry month 4: expiry year */
+			__( 'eCheck ending in %1$s', 'woocommerce' ),
+			$this->get_last4()
+		);
+		return $display;
 	}
 
 	/**

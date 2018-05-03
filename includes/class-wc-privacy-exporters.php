@@ -380,7 +380,7 @@ class WC_Privacy_Exporters {
 					'group_id'    => 'woocommerce_tokens',
 					'group_label' => __( 'Payment Tokens', 'woocommerce' ),
 					'item_id'     => 'token-' . $token->get_id(),
-					'data'        => json_encode( $token->get_data() ),
+					'data'        => $token->get_display_name(),
 				);
 			}
 			$done = 10 > count( $tokens );
