@@ -47,6 +47,8 @@ jQuery( function( $ ) {
 			$( '.store-state-container' ).hide();
 			$state_select.empty().val( '' ).change().prop( 'required', false );
 		}
+
+		$( '#currency_code' ).val( wc_setup_currencies[ country ] ).change();
 	} );
 
 	$( '#store_country' ).change();
@@ -172,8 +174,50 @@ jQuery( function( $ ) {
 		}
 	} ).find( 'input#stripe_create_account, input#ppec_paypal_reroute_requests' ).change();
 
-	$( 'select#store_country' ).on( 'change', function() {
-		var countryCode = $( this ).val();
-		$( 'select#currency_code' ).val( wc_setup_currencies[ countryCode ] ).change();
-	} );
+	function addPlugins( bySlug, $el, hover ) {
+		var plugins = $el.data( 'plugins' );
+		for ( var i in Array.isArray( plugins ) ? plugins : [] ) {
+			var slug = plugins[ i ].slug;
+			bySlug[ slug ] = bySlug[ slug ] ||
+				$( '<span class="plugin-install-info-list-item">' )
+					.append( '<a href="https://wordpress.org/plugins/' + slug + '/" target="_blank">' + plugins[ i ].name + '</a>' );
+
+			bySlug[ slug ].find( 'a' )
+				.on( 'mouseenter mouseleave', ( function( $hover, event ) {
+					$hover.toggleClass( 'plugin-install-source', 'mouseenter' === event.type );
+				} ).bind( null, hover ? $el.closest( hover ) : $el ) );
+		}
+	}
+
+	function updatePluginInfo() {
+		var pluginLinkBySlug = {};
+
+		$( '.wc-wizard-service-enable input:checked' ).each( function() {
+			addPlugins( pluginLinkBySlug, $( this ), '.wc-wizard-service-item' );
+
+			var $container = $( this ).closest( '.wc-wizard-service-item' );
+			$container.find( 'input.payment-checkbox-input:checked' ).each( function() {
+				addPlugins( pluginLinkBySlug, $( this ), '.wc-wizard-service-settings' );
+			} );
+			$container.find( '.wc-wizard-shipping-method-select .method' ).each( function() {
+				var $this = $( this );
+				if ( 'live_rates' === $this.val()  ) {
+					addPlugins( pluginLinkBySlug, $this, '.wc-wizard-service-item' );
+				}
+			} );
+		} );
+
+		$( '.recommended-item-checkbox:checked' ).each( function() {
+			addPlugins( pluginLinkBySlug, $( this ), '.recommended-item' );
+		} );
+
+		var $list = $( 'span.plugin-install-info-list' ).empty();
+		for ( var slug in pluginLinkBySlug ) {
+			$list.append( pluginLinkBySlug[ slug ] );
+		}
+		$( 'span.plugin-install-info' ).toggle( $list.children().length > 0 );
+	}
+
+	updatePluginInfo();
+	$( '.wc-setup-content' ).on( 'change', '[data-plugins]', updatePluginInfo );
 } );

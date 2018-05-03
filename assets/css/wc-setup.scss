@@ -711,6 +711,7 @@ body {
 
 	.wc-wizard-service-settings {
 		display: none;
+		margin-top: 0.75em;
 		margin-bottom: 0;
 		cursor: default;
 
@@ -947,6 +948,40 @@ h3.jetpack-reasons {
 	}
 }
 
+.wc-setup .wc-setup-actions .plugin-install-info {
+	display: block;
+	font-style: italic;
+	color: #999;
+	font-size: 14px;
+	line-height: 1.5em;
+	margin: 5px 0;
+
+	& > * {
+		display: block;
+	}
+	
+	.plugin-install-info-list-item:not(:last-child)::after {
+		content: ', ';
+	}
+
+	a {
+		white-space: nowrap;
+
+		&:not(:hover):not(:focus) {
+			color: inherit;
+		}
+	}
+}
+
+.plugin-install-source {
+	$background: rgba( #bb77ae, 0.15 );
+	background: $background;
+
+	&:not(.wc-wizard-service-item) {
+		box-shadow: 0 0 0 10px $background;
+	}
+}
+
 .location-prompt {
 	color: #666;
 	font-size: 13px;
@@ -1168,7 +1203,6 @@ p.jetpack-terms {
 .wc-wizard-service-setting-stripe_create_account, .wc-wizard-service-setting-ppec_paypal_reroute_requests {
 	display: flex;
 	align-items: flex-start;
-	margin-top: 0.75em;
 
 	.payment-checkbox-input {
 		order: 1;
@@ -1186,6 +1220,7 @@ p.jetpack-terms {
 
 .wc-wizard-service-setting-stripe_email, .wc-wizard-service-setting-ppec_paypal_email {
 	margin-top: 0.75em;
+	margin-left: 1.5em;
 
 	label.stripe_email, label.ppec_paypal_email {
 		position: absolute;
@@ -1199,13 +1234,10 @@ p.jetpack-terms {
 	}
 
 	input.payment-email-input {
-		margin-left: 1.5em;
+		box-sizing: border-box;
 		margin-bottom: .5em;
 		width: 100%;
-	}
-
-	.wc-wizard-service-settings-description {
-		margin-left: 1.5em;
+		height: 32px;
 	}
 }
 
