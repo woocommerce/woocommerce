@@ -233,6 +233,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Update - Include pending products in export. #19928
 * Tweak - Deprecate woocommerce_ajax_added_order_items action in favor of more useful action. #19933
 * Tweak - Disable image gallery zoom on touch devices to make photoswipe more easily accessible. #19954
+* Tweak - Wizard: List out all plugins to be installed upon proceeding to the next step, with a highlight on hover indicating relevant settings. #19952
 * Fix - Properly set orderby and order when calling WC_Customer_Download_Data_Store::get_downloads(). #1862
 * Fix - Set maxlength for order item meta key to avoid values disappearing if too long. #18918
 * Fix - Remove hardcoded /wp-content check for downloads. #18961
