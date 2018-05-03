@@ -105,6 +105,11 @@ jQuery( function( $ ) {
 			this.flexslider_enabled = false;
 		}
 
+		// ...and if we're on a touch device.
+		if ( 'ontouchstart' in document.documentElement ) {
+			this.zoom_enabled = false;
+		}
+
 		// Bind functions to this.
 		this.initFlexslider       = this.initFlexslider.bind( this );
 		this.initZoom             = this.initZoom.bind( this );
