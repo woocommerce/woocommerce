@@ -215,7 +215,7 @@ jQuery( function( $ ) {
 		for ( var slug in pluginLinkBySlug ) {
 			$list.append( pluginLinkBySlug[ slug ] );
 		}
-		$( 'span.plugin-install-info' ).toggle( $list.length > 0 );
+		$( 'span.plugin-install-info' ).toggle( $list.children().length > 0 );
 	}
 
 	updatePluginInfo();
