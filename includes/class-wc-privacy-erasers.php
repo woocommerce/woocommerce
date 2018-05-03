@@ -139,7 +139,7 @@ class WC_Privacy_Erasers {
 					$response['items_removed'] = true;
 				} else {
 					/* Translators: %s Order number. */
-					$response['messages'][]     = sprintf( __( 'Retained personal data in order %s due to settings.', 'woocommerce' ), $order->get_order_number() );
+					$response['messages'][]     = sprintf( __( 'Personal data within order %s has been retained.', 'woocommerce' ), $order->get_order_number() );
 					$response['items_retained'] = true;
 				}
 			}
@@ -196,7 +196,7 @@ class WC_Privacy_Erasers {
 				$response['items_removed'] = true;
 			}
 		} else {
-			$response['messages'][]     = __( 'Retained access to downloadable files due to settings.', 'woocommerce' );
+			$response['messages'][]     = __( 'Customer download permissions have been retained.', 'woocommerce' );
 			$response['items_retained'] = true;
 		}
 
