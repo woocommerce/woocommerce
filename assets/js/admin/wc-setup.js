@@ -180,7 +180,7 @@ jQuery( function( $ ) {
 	$( '.wc-setup-content' ).on( 'change', '[data-plugins]', function() {
 		var pluginLinkBySlug = {};
 
-		function addPlugins( $el ) {
+		function addPlugins( $el, hover ) {
 			var plugins = $el.data( 'plugins' );
 			if ( ! Array.isArray( plugins ) ) {
 				return;
@@ -193,25 +193,34 @@ jQuery( function( $ ) {
 						$( '<span class="plugin-install-info-list-item">' )
 							.append( '<a href="https://wordpress.org/plugins/' + slug + '/" target="_blank">' + plugins[ i ].name + '</a>' );
 				}
+
+				var $hover = hover ? $el.closest( hover ) : $el;
+				pluginLinkBySlug[ slug ].find( 'a' )
+					.on( 'mouseenter', ( function( $hover ) {
+						$hover.addClass( 'plugin-install-source' );
+					} ).bind( null, $hover ) )
+					.on( 'mouseleave', ( function( $hover ) {
+						$hover.removeClass( 'plugin-install-source' );
+					} ).bind( null, $hover ) );
 			}
 		}
 
 		$( '.wc-wizard-service-enable input:checked' ).each( function() {
-			addPlugins( $( this ) );
+			addPlugins( $( this ), '.wc-wizard-service-item' );
 			$( this ).closest( '.wc-wizard-service-item' ).find( 'input.payment-checkbox-input:checked' ).each( function() {
-				addPlugins( $( this ) );
+				addPlugins( $( this ), '.wc-wizard-service-settings' );
 			} );
 		} );
 
 		$( '.wc-wizard-shipping-method-select .method' ).each( function() {
 			var $this = $( this );
 			if ( 'live_rates' === $this.val() ) {
-				addPlugins( $this );
+				addPlugins( $this, '.wc-wizard-service-item' );
 			}
 		} );
 
 		$( '.recommended-item-checkbox:checked' ).each( function() {
-			addPlugins( $( this ) );
+			addPlugins( $( this ), '.recommended-item' );
 		} );
 
 		// Render list of plugins.
