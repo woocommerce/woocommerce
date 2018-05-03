@@ -973,7 +973,12 @@ h3.jetpack-reasons {
 }
 
 .plugin-install-source {
-	background: rgba( #bb77ae, 0.15 );
+	$background: rgba( #bb77ae, 0.15 );
+	background: $background;
+
+	&:not(.wc-wizard-service-item) {
+		box-shadow: 0 0 0 10px $background;
+	}
 }
 
 .location-prompt {
