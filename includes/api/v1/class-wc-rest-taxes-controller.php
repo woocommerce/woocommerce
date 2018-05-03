@@ -214,6 +214,7 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 		);
 		$prepared_args['orderby'] = $orderby_possibles[ $request['orderby'] ];
 		$prepared_args['class']   = $request['class'];
+		$prepared_args['state']   = $request['state'];
 
 		/**
 		 * Filter arguments, before passing to $wpdb->get_results(), when querying taxes via the REST API.
@@ -233,6 +234,12 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 		if ( ! empty( $prepared_args['class'] ) ) {
 			$class = 'standard' !== $prepared_args['class'] ? sanitize_title( $prepared_args['class'] ) : '';
 			$query .= " AND tax_rate_class = '$class'";
+		}
+		
+		// Filter by tax state.
+		if ( ! empty( $prepared_args['state'] ) ) {
+			$state = 'standard' !== $prepared_args['state'] ? sanitize_title( $prepared_args['state'] ) : '';
+			$query .= " AND tax_rate_state = '$state'";
 		}
 
 		// Order tax rates.
