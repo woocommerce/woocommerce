@@ -12,17 +12,17 @@ class WidgetNumbers extends Component {
 		const totalOrders = orders.data && orders.data.length || 0;
 		const totalProducts = products.data && products.data.length || 0;
 		return (
-			<div className="wd_widget">
-				<div className="wd_widget-item">
+			<div className="woo-dash__widget">
+				<div className="woo-dash__widget-item">
 					{ sprintf( _n( '%d New Customer', '%d New Customers', 4, 'woo-dash' ), 4 ) }
 				</div>
-				<div className="wd_widget-item">
+				<div className="woo-dash__widget-item">
 					{ sprintf( _n( '%d New Order', '%d New Orders', totalOrders, 'woo-dash' ), totalOrders ) }
 				</div>
-				<div className="wd_widget-item">
+				<div className="woo-dash__widget-item">
 					{ sprintf( _n( '%d Product', '%d Products', totalProducts, 'woo-dash' ), totalProducts ) }
 				</div>
-				<div className="wd_widget-item">
+				<div className="woo-dash__widget-item">
 					<Button isPrimary href="#">{ __( 'View Orders', 'woo-dash' ) }</Button>
 				</div>
 			</div>
