@@ -19,6 +19,9 @@ export default class extends Component {
 					<WidgetNumbers />
 				</div>
 
+				<div className="woo-dash__secondary">
+					<ActivityList />
+				</div>
 			</div>
 		);
 	}
