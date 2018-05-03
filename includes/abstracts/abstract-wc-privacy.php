@@ -40,6 +40,13 @@ abstract class WC_Abstract_Privacy {
 	protected $erasers = array();
 
 	/**
+	 * Track ordering for adding export/erase to WP array.
+	 *
+	 * @var int
+	 */
+	protected $count = 0;
+
+	/**
 	 * Constructor
 	 *
 	 * @param string $name Plugin identifier.
@@ -47,6 +54,17 @@ abstract class WC_Abstract_Privacy {
 	public function __construct( $name = '' ) {
 		$this->name = $name;
 		$this->init();
+	}
+
+	/**
+	 * Get next key to be added to the exporters/erasures list.
+	 * Maintain order since the array is associative.
+	 *
+	 * @return string
+	 */
+	protected function get_next_key() {
+		$this->count++;
+		return sanitize_title( $this->name . '-' . $this->count );
 	}
 
 	/**
@@ -90,7 +108,7 @@ abstract class WC_Abstract_Privacy {
 	 */
 	public function register_exporters( $exporters = array() ) {
 		foreach ( $this->exporters as $exporter ) {
-			$exporters[] = $exporter;
+			$exporters[ $this->get_next_key() ] = $exporter;
 		}
 		return $exporters;
 	}
@@ -103,7 +121,7 @@ abstract class WC_Abstract_Privacy {
 	 */
 	public function register_erasers( $erasers = array() ) {
 		foreach ( $this->erasers as $eraser ) {
-			$erasers[] = $eraser;
+			$erasers[ $this->get_next_key() ] = $eraser;
 		}
 		return $erasers;
 	}
