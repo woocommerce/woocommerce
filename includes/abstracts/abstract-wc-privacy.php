@@ -116,7 +116,7 @@ abstract class WC_Abstract_Privacy {
 	 * @param string $callback Exporter callback.
 	 */
 	public function add_exporter( $id, $name, $callback ) {
-		$this->exporters[ sanitize_title( $this->name . '-' . $id ) ] = array(
+		$this->exporters[ $id ] = array(
 			'exporter_friendly_name' => $name,
 			'callback'               => $callback,
 		);
@@ -131,7 +131,7 @@ abstract class WC_Abstract_Privacy {
 	 * @param string $callback Exporter callback.
 	 */
 	public function add_eraser( $id, $name, $callback ) {
-		$this->erasers[ sanitize_title( $this->name . '-' . $id ) ] = array(
+		$this->erasers[ $id ] = array(
 			'eraser_friendly_name' => $name,
 			'callback'             => $callback,
 		);
