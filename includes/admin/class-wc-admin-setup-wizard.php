@@ -698,20 +698,23 @@ class WC_Admin_Setup_Wizard {
 	 */
 	protected function get_wcs_requisite_plugins() {
 		$plugins = array();
-		if ( ! is_plugin_active( 'woocommerce-services/woocommerce-services.php' ) ) {
-			$plugins[] = array( 'name' => __( 'WooCommerce Services', 'woocommerce' ), 'slug' => 'woocommerce-services' );
+		if ( ! is_plugin_active( 'woocommerce-services/woocommerce-services.php' ) && ! get_option( 'woocommerce_setup_background_installing_woocommerce-services' ) ) {
+			$plugins[] = array(
+				'name' => __( 'WooCommerce Services', 'woocommerce' ),
+				'slug' => 'woocommerce-services',
+			);
 		}
-		if ( ! is_plugin_active( 'jetpack/jetpack.php' ) ) {
-			$plugins[] = array( 'name' => __( 'Jetpack', 'woocommerce' ), 'slug' => 'jetpack' );
+		if ( ! is_plugin_active( 'jetpack/jetpack.php' ) && ! get_option( 'woocommerce_setup_background_installing_jetpack' ) ) {
+			$plugins[] = array(
+				'name' => __( 'Jetpack', 'woocommerce' ),
+				'slug' => 'jetpack',
+			);
 		}
 		return $plugins;
 	}
 
 	/**
 	 * Plugin install info message markup with heading.
-	 *
-	 * @param array $service Service info array.
-	 * @return boolean
 	 */
 	public function plugin_install_info() {
 		?>
@@ -1445,7 +1448,14 @@ class WC_Admin_Setup_Wizard {
 			$should_enable_toggle = isset( $item_info['enabled'] ) && $item_info['enabled'];
 		}
 
-		$plugins = isset( $item_info['repo-slug'] ) ? array( array( 'slug' => $item_info['repo-slug'], 'name' => $item_info['name'] ) ) : null;
+		$plugins = null;
+		if ( isset( $item_info['repo-slug'] ) ) {
+			$plugin = array(
+				'slug' => $item_info['repo-slug'],
+				'name' => $item_info['name'],
+			);
+			$plugins = array( $plugin );
+		}
 
 		?>
 		<li class="<?php echo esc_attr( $item_class ); ?>">
