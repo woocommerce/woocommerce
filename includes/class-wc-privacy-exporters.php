@@ -378,7 +378,7 @@ class WC_Privacy_Exporters {
 			foreach ( $tokens as $token ) {
 				$data_to_export[] = array(
 					'group_id'    => 'woocommerce_tokens',
-					'group_label' => __( 'Tokens', 'woocommerce' ),
+					'group_label' => __( 'Payment Tokens', 'woocommerce' ),
 					'item_id'     => 'token-' . $token->get_id(),
 					'data'        => json_encode( $token->get_data() ),
 				);

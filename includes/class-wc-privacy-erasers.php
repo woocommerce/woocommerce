@@ -344,13 +344,9 @@ class WC_Privacy_Erasers {
 		foreach ( $tokens as $token ) {
 			WC_Payment_Tokens::delete( $token->get_id() );
 
-			$erased = apply_filters( 'woocommerce_privacy_erase_customer_token', true, $token );
-
-			if ( $erased ) {
-				/* Translators: %s Prop name. */
-				$response['messages'][]    = sprintf( __( 'Removed token "%d"', 'woocommerce' ), $token->get_id() );
-				$response['items_removed'] = true;
-			}
+			/* Translators: %s Prop name. */
+			$response['messages'][]    = sprintf( __( 'Removed payment token "%d"', 'woocommerce' ), $token->get_id() );
+			$response['items_removed'] = true;
 		}
 
 		/**
