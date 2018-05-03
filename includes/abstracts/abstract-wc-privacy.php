@@ -40,13 +40,6 @@ abstract class WC_Abstract_Privacy {
 	protected $erasers = array();
 
 	/**
-	 * Track ordering for adding export/erase to WP array.
-	 *
-	 * @var int
-	 */
-	protected $count = 0;
-
-	/**
 	 * Constructor
 	 *
 	 * @param string $name Plugin identifier.
@@ -54,17 +47,6 @@ abstract class WC_Abstract_Privacy {
 	public function __construct( $name = '' ) {
 		$this->name = $name;
 		$this->init();
-	}
-
-	/**
-	 * Get next key to be added to the exporters/erasures list.
-	 * Maintain order since the array is associative.
-	 *
-	 * @return string
-	 */
-	protected function get_next_key() {
-		$this->count++;
-		return sanitize_title( $this->name . '-' . $this->count );
 	}
 
 	/**
@@ -107,8 +89,8 @@ abstract class WC_Abstract_Privacy {
 	 * @return array
 	 */
 	public function register_exporters( $exporters = array() ) {
-		foreach ( $this->exporters as $exporter ) {
-			$exporters[ $this->get_next_key() ] = $exporter;
+		foreach ( $this->exporters as $id => $exporter ) {
+			$exporters[ $id ] = $exporter;
 		}
 		return $exporters;
 	}
@@ -120,8 +102,8 @@ abstract class WC_Abstract_Privacy {
 	 * @return array
 	 */
 	public function register_erasers( $erasers = array() ) {
-		foreach ( $this->erasers as $eraser ) {
-			$erasers[ $this->get_next_key() ] = $eraser;
+		foreach ( $this->erasers as $id => $eraser ) {
+			$erasers[ $id ] = $eraser;
 		}
 		return $erasers;
 	}
@@ -129,11 +111,12 @@ abstract class WC_Abstract_Privacy {
 	/**
 	 * Add exporter to list of exporters.
 	 *
-	 * @param string $name Exporter name.
+	 * @param string $id       ID of the Exporter.
+	 * @param string $name     Exporter name.
 	 * @param string $callback Exporter callback.
 	 */
-	public function add_exporter( $name, $callback ) {
-		$this->exporters[] = array(
+	public function add_exporter( $id, $name, $callback ) {
+		$this->exporters[ sanitize_title( $this->name . '-' . $id ) ] = array(
 			'exporter_friendly_name' => $name,
 			'callback'               => $callback,
 		);
@@ -141,13 +124,14 @@ abstract class WC_Abstract_Privacy {
 	}
 
 	/**
-	 * Add eraser to list of exporters.
+	 * Add eraser to list of erasers.
 	 *
-	 * @param string $name Exporter name.
+	 * @param string $id       ID of the Eraser.
+	 * @param string $name     Exporter name.
 	 * @param string $callback Exporter callback.
 	 */
-	public function add_eraser( $name, $callback ) {
-		$this->erasers[] = array(
+	public function add_eraser( $id, $name, $callback ) {
+		$this->erasers[ sanitize_title( $this->name . '-' . $id ) ] = array(
 			'eraser_friendly_name' => $name,
 			'callback'             => $callback,
 		);
