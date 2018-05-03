@@ -4,8 +4,8 @@
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
-import { Button } from '@wordpress/components';
-import { Component } from '@wordpress/element';
+import { Button, withAPIData } from '@wordpress/components';
+import { Component, compose } from '@wordpress/element';
 
 /**
  * External dependencies
@@ -15,6 +15,8 @@ import useFilters from '../use-filters';
 
 class Dashboard extends Component {
 	render() {
+		const { products } = this.props;
+		const totalProducts = products.data && products.data.length || 0;
 		return (
 			<div>
 				<h2>{ applyFilters( 'woodash.example2', __( 'Example Widget', 'woo-dash' ) ) }</h2>
@@ -24,6 +26,9 @@ class Dashboard extends Component {
 					</div>
 					<div className="wd_widget-item">
 						{ sprintf( _n( '%d New Order', '%d New Orders', 10, 'woo-dash' ), 10 ) }
+					</div>
+					<div className="wd_widget-item">
+						{ sprintf( _n( '%d Product', '%d Products', totalProducts, 'woo-dash' ), totalProducts ) }
 					</div>
 					<div className="wd_widget-item">
 						<Button isPrimary href="#">{ __( 'View Orders', 'woo-dash' ) }</Button>
@@ -36,4 +41,9 @@ class Dashboard extends Component {
 	}
 }
 
-export default useFilters( [ 'woodash.example', 'woodash.example2' ] )( Dashboard );
+export default compose( [
+	useFilters( [ 'woodash.example', 'woodash.example2' ] ),
+	withAPIData( () => ( {
+		products: '/wc/v2/products',
+	} ) ),
+] )( Dashboard );

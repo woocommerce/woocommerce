@@ -23,6 +23,9 @@ function woo_dash_register_script() {
 	$locale_data = gutenberg_get_jed_locale_data( 'woo-dash' );
 	$content = 'wp.i18n.setLocaleData( ' . json_encode( $locale_data ) . ', "woo-dash" );';
 	wp_add_inline_script( WOO_DASH_APP, $content, 'before' );
+
+	wp_enqueue_script( 'wp-api' );
+	gutenberg_extend_wp_api_backbone_client();
 }
 add_action( 'init', 'woo_dash_register_script' );
 

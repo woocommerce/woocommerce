@@ -2,7 +2,7 @@
     "root": true,
     "parser": "babel-eslint",
     "extends": [
-        "wpcalypso/react",
+        "wpcalypso/react"
     ],
     "env": {
         "browser": true,
@@ -15,6 +15,7 @@
         "FoxhoundSettings": true,
         "jQuery": true,
         "wp": true,
+        "wpApiSettings": true
     },
     "rules": {
         "camelcase": 0,
@@ -24,6 +25,6 @@
         "react/react-in-jsx-scope": 0,
         "wpcalypso/import-no-redux-combine-reducers": 0,
         "wpcalypso/jsx-classname-namespace": 0,
-        "wpcalypso/redux-no-bound-selectors": 1,
+        "wpcalypso/redux-no-bound-selectors": 1
     }
 }
