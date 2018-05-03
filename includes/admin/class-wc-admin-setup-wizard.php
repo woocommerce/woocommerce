@@ -692,10 +692,14 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	protected function get_wcs_requisite_plugins() {
-		return array(
-			array( 'name' => __( 'WooCommerce Services', 'woocommerce' ), 'slug' => 'woocommerce-services' ),
-			array( 'name' => __( 'Jetpack', 'woocommerce' ), 'slug' => 'jetpack' ),
-		);
+		$plugins = array();
+		if ( ! is_plugin_active( 'woocommerce-services/woocommerce-services.php' ) ) {
+			$plugins[] = array( 'name' => __( 'WooCommerce Services', 'woocommerce' ), 'slug' => 'woocommerce-services' );
+		}
+		if ( ! is_plugin_active( 'jetpack/jetpack.php' ) ) {
+			$plugins[] = array( 'name' => __( 'Jetpack', 'woocommerce' ), 'slug' => 'jetpack' );
+		}
+		return $plugins;
 	}
 
 	/**
