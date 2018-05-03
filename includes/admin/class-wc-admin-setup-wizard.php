@@ -729,7 +729,7 @@ class WC_Admin_Setup_Wizard {
 		$shipping_methods = array(
 			'live_rates'    => array(
 				'name'        => __( 'Live Rates', 'woocommerce' ),
-				'description' => __( 'WooCommerce Services and Jetpack will be installed and activated for you.', 'woocommerce' ),
+				'description' => __( 'Powered by WooCommerce Services and Jetpack.', 'woocommerce' ),
 			),
 			'flat_rate'     => array(
 				'name'        => __( 'Flat Rate', 'woocommerce' ),
@@ -1213,7 +1213,7 @@ class WC_Admin_Setup_Wizard {
 						'type'        => 'email',
 						'value'       => $user_email,
 						'placeholder' => __( 'Stripe email address', 'woocommerce' ),
-						'description' => __( "Enter your email address and we'll handle account creation. WooCommerce Services and Jetpack will be installed and activated for you.", 'woocommerce' ),
+						'description' => __( "Enter your email address and we'll handle account creation. Powered by WooCommerce Services and Jetpack.", 'woocommerce' ),
 						'required'    => true,
 					),
 				),
@@ -1239,7 +1239,7 @@ class WC_Admin_Setup_Wizard {
 						'type'        => 'email',
 						'value'       => $user_email,
 						'placeholder' => __( 'Email address to receive payments', 'woocommerce' ),
-						'description' => __( "Enter your email address and we'll authenticate payments for you. WooCommerce Services and Jetpack will be installed and activated for you.", 'woocommerce' ),
+						'description' => __( "Enter your email address and we'll authenticate payments for you. Powered by WooCommerce Services and Jetpack.", 'woocommerce' ),
 						'required'    => true,
 					),
 				),
