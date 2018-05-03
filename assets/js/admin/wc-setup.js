@@ -180,41 +180,47 @@ jQuery( function( $ ) {
 	$( '.wc-setup-content' ).on( 'change', '[data-plugins]', function() {
 		var pluginLinkBySlug = {};
 
-		function addPlugins( plugins ) {
-			if ( Array.isArray( plugins ) ) {
-				for ( var i in plugins ) {
-					var pluginLink = '<a href="https://wordpress.org/plugins/' + plugins[ i ].slug + '/" target="_blank">' + plugins[ i ].name + '</a>';
-					pluginLinkBySlug[ plugins[ i ].slug ] = pluginLink;
+		function addPlugins( $el ) {
+			var plugins = $el.data( 'plugins' );
+			if ( ! Array.isArray( plugins ) ) {
+				return;
+			}
+
+			for ( var i in plugins ) {
+				var slug = plugins[ i ].slug;
+				if ( ! pluginLinkBySlug[ slug ] ) {
+					pluginLinkBySlug[ slug ] =
+						$( '<span class="plugin-install-info-list-item">' )
+							.append( '<a href="https://wordpress.org/plugins/' + slug + '/" target="_blank">' + plugins[ i ].name + '</a>' );
 				}
 			}
 		}
 
 		$( '.wc-wizard-service-enable input:checked' ).each( function() {
-			addPlugins( $( this ).data( 'plugins' ) );
+			addPlugins( $( this ) );
 			$( this ).closest( '.wc-wizard-service-item' ).find( 'input.payment-checkbox-input:checked' ).each( function() {
-				addPlugins( $( this ).data( 'plugins' ) );
+				addPlugins( $( this ) );
 			} );
 		} );
 
 		$( '.wc-wizard-shipping-method-select .method' ).each( function() {
-			if ( 'live_rates' === $( this ).val() ) {
-				addPlugins( $( this ).data( 'plugins' ) );
+			var $this = $( this );
+			if ( 'live_rates' === $this.val() ) {
+				addPlugins( $this );
 			}
 		} );
 
 		$( '.recommended-item-checkbox:checked' ).each( function() {
-			addPlugins( $( this ).data( 'plugins' ) );
+			addPlugins( $( this ) );
 		} );
 
 		// Render list of plugins.
 		if ( Object.keys( pluginLinkBySlug ).length ) {
-			var pluginLinks = [];
-			for ( var slug in pluginLinkBySlug ) {
-				pluginLinks.push( pluginLinkBySlug[ slug ] );
-			}
-			
 			$( 'span.plugin-install-info' ).show();
-			$( 'span.plugin-install-info-list' ).html( pluginLinks.join( ', ' ) );
+			var $list = $( 'span.plugin-install-info-list' ).empty();
+			for ( var slug in pluginLinkBySlug ) {
+				$list.append( pluginLinkBySlug[ slug ] );
+			}
 		} else {
 			$( 'span.plugin-install-info' ).hide();
 		}

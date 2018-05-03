@@ -958,6 +958,10 @@ h3.jetpack-reasons {
 	& > * {
 		display: block;
 	}
+	
+	.plugin-install-info-list-item:not(:last-child)::after {
+		content: ', ';
+	}
 
 	a {
 		white-space: nowrap;
