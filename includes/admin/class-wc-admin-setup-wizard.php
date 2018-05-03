@@ -691,6 +691,11 @@ class WC_Admin_Setup_Wizard {
 		);
 	}
 
+	/**
+	 * Retrieve info for missing WooCommerce Services and/or Jetpack plugin.
+	 *
+	 * @return array
+	 */
 	protected function get_wcs_requisite_plugins() {
 		$plugins = array();
 		if ( ! is_plugin_active( 'woocommerce-services/woocommerce-services.php' ) ) {
@@ -700,6 +705,21 @@ class WC_Admin_Setup_Wizard {
 			$plugins[] = array( 'name' => __( 'Jetpack', 'woocommerce' ), 'slug' => 'jetpack' );
 		}
 		return $plugins;
+	}
+
+	/**
+	 * Plugin install info message markup with heading.
+	 *
+	 * @param array $service Service info array.
+	 * @return boolean
+	 */
+	public function plugin_install_info() {
+		?>
+		<span class="plugin-install-info">
+			<span class="plugin-install-info-label"><?php esc_html_e( 'The following plugins will be installed and activated for you:', 'woocommerce' ); ?></span>
+			<span class="plugin-install-info-list"></span>
+		</span>
+		<?php
 	}
 
 	/**
@@ -1517,15 +1537,6 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function is_not_featured_service( $service ) {
 		return ! $this->is_featured_service( $service );
-	}
-
-	public function plugin_install_info() {
-		?>
-		<span class="plugin-install-info">
-			<span class="plugin-install-info-label"><?php esc_html_e( 'The following plugins will be installed and activated for you:', 'woocommerce' ); ?></span>
-			<span class="plugin-install-info-list"></span>
-		</span>
-		<?php
 	}
 
 	/**

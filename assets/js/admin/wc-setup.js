@@ -47,6 +47,8 @@ jQuery( function( $ ) {
 			$( '.store-state-container' ).hide();
 			$state_select.empty().val( '' ).change().prop( 'required', false );
 		}
+
+		$( '#currency_code' ).val( wc_setup_currencies[ country ] ).change();
 	} );
 
 	$( '#store_country' ).change();
@@ -171,11 +173,6 @@ jQuery( function( $ ) {
 				.hide();
 		}
 	} ).find( 'input#stripe_create_account, input#ppec_paypal_reroute_requests' ).change();
-
-	$( 'select#store_country' ).on( 'change', function() {
-		var countryCode = $( this ).val();
-		$( 'select#currency_code' ).val( wc_setup_currencies[ countryCode ] ).change();
-	} );
 
 	$( '.wc-setup-content' ).on( 'change', '[data-plugins]', function() {
 		var pluginLinkBySlug = {};
