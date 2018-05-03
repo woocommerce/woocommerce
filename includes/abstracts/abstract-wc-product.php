@@ -1799,8 +1799,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return string
 	 */
 	public function get_image( $size = 'woocommerce_thumbnail', $attr = array(), $placeholder = true ) {
-        $dimensions           = wc_get_image_size( $size );
-        $wp_media_dimensions  = array($dimensions['width'],$dimensions['height']);
+		$dimensions           = wc_get_image_size( $size );
+		$wp_media_dimensions  = array( $dimensions['width'], $dimensions['height'] );
 		if ( has_post_thumbnail( $this->get_id() ) ) {
 			$image = get_the_post_thumbnail( $this->get_id(), $wp_media_dimensions, $attr );
 		} elseif ( ( $parent_id = wp_get_post_parent_id( $this->get_id() ) ) && has_post_thumbnail( $parent_id ) ) { // @phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found
