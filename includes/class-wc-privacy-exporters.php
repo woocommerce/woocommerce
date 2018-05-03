@@ -348,4 +348,49 @@ class WC_Privacy_Exporters {
 
 		return $personal_data;
 	}
+
+	/**
+	 * Finds and exports customer tokens by email address.
+	 *
+	 * @since 3.4.0
+	 * @param string $email_address The user email address.
+	 * @param int    $page  Page.
+	 * @return array An array of personal data in name value pairs
+	 */
+	public static function customer_tokens_exporter( $email_address, $page ) {
+		$user           = get_user_by( 'email', $email_address ); // Check if user has an ID in the DB to load stored personal data.
+		$data_to_export = array();
+
+		if ( ! $user instanceof WP_User ) {
+			return array(
+				'data' => $data_to_export,
+				'done' => true,
+			);
+		}
+
+		$tokens = WC_Payment_Tokens::get_tokens( array(
+			'user_id' => $user->ID,
+			'limit'   => 10,
+			'page'    => $page,
+		) );
+
+		if ( 0 < count( $tokens ) ) {
+			foreach ( $tokens as $token ) {
+				$data_to_export[] = array(
+					'group_id'    => 'woocommerce_tokens',
+					'group_label' => __( 'Tokens', 'woocommerce' ),
+					'item_id'     => 'token-' . $token->get_id(),
+					'data'        => json_encode( $token->get_data() ),
+				);
+			}
+			$done = 10 > count( $tokens );
+		} else {
+			$done = true;
+		}
+
+		return array(
+			'data' => $data_to_export,
+			'done' => true,
+		);
+	}
 }

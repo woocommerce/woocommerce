@@ -310,4 +310,56 @@ class WC_Privacy_Erasers {
 		 */
 		do_action( 'woocommerce_privacy_remove_order_personal_data', $order );
 	}
+
+	/**
+	 * Finds and erases customer tokens by email address.
+	 *
+	 * @since 3.4.0
+	 * @param string $email_address The user email address.
+	 * @param int    $page  Page.
+	 * @return array An array of personal data in name value pairs
+	 */
+	public static function customer_tokens_eraser( $email_address, $page ) {
+		$response = array(
+			'items_removed'  => false,
+			'items_retained' => false,
+			'messages'       => array(),
+			'done'           => true,
+		);
+
+		$user = get_user_by( 'email', $email_address ); // Check if user has an ID in the DB to load stored personal data.
+
+		if ( ! $user instanceof WP_User ) {
+			return $response;
+		}
+
+		$tokens = WC_Payment_Tokens::get_tokens( array(
+			'user_id' => $user->ID,
+		) );
+
+		if ( empty( $tokens ) ) {
+			return $response;
+		}
+
+		foreach ( $tokens as $token ) {
+			WC_Payment_Tokens::delete( $token->get_id() );
+
+			$erased = apply_filters( 'woocommerce_privacy_erase_customer_token', true, $token );
+
+			if ( $erased ) {
+				/* Translators: %s Prop name. */
+				$response['messages'][]    = sprintf( __( 'Removed token "%d"', 'woocommerce' ), $token->get_id() );
+				$response['items_removed'] = true;
+			}
+		}
+
+		/**
+		 * Allow extensions to remove data for tokens and adjust the response.
+		 *
+		 * @since 3.4.0
+		 * @param array $response Array resonse data. Must include messages, num_items_removed, num_items_retained, done.
+		 * @param array $tokens   Array of tokens.
+		 */
+		return apply_filters( 'woocommerce_privacy_erase_personal_data_tokens', $response, $tokens );
+	}
 }
