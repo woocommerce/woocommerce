@@ -89,8 +89,8 @@ abstract class WC_Abstract_Privacy {
 	 * @return array
 	 */
 	public function register_exporters( $exporters = array() ) {
-		foreach ( $this->exporters as $exporter ) {
-			$exporters[] = $exporter;
+		foreach ( $this->exporters as $id => $exporter ) {
+			$exporters[ $id ] = $exporter;
 		}
 		return $exporters;
 	}
@@ -102,8 +102,8 @@ abstract class WC_Abstract_Privacy {
 	 * @return array
 	 */
 	public function register_erasers( $erasers = array() ) {
-		foreach ( $this->erasers as $eraser ) {
-			$erasers[] = $eraser;
+		foreach ( $this->erasers as $id => $eraser ) {
+			$erasers[ $id ] = $eraser;
 		}
 		return $erasers;
 	}
@@ -111,11 +111,12 @@ abstract class WC_Abstract_Privacy {
 	/**
 	 * Add exporter to list of exporters.
 	 *
-	 * @param string $name Exporter name.
+	 * @param string $id       ID of the Exporter.
+	 * @param string $name     Exporter name.
 	 * @param string $callback Exporter callback.
 	 */
-	public function add_exporter( $name, $callback ) {
-		$this->exporters[] = array(
+	public function add_exporter( $id, $name, $callback ) {
+		$this->exporters[ $id ] = array(
 			'exporter_friendly_name' => $name,
 			'callback'               => $callback,
 		);
@@ -123,13 +124,14 @@ abstract class WC_Abstract_Privacy {
 	}
 
 	/**
-	 * Add eraser to list of exporters.
+	 * Add eraser to list of erasers.
 	 *
-	 * @param string $name Exporter name.
+	 * @param string $id       ID of the Eraser.
+	 * @param string $name     Exporter name.
 	 * @param string $callback Exporter callback.
 	 */
-	public function add_eraser( $name, $callback ) {
-		$this->erasers[] = array(
+	public function add_eraser( $id, $name, $callback ) {
+		$this->erasers[ $id ] = array(
 			'eraser_friendly_name' => $name,
 			'callback'             => $callback,
 		);
