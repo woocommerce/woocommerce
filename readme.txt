@@ -274,6 +274,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Ensure coupon amount is always returns as a float value #19889
 * Fix - No update available message after activating subscription that has a valid update. #19831
 * Fix - Include scheduled products in CSV export. #19907
+* Fix - Generator tag actions should be filters. #19946
 * Dev - Added refunded_payment prop to orders for determining if payment was refunded via API. #18196
 * Dev - Added extra params to `woocommerce_order_get_downloadable_items`. #18408
 * Dev - Store shipping method ID and instance ID in separate fields instead of both in one serialized field. #18483
