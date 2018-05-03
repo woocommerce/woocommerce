@@ -174,62 +174,50 @@ jQuery( function( $ ) {
 		}
 	} ).find( 'input#stripe_create_account, input#ppec_paypal_reroute_requests' ).change();
 
-	$( '.wc-setup-content' ).on( 'change', '[data-plugins]', function() {
+	function addPlugins( bySlug, $el, hover ) {
+		var plugins = $el.data( 'plugins' );
+		for ( var i in Array.isArray( plugins ) ? plugins : [] ) {
+			var slug = plugins[ i ].slug;
+			bySlug[ slug ] = bySlug[ slug ] ||
+				$( '<span class="plugin-install-info-list-item">' )
+					.append( '<a href="https://wordpress.org/plugins/' + slug + '/" target="_blank">' + plugins[ i ].name + '</a>' );
+
+			bySlug[ slug ].find( 'a' )
+				.on( 'mouseenter mouseleave', ( function( $hover, event ) {
+					$hover.toggleClass( 'plugin-install-source', 'mouseenter' === event.type );
+				} ).bind( null, hover ? $el.closest( hover ) : $el ) );
+		}
+	}
+
+	function updatePluginInfo() {
 		var pluginLinkBySlug = {};
 
-		function addPlugins( $el, hover ) {
-			var plugins = $el.data( 'plugins' );
-			if ( ! Array.isArray( plugins ) ) {
-				return;
-			}
-
-			for ( var i in plugins ) {
-				var slug = plugins[ i ].slug;
-				if ( ! pluginLinkBySlug[ slug ] ) {
-					pluginLinkBySlug[ slug ] =
-						$( '<span class="plugin-install-info-list-item">' )
-							.append( '<a href="https://wordpress.org/plugins/' + slug + '/" target="_blank">' + plugins[ i ].name + '</a>' );
-				}
-
-				var $hover = hover ? $el.closest( hover ) : $el;
-				pluginLinkBySlug[ slug ].find( 'a' )
-					.on( 'mouseenter', ( function( $hover ) {
-						$hover.addClass( 'plugin-install-source' );
-					} ).bind( null, $hover ) )
-					.on( 'mouseleave', ( function( $hover ) {
-						$hover.removeClass( 'plugin-install-source' );
-					} ).bind( null, $hover ) );
-			}
-		}
-
 		$( '.wc-wizard-service-enable input:checked' ).each( function() {
-			addPlugins( $( this ), '.wc-wizard-service-item' );
+			addPlugins( pluginLinkBySlug, $( this ), '.wc-wizard-service-item' );
 
 			var $container = $( this ).closest( '.wc-wizard-service-item' );
 			$container.find( 'input.payment-checkbox-input:checked' ).each( function() {
-				addPlugins( $( this ), '.wc-wizard-service-settings' );
+				addPlugins( pluginLinkBySlug, $( this ), '.wc-wizard-service-settings' );
 			} );
 			$container.find( '.wc-wizard-shipping-method-select .method' ).each( function() {
 				var $this = $( this );
 				if ( 'live_rates' === $this.val()  ) {
-					addPlugins( $this, '.wc-wizard-service-item' );
+					addPlugins( pluginLinkBySlug, $this, '.wc-wizard-service-item' );
 				}
 			} );
 		} );
 
 		$( '.recommended-item-checkbox:checked' ).each( function() {
-			addPlugins( $( this ), '.recommended-item' );
+			addPlugins( pluginLinkBySlug, $( this ), '.recommended-item' );
 		} );
 
-		// Render list of plugins.
-		if ( Object.keys( pluginLinkBySlug ).length ) {
-			$( 'span.plugin-install-info' ).show();
-			var $list = $( 'span.plugin-install-info-list' ).empty();
-			for ( var slug in pluginLinkBySlug ) {
-				$list.append( pluginLinkBySlug[ slug ] );
-			}
-		} else {
-			$( 'span.plugin-install-info' ).hide();
+		var $list = $( 'span.plugin-install-info-list' ).empty();
+		for ( var slug in pluginLinkBySlug ) {
+			$list.append( pluginLinkBySlug[ slug ] );
 		}
-	} ).find( '[data-plugins]' ).change();
+		$( 'span.plugin-install-info' ).toggle( $list.length > 0 );
+	}
+
+	updatePluginInfo();
+	$( '.wc-setup-content' ).on( 'change', '[data-plugins]', updatePluginInfo );
 } );
