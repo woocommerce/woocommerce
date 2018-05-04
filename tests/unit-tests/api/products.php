@@ -53,11 +53,6 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'DUMMY SKU', $products[0]['sku'] );
 		$this->assertEquals( 'Dummy External Product', $products[1]['name'] );
 		$this->assertEquals( 'DUMMY EXTERNAL SKU', $products[1]['sku'] );
-
-		foreach ( $products as $key => $value ) {
-			$product = wc_get_product( $value['id'] );
-			$product->delete( true );
-		}
 	}
 
 	/**
@@ -70,13 +65,6 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		WC_Helper_Product::create_simple_product();
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products' ) );
 		$this->assertEquals( 401, $response->get_status() );
-
-		// Remove product.
-		wp_set_current_user( $this->user );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products' ) );
-		$products = $response->get_data();
-		$product  = wc_get_product( $products[0]['id'] );
-		$product->delete( true );
 	}
 
 	/**
@@ -101,7 +89,6 @@ class Products_API extends WC_REST_Unit_Test_Case {
 				'regular_price' => 10,
 			), $product
 		);
-		$simple->delete( true );
 	}
 
 	/**
@@ -114,7 +101,6 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$product  = WC_Helper_Product::create_simple_product();
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products/' . $product->get_id() ) );
 		$this->assertEquals( 401, $response->get_status() );
-		$product->delete( true );
 	}
 
 	/**
@@ -134,7 +120,6 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$response   = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products' ) );
 		$variations = $response->get_data();
 		$this->assertEquals( 0, count( $variations ) );
-		$product->delete( true );
 	}
 
 	/**
@@ -149,7 +134,6 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 401, $response->get_status() );
-		$product->delete( true );
 	}
 
 	/**
@@ -263,7 +247,6 @@ class Products_API extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 'Test API Update', $data['button_text'] );
 		$this->assertEquals( 'http://automattic.com', $data['external_url'] );
-		$product->delete( true );
 	}
 
 	/**
@@ -282,7 +265,6 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		);
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 401, $response->get_status() );
-		$product->delete( true );
 	}
 
 	/**
@@ -301,7 +283,6 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		);
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 400, $response->get_status() );
-		$product->delete( true );
 	}
 
 	/**
@@ -473,8 +454,6 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$data     = $response->get_data();
 
 		$this->assertEquals( 3, count( $data ) );
-		$product->delete( true );
-		$product_2->delete( true );
 	}
 
 	/*
@@ -525,11 +504,6 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$products = $response->get_data();
 
 		$this->assertEquals( 8, count( $products ) );
-
-		foreach ( $products as $key => $value ) {
-			$product = wc_get_product( $value['id'] );
-			$product->delete( true );
-		}
 	}
 
 	/**
@@ -545,7 +519,5 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 		$this->assertEquals( 65, count( $properties ) );
-		$product->delete( true );
 	}
-
 }

@@ -38,16 +38,6 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Cleanup.
-	 */
-	public function stoppit_and_tidyup() {
-		foreach ( $this->orders as $order ) {
-			wp_delete_post( $order->get_id(), true );
-		}
-		$this->orders = array();
-	}
-
-	/**
 	 * Test getting all orders.
 	 * @since 3.0.0
 	 */
@@ -64,7 +54,6 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 10, count( $orders ) );
-		$this->stoppit_and_tidyup();
 	}
 
 	/**
@@ -77,7 +66,6 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$this->orders[] = WC_Helper_Order::create_order();
 		$response       = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/orders' ) );
 		$this->assertEquals( 401, $response->get_status() );
-		$this->stoppit_and_tidyup();
 	}
 
 	/**
@@ -102,8 +90,6 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'value', $data['meta_data'][0]->value );
 		$this->assertEquals( 'key2', $data['meta_data'][1]->key );
 		$this->assertEquals( 'value2', $data['meta_data'][1]->value );
-
-		$this->stoppit_and_tidyup();
 	}
 
 	/**
@@ -116,7 +102,6 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$this->orders[] = $order;
 		$response       = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/orders/' . $order->get_id() ) );
 		$this->assertEquals( 401, $response->get_status() );
-		$this->stoppit_and_tidyup();
 	}
 
 	/**
@@ -207,9 +192,6 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $order->get_shipping_country(), $data['shipping']['country'] );
 		$this->assertEquals( 1, count( $data['line_items'] ) );
 		$this->assertEquals( 1, count( $data['shipping_lines'] ) );
-
-		wp_delete_post( $product->get_id(), true );
-		wp_delete_post( $data['id'], true );
 	}
 
 	/**
@@ -268,7 +250,6 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 		$this->assertEquals( 400, $response->get_status() );
-		wp_delete_post( $product->get_id(), true );
 	}
 
 	/**
@@ -296,8 +277,6 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'test-update', $data['payment_method'] );
 		$this->assertEquals( 'Fish', $data['billing']['first_name'] );
 		$this->assertEquals( 'Face', $data['billing']['last_name'] );
-
-		WC_Helper_Order::delete_order( $order->get_id() );
 	}
 
 	/**
@@ -338,8 +317,6 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertTrue( empty( $data['fee_lines'] ) );
-
-		WC_Helper_Order::delete_order( $order->get_id() );
 	}
 
 	/**
@@ -379,8 +356,6 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( 1, $data['coupon_lines'] );
 		$this->assertEquals( '45.00', $data['total'] );
-
-		WC_Helper_Order::delete_order( $order->get_id() );
 	}
 
 	/**
@@ -428,8 +403,6 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertTrue( empty( $data['coupon_lines'] ) );
 		$this->assertEquals( '50.00', $data['total'] );
-
-		WC_Helper_Order::delete_order( $order->get_id() );
 	}
 
 	/**
@@ -452,7 +425,6 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		);
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 401, $response->get_status() );
-		WC_Helper_Order::delete_order( $order->get_id() );
 	}
 
 	/**
@@ -500,7 +472,6 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 401, $response->get_status() );
-		wp_delete_post( $order->get_id(), true );
 	}
 
 	/**
@@ -552,10 +523,6 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 		$this->assertEquals( 1, count( $data ) );
-
-		wp_delete_post( $order1->get_id(), true );
-		wp_delete_post( $order2->get_id(), true );
-		wp_delete_post( $order3->get_id(), true );
 	}
 
 	/**
@@ -572,6 +539,5 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 42, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
-		wp_delete_post( $order->get_id(), true );
 	}
 }

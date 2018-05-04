@@ -30,16 +30,6 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Delete zones.
-	 */
-	public function tearDown() {
-		parent::tearDown();
-		foreach ( $this->zones as $zone ) {
-			$zone->delete();
-		}
-	}
-
-	/**
 	 * Helper method to create a Shipping Zone.
 	 *
 	 * @param string $name Zone name.
