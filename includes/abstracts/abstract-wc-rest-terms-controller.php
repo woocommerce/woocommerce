@@ -381,6 +381,9 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 			$args['slug'] = $request['slug'];
 		}
 		if ( isset( $request['parent'] ) ) {
+			if ( ! is_taxonomy_hierarchical( $taxonomy ) ) {
+				return new WP_Error( 'woocommerce_rest_taxonomy_not_hierarchical', __( 'Can not set resource parent, taxonomy is not hierarchical.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
 			$args['parent'] = $request['parent'];
 		}
 
@@ -475,6 +478,9 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 			$prepared_args['slug'] = $request['slug'];
 		}
 		if ( isset( $request['parent'] ) ) {
+			if ( ! is_taxonomy_hierarchical( $taxonomy ) ) {
+				return new WP_Error( 'woocommerce_rest_taxonomy_not_hierarchical', __( 'Can not set resource parent, taxonomy is not hierarchical.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
 			$prepared_args['parent'] = $request['parent'];
 		}
 
