@@ -33,8 +33,7 @@ function woo_dash_plugins_notice() {
  */
 function woo_dash_plugins_loaded() {
 	if (
-		! defined( 'GUTENBERG_DEVELOPMENT_MODE' ) ||
-		! defined( 'GUTENBERG_VERSION' ) ||
+		! ( defined( 'GUTENBERG_DEVELOPMENT_MODE' ) || defined( 'GUTENBERG_VERSION' ) ) ||
 		! class_exists( 'WooCommerce' )
 	) {
 		add_action( 'admin_notices', 'woo_dash_plugins_notice' );
