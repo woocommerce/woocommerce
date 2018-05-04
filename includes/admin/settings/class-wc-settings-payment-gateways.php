@@ -153,10 +153,12 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 										break;
 									case 'name':
 										$method_title = $gateway->get_title() ? $gateway->get_title() : __( '(no title)', 'woocommerce' );
-										echo '<a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $gateway->id ) ) ) . '">' . esc_html( $method_title ) . '</a>';
+										echo '<a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $gateway->id ) ) ) . '" class="wc-payment-gateway-method-title">' . wp_kses_post( $gateway->get_method_title() ) . '</a>';
+										if ( $method_title !== $gateway->get_method_title() ) {
+											echo '<span class="wc-payment-gateway-method-name">&nbsp;&ndash;&nbsp;' . esc_html( $method_title ) . '</span>';
+										}
 										break;
 									case 'description':
-										echo '<strong class="wc-payment-gateway-method-name">' . wp_kses_post( $gateway->get_method_title() ) . '</strong>';
 										echo wp_kses_post( $gateway->get_method_description() );
 										break;
 									case 'action':

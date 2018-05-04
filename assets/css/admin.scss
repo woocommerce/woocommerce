@@ -2940,7 +2940,7 @@ table.wc_shipping {
 		}
 	}
 	.wc-payment-gateway-method-name {
-		display: block;
+		font-weight: normal;
 	}
 	.wc-email-settings-table-name {
 		font-weight: 700;
@@ -2949,6 +2949,13 @@ table.wc_shipping {
 			color: #999;
 			margin: 0 0 0 4px !important;
 		}
+	}
+	.wc-payment-gateway-method-toggle-enabled,
+	.wc-payment-gateway-method-toggle-disabled {
+		padding-top: 1px;
+		display: block;
+		outline: 0;
+		box-shadow: none;
 	}
 	.wc-email-settings-table-status {
 		text-align: center;
@@ -3305,6 +3312,9 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 			right: auto;
 			left: 0;
 		}
+	}
+	&.woocommerce-input-toggle--loading {
+		opacity: 0.5;
 	}
 }
 
