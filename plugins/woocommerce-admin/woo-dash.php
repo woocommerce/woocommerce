@@ -32,7 +32,11 @@ function woo_dash_plugins_notice() {
  * Set up the plugin, only if we can detect both Gutenberg and WooCommerce
  */
 function woo_dash_plugins_loaded() {
-	if ( ! defined( 'GUTENBERG_VERSION' ) || ! class_exists( 'WooCommerce' ) ) {
+	if (
+		! defined( 'GUTENBERG_DEVELOPMENT_MODE' ) ||
+		! defined( 'GUTENBERG_VERSION' ) ||
+		! class_exists( 'WooCommerce' )
+	) {
 		add_action( 'admin_notices', 'woo_dash_plugins_notice' );
 		return;
 	}
