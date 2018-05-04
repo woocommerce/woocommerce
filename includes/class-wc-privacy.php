@@ -92,7 +92,7 @@ class WC_Privacy extends WC_Abstract_Privacy {
 			'</ul>' .
 			'<p>' . __( 'If you create an account, we will store your name, address, email and phone number, which will be used to populate the checkout for future orders.', 'woocommerce' ) . '</p>' .
 			'<p>' . __( 'We generally store information about you for as long as we need the information for the purposes for which we collect and use it, and we are not legally required to continue to keep it. For example, we will store order information for XXX years for tax and accounting purposes. This includes your name, email address and billing and shipping addresses.', 'woocommerce' ) . '</p>' .
-			'<p>' . __( 'We will also store comments or reviews, if you chose to leave them.', 'woocommerce' ) . '</p>' .
+			'<p>' . __( 'We will also store comments or reviews, if you choose to leave them.', 'woocommerce' ) . '</p>' .
 			'<h2>' . __( 'Who on our team has access', 'woocommerce' ) . '</h2>' .
 			'<p>' . __( 'Members of our team have access to the information you provide us. For example, both Administrators and Shop Managers can access:', 'woocommerce' ) . '</p>' .
 			'<ul>' .
