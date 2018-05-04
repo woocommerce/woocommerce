@@ -513,6 +513,10 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 				break;
 
 			case 'reset_tracking':
+				if ( ! class_exists( 'WC_Tracker' ) ) {
+					include_once WC_ABSPATH . 'includes/class-wc-tracker.php';
+				}
+				WC_Tracker::opt_out_request();
 				delete_option( 'woocommerce_allow_tracking' );
 				WC_Admin_Notices::add_notice( 'tracking' );
 				$message = __( 'Usage tracking settings successfully reset.', 'woocommerce' );
