@@ -184,7 +184,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 			'reset_tracking'                     => array(
 				'name'   => __( 'Reset usage tracking', 'woocommerce' ),
 				'button' => __( 'Reset', 'woocommerce' ),
-				'desc'   => __( 'This will reset your usage tracking settings, causing it to show the opt-in banner again and not sending any data.', 'woocommerce' ),
+				'desc'   => __( 'This will reset your usage tracking settings, causing it to show the opt-in banner again and not sending any data. It will also remove any personal data from the woocommerce.com servers.', 'woocommerce' ),
 			),
 			'regenerate_thumbnails'              => array(
 				'name'   => __( 'Regenerate shop thumbnails', 'woocommerce' ),
