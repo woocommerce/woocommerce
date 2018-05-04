@@ -157,7 +157,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				),
 				array(
 					'title' => __( 'Personal data retention', 'woocommerce' ),
-					'desc'  => __( 'Choose how long to retain personal data when it\'s no longer needed for processing. Leave the following options blank to retain this data indefinetely.', 'woocommerce' ),
+					'desc'  => __( 'Choose how long to retain personal data when it\'s no longer needed for processing. Leave the following options blank to retain this data indefinitely.', 'woocommerce' ),
 					'type'  => 'title',
 					'id'    => 'personal_data_retention',
 				),
