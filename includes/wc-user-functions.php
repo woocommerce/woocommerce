@@ -218,10 +218,14 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 	$result         = get_transient( $transient_name );
 
 	if ( false === $result ) {
-		$customer_data = array( $user_id );
+		$customer_data = array();
 
 		if ( $user_id ) {
 			$user = get_user_by( 'id', $user_id );
+
+			if ( version_compare( get_option( 'woocommerce_db_version' ), '3.5.0', '<' ) ) {
+				$customer_data[] = $user_id;
+			}
 
 			if ( isset( $user->user_email ) ) {
 				$customer_data[] = $user->user_email;
@@ -239,19 +243,31 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 			return false;
 		}
 
-		$result = $wpdb->get_col(
-			"
-			SELECT im.meta_value FROM {$wpdb->posts} AS p
-			INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
-			INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
-			INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
-			WHERE p.post_status IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
-			AND pm.meta_key IN ( '_billing_email', '_customer_user' )
-			AND im.meta_key IN ( '_product_id', '_variation_id' )
-			AND im.meta_value != 0
-			AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )
-		"
-		); // WPCS: unprepared SQL ok.
+		if ( version_compare( get_option( 'woocommerce_db_version' ), '3.5.0', '>=' ) && $user_id ) {
+			// Since WC 3.5 wp_posts.post_author is used to store the ID of the customer who placed an order.
+			$query = "SELECT im.meta_value FROM {$wpdb->posts} AS p
+				INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
+				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
+				INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
+				WHERE p.post_status IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
+				AND p.post_author = {$user_id}
+				AND pm.meta_key = '_billing_email'
+				AND im.meta_key IN ( '_product_id', '_variation_id' )
+				AND im.meta_value != 0
+				AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )";
+		} else {
+			$query = "SELECT im.meta_value FROM {$wpdb->posts} AS p
+				INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
+				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
+				INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
+				WHERE p.post_status IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
+				AND pm.meta_key IN ( '_billing_email', '_customer_user' )
+				AND im.meta_key IN ( '_product_id', '_variation_id' )
+				AND im.meta_value != 0
+				AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )";
+		}
+
+		$result = $wpdb->get_col( $query ); // WPCS: unprepared SQL ok.
 		$result = array_map( 'absint', $result );
 
 		set_transient( $transient_name, $result, DAY_IN_SECONDS * 30 );
