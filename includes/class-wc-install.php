@@ -1086,8 +1086,9 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	 * @param string $key Plugin relative path. Example: woocommerce/woocommerce.php.
 	 */
 	private static function associate_plugin_file( $plugins, $key ) {
-		$path                = explode( '/', $key );
-		$plugins[ $path[1] ] = $key;
+		$path                 = explode( '/', $key );
+		$filename             = end( $path );
+		$plugins[ $filename ] = $key;
 		return $plugins;
 	}
 
