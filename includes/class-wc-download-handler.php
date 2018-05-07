@@ -98,7 +98,8 @@ class WC_Download_Handler {
 		// Track the download in logs and change remaining/counts.
 		$current_user_id = get_current_user_id();
 		$ip_address      = WC_Geolocation::get_ip_address();
-		$download->track_download( $current_user_id > 0 ? $current_user_id : null, ! empty( $ip_address ) ? $ip_address : null );
+		$range_download  = isset( $_SERVER['HTTP_RANGE'] );
+		$download->track_download( $current_user_id > 0 ? $current_user_id : null, ! empty( $ip_address ) ? $ip_address : null, $range_download );
 
 		self::download( $product->get_file_download_path( $download->get_download_id() ), $download->get_product_id() );
 	}
@@ -198,10 +199,17 @@ class WC_Download_Handler {
 	/**
 	 * Redirect to a file to start the download.
 	 *
-	 * @param string $file_path File path.
-	 * @param string $filename  File name.
+	 * @param string $file_path             File path.
+	 * @param string $filename              File name.
+	 * @param bool   $include_content_legth Whether to include Content-Length header.
 	 */
-	public static function download_file_redirect( $file_path, $filename = '' ) {
+	public static function download_file_redirect( $file_path, $filename = '', $include_content_legth = false ) {
+		// In case function is called as a fallback for force download, content length was not included yet.
+		// TODO: test.
+		if ( $include_content_legth ) {
+			$size   = @filesize( $file_path );
+			header( 'Content-Length: ' . $size );
+		}
 		header( 'Location: ' . $file_path );
 		exit;
 	}
@@ -284,6 +292,66 @@ class WC_Download_Handler {
 	}
 
 	/**
+	 * Parses the HTTP_RANGE request from iOS devices, sends out headers to advertise support for the request and
+	 * return start position and legth of the file chunk to read based on the request.
+	 *
+	 * TODO: split to smaller functions? Think of a better name. Test.
+	 * Code taken from https://mu.trac.wordpress.org/ticket/1128.
+	 *
+	 * @param  string $file_path Path to the file to download.
+	 * @return array(int, int)   Byte offset where to start reading the file and length of the file chunk to read based on request.
+	 */
+	protected static function handle_range_download( $file_path ) {
+		$size   = @filesize( $file_path );
+		$length = $size;
+		$start  = 0;
+		$end    = $size - 1;
+
+		if ( isset( $_SERVER['HTTP_RANGE'] ) ) {
+			$c_start = $start;
+			$c_end   = $end;
+			// Extract the range string.
+			list( , $range ) = explode( '=', $_SERVER['HTTP_RANGE'], 2 );
+			// Make sure the client hasn't sent us a multibyte range.
+			if ( strpos( $range, ',' ) !== false ) {
+				header( 'HTTP/1.1 416 Requested Range Not Satisfiable' );
+				header( "Content-Range: bytes $start-$end/$size" );
+				exit;
+			}
+			// If the range starts with an '-' we start from the beginning
+			// If not, we forward the file pointer
+			// And make sure to get the end byte if spesified.
+			if ( '-' === $range[0] ) {
+				// The n-number of the last bytes is requested.
+				$c_start = $size - substr( $range, 1 );
+			} else {
+				$range  = explode( '-', $range );
+				$c_start = $range[0];
+				$c_end   = ( isset( $range[1] ) && is_numeric( $range[1] ) ) ? $range[1] : $size;
+			}
+
+			// Check the range and make sure it's treated according to the specs: http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html.
+			// End bytes can not be larger than $end.
+			$c_end = ( $c_end > $end ) ? $end : $c_end;
+			// Validate the requested range and return an error if it's not correct.
+			if ( $c_start > $c_end || $c_start > $size - 1 || $c_end >= $size ) {
+				header( 'HTTP/1.1 416 Requested Range Not Satisfiable' );
+				header( "Content-Range: bytes $start-$end/$size" );
+				exit;
+			}
+			$start  = $c_start;
+			$end    = $c_end;
+			$length = $end - $start + 1;
+
+			header( 'HTTP/1.1 206 Partial Content' );
+			header( "Accept-Ranges: 0-$size" );
+			header( "Content-Range: bytes $start-$end/$size" );
+			header( "Content-Length: $length" );
+		}
+		return array( $start, $length );
+	}
+
+	/**
 	 * Force download - this is the default method.
 	 *
 	 * @param string $file_path File path.
@@ -292,9 +360,10 @@ class WC_Download_Handler {
 	public static function download_file_force( $file_path, $filename ) {
 		$parsed_file_path = self::parse_file_path( $file_path );
 
-		self::download_headers( $parsed_file_path['file_path'], $filename );
+		self::download_headers( $parsed_file_path['file_path'], $filename, false );
+		list( $start, $length ) = self::handle_range_download( $parsed_file_path['file_path'] );
 
-		if ( ! self::readfile_chunked( $parsed_file_path['file_path'] ) ) {
+		if ( ! self::readfile_chunked( $parsed_file_path['file_path'], $start, $length ) ) {
 			if ( $parsed_file_path['remote_file'] ) {
 				self::download_file_redirect( $file_path );
 			} else {
@@ -329,10 +398,11 @@ class WC_Download_Handler {
 	/**
 	 * Set headers for the download.
 	 *
-	 * @param string $file_path File path.
-	 * @param string $filename  File name.
+	 * @param string $file_path              File path.
+	 * @param string $filename               File name.
+	 * @param bool   $include_content_length Whether to include Content-Length header.
 	 */
-	private static function download_headers( $file_path, $filename ) {
+	private static function download_headers( $file_path, $filename, $include_content_length = true ) {
 		self::check_server_config();
 		self::clean_buffers();
 		wc_nocache_headers();
@@ -344,7 +414,7 @@ class WC_Download_Handler {
 		header( 'Content-Transfer-Encoding: binary' );
 
 		$size = @filesize( $file_path ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
-		if ( $size ) {
+		if ( $size && $include_content_length ) {
 			header( 'Content-Length: ' . $size );
 		}
 	}
@@ -385,21 +455,39 @@ class WC_Download_Handler {
 	 *
 	 * Reads file in chunks so big downloads are possible without changing PHP.INI - http://codeigniter.com/wiki/Download_helper_for_large_files/.
 	 *
-	 * @param  string $file File.
+	 * @param  string $file   File.
+	 * @param  int    $start  Byte offset/position of the beginning from which to read from the file.
+	 * @param  int    $length Length of the chunk to be read from the file in bytes, 0 means full file.
 	 * @return bool Success or fail
 	 */
-	public static function readfile_chunked( $file ) {
+	public static function readfile_chunked( $file, $start = 0, $length = 0 ) {
 		if ( ! defined( 'WC_CHUNK_SIZE' ) ) {
 			define( 'WC_CHUNK_SIZE', 1024 * 1024 );
 		}
 		$handle = @fopen( $file, 'r' ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
 
+		$size = filesize( $file );
+		if ( ! $length ) {
+			$length = $size;
+		}
+		$end = $start + $length - 1;
+
 		if ( false === $handle ) {
 			return false;
 		}
 
-		while ( ! @feof( $handle ) ) { // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
-			echo @fread( $handle, (int) WC_CHUNK_SIZE ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.XSS.EscapeOutput.OutputNotEscaped, WordPress.WP.AlternativeFunctions.file_system_read_fread
+		@fseek( $handle, $start ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+		$read_length = WC_CHUNK_SIZE;
+		$p = @ftell( $handle ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+
+		while ( ! @feof( $handle ) && $p <= $end ) { // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+			// Don't run past the end of file.
+			if ( $p + $read_length > $end ) {
+				$read_length = $end - $p + 1;
+			}
+
+			echo @fread( $handle, (int) $read_length ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.XSS.EscapeOutput.OutputNotEscaped, WordPress.WP.AlternativeFunctions.file_system_read_fread
+			$p = @ftell( $handle ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
 
 			if ( ob_get_length() ) {
 				ob_flush();

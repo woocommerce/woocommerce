@@ -291,12 +291,17 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	 * @param int    $user_id         Id of the user performing the download.
 	 * @param string $user_ip_address IP Address of the user performing the download.
 	 */
-	public function track_download( $user_id = null, $user_ip_address = null ) {
+	public function track_download( $user_id = null, $user_ip_address = null, $range_download = false ) {
 		global $wpdb;
 
 		// Must have a permission_id to track download log.
 		if ( ! ( $this->get_id() > 0 ) ) {
 			throw new Exception( __( 'Invalid permission ID.', 'woocommerce' ) );
+		}
+
+		// TODO: how to log range downloads?
+		if ( $range_download ) {
+			return;
 		}
 
 		// Increment download count, and decrement downloads remaining.
