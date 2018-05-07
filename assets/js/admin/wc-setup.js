@@ -207,7 +207,7 @@ jQuery( function( $ ) {
 			} );
 		} );
 
-		$( '.recommended-item-checkbox:checked' ).each( function() {
+		$( '.recommended-item input:checked' ).each( function() {
 			addPlugins( pluginLinkBySlug, $( this ), '.recommended-item' );
 		} );
 
