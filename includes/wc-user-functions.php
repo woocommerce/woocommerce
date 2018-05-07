@@ -494,7 +494,7 @@ function wc_get_customer_order_count( $user_id ) {
 }
 
 /**
- * Reset _customer_user on orders when a user is deleted.
+ * Reset customer ID on orders when a user is deleted.
  *
  * @param int $user_id User ID.
  */
@@ -507,6 +507,21 @@ function wc_reset_order_customer_id_on_deleted_user( $user_id ) {
 			'meta_value' => $user_id,
 		)
 	); // WPCS: slow query ok.
+
+	$post_types              = (array) apply_filters( 'woocommerce_reset_order_customer_id_post_types', array( 'shop_order' ) );
+	$post_types_placeholders = implode( ', ', array_fill( 0, count( $post_types ), '%s' ) );
+
+	// Since WC 3.5, the customer ID is stored both in the _customer_user postmeta and in the post_author field.
+	// In future versions of WC, the plan is to use only post_author and stop using _customer_user, but for now
+	// we have to update both places.
+	$wpdb->query(
+		// phpcs:disable WordPress.WP.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		$wpdb->prepare(
+			"UPDATE {$wpdb->posts} SET `post_author` = 0 WHERE post_type IN ({$post_types_placeholders}) AND post_author = {$user_id}",
+			$post_types
+		)
+		// phpcs:enable
+	);
 }
 
 add_action( 'deleted_user', 'wc_reset_order_customer_id_on_deleted_user' );
