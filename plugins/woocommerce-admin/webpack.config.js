@@ -53,11 +53,13 @@ coreGlobals.forEach( ( name ) => {
 
 const webpackConfig = {
 	mode: NODE_ENV,
-	entry: './js/src/index.js',
+	entry: {
+		index: './js/src/index.js',
+	},
 	output: {
 		path: path.resolve( 'js' ),
-		filename: 'index.js',
-		library: [ 'wp', 'woodash' ],
+		filename: '[name].js',
+		library: [ 'wp', 'woodash', '[name]' ],
 		libraryTarget: 'this',
 	},
 	externals,

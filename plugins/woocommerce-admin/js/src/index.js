@@ -23,14 +23,7 @@ render(
 	document.getElementById( 'root' )
 );
 
-setTimeout( function() {
-	function editText( string ) {
-		return `Also filtered: ${ string }`;
-	}
-	addFilter( 'woodash.example', 'editText', editText );
-}, 1500 );
-
-function editText2( string ) {
+function editText( string ) {
 	return `Filtered: ${ string }`;
 }
-addFilter( 'woodash.example2', 'editText2', editText2 );
+addFilter( 'woodash.example', 'editText', editText );

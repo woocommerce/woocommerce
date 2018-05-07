@@ -1,12 +1,25 @@
-.wd_widget {
-	display: flex;
+
+.woo-dashboard {
+	display: grid;
+	grid-template-columns: auto 300px;
+	grid-gap: 0 40px;
+}
+
+.woo-dash__secondary {
 	background: white;
 	border: 1px solid rgba( black, 0.2 );
 	padding: 2em;
-	align-items: center;
-	text-align: center;
 }
 
-.wd_widget-item {
+.woo-dash__widget {
+	display: flex;
+	align-items: center;
+	text-align: center;
+	background: white;
+	border: 1px solid rgba( black, 0.2 );
+	padding: 2em;
+}
+
+.woo-dash__widget-item {
 	flex: 1;
 }
