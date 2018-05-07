@@ -98,7 +98,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</table>
 			</td>
 		</tr>
-	<?php do_action( 'woocommerce_shipping_zone_inside_bottom_methods_table' ); ?>
+		<?php do_action( 'woocommerce_shipping_zone_inside_bottom_methods_table' ); ?>
 	</tbody>
 </table>
 
