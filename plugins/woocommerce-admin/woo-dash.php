@@ -16,13 +16,37 @@ if ( ! defined( 'WOO_DASH_APP' ) ) {
 	define( 'WOO_DASH_APP', 'woo-dash-app' );
 }
 
-// @TODO check for Gutenberg + WooCommerce
+/**
+ * Notify users of the plugin requirements
+ */
+function woo_dash_plugins_notice() {
+	$message = sprintf(
+		__( 'The WooCommerce Dashboard feature plugin requires both <a href="%1$s">Gutenberg</a> and <a href="%2$s">WooCommerce</a> to be installed and active.', 'woo-dash' ),
+		'https://wordpress.org/plugins/gutenberg/',
+		'https://wordpress.org/plugins/woocommerce/'
+	);
+	printf( '<div class="error"><p>%s</p></div>', $message ); /* WPCS: xss ok. */
+}
 
-// Some common utilities
-require_once dirname( __FILE__ ) . '/lib/common.php';
+/**
+ * Set up the plugin, only if we can detect both Gutenberg and WooCommerce
+ */
+function woo_dash_plugins_loaded() {
+	if (
+		! ( defined( 'GUTENBERG_DEVELOPMENT_MODE' ) || defined( 'GUTENBERG_VERSION' ) ) ||
+		! class_exists( 'WooCommerce' )
+	) {
+		add_action( 'admin_notices', 'woo_dash_plugins_notice' );
+		return;
+	}
 
-// Register script files
-require_once dirname( __FILE__ ) . '/lib/client-assets.php';
+	// Some common utilities
+	require_once dirname( __FILE__ ) . '/lib/common.php';
 
-// Create the Admin pages
-require_once dirname( __FILE__ ) . '/lib/admin.php';
+	// Register script files
+	require_once dirname( __FILE__ ) . '/lib/client-assets.php';
+
+	// Create the Admin pages
+	require_once dirname( __FILE__ ) . '/lib/admin.php';
+}
+add_action( 'plugins_loaded', 'woo_dash_plugins_loaded' );
