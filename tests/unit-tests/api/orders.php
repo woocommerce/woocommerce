@@ -19,9 +19,11 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	public function setUp() {
 		parent::setUp();
 		$this->endpoint = new WC_REST_Orders_Controller();
-		$this->user = $this->factory->user->create( array(
-			'role' => 'administrator',
-		) );
+		$this->user     = $this->factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
 	}
 
 	/**
@@ -33,16 +35,6 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( '/wc/v2/orders', $routes );
 		$this->assertArrayHasKey( '/wc/v2/orders/batch', $routes );
 		$this->assertArrayHasKey( '/wc/v2/orders/(?P<id>[\d]+)', $routes );
-	}
-
-	/**
-	 * Cleanup.
-	 */
-	public function stoppit_and_tidyup() {
-		foreach ( $this->orders as $order ) {
-			wp_delete_post( $order->get_id(), true );
-		}
-		$this->orders = array();
 	}
 
 	/**
@@ -62,7 +54,6 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 10, count( $orders ) );
-		$this->stoppit_and_tidyup();
 	}
 
 	/**
@@ -75,7 +66,6 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$this->orders[] = WC_Helper_Order::create_order();
 		$response       = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/orders' ) );
 		$this->assertEquals( 401, $response->get_status() );
-		$this->stoppit_and_tidyup();
 	}
 
 	/**
@@ -84,7 +74,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_item() {
 		wp_set_current_user( $this->user );
-		$order          = WC_Helper_Order::create_order();
+		$order = WC_Helper_Order::create_order();
 		$order->add_meta_data( 'key', 'value' );
 		$order->add_meta_data( 'key2', 'value2' );
 		$order->save();
@@ -100,8 +90,6 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'value', $data['meta_data'][0]->value );
 		$this->assertEquals( 'key2', $data['meta_data'][1]->key );
 		$this->assertEquals( 'value2', $data['meta_data'][1]->value );
-
-		$this->stoppit_and_tidyup();
 	}
 
 	/**
@@ -114,7 +102,6 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$this->orders[] = $order;
 		$response       = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/orders/' . $order->get_id() ) );
 		$this->assertEquals( 401, $response->get_status() );
-		$this->stoppit_and_tidyup();
 	}
 
 	/**
@@ -135,46 +122,48 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 		$product = WC_Helper_Product::create_simple_product();
 		$request = new WP_REST_Request( 'POST', '/wc/v2/orders' );
-		$request->set_body_params( array(
-			'payment_method' => 'bacs',
-			'payment_method_title' => 'Direct Bank Transfer',
-			'set_paid' => true,
-			'billing' => array(
-				'first_name' => 'John',
-				'last_name'  => 'Doe',
-				'address_1'  => '969 Market',
-				'address_2'  => '',
-				'city'       => 'San Francisco',
-				'state'      => 'CA',
-				'postcode'   => '94103',
-				'country'    => 'US',
-				'email'      => 'john.doe@example.com',
-				'phone'      => '(555) 555-5555',
-			),
-			'shipping' => array(
-				'first_name' => 'John',
-				'last_name'  => 'Doe',
-				'address_1'  => '969 Market',
-				'address_2'  => '',
-				'city'       => 'San Francisco',
-				'state'      => 'CA',
-				'postcode'   => '94103',
-				'country'    => 'US',
-			),
-			'line_items' => array(
-				array(
-					'product_id' => $product->get_id(),
-					'quantity'   => 2,
+		$request->set_body_params(
+			array(
+				'payment_method'       => 'bacs',
+				'payment_method_title' => 'Direct Bank Transfer',
+				'set_paid'             => true,
+				'billing'              => array(
+					'first_name' => 'John',
+					'last_name'  => 'Doe',
+					'address_1'  => '969 Market',
+					'address_2'  => '',
+					'city'       => 'San Francisco',
+					'state'      => 'CA',
+					'postcode'   => '94103',
+					'country'    => 'US',
+					'email'      => 'john.doe@example.com',
+					'phone'      => '(555) 555-5555',
 				),
-			),
-			'shipping_lines' => array(
-				array(
-					'method_id'    => 'flat_rate',
-					'method_title' => 'Flat rate',
-					'total'        => '10',
+				'shipping'             => array(
+					'first_name' => 'John',
+					'last_name'  => 'Doe',
+					'address_1'  => '969 Market',
+					'address_2'  => '',
+					'city'       => 'San Francisco',
+					'state'      => 'CA',
+					'postcode'   => '94103',
+					'country'    => 'US',
 				),
-			),
-		) );
+				'line_items'           => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 2,
+					),
+				),
+				'shipping_lines'       => array(
+					array(
+						'method_id'    => 'flat_rate',
+						'method_title' => 'Flat rate',
+						'total'        => '10',
+					),
+				),
+			)
+		);
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 		$order    = wc_get_order( $data['id'] );
@@ -203,9 +192,6 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $order->get_shipping_country(), $data['shipping']['country'] );
 		$this->assertEquals( 1, count( $data['line_items'] ) );
 		$this->assertEquals( 1, count( $data['shipping_lines'] ) );
-
-		wp_delete_post( $product->get_id(), true );
-		wp_delete_post( $data['id'], true );
 	}
 
 	/**
@@ -218,51 +204,52 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 
 		// non-existent customer
 		$request = new WP_REST_Request( 'POST', '/wc/v2/orders' );
-		$request->set_body_params( array(
-			'payment_method'       => 'bacs',
-			'payment_method_title' => 'Direct Bank Transfer',
-			'set_paid'             => true,
-			'customer_id'          => 99999,
-			'billing'              => array(
-				'first_name' => 'John',
-				'last_name'  => 'Doe',
-				'address_1'  => '969 Market',
-				'address_2'  => '',
-				'city'       => 'San Francisco',
-				'state'      => 'CA',
-				'postcode'   => '94103',
-				'country'    => 'US',
-				'email'      => 'john.doe@example.com',
-				'phone'      => '(555) 555-5555',
-			),
-			'shipping' => array(
-				'first_name' => 'John',
-				'last_name'  => 'Doe',
-				'address_1'  => '969 Market',
-				'address_2'  => '',
-				'city'       => 'San Francisco',
-				'state'      => 'CA',
-				'postcode'   => '94103',
-				'country'    => 'US',
-			),
-			'line_items' => array(
-				array(
-					'product_id' => $product->get_id(),
-					'quantity'   => 2,
+		$request->set_body_params(
+			array(
+				'payment_method'       => 'bacs',
+				'payment_method_title' => 'Direct Bank Transfer',
+				'set_paid'             => true,
+				'customer_id'          => 99999,
+				'billing'              => array(
+					'first_name' => 'John',
+					'last_name'  => 'Doe',
+					'address_1'  => '969 Market',
+					'address_2'  => '',
+					'city'       => 'San Francisco',
+					'state'      => 'CA',
+					'postcode'   => '94103',
+					'country'    => 'US',
+					'email'      => 'john.doe@example.com',
+					'phone'      => '(555) 555-5555',
 				),
-			),
-			'shipping_lines' => array(
-				array(
-					'method_id'    => 'flat_rate',
-					'method_title' => 'Flat rate',
-					'total'        => 10,
+				'shipping'             => array(
+					'first_name' => 'John',
+					'last_name'  => 'Doe',
+					'address_1'  => '969 Market',
+					'address_2'  => '',
+					'city'       => 'San Francisco',
+					'state'      => 'CA',
+					'postcode'   => '94103',
+					'country'    => 'US',
 				),
-			),
-		) );
+				'line_items'           => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 2,
+					),
+				),
+				'shipping_lines'       => array(
+					array(
+						'method_id'    => 'flat_rate',
+						'method_title' => 'Flat rate',
+						'total'        => 10,
+					),
+				),
+			)
+		);
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 		$this->assertEquals( 400, $response->get_status() );
-		wp_delete_post( $product->get_id(), true );
 	}
 
 	/**
@@ -274,13 +261,15 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 		$order   = WC_Helper_Order::create_order();
 		$request = new WP_REST_Request( 'PUT', '/wc/v2/orders/' . $order->get_id() );
-		$request->set_body_params( array(
-			'payment_method' => 'test-update',
-			'billing' => array(
-				'first_name' => 'Fish',
-				'last_name'  => 'Face',
-			),
-		) );
+		$request->set_body_params(
+			array(
+				'payment_method' => 'test-update',
+				'billing'        => array(
+					'first_name' => 'Fish',
+					'last_name'  => 'Face',
+				),
+			)
+		);
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
@@ -288,8 +277,6 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'test-update', $data['payment_method'] );
 		$this->assertEquals( 'Fish', $data['billing']['first_name'] );
 		$this->assertEquals( 'Face', $data['billing']['last_name'] );
-
-		WC_Helper_Order::delete_order( $order->get_id() );
 	}
 
 	/**
@@ -299,35 +286,37 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_update_order_remove_items() {
 		wp_set_current_user( $this->user );
-		$order   = WC_Helper_Order::create_order();
-		$fee     = new WC_Order_Item_Fee();
-		$fee->set_props( array(
-			'name'       => 'Some Fee',
-			'tax_status' => 'taxable',
-			'total'      => '100',
-			'tax_class'  => '',
-		) );
+		$order = WC_Helper_Order::create_order();
+		$fee   = new WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'       => 'Some Fee',
+				'tax_status' => 'taxable',
+				'total'      => '100',
+				'tax_class'  => '',
+			)
+		);
 		$order->add_item( $fee );
 		$order->save();
 
 		$request  = new WP_REST_Request( 'PUT', '/wc/v2/orders/' . $order->get_id() );
 		$fee_data = current( $order->get_items( 'fee' ) );
 
-		$request->set_body_params( array(
-			'fee_lines' => array(
-				array(
-					'id'   => $fee_data->get_id(),
-					'name' => null,
+		$request->set_body_params(
+			array(
+				'fee_lines' => array(
+					array(
+						'id'   => $fee_data->get_id(),
+						'name' => null,
+					),
 				),
-			),
-		) );
+			)
+		);
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertTrue( empty( $data['fee_lines'] ) );
-
-		WC_Helper_Order::delete_order( $order->get_id() );
 	}
 
 	/**
@@ -337,36 +326,36 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_update_order_add_coupons() {
 		wp_set_current_user( $this->user );
-		$order = WC_Helper_Order::create_order();
+		$order      = WC_Helper_Order::create_order();
 		$order_item = current( $order->get_items() );
-		$coupon = WC_Helper_Coupon::create_coupon( 'fake-coupon' );
+		$coupon     = WC_Helper_Coupon::create_coupon( 'fake-coupon' );
 		$coupon->set_amount( 5 );
 		$coupon->save();
 		$request = new WP_REST_Request( 'PUT', '/wc/v2/orders/' . $order->get_id() );
-		$request->set_body_params( array(
-			'coupon_lines' => array(
-				array(
-					'code'           => 'fake-coupon',
-					'discount_total' => '5',
-					'discount_tax'   => '0',
+		$request->set_body_params(
+			array(
+				'coupon_lines' => array(
+					array(
+						'code'           => 'fake-coupon',
+						'discount_total' => '5',
+						'discount_tax'   => '0',
+					),
 				),
-			),
-			'line_items' => array(
-				array(
-					'id' => $order_item->get_id(),
-					'product_id' => $order_item->get_product_id(),
-					'total' => '35.00',
+				'line_items'   => array(
+					array(
+						'id'         => $order_item->get_id(),
+						'product_id' => $order_item->get_product_id(),
+						'total'      => '35.00',
+					),
 				),
-			),
-		) );
+			)
+		);
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( 1, $data['coupon_lines'] );
 		$this->assertEquals( '45.00', $data['total'] );
-
-		WC_Helper_Order::delete_order( $order->get_id() );
 	}
 
 	/**
@@ -376,9 +365,9 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_update_order_remove_coupons() {
 		wp_set_current_user( $this->user );
-		$order  = WC_Helper_Order::create_order();
+		$order      = WC_Helper_Order::create_order();
 		$order_item = current( $order->get_items() );
-		$coupon = WC_Helper_Coupon::create_coupon( 'fake-coupon' );
+		$coupon     = WC_Helper_Coupon::create_coupon( 'fake-coupon' );
 		$coupon->set_amount( 5 );
 		$coupon->save();
 
@@ -391,29 +380,29 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$request     = new WP_REST_Request( 'PUT', '/wc/v2/orders/' . $order->get_id() );
 		$coupon_data = current( $order->get_items( 'coupon' ) );
 
-		$request->set_body_params( array(
-			'coupon_lines' => array(
-				array(
-					'id'   => $coupon_data->get_id(),
-					'code' => null,
+		$request->set_body_params(
+			array(
+				'coupon_lines' => array(
+					array(
+						'id'   => $coupon_data->get_id(),
+						'code' => null,
+					),
 				),
-			),
-			'line_items' => array(
-				array(
-					'id' => $order_item->get_id(),
-					'product_id' => $order_item->get_product_id(),
-					'total' => '40.00',
+				'line_items'   => array(
+					array(
+						'id'         => $order_item->get_id(),
+						'product_id' => $order_item->get_product_id(),
+						'total'      => '40.00',
+					),
 				),
-			),
-		) );
+			)
+		);
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertTrue( empty( $data['coupon_lines'] ) );
 		$this->assertEquals( '50.00', $data['total'] );
-
-		WC_Helper_Order::delete_order( $order->get_id() );
 	}
 
 	/**
@@ -425,16 +414,17 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( 0 );
 		$order   = WC_Helper_Order::create_order();
 		$request = new WP_REST_Request( 'PUT', '/wc/v2/orders/' . $order->get_id() );
-		$request->set_body_params( array(
-			'payment_method' => 'test-update',
-			'billing' => array(
-				'first_name' => 'Fish',
-				'last_name'  => 'Face',
-			),
-		) );
+		$request->set_body_params(
+			array(
+				'payment_method' => 'test-update',
+				'billing'        => array(
+					'first_name' => 'Fish',
+					'last_name'  => 'Face',
+				),
+			)
+		);
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 401, $response->get_status() );
-		WC_Helper_Order::delete_order( $order->get_id() );
 	}
 
 	/**
@@ -444,13 +434,15 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	public function test_update_order_invalid_id() {
 		wp_set_current_user( $this->user );
 		$request = new WP_REST_Request( 'POST', '/wc/v2/orders/999999' );
-		$request->set_body_params( array(
-			'payment_method' => 'test-update',
-			'billing' => array(
-				'first_name' => 'Fish',
-				'last_name'  => 'Face',
-			),
-		) );
+		$request->set_body_params(
+			array(
+				'payment_method' => 'test-update',
+				'billing'        => array(
+					'first_name' => 'Fish',
+					'last_name'  => 'Face',
+				),
+			)
+		);
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 400, $response->get_status() );
 	}
@@ -461,8 +453,8 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_delete_order() {
 		wp_set_current_user( $this->user );
-		$order    = WC_Helper_Order::create_order();
-		$request  = new WP_REST_Request( 'DELETE', '/wc/v2/orders/' . $order->get_id() );
+		$order   = WC_Helper_Order::create_order();
+		$request = new WP_REST_Request( 'DELETE', '/wc/v2/orders/' . $order->get_id() );
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
@@ -475,12 +467,11 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_delete_order_without_permission() {
 		wp_set_current_user( 0 );
-		$order    = WC_Helper_Order::create_order();
-		$request  = new WP_REST_Request( 'DELETE', '/wc/v2/orders/' . $order->get_id() );
+		$order   = WC_Helper_Order::create_order();
+		$request = new WP_REST_Request( 'DELETE', '/wc/v2/orders/' . $order->get_id() );
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 401, $response->get_status() );
-		wp_delete_post( $order->get_id(), true );
 	}
 
 	/**
@@ -490,7 +481,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_delete_order_invalid_id() {
 		wp_set_current_user( $this->user );
-		$request  = new WP_REST_Request( 'DELETE', '/wc/v2/orders/9999999' );
+		$request = new WP_REST_Request( 'DELETE', '/wc/v2/orders/9999999' );
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 404, $response->get_status() );
@@ -507,18 +498,20 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$order3 = WC_Helper_Order::create_order();
 
 		$request = new WP_REST_Request( 'POST', '/wc/v2/orders/batch' );
-		$request->set_body_params( array(
-			'update' => array(
-				array(
-					'id'             => $order1->get_id(),
-					'payment_method' => 'updated',
+		$request->set_body_params(
+			array(
+				'update' => array(
+					array(
+						'id'             => $order1->get_id(),
+						'payment_method' => 'updated',
+					),
 				),
-			),
-			'delete' => array(
-				$order2->get_id(),
-				$order3->get_id(),
-			),
-		) );
+				'delete' => array(
+					$order2->get_id(),
+					$order3->get_id(),
+				),
+			)
+		);
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
@@ -530,10 +523,6 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 		$this->assertEquals( 1, count( $data ) );
-
-		wp_delete_post( $order1->get_id(), true );
-		wp_delete_post( $order2->get_id(), true );
-		wp_delete_post( $order3->get_id(), true );
 	}
 
 	/**
@@ -550,6 +539,5 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 42, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
-		wp_delete_post( $order->get_id(), true );
 	}
 }
