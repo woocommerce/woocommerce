@@ -110,9 +110,11 @@ jQuery( function( $ ) {
 
 	$( '.wc-wizard-services' ).on( 'change', '.wc-wizard-shipping-method-enable', function() {
 		var checked = $( this ).is( ':checked' );
+		var selectedMethod = $( '.wc-wizard-shipping-method-select .method' ).val();
 
 		$( this )
 			.closest( '.wc-wizard-service-item' )
+			.find( '.' + selectedMethod )
 			.find( '.shipping-method-required-field' )
 			.prop( 'required', checked );
 	} );
