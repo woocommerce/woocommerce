@@ -299,7 +299,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 			throw new Exception( __( 'Invalid permission ID.', 'woocommerce' ) );
 		}
 
-		// TODO: how to log range downloads?
+		// TODO: how to log range downloads?, +test
 		if ( $range_download ) {
 			return;
 		}
