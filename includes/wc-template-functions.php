@@ -717,7 +717,8 @@ function wc_privacy_policy_page_id() {
  * @return bool
  */
 function wc_terms_and_conditions_checkbox_enabled() {
-	return wc_terms_and_conditions_page_id() && wc_get_terms_and_conditions_checkbox_text();
+	$page = get_post( wc_terms_and_conditions_page_id() );
+	return $page && wc_get_terms_and_conditions_checkbox_text();
 }
 
 /**
