@@ -8,7 +8,7 @@ function woo_dash_register_script() {
 		WOO_DASH_APP,
 		woo_dash_url( 'js/index.js' ),
 		[ 'wp-blocks', 'wp-element', 'wp-i18n' ],
-		filemtime( woo_dash_dir_path( '/js/index.js' ) ),
+		filemtime( woo_dash_dir_path( 'js/index.js' ) ),
 		true
 	);
 
@@ -16,7 +16,7 @@ function woo_dash_register_script() {
 		WOO_DASH_APP,
 		woo_dash_url( 'js/style.css' ),
 		[ 'wp-components', 'wp-blocks', 'wp-edit-blocks' ],
-		filemtime( woo_dash_dir_path( '/js/index.js' ) )
+		filemtime( woo_dash_dir_path( 'js/index.js' ) )
 	);
 
 	// Set up the text domain and translations
