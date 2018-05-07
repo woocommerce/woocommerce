@@ -1682,16 +1682,16 @@ class WC_Admin_Setup_Wizard {
 		$img_url     = $item_info['img_url'];
 		$img_alt     = $item_info['img_alt'];
 		?>
-		<li>
-			<label class="recommended-item">
-				<input
-					class="recommended-item-checkbox"
-					type="checkbox"
-					name="<?php echo esc_attr( 'setup_' . $type ); ?>"
-					value="yes"
-					checked
-					data-plugins="<?php echo esc_attr( json_encode( isset( $item_info['plugins'] ) ? $item_info['plugins'] : null ) ); ?>"
-				/>
+		<li class="recommended-item checkbox">
+			<input
+				id="<?php echo esc_attr( 'wc_recommended_' . $type ); ?>"
+				type="checkbox"
+				name="<?php echo esc_attr( 'setup_' . $type ); ?>"
+				value="yes"
+				checked
+				data-plugins="<?php echo esc_attr( json_encode( isset( $item_info['plugins'] ) ? $item_info['plugins'] : null ) ); ?>"
+			/>
+			<label for="<?php echo esc_attr( 'wc_recommended_' . $type ); ?>">
 				<img
 					src="<?php echo esc_url( $img_url ); ?>"
 					class="<?php echo esc_attr( 'recommended-item-icon-' . $type ); ?> recommended-item-icon"
