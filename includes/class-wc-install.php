@@ -1079,7 +1079,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	 */
 	private static function associate_plugin_file( $plugins, $key ) {
 		$path                 = explode( '/', $key );
-		$filename             = array_slice( $path, -1 )[0];
+		$filename             = end( $path );
 		$plugins[ $filename ] = $key;
 		return $plugins;
 	}
