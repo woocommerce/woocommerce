@@ -29,7 +29,7 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 		$this->icon               = apply_filters( 'woocommerce_cheque_icon', '' );
 		$this->has_fields         = false;
 		$this->method_title       = _x( 'Check payments', 'Check payment method', 'woocommerce' );
-		$this->method_description = __( 'Take payments in-person via checks. This offline gateway can also be useful to test purchases.', 'woocommerce' );
+		$this->method_description = __( 'Take payments in person via checks. This offline gateway can also be useful to test purchases.', 'woocommerce' );
 
 		// Load the settings.
 		$this->init_form_fields();
