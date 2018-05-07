@@ -8,9 +8,6 @@ node_modules/
 *.tar.gz
 *.zip
 
-js/index.js
-js/index.js.map
-js/style.css
-js/style.css.map
+dist
 languages/*
 !languages/README.md
