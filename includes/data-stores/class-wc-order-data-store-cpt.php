@@ -646,6 +646,11 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			'page'           => 'paged',
 		);
 
+		// On WC 3.5.0 the ID of the user that placed the order was moved from the post meta _customer_user to the post_author field in the wp_posts table.
+		if ( version_compare( get_option( 'woocommerce_db_version' ), '3.5.0', '>=' ) ) {
+			$key_mapping['customer_id'] = 'author';
+		}
+
 		foreach ( $key_mapping as $query_key => $db_key ) {
 			if ( isset( $query_vars[ $query_key ] ) ) {
 				$query_vars[ $db_key ] = $query_vars[ $query_key ];
