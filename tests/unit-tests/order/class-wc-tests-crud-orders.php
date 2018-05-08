@@ -335,8 +335,6 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 * Test: get_taxes
 	 */
 	public function test_get_taxes() {
-		global $wpdb;
-
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		$tax_rate = array(
 			'tax_rate_country'  => '',
@@ -371,11 +369,6 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->save();
 
 		$this->assertCount( 2, $object->get_taxes() );
-
-		// Cleanup.
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
-		update_option( 'woocommerce_calc_taxes', 'no' );
 	}
 
 	/**
@@ -603,7 +596,6 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 * Test: calculate_taxes
 	 */
 	public function test_calculate_taxes() {
-		global $wpdb;
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		$tax_rate = array(
 			'tax_rate_country'  => '',
@@ -638,19 +630,12 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 
 		$object->calculate_taxes();
 		$this->assertEquals( 5, $object->get_total_tax() );
-
-		// Cleanup.
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
-		update_option( 'woocommerce_calc_taxes', 'no' );
-		$object->delete();
 	}
 
 	/**
 	 * Test: calculate_taxes_is_vat_excempt
 	 */
 	public function test_calculate_taxes_is_vat_excempt() {
-		global $wpdb;
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		$tax_rate = array(
 			'tax_rate_country'  => '',
@@ -690,22 +675,13 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->save();
 		$object->calculate_taxes();
 		$this->assertEquals( 0, $object->get_total_tax() );
-
-		// Cleanup.
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
-		update_option( 'woocommerce_calc_taxes', 'no' );
-		$object->delete();
 	}
 
 	/**
 	 * Test: calculate_taxes_issue_with_addresses
 	 */
 	public function test_calculate_taxes_issue_with_addresses() {
-		global $wpdb;
 		update_option( 'woocommerce_calc_taxes', 'yes' );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 
 		$taxes = array();
 
@@ -754,7 +730,6 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 * Test: calculate_totals
 	 */
 	public function test_calculate_totals() {
-		global $wpdb;
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		$tax_rate = array(
 			'tax_rate_country'  => '',
@@ -789,11 +764,6 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 
 		$object->calculate_totals();
 		$this->assertEquals( 55, $object->get_total() );
-
-		// Cleanup.
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
-		update_option( 'woocommerce_calc_taxes', 'no' );
 	}
 
 	/**
@@ -907,9 +877,13 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		add_action( 'woocommerce_payment_complete', array( $this, 'throwAnException' ) );
 
 		$this->assertFalse( $object->payment_complete( '12345' ) );
-		$note = current( wc_get_order_notes( array(
-			'order_id' => $object->get_id(),
-		) ) );
+		$note = current(
+			wc_get_order_notes(
+				array(
+					'order_id' => $object->get_id(),
+				)
+			)
+		);
 		$this->assertContains( 'Payment complete event failed', $note->content );
 
 		remove_action( 'woocommerce_payment_complete', array( $this, 'throwAnException' ) );
@@ -958,9 +932,13 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_payment_complete_order_status', array( $this, 'throwAnException' ) );
 
 		$this->assertFalse( $object->update_status( 'on-hold' ) );
-		$note = current( wc_get_order_notes( array(
-			'order_id' => $object->get_id(),
-		) ) );
+		$note = current(
+			wc_get_order_notes(
+				array(
+					'order_id' => $object->get_id(),
+				)
+			)
+		);
 		$this->assertContains( 'Update status event failed', $note->content );
 
 		remove_filter( 'woocommerce_payment_complete_order_status', array( $this, 'throwAnException' ) );
@@ -1798,9 +1776,6 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 
 		$order->remove_coupon( 'test' );
 		$this->assertEquals( 50, $order->get_total() );
-
-		$coupon->delete( true );
-		$order->delete( true );
 	}
 
 	/**
@@ -1822,9 +1797,6 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 
 		$order->remove_coupon( 'test' );
 		$this->assertEquals( 50, $order->get_total() );
-
-		$coupon->delete( true );
-		$order->delete( true );
 	}
 
 	/**
@@ -1889,9 +1861,13 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		add_action( 'woocommerce_before_order_object_save', array( $this, 'throwAnException' ) );
 
 		$object->save();
-		$note = current( wc_get_order_notes( array(
-			'order_id' => $object->get_id(),
-		) ) );
+		$note = current(
+			wc_get_order_notes(
+				array(
+					'order_id' => $object->get_id(),
+				)
+			)
+		);
 		$this->assertContains( 'Error saving order', $note->content );
 
 		remove_action( 'woocommerce_before_order_object_save', array( $this, 'throwAnException' ) );
