@@ -214,8 +214,6 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$this->assertGreaterThan( 0, $products->total );
 		$this->assertGreaterThan( 0, $products->max_num_pages );
 		$this->assertNotEmpty( $products->products );
-
-		$variation->delete( true );
 	}
 
 	/**
@@ -702,9 +700,6 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$product_copy = wc_get_product( $product->get_id() );
 
 		$this->assertEquals( $product->get_id(), $product_copy->get_id() );
-
-		// Delete Product
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -721,9 +716,6 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 
 		$product = new WC_Product_Simple( $product->get_id() );
 		$this->assertEquals( 5, $product->get_stock_quantity() );
-
-		// Delete Product
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	public function test_wc_update_product_stock_increase_decrease() {
@@ -743,8 +735,6 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$product = new WC_Product_Simple( $product->get_id() );
 		$this->assertEquals( 5, $product->get_stock_quantity() );
 		$this->assertEquals( 5, $new_value );
-
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	public function test_wc_update_product_stock_should_return_false_if_invalid_product() {
@@ -803,8 +793,6 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 
 		$this->assertFalse( get_transient( 'wc_products_onsale' ) );
 		$this->assertFalse( get_transient( 'wc_featured_products' ) );
-
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -825,9 +813,6 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		update_post_meta( $product->get_id(), '_sale_price', wc_format_decimal( 5 ) );
 
 		$this->assertEquals( array( $product->get_id() ), wc_get_product_ids_on_sale() );
-
-		// Delete Product
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -846,9 +831,6 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$product->save();
 
 		$this->assertEquals( array( $product->get_id() ), wc_get_featured_product_ids() );
-
-		// Delete Product
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -898,8 +880,6 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		WC_Helper_Product::delete_product( $product_1->get_id() );
 
 		$this->assertTrue( wc_product_has_unique_sku( $product_2->get_id(), $product_2->get_sku() ) );
-
-		WC_Helper_Product::delete_product( $product_2->get_id() );
 	}
 
 	/**
@@ -912,9 +892,6 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 
 		$this->assertEquals( $product->get_id(), wc_get_product_id_by_sku( $product->get_sku() ) );
-
-		// Delete Product
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
