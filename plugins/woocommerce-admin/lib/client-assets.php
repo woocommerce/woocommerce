@@ -6,17 +6,17 @@
 function woo_dash_register_script() {
 	wp_register_script(
 		WOO_DASH_APP,
-		woo_dash_url( 'js/index.js' ),
-		[ 'wp-blocks', 'wp-element', 'wp-i18n' ],
-		filemtime( woo_dash_dir_path( 'js/index.js' ) ),
+		woo_dash_url( 'dist/index.js' ),
+		[ 'wp-components', 'wp-blocks', 'wp-element', 'wp-i18n' ],
+		filemtime( woo_dash_dir_path( 'dist/index.js' ) ),
 		true
 	);
 
 	wp_register_style(
 		WOO_DASH_APP,
-		woo_dash_url( 'js/style.css' ),
-		[ 'wp-components', 'wp-blocks', 'wp-edit-blocks' ],
-		filemtime( woo_dash_dir_path( 'js/index.js' ) )
+		woo_dash_url( 'dist/css/style.css' ),
+		[ 'wp-edit-blocks' ],
+		filemtime( woo_dash_dir_path( 'dist/css/style.css' ) )
 	);
 
 	// Set up the text domain and translations

@@ -57,9 +57,9 @@ const webpackConfig = {
 		index: './js/src/index.js',
 	},
 	output: {
-		path: path.resolve( 'js' ),
+		path: path.resolve( 'dist' ),
 		filename: '[name].js',
-		library: [ 'wp', 'woodash', '[name]' ],
+		library: [ 'wc', '[name]' ],
 		libraryTarget: 'this',
 	},
 	externals,
@@ -80,7 +80,7 @@ const webpackConfig = {
 		],
 	},
 	plugins: [
-		new ExtractTextPlugin( 'style.css' ),
+		new ExtractTextPlugin( 'css/style.css' ),
 	],
 };
 
