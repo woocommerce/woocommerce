@@ -105,11 +105,6 @@ jQuery( function( $ ) {
 			this.flexslider_enabled = false;
 		}
 
-		// ...and if we're on a touch device.
-		if ( 'ontouchstart' in document.documentElement ) {
-			this.zoom_enabled = false;
-		}
-
 		// Bind functions to this.
 		this.initFlexslider       = this.initFlexslider.bind( this );
 		this.initZoom             = this.initZoom.bind( this );
@@ -209,7 +204,7 @@ jQuery( function( $ ) {
 				touch: false
 			}, wc_single_product_params.zoom_options );
 
-			if ( 'ontouchstart' in window ) {
+			if ( 'ontouchstart' in document.documentElement ) {
 				zoom_options.on = 'click';
 			}
 
@@ -225,8 +220,12 @@ jQuery( function( $ ) {
 		if ( this.zoom_enabled && this.$images.length > 0 ) {
 			this.$target.prepend( '<a href="#" class="woocommerce-product-gallery__trigger">🔍</a>' );
 			this.$target.on( 'click', '.woocommerce-product-gallery__trigger', this.openPhotoswipe );
+			this.$target.on( 'click', '.woocommerce-product-gallery__image a', function( e ) {
+				e.preventDefault();
+			});
+		} else {
+			this.$target.on( 'click', '.woocommerce-product-gallery__image a', this.openPhotoswipe );
 		}
-		this.$target.on( 'click', '.woocommerce-product-gallery__image a', this.openPhotoswipe );
 	};
 
 	/**
