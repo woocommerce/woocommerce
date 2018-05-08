@@ -122,7 +122,7 @@ class WC_Product_Grouped extends WC_Product {
 				$price = apply_filters( 'woocommerce_grouped_price_html', $price . $this->get_price_suffix(), $this, $child_prices );
 			}
 		} else {
-			$price = apply_filters( 'woocommerce_grouped_empty_price_html', '', $this );
+			$price = apply_filters( 'woocommerce_grouped_empty_price_html', $price, $this );
 		}
 
 		return apply_filters( 'woocommerce_get_price_html', $price, $this );
