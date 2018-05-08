@@ -246,4 +246,60 @@ class WC_Tests_WC_Order_Query extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 1, count( $results ) );
 	}
+
+	public function test_order_query_search_by_customers() {
+		$user_email_1 = 'email@testmail.com';
+		$user_id_1    = wp_insert_user( array(
+			'user_login' => 'testname',
+			'user_pass'  => 'testpass',
+			'user_email' => $user_email_1,
+		) );
+
+		$user_email_2 = 'email2@testmail.com';
+		$user_id_2    = wp_insert_user( array(
+			'user_login' => 'testname2',
+			'user_pass'  => 'testpass2',
+			'user_email' => $user_email_2,
+		) );
+
+		$order1 = new WC_Order();
+		$order1->set_customer_id( $user_id_1 );
+		$order1->save();
+
+		$order2 = new WC_Order();
+		$order2->set_customer_id( $user_id_2 );
+		$order2->save();
+
+		$order3 = new WC_Order();
+		$order3->set_customer_id( $user_id_2 );
+		$order3->save();
+
+		// Searching for both users IDs should return all orders.
+		$query   = new WC_Order_Query( array(
+			'customer' => array( $user_id_1, $user_id_2 ),
+		) );
+		$results = $query->get_orders();
+		$this->assertEquals( 3, count( $results ) );
+
+		// Searching for user 1 email and user 2 ID should return all orders.
+		$query   = new WC_Order_Query( array(
+			'customer' => array( $user_email_1, $user_id_2 ),
+		) );
+		$results = $query->get_orders();
+		$this->assertEquals( 3, count( $results ) );
+
+		// Searching for orders that match the first user email AND ID should return only a single order
+		$query   = new WC_Order_Query( array(
+			'customer' => array( array( $user_email_1, $user_id_1 ) ),
+		) );
+		$results = $query->get_orders();
+		$this->assertEquals( 1, count( $results ) );
+
+		// Searching for orders that match the first user email AND the second user ID should return no orders.
+		$query   = new WC_Order_Query( array(
+			'customer' => array( array( $user_email_1, $user_id_2 ) ),
+		) );
+		$results = $query->get_orders();
+		$this->assertEquals( 0, count( $results ) );
+	}
 }
