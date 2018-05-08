@@ -22,9 +22,9 @@ class WC_Download_Handler {
 		if ( isset( $_GET['download_file'], $_GET['order'] ) && ( isset( $_GET['email'] ) || isset( $_GET['uid'] ) ) ) { // WPCS: input var ok, CSRF ok.
 			add_action( 'init', array( __CLASS__, 'download_product' ) );
 		}
-		add_action( 'woocommerce_download_file_redirect', array( __CLASS__, 'download_file_redirect' ), 10, 3 );
-		add_action( 'woocommerce_download_file_xsendfile', array( __CLASS__, 'download_file_xsendfile' ), 10, 3 );
-		add_action( 'woocommerce_download_file_force', array( __CLASS__, 'download_file_force' ), 10, 3 );
+		add_action( 'woocommerce_download_file_redirect', array( __CLASS__, 'download_file_redirect' ), 10, 2 );
+		add_action( 'woocommerce_download_file_xsendfile', array( __CLASS__, 'download_file_xsendfile' ), 10, 2 );
+		add_action( 'woocommerce_download_file_force', array( __CLASS__, 'download_file_force' ), 10, 2 );
 	}
 
 	/**
@@ -103,7 +103,7 @@ class WC_Download_Handler {
 		$download_range   = self::get_download_range( @filesize( $parsed_file_path['file_path'] ) );  // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged.
 		$download->track_download( $current_user_id > 0 ? $current_user_id : null, ! empty( $ip_address ) ? $ip_address : null, $download_range['is_range_request'] );
 
-		self::download( $file_path, $download->get_product_id(), $download_range );
+		self::download( $file_path, $download->get_product_id() );
 	}
 
 	/**
@@ -174,11 +174,10 @@ class WC_Download_Handler {
 	/**
 	 * Download a file - hook into init function.
 	 *
-	 * @param string  $file_path      URL to file.
-	 * @param integer $product_id     Product ID of the product being downloaded.
-	 * @param array   $download_range Array containing info about range download request.
+	 * @param string  $file_path  URL to file.
+	 * @param integer $product_id Product ID of the product being downloaded.
 	 */
-	public static function download( $file_path, $product_id, $download_range = array() ) {
+	public static function download( $file_path, $product_id ) {
 		if ( ! $file_path ) {
 			self::download_error( __( 'No file defined', 'woocommerce' ) );
 		}
@@ -196,17 +195,16 @@ class WC_Download_Handler {
 		add_action( 'nocache_headers', array( __CLASS__, 'ie_nocache_headers_fix' ) );
 
 		// Trigger download via one of the methods.
-		do_action( 'woocommerce_download_file_' . $file_download_method, $file_path, $filename, $download_range );
+		do_action( 'woocommerce_download_file_' . $file_download_method, $file_path, $filename );
 	}
 
 	/**
 	 * Redirect to a file to start the download.
 	 *
-	 * @param string $file_path      File path.
-	 * @param string $filename       File name.
-	 * @param array  $download_range Array containing info about range download request.
+	 * @param string $file_path File path.
+	 * @param string $filename  File name.
 	 */
-	public static function download_file_redirect( $file_path, $filename = '', $download_range = array() ) {
+	public static function download_file_redirect( $file_path, $filename = '' ) {
 		header( 'Location: ' . $file_path );
 		exit;
 	}
@@ -263,11 +261,10 @@ class WC_Download_Handler {
 	/**
 	 * Download a file using X-Sendfile, X-Lighttpd-Sendfile, or X-Accel-Redirect if available.
 	 *
-	 * @param string $file_path      File path.
-	 * @param string $filename       File name.
-	 * @param array  $download_range Download range array in case start and length were specified in the request.
+	 * @param string $file_path File path.
+	 * @param string $filename  File name.
 	 */
-	public static function download_file_xsendfile( $file_path, $filename, $download_range = array() ) {
+	public static function download_file_xsendfile( $file_path, $filename ) {
 		$parsed_file_path = self::parse_file_path( $file_path );
 
 		if ( function_exists( 'apache_get_modules' ) && in_array( 'mod_xsendfile', apache_get_modules(), true ) ) {
@@ -286,7 +283,7 @@ class WC_Download_Handler {
 		}
 
 		// Fallback.
-		self::download_file_force( $file_path, $filename, $download_range );
+		self::download_file_force( $file_path, $filename );
 	}
 
 	/**
@@ -358,12 +355,13 @@ class WC_Download_Handler {
 	 *
 	 * @param string $file_path      File path.
 	 * @param string $filename       File name.
-	 * @param array  $download_range Array containing info about range download request.
 	 */
-	public static function download_file_force( $file_path, $filename, $download_range = array() ) {
+	public static function download_file_force( $file_path, $filename ) {
 		$parsed_file_path = self::parse_file_path( $file_path );
+		$download_range = self::get_download_range( @filesize( $parsed_file_path['file_path'] ) );
 
 		self::download_headers( $parsed_file_path['file_path'], $filename, $download_range );
+
 		$start  = isset( $download_range['start'] ) ? $download_range['start'] : 0;
 		$length = isset( $download_range['length'] ) ? $download_range['length'] : 0;
 		if ( ! self::readfile_chunked( $parsed_file_path['file_path'], $start, $length ) ) {
@@ -485,7 +483,6 @@ class WC_Download_Handler {
 			define( 'WC_CHUNK_SIZE', 1024 * 1024 );
 		}
 		$handle = @fopen( $file, 'r' ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
-
 
 		if ( ! $length ) {
 			$length = @filesize( $file ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged

@@ -290,6 +290,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	 * @throws Exception When permission ID is invalid.
 	 * @param int    $user_id         Id of the user performing the download.
 	 * @param string $user_ip_address IP Address of the user performing the download.
+	 * @param bool   $range_download  Whether the download is a partial/range download.
 	 */
 	public function track_download( $user_id = null, $user_ip_address = null, $range_download = false ) {
 		global $wpdb;
@@ -299,7 +300,7 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 			throw new Exception( __( 'Invalid permission ID.', 'woocommerce' ) );
 		}
 
-		// TODO: how to log range downloads?, +test
+		// Range downloads are not logged.
 		if ( $range_download ) {
 			return;
 		}
