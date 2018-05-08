@@ -747,6 +747,42 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
+	public function test_wc_update_product_stock_should_return_false_if_invalid_product() {
+		$this->assertFalse( wc_update_product_stock( 1 ) );
+	}
+
+	public function test_wc_update_product_stock_should_return_stock_quantity_if_no_stock_quantity_given() {
+		$stock_quantity = 5;
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_stock_quantity( $stock_quantity );
+		$product->set_manage_stock( true );
+		$product->save();
+
+		$this->assertEquals( $stock_quantity, wc_update_product_stock( $product ) );
+	}
+
+	public function test_wc_update_product_stock_should_return_null_if_not_managing_stock() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_stock_quantity( 5 );
+		$product->save();
+
+		$this->assertNull( wc_update_product_stock( $product, 3 ) );
+	}
+
+	/**
+	 * Test wc_update_product_stock_status().
+	 */
+	public function test_wc_update_product_stock_status_should_change_stock_status() {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$this->assertEquals( 'instock', $product->get_stock_status() );
+
+		wc_update_product_stock_status( $product->get_id(), 'outofstock' );
+		$product = wc_get_product( $product->get_id() );
+
+		$this->assertEquals( 'outofstock', $product->get_stock_status() );
+	}
+
 	/**
 	 * Test wc_delete_product_transients().
 	 *
