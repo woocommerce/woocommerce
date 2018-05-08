@@ -192,7 +192,7 @@ abstract class WC_Settings_API {
 
 		$this->settings[ $key ] = $value;
 
-		return update_option( $this->get_option_key(), apply_filters( 'woocommerce_settings_api_sanitized_fields_' . $this->id, $this->settings ) );
+		return update_option( $this->get_option_key(), apply_filters( 'woocommerce_settings_api_sanitized_fields_' . $this->id, $this->settings ), 'yes' );
 	}
 
 	/**
@@ -216,7 +216,7 @@ abstract class WC_Settings_API {
 			}
 		}
 
-		return update_option( $this->get_option_key(), apply_filters( 'woocommerce_settings_api_sanitized_fields_' . $this->id, $this->settings ) );
+		return update_option( $this->get_option_key(), apply_filters( 'woocommerce_settings_api_sanitized_fields_' . $this->id, $this->settings ), 'yes' );
 	}
 
 	/**
