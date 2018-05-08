@@ -1809,7 +1809,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			$image = '';
 		}
 
-		return apply_filters( 'woocommerce_product_get_image', $image, $this, $size, $attr, $placeholder );
+		return apply_filters( 'woocommerce_product_get_image', $image, $this, $size, $attr, $placeholder, $image );
 	}
 
 	/**
