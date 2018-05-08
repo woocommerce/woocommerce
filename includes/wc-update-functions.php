@@ -1635,47 +1635,136 @@ function wc_update_330_db_version() {
 }
 
 /**
- * Update state codes for Ireland.
+ * Update state codes for Ireland and BD.
  */
-function wc_update_340_irish_states() {
+function wc_update_340_states() {
 	global $wpdb;
 
-	$ie_states = array(
-		'CK'    => 'CO',
-		'DN'    => 'D',
-		'GY'    => 'G',
-		'TY'    => 'TA',
+	$country_states = array(
+		'IE' => array(
+			'CK' => 'CO',
+			'DN' => 'D',
+			'GY' => 'G',
+			'TY' => 'TA',
+		),
+		'BD' => array(
+			'BAG'  => 'BD-05',
+			'BAN'  => 'BD-01',
+			'BAR'  => 'BD-02',
+			'BARI' => 'BD-06',
+			'BHO'  => 'BD-07',
+			'BOG'  => 'BD-03',
+			'BRA'  => 'BD-04',
+			'CHA'  => 'BD-09',
+			'CHI'  => 'BD-10',
+			'CHU'  => 'BD-12',
+			'COX'  => 'BD-11',
+			'COM'  => 'BD-08',
+			'DHA'  => 'BD-13',
+			'DIN'  => 'BD-14',
+			'FAR'  => 'BD-15',
+			'FEN'  => 'BD-16',
+			'GAI'  => 'BD-19',
+			'GAZI' => 'BD-18',
+			'GOP'  => 'BD-17',
+			'HAB'  => 'BD-20',
+			'JAM'  => 'BD-21',
+			'JES'  => 'BD-22',
+			'JHA'  => 'BD-25',
+			'JHE'  => 'BD-23',
+			'JOY'  => 'BD-24',
+			'KHA'  => 'BD-29',
+			'KHU'  => 'BD-27',
+			'KIS'  => 'BD-26',
+			'KUR'  => 'BD-28',
+			'KUS'  => 'BD-30',
+			'LAK'  => 'BD-31',
+			'LAL'  => 'BD-32',
+			'MAD'  => 'BD-36',
+			'MAG'  => 'BD-37',
+			'MAN'  => 'BD-33',
+			'MEH'  => 'BD-39',
+			'MOU'  => 'BD-38',
+			'MUN'  => 'BD-35',
+			'MYM'  => 'BD-34',
+			'NAO'  => 'BD-48',
+			'NAR'  => 'BD-43',
+			'NARG' => 'BD-40',
+			'NARD' => 'BD-42',
+			'NAT'  => 'BD-44',
+			'NAW'  => 'BD-45',
+			'NET'  => 'BD-41',
+			'NIL'  => 'BD-46',
+			'NOA'  => 'BD-47',
+			'PAB'  => 'BD-49',
+			'PAN'  => 'BD-52',
+			'PAT'  => 'BD-51',
+			'PIR'  => 'BD-50',
+			'RAJB' => 'BD-53',
+			'RAJ'  => 'BD-54',
+			'RAN'  => 'BD-56',
+			'RANP' => 'BD-55',
+			'SAT'  => 'BD-58',
+			'SHA'  => 'BD-57',
+			'SIR'  => 'BD-59',
+			'SUN'  => 'BD-61',
+			'SYL'  => 'BD-60',
+			'TAN'  => 'BD-63',
+			'THA'  => 'BD-64',
+		),
 	);
 
-	foreach ( $ie_states as $old => $new ) {
-		$wpdb->query(
-			$wpdb->prepare(
-				"UPDATE $wpdb->postmeta
-				SET meta_value = %s
-				WHERE meta_key IN ( '_billing_state', '_shipping_state' )
-				AND meta_value = %s",
-				$new, $old
-			)
-		);
-		$wpdb->update(
-			"{$wpdb->prefix}woocommerce_shipping_zone_locations",
-			array(
-				'location_code' => 'IE:' . $new,
-			),
-			array(
-				'location_code' => 'IE:' . $old,
-			)
-		);
-		$wpdb->update(
-			"{$wpdb->prefix}woocommerce_tax_rates",
-			array(
-				'tax_rate_state' => strtoupper( $new ),
-			),
-			array(
-				'tax_rate_state' => strtoupper( $old ),
-			)
-		);
+	foreach ( $country_states as $country => $states ) {
+		foreach ( $states as $old => $new ) {
+			$wpdb->query(
+				$wpdb->prepare(
+					"UPDATE $wpdb->postmeta
+					SET meta_value = %s
+					WHERE meta_key IN ( '_billing_state', '_shipping_state' )
+					AND meta_value = %s",
+					$new, $old
+				)
+			);
+			$wpdb->update(
+				"{$wpdb->prefix}woocommerce_shipping_zone_locations",
+				array(
+					'location_code' => $country . ':' . $new,
+				),
+				array(
+					'location_code' => $country . ':' . $old,
+				)
+			);
+			$wpdb->update(
+				"{$wpdb->prefix}woocommerce_tax_rates",
+				array(
+					'tax_rate_state' => strtoupper( $new ),
+				),
+				array(
+					'tax_rate_state' => strtoupper( $old ),
+				)
+			);
+		}
 	}
+}
+
+/**
+ * Set last active prop for users.
+ */
+function wc_update_340_last_active() {
+	global $wpdb;
+	// @codingStandardsIgnoreStart.
+	$wpdb->query(
+		$wpdb->prepare( "
+			INSERT INTO {$wpdb->usermeta} (user_id, meta_key, meta_value)
+			SELECT DISTINCT users.ID, 'wc_last_active', %s
+			FROM {$wpdb->users} as users
+			LEFT OUTER JOIN {$wpdb->usermeta} AS usermeta ON users.ID = usermeta.user_id AND usermeta.meta_key = 'wc_last_active'
+			WHERE usermeta.meta_value IS NULL
+			",
+			(string) strtotime( date( 'Y-m-d', current_time( 'timestamp', true ) ) )
+		)
+	);
+	// @codingStandardsIgnoreEnd.
 }
 
 /**

@@ -135,16 +135,17 @@ class WC_Product_Variation extends WC_Product_Simple {
 		if ( isset( $attributes[ $attribute ] ) ) {
 			$value = $attributes[ $attribute ];
 			$term  = taxonomy_exists( $attribute ) ? get_term_by( 'slug', $value, $attribute ) : false;
-			$value = ! is_wp_error( $term ) && $term ? $term->name : $value;
-		} elseif ( isset( $attributes[ 'pa_' . $attribute ] ) ) {
-			$value = $attributes[ 'pa_' . $attribute ];
-			$term  = taxonomy_exists( 'pa_' . $attribute ) ? get_term_by( 'slug', $value, 'pa_' . $attribute ) : false;
-			$value = ! is_wp_error( $term ) && $term ? $term->name : $value;
-		} else {
-			return '';
+			return ! is_wp_error( $term ) && $term ? $term->name : $value;
 		}
 
-		return $value;
+		$att_str = 'pa_' . $attribute;
+		if ( isset( $attributes[ $att_str ] ) ) {
+			$value = $attributes[ $att_str ];
+			$term  = taxonomy_exists( $att_str ) ? get_term_by( 'slug', $value, $att_str ) : false;
+			return ! is_wp_error( $term ) && $term ? $term->name : $value;
+		}
+
+		return '';
 	}
 
 	/**

@@ -48,7 +48,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 										foreach ( $all_terms as $term ) {
 											$options = $attribute->get_options();
 											$options = ! empty( $options ) ? $options : array();
-											echo '<option value="' . esc_attr( $term->term_id ) . '" ' . selected( in_array( $term->term_id, $options, true ), true, false ) . '>' . esc_attr( apply_filters( 'woocommerce_product_attribute_term_name', $term->name, $term ) ) . '</option>';
+											echo '<option value="' . esc_attr( $term->term_id ) . '"' . wc_selected( $term->term_id, $options ) . '>' . esc_attr( apply_filters( 'woocommerce_product_attribute_term_name', $term->name, $term ) ) . '</option>';
 										}
 									}
 									?>

@@ -231,7 +231,7 @@ class WC_Frontend_Scripts {
 			),
 			'wc-cart'                    => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/cart' . $suffix . '.js' ),
-				'deps'    => array( 'jquery', 'wc-country-select', 'wc-address-i18n' ),
+				'deps'    => array( 'jquery', 'woocommerce', 'wc-country-select', 'wc-address-i18n' ),
 				'version' => WC_VERSION,
 			),
 			'wc-cart-fragments'          => array(
@@ -292,7 +292,7 @@ class WC_Frontend_Scripts {
 			'zoom'                       => array(
 				'src'     => self::get_asset_url( 'assets/js/zoom/jquery.zoom' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
-				'version' => '1.7.15',
+				'version' => '1.7.21',
 			),
 		);
 		foreach ( $register_scripts as $name => $props ) {
@@ -412,6 +412,16 @@ class WC_Frontend_Scripts {
 				self::enqueue_style( $handle, $args['src'], $args['deps'], $args['version'], $args['media'], $args['has_rtl'] );
 			}
 		}
+
+		// Placeholder style.
+		wp_register_style( 'woocommerce-inline', false );
+		wp_enqueue_style( 'woocommerce-inline' );
+
+		if ( true === wc_string_to_bool( get_option( 'woocommerce_checkout_highlight_required_fields', 'yes' ) ) ) {
+			wp_add_inline_style( 'woocommerce-inline', '.woocommerce form .form-row .required { visibility: visible; }' );
+		} else {
+			wp_add_inline_style( 'woocommerce-inline', '.woocommerce form .form-row .required { visibility: hidden; }' );
+		}
 	}
 
 	/**
@@ -509,6 +519,7 @@ class WC_Frontend_Scripts {
 					'locale'             => wp_json_encode( WC()->countries->get_country_locale() ),
 					'locale_fields'      => wp_json_encode( WC()->countries->get_country_locale_field_selectors() ),
 					'i18n_required_text' => esc_attr__( 'required', 'woocommerce' ),
+					'i18n_optional_text' => esc_html__( 'optional', 'woocommerce' ),
 				);
 				break;
 			case 'wc-cart':
@@ -524,8 +535,8 @@ class WC_Frontend_Scripts {
 				$params = array(
 					'ajax_url'      => WC()->ajax_url(),
 					'wc_ajax_url'   => WC_AJAX::get_endpoint( '%%endpoint%%' ),
-					'cart_hash_key' => apply_filters( 'woocommerce_cart_hash_key', 'wc_cart_hash_' . md5( get_current_blog_id() . '_' . get_site_url( get_current_blog_id(), '/' ) ) ),
-					'fragment_name' => apply_filters( 'woocommerce_cart_fragment_name', 'wc_fragments_' . md5( get_current_blog_id() . '_' . get_site_url( get_current_blog_id(), '/' ) ) ),
+					'cart_hash_key' => apply_filters( 'woocommerce_cart_hash_key', 'wc_cart_hash_' . md5( get_current_blog_id() . '_' . get_site_url( get_current_blog_id(), '/' ) . get_template() ) ),
+					'fragment_name' => apply_filters( 'woocommerce_cart_fragment_name', 'wc_fragments_' . md5( get_current_blog_id() . '_' . get_site_url( get_current_blog_id(), '/' ) . get_template() ) ),
 				);
 				break;
 			case 'wc-add-to-cart':

@@ -270,6 +270,11 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$this->update_downloadable_permissions( $order );
 		}
 
+		// Mark user account as active.
+		if ( in_array( 'customer_id', $updated_props, true ) ) {
+			wc_update_user_last_active( $order->get_customer_id() );
+		}
+
 		do_action( 'woocommerce_order_object_updated_props', $order, $updated_props );
 	}
 
@@ -705,6 +710,20 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				$wp_query_args['errors'][] = $customer_query;
 			} else {
 				$wp_query_args['meta_query'][] = $customer_query;
+			}
+		}
+
+		if ( isset( $query_vars['anonymized'] ) ) {
+			if ( $query_vars['anonymized'] ) {
+				$wp_query_args['meta_query'][] = array(
+					'key'   => '_anonymized',
+					'value' => 'yes',
+				);
+			} else {
+				$wp_query_args['meta_query'][] = array(
+					'key'     => '_anonymized',
+					'compare' => 'NOT EXISTS',
+				);
 			}
 		}
 

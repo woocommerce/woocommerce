@@ -11,7 +11,16 @@ class WC_Tests_Customer_Download_Log extends WC_Unit_Test_Case {
 	 * Test: get_id
 	 */
 	function test_get_id() {
+		$customer_id = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
+		$download    = new WC_Customer_Download();
+		$download->set_user_id( $customer_id );
+		$download->set_order_id( 1 );
+		$download->save();
+
 		$object = new WC_Customer_Download_Log();
+		$object->set_permission_id( $download->get_id() );
+		$object->set_user_id( $customer_id );
+		$object->set_user_ip_address( '1.2.3.4' );
 		$id = $object->save();
 		$this->assertEquals( $id, $object->get_id() );
 	}

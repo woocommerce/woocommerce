@@ -36,8 +36,8 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		$this->id                 = 'bacs';
 		$this->icon               = apply_filters( 'woocommerce_bacs_icon', '' );
 		$this->has_fields         = false;
-		$this->method_title       = __( 'BACS', 'woocommerce' );
-		$this->method_description = __( 'Allows payments by BACS, more commonly known as direct bank/wire transfer.', 'woocommerce' );
+		$this->method_title       = __( 'Direct bank transfer', 'woocommerce' );
+		$this->method_description = __( 'Take payments in person via BACS. More commonly known as direct bank/wire transfer', 'woocommerce' );
 
 		// Load the settings.
 		$this->init_form_fields();

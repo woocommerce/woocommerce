@@ -99,16 +99,15 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 		// Post back to get a response.
 		$response = wp_safe_remote_post( $this->sandbox ? 'https://www.sandbox.paypal.com/cgi-bin/webscr' : 'https://www.paypal.com/cgi-bin/webscr', $params );
 
-		WC_Gateway_Paypal::log( 'IPN Request: ' . wc_print_r( $params, true ) );
 		WC_Gateway_Paypal::log( 'IPN Response: ' . wc_print_r( $response, true ) );
 
 		// Check to see if the request was valid.
 		if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 && strstr( $response['body'], 'VERIFIED' ) ) {
-			WC_Gateway_Paypal::log( 'Received valid response from PayPal' );
+			WC_Gateway_Paypal::log( 'Received valid response from PayPal IPN' );
 			return true;
 		}
 
-		WC_Gateway_Paypal::log( 'Received invalid response from PayPal' );
+		WC_Gateway_Paypal::log( 'Received invalid response from PayPal IPN' );
 
 		if ( is_wp_error( $response ) ) {
 			WC_Gateway_Paypal::log( 'Error response: ' . $response->get_error_message() );
@@ -347,15 +346,6 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	 * @param array    $posted Posted data.
 	 */
 	protected function save_paypal_meta_data( $order, $posted ) {
-		if ( ! empty( $posted['payer_email'] ) ) {
-			update_post_meta( $order->get_id(), 'Payer PayPal address', wc_clean( $posted['payer_email'] ) );
-		}
-		if ( ! empty( $posted['first_name'] ) ) {
-			update_post_meta( $order->get_id(), 'Payer first name', wc_clean( $posted['first_name'] ) );
-		}
-		if ( ! empty( $posted['last_name'] ) ) {
-			update_post_meta( $order->get_id(), 'Payer last name', wc_clean( $posted['last_name'] ) );
-		}
 		if ( ! empty( $posted['payment_type'] ) ) {
 			update_post_meta( $order->get_id(), 'Payment type', wc_clean( $posted['payment_type'] ) );
 		}

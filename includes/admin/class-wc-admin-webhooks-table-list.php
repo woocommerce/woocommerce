@@ -86,7 +86,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 					add_query_arg(
 						array(
 							'delete' => $webhook->get_id(),
-						), admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks' )
+						), admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks' )
 					), 'delete-webhook'
 				)
 			) . '">' . esc_html__( 'Delete permanently', 'woocommerce' ) . '</a>',

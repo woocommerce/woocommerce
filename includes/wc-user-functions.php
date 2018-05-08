@@ -666,3 +666,90 @@ function wc_user_search_columns( $search_columns ) {
 	return $search_columns;
 }
 add_filter( 'user_search_columns', 'wc_user_search_columns' );
+
+/**
+ * When a user is deleted in WordPress, delete corresponding WooCommerce data.
+ *
+ * @param int $user_id User ID being deleted.
+ */
+function wc_delete_user_data( $user_id ) {
+	global $wpdb;
+
+	// Clean up sessions.
+	$wpdb->delete(
+		$wpdb->prefix . 'woocommerce_sessions',
+		array(
+			'session_key' => $user_id,
+		)
+	);
+
+	// Revoke API keys.
+	$wpdb->delete(
+		$wpdb->prefix . 'woocommerce_api_keys',
+		array(
+			'user_id' => $user_id,
+		)
+	);
+
+	// Clean up payment tokens.
+	$payment_tokens = WC_Payment_Tokens::get_customer_tokens( $user_id );
+
+	foreach ( $payment_tokens as $payment_token ) {
+		$payment_token->delete();
+	}
+}
+add_action( 'delete_user', 'wc_delete_user_data' );
+
+/**
+ * Store user agents. Used for tracker.
+ *
+ * @since 3.0.0
+ * @param string     $user_login User login.
+ * @param int|object $user       User.
+ */
+function wc_maybe_store_user_agent( $user_login, $user ) {
+	if ( 'yes' === get_option( 'woocommerce_allow_tracking', 'no' ) && user_can( $user, 'manage_woocommerce' ) ) {
+		$admin_user_agents   = array_filter( (array) get_option( 'woocommerce_tracker_ua', array() ) );
+		$admin_user_agents[] = wc_get_user_agent();
+		update_option( 'woocommerce_tracker_ua', array_unique( $admin_user_agents ) );
+	}
+}
+add_action( 'wp_login', 'wc_maybe_store_user_agent', 10, 2 );
+
+/**
+ * Update logic triggered on login.
+ *
+ * @since 3.4.0
+ * @param string $user_login User login.
+ * @param object $user       User.
+ */
+function wc_user_logged_in( $user_login, $user ) {
+	wc_update_user_last_active( $user->ID );
+}
+add_action( 'wp_login', 'wc_user_logged_in', 10, 2 );
+
+/**
+ * Update when the user was last active.
+ *
+ * @since 3.4.0
+ */
+function wc_current_user_is_active() {
+	if ( ! is_user_logged_in() ) {
+		return;
+	}
+	wc_update_user_last_active( get_current_user_id() );
+}
+add_action( 'wp', 'wc_current_user_is_active', 10 );
+
+/**
+ * Set the user last active timestamp to now.
+ *
+ * @since 3.4.0
+ * @param int $user_id User ID to mark active.
+ */
+function wc_update_user_last_active( $user_id ) {
+	if ( ! $user_id ) {
+		return;
+	}
+	update_user_meta( $user_id, 'wc_last_active', (string) strtotime( date( 'Y-m-d', current_time( 'timestamp', true ) ) ) );
+}

@@ -129,6 +129,7 @@ class WC_Checkout {
 		if ( in_array( $key, array( 'posted', 'shipping_method', 'payment_method' ), true ) && empty( $this->legacy_posted_data ) ) {
 			$this->legacy_posted_data = $this->get_posted_data();
 		}
+
 		switch ( $key ) {
 			case 'enable_signup':
 				return $this->is_registration_enabled();
@@ -193,45 +194,54 @@ class WC_Checkout {
 	 * @return array
 	 */
 	public function get_checkout_fields( $fieldset = '' ) {
-		if ( is_null( $this->fields ) ) {
-			$this->fields = array(
-				'billing'  => WC()->countries->get_address_fields( $this->get_value( 'billing_country' ), 'billing_' ),
-				'shipping' => WC()->countries->get_address_fields( $this->get_value( 'shipping_country' ), 'shipping_' ),
-				'account'  => array(),
-				'order'    => array(
-					'order_comments' => array(
-						'type'        => 'textarea',
-						'class'       => array( 'notes' ),
-						'label'       => __( 'Order notes', 'woocommerce' ),
-						'placeholder' => esc_attr__( 'Notes about your order, e.g. special notes for delivery.', 'woocommerce' ),
+		if ( ! is_null( $this->fields ) ) {
+			return $fieldset ? $this->fields[ $fieldset ] : $this->fields;
+		}
+
+		$this->fields = array(
+			'billing'  => WC()->countries->get_address_fields(
+				$this->get_value( 'billing_country' ),
+				'billing_'
+			),
+			'shipping' => WC()->countries->get_address_fields(
+				$this->get_value( 'shipping_country' ),
+				'shipping_'
+			),
+			'account'  => array(),
+			'order'    => array(
+				'order_comments' => array(
+					'type'        => 'textarea',
+					'class'       => array( 'notes' ),
+					'label'       => __( 'Order notes', 'woocommerce' ),
+					'placeholder' => esc_attr__(
+						'Notes about your order, e.g. special notes for delivery.',
+						'woocommerce'
 					),
 				),
+			),
+		);
+
+		if ( 'no' === get_option( 'woocommerce_registration_generate_username' ) ) {
+			$this->fields['account']['account_username'] = array(
+				'type'        => 'text',
+				'label'       => __( 'Account username', 'woocommerce' ),
+				'required'    => true,
+				'placeholder' => esc_attr__( 'Username', 'woocommerce' ),
 			);
-			if ( 'no' === get_option( 'woocommerce_registration_generate_username' ) ) {
-				$this->fields['account']['account_username'] = array(
-					'type'        => 'text',
-					'label'       => __( 'Account username', 'woocommerce' ),
-					'required'    => true,
-					'placeholder' => esc_attr__( 'Username', 'woocommerce' ),
-				);
-			}
-
-			if ( 'no' === get_option( 'woocommerce_registration_generate_password' ) ) {
-				$this->fields['account']['account_password'] = array(
-					'type'        => 'password',
-					'label'       => __( 'Create account password', 'woocommerce' ),
-					'required'    => true,
-					'placeholder' => esc_attr__( 'Password', 'woocommerce' ),
-				);
-			}
-
-			$this->fields = apply_filters( 'woocommerce_checkout_fields', $this->fields );
 		}
-		if ( $fieldset ) {
-			return $this->fields[ $fieldset ];
-		} else {
-			return $this->fields;
+
+		if ( 'no' === get_option( 'woocommerce_registration_generate_password' ) ) {
+			$this->fields['account']['account_password'] = array(
+				'type'        => 'password',
+				'label'       => __( 'Create account password', 'woocommerce' ),
+				'required'    => true,
+				'placeholder' => esc_attr__( 'Password', 'woocommerce' ),
+			);
 		}
+
+		$this->fields = apply_filters( 'woocommerce_checkout_fields', $this->fields );
+
+		return $fieldset ? $this->fields[ $fieldset ] : $this->fields;
 	}
 
 	/**
@@ -378,6 +388,7 @@ class WC_Checkout {
 					'taxes'        => $values['line_tax_data'],
 				)
 			);
+
 			if ( $product ) {
 				$item->set_props(
 					array(
@@ -388,6 +399,7 @@ class WC_Checkout {
 					)
 				);
 			}
+
 			$item->set_backorder_meta();
 
 			/**
@@ -560,9 +572,11 @@ class WC_Checkout {
 		if ( 'shipping' === $fieldset_key && ( ! $data['ship_to_different_address'] || ! WC()->cart->needs_shipping_address() ) ) {
 			return true;
 		}
+
 		if ( 'account' === $fieldset_key && ( is_user_logged_in() || ( ! $this->is_registration_required() && empty( $data['createaccount'] ) ) ) ) {
 			return true;
 		}
+
 		return false;
 	}
 
@@ -587,6 +601,7 @@ class WC_Checkout {
 				$skipped[] = $fieldset_key;
 				continue;
 			}
+
 			foreach ( $fieldset as $key => $field ) {
 				$type = sanitize_title( isset( $field['type'] ) ? $field['type'] : 'text' );
 
@@ -633,6 +648,7 @@ class WC_Checkout {
 			if ( $this->maybe_skip_fieldset( $fieldset_key, $data ) ) {
 				continue;
 			}
+
 			foreach ( $fieldset as $key => $field ) {
 				if ( ! isset( $data[ $key ] ) ) {
 					continue;
@@ -721,7 +737,7 @@ class WC_Checkout {
 		$this->check_cart_items();
 
 		if ( empty( $data['woocommerce_checkout_update_totals'] ) && ! empty( $_POST['terms-field'] ) && empty( $data['terms'] ) && apply_filters( 'woocommerce_checkout_show_terms', wc_get_page_id( 'terms' ) > 0 ) ) { // WPCS: input var ok, CSRF ok.
-			$errors->add( 'terms', __( 'You must accept our Terms &amp; Conditions.', 'woocommerce' ) );
+			$errors->add( 'terms', __( 'Please read and accept the terms and conditions to proceed with your order.', 'woocommerce' ) );
 		}
 
 		if ( WC()->cart->needs_shipping() ) {
@@ -769,6 +785,7 @@ class WC_Checkout {
 			WC()->customer->{"set_billing_{$field}"}( $data[ "billing_{$field}" ] );
 			WC()->customer->{"set_shipping_{$field}"}( $data[ "billing_{$field}" ] );
 		}
+
 		if ( isset( $data[ "shipping_{$field}" ] ) ) {
 			WC()->customer->{"set_shipping_{$field}"}( $data[ "shipping_{$field}" ] );
 		}
@@ -835,12 +852,12 @@ class WC_Checkout {
 		if ( isset( $result['result'] ) && 'success' === $result['result'] ) {
 			$result = apply_filters( 'woocommerce_payment_successful_result', $result, $order_id );
 
-			if ( is_ajax() ) {
-				wp_send_json( $result );
-			} else {
+			if ( ! is_ajax() ) {
 				wp_redirect( $result['redirect'] );
 				exit;
 			}
+
+			wp_send_json( $result );
 		}
 	}
 
@@ -855,19 +872,19 @@ class WC_Checkout {
 		$order->payment_complete();
 		wc_empty_cart();
 
-		if ( is_ajax() ) {
-			wp_send_json(
-				array(
-					'result'   => 'success',
-					'redirect' => apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $order->get_checkout_order_received_url(), $order ),
-				)
-			);
-		} else {
+		if ( ! is_ajax() ) {
 			wp_safe_redirect(
 				apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $order->get_checkout_order_received_url(), $order )
 			);
 			exit;
 		}
+
+		wp_send_json(
+			array(
+				'result'   => 'success',
+				'redirect' => apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $order->get_checkout_order_received_url(), $order ),
+			)
+		);
 	}
 
 	/**
@@ -1017,6 +1034,10 @@ class WC_Checkout {
 					throw new Exception( $order_id->get_error_message() );
 				}
 
+				if ( ! $order ) {
+					throw new Exception( __( 'Unable to create order.', 'woocommerce' ) );
+				}
+
 				do_action( 'woocommerce_checkout_order_processed', $order_id, $posted_data, $order );
 
 				if ( WC()->cart->needs_payment() ) {
@@ -1056,22 +1077,20 @@ class WC_Checkout {
 	public function get_value( $input ) {
 		if ( ! empty( $_POST[ $input ] ) ) { // WPCS: input var ok, CSRF OK.
 			return wc_clean( wp_unslash( $_POST[ $input ] ) ); // WPCS: input var ok, CSRF OK.
-
-		} else {
-
-			$value = apply_filters( 'woocommerce_checkout_get_value', null, $input );
-
-			if ( null !== $value ) {
-				return $value;
-			}
-
-			if ( is_callable( array( WC()->customer, "get_$input" ) ) ) {
-				$value = WC()->customer->{"get_$input"}() ? WC()->customer->{"get_$input"}() : null;
-			} elseif ( WC()->customer->meta_exists( $input ) ) {
-				$value = WC()->customer->get_meta( $input, true );
-			}
-
-			return apply_filters( 'default_checkout_' . $input, $value, $input );
 		}
+
+		$value = apply_filters( 'woocommerce_checkout_get_value', null, $input );
+
+		if ( null !== $value ) {
+			return $value;
+		}
+
+		if ( is_callable( array( WC()->customer, "get_$input" ) ) ) {
+			$value = WC()->customer->{"get_$input"}() ? WC()->customer->{"get_$input"}() : null;
+		} elseif ( WC()->customer->meta_exists( $input ) ) {
+			$value = WC()->customer->get_meta( $input, true );
+		}
+
+		return apply_filters( 'default_checkout_' . $input, $value, $input );
 	}
 }

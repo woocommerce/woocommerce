@@ -15,6 +15,8 @@ global $wpdb, $wp_version;
 wp_clear_scheduled_hook( 'woocommerce_scheduled_sales' );
 wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
 wp_clear_scheduled_hook( 'woocommerce_cleanup_sessions' );
+wp_clear_scheduled_hook( 'woocommerce_cleanup_personal_data' );
+wp_clear_scheduled_hook( 'woocommerce_cleanup_logs' );
 wp_clear_scheduled_hook( 'woocommerce_geoip_updater' );
 wp_clear_scheduled_hook( 'woocommerce_tracker_send_event' );
 

@@ -79,9 +79,9 @@ class WC_REST_Authentication {
 
 		if ( is_ssl() ) {
 			return $this->perform_basic_authentication();
-		} else {
-			return $this->perform_oauth_authentication();
 		}
+
+		return $this->perform_oauth_authentication();
 	}
 
 	/**

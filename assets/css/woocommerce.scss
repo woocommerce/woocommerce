@@ -186,6 +186,7 @@ p.demo_store,
 
 			.woocommerce-product-gallery__wrapper .zoomImg {
 				background-color: #fff;
+				opacity: 0;
 			}
 
 			.woocommerce-product-gallery__image:nth-child(n+2) {
@@ -1276,6 +1277,40 @@ p.demo_store,
 			display: inline;
 		}
 
+		.woocommerce-input-wrapper {
+			.description {
+				background: #1e85be;
+				color: #fff;
+				border-radius: 3px;
+				padding: 1em;
+				margin: .5em 0 0;
+				clear: both;
+				display: none;
+				position: relative;
+
+				a {
+					color: #fff;
+					text-decoration: underline;
+					border: 0;
+					box-shadow: none;
+				}
+
+				&:before {
+					left: 50%;
+					top: 0%;
+					margin-top: -4px;
+					transform: translatex(-50%) rotate(180deg);
+					content: "";
+					position: absolute;
+					border-width: 4px 6px 0 6px;
+					border-style: solid;
+					border-color: #1e85be transparent transparent transparent;
+					z-index: 100;
+					display: block;
+				}
+			}
+		}
+
 		select {
 			cursor: pointer;
 			margin: 0;
@@ -1284,8 +1319,14 @@ p.demo_store,
 		.required {
 			color: red;
 			font-weight: 700;
-			border: 0;
+			border: 0 !important;
+			text-decoration: none;
+			visibility: hidden; // Only show optional by default.
 		}
+
+		.optional {
+			visibility: visible;
+ 		}
 
 		.input-checkbox {
 			display: inline;
