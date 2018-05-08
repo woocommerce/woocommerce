@@ -877,9 +877,13 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		add_action( 'woocommerce_payment_complete', array( $this, 'throwAnException' ) );
 
 		$this->assertFalse( $object->payment_complete( '12345' ) );
-		$note = current( wc_get_order_notes( array(
-			'order_id' => $object->get_id(),
-		) ) );
+		$note = current(
+			wc_get_order_notes(
+				array(
+					'order_id' => $object->get_id(),
+				)
+			)
+		);
 		$this->assertContains( 'Payment complete event failed', $note->content );
 
 		remove_action( 'woocommerce_payment_complete', array( $this, 'throwAnException' ) );
@@ -928,9 +932,13 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_payment_complete_order_status', array( $this, 'throwAnException' ) );
 
 		$this->assertFalse( $object->update_status( 'on-hold' ) );
-		$note = current( wc_get_order_notes( array(
-			'order_id' => $object->get_id(),
-		) ) );
+		$note = current(
+			wc_get_order_notes(
+				array(
+					'order_id' => $object->get_id(),
+				)
+			)
+		);
 		$this->assertContains( 'Update status event failed', $note->content );
 
 		remove_filter( 'woocommerce_payment_complete_order_status', array( $this, 'throwAnException' ) );
@@ -1853,9 +1861,13 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		add_action( 'woocommerce_before_order_object_save', array( $this, 'throwAnException' ) );
 
 		$object->save();
-		$note = current( wc_get_order_notes( array(
-			'order_id' => $object->get_id(),
-		) ) );
+		$note = current(
+			wc_get_order_notes(
+				array(
+					'order_id' => $object->get_id(),
+				)
+			)
+		);
 		$this->assertContains( 'Error saving order', $note->content );
 
 		remove_action( 'woocommerce_before_order_object_save', array( $this, 'throwAnException' ) );
