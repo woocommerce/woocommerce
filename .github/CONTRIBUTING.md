@@ -18,7 +18,7 @@ Feature requests can be [submitted to our issue tracker](https://github.com/wooc
 
 Feature request issues will remain closed until we see sufficient interest via comments and [👍 reactions](https://help.github.com/articles/about-discussions-in-issues-and-pull-requests/) from the community.
 
-You can see a [list of current feature requests which require votes here](https://github.com/woocommerce/woocommerce/issues?q=is%3Aopen+label%3A%22votes+needed%22+label%3Aenhancement+sort%3Areactions-%2B1-desc).
+You can see a [list of current feature requests which require votes here](https://github.com/woocommerce/woocommerce/issues?q=label%3A%22votes+needed%22+label%3Aenhancement+sort%3Areactions-%2B1-desc+is%3Aclosed).
 
 ## Technical Support / Questions
 
