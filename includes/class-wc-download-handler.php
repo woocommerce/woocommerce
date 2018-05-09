@@ -290,9 +290,16 @@ class WC_Download_Handler {
 	 * Parse the HTTP_RANGE request from iOS devices.
 	 * Does not support multi-range requests.
 	 *
-	 * @param int $file_size               Size of file in bytes.
-	 * @return array(int, int, bool, bool) Array containing info about range download request: beginning and length of
-	 * file chunk, whether the range is valid/supported and whether the request is a range request.
+	 * @param int $file_size Size of file in bytes.
+	 * @return array {
+	 *     Information about range download request: beginning and length of
+	 *     file chunk, whether the range is valid/supported and whether the request is a range request.
+	 *
+	 *     @type int  $start            Byte offset of the beginning of the range. Default 0.
+	 *     @type int  $length           Length of the requested file chunk in bytes. Optional.
+	 *     @type bool $is_range_valid   Whether the requested range is a valid and supported range.
+	 *     @type bool $is_range_request Whether the request is a range request.
+	 * }
 	 */
 	protected static function get_download_range( $file_size ) {
 		$start  = 0;
@@ -321,9 +328,12 @@ class WC_Download_Handler {
 			if ( strpos( $range, ',' ) !== false ) {
 				return $download_range;
 			}
-			// If the range starts with an '-' we start from the beginning
-			// If not, we forward the file pointer
-			// And make sure to get the end byte if specified.
+
+			/*
+			 * If the range starts with an '-' we start from the beginning.
+			 * If not, we forward the file pointer
+			 * and make sure to get the end byte if specified.
+			 */
 			if ( '-' === $range[0] ) {
 				// The n-number of the last bytes is requested.
 				$c_start = $file_size - substr( $range, 1 );
@@ -333,8 +343,10 @@ class WC_Download_Handler {
 				$c_end   = ( isset( $range[1] ) && is_numeric( $range[1] ) ) ? (int) $range[1] : $file_size;
 			}
 
-			// Check the range and make sure it's treated according to the specs: http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html.
-			// End bytes can not be larger than $end.
+			/*
+			 * Check the range and make sure it's treated according to the specs: http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html.
+			 * End bytes can not be larger than $end.
+			 */
 			$c_end = ( $c_end > $end ) ? $end : $c_end;
 			// Validate the requested range and return an error if it's not correct.
 			if ( $c_start > $c_end || $c_start > $file_size - 1 || $c_end >= $file_size ) {
@@ -354,8 +366,8 @@ class WC_Download_Handler {
 	/**
 	 * Force download - this is the default method.
 	 *
-	 * @param string $file_path      File path.
-	 * @param string $filename       File name.
+	 * @param string $file_path File path.
+	 * @param string $filename  File name.
 	 */
 	public static function download_file_force( $file_path, $filename ) {
 		$parsed_file_path = self::parse_file_path( $file_path );
@@ -402,7 +414,7 @@ class WC_Download_Handler {
 	 *
 	 * @param string $file_path      File path.
 	 * @param string $filename       File name.
-	 * @param array  $download_range Array containing info about range download request.
+	 * @param array  $download_range Array containing info about range download request (see {@see get_download_range} for structure).
 	 */
 	private static function download_headers( $file_path, $filename, $download_range = array() ) {
 		self::check_server_config();
