@@ -236,6 +236,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Wizard: List out all plugins to be installed upon proceeding to the next step, with a highlight on hover indicating relevant settings. #19952
 * Tweak - Hide/show password strength meter instead of removing/inserting password strength meter. #20006
 * Tweak - Added support for HTTP_RANGE requests (used by iOS devices) to Force download method. #19984
+* Tweak/Fix - Replaced protocol-relative URLs for thumbnails in the cart and mini-cart with protocol-specific URLs to prevent problems with URLs that include port section. #19934
 * Fix - Properly set orderby and order when calling WC_Customer_Download_Data_Store::get_downloads(). #1862
 * Fix - Set maxlength for order item meta key to avoid values disappearing if too long. #18918
 * Fix - Remove hardcoded /wp-content check for downloads. #18961
