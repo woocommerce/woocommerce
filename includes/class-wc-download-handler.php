@@ -79,8 +79,15 @@ class WC_Download_Handler {
 
 		$download = new WC_Customer_Download( current( $download_ids ) );
 
+		$file_path        = $product->get_file_download_path( $download->get_download_id() );
+		$parsed_file_path = self::parse_file_path( $file_path );
+		$download_range   = self::get_download_range( @filesize( $parsed_file_path['file_path'] ) );  // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged.
+
 		self::check_order_is_valid( $download );
-		self::check_downloads_remaining( $download );
+		if ( ! $download_range['is_range_request'] ) {
+			// If the remaining download count goes to 0, allow range requests to be able to finish streaming from iOS devices.
+			self::check_downloads_remaining( $download );
+		}
 		self::check_download_expiry( $download );
 		self::check_download_login_required( $download );
 
@@ -98,9 +105,6 @@ class WC_Download_Handler {
 		// Track the download in logs and change remaining/counts.
 		$current_user_id  = get_current_user_id();
 		$ip_address       = WC_Geolocation::get_ip_address();
-		$file_path        = $product->get_file_download_path( $download->get_download_id() );
-		$parsed_file_path = self::parse_file_path( $file_path );
-		$download_range   = self::get_download_range( @filesize( $parsed_file_path['file_path'] ) );  // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged.
 		if ( ! $download_range['is_range_request'] ) {
 			$download->track_download( $current_user_id > 0 ? $current_user_id : null, ! empty( $ip_address ) ? $ip_address : null );
 		}
