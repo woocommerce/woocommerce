@@ -427,10 +427,15 @@ class WC_Download_Handler {
 		header( 'Content-Disposition: attachment; filename="' . $filename . '";' );
 		header( 'Content-Transfer-Encoding: binary' );
 
+		$file_size = @filesize( $file_path ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+		if ( ! $file_size ) {
+			return;
+		}
+
 		if ( isset( $download_range['is_range_request'] ) && true === $download_range['is_range_request'] ) {
 			if ( false === $download_range['is_range_valid'] ) {
 				header( 'HTTP/1.1 416 Requested Range Not Satisfiable' );
-				header( 'Content-Range: bytes ' . $download_range['start'] . '-' . ( $download_range['length'] - 1 ) . '/' . $download_range['length'] );
+				header( 'Content-Range: bytes 0-' . ( $file_size - 1 ) . '/' . $file_size );
 				exit;
 			}
 
@@ -439,14 +444,11 @@ class WC_Download_Handler {
 			$length = $download_range['length'];
 
 			header( 'HTTP/1.1 206 Partial Content' );
-			header( 'Accept-Ranges: bytes' );
-			header( "Content-Range: bytes $start-$end/$length" );
+			header( "Accept-Ranges: 0-$file_size" );
+			header( "Content-Range: bytes $start-$end/$file_size" );
 			header( "Content-Length: $length" );
 		} else {
-			$size = @filesize( $file_path ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
-			if ( $size ) {
-				header( 'Content-Length: ' . $size );
-			}
+			header( 'Content-Length: ' . $file_size );
 		}
 	}
 
