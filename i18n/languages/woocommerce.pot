@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 3.4.0-beta.2\n"
+"Project-Id-Version: WooCommerce 3.4.0-rc.1\n"
 "Report-Msgid-Bugs-To: https://github.com/woocommerce/woocommerce/issues\n"
-"POT-Creation-Date: 2018-05-08 13:42:57+00:00\n"
+"POT-Creation-Date: 2018-05-09 18:00:58+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -6808,7 +6808,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-post-types.php:746
 #: includes/admin/list-tables/class-wc-admin-list-table-products.php:120
 #: includes/admin/views/html-bulk-edit-product.php:200
-#: includes/admin/views/html-quick-edit-product.php:160
+#: includes/admin/views/html-quick-edit-product.php:159
 msgid "Featured"
 msgstr ""
 
@@ -7455,7 +7455,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-meta-boxes.php:121
 #: includes/admin/views/html-bulk-edit-product.php:15
-#: includes/admin/views/html-quick-edit-product.php:15
+#: includes/admin/views/html-quick-edit-product.php:14
 msgid "Product data"
 msgstr ""
 
@@ -9571,7 +9571,7 @@ msgstr ""
 #: includes/admin/list-tables/class-wc-admin-list-table-products.php:110
 #: includes/admin/meta-boxes/views/html-product-data-inventory.php:15
 #: includes/admin/meta-boxes/views/html-variation-admin.php:67
-#: includes/admin/views/html-quick-edit-product.php:22
+#: includes/admin/views/html-quick-edit-product.php:21
 #: includes/export/class-wc-product-csv-exporter.php:84
 msgid "SKU"
 msgstr ""
@@ -9616,7 +9616,7 @@ msgstr ""
 #: includes/admin/importers/class-wc-product-csv-importer-controller.php:638
 #: includes/admin/meta-boxes/views/html-product-data-general.php:151
 #: includes/admin/views/html-bulk-edit-product.php:70
-#: includes/admin/views/html-quick-edit-product.php:50
+#: includes/admin/views/html-quick-edit-product.php:49
 #: includes/export/class-wc-product-csv-exporter.php:93
 #: includes/shipping/flat-rate/includes/settings-flat-rate.php:21
 #: includes/shipping/legacy-flat-rate/includes/settings-flat-rate.php:53
@@ -9631,7 +9631,7 @@ msgstr ""
 #: includes/admin/meta-boxes/views/html-variation-admin.php:313
 #: includes/admin/settings/class-wc-settings-tax.php:202
 #: includes/admin/views/html-bulk-edit-product.php:89
-#: includes/admin/views/html-quick-edit-product.php:68
+#: includes/admin/views/html-quick-edit-product.php:67
 #: includes/export/class-wc-product-csv-exporter.php:94
 msgid "Tax class"
 msgstr ""
@@ -9639,7 +9639,7 @@ msgstr ""
 #: includes/admin/importers/class-wc-product-csv-importer-controller.php:475
 #: includes/admin/importers/class-wc-product-csv-importer-controller.php:640
 #: includes/admin/views/html-bulk-edit-product.php:218
-#: includes/admin/views/html-quick-edit-product.php:174
+#: includes/admin/views/html-quick-edit-product.php:173
 #: includes/export/class-wc-product-csv-exporter.php:95
 msgid "In stock?"
 msgstr ""
@@ -9714,7 +9714,7 @@ msgstr ""
 #: includes/admin/importers/class-wc-product-csv-importer-controller.php:489
 #: includes/admin/importers/class-wc-product-csv-importer-controller.php:633
 #: includes/admin/meta-boxes/views/html-product-data-general.php:48
-#: includes/admin/views/html-quick-edit-product.php:42
+#: includes/admin/views/html-quick-edit-product.php:41
 #: includes/export/class-wc-product-csv-exporter.php:109
 msgid "Sale price"
 msgstr ""
@@ -9722,7 +9722,7 @@ msgstr ""
 #: includes/admin/importers/class-wc-product-csv-importer-controller.php:490
 #: includes/admin/importers/class-wc-product-csv-importer-controller.php:632
 #: includes/admin/meta-boxes/views/html-product-data-general.php:38
-#: includes/admin/views/html-quick-edit-product.php:35
+#: includes/admin/views/html-quick-edit-product.php:34
 #: includes/export/class-wc-product-csv-exporter.php:110
 msgid "Regular price"
 msgstr ""
@@ -9749,7 +9749,7 @@ msgstr ""
 #: includes/admin/meta-boxes/views/html-variation-admin.php:291
 #: includes/admin/settings/class-wc-settings-shipping.php:359
 #: includes/admin/views/html-bulk-edit-product.php:166
-#: includes/admin/views/html-quick-edit-product.php:124
+#: includes/admin/views/html-quick-edit-product.php:123
 #: includes/class-wc-post-types.php:168
 #: includes/export/class-wc-product-csv-exporter.php:113
 msgid "Shipping class"
@@ -9883,7 +9883,7 @@ msgstr ""
 #: includes/admin/importers/mappings/generic.php:23
 #: includes/admin/list-tables/class-wc-admin-list-table-products.php:117
 #: includes/admin/views/html-bulk-edit-product.php:21
-#: includes/admin/views/html-quick-edit-product.php:33
+#: includes/admin/views/html-quick-edit-product.php:32
 #: includes/widgets/class-wc-widget-products.php:54 templates/cart/cart.php:33
 #: templates/cart/cart.php:94 templates/emails/email-order-details.php:46
 msgid "Price"
@@ -11424,7 +11424,7 @@ msgstr ""
 
 #: includes/admin/meta-boxes/views/html-product-data-general.php:153
 #: includes/admin/views/html-bulk-edit-product.php:76
-#: includes/admin/views/html-quick-edit-product.php:55
+#: includes/admin/views/html-quick-edit-product.php:54
 #: includes/shipping/flat-rate/includes/settings-flat-rate.php:26
 #: includes/shipping/legacy-flat-rate/includes/settings-flat-rate.php:58
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:92
@@ -11433,7 +11433,7 @@ msgstr ""
 
 #: includes/admin/meta-boxes/views/html-product-data-general.php:154
 #: includes/admin/views/html-bulk-edit-product.php:77
-#: includes/admin/views/html-quick-edit-product.php:56
+#: includes/admin/views/html-quick-edit-product.php:55
 msgid "Shipping only"
 msgstr ""
 
@@ -11465,7 +11465,7 @@ msgstr ""
 #: includes/admin/meta-boxes/views/html-product-data-inventory.php:31
 #: includes/admin/meta-boxes/views/html-variation-admin.php:91
 #: includes/admin/views/html-bulk-edit-product.php:234
-#: includes/admin/views/html-quick-edit-product.php:168
+#: includes/admin/views/html-quick-edit-product.php:167
 msgid "Manage stock?"
 msgstr ""
 
@@ -11544,7 +11544,7 @@ msgstr ""
 #: includes/admin/meta-boxes/views/html-product-data-shipping.php:14
 #: includes/admin/meta-boxes/views/html-product-data-variations.php:83
 #: includes/admin/views/html-bulk-edit-product.php:118
-#: includes/admin/views/html-quick-edit-product.php:99
+#: includes/admin/views/html-quick-edit-product.php:98
 #: templates/single-product/product-attributes.php:28
 msgid "Weight"
 msgstr ""
@@ -11562,21 +11562,21 @@ msgstr ""
 #: includes/admin/meta-boxes/views/html-product-data-shipping.php:30
 #: includes/admin/meta-boxes/views/html-product-data-variations.php:80
 #: includes/admin/meta-boxes/views/html-variation-admin.php:268
-#: includes/admin/views/html-quick-edit-product.php:112
+#: includes/admin/views/html-quick-edit-product.php:111
 msgid "Length"
 msgstr ""
 
 #: includes/admin/meta-boxes/views/html-product-data-shipping.php:31
 #: includes/admin/meta-boxes/views/html-product-data-variations.php:81
 #: includes/admin/meta-boxes/views/html-variation-admin.php:269
-#: includes/admin/views/html-quick-edit-product.php:113
+#: includes/admin/views/html-quick-edit-product.php:112
 msgid "Width"
 msgstr ""
 
 #: includes/admin/meta-boxes/views/html-product-data-shipping.php:32
 #: includes/admin/meta-boxes/views/html-product-data-variations.php:82
 #: includes/admin/meta-boxes/views/html-variation-admin.php:270
-#: includes/admin/views/html-quick-edit-product.php:114
+#: includes/admin/views/html-quick-edit-product.php:113
 msgid "Height"
 msgstr ""
 
@@ -11586,7 +11586,7 @@ msgstr ""
 
 #: includes/admin/meta-boxes/views/html-product-data-shipping.php:48
 #: includes/admin/views/html-bulk-edit-product.php:170
-#: includes/admin/views/html-quick-edit-product.php:127
+#: includes/admin/views/html-quick-edit-product.php:126
 msgid "No shipping class"
 msgstr ""
 
@@ -12455,7 +12455,7 @@ msgid "Allow customers to place orders without an account."
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-accounts.php:51
-#: includes/class-wc-download-handler.php:155 templates/auth/form-login.php:49
+#: includes/class-wc-download-handler.php:164 templates/auth/form-login.php:49
 #: templates/global/form-login.php:48 templates/myaccount/form-login.php:36
 msgid "Login"
 msgstr ""
@@ -13852,7 +13852,7 @@ msgstr ""
 
 #: includes/admin/settings/views/html-settings-tax.php:18
 #: includes/admin/views/html-bulk-edit-product.php:95
-#: includes/admin/views/html-quick-edit-product.php:73
+#: includes/admin/views/html-quick-edit-product.php:72
 #: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:217
 #: includes/wc-product-functions.php:807
 msgid "Standard"
@@ -15068,7 +15068,7 @@ msgid "Enter price (%s)"
 msgstr ""
 
 #: includes/admin/views/html-bulk-edit-product.php:45
-#: includes/admin/views/html-quick-edit-product.php:40
+#: includes/admin/views/html-quick-edit-product.php:39
 msgid "Sale"
 msgstr ""
 
@@ -15089,32 +15089,32 @@ msgid "Enter sale price (%s)"
 msgstr ""
 
 #: includes/admin/views/html-bulk-edit-product.php:142
-#: includes/admin/views/html-quick-edit-product.php:110
+#: includes/admin/views/html-quick-edit-product.php:109
 msgid "L/W/H"
 msgstr ""
 
 #: includes/admin/views/html-bulk-edit-product.php:181
-#: includes/admin/views/html-quick-edit-product.php:139
+#: includes/admin/views/html-quick-edit-product.php:138
 msgid "Visibility"
 msgstr ""
 
 #: includes/admin/views/html-bulk-edit-product.php:187
-#: includes/admin/views/html-quick-edit-product.php:145
+#: includes/admin/views/html-quick-edit-product.php:144
 msgid "Catalog &amp; search"
 msgstr ""
 
 #: includes/admin/views/html-bulk-edit-product.php:188
-#: includes/admin/views/html-quick-edit-product.php:146
+#: includes/admin/views/html-quick-edit-product.php:145
 msgid "Catalog"
 msgstr ""
 
 #: includes/admin/views/html-bulk-edit-product.php:189
-#: includes/admin/views/html-quick-edit-product.php:147
+#: includes/admin/views/html-quick-edit-product.php:146
 msgid "Search"
 msgstr ""
 
 #: includes/admin/views/html-bulk-edit-product.php:190
-#: includes/admin/views/html-quick-edit-product.php:148
+#: includes/admin/views/html-quick-edit-product.php:147
 #: includes/customizer/class-wc-shop-customizer.php:726
 #: includes/wc-product-functions.php:753
 msgid "Hidden"
@@ -15127,12 +15127,12 @@ msgstr ""
 
 #: includes/admin/views/html-bulk-edit-product.php:253
 #: includes/admin/views/html-bulk-edit-product.php:269
-#: includes/admin/views/html-quick-edit-product.php:189
+#: includes/admin/views/html-quick-edit-product.php:188
 msgid "Stock qty"
 msgstr ""
 
 #: includes/admin/views/html-bulk-edit-product.php:274
-#: includes/admin/views/html-quick-edit-product.php:198
+#: includes/admin/views/html-quick-edit-product.php:197
 msgid "Backorders?"
 msgstr ""
 
@@ -20080,7 +20080,7 @@ msgstr ""
 msgid "Invalid download link."
 msgstr ""
 
-#: includes/class-wc-download-handler.php:116
+#: includes/class-wc-download-handler.php:125
 #: includes/class-wc-form-handler.php:774
 #: includes/data-stores/abstract-wc-order-data-store-cpt.php:100
 #: includes/shortcodes/class-wc-shortcode-checkout.php:177
@@ -20089,36 +20089,36 @@ msgstr ""
 msgid "Invalid order."
 msgstr ""
 
-#: includes/class-wc-download-handler.php:128
+#: includes/class-wc-download-handler.php:137
 msgid "Sorry, you have reached your download limit for this file"
 msgstr ""
 
-#: includes/class-wc-download-handler.php:139
+#: includes/class-wc-download-handler.php:148
 msgid "Sorry, this download has expired"
 msgstr ""
 
-#: includes/class-wc-download-handler.php:152
-#: includes/class-wc-download-handler.php:155
+#: includes/class-wc-download-handler.php:161
+#: includes/class-wc-download-handler.php:164
 msgid "You must be logged in to download files."
 msgstr ""
 
-#: includes/class-wc-download-handler.php:155
+#: includes/class-wc-download-handler.php:164
 msgid "Log in to Download Files"
 msgstr ""
 
-#: includes/class-wc-download-handler.php:158
+#: includes/class-wc-download-handler.php:167
 msgid "This is not your download link."
 msgstr ""
 
-#: includes/class-wc-download-handler.php:179
+#: includes/class-wc-download-handler.php:188
 msgid "No file defined"
 msgstr ""
 
-#: includes/class-wc-download-handler.php:301
+#: includes/class-wc-download-handler.php:390
 msgid "File not found"
 msgstr ""
 
-#: includes/class-wc-download-handler.php:438
+#: includes/class-wc-download-handler.php:564
 msgid "Go to shop"
 msgstr ""
 
@@ -25623,7 +25623,7 @@ msgstr ""
 
 #: includes/admin/meta-boxes/views/html-product-data-general.php:155
 #: includes/admin/views/html-bulk-edit-product.php:78
-#: includes/admin/views/html-quick-edit-product.php:57
+#: includes/admin/views/html-quick-edit-product.php:56
 #: includes/shipping/flat-rate/includes/settings-flat-rate.php:27
 #: includes/shipping/legacy-flat-rate/includes/settings-flat-rate.php:59
 #: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php:93
