@@ -1,7 +1,6 @@
 ---
 name: "\U0001F680 Feature request"
-about: "Suggest a new feature \U0001F389 We'll consider building it if it receives
-  a bunch of interest and \U0001F44D votes!"
+about: "Suggest a new feature \U0001F389 We'll consider building it if it receives sufficient interest! \U0001F44D"
 
 ---
 
