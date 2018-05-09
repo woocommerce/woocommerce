@@ -128,11 +128,6 @@ class WC_Tests_Customer_Download_Log extends WC_Unit_Test_Case {
 		$this->assertEquals( 0, $download_1->get_download_count(), 'New permission download count should be zero.' );
 		$this->assertEquals( 10, $download_1->get_downloads_remaining(), 'New permission downloads remaining should be 10.' );
 
-		// Range download is not legged & does not reduce remaining download count.
-		$download_1->track_download( $customer_id_2, $ip_address, true );
-		$this->assertEquals( 0, $download_1->get_download_count(), 'After range download, permission download count should be 0.' );
-		$this->assertEquals( 10, $download_1->get_downloads_remaining(), 'After range download, permission downloads remaining should be 10.' );
-
 		// Track the download in logs and change remaining/counts.
 		$download_1->track_download( $customer_id_2, $ip_address );
 
