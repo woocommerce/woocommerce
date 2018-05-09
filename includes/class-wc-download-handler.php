@@ -101,7 +101,9 @@ class WC_Download_Handler {
 		$file_path        = $product->get_file_download_path( $download->get_download_id() );
 		$parsed_file_path = self::parse_file_path( $file_path );
 		$download_range   = self::get_download_range( @filesize( $parsed_file_path['file_path'] ) );  // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged.
-		$download->track_download( $current_user_id > 0 ? $current_user_id : null, ! empty( $ip_address ) ? $ip_address : null, $download_range['is_range_request'] );
+		if ( ! $download_range['is_range_request'] ) {
+			$download->track_download( $current_user_id > 0 ? $current_user_id : null, ! empty( $ip_address ) ? $ip_address : null );
+		}
 
 		self::download( $file_path, $download->get_product_id() );
 	}
