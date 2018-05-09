@@ -232,8 +232,11 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Include select tags when saving payment details temporarily in checkout.js. #19854
 * Tweak - Update - Include pending products in export. #19928
 * Tweak - Deprecate woocommerce_ajax_added_order_items action in favor of more useful action. #19933
-* Tweak - Disable image gallery zoom on touch devices to make photoswipe more easily accessible. #19954
+* Tweak - Enable touch-to-zoom on touch devices to make photoswipe more easily accessible. #20002
 * Tweak - Wizard: List out all plugins to be installed upon proceeding to the next step, with a highlight on hover indicating relevant settings. #19952
+* Tweak - Hide/show password strength meter instead of removing/inserting password strength meter. #20006
+* Tweak - Added support for HTTP_RANGE requests (used by iOS devices) to Force download method. #19984
+* Tweak/Fix - Replaced protocol-relative URLs for thumbnails in the cart and mini-cart with protocol-specific URLs to prevent problems with URLs that include port section. #19934
 * Fix - Properly set orderby and order when calling WC_Customer_Download_Data_Store::get_downloads(). #1862
 * Fix - Set maxlength for order item meta key to avoid values disappearing if too long. #18918
 * Fix - Remove hardcoded /wp-content check for downloads. #18961
@@ -277,6 +280,12 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - No update available message after activating subscription that has a valid update. #19831
 * Fix - Include scheduled products in CSV export. #19907
 * Fix - Generator tag actions should be filters. #19946
+* Fix - WC API should not try to create a product image when creating a product variation if an empty image is passed. #19971
+* Fix - Force settings API settings to autoload by default. #19998
+* Fix - Cart html5 validation events when using keyboard. #20001
+* Fix - Don't show stock status fields in external product quick-edit. #20005 
+* Fix - Prevent an infinite loop if 2 grouped products are linked. #20020
+* Fix - Switch stock_status when manage stock gets changed to prevent being out of stock if stock quantity is > 0. #20021
 * Dev - Added refunded_payment prop to orders for determining if payment was refunded via API. #18196
 * Dev - Added extra params to `woocommerce_order_get_downloadable_items`. #18408
 * Dev - Store shipping method ID and instance ID in separate fields instead of both in one serialized field. #18483
