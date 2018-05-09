@@ -310,12 +310,13 @@ class WC_Download_Handler {
 		$download_range['length'] = $file_size;
 
 		if ( isset( $_SERVER['HTTP_RANGE'] ) ) {
+			$http_range = sanitize_text_field( wp_unslash( $_SERVER['HTTP_RANGE'] ) );
 			$download_range['is_range_request'] = true;
 
 			$c_start = $start;
 			$c_end   = $end;
 			// Extract the range string.
-			list( , $range ) = explode( '=', $_SERVER['HTTP_RANGE'], 2 );
+			list( , $range ) = explode( '=', $http_range, 2 );
 			// Make sure the client hasn't sent us a multibyte range.
 			if ( strpos( $range, ',' ) !== false ) {
 				return $download_range;
