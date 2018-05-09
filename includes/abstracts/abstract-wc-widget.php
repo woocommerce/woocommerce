@@ -78,7 +78,7 @@ abstract class WC_Widget extends WP_Widget {
 	 * @return bool true if the widget is cached otherwise false
 	 */
 	public function get_cached_widget( $args ) {
-		$cache = wp_cache_get( apply_filters( 'woocommerce_cached_widget_id', $this->get_widget_id_for_cache( $this->widget_id ) ), 'widget' );
+		$cache = wp_cache_get( $this->get_widget_id_for_cache( $this->widget_id ), 'widget' );
 
 		if ( ! is_array( $cache ) ) {
 			$cache = array();
@@ -100,7 +100,7 @@ abstract class WC_Widget extends WP_Widget {
 	 * @return string the content that was cached
 	 */
 	public function cache_widget( $args, $content ) {
-		$cache = wp_cache_get( apply_filters( 'woocommerce_cached_widget_id', $this->get_widget_id_for_cache( $this->widget_id ) ), 'widget' );
+		$cache = wp_cache_get( $this->get_widget_id_for_cache( $this->widget_id ), 'widget' );
 
 		if ( ! is_array( $cache ) ) {
 			$cache = array();
@@ -108,7 +108,7 @@ abstract class WC_Widget extends WP_Widget {
 
 		$cache[ $this->get_widget_id_for_cache( $args['widget_id'] ) ] = $content;
 
-		wp_cache_set( apply_filters( 'woocommerce_cached_widget_id', $this->get_widget_id_for_cache( $this->widget_id ) ), $cache, 'widget' );
+		wp_cache_set( $this->get_widget_id_for_cache( $this->widget_id ), $cache, 'widget' );
 
 		return $content;
 	}
@@ -118,7 +118,7 @@ abstract class WC_Widget extends WP_Widget {
 	 */
 	public function flush_widget_cache() {
 		foreach ( array( '-https', '-http' ) as $scheme ) {
-			wp_cache_delete( apply_filters( 'woocommerce_cached_widget_id', $this->widget_id . $scheme ), 'widget' );
+			wp_cache_delete( $this->get_widget_id_for_cache( $this->widget_id, $scheme ), 'widget' );
 		}
 	}
 
@@ -353,10 +353,18 @@ abstract class WC_Widget extends WP_Widget {
 	/**
 	 * Get widget id plus scheme/protocol to prevent serving mixed content from (persistently) cached widgets.
 	 *
-	 * @param string $widget_id Id of the cached widget.
-	 * @return string Widget id including scheme/protocol.
+	 * @since  3.4.0
+	 * @param  string $widget_id Id of the cached widget.
+	 * @param  string $scheme    Scheme for the widget id.
+	 * @return string            Widget id including scheme/protocol.
 	 */
-	protected function get_widget_id_for_cache( $widget_id ) {
-		return $widget_id . ( is_ssl() ? '-https' : '-http' );
+	protected function get_widget_id_for_cache( $widget_id, $scheme = '' ) {
+		if ( $scheme ) {
+			$widget_id_for_cache = $widget_id . $scheme;
+		} else {
+			$widget_id_for_cache = $widget_id . ( is_ssl() ? '-https' : '-http' );
+		}
+
+		return apply_filters( 'woocommerce_cached_widget_id', $widget_id_for_cache );
 	}
 }
