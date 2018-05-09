@@ -2504,7 +2504,7 @@ class WC_AJAX {
 
 		wp_send_json_success(
 			array(
-				'zones' => WC_Shipping_Zones::get_zones(),
+				'zones' => WC_Shipping_Zones::get_zones( 'json' ),
 			)
 		);
 	}

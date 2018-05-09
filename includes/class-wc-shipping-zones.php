@@ -20,19 +20,20 @@ class WC_Shipping_Zones {
 	 * Get shipping zones from the database.
 	 *
 	 * @since 2.6.0
+	 * @param string $context Getting shipping methods for what context. Valid values, admin, json.
 	 * @return array Array of arrays.
 	 */
-	public static function get_zones() {
+	public static function get_zones( $context = 'admin' ) {
 		$data_store = WC_Data_Store::load( 'shipping-zone' );
 		$raw_zones  = $data_store->get_zones();
 		$zones      = array();
 
 		foreach ( $raw_zones as $raw_zone ) {
-			$zone                                = new WC_Shipping_Zone( $raw_zone );
-			$zones[ $zone->get_id() ]            = $zone->get_data();
-			$zones[ $zone->get_id() ]['zone_id'] = $zone->get_id();
+			$zone                                                = new WC_Shipping_Zone( $raw_zone );
+			$zones[ $zone->get_id() ]                            = $zone->get_data();
+			$zones[ $zone->get_id() ]['zone_id']                 = $zone->get_id();
 			$zones[ $zone->get_id() ]['formatted_zone_location'] = $zone->get_formatted_location();
-			$zones[ $zone->get_id() ]['shipping_methods']        = $zone->get_shipping_methods( false, 'json' );
+			$zones[ $zone->get_id() ]['shipping_methods']        = $zone->get_shipping_methods( false, $context );
 		}
 
 		return $zones;
