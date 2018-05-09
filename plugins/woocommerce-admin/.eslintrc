@@ -10,9 +10,6 @@
         "node": true
     },
     "globals": {
-        "FoxhoundData": true,
-        "FoxhoundMenu": true,
-        "FoxhoundSettings": true,
         "jQuery": true,
         "wp": true,
         "wpApiSettings": true
