@@ -282,6 +282,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Force settings API settings to autoload by default. #19998
 * Fix - Cart html5 validation events when using keyboard. #20001
 * Fix - Don't show stock status fields in external product quick-edit. #20005 
+* Fix - Prevent an infinite loop if 2 grouped products are linked. #20020
 * Dev - Added refunded_payment prop to orders for determining if payment was refunded via API. #18196
 * Dev - Added extra params to `woocommerce_order_get_downloadable_items`. #18408
 * Dev - Store shipping method ID and instance ID in separate fields instead of both in one serialized field. #18483
