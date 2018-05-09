@@ -117,7 +117,7 @@ abstract class WC_Widget extends WP_Widget {
 	 * Flush the cache.
 	 */
 	public function flush_widget_cache() {
-		foreach ( array( '-https', '-http' ) as $scheme ) {
+		foreach ( array( 'https', 'http' ) as $scheme ) {
 			wp_cache_delete( $this->get_widget_id_for_cache( $this->widget_id, $scheme ), 'widget' );
 		}
 	}
@@ -360,9 +360,9 @@ abstract class WC_Widget extends WP_Widget {
 	 */
 	protected function get_widget_id_for_cache( $widget_id, $scheme = '' ) {
 		if ( $scheme ) {
-			$widget_id_for_cache = $widget_id . $scheme;
+			$widget_id_for_cache = $widget_id . '-' . $scheme;
 		} else {
-			$widget_id_for_cache = $widget_id . ( is_ssl() ? '-https' : '-http' );
+			$widget_id_for_cache = $widget_id . '-' . ( is_ssl() ? 'https' : 'http' );
 		}
 
 		return apply_filters( 'woocommerce_cached_widget_id', $widget_id_for_cache );
