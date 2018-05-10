@@ -79,6 +79,10 @@ const webpackConfig = {
 			},
 		],
 	},
+	resolve: {
+		extensions: [ '.json', '.js', '.jsx' ],
+		modules: [ path.join( __dirname, 'js/src' ), 'node_modules' ],
+	},
 	plugins: [
 		new ExtractTextPlugin( 'css/style.css' ),
 	],
