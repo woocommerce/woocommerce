@@ -2,7 +2,11 @@
     "root": true,
     "parser": "babel-eslint",
     "extends": [
-        "wpcalypso/react"
+        "wpcalypso/react",
+        "plugin:jsx-a11y/recommended"
+    ],
+    "plugins": [
+        "jsx-a11y"
     ],
     "env": {
         "browser": true,
