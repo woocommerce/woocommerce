@@ -9,7 +9,7 @@ import { Component, compose } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import useFilters from '../../use-filters';
+import useFilters from 'components/higher-order/use-filters';
 
 class Activity extends Component {
 	render() {
