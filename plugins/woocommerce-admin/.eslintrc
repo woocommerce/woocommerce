@@ -16,7 +16,8 @@
     "globals": {
         "jQuery": true,
         "wp": true,
-        "wpApiSettings": true
+        "wpApiSettings": true,
+        "wcSettings": true
     },
     "rules": {
         "camelcase": 0,

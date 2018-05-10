@@ -4,6 +4,7 @@
  * Register a new menu page for the Dashboard
  */
 function woo_dash_register_page(){
+	// toplevel_page_woodash
 	add_menu_page(
 		__( 'Woo Dash', 'woo-dash' ),
 		__( 'WC Dashboard', 'woo-dash' ),
@@ -29,13 +30,27 @@ function woo_dash_enqueue_script( $hook ){
 }
 add_action( 'admin_enqueue_scripts', 'woo_dash_enqueue_script' );
 
+function woo_dash_admin_body_class( $admin_body_class = '' ) {
+	global $hook_suffix;
+
+	if ( ! in_array( $hook_suffix, array( 'toplevel_page_woodash' ) ) ) {
+		return $admin_body_class;
+	}
+
+	$classes = explode( ' ', trim( $admin_body_class ) );
+	$classes[] = 'woocommerce-page';
+	$admin_body_class = implode( ' ', array_unique( $classes ) );
+	return " $admin_body_class ";
+}
+add_filter( 'admin_body_class', 'woo_dash_admin_body_class' );
+
+
 /**
  * Set up a div for the app to render into.
  */
 function woo_dash_page(){
 	?>
 	<div class="wrap">
-		<h1 class="wp-heading-inline"><?php esc_html_e( 'Woo Dashboard Demo', 'woo-dash' ); ?></h1>
 		<div id="root"></div>
 	</div>
 <?php

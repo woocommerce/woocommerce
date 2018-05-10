@@ -26,6 +26,16 @@ function woo_dash_register_script() {
 
 	wp_enqueue_script( 'wp-api' );
 	gutenberg_extend_wp_api_backbone_client();
+
+	// Settings and variables can be passed here for access in the app
+	$settings = array(
+		'adminUrl' => admin_url(),
+	);
+	wp_add_inline_script(
+		WOO_DASH_APP,
+		'var wcSettings = '. json_encode( $settings ) . ';',
+		'before'
+	);
 }
 add_action( 'init', 'woo_dash_register_script' );
 

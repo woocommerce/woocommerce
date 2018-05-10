@@ -1,0 +1,28 @@
+.woo-dash__header {
+	background: #ffffff;
+	width: 100%;
+	min-height: 47px;
+	margin: 0 0 8px;
+	padding: 8px 16px 8px 16px;
+	display: flex;
+	justify-content: flex-start;
+	flex-direction: row;
+	align-items: center;
+	box-sizing: border-box;
+	background: #ffffff;
+	border-bottom: 1px solid rgba( black, 0.2 );
+
+	h1 {
+		font-size: 13px;
+
+		span {
+			display: inline-block;
+		}
+
+		span + span::before {
+			content: ' / ';
+			color: #cccccc;
+			margin: 0 2px 0 4px;
+		}
+	}
+}

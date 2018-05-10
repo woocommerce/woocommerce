@@ -1,8 +1,19 @@
+.woocommerce-page {
+	.wrap {
+		margin: 0;
+	}
+
+	#wpcontent {
+		padding: 0;
+	}
+}
 
 .woo-dashboard {
 	display: grid;
 	grid-template-columns: auto 300px;
 	grid-gap: 0 40px;
+	margin: 10px 20px 0 2px;
+	padding-left: 20px;
 }
 
 .woo-dash__secondary {
