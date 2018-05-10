@@ -10,11 +10,16 @@
     "npm": "5.6.0"
   },
   "scripts": {
+    "install-if-deps-outdated": "node bin/install-if-deps-outdated.js",
+    "install-if-no-packages": "node bin/install-if-no-packages.js",
+    "prebuild": "npm run -s install-if-deps-outdated",
     "build": "NODE_ENV=production webpack",
-    "dev": "webpack",
-    "watch": "webpack --watch",
-    "lint": "eslint js/src --ext=js,jsx",
-    "i18n": "pot-to-php ./languages/woo-dash.pot ./languages/woo-dash.php woo-dash && grunt i18n"
+    "prestart": "npm run -s install-if-deps-outdated",
+    "start": "webpack --watch",
+    "lint": "npm run -s install-if-deps-outdated && eslint js/src --ext=js,jsx",
+    "i18n": "pot-to-php ./languages/woo-dash.pot ./languages/woo-dash.php woo-dash && grunt i18n",
+    "precommit": "npm run -s install-if-no-packages && node bin/pre-commit-hook.js",
+    "prepush": "npm run -s install-if-no-packages && node bin/pre-push-hook.js"
   },
   "devDependencies": {
     "@wordpress/babel-plugin-makepot": "^1.0.0",
@@ -24,6 +29,7 @@
     "babel-eslint": "^8.2.3",
     "babel-loader": "^7.1.4",
     "babel-plugin-transform-async-generator-functions": "^6.24.1",
+    "chalk": "^2.4.1",
     "css-loader": "^0.28.11",
     "eslint": "^4.18.2",
     "eslint-config-wpcalypso": "^3.0.0",
@@ -34,9 +40,11 @@
     "extract-text-webpack-plugin": "^4.0.0-beta.0",
     "grunt": "^1.0.2",
     "grunt-wp-i18n": "^1.0.2",
+    "husky": "^0.14.3",
     "node-sass": "^4.9.0",
     "prettier": "github:automattic/calypso-prettier#c56b4251",
     "prop-types": "^15.6.1",
+    "readline-sync": "^1.4.9",
     "sass-loader": "^7.0.1",
     "style-loader": "^0.21.0",
     "webpack": "^4.8.0",

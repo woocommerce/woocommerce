@@ -11,8 +11,7 @@ This is a feature plugin for a modern, javascript-driven dashboard for WooCommer
 After cloning the repo, install dependencies with `npm install`. Now you can build the files using one of these commands:
 
  - `npm run build` : Build a production version
- - `npm run dev` : Build a development version
- - `npm run watch` : Build a development version, watch files for changes
+ - `npm start` : Build a development version, watch files for changes
 
 There are also some helper scripts:
 
