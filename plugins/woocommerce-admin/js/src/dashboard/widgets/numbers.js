@@ -6,26 +6,41 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { Button, withAPIData } from '@wordpress/components';
 import { Component, compose } from '@wordpress/element';
 
+/**
+ * Internal dependencies
+ */
+import Card from 'components/card';
+
 class WidgetNumbers extends Component {
 	render() {
 		const { orders, products } = this.props;
-		const totalOrders = orders.data && orders.data.length || 0;
-		const totalProducts = products.data && products.data.length || 0;
+		const totalOrders = ( orders.data && orders.data.length ) || 0;
+		const totalProducts = ( products.data && products.data.length ) || 0;
 		return (
-			<div className="woo-dash__widget">
-				<div className="woo-dash__widget-item">
-					{ sprintf( _n( '%d New Customer', '%d New Customers', 4, 'woo-dash' ), 4 ) }
+			<Card title={ __( 'Store Performance', 'woo-dash' ) }>
+				<div className="woo-dash__widget">
+					<div className="woo-dash__widget-item">
+						{ sprintf( _n( '%d New Customer', '%d New Customers', 4, 'woo-dash' ), 4 ) }
+					</div>
+					<div className="woo-dash__widget-item">
+						{ sprintf(
+							_n( '%d New Order', '%d New Orders', totalOrders, 'woo-dash' ),
+							totalOrders
+						) }
+					</div>
+					<div className="woo-dash__widget-item">
+						{ sprintf(
+							_n( '%d Product', '%d Products', totalProducts, 'woo-dash' ),
+							totalProducts
+						) }
+					</div>
+					<div className="woo-dash__widget-item">
+						<Button isPrimary href="#">
+							{ __( 'View Orders', 'woo-dash' ) }
+						</Button>
+					</div>
 				</div>
-				<div className="woo-dash__widget-item">
-					{ sprintf( _n( '%d New Order', '%d New Orders', totalOrders, 'woo-dash' ), totalOrders ) }
-				</div>
-				<div className="woo-dash__widget-item">
-					{ sprintf( _n( '%d Product', '%d Products', totalProducts, 'woo-dash' ), totalProducts ) }
-				</div>
-				<div className="woo-dash__widget-item">
-					<Button isPrimary href="#">{ __( 'View Orders', 'woo-dash' ) }</Button>
-				</div>
-			</div>
+			</Card>
 		);
 	}
 }

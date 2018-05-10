@@ -9,9 +9,9 @@ import { Component, Fragment } from '@wordpress/element';
  * Internal dependencies
  */
 import './style.scss';
-import Header from '../components/header';
-import WidgetNumbers from './widgets/numbers';
 import ActivityList from './widgets/activity';
+import Header from 'components/header';
+import WidgetNumbers from './widgets/numbers';
 
 export default class extends Component {
 	render() {
