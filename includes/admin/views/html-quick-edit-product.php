@@ -1,12 +1,11 @@
 <?php
 /**
  * Admin View: Quick Edit Product
+ *
+ * @package admin.
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
+defined( 'ABSPATH' ) || exit;
 ?>
 
 <fieldset class="inline-edit-col-left">
@@ -82,7 +81,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						}
 
 						foreach ( $options as $key => $value ) {
-							echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
+							echo '<option value="' . esc_attr( $key ) . '">' . esc_html( $value ) . '</option>';
 						}
 						?>
 					</select>
@@ -98,7 +97,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<label>
 					<span class="title"><?php esc_html_e( 'Weight', 'woocommerce' ); ?></span>
 					<span class="input-text-wrap">
-						<input type="text" name="_weight" class="text weight" placeholder="<?php echo wc_format_localized_decimal( 0 ); ?>" value="">
+						<input type="text" name="_weight" class="text weight" placeholder="<?php echo esc_attr( wc_format_localized_decimal( 0 ) ); ?>" value="">
 					</span>
 				</label>
 				<br class="clear" />
@@ -161,8 +160,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</label>
 		</div>
 
-		<?php if ( get_option( 'woocommerce_manage_stock' ) == 'yes' ) : ?>
-			<div class="inline-edit-group">
+		<?php if ( get_option( 'woocommerce_manage_stock' ) === 'yes' ) : ?>
+			<div class="inline-edit-group manage_stock_field">
 				<label class="manage_stock">
 					<input type="checkbox" name="_manage_stock" value="1">
 					<span class="checkbox-title"><?php esc_html_e( 'Manage stock?', 'woocommerce' ); ?></span>
@@ -184,7 +183,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</label>
 
 		<div class="stock_fields">
-			<?php if ( get_option( 'woocommerce_manage_stock' ) == 'yes' ) : ?>
+			<?php if ( get_option( 'woocommerce_manage_stock' ) === 'yes' ) : ?>
 				<label class="stock_qty_field">
 					<span class="title"><?php esc_html_e( 'Stock qty', 'woocommerce' ); ?></span>
 					<span class="input-text-wrap">
@@ -210,6 +209,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php do_action( 'woocommerce_product_quick_edit_end' ); ?>
 
 		<input type="hidden" name="woocommerce_quick_edit" value="1" />
-		<input type="hidden" name="woocommerce_quick_edit_nonce" value="<?php echo wp_create_nonce( 'woocommerce_quick_edit_nonce' ); ?>" />
+		<input type="hidden" name="woocommerce_quick_edit_nonce" value="<?php echo esc_attr( wp_create_nonce( 'woocommerce_quick_edit_nonce' ) ); ?>" />
 	</div>
 </fieldset>

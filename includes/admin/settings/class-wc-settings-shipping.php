@@ -279,7 +279,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 		wp_localize_script(
 			'wc-shipping-zones', 'shippingZonesLocalizeScript', array(
-				'zones'                   => WC_Shipping_Zones::get_zones(),
+				'zones'                   => WC_Shipping_Zones::get_zones( 'json' ),
 				'default_zone'            => array(
 					'zone_id'    => 0,
 					'zone_name'  => '',
