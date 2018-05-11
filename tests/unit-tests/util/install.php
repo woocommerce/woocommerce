@@ -146,4 +146,31 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 
 		return $tables;
 	}
+
+	/**
+	 * Test - WC_Install::get_tables() should sort tables alphabetically.
+	 */
+	public function test_get_tables_sorts_results() {
+		global $wpdb;
+
+		add_filter( 'woocommerce_install_get_tables', array( $this, 'append_tables_for_sorting' ) );
+
+		$sorted = WC_Install::get_tables();
+		sort( $sorted );
+
+		$this->assertEquals( $sorted, WC_Install::get_tables() );
+	}
+
+	/**
+	 * Filter callback for test_get_tables_sorts_results().
+	 */
+	public function append_tables_for_sorting( $tables ) {
+		global $wpdb;
+
+		$tables[] = "{$wpdb->prefix}wc_another_table";
+		$tables[] = "{$wpdb->prefix}woocommerce_another_one";
+		$tables[] = "{$wpdb->prefix}woocommerce_yet_another_table";
+
+		return $tables;
+	}
 }
