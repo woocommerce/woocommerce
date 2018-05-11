@@ -809,9 +809,6 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 		 */
 		$tables = apply_filters( 'woocommerce_install_get_tables', $tables );
 
-		// Sort the tables alphabetically.
-		sort( $tables );
-
 		return $tables;
 	}
 
