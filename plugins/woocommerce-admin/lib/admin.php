@@ -1,6 +1,17 @@
 <?php
 
 /**
+ * Returns true if we are on a JS powered admin page.
+ */
+function woo_dash_is_admin_page() {
+	global $hook_suffix;
+	if ( in_array( $hook_suffix, array( 'toplevel_page_woodash' ) ) ) {
+		return true;
+	}
+	return false;
+}
+
+/**
  * Register a new menu page for the Dashboard
  */
 function woo_dash_register_page(){
@@ -20,8 +31,8 @@ add_action( 'admin_menu', 'woo_dash_register_page' );
 /**
  * Load the assets on the Dashboard page
  */
-function woo_dash_enqueue_script( $hook ){
-	if ( 'toplevel_page_woodash' !== $hook ) {
+function woo_dash_enqueue_script(){
+	if ( ! woo_dash_is_admin_page() ) {
 		return;
 	}
 
@@ -33,7 +44,7 @@ add_action( 'admin_enqueue_scripts', 'woo_dash_enqueue_script' );
 function woo_dash_admin_body_class( $admin_body_class = '' ) {
 	global $hook_suffix;
 
-	if ( ! in_array( $hook_suffix, array( 'toplevel_page_woodash' ) ) ) {
+	if ( ! woo_dash_is_admin_page() ) {
 		return $admin_body_class;
 	}
 
@@ -43,6 +54,24 @@ function woo_dash_admin_body_class( $admin_body_class = '' ) {
 	return " $admin_body_class ";
 }
 add_filter( 'admin_body_class', 'woo_dash_admin_body_class' );
+
+
+function woo_dash_admin_before_notices() {
+	if ( ! woo_dash_is_admin_page() ) {
+		return;
+	}
+	echo '<div class="woo-dashboard__admin-notice-list-hide">';
+	echo '<div class="wp-header-end"></div>'; // https://github.com/WordPress/WordPress/blob/f6a37e7d39e2534d05b9e542045174498edfe536/wp-admin/js/common.js#L737
+}
+add_action( 'admin_notices', 'woo_dash_admin_before_notices', 0 );
+
+function woo_dash_admin_after_notices() {
+	if ( ! woo_dash_is_admin_page() ) {
+		return;
+	}
+	echo '</div>';
+}
+add_action( 'admin_notices', 'woo_dash_admin_after_notices', PHP_INT_MAX );
 
 
 /**
