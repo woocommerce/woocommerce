@@ -771,12 +771,11 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 */
 	protected function unescape_negative_number( $value ) {
 		if ( 0 === strpos( $value, "'-" ) ) {
-			$unescaped = substr_replace( $value, '', 0, 1 );
+			$unescaped = trim( $value, "'" );
 			if ( is_numeric( $unescaped ) ) {
 				return $unescaped;
 			}
 		}
-
 		return $value;
 	}
 }
