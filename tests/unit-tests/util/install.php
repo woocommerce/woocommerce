@@ -122,8 +122,10 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 		$tables = $wpdb->get_col(
 			"SHOW TABLES WHERE `Tables_in_{$wpdb->dbname}` LIKE '{$wpdb->prefix}woocommerce\_%' OR `Tables_in_{$wpdb->dbname}` LIKE '{$wpdb->prefix}wc\_%'"
 		);
+		$result = WC_Install::get_tables();
+		sort( $result );
 
-		$this->assertEquals( $tables, WC_Install::get_tables() );
+		$this->assertEquals( $tables, $result );
 	}
 
 	/**
@@ -143,33 +145,6 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 	 */
 	public function append_table_to_get_tables( $tables ) {
 		$tables[] = 'some_table_name';
-
-		return $tables;
-	}
-
-	/**
-	 * Test - WC_Install::get_tables() should sort tables alphabetically.
-	 */
-	public function test_get_tables_sorts_results() {
-		global $wpdb;
-
-		add_filter( 'woocommerce_install_get_tables', array( $this, 'append_tables_for_sorting' ) );
-
-		$sorted = WC_Install::get_tables();
-		sort( $sorted );
-
-		$this->assertEquals( $sorted, WC_Install::get_tables() );
-	}
-
-	/**
-	 * Filter callback for test_get_tables_sorts_results().
-	 */
-	public function append_tables_for_sorting( $tables ) {
-		global $wpdb;
-
-		$tables[] = "{$wpdb->prefix}wc_another_table";
-		$tables[] = "{$wpdb->prefix}woocommerce_another_one";
-		$tables[] = "{$wpdb->prefix}woocommerce_yet_another_table";
 
 		return $tables;
 	}
