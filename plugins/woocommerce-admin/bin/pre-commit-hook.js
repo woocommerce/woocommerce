@@ -41,9 +41,9 @@ const dirtyFiles = new Set( parseGitDiffToPathArray( 'git diff --name-only --dif
 
 const files = parseGitDiffToPathArray( 'git diff --cached --name-only --diff-filter=ACM' );
 
-// run prettier for any files in the commit that have @format within their first docblock
+// run prettier for any files in client/
 files.forEach( file => {
-	if ( 0 === file.indexOf( 'bin/' ) ) {
+	if ( 0 !== file.indexOf( 'client/' ) ) {
 		return;
 	}
 	const text = fs.readFileSync( file, 'utf8' );

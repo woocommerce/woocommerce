@@ -16,7 +16,7 @@
     "build": "NODE_ENV=production webpack",
     "prestart": "npm run -s install-if-deps-outdated",
     "start": "webpack --watch",
-    "lint": "npm run -s install-if-deps-outdated && eslint js/src --ext=js,jsx",
+    "lint": "npm run -s install-if-deps-outdated && eslint client --ext=js,jsx",
     "i18n": "pot-to-php ./languages/woo-dash.pot ./languages/woo-dash.php woo-dash && grunt i18n",
     "precommit": "npm run -s install-if-no-packages && node bin/pre-commit-hook.js",
     "prepush": "npm run -s install-if-no-packages && node bin/pre-push-hook.js"

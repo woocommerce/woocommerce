@@ -54,7 +54,7 @@ coreGlobals.forEach( ( name ) => {
 const webpackConfig = {
 	mode: NODE_ENV,
 	entry: {
-		index: './js/src/index.js',
+		index: './client/index.js',
 	},
 	output: {
 		path: path.resolve( 'dist' ),
@@ -81,7 +81,7 @@ const webpackConfig = {
 	},
 	resolve: {
 		extensions: [ '.json', '.js', '.jsx' ],
-		modules: [ path.join( __dirname, 'js/src' ), 'node_modules' ],
+		modules: [ path.join( __dirname, 'client' ), 'node_modules' ],
 	},
 	plugins: [
 		new ExtractTextPlugin( 'css/style.css' ),
