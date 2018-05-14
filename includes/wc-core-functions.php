@@ -1135,11 +1135,11 @@ endif;
  * @return string
  */
 function wc_rand_hash() {
-	if ( function_exists( 'openssl_random_pseudo_bytes' ) ) {
-		return bin2hex( openssl_random_pseudo_bytes( 20 ) ); // @codingStandardsIgnoreLine
-	} else {
+	if ( ! function_exists( 'openssl_random_pseudo_bytes' ) ) {
 		return sha1( wp_rand() );
 	}
+
+	return bin2hex( openssl_random_pseudo_bytes( 20 ) ); // @codingStandardsIgnoreLine
 }
 
 /**
@@ -1349,10 +1349,10 @@ function wc_back_link( $label, $url ) {
  * @return string
  */
 function wc_help_tip( $tip, $allow_html = false ) {
+	$tip = esc_attr( $tip );
+
 	if ( $allow_html ) {
 		$tip = wc_sanitize_tooltip( $tip );
-	} else {
-		$tip = esc_attr( $tip );
 	}
 
 	return '<span class="woocommerce-help-tip" data-tip="' . $tip . '"></span>';
@@ -1585,16 +1585,17 @@ function wc_remove_number_precision( $value ) {
  * @since  3.2.0
  * @param  array $value Number to add precision to.
  * @param  bool  $round Should we round after adding precision?.
- * @return int
+ * @return int | array
  */
 function wc_add_number_precision_deep( $value, $round = true ) {
-	if ( is_array( $value ) ) {
-		foreach ( $value as $key => $subvalue ) {
-			$value[ $key ] = wc_add_number_precision_deep( $subvalue, $round );
-		}
-	} else {
-		$value = wc_add_number_precision( $value, $round );
+	if ( ! is_array( $value ) ) {
+		return wc_add_number_precision( $value, $round );
 	}
+
+	foreach ( $value as $key => $sub_value ) {
+		$value[ $key ] = wc_add_number_precision_deep( $sub_value, $round );
+	}
+
 	return $value;
 }
 
@@ -1603,16 +1604,17 @@ function wc_add_number_precision_deep( $value, $round = true ) {
  *
  * @since  3.2.0
  * @param  array $value Number to add precision to.
- * @return int
+ * @return int | array
  */
 function wc_remove_number_precision_deep( $value ) {
-	if ( is_array( $value ) ) {
-		foreach ( $value as $key => $subvalue ) {
-			$value[ $key ] = wc_remove_number_precision_deep( $subvalue );
-		}
-	} else {
-		$value = wc_remove_number_precision( $value );
+	if ( ! is_array( $value ) ) {
+		wc_remove_number_precision( $value );
 	}
+
+	foreach ( $value as $key => $sub_value ) {
+		$value[ $key ] = wc_remove_number_precision_deep( $sub_value );
+	}
+
 	return $value;
 }
 
