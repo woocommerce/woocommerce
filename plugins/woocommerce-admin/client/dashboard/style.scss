@@ -1,17 +1,4 @@
-.woocommerce-page {
-	.wrap {
-		margin: 0;
-	}
-
-	#wpcontent {
-		padding: 0;
-	}
-}
-
-.woo-dashboard__admin-notice-list-hide {
-	display: none;
-}
-
+/** @format */
 .woo-dashboard {
 	display: grid;
 	grid-template-columns: auto 300px;
@@ -21,8 +8,8 @@
 }
 
 .woo-dash__secondary {
-	background: white;
-	border: 1px solid rgba( black, 0.2 );
+	background: $white;
+	border: 1px solid $gray;
 	padding: 2em;
 }
 

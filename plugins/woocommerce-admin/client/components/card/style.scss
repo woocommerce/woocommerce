@@ -1,12 +1,14 @@
+/** @format */
+
 .woo-dash__card {
 	margin-bottom: 20px;
 	background: white;
-	border: 1px solid rgba( black, 0.2 );
+	border: 1px solid $gray;
 }
 
 .woo-dash__card-header {
 	padding: 20px;
-	border-bottom: 1px solid rgba( black, 0.2 );
+	border-bottom: 1px solid $gray;
 	display: grid;
 
 	.has-action & {

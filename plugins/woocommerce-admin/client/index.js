@@ -13,13 +13,14 @@ import { pick } from 'lodash';
 import Dashboard from './dashboard';
 
 render(
-	createElement( APIProvider, {
-		...wpApiSettings,
-		...pick( wp.api, [
-			'postTypeRestBaseMapping',
-			'taxonomyRestBaseMapping',
-		] ),
-	}, createElement( Dashboard ) ),
+	createElement(
+		APIProvider,
+		{
+			...wpApiSettings,
+			...pick( wp.api, [ 'postTypeRestBaseMapping', 'taxonomyRestBaseMapping' ] ),
+		},
+		createElement( Dashboard )
+	),
 	document.getElementById( 'root' )
 );
 

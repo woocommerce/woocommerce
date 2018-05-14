@@ -19,7 +19,9 @@ const Header = ( { sections, showTimeline } ) => {
 		const crumbs = _sections.map( ( subSection, i ) => <span key={ i }>{ subSection }</span> );
 		return (
 			<h1>
-				<span><a href={ getAdminLink( 'admin.php?page=woodash' ) }>WooCommerce</a></span>
+				<span>
+					<a href={ getAdminLink( 'admin.php?page=woodash' ) }>WooCommerce</a>
+				</span>
 				{ crumbs }
 			</h1>
 		);
@@ -28,9 +30,7 @@ const Header = ( { sections, showTimeline } ) => {
 	return (
 		<div className="woo-dash__header">
 			{ renderBreadcrumbs() }
-			{ showTimeline && (
-				<div />
-			) }
+			{ showTimeline && <div /> }
 		</div>
 	);
 };

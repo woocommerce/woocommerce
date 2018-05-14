@@ -1,5 +1,7 @@
+/** @format */
+
 .woo-dash__header {
-	background: #ffffff;
+	background: $white;
 	width: 100%;
 	min-height: 47px;
 	margin: 0 0 8px;
@@ -9,8 +11,8 @@
 	flex-direction: row;
 	align-items: center;
 	box-sizing: border-box;
-	background: #ffffff;
-	border-bottom: 1px solid rgba( black, 0.2 );
+	background: $white;
+	border-bottom: 1px solid $gray;
 
 	h1 {
 		font-size: 13px;
@@ -21,8 +23,8 @@
 
 		span + span::before {
 			content: ' / ';
-			color: #cccccc;
-			margin: 0 2px 0 4px;
+			color: $gray-text;
+			margin: 0 2px 0 6px;
 		}
 	}
 }
