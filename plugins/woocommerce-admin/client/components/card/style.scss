@@ -10,6 +10,7 @@
 	padding: 20px;
 	border-bottom: 1px solid $gray;
 	display: grid;
+	align-items: center;
 
 	.has-action & {
 		grid-template-columns: 1fr 1fr;

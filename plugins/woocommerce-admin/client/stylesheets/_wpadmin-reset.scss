@@ -10,6 +10,10 @@
 	#wpcontent {
 		padding: 0;
 	}
+
+	* {
+		box-sizing: border-box;
+	}
 }
 
 .woo-dashboard__admin-notice-list-hide {
