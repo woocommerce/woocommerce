@@ -166,6 +166,7 @@ class WC_Admin_Duplicate_Product {
 				$child_duplicate = clone $child;
 				$child_duplicate->set_parent_id( $duplicate->get_id() );
 				$child_duplicate->set_id( 0 );
+				$child_duplicate->set_date_created( null );
 
 				if ( '' !== $child->get_sku( 'edit' ) ) {
 					$child_duplicate->set_sku( wc_product_generate_unique_sku( 0, $child->get_sku( 'edit' ) ) );
