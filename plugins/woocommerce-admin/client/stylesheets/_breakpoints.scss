@@ -1,7 +1,11 @@
+/** @format */
+
 // Breakpoints
 // Forked from https://github.com/Automattic/wp-calypso/blob/46ae24d8800fb85da6acf057a640e60dac988a38/assets/stylesheets/shared/mixins/_breakpoints.scss
 
-$breakpoints: 480px, 660px, 800px, 960px, 1040px, 1280px, 1400px; // Think very carefully before adding a new breakpoint
+// Think very carefully before adding a new breakpoint.
+// The list below is based on wp-admin's main breakpoints
+$breakpoints: 400px, 600px, 782px, 960px, 1100px;
 
 @mixin breakpoint( $sizes... ) {
 	@each $size in $sizes {

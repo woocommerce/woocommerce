@@ -14,6 +14,17 @@
 	* {
 		box-sizing: border-box;
 	}
+
+	.menu-top {
+		box-sizing: initial;
+	}
+
+	@include breakpoint( '<782px' ) {
+		// WP breakpoint for mobile menu
+		.wp-responsive-open #wpbody {
+			right: -14.5em;
+		}
+	}
 }
 
 .woo-dashboard__admin-notice-list-hide {
