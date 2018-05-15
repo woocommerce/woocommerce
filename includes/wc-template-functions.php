@@ -122,7 +122,7 @@ add_action( 'wp_head', 'wc_gallery_noscript' );
 /**
  * When the_post is called, put product data into a global.
  *
- * @param   mixed   $post   Post Object.
+ * @param   mixed $post   Post Object.
  * @return  WC_Product | bool
  */
 function wc_setup_product_data( $post ) {
