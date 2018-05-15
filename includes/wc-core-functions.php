@@ -1714,10 +1714,10 @@ function wc_print_r( $expression, $return = false ) {
 			$res = call_user_func_array( $alternative['func'], $alternative['args'] );
 			if ( $return ) {
 				return $res;
-			} else {
-				echo $res; // WPCS: XSS ok.
-				return true;
 			}
+
+			echo $res; // WPCS: XSS ok.
+			return true;
 		}
 	}
 
