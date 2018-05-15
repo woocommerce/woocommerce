@@ -274,7 +274,11 @@ jQuery( function ( $ ) {
 
 				// Meta
 				.on( 'click', 'button.add_order_item_meta', this.item_meta.add )
-				.on( 'click', 'button.remove_order_item_meta', this.item_meta.remove );
+				.on( 'click', 'button.remove_order_item_meta', this.item_meta.remove )
+
+				// Reload items
+				.on( 'wc_order_items_reload', this.reload_items )
+				.on( 'wc_order_items_reloaded', this.reloaded_items );
 
 			$( document.body )
 				.on( 'wc_backbone_modal_loaded', this.backbone.init )
@@ -316,6 +320,11 @@ jQuery( function ( $ ) {
 					wc_meta_boxes_order_items.stupidtable.init();
 				}
 			});
+		},
+
+		reloaded_items: function() {
+			wc_meta_boxes_order.init_tiptip();
+			wc_meta_boxes_order_items.stupidtable.init();
 		},
 
 		// When the qty is changed, increase or decrease costs
