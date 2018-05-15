@@ -6,6 +6,6 @@
  * @param {String} path Relative path.
  * @return {String} Full admin URL.
  */
-export const getAdminLink = ( path ) => {
-	return wcSettings.adminUrl + path;
+export const getAdminLink = path => {
+	return wcSettings.adminUrl + 'admin.php?page=woodash#' + path;
 };

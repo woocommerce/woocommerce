@@ -12,9 +12,9 @@ function woo_dash_is_admin_page() {
 }
 
 /**
- * Register a new menu page for the Dashboard
+ * Register menu pages for the Dashboard and Analytics sections
  */
-function woo_dash_register_page(){
+function woo_dash_register_pages(){
 	// toplevel_page_woodash
 	add_menu_page(
 		__( 'Woo Dash', 'woo-dash' ),
@@ -25,8 +25,29 @@ function woo_dash_register_page(){
 		'dashicons-cart',
 		6
 	);
+
+	// toplevel_page_wooanalytics
+	add_menu_page(
+		__( 'WooCommerce Analytics', 'woo-dash' ),
+		__( 'WooAnalytics', 'woo-dash' ),
+		'manage_options',
+		'woodash#/analytics',
+		'woo_dash_page',
+		'dashicons-chart-bar',
+		6
+	);
+
+	// TODO: Remove. Test report link
+	add_submenu_page(
+		'woodash#/analytics',
+		__( 'Report Title', 'woo-dash' ),
+		__( 'Report Title', 'woo-dash' ),
+		'manage_options',
+		'woodash#/analytics/test',
+		'woo_dash_page'
+	);
 }
-add_action( 'admin_menu', 'woo_dash_register_page' );
+add_action( 'admin_menu', 'woo_dash_register_pages' );
 
 /**
  * Load the assets on the Dashboard page

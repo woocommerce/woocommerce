@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import './style.scss';
-import { getAdminLink } from '../../lib/nav-utils';
+import { getAdminLink } from 'lib/nav-utils';
 
 // TODO Implement timeline icon
 
@@ -20,7 +20,7 @@ const Header = ( { sections, showTimeline } ) => {
 		return (
 			<h1>
 				<span>
-					<a href={ getAdminLink( 'admin.php?page=woodash' ) }>WooCommerce</a>
+					<a href={ getAdminLink( '/' ) }>WooCommerce</a>
 				</span>
 				{ crumbs }
 			</h1>

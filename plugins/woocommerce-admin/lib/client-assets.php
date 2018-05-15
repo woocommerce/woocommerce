@@ -33,7 +33,8 @@ function woo_dash_register_script() {
 	);
 	wp_add_inline_script(
 		WOO_DASH_APP,
-		'var wcSettings = '. json_encode( $settings ) . ';',
+		'var wcSettings = '. json_encode( $settings ) . ';' .
+		"jQuery( '#toplevel_page_woodash a' ).attr( 'href', 'admin.php?page=woodash#/' );",
 		'before'
 	);
 }
