@@ -315,9 +315,8 @@ jQuery( function ( $ ) {
 				success: function( response ) {
 					$( '#woocommerce-order-items' ).find( '.inside' ).empty();
 					$( '#woocommerce-order-items' ).find( '.inside' ).append( response );
-					wc_meta_boxes_order.init_tiptip();
+					wc_meta_boxes_order_items.reloaded_items();
 					wc_meta_boxes_order_items.unblock();
-					wc_meta_boxes_order_items.stupidtable.init();
 				}
 			});
 		},
@@ -402,9 +401,8 @@ jQuery( function ( $ ) {
 					if ( response.success ) {
 						$( '#woocommerce-order-items' ).find( '.inside' ).empty();
 							$( '#woocommerce-order-items' ).find( '.inside' ).append( response.data.html );
-							wc_meta_boxes_order.init_tiptip();
+							wc_meta_boxes_order_items.reloaded_items();
 							wc_meta_boxes_order_items.unblock();
-							wc_meta_boxes_order_items.stupidtable.init();
 					} else {
 						window.alert( response.data.error );
 					}
@@ -430,9 +428,8 @@ jQuery( function ( $ ) {
 				if ( response.success ) {
 					$( '#woocommerce-order-items' ).find( '.inside' ).empty();
 						$( '#woocommerce-order-items' ).find( '.inside' ).append( response.data.html );
-						wc_meta_boxes_order.init_tiptip();
+						wc_meta_boxes_order_items.reloaded_items();
 						wc_meta_boxes_order_items.unblock();
-						wc_meta_boxes_order_items.stupidtable.init();
 				} else {
 					window.alert( response.data.error );
 				}
@@ -490,9 +487,8 @@ jQuery( function ( $ ) {
 					if ( response.success ) {
 						$( '#woocommerce-order-items' ).find( '.inside' ).empty();
 							$( '#woocommerce-order-items' ).find( '.inside' ).append( response.data.html );
-							wc_meta_boxes_order.init_tiptip();
+							wc_meta_boxes_order_items.reloaded_items();
 							wc_meta_boxes_order_items.unblock();
-							wc_meta_boxes_order_items.stupidtable.init();
 					} else {
 						window.alert( response.data.error );
 					}
@@ -569,9 +565,8 @@ jQuery( function ( $ ) {
 						if ( response.success ) {
 							$( '#woocommerce-order-items' ).find( '.inside' ).empty();
 							$( '#woocommerce-order-items' ).find( '.inside' ).append( response.data.html );
-							wc_meta_boxes_order.init_tiptip();
+							wc_meta_boxes_order_items.reloaded_items();
 							wc_meta_boxes_order_items.unblock();
-							wc_meta_boxes_order_items.stupidtable.init();
 						} else {
 							window.alert( response.data.error );
 						}
@@ -601,9 +596,8 @@ jQuery( function ( $ ) {
 						if ( response.success ) {
 							$( '#woocommerce-order-items' ).find( '.inside' ).empty();
 								$( '#woocommerce-order-items' ).find( '.inside' ).append( response.data.html );
-								wc_meta_boxes_order.init_tiptip();
+								wc_meta_boxes_order_items.reloaded_items();
 								wc_meta_boxes_order_items.unblock();
-								wc_meta_boxes_order_items.stupidtable.init();
 						} else {
 							window.alert( response.data.error );
 						}
@@ -660,9 +654,8 @@ jQuery( function ( $ ) {
 					success: function( response ) {
 						$( '#woocommerce-order-items' ).find( '.inside' ).empty();
 						$( '#woocommerce-order-items' ).find( '.inside' ).append( response );
-						wc_meta_boxes_order.init_tiptip();
+						wc_meta_boxes_order_items.reloaded_items();
 						wc_meta_boxes_order_items.unblock();
-						wc_meta_boxes_order_items.stupidtable.init();
 					}
 				});
 			}
@@ -687,9 +680,8 @@ jQuery( function ( $ ) {
 				success: function( response ) {
 					$( '#woocommerce-order-items' ).find( '.inside' ).empty();
 					$( '#woocommerce-order-items' ).find( '.inside' ).append( response );
-					wc_meta_boxes_order.init_tiptip();
+					wc_meta_boxes_order_items.reloaded_items();
 					wc_meta_boxes_order_items.unblock();
-					wc_meta_boxes_order_items.stupidtable.init();
 				}
 			});
 
@@ -1137,8 +1129,7 @@ jQuery( function ( $ ) {
 						if ( response.success ) {
 							$( '#woocommerce-order-items' ).find( '.inside' ).empty();
 							$( '#woocommerce-order-items' ).find( '.inside' ).append( response.data.html );
-							wc_meta_boxes_order.init_tiptip();
-							wc_meta_boxes_order_items.stupidtable.init();
+							wc_meta_boxes_order_items.reloaded_items();
 						} else {
 							window.alert( response.data.error );
 						}
@@ -1180,8 +1171,7 @@ jQuery( function ( $ ) {
 							if ( response.success ) {
 								$( '#woocommerce-order-items' ).find( '.inside' ).empty();
 								$( '#woocommerce-order-items' ).find( '.inside' ).append( response.data.html );
-								wc_meta_boxes_order.init_tiptip();
-								wc_meta_boxes_order_items.stupidtable.init();
+								wc_meta_boxes_order_items.reloaded_items();
 							} else {
 								window.alert( response.data.error );
 							}
