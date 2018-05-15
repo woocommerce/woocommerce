@@ -3537,11 +3537,6 @@ img.help_tip {
 			padding-right: 24px;
 		}
 
-		th label {
-			position: relative;
-			display: block;
-		}
-
 		.select2-container {
 			vertical-align: top;
 			margin-bottom: 3px;
@@ -3553,7 +3548,7 @@ img.help_tip {
 
 		th img.help_tip,
 		th .woocommerce-help-tip {
-			margin: -8px -24px 0 0;
+			margin: -8px 0 0 0;
 			position: absolute;
 			right: 0;
 			top: 50%;
