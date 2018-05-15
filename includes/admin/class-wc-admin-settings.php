@@ -520,7 +520,9 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 						?>
 						<tr valign="top">
-							<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html . $disabled_message; // WPCS: XSS ok. ?></th>
+							<th scope="row" class="titledesc">
+							<label><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html . $disabled_message; // WPCS: XSS ok. ?></label>
+						</th>
 							<td class="forminp image_width_settings">
 
 								<input name="<?php echo esc_attr( $value['id'] ); ?>[width]" <?php echo $disabled_attr; // WPCS: XSS ok. ?> id="<?php echo esc_attr( $value['id'] ); ?>-width" type="text" size="3" value="<?php echo esc_attr( $width ); ?>" /> &times; <input name="<?php echo esc_attr( $value['id'] ); ?>[height]" <?php echo $disabled_attr; // WPCS: XSS ok. ?> id="<?php echo esc_attr( $value['id'] ); ?>-height" type="text" size="3" value="<?php echo esc_attr( $height ); ?>" />px
@@ -552,7 +554,9 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 						?>
 						<tr valign="top" class="single_select_page">
-							<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></th>
+							<th scope="row" class="titledesc">
+								<label><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
+							</th>
 							<td class="forminp">
 								<?php echo str_replace( ' id=', " data-placeholder='" . esc_attr__( 'Select a page&hellip;', 'woocommerce' ) . "' style='" . $value['css'] . "' class='" . $value['class'] . "' id=", wp_dropdown_pages( $args ) ); // WPCS: XSS ok. ?> <?php echo $description; // WPCS: XSS ok. ?>
 							</td>
