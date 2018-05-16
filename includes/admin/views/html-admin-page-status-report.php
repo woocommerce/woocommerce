@@ -866,7 +866,7 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 						<?php esc_html_e( 'Learn how to update', 'woocommerce' ); ?>
 					</a>
 				</td>
-			/tr>
+			</tr>
 		<?php endif; ?>
 	</tbody>
 </table>
