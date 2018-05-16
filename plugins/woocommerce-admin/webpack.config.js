@@ -20,20 +20,34 @@ function camelCaseDash( string ) {
 	);
 }
 
-const coreGlobals = [
+const gutenbergEntries = [
 	'blocks',
 	'components',
-	'date',
 	'editor',
-	'element',
 	'utils',
 	'data',
 	'viewport',
 	'core-data',
 	'plugins',
 	'edit-post',
+	'core-blocks',
+];
+
+
+const gutenbergPackages = [
+	'date',
+	'element',
+];
+
+const wordPressPackages = [
+	'a11y',
+	'dom-ready',
 	'hooks',
 	'i18n',
+	'is-shallow-equal',
+];
+
+const coreGlobals = [
 	'api-request',
 ];
 
@@ -45,7 +59,12 @@ const externals = {
 	jquery: 'jQuery',
 };
 
-coreGlobals.forEach( ( name ) => {
+[
+	...gutenbergEntries,
+	...gutenbergPackages,
+	...wordPressPackages,
+	...coreGlobals,
+].forEach( ( name ) => {
 	externals[ `@wordpress/${ name }` ] = {
 		this: [ 'wp', camelCaseDash( name ) ],
 	};

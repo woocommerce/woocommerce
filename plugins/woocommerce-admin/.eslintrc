@@ -6,11 +6,12 @@
         "plugin:jsx-a11y/recommended"
     ],
     "plugins": [
-        "jsx-a11y"
+        "jsx-a11y",
+        "jest"
     ],
     "env": {
         "browser": true,
-        "mocha": true,
+        "jest/globals": true,
         "node": true
     },
     "globals": {
