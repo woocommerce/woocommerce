@@ -683,9 +683,9 @@ function wc_query_string_form_fields( $values = null, $exclude = array(), $curre
 
 	if ( $return ) {
 		return $html;
-	} else {
-		echo $html; // WPCS: XSS ok.
 	}
+
+	echo $html; // WPCS: XSS ok.
 }
 
 /**
