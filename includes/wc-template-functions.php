@@ -16,20 +16,33 @@ defined( 'ABSPATH' ) || exit;
 function wc_template_redirect() {
 	global $wp_query, $wp;
 
-	if ( ! empty( $_GET['page_id'] ) && '' === get_option( 'permalink_structure' ) && wc_get_page_id( 'shop' ) === absint( $_GET['page_id'] ) && get_post_type_archive_link( 'product' ) ) { // WPCS: input var ok, CSRF ok.
-
+	if (
+		! empty( $_GET['page_id'] ) // WPCS: input var ok, CSRF ok.
+		&& '' === get_option( 'permalink_structure' )
+		&& wc_get_page_id( 'shop' ) === absint( $_GET['page_id'] ) // WPCS: input var ok, CSRF ok.
+		&& get_post_type_archive_link( 'product' )
+	) {
 		// When default permalinks are enabled, redirect shop page to post type archive url.
 		wp_safe_redirect( get_post_type_archive_link( 'product' ) );
 		exit;
 
-	} elseif ( is_page( wc_get_page_id( 'checkout' ) ) && wc_get_page_id( 'checkout' ) !== wc_get_page_id( 'cart' ) && WC()->cart->is_empty() && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ) {
-
+	} elseif (
+		is_page( wc_get_page_id( 'checkout' ) )
+		&& wc_get_page_id( 'checkout' ) !== wc_get_page_id( 'cart' )
+		&& WC()->cart->is_empty()
+		&& empty( $wp->query_vars['order-pay'] )
+		&& ! isset( $wp->query_vars['order-received'] )
+	) {
 		// When on the checkout with an empty cart, redirect to cart page.
 		wc_add_notice( __( 'Checkout is not available whilst your cart is empty.', 'woocommerce' ), 'notice' );
 		wp_safe_redirect( wc_get_page_permalink( 'cart' ) );
 		exit;
 
-	} elseif ( isset( $wp->query_vars['customer-logout'] ) && ! empty( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( sanitize_key( $_REQUEST['_wpnonce'] ), 'customer-logout' ) ) { // WPCS: input var ok, CSRF ok.
+	} elseif (
+		isset( $wp->query_vars['customer-logout'] )
+		&& ! empty( $_REQUEST['_wpnonce'] ) // WPCS: input var ok, CSRF ok.
+		&& wp_verify_nonce( sanitize_key( $_REQUEST['_wpnonce'] ), 'customer-logout' ) // WPCS: input var ok, CSRF ok.
+	) {
 
 		// Logout.
 		wp_safe_redirect( str_replace( '&amp;', '&', wp_logout_url( wc_get_page_permalink( 'myaccount' ) ) ) );
@@ -40,8 +53,12 @@ function wc_template_redirect() {
 		wp_safe_redirect( esc_url_raw( wc_get_account_endpoint_url( 'customer-logout' ) ) );
 		exit;
 
-	} elseif ( is_search() && is_post_type_archive( 'product' ) && apply_filters( 'woocommerce_redirect_single_search_result', true ) && 1 === absint( $wp_query->found_posts ) ) {
-
+	} elseif (
+		is_search()
+		&& is_post_type_archive( 'product' )
+		&& apply_filters( 'woocommerce_redirect_single_search_result', true )
+		&& 1 === absint( $wp_query->found_posts )
+	) {
 		// Redirect to the product page if we have a single product.
 		$product = wc_get_product( $wp_query->post );
 
@@ -55,11 +72,9 @@ function wc_template_redirect() {
 		WC()->payment_gateways();
 
 	} elseif ( is_checkout() ) {
-
 		// Checkout pages handling
 		// Buffer the checkout page.
 		ob_start();
-
 		// Ensure gateways and shipping methods are loaded early.
 		WC()->payment_gateways();
 		WC()->shipping();
