@@ -455,7 +455,7 @@ function wc_get_product_cat_class( $class = '', $category = null ) {
  * @param int          $post_id Post ID.
  * @return array
  */
-function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
+function wc_product_post_class( $classes, $class = '', $post_id = 0 ) {
 	if ( ! $post_id || ! in_array( get_post_type( $post_id ), array( 'product', 'product_variation' ), true ) ) {
 		return $classes;
 	}
@@ -683,9 +683,9 @@ function wc_query_string_form_fields( $values = null, $exclude = array(), $curre
 
 	if ( $return ) {
 		return $html;
-	} else {
-		echo $html; // WPCS: XSS ok.
 	}
+
+	echo $html; // WPCS: XSS ok.
 }
 
 /**
