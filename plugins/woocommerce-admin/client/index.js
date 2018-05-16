@@ -12,6 +12,7 @@ import { pick, find } from 'lodash';
 /**
  * Internal dependencies
  */
+import './stylesheets/_wpadmin-reset.scss';
 import Analytics from './analytics';
 import AnalyticsReport from './analytics/report';
 import Dashboard from './dashboard';
