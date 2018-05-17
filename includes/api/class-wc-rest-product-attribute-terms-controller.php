@@ -14,14 +14,14 @@ defined( 'ABSPATH' ) || exit;
  * REST API Product Attribute Terms controller class.
  *
  * @package WooCommerce/API
- * @extends WC_REST_Product_Attribute_Terms_V1_Controller
+ * @extends WC_REST_Product_Attribute_Terms_V2_Controller
  */
-class WC_REST_Product_Attribute_Terms_Controller extends WC_REST_Product_Attribute_Terms_V1_Controller {
+class WC_REST_Product_Attribute_Terms_Controller extends WC_REST_Product_Attribute_Terms_V2_Controller {
 
 	/**
 	 * Endpoint namespace.
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v2';
+	protected $namespace = 'wc/v3';
 }

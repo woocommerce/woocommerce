@@ -14,14 +14,21 @@ defined( 'ABSPATH' ) || exit;
  * REST API Reports controller class.
  *
  * @package WooCommerce/API
- * @extends WC_REST_Reports_V1_Controller
+ * @extends WC_REST_Controller
  */
-class WC_REST_Reports_Controller extends WC_REST_Reports_V1_Controller {
+class WC_REST_Reports_Controller extends WC_REST_Controller {
 
 	/**
 	 * Endpoint namespace.
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v2';
+	protected $namespace = 'wc/v3';
+
+	/**
+	 * Route base.
+	 *
+	 * @var string
+	 */
+	protected $rest_base = 'reports';
 }
