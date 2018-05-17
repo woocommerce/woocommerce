@@ -44,7 +44,4 @@
 			</exclude>
 		</whitelist>
 	</filter>
-	<listeners>
-		<listener class="JohnKary\PHPUnit\Listener\SpeedTrapListener" />
-	</listeners>
 </phpunit>

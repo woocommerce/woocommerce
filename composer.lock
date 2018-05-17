@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "90e327f21ad7c717c91787def1f0cfec",
+    "content-hash": "bc2c57d2be29888a0e4c3a09ec26cbe3",
     "packages": [
         {
             "name": "composer/installers",
@@ -643,54 +643,6 @@
             ],
             "abandoned": true,
             "time": "2014-05-27T05:29:25+00:00"
-        },
-        {
-            "name": "johnkary/phpunit-speedtrap",
-            "version": "v2.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/johnkary/phpunit-speedtrap.git",
-                "reference": "a1e39e0e3d07e0faee4ef3f342229d68fab07b5f"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/johnkary/phpunit-speedtrap/zipball/a1e39e0e3d07e0faee4ef3f342229d68fab07b5f",
-                "reference": "a1e39e0e3d07e0faee4ef3f342229d68fab07b5f",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.0",
-                "phpunit/phpunit": "^6.0"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "2.0-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "JohnKary\\PHPUnit\\Listener\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "John Kary",
-                    "email": "john@johnkary.net"
-                }
-            ],
-            "description": "Find slow tests in your PHPUnit test suite",
-            "homepage": "https://github.com/johnkary/phpunit-speedtrap",
-            "keywords": [
-                "phpunit",
-                "profile",
-                "slow"
-            ],
-            "time": "2017-12-06T15:14:00+00:00"
         },
         {
             "name": "justinrainbow/json-schema",
