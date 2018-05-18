@@ -165,11 +165,12 @@ class WC_Privacy extends WC_Abstract_Privacy {
 			return 0;
 		}
 
-		return self::trash_orders_query( array(
+		return self::trash_orders_query( apply_filters( 'woocommerce_trash_pending_orders_query_args', array(
 			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
 			'limit'        => $limit, // Batches of 20.
 			'status'       => 'wc-pending',
-		) );
+			'type'         => 'shop_order',
+		) ) );
 	}
 
 	/**
@@ -186,11 +187,12 @@ class WC_Privacy extends WC_Abstract_Privacy {
 			return 0;
 		}
 
-		return self::trash_orders_query( array(
+		return self::trash_orders_query( apply_filters( 'woocommerce_trash_failed_orders_query_args', array(
 			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
 			'limit'        => $limit, // Batches of 20.
 			'status'       => 'wc-failed',
-		) );
+			'type'         => 'shop_order',
+		) ) );
 	}
 
 	/**
@@ -207,11 +209,12 @@ class WC_Privacy extends WC_Abstract_Privacy {
 			return 0;
 		}
 
-		return self::trash_orders_query( array(
+		return self::trash_orders_query( apply_filters( 'woocommerce_trash_cancelled_orders_query_args', array(
 			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
 			'limit'        => $limit, // Batches of 20.
 			'status'       => 'wc-cancelled',
-		) );
+			'type'         => 'shop_order',
+		) ) );
 	}
 
 	/**
@@ -249,12 +252,13 @@ class WC_Privacy extends WC_Abstract_Privacy {
 			return 0;
 		}
 
-		return self::anonymize_orders_query( array(
+		return self::anonymize_orders_query( apply_filters( 'woocommerce_anonymize_completed_orders_query_args', array(
 			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
 			'limit'        => $limit, // Batches of 20.
 			'status'       => 'wc-completed',
 			'anonymized'   => false,
-		) );
+			'type'         => 'shop_order',
+		) ) );
 	}
 
 	/**
