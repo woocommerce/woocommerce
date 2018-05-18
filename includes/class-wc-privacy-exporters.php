@@ -383,8 +383,10 @@ class WC_Privacy_Exporters {
 					'group_label' => __( 'Payment Tokens', 'woocommerce' ),
 					'item_id'     => 'token-' . $token->get_id(),
 					'data'        => array(
-						'name'  => __( 'Token', 'woocommerce' ),
-						'value' => $token->get_display_name(),
+						array(
+							'name'  => __( 'Token', 'woocommerce' ),
+							'value' => $token->get_display_name(),
+						),
 					),
 				);
 			}
