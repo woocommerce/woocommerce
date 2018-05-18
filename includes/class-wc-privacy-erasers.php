@@ -285,6 +285,20 @@ class WC_Privacy_Erasers {
 			}
 		}
 
+		// Remove meta data.
+		$meta_to_remove = apply_filters( 'woocommerce_privacy_remove_order_personal_data_meta', array(
+			'Payer first name'     => 'text',
+			'Payer last name'      => 'text',
+			'Payer PayPal address' => 'email',
+			'Transaction ID'       => 'numeric_id',
+		) );
+
+		if ( ! empty( $meta_to_remove ) && is_array( $meta_to_remove ) ) {
+			foreach ( $meta_to_remove as $meta_key => $data_type ) {
+				$order->delete_meta_data( $meta_key );
+			}
+		}
+
 		// Set all new props and persist the new data to the database.
 		$order->set_props( $anonymized_data );
 		$order->update_meta_data( '_anonymized', 'yes' );
