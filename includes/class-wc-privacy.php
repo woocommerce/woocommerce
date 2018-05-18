@@ -167,9 +167,9 @@ class WC_Privacy extends WC_Abstract_Privacy {
 
 		return self::trash_orders_query( array(
 			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
-			'limit'        => $limit, // Batches of 20.
 			'status'       => 'wc-pending',
-		) );
+			'return'       => 'ids',
+		), $limit );
 	}
 
 	/**
@@ -188,9 +188,9 @@ class WC_Privacy extends WC_Abstract_Privacy {
 
 		return self::trash_orders_query( array(
 			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
-			'limit'        => $limit, // Batches of 20.
 			'status'       => 'wc-failed',
-		) );
+			'return'       => 'ids',
+		), $limit );
 	}
 
 	/**
@@ -209,9 +209,9 @@ class WC_Privacy extends WC_Abstract_Privacy {
 
 		return self::trash_orders_query( array(
 			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
-			'limit'        => $limit, // Batches of 20.
 			'status'       => 'wc-cancelled',
-		) );
+			'return'       => 'ids',
+		), $limit );
 	}
 
 	/**
@@ -219,16 +219,25 @@ class WC_Privacy extends WC_Abstract_Privacy {
 	 *
 	 * @since 3.4.0
 	 * @param array $query Query array to pass to wc_get_orders().
+	 * @param int   $limit Limit orders to process per batch.
 	 * @return int Count of orders that were trashed.
 	 */
-	protected static function trash_orders_query( $query ) {
+	protected static function trash_orders_query( $query, $limit ) {
 		$orders = wc_get_orders( $query );
 		$count  = 0;
 
 		if ( $orders ) {
-			foreach ( $orders as $order ) {
-				$order->delete( false );
-				$count ++;
+			foreach ( $orders as $order_id ) {
+				$order = wc_get_order( $order_id );
+
+				if ( $order && apply_filters( 'woocommerce_privacy_trash_order', true, $order, $query ) ) {
+					$order->delete( false );
+					$count ++;
+				}
+
+				if ( $count === $limit ) {
+					break;
+				}
 			}
 		}
 
@@ -251,10 +260,10 @@ class WC_Privacy extends WC_Abstract_Privacy {
 
 		return self::anonymize_orders_query( array(
 			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
-			'limit'        => $limit, // Batches of 20.
 			'status'       => 'wc-completed',
 			'anonymized'   => false,
-		) );
+			'return'       => 'ids',
+		), $limit );
 	}
 
 	/**
@@ -262,16 +271,25 @@ class WC_Privacy extends WC_Abstract_Privacy {
 	 *
 	 * @since 3.4.0
 	 * @param array $query Query array to pass to wc_get_orders().
+	 * @param int   $limit The number of orders in a batch.
 	 * @return int Count of orders that were anonymized.
 	 */
-	protected static function anonymize_orders_query( $query ) {
+	protected static function anonymize_orders_query( $query, $limit ) {
 		$orders = wc_get_orders( $query );
 		$count  = 0;
 
 		if ( $orders ) {
-			foreach ( $orders as $order ) {
-				WC_Privacy_Erasers::remove_order_personal_data( $order );
-				$count ++;
+			foreach ( $orders as $order_id ) {
+				$order = wc_get_order( $order_id );
+
+				if ( $order && apply_filters( 'woocommerce_privacy_anonymize_order_personal_data', true, $order, $query ) ) {
+					WC_Privacy_Erasers::remove_order_personal_data( $order );
+					$count ++;
+				}
+
+				if ( $count === $limit ) {
+					break;
+				}
 			}
 		}
 
