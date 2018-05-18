@@ -382,7 +382,10 @@ class WC_Privacy_Exporters {
 					'group_id'    => 'woocommerce_tokens',
 					'group_label' => __( 'Payment Tokens', 'woocommerce' ),
 					'item_id'     => 'token-' . $token->get_id(),
-					'data'        => $token->get_display_name(),
+					'data'        => array(
+						'name'  => __( 'Token', 'woocommerce' ),
+						'value' => $token->get_display_name(),
+					),
 				);
 			}
 			$done = 10 > count( $tokens );
@@ -392,7 +395,7 @@ class WC_Privacy_Exporters {
 
 		return array(
 			'data' => $data_to_export,
-			'done' => true,
+			'done' => $done,
 		);
 	}
 }
