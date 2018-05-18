@@ -179,14 +179,19 @@ class WC_Payment_Gateways {
 			return;
 		}
 
-		$current_gateway = false;
-		$current         = WC()->session->get( 'chosen_payment_method' );
+		if ( is_user_logged_in() ) {
+			$default_token = WC_Payment_Tokens::get_customer_default_token( get_current_user_id() );
+			if ( ! is_null( $default_token ) ) {
+				$default_token_gateway = $default_token->get_gateway_id();
+			}
+		}
+
+		$current = ( isset( $default_token_gateway ) ? $default_token_gateway : WC()->session->get( 'chosen_payment_method' ) );
 
 		if ( $current && isset( $gateways[ $current ] ) ) {
 			$current_gateway = $gateways[ $current ];
-		}
 
-		if ( ! $current_gateway ) {
+		} else {
 			$current_gateway = current( $gateways );
 		}
 
