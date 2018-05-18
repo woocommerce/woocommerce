@@ -64,6 +64,7 @@
   "dependencies": {
     "classnames": "^2.2.5",
     "lodash": "^4.17.10",
-    "prop-types": "^15.6.1"
+    "prop-types": "^15.6.1",
+    "react-slot-fill": "^2.0.1"
   }
 }

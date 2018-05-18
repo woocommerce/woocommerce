@@ -8,25 +8,15 @@ import { Component, Fragment } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import './style.scss';
-import ActivityList from './widgets/activity';
 import Header from 'components/header';
-import WidgetNumbers from './widgets/numbers';
+import Numbers from './numbers';
 
-export default class extends Component {
+export default class Dashboard extends Component {
 	render() {
 		return (
 			<Fragment>
 				<Header sections={ [ __( 'Dashboard', 'woo-dash' ) ] } />
-				<div className="woo-dashboard">
-					<div className="woo-dash__primary">
-						<WidgetNumbers />
-					</div>
-
-					<div className="woo-dash__secondary">
-						<ActivityList />
-					</div>
-				</div>
+				<Numbers />
 			</Fragment>
 		);
 	}

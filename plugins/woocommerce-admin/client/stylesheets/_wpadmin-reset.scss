@@ -7,16 +7,10 @@
 		margin: 0;
 	}
 
-	#wpcontent {
+	#wpcontent,
+	#wpbody-content {
 		padding: 0;
-	}
-
-	* {
-		box-sizing: border-box;
-	}
-
-	.menu-top {
-		box-sizing: initial;
+		overflow-x: hidden !important;
 	}
 
 	@include breakpoint( '<782px' ) {
@@ -27,6 +21,14 @@
 	}
 }
 
+.woo-dashboard * {
+	box-sizing: border-box;
+}
+
 .woo-dashboard__admin-notice-list-hide {
+	display: none;
+}
+
+#wpfooter {
 	display: none;
 }

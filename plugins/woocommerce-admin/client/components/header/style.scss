@@ -2,12 +2,8 @@
 
 .woo-dash__header {
 	background: $white;
-	width: 100%;
-	min-height: 47px;
-	margin: 0 0 8px;
-	padding: 8px 16px 8px 16px;
 	display: flex;
-	justify-content: flex-start;
+	justify-content: space-between;
 	flex-direction: row;
 	align-items: center;
 	box-sizing: border-box;

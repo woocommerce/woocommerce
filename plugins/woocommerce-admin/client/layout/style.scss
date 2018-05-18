@@ -1,0 +1,102 @@
+/** @format */
+.woo-dashboard {
+	margin: 0;
+	padding: 0;
+	min-height: calc(100vh - 32px);
+	overflow: hidden;
+
+	@include breakpoint( '<782px' ) {
+		min-height: calc(100vh - 46px);
+	}
+}
+
+.woo-dash__header {
+	min-height: 47px;
+	margin: 0;
+	padding: 8px 16px 8px 16px;
+}
+
+.woo-dash__primary {
+	margin: 20px 0 0 20px;
+
+	.woo-dash__main {
+		margin: 0 auto;
+		max-width: 640px;
+	}
+}
+
+.woo-dashboard.has-visible-sidebar {
+	display: grid;
+	grid-template-columns: auto 360px;
+	grid-template-rows: 47px auto;
+	grid-gap: 0 20px;
+
+	@include breakpoint( '<782px' ) {
+		display: block;
+	}
+
+	.woo-dash__header {
+		grid-column: 1/span 2;
+	}
+}
+
+// This is a mixin so that we can use the same code for both smaller screen media queries
+// and also "hidden sidebar" pages on desktop as well.
+@mixin hidden-sidebar() {
+	position: fixed;
+	top: 32px;
+	right: 0;
+	width: 100%;
+	max-width: 400px;
+	height: calc(100vh - 32px);
+	overflow-x: hidden;
+	overflow-y: scroll;
+	transform: translate3d( 100%, 0, 0 );
+	transition: transform 0.15s ease-in-out;
+
+	&.is-opened {
+		transform: translate3d( 0, 0, 0 );
+	}
+}
+
+.woo-dashboard.has-hidden-sidebar .woo-dash__secondary {
+	@include hidden-sidebar;
+}
+
+.woo-dash__secondary {
+	background: $white;
+	border-left: 1px solid $gray;
+	padding: 2em;
+	min-height: calc(100vh - 32px);
+
+	@include breakpoint( '<782px' ) {
+		@include hidden-sidebar;
+
+		top: 46px;
+		height: calc(100vh - 46px);
+	}
+
+	.woo-dash__sidebar-header {
+		display: flex;
+		justify-content: space-between;
+	}
+}
+
+// Hide the toggle buttons on larger screens (if the sidebar should be visible)
+@include breakpoint( '>782px' ) {
+	.woo-dashboard.has-visible-sidebar .woo-dash__header-toggle,
+	.woo-dashboard.has-visible-sidebar .woo-dash__sidebar-toggle {
+		display: none;
+	}
+}
+
+// @TODO remove this?
+.woo-dash__widget {
+	display: flex;
+	align-items: center;
+	text-align: center;
+}
+
+.woo-dash__widget-item {
+	flex: 1;
+}
