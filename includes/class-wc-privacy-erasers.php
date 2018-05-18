@@ -271,7 +271,7 @@ class WC_Privacy_Erasers {
 				 * Expose a way to control the anonymized value of a prop via 3rd party code.
 				 *
 				 * @since 3.4.0
-				 * @param bool     $anonymized_data Value of this prop after anonymization.
+				 * @param string   $anon_value Value of this prop after anonymization.
 				 * @param string   $prop Name of the prop being removed.
 				 * @param string   $value Current value of the data.
 				 * @param string   $data_type Type of data.
@@ -307,8 +307,8 @@ class WC_Privacy_Erasers {
 				 * Expose a way to control the anonymized value of a value via 3rd party code.
 				 *
 				 * @since 3.4.0
-				 * @param bool     $anonymized_data Value of this data after anonymization.
-				 * @param string   $prop Meta key being removed.
+				 * @param string   $anon_value Value of this data after anonymization.
+				 * @param string   $prop meta_key key being removed.
 				 * @param string   $value Current value of the data.
 				 * @param string   $data_type Type of data.
 				 * @param WC_Order $order An order object.
@@ -316,9 +316,9 @@ class WC_Privacy_Erasers {
 				$anon_value = apply_filters( 'woocommerce_privacy_remove_order_personal_data_meta_value', $anon_value, $meta_key, $value, $data_type, $order );
 
 				if ( $anon_value ) {
-					$order->delete_meta_data( $meta_key );
-				} else {
 					$order->update_meta_data( $meta_key, $anon_value );
+				} else {
+					$order->delete_meta_data( $meta_key );
 				}
 			}
 		}
