@@ -40,12 +40,28 @@ abstract class WC_Abstract_Privacy {
 	protected $erasers = array();
 
 	/**
+	 * This is a priority for the wp_privacy_personal_data_exporters filter
+	 *
+	 * @var int
+	 */
+	protected $export_priority;
+
+	/**
+	 * This is a priority for the wp_privacy_personal_data_erasers filter
+	 *
+	 * @var int
+	 */
+	protected $erase_priority;
+
+	/**
 	 * Constructor
 	 *
 	 * @param string $name Plugin identifier.
 	 */
-	public function __construct( $name = '' ) {
+	public function __construct( $name = '', $export_priority = 5, $erase_priority = 10 ) {
 		$this->name = $name;
+		$this->export_priority = $export_priority;
+		$this->erase_priority = $erase_priority;
 		$this->init();
 	}
 
@@ -55,8 +71,8 @@ abstract class WC_Abstract_Privacy {
 	protected function init() {
 		add_action( 'admin_init', array( $this, 'add_privacy_message' ) );
 		// We set priority to 5 to help WooCommerce's findings appear before those from extensions in exported items.
-		add_filter( 'wp_privacy_personal_data_exporters', array( $this, 'register_exporters' ), 5 );
-		add_filter( 'wp_privacy_personal_data_erasers', array( $this, 'register_erasers' ) );
+		add_filter( 'wp_privacy_personal_data_exporters', array( $this, 'register_exporters' ), $this->export_priority );
+		add_filter( 'wp_privacy_personal_data_erasers', array( $this, 'register_erasers' ), $this->erase_priority );
 	}
 
 	/**
