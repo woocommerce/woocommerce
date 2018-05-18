@@ -265,11 +265,7 @@ class WC_Privacy_Erasers {
 					continue;
 				}
 
-				if ( function_exists( 'wp_privacy_anonymize_data' ) ) {
-					$anon_value = wp_privacy_anonymize_data( $data_type, $value );
-				} else {
-					$anon_value = '';
-				}
+				$anon_value = function_exists( 'wp_privacy_anonymize_data' ) ? wp_privacy_anonymize_data( $data_type, $value ) : '';
 
 				/**
 				 * Expose a way to control the anonymized value of a prop via 3rd party code.
@@ -285,6 +281,9 @@ class WC_Privacy_Erasers {
 			}
 		}
 
+		// Set all new props and persist the new data to the database.
+		$order->set_props( $anonymized_data );
+
 		// Remove meta data.
 		$meta_to_remove = apply_filters( 'woocommerce_privacy_remove_order_personal_data_meta', array(
 			'Payer first name'     => 'text',
@@ -295,12 +294,35 @@ class WC_Privacy_Erasers {
 
 		if ( ! empty( $meta_to_remove ) && is_array( $meta_to_remove ) ) {
 			foreach ( $meta_to_remove as $meta_key => $data_type ) {
-				$order->delete_meta_data( $meta_key );
+				$value = $order->get_meta( $meta_key );
+
+				// If the value is empty, it does not need to be anonymized.
+				if ( empty( $value ) || empty( $data_type ) ) {
+					continue;
+				}
+
+				$anon_value = function_exists( 'wp_privacy_anonymize_data' ) ? wp_privacy_anonymize_data( $data_type, $value ) : '';
+
+				/**
+				 * Expose a way to control the anonymized value of a value via 3rd party code.
+				 *
+				 * @since 3.4.0
+				 * @param bool     $anonymized_data Value of this data after anonymization.
+				 * @param string   $prop Meta key being removed.
+				 * @param string   $value Current value of the data.
+				 * @param string   $data_type Type of data.
+				 * @param WC_Order $order An order object.
+				 */
+				$anon_value = apply_filters( 'woocommerce_privacy_remove_order_personal_data_meta_value', $anon_value, $meta_key, $value, $data_type, $order );
+
+				if ( $anon_value ) {
+					$order->delete_meta_data( $meta_key );
+				} else {
+					$order->update_meta_data( $meta_key, $anon_value );
+				}
 			}
 		}
 
-		// Set all new props and persist the new data to the database.
-		$order->set_props( $anonymized_data );
 		$order->update_meta_data( '_anonymized', 'yes' );
 		$order->save();
 
