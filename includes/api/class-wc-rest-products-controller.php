@@ -365,10 +365,12 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 	protected function get_images( $product ) {
 		$images         = array();
 		$attachment_ids = array();
+		$featured_id = null;
 
 		// Add featured image.
 		if ( has_post_thumbnail( $product->get_id() ) ) {
-			$attachment_ids[] = $product->get_image_id();
+			$featured_id = (int) $product->get_image_id();
+			$attachment_ids[] = $featured_id;
 		}
 
 		// Add gallery images.
@@ -396,6 +398,7 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 				'name'              => get_the_title( $attachment_id ),
 				'alt'               => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
 				'position'          => (int) $position,
+				'featured'          => $attachment_id === $featured_id,
 			);
 		}
 
