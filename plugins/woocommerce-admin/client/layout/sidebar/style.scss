@@ -9,7 +9,7 @@
 		flex-grow: 0;
 		text-transform: uppercase;
 		margin-right: 8px;
-		color: $gray-dark;
+		color: $gray-text;
 		font-weight: 500;
 		font-size: 1.1em;
 	}
@@ -17,6 +17,6 @@
 	.woo-dash__sidebar-header-divider {
 		flex-grow: 1;
 		height: 1px;
-		background-color: $gray-dark;
+		background-color: $gray-darken-40;
 	}
 }

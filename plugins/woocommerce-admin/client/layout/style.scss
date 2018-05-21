@@ -64,9 +64,8 @@
 }
 
 .woo-dash__secondary {
-	background: $white;
+	background: $gray;
 	border-left: 1px solid $gray;
-	padding: 2em;
 	min-height: calc(100vh - 32px);
 
 	@include breakpoint( '<782px' ) {
@@ -87,6 +86,42 @@
 	.woo-dashboard.has-visible-sidebar .woo-dash__header-toggle,
 	.woo-dashboard.has-visible-sidebar .woo-dash__sidebar-toggle {
 		display: none;
+	}
+}
+
+.woo-dash__sidebar-tabs {
+	min-height: inherit;
+
+	.components-tab-panel__tabs {
+		display: grid;
+		grid-template-columns: 1fr 1fr 1fr;
+		grid-column-gap: 5px;
+		padding: 2em 2em 0;
+		background-color: transparent;
+	}
+
+	.components-tab-panel__tab-content {
+		min-height: inherit;
+		background-color: $wp-admin-background;
+		padding: 2em;
+	}
+
+	.woo-dash__sidebar-tab {
+		border: none;
+		outline: none;
+		cursor: pointer;
+		background-color: transparent;
+		padding: 1em 0.5em;
+		color: $gray-darken-30;
+
+		&.is-active {
+			background-color: $wp-admin-background;
+			color: $gray-darken-40;
+		}
+
+		h2 {
+			font-size: 1.2em;
+		}
 	}
 }
 
