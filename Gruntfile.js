@@ -263,8 +263,34 @@ module.exports = function( grunt ) {
 			},
 			e2e_tests_grep: {
 				command: 'npm run --silent test:grep "' + grunt.option( 'grep' ) + '"'
+			},
+			contributors: {
+				command: [
+					'echo "Generating contributor list since <%= fromDate %>"',
+					'./node_modules/.bin/githubcontrib --owner woocommerce --repo woocommerce --fromDate <%= fromDate %> --authToken <%= authToken %> --cols 6 --sortBy contributions --format md --sortOrder desc --showlogin true > contributors.md'
+				].join( '&&' )
 			}
 		},
+
+		prompt: {
+			contributors: {
+			  options: {
+				questions: [
+				  {
+					config: 'fromDate',
+					type: 'input',
+					message: 'What date (YYYY-MM-DD) should we get contributions since?'
+				  },
+				  {
+					config: 'authToken',
+					type: 'input',
+					message: '(optional) Provide a personal access token. This will allow 5000 requests per hour rather than 60 - use if nothing is generated.',
+					default: ''
+				  }
+				]
+			  }
+			},
+		  },
 
 		// Clean the directory.
 		clean: {
@@ -329,6 +355,7 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks( 'grunt-contrib-concat' );
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
 	grunt.loadNpmTasks( 'grunt-contrib-clean' );
+	grunt.loadNpmTasks('grunt-prompt');
 
 	// Register tasks
 	grunt.registerTask( 'default', [
@@ -354,6 +381,11 @@ module.exports = function( grunt ) {
 	grunt.registerTask( 'docs', [
 		'clean:apidocs',
 		'shell:apidocs'
+	]);
+
+	grunt.registerTask( 'contributors', [
+		'prompt:contributors',
+		'shell:contributors'
 	]);
 
 	// Only an alias to 'default' task.
