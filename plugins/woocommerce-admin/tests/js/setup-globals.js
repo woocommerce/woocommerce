@@ -27,3 +27,7 @@ global.wp = {
 Object.defineProperty( global.wp, 'element', {
 	get: () => require( 'gutenberg/packages/element' ),
 } );
+
+Object.defineProperty( global.wp, 'dom', {
+	get: () => require( 'gutenberg/packages/dom' ),
+} );

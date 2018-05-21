@@ -36,6 +36,7 @@ const gutenbergEntries = [
 
 const gutenbergPackages = [
 	'date',
+	'dom',
 	'element',
 ];
 
