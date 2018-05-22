@@ -1552,9 +1552,18 @@ if ( ! function_exists( 'woocommerce_external_add_to_cart' ) ) {
 			return;
 		}
 
+		$product_url       = $product->add_to_cart_url();
+		$product_url_parts = wp_parse_url( $product_url );
+		$query_string      = array();
+
+		if ( ! empty( $product_url_parts['query'] ) ) {
+			parse_str( $product_url_parts['query'], $query_string );
+		}
+
 		wc_get_template( 'single-product/add-to-cart/external.php', array(
-			'product_url' => $product->add_to_cart_url(),
-			'button_text' => $product->single_add_to_cart_text(),
+			'product_url'  => $product_url,
+			'button_text'  => $product->single_add_to_cart_text(),
+			'query_string' => $query_string,
 		) );
 	}
 }
