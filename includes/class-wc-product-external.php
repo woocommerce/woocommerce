@@ -49,7 +49,7 @@ class WC_Product_External extends WC_Product {
 	 * @return string
 	 */
 	public function get_product_url( $context = 'view' ) {
-		return esc_url( $this->get_prop( 'product_url', $context ) );
+		return esc_url_raw( $this->get_prop( 'product_url', $context ) );
 	}
 
 	/**
@@ -79,7 +79,7 @@ class WC_Product_External extends WC_Product {
 	 * @param string $product_url Product URL.
 	 */
 	public function set_product_url( $product_url ) {
-		$this->set_prop( 'product_url', $product_url );
+		$this->set_prop( 'product_url', htmlspecialchars_decode( $product_url ) );
 	}
 
 	/**
