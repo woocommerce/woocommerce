@@ -17,13 +17,6 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$product_url_parts = wp_parse_url( $product_url );
-$query_string      = array();
-
-if ( ! empty( $product_url_parts['query'] ) ) {
-	parse_str( $product_url_parts['query'], $query_string );
-}
-
 do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 
 <form class="cart" action="<?php echo esc_url( $product_url ); ?>" method="get">
@@ -31,7 +24,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 
 	<button type="submit" class="single_add_to_cart_button button alt"><?php echo esc_html( $button_text ); ?></button>
 
-	<?php wc_query_string_form_fields( $query_string ); ?>
+	<?php wc_query_string_form_fields( $product_url ); ?>
 
 	<?php do_action( 'woocommerce_after_add_to_cart_button' ); ?>
 </form>
