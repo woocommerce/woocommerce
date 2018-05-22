@@ -131,7 +131,7 @@ module.exports = function( grunt ) {
 			}
 		},
 
-		// Generate RTL .css files
+		// Generate RTL .css files.
 		rtlcss: {
 			woocommerce: {
 				expand: true,
@@ -274,23 +274,23 @@ module.exports = function( grunt ) {
 
 		prompt: {
 			contributors: {
-			  options: {
-				questions: [
-				  {
-					config: 'fromDate',
-					type: 'input',
-					message: 'What date (YYYY-MM-DD) should we get contributions since?'
-				  },
-				  {
-					config: 'authToken',
-					type: 'input',
-					message: '(optional) Provide a personal access token. This will allow 5000 requests per hour rather than 60 - use if nothing is generated.',
-					default: ''
-				  }
-				]
-			  }
+				options: {
+					questions: [
+						{
+							config: 'fromDate',
+							type: 'input',
+							message: 'What date (YYYY-MM-DD) should we get contributions since?'
+						},
+						{
+							config: 'authToken',
+							type: 'input',
+							message: '(optional) Provide a personal access token. This will allow 5000 requests per hour rather than 60 - use if nothing is generated.',
+							default: ''
+						}
+					]
+				}
 			},
-		  },
+		},
 
 		// Clean the directory.
 		clean: {
@@ -340,7 +340,7 @@ module.exports = function( grunt ) {
 		}
 	});
 
-	// Load NPM tasks to be used here
+	// Load NPM tasks to be used here.
 	grunt.loadNpmTasks( 'grunt-sass' );
 	grunt.loadNpmTasks( 'grunt-shell' );
 	grunt.loadNpmTasks( 'grunt-phpcs' );
@@ -355,9 +355,9 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks( 'grunt-contrib-concat' );
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
 	grunt.loadNpmTasks( 'grunt-contrib-clean' );
-	grunt.loadNpmTasks('grunt-prompt');
+	grunt.loadNpmTasks( 'grunt-prompt' );
 
-	// Register tasks
+	// Register tasks.
 	grunt.registerTask( 'default', [
 		'js',
 		'css',
