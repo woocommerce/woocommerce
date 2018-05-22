@@ -655,15 +655,22 @@ function wc_product_class( $class = '', $product_id = null ) {
  * Outputs hidden form inputs for each query string variable.
  *
  * @since 3.0.0
- * @param array  $values Name value pairs.
- * @param array  $exclude Keys to exclude.
- * @param string $current_key Current key we are outputting.
- * @param bool   $return Whether to return.
+ * @param string|array $values Name value pairs, or a URL to parse.
+ * @param array        $exclude Keys to exclude.
+ * @param string       $current_key Current key we are outputting.
+ * @param bool         $return Whether to return.
  * @return string
  */
 function wc_query_string_form_fields( $values = null, $exclude = array(), $current_key = '', $return = false ) {
 	if ( is_null( $values ) ) {
 		$values = $_GET; // WPCS: input var ok, CSRF ok.
+	} elseif ( is_string( $values ) ) {
+		$url_parts = wp_parse_url( $values );
+		$values    = array();
+
+		if ( ! empty( $url_parts['query'] ) ) {
+			parse_str( $url_parts['query'], $values );
+		}
 	}
 	$html = '';
 
