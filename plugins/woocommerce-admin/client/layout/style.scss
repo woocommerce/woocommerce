@@ -51,11 +51,11 @@
 	height: calc(100vh - 32px);
 	overflow-x: hidden;
 	overflow-y: scroll;
-	transform: translate3d( 100%, 0, 0 );
+	transform: translate3d(100%, 0, 0);
 	transition: transform 0.15s ease-in-out;
 
 	&.is-opened {
-		transform: translate3d( 0, 0, 0 );
+		transform: translate3d(0, 0, 0);
 	}
 }
 
@@ -76,7 +76,7 @@
 		height: calc(100vh - 46px);
 	}
 
-	.woo-dash__sidebar-header {
+	.woo-dash__sidebar-top {
 		display: flex;
 		justify-content: space-between;
 	}

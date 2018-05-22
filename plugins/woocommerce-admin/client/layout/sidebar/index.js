@@ -11,7 +11,9 @@ import { uniqueId } from 'lodash';
 /**
  * Internal dependencies
  */
+import './style.scss';
 import Activity from 'dashboard/activity';
+import SidebarHeader from './header';
 
 class Sidebar extends Component {
 	render() {
@@ -23,7 +25,7 @@ class Sidebar extends Component {
 
 		return (
 			<aside className={ className } aria-labelledby={ headerId }>
-				<header className="woo-dash__sidebar-header">
+				<header className="woo-dash__sidebar-top">
 					<h2 className="woo-dash__sidebar-title" id={ headerId }>
 						{ __( 'Store Activity', 'woo-dash' ) }
 					</h2>
@@ -37,6 +39,7 @@ class Sidebar extends Component {
 					</div>
 				</header>
 
+				<SidebarHeader label={ __( 'Today', 'woo-dash' ) } />
 				<Activity />
 			</aside>
 		);

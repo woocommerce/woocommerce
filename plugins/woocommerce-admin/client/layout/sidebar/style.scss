@@ -1,0 +1,22 @@
+/** @format */
+
+.woo-dash__sidebar-header {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+
+	.woo-dash__sidebar-header-label {
+		flex-grow: 0;
+		text-transform: uppercase;
+		margin-right: 8px;
+		color: $gray-dark;
+		font-weight: 500;
+		font-size: 1.1em;
+	}
+
+	.woo-dash__sidebar-header-divider {
+		flex-grow: 1;
+		height: 1px;
+		background-color: $gray-dark;
+	}
+}
