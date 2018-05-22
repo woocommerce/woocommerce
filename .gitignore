@@ -44,3 +44,4 @@ tests/cli/vendor
 
 # Composer
 /vendor/
+tests/e2e-tests/config/local.json
