@@ -77,8 +77,11 @@ jQuery( function( $ ) {
 				$payment_methods.eq(0).prop( 'checked', true );
 			}
 
-			// Hide open descriptions.
-			$( 'div.payment_box' ).filter( ':visible' ).slideUp( 0 );
+			if ( $payment_methods.length > 1 ) {
+
+				// Hide open descriptions.
+				$( 'div.payment_box' ).filter( ':visible' ).slideUp( 0 );
+			}
 
 			// Trigger click event for selected method
 			$payment_methods.filter( ':checked' ).eq(0).trigger( 'click' );
