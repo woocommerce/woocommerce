@@ -1,4 +1,4 @@
-/* jshint node:true */
+/* global node */
 module.exports = function( grunt ) {
 	'use strict';
 
@@ -13,11 +13,11 @@ module.exports = function( grunt ) {
 		},
 
 		// JavaScript linting with JSHint.
-		jshint: {
+		eslint: {
 			options: {
-				jshintrc: '.jshintrc'
+				configFile: '.eslintrc.js'
 			},
-			all: [
+			target: [
 				'Gruntfile.js',
 				'<%= dirs.js %>/admin/*.js',
 				'!<%= dirs.js %>/admin/*.min.js',
@@ -180,7 +180,7 @@ module.exports = function( grunt ) {
 					'!<%= dirs.js %>/admin/*.min.js',
 					'!<%= dirs.js %>/frontend/*.min.js'
 				],
-				tasks: ['jshint', 'uglify']
+				tasks: ['eslint', 'uglify']
 			}
 		},
 
@@ -323,12 +323,12 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks( 'grunt-stylelint' );
 	grunt.loadNpmTasks( 'grunt-wp-i18n' );
 	grunt.loadNpmTasks( 'grunt-checktextdomain' );
-	grunt.loadNpmTasks( 'grunt-contrib-jshint' );
 	grunt.loadNpmTasks( 'grunt-contrib-uglify' );
 	grunt.loadNpmTasks( 'grunt-contrib-cssmin' );
 	grunt.loadNpmTasks( 'grunt-contrib-concat' );
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
 	grunt.loadNpmTasks( 'grunt-contrib-clean' );
+	grunt.loadNpmTasks( 'grunt-eslint' );
 
 	// Register tasks
 	grunt.registerTask( 'default', [
@@ -338,7 +338,7 @@ module.exports = function( grunt ) {
 	]);
 
 	grunt.registerTask( 'js', [
-		'jshint',
+		'eslint',
 		'uglify:admin',
 		'uglify:frontend'
 	]);
