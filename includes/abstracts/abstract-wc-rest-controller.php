@@ -2,8 +2,18 @@
 /**
  * REST Controller
  *
- * @class WC_REST_Controller
+ * This class extend `WP_REST_Controller` in order to include /batch endpoint
+ * for almost all endpoints in WooCommerce REST API.
+ *
+ * It's required to follow "Controller Classes" guide before extending this class:
+ * <https://developer.wordpress.org/rest-api/extending-the-rest-api/controller-classes/>
+ *
+ * NOTE THAT ONLY CODE RELEVANT FOR MOST ENDPOINTS SHOULD BE INCLUDED INTO THIS CLASS.
+ * If necessary extend this class and create new abstract classes like `WC_REST_CRUD_Controller` or `WC_REST_Terms_Controller`.
+ *
+ * @class   WC_REST_Controller
  * @package WooCommerce/Abstracts
+ * @see     https://developer.wordpress.org/rest-api/extending-the-rest-api/controller-classes/
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
