@@ -19,6 +19,31 @@
 			right: -14.5em;
 		}
 	}
+
+	@include breakpoint( '>960px' ) {
+		#toplevel_page_woocommerce.menu-top > a:focus,
+		#toplevel_page_woodash--analytics.menu-top > a:focus {
+			padding-bottom: 1px;
+		}
+	}
+
+	.wp-has-current-submenu:after {
+		right: 0;
+		border: 8px solid transparent;
+		content: ' ';
+		height: 0;
+		width: 0;
+		position: absolute;
+		pointer-events: none;
+		border-right-color: #f1f1f1;
+		top: 0;
+		margin-top: 10px;
+
+		@include breakpoint( '<960px' ) {
+			border-width: 4px;
+			margin-top: 14px;
+		}
+	}
 }
 
 .woo-dashboard * {

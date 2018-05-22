@@ -5,7 +5,7 @@
  */
 function woo_dash_is_admin_page() {
 	global $hook_suffix;
-	if ( in_array( $hook_suffix, array( 'toplevel_page_woodash' ) ) ) {
+	if ( in_array( $hook_suffix, array( 'woocommerce_page_woodash' ) ) ) {
 		return true;
 	}
 	return false;
@@ -15,26 +15,28 @@ function woo_dash_is_admin_page() {
  * Register menu pages for the Dashboard and Analytics sections
  */
 function woo_dash_register_pages(){
-	// toplevel_page_woodash
-	add_menu_page(
-		__( 'Woo Dash', 'woo-dash' ),
-		__( 'WC Dashboard', 'woo-dash' ),
+	global $menu, $submenu;
+
+	// woocommerce_page_woodash
+	add_submenu_page(
+		'woocommerce',
+		__( 'WooCommerce Dashboard', 'woo-dash' ),
+		__( 'Dashboard', 'woo-dash' ),
 		'manage_options',
 		'woodash',
-		'woo_dash_page',
-		'dashicons-cart',
-		6
+		'woo_dash_page'
 	);
+
 
 	// toplevel_page_wooanalytics
 	add_menu_page(
 		__( 'WooCommerce Analytics', 'woo-dash' ),
-		__( 'WooAnalytics', 'woo-dash' ),
+		__( 'Analytics', 'woo-dash' ),
 		'manage_options',
 		'woodash#/analytics',
 		'woo_dash_page',
 		'dashicons-chart-bar',
-		6
+		56 // After WooCommerce & Product menu items
 	);
 
 	// TODO: Remove. Test report link
@@ -48,6 +50,38 @@ function woo_dash_register_pages(){
 	);
 }
 add_action( 'admin_menu', 'woo_dash_register_pages' );
+
+/**
+ * This method is temporary while this is a feature plugin. As a part of core,
+ * we can integrate this better with wc-admin-menus.
+ *
+ * It makes dashboard the top level link for 'WooCommerce' and renames the first Analytics menu item.
+ */
+function woo_dash_link_structure() {
+	global $submenu;
+
+	$woodash_key = null;
+	foreach ( $submenu['woocommerce'] as $submenu_key => $submenu_item ) {
+		if ( 'woodash' === $submenu_item[2] ) {
+			$woodash_key = $submenu_key;
+			break;
+		}
+	}
+
+	if ( ! $woodash_key ) {
+		return;
+	}
+
+	$dashmenu    = $submenu['woocommerce'][ $woodash_key ];
+	$dashmenu[2] = 'admin.php?page=woodash#/';
+	unset( $submenu['woocommerce'][ $woodash_key ] );
+
+	array_unshift( $submenu['woocommerce'], $dashmenu );
+	$submenu['woodash#/analytics'][0][0] = __( 'Overview', 'woo-dash' );
+}
+
+// priority is 20 to run after https://github.com/woocommerce/woocommerce/blob/a55ae325306fc2179149ba9b97e66f32f84fdd9c/includes/admin/class-wc-admin-menus.php#L165
+add_action( 'admin_head', 'woo_dash_link_structure', 20 );
 
 /**
  * Load the assets on the Dashboard page

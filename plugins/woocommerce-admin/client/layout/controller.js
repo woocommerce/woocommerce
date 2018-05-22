@@ -18,7 +18,7 @@ const getPages = () => {
 		{
 			container: Dashboard,
 			path: '/',
-			wpMenu: 'toplevel_page_woodash',
+			wpMenu: 'toplevel_page_woocommerce',
 			hasOpenSidebar: true,
 		},
 		{
