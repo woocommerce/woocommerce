@@ -8,6 +8,10 @@
 
 defined( 'ABSPATH' ) || exit;
 
+if ( ! class_exists( 'WC_Privacy_Background_Process', false ) ) {
+	include_once dirname( __FILE__ ) . '/class-wc-privacy-background-process.php';
+}
+
 /**
  * WC_Privacy Class.
  */
