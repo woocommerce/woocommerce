@@ -158,7 +158,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 
 == Changelog ==
 
-= 3.4.0 - 2018-XX-XX =
+= 3.4.0 - 2018-05-23 =
 * Feature - GDPR: Tools to export WooCommerce data using the new export functionality in WordPress 4.9.6. #19330
 * Feature - GDPR: Tools to bulk anonymize order data in admin. #19330
 * Feature - GDPR: Tools to turn off company/address-2/phone checkout fields to avoid unnecessary data collection, and a toggle to choose how required fields are presented. This is available via the Customizer. #19637
@@ -236,7 +236,9 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Wizard: List out all plugins to be installed upon proceeding to the next step, with a highlight on hover indicating relevant settings. #19952
 * Tweak - Hide/show password strength meter instead of removing/inserting password strength meter. #20006
 * Tweak - Added support for HTTP_RANGE requests (used by iOS devices) to Force download method. #19984
-* Tweak/Fix - Replaced protocol-relative URLs for thumbnails in the cart and mini-cart with protocol-specific URLs to prevent problems with URLs that include port section. #19934
+* Tweak - Replaced protocol-relative URLs for thumbnails in the cart and mini-cart with protocol-specific URLs to prevent problems with URLs that include port section. #19934
+* Tweak - In CSV exports, wrap cell in ' rather than just prepending to escape values. #20041
+* Tweak - Add JS listeners for reloading/reinitializing order items in edit-order page. #20082
 * Fix - Properly set orderby and order when calling WC_Customer_Download_Data_Store::get_downloads(). #1862
 * Fix - Set maxlength for order item meta key to avoid values disappearing if too long. #18918
 * Fix - Remove hardcoded /wp-content check for downloads. #18961
@@ -286,6 +288,12 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Don't show stock status fields in external product quick-edit. #20005 
 * Fix - Prevent an infinite loop if 2 grouped products are linked. #20020
 * Fix - Switch stock_status when manage stock gets changed to prevent being out of stock if stock quantity is > 0. #20021
+* Fix - When duplicating variation, set the date to null. #20083
+* Fix - Fix rounding of line items for orders to match cart. #20086
+* Fix - Remove hardcoded border in email template. #20090
+* Fix - Prevent autofocus on checkout. #20123
+* Fix - Recalc taxes if address changes in API. #20137
+* Dev - Made wc_query_string_form_fields handle strings. #20162
 * Dev - Added refunded_payment prop to orders for determining if payment was refunded via API. #18196
 * Dev - Added extra params to `woocommerce_order_get_downloadable_items`. #18408
 * Dev - Store shipping method ID and instance ID in separate fields instead of both in one serialized field. #18483
@@ -335,6 +343,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Localization - LR-Liberia states. #19709
 * Localization - Update ZA tax rate. #19909
 * Localization - Various spelling, grammar fixes, and phrasing improvements.
+* Localization - Fix missing Bahrain country code. #20061
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
