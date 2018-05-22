@@ -44,3 +44,4 @@ tests/cli/vendor
 
 # Composer
 /vendor/
+contributors.md
