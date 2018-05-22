@@ -12,6 +12,7 @@
 defined( 'ABSPATH' ) || exit;
 
 require_once WC_ABSPATH . 'includes/legacy/class-wc-legacy-cart.php';
+require_once WC_ABSPATH . 'includes/class-wc-cart-fees.php';
 require_once WC_ABSPATH . 'includes/class-wc-cart-session.php';
 
 /**
