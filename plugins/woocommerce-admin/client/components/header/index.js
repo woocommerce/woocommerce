@@ -46,7 +46,7 @@ Header.propTypes = {
 
 Header.defaultProps = {
 	onToggle: noop,
-}
+};
 
 export default function( props ) {
 	return (
