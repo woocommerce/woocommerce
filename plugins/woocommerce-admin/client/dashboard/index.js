@@ -8,6 +8,7 @@ import { Component, Fragment } from '@wordpress/element';
 /**
  * Internal dependencies
  */
+import Agenda from './widgets/agenda';
 import Header from 'components/header';
 import Numbers from './numbers';
 
@@ -17,6 +18,7 @@ export default class Dashboard extends Component {
 			<Fragment>
 				<Header sections={ [ __( 'Dashboard', 'woo-dash' ) ] } />
 				<Numbers />
+				<Agenda />
 			</Fragment>
 		);
 	}

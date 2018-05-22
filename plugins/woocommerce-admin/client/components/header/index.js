@@ -6,13 +6,13 @@ import { __ } from '@wordpress/i18n';
 import { Fill } from 'react-slot-fill';
 import { isArray, noop } from 'lodash';
 import { IconButton } from '@wordpress/components';
+import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import { getAdminLink } from 'lib/nav-utils';
 
 const Header = ( { sections, onToggle, isSidebarOpen } ) => {
 	const _sections = isArray( sections ) ? sections : [ sections ];
@@ -21,7 +21,7 @@ const Header = ( { sections, onToggle, isSidebarOpen } ) => {
 		<div className="woo-dash__header">
 			<h1>
 				<span>
-					<a href={ getAdminLink( '/' ) }>WooCommerce</a>
+					<Link to="/">WooCommerce</Link>
 				</span>
 				{ _sections.map( ( subSection, i ) => <span key={ i }>{ subSection }</span> ) }
 			</h1>
@@ -46,7 +46,7 @@ Header.propTypes = {
 
 Header.defaultProps = {
 	onToggle: noop,
-}
+};
 
 export default function( props ) {
 	return (

@@ -7,11 +7,12 @@ A basic component for the app header. The header outputs breadcrumbs via the `se
 
 ```jsx
 import Header from 'components/header';
+import { Link } from 'react-router-dom';
 
 render: function() {
 	return (
 		<Header sections={ [
-			<a href={ getAdminLink( 'admin.php?page=wooanalytics' ) }>{ __( 'Analytics', 'woo-dash' ) }</a>,
+			<Link to="/analytics">{ __( 'Analytics', 'woo-dash' ) }</Link>,
 			__( 'Report Title', 'woo-dash' ),
 		] } />
   	);

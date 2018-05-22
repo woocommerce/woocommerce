@@ -4,12 +4,12 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
+import { Link } from 'react-router-dom';
 
 /**
  * Internal dependencies
  */
 import Header from 'components/header';
-import { getAdminLink } from 'lib/nav-utils';
 
 export default class extends Component {
 	render() {
@@ -17,7 +17,7 @@ export default class extends Component {
 			<Fragment>
 				<Header
 					sections={ [
-						<a href={ getAdminLink( '/analytics' ) }>{ __( 'Analytics', 'woo-dash' ) }</a>,
+						<Link to="/analytics">{ __( 'Analytics', 'woo-dash' ) }</Link>,
 						__( 'Report Title', 'woo-dash' ),
 					] }
 				/>

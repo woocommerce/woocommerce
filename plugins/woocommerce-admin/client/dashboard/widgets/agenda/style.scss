@@ -1,0 +1,101 @@
+/** @format */
+
+.woo-dash__agenda-card .woo-dash__card-body {
+	padding: 0;
+}
+
+.woo-dash__agenda-group-wrapper {
+	background: #f9f9f9;
+	font-size: 13px;
+	text-decoration: none;
+	display: block;
+
+	h3 {
+		font-size: 13px;
+		font-weight: normal;
+
+		span {
+			background: $white;
+			font-weight: bold;
+			padding: 4px 12px 4px 12px;
+			border-radius: 25px;
+			margin-right: 8px;
+		}
+	}
+}
+
+.woo-dash__agenda-group-content {
+	background: $white;
+	padding: 16px;
+}
+
+.woo-dash__agenda-group-title {
+	height: 60px;
+	padding: 20px 0px 0px 20px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+
+	&.is-accordion {
+		cursor: pointer;
+	}
+
+	h3 {
+		margin: 0;
+	}
+
+	.components-button {
+		position: relative;
+		padding: 16px;
+		outline: none;
+		width: 100%;
+		text-align: right;
+		border: none;
+		box-shadow: none;
+		color: #444;
+	}
+
+	.components-icon-button {
+		overflow: visible;
+	}
+
+	.components-button:not(:disabled):focus,
+	.components-button:not(:disabled):hover {
+		box-shadow: none;
+		background: transparent;
+	}
+
+	.components-button:not(:disabled):focus {
+		.dashicon {
+			box-shadow: inset 0 0 0 1px $gray-darken-10, inset 0 0 0 2px $white;
+		}
+	}
+
+	&.is-link {
+		a {
+			color: #444;
+		}
+	}
+
+	.dashicon {
+		position: absolute;
+		top: -18px;
+		right: 32px;
+	}
+}
+
+.woo-dash__agenda-item-wrapper {
+	display: flex;
+	flex: 1;
+	flex-direction: row;
+	justify-content: space-between;
+	margin-bottom: 8px;
+
+	&:last-child {
+		margin-bottom: 0;
+	}
+}
+
+.woo-dash__agenda-item-content {
+	max-width: 75%;
+}
