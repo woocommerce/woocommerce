@@ -40,7 +40,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				),
 				array(
 					'title'         => __( 'Guest checkout', 'woocommerce' ),
-					'desc'          => __( 'Allow customers to place orders without an account.', 'woocommerce' ),
+					'desc'          => __( 'Allow customers to place orders without an account', 'woocommerce' ),
 					'id'            => 'woocommerce_enable_guest_checkout',
 					'default'       => 'yes',
 					'type'          => 'checkbox',
@@ -58,7 +58,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				),
 				array(
 					'title'         => __( 'Account creation', 'woocommerce' ),
-					'desc'          => __( 'Allow customers to create an account during checkout.', 'woocommerce' ),
+					'desc'          => __( 'Allow customers to create an account during checkout', 'woocommerce' ),
 					'id'            => 'woocommerce_enable_signup_and_login_from_checkout',
 					'default'       => 'no',
 					'type'          => 'checkbox',
@@ -66,7 +66,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 					'autoload'      => false,
 				),
 				array(
-					'desc'          => __( 'Allow customers to create an account on the "My account" page.', 'woocommerce' ),
+					'desc'          => __( 'Allow customers to create an account on the "My account" page', 'woocommerce' ),
 					'id'            => 'woocommerce_enable_myaccount_registration',
 					'default'       => 'no',
 					'type'          => 'checkbox',
@@ -74,7 +74,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 					'autoload'      => false,
 				),
 				array(
-					'desc'          => __( 'When creating an account, automatically generate a username from the customer\'s email address.', 'woocommerce' ),
+					'desc'          => __( 'When creating an account, automatically generate a username from the customer\'s email address', 'woocommerce' ),
 					'id'            => 'woocommerce_registration_generate_username',
 					'default'       => 'yes',
 					'type'          => 'checkbox',
@@ -82,7 +82,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 					'autoload'      => false,
 				),
 				array(
-					'desc'          => __( 'When creating an account, automatically generate an account password.', 'woocommerce' ),
+					'desc'          => __( 'When creating an account, automatically generate an account password', 'woocommerce' ),
 					'id'            => 'woocommerce_registration_generate_password',
 					'default'       => 'yes',
 					'type'          => 'checkbox',
