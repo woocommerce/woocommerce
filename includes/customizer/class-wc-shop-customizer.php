@@ -21,7 +21,6 @@ class WC_Shop_Customizer {
 		add_action( 'customize_controls_print_styles', array( $this, 'add_styles' ) );
 		add_action( 'customize_controls_print_scripts', array( $this, 'add_scripts' ), 30 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'add_frontend_scripts' ) );
-		add_action( 'woocommerce_cart_loaded_from_session', array( $this, 'populate_cart' ) );
 	}
 
 	/**
@@ -53,31 +52,6 @@ class WC_Shop_Customizer {
 
 		$css = '.woocommerce-store-notice, p.demo_store { display: block !important; }';
 		wp_add_inline_style( 'customize-preview', $css );
-	}
-
-	/**
-	 * Make sure the cart has something inside when we're customizing.
-	 *
-	 * @return void
-	 */
-	public function populate_cart() {
-		if ( ! is_customize_preview() ) {
-			return;
-		}
-		if ( WC()->cart->is_empty() ) {
-			$dummy_product = new WC_Product();
-			$dummy_product->set_name( 'Sample' );
-			$dummy_product->set_price( 0 );
-			$dummy_product->set_status( 'publish' );
-			$cart_contents['customize-preview'] = array(
-				'data'         => $dummy_product,
-				'product_id'   => 0,
-				'variation_id' => 0,
-				'data_hash'    => false,
-				'quantity'     => 1,
-			);
-			WC()->cart->set_cart_contents( $cart_contents );
-		}
 	}
 
 	/**
