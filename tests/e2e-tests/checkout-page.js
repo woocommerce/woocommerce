@@ -138,6 +138,7 @@ test.describe( 'Checkout Page', function() {
 		billingDetails.setCity( 'San Francisco' );
 		billingDetails.selectState( 'cali', 'California' );
 		billingDetails.setZip( '94107' );
+		Helper.waitTillUIBlockNotPresent( driver );
 		checkoutPage.selectPaymentMethod( 'Cash on delivery' );
 		checkoutPage.placeOrder();
 		Helper.waitTillUIBlockNotPresent( driver );
