@@ -119,37 +119,42 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 	 */
 	public function get_tools() {
 		$tools = array(
-			'clear_transients'           => array(
+			'clear_transients'                   => array(
 				'name'   => __( 'WooCommerce transients', 'woocommerce' ),
 				'button' => __( 'Clear transients', 'woocommerce' ),
 				'desc'   => __( 'This tool will clear the product/shop transients cache.', 'woocommerce' ),
 			),
-			'clear_expired_transients'   => array(
+			'clear_expired_transients'           => array(
 				'name'   => __( 'Expired transients', 'woocommerce' ),
 				'button' => __( 'Clear transients', 'woocommerce' ),
 				'desc'   => __( 'This tool will clear ALL expired transients from WordPress.', 'woocommerce' ),
 			),
-			'delete_orphaned_variations' => array(
+			'delete_orphaned_variations'         => array(
 				'name'   => __( 'Orphaned variations', 'woocommerce' ),
 				'button' => __( 'Delete orphaned variations', 'woocommerce' ),
 				'desc'   => __( 'This tool will delete all variations which have no parent.', 'woocommerce' ),
 			),
-			'add_order_indexes'          => array(
+			'clear_expired_download_permissions' => array(
+				'name'   => __( 'Used-up download permissions', 'woocommerce' ),
+				'button' => __( 'Clean up download permissions', 'woocommerce' ),
+				'desc'   => __( 'This tool will delete expired download permissions and permissions with 0 remaining downloads.', 'woocommerce' ),
+			),
+			'add_order_indexes'                  => array(
 				'name'   => __( 'Order address indexes', 'woocommerce' ),
 				'button' => __( 'Index orders', 'woocommerce' ),
 				'desc'   => __( 'This tool will add address indexes to orders that do not have them yet. This improves order search results.', 'woocommerce' ),
 			),
-			'recount_terms'              => array(
+			'recount_terms'                      => array(
 				'name'   => __( 'Term counts', 'woocommerce' ),
 				'button' => __( 'Recount terms', 'woocommerce' ),
 				'desc'   => __( 'This tool will recount product terms - useful when changing your settings in a way which hides products from the catalog.', 'woocommerce' ),
 			),
-			'reset_roles'                => array(
+			'reset_roles'                        => array(
 				'name'   => __( 'Capabilities', 'woocommerce' ),
 				'button' => __( 'Reset capabilities', 'woocommerce' ),
 				'desc'   => __( 'This tool will reset the admin, customer and shop_manager roles to default. Use this if your users cannot access all of the WooCommerce admin pages.', 'woocommerce' ),
 			),
-			'clear_sessions'             => array(
+			'clear_sessions'                     => array(
 				'name'   => __( 'Clear customer sessions', 'woocommerce' ),
 				'button' => __( 'Clear', 'woocommerce' ),
 				'desc'   => sprintf(
@@ -158,7 +163,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 					__( 'This tool will delete all customer session data from the database, including current carts and saved carts in the database.', 'woocommerce' )
 				),
 			),
-			'install_pages'              => array(
+			'install_pages'                      => array(
 				'name'   => __( 'Create default WooCommerce pages', 'woocommerce' ),
 				'button' => __( 'Create pages', 'woocommerce' ),
 				'desc'   => sprintf(
@@ -167,7 +172,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 					__( 'This tool will install all the missing WooCommerce pages. Pages already defined and set up will not be replaced.', 'woocommerce' )
 				),
 			),
-			'delete_taxes'               => array(
+			'delete_taxes'                       => array(
 				'name'   => __( 'Delete WooCommerce tax rates', 'woocommerce' ),
 				'button' => __( 'Delete tax rates', 'woocommerce' ),
 				'desc'   => sprintf(
@@ -176,12 +181,12 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 					__( 'This option will delete ALL of your tax rates, use with caution. This action cannot be reversed.', 'woocommerce' )
 				),
 			),
-			'reset_tracking'             => array(
+			'reset_tracking'                     => array(
 				'name'   => __( 'Reset usage tracking', 'woocommerce' ),
 				'button' => __( 'Reset', 'woocommerce' ),
 				'desc'   => __( 'This will reset your usage tracking settings, causing it to show the opt-in banner again and not sending any data.', 'woocommerce' ),
 			),
-			'regenerate_thumbnails'      => array(
+			'regenerate_thumbnails'              => array(
 				'name'   => __( 'Regenerate shop thumbnails', 'woocommerce' ),
 				'button' => __( 'Regenerate', 'woocommerce' ),
 				'desc'   => __( 'This will regenerate all shop thumbnails to match your theme and/or image settings.', 'woocommerce' ),
@@ -427,6 +432,21 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 				$message = sprintf( __( '%d orphaned variations deleted', 'woocommerce' ), $result );
 				break;
 
+			case 'clear_expired_download_permissions':
+				// Delete expired download permissions and ones with 0 downloads remaining.
+				$result = absint(
+					$wpdb->query(
+						$wpdb->prepare(
+							"DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
+							WHERE ( downloads_remaining != '' AND downloads_remaining = 0 ) OR ( access_expires IS NOT NULL AND access_expires < %s )",
+							date( 'Y-m-d', current_time( 'timestamp' ) )
+						)
+					)
+				);
+				/* translators: %d: amount of permissions */
+				$message = sprintf( __( '%d permissions deleted', 'woocommerce' ), $result );
+				break;
+
 			case 'add_order_indexes':
 				/*
 				 * Add billing and shipping address indexes containing the customer name for orders
@@ -493,6 +513,10 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 				break;
 
 			case 'reset_tracking':
+				if ( ! class_exists( 'WC_Tracker' ) ) {
+					include_once WC_ABSPATH . 'includes/class-wc-tracker.php';
+				}
+				WC_Tracker::opt_out_request();
 				delete_option( 'woocommerce_allow_tracking' );
 				WC_Admin_Notices::add_notice( 'tracking' );
 				$message = __( 'Usage tracking settings successfully reset.', 'woocommerce' );

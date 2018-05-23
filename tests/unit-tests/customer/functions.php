@@ -46,6 +46,7 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( 'fred2', $userdata->user_login );
 
 		// No password.
+		update_option( 'woocommerce_registration_generate_password', 'no' );
 		$id = wc_create_new_customer( 'joe@example.com', 'joecustomer', '' );
 		$this->assertInstanceOf( 'WP_Error', $id );
 

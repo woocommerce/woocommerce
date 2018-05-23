@@ -8,10 +8,14 @@
 
 defined( 'ABSPATH' ) || exit;
 
+if ( ! class_exists( 'WC_Privacy_Background_Process', false ) ) {
+	include_once dirname( __FILE__ ) . '/class-wc-privacy-background-process.php';
+}
+
 /**
  * WC_Privacy Class.
  */
-class WC_Privacy {
+class WC_Privacy extends WC_Abstract_Privacy {
 
 	/**
 	 * Background process to clean up orders.
@@ -23,23 +27,198 @@ class WC_Privacy {
 	/**
 	 * Init - hook into events.
 	 */
-	public static function init() {
-		self::$background_process = new WC_Privacy_Background_Process();
+	public function __construct() {
+		parent::__construct( __( 'WooCommerce', 'woocommerce' ) );
 
-		// Cleanup orders daily - this is a callback on a daily cron event.
-		add_action( 'woocommerce_cleanup_orders', array( __CLASS__, 'order_cleanup_process' ) );
+		if ( ! self::$background_process ) {
+			self::$background_process = new WC_Privacy_Background_Process();
+		}
+
+		// Include supporting classes.
+		include_once 'class-wc-privacy-erasers.php';
+		include_once 'class-wc-privacy-exporters.php';
 
 		// This hook registers WooCommerce data exporters.
-		add_filter( 'wp_privacy_personal_data_exporters', array( __CLASS__, 'register_data_exporters' ), 10 );
+		$this->add_exporter( 'woocommerce-customer-data', __( 'Customer Data', 'woocommerce' ), array( 'WC_Privacy_Exporters', 'customer_data_exporter' ) );
+		$this->add_exporter( 'woocommerce-customer-orders', __( 'Customer Orders', 'woocommerce' ), array( 'WC_Privacy_Exporters', 'order_data_exporter' ) );
+		$this->add_exporter( 'woocommerce-customer-downloads', __( 'Customer Downloads', 'woocommerce' ), array( 'WC_Privacy_Exporters', 'download_data_exporter' ) );
+		$this->add_exporter( 'woocommerce-customer-tokens', __( 'Customer Tokens', 'woocommerce' ), array( 'WC_Privacy_Exporters', 'customer_tokens_exporter' ) );
 
-		// When this is fired, data is removed in a given order. Called from bulk actions.
-		add_action( 'woocommerce_remove_order_personal_data', array( __CLASS__, 'remove_order_personal_data' ) );
+		// This hook registers WooCommerce data erasers.
+		$this->add_eraser( 'woocommerce-customer-data', __( 'Customer Data', 'woocommerce' ), array( 'WC_Privacy_Erasers', 'customer_data_eraser' ) );
+		$this->add_eraser( 'woocommerce-customer-orders', __( 'Customer Orders', 'woocommerce' ), array( 'WC_Privacy_Erasers', 'order_data_eraser' ) );
+		$this->add_eraser( 'woocommerce-customer-downloads', __( 'Customer Downloads', 'woocommerce' ), array( 'WC_Privacy_Erasers', 'download_data_eraser' ) );
+		$this->add_eraser( 'woocommerce-customer-tokens', __( 'Customer Tokens', 'woocommerce' ), array( 'WC_Privacy_Erasers', 'customer_tokens_eraser' ) );
+
+		// Cleanup orders daily - this is a callback on a daily cron event.
+		add_action( 'woocommerce_cleanup_personal_data', array( $this, 'queue_cleanup_personal_data' ) );
 
 		// Handles custom anonomization types not included in core.
-		add_filter( 'wp_privacy_anonymize_data', array( __CLASS__, 'anonymize_custom_data_types' ), 10, 3 );
+		add_filter( 'wp_privacy_anonymize_data', array( $this, 'anonymize_custom_data_types' ), 10, 3 );
 
-		// Privacy page content.
-		add_action( 'admin_init', array( __CLASS__, 'add_privacy_policy_content' ) );
+		// When this is fired, data is removed in a given order. Called from bulk actions.
+		add_action( 'woocommerce_remove_order_personal_data', array( 'WC_Privacy_Erasers', 'remove_order_personal_data' ) );
+	}
+
+	/**
+	 * Add privacy policy content for the privacy policy page.
+	 *
+	 * @since 3.4.0
+	 */
+	public function get_privacy_message() {
+		$content = '
+			<div contenteditable="false">' .
+				'<p class="wp-policy-help">' .
+					__( 'This sample language includes the basics around what personal data your store may be collecting, storing and sharing, as well as who may have access to that data. Depending on what settings are enabled and which additional plugins are used, the specific information shared by your store will vary. We recommend consulting with a lawyer when deciding what information to disclose on your privacy policy.', 'woocommerce' ) .
+				'</p>' .
+			'</div>' .
+			'<p>' . __( 'We collect information about you during the checkout process on our store.', 'woocommerce' ) . '</p>' .
+			'<h2>' . __( 'What we collect and store', 'woocommerce' ) . '</h2>' .
+			'<p>' . __( 'While you visit our site, we’ll track:', 'woocommerce' ) . '</p>' .
+			'<ul>' .
+				'<li>' . __( 'Products you’ve viewed:  we’ll use this to, for example, show you products you’ve recently viewed', 'woocommerce' ) . '</li>' .
+				'<li>' . __( 'Location, IP address and browser type: we’ll use this for purposes like estimating taxes and shipping', 'woocommerce' ) . '</li>' .
+				'<li>' . __( 'Shipping address: we’ll ask you to enter this so we can, for instance, estimate shipping before you place an order, and send you the order!', 'woocommerce' ) . '</li>' .
+			'</ul>' .
+			'<p>' . __( 'We’ll also use cookies to keep track of cart contents while you’re browsing our site.', 'woocommerce' ) . '</p>' .
+			'<div contenteditable="false">' .
+				'<p class="wp-policy-help">' . __( 'Note: you may want to further detail your cookie policy, and link to that section from here.', 'woocommerce' ) . '</p>' .
+			'</div>' .
+			'<p>' . __( 'When you purchase from us, we’ll ask you to provide information including your name, billing address, shipping address, email address, phone number, credit card/payment details and optional account information like username and password. We’ll use this information for purposes, such as, to:', 'woocommerce' ) . '</p>' .
+			'<ul>' .
+				'<li>' . __( 'Send you information about your account and order', 'woocommerce' ) . '</li>' .
+				'<li>' . __( 'Respond to your requests, including refunds and complaints', 'woocommerce' ) . '</li>' .
+				'<li>' . __( 'Process payments and prevent fraud', 'woocommerce' ) . '</li>' .
+				'<li>' . __( 'Set up your account for our store', 'woocommerce' ) . '</li>' .
+				'<li>' . __( 'Comply with any legal obligations we have, such as calculating taxes', 'woocommerce' ) . '</li>' .
+				'<li>' . __( 'Improve our store offerings', 'woocommerce' ) . '</li>' .
+				'<li>' . __( 'Send you marketing messages, if you choose to receive them', 'woocommerce' ) . '</li>' .
+			'</ul>' .
+			'<p>' . __( 'If you create an account, we will store your name, address, email and phone number, which will be used to populate the checkout for future orders.', 'woocommerce' ) . '</p>' .
+			'<p>' . __( 'We generally store information about you for as long as we need the information for the purposes for which we collect and use it, and we are not legally required to continue to keep it. For example, we will store order information for XXX years for tax and accounting purposes. This includes your name, email address and billing and shipping addresses.', 'woocommerce' ) . '</p>' .
+			'<p>' . __( 'We will also store comments or reviews, if you choose to leave them.', 'woocommerce' ) . '</p>' .
+			'<h2>' . __( 'Who on our team has access', 'woocommerce' ) . '</h2>' .
+			'<p>' . __( 'Members of our team have access to the information you provide us. For example, both Administrators and Shop Managers can access:', 'woocommerce' ) . '</p>' .
+			'<ul>' .
+				'<li>' . __( 'Order information like what was purchased, when it was purchased and where it should be sent, and', 'woocommerce' ) . '</li>' .
+				'<li>' . __( 'Customer information like your name, email address, and billing and shipping information.', 'woocommerce' ) . '</li>' .
+			'</ul>' .
+			'<p>' . __( 'Our team members have access to this information to help fulfill orders, process refunds and support you.', 'woocommerce' ) . '</p>' .
+			'<h2>' . __( 'What we share with others', 'woocommerce' ) . '</h2>' .
+			'<div contenteditable="false">' .
+				'<p class="wp-policy-help">' . __( 'In this section you should list who you’re sharing data with, and for what purpose. This could include, but may not be limited to, analytics, marketing, payment gateways, shipping providers, and third party embeds.', 'woocommerce' ) . '</p>' .
+			'</div>' .
+			'<p>' . __( 'We share information with third parties who help us provide our orders and store services to you; for example --', 'woocommerce' ) . '</p>' .
+			'<h3>' . __( 'Payments', 'woocommerce' ) . '</h3>' .
+			'<div contenteditable="false">' .
+				'<p class="wp-policy-help">' . __( 'In this subsection you should list which third party payment processors you’re using to take payments on your store since these may handle customer data. We’ve included PayPal as an example, but you should remove this if you’re not using PayPal.', 'woocommerce' ) . '</p>' .
+			'</div>' .
+			'<p>' . __( 'We accept payments through PayPal. When processing payments, some of your data will be passed to PayPal, including information required to process or support the payment, such as the purchase total and billing information.', 'woocommerce' ) . '</p>' .
+			'<p>' . __( 'Please see the <a href="https://www.paypal.com/us/webapps/mpp/ua/privacy-full">PayPal Privacy Policy</a> for more details.', 'woocommerce' ) . '</p>';
+
+		return apply_filters( 'wc_privacy_policy_content', $content );
+	}
+
+	/**
+	 * Spawn events for order cleanup.
+	 */
+	public function queue_cleanup_personal_data() {
+		self::$background_process->push_to_queue( array( 'task' => 'trash_pending_orders' ) );
+		self::$background_process->push_to_queue( array( 'task' => 'trash_failed_orders' ) );
+		self::$background_process->push_to_queue( array( 'task' => 'trash_cancelled_orders' ) );
+		self::$background_process->push_to_queue( array( 'task' => 'anonymize_completed_orders' ) );
+		self::$background_process->push_to_queue( array( 'task' => 'delete_inactive_accounts' ) );
+		self::$background_process->save()->dispatch();
+	}
+
+	/**
+	 * Handle some custom types of data and anonymize them.
+	 *
+	 * @param string $anonymous Anonymized string.
+	 * @param string $type Type of data.
+	 * @param string $data The data being anonymized.
+	 * @return string Anonymized string.
+	 */
+	public function anonymize_custom_data_types( $anonymous, $type, $data ) {
+		switch ( $type ) {
+			case 'address_state':
+			case 'address_country':
+				$anonymous = ''; // Empty string - we don't want to store anything after removal.
+				break;
+			case 'phone':
+				$anonymous = preg_replace( '/\d/u', '0', $data );
+				break;
+			case 'numeric_id':
+				$anonymous = 0;
+				break;
+		}
+		return $anonymous;
+	}
+
+	/**
+	 * Find and trash old orders.
+	 *
+	 * @since 3.4.0
+	 * @param  int $limit Limit orders to process per batch.
+	 * @return int Number of orders processed.
+	 */
+	public static function trash_pending_orders( $limit = 20 ) {
+		$option = wc_parse_relative_date_option( get_option( 'woocommerce_trash_pending_orders' ) );
+
+		if ( empty( $option['number'] ) ) {
+			return 0;
+		}
+
+		return self::trash_orders_query( apply_filters( 'woocommerce_trash_pending_orders_query_args', array(
+			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
+			'limit'        => $limit, // Batches of 20.
+			'status'       => 'wc-pending',
+			'type'         => 'shop_order',
+		) ) );
+	}
+
+	/**
+	 * Find and trash old orders.
+	 *
+	 * @since 3.4.0
+	 * @param  int $limit Limit orders to process per batch.
+	 * @return int Number of orders processed.
+	 */
+	public static function trash_failed_orders( $limit = 20 ) {
+		$option = wc_parse_relative_date_option( get_option( 'woocommerce_trash_failed_orders' ) );
+
+		if ( empty( $option['number'] ) ) {
+			return 0;
+		}
+
+		return self::trash_orders_query( apply_filters( 'woocommerce_trash_failed_orders_query_args', array(
+			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
+			'limit'        => $limit, // Batches of 20.
+			'status'       => 'wc-failed',
+			'type'         => 'shop_order',
+		) ) );
+	}
+
+	/**
+	 * Find and trash old orders.
+	 *
+	 * @since 3.4.0
+	 * @param  int $limit Limit orders to process per batch.
+	 * @return int Number of orders processed.
+	 */
+	public static function trash_cancelled_orders( $limit = 20 ) {
+		$option = wc_parse_relative_date_option( get_option( 'woocommerce_trash_cancelled_orders' ) );
+
+		if ( empty( $option['number'] ) ) {
+			return 0;
+		}
+
+		return self::trash_orders_query( apply_filters( 'woocommerce_trash_cancelled_orders_query_args', array(
+			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
+			'limit'        => $limit, // Batches of 20.
+			'status'       => 'wc-cancelled',
+			'type'         => 'shop_order',
+		) ) );
 	}
 
 	/**
@@ -64,6 +243,29 @@ class WC_Privacy {
 	}
 
 	/**
+	 * Anonymize old completed orders.
+	 *
+	 * @since 3.4.0
+	 * @param  int $limit Limit orders to process per batch.
+	 * @return int Number of orders processed.
+	 */
+	public static function anonymize_completed_orders( $limit = 20 ) {
+		$option = wc_parse_relative_date_option( get_option( 'woocommerce_anonymize_completed_orders' ) );
+
+		if ( empty( $option['number'] ) ) {
+			return 0;
+		}
+
+		return self::anonymize_orders_query( apply_filters( 'woocommerce_anonymize_completed_orders_query_args', array(
+			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
+			'limit'        => $limit, // Batches of 20.
+			'status'       => 'wc-completed',
+			'anonymized'   => false,
+			'type'         => 'shop_order',
+		) ) );
+	}
+
+	/**
 	 * For a given query, anonymize all matches.
 	 *
 	 * @since 3.4.0
@@ -76,7 +278,7 @@ class WC_Privacy {
 
 		if ( $orders ) {
 			foreach ( $orders as $order ) {
-				self::remove_order_personal_data( $order );
+				WC_Privacy_Erasers::remove_order_personal_data( $order );
 				$count ++;
 			}
 		}
@@ -85,626 +287,67 @@ class WC_Privacy {
 	}
 
 	/**
-	 * Spawn events for order cleanup.
-	 */
-	public static function order_cleanup_process() {
-		self::$background_process->push_to_queue( array( 'task' => 'trash_pending_orders' ) );
-		self::$background_process->push_to_queue( array( 'task' => 'trash_failed_orders' ) );
-		self::$background_process->push_to_queue( array( 'task' => 'trash_cancelled_orders' ) );
-		self::$background_process->push_to_queue( array( 'task' => 'anonymize_completed_orders' ) );
-		self::$background_process->save()->dispatch();
-	}
-
-	/**
-	 * Find and trash old orders.
+	 * Delete inactive accounts.
 	 *
 	 * @since 3.4.0
-	 * @param  int $limit Limit orders to process per batch.
-	 * @return int Number of orders processed.
+	 * @param  int $limit Limit users to process per batch.
+	 * @return int Number of users processed.
 	 */
-	public static function trash_pending_orders( $limit = 20 ) {
-		$option = wc_parse_relative_date_option( get_option( 'woocommerce_trash_pending_orders' ) );
+	public static function delete_inactive_accounts( $limit = 20 ) {
+		$option = wc_parse_relative_date_option( get_option( 'woocommerce_delete_inactive_accounts' ) );
 
 		if ( empty( $option['number'] ) ) {
 			return 0;
 		}
 
-		return self::trash_orders_query( array(
-			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
-			'limit'        => $limit, // Batches of 20.
-			'status'       => 'wc-pending',
+		return self::delete_inactive_accounts_query( strtotime( '-' . $option['number'] . ' ' . $option['unit'] ), $limit );
+	}
+
+	/**
+	 * Delete inactive accounts.
+	 *
+	 * @since 3.4.0
+	 * @param int $timestamp Timestamp to delete customers before.
+	 * @param int $limit     Limit number of users to delete per run.
+	 * @return int Count of customers that were deleted.
+	 */
+	protected static function delete_inactive_accounts_query( $timestamp, $limit = 20 ) {
+		$count      = 0;
+		$user_query = new WP_User_Query( array(
+			'fields'     => 'ID',
+			'number'     => $limit,
+			'role__in'   => apply_filters( 'woocommerce_delete_inactive_account_roles', array(
+				'Customer',
+				'Subscriber',
+			) ),
+			'meta_query' => array(
+				'relation' => 'AND',
+				array(
+					'key'     => 'wc_last_active',
+					'value'   => (string) $timestamp,
+					'compare' => '<',
+					'type'    => 'NUMERIC',
+				),
+				array(
+					'key'     => 'wc_last_active',
+					'value'   => '0',
+					'compare' => '>',
+					'type'    => 'NUMERIC',
+				),
+			),
 		) );
-	}
 
-	/**
-	 * Find and trash old orders.
-	 *
-	 * @since 3.4.0
-	 * @param  int $limit Limit orders to process per batch.
-	 * @return int Number of orders processed.
-	 */
-	public static function trash_failed_orders( $limit = 20 ) {
-		$option = wc_parse_relative_date_option( get_option( 'woocommerce_trash_failed_orders' ) );
+		$user_ids = $user_query->get_results();
 
-		if ( empty( $option['number'] ) ) {
-			return 0;
-		}
-
-		return self::trash_orders_query( array(
-			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
-			'limit'        => $limit, // Batches of 20.
-			'status'       => 'wc-failed',
-		) );
-	}
-
-	/**
-	 * Find and trash old orders.
-	 *
-	 * @since 3.4.0
-	 * @param  int $limit Limit orders to process per batch.
-	 * @return int Number of orders processed.
-	 */
-	public static function trash_cancelled_orders( $limit = 20 ) {
-		$option = wc_parse_relative_date_option( get_option( 'woocommerce_trash_cancelled_orders' ) );
-
-		if ( empty( $option['number'] ) ) {
-			return 0;
-		}
-
-		return self::trash_orders_query( array(
-			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
-			'limit'        => $limit, // Batches of 20.
-			'status'       => 'wc-cancelled',
-		) );
-	}
-
-	/**
-	 * Anonymize old completed orders from guests.
-	 *
-	 * @since 3.4.0
-	 * @param  int $limit Limit orders to process per batch.
-	 * @param  int $page Page to process.
-	 * @return int Number of orders processed.
-	 */
-	public static function anonymize_completed_orders( $limit = 20, $page = 1 ) {
-		$option = wc_parse_relative_date_option( get_option( 'woocommerce_anonymize_completed_orders' ) );
-
-		if ( empty( $option['number'] ) ) {
-			return 0;
-		}
-
-		return self::anonymize_orders_query( array(
-			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
-			'limit'        => $limit, // Batches of 20.
-			'status'       => 'wc-completed',
-			'anonymized'   => false,
-			'customer_id'  => 0,
-		) );
-	}
-
-	/**
-	 * Registers the personal data exporter for comments.
-	 *
-	 * @since 3.4.0
-	 * @param array $exporters An array of personal data exporters.
-	 * @return array An array of personal data exporters.
-	 */
-	public static function register_data_exporters( $exporters ) {
-		$exporters[] = array(
-			'exporter_friendly_name' => __( 'WooCommerce Customer Data', 'woocommerce' ),
-			'callback'               => array( __CLASS__, 'customer_data_exporter' ),
-		);
-		$exporters[] = array(
-			'exporter_friendly_name' => __( 'WooCommerce Order Data', 'woocommerce' ),
-			'callback'               => array( __CLASS__, 'order_data_exporter' ),
-		);
-		$exporters[] = array(
-			'exporter_friendly_name' => __( 'WooCommerce Downloads', 'woocommerce' ),
-			'callback'               => array( __CLASS__, 'download_data_exporter' ),
-		);
-		return $exporters;
-	}
-
-	/**
-	 * Finds and exports customer data by email address.
-	 *
-	 * @since 3.4.0
-	 * @param string $email_address The user email address.
-	 * @param int    $page  Page.
-	 * @return array An array of personal data in name value pairs
-	 */
-	public static function customer_data_exporter( $email_address, $page ) {
-		$user           = get_user_by( 'email', $email_address ); // Check if user has an ID in the DB to load stored personal data.
-		$data_to_export = array();
-
-		if ( $user instanceof WP_User ) {
-			$data_to_export[] = array(
-				'group_id'    => 'woocommerce_customer',
-				'group_label' => __( 'Customer Data', 'woocommerce' ),
-				'item_id'     => 'user',
-				'data'        => self::get_user_personal_data( $user ),
-			);
-		}
-
-		return array(
-			'data' => $data_to_export,
-			'done' => true,
-		);
-	}
-
-	/**
-	 * Finds and exports data which could be used to identify a person from WooCommerce data associated with an email address.
-	 *
-	 * Orders are exported in blocks of 10 to avoid timeouts.
-	 *
-	 * @since 3.4.0
-	 * @param string $email_address The user email address.
-	 * @param int    $page  Page.
-	 * @return array An array of personal data in name value pairs
-	 */
-	public static function order_data_exporter( $email_address, $page ) {
-		$done           = false;
-		$page           = (int) $page;
-		$user           = get_user_by( 'email', $email_address ); // Check if user has an ID in the DB to load stored personal data.
-		$data_to_export = array();
-		$order_query    = array(
-			'limit' => 10,
-			'page'  => $page,
-		);
-
-		if ( $user instanceof WP_User ) {
-			$order_query['customer_id'] = (int) $user->ID;
-		} else {
-			$order_query['billing_email'] = $email_address;
-		}
-
-		$orders = wc_get_orders( $order_query );
-
-		if ( 0 < count( $orders ) ) {
-			foreach ( $orders as $order ) {
-				$data_to_export[] = array(
-					'group_id'    => 'woocommerce_orders',
-					'group_label' => __( 'Orders', 'woocommerce' ),
-					'item_id'     => 'order-' . $order->get_id(),
-					'data'        => self::get_order_personal_data( $order ),
-				);
-			}
-			$done = 10 > count( $orders );
-		} else {
-			$done = true;
-		}
-
-		return array(
-			'data' => $data_to_export,
-			'done' => $done,
-		);
-	}
-
-	/**
-	 * Finds and exports customer download logs by email address.
-	 *
-	 * @since 3.4.0
-	 * @param string $email_address The user email address.
-	 * @param int    $page  Page.
-	 * @return array An array of personal data in name value pairs
-	 */
-	public static function download_data_exporter( $email_address, $page ) {
-		$done            = false;
-		$page            = (int) $page;
-		$user            = get_user_by( 'email', $email_address ); // Check if user has an ID in the DB to load stored personal data.
-		$data_to_export  = array();
-		$downloads_query = array(
-			'limit' => 10,
-			'page'  => $page,
-		);
-
-		if ( $user instanceof WP_User ) {
-			$downloads_query['user_id'] = (int) $user->ID;
-		} else {
-			$downloads_query['user_email'] = $email_address;
-		}
-
-		$customer_download_data_store     = WC_Data_Store::load( 'customer-download' );
-		$customer_download_log_data_store = WC_Data_Store::load( 'customer-download-log' );
-		$downloads                        = $customer_download_data_store->get_downloads( $downloads_query );
-
-		if ( 0 < count( $downloads ) ) {
-			foreach ( $downloads as $download ) {
-				$data_to_export[] = array(
-					'group_id'    => 'woocommerce_downloads',
-					'group_label' => __( 'Order Downloads', 'woocommerce' ),
-					'item_id'     => 'download-' . $download->get_id(),
-					'data'        => array(
-						array(
-							'name'  => __( 'Download ID', 'woocommerce' ),
-							'value' => $download->get_id(),
-						),
-						array(
-							'name'  => __( 'Order ID', 'woocommerce' ),
-							'value' => $download->get_order_id(),
-						),
-						array(
-							'name'  => __( 'Product', 'woocommerce' ),
-							'value' => get_the_title( $download->get_product_id() ),
-						),
-						array(
-							'name'  => __( 'User email', 'woocommerce' ),
-							'value' => $download->get_user_email(),
-						),
-						array(
-							'name'  => __( 'Downloads remaining', 'woocommerce' ),
-							'value' => $download->get_downloads_remaining(),
-						),
-						array(
-							'name'  => __( 'Download count', 'woocommerce' ),
-							'value' => $download->get_download_count(),
-						),
-						array(
-							'name'  => __( 'Access granted', 'woocommerce' ),
-							'value' => date( 'Y-m-d', $download->get_access_granted( 'edit' )->getTimestamp() ),
-						),
-						array(
-							'name'  => __( 'Access expires', 'woocommerce' ),
-							'value' => ! is_null( $download->get_access_expires( 'edit' ) ) ? date( 'Y-m-d', $download->get_access_expires( 'edit' )->getTimestamp() ) : null,
-						),
-					),
-				);
-
-				$download_logs = $customer_download_log_data_store->get_download_logs_for_permission( $download->get_id() );
-
-				foreach ( $download_logs as $download_log ) {
-					$data_to_export[] = array(
-						'group_id'    => 'woocommerce_download_logs',
-						'group_label' => __( 'Download Logs', 'woocommerce' ),
-						'item_id'     => 'download-log-' . $download_log->get_id(),
-						'data'        => array(
-							array(
-								'name'  => __( 'Download ID', 'woocommerce' ),
-								'value' => $download_log->get_permission_id(),
-							),
-							array(
-								'name'  => __( 'Timestamp', 'woocommerce' ),
-								'value' => $download_log->get_timestamp(),
-							),
-							array(
-								'name'  => __( 'IP Address', 'woocommerce' ),
-								'value' => $download_log->get_user_ip_address(),
-							),
-						),
-					);
-				}
-			}
-			$done = 10 > count( $downloads );
-		} else {
-			$done = true;
-		}
-
-		return array(
-			'data' => $data_to_export,
-			'done' => $done,
-		);
-	}
-
-	/**
-	 * Get personal data (key/value pairs) for a user object.
-	 *
-	 * @since 3.4.0
-	 * @param WP_User $user user object.
-	 * @return array
-	 */
-	protected static function get_user_personal_data( $user ) {
-		$personal_data   = array();
-		$customer        = new WC_Customer( $user->ID );
-		$props_to_export = array(
-			'billing_first_name'  => __( 'Billing First Name', 'woocommerce' ),
-			'billing_last_name'   => __( 'Billing Last Name', 'woocommerce' ),
-			'billing_company'     => __( 'Billing Company', 'woocommerce' ),
-			'billing_address_1'   => __( 'Billing Address 1', 'woocommerce' ),
-			'billing_address_2'   => __( 'Billing Address 2', 'woocommerce' ),
-			'billing_city'        => __( 'Billing City', 'woocommerce' ),
-			'billing_postcode'    => __( 'Billing Postal/Zip Code', 'woocommerce' ),
-			'billing_state'       => __( 'Billing State', 'woocommerce' ),
-			'billing_country'     => __( 'Billing Country', 'woocommerce' ),
-			'billing_phone'       => __( 'Phone Number', 'woocommerce' ),
-			'billing_email'       => __( 'Email Address', 'woocommerce' ),
-			'shipping_first_name' => __( 'Shipping First Name', 'woocommerce' ),
-			'shipping_last_name'  => __( 'Shipping Last Name', 'woocommerce' ),
-			'shipping_company'    => __( 'Shipping Company', 'woocommerce' ),
-			'shipping_address_1'  => __( 'Shipping Address 1', 'woocommerce' ),
-			'shipping_address_2'  => __( 'Shipping Address 2', 'woocommerce' ),
-			'shipping_city'       => __( 'Shipping City', 'woocommerce' ),
-			'shipping_postcode'   => __( 'Shipping Postal/Zip Code', 'woocommerce' ),
-			'shipping_state'      => __( 'Shipping State', 'woocommerce' ),
-			'shipping_country'    => __( 'Shipping Country', 'woocommerce' ),
-		);
-
-		foreach ( $props_to_export as $prop => $description ) {
-			$value = $customer->{"get_$prop"}( 'edit' );
-
-			if ( $value ) {
-				$personal_data[] = array(
-					'name'  => $description,
-					'value' => $value,
-				);
+		if ( $user_ids ) {
+			foreach ( $user_ids as $user_id ) {
+				wp_delete_user( $user_id );
+				$count ++;
 			}
 		}
 
-		/**
-		 * Allow extensions to register their own personal data for this customer for the export.
-		 *
-		 * @since 3.4.0
-		 * @param array    $personal_data Array of name value pairs.
-		 * @param WC_Order $order A customer object.
-		 */
-		$personal_data = apply_filters( 'woocommerce_privacy_export_personal_data_customer', $personal_data, $customer );
-
-		return $personal_data;
-	}
-
-	/**
-	 * Get personal data (key/value pairs) for an order object.
-	 *
-	 * @since 3.4.0
-	 * @param WC_Order $order Order object.
-	 * @return array
-	 */
-	protected static function get_order_personal_data( $order ) {
-		$personal_data   = array();
-		$props_to_export = array(
-			'order_number'               => __( 'Order Number', 'woocommerce' ),
-			'date_created'               => __( 'Order Date', 'woocommerce' ),
-			'total'                      => __( 'Order Total', 'woocommerce' ),
-			'items'                      => __( 'Items Purchased', 'woocommerce' ),
-			'customer_ip_address'        => __( 'IP Address', 'woocommerce' ),
-			'customer_user_agent'        => __( 'Browser User Agent', 'woocommerce' ),
-			'formatted_billing_address'  => __( 'Billing Address', 'woocommerce' ),
-			'formatted_shipping_address' => __( 'Shipping Address', 'woocommerce' ),
-			'billing_phone'              => __( 'Phone Number', 'woocommerce' ),
-			'billing_email'              => __( 'Email Address', 'woocommerce' ),
-		);
-
-		foreach ( $props_to_export as $prop => $name ) {
-			switch ( $prop ) {
-				case 'items':
-					$item_names = array();
-					foreach ( $order->get_items() as $item ) {
-						$item_names[] = $item->get_name() . ' x ' . $item->get_quantity();
-					}
-					$value = implode( ', ', $item_names );
-					break;
-				case 'date_created':
-					$value = wc_format_datetime( $order->get_date_created(), get_option( 'date_format' ) . ', ' . get_option( 'time_format' ) );
-					break;
-				case 'formatted_billing_address':
-				case 'formatted_shipping_address':
-					$value = preg_replace( '#<br\s*/?>#i', ', ', $order->{"get_$prop"}() );
-					break;
-				default:
-					$value = $order->{"get_$prop"}();
-					break;
-			}
-
-			if ( $value ) {
-				$personal_data[] = array(
-					'name'  => $name,
-					'value' => $value,
-				);
-			}
-		}
-
-		/**
-		 * Allow extensions to register their own personal data for this order for the export.
-		 *
-		 * @since 3.4.0
-		 * @param array    $personal_data Array of name value pairs to expose in the export.
-		 * @param WC_Order $order An order object.
-		 */
-		$personal_data = apply_filters( 'woocommerce_privacy_export_personal_data_order', $personal_data, $order );
-
-		return $personal_data;
-	}
-
-	/**
-	 * Anonymize/remove personal data for a given EMAIL ADDRESS. This user may not have an account.
-	 *
-	 * Note; this is separate to account deletion. WooCommerce handles account deletion/cleanup elsewhere.
-	 * This logic is simply to clean up data for guest users.
-	 *
-	 * @todo Add option to determine if order data should be left alone when removing personal data for a user.
-	 * @todo Hook into core UI.
-	 *
-	 * @param string $email_address Customer email address.
-	 */
-	public static function remove_personal_data( $email_address ) {
-		$user        = get_user_by( 'email', $email_address ); // Check if user has an ID in the DB.
-		$has_account = $user instanceof WP_User;
-
-		/**
-		 * Allow 3rd parties to modify this behavior. If true, orders belonging to this user will be anonyimized.
-		 *
-		 * @since 3.4.0
-		 */
-		if ( apply_filters( 'woocommerce_privacy_remove_personal_data_includes_orders', true, $email_address ) ) {
-			$order_query = array(
-				'limit' => -1,
-			);
-
-			if ( $user instanceof WP_User ) {
-				$order_query['customer_id'] = (int) $user->ID;
-			} else {
-				$order_query['billing_email'] = $email_address;
-			}
-
-			$orders = wc_get_orders( $order_query );
-
-			if ( 0 < count( $orders ) ) {
-				foreach ( $orders as $order ) {
-					self::remove_order_personal_data( $order );
-				}
-			}
-		}
-
-		// Revoke download permissions.
-		$data_store = WC_Data_Store::load( 'customer-download' );
-
-		if ( $user instanceof WP_User ) {
-			$data_store->delete_by_user_id( (int) $user->ID );
-		} else {
-			$data_store->delete_by_user_email( $email_address );
-		}
-
-		/**
-		 * Allow extensions to remove their own personal data for this customer.
-		 *
-		 * @since 3.4.0
-		 * @param string $email_address Customer email address.
-		 */
-		do_action( 'woocommerce_privacy_remove_personal_data', $email_address );
-	}
-
-	/**
-	 * Remove personal data specific to WooCommerce from an order object.
-	 *
-	 * Note; this will hinder order processing for obvious reasons!
-	 *
-	 * @param WC_Order $order Order object.
-	 */
-	public static function remove_order_personal_data( $order ) {
-		$anonymized_data = array();
-
-		/**
-		 * Expose props and data types we'll be anonymizing.
-		 *
-		 * @since 3.4.0
-		 * @param array    $props Keys are the prop names, values are the data type we'll be passing to wp_privacy_anonymize_data().
-		 * @param WC_Order $order A customer object.
-		 */
-		$props_to_remove = apply_filters( 'woocommerce_privacy_remove_order_personal_data_props', array(
-			'customer_ip_address' => 'ip',
-			'customer_user_agent' => 'text',
-			'billing_first_name'  => 'text',
-			'billing_last_name'   => 'text',
-			'billing_company'     => 'text',
-			'billing_address_1'   => 'text',
-			'billing_address_2'   => 'text',
-			'billing_city'        => 'text',
-			'billing_postcode'    => 'text',
-			'billing_state'       => 'address_state',
-			'billing_country'     => 'address_country',
-			'billing_phone'       => 'phone',
-			'billing_email'       => 'email',
-			'shipping_first_name' => 'text',
-			'shipping_last_name'  => 'text',
-			'shipping_company'    => 'text',
-			'shipping_address_1'  => 'text',
-			'shipping_address_2'  => 'text',
-			'shipping_city'       => 'text',
-			'shipping_postcode'   => 'text',
-			'shipping_state'      => 'address_state',
-			'shipping_country'    => 'address_country',
-		), $order );
-
-		if ( ! empty( $props_to_remove ) && is_array( $props_to_remove ) ) {
-			foreach ( $props_to_remove as $prop => $data_type ) {
-				// Get the current value in edit context.
-				$value = $order->{"get_$prop"}( 'edit' );
-
-				// If the value is empty, it does not need to be anonymized.
-				if ( empty( $value ) || empty( $data_type ) ) {
-					continue;
-				}
-
-				if ( function_exists( 'wp_privacy_anonymize_data' ) ) {
-					$anon_value = wp_privacy_anonymize_data( $data_type, $value );
-				} else {
-					$anon_value = '';
-				}
-
-				/**
-				 * Expose a way to control the anonymized value of a prop via 3rd party code.
-				 *
-				 * @since 3.4.0
-				 * @param bool     $anonymized_data Value of this prop after anonymization.
-				 * @param string   $prop Name of the prop being removed.
-				 * @param string   $value Current value of the data.
-				 * @param string   $data_type Type of data.
-				 * @param WC_Order $order An order object.
-				 */
-				$anonymized_data[ $prop ] = apply_filters( 'woocommerce_privacy_remove_order_personal_data_prop_value', $anon_value, $prop, $value, $data_type, $order );
-			}
-		}
-
-		// Set all new props and persist the new data to the database.
-		$order->set_props( $anonymized_data );
-		$order->update_meta_data( '_anonymized', 'yes' );
-		$order->save();
-
-		// Add note that this event occured.
-		$order->add_order_note( __( 'Personal data removed.', 'woocommerce' ) );
-
-		/**
-		 * Allow extensions to remove their own personal data for this order.
-		 *
-		 * @since 3.4.0
-		 * @param WC_Order $order A customer object.
-		 */
-		do_action( 'woocommerce_privacy_remove_order_personal_data', $order );
-	}
-
-	/**
-	 * Handle some custom types of data and anonymize them.
-	 *
-	 * @param string $anonymous Anonymized string.
-	 * @param string $type Type of data.
-	 * @param string $data The data being anonymized.
-	 * @return string Anonymized string.
-	 */
-	public static function anonymize_custom_data_types( $anonymous, $type, $data ) {
-		switch ( $type ) {
-			case 'address_state':
-			case 'address_country':
-				$anonymous = ''; // Empty string - we don't want to store anything after removal.
-				break;
-			case 'phone':
-				$anonymous = preg_replace( '/\d/u', '0', $data );
-				break;
-		}
-		return $anonymous;
-	}
-
-	/**
-	 * Add privacy policy content for the privacy policy page.
-	 *
-	 * @since 3.4.0
-	 */
-	public static function add_privacy_policy_content() {
-		if ( ! function_exists( 'wp_add_privacy_policy_content' ) ) {
-			return;
-		}
-
-		$content = wp_kses_post( apply_filters( 'wc_privacy_policy_content', wpautop( __( '
-We collect information about you during the checkout process on our store. This information may include, but is not limited to, your name, billing address, shipping address, email address, phone number, credit card/payment details and any other details that might be requested from you for the purpose of processing your orders.
-
-Handling this data also allows us to:
-
-- Send you important account/order/service information.
-- Respond to your queries, refund requests, or complaints.
-- Process payments and to prevent fraudulent transactions. We do this on the basis of our legitimate business interests.
-- Set up and administer your account, provide technical and customer support, and to verify your identity.
-
-Additionally we may also collect the following information:
-
-- Location and traffic data (including IP address and browser type) if you place an order, or if we need to estimate taxes and shipping costs based on your location.
-- Product pages visited and content viewed whist your session is active.
-- Your comments and product reviews if you choose to leave them on our website.
-- Shipping address if you request shipping rates from us before checkout whilst your session is active.
-- Cookies which are essential to keep track of the contents of your cart whilst your session is active.
-- Account email/password to allow you to access your account, if you have one.
-- If you choose to create an account with us, your name, address, email and phone number, which will be used to populate the checkout for future orders.
-', 'woocommerce' ) ) ) );
-
-		wp_add_privacy_policy_content( 'WooCommerce', $content );
+		return $count;
 	}
 }
 
-WC_Privacy::init();
+new WC_Privacy();

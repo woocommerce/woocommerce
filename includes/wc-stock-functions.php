@@ -46,7 +46,11 @@ function wc_update_product_stock( $product, $stock_quantity = null, $operation =
 		$product_with_stock->set_date_modified( current_time( 'timestamp', true ) );
 		$product_with_stock->save();
 
-		do_action( $product_with_stock->is_type( 'variation' ) ? 'woocommerce_variation_set_stock' : 'woocommerce_product_set_stock', $product_with_stock );
+		if ( $product_with_stock->is_type( 'variation' ) ) {
+			do_action( 'woocommerce_variation_set_stock', $product_with_stock );
+		} else {
+			do_action( 'woocommerce_product_set_stock', $product_with_stock );
+		}
 
 		return $product_with_stock->get_stock_quantity();
 	}

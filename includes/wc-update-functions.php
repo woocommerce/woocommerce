@@ -1748,6 +1748,26 @@ function wc_update_340_states() {
 }
 
 /**
+ * Set last active prop for users.
+ */
+function wc_update_340_last_active() {
+	global $wpdb;
+	// @codingStandardsIgnoreStart.
+	$wpdb->query(
+		$wpdb->prepare( "
+			INSERT INTO {$wpdb->usermeta} (user_id, meta_key, meta_value)
+			SELECT DISTINCT users.ID, 'wc_last_active', %s
+			FROM {$wpdb->users} as users
+			LEFT OUTER JOIN {$wpdb->usermeta} AS usermeta ON users.ID = usermeta.user_id AND usermeta.meta_key = 'wc_last_active'
+			WHERE usermeta.meta_value IS NULL
+			",
+			(string) strtotime( date( 'Y-m-d', current_time( 'timestamp', true ) ) )
+		)
+	);
+	// @codingStandardsIgnoreEnd.
+}
+
+/**
  * Update DB Version.
  */
 function wc_update_340_db_version() {

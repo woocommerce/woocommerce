@@ -2940,7 +2940,7 @@ table.wc_shipping {
 		}
 	}
 	.wc-payment-gateway-method-name {
-		display: block;
+		font-weight: normal;
 	}
 	.wc-email-settings-table-name {
 		font-weight: 700;
@@ -2949,6 +2949,13 @@ table.wc_shipping {
 			color: #999;
 			margin: 0 0 0 4px !important;
 		}
+	}
+	.wc-payment-gateway-method-toggle-enabled,
+	.wc-payment-gateway-method-toggle-disabled {
+		padding-top: 1px;
+		display: block;
+		outline: 0;
+		box-shadow: none;
 	}
 	.wc-email-settings-table-status {
 		text-align: center;
@@ -3306,6 +3313,9 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 			left: 0;
 		}
 	}
+	&.woocommerce-input-toggle--loading {
+		opacity: 0.5;
+	}
 }
 
 .wc-modal-shipping-method-settings {
@@ -3530,7 +3540,24 @@ img.help_tip {
 		th label {
 			position: relative;
 			display: block;
+
+			img.help_tip,
+			.woocommerce-help-tip {
+				margin: -8px -24px 0 0;
+				position: absolute;
+				right: 0;
+				top: 50%;
+			}
 		}
+
+		th label + .woocommerce-help-tip {
+			margin: 0 0 0 0;
+			position: absolute;
+			right: 0;
+			top: 20px;
+		}
+
+		woocommerce-help-tip
 
 		.select2-container {
 			vertical-align: top;
@@ -3539,14 +3566,6 @@ img.help_tip {
 
 		table.widefat th {
 			padding-right: inherit;
-		}
-
-		th img.help_tip,
-		th .woocommerce-help-tip {
-			margin: -8px -24px 0 0;
-			position: absolute;
-			right: 0;
-			top: 50%;
 		}
 
 		.wp-list-table .woocommerce-help-tip {
@@ -3596,18 +3615,12 @@ img.help_tip {
 		}
 
 		.colorpickpreview {
-			padding: 6px;
-			padding-left: 20px;
+			padding: 7px 0;
+			line-height: 1em;
+			display: inline-block;
+			width: 26px;
 			border: 1px solid #ddd;
-			/* rtl:ignore */
-			border-right: 0;
-			/* rtl:ignore */
-			margin-left: -3px;
-		}
-
-		.colorpick {
-			/* rtl:ignore */
-			border-left: 0;
+			font-size: 14px;
 		}
 
 		.image_width_settings {
@@ -5482,6 +5495,7 @@ table.bar_chart {
 	.woocommerce-BlankState-cta {
 		font-size: 1.2em;
 		padding: 0.75em 1.5em;
+		margin: 0 .25em;
 		height: auto;
 		display: inline-block !important
 	}

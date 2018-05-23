@@ -537,9 +537,9 @@ function wc_product_has_unique_sku( $product_id, $sku ) {
 
 	if ( apply_filters( 'wc_product_has_unique_sku', $sku_found, $product_id, $sku ) ) {
 		return false;
-	} else {
-		return true;
 	}
+
+	return true;
 }
 
 /**
@@ -854,7 +854,7 @@ function wc_get_product_backorder_options() {
 function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array() ) {
 
 	$product_id     = absint( $product_id );
-	$limit          = $limit > 0 ? $limit : 5;
+	$limit          = $limit >= -1 ? $limit : 5;
 	$exclude_ids    = array_merge( array( 0, $product_id ), $exclude_ids );
 	$transient_name = 'wc_related_' . $product_id;
 	$query_args     = http_build_query( array(

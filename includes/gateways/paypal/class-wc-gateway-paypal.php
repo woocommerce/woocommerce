@@ -60,8 +60,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->email          = $this->get_option( 'email' );
 		$this->receiver_email = $this->get_option( 'receiver_email', $this->email );
 		$this->identity_token = $this->get_option( 'identity_token' );
-
-		self::$log_enabled = $this->debug;
+		self::$log_enabled    = $this->debug;
 
 		if ( $this->testmode ) {
 			/* translators: %s: Link to PayPal sandbox testing guide page */
@@ -114,6 +113,26 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			}
 			self::$log->log( $level, $message, array( 'source' => 'paypal' ) );
 		}
+	}
+
+	/**
+	 * Processes and saves options.
+	 * If there is an error thrown, will continue to save and validate fields, but will leave the erroring field out.
+	 *
+	 * @return bool was anything saved?
+	 */
+	public function process_admin_options() {
+		$saved = parent::process_admin_options();
+
+		// Maybe clear logs.
+		if ( 'yes' !== $this->get_option( 'debug', 'no' ) ) {
+			if ( empty( self::$log ) ) {
+				self::$log = wc_get_logger();
+			}
+			self::$log->clear( 'paypal' );
+		}
+
+		return $saved;
 	}
 
 	/**

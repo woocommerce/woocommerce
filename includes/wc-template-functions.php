@@ -22,7 +22,7 @@ function wc_template_redirect() {
 		wp_safe_redirect( get_post_type_archive_link( 'product' ) );
 		exit;
 
-	} elseif ( is_page( wc_get_page_id( 'checkout' ) ) && wc_get_page_id( 'checkout' ) !== wc_get_page_id( 'cart' ) && WC()->cart->is_empty() && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ) {
+	} elseif ( is_page( wc_get_page_id( 'checkout' ) ) && wc_get_page_id( 'checkout' ) !== wc_get_page_id( 'cart' ) && WC()->cart->is_empty() && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) && ! is_customize_preview() && ! apply_filters( 'woocommerce_checkout_skip_cart_is_empty_check', false ) ) {
 
 		// When on the checkout with an empty cart, redirect to cart page.
 		wc_add_notice( __( 'Checkout is not available whilst your cart is empty.', 'woocommerce' ), 'notice' );
@@ -498,9 +498,6 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
 			if ( ! $product->get_default_attributes() ) {
 				$classes[] = 'has-default-attributes';
 			}
-			if ( $product->has_child() ) {
-				$classes[] = 'has-children';
-			}
 		}
 	}
 
@@ -658,15 +655,22 @@ function wc_product_class( $class = '', $product_id = null ) {
  * Outputs hidden form inputs for each query string variable.
  *
  * @since 3.0.0
- * @param array  $values Name value pairs.
- * @param array  $exclude Keys to exclude.
- * @param string $current_key Current key we are outputting.
- * @param bool   $return Whether to return.
+ * @param string|array $values Name value pairs, or a URL to parse.
+ * @param array        $exclude Keys to exclude.
+ * @param string       $current_key Current key we are outputting.
+ * @param bool         $return Whether to return.
  * @return string
  */
 function wc_query_string_form_fields( $values = null, $exclude = array(), $current_key = '', $return = false ) {
 	if ( is_null( $values ) ) {
 		$values = $_GET; // WPCS: input var ok, CSRF ok.
+	} elseif ( is_string( $values ) ) {
+		$url_parts = wp_parse_url( $values );
+		$values    = array();
+
+		if ( ! empty( $url_parts['query'] ) ) {
+			parse_str( $url_parts['query'], $values );
+		}
 	}
 	$html = '';
 
@@ -720,7 +724,9 @@ function wc_privacy_policy_page_id() {
  * @return bool
  */
 function wc_terms_and_conditions_checkbox_enabled() {
-	return wc_terms_and_conditions_page_id() && wc_get_terms_and_conditions_checkbox_text();
+	$page_id = wc_terms_and_conditions_page_id();
+	$page    = $page_id ? get_post( $page_id ) : false;
+	return $page && wc_get_terms_and_conditions_checkbox_text();
 }
 
 /**
@@ -730,7 +736,8 @@ function wc_terms_and_conditions_checkbox_enabled() {
  * @return string
  */
 function wc_get_terms_and_conditions_checkbox_text() {
-	return trim( apply_filters( 'woocommerce_get_terms_and_conditions_checkbox_text', get_option( 'woocommerce_checkout_terms_and_conditions_checkbox_text', __( 'I have read and agree to the website [terms]', 'woocommerce' ) ) ) );
+	/* translators: %s terms and conditions page name and link */
+	return trim( apply_filters( 'woocommerce_get_terms_and_conditions_checkbox_text', get_option( 'woocommerce_checkout_terms_and_conditions_checkbox_text', sprintf( __( 'I have read and agree to the website %s', 'woocommerce' ), '[terms]' ) ) ) );
 }
 
 /**
@@ -745,10 +752,12 @@ function wc_get_privacy_policy_text( $type = '' ) {
 
 	switch ( $type ) {
 		case 'checkout':
-			$text = get_option( 'woocommerce_checkout_privacy_policy_text', __( 'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our [privacy_policy].', 'woocommerce' ) );
+			/* translators: %s privacy policy page name and link */
+			$text = get_option( 'woocommerce_checkout_privacy_policy_text', sprintf( __( 'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our %s.', 'woocommerce' ), '[privacy_policy]' ) );
 			break;
 		case 'registration':
-			$text = get_option( 'woocommerce_registration_privacy_policy_text', __( 'Your personal data will be used to support your experience throughout this website, to manage access to your account, and for other purposes described in our [privacy_policy].', 'woocommerce' ) );
+			/* translators: %s privacy policy page name and link */
+			$text = get_option( 'woocommerce_registration_privacy_policy_text', sprintf( __( 'Your personal data will be used to support your experience throughout this website, to manage access to your account, and for other purposes described in our %s.', 'woocommerce' ), '[privacy_policy]' ) );
 			break;
 	}
 
@@ -790,6 +799,28 @@ function wc_terms_and_conditions_page_content() {
 }
 
 /**
+ * Render privacy policy text on the checkout.
+ *
+ * @since 3.4.0
+ */
+function wc_checkout_privacy_policy_text() {
+	echo '<div class="woocommerce-privacy-policy-text">';
+	wc_privacy_policy_text( 'checkout' );
+	echo '</div>';
+}
+
+/**
+ * Render privacy policy text on the register forms.
+ *
+ * @since 3.4.0
+ */
+function wc_registration_privacy_policy_text() {
+	echo '<div class="woocommerce-privacy-policy-text">';
+	wc_privacy_policy_text( 'registration' );
+	echo '</div>';
+}
+
+/**
  * Output privacy policy text. This is custom text which can be added via the customizer/privacy settings section.
  *
  * Loads the relevant policy for the current page unless a specific policy text is required.
@@ -797,22 +828,11 @@ function wc_terms_and_conditions_page_content() {
  * @since 3.4.0
  * @param string $type Type of policy to load. Valid values include registration and checkout.
  */
-function wc_privacy_policy_text( $type = '' ) {
+function wc_privacy_policy_text( $type = 'checkout' ) {
 	if ( ! wc_privacy_policy_page_id() ) {
 		return;
 	}
-
-	if ( ! $type ) {
-		$type = is_checkout() ? 'checkout' : 'registration';
-	}
-
-	$text = wc_get_privacy_policy_text( $type );
-
-	if ( ! $text ) {
-		return;
-	}
-
-	echo '<div class="woocommerce-terms-and-conditions-text">' . wp_kses_post( wpautop( wc_replace_policy_page_link_placeholders( $text ) ) ) . '</div>';
+	echo wp_kses_post( wpautop( wc_replace_policy_page_link_placeholders( wc_get_privacy_policy_text( $type ) ) ) );
 }
 
 /**

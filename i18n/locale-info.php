@@ -999,7 +999,7 @@ return array(
 				array(
 					'country'  => 'ZA',
 					'state'    => '',
-					'rate'     => '14.0000',
+					'rate'     => '15.0000',
 					'name'     => 'VAT',
 					'shipping' => true,
 				),

@@ -183,7 +183,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @return float
 	 */
 	public function get_amount( $context = 'view' ) {
-		return $this->get_prop( 'amount', $context );
+		return (float) $this->get_prop( 'amount', $context );
 	}
 
 	/**
