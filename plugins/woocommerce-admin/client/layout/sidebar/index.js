@@ -4,8 +4,8 @@
  */
 import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
-import { Component } from '@wordpress/element';
-import { IconButton } from '@wordpress/components';
+import { Component, Fragment } from '@wordpress/element';
+import { IconButton, TabPanel } from '@wordpress/components';
 import { uniqueId } from 'lodash';
 
 /**
@@ -14,14 +14,48 @@ import { uniqueId } from 'lodash';
 import './style.scss';
 import Activity from 'dashboard/activity';
 import SidebarHeader from './header';
+import Count from 'components/count';
 
 class Sidebar extends Component {
+	getTabs() {
+		return [
+			{
+				name: 'insights',
+				title: (
+					<span>
+						{ __( 'Insights', 'woo-dash' ) } <Count count={ 3 } />
+					</span>
+				),
+				className: 'woo-dash__sidebar-tab',
+			},
+			{
+				name: 'orders',
+				title: (
+					<span>
+						{ __( 'Orders', 'woo-dash' ) } <Count count={ 1 } />
+					</span>
+				),
+				className: 'woo-dash__sidebar-tab',
+			},
+			{
+				name: 'reviews',
+				title: (
+					<span>
+						{ __( 'Reviews', 'woo-dash' ) } <Count count={ 7 } />
+					</span>
+				),
+				className: 'woo-dash__sidebar-tab',
+			},
+		];
+	}
+
 	render() {
 		const { isOpen, onToggle } = this.props;
 		const className = classnames( 'woo-dash__secondary', {
 			'is-opened': isOpen,
 		} );
 		const headerId = uniqueId( 'sidebar-header_' );
+		const tabs = this.getTabs();
 
 		return (
 			<aside className={ className } aria-labelledby={ headerId }>
@@ -38,9 +72,17 @@ class Sidebar extends Component {
 						/>
 					</div>
 				</header>
-
-				<SidebarHeader label={ __( 'Today', 'woo-dash' ) } />
-				<Activity />
+				<TabPanel className="woo-dash__sidebar-tabs" activeClass="is-active" tabs={ tabs }>
+					{ selectedTabName => {
+						return (
+							<Fragment>
+								<h3>Section: { selectedTabName }</h3>
+								<SidebarHeader label={ __( 'Today', 'woo-dash' ) } />
+								<Activity />
+							</Fragment>
+						);
+					} }
+				</TabPanel>
 			</aside>
 		);
 	}

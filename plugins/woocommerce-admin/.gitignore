@@ -11,3 +11,5 @@ node_modules/
 dist
 languages/*
 !languages/README.md
+
+.idea
