@@ -10,4 +10,9 @@ $gray-darken-30: darken($gray, 30%);
 $gray-darken-40: darken($gray, 40%);
 $gray-text: $gray-darken-40;
 
+$gray-light-10: lighten($gray, 10%);
+
 $wp-admin-background: #f1f1f1;
+
+// Black
+$black: #24292d; // same as wp-admin sidebar
