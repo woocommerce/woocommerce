@@ -102,6 +102,7 @@ class WC_Countries {
 			'AT' => array(),
 			'AX' => array(),
 			'BE' => array(),
+			'BH' => array(),
 			'BI' => array(),
 			'CZ' => array(),
 			'DE' => array(),
@@ -618,7 +619,6 @@ class WC_Countries {
 				'required'     => true,
 				'class'        => array( 'form-row-first' ),
 				'autocomplete' => 'given-name',
-				'autofocus'    => true,
 				'priority'     => 10,
 			),
 			'last_name'  => array(

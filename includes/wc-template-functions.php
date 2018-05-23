@@ -22,7 +22,7 @@ function wc_template_redirect() {
 		wp_safe_redirect( get_post_type_archive_link( 'product' ) );
 		exit;
 
-	} elseif ( is_page( wc_get_page_id( 'checkout' ) ) && wc_get_page_id( 'checkout' ) !== wc_get_page_id( 'cart' ) && WC()->cart->is_empty() && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ) {
+	} elseif ( is_page( wc_get_page_id( 'checkout' ) ) && wc_get_page_id( 'checkout' ) !== wc_get_page_id( 'cart' ) && WC()->cart->is_empty() && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) && ! is_customize_preview() ) {
 
 		// When on the checkout with an empty cart, redirect to cart page.
 		wc_add_notice( __( 'Checkout is not available whilst your cart is empty.', 'woocommerce' ), 'notice' );
@@ -655,15 +655,22 @@ function wc_product_class( $class = '', $product_id = null ) {
  * Outputs hidden form inputs for each query string variable.
  *
  * @since 3.0.0
- * @param array  $values Name value pairs.
- * @param array  $exclude Keys to exclude.
- * @param string $current_key Current key we are outputting.
- * @param bool   $return Whether to return.
+ * @param string|array $values Name value pairs, or a URL to parse.
+ * @param array        $exclude Keys to exclude.
+ * @param string       $current_key Current key we are outputting.
+ * @param bool         $return Whether to return.
  * @return string
  */
 function wc_query_string_form_fields( $values = null, $exclude = array(), $current_key = '', $return = false ) {
 	if ( is_null( $values ) ) {
 		$values = $_GET; // WPCS: input var ok, CSRF ok.
+	} elseif ( is_string( $values ) ) {
+		$url_parts = wp_parse_url( $values );
+		$values    = array();
+
+		if ( ! empty( $url_parts['query'] ) ) {
+			parse_str( $url_parts['query'], $values );
+		}
 	}
 	$html = '';
 
@@ -717,7 +724,8 @@ function wc_privacy_policy_page_id() {
  * @return bool
  */
 function wc_terms_and_conditions_checkbox_enabled() {
-	$page = get_post( wc_terms_and_conditions_page_id() );
+	$page_id = wc_terms_and_conditions_page_id();
+	$page    = $page_id ? get_post( $page_id ) : false;
 	return $page && wc_get_terms_and_conditions_checkbox_text();
 }
 

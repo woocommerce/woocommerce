@@ -532,7 +532,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 			} else {
 				// If items have changed, recalculate order totals.
 				if ( isset( $request['billing'] ) || isset( $request['shipping'] ) || isset( $request['line_items'] ) || isset( $request['shipping_lines'] ) || isset( $request['fee_lines'] ) || isset( $request['coupon_lines'] ) ) {
-					$object->calculate_totals();
+					$object->calculate_totals( true );
 				}
 			}
 

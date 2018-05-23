@@ -3540,7 +3540,24 @@ img.help_tip {
 		th label {
 			position: relative;
 			display: block;
+
+			img.help_tip,
+			.woocommerce-help-tip {
+				margin: -8px -24px 0 0;
+				position: absolute;
+				right: 0;
+				top: 50%;
+			}
 		}
+
+		th label + .woocommerce-help-tip {
+			margin: 0 0 0 0;
+			position: absolute;
+			right: 0;
+			top: 20px;
+		}
+
+		woocommerce-help-tip
 
 		.select2-container {
 			vertical-align: top;
@@ -3549,14 +3566,6 @@ img.help_tip {
 
 		table.widefat th {
 			padding-right: inherit;
-		}
-
-		th img.help_tip,
-		th .woocommerce-help-tip {
-			margin: -8px -24px 0 0;
-			position: absolute;
-			right: 0;
-			top: 50%;
 		}
 
 		.wp-list-table .woocommerce-help-tip {
