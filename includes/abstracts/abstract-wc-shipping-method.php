@@ -532,7 +532,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 */
 	public function process_admin_options() {
 		if ( $this->instance_id ) {
-			if ( isset( $_GET['instance_id'] ) && $this->instance_id == $_GET['instance_id']  ) {
+			if ( isset( $_GET['instance_id'] ) && $this->instance_id == $_GET['instance_id'] ) {
 				$this->init_instance_settings();
 
 				$post_data = $this->get_post_data();
