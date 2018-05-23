@@ -36,6 +36,14 @@ function woo_dash_register_script() {
 		'var wcSettings = '. json_encode( $settings ) . ';',
 		'before'
 	);
+
+	// Resets lodash to wp-admin's version of lodash
+	wp_add_inline_script(
+		WOO_DASH_APP,
+		'_.noConflict();',
+		'after'
+	);
+
 }
 add_action( 'init', 'woo_dash_register_script' );
 

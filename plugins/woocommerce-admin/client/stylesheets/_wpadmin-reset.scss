@@ -57,3 +57,49 @@
 #wpfooter {
 	display: none;
 }
+
+// Temporary fix for compability with the Jetpack masterbar
+// See https://github.com/Automattic/jetpack/issues/9608
+// !important rules overwrite some existing !important rules
+.jetpack-masterbar {
+	@include breakpoint( '<782px' ) {
+		&.wp-admin .wrap h1 {
+			padding-left: 0;
+		}
+
+		#wpadminbar li.menupop.my-sites {
+			margin-left: 55px;
+		}
+
+		#wpadminbar #wp-admin-bar-menu-toggle {
+			top: -5px;
+			left: -5px;
+			width: 60px;
+
+			.ab-icon:before {
+				color: $white;
+			}
+
+			a {
+				padding: 0 8px 4px 8px !important;
+			}
+
+			a:hover {
+				background: #333;
+			}
+		}
+
+		.wp-responsive-open #wpadminbar #wp-admin-bar-menu-toggle {
+			left: -5px;
+			width: 60px;
+
+			.ab-icon:before {
+				color: $white !important;
+			}
+
+			a {
+				background: #333;
+			}
+		}
+	}
+}
