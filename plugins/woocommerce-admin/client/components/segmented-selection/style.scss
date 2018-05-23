@@ -1,0 +1,43 @@
+/** @format */
+
+.woo-dash__segmented-selection {
+	width: 100%;
+	grid-template-columns: 1fr 1fr;
+	display: grid;
+	border: 1px solid $gray;
+	grid-gap: 1px;
+	background-color: $gray;
+}
+
+.woo-dash__segmented-selection-label {
+	background-color: $white;
+	padding: 1em;
+	position: relative;
+	display: block;
+}
+
+.woo-dash__segmented-selection-input {
+	opacity: 0;
+	position: absolute;
+	left: -9999px;
+
+	&:checked + label .woo-dash__segmented-selection-label {
+		background-color: $gray-light-10;
+		padding-left: calc(1em + 20px);
+
+		&::before {
+			content: '';
+			width: 8px;
+			height: 8px;
+			background-color: #444;
+			border-radius: 4px;
+			position: absolute;
+			top: 50%;
+			transform: translate(-20px, -50%);
+		}
+	}
+
+	&:focus + label .woo-dash__segmented-selection-label {
+		outline: 1px solid lightseagreen;
+	}
+}
