@@ -273,7 +273,7 @@ class WC_AJAX {
 
 		wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
 
-		if ( WC()->cart->is_empty() ) {
+		if ( WC()->cart->is_empty() && !apply_filters( 'woocommerce_checkout_skip_update_order_review_expired', false ) ) {
 			self::update_order_review_expired();
 		}
 
