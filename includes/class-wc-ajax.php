@@ -474,7 +474,7 @@ class WC_AJAX {
 		}
 
 		wp_safe_redirect( wp_get_referer() ? remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids' ), wp_get_referer() ) : admin_url( 'edit.php?post_type=product' ) );
-		wp_die();
+		exit;
 	}
 
 	/**
@@ -495,7 +495,7 @@ class WC_AJAX {
 		}
 
 		wp_safe_redirect( wp_get_referer() ? wp_get_referer() : admin_url( 'edit.php?post_type=shop_order' ) );
-		wp_die();
+		exit;
 	}
 
 	/**
