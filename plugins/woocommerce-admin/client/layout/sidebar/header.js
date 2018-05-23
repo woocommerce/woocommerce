@@ -9,9 +9,9 @@ class SidebarHeader extends Component {
 	render() {
 		const { label } = this.props;
 		return (
-			<div class="woo-dash__sidebar-header">
+			<div className="woo-dash__sidebar-header">
 				<h3 className="woo-dash__sidebar-header-label">{ label }</h3>
-				<div class="woo-dash__sidebar-header-divider" />
+				<div className="woo-dash__sidebar-header-divider" />
 			</div>
 		);
 	}

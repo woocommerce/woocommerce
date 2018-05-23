@@ -4,7 +4,7 @@
  */
 import classnames from 'classnames';
 import { Component } from '@wordpress/element';
-import { IconButton } from '@wordpress/components';
+import { Dashicon, IconButton } from '@wordpress/components';
 import PropTypes from 'prop-types';
 
 class AgendaHeader extends Component {
@@ -41,7 +41,9 @@ class AgendaHeader extends Component {
 						{ count && <span>{ count }</span> }
 						{ title }
 					</h3>
-					<IconButton href={ href } icon="arrow-right-alt2" />
+					<span className="woo-dash__agenda-group-arrow">
+						<Dashicon icon="arrow-right-alt2" />
+					</span>
 				</div>
 			</a>
 		);
