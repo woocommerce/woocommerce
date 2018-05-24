@@ -160,6 +160,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 
 = 3.5.0 - 2018-XX-XX =
 
+
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
 == Upgrade Notice ==
