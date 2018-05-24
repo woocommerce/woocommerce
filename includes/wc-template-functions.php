@@ -122,23 +122,24 @@ add_action( 'wp_head', 'wc_gallery_noscript' );
 /**
  * When the_post is called, put product data into a global.
  *
- * @param mixed $post Post Object.
- * @return WC_Product
+ * @param   mixed $post   Post Object.
+ * @return  WC_Product | bool
  */
 function wc_setup_product_data( $post ) {
 	unset( $GLOBALS['product'] );
 
 	if ( is_int( $post ) ) {
-		$the_post = get_post( $post );
-	} else {
-		$the_post = $post;
+		$post = get_post( $post );
 	}
 
-	if ( empty( $the_post->post_type ) || ! in_array( $the_post->post_type, array( 'product', 'product_variation' ), true ) ) {
-		return;
+	if (
+		empty( $post->post_type )
+		|| ! in_array( $post->post_type, array( 'product', 'product_variation' ), true )
+	) {
+		return false;
 	}
 
-	$GLOBALS['product'] = wc_get_product( $the_post );
+	$GLOBALS['product'] = wc_get_product( $post );
 
 	return $GLOBALS['product'];
 }
