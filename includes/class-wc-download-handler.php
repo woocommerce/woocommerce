@@ -81,7 +81,7 @@ class WC_Download_Handler {
 
 		$file_path        = $product->get_file_download_path( $download->get_download_id() );
 		$parsed_file_path = self::parse_file_path( $file_path );
-		$download_range   = self::get_download_range( @filesize( $parsed_file_path['file_path'] ) );  // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged.
+		$download_range   = self::get_download_range( @filesize( $parsed_file_path['file_path'] ) );  // @codingStandardsIgnoreLine.
 
 		self::check_order_is_valid( $download );
 		if ( ! $download_range['is_range_request'] ) {
@@ -103,8 +103,8 @@ class WC_Download_Handler {
 		$download->save();
 
 		// Track the download in logs and change remaining/counts.
-		$current_user_id  = get_current_user_id();
-		$ip_address       = WC_Geolocation::get_ip_address();
+		$current_user_id = get_current_user_id();
+		$ip_address      = WC_Geolocation::get_ip_address();
 		if ( ! $download_range['is_range_request'] ) {
 			$download->track_download( $current_user_id > 0 ? $current_user_id : null, ! empty( $ip_address ) ? $ip_address : null );
 		}
@@ -308,7 +308,7 @@ class WC_Download_Handler {
 	 * }
 	 */
 	protected static function get_download_range( $file_size ) {
-		$start  = 0;
+		$start          = 0;
 		$download_range = array(
 			'start'            => $start,
 			'is_range_valid'   => false,
@@ -319,11 +319,11 @@ class WC_Download_Handler {
 			return $download_range;
 		}
 
-		$end    = $file_size - 1;
+		$end                      = $file_size - 1;
 		$download_range['length'] = $file_size;
 
-		if ( isset( $_SERVER['HTTP_RANGE'] ) ) {
-			$http_range = sanitize_text_field( wp_unslash( $_SERVER['HTTP_RANGE'] ) );
+		if ( isset( $_SERVER['HTTP_RANGE'] ) ) { // @codingStandardsIgnoreLine.
+			$http_range                         = sanitize_text_field( wp_unslash( $_SERVER['HTTP_RANGE'] ) ); // WPCS: input var ok.
 			$download_range['is_range_request'] = true;
 
 			$c_start = $start;
@@ -362,8 +362,8 @@ class WC_Download_Handler {
 			$end    = $c_end;
 			$length = $end - $start + 1;
 
-			$download_range['start']       = $start;
-			$download_range['length']      = $length;
+			$download_range['start']          = $start;
+			$download_range['length']         = $length;
 			$download_range['is_range_valid'] = true;
 		}
 		return $download_range;
@@ -377,7 +377,7 @@ class WC_Download_Handler {
 	 */
 	public static function download_file_force( $file_path, $filename ) {
 		$parsed_file_path = self::parse_file_path( $file_path );
-		$download_range = self::get_download_range( @filesize( $parsed_file_path['file_path'] ) );
+		$download_range   = self::get_download_range( @filesize( $parsed_file_path['file_path'] ) ); // @codingStandardsIgnoreLine.
 
 		self::download_headers( $parsed_file_path['file_path'], $filename, $download_range );
 
@@ -505,31 +505,43 @@ class WC_Download_Handler {
 		}
 		$handle = @fopen( $file, 'r' ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
 
-		if ( ! $length ) {
-			$length = @filesize( $file ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
-		}
-		$end = $start + $length - 1;
-
 		if ( false === $handle ) {
 			return false;
 		}
 
-		@fseek( $handle, $start ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
-		$read_length = WC_CHUNK_SIZE;
-		$p = @ftell( $handle ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+		if ( ! $length ) {
+			$length = @filesize( $file ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+		}
 
-		while ( ! @feof( $handle ) && $p <= $end ) { // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
-			// Don't run past the end of file.
-			if ( $p + $read_length > $end ) {
-				$read_length = $end - $p + 1;
-			}
+		$read_length = (int) WC_CHUNK_SIZE;
 
-			echo @fread( $handle, (int) $read_length ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.XSS.EscapeOutput.OutputNotEscaped, WordPress.WP.AlternativeFunctions.file_system_read_fread
+		if ( $length ) {
+			$end = $start + $length - 1;
+
+			@fseek( $handle, $start ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
 			$p = @ftell( $handle ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
 
-			if ( ob_get_length() ) {
-				ob_flush();
-				flush();
+			while ( ! @feof( $handle ) && $p <= $end ) { // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+				// Don't run past the end of file.
+				if ( $p + $read_length > $end ) {
+					$read_length = $end - $p + 1;
+				}
+
+				echo @fread( $handle, $read_length ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.XSS.EscapeOutput.OutputNotEscaped, WordPress.WP.AlternativeFunctions.file_system_read_fread
+				$p = @ftell( $handle ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+
+				if ( ob_get_length() ) {
+					ob_flush();
+					flush();
+				}
+			}
+		} else {
+			while ( ! @feof( $handle ) ) { // @codingStandardsIgnoreLine.
+				echo @fread( $handle, $read_length ); // @codingStandardsIgnoreLine.
+				if ( ob_get_length() ) {
+					ob_flush();
+					flush();
+				}
 			}
 		}
 
