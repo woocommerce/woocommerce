@@ -4,7 +4,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
-import { Link } from 'react-router-dom';
 
 /**
  * Internal dependencies
@@ -17,7 +16,7 @@ export default class extends Component {
 			<Fragment>
 				<Header
 					sections={ [
-						<Link to="/analytics">{ __( 'Analytics', 'woo-dash' ) }</Link>,
+						[ '/analytics', __( 'Analytics', 'woo-dash' ) ],
 						__( 'Report Title', 'woo-dash' ),
 					] }
 				/>

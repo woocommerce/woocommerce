@@ -129,6 +129,15 @@ function woo_dash_admin_after_notices() {
 add_action( 'admin_notices', 'woo_dash_admin_after_notices', PHP_INT_MAX );
 
 
+// TODO Can we do some URL rewriting so we can figure out which page they are on server side?
+function woo_dash_admin_title( $admin_title ) {
+	if ( ! woo_dash_is_admin_page() ) {
+		return $admin_title;
+	}
+	return sprintf( __( '%1$s &lsaquo; %2$s &#8212; WooCommerce' ), __( 'Dashboard', 'woo-dash' ), get_bloginfo( 'name' ) );
+}
+add_filter( 'admin_title',  'woo_dash_admin_title' );
+
 /**
  * Set up a div for the app to render into.
  */

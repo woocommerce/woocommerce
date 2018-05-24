@@ -1,27 +1,28 @@
 Header
 ====
 
-A basic component for the app header. The header outputs breadcrumbs via the `sections` prop (required) and a toggle button to show the timeline sidebar (hidden via CSS if no applicable to the page).
+A basic component for the app header. The header outputs breadcrumbs via the `sections` prop (required) and a toggle button to show the timeline sidebar (hidden via CSS if no applicable to the page). It also sets the document title.
 
 ## How to use:
 
 ```jsx
 import Header from 'components/header';
-import { Link } from 'react-router-dom';
 
 render: function() {
 	return (
-		<Header sections={ [
-			<Link to="/analytics">{ __( 'Analytics', 'woo-dash' ) }</Link>,
-			__( 'Report Title', 'woo-dash' ),
-		] } />
+		<Header
+			sections={ [
+				[ '/analytics', __( 'Analytics', 'woo-dash' ) ],
+				__( 'Report Title', 'woo-dash' ),
+			] }
+		/>
   	);
 }
 ```
 
 ## Props
 
-* `sections` (required): Used to generate breadcrumbs. Accepts a single node/elemnt or an array of nodes.
+* `sections` (required): Used to generate breadcrumbs. Accepts a single items or an array of items. To make an item a link, wrap it in an array with a relative link (example: `[ '/analytics', __( 'Analytics', 'woo-dash' ) ]` ).
 * `onToggle` (required): The toggle callback when "open sidebar" button is clicked.
 * `isSidebarOpen`: Boolean describing whether the sidebar is toggled visible.
 
