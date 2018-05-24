@@ -181,6 +181,11 @@ add_action( 'woocommerce_single_variation', 'woocommerce_single_variation', 10 )
 add_action( 'woocommerce_single_variation', 'woocommerce_single_variation_add_to_cart_button', 20 );
 
 /**
+ * Product attributes.
+ */
+add_filter( 'woocommerce_attribute_label', 'wp_kses_post', 100 );
+
+/**
  * Pagination after shop loops.
  *
  * @see woocommerce_pagination()
