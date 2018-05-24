@@ -418,11 +418,13 @@ function wc_get_loop_class() {
 
 	if ( 0 === ( $loop_index - 1 ) % $columns || 1 === $columns ) {
 		return 'first';
-	} elseif ( 0 === $loop_index % $columns ) {
-		return 'last';
-	} else {
-		return '';
 	}
+
+	if ( 0 === $loop_index % $columns ) {
+		return 'last';
+	}
+
+	return '';
 }
 
 
