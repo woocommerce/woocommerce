@@ -21,7 +21,7 @@ jQuery( function( $ ) {
 					field.find( 'label .required' ).remove();
 					field.removeClass( 'validate-required' );
 
-					if ( field.find( 'label .required' ).length === 0 ) {
+					if ( field.find( 'label .optional' ).length === 0 ) {
 						field.find( 'label' ).append( '&nbsp;<span class="optional">(' + wc_address_i18n_params.i18n_optional_text + ')</span>' );
 					}
 				}
