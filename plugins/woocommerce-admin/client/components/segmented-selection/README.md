@@ -22,7 +22,6 @@ const Numbers = () => {
 		/>
 	);
 }
-
 ```
 
 ### Props

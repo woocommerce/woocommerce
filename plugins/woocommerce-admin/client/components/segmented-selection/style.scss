@@ -4,7 +4,8 @@
 	width: 100%;
 	grid-template-columns: 1fr 1fr;
 	display: grid;
-	border: 1px solid $gray;
+	border-top: 1px solid $gray;
+	border-bottom: 1px solid $gray;
 	grid-gap: 1px;
 	background-color: $gray;
 }
@@ -14,6 +15,7 @@
 	padding: 1em;
 	position: relative;
 	display: block;
+	height: 100%;
 }
 
 .woo-dash__segmented-selection-input {

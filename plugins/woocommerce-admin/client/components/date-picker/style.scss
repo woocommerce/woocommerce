@@ -1,0 +1,79 @@
+/** @format */
+
+.woo-dash__datepicker {
+	width: 350px;
+	padding: 1em 0;
+	border: 1px solid $gray;
+	background-color: $white;
+	display: flex;
+	flex-direction: column;
+
+	& > * {
+		margin: 0 0 1em 0;
+
+		&:last-child {
+			margin: 0;
+		}
+	}
+}
+
+.woo-dash__datepicker-tabs {
+	.components-tab-panel__tabs {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		border-radius: 5px;
+		margin: 0 1em 1em 1em;
+	}
+
+	.components-tab-panel__tab-content {
+		display: flex;
+		flex-direction: column;
+
+		& > * {
+			margin: 0 0 1em 0;
+
+			&:last-child {
+				margin: 0;
+			}
+		}
+	}
+}
+
+.woo-dash__datepicker-tab {
+	outline: none;
+	border: 1px solid $black;
+	padding: 10px;
+	margin: 0;
+	border-radius: 5px 0 0 5px;
+	background-color: transparent;
+
+	&:last-child {
+		border-radius: 0 5px 5px 0;
+	}
+
+	&.is-active {
+		background-color: $black;
+		color: $white;
+	}
+
+	&:focus {
+		outline: 2px solid lightseagreen;
+	}
+}
+
+.woo-dash__datepicker-update-btn {
+	border: 1px solid $gray;
+	background-color: transparent;
+	align-self: center;
+	padding: 0.5em;
+	width: 50%;
+	justify-content: center;
+}
+
+.woo-dash__datepicker-text {
+	font-size: 14px;
+	font-weight: 200;
+	text-transform: uppercase;
+	text-align: center;
+	color: $gray-text;
+}
