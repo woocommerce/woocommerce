@@ -532,20 +532,10 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @return bool was anything saved?
 	 */
 	public function process_admin_options() {
-		if ( $this->instance_id ) {
-			return $this->process_instance_options();
+		if ( ! $this->instance_id ) {
+			return parent::process_admin_options();
 		}
 
-		return parent::process_admin_options();
-	}
-
-	/**
-	 * Processes and saves options for a shipping method instance.
-	 *
-	 * @since 3.4.1
-	 * @return bool was anything saved?
-	 */
-	public function process_instance_options() {
 		// Check we are processing the correct form for this instance.
 		if ( ! $this->instance_id || ! isset( $_REQUEST['instance_id'] ) || absint( $_REQUEST['instance_id'] ) !== $this->instance_id ) { // WPCS: input var ok, CSRF ok.
 			return false;
