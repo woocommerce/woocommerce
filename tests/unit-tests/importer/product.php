@@ -102,6 +102,27 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test importing file located on another location on server.
+	 *
+	 * @return void
+	 */
+	public function test_server_file_import() {
+		$args = array(
+			'mapping'          => $this->get_csv_mapped_items(),
+			'parse'            => true,
+			'prevent_timeouts' => false,
+		);
+		// Move file to a server location.
+		copy( $this->csv_file, ABSPATH . '/sample.csv' );
+		$importer = new WC_Product_CSV_Importer( ABSPATH . '/sample.csv', $args );
+		$results  = $importer->import();
+		$this->assertEquals( 7, count( $results['imported'] ) );
+		$this->assertEquals( 0, count( $results['failed'] ) );
+		$this->assertEquals( 0, count( $results['updated'] ) );
+		$this->assertEquals( 0, count( $results['skipped'] ) );
+	}
+
+	/**
 	 * Test get_raw_keys.
 	 * @since 3.1.0
 	 */
