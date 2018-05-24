@@ -537,7 +537,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		}
 
 		// Check we are processing the correct form for this instance.
-		if ( ! $this->instance_id || ! isset( $_REQUEST['instance_id'] ) || absint( $_REQUEST['instance_id'] ) !== $this->instance_id ) { // WPCS: input var ok, CSRF ok.
+		if ( ! isset( $_REQUEST['instance_id'] ) || absint( $_REQUEST['instance_id'] ) !== $this->instance_id ) { // WPCS: input var ok, CSRF ok.
 			return false;
 		}
 
