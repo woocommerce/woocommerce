@@ -159,7 +159,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 == Changelog ==
 
 = 3.5.0 - 2018-XX-XX =
-
+* Tweak - Excluded children categories from WP_Query in product shortcode if cat_operator=AND. #20207
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
