@@ -352,7 +352,7 @@ class WC_Privacy_Exporters {
 	}
 
 	/**
-	 * Finds and exports customer tokens by email address.
+	 * Finds and exports payment tokens by email address for a customer.
 	 *
 	 * @since 3.4.0
 	 * @param string $email_address The user email address.
