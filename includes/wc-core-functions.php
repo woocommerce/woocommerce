@@ -1607,7 +1607,7 @@ function wc_add_number_precision_deep( $value, $round = true ) {
  */
 function wc_remove_number_precision_deep( $value ) {
 	if ( ! is_array( $value ) ) {
-		$value = wc_remove_number_precision( $value );
+		return wc_remove_number_precision( $value );
 	}
 
 	foreach ( $value as $key => $sub_value ) {
