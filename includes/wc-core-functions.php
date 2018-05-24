@@ -38,6 +38,7 @@ add_filter( 'woocommerce_coupon_code', 'sanitize_text_field' );
 add_filter( 'woocommerce_coupon_code', 'wc_strtolower' );
 add_filter( 'woocommerce_stock_amount', 'intval' ); // Stock amounts are integers by default.
 add_filter( 'woocommerce_shipping_rate_label', 'sanitize_text_field' ); // Shipping rate label.
+add_filter( 'woocommerce_attribute_label', 'wp_kses_post', 100 );
 
 /**
  * Short Description (excerpt).
