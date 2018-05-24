@@ -532,21 +532,24 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 */
 	public function process_admin_options() {
 		if ( $this->instance_id ) {
-			$this->init_instance_settings();
+			if ( isset( $_GET['instance_id'] ) && $this->instance_id == $_GET['instance_id'] ) {
+				$this->init_instance_settings();
 
-			$post_data = $this->get_post_data();
+				$post_data = $this->get_post_data();
 
-			foreach ( $this->get_instance_form_fields() as $key => $field ) {
-				if ( 'title' !== $this->get_field_type( $field ) ) {
-					try {
-						$this->instance_settings[ $key ] = $this->get_field_value( $key, $field, $post_data );
-					} catch ( Exception $e ) {
-						$this->add_error( $e->getMessage() );
+				foreach ( $this->get_instance_form_fields() as $key => $field ) {
+					if ( 'title' !== $this->get_field_type( $field ) ) {
+						try {
+							$this->instance_settings[ $key ] = $this->get_field_value( $key, $field, $post_data );
+						} catch ( Exception $e ) {
+							$this->add_error( $e->getMessage() );
+						}
 					}
 				}
-			}
 
-			return update_option( $this->get_instance_option_key(), apply_filters( 'woocommerce_shipping_' . $this->id . '_instance_settings_values', $this->instance_settings, $this ) );
+				return update_option( $this->get_instance_option_key(), apply_filters( 'woocommerce_shipping_' . $this->id . '_instance_settings_values', $this->instance_settings, $this ) );
+			}
+			return false;
 		} else {
 			return parent::process_admin_options();
 		}
