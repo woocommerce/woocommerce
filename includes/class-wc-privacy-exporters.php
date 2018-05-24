@@ -284,6 +284,27 @@ class WC_Privacy_Exporters {
 			}
 		}
 
+		// Export meta data.
+		$meta_to_export = apply_filters( 'woocommerce_privacy_export_order_personal_data_meta', array(
+			'Payer first name'     => __( 'Payer first name', 'woocommerce' ),
+			'Payer last name'      => __( 'Payer last name', 'woocommerce' ),
+			'Payer PayPal address' => __( 'Payer PayPal address', 'woocommerce' ),
+			'Transaction ID'       => __( 'Transaction ID', 'woocommerce' ),
+		) );
+
+		if ( ! empty( $meta_to_export ) && is_array( $meta_to_export ) ) {
+			foreach ( $meta_to_export as $meta_key => $name ) {
+				$value = apply_filters( 'woocommerce_privacy_export_order_personal_data_meta_value', $order->get_meta( $meta_key ), $meta_key, $order );
+
+				if ( $value ) {
+					$personal_data[] = array(
+						'name'  => $name,
+						'value' => $value,
+					);
+				}
+			}
+		}
+
 		/**
 		 * Allow extensions to register their own personal data for this order for the export.
 		 *
