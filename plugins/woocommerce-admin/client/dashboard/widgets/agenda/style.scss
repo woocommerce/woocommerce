@@ -14,11 +14,9 @@
 		font-size: 13px;
 		font-weight: normal;
 
-		span {
+		.woo-dash__count {
+			border-color: $white;
 			background: $white;
-			font-weight: bold;
-			padding: 4px 12px 4px 12px;
-			border-radius: 25px;
 			margin-right: 8px;
 		}
 	}

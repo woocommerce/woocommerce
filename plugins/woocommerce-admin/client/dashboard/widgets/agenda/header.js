@@ -7,6 +7,11 @@ import { Component } from '@wordpress/element';
 import { Dashicon, IconButton } from '@wordpress/components';
 import PropTypes from 'prop-types';
 
+/**
+ * Internal dependencies
+ */
+import Count from 'components/count';
+
 class AgendaHeader extends Component {
 	constructor( props ) {
 		super( ...arguments );
@@ -38,7 +43,7 @@ class AgendaHeader extends Component {
 			<a className={ classes } href={ href }>
 				<div className="woo-dash__agenda-group-title is-link">
 					<h3>
-						{ count && <span>{ count }</span> }
+						{ count && <Count count={ count } /> }
 						{ title }
 					</h3>
 					<span className="woo-dash__agenda-group-arrow">
@@ -69,7 +74,7 @@ class AgendaHeader extends Component {
 			<div className={ classes }>
 				<div onClick={ this.toggle } className="woo-dash__agenda-group-title is-accordion">
 					<h3>
-						{ count && <span>{ count }</span> }
+						{ count && <Count count={ count } /> }
 						{ title }
 					</h3>
 					<IconButton onClick={ this.toggle } aria-expanded={ isOpened } icon={ icon } />
