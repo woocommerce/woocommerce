@@ -2701,11 +2701,11 @@ if ( ! function_exists( 'get_product_search_form' ) ) {
 
 		$form = apply_filters( 'get_product_search_form', ob_get_clean() );
 
-		if ( $echo ) {
-			echo $form; // WPCS: XSS ok.
-		} else {
+		if ( ! $echo ) {
 			return $form;
 		}
+
+		echo $form; // WPCS: XSS ok.
 	}
 }
 
