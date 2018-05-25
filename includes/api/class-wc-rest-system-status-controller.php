@@ -228,6 +228,12 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
+						'mysql_version_string'             => array(
+							'description' => __( 'MySQL version string.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
 						'default_timezone'          => array(
 							'description' => __( 'Default timezone.', 'woocommerce' ),
 							'type'        => 'string',
@@ -597,6 +603,8 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 			$get_response_successful = true;
 		}
 
+		$database_version = wc_get_server_database_version();
+
 		// Return all environment info. Described by JSON Schema.
 		return array(
 			'home_url'                  => get_option( 'home' ),
@@ -619,7 +627,8 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 			'curl_version'              => $curl_version,
 			'suhosin_installed'         => extension_loaded( 'suhosin' ),
 			'max_upload_size'           => wp_max_upload_size(),
-			'mysql_version'             => ( ! empty( $wpdb->is_mysql ) ? $wpdb->db_version() : '' ),
+			'mysql_version'             => $database_version['number'],
+			'mysql_version_string'      => $database_version['string'],
 			'default_timezone'          => date_default_timezone_get(),
 			'fsockopen_or_curl_enabled' => ( function_exists( 'fsockopen' ) || function_exists( 'curl_init' ) ),
 			'soapclient_enabled'        => class_exists( 'SoapClient' ),
