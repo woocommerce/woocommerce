@@ -200,8 +200,8 @@ class WC_Tracker {
 			$server_data['php_suhosin'] = extension_loaded( 'suhosin' ) ? 'Yes' : 'No';
 		}
 
-		global $wpdb;
-		$server_data['mysql_version'] = $wpdb->db_version();
+		$database_version             = wc_get_server_database_version();
+		$server_data['mysql_version'] = $database_version['number'];
 
 		$server_data['php_max_upload_size'] = size_format( wp_max_upload_size() );
 		$server_data['php_default_timezone'] = date_default_timezone_get();
