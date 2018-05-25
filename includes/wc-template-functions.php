@@ -3197,14 +3197,13 @@ function wc_get_price_html_from_text() {
  * @return string
  */
 function wc_logout_url( $redirect = '' ) {
-	$logout_endpoint = get_option( 'woocommerce_logout_endpoint' );
-	$redirect        = $redirect ? $redirect : wc_get_page_permalink( 'myaccount' );
+	$redirect = $redirect ? $redirect : wc_get_page_permalink( 'myaccount' );
 
-	if ( $logout_endpoint ) {
+	if ( get_option( 'woocommerce_logout_endpoint' ) ) {
 		return wp_nonce_url( wc_get_endpoint_url( 'customer-logout', '', $redirect ), 'customer-logout' );
-	} else {
-		return wp_logout_url( $redirect );
 	}
+
+	return wp_logout_url( $redirect );
 }
 
 /**
