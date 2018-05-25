@@ -69,7 +69,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_title( $webhook ) {
-		$edit_link = admin_url( 'admin.php?page=wc-settings&amp;tab=api&amp;section=webhooks&amp;edit-webhook=' . $webhook->get_id() );
+		$edit_link = admin_url( 'admin.php?page=wc-settings&amp;tab=advanced&amp;section=webhooks&amp;edit-webhook=' . $webhook->get_id() );
 		$output    = '';
 
 		// Title.
