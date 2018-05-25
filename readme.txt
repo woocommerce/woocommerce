@@ -158,6 +158,23 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 
 == Changelog ==
 
+= 3.4.1 - 2018-05-xx =
+* Fix - Fix webhook admin filtering URLs. #20236
+* Fix - Add missing wp_unslash calls to product data meta box to prevent quote characters being escaped on save. #20235
+* Fix - Display price filter widget in LTR mode on RTL sites. #20221
+* Fix - Refactor WC_Coupon constructor to allow for passing in coupon objects. #20193
+* Fix - Path field in advanced CSV importer was broken due to an esc_url call. #20191
+* Fix - Prevent shipping method instances trying to save settings on non-instance screens. #20217
+* Fix - Wrapper function to get full mysql version string with mariadb handling. #20231
+* Fix - woocommerce_pagination had some extra white space. #20214
+* Fix - If a file size cannot be read, ignore range headers to prevent offsite downloads being 0kb. #20205
+* Fix - Allow HTML when using `wc_attribute_label()`. #20202
+* Fix - Update address-i18n.js to prevent appending multiple "(optional)" labels. #20195
+* Fix - Check plugin properties exist when listening to auto_update_plugin hook. #20234
+* Enhancement - Export legacy paypal meta data in personal data exporter. #20200
+* Dev - Add an action hook after printing the cart item name. #20190
+* Localization - Use "payment tokens" terminology in exports. #20197
+
 = 3.4.0 - 2018-05-23 =
 * Feature - GDPR: Tools to export WooCommerce data using the new export functionality in WordPress 4.9.6. #19330
 * Feature - GDPR: Tools to bulk anonymize order data in admin. #19330
