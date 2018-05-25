@@ -1604,16 +1604,17 @@ function wc_add_number_precision_deep( $value, $round = true ) {
  *
  * @since  3.2.0
  * @param  array $value Number to add precision to.
- * @return int
+ * @return int|array
  */
 function wc_remove_number_precision_deep( $value ) {
-	if ( is_array( $value ) ) {
-		foreach ( $value as $key => $subvalue ) {
-			$value[ $key ] = wc_remove_number_precision_deep( $subvalue );
-		}
-	} else {
-		$value = wc_remove_number_precision( $value );
+	if ( ! is_array( $value ) ) {
+		return wc_remove_number_precision( $value );
 	}
+
+	foreach ( $value as $key => $sub_value ) {
+		$value[ $key ] = wc_remove_number_precision_deep( $sub_value );
+	}
+
 	return $value;
 }
 
