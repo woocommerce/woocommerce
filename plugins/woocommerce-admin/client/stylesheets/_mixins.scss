@@ -1,0 +1,16 @@
+// Rem output with px fallback
+@mixin font-size($sizeValue: 16, $lineHeight: false ) {
+	font-size: $sizeValue + px;
+	font-size: ($sizeValue / 16) + rem;
+	@if ($lineHeight) {
+		line-height: $lineHeight;
+	}
+}
+
+@mixin hover-state {
+	&:hover,
+	&:active,
+	&:focus {
+		@content;
+	}
+}

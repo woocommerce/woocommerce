@@ -12,7 +12,7 @@ import { uniqueId } from 'lodash';
  * Internal dependencies
  */
 import './style.scss';
-import Activity from 'dashboard/activity';
+import Activity from './activity';
 import SidebarHeader from './header';
 import Count from 'components/count';
 

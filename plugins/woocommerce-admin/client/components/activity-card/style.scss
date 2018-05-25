@@ -1,0 +1,76 @@
+/** @format */
+
+.woo-dash__activity-card {
+	background: $white;
+	border: 1px solid $gray;
+	margin-bottom: $spacing * 2;
+}
+
+.woo-dash__activity-card-header {
+	display: flex;
+	align-items: center;
+	margin-bottom: $spacing * 0.5;
+	padding: $spacing $spacing 0;
+
+	.woo-dash__activity-card-icon {
+		margin-right: $spacing;
+
+		.dashicon {
+			fill: $gray-text;
+		}
+	}
+
+	.woo-dash__activity-card-label {
+		flex: 1;
+		margin: 0;
+		@include font-size( 14 );
+		color: $gray-text;
+		font-weight: normal;
+	}
+
+	.woo-dash__activity-card-date {
+		margin-left: 0.5em;
+	}
+
+	.woo-dash__activity-card-menu {
+		// Pull the menu up/out slightly
+		margin-right: $spacing * -0.5;
+		margin-top: $spacing * -0.5;
+	}
+}
+
+.woo-dash__activity-card-body {
+	padding: 0 $spacing $spacing;
+	display: flex;
+
+	.woo-dash__activity-card-content {
+		flex: 1;
+	}
+
+	.woo-dash__activity-card-image {
+		border-radius: 50%;
+		overflow: hidden;
+		width: 60px;
+		align-self: flex-end;
+		border: 1px solid $gray;
+		background: #f8f8f8;
+
+		img,
+		.dashicon {
+			vertical-align: middle;
+			width: 100%;
+			height: auto;
+		}
+	}
+}
+
+.woo-dash__activity-card-actions {
+	padding: $spacing;
+	border-top: 1px solid $gray;
+	background: #eee;
+
+	// Ensures any immediate child with a sibling has space between the items
+	& > * + * {
+		margin-left: 0.5em;
+	}
+}

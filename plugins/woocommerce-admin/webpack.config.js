@@ -100,7 +100,7 @@ const webpackConfig = {
 							loader: 'sass-loader',
 							query: {
 								includePaths: [ 'client/stylesheets' ],
-								data: '@import "_colors"; @import "_breakpoints";',
+								data: '@import "_colors"; @import "_breakpoints"; @import "_mixins";',
 							},
 						},
 					],
