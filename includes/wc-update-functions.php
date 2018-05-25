@@ -1636,8 +1636,16 @@ function wc_update_330_db_version() {
 
 /**
  * Update state codes for Ireland and BD.
+ *
+ * This is a slow update and will only run over CLI.
+ *
+ * @param bool $force_run Force this to run outside of CLI.
  */
-function wc_update_340_states() {
+function wc_update_340_states( $force_run = false ) {
+	if ( ! $force_run && ! defined( 'WP_CLI' ) ) {
+		return;
+	}
+
 	global $wpdb;
 
 	$country_states = array(
