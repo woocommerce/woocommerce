@@ -73,13 +73,14 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 		}
 
 		// Handle password creation.
+		$password_generated = false;
 		if ( 'yes' === get_option( 'woocommerce_registration_generate_password' ) && empty( $password ) ) {
 			$password           = wp_generate_password();
 			$password_generated = true;
-		} elseif ( empty( $password ) ) {
+		}
+
+		if ( empty( $password ) ) {
 			return new WP_Error( 'registration-error-missing-password', __( 'Please enter an account password.', 'woocommerce' ) );
-		} else {
-			$password_generated = false;
 		}
 
 		// Use WP_Error to handle registration errors.
