@@ -1715,6 +1715,12 @@ p.demo_store,
 	float: right;
 }
 
+.rtl.woocommerce .price_label span {
+	unicode-bidi: embed;
+	/* rtl:ignore */
+    direction: ltr;
+}
+
 .woocommerce-message {
 	border-top-color: #8fae1b;
 
