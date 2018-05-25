@@ -93,7 +93,7 @@ class WC_Background_Updater extends WC_Background_Process {
 	 * item from the queue.
 	 *
 	 * @param string $callback Update callback function.
-	 * @return mixed
+	 * @return string|bool
 	 */
 	protected function task( $callback ) {
 		wc_maybe_define_constant( 'WC_UPDATING', true );
@@ -117,7 +117,7 @@ class WC_Background_Updater extends WC_Background_Process {
 			$logger->notice( sprintf( 'Could not find %s callback', $callback ), array( 'source' => 'wc_db_updates' ) );
 		}
 
-		return $result;
+		return $result ? $callback : false;
 	}
 
 	/**
