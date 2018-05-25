@@ -1929,6 +1929,10 @@ add_filter( 'extra_plugin_headers', 'wc_enable_wc_plugin_headers' );
  * @return bool
  */
 function wc_prevent_dangerous_auto_updates( $should_update, $plugin ) {
+	if ( ! isset( $plugin->plugin, $plugin->new_version ) ) {
+		return $should_update;
+	}
+
 	if ( 'woocommerce/woocommerce.php' !== $plugin->plugin ) {
 		return $should_update;
 	}
