@@ -102,15 +102,22 @@ class WC_Background_Updater extends WC_Background_Process {
 
 		include_once dirname( __FILE__ ) . '/wc-update-functions.php';
 
+		$result = false;
+
 		if ( is_callable( $callback ) ) {
 			$logger->info( sprintf( 'Running %s callback', $callback ), array( 'source' => 'wc_db_updates' ) );
-			call_user_func( $callback );
-			$logger->info( sprintf( 'Finished %s callback', $callback ), array( 'source' => 'wc_db_updates' ) );
+			$result = (bool) call_user_func( $callback );
+
+			if ( $result ) {
+				$logger->info( sprintf( '%s callback needs to run again', $callback ), array( 'source' => 'wc_db_updates' ) );
+			} else {
+				$logger->info( sprintf( 'Finished running %s callback', $callback ), array( 'source' => 'wc_db_updates' ) );
+			}
 		} else {
 			$logger->notice( sprintf( 'Could not find %s callback', $callback ), array( 'source' => 'wc_db_updates' ) );
 		}
 
-		return false;
+		return $result;
 	}
 
 	/**
