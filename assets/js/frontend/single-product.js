@@ -223,9 +223,8 @@ jQuery( function( $ ) {
 			this.$target.on( 'click', '.woocommerce-product-gallery__image a', function( e ) {
 				e.preventDefault();
 			});
-		} else {
-			this.$target.on( 'click', '.woocommerce-product-gallery__image a', this.openPhotoswipe );
 		}
+			this.$target.on( 'click', '.woocommerce-product-gallery__image a', this.openPhotoswipe );
 	};
 
 	/**
