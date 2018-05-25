@@ -279,7 +279,7 @@ class WC_Product_CSV_Importer_Controller {
 		);
 
 		// phpcs:disable WordPress.CSRF.NonceVerification.NoNonceVerification -- Nonce already verified in WC_Product_CSV_Importer_Controller::upload_form_handler()
-		$file_url = isset( $_POST['file_url'] ) ? esc_url_raw( wp_unslash( $_POST['file_url'] ) ) : '';
+		$file_url = isset( $_POST['file_url'] ) ? wc_clean( wp_unslash( $_POST['file_url'] ) ) : '';
 
 		if ( empty( $file_url ) ) {
 			if ( ! isset( $_FILES['import'] ) ) {
@@ -329,13 +329,6 @@ class WC_Product_CSV_Importer_Controller {
 			}
 
 			return ABSPATH . $file_url;
-		} elseif ( file_exists( $file_url ) ) {
-			$filetype = wp_check_filetype( $file_url, $valid_filetypes );
-			if ( ! in_array( $filetype['type'], $valid_filetypes, true ) ) {
-				return new WP_Error( 'woocommerce_product_csv_importer_upload_file_invalid', __( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
-			}
-
-			return $file_url;
 		}
 		// phpcs:enable
 
