@@ -2105,3 +2105,31 @@ function wc_selected( $value, $options ) {
 
 	return selected( $value, $options, false );
 }
+
+/**
+ * Retrieves the MySQL server version. Based on $wpdb.
+ *
+ * @since 3.4.1
+ * @return array Vesion information.
+ */
+function wc_get_server_database_version() {
+	global $wpdb;
+
+	if ( empty( $wpdb->is_mysql ) ) {
+		return array(
+			'string' => '',
+			'number' => '',
+		);
+	}
+
+	if ( $wpdb->use_mysqli ) {
+		$server_info = mysqli_get_server_info( $wpdb->dbh ); // @codingStandardsIgnoreLine.
+	} else {
+		$server_info = mysql_get_server_info( $wpdb->dbh ); // @codingStandardsIgnoreLine.
+	}
+
+	return array(
+		'string' => $server_info,
+		'number' => preg_replace( '/([^\d.]+).*/', '', $server_info ),
+	);
+}
