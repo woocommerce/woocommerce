@@ -1718,7 +1718,7 @@ function wc_update_340_states() {
 /**
  * Update next state in the queue.
  *
- * @return void
+ * @return bool True to run again, false if completed.
  */
 function wc_update_340_state() {
 	global $wpdb;
