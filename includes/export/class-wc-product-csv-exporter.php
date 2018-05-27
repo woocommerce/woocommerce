@@ -94,6 +94,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			'tax_class'          => __( 'Tax class', 'woocommerce' ),
 			'stock_status'       => __( 'In stock?', 'woocommerce' ),
 			'stock'              => __( 'Stock', 'woocommerce' ),
+			'low_stock_amount'   => __( 'Low stock amount', 'woocommerce' ),
 			'backorders'         => __( 'Backorders allowed?', 'woocommerce' ),
 			'sold_individually'  => __( 'Sold individually?', 'woocommerce' ),
 			/* translators: %s: weight */

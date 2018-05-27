@@ -187,6 +187,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				<div class="tax_status">' . esc_html( $this->object->get_tax_status() ) . '</div>
 				<div class="tax_class">' . esc_html( $this->object->get_tax_class() ) . '</div>
 				<div class="backorders">' . esc_html( $this->object->get_backorders() ) . '</div>
+				<div class="low_stock_amount">' . esc_html( $this->object->get_low_stock_amount() ) . '</div>
 			</div>
 		';
 	}

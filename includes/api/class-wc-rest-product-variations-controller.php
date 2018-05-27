@@ -208,6 +208,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 			'manage_stock'          => $object->managing_stock(),
 			'stock_quantity'        => $object->get_stock_quantity(),
 			'in_stock'              => $object->is_in_stock(),
+			'low_stock_amount'      => $object->get_low_stock_amount(),
 			'backorders'            => $object->get_backorders(),
 			'backorders_allowed'    => $object->backorders_allowed(),
 			'backordered'           => $object->is_on_backorder(),
@@ -344,6 +345,10 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 
 		if ( isset( $request['in_stock'] ) ) {
 			$variation->set_stock_status( true === $request['in_stock'] ? 'instock' : 'outofstock' );
+		}
+
+		if ( isset( $request['low_stock_amount'] ) ) {
+			$variation->set_low_stock_amount( $request['low_stock_amount'] );
 		}
 
 		if ( isset( $request['backorders'] ) ) {
@@ -819,6 +824,12 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 					'description' => __( 'Controls whether or not the variation is listed as "in stock" or "out of stock" on the frontend.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'default'     => true,
+					'context'     => array( 'view', 'edit' ),
+				),
+				'low_stock_amount'      => array(
+					'description' => __( 'If managing stock, this controls when low stock notifications are sent.', 'woocommerce' ),
+					'type'        => 'integer',
+					'default'     => -1,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'backorders'            => array(

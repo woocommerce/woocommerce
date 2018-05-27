@@ -65,6 +65,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 				)
 			);
 
+			woocommerce_wp_text_input( array(
+				'id'                => '_low_stock_amount',
+				'value'             => -1 === $product_object->get_low_stock_amount( 'edit' ) ? '' : $product_object->get_low_stock_amount( 'edit' ),
+				'label'             => __( 'Low stock threshold', 'woocommerce' ),
+				'desc_tip'          => true,
+				'description'       => __( 'When product stock reaches this amount you will be notified by email', 'woocommerce' ),
+				'type'              => 'number',
+				'custom_attributes' => array(
+					'min'  => 0,
+					'step' => 1,
+				),
+				'data_type'         => 'stock',
+			) );
+
 			do_action( 'woocommerce_product_options_stock_fields' );
 
 			echo '</div>';

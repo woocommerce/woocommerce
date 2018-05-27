@@ -52,6 +52,11 @@ function wc_update_product_stock( $product, $stock_quantity = null, $operation =
 			do_action( 'woocommerce_product_set_stock', $product_with_stock );
 		}
 
+		// Send low stock notification for variable products
+		if ( ( $product->get_id() !== $product_id_with_stock ) && absint( $product_with_stock->get_stock_quantity() ) <= wc_get_low_stock_amount( $product_with_stock ) ) {
+			do_action( 'woocommerce_low_stock', $product_with_stock );
+		}
+
 		return $product_with_stock->get_stock_quantity();
 	}
 	return $product->get_stock_quantity();
@@ -120,7 +125,7 @@ function wc_reduce_stock_levels( $order_id ) {
 
 					if ( '' !== get_option( 'woocommerce_notify_no_stock_amount' ) && $new_stock <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 						do_action( 'woocommerce_no_stock', $product );
-					} elseif ( '' !== get_option( 'woocommerce_notify_low_stock_amount' ) && $new_stock <= get_option( 'woocommerce_notify_low_stock_amount' ) ) {
+					} elseif ( $new_stock <= wc_get_low_stock_amount( $product ) ) {
 						do_action( 'woocommerce_low_stock', $product );
 					}
 
@@ -142,4 +147,20 @@ function wc_reduce_stock_levels( $order_id ) {
 
 		do_action( 'woocommerce_reduce_order_stock', $order );
 	}
+}
+
+/**
+ * Return low stock amount to determine if notification needs to be sent
+ *
+ * @param WC_Product $product
+ *
+ * @return int
+ */
+function wc_get_low_stock_amount( WC_Product $product ) {
+	$low_stock_amount = absint( $product->get_low_stock_amount() );
+	if ( ! is_int( $low_stock_amount ) ) {
+		$low_stock_amount = absint( get_option( 'woocommerce_notify_low_stock_amount', 2 ) );
+	}
+
+	return $low_stock_amount;
 }
