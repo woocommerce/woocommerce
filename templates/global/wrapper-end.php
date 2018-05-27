@@ -48,6 +48,6 @@ switch ( $template ) {
 		echo '</main></div>';
 		break;
 	default :
-		echo '</main></div>';
+		echo apply_filters('woocommerce_templates_wrapper_end', '</main></div>');
 		break;
 }
