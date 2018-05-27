@@ -445,6 +445,16 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	}
 
 	/**
+	 * Get low stock amount value.
+	 *
+	 * @param WC_Product $product Product being exported.
+	 * @return string
+	 */
+	protected function get_column_value_low_stock_amount( $product ) {
+		return $product->managing_stock() && $product->get_low_stock_amount( 'edit' ) ? $product->get_low_stock_amount( 'edit' ) : '';
+	}
+
+	/**
 	 * Get type value.
 	 *
 	 * @since 3.1.0
