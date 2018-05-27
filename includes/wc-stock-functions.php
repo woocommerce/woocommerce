@@ -158,7 +158,7 @@ function wc_reduce_stock_levels( $order_id ) {
  */
 function wc_get_low_stock_amount( WC_Product $product ) {
 	$low_stock_amount = absint( $product->get_low_stock_amount() );
-	if ( ! is_int( $low_stock_amount ) ) {
+	if ( ! is_int( $low_stock_amount ) || -1 === $low_stock_amount ) {
 		$low_stock_amount = absint( get_option( 'woocommerce_notify_low_stock_amount', 2 ) );
 	}
 
