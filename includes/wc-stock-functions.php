@@ -53,7 +53,7 @@ function wc_update_product_stock( $product, $stock_quantity = null, $operation =
 		}
 
 		// Send low stock notification for variable products
-		if ( ( $product->get_id() !== $product_id_with_stock ) && absint( $product_with_stock->get_stock_quantity() ) <= wc_get_low_stock_amount( $product_with_stock ) ) {
+		if ( $product_with_stock->is_type( 'variable' ) && absint( $product_with_stock->get_stock_quantity() ) <= wc_get_low_stock_amount( $product_with_stock ) ) {
 			do_action( 'woocommerce_low_stock', $product_with_stock );
 		}
 
