@@ -46,7 +46,7 @@ class Controller extends Component {
 		const query = parse( search );
 		const page = find( getPages(), { path } );
 		window.wpNavMenuClassChange( page.wpMenu );
-		return createElement( page.container, { params, query } );
+		return createElement( page.container, { params, path, query } );
 	}
 }
 

@@ -1,18 +1,40 @@
 /** @format */
 
 .woocommerce-date-picker {
-	width: 350px;
-	padding: 1em 0;
-	border: 1px solid $gray;
-	background-color: $white;
-	display: flex;
-	flex-direction: column;
+	width: 100%;
+	max-width: 360px;
+}
 
-	& > * {
-		margin: 0 0 1em 0;
+.woocommerce-date-picker__content {
+	.components-popover__content {
+		width: 360px;
+		padding: 1em 0;
+		border: 1px solid $gray;
+		background-color: $white;
+		display: flex;
+		flex-direction: column;
 
-		&:last-child {
-			margin: 0;
+		& > * {
+			margin: 0 0 1em 0;
+
+			&:last-child {
+				margin: 0;
+			}
+		}
+	}
+
+	&.is-mobile {
+		.components-popover__content {
+			width: 100%;
+		}
+
+		.components-popover__header {
+			border: none;
+			height: 0;
+		}
+
+		.components-popover__close {
+			transform: translateY(22px);
 		}
 	}
 }
@@ -67,7 +89,8 @@
 	align-self: center;
 	padding: 0.5em;
 	width: 50%;
-	justify-content: center;
+	text-align: center;
+	text-decoration: none;
 }
 
 .woocommerce-date-picker__text {
@@ -76,4 +99,52 @@
 	text-transform: uppercase;
 	text-align: center;
 	color: $gray-text;
+}
+
+.woocommerce-date-picker__toggle {
+	background-color: $white;
+	position: relative;
+	border: 1px solid $gray;
+	border-radius: 5px;
+	padding: 0 40px 0 0;
+
+	&::after {
+		content: '';
+		position: absolute;
+		right: 14px;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 0;
+		height: 0;
+		border-style: solid;
+		border-width: 6px 6px 0 6px;
+		border-color: #444 transparent transparent transparent;
+	}
+}
+
+.woocommerce-date-picker__toggle-label {
+	text-align: left;
+	padding: 2px 7px;
+	border-right: 1px solid $gray;
+
+	p:first-child {
+		margin: 0 0 3px 0;
+		font-size: 14px;
+	}
+
+	p:last-child {
+		margin: 0;
+		font-size: 12px;
+		color: $gray-text;
+	}
+
+	@include breakpoint( '<400px' ) {
+		p:first-child {
+			font-size: 12px;
+		}
+
+		p:last-child {
+			font-size: 10px;
+		}
+	}
 }
