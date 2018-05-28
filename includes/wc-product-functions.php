@@ -702,7 +702,7 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
 		$alt_text = array( wp_strip_all_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ), $props['caption'], wp_strip_all_tags( $attachment->post_title ) );
 
 		if ( $product ) {
-			$alt_text[] = wp_strip_all_tags( get_the_title( $product->ID ) );
+			$alt_text[] = wp_strip_all_tags( get_the_title( $product->get_id() ) );
 		}
 
 		$alt_text     = array_filter( $alt_text );
