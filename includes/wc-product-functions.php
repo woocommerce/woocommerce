@@ -701,7 +701,7 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
 		// Alt text.
 		$alt_text = array( wp_strip_all_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ), $props['caption'], wp_strip_all_tags( $attachment->post_title ) );
 
-		if ( $product ) {
+		if ( $product && $product instanceof WC_Product ) {
 			$alt_text[] = wp_strip_all_tags( get_the_title( $product->get_id() ) );
 		}
 
