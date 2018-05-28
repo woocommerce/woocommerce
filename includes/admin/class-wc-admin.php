@@ -177,7 +177,12 @@ class WC_Admin {
 		}
 
 		if ( apply_filters( 'woocommerce_prevent_admin_access', $prevent_access ) ) {
-			wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) );
+			$my_account_page_permalink = wc_get_page_permalink( 'myaccount' );
+			if ( ! empty ( $my_account_page_permalink ) ) {
+				wp_safe_redirect( $my_account_page_permalink );
+				exit;
+			}
+			wp_safe_redirect( home_url() );
 			exit;
 		}
 	}
