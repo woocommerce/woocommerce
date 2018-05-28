@@ -6,6 +6,7 @@ import { APIProvider } from '@wordpress/components';
 import { pick } from 'lodash';
 import { render } from '@wordpress/element';
 import { Provider as SlotFillProvider } from 'react-slot-fill';
+import 'react-dates/initialize';
 
 /**
  * Internal dependencies

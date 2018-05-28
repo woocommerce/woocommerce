@@ -8,7 +8,7 @@
   ],
   "moduleDirectories": ["node_modules", "<rootDir>/client"],
   "moduleNameMapper": {
-    "@wordpress\\/(blocks|components|date|editor|data|utils|edit-post|viewport|plugins|core-data)": "<rootDir>/node_modules/gutenberg/$1",
+    "@wordpress\\/(blocks|components|editor|data|utils|edit-post|viewport|plugins|core-data)": "<rootDir>/node_modules/gutenberg/$1",
     "@wordpress\\/(date|element|dom)$": "<rootDir>/node_modules/gutenberg/packages/$1/src",
     "@wordpress\\/api-request": "<rootDir>/tests/js/mocks/api-request",
     "tinymce": "<rootDir>/tests/js/mocks/tinymce"

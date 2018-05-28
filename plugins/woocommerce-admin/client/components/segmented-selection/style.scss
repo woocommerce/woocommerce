@@ -2,6 +2,10 @@
 
 .woocommerce-segmented-selection {
 	width: 100%;
+}
+
+.woocommerce-segmented-selection__container {
+	width: 100%;
 	grid-template-columns: 1fr 1fr;
 	display: grid;
 	border-top: 1px solid $gray;
