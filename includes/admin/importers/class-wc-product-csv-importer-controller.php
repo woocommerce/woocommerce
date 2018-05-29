@@ -295,8 +295,7 @@ class WC_Product_CSV_Importer_Controller {
 				'test_form' => false,
 				'mimes'     => $valid_filetypes,
 			);
-			$import    = wc_clean( $_FILES['import'] ); // WPCS: sanitization ok.
-			$upload    = wp_handle_upload( $import, $overrides );
+			$upload    = wp_handle_upload( $_FILES['import'], $overrides ); // WPCS: sanitization ok.
 
 			if ( isset( $upload['error'] ) ) {
 				return new WP_Error( 'woocommerce_product_csv_importer_upload_error', $upload['error'] );
