@@ -766,7 +766,7 @@ class WC_Admin_Setup_Wizard {
 						'type'          => 'text',
 						'default_value' => __( 'Cost', 'woocommerce' ),
 						'description'   => __( 'What would you like to charge for flat rate shipping?', 'woocommerce' ),
-						'required'      => true,
+						'required'      => false,
 					),
 				),
 			),
