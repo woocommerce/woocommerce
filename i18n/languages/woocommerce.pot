@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 3.4.1\n"
 "Report-Msgid-Bugs-To: https://github.com/woocommerce/woocommerce/issues\n"
-"POT-Creation-Date: 2018-05-29 14:39:54+00:00\n"
+"POT-Creation-Date: 2018-05-29 17:41:01+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -6736,7 +6736,7 @@ msgstr ""
 #: includes/admin/meta-boxes/views/html-product-data-general.php:74
 #: includes/admin/meta-boxes/views/html-variation-admin.php:355
 #: includes/admin/settings/views/html-webhooks-edit.php:22
-#: includes/admin/views/html-admin-page-status-report.php:730
+#: includes/admin/views/html-admin-page-status-report.php:732
 #: includes/export/class-wc-product-csv-exporter.php:85
 #: includes/widgets/class-wc-widget-product-categories.php:52
 #: templates/single-product-reviews.php:77
@@ -7426,7 +7426,7 @@ msgid "WooCommerce settings"
 msgstr ""
 
 #: includes/admin/class-wc-admin-menus.php:79
-#: includes/admin/views/html-admin-page-status-report.php:602
+#: includes/admin/views/html-admin-page-status-report.php:604
 #: includes/class-wc-install.php:1056
 msgid "Settings"
 msgstr ""
@@ -9312,7 +9312,7 @@ msgstr ""
 #: includes/class-wc-emails.php:404
 #: includes/legacy/abstract-wc-legacy-order.php:507
 #: includes/wc-account-functions.php:214
-#: includes/wc-template-functions.php:3066
+#: includes/wc-template-functions.php:3072
 msgid "Download"
 msgstr ""
 
@@ -10932,7 +10932,7 @@ msgid "added on %1$s at %2$s"
 msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-order-notes.php:54
-#: includes/admin/views/html-admin-page-status-report.php:588
+#: includes/admin/views/html-admin-page-status-report.php:590
 #: includes/class-wc-ajax.php:1352 templates/content-widget-reviews.php:31
 #. translators: %s: note author
 #. translators: %s: plugin author
@@ -13153,7 +13153,7 @@ msgid "The following options affect how prices are displayed on the frontend."
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:234
-#: includes/admin/views/html-admin-page-status-report.php:617
+#: includes/admin/views/html-admin-page-status-report.php:619
 msgid "Currency"
 msgstr ""
 
@@ -13164,7 +13164,7 @@ msgid ""
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:245
-#: includes/admin/views/html-admin-page-status-report.php:622
+#: includes/admin/views/html-admin-page-status-report.php:624
 msgid "Currency position"
 msgstr ""
 
@@ -13189,7 +13189,7 @@ msgid "Right with space"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:261
-#: includes/admin/views/html-admin-page-status-report.php:627
+#: includes/admin/views/html-admin-page-status-report.php:629
 msgid "Thousand separator"
 msgstr ""
 
@@ -13198,7 +13198,7 @@ msgid "This sets the thousand separator of displayed prices."
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:271
-#: includes/admin/views/html-admin-page-status-report.php:632
+#: includes/admin/views/html-admin-page-status-report.php:634
 msgid "Decimal separator"
 msgstr ""
 
@@ -13207,7 +13207,7 @@ msgid "This sets the decimal separator of displayed prices."
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:281
-#: includes/admin/views/html-admin-page-status-report.php:637
+#: includes/admin/views/html-admin-page-status-report.php:639
 msgid "Number of decimals"
 msgstr ""
 
@@ -14466,7 +14466,7 @@ msgstr ""
 msgid "How to update your PHP version"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:196
+#: includes/admin/views/html-admin-page-status-report.php:197
 msgid ""
 "WooCommerce will run under this version of PHP, however, some features such "
 "as geolocation are not compatible. Support for this version will be dropped "
@@ -14474,60 +14474,60 @@ msgid ""
 "greater performance and security."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:198
+#: includes/admin/views/html-admin-page-status-report.php:199
 msgid ""
 "WooCommerce will run under this version of PHP, however, it has reached end "
 "of life. We recommend using PHP version 7.2 or above for greater "
 "performance and security."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:200
+#: includes/admin/views/html-admin-page-status-report.php:201
 msgid ""
 "We recommend using PHP version 7.2 or above for greater performance and "
 "security."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:210
+#: includes/admin/views/html-admin-page-status-report.php:212
 msgid "PHP post max size"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:211
+#: includes/admin/views/html-admin-page-status-report.php:213
 msgid "The largest filesize that can be contained in one post."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:215
+#: includes/admin/views/html-admin-page-status-report.php:217
 msgid "PHP time limit"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:216
+#: includes/admin/views/html-admin-page-status-report.php:218
 msgid ""
 "The amount of time (in seconds) that your site will spend on a single "
 "operation before timing out (to avoid server lockups)"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:220
+#: includes/admin/views/html-admin-page-status-report.php:222
 msgid "PHP max input vars"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:221
+#: includes/admin/views/html-admin-page-status-report.php:223
 msgid ""
 "The maximum number of variables your server can use for a single function "
 "to avoid overloads."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:225
+#: includes/admin/views/html-admin-page-status-report.php:227
 msgid "cURL version"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:226
+#: includes/admin/views/html-admin-page-status-report.php:228
 msgid "The version of cURL installed on your server."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:230
+#: includes/admin/views/html-admin-page-status-report.php:232
 msgid "SUHOSIN installed"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:231
+#: includes/admin/views/html-admin-page-status-report.php:233
 msgid ""
 "Suhosin is an advanced protection system for PHP installations. It was "
 "designed to protect your servers on the one hand against a number of well "
@@ -14537,193 +14537,193 @@ msgid ""
 "its data submission limits."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:241
+#: includes/admin/views/html-admin-page-status-report.php:243
 msgid "MySQL version"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:242
+#: includes/admin/views/html-admin-page-status-report.php:244
 msgid "The version of MySQL installed on your hosting server."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:247
+#: includes/admin/views/html-admin-page-status-report.php:249
 #. Translators: %1$s: MySQL version, %2$s: Recommended MySQL version.
 msgid "%1$s - We recommend a minimum MySQL version of 5.6. See: %2$s"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:247
+#: includes/admin/views/html-admin-page-status-report.php:249
 msgid "WordPress requirements"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:256
+#: includes/admin/views/html-admin-page-status-report.php:258
 msgid "Max upload size"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:257
+#: includes/admin/views/html-admin-page-status-report.php:259
 msgid "The largest filesize that can be uploaded to your WordPress installation."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:261
+#: includes/admin/views/html-admin-page-status-report.php:263
 msgid "Default timezone is UTC"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:262
+#: includes/admin/views/html-admin-page-status-report.php:264
 msgid "The default timezone for your server."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:267
+#: includes/admin/views/html-admin-page-status-report.php:269
 #. Translators: %s: default timezone..
 msgid "Default timezone is %s - it should be UTC"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:275
+#: includes/admin/views/html-admin-page-status-report.php:277
 msgid "fsockopen/cURL"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:276
+#: includes/admin/views/html-admin-page-status-report.php:278
 msgid ""
 "Payment gateways can use cURL to communicate with remote servers to "
 "authorize payments, other plugins may also use it when communicating with "
 "remote services."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:282
+#: includes/admin/views/html-admin-page-status-report.php:284
 msgid ""
 "Your server does not have fsockopen or cURL enabled - PayPal IPN and other "
 "scripts which communicate with other servers will not work. Contact your "
 "hosting provider."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:288
+#: includes/admin/views/html-admin-page-status-report.php:290
 msgid "SoapClient"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:289
+#: includes/admin/views/html-admin-page-status-report.php:291
 msgid ""
 "Some webservices like shipping use SOAP to get information from remote "
 "servers, for example, live shipping quotes from FedEx require SOAP to be "
 "installed."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:296
+#: includes/admin/views/html-admin-page-status-report.php:298
 #. Translators: %s classname and link.
 msgid ""
 "Your server does not have the %s class enabled - some gateway plugins which "
 "use SOAP may not work as expected."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:302
+#: includes/admin/views/html-admin-page-status-report.php:304
 msgid "DOMDocument"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:303
+#: includes/admin/views/html-admin-page-status-report.php:305
 msgid "HTML/Multipart emails use DOMDocument to generate inline CSS in templates."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:310
+#: includes/admin/views/html-admin-page-status-report.php:312
 #. Translators: %s: classname and link.
 msgid ""
 "Your server does not have the %s class enabled - HTML/Multipart emails, and "
 "also some extensions, will not work without DOMDocument."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:316
+#: includes/admin/views/html-admin-page-status-report.php:318
 msgid "GZip"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:317
+#: includes/admin/views/html-admin-page-status-report.php:319
 msgid "GZip (gzopen) is used to open the GEOIP database from MaxMind."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:324
+#: includes/admin/views/html-admin-page-status-report.php:326
 #. Translators: %s: classname and link.
 msgid ""
 "Your server does not support the %s function - this is required to use the "
 "GeoIP database from MaxMind."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:330
+#: includes/admin/views/html-admin-page-status-report.php:332
 msgid "Multibyte string"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:331
+#: includes/admin/views/html-admin-page-status-report.php:333
 msgid ""
 "Multibyte String (mbstring) is used to convert character encoding, like for "
 "emails or converting characters to lowercase."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:338
+#: includes/admin/views/html-admin-page-status-report.php:340
 #. Translators: %s: classname and link.
 msgid ""
 "Your server does not support the %s functions - this is required for better "
 "character encoding. Some fallbacks will be used instead for it."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:344
+#: includes/admin/views/html-admin-page-status-report.php:346
 msgid "Remote post"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:345
+#: includes/admin/views/html-admin-page-status-report.php:347
 msgid ""
 "PayPal uses this method of communicating when sending back transaction "
 "information."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:352
-#: includes/admin/views/html-admin-page-status-report.php:366
+#: includes/admin/views/html-admin-page-status-report.php:354
+#: includes/admin/views/html-admin-page-status-report.php:368
 #. Translators: %s: function name.
 msgid "%s failed. Contact your hosting provider."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:358
+#: includes/admin/views/html-admin-page-status-report.php:360
 msgid "Remote get"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:359
+#: includes/admin/views/html-admin-page-status-report.php:361
 msgid ""
 "WooCommerce plugins may use this method of communication when checking for "
 "plugin updates."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:399
+#: includes/admin/views/html-admin-page-status-report.php:401
 msgid "Database"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:404
+#: includes/admin/views/html-admin-page-status-report.php:406
 msgid "WooCommerce database version"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:405
+#: includes/admin/views/html-admin-page-status-report.php:407
 msgid ""
 "The version of WooCommerce that the database is formatted for. This should "
 "be the same as your WooCommerce version."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:409
+#: includes/admin/views/html-admin-page-status-report.php:411
 msgid "Database prefix"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:415
+#: includes/admin/views/html-admin-page-status-report.php:417
 #. Translators: %1$s: Database prefix, %2$s: Docs link.
 msgid "%1$s - We recommend using a prefix with less than 20 characters. See: %2$s"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:415
+#: includes/admin/views/html-admin-page-status-report.php:417
 msgid "How to update your database table prefix"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:425
+#: includes/admin/views/html-admin-page-status-report.php:427
 msgid "MaxMind GeoIP database"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:426
+#: includes/admin/views/html-admin-page-status-report.php:428
 msgid "The GeoIP database from MaxMind is used to geolocate customers."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:430
+#: includes/admin/views/html-admin-page-status-report.php:432
 msgid "MaxMind GeoIP database requires at least PHP 5.4."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:435
+#: includes/admin/views/html-admin-page-status-report.php:437
 #. Translators: %1$s: Library url, %2$s: install path.
 msgid ""
 "The MaxMind GeoIP Database does not exist - Geolocation will not function. "
@@ -14734,211 +14734,211 @@ msgid ""
 "only."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:443
+#: includes/admin/views/html-admin-page-status-report.php:445
 msgid "Total Database Size"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:449
+#: includes/admin/views/html-admin-page-status-report.php:451
 msgid "Database Data Size"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:455
+#: includes/admin/views/html-admin-page-status-report.php:457
 msgid "Database Index Size"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:467
+#: includes/admin/views/html-admin-page-status-report.php:469
 msgid "Table does not exist"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:470
-#: includes/admin/views/html-admin-page-status-report.php:484
+#: includes/admin/views/html-admin-page-status-report.php:472
+#: includes/admin/views/html-admin-page-status-report.php:486
 #. Translators: %1$f: Table size, %2$f: Index size.
 msgid "Data: %1$.2fMB + Index: %2$.2fMB"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:494
+#: includes/admin/views/html-admin-page-status-report.php:496
 msgid "Post Type Counts"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:514
+#: includes/admin/views/html-admin-page-status-report.php:516
 msgid "Security"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:519
+#: includes/admin/views/html-admin-page-status-report.php:521
 msgid "Secure connection (HTTPS)"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:520
+#: includes/admin/views/html-admin-page-status-report.php:522
 #: includes/api/class-wc-rest-system-status-controller.php:515
 msgid "Is the connection to your store secure?"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:528
+#: includes/admin/views/html-admin-page-status-report.php:530
 #. Translators: %s: docs link.
 msgid ""
 "Your store is not using HTTPS. <a href=\"%s\" target=\"_blank\">Learn more "
 "about HTTPS and SSL Certificates</a>."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:535
+#: includes/admin/views/html-admin-page-status-report.php:537
 msgid "Hide errors from visitors"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:536
+#: includes/admin/views/html-admin-page-status-report.php:538
 msgid ""
 "Error messages can contain sensitive information about your store "
 "environment. These should be hidden from untrusted visitors."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:541
+#: includes/admin/views/html-admin-page-status-report.php:543
 msgid "Error messages should not be shown to visitors."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:550
+#: includes/admin/views/html-admin-page-status-report.php:552
 msgid "Active plugins"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:562
+#: includes/admin/views/html-admin-page-status-report.php:564
 msgid "Visit plugin homepage"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:570
-#: includes/admin/views/html-admin-page-status-report.php:742
-#: includes/admin/views/html-admin-page-status-report.php:780
+#: includes/admin/views/html-admin-page-status-report.php:572
+#: includes/admin/views/html-admin-page-status-report.php:744
+#: includes/admin/views/html-admin-page-status-report.php:782
 #. translators: %s: plugin latest version
 #. translators: %s: theme latest version
 #. translators: %s: parent theme latest version
 msgid "%s is available"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:574
+#: includes/admin/views/html-admin-page-status-report.php:576
 msgid "Network enabled"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:579
+#: includes/admin/views/html-admin-page-status-report.php:581
 msgid "Not tested with the active version of WooCommerce"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:607
+#: includes/admin/views/html-admin-page-status-report.php:609
 msgid "API enabled"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:608
+#: includes/admin/views/html-admin-page-status-report.php:610
 msgid "Does your site have REST API enabled?"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:612
+#: includes/admin/views/html-admin-page-status-report.php:614
 msgid "Force SSL"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:613
+#: includes/admin/views/html-admin-page-status-report.php:615
 msgid "Does your site force a SSL Certificate for transactions?"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:618
+#: includes/admin/views/html-admin-page-status-report.php:620
 msgid ""
 "What currency prices are listed at in the catalog and which currency "
 "gateways will take payments in."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:623
+#: includes/admin/views/html-admin-page-status-report.php:625
 msgid "The position of the currency symbol."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:628
+#: includes/admin/views/html-admin-page-status-report.php:630
 msgid "The thousand separator of displayed prices."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:633
+#: includes/admin/views/html-admin-page-status-report.php:635
 msgid "The decimal separator of displayed prices."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:638
+#: includes/admin/views/html-admin-page-status-report.php:640
 msgid "The number of decimal points shown in displayed prices."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:642
+#: includes/admin/views/html-admin-page-status-report.php:644
 msgid "Taxonomies: Product types"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:643
+#: includes/admin/views/html-admin-page-status-report.php:645
 msgid ""
 "A list of taxonomy terms that can be used in regard to order/product "
 "statuses."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:655
+#: includes/admin/views/html-admin-page-status-report.php:657
 msgid "Taxonomies: Product visibility"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:656
+#: includes/admin/views/html-admin-page-status-report.php:658
 msgid "A list of taxonomy terms used for product visibility."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:672
+#: includes/admin/views/html-admin-page-status-report.php:674
 msgid "WooCommerce pages"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:683
+#: includes/admin/views/html-admin-page-status-report.php:685
 #. Translators: %s: page name.
 msgid "Edit %s page"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:690
+#: includes/admin/views/html-admin-page-status-report.php:692
 #. Translators: %s: page name.
 msgid "The URL of your %s page (along with the Page ID)."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:694
+#: includes/admin/views/html-admin-page-status-report.php:696
 msgid "Page not set"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:697
+#: includes/admin/views/html-admin-page-status-report.php:699
 msgid "Page ID is set, but the page does not exist"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:701
+#: includes/admin/views/html-admin-page-status-report.php:703
 #. Translators: %s: docs link.
 msgid "Page visibility should be <a href=\"%s\" target=\"_blank\">public</a>"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:707
+#: includes/admin/views/html-admin-page-status-report.php:709
 msgid "Page does not contain the shortcode."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:725
+#: includes/admin/views/html-admin-page-status-report.php:727
 msgid "Theme"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:731
+#: includes/admin/views/html-admin-page-status-report.php:733
 msgid "The name of the current active theme."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:735
+#: includes/admin/views/html-admin-page-status-report.php:737
 msgid "Version"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:736
+#: includes/admin/views/html-admin-page-status-report.php:738
 msgid "The installed version of the current active theme."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:748
+#: includes/admin/views/html-admin-page-status-report.php:750
 msgid "Author URL"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:749
+#: includes/admin/views/html-admin-page-status-report.php:751
 msgid "The theme developers URL."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:753
+#: includes/admin/views/html-admin-page-status-report.php:755
 msgid "Child theme"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:754
+#: includes/admin/views/html-admin-page-status-report.php:756
 msgid "Displays whether or not the current theme is a child theme."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:761
+#: includes/admin/views/html-admin-page-status-report.php:763
 #. Translators: %s docs link.
 msgid ""
 "If you are modifying WooCommerce on a parent theme that you did not build "
@@ -14946,59 +14946,59 @@ msgid ""
 "target=\"_blank\">How to create a child theme</a>"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:768
+#: includes/admin/views/html-admin-page-status-report.php:770
 msgid "Parent theme name"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:769
+#: includes/admin/views/html-admin-page-status-report.php:771
 msgid "The name of the parent theme."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:773
+#: includes/admin/views/html-admin-page-status-report.php:775
 msgid "Parent theme version"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:774
+#: includes/admin/views/html-admin-page-status-report.php:776
 msgid "The installed version of the parent theme."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:786
+#: includes/admin/views/html-admin-page-status-report.php:788
 msgid "Parent theme author URL"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:787
+#: includes/admin/views/html-admin-page-status-report.php:789
 msgid "The parent theme developers URL."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:792
+#: includes/admin/views/html-admin-page-status-report.php:794
 msgid "WooCommerce support"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:793
+#: includes/admin/views/html-admin-page-status-report.php:795
 msgid ""
 "Displays whether or not the current active theme declares WooCommerce "
 "support."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:797
+#: includes/admin/views/html-admin-page-status-report.php:799
 msgid "Not declared"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:809
+#: includes/admin/views/html-admin-page-status-report.php:811
 msgid "Templates"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:809
+#: includes/admin/views/html-admin-page-status-report.php:811
 msgid ""
 "This section shows any files that are overriding the default WooCommerce "
 "template pages."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:815
+#: includes/admin/views/html-admin-page-status-report.php:817
 msgid "Archive template"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:817
+#: includes/admin/views/html-admin-page-status-report.php:819
 msgid ""
 "Your theme has a woocommerce.php file, you will not be able to override the "
 "woocommerce/archive-product.php custom template since woocommerce.php has "
@@ -15006,22 +15006,22 @@ msgid ""
 "issues."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:822
-#: includes/admin/views/html-admin-page-status-report.php:851
+#: includes/admin/views/html-admin-page-status-report.php:824
+#: includes/admin/views/html-admin-page-status-report.php:853
 msgid "Overrides"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:833
+#: includes/admin/views/html-admin-page-status-report.php:835
 #. Translators: %1$s: Template name, %2$s: Template version, %3$s: Core
 #. version.
 msgid "%1$s version %2$s is out of date. The core version is %3$s"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:859
+#: includes/admin/views/html-admin-page-status-report.php:861
 msgid "Outdated templates"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:866
+#: includes/admin/views/html-admin-page-status-report.php:868
 msgid "Learn how to update"
 msgstr ""
 
@@ -17844,7 +17844,7 @@ msgid "Clear customer sessions"
 msgstr ""
 
 #: includes/api/class-wc-rest-system-status-tools-controller.php:159
-#: templates/single-product/add-to-cart/variable.php:48
+#: templates/single-product/add-to-cart/variable.php:44
 msgid "Clear"
 msgstr ""
 
@@ -20163,7 +20163,7 @@ msgstr ""
 msgid "Buy now"
 msgstr ""
 
-#: includes/class-wc-embed.php:130 includes/wc-template-functions.php:3179
+#: includes/class-wc-embed.php:130 includes/wc-template-functions.php:3185
 #: includes/widgets/class-wc-widget-layered-nav-filters.php:102
 #. translators: %s: average rating
 #. translators: %s: rating
@@ -23034,7 +23034,7 @@ msgid "No matching product exists to update."
 msgstr ""
 
 #: includes/legacy/abstract-wc-legacy-order.php:507
-#: includes/wc-template-functions.php:3066
+#: includes/wc-template-functions.php:3072
 #. translators: 1: current item count
 #. translators: %d: downloads count
 msgid "Download %d"
@@ -24389,18 +24389,18 @@ msgstr ""
 
 #: includes/wc-template-functions.php:2605
 #: includes/wc-template-functions.php:2767
-#: includes/wc-template-functions.php:2777
+#: includes/wc-template-functions.php:2783
 msgid "Choose an option"
 msgstr ""
 
-#: includes/wc-template-functions.php:3176
+#: includes/wc-template-functions.php:3182
 #. translators: 1: rating 2: rating count
 msgid "Rated %1$s out of 5 based on %2$s customer rating"
 msgid_plural "Rated %1$s out of 5 based on %2$s customer ratings"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/wc-template-functions.php:3223
+#: includes/wc-template-functions.php:3229
 msgid "Your cart is currently empty."
 msgstr ""
 
@@ -25865,7 +25865,7 @@ msgctxt "breadcrumb"
 msgid "Home"
 msgstr ""
 
-#: includes/wc-template-functions.php:3194
+#: includes/wc-template-functions.php:3200
 msgctxt "min_price"
 msgid "From:"
 msgstr ""
