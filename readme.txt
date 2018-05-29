@@ -171,6 +171,10 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Allow HTML when using `wc_attribute_label()`. #20202
 * Fix - Update address-i18n.js to prevent appending multiple "(optional)" labels. #20195
 * Fix - Check plugin properties exist when listening to auto_update_plugin hook. #20234
+* Fix - Add extra checks in `get_canonical_package_rate_ids` to prevent notices. #20237
+* Fix - Fix infinite loop with importing tax rates. #20253
+* Fix - Echo attribute label for "empty" default option. #20256
+* Fix - Product properties should not be accessed directly PHP notice when calling `wc_get_product_attachment_props`. #20282
 * Enhancement - Export legacy paypal meta data in personal data exporter. #20200
 * Dev - Add an action hook after printing the cart item name. #20190
 * Localization - Use "payment tokens" terminology in exports. #20197
