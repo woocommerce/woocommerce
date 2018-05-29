@@ -150,6 +150,11 @@ test.describe( 'Checkout Page', function() {
 		);
 	} );
 
+	// take screenshot
+	test.afterEach( function(){
+		helper.takeScreenshot( manager, this.currentTest );
+	});
+
 	// quit browser
 	test.after( () => {
 		manager.quitBrowser();

@@ -61,6 +61,11 @@ test.describe( 'Single Product Page', function() {
 		assert.eventually.ok( visitCart().hasItem( 'Hoodie - Green, No' ), '"Hoodie - Green, No" in the cart' );
 	} );
 
+	// take screenshot
+	test.afterEach( function(){
+		helper.takeScreenshot( manager, this.currentTest );
+	});
+
 	// quit browser
 	test.after( () => {
 		manager.quitBrowser();

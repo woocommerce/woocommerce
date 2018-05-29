@@ -11,7 +11,7 @@ const assert = chai.assert;
 let manager;
 let driver;
 
-test.describe( 'Cart page', function() {
+test.describe.only( 'Cart page', function() {
 	// open browser
 	test.before( function() {
 		this.timeout( config.get( 'startBrowserTimeoutMs' ) );
@@ -105,8 +105,13 @@ test.describe( 'Cart page', function() {
 		);
 	} );
 
+	// take screenshot
+	test.afterEach( function(){
+		helper.takeScreenshot( manager, this.currentTest );
+	});
+
 	// quit browser
-	test.after( () => {
+	test.after( function() {
 		manager.quitBrowser();
 	} );
 } );

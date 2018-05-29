@@ -66,6 +66,11 @@ test.describe( 'WooCommerce General Settings', function() {
 		assert.eventually.ok( settings.hasNotice( 'Your settings have been saved.' ) );
 	} );
 
+	// take screenshot
+	test.afterEach( function(){
+		helper.takeScreenshot( manager, this.currentTest );
+	});
+
 	// quit browser
 	test.after( () => {
 		manager.quitBrowser();
