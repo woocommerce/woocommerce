@@ -35,7 +35,7 @@ class WC_Tests_Tax_CSV_Importer extends WC_Unit_Test_Case {
 		$importer = new WC_Tax_Rate_Importer();
 		ob_start();
 		$importer->import( $this->csv_file );
-		ob_get_clean();
+		ob_end_clean();
 		$rate_count = $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_tax_rates" );
 		$this->assertEquals( 5, $rate_count );
 	}
