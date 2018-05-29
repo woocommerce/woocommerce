@@ -167,10 +167,14 @@ class WC_Product_Variation extends WC_Product_Simple {
 			$data = $this->get_variation_attributes();
 		}
 
-		// Filter and encode values so this is not broken by add_query_arg.
-		$data = array_map( 'urlencode', array_filter( $data ) );
+		$data = array_filter( $data );
 
-		// Encode keys.
+		if ( empty( $data ) ) {
+			return $url;
+		}
+
+		// Filter and encode keys and values so this is not broken by add_query_arg.
+		$data = array_map( 'urlencode', $data );
 		$keys = array_map( 'urlencode', array_keys( $data ) );
 
 		return add_query_arg( array_combine( $keys, $data ), $url );
