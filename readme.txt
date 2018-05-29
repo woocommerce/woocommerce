@@ -174,6 +174,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Add extra checks in `get_canonical_package_rate_ids` to prevent notices. #20237
 * Fix - Fix infinite loop with importing tax rates. #20253
 * Fix - Echo attribute label for "empty" default option. #20256
+* Fix - Fix download sample tax rates URL format. #20272
 * Fix - Product properties should not be accessed directly PHP notice when calling `wc_get_product_attachment_props`. #20282
 * Enhancement - Export legacy paypal meta data in personal data exporter. #20200
 * Dev - Add an action hook after printing the cart item name. #20190
