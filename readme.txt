@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, claudiulodro,
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
 Requires at least: 4.7
 Tested up to: 4.9
-Stable tag: 3.4.0
+Stable tag: 3.4.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -158,7 +158,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 
 == Changelog ==
 
-= 3.4.1 - 2018-05-xx =
+= 3.4.1 - 2018-05-29 =
 * Fix - Fix webhook admin filtering URLs. #20236
 * Fix - Add missing wp_unslash calls to product data meta box to prevent quote characters being escaped on save. #20235
 * Fix - Display price filter widget in LTR mode on RTL sites. #20221
@@ -176,6 +176,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Echo attribute label for "empty" default option. #20256
 * Fix - Fix download sample tax rates URL format. #20272
 * Fix - Product properties should not be accessed directly PHP notice when calling `wc_get_product_attachment_props`. #20282
+* Fix - If flexslider is disabled, gallery images also need to trigger photoswipe on click. #20290
 * Enhancement - Export legacy paypal meta data in personal data exporter. #20200
 * Dev - Add an action hook after printing the cart item name. #20190
 * Localization - Use "payment tokens" terminology in exports. #20197
