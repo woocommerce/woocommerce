@@ -177,6 +177,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Fix download sample tax rates URL format. #20272
 * Fix - Product properties should not be accessed directly PHP notice when calling `wc_get_product_attachment_props`. #20282
 * Fix - If flexslider is disabled, gallery images also need to trigger photoswipe on click. #20290
+* Fix - Product import file uploads on windows servers. #20273
 * Enhancement - Export legacy paypal meta data in personal data exporter. #20200
 * Enhancement - Improve performance of `wc_update_340_states` update routine to help prevent timeouts. #20241
 * Dev - Add an action hook after printing the cart item name. #20190
