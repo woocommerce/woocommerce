@@ -1638,8 +1638,6 @@ function wc_update_330_db_version() {
  * Update state codes for Ireland and BD.
  */
 function wc_update_340_states() {
-	global $wpdb;
-
 	$country_states = array(
 		'IE' => array(
 			'CK' => 'CO',
@@ -1714,6 +1712,23 @@ function wc_update_340_states() {
 		),
 	);
 
+	update_option( 'woocommerce_update_340_states', $country_states );
+}
+
+/**
+ * Update next state in the queue.
+ *
+ * @return bool True to run again, false if completed.
+ */
+function wc_update_340_state() {
+	global $wpdb;
+
+	$country_states = array_filter( (array) get_option( 'woocommerce_update_340_states', array() ) );
+
+	if ( empty( $country_states ) ) {
+		return false;
+	}
+
 	foreach ( $country_states as $country => $states ) {
 		foreach ( $states as $old => $new ) {
 			$wpdb->query(
@@ -1743,8 +1758,22 @@ function wc_update_340_states() {
 					'tax_rate_state' => strtoupper( $old ),
 				)
 			);
+			unset( $country_states[ $country ][ $old ] );
+
+			if ( empty( $country_states[ $country ] ) ) {
+				unset( $country_states[ $country ] );
+			}
+			break 2;
 		}
 	}
+
+	if ( ! empty( $country_states ) ) {
+		return update_option( 'woocommerce_update_340_states', $country_states );
+	}
+
+	delete_option( 'woocommerce_update_340_states' );
+
+	return false;
 }
 
 /**
