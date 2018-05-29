@@ -179,8 +179,10 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - If flexslider is disabled, gallery images also need to trigger photoswipe on click. #20290
 * Fix - Product import file uploads on windows servers. #20273
 * Fix - Fix variation attribute selection via the cart page/query string. #20293
+* Fix - Add greater specificity to required styling in 2017 theme. #20296
 * Enhancement - Export legacy paypal meta data in personal data exporter. #20200
 * Enhancement - Improve performance of `wc_update_340_states` update routine to help prevent timeouts. #20241
+* Dev - Remove red styling for PHP notice if using > 5.6. #20294
 * Dev - Add an action hook after printing the cart item name. #20190
 * Localization - Use "payment tokens" terminology in exports. #20197
 
