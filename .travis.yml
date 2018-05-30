@@ -6,8 +6,6 @@ addons:
     packages:
       - nginx
   artifacts: true
-    target_paths: 
-      - /$TRAVIS_BUILD_NUMBER/
 
 sudo: false
 
