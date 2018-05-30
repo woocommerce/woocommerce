@@ -366,8 +366,18 @@ jQuery( function( $ ) {
 
 			// Catch the enter key and don't let it submit the form.
 			if ( 13 === evt.keyCode ) {
-				evt.preventDefault();
-				this.cart_submit( evt );
+				var $form = $( evt.currentTarget ).parents( 'form' );
+
+				try {
+					// If there are no validation errors, handle the submit.
+					if ( $form[0].checkValidity() ) {
+						evt.preventDefault();
+						this.cart_submit( evt );
+					}
+				} catch( err ) {
+					evt.preventDefault();
+					this.cart_submit( evt );
+				}
 			}
 		},
 

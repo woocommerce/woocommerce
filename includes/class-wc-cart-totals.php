@@ -481,6 +481,9 @@ final class WC_Cart_Totals {
 	 * @return array of taxes
 	 */
 	protected function get_item_tax_rates( $item ) {
+		if ( ! wc_tax_enabled() ) {
+			return array();
+		}
 		$tax_class = $item->product->get_tax_class();
 		return isset( $this->item_tax_rates[ $tax_class ] ) ? $this->item_tax_rates[ $tax_class ] : $this->item_tax_rates[ $tax_class ] = WC_Tax::get_rates( $item->product->get_tax_class(), $this->cart->get_customer() );
 	}

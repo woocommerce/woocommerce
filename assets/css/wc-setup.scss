@@ -339,56 +339,56 @@ body {
 			font-size: 1em;
 			margin-top: 0;
 			margin-bottom: 20px;
-
-			input[type="checkbox"] {
-				opacity: 0;
+		}
+	}
+	.checkbox {
+		input[type="checkbox"] {
+			opacity: 0;
+			position: absolute;
+			left: -9999px;
+		}
+		label {
+			position: relative;
+			display: inline-block;
+			padding-left: 28px;
+			&:before,
+			&:after {
 				position: absolute;
-				left: -9999px;
-			}
-			label {
-				position: relative;
-				display: inline-block;
-				padding-left: 28px;
-				&:before,
-				&:after {
-					position: absolute;
-					content: "";
-					display: inline-block;
-				}
-				&:before {
-					height: 16px;
-					width: 16px;
-					left: 0px;
-					top: 3px;
-					border: 1px solid #aaa;
-					background-color: #fff;
-					border-radius: 3px;
-				}
-				&:after {
-					height: 5px;
-					width: 9px;
-					border-left: 2px solid;
-					border-bottom: 2px solid;
-					transform: rotate(-45deg);
-					left: 4px;
-					top: 7px;
-					color: #fff;
-				}
-			}
-			input[type="checkbox"] + label::after {
-				content: none;
-			}
-			input[type="checkbox"]:checked + label::after {
 				content: "";
+				display: inline-block;
 			}
-			input[type="checkbox"]:focus + label::before {
-				outline: rgb(59, 153, 252) auto 5px;
+			&:before {
+				height: 16px;
+				width: 16px;
+				left: 0px;
+				top: 3px;
+				border: 1px solid #aaa;
+				background-color: #fff;
+				border-radius: 3px;
 			}
-			input[type="checkbox"]:checked + label::before {
-				background: #935687;
-				border-color: #935687;
-				outline: none;
+			&:after {
+				height: 5px;
+				width: 9px;
+				border-left: 2px solid;
+				border-bottom: 2px solid;
+				transform: rotate(-45deg);
+				left: 4px;
+				top: 7px;
+				color: #fff;
 			}
+		}
+		input[type="checkbox"] + label::after {
+			content: none;
+		}
+		input[type="checkbox"]:checked + label::after {
+			content: "";
+		}
+		input[type="checkbox"]:focus + label::before {
+			outline: rgb(59, 153, 252) auto 5px;
+		}
+		input[type="checkbox"]:checked + label::before {
+			background: #935687;
+			border-color: #935687;
 		}
 	}
 }
@@ -711,6 +711,7 @@ body {
 
 	.wc-wizard-service-settings {
 		display: none;
+		margin-top: 0.75em;
 		margin-bottom: 0;
 		cursor: default;
 
@@ -947,6 +948,40 @@ h3.jetpack-reasons {
 	}
 }
 
+.wc-setup .wc-setup-actions .plugin-install-info {
+	display: block;
+	font-style: italic;
+	color: #999;
+	font-size: 14px;
+	line-height: 1.5em;
+	margin: 5px 0;
+
+	& > * {
+		display: block;
+	}
+	
+	.plugin-install-info-list-item:not(:last-child)::after {
+		content: ', ';
+	}
+
+	a {
+		white-space: nowrap;
+
+		&:not(:hover):not(:focus) {
+			color: inherit;
+		}
+	}
+}
+
+.plugin-install-source {
+	$background: rgba( #bb77ae, 0.15 );
+	background: $background;
+
+	&:not(.wc-wizard-service-item) {
+		box-shadow: 0 0 0 10px $background;
+	}
+}
+
 .location-prompt {
 	color: #666;
 	font-size: 13px;
@@ -1168,7 +1203,6 @@ p.jetpack-terms {
 .wc-wizard-service-setting-stripe_create_account, .wc-wizard-service-setting-ppec_paypal_reroute_requests {
 	display: flex;
 	align-items: flex-start;
-	margin-top: 0.75em;
 
 	.payment-checkbox-input {
 		order: 1;
@@ -1186,6 +1220,7 @@ p.jetpack-terms {
 
 .wc-wizard-service-setting-stripe_email, .wc-wizard-service-setting-ppec_paypal_email {
 	margin-top: 0.75em;
+	margin-left: 1.5em;
 
 	label.stripe_email, label.ppec_paypal_email {
 		position: absolute;
@@ -1199,17 +1234,14 @@ p.jetpack-terms {
 	}
 
 	input.payment-email-input {
-		margin-left: 1.5em;
+		box-sizing: border-box;
 		margin-bottom: .5em;
 		width: 100%;
-	}
-
-	.wc-wizard-service-settings-description {
-		margin-left: 1.5em;
+		height: 32px;
 	}
 }
 
-.recommended-step {
+.wc-setup-content .recommended-step {
 	border: 1px solid #ebebeb;
 	border-radius: 4px;
 	padding: 2.5em;
@@ -1217,15 +1249,22 @@ p.jetpack-terms {
 	li {
 		list-style: none;
 
-		&:last-child .recommended-item {
+		&:last-child label {
 			margin-bottom: 0; // Avoid extra space at the end of the list.
 		}
 	}
 
-	.recommended-item {
+	label {
 		display: flex;
 		align-items: center;
 		margin-bottom: 1.5em;
+
+		&:before, &:after {
+			top: auto;
+		}
+		&:after {
+			margin-top: -1.5px;
+		}
 	}
 
 	.recommended-item-icon {
@@ -1233,7 +1272,7 @@ p.jetpack-terms {
 		border-radius: 7px;
 		height: 3.5em;
 		margin-right: 1em;
-		margin-left: 1em;
+		margin-left: 4px;
 
 		&.recommended-item-icon-storefront_theme {
 			background-color: #f4a224;

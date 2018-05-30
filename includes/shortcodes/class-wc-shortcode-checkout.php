@@ -222,7 +222,7 @@ class WC_Shortcode_Checkout {
 		wc_print_notices();
 
 		// Check cart has contents.
-		if ( WC()->cart->is_empty() ) {
+		if ( WC()->cart->is_empty() && ! is_customize_preview() ) {
 			return;
 		}
 

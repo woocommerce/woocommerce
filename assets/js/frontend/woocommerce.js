@@ -71,7 +71,8 @@ jQuery( function( $ ) {
 		if ( scrollElement.length ) {
 			if ( isSmoothScrollSupported ) {
 				scrollElement[0].scrollIntoView({
-					behavior: 'smooth'
+					behavior: 'smooth',
+					block:    'center'
 				});
 			} else {
 				$( 'html, body' ).animate( {

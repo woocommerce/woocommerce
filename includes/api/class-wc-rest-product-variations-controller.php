@@ -290,7 +290,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 
 		// Thumbnail.
 		if ( isset( $request['image'] ) ) {
-			if ( is_array( $request['image'] ) ) {
+			if ( is_array( $request['image'] ) && ! empty( $request['image'] ) ) {
 				$image = $request['image'];
 				if ( is_array( $image ) ) {
 					$image['position'] = 0;

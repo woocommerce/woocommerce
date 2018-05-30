@@ -153,8 +153,13 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		}
 
 		$customer_id = $customer->get_id();
+
 		// Load meta but exclude deprecated props.
-		$user_meta = array_diff_key( array_map( 'wc_flatten_meta_callback', get_user_meta( $customer_id ) ), array_flip( array( 'country', 'state', 'postcode', 'city', 'address', 'address_2', 'default', 'location' ) ) );
+		$user_meta = array_diff_key(
+			array_map( 'wc_flatten_meta_callback', get_user_meta( $customer_id ) ),
+			array_flip( array( 'country', 'state', 'postcode', 'city', 'address', 'address_2', 'default', 'location' ) )
+		);
+
 		$customer->set_props( $user_meta );
 		$customer->set_props(
 			array(
@@ -188,6 +193,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				), $customer
 			)
 		);
+
 		// Only update password if a new one was set with set_password.
 		if ( $customer->get_password() ) {
 			wp_update_user(
@@ -198,6 +204,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			);
 			$customer->set_password( '' );
 		}
+
 		$this->update_user_meta( $customer );
 		$customer->set_date_modified( get_user_meta( $customer->get_id(), 'last_update', true ) );
 		$customer->save_meta_data();
@@ -216,6 +223,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		if ( ! $customer->get_id() ) {
 			return;
 		}
+
 		$args = wp_parse_args(
 			$args, array(
 				'reassign' => 0,
@@ -270,9 +278,11 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 		foreach ( $billing_address_props as $meta_key => $prop ) {
 			$prop_key = substr( $prop, 8 );
+
 			if ( ! isset( $changed_props['billing'] ) || ! array_key_exists( $prop_key, $changed_props['billing'] ) ) {
 				continue;
 			}
+
 			if ( update_user_meta( $customer->get_id(), $meta_key, $customer->{"get_$prop"}( 'edit' ) ) ) {
 				$updated_props[] = $prop;
 			}
@@ -292,9 +302,11 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 		foreach ( $shipping_address_props as $meta_key => $prop ) {
 			$prop_key = substr( $prop, 9 );
+
 			if ( ! isset( $changed_props['shipping'] ) || ! array_key_exists( $prop_key, $changed_props['shipping'] ) ) {
 				continue;
 			}
+
 			if ( update_user_meta( $customer->get_id(), $meta_key, $customer->{"get_$prop"}( 'edit' ) ) ) {
 				$updated_props[] = $prop;
 			}
@@ -326,11 +338,11 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			// phpcs:enable
 		);
 
-		if ( $last_order ) {
-			return wc_get_order( absint( $last_order ) );
-		} else {
+		if ( ! $last_order ) {
 			return false;
 		}
+
+		return wc_get_order( absint( $last_order ) );
 	}
 
 	/**
@@ -371,7 +383,11 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @return float
 	 */
 	public function get_total_spent( &$customer ) {
-		$spent = apply_filters( 'woocommerce_customer_get_total_spent', get_user_meta( $customer->get_id(), '_money_spent', true ), $customer );
+		$spent = apply_filters(
+			'woocommerce_customer_get_total_spent',
+			get_user_meta( $customer->get_id(), '_money_spent', true ),
+			$customer
+		);
 
 		if ( '' === $spent ) {
 			global $wpdb;

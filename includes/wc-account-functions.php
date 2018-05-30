@@ -126,7 +126,7 @@ function wc_get_account_menu_items() {
 		}
 	}
 
-	return apply_filters( 'woocommerce_account_menu_items', $items );
+	return apply_filters( 'woocommerce_account_menu_items', $items, $endpoints );
 }
 
 /**

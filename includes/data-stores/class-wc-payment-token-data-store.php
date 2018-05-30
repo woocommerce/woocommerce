@@ -262,6 +262,12 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 			$gateway_ids = $gateways->get_payment_gateway_ids();
 		}
 
+		$page           = isset( $args['page'] ) ? absint( $args['page'] ) : 1;
+		$posts_per_page = isset( $args['limit'] ) ? absint( $args['limit'] ) : get_option( 'posts_per_page' );
+
+		$pgstrt = absint( ( $page - 1 ) * $posts_per_page ) . ', ';
+		$limits = 'LIMIT ' . $pgstrt . $posts_per_page;
+
 		$gateway_ids[] = '';
 		$where[]       = "gateway_id IN ('" . implode( "','", array_map( 'esc_sql', $gateway_ids ) ) . "')";
 
@@ -270,7 +276,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 		}
 
 		// phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
-		$token_results = $wpdb->get_results( $sql . ' WHERE ' . implode( ' AND ', $where ) );
+		$token_results = $wpdb->get_results( $sql . ' WHERE ' . implode( ' AND ', $where ) . ' ' . $limits );
 
 		return $token_results;
 	}

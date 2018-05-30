@@ -44,8 +44,8 @@ class WC_Admin_List_Table_Coupons extends WC_Admin_List_Table {
 	protected function render_blank_state() {
 		echo '<div class="woocommerce-BlankState">';
 		echo '<h2 class="woocommerce-BlankState-message">' . esc_html__( 'Coupons are a great way to offer discounts and rewards to your customers. They will appear here once created.', 'woocommerce' ) . '</h2>';
-		echo '<a class="woocommerce-BlankState-cta button-primary button" target="_blank" href="https://docs.woocommerce.com/document/coupon-management/?utm_source=blankslate&utm_medium=product&utm_content=couponsdoc&utm_campaign=woocommerceplugin">' . esc_html__( 'Learn more about coupons', 'woocommerce' ) . '</a>';
 		echo '<a class="woocommerce-BlankState-cta button-primary button" href="' . esc_url( admin_url( 'post-new.php?post_type=shop_coupon' ) ) . '">' . esc_html__( 'Create your first coupon', 'woocommerce' ) . '</a>';
+		echo '<a class="woocommerce-BlankState-cta button" target="_blank" href="https://docs.woocommerce.com/document/coupon-management/?utm_source=blankslate&utm_medium=product&utm_content=couponsdoc&utm_campaign=woocommerceplugin">' . esc_html__( 'Learn more about coupons', 'woocommerce' ) . '</a>';
 		echo '</div>';
 	}
 

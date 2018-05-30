@@ -64,6 +64,7 @@ class WC_Geolocation {
 	/**
 	 * Check if server supports MaxMind GeoLite2 Reader.
 	 *
+	 * @since 3.4.0
 	 * @return bool
 	 */
 	private static function supports_geolite2() {
@@ -71,15 +72,28 @@ class WC_Geolocation {
 	}
 
 	/**
+	 * Check if geolocation is enabled.
+	 *
+	 * @since 3.4.0
+	 * @param string $current_settings Current geolocation settings.
+	 * @return bool
+	 */
+	private static function is_geolocation_enabled( $current_settings ) {
+		return in_array( $current_settings, array( 'geolocation', 'geolocation_ajax' ), true );
+	}
+
+	/**
 	 * Prevent geolocation via MaxMind when using legacy versions of php.
 	 *
+	 * @since 3.4.0
 	 * @param string $default_customer_address current value.
 	 * @return string
 	 */
 	public static function disable_geolocation_on_legacy_php( $default_customer_address ) {
-		if ( in_array( $default_customer_address, array( 'geolocation', 'geolocation_ajax' ), true ) ) {
+		if ( self::is_geolocation_enabled( $default_customer_address ) ) {
 			$default_customer_address = 'base';
 		}
+
 		return $default_customer_address;
 	}
 
@@ -89,9 +103,11 @@ class WC_Geolocation {
 	public static function init() {
 		if ( self::supports_geolite2() ) {
 			// Only download the database from MaxMind if the geolocation function is enabled, or a plugin specifically requests it.
-			if ( in_array( get_option( 'woocommerce_default_customer_address' ), array( 'geolocation', 'geolocation_ajax' ), true ) || apply_filters( 'woocommerce_geolocation_update_database_periodically', false ) ) {
+			if ( self::is_geolocation_enabled( get_option( 'woocommerce_default_customer_address' ) ) || apply_filters( 'woocommerce_geolocation_update_database_periodically', false ) ) {
 				add_action( 'woocommerce_geoip_updater', array( __CLASS__, 'update_database' ) );
 			}
+
+			// Trigger database update when settings are changed to enable geolocation.
 			add_filter( 'pre_update_option_woocommerce_default_customer_address', array( __CLASS__, 'maybe_update_database' ), 10, 2 );
 		} else {
 			add_filter( 'pre_option_woocommerce_default_customer_address', array( __CLASS__, 'disable_geolocation_on_legacy_php' ) );
@@ -106,9 +122,10 @@ class WC_Geolocation {
 	 * @return string
 	 */
 	public static function maybe_update_database( $new_value, $old_value ) {
-		if ( $new_value !== $old_value && in_array( $new_value, array( 'geolocation', 'geolocation_ajax' ), true ) ) {
+		if ( $new_value !== $old_value && self::is_geolocation_enabled( $new_value ) ) {
 			self::update_database();
 		}
+
 		return $new_value;
 	}
 
@@ -227,7 +244,7 @@ class WC_Geolocation {
 	}
 
 	/**
-	 * Update geoip database. Adapted from https://wordpress.org/plugins/geoip-detect/.
+	 * Update geoip database.
 	 */
 	public static function update_database() {
 		$logger = wc_get_logger();

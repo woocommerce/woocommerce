@@ -230,10 +230,11 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	 *
 	 * @since 3.4.0
 	 * @param int $id user ID of the downloads that will be deleted.
+	 * @return bool True if deleted rows.
 	 */
 	public function delete_by_user_id( $id ) {
 		global $wpdb;
-		$wpdb->query(
+		return (bool) $wpdb->query(
 			$wpdb->prepare(
 				"DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
 				WHERE user_id = %d",
@@ -247,10 +248,11 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	 *
 	 * @since 3.4.0
 	 * @param string $email email of the downloads that will be deleted.
+	 * @return bool True if deleted rows.
 	 */
 	public function delete_by_user_email( $email ) {
 		global $wpdb;
-		$wpdb->query(
+		return (bool) $wpdb->query(
 			$wpdb->prepare(
 				"DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
 				WHERE user_email = %s",

@@ -102,6 +102,7 @@ class WC_Countries {
 			'AT' => array(),
 			'AX' => array(),
 			'BE' => array(),
+			'BH' => array(),
 			'BI' => array(),
 			'CZ' => array(),
 			'DE' => array(),
@@ -618,7 +619,6 @@ class WC_Countries {
 				'required'     => true,
 				'class'        => array( 'form-row-first' ),
 				'autocomplete' => 'given-name',
-				'autofocus'    => true,
 				'priority'     => 10,
 			),
 			'last_name'  => array(
@@ -1216,10 +1216,10 @@ class WC_Countries {
 
 		// Add email and phone fields.
 		if ( 'billing_' === $type ) {
-			if ( 'hidden' !== get_option( 'woocommerce_checkout_phone_field', 'optional' ) ) {
+			if ( 'hidden' !== get_option( 'woocommerce_checkout_phone_field', 'required' ) ) {
 				$address_fields['billing_phone'] = array(
 					'label'        => __( 'Phone', 'woocommerce' ),
-					'required'     => 'required' === get_option( 'woocommerce_checkout_phone_field', 'optional' ),
+					'required'     => 'required' === get_option( 'woocommerce_checkout_phone_field', 'required' ),
 					'type'         => 'tel',
 					'class'        => array( 'form-row-wide' ),
 					'validate'     => array( 'phone' ),

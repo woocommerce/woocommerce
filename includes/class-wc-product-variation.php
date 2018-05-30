@@ -135,16 +135,17 @@ class WC_Product_Variation extends WC_Product_Simple {
 		if ( isset( $attributes[ $attribute ] ) ) {
 			$value = $attributes[ $attribute ];
 			$term  = taxonomy_exists( $attribute ) ? get_term_by( 'slug', $value, $attribute ) : false;
-			$value = ! is_wp_error( $term ) && $term ? $term->name : $value;
-		} elseif ( isset( $attributes[ 'pa_' . $attribute ] ) ) {
-			$value = $attributes[ 'pa_' . $attribute ];
-			$term  = taxonomy_exists( 'pa_' . $attribute ) ? get_term_by( 'slug', $value, 'pa_' . $attribute ) : false;
-			$value = ! is_wp_error( $term ) && $term ? $term->name : $value;
-		} else {
-			return '';
+			return ! is_wp_error( $term ) && $term ? $term->name : $value;
 		}
 
-		return $value;
+		$att_str = 'pa_' . $attribute;
+		if ( isset( $attributes[ $att_str ] ) ) {
+			$value = $attributes[ $att_str ];
+			$term  = taxonomy_exists( $att_str ) ? get_term_by( 'slug', $value, $att_str ) : false;
+			return ! is_wp_error( $term ) && $term ? $term->name : $value;
+		}
+
+		return '';
 	}
 
 	/**
@@ -166,7 +167,17 @@ class WC_Product_Variation extends WC_Product_Simple {
 			$data = $this->get_variation_attributes();
 		}
 
-		return add_query_arg( array_map( 'urlencode', array_filter( $data ) ), $url );
+		$data = array_filter( $data );
+
+		if ( empty( $data ) ) {
+			return $url;
+		}
+
+		// Filter and encode keys and values so this is not broken by add_query_arg.
+		$data = array_map( 'urlencode', $data );
+		$keys = array_map( 'urlencode', array_keys( $data ) );
+
+		return add_query_arg( array_combine( $keys, $data ), $url );
 	}
 
 	/**

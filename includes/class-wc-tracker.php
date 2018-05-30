@@ -200,8 +200,8 @@ class WC_Tracker {
 			$server_data['php_suhosin'] = extension_loaded( 'suhosin' ) ? 'Yes' : 'No';
 		}
 
-		global $wpdb;
-		$server_data['mysql_version'] = $wpdb->db_version();
+		$database_version             = wc_get_server_database_version();
+		$server_data['mysql_version'] = $database_version['number'];
 
 		$server_data['php_max_upload_size'] = size_format( wp_max_upload_size() );
 		$server_data['php_default_timezone'] = date_default_timezone_get();
@@ -486,6 +486,28 @@ class WC_Tracker {
 		}
 
 		return $min_max;
+	}
+
+	/**
+	 * Make a request when opting out of tracker usage.
+	 *
+	 * @return void
+	 */
+	public static function opt_out_request() {
+		$body = array(
+			'event' => 'opt-out',
+			'email' => apply_filters( 'woocommerce_tracker_admin_email', get_option( 'admin_email' ) ),
+			'url'   => home_url(),
+		);
+		wp_safe_remote_post( self::$api_url . 'event/', array(
+			'method'      => 'POST',
+			'redirection' => 5,
+			'httpversion' => '1.0',
+			'blocking'    => false,
+			'headers'     => array( 'user-agent' => 'WooCommerceTracker/' . md5( esc_url_raw( home_url( '/' ) ) ) . ';' ),
+			'body'        => wp_json_encode( $body ),
+			'cookies'     => array(),
+		) );
 	}
 }
 

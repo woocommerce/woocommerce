@@ -229,9 +229,9 @@ function wc_get_order_type( $type ) {
 
 	if ( isset( $wc_order_types[ $type ] ) ) {
 		return $wc_order_types[ $type ];
-	} else {
-		return false;
 	}
+
+	return false;
 }
 
 /**

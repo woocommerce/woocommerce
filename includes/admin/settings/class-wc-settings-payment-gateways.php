@@ -145,7 +145,8 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 									$width = '1%';
 								}
 
-								$method_title = $gateway->get_title() ? $gateway->get_title() : __( '(no title)', 'woocommerce' );
+								$method_title = $gateway->get_method_title() ? $gateway->get_method_title() : $gateway->get_title();
+								$custom_title = $gateway->get_title();
 
 								echo '<td class="' . esc_attr( $key ) . '" width="' . esc_attr( $width ) . '">';
 
@@ -160,10 +161,13 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 										<?php
 										break;
 									case 'name':
-										echo '<a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $gateway->id ) ) ) . '">' . esc_html( $method_title ) . '</a>';
+										echo '<a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $gateway->id ) ) ) . '" class="wc-payment-gateway-method-title">' . wp_kses_post( $method_title ) . '</a>';
+
+										if ( $method_title !== $custom_title ) {
+											echo '<span class="wc-payment-gateway-method-name">&nbsp;&ndash;&nbsp;' . wp_kses_post( $custom_title ) . '</span>';
+										}
 										break;
 									case 'description':
-										echo '<strong class="wc-payment-gateway-method-name">' . wp_kses_post( $gateway->get_method_title() ) . '</strong>';
 										echo wp_kses_post( $gateway->get_method_description() );
 										break;
 									case 'action':
