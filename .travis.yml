@@ -19,7 +19,7 @@ env:
   - WP_VERSION=latest WP_MULTISITE=0
 
 # Additional tests against stable PHP (min recommended version is 5.6) and past supported versions of WP
-# and code coverage report. 
+# and code coverage report.
 matrix:
   fast_finish: true
   include:
