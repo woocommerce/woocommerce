@@ -7,7 +7,7 @@ addons:
       - nginx
   artifacts: true
     paths:
-      - ./screenshots
+      - "./screenshots"
     target_paths: $TRAVIS_BUILD_NUMBER
 
 sudo: false
