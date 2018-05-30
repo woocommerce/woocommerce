@@ -68,7 +68,9 @@ test.describe( 'WooCommerce General Settings', function() {
 
 	// take screenshot
 	test.afterEach( function(){
-		helper.takeScreenshot( manager, this.currentTest );
+		if ( this.currentTest.state === 'failed' ) {
+			helper.takeScreenshot( manager, this.currentTest );
+		}
 	});
 
 	// quit browser
