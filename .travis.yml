@@ -40,7 +40,7 @@ before_script:
   - bash tests/bin/travis.sh before
 
 script:
-  #- bash tests/bin/phpunit.sh
+  - bash tests/bin/phpunit.sh
   - bash tests/bin/phpcs.sh
   - bash tests/bin/run-e2e-CI.sh
 
@@ -53,4 +53,3 @@ branches:
     - master
     - /^\d+\.\d+(\.\d+)?(-\S*)?$/
     - /^release\//
-    - try/get-e2e-screenshots
