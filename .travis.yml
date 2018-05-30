@@ -5,6 +5,7 @@ addons:
   apt:
     packages:
       - nginx
+  artifacts: true
 
 sudo: false
 
@@ -52,3 +53,4 @@ branches:
     - master
     - /^\d+\.\d+(\.\d+)?(-\S*)?$/
     - /^release\//
+    - try/get-e2e-screenshots
