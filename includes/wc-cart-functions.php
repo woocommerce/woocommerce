@@ -128,7 +128,7 @@ function wc_add_to_cart_message( $products, $show_qty = false, $return = false )
 		$message = apply_filters( 'wc_add_to_cart_message', $message, $product_id );
 	}
 
-	$message = apply_filters( 'wc_add_to_cart_message_html', $message, $products );
+	$message = apply_filters( 'wc_add_to_cart_message_html', $message, $products, $show_qty );
 
 	if ( $return ) {
 		return $message;
