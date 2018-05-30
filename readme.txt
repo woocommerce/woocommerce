@@ -161,6 +161,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 = 3.5.0 - 2018-XX-XX =
 * Enhancement - Excluded children categories from WP_Query in product shortcode if cat_operator=AND. #20207
 * Enhancement - Add anchor tag example to email template preview. #20246
+* Enhancement - Introduce is_paypal_supported_currency check in setup wizard. #20244
 * Performance - Exclude frontend include from REST API calls. #20000
 * Dev - Added woocommerce_increase_coupon_usage_count and woocommerce_decrease_coupon_usage_count action hooks to increase extensibility of Coupons. #19981
 * Dev - Add endpoints to account menu items filter. #19980
