@@ -6,6 +6,8 @@ addons:
     packages:
       - nginx
   artifacts: true
+    paths:
+      -$(ls ./screenshots/failed*.png | tr "\n" ":")
 
 sudo: false
 
