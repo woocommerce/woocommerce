@@ -228,6 +228,10 @@ class WC_API extends WC_Legacy_API {
 		include_once dirname( __FILE__ ) . '/api/class-wc-rest-system-status-tools-controller.php';
 		include_once dirname( __FILE__ ) . '/api/class-wc-rest-shipping-methods-controller.php';
 		include_once dirname( __FILE__ ) . '/api/class-wc-rest-payment-gateways-controller.php';
+		include_once dirname( __FILE__ ) . '/api/includes/api/class-wc-rest-data-continents-controller.php';
+		include_once dirname( __FILE__ ) . '/api/includes/api/class-wc-rest-data-controller.php';
+		include_once dirname( __FILE__ ) . '/api/includes/api/class-wc-rest-data-countries-controller.php';
+		include_once dirname( __FILE__ ) . '/api/includes/api/class-wc-rest-data-currencies-controller.php';
 	}
 
 	/**
