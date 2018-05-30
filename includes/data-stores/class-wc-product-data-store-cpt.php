@@ -1440,7 +1440,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$product_ids[] = wp_get_post_parent_id( $post_id );
 		}
 
-		return apply_filters( 'woocommerce_search_products_ids', wp_parse_id_list( $product_ids ), $term, $type, $include_variations, $all_statuses);
+		return apply_filters( 'woocommerce_search_products_ids', wp_parse_id_list( $product_ids ), $term, $type, $include_variations, $all_statuses );
 	}
 
 	/**
