@@ -113,7 +113,7 @@ test.describe( 'Cart page', function() {
 	} );
 
 	// quit browser
-	test.after( function() {
+	test.after( () => {
 		manager.quitBrowser();
 	} );
 } );
