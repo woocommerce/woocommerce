@@ -100,7 +100,7 @@ $states['IT'] = array(
 	'SI' => __( 'Siena', 'woocommerce' ),
 	'SR' => __( 'Siracusa', 'woocommerce' ),
 	'SO' => __( 'Sondrio', 'woocommerce' ),
-	'SU' -> __( 'Sud Sardegna', 'woocommerce' ),
+	'SU' => __( 'Sud Sardegna', 'woocommerce' ),
 	'TA' => __( 'Taranto', 'woocommerce' ),
 	'TE' => __( 'Teramo', 'woocommerce' ),
 	'TR' => __( 'Terni', 'woocommerce' ),
