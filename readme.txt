@@ -162,6 +162,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Enhancement - Excluded children categories from WP_Query in product shortcode if cat_operator=AND. #20207
 * Enhancement - Add anchor tag example to email template preview. #20246
 * Enhancement - Introduce is_paypal_supported_currency check in setup wizard. #20244
+* Fix - Check billing email is posted before using in WC_Cart::check_customer_coupons. #20180
 * Tweak - Show empty terms in admin product category filter dropdown. #20324
 * Tweak - Don't force default token gateway active by default. #20125
 * Performance - Exclude frontend include from REST API calls. #20000
