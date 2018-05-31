@@ -1711,10 +1711,6 @@ p.demo_store,
 /**
  * Right to left styles
  */
-.rtl.woocommerce div.product div.images .flex-control-thumbs li {
-	float: right;
-}
-
 .rtl.woocommerce .price_label span {
 	unicode-bidi: embed;
 	/* rtl:ignore */
