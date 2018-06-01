@@ -1058,12 +1058,14 @@ p.demo_store,
 		th {
 			font-weight: 700;
 			padding: 9px 12px;
+			line-height: 1.5em;
 		}
 
 		td {
 			border-top: 1px solid rgba(0, 0, 0, 0.1);
-			padding: 6px 12px;
+			padding: 9px 12px;
 			vertical-align: middle;
+			line-height: 1.5em;
 
 			small {
 				font-weight: normal;
@@ -1404,12 +1406,12 @@ p.demo_store,
 		padding: 0;
 
 		li {
-			margin: 0;
-			padding: 0.25em 0 0.25em 22px;
-			text-indent: -22px;
+			margin: 0 0 .5em;
+			line-height: 1.5em;
 			list-style: none outside;
 			input {
-				margin: 3px 0.5ex;
+				margin: 3px 0.4375em 0 0;
+				vertical-align: top;
 			}
 			label {
 				display: inline;
@@ -1847,16 +1849,18 @@ p.demo_store,
 	}
 
 	.cart-collaterals {
-		.shipping_calculator {
-			.button {
-				width: 100%;
-				float: none;
-				display: block;
-			}
+		.shipping-calculator-button {
+			float: none;
+			margin-top: .5em;
+			display: inline-block;
+		}
 
-			.shipping-calculator-button::after {
-				@include iconafter( '\e019' );
-			}
+		.shipping-calculator-button::after {
+			@include iconafter( '\e019' );
+		}
+
+		.shipping-calculator-form {
+			margin: 1em 0 0 0;
 		}
 
 		.cart_totals {
@@ -1878,7 +1882,7 @@ p.demo_store,
 				}
 
 				th {
-					width: 40%;
+					width: 35%;
 				}
 
 				td,
@@ -1905,6 +1909,9 @@ p.demo_store,
 			tr td,
 			tr th {
 				border-top: 1px solid $secondary;
+			}
+			.woocommerce-shipping-destination {
+				margin-bottom: 0;
 			}
 		}
 
