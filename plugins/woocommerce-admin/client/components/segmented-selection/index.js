@@ -18,7 +18,7 @@ class SegmentedSelection extends Component {
 		return (
 			<fieldset>
 				<legend className="screen-reader-text">{ legend }</legend>
-				<div className={ classnames( className, 'woo-dash__segmented-selection' ) }>
+				<div className={ classnames( className, 'woocommerce-segmented-selection' ) }>
 					{ options.map( ( { value, label } ) => {
 						if ( ! value || ! label ) {
 							return null;
@@ -27,7 +27,7 @@ class SegmentedSelection extends Component {
 						return (
 							<Fragment key={ value }>
 								<input
-									className="woo-dash__segmented-selection-input"
+									className="woocommerce-segmented-selection__input"
 									type="radio"
 									name={ name }
 									id={ id }
@@ -35,7 +35,7 @@ class SegmentedSelection extends Component {
 									onChange={ partial( onSelect, name, value ) }
 								/>
 								<label htmlFor={ id }>
-									<span className="woo-dash__segmented-selection-label">{ label }</span>
+									<span className="woocommerce-segmented-selection__label">{ label }</span>
 								</label>
 							</Fragment>
 						);

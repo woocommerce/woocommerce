@@ -19,6 +19,6 @@ describe( 'Card', () => {
 
 	test( 'should have correct class', () => {
 		const card = shallow( <Card title="A Card Example" /> );
-		expect( card.hasClass( 'woo-dash__card' ) ).toBe( true );
+		expect( card.hasClass( 'woocommerce-card' ) ).toBe( true );
 	} );
 } );

@@ -54,22 +54,24 @@ class DatePicker extends Component {
 		const { period, compare } = this.state;
 		const compareToString = __( 'compare to', 'woo-dash' );
 		return (
-			<div className="woo-dash__datepicker">
-				<h3 className="woo-dash__datepicker-text">{ __( 'select a date range', 'woo-dash' ) }</h3>
+			<div className="woocommerce-date-picker">
+				<h3 className="woocommerce-date-picker__text">
+					{ __( 'select a date range', 'woo-dash' ) }
+				</h3>
 				<TabPanel
 					tabs={ [
 						{
 							name: 'period',
 							title: __( 'Presets', 'woo-dash' ),
-							className: 'woo-dash__datepicker-tab',
+							className: 'woocommerce-date-picker__tab',
 						},
 						{
 							name: 'custom',
 							title: __( 'Custom', 'woo-dash' ),
-							className: 'woo-dash__datepicker-tab',
+							className: 'woocommerce-date-picker__tab',
 						},
 					] }
-					className="woo-dash__datepicker-tabs"
+					className="woocommerce-date-picker__tabs"
 					activeClass="is-active"
 				>
 					{ selectedTab => (
@@ -78,7 +80,7 @@ class DatePicker extends Component {
 								<PresetPeriods onSelect={ this.select } period={ period } />
 							) }
 							{ selectedTab === 'custom' && <div>Custom Date Picker Goes here</div> }
-							<h3 className="woo-dash__datepicker-text">{ compareToString }</h3>
+							<h3 className="woocommerce-date-picker__text">{ compareToString }</h3>
 							<SegmentedSelection
 								options={ [
 									{ value: 'previous_period', label: __( 'Previous Period', 'woo-dash' ) },
@@ -90,7 +92,7 @@ class DatePicker extends Component {
 								legend={ compareToString }
 							/>
 							<Button
-								className="woo-dash__datepicker-update-btn"
+								className="woocommerce-date-picker__update-btn"
 								onClick={ partial( this.update, selectedTab ) }
 							>
 								{ __( 'Update', 'woo-dash' ) }

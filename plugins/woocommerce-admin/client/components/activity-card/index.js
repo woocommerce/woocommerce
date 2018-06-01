@@ -19,24 +19,24 @@ import { EllipsisMenu } from '../ellipsis-menu';
 class ActivityCard extends Component {
 	render() {
 		const { actions, className, date, icon, image, label, menu, children } = this.props;
-		const cardClassName = classnames( 'woo-dash__activity-card', className );
+		const cardClassName = classnames( 'woocommerce-activity-card', className );
 
 		return (
 			<section className={ cardClassName }>
-				<header className="woo-dash__activity-card-header">
-					<span className="woo-dash__activity-card-icon">{ icon }</span>
-					<h3 className="woo-dash__activity-card-label">
+				<header className="woocommerce-activity-card__header">
+					<span className="woocommerce-activity-card__icon">{ icon }</span>
+					<h3 className="woocommerce-activity-card__label">
 						{ label }
-						{ date && <span className="woo-dash__activity-card-date">– { date }</span> }
+						{ date && <span className="woocommerce-activity-card__date">– { date }</span> }
 					</h3>
-					{ menu && <div className="woo-dash__activity-card-menu">{ menu }</div> }
+					{ menu && <div className="woocommerce-activity-card__menu">{ menu }</div> }
 				</header>
-				<div className="woo-dash__activity-card-body">
-					<div className="woo-dash__activity-card-content">{ children }</div>
-					{ image && <div className="woo-dash__activity-card-image">{ image }</div> }
+				<div className="woocommerce-activity-card__body">
+					<div className="woocommerce-activity-card__content">{ children }</div>
+					{ image && <div className="woocommerce-activity-card__image">{ image }</div> }
 				</div>
 				{ actions && (
-					<footer className="woo-dash__activity-card-actions">
+					<footer className="woocommerce-activity-card__actions">
 						{ actions.map( ( item, i ) => cloneElement( item, { key: i } ) ) }
 					</footer>
 				) }

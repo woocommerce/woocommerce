@@ -1,12 +1,12 @@
 /** @format */
 
-.woo-dash__card {
+.woocommerce-card {
 	margin-bottom: 20px;
 	background: white;
 	border: 1px solid $gray;
 }
 
-.woo-dash__card-header {
+.woocommerce-card__header {
 	padding: 20px;
 	border-bottom: 1px solid $gray;
 	display: grid;
@@ -29,11 +29,11 @@
 	}
 }
 
-.woo-dash__card-action,
-.woo-dash__card-menu {
+.woocommerce-card__action,
+.woocommerce-card__menu {
 	text-align: right;
 }
 
-.woo-dash__card-body {
+.woocommerce-card__body {
 	padding: 20px;
 }

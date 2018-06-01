@@ -33,7 +33,7 @@ class Layout extends Component {
 		const { path } = this.props.match;
 		const page = find( getPages(), { path } );
 		const className = classnames( {
-			'woo-dashboard': true,
+			'woocommerce-layout': true,
 			'has-visible-sidebar': page.hasOpenSidebar,
 			'has-hidden-sidebar': ! page.hasOpenSidebar,
 		} );
@@ -45,9 +45,9 @@ class Layout extends Component {
 		return (
 			<div className={ className }>
 				<Slot name="header" fillChildProps={ headerProps } />
-				<div className="woo-dash__primary">
+				<div className="woocommerce-layout__primary">
 					<Notices />
-					<div className="woo-dash__main">
+					<div className="woocommerce-layout__main">
 						<Controller { ...this.props } />
 					</div>
 				</div>

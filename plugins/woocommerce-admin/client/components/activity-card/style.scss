@@ -1,18 +1,18 @@
 /** @format */
 
-.woo-dash__activity-card {
+.woocommerce-activity-card {
 	background: $white;
 	border: 1px solid $gray;
 	margin-bottom: $spacing * 2;
 }
 
-.woo-dash__activity-card-header {
+.woocommerce-activity-card__header {
 	display: flex;
 	align-items: center;
 	margin-bottom: $spacing * 0.5;
 	padding: $spacing $spacing 0;
 
-	.woo-dash__activity-card-icon {
+	.woocommerce-activity-card__icon {
 		margin-right: $spacing;
 
 		.dashicon {
@@ -20,7 +20,7 @@
 		}
 	}
 
-	.woo-dash__activity-card-label {
+	.woocommerce-activity-card__label {
 		flex: 1;
 		margin: 0;
 		@include font-size( 14 );
@@ -28,26 +28,26 @@
 		font-weight: normal;
 	}
 
-	.woo-dash__activity-card-date {
+	.woocommerce-activity-card__date {
 		margin-left: 0.5em;
 	}
 
-	.woo-dash__activity-card-menu {
+	.woocommerce-activity-card__menu {
 		// Pull the menu up/out slightly
 		margin-right: $spacing * -0.5;
 		margin-top: $spacing * -0.5;
 	}
 }
 
-.woo-dash__activity-card-body {
+.woocommerce-activity-card__body {
 	padding: 0 $spacing $spacing;
 	display: flex;
 
-	.woo-dash__activity-card-content {
+	.woocommerce-activity-card__content {
 		flex: 1;
 	}
 
-	.woo-dash__activity-card-image {
+	.woocommerce-activity-card__image {
 		border-radius: 50%;
 		overflow: hidden;
 		width: 60px;
@@ -64,7 +64,7 @@
 	}
 }
 
-.woo-dash__activity-card-actions {
+.woocommerce-activity-card__actions {
 	padding: $spacing;
 	border-top: 1px solid $gray;
 	background: #eee;

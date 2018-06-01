@@ -67,14 +67,14 @@ class WidgetNumbers extends Component {
 
 		return (
 			<Card title={ __( 'Store Performance', 'woo-dash' ) } menu={ this.renderMenu() }>
-				<div className="woo-dash__widget">
+				<div className="woocommerce-dashboard__widget">
 					{ showCustomers && (
-						<div className="woo-dash__widget-item">
+						<div className="woocommerce-dashboard__widget-item">
 							{ sprintf( _n( '%d New Customer', '%d New Customers', 4, 'woo-dash' ), 4 ) }
 						</div>
 					) }
 					{ showOrders && (
-						<div className="woo-dash__widget-item">
+						<div className="woocommerce-dashboard__widget-item">
 							{ sprintf(
 								_n( '%d New Order', '%d New Orders', totalOrders, 'woo-dash' ),
 								totalOrders
@@ -82,14 +82,14 @@ class WidgetNumbers extends Component {
 						</div>
 					) }
 					{ showProducts && (
-						<div className="woo-dash__widget-item">
+						<div className="woocommerce-dashboard__widget-item">
 							{ sprintf(
 								_n( '%d Product', '%d Products', totalProducts, 'woo-dash' ),
 								totalProducts
 							) }
 						</div>
 					) }
-					<div className="woo-dash__widget-item">
+					<div className="woocommerce-dashboard__widget-item">
 						<Button isPrimary href="#">
 							{ __( 'View Orders', 'woo-dash' ) }
 						</Button>

@@ -37,16 +37,16 @@ class AgendaHeader extends Component {
 
 	renderLink() {
 		const { title, className, count, href } = this.props;
-		const classes = classnames( 'woo-dash__agenda-group-wrapper', className );
+		const classes = classnames( 'woocommerce-dashboard__agenda-group-wrapper', className );
 
 		return (
 			<a className={ classes } href={ href }>
-				<div className="woo-dash__agenda-group-title is-link">
+				<div className="woocommerce-dashboard__agenda-group-title is-link">
 					<h3>
 						{ count && <Count count={ count } /> }
 						{ title }
 					</h3>
-					<span className="woo-dash__agenda-group-arrow">
+					<span className="woocommerce-dashboard__agenda-group-arrow">
 						<Dashicon icon="arrow-right-alt2" />
 					</span>
 				</div>
@@ -63,7 +63,7 @@ class AgendaHeader extends Component {
 		}
 
 		const isOpened = opened === undefined ? this.state.opened : opened;
-		const classes = classnames( 'woo-dash__agenda-group-wrapper', className, {
+		const classes = classnames( 'woocommerce-dashboard__agenda-group-wrapper', className, {
 			'is-opened': isOpened,
 		} );
 		const icon = `arrow-${ isOpened ? 'up-alt2' : 'down-alt2' }`;
@@ -72,7 +72,10 @@ class AgendaHeader extends Component {
 		/* eslint-disable jsx-a11y/no-static-element-interactions */
 		return (
 			<div className={ classes }>
-				<div onClick={ this.toggle } className="woo-dash__agenda-group-title is-accordion">
+				<div
+					onClick={ this.toggle }
+					className="woocommerce-dashboard__agenda-group-title is-accordion"
+				>
 					<h3>
 						{ count && <Count count={ count } /> }
 						{ title }
@@ -81,7 +84,9 @@ class AgendaHeader extends Component {
 				</div>
 
 				{ isOpened &&
-					children && <div className="woo-dash__agenda-group-content"> { children } </div> }
+					children && (
+						<div className="woocommerce-dashboard__agenda-group-content">{ children }</div>
+					) }
 			</div>
 		);
 		/* eslint-enable jsx-a11y/click-events-have-key-events */

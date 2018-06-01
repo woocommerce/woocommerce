@@ -1,6 +1,6 @@
 /** @format */
 
-.woo-dash__datepicker {
+.woocommerce-date-picker {
 	width: 350px;
 	padding: 1em 0;
 	border: 1px solid $gray;
@@ -17,7 +17,7 @@
 	}
 }
 
-.woo-dash__datepicker-tabs {
+.woocommerce-date-picker__tabs {
 	.components-tab-panel__tabs {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
@@ -39,7 +39,7 @@
 	}
 }
 
-.woo-dash__datepicker-tab {
+.woocommerce-date-picker__tab {
 	outline: none;
 	border: 1px solid $black;
 	padding: 10px;
@@ -61,7 +61,7 @@
 	}
 }
 
-.woo-dash__datepicker-update-btn {
+.woocommerce-date-picker__update-btn {
 	border: 1px solid $gray;
 	background-color: transparent;
 	align-self: center;
@@ -70,7 +70,7 @@
 	justify-content: center;
 }
 
-.woo-dash__datepicker-text {
+.woocommerce-date-picker__text {
 	font-size: 14px;
 	font-weight: 200;
 	text-transform: uppercase;

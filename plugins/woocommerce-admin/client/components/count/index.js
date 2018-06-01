@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import './style.scss';
 
 const Count = ( { count } ) => {
-	return <span className="woo-dash__count">{ count }</span>;
+	return <span className="woocommerce-count">{ count }</span>;
 };
 
 Count.propTypes = {

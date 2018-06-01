@@ -15,18 +15,18 @@ import { EllipsisMenu } from '../ellipsis-menu';
 class Card extends Component {
 	render() {
 		const { action, children, menu, title } = this.props;
-		const className = classnames( 'woo-dash__card', this.props.className, {
+		const className = classnames( 'woocommerce-card', this.props.className, {
 			'has-menu': !! menu,
 			'has-action': !! action,
 		} );
 		return (
 			<div className={ className }>
-				<div className="woo-dash__card-header">
-					<h2 className="woo-dash__card-title">{ title }</h2>
-					{ action && <div className="woo-dash__card-action">{ action }</div> }
-					{ menu && <div className="woo-dash__card-menu">{ menu }</div> }
+				<div className="woocommerce-card__header">
+					<h2 className="woocommerce-card__title">{ title }</h2>
+					{ action && <div className="woocommerce-card__action">{ action }</div> }
+					{ menu && <div className="woocommerce-card__menu">{ menu }</div> }
 				</div>
-				<div className="woo-dash__card-body">{ children }</div>
+				<div className="woocommerce-card__body">{ children }</div>
 			</div>
 		);
 	}

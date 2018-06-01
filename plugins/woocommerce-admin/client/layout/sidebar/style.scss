@@ -1,11 +1,11 @@
 /** @format */
 
-.woo-dash__sidebar-header {
+.woocommerce-layout__sidebar-header {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
 
-	.woo-dash__sidebar-header-label {
+	.woocommerce-layout__sidebar-header-label {
 		flex-grow: 0;
 		text-transform: uppercase;
 		margin-right: 8px;
@@ -14,7 +14,7 @@
 		font-size: 1.1em;
 	}
 
-	.woo-dash__sidebar-header-divider {
+	.woocommerce-layout__sidebar-header-divider {
 		flex-grow: 1;
 		height: 1px;
 		background-color: $gray-darken-40;

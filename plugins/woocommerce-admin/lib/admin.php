@@ -115,7 +115,7 @@ function woo_dash_admin_before_notices() {
 	if ( ! woo_dash_is_admin_page() ) {
 		return;
 	}
-	echo '<div class="woo-dashboard__admin-notice-list-hide">';
+	echo '<div class="woocommerce__admin-notice-list-hide">';
 	echo '<div class="wp-header-end"></div>'; // https://github.com/WordPress/WordPress/blob/f6a37e7d39e2534d05b9e542045174498edfe536/wp-admin/js/common.js#L737
 }
 add_action( 'admin_notices', 'woo_dash_admin_before_notices', 0 );

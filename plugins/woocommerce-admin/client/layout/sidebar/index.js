@@ -26,7 +26,7 @@ class Sidebar extends Component {
 						{ __( 'Insights', 'woo-dash' ) } <Count count={ 3 } />
 					</span>
 				),
-				className: 'woo-dash__sidebar-tab',
+				className: 'woocommerce-layout__sidebar-tab',
 			},
 			{
 				name: 'orders',
@@ -35,7 +35,7 @@ class Sidebar extends Component {
 						{ __( 'Orders', 'woo-dash' ) } <Count count={ 1 } />
 					</span>
 				),
-				className: 'woo-dash__sidebar-tab',
+				className: 'woocommerce-layout__sidebar-tab',
 			},
 			{
 				name: 'reviews',
@@ -44,14 +44,14 @@ class Sidebar extends Component {
 						{ __( 'Reviews', 'woo-dash' ) } <Count count={ 7 } />
 					</span>
 				),
-				className: 'woo-dash__sidebar-tab',
+				className: 'woocommerce-layout__sidebar-tab',
 			},
 		];
 	}
 
 	render() {
 		const { isOpen, onToggle } = this.props;
-		const className = classnames( 'woo-dash__secondary', {
+		const className = classnames( 'woocommerce-layout__secondary', {
 			'is-opened': isOpen,
 		} );
 		const headerId = uniqueId( 'sidebar-header_' );
@@ -59,20 +59,24 @@ class Sidebar extends Component {
 
 		return (
 			<aside className={ className } aria-labelledby={ headerId }>
-				<header className="woo-dash__sidebar-top">
-					<h2 className="woo-dash__sidebar-title" id={ headerId }>
+				<header className="woocommerce-layout__sidebar-top">
+					<h2 className="woocommerce-layout__sidebar-title" id={ headerId }>
 						{ __( 'Store Activity', 'woo-dash' ) }
 					</h2>
-					<div className="woo-dash__sidebar-toggle">
+					<div className="woocommerce-layout__sidebar-toggle">
 						<IconButton
-							className="woo-dash__sidebar-button"
+							className="woocommerce-layout__sidebar-button"
 							onClick={ onToggle }
 							icon="no-alt"
 							label={ __( 'Close Sidebar', 'woo-dash' ) }
 						/>
 					</div>
 				</header>
-				<TabPanel className="woo-dash__sidebar-tabs" activeClass="is-active" tabs={ tabs }>
+				<TabPanel
+					className="woocommerce-layout__sidebar-tabs"
+					activeClass="is-active"
+					tabs={ tabs }
+				>
 					{ selectedTabName => {
 						return (
 							<Fragment>

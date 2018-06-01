@@ -20,7 +20,10 @@ import './style.scss';
 class Agenda extends Component {
 	render() {
 		return (
-			<Card title={ __( 'Your agenda', 'woo-dash' ) } className="woo-dash__agenda-card">
+			<Card
+				title={ __( 'Your agenda', 'woo-dash' ) }
+				className="woocommerce-dashboard__agenda-card"
+			>
 				<AgendaHeader
 					count={ 2 }
 					title={ _n(

@@ -22,6 +22,7 @@
     },
     "rules": {
         "camelcase": 0,
+        "indent": 0,
         "max-len": [ 2, { "code": 140 } ],
         "no-console": 1,
         "react/no-danger": 0,

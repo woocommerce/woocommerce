@@ -1,10 +1,10 @@
 /** @format */
 
-.woo-dash__agenda-card .woo-dash__card-body {
+.woocommerce-dashboard__agenda-card .woocommerce-card__body {
 	padding: 0;
 }
 
-.woo-dash__agenda-group-wrapper {
+.woocommerce-dashboard__agenda-group-wrapper {
 	background: #f9f9f9;
 	font-size: 13px;
 	text-decoration: none;
@@ -14,7 +14,7 @@
 		font-size: 13px;
 		font-weight: normal;
 
-		.woo-dash__count {
+		.woocommerce-count {
 			border-color: $white;
 			background: $white;
 			margin-right: 8px;
@@ -22,12 +22,12 @@
 	}
 }
 
-.woo-dash__agenda-group-content {
+.woocommerce-dashboard__agenda-group-content {
 	background: $white;
 	padding: 16px;
 }
 
-.woo-dash__agenda-group-title {
+.woocommerce-dashboard__agenda-group-title {
 	height: 60px;
 	padding: 20px 0px 0px 20px;
 	display: flex;
@@ -42,7 +42,7 @@
 		margin: 0;
 	}
 
-	.woo-dash__agenda-group-arrow,
+	.woocommerce-dashboard__agenda-group-arrow,
 	.components-button {
 		position: relative;
 		padding: 16px;
@@ -54,7 +54,7 @@
 		color: #444;
 	}
 
-	.woo-dash__agenda-group-arrow .dashicon,
+	.woocommerce-dashboard__agenda-group-arrow .dashicon,
 	.components-icon-button {
 		overflow: visible;
 	}
@@ -84,7 +84,7 @@
 	}
 }
 
-.woo-dash__agenda-item-wrapper {
+.woocommerce-dashboard__agenda-item-wrapper {
 	display: flex;
 	flex: 1;
 	flex-direction: row;
@@ -96,6 +96,6 @@
 	}
 }
 
-.woo-dash__agenda-item-content {
+.woocommerce-dashboard__agenda-item-content {
 	max-width: 75%;
 }

@@ -20,7 +20,7 @@ class EllipsisMenu extends Component {
 		}
 
 		const renderToggle = ( { onToggle, isOpen } ) => {
-			const toggleClassname = classnames( 'woo-dash__ellipsis-menu-toggle', {
+			const toggleClassname = classnames( 'woocommerce-ellipsis-menu__toggle', {
 				'is-opened': isOpen,
 			} );
 
@@ -36,13 +36,13 @@ class EllipsisMenu extends Component {
 		};
 
 		const renderContent = () => (
-			<NavigableMenu className="woo-dash__ellipsis-menu-content">{ children }</NavigableMenu>
+			<NavigableMenu className="woocommerce-ellipsis-menu__content">{ children }</NavigableMenu>
 		);
 
 		return (
-			<div className="woo-dash__ellipsis-menu">
+			<div className="woocommerce-ellipsis-menu">
 				<Dropdown
-					contentClassName="woo-dash__ellipsis-menu-popover"
+					contentClassName="woocommerce-ellipsis-menu__popover"
 					position="bottom left"
 					renderToggle={ renderToggle }
 					renderContent={ renderContent }

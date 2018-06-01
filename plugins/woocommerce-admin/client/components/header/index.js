@@ -34,7 +34,7 @@ const Header = ( { sections, onToggle, isSidebarOpen } ) => {
 	);
 
 	return (
-		<div className="woo-dash__header">
+		<div className="woocommerce-header">
 			<h1>
 				<span>
 					<Link to="/">WooCommerce</Link>
@@ -48,9 +48,9 @@ const Header = ( { sections, onToggle, isSidebarOpen } ) => {
 					return <span key={ i }>{ sectionPiece }</span>;
 				} ) }
 			</h1>
-			<div className="woo-dash__header-toggle">
+			<div className="woocommerce-header__toggle">
 				<IconButton
-					className="woo-dash__header-button"
+					className="woocommerce-header__button"
 					onClick={ onToggle }
 					icon="clock"
 					label={ __( 'Show Sidebar', 'woo-dash' ) }

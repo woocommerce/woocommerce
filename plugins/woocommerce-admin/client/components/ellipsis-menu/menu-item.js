@@ -37,7 +37,7 @@ class MenuItem extends Component {
 				tabIndex="0"
 				onKeyDown={ this.onKeyDown }
 				onClick={ this.onClick }
-				className="woo-dash__ellipsis-menu-item"
+				className="woocommerce-ellipsis-menu__item"
 			>
 				{ children }
 			</div>

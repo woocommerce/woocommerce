@@ -1,5 +1,5 @@
 /** @format */
-.woo-dashboard {
+.woocommerce-layout {
 	margin: 0;
 	padding: 0;
 	min-height: calc(100vh - 32px);
@@ -10,22 +10,22 @@
 	}
 }
 
-.woo-dash__header {
+.woocommerce-header {
 	min-height: 47px;
 	margin: 0;
 	padding: 8px 16px 8px 16px;
 }
 
-.woo-dash__primary {
+.woocommerce-layout__primary {
 	margin: 20px 0 0 20px;
 
-	.woo-dash__main {
+	.woocommerce-layout__main {
 		margin: 0 auto;
 		max-width: 640px;
 	}
 }
 
-.woo-dashboard.has-visible-sidebar {
+.woocommerce-layout.has-visible-sidebar {
 	display: grid;
 	grid-template-columns: auto 360px;
 	grid-template-rows: 47px auto;
@@ -35,7 +35,7 @@
 		display: block;
 	}
 
-	.woo-dash__header {
+	.woocommerce-header {
 		grid-column: 1/span 2;
 	}
 }
@@ -59,11 +59,11 @@
 	}
 }
 
-.woo-dashboard.has-hidden-sidebar .woo-dash__secondary {
+.woocommerce-layout.has-hidden-sidebar .woocommerce-layout__secondary {
 	@include hidden-sidebar;
 }
 
-.woo-dash__secondary {
+.woocommerce-layout__secondary {
 	background: $gray;
 	border-left: 1px solid $gray;
 	min-height: calc(100vh - 32px);
@@ -75,7 +75,7 @@
 		height: calc(100vh - 46px);
 	}
 
-	.woo-dash__sidebar-top {
+	.woocommerce-layout__sidebar-top {
 		display: flex;
 		justify-content: space-between;
 	}
@@ -83,13 +83,13 @@
 
 // Hide the toggle buttons on larger screens (if the sidebar should be visible)
 @include breakpoint( '>782px' ) {
-	.woo-dashboard.has-visible-sidebar .woo-dash__header-toggle,
-	.woo-dashboard.has-visible-sidebar .woo-dash__sidebar-toggle {
+	.woocommerce-layout.has-visible-sidebar .woocommerce-header__toggle,
+	.woocommerce-layout.has-visible-sidebar .woocommerce-layout__sidebar-toggle {
 		display: none;
 	}
 }
 
-.woo-dash__sidebar-tabs {
+.woocommerce-layout__sidebar-tabs {
 	min-height: inherit;
 
 	.components-tab-panel__tabs {
@@ -106,7 +106,7 @@
 		padding: 2em;
 	}
 
-	.woo-dash__sidebar-tab {
+	.woocommerce-layout__sidebar-tab {
 		border: none;
 		outline: none;
 		cursor: pointer;
@@ -126,12 +126,12 @@
 }
 
 // @TODO remove this?
-.woo-dash__widget {
+.woocommerce-dashboard__widget {
 	display: flex;
 	align-items: center;
 	text-align: center;
 }
 
-.woo-dash__widget-item {
+.woocommerce-dashboard__widget-item {
 	flex: 1;
 }

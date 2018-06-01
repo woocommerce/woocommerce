@@ -1,6 +1,6 @@
 /** @format */
 
-.woo-dash__segmented-selection {
+.woocommerce-segmented-selection {
 	width: 100%;
 	grid-template-columns: 1fr 1fr;
 	display: grid;
@@ -10,7 +10,7 @@
 	background-color: $gray;
 }
 
-.woo-dash__segmented-selection-label {
+.woocommerce-segmented-selection__label {
 	background-color: $white;
 	padding: 1em;
 	position: relative;
@@ -18,12 +18,12 @@
 	height: 100%;
 }
 
-.woo-dash__segmented-selection-input {
+.woocommerce-segmented-selection__input {
 	opacity: 0;
 	position: absolute;
 	left: -9999px;
 
-	&:checked + label .woo-dash__segmented-selection-label {
+	&:checked + label .woocommerce-segmented-selection__label {
 		background-color: $gray-light-10;
 		padding-left: calc(1em + 20px);
 
@@ -39,7 +39,7 @@
 		}
 	}
 
-	&:focus + label .woo-dash__segmented-selection-label {
+	&:focus + label .woocommerce-segmented-selection__label {
 		outline: 1px solid lightseagreen;
 	}
 }
