@@ -378,12 +378,18 @@ const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
 		query.on_sale = 1;
 	}
 
-	// @todo Add support for orderby by sales, rating, and price here when we switch to V3 API.
-	if ( supportsOrderby( display ) && ( 'title' === orderby || 'date' === orderby ) ) {
-		query.orderby = orderby;
-
-		if ( 'title' === orderby ) {
+	if ( supportsOrderby( display ) ) {
+		if ( 'price_desc' === orderby ) {
+			query.orderby = 'price';
+			query.order = 'desc';
+		} else if ( 'price_asc' === orderby ) {
+			query.orderby = 'price';
 			query.order = 'asc';
+		} else if ( 'title' === orderby ) {
+			query.orderby = 'title';
+			query.order = 'asc';
+		} else {
+			query.orderby = orderby;
 		}
 	}
 
@@ -393,7 +399,8 @@ const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
 	}
 
 	return {
-		products: '/wc/v2/products' + query_string
+		// @todo Switch this to use WC core API when possible.
+		products: '/wgbp/v3/products' + query_string
 	};
 
 } )( ( { products, attributes } ) => {
