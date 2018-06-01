@@ -21,6 +21,7 @@ function wgpb_initialize() {
 
 	if ( function_exists( 'register_block_type' ) ) {
 		add_action( 'init', 'wgpb_register_products_block' );
+		add_action( 'rest_api_init', 'wgpb_register_api_routes' );
 	}
 
 }
@@ -74,6 +75,17 @@ function wgpb_extra_gutenberg_scripts() {
 	);
 }
 add_action( 'enqueue_block_editor_assets', 'wgpb_extra_gutenberg_scripts' );
+
+/**
+ * Register extra API routes with functionality not available in WC core yet.
+ *
+ * @todo Remove this function when merging into core because it won't be necessary.
+ */
+function wgpb_register_api_routes() {
+	include_once( dirname( __FILE__ ) . '/includes/class-wgpb-products-controller.php' );
+	$controller = new WGPB_Products_Controller();
+	$controller->register_routes();
+}
 
 /**
  * Brings some extra required shortcode features from WC core 3.4+ to this feature plugin.
