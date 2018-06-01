@@ -25,12 +25,15 @@ class WC_Privacy_Exporters {
 		$data_to_export = array();
 
 		if ( $user instanceof WP_User ) {
-			$data_to_export[] = array(
-				'group_id'    => 'woocommerce_customer',
-				'group_label' => __( 'Customer Data', 'woocommerce' ),
-				'item_id'     => 'user',
-				'data'        => self::get_customer_personal_data( $user ),
-			);
+			$customer_personal_data = self::get_customer_personal_data( $user );
+			if ( ! empty( $customer_personal_data ) ) {
+				$data_to_export[] = array(
+					'group_id'    => 'woocommerce_customer',
+					'group_label' => __( 'Customer Data', 'woocommerce' ),
+					'item_id'     => 'user',
+					'data'        => $customer_personal_data,
+				);
+			}
 		}
 
 		return array(
