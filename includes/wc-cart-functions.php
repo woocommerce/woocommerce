@@ -280,7 +280,7 @@ function wc_cart_totals_coupon_html( $coupon ) {
 	$amount               = WC()->cart->get_coupon_discount_amount( $coupon->get_code(), WC()->cart->display_cart_ex_tax );
 	$discount_amount_html = '-' . wc_price( $amount );
 
-	if ( $coupon->get_free_shipping() ) {
+	if ( $coupon->get_free_shipping() && ! apply_filters( 'woocommerce_coupon_show_discount_amount', ! empty( $amount ), $coupon ) ) {
 		$discount_amount_html = __( 'Free shipping coupon', 'woocommerce' );
 	}
 
