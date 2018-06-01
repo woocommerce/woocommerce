@@ -90,10 +90,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 var __ = wp.i18n.__;
 var RawHTML = wp.element.RawHTML;
-var _wp$blocks = wp.blocks,
-    registerBlockType = _wp$blocks.registerBlockType,
-    InspectorControls = _wp$blocks.InspectorControls,
-    BlockControls = _wp$blocks.BlockControls;
+var registerBlockType = wp.blocks.registerBlockType;
+var _wp$editor = wp.editor,
+    InspectorControls = _wp$editor.InspectorControls,
+    BlockControls = _wp$editor.BlockControls;
 var _wp$components = wp.components,
     Toolbar = _wp$components.Toolbar,
     withAPIData = _wp$components.withAPIData,
@@ -1058,13 +1058,11 @@ var ProductsBlock = function (_React$Component5) {
 	}, {
 		key: 'render',
 		value: function render() {
-			var _props5 = this.props,
-			    attributes = _props5.attributes,
-			    focus = _props5.focus;
+			var attributes = this.props.attributes;
 			var edit_mode = attributes.edit_mode;
 
 
-			return [!!focus ? this.getInspectorControls() : null, !!focus ? this.getToolbarControls() : null, edit_mode ? this.getSettingsEditor() : this.getPreview()];
+			return [this.getInspectorControls(), this.getToolbarControls(), edit_mode ? this.getSettingsEditor() : this.getPreview()];
 		}
 	}]);
 

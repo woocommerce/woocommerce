@@ -1,6 +1,7 @@
 const { __ } = wp.i18n;
 const { RawHTML } = wp.element;
-const { registerBlockType, InspectorControls, BlockControls } = wp.blocks;
+const { registerBlockType } = wp.blocks;
+const { InspectorControls, BlockControls } = wp.editor;
 const { Toolbar, withAPIData, Dropdown, Dashicon, RangeControl, Tooltip, SelectControl } = wp.components;
 
 import { ProductsSpecificSelect } from './views/specific-select.jsx';
@@ -705,12 +706,12 @@ class ProductsBlock extends React.Component {
 	}
 
 	render() {
-		const { attributes, focus } = this.props;
+		const { attributes } = this.props;
 		const { edit_mode } = attributes;
 
 		return [
-			( !! focus ) ? this.getInspectorControls() : null,
-			( !! focus ) ? this.getToolbarControls() : null,
+			this.getInspectorControls(),
+			this.getToolbarControls(),
 			edit_mode ? this.getSettingsEditor() : this.getPreview(),
 		];
 	}
