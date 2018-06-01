@@ -22,4 +22,4 @@ export default function myCount() {
 Name | Type | Default | Description
 --- | --- | --- | ---
 `count`* | `number` | none | Value of the number to be displayed
-
+`label` | `string` | "Total {props.count}" | A translated label with the number in context, used for screen readers

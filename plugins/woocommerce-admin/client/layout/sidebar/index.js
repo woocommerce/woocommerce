@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import classnames from 'classnames';
 import { Component, Fragment } from '@wordpress/element';
 import { IconButton, TabPanel } from '@wordpress/components';
@@ -32,7 +32,8 @@ class Sidebar extends Component {
 				name: 'orders',
 				title: (
 					<span>
-						{ __( 'Orders', 'woo-dash' ) } <Count count={ 1 } />
+						{ __( 'Orders', 'woo-dash' ) }{' '}
+						<Count count={ 1 } label={ sprintf( __( '%d Unfulfilled', 'woo-dash' ), 3 ) } />
 					</span>
 				),
 				className: 'woocommerce-layout__sidebar-tab',
