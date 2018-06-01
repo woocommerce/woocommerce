@@ -85,7 +85,7 @@
 			}
 		});
 
-		$( '.submit input' ).click( function() {
+		$( '.submit button' ).click( function() {
 			window.onbeforeunload = '';
 		});
 	});
