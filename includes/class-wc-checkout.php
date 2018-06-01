@@ -645,8 +645,9 @@ class WC_Checkout {
 	 */
 	protected function validate_posted_data( &$data, &$errors ) {
 		foreach ( $this->get_checkout_fields() as $fieldset_key => $fieldset ) {
+			$validate_fieldset = true;
 			if ( $this->maybe_skip_fieldset( $fieldset_key, $data ) ) {
-				continue;
+				$validate_fieldset = false;
 			}
 
 			foreach ( $fieldset as $key => $field ) {
@@ -672,7 +673,7 @@ class WC_Checkout {
 					$country      = isset( $data[ $fieldset_key . '_country' ] ) ? $data[ $fieldset_key . '_country' ] : WC()->customer->{"get_{$fieldset_key}_country"}();
 					$data[ $key ] = wc_format_postcode( $data[ $key ], $country );
 
-					if ( '' !== $data[ $key ] && ! WC_Validation::is_postcode( $data[ $key ], $country ) ) {
+					if ( $validate_fieldset && '' !== $data[ $key ] && ! WC_Validation::is_postcode( $data[ $key ], $country ) ) {
 						switch ( $country ) {
 							case 'IE':
 								/* translators: %1$s: field name, %2$s finder.eircode.ie URL */
@@ -689,7 +690,7 @@ class WC_Checkout {
 				if ( in_array( 'phone', $format, true ) ) {
 					$data[ $key ] = wc_format_phone_number( $data[ $key ] );
 
-					if ( '' !== $data[ $key ] && ! WC_Validation::is_phone( $data[ $key ] ) ) {
+					if ( $validate_fieldset && '' !== $data[ $key ] && ! WC_Validation::is_phone( $data[ $key ] ) ) {
 						/* translators: %s: phone number */
 						$errors->add( 'validation', sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ) );
 					}
@@ -698,7 +699,7 @@ class WC_Checkout {
 				if ( in_array( 'email', $format, true ) && '' !== $data[ $key ] ) {
 					$data[ $key ] = sanitize_email( $data[ $key ] );
 
-					if ( ! is_email( $data[ $key ] ) ) {
+					if ( $validate_fieldset && ! is_email( $data[ $key ] ) ) {
 						/* translators: %s: email address */
 						$errors->add( 'validation', sprintf( __( '%s is not a valid email address.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ) );
 						continue;
@@ -718,14 +719,14 @@ class WC_Checkout {
 							$data[ $key ] = $valid_state_values[ $data[ $key ] ];
 						}
 
-						if ( ! in_array( $data[ $key ], $valid_state_values, true ) ) {
+						if ( $validate_fieldset && ! in_array( $data[ $key ], $valid_state_values, true ) ) {
 							/* translators: 1: state field 2: valid states */
 							$errors->add( 'validation', sprintf( __( '%1$s is not valid. Please enter one of the following: %2$s', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>', implode( ', ', $valid_states ) ) );
 						}
 					}
 				}
 
-				if ( $required && '' === $data[ $key ] ) {
+				if ( $validate_fieldset && $required && '' === $data[ $key ] ) {
 					/* translators: %s: field name */
 					$errors->add( 'required-field', apply_filters( 'woocommerce_checkout_required_field_notice', sprintf( __( '%s is a required field.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ), $field_label ) );
 				}
