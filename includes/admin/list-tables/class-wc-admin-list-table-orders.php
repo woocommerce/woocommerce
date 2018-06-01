@@ -623,7 +623,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	 * @return string
 	 */
 	public function handle_bulk_actions( $redirect_to, $action, $ids ) {
-		$ids     = array_map( 'absint', $ids );
+		$ids     = array_reverse( array_map( 'absint', $ids ) );
 		$changed = 0;
 
 		if ( 'remove_personal_data' === $action ) {
