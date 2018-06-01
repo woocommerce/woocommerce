@@ -2,7 +2,6 @@
 /**
  * External dependencies
  */
-import { addFilter } from '@wordpress/hooks';
 import { APIProvider } from '@wordpress/components';
 import { pick } from 'lodash';
 import { render } from '@wordpress/element';
@@ -25,8 +24,3 @@ render(
 	</APIProvider>,
 	document.getElementById( 'root' )
 );
-
-function editText( string ) {
-	return `Filtered: ${ string }`;
-}
-addFilter( 'woodash.example', 'editText', editText );
