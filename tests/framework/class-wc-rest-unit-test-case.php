@@ -26,7 +26,8 @@
      */
     public function tearDown() {
         parent::tearDown();
-        global $wp_rest_server;
+		global $wp_rest_server;
+		unset( $this->server );
         $wp_rest_server = null;
     }
 }
