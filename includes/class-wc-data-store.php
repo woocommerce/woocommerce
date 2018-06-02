@@ -119,6 +119,7 @@ class WC_Data_Store {
 
 	/**
 	 * Re-run the constructor with the object type.
+	 * @throws Exception
 	 */
 	public function __wakeup() {
 		$this->__construct( $this->object_type );
@@ -131,6 +132,7 @@ class WC_Data_Store {
 	 *
 	 * @since 3.0.0
 	 * @return WC_Data_Store
+	 * @throws Exception
 	 */
 	public static function load( $object_type ) {
 		return new WC_Data_Store( $object_type );
