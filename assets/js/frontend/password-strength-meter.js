@@ -106,6 +106,10 @@
 				case 5 :
 					meter.addClass( 'short' ).html( pwsL10n.mismatch );
 					break;
+				default:
+                    meter.addClass( 'bad' ).html( pwsL10n.bad + error );
+                    meter.after( hint_html );
+                    break;
 			}
 
 			return strength;
