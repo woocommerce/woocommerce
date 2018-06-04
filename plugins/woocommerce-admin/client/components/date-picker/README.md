@@ -6,7 +6,7 @@ Select a range of dates or single dates
 ## Usage
 
 ```jsx
-<DatePicker period="last_week" compare="previous_year" />
+<DatePicker query={ query } path={ path } />
 ```
 
 ### Props
@@ -15,7 +15,17 @@ Required props are marked with `*`.
 
 Name | Type | Default | Description
 --- | --- | --- | ---
-`period`* | `string` | none | Selected period. `today`, `yesterday`, `week`, `last_week`, `month`, `last_month`, `quarter`, `last_quarter`, `year`, `last_year`, `custom`
-`compare`* | `string` | none | Selected period to compare. `previous_period`, `previous_year`
-`start` | `string` | none | If a `custom` period is selected, this is the start date
-`end` | `string` | none | If a `custom` period is selected, this is the end date
+`query`* | `object` | none | The query string represented in object form
+`path`* | `string` | none | `path` parameter supplied by React-Router
+
+## URL as the source of truth
+
+The Date Picker reads parameters from the URL querystring and updates them by creating a link to reflect newly selected parameters, which is rendered as the "Update" button.
+ 
+ URL Parameter | Default | Possible Values
+ --- | --- | ---
+ `period` | `today` | `today`, `yesterday`, `week`, `last_week`, `month`, `last_month`, `quarter`, `last_quarter`, `year`, `last_year`, `custom`
+ `compare` | `previous_period` | `previous_period`, `previous_year`
+ `start` | none | start date for custom periods `2018-04-15`. [ISO 8601 format](https://en.wikipedia.org/wiki/ISO_8601)
+ `end` | none | end date for custom periods `2018-04-15`. [ISO 8601 format](https://en.wikipedia.org/wiki/ISO_8601)
+

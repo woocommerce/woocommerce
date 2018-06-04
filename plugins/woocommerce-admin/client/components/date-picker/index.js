@@ -2,107 +2,107 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
-import { Component, Fragment } from '@wordpress/element';
-import { Button, TabPanel } from '@wordpress/components';
-import { partial } from 'lodash';
+import { Component } from '@wordpress/element';
+import { Button, Dropdown } from '@wordpress/components';
+import { stringify as stringifyQueryObject } from 'qs';
+import moment from 'moment';
+import PropTypes from 'prop-types';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import SegmentedSelection from 'components/segmented-selection';
-import PresetPeriods from './preset-periods';
+import DatePickerContent from './content';
+import { getDateValues } from 'lib/date-utils';
 
 class DatePicker extends Component {
 	constructor( props ) {
 		super( props );
-		/**
-		 * Getting initial data from props here, but they will come from the url
-		 * Defaults can be added here
-		 */
-		const { period, compare, start, end } = props;
-		const state = {
-			period,
-			compare: compare,
-		};
-		if ( 'custom' === period ) {
-			Object.assign( state, { start, end } );
-		}
-		this.state = state;
-		this.update = this.update.bind( this );
+		this.state = this.addQueryDefaults( props.query );
 		this.select = this.select.bind( this );
+		this.getUpdatePath = this.getUpdatePath.bind( this );
+	}
+
+	addQueryDefaults( { period, compare, start, end } ) {
+		// @TODO: What are the default `start` and `end` for custom dates, if at all?
+		return {
+			period: period || 'today',
+			compare: compare || 'previous_period',
+			start: start ? moment( start ) : undefined,
+			end: end ? moment( end ) : undefined,
+		};
 	}
 
 	select( key, value ) {
 		this.setState( { [ key ]: value } );
 	}
 
-	update( selectedTab ) {
+	getUpdatePath( selectedTab ) {
+		const { path, query } = this.props;
+		const { period, compare, start, end, ...otherQueries } = query; // eslint-disable-line no-unused-vars
 		const data = {
 			period: 'custom' === selectedTab ? 'custom' : this.state.period,
 			compare: this.state.compare,
 		};
-		// This would be set as a result of the custom date picker, placing here as an example
+		// `start` and `end` would be added as a result of the custom date picker. Adding here as an example
 		if ( 'custom' === selectedTab ) {
-			Object.assign( data, { start: 'a date', end: 'another date' } );
+			Object.assign( data, { start: '2018-04-15', end: '2018-04-29' } );
 		}
-		console.log( data );
+		const queryString = stringifyQueryObject( Object.assign( otherQueries, data ) );
+		return `${ path }?${ queryString }`;
 	}
 
-	render() {
-		const { period, compare } = this.state;
-		const compareToString = __( 'compare to', 'woo-dash' );
+	getButtonLabel() {
+		const queryWithDefaults = this.addQueryDefaults( this.props.query );
+		const { primary, secondary } = getDateValues( queryWithDefaults );
 		return (
-			<div className="woocommerce-date-picker">
-				<h3 className="woocommerce-date-picker__text">
-					{ __( 'select a date range', 'woo-dash' ) }
-				</h3>
-				<TabPanel
-					tabs={ [
-						{
-							name: 'period',
-							title: __( 'Presets', 'woo-dash' ),
-							className: 'woocommerce-date-picker__tab',
-						},
-						{
-							name: 'custom',
-							title: __( 'Custom', 'woo-dash' ),
-							className: 'woocommerce-date-picker__tab',
-						},
-					] }
-					className="woocommerce-date-picker__tabs"
-					activeClass="is-active"
-				>
-					{ selectedTab => (
-						<Fragment>
-							{ selectedTab === 'period' && (
-								<PresetPeriods onSelect={ this.select } period={ period } />
-							) }
-							{ selectedTab === 'custom' && <div>Custom Date Picker Goes here</div> }
-							<h3 className="woocommerce-date-picker__text">{ compareToString }</h3>
-							<SegmentedSelection
-								options={ [
-									{ value: 'previous_period', label: __( 'Previous Period', 'woo-dash' ) },
-									{ value: 'previous_year', label: __( 'Previous Year', 'woo-dash' ) },
-								] }
-								selected={ compare }
-								onSelect={ this.select }
-								name="compare"
-								legend={ compareToString }
-							/>
-							<Button
-								className="woocommerce-date-picker__update-btn"
-								onClick={ partial( this.update, selectedTab ) }
-							>
-								{ __( 'Update', 'woo-dash' ) }
-							</Button>
-						</Fragment>
-					) }
-				</TabPanel>
+			<div className="woocommerce-date-picker__toggle-label">
+				<p>
+					{ primary.label } ({ primary.range })
+				</p>
+				<p>
+					vs. { secondary.label } ({ secondary.range })
+				</p>
 			</div>
 		);
 	}
+
+	render() {
+		const { period, compare, start, end } = this.state;
+		return (
+			<Dropdown
+				className="woocommerce-date-picker"
+				contentClassName="woocommerce-date-picker__content"
+				position="bottom"
+				expandOnMobile
+				renderToggle={ ( { isOpen, onToggle } ) => (
+					<Button
+						className="woocommerce-date-picker__toggle"
+						onClick={ onToggle }
+						aria-expanded={ isOpen }
+					>
+						{ this.getButtonLabel() }
+					</Button>
+				) }
+				renderContent={ ( { onClose } ) => (
+					<DatePickerContent
+						period={ period }
+						compare={ compare }
+						start={ start }
+						end={ end }
+						onSelect={ this.select }
+						onClose={ onClose }
+						getUpdatePath={ this.getUpdatePath }
+					/>
+				) }
+			/>
+		);
+	}
 }
+
+DatePicker.propTypes = {
+	path: PropTypes.string.isRequired,
+	query: PropTypes.object.isRequired,
+};
 
 export default DatePicker;
