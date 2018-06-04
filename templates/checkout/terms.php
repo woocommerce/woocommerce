@@ -18,7 +18,7 @@ if ( apply_filters( 'woocommerce_checkout_show_terms', true ) && function_exists
 		 * Terms and conditions hook used to inject content.
 		 *
 		 * @since 3.4.0.
-		 * @hooked wc_privacy_policy_text() Shows custom privacy policy text. Priority 20.
+		 * @hooked wc_checkout_privacy_policy_text() Shows custom privacy policy text. Priority 20.
 		 * @hooked wc_terms_and_conditions_page_content() Shows t&c page content. Priority 30.
 		 */
 		do_action( 'woocommerce_checkout_terms_and_conditions' );
