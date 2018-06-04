@@ -1324,7 +1324,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$shipping_tax_class = count( $found_classes ) ? current( $found_classes ) : false;
 		}
 
-		$is_vat_exempt = apply_filters( 'woocommerce_order_is_vat_exempt', 'yes' === $this->get_meta( 'is_vat_exempt' ) );
+		$is_vat_exempt = apply_filters( 'woocommerce_order_is_vat_exempt', 'yes' === $this->get_meta( 'is_vat_exempt' ), $this );
 
 		// Trigger tax recalculation for all items.
 		foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
