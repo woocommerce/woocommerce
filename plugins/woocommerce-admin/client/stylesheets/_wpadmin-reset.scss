@@ -51,7 +51,19 @@
 }
 
 .woocommerce__admin-notice-list-hide {
-	display: none;
+	opacity: 0;
+	height: 0;
+	overflow: hidden;
+}
+
+.woocommerce__admin-notice-list-show {
+	opacity: 1;
+	height: auto;
+	transition: all 1s ease-in-out;
+}
+
+.wp-header-end {
+	margin: 0;
 }
 
 #wpfooter {

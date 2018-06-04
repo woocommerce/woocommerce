@@ -14,6 +14,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import './style.scss';
+import WordPressNotices from './wordpress-notices';
 
 const Header = ( { sections, onToggle, isSidebarOpen } ) => {
 	const _sections = isArray( sections ) ? sections : [ sections ];
@@ -48,14 +49,17 @@ const Header = ( { sections, onToggle, isSidebarOpen } ) => {
 					return <span key={ i }>{ sectionPiece }</span>;
 				} ) }
 			</h1>
-			<div className="woocommerce-header__toggle">
-				<IconButton
-					className="woocommerce-header__button"
-					onClick={ onToggle }
-					icon="clock"
-					label={ __( 'Show Sidebar', 'woo-dash' ) }
-					aria-expanded={ isSidebarOpen }
-				/>
+			<div className="woocommerce-header__buttons">
+				<div className="woocommerce-header__toggle">
+					<IconButton
+						className="woocommerce-header__button"
+						onClick={ onToggle }
+						icon="clock"
+						label={ __( 'Show Sidebar', 'woo-dash' ) }
+						aria-expanded={ isSidebarOpen }
+					/>
+				</div>
+				<WordPressNotices />
 			</div>
 		</div>
 	);
