@@ -788,6 +788,11 @@ class WC_Countries {
 							'label'    => __( 'Province', 'woocommerce' ),
 						),
 					),
+					'BH' => array(
+						'state' => array(
+							'required' => false,
+						),
+					),
 					'BI' => array(
 						'state' => array(
 							'required' => false,
