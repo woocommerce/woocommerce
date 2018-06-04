@@ -10,6 +10,26 @@
 defined( 'ABSPATH' ) || exit;
 
 global $product;
+
+if ( ! $product->is_purchasable() ) {
+	// variable product is not purchasable.
+	// check if all variations are not purchasable.
+	$variations_ids = $product->get_children();
+	$is_one_purchasable = false;
+	foreach ( $variations_ids as $variation_id ) {
+		$variation = wc_get_product( $variation_id );
+		if ( $variation && $variation->is_purchasable() ) {
+			$is_one_purchasable = true;
+			break;
+		}
+	}
+	// if at least one variation is purchasable we show the add to cart button.
+	// else we can omit it.
+	if ( ! $is_one_purchasable ) {
+		return;
+	}
+}
+
 ?>
 <div class="woocommerce-variation-add-to-cart variations_button">
 	<?php do_action( 'woocommerce_before_add_to_cart_button' ); ?>
