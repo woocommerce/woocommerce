@@ -337,7 +337,7 @@ const ProductSpecificSelectedProducts = withAPIData( ( props ) => {
 			const productData = PRODUCT_DATA[ productId ];
 
 			productElements.push(
-				<li className="wc-products-list-card__item">
+				<li className="wc-products-list-card__item" key={ productData.id + '-specific-select-edit' } >
 					<div className="wc-products-list-card__content">
 						<img src={ productData.images[0].src } />
 						<span className="wc-products-list-card__content-item-name">{ productData.name }</span>

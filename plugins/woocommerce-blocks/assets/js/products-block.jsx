@@ -340,7 +340,7 @@ class ProductPreview extends React.Component {
 		}
 
 		return (
-			<div className="product-preview">
+			<div className="product-preview" key={ product.id + '-preview' } >
 				{ image }
 				<div className="product-title">{ product.name }</div>
 				<div className="product-price" dangerouslySetInnerHTML={ { __html: product.price_html } } />
