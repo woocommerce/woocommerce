@@ -552,7 +552,7 @@ var ProductPreview = function (_React$Component4) {
 
 			return wp.element.createElement(
 				'div',
-				{ className: 'product-preview' },
+				{ className: 'product-preview', key: product.id + '-preview' },
 				image,
 				wp.element.createElement(
 					'div',
@@ -1802,7 +1802,7 @@ var ProductSpecificSelectedProducts = withAPIData(function (props) {
 
 		productElements.push(wp.element.createElement(
 			'li',
-			{ className: 'wc-products-list-card__item' },
+			{ className: 'wc-products-list-card__item', key: productData.id + '-specific-select-edit' },
 			wp.element.createElement(
 				'div',
 				{ className: 'wc-products-list-card__content' },
