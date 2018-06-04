@@ -544,8 +544,27 @@ class WC_Install {
 			$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_type (comment_type)" );
 		}
 
-		// Add constraint to download logs.
-		$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log ADD FOREIGN KEY (permission_id) REFERENCES {$wpdb->prefix}woocommerce_downloadable_product_permissions(permission_id) ON DELETE CASCADE" );
+		// Get tables data types and check it matches before adding constraint.
+		$download_log_columns         = $wpdb->get_results( "SHOW COLUMNS FROM {$wpdb->prefix}wc_download_log", ARRAY_A );
+		$download_log_column_type     = '';
+		foreach ( $download_log_columns as $column ) {
+			if ( isset( $column['Field'], $column['Type'] ) && 'permission_id' === $column['Field'] ) {
+				$download_log_column_type = $column['Type'];
+			}
+		}
+
+		$download_permissions_columns     = $wpdb->get_results( "SHOW COLUMNS FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions", ARRAY_A );
+		$download_permissions_column_type = '';
+		foreach ( $download_permissions_columns as $column ) {
+			if ( isset( $column['Field'], $column['Type'] ) && 'permission_id' === $column['Field'] ) {
+				$download_permissions_column_type = $column['Type'];
+			}
+		}
+
+		// Add constraint to download logs if the columns matches.
+		if ( ! empty( $download_permissions_column_type ) && ! empty( $download_log_column_type ) && $download_permissions_column_type === $download_log_column_type ) {
+			$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log ADD FOREIGN KEY (permission_id) REFERENCES {$wpdb->prefix}woocommerce_downloadable_product_permissions(permission_id) ON DELETE CASCADE" );
+		}
 	}
 
 	/**
