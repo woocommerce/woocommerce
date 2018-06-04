@@ -1142,6 +1142,10 @@ class WC_Helper {
 		}
 
 		set_transient( $cache_key, $data, 1 * HOUR_IN_SECONDS );
+
+		// Make sure updates in WP are in sync with the latest updates.
+		self::_flush_updates_cache();
+
 		return $data;
 	}
 
