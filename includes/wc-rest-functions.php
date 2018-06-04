@@ -227,9 +227,9 @@ function wc_rest_validate_reports_request_arg( $value, $request, $param ) {
 function wc_rest_urlencode_rfc3986( $value ) {
 	if ( is_array( $value ) ) {
 		return array_map( 'wc_rest_urlencode_rfc3986', $value );
-	} else {
-		return str_replace( array( '+', '%7E' ), array( ' ', '~' ), rawurlencode( $value ) );
 	}
+
+	return str_replace( array( '+', '%7E' ), array( ' ', '~' ), rawurlencode( $value ) );
 }
 
 /**

@@ -38,6 +38,7 @@ add_filter( 'woocommerce_coupon_code', 'sanitize_text_field' );
 add_filter( 'woocommerce_coupon_code', 'wc_strtolower' );
 add_filter( 'woocommerce_stock_amount', 'intval' ); // Stock amounts are integers by default.
 add_filter( 'woocommerce_shipping_rate_label', 'sanitize_text_field' ); // Shipping rate label.
+add_filter( 'woocommerce_attribute_label', 'wp_kses_post', 100 );
 
 /**
  * Short Description (excerpt).
@@ -58,7 +59,7 @@ add_filter( 'woocommerce_short_description', array( $GLOBALS['wp_embed'], 'run_s
  *
  * @since 3.0.0
  * @param string $name  Constant name.
- * @param string $value Value.
+ * @param mixed  $value Value.
  */
 function wc_maybe_define_constant( $name, $value ) {
 	if ( ! defined( $name ) ) {
@@ -1135,11 +1136,11 @@ endif;
  * @return string
  */
 function wc_rand_hash() {
-	if ( function_exists( 'openssl_random_pseudo_bytes' ) ) {
-		return bin2hex( openssl_random_pseudo_bytes( 20 ) ); // @codingStandardsIgnoreLine
-	} else {
+	if ( ! function_exists( 'openssl_random_pseudo_bytes' ) ) {
 		return sha1( wp_rand() );
 	}
+
+	return bin2hex( openssl_random_pseudo_bytes( 20 ) ); // @codingStandardsIgnoreLine
 }
 
 /**
@@ -1585,16 +1586,17 @@ function wc_remove_number_precision( $value ) {
  * @since  3.2.0
  * @param  array $value Number to add precision to.
  * @param  bool  $round Should we round after adding precision?.
- * @return int
+ * @return int|array
  */
 function wc_add_number_precision_deep( $value, $round = true ) {
-	if ( is_array( $value ) ) {
-		foreach ( $value as $key => $subvalue ) {
-			$value[ $key ] = wc_add_number_precision_deep( $subvalue, $round );
-		}
-	} else {
-		$value = wc_add_number_precision( $value, $round );
+	if ( ! is_array( $value ) ) {
+		return wc_add_number_precision( $value, $round );
 	}
+
+	foreach ( $value as $key => $sub_value ) {
+		$value[ $key ] = wc_add_number_precision_deep( $sub_value, $round );
+	}
+
 	return $value;
 }
 
@@ -1603,16 +1605,17 @@ function wc_add_number_precision_deep( $value, $round = true ) {
  *
  * @since  3.2.0
  * @param  array $value Number to add precision to.
- * @return int
+ * @return int|array
  */
 function wc_remove_number_precision_deep( $value ) {
-	if ( is_array( $value ) ) {
-		foreach ( $value as $key => $subvalue ) {
-			$value[ $key ] = wc_remove_number_precision_deep( $subvalue );
-		}
-	} else {
-		$value = wc_remove_number_precision( $value );
+	if ( ! is_array( $value ) ) {
+		return wc_remove_number_precision( $value );
 	}
+
+	foreach ( $value as $key => $sub_value ) {
+		$value[ $key ] = wc_remove_number_precision_deep( $sub_value );
+	}
+
 	return $value;
 }
 
@@ -1928,6 +1931,10 @@ add_filter( 'extra_plugin_headers', 'wc_enable_wc_plugin_headers' );
  * @return bool
  */
 function wc_prevent_dangerous_auto_updates( $should_update, $plugin ) {
+	if ( ! isset( $plugin->plugin, $plugin->new_version ) ) {
+		return $should_update;
+	}
+
 	if ( 'woocommerce/woocommerce.php' !== $plugin->plugin ) {
 		return $should_update;
 	}
@@ -2079,11 +2086,13 @@ function wc_decimal_to_fraction( $decimal ) {
 function wc_round_discount( $value, $precision ) {
 	if ( version_compare( PHP_VERSION, '5.3.0', '>=' ) ) {
 		return round( $value, $precision, WC_DISCOUNT_ROUNDING_MODE ); // phpcs:ignore PHPCompatibility.PHP.NewFunctionParameters.round_modeFound
-	} elseif ( 2 === WC_DISCOUNT_ROUNDING_MODE ) {
-		return wc_legacy_round_half_down( $value, $precision );
-	} else {
-		return round( $value, $precision );
 	}
+
+	if ( 2 === WC_DISCOUNT_ROUNDING_MODE ) {
+		return wc_legacy_round_half_down( $value, $precision );
+	}
+
+	return round( $value, $precision );
 }
 
 /**
@@ -2101,4 +2110,32 @@ function wc_selected( $value, $options ) {
 	}
 
 	return selected( $value, $options, false );
+}
+
+/**
+ * Retrieves the MySQL server version. Based on $wpdb.
+ *
+ * @since 3.4.1
+ * @return array Vesion information.
+ */
+function wc_get_server_database_version() {
+	global $wpdb;
+
+	if ( empty( $wpdb->is_mysql ) ) {
+		return array(
+			'string' => '',
+			'number' => '',
+		);
+	}
+
+	if ( $wpdb->use_mysqli ) {
+		$server_info = mysqli_get_server_info( $wpdb->dbh ); // @codingStandardsIgnoreLine.
+	} else {
+		$server_info = mysql_get_server_info( $wpdb->dbh ); // @codingStandardsIgnoreLine.
+	}
+
+	return array(
+		'string' => $server_info,
+		'number' => preg_replace( '/([^\d.]+).*/', '', $server_info ),
+	);
 }

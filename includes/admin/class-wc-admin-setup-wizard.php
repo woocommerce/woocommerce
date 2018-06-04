@@ -803,7 +803,7 @@ class WC_Admin_Setup_Wizard {
 					id="<?php echo esc_attr( "{$input_prefix}[method]" ); ?>"
 					name="<?php echo esc_attr( "{$input_prefix}[method]" ); ?>"
 					class="method wc-enhanced-select"
-					data-plugins="<?php echo esc_attr( json_encode( $this->get_wcs_requisite_plugins() ) ); ?>"
+					data-plugins="<?php echo esc_attr( wp_json_encode( $this->get_wcs_requisite_plugins() ) ); ?>"
 				>
 				<?php foreach ( $shipping_methods as $method_id => $method ) : ?>
 					<option value="<?php echo esc_attr( $method_id ); ?>" <?php selected( $selected, $method_id ); ?>><?php echo esc_html( $method['name'] ); ?></option>
@@ -1116,7 +1116,46 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Is Klarna Checkout country supported
+	 * Is PayPal currency supported.
+	 *
+	 * @param string $currency Currency code.
+	 * @return boolean
+	 */
+	protected function is_paypal_supported_currency( $currency ) {
+		$supported_currencies = array(
+			'AUD',
+			'BRL',
+			'CAD',
+			'MXN',
+			'NZD',
+			'HKD',
+			'SGD',
+			'USD',
+			'EUR',
+			'JPY',
+			'TRY',
+			'NOK',
+			'CZK',
+			'DKK',
+			'HUF',
+			'ILS',
+			'MYR',
+			'PHP',
+			'PLN',
+			'SEK',
+			'CHF',
+			'TWD',
+			'THB',
+			'GBP',
+			'RMB',
+			'RUB',
+			'INR',
+		);
+		return in_array( $currency, $supported_currencies, true );
+	}
+
+	/**
+	 * Is Klarna Checkout country supported.
 	 *
 	 * @param string $country_code Country code.
 	 */
@@ -1131,7 +1170,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Is Klarna Payments country supported
+	 * Is Klarna Payments country supported.
 	 *
 	 * @param string $country_code Country code.
 	 */
@@ -1336,15 +1375,19 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function get_wizard_in_cart_payment_gateways() {
 		$gateways = $this->get_wizard_available_in_cart_payment_gateways();
+		$country  = WC()->countries->get_base_country();
+		$currency = get_woocommerce_currency();
 
-		if ( ! current_user_can( 'install_plugins' ) ) {
-			return array( 'paypal' => $gateways['paypal'] );
-		}
-
-		$country     = WC()->countries->get_base_country();
 		$can_stripe  = $this->is_stripe_supported_country( $country );
 		$can_eway    = $this->is_eway_payments_supported_country( $country );
 		$can_payfast = ( 'ZA' === $country ); // South Africa.
+		$can_paypal  = $this->is_paypal_supported_currency( $currency );
+
+		if ( ! current_user_can( 'install_plugins' ) ) {
+			return $can_paypal ? array( 'paypal' => $gateways['paypal'] ) : array();
+		}
+
+		$spotlight = '';
 
 		if ( $this->is_klarna_checkout_supported_country( $country ) ) {
 			$spotlight = 'klarna_checkout';
@@ -1354,11 +1397,14 @@ class WC_Admin_Setup_Wizard {
 			$spotlight = 'square';
 		}
 
-		if ( isset( $spotlight ) ) {
+		if ( $spotlight ) {
 			$offered_gateways = array(
-				$spotlight    => $gateways[ $spotlight ],
-				'ppec_paypal' => $gateways['ppec_paypal'],
+				$spotlight => $gateways[ $spotlight ],
 			);
+
+			if ( $can_paypal ) {
+				$offered_gateways += array( 'ppec_paypal' => $gateways['ppec_paypal'] );
+			}
 
 			if ( $can_stripe ) {
 				$offered_gateways += array( 'stripe' => $gateways['stripe'] );
@@ -1383,7 +1429,9 @@ class WC_Admin_Setup_Wizard {
 			$offered_gateways              += array( 'stripe' => $gateways['stripe'] );
 		}
 
-		$offered_gateways += array( 'ppec_paypal' => $gateways['ppec_paypal'] );
+		if ( $can_paypal ) {
+			$offered_gateways += array( 'ppec_paypal' => $gateways['ppec_paypal'] );
+		}
 
 		if ( $can_eway ) {
 			$offered_gateways += array( 'eway' => $gateways['eway'] );
@@ -1450,7 +1498,7 @@ class WC_Admin_Setup_Wizard {
 
 		$plugins = null;
 		if ( isset( $item_info['repo-slug'] ) ) {
-			$plugin = array(
+			$plugin  = array(
 				'slug' => $item_info['repo-slug'],
 				'name' => $item_info['name'],
 			);
@@ -1503,7 +1551,7 @@ class WC_Admin_Setup_Wizard {
 									placeholder="<?php echo esc_attr( $setting['placeholder'] ); ?>"
 									<?php echo ( $setting['required'] ) ? 'required' : ''; ?>
 									<?php echo $is_checkbox ? checked( isset( $checked ) && $checked, true, false ) : ''; ?>
-									data-plugins="<?php echo esc_attr( json_encode( isset( $setting['plugins'] ) ? $setting['plugins'] : null ) ); ?>"
+									data-plugins="<?php echo esc_attr( wp_json_encode( isset( $setting['plugins'] ) ? $setting['plugins'] : null ) ); ?>"
 								/>
 								<?php if ( ! empty( $setting['description'] ) ) : ?>
 									<span class="wc-wizard-service-settings-description"><?php echo esc_html( $setting['description'] ); ?></span>
@@ -1520,7 +1568,7 @@ class WC_Admin_Setup_Wizard {
 						type="checkbox"
 						name="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>-enabled"
 						value="yes" <?php checked( $should_enable_toggle ); ?>
-						data-plugins="<?php echo esc_attr( json_encode( $plugins ) ); ?>"
+						data-plugins="<?php echo esc_attr( wp_json_encode( $plugins ) ); ?>"
 					/>
 					<label for="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>">
 				</span>
@@ -1689,7 +1737,7 @@ class WC_Admin_Setup_Wizard {
 				name="<?php echo esc_attr( 'setup_' . $type ); ?>"
 				value="yes"
 				checked
-				data-plugins="<?php echo esc_attr( json_encode( isset( $item_info['plugins'] ) ? $item_info['plugins'] : null ) ); ?>"
+				data-plugins="<?php echo esc_attr( wp_json_encode( isset( $item_info['plugins'] ) ? $item_info['plugins'] : null ) ); ?>"
 			/>
 			<label for="<?php echo esc_attr( 'wc_recommended_' . $type ); ?>">
 				<img

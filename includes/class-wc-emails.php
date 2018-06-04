@@ -161,8 +161,16 @@ class WC_Emails {
 			self::instance(); // Init self so emails exist.
 			do_action_ref_array( current_filter() . '_notification', $args );
 		} catch ( Exception $e ) {
+			$error  = 'Transactional email triggered fatal error for callback ' . current_filter();
+			$logger = wc_get_logger();
+			$logger->critical(
+				$error . PHP_EOL,
+				array(
+					'source' => 'transactional-emails',
+				)
+			);
 			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-				trigger_error( 'Transactional email triggered fatal error for callback ' . current_filter(), E_USER_WARNING ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped, WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+				trigger_error( $error, E_USER_WARNING ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped, WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 			}
 		}
 	}

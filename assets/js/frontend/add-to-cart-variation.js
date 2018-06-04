@@ -565,10 +565,19 @@
 			$product_link     = $product_img_wrap.find( 'a' ).eq( 0 );
 
 		if ( variation && variation.image && variation.image.src && variation.image.src.length > 1 ) {
-			$form.wc_variations_image_reset();
+			// See if the gallery has an image with the same original src as the image we want to switch to.
+			var galleryHasImage = $gallery_nav.find( 'li img[data-o_src="' + variation.image.gallery_thumbnail_src + '"]' ).length > 0;
 
-			if ( $gallery_nav.find( 'li img[src="' + variation.image.gallery_thumbnail_src + '"]' ).length > 0 ) {
-				$gallery_nav.find( 'li img[src="' + variation.image.gallery_thumbnail_src + '"]' ).trigger( 'click' );
+			// If the gallery has the image, reset the images. We'll scroll to the correct one.
+			if ( galleryHasImage ) {
+				$form.wc_variations_image_reset();
+			}
+
+			// See if gallery has a matching image we can slide to.
+			var slideToImage = $gallery_nav.find( 'li img[src="' + variation.image.gallery_thumbnail_src + '"]' );
+
+			if ( slideToImage.length > 0 ) {
+				slideToImage.trigger( 'click' );
 				$form.attr( 'current-image', variation.image_id );
 				return;
 			} else {

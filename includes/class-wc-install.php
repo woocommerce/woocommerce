@@ -101,6 +101,7 @@ class WC_Install {
 		),
 		'3.4.0' => array(
 			'wc_update_340_states',
+			'wc_update_340_state',
 			'wc_update_340_last_active',
 			'wc_update_340_db_version',
 		),
