@@ -545,20 +545,16 @@ class WC_Install {
 		}
 
 		// Get tables data types and check it matches before adding constraint.
-		$download_log_columns         = $wpdb->get_results( "SHOW COLUMNS FROM {$wpdb->prefix}wc_download_log", ARRAY_A );
-		$download_log_column_type     = '';
-		foreach ( $download_log_columns as $column ) {
-			if ( isset( $column['Field'], $column['Type'] ) && 'permission_id' === $column['Field'] ) {
-				$download_log_column_type = $column['Type'];
-			}
+		$download_log_columns     = $wpdb->get_results( "SHOW COLUMNS FROM {$wpdb->prefix}wc_download_log WHERE Field = `permission_id`", ARRAY_A );
+		$download_log_column_type = '';
+		if ( isset( $download_log_columns[0]['Type'] ) ) {
+			$download_log_column_type = $download_log_columns[0]['Type'];
 		}
 
-		$download_permissions_columns     = $wpdb->get_results( "SHOW COLUMNS FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions", ARRAY_A );
+		$download_permissions_columns     = $wpdb->get_results( "SHOW COLUMNS FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE Field = `permission_id`", ARRAY_A );
 		$download_permissions_column_type = '';
-		foreach ( $download_permissions_columns as $column ) {
-			if ( isset( $column['Field'], $column['Type'] ) && 'permission_id' === $column['Field'] ) {
-				$download_permissions_column_type = $column['Type'];
-			}
+		if ( isset( $download_permissions_columns[0]['Type'] ) ) {
+			$download_permissions_column_type = $download_permissions_columns[0]['Type'];
 		}
 
 		// Add constraint to download logs if the columns matches.
