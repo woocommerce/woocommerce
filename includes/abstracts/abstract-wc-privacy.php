@@ -129,9 +129,9 @@ abstract class WC_Abstract_Privacy {
 	/**
 	 * Add exporter to list of exporters.
 	 *
-	 * @param string       $id          ID of the Exporter.
-	 * @param string       $name        Exporter name.
-	 * @param string|array $callback    Exporter callback.
+	 * @param string       $id       ID of the Exporter.
+	 * @param string       $name     Exporter name.
+	 * @param string|array $callback Exporter callback.
 	 *
 	 * @return array
 	 */
