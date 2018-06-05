@@ -73,7 +73,7 @@ test.describe( 'Cart page', function() {
 
 		const cartPage = new CartPage( driver, { url: manager.getPageUrl( '/cart' ) } );
 		assert.eventually.equal(
-			cartPage.hasItem( 'Album', { qty: 1 } ),
+			cartPage.hasItem( 'Albsdfgum', { qty: 1 } ),
 			true,
 			'Cart item "Album" with qty 1 is not displayed'
 		);
