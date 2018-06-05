@@ -159,14 +159,15 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 == Changelog ==
 
 = 3.4.2 - 2018-06-05 =
+* Fix - Flexslider gallery fixes for RTL sites, and for variation image switching. #20328 ##20321
 * Fix - Allow forms to be submitted when the password strength library fails to load. #20362
 * Fix - Personal data exporter: Do not export a customer data group containing no data. #20347
 * Fix - Fix navigation notification in settings when clicking save. #20335
 * Fix - Show discount amount for free shipping coupons. #20334
-* Fix - Gallery 20328
 * Fix - Fixed cache clearing for category children for sites running object caching. #20308
 * Fix - Use correct escaping on select2 placeholders. #20364
 * Fix - Order by price clauses when searching within terms. #20391
+* Fix - Clear needs_processing transient when adding a product to an order. #20390
 * Enhancement - Permission_id constraint checks on install. #20366
 * Dev - Added order to "woocommerce_order_is_vat_exempt" filter arguments. #20365
 * Localization - Disable states for Bahrain. #20363
