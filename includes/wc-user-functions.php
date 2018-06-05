@@ -520,7 +520,7 @@ add_action( 'deleted_user', 'wc_reset_order_customer_id_on_deleted_user' );
  */
 function wc_review_is_from_verified_owner( $comment_id ) {
 	$verified = get_comment_meta( $comment_id, 'verified', true );
-	return (bool) '' === $verified ? WC_Comments::add_comment_purchase_verification( $comment_id ) : $verified;
+	return '' === $verified ? WC_Comments::add_comment_purchase_verification( $comment_id ) : (bool) $verified;
 }
 
 /**
