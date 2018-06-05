@@ -5,6 +5,7 @@ addons:
   apt:
     packages:
       - nginx
+
 sudo: false
 
 # Test main supported versions of PHP against latest WP.
