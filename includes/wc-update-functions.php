@@ -49,38 +49,29 @@ function wc_update_200_permalinks() {
 	$permalinks   = get_option( 'woocommerce_permalinks' );
 	$shop_page_id = wc_get_page_id( 'shop' );
 
-	if ( empty( $permalinks ) && $shop_page_id > 0 ) {
-
-		$base_slug = $shop_page_id > 0 && get_post( $shop_page_id ) ? get_page_uri( $shop_page_id ) : 'shop';
-
-		$category_base = get_option( 'woocommerce_prepend_shop_page_to_urls' ) == 'yes' ? trailingslashit( $base_slug ) : '';
-		$category_slug = get_option( 'woocommerce_product_category_slug' ) ? get_option( 'woocommerce_product_category_slug' ) : _x( 'product-category', 'slug', 'woocommerce' );
-		$tag_slug      = get_option( 'woocommerce_product_tag_slug' ) ? get_option( 'woocommerce_product_tag_slug' ) : _x( 'product-tag', 'slug', 'woocommerce' );
-
-		if ( 'yes' == get_option( 'woocommerce_prepend_shop_page_to_products' ) ) {
-			$product_base = trailingslashit( $base_slug );
-		} else {
-			$product_slug = get_option( 'woocommerce_product_slug' );
-			if ( false !== $product_slug && ! empty( $product_slug ) ) {
-				$product_base = trailingslashit( $product_slug );
-			} else {
-				$product_base = trailingslashit( _x( 'product', 'slug', 'woocommerce' ) );
-			}
-		}
-
-		if ( get_option( 'woocommerce_prepend_category_to_products' ) == 'yes' ) {
-			$product_base .= trailingslashit( '%product_cat%' );
-		}
-
-		$permalinks = array(
-			'product_base'   => untrailingslashit( $product_base ),
-			'category_base'  => untrailingslashit( $category_base . $category_slug ),
-			'attribute_base' => untrailingslashit( $category_base ),
-			'tag_base'       => untrailingslashit( $category_base . $tag_slug ),
-		);
-
-		update_option( 'woocommerce_permalinks', $permalinks );
+	if ( ! empty( $permalinks ) || $shop_page_id < 1 ) {
+		return;
 	}
+
+	$base_slug = get_post( $shop_page_id ) ? get_page_uri( $shop_page_id ) : 'shop';
+
+	$category_base = get_option( 'woocommerce_prepend_shop_page_to_urls' ) === 'yes' ? trailingslashit( $base_slug ) : '';
+	$category_slug = get_option( 'woocommerce_product_category_slug' ) ? get_option( 'woocommerce_product_category_slug' ) : _x( 'product-category', 'slug', 'woocommerce' );
+	$tag_slug      = get_option( 'woocommerce_product_tag_slug' ) ? get_option( 'woocommerce_product_tag_slug' ) : _x( 'product-tag', 'slug', 'woocommerce' );
+
+	$product_slug  = get_option( 'woocommerce_product_slug' );
+	$product_base  = ! empty( $product_slug ) ? trailingslashit( $product_slug ) : trailingslashit( _x( 'product', 'slug', 'woocommerce' ) );
+	$product_base  = 'yes' === get_option( 'woocommerce_prepend_shop_page_to_products' ) ? trailingslashit( $base_slug ) : $product_base;
+	$product_base .= get_option( 'woocommerce_prepend_category_to_products' ) === 'yes' ? trailingslashit( '%product_cat%' ) : '';
+
+	$permalinks = array(
+		'product_base'   => untrailingslashit( $product_base ),
+		'category_base'  => untrailingslashit( $category_base . $category_slug ),
+		'attribute_base' => untrailingslashit( $category_base ),
+		'tag_base'       => untrailingslashit( $category_base . $tag_slug ),
+	);
+
+	update_option( 'woocommerce_permalinks', $permalinks );
 }
 
 /**
