@@ -158,6 +158,20 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 
 == Changelog ==
 
+= 3.4.2 - 2018-06-05 =
+* Fix - Allow forms to be submitted when the password strength library fails to load. #20362
+* Fix - Personal data exporter: Do not export a customer data group containing no data. #20347
+* Fix - Fix navigation notification in settings when clicking save. #20335
+* Fix - Show discount amount for free shipping coupons. #20334
+* Fix - Gallery 20328
+* Fix - Fixed cache clearing for category children for sites running object caching. #20308
+* Fix - Use correct escaping on select2 placeholders. #20364
+* Fix - Order by price clauses when searching within terms. #20391
+* Enhancement - Permission_id constraint checks on install. #20366
+* Dev - Added order to "woocommerce_order_is_vat_exempt" filter arguments. #20365
+* Localization - Disable states for Bahrain. #20363
+* Localization - Disable states for Luxemberg. #20389
+
 = 3.4.1 - 2018-05-29 =
 * Fix - Fix webhook admin filtering URLs. #20236
 * Fix - Add missing wp_unslash calls to product data meta box to prevent quote characters being escaped on save. #20235
