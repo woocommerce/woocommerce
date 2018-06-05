@@ -68,7 +68,7 @@ class WC_Beta_Tester {
 	 * Include any classes we need within admin.
 	 */
 	public function includes() {
-		include_once( dirname( __FILE__ ) . '/class-wc-beta-tester-admin-menus.php' );
+		include_once dirname( __FILE__ ) . '/class-wc-beta-tester-admin-menus.php';
 	}
 
 	/**
@@ -190,19 +190,19 @@ class WC_Beta_Tester {
 
 		$data = $data->sections->description;
 
-		if ( preg_match('%(<p[^>]*>.*?</p>)%i', $data, $regs ) ) {
+		if ( preg_match( '%(<p[^>]*>.*?</p>)%i', $data, $regs ) ) {
 			$data = strip_tags( $regs[1] );
 		}
-
 
 		return $data;
 	}
 
 	/**
-	 * Get plugin download URL
+	 * Get plugin download URL.
 	 *
 	 * @since 1.0
-	 * @return string $description the description
+	 * @param string $version The version.
+	 * @return string
 	 */
 	public function get_download_url( $version ) {
 		$data = $this->get_wporg_data();
