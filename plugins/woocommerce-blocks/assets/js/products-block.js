@@ -2304,19 +2304,13 @@ var _wp$components = wp.components,
     Dashicon = _wp$components.Dashicon;
 
 /**
- * Attribute data cache.
- * Needed because it takes a lot of API calls to generate attribute info.
- */
-
-var PRODUCT_ATTRIBUTE_DATA = {};
-
-/**
  * Get the identifier for an attribute. The identifier can be used to determine
  * the slug or the ID of the attribute.
  *
  * @param string slug The attribute slug.
  * @param int|numeric string id The attribute ID.
  */
+
 function getAttributeIdentifier(slug, id) {
 	return slug + ',' + id;
 }
@@ -2545,31 +2539,19 @@ var ProductAttributeList = withAPIData(function (props) {
 		for (var _iterator2 = attributes.data[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
 			var attribute = _step2.value;
 
-
 			// Filter out attributes that don't match the search query.
 			if (filter.length && -1 === attribute.name.toLowerCase().indexOf(filter)) {
 				continue;
 			}
 
-			if (PRODUCT_ATTRIBUTE_DATA.hasOwnProperty(attribute.slug)) {
-				attributeElements.push(wp.element.createElement(ProductAttributeElement, {
-					selectedAttribute: selectedAttribute,
-					selectedTerms: selectedTerms,
-					attribute: attribute,
-					setSelectedAttribute: setSelectedAttribute,
-					addTerm: addTerm,
-					removeTerm: removeTerm
-				}));
-			} else {
-				attributeElements.push(wp.element.createElement(UncachedProductAttributeElement, {
-					selectedAttribute: selectedAttribute,
-					selectedTerms: selectedTerms,
-					attribute: attribute,
-					setSelectedAttribute: setSelectedAttribute,
-					addTerm: addTerm,
-					removeTerm: removeTerm
-				}));
-			}
+			attributeElements.push(wp.element.createElement(ProductAttributeElement, {
+				attribute: attribute,
+				selectedAttribute: selectedAttribute,
+				selectedTerms: selectedTerms,
+				setSelectedAttribute: setSelectedAttribute,
+				addTerm: addTerm,
+				removeTerm: removeTerm
+			}));
 		}
 	} catch (err) {
 		_didIteratorError2 = true;
@@ -2594,77 +2576,12 @@ var ProductAttributeList = withAPIData(function (props) {
 });
 
 /**
- * Caches then renders a product attribute term element.
- */
-var UncachedProductAttributeElement = withAPIData(function (props) {
-	return {
-		terms: '/wc/v2/products/attributes/' + props.attribute.id + '/terms'
-	};
-})(function (_ref2) {
-	var terms = _ref2.terms,
-	    selectedAttribute = _ref2.selectedAttribute,
-	    selectedTerms = _ref2.selectedTerms,
-	    attribute = _ref2.attribute,
-	    setSelectedAttribute = _ref2.setSelectedAttribute,
-	    addTerm = _ref2.addTerm,
-	    removeTerm = _ref2.removeTerm;
-
-	if (!terms.data || 0 === terms.data.length) {
-		return null;
-	}
-
-	// Populate cache.
-	PRODUCT_ATTRIBUTE_DATA[attribute.slug] = { terms: [] };
-
-	var totalCount = 0;
-	var _iteratorNormalCompletion3 = true;
-	var _didIteratorError3 = false;
-	var _iteratorError3 = undefined;
-
-	try {
-		for (var _iterator3 = terms.data[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-			var term = _step3.value;
-
-			totalCount += term.count;
-			PRODUCT_ATTRIBUTE_DATA[attribute.slug].terms.push(term);
-		}
-	} catch (err) {
-		_didIteratorError3 = true;
-		_iteratorError3 = err;
-	} finally {
-		try {
-			if (!_iteratorNormalCompletion3 && _iterator3.return) {
-				_iterator3.return();
-			}
-		} finally {
-			if (_didIteratorError3) {
-				throw _iteratorError3;
-			}
-		}
-	}
-
-	PRODUCT_ATTRIBUTE_DATA[attribute.slug].count = totalCount;
-
-	return wp.element.createElement(ProductAttributeElement, {
-		selectedAttribute: selectedAttribute,
-		selectedTerms: selectedTerms,
-		attribute: attribute,
-		setSelectedAttribute: setSelectedAttribute,
-		addTerm: addTerm,
-		removeTerm: removeTerm
-	});
-});
-
-/**
- * A product attribute term element.
+ * One product attribute.
  */
 
 var ProductAttributeElement = function (_React$Component2) {
 	_inherits(ProductAttributeElement, _React$Component2);
 
-	/**
-  * Constructor.
-  */
 	function ProductAttributeElement(props) {
 		_classCallCheck(this, ProductAttributeElement);
 
@@ -2707,50 +2624,22 @@ var ProductAttributeElement = function (_React$Component2) {
 				this.props.removeTerm(evt.target.value);
 			}
 		}
-
-		/**
-   * Render the details for one attribute.
-   */
-
 	}, {
 		key: 'render',
 		value: function render() {
-			var _this3 = this;
-
-			var attribute = PRODUCT_ATTRIBUTE_DATA[this.props.attribute.slug];
 			var isSelected = this.props.selectedAttribute === getAttributeIdentifier(this.props.attribute.slug, this.props.attribute.id);
 
 			var attributeTerms = null;
 			if (isSelected) {
-				attributeTerms = wp.element.createElement(
-					'ul',
-					null,
-					attribute.terms.map(function (term) {
-						return wp.element.createElement(
-							'li',
-							{ className: 'wc-products-list-card__item' },
-							wp.element.createElement(
-								'label',
-								{ className: 'wc-products-list-card__content' },
-								wp.element.createElement('input', { type: 'checkbox',
-									value: term.id,
-									onChange: _this3.handleTermChange,
-									checked: _this3.props.selectedTerms.includes(String(term.id))
-								}),
-								term.name,
-								wp.element.createElement(
-									'span',
-									{ className: 'wc-products-list-card__taxonomy-count' },
-									term.count
-								)
-							)
-						);
-					})
-				);
+				attributeTerms = wp.element.createElement(AttributeTerms, {
+					attribute: this.props.attribute,
+					selectedTerms: this.props.selectedTerms,
+					addTerm: this.props.addTerm,
+					removeTerm: this.props.removeTerm
+				});
 			}
 
 			var cssClasses = ['wc-products-list-card--taxonomy-atributes__atribute'];
-
 			if (isSelected) {
 				cssClasses.push('wc-products-list-card__accordion-open');
 			}
@@ -2769,12 +2658,7 @@ var ProductAttributeElement = function (_React$Component2) {
 							onChange: this.handleAttributeChange,
 							checked: isSelected
 						}),
-						this.props.attribute.name,
-						wp.element.createElement(
-							'span',
-							{ className: 'wc-products-list-card__taxonomy-count' },
-							attribute.count
-						)
+						this.props.attribute.name
 					)
 				),
 				attributeTerms
@@ -2784,6 +2668,86 @@ var ProductAttributeElement = function (_React$Component2) {
 
 	return ProductAttributeElement;
 }(React.Component);
+
+/**
+ * The list of terms in an attribute.
+ */
+
+
+var AttributeTerms = withAPIData(function (props) {
+	return {
+		terms: '/wc/v2/products/attributes/' + props.attribute.id + '/terms'
+	};
+})(function (_ref2) {
+	var terms = _ref2.terms,
+	    selectedTerms = _ref2.selectedTerms,
+	    attribute = _ref2.attribute,
+	    addTerm = _ref2.addTerm,
+	    removeTerm = _ref2.removeTerm;
+
+	if (!terms.data) {
+		return wp.element.createElement(
+			'ul',
+			null,
+			wp.element.createElement(
+				'li',
+				null,
+				__('Loading')
+			)
+		);
+	}
+
+	if (0 === terms.data.length) {
+		return wp.element.createElement(
+			'ul',
+			null,
+			wp.element.createElement(
+				'li',
+				null,
+				__('No terms found')
+			)
+		);
+	}
+
+	/**
+  * Add or remove selected terms.
+  *
+  * @param evt Event object
+  */
+	function handleTermChange(evt) {
+		if (evt.target.checked) {
+			addTerm(evt.target.value);
+		} else {
+			removeTerm(evt.target.value);
+		}
+	}
+
+	return wp.element.createElement(
+		'ul',
+		null,
+		terms.data.map(function (term) {
+			return wp.element.createElement(
+				'li',
+				{ className: 'wc-products-list-card__item' },
+				wp.element.createElement(
+					'label',
+					{ className: 'wc-products-list-card__content' },
+					wp.element.createElement('input', { type: 'checkbox',
+						value: term.id,
+						onChange: handleTermChange,
+						checked: selectedTerms.includes(String(term.id))
+					}),
+					term.name,
+					wp.element.createElement(
+						'span',
+						{ className: 'wc-products-list-card__taxonomy-count' },
+						term.count
+					)
+				)
+			);
+		})
+	);
+});
 
 /***/ })
 /******/ ]);
