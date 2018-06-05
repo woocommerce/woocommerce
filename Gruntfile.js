@@ -101,16 +101,9 @@ module.exports = function( grunt ) {
 					ext: '.min.js'
 				}]
 			},
-			simplify_commerce: {
+			flexslider: {
 				files: [{
-					expand: true,
-					cwd: 'includes/gateways/simplify-commerce/assets/js/',
-					src: [
-						'*.js',
-						'!*.min.js'
-					],
-					dest: 'includes/gateways/simplify-commerce/assets/js/',
-					ext: '.min.js'
+					'<%= dirs.js %>/flexslider/jquery.flexslider.min.js': ['<%= dirs.js %>/flexslider/jquery.flexslider.js']
 				}]
 			}
 		},
@@ -284,12 +277,11 @@ module.exports = function( grunt ) {
 						{
 							config: 'authToken',
 							type: 'input',
-							message: '(optional) Provide a personal access token. This will allow 5000 requests per hour rather than 60 - use if nothing is generated.',
-							default: ''
+							message: '(optional) Provide a personal access token. This will allow 5000 requests per hour rather than 60 - use if nothing is generated.'
 						}
 					]
 				}
-			},
+			}
 		},
 
 		// Clean the directory.
@@ -367,7 +359,8 @@ module.exports = function( grunt ) {
 	grunt.registerTask( 'js', [
 		'jshint',
 		'uglify:admin',
-		'uglify:frontend'
+		'uglify:frontend',
+		'uglify:flexslider'
 	]);
 
 	grunt.registerTask( 'css', [
