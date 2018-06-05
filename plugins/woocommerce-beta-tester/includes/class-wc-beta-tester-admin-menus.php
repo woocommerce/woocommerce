@@ -126,7 +126,7 @@ class WC_Beta_Tester_Admin_Menus {
 				'href'   => '#',
 				'meta'   => array(
 					// We can't simply use the href here since WP core calls esc_url on it which strips some parts.
-					'onclick' => 'javascript:window.open( "' . $this->get_github_ticket_url() . '" );',
+					'onclick' => 'javascript:window.open( "' . esc_js( $this->get_github_ticket_url() ) . '" );',
 				),
 			),
 			array(
