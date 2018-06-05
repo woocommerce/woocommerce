@@ -114,9 +114,7 @@ class WC_Beta_Tester {
 			foreach ( $versions as $version => $download_url ) {
 				if ( version_compare( $version, $latest_version, '>' )
 					&& preg_match( '/(.*)?-(beta|rc)(.*)/', $version ) ) {
-
 					$tagged_version = $version;
-					break;
 				}
 			}
 
