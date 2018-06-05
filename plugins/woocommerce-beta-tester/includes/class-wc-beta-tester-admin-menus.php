@@ -73,7 +73,7 @@ class WC_Beta_Tester_Admin_Menus {
 				'parent' => 'wc-beta-tester',
 				'id'     => 'update-channel',
 				'title'  => __( 'Update channel settings', 'woocommerce-beta-tester' ),
-				'href'   => admin_url( 'plugins.php' ),
+				'href'   => admin_url( 'plugins.php?page=wc-beta-tester' ),
 			),
 		);
 
