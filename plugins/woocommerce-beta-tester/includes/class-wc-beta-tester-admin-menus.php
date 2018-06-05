@@ -47,8 +47,6 @@ class WC_Beta_Tester_Admin_Menus {
 		$ssr            = get_transient( $transient_name );
 
 		if ( false === $ssr ) {
-			ob_start();
-
 			// Get SSR.
 			$api      = new WC_REST_System_Status_Controller();
 			$schema   = $api->get_item_schema();
