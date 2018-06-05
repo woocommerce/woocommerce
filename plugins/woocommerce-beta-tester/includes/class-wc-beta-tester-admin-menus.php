@@ -16,7 +16,9 @@ class WC_Beta_Tester_Admin_Menus {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_action( 'admin_bar_menu', array( $this, 'admin_bar_menus' ), 31 );
+		if ( class_exists( 'WC_Admin_Status' ) ) {
+			add_action( 'admin_bar_menu', array( $this, 'admin_bar_menus' ), 31 );
+		}
 	}
 
 	/**
@@ -42,7 +44,7 @@ class WC_Beta_Tester_Admin_Menus {
 	 */
 	protected function construct_ssr() {
 		$transient_name = 'wc-beta-tester-ssr';
-		$ssr = get_transient( $transient_name );
+		$ssr            = get_transient( $transient_name );
 
 		if ( false === $ssr ) {
 			ob_start();
@@ -107,8 +109,9 @@ class WC_Beta_Tester_Admin_Menus {
 
 		return add_query_arg(
 			array(
-				'body'  => urlencode( $body ),
-				'title' => urlencode( sprintf( __( '[WC Beta Tester] Bug report for version "%s"', 'woocommerce-beta-tester' ), $version ) ),
+				'body'  => rawurlencode( $body ),
+				/* translators: %s: woocommerce version */
+				'title' => rawurlencode( sprintf( __( '[WC Beta Tester] Bug report for version "%s"', 'woocommerce-beta-tester' ), $version ) ),
 			),
 			'https://github.com/woocommerce/woocommerce/issues/new'
 		);
@@ -137,7 +140,7 @@ class WC_Beta_Tester_Admin_Menus {
 		) );
 
 		$current_channel = __( 'Stable', 'woocommerce-beta-tester' );
-		$options = get_option( 'wc_beta_tester_options' );
+		$options         = get_option( 'wc_beta_tester_options' );
 		if ( isset( $options['wc-beta-tester-version'] ) ) {
 			switch ( $options['wc-beta-tester-version'] ) {
 				case 'beta':
@@ -152,12 +155,12 @@ class WC_Beta_Tester_Admin_Menus {
 			}
 		}
 
-
 		// TODO: Implementation of each node.
 		$nodes = array(
 			array(
 				'parent' => 'wc-beta-tester',
 				'id'     => 'current-channel',
+				/* translators: %s: current channel */
 				'title'  => sprintf( __( '<center><i>Current channel: %s</i></center>', 'woocommerce-beta-tester' ), $current_channel ),
 			),
 			array(
