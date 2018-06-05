@@ -52,7 +52,7 @@ class WC_Beta_Tester {
 			'slug'               => 'woocommerce',
 			'proper_folder_name' => 'woocommerce',
 			'api_url'            => 'https://api.wordpress.org/plugins/info/1.0/woocommerce.json',
-			'github_url'         => 'https://github.com/woocommerce/woocommerce',
+			'repo_url'           => 'https://wordpress.org/plugins/woocommerce/',
 			'requires'           => '4.4',
 			'tested'             => '4.9',
 		);
@@ -252,7 +252,7 @@ class WC_Beta_Tester {
 			$response->plugin      = $this->config['slug'];
 			$response->new_version = $this->config['new_version'];
 			$response->slug        = $this->config['slug'];
-			$response->url         = $this->config['github_url'];
+			$response->url         = $this->config['repo_url'];
 			$response->package     = $this->config['zip_url'];
 
 			// If response is false, don't alter the transient.
