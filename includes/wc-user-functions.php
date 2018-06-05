@@ -572,16 +572,10 @@ add_action( 'profile_update', 'wc_update_profile_last_update_time', 10, 2 );
  */
 function wc_meta_update_last_update_time( $meta_id, $user_id, $meta_key, $_meta_value ) {
 	$keys_to_track = apply_filters( 'woocommerce_user_last_update_fields', array( 'first_name', 'last_name' ) );
-	$update_time   = false;
-	if ( in_array( $meta_key, $keys_to_track, true ) ) {
-		$update_time = true;
-	}
-	if ( 'billing_' === substr( $meta_key, 0, 8 ) ) {
-		$update_time = true;
-	}
-	if ( 'shipping_' === substr( $meta_key, 0, 9 ) ) {
-		$update_time = true;
-	}
+
+	$update_time = in_array( $meta_key, $keys_to_track, true ) ? true : false;
+	$update_time = 'billing_' === substr( $meta_key, 0, 8 ) ? true : $update_time;
+	$update_time = 'shipping_' === substr( $meta_key, 0, 9 ) ? true : $update_time;
 
 	if ( $update_time ) {
 		wc_set_user_last_update_time( $user_id );
