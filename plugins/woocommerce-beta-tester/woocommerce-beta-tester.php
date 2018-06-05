@@ -9,6 +9,8 @@
  * Requires at least: 4.4
  * Tested up to: 4.9
  *
+ * Text Domain: woocommerce-beta-tester
+ *
  * @package WC_Beta_Tester
  */
 
@@ -34,6 +36,8 @@ if ( ! file_exists( trailingslashit( dirname( dirname( __FILE__ ) ) ) . 'woocomm
 	add_action( 'admin_notices', 'wcbt_woocoommerce_not_installed' );
 } elseif ( ! class_exists( 'WC_Beta_Tester' ) ) {
 	include dirname( __FILE__ ) . '/includes/class-wc-beta-tester.php';
+	// Settings.
+	include dirname( __FILE__ ) . '/includes/class-wc-beta-tester-settings.php';
 
 	register_activation_hook( __FILE__, array( 'WC_Beta_Tester', 'activate' ) );
 
