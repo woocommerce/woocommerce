@@ -68,7 +68,7 @@ class WC_Beta_Tester_Admin_Menus {
 			$ssr = '';
 			foreach ( $response['environment'] as $key => $value ) {
 				$index = $key;
-				// @todo remove this hack after fix schema in WooCommercem, and Claudio never let you folks to forget that need to write schema first, and review after every change, schema is the most important part of the REST API.
+				// @todo remove this hack after fix schema in WooCommerce, and Claudio never let you folks forget that need to write schema first, and review after every change, schema is the most important part of the REST API.
 				if ( 'version' === $index ) {
 					$index = 'wc_version';
 				} elseif ( 'external_object_cache' === $index ) {
