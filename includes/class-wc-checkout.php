@@ -673,8 +673,16 @@ class WC_Checkout {
 					$data[ $key ] = wc_format_postcode( $data[ $key ], $country );
 
 					if ( '' !== $data[ $key ] && ! WC_Validation::is_postcode( $data[ $key ], $country ) ) {
-						/* translators: %s: field name */
-						$errors->add( 'validation', sprintf( __( '%s is not a valid postcode / ZIP.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ) );
+						switch ( $country ) {
+							case 'IE':
+								/* translators: %1$s: field name, %2$s finder.eircode.ie URL */
+								$postcode_validation_notice = sprintf( __( '%1$s is not a valid. You can look up the correct Eircode <a target="_blank" href="%2$s">here</a>.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>', 'https://finder.eircode.ie' );
+								break;
+							default:
+								/* translators: %s: field name */
+								$postcode_validation_notice = sprintf( __( '%s is not a valid postcode / ZIP.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' );
+						}
+						$errors->add( 'validation', apply_filters( 'woocommerce_checkout_postcode_validation_notice', $postcode_validation_notice, $country, $data[ $key ] ) );
 					}
 				}
 
