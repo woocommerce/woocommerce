@@ -36,11 +36,11 @@ class WC_Discounts {
 	protected $discounts = array();
 
 	/**
-	 * Constructor.
+	 * WC_Discounts Constructor.
 	 *
-	 * @param array $object Cart or order object.
+	 * @param WC_Cart|WC_Order $object Cart or order object.
 	 */
-	public function __construct( $object = array() ) {
+	public function __construct( $object = null ) {
 		if ( is_a( $object, 'WC_Cart' ) ) {
 			$this->set_items_from_cart( $object );
 		} elseif ( is_a( $object, 'WC_Order' ) ) {
