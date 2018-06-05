@@ -57,10 +57,10 @@ class WC_Beta_Tester_Admin_Menus {
 
 			$ssr = substr( $ssr, 0, 2048 );
 
-			set_transient( $transient_name, $response, DAY_IN_SECONDS );
+			set_transient( $transient_name, $ssr, DAY_IN_SECONDS );
 		}
 
-		return $response;
+		return $ssr;
 	}
 
 	/**
