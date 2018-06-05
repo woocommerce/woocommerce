@@ -44,34 +44,35 @@ class WC_Beta_Tester_Admin_Menus {
 		// TODO: Retrieve this programmatically.
 		$current_channel = 'test';
 
+		// TODO: Implementation of each node.
 		$nodes = array(
 			array(
 				'parent' => 'wc-beta-tester',
 				'id'     => 'current-channel',
-				'title'  => sprintf( __( '<center><i>Current channel: %s</i></center>', 'woocommerce' ), $current_channel ),
+				'title'  => sprintf( __( '<center><i>Current channel: %s</i></center>', 'woocommerce-beta-tester' ), $current_channel ),
 			),
 			array(
 				'parent' => 'wc-beta-tester',
 				'id'     => 'submit-gh-ticket',
-				'title'  => __( 'Submit a bug ticket to GitHub', 'woocommerce' ),
+				'title'  => __( 'Submit a bug ticket to GitHub', 'woocommerce-beta-tester' ),
 				'href'   => admin_url( 'plugins.php' ),
 			),
 			array(
 				'parent' => 'wc-beta-tester',
 				'id'     => 'show-version-info',
-				'title'  => __( 'Show version information', 'woocommerce' ),
+				'title'  => __( 'Show version information', 'woocommerce-beta-tester' ),
 				'href'   => admin_url( 'plugins.php' ),
 			),
 			array(
 				'parent' => 'wc-beta-tester',
 				'id'     => 'switch-version',
-				'title'  => __( 'Switch Version', 'woocommerce' ),
+				'title'  => __( 'Switch Version', 'woocommerce-beta-tester' ),
 				'href'   => admin_url( 'plugins.php' ),
 			),
 			array(
 				'parent' => 'wc-beta-tester',
 				'id'     => 'update-channel',
-				'title'  => __( 'Update channel settings', 'woocommerce' ),
+				'title'  => __( 'Update channel settings', 'woocommerce-beta-tester' ),
 				'href'   => admin_url( 'plugins.php' ),
 			),
 		);
