@@ -74,7 +74,7 @@ class WC_Beta_Tester {
 		$this->config['new_version']  = $this->get_latest_prerelease();
 		$this->config['last_updated'] = $this->get_date();
 		$this->config['description']  = $this->get_description();
-		$this->config['zip_url']      = 'https://downloads.wordpress.org/plugin/woocommerce.' . $this->config['new_version'] . '.zip';
+		$this->config['zip_url']      = $this->get_download_url( $this->config['new_version'] );
 	}
 
 	/**
@@ -162,8 +162,8 @@ class WC_Beta_Tester {
 	 * @return string $date the date
 	 */
 	public function get_date() {
-		$_date = $this->get_wporg_data();
-		return ! empty( $_date->last_updated ) ? date( 'Y-m-d', strtotime( $_date->last_updated ) ) : false;
+		$data = $this->get_wporg_data();
+		return ! empty( $data->last_updated ) ? date( 'Y-m-d', strtotime( $data->last_updated ) ) : false;
 	}
 
 	/**
@@ -173,20 +173,36 @@ class WC_Beta_Tester {
 	 * @return string $description the description
 	 */
 	public function get_description() {
-		$_description = $this->get_wporg_data();
+		$data = $this->get_wporg_data();
 
-		if ( empty( $_description->sections->description ) ) {
+		if ( empty( $data->sections->description ) ) {
 			return false;
 		}
 
-		$_description = $_description->sections->description;
+		$data = $data->sections->description;
 
-		if ( preg_match('%(<p[^>]*>.*?</p>)%i', $_description, $regs ) ) {
-			$_description = strip_tags( $regs[1] );
+		if ( preg_match('%(<p[^>]*>.*?</p>)%i', $data, $regs ) ) {
+			$data = strip_tags( $regs[1] );
 		}
 
 
-		return $_description;
+		return $data;
+	}
+
+	/**
+	 * Get plugin download URL
+	 *
+	 * @since 1.0
+	 * @return string $description the description
+	 */
+	public function get_download_url( $version ) {
+		$data = $this->get_wporg_data();
+
+		if ( empty( $data->versions->$version ) ) {
+			return false;
+		}
+
+		return $data->versions->$version;
 	}
 
 	/**
