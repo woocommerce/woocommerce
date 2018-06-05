@@ -20,6 +20,70 @@ class WC_Beta_Tester_Admin_Menus {
 	}
 
 	/**
+	 * Get issue template from GitHub.
+	 *
+	 * @return string
+	 */
+	protected function get_ticket_template() {
+		$bug_tpl = wp_remote_retrieve_body( wp_remote_get( 'https://raw.githubusercontent.com/woocommerce/woocommerce/master/.github/ISSUE_TEMPLATE/Bug_report.md' ) );
+
+		$begin = strpos( $bug_tpl, '**Describe the bug**' );
+		if ( $begin ) {
+			$bug_tpl = substr( $bug_tpl, $begin );
+		}
+
+		return $bug_tpl;
+	}
+
+	/**
+	 * Constructs a WC System Status Report.
+	 *
+	 * @return string
+	 */
+	protected function construct_ssr() {
+		$transient_name = 'wc-beta-tester-ssr';
+		$ssr = get_transient( $transient_name );
+
+		if ( false === $ssr ) {
+			ob_start();
+
+			// Get SSR
+			// TODO: See what we can re-use from core `includes/admin/views/html-admin-page-status-report.php`
+			WC_Admin_Status::status_report();
+
+			$ssr = ob_get_clean();
+
+			$ssr = substr( $ssr, 0, 2048 );
+
+			set_transient( $transient_name, $ssr, DAY_IN_SECONDS );
+		}
+
+		return $ssr;
+	}
+
+	/**
+	 * Get URL for creating a GitHub ticket.
+	 *
+	 * @return string
+	 */
+	protected function get_github_ticket_url() {
+		$bug_tpl = $this->get_ticket_template();
+		$ssr     = $this->construct_ssr();
+		$body    = str_replace( 'Copy and paste the system status report from **WooCommerce > System Status** in WordPress admin.', $ssr, $bug_tpl );
+
+		// TODO: Retrieve this programmatically based on current channel.
+		$version = '1.2.3-rc.4';
+
+		return add_query_arg(
+			array(
+				'body'  => urlencode( $body ),
+				'title' => urlencode( sprintf( __( '[WC Beta Tester] Bug report for version "%s"', 'woocommerce-beta-tester' ), $version ) ),
+			),
+			'https://github.com/woocommerce/woocommerce/issues/new'
+		);
+	}
+
+	/**
 	 * Add the "Visit Store" link in admin bar main menu.
 	 *
 	 * @param WP_Admin_Bar $wp_admin_bar Admin bar instance.
@@ -55,7 +119,11 @@ class WC_Beta_Tester_Admin_Menus {
 				'parent' => 'wc-beta-tester',
 				'id'     => 'submit-gh-ticket',
 				'title'  => __( 'Submit a bug ticket to GitHub', 'woocommerce-beta-tester' ),
-				'href'   => admin_url( 'plugins.php' ),
+				'href'   => '#',
+				'meta'   => array(
+					// We can't simply use the href here since WP core calls esc_url on it which strips some parts.
+					'onclick' => 'javascript:window.open( "' . $this->get_github_ticket_url() . '" );',
+				),
 			),
 			array(
 				'parent' => 'wc-beta-tester',
