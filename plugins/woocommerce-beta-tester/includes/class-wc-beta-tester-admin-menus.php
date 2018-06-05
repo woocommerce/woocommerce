@@ -16,7 +16,9 @@ class WC_Beta_Tester_Admin_Menus {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_action( 'admin_bar_menu', array( $this, 'admin_bar_menus' ), 31 );
+		if ( class_exists( 'WC_Admin_Status' ) ) {
+			add_action( 'admin_bar_menu', array( $this, 'admin_bar_menus' ), 31 );
+		}
 	}
 
 	/**
@@ -124,7 +126,7 @@ class WC_Beta_Tester_Admin_Menus {
 					break;
 			}
 		}
-		
+
 
 		// TODO: Implementation of each node.
 		$nodes = array(
