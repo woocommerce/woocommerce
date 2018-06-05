@@ -50,12 +50,38 @@ class WC_Beta_Tester_Admin_Menus {
 			ob_start();
 
 			// Get SSR.
-			// @todo See what we can re-use from core `includes/admin/views/html-admin-page-status-report.php`.
-			WC_Admin_Status::status_report();
+			$api      = new WC_REST_System_Status_Controller();
+			$schema   = $api->get_item_schema();
+			$mappings = $api->get_item_mappings();
+			$response = array();
 
-			$ssr = ob_get_clean();
+			foreach ( $mappings as $section => $values ) {
+				foreach ( $values as $key => $value ) {
+					if ( isset( $schema['properties'][ $section ]['properties'][ $key ]['type'] ) ) {
+						settype( $values[ $key ], $schema['properties'][ $section ]['properties'][ $key ]['type'] );
+					}
+				}
+				settype( $values, $schema['properties'][ $section ]['type'] );
+				$response[ $section ] = $values;
+			}
 
-			$ssr = substr( $ssr, 0, 2048 );
+			$ssr = '';
+			foreach ( $response['environment'] as $key => $value ) {
+				$index = $key;
+				// @todo remove this hack after fix schema in WooCommerce, and Claudio never let you folks forget that need to write schema first, and review after every change, schema is the most important part of the REST API.
+				if ( 'version' === $index ) {
+					$index = 'wc_version';
+				} elseif ( 'external_object_cache' === $index ) {
+					$ssr .= sprintf( "%s: %s\n", 'External object cache', wc_bool_to_string( $value ) );
+					continue;
+				}
+
+				if ( is_bool( $value ) ) {
+					$value = wc_bool_to_string( $value );
+				}
+
+				$ssr .= sprintf( "%s: %s\n", $schema['properties']['environment']['properties'][ $index ]['description'], $value );
+			}
 
 			set_transient( $transient_name, $ssr, DAY_IN_SECONDS );
 		}
@@ -72,6 +98,7 @@ class WC_Beta_Tester_Admin_Menus {
 		$bug_tpl = $this->get_ticket_template();
 		$ssr     = $this->construct_ssr();
 		$body    = str_replace( 'Copy and paste the system status report from **WooCommerce > System Status** in WordPress admin.', $ssr, $bug_tpl );
+		$body    = str_replace( '```', '', $body ); // Remove since this break how is displayed.
 
 		$wc_plugin_data = get_plugin_data( WC_PLUGIN_FILE );
 		if ( isset( $wc_plugin_data['Version'] ) ) {
