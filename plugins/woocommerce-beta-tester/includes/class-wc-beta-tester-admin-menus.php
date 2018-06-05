@@ -71,8 +71,12 @@ class WC_Beta_Tester_Admin_Menus {
 		$ssr     = $this->construct_ssr();
 		$body    = str_replace( 'Copy and paste the system status report from **WooCommerce > System Status** in WordPress admin.', $ssr, $bug_tpl );
 
-		// TODO: Retrieve this programmatically based on current channel.
-		$version = '1.2.3-rc.4';
+		$wc_plugin_data = get_plugin_data( WC_PLUGIN_FILE );
+		if ( isset( $wc_plugin_data['Version'] ) ) {
+			$version = $wc_plugin_data['Version'];
+		} else {
+			$version = '-';
+		}
 
 		return add_query_arg(
 			array(
