@@ -41,7 +41,7 @@ class WC_Beta_Tester_Admin_Menus {
 			'title'  => __( 'WC Beta Tester', 'woocommerce-beta-tester' ),
 		) );
 
-		$current_channel = __( 'Release Candidate', 'woocommerce-beta-tester' );
+		$current_channel = __( 'Stable', 'woocommerce-beta-tester' );
 		$options = get_option( 'wc_beta_tester_options' );
 		if ( isset( $options['wc-beta-tester-version'] ) ) {
 			switch ( $options['wc-beta-tester-version'] ) {
