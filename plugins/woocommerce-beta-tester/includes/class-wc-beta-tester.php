@@ -74,7 +74,7 @@ class WC_Beta_Tester {
 		$this->config['new_version']  = $this->get_latest_prerelease();
 		$this->config['last_updated'] = $this->get_date();
 		$this->config['description']  = $this->get_description();
-		$this->config['zip_url']      = 'https://github.com/woocommerce/woocommerce/zipball/' . $this->config['new_version'];
+		$this->config['zip_url']      = 'https://downloads.wordpress.org/plugin/woocommerce.' . $this->config['new_version'] . '.zip';
 	}
 
 	/**
