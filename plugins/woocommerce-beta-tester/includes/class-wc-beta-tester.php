@@ -106,21 +106,17 @@ class WC_Beta_Tester {
 
 		if ( $this->overrule_transients() || empty( $tagged_version ) ) {
 
-			$raw_response = wp_remote_get( trailingslashit( $this->config['api_url'] ) . 'releases' );
+			$data = $this->get_wporg_data();
 
-			if ( is_wp_error( $raw_response ) ) {
-				return false;
-			}
+			$latest_version = $data->version;
+			$versions       = (array) $data->versions;
 
-			$releases       = json_decode( $raw_response['body'] );
-			$tagged_version = false;
+			foreach ( $versions as $version => $download_url ) {
+				if ( version_compare( $version, $latest_version, '>' )
+					&& preg_match( '/(.*)?-(beta|rc)(.*)/', $version ) ) {
 
-			if ( is_array( $releases ) ) {
-				foreach ( $releases as $release ) {
-					if ( $release->prerelease ) {
-						$tagged_version = $release->tag_name;
-						break;
-					}
+					$tagged_version = $version;
+					break;
 				}
 			}
 
