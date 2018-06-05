@@ -60,6 +60,15 @@ class WC_Beta_Tester {
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'api_check' ) );
 		add_filter( 'plugins_api', array( $this, 'get_plugin_info' ), 10, 3 );
 		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
+
+		$this->includes();
+	}
+
+	/**
+	 * Include any classes we need within admin.
+	 */
+	public function includes() {
+		include_once( dirname( __FILE__ ) . '/class-wc-beta-tester-admin-menus.php' );
 	}
 
 	/**
