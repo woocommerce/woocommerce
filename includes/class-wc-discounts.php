@@ -93,7 +93,7 @@ class WC_Discounts {
 	 * Normalise order items which will be discounted.
 	 *
 	 * @since 3.2.0
-	 * @param array $order Cart object.
+	 * @param WC_Order $order Order object.
 	 */
 	public function set_items_from_order( $order ) {
 		$this->items     = array();
