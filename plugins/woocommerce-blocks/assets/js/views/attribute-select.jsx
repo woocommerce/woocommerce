@@ -2,12 +2,6 @@ const { __ } = wp.i18n;
 const { Toolbar, withAPIData, Dropdown, Dashicon } = wp.components;
 
 /**
- * Attribute data cache.
- * Needed because it takes a lot of API calls to generate attribute info.
- */
-const PRODUCT_ATTRIBUTE_DATA = {};
-
-/**
  * Get the identifier for an attribute. The identifier can be used to determine
  * the slug or the ID of the attribute.
  *
@@ -181,31 +175,21 @@ const ProductAttributeList = withAPIData( ( props ) => {
 		const filter = filterQuery.toLowerCase();
 		let attributeElements = [];
 		for ( let attribute of attributes.data ) {
-
 			// Filter out attributes that don't match the search query.
 			if ( filter.length && -1 === attribute.name.toLowerCase().indexOf( filter ) ) {
 				continue;
 			}
 
-			if ( PRODUCT_ATTRIBUTE_DATA.hasOwnProperty( attribute.slug ) ) {
-				attributeElements.push( <ProductAttributeElement
-					selectedAttribute={ selectedAttribute }
-					selectedTerms={ selectedTerms }
-					attribute={attribute}
-					setSelectedAttribute={ setSelectedAttribute }
+			attributeElements.push(
+				<ProductAttributeElement 
+					attribute={ attribute } 
+					selectedAttribute={ selectedAttribute } 
+					selectedTerms={ selectedTerms } 
+					setSelectedAttribute={ setSelectedAttribute}
 					addTerm={ addTerm }
-					removeTerm={ removeTerm }
-				/> );
-			} else {
-				attributeElements.push( <UncachedProductAttributeElement
-					selectedAttribute={ selectedAttribute }
-					selectedTerms={ selectedTerms }
-					attribute={ attribute }
-					setSelectedAttribute={ setSelectedAttribute }
-					addTerm={ addTerm }
-					removeTerm={ removeTerm }
-				/> );
-			}
+					removeTerm={ removeTerm } 
+				/>
+			);
 		}
 
 		return (
@@ -217,47 +201,10 @@ const ProductAttributeList = withAPIData( ( props ) => {
 );
 
 /**
- * Caches then renders a product attribute term element.
- */
-const UncachedProductAttributeElement = withAPIData( ( props ) => {
-		return {
-			terms: '/wc/v2/products/attributes/' + props.attribute.id + '/terms'
-		};
-	} )( ( { terms, selectedAttribute, selectedTerms, attribute, setSelectedAttribute, addTerm, removeTerm } ) => {
-		if ( ! terms.data || 0 === terms.data.length ) {
-			return null;
-		}
-
-		// Populate cache.
-		PRODUCT_ATTRIBUTE_DATA[ attribute.slug ] = { terms: [] };
-
-		let totalCount = 0;
-		for ( let term of terms.data ) {
-			totalCount += term.count;
-			PRODUCT_ATTRIBUTE_DATA[ attribute.slug ].terms.push( term );
-		}
-
-		PRODUCT_ATTRIBUTE_DATA[ attribute.slug ].count = totalCount;
-
-		return <ProductAttributeElement
-			selectedAttribute={ selectedAttribute }
-			selectedTerms={ selectedTerms }
-			attribute={ attribute }
-			setSelectedAttribute={ setSelectedAttribute }
-			addTerm={ addTerm }
-			removeTerm={ removeTerm }
-		/>
-	}
-);
-
-/**
- * A product attribute term element.
+ * One product attribute.
  */
 class ProductAttributeElement extends React.Component {
 
-	/**
-	 * Constructor.
-	 */
 	constructor( props ) {
 		super( props );
 
@@ -291,36 +238,20 @@ class ProductAttributeElement extends React.Component {
 		}
 	}
 
-	/**
-	 * Render the details for one attribute.
-	 */
 	render() {
-		const attribute = PRODUCT_ATTRIBUTE_DATA[ this.props.attribute.slug ];
 		const isSelected = this.props.selectedAttribute === getAttributeIdentifier( this.props.attribute.slug, this.props.attribute.id );
 
 		let attributeTerms = null;
 		if ( isSelected ) {
-			attributeTerms = (
-				<ul>
-					{ attribute.terms.map( ( term ) => (
-						<li className="wc-products-list-card__item">
-							<label className="wc-products-list-card__content">
-								<input type="checkbox"
-									value={ term.id }
-									onChange={ this.handleTermChange }
-									checked={ this.props.selectedTerms.includes( String( term.id ) ) }
-								/>
-								{ term.name }
-								<span className="wc-products-list-card__taxonomy-count">{ term.count }</span>
-							</label>
-						</li>
-					) ) }
-				</ul>
-			);
+			attributeTerms = <AttributeTerms
+								attribute={ this.props.attribute }
+								selectedTerms={ this.props.selectedTerms }
+								addTerm={ this.props.addTerm }
+								removeTerm={ this.props.removeTerm }
+							/>
 		}
 
 		let cssClasses = [ 'wc-products-list-card--taxonomy-atributes__atribute' ];
-
 		if ( isSelected ) {
 			cssClasses.push( 'wc-products-list-card__accordion-open' );
 		}
@@ -335,7 +266,6 @@ class ProductAttributeElement extends React.Component {
 							checked={ isSelected }
 						/>
 						{ this.props.attribute.name }
-						<span className="wc-products-list-card__taxonomy-count">{ attribute.count }</span>
 					</label>
 				</div>
 				{ attributeTerms }
@@ -343,3 +273,52 @@ class ProductAttributeElement extends React.Component {
 		);
 	}
 }
+
+/**
+ * The list of terms in an attribute.
+ */
+const AttributeTerms = withAPIData( ( props ) => {
+		return {
+			terms: '/wc/v2/products/attributes/' + props.attribute.id + '/terms'
+		};
+	} )( ( { terms, selectedTerms, attribute, addTerm, removeTerm } ) => {
+		if ( ! terms.data ) {
+			return ( <ul><li>{ __( 'Loading' ) }</li></ul> );
+		}
+
+		if ( 0 === terms.data.length ) {
+			return ( <ul><li>{ __( 'No terms found' ) }</li></ul> );
+		}
+
+		/**
+		 * Add or remove selected terms.
+		 *
+		 * @param evt Event object
+		 */
+		function handleTermChange( evt ) {
+			if ( evt.target.checked ) {
+				addTerm( evt.target.value );
+			} else {
+				removeTerm( evt.target.value );
+			}
+		}
+
+		return (
+			<ul>
+				{ terms.data.map( ( term ) => (
+					<li className="wc-products-list-card__item">
+						<label className="wc-products-list-card__content">
+							<input type="checkbox"
+								value={ term.id }
+								onChange={ handleTermChange }
+								checked={ selectedTerms.includes( String( term.id ) ) }
+							/>
+							{ term.name }
+							<span className="wc-products-list-card__taxonomy-count">{ term.count }</span>
+						</label>
+					</li>
+				) ) }
+			</ul>
+		);
+	}
+);
