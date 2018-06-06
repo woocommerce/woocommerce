@@ -24,8 +24,6 @@ class WC_Beta_Tester_Admin_Assets {
 	 */
 	public function admin_scripts() {
 		$suffix       = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
-		// TODO: Handle minification later.
-		$suffix       = '';
 
 		// TODO: Figure out why the modal appears only on WC screens. Need some other dependencies?
 		wp_register_script( 'wc-beta-tester-version-info', WC_Beta_Tester::instance()->plugin_url() . '/assets/js/version-information' . $suffix . '.js', array( 'wc-backbone-modal' ), WC_BETA_TESTER_VERSION );
