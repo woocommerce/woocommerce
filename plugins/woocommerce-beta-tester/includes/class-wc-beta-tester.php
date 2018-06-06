@@ -51,8 +51,8 @@ class WC_Beta_Tester {
 			'plugin_file'        => 'woocommerce/woocommerce.php',
 			'slug'               => 'woocommerce',
 			'proper_folder_name' => 'woocommerce',
-			'api_url'            => 'https://api.github.com/repos/woocommerce/woocommerce',
-			'github_url'         => 'https://github.com/woocommerce/woocommerce',
+			'api_url'            => 'https://api.wordpress.org/plugins/info/1.0/woocommerce.json',
+			'repo_url'           => 'https://wordpress.org/plugins/woocommerce/',
 			'requires'           => '4.4',
 			'tested'             => '4.9',
 		);
@@ -68,7 +68,7 @@ class WC_Beta_Tester {
 	 * Include any classes we need within admin.
 	 */
 	public function includes() {
-		include_once( dirname( __FILE__ ) . '/class-wc-beta-tester-admin-menus.php' );
+		include_once dirname( __FILE__ ) . '/class-wc-beta-tester-admin-menus.php';
 	}
 
 	/**
@@ -83,7 +83,7 @@ class WC_Beta_Tester {
 		$this->config['new_version']  = $this->get_latest_prerelease();
 		$this->config['last_updated'] = $this->get_date();
 		$this->config['description']  = $this->get_description();
-		$this->config['zip_url']      = 'https://github.com/woocommerce/woocommerce/zipball/' . $this->config['new_version'];
+		$this->config['zip_url']      = $this->get_download_url( $this->config['new_version'] );
 	}
 
 	/**
@@ -96,7 +96,7 @@ class WC_Beta_Tester {
 	}
 
 	/**
-	 * Get New Version from GitHub
+	 * Get New Version from WPorg
 	 *
 	 * @since 1.0
 	 * @return int $version the version number
@@ -106,21 +106,14 @@ class WC_Beta_Tester {
 
 		if ( $this->overrule_transients() || empty( $tagged_version ) ) {
 
-			$raw_response = wp_remote_get( trailingslashit( $this->config['api_url'] ) . 'releases' );
+			$data = $this->get_wporg_data();
 
-			if ( is_wp_error( $raw_response ) ) {
-				return false;
-			}
+			$latest_version = $data->version;
+			$versions       = (array) $data->versions;
 
-			$releases       = json_decode( $raw_response['body'] );
-			$tagged_version = false;
-
-			if ( is_array( $releases ) ) {
-				foreach ( $releases as $release ) {
-					if ( $release->prerelease ) {
-						$tagged_version = $release->tag_name;
-						break;
-					}
+			foreach ( $versions as $version => $download_url ) {
+				if ( preg_match( '/(.*)?-(beta|rc)(.*)/', $version ) ) {
+					$tagged_version = $version;
 				}
 			}
 
@@ -134,35 +127,35 @@ class WC_Beta_Tester {
 	}
 
 	/**
-	 * Get GitHub Data from the specified repository.
+	 * Get Data from .org API.
 	 *
 	 * @since 1.0
-	 * @return array $github_data The data.
+	 * @return array $wporg_data The data.
 	 */
-	public function get_github_data() {
-		if ( ! empty( $this->github_data ) ) {
-			$github_data = $this->github_data;
-		} else {
-			$github_data = get_site_transient( md5( $this->config['slug'] ) . '_github_data' );
-
-			if ( $this->overrule_transients() || ( ! isset( $github_data ) || ! $github_data || '' === $github_data ) ) {
-				$github_data = wp_remote_get( $this->config['api_url'] );
-
-				if ( is_wp_error( $github_data ) ) {
-					return false;
-				}
-
-				$github_data = json_decode( $github_data['body'] );
-
-				// Refresh every 6 hours.
-				set_site_transient( md5( $this->config['slug'] ) . '_github_data', $github_data, 60 * 60 * 6 );
-			}
-
-			// Store the data in this class instance for future calls.
-			$this->github_data = $github_data;
+	public function get_wporg_data() {
+		if ( ! empty( $this->wporg_data ) ) {
+			return $this->wporg_data;
 		}
 
-		return $github_data;
+		$wporg_data = get_site_transient( md5( $this->config['slug'] ) . '_wporg_data' );
+
+		if ( $this->overrule_transients() || ( ! isset( $wporg_data ) || ! $wporg_data || '' === $wporg_data ) ) {
+			$wporg_data = wp_remote_get( $this->config['api_url'] );
+
+			if ( is_wp_error( $wporg_data ) ) {
+				return false;
+			}
+
+			$wporg_data = json_decode( $wporg_data['body'] );
+
+			// Refresh every 6 hours.
+			set_site_transient( md5( $this->config['slug'] ) . '_wporg_data', $wporg_data, 60 * 60 * 6 );
+		}
+
+		// Store the data in this class instance for future calls.
+		$this->wporg_data = $wporg_data;
+
+		return $wporg_data;
 	}
 	/**
 	 * Get update date
@@ -171,8 +164,8 @@ class WC_Beta_Tester {
 	 * @return string $date the date
 	 */
 	public function get_date() {
-		$_date = $this->get_github_data();
-		return ! empty( $_date->updated_at ) ? date( 'Y-m-d', strtotime( $_date->updated_at ) ) : false;
+		$data = $this->get_wporg_data();
+		return ! empty( $data->last_updated ) ? date( 'Y-m-d', strtotime( $data->last_updated ) ) : false;
 	}
 
 	/**
@@ -182,8 +175,36 @@ class WC_Beta_Tester {
 	 * @return string $description the description
 	 */
 	public function get_description() {
-		$_description = $this->get_github_data();
-		return ! empty( $_description->description ) ? $_description->description : false;
+		$data = $this->get_wporg_data();
+
+		if ( empty( $data->sections->description ) ) {
+			return false;
+		}
+
+		$data = $data->sections->description;
+
+		if ( preg_match( '%(<p[^>]*>.*?</p>)%i', $data, $regs ) ) {
+			$data = strip_tags( $regs[1] );
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Get plugin download URL.
+	 *
+	 * @since 1.0
+	 * @param string $version The version.
+	 * @return string
+	 */
+	public function get_download_url( $version ) {
+		$data = $this->get_wporg_data();
+
+		if ( empty( $data->versions->$version ) ) {
+			return false;
+		}
+
+		return $data->versions->$version;
 	}
 
 	/**
@@ -197,7 +218,7 @@ class WC_Beta_Tester {
 	}
 
 	/**
-	 * Hook into the plugin update check and connect to GitHub.
+	 * Hook into the plugin update check and connect to WPorg.
 	 *
 	 * @since 1.0
 	 * @param object $transient The plugin data transient.
@@ -224,7 +245,7 @@ class WC_Beta_Tester {
 			$response->plugin      = $this->config['slug'];
 			$response->new_version = $this->config['new_version'];
 			$response->slug        = $this->config['slug'];
-			$response->url         = $this->config['github_url'];
+			$response->url         = $this->config['repo_url'];
 			$response->package     = $this->config['zip_url'];
 
 			// If response is false, don't alter the transient.
