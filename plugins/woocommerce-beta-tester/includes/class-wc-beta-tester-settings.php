@@ -41,8 +41,8 @@ class WC_Beta_Tester_Settings {
 		);
 
 		add_settings_field(
-      self::$version_setting_id,
-      __( 'Release Channel', 'woocommerce-beta-tester' ),
+			self::$version_setting_id,
+			__( 'Release Channel', 'woocommerce-beta-tester' ),
 			array( $this, 'version_select_html' ),
 			'wc-beta-tester',
 			'wc-beta-tester-update',
