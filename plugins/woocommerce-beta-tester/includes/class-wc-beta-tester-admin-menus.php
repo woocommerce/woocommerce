@@ -198,7 +198,7 @@ class WC_Beta_Tester_Admin_Menus {
 	}
 
 	/**
-	 * Template for order preview.
+	 * Template for version information.
 	 */
 	public function version_information_template() {
 		?>
