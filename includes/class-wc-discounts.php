@@ -258,7 +258,6 @@ class WC_Discounts {
 		}
 
 		$items_to_apply = $this->get_items_to_apply_coupon( $coupon );
-		$coupon_type    = $coupon->get_discount_type();
 
 		// Core discounts are handled here as of 3.2.
 		switch ( $coupon->get_discount_type() ) {
