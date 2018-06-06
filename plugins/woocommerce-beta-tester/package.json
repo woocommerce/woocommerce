@@ -1,0 +1,39 @@
+{
+  "name": "woocommerce-beta-tester",
+  "description": "Setting up the local beta tester scripts.",
+  "license": "GPL-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/woocommerce/woocommerce-beta-tester.git"
+  },
+  "title": "WooCommerce Beta Tester",
+  "version": "1.0.0",
+  "homepage": "http://github.com/woocommerce/woocommerce-beta-tester",
+  "devDependencies": {
+    "clean-css-cli": "^4.1.11",
+    "less": "^3.0.4",
+    "uglify-js": "^3.4.0"
+  },
+  "assets": {
+    "js": {
+      "min": "assets/js/*.min.js",
+      "js": "assets/js/*.js"
+    },
+    "styles": {
+      "css": "assets/css/*.css",
+      "less": "assets/css/*.less"
+    }
+  },
+  "scripts": {
+    "build": "npm run uglify && npm run less",
+    "preuglify": "rm -f $npm_package_assets_js_min",
+    "uglify": "for f in $npm_package_assets_js_js; do file=${f%.js}; node_modules/.bin/uglifyjs $f -c -m > $file.min.js; done",
+    "preless": "rm -f $npm_package_assets_styles_css",
+    "less": "for f in $npm_package_assets_styles_less; do file=${f%.less}; node_modules/.bin/lessc $f > $file.css; done && rm -f assets/css/mixins.css",
+    "postless": "for f in $npm_package_assets_styles_css; do file=${f%.css}; node_modules/.bin/cleancss -o $file.css $f; done"
+  },
+  "engines": {
+    "node": ">=6.8.1",
+    "npm": ">=4.0.5"
+  }
+}
