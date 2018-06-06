@@ -86,6 +86,7 @@ class WC_Beta_Tester {
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'api_check' ) );
 		add_filter( 'plugins_api', array( $this, 'get_plugin_info' ), 10, 3 );
 		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
+		add_filter( 'auto_update_plugin', 'auto_update_woocommerce', 100, 2 );
 
 		$this->includes();
 	}
@@ -341,6 +342,21 @@ class WC_Beta_Tester {
 		}
 
 		return $source;
+	}
+
+	/**
+	 * Enable auto updates for WooCommerce.
+	 *
+	 * @param bool   $update Should this autoupdate.
+	 * @param object $plugin Plugin being checked.
+	 * @return bool
+	 */
+	public function auto_update_woocommerce( $update, $plugin ) {
+		if ( true === $this->get_settings()->auto_update && 'woocommerce' === $item->slug ) {
+			return true;
+		} else {
+			return $update;
+		}
 	}
 
 	/**
