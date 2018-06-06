@@ -13,9 +13,11 @@ defined( 'ABSPATH' ) || exit;
 class WC_Beta_Tester_Version_Picker {
 
 	/**
-	 * @var null
+	 * Currently installed version of WooCommerce plugin.
+	 *
+	 * @var string
 	 */
-	protected $current_version = null;
+	protected $current_version = '';
 
 	/**
 	 * Constructor
@@ -25,7 +27,7 @@ class WC_Beta_Tester_Version_Picker {
 	}
 
 	/**
-	 * Add options page to menu
+	 * Add options page to menu.
 	 *
 	 * @return void
 	 */
@@ -78,7 +80,7 @@ class WC_Beta_Tester_Version_Picker {
 		return $versions_html;
 	}
 
-	// TODO: this needs css (and maybe a bit of JS), but the idea is to display Switch version button that displays modal which contains the actual form submit,
+	// TODO: this needs css (and maybe a bit of JS), but the idea is to display Switch version button that displays modal which contains the actual form submit.
 	/**
 	 * Echo HTML form to switch WooCommerce versions, filtered for the selected channel.
 	 */
@@ -88,7 +90,7 @@ class WC_Beta_Tester_Version_Picker {
 		}
 
 		$options = get_option( 'wc_beta_tester_options' );
-		$channel = $options[WC_Beta_Tester_Settings::$version_setting_id];
+		$channel = $options[ WC_Beta_Tester_Settings::$version_setting_id ];
 
 		?>
 		<div class="wrap">
@@ -127,7 +129,7 @@ class WC_Beta_Tester_Version_Picker {
 							</div>
 
 							<div class="wcbt-notice">
-								<p><?php esc_html_e( 'Notice: We strongly recommend you perform the test on a staging site and create a complete backup of your WordPress files and database prior to performing a rollback. We are not responsible for any misuse, deletions, white screens, fatal errors, or any other issue arising from using this plugin.', 'woocommerce-beta-tester' ); ?></p>
+								<p><?php esc_html_e( 'Notice: We strongly recommend you perform the test on a staging site and create a complete backup of your WordPress files and database prior to performing a version switch. We are not responsible for any misuse, deletions, white screens, fatal errors, or any other issue arising from using this plugin.', 'woocommerce-beta-tester' ); ?></p>
 							</div>
 
 							<input type="submit" value="<?php esc_attr_e( 'Switch version', 'woocommerce-beta-tester' ); ?>" class="button-primary wcbt-go" />

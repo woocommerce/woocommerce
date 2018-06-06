@@ -12,6 +12,11 @@ defined( 'ABSPATH' ) || exit;
  */
 class WC_Beta_Tester_Settings {
 
+	/**
+	 * Id for channel settings field.
+	 *
+	 * @var string
+	 */
 	public static $version_setting_id = 'wc-beta-tester-version';
 
 	/**
