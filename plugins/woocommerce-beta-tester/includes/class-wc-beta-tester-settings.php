@@ -34,13 +34,24 @@ class WC_Beta_Tester_Settings {
 		);
 
 		add_settings_field(
-			'wc-beta-tester-version',
+			'wc-beta-tester-channel',
 			__( 'Release Channel', 'woocommerce-beta-tester' ),
 			array( $this, 'version_select_html' ),
 			'wc-beta-tester',
 			'wc-beta-tester-update',
 			array(
-				'label_for' => 'wc-beta-tester-version',
+				'label_for' => 'channel',
+			)
+		);
+
+		add_settings_field(
+			'wc-beta-tester-auto-update',
+			__( 'Automatic Updates', 'woocommerce-beta-tester' ),
+			array( $this, 'automatic_update_checkbox_html' ),
+			'wc-beta-tester',
+			'wc-beta-tester-update',
+			array(
+				'label_for' => 'auto_update',
 			)
 		);
 	}
@@ -57,13 +68,12 @@ class WC_Beta_Tester_Settings {
 	}
 
 	/**
-	 * Version select markup output
+	 * Version select markup output.
 	 *
 	 * @param array $args Arguments.
 	 */
 	public function version_select_html( $args ) {
-		$options  = get_option( 'wc_beta_tester_options' );
-		$selected = isset( $options[ $args['label_for'] ] ) ? $options[ $args['label_for'] ] : 'stable';
+		$settings = WC_Beta_Tester::get_settings();
 		$channels = array(
 			'beta' => array(
 				'name'        => __( 'Beta Releases', 'woocommerce-beta-tester' ),
@@ -82,7 +92,7 @@ class WC_Beta_Tester_Settings {
 		foreach ( $channels as $channel_id => $channel ) {
 			?>
 			<label>
-				<input type="radio" id="<?php echo esc_attr( $args['label_for'] ); ?>" name="wc_beta_tester_options[<?php echo esc_attr( $args['label_for'] ); ?>]" value="<?php echo esc_attr( $channel_id ); ?>" <?php checked( $selected, $channel_id ); ?> />
+				<input type="radio" id="<?php echo esc_attr( $args['label_for'] ); ?>" name="wc_beta_tester_options[<?php echo esc_attr( $args['label_for'] ); ?>]" value="<?php echo esc_attr( $channel_id ); ?>" <?php checked( $settings->{ $args['label_for'] }, $channel_id ); ?> />
 				<?php echo esc_html( $channel['name'] ); ?>
 				<p class="description">
 					<?php echo esc_html( $channel['description'] ); ?>
@@ -92,6 +102,21 @@ class WC_Beta_Tester_Settings {
 			<?php
 		}
 		echo '</fieldset>';
+	}
+
+	/**
+	 * Auto updates checkbox markup output.
+	 *
+	 * @param array $args Arguments.
+	 */
+	public function automatic_update_checkbox_html( $args ) {
+		$settings = WC_Beta_Tester::get_settings();
+		?>
+		<label for="<?php echo esc_attr( $args['label_for'] ); ?>">
+			<input type="checkbox" id="<?php echo esc_attr( $args['label_for'] ); ?>" name="wc_beta_tester_options[<?php echo esc_attr( $args['label_for'] ); ?>]" value="1" <?php checked( $settings->{ $args['label_for'] }, true ); ?> />
+			<?php echo esc_html__( 'If enabled, WooCommerce will update to the latest release in the background. Use with caution; we do not recommend using this on production stores!', 'woocommerce-beta-tester' ); ?>
+		</label>
+		<?php
 	}
 
 	/**
@@ -109,7 +134,7 @@ class WC_Beta_Tester_Settings {
 			return;
 		}
 
-		if ( isset( $_GET['settings-updated'] ) ) {
+		if ( isset( $_GET['settings-updated'] ) ) { // WPCS: input var.
 			add_settings_error( 'wc-beta-tester-messages', 'wc-beta-tester-message', __( 'Settings Saved', 'woocommerce-beta-tester' ), 'updated' );
 		}
 

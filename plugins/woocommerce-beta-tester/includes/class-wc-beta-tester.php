@@ -44,6 +44,23 @@ class WC_Beta_Tester {
 	}
 
 	/**
+	 * Get plugin settings.
+	 *
+	 * @return object
+	 */
+	public static function get_settings() {
+		$settings = (object) wp_parse_args(
+			get_option( 'wc_beta_tester_options', array() ),
+			array(
+				'channel'     => 'stable',
+				'auto_update' => false,
+			)
+		);
+		$settings->auto_update = (bool) $settings->auto_update;
+		return $settings;
+	}
+
+	/**
 	 * Get the plugin url.
 	 *
 	 * @return string
@@ -69,6 +86,7 @@ class WC_Beta_Tester {
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'api_check' ) );
 		add_filter( 'plugins_api', array( $this, 'get_plugin_info' ), 10, 3 );
 		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
+		add_filter( 'auto_update_plugin', 'auto_update_woocommerce', 100, 2 );
 
 		$this->includes();
 	}
@@ -327,9 +345,24 @@ class WC_Beta_Tester {
 	}
 
 	/**
+	 * Enable auto updates for WooCommerce.
+	 *
+	 * @param bool   $update Should this autoupdate.
+	 * @param object $plugin Plugin being checked.
+	 * @return bool
+	 */
+	public function auto_update_woocommerce( $update, $plugin ) {
+		if ( true === $this->get_settings()->auto_update && 'woocommerce' === $item->slug ) {
+			return true;
+		} else {
+			return $update;
+		}
+	}
+
+	/**
 	 * Gets release information from GitHub.
 	 *
-	 * @param string $version
+	 * @param string $version Version number.
 	 * @return bool|string False on error, description otherwise
 	 */
 	public function get_version_information( $version ) {
