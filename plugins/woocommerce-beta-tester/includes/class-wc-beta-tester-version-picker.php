@@ -88,8 +88,8 @@ class WC_Beta_Tester_Version_Picker {
 			return;
 		}
 
-		$options = get_option( 'wc_beta_tester_options' );
-		$channel = $options[ WC_Beta_Tester_Settings::$version_setting_id ];
+		$settings = WC_Beta_Tester::get_settings();
+		$channel = $settings->channel;
 
 		?>
 		<div class="wrap">
