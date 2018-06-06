@@ -1711,10 +1711,11 @@ p.demo_store,
 /**
  * Right to left styles
  */
-.rtl.woocommerce .price_label span {
-	unicode-bidi: embed;
+ .rtl.woocommerce .price_label, 
+ .rtl.woocommerce .price_label span {
 	/* rtl:ignore */
-    direction: ltr;
+	direction: ltr;
+	unicode-bidi: embed;
 }
 
 .woocommerce-message {
