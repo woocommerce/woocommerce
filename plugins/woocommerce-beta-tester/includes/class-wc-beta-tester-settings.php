@@ -29,22 +29,20 @@ class WC_Beta_Tester_Settings {
 
 	/**
 	 * Initialise settings
-	 *
-	 * @return void
 	 */
 	public function settings_init() {
 		register_setting( 'wc-beta-tester', 'wc_beta_tester_options' );
 
 		add_settings_section(
 			'wc-beta-tester-update',
-			__( 'Plugin Update Settings', 'woocommerce-beta-tester' ),
+			__( 'Update Settings', 'woocommerce-beta-tester' ),
 			array( $this, 'update_section_html' ),
 			'wc-beta-tester'
 		);
 
 		add_settings_field(
-			self::$version_setting_id,
-			__( 'WooCommerce Version', 'woocommerce-beta-tester' ),
+      self::$version_setting_id,
+      __( 'Release Channel', 'woocommerce-beta-tester' ),
 			array( $this, 'version_select_html' ),
 			'wc-beta-tester',
 			'wc-beta-tester-update',
@@ -58,11 +56,10 @@ class WC_Beta_Tester_Settings {
 	 * Update section HTML output.
 	 *
 	 * @param array $args Arguments.
-	 * @return void
 	 */
 	public function update_section_html( $args ) {
 	?>
-		<p id="<?php echo esc_attr( $args['id'] ); ?>"><?php esc_html_e( 'Which version of WooCommerce to provide updates for.', 'woocommerce-beta-tester' ); ?></p>
+		<p id="<?php echo esc_attr( $args['id'] ); ?>"><?php esc_html_e( 'The following settings allow you to choose which WooCommerce updates to receive on this site, including beta and RC versions not quite ready for production deployment.', 'woocommerce-beta-tester' ); ?></p>
 	<?php
 	}
 
@@ -70,44 +67,49 @@ class WC_Beta_Tester_Settings {
 	 * Version select markup output
 	 *
 	 * @param array $args Arguments.
-	 * @return void
 	 */
 	public function version_select_html( $args ) {
-		$options = get_option( 'wc_beta_tester_options' );
-		?>
-		<select
-			id="<?php echo esc_attr( $args['label_for'] ); ?>"
-			name="wc_beta_tester_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
-		>
-			<option value="beta" <?php echo isset( $options[ $args['label_for'] ] ) ? ( selected( $options[ $args['label_for'] ], 'beta', false ) ) : ( '' ); ?>>
-				<?php esc_html_e( 'Beta', 'woocommerce-beta-tester' ); ?>
-			</option>
-			<option value="rc" <?php echo isset( $options[ $args['label_for'] ] ) ? ( selected( $options[ $args['label_for'] ], 'rc', false ) ) : ( '' ); ?>>
-				<?php esc_html_e( 'Release Candidate', 'woocommerce-beta-tester' ); ?>
-			</option>
-			<option value="stable" <?php echo isset( $options[ $args['label_for'] ] ) ? ( selected( $options[ $args['label_for'] ], 'stable', false ) ) : ( '' ); ?>>
-				<?php esc_html_e( 'Stable', 'woocommerce-beta-tester' ); ?>
-			</option>
-		</select>
-		<p class="description">
-			<?php esc_html_e( 'Which version of WooCommerce do you want to keep up to date with?.', 'woocommerce-beta-tester' ); ?>
-		</p>
-		<?php
+		$options  = get_option( 'wc_beta_tester_options' );
+		$selected = isset( $options[ $args['label_for'] ] ) ? $options[ $args['label_for'] ] : 'stable';
+		$channels = array(
+			'beta' => array(
+				'name'        => __( 'Beta Releases', 'woocommerce-beta-tester' ),
+				'description' => __( 'Beta releases contain experimental functionality for testing purposes only. This channel will also include RC and stable releases if more current.', 'woocommerce-beta-tester' ),
+			),
+			'rc' => array(
+				'name'        => __( 'Release Candidates', 'woocommerce-beta-tester' ),
+				'description' => __( 'Release candidates are released to ensure any critical problems have not gone undetected. This channel will also include stable releases if more current.', 'woocommerce-beta-tester' ),
+			),
+			'stable' => array(
+				'name'        => __( 'Stable Releases', 'woocommerce-beta-tester' ),
+				'description' => __( 'This is the default behaviour in WordPress.', 'woocommerce-beta-tester' ),
+			),
+		);
+		echo '<fieldset><legend class="screen-reader-text"><span>' . esc_html__( 'Update Channel', 'woocommerce-beta-tester' ) . '</span></legend>';
+		foreach ( $channels as $channel_id => $channel ) {
+			?>
+			<label>
+				<input type="radio" id="<?php echo esc_attr( $args['label_for'] ); ?>" name="wc_beta_tester_options[<?php echo esc_attr( $args['label_for'] ); ?>]" value="<?php echo esc_attr( $channel_id ); ?>" <?php checked( $selected, $channel_id ); ?> />
+				<?php echo esc_html( $channel['name'] ); ?>
+				<p class="description">
+					<?php echo esc_html( $channel['description'] ); ?>
+				</p>
+			</label>
+			<br>
+			<?php
+		}
+		echo '</fieldset>';
 	}
 
 	/**
 	 * Add options page to menu
-	 *
-	 * @return void
 	 */
 	public function add_to_menus() {
-		add_submenu_page( 'plugins.php', __( 'WooCommerce Beta Tester', 'woocommerce-beta-tester' ), __( 'WooCommerce Beta Tester', 'woocommerce-beta-tester' ), 'install_plugins', 'wc-beta-tester', array( $this, 'settings_page_html' ) );
+		add_submenu_page( 'plugins.php', __( 'WooCommerce Beta Tester', 'woocommerce-beta-tester' ), __( 'WC Beta Tester', 'woocommerce-beta-tester' ), 'install_plugins', 'wc-beta-tester', array( $this, 'settings_page_html' ) );
 	}
 
 	/**
 	 * Output settings HTML
-	 *
-	 * @return void
 	 */
 	public function settings_page_html() {
 		if ( ! current_user_can( 'install_plugins' ) ) {
@@ -129,7 +131,7 @@ class WC_Beta_Tester_Settings {
 
 		settings_fields( 'wc-beta-tester' );
 		do_settings_sections( 'wc-beta-tester' );
-		submit_button( 'Save Settings' );
+		submit_button();
 
 		?>
 			</form>
