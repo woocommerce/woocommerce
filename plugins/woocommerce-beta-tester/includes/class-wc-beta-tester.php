@@ -44,6 +44,15 @@ class WC_Beta_Tester {
 	}
 
 	/**
+	 * Get the plugin url.
+	 *
+	 * @return string
+	 */
+	public function plugin_url() {
+		return untrailingslashit( plugins_url( '/', WC_BETA_TESTER_FILE ) );
+	}
+
+	/**
 	 * Constructor
 	 */
 	public function __construct() {
@@ -69,6 +78,7 @@ class WC_Beta_Tester {
 	 */
 	public function includes() {
 		include_once dirname( __FILE__ ) . '/class-wc-beta-tester-admin-menus.php';
+		include_once dirname( __FILE__ ) . '/class-wc-beta-tester-admin-assets.php';
 	}
 
 	/**
@@ -314,5 +324,38 @@ class WC_Beta_Tester {
 		}
 
 		return $source;
+	}
+
+	/**
+	 * Gets release information from GitHub.
+	 *
+	 * @param string $version
+	 * @return bool|string False on error, description otherwise
+	 */
+	public function get_version_information( $version ) {
+		$url = 'https://api.github.com/repos/woocommerce/woocommerce/releases/tags/' . $version;
+
+		$github_data = get_site_transient( md5( $url ) . '_github_data' );
+
+		if ( $this->overrule_transients() || empty( $github_data ) ) {
+			$github_data = wp_remote_get( $url );
+
+			if ( is_wp_error( $github_data ) ) {
+				return false;
+			}
+
+			$github_data = json_decode( $github_data['body'] );
+
+			if ( empty( $github_data->body ) ) {
+				return false;
+			}
+
+			$github_data = $github_data->body;
+
+			// Refresh every 6 hours.
+			set_site_transient( md5( $url ) . '_github_data', $github_data, HOUR_IN_SECONDS * 6 );
+		}
+
+		return $github_data;
 	}
 }

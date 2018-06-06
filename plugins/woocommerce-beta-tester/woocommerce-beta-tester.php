@@ -15,6 +15,15 @@
 
 defined( 'ABSPATH' ) || exit;
 
+// Define WC_BETA_TESTER_FILE.
+if ( ! defined( 'WC_BETA_TESTER_FILE' ) ) {
+	define( 'WC_BETA_TESTER_FILE', __FILE__ );
+}
+
+if ( ! defined( 'WC_BETA_TESTER_VERSION' ) ) {
+	define( 'WC_BETA_TESTER_VERSION', '1.0.3' );
+}
+
 /**
  * Load text domain before all other code.
  *
