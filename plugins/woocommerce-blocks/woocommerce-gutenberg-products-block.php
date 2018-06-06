@@ -8,7 +8,7 @@
  * Author URI: https://woocommerce.com
  * Text Domain:  woocommerce
  * Domain Path:  /languages
- * WC requires at least: 2.6
+ * WC requires at least: 3.3
  * WC tested up to: 3.4
  */
 
