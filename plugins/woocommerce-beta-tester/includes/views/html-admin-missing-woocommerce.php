@@ -10,7 +10,12 @@ defined( 'ABSPATH' ) || exit;
 ?>
 
 <div class="notice notice-error">
-	<p><strong><?php esc_html_e( 'WooCommerce Beta Tester', 'woocommerce-beta-tester' ); ?></strong> <?php esc_html_e( 'requires WooCommerce to be installed and enabled.', 'woocommerce-beta-tester' ); ?></p>
+	<p>
+		<?php
+		// Translators: %s Plugin name.
+		echo sprintf( esc_html__( '%s requires WooCommerce to be installed and activated in order to serve updates.', 'woocommerce-beta-tester' ), '<strong>' . esc_html__( 'WooCommerce Beta Tester', 'woocommerce-beta-tester' ) . '</strong>' );
+		?>
+	</p>
 
 	<?php if ( ! is_plugin_active( 'woocommerce/woocommerce.php' ) && current_user_can( 'activate_plugin', 'woocommerce/woocommerce.php' ) ) : ?>
 		<p>
