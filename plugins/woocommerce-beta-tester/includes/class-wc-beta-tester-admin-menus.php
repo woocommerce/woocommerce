@@ -207,8 +207,12 @@ class WC_Beta_Tester_Admin_Menus {
 				<div class="wc-backbone-modal-content">
 					<section class="wc-backbone-modal-main" role="main">
 						<header class="wc-backbone-modal-header">
-							<?php /* translators: %s: version number */ ?>
-							<h1><?php echo esc_html( sprintf( __( 'Version information for %s', 'woocommerce-beta-tester' ), '{{ data.version }}' ) ); ?></h1>
+							<h1>
+							<?php
+								/* translators: %s: version number */
+								echo esc_html( sprintf( __( 'Version information for %s', 'woocommerce-beta-tester' ), '{{ data.version }}' ) );
+							?>
+							</h1>
 							<button class="modal-close modal-close-link dashicons dashicons-no-alt">
 								<span class="screen-reader-text"><?php esc_html_e( 'Close modal panel', 'woocommerce-beta-tester' ); ?></span>
 							</button>
