@@ -16,6 +16,15 @@
 
 defined( 'ABSPATH' ) || exit;
 
+// Define WC_BETA_TESTER_FILE.
+if ( ! defined( 'WC_BETA_TESTER_FILE' ) ) {
+	define( 'WC_BETA_TESTER_FILE', __FILE__ );
+}
+
+if ( ! defined( 'WC_BETA_TESTER_VERSION' ) ) {
+	define( 'WC_BETA_TESTER_VERSION', '1.0.3' );
+}
+
 /**
  * Confirm woocommerce is at least installed before doing anything
  * Curiously, developers are discouraged from using WP_PLUGIN_DIR and not given a
