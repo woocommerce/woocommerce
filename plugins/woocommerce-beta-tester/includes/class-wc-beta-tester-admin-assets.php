@@ -30,8 +30,7 @@ class WC_Beta_Tester_Admin_Assets {
 
 		wp_register_script( 'wc-beta-tester-version-info', WC_Beta_Tester::instance()->plugin_url() . '/assets/js/version-information' . $suffix . '.js', array( 'wc-backbone-modal' ), WC_BETA_TESTER_VERSION );
 
-		// TODO: Get version programmatically.
-		$version = '3.4.0';
+		$version = WC_VERSION;
 
 		wp_localize_script(
 			'wc-beta-tester-version-info',
