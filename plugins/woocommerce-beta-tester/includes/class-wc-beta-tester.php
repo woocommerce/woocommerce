@@ -44,6 +44,23 @@ class WC_Beta_Tester {
 	}
 
 	/**
+	 * Get plugin settings.
+	 *
+	 * @return object
+	 */
+	public static function get_settings() {
+		$settings = (object) wp_parse_args(
+			get_option( 'wc_beta_tester_options', array() ),
+			array(
+				'channel'     => 'stable',
+				'auto_update' => false,
+			)
+		);
+		$settings->auto_update = (bool) $settings->auto_update;
+		return $settings;
+	}
+
+	/**
 	 * Get the plugin url.
 	 *
 	 * @return string
@@ -329,7 +346,7 @@ class WC_Beta_Tester {
 	/**
 	 * Gets release information from GitHub.
 	 *
-	 * @param string $version
+	 * @param string $version Version number.
 	 * @return bool|string False on error, description otherwise
 	 */
 	public function get_version_information( $version ) {
