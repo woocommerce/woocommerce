@@ -38,6 +38,7 @@ if ( ! file_exists( trailingslashit( dirname( dirname( __FILE__ ) ) ) . 'woocomm
 	include dirname( __FILE__ ) . '/includes/class-wc-beta-tester.php';
 	// Settings.
 	include dirname( __FILE__ ) . '/includes/class-wc-beta-tester-settings.php';
+	include dirname( __FILE__ ) . '/includes/class-wc-beta-tester-version-picker.php';
 
 	register_activation_hook( __FILE__, array( 'WC_Beta_Tester', 'activate' ) );
 

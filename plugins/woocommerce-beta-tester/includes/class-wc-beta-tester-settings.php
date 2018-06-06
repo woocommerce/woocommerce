@@ -12,6 +12,8 @@ defined( 'ABSPATH' ) || exit;
  */
 class WC_Beta_Tester_Settings {
 
+	public static $version_setting_id = 'wc-beta-tester-version';
+
 	/**
 	 * Constructor
 	 */
@@ -36,13 +38,13 @@ class WC_Beta_Tester_Settings {
 		);
 
 		add_settings_field(
-			'wc-beta-tester-version',
+			self::$version_setting_id,
 			__( 'WooCommerce Version', 'woocommerce-beta-tester' ),
 			array( $this, 'version_select_html' ),
 			'wc-beta-tester',
 			'wc-beta-tester-update',
 			array(
-				'label_for' => 'wc-beta-tester-version',
+				'label_for' => self::$version_setting_id,
 			)
 		);
 	}

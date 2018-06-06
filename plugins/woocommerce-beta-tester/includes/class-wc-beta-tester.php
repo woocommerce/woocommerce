@@ -296,14 +296,13 @@ class WC_Beta_Tester {
 	}
 
 	// TODO: the code below depends on merging bor0's PR #19.
-	// TODO: move these out with other wp.org API related bits to extra module?
 	/**
 	 * Return true if version string is a beta version.
 	 *
 	 * @param string $version_str Version string.
 	 * @return bool
 	 */
-	protected function is_beta_version( $version_str ) {
+	protected static function is_beta_version( $version_str ) {
 		return strpos( $version_str, 'beta' ) !== false;
 	}
 
@@ -313,7 +312,7 @@ class WC_Beta_Tester {
 	 * @param string $version_str Version string.
 	 * @return bool
 	 */
-	protected function is_rc_version( $version_str ) {
+	protected static function is_rc_version( $version_str ) {
 		return strpos( $version_str, 'rc' ) !== false;
 	}
 
@@ -323,8 +322,8 @@ class WC_Beta_Tester {
 	 * @param string $version_str Version string.
 	 * @return bool
 	 */
-	protected function is_stable_version( $version_str ) {
-		return ! $this->is_beta_version( $version_str ) && ! $this->is_rc_version( $version_str );
+	protected static function is_stable_version( $version_str ) {
+		return ! self::is_beta_version( $version_str ) && ! self::is_rc_version( $version_str );
 	}
 
 	/**
@@ -334,8 +333,8 @@ class WC_Beta_Tester {
 	 * @param string $version_str Version string of the release.
 	 * @return bool
 	 */
-	protected function is_in_beta_channel( $version_str ) {
-		return $this->is_beta_version( $version_str ) || $this->is_rc_version( $version_str ) || $this->is_stable_version( $version_str );
+	protected static function is_in_beta_channel( $version_str ) {
+		return self::is_beta_version( $version_str ) || self::is_rc_version( $version_str ) || self::is_stable_version( $version_str );
 	}
 
 	/**
@@ -345,8 +344,8 @@ class WC_Beta_Tester {
 	 * @param string $version_str Version string of the release.
 	 * @return bool
 	 */
-	protected function is_in_rc_channel( $version_str ) {
-		return $this->is_rc_version( $version_str ) || $this->is_stable_version( $version_str );
+	protected static function is_in_rc_channel( $version_str ) {
+		return self::is_rc_version( $version_str ) || self::is_stable_version( $version_str );
 	}
 
 	/**
@@ -356,8 +355,8 @@ class WC_Beta_Tester {
 	 * @param string $version_str Version string of the release.
 	 * @return bool
 	 */
-	protected function is_in_stable_channel( $version_str ) {
-		return $this->is_stable_version( $version_str );
+	protected static function is_in_stable_channel( $version_str ) {
+		return self::is_stable_version( $version_str );
 	}
 
 	/**
@@ -372,114 +371,13 @@ class WC_Beta_Tester {
 		unset( $releases['trunk'] );
 
 		if ( 'beta' === $channel ) {
-			$releases = array_filter( $releases, array( $this, 'is_in_beta_channel' ), ARRAY_FILTER_USE_KEY );
+			$releases = array_filter( $releases, array( __CLASS__, 'is_in_beta_channel' ), ARRAY_FILTER_USE_KEY );
 		} elseif ( 'rc' === $channel ) {
-			$releases = array_filter( $releases, array( $this, 'is_in_rc_channel' ), ARRAY_FILTER_USE_KEY );
+			$releases = array_filter( $releases, array( __CLASS__, 'is_in_rc_channel' ), ARRAY_FILTER_USE_KEY );
 		} elseif ( 'stable' === $channel ) {
-			$releases = array_filter( $releases, array( $this, 'is_in_stable_channel' ), ARRAY_FILTER_USE_KEY );
+			$releases = array_filter( $releases, array( __CLASS__, 'is_in_stable_channel' ), ARRAY_FILTER_USE_KEY );
 		};
 
 		return array_keys( $releases );
 	}
-
-	//TODO: move these to admin section, but some of the code needs to be refactored first, probably to submodules such as API interface and plugin interface
-	// to be able to get a list of versions and current version.
-	/**
-	 * Return HTML code representation of list of WooCommerce versions for the selected channel.
-	 *
-	 * @param string $channel Filter versions by channel: all|beta|rc|stable.
-	 * @return string
-	 */
-	public function get_versions_html( $channel ) {
-		$tags = $this->get_tags( $channel );
-
-		if ( ! $tags ) {
-			return '';
-		}
-
-		usort( $tags, 'version_compare' );
-		$tags = array_reverse( $tags );
-
-		$versions_html           = '<ul class="wcbt-version-list">';
-		$plugin_data             = $this->get_plugin_data();
-		$this->config['version'] = $plugin_data['Version'];
-
-		// Loop through versions and output in a radio list.
-		foreach ( $tags as $tag_version ) {
-
-			$versions_html .= '<li class="wcbt-version-li">';
-			$versions_html .= '<label><input type="radio" value="' . esc_attr( $tag_version ) . '" name="switch_to_version">' . $tag_version;
-
-			// Is this the current version?
-			if ( $tag_version === $this->config['version'] ) {
-				$versions_html .= '<span class="wcbt-current-version">' . esc_html__( 'Installed Version', 'woocommerce-beta-tester' ) . '</span>';
-			}
-
-			$versions_html .= '</label>';
-			$versions_html .= '</li>';
-		}
-
-		$versions_html .= '</ul>';
-
-		return $versions_html;
-	}
-
-	// TODO: this needs css (and maybe a bit of JS), but the idea is to display Switch version button that displays modal which contains the actual form submit,
-	// similarly to WP_Rollback.
-	/**
-	 * Echo HTML form to switch WooCommerce versions, filtered for the selected channel.
-	 *
-	 * @param string $channel Filter versions by channel: all|beta|rc|stable.
-	 */
-	public function get_select_versions_form_html( $channel ) {
-		?>
-		<div class="wrap">
-			<div class="wcbt-content-wrap">
-				<h1><?php esc_html_e( 'Available WooCommerce versions', 'woocommerce-beta-tester' ); ?></h1>
-				<form name="wcbt-select-version" class="wcbt-select-version-form" action="<?php echo esc_attr( admin_url( '/index.php' ) ); ?>">
-					<div class="wcbt-versions-wrap">
-						<?php echo $this->get_versions_html( $channel ); // WPCS: XSS ok. ?>
-					</div>
-					<div class="wcbt-submit-wrap">
-						<a href="#wcbt-modal-confirm" class="magnific-popup button-primary wcbt-rollback-disabled"><?php esc_html_e( 'Switch version', 'woocommerce-beta-tester' ); ?></a>
-						<input type="button" value="<?php esc_html_e( 'Cancel', 'woocommerce-beta-tester' ); ?>" class="button" onclick="location.href='<?php echo esc_attr( wp_get_referer() ); ?>';" />
-					</div>
-					<?php wp_nonce_field( 'wcbt_switch_version_nonce' ); ?>
-					<div id="wcbt-modal-confirm" class="white-popup mfp-hide">
-						<div class="wcbt-modal-inner">
-							<p class="wcbt-rollback-intro"><?php esc_html_e( 'Are you sure you want to switch the version of WooCommerce plugin?', 'woocommerce-beta-tester' ); ?></p>
-
-							<div class="wcbt-rollback-details">
-								<table class="wcbt-widefat">
-									<tbody>
-									<tr class="alternate">
-										<td class="row-title">
-											<label for="tablecell"><?php esc_html_e( 'Installed Version:', 'woocommerce-beta-tester' ); ?></label>
-										</td>
-										<td><span class="wcbt-installed-version"><?php echo esc_html( $this->config['version'] ); ?></span></td>
-									</tr>
-									<tr>
-										<td class="row-title">
-											<label for="tablecell"><?php esc_html_e( 'New Version:', 'woocommerce-beta-tester' ); ?></label>
-										</td>
-										<td><span class="wcbt-new-version"></span></td>
-									</tr>
-									</tbody>
-								</table>
-							</div>
-
-							<div class="wcbt-notice">
-								<p><?php esc_html_e( 'Notice: We strongly recommend you perform the test on a staging site and create a complete backup of your WordPress files and database prior to performing a rollback. We are not responsible for any misuse, deletions, white screens, fatal errors, or any other issue arising from using this plugin.', 'woocommerce-beta-tester' ); ?></p>
-							</div>
-
-							<input type="submit" value="<?php esc_attr_e( 'Switch version', 'woocommerce-beta-tester' ); ?>" class="button-primary wcbt-go" />
-							<a href="#" class="button wcbt-close"><?php esc_attr_e( 'Cancel', 'woocommerce-beta-tester' ); ?></a>
-						</div>
-					</div>
-				</form>
-			</div>
-		</div>
-		<?php
-	}
-
 }
