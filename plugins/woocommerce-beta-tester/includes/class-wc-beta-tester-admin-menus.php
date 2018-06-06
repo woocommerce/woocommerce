@@ -223,7 +223,7 @@ class WC_Beta_Tester_Admin_Menus {
 							<?php do_action( 'woocommerce_admin_version_information_end' ); ?>
 						</article>
 						<footer>
-							<?php echo __( '<a target="_blank" href="https://github.com/woocommerce/woocommerce/releases/tag/{{ data.version }}">Read more</a>' ); ?>
+							<a target="_blank" href="https://github.com/woocommerce/woocommerce/releases/tag/{{ data.version }}">Read more</a>
 						</footer>
 					</section>
 				</div>

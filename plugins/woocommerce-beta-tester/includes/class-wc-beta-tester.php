@@ -309,14 +309,14 @@ class WC_Beta_Tester {
 	 * Gets release information from GitHub.
 	 *
 	 * @param string $version
-	 * @return string
+	 * @return bool|string False on error, description otherwise
 	 */
 	public function get_version_information( $version ) {
 		$url = 'https://api.github.com/repos/woocommerce/woocommerce/releases/tags/' . $version;
 
 		$github_data = get_site_transient( md5( $url ) . '_github_data' );
 
-		if ( $this->overrule_transients() || ( ! isset( $github_data ) || ! $github_data || '' === $github_data ) ) {
+		if ( $this->overrule_transients() || empty( $github_data ) ) {
 			$github_data = wp_remote_get( $url );
 
 			if ( is_wp_error( $github_data ) ) {
@@ -332,7 +332,7 @@ class WC_Beta_Tester {
 			$github_data = $github_data->body;
 
 			// Refresh every 6 hours.
-			set_site_transient( md5( $url ) . '_github_data', $github_data, 60 * 60 * 6 );
+			set_site_transient( md5( $url ) . '_github_data', $github_data, HOUR_IN_SECONDS * 6 );
 		}
 
 		return $github_data;

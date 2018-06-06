@@ -1,12 +1,12 @@
 jQuery(function( $ ) {
 
 	/**
-	 * Coupon actions
+	 * Version information
 	 */
 	var wc_beta_tester_version_information = {
 
 		/**
-		 * Initialize variations actions
+		 * Initialize Version Information click
 		 */
 		init: function() {
 			$( '#wp-admin-bar-show-version-info' )
@@ -14,7 +14,7 @@ jQuery(function( $ ) {
 		},
 
 		/**
-		 * Show/hide fields by coupon type options
+		 * Handler for showing/hiding version information modal
 		 */
 		showModal: function( event ) {
 			event.preventDefault();

@@ -23,7 +23,7 @@ class WC_Beta_Tester_Admin_Assets {
 	 * Enqueue scripts.
 	 */
 	public function admin_scripts() {
-		$suffix       = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
 		// Need admin styles for the modal.
 		wp_enqueue_style( 'woocommerce_admin_styles' );
