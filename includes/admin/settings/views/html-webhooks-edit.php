@@ -86,7 +86,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 							foreach ( $topics as $topic_slug => $topic_name ) :
 								?>
-							<option value="<?php echo esc_attr( $topic_slug ); ?>" <?php selected( $topic_data['topic'], $topic_slug, true ); ?>><?php echo esc_html( $topic_name ); ?></option>
+							<option value="<?php echo esc_attr( $topic_slug ); ?>" <?php selected( $topic_data['resource'] . '.' . $topic_data['event'], $topic_slug, true ); ?>><?php echo esc_html( $topic_name ); ?></option>
 						<?php endforeach; ?>
 					</select>
 				</td>
