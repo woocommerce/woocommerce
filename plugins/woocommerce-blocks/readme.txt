@@ -4,7 +4,7 @@ Tags: gutenberg, woocommerce, woo commerce, products
 Requires at least: 4.7
 Tested up to: 4.9
 Requires PHP: 5.2
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -52,6 +52,14 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 3. The completed Products block when inserted into a post.
 
 == Changelog ==
+
+= 1.1.0 - 2018-06-06 =
+* Feature - Add "Best Selling" and "Top Rated" product scopes.
+* Fix - Only enqueue scripts and styles in the site backend.
+* Fix - Remove focus checks deprecated in latest Gutenberg version.
+* Fix - Added keys to some elements to prevent React warnings.
+* Enhancement - Added custom API endpoint for more accurate block previews with orderby.
+* Performance - Refactored the way the attribute select works to prevent many concurrent API requests on sites with many attributes.
 
 = 1.0.0 - 2018-04-24 =
 * Initial implementation of the Gutenberg Products block.
