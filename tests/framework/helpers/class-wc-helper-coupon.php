@@ -1,28 +1,24 @@
 <?php
 
 /**
- * Class WC_Helper_Product
+ * Class WC_Helper_Product.
  *
- * This helper class should ONLY be used for unit tests!
+ * This helper class should ONLY be used for unit tests!.
  */
 class WC_Helper_Coupon {
 
 	/**
-	 * Create a dummy coupon
+	 * Create a dummy coupon.
 	 *
 	 * @return WC_Coupon
 	 */
-	public static function create_coupon() {
-
-		// Coupon code
-		$coupon_code = 'dummycoupon';
-
+	public static function create_coupon( $coupon_code = 'dummycoupon' ) {
 		// Insert post
 		$coupon_id = wp_insert_post( array(
 			'post_title'   => $coupon_code,
 			'post_type'    => 'shop_coupon',
 			'post_status'  => 'publish',
-			'post_excerpt' => 'This is a dummy coupon'
+			'post_excerpt' => 'This is a dummy coupon',
 		) );
 
 		// Update meta
@@ -48,7 +44,7 @@ class WC_Helper_Coupon {
 	}
 
 	/**
-	 * Delete a coupon
+	 * Delete a coupon.
 	 *
 	 * @param $coupon_id
 	 *
@@ -58,5 +54,4 @@ class WC_Helper_Coupon {
 		wp_delete_post( $coupon_id, true );
 		return true;
 	}
-
 }

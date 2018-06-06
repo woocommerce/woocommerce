@@ -5,11 +5,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! class_exists( 'WC_Report_Stock' ) ) {
-	require_once( 'class-wc-report-stock.php' );
+	require_once dirname( __FILE__ ) . '/class-wc-report-stock.php';
 }
 
 /**
- * WC_Report_Low_In_Stock
+ * WC_Report_Low_In_Stock.
  *
  * @author      WooThemes
  * @category    Admin
@@ -19,14 +19,17 @@ if ( ! class_exists( 'WC_Report_Stock' ) ) {
 class WC_Report_Low_In_Stock extends WC_Report_Stock {
 
 	/**
-	 * No items found text
+	 * No items found text.
 	 */
 	public function no_items() {
 		_e( 'No low in stock products found.', 'woocommerce' );
 	}
 
 	/**
-	 * Get Products matching stock criteria
+	 * Get Products matching stock criteria.
+	 *
+	 * @param int $current_page
+	 * @param int $per_page
 	 */
 	public function get_items( $current_page, $per_page ) {
 		global $wpdb;
@@ -38,7 +41,8 @@ class WC_Report_Low_In_Stock extends WC_Report_Stock {
 		$stock   = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
 		$nostock = absint( max( get_option( 'woocommerce_notify_no_stock_amount' ), 0 ) );
 
-		$query_from = "FROM {$wpdb->posts} as posts
+		$query_from = apply_filters(
+			'woocommerce_report_low_in_stock_query_from', "FROM {$wpdb->posts} as posts
 			INNER JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id
 			INNER JOIN {$wpdb->postmeta} AS postmeta2 ON posts.ID = postmeta2.post_id
 			WHERE 1=1
@@ -47,9 +51,8 @@ class WC_Report_Low_In_Stock extends WC_Report_Stock {
 			AND postmeta2.meta_key = '_manage_stock' AND postmeta2.meta_value = 'yes'
 			AND postmeta.meta_key = '_stock' AND CAST(postmeta.meta_value AS SIGNED) <= '{$stock}'
 			AND postmeta.meta_key = '_stock' AND CAST(postmeta.meta_value AS SIGNED) > '{$nostock}'
-			";
-
-		$query_from = apply_filters( 'woocommerce_report_low_in_stock_query_from', $query_from );
+		"
+		);
 
 		$this->items     = $wpdb->get_results( $wpdb->prepare( "SELECT posts.ID as id, posts.post_parent as parent {$query_from} GROUP BY posts.ID ORDER BY posts.post_title DESC LIMIT %d, %d;", ( $current_page - 1 ) * $per_page, $per_page ) );
 		$this->max_items = $wpdb->get_var( "SELECT COUNT( DISTINCT posts.ID ) {$query_from};" );

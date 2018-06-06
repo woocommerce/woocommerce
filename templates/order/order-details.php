@@ -2,229 +2,96 @@
 /**
  * Order details
  *
+ * This template can be overridden by copying it to yourtheme/woocommerce/order/order-details.php.
+ *
+ * HOWEVER, on occasion WooCommerce will need to update template files and you
+ * (the theme developer) will need to copy the new files to your theme to
+ * maintain compatibility. We try to do this as little as possible, but it does
+ * happen. When this occurs the version of the template file will be bumped and
+ * the readme will list any important changes.
+ *
+ * @see 	https://docs.woocommerce.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates
- * @version 2.3.0
+ * @version 3.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
+}
+if ( ! $order = wc_get_order( $order_id ) ) {
+	return;
 }
 
-$order = wc_get_order( $order_id );
+$order_items           = $order->get_items( apply_filters( 'woocommerce_purchase_order_item_types', 'line_item' ) );
+$show_purchase_note    = $order->has_status( apply_filters( 'woocommerce_purchase_note_order_statuses', array( 'completed', 'processing' ) ) );
+$show_customer_details = is_user_logged_in() && $order->get_user_id() === get_current_user_id();
+$downloads             = $order->get_downloadable_items();
+$show_downloads        = $order->has_downloadable_item() && $order->is_download_permitted();
 
+if ( $show_downloads ) {
+	wc_get_template( 'order/order-downloads.php', array( 'downloads' => $downloads, 'show_title' => true ) );
+}
 ?>
-<h2><?php _e( 'Order Details', 'woocommerce' ); ?></h2>
-<table class="shop_table order_details">
-	<thead>
-		<tr>
-			<th class="product-name"><?php _e( 'Product', 'woocommerce' ); ?></th>
-			<th class="product-total"><?php _e( 'Total', 'woocommerce' ); ?></th>
-		</tr>
-	</thead>
-	<tbody>
-		<?php
-		if ( sizeof( $order->get_items() ) > 0 ) {
+<section class="woocommerce-order-details">
+	<?php do_action( 'woocommerce_order_details_before_order_table', $order ); ?>
 
-			foreach( $order->get_items() as $item_id => $item ) {
-				$_product  = apply_filters( 'woocommerce_order_item_product', $order->get_product_from_item( $item ), $item );
-				$item_meta = new WC_Order_Item_Meta( $item['item_meta'], $_product );
+	<h2 class="woocommerce-order-details__title"><?php _e( 'Order details', 'woocommerce' ); ?></h2>
 
-				if ( apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
-					?>
-					<tr class="<?php echo esc_attr( apply_filters( 'woocommerce_order_item_class', 'order_item', $item, $order ) ); ?>">
-						<td class="product-name">
-							<?php
-								if ( $_product && ! $_product->is_visible() ) {
-									echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item );
-								} else {
-									echo apply_filters( 'woocommerce_order_item_name', sprintf( '<a href="%s">%s</a>', get_permalink( $item['product_id'] ), $item['name'] ), $item );
-								}
+	<table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
 
-								echo apply_filters( 'woocommerce_order_item_quantity_html', ' <strong class="product-quantity">' . sprintf( '&times; %s', $item['qty'] ) . '</strong>', $item );
+		<thead>
+			<tr>
+				<th class="woocommerce-table__product-name product-name"><?php _e( 'Product', 'woocommerce' ); ?></th>
+				<th class="woocommerce-table__product-table product-total"><?php _e( 'Total', 'woocommerce' ); ?></th>
+			</tr>
+		</thead>
 
-								// Allow other plugins to add additional product information here
-								do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order );
+		<tbody>
+			<?php
+			do_action( 'woocommerce_order_details_before_order_table_items', $order );
 
-								$item_meta->display();
+			foreach ( $order_items as $item_id => $item ) {
+				$product = $item->get_product();
 
-								if ( $_product && $_product->exists() && $_product->is_downloadable() && $order->is_download_permitted() ) {
-
-									$download_files = $order->get_item_downloads( $item );
-									$i              = 0;
-									$links          = array();
-
-									foreach ( $download_files as $download_id => $file ) {
-										$i++;
-
-										$links[] = '<small><a href="' . esc_url( $file['download_url'] ) . '">' . sprintf( __( 'Download file%s', 'woocommerce' ), ( count( $download_files ) > 1 ? ' ' . $i . ': ' : ': ' ) ) . esc_html( $file['name'] ) . '</a></small>';
-									}
-
-									echo '<br/>' . implode( '<br/>', $links );
-								}
-
-								// Allow other plugins to add additional product information here
-								do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order );
-							?>
-						</td>
-						<td class="product-total">
-							<?php echo $order->get_formatted_line_subtotal( $item ); ?>
-						</td>
-					</tr>
-					<?php
-				}
-
-				if ( $order->has_status( array( 'completed', 'processing' ) ) && ( $purchase_note = get_post_meta( $_product->id, '_purchase_note', true ) ) ) {
-					?>
-					<tr class="product-purchase-note">
-						<td colspan="3"><?php echo wpautop( do_shortcode( wp_kses_post( $purchase_note ) ) ); ?></td>
-					</tr>
-					<?php
-				}
+				wc_get_template( 'order/order-details-item.php', array(
+					'order'			     => $order,
+					'item_id'		     => $item_id,
+					'item'			     => $item,
+					'show_purchase_note' => $show_purchase_note,
+					'purchase_note'	     => $product ? $product->get_purchase_note() : '',
+					'product'	         => $product,
+				) );
 			}
-		}
 
-		do_action( 'woocommerce_order_items_table', $order );
-		?>
-	</tbody>
-	<tfoot>
-	<?php
-		$has_refund = false;
+			do_action( 'woocommerce_order_details_after_order_table_items', $order );
+			?>
+		</tbody>
 
-		if ( $total_refunded = $order->get_total_refunded() ) {
-			$has_refund = true;
-		}
-
-		if ( $totals = $order->get_order_item_totals() ) {
-			foreach ( $totals as $key => $total ) {
-				$value = $total['value'];
-
-				// Check for refund
-				if ( $has_refund && $key === 'order_total' ) {
-					$refunded_tax_del = '';
-					$refunded_tax_ins = '';
-
-					// Tax for inclusive prices
-					if ( wc_tax_enabled() && 'incl' == $order->tax_display_cart ) {
-
-						$tax_del_array = array();
-						$tax_ins_array = array();
-
-						if ( 'itemized' == get_option( 'woocommerce_tax_total_display' ) ) {
-
-							foreach ( $order->get_tax_totals() as $code => $tax ) {
-								$tax_del_array[] = sprintf( '%s %s', $tax->formatted_amount, $tax->label );
-								$tax_ins_array[] = sprintf( '%s %s', wc_price( $tax->amount - $order->get_total_tax_refunded_by_rate_id( $tax->rate_id ), array( 'currency' => $order->get_order_currency() ) ), $tax->label );
-							}
-
-						} else {
-							$tax_del_array[] = sprintf( '%s %s', wc_price( $order->get_total_tax(), array( 'currency' => $order->get_order_currency() ) ), WC()->countries->tax_or_vat() );
-							$tax_ins_array[] = sprintf( '%s %s', wc_price( $order->get_total_tax() - $order->get_total_tax_refunded(), array( 'currency' => $order->get_order_currency() ) ), WC()->countries->tax_or_vat() );
-						}
-
-						if ( ! empty( $tax_del_array ) ) {
-							$refunded_tax_del .= ' ' . sprintf( __( '(Includes %s)', 'woocommerce' ), implode( ', ', $tax_del_array ) );
-						}
-
-						if ( ! empty( $tax_ins_array ) ) {
-							$refunded_tax_ins .= ' ' . sprintf( __( '(Includes %s)', 'woocommerce' ), implode( ', ', $tax_ins_array ) );
-						}
-					}
-
-					$value = '<del>' . strip_tags( $order->get_formatted_order_total() ) . $refunded_tax_del . '</del> <ins>' . wc_price( $order->get_total() - $total_refunded, array( 'currency' => $order->get_order_currency() ) ) . $refunded_tax_ins . '</ins>';
+		<tfoot>
+			<?php
+				foreach ( $order->get_order_item_totals() as $key => $total ) {
+					?>
+					<tr>
+						<th scope="row"><?php echo $total['label']; ?></th>
+						<td><?php echo $total['value']; ?></td>
+					</tr>
+					<?php
 				}
-				?>
+			?>
+			<?php if ( $order->get_customer_note() ) : ?>
 				<tr>
-					<th scope="row"><?php echo $total['label']; ?></th>
-					<td><?php echo $value; ?></td>
+					<th><?php _e( 'Note:', 'woocommerce' ); ?></th>
+					<td><?php echo wptexturize( $order->get_customer_note() ); ?></td>
 				</tr>
-				<?php
-			}
-		}
+			<?php endif; ?>
+		</tfoot>
+	</table>
 
-		// Check for refund
-		if ( $has_refund ) { ?>
-			<tr>
-				<th scope="row"><?php _e( 'Refunded:', 'woocommerce' ); ?></th>
-				<td>-<?php echo wc_price( $total_refunded, array( 'currency' => $order->get_order_currency() ) ); ?></td>
-			</tr>
-		<?php
-		}
+	<?php do_action( 'woocommerce_order_details_after_order_table', $order ); ?>
+</section>
 
-		// Check for customer note
-		if ( '' != $order->customer_note ) { ?>
-			<tr>
-				<th scope="row"><?php _e( 'Note:', 'woocommerce' ); ?></th>
-				<td><?php echo wptexturize( $order->customer_note ); ?></td>
-			</tr>
-		<?php } ?>
-	</tfoot>
-</table>
-
-<?php do_action( 'woocommerce_order_details_after_order_table', $order ); ?>
-
-<header>
-	<h2><?php _e( 'Customer details', 'woocommerce' ); ?></h2>
-</header>
-<table class="shop_table shop_table_responsive customer_details">
 <?php
-	if ( $order->billing_email ) {
-		echo '<tr><th>' . __( 'Email:', 'woocommerce' ) . '</th><td data-title="' . __( 'Email', 'woocommerce' ) . '">' . $order->billing_email . '</td></tr>';
-	}
-
-	if ( $order->billing_phone ) {
-		echo '<tr><th>' . __( 'Telephone:', 'woocommerce' ) . '</th><td data-title="' . __( 'Telephone', 'woocommerce' ) . '">' . $order->billing_phone . '</td></tr>';
-	}
-
-	// Additional customer details hook
-	do_action( 'woocommerce_order_details_after_customer_details', $order );
-?>
-</table>
-
-<?php if ( ! wc_ship_to_billing_address_only() && $order->needs_shipping_address() && get_option( 'woocommerce_calc_shipping' ) !== 'no' ) : ?>
-
-<div class="col2-set addresses">
-
-	<div class="col-1">
-
-<?php endif; ?>
-
-		<header class="title">
-			<h3><?php _e( 'Billing Address', 'woocommerce' ); ?></h3>
-		</header>
-		<address>
-			<?php
-				if ( ! $order->get_formatted_billing_address() ) {
-					_e( 'N/A', 'woocommerce' );
-				} else {
-					echo $order->get_formatted_billing_address();
-				}
-			?>
-		</address>
-
-<?php if ( ! wc_ship_to_billing_address_only() && $order->needs_shipping_address() && get_option( 'woocommerce_calc_shipping' ) !== 'no' ) : ?>
-
-	</div><!-- /.col-1 -->
-
-	<div class="col-2">
-
-		<header class="title">
-			<h3><?php _e( 'Shipping Address', 'woocommerce' ); ?></h3>
-		</header>
-		<address>
-			<?php
-				if ( ! $order->get_formatted_shipping_address() ) {
-					_e( 'N/A', 'woocommerce' );
-				} else {
-					echo $order->get_formatted_shipping_address();
-				}
-			?>
-		</address>
-
-	</div><!-- /.col-2 -->
-
-</div><!-- /.col2-set -->
-
-<?php endif; ?>
-
-<div class="clear"></div>
+if ( $show_customer_details ) {
+	wc_get_template( 'order/order-details-customer.php', array( 'order' => $order ) );
+}

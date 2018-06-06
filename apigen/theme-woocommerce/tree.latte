@@ -45,22 +45,22 @@
 	<h1>{include title}</h1>
 
 	{if $classTree->valid()}
-		<h3>Classes</h3>
+		<h2>Classes</h2>
 		{include tree, tree => $classTree}
 	{/if}
 
 	{if $interfaceTree->valid()}
-		<h3>Interfaces</h3>
+		<h2>Interfaces</h2>
 		{include tree, tree => $interfaceTree}
 	{/if}
 
 	{if $traitTree->valid()}
-		<h3>Traits</h3>
+		<h2>Traits</h2>
 		{include tree, tree => $traitTree}
 	{/if}
 
 	{if $exceptionTree->valid()}
-		<h3>Exceptions</h3>
+		<h2>Exceptions</h2>
 		{include tree, tree => $exceptionTree}
 	{/if}
 </div>

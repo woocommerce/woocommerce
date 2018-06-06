@@ -5,27 +5,32 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Simplify Commerce Gateway for subscriptions
+ * Simplify Commerce Gateway for subscriptions.
  *
- * @class 		WC_Addons_Gateway_Simplify_Commerce
- * @extends		WC_Gateway_Simplify_Commerce
+ * @class       WC_Addons_Gateway_Simplify_Commerce
+ * @extends     WC_Gateway_Simplify_Commerce
  * @since       2.2.0
- * @version		1.0.0
- * @package		WooCommerce/Classes/Payment
- * @author 		WooThemes
+ * @version     1.0.0
+ * @package     WooCommerce/Classes/Payment
+ * @author      WooThemes
  */
 class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		parent::__construct();
 
 		if ( class_exists( 'WC_Subscriptions_Order' ) ) {
-			add_action( 'scheduled_subscription_payment_' . $this->id, array( $this, 'scheduled_subscription_payment' ), 10, 3 );
-			add_filter( 'woocommerce_subscriptions_renewal_order_meta_query', array( $this, 'remove_renewal_order_meta' ), 10, 4 );
-			add_action( 'woocommerce_subscriptions_changed_failing_payment_method_' . $this->id, array( $this, 'update_failing_payment_method' ), 10, 3 );
+			add_action( 'woocommerce_scheduled_subscription_payment_' . $this->id, array( $this, 'scheduled_subscription_payment' ), 10, 2 );
+			add_action( 'woocommerce_subscription_failing_payment_method_updated_' . $this->id, array( $this, 'update_failing_payment_method' ), 10, 2 );
+
+			add_action( 'wcs_resubscribe_order_created', array( $this, 'delete_resubscribe_meta' ), 10 );
+
+			// Allow store managers to manually set Simplify as the payment method on a subscription
+			add_filter( 'woocommerce_subscription_payment_meta', array( $this, 'add_subscription_payment_meta' ), 10, 2 );
+			add_filter( 'woocommerce_subscription_validate_payment_meta', array( $this, 'validate_subscription_payment_meta' ), 10, 2 );
 		}
 
 		if ( class_exists( 'WC_Pre_Orders_Order' ) ) {
@@ -37,11 +42,10 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	}
 
 	/**
-	 * Hosted payment args
+	 * Hosted payment args.
 	 *
 	 * @param  array $args
 	 * @param  int   $order_id
-	 *
 	 * @return array
 	 */
 	public function hosted_payment_args( $args, $order_id ) {
@@ -58,18 +62,16 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	 * Check if order contains subscriptions.
 	 *
 	 * @param  int $order_id
-	 *
 	 * @return bool
 	 */
 	protected function order_contains_subscription( $order_id ) {
-		return class_exists( 'WC_Subscriptions_Order' ) && WC_Subscriptions_Order::order_contains_subscription( $order_id );
+		return function_exists( 'wcs_order_contains_subscription' ) && ( wcs_order_contains_subscription( $order_id ) || wcs_order_contains_renewal( $order_id ) );
 	}
 
 	/**
 	 * Check if order contains pre-orders.
 	 *
 	 * @param  int $order_id
-	 *
 	 * @return bool
 	 */
 	protected function order_contains_pre_order( $order_id ) {
@@ -77,12 +79,14 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	}
 
 	/**
-	 * Process the subscription
+	 * Process the subscription.
 	 *
-	 * @param WC_Order $order
-	 * @param string   $cart_token
-	 *
+	 * @param  WC_Order $order
+	 * @param  string   $cart_token
+	 * @uses   Simplify_ApiException
+	 * @uses   Simplify_BadRequestException
 	 * @return array
+	 * @throws Exception
 	 */
 	protected function process_subscription( $order, $cart_token = '' ) {
 		try {
@@ -90,41 +94,34 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 				$error_msg = __( 'Please make sure your card details have been entered correctly and that your browser supports JavaScript.', 'woocommerce' );
 
 				if ( 'yes' == $this->sandbox ) {
-					$error_msg .= ' ' . __( 'Developers: Please make sure that you\'re including jQuery and there are no JavaScript errors on the page.', 'woocommerce' );
+					$error_msg .= ' ' . __( 'Developers: Please make sure that you are including jQuery and there are no JavaScript errors on the page.', 'woocommerce' );
 				}
 
 				throw new Simplify_ApiException( $error_msg );
 			}
 
 			// Create customer
-			$customer = Simplify_Customer::createCustomer( array(
-				'token'     => $cart_token,
-				'email'     => $order->billing_email,
-				'name'      => trim( $order->billing_first_name . ' ' . $order->billing_last_name ),
-				'reference' => $order->id
-			) );
+			$customer = Simplify_Customer::createCustomer(
+				array(
+					'token'     => $cart_token,
+					'email'     => $order->get_billing_email(),
+					'name'      => trim( $order->get_formatted_billing_full_name() ),
+					'reference' => $order->get_id(),
+				)
+			);
 
 			if ( is_object( $customer ) && '' != $customer->id ) {
-				$customer_id = wc_clean( $customer->id );
-
-				// Store the customer ID in the order
-				update_post_meta( $order->id, '_simplify_customer_id', $customer_id );
+				$this->save_subscription_meta( $order->get_id(), $customer->id );
 			} else {
 				$error_msg = __( 'Error creating user in Simplify Commerce.', 'woocommerce' );
 
 				throw new Simplify_ApiException( $error_msg );
 			}
 
-			$initial_payment = WC_Subscriptions_Order::get_total_initial_payment( $order );
+			$payment_response = $this->process_subscription_payment( $order, $order->get_total() );
 
-			if ( $initial_payment > 0 ) {
-				$payment_response = $this->process_subscription_payment( $order, $initial_payment );
-			}
-
-			if ( isset( $payment_response ) && is_wp_error( $payment_response ) ) {
-
+			if ( is_wp_error( $payment_response ) ) {
 				throw new Exception( $payment_response->get_error_message() );
-
 			} else {
 				// Remove cart
 				WC()->cart->empty_cart();
@@ -132,10 +129,9 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 				// Return thank you page redirect
 				return array(
 					'result'   => 'success',
-					'redirect' => $this->get_return_url( $order )
+					'redirect' => $this->get_return_url( $order ),
 				);
 			}
-
 		} catch ( Simplify_ApiException $e ) {
 			if ( $e instanceof Simplify_BadRequestException && $e->hasFieldErrors() && $e->getFieldErrors() ) {
 				foreach ( $e->getFieldErrors() as $error ) {
@@ -147,24 +143,43 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 
 			return array(
 				'result'   => 'fail',
-				'redirect' => ''
+				'redirect' => '',
 			);
 		}
 	}
 
 	/**
-	 * Process the pre-order
+	 * Store the customer and card IDs on the order and subscriptions in the order.
+	 *
+	 * @param int    $order_id
+	 * @param string $customer_id
+	 */
+	protected function save_subscription_meta( $order_id, $customer_id ) {
+
+		$customer_id = wc_clean( $customer_id );
+
+		update_post_meta( $order_id, '_simplify_customer_id', $customer_id );
+
+		// Also store it on the subscriptions being purchased in the order
+		foreach ( wcs_get_subscriptions_for_order( $order_id ) as $subscription ) {
+			update_post_meta( $subscription->id, '_simplify_customer_id', $customer_id );
+		}
+	}
+
+	/**
+	 * Process the pre-order.
 	 *
 	 * @param WC_Order $order
 	 * @param string   $cart_token
-	 *
+	 * @uses  Simplify_ApiException
+	 * @uses  Simplify_BadRequestException
 	 * @return array
 	 */
 	protected function process_pre_order( $order, $cart_token = '' ) {
-		if ( WC_Pre_Orders_Order::order_requires_payment_tokenization( $order->id ) ) {
+		if ( WC_Pre_Orders_Order::order_requires_payment_tokenization( $order->get_id() ) ) {
 
 			try {
-				if ( $order->order_total * 100 < 50 ) {
+				if ( $order->get_total() * 100 < 50 ) {
 					$error_msg = __( 'Sorry, the minimum allowed order total is 0.50 to use this payment method.', 'woocommerce' );
 
 					throw new Simplify_ApiException( $error_msg );
@@ -174,25 +189,27 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 					$error_msg = __( 'Please make sure your card details have been entered correctly and that your browser supports JavaScript.', 'woocommerce' );
 
 					if ( 'yes' == $this->sandbox ) {
-						$error_msg .= ' ' . __( 'Developers: Please make sure that you\'re including jQuery and there are no JavaScript errors on the page.', 'woocommerce' );
+						$error_msg .= ' ' . __( 'Developers: Please make sure that you are including jQuery and there are no JavaScript errors on the page.', 'woocommerce' );
 					}
 
 					throw new Simplify_ApiException( $error_msg );
 				}
 
 				// Create customer
-				$customer = Simplify_Customer::createCustomer( array(
-					'token'     => $cart_token,
-					'email'     => $order->billing_email,
-					'name'      => trim( $order->billing_first_name . ' ' . $order->billing_last_name ),
-					'reference' => $order->id
-				) );
+				$customer = Simplify_Customer::createCustomer(
+					array(
+						'token'     => $cart_token,
+						'email'     => $order->get_billing_email(),
+						'name'      => trim( $order->get_formatted_billing_full_name() ),
+						'reference' => $order->get_id(),
+					)
+				);
 
 				if ( is_object( $customer ) && '' != $customer->id ) {
 					$customer_id = wc_clean( $customer->id );
 
 					// Store the customer ID in the order
-					update_post_meta( $order->id, '_simplify_customer_id', $customer_id );
+					update_post_meta( $order->get_id(), '_simplify_customer_id', $customer_id );
 				} else {
 					$error_msg = __( 'Error creating user in Simplify Commerce.', 'woocommerce' );
 
@@ -200,7 +217,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 				}
 
 				// Reduce stock levels
-				$order->reduce_order_stock();
+				wc_reduce_stock_levels( $order->get_id() );
 
 				// Remove cart
 				WC()->cart->empty_cart();
@@ -211,7 +228,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 				// Return thank you page redirect
 				return array(
 					'result'   => 'success',
-					'redirect' => $this->get_return_url( $order )
+					'redirect' => $this->get_return_url( $order ),
 				);
 
 			} catch ( Simplify_ApiException $e ) {
@@ -225,17 +242,16 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 
 				return array(
 					'result'   => 'fail',
-					'redirect' => ''
+					'redirect' => '',
 				);
 			}
-
 		} else {
 			return parent::process_standard_payments( $order, $cart_token );
 		}
 	}
 
 	/**
-	 * Process the payment
+	 * Process the payment.
 	 *
 	 * @param  int $order_id
 	 * @return array
@@ -245,15 +261,14 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 		$order      = wc_get_order( $order_id );
 
 		// Processing subscription
-		if ( 'standard' == $this->mode && $this->order_contains_subscription( $order->id ) ) {
+		if ( 'standard' == $this->mode && ( $this->order_contains_subscription( $order->get_id() ) || ( function_exists( 'wcs_is_subscription' ) && wcs_is_subscription( $order_id ) ) ) ) {
 			return $this->process_subscription( $order, $cart_token );
 
-		// Processing pre-order
-		} elseif ( 'standard' == $this->mode && $this->order_contains_pre_order( $order->id ) ) {
+		} elseif ( 'standard' == $this->mode && $this->order_contains_pre_order( $order->get_id() ) ) {
+			// Processing pre-order.
 			return $this->process_pre_order( $order, $cart_token );
-
-		// Processing regular product
 		} else {
+			// Processing regular product.
 			return parent::process_payment( $order_id );
 		}
 	}
@@ -262,45 +277,62 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	 * process_subscription_payment function.
 	 *
 	 * @param WC_order $order
-	 * @param integer $amount (default: 0)
+	 * @param int      $amount (default: 0)
+	 * @uses  Simplify_BadRequestException
 	 * @return bool|WP_Error
 	 */
-	public function process_subscription_payment( $order = '', $amount = 0 ) {
-		$order_items       = $order->get_items();
-		$order_item        = array_shift( $order_items );
-		$subscription_name = sprintf( __( '%s - Subscription for "%s"', 'woocommerce' ), esc_html( get_bloginfo( 'name', 'display' ) ), $order_item['name'] ) . ' ' . sprintf( __( '(Order #%s)', 'woocommerce' ), $order->get_order_number() );
+	public function process_subscription_payment( $order, $amount = 0 ) {
+		if ( 0 == $amount ) {
+			// Payment complete
+			$order->payment_complete();
+
+			return true;
+		}
 
 		if ( $amount * 100 < 50 ) {
 			return new WP_Error( 'simplify_error', __( 'Sorry, the minimum allowed order total is 0.50 to use this payment method.', 'woocommerce' ) );
 		}
 
-		$customer_id = get_post_meta( $order->id, '_simplify_customer_id', true );
+		$customer_id = get_post_meta( $order->get_id(), '_simplify_customer_id', true );
 
 		if ( ! $customer_id ) {
-			return new WP_Error( 'simplify_error', __( 'Customer not found', 'woocommerce' ) );
+			return new WP_Error( 'simplify_error', __( 'Customer not found.', 'woocommerce' ) );
 		}
 
-		// Charge the customer
-		$payment = Simplify_Payment::createPayment( array(
-			'amount'              => $amount * 100, // In cents
-			'customer'            => $customer_id,
-			'description'         => trim( substr( $subscription_name, 0, 1024 ) ),
-			'currency'            => strtoupper( get_woocommerce_currency() ),
-			'reference'           => $order->id,
-			'card.addressCity'    => $order->billing_city,
-			'card.addressCountry' => $order->billing_country,
-			'card.addressLine1'   => $order->billing_address_1,
-			'card.addressLine2'   => $order->billing_address_2,
-			'card.addressState'   => $order->billing_state,
-			'card.addressZip'     => $order->billing_postcode
-		) );
+		try {
+			// Charge the customer
+			$payment = Simplify_Payment::createPayment(
+				array(
+					'amount'      => $amount * 100, // In cents.
+					'customer'    => $customer_id,
+					'description' => sprintf( __( '%1$s - Order #%2$s', 'woocommerce' ), esc_html( get_bloginfo( 'name', 'display' ) ), $order->get_order_number() ),
+					'currency'    => strtoupper( get_woocommerce_currency() ),
+					'reference'   => $order->get_id(),
+				)
+			);
+
+		} catch ( Exception $e ) {
+
+			$error_message = $e->getMessage();
+
+			if ( $e instanceof Simplify_BadRequestException && $e->hasFieldErrors() && $e->getFieldErrors() ) {
+				$error_message = '';
+				foreach ( $e->getFieldErrors() as $error ) {
+					$error_message .= ' ' . $error->getFieldName() . ': "' . $error->getMessage() . '" (' . $error->getErrorCode() . ')';
+				}
+			}
+
+			$order->add_order_note( sprintf( __( 'Simplify payment error: %s.', 'woocommerce' ), $error_message ) );
+
+			return new WP_Error( 'simplify_payment_declined', $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
 
 		if ( 'APPROVED' == $payment->paymentStatus ) {
 			// Payment complete
 			$order->payment_complete( $payment->id );
 
 			// Add order note
-			$order->add_order_note( sprintf( __( 'Simplify payment approved (ID: %s, Auth Code: %s)', 'woocommerce' ), $payment->id, $payment->authCode ) );
+			$order->add_order_note( sprintf( __( 'Simplify payment approved (ID: %1$s, Auth Code: %2$s)', 'woocommerce' ), $payment->id, $payment->authCode ) );
 
 			return true;
 		} else {
@@ -313,93 +345,121 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	/**
 	 * scheduled_subscription_payment function.
 	 *
-	 * @param float $amount_to_charge The amount to charge.
-	 * @param WC_Order $order The WC_Order object of the order which the subscription was purchased in.
-	 * @param int $product_id The ID of the subscription product for which this payment relates.
-	 * @return void
+	 * @param float    $amount_to_charge The amount to charge.
+	 * @param WC_Order $renewal_order A WC_Order object created to record the renewal payment.
 	 */
-	public function scheduled_subscription_payment( $amount_to_charge, $order, $product_id ) {
-		$result = $this->process_subscription_payment( $order, $amount_to_charge );
+	public function scheduled_subscription_payment( $amount_to_charge, $renewal_order ) {
+		$result = $this->process_subscription_payment( $renewal_order, $amount_to_charge );
 
 		if ( is_wp_error( $result ) ) {
-			WC_Subscriptions_Manager::process_subscription_payment_failure_on_order( $order, $product_id );
-		} else {
-			WC_Subscriptions_Manager::process_subscription_payments_on_order( $order );
+			$renewal_order->update_status( 'failed', sprintf( __( 'Simplify Transaction Failed (%s)', 'woocommerce' ), $result->get_error_message() ) );
 		}
 	}
 
 	/**
-	 * Don't transfer customer meta when creating a parent renewal order.
-	 *
-	 * @param string $order_meta_query MySQL query for pulling the metadata
-	 * @param int $original_order_id Post ID of the order being used to purchased the subscription being renewed
-	 * @param int $renewal_order_id Post ID of the order created for renewing the subscription
-	 * @param string $new_order_role The role the renewal order is taking, one of 'parent' or 'child'
-	 * @return string
-	 */
-	public function remove_renewal_order_meta( $order_meta_query, $original_order_id, $renewal_order_id, $new_order_role ) {
-		if ( 'parent' == $new_order_role ) {
-			$order_meta_query .= " AND `meta_key` NOT LIKE '_simplify_customer_id' ";
-		}
-
-		return $order_meta_query;
-	}
-
-	/**
-	 * Update the customer_id for a subscription after using Simplify to complete a payment to make up for
+	 * Update the customer_id for a subscription after using Simplify to complete a payment to make up for.
 	 * an automatic renewal payment which previously failed.
 	 *
-	 * @param WC_Order $original_order The original order in which the subscription was purchased.
-	 * @param WC_Order $renewal_order The order which recorded the successful payment (to make up for the failed automatic payment).
-	 * @param string $subscription_key A subscription key of the form created by @see WC_Subscriptions_Manager::get_subscription_key()
-	 * @return void
+	 * @param WC_Subscription $subscription The subscription for which the failing payment method relates.
+	 * @param WC_Order        $renewal_order The order which recorded the successful payment (to make up for the failed automatic payment).
 	 */
-	public function update_failing_payment_method( $original_order, $renewal_order, $subscription_key ) {
-		$new_customer_id = get_post_meta( $renewal_order->id, '_simplify_customer_id', true );
-
-		update_post_meta( $original_order->id, '_simplify_customer_id', $new_customer_id );
+	public function update_failing_payment_method( $subscription, $renewal_order ) {
+		update_post_meta( $subscription->id, '_simplify_customer_id', get_post_meta( $renewal_order->get_id(), '_simplify_customer_id', true ) );
 	}
 
 	/**
-	 * Process a pre-order payment when the pre-order is released
+	 * Include the payment meta data required to process automatic recurring payments so that store managers can.
+	 * manually set up automatic recurring payments for a customer via the Edit Subscription screen in Subscriptions v2.0+.
+	 *
+	 * @since 2.4
+	 * @param array           $payment_meta associative array of meta data required for automatic payments
+	 * @param WC_Subscription $subscription An instance of a subscription object
+	 * @return array
+	 */
+	public function add_subscription_payment_meta( $payment_meta, $subscription ) {
+
+		$payment_meta[ $this->id ] = array(
+			'post_meta' => array(
+				'_simplify_customer_id' => array(
+					'value' => get_post_meta( $subscription->id, '_simplify_customer_id', true ),
+					'label' => 'Simplify Customer ID',
+				),
+			),
+		);
+
+		return $payment_meta;
+	}
+
+	/**
+	 * Validate the payment meta data required to process automatic recurring payments so that store managers can.
+	 * manually set up automatic recurring payments for a customer via the Edit Subscription screen in Subscriptions 2.0+.
+	 *
+	 * @since  2.4
+	 * @param  string $payment_method_id The ID of the payment method to validate
+	 * @param  array  $payment_meta associative array of meta data required for automatic payments
+	 * @throws Exception
+	 */
+	public function validate_subscription_payment_meta( $payment_method_id, $payment_meta ) {
+		if ( $this->id === $payment_method_id ) {
+			if ( ! isset( $payment_meta['post_meta']['_simplify_customer_id']['value'] ) || empty( $payment_meta['post_meta']['_simplify_customer_id']['value'] ) ) {
+				throw new Exception( 'A "_simplify_customer_id" value is required.' );
+			}
+		}
+	}
+
+	/**
+	 * Don't transfer customer meta to resubscribe orders.
+	 *
+	 * @access public
+	 * @param int $resubscribe_order The order created for the customer to resubscribe to the old expired/cancelled subscription
+	 * @return void
+	 */
+	public function delete_resubscribe_meta( $resubscribe_order ) {
+		delete_post_meta( $resubscribe_order->get_id(), '_simplify_customer_id' );
+	}
+
+	/**
+	 * Process a pre-order payment when the pre-order is released.
 	 *
 	 * @param WC_Order $order
-	 * @return wp_error|null
+	 * @return WP_Error|null
 	 */
 	public function process_pre_order_release_payment( $order ) {
 
 		try {
-			$order_items    = $order->get_items();
-			$order_item     = array_shift( $order_items );
-			$pre_order_name = sprintf( __( '%s - Pre-order for "%s"', 'woocommerce' ), esc_html( get_bloginfo( 'name', 'display' ) ), $order_item['name'] ) . ' ' . sprintf( __( '(Order #%s)', 'woocommerce' ), $order->get_order_number() );
+			$order_items = $order->get_items();
+			$order_item  = array_shift( $order_items );
+			/* translators: 1: site name 2: product name 3: order number */
+			$pre_order_name = sprintf(
+				__( '%1$s - Pre-order for "%2$s" (Order #%3$s)', 'woocommerce' ),
+				esc_html( get_bloginfo( 'name', 'display' ) ),
+				$order_item['name'],
+				$order->get_order_number()
+			);
 
-			$customer_id = get_post_meta( $order->id, '_simplify_customer_id', true );
+			$customer_id = get_post_meta( $order->get_id(), '_simplify_customer_id', true );
 
 			if ( ! $customer_id ) {
-				return new WP_Error( 'simplify_error', __( 'Customer not found', 'woocommerce' ) );
+				return new WP_Error( 'simplify_error', __( 'Customer not found.', 'woocommerce' ) );
 			}
 
 			// Charge the customer
-			$payment = Simplify_Payment::createPayment( array(
-				'amount'              => $order->order_total * 100, // In cents
-				'customer'            => $customer_id,
-				'description'         => trim( substr( $pre_order_name, 0, 1024 ) ),
-				'currency'            => strtoupper( get_woocommerce_currency() ),
-				'reference'           => $order->id,
-				'card.addressCity'    => $order->billing_city,
-				'card.addressCountry' => $order->billing_country,
-				'card.addressLine1'   => $order->billing_address_1,
-				'card.addressLine2'   => $order->billing_address_2,
-				'card.addressState'   => $order->billing_state,
-				'card.addressZip'     => $order->billing_postcode
-			) );
+			$payment = Simplify_Payment::createPayment(
+				array(
+					'amount'      => $order->get_total() * 100, // In cents.
+					'customer'    => $customer_id,
+					'description' => trim( substr( $pre_order_name, 0, 1024 ) ),
+					'currency'    => strtoupper( get_woocommerce_currency() ),
+					'reference'   => $order->get_id(),
+				)
+			);
 
 			if ( 'APPROVED' == $payment->paymentStatus ) {
 				// Payment complete
 				$order->payment_complete( $payment->id );
 
 				// Add order note
-				$order->add_order_note( sprintf( __( 'Simplify payment approved (ID: %s, Auth Code: %s)', 'woocommerce' ), $payment->id, $payment->authCode ) );
+				$order->add_order_note( sprintf( __( 'Simplify payment approved (ID: %1$s, Auth Code: %2$s)', 'woocommerce' ), $payment->id, $payment->authCode ) );
 			} else {
 				return new WP_Error( 'simplify_payment_declined', __( 'Payment was declined - the customer need to try another card.', 'woocommerce' ) );
 			}
@@ -417,7 +477,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	}
 
 	/**
-	 * Return handler for Hosted Payments
+	 * Return handler for Hosted Payments.
 	 */
 	public function return_handler() {
 		if ( ! isset( $_REQUEST['cardToken'] ) ) {
@@ -434,12 +494,12 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 			$amount      = absint( $_REQUEST['amount'] );
 			$order_id    = absint( $_REQUEST['reference'] );
 			$order       = wc_get_order( $order_id );
-			$order_total = absint( $order->order_total * 100 );
+			$order_total = absint( $order->get_total() * 100 );
 
 			if ( $amount === $order_total ) {
-				if ( $this->order_contains_subscription( $order->id ) ) {
+				if ( $this->order_contains_subscription( $order->get_id() ) ) {
 					$response = $this->process_subscription( $order, $cart_token );
-				} elseif ( $this->order_contains_pre_order( $order->id ) ) {
+				} elseif ( $this->order_contains_pre_order( $order->get_id() ) ) {
 					$response = $this->process_pre_order( $order, $cart_token );
 				} else {
 					$response = parent::process_standard_payments( $order, $cart_token );

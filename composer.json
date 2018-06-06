@@ -1,0 +1,53 @@
+{
+  "name": "woocommerce/woocommerce",
+  "description": "An eCommerce toolkit that helps you sell anything. Beautifully.",
+  "homepage": "https://woocommerce.com/",
+  "type": "wordpress-plugin",
+  "license": "GPL-3.0-or-later",
+  "prefer-stable": true,
+  "minimum-stability": "dev",
+  "require": {
+    "composer/installers": "~1.2"
+  },
+  "require-dev": {
+    "squizlabs/php_codesniffer": "*",
+    "wp-coding-standards/wpcs": "^0.14",
+    "phpunit/phpunit": "6.*",
+    "woocommerce/woocommerce-git-hooks": "*",
+    "woocommerce/woocommerce-sniffs": "*",
+    "wimg/php-compatibility": "^8.0",
+    "dealerdirect/phpcodesniffer-composer-installer": "^0.4.3",
+    "apigen/apigen": "^4",
+    "nette/utils": "~2.3.0"
+  },
+  "scripts": {
+    "pre-update-cmd": [
+      "WooCommerce\\GitHooks\\Hooks::preHooks"
+    ],
+    "pre-install-cmd": [
+      "WooCommerce\\GitHooks\\Hooks::preHooks"
+    ],
+    "post-install-cmd": [
+      "WooCommerce\\GitHooks\\Hooks::postHooks"
+    ],
+    "post-update-cmd": [
+      "WooCommerce\\GitHooks\\Hooks::postHooks"
+    ],
+    "test": [
+      "phpunit"
+    ],
+    "phpcs": [
+      "phpcs -s -p"
+    ],
+    "phpcbf": [
+      "phpcbf -p"
+    ]
+  },
+  "extra": {
+    "scripts-description": {
+      "test": "Run unit tests",
+      "phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
+      "phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier"
+    }
+  }
+}

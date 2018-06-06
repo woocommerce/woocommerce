@@ -5,32 +5,56 @@
 </tr>
 {/define}
 
-<table class="summary" id="classes" n:if="$classes">
-<caption>Classes summary</caption>
-{include elements, elements => $classes}
-</table>
+{if $classes}
+<div class="panel panel-default">
+	<div class="panel-heading"><h2>Classes summary</h2></div>
+	<table class="summary table table-bordered table-striped" id="classes">
+	{include elements, elements => $classes}
+	</table>
+</div>
+{/if}
 
-<table class="summary" id="interfaces" n:if="$interfaces">
-<caption>Interfaces summary</caption>
-{include elements, elements => $interfaces}
-</table>
+{if $interfaces}
+<div class="panel panel-default">
+	<div class="panel-heading"><h2>Interfaces summary</h2></div>
+	<table class="summary table table-bordered table-striped" id="interfaces">
+	{include elements, elements => $interfaces}
+	</table>
+</div>
+{/if}
 
-<table class="summary" id="traits" n:if="$traits">
-<caption>Traits summary</caption>
-{include elements, elements => $traits}
-</table>
+{if $traits}
+<div class="panel panel-default">
+	<div class="panel-heading"><h2>Traits summary</h2></div>
+	<table class="summary table table-bordered table-striped" id="traits">
+	{include elements, elements => $traits}
+	</table>
+</div>
+{/if}
 
-<table class="summary" id="exceptions" n:if="$exceptions">
-<caption>Exceptions summary</caption>
-{include elements, elements => $exceptions}
-</table>
+{if $exceptions}
+<div class="panel panel-default">
+	<div class="panel-heading"><h2>Exceptions summary</h2></div>
+	<table class="summary table table-bordered table-striped" id="exceptions">
+	{include elements, elements => $exceptions}
+	</table>
+</div>
+{/if}
 
-<table class="summary" id="constants" n:if="$constants">
-<caption>Constants summary</caption>
-{include elements, elements => $constants}
-</table>
+{if $constants}
+<div class="panel panel-default">
+	<div class="panel-heading"><h2>Constants summary</h2></div>
+	<table class="summary table table-bordered table-striped" id="constants">
+	{include elements, elements => $constants}
+	</table>
+</div>
+{/if}
 
-<table class="summary" id="functions" n:if="$functions">
-<caption>Functions summary</caption>
-{include elements, elements => $functions}
-</table>
+{if $functions}
+<div class="panel panel-default">
+	<div class="panel-heading"><h2>Functions summary</h2></div>
+	<table class="summary table table-bordered table-striped" id="functions">
+	{include elements, elements => $functions}
+	</table>
+</div>
+{/if}

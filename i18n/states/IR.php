@@ -2,12 +2,13 @@
 /**
  * Iran States
  *
- * @author      WooThemes
- * @category    i18n
- * @package     WooCommerce/i18n
- * @version     2.2.3
+ * @package WooCommerce/i18n
+ * @version 2.2.3
  */
+
 global $states;
+
+defined( 'ABSPATH' ) || exit;
 
 $states['IR'] = array(
 	'KHZ' => __( 'Khuzestan  (خوزستان)', 'woocommerce' ),
@@ -40,5 +41,5 @@ $states['IR'] = array(
 	'MZN' => __( 'Mazandaran (مازندران)', 'woocommerce' ),
 	'MKZ' => __( 'Markazi (مرکزی)', 'woocommerce' ),
 	'HRZ' => __( 'Hormozgan (هرمزگان)', 'woocommerce' ),
-	'SBN' => __( 'Sistan and Baluchestan (سیستان و بلوچستان)', 'woocommerce' )
+	'SBN' => __( 'Sistan and Baluchestan (سیستان و بلوچستان)', 'woocommerce' ),
 );

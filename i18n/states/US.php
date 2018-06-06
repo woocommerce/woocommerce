@@ -2,12 +2,13 @@
 /**
  * United States
  *
- * @author      WooThemes
- * @category    i18n
- * @package     WooCommerce/i18n
- * @version     2.0.0
+ * @package WooCommerce/i18n
+ * @version 2.0.0
  */
+
 global $states;
+
+defined( 'ABSPATH' ) || exit;
 
 $states['US'] = array(
 	'AL' => __( 'Alabama', 'woocommerce' ),
@@ -64,10 +65,4 @@ $states['US'] = array(
 	'AA' => __( 'Armed Forces (AA)', 'woocommerce' ),
 	'AE' => __( 'Armed Forces (AE)', 'woocommerce' ),
 	'AP' => __( 'Armed Forces (AP)', 'woocommerce' ),
-	'AS' => __( 'American Samoa', 'woocommerce' ),
-	'GU' => __( 'Guam', 'woocommerce' ),
-	'MP' => __( 'Northern Mariana Islands', 'woocommerce' ),
-	'PR' => __( 'Puerto Rico', 'woocommerce' ),
-	'UM' => __( 'US Minor Outlying Islands', 'woocommerce' ),
-	'VI' => __( 'US Virgin Islands', 'woocommerce' ),
 );

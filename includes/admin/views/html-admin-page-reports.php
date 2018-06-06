@@ -4,62 +4,70 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 ?>
-
 <div class="wrap woocommerce">
-	<div class="icon32 icon32-woocommerce-reports" id="icon-woocommerce"><br /></div><h2 class="nav-tab-wrapper woo-nav-tab-wrapper">
+	<nav class="nav-tab-wrapper woo-nav-tab-wrapper">
 		<?php
-			foreach ( $reports as $key => $report_group ) {
-				echo '<a href="'.admin_url( 'admin.php?page=wc-reports&tab=' . urlencode( $key ) ).'" class="nav-tab ';
-				if ( $current_tab == $key ) echo 'nav-tab-active';
-				echo '">' . esc_html( $report_group[ 'title' ] ) . '</a>';
+		foreach ( $reports as $key => $report_group ) {
+			echo '<a href="' . admin_url( 'admin.php?page=wc-reports&tab=' . urlencode( $key ) ) . '" class="nav-tab ';
+			if ( $current_tab == $key ) {
+				echo 'nav-tab-active';
 			}
-		?>
-		<?php do_action('wc_reports_tabs'); ?>
-	</h2>
+			echo '">' . esc_html( $report_group['title'] ) . '</a>';
+		}
 
-	<?php if ( sizeof( $reports[ $current_tab ]['reports'] ) > 1 ) {
+		do_action( 'wc_reports_tabs' );
+		?>
+	</nav>
+	<?php
+	if ( sizeof( $reports[ $current_tab ]['reports'] ) > 1 ) {
 		?>
 		<ul class="subsubsub">
-			<li><?php
+			<li>
+			<?php
 
-				$links = array();
+			$links = array();
 
-				foreach ( $reports[ $current_tab ]['reports'] as $key => $report ) {
+			foreach ( $reports[ $current_tab ]['reports'] as $key => $report ) {
+				$link = '<a href="admin.php?page=wc-reports&tab=' . urlencode( $current_tab ) . '&amp;report=' . urlencode( $key ) . '" class="';
 
-					$link = '<a href="admin.php?page=wc-reports&tab=' . urlencode( $current_tab ) . '&amp;report=' . urlencode( $key ) . '" class="';
-
-					if ( $key == $current_report ) $link .= 'current';
-
-					$link .= '">' . $report['title'] . '</a>';
-
-					$links[] = $link;
-
+				if ( $key == $current_report ) {
+					$link .= 'current';
 				}
 
-				echo implode(' | </li><li>', $links);
+				$link .= '">' . $report['title'] . '</a>';
 
-			?></li>
+				$links[] = $link;
+			}
+
+			echo implode( ' | </li><li>', $links );
+
+			?>
+			</li>
 		</ul>
 		<br class="clear" />
 		<?php
 	}
 
-	if ( isset( $reports[ $current_tab ][ 'reports' ][ $current_report ] ) ) {
+	if ( isset( $reports[ $current_tab ]['reports'][ $current_report ] ) ) {
+		$report = $reports[ $current_tab ]['reports'][ $current_report ];
 
-		$report = $reports[ $current_tab ][ 'reports' ][ $current_report ];
+		if ( ! isset( $report['hide_title'] ) || true != $report['hide_title'] ) {
+			echo '<h1>' . esc_html( $report['title'] ) . '</h1>';
+		} else {
+			echo '<h1 class="screen-reader-text">' . esc_html( $report['title'] ) . '</h1>';
+		}
 
-		if ( ! isset( $report['hide_title'] ) || $report['hide_title'] != true )
-			echo '<h3>' . $report['title'] . '</h3>';
-
-		if ( $report['description'] )
+		if ( $report['description'] ) {
 			echo '<p>' . $report['description'] . '</p>';
+		}
 
-		if ( $report['callback'] && ( is_callable( $report['callback'] ) ) )
+		if ( $report['callback'] && ( is_callable( $report['callback'] ) ) ) {
 			call_user_func( $report['callback'], $current_report );
+		}
 	}
 	?>
 </div>

@@ -473,7 +473,7 @@
 
 			var els;
 			if (full) // crazy selector to handle odd field errors in ie6/7
-				els = $('body').children().filter('.blockUI').add('body > .blockUI');
+				els = $(document.body).children().filter('.blockUI').add('body > .blockUI');
 			else
 				els = $el.find('>.blockUI');
 
