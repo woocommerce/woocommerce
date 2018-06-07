@@ -262,7 +262,7 @@ class WC_Beta_Tester_Admin_Menus {
 				'parent' => 'wc-beta-tester',
 				'id'     => 'switch-version',
 				'title'  => __( 'Switch versions', 'woocommerce-beta-tester' ),
-				'href'   => admin_url( 'plugins.php' ),
+				'href'   => admin_url( 'tools.php?page=wc-beta-tester-version-picker' ),
 			),
 			array(
 				'parent' => 'wc-beta-tester',

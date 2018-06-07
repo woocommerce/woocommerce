@@ -441,6 +441,91 @@ class WC_Beta_Tester {
 	}
 
 	/**
+	 * Return true if version string is a beta version.
+	 *
+	 * @param string $version_str Version string.
+	 * @return bool
+	 */
+	protected static function is_beta_version( $version_str ) {
+		return strpos( $version_str, 'beta' ) !== false;
+	}
+
+	/**
+	 * Return true if version string is a Release Candidate.
+	 *
+	 * @param string $version_str Version string.
+	 * @return bool
+	 */
+	protected static function is_rc_version( $version_str ) {
+		return strpos( $version_str, 'rc' ) !== false;
+	}
+
+	/**
+	 * Return true if version string is a stable version.
+	 *
+	 * @param string $version_str Version string.
+	 * @return bool
+	 */
+	protected static function is_stable_version( $version_str ) {
+		return ! self::is_beta_version( $version_str ) && ! self::is_rc_version( $version_str );
+	}
+
+	/**
+	 * Return true if release's version string belongs to beta channel, i.e.
+	 * if it's beta, rc or stable release.
+	 *
+	 * @param string $version_str Version string of the release.
+	 * @return bool
+	 */
+	protected static function is_in_beta_channel( $version_str ) {
+		return self::is_beta_version( $version_str ) || self::is_rc_version( $version_str ) || self::is_stable_version( $version_str );
+	}
+
+	/**
+	 * Return true if release's version string belongs to release candidate channel, i.e.
+	 * if it's rc or stable release.
+	 *
+	 * @param string $version_str Version string of the release.
+	 * @return bool
+	 */
+	protected static function is_in_rc_channel( $version_str ) {
+		return self::is_rc_version( $version_str ) || self::is_stable_version( $version_str );
+	}
+
+	/**
+	 * Return true if release's version string belongs to stable channel, i.e.
+	 * if it's stable release and not a beta or rc.
+	 *
+	 * @param string $version_str Version string of the release.
+	 * @return bool
+	 */
+	protected static function is_in_stable_channel( $version_str ) {
+		return self::is_stable_version( $version_str );
+	}
+
+	/**
+	 * Return available versions from wp.org tags belonging to selected channel.
+	 *
+	 * @param string $channel Filter versions by channel: all|beta|rc|stable.
+	 * @return array(string)
+	 */
+	public function get_tags( $channel = 'all' ) {
+		$data = $this->get_wporg_data();
+		$releases       = (array) $data->versions;
+		unset( $releases['trunk'] );
+
+		if ( 'beta' === $channel ) {
+			$releases = array_filter( $releases, array( __CLASS__, 'is_in_beta_channel' ), ARRAY_FILTER_USE_KEY );
+		} elseif ( 'rc' === $channel ) {
+			$releases = array_filter( $releases, array( __CLASS__, 'is_in_rc_channel' ), ARRAY_FILTER_USE_KEY );
+		} elseif ( 'stable' === $channel ) {
+			$releases = array_filter( $releases, array( __CLASS__, 'is_in_stable_channel' ), ARRAY_FILTER_USE_KEY );
+		}
+
+		return array_keys( $releases );
+	}
+
+	/**
 	 * Show action links on the plugin screen.
 	 *
 	 * @param   mixed $links Plugin Action links.

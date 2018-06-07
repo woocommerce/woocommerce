@@ -50,6 +50,8 @@ function _wc_beta_tester_bootstrap() {
 		include dirname( __FILE__ ) . '/includes/class-wc-beta-tester.php';
 		// Settings.
 		include dirname( __FILE__ ) . '/includes/class-wc-beta-tester-settings.php';
+		// Tools.
+		include dirname( __FILE__ ) . '/includes/class-wc-beta-tester-version-picker.php';
 
 		register_activation_hook( __FILE__, array( 'WC_Beta_Tester', 'activate' ) );
 
