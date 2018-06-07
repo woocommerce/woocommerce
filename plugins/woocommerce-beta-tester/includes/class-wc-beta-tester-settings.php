@@ -85,7 +85,7 @@ class WC_Beta_Tester_Settings {
 			),
 			'stable' => array(
 				'name'        => __( 'Stable Releases', 'woocommerce-beta-tester' ),
-				'description' => __( 'This is the default behaviour in WordPress.', 'woocommerce-beta-tester' ),
+				'description' => __( 'This is the default behavior in WordPress.', 'woocommerce-beta-tester' ),
 			),
 		);
 		echo '<fieldset><legend class="screen-reader-text"><span>' . esc_html__( 'Update Channel', 'woocommerce-beta-tester' ) . '</span></legend>';
