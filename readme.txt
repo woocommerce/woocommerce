@@ -162,6 +162,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Enhancement - Excluded children categories from WP_Query in product shortcode if cat_operator=AND. #20207
 * Enhancement - Add anchor tag example to email template preview. #20246
 * Enhancement - Introduce is_paypal_supported_currency check in setup wizard. #20244
+* Enhancement - Payment method table reordering accessibility. #19844
 * Performance - Exclude frontend include from REST API calls. #20000
 * Dev - REST API - Allows oAuth1.0a authentication under SSL.
 * Dev - Added woocommerce_increase_coupon_usage_count and woocommerce_decrease_coupon_usage_count action hooks to increase extensibility of Coupons. #19981
@@ -170,6 +171,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Added `woocommerce_search_products_ids` filter. #20160
 * Dev - Introduced `woocommerce_cart_calculate_shipping_address` field to allow manipulation of cart shipping calculator data. #20046
 * Dev - Introduced `woocommerce_shipping_calculator_enable_country` filter. #20046
+* Dev - Pass product id to backorder notification. #20416
 * Localization - Updated IT provinces. #20286
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
