@@ -53,7 +53,7 @@ class WC_Beta_Tester_Admin_Menus {
 			$version .= sprintf( __( ' - %s is available', 'woocommerce-beta-tester' ), esc_html( $theme['version_latest'] ) );
 		}
 
-		$child_theme = $theme['is_child_theme'] ? __( 'Yes', 'woocommerce-beta-tester' ) : __( 'No - If you are modifying WooCommerce on a parent theme that you did not build personally we recommend using a child theme.', 'woocommerce' );
+		$child_theme = $theme['is_child_theme'] ? __( 'Yes', 'woocommerce-beta-tester' ) : __( 'No - If you are modifying WooCommerce on a parent theme that you did not build personally we recommend using a child theme.', 'woocommerce-beta-tester' );
 
 		if ( $theme['is_child_theme'] ) {
 			$parent_version = $theme['parent_version'];
