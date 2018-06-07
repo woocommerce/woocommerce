@@ -53,7 +53,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 				'woocommerce_payment_gateways_settings', array(
 					array(
 						'title' => __( 'Payment methods', 'woocommerce' ),
-						'desc'  => __( 'Installed payment methods are listed below. Drag and drop gateways to control their display order on the frontend.', 'woocommerce' ),
+						'desc'  => __( 'Installed payment methods are listed below and can be sorted to control their display order on the frontend.', 'woocommerce' ),
 						'type'  => 'title',
 						'id'    => 'payment_gateways_options',
 					),
@@ -107,7 +107,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 		?>
 		<tr valign="top">
 		<td class="wc_payment_gateways_wrapper" colspan="2">
-			<table class="wc_gateways widefat" cellspacing="0">
+			<table class="wc_gateways widefat" cellspacing="0" aria-describedby="payment_gateways_options-description">
 				<thead>
 					<tr>
 						<?php
@@ -145,17 +145,26 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 									$width = '1%';
 								}
 
+								$method_title = $gateway->get_method_title() ? $gateway->get_method_title() : $gateway->get_title();
+								$custom_title = $gateway->get_title();
+
 								echo '<td class="' . esc_attr( $key ) . '" width="' . esc_attr( $width ) . '">';
 
 								switch ( $key ) {
 									case 'sort':
-										echo '<input type="hidden" name="gateway_order[]" value="' . esc_attr( $gateway->id ) . '" />';
+										?>
+										<div class="wc-item-reorder-nav">
+											<button type="button" class="wc-move-up" tabindex="0" aria-hidden="false" aria-label="<?php /* Translators: %s Payment gateway name. */ echo esc_attr( sprintf( __( 'Move the "%s" payment method up', 'woocommerce' ), $method_title ) ); ?>"><?php esc_html_e( 'Move up', 'woocommerce' ); ?></button>
+											<button type="button" class="wc-move-down" tabindex="0" aria-hidden="false" aria-label="<?php /* Translators: %s Payment gateway name. */ echo esc_attr( sprintf( __( 'Move the "%s" payment method down', 'woocommerce' ), $method_title ) ); ?>"><?php esc_html_e( 'Move down', 'woocommerce' ); ?></button>
+											<input type="hidden" name="gateway_order[]" value="<?php echo esc_attr( $gateway->id ); ?>" />
+										</div>
+										<?php
 										break;
 									case 'name':
-										$method_title = $gateway->get_title() ? $gateway->get_title() : __( '(no title)', 'woocommerce' );
-										echo '<a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $gateway->id ) ) ) . '" class="wc-payment-gateway-method-title">' . wp_kses_post( $gateway->get_method_title() ) . '</a>';
-										if ( $method_title !== $gateway->get_method_title() ) {
-											echo '<span class="wc-payment-gateway-method-name">&nbsp;&ndash;&nbsp;' . esc_html( $method_title ) . '</span>';
+										echo '<a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $gateway->id ) ) ) . '" class="wc-payment-gateway-method-title">' . wp_kses_post( $method_title ) . '</a>';
+
+										if ( $method_title !== $custom_title ) {
+											echo '<span class="wc-payment-gateway-method-name">&nbsp;&ndash;&nbsp;' . wp_kses_post( $custom_title ) . '</span>';
 										}
 										break;
 									case 'description':
@@ -163,17 +172,21 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 										break;
 									case 'action':
 										if ( wc_string_to_bool( $gateway->enabled ) ) {
-											echo '<a class="button alignright" href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $gateway->id ) ) ) . '">' . esc_html__( 'Manage', 'woocommerce' ) . '</a>';
+											/* Translators: %s Payment gateway name. */
+											echo '<a class="button alignright" aria-label="' . esc_attr( sprintf( __( 'Manage the "%s" payment method', 'woocommerce' ), $method_title ) ) . '" href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $gateway->id ) ) ) . '">' . esc_html__( 'Manage', 'woocommerce' ) . '</a>';
 										} else {
-											echo '<a class="button alignright" href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $gateway->id ) ) ) . '">' . esc_html__( 'Set up', 'woocommerce' ) . '</a>';
+											/* Translators: %s Payment gateway name. */
+											echo '<a class="button alignright" aria-label="' . esc_attr( sprintf( __( 'Set up the "%s" payment method', 'woocommerce' ), $method_title ) ) . '" href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $gateway->id ) ) ) . '">' . esc_html__( 'Set up', 'woocommerce' ) . '</a>';
 										}
 										break;
 									case 'status':
 										echo '<a class="wc-payment-gateway-method-toggle-enabled" href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $gateway->id ) ) ) . '">';
 										if ( wc_string_to_bool( $gateway->enabled ) ) {
-											echo '<span class="woocommerce-input-toggle woocommerce-input-toggle--enabled">' . esc_attr__( 'Yes', 'woocommerce' ) . '</span>';
+											/* Translators: %s Payment gateway name. */
+											echo '<span class="woocommerce-input-toggle woocommerce-input-toggle--enabled" aria-label="' . esc_attr( sprintf( __( 'The "%s" payment method is currently enabled', 'woocommerce' ), $method_title ) ) . '">' . esc_attr__( 'Yes', 'woocommerce' ) . '</span>';
 										} else {
-											echo '<span class="woocommerce-input-toggle woocommerce-input-toggle--disabled">' . esc_attr__( 'No', 'woocommerce' ) . '</span>';
+											/* Translators: %s Payment gateway name. */
+											echo '<span class="woocommerce-input-toggle woocommerce-input-toggle--disabled" aria-label="' . esc_attr( sprintf( __( 'The "%s" payment method is currently disabled', 'woocommerce' ), $method_title ) ) . '">' . esc_attr__( 'No', 'woocommerce' ) . '</span>';
 										}
 										echo '</a>';
 										break;
