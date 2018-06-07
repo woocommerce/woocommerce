@@ -169,6 +169,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Show empty terms in admin product category filter dropdown. #20324
 * Tweak - Don't force default token gateway active by default. #20125
 * Tweak - Move notice output to hooked in functions. #19794
+* Tweak - Apply order bulk actions in chronological order. #20338
 * Performance - Exclude frontend include from REST API calls. #20000
 * Dev - REST API - Allows oAuth1.0a authentication under SSL.
 * Dev - Added woocommerce_increase_coupon_usage_count and woocommerce_decrease_coupon_usage_count action hooks to increase extensibility of Coupons. #19981
