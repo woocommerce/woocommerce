@@ -379,7 +379,7 @@ class WC_Beta_Tester {
 				. $res->sections['description'];
 		}
 
-		$res->sections['pre-release_information'] = $this->get_version_information( $res->version );
+		$res->sections['pre-release_information'] = make_clickable( wpautop( $this->get_version_information( $res->version ) ) );
 		$res->sections['pre-release_information'] .= sprintf(
 			/* translators: 1: GitHub pre-release URL */
 			__( '<p><a target="_blank" href="%s">Read more on GitHub</a></p>' ),
