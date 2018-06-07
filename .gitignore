@@ -47,5 +47,5 @@ tests/cli/vendor
 /vendor/
 contributors.md
 
-# Screenshots
+# Screenshots for e2e tests failures
 /screenshots/
