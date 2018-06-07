@@ -147,7 +147,7 @@ class WC_Beta_Tester {
 
 			// Refresh every 6 hours.
 			if ( ! empty( $tagged_version ) ) {
-				set_site_transient( md5( $this->config['slug'] ) . '_latest_tag', $tagged_version, 60 * 60 * 6 );
+				set_site_transient( md5( $this->config['slug'] ) . '_latest_tag', $tagged_version, HOUR_IN_SECONDS * 6 );
 			}
 		}
 
@@ -177,7 +177,7 @@ class WC_Beta_Tester {
 			$wporg_data = json_decode( $wporg_data['body'] );
 
 			// Refresh every 6 hours.
-			set_site_transient( md5( $this->config['slug'] ) . '_wporg_data', $wporg_data, 60 * 60 * 6 );
+			set_site_transient( md5( $this->config['slug'] ) . '_wporg_data', $wporg_data, HOUR_IN_SECONDS * 6 );
 		}
 
 		// Store the data in this class instance for future calls.
