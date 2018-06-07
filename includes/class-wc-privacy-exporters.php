@@ -95,10 +95,11 @@ class WC_Privacy_Exporters {
 	 * @since 3.4.0
 	 * @param string $email_address The user email address.
 	 * @param int    $page  Page.
+	 * @throws Exception When WC_Data_Store validation fails.
 	 * @return array An array of personal data in name value pairs
 	 */
 	public static function download_data_exporter( $email_address, $page ) {
-		$done            = false;
+		$done            = true;
 		$page            = (int) $page;
 		$user            = get_user_by( 'email', $email_address ); // Check if user has an ID in the DB to load stored personal data.
 		$data_to_export  = array();
@@ -153,8 +154,6 @@ class WC_Privacy_Exporters {
 				}
 			}
 			$done = 10 > count( $downloads );
-		} else {
-			$done = true;
 		}
 
 		return array(
