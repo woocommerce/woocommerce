@@ -39,6 +39,89 @@ class WC_Beta_Tester_Admin_Menus {
 	}
 
 	/**
+	 * Get info about the current theme for SSR.
+	 *
+	 * @param string $theme
+	 * @return string
+	 */
+	private function get_theme_ssr_info( $theme ) {
+		$theme_info = __( "\n\n### Theme ###\n\n", 'woocommerce-beta-tester' );
+
+		$version = $theme['version'];
+		if ( version_compare( $theme['version'], $theme['version_latest'], '<' ) ) {
+			/* translators: 1: latest version */
+			$version .= sprintf( __( ' - %s is available', 'woocommerce-beta-tester' ), esc_html( $theme['version_latest'] ) );
+		}
+
+		$child_theme = $theme['is_child_theme'] ? __( 'Yes', 'woocommerce-beta-tester' ) : __( 'No - If you are modifying WooCommerce on a parent theme that you did not build personally we recommend using a child theme.', 'woocommerce-beta-tester' );
+
+		if ( $theme['is_child_theme'] ) {
+			$parent_version = $theme['parent_version'];
+			if ( version_compare( $theme['parent_version'], $theme['parent_version_latest'], '<' ) ) {
+				/* translators: 1: latest version */
+				$parent_version .= sprintf( __( ' - %s is available', 'woocommerce-beta-tester' ), esc_html( $theme['parent_version_latest'] ) );
+			}
+
+			$child_theme .= sprintf(
+				__( "Parent theme name: %1\$s\nParent theme version: %2\$s\nParent theme author URL: %3\$s\n", 'woocommerce-beta-tester' ),
+				$theme['parent_name'],
+				$parent_version,
+				$theme['parent_author_url']
+			);
+		}
+
+		$theme_info .= sprintf(
+			__( "Name: %1\$s\nVersion: %2\$s\nAuthor URL: %3\$s\nChild Theme: %4\$s\nWooCommerce Support: %5\$s", 'woocommerce-beta-tester' ),
+			$theme['name'],
+			$version,
+			esc_html( $theme['author_url'] ),
+			$child_theme,
+			! $theme['has_woocommerce_support'] ? __( 'Not declared', 'woocommerce-beta-tester' ) : __( 'Yes', 'woocommerce-beta-tester' )
+		);
+
+		return $theme_info;
+	}
+
+	/**
+	 * Get info about the current plugins for SSR.
+	 *
+	 * @param array $active_plugins
+	 * @param array $untested_plugins
+	 * @return string
+	 */
+	private function get_plugins_ssr_info( $active_plugins, $untested_plugins ) {
+		$plugins_info = __( "\n\n### Plugins ###\n\n", 'woocommerce-beta-tester' );
+
+		foreach ( $active_plugins as $plugin ) {
+			if ( ! empty( $plugin['name'] ) ) {
+				// Link the plugin name to the plugin url if available.
+				$plugin_name = esc_html( $plugin['name'] );
+
+				$version_string = '';
+				$network_string = '';
+				if ( strstr( $plugin['url'], 'woothemes.com' ) || strstr( $plugin['url'], 'woocommerce.com' ) ) {
+					if ( ! empty( $plugin['version_latest'] ) && version_compare( $plugin['version_latest'], $plugin['version'], '>' ) ) {
+						/* translators: %s: plugin latest version */
+						$version_string = sprintf( esc_html__( '%s is available', 'woocommerce-beta-tester' ), $plugin['version_latest'] );
+					}
+
+					if ( false != $plugin['network_activated'] ) {
+						$network_string = __( 'Network enabled', 'woocommerce-beta-tester' );
+					}
+				}
+				$untested_string = '';
+				if ( array_key_exists( $plugin['plugin'], $untested_plugins ) ) {
+					$untested_string = __( 'Not tested with the active version of WooCommerce', 'woocommerce-beta-tester' );
+				}
+
+				$plugins_info .= sprintf( __( "%1\$s: by %2\$s - %3\$s - %4\$s\n", 'woocommerce-beta-tester' ), $plugin_name, $plugin['author_name'], $plugin['version'], $version_string . $untested_string . $network_string );
+			}
+		}
+
+		return $plugins_info;
+	}
+
+	/**
 	 * Constructs a WC System Status Report.
 	 *
 	 * @return string
@@ -81,6 +164,14 @@ class WC_Beta_Tester_Admin_Menus {
 
 				$ssr .= sprintf( "%s: %s\n", $schema['properties']['environment']['properties'][ $index ]['description'], $value );
 			}
+
+			$active_plugins   = $api->get_active_plugins();
+			$plugin_updates   = new WC_Plugin_Updates;
+			$untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor' );
+			$ssr             .= $this->get_plugins_ssr_info( $active_plugins, $untested_plugins );
+
+			$theme            = $api->get_theme_info();
+			$ssr             .= $this->get_theme_ssr_info( $theme );
 
 			set_transient( $transient_name, $ssr, DAY_IN_SECONDS );
 		}
