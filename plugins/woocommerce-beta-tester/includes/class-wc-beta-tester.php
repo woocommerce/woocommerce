@@ -87,6 +87,7 @@ class WC_Beta_Tester {
 		add_filter( 'plugins_api', array( $this, 'get_plugin_info' ), 10, 3 );
 		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
 		add_filter( 'auto_update_plugin', 'auto_update_woocommerce', 100, 2 );
+		add_filter( 'plugins_api_result', array( $this, 'plugin_api_prerelease_info' ), 10, 3 );
 
 		$this->includes();
 	}
@@ -124,6 +125,16 @@ class WC_Beta_Tester {
 	}
 
 	/**
+	 * Checks if a given version is a pre-release.
+	 *
+	 * @param string $version
+	 * @return bool
+	 */
+	public function is_prerelease( $version ) {
+		return preg_match( '/(.*)?-(beta|rc)(.*)/', $version );
+	}
+
+	/**
 	 * Get New Version from WPorg
 	 *
 	 * @since 1.0
@@ -140,7 +151,7 @@ class WC_Beta_Tester {
 			$versions       = (array) $data->versions;
 
 			foreach ( $versions as $version => $download_url ) {
-				if ( preg_match( '/(.*)?-(beta|rc)(.*)/', $version ) ) {
+				if ( $this->is_prerelease( $version ) ) {
 					$tagged_version = $version;
 				}
 			}
@@ -342,6 +353,40 @@ class WC_Beta_Tester {
 		}
 
 		return $source;
+	}
+
+	/**
+	 * Add additional information to the Plugin Information version details modal.
+	 *
+	 * @param object|WP_Error $res    Response object or WP_Error.
+	 * @param string          $action The type of information being requested from the Plugin Installation API.
+	 * @param object          $args   Plugin API arguments.
+	 * @return object|WP_Error
+	 */
+	public function plugin_api_prerelease_info( $res, $action, $args ) {
+		// We only care about the plugin information action for woocommerce
+		if ( ! isset( $args->slug ) || 'woocommerce' !== $args->slug || 'plugin_information' !== $action ) {
+			return $res;
+		}
+
+		// Not a pre-release, no need to do anything.
+		if ( ! $this->is_prerelease( $res->version ) ) {
+			return $res;
+		}
+
+		if ( isset( $res->sections['description'] ) ) {
+			$res->sections['description'] = __( '<h1><span>&#9888;</span>This is a pre-release<span>&#9888;</span></h1>', 'woocommerce-beta-tester' )
+				. $res->sections['description'];
+		}
+
+		$res->sections['pre-release_information'] = make_clickable( wpautop( $this->get_version_information( $res->version ) ) );
+		$res->sections['pre-release_information'] .= sprintf(
+			/* translators: 1: GitHub pre-release URL */
+			__( '<p><a target="_blank" href="%s">Read more on GitHub</a></p>' ),
+			'https://github.com/woocommerce/woocommerce/releases/tag/' . $res->version
+		);
+
+		return $res;
 	}
 
 	/**
