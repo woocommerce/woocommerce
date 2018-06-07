@@ -79,14 +79,59 @@ function wc_update_product_stock_status( $product_id, $status ) {
  */
 function wc_maybe_reduce_stock_levels( $order_id ) {
 	$order = wc_get_order( $order_id );
-	if ( apply_filters( 'woocommerce_payment_complete_reduce_order_stock', $order && ! $order->get_data_store()->get_stock_reduced( $order_id ), $order_id ) ) {
-		wc_reduce_stock_levels( $order );
+
+	if ( ! $order ) {
+		return;
 	}
+
+	$stock_reduced  = $order->get_data_store()->get_stock_reduced( $order_id );
+	$trigger_reduce = apply_filters( 'woocommerce_payment_complete_reduce_order_stock', ! $stock_reduced, $order_id );
+
+	// Only continue if we're reducing stock.
+	if ( ! $trigger_reduce ) {
+		return;
+	}
+
+	wc_reduce_stock_levels( $order );
+
+	// Ensure stock is marked as "reduced" in case payment complete or other stock actions are called.
+	$order->get_data_store()->set_stock_reduced( $order_id, true );
 }
 add_action( 'woocommerce_payment_complete', 'wc_maybe_reduce_stock_levels' );
+add_action( 'woocommerce_order_status_completed', 'wc_maybe_reduce_stock_levels' );
+add_action( 'woocommerce_order_status_processing', 'wc_maybe_reduce_stock_levels' );
+add_action( 'woocommerce_order_status_on-hold', 'wc_maybe_reduce_stock_levels' );
 
 /**
- * Reduce stock levels for items within an order.
+ * When a payment is cancelled, restore stock.
+ *
+ * @since 3.0.0
+ * @param int $order_id Order ID.
+ */
+function wc_maybe_increase_stock_levels( $order_id ) {
+	$order = wc_get_order( $order_id );
+
+	if ( ! $order ) {
+		return;
+	}
+
+	$stock_reduced  = $order->get_data_store()->get_stock_reduced( $order_id );
+	$trigger_reduce = (bool) $stock_reduced;
+
+	// Only continue if we're reducing stock.
+	if ( ! $trigger_reduce ) {
+		return;
+	}
+
+	wc_increase_stock_levels( $order );
+
+	// Ensure stock is marked as "reduced" in case payment complete or other stock actions are called.
+	$order->get_data_store()->set_stock_reduced( $order_id, false );
+}
+add_action( 'woocommerce_order_status_cancelled', 'wc_maybe_increase_stock_levels' );
+
+/**
+ * Reduce stock levels for items within an order, if stock has not already been reduced for the items.
  *
  * @since 3.0.0
  * @param int|WC_Order $order_id Order ID or order instance.
@@ -98,48 +143,120 @@ function wc_reduce_stock_levels( $order_id ) {
 	} else {
 		$order = wc_get_order( $order_id );
 	}
-	if ( 'yes' === get_option( 'woocommerce_manage_stock' ) && $order && apply_filters( 'woocommerce_can_reduce_order_stock', true, $order ) && count( $order->get_items() ) > 0 ) {
-		foreach ( $order->get_items() as $item ) {
-			if ( ! $item->is_type( 'line_item' ) ) {
-				continue;
-			}
 
-			$product = $item->get_product();
+	// We need an order, and a store with stock management to continue.
+	if ( ! $order || 'yes' !== get_option( 'woocommerce_manage_stock' ) || ! apply_filters( 'woocommerce_can_reduce_order_stock', true, $order ) ) {
+		return;
+	}
 
-			if ( $product && $product->managing_stock() ) {
-				$qty       = apply_filters( 'woocommerce_order_item_quantity', $item->get_quantity(), $order, $item );
-				$item_name = $product->get_formatted_name();
-				$new_stock = wc_update_product_stock( $product, $qty, 'decrease' );
+	$changes = array();
 
-				if ( ! is_wp_error( $new_stock ) ) {
-					/* translators: 1: item name 2: old stock quantity 3: new stock quantity */
-					$order->add_order_note( sprintf( __( '%1$s stock reduced from %2$s to %3$s.', 'woocommerce' ), $item_name, $new_stock + $qty, $new_stock ) );
-
-					// Get the latest product data.
-					$product = wc_get_product( $product->get_id() );
-
-					if ( '' !== get_option( 'woocommerce_notify_no_stock_amount' ) && $new_stock <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-						do_action( 'woocommerce_no_stock', $product );
-					} elseif ( '' !== get_option( 'woocommerce_notify_low_stock_amount' ) && $new_stock <= get_option( 'woocommerce_notify_low_stock_amount' ) ) {
-						do_action( 'woocommerce_low_stock', $product );
-					}
-
-					if ( $new_stock < 0 ) {
-						do_action(
-							'woocommerce_product_on_backorder', array(
-								'product'  => $product,
-								'order_id' => $order_id,
-								'quantity' => $qty,
-							)
-						);
-					}
-				}
-			}
+	// Loop over all items.
+	foreach ( $order->get_items() as $item ) {
+		if ( ! $item->is_type( 'line_item' ) ) {
+			continue;
 		}
 
-		// Ensure stock is marked as "reduced" in case payment complete or other stock actions are called.
-		$order->get_data_store()->set_stock_reduced( $order_id, true );
+		// Only reduce stock once for each item.
+		$product            = $item->get_product();
+		$item_stock_reduced = $item->get_meta( 'reduced_stock', true );
 
-		do_action( 'woocommerce_reduce_order_stock', $order );
+		if ( $item_stock_reduced || ! $product || ! $product->managing_stock() ) {
+			continue;
+		}
+
+		$qty       = apply_filters( 'woocommerce_order_item_quantity', $item->get_quantity(), $order, $item );
+		$item_name = $product->get_formatted_name();
+		$new_stock = wc_update_product_stock( $product, $qty, 'decrease' );
+
+		if ( is_wp_error( $new_stock ) ) {
+			/* translators: %s item name. */
+			$order->add_order_note( sprintf( __( 'Unable to reduce stock for item %s.', 'woocommerce' ), $item_name ) );
+			continue;
+		}
+
+		$item->add_meta_data( 'reduced_stock', $qty, true );
+		$item->save();
+
+		$changes[]        = $item_name . ' ' . ( $new_stock + $qty ) . '->' . $new_stock;
+		$no_stock_amount  = absint( get_option( 'woocommerce_notify_no_stock_amount', 0 ) );
+		$low_stock_amount = absint( get_option( 'woocommerce_notify_low_stock_amount', 2 ) );
+
+		if ( $new_stock <= $no_stock_amount ) {
+			do_action( 'woocommerce_no_stock', wc_get_product( $product->get_id() ) );
+		} elseif ( $new_stock <= $low_stock_amount ) {
+			do_action( 'woocommerce_low_stock', wc_get_product( $product->get_id() ) );
+		}
+
+		if ( $new_stock < 0 ) {
+			do_action(
+				'woocommerce_product_on_backorder', array(
+					'product'  => wc_get_product( $product->get_id() ),
+					'order_id' => $order_id,
+					'quantity' => $qty,
+				)
+			);
+		}
 	}
+
+	if ( $changes ) {
+		$order->add_order_note( __( 'Stock levels reduced:', 'woocommerce' ) . ' ' . implode( ', ', $changes ) );
+	}
+
+	do_action( 'woocommerce_reduce_order_stock', $order );
+}
+
+/**
+ * Increase stock levels for items within an order.
+ *
+ * @since 3.0.0
+ * @param int|WC_Order $order_id Order ID or order instance.
+ */
+function wc_increase_stock_levels( $order_id ) {
+	if ( is_a( $order_id, 'WC_Order' ) ) {
+		$order    = $order_id;
+		$order_id = $order->get_id();
+	} else {
+		$order = wc_get_order( $order_id );
+	}
+
+	// We need an order, and a store with stock management to continue.
+	if ( ! $order || 'yes' !== get_option( 'woocommerce_manage_stock' ) || ! apply_filters( 'woocommerce_can_restore_order_stock', true, $order ) ) {
+		return;
+	}
+
+	// Loop over all items.
+	foreach ( $order->get_items() as $item ) {
+		if ( ! $item->is_type( 'line_item' ) ) {
+			continue;
+		}
+
+		// Only reduce stock once for each item.
+		$product            = $item->get_product();
+		$item_stock_reduced = $item->get_meta( 'reduced_stock', true );
+
+		if ( ! $item_stock_reduced || ! $product || ! $product->managing_stock() ) {
+			continue;
+		}
+
+		$item_name = $product->get_formatted_name();
+		$new_stock = wc_update_product_stock( $product, $item_stock_reduced, 'increase' );
+
+		if ( is_wp_error( $new_stock ) ) {
+			/* translators: %s item name. */
+			$order->add_order_note( sprintf( __( 'Unable to restore stock for item %s.', 'woocommerce' ), $item_name ) );
+			continue;
+		}
+
+		$item->delete_meta_data( 'reduced_stock' );
+		$item->save();
+
+		$changes[] = $item_name . ' ' . ( $new_stock - $item_stock_reduced ) . '->' . $new_stock;
+	}
+
+	if ( $changes ) {
+		$order->add_order_note( __( 'Stock levels increased:', 'woocommerce' ) . ' ' . implode( ', ', $changes ) );
+	}
+
+	do_action( 'woocommerce_restore_order_stock', $order );
 }
