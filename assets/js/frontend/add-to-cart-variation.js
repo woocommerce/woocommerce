@@ -538,7 +538,7 @@
 			$product             = $form.closest( '.product' ),
 			$product_gallery     = $product.find( '.images' ),
 			reset_slide_position = false,
-			new_image_id = ( variation && variation.image_id ) ? variation.image_id : '';
+			new_image_id         = ( variation && variation.image_id ) ? variation.image_id : '';
 
 		if ( $form.attr( 'current-image' ) !== new_image_id ) {
 			reset_slide_position = true;
@@ -565,28 +565,41 @@
 			$product_link     = $product_img_wrap.find( 'a' ).eq( 0 );
 
 		if ( variation && variation.image && variation.image.src && variation.image.src.length > 1 ) {
-			$form.wc_variations_image_reset();
+			// See if the gallery has an image with the same original src as the image we want to switch to.
+			var galleryHasImage = $gallery_nav.find( 'li img[data-o_src="' + variation.image.gallery_thumbnail_src + '"]' ).length > 0;
 
-			if ( $gallery_nav.find( 'li img[src="' + variation.image.gallery_thumbnail_src + '"]' ).length > 0 ) {
-				$gallery_nav.find( 'li img[src="' + variation.image.gallery_thumbnail_src + '"]' ).trigger( 'click' );
-				$form.attr( 'current-image', variation.image_id );
-				return;
-			} else {
-				$product_img.wc_set_variation_attr( 'src', variation.image.src );
-				$product_img.wc_set_variation_attr( 'height', variation.image.src_h );
-				$product_img.wc_set_variation_attr( 'width', variation.image.src_w );
-				$product_img.wc_set_variation_attr( 'srcset', variation.image.srcset );
-				$product_img.wc_set_variation_attr( 'sizes', variation.image.sizes );
-				$product_img.wc_set_variation_attr( 'title', variation.image.title );
-				$product_img.wc_set_variation_attr( 'alt', variation.image.alt );
-				$product_img.wc_set_variation_attr( 'data-src', variation.image.full_src );
-				$product_img.wc_set_variation_attr( 'data-large_image', variation.image.full_src );
-				$product_img.wc_set_variation_attr( 'data-large_image_width', variation.image.full_src_w );
-				$product_img.wc_set_variation_attr( 'data-large_image_height', variation.image.full_src_h );
-				$product_img_wrap.wc_set_variation_attr( 'data-thumb', variation.image.src );
-				$gallery_img.wc_set_variation_attr( 'src', variation.image.gallery_thumbnail_src );
-				$product_link.wc_set_variation_attr( 'href', variation.image.full_src );
+			// If the gallery has the image, reset the images. We'll scroll to the correct one.
+			if ( galleryHasImage ) {
+				$form.wc_variations_image_reset();
 			}
+
+			// See if gallery has a matching image we can slide to.
+			var slideToImage = $gallery_nav.find( 'li img[src="' + variation.image.gallery_thumbnail_src + '"]' );
+
+			if ( slideToImage.length > 0 ) {
+				slideToImage.trigger( 'click' );
+				$form.attr( 'current-image', variation.image_id );
+				window.setTimeout( function() {
+					$( window ).trigger( 'resize' );
+					$product_gallery.trigger( 'woocommerce_gallery_init_zoom' );
+				}, 20 );
+				return;
+			}
+
+			$product_img.wc_set_variation_attr( 'src', variation.image.src );
+			$product_img.wc_set_variation_attr( 'height', variation.image.src_h );
+			$product_img.wc_set_variation_attr( 'width', variation.image.src_w );
+			$product_img.wc_set_variation_attr( 'srcset', variation.image.srcset );
+			$product_img.wc_set_variation_attr( 'sizes', variation.image.sizes );
+			$product_img.wc_set_variation_attr( 'title', variation.image.title );
+			$product_img.wc_set_variation_attr( 'alt', variation.image.alt );
+			$product_img.wc_set_variation_attr( 'data-src', variation.image.full_src );
+			$product_img.wc_set_variation_attr( 'data-large_image', variation.image.full_src );
+			$product_img.wc_set_variation_attr( 'data-large_image_width', variation.image.full_src_w );
+			$product_img.wc_set_variation_attr( 'data-large_image_height', variation.image.full_src_h );
+			$product_img_wrap.wc_set_variation_attr( 'data-thumb', variation.image.src );
+			$gallery_img.wc_set_variation_attr( 'src', variation.image.gallery_thumbnail_src );
+			$product_link.wc_set_variation_attr( 'href', variation.image.full_src );
 		} else {
 			$form.wc_variations_image_reset();
 		}

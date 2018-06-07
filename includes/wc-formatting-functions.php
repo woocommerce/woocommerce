@@ -900,6 +900,9 @@ function wc_format_postcode( $postcode, $country ) {
 		case 'GB':
 			$postcode = trim( substr_replace( $postcode, ' ', -3, 0 ) );
 			break;
+		case 'IE':
+			$postcode = trim( substr_replace( $postcode, ' ', 3, 0 ) );
+			break;
 		case 'BR':
 		case 'PL':
 			$postcode = substr_replace( $postcode, '-', -3, 0 );

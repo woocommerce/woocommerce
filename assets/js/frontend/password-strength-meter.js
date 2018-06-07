@@ -29,7 +29,7 @@
 
 			strength = wc_password_strength_meter.checkPasswordStrength( wrapper, field );
 
-			if ( fieldValue.length > 0 && strength < wc_password_strength_meter_params.min_password_strength && ! wrapper.is( 'form.checkout' ) ) {
+			if ( fieldValue.length > 0 && strength < wc_password_strength_meter_params.min_password_strength && ! wrapper.is( 'form.checkout' ) && -1 !== strength ) {
 				submit.attr( 'disabled', 'disabled' ).addClass( 'disabled' );
 			} else {
 				submit.removeAttr( 'disabled', 'disabled' ).removeClass( 'disabled' );

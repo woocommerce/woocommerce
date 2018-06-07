@@ -54,9 +54,11 @@ abstract class WC_Abstract_Privacy {
 	protected $erase_priority;
 
 	/**
-	 * Constructor
+	 * WC_Abstract_Privacy Constructor.
 	 *
-	 * @param string $name Plugin identifier.
+	 * @param string $name            Plugin identifier.
+	 * @param int    $export_priority Export priority.
+	 * @param int    $erase_priority  Erase priority.
 	 */
 	public function __construct( $name = '', $export_priority = 5, $erase_priority = 10 ) {
 		$this->name = $name;
@@ -127,9 +129,11 @@ abstract class WC_Abstract_Privacy {
 	/**
 	 * Add exporter to list of exporters.
 	 *
-	 * @param string $id       ID of the Exporter.
-	 * @param string $name     Exporter name.
-	 * @param string $callback Exporter callback.
+	 * @param string       $id       ID of the Exporter.
+	 * @param string       $name     Exporter name.
+	 * @param string|array $callback Exporter callback.
+	 *
+	 * @return array
 	 */
 	public function add_exporter( $id, $name, $callback ) {
 		$this->exporters[ $id ] = array(
@@ -142,9 +146,11 @@ abstract class WC_Abstract_Privacy {
 	/**
 	 * Add eraser to list of erasers.
 	 *
-	 * @param string $id       ID of the Eraser.
-	 * @param string $name     Exporter name.
-	 * @param string $callback Exporter callback.
+	 * @param string       $id       ID of the Eraser.
+	 * @param string       $name     Exporter name.
+	 * @param string|array $callback Exporter callback.
+	 *
+	 * @return array
 	 */
 	public function add_eraser( $id, $name, $callback ) {
 		$this->erasers[ $id ] = array(

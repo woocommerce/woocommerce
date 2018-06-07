@@ -150,7 +150,6 @@ function wc_update_order( $args ) {
  *
  * WC_TEMPLATE_DEBUG_MODE will prevent overrides in themes from taking priority.
  *
- * @access public
  * @param mixed  $slug Template slug.
  * @param string $name Template name (default: '').
  */
@@ -183,7 +182,6 @@ function wc_get_template_part( $slug, $name = '' ) {
 /**
  * Get other templates (e.g. product attributes) passing attributes and including the file.
  *
- * @access public
  * @param string $template_name Template name.
  * @param array  $args          Arguments. (default: array).
  * @param string $template_path Template path. (default: '').
@@ -239,7 +237,6 @@ function wc_get_template_html( $template_name, $args = array(), $template_path =
  * yourtheme/$template_name
  * $default_path/$template_name
  *
- * @access public
  * @param string $template_name Template name.
  * @param string $template_path Template path. (default: '').
  * @param string $default_path  Default path. (default: '').
