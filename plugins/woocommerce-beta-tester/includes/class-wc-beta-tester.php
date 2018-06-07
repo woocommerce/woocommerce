@@ -374,12 +374,10 @@ class WC_Beta_Tester {
 			return $res;
 		}
 
-		if ( ! isset( $res->sections['description'] ) ) {
-			return $res;
+		if ( isset( $res->sections['description'] ) ) {
+			$res->sections['description'] = __( '<h1><span>&#9888;</span>This is a pre-release<span>&#9888;</span></h1>', 'woocommerce-beta-tester' )
+				. $res->sections['description'];
 		}
-
-		$res->sections['description'] = __( '<h1><span>&#9888;</span>This is a pre-release<span>&#9888;</span></h1>', 'woocommerce-beta-tester' )
-			. $res->sections['description'];
 
 		$res->sections['pre-release_information'] = WC_Beta_Tester::instance()->get_version_information( $res->version );
 		$res->sections['pre-release_information'] .= sprintf(
