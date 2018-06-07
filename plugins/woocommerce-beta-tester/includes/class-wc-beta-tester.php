@@ -73,6 +73,8 @@ class WC_Beta_Tester {
 	 * Constructor
 	 */
 	public function __construct() {
+		$this->plugin_name = plugin_basename( WC_BETA_TESTER_FILE );
+
 		$this->config = array(
 			'plugin_file'        => 'woocommerce/woocommerce.php',
 			'slug'               => 'woocommerce',
@@ -87,6 +89,8 @@ class WC_Beta_Tester {
 		add_filter( 'plugins_api', array( $this, 'get_plugin_info' ), 10, 3 );
 		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
 		add_filter( 'auto_update_plugin', 'auto_update_woocommerce', 100, 2 );
+		add_filter( 'plugins_api_result', array( $this, 'plugin_api_prerelease_info' ), 10, 3 );
+		add_filter( "plugin_action_links_{$this->plugin_name}", array( $this, 'plugin_action_links' ), 10, 1 );
 
 		$this->includes();
 	}
@@ -124,6 +128,16 @@ class WC_Beta_Tester {
 	}
 
 	/**
+	 * Checks if a given version is a pre-release.
+	 *
+	 * @param string $version
+	 * @return bool
+	 */
+	public function is_prerelease( $version ) {
+		return preg_match( '/(.*)?-(beta|rc)(.*)/', $version );
+	}
+
+	/**
 	 * Get New Version from WPorg
 	 *
 	 * @since 1.0
@@ -140,14 +154,14 @@ class WC_Beta_Tester {
 			$versions       = (array) $data->versions;
 
 			foreach ( $versions as $version => $download_url ) {
-				if ( preg_match( '/(.*)?-(beta|rc)(.*)/', $version ) ) {
+				if ( $this->is_prerelease( $version ) ) {
 					$tagged_version = $version;
 				}
 			}
 
 			// Refresh every 6 hours.
 			if ( ! empty( $tagged_version ) ) {
-				set_site_transient( md5( $this->config['slug'] ) . '_latest_tag', $tagged_version, 60 * 60 * 6 );
+				set_site_transient( md5( $this->config['slug'] ) . '_latest_tag', $tagged_version, HOUR_IN_SECONDS * 6 );
 			}
 		}
 
@@ -177,7 +191,7 @@ class WC_Beta_Tester {
 			$wporg_data = json_decode( $wporg_data['body'] );
 
 			// Refresh every 6 hours.
-			set_site_transient( md5( $this->config['slug'] ) . '_wporg_data', $wporg_data, 60 * 60 * 6 );
+			set_site_transient( md5( $this->config['slug'] ) . '_wporg_data', $wporg_data, HOUR_IN_SECONDS * 6 );
 		}
 
 		// Store the data in this class instance for future calls.
@@ -345,6 +359,40 @@ class WC_Beta_Tester {
 	}
 
 	/**
+	 * Add additional information to the Plugin Information version details modal.
+	 *
+	 * @param object|WP_Error $res    Response object or WP_Error.
+	 * @param string          $action The type of information being requested from the Plugin Installation API.
+	 * @param object          $args   Plugin API arguments.
+	 * @return object|WP_Error
+	 */
+	public function plugin_api_prerelease_info( $res, $action, $args ) {
+		// We only care about the plugin information action for woocommerce
+		if ( ! isset( $args->slug ) || 'woocommerce' !== $args->slug || 'plugin_information' !== $action ) {
+			return $res;
+		}
+
+		// Not a pre-release, no need to do anything.
+		if ( ! $this->is_prerelease( $res->version ) ) {
+			return $res;
+		}
+
+		if ( isset( $res->sections['description'] ) ) {
+			$res->sections['description'] = __( '<h1><span>&#9888;</span>This is a pre-release<span>&#9888;</span></h1>', 'woocommerce-beta-tester' )
+				. $res->sections['description'];
+		}
+
+		$res->sections['pre-release_information'] = make_clickable( wpautop( $this->get_version_information( $res->version ) ) );
+		$res->sections['pre-release_information'] .= sprintf(
+			/* translators: 1: GitHub pre-release URL */
+			__( '<p><a target="_blank" href="%s">Read more on GitHub</a></p>' ),
+			'https://github.com/woocommerce/woocommerce/releases/tag/' . $res->version
+		);
+
+		return $res;
+	}
+
+	/**
 	 * Enable auto updates for WooCommerce.
 	 *
 	 * @param bool   $update Should this autoupdate.
@@ -475,5 +523,28 @@ class WC_Beta_Tester {
 		}
 
 		return array_keys( $releases );
+	}
+
+	/**
+	 * Show action links on the plugin screen.
+	 *
+	 * @param   mixed $links Plugin Action links.
+	 * @return  array
+	 */
+	public function plugin_action_links( $links ) {
+		$action_links = array(
+			'switch-version' => sprintf(
+				'<a href="%s">%s</a>',
+				esc_url( admin_url( 'tools.php?page=wc-beta-tester-version-picker' ) ),
+				esc_html__( 'Switch versions', 'woocommerce-beta-tester' )
+			),
+			'settings'      => sprintf(
+				'<a href="%s">%s</a>',
+				esc_url( admin_url( 'plugins.php?page=wc-beta-tester' ) ),
+				esc_html__( 'Settings', 'woocommerce-beta-tester' )
+			),
+		);
+
+		return array_merge( $action_links, $links );
 	}
 }
