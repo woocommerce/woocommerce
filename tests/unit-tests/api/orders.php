@@ -116,7 +116,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Tests getting an order with an invalid ID.
-	 * @since 3.4.3
+	 * @since 3.5.0
 	 */
 	public function test_get_item_refund_id() {
 		wp_set_current_user( $this->user );
