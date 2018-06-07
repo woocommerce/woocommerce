@@ -129,6 +129,7 @@ function wc_maybe_increase_stock_levels( $order_id ) {
 	$order->get_data_store()->set_stock_reduced( $order_id, false );
 }
 add_action( 'woocommerce_order_status_cancelled', 'wc_maybe_increase_stock_levels' );
+add_action( 'woocommerce_order_status_pending', 'wc_maybe_increase_stock_levels' );
 
 /**
  * Reduce stock levels for items within an order, if stock has not already been reduced for the items.
