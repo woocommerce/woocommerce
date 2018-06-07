@@ -332,7 +332,9 @@ class WC_Meta_Box_Order_Data {
 
 								$field_name = 'billing_' . $key;
 
-								if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
+								if ( isset( $field['value'] ) ) {
+									$field_value = $field['value'];
+								} elseif ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
 									$field_value = $order->{"get_$field_name"}( 'edit' );
 								} else {
 									$field_value = $order->get_meta( '_' . $field_name );
@@ -365,10 +367,12 @@ class WC_Meta_Box_Order_Data {
 
 								$field_name = 'billing_' . $key;
 
-								if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
-									$field['value'] = $order->{"get_$field_name"}( 'edit' );
-								} else {
-									$field['value'] = $order->get_meta( '_' . $field_name );
+								if ( ! isset( $field['value'] ) ) {
+									if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
+										$field['value'] = $order->{"get_$field_name"}( 'edit' );
+									} else {
+										$field['value'] = $order->get_meta( '_' . $field_name );
+									}
 								}
 
 								switch ( $field['type'] ) {
