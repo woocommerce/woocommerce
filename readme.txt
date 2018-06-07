@@ -165,6 +165,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Enhancement - Payment method table reordering accessibility. #19844
 * Enhancement - Log errors from transaction emails with logger. #20203
 * Fix - Check billing email is posted before using in WC_Cart::check_customer_coupons. #20180
+* Fix - Shipping postcode formatting when only posting a billing address. #20330
 * Tweak - Show empty terms in admin product category filter dropdown. #20324
 * Tweak - Don't force default token gateway active by default. #20125
 * Performance - Exclude frontend include from REST API calls. #20000
@@ -177,6 +178,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Introduced `woocommerce_shipping_calculator_enable_country` filter. #20046
 * Dev - Pass product id to backorder notification. #20416
 * Localization - Updated IT provinces. #20286
+* Localization - Eircode validation. #20330
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
