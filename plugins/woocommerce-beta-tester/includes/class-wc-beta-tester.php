@@ -472,7 +472,7 @@ class WC_Beta_Tester {
 			$releases = array_filter( $releases, array( __CLASS__, 'is_in_rc_channel' ), ARRAY_FILTER_USE_KEY );
 		} elseif ( 'stable' === $channel ) {
 			$releases = array_filter( $releases, array( __CLASS__, 'is_in_stable_channel' ), ARRAY_FILTER_USE_KEY );
-		};
+		}
 
 		return array_keys( $releases );
 	}

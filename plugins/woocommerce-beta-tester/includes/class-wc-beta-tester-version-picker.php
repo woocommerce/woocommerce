@@ -68,7 +68,7 @@ class WC_Beta_Tester_Version_Picker {
 
 			// Is this the current version?
 			if ( $tag_version === $this->current_version ) {
-				$versions_html .= '<span class="wcbt-current-version">' . esc_html__( 'Installed Version', 'woocommerce-beta-tester' ) . '</span>';
+				$versions_html .= '<span class="wcbt-current-version">' . esc_html__( '&nbsp;Installed Version', 'woocommerce-beta-tester' ) . '</span>';
 			}
 
 			$versions_html .= '</label>';
@@ -140,12 +140,11 @@ class WC_Beta_Tester_Version_Picker {
 										<div class="wcbt-notice">
 											<p><?php esc_html_e( 'Notice: We strongly recommend you perform the test on a staging site and create a complete backup of your WordPress files and database prior to performing a version switch. We are not responsible for any misuse, deletions, white screens, fatal errors, or any other issue arising from using this plugin.', 'woocommerce-beta-tester' ); ?></p>
 										</div>
-
+									</article>
+									<footer>
 										<input type="submit" value="<?php esc_attr_e( 'Switch version', 'woocommerce-beta-tester' ); ?>" class="button-primary wcbt-go" id="wcbt-submit-version-switch" />
 										<a href="#" class="modal-close modal-close-link"><?php esc_attr_e( 'Cancel', 'woocommerce-beta-tester' ); ?></a>
-
-									</article>
-
+									</footer>
 								</section>
 							</div>
 						</div>

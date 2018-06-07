@@ -1,6 +1,5 @@
 jQuery(function( $ ) {
 
-	//var instance = undefined;
 	/**
 	 * Version information
 	 */
