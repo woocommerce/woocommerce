@@ -168,6 +168,7 @@ class WC_Privacy_Exporters {
 	 *
 	 * @since 3.4.0
 	 * @param WP_User $user user object.
+	 * @throws Exception If customer cannot be read/found and $data is set to WC_Customer class.
 	 * @return array
 	 */
 	protected static function get_customer_personal_data( $user ) {
