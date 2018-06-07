@@ -138,7 +138,7 @@
 							var $tr = view.$el.find( 'tr[data-id="' + rowData.instance_id + '"]');
 
 							if ( ! rowData.has_settings ) {
-								$tr.find( '.wc-shipping-zone-method-title a').replaceWith( $tr.find( '.wc-shipping-zone-method-title' ).text() );
+								$tr.find(".wc-shipping-zone-method-title").text(t.find(".wc-shipping-zone-method-title > a").text() );
 								$tr.find( '.wc-shipping-zone-method-settings' ).remove();
 							}
 						} );
