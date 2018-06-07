@@ -99,6 +99,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tr>
 	</tbody>
 </table>
+
+<?php do_action( 'woocommerce_shipping_zone_after_methods_table' ); ?>
+
 <p class="submit">
 	<button type="submit" name="submit" id="submit" class="button button-primary button-large wc-shipping-zone-method-save" value="<?php esc_attr_e( 'Save changes', 'woocommerce' ); ?>" disabled><?php esc_html_e( 'Save changes', 'woocommerce' ); ?></button>
 </p>

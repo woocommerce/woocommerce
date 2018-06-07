@@ -68,14 +68,14 @@ test.describe( 'Add New Product Page', function() {
 		attr1.toggle();
 
 		const attr2 = panelAttributes.add();
-		assert.eventually.ok( attr1.displayed() );
+		assert.eventually.ok( attr2.displayed() );
 		attr2.setName( 'attr #2' );
 		attr2.checkVisibleOnTheProductPage();
 		attr2.checkUsedForVariations();
 		attr2.setValue( 'val1 | val2' );
 
 		const attr3 = panelAttributes.add();
-		assert.eventually.ok( attr1.displayed() );
+		assert.eventually.ok( attr3.displayed() );
 		attr3.setName( 'attr #3' );
 		attr3.checkVisibleOnTheProductPage();
 		attr3.checkUsedForVariations();

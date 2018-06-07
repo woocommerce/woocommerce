@@ -5,19 +5,33 @@ jQuery( function( $ ) {
 
 	var table_selector   = 'table.wp-list-table',
 		item_selector    = 'tbody tr:not(.inline-edit-row)',
-		term_id_selector = '.column-handle input[name="term_id"]';
+		term_id_selector = '.column-handle input[name="term_id"]',
+		column_handle    = '<td class="column-handle"></td>';
 
 	if ( 0 === $( table_selector ).find( '.column-handle' ).length ) {
-		$( table_selector ).find( 'tr:not(.inline-edit-row)' ).append( '<td class="column-handle"></td>' );
+		$( table_selector ).find( 'tr:not(.inline-edit-row)' ).append( column_handle );
 
 		term_id_selector = '.check-column input';
 	}
 
 	$( table_selector ).find( '.column-handle' ).show();
 
+	$.wc_add_missing_sort_handles = function() {
+		var all_table_rows = $( table_selector ).find('tbody > tr');
+		var rows_with_handle = $( table_selector ).find('tbody > tr > td.column-handle').parent();
+		if ( all_table_rows.length !== rows_with_handle.length ) {
+			all_table_rows.each(function(index, elem){
+				if ( ! rows_with_handle.is( elem ) ) {
+					$( elem ).append( column_handle );
+				}
+			});
+		}
+		$( table_selector ).find( '.column-handle' ).show();
+	};
+
 	$( document ).ajaxComplete( function( event, request, options ) {
-		if ( request && 4 === request.readyState && 200 === request.status && options.data && 0 <= options.data.indexOf( '_inline_edit' ) ) {
-			$( table_selector ).find( '.column-handle' ).show();
+		if ( request && 4 === request.readyState && 200 === request.status && options.data && ( 0 <= options.data.indexOf( '_inline_edit' ) || 0 <= options.data.indexOf( 'add-tag' ) ) ) {
+			$.wc_add_missing_sort_handles();
 			$( document.body ).trigger( 'init_tooltips' );
 		}
 	} );

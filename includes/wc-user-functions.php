@@ -73,13 +73,14 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 		}
 
 		// Handle password creation.
+		$password_generated = false;
 		if ( 'yes' === get_option( 'woocommerce_registration_generate_password' ) && empty( $password ) ) {
 			$password           = wp_generate_password();
 			$password_generated = true;
-		} elseif ( empty( $password ) ) {
+		}
+
+		if ( empty( $password ) ) {
 			return new WP_Error( 'registration-error-missing-password', __( 'Please enter an account password.', 'woocommerce' ) );
-		} else {
-			$password_generated = false;
 		}
 
 		// Use WP_Error to handle registration errors.
@@ -519,13 +520,7 @@ add_action( 'deleted_user', 'wc_reset_order_customer_id_on_deleted_user' );
  */
 function wc_review_is_from_verified_owner( $comment_id ) {
 	$verified = get_comment_meta( $comment_id, 'verified', true );
-
-	// If no "verified" meta is present, generate it (if this is a product review).
-	if ( '' === $verified ) {
-		$verified = WC_Comments::add_comment_purchase_verification( $comment_id );
-	}
-
-	return (bool) $verified;
+	return '' === $verified ? WC_Comments::add_comment_purchase_verification( $comment_id ) : (bool) $verified;
 }
 
 /**
@@ -571,16 +566,10 @@ add_action( 'profile_update', 'wc_update_profile_last_update_time', 10, 2 );
  */
 function wc_meta_update_last_update_time( $meta_id, $user_id, $meta_key, $_meta_value ) {
 	$keys_to_track = apply_filters( 'woocommerce_user_last_update_fields', array( 'first_name', 'last_name' ) );
-	$update_time   = false;
-	if ( in_array( $meta_key, $keys_to_track, true ) ) {
-		$update_time = true;
-	}
-	if ( 'billing_' === substr( $meta_key, 0, 8 ) ) {
-		$update_time = true;
-	}
-	if ( 'shipping_' === substr( $meta_key, 0, 9 ) ) {
-		$update_time = true;
-	}
+
+	$update_time = in_array( $meta_key, $keys_to_track, true ) ? true : false;
+	$update_time = 'billing_' === substr( $meta_key, 0, 8 ) ? true : $update_time;
+	$update_time = 'shipping_' === substr( $meta_key, 0, 9 ) ? true : $update_time;
 
 	if ( $update_time ) {
 		wc_set_user_last_update_time( $user_id );
@@ -668,3 +657,57 @@ function wc_delete_user_data( $user_id ) {
 	}
 }
 add_action( 'delete_user', 'wc_delete_user_data' );
+
+/**
+ * Store user agents. Used for tracker.
+ *
+ * @since 3.0.0
+ * @param string     $user_login User login.
+ * @param int|object $user       User.
+ */
+function wc_maybe_store_user_agent( $user_login, $user ) {
+	if ( 'yes' === get_option( 'woocommerce_allow_tracking', 'no' ) && user_can( $user, 'manage_woocommerce' ) ) {
+		$admin_user_agents   = array_filter( (array) get_option( 'woocommerce_tracker_ua', array() ) );
+		$admin_user_agents[] = wc_get_user_agent();
+		update_option( 'woocommerce_tracker_ua', array_unique( $admin_user_agents ) );
+	}
+}
+add_action( 'wp_login', 'wc_maybe_store_user_agent', 10, 2 );
+
+/**
+ * Update logic triggered on login.
+ *
+ * @since 3.4.0
+ * @param string $user_login User login.
+ * @param object $user       User.
+ */
+function wc_user_logged_in( $user_login, $user ) {
+	wc_update_user_last_active( $user->ID );
+}
+add_action( 'wp_login', 'wc_user_logged_in', 10, 2 );
+
+/**
+ * Update when the user was last active.
+ *
+ * @since 3.4.0
+ */
+function wc_current_user_is_active() {
+	if ( ! is_user_logged_in() ) {
+		return;
+	}
+	wc_update_user_last_active( get_current_user_id() );
+}
+add_action( 'wp', 'wc_current_user_is_active', 10 );
+
+/**
+ * Set the user last active timestamp to now.
+ *
+ * @since 3.4.0
+ * @param int $user_id User ID to mark active.
+ */
+function wc_update_user_last_active( $user_id ) {
+	if ( ! $user_id ) {
+		return;
+	}
+	update_user_meta( $user_id, 'wc_last_active', (string) strtotime( date( 'Y-m-d', current_time( 'timestamp', true ) ) ) );
+}

@@ -167,7 +167,7 @@ class WC_Frontend_Scripts {
 			'flexslider'                 => array(
 				'src'     => self::get_asset_url( 'assets/js/flexslider/jquery.flexslider' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
-				'version' => '2.7.0',
+				'version' => '2.7.1',
 			),
 			'js-cookie'                  => array(
 				'src'     => self::get_asset_url( 'assets/js/js-cookie/js.cookie' . $suffix . '.js' ),
@@ -292,7 +292,7 @@ class WC_Frontend_Scripts {
 			'zoom'                       => array(
 				'src'     => self::get_asset_url( 'assets/js/zoom/jquery.zoom' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
-				'version' => '1.7.15',
+				'version' => '1.7.21',
 			),
 		);
 		foreach ( $register_scripts as $name => $props ) {
@@ -535,8 +535,8 @@ class WC_Frontend_Scripts {
 				$params = array(
 					'ajax_url'      => WC()->ajax_url(),
 					'wc_ajax_url'   => WC_AJAX::get_endpoint( '%%endpoint%%' ),
-					'cart_hash_key' => apply_filters( 'woocommerce_cart_hash_key', 'wc_cart_hash_' . md5( get_current_blog_id() . '_' . get_site_url( get_current_blog_id(), '/' ) ) ),
-					'fragment_name' => apply_filters( 'woocommerce_cart_fragment_name', 'wc_fragments_' . md5( get_current_blog_id() . '_' . get_site_url( get_current_blog_id(), '/' ) ) ),
+					'cart_hash_key' => apply_filters( 'woocommerce_cart_hash_key', 'wc_cart_hash_' . md5( get_current_blog_id() . '_' . get_site_url( get_current_blog_id(), '/' ) . get_template() ) ),
+					'fragment_name' => apply_filters( 'woocommerce_cart_fragment_name', 'wc_fragments_' . md5( get_current_blog_id() . '_' . get_site_url( get_current_blog_id(), '/' ) . get_template() ) ),
 				);
 				break;
 			case 'wc-add-to-cart':

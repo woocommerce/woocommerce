@@ -293,6 +293,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			wc_product_dropdown_categories(
 				array(
 					'option_select_text' => __( 'Filter by category', 'woocommerce' ),
+					'hide_empty'         => 0,
 				)
 			);
 		} else {
@@ -340,17 +341,11 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			if ( 'simple' === $term->name ) {
 
 				$output .= '<option value="downloadable" ';
-
-				if ( isset( $wp_query->query['product_type'] ) ) {
-					$output .= selected( 'downloadable', $current_product_type, false );
-				}
-
+				$output .= selected( 'downloadable', $current_product_type, false );
 				$output .= '> ' . ( is_rtl() ? '&larr;' : '&rarr;' ) . ' ' . __( 'Downloadable', 'woocommerce' ) . '</option>';
 
 				$output .= '<option value="virtual" ';
-
 				$output .= selected( 'virtual', $current_product_type, false );
-
 				$output .= '> ' . ( is_rtl() ? '&larr;' : '&rarr;' ) . ' ' . __( 'Virtual', 'woocommerce' ) . '</option>';
 			}
 		}

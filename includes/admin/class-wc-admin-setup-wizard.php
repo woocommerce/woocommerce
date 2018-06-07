@@ -552,7 +552,7 @@ class WC_Admin_Setup_Wizard {
 
 		if ( $tracking ) {
 			update_option( 'woocommerce_allow_tracking', 'yes' );
-			WC_Tracker::send_tracking_data( true );
+			wp_schedule_single_event( time() + 10, 'woocommerce_tracker_send_event', array( true ) );
 		} else {
 			update_option( 'woocommerce_allow_tracking', 'no' );
 		}
@@ -692,6 +692,40 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
+	 * Retrieve info for missing WooCommerce Services and/or Jetpack plugin.
+	 *
+	 * @return array
+	 */
+	protected function get_wcs_requisite_plugins() {
+		$plugins = array();
+		if ( ! is_plugin_active( 'woocommerce-services/woocommerce-services.php' ) && ! get_option( 'woocommerce_setup_background_installing_woocommerce-services' ) ) {
+			$plugins[] = array(
+				'name' => __( 'WooCommerce Services', 'woocommerce' ),
+				'slug' => 'woocommerce-services',
+			);
+		}
+		if ( ! is_plugin_active( 'jetpack/jetpack.php' ) && ! get_option( 'woocommerce_setup_background_installing_jetpack' ) ) {
+			$plugins[] = array(
+				'name' => __( 'Jetpack', 'woocommerce' ),
+				'slug' => 'jetpack',
+			);
+		}
+		return $plugins;
+	}
+
+	/**
+	 * Plugin install info message markup with heading.
+	 */
+	public function plugin_install_info() {
+		?>
+		<span class="plugin-install-info">
+			<span class="plugin-install-info-label"><?php esc_html_e( 'The following plugins will be installed and activated for you:', 'woocommerce' ); ?></span>
+			<span class="plugin-install-info-list"></span>
+		</span>
+		<?php
+	}
+
+	/**
 	 * Get the WCS shipping carrier for a given country code.
 	 *
 	 * Can also be used to determine if WCS supports a given country.
@@ -722,7 +756,7 @@ class WC_Admin_Setup_Wizard {
 		$shipping_methods = array(
 			'live_rates'    => array(
 				'name'        => __( 'Live Rates', 'woocommerce' ),
-				'description' => __( 'WooCommerce Services and Jetpack will be installed and activated for you.', 'woocommerce' ),
+				'description' => __( 'Powered by WooCommerce Services and Jetpack.', 'woocommerce' ),
 			),
 			'flat_rate'     => array(
 				'name'        => __( 'Flat Rate', 'woocommerce' ),
@@ -765,7 +799,12 @@ class WC_Admin_Setup_Wizard {
 		?>
 		<div class="wc-wizard-shipping-method-select">
 			<div class="wc-wizard-shipping-method-dropdown">
-				<select id="<?php echo esc_attr( "{$input_prefix}[method]" ); ?>" name="<?php echo esc_attr( "{$input_prefix}[method]" ); ?>" class="method wc-enhanced-select">
+				<select
+					id="<?php echo esc_attr( "{$input_prefix}[method]" ); ?>"
+					name="<?php echo esc_attr( "{$input_prefix}[method]" ); ?>"
+					class="method wc-enhanced-select"
+					data-plugins="<?php echo esc_attr( wp_json_encode( $this->get_wcs_requisite_plugins() ) ); ?>"
+				>
 				<?php foreach ( $shipping_methods as $method_id => $method ) : ?>
 					<option value="<?php echo esc_attr( $method_id ); ?>" <?php selected( $selected, $method_id ); ?>><?php echo esc_html( $method['name'] ); ?></option>
 				<?php endforeach; ?>
@@ -861,7 +900,7 @@ class WC_Admin_Setup_Wizard {
 						</div>
 						<div class="wc-wizard-service-enable">
 							<span class="wc-wizard-service-toggle">
-								<input id="shipping_zones[domestic][enabled]" type="checkbox" name="shipping_zones[domestic][enabled]" value="yes" checked="checked" class="wc-wizard-shipping-method-enable" />
+								<input id="shipping_zones[domestic][enabled]" type="checkbox" name="shipping_zones[domestic][enabled]" value="yes" checked="checked" class="wc-wizard-shipping-method-enable" data-plugins="true" />
 								<label for="shipping_zones[domestic][enabled]">
 							</span>
 						</div>
@@ -875,7 +914,7 @@ class WC_Admin_Setup_Wizard {
 						</div>
 						<div class="wc-wizard-service-enable">
 							<span class="wc-wizard-service-toggle">
-								<input id="shipping_zones[intl][enabled]" type="checkbox" name="shipping_zones[intl][enabled]" value="yes" checked="checked" class="wc-wizard-shipping-method-enable"/>
+								<input id="shipping_zones[intl][enabled]" type="checkbox" name="shipping_zones[intl][enabled]" value="yes" checked="checked" class="wc-wizard-shipping-method-enable" data-plugins="true" />
 								<label for="shipping_zones[intl][enabled]">
 							</span>
 						</div>
@@ -928,6 +967,7 @@ class WC_Admin_Setup_Wizard {
 			</div>
 
 			<p class="wc-setup-actions step">
+				<?php $this->plugin_install_info(); ?>
 				<button type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step"><?php esc_html_e( 'Continue', 'woocommerce' ); ?></button>
 				<?php wp_nonce_field( 'wc-setup' ); ?>
 			</p>
@@ -1076,7 +1116,46 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Is Klarna Checkout country supported
+	 * Is PayPal currency supported.
+	 *
+	 * @param string $currency Currency code.
+	 * @return boolean
+	 */
+	protected function is_paypal_supported_currency( $currency ) {
+		$supported_currencies = array(
+			'AUD',
+			'BRL',
+			'CAD',
+			'MXN',
+			'NZD',
+			'HKD',
+			'SGD',
+			'USD',
+			'EUR',
+			'JPY',
+			'TRY',
+			'NOK',
+			'CZK',
+			'DKK',
+			'HUF',
+			'ILS',
+			'MYR',
+			'PHP',
+			'PLN',
+			'SEK',
+			'CHF',
+			'TWD',
+			'THB',
+			'GBP',
+			'RMB',
+			'RUB',
+			'INR',
+		);
+		return in_array( $currency, $supported_currencies, true );
+	}
+
+	/**
+	 * Is Klarna Checkout country supported.
 	 *
 	 * @param string $country_code Country code.
 	 */
@@ -1091,7 +1170,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Is Klarna Payments country supported
+	 * Is Klarna Payments country supported.
 	 *
 	 * @param string $country_code Country code.
 	 */
@@ -1181,7 +1260,7 @@ class WC_Admin_Setup_Wizard {
 
 		return array(
 			'stripe'          => array(
-				'name'        => __( 'Stripe', 'woocommerce' ),
+				'name'        => __( 'WooCommerce Stripe Gateway', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/stripe.png',
 				'description' => $stripe_description,
 				'class'       => 'checked stripe-logo',
@@ -1193,19 +1272,20 @@ class WC_Admin_Setup_Wizard {
 						'value'       => 'yes',
 						'placeholder' => '',
 						'required'    => false,
+						'plugins'     => $this->get_wcs_requisite_plugins(),
 					),
 					'email'          => array(
 						'label'       => __( 'Stripe email address:', 'woocommerce' ),
 						'type'        => 'email',
 						'value'       => $user_email,
 						'placeholder' => __( 'Stripe email address', 'woocommerce' ),
-						'description' => __( "Enter your email address and we'll handle account creation. WooCommerce Services and Jetpack will be installed and activated for you.", 'woocommerce' ),
+						'description' => __( "Enter your email address and we'll handle account creation. Powered by WooCommerce Services and Jetpack.", 'woocommerce' ),
 						'required'    => true,
 					),
 				),
 			),
 			'ppec_paypal'     => array(
-				'name'        => __( 'PayPal Express Checkout', 'woocommerce' ),
+				'name'        => __( 'WooCommerce PayPal Express Checkout Gateway', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/paypal.png',
 				'description' => $paypal_ec_description,
 				'enabled'     => true,
@@ -1218,13 +1298,14 @@ class WC_Admin_Setup_Wizard {
 						'value'       => 'yes',
 						'placeholder' => '',
 						'required'    => false,
+						'plugins'     => $this->get_wcs_requisite_plugins(),
 					),
 					'email'            => array(
 						'label'       => __( 'Direct payments to email address:', 'woocommerce' ),
 						'type'        => 'email',
 						'value'       => $user_email,
 						'placeholder' => __( 'Email address to receive payments', 'woocommerce' ),
-						'description' => __( "Enter your email address and we'll authenticate payments for you. WooCommerce Services and Jetpack will be installed and activated for you.", 'woocommerce' ),
+						'description' => __( "Enter your email address and we'll authenticate payments for you. Powered by WooCommerce Services and Jetpack.", 'woocommerce' ),
 						'required'    => true,
 					),
 				),
@@ -1244,7 +1325,7 @@ class WC_Admin_Setup_Wizard {
 				),
 			),
 			'klarna_checkout' => array(
-				'name'        => __( 'Klarna Checkout', 'woocommerce' ),
+				'name'        => __( 'Klarna Checkout for WooCommerce', 'woocommerce' ),
 				'description' => $klarna_checkout_description,
 				'image'       => WC()->plugin_url() . '/assets/images/klarna-white.png',
 				'enabled'     => true,
@@ -1252,7 +1333,7 @@ class WC_Admin_Setup_Wizard {
 				'repo-slug'   => 'klarna-checkout-for-woocommerce',
 			),
 			'klarna_payments' => array(
-				'name'        => __( 'Klarna Payments', 'woocommerce' ),
+				'name'        => __( 'Klarna Payments for WooCommerce', 'woocommerce' ),
 				'description' => $klarna_payments_description,
 				'image'       => WC()->plugin_url() . '/assets/images/klarna-white.png',
 				'enabled'     => true,
@@ -1260,7 +1341,7 @@ class WC_Admin_Setup_Wizard {
 				'repo-slug'   => 'klarna-payments-for-woocommerce',
 			),
 			'square'          => array(
-				'name'        => __( 'Square', 'woocommerce' ),
+				'name'        => __( 'WooCommerce Square', 'woocommerce' ),
 				'description' => $square_description,
 				'image'       => WC()->plugin_url() . '/assets/images/square-white.png',
 				'class'       => 'square-logo',
@@ -1268,7 +1349,7 @@ class WC_Admin_Setup_Wizard {
 				'repo-slug'   => 'woocommerce-square',
 			),
 			'eway'            => array(
-				'name'        => __( 'eWAY', 'woocommerce' ),
+				'name'        => __( 'WooCommerce eWAY Gateway', 'woocommerce' ),
 				'description' => __( 'The eWAY extension for WooCommerce allows you to take credit card payments directly on your store without redirecting your customers to a third party site to make payment.', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/eway-logo.jpg',
 				'enabled'     => false,
@@ -1276,12 +1357,12 @@ class WC_Admin_Setup_Wizard {
 				'repo-slug'   => 'woocommerce-gateway-eway',
 			),
 			'payfast'         => array(
-				'name'        => __( 'PayFast', 'woocommerce' ),
+				'name'        => __( 'WooCommerce PayFast Gateway', 'woocommerce' ),
 				'description' => __( 'The PayFast extension for WooCommerce enables you to accept payments by Credit Card and EFT via one of South Africa’s most popular payment gateways. No setup fees or monthly subscription costs.', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/payfast.png',
 				'class'       => 'payfast-logo',
 				'enabled'     => false,
-				'repo-slug'   => 'woocommerce-gateway-payfast',
+				'repo-slug'   => 'woocommerce-payfast-gateway',
 				'file'        => 'gateway-payfast.php',
 			),
 		);
@@ -1294,15 +1375,19 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function get_wizard_in_cart_payment_gateways() {
 		$gateways = $this->get_wizard_available_in_cart_payment_gateways();
+		$country  = WC()->countries->get_base_country();
+		$currency = get_woocommerce_currency();
 
-		if ( ! current_user_can( 'install_plugins' ) ) {
-			return array( 'paypal' => $gateways['paypal'] );
-		}
-
-		$country     = WC()->countries->get_base_country();
 		$can_stripe  = $this->is_stripe_supported_country( $country );
 		$can_eway    = $this->is_eway_payments_supported_country( $country );
 		$can_payfast = ( 'ZA' === $country ); // South Africa.
+		$can_paypal  = $this->is_paypal_supported_currency( $currency );
+
+		if ( ! current_user_can( 'install_plugins' ) ) {
+			return $can_paypal ? array( 'paypal' => $gateways['paypal'] ) : array();
+		}
+
+		$spotlight = '';
 
 		if ( $this->is_klarna_checkout_supported_country( $country ) ) {
 			$spotlight = 'klarna_checkout';
@@ -1312,11 +1397,14 @@ class WC_Admin_Setup_Wizard {
 			$spotlight = 'square';
 		}
 
-		if ( isset( $spotlight ) ) {
+		if ( $spotlight ) {
 			$offered_gateways = array(
-				$spotlight    => $gateways[ $spotlight ],
-				'ppec_paypal' => $gateways['ppec_paypal'],
+				$spotlight => $gateways[ $spotlight ],
 			);
+
+			if ( $can_paypal ) {
+				$offered_gateways += array( 'ppec_paypal' => $gateways['ppec_paypal'] );
+			}
 
 			if ( $can_stripe ) {
 				$offered_gateways += array( 'stripe' => $gateways['stripe'] );
@@ -1341,7 +1429,9 @@ class WC_Admin_Setup_Wizard {
 			$offered_gateways              += array( 'stripe' => $gateways['stripe'] );
 		}
 
-		$offered_gateways += array( 'ppec_paypal' => $gateways['ppec_paypal'] );
+		if ( $can_paypal ) {
+			$offered_gateways += array( 'ppec_paypal' => $gateways['ppec_paypal'] );
+		}
 
 		if ( $can_eway ) {
 			$offered_gateways += array( 'eway' => $gateways['eway'] );
@@ -1406,6 +1496,15 @@ class WC_Admin_Setup_Wizard {
 			$should_enable_toggle = isset( $item_info['enabled'] ) && $item_info['enabled'];
 		}
 
+		$plugins = null;
+		if ( isset( $item_info['repo-slug'] ) ) {
+			$plugin  = array(
+				'slug' => $item_info['repo-slug'],
+				'name' => $item_info['name'],
+			);
+			$plugins = array( $plugin );
+		}
+
 		?>
 		<li class="<?php echo esc_attr( $item_class ); ?>">
 			<div class="wc-wizard-service-name">
@@ -1452,6 +1551,7 @@ class WC_Admin_Setup_Wizard {
 									placeholder="<?php echo esc_attr( $setting['placeholder'] ); ?>"
 									<?php echo ( $setting['required'] ) ? 'required' : ''; ?>
 									<?php echo $is_checkbox ? checked( isset( $checked ) && $checked, true, false ) : ''; ?>
+									data-plugins="<?php echo esc_attr( wp_json_encode( isset( $setting['plugins'] ) ? $setting['plugins'] : null ) ); ?>"
 								/>
 								<?php if ( ! empty( $setting['description'] ) ) : ?>
 									<span class="wc-wizard-service-settings-description"><?php echo esc_html( $setting['description'] ); ?></span>
@@ -1468,6 +1568,7 @@ class WC_Admin_Setup_Wizard {
 						type="checkbox"
 						name="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>-enabled"
 						value="yes" <?php checked( $should_enable_toggle ); ?>
+						data-plugins="<?php echo esc_attr( wp_json_encode( $plugins ) ); ?>"
 					/>
 					<label for="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>">
 				</span>
@@ -1561,6 +1662,7 @@ class WC_Admin_Setup_Wizard {
 				?>
 			</ul>
 			<p class="wc-setup-actions step">
+				<?php $this->plugin_install_info(); ?>
 				<button type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step"><?php esc_html_e( 'Continue', 'woocommerce' ); ?></button>
 				<?php wp_nonce_field( 'wc-setup' ); ?>
 			</p>
@@ -1628,14 +1730,16 @@ class WC_Admin_Setup_Wizard {
 		$img_url     = $item_info['img_url'];
 		$img_alt     = $item_info['img_alt'];
 		?>
-		<li>
-			<label class="recommended-item">
-				<input
-					class="recommended-item-checkbox"
-					type="checkbox"
-					name="<?php echo esc_attr( 'setup_' . $type ); ?>"
-					value="yes"
-					checked />
+		<li class="recommended-item checkbox">
+			<input
+				id="<?php echo esc_attr( 'wc_recommended_' . $type ); ?>"
+				type="checkbox"
+				name="<?php echo esc_attr( 'setup_' . $type ); ?>"
+				value="yes"
+				checked
+				data-plugins="<?php echo esc_attr( wp_json_encode( isset( $item_info['plugins'] ) ? $item_info['plugins'] : null ) ); ?>"
+			/>
+			<label for="<?php echo esc_attr( 'wc_recommended_' . $type ); ?>">
 				<img
 					src="<?php echo esc_url( $img_url ); ?>"
 					class="<?php echo esc_attr( 'recommended-item-icon-' . $type ); ?> recommended-item-icon"
@@ -1701,6 +1805,7 @@ class WC_Admin_Setup_Wizard {
 						'description' => __( 'Save time and errors with automated tax calculation and collection at checkout. Powered by WooCommerce Services and Jetpack.', 'woocommerce' ),
 						'img_url'     => WC()->plugin_url() . '/assets/images/obw-taxes-icon.svg',
 						'img_alt'     => __( 'automated taxes icon', 'woocommerce' ),
+						'plugins'     => $this->get_wcs_requisite_plugins(),
 					) );
 				endif;
 
@@ -1711,11 +1816,13 @@ class WC_Admin_Setup_Wizard {
 						'description' => __( 'Join the 16 million customers who use MailChimp. Sync list and store data to send automated emails, and targeted campaigns.', 'woocommerce' ),
 						'img_url'     => WC()->plugin_url() . '/assets/images/obw-mailchimp-icon.svg',
 						'img_alt'     => __( 'MailChimp icon', 'woocommerce' ),
+						'plugins'     => array( array( 'name' => __( 'MailChimp for WooCommerce', 'woocommerce' ), 'slug' => 'mailchimp-for-woocommerce' ) ),
 					) );
 				endif;
 			?>
 		</ul>
 			<p class="wc-setup-actions step">
+				<?php $this->plugin_install_info(); ?>
 				<button type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step"><?php esc_html_e( 'Continue', 'woocommerce' ); ?></button>
 				<?php wp_nonce_field( 'wc-setup' ); ?>
 			</p>

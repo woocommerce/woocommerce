@@ -323,10 +323,16 @@ class WC_Shortcode_Products {
 			}
 
 			$query_args['tax_query'][] = array(
-				'taxonomy' => 'product_cat',
-				'terms'    => $categories,
-				'field'    => $field,
-				'operator' => $this->attributes['cat_operator'],
+				'taxonomy'         => 'product_cat',
+				'terms'            => $categories,
+				'field'            => $field,
+				'operator'         => $this->attributes['cat_operator'],
+
+				/*
+				 * When cat_operator is AND, the children categories should be excluded,
+				 * as only products belonging to all the children categories would be selected.
+				 */
+				'include_children' => 'AND' === $this->attributes['cat_operator'] ? false : true,
 			);
 		}
 	}
@@ -574,9 +580,10 @@ class WC_Shortcode_Products {
 		ob_start();
 
 		if ( $products && $products->ids ) {
-			// Prime meta cache to reduce future queries.
-			update_meta_cache( 'post', $products->ids );
-			update_object_term_cache( $products->ids, 'product' );
+			// Prime caches to reduce future queries.
+			if ( is_callable( '_prime_post_caches' ) ) {
+				_prime_post_caches( $products->ids );
+			}
 
 			// Setup the loop.
 			wc_setup_loop(

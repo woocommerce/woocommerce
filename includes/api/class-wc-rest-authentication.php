@@ -78,10 +78,14 @@ class WC_REST_Authentication {
 		}
 
 		if ( is_ssl() ) {
-			return $this->perform_basic_authentication();
-		} else {
-			return $this->perform_oauth_authentication();
+			$user_id = $this->perform_basic_authentication();
 		}
+
+		if ( $user_id ) {
+			return $user_id;
+		}
+
+		return $this->perform_oauth_authentication();
 	}
 
 	/**

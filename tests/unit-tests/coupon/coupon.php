@@ -44,6 +44,10 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		// Required for backwards compatibility, but will try and initialize coupon by code if possible first.
 		$test_coupon = new WC_Coupon( (string) $coupon_2->get_id() );
 		$this->assertEquals( $coupon_2->get_id(), $test_coupon->get_id() );
+
+		// Test getting a coupon by coupon object
+		$test_coupon = new WC_Coupon( $coupon_1 );
+		$this->assertEquals( $test_coupon->get_id(), $coupon_1->get_id() );
 	}
 
 	/**

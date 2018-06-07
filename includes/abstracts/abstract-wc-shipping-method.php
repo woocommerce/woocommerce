@@ -524,31 +524,37 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	}
 
 	/**
-	 * Processes and saves options.
-	 * If there is an error thrown, will continue to save and validate fields, but will leave the erroring field out.
+	 * Processes and saves global shipping method options in the admin area.
+	 *
+	 * This method is usually attached to woocommerce_update_options_x hooks.
 	 *
 	 * @since 2.6.0
 	 * @return bool was anything saved?
 	 */
 	public function process_admin_options() {
-		if ( $this->instance_id ) {
-			$this->init_instance_settings();
-
-			$post_data = $this->get_post_data();
-
-			foreach ( $this->get_instance_form_fields() as $key => $field ) {
-				if ( 'title' !== $this->get_field_type( $field ) ) {
-					try {
-						$this->instance_settings[ $key ] = $this->get_field_value( $key, $field, $post_data );
-					} catch ( Exception $e ) {
-						$this->add_error( $e->getMessage() );
-					}
-				}
-			}
-
-			return update_option( $this->get_instance_option_key(), apply_filters( 'woocommerce_shipping_' . $this->id . '_instance_settings_values', $this->instance_settings, $this ) );
-		} else {
+		if ( ! $this->instance_id ) {
 			return parent::process_admin_options();
 		}
+
+		// Check we are processing the correct form for this instance.
+		if ( ! isset( $_REQUEST['instance_id'] ) || absint( $_REQUEST['instance_id'] ) !== $this->instance_id ) { // WPCS: input var ok, CSRF ok.
+			return false;
+		}
+
+		$this->init_instance_settings();
+
+		$post_data = $this->get_post_data();
+
+		foreach ( $this->get_instance_form_fields() as $key => $field ) {
+			if ( 'title' !== $this->get_field_type( $field ) ) {
+				try {
+					$this->instance_settings[ $key ] = $this->get_field_value( $key, $field, $post_data );
+				} catch ( Exception $e ) {
+					$this->add_error( $e->getMessage() );
+				}
+			}
+		}
+
+		return update_option( $this->get_instance_option_key(), apply_filters( 'woocommerce_shipping_' . $this->id . '_instance_settings_values', $this->instance_settings, $this ), 'yes' );
 	}
 }

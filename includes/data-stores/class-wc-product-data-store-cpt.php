@@ -611,11 +611,19 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		if ( in_array( 'stock_quantity', $this->updated_props, true ) ) {
-			do_action( $product->is_type( 'variation' ) ? 'woocommerce_variation_set_stock' : 'woocommerce_product_set_stock', $product );
+			if ( $product->is_type( 'variation' ) ) {
+				do_action( 'woocommerce_variation_set_stock', $product );
+			} else {
+				do_action( 'woocommerce_product_set_stock', $product );
+			}
 		}
 
 		if ( in_array( 'stock_status', $this->updated_props, true ) ) {
-			do_action( $product->is_type( 'variation' ) ? 'woocommerce_variation_set_stock_status' : 'woocommerce_product_set_stock_status', $product->get_id(), $product->get_stock_status(), $product );
+			if ( $product->is_type( 'variation' ) ) {
+				do_action( 'woocommerce_variation_set_stock_status', $product->get_id(), $product->get_stock_status(), $product );
+			} else {
+				do_action( 'woocommerce_product_set_stock_status', $product->get_id(), $product->get_stock_status(), $product );
+			}
 		}
 
 		// Trigger action so 3rd parties can deal with updated props.
@@ -1390,7 +1398,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
-		if ( $search_queries ) {
+		if ( ! empty( $search_queries ) ) {
 			$search_where = 'AND (' . implode( ') OR (', $search_queries ) . ')';
 		}
 

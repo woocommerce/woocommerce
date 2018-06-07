@@ -128,7 +128,7 @@ function wc_add_to_cart_message( $products, $show_qty = false, $return = false )
 		$message = apply_filters( 'wc_add_to_cart_message', $message, $product_id );
 	}
 
-	$message = apply_filters( 'wc_add_to_cart_message_html', $message, $products );
+	$message = apply_filters( 'wc_add_to_cart_message_html', $message, $products, $show_qty );
 
 	if ( $return ) {
 		return $message;
@@ -280,7 +280,7 @@ function wc_cart_totals_coupon_html( $coupon ) {
 	$amount               = WC()->cart->get_coupon_discount_amount( $coupon->get_code(), WC()->cart->display_cart_ex_tax );
 	$discount_amount_html = '-' . wc_price( $amount );
 
-	if ( $coupon->get_free_shipping() ) {
+	if ( $coupon->get_free_shipping() && empty( $amount ) ) {
 		$discount_amount_html = __( 'Free shipping coupon', 'woocommerce' );
 	}
 
@@ -480,10 +480,12 @@ function wc_get_cart_item_data_hash( $product ) {
 	return md5(
 		wp_json_encode(
 			apply_filters(
-				'woocommerce_cart_item_data_to_validate', array(
+				'woocommerce_cart_item_data_to_validate',
+				array(
 					'type'       => $product->get_type(),
 					'attributes' => 'variation' === $product->get_type() ? $product->get_variation_attributes() : '',
-				)
+				),
+				$product
 			)
 		)
 	);

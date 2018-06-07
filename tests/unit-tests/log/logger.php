@@ -25,7 +25,10 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 				$this->greaterThanOrEqual( $time ),
 				$this->equalTo( 'notice' ),
 				$this->equalTo( 'this is a message' ),
-				$this->equalTo( array( 'source' => 'unit-tests', '_legacy' => true ) )
+				$this->equalTo( array(
+					'source' => 'unit-tests',
+					'_legacy' => true,
+				) )
 			);
 		$log = new WC_Logger( array( $handler ), 'debug' );
 
@@ -39,11 +42,10 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 */
 	public function test_clear() {
 		$file = wc_get_log_file_path( 'unit-tests' );
-		file_put_contents( $file, 'Test file content.' );
+		file_put_contents( $file, 'Test file content.' ); // @codingStandardsIgnoreLine.
 		$log = new WC_Logger();
 		$log->clear( 'unit-tests' );
 		$this->assertEquals( '', file_get_contents( $file ) );
-		$this->setExpectedDeprecated( 'WC_Logger::clear' );
 	}
 
 	/**

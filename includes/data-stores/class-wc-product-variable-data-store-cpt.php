@@ -105,12 +105,6 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		// Make sure data which does not apply to variables is unset.
 		$product->set_regular_price( '' );
 		$product->set_sale_price( '' );
-
-		// Set directly since individual data needs changed at the WC_Product_Variation level -- these datasets just pull.
-		$children = $this->read_children( $product );
-		$product->set_children( $children['all'] );
-		$product->set_visible_children( $children['visible'] );
-		$product->set_variation_attributes( $this->read_variation_attributes( $product ) );
 	}
 
 	/**
@@ -120,7 +114,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @param  bool       $force_read True to bypass the transient.
 	 * @return array
 	 */
-	protected function read_children( &$product, $force_read = false ) {
+	public function read_children( &$product, $force_read = false ) {
 		$children_transient_name = 'wc_product_children_' . $product->get_id();
 		$children                = get_transient( $children_transient_name );
 
@@ -166,7 +160,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @param WC_Product $product Product object.
 	 * @return array
 	 */
-	protected function read_variation_attributes( &$product ) {
+	public function read_variation_attributes( &$product ) {
 		global $wpdb;
 
 		$variation_attributes = array();
@@ -367,7 +361,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	protected function get_price_hash( &$product, $for_display = false ) {
 		global $wp_filter;
 
-		$price_hash   = $for_display ? array( get_option( 'woocommerce_tax_display_shop', 'excl' ), WC_Tax::get_rates() ) : array( false );
+		$price_hash   = $for_display && wc_tax_enabled() ? array( get_option( 'woocommerce_tax_display_shop', 'excl' ), WC_Tax::get_rates() ) : array( false );
 		$filter_names = array( 'woocommerce_variation_prices_price', 'woocommerce_variation_prices_regular_price', 'woocommerce_variation_prices_sale_price' );
 
 		foreach ( $filter_names as $filter_name ) {

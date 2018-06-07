@@ -12,6 +12,7 @@
 defined( 'ABSPATH' ) || exit;
 
 require_once WC_ABSPATH . 'includes/legacy/class-wc-legacy-cart.php';
+require_once WC_ABSPATH . 'includes/class-wc-cart-fees.php';
 require_once WC_ABSPATH . 'includes/class-wc-cart-session.php';
 
 /**
@@ -1451,12 +1452,13 @@ class WC_Cart extends WC_Legacy_Cart {
 
 				// Get user and posted emails to compare.
 				$current_user = wp_get_current_user();
-				$check_emails = array_unique(
+				$billing_email = isset( $posted['billing_email'] ) ? $posted['billing_email'] : '';
+				$check_emails  = array_unique(
 					array_filter(
 						array_map(
 							'strtolower', array_map(
 								'sanitize_email', array(
-									$posted['billing_email'],
+									$billing_email,
 									$current_user->user_email,
 								)
 							)
