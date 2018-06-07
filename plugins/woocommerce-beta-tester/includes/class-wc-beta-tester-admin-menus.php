@@ -17,7 +17,7 @@ class WC_Beta_Tester_Admin_Menus {
 	 */
 	public function __construct() {
 		if ( class_exists( 'WC_Admin_Status' ) ) {
-			add_action( 'admin_bar_menu', array( $this, 'admin_bar_menus' ), 31 );
+			add_action( 'admin_bar_menu', array( $this, 'admin_bar_menus' ), 50 );
 		}
 		add_action( 'admin_footer', array( $this, 'version_information_template' ) );
 	}
@@ -155,37 +155,33 @@ class WC_Beta_Tester_Admin_Menus {
 		$nodes = array(
 			array(
 				'parent' => 'wc-beta-tester',
-				'id'     => 'current-channel',
+				'id'     => 'update-channel',
 				/* translators: %s: current channel */
-				'title'  => sprintf( __( '<center><i>Current channel: %s</i></center>', 'woocommerce-beta-tester' ), $current_channel ),
-			),
-			array(
-				'parent' => 'wc-beta-tester',
-				'id'     => 'submit-gh-ticket',
-				'title'  => __( 'Submit a bug ticket to GitHub', 'woocommerce-beta-tester' ),
-				'href'   => '#',
-				'meta'   => array(
-					// We can't simply use the href here since WP core calls esc_url on it which strips some parts.
-					'onclick' => 'javascript:window.open( "' . esc_js( $this->get_github_ticket_url() ) . '" );',
-				),
+				'title'  => sprintf( __( 'Current channel: %s', 'woocommerce-beta-tester' ), $current_channel ),
+				'href'   => admin_url( 'plugins.php?page=wc-beta-tester' ),
 			),
 			array(
 				'parent' => 'wc-beta-tester',
 				'id'     => 'show-version-info',
-				'title'  => __( 'Show version information', 'woocommerce-beta-tester' ),
+				/* translators: %s: current version */
+				'title'  => sprintf( __( 'Version %s information', 'woocommerce-beta-tester' ), WC_VERSION ),
 				'href'   => '#',
 			),
 			array(
 				'parent' => 'wc-beta-tester',
 				'id'     => 'switch-version',
-				'title'  => __( 'Switch Version', 'woocommerce-beta-tester' ),
+				'title'  => __( 'Switch versions', 'woocommerce-beta-tester' ),
 				'href'   => admin_url( 'plugins.php' ),
 			),
 			array(
 				'parent' => 'wc-beta-tester',
-				'id'     => 'update-channel',
-				'title'  => __( 'Update channel settings', 'woocommerce-beta-tester' ),
-				'href'   => admin_url( 'plugins.php?page=wc-beta-tester' ),
+				'id'     => 'submit-gh-ticket',
+				'title'  => __( 'Submit bug report', 'woocommerce-beta-tester' ),
+				'href'   => '#',
+				'meta'   => array(
+					// We can't simply use the href here since WP core calls esc_url on it which strips some parts.
+					'onclick' => 'javascript:window.open( "' . esc_js( $this->get_github_ticket_url() ) . '" );',
+				),
 			),
 		);
 
