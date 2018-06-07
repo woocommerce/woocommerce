@@ -977,9 +977,7 @@ class WC_Checkout {
 		if ( is_ajax() ) {
 			// Only print notices if not reloading the checkout, otherwise they're lost in the page reload.
 			if ( ! isset( WC()->session->reload_checkout ) ) {
-				ob_start();
-				wc_print_notices();
-				$messages = ob_get_clean();
+				$messages = wc_print_notices( true );
 			}
 
 			$response = array(

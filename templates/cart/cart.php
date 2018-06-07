@@ -17,8 +17,6 @@
 
 defined( 'ABSPATH' ) || exit;
 
-wc_print_notices();
-
 do_action( 'woocommerce_before_cart' ); ?>
 
 <form class="woocommerce-cart-form" action="<?php echo esc_url( wc_get_cart_url() ); ?>" method="post">
