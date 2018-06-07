@@ -73,6 +73,8 @@ class WC_Beta_Tester {
 	 * Constructor
 	 */
 	public function __construct() {
+		$this->plugin_name = plugin_basename( WC_BETA_TESTER_FILE );
+
 		$this->config = array(
 			'plugin_file'        => 'woocommerce/woocommerce.php',
 			'slug'               => 'woocommerce',
@@ -88,6 +90,7 @@ class WC_Beta_Tester {
 		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
 		add_filter( 'auto_update_plugin', 'auto_update_woocommerce', 100, 2 );
 		add_filter( 'plugins_api_result', array( $this, 'plugin_api_prerelease_info' ), 10, 3 );
+		add_filter( "plugin_action_links_{$this->plugin_name}", array( $this, 'plugin_action_links' ), 10, 1 );
 
 		$this->includes();
 	}
@@ -435,5 +438,28 @@ class WC_Beta_Tester {
 		}
 
 		return $github_data;
+	}
+
+	/**
+	 * Show action links on the plugin screen.
+	 *
+	 * @param   mixed $links Plugin Action links.
+	 * @return  array
+	 */
+	public function plugin_action_links( $links ) {
+		$action_links = array(
+			'switch-version' => sprintf(
+				'<a href="%s">%s</a>',
+				esc_url( admin_url( 'tools.php?page=wc-beta-tester-version-picker' ) ),
+				esc_html__( 'Switch versions', 'woocommerce-beta-tester' )
+			),
+			'settings'      => sprintf(
+				'<a href="%s">%s</a>',
+				esc_url( admin_url( 'plugins.php?page=wc-beta-tester' ) ),
+				esc_html__( 'Settings', 'woocommerce-beta-tester' )
+			),
+		);
+
+		return array_merge( $action_links, $links );
 	}
 }
