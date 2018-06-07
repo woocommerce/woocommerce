@@ -26,4 +26,7 @@ if [ $1 == 'after' ]; then
 		php ocular.phar code-coverage:upload --format=php-clover coverage.clover
 	fi
 
+	curl -sL https://raw.githubusercontent.com/travis-ci/artifacts/master/install | bash
+	artifacts upload
+
 fi
