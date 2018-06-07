@@ -1347,11 +1347,6 @@
 		 }
 	 }
 
-	 .wc-order-item-bulk-edit .cancel-action {
-		 float: left;
-		 margin-left: 0;
-	 }
-
 	 .add_meta {
 		 margin-left: 0 !important;
 	 }
@@ -1447,19 +1442,6 @@
 				 }
 				 &:first-child {
 					 padding-left: 2em;
-				 }
-			 }
-
-			 tbody tr {
-				 td {
-					 cursor: pointer;
-				 }
-				 &.selected {
-					 background: #f5ebf3;
-					 td {
-						 border-color: #e6cce1;
-						 opacity: 0.8;
-					 }
 				 }
 			 }
 
