@@ -160,9 +160,14 @@ class WC_Install {
 			self::update();
 			WC_Admin_Notices::add_notice( 'update' );
 		}
-		if ( ! empty( $_GET['force_update_woocommerce'] ) ) { // WPCS: input var ok, CSRF ok.
+		if ( ! empty( $_GET['force_update_woocommerce'] ) ) { // WPCS: input var ok.
+			check_admin_referer( 'wc_force_db_update', 'wc_force_db_update_nonce' );
 			$blog_id = get_current_blog_id();
+
+			// Used to fire an action added in WP_Background_Process::_construct() that calls WP_Background_Process::handle_cron_healthcheck().
+			// This method will make sure the database updates are executed even if cron is disabled. Nothing will happen if the updates are already running.
 			do_action( 'wp_' . $blog_id . '_wc_updater_cron' );
+
 			wp_safe_redirect( admin_url( 'admin.php?page=wc-settings' ) );
 			exit;
 		}
