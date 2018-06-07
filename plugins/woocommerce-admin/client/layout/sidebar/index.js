@@ -12,22 +12,12 @@ import { uniqueId } from 'lodash';
  * Internal dependencies
  */
 import './style.scss';
-import Activity from './activity';
-import SidebarHeader from './header';
+import ActivityList from 'components/activity-list';
 import Count from 'components/count';
 
 class Sidebar extends Component {
 	getTabs() {
 		return [
-			{
-				name: 'insights',
-				title: (
-					<span>
-						{ __( 'Insights', 'woo-dash' ) } <Count count={ 3 } />
-					</span>
-				),
-				className: 'woocommerce-layout__sidebar-tab',
-			},
 			{
 				name: 'orders',
 				title: (
@@ -47,6 +37,11 @@ class Sidebar extends Component {
 				),
 				className: 'woocommerce-layout__sidebar-tab',
 			},
+			{
+				name: 'stock',
+				title: <span>{ __( 'Stock', 'woo-dash' ) }</span>,
+				className: 'woocommerce-layout__sidebar-tab',
+			},
 		];
 	}
 
@@ -61,7 +56,7 @@ class Sidebar extends Component {
 		return (
 			<aside className={ className } aria-labelledby={ headerId }>
 				<header className="woocommerce-layout__sidebar-top">
-					<h2 className="woocommerce-layout__sidebar-title" id={ headerId }>
+					<h2 className="woocommerce-layout__sidebar-title screen-reader-text" id={ headerId }>
 						{ __( 'Store Activity', 'woo-dash' ) }
 					</h2>
 					<div className="woocommerce-layout__sidebar-toggle">
@@ -82,8 +77,7 @@ class Sidebar extends Component {
 						return (
 							<Fragment>
 								<h3>Section: { selectedTabName }</h3>
-								<SidebarHeader label={ __( 'Today', 'woo-dash' ) } />
-								<Activity />
+								<ActivityList section={ selectedTabName } />
 							</Fragment>
 						);
 					} }

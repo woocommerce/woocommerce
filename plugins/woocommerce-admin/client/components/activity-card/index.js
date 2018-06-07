@@ -2,10 +2,10 @@
 /**
  * External dependencies
  */
-// import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
 import { cloneElement, Component } from '@wordpress/element';
 import { Dashicon } from '@wordpress/components';
+import { moment } from '@wordpress/date';
 import PropTypes from 'prop-types';
 
 /**
@@ -13,8 +13,6 @@ import PropTypes from 'prop-types';
  */
 import './style.scss';
 import { EllipsisMenu } from '../ellipsis-menu';
-
-// @TODO Use @wordpress/date to format the date
 
 class ActivityCard extends Component {
 	render() {
@@ -27,7 +25,11 @@ class ActivityCard extends Component {
 					<span className="woocommerce-activity-card__icon">{ icon }</span>
 					<h3 className="woocommerce-activity-card__label">
 						{ label }
-						{ date && <span className="woocommerce-activity-card__date">– { date }</span> }
+						{ date && (
+							<span className="woocommerce-activity-card__date">
+								– { moment( date ).fromNow() }
+							</span>
+						) }
 					</h3>
 					{ menu && <div className="woocommerce-activity-card__menu">{ menu }</div> }
 				</header>
