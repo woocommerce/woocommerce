@@ -115,6 +115,20 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests getting an order with an invalid ID.
+	 * @since 3.4.3
+	 */
+	public function test_get_item_refund_id() {
+		wp_set_current_user( $this->user );
+		$order  = WC_Helper_Order::create_order();
+		$refund = wc_create_refund( array(
+			'order_id' => $order->get_id(),
+		) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/orders/' . $refund->get_id() ) );
+		$this->assertEquals( 404, $response->get_status() );
+	}
+
+	/**
 	 * Tests creating an order.
 	 * @since 3.0.0
 	 */
