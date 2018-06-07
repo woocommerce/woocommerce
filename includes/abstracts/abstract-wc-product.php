@@ -74,7 +74,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'stock_quantity'     => null,
 		'stock_status'       => 'instock',
 		'backorders'         => 'no',
-		'low_stock_amount'   => -1,
+		'low_stock_amount'   => '',
 		'sold_individually'  => false,
 		'weight'             => '',
 		'length'             => '',

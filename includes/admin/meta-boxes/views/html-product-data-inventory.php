@@ -73,7 +73,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 				'description'       => __( 'When product stock reaches this amount you will be notified by email', 'woocommerce' ),
 				'type'              => 'number',
 				'custom_attributes' => array(
-					'min'  => 0,
 					'step' => 'any',
 				),
 				'data_type'         => 'stock',

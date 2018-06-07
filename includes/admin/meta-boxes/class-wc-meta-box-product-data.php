@@ -456,7 +456,7 @@ class WC_Meta_Box_Product_Data {
 						'manage_stock'      => isset( $_POST['variable_manage_stock'][ $i ] ),
 						'stock_quantity'    => $stock,
 						'backorders'        => isset( $_POST['variable_backorders'], $_POST['variable_backorders'][ $i ] ) ? wc_clean( $_POST['variable_backorders'][ $i ] ) : null,
-						'low_stock_amount'  => wc_clean( $_POST['variable_low_stock_amount'][ $i ] ),
+						'low_stock_amount'  => wc_stock_amount( $_POST['variable_low_stock_amount'][ $i ] ),
 						'stock_status'      => wc_clean( $_POST['variable_stock_status'][ $i ] ),
 						'image_id'          => wc_clean( $_POST['upload_image_id'][ $i ] ),
 						'attributes'        => self::prepare_set_attributes( $parent->get_attributes(), 'attribute_', $i ),
