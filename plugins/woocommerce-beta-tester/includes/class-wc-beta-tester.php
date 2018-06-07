@@ -451,12 +451,12 @@ class WC_Beta_Tester {
 			'switch-version' => sprintf(
 				'<a href="%s">%s</a>',
 				esc_url( admin_url( 'tools.php?page=wc-beta-tester-version-picker' ) ),
-				esc_html__( 'Switch versions', 'wp-crontrol' )
+				esc_html__( 'Switch versions', 'woocommerce-beta-tester' )
 			),
 			'settings'      => sprintf(
 				'<a href="%s">%s</a>',
 				esc_url( admin_url( 'plugins.php?page=wc-beta-tester' ) ),
-				esc_html__( 'Settings', 'wp-crontrol' )
+				esc_html__( 'Settings', 'woocommerce-beta-tester' )
 			),
 		);
 
