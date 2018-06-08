@@ -189,12 +189,12 @@ class WC_Admin_Webhooks {
 			wp_die( esc_html__( 'You do not have permission to edit Webhooks', 'woocommerce' ) );
 		}
 
-		if ( isset( $_REQUEST['action'] ) ) { // WPCS: input var okay, CSRF ok.
+		if ( isset( $_REQUEST['action'] ) || isset( $_REQUEST['action2'] ) ) { // WPCS: input var okay, CSRF ok.
 			$webhooks = isset( $_REQUEST['webhook'] ) ? array_map( 'absint', (array) $_REQUEST['webhook'] ) : array(); // WPCS: input var okay, CSRF ok.
+			$action   = sanitize_text_field( wp_unslash( $_REQUEST['action'] ) ); // WPCS: input var okay, CSRF ok.
+			$action2  = sanitize_text_field( wp_unslash( $_REQUEST['action2'] ) ); // WPCS: input var okay, CSRF ok.
 
-			$action = sanitize_text_field( wp_unslash( $_REQUEST['action'] ) ); // WPCS: input var okay, CSRF ok.
-
-			if ( 'delete' === $action ) {
+			if ( 'delete' === $action || 'delete' === $action2 ) {
 				$this->bulk_delete( $webhooks );
 			}
 		}
