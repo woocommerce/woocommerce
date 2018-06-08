@@ -428,6 +428,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 				'_line_tax',
 				'method_id',
 				'cost',
+				'_reduced_stock',
 			)
 		);
 
