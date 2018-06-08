@@ -284,3 +284,35 @@ function wc_increase_stock_levels( $order_id ) {
 
 	do_action( 'woocommerce_restore_order_stock', $order );
 }
+
+/**
+ * See how much stock is being held in pending orders.
+ *
+ * @since 3.5.0
+ * @param WC_Product $product Product to check.
+ * @param integer    $exclude_order_id Order ID to exclude.
+ * @return int
+ */
+function wc_get_held_stock_quantity( $product, $exclude_order_id = 0 ) {
+	global $wpdb;
+
+	return $wpdb->get_var(
+		$wpdb->prepare(
+			"
+			SELECT SUM( order_item_meta.meta_value ) AS held_qty
+			FROM {$wpdb->posts} AS posts
+			LEFT JOIN {$wpdb->prefix}woocommerce_order_items as order_items ON posts.ID = order_items.order_id
+			LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id
+			LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta2 ON order_items.order_item_id = order_item_meta2.order_item_id
+			WHERE 	order_item_meta.meta_key    = '_qty'
+			AND 	order_item_meta2.meta_key   = %s
+			AND 	order_item_meta2.meta_value = %d
+			AND 	posts.post_type             IN ( '" . implode( "','", wc_get_order_types() ) . "' )
+			AND 	posts.post_status           = 'wc-pending'
+			AND		posts.ID                    != %d;",
+			'variation' === get_post_type( $product->get_stock_managed_by_id() ) ? '_variation_id' : '_product_id',
+			$product->get_stock_managed_by_id(),
+			$exclude_order_id
+		)
+	); // WPCS: unprepared SQL ok.
+}
