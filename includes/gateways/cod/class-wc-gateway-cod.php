@@ -182,10 +182,8 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 
 		// Only apply if all packages are being shipped via chosen method, or order is virtual.
 		if ( ! empty( $this->enable_for_methods ) && $needs_shipping ) {
-			$order_shipping_items            = is_object( $order ) ? $order->get_shipping_methods() : false;
-			$chosen_shipping_methods_session = WC()->session->get( 'chosen_shipping_methods' );
-
-			$canonical_rate_ids = $order_shipping_items ? $order_shipping_items : $chosen_shipping_methods_session;
+			$order_shipping_items = is_object( $order ) ? $order->get_shipping_methods() : false;
+			$canonical_rate_ids = $order_shipping_items ? $order_shipping_items : WC()->session->get( 'chosen_shipping_methods' );
 			$canonical_rate_ids = $this->get_canonical_order_shipping_item_rate_ids( $canonical_rate_ids );
 
 			if ( ! count( $this->get_matching_rates( $canonical_rate_ids ) ) ) {
