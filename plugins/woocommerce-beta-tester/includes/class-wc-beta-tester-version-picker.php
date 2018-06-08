@@ -24,6 +24,26 @@ class WC_Beta_Tester_Version_Picker {
 	 */
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'add_to_menus' ) );
+		add_action( 'admin_init', array( $this, 'handle_version_switch' ) );
+	}
+
+	/**
+	 * Handler for the version switch button.
+	 */
+	public function handle_version_switch() {
+		if ( empty( $_GET['wcbt_switch_to_version'] ) ) {
+			return;
+		}
+
+		if ( ! wp_verify_nonce( $_GET['_wpnonce'], 'wcbt_switch_version_nonce' ) ) {
+			wp_die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce-beta-tester' ) );
+		}
+
+		$switch_to = $_GET['wcbt_switch_to_version'];
+
+		// TODO: Actual switch.
+
+		wp_redirect( admin_url( 'tools.php?page=wc-beta-tester-version-picker&switched=1' ) );
 	}
 
 	/**
@@ -56,7 +76,13 @@ class WC_Beta_Tester_Version_Picker {
 		usort( $tags, 'version_compare' );
 		$tags = array_reverse( $tags );
 
-		$versions_html         = '<ul class="wcbt-version-list">';
+		$versions_html         = '';
+
+		if ( ! empty( $_GET['switched'] ) ) {
+			$versions_html    .= __( '<h2>Successfully switched version.</h2>', 'woocommerce-beta-tester' );
+		}
+
+		$versions_html        .= '<ul class="wcbt-version-list">';
 		$plugin_data           = WC_Beta_Tester::instance()->get_plugin_data();
 		$this->current_version = $plugin_data['Version'];
 
