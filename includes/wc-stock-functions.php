@@ -160,7 +160,7 @@ function wc_reduce_stock_levels( $order_id ) {
 
 		// Only reduce stock once for each item.
 		$product            = $item->get_product();
-		$item_stock_reduced = $item->get_meta( 'reduced_stock', true );
+		$item_stock_reduced = $item->get_meta( '_reduced_stock', true );
 
 		if ( $item_stock_reduced || ! $product || ! $product->managing_stock() ) {
 			continue;
@@ -176,10 +176,10 @@ function wc_reduce_stock_levels( $order_id ) {
 			continue;
 		}
 
-		$item->add_meta_data( 'reduced_stock', $qty, true );
+		$item->add_meta_data( '_reduced_stock', $qty, true );
 		$item->save();
 
-		$changes[]        = $item_name . ' ' . ( $new_stock + $qty ) . '->' . $new_stock;
+		$changes[]        = $item_name . ' ' . ( $new_stock + $qty ) . '&rarr;' . $new_stock;
 		$no_stock_amount  = absint( get_option( 'woocommerce_notify_no_stock_amount', 0 ) );
 		$low_stock_amount = absint( get_option( 'woocommerce_notify_low_stock_amount', 2 ) );
 
@@ -234,7 +234,7 @@ function wc_increase_stock_levels( $order_id ) {
 
 		// Only reduce stock once for each item.
 		$product            = $item->get_product();
-		$item_stock_reduced = $item->get_meta( 'reduced_stock', true );
+		$item_stock_reduced = $item->get_meta( '_reduced_stock', true );
 
 		if ( ! $item_stock_reduced || ! $product || ! $product->managing_stock() ) {
 			continue;
@@ -249,10 +249,10 @@ function wc_increase_stock_levels( $order_id ) {
 			continue;
 		}
 
-		$item->delete_meta_data( 'reduced_stock' );
+		$item->delete_meta_data( '_reduced_stock' );
 		$item->save();
 
-		$changes[] = $item_name . ' ' . ( $new_stock - $item_stock_reduced ) . '->' . $new_stock;
+		$changes[] = $item_name . ' ' . ( $new_stock - $item_stock_reduced ) . '&rarr;' . $new_stock;
 	}
 
 	if ( $changes ) {
