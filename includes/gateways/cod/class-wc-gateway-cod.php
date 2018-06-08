@@ -165,7 +165,8 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 
 		if ( ! $needs_shipping && is_page( wc_get_page_id( 'checkout' ) ) && 0 < get_query_var( 'order-pay' ) && is_object( $order ) && 0 < count( $order->get_items() ) ) {
 			foreach ( $order->get_items() as $item ) {
-				if ( $item->get_product() && $item->get_product()->needs_shipping() ) {
+				$_product = $item->get_product();
+				if ( is_object( $_product ) && $_product->needs_shipping() ) {
 					$needs_shipping = true;
 					break;
 				}
