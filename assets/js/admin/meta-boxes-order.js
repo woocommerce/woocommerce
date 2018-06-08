@@ -900,7 +900,18 @@ jQuery( function ( $ ) {
 			init: function( e, target ) {
 				if ( 'wc-modal-add-products' === target ) {
 					$( document.body ).trigger( 'wc-enhanced-select-init' );
-					$( '#add_item_id' ).selectWoo( 'open' ).selectWoo( 'focus' );
+
+					$( this ).on( 'change', '.wc-product-search', function() {
+						if ( ! $( this ).closest( 'tr' ).is( ':last-child' ) ) {
+							return;
+						}
+						var item_table      = $( this ).closest( 'table.widefat' ),
+							item_table_body = item_table.find( 'tbody' ),
+							row             = item_table_body.data( 'row' );
+
+						item_table_body.append( '<tr>' + row + '</tr>' );
+						$( document.body ).trigger( 'wc-enhanced-select-init' );
+					} );
 				}
 			},
 
