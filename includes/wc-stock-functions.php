@@ -210,13 +210,13 @@ function wc_trigger_stock_change_notifications( $order, $changes ) {
 	foreach ( $changes as $change ) {
 		$order_notes[] = $change['product']->get_formatted_name() . ' ' . $change['from'] . '&rarr;' . $change['to'];
 
-		if ( $stock_to <= $no_stock_amount ) {
+		if ( $change['to'] <= $no_stock_amount ) {
 			do_action( 'woocommerce_no_stock', wc_get_product( $change['product']->get_id() ) );
-		} elseif ( $stock_to <= $low_stock_amount ) {
+		} elseif ( $change['to'] <= $low_stock_amount ) {
 			do_action( 'woocommerce_low_stock', wc_get_product( $change['product']->get_id() ) );
 		}
 
-		if ( $stock_to < 0 ) {
+		if ( $change['to'] < 0 ) {
 			do_action(
 				'woocommerce_product_on_backorder', array(
 					'product'  => wc_get_product( $change['product']->get_id() ),
