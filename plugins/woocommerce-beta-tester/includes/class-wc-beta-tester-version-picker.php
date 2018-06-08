@@ -43,12 +43,13 @@ class WC_Beta_Tester_Version_Picker {
 
 		$plugin_name = 'woocommerce';
 		$plugin      = 'woocommerce/woocommerce.php';
+		$version     = $_GET['wcbt_switch_to_version'];
 		$skin_args   = array(
 			'type'    => 'web',
 			'url'     => 'tools.php?page=wc-beta-tester-version-picker',
 			'title'   => 'Version switch result',
 			'plugin'  => $plugin_name,
-			'version' => $_GET['wcbt_switch_to_version'],
+			'version' => $version,
 			'nonce'   => $_GET['_wpnonce'],
 		);
 
@@ -59,13 +60,8 @@ class WC_Beta_Tester_Version_Picker {
 
 		if ( $result ) {
 			// Activate plugin.
-			// TODO: this causes some issues...
-			//$result = activate_plugin( $plugin, self_admin_url('plugins.php?error=true&plugin=' . urlencode( $plugin ) ), is_network_admin(), true );
-
-			// ... so just do a redirect instead
-			$activate_url_encoded = wp_nonce_url( self_admin_url( 'plugins.php?action=activate&plugin=woocommerce/woocommerce.php&plugin_status=active' ), 'activate-plugin_woocommerce/woocommerce.php' );
-			$activate_url         = str_replace( '&amp;', '&', $activate_url_encoded );
-			wp_redirect( $activate_url );
+			activate_plugin( $plugin, '', is_network_admin(), true );
+			wp_redirect( admin_url('tools.php?page=wc-beta-tester-version-picker&switched=' . $version ) );
 		} else {
 			// TODO: fail more gracefully.
 			print_r( $skin->get_upgrade_messages() );
@@ -105,7 +101,7 @@ class WC_Beta_Tester_Version_Picker {
 		$versions_html         = '';
 
 		if ( ! empty( $_GET['switched'] ) ) {
-			$versions_html    .= __( '<h2>Successfully switched version.</h2>', 'woocommerce-beta-tester' );
+			$versions_html    .= sprintf( __( '<h2>Successfully switched version to %s.</h2>' , 'woocommerce-beta-tester' ), $_GET['switched'] );
 		}
 
 		$versions_html        .= '<ul class="wcbt-version-list">';
