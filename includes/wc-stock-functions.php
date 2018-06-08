@@ -179,32 +179,55 @@ function wc_reduce_stock_levels( $order_id ) {
 		$item->add_meta_data( '_reduced_stock', $qty, true );
 		$item->save();
 
-		$changes[]        = $item_name . ' ' . ( $new_stock + $qty ) . '&rarr;' . $new_stock;
-		$no_stock_amount  = absint( get_option( 'woocommerce_notify_no_stock_amount', 0 ) );
-		$low_stock_amount = absint( get_option( 'woocommerce_notify_low_stock_amount', 2 ) );
+		$changes[] = array(
+			'product' => $product,
+			'from'    => $new_stock + $qty,
+			'to'      => $new_stock,
+		);
+	}
 
-		if ( $new_stock <= $no_stock_amount ) {
-			do_action( 'woocommerce_no_stock', wc_get_product( $product->get_id() ) );
-		} elseif ( $new_stock <= $low_stock_amount ) {
-			do_action( 'woocommerce_low_stock', wc_get_product( $product->get_id() ) );
+	wc_trigger_stock_change_notifications( $order, $changes );
+
+	do_action( 'woocommerce_reduce_order_stock', $order );
+}
+
+/**
+ * After stock change events, triggers emails and adds order notes.
+ *
+ * @since 3.5.0
+ * @param WC_Order $order order object.
+ * @param array $changes Array of changes.
+ */
+function wc_trigger_stock_change_notifications( $order, $changes ) {
+	if ( empty( $changes ) ) {
+		return;
+	}
+
+	$order_notes      = array();
+	$no_stock_amount  = absint( get_option( 'woocommerce_notify_no_stock_amount', 0 ) );
+	$low_stock_amount = absint( get_option( 'woocommerce_notify_low_stock_amount', 2 ) );
+
+	foreach ( $changes as $change ) {
+		$order_notes[] = $change['product']->get_formatted_name() . ' ' . $change['from'] . '&rarr;' . $change['to'];
+
+		if ( $stock_to <= $no_stock_amount ) {
+			do_action( 'woocommerce_no_stock', wc_get_product( $change['product']->get_id() ) );
+		} elseif ( $stock_to <= $low_stock_amount ) {
+			do_action( 'woocommerce_low_stock', wc_get_product( $change['product']->get_id() ) );
 		}
 
-		if ( $new_stock < 0 ) {
+		if ( $stock_to < 0 ) {
 			do_action(
 				'woocommerce_product_on_backorder', array(
-					'product'  => wc_get_product( $product->get_id() ),
-					'order_id' => $order_id,
-					'quantity' => $qty,
+					'product'  => wc_get_product( $change['product']->get_id() ),
+					'order_id' => $order->get_id(),
+					'quantity' => abs( $change['from'] - $change['to'] ),
 				)
 			);
 		}
 	}
 
-	if ( $changes ) {
-		$order->add_order_note( __( 'Stock levels reduced:', 'woocommerce' ) . ' ' . implode( ', ', $changes ) );
-	}
-
-	do_action( 'woocommerce_reduce_order_stock', $order );
+	$order->add_order_note( __( 'Stock levels reduced:', 'woocommerce' ) . ' ' . implode( ', ', $order_notes ) );
 }
 
 /**

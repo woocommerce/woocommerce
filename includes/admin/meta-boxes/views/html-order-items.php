@@ -314,14 +314,12 @@ if ( wc_tax_enabled() ) {
 								<tr>
 									<th><?php esc_html_e( 'Product', 'woocommerce' ); ?></th>
 									<th><?php esc_html_e( 'Quantity', 'woocommerce' ); ?></th>
-									<th><?php esc_html_e( 'Reduce stock?', 'woocommerce' ); ?></th>
 								</tr>
 							</thead>
 							<?php
 								$row = '
-									<td><select class="wc-product-search" name="add_order_items[]" data-allow_clear="true" data-placeholder="' . esc_attr__( 'Search for a product&hellip;', 'woocommerce' ) . '"></select></td>
-									<td><input type="text" autocomplete="off" name="add_order_items_qty[]" placeholder="1" size="4" class="quantity" /></td>
-									<td><input type="checkbox" name="add_order_items_reduce_stock[]" checked value="1" /></td>';
+									<td><select class="wc-product-search" name="item_id" data-allow_clear="true" data-placeholder="' . esc_attr__( 'Search for a product&hellip;', 'woocommerce' ) . '"></select></td>
+									<td><input type="text" autocomplete="off" name="item_qty" placeholder="1" size="4" class="quantity" /></td>';
 							?>
 							<tbody data-row="<?php echo esc_attr( $row ); ?>">
 								<tr>
