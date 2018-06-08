@@ -59,6 +59,10 @@ add_action( 'admin_menu', 'woo_dash_register_pages' );
  */
 function woo_dash_link_structure() {
 	global $submenu;
+	// User does not have capabilites to see the submenu
+	if ( ! current_user_can( 'manage_woocommerce' ) ) {
+		return;
+	}
 
 	$woodash_key = null;
 	foreach ( $submenu['woocommerce'] as $submenu_key => $submenu_item ) {
