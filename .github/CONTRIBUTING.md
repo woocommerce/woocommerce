@@ -44,7 +44,7 @@ https://woocommerce.com/contact-us/
 
 ## Coding Guidelines
 
-- **Ensure you stick to the [WordPress Coding Standards](https://make.wordpress.org/core/handbook/coding-standards/php/)**
+- **Ensure you stick to the [WordPress Coding Standards](https://make.wordpress.org/core/handbook/best-practices/coding-standards/php/)**
 - Install our pre-commit hook using composer. It'll help with the Coding Standards. To install run `composer install` from the command line within the woocommerce plugin directory.
 - Ensure you use LF line endings in your code editor. Use [EditorConfig](http://editorconfig.org/) if your editor supports it so that indentation, line endings and other settings are auto configured.
 - When committing, reference your issue number (#1234) and include a note about the fix.
