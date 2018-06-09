@@ -1344,13 +1344,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Search product data for a term and return ids.
 	 *
-	 * @param  string $term Search term.
-	 * @param  string $type Type of product.
-	 * @param  bool   $include_variations Include variations in search or not.
-	 * @param  bool   $all_statuses Should we search all statuses or limit to published.
+	 * @param  string   $term Search term.
+	 * @param  string   $type Type of product.
+	 * @param  bool     $include_variations Include variations in search or not.
+	 * @param  bool     $all_statuses Should we search all statuses or limit to published.
+	 * @param  null|int $limit Limit returned results. @since 3.5.0.
 	 * @return array of ids
 	 */
-	public function search_products( $term, $type = '', $include_variations = false, $all_statuses = false ) {
+	public function search_products( $term, $type = '', $include_variations = false, $all_statuses = false, $limit = null ) {
 		global $wpdb;
 
 		$post_types    = $include_variations ? array( 'product', 'product_variation' ) : array( 'product' );
@@ -1411,6 +1412,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$status_where = " AND posts.post_status IN ('" . implode( "','", $post_statuses ) . "') ";
 		}
 
+		if ( $limit ) {
+			$limit_query = $wpdb->prepare( ' LIMIT %d ', $limit );
+		}
+
 		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 		$search_results = $wpdb->get_results(
 			// phpcs:disable
@@ -1421,7 +1426,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$search_where
 			$status_where
 			$type_where
-			ORDER BY posts.post_parent ASC, posts.post_title ASC"
+			ORDER BY posts.post_parent ASC, posts.post_title ASC
+			$limit_query
+			"
 			// phpcs:enable
 		);
 
