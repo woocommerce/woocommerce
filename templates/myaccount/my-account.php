@@ -20,8 +20,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-wc_print_notices();
-
 /**
  * My Account navigation.
  * @since 2.6.0

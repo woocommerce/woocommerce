@@ -287,6 +287,7 @@ class WC_Auth {
 	 * Handle auth requests.
 	 *
 	 * @since 2.4.0
+	 * @throws Exception When auth_endpoint validation fails.
 	 */
 	public function handle_auth_requests() {
 		global $wp;
@@ -295,7 +296,7 @@ class WC_Auth {
 			$wp->query_vars['wc-auth-version'] = wc_clean( wp_unslash( $_GET['wc-auth-version'] ) ); // WPCS: input var ok, CSRF ok.
 		}
 
-		if ( ! empty( $_GET['wc-auth-route'] ) ) {
+		if ( ! empty( $_GET['wc-auth-route'] ) ) { // WPCS: input var ok, CSRF ok.
 			$wp->query_vars['wc-auth-route'] = wc_clean( wp_unslash( $_GET['wc-auth-route'] ) ); // WPCS: input var ok, CSRF ok.
 		}
 

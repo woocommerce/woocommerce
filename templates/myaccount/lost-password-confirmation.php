@@ -20,7 +20,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-wc_print_notices();
 wc_print_notice( __( 'Password reset email has been sent.', 'woocommerce' ) );
 ?>
 

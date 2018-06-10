@@ -345,11 +345,10 @@ class WC_AJAX {
 		$woocommerce_checkout_payment = ob_get_clean();
 
 		// Get messages if reload checkout is not true
-		$messages = '';
 		if ( ! isset( WC()->session->reload_checkout ) ) {
-			ob_start();
-			wc_print_notices();
-			$messages = ob_get_clean();
+			$messages = wc_print_notices( true );
+		} else {
+			$messages = '';
 		}
 
 		unset( WC()->session->refresh_totals, WC()->session->reload_checkout );

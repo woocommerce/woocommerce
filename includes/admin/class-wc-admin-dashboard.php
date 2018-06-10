@@ -360,7 +360,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			<script type="text/template" id="network-orders-row-template">
 				<tr>
 					<td>
-						<a href="<%- edit_url %>" class="order-view"><strong>#<%- id %> <%- customer %></strong></a>
+						<a href="<%- edit_url %>" class="order-view"><strong>#<%- number %> <%- customer %></strong></a>
 						<br>
 						<em>
 							<%- blog.blogname %>
