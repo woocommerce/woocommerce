@@ -93,7 +93,7 @@ class WC_Background_Updater extends WC_Background_Process {
 	 * item from the queue.
 	 *
 	 * @param string $callback Update callback function.
-	 * @return mixed
+	 * @return string|bool
 	 */
 	protected function task( $callback ) {
 		wc_maybe_define_constant( 'WC_UPDATING', true );
@@ -103,22 +103,20 @@ class WC_Background_Updater extends WC_Background_Process {
 
 		include_once dirname( __FILE__ ) . '/wc-update-functions.php';
 
+		$result = false;
+
 		if ( is_callable( $callback ) ) {
 			$logger->info( sprintf( 'Running %s callback', $callback ), array( 'source' => 'wc_db_updates' ) );
-			$result = call_user_func( $callback, $this );
+			$result = (bool) call_user_func( $callback );
 
-			if ( -1 === $result ) {
-				$message = sprintf( 'Requeuing %s callback.', $callback );
+			if ( $result ) {
+				$logger->info( sprintf( '%s callback needs to run again', $callback ), array( 'source' => 'wc_db_updates' ) );
 			} else {
-				$message = sprintf( 'Finished %s callback.', $callback );
+				$logger->info( sprintf( 'Finished running %s callback', $callback ), array( 'source' => 'wc_db_updates' ) );
 			}
-
-			$logger->info( $message, array( 'source' => 'wc_db_updates' ) );
-		} else {
-			$logger->notice( sprintf( 'Could not find %s callback', $callback ), array( 'source' => 'wc_db_updates' ) );
 		}
 
-		return -1 === $result ? $callback : false;
+		return $result ? $callback : false;
 	}
 
 	/**

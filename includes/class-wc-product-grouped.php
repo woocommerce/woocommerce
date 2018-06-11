@@ -64,7 +64,7 @@ class WC_Product_Grouped extends WC_Product {
 		$on_sale  = false;
 
 		foreach ( $children as $child ) {
-			if ( $child->is_on_sale() ) {
+			if ( $child->is_purchasable() && ! $child->has_child() && $child->is_on_sale() ) {
 				$on_sale = true;
 				break;
 			}

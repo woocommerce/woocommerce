@@ -585,9 +585,7 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public static function shop_messages() {
-		ob_start();
-		wc_print_notices();
-		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
+		return '<div class="woocommerce">' . wc_print_notices( true ) . '</div>';
 	}
 
 	/**

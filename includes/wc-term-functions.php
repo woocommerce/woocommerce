@@ -25,15 +25,11 @@ function wc_get_object_terms( $object_id, $taxonomy, $field = null, $index_key =
 	// Test if terms exists. get_the_terms() return false when it finds no terms.
 	$terms = get_the_terms( $object_id, $taxonomy );
 
-	if ( $terms && ! is_wp_error( $terms ) ) {
-		if ( ! is_null( $field ) ) {
-			$terms = wp_list_pluck( $terms, $field, $index_key );
-		}
-	} else {
-		$terms = array();
+	if ( ! $terms || is_wp_error( $terms ) || is_null( $field ) ) {
+		return array();
 	}
 
-	return $terms;
+	return wp_list_pluck( $terms, $field, $index_key );
 }
 
 /**

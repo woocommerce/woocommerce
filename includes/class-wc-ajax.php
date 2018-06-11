@@ -274,7 +274,7 @@ class WC_AJAX {
 
 		wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
 
-		if ( WC()->cart->is_empty() ) {
+		if ( WC()->cart->is_empty() && ! is_customize_preview() ) {
 			self::update_order_review_expired();
 		}
 
@@ -345,11 +345,10 @@ class WC_AJAX {
 		$woocommerce_checkout_payment = ob_get_clean();
 
 		// Get messages if reload checkout is not true
-		$messages = '';
 		if ( ! isset( WC()->session->reload_checkout ) ) {
-			ob_start();
-			wc_print_notices();
-			$messages = ob_get_clean();
+			$messages = wc_print_notices( true );
+		} else {
+			$messages = '';
 		}
 
 		unset( WC()->session->refresh_totals, WC()->session->reload_checkout );
@@ -474,7 +473,7 @@ class WC_AJAX {
 		}
 
 		wp_safe_redirect( wp_get_referer() ? remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids' ), wp_get_referer() ) : admin_url( 'edit.php?post_type=product' ) );
-		wp_die();
+		exit;
 	}
 
 	/**
@@ -495,7 +494,7 @@ class WC_AJAX {
 		}
 
 		wp_safe_redirect( wp_get_referer() ? wp_get_referer() : admin_url( 'edit.php?post_type=shop_order' ) );
-		wp_die();
+		exit;
 	}
 
 	/**
@@ -2504,7 +2503,7 @@ class WC_AJAX {
 
 		wp_send_json_success(
 			array(
-				'zones' => WC_Shipping_Zones::get_zones(),
+				'zones' => WC_Shipping_Zones::get_zones( 'json' ),
 			)
 		);
 	}

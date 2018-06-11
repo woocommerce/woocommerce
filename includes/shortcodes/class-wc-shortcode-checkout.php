@@ -79,8 +79,6 @@ class WC_Shortcode_Checkout {
 
 		do_action( 'before_woocommerce_pay' );
 
-		wc_print_notices();
-
 		$order_id = absint( $order_id );
 
 		// Pay for existing order.
@@ -152,7 +150,7 @@ class WC_Shortcode_Checkout {
 				);
 
 			} catch ( Exception $e ) {
-				wc_add_notice( $e->getMessage(), 'error' );
+				wc_print_notice( $e->getMessage(), 'error' );
 			}
 		} elseif ( $order_id ) {
 
@@ -168,16 +166,14 @@ class WC_Shortcode_Checkout {
 
 				} else {
 					/* translators: %s: order status */
-					wc_add_notice( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), wc_get_order_status_name( $order->get_status() ) ), 'error' );
+					wc_print_notice( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), wc_get_order_status_name( $order->get_status() ) ), 'error' );
 				}
 			} else {
-				wc_add_notice( __( 'Sorry, this order is invalid and cannot be paid for.', 'woocommerce' ), 'error' );
+				wc_print_notice( __( 'Sorry, this order is invalid and cannot be paid for.', 'woocommerce' ), 'error' );
 			}
 		} else {
-			wc_add_notice( __( 'Invalid order.', 'woocommerce' ), 'error' );
+			wc_print_notice( __( 'Invalid order.', 'woocommerce' ), 'error' );
 		}
-
-		wc_print_notices();
 
 		do_action( 'after_woocommerce_pay' );
 	}
@@ -188,9 +184,6 @@ class WC_Shortcode_Checkout {
 	 * @param int $order_id Order ID.
 	 */
 	private static function order_received( $order_id = 0 ) {
-
-		wc_print_notices();
-
 		$order = false;
 
 		// Get the order.
@@ -217,12 +210,8 @@ class WC_Shortcode_Checkout {
 	 * Show the checkout.
 	 */
 	private static function checkout() {
-
-		// Show non-cart errors.
-		wc_print_notices();
-
 		// Check cart has contents.
-		if ( WC()->cart->is_empty() ) {
+		if ( WC()->cart->is_empty() && ! is_customize_preview() ) {
 			return;
 		}
 

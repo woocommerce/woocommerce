@@ -1314,7 +1314,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			$this->set_stock_status( 'onbackorder' );
 
 			// If the stock level is changing and we do now have enough, force in stock status.
-		} elseif ( $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount', 0 ) && array_key_exists( 'stock_quantity', $this->get_changes() ) ) {
+		} elseif ( $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount', 0 ) && ( array_key_exists( 'stock_quantity', $this->get_changes() ) || array_key_exists( 'manage_stock', $this->get_changes() ) ) ) {
 			$this->set_stock_status( 'instock' );
 		}
 	}
@@ -1809,7 +1809,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			$image = '';
 		}
 
-		return apply_filters( 'woocommerce_product_get_image', wc_get_relative_url( $image ), $this, $size, $attr, $placeholder, $image );
+		return apply_filters( 'woocommerce_product_get_image', $image, $this, $size, $attr, $placeholder, $image );
 	}
 
 	/**

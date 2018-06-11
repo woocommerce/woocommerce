@@ -1638,8 +1638,6 @@ function wc_update_330_db_version() {
  * Update state codes for Ireland and BD.
  */
 function wc_update_340_states() {
-	global $wpdb;
-
 	$country_states = array(
 		'IE' => array(
 			'CK' => 'CO',
@@ -1714,6 +1712,23 @@ function wc_update_340_states() {
 		),
 	);
 
+	update_option( 'woocommerce_update_340_states', $country_states );
+}
+
+/**
+ * Update next state in the queue.
+ *
+ * @return bool True to run again, false if completed.
+ */
+function wc_update_340_state() {
+	global $wpdb;
+
+	$country_states = array_filter( (array) get_option( 'woocommerce_update_340_states', array() ) );
+
+	if ( empty( $country_states ) ) {
+		return false;
+	}
+
 	foreach ( $country_states as $country => $states ) {
 		foreach ( $states as $old => $new ) {
 			$wpdb->query(
@@ -1743,8 +1758,22 @@ function wc_update_340_states() {
 					'tax_rate_state' => strtoupper( $old ),
 				)
 			);
+			unset( $country_states[ $country ][ $old ] );
+
+			if ( empty( $country_states[ $country ] ) ) {
+				unset( $country_states[ $country ] );
+			}
+			break 2;
 		}
 	}
+
+	if ( ! empty( $country_states ) ) {
+		return update_option( 'woocommerce_update_340_states', $country_states );
+	}
+
+	delete_option( 'woocommerce_update_340_states' );
+
+	return false;
 }
 
 /**
@@ -1868,7 +1897,7 @@ function wc_update_350_order_customer_id( $updater = false ) {
 			foreach ( $orders_meta_data as $order_meta ) {
 				// Stop update execution and re-enqueue it if near memory limit.
 				if ( $updater instanceof WC_Background_Updater && $updater->is_memory_exceeded() ) {
-					return -1;
+					return true;
 				}
 
 				$wpdb->update( $wpdb->posts, array( 'post_author' => $order_meta->customer_id ), array( 'ID' => $order_meta->post_id ) );
@@ -1879,7 +1908,7 @@ function wc_update_350_order_customer_id( $updater = false ) {
 		while ( true ) {
 			// Stop update execution and re-enqueue it if near memory limit.
 			if ( $updater instanceof WC_Background_Updater && $updater->is_memory_exceeded() ) {
-				return -1;
+				return true;
 			}
 
 			$updated_rows = $wpdb->query( "UPDATE {$wpdb->posts} SET post_author = 0 WHERE post_type = 'shop_order_refund' LIMIT 1000" );
@@ -1892,4 +1921,3 @@ function wc_update_350_order_customer_id( $updater = false ) {
 
 	wp_cache_flush();
 }
-

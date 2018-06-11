@@ -102,6 +102,7 @@ class WC_Countries {
 			'AT' => array(),
 			'AX' => array(),
 			'BE' => array(),
+			'BH' => array(),
 			'BI' => array(),
 			'CZ' => array(),
 			'DE' => array(),
@@ -117,6 +118,7 @@ class WC_Countries {
 			'KR' => array(),
 			'KW' => array(),
 			'LB' => array(),
+			'LU' => array(),
 			'MQ' => array(),
 			'NL' => array(),
 			'NO' => array(),
@@ -514,10 +516,11 @@ class WC_Countries {
 	/**
 	 * Get country address format.
 	 *
-	 * @param  array $args Arguments.
+	 * @param  array  $args Arguments.
+	 * @param  string $separator How to separate address lines. @since 3.5.0.
 	 * @return string
 	 */
-	public function get_formatted_address( $args = array() ) {
+	public function get_formatted_address( $args = array(), $separator = '<br/>' ) {
 		$default_args = array(
 			'first_name' => '',
 			'last_name'  => '',
@@ -544,7 +547,7 @@ class WC_Countries {
 		$full_country = ( isset( $this->countries[ $country ] ) ) ? $this->countries[ $country ] : $country;
 
 		// Country is not needed if the same as base.
-		if ( $country === $this->get_base_country() && ! apply_filters( 'woocommerce_formatted_address_force_country_display', false ) ) {
+		if ( $country === $this->get_base_country() && ! apply_filters( 'woocommerce_formatted_address_force_country_display', true ) ) {
 			$format = str_replace( '{country}', '', $format );
 		}
 
@@ -590,7 +593,7 @@ class WC_Countries {
 		$formatted_address = array_filter( array_map( array( $this, 'trim_formatted_address_line' ), explode( "\n", $formatted_address ) ) );
 
 		// Add html breaks.
-		$formatted_address = implode( '<br/>', $formatted_address );
+		$formatted_address = implode( $separator, $formatted_address );
 
 		// We're done!
 		return $formatted_address;
@@ -618,7 +621,6 @@ class WC_Countries {
 				'required'     => true,
 				'class'        => array( 'form-row-first' ),
 				'autocomplete' => 'given-name',
-				'autofocus'    => true,
 				'priority'     => 10,
 			),
 			'last_name'  => array(
@@ -786,6 +788,11 @@ class WC_Countries {
 						'state'    => array(
 							'required' => false,
 							'label'    => __( 'Province', 'woocommerce' ),
+						),
+					),
+					'BH' => array(
+						'state' => array(
+							'required' => false,
 						),
 					),
 					'BI' => array(
@@ -1087,6 +1094,11 @@ class WC_Countries {
 						),
 					),
 					'LK' => array(
+						'state' => array(
+							'required' => false,
+						),
+					),
+					'LU' => array(
 						'state' => array(
 							'required' => false,
 						),

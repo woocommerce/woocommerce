@@ -73,13 +73,14 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 		}
 
 		// Handle password creation.
+		$password_generated = false;
 		if ( 'yes' === get_option( 'woocommerce_registration_generate_password' ) && empty( $password ) ) {
 			$password           = wp_generate_password();
 			$password_generated = true;
-		} elseif ( empty( $password ) ) {
+		}
+
+		if ( empty( $password ) ) {
 			return new WP_Error( 'registration-error-missing-password', __( 'Please enter an account password.', 'woocommerce' ) );
-		} else {
-			$password_generated = false;
 		}
 
 		// Use WP_Error to handle registration errors.
@@ -550,13 +551,7 @@ add_action( 'deleted_user', 'wc_reset_order_customer_id_on_deleted_user' );
  */
 function wc_review_is_from_verified_owner( $comment_id ) {
 	$verified = get_comment_meta( $comment_id, 'verified', true );
-
-	// If no "verified" meta is present, generate it (if this is a product review).
-	if ( '' === $verified ) {
-		$verified = WC_Comments::add_comment_purchase_verification( $comment_id );
-	}
-
-	return (bool) $verified;
+	return '' === $verified ? WC_Comments::add_comment_purchase_verification( $comment_id ) : (bool) $verified;
 }
 
 /**
@@ -602,16 +597,10 @@ add_action( 'profile_update', 'wc_update_profile_last_update_time', 10, 2 );
  */
 function wc_meta_update_last_update_time( $meta_id, $user_id, $meta_key, $_meta_value ) {
 	$keys_to_track = apply_filters( 'woocommerce_user_last_update_fields', array( 'first_name', 'last_name' ) );
-	$update_time   = false;
-	if ( in_array( $meta_key, $keys_to_track, true ) ) {
-		$update_time = true;
-	}
-	if ( 'billing_' === substr( $meta_key, 0, 8 ) ) {
-		$update_time = true;
-	}
-	if ( 'shipping_' === substr( $meta_key, 0, 9 ) ) {
-		$update_time = true;
-	}
+
+	$update_time = in_array( $meta_key, $keys_to_track, true ) ? true : false;
+	$update_time = 'billing_' === substr( $meta_key, 0, 8 ) ? true : $update_time;
+	$update_time = 'shipping_' === substr( $meta_key, 0, 9 ) ? true : $update_time;
 
 	if ( $update_time ) {
 		wc_set_user_last_update_time( $user_id );

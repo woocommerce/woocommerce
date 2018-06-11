@@ -150,10 +150,11 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'fields'              => 'ids',
 		);
 		$expected4['tax_query'][] = array(
-			'taxonomy' => 'product_cat',
-			'terms'    => array( 'clothing' ),
-			'field'    => 'slug',
-			'operator' => 'IN',
+			'taxonomy'         => 'product_cat',
+			'terms'            => array( 'clothing' ),
+			'field'            => 'slug',
+			'operator'         => 'IN',
+			'include_children' => true,
 		);
 
 		$this->assertEquals( $expected4, $shortcode4->get_query_args() );
@@ -180,10 +181,11 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'fields'              => 'ids',
 		);
 		$expected4_id['tax_query'][] = array(
-			'taxonomy' => 'product_cat',
-			'terms'    => array( 123 ),
-			'field'    => 'term_id',
-			'operator' => 'IN',
+			'taxonomy'         => 'product_cat',
+			'terms'            => array( 123 ),
+			'field'            => 'term_id',
+			'operator'         => 'IN',
+			'include_children' => true,
 		);
 
 		$this->assertEquals( $expected4_id, $shortcode4_id->get_query_args() );
@@ -492,6 +494,63 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 		);
 
 		$this->assertEquals( $expected14, $shortcode14->get_query_args() );
+
+		// products shortcode -- select multiple categories using AND operator.
+		$shortcode15 = new WC_Shortcode_Products( array(
+			'category'     => 'cat1,cat2',
+			'cat_operator' => 'AND',
+		) );
+		$expected15  = array(
+			'post_type'           => 'product',
+			'post_status'         => 'publish',
+			'ignore_sticky_posts' => true,
+			'no_found_rows'       => true,
+			'orderby'             => 'title',
+			'order'               => 'ASC',
+			'posts_per_page'      => -1,
+			'meta_query'          => $meta_query,
+			'tax_query'           => array_merge( $tax_query, array(
+				array(
+					'taxonomy'         => 'product_cat',
+					'terms'            => array( 'cat1', 'cat2' ),
+					'field'            => 'slug',
+					'operator'         => 'AND',
+					'include_children' => false,
+				),
+			) ),
+			'fields'              => 'ids',
+		);
+
+		$this->assertEquals( $expected15, $shortcode15->get_query_args() );
+
+		// products shortcode -- exclude multiple categories using NOT IN operator.
+		$shortcode16 = new WC_Shortcode_Products( array(
+			'category'     => 'cat1,cat2',
+			'cat_operator' => 'NOT IN',
+		) );
+		$expected16  = array(
+			'post_type'           => 'product',
+			'post_status'         => 'publish',
+			'ignore_sticky_posts' => true,
+			'no_found_rows'       => true,
+			'orderby'             => 'title',
+			'order'               => 'ASC',
+			'posts_per_page'      => -1,
+			'meta_query'          => $meta_query,
+			'tax_query'           => array_merge( $tax_query, array(
+				array(
+					'taxonomy'         => 'product_cat',
+					'terms'            => array( 'cat1', 'cat2' ),
+					'field'            => 'slug',
+					'operator'         => 'NOT IN',
+					'include_children' => true,
+				),
+			) ),
+			'fields'              => 'ids',
+		);
+
+		$this->assertEquals( $expected16, $shortcode16->get_query_args() );
+
 	}
 
 	/**
