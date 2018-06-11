@@ -99,7 +99,6 @@ class WC_Background_Updater extends WC_Background_Process {
 		wc_maybe_define_constant( 'WC_UPDATING', true );
 
 		$logger = wc_get_logger();
-		$result = null;
 
 		include_once dirname( __FILE__ ) . '/wc-update-functions.php';
 
@@ -114,6 +113,8 @@ class WC_Background_Updater extends WC_Background_Process {
 			} else {
 				$logger->info( sprintf( 'Finished running %s callback', $callback ), array( 'source' => 'wc_db_updates' ) );
 			}
+		} else {
+			$logger->notice( sprintf( 'Could not find %s callback', $callback ), array( 'source' => 'wc_db_updates' ) );
 		}
 
 		return $result ? $callback : false;
