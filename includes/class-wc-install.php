@@ -573,8 +573,8 @@ class WC_Install {
 				THEN
 					ALTER TABLE `{$wpdb->prefix}wc_download_log`
 					ADD CONSTRAINT `fk_wc_download_log_permission_id`
-					FOREIGN KEY (permission_id)
-					REFERENCES {$wpdb->prefix}woocommerce_downloadable_product_permissions(permission_id) ON DELETE CASCADE
+					FOREIGN KEY (`permission_id`)
+					REFERENCES `{$wpdb->prefix}woocommerce_downloadable_product_permissions` (`permission_id`) ON DELETE CASCADE;
 				END IF
 			" );
 		}
