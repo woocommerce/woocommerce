@@ -211,7 +211,7 @@ class WC_Shortcode_Checkout {
 	 */
 	private static function checkout() {
 		// Check cart has contents.
-		if ( WC()->cart->is_empty() && ! is_customize_preview() ) {
+		if ( WC()->cart->is_empty() && ! is_customize_preview() && apply_filters( 'woocommerce_checkout_redirect_empty_cart', true ) ) {
 			return;
 		}
 
