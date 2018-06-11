@@ -131,9 +131,9 @@
 				var regular_price = parseFloat( window.accounting.unformat( regular_price_field.val(), woocommerce_admin.mon_decimal_point ) );
 
 				if ( sale_price >= regular_price ) {
-					$( document.body ).triggerHandler( 'wc_add_error_tip', [ $(this), 'i18_sale_less_than_regular_error' ] );
+					$( document.body ).triggerHandler( 'wc_add_error_tip', [ $(this), 'i18n_sale_less_than_regular_error' ] );
 				} else {
-					$( document.body ).triggerHandler( 'wc_remove_error_tip', [ $(this), 'i18_sale_less_than_regular_error' ] );
+					$( document.body ).triggerHandler( 'wc_remove_error_tip', [ $(this), 'i18n_sale_less_than_regular_error' ] );
 				}
 			})
 
@@ -333,6 +333,14 @@
 			} );
 
 			return false;
+		});
+
+		$( '#wpbody' ).on( 'click', '#doaction, #doaction2', function() {
+			var action = $( this ).is( '#doaction' ) ? $( '#bulk-action-selector-top' ).val() : $( '#bulk-action-selector-bottom' ).val();
+
+			if ( 'remove_personal_data' === action ) {
+				return window.confirm( woocommerce_admin.i18n_remove_personal_data_notice );
+			}
 		});
 	});
 })( jQuery, woocommerce_admin );
