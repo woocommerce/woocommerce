@@ -1921,3 +1921,10 @@ function wc_update_350_order_customer_id( $updater = false ) {
 
 	wp_cache_flush();
 }
+
+/**
+ * Update DB Version.
+ */
+function wc_update_350_db_version() {
+	WC_Install::update_db_version( '3.5.0' );
+}

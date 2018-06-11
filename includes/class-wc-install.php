@@ -107,6 +107,7 @@ class WC_Install {
 		),
 		'3.5.0' => array(
 			'wc_update_350_order_customer_id',
+			'wc_update_350_db_version',
 		),
 	);
 
