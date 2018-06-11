@@ -1887,9 +1887,17 @@ if ( ! function_exists( 'woocommerce_shipping_calculator' ) ) {
 
 	/**
 	 * Output the cart shipping calculator.
+	 *
+	 * @param string $button_text Text for the shipping calculation toggle.
 	 */
-	function woocommerce_shipping_calculator() {
-		wc_get_template( 'cart/shipping-calculator.php' );
+	function woocommerce_shipping_calculator( $button_text = '' ) {
+		if ( 'no' === get_option( 'woocommerce_enable_shipping_calc' ) || ! WC()->cart->needs_shipping() ) {
+			return;
+		}
+		wp_enqueue_script( 'wc-country-select' );
+		wc_get_template( 'cart/shipping-calculator.php', array(
+			'button_text' => $button_text,
+		) );
 	}
 }
 
