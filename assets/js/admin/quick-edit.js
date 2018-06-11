@@ -129,6 +129,6 @@ jQuery(function( $ ) {
 	});
 
 	$( '#wpbody' ).on( 'click', '.trash-product', function() {
-		return window.confirm( woocommerce_admin.i18_delete_product_notice );
+		return window.confirm( woocommerce_admin.i18n_delete_product_notice );
 	});
 });
