@@ -43,7 +43,7 @@ class WC_Beta_Tester_Version_Picker {
 
 		$plugin_name = 'woocommerce';
 		$plugin      = 'woocommerce/woocommerce.php';
-		$version     = $_GET['wcbt_switch_to_version'];
+		$version     = sanitize_text_field( $_GET['wcbt_switch_to_version'] );
 		$skin_args   = array(
 			'type'    => 'web',
 			'url'     => 'tools.php?page=wc-beta-tester-version-picker',
@@ -53,15 +53,13 @@ class WC_Beta_Tester_Version_Picker {
 			'nonce'   => $_GET['_wpnonce'],
 		);
 
-		$skin = new Automatic_Upgrader_Skin( $skin_args );
+		$skin     = new Automatic_Upgrader_Skin( $skin_args );
 		$upgrader = new WC_Beta_Tester_Plugin_Upgrader( $skin );
-
-		$result = $upgrader->switch_version( $plugin );
+		$result   = $upgrader->switch_version( $plugin );
 
 		if ( $result ) {
-			// Activate plugin.
 			activate_plugin( $plugin, '', is_network_admin(), true );
-			wp_redirect( admin_url('tools.php?page=wc-beta-tester-version-picker&switched=' . $version ) );
+			wp_redirect( admin_url( 'tools.php?page=wc-beta-tester-version-picker&switched=' . urlencode( $version ) ) );
 		} else {
 			// TODO: fail more gracefully.
 			print_r( $skin->get_upgrade_messages() );
@@ -96,12 +94,12 @@ class WC_Beta_Tester_Version_Picker {
 		}
 
 		usort( $tags, 'version_compare' );
-		$tags = array_reverse( $tags );
-
-		$versions_html         = '';
+		$tags          = array_reverse( $tags );
+		$versions_html = '';
 
 		if ( ! empty( $_GET['switched'] ) ) {
-			$versions_html    .= sprintf( __( '<h2>Successfully switched version to %s.</h2>' , 'woocommerce-beta-tester' ), $_GET['switched'] );
+			/* translators: %s: WooCoomerce version  */
+			$versions_html .= '<h2>' . sprintf( esc_html__( 'Successfully switched version to %s.', 'woocommerce-beta-tester' ), esc_html( $_GET['switched'] ) ) . '</h2>';
 		}
 
 		$versions_html        .= '<ul class="wcbt-version-list">';
