@@ -527,6 +527,7 @@ function wc_reset_order_customer_id_on_deleted_user( $user_id ) {
 
 	$post_types              = (array) apply_filters( 'woocommerce_reset_order_customer_id_post_types', array( 'shop_order' ) );
 	$post_types_placeholders = implode( ', ', array_fill( 0, count( $post_types ), '%s' ) );
+	$query_args              = array_merge( $post_types, array( $user_id ) );
 
 	// Since WC 3.5, the customer ID is stored both in the _customer_user postmeta and in the post_author field.
 	// In future versions of WC, the plan is to use only post_author and stop using _customer_user, but for now
@@ -534,8 +535,8 @@ function wc_reset_order_customer_id_on_deleted_user( $user_id ) {
 	$wpdb->query(
 		// phpcs:disable WordPress.WP.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 		$wpdb->prepare(
-			"UPDATE {$wpdb->posts} SET `post_author` = 0 WHERE post_type IN ({$post_types_placeholders}) AND post_author = {$user_id}",
-			$post_types
+			"UPDATE {$wpdb->posts} SET `post_author` = 0 WHERE post_type IN ({$post_types_placeholders}) AND post_author = %d",
+			$query_args
 		)
 		// phpcs:enable
 	);
