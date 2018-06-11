@@ -413,8 +413,8 @@ table.variations {
 	.flex-control-thumbs {
 		li {
 			list-style: none;
-			float: left;
 			cursor: pointer;
+			float: left;
 		}
 
 		img {
@@ -429,6 +429,8 @@ table.variations {
 
 	img {
 		display: block;
+		width: 100%;
+		height: auto;
 	}
 }
 
