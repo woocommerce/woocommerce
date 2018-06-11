@@ -572,7 +572,7 @@ class WC_Install {
 						CONSTRAINT_SCHEMA = '{$wpdb->dbname}' AND
 						(
 							CONSTRAINT_NAME LIKE '%wc_download_log_ib%' OR
-							CONSTRAINT_NAME = 'fk_wc_download_log_permission_id' OR
+							CONSTRAINT_NAME = 'fk_wc_download_log_permission_id'
 						)
 						AND CONSTRAINT_TYPE = 'FOREIGN KEY'
 					)
