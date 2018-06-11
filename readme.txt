@@ -164,6 +164,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Enhancement - Introduce is_paypal_supported_currency check in setup wizard. #20244
 * Enhancement - Payment method table reordering accessibility. #19844
 * Enhancement - Log errors from transaction emails with logger. #20203
+* Enhancement - Improved shipping calculator experience. Shows destination country and added context to calculate shipping link. #20345
 * Fix - Check billing email is posted before using in WC_Cart::check_customer_coupons. #20180
 * Fix - Shipping postcode formatting when only posting a billing address. #20330
 * Tweak - Show empty terms in admin product category filter dropdown. #20324
