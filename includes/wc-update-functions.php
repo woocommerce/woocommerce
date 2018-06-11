@@ -1868,7 +1868,7 @@ function wc_update_350_order_customer_id( $updater = false ) {
 		$query = $wpdb->prepare(
 			// phpcs:disable WordPress.WP.PreparedSQL.NotPrepared
 			"SELECT ID FROM {$wpdb->posts}
-	        WHERE post_author = 1 AND post_type IN ({$post_types_placeholders}) $admin_orders_sql
+			WHERE post_author = 1 AND post_type IN ({$post_types_placeholders}) $admin_orders_sql
 			LIMIT 1000",
 			$post_types
 			// phpcs:enable
