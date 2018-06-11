@@ -335,4 +335,12 @@ jQuery( function ( $ ) {
 
 		return false;
 	});
+
+	$( '#wpbody' ).on( 'click', '#doaction, #doaction2', function() {
+		var action = $( this ).is( '#doaction' ) ? $( '#bulk-action-selector-top' ).val() : $( '#bulk-action-selector-bottom' ).val();
+
+		if ( 'remove_personal_data' === action ) {
+			return window.confirm( woocommerce_admin.i18n_remove_personal_data_notice );
+		}
+	});
 });
