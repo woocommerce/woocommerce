@@ -46,7 +46,7 @@ jQuery( function( $ ) {
 
 		// Hide "save card" if "Create Account" is not checked and registration is not forced.
 		var hasCreateAccountCheckbox = 0 < $( 'input#createaccount' ).length,
-			createAccount               = hasCreateAccountCheckbox && $('input#createaccount').is( ': checked' );
+			createAccount               = hasCreateAccountCheckbox && $('input#createaccount').is( ':checked' );
 
 		if ( createAccount || this.params.is_registration_required ) {
 			this.showSaveNewCheckbox();
