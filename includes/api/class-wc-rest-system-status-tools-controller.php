@@ -409,6 +409,15 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 			case 'clear_transients':
 				wc_delete_product_transients();
 				wc_delete_shop_order_transients();
+
+				$attribute_taxonomies = wc_get_attribute_taxonomies();
+
+				if ( $attribute_taxonomies ) {
+					foreach ( $attribute_taxonomies as $attribute ) {
+						delete_transient( 'wc_layered_nav_counts_pa_' . $attribute->attribute_name );
+					}
+				}
+
 				WC_Cache_Helper::get_transient_version( 'shipping', true );
 				$message = __( 'Product transients cleared', 'woocommerce' );
 				break;
