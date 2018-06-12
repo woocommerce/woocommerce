@@ -318,10 +318,6 @@ class WC_Auth {
 		$consumer_data = array();
 
 		try {
-			if ( 'yes' !== get_option( 'woocommerce_api_enabled' ) ) {
-				throw new Exception( __( 'API disabled!', 'woocommerce' ) );
-			}
-
 			$route = strtolower( wc_clean( $route ) );
 			$this->make_validation();
 
