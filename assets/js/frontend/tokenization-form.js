@@ -10,7 +10,8 @@ jQuery( function( $ ) {
 
 		// Params.
 		this.params = $.extend( {}, {
-			'is_registration_required': false
+			'is_registration_required': false,
+			'is_logged_in'            : false,
 		}, wc_tokenization_form_params );
 
 		// Bind functions to this.
@@ -21,7 +22,7 @@ jQuery( function( $ ) {
 		this.hideSaveNewCheckbox   = this.hideSaveNewCheckbox.bind( this );
 
 		// When a radio button is changed, make sure to show/hide our new CC info area.
-		this.$target.on( 'click', ':input.woocommerce-SavedPaymentMethods-tokenInput', { tokenizationForm: this }, this.onTokenChange );
+		this.$target.on( 'click change', ':input.woocommerce-SavedPaymentMethods-tokenInput', { tokenizationForm: this }, this.onTokenChange );
 
 		// OR if create account is checked.
 		$( 'input#createaccount' ).change( { tokenizationForm: this }, this.onCreateAccountChange );
@@ -38,21 +39,21 @@ jQuery( function( $ ) {
 
 		// Don't show the "use new" radio button if we only have one method..
 		if ( 0 === this.$target.data( 'count' ) ) {
-			$( '.woocommerce-SavedPaymentMethods-new', this.$target ).hide();
+			$( '.woocommerce-SavedPaymentMethods-new', this.$target ).remove();
 		}
-
-		// Trigger change event
-		$( ':input.woocommerce-SavedPaymentMethods-tokenInput:checked', this.$target ).trigger( 'change' );
 
 		// Hide "save card" if "Create Account" is not checked and registration is not forced.
 		var hasCreateAccountCheckbox = 0 < $( 'input#createaccount' ).length,
-			createAccount               = hasCreateAccountCheckbox && $('input#createaccount').is( ':checked' );
+			createAccount            = hasCreateAccountCheckbox && $( 'input#createaccount' ).is( ':checked' );
 
-		if ( createAccount || this.params.is_registration_required ) {
+		if ( createAccount || this.params.is_logged_in || this.params.is_registration_required ) {
 			this.showSaveNewCheckbox();
 		} else {
 			this.hideSaveNewCheckbox();
 		}
+
+		// Trigger change event
+		$( ':input.woocommerce-SavedPaymentMethods-tokenInput:checked', this.$target ).trigger( 'change' );
 	};
 
 	TokenizationForm.prototype.onTokenChange = function( event ) {
@@ -97,7 +98,7 @@ jQuery( function( $ ) {
 		return this;
 	};
 
-	/*
+	/**
 	 * Initialize.
 	 */
 	$( document.body ).on( 'updated_checkout wc-credit-card-form-init', function() {
