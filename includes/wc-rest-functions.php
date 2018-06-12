@@ -102,7 +102,8 @@ function wc_rest_upload_image_from_url( $image_url ) {
 	if ( ! $wp_filetype['type'] ) {
 		$headers = wp_remote_retrieve_headers( $response );
 		if ( isset( $headers['content-disposition'] ) && strstr( $headers['content-disposition'], 'filename=' ) ) {
-			$disposition = end( explode( 'filename=', $headers['content-disposition'] ) );
+			$content = explode( 'filename=', $headers['content-disposition'] );
+			$disposition = end( $content );
 			$disposition = sanitize_file_name( $disposition );
 			$file_name   = $disposition;
 		} elseif ( isset( $headers['content-type'] ) && strstr( $headers['content-type'], 'image/' ) ) {
