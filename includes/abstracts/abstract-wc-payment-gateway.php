@@ -441,6 +441,12 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 			array( 'jquery' ),
 			WC()->version
 		);
+
+		wp_localize_script(
+			'woocommerce-tokenization-form', 'wc_tokenization_form_params', array(
+				'is_registration_required' => WC()->checkout()->is_registration_required(),
+			)
+		);
 	}
 
 	/**
