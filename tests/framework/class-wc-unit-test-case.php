@@ -81,6 +81,9 @@ class WC_Unit_Test_Case extends WP_UnitTestCase {
 	 * @param string $message A message to display if the assertion fails.
 	 */
 	public function assertNotWPError( $actual, $message = '' ) {
+		if ( ! $message && is_wp_error( $actual ) ) {
+			$message = $actual->get_error_message();
+		}
 		$this->assertNotInstanceOf( 'WP_Error', $actual, $message );
 	}
 
