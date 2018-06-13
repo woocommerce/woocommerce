@@ -206,9 +206,9 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$children = $product->get_children();
 
 		// Test sale prices too
-		update_post_meta( $children[0], '_price', '8' );
-		update_post_meta( $children[0], '_sale_price', '8' );
-		delete_transient( 'wc_var_prices_' . $product->get_id() );
+		$child = wc_get_product( $children[0] );
+		$child->set_sale_price( 8 );
+		$child->save();
 
 		$product = new WC_Product_Variable( $product->get_id() );
 
