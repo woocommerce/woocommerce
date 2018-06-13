@@ -129,6 +129,7 @@ class WC_Checkout {
 		if ( in_array( $key, array( 'posted', 'shipping_method', 'payment_method' ), true ) && empty( $this->legacy_posted_data ) ) {
 			$this->legacy_posted_data = $this->get_posted_data();
 		}
+
 		switch ( $key ) {
 			case 'enable_signup':
 				return $this->is_registration_enabled();
@@ -193,45 +194,54 @@ class WC_Checkout {
 	 * @return array
 	 */
 	public function get_checkout_fields( $fieldset = '' ) {
-		if ( is_null( $this->fields ) ) {
-			$this->fields = array(
-				'billing'  => WC()->countries->get_address_fields( $this->get_value( 'billing_country' ), 'billing_' ),
-				'shipping' => WC()->countries->get_address_fields( $this->get_value( 'shipping_country' ), 'shipping_' ),
-				'account'  => array(),
-				'order'    => array(
-					'order_comments' => array(
-						'type'        => 'textarea',
-						'class'       => array( 'notes' ),
-						'label'       => __( 'Order notes', 'woocommerce' ),
-						'placeholder' => esc_attr__( 'Notes about your order, e.g. special notes for delivery.', 'woocommerce' ),
+		if ( ! is_null( $this->fields ) ) {
+			return $fieldset ? $this->fields[ $fieldset ] : $this->fields;
+		}
+
+		$this->fields = array(
+			'billing'  => WC()->countries->get_address_fields(
+				$this->get_value( 'billing_country' ),
+				'billing_'
+			),
+			'shipping' => WC()->countries->get_address_fields(
+				$this->get_value( 'shipping_country' ),
+				'shipping_'
+			),
+			'account'  => array(),
+			'order'    => array(
+				'order_comments' => array(
+					'type'        => 'textarea',
+					'class'       => array( 'notes' ),
+					'label'       => __( 'Order notes', 'woocommerce' ),
+					'placeholder' => esc_attr__(
+						'Notes about your order, e.g. special notes for delivery.',
+						'woocommerce'
 					),
 				),
+			),
+		);
+
+		if ( 'no' === get_option( 'woocommerce_registration_generate_username' ) ) {
+			$this->fields['account']['account_username'] = array(
+				'type'        => 'text',
+				'label'       => __( 'Account username', 'woocommerce' ),
+				'required'    => true,
+				'placeholder' => esc_attr__( 'Username', 'woocommerce' ),
 			);
-			if ( 'no' === get_option( 'woocommerce_registration_generate_username' ) ) {
-				$this->fields['account']['account_username'] = array(
-					'type'        => 'text',
-					'label'       => __( 'Account username', 'woocommerce' ),
-					'required'    => true,
-					'placeholder' => esc_attr__( 'Username', 'woocommerce' ),
-				);
-			}
-
-			if ( 'no' === get_option( 'woocommerce_registration_generate_password' ) ) {
-				$this->fields['account']['account_password'] = array(
-					'type'        => 'password',
-					'label'       => __( 'Create account password', 'woocommerce' ),
-					'required'    => true,
-					'placeholder' => esc_attr__( 'Password', 'woocommerce' ),
-				);
-			}
-
-			$this->fields = apply_filters( 'woocommerce_checkout_fields', $this->fields );
 		}
-		if ( $fieldset ) {
-			return $this->fields[ $fieldset ];
-		} else {
-			return $this->fields;
+
+		if ( 'no' === get_option( 'woocommerce_registration_generate_password' ) ) {
+			$this->fields['account']['account_password'] = array(
+				'type'        => 'password',
+				'label'       => __( 'Create account password', 'woocommerce' ),
+				'required'    => true,
+				'placeholder' => esc_attr__( 'Password', 'woocommerce' ),
+			);
 		}
+
+		$this->fields = apply_filters( 'woocommerce_checkout_fields', $this->fields );
+
+		return $fieldset ? $this->fields[ $fieldset ] : $this->fields;
 	}
 
 	/**
@@ -378,6 +388,7 @@ class WC_Checkout {
 					'taxes'        => $values['line_tax_data'],
 				)
 			);
+
 			if ( $product ) {
 				$item->set_props(
 					array(
@@ -388,6 +399,7 @@ class WC_Checkout {
 					)
 				);
 			}
+
 			$item->set_backorder_meta();
 
 			/**
@@ -560,9 +572,11 @@ class WC_Checkout {
 		if ( 'shipping' === $fieldset_key && ( ! $data['ship_to_different_address'] || ! WC()->cart->needs_shipping_address() ) ) {
 			return true;
 		}
+
 		if ( 'account' === $fieldset_key && ( is_user_logged_in() || ( ! $this->is_registration_required() && empty( $data['createaccount'] ) ) ) ) {
 			return true;
 		}
+
 		return false;
 	}
 
@@ -587,6 +601,7 @@ class WC_Checkout {
 				$skipped[] = $fieldset_key;
 				continue;
 			}
+
 			foreach ( $fieldset as $key => $field ) {
 				$type = sanitize_title( isset( $field['type'] ) ? $field['type'] : 'text' );
 
@@ -630,9 +645,11 @@ class WC_Checkout {
 	 */
 	protected function validate_posted_data( &$data, &$errors ) {
 		foreach ( $this->get_checkout_fields() as $fieldset_key => $fieldset ) {
+			$validate_fieldset = true;
 			if ( $this->maybe_skip_fieldset( $fieldset_key, $data ) ) {
-				continue;
+				$validate_fieldset = false;
 			}
+
 			foreach ( $fieldset as $key => $field ) {
 				if ( ! isset( $data[ $key ] ) ) {
 					continue;
@@ -656,16 +673,24 @@ class WC_Checkout {
 					$country      = isset( $data[ $fieldset_key . '_country' ] ) ? $data[ $fieldset_key . '_country' ] : WC()->customer->{"get_{$fieldset_key}_country"}();
 					$data[ $key ] = wc_format_postcode( $data[ $key ], $country );
 
-					if ( '' !== $data[ $key ] && ! WC_Validation::is_postcode( $data[ $key ], $country ) ) {
-						/* translators: %s: field name */
-						$errors->add( 'validation', sprintf( __( '%s is not a valid postcode / ZIP.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ) );
+					if ( $validate_fieldset && '' !== $data[ $key ] && ! WC_Validation::is_postcode( $data[ $key ], $country ) ) {
+						switch ( $country ) {
+							case 'IE':
+								/* translators: %1$s: field name, %2$s finder.eircode.ie URL */
+								$postcode_validation_notice = sprintf( __( '%1$s is not valid. You can look up the correct Eircode <a target="_blank" href="%2$s">here</a>.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>', 'https://finder.eircode.ie' );
+								break;
+							default:
+								/* translators: %s: field name */
+								$postcode_validation_notice = sprintf( __( '%s is not a valid postcode / ZIP.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' );
+						}
+						$errors->add( 'validation', apply_filters( 'woocommerce_checkout_postcode_validation_notice', $postcode_validation_notice, $country, $data[ $key ] ) );
 					}
 				}
 
 				if ( in_array( 'phone', $format, true ) ) {
 					$data[ $key ] = wc_format_phone_number( $data[ $key ] );
 
-					if ( '' !== $data[ $key ] && ! WC_Validation::is_phone( $data[ $key ] ) ) {
+					if ( $validate_fieldset && '' !== $data[ $key ] && ! WC_Validation::is_phone( $data[ $key ] ) ) {
 						/* translators: %s: phone number */
 						$errors->add( 'validation', sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ) );
 					}
@@ -674,7 +699,7 @@ class WC_Checkout {
 				if ( in_array( 'email', $format, true ) && '' !== $data[ $key ] ) {
 					$data[ $key ] = sanitize_email( $data[ $key ] );
 
-					if ( ! is_email( $data[ $key ] ) ) {
+					if ( $validate_fieldset && ! is_email( $data[ $key ] ) ) {
 						/* translators: %s: email address */
 						$errors->add( 'validation', sprintf( __( '%s is not a valid email address.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ) );
 						continue;
@@ -694,14 +719,14 @@ class WC_Checkout {
 							$data[ $key ] = $valid_state_values[ $data[ $key ] ];
 						}
 
-						if ( ! in_array( $data[ $key ], $valid_state_values, true ) ) {
+						if ( $validate_fieldset && ! in_array( $data[ $key ], $valid_state_values, true ) ) {
 							/* translators: 1: state field 2: valid states */
 							$errors->add( 'validation', sprintf( __( '%1$s is not valid. Please enter one of the following: %2$s', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>', implode( ', ', $valid_states ) ) );
 						}
 					}
 				}
 
-				if ( $required && '' === $data[ $key ] ) {
+				if ( $validate_fieldset && $required && '' === $data[ $key ] ) {
 					/* translators: %s: field name */
 					$errors->add( 'required-field', apply_filters( 'woocommerce_checkout_required_field_notice', sprintf( __( '%s is a required field.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ), $field_label ) );
 				}
@@ -720,7 +745,7 @@ class WC_Checkout {
 		$this->validate_posted_data( $data, $errors );
 		$this->check_cart_items();
 
-		if ( empty( $data['woocommerce_checkout_update_totals'] ) && ! empty( $_POST['terms-field'] ) && empty( $data['terms'] ) && apply_filters( 'woocommerce_checkout_show_terms', wc_get_page_id( 'terms' ) > 0 ) ) { // WPCS: input var ok, CSRF ok.
+		if ( empty( $data['woocommerce_checkout_update_totals'] ) && empty( $data['terms'] ) && ! empty( $_POST['terms-field'] ) ) { // WPCS: input var ok, CSRF ok.
 			$errors->add( 'terms', __( 'Please read and accept the terms and conditions to proceed with your order.', 'woocommerce' ) );
 		}
 
@@ -769,6 +794,7 @@ class WC_Checkout {
 			WC()->customer->{"set_billing_{$field}"}( $data[ "billing_{$field}" ] );
 			WC()->customer->{"set_shipping_{$field}"}( $data[ "billing_{$field}" ] );
 		}
+
 		if ( isset( $data[ "shipping_{$field}" ] ) ) {
 			WC()->customer->{"set_shipping_{$field}"}( $data[ "shipping_{$field}" ] );
 		}
@@ -835,12 +861,12 @@ class WC_Checkout {
 		if ( isset( $result['result'] ) && 'success' === $result['result'] ) {
 			$result = apply_filters( 'woocommerce_payment_successful_result', $result, $order_id );
 
-			if ( is_ajax() ) {
-				wp_send_json( $result );
-			} else {
+			if ( ! is_ajax() ) {
 				wp_redirect( $result['redirect'] );
 				exit;
 			}
+
+			wp_send_json( $result );
 		}
 	}
 
@@ -855,19 +881,19 @@ class WC_Checkout {
 		$order->payment_complete();
 		wc_empty_cart();
 
-		if ( is_ajax() ) {
-			wp_send_json(
-				array(
-					'result'   => 'success',
-					'redirect' => apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $order->get_checkout_order_received_url(), $order ),
-				)
-			);
-		} else {
+		if ( ! is_ajax() ) {
 			wp_safe_redirect(
 				apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $order->get_checkout_order_received_url(), $order )
 			);
 			exit;
 		}
+
+		wp_send_json(
+			array(
+				'result'   => 'success',
+				'redirect' => apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $order->get_checkout_order_received_url(), $order ),
+			)
+		);
 	}
 
 	/**
@@ -951,9 +977,7 @@ class WC_Checkout {
 		if ( is_ajax() ) {
 			// Only print notices if not reloading the checkout, otherwise they're lost in the page reload.
 			if ( ! isset( WC()->session->reload_checkout ) ) {
-				ob_start();
-				wc_print_notices();
-				$messages = ob_get_clean();
+				$messages = wc_print_notices( true );
 			}
 
 			$response = array(
@@ -1060,22 +1084,20 @@ class WC_Checkout {
 	public function get_value( $input ) {
 		if ( ! empty( $_POST[ $input ] ) ) { // WPCS: input var ok, CSRF OK.
 			return wc_clean( wp_unslash( $_POST[ $input ] ) ); // WPCS: input var ok, CSRF OK.
-
-		} else {
-
-			$value = apply_filters( 'woocommerce_checkout_get_value', null, $input );
-
-			if ( null !== $value ) {
-				return $value;
-			}
-
-			if ( is_callable( array( WC()->customer, "get_$input" ) ) ) {
-				$value = WC()->customer->{"get_$input"}() ? WC()->customer->{"get_$input"}() : null;
-			} elseif ( WC()->customer->meta_exists( $input ) ) {
-				$value = WC()->customer->get_meta( $input, true );
-			}
-
-			return apply_filters( 'default_checkout_' . $input, $value, $input );
 		}
+
+		$value = apply_filters( 'woocommerce_checkout_get_value', null, $input );
+
+		if ( null !== $value ) {
+			return $value;
+		}
+
+		if ( is_callable( array( WC()->customer, "get_$input" ) ) ) {
+			$value = WC()->customer->{"get_$input"}() ? WC()->customer->{"get_$input"}() : null;
+		} elseif ( WC()->customer->meta_exists( $input ) ) {
+			$value = WC()->customer->get_meta( $input, true );
+		}
+
+		return apply_filters( 'default_checkout_' . $input, $value, $input );
 	}
 }

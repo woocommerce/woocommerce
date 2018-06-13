@@ -151,13 +151,13 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 			'debug'     => __( 'Debug', 'woocommerce' ),
 		);
 
-		if ( isset( $levels[ $level_key ] ) ) {
-			$level       = $levels[ $level_key ];
-			$level_class = sanitize_html_class( 'log-level--' . $level_key );
-			return '<span class="log-level ' . $level_class . '">' . esc_html( $level ) . '</span>';
-		} else {
+		if ( ! isset( $levels[ $level_key ] ) ) {
 			return '';
 		}
+
+		$level       = $levels[ $level_key ];
+		$level_class = sanitize_html_class( 'log-level--' . $level_key );
+		return '<span class="log-level ' . $level_class . '">' . esc_html( $level ) . '</span>';
 	}
 
 	/**
@@ -375,11 +375,11 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 			$where_values[]     = '%' . $wpdb->esc_like( wc_clean( wp_unslash( $_REQUEST['s'] ) ) ) . '%';
 		}
 
-		if ( ! empty( $where_conditions ) ) {
-			return $wpdb->prepare( 'WHERE 1 = 1 AND ' . implode( ' AND ', $where_conditions ), $where_values );
-		} else {
+		if ( empty( $where_conditions ) ) {
 			return '';
 		}
+
+		return $wpdb->prepare( 'WHERE 1 = 1 AND ' . implode( ' AND ', $where_conditions ), $where_values );
 	}
 
 	/**

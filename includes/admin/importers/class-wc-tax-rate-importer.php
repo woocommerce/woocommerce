@@ -162,6 +162,8 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 					$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 					WC_Tax::_update_tax_rate_postcodes( $tax_rate_id, wc_clean( $postcode ) );
 					WC_Tax::_update_tax_rate_cities( $tax_rate_id, wc_clean( $city ) );
+
+					$row = fgetcsv( $handle, 0, $this->delimiter );
 				}
 			} else {
 				$this->import_error( __( 'The CSV is invalid.', 'woocommerce' ) );
@@ -242,8 +244,8 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 		echo '<div class="narrow">';
 		echo '<p>' . esc_html__( 'Hi there! Upload a CSV file containing tax rates to import the contents into your shop. Choose a .csv file to upload, then click "Upload file and import".', 'woocommerce' ) . '</p>';
 
-		/* translators: 1: Link to tax rates sample file */
-		echo '<p>' . sprintf( esc_html__( 'Tax rates need to be defined with columns in a specific order (10 columns). <a href="%s">Click here to download a sample</a>.', 'woocommerce' ), esc_url( WC()->plugin_url() ) . '/sample-data/sample_tax_rates.csv' ) . '</p>';
+		/* translators: 1: Link to tax rates sample file 2: Closing link. */
+		echo '<p>' . sprintf( esc_html__( 'Your CSV needs to include columns in a specific order. %1$sClick here to download a sample%2$s.', 'woocommerce' ), '<a href="' . esc_url( WC()->plugin_url() ) . '/sample-data/sample_tax_rates.csv">', '</a>' ) . '</p>';
 
 		$action = 'admin.php?import=woocommerce_tax_rate_csv&step=1';
 

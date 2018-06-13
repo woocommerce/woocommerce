@@ -10,7 +10,7 @@ class WC_Tests_Customer_Download_Log extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_id
 	 */
-	function test_get_id() {
+	public function test_get_id() {
 		$customer_id = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
 		$download    = new WC_Customer_Download();
 		$download->set_user_id( $customer_id );
@@ -28,12 +28,12 @@ class WC_Tests_Customer_Download_Log extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_timestamp
 	 */
-	function test_get_timestamp() {
+	public function test_get_timestamp() {
 		$object = new WC_Customer_Download_Log();
 		$set_to = current_time( 'timestamp', true );
 
 		// Convert timestamp to WC_DateTime using ISO 8601 for PHP 5.2 compat.
-		$dt_str = date( 'c', $set_to );
+		$dt_str       = date( 'c', $set_to );
 		$wc_timestamp = new WC_DateTime( $dt_str );
 
 		$object->set_timestamp( $set_to );
@@ -43,7 +43,7 @@ class WC_Tests_Customer_Download_Log extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_permission_id
 	 */
-	function test_get_permission_id() {
+	public function test_get_permission_id() {
 		$object = new WC_Customer_Download_Log();
 		$set_to = 10;
 		$object->set_permission_id( $set_to );
@@ -53,7 +53,7 @@ class WC_Tests_Customer_Download_Log extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_user_id
 	 */
-	function test_get_user_id() {
+	public function test_get_user_id() {
 		$object = new WC_Customer_Download_Log();
 		$set_to = 10;
 		$object->set_user_id( $set_to );
@@ -63,7 +63,7 @@ class WC_Tests_Customer_Download_Log extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_user_ip_address
 	 */
-	function test_get_user_ip_address() {
+	public function test_get_user_ip_address() {
 		$object = new WC_Customer_Download_Log();
 		$set_to = '1.2.3.4';
 		$object->set_user_ip_address( $set_to );
@@ -78,7 +78,7 @@ class WC_Tests_Customer_Download_Log extends WC_Unit_Test_Case {
 		$customer_id_1 = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
 		$customer_id_2 = wc_create_new_customer( 'test2@example.com', 'testuser2', 'testpassword2' );
 
-		$download_1 = new WC_Customer_Download;
+		$download_1 = new WC_Customer_Download();
 		$download_1->set_user_id( $customer_id_1 );
 		$download_1->set_order_id( 1 );
 		$download_1->save();
@@ -87,10 +87,10 @@ class WC_Tests_Customer_Download_Log extends WC_Unit_Test_Case {
 		$timestamp = current_time( 'timestamp', true );
 
 		// Convert timestamp to WC_DateTime using ISO 8601 for PHP 5.2 compat.
-		$dt_str = date( 'c', $timestamp );
+		$dt_str       = date( 'c', $timestamp );
 		$wc_timestamp = new WC_DateTime( $dt_str );
 
-		$download_log = new WC_Customer_Download_Log;
+		$download_log = new WC_Customer_Download_Log();
 		$download_log->set_timestamp( $timestamp );
 		$download_log->set_permission_id( $download_1->get_id() );
 		$download_log->set_user_id( $customer_id_2 );
@@ -116,7 +116,7 @@ class WC_Tests_Customer_Download_Log extends WC_Unit_Test_Case {
 		$customer_id_1 = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
 		$customer_id_2 = wc_create_new_customer( 'test2@example.com', 'testuser2', 'testpassword2' );
 
-		$download_1 = new WC_Customer_Download;
+		$download_1 = new WC_Customer_Download();
 		$download_1->set_user_id( $customer_id_1 );
 		$download_1->set_order_id( 1 );
 		$download_1->set_downloads_remaining( 10 );
@@ -136,9 +136,9 @@ class WC_Tests_Customer_Download_Log extends WC_Unit_Test_Case {
 		$this->assertEquals( 9, $download_1->get_downloads_remaining(), 'After download, permission downloads remaining should be 9.' );
 
 		// Make sure download log was recorded properly.
-		$data_store = WC_Data_Store::load( 'customer-download-log' );
+		$data_store    = WC_Data_Store::load( 'customer-download-log' );
 		$download_logs = $data_store->get_download_logs( array(
-			'permission_id' => $download_1->get_id()
+			'permission_id' => $download_1->get_id(),
 		) );
 
 		$this->assertEquals( 1, count( $download_logs ), 'After single download, permission should have one download log in database.' );

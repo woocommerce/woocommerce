@@ -124,8 +124,10 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 		$tables = $wpdb->get_col(
 			"SHOW TABLES WHERE `Tables_in_{$wpdb->dbname}` LIKE '{$wpdb->prefix}woocommerce\_%' OR `Tables_in_{$wpdb->dbname}` LIKE '{$wpdb->prefix}wc\_%'"
 		);
+		$result = WC_Install::get_tables();
+		sort( $result );
 
-		$this->assertEquals( $tables, WC_Install::get_tables() );
+		$this->assertEquals( $tables, $result );
 	}
 
 	/**

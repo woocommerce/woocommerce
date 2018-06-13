@@ -101,6 +101,8 @@ class WC_Install {
 		),
 		'3.4.0' => array(
 			'wc_update_340_states',
+			'wc_update_340_state',
+			'wc_update_340_last_active',
 			'wc_update_340_db_version',
 		),
 	);
@@ -153,12 +155,19 @@ class WC_Install {
 	 * This function is hooked into admin_init to affect admin only.
 	 */
 	public static function install_actions() {
-		if ( ! empty( $_GET['do_update_woocommerce'] ) ) { // WPCS: input var ok, CSRF ok.
+		if ( ! empty( $_GET['do_update_woocommerce'] ) ) { // WPCS: input var ok.
+			check_admin_referer( 'wc_db_update', 'wc_db_update_nonce' );
 			self::update();
 			WC_Admin_Notices::add_notice( 'update' );
 		}
-		if ( ! empty( $_GET['force_update_woocommerce'] ) ) { // WPCS: input var ok, CSRF ok.
-			do_action( 'wp_' . get_current_blog_id() . '_wc_updater_cron' );
+		if ( ! empty( $_GET['force_update_woocommerce'] ) ) { // WPCS: input var ok.
+			check_admin_referer( 'wc_force_db_update', 'wc_force_db_update_nonce' );
+			$blog_id = get_current_blog_id();
+
+			// Used to fire an action added in WP_Background_Process::_construct() that calls WP_Background_Process::handle_cron_healthcheck().
+			// This method will make sure the database updates are executed even if cron is disabled. Nothing will happen if the updates are already running.
+			do_action( 'wp_' . $blog_id . '_wc_updater_cron' );
+
 			wp_safe_redirect( admin_url( 'admin.php?page=wc-settings' ) );
 			exit;
 		}
@@ -351,7 +360,8 @@ class WC_Install {
 		wp_clear_scheduled_hook( 'woocommerce_scheduled_sales' );
 		wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
 		wp_clear_scheduled_hook( 'woocommerce_cleanup_sessions' );
-		wp_clear_scheduled_hook( 'woocommerce_cleanup_orders' );
+		wp_clear_scheduled_hook( 'woocommerce_cleanup_personal_data' );
+		wp_clear_scheduled_hook( 'woocommerce_cleanup_logs' );
 		wp_clear_scheduled_hook( 'woocommerce_geoip_updater' );
 		wp_clear_scheduled_hook( 'woocommerce_tracker_send_event' );
 
@@ -365,10 +375,14 @@ class WC_Install {
 			wp_schedule_single_event( time() + ( absint( $held_duration ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
 		}
 
-		wp_schedule_event( time(), 'daily', 'woocommerce_cleanup_orders' );
-		wp_schedule_event( time(), 'twicedaily', 'woocommerce_cleanup_sessions' );
+		wp_schedule_event( time(), 'daily', 'woocommerce_cleanup_personal_data' );
+		wp_schedule_event( time() + ( 3 * HOUR_IN_SECONDS ), 'daily', 'woocommerce_cleanup_logs' );
+		wp_schedule_event( time() + ( 6 * HOUR_IN_SECONDS ), 'twicedaily', 'woocommerce_cleanup_sessions' );
 		wp_schedule_event( strtotime( 'first tuesday of next month' ), 'monthly', 'woocommerce_geoip_updater' );
 		wp_schedule_event( time() + 10, apply_filters( 'woocommerce_tracker_event_recurrence', 'daily' ), 'woocommerce_tracker_send_event' );
+
+		// Trigger GeoLite2 database download after 5 minutes.
+		wp_schedule_single_event( time() + ( MINUTE_IN_SECONDS * 5 ), 'woocommerce_geoip_updater' );
 	}
 
 	/**
@@ -433,6 +447,12 @@ class WC_Install {
 				}
 			}
 		}
+
+		// Define other defaults if not in setting screens.
+		add_option( 'woocommerce_single_image_width', '600', '', 'yes' );
+		add_option( 'woocommerce_thumbnail_image_width', '300', '', 'yes' );
+		add_option( 'woocommerce_checkout_highlight_required_fields', 'yes', '', 'yes' );
+		add_option( 'woocommerce_demo_store', 'no', '', 'no' );
 	}
 
 	/**
@@ -530,8 +550,23 @@ class WC_Install {
 			$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_type (comment_type)" );
 		}
 
-		// Add constraint to download logs.
-		$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log ADD FOREIGN KEY (permission_id) REFERENCES {$wpdb->prefix}woocommerce_downloadable_product_permissions(permission_id) ON DELETE CASCADE" );
+		// Get tables data types and check it matches before adding constraint.
+		$download_log_columns     = $wpdb->get_results( "SHOW COLUMNS FROM {$wpdb->prefix}wc_download_log WHERE Field = 'permission_id'", ARRAY_A );
+		$download_log_column_type = '';
+		if ( isset( $download_log_columns[0]['Type'] ) ) {
+			$download_log_column_type = $download_log_columns[0]['Type'];
+		}
+
+		$download_permissions_columns     = $wpdb->get_results( "SHOW COLUMNS FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE Field = 'permission_id'", ARRAY_A );
+		$download_permissions_column_type = '';
+		if ( isset( $download_permissions_columns[0]['Type'] ) ) {
+			$download_permissions_column_type = $download_permissions_columns[0]['Type'];
+		}
+
+		// Add constraint to download logs if the columns matches.
+		if ( ! empty( $download_permissions_column_type ) && ! empty( $download_log_column_type ) && $download_permissions_column_type === $download_log_column_type ) {
+			$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log ADD FOREIGN KEY (permission_id) REFERENCES {$wpdb->prefix}woocommerce_downloadable_product_permissions(permission_id) ON DELETE CASCADE" );
+		}
 	}
 
 	/**
@@ -838,10 +873,16 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			$wp_roles = new WP_Roles(); // @codingStandardsIgnoreLine
 		}
 
+		// Dummy gettext calls to get strings in the catalog.
+		/* translators: user role */
+		_x( 'Customer', 'User role', 'woocommerce' );
+		/* translators: user role */
+		_x( 'Shop manager', 'User role', 'woocommerce' );
+
 		// Customer role.
 		add_role(
 			'customer',
-			__( 'Customer', 'woocommerce' ),
+			'Customer',
 			array(
 				'read' => true,
 			)
@@ -850,7 +891,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 		// Shop manager role.
 		add_role(
 			'shop_manager',
-			__( 'Shop manager', 'woocommerce' ),
+			'Shop manager',
 			array(
 				'level_9'                => true,
 				'level_8'                => true,
@@ -1067,8 +1108,9 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	 * @param string $key Plugin relative path. Example: woocommerce/woocommerce.php.
 	 */
 	private static function associate_plugin_file( $plugins, $key ) {
-		$path                = explode( '/', $key );
-		$plugins[ $path[1] ] = $key;
+		$path                 = explode( '/', $key );
+		$filename             = end( $path );
+		$plugins[ $filename ] = $key;
 		return $plugins;
 	}
 

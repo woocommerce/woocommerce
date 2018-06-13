@@ -157,7 +157,12 @@ class WC_Cache_Helper {
 		if ( ! wp_using_ext_object_cache() && ! empty( $version ) ) {
 			global $wpdb;
 
-			$limit    = apply_filters( 'woocommerce_delete_version_transients_limit', 1000 );
+			$limit = apply_filters( 'woocommerce_delete_version_transients_limit', 1000 );
+
+			if ( ! $limit ) {
+				return;
+			}
+
 			$affected = $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s ORDER BY option_id LIMIT %d;", '\_transient\_%' . $version, $limit ) ); // WPCS: cache ok, db call ok.
 
 			// If affected rows is equal to limit, there are more rows to delete. Delete in 10 secs.
@@ -217,7 +222,7 @@ class WC_Cache_Helper {
 		if ( 'product_cat' === $taxonomy ) {
 			$ids = is_array( $ids ) ? $ids : array( $ids );
 
-			$clear_ids = array();
+			$clear_ids = array( 0 );
 
 			foreach ( $ids as $id ) {
 				$clear_ids[] = $id;

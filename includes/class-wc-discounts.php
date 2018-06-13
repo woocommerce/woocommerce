@@ -17,7 +17,7 @@ class WC_Discounts {
 	 * Reference to cart or order object.
 	 *
 	 * @since 3.2.0
-	 * @var array
+	 * @var WC_Cart|WC_Order
 	 */
 	protected $object;
 
@@ -36,11 +36,11 @@ class WC_Discounts {
 	protected $discounts = array();
 
 	/**
-	 * Constructor.
+	 * WC_Discounts Constructor.
 	 *
-	 * @param array $object Cart or order object.
+	 * @param WC_Cart|WC_Order $object Cart or order object.
 	 */
-	public function __construct( $object = array() ) {
+	public function __construct( $object = null ) {
 		if ( is_a( $object, 'WC_Cart' ) ) {
 			$this->set_items_from_cart( $object );
 		} elseif ( is_a( $object, 'WC_Order' ) ) {
@@ -93,7 +93,7 @@ class WC_Discounts {
 	 * Normalise order items which will be discounted.
 	 *
 	 * @since 3.2.0
-	 * @param array $order Cart object.
+	 * @param WC_Order $order Order object.
 	 */
 	public function set_items_from_order( $order ) {
 		$this->items     = array();
@@ -239,6 +239,7 @@ class WC_Discounts {
 	 * @since  3.2.0
 	 * @param  WC_Coupon $coupon Coupon object being applied to the items.
 	 * @param  bool      $validate Set to false to skip coupon validation.
+	 * @throws Exception Error message when coupon isn't valid.
 	 * @return bool|WP_Error True if applied or WP_Error instance in failure.
 	 */
 	public function apply_coupon( $coupon, $validate = true ) {
@@ -257,7 +258,6 @@ class WC_Discounts {
 		}
 
 		$items_to_apply = $this->get_items_to_apply_coupon( $coupon );
-		$coupon_type    = $coupon->get_discount_type();
 
 		// Core discounts are handled here as of 3.2.
 		switch ( $coupon->get_discount_type() ) {

@@ -40,8 +40,14 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 		$coupon_id = $coupon->get_id();
 		$this->assertNotEquals( 0, $coupon_id );
 		$coupon->delete( true );
-		$coupon = new WC_Coupon( $coupon_id );
 		$this->assertEquals( 0, $coupon->get_id() );
+		// Test loading a deleted coupon exception.
+		try {
+			$coupon = new WC_Coupon( $coupon_id );
+		} catch ( Exception $e ) {
+			$this->assertEquals( 'Invalid coupon.', $e->getMessage() );
+		}
+
 	}
 
 	/**

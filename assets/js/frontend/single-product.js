@@ -204,7 +204,7 @@ jQuery( function( $ ) {
 				touch: false
 			}, wc_single_product_params.zoom_options );
 
-			if ( 'ontouchstart' in window ) {
+			if ( 'ontouchstart' in document.documentElement ) {
 				zoom_options.on = 'click';
 			}
 
@@ -220,8 +220,17 @@ jQuery( function( $ ) {
 		if ( this.zoom_enabled && this.$images.length > 0 ) {
 			this.$target.prepend( '<a href="#" class="woocommerce-product-gallery__trigger">🔍</a>' );
 			this.$target.on( 'click', '.woocommerce-product-gallery__trigger', this.openPhotoswipe );
+			this.$target.on( 'click', '.woocommerce-product-gallery__image a', function( e ) {
+				e.preventDefault();
+			});
+
+			// If flexslider is disabled, gallery images also need to trigger photoswipe on click.
+			if ( ! this.flexslider_enabled ) {
+				this.$target.on( 'click', '.woocommerce-product-gallery__image a', this.openPhotoswipe );
+			}
+		} else {
+			this.$target.on( 'click', '.woocommerce-product-gallery__image a', this.openPhotoswipe );
 		}
-		this.$target.on( 'click', '.woocommerce-product-gallery__image a', this.openPhotoswipe );
 	};
 
 	/**

@@ -239,8 +239,9 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	public function test_wc_get_log_file_path() {
 		$log_dir   = trailingslashit( WC_LOG_DIR );
 		$hash_name = sanitize_file_name( wp_hash( 'unit-tests' ) );
+		$date_suffix = date( 'Y-m-d', current_time( 'timestamp', true ) );
 
-		$this->assertEquals( $log_dir . 'unit-tests-' . $hash_name . '.log', wc_get_log_file_path( 'unit-tests' ) );
+		$this->assertEquals( $log_dir . 'unit-tests-' . $date_suffix . '-' . $hash_name . '.log', wc_get_log_file_path( 'unit-tests' ) );
 	}
 
 	/**

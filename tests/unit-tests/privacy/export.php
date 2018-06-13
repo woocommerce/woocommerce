@@ -58,11 +58,11 @@ class WC_Test_Privacy_Export extends WC_Unit_Test_Case {
 	 */
 	public function test_customer_data_exporter() {
 		// Test a non existing user.
-		$response = WC_Privacy::customer_data_exporter( 'doesnotexist@test.com', 1 );
+		$response = WC_Privacy_Exporters::customer_data_exporter( 'doesnotexist@test.com' );
 		$this->assertEquals( array(), $response['data'] );
 
 		// Do a test export and check response.
-		$response = WC_Privacy::customer_data_exporter( 'test1@test.com', 1 );
+		$response = WC_Privacy_Exporters::customer_data_exporter( 'test1@test.com' );
 		$this->assertTrue( $response['done'] );
 		$this->assertEquals(
 			array(
@@ -134,7 +134,7 @@ class WC_Test_Privacy_Export extends WC_Unit_Test_Case {
 	 * Test: Order data exporter.
 	 */
 	public function test_order_data_exporter() {
-		$response = WC_Privacy::order_data_exporter( 'test1@test.com', 1 );
+		$response = WC_Privacy_Exporters::order_data_exporter( 'test1@test.com', 1 );
 
 		$this->assertEquals( 'woocommerce_orders', $response['data'][0]['group_id'] );
 		$this->assertEquals( 'Orders', $response['data'][0]['group_label'] );
@@ -143,7 +143,7 @@ class WC_Test_Privacy_Export extends WC_Unit_Test_Case {
 		$this->assertTrue( 8 === count( $response['data'][0]['data'] ), count( $response['data'][0]['data'] ) );
 
 		// Next page should be orders.
-		$response = WC_Privacy::order_data_exporter( 'test1@test.com', 2 );
+		$response = WC_Privacy_Exporters::order_data_exporter( 'test1@test.com', 2 );
 		$this->assertTrue( $response['done'] );
 		$this->assertTrue( 8 === count( $response['data'][0]['data'] ), count( $response['data'][0]['data'] ) );
 	}

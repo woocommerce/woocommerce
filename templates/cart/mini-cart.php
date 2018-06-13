@@ -51,10 +51,10 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 						), $cart_item_key );
 						?>
 						<?php if ( empty( $product_permalink ) ) : ?>
-							<?php echo str_replace( array( 'http:', 'https:' ), '', $thumbnail ) . $product_name . '&nbsp;'; ?>
+							<?php echo $thumbnail . $product_name . '&nbsp;'; ?>
 						<?php else : ?>
 							<a href="<?php echo esc_url( $product_permalink ); ?>">
-								<?php echo str_replace( array( 'http:', 'https:' ), '', $thumbnail ) . $product_name . '&nbsp;'; ?>
+								<?php echo $thumbnail . $product_name . '&nbsp;'; ?>
 							</a>
 						<?php endif; ?>
 						<?php echo wc_get_formatted_cart_item_data( $cart_item ); ?>

@@ -335,45 +335,45 @@ class WC_Meta_Box_Product_Data {
 				/* translators: 1: product ID 2: quantity in stock */
 				WC_Admin_Meta_Boxes::add_error( sprintf( __( 'The stock has not been updated because the value has changed since editing. Product %1$d has %2$d units in stock.', 'woocommerce' ), $product->get_id(), $product->get_stock_quantity( 'edit' ) ) );
 			} else {
-				$stock = wc_stock_amount( $_POST['_stock'] );
+				$stock = wc_stock_amount( wp_unslash( $_POST['_stock'] ) );
 			}
 		}
 
 		$errors = $product->set_props(
 			array(
-				'sku'                => isset( $_POST['_sku'] ) ? wc_clean( $_POST['_sku'] ) : null,
-				'purchase_note'      => wp_kses_post( stripslashes( $_POST['_purchase_note'] ) ),
+				'sku'                => isset( $_POST['_sku'] ) ? wc_clean( wp_unslash( $_POST['_sku'] ) ) : null,
+				'purchase_note'      => wp_kses_post( wp_unslash( $_POST['_purchase_note'] ) ),
 				'downloadable'       => isset( $_POST['_downloadable'] ),
 				'virtual'            => isset( $_POST['_virtual'] ),
 				'featured'           => isset( $_POST['_featured'] ),
-				'catalog_visibility' => wc_clean( $_POST['_visibility'] ),
-				'tax_status'         => isset( $_POST['_tax_status'] ) ? wc_clean( $_POST['_tax_status'] ) : null,
-				'tax_class'          => isset( $_POST['_tax_class'] ) ? wc_clean( $_POST['_tax_class'] ) : null,
-				'weight'             => wc_clean( $_POST['_weight'] ),
-				'length'             => wc_clean( $_POST['_length'] ),
-				'width'              => wc_clean( $_POST['_width'] ),
-				'height'             => wc_clean( $_POST['_height'] ),
-				'shipping_class_id'  => absint( $_POST['product_shipping_class'] ),
+				'catalog_visibility' => wc_clean( wp_unslash( $_POST['_visibility'] ) ),
+				'tax_status'         => isset( $_POST['_tax_status'] ) ? wc_clean( wp_unslash( $_POST['_tax_status'] ) ) : null,
+				'tax_class'          => isset( $_POST['_tax_class'] ) ? wc_clean( wp_unslash( $_POST['_tax_class'] ) ) : null,
+				'weight'             => wc_clean( wp_unslash( $_POST['_weight'] ) ),
+				'length'             => wc_clean( wp_unslash( $_POST['_length'] ) ),
+				'width'              => wc_clean( wp_unslash( $_POST['_width'] ) ),
+				'height'             => wc_clean( wp_unslash( $_POST['_height'] ) ),
+				'shipping_class_id'  => absint( wp_unslash( $_POST['product_shipping_class'] ) ),
 				'sold_individually'  => ! empty( $_POST['_sold_individually'] ),
-				'upsell_ids'         => isset( $_POST['upsell_ids'] ) ? array_map( 'intval', (array) $_POST['upsell_ids'] ) : array(),
-				'cross_sell_ids'     => isset( $_POST['crosssell_ids'] ) ? array_map( 'intval', (array) $_POST['crosssell_ids'] ) : array(),
-				'regular_price'      => wc_clean( $_POST['_regular_price'] ),
-				'sale_price'         => wc_clean( $_POST['_sale_price'] ),
-				'date_on_sale_from'  => wc_clean( $_POST['_sale_price_dates_from'] ),
-				'date_on_sale_to'    => wc_clean( $_POST['_sale_price_dates_to'] ),
+				'upsell_ids'         => isset( $_POST['upsell_ids'] ) ? array_map( 'intval', (array) wp_unslash( $_POST['upsell_ids'] ) ) : array(),
+				'cross_sell_ids'     => isset( $_POST['crosssell_ids'] ) ? array_map( 'intval', (array) wp_unslash( $_POST['crosssell_ids'] ) ) : array(),
+				'regular_price'      => wc_clean( wp_unslash( $_POST['_regular_price'] ) ),
+				'sale_price'         => wc_clean( wp_unslash( $_POST['_sale_price'] ) ),
+				'date_on_sale_from'  => wc_clean( wp_unslash( $_POST['_sale_price_dates_from'] ) ),
+				'date_on_sale_to'    => wc_clean( wp_unslash( $_POST['_sale_price_dates_to'] ) ),
 				'manage_stock'       => ! empty( $_POST['_manage_stock'] ),
-				'backorders'         => isset( $_POST['_backorders'] ) ? wc_clean( $_POST['_backorders'] ) : null,
-				'stock_status'       => wc_clean( $_POST['_stock_status'] ),
+				'backorders'         => isset( $_POST['_backorders'] ) ? wc_clean( wp_unslash( $_POST['_backorders'] ) ) : null,
+				'stock_status'       => wc_clean( wp_unslash( $_POST['_stock_status'] ) ),
 				'stock_quantity'     => $stock,
-				'download_limit'     => '' === $_POST['_download_limit'] ? '' : absint( $_POST['_download_limit'] ),
-				'download_expiry'    => '' === $_POST['_download_expiry'] ? '' : absint( $_POST['_download_expiry'] ),
+				'download_limit'     => '' === $_POST['_download_limit'] ? '' : absint( wp_unslash( $_POST['_download_limit'] ) ),
+				'download_expiry'    => '' === $_POST['_download_expiry'] ? '' : absint( wp_unslash( $_POST['_download_expiry'] ) ),
 				'downloads'          => self::prepare_downloads(
-					isset( $_POST['_wc_file_names'] ) ? $_POST['_wc_file_names'] : array(),
-					isset( $_POST['_wc_file_urls'] ) ? $_POST['_wc_file_urls'] : array(),
-					isset( $_POST['_wc_file_hashes'] ) ? $_POST['_wc_file_hashes'] : array()
+					isset( $_POST['_wc_file_names'] ) ? wp_unslash( $_POST['_wc_file_names'] ) : array(),
+					isset( $_POST['_wc_file_urls'] ) ? wp_unslash( $_POST['_wc_file_urls'] ) : array(),
+					isset( $_POST['_wc_file_hashes'] ) ? wp_unslash( $_POST['_wc_file_hashes'] ) : array()
 				),
-				'product_url'        => esc_url_raw( $_POST['_product_url'] ),
-				'button_text'        => wc_clean( $_POST['_button_text'] ),
+				'product_url'        => esc_url_raw( wp_unslash( $_POST['_product_url'] ) ),
+				'button_text'        => wc_clean( wp_unslash( $_POST['_button_text'] ) ),
 				'children'           => 'grouped' === $product_type ? self::prepare_children() : null,
 				'reviews_allowed'    => ! empty( $_POST['comment_status'] ) && 'open' === $_POST['comment_status'],
 				'attributes'         => $attributes,

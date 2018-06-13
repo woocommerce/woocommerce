@@ -132,11 +132,13 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 			do_action( 'woocommerce_settings_start' );
 
-			wp_enqueue_script( 'woocommerce_settings', WC()->plugin_url() . '/assets/js/admin/settings' . $suffix . '.js', array( 'jquery', 'jquery-ui-datepicker', 'jquery-ui-sortable', 'iris', 'selectWoo' ), WC()->version, true );
+			wp_enqueue_script( 'woocommerce_settings', WC()->plugin_url() . '/assets/js/admin/settings' . $suffix . '.js', array( 'jquery', 'wp-util', 'jquery-ui-datepicker', 'jquery-ui-sortable', 'iris', 'selectWoo' ), WC()->version, true );
 
 			wp_localize_script(
 				'woocommerce_settings', 'woocommerce_settings_params', array(
 					'i18n_nav_warning' => __( 'The changes you made will be lost if you navigate away from this page.', 'woocommerce' ),
+					'i18n_moved_up'    => __( 'Item moved up', 'woocommerce' ),
+					'i18n_moved_down'  => __( 'Item moved down', 'woocommerce' ),
 				)
 			);
 
@@ -249,7 +251,9 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 							echo '<h2>' . esc_html( $value['title'] ) . '</h2>';
 						}
 						if ( ! empty( $value['desc'] ) ) {
+							echo '<div id="' . esc_attr( sanitize_title( $value['id'] ) ) . '-description">';
 							echo wp_kses_post( wpautop( wptexturize( $value['desc'] ) ) );
+							echo '</div>';
 						}
 						echo '<table class="form-table">' . "\n\n";
 						if ( ! empty( $value['id'] ) ) {
@@ -313,7 +317,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
 							<td class="forminp forminp-<?php echo esc_attr( sanitize_title( $value['type'] ) ); ?>">&lrm;
-								<span class="colorpickpreview" style="background: <?php echo esc_attr( $option_value ); ?>"></span>
+								<span class="colorpickpreview" style="background: <?php echo esc_attr( $option_value ); ?>">&nbsp;</span>
 								<input
 									name="<?php echo esc_attr( $value['id'] ); ?>"
 									id="<?php echo esc_attr( $value['id'] ); ?>"
@@ -520,7 +524,9 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 						?>
 						<tr valign="top">
-							<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html . $disabled_message; // WPCS: XSS ok. ?></th>
+							<th scope="row" class="titledesc">
+							<label><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html . $disabled_message; // WPCS: XSS ok. ?></label>
+						</th>
 							<td class="forminp image_width_settings">
 
 								<input name="<?php echo esc_attr( $value['id'] ); ?>[width]" <?php echo $disabled_attr; // WPCS: XSS ok. ?> id="<?php echo esc_attr( $value['id'] ); ?>-width" type="text" size="3" value="<?php echo esc_attr( $width ); ?>" /> &times; <input name="<?php echo esc_attr( $value['id'] ); ?>[height]" <?php echo $disabled_attr; // WPCS: XSS ok. ?> id="<?php echo esc_attr( $value['id'] ); ?>-height" type="text" size="3" value="<?php echo esc_attr( $height ); ?>" />px
@@ -552,7 +558,9 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 						?>
 						<tr valign="top" class="single_select_page">
-							<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></th>
+							<th scope="row" class="titledesc">
+								<label><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
+							</th>
 							<td class="forminp">
 								<?php echo str_replace( ' id=', " data-placeholder='" . esc_attr__( 'Select a page&hellip;', 'woocommerce' ) . "' style='" . $value['css'] . "' class='" . $value['class'] . "' id=", wp_dropdown_pages( $args ) ); // WPCS: XSS ok. ?> <?php echo $description; // WPCS: XSS ok. ?>
 							</td>
@@ -606,7 +614,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 									<?php
 									if ( ! empty( $countries ) ) {
 										foreach ( $countries as $key => $val ) {
-											echo '<option value="' . esc_attr( $key ) . '"' . wc_selected( $key, $selections ) . '>' . esc_html( $val ) . '</option>';
+											echo '<option value="' . esc_attr( $key ) . '"' . wc_selected( $key, $selections ) . '>' . esc_html( $val ) . '</option>'; // WPCS: XSS ok.
 										}
 									}
 									?>
@@ -722,7 +730,8 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 			}
 
 			// Options to update will be stored here and saved later.
-			$update_options = array();
+			$update_options   = array();
+			$autoload_options = array();
 
 			// Loop options and get values to save.
 			foreach ( $options as $option ) {
@@ -825,6 +834,8 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					$update_options[ $option_name ] = $value;
 				}
 
+				$autoload_options[ $option_name ] = isset( $option['autoload'] ) ? (bool) $option['autoload'] : true;
+
 				/**
 				 * Fire an action before saved.
 				 *
@@ -835,7 +846,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 			// Save all options in our array.
 			foreach ( $update_options as $name => $value ) {
-				update_option( $name, $value );
+				update_option( $name, $value, $autoload_options[ $name ] ? 'yes' : 'no' );
 			}
 
 			return true;

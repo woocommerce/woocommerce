@@ -74,7 +74,8 @@ class WC_AJAX {
 
 		if ( $action ) {
 			self::wc_ajax_headers();
-			do_action( 'wc_ajax_' . sanitize_text_field( $action ) );
+			$action = sanitize_text_field( $action );
+			do_action( 'wc_ajax_' . $action );
 			wp_die();
 		}
 	}
@@ -273,7 +274,7 @@ class WC_AJAX {
 
 		wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
 
-		if ( WC()->cart->is_empty() ) {
+		if ( WC()->cart->is_empty() && ! is_customize_preview() && apply_filters( 'woocommerce_checkout_update_order_review_expired', true ) ) {
 			self::update_order_review_expired();
 		}
 
@@ -344,11 +345,10 @@ class WC_AJAX {
 		$woocommerce_checkout_payment = ob_get_clean();
 
 		// Get messages if reload checkout is not true
-		$messages = '';
 		if ( ! isset( WC()->session->reload_checkout ) ) {
-			ob_start();
-			wc_print_notices();
-			$messages = ob_get_clean();
+			$messages = wc_print_notices( true );
+		} else {
+			$messages = '';
 		}
 
 		unset( WC()->session->refresh_totals, WC()->session->reload_checkout );
@@ -473,7 +473,7 @@ class WC_AJAX {
 		}
 
 		wp_safe_redirect( wp_get_referer() ? remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids' ), wp_get_referer() ) : admin_url( 'edit.php?post_type=product' ) );
-		wp_die();
+		exit;
 	}
 
 	/**
@@ -494,7 +494,7 @@ class WC_AJAX {
 		}
 
 		wp_safe_redirect( wp_get_referer() ? wp_get_referer() : admin_url( 'edit.php?post_type=shop_order' ) );
-		wp_die();
+		exit;
 	}
 
 	/**
@@ -851,6 +851,7 @@ class WC_AJAX {
 			$order        = wc_get_order( $order_id );
 			$items_to_add = wp_parse_id_list( is_array( $_POST['item_to_add'] ) ? $_POST['item_to_add'] : array( $_POST['item_to_add'] ) );
 			$items        = ( ! empty( $_POST['items'] ) ) ? $_POST['items'] : '';
+			$added_items  = array();
 
 			if ( ! $order ) {
 				throw new Exception( __( 'Invalid order', 'woocommerce' ) );
@@ -865,15 +866,23 @@ class WC_AJAX {
 			}
 
 			foreach ( $items_to_add as $item_to_add ) {
+
 				if ( ! in_array( get_post_type( $item_to_add ), array( 'product', 'product_variation' ) ) ) {
 					continue;
 				}
+
 				$item_id = $order->add_product( wc_get_product( $item_to_add ) );
 				$item    = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id );
+
+				$added_items[ $item_id ] = $item;
+
 				do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item, $order );
 			}
 
-			do_action( 'woocommerce_ajax_added_order_items', $item_id, $item, $order );
+			$last_item = ! empty( $added_items ) ? end( $added_items ) : null;
+			wc_do_deprecated_action( 'woocommerce_ajax_added_order_items', array( is_a( $last_item, 'WC_Order_Item' ) ? $last_item->get_id() : null, $last_item, $order ), '3.4', 'woocommerce_ajax_order_items_added action instead.' );
+
+			do_action( 'woocommerce_ajax_order_items_added', $added_items, $order );
 
 			$data = get_post_meta( $order_id );
 
@@ -2523,7 +2532,7 @@ class WC_AJAX {
 
 		wp_send_json_success(
 			array(
-				'zones' => WC_Shipping_Zones::get_zones(),
+				'zones' => WC_Shipping_Zones::get_zones( 'json' ),
 			)
 		);
 	}

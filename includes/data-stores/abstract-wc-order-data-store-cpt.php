@@ -132,6 +132,10 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		$order->save_meta_data();
 		$order->set_version( WC_VERSION );
 
+		if ( null === $order->get_date_created( 'edit' ) ) {
+			$order->set_date_created( current_time( 'timestamp', true ) );
+		}
+
 		$changes = $order->get_changes();
 
 		// Only update the post when the post data changes.

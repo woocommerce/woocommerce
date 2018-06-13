@@ -2093,7 +2093,7 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['attribute']      = array(
-			'description'       => __( 'Limit result set to products with a specific attribute.', 'woocommerce' ),
+			'description'       => __( 'Limit result set to products with a specific attribute. Use the taxonomy name/attribute slug.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',

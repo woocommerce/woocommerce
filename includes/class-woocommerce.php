@@ -240,7 +240,7 @@ final class WooCommerce {
 			case 'cron':
 				return defined( 'DOING_CRON' );
 			case 'frontend':
-				return ( ! is_admin() || defined( 'DOING_AJAX' ) ) && ! defined( 'DOING_CRON' );
+				return ( ! is_admin() || defined( 'DOING_AJAX' ) ) && ! defined( 'DOING_CRON' ) && ! defined( 'REST_REQUEST' );
 		}
 	}
 
@@ -290,6 +290,7 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-log-handler.php';
 		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-deprecated-hooks.php';
 		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-session.php';
+		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-privacy.php';
 
 		/**
 		 * Core classes.
@@ -327,7 +328,9 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/customizer/class-wc-shop-customizer.php';
 		include_once WC_ABSPATH . 'includes/class-wc-regenerate-images.php';
 		include_once WC_ABSPATH . 'includes/class-wc-privacy.php';
-		include_once WC_ABSPATH . 'includes/class-wc-privacy-background-process.php';
+		include_once WC_ABSPATH . 'includes/class-wc-structured-data.php';
+		include_once WC_ABSPATH . 'includes/class-wc-shortcodes.php';
+		include_once WC_ABSPATH . 'includes/class-wc-logger.php';
 
 		/**
 		 * Data stores - used to store and retrieve CRUD object data from the database.
@@ -436,9 +439,7 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/class-wc-tax.php';
 		include_once WC_ABSPATH . 'includes/class-wc-shipping-zones.php';
 		include_once WC_ABSPATH . 'includes/class-wc-customer.php';
-		include_once WC_ABSPATH . 'includes/class-wc-shortcodes.php';
 		include_once WC_ABSPATH . 'includes/class-wc-embed.php';
-		include_once WC_ABSPATH . 'includes/class-wc-structured-data.php';
 		include_once WC_ABSPATH . 'includes/class-wc-session-handler.php';
 	}
 
