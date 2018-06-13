@@ -364,16 +364,16 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$test_object           = new stdClass();
 		$test_object->property = '12345';
 		$product->set_default_attributes( array(
-			'sample-attribute-false-0' => 0,
-			'sample-attribute-false-1' => false,
-			'sample-attribute-false-2' => '',
-			'sample-attribute-false-3' => null,
-			'sample-attribute-true-0'  => '0',
-			'sample-attribute-true-1'  => 1,
-			'sample-attribute-true-2'  => 'true',
-			'sample-attribute-true-3'  => 'false',
-			'sample-attribute-true-4'  => array( 'exists' => 'false' ),
-			'sample-attribute-false-4' => $test_object,
+			'sample-attribute-0' => 0,
+			'sample-attribute-1' => false,
+			'sample-attribute-2' => '',
+			'sample-attribute-3' => null,
+			'sample-attribute-4'  => '0',
+			'sample-attribute-5'  => 1,
+			'sample-attribute-6'  => 'true',
+			'sample-attribute-7'  => 'false',
+			'sample-attribute-8'  => array( 'exists' => 'false' ),
+			'sample-attribute-9' => $test_object,
 		));
 		$product->save();
 
@@ -382,12 +382,10 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$default_attributes = $product->get_default_attributes();
 		$this->assertEquals(
 			array(
-				'sample-attribute-true-0'  => '0',
-				'sample-attribute-true-1'  => 1,
-				'sample-attribute-true-2'  => 'true',
-				'sample-attribute-true-3'  => 'false',
-				'sample-attribute-true-4'  => array( 'exists' => 'false' ),
-				'sample-attribute-false-4' => $test_object,
+				'sample-attribute-4'  => '0',
+				'sample-attribute-5'  => '1',
+				'sample-attribute-6'  => 'true',
+				'sample-attribute-7'  => 'false',
 			),
 			$default_attributes
 		);
