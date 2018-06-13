@@ -175,7 +175,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 				'images'      => array(
 					array(
 						'position' => 0,
-						'src'      => 'https://cldup.com/Dr1Bczxq4q.png',
+						'src'      => 'http://cldup.com/Dr1Bczxq4q.png',
 						'alt'      => 'test upload image',
 					),
 				),
