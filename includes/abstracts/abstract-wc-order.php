@@ -1372,7 +1372,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		foreach ( $this->get_shipping_methods() as $item_id => $item ) {
 			$taxes = $item->get_taxes();
 			foreach ( $taxes['total'] as $tax_rate_id => $tax ) {
-				$shipping_taxes[ $tax_rate_id ] = isset( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] + (float) $tax : (float) $tax;
+				$tax_amount = (float) $tax;
+
+				if ( 'yes' !== get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
+					$tax_amount = wc_round_tax_total( $tax_amount );
+				}
+
+				$shipping_taxes[ $tax_rate_id ] = isset( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] + $tax_amount : $tax_amount;
 			}
 		}
 
@@ -1399,12 +1405,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->add_item( $item );
 		}
 
-		if ( 'yes' !== get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
-			$this->set_shipping_tax( wc_round_tax_total( array_sum( array_map( 'wc_round_tax_total', $shipping_taxes ) ) ) );
-			$this->set_cart_tax( wc_round_tax_total( array_sum( array_map( 'wc_round_tax_total', $cart_taxes ) ) ) );
-		} else {
+		if ( 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
 			$this->set_shipping_tax( wc_round_tax_total( array_sum( $shipping_taxes ) ) );
 			$this->set_cart_tax( wc_round_tax_total( array_sum( $cart_taxes ) ) );
+		} else {
+			$this->set_shipping_tax( array_sum( $shipping_taxes ) );
+			$this->set_cart_tax( array_sum( $cart_taxes ) );
 		}
 
 		$this->save();
@@ -1429,13 +1435,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// Sum line item costs.
 		foreach ( $this->get_items() as $item ) {
-			$cart_subtotal += $item->get_subtotal();
-			$cart_total    += $item->get_total();
+			$cart_subtotal += round( $item->get_subtotal(), wc_get_price_decimals() );
+			$cart_total    += round( $item->get_total(), wc_get_price_decimals() );
 		}
 
 		// Sum shipping costs.
 		foreach ( $this->get_shipping_methods() as $shipping ) {
-			$shipping_total += $shipping->get_total();
+			$shipping_total += round( $shipping->get_total(), wc_get_price_decimals() );
 		}
 
 		$this->set_shipping_total( $shipping_total );
