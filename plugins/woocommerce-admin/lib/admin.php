@@ -48,6 +48,15 @@ function woo_dash_register_pages(){
 		'woodash#/analytics/test',
 		'woo_dash_page'
 	);
+
+	add_submenu_page(
+		'woodash#/analytics',
+		__( 'Revenue', 'woo-dash' ),
+		__( 'Revenue', 'woo-dash' ),
+		'manage_options',
+		'woodash#/analytics/revenue',
+		'woo_dash_page'
+	);
 }
 add_action( 'admin_menu', 'woo_dash_register_pages' );
 
