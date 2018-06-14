@@ -24,14 +24,21 @@ class WordPressNotices extends Component {
 
 	componentDidMount() {
 		const notices = document.getElementById( 'wpadmin-notice-list' );
-		const count = notices.getElementsByClassName( 'notice' ).length;
+		let count = notices.children.length - 1; // Subtract 1 for the wp-header-end div, used to show notices
 		const noticesOpen = notices.classList.contains( 'woocommerce__admin-notice-list-show' );
+		const primary = document.getElementById( 'woocommerce-layout__primary' );
+
+		// Move JITM notices out of the wp toggle
+		const jitmPlaceholder = notices.getElementsByClassName( 'jetpack-jitm-message' );
+		if ( jitmPlaceholder.length > 0 ) {
+			count = count - 1; // Container div
+			primary.insertAdjacentElement( 'afterbegin', jitmPlaceholder[ 0 ] );
+		}
 
 		// See https://reactjs.org/docs/react-component.html#componentdidmount
 		this.setState( { count, notices, noticesOpen } ); // eslint-disable-line react/no-did-mount-set-state
 
 		// Move WordPress notifications into the main WooDash body
-		const primary = document.getElementById( 'woocommerce-layout__primary' );
 		primary.insertAdjacentElement( 'afterbegin', notices );
 	}
 
