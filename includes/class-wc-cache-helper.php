@@ -150,7 +150,7 @@ class WC_Cache_Helper {
 	 *
 	 * @param string $version Version of the transient to remove.
 	 */
-	protected function queue_delete_version_transients( $version = '' ) {
+	protected static function queue_delete_version_transients( $version = '' ) {
 		if ( ! wp_using_ext_object_cache() && ! empty( $version ) ) {
 			wp_schedule_single_event( time() + 30, 'delete_version_transients', array( $version ) );
 		}
