@@ -136,13 +136,24 @@ class WC_Cache_Helper {
 		$transient_value = get_transient( $transient_name );
 
 		if ( false === $transient_value || true === $refresh ) {
-			self::delete_version_transients( $transient_value );
+			self::queue_delete_version_transients( $transient_value );
 
 			$transient_value = time();
 
 			set_transient( $transient_name, $transient_value );
 		}
 		return $transient_value;
+	}
+
+	/**
+	 * Queues a cleanup event for version transients.
+	 *
+	 * @param string $version Version of the transient to remove.
+	 */
+	protected function queue_delete_version_transients( $version = '' ) {
+		if ( ! wp_using_ext_object_cache() && ! empty( $version ) ) {
+			wp_schedule_single_event( time() + 30, 'delete_version_transients', array( $version ) );
+		}
 	}
 
 	/**
@@ -165,9 +176,9 @@ class WC_Cache_Helper {
 
 			$affected = $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s ORDER BY option_id LIMIT %d;", '\_transient\_%' . $version, $limit ) ); // WPCS: cache ok, db call ok.
 
-			// If affected rows is equal to limit, there are more rows to delete. Delete in 10 secs.
+			// If affected rows is equal to limit, there are more rows to delete. Delete in 30 secs.
 			if ( $affected === $limit ) {
-				wp_schedule_single_event( time() + 10, 'delete_version_transients', array( $version ) );
+				self::queue_delete_version_transients( $version );
 			}
 		}
 	}
