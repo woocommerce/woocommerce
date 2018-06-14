@@ -167,6 +167,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Enhancement - Improved shipping calculator experience. Shows destination country and added context to calculate shipping link. #20345
 * Fix - Check billing email is posted before using in WC_Cart::check_customer_coupons. #20180
 * Fix - Shipping postcode formatting when only posting a billing address. #20330
+* Fix - Correctly show/hide save card checkbox on tokenization form. #20506
 * Tweak - Show empty terms in admin product category filter dropdown. #20324
 * Tweak - Don't force default token gateway active by default. #20125
 * Tweak - Move notice output to hooked in functions. #19794
