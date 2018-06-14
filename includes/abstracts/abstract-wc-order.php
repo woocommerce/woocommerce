@@ -1405,12 +1405,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->add_item( $item );
 		}
 
-		if ( 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
+		if ( 'yes' !== get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
+			$this->set_shipping_tax( wc_round_tax_total( array_sum( array_map( 'wc_round_tax_total', $shipping_taxes ) ) ) );
+			$this->set_cart_tax( wc_round_tax_total( array_sum( array_map( 'wc_round_tax_total', $cart_taxes ) ) ) );
+		} else {
 			$this->set_shipping_tax( wc_round_tax_total( array_sum( $shipping_taxes ) ) );
 			$this->set_cart_tax( wc_round_tax_total( array_sum( $cart_taxes ) ) );
-		} else {
-			$this->set_shipping_tax( array_sum( $shipping_taxes ) );
-			$this->set_cart_tax( array_sum( $cart_taxes ) );
 		}
 
 		$this->save();
