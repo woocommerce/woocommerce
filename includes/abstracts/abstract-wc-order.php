@@ -1703,7 +1703,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				// Show shipping excluding tax.
 				$shipping = wc_price( $this->get_shipping_total(), array( 'currency' => $this->get_currency() ) );
 
-				if ( $this->get_shipping_tax() !== 0 && $this->get_prices_include_tax() ) {
+				if ( (float) $this->get_shipping_tax() > 0 && $this->get_prices_include_tax() ) {
 					$shipping .= apply_filters( 'woocommerce_order_shipping_to_display_tax_label', '&nbsp;<small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>', $this, $tax_display );
 				}
 			} else {
@@ -1711,7 +1711,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				// Show shipping including tax.
 				$shipping = wc_price( $this->get_shipping_total() + $this->get_shipping_tax(), array( 'currency' => $this->get_currency() ) );
 
-				if ( $this->get_shipping_tax() !== 0 && ! $this->get_prices_include_tax() ) {
+				if ( (float) $this->get_shipping_tax() > 0 && ! $this->get_prices_include_tax() ) {
 					$shipping .= apply_filters( 'woocommerce_order_shipping_to_display_tax_label', '&nbsp;<small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>', $this, $tax_display );
 				}
 			}
