@@ -6262,11 +6262,13 @@ table.bar_chart {
 			border: 0;
 			box-shadow: none;
 			width: 100%;
+			table-layout: fixed;
 
 			td, th {
 				border: 0;
 				padding: 12px;
 				vertical-align: middle;
+				word-wrap: break-word;
 
 				select {
 					width: 100%;
