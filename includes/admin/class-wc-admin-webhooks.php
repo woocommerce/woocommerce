@@ -150,7 +150,7 @@ class WC_Admin_Webhooks {
 	 *
 	 * @param array $webhooks List of webhooks IDs.
 	 */
-	public function bulk_delete( $webhooks ) {
+	public static function bulk_delete( $webhooks ) {
 		foreach ( $webhooks as $webhook_id ) {
 			$webhook = new WC_Webhook( (int) $webhook_id );
 			$webhook->delete( true );
