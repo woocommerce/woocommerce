@@ -17,7 +17,7 @@
 }
 
 .woocommerce-layout__primary {
-	margin: 20px 0 0 20px;
+	margin: $spacing 0 0 $spacing;
 
 	.woocommerce-layout__main {
 		margin: 0 auto;
@@ -29,7 +29,7 @@
 	display: grid;
 	grid-template-columns: auto 360px;
 	grid-template-rows: 47px auto;
-	grid-gap: 0 20px;
+	grid-gap: 0 $spacing;
 
 	@include breakpoint( '<782px' ) {
 		display: block;
@@ -61,6 +61,11 @@
 
 .woocommerce-layout.has-hidden-sidebar .woocommerce-layout__secondary {
 	@include hidden-sidebar;
+}
+
+.woocommerce-layout.has-hidden-sidebar .woocommerce-layout__main {
+	padding-right: $spacing;
+	max-width: 1100px;
 }
 
 .woocommerce-layout__secondary {

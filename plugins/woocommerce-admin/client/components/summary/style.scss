@@ -1,0 +1,72 @@
+/** @format */
+
+.woocommerce-summary {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	border-width: 0 1px 1px 0;
+	border-style: solid;
+	border-color: #e5e8ec;
+
+	@include breakpoint( '<600px' ) {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	@include breakpoint( '<400px' ) {
+		grid-template-columns: 1fr;
+	}
+}
+
+.woocommerce-summary__item {
+	margin-bottom: 0;
+	padding: $spacing;
+	width: 100%;
+	background: $white;
+	border-width: 1px 0 0 1px;
+	border-style: solid;
+	border-color: #e5e8ec;
+
+	&.is-selected {
+		border-top: 0;
+		background: #f8f9fa;
+		box-shadow: inset 0 4px 0 $woocommerce;
+	}
+
+	.woocommerce-summary__item-label,
+	.woocommerce-summary__item-value,
+	.woocommerce-summary__item-delta {
+		display: block;
+	}
+
+	.woocommerce-summary__item-label {
+		margin-bottom: $spacing/2;
+	}
+
+	.woocommerce-summary__item-value {
+		@include font-size( 24 );
+		margin-bottom: $spacing;
+	}
+
+	.woocommerce-summary__item-delta {
+		@include font-size( 11 );
+	}
+
+	.woocommerce-summary__item-delta-icon {
+		vertical-align: middle;
+		margin-right: 3px;
+		margin-top: -3px;
+
+		&.dashicons-arrow-up-alt {
+			transform: rotate(45deg);
+			fill: $valid-green;
+		}
+
+		&.dashicons-arrow-down-alt {
+			transform: rotate(-45deg);
+			fill: $error-red;
+		}
+	}
+
+	.woocommerce-summary__item-delta-label {
+		margin-left: 5px;
+	}
+}

@@ -9,6 +9,7 @@ import { Component, Fragment } from '@wordpress/element';
  * Internal dependencies
  */
 import Header from 'components/header';
+import { SummaryList, SummaryNumber } from 'components/summary';
 
 export default class extends Component {
 	render() {
@@ -20,7 +21,21 @@ export default class extends Component {
 						__( 'Report Title', 'woo-dash' ),
 					] }
 				/>
-				<div>Report: { this.props.params.report }</div>
+				<SummaryList>
+					<SummaryNumber
+						value={ '$829.40' }
+						label={ __( 'Gross Revenue', 'woo-dash' ) }
+						delta={ 29 }
+					/>
+					<SummaryNumber
+						value={ '$24.00' }
+						label={ __( 'Refunds', 'woo-dash' ) }
+						delta={ -10 }
+						selected
+					/>
+					<SummaryNumber value={ '$49.90' } label={ __( 'Coupons', 'woo-dash' ) } delta={ 15 } />
+					<SummaryNumber value={ '$66.39' } label={ __( 'Tax', 'woo-dash' ) } />
+				</SummaryList>
 			</Fragment>
 		);
 	}
