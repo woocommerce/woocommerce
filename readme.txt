@@ -173,6 +173,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Apply order bulk actions in chronological order. #20338
 * Performance - Exclude frontend include from REST API calls. #20000
 * Dev - REST API - Allows oAuth1.0a authentication under SSL.
+* Dev - REST API - Fix position param for images. #20497
 * Dev - Added woocommerce_increase_coupon_usage_count and woocommerce_decrease_coupon_usage_count action hooks to increase extensibility of Coupons. #19981
 * Dev - Add endpoints to account menu items filter. #19980
 * Dev - Added qty param to `wc_add_to_cart_message` filter. #19817
