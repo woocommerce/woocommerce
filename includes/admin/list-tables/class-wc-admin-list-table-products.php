@@ -293,6 +293,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			wc_product_dropdown_categories(
 				array(
 					'option_select_text' => __( 'Filter by category', 'woocommerce' ),
+					'hide_empty'         => 0,
 				)
 			);
 		} else {

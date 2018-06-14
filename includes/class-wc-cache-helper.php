@@ -222,7 +222,7 @@ class WC_Cache_Helper {
 		if ( 'product_cat' === $taxonomy ) {
 			$ids = is_array( $ids ) ? $ids : array( $ids );
 
-			$clear_ids = array();
+			$clear_ids = array( 0 );
 
 			foreach ( $ids as $id ) {
 				$clear_ids[] = $id;

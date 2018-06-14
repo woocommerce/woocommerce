@@ -101,6 +101,7 @@ class WC_Install {
 		),
 		'3.4.0' => array(
 			'wc_update_340_states',
+			'wc_update_340_state',
 			'wc_update_340_last_active',
 			'wc_update_340_db_version',
 		),
@@ -154,13 +155,19 @@ class WC_Install {
 	 * This function is hooked into admin_init to affect admin only.
 	 */
 	public static function install_actions() {
-		if ( ! empty( $_GET['do_update_woocommerce'] ) ) { // WPCS: input var ok, CSRF ok.
+		if ( ! empty( $_GET['do_update_woocommerce'] ) ) { // WPCS: input var ok.
+			check_admin_referer( 'wc_db_update', 'wc_db_update_nonce' );
 			self::update();
 			WC_Admin_Notices::add_notice( 'update' );
 		}
-		if ( ! empty( $_GET['force_update_woocommerce'] ) ) { // WPCS: input var ok, CSRF ok.
+		if ( ! empty( $_GET['force_update_woocommerce'] ) ) { // WPCS: input var ok.
+			check_admin_referer( 'wc_force_db_update', 'wc_force_db_update_nonce' );
 			$blog_id = get_current_blog_id();
+
+			// Used to fire an action added in WP_Background_Process::_construct() that calls WP_Background_Process::handle_cron_healthcheck().
+			// This method will make sure the database updates are executed even if cron is disabled. Nothing will happen if the updates are already running.
 			do_action( 'wp_' . $blog_id . '_wc_updater_cron' );
+
 			wp_safe_redirect( admin_url( 'admin.php?page=wc-settings' ) );
 			exit;
 		}
@@ -543,8 +550,23 @@ class WC_Install {
 			$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_type (comment_type)" );
 		}
 
-		// Add constraint to download logs.
-		$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log ADD FOREIGN KEY (permission_id) REFERENCES {$wpdb->prefix}woocommerce_downloadable_product_permissions(permission_id) ON DELETE CASCADE" );
+		// Get tables data types and check it matches before adding constraint.
+		$download_log_columns     = $wpdb->get_results( "SHOW COLUMNS FROM {$wpdb->prefix}wc_download_log WHERE Field = 'permission_id'", ARRAY_A );
+		$download_log_column_type = '';
+		if ( isset( $download_log_columns[0]['Type'] ) ) {
+			$download_log_column_type = $download_log_columns[0]['Type'];
+		}
+
+		$download_permissions_columns     = $wpdb->get_results( "SHOW COLUMNS FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE Field = 'permission_id'", ARRAY_A );
+		$download_permissions_column_type = '';
+		if ( isset( $download_permissions_columns[0]['Type'] ) ) {
+			$download_permissions_column_type = $download_permissions_columns[0]['Type'];
+		}
+
+		// Add constraint to download logs if the columns matches.
+		if ( ! empty( $download_permissions_column_type ) && ! empty( $download_log_column_type ) && $download_permissions_column_type === $download_log_column_type ) {
+			$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log ADD FOREIGN KEY (permission_id) REFERENCES {$wpdb->prefix}woocommerce_downloadable_product_permissions(permission_id) ON DELETE CASCADE" );
+		}
 	}
 
 	/**

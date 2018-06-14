@@ -32,7 +32,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			global $wp_scripts;
 
 			$screen    = get_current_screen();
-			$screen_id = $screen ? $screen->id: '';
+			$screen_id = $screen ? $screen->id : '';
 
 			// Register admin styles.
 			wp_register_style( 'woocommerce_admin_menu_styles', WC()->plugin_url() . '/assets/css/menu.css', array(), WC_VERSION );
@@ -161,23 +161,24 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 				$params = array(
 					/* translators: %s: decimal */
-					'i18n_decimal_error'               => sprintf( __( 'Please enter in decimal (%s) format without thousand separators.', 'woocommerce' ), $decimal ),
+					'i18n_decimal_error'                => sprintf( __( 'Please enter in decimal (%s) format without thousand separators.', 'woocommerce' ), $decimal ),
 					/* translators: %s: price decimal separator */
-					'i18n_mon_decimal_error'           => sprintf( __( 'Please enter in monetary decimal (%s) format without thousand separators and currency symbols.', 'woocommerce' ), wc_get_price_decimal_separator() ),
-					'i18n_country_iso_error'           => __( 'Please enter in country code with two capital letters.', 'woocommerce' ),
-					'i18_sale_less_than_regular_error' => __( 'Please enter in a value less than the regular price.', 'woocommerce' ),
-					'i18_delete_product_notice'        => __( 'This product has produced sales and may be linked to existing orders. Are you sure you want to delete it?', 'woocommerce' ),
-					'decimal_point'                    => $decimal,
-					'mon_decimal_point'                => wc_get_price_decimal_separator(),
-					'ajax_url'                         => admin_url( 'admin-ajax.php' ),
-					'strings'                          => array(
+					'i18n_mon_decimal_error'            => sprintf( __( 'Please enter in monetary decimal (%s) format without thousand separators and currency symbols.', 'woocommerce' ), wc_get_price_decimal_separator() ),
+					'i18n_country_iso_error'            => __( 'Please enter in country code with two capital letters.', 'woocommerce' ),
+					'i18n_sale_less_than_regular_error' => __( 'Please enter in a value less than the regular price.', 'woocommerce' ),
+					'i18n_delete_product_notice'        => __( 'This product has produced sales and may be linked to existing orders. Are you sure you want to delete it?', 'woocommerce' ),
+					'i18n_remove_personal_data_notice'  => __( 'This action cannot be reversed. Are you sure you wish to erase personal data from the selected orders?', 'woocommerce' ),
+					'decimal_point'                     => $decimal,
+					'mon_decimal_point'                 => wc_get_price_decimal_separator(),
+					'ajax_url'                          => admin_url( 'admin-ajax.php' ),
+					'strings'                           => array(
 						'import_products' => __( 'Import', 'woocommerce' ),
 						'export_products' => __( 'Export', 'woocommerce' ),
 					),
-					'nonces'                           => array(
+					'nonces'                            => array(
 						'gateway_toggle' => wp_create_nonce( 'woocommerce-toggle-payment-gateway-enabled' ),
 					),
-					'urls'                             => array(
+					'urls'                              => array(
 						'import_products' => current_user_can( 'import' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_importer' ) ) : null,
 						'export_products' => current_user_can( 'export' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_exporter' ) ) : null,
 					),
