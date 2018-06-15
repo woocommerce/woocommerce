@@ -1359,6 +1359,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$type_join     = '';
 		$type_where    = '';
 		$status_where  = '';
+		$limit_query   = '';
 		$term          = wc_strtolower( $term );
 
 		// See if search term contains OR keywords.
