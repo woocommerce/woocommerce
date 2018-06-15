@@ -134,11 +134,18 @@ class WC_Cache_Helper {
 	public static function get_transient_version( $group, $refresh = false ) {
 		$transient_name  = $group . '-transient-version';
 		$transient_value = get_transient( $transient_name );
+		$transient_value = strval( $transient_value ? $transient_value : '' );
 
-		if ( false === $transient_value || true === $refresh ) {
-			self::queue_delete_version_transients( $transient_value );
+		if ( '' === $transient_value || true === $refresh ) {
+			$old_transient_value = $transient_value;
+			$transient_value     = (string) time();
 
-			$transient_value = time();
+			if ( $old_transient_value === $transient_value ) {
+				// Time did not change but transient needs flushing now.
+				self::delete_version_transients( $transient_value );
+			} else {
+				self::queue_delete_version_transients( $transient_value );
+			}
 
 			set_transient( $transient_name, $transient_value );
 		}
