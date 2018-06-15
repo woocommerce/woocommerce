@@ -1310,8 +1310,14 @@ class WC_AJAX {
 			wp_die();
 		}
 
+		if ( ! empty( $_GET['limit'] ) ) {
+			$limit = absint( $_GET['limit'] );
+		} else {
+			$limit = absint( apply_filters( 'woocommerce_json_search_limit', 30 ) );
+		}
+
 		$data_store = WC_Data_Store::load( 'product' );
-		$ids        = $data_store->search_products( $term, '', (bool) $include_variations );
+		$ids        = $data_store->search_products( $term, '', (bool) $include_variations, false, $limit );
 
 		if ( ! empty( $_GET['exclude'] ) ) {
 			$ids = array_diff( $ids, (array) $_GET['exclude'] );
@@ -1319,10 +1325,6 @@ class WC_AJAX {
 
 		if ( ! empty( $_GET['include'] ) ) {
 			$ids = array_intersect( $ids, (array) $_GET['include'] );
-		}
-
-		if ( ! empty( $_GET['limit'] ) ) {
-			$ids = array_slice( $ids, 0, absint( $_GET['limit'] ) );
 		}
 
 		$product_objects = array_filter( array_map( 'wc_get_product', $ids ), 'wc_products_array_filter_readable' );
