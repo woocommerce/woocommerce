@@ -222,7 +222,12 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	 * Render columm: order_date.
 	 */
 	protected function render_order_date_column() {
-		$order_timestamp = $this->object->get_date_created()->getTimestamp();
+		$order_timestamp = $this->object->get_date_created() ? $this->object->get_date_created()->getTimestamp() : '';
+
+		if ( ! $order_timestamp ) {
+			echo '&ndash;';
+			return;
+		}
 
 		// Check if the order was created within the last 24 hours, and not in the future.
 		if ( $order_timestamp > strtotime( '-1 day', current_time( 'timestamp', true ) ) && $order_timestamp <= current_time( 'timestamp', true ) ) {
@@ -428,6 +433,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 				'_line_tax',
 				'method_id',
 				'cost',
+				'_reduced_stock',
 			)
 		);
 

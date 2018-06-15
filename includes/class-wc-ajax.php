@@ -818,17 +818,20 @@ class WC_AJAX {
 		}
 
 		try {
-			$order_id     = absint( $_POST['order_id'] );
+			if ( ! isset( $_POST['order_id'] ) ) {
+				throw new Exception( __( 'Invalid order', 'woocommerce' ) );
+			}
+
+			$order_id     = absint( wp_unslash( $_POST['order_id'] ) ); // WPCS: input var ok.
 			$order        = wc_get_order( $order_id );
-			$items_to_add = wp_parse_id_list( is_array( $_POST['item_to_add'] ) ? $_POST['item_to_add'] : array( $_POST['item_to_add'] ) );
-			$items        = ( ! empty( $_POST['items'] ) ) ? $_POST['items'] : '';
-			$added_items  = array();
 
 			if ( ! $order ) {
 				throw new Exception( __( 'Invalid order', 'woocommerce' ) );
 			}
 
 			// If we passed through items it means we need to save first before adding a new one.
+			$items = ( ! empty( $_POST['items'] ) ) ? $_POST['items'] : '';
+
 			if ( ! empty( $items ) ) {
 				$save_items = array();
 				parse_str( $items, $save_items );
@@ -836,22 +839,27 @@ class WC_AJAX {
 				wc_save_order_items( $order->get_id(), $save_items );
 			}
 
-			foreach ( $items_to_add as $item_to_add ) {
+			$items_to_add = array_filter( wp_unslash( (array) $_POST['data'] ) );
 
-				if ( ! in_array( get_post_type( $item_to_add ), array( 'product', 'product_variation' ) ) ) {
+			// Add items to order.
+			foreach ( $items_to_add as $item ) {
+				if ( ! isset( $item['id'], $item['qty'] ) || empty( $item['id'] ) ) {
 					continue;
 				}
+				$product_id = absint( $item['id'] );
+				$qty        = wc_stock_amount( $item['qty'] );
+				$product    = wc_get_product( $product_id );
 
-				$item_id = $order->add_product( wc_get_product( $item_to_add ) );
-				$item    = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id );
+				if ( ! $product ) {
+					throw new Exception( __( 'Invalid product ID', 'woocommerce' ) . ' ' . $product_id );
+				}
 
+				$item_id                 = $order->add_product( $product, $qty );
+				$item                    = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id );
 				$added_items[ $item_id ] = $item;
 
 				do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item, $order );
 			}
-
-			$last_item = ! empty( $added_items ) ? end( $added_items ) : null;
-			wc_do_deprecated_action( 'woocommerce_ajax_added_order_items', array( is_a( $last_item, 'WC_Order_Item' ) ? $last_item->get_id() : null, $last_item, $order ), '3.4', 'woocommerce_ajax_order_items_added action instead.' );
 
 			do_action( 'woocommerce_ajax_order_items_added', $added_items, $order );
 
@@ -1146,96 +1154,6 @@ class WC_AJAX {
 	}
 
 	/**
-	 * Reduce order item stock.
-	 */
-	public static function reduce_order_item_stock() {
-		check_ajax_referer( 'order-item', 'security' );
-		if ( ! current_user_can( 'edit_shop_orders' ) ) {
-			wp_die( -1 );
-		}
-		$order_id       = absint( $_POST['order_id'] );
-		$order_item_ids = isset( $_POST['order_item_ids'] ) ? $_POST['order_item_ids'] : array();
-		$order_item_qty = isset( $_POST['order_item_qty'] ) ? $_POST['order_item_qty'] : array();
-		$order          = wc_get_order( $order_id );
-		$order_items    = $order->get_items();
-		$return         = array();
-		if ( $order && ! empty( $order_items ) && sizeof( $order_item_ids ) > 0 ) {
-			foreach ( $order_items as $item_id => $order_item ) {
-				// Only reduce checked items
-				if ( ! in_array( $item_id, $order_item_ids ) ) {
-					continue;
-				}
-				$_product = $order_item->get_product();
-				if ( $_product && $_product->exists() && $_product->managing_stock() && isset( $order_item_qty[ $item_id ] ) && $order_item_qty[ $item_id ] > 0 ) {
-					$stock_change = apply_filters( 'woocommerce_reduce_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
-					$new_stock    = wc_update_product_stock( $_product, $stock_change, 'decrease' );
-					$item_name    = $_product->get_formatted_name();
-					$return[]     = array(
-						'note'    => sprintf( wp_kses_post( __( '%1$s stock reduced from %2$s to %3$s.', 'woocommerce' ) ), $item_name, $new_stock + $stock_change, $new_stock ),
-						'success' => true,
-					);
-				}
-			}
-			do_action( 'woocommerce_reduce_order_stock', $order );
-
-			if ( empty( $return ) ) {
-				$return[] = array(
-					'note'    => wp_kses_post( __( 'No products had their stock reduced - they may not have stock management enabled.', 'woocommerce' ) ),
-					'success' => false,
-				);
-			}
-
-			wp_send_json_success( $return );
-		}
-		wp_send_json_error();
-	}
-
-	/**
-	 * Increase order item stock.
-	 */
-	public static function increase_order_item_stock() {
-		check_ajax_referer( 'order-item', 'security' );
-		if ( ! current_user_can( 'edit_shop_orders' ) ) {
-			wp_die( -1 );
-		}
-		$order_id       = absint( $_POST['order_id'] );
-		$order_item_ids = isset( $_POST['order_item_ids'] ) ? $_POST['order_item_ids'] : array();
-		$order_item_qty = isset( $_POST['order_item_qty'] ) ? $_POST['order_item_qty'] : array();
-		$order          = wc_get_order( $order_id );
-		$order_items    = $order->get_items();
-		$return         = array();
-		if ( $order && ! empty( $order_items ) && sizeof( $order_item_ids ) > 0 ) {
-			foreach ( $order_items as $item_id => $order_item ) {
-				// Only reduce checked items
-				if ( ! in_array( $item_id, $order_item_ids ) ) {
-					continue;
-				}
-				$_product = $order_item->get_product();
-				if ( $_product && $_product->exists() && $_product->managing_stock() && isset( $order_item_qty[ $item_id ] ) && $order_item_qty[ $item_id ] > 0 ) {
-					$old_stock    = $_product->get_stock_quantity();
-					$stock_change = apply_filters( 'woocommerce_restore_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
-					$new_quantity = wc_update_product_stock( $_product, $stock_change, 'increase' );
-					$item_name    = $_product->get_formatted_name();
-					$return[]     = array(
-						'note'    => sprintf( wp_kses_post( __( '%1$s stock increased from %2$s to %3$s.', 'woocommerce' ) ), $item_name, $old_stock, $new_quantity ),
-						'success' => true,
-					);
-				}
-			}
-			do_action( 'woocommerce_restore_order_stock', $order );
-			if ( empty( $return ) ) {
-				$return[] = array(
-					'note'    => wp_kses_post( __( 'No products had their stock increased - they may not have stock management enabled.', 'woocommerce' ) ),
-					'success' => false,
-				);
-			}
-
-			wp_send_json_success( $return );
-		}
-		wp_send_json_error();
-	}
-
-	/**
 	 * Calc line tax.
 	 */
 	public static function calc_line_taxes() {
@@ -1411,7 +1329,14 @@ class WC_AJAX {
 		$products        = array();
 
 		foreach ( $product_objects as $product_object ) {
-			$products[ $product_object->get_id() ] = rawurldecode( $product_object->get_formatted_name() );
+			$formatted_name = $product_object->get_formatted_name();
+			$managing_stock = $product_object->managing_stock();
+
+			if ( $managing_stock && ! empty( $_GET['display_stock'] ) ) {
+				$formatted_name .= ' &ndash; ' . wc_format_stock_for_display( $product_object );
+			}
+
+			$products[ $product_object->get_id() ] = rawurldecode( $formatted_name );
 		}
 
 		wp_send_json( apply_filters( 'woocommerce_json_search_found_products', $products ) );
