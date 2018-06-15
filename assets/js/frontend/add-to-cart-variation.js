@@ -220,10 +220,19 @@
 
 		form.$form.wc_variations_image_update( variation );
 
+		var wp_template = function(templateId) {
+			return function template (data) {
+				var html = document.getElementById('tmpl-' + templateId).textContent;
+				var variation = data.variation || {};
+				return html.replace(/{{{\s?data\.variation\.([\w-]*)\s?}}}/g, function(match, variationKey) {
+					return variation[variationKey] || '';
+				});
+			};
+		};
 		if ( ! variation.variation_is_visible ) {
-			template = wp.template( 'unavailable-variation-template' );
+			template = wp_template( 'unavailable-variation-template' );
 		} else {
-			template     = wp.template( 'variation-template' );
+			template     = wp_template( 'variation-template' );
 			variation_id = variation.variation_id;
 		}
 
