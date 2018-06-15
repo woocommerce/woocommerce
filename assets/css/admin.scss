@@ -5920,6 +5920,11 @@
 					padding-right: 0;
 					text-align: right;
 				}
+
+				select,
+				.select2-container {
+					width: 100%;
+				}
 			}
 		}
 	}
