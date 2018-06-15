@@ -2106,7 +2106,7 @@ class WC_Admin_Setup_Wizard {
 
 		<div class="woocommerce-message woocommerce-newsletter">
 			<p><?php esc_html_e( "We're here for you — get tips, product updates, and inspiration straight to your mailbox.", 'woocommerce' ); ?></p>
-			<form action="//woocommerce.us8.list-manage.com/subscribe/post?u=2c1434dc56f9506bf3c3ecd21&amp;id=13860df971" method="post" target="_blank" novalidate>
+			<form action="//woocommerce.us8.list-manage.com/subscribe/post?u=2c1434dc56f9506bf3c3ecd21&amp;id=13860df971&amp;SIGNUPPAGE=plugin" method="post" target="_blank" novalidate>
 				<div class="newsletter-form-container">
 					<input
 						class="newsletter-form-email"
