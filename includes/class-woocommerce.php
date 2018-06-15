@@ -359,6 +359,11 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/data-stores/class-wc-webhook-data-store.php';
 
 		/**
+		 * Stats API
+		 */
+		include_once WC_ABSPATH . 'includes/class-wc-stats.php';
+
+		/**
 		 * REST API.
 		 */
 		include_once WC_ABSPATH . 'includes/legacy/class-wc-legacy-api.php';
