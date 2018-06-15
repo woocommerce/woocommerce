@@ -1332,7 +1332,7 @@ class WC_AJAX {
 			$formatted_name = $product_object->get_formatted_name();
 			$managing_stock = $product_object->managing_stock();
 
-			if ( $managing_stock ) {
+			if ( $managing_stock && ! empty( $_GET['display_stock'] ) ) {
 				$formatted_name .= ' &ndash; ' . wc_format_stock_for_display( $product_object );
 			}
 

@@ -932,7 +932,7 @@ jQuery( function ( $ ) {
 					var item_table      = $( this ).find( 'table.widefat' ),
 						item_table_body = item_table.find( 'tbody' ),
 						rows            = item_table_body.find( 'tr' ),
-						add_items       = new Array();
+						add_items       = [];
 
 					$( rows ).each( function() {
 						var item_id = $( this ).find( ':input[name="item_id"]' ).val(),
@@ -940,7 +940,7 @@ jQuery( function ( $ ) {
 
 						add_items.push( {
 							'id' : item_id,
-							'qty': item_qty ? item_qty: 1,
+							'qty': item_qty ? item_qty: 1
 						} );
 					} );
 
@@ -978,7 +978,7 @@ jQuery( function ( $ ) {
 							window.alert( response.data.error );
 						}
 					},
-					dataType: 'json',
+					dataType: 'json'
 				});
 			},
 
