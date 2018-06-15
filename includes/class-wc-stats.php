@@ -22,7 +22,7 @@ class WC_Stats {
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'install' ) ); // @todo Don't do this on every page load.
-		//add_action( 'init', array( $this, 'populate_database_naive' ), 99 );
+		add_action( 'init', array( $this, 'populate_database_naive' ), 99 );
 	}
 
 	public function install() {
@@ -129,11 +129,20 @@ CREATE TABLE wp_wc_stats (
 			'date_created' => $start_time . '...' . $end_time,
 		) );
 
-		$summary['num_orders'] = count( $orders );
-		$summary['num_items_sold'] = $this->get_num_items_sold( $orders );
-		$summary['num_products_sold'] = $this->get_num_products_sold( $orders );
+		// @todo The gross/net total logic may need tweaking. Verify that logic is correct.
+		$summary['num_orders']            = count( $orders );
+		$summary['num_items_sold']        = $this->get_num_items_sold( $orders );
+		$summary['num_products_sold']     = $this->get_num_products_sold( $orders );
+		$summary['orders_gross_total']    = $this->get_orders_gross_total( $orders );
+		$summary['orders_coupon_total']   = $this->get_orders_coupon_total( $orders );
+		$summary['orders_refund_total']   = $this->get_orders_refund_total( $orders );
+		$summary['orders_tax_total']      = $this->get_orders_tax_total( $orders );
+		$summary['orders_shipping_total'] = $this->get_orders_shipping_total( $orders );
+		$summary['orders_net_total']      = $summary['orders_gross_total'] - $summary['orders_coupon_total'] - $summary['orders_refund_total'] - $summary['orders_tax_total'] - $summary['orders_shipping_total'];
 
-		var_dump( $summary );
+		if ( $summary['num_orders'] ) {
+			$summary['average_order_total'] = wc_round_tax_total( $summary['orders_gross_total'] / $summary['num_orders'] );
+		}
 
 		return $summary;
 	}
@@ -165,7 +174,6 @@ CREATE TABLE wp_wc_stats (
 				'%s',
 			)
 		);
-		var_dump( $result );
 	}
 
 	private function get_num_items_sold( $orders ) {
@@ -203,5 +211,50 @@ CREATE TABLE wp_wc_stats (
 		return $num_products;
 	}
 
+	private function get_orders_gross_total( $orders ) {
+		$total = 0.0;
+
+		foreach ( $orders as $order ) {
+			$total += $order->get_subtotal();
+		}
+
+		return $total;
+	}
+
+	private function get_orders_coupon_total( $orders ) {
+		$total = 0.0;
+
+		foreach ( $orders as $order ) {
+			$total += $order->get_discount_total();
+		}
+
+		return $total;
+	}
+
+	private function get_orders_refund_total( $orders ) {
+		$total = 0.0;
+		// @todo
+		return $total;
+	}
+
+	private function get_orders_tax_total( $orders ) {
+		$total = 0.0;
+
+		foreach ( $orders as $order ) {
+			$total += $order->get_total_tax();
+		}
+
+		return $total;
+	}
+
+	private function get_orders_shipping_total( $orders ) {
+		$total = 0.0;
+
+		foreach ( $orders as $order ) {
+			$total += $order->get_shipping_total();
+		}
+
+		return $total;
+	}
 }
 new WC_Stats();
