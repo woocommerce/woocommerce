@@ -224,8 +224,19 @@
 			return function template (data) {
 				var html = document.getElementById('tmpl-' + templateId).textContent;
 				var variation = data.variation || {};
-				return html.replace(/{{{\s?data\.variation\.([\w-]*)\s?}}}/g, function(match, variationKey) {
-					return variation[variationKey] || '';
+				return html.replace(/({{{?)\s?data\.variation\.([\w-]*)\s?(}}}?)/g, function(_, open, key, close) {
+					// Error in the format, ignore.
+					if (open.length !== close.length) {
+						return '';
+					}
+					var replacement = variation[key] || '';
+					// {{{ }}} => interpolate (unescaped).
+					// {{ }}   => interpolate (escaped).
+					// https://codex.wordpress.org/Javascript_Reference/wp.template
+					if (open.length === 2) {
+						return window.escape(replacement);
+					}
+					return replacement;
 				});
 			};
 		};
