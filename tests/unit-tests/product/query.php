@@ -31,7 +31,7 @@ class WC_Tests_WC_Product_Query extends WC_Unit_Test_Case {
 		$product1->set_sale_price( '5.00' );
 		$product1->save();
 
-		$product2 = new WC_Product_Grouped();
+		$product2 = new WC_Product_Simple();
 		$product2->set_sku( 'sku2' );
 		$product2->set_regular_price( '12.50' );
 		$product2->set_sale_price( '5.00' );

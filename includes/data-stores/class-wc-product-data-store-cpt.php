@@ -594,19 +594,24 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @param WC_Product $product Product Object.
 	 */
 	protected function handle_updated_props( &$product ) {
-		if ( in_array( 'regular_price', $this->updated_props, true ) || in_array( 'sale_price', $this->updated_props, true ) ) {
-			if ( $product->get_sale_price( 'edit' ) >= $product->get_regular_price( 'edit' ) ) {
-				update_post_meta( $product->get_id(), '_sale_price', '' );
-				$product->set_sale_price( '' );
+		$price_is_synced = $product->is_type( array( 'variable', 'grouped' ) );
+
+		if ( ! $price_is_synced ) {
+			if ( in_array( 'regular_price', $this->updated_props, true ) || in_array( 'sale_price', $this->updated_props, true ) ) {
+				if ( $product->get_sale_price( 'edit' ) >= $product->get_regular_price( 'edit' ) ) {
+					update_post_meta( $product->get_id(), '_sale_price', '' );
+					$product->set_sale_price( '' );
+				}
 			}
-		}
-		if ( in_array( 'date_on_sale_from', $this->updated_props, true ) || in_array( 'date_on_sale_to', $this->updated_props, true ) || in_array( 'regular_price', $this->updated_props, true ) || in_array( 'sale_price', $this->updated_props, true ) || in_array( 'product_type', $this->updated_props, true ) ) {
-			if ( $product->is_on_sale( 'edit' ) ) {
-				update_post_meta( $product->get_id(), '_price', $product->get_sale_price( 'edit' ) );
-				$product->set_price( $product->get_sale_price( 'edit' ) );
-			} else {
-				update_post_meta( $product->get_id(), '_price', $product->get_regular_price( 'edit' ) );
-				$product->set_price( $product->get_regular_price( 'edit' ) );
+
+			if ( in_array( 'date_on_sale_from', $this->updated_props, true ) || in_array( 'date_on_sale_to', $this->updated_props, true ) || in_array( 'regular_price', $this->updated_props, true ) || in_array( 'sale_price', $this->updated_props, true ) || in_array( 'product_type', $this->updated_props, true ) ) {
+				if ( $product->is_on_sale( 'edit' ) ) {
+					update_post_meta( $product->get_id(), '_price', $product->get_sale_price( 'edit' ) );
+					$product->set_price( $product->get_sale_price( 'edit' ) );
+				} else {
+					update_post_meta( $product->get_id(), '_price', $product->get_regular_price( 'edit' ) );
+					$product->set_price( $product->get_regular_price( 'edit' ) );
+				}
 			}
 		}
 
