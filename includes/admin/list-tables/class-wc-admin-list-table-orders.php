@@ -629,7 +629,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	 * @return string
 	 */
 	public function handle_bulk_actions( $redirect_to, $action, $ids ) {
-		$ids     = array_map( 'absint', $ids );
+		$ids     = apply_filters( 'woocommerce_bulk_action_ids', array_reverse( array_map( 'absint', $ids ) ), $action, 'order' );
 		$changed = 0;
 
 		if ( 'remove_personal_data' === $action ) {
@@ -650,6 +650,9 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 
 			// Sanity check: bail out if this is actually not a status, or is not a registered status.
 			if ( isset( $order_statuses[ 'wc-' . $new_status ] ) ) {
+				// Initialize payment gateways in case order has hooked status transition actions.
+				wc()->payment_gateways();
+
 				foreach ( $ids as $id ) {
 					$order = wc_get_order( $id );
 					$order->update_status( $new_status, __( 'Order status changed by bulk edit:', 'woocommerce' ), true );

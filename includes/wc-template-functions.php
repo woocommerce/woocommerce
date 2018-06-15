@@ -22,7 +22,7 @@ function wc_template_redirect() {
 		wp_safe_redirect( get_post_type_archive_link( 'product' ) );
 		exit;
 
-	} elseif ( is_page( wc_get_page_id( 'checkout' ) ) && wc_get_page_id( 'checkout' ) !== wc_get_page_id( 'cart' ) && WC()->cart->is_empty() && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) && ! is_customize_preview() ) {
+	} elseif ( is_page( wc_get_page_id( 'checkout' ) ) && wc_get_page_id( 'checkout' ) !== wc_get_page_id( 'cart' ) && WC()->cart->is_empty() && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) && ! is_customize_preview() && apply_filters( 'woocommerce_checkout_redirect_empty_cart', true ) ) {
 
 		// When on the checkout with an empty cart, redirect to cart page.
 		wc_add_notice( __( 'Checkout is not available whilst your cart is empty.', 'woocommerce' ), 'notice' );
@@ -1887,9 +1887,17 @@ if ( ! function_exists( 'woocommerce_shipping_calculator' ) ) {
 
 	/**
 	 * Output the cart shipping calculator.
+	 *
+	 * @param string $button_text Text for the shipping calculation toggle.
 	 */
-	function woocommerce_shipping_calculator() {
-		wc_get_template( 'cart/shipping-calculator.php' );
+	function woocommerce_shipping_calculator( $button_text = '' ) {
+		if ( 'no' === get_option( 'woocommerce_enable_shipping_calc' ) || ! WC()->cart->needs_shipping() ) {
+			return;
+		}
+		wp_enqueue_script( 'wc-country-select' );
+		wc_get_template( 'cart/shipping-calculator.php', array(
+			'button_text' => $button_text,
+		) );
 	}
 }
 

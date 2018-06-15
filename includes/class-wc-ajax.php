@@ -274,7 +274,7 @@ class WC_AJAX {
 
 		wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
 
-		if ( WC()->cart->is_empty() && ! is_customize_preview() ) {
+		if ( WC()->cart->is_empty() && ! is_customize_preview() && apply_filters( 'woocommerce_checkout_update_order_review_expired', true ) ) {
 			self::update_order_review_expired();
 		}
 
