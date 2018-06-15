@@ -1064,9 +1064,9 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 		$images = is_array( $images ) ? array_filter( $images ) : array();
 
 		if ( ! empty( $images ) ) {
-			$gallery = array();
+			$gallery_positions = array();
 
-			foreach ( $images as $image ) {
+			foreach ( $images as $index => $image ) {
 				$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
 
 				if ( 0 === $attachment_id && isset( $image['src'] ) ) {
@@ -1088,11 +1088,7 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 					throw new WC_REST_Exception( 'woocommerce_product_invalid_image_id', sprintf( __( '#%s is an invalid image ID.', 'woocommerce' ), $attachment_id ), 400 );
 				}
 
-				if ( isset( $image['position'] ) && 0 === absint( $image['position'] ) ) {
-					$product->set_image_id( $attachment_id );
-				} else {
-					$gallery[] = $attachment_id;
-				}
+				$gallery_positions[ $attachment_id ] = absint( isset( $image['position'] ) ? $image['position'] : $index );
 
 				// Set the image alt if present.
 				if ( ! empty( $image['alt'] ) ) {
@@ -1115,6 +1111,17 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 				}
 			}
 
+			// Sort images and get IDs in correct order.
+			asort( $gallery_positions );
+
+			// Get gallery in correct order.
+			$gallery = array_keys( $gallery_positions );
+
+			// Featured image is in position 0.
+			$image_id = array_shift( $gallery );
+
+			// Set images.
+			$product->set_image_id( $image_id );
 			$product->set_gallery_image_ids( $gallery );
 		} else {
 			$product->set_image_id( '' );

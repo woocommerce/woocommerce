@@ -1347,11 +1347,6 @@
 		 }
 	 }
 
-	 .wc-order-item-bulk-edit .cancel-action {
-		 float: left;
-		 margin-left: 0;
-	 }
-
 	 .add_meta {
 		 margin-left: 0 !important;
 	 }
@@ -1447,19 +1442,6 @@
 				 }
 				 &:first-child {
 					 padding-left: 2em;
-				 }
-			 }
-
-			 tbody tr {
-				 td {
-					 cursor: pointer;
-				 }
-				 &.selected {
-					 background: #f5ebf3;
-					 td {
-						 border-color: #e6cce1;
-						 opacity: 0.8;
-					 }
 				 }
 			 }
 
@@ -5894,20 +5876,58 @@
 		 padding: 1.5em;
 
 		 p {
-			 margin: 1.5em 0;
+			margin: 1.5em 0;
 		 }
 		 p:first-child {
-			 margin-top: 0;
+			margin-top: 0;
 		 }
 
 		 p:last-child {
-			 margin-bottom: 0;
+			margin-bottom: 0;
 		 }
 		 .pagination {
-			 padding: 10px 0 0;
-			 text-align: center;
+			padding: 10px 0 0;
+			text-align: center;
 		 }
-	 }
+		 table.widefat {
+			margin: 0;
+			width: 100%;
+			border: 0;
+			box-shadow: none;
+
+			thead th {
+				padding: 0 1em 1em 1em;
+				text-align: left;
+
+				&:first-child {
+					padding-left: 0;
+				}
+				&:last-child {
+					padding-right: 0;
+					text-align: right;
+				}
+			}
+
+			tbody td, tbody th {
+				padding: 1em;
+				text-align: left;
+				vertical-align: middle;
+
+				&:first-child {
+					padding-left: 0;
+				}
+				&:last-child {
+					padding-right: 0;
+					text-align: right;
+				}
+
+				select,
+				.select2-container {
+					width: 100%;
+				}
+			}
+		}
+	}
 
 	 footer {
 		 position: absolute;
@@ -6311,11 +6331,13 @@
 			 border: 0;
 			 box-shadow: none;
 			 width: 100%;
+			 table-layout: fixed;
 
 			 td, th {
 				 border: 0;
 				 padding: 12px;
 				 vertical-align: middle;
+				 word-wrap: break-word;
 
 				 select {
 					 width: 100%;

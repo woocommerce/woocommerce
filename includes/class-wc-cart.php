@@ -757,65 +757,34 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return bool|WP_Error
 	 */
 	public function check_cart_item_stock() {
-		global $wpdb;
-
-		$error               = new WP_Error();
-		$product_qty_in_cart = $this->get_cart_item_quantities();
+		$error                    = new WP_Error();
+		$product_qty_in_cart      = $this->get_cart_item_quantities();
+		$hold_stock_minutes       = (int) get_option( 'woocommerce_hold_stock_minutes', 0 );
+		$current_session_order_id = isset( WC()->session->order_awaiting_payment ) ? absint( WC()->session->order_awaiting_payment ) : 0;
 
 		foreach ( $this->get_cart() as $cart_item_key => $values ) {
 			$product = $values['data'];
 
-			/**
-			 * Check stock based on stock-status.
-			 */
+			// Check stock based on stock-status.
 			if ( ! $product->is_in_stock() ) {
 				/* translators: %s: product name */
 				$error->add( 'out-of-stock', sprintf( __( 'Sorry, "%s" is not in stock. Please edit your cart and try again. We apologize for any inconvenience caused.', 'woocommerce' ), $product->get_name() ) );
 				return $error;
 			}
 
-			if ( ! $product->managing_stock() ) {
+			// We only need to check products managing stock, with a limited stock qty.
+			if ( ! $product->managing_stock() || $product->backorders_allowed() ) {
 				continue;
 			}
 
-			/**
-			 * Check stock based on all items in the cart.
-			 */
-			if ( ! $product->has_enough_stock( $product_qty_in_cart[ $product->get_stock_managed_by_id() ] ) ) {
+			// Check stock based on all items in the cart and consider any held stock within pending orders.
+			$held_stock     = wc_get_held_stock_quantity( $product, $current_session_order_id );
+			$required_stock = $product_qty_in_cart[ $product->get_stock_managed_by_id() ];
+
+			if ( $product->get_stock_quantity() < ( $held_stock + $required_stock ) ) {
 				/* translators: 1: product name 2: quantity in stock */
-				$error->add( 'out-of-stock', sprintf( __( 'Sorry, we do not have enough "%1$s" in stock to fulfill your order (%2$s in stock). Please edit your cart and try again. We apologize for any inconvenience caused.', 'woocommerce' ), $product->get_name(), wc_format_stock_quantity_for_display( $product->get_stock_quantity(), $product ) ) );
+				$error->add( 'out-of-stock', sprintf( __( 'Sorry, we do not have enough "%1$s" in stock to fulfill your order (%2$s available). We apologize for any inconvenience caused.', 'woocommerce' ), $product->get_name(), wc_format_stock_quantity_for_display( $product->get_stock_quantity() - $held_stock, $product ) ) );
 				return $error;
-			}
-
-			/**
-			 * Finally consider any held stock, from pending orders.
-			 */
-			if ( get_option( 'woocommerce_hold_stock_minutes' ) > 0 && ! $product->backorders_allowed() ) {
-				$order_id   = isset( WC()->session->order_awaiting_payment ) ? absint( WC()->session->order_awaiting_payment ) : 0;
-				$held_stock = $wpdb->get_var(
-					$wpdb->prepare(
-						"
-						SELECT SUM( order_item_meta.meta_value ) AS held_qty
-						FROM {$wpdb->posts} AS posts
-						LEFT JOIN {$wpdb->prefix}woocommerce_order_items as order_items ON posts.ID = order_items.order_id
-						LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id
-						LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta2 ON order_items.order_item_id = order_item_meta2.order_item_id
-						WHERE 	order_item_meta.meta_key   = '_qty'
-						AND 	order_item_meta2.meta_key  = %s AND order_item_meta2.meta_value  = %d
-						AND 	posts.post_type            IN ( '" . implode( "','", wc_get_order_types() ) . "' )
-						AND 	posts.post_status          = 'wc-pending'
-						AND		posts.ID                   != %d;",
-						'variation' === get_post_type( $product->get_stock_managed_by_id() ) ? '_variation_id' : '_product_id',
-						$product->get_stock_managed_by_id(),
-						$order_id
-					)
-				); // WPCS: unprepared SQL ok.
-
-				if ( $product->get_stock_quantity() < ( $held_stock + $product_qty_in_cart[ $product->get_stock_managed_by_id() ] ) ) {
-					/* translators: 1: product name 2: minutes */
-					$error->add( 'out-of-stock', sprintf( __( 'Sorry, we do not have enough "%1$s" in stock to fulfill your order right now. Please try again in %2$d minutes or edit your cart and try again. We apologize for any inconvenience caused.', 'woocommerce' ), $product->get_name(), get_option( 'woocommerce_hold_stock_minutes' ) ) );
-					return $error;
-				}
 			}
 		}
 

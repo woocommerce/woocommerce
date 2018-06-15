@@ -1,15 +1,15 @@
 <?php
+/**
+ * Order items HTML for meta box.
+ *
+ * @package WooCommerce/Admin
+ */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
+defined( 'ABSPATH' ) || exit;
 
 global $wpdb;
 
-// Get the payment gateway
-$payment_gateway = wc_get_payment_gateway_by_order( $order );
-
-// Get line items
+$payment_gateway     = wc_get_payment_gateway_by_order( $order );
 $line_items          = $order->get_items( apply_filters( 'woocommerce_admin_order_item_types', 'line_item' ) );
 $discounts           = $order->get_items( 'discount' );
 $line_items_fee      = $order->get_items( 'fee' );
@@ -83,7 +83,9 @@ if ( wc_tax_enabled() ) {
 		</tbody>
 		<tbody id="order_refunds">
 			<?php
-			if ( $refunds = $order->get_refunds() ) {
+			$refunds = $order->get_refunds();
+
+			if ( $refunds ) {
 				foreach ( $refunds as $refund ) {
 					include 'html-order-refund.php';
 				}
@@ -92,18 +94,6 @@ if ( wc_tax_enabled() ) {
 			?>
 		</tbody>
 	</table>
-</div>
-<div class="wc-order-data-row wc-order-item-bulk-edit" style="display:none;">
-	<?php if ( $order->is_editable() ) : ?>
-		<button type="button" class="button bulk-delete-items"><?php esc_html_e( 'Delete selected row(s)', 'woocommerce' ); ?></button>
-	<?php endif; ?>
-
-	<?php if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) : ?>
-		<button type="button" class="button bulk-decrease-stock"><?php esc_html_e( 'Reduce stock', 'woocommerce' ); ?></button>
-		<button type="button" class="button bulk-increase-stock"><?php esc_html_e( 'Increase stock', 'woocommerce' ); ?></button>
-	<?php endif; ?>
-
-	<?php do_action( 'woocommerce_admin_order_item_bulk_actions', $order ); ?>
 </div>
 <div class="wc-order-data-row wc-order-totals-items wc-order-items-editable">
 	<?php
@@ -118,7 +108,7 @@ if ( wc_tax_enabled() ) {
 					$post_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish' LIMIT 1;", $item->get_code() ) );
 					$class   = $order->is_editable() ? 'code editable' : 'code';
 					?>
-					<li class="<?php echo $class; ?>">
+					<li class="<?php echo esc_attr( $class ); ?>">
 						<?php if ( $post_id ) : ?>
 							<?php
 							$post_url = apply_filters( 'woocommerce_admin_order_item_coupon_url', add_query_arg(
@@ -151,7 +141,7 @@ if ( wc_tax_enabled() ) {
 				<td class="label"><?php esc_html_e( 'Discount:', 'woocommerce' ); ?></td>
 				<td width="1%"></td>
 				<td class="total">
-					<?php echo wc_price( $order->get_total_discount(), array( 'currency' => $order->get_currency() ) ); ?>
+					<?php echo wc_price( $order->get_total_discount(), array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok. ?>
 				</td>
 			</tr>
 		<?php endif; ?>
@@ -166,9 +156,9 @@ if ( wc_tax_enabled() ) {
 					<?php
 					$refunded = $order->get_total_shipping_refunded();
 					if ( $refunded > 0 ) {
-						echo '<del>' . strip_tags( wc_price( $order->get_shipping_total(), array( 'currency' => $order->get_currency() ) ) ) . '</del> <ins>' . wc_price( $order->get_shipping_total() - $refunded, array( 'currency' => $order->get_currency() ) ) . '</ins>';
+						echo '<del>' . strip_tags( wc_price( $order->get_shipping_total(), array( 'currency' => $order->get_currency() ) ) ) . '</del> <ins>' . wc_price( $order->get_shipping_total() - $refunded, array( 'currency' => $order->get_currency() ) ) . '</ins>'; // WPCS: XSS ok.
 					} else {
-						echo wc_price( $order->get_shipping_total(), array( 'currency' => $order->get_currency() ) );
+						echo wc_price( $order->get_shipping_total(), array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok.
 					}
 				?>
 				</td>
@@ -186,9 +176,9 @@ if ( wc_tax_enabled() ) {
 						<?php
 						$refunded = $order->get_total_tax_refunded_by_rate_id( $tax->rate_id );
 						if ( $refunded > 0 ) {
-							echo '<del>' . strip_tags( $tax->formatted_amount ) . '</del> <ins>' . wc_price( WC_Tax::round( $tax->amount, wc_get_price_decimals() ) - WC_Tax::round( $refunded, wc_get_price_decimals() ), array( 'currency' => $order->get_currency() ) ) . '</ins>';
+							echo '<del>' . strip_tags( $tax->formatted_amount ) . '</del> <ins>' . wc_price( WC_Tax::round( $tax->amount, wc_get_price_decimals() ) - WC_Tax::round( $refunded, wc_get_price_decimals() ), array( 'currency' => $order->get_currency() ) ) . '</ins>'; // WPCS: XSS ok.
 						} else {
-							echo $tax->formatted_amount;
+							echo wp_kses_post( $tax->formatted_amount );
 						}
 					?>
 					</td>
@@ -202,7 +192,7 @@ if ( wc_tax_enabled() ) {
 			<td class="label"><?php esc_html_e( 'Total', 'woocommerce' ); ?>:</td>
 			<td width="1%"></td>
 			<td class="total">
-				<?php echo $order->get_formatted_order_total(); ?>
+				<?php echo $order->get_formatted_order_total(); // WPCS: XSS ok. ?>
 			</td>
 		</tr>
 
@@ -212,7 +202,7 @@ if ( wc_tax_enabled() ) {
 			<tr>
 				<td class="label refunded-total"><?php esc_html_e( 'Refunded', 'woocommerce' ); ?>:</td>
 				<td width="1%"></td>
-				<td class="total refunded-total">-<?php echo wc_price( $order->get_total_refunded(), array( 'currency' => $order->get_currency() ) ); ?></td>
+				<td class="total refunded-total">-<?php echo wc_price( $order->get_total_refunded(), array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok. ?></td>
 			</tr>
 		<?php endif; ?>
 
@@ -235,7 +225,7 @@ if ( wc_tax_enabled() ) {
 			<button type="button" class="button refund-items"><?php esc_html_e( 'Refund', 'woocommerce' ); ?></button>
 		<?php endif; ?>
 		<?php
-			// allow adding custom buttons
+			// Allow adding custom buttons.
 			do_action( 'woocommerce_order_item_add_action_buttons', $order );
 		?>
 		<?php if ( $order->is_editable() ) : ?>
@@ -251,7 +241,7 @@ if ( wc_tax_enabled() ) {
 		<button type="button" class="button add-order-tax"><?php esc_html_e( 'Add tax', 'woocommerce' ); ?></button>
 	<?php endif; ?>
 	<?php
-		// allow adding custom buttons
+		// Allow adding custom buttons.
 		do_action( 'woocommerce_order_item_add_line_buttons', $order );
 	?>
 	<button type="button" class="button cancel-action"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></button>
@@ -268,11 +258,11 @@ if ( wc_tax_enabled() ) {
 		<?php endif; ?>
 		<tr>
 			<td class="label"><?php esc_html_e( 'Amount already refunded', 'woocommerce' ); ?>:</td>
-			<td class="total">-<?php echo wc_price( $order->get_total_refunded(), array( 'currency' => $order->get_currency() ) ); ?></td>
+			<td class="total">-<?php echo wc_price( $order->get_total_refunded(), array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok. ?></td>
 		</tr>
 		<tr>
 			<td class="label"><?php esc_html_e( 'Total available to refund', 'woocommerce' ); ?>:</td>
-			<td class="total"><?php echo wc_price( $order->get_total() - $order->get_total_refunded(), array( 'currency' => $order->get_currency() ) ); ?></td>
+			<td class="total"><?php echo wc_price( $order->get_total() - $order->get_total_refunded(), array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok. ?></td>
 		</tr>
 		<tr>
 			<td class="label"><label for="refund_amount"><?php esc_html_e( 'Refund amount', 'woocommerce' ); ?>:</label></td>
@@ -301,7 +291,7 @@ if ( wc_tax_enabled() ) {
 		}
 		?>
 		<?php /* translators: refund amount  */ ?>
-		<button type="button" class="button button-primary do-manual-refund tips" data-tip="<?php esc_attr_e( 'You will need to manually issue a refund through your payment gateway after using this.', 'woocommerce' ); ?>"><?php printf( esc_html__( 'Refund %s manually', 'woocommerce' ), $refund_amount ); ?></button>
+		<button type="button" class="button button-primary do-manual-refund tips" data-tip="<?php esc_attr_e( 'You will need to manually issue a refund through your payment gateway after using this.', 'woocommerce' ); ?>"><?php printf( esc_html__( 'Refund %s manually', 'woocommerce' ), wp_kses_post( $refund_amount ) ); ?></button>
 		<button type="button" class="button cancel-action"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></button>
 		<input type="hidden" id="refunded_amount" name="refunded_amount" value="<?php echo esc_attr( $order->get_total_refunded() ); ?>" />
 		<div class="clear"></div>
@@ -321,7 +311,24 @@ if ( wc_tax_enabled() ) {
 				</header>
 				<article>
 					<form action="" method="post">
-						<select class="wc-product-search" multiple="multiple" style="width: 50%;" id="add_item_id" name="add_order_items[]" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>"></select>
+						<table class="widefat">
+							<thead>
+								<tr>
+									<th><?php esc_html_e( 'Product', 'woocommerce' ); ?></th>
+									<th><?php esc_html_e( 'Quantity', 'woocommerce' ); ?></th>
+								</tr>
+							</thead>
+							<?php
+								$row = '
+									<td><select class="wc-product-search" name="item_id" data-allow_clear="true" data-display_stock="true" data-placeholder="' . esc_attr__( 'Search for a product&hellip;', 'woocommerce' ) . '"></select></td>
+									<td><input type="number" step="1" min="0" max="9999" autocomplete="off" name="item_qty" placeholder="1" size="4" class="quantity" /></td>';
+							?>
+							<tbody data-row="<?php echo esc_attr( $row ); ?>">
+								<tr>
+									<?php echo $row; // WPCS: XSS ok. ?>
+								</tr>
+							</tbody>
+						</table>
 					</form>
 				</article>
 				<footer>
@@ -369,7 +376,7 @@ if ( wc_tax_enabled() ) {
 										<td>' . WC_Tax::get_rate_code( $rate ) . '</td>
 										<td>' . WC_Tax::get_rate_percent( $rate ) . '</td>
 									</tr>
-								';
+								'; // WPCS: XSS ok.
 						}
 						?>
 						</table>
