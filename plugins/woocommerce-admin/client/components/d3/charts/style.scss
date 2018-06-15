@@ -1,0 +1,70 @@
+/** @format */
+
+.key-colour {
+	width: 10px;
+	height: 10px;
+	margin-right: 8px;
+	border-radius: 2px;
+}
+.key-key {
+	margin-right: 6px;
+	font-weight: 600;
+}
+svg {
+	overflow: visible;
+}
+.tooltip {
+	position: absolute;
+	display: none;
+	min-width: 80px;
+	height: auto;
+	background-color: #fff;
+	text-align: left;
+	padding: 6px;
+	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+
+	h4 {
+		text-align: center;
+		width: 100%;
+		margin: 0 auto;
+	}
+
+	ul {
+		padding-left: 7px;
+		list-style: none;
+		margin-bottom: 2px;
+		margin-top: 2px;
+		font-size: 14px;
+
+		li {
+			display: flex;
+			flex-direction: row;
+			flex-wrap: nowrap;
+			justify-content: flex-start;
+			align-items: center;
+		}
+	}
+}
+.bargroup {
+	&rect {
+		shape-rendering: crispEdges;
+	}
+}
+.grid {
+	line {
+		stroke: #e2e4e7;
+		stroke-opacity: 0.7;
+		shape-rendering: crispEdges;
+	}
+}
+.tick {
+	padding-top: 10px;
+	stroke-width: 0.5;
+}
+.y-axis {
+	&.tick {
+		&text {
+			fill: #555d66;
+		}
+	}
+}

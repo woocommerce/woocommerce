@@ -9,6 +9,11 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { select as d3Select } from 'd3-selection';
 
+/**
+ * Internal dependencies
+ */
+import './style.scss';
+
 class D3Base extends Component {
 	constructor() {
 		super( ...arguments );
@@ -22,7 +27,7 @@ class D3Base extends Component {
 		this.updateParams();
 	}
 
-	componentWillReceiveProps( nextProps ) {
+	UNSAFE_componentWillReceiveProps( nextProps ) {
 		this.updateParams( nextProps );
 	}
 

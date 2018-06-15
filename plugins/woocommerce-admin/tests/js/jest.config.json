@@ -23,5 +23,6 @@
   ],
   "transformIgnorePatterns": [
     "node_modules/(?!(gutenberg)/)"
-  ]
+  ],
+  "verbose": true
 }
