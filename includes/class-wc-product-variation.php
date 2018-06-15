@@ -426,6 +426,33 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @param array $parent_data parent data array for this variation.
 	 */
 	public function set_parent_data( $parent_data ) {
+		$parent_data = wp_parse_args( $parent_data, array(
+			'title'              => '',
+			'status'             => '',
+			'sku'                => '',
+			'manage_stock'       => 'no',
+			'backorders'         => 'no',
+			'stock_quantity'     => '',
+			'weight'             => '',
+			'length'             => '',
+			'width'              => '',
+			'height'             => '',
+			'tax_class'          => '',
+			'shipping_class_id'  => 0,
+			'image_id'           => 0,
+			'purchase_note'      => '',
+			'catalog_visibility' => 'visible',
+		) );
+
+		// Normalize tax class.
+		$parent_data['tax_class'] = sanitize_title( $parent_data['tax_class'] );
+		$parent_data['tax_class'] = 'standard' === $parent_data['tax_class'] ? '' : $parent_data['tax_class'];
+		$valid_classes            = $this->get_valid_tax_classes();
+
+		if ( ! in_array( $parent_data['tax_class'], $valid_classes, true ) ) {
+			$parent_data['tax_class'] = '';
+		}
+
 		$this->parent_data = $parent_data;
 	}
 
