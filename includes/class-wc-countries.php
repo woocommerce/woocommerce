@@ -120,6 +120,7 @@ class WC_Countries {
 			'LB' => array(),
 			'LU' => array(),
 			'MQ' => array(),
+			'MT' => array(),
 			'NL' => array(),
 			'NO' => array(),
 			'PL' => array(),
@@ -987,6 +988,11 @@ class WC_Countries {
 						),
 					),
 					'MQ' => array(
+						'state' => array(
+							'required' => false,
+						),
+					),
+					'MT' => array(
 						'state' => array(
 							'required' => false,
 						),

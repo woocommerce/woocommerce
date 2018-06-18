@@ -902,7 +902,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		$class         = 'standard' === $class ? '' : $class;
 		$valid_classes = $this->get_valid_tax_classes();
 
-		if ( ! in_array( $class, $valid_classes ) ) {
+		if ( ! in_array( $class, $valid_classes, true ) ) {
 			$class = '';
 		}
 

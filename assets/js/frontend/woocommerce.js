@@ -48,7 +48,7 @@ jQuery( function( $ ) {
 				return false;
 			}
 		} )
-		.on( 'focus', function() {
+		.on( 'click focus', function() {
 			var input       = $( this ),
 				parent      = input.parent(),
 				description = parent.find( 'span.description' );
