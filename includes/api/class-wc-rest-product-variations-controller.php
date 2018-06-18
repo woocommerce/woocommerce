@@ -40,6 +40,20 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 	protected $post_type = 'product_variation';
 
 	/**
+	 * Name of parent product table in SQL query.
+	 *
+	 * @var string
+	 */
+	protected $parent_product_table_name = 'p_wc_variation_parent';
+
+	/**
+	 * Extra clauses to add to WP_Query.
+	 *
+	 * @var array
+	 */
+	protected $clauses = array();
+
+	/**
 	 * Initialize product actions (parent).
 	 */
 	public function __construct() {
@@ -255,9 +269,11 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 	public function parent_product_taxonomies_query_join( $join, $wp_query ) {
 		global $wpdb;
 
-		// TODO: add some more checks here, probably only run in case one of the following filters are active: category, prod type, visibility, tag, shipping class, attribute; post_type == product_variation.
-		if ( isset( $wp_query->query_vars['post_parent'] ) && isset( $wp_query->query_vars['post_type'] ) && 'product_variation' === $wp_query->query_vars['post_type'] ) {
-			$join .= " LEFT JOIN {$wpdb->posts} AS p_wc_variation_parent ON ({$wpdb->posts}.post_parent = p_wc_variation_parent.ID) ";
+		// TODO: add some more checks here, probably only run in case one of the following filters are active:
+		// category, prod type, visibility, tag, shipping class, attribute; post_type == product_variation.
+		if ( isset( $wp_query->query_vars['post_parent'] ) && $wp_query->query_vars['meta_query']
+			&& isset( $wp_query->query_vars['post_type'] ) && 'product_variation' === $wp_query->query_vars['post_type'] ) {
+			$join .= " LEFT JOIN {$wpdb->posts} AS {$this->parent_product_table_name} ON ({$wpdb->posts}.post_parent = {$this->parent_product_table_name}.ID) ";
 			$join .= $this->clauses['join'];
 		}
 
@@ -273,8 +289,10 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 	 * @return string
 	 */
 	public function parent_product_taxonomies_query_where( $where, $wp_query ) {
-		// TODO: add some more checks here, probably only run in case one of the following filters are active: category, prod type, visibility, tag, shipping class, attribute; post_type == product_variation.
-		if ( isset( $wp_query->query_vars['post_parent'] ) && isset( $wp_query->query_vars['post_type'] ) && 'product_variation' === $wp_query->query_vars['post_type'] ) {
+		// TODO: add some more checks here, probably only run in case one of the following filters are active:
+		// category, prod type, visibility, tag, shipping class, attribute; post_type == product_variation.
+		if ( isset( $wp_query->query_vars['post_parent'] )
+			&& isset( $wp_query->query_vars['post_type'] ) && 'product_variation' === $wp_query->query_vars['post_type'] ) {
 			$where .= $this->clauses['where'];
 		}
 
@@ -299,7 +317,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 		$query_for_parent = new WP_Query( $args );
 		$query_for_parent->parse_tax_query( $query_for_parent->query_vars );
 
-		$this->clauses = $query_for_parent->tax_query->get_sql( 'p_wc_variation_parent', 'ID' );
+		$this->clauses = $query_for_parent->tax_query->get_sql( $this->parent_product_table_name, 'ID' );
 
 		// this does not work anyway as these are not assigned to variation.
 		unset( $args['tax_query'] );
@@ -310,6 +328,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 		add_filter( 'posts_where', array( $this, 'parent_product_taxonomies_query_where' ), 10, 2 );
 		add_filter( 'posts_join', array( $this, 'parent_product_taxonomies_query_join' ), 10, 2 );
 
+		$GLOBALS['wpdb']->query( 'SET SESSION SQL_BIG_SELECTS=1' );
 		// These properties needs to be transformed to meta query.
 		foreach ( $taxonomies as $taxonomy ) {
 			if ( in_array( $taxonomy['taxonomy'], array( 'product_type', 'product_visibility', 'product_cat', 'product_tag', 'product_shipping_class' ), true ) ) {
