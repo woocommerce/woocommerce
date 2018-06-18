@@ -569,19 +569,21 @@ class WC_Install {
 
 		// Add constraint to download logs if the columns matches.
 		if ( ! empty( $download_permissions_column_type ) && ! empty( $download_log_column_type ) && $download_permissions_column_type === $download_log_column_type ) {
-			$wpdb->query( "
-				IF NOT EXISTS (
-					SELECT NULL FROM information_schema.TABLE_CONSTRAINTS
-					WHERE CONSTRAINT_SCHEMA = '{$wpdb->dbname}'
-					AND CONSTRAINT_NAME = 'fk_wc_download_log_permission_id'
-					AND CONSTRAINT_TYPE = 'FOREIGN KEY'
-				) THEN
+			$fk_result = $wpdb->get_row( "
+				SELECT COUNT(*) AS fk_count
+				FROM information_schema.TABLE_CONSTRAINTS
+				WHERE CONSTRAINT_SCHEMA = '{$wpdb->dbname}'
+				AND CONSTRAINT_NAME = 'fk_wc_download_log_permission_id'
+				AND CONSTRAINT_TYPE = 'FOREIGN KEY'
+			" );
+			if ( 0 === (int) $fk_result->fk_count ) {
+				$wpdb->query( "
 					ALTER TABLE `{$wpdb->prefix}wc_download_log`
 					ADD CONSTRAINT `fk_wc_download_log_permission_id`
 					FOREIGN KEY (`permission_id`)
 					REFERENCES `{$wpdb->prefix}woocommerce_downloadable_product_permissions` (`permission_id`) ON DELETE CASCADE;
-				END IF
-			" );
+				" );
+			}
 		}
 	}
 
