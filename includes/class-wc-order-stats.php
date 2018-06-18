@@ -1,8 +1,8 @@
 <?php
 /**
- * WooCommerce Stats
+ * WooCommerce Orders Stats
  *
- * Handles the stats database and API.
+ * Handles the orders stats database and API.
  *s
  * @package WooCommerce/Classes
  * @since   3.5.0
@@ -11,11 +11,11 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Stats class.
+ * Order stats class.
  */
-class WC_Stats {
+class WC_Order_Stats {
 
-	const TABLE_NAME = 'wc_stats';
+	const TABLE_NAME = 'wc_order_stats';
 
 	/**
 	 * Setup class.
@@ -23,6 +23,13 @@ class WC_Stats {
 	public function __construct() {
 		add_action( 'init', array( $this, 'install' ) ); // @todo Don't do this on every page load.
 		add_action( 'init', array( $this, 'populate_database_naive' ), 99 );
+
+		// next steps:
+		// background process for populating (LEFT OFF HERE)
+		// tool for repopulating everything
+		// scheduler for adding new lines each hour
+		// handling for when old orders are updated
+		// easy method(s) for querying the stored data
 	}
 
 	public function install() {
@@ -36,25 +43,6 @@ class WC_Stats {
 		}
 
 		$table_name = $wpdb->prefix . self::TABLE_NAME;
-	/*
-
-CREATE TABLE wp_wc_stats (
-	start_date datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
-	end_date datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
-	num_orders smallint(5) UNSIGNED DEFAULT 0 NOT NULL,
-	num_items_sold smallint(5) UNSIGNED DEFAULT 0 NOT NULL,
-	num_products_sold smallint(5) UNSIGNED DEFAULT 0 NOT NULL,
-	orders_gross_total double DEFAULT 0 NOT NULL,
-	orders_coupon_total double DEFAULT 0 NOT NULL,
-	orders_refund_total double DEFAULT 0 NOT NULL,
-	orders_tax_total double DEFAULT 0 NOT NULL,
-	orders_shipping_total double DEFAULT 0 NOT NULL,
-	orders_net_total double DEFAULT 0 NOT NULL,
-	average_order_total double DEFAULT 0 NOT NULL,
-	PRIMARY KEY (start_date)
-);
-	*/
-
 		$sql = "CREATE TABLE $table_name (
 			start_date datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
 			end_date datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
@@ -148,8 +136,6 @@ CREATE TABLE wp_wc_stats (
 	}
 
 	public function update( $start, $end, $data ) {
-		// if line doesnt exist add it
-		// if it exists update it
 		global $wpdb;
 		$table_name = $wpdb->prefix . self::TABLE_NAME;
 
@@ -175,6 +161,10 @@ CREATE TABLE wp_wc_stats (
 			)
 		);
 	}
+
+	/**
+	 * Calculation methods.
+	 */
 
 	private function get_num_items_sold( $orders ) {
 		$num_items = 0;
@@ -233,7 +223,11 @@ CREATE TABLE wp_wc_stats (
 
 	private function get_orders_refund_total( $orders ) {
 		$total = 0.0;
-		// @todo
+
+		foreach ( $orders as $order ) {
+			$total += $order->get_total_refunded();
+		}
+
 		return $total;
 	}
 
@@ -257,4 +251,4 @@ CREATE TABLE wp_wc_stats (
 		return $total;
 	}
 }
-new WC_Stats();
+new WC_Order_Stats();

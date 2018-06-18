@@ -361,7 +361,7 @@ final class WooCommerce {
 		/**
 		 * Stats API
 		 */
-		include_once WC_ABSPATH . 'includes/class-wc-stats.php';
+		include_once WC_ABSPATH . 'includes/class-wc-order-stats.php';
 
 		/**
 		 * REST API.
