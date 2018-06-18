@@ -1846,6 +1846,7 @@ function wc_update_343_db_version() {
  * few resources and thus is less likely to fail on smaller servers.
  *
  * @param WC_Background_Updater|false $updater Background updater instance or false if function is called from `wp wc update` WP-CLI command.
+ * @return true|void Return true if near memory limit and needs to restart. Return void if update completed.
  */
 function wc_update_350_order_customer_id( $updater = false ) {
 	global $wpdb;
