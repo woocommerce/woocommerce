@@ -575,6 +575,7 @@ class WC_Install {
 				WHERE CONSTRAINT_SCHEMA = '{$wpdb->dbname}'
 				AND CONSTRAINT_NAME = 'fk_wc_download_log_permission_id'
 				AND CONSTRAINT_TYPE = 'FOREIGN KEY'
+				AND TABLE_NAME = '{$wpdb->prefix}wc_download_log'
 			" );
 			if ( 0 === (int) $fk_result->fk_count ) {
 				$wpdb->query( "
