@@ -389,7 +389,7 @@ class WC_Admin_Notices {
 	 * Notice about trying the Products block.
 	 */
 	public static function wootenberg_feature_plugin_notice() {
-		if ( is_plugin_active( 'woo-gutenberg-products-block/woocommerce-gutenberg-products-block.php' ) ) {
+		if ( get_user_meta( get_current_user_id(), 'dismissed_wootenberg_notice', true ) || is_plugin_active( 'woo-gutenberg-products-block/woocommerce-gutenberg-products-block.php' ) ) {
 			self::remove_notice( 'wootenberg' );
 			return;
 		}
