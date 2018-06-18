@@ -572,12 +572,10 @@ class WC_Install {
 			$wpdb->query( "
 				IF NOT EXISTS (
 					SELECT NULL FROM information_schema.TABLE_CONSTRAINTS
-					WHERE
-						CONSTRAINT_SCHEMA = '{$wpdb->dbname}' AND
-						CONSTRAINT_NAME = 'fk_wc_download_log_permission_id'
-						AND CONSTRAINT_TYPE = 'FOREIGN KEY'
-					)
-				THEN
+					WHERE CONSTRAINT_SCHEMA = '{$wpdb->dbname}'
+					AND CONSTRAINT_NAME = 'fk_wc_download_log_permission_id'
+					AND CONSTRAINT_TYPE = 'FOREIGN KEY'
+				) THEN
 					ALTER TABLE `{$wpdb->prefix}wc_download_log`
 					ADD CONSTRAINT `fk_wc_download_log_permission_id`
 					FOREIGN KEY (`permission_id`)
