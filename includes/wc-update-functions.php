@@ -1802,3 +1802,36 @@ function wc_update_340_last_active() {
 function wc_update_340_db_version() {
 	WC_Install::update_db_version( '3.4.0' );
 }
+
+/**
+ * Remove duplicate foreign keys
+ *
+ * @return void
+ */
+function wc_update_343_cleanup_foreign_keys() {
+	global $wpdb;
+
+	$results = $wpdb->get_results( "
+		SELECT CONSTRAINT_NAME
+		FROM information_schema.TABLE_CONSTRAINTS
+		WHERE CONSTRAINT_SCHEMA = '{$wpdb->dbname}'
+		AND CONSTRAINT_NAME LIKE '%wc_download_log_ib%'
+		AND CONSTRAINT_TYPE = 'FOREIGN KEY'
+		AND TABLE_NAME = '{$wpdb->prefix}wc_download_log'
+	" );
+
+	if ( $results ) {
+		foreach ( $results as $fk ) {
+			$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log DROP FOREIGN KEY {$fk->CONSTRAINT_NAME}" ); // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+		}
+	}
+}
+
+/**
+ * Update DB version.
+ *
+ * @return void
+ */
+function wc_update_343_db_version() {
+	WC_Install::update_db_version( '3.4.3' );
+}
