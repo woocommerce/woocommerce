@@ -61,12 +61,13 @@ class WC_Order_Stats {
 	 * @param string $start_time "Y-m-d H:00:00" format date.
 	 * @param string $end_time "Y-m-d H:00:00" format date.
 	 * @param array $args Optional arguments.
+	 * @return array
 	 */
 	public static function query( $start_date, $end_date, $args = array() ) {
 		global $wpdb;
 
 		$defaults = array(
-			'interval' => 'hour', // hour, week, day, month, year.
+			'interval' => 'hour', // hour, week, day, month, or year.
 			'fields' => '*',
 		);
 		$args = wp_parse_args( $args, $defaults );
@@ -103,10 +104,12 @@ class WC_Order_Stats {
 
 		$table_name = $wpdb->prefix . self::TABLE_NAME;
 		$query = $wpdb->prepare(
-			'SELECT ' . $selections . ' FROM ' . $table_name . ' WHERE start_date >= %s AND end_date <= %s GROUP BY ' . strtoupper( $args['interval'] ) . '(start_date);',
+			'SELECT ' . $selections . ' FROM ' . $table_name . ' WHERE start_date >= %s AND end_date <= %s GROUP BY ' . strtoupper( esc_sql( $args['interval'] ) ) . '(start_date);',
 			$start_date,
 			$end_date
 		);
+
+		return $wpdb->get_results( $query, ARRAY_A );
 	}
 
 	/**
@@ -143,6 +146,9 @@ class WC_Order_Stats {
 		dbDelta( $sql );
 	}
 
+	/**
+	 * Queue a background process that will repopulate the entire orders stats database.
+	 */
 	public function queue_order_stats_repopulate_database() {
 		// To get the first start time, get the oldest order and round the completion time down to the nearest hour.
 		$oldest = wc_get_orders( array(
@@ -176,6 +182,9 @@ class WC_Order_Stats {
 		self::$background_process->save()->dispatch();
 	}
 
+	/**
+	 * Queue a background process that will update the database with stats info from the last hour.
+	 */
 	public function queue_update_recent_orders() {
 		// Populate the stats information for the previous hour.
 		$last_hour = strtotime( date( 'Y-m-d H:00:00' ) ) - HOUR_IN_SECONDS;
@@ -211,6 +220,13 @@ class WC_Order_Stats {
 		self::$background_process->save()->dispatch();
 	}
 
+	/**
+	 * Get stats summary information for orders between two time frames.
+	 *
+	 * @param int $start_time Timestamp.
+	 * @param int $end_time Timestamp.
+	 * @return Array of stats.
+	 */
 	public static function summarize_orders( $start_time, $end_time ) {
 		$summary = array(
 			'num_orders'            => 0,
@@ -252,6 +268,14 @@ class WC_Order_Stats {
 		return $summary;
 	}
 
+	/**
+	 * Update the database with stats data.
+	 *
+	 * @param int/string $start Timestamp or ISO date.
+	 * @param int/string $end Timestamp or ISO date.
+	 * @param array $data Stats data.
+	 * @return int/bool Number or rows modified or false on failure.
+	 */
 	public static function update( $start, $end, $data ) {
 		global $wpdb;
 		$table_name = $wpdb->prefix . self::TABLE_NAME;
@@ -320,6 +344,12 @@ class WC_Order_Stats {
 	 * Calculation methods.
 	 */
 
+	/**
+	 * Get number of items sold among all orders.
+	 *
+	 * @param array $orders Array of WC_Order objects.
+	 * @return int
+	 */
 	protected static function get_num_items_sold( $orders ) {
 		$num_items = 0;
 
@@ -333,6 +363,12 @@ class WC_Order_Stats {
 		return $num_items;
 	}
 
+	/**
+	 * Get number of products sold among all orders.
+	 *
+	 * @param array $orders Array of WC_Order objects.
+	 * @return int
+	 */
 	protected static function get_num_products_sold( $orders ) {
 		$counted_products = array();
 		$num_products = 0;
@@ -355,6 +391,12 @@ class WC_Order_Stats {
 		return $num_products;
 	}
 
+	/**
+	 * Get the gross total for all orders.
+	 *
+	 * @param array $orders Array of WC_Order objects.
+	 * @return float
+	 */
 	protected static function get_orders_gross_total( $orders ) {
 		$total = 0.0;
 
@@ -365,6 +407,12 @@ class WC_Order_Stats {
 		return $total;
 	}
 
+	/**
+	 * Get the coupon total for all orders.
+	 *
+	 * @param array $orders Array of WC_Order objects.
+	 * @return float
+	 */
 	protected static function get_orders_coupon_total( $orders ) {
 		$total = 0.0;
 
@@ -375,6 +423,12 @@ class WC_Order_Stats {
 		return $total;
 	}
 
+	/**
+	 * Get the refund total for all orders.
+	 *
+	 * @param array $orders Array of WC_Order objects.
+	 * @return float
+	 */
 	protected static function get_orders_refund_total( $orders ) {
 		$total = 0.0;
 
@@ -385,6 +439,12 @@ class WC_Order_Stats {
 		return $total;
 	}
 
+	/**
+	 * Get the tax total for all orders.
+	 *
+	 * @param array $orders Array of WC_Order objects.
+	 * @return float
+	 */
 	protected static function get_orders_tax_total( $orders ) {
 		$total = 0.0;
 
@@ -395,6 +455,12 @@ class WC_Order_Stats {
 		return $total;
 	}
 
+	/**
+	 * Get the shipping total for all orders.
+	 *
+	 * @param array $orders Array of WC_Order objects.
+	 * @return float
+	 */
 	protected static function get_orders_shipping_total( $orders ) {
 		$total = 0.0;
 
