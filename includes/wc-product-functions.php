@@ -275,6 +275,7 @@ add_filter( 'post_type_link', 'wc_product_post_type_link', 10, 2 );
 /**
  * Get the placeholder image URL for products etc.
  *
+ * @access public
  * @return string
  */
 function wc_placeholder_img_src() {
@@ -284,7 +285,10 @@ function wc_placeholder_img_src() {
 /**
  * Get the placeholder image.
  *
+ * @access public
+ *
  * @param string $size Image size.
+ *
  * @return string
  */
 function wc_placeholder_img( $size = 'woocommerce_thumbnail' ) {
@@ -434,6 +438,7 @@ add_action( 'woocommerce_scheduled_sales', 'wc_scheduled_sales' );
 /**
  * Get attachment image attributes.
  *
+ * @access public
  * @param array $attr Image attributes.
  * @return array
  */
@@ -449,6 +454,7 @@ add_filter( 'wp_get_attachment_image_attributes', 'wc_get_attachment_image_attri
 /**
  * Prepare attachment for JavaScript.
  *
+ * @access public
  * @param array $response JS version of a attachment post object.
  * @return array
  */
@@ -597,17 +603,52 @@ function wc_get_product_id_by_sku( $sku ) {
  * @return array
  */
 function wc_get_product_variation_attributes( $variation_id ) {
-	wc_deprecated_function( 'wc_get_product_variation_attributes', '3.5', 'WC_Product::get_attributes' );
+	// Build variation data from meta.
+	$all_meta                = get_post_meta( $variation_id );
+	$parent_id               = wp_get_post_parent_id( $variation_id );
+	$parent_attributes       = array_filter( (array) get_post_meta( $parent_id, '_product_attributes', true ) );
+	$found_parent_attributes = array();
+	$variation_attributes    = array();
 
-	$product              = wc_get_product( $variation_id );
-	$variation_attributes = array();
-
-	if ( $product ) {
-		$product->read_attributes();
-		$product_attributes = $product->get_attributes();
-		foreach ( $product_attributes as $attr_name => $attr_value ) {
-			$variation_attributes[ 'attribute_' . $attr_name ] = $attr_value;
+	// Compare to parent variable product attributes and ensure they match.
+	foreach ( $parent_attributes as $attribute_name => $options ) {
+		if ( ! empty( $options['is_variation'] ) ) {
+			$attribute                 = 'attribute_' . sanitize_title( $attribute_name );
+			$found_parent_attributes[] = $attribute;
+			if ( ! array_key_exists( $attribute, $variation_attributes ) ) {
+				$variation_attributes[ $attribute ] = ''; // Add it - 'any' will be asumed.
+			}
 		}
+	}
+
+	// Get the variation attributes from meta.
+	foreach ( $all_meta as $name => $value ) {
+		// Only look at valid attribute meta, and also compare variation level attributes and remove any which do not exist at parent level.
+		if ( 0 !== strpos( $name, 'attribute_' ) || ! in_array( $name, $found_parent_attributes, true ) ) {
+			unset( $variation_attributes[ $name ] );
+			continue;
+		}
+		/**
+		 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
+		 * Attempt to get full version of the text attribute from the parent.
+		 */
+		if ( sanitize_title( $value[0] ) === $value[0] && version_compare( get_post_meta( $parent_id, '_product_version', true ), '2.4.0', '<' ) ) {
+			foreach ( $parent_attributes as $attribute ) {
+				if ( 'attribute_' . sanitize_title( $attribute['name'] ) !== $name ) {
+					continue;
+				}
+				$text_attributes = wc_get_text_attributes( $attribute['value'] );
+
+				foreach ( $text_attributes as $text_attribute ) {
+					if ( sanitize_title( $text_attribute ) === $value[0] ) {
+						$value[0] = $text_attribute;
+						break;
+					}
+				}
+			}
+		}
+
+		$variation_attributes[ $name ] = $value[0];
 	}
 
 	return $variation_attributes;
