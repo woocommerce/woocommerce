@@ -50,8 +50,63 @@ class WC_Order_Stats {
 			self::$background_process = new WC_Order_Stats_Background_Process();
 		}
 
-		// next steps:
-		// easy method(s) for querying the stored data
+		add_action( 'init', function() {
+			self::query( '2018-06-15 15:00:00', '2018-06-15 18:00:00', array( 'fields' => array( 'start_date', 'num_orders' ) ) );
+		}, 99 );
+	}
+
+	/**
+	 * Get order stats information.
+	 *
+	 * @param string $start_time "Y-m-d H:00:00" format date.
+	 * @param string $end_time "Y-m-d H:00:00" format date.
+	 * @param array $args Optional arguments.
+	 */
+	public static function query( $start_date, $end_date, $args = array() ) {
+		global $wpdb;
+
+		$defaults = array(
+			'interval' => 'hour', // hour, week, day, month, year.
+			'fields' => '*',
+		);
+		$args = wp_parse_args( $args, $defaults );
+
+		$selections = array(
+			'start_date' => 'MIN(start_date) as start_date',
+			'end_date' => 'MAX(end_date) as end_date',
+			'num_orders' => 'SUM(num_orders) as num_orders',
+			'num_items_sold' => 'SUM(num_items_sold) as num_items_sold',
+			'num_products_sold' => 'SUM(num_products_sold) as num_products_sold',
+			'orders_gross_total' => 'SUM(orders_gross_total) as orders_gross_total',
+			'orders_coupon_total' => 'SUM(orders_coupon_total) as orders_coupon_total',
+			'orders_refund_total' => 'SUM(orders_refund_total) as orders_refund_total',
+			'orders_tax_total' => 'SUM(orders_tax_total) as orders_tax_total',
+			'orders_shipping_total' => 'SUM(orders_shipping_total) as orders_shipping_total',
+			'orders_net_total' => 'SUM(orders_net_total) as orders_net_total',
+			'average_order_total' => 'AVG(average_order_total) as average_order_total',
+		);
+
+		if ( is_array( $args['fields'] ) ) {
+			$keep = array();
+			foreach ( $args['fields'] as $field ) {
+				if ( isset( $selections[ $field ] ) ) {
+					$keep[ $field ] = $selections[ $field ];
+				}
+			}
+			if ( empty( $keep ) ) {
+				return array();
+			}
+			$selections = implode( ',', $keep );
+		} else {
+			$selections = implode( ',', $selections );
+		}
+
+		$table_name = $wpdb->prefix . self::TABLE_NAME;
+		$query = $wpdb->prepare(
+			'SELECT ' . $selections . ' FROM ' . $table_name . ' WHERE start_date >= %s AND end_date <= %s GROUP BY ' . strtoupper( $args['interval'] ) . '(start_date);',
+			$start_date,
+			$end_date
+		);
 	}
 
 	/**
