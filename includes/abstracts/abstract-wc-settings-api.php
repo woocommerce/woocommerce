@@ -761,11 +761,11 @@ abstract class WC_Settings_API {
 							<?php if ( is_array( $option_value ) ) : ?>
 								<optgroup label="<?php echo esc_attr( $option_key ); ?>">
 									<?php foreach ( $option_value as $option_key_inner => $option_value_inner ) : ?>
-										<option value="<?php echo esc_attr( $option_key_inner ); ?>" <?php selected( in_array( $option_key_inner, $value, true ), true ); ?>><?php echo esc_attr( $option_value_inner ); ?></option>
+										<option value="<?php echo esc_attr( $option_key_inner ); ?>" <?php selected( in_array( (string) $option_key_inner, $value, true ), true ); ?>><?php echo esc_attr( $option_value_inner ); ?></option>
 									<?php endforeach; ?>
 								</optgroup>
 							<?php else : ?>
-								<option value="<?php echo esc_attr( $option_key ); ?>" <?php selected( in_array( $option_key, $value, true ), true ); ?>><?php echo esc_attr( $option_value ); ?></option>
+								<option value="<?php echo esc_attr( $option_key ); ?>" <?php selected( in_array( (string) $option_key, $value, true ), true ); ?>><?php echo esc_attr( $option_value ); ?></option>
 							<?php endif; ?>
 						<?php endforeach; ?>
 					</select>
