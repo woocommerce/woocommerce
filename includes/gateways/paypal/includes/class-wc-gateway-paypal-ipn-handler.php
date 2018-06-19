@@ -292,7 +292,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	 */
 	protected function payment_status_refunded( $order, $posted ) {
 		// Only handle full refunds, not partial.
-		if ( $order->get_total() === wc_format_decimal( $posted['mc_gross'] * -1 ) ) {
+		if ( $order->get_total() === wc_format_decimal( $posted['mc_gross'] * -1, wc_get_price_decimals() ) ) {
 
 			/* translators: %s: payment status. */
 			$order->update_status( 'refunded', sprintf( __( 'Payment %s via IPN.', 'woocommerce' ), strtolower( $posted['payment_status'] ) ) );
