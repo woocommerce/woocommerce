@@ -10,6 +10,10 @@
 
 defined( 'ABSPATH' ) || exit;
 
+if ( ! class_exists( 'WC_Order_Stats_Background_Process', false ) ) {
+	include_once dirname( __FILE__ ) . '/class-wc-order-stats-background-process.php';
+}
+
 /**
  * Order stats class.
  */
@@ -18,14 +22,28 @@ class WC_Order_Stats {
 	const TABLE_NAME = 'wc_order_stats';
 
 	/**
+	 * Background process to populate order stats.
+	 *
+	 * @var WC_Order_Stats_Background_Process
+	 */
+	protected static $background_process;
+
+	/**
 	 * Setup class.
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'install' ) ); // @todo Don't do this on every page load.
-		add_action( 'init', array( $this, 'populate_database_naive' ), 99 );
+		//add_action( 'init', array( $this, 'populate_database_naive' ), 99 );
+
+		if ( ! self::$background_process ) {
+			self::$background_process = new WC_Order_Stats_Background_Process();
+		}
+
+		if ( ! empty( $_GET['repopdb'] ) ) {
+			add_action( 'init', array( $this, 'queue_order_stats_repopulate_database' ) );
+		}
 
 		// next steps:
-		// background process for populating (LEFT OFF HERE)
 		// tool for repopulating everything
 		// scheduler for adding new lines each hour
 		// handling for when old orders are updated
@@ -63,13 +81,7 @@ class WC_Order_Stats {
 		dbDelta( $sql );
 	}
 
-	public function populate_database() {
-		// @todo do it this way instead of the naive way.
-		// start a background process to update
-		// each go-through of the process will process one hour's worth of orders
-	}
-
-	public function populate_database_naive() {
+	public function queue_order_stats_repopulate_database() {
 		// To get the first start time, get the oldest order and round the completion time down to the nearest hour.
 		$oldest = wc_get_orders( array(
 			'limit'   => 1,
@@ -87,15 +99,21 @@ class WC_Order_Stats {
 		$end_time = $start_time + HOUR_IN_SECONDS;
 
 		while ( $end_time < time() ) {
-			$summary = $this->summarize_orders( $start_time, $end_time );
-			$this->update( $start_time, $end_time, $summary );
+			self::$background_process->push_to_queue(
+				array(
+					'start_time' => $start_time,
+					'end_time' => $end_time,
+				)
+			);
 
 			$start_time = $end_time;
 			$end_time = $start_time + HOUR_IN_SECONDS;
 		}
+
+		self::$background_process->save()->dispatch();
 	}
 
-	public function summarize_orders( $start_time, $end_time ) {
+	public static function summarize_orders( $start_time, $end_time ) {
 		$summary = array(
 			'num_orders'            => 0,
 			'num_items_sold'        => 0,
@@ -119,13 +137,13 @@ class WC_Order_Stats {
 
 		// @todo The gross/net total logic may need tweaking. Verify that logic is correct.
 		$summary['num_orders']            = count( $orders );
-		$summary['num_items_sold']        = $this->get_num_items_sold( $orders );
-		$summary['num_products_sold']     = $this->get_num_products_sold( $orders );
-		$summary['orders_gross_total']    = $this->get_orders_gross_total( $orders );
-		$summary['orders_coupon_total']   = $this->get_orders_coupon_total( $orders );
-		$summary['orders_refund_total']   = $this->get_orders_refund_total( $orders );
-		$summary['orders_tax_total']      = $this->get_orders_tax_total( $orders );
-		$summary['orders_shipping_total'] = $this->get_orders_shipping_total( $orders );
+		$summary['num_items_sold']        = self::get_num_items_sold( $orders );
+		$summary['num_products_sold']     = self::get_num_products_sold( $orders );
+		$summary['orders_gross_total']    = self::get_orders_gross_total( $orders );
+		$summary['orders_coupon_total']   = self::get_orders_coupon_total( $orders );
+		$summary['orders_refund_total']   = self::get_orders_refund_total( $orders );
+		$summary['orders_tax_total']      = self::get_orders_tax_total( $orders );
+		$summary['orders_shipping_total'] = self::get_orders_shipping_total( $orders );
 		$summary['orders_net_total']      = $summary['orders_gross_total'] - $summary['orders_coupon_total'] - $summary['orders_refund_total'] - $summary['orders_tax_total'] - $summary['orders_shipping_total'];
 
 		if ( $summary['num_orders'] ) {
@@ -135,29 +153,66 @@ class WC_Order_Stats {
 		return $summary;
 	}
 
-	public function update( $start, $end, $data ) {
+	public static function update( $start, $end, $data ) {
 		global $wpdb;
 		$table_name = $wpdb->prefix . self::TABLE_NAME;
 
-		$data['start_date'] = date( 'Y-m-d H-0-0', $start );
-		$data['end_date'] = date( 'Y-m-d H-0-0', $end );
+		// Format dates to same format used in DB.
+		if ( is_numeric( $start ) ) {
+			$start = date( 'Y-m-d H:00:00', $start );
+		}
+		if ( is_numeric( $end ) ) {
+			$end = date( 'Y-m-d H:00:00', $end );
+		}
 
-		$result = $wpdb->replace(
+		$defaults = array(
+			'start_date'            => $start,
+			'end_date'              => $end,
+			'num_orders'            => 0,
+			'num_items_sold'        => 0,
+			'num_products_sold'     => 0,
+			'orders_gross_total'    => 0.0,
+			'orders_coupon_total'   => 0.0,
+			'orders_refund_total'   => 0.0,
+			'orders_tax_total'      => 0.0,
+			'orders_shipping_total' => 0.0,
+			'orders_net_total'      => 0.0,
+			'average_order_total'   => 0.0,
+		);
+		$data = wp_parse_args( $data, $defaults );
+
+		// Delete rows that don't have any information.
+		if ( ! $data['num_orders'] ) {
+			return $wpdb->delete(
+				$table_name,
+				array(
+					'start_date' => $start,
+					'end_date'   => $end,
+				),
+				array(
+					'%s',
+					'%s',
+				)
+			);
+		}
+
+		// Update or add the information to the DB.
+		return $wpdb->replace(
 			$table_name,
 			$data,
 			array(
-				'%d',
-				'%d',
-				'%d',
-				'%f',
-				'%f',
-				'%f',
-				'%f',
-				'%f',
-				'%f',
-				'%f',
 				'%s',
 				'%s',
+				'%d',
+				'%d',
+				'%d',
+				'%f',
+				'%f',
+				'%f',
+				'%f',
+				'%f',
+				'%f',
+				'%f',
 			)
 		);
 	}
@@ -166,7 +221,7 @@ class WC_Order_Stats {
 	 * Calculation methods.
 	 */
 
-	private function get_num_items_sold( $orders ) {
+	private static function get_num_items_sold( $orders ) {
 		$num_items = 0;
 
 		foreach ( $orders as $order ) {
@@ -179,7 +234,7 @@ class WC_Order_Stats {
 		return $num_items;
 	}
 
-	private function get_num_products_sold( $orders ) {
+	private static function get_num_products_sold( $orders ) {
 		$counted_products = array();
 		$num_products = 0;
 
@@ -201,7 +256,7 @@ class WC_Order_Stats {
 		return $num_products;
 	}
 
-	private function get_orders_gross_total( $orders ) {
+	private static function get_orders_gross_total( $orders ) {
 		$total = 0.0;
 
 		foreach ( $orders as $order ) {
@@ -211,7 +266,7 @@ class WC_Order_Stats {
 		return $total;
 	}
 
-	private function get_orders_coupon_total( $orders ) {
+	private static function get_orders_coupon_total( $orders ) {
 		$total = 0.0;
 
 		foreach ( $orders as $order ) {
@@ -221,17 +276,19 @@ class WC_Order_Stats {
 		return $total;
 	}
 
-	private function get_orders_refund_total( $orders ) {
+	private static function get_orders_refund_total( $orders ) {
 		$total = 0.0;
 
 		foreach ( $orders as $order ) {
-			$total += $order->get_total_refunded();
+			if ( method_exists( $order, 'get_total_refunded' ) ) {
+				$total += $order->get_total_refunded();
+			}
 		}
 
 		return $total;
 	}
 
-	private function get_orders_tax_total( $orders ) {
+	private static function get_orders_tax_total( $orders ) {
 		$total = 0.0;
 
 		foreach ( $orders as $order ) {
@@ -241,7 +298,7 @@ class WC_Order_Stats {
 		return $total;
 	}
 
-	private function get_orders_shipping_total( $orders ) {
+	private static function get_orders_shipping_total( $orders ) {
 		$total = 0.0;
 
 		foreach ( $orders as $order ) {

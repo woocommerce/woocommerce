@@ -35,35 +35,19 @@ class WC_Order_Stats_Background_Process extends WC_Background_Process {
 	 * @return bool
 	 */
 	protected function task( $item ) {
-		if ( ! $item || empty( $item['task'] ) ) {
+		$logger     = wc_get_logger();
+		$logger->debug( $item );
+
+
+		if ( ! $item || empty( $item['start_time'] ) ) {
 			return false;
 		}
 
-		$process_count = 0;
-		$process_limit = 20;
+		$start_time = $item['start_time'];
+		$end_time = ! empty( $item['end_time'] ) ? $item['end_time'] : $start_time + HOUR_IN_SECONDS;
 
-		switch ( $item['task'] ) {
-			case 'trash_pending_orders':
-				$process_count = WC_Privacy::trash_pending_orders( $process_limit );
-				break;
-			case 'trash_failed_orders':
-				$process_count = WC_Privacy::trash_failed_orders( $process_limit );
-				break;
-			case 'trash_cancelled_orders':
-				$process_count = WC_Privacy::trash_cancelled_orders( $process_limit );
-				break;
-			case 'anonymize_completed_orders':
-				$process_count = WC_Privacy::anonymize_completed_orders( $process_limit );
-				break;
-			case 'delete_inactive_accounts':
-				$process_count = WC_Privacy::delete_inactive_accounts( $process_limit );
-				break;
-		}
-
-		if ( $process_limit === $process_count ) {
-			// Needs to run again.
-			return $item;
-		}
+		$data = WC_Order_Stats::summarize_orders( $start_time, $end_time );
+		WC_Order_Stats::update( $start_time, $end_time, $data );
 
 		return false;
 	}
