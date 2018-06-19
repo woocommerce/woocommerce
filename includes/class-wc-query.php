@@ -176,8 +176,6 @@ class WC_Query {
 	/**
 	 * Add query vars.
 	 *
-	 * @access public
-	 *
 	 * @param array $vars Query vars.
 	 * @return array
 	 */
@@ -371,7 +369,6 @@ class WC_Query {
 	 *
 	 * Hooked into wpseo_ hook already, so no need for function_exist.
 	 *
-	 * @access public
 	 * @return string
 	 */
 	public function wpseo_metakey() {
