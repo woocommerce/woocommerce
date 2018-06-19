@@ -20,6 +20,7 @@ if ( ! class_exists( 'WC_Order_Stats_Background_Process', false ) ) {
 class WC_Order_Stats {
 
 	const TABLE_NAME = 'wc_order_stats';
+	const CRON_EVENT = 'wc_order_stats_update';
 
 	/**
 	 * Background process to populate order stats.
@@ -33,23 +34,29 @@ class WC_Order_Stats {
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'install' ) ); // @todo Don't do this on every page load.
-		//add_action( 'init', array( $this, 'populate_database_naive' ), 99 );
+		add_action( self::CRON_EVENT, array( $this, 'queue_update_recent_orders' ) );
+		// @todo Need to also handle orders whose 'Date created' has changed by hooking into the status changed action and scheduling a recalc.
+
+		if ( ! empty( $_GET['repopstatsdb'] ) ) {
+			add_action( 'init', array( $this, 'queue_order_stats_repopulate_database' ) );
+		}
+
+		// Each hour update the DB with info for the previous hour.
+		if ( ! wp_next_scheduled( self::CRON_EVENT ) ) {
+			wp_schedule_event( strtotime( date( 'Y-m-d H:30:00' ) ), 'hourly', self::CRON_EVENT );
+		}
 
 		if ( ! self::$background_process ) {
 			self::$background_process = new WC_Order_Stats_Background_Process();
 		}
 
-		if ( ! empty( $_GET['repopdb'] ) ) {
-			add_action( 'init', array( $this, 'queue_order_stats_repopulate_database' ) );
-		}
-
 		// next steps:
-		// tool for repopulating everything
-		// scheduler for adding new lines each hour
-		// handling for when old orders are updated
 		// easy method(s) for querying the stored data
 	}
 
+	/**
+	 * Create the table that will hold the order stats information.
+	 */
 	public function install() {
 		global $wpdb;
 
@@ -88,6 +95,7 @@ class WC_Order_Stats {
 			'orderby' => 'date',
 			'order'   => 'ASC',
 			'status'  => 'completed',
+			'type'    => 'shop_order',
 		) );
 
 		$oldest = $oldest ? reset( $oldest ) : false;
@@ -95,7 +103,7 @@ class WC_Order_Stats {
 			return;
 		}
 
-		$start_time = strtotime( $oldest->get_date_created()->date( 'Y-m-d\TH:0:0O' ) );
+		$start_time = strtotime( $oldest->get_date_created()->date( 'Y-m-d\TH:00:00O' ) );
 		$end_time = $start_time + HOUR_IN_SECONDS;
 
 		while ( $end_time < time() ) {
@@ -108,6 +116,41 @@ class WC_Order_Stats {
 
 			$start_time = $end_time;
 			$end_time = $start_time + HOUR_IN_SECONDS;
+		}
+
+		self::$background_process->save()->dispatch();
+	}
+
+	public function queue_update_recent_orders() {
+		// Populate the stats information for the previous hour.
+		$last_hour = strtotime( date( 'Y-m-d H:00:00' ) ) - HOUR_IN_SECONDS;
+		self::$background_process->push_to_queue(
+			array(
+				'start_time' => $last_hour,
+				'end_time' => $last_hour + HOUR_IN_SECONDS,
+			)
+		);
+
+		// Recalculate the stats information for orders modified in the previous hour.
+		$modified_orders = wc_get_orders(
+			array(
+				'limit' => -1,
+				'date_modified' => '>=' . $last_hour,
+			)
+		);
+
+		$scheduled_dates = array( $last_hour );
+		foreach( $modified_orders as $order ) {
+			$modified_date = strtotime( $order->get_date_modified()->date( 'Y-m-d H:00:00' ) );
+			if ( ! in_array( $modified_date, $scheduled_dates, true ) ) {
+				self::$background_process->push_to_queue(
+					array(
+						'start_time' => $modified_date,
+						'end_time' => $modified_date + HOUR_IN_SECONDS,
+					)
+				);
+				$scheduled_dates[] = $modified_date;
+			}
 		}
 
 		self::$background_process->save()->dispatch();
@@ -128,10 +171,11 @@ class WC_Order_Stats {
 		);
 
 		$orders = wc_get_orders( array(
-			'limit' => -1,
-			'orderby' => 'date',
-			'order' => 'ASC',
-			'status' => 'completed',
+			'limit'        => -1,
+			'type'         => 'shop_order',
+			'orderby'      => 'date',
+			'order'        => 'ASC',
+			'status'       => 'completed',
 			'date_created' => $start_time . '...' . $end_time,
 		) );
 
@@ -181,7 +225,7 @@ class WC_Order_Stats {
 		);
 		$data = wp_parse_args( $data, $defaults );
 
-		// Delete rows that don't have any information.
+		// Don't store rows that don't have useful information.
 		if ( ! $data['num_orders'] ) {
 			return $wpdb->delete(
 				$table_name,
@@ -221,7 +265,7 @@ class WC_Order_Stats {
 	 * Calculation methods.
 	 */
 
-	private static function get_num_items_sold( $orders ) {
+	protected static function get_num_items_sold( $orders ) {
 		$num_items = 0;
 
 		foreach ( $orders as $order ) {
@@ -234,7 +278,7 @@ class WC_Order_Stats {
 		return $num_items;
 	}
 
-	private static function get_num_products_sold( $orders ) {
+	protected static function get_num_products_sold( $orders ) {
 		$counted_products = array();
 		$num_products = 0;
 
@@ -256,7 +300,7 @@ class WC_Order_Stats {
 		return $num_products;
 	}
 
-	private static function get_orders_gross_total( $orders ) {
+	protected static function get_orders_gross_total( $orders ) {
 		$total = 0.0;
 
 		foreach ( $orders as $order ) {
@@ -266,7 +310,7 @@ class WC_Order_Stats {
 		return $total;
 	}
 
-	private static function get_orders_coupon_total( $orders ) {
+	protected static function get_orders_coupon_total( $orders ) {
 		$total = 0.0;
 
 		foreach ( $orders as $order ) {
@@ -276,19 +320,17 @@ class WC_Order_Stats {
 		return $total;
 	}
 
-	private static function get_orders_refund_total( $orders ) {
+	protected static function get_orders_refund_total( $orders ) {
 		$total = 0.0;
 
 		foreach ( $orders as $order ) {
-			if ( method_exists( $order, 'get_total_refunded' ) ) {
-				$total += $order->get_total_refunded();
-			}
+			$total += $order->get_total_refunded();
 		}
 
 		return $total;
 	}
 
-	private static function get_orders_tax_total( $orders ) {
+	protected static function get_orders_tax_total( $orders ) {
 		$total = 0.0;
 
 		foreach ( $orders as $order ) {
@@ -298,7 +340,7 @@ class WC_Order_Stats {
 		return $total;
 	}
 
-	private static function get_orders_shipping_total( $orders ) {
+	protected static function get_orders_shipping_total( $orders ) {
 		$total = 0.0;
 
 		foreach ( $orders as $order ) {

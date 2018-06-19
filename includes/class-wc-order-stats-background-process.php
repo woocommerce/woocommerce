@@ -35,10 +35,6 @@ class WC_Order_Stats_Background_Process extends WC_Background_Process {
 	 * @return bool
 	 */
 	protected function task( $item ) {
-		$logger     = wc_get_logger();
-		$logger->debug( $item );
-
-
 		if ( ! $item || empty( $item['start_time'] ) ) {
 			return false;
 		}
