@@ -1675,7 +1675,7 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 				'low_stock_amount'      => array(
 					'description' => __( 'If managing stock, this controls when low stock notifications are sent.', 'woocommerce' ),
 					'type'        => 'integer',
-					'default'     => -1,
+					'default'     => '',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'backorders'            => array(

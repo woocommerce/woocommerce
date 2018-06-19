@@ -314,7 +314,6 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 				'download_expiry'   => get_post_meta( $id, '_download_expiry', true ),
 				'image_id'          => get_post_thumbnail_id( $id ),
 				'backorders'        => get_post_meta( $id, '_backorders', true ),
-				'low_stock_amount'  => get_post_meta( $id, '_low_stock_amount', true ),
 				'sku'               => get_post_meta( $id, '_sku', true ),
 				'stock_quantity'    => get_post_meta( $id, '_stock', true ),
 				'weight'            => get_post_meta( $id, '_weight', true ),

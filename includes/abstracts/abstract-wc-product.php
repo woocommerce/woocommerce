@@ -394,8 +394,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Get low stock amount.
 	 *
 	 * @param  string $context What the value is for. Valid values are view and edit.
-	 * @since 3.4.0
-	 * @return int|null
+	 * @since  3.5.0
+	 * @return int|string Returns empty string if value not set
 	 */
 	public function get_low_stock_amount( $context = 'view' ) {
 		return $this->get_prop( 'low_stock_amount', $context );
@@ -978,10 +978,11 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Set low stock amount.
 	 *
-	 * @param $amount
+	 * @param int|string $amount Empty string if value not set
+	 * @since 3.5.0
 	 */
 	public function set_low_stock_amount( $amount ) {
-		$this->set_prop( 'low_stock_amount', $amount );
+		$this->set_prop( 'low_stock_amount', '' === $amount ? '' : absint( $amount ) );
 	}
 
 	/**

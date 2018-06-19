@@ -145,7 +145,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	}
 
 	/**
-	 * Render columm: name.
+	 * Render column: name.
 	 */
 	protected function render_name_column() {
 		global $post;

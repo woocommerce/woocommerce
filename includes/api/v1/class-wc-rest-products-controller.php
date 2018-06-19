@@ -569,7 +569,6 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 				'manage_stock'       => $variation->managing_stock(),
 				'stock_quantity'     => $variation->get_stock_quantity(),
 				'in_stock'           => $variation->is_in_stock(),
-				'low_stock_amount'   => $variation->get_low_stock_amount(),
 				'backorders'         => $variation->get_backorders(),
 				'backorders_allowed' => $variation->backorders_allowed(),
 				'backordered'        => $variation->is_on_backorder(),
@@ -1449,10 +1448,6 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 				$variation->set_stock_status( true === $data['in_stock'] ? 'instock' : 'outofstock' );
 			}
 
-			if ( isset( $data['low_stock_amount'] ) ) {
-				$variation->set_low_stock_amount( $data['low_stock_amount'] );
-			}
-
 			if ( isset( $data['backorders'] ) ) {
 				$variation->set_backorders( $data['backorders'] );
 			}
@@ -1970,7 +1965,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 				'low_stock_amount'      => array(
 					'description' => __( 'If managing stock, this controls when low stock notifications are sent.', 'woocommerce' ),
 					'type'        => 'integer',
-					'default'     => -1,
+					'default'     => '',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'backorders' => array(
@@ -2431,12 +2426,6 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 								'description' => __( 'Controls whether or not the variation is listed as "in stock" or "out of stock" on the frontend.', 'woocommerce' ),
 								'type'        => 'boolean',
 								'default'     => true,
-								'context'     => array( 'view', 'edit' ),
-							),
-							'low_stock_amount'      => array(
-								'description' => __( 'If managing stock, this controls when low stock notifications are sent.', 'woocommerce' ),
-								'type'        => 'integer',
-								'default'     => -1,
 								'context'     => array( 'view', 'edit' ),
 							),
 							'backorders' => array(
