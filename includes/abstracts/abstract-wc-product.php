@@ -354,9 +354,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return boolean
 	 */
 	public function get_manage_stock( $context = 'view' ) {
-		wc_deprecated_function( 'WC_Product::get_manage_stock', '3.5', 'WC_Product::get_stock_quantity' );
-
-		return is_null( $this->get_stock_quantity( $context ) ) ? false : true;
+		return $this->get_prop( 'manage_stock', $context );
 	}
 
 	/**
@@ -927,8 +925,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param bool $manage_stock Whether or not manage stock is enabled.
 	 */
 	public function set_manage_stock( $manage_stock ) {
-		wc_deprecated_function( 'WC_Product::set_manage_stock', '3.5', 'WC_Product::set_stock_quantity' );
-		$this->set_stock_quantity( ! $manage_stock ? null : 0 );
+		$this->set_prop( 'manage_stock', wc_string_to_bool( $manage_stock ) );
 	}
 
 	/**
