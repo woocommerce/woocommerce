@@ -24,7 +24,7 @@ export function formatCurrency( number, currency ) {
 }
 
 /**
- * Get the rounded decimal value of a number at the precision used for a given currency.
+ * Get the rounded decimal value of a number at the precision used for the current currency.
  * This is a work-around for fraction-cents, meant to be used like `wc_format_decimal`
  *
  * @param {Number|String} number A floating point number (or integer), or string that converts to a number
