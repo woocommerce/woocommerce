@@ -4,7 +4,7 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import classnames from 'classnames';
-import { Component, Fragment } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import { IconButton, TabPanel } from '@wordpress/components';
 import { uniqueId } from 'lodash';
 
@@ -14,6 +14,7 @@ import { uniqueId } from 'lodash';
 import './style.scss';
 import ActivityList from 'components/activity-list';
 import Count from 'components/count';
+import { H, Section } from 'layout/section';
 
 class Sidebar extends Component {
 	getTabs() {
@@ -56,9 +57,9 @@ class Sidebar extends Component {
 		return (
 			<aside className={ className } aria-labelledby={ headerId }>
 				<header className="woocommerce-layout__sidebar-top">
-					<h2 className="woocommerce-layout__sidebar-title screen-reader-text" id={ headerId }>
+					<H className="woocommerce-layout__sidebar-title screen-reader-text" id={ headerId }>
 						{ __( 'Store Activity', 'woo-dash' ) }
-					</h2>
+					</H>
 					<div className="woocommerce-layout__sidebar-toggle">
 						<IconButton
 							className="woocommerce-layout__sidebar-button"
@@ -75,10 +76,10 @@ class Sidebar extends Component {
 				>
 					{ selectedTabName => {
 						return (
-							<Fragment>
-								<h3>Section: { selectedTabName }</h3>
+							<Section component={ false }>
+								<H>Section: { selectedTabName }</H>
 								<ActivityList section={ selectedTabName } />
-							</Fragment>
+							</Section>
 						);
 					} }
 				</TabPanel>

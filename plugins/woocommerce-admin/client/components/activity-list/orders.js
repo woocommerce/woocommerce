@@ -13,12 +13,13 @@ import PropTypes from 'prop-types';
 import ActivityCard from 'components/activity-card';
 import { getCurrencyFormatDecimal, getCurrencyFormatString } from 'lib/currency';
 import { getOrderRefundTotal } from 'lib/order-values';
+import { Section } from 'layout/section';
 
 function OrdersList( { orders } ) {
 	const { data = [], isLoading } = orders;
 
 	return (
-		<div>
+		<Section>
 			{ isLoading ? (
 				<p>Loading</p>
 			) : (
@@ -63,7 +64,7 @@ function OrdersList( { orders } ) {
 					);
 				} )
 			) }
-		</div>
+		</Section>
 	);
 }
 

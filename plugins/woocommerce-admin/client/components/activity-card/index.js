@@ -13,6 +13,7 @@ import PropTypes from 'prop-types';
  */
 import './style.scss';
 import { EllipsisMenu } from '../ellipsis-menu';
+import { H, Section } from 'layout/section';
 
 class ActivityCard extends Component {
 	render() {
@@ -23,20 +24,20 @@ class ActivityCard extends Component {
 			<section className={ cardClassName }>
 				<header className="woocommerce-activity-card__header">
 					<span className="woocommerce-activity-card__icon">{ icon }</span>
-					<h3 className="woocommerce-activity-card__label">
+					<H className="woocommerce-activity-card__label">
 						{ label }
 						{ date && (
 							<span className="woocommerce-activity-card__date">
 								– { moment( date ).fromNow() }
 							</span>
 						) }
-					</h3>
+					</H>
 					{ menu && <div className="woocommerce-activity-card__menu">{ menu }</div> }
 				</header>
-				<div className="woocommerce-activity-card__body">
+				<Section className="woocommerce-activity-card__body">
 					<div className="woocommerce-activity-card__content">{ children }</div>
 					{ image && <div className="woocommerce-activity-card__image">{ image }</div> }
-				</div>
+				</Section>
 				{ actions && (
 					<footer className="woocommerce-activity-card__actions">
 						{ actions.map( ( item, i ) => cloneElement( item, { key: i } ) ) }

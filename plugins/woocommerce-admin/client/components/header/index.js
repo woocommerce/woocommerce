@@ -36,7 +36,7 @@ const Header = ( { sections, onToggle, isSidebarOpen } ) => {
 
 	return (
 		<div className="woocommerce-header">
-			<h1>
+			<h1 className="woocommerce-header__breadcrumbs">
 				<span>
 					<Link to="/">WooCommerce</Link>
 				</span>

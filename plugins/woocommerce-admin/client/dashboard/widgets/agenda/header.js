@@ -11,6 +11,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import Count from 'components/count';
+import { H, Section } from 'layout/section';
 
 class AgendaHeader extends Component {
 	constructor( props ) {
@@ -42,10 +43,10 @@ class AgendaHeader extends Component {
 		return (
 			<a className={ classes } href={ href }>
 				<div className="woocommerce-dashboard__agenda-group-title is-link">
-					<h3>
+					<H className="woocommerce-dashboard__agenda-group-label">
 						{ count && <Count count={ count } /> }
 						{ title }
-					</h3>
+					</H>
 					<span className="woocommerce-dashboard__agenda-group-arrow">
 						<Dashicon icon="arrow-right-alt2" />
 					</span>
@@ -76,16 +77,16 @@ class AgendaHeader extends Component {
 					onClick={ this.toggle }
 					className="woocommerce-dashboard__agenda-group-title is-accordion"
 				>
-					<h3>
+					<H className="woocommerce-dashboard__agenda-group-label">
 						{ count && <Count count={ count } /> }
 						{ title }
-					</h3>
+					</H>
 					<IconButton onClick={ this.toggle } aria-expanded={ isOpened } icon={ icon } />
 				</div>
 
 				{ isOpened &&
 					children && (
-						<div className="woocommerce-dashboard__agenda-group-content">{ children }</div>
+						<Section className="woocommerce-dashboard__agenda-group-content">{ children }</Section>
 					) }
 			</div>
 		);

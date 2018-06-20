@@ -11,6 +11,7 @@ import PropTypes from 'prop-types';
  */
 import './style.scss';
 import { EllipsisMenu } from '../ellipsis-menu';
+import { H, Section } from 'layout/section';
 
 class Card extends Component {
 	render() {
@@ -22,11 +23,11 @@ class Card extends Component {
 		return (
 			<div className={ className }>
 				<div className="woocommerce-card__header">
-					<h2 className="woocommerce-card__title">{ title }</h2>
+					<H className="woocommerce-card__title">{ title }</H>
 					{ action && <div className="woocommerce-card__action">{ action }</div> }
 					{ menu && <div className="woocommerce-card__menu">{ menu }</div> }
 				</div>
-				<div className="woocommerce-card__body">{ children }</div>
+				<Section className="woocommerce-card__body">{ children }</Section>
 			</div>
 		);
 	}
