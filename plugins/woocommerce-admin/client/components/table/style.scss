@@ -1,0 +1,45 @@
+/** @format */
+
+.woocommerce-table {
+	overflow-x: auto;
+	background: white;
+}
+
+.woocommerce-table__caption {
+	@include font-size( 24 );
+	margin-bottom: $spacing;
+	text-align: left;
+}
+
+.woocommerce-table__table {
+	border-collapse: collapse;
+	border: 1px solid $gray;
+	width: 100%;
+}
+
+.woocommerce-table__header,
+.woocommerce-table__item {
+	padding: $spacing/2;
+	border-bottom: 1px solid $gray;
+	text-align: left;
+}
+
+.woocommerce-table__header,
+th.woocommerce-table__item {
+	font-weight: bold;
+	white-space: nowrap;
+}
+
+.woocommerce-table__header {
+	background-color: #f8f9fa;
+
+	& + .woocommerce-table__header {
+		border-left: 1px solid $gray;
+	}
+
+	.components-icon-button {
+		margin-right: 5px;
+		padding: 0;
+		vertical-align: middle;
+	}
+}
