@@ -1405,7 +1405,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				return $return;
 			}
 		} else {
-			return __( 'Free!', 'woocommerce' );
+			return apply_filters( 'woocommerce_shipping_cost_returns_free', __( 'Free!', 'woocommerce' ) );
 		}
 	}
 
