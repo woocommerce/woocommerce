@@ -248,7 +248,7 @@ function woo_dash_get_embed_enabled_screen_ids() {
  * @return  array  Settings for the current currency {
  *     Array of settings.
  *
- *     @type string $currency   Currency code.
+ *     @type string $code       Currency code.
  *     @type string $precision  Number of decimals.
  *     @type string $symbol     Symbol for currency.
  * }
@@ -258,7 +258,7 @@ function woo_dash_currency_settings() {
 
 	return apply_filters(
 		'wc_currency_settings', array(
-			'currency'  => $code,
+			'code'      => $code,
 			'precision' => wc_get_price_decimals(),
 			'symbol'    => get_woocommerce_currency_symbol( $code ),
 		)
