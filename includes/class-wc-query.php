@@ -176,8 +176,6 @@ class WC_Query {
 	/**
 	 * Add query vars.
 	 *
-	 * @access public
-	 *
 	 * @param array $vars Query vars.
 	 * @return array
 	 */
@@ -371,7 +369,6 @@ class WC_Query {
 	 *
 	 * Hooked into wpseo_ hook already, so no need for function_exist.
 	 *
-	 * @access public
 	 * @return string
 	 */
 	public function wpseo_metakey() {
@@ -517,7 +514,7 @@ class WC_Query {
 		if ( isset( $wp_query->queried_object, $wp_query->queried_object->term_taxonomy_id, $wp_query->queried_object->taxonomy ) && is_a( $wp_query->queried_object, 'WP_Term' ) ) {
 			$search_within_terms = get_terms( array(
 				'taxonomy' => $wp_query->queried_object->taxonomy,
-				'parent'   => $wp_query->queried_object->term_id,
+				'child_of' => $wp_query->queried_object->term_id,
 				'fields'   => 'tt_ids',
 			) );
 			$search_within_terms[] = $wp_query->queried_object->term_taxonomy_id;
@@ -550,7 +547,7 @@ class WC_Query {
 		if ( isset( $wp_query->queried_object, $wp_query->queried_object->term_taxonomy_id, $wp_query->queried_object->taxonomy ) && is_a( $wp_query->queried_object, 'WP_Term' ) ) {
 			$search_within_terms = get_terms( array(
 				'taxonomy' => $wp_query->queried_object->taxonomy,
-				'parent'   => $wp_query->queried_object->term_id,
+				'child_of' => $wp_query->queried_object->term_id,
 				'fields'   => 'tt_ids',
 			) );
 			$search_within_terms[] = $wp_query->queried_object->term_taxonomy_id;
