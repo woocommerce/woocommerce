@@ -1,3 +1,5 @@
+/** @format */
+
 // Set up `wp.*` aliases.  Doing this because any tests importing wp stuff will
 // likely run into this.
 global.wp = {
@@ -31,3 +33,9 @@ Object.defineProperty( global.wp, 'element', {
 Object.defineProperty( global.wp, 'dom', {
 	get: () => require( 'gutenberg/packages/dom' ),
 } );
+
+global.wcSettings = {
+	adminUrl: 'https://vagrant.local/wp/wp-admin/',
+	locale: 'en-US',
+	currency: { code: 'USD', precision: 2, symbol: '&#36;' },
+};
