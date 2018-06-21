@@ -378,9 +378,10 @@ abstract class WC_Data {
 	 * Add meta data.
 	 *
 	 * @since 2.6.0
-	 * @param string $key Meta key.
-	 * @param string $value Meta value.
-	 * @param bool   $unique Should this be a unique key?.
+	 *
+	 * @param string        $key Meta key.
+	 * @param string|array  $value Meta value.
+	 * @param bool          $unique Should this be a unique key?.
 	 */
 	public function add_meta_data( $key, $value, $unique = false ) {
 		if ( $this->is_internal_meta_key( $key ) ) {
@@ -405,9 +406,10 @@ abstract class WC_Data {
 	 * Update meta data by key or ID, if provided.
 	 *
 	 * @since  2.6.0
-	 * @param  string $key Meta key.
-	 * @param  string $value Meta value.
-	 * @param  int    $meta_id Meta ID.
+	 *
+	 * @param  string       $key Meta key.
+	 * @param  string|array $value Meta value.
+	 * @param  int          $meta_id Meta ID.
 	 */
 	public function update_meta_data( $key, $value, $meta_id = 0 ) {
 		if ( $this->is_internal_meta_key( $key ) ) {
