@@ -389,15 +389,11 @@ class WC_API_Orders extends WC_API_Resource {
 	 * Create an order
 	 *
 	 * @since 2.2
-	 *
 	 * @param array $data raw order data
-	 *
 	 * @return array|WP_Error
 	 */
 	public function create_order( $data ) {
 		global $wpdb;
-
-		wc_transaction_query( 'start' );
 
 		try {
 			if ( ! isset( $data['order'] ) ) {
@@ -508,15 +504,10 @@ class WC_API_Orders extends WC_API_Resource {
 			do_action( 'woocommerce_api_create_order', $order->get_id(), $data, $this );
 			do_action( 'woocommerce_new_order', $order->get_id() );
 
-			wc_transaction_query( 'commit' );
-
 			return $this->get_order( $order->get_id() );
-
 		} catch ( WC_Data_Exception $e ) {
-			wc_transaction_query( 'rollback' );
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => 400 ) );
 		} catch ( WC_API_Exception $e ) {
-			wc_transaction_query( 'rollback' );
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
@@ -1316,7 +1307,7 @@ class WC_API_Orders extends WC_API_Resource {
 				'id'            => $note->comment_ID,
 				'created_at'    => $this->server->format_datetime( $note->comment_date_gmt ),
 				'note'          => $note->comment_content,
-				'customer_note' => get_comment_meta( $note->comment_ID, 'is_customer_note', true ) ? true : false,
+				'customer_note' => (bool) get_comment_meta( $note->comment_ID, 'is_customer_note', true ),
 			);
 
 			return array( 'order_note' => apply_filters( 'woocommerce_api_order_note_response', $order_note, $id, $fields, $note, $order_id, $this ) );

@@ -1,24 +1,17 @@
 <?php
 /**
- * WooCommerce product variation class.
- *
- * @package WooCommerce/Classes
- */
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
-/**
- * Product Variation Class.
+ * Product Variation
  *
  * The WooCommerce product variation class handles product variation data.
  *
- * @class       WC_Product_Variation
- * @version     3.0.0
- * @package     WooCommerce/Classes
- * @category    Class
- * @author      WooThemes
+ * @package WooCommerce/Classes
+ * @version 3.0.0
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Product variation class.
  */
 class WC_Product_Variation extends WC_Product_Simple {
 
@@ -142,16 +135,17 @@ class WC_Product_Variation extends WC_Product_Simple {
 		if ( isset( $attributes[ $attribute ] ) ) {
 			$value = $attributes[ $attribute ];
 			$term  = taxonomy_exists( $attribute ) ? get_term_by( 'slug', $value, $attribute ) : false;
-			$value = ! is_wp_error( $term ) && $term ? $term->name : $value;
-		} elseif ( isset( $attributes[ 'pa_' . $attribute ] ) ) {
-			$value = $attributes[ 'pa_' . $attribute ];
-			$term  = taxonomy_exists( 'pa_' . $attribute ) ? get_term_by( 'slug', $value, 'pa_' . $attribute ) : false;
-			$value = ! is_wp_error( $term ) && $term ? $term->name : $value;
-		} else {
-			return '';
+			return ! is_wp_error( $term ) && $term ? $term->name : $value;
 		}
 
-		return $value;
+		$att_str = 'pa_' . $attribute;
+		if ( isset( $attributes[ $att_str ] ) ) {
+			$value = $attributes[ $att_str ];
+			$term  = taxonomy_exists( $att_str ) ? get_term_by( 'slug', $value, $att_str ) : false;
+			return ! is_wp_error( $term ) && $term ? $term->name : $value;
+		}
+
+		return '';
 	}
 
 	/**
@@ -166,14 +160,24 @@ class WC_Product_Variation extends WC_Product_Simple {
 		if ( ! empty( $item_object['variation'] ) ) {
 			$data = $item_object['variation'];
 		} elseif ( ! empty( $item_object['item_meta_array'] ) ) {
-			$data_keys    = array_map( 'wc_variation_attribute_name', wp_list_pluck( $item_object['item_meta_array'], 'key' ) );
-			$data_values  = wp_list_pluck( $item_object['item_meta_array'], 'value' );
-			$data         = array_intersect_key( array_combine( $data_keys, $data_values ), $this->get_variation_attributes() );
+			$data_keys   = array_map( 'wc_variation_attribute_name', wp_list_pluck( $item_object['item_meta_array'], 'key' ) );
+			$data_values = wp_list_pluck( $item_object['item_meta_array'], 'value' );
+			$data        = array_intersect_key( array_combine( $data_keys, $data_values ), $this->get_variation_attributes() );
 		} else {
-			$data         = $this->get_variation_attributes();
+			$data = $this->get_variation_attributes();
 		}
 
-		return add_query_arg( array_map( 'urlencode', array_filter( $data ) ), $url );
+		$data = array_filter( $data );
+
+		if ( empty( $data ) ) {
+			return $url;
+		}
+
+		// Filter and encode keys and values so this is not broken by add_query_arg.
+		$data = array_map( 'urlencode', $data );
+		$keys = array_map( 'urlencode', array_keys( $data ) );
+
+		return add_query_arg( array_combine( $keys, $data ), $url );
 	}
 
 	/**
@@ -182,7 +186,14 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @return string
 	 */
 	public function add_to_cart_url() {
-		$url            = $this->is_purchasable() ? remove_query_arg( 'added-to-cart', add_query_arg( array( 'variation_id' => $this->get_id(), 'add-to-cart' => $this->get_parent_id() ), $this->get_permalink() ) ) : $this->get_permalink();
+		$url = $this->is_purchasable() ? remove_query_arg(
+			'added-to-cart', add_query_arg(
+				array(
+					'variation_id' => $this->get_id(),
+					'add-to-cart'  => $this->get_parent_id(),
+				), $this->get_permalink()
+			)
+		) : $this->get_permalink();
 		return apply_filters( 'woocommerce_product_add_to_cart_url', $url, $this );
 	}
 
@@ -415,6 +426,33 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @param array $parent_data parent data array for this variation.
 	 */
 	public function set_parent_data( $parent_data ) {
+		$parent_data = wp_parse_args( $parent_data, array(
+			'title'              => '',
+			'status'             => '',
+			'sku'                => '',
+			'manage_stock'       => 'no',
+			'backorders'         => 'no',
+			'stock_quantity'     => '',
+			'weight'             => '',
+			'length'             => '',
+			'width'              => '',
+			'height'             => '',
+			'tax_class'          => '',
+			'shipping_class_id'  => 0,
+			'image_id'           => 0,
+			'purchase_note'      => '',
+			'catalog_visibility' => 'visible',
+		) );
+
+		// Normalize tax class.
+		$parent_data['tax_class'] = sanitize_title( $parent_data['tax_class'] );
+		$parent_data['tax_class'] = 'standard' === $parent_data['tax_class'] ? '' : $parent_data['tax_class'];
+		$valid_classes            = $this->get_valid_tax_classes();
+
+		if ( ! in_array( $parent_data['tax_class'], $valid_classes, true ) ) {
+			$parent_data['tax_class'] = '';
+		}
+
 		$this->parent_data = $parent_data;
 	}
 
@@ -473,7 +511,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @return bool
 	 */
 	public function is_purchasable() {
-		return apply_filters( 'woocommerce_variation_is_purchasable', $this->variation_is_visible() && parent::is_purchasable(), $this );
+		return apply_filters( 'woocommerce_variation_is_purchasable', $this->variation_is_visible() && parent::is_purchasable() && ( 'publish' === $this->parent_data['status'] || current_user_can( 'edit_post', $this->get_parent_id() ) ), $this );
 	}
 
 	/**
@@ -504,7 +542,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @return array valid tax classes
 	 */
 	protected function get_valid_tax_classes() {
-		$valid_classes = WC_Tax::get_tax_class_slugs();
+		$valid_classes   = WC_Tax::get_tax_class_slugs();
 		$valid_classes[] = 'parent';
 
 		return $valid_classes;

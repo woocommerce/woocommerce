@@ -2,14 +2,11 @@
 /**
  * Regular order
  *
- * @author  Automattic
  * @package WooCommerce\Classes
  * @version 2.2.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Order Class.
@@ -96,16 +93,15 @@ class WC_Order extends WC_Abstract_Order {
 	 * Sales are also recorded for products.
 	 * Finally, record the date of payment.
 	 *
-	 * Order must exist.
-	 *
 	 * @param string $transaction_id Optional transaction id to store in post meta.
 	 * @return bool success
 	 */
 	public function payment_complete( $transaction_id = '' ) {
+		if ( ! $this->get_id() ) { // Order must exist.
+			return false;
+		}
+
 		try {
-			if ( ! $this->get_id() ) {
-				return false;
-			}
 			do_action( 'woocommerce_pre_payment_complete', $this->get_id() );
 
 			if ( WC()->session ) {
@@ -127,12 +123,17 @@ class WC_Order extends WC_Abstract_Order {
 				do_action( 'woocommerce_payment_complete_order_status_' . $this->get_status(), $this->get_id() );
 			}
 		} catch ( Exception $e ) {
+			/**
+			 * If there was an error completing the payment, log to a file and add an order note so the admin can take action.
+			 */
 			$logger = wc_get_logger();
-			$logger->error( sprintf( 'Payment complete of order #%d failed!', $this->get_id() ), array(
-				'order' => $this,
-				'error' => $e,
-			) );
-
+			$logger->error(
+				sprintf( 'Error completing payment for order #%d', $this->get_id() ), array(
+					'order' => $this,
+					'error' => $e,
+				)
+			);
+			$this->add_order_note( __( 'Payment complete event failed.', 'woocommerce' ) . ' ' . $e->getMessage() );
 			return false;
 		}
 		return true;
@@ -211,19 +212,33 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return int order ID
 	 */
 	public function save() {
-		$this->maybe_set_user_billing_email();
-		if ( $this->data_store ) {
-			// Trigger action before saving to the DB. Allows you to adjust object props before save.
-			do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
+		try {
+			$this->maybe_set_user_billing_email();
 
-			if ( $this->get_id() ) {
-				$this->data_store->update( $this );
-			} else {
-				$this->data_store->create( $this );
+			if ( $this->data_store ) {
+				// Trigger action before saving to the DB. Allows you to adjust object props before save.
+				do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
+
+				if ( $this->get_id() ) {
+					$this->data_store->update( $this );
+				} else {
+					$this->data_store->create( $this );
+				}
 			}
+
+			$this->save_items();
+			$this->status_transition();
+		} catch ( Exception $e ) {
+			$logger = wc_get_logger();
+			$logger->error(
+				sprintf( 'Error saving order #%d', $this->get_id() ), array(
+					'order' => $this,
+					'error' => $e,
+				)
+			);
+			$this->add_order_note( __( 'Error saving order.', 'woocommerce' ) . ' ' . $e->getMessage() );
 		}
-		$this->save_items();
-		$this->status_transition();
+
 		return $this->get_id();
 	}
 
@@ -287,7 +302,7 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Updates status of order immediately. Order must exist.
+	 * Updates status of order immediately.
 	 *
 	 * @uses WC_Order::set_status()
 	 * @param string $new_status    Status to change the order to. No internal wc- prefix is required.
@@ -296,19 +311,22 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool
 	 */
 	public function update_status( $new_status, $note = '', $manual = false ) {
+		if ( ! $this->get_id() ) { // Order must exist.
+			return false;
+		}
+
 		try {
-			if ( ! $this->get_id() ) {
-				return false;
-			}
 			$this->set_status( $new_status, $note, $manual );
 			$this->save();
 		} catch ( Exception $e ) {
 			$logger = wc_get_logger();
-			$logger->error( sprintf( 'Update status of order #%d failed!', $this->get_id() ), array(
-				'order' => $this,
-				'error' => $e,
-			) );
-
+			$logger->error(
+				sprintf( 'Error updating status for order #%d', $this->get_id() ), array(
+					'order' => $this,
+					'error' => $e,
+				)
+			);
+			$this->add_order_note( __( 'Update status event failed.', 'woocommerce' ) . ' ' . $e->getMessage() );
 			return false;
 		}
 		return true;
@@ -324,21 +342,32 @@ class WC_Order extends WC_Abstract_Order {
 		$this->status_transition = false;
 
 		if ( $status_transition ) {
-			do_action( 'woocommerce_order_status_' . $status_transition['to'], $this->get_id(), $this );
+			try {
+				do_action( 'woocommerce_order_status_' . $status_transition['to'], $this->get_id(), $this );
 
-			if ( ! empty( $status_transition['from'] ) ) {
-				/* translators: 1: old order status 2: new order status */
-				$transition_note = sprintf( __( 'Order status changed from %1$s to %2$s.', 'woocommerce' ), wc_get_order_status_name( $status_transition['from'] ), wc_get_order_status_name( $status_transition['to'] ) );
+				if ( ! empty( $status_transition['from'] ) ) {
+					/* translators: 1: old order status 2: new order status */
+					$transition_note = sprintf( __( 'Order status changed from %1$s to %2$s.', 'woocommerce' ), wc_get_order_status_name( $status_transition['from'] ), wc_get_order_status_name( $status_transition['to'] ) );
 
-				do_action( 'woocommerce_order_status_' . $status_transition['from'] . '_to_' . $status_transition['to'], $this->get_id(), $this );
-				do_action( 'woocommerce_order_status_changed', $this->get_id(), $status_transition['from'], $status_transition['to'], $this );
-			} else {
-				/* translators: %s: new order status */
-				$transition_note = sprintf( __( 'Order status set to %s.', 'woocommerce' ), wc_get_order_status_name( $status_transition['to'] ) );
+					do_action( 'woocommerce_order_status_' . $status_transition['from'] . '_to_' . $status_transition['to'], $this->get_id(), $this );
+					do_action( 'woocommerce_order_status_changed', $this->get_id(), $status_transition['from'], $status_transition['to'], $this );
+				} else {
+					/* translators: %s: new order status */
+					$transition_note = sprintf( __( 'Order status set to %s.', 'woocommerce' ), wc_get_order_status_name( $status_transition['to'] ) );
+				}
+
+				// Note the transition occurred.
+				$this->add_order_note( trim( $status_transition['note'] . ' ' . $transition_note ), 0, $status_transition['manual'] );
+			} catch ( Exception $e ) {
+				$logger = wc_get_logger();
+				$logger->error(
+					sprintf( 'Status transition of order #%d errored!', $this->get_id() ), array(
+						'order' => $this,
+						'error' => $e,
+					)
+				);
+				$this->add_order_note( __( 'Error during status transition.', 'woocommerce' ) . ' ' . $e->getMessage() );
 			}
-
-			// Note the transition occurred.
-			$this->add_order_note( trim( $status_transition['note'] . ' ' . $transition_note ), 0, $status_transition['manual'] );
 		}
 	}
 
@@ -1377,6 +1406,10 @@ class WC_Order extends WC_Abstract_Order {
 							'order_key'           => $this->get_order_key(),
 							'downloads_remaining' => $file['downloads_remaining'],
 							'access_expires'      => $file['access_expires'],
+							'file'                => array(
+								'name' => $file['name'],
+								'file' => $file['file'],
+							),
 						);
 					}
 				}
@@ -1402,31 +1435,42 @@ class WC_Order extends WC_Abstract_Order {
 	 * Orders which only contain virtual, downloadable items do not need admin
 	 * intervention.
 	 *
+	 * Uses a transient so these calls are not repeated multiple times, and because
+	 * once the order is processed this code/transient does not need to persist.
+	 *
 	 * @since 3.0.0
 	 * @return bool
 	 */
 	public function needs_processing() {
-		$needs_processing = false;
+		$transient_name   = 'wc_order_' . $this->get_id() . '_needs_processing';
+		$needs_processing = get_transient( $transient_name );
 
-		if ( count( $this->get_items() ) > 0 ) {
-			foreach ( $this->get_items() as $item ) {
-				if ( $item->is_type( 'line_item' ) ) {
-					$product = $item->get_product();
-					if ( ! $product ) {
-						continue;
-					}
+		if ( false === $needs_processing ) {
+			$needs_processing = 0;
 
-					$virtual_downloadable_item = $product->is_downloadable() && $product->is_virtual();
+			if ( count( $this->get_items() ) > 0 ) {
+				foreach ( $this->get_items() as $item ) {
+					if ( $item->is_type( 'line_item' ) ) {
+						$product = $item->get_product();
 
-					if ( apply_filters( 'woocommerce_order_item_needs_processing', ! $virtual_downloadable_item, $product, $this->get_id() ) ) {
-						$needs_processing = true;
-						break;
+						if ( ! $product ) {
+							continue;
+						}
+
+						$virtual_downloadable_item = $product->is_downloadable() && $product->is_virtual();
+
+						if ( apply_filters( 'woocommerce_order_item_needs_processing', ! $virtual_downloadable_item, $product, $this->get_id() ) ) {
+							$needs_processing = 1;
+							break;
+						}
 					}
 				}
 			}
+
+			set_transient( $transient_name, $needs_processing, DAY_IN_SECONDS );
 		}
 
-		return $needs_processing;
+		return 1 === absint( $needs_processing );
 	}
 
 	/*
@@ -1451,10 +1495,12 @@ class WC_Order extends WC_Abstract_Order {
 		if ( $on_checkout ) {
 			$pay_url = add_query_arg( 'key', $this->get_order_key(), $pay_url );
 		} else {
-			$pay_url = add_query_arg( array(
-				'pay_for_order' => 'true',
-				'key'           => $this->get_order_key(),
-			), $pay_url );
+			$pay_url = add_query_arg(
+				array(
+					'pay_for_order' => 'true',
+					'key'           => $this->get_order_key(),
+				), $pay_url
+			);
 		}
 
 		return apply_filters( 'woocommerce_get_checkout_payment_url', $pay_url, $this );
@@ -1484,12 +1530,18 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_cancel_order_url( $redirect = '' ) {
-		return apply_filters( 'woocommerce_get_cancel_order_url', wp_nonce_url( add_query_arg( array(
-			'cancel_order' => 'true',
-			'order'        => $this->get_order_key(),
-			'order_id'     => $this->get_id(),
-			'redirect'     => $redirect,
-		), $this->get_cancel_endpoint() ), 'woocommerce-cancel_order' ) );
+		return apply_filters(
+			'woocommerce_get_cancel_order_url', wp_nonce_url(
+				add_query_arg(
+					array(
+						'cancel_order' => 'true',
+						'order'        => $this->get_order_key(),
+						'order_id'     => $this->get_id(),
+						'redirect'     => $redirect,
+					), $this->get_cancel_endpoint()
+				), 'woocommerce-cancel_order'
+			)
+		);
 	}
 
 	/**
@@ -1499,13 +1551,17 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string The unescaped cancel-order URL.
 	 */
 	public function get_cancel_order_url_raw( $redirect = '' ) {
-		return apply_filters( 'woocommerce_get_cancel_order_url_raw', add_query_arg( array(
-			'cancel_order' => 'true',
-			'order'        => $this->get_order_key(),
-			'order_id'     => $this->get_id(),
-			'redirect'     => $redirect,
-			'_wpnonce'     => wp_create_nonce( 'woocommerce-cancel_order' ),
-		), $this->get_cancel_endpoint() ) );
+		return apply_filters(
+			'woocommerce_get_cancel_order_url_raw', add_query_arg(
+				array(
+					'cancel_order' => 'true',
+					'order'        => $this->get_order_key(),
+					'order_id'     => $this->get_id(),
+					'redirect'     => $redirect,
+					'_wpnonce'     => wp_create_nonce( 'woocommerce-cancel_order' ),
+				), $this->get_cancel_endpoint()
+			)
+		);
 	}
 
 	/**
@@ -1574,7 +1630,8 @@ class WC_Order extends WC_Abstract_Order {
 			$comment_author_email .= isset( $_SERVER['HTTP_HOST'] ) ? str_replace( 'www.', '', sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) ) : 'noreply.com'; // WPCS: input var ok.
 			$comment_author_email  = sanitize_email( $comment_author_email );
 		}
-		$commentdata = apply_filters( 'woocommerce_new_order_note_data',
+		$commentdata = apply_filters(
+			'woocommerce_new_order_note_data',
 			array(
 				'comment_post_ID'      => $this->get_id(),
 				'comment_author'       => $comment_author,
@@ -1597,10 +1654,12 @@ class WC_Order extends WC_Abstract_Order {
 		if ( $is_customer_note ) {
 			add_comment_meta( $comment_id, 'is_customer_note', 1 );
 
-			do_action( 'woocommerce_new_customer_note', array(
-				'order_id'      => $this->get_id(),
-				'customer_note' => $commentdata['comment_content'],
-			) );
+			do_action(
+				'woocommerce_new_customer_note', array(
+					'order_id'      => $this->get_id(),
+					'customer_note' => $commentdata['comment_content'],
+				)
+			);
 		}
 
 		return $comment_id;
@@ -1656,11 +1715,13 @@ class WC_Order extends WC_Abstract_Order {
 			return $cached_data;
 		}
 
-		$this->refunds = wc_get_orders( array(
-			'type'   => 'shop_order_refund',
-			'parent' => $this->get_id(),
-			'limit'  => -1,
-		) );
+		$this->refunds = wc_get_orders(
+			array(
+				'type'   => 'shop_order_refund',
+				'parent' => $this->get_id(),
+				'limit'  => -1,
+			)
+		);
 
 		wp_cache_set( $cache_key, $this->refunds, $this->cache_group );
 

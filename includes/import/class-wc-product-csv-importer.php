@@ -23,6 +23,13 @@ if ( ! class_exists( 'WC_Product_Importer', false ) ) {
 class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 	/**
+	 * Tracks current row being parsed.
+	 *
+	 * @var integer
+	 */
+	protected $parsing_raw_data_index = 0;
+
+	/**
 	 * Initialize importer.
 	 *
 	 * @param string $file   File to read.
@@ -39,6 +46,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'delimiter'        => ',', // CSV delimiter.
 			'prevent_timeouts' => true, // Check memory and time usage and abort if reaching limit.
 			'enclosure'        => '"', // The character used to wrap text in the CSV.
+			'escape'           => "\0", // PHP uses '\' as the default escape character. This is not RFC-4180 compliant. This disables the escape character.
 		);
 
 		$this->params = wp_parse_args( $params, $default_args );
@@ -58,7 +66,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		$handle = fopen( $this->file, 'r' ); // @codingStandardsIgnoreLine.
 
 		if ( false !== $handle ) {
-			$this->raw_keys = fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'] );
+			$this->raw_keys = version_compare( PHP_VERSION, '5.3', '>=' ) ? fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'], $this->params['escape'] ) : fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'] ); // @codingStandardsIgnoreLine
 
 			// Remove BOM signature from the first item.
 			if ( isset( $this->raw_keys[0] ) ) {
@@ -70,7 +78,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			}
 
 			while ( 1 ) {
-				$row = fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'] );
+				$row = version_compare( PHP_VERSION, '5.3', '>=' ) ? fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'], $this->params['escape'] ) : fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'] ); // @codingStandardsIgnoreLine
 
 				if ( false !== $row ) {
 					$this->raw_data[]                                 = $row;
@@ -222,11 +230,14 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 		// Not updating? Make sure we have a new placeholder for this ID.
 		if ( ! $this->params['update_existing'] ) {
-			$id = isset( $this->raw_data['sku'] ) ? wc_get_product_id_by_sku( $this->raw_data['sku'] ) : '';
+			$mapped_keys      = $this->get_mapped_keys();
+			$sku_column_index = absint( array_search( 'sku', $mapped_keys, true ) );
+			$row_sku          = isset( $this->raw_data[ $this->parsing_raw_data_index ][ $sku_column_index ] ) ? $this->raw_data[ $this->parsing_raw_data_index ][ $sku_column_index ] : '';
+			$id_from_sku      = $row_sku ? wc_get_product_id_by_sku( $row_sku ) : '';
 
 			// If row has a SKU, make sure placeholder was not made already.
-			if ( $id ) {
-				return $id;
+			if ( $id_from_sku ) {
+				return $id_from_sku;
 			}
 
 			$product = new WC_Product_Simple();
@@ -235,8 +246,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$product->add_meta_data( '_original_id', $id, true );
 
 			// If row has a SKU, make sure placeholder has it too.
-			if ( isset( $this->raw_data['sku'] ) ) {
-				$product->set_sku( $this->raw_data['sku'] );
+			if ( $row_sku ) {
+				$product->set_sku( $row_sku );
 			}
 			$id = $product->save();
 		}
@@ -481,7 +492,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 */
 	public function parse_backorders_field( $value ) {
 		if ( empty( $value ) ) {
-			return '';
+			return 'no';
 		}
 
 		$value = $this->parse_bool_field( $value );
@@ -492,7 +503,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return $value ? 'yes' : 'no';
 		}
 
-		return '';
+		return 'no';
 	}
 
 	/**
@@ -523,6 +534,19 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		}
 		// Relative and shortcode paths.
 		return wc_clean( $value );
+	}
+
+	/**
+	 * Parse an int value field
+	 *
+	 * @param int $value field value.
+	 * @return int
+	 */
+	public function parse_int_field( $value ) {
+		// Remove the ' prepended to fields that start with - if needed.
+		$value = $this->unescape_negative_number( $value );
+
+		return intval( $value );
 	}
 
 	/**
@@ -567,8 +591,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'grouped_products'  => array( $this, 'parse_relative_comma_field' ),
 			'upsell_ids'        => array( $this, 'parse_relative_comma_field' ),
 			'cross_sell_ids'    => array( $this, 'parse_relative_comma_field' ),
-			'download_limit'    => 'intval',
-			'download_expiry'   => 'intval',
+			'download_limit'    => array( $this, 'parse_int_field' ),
+			'download_expiry'   => array( $this, 'parse_int_field' ),
 			'product_url'       => 'esc_url_raw',
 			'menu_order'        => 'intval',
 		);
@@ -777,11 +801,14 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		$use_mb          = function_exists( 'mb_convert_encoding' );
 
 		// Parse the data.
-		foreach ( $this->raw_data as $row ) {
+		foreach ( $this->raw_data as $row_index => $row ) {
 			// Skip empty rows.
 			if ( ! count( array_filter( $row ) ) ) {
 				continue;
 			}
+
+			$this->parsing_raw_data_index = $row_index;
+
 			$data = array();
 
 			do_action( 'woocommerce_product_importer_before_set_parsed_data', $row, $mapped_keys );
@@ -869,7 +896,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			if ( $id ) {
 				$product   = wc_get_product( $id );
 				$id_exists = $product && 'importing' !== $product->get_status();
-			} elseif ( $sku ) {
+			}
+
+			if ( $sku ) {
 				$id_from_sku = wc_get_product_id_by_sku( $sku );
 				$product     = $id_from_sku ? wc_get_product( $id_from_sku ) : false;
 				$sku_exists  = $product && 'importing' !== $product->get_status();

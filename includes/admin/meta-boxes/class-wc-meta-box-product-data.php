@@ -28,11 +28,11 @@ class WC_Meta_Box_Product_Data {
 		global $thepostid, $product_object;
 
 		$thepostid      = $post->ID;
-		$product_object = $thepostid ? wc_get_product( $thepostid ) : new WC_Product;
+		$product_object = $thepostid ? wc_get_product( $thepostid ) : new WC_Product();
 
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
 
-		include( 'views/html-product-data-panel.php' );
+		include 'views/html-product-data-panel.php';
 	}
 
 	/**
@@ -41,86 +41,92 @@ class WC_Meta_Box_Product_Data {
 	private static function output_tabs() {
 		global $post, $thepostid, $product_object;
 
-		include( 'views/html-product-data-general.php' );
-		include( 'views/html-product-data-inventory.php' );
-		include( 'views/html-product-data-shipping.php' );
-		include( 'views/html-product-data-linked-products.php' );
-		include( 'views/html-product-data-attributes.php' );
-		include( 'views/html-product-data-advanced.php' );
+		include 'views/html-product-data-general.php';
+		include 'views/html-product-data-inventory.php';
+		include 'views/html-product-data-shipping.php';
+		include 'views/html-product-data-linked-products.php';
+		include 'views/html-product-data-attributes.php';
+		include 'views/html-product-data-advanced.php';
 	}
 
 	/**
 	 * Return array of product type options.
+	 *
 	 * @return array
 	 */
 	private static function get_product_type_options() {
-		return apply_filters( 'product_type_options', array(
-			'virtual' => array(
-				'id'            => '_virtual',
-				'wrapper_class' => 'show_if_simple',
-				'label'         => __( 'Virtual', 'woocommerce' ),
-				'description'   => __( 'Virtual products are intangible and are not shipped.', 'woocommerce' ),
-				'default'       => 'no',
-			),
-			'downloadable' => array(
-				'id'            => '_downloadable',
-				'wrapper_class' => 'show_if_simple',
-				'label'         => __( 'Downloadable', 'woocommerce' ),
-				'description'   => __( 'Downloadable products give access to a file upon purchase.', 'woocommerce' ),
-				'default'       => 'no',
-			),
-		) );
+		return apply_filters(
+			'product_type_options', array(
+				'virtual'      => array(
+					'id'            => '_virtual',
+					'wrapper_class' => 'show_if_simple',
+					'label'         => __( 'Virtual', 'woocommerce' ),
+					'description'   => __( 'Virtual products are intangible and are not shipped.', 'woocommerce' ),
+					'default'       => 'no',
+				),
+				'downloadable' => array(
+					'id'            => '_downloadable',
+					'wrapper_class' => 'show_if_simple',
+					'label'         => __( 'Downloadable', 'woocommerce' ),
+					'description'   => __( 'Downloadable products give access to a file upon purchase.', 'woocommerce' ),
+					'default'       => 'no',
+				),
+			)
+		);
 	}
 
 	/**
 	 * Return array of tabs to show.
+	 *
 	 * @return array
 	 */
 	private static function get_product_data_tabs() {
-		$tabs = apply_filters( 'woocommerce_product_data_tabs', array(
-			'general' => array(
-				'label'    => __( 'General', 'woocommerce' ),
-				'target'   => 'general_product_data',
-				'class'    => array( 'hide_if_grouped' ),
-				'priority' => 10,
-			),
-			'inventory' => array(
-				'label'    => __( 'Inventory', 'woocommerce' ),
-				'target'   => 'inventory_product_data',
-				'class'    => array( 'show_if_simple', 'show_if_variable', 'show_if_grouped', 'show_if_external' ),
-				'priority' => 20,
-			),
-			'shipping' => array(
-				'label'    => __( 'Shipping', 'woocommerce' ),
-				'target'   => 'shipping_product_data',
-				'class'    => array( 'hide_if_virtual', 'hide_if_grouped', 'hide_if_external' ),
-				'priority' => 30,
-			),
-			'linked_product' => array(
-				'label'    => __( 'Linked Products', 'woocommerce' ),
-				'target'   => 'linked_product_data',
-				'class'    => array(),
-				'priority' => 40,
-			),
-			'attribute' => array(
-				'label'    => __( 'Attributes', 'woocommerce' ),
-				'target'   => 'product_attributes',
-				'class'    => array(),
-				'priority' => 50,
-			),
-			'variations' => array(
-				'label'    => __( 'Variations', 'woocommerce' ),
-				'target'   => 'variable_product_options',
-				'class'    => array( 'variations_tab', 'show_if_variable' ),
-				'priority' => 60,
-			),
-			'advanced' => array(
-				'label'    => __( 'Advanced', 'woocommerce' ),
-				'target'   => 'advanced_product_data',
-				'class'    => array(),
-				'priority' => 70,
-			),
-		) );
+		$tabs = apply_filters(
+			'woocommerce_product_data_tabs', array(
+				'general'        => array(
+					'label'    => __( 'General', 'woocommerce' ),
+					'target'   => 'general_product_data',
+					'class'    => array( 'hide_if_grouped' ),
+					'priority' => 10,
+				),
+				'inventory'      => array(
+					'label'    => __( 'Inventory', 'woocommerce' ),
+					'target'   => 'inventory_product_data',
+					'class'    => array( 'show_if_simple', 'show_if_variable', 'show_if_grouped', 'show_if_external' ),
+					'priority' => 20,
+				),
+				'shipping'       => array(
+					'label'    => __( 'Shipping', 'woocommerce' ),
+					'target'   => 'shipping_product_data',
+					'class'    => array( 'hide_if_virtual', 'hide_if_grouped', 'hide_if_external' ),
+					'priority' => 30,
+				),
+				'linked_product' => array(
+					'label'    => __( 'Linked Products', 'woocommerce' ),
+					'target'   => 'linked_product_data',
+					'class'    => array(),
+					'priority' => 40,
+				),
+				'attribute'      => array(
+					'label'    => __( 'Attributes', 'woocommerce' ),
+					'target'   => 'product_attributes',
+					'class'    => array(),
+					'priority' => 50,
+				),
+				'variations'     => array(
+					'label'    => __( 'Variations', 'woocommerce' ),
+					'target'   => 'variable_product_options',
+					'class'    => array( 'variations_tab', 'show_if_variable' ),
+					'priority' => 60,
+				),
+				'advanced'       => array(
+					'label'    => __( 'Advanced', 'woocommerce' ),
+					'target'   => 'advanced_product_data',
+					'class'    => array(),
+					'priority' => 70,
+				),
+			)
+		);
 
 		// Sort tabs based on priority.
 		uasort( $tabs, array( __CLASS__, 'product_data_tabs_sort' ) );
@@ -151,6 +157,7 @@ class WC_Meta_Box_Product_Data {
 
 	/**
 	 * Filter callback for finding variation attributes.
+	 *
 	 * @param  WC_Product_Attribute $attribute
 	 * @return bool
 	 */
@@ -170,7 +177,7 @@ class WC_Meta_Box_Product_Data {
 		$variations_per_page    = absint( apply_filters( 'woocommerce_admin_meta_boxes_variations_per_page', 15 ) );
 		$variations_total_pages = ceil( $variations_count / $variations_per_page );
 
-		include( 'views/html-product-data-variations.php' );
+		include 'views/html-product-data-variations.php';
 	}
 
 	/**
@@ -191,9 +198,9 @@ class WC_Meta_Box_Product_Data {
 			for ( $i = 0; $i < $file_url_size; $i ++ ) {
 				if ( ! empty( $file_urls[ $i ] ) ) {
 					$downloads[] = array(
-						'name'          => wc_clean( $file_names[ $i ] ),
-						'file'          => wp_unslash( trim( $file_urls[ $i ] ) ),
-						'download_id'	=> wc_clean( $file_hashes[ $i ] ),
+						'name'        => wc_clean( $file_names[ $i ] ),
+						'file'        => wp_unslash( trim( $file_urls[ $i ] ) ),
+						'download_id' => wc_clean( $file_hashes[ $i ] ),
 					);
 				}
 			}
@@ -203,6 +210,7 @@ class WC_Meta_Box_Product_Data {
 
 	/**
 	 * Prepare children for save.
+	 *
 	 * @return array
 	 */
 	private static function prepare_children() {
@@ -272,9 +280,10 @@ class WC_Meta_Box_Product_Data {
 
 	/**
 	 * Prepare attributes for a specific variation or defaults.
-	 * @param  array $all_attributes
+	 *
+	 * @param  array  $all_attributes
 	 * @param  string $key_prefix
-	 * @param  int $index
+	 * @param  int    $index
 	 * @return array
 	 */
 	private static function prepare_set_attributes( $all_attributes, $key_prefix = 'attribute_', $index = null ) {
@@ -309,7 +318,7 @@ class WC_Meta_Box_Product_Data {
 	/**
 	 * Save meta box data.
 	 *
-	 * @param int $post_id
+	 * @param int  $post_id
 	 * @param $post
 	 */
 	public static function save( $post_id, $post ) {
@@ -326,49 +335,51 @@ class WC_Meta_Box_Product_Data {
 				/* translators: 1: product ID 2: quantity in stock */
 				WC_Admin_Meta_Boxes::add_error( sprintf( __( 'The stock has not been updated because the value has changed since editing. Product %1$d has %2$d units in stock.', 'woocommerce' ), $product->get_id(), $product->get_stock_quantity( 'edit' ) ) );
 			} else {
-				$stock = wc_stock_amount( $_POST['_stock'] );
+				$stock = wc_stock_amount( wp_unslash( $_POST['_stock'] ) );
 			}
 		}
 
-		$errors       = $product->set_props( array(
-			'sku'                => isset( $_POST['_sku'] ) ? wc_clean( $_POST['_sku'] ) : null,
-			'purchase_note'      => wp_kses_post( stripslashes( $_POST['_purchase_note'] ) ),
-			'downloadable'       => isset( $_POST['_downloadable'] ),
-			'virtual'            => isset( $_POST['_virtual'] ),
-			'featured'           => isset( $_POST['_featured'] ),
-			'catalog_visibility' => wc_clean( $_POST['_visibility'] ),
-			'tax_status'         => isset( $_POST['_tax_status'] ) ? wc_clean( $_POST['_tax_status'] ) : null,
-			'tax_class'          => isset( $_POST['_tax_class'] ) ? wc_clean( $_POST['_tax_class'] ) : null,
-			'weight'             => wc_clean( $_POST['_weight'] ),
-			'length'             => wc_clean( $_POST['_length'] ),
-			'width'              => wc_clean( $_POST['_width'] ),
-			'height'             => wc_clean( $_POST['_height'] ),
-			'shipping_class_id'  => absint( $_POST['product_shipping_class'] ),
-			'sold_individually'  => ! empty( $_POST['_sold_individually'] ),
-			'upsell_ids'         => isset( $_POST['upsell_ids'] ) ? array_map( 'intval', (array) $_POST['upsell_ids'] ) : array(),
-			'cross_sell_ids'     => isset( $_POST['crosssell_ids'] ) ? array_map( 'intval', (array) $_POST['crosssell_ids'] ) : array(),
-			'regular_price'      => wc_clean( $_POST['_regular_price'] ),
-			'sale_price'         => wc_clean( $_POST['_sale_price'] ),
-			'date_on_sale_from'  => wc_clean( $_POST['_sale_price_dates_from'] ),
-			'date_on_sale_to'    => wc_clean( $_POST['_sale_price_dates_to'] ),
-			'manage_stock'       => ! empty( $_POST['_manage_stock'] ),
-			'backorders'         => isset( $_POST['_backorders'] ) ? wc_clean( $_POST['_backorders'] ) : null,
-			'stock_status'       => wc_clean( $_POST['_stock_status'] ),
-			'stock_quantity'     => $stock,
-			'download_limit'     => '' === $_POST['_download_limit'] ? '' : absint( $_POST['_download_limit'] ),
-			'download_expiry'    => '' === $_POST['_download_expiry'] ? '' : absint( $_POST['_download_expiry'] ),
-			'downloads'          => self::prepare_downloads(
-				isset( $_POST['_wc_file_names'] ) ? $_POST['_wc_file_names'] : array(),
-				isset( $_POST['_wc_file_urls'] ) ? $_POST['_wc_file_urls'] : array(),
-				isset( $_POST['_wc_file_hashes'] ) ? $_POST['_wc_file_hashes'] : array()
-			),
-			'product_url'        => esc_url_raw( $_POST['_product_url'] ),
-			'button_text'        => wc_clean( $_POST['_button_text'] ),
-			'children'           => 'grouped' === $product_type ? self::prepare_children() : null,
-			'reviews_allowed'    => ! empty( $_POST['comment_status'] ) && 'open' === $_POST['comment_status'],
-			'attributes'         => $attributes,
-			'default_attributes' => self::prepare_set_attributes( $attributes, 'default_attribute_' ),
-		) );
+		$errors = $product->set_props(
+			array(
+				'sku'                => isset( $_POST['_sku'] ) ? wc_clean( wp_unslash( $_POST['_sku'] ) ) : null,
+				'purchase_note'      => wp_kses_post( wp_unslash( $_POST['_purchase_note'] ) ),
+				'downloadable'       => isset( $_POST['_downloadable'] ),
+				'virtual'            => isset( $_POST['_virtual'] ),
+				'featured'           => isset( $_POST['_featured'] ),
+				'catalog_visibility' => wc_clean( wp_unslash( $_POST['_visibility'] ) ),
+				'tax_status'         => isset( $_POST['_tax_status'] ) ? wc_clean( wp_unslash( $_POST['_tax_status'] ) ) : null,
+				'tax_class'          => isset( $_POST['_tax_class'] ) ? wc_clean( wp_unslash( $_POST['_tax_class'] ) ) : null,
+				'weight'             => wc_clean( wp_unslash( $_POST['_weight'] ) ),
+				'length'             => wc_clean( wp_unslash( $_POST['_length'] ) ),
+				'width'              => wc_clean( wp_unslash( $_POST['_width'] ) ),
+				'height'             => wc_clean( wp_unslash( $_POST['_height'] ) ),
+				'shipping_class_id'  => absint( wp_unslash( $_POST['product_shipping_class'] ) ),
+				'sold_individually'  => ! empty( $_POST['_sold_individually'] ),
+				'upsell_ids'         => isset( $_POST['upsell_ids'] ) ? array_map( 'intval', (array) wp_unslash( $_POST['upsell_ids'] ) ) : array(),
+				'cross_sell_ids'     => isset( $_POST['crosssell_ids'] ) ? array_map( 'intval', (array) wp_unslash( $_POST['crosssell_ids'] ) ) : array(),
+				'regular_price'      => wc_clean( wp_unslash( $_POST['_regular_price'] ) ),
+				'sale_price'         => wc_clean( wp_unslash( $_POST['_sale_price'] ) ),
+				'date_on_sale_from'  => wc_clean( wp_unslash( $_POST['_sale_price_dates_from'] ) ),
+				'date_on_sale_to'    => wc_clean( wp_unslash( $_POST['_sale_price_dates_to'] ) ),
+				'manage_stock'       => ! empty( $_POST['_manage_stock'] ),
+				'backorders'         => isset( $_POST['_backorders'] ) ? wc_clean( wp_unslash( $_POST['_backorders'] ) ) : null,
+				'stock_status'       => wc_clean( wp_unslash( $_POST['_stock_status'] ) ),
+				'stock_quantity'     => $stock,
+				'download_limit'     => '' === $_POST['_download_limit'] ? '' : absint( wp_unslash( $_POST['_download_limit'] ) ),
+				'download_expiry'    => '' === $_POST['_download_expiry'] ? '' : absint( wp_unslash( $_POST['_download_expiry'] ) ),
+				'downloads'          => self::prepare_downloads(
+					isset( $_POST['_wc_file_names'] ) ? wp_unslash( $_POST['_wc_file_names'] ) : array(),
+					isset( $_POST['_wc_file_urls'] ) ? wp_unslash( $_POST['_wc_file_urls'] ) : array(),
+					isset( $_POST['_wc_file_hashes'] ) ? wp_unslash( $_POST['_wc_file_hashes'] ) : array()
+				),
+				'product_url'        => esc_url_raw( wp_unslash( $_POST['_product_url'] ) ),
+				'button_text'        => wc_clean( wp_unslash( $_POST['_button_text'] ) ),
+				'children'           => 'grouped' === $product_type ? self::prepare_children() : null,
+				'reviews_allowed'    => ! empty( $_POST['comment_status'] ) && 'open' === $_POST['comment_status'],
+				'attributes'         => $attributes,
+				'default_attributes' => self::prepare_set_attributes( $attributes, 'default_attribute_' ),
+			)
+		);
 
 		if ( is_wp_error( $errors ) ) {
 			WC_Admin_Meta_Boxes::add_error( $errors->get_error_message() );
@@ -391,12 +402,12 @@ class WC_Meta_Box_Product_Data {
 	/**
 	 * Save meta box data.
 	 *
-	 * @param int $post_id
+	 * @param int     $post_id
 	 * @param WP_Post $post
 	 */
 	public static function save_variations( $post_id, $post ) {
 		if ( isset( $_POST['variable_post_id'] ) ) {
-			$parent     = wc_get_product( $post_id );
+			$parent = wc_get_product( $post_id );
 			$parent->set_default_attributes( self::prepare_set_attributes( $parent->get_attributes(), 'default_attribute_' ) );
 			$parent->save();
 
@@ -423,37 +434,39 @@ class WC_Meta_Box_Product_Data {
 					}
 				}
 
-				$errors       = $variation->set_props( array(
-					'status'            => isset( $_POST['variable_enabled'][ $i ] ) ? 'publish' : 'private',
-					'menu_order'        => wc_clean( $_POST['variation_menu_order'][ $i ] ),
-					'regular_price'     => wc_clean( $_POST['variable_regular_price'][ $i ] ),
-					'sale_price'        => wc_clean( $_POST['variable_sale_price'][ $i ] ),
-					'virtual'           => isset( $_POST['variable_is_virtual'][ $i ] ),
-					'downloadable'      => isset( $_POST['variable_is_downloadable'][ $i ] ),
-					'date_on_sale_from' => wc_clean( $_POST['variable_sale_price_dates_from'][ $i ] ),
-					'date_on_sale_to'   => wc_clean( $_POST['variable_sale_price_dates_to'][ $i ] ),
-					'description'       => wp_kses_post( $_POST['variable_description'][ $i ] ),
-					'download_limit'    => wc_clean( $_POST['variable_download_limit'][ $i ] ),
-					'download_expiry'   => wc_clean( $_POST['variable_download_expiry'][ $i ] ),
-					'downloads'         => self::prepare_downloads(
-						isset( $_POST['_wc_variation_file_names'][ $variation_id ] ) ? $_POST['_wc_variation_file_names'][ $variation_id ] : array(),
-						isset( $_POST['_wc_variation_file_urls'][ $variation_id ] ) ? $_POST['_wc_variation_file_urls'][ $variation_id ] : array(),
-						isset( $_POST['_wc_variation_file_hashes'][ $variation_id ] ) ? $_POST['_wc_variation_file_hashes'][ $variation_id ] : array()
-					),
-					'manage_stock'      => isset( $_POST['variable_manage_stock'][ $i ] ),
-					'stock_quantity'    => $stock,
-					'backorders'        => isset( $_POST['variable_backorders'], $_POST['variable_backorders'][ $i ] ) ? wc_clean( $_POST['variable_backorders'][ $i ] ) : null,
-					'stock_status'      => wc_clean( $_POST['variable_stock_status'][ $i ] ),
-					'image_id'          => wc_clean( $_POST['upload_image_id'][ $i ] ),
-					'attributes'        => self::prepare_set_attributes( $parent->get_attributes(), 'attribute_', $i ),
-					'sku'               => isset( $_POST['variable_sku'][ $i ] ) ? wc_clean( $_POST['variable_sku'][ $i ] )       : '',
-					'weight'            => isset( $_POST['variable_weight'][ $i ] ) ? wc_clean( $_POST['variable_weight'][ $i ] ) : '',
-					'length'            => isset( $_POST['variable_length'][ $i ] ) ? wc_clean( $_POST['variable_length'][ $i ] ) : '',
-					'width'             => isset( $_POST['variable_width'][ $i ] ) ? wc_clean( $_POST['variable_width'][ $i ] )   : '',
-					'height'            => isset( $_POST['variable_height'][ $i ] ) ? wc_clean( $_POST['variable_height'][ $i ] ) : '',
-					'shipping_class_id' => wc_clean( $_POST['variable_shipping_class'][ $i ] ),
-					'tax_class'         => isset( $_POST['variable_tax_class'][ $i ] ) ? wc_clean( $_POST['variable_tax_class'][ $i ] ) : null,
-				) );
+				$errors = $variation->set_props(
+					array(
+						'status'            => isset( $_POST['variable_enabled'][ $i ] ) ? 'publish' : 'private',
+						'menu_order'        => wc_clean( $_POST['variation_menu_order'][ $i ] ),
+						'regular_price'     => wc_clean( $_POST['variable_regular_price'][ $i ] ),
+						'sale_price'        => wc_clean( $_POST['variable_sale_price'][ $i ] ),
+						'virtual'           => isset( $_POST['variable_is_virtual'][ $i ] ),
+						'downloadable'      => isset( $_POST['variable_is_downloadable'][ $i ] ),
+						'date_on_sale_from' => wc_clean( $_POST['variable_sale_price_dates_from'][ $i ] ),
+						'date_on_sale_to'   => wc_clean( $_POST['variable_sale_price_dates_to'][ $i ] ),
+						'description'       => wp_kses_post( $_POST['variable_description'][ $i ] ),
+						'download_limit'    => wc_clean( $_POST['variable_download_limit'][ $i ] ),
+						'download_expiry'   => wc_clean( $_POST['variable_download_expiry'][ $i ] ),
+						'downloads'         => self::prepare_downloads(
+							isset( $_POST['_wc_variation_file_names'][ $variation_id ] ) ? $_POST['_wc_variation_file_names'][ $variation_id ] : array(),
+							isset( $_POST['_wc_variation_file_urls'][ $variation_id ] ) ? $_POST['_wc_variation_file_urls'][ $variation_id ] : array(),
+							isset( $_POST['_wc_variation_file_hashes'][ $variation_id ] ) ? $_POST['_wc_variation_file_hashes'][ $variation_id ] : array()
+						),
+						'manage_stock'      => isset( $_POST['variable_manage_stock'][ $i ] ),
+						'stock_quantity'    => $stock,
+						'backorders'        => isset( $_POST['variable_backorders'], $_POST['variable_backorders'][ $i ] ) ? wc_clean( $_POST['variable_backorders'][ $i ] ) : null,
+						'stock_status'      => wc_clean( $_POST['variable_stock_status'][ $i ] ),
+						'image_id'          => wc_clean( $_POST['upload_image_id'][ $i ] ),
+						'attributes'        => self::prepare_set_attributes( $parent->get_attributes(), 'attribute_', $i ),
+						'sku'               => isset( $_POST['variable_sku'][ $i ] ) ? wc_clean( $_POST['variable_sku'][ $i ] ) : '',
+						'weight'            => isset( $_POST['variable_weight'][ $i ] ) ? wc_clean( $_POST['variable_weight'][ $i ] ) : '',
+						'length'            => isset( $_POST['variable_length'][ $i ] ) ? wc_clean( $_POST['variable_length'][ $i ] ) : '',
+						'width'             => isset( $_POST['variable_width'][ $i ] ) ? wc_clean( $_POST['variable_width'][ $i ] ) : '',
+						'height'            => isset( $_POST['variable_height'][ $i ] ) ? wc_clean( $_POST['variable_height'][ $i ] ) : '',
+						'shipping_class_id' => wc_clean( $_POST['variable_shipping_class'][ $i ] ),
+						'tax_class'         => isset( $_POST['variable_tax_class'][ $i ] ) ? wc_clean( $_POST['variable_tax_class'][ $i ] ) : null,
+					)
+				);
 
 				if ( is_wp_error( $errors ) ) {
 					WC_Admin_Meta_Boxes::add_error( $errors->get_error_message() );

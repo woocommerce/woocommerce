@@ -1,32 +1,36 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 /**
  * Flat Rate Shipping Method.
  *
- * @class 		WC_Shipping_Flat_Rate
- * @version		2.6.0
- * @package		WooCommerce/Classes/Shipping
- * @author 		WooThemes
+ * @version 2.6.0
+ * @package WooCommerce/Classes/Shipping
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * WC_Shipping_Flat_Rate class.
  */
 class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
-	/** @var string cost passed to [fee] shortcode */
+	/**
+	 * Cost passed to [fee] shortcode.
+	 *
+	 * @var string Cost.
+	 */
 	protected $fee_cost = '';
 
 	/**
 	 * Constructor.
 	 *
-	 * @param int $instance_id
+	 * @param int $instance_id Shipping method instance ID.
 	 */
 	public function __construct( $instance_id = 0 ) {
-		$this->id                    = 'flat_rate';
-		$this->instance_id 			 = absint( $instance_id );
-		$this->method_title          = __( 'Flat rate', 'woocommerce' );
-		$this->method_description    = __( 'Lets you charge a fixed rate for shipping.', 'woocommerce' );
-		$this->supports              = array(
+		$this->id                 = 'flat_rate';
+		$this->instance_id        = absint( $instance_id );
+		$this->method_title       = __( 'Flat rate', 'woocommerce' );
+		$this->method_description = __( 'Lets you charge a fixed rate for shipping.', 'woocommerce' );
+		$this->supports           = array(
 			'shipping-zones',
 			'instance-settings',
 			'instance-settings-modal',
@@ -37,10 +41,10 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	}
 
 	/**
-	 * init user set variables.
+	 * Init user set variables.
 	 */
 	public function init() {
-		$this->instance_form_fields = include( 'includes/settings-flat-rate.php' );
+		$this->instance_form_fields = include 'includes/settings-flat-rate.php';
 		$this->title                = $this->get_option( 'title' );
 		$this->tax_status           = $this->get_option( 'tax_status' );
 		$this->cost                 = $this->get_option( 'cost' );
@@ -49,60 +53,66 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
 	/**
 	 * Evaluate a cost from a sum/string.
-	 * @param  string $sum
-	 * @param  array  $args
+	 *
+	 * @param  string $sum Sum of shipping.
+	 * @param  array  $args Args.
 	 * @return string
 	 */
 	protected function evaluate_cost( $sum, $args = array() ) {
-		include_once( WC()->plugin_path() . '/includes/libraries/class-wc-eval-math.php' );
+		include_once WC()->plugin_path() . '/includes/libraries/class-wc-eval-math.php';
 
-		// Allow 3rd parties to process shipping cost arguments
+		// Allow 3rd parties to process shipping cost arguments.
 		$args           = apply_filters( 'woocommerce_evaluate_shipping_cost_args', $args, $sum, $this );
 		$locale         = localeconv();
 		$decimals       = array( wc_get_price_decimal_separator(), $locale['decimal_point'], $locale['mon_decimal_point'], ',' );
 		$this->fee_cost = $args['cost'];
 
-		// Expand shortcodes
+		// Expand shortcodes.
 		add_shortcode( 'fee', array( $this, 'fee' ) );
 
-		$sum = do_shortcode( str_replace(
-			array(
-				'[qty]',
-				'[cost]',
-			),
-			array(
-				$args['qty'],
-				$args['cost'],
-			),
-			$sum
-		) );
+		$sum = do_shortcode(
+			str_replace(
+				array(
+					'[qty]',
+					'[cost]',
+				),
+				array(
+					$args['qty'],
+					$args['cost'],
+				),
+				$sum
+			)
+		);
 
 		remove_shortcode( 'fee', array( $this, 'fee' ) );
 
-		// Remove whitespace from string
+		// Remove whitespace from string.
 		$sum = preg_replace( '/\s+/', '', $sum );
 
-		// Remove locale from string
+		// Remove locale from string.
 		$sum = str_replace( $decimals, '.', $sum );
 
-		// Trim invalid start/end characters
+		// Trim invalid start/end characters.
 		$sum = rtrim( ltrim( $sum, "\t\n\r\0\x0B+*/" ), "\t\n\r\0\x0B+-*/" );
 
-		// Do the math
+		// Do the math.
 		return $sum ? WC_Eval_Math::evaluate( $sum ) : 0;
 	}
 
 	/**
 	 * Work out fee (shortcode).
-	 * @param  array $atts
+	 *
+	 * @param  array $atts Attributes.
 	 * @return string
 	 */
 	public function fee( $atts ) {
-		$atts = shortcode_atts( array(
-			'percent' => '',
-			'min_fee' => '',
-			'max_fee' => '',
-		), $atts, 'fee' );
+		$atts = shortcode_atts(
+			array(
+				'percent' => '',
+				'min_fee' => '',
+				'max_fee' => '',
+			), $atts, 'fee'
+		);
 
 		$calculated_fee = 0;
 
@@ -122,9 +132,9 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	}
 
 	/**
-	 * calculate_shipping function.
+	 * Calculate the shipping costs.
 	 *
-	 * @param array $package (default: array())
+	 * @param array $package Package of items from cart.
 	 */
 	public function calculate_shipping( $package = array() ) {
 		$rate = array(
@@ -134,16 +144,18 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 			'package' => $package,
 		);
 
-		// Calculate the costs
+		// Calculate the costs.
 		$has_costs = false; // True when a cost is set. False if all costs are blank strings.
 		$cost      = $this->get_option( 'cost' );
 
 		if ( '' !== $cost ) {
 			$has_costs    = true;
-			$rate['cost'] = $this->evaluate_cost( $cost, array(
-				'qty'  => $this->get_package_item_qty( $package ),
-				'cost' => $package['contents_cost'],
-			) );
+			$rate['cost'] = $this->evaluate_cost(
+				$cost, array(
+					'qty'  => $this->get_package_item_qty( $package ),
+					'cost' => $package['contents_cost'],
+				)
+			);
 		}
 
 		// Add shipping class costs.
@@ -154,7 +166,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 			$highest_class_cost     = 0;
 
 			foreach ( $found_shipping_classes as $shipping_class => $products ) {
-				// Also handles BW compatibility when slugs were used instead of ids
+				// Also handles BW compatibility when slugs were used instead of ids.
 				$shipping_class_term = get_term_by( 'slug', $shipping_class, 'product_shipping_class' );
 				$class_cost_string   = $shipping_class_term && $shipping_class_term->term_id ? $this->get_option( 'class_cost_' . $shipping_class_term->term_id, $this->get_option( 'class_cost_' . $shipping_class, '' ) ) : $this->get_option( 'no_class_cost', '' );
 
@@ -163,10 +175,12 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 				}
 
 				$has_costs  = true;
-				$class_cost = $this->evaluate_cost( $class_cost_string, array(
-					'qty'  => array_sum( wp_list_pluck( $products, 'quantity' ) ),
-					'cost' => array_sum( wp_list_pluck( $products, 'line_total' ) ),
-				) );
+				$class_cost = $this->evaluate_cost(
+					$class_cost_string, array(
+						'qty'  => array_sum( wp_list_pluck( $products, 'quantity' ) ),
+						'cost' => array_sum( wp_list_pluck( $products, 'line_total' ) ),
+					)
+				);
 
 				if ( 'class' === $this->type ) {
 					$rate['cost'] += $class_cost;
@@ -180,7 +194,6 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 			}
 		}
 
-		// Add the rate
 		if ( $has_costs ) {
 			$this->add_rate( $rate );
 		}
@@ -190,27 +203,14 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		 *
 		 * Previously there were (overly complex) options to add additional rates however this was not user.
 		 * friendly and goes against what Flat Rate Shipping was originally intended for.
-		 *
-		 * This example shows how you can add an extra rate based on this flat rate via custom function:
-		 *
-		 * 		add_action( 'woocommerce_flat_rate_shipping_add_rate', 'add_another_custom_flat_rate', 10, 2 );
-		 *
-		 * 		function add_another_custom_flat_rate( $method, $rate ) {
-		 * 			$new_rate          = $rate;
-		 * 			$new_rate['id']    .= ':' . 'custom_rate_name'; // Append a custom ID.
-		 * 			$new_rate['label'] = 'Rushed Shipping'; // Rename to 'Rushed Shipping'.
-		 * 			$new_rate['cost']  += 2; // Add $2 to the cost.
-		 *
-		 * 			// Add it to WC.
-		 * 			$method->add_rate( $new_rate );
-		 * 		}.
 		 */
 		do_action( 'woocommerce_' . $this->id . '_shipping_add_rate', $this, $rate );
 	}
 
 	/**
 	 * Get items in package.
-	 * @param  array $package
+	 *
+	 * @param  array $package Package of items from cart.
 	 * @return int
 	 */
 	public function get_package_item_qty( $package ) {
@@ -225,7 +225,8 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
 	/**
 	 * Finds and returns shipping classes and the products with said class.
-	 * @param mixed $package
+	 *
+	 * @param mixed $package Package of items from cart.
 	 * @return array
 	 */
 	public function find_shipping_classes( $package ) {
@@ -244,5 +245,19 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		}
 
 		return $found_shipping_classes;
+	}
+
+	/**
+	 * Sanitize the cost field.
+	 *
+	 * @since 3.4.0
+	 * @param string $value Unsanitized value.
+	 * @return string
+	 */
+	public function sanitize_cost( $value ) {
+		$value = is_null( $value ) ? '' : $value;
+		$value = wp_kses_post( trim( wp_unslash( $value ) ) );
+		$value = str_replace( array( get_woocommerce_currency_symbol(), html_entity_decode( get_woocommerce_currency_symbol() ) ), '', $value );
+		return $value;
 	}
 }

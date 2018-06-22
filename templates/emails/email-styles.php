@@ -11,7 +11,6 @@
  * the readme will list any important changes.
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
- * @author  WooThemes
  * @package WooCommerce/Templates/Emails
  * @version 3.3.0
  */
@@ -134,6 +133,7 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
 .td {
 	color: <?php echo esc_attr( $text_lighter_20 ); ?>;
 	border: 1px solid <?php echo esc_attr( $body_darker_10 ); ?>;
+	vertical-align: middle;
 }
 
 .address {
@@ -197,13 +197,14 @@ a {
 
 img {
 	border: none;
-	display: inline;
+	display: inline-block;
 	font-size: 14px;
 	font-weight: bold;
 	height: auto;
-	line-height: 100%;
 	outline: none;
 	text-decoration: none;
 	text-transform: capitalize;
+	vertical-align: middle;
+	margin-<?php echo is_rtl() ? 'left' : 'right'; ?>: 10px;
 }
 <?php

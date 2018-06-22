@@ -30,10 +30,10 @@ class WC_Helper_Payment_Token {
 	 * Create a new eCheck payment token
 	 *
 	 * @since 2.6
-	 * @return WC_Payment_Token_eCheck object
+	 * @return WC_Payment_Token_ECheck object
 	 */
 	public static function create_eCheck_token() {
-		$token = new WC_Payment_Token_eCheck();
+		$token = new WC_Payment_Token_ECheck();
 		$token->set_last4( 1234 );
 		$token->set_token( time() );
 		$token->save();

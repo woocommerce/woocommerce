@@ -82,7 +82,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		$settings = array();
 
 		if ( '' === $current_section ) {
-			$settings = include( 'views/settings-tax.php' );
+			$settings = include 'views/settings-tax.php';
 		}
 		return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings, $current_section );
 	}
@@ -118,6 +118,10 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			$this->save_tax_rates();
 		}
 
+		if ( $current_section ) {
+			do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section );
+		}
+
 		// Invalidate caches.
 		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
 		WC_Cache_Helper::get_transient_version( 'shipping', true );
@@ -149,54 +153,60 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			}
 		}
 
-		$base_url = admin_url( add_query_arg( array(
-			'page'    => 'wc-settings',
-			'tab'     => 'tax',
-			'section' => $current_section,
-		), 'admin.php' ) );
+		$base_url = admin_url(
+			add_query_arg(
+				array(
+					'page'    => 'wc-settings',
+					'tab'     => 'tax',
+					'section' => $current_section,
+				), 'admin.php'
+			)
+		);
 
 		// Localize and enqueue our js.
-		wp_localize_script( 'wc-settings-tax', 'htmlSettingsTaxLocalizeScript', array(
-			'current_class' => $current_class,
-			'wc_tax_nonce'  => wp_create_nonce( 'wc_tax_nonce-class:' . $current_class ),
-			'base_url'      => $base_url,
-			'rates'         => array_values( WC_Tax::get_rates_for_tax_class( $current_class ) ),
-			'page'          => ! empty( $_GET['p'] ) ? absint( $_GET['p'] ) : 1,
-			'limit'         => 100,
-			'countries'     => $countries,
-			'states'        => $states,
-			'default_rate'  => array(
-				'tax_rate_id'       => 0,
-				'tax_rate_country'  => '',
-				'tax_rate_state'    => '',
-				'tax_rate'          => '',
-				'tax_rate_name'     => '',
-				'tax_rate_priority' => 1,
-				'tax_rate_compound' => 0,
-				'tax_rate_shipping' => 1,
-				'tax_rate_order'    => null,
-				'tax_rate_class'    => $current_class,
-			),
-			'strings'       => array(
-				'no_rows_selected' => __( 'No row(s) selected', 'woocommerce' ),
-				'unload_confirmation_msg' => __( 'Your changed data will be lost if you leave this page without saving.', 'woocommerce' ),
-				'csv_data_cols' => array(
-					__( 'Country code', 'woocommerce' ),
-					__( 'State code', 'woocommerce' ),
-					__( 'Postcode / ZIP', 'woocommerce' ),
-					__( 'City', 'woocommerce' ),
-					__( 'Rate %', 'woocommerce' ),
-					__( 'Tax name', 'woocommerce' ),
-					__( 'Priority', 'woocommerce' ),
-					__( 'Compound', 'woocommerce' ),
-					__( 'Shipping', 'woocommerce' ),
-					__( 'Tax class', 'woocommerce' ),
+		wp_localize_script(
+			'wc-settings-tax', 'htmlSettingsTaxLocalizeScript', array(
+				'current_class' => $current_class,
+				'wc_tax_nonce'  => wp_create_nonce( 'wc_tax_nonce-class:' . $current_class ),
+				'base_url'      => $base_url,
+				'rates'         => array_values( WC_Tax::get_rates_for_tax_class( $current_class ) ),
+				'page'          => ! empty( $_GET['p'] ) ? absint( $_GET['p'] ) : 1,
+				'limit'         => 100,
+				'countries'     => $countries,
+				'states'        => $states,
+				'default_rate'  => array(
+					'tax_rate_id'       => 0,
+					'tax_rate_country'  => '',
+					'tax_rate_state'    => '',
+					'tax_rate'          => '',
+					'tax_rate_name'     => '',
+					'tax_rate_priority' => 1,
+					'tax_rate_compound' => 0,
+					'tax_rate_shipping' => 1,
+					'tax_rate_order'    => null,
+					'tax_rate_class'    => $current_class,
 				),
-			),
-		) );
+				'strings'       => array(
+					'no_rows_selected'        => __( 'No row(s) selected', 'woocommerce' ),
+					'unload_confirmation_msg' => __( 'Your changed data will be lost if you leave this page without saving.', 'woocommerce' ),
+					'csv_data_cols'           => array(
+						__( 'Country code', 'woocommerce' ),
+						__( 'State code', 'woocommerce' ),
+						__( 'Postcode / ZIP', 'woocommerce' ),
+						__( 'City', 'woocommerce' ),
+						__( 'Rate %', 'woocommerce' ),
+						__( 'Tax name', 'woocommerce' ),
+						__( 'Priority', 'woocommerce' ),
+						__( 'Compound', 'woocommerce' ),
+						__( 'Shipping', 'woocommerce' ),
+						__( 'Tax class', 'woocommerce' ),
+					),
+				),
+			)
+		);
 		wp_enqueue_script( 'wc-settings-tax' );
 
-		include( 'views/html-settings-tax.php' );
+		include 'views/html-settings-tax.php';
 	}
 
 	/**
@@ -228,7 +238,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * @return array
 	 */
 	private function get_posted_tax_rate( $key, $order, $class ) {
-		$tax_rate     = array();
+		$tax_rate      = array();
 		$tax_rate_keys = array(
 			'tax_rate_country',
 			'tax_rate_state',
@@ -270,8 +280,8 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 		// Loop posted fields.
 		foreach ( $posted_countries as $key => $value ) {
-			$mode        = ( 0 === strpos( $key, 'new-' ) ) ? 'insert' : 'update';
-			$tax_rate    = $this->get_posted_tax_rate( $key, $index ++, $current_class );
+			$mode     = ( 0 === strpos( $key, 'new-' ) ) ? 'insert' : 'update';
+			$tax_rate = $this->get_posted_tax_rate( $key, $index ++, $current_class );
 
 			if ( 'insert' === $mode ) {
 				$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );

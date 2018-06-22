@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<h3>
 		<a href="#" class="remove_row delete"><?php esc_html_e( 'Remove', 'woocommerce' ); ?></a>
 		<div class="handlediv" title="<?php esc_attr_e( 'Click to toggle', 'woocommerce' ); ?>"></div>
-		<strong class="attribute_name"><?php echo esc_html( wc_attribute_label( $attribute->get_name() ) ); ?></strong>
+		<strong class="attribute_name"><?php echo wc_attribute_label( $attribute->get_name() ); ?></strong>
 	</h3>
 	<div class="woocommerce_attribute_data wc-metabox-content">
 		<table cellpadding="0" cellspacing="0">
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<label><?php esc_html_e( 'Name', 'woocommerce' ); ?>:</label>
 
 						<?php if ( $attribute->is_taxonomy() ) : ?>
-							<strong><?php echo esc_html( wc_attribute_label( $attribute->get_name() ) ); ?></strong>
+							<strong><?php echo wc_attribute_label( $attribute->get_name() ); ?></strong>
 							<input type="hidden" name="attribute_names[<?php echo esc_attr( $i ); ?>]" value="<?php echo esc_attr( $attribute->get_name() ); ?>" />
 						<?php else : ?>
 							<input type="text" class="attribute_name" name="attribute_names[<?php echo esc_attr( $i ); ?>]" value="<?php echo esc_attr( $attribute->get_name() ); ?>" />
@@ -39,7 +39,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								?>
 								<select multiple="multiple" data-placeholder="<?php esc_attr_e( 'Select terms', 'woocommerce' ); ?>" class="multiselect attribute_values wc-enhanced-select" name="attribute_values[<?php echo esc_attr( $i ); ?>][]">
 									<?php
-									$args = array(
+									$args      = array(
 										'orderby'    => 'name',
 										'hide_empty' => 0,
 									);
@@ -48,7 +48,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 										foreach ( $all_terms as $term ) {
 											$options = $attribute->get_options();
 											$options = ! empty( $options ) ? $options : array();
-											echo '<option value="' . esc_attr( $term->term_id ) . '" ' . selected( in_array( $term->term_id, $options, true ), true, false ) . '>' . esc_attr( apply_filters( 'woocommerce_product_attribute_term_name', $term->name, $term ) ) . '</option>';
+											echo '<option value="' . esc_attr( $term->term_id ) . '"' . wc_selected( $term->term_id, $options ) . '>' . esc_attr( apply_filters( 'woocommerce_product_attribute_term_name', $term->name, $term ) ) . '</option>';
 										}
 									}
 									?>
@@ -62,7 +62,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 							do_action( 'woocommerce_product_option_terms', $attribute_taxonomy, $i );
 						} else {
 							/* translators: %s: WC_DELIMITER */
-							?><textarea name="attribute_values[<?php echo esc_attr( $i ); ?>]" cols="5" rows="5" placeholder="<?php printf( esc_attr__( 'Enter some text, or some attributes by "%s" separating values.', 'woocommerce' ), WC_DELIMITER ); ?>"><?php echo esc_textarea( wc_implode_text_attributes( $attribute->get_options() ) ); ?></textarea><?php
+							?>
+							<textarea name="attribute_values[<?php echo esc_attr( $i ); ?>]" cols="5" rows="5" placeholder="<?php printf( esc_attr__( 'Enter some text, or some attributes by "%s" separating values.', 'woocommerce' ), WC_DELIMITER ); ?>"><?php echo esc_textarea( wc_implode_text_attributes( $attribute->get_options() ) ); ?></textarea>
+							<?php
 						}
 						?>
 					</td>

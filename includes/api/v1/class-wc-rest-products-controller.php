@@ -1675,7 +1675,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 			}
 
 			$product->delete( true );
-			$result = $product->get_id() > 0 ? false : true;
+			$result = ! ( $product->get_id() > 0 );
 		} else {
 			// If we don't support trashing for this type, error out.
 			if ( ! $supports_trash ) {
@@ -2029,7 +2029,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 				),
 				'shipping_class_id' => array(
 					'description' => __( 'Shipping class ID.', 'woocommerce' ),
-					'type'        => 'string',
+					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
@@ -2471,7 +2471,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 							),
 							'shipping_class_id' => array(
 								'description' => __( 'Shipping class ID.', 'woocommerce' ),
-								'type'        => 'string',
+								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),

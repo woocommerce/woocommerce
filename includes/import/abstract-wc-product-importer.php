@@ -2,8 +2,6 @@
 /**
  * Abstract Product importer
  *
- * @author   Automattic
- * @category Admin
  * @package  WooCommerce/Import
  * @version  3.1.0
  */
@@ -319,8 +317,9 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 */
 	protected function set_product_data( &$product, $data ) {
 		if ( isset( $data['raw_attributes'] ) ) {
-			$attributes         = array();
-			$default_attributes = array();
+			$attributes          = array();
+			$default_attributes  = array();
+			$existing_attributes = $product->get_attributes();
 
 			foreach ( $data['raw_attributes'] as $position => $attribute ) {
 				$attribute_id = 0;
@@ -337,12 +336,22 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 					$is_visible = 1;
 				}
 
-				// Set if is a variation attribute.
+				// Get name.
+				$attribute_name = $attribute_id ? wc_attribute_taxonomy_name_by_id( $attribute_id ) : $attribute['name'];
+
+				// Set if is a variation attribute based on existing attributes if possible so updates via CSV do not change this.
 				$is_variation = 0;
 
-				if ( $attribute_id ) {
-					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
+				if ( $existing_attributes ) {
+					foreach ( $existing_attributes as $existing_attribute ) {
+						if ( $existing_attribute->get_name() === $attribute_name ) {
+							$is_variation = $existing_attribute->get_variation();
+							break;
+						}
+					}
+				}
 
+				if ( $attribute_id ) {
 					if ( isset( $attribute['value'] ) ) {
 						$options = array_map( 'wc_sanitize_term_text_based', $attribute['value'] );
 						$options = array_filter( $options, 'strlen' );
@@ -762,12 +771,11 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 */
 	protected function unescape_negative_number( $value ) {
 		if ( 0 === strpos( $value, "'-" ) ) {
-			$unescaped = substr_replace( $value, '', 0, 1 );
+			$unescaped = trim( $value, "'" );
 			if ( is_numeric( $unescaped ) ) {
 				return $unescaped;
 			}
 		}
-
 		return $value;
 	}
 }

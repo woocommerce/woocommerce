@@ -13,6 +13,16 @@ body {
 		max-width: 30%;
 	}
 }
+.wc-setup {
+	text-align: center;
+
+	.select2-container {
+		text-align: left;
+	}
+	.hidden {
+		display: none;
+	}
+}
 .wc-setup-content {
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.13);
 	padding: 2em;
@@ -20,6 +30,7 @@ body {
 	background: #fff;
 	overflow: hidden;
 	zoom: 1;
+	text-align: left;
 
 	h1, h2, h3, table {
 		margin: 0 0 20px;
@@ -297,7 +308,6 @@ body {
 		}
 	}
 	.woocommerce-newsletter,
-	.woocommerce-tracker,
 	.updated {
 		padding: 24px 24px 0;
 		margin: 0 0 24px;
@@ -312,9 +322,74 @@ body {
 			margin: 0 0 24px;
 		}
 	}
-	.woocommerce-tracker + .woocommerce-newsletter {
-		margin-top: -24px;
-		border-top: 2px dashed #ddd;
+	.woocommerce-tracker {
+		margin: 24px 0;
+		border: 1px solid #eee;
+		padding: 20px;
+		border-radius: 4px;
+		overflow: hidden;
+
+		p {
+			font-size: 14px;
+			line-height: 1.5em;
+		}
+		.checkbox {
+			line-height: 24px;
+			font-weight: 500;
+			font-size: 1em;
+			margin-top: 0;
+			margin-bottom: 20px;
+		}
+	}
+	.checkbox {
+		input[type="checkbox"] {
+			opacity: 0;
+			position: absolute;
+			left: -9999px;
+		}
+		label {
+			position: relative;
+			display: inline-block;
+			padding-left: 28px;
+			&:before,
+			&:after {
+				position: absolute;
+				content: "";
+				display: inline-block;
+			}
+			&:before {
+				height: 16px;
+				width: 16px;
+				left: 0px;
+				top: 3px;
+				border: 1px solid #aaa;
+				background-color: #fff;
+				border-radius: 3px;
+			}
+			&:after {
+				height: 5px;
+				width: 9px;
+				border-left: 2px solid;
+				border-bottom: 2px solid;
+				transform: rotate(-45deg);
+				left: 4px;
+				top: 7px;
+				color: #fff;
+			}
+		}
+		input[type="checkbox"] + label::after {
+			content: none;
+		}
+		input[type="checkbox"]:checked + label::after {
+			content: "";
+		}
+		input[type="checkbox"]:focus + label::before {
+			outline: rgb(59, 153, 252) auto 5px;
+		}
+		input[type="checkbox"]:checked + label::before {
+			background: #935687;
+			border-color: #935687;
+		}
 	}
 }
 .wc-setup-steps {
@@ -326,7 +401,7 @@ body {
 	width:100%;
 	display: inline-flex;
 	li {
-		width: 20%;
+		width: 100%;
 		float: left;
 		padding: 0 0 0.8em;
 		margin: 0;
@@ -334,6 +409,18 @@ body {
 		position: relative;
 		border-bottom: 4px solid #ccc;
 		line-height: 1.4em;
+		a {
+			color: #a16696;
+			text-decoration: none;
+			padding: 1.5em;
+			margin: -1.5em;
+			position: relative;
+			z-index: 1;
+			&:hover, &:focus {
+				color: #111;
+				text-decoration: underline;
+			}
+		}
 	}
 	li::before {
 		content: '';
@@ -351,6 +438,7 @@ body {
 	li.active {
 		border-color: #a16696;
 		color: #a16696;
+		font-weight: bold;
 		&::before {
 			border-color: #a16696;
 		}
@@ -367,6 +455,7 @@ body {
 .wc-setup .wc-setup-actions {
 	overflow: hidden;
 	margin: 20px 0 0;
+	position: relative;
 	.button {
 		font-size: 1.25em;
 		padding: 0.5em 1em;
@@ -400,11 +489,11 @@ body {
 	margin-top: 0;
 }
 
-.wc-return-to-dashboard {
+.wc-setup-footer-links {
 	font-size: 0.85em;
-	color: #b5b5b5;
-	margin: 1.18em 0;
-	display: block;
+	color: #7b7b7b;
+	margin: 1.18em auto;
+	display: inline-block;
 	text-align: center;
 }
 
@@ -508,7 +597,10 @@ body {
 		align-self: stretch;
 		display: flex;
 		align-items: baseline;
-		justify-content: center;
+
+		.wc-wizard-payment-gateway-form & {
+			justify-content: center;
+		}
 
 		img {
 			max-width: 75px;
@@ -542,6 +634,14 @@ body {
 		}
 	}
 
+	&.eway-logo .wc-wizard-service-name img {
+		max-width: 87px;
+	}
+
+	&.payfast-logo .wc-wizard-service-name img {
+		max-width: 140px;
+	}
+
 	.wc-wizard-service-description {
 		flex-grow: 1;
 		padding: 20px;
@@ -552,10 +652,6 @@ body {
 
 		p:last-child {
 			margin-bottom: 0;
-		}
-
-		.wc-wizard-service-settings {
-			margin-top: 1em;
 		}
 
 		.wc-wizard-service-settings-description {
@@ -615,6 +711,7 @@ body {
 
 	.wc-wizard-service-settings {
 		display: none;
+		margin-top: 0.75em;
 		margin-bottom: 0;
 		cursor: default;
 
@@ -640,6 +737,8 @@ body {
 
 // Toggle display a list of services.
 .wc-wizard-services-list-toggle {
+	cursor: pointer;
+
 	.wc-wizard-service-enable::before {
 		content: "\f343"; // up chevron
 		font-family: "dashicons";
@@ -659,7 +758,6 @@ body {
 	.wc-wizard-service-enable input {
 		visibility: hidden;
 		position: relative;
-		cursor: pointer;
 	}
 }
 
@@ -673,11 +771,15 @@ body {
 	.wc-wizard-service-name {
 		font-weight: normal;
 		text-align: left;
+		align-items: center;
+		max-height: 5em;
+		padding: 0;
 	}
 
 	// List header
 	.wc-wizard-service-item {
 		padding-left: 2em;
+		padding-top: 0.67em;
 
 		&:first-child {
 			border-bottom: 0;
@@ -713,7 +815,10 @@ body {
 		display: flex;
 		flex-direction: column;
 		color: #a6a6a6;
+	}
+	.wc-wizard-service-item:not(:first-child) .wc-wizard-service-description {
 		font-size: 0.92em;
+		padding-bottom: 10px;
 	}
 
 	.shipping-method-setting {
@@ -807,10 +912,20 @@ h3.jetpack-reasons {
 	font-size: 14px;
 }
 
-.jetpack-logo {
+.jetpack-logo, .wcs-notice {
 	display: block;
 	margin: 1.75em auto 2em auto;
 	max-height: 175px;
+}
+.activate-splash {
+	.jetpack-logo {
+		width: 170px;
+		margin-bottom: 0;
+	}
+	.wcs-notice {
+		margin-top: 1em;
+		padding-left: 57px;
+	}
 }
 
 .step {
@@ -833,12 +948,46 @@ h3.jetpack-reasons {
 	}
 }
 
+.wc-setup .wc-setup-actions .plugin-install-info {
+	display: block;
+	font-style: italic;
+	color: #999;
+	font-size: 14px;
+	line-height: 1.5em;
+	margin: 5px 0;
+
+	& > * {
+		display: block;
+	}
+	
+	.plugin-install-info-list-item:not(:last-child)::after {
+		content: ', ';
+	}
+
+	a {
+		white-space: nowrap;
+
+		&:not(:hover):not(:focus) {
+			color: inherit;
+		}
+	}
+}
+
+.plugin-install-source {
+	$background: rgba( #bb77ae, 0.15 );
+	background: $background;
+
+	&:not(.wc-wizard-service-item) {
+		box-shadow: 0 0 0 10px $background;
+	}
+}
+
 .location-prompt {
 	color: #666;
 	font-size: 13px;
 	font-weight: 500;
 	margin-bottom: 0.5em;
-	margin-top: 1em;
+	margin-top: 0.85em;
 	display: inline-block;
 }
 
@@ -867,8 +1016,6 @@ h3.jetpack-reasons {
 }
 
 .store-address-container {
-	margin-bottom: 24px; // match margin-bottom on top paragraph
-
 	.city-and-postcode {
 		display: flex;
 
@@ -881,6 +1028,18 @@ h3.jetpack-reasons {
 			}
 		}
 	}
+	input[type="text"],
+	select,
+	.select2-container {
+		margin-bottom: 10px;
+	}
+}
+.product-type-container {
+	margin-top: 14px;
+	margin-bottom: 1px;
+}
+#woocommerce_sell_in_person {
+	margin-left: 0;
 }
 
 .wc-wizard-service-settings {
@@ -955,7 +1114,7 @@ h3.jetpack-reasons {
 		align-items: center;
 
 		.button {
-			margin: 1em;
+			margin: 1em 1.5em;
 		}
 	}
 
@@ -977,6 +1136,26 @@ h3.jetpack-reasons {
 			margin: 0;
 			font-size: 16px;
 			font-weight: 600;
+		}
+	}
+
+	.wc-wizard-additional-steps {
+		border-top: 1px solid #eee;
+
+		.wc-wizard-next-step-description {
+			margin-bottom: 0;
+		}
+
+		.wc-setup-actions {
+			margin: 0 0 1.5em 0;
+
+			.button {
+				font-size: 15px;
+				margin: 1em 0 1em 1.5em;
+			}
+			.button::last-child {
+				margin-right: 1.5em;
+			}
 		}
 	}
 }
@@ -1021,22 +1200,13 @@ p.jetpack-terms {
 	}
 }
 
-.allow-tracking {
-	color: #9f9f9f;
-	margin-top: 1em;
-	text-align: center;
-	font-size: 0.9em;
-	padding-top: 2em;
-	border-top: 1px solid #ccc;
-}
-
 .wc-wizard-service-setting-stripe_create_account, .wc-wizard-service-setting-ppec_paypal_reroute_requests {
 	display: flex;
-	align-items: flex-end;
-	margin-top: 0.75em;
+	align-items: flex-start;
 
 	.payment-checkbox-input {
 		order: 1;
+		margin-top: 5px;
 		margin-left: 0;
 		margin-right: 0;
 		width: 1.5em;
@@ -1050,6 +1220,7 @@ p.jetpack-terms {
 
 .wc-wizard-service-setting-stripe_email, .wc-wizard-service-setting-ppec_paypal_email {
 	margin-top: 0.75em;
+	margin-left: 1.5em;
 
 	label.stripe_email, label.ppec_paypal_email {
 		position: absolute;
@@ -1063,12 +1234,77 @@ p.jetpack-terms {
 	}
 
 	input.payment-email-input {
-		margin-left: 1.5em;
+		box-sizing: border-box;
 		margin-bottom: .5em;
 		width: 100%;
+		height: 32px;
+	}
+}
+
+.wc-setup-content .recommended-step {
+	border: 1px solid #ebebeb;
+	border-radius: 4px;
+	padding: 2.5em;
+
+	li {
+		list-style: none;
+
+		&:last-child label {
+			margin-bottom: 0; // Avoid extra space at the end of the list.
+		}
 	}
 
-	.wc-wizard-service-settings-description {
-		margin-left: 1.5em;
+	label {
+		display: flex;
+		align-items: center;
+		margin-bottom: 1.5em;
+
+		&:before, &:after {
+			top: auto;
+		}
+		&:after {
+			margin-top: -1.5px;
+		}
+	}
+
+	.recommended-item-icon {
+		border: 1px solid #fff;
+		border-radius: 7px;
+		height: 3.5em;
+		margin-right: 1em;
+		margin-left: 4px;
+
+		&.recommended-item-icon-storefront_theme {
+			background-color: #f4a224;
+			max-height: 3em;
+			max-width: 3em;
+			padding: ( 3.5em - 3em ) / 2;
+		}
+
+		&.recommended-item-icon-automated_taxes {
+			background-color: #d0011b;
+			max-height: 1.75em;
+			padding: ( 3.5em - 1.75em ) / 2;
+		}
+
+		&.recommended-item-icon-mailchimp {
+			background-color: #209bbb;
+			height: 2em;
+			padding: ( 3.5em - 2em ) / 2;
+		}
+	}
+
+	.recommended-item-description-container {
+		h3 {
+			font-size: 15px;
+			font-weight: bold;
+			letter-spacing: 0.5px;
+			margin-bottom: 0;
+		}
+
+		p {
+			margin-top: 0;
+			line-height: 1.5em;
+		}
 	}
 }

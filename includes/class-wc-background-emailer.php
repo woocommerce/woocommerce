@@ -2,31 +2,20 @@
 /**
  * Background Emailer
  *
- * Uses https://github.com/A5hleyRich/wp-background-processing to handle emails
- * in the background.
- *
- * @class    WC_Background_Emailer
- * @version  3.0.1
- * @package  WooCommerce/Classes
- * @category Class
- * @author   WooCommerce
+ * @version 3.0.1
+ * @package WooCommerce/Classes
  */
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
 
-if ( ! class_exists( 'WP_Async_Request', false ) ) {
-	include_once( dirname( __FILE__ ) . '/libraries/wp-async-request.php' );
-}
+defined( 'ABSPATH' ) || exit;
 
-if ( ! class_exists( 'WP_Background_Process', false ) ) {
-	include_once( dirname( __FILE__ ) . '/libraries/wp-background-process.php' );
+if ( ! class_exists( 'WC_Background_Process', false ) ) {
+	include_once dirname( __FILE__ ) . '/abstracts/class-wc-background-process.php';
 }
 
 /**
  * WC_Background_Emailer Class.
  */
-class WC_Background_Emailer extends WP_Background_Process {
+class WC_Background_Emailer extends WC_Background_Process {
 
 	/**
 	 * Initiate new background process.
@@ -59,7 +48,7 @@ class WC_Background_Emailer extends WP_Background_Process {
 	 * in the next pass through. Or, return false to remove the
 	 * item from the queue.
 	 *
-	 * @param array $callback Update callback function
+	 * @param array $callback Update callback function.
 	 * @return mixed
 	 */
 	protected function task( $callback ) {
@@ -68,7 +57,7 @@ class WC_Background_Emailer extends WP_Background_Process {
 				WC_Emails::send_queued_transactional_email( $callback['filter'], $callback['args'] );
 			} catch ( Exception $e ) {
 				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-					trigger_error( 'Transactional email triggered fatal error for callback ' . $callback['filter'], E_USER_WARNING );
+					trigger_error( 'Transactional email triggered fatal error for callback ' . esc_html( $callback['filter'] ), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 				}
 			}
 		}
@@ -98,7 +87,7 @@ class WC_Background_Emailer extends WP_Background_Process {
 			if ( ! headers_sent() ) {
 				header( 'Connection: close' );
 			}
-			@ob_end_flush();
+			@ob_end_flush(); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
 			flush();
 		}
 	}
@@ -126,11 +115,14 @@ class WC_Background_Emailer extends WP_Background_Process {
 		// Pass cookies through with the request so nonces function.
 		$cookies = array();
 
-		foreach ( $_COOKIE as $name => $value ) {
+		foreach ( $_COOKIE as $name => $value ) { // WPCS: input var ok.
 			if ( 'PHPSESSID' === $name ) {
 				continue;
 			}
-			$cookies[] = new WP_Http_Cookie( array( 'name' => $name, 'value' => $value ) );
+			$cookies[] = new WP_Http_Cookie( array(
+				'name'  => $name,
+				'value' => $value,
+			) );
 		}
 
 		return array(

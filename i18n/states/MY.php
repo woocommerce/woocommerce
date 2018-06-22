@@ -2,16 +2,13 @@
 /**
  * Malaysian states
  *
- * @author      WooThemes
- * @category    i18n
- * @package     WooCommerce/i18n
- * @version     2.0.0
+ * @package WooCommerce/i18n
+ * @version 2.0.0
  */
+
 global $states;
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 $states['MY'] = array(
 	'JHR' => __( 'Johor', 'woocommerce' ),

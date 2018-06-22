@@ -2,17 +2,15 @@
 /**
  * Structured data's handler and generator using JSON-LD format.
  *
+ * @package WooCommerce/Classes
  * @since   3.0.0
  * @version 3.0.0
- * @package WooCommerce/Classes
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
- * WC_Structured_Data class.
+ * Structured data class.
  */
 class WC_Structured_Data {
 
@@ -217,14 +215,18 @@ class WC_Structured_Data {
 
 		if ( '' !== $product->get_price() ) {
 			if ( $product->is_type( 'variable' ) ) {
-				$prices  = $product->get_variation_prices();
-				$lowest  = reset( $prices['price'] );
-				$highest = end( $prices['price'] );
+				$lowest  = $product->get_variation_price( 'min', false );
+				$highest = $product->get_variation_price( 'max', false );
 
 				if ( $lowest === $highest ) {
 					$markup_offer = array(
-						'@type' => 'Offer',
-						'price' => wc_format_decimal( $lowest, wc_get_price_decimals() ),
+						'@type'              => 'Offer',
+						'price'              => wc_format_decimal( $lowest, wc_get_price_decimals() ),
+						'priceSpecification' => array(
+							'price'                 => wc_format_decimal( $lowest, wc_get_price_decimals() ),
+							'priceCurrency'         => $currency,
+							'valueAddedTaxIncluded' => wc_prices_include_tax() ? 'true' : 'false',
+						),
 					);
 				} else {
 					$markup_offer = array(
@@ -235,8 +237,13 @@ class WC_Structured_Data {
 				}
 			} else {
 				$markup_offer = array(
-					'@type' => 'Offer',
-					'price' => wc_format_decimal( $product->get_price(), wc_get_price_decimals() ),
+					'@type'              => 'Offer',
+					'price'              => wc_format_decimal( $product->get_price(), wc_get_price_decimals() ),
+					'priceSpecification' => array(
+						'price'                 => wc_format_decimal( $product->get_price(), wc_get_price_decimals() ),
+						'priceCurrency'         => $currency,
+						'valueAddedTaxIncluded' => wc_prices_include_tax() ? 'true' : 'false',
+					),
 				);
 			}
 
@@ -254,11 +261,10 @@ class WC_Structured_Data {
 			$markup['offers'] = array( apply_filters( 'woocommerce_structured_data_product_offer', $markup_offer, $product ) );
 		}
 
-		if ( $product->get_rating_count() ) {
+		if ( $product->get_review_count() && 'yes' === get_option( 'woocommerce_enable_review_rating' ) ) {
 			$markup['aggregateRating'] = array(
 				'@type'       => 'AggregateRating',
 				'ratingValue' => $product->get_average_rating(),
-				'ratingCount' => $product->get_rating_count(),
 				'reviewCount' => $product->get_review_count(),
 			);
 		}
@@ -391,7 +397,7 @@ class WC_Structured_Data {
 				continue;
 			}
 
-			$product        = apply_filters( 'woocommerce_order_item_product', $order->get_product_from_item( $item ), $item );
+			$product        = $order->get_product_from_item( $item );
 			$product_exists = is_object( $product );
 			$is_visible     = $product_exists && $product->is_visible();
 
@@ -436,7 +442,7 @@ class WC_Structured_Data {
 		$markup['priceSpecification'] = array(
 			'price'                 => $order->get_total(),
 			'priceCurrency'         => $order->get_currency(),
-			'valueAddedTaxIncluded' => true,
+			'valueAddedTaxIncluded' => 'true',
 		);
 		$markup['billingAddress']     = array(
 			'@type'           => 'PostalAddress',

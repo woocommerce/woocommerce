@@ -1,14 +1,17 @@
 <?php
+/**
+ * Class WC_Report_Customers file.
+ *
+ * @package WooCommerce\Reports
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit; // Exit if accessed directly.
 }
 
 /**
  * WC_Report_Customers
  *
- * @author      WooThemes
- * @category    Admin
  * @package     WooCommerce/Admin/Reports
  * @version     2.1.0
  */
@@ -34,12 +37,12 @@ class WC_Report_Customers extends WC_Admin_Report {
 	 * @return array
 	 */
 	public function get_chart_legend() {
-		$legend   = array();
+		$legend = array();
 
 		$legend[] = array(
 			/* translators: %s: signups amount */
-			'title' => sprintf( __( '%s signups in this period', 'woocommerce' ), '<strong>' . sizeof( $this->customers ) . '</strong>' ),
-			'color' => $this->chart_colours['signups'],
+			'title'            => sprintf( __( '%s signups in this period', 'woocommerce' ), '<strong>' . count( $this->customers ) . '</strong>' ),
+			'color'            => $this->chart_colours['signups'],
 			'highlight_series' => 2,
 		);
 
@@ -67,63 +70,67 @@ class WC_Report_Customers extends WC_Admin_Report {
 	 */
 	public function customers_vs_guests() {
 
-		$customer_order_totals = $this->get_order_report_data( array(
-			'data' => array(
-				'ID' => array(
-					'type'     => 'post_data',
-					'function' => 'COUNT',
-					'name'     => 'total_orders',
+		$customer_order_totals = $this->get_order_report_data(
+			array(
+				'data'         => array(
+					'ID' => array(
+						'type'     => 'post_data',
+						'function' => 'COUNT',
+						'name'     => 'total_orders',
+					),
 				),
-			),
-			'where_meta' => array(
-				array(
-					'meta_key'   => '_customer_user',
-					'meta_value' => '0',
-					'operator'   => '>',
+				'where_meta'   => array(
+					array(
+						'meta_key'   => '_customer_user',
+						'meta_value' => '0',
+						'operator'   => '>',
+					),
 				),
-			),
-			'filter_range' => true,
-		) );
+				'filter_range' => true,
+			)
+		);
 
-		$guest_order_totals = $this->get_order_report_data( array(
-			'data' => array(
-				'ID' => array(
-					'type'     => 'post_data',
-					'function' => 'COUNT',
-					'name'     => 'total_orders',
+		$guest_order_totals = $this->get_order_report_data(
+			array(
+				'data'         => array(
+					'ID' => array(
+						'type'     => 'post_data',
+						'function' => 'COUNT',
+						'name'     => 'total_orders',
+					),
 				),
-			),
-			'where_meta' => array(
-				array(
-					'meta_key'   => '_customer_user',
-					'meta_value' => '0',
-					'operator'   => '=',
+				'where_meta'   => array(
+					array(
+						'meta_key'   => '_customer_user',
+						'meta_value' => '0',
+						'operator'   => '=',
+					),
 				),
-			),
-			'filter_range' => true,
-		) );
+				'filter_range' => true,
+			)
+		);
 		?>
 		<div class="chart-container">
 			<div class="chart-placeholder customers_vs_guests pie-chart" style="height:200px"></div>
 			<ul class="pie-chart-legend">
-				<li style="border-color: <?php echo $this->chart_colours['customers']; ?>"><?php _e( 'Customer sales', 'woocommerce' ); ?></li>
-				<li style="border-color: <?php echo $this->chart_colours['guests']; ?>"><?php _e( 'Guest sales', 'woocommerce' ); ?></li>
+				<li style="border-color: <?php echo esc_attr( $this->chart_colours['customers'] ); ?>"><?php esc_html_e( 'Customer sales', 'woocommerce' ); ?></li>
+				<li style="border-color: <?php echo esc_attr( $this->chart_colours['guests'] ); ?>"><?php esc_html_e( 'Guest sales', 'woocommerce' ); ?></li>
 			</ul>
 		</div>
 		<script type="text/javascript">
 			jQuery(function(){
- 				jQuery.plot(
+				 jQuery.plot(
 					jQuery('.chart-placeholder.customers_vs_guests'),
 					[
 						{
-							label: '<?php _e( 'Customer orders', 'woocommerce' ); ?>',
-							data:  "<?php echo $customer_order_totals->total_orders ?>",
-							color: '<?php echo $this->chart_colours['customers']; ?>'
+							label: '<?php esc_html_e( 'Customer orders', 'woocommerce' ); ?>',
+							data:  "<?php echo esc_html( $customer_order_totals->total_orders ); ?>",
+							color: '<?php echo esc_html( $this->chart_colours['customers'] ); ?>'
 						},
 						{
-							label: '<?php _e( 'Guest orders', 'woocommerce' ); ?>',
-							data:  "<?php echo $guest_order_totals->total_orders ?>",
-							color: '<?php echo $this->chart_colours['guests']; ?>'
+							label: '<?php esc_html_e( 'Guest orders', 'woocommerce' ); ?>',
+							data:  "<?php echo esc_html( $guest_order_totals->total_orders ); ?>",
+							color: '<?php echo esc_html( $this->chart_colours['guests'] ); ?>'
 						}
 					],
 					{
@@ -140,7 +147,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 								}
 							},
 							enable_tooltip: true,
-							append_tooltip: "<?php echo ' ' . __( 'orders', 'woocommerce' ); ?>",
+							append_tooltip: "<?php echo esc_html( ' ' . __( 'orders', 'woocommerce' ) ); ?>",
 						},
 						legend: {
 							show: false
@@ -160,10 +167,10 @@ class WC_Report_Customers extends WC_Admin_Report {
 	public function output_report() {
 
 		$ranges = array(
-			'year'         => __( 'Year', 'woocommerce' ),
-			'last_month'   => __( 'Last month', 'woocommerce' ),
-			'month'        => __( 'This month', 'woocommerce' ),
-			'7day'         => __( 'Last 7 days', 'woocommerce' ),
+			'year'       => __( 'Year', 'woocommerce' ),
+			'last_month' => __( 'Last month', 'woocommerce' ),
+			'month'      => __( 'This month', 'woocommerce' ),
+			'7day'       => __( 'Last 7 days', 'woocommerce' ),
 		);
 
 		$this->chart_colours = array(
@@ -172,9 +179,9 @@ class WC_Report_Customers extends WC_Admin_Report {
 			'guests'    => '#8fdece',
 		);
 
-		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( $_GET['range'] ) : '7day';
+		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( wp_unslash( $_GET['range'] ) ) : '7day';
 
-		if ( ! in_array( $current_range, array( 'custom', 'year', 'last_month', 'month', '7day' ) ) ) {
+		if ( ! in_array( $current_range, array( 'custom', 'year', 'last_month', 'month', '7day' ), true ) ) {
 			$current_range = '7day';
 		}
 
@@ -210,7 +217,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 			}
 		}
 
-		include( WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php' );
+		include WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php';
 	}
 
 	/**
@@ -218,17 +225,17 @@ class WC_Report_Customers extends WC_Admin_Report {
 	 */
 	public function get_export_button() {
 
-		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( $_GET['range'] ) : '7day';
+		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( wp_unslash( $_GET['range'] ) ) : '7day';
 		?>
 		<a
 			href="#"
-			download="report-<?php echo esc_attr( $current_range ); ?>-<?php echo date_i18n( 'Y-m-d', current_time( 'timestamp' ) ); ?>.csv"
+			download="report-<?php echo esc_attr( $current_range ); ?>-<?php echo esc_attr( date_i18n( 'Y-m-d', current_time( 'timestamp' ) ) ); ?>.csv"
 			class="export_csv"
 			data-export="chart"
 			data-xaxes="<?php esc_attr_e( 'Date', 'woocommerce' ); ?>"
-			data-groupby="<?php echo $this->chart_groupby; ?>"
+			data-groupby="<?php echo esc_attr( $this->chart_groupby ); ?>"
 		>
-			<?php _e( 'Export CSV', 'woocommerce' ); ?>
+			<?php esc_html_e( 'Export CSV', 'woocommerce' ); ?>
 		</a>
 		<?php
 	}
@@ -239,68 +246,71 @@ class WC_Report_Customers extends WC_Admin_Report {
 	public function get_main_chart() {
 		global $wp_locale;
 
-		$customer_orders = $this->get_order_report_data( array(
-			'data' => array(
-				'ID' => array(
-					'type'     => 'post_data',
-					'function' => 'COUNT',
-					'name'     => 'total_orders',
+		$customer_orders = $this->get_order_report_data(
+			array(
+				'data'         => array(
+					'ID'        => array(
+						'type'     => 'post_data',
+						'function' => 'COUNT',
+						'name'     => 'total_orders',
+					),
+					'post_date' => array(
+						'type'     => 'post_data',
+						'function' => '',
+						'name'     => 'post_date',
+					),
 				),
-				'post_date' => array(
-					'type'     => 'post_data',
-					'function' => '',
-					'name'     => 'post_date',
+				'where_meta'   => array(
+					array(
+						'meta_key'   => '_customer_user',
+						'meta_value' => '0',
+						'operator'   => '>',
+					),
 				),
-			),
-			'where_meta' => array(
-				array(
-					'meta_key'   => '_customer_user',
-					'meta_value' => '0',
-					'operator'   => '>',
-				),
-			),
-			'group_by'     => $this->group_by_query,
-			'order_by'     => 'post_date ASC',
-			'query_type'   => 'get_results',
-			'filter_range' => true,
-		) );
+				'group_by'     => $this->group_by_query,
+				'order_by'     => 'post_date ASC',
+				'query_type'   => 'get_results',
+				'filter_range' => true,
+			)
+		);
 
-		$guest_orders = $this->get_order_report_data( array(
-			'data' => array(
-				'ID' => array(
-					'type'     => 'post_data',
-					'function' => 'COUNT',
-					'name'     => 'total_orders',
+		$guest_orders = $this->get_order_report_data(
+			array(
+				'data'         => array(
+					'ID'        => array(
+						'type'     => 'post_data',
+						'function' => 'COUNT',
+						'name'     => 'total_orders',
+					),
+					'post_date' => array(
+						'type'     => 'post_data',
+						'function' => '',
+						'name'     => 'post_date',
+					),
 				),
-				'post_date' => array(
-					'type'     => 'post_data',
-					'function' => '',
-					'name'     => 'post_date',
+				'where_meta'   => array(
+					array(
+						'meta_key'   => '_customer_user',
+						'meta_value' => '0',
+						'operator'   => '=',
+					),
 				),
-			),
-			'where_meta' => array(
-				array(
-					'meta_key'   => '_customer_user',
-					'meta_value' => '0',
-					'operator'   => '=',
-				),
-			),
-			'group_by'     => $this->group_by_query,
-			'order_by'     => 'post_date ASC',
-			'query_type'   => 'get_results',
-			'filter_range' => true,
-		) );
+				'group_by'     => $this->group_by_query,
+				'order_by'     => 'post_date ASC',
+				'query_type'   => 'get_results',
+				'filter_range' => true,
+			)
+		);
 
 		$signups         = $this->prepare_chart_data( $this->customers, 'user_registered', '', $this->chart_interval, $this->start_date, $this->chart_groupby );
 		$customer_orders = $this->prepare_chart_data( $customer_orders, 'post_date', 'total_orders', $this->chart_interval, $this->start_date, $this->chart_groupby );
 		$guest_orders    = $this->prepare_chart_data( $guest_orders, 'post_date', 'total_orders', $this->chart_interval, $this->start_date, $this->chart_groupby );
 
-		// Encode in json format
-		$chart_data = json_encode( array(
+		$chart_data = array(
 			'signups'         => array_values( $signups ),
 			'customer_orders' => array_values( $customer_orders ),
 			'guest_orders'    => array_values( $guest_orders ),
-		) );
+		);
 		?>
 		<div class="chart-container">
 			<div class="chart-placeholder main"></div>
@@ -309,39 +319,39 @@ class WC_Report_Customers extends WC_Admin_Report {
 			var main_chart;
 
 			jQuery(function(){
-				var chart_data = jQuery.parseJSON( '<?php echo $chart_data; ?>' );
+				var chart_data = jQuery.parseJSON( '<?php echo wp_json_encode( $chart_data ); ?>' );
 
 				var drawGraph = function( highlight ) {
 					var series = [
 							{
-								label: "<?php echo esc_js( __( 'Customer orders', 'woocommerce' ) ) ?>",
+								label: "<?php echo esc_js( __( 'Customer orders', 'woocommerce' ) ); ?>",
 								data: chart_data.customer_orders,
-								color: '<?php echo $this->chart_colours['customers']; ?>',
-								bars: { fillColor: '<?php echo $this->chart_colours['customers']; ?>', fill: true, show: true, lineWidth: 0, barWidth: <?php echo $this->barwidth; ?> * 0.5, align: 'center' },
+								color: '<?php echo esc_html( $this->chart_colours['customers'] ); ?>',
+								bars: { fillColor: '<?php echo esc_html( $this->chart_colours['customers'] ); ?>', fill: true, show: true, lineWidth: 0, barWidth: <?php echo esc_html( $this->barwidth ); ?> * 0.5, align: 'center' },
 								shadowSize: 0,
 								enable_tooltip: true,
-								append_tooltip: "<?php echo ' ' . __( 'customer orders', 'woocommerce' ); ?>",
+								append_tooltip: "<?php echo esc_html( ' ' . __( 'customer orders', 'woocommerce' ) ); ?>",
 								stack: true,
 							},
 							{
-								label: "<?php echo esc_js( __( 'Guest orders', 'woocommerce' ) ) ?>",
+								label: "<?php echo esc_js( __( 'Guest orders', 'woocommerce' ) ); ?>",
 								data: chart_data.guest_orders,
-								color: '<?php echo $this->chart_colours['guests']; ?>',
-								bars: { fillColor: '<?php echo $this->chart_colours['guests']; ?>', fill: true, show: true, lineWidth: 0, barWidth: <?php echo $this->barwidth; ?> * 0.5, align: 'center' },
+								color: '<?php echo esc_html( $this->chart_colours['guests'] ); ?>',
+								bars: { fillColor: '<?php echo esc_html( $this->chart_colours['guests'] ); ?>', fill: true, show: true, lineWidth: 0, barWidth: <?php echo esc_html( $this->barwidth ); ?> * 0.5, align: 'center' },
 								shadowSize: 0,
 								enable_tooltip: true,
-								append_tooltip: "<?php echo ' ' . __( 'guest orders', 'woocommerce' ); ?>",
+								append_tooltip: "<?php echo esc_html( ' ' . __( 'guest orders', 'woocommerce' ) ); ?>",
 								stack: true,
 							},
 							{
-								label: "<?php echo esc_js( __( 'Signups', 'woocommerce' ) ) ?>",
+								label: "<?php echo esc_js( __( 'Signups', 'woocommerce' ) ); ?>",
 								data: chart_data.signups,
-								color: '<?php echo $this->chart_colours['signups']; ?>',
+								color: '<?php echo esc_html( $this->chart_colours['signups'] ); ?>',
 								points: { show: true, radius: 5, lineWidth: 3, fillColor: '#fff', fill: true },
 								lines: { show: true, lineWidth: 4, fill: false },
 								shadowSize: 0,
 								enable_tooltip: true,
-								append_tooltip: "<?php echo ' ' . __( 'new users', 'woocommerce' ); ?>",
+								append_tooltip: "<?php echo esc_html( ' ' . __( 'new users', 'woocommerce' ) ); ?>",
 								stack: false
 							},
 						];
@@ -378,10 +388,10 @@ class WC_Report_Customers extends WC_Admin_Report {
 								tickColor: 'transparent',
 								mode: "time",
 								timeformat: "<?php echo ( 'day' === $this->chart_groupby ) ? '%d %b' : '%b'; ?>",
-								monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ) ?>,
+								monthNames: <?php echo wp_json_encode( array_values( $wp_locale->month_abbrev ) ); ?>,
 								tickLength: 1,
-								minTickSize: [1, "<?php echo $this->chart_groupby; ?>"],
-								tickSize: [1, "<?php echo $this->chart_groupby; ?>"],
+								minTickSize: [1, "<?php echo esc_html( $this->chart_groupby ); ?>"],
+								tickSize: [1, "<?php echo esc_html( $this->chart_groupby ); ?>"],
 								font: {
 									color: "#aaa"
 								}

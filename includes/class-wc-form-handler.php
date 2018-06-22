@@ -40,13 +40,21 @@ class WC_Form_Handler {
 	}
 
 	/**
-	 * Remove key and login from query string, set cookie, and redirect to account page to show the form.
+	 * Remove key and user ID (or user login, as a fallback) from query string, set cookie, and redirect to account page to show the form.
 	 */
 	public static function redirect_reset_password_link() {
-		if ( is_account_page() && ! empty( $_GET['key'] ) && ! empty( $_GET['login'] ) ) {
-			$value = sprintf( '%s:%s', wp_unslash( $_GET['login'] ), wp_unslash( $_GET['key'] ) );
-			WC_Shortcode_My_Account::set_reset_password_cookie( $value );
+		if ( is_account_page() && isset( $_GET['key'] ) && ( isset( $_GET['id'] ) || isset( $_GET['login'] ) ) ) {
 
+			// If available, get $user_login from query string parameter for fallback purposes.
+			if ( isset( $_GET['login'] ) ) {
+				$user_login = $_GET['login'];
+			} else {
+				$user = get_user_by( 'id', absint( $_GET['id'] ) );
+				$user_login = $user ? $user->user_login : '';
+			}
+
+			$value = sprintf( '%s:%s', wp_unslash( $user_login ), wp_unslash( $_GET['key'] ) );
+			WC_Shortcode_My_Account::set_reset_password_cookie( $value );
 			wp_safe_redirect( add_query_arg( 'show-reset-form', 'true', wc_lostpassword_url() ) );
 			exit;
 		}
@@ -63,11 +71,17 @@ class WC_Form_Handler {
 			return;
 		}
 
-		if ( empty( $_POST['action'] ) || 'edit_address' !== $_POST['action'] || empty( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-edit_address' ) ) {
+		if ( empty( $_POST['action'] ) || 'edit_address' !== $_POST['action'] ) {
 			return;
 		}
 
 		wc_nocache_headers();
+
+		$nonce_value = wc_get_var( $_REQUEST['woocommerce-edit-address-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // @codingStandardsIgnoreLine.
+
+		if ( ! wp_verify_nonce( $nonce_value, 'woocommerce-edit_address' ) ) {
+			return;
+		}
 
 		$user_id = get_current_user_id();
 
@@ -176,11 +190,17 @@ class WC_Form_Handler {
 			return;
 		}
 
-		if ( empty( $_POST['action'] ) || 'save_account_details' !== $_POST['action'] || empty( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'save_account_details' ) ) {
+		if ( empty( $_POST['action'] ) || 'save_account_details' !== $_POST['action'] ) {
 			return;
 		}
 
 		wc_nocache_headers();
+
+		$nonce_value = wc_get_var( $_REQUEST['save-account-details-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // @codingStandardsIgnoreLine.
+
+		if ( ! wp_verify_nonce( $nonce_value, 'save_account_details' ) ) {
+			return;
+		}
 
 		$user_id = get_current_user_id();
 
@@ -188,32 +208,39 @@ class WC_Form_Handler {
 			return;
 		}
 
+		$account_first_name   = ! empty( $_POST['account_first_name'] ) ? wc_clean( $_POST['account_first_name'] ): '';
+		$account_last_name    = ! empty( $_POST['account_last_name'] ) ? wc_clean( $_POST['account_last_name'] ) : '';
+		$account_display_name = ! empty( $_POST['account_display_name'] ) ? wc_clean( $_POST['account_display_name'] ) : '';
+		$account_email        = ! empty( $_POST['account_email'] ) ? wc_clean( $_POST['account_email'] ) : '';
+		$pass_cur             = ! empty( $_POST['password_current'] ) ? $_POST['password_current'] : '';
+		$pass1                = ! empty( $_POST['password_1'] ) ? $_POST['password_1'] : '';
+		$pass2                = ! empty( $_POST['password_2'] ) ? $_POST['password_2'] : '';
+		$save_pass            = true;
+
+		// Current user data.
 		$current_user       = get_user_by( 'id', $user_id );
 		$current_first_name = $current_user->first_name;
 		$current_last_name  = $current_user->last_name;
 		$current_email      = $current_user->user_email;
 
-		$account_first_name = ! empty( $_POST['account_first_name'] ) ? wc_clean( $_POST['account_first_name'] ): '';
-		$account_last_name  = ! empty( $_POST['account_last_name'] ) ? wc_clean( $_POST['account_last_name'] )  : '';
-		$account_email      = ! empty( $_POST['account_email'] ) ? wc_clean( $_POST['account_email'] )          : '';
-		$pass_cur           = ! empty( $_POST['password_current'] ) ? $_POST['password_current']                : '';
-		$pass1              = ! empty( $_POST['password_1'] ) ? $_POST['password_1']                            : '';
-		$pass2              = ! empty( $_POST['password_2'] ) ? $_POST['password_2']                            : '';
-		$save_pass          = true;
+		// New user data.
+		$user                = new stdClass();
+		$user->ID            = $user_id;
+		$user->first_name    = $account_first_name;
+		$user->last_name     = $account_last_name;
+		$user->display_name  = $account_display_name;
 
-		$user               = new stdClass();
-		$user->ID           = $user_id;
-		$user->first_name   = $account_first_name;
-		$user->last_name    = $account_last_name;
-
-		// Prevent emails being displayed, or leave alone.
-		$user->display_name = is_email( $current_user->display_name ) ? $user->first_name : $current_user->display_name;
+		// Prevent display name to be changed to email.
+		if ( is_email( $account_display_name ) ) {
+			wc_add_notice( __( 'Display name cannot be changed to email address due to privacy concern.', 'woocommerce' ), 'error' );
+		}
 
 		// Handle required fields.
 		$required_fields = apply_filters( 'woocommerce_save_account_details_required_fields', array(
-			'account_first_name' => __( 'First name', 'woocommerce' ),
-			'account_last_name'  => __( 'Last name', 'woocommerce' ),
-			'account_email'      => __( 'Email address', 'woocommerce' ),
+			'account_first_name'    => __( 'First name', 'woocommerce' ),
+			'account_last_name'     => __( 'Last name', 'woocommerce' ),
+			'account_display_name'  => __( 'Display name', 'woocommerce' ),
+			'account_email'         => __( 'Email address', 'woocommerce' ),
 		) );
 
 		foreach ( $required_fields as $field_key => $field_name ) {
@@ -319,8 +346,15 @@ class WC_Form_Handler {
 	public static function pay_action() {
 		global $wp;
 
-		if ( isset( $_POST['woocommerce_pay'] ) && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-pay' ) ) {
+		if ( isset( $_POST['woocommerce_pay'] ) ) {
 			wc_nocache_headers();
+
+			$nonce_value = wc_get_var( $_REQUEST['woocommerce-pay-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // @codingStandardsIgnoreLine.
+
+			if ( ! wp_verify_nonce( $nonce_value, 'woocommerce-pay' ) ) {
+				return;
+			}
+
 			ob_start();
 
 			// Pay for existing order
@@ -342,7 +376,7 @@ class WC_Form_Handler {
 
 				// Terms
 				if ( ! empty( $_POST['terms-field'] ) && empty( $_POST['terms'] ) ) {
-					wc_add_notice( __( 'You must accept our Terms &amp; Conditions.', 'woocommerce' ), 'error' );
+					wc_add_notice( __( 'Please read and accept the terms and conditions to proceed with your order.', 'woocommerce' ), 'error' );
 					return;
 				}
 
@@ -398,8 +432,15 @@ class WC_Form_Handler {
 	 * Process the add payment method form.
 	 */
 	public static function add_payment_method_action() {
-		if ( isset( $_POST['woocommerce_add_payment_method'], $_POST['payment_method'], $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-add-payment-method' ) ) {
+		if ( isset( $_POST['woocommerce_add_payment_method'], $_POST['payment_method'] ) ) {
 			wc_nocache_headers();
+
+			$nonce_value = wc_get_var( $_REQUEST['woocommerce-add-payment-method-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // @codingStandardsIgnoreLine.
+
+			if ( ! wp_verify_nonce( $nonce_value, 'woocommerce-add-payment-method' ) ) {
+				return;
+			}
+
 			ob_start();
 
 			$payment_method_id  = wc_clean( wp_unslash( $_POST['payment_method'] ) );
@@ -497,16 +538,19 @@ class WC_Form_Handler {
 
 		wc_nocache_headers();
 
+		$nonce_value = wc_get_var( $_REQUEST['woocommerce-cart-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // @codingStandardsIgnoreLine.
+
 		if ( ! empty( $_POST['apply_coupon'] ) && ! empty( $_POST['coupon_code'] ) ) {
-			WC()->cart->add_discount( sanitize_text_field( $_POST['coupon_code'] ) );
+			WC()->cart->add_discount( sanitize_text_field( wp_unslash( $_POST['coupon_code'] ) ) );
 
 		} elseif ( isset( $_GET['remove_coupon'] ) ) {
-			WC()->cart->remove_coupon( wc_clean( $_GET['remove_coupon'] ) );
+			WC()->cart->remove_coupon( wc_clean( wp_unslash( $_GET['remove_coupon'] ) ) );
 
-		} elseif ( ! empty( $_GET['remove_item'] ) && wp_verify_nonce( wc_get_var( $_REQUEST['_wpnonce'] ), 'woocommerce-cart' ) ) {
-			$cart_item_key = sanitize_text_field( $_GET['remove_item'] );
+		} elseif ( ! empty( $_GET['remove_item'] ) && wp_verify_nonce( $nonce_value, 'woocommerce-cart' ) ) {
+			$cart_item_key = sanitize_text_field( wp_unslash( $_GET['remove_item'] ) );
+			$cart_item     = WC()->cart->get_cart_item( $cart_item_key );
 
-			if ( $cart_item = WC()->cart->get_cart_item( $cart_item_key ) ) {
+			if ( $cart_item ) {
 				WC()->cart->remove_cart_item( $cart_item_key );
 
 				$product = wc_get_product( $cart_item['product_id'] );
@@ -514,10 +558,12 @@ class WC_Form_Handler {
 				$item_removed_title = apply_filters( 'woocommerce_cart_item_removed_title', $product ? sprintf( _x( '&ldquo;%s&rdquo;', 'Item name in quotes', 'woocommerce' ), $product->get_name() ) : __( 'Item', 'woocommerce' ), $cart_item );
 
 				// Don't show undo link if removed item is out of stock.
-				if ( $product->is_in_stock() && $product->has_enough_stock( $cart_item['quantity'] ) ) {
+				if ( $product && $product->is_in_stock() && $product->has_enough_stock( $cart_item['quantity'] ) ) {
+					/* Translators: %s Product title. */
 					$removed_notice  = sprintf( __( '%s removed.', 'woocommerce' ), $item_removed_title );
 					$removed_notice .= ' <a href="' . esc_url( wc_get_cart_undo_url( $cart_item_key ) ) . '" class="restore-item">' . __( 'Undo?', 'woocommerce' ) . '</a>';
 				} else {
+					/* Translators: %s Product title. */
 					$removed_notice = sprintf( __( '%s removed.', 'woocommerce' ), $item_removed_title );
 				}
 
@@ -528,10 +574,10 @@ class WC_Form_Handler {
 			wp_safe_redirect( $referer );
 			exit;
 
-		} elseif ( ! empty( $_GET['undo_item'] ) && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cart' ) ) {
+		} elseif ( ! empty( $_GET['undo_item'] ) && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $nonce_value, 'woocommerce-cart' ) ) {
 
-			// Undo Cart Item
-			$cart_item_key = sanitize_text_field( $_GET['undo_item'] );
+			// Undo Cart Item.
+			$cart_item_key = sanitize_text_field( wp_unslash( $_GET['undo_item'] ) );
 
 			WC()->cart->restore_cart_item( $cart_item_key );
 
@@ -541,34 +587,35 @@ class WC_Form_Handler {
 
 		}
 
-		// Update Cart - checks apply_coupon too because they are in the same form
-		if ( ( ! empty( $_POST['apply_coupon'] ) || ! empty( $_POST['update_cart'] ) || ! empty( $_POST['proceed'] ) ) && wp_verify_nonce( wc_get_var( $_POST['_wpnonce'] ), 'woocommerce-cart' ) ) {
+		// Update Cart - checks apply_coupon too because they are in the same form.
+		if ( ( ! empty( $_POST['apply_coupon'] ) || ! empty( $_POST['update_cart'] ) || ! empty( $_POST['proceed'] ) ) && wp_verify_nonce( $nonce_value, 'woocommerce-cart' ) ) {
 
 			$cart_updated = false;
-			$cart_totals  = isset( $_POST['cart'] ) ? $_POST['cart'] : '';
+			$cart_totals  = isset( $_POST['cart'] ) ? wp_unslash( $_POST['cart'] ) : ''; // PHPCS: input var ok, CSRF ok, sanitization ok.
 
 			if ( ! WC()->cart->is_empty() && is_array( $cart_totals ) ) {
 				foreach ( WC()->cart->get_cart() as $cart_item_key => $values ) {
 
 					$_product = $values['data'];
 
-					// Skip product if no updated quantity was posted
+					// Skip product if no updated quantity was posted.
 					if ( ! isset( $cart_totals[ $cart_item_key ] ) || ! isset( $cart_totals[ $cart_item_key ]['qty'] ) ) {
 						continue;
 					}
 
-					// Sanitize
-					$quantity = apply_filters( 'woocommerce_stock_amount_cart_item', wc_stock_amount( preg_replace( "/[^0-9\.]/", '', $cart_totals[ $cart_item_key ]['qty'] ) ), $cart_item_key );
+					// Sanitize.
+					$quantity = apply_filters( 'woocommerce_stock_amount_cart_item', wc_stock_amount( preg_replace( '/[^0-9\.]/', '', $cart_totals[ $cart_item_key ]['qty'] ) ), $cart_item_key );
 
 					if ( '' === $quantity || $quantity === $values['quantity'] ) {
 						continue;
 					}
 
-					// Update cart validation
-					$passed_validation 	= apply_filters( 'woocommerce_update_cart_validation', true, $cart_item_key, $values, $quantity );
+					// Update cart validation.
+					$passed_validation = apply_filters( 'woocommerce_update_cart_validation', true, $cart_item_key, $values, $quantity );
 
-					// is_sold_individually
+					// is_sold_individually.
 					if ( $_product->is_sold_individually() && $quantity > 1 ) {
+						/* Translators: %s Product title. */
 						wc_add_notice( sprintf( __( 'You can only have 1 %s in your cart.', 'woocommerce' ), $_product->get_name() ), 'error' );
 						$passed_validation = false;
 					}
@@ -580,11 +627,10 @@ class WC_Form_Handler {
 				}
 			}
 
-			// Trigger action - let 3rd parties update the cart if they need to and update the $cart_updated variable
+			// Trigger action - let 3rd parties update the cart if they need to and update the $cart_updated variable.
 			$cart_updated = apply_filters( 'woocommerce_update_cart_action_cart_updated', $cart_updated );
 
 			if ( $cart_updated ) {
-				// Recalc our totals
 				WC()->cart->calculate_totals();
 			}
 
@@ -877,17 +923,39 @@ class WC_Form_Handler {
 				}
 			}
 
+			// Gather posted attributes.
+			$posted_attributes = array();
+
+			foreach ( $adding_to_cart->get_attributes() as $attribute ) {
+				if ( ! $attribute['is_variation'] ) {
+					continue;
+				}
+				$attribute_key = 'attribute_' . sanitize_title( $attribute['name'] );
+
+				if ( isset( $_REQUEST[ $attribute_key ] ) ) {
+					if ( $attribute['is_taxonomy'] ) {
+						// Don't use wc_clean as it destroys sanitized characters.
+						$value = sanitize_title( wp_unslash( $_REQUEST[ $attribute_key ] ) );
+					} else {
+						$value = html_entity_decode( wc_clean( wp_unslash( $_REQUEST[ $attribute_key ] ) ), ENT_QUOTES, get_bloginfo( 'charset' ) ); // WPCS: sanitization ok.
+					}
+
+					$posted_attributes[ $attribute_key ] = $value;
+				}
+			}
+
 			// If no variation ID is set, attempt to get a variation ID from posted attributes.
 			if ( empty( $variation_id ) ) {
 				$data_store   = WC_Data_Store::load( 'product' );
-				$variation_id = $data_store->find_matching_product_variation( $adding_to_cart, array_map( 'sanitize_title', wp_unslash( $_REQUEST ) ) );
+				$variation_id = $data_store->find_matching_product_variation( $adding_to_cart, $posted_attributes );
 			}
 
-			// Validate the attributes.
+			// Do we have a variation ID?
 			if ( empty( $variation_id ) ) {
 				throw new Exception( __( 'Please choose product options&hellip;', 'woocommerce' ) );
 			}
 
+			// Check the data we have is valid.
 			$variation_data = wc_get_product_variation_attributes( $variation_id );
 
 			foreach ( $adding_to_cart->get_attributes() as $attribute ) {
@@ -896,28 +964,23 @@ class WC_Form_Handler {
 				}
 
 				// Get valid value from variation data.
-				$taxonomy    = 'attribute_' . sanitize_title( $attribute['name'] );
-				$valid_value = isset( $variation_data[ $taxonomy ] ) ? $variation_data[ $taxonomy ] : '';
+				$attribute_key = 'attribute_' . sanitize_title( $attribute['name'] );
+				$valid_value   = isset( $variation_data[ $attribute_key ] ) ? $variation_data[ $attribute_key ]: '';
 
 				/**
 				 * If the attribute value was posted, check if it's valid.
 				 *
 				 * If no attribute was posted, only error if the variation has an 'any' attribute which requires a value.
 				 */
-				if ( isset( $_REQUEST[ $taxonomy ] ) ) {
-					if ( $attribute['is_taxonomy'] ) {
-						// Don't use wc_clean as it destroys sanitized characters.
-						$value = sanitize_title( wp_unslash( $_REQUEST[ $taxonomy ] ) );
-					} else {
-						$value = html_entity_decode( wc_clean( wp_unslash( $_REQUEST[ $taxonomy ] ) ), ENT_QUOTES, get_bloginfo( 'charset' ) ); // WPCS: sanitization ok.
-					}
+				if ( isset( $posted_attributes[ $attribute_key ] ) ) {
+					$value = $posted_attributes[ $attribute_key ];
 
 					// Allow if valid or show error.
 					if ( $valid_value === $value ) {
-						$variations[ $taxonomy ] = $value;
+						$variations[ $attribute_key ] = $value;
 					} elseif ( '' === $valid_value && in_array( $value, $attribute->get_slugs() ) ) {
 						// If valid values are empty, this is an 'any' variation so get all possible values.
-						$variations[ $taxonomy ] = $value;
+						$variations[ $attribute_key ] = $value;
 					} else {
 						throw new Exception( sprintf( __( 'Invalid value posted for %s', 'woocommerce' ), wc_attribute_label( $attribute['name'] ) ) );
 					}
@@ -933,7 +996,7 @@ class WC_Form_Handler {
 			return false;
 		}
 
-		$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity, $variation_id, $variations );
+		$passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity, $variation_id, $variations );
 
 		if ( $passed_validation && false !== WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations ) ) {
 			wc_add_to_cart_message( array( $product_id => $quantity ), true );
@@ -948,8 +1011,7 @@ class WC_Form_Handler {
 	 */
 	public static function process_login() {
 		// The global form-login.php template used `_wpnonce` in template versions < 3.3.0.
-		$nonce_value = isset( $_POST['_wpnonce'] ) ? $_POST['_wpnonce'] : '';
-		$nonce_value = isset( $_POST['woocommerce-login-nonce'] ) ? $_POST['woocommerce-login-nonce'] : $nonce_value;
+		$nonce_value = wc_get_var( $_REQUEST['woocommerce-login-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // @codingStandardsIgnoreLine.
 
 		if ( ! empty( $_POST['login'] ) && wp_verify_nonce( $nonce_value, 'woocommerce-login' ) ) {
 
@@ -1011,7 +1073,13 @@ class WC_Form_Handler {
 	 * Handle lost password form.
 	 */
 	public static function process_lost_password() {
-		if ( isset( $_POST['wc_reset_password'] ) && isset( $_POST['user_login'] ) && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'lost_password' ) ) {
+		if ( isset( $_POST['wc_reset_password'], $_POST['user_login'] ) ) {
+			$nonce_value = wc_get_var( $_REQUEST['woocommerce-lost-password-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // @codingStandardsIgnoreLine.
+
+			if ( ! wp_verify_nonce( $nonce_value, 'lost_password' ) ) {
+				return;
+			}
+
 			$success = WC_Shortcode_My_Account::retrieve_password();
 
 			// If successful, redirect to my account with query arg set.
@@ -1026,7 +1094,7 @@ class WC_Form_Handler {
 	 * Handle reset password form.
 	 */
 	public static function process_reset_password() {
-		$posted_fields = array( 'wc_reset_password', 'password_1', 'password_2', 'reset_key', 'reset_login', '_wpnonce' );
+		$posted_fields = array( 'wc_reset_password', 'password_1', 'password_2', 'reset_key', 'reset_login' );
 
 		foreach ( $posted_fields as $field ) {
 			if ( ! isset( $_POST[ $field ] ) ) {
@@ -1035,7 +1103,9 @@ class WC_Form_Handler {
 			$posted_fields[ $field ] = $_POST[ $field ];
 		}
 
-		if ( ! wp_verify_nonce( $posted_fields['_wpnonce'], 'reset_password' ) ) {
+		$nonce_value = wc_get_var( $_REQUEST['woocommerce-reset-password-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // @codingStandardsIgnoreLine.
+
+		if ( ! wp_verify_nonce( $nonce_value, 'reset_password' ) ) {
 			return;
 		}
 

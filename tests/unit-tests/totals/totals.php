@@ -28,13 +28,15 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 	 * Setup the cart for totals calculation.
 	 */
 	public function setUp() {
+		parent::setUp();
+
 		$this->ids = array();
 
 		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
 			define( 'WOOCOMMERCE_CHECKOUT', 1 );
 		}
 
-		$tax_rate = array(
+		$tax_rate    = array(
 			'tax_rate_country'  => '',
 			'tax_rate_state'    => '',
 			'tax_rate'          => '20.0000',
@@ -54,7 +56,7 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 		$product  = WC_Helper_Product::create_simple_product();
 		$product2 = WC_Helper_Product::create_simple_product();
 		// Variations with parent tax class.
-		$product3 = WC_Helper_Product::create_variation_product();
+		$product3   = WC_Helper_Product::create_variation_product();
 		$variations = $product3->get_available_variations();
 
 		// Update product3 so that each variation has the parent tax class.
@@ -67,7 +69,7 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 		WC_Helper_Shipping::create_simple_flat_rate();
 		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate' ) );
 
-		$coupon = new WC_Coupon;
+		$coupon = new WC_Coupon();
 		$coupon->set_code( 'test-coupon-10' );
 		$coupon->set_amount( 10 );
 		$coupon->set_discount_type( 'percent' );
@@ -131,19 +133,22 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 	 * Test get and set items.
 	 */
 	public function test_get_totals() {
-		$this->assertEquals( array(
-			'fees_total'          => 40.00,
-			'fees_total_tax'      => 6.00,
-			'items_subtotal'      => 40.00,
-			'items_subtotal_tax'  => 8.00,
-			'items_total'         => 36.00,
-			'items_total_tax'     => 7.20,
-			'total'               => 101.20,
-			'shipping_total'      => 10,
-			'shipping_tax_total'  => 2,
-			'discounts_total'     => 4.00,
-			'discounts_tax_total' => 0.80,
-		), $this->totals->get_totals() );
+		$this->assertEquals(
+			array(
+				'fees_total'          => 40.00,
+				'fees_total_tax'      => 6.00,
+				'items_subtotal'      => 40.00,
+				'items_subtotal_tax'  => 8.00,
+				'items_total'         => 36.00,
+				'items_total_tax'     => 7.20,
+				'total'               => 101.20,
+				'shipping_total'      => 10,
+				'shipping_tax_total'  => 2,
+				'discounts_total'     => 4.00,
+				'discounts_tax_total' => 0.80,
+			),
+			$this->totals->get_totals()
+		);
 	}
 
 	/**
