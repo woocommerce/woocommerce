@@ -1,17 +1,15 @@
 <?php
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 /**
  * Handle frontend forms.
  *
- * @class 		WC_Form_Handler
- * @version		2.2.0
- * @package		WooCommerce/Classes/
- * @category	Class
- * @author 		WooThemes
+ * @version	2.2.0
+ * @package	WooCommerce/Classes/
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * WC_Form_Handler class.
  */
 class WC_Form_Handler {
 
@@ -28,7 +26,6 @@ class WC_Form_Handler {
 		add_action( 'wp_loaded', array( __CLASS__, 'process_lost_password' ), 20 );
 		add_action( 'wp_loaded', array( __CLASS__, 'process_reset_password' ), 20 );
 		add_action( 'wp_loaded', array( __CLASS__, 'cancel_order' ), 20 );
-		add_action( 'wp_loaded', array( __CLASS__, 'order_again' ), 20 );
 		add_action( 'wp_loaded', array( __CLASS__, 'update_cart_action' ), 20 );
 		add_action( 'wp_loaded', array( __CLASS__, 'add_to_cart_action' ), 20 );
 
@@ -648,92 +645,11 @@ class WC_Form_Handler {
 
 	/**
 	 * Place a previous order again.
+	 *
+	 * @deprecated 3.5.0 Logic moved to cart session handling.
 	 */
 	public static function order_again() {
-		// Nothing to do
-		if ( ! isset( $_GET['order_again'] ) || ! is_user_logged_in() || ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-order_again' ) ) {
-			return;
-		}
-
-		wc_nocache_headers();
-
-		if ( apply_filters( 'woocommerce_empty_cart_when_order_again', true ) ) {
-			WC()->cart->empty_cart();
-		}
-
-		// Load the previous order - Stop if the order does not exist
-		$order = wc_get_order( absint( $_GET['order_again'] ) );
-
-		if ( ! $order->get_id() ) {
-			return;
-		}
-
-		if ( ! $order->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_order_again', array( 'completed' ) ) ) ) {
-			return;
-		}
-
-		// Make sure the user is allowed to order again. By default it check if the
-		// previous order belonged to the current user.
-		if ( ! current_user_can( 'order_again', $order->get_id() ) ) {
-			return;
-		}
-
-		// Copy products from the order to the cart
-		$order_items = $order->get_items();
-		foreach ( $order_items as $item ) {
-			// Load all product info including variation data
-			$product_id   = (int) apply_filters( 'woocommerce_add_to_cart_product_id', $item->get_product_id() );
-			$quantity     = $item->get_quantity();
-			$variation_id = $item->get_variation_id();
-			$variations   = array();
-			$cart_item_data = apply_filters( 'woocommerce_order_again_cart_item_data', array(), $item, $order );
-
-			foreach ( $item->get_meta_data() as $meta ) {
-				if ( taxonomy_is_product_attribute( $meta->key ) ) {
-					$term = get_term_by( 'slug', $meta->value, $meta->key );
-					$variations[ $meta->key ] = $term ? $term->name : $meta->value;
-				} elseif ( meta_is_product_attribute( $meta->key, $meta->value, $product_id ) ) {
-					$variations[ $meta->key ] = $meta->value;
-				}
-			}
-
-			// Prevent reordering variable products if no selected variation.
-			if ( ! $variation_id && ( $product = $item->get_product() ) && $product->is_type( 'variable' ) ) {
-				continue;
-			}
-
-			// Add to cart validation
-			if ( ! apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity, $variation_id, $variations, $cart_item_data ) ) {
-				continue;
-			}
-
-			WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations, $cart_item_data );
-		}
-
-		do_action( 'woocommerce_ordered_again', $order->get_id() );
-
-		$num_items_in_cart = count( WC()->cart->get_cart() );
-		$num_items_in_original_order = count( $order_items );
-
-		if ( $num_items_in_original_order > $num_items_in_cart ) {
-			wc_add_notice(
-				sprintf( _n(
-					'%d item from your previous order is currently unavailable and could not be added to your cart.',
-					'%d items from your previous order are currently unavailable and could not be added to your cart.',
-					$num_items_in_original_order - $num_items_in_cart,
-					'woocommerce'
-				), $num_items_in_original_order - $num_items_in_cart ),
-				'error'
-			);
-		}
-
-		if ( $num_items_in_cart > 0 ) {
-			wc_add_notice( __( 'The cart has been filled with the items from your previous order.', 'woocommerce' ) );
-		}
-
-		// Redirect to cart
-		wp_safe_redirect( wc_get_cart_url() );
-		exit;
+		wc_deprecated_function( 'WC_Form_Handler::order_again', '3.5', 'This method should not be called manually.' );
 	}
 
 	/**
