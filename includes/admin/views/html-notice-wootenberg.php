@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</p>
 	<?php if ( file_exists( WP_PLUGIN_DIR . '/woo-gutenberg-products-block/woocommerce-gutenberg-products-block.php' ) && ! is_plugin_active( 'woo-gutenberg-products-block/woocommerce-gutenberg-products-block.php' ) && current_user_can( 'activate_plugin', 'woo-gutenberg-products-block/woocommerce-gutenberg-products-block.php' ) ) : ?>
 		<p>
-			<a href="<?php echo esc_url( wp_nonce_url( self_admin_url( 'plugins.php?action=activate&plugin=woo-gutenberg-products-block/woocommerce-gutenberg-products-block.php&plugin_status=active' ), 'activate-plugin_woo-gutenberg-products-block/woocommerce-gutenberg-products-block.php' ) ); ?>" class="button button-primary"><?php esc_html_e( 'Active the Gutenberg Products Block', 'woocommerce' ); ?></a>
+			<a href="<?php echo esc_url( wp_nonce_url( self_admin_url( 'plugins.php?action=activate&plugin=woo-gutenberg-products-block/woocommerce-gutenberg-products-block.php&plugin_status=active' ), 'activate-plugin_woo-gutenberg-products-block/woocommerce-gutenberg-products-block.php' ) ); ?>" class="button button-primary"><?php esc_html_e( 'Activate the Gutenberg Products Block', 'woocommerce' ); ?></a>
 		</p>
 	<?php else : ?>
 		<?php
