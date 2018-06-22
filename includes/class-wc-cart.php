@@ -1933,8 +1933,6 @@ class WC_Cart extends WC_Legacy_Cart {
 
 	/**
 	 * Reset cart totals to the defaults. Useful before running calculations.
-	 *
-	 * @access private
 	 */
 	private function reset_totals() {
 		$this->totals = $this->default_totals;
