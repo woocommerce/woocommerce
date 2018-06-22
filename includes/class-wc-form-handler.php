@@ -71,7 +71,7 @@ final class WC_Form_Handler {
 	 * @return bool|Abstract_WC_Form_Handler
 	 */
 	public static function get_posted_form() {
-		if ( 'POST' !== strtoupper( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) ) { // WPCS: input var ok, sanitization ok.
+		if ( 'POST' !== strtoupper( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) ) { // WPCS: input var ok, sanitization ok, CSRF ok.
 			return false;
 		}
 
@@ -120,125 +120,10 @@ final class WC_Form_Handler {
 	}
 
 	/**
-	 * Save and and update a billing or shipping address if the
-	 * form was submitted through the user account page.
+	 * @deprecated 3.5.0 Logic moved to form handling classes.
 	 */
 	public static function save_address() {
-		global $wp;
-
-		if ( 'POST' !== strtoupper( $_SERVER['REQUEST_METHOD'] ) ) {
-			return;
-		}
-
-		if ( empty( $_POST['action'] ) || 'edit_address' !== $_POST['action'] ) {
-			return;
-		}
-
-		wc_nocache_headers();
-
-		$nonce_value = wc_get_var( $_REQUEST['woocommerce-edit-address-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // @codingStandardsIgnoreLine.
-
-		if ( ! wp_verify_nonce( $nonce_value, 'woocommerce-edit_address' ) ) {
-			return;
-		}
-
-		$user_id = get_current_user_id();
-
-		if ( $user_id <= 0 ) {
-			return;
-		}
-
-		$load_address = isset( $wp->query_vars['edit-address'] ) ? wc_edit_address_i18n( sanitize_title( $wp->query_vars['edit-address'] ), true ) : 'billing';
-
-		$address = WC()->countries->get_address_fields( esc_attr( $_POST[ $load_address . '_country' ] ), $load_address . '_' );
-
-		foreach ( $address as $key => $field ) {
-
-			if ( ! isset( $field['type'] ) ) {
-				$field['type'] = 'text';
-			}
-
-			// Get Value.
-			switch ( $field['type'] ) {
-				case 'checkbox' :
-					$_POST[ $key ] = (int) isset( $_POST[ $key ] );
-					break;
-				default :
-					$_POST[ $key ] = isset( $_POST[ $key ] ) ? wc_clean( $_POST[ $key ] ) : '';
-					break;
-			}
-
-			// Hook to allow modification of value.
-			$_POST[ $key ] = apply_filters( 'woocommerce_process_myaccount_field_' . $key, $_POST[ $key ] );
-
-			// Validation: Required fields.
-			if ( ! empty( $field['required'] ) && empty( $_POST[ $key ] ) ) {
-				wc_add_notice( sprintf( __( '%s is a required field.', 'woocommerce' ), $field['label'] ), 'error' );
-			}
-
-			if ( ! empty( $_POST[ $key ] ) ) {
-
-				// Validation rules.
-				if ( ! empty( $field['validate'] ) && is_array( $field['validate'] ) ) {
-					foreach ( $field['validate'] as $rule ) {
-						switch ( $rule ) {
-							case 'postcode' :
-								$_POST[ $key ] = strtoupper( str_replace( ' ', '', $_POST[ $key ] ) );
-
-								if ( ! WC_Validation::is_postcode( $_POST[ $key ], $_POST[ $load_address . '_country' ] ) ) {
-									wc_add_notice( __( 'Please enter a valid postcode / ZIP.', 'woocommerce' ), 'error' );
-								} else {
-									$_POST[ $key ] = wc_format_postcode( $_POST[ $key ], $_POST[ $load_address . '_country' ] );
-								}
-								break;
-							case 'phone' :
-								$_POST[ $key ] = wc_format_phone_number( $_POST[ $key ] );
-
-								if ( ! WC_Validation::is_phone( $_POST[ $key ] ) ) {
-									wc_add_notice( sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . $field['label'] . '</strong>' ), 'error' );
-								}
-								break;
-							case 'email' :
-								$_POST[ $key ] = strtolower( $_POST[ $key ] );
-
-								if ( ! is_email( $_POST[ $key ] ) ) {
-									wc_add_notice( sprintf( __( '%s is not a valid email address.', 'woocommerce' ), '<strong>' . $field['label'] . '</strong>' ), 'error' );
-								}
-								break;
-						}
-					}
-				}
-			}
-		}
-
-		do_action( 'woocommerce_after_save_address_validation', $user_id, $load_address, $address );
-
-		if ( 0 === wc_notice_count( 'error' ) ) {
-
-			$customer = new WC_Customer( $user_id );
-
-			if ( $customer ) {
-				foreach ( $address as $key => $field ) {
-					if ( is_callable( array( $customer, "set_$key" ) ) ) {
-						$customer->{"set_$key"}( wc_clean( $_POST[ $key ] ) );
-					} else {
-						$customer->update_meta_data( $key, wc_clean( $_POST[ $key ] ) );
-					}
-
-					if ( WC()->customer && is_callable( array( WC()->customer, "set_$key" ) ) ) {
-						WC()->customer->{"set_$key"}( wc_clean( $_POST[ $key ] ) );
-					}
-				}
-				$customer->save();
-			}
-
-			wc_add_notice( __( 'Address changed successfully.', 'woocommerce' ) );
-
-			do_action( 'woocommerce_customer_save_address', $user_id, $load_address );
-
-			wp_safe_redirect( wc_get_endpoint_url( 'edit-address', '', wc_get_page_permalink( 'myaccount' ) ) );
-			exit;
-		}
+		wc_deprecated_function( 'WC_Form_Handler::save_address', '3.5', 'This method should not be called manually. Logic moved to form handling classes.' );
 	}
 
 	/**
