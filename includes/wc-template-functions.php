@@ -2429,7 +2429,8 @@ if ( ! function_exists( 'woocommerce_order_again_button' ) ) {
 		}
 
 		wc_get_template( 'order/order-again.php', array(
-			'order' => $order,
+			'order'           => $order,
+			'order_again_url' => wp_nonce_url( add_query_arg( 'order_again', $order->get_id(), wc_get_cart_url() ), 'woocommerce-order_again' ),
 		) );
 	}
 }
