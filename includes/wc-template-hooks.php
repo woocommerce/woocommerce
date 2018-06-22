@@ -298,4 +298,4 @@ add_action( 'woocommerce_before_shop_loop', 'woocommerce_output_all_notices', 10
 add_action( 'woocommerce_before_single_product', 'woocommerce_output_all_notices', 10 );
 add_action( 'woocommerce_before_cart', 'woocommerce_output_all_notices', 10 );
 add_action( 'woocommerce_before_checkout_form', 'woocommerce_output_all_notices', 10 );
-add_action( 'woocommerce_account_content', 'woocommerce_output_all_notices', 10 );
+add_action( 'woocommerce_account_content', 'woocommerce_output_all_notices', 5 );
