@@ -46,7 +46,7 @@ class WC_Geolite_Integration {
 
 	/**
 	 * Get country 2-letters ISO by IP address.
-	 * Retuns empty string when not able to find any ISO code.
+	 * Returns empty string when not able to find any ISO code.
 	 *
 	 * @param string $ip_address User IP address.
 	 * @return string
