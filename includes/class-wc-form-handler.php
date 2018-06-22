@@ -1,9 +1,8 @@
 <?php
 /**
- * Handle frontend forms.
+ * Form controller class.
  *
- * @version	2.2.0
- * @package	WooCommerce/Classes/
+ * @package WooCommerce/Classes
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -11,14 +10,24 @@ defined( 'ABSPATH' ) || exit;
 /**
  * WC_Form_Handler class.
  */
-class WC_Form_Handler {
+final class WC_Form_Handler {
+
+	/**
+	 * Array of forms which can be handled.
+	 *
+	 * @var array
+	 */
+	private $forms = array(
+		'edit-address' => 'WC_Form_Handler_Edit_Address',
+	);
 
 	/**
 	 * Hook in methods.
 	 */
 	public static function init() {
+		add_action( 'template_redirect', array( __CLASS__, 'handle_posted_forms' ), 20 );
+
 		add_action( 'template_redirect', array( __CLASS__, 'redirect_reset_password_link' ) );
-		add_action( 'template_redirect', array( __CLASS__, 'save_address' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'save_account_details' ) );
 		add_action( 'wp_loaded', array( __CLASS__, 'checkout_action' ), 20 );
 		add_action( 'wp_loaded', array( __CLASS__, 'process_login' ), 20 );
@@ -34,6 +43,59 @@ class WC_Form_Handler {
 		add_action( 'wp', array( __CLASS__, 'add_payment_method_action' ), 20 );
 		add_action( 'wp', array( __CLASS__, 'delete_payment_method_action' ), 20 );
 		add_action( 'wp', array( __CLASS__, 'set_default_payment_method_action' ), 20 );
+	}
+
+	/**
+	 * Handle posted forms for this request.
+	 *
+	 * @since 3.5.0
+	 */
+	public static function handle_posted_forms() {
+		$form = self::get_posted_form();
+
+		if ( $form ) {
+			try {
+				wc_nocache_headers();
+				$form->set_post_data( $_POST );
+				$form->process();
+			} catch ( Exception $e ) {
+				$form->handle_error( $e );
+			}
+		}
+	}
+
+	/**
+	 * Get the posted form handler.
+	 *
+	 * @since 3.5.0
+	 * @return bool|Abstract_WC_Form_Handler
+	 */
+	public static function get_posted_form() {
+		if ( 'POST' !== strtoupper( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) ) { // WPCS: input var ok, sanitization ok.
+			return false;
+		}
+
+		$posted_form      = false;
+		$posted_form_name = self::get_posted_form_name();
+
+		switch ( $posted_form_name ) {
+			case 'edit_address':
+				include_once 'form-handlers/class-wc-form-handler-edit-address.php';
+				$posted_form = new WC_Form_Handler_Edit_Address();
+				break;
+		}
+
+		return $posted_form;
+	}
+
+	/**
+	 * Gets the name of the posted form so we know which class to load.
+	 *
+	 * @since 3.5.0
+	 * @return string
+	 */
+	public static function get_posted_form_name() {
+		return isset( $_POST['action'] ) ? sanitize_title( $_POST['action'] ) : '';
 	}
 
 	/**
