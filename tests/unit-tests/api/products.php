@@ -520,4 +520,52 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$properties = $data['schema']['properties'];
 		$this->assertEquals( 65, count( $properties ) );
 	}
+
+	/**
+	 * Test product category.
+	 *
+	 * @since 3.5.0
+	 */
+	public function test_get_products_by_category() {
+		wp_set_current_user( $this->user );
+
+		// Test product assigned to a single category.
+		$category = wp_insert_term( 'Some Category', 'product_cat' );
+
+		$product = new WC_Product_Simple();
+		$product->set_category_ids( array( $category['term_id'] ) );
+		$product->save();
+
+		$args = array(
+			'args' => array(
+				'category' => $category['term_id'],
+			),
+		);
+		$response           = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products', $args ) );
+		$response_products  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		foreach ( $response_products as $response_product ) {
+			$this->assertEquals( $product->get_id(), $response_product['id'] );
+			$this->assertEquals( $product->get_category_ids(), wp_list_pluck( $response_product['categories'], 'id' ) );
+		}
+
+		$product->delete( true );
+		wp_delete_term( $category['term_id'], 'product_cat' );
+
+		// Test product without categories.
+		$product_2 = new WC_Product_Simple();
+		$product_2->save();
+
+		$request           = new WP_REST_Request( 'GET', '/wc/v2/products/' . $product_2->get_id() );
+		$response          = $this->server->dispatch( $request );
+		$response_product  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $response_product['categories'] );
+		$this->assertEquals( 'uncategorized', $response_product['categories'][0]['slug'] );
+
+		$product_2->delete( true );
+
+	}
 }
