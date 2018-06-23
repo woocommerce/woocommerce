@@ -271,7 +271,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 
 		// TODO: add some more checks here, probably only run in case one of the following filters are active:
 		// category, prod type, visibility, tag, shipping class, attribute; post_type == product_variation.
-		if ( isset( $wp_query->query_vars['post_parent'] ) && $wp_query->query_vars['meta_query']
+		if ( isset( $wp_query->query_vars['post_parent'] ) && isset( $wp_query->query_vars['meta_query'] )
 			&& isset( $wp_query->query_vars['post_type'] ) && 'product_variation' === $wp_query->query_vars['post_type'] ) {
 			$join .= " LEFT JOIN {$wpdb->posts} AS {$this->parent_product_table_name} ON ({$wpdb->posts}.post_parent = {$this->parent_product_table_name}.ID) ";
 			$join .= $this->clauses['join'];
@@ -312,7 +312,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 		$args['post_parent'] = $request['product_id'];
 		// TODO: check if WC_Product_Data_Store_CPT::find_matching_product_variation could not be used...
 		// fix the filtering, otherwise taxonomy is not mapped correctly to variable product.
-		$taxonomies = $args['tax_query'];
+		$taxonomies = isset( $args['tax_query'] ) ? $args['tax_query'] : array();
 		// maybe do this only if there are taxonomies as categories etc, not attributes and terms?
 		$query_for_parent = new WP_Query( $args );
 		$query_for_parent->parse_tax_query( $query_for_parent->query_vars );
