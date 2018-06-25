@@ -541,8 +541,8 @@ class Products_API extends WC_REST_Unit_Test_Case {
 				'category' => $category['term_id'],
 			),
 		);
-		$response           = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products', $args ) );
-		$response_products  = $response->get_data();
+		$response          = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products', $args ) );
+		$response_products = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 		foreach ( $response_products as $response_product ) {
@@ -557,9 +557,9 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$product_2 = new WC_Product_Simple();
 		$product_2->save();
 
-		$request           = new WP_REST_Request( 'GET', '/wc/v2/products/' . $product_2->get_id() );
-		$response          = $this->server->dispatch( $request );
-		$response_product  = $response->get_data();
+		$request          = new WP_REST_Request( 'GET', '/wc/v2/products/' . $product_2->get_id() );
+		$response         = $this->server->dispatch( $request );
+		$response_product = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( 1, $response_product['categories'] );
