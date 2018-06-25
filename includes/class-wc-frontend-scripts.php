@@ -354,7 +354,7 @@ class WC_Frontend_Scripts {
 		if ( is_cart() ) {
 			self::enqueue_script( 'wc-cart' );
 		}
-		if ( is_cart() || is_checkout() || is_account_page() ) {
+		if ( is_cart() || is_checkout() || is_account_page() || is_product() ) {
 			self::enqueue_script( 'selectWoo' );
 			self::enqueue_style( 'select2' );
 
