@@ -107,10 +107,17 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$date_paid = get_post_meta( $id, '_paid_date', true );
 		}
 
+		// On WC 3.5.0 the ID of the user that placed the order was moved from the post meta _customer_user to the post_author field in the wp_posts table.
+		if ( version_compare( get_option( 'woocommerce_db_version' ), '3.5.0', '>=' ) ) {
+			$customer_id = $post_object->post_author;
+		} else {
+			$customer_id = get_post_meta( $id, '_customer_user', true );
+		}
+
 		$order->set_props(
 			array(
 				'order_key'            => get_post_meta( $id, '_order_key', true ),
-				'customer_id'          => get_post_meta( $id, '_customer_user', true ),
+				'customer_id'          => $customer_id,
 				'billing_first_name'   => get_post_meta( $id, '_billing_first_name', true ),
 				'billing_last_name'    => get_post_meta( $id, '_billing_last_name', true ),
 				'billing_company'      => get_post_meta( $id, '_billing_company', true ),
@@ -258,10 +265,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			update_post_meta( $id, '_shipping_address_index', implode( ' ', $order->get_address( 'shipping' ) ) );
 		}
 
-		// If customer changed, update any downloadable permissions.
-		if ( in_array( 'customer_id', $updated_props, true ) || in_array( 'billing_email', $updated_props, true ) ) {
-			$data_store = WC_Data_Store::load( 'customer-download' );
-			$data_store->update_user_by_order_id( $id, $order->get_customer_id(), $order->get_billing_email() );
+		// If customer email changed, update any downloadable permissions.
+		if ( in_array( 'billing_email', $updated_props ) ) {
+			$this->update_downloadable_permissions( $order );
 		}
 
 		// Mark user account as active.
@@ -644,6 +650,11 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			'total'          => 'order_total',
 			'page'           => 'paged',
 		);
+
+		// On WC 3.5.0 the ID of the user that placed the order was moved from the post meta _customer_user to the post_author field in the wp_posts table.
+		if ( version_compare( get_option( 'woocommerce_db_version' ), '3.5.0', '>=' ) ) {
+			$key_mapping['customer_id'] = 'author';
+		}
 
 		foreach ( $key_mapping as $query_key => $db_key ) {
 			if ( isset( $query_vars[ $query_key ] ) ) {

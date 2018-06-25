@@ -325,18 +325,27 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	public function get_last_order( &$customer ) {
 		global $wpdb;
 
-		$last_order = $wpdb->get_var(
-			// phpcs:disable WordPress.WP.PreparedSQL.NotPrepared
-			"SELECT posts.ID
+		// On WC 3.5.0 the ID of the user that placed the order was moved from the post meta _customer_user to the post_author field in the wp_posts table.
+		if ( version_compare( get_option( 'woocommerce_db_version' ), '3.5.0', '>=' ) ) {
+			$query = "SELECT ID
+			FROM $wpdb->posts
+			WHERE post_author = '" . esc_sql( $customer->get_id() ) . "'
+			AND   post_type = 'shop_order'
+			AND   post_status IN ( '" . implode( "','", array_map( 'esc_sql', array_keys( wc_get_order_statuses() ) ) ) . "' )
+			ORDER BY ID DESC";
+		} else {
+			$query = "SELECT posts.ID
 			FROM $wpdb->posts AS posts
 			LEFT JOIN {$wpdb->postmeta} AS meta on posts.ID = meta.post_id
 			WHERE meta.meta_key = '_customer_user'
 			AND   meta.meta_value = '" . esc_sql( $customer->get_id() ) . "'
 			AND   posts.post_type = 'shop_order'
 			AND   posts.post_status IN ( '" . implode( "','", array_map( 'esc_sql', array_keys( wc_get_order_statuses() ) ) ) . "' )
-			ORDER BY posts.ID DESC"
-			// phpcs:enable
-		);
+			ORDER BY posts.ID DESC";
+		}
+
+		// phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+		$last_order = $wpdb->get_var( $query );
 
 		if ( ! $last_order ) {
 			return false;
@@ -358,17 +367,25 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		if ( '' === $count ) {
 			global $wpdb;
 
-			$count = $wpdb->get_var(
-				// phpcs:disable WordPress.WP.PreparedSQL.NotPrepared
-				"SELECT COUNT(*)
+			// On WC 3.5.0 the ID of the user that placed the order was moved from the post meta _customer_user to the post_author field in the wp_posts table.
+			if ( version_compare( get_option( 'woocommerce_db_version' ), '3.5.0', '>=' ) ) {
+				$query = "SELECT COUNT(*)
+				FROM $wpdb->posts
+				WHERE   post_type = 'shop_order'
+				AND     post_status IN ( '" . implode( "','", array_map( 'esc_sql', array_keys( wc_get_order_statuses() ) ) ) . "' )
+				AND     post_author = " . esc_sql( $customer->get_id() );
+			} else {
+				$query = "SELECT COUNT(*)
 				FROM $wpdb->posts as posts
 				LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
 				WHERE   meta.meta_key = '_customer_user'
 				AND     posts.post_type = 'shop_order'
 				AND     posts.post_status IN ( '" . implode( "','", array_map( 'esc_sql', array_keys( wc_get_order_statuses() ) ) ) . "' )
-				AND     meta_value = '" . esc_sql( $customer->get_id() ) . "'"
-				// phpcs:enable
-			);
+				AND     meta_value = '" . esc_sql( $customer->get_id() ) . "'";
+			}
+
+			// phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+			$count = $wpdb->get_var( $query );
 			update_user_meta( $customer->get_id(), '_order_count', $count );
 		}
 
@@ -393,11 +410,18 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			global $wpdb;
 
 			$statuses = array_map( 'esc_sql', wc_get_is_paid_statuses() );
-			$spent    = $wpdb->get_var(
-				// phpcs:disable WordPress.WP.PreparedSQL.NotPrepared
-				apply_filters(
-					'woocommerce_customer_get_total_spent_query',
-					"SELECT SUM(meta2.meta_value)
+
+			// On WC 3.5.0 the ID of the user that placed the order was moved from the post meta _customer_user to the post_author field in the wp_posts table.
+			if ( version_compare( get_option( 'woocommerce_db_version' ), '3.5.0', '>=' ) ) {
+				$query = "SELECT SUM(meta.meta_value)
+					FROM $wpdb->posts as posts
+					LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
+					WHERE   posts.post_author   = '" . esc_sql( $customer->get_id() ) . "'
+					AND     posts.post_type     = 'shop_order'
+					AND     posts.post_status   IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
+					AND     meta.meta_key      = '_order_total'";
+			} else {
+				$query = "SELECT SUM(meta2.meta_value)
 					FROM $wpdb->posts as posts
 					LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
 					LEFT JOIN {$wpdb->postmeta} AS meta2 ON posts.ID = meta2.post_id
@@ -405,11 +429,11 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 					AND     meta.meta_value     = '" . esc_sql( $customer->get_id() ) . "'
 					AND     posts.post_type     = 'shop_order'
 					AND     posts.post_status   IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
-					AND     meta2.meta_key      = '_order_total'",
-					$customer
-				)
-				// phpcs:enable
-			);
+					AND     meta2.meta_key      = '_order_total'";
+			}
+
+			// phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+			$spent = $wpdb->get_var( apply_filters( 'woocommerce_customer_get_total_spent_query', $query, $customer ) );
 
 			if ( ! $spent ) {
 				$spent = 0;
