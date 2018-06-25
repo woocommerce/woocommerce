@@ -30,6 +30,8 @@ class WC_Beta_Tester_Version_Picker {
 
 	/**
 	 * Handler for the version switch button.
+	 *
+	 * @throws Exception On update error.
 	 */
 	public function handle_version_switch() {
 		if ( ! isset( $_GET['wcbt_switch_to_version'], $_GET['_wpnonce'] ) ) { // WPCS: Input var ok.
@@ -46,29 +48,51 @@ class WC_Beta_Tester_Version_Picker {
 			return;
 		}
 
-		include dirname( __FILE__ ) . '/class-wc-beta-tester-plugin-upgrader.php';
+		try {
+			include dirname( __FILE__ ) . '/class-wc-beta-tester-plugin-upgrader.php';
 
-		$plugin_name = 'woocommerce';
-		$plugin      = 'woocommerce/woocommerce.php';
-		$skin_args   = array(
-			'type'    => 'web',
-			'url'     => 'plugins.php?page=wc-beta-tester-version-picker',
-			'title'   => 'Version switch result',
-			'plugin'  => $plugin_name,
-			'version' => $version,
-			'nonce'   => wp_unslash( $_GET['_wpnonce'] ), // WPCS: Input var ok, sanitization ok.
-		);
+			$plugin_name = 'woocommerce';
+			$plugin      = 'woocommerce/woocommerce.php';
+			$skin_args   = array(
+				'type'    => 'web',
+				'url'     => 'plugins.php?page=wc-beta-tester-version-picker',
+				'title'   => 'Version switch result',
+				'plugin'  => $plugin_name,
+				'version' => $version,
+				'nonce'   => wp_unslash( $_GET['_wpnonce'] ), // WPCS: Input var ok, sanitization ok.
+			);
 
-		$skin     = new Automatic_Upgrader_Skin( $skin_args );
-		$upgrader = new WC_Beta_Tester_Plugin_Upgrader( $skin );
-		$result   = $upgrader->switch_version( $plugin );
+			$skin     = new Automatic_Upgrader_Skin( $skin_args );
+			$upgrader = new WC_Beta_Tester_Plugin_Upgrader( $skin );
+			$result   = $upgrader->switch_version( $plugin );
 
-		if ( $result ) {
+			// Try to reactivate.
 			activate_plugin( $plugin, '', is_network_admin(), true );
-			wp_redirect( admin_url( 'plugins.php?page=wc-beta-tester-version-picker&switched=' . rawurlencode( $version ) ) );
-		} else {
-			// TODO: fail more gracefully.
-			print_r( $skin->get_upgrade_messages() );
+
+			if ( is_wp_error( $skin->result ) ) {
+				throw new Exception( $skin->result->get_error_message() );
+			} elseif ( false === $result ) {
+				throw new Exception( __( 'Update failed', 'woocommerce-beta-tester' ) );
+			}
+
+			wp_safe_redirect( admin_url( 'plugins.php?page=wc-beta-tester-version-picker&switched=' . rawurlencode( $version ) ) );
+			exit;
+		} catch ( Exception $e ) {
+			if ( class_exists( 'WC_Admin_Notices' ) ) {
+				WC_Admin_Notices::add_custom_notice(
+					$plugin . '_update_error',
+					sprintf(
+						// translators: 1: plugin name, 2: error message.
+						__( '%1$s could not be updated (%2$s).', 'woocommerce-beta-tester' ),
+						$plugin,
+						$e->getMessage()
+					)
+				);
+				wp_safe_redirect( admin_url( 'plugins.php?page=wc-beta-tester-version-picker' ) );
+				exit;
+			} else {
+				wp_die( esc_html( $e->getMessage() ) );
+			}
 		}
 	}
 
