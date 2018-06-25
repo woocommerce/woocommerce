@@ -1385,28 +1385,28 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return string price or string for the shipping total
 	 */
 	public function get_cart_shipping_total() {
+		
+		// Default total assumes Free shipping
+		$total = __( 'Free!', 'woocommerce' );
+		
 		if ( 0 < $this->get_shipping_total() ) {
 
 			if ( $this->display_prices_including_tax() ) {
-				$return = wc_price( $this->shipping_total + $this->shipping_tax_total );
+				$total = wc_price( $this->shipping_total + $this->shipping_tax_total );
 
 				if ( $this->shipping_tax_total > 0 && ! wc_prices_include_tax() ) {
-					$return .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
+					$total .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
 				}
-
-				return $return;
 			} else {
-				$return = wc_price( $this->shipping_total );
+				$total = wc_price( $this->shipping_total );
 
 				if ( $this->shipping_tax_total > 0 && wc_prices_include_tax() ) {
-					$return .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
+					$total .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 				}
-
-				return $return;
 			}
-		} else {
-			return apply_filters( 'woocommerce_cart_shipping_cost_returns_free', __( 'Free!', 'woocommerce' ), $this );
 		}
+		
+		return apply_filters( 'woocommerce_cart_shipping_total', $total, $this );
 	}
 
 	/**
