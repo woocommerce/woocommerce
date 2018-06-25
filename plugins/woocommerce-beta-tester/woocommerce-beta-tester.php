@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WooCommerce Beta Tester
  * Plugin URI: https://github.com/woocommerce/woocommerce-beta-tester
- * Description: Run bleeding edge versions of WooCommerce. This will replace your installed version of WooCommerce with the latest tagged release - use with caution, and not on production sites. You have been warned.
+ * Description: Run bleeding edge versions of WooCommerce. This will replace your installed version of WooCommerce with the latest tagged release - use with caution, and not on production sites.
  * Version: 2.0.0
  * Author: WooCommerce
  * Author URI: http://woocommerce.com/
