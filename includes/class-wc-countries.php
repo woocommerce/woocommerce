@@ -654,7 +654,7 @@ class WC_Countries {
 				'priority'     => 50,
 			),
 			'address_2'  => array(
-				'placeholder'  => esc_attr__( 'Apartment, suite, unit etc. (optional)', 'woocommerce' ),
+				'placeholder'  => esc_attr__( 'Apartment, suite, unit etc.', 'woocommerce' ),
 				'class'        => array( 'form-row-wide', 'address-field' ),
 				'required'     => false,
 				'autocomplete' => 'address-line2',
