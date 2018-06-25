@@ -33,11 +33,12 @@ class WC_Beta_Tester_Version_Picker {
 	 */
 	public function add_to_menus() {
 		add_submenu_page( 'tools.php',
-			__( 'WooCommerce Beta Tester Version Switch', 'woocommerce-beta-tester' ),
-			__( 'WooCommerce Beta Tester Version Switch', 'woocommerce-beta-tester' ),
+			__( 'WooCommerce Version Switch', 'woocommerce-beta-tester' ),
+			__( 'WooCommerce Version Switch', 'woocommerce-beta-tester' ),
 			'install_plugins',
 			'wc-beta-tester-version-picker',
-			array( $this, 'select_versions_form_html' ) );
+			array( $this, 'select_versions_form_html' )
+		);
 	}
 
 	/**
@@ -64,7 +65,7 @@ class WC_Beta_Tester_Version_Picker {
 		foreach ( $tags as $tag_version ) {
 
 			$versions_html .= '<li class="wcbt-version-li">';
-			$versions_html .= '<label><input type="radio" value="' . esc_attr( $tag_version ) . '" name="wcbt_switch_to_version">' . $tag_version;
+			$versions_html .= '<label><input type="radio" ' . checked( $tag_version, $this->current_version, false ) . ' value="' . esc_attr( $tag_version ) . '" name="wcbt_switch_to_version">' . $tag_version;
 
 			// Is this the current version?
 			if ( $tag_version === $this->current_version ) {
@@ -89,12 +90,11 @@ class WC_Beta_Tester_Version_Picker {
 		}
 
 		$settings = WC_Beta_Tester::get_settings();
-		$channel = $settings->channel;
-
+		$channel  = $settings->channel;
 		?>
 		<div class="wrap">
 			<div class="wcbt-content-wrap">
-				<h1><?php esc_html_e( 'Available WooCommerce versions', 'woocommerce-beta-tester' ); ?></h1>
+				<h1><?php esc_html_e( 'Available WooCommerce Releases', 'woocommerce-beta-tester' ); ?></h1>
 				<form name="wcbt-select-version" class="wcbt-select-version-form" action="<?php echo esc_attr( admin_url( '/index.php' ) ); ?>">
 					<div class="wcbt-versions-wrap">
 						<?php echo $this->get_versions_html( $channel ); // WPCS: XSS ok. ?>
@@ -120,7 +120,7 @@ class WC_Beta_Tester_Version_Picker {
 									</header>
 									<article>
 
-										<table class="wcbt-widefat">
+										<table class="wcbt-widefat widefat">
 											<tbody>
 											<tr class="alternate">
 												<td class="row-title">
@@ -137,12 +137,10 @@ class WC_Beta_Tester_Version_Picker {
 											</tbody>
 										</table>
 
-										<div class="wcbt-notice">
-											<p><?php esc_html_e( 'Notice: We strongly recommend you perform the test on a staging site and create a complete backup of your WordPress files and database prior to performing a version switch. We are not responsible for any misuse, deletions, white screens, fatal errors, or any other issue arising from using this plugin.', 'woocommerce-beta-tester' ); ?></p>
-										</div>
+										<p class="wcbt-notice"><?php esc_html_e( 'Notice: We strongly recommend you perform the test on a staging site and create a complete backup of your WordPress files and database prior to performing a version switch. We are not responsible for any misuse, deletions, white screens, fatal errors, or any other issue arising from using this plugin.', 'woocommerce-beta-tester' ); ?></p>
 									</article>
 									<footer>
-										<input type="submit" value="<?php esc_attr_e( 'Switch version', 'woocommerce-beta-tester' ); ?>" class="button-primary wcbt-go" id="wcbt-submit-version-switch" />
+										<input type="submit" value="<?php esc_attr_e( 'Switch version', 'woocommerce-beta-tester' ); ?>" class="button-primary wcbt-go" id="wcbt-submit-version-switch" />&nbsp;
 										<a href="#" class="modal-close modal-close-link"><?php esc_attr_e( 'Cancel', 'woocommerce-beta-tester' ); ?></a>
 									</footer>
 								</section>

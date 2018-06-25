@@ -56,7 +56,9 @@ class WC_Beta_Tester {
 				'auto_update' => false,
 			)
 		);
+
 		$settings->auto_update = (bool) $settings->auto_update;
+
 		return $settings;
 	}
 
@@ -130,7 +132,7 @@ class WC_Beta_Tester {
 	/**
 	 * Checks if a given version is a pre-release.
 	 *
-	 * @param string $version
+	 * @param string $version Version to compare.
 	 * @return bool
 	 */
 	public function is_prerelease( $version ) {
@@ -367,7 +369,7 @@ class WC_Beta_Tester {
 	 * @return object|WP_Error
 	 */
 	public function plugin_api_prerelease_info( $res, $action, $args ) {
-		// We only care about the plugin information action for woocommerce
+		// We only care about the plugin information action for woocommerce.
 		if ( ! isset( $args->slug ) || 'woocommerce' !== $args->slug || 'plugin_information' !== $action ) {
 			return $res;
 		}
@@ -382,10 +384,9 @@ class WC_Beta_Tester {
 				. $res->sections['description'];
 		}
 
-		$res->sections['pre-release_information'] = make_clickable( wpautop( $this->get_version_information( $res->version ) ) );
+		$res->sections['pre-release_information']  = make_clickable( wpautop( $this->get_version_information( $res->version ) ) );
 		$res->sections['pre-release_information'] .= sprintf(
-			/* translators: 1: GitHub pre-release URL */
-			__( '<p><a target="_blank" href="%s">Read more on GitHub</a></p>' ),
+			'<p><a target="_blank" href="%s">' . __( 'Read more on GitHub', 'woocommerce-beta-tester' ) . '</a></p>',
 			'https://github.com/woocommerce/woocommerce/releases/tag/' . $res->version
 		);
 
@@ -419,7 +420,9 @@ class WC_Beta_Tester {
 		$github_data = get_site_transient( md5( $url ) . '_github_data' );
 
 		if ( $this->overrule_transients() || empty( $github_data ) ) {
-			$github_data = wp_remote_get( $url );
+			$github_data = wp_remote_get( $url, array(
+				'sslverify' => false,
+			) );
 
 			if ( is_wp_error( $github_data ) ) {
 				return false;
@@ -510,19 +513,22 @@ class WC_Beta_Tester {
 	 * @return array(string)
 	 */
 	public function get_tags( $channel = 'all' ) {
-		$data = $this->get_wporg_data();
-		$releases       = (array) $data->versions;
+		$data     = $this->get_wporg_data();
+		$releases = (array) $data->versions;
+
 		unset( $releases['trunk'] );
 
+		$releases = array_keys( $releases );
+
 		if ( 'beta' === $channel ) {
-			$releases = array_filter( $releases, array( __CLASS__, 'is_in_beta_channel' ), ARRAY_FILTER_USE_KEY );
+			$releases = array_filter( $releases, array( __CLASS__, 'is_in_beta_channel' ) );
 		} elseif ( 'rc' === $channel ) {
-			$releases = array_filter( $releases, array( __CLASS__, 'is_in_rc_channel' ), ARRAY_FILTER_USE_KEY );
+			$releases = array_filter( $releases, array( __CLASS__, 'is_in_rc_channel' ) );
 		} elseif ( 'stable' === $channel ) {
-			$releases = array_filter( $releases, array( __CLASS__, 'is_in_stable_channel' ), ARRAY_FILTER_USE_KEY );
+			$releases = array_filter( $releases, array( __CLASS__, 'is_in_stable_channel' ) );
 		}
 
-		return array_keys( $releases );
+		return $releases;
 	}
 
 	/**
@@ -538,7 +544,7 @@ class WC_Beta_Tester {
 				esc_url( admin_url( 'tools.php?page=wc-beta-tester-version-picker' ) ),
 				esc_html__( 'Switch versions', 'woocommerce-beta-tester' )
 			),
-			'settings'      => sprintf(
+			'settings'       => sprintf(
 				'<a href="%s">%s</a>',
 				esc_url( admin_url( 'plugins.php?page=wc-beta-tester' ) ),
 				esc_html__( 'Settings', 'woocommerce-beta-tester' )

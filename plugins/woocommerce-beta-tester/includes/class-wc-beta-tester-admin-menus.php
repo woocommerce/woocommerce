@@ -41,7 +41,7 @@ class WC_Beta_Tester_Admin_Menus {
 	/**
 	 * Get info about the current theme for SSR.
 	 *
-	 * @param string $theme
+	 * @param string $theme Current theme.
 	 * @return string
 	 */
 	private function get_theme_ssr_info( $theme ) {
@@ -85,8 +85,8 @@ class WC_Beta_Tester_Admin_Menus {
 	/**
 	 * Get info about the current plugins for SSR.
 	 *
-	 * @param array $active_plugins
-	 * @param array $untested_plugins
+	 * @param array $active_plugins List of active plugins.
+	 * @param array $untested_plugins List of untested plugins.
 	 * @return string
 	 */
 	private function get_plugins_ssr_info( $active_plugins, $untested_plugins ) {
@@ -105,7 +105,7 @@ class WC_Beta_Tester_Admin_Menus {
 						$version_string = sprintf( esc_html__( '%s is available', 'woocommerce-beta-tester' ), $plugin['version_latest'] );
 					}
 
-					if ( false != $plugin['network_activated'] ) {
+					if ( false !== (bool) $plugin['network_activated'] ) {
 						$network_string = __( 'Network enabled', 'woocommerce-beta-tester' );
 					}
 				}
@@ -166,10 +166,9 @@ class WC_Beta_Tester_Admin_Menus {
 			}
 
 			$active_plugins   = $api->get_active_plugins();
-			$plugin_updates   = new WC_Plugin_Updates;
+			$plugin_updates   = new WC_Plugin_Updates();
 			$untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor' );
 			$ssr             .= $this->get_plugins_ssr_info( $active_plugins, $untested_plugins );
-
 			$theme            = $api->get_theme_info();
 			$ssr             .= $this->get_theme_ssr_info( $theme );
 
@@ -242,7 +241,6 @@ class WC_Beta_Tester_Admin_Menus {
 				break;
 		}
 
-		// TODO: Implementation of each node.
 		$nodes = array(
 			array(
 				'parent' => 'wc-beta-tester',
@@ -255,7 +253,7 @@ class WC_Beta_Tester_Admin_Menus {
 				'parent' => 'wc-beta-tester',
 				'id'     => 'show-version-info',
 				/* translators: %s: current version */
-				'title'  => sprintf( __( 'Version %s information', 'woocommerce-beta-tester' ), WC_VERSION ),
+				'title'  => sprintf( __( 'Release %s information', 'woocommerce-beta-tester' ), WC_VERSION ),
 				'href'   => '#',
 			),
 			array(
@@ -294,7 +292,7 @@ class WC_Beta_Tester_Admin_Menus {
 							<h1>
 							<?php
 								/* translators: %s: version number */
-								echo esc_html( sprintf( __( 'Version information for %s', 'woocommerce-beta-tester' ), '{{ data.version }}' ) );
+								echo esc_html( sprintf( __( 'Release %s information', 'woocommerce-beta-tester' ), '{{ data.version }}' ) );
 							?>
 							</h1>
 							<button class="modal-close modal-close-link dashicons dashicons-no-alt">
@@ -307,7 +305,7 @@ class WC_Beta_Tester_Admin_Menus {
 							<?php do_action( 'woocommerce_admin_version_information_end' ); ?>
 						</article>
 						<footer>
-							<a target="_blank" href="https://github.com/woocommerce/woocommerce/releases/tag/{{ data.version }}">Read more</a>
+							<a target="_blank" href="https://github.com/woocommerce/woocommerce/releases/tag/{{ data.version }}"><?php esc_html_e( 'Read more on GitHub', 'woocommerce-beta-tester' ); ?></a>
 						</footer>
 					</section>
 				</div>

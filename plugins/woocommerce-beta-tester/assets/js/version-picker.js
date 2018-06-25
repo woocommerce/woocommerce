@@ -14,11 +14,11 @@ jQuery(function( $ ) {
 
 			$( '#wcbt-modal-version-switch-confirm' )
 				.on( 'click', this.showConfirmVersionSwitchModal );
-			$( 'input[type=radio][name=wcbt_switch_to_version]' ).change(function() {
-				instance.new_version = this.value;
-			});
-
-
+			$( 'input[type=radio][name=wcbt_switch_to_version]' ).change( function() {
+				if ( $( this ).is( ':checked' ) ) {
+					instance.new_version = $( this ).val();
+				}
+			} ).trigger( 'change' );
 		},
 
 		/**
@@ -40,8 +40,6 @@ jQuery(function( $ ) {
 				$( '#wcbt-submit-version-switch' )
 					.on( 'click', instance.submitSwitchVersionForm );
 			}
-
-
 		},
 
 		/**
