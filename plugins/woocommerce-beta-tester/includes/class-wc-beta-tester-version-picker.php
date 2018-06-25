@@ -24,6 +24,46 @@ class WC_Beta_Tester_Version_Picker {
 	 */
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'add_to_menus' ) );
+		add_action( 'admin_init', array( $this, 'handle_version_switch' ) );
+	}
+
+	/**
+	 * Handler for the version switch button.
+	 */
+	public function handle_version_switch() {
+		if ( empty( $_GET['wcbt_switch_to_version'] ) ) {
+			return;
+		}
+
+		if ( ! wp_verify_nonce( $_GET['_wpnonce'], 'wcbt_switch_version_nonce' ) ) {
+			wp_die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce-beta-tester' ) );
+		}
+
+		include dirname( __FILE__ ) . '/class-wc-beta-tester-plugin-upgrader.php';
+
+		$plugin_name = 'woocommerce';
+		$plugin      = 'woocommerce/woocommerce.php';
+		$version     = sanitize_text_field( $_GET['wcbt_switch_to_version'] );
+		$skin_args   = array(
+			'type'    => 'web',
+			'url'     => 'tools.php?page=wc-beta-tester-version-picker',
+			'title'   => 'Version switch result',
+			'plugin'  => $plugin_name,
+			'version' => $version,
+			'nonce'   => $_GET['_wpnonce'],
+		);
+
+		$skin     = new Automatic_Upgrader_Skin( $skin_args );
+		$upgrader = new WC_Beta_Tester_Plugin_Upgrader( $skin );
+		$result   = $upgrader->switch_version( $plugin );
+
+		if ( $result ) {
+			activate_plugin( $plugin, '', is_network_admin(), true );
+			wp_redirect( admin_url( 'tools.php?page=wc-beta-tester-version-picker&switched=' . urlencode( $version ) ) );
+		} else {
+			// TODO: fail more gracefully.
+			print_r( $skin->get_upgrade_messages() );
+		}
 	}
 
 	/**
@@ -54,9 +94,15 @@ class WC_Beta_Tester_Version_Picker {
 		}
 
 		usort( $tags, 'version_compare' );
-		$tags = array_reverse( $tags );
+		$tags          = array_reverse( $tags );
+		$versions_html = '';
 
-		$versions_html         = '<ul class="wcbt-version-list">';
+		if ( ! empty( $_GET['switched'] ) ) {
+			/* translators: %s: WooCoomerce version  */
+			$versions_html .= '<h2>' . sprintf( esc_html__( 'Successfully switched version to %s.', 'woocommerce-beta-tester' ), esc_html( $_GET['switched'] ) ) . '</h2>';
+		}
+
+		$versions_html        .= '<ul class="wcbt-version-list">';
 		$plugin_data           = WC_Beta_Tester::instance()->get_plugin_data();
 		$this->current_version = $plugin_data['Version'];
 
@@ -89,13 +135,13 @@ class WC_Beta_Tester_Version_Picker {
 		}
 
 		$settings = WC_Beta_Tester::get_settings();
-		$channel = $settings->channel;
+		$channel  = $settings->channel;
 
 		?>
 		<div class="wrap">
 			<div class="wcbt-content-wrap">
 				<h1><?php esc_html_e( 'Available WooCommerce versions', 'woocommerce-beta-tester' ); ?></h1>
-				<form name="wcbt-select-version" class="wcbt-select-version-form" action="<?php echo esc_attr( admin_url( '/index.php' ) ); ?>">
+				<form name="wcbt-select-version" class="wcbt-select-version-form" action="<?php echo esc_attr( admin_url( '/tools.php' ) ); ?>">
 					<div class="wcbt-versions-wrap">
 						<?php echo $this->get_versions_html( $channel ); // WPCS: XSS ok. ?>
 					</div>
@@ -103,6 +149,8 @@ class WC_Beta_Tester_Version_Picker {
 						<a href="#wcbt-modal-version-switch-confirm" class="button-primary" id="wcbt-modal-version-switch-confirm"><?php esc_html_e( 'Switch version', 'woocommerce-beta-tester' ); ?></a>
 					</div>
 					<?php wp_nonce_field( 'wcbt_switch_version_nonce' ); ?>
+					<input type="hidden" name="noheader" value="1">
+					<input type="hidden" name="page" value="wc-beta-tester-version-picker">
 
 					<script type="text/template" id="tmpl-wcbt-version-switch-confirm">
 						<div class="wc-backbone-modal wc-backbone-modal-beta-tester-version-info">
@@ -142,7 +190,7 @@ class WC_Beta_Tester_Version_Picker {
 										</div>
 									</article>
 									<footer>
-										<input type="submit" value="<?php esc_attr_e( 'Switch version', 'woocommerce-beta-tester' ); ?>" class="button-primary wcbt-go" id="wcbt-submit-version-switch" />
+										<input type="submit" value="<?php esc_attr_e( 'Switch version', 'woocommerce-beta-tester' ); ?>" class="button-primary wcbt-go" id="wcbt-submit-version-switch"/>
 										<a href="#" class="modal-close modal-close-link"><?php esc_attr_e( 'Cancel', 'woocommerce-beta-tester' ); ?></a>
 									</footer>
 								</section>
