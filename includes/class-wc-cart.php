@@ -1385,10 +1385,10 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return string price or string for the shipping total
 	 */
 	public function get_cart_shipping_total() {
-		
-		// Default total assumes Free shipping
+
+		// Default total assumes Free shipping.
 		$total = __( 'Free!', 'woocommerce' );
-		
+
 		if ( 0 < $this->get_shipping_total() ) {
 
 			if ( $this->display_prices_including_tax() ) {
@@ -1405,7 +1405,6 @@ class WC_Cart extends WC_Legacy_Cart {
 				}
 			}
 		}
-		
 		return apply_filters( 'woocommerce_cart_shipping_total', $total, $this );
 	}
 
