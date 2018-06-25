@@ -246,7 +246,7 @@ class WC_Beta_Tester_Admin_Menus {
 				'parent' => 'wc-beta-tester',
 				'id'     => 'update-channel',
 				/* translators: %s: current channel */
-				'title'  => sprintf( __( 'Current channel: %s', 'woocommerce-beta-tester' ), $current_channel ),
+				'title'  => sprintf( __( 'Channel: %s', 'woocommerce-beta-tester' ), $current_channel ),
 				'href'   => admin_url( 'plugins.php?page=wc-beta-tester' ),
 			),
 			array(
@@ -260,7 +260,7 @@ class WC_Beta_Tester_Admin_Menus {
 				'parent' => 'wc-beta-tester',
 				'id'     => 'switch-version',
 				'title'  => __( 'Switch versions', 'woocommerce-beta-tester' ),
-				'href'   => admin_url( 'tools.php?page=wc-beta-tester-version-picker' ),
+				'href'   => admin_url( 'plugins.php?page=wc-beta-tester-version-picker' ),
 			),
 			array(
 				'parent' => 'wc-beta-tester',

@@ -52,7 +52,7 @@ class WC_Beta_Tester {
 		$settings = (object) wp_parse_args(
 			get_option( 'wc_beta_tester_options', array() ),
 			array(
-				'channel'     => 'stable',
+				'channel'     => 'beta',
 				'auto_update' => false,
 			)
 		);
@@ -485,7 +485,7 @@ class WC_Beta_Tester {
 		$action_links = array(
 			'switch-version' => sprintf(
 				'<a href="%s">%s</a>',
-				esc_url( admin_url( 'tools.php?page=wc-beta-tester-version-picker' ) ),
+				esc_url( admin_url( 'plugins.php?page=wc-beta-tester-version-picker' ) ),
 				esc_html__( 'Switch versions', 'woocommerce-beta-tester' )
 			),
 			'settings'       => sprintf(

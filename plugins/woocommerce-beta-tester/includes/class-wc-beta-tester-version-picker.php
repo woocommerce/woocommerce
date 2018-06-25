@@ -24,6 +24,7 @@ class WC_Beta_Tester_Version_Picker {
 	 */
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'add_to_menus' ) );
+		add_action( 'admin_head', array( $this, 'hide_from_menus' ) );
 		add_action( 'admin_init', array( $this, 'handle_version_switch' ) );
 	}
 
@@ -51,7 +52,7 @@ class WC_Beta_Tester_Version_Picker {
 		$plugin      = 'woocommerce/woocommerce.php';
 		$skin_args   = array(
 			'type'    => 'web',
-			'url'     => 'tools.php?page=wc-beta-tester-version-picker',
+			'url'     => 'plugins.php?page=wc-beta-tester-version-picker',
 			'title'   => 'Version switch result',
 			'plugin'  => $plugin_name,
 			'version' => $version,
@@ -64,7 +65,7 @@ class WC_Beta_Tester_Version_Picker {
 
 		if ( $result ) {
 			activate_plugin( $plugin, '', is_network_admin(), true );
-			wp_redirect( admin_url( 'tools.php?page=wc-beta-tester-version-picker&switched=' . rawurlencode( $version ) ) );
+			wp_redirect( admin_url( 'plugins.php?page=wc-beta-tester-version-picker&switched=' . rawurlencode( $version ) ) );
 		} else {
 			// TODO: fail more gracefully.
 			print_r( $skin->get_upgrade_messages() );
@@ -77,13 +78,28 @@ class WC_Beta_Tester_Version_Picker {
 	 * @return void
 	 */
 	public function add_to_menus() {
-		add_submenu_page( 'tools.php',
+		add_submenu_page( 'plugins.php',
 			__( 'WooCommerce Version Switch', 'woocommerce-beta-tester' ),
 			__( 'WooCommerce Version Switch', 'woocommerce-beta-tester' ),
 			'install_plugins',
 			'wc-beta-tester-version-picker',
 			array( $this, 'select_versions_form_html' )
 		);
+	}
+
+	/**
+	 * Hide menu items from view so the pages exist, but the menu items do not.
+	 */
+	public function hide_from_menus() {
+		global $submenu;
+
+		if ( isset( $submenu['plugins.php'] ) ) {
+			foreach ( $submenu['plugins.php'] as $key => $menu ) {
+				if ( 'wc-beta-tester-version-picker' === $menu[2] || 'wc-beta-tester' === $menu[2] ) {
+					unset( $submenu['plugins.php'][ $key ] );
+				}
+			}
+		}
 	}
 
 	/**

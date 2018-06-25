@@ -28,7 +28,7 @@ class WC_Beta_Tester_Settings {
 
 		add_settings_section(
 			'wc-beta-tester-update',
-			__( 'Update Settings', 'woocommerce-beta-tester' ),
+			__( 'Settings', 'woocommerce-beta-tester' ),
 			array( $this, 'update_section_html' ),
 			'wc-beta-tester'
 		);
