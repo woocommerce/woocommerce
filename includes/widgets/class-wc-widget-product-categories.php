@@ -235,13 +235,6 @@ class WC_Widget_Product_Categories extends WC_Widget {
 			);
 			wc_enqueue_js(
 				"
-				// Use Select2 enhancement if possible
-				if ( jQuery().selectWoo ) {
-                    jQuery( '.dropdown_product_cat' ).selectWoo({
-                        width: '100%'
-                    });
-				}
-				
 				jQuery( '.dropdown_product_cat' ).change( function() {
 					if ( jQuery(this).val() != '' ) {
 						var this_page = '';
