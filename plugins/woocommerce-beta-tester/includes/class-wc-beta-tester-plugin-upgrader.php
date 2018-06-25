@@ -28,7 +28,6 @@ class WC_Beta_Tester_Plugin_Upgrader extends Plugin_Upgrader {
 	 * @return array|bool|\WP_Error
 	 */
 	public function switch_version( $plugin, $args = array() ) {
-
 		$defaults    = array(
 			'clear_update_cache' => true,
 		);

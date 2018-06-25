@@ -17,7 +17,7 @@ class WC_Beta_Tester {
 	 *
 	 * @var array
 	 */
-	private $config = array();
+	private $plugin_config;
 
 	/**
 	 * Plugin instance.
@@ -57,6 +57,7 @@ class WC_Beta_Tester {
 			)
 		);
 
+		$settings->channel     = $settings->channel;
 		$settings->auto_update = (bool) $settings->auto_update;
 
 		return $settings;
@@ -75,24 +76,23 @@ class WC_Beta_Tester {
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->plugin_name = plugin_basename( WC_BETA_TESTER_FILE );
-
-		$this->config = array(
+		$this->plugin_name   = plugin_basename( WC_BETA_TESTER_FILE );
+		$this->plugin_config = array(
 			'plugin_file'        => 'woocommerce/woocommerce.php',
 			'slug'               => 'woocommerce',
 			'proper_folder_name' => 'woocommerce',
 			'api_url'            => 'https://api.wordpress.org/plugins/info/1.0/woocommerce.json',
 			'repo_url'           => 'https://wordpress.org/plugins/woocommerce/',
-			'requires'           => '4.4',
-			'tested'             => '4.9',
 		);
 
-		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'api_check' ) );
-		add_filter( 'plugins_api', array( $this, 'get_plugin_info' ), 10, 3 );
-		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
-		add_filter( 'auto_update_plugin', 'auto_update_woocommerce', 100, 2 );
-		add_filter( 'plugins_api_result', array( $this, 'plugin_api_prerelease_info' ), 10, 3 );
 		add_filter( "plugin_action_links_{$this->plugin_name}", array( $this, 'plugin_action_links' ), 10, 1 );
+		add_filter( 'auto_update_plugin', 'auto_update_woocommerce', 100, 2 );
+
+		if ( 'stable' !== $this->get_settings()->channel ) {
+			add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'api_check' ) );
+			add_filter( 'plugins_api_result', array( $this, 'plugins_api_result' ), 10, 3 );
+			add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
+		}
 
 		$this->includes();
 	}
@@ -103,21 +103,6 @@ class WC_Beta_Tester {
 	public function includes() {
 		include_once dirname( __FILE__ ) . '/class-wc-beta-tester-admin-menus.php';
 		include_once dirname( __FILE__ ) . '/class-wc-beta-tester-admin-assets.php';
-	}
-
-	/**
-	 * Update args.
-	 */
-	public function set_update_args() {
-		$plugin_data                  = $this->get_plugin_data();
-		$this->config['plugin_name']  = $plugin_data['Name'];
-		$this->config['version']      = $plugin_data['Version'];
-		$this->config['author']       = $plugin_data['Author'];
-		$this->config['homepage']     = $plugin_data['PluginURI'];
-		$this->config['new_version']  = $this->get_latest_prerelease();
-		$this->config['last_updated'] = $this->get_date();
-		$this->config['description']  = $this->get_description();
-		$this->config['zip_url']      = $this->get_download_url( $this->config['new_version'] );
 	}
 
 	/**
@@ -145,8 +130,8 @@ class WC_Beta_Tester {
 	 * @since 1.0
 	 * @return int $version the version number
 	 */
-	public function get_latest_prerelease() {
-		$tagged_version = get_site_transient( md5( $this->config['slug'] ) . '_latest_tag' );
+	public function get_latest_channel_release() {
+		$tagged_version = get_site_transient( md5( $this->plugin_config['slug'] ) . '_latest_tag' );
 
 		if ( $this->overrule_transients() || empty( $tagged_version ) ) {
 
@@ -154,16 +139,34 @@ class WC_Beta_Tester {
 
 			$latest_version = $data->version;
 			$versions       = (array) $data->versions;
+			$channel        = $this->get_settings()->channel;
 
 			foreach ( $versions as $version => $download_url ) {
-				if ( $this->is_prerelease( $version ) ) {
-					$tagged_version = $version;
+				if ( 'trunk' === $version ) {
+					continue;
+				}
+				switch ( $channel ) {
+					case 'stable':
+						if ( $this->is_in_stable_channel( $version ) ) {
+							$tagged_version = $version;
+						}
+						break;
+					case 'rc':
+						if ( $this->is_in_rc_channel( $version ) ) {
+							$tagged_version = $version;
+						}
+						break;
+					case 'beta':
+						if ( $this->is_in_beta_channel( $version ) ) {
+							$tagged_version = $version;
+						}
+						break;
 				}
 			}
 
 			// Refresh every 6 hours.
 			if ( ! empty( $tagged_version ) ) {
-				set_site_transient( md5( $this->config['slug'] ) . '_latest_tag', $tagged_version, HOUR_IN_SECONDS * 6 );
+				set_site_transient( md5( $this->plugin_config['slug'] ) . '_latest_tag', $tagged_version, HOUR_IN_SECONDS * 6 );
 			}
 		}
 
@@ -181,10 +184,10 @@ class WC_Beta_Tester {
 			return $this->wporg_data;
 		}
 
-		$wporg_data = get_site_transient( md5( $this->config['slug'] ) . '_wporg_data' );
+		$wporg_data = get_site_transient( md5( $this->plugin_config['slug'] ) . '_wporg_data' );
 
 		if ( $this->overrule_transients() || ( ! isset( $wporg_data ) || ! $wporg_data || '' === $wporg_data ) ) {
-			$wporg_data = wp_remote_get( $this->config['api_url'] );
+			$wporg_data = wp_remote_get( $this->plugin_config['api_url'] );
 
 			if ( is_wp_error( $wporg_data ) ) {
 				return false;
@@ -193,45 +196,13 @@ class WC_Beta_Tester {
 			$wporg_data = json_decode( $wporg_data['body'] );
 
 			// Refresh every 6 hours.
-			set_site_transient( md5( $this->config['slug'] ) . '_wporg_data', $wporg_data, HOUR_IN_SECONDS * 6 );
+			set_site_transient( md5( $this->plugin_config['slug'] ) . '_wporg_data', $wporg_data, HOUR_IN_SECONDS * 6 );
 		}
 
 		// Store the data in this class instance for future calls.
 		$this->wporg_data = $wporg_data;
 
 		return $wporg_data;
-	}
-	/**
-	 * Get update date
-	 *
-	 * @since 1.0
-	 * @return string $date the date
-	 */
-	public function get_date() {
-		$data = $this->get_wporg_data();
-		return ! empty( $data->last_updated ) ? date( 'Y-m-d', strtotime( $data->last_updated ) ) : false;
-	}
-
-	/**
-	 * Get plugin description
-	 *
-	 * @since 1.0
-	 * @return string $description the description
-	 */
-	public function get_description() {
-		$data = $this->get_wporg_data();
-
-		if ( empty( $data->sections->description ) ) {
-			return false;
-		}
-
-		$data = $data->sections->description;
-
-		if ( preg_match( '%(<p[^>]*>.*?</p>)%i', $data, $regs ) ) {
-			$data = strip_tags( $regs[1] );
-		}
-
-		return $data;
 	}
 
 	/**
@@ -258,7 +229,7 @@ class WC_Beta_Tester {
 	 * @return object $data The data.
 	 */
 	public function get_plugin_data() {
-		return get_plugin_data( WP_PLUGIN_DIR . '/' . $this->config['plugin_file'] );
+		return get_plugin_data( WP_PLUGIN_DIR . '/' . $this->plugin_config['plugin_file'] );
 	}
 
 	/**
@@ -269,69 +240,76 @@ class WC_Beta_Tester {
 	 * @return object $transient Updated plugin data transient.
 	 */
 	public function api_check( $transient ) {
-		// Check if the transient contains the 'checked' information,
-		// If not, just return its value without hacking it.
-		if ( empty( $transient->checked ) ) {
+		// Clear our transient.
+		delete_site_transient( md5( $this->plugin_config['slug'] ) . '_latest_tag' );
+
+		// Get version data.
+		$plugin_data = $this->get_plugin_data();
+		$version     = $plugin_data['Version'];
+		$new_version = $this->get_latest_channel_release();
+
+		// check the version and decide if it's new.
+		$update = version_compare( $new_version, $version, '>' );
+
+		if ( ! $update ) {
 			return $transient;
 		}
 
-		// Clear our transient.
-		delete_site_transient( md5( $this->config['slug'] ) . '_latest_tag' );
-
-		// Update tags.
-		$this->set_update_args();
-
-		// check the version and decide if it's new.
-		$update = version_compare( $this->config['new_version'], $this->config['version'], '>' );
-
-		if ( $update ) {
-			$response              = new stdClass();
-			$response->plugin      = $this->config['slug'];
-			$response->new_version = $this->config['new_version'];
-			$response->slug        = $this->config['slug'];
-			$response->url         = $this->config['repo_url'];
-			$response->package     = $this->config['zip_url'];
-
-			// If response is false, don't alter the transient.
-			if ( false !== $response ) {
-				$transient->response[ $this->config['plugin_file'] ] = $response;
-			}
+		// Populate response data.
+		if ( ! isset( $transient->response['woocommerce/woocommerce.php'] ) ) {
+			$transient->response['woocommerce/woocommerce.php'] = (object) $this->plugin_config;
 		}
+
+		$transient->response['woocommerce/woocommerce.php']->new_version = $new_version;
+		$transient->response['woocommerce/woocommerce.php']->zip_url     = $this->get_download_url( $new_version );
+		$transient->response['woocommerce/woocommerce.php']->package     = $this->get_download_url( $new_version );
 
 		return $transient;
 	}
 
 	/**
-	 * Get Plugin info.
+	 * Filters the Plugin Installation API response results.
 	 *
-	 * @since 1.0
-	 * @param bool   $false    Always false.
-	 * @param string $action   The API function being performed.
-	 * @param object $response The plugin info.
+	 * @param object|WP_Error $response Response object or WP_Error.
+	 * @param string          $action The type of information being requested from the Plugin Installation API.
+	 * @param object          $args Plugin API arguments.
 	 * @return object
 	 */
-	public function get_plugin_info( $false, $action, $response ) {
+	public function plugins_api_result( $response, $action, $args ) {
 		// Check if this call API is for the right plugin.
-		if ( ! isset( $response->slug ) || $response->slug !== $this->config['slug'] ) {
-			return false;
+		if ( ! isset( $response->slug ) || $response->slug !== $this->plugin_config['slug'] ) {
+			return $response;
 		}
 
-		// Update tags.
-		$this->set_update_args();
+		$new_version = $this->get_latest_channel_release();
 
-		$response->slug          = $this->config['slug'];
-		$response->plugin        = $this->config['slug'];
-		$response->name          = $this->config['plugin_name'];
-		$response->plugin_name   = $this->config['plugin_name'];
-		$response->version       = $this->config['new_version'];
-		$response->author        = $this->config['author'];
-		$response->homepage      = $this->config['homepage'];
-		$response->requires      = $this->config['requires'];
-		$response->tested        = $this->config['tested'];
-		$response->downloaded    = 0;
-		$response->last_updated  = $this->config['last_updated'];
-		$response->sections      = array( 'description' => $this->config['description'] );
-		$response->download_link = $this->config['zip_url'];
+		if ( version_compare( $response->version, $new_version, '=' ) ) {
+			return $response;
+		}
+
+		$github_release_data = $this->get_github_release_information( $new_version );
+
+		if ( $this->is_beta_version( $new_version ) ) {
+			$warning = __( '<h1><span>&#9888;</span>This is a beta release<span>&#9888;</span></h1>', 'woocommerce-beta-tester' );
+		}
+
+		if ( $this->is_rc_version( $new_version ) ) {
+			$warning = __( '<h1><span>&#9888;</span>This is a pre-release version<span>&#9888;</span></h1>', 'woocommerce-beta-tester' );
+		}
+
+		// If we are returning a different version than the stable tag on .org, manipulate the returned data.
+		$response->version       = $new_version;
+		$response->download_link = $this->get_download_url( $new_version );
+
+		$response->sections['changelog']   = make_clickable( wpautop( $github_release_data->body ) );
+		$response->sections['changelog']  .= sprintf(
+			'<p><a target="_blank" href="%s">' . __( 'Read more on GitHub', 'woocommerce-beta-tester' ) . '</a></p>',
+			'https://github.com/woocommerce/woocommerce/releases/tag/' . $response->version
+		);
+
+		foreach ( $response->sections as $key => $section ) {
+			$response->sections[ $key ] = $warning . $section;
+		}
 
 		return $response;
 	}
@@ -348,7 +326,7 @@ class WC_Beta_Tester {
 		global $wp_filesystem;
 
 		if ( strstr( $source, '/woocommerce-woocommerce-' ) ) {
-			$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $this->config['proper_folder_name'] );
+			$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $this->plugin_config['proper_folder_name'] );
 
 			if ( $wp_filesystem->move( $source, $corrected_source, true ) ) {
 				return $corrected_source;
@@ -358,39 +336,6 @@ class WC_Beta_Tester {
 		}
 
 		return $source;
-	}
-
-	/**
-	 * Add additional information to the Plugin Information version details modal.
-	 *
-	 * @param object|WP_Error $res    Response object or WP_Error.
-	 * @param string          $action The type of information being requested from the Plugin Installation API.
-	 * @param object          $args   Plugin API arguments.
-	 * @return object|WP_Error
-	 */
-	public function plugin_api_prerelease_info( $res, $action, $args ) {
-		// We only care about the plugin information action for woocommerce.
-		if ( ! isset( $args->slug ) || 'woocommerce' !== $args->slug || 'plugin_information' !== $action ) {
-			return $res;
-		}
-
-		// Not a pre-release, no need to do anything.
-		if ( ! $this->is_prerelease( $res->version ) ) {
-			return $res;
-		}
-
-		if ( isset( $res->sections['description'] ) ) {
-			$res->sections['description'] = __( '<h1><span>&#9888;</span>This is a pre-release<span>&#9888;</span></h1>', 'woocommerce-beta-tester' )
-				. $res->sections['description'];
-		}
-
-		$res->sections['pre-release_information']  = make_clickable( wpautop( $this->get_version_information( $res->version ) ) );
-		$res->sections['pre-release_information'] .= sprintf(
-			'<p><a target="_blank" href="%s">' . __( 'Read more on GitHub', 'woocommerce-beta-tester' ) . '</a></p>',
-			'https://github.com/woocommerce/woocommerce/releases/tag/' . $res->version
-		);
-
-		return $res;
 	}
 
 	/**
@@ -414,9 +359,8 @@ class WC_Beta_Tester {
 	 * @param string $version Version number.
 	 * @return bool|string False on error, description otherwise
 	 */
-	public function get_version_information( $version ) {
-		$url = 'https://api.github.com/repos/woocommerce/woocommerce/releases/tags/' . $version;
-
+	public function get_github_release_information( $version ) {
+		$url         = 'https: //api.github.com/repos/woocommerce/woocommerce/releases/tags/' . $version;
 		$github_data = get_site_transient( md5( $url ) . '_github_data' );
 
 		if ( $this->overrule_transients() || empty( $github_data ) ) {
@@ -430,11 +374,11 @@ class WC_Beta_Tester {
 
 			$github_data = json_decode( $github_data['body'] );
 
-			if ( empty( $github_data->body ) ) {
+			if ( empty( $github_data ) ) {
 				return false;
 			}
 
-			$github_data = $github_data->body;
+			$github_data = $github_data;
 
 			// Refresh every 6 hours.
 			set_site_transient( md5( $url ) . '_github_data', $github_data, HOUR_IN_SECONDS * 6 );
