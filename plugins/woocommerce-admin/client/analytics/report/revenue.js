@@ -12,16 +12,13 @@ import PropTypes from 'prop-types';
  */
 import Card from 'components/card';
 import DatePicker from 'components/date-picker';
+import { formatCurrency } from 'lib/currency';
 import { getAdminLink, updateQueryString } from 'lib/nav-utils';
-import { getCurrencyFormatString, formatCurrency } from 'lib/currency';
 import { getReportData } from 'lib/swagger';
 import Header from 'components/header';
 import { SummaryList, SummaryNumber } from 'components/summary';
 import Table from 'components/table';
 import Pagination from 'components/pagination';
-
-// Mock data until we fetch from an API
-import rawData from './mock-data';
 
 class RevenueReport extends Component {
 	constructor() {
@@ -62,30 +59,43 @@ class RevenueReport extends Component {
 	}
 
 	getRowsContent( data ) {
-		return map( data, ( row, label ) => {
+		return map( data, row => {
 			// @TODO How to create this per-report? Can use `w`, `year`, `m` to build time-specific order links
 			// we need to know which kind of report this is, and parse the `label` to get this row's date
+			const {
+				coupons,
+				gross_revenue,
+				net_revenue,
+				orders_count,
+				refunds,
+				shipping,
+				taxes,
+			} = row.subtotals;
+
 			const orderLink = (
 				<a href={ getAdminLink( '/edit.php?post_type=shop_order&w=4&year=2018' ) }>
-					{ row.order_count }
+					{ orders_count }
 				</a>
 			);
 			return [
-				label,
+				row.start_date,
 				orderLink,
-				getCurrencyFormatString( row.gross_revenue ),
-				getCurrencyFormatString( row.refunds ),
-				getCurrencyFormatString( row.coupons ),
-				getCurrencyFormatString( row.taxes ),
-				getCurrencyFormatString( row.shipping ),
-				getCurrencyFormatString( row.net_revenue ),
+				formatCurrency( gross_revenue ),
+				formatCurrency( refunds ),
+				formatCurrency( coupons ),
+				formatCurrency( taxes ),
+				formatCurrency( shipping ),
+				formatCurrency( net_revenue ),
 			];
 		} );
 	}
 
 	render() {
 		const { path, query } = this.props;
-		const rows = this.getRowsContent( rawData.intervals[ 0 ].week[ 0 ] );
+		const summaryStats = get( this.state.stats, 'totals', {} );
+		const intervalStats = get( this.state.stats, 'intervals', [] );
+		const rows = this.getRowsContent( intervalStats );
+
 		const headers = [
 			__( 'Date', 'woo-dash' ),
 			__( 'Orders', 'woo-dash' ),
@@ -96,7 +106,6 @@ class RevenueReport extends Component {
 			__( 'Shipping', 'woo-dash' ),
 			__( 'Net Revenue', 'woo-dash' ),
 		];
-		const summaryStats = get( this.state.stats, 'totals', {} );
 
 		return (
 			<Fragment>
@@ -134,7 +143,10 @@ class RevenueReport extends Component {
 				<Card title={ __( 'Gross Revenue' ) }>
 					<p>Graph here</p>
 					<hr />
-					<Table rows={ rows } headers={ headers } caption={ __( 'Revenue Last Week' ) } />
+					{ rows &&
+						rows.length && (
+							<Table rows={ rows } headers={ headers } caption={ __( 'Revenue Last Week' ) } />
+						) }
 				</Card>
 
 				<Pagination
