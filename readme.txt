@@ -165,6 +165,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Enhancement - Payment method table reordering accessibility. #19844
 * Enhancement - Log errors from transaction emails with logger. #20203
 * Enhancement - Improved shipping calculator experience. Shows destination country and added context to calculate shipping link. #20345
+* Enhancement - On the fly image generation for frontend, if image sizes are missing. #20011
 * Fix - Check billing email is posted before using in WC_Cart::check_customer_coupons. #20180
 * Fix - Shipping postcode formatting when only posting a billing address. #20330
 * Fix - Correctly show/hide save card checkbox on tokenization form. #20506
@@ -172,6 +173,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Don't force default token gateway active by default. #20125
 * Tweak - Move notice output to hooked in functions. #19794
 * Tweak - Apply order bulk actions in chronological order. #20338
+* Tweak - Updated Emogrifier to 2.0. #20547
 * Performance - Exclude frontend include from REST API calls. #20000
 * Dev - REST API - Allows oAuth1.0a authentication under SSL.
 * Dev - REST API - Fix position param for images. #20497
@@ -182,6 +184,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Introduced `woocommerce_cart_calculate_shipping_address` field to allow manipulation of cart shipping calculator data. #20046
 * Dev - Introduced `woocommerce_shipping_calculator_enable_country` filter. #20046
 * Dev - Pass product id to backorder notification. #20416
+* Dev - Added woocommerce_cart_shipping_total filter to control shipping display. #20591
 * Localization - Updated IT provinces. #20286
 * Localization - Eircode validation. #20330
 
