@@ -617,7 +617,7 @@ class WC_Countries {
 
 		$address_2_placeholder = __( 'Apartment, suite, unit etc.', 'woocommerce' );
 		if ( 'optional' === get_option( 'woocommerce_checkout_address_2_field', 'optional' ) ) {
-			$address_2_placeholder .= __( ' (optional)', 'woocommerce' );
+			$address_2_placeholder .= ' ' . __( '(optional)', 'woocommerce' );
 		}
 
 		$fields = array(
