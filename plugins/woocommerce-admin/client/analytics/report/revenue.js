@@ -4,7 +4,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
-import { map } from 'lodash';
+import { get, map } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
@@ -14,6 +14,7 @@ import Card from 'components/card';
 import DatePicker from 'components/date-picker';
 import { getAdminLink, updateQueryString } from 'lib/nav-utils';
 import { getCurrencyFormatString } from 'lib/currency';
+import { getReportData } from 'lib/swagger';
 import Header from 'components/header';
 import { SummaryList, SummaryNumber } from 'components/summary';
 import Table from 'components/table';
@@ -27,10 +28,33 @@ class RevenueReport extends Component {
 		super();
 		this.onPageChange = this.onPageChange.bind( this );
 		this.onPerPageChange = this.onPerPageChange.bind( this );
+
+		// TODO remove this when we implement real endpoints
+		this.state = { stats: {} };
 	}
 
 	onPageChange( page ) {
 		updateQueryString( { page } );
+	}
+
+	componentDidMount() {
+		// Swagger doesn't support returning different data based on query args
+		// this is more or less to show how we will manipulate data calls based on props
+		const statsQueryArgs = {
+			interval: 'week',
+			after: '2018-04-22',
+			before: '2018-05-06',
+		};
+
+		getReportData( 'revenue/stats', statsQueryArgs ).then( response => {
+			if ( ! response.ok ) {
+				return;
+			}
+
+			response.json().then( data => {
+				this.setState( { stats: data } );
+			} );
+		} );
 	}
 
 	onPerPageChange( perPage ) {
@@ -72,6 +96,7 @@ class RevenueReport extends Component {
 			__( 'Shipping', 'woo-dash' ),
 			__( 'Net Revenue', 'woo-dash' ),
 		];
+		const summaryStats = get( this.state.stats, 'totals', {} );
 
 		return (
 			<Fragment>
@@ -85,18 +110,22 @@ class RevenueReport extends Component {
 
 				<SummaryList>
 					<SummaryNumber
-						value={ '$829.40' }
+						value={ summaryStats.gross_revenue }
 						label={ __( 'Gross Revenue', 'woo-dash' ) }
 						delta={ 29 }
 					/>
 					<SummaryNumber
-						value={ '$24.00' }
+						value={ summaryStats.refunds }
 						label={ __( 'Refunds', 'woo-dash' ) }
 						delta={ -10 }
 						selected
 					/>
-					<SummaryNumber value={ '$49.90' } label={ __( 'Coupons', 'woo-dash' ) } delta={ 15 } />
-					<SummaryNumber value={ '$66.39' } label={ __( 'Taxes', 'woo-dash' ) } />
+					<SummaryNumber
+						value={ summaryStats.coupons }
+						label={ __( 'Coupons', 'woo-dash' ) }
+						delta={ 15 }
+					/>
+					<SummaryNumber value={ summaryStats.taxes } label={ __( 'Taxes', 'woo-dash' ) } />
 				</SummaryList>
 
 				<Card title={ __( 'Gross Revenue' ) }>
@@ -112,7 +141,6 @@ class RevenueReport extends Component {
 					onPageChange={ this.onPageChange }
 					onPerPageChange={ this.onPerPageChange }
 				/>
-
 			</Fragment>
 		);
 	}
