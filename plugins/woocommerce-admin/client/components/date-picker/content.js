@@ -6,7 +6,6 @@ import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { TabPanel } from '@wordpress/components';
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
 
 /**
  * Internal dependencies
@@ -14,6 +13,7 @@ import { Link } from 'react-router-dom';
 import ComparePeriods from './compare-periods';
 import { H, Section } from 'layout/section';
 import PresetPeriods from './preset-periods';
+import Link from 'components/link';
 
 class DatePickerContent extends Component {
 	render() {

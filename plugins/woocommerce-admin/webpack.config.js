@@ -75,6 +75,7 @@ const webpackConfig = {
 	mode: NODE_ENV,
 	entry: {
 		index: './client/index.js',
+		embedded: './client/embedded.js',
 	},
 	output: {
 		path: path.resolve( 'dist' ),
@@ -113,7 +114,7 @@ const webpackConfig = {
 		modules: [ path.join( __dirname, 'client' ), 'node_modules' ],
 	},
 	plugins: [
-		new ExtractTextPlugin( 'css/style.css' ),
+		new ExtractTextPlugin( 'css/[name].css' ),
 	],
 };
 

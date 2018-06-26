@@ -9,18 +9,19 @@
 	box-sizing: border-box;
 	background: $white;
 	border-bottom: 1px solid $gray;
+	padding: 2px 2px 2px 12px;
+	height: 81px;
 
 	.woocommerce-header__breadcrumbs {
 		font-size: 13px;
-
-		span {
-			display: inline-block;
-		}
+		font-weight: normal;
+		padding: 9px 0 4px 0;
+		margin-left: 35px;
 
 		span + span::before {
 			content: ' / ';
 			color: $gray-text;
-			margin: 0 2px 0 6px;
+			margin: 0 2px 0 2px;
 		}
 	}
 }

@@ -11,7 +11,7 @@ import { Provider as SlotFillProvider } from 'react-slot-fill';
  * Internal dependencies
  */
 import './stylesheets/_wpadmin-reset.scss';
-import { PageLayout } from './layout';
+import { EmbedLayout } from './layout';
 
 render(
 	<APIProvider
@@ -19,8 +19,8 @@ render(
 		{ ...pick( wp.api, [ 'postTypeRestBaseMapping', 'taxonomyRestBaseMapping' ] ) }
 	>
 		<SlotFillProvider>
-			<PageLayout />
+			<EmbedLayout />
 		</SlotFillProvider>
 	</APIProvider>,
-	document.getElementById( 'root' )
+	document.getElementById( 'woocommerce-embedded-root' )
 );

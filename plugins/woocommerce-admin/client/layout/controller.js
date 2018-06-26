@@ -13,6 +13,7 @@ import Analytics from 'analytics';
 import AnalyticsReport from 'analytics/report';
 import Dashboard from 'dashboard';
 
+// TODO Remove hasOpenSideBar, as the activity panel will always be closed by default
 const getPages = () => {
 	const pages = [
 		{

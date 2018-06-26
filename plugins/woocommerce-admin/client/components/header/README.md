@@ -25,5 +25,6 @@ render: function() {
 * `sections` (required): Used to generate breadcrumbs. Accepts a single items or an array of items. To make an item a link, wrap it in an array with a relative link (example: `[ '/analytics', __( 'Analytics', 'woo-dash' ) ]` ).
 * `onToggle` (required): The toggle callback when "open sidebar" button is clicked.
 * `isSidebarOpen`: Boolean describing whether the sidebar is toggled visible.
+* `isEmbedded`: Boolean describing if the header is embedded on an existing wp-admin page. False if rendered as part of a full react page.
 
 Note: `onToggle` & `isSidebarOpen` are passed through the `Slot` call, and aren't required when using `<Header />` in section components.

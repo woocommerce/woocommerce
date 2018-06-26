@@ -2,23 +2,16 @@
 .woocommerce-layout {
 	margin: 0;
 	padding: 0;
-	min-height: calc(100vh - 32px);
-	overflow: hidden;
-
-	@include breakpoint( '<782px' ) {
-		min-height: calc(100vh - 46px);
-	}
 }
 
 .woocommerce-header {
-	min-height: 47px;
+	min-height: 81px;
 	margin: 0;
 	padding: 8px 16px 8px 16px;
 }
 
 .woocommerce-layout__primary {
 	margin: $spacing 0 0 $spacing;
-
 	.woocommerce-layout__main {
 		margin: 0 auto;
 		max-width: 640px;
@@ -28,7 +21,7 @@
 .woocommerce-layout.has-visible-sidebar {
 	display: grid;
 	grid-template-columns: auto 360px;
-	grid-template-rows: 47px auto;
+	grid-template-rows: 81px auto;
 	grid-gap: 0 $spacing;
 
 	@include breakpoint( '<782px' ) {
@@ -72,6 +65,7 @@
 	background: $gray;
 	border-left: 1px solid $gray;
 	min-height: calc(100vh - 32px);
+	z-index: 1000;
 
 	@include breakpoint( '<782px' ) {
 		@include hidden-sidebar;

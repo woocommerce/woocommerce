@@ -7,7 +7,7 @@ import { decodeEntities } from '@wordpress/utils';
 import { Fill } from 'react-slot-fill';
 import { isArray, noop } from 'lodash';
 import { IconButton } from '@wordpress/components';
-import { Link } from 'react-router-dom';
+import Link from 'components/link';
 import PropTypes from 'prop-types';
 
 /**
@@ -16,7 +16,7 @@ import PropTypes from 'prop-types';
 import './style.scss';
 import WordPressNotices from './wordpress-notices';
 
-const Header = ( { sections, onToggle, isSidebarOpen } ) => {
+const Header = ( { sections, onToggle, isSidebarOpen, isEmbedded } ) => {
 	const _sections = isArray( sections ) ? sections : [ sections ];
 
 	const documentTitle = _sections
@@ -42,7 +42,9 @@ const Header = ( { sections, onToggle, isSidebarOpen } ) => {
 				</span>
 				{ _sections.map( ( section, i ) => {
 					const sectionPiece = isArray( section ) ? (
-						<Link to={ section[ 0 ] }> { section[ 1 ] }</Link>
+						<Link to={ section[ 0 ] } wpAdmin={ isEmbedded }>
+							{ section[ 1 ] }
+						</Link>
 					) : (
 						section
 					);
@@ -69,10 +71,12 @@ Header.propTypes = {
 	sections: PropTypes.node.isRequired,
 	onToggle: PropTypes.func.isRequired,
 	isSidebarOpen: PropTypes.bool,
+	isEmbedded: PropTypes.bool,
 };
 
 Header.defaultProps = {
 	onToggle: noop,
+	isEmbedded: false,
 };
 
 export default function( props ) {
