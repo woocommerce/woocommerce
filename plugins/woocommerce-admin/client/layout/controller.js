@@ -42,12 +42,12 @@ const getPages = () => {
 class Controller extends Component {
 	render() {
 		// Pass URL parameters (example :report -> params.report) and query string parameters
-		const { path, params } = this.props.match;
+		const { path, url, params } = this.props.match;
 		const search = this.props.location.search.substring( 1 );
 		const query = parse( search );
 		const page = find( getPages(), { path } );
 		window.wpNavMenuClassChange( page.wpMenu );
-		return createElement( page.container, { params, path, query } );
+		return createElement( page.container, { params, path: url, pathMatch: path, query } );
 	}
 }
 

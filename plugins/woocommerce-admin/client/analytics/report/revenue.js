@@ -12,16 +12,31 @@ import PropTypes from 'prop-types';
  */
 import Card from 'components/card';
 import DatePicker from 'components/date-picker';
-import { getAdminLink } from 'lib/nav-utils';
+import { getAdminLink, updateQueryString } from 'lib/nav-utils';
 import { getCurrencyFormatString } from 'lib/currency';
 import Header from 'components/header';
 import { SummaryList, SummaryNumber } from 'components/summary';
 import Table from 'components/table';
+import Pagination from 'components/pagination';
 
 // Mock data until we fetch from an API
 import rawData from './mock-data';
 
 class RevenueReport extends Component {
+	constructor() {
+		super();
+		this.onPageChange = this.onPageChange.bind( this );
+		this.onPerPageChange = this.onPerPageChange.bind( this );
+	}
+
+	onPageChange( page ) {
+		updateQueryString( { page } );
+	}
+
+	onPerPageChange( perPage ) {
+		updateQueryString( { per_page: perPage } );
+	}
+
 	getRowsContent( data ) {
 		return map( data, ( row, label ) => {
 			// @TODO How to create this per-report? Can use `w`, `year`, `m` to build time-specific order links
@@ -83,11 +98,21 @@ class RevenueReport extends Component {
 					<SummaryNumber value={ '$49.90' } label={ __( 'Coupons', 'woo-dash' ) } delta={ 15 } />
 					<SummaryNumber value={ '$66.39' } label={ __( 'Taxes', 'woo-dash' ) } />
 				</SummaryList>
+
 				<Card title={ __( 'Gross Revenue' ) }>
 					<p>Graph here</p>
 					<hr />
 					<Table rows={ rows } headers={ headers } caption={ __( 'Revenue Last Week' ) } />
 				</Card>
+
+				<Pagination
+					page={ parseInt( query.page ) || 1 }
+					perPage={ parseInt( query.per_page ) || 25 }
+					total={ 5000 }
+					onPageChange={ this.onPageChange }
+					onPerPageChange={ this.onPerPageChange }
+				/>
+
 			</Fragment>
 		);
 	}

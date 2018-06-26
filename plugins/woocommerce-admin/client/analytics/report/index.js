@@ -25,8 +25,6 @@ class Report extends Component {
 
 Report.propTypes = {
 	params: PropTypes.object.isRequired,
-	path: PropTypes.string.isRequired,
-	query: PropTypes.object.isRequired,
 };
 
 export default Report;

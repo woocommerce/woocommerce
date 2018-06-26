@@ -4,7 +4,7 @@
  */
 import classnames from 'classnames';
 import { Component, Fragment } from '@wordpress/element';
-import { HashRouter as Router, Route, Switch } from 'react-router-dom';
+import { Router, Route, Switch } from 'react-router-dom';
 import { Slot } from 'react-slot-fill';
 import PropTypes from 'prop-types';
 
@@ -14,6 +14,7 @@ import PropTypes from 'prop-types';
 import './style.scss';
 import Header from 'components/header';
 import { Controller, getPages } from './controller';
+import history from 'lib/history';
 import Notices from './notices';
 import Sidebar from './sidebar';
 
@@ -68,7 +69,7 @@ Layout.propTypes = {
 export class PageLayout extends Component {
 	render() {
 		return (
-			<Router>
+			<Router history={ history }>
 				<Switch>
 					{ getPages().map( page => {
 						return <Route key={ page.path } path={ page.path } exact component={ Layout } />;
