@@ -615,9 +615,9 @@ class WC_Countries {
 	 */
 	public function get_default_address_fields() {
 
-		$address_2_palceholder = '';
+		$address_2_placeholder = __( 'Apartment, suite, unit etc.', 'woocommerce' );
 		if ( 'optional' === get_option( 'woocommerce_checkout_address_2_field', 'optional' ) ) {
-			$address_2_palceholder = __( '(optional)', 'woocommerce' );
+			$address_2_placeholder .= __( ' (optional)', 'woocommerce' );
 		}
 
 		$fields = array(
@@ -660,12 +660,11 @@ class WC_Countries {
 				'priority'     => 50,
 			),
 			'address_2'  => array(
-				/* translators: use to display optional text in address2 field. */
-				'placeholder'  => sprintf( esc_attr__( 'Apartment, suite, unit etc. %s', 'woocommerce' ), esc_html( $address_2_palceholder ) ),
+				'placeholder'  => esc_attr( $address_2_placeholder ),
 				'class'        => array( 'form-row-wide', 'address-field' ),
 				'autocomplete' => 'address-line2',
 				'priority'     => 60,
-				'required'     => 'required' === $address_2_palceholder,
+				'required'     => 'required' === get_option( 'woocommerce_checkout_address_2_field', 'optional' ),
 			),
 			'city'       => array(
 				'label'        => __( 'Town / City', 'woocommerce' ),
