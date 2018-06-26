@@ -128,7 +128,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 						'id'    => 'checkout_process_options',
 					),
 
-					'force_ssl_checkout'   => array(
+					array(
 						'title'           => __( 'Secure checkout', 'woocommerce' ),
 						'desc'            => __( 'Force secure checkout', 'woocommerce' ),
 						'id'              => 'woocommerce_force_ssl_checkout',
@@ -140,7 +140,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 						'desc_tip'        => sprintf( __( 'Force SSL (HTTPS) on the checkout pages (<a href="%s" target="_blank">an SSL Certificate is required</a>).', 'woocommerce' ), 'https://docs.woocommerce.com/document/ssl-and-https/#section-3' ),
 					),
 
-					'unforce_ssl_checkout' => array(
+					array(
 						'desc'            => __( 'Force HTTP when leaving the checkout', 'woocommerce' ),
 						'id'              => 'woocommerce_unforce_ssl_checkout',
 						'default'         => 'no',
