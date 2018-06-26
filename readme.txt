@@ -186,6 +186,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Introduced `woocommerce_shipping_calculator_enable_country` filter. #20046
 * Dev - Pass product id to backorder notification. #20416
 * Dev - Added woocommerce_cart_shipping_total filter to control shipping display. #20591
+* Dev - Refactor "Order again" handling to separate logic better. #20606 
 * Localization - Updated IT provinces. #20286
 * Localization - Eircode validation. #20330
 
