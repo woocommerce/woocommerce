@@ -249,6 +249,8 @@ class WC_Widget_Product_Categories extends WC_Widget {
 							this_page = home_url + '?product_cat=' + jQuery(this).val();
 						}
 						location.href = this_page;
+					} else {
+						location.href = '" . esc_js( wc_get_page_permalink( 'shop' ) ) . "';
 					}
 				});
 
