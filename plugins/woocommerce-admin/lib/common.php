@@ -241,3 +241,26 @@ function woo_dash_get_embed_enabled_plugin_screen_ids() {
 function woo_dash_get_embed_enabled_screen_ids() {
 	return array_merge( woo_dash_get_embed_enabled_core_screen_ids(), woo_dash_get_embed_enabled_plugin_screen_ids() );
 }
+
+/**
+ * Return an object defining the currecy options for the site's current currency
+ *
+ * @return  array  Settings for the current currency {
+ *     Array of settings.
+ *
+ *     @type string $code       Currency code.
+ *     @type string $precision  Number of decimals.
+ *     @type string $symbol     Symbol for currency.
+ * }
+ */
+function woo_dash_currency_settings() {
+	$code = get_woocommerce_currency();
+
+	return apply_filters(
+		'wc_currency_settings', array(
+			'code'      => $code,
+			'precision' => wc_get_price_decimals(),
+			'symbol'    => get_woocommerce_currency_symbol( $code ),
+		)
+	);
+}

@@ -11,7 +11,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import ActivityCard from 'components/activity-card';
-import { getCurrencyFormatDecimal, getCurrencyFormatString } from 'lib/currency';
+import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
 import { getOrderRefundTotal } from 'lib/order-values';
 import { Section } from 'layout/section';
 
@@ -53,11 +53,11 @@ function OrdersList( { orders } ) {
 								</span>{' '}
 								{ refundValue ? (
 									<span>
-										<s>{ getCurrencyFormatString( total ) }</s>{' '}
-										{ getCurrencyFormatString( remainingTotal ) }
+										<s>{ formatCurrency( total, order.currency ) }</s>{' '}
+										{ formatCurrency( remainingTotal, order.currency ) }
 									</span>
 								) : (
-									<span>{ getCurrencyFormatString( total ) }</span>
+									<span>{ formatCurrency( total, order.currency ) }</span>
 								) }
 							</div>
 						</ActivityCard>

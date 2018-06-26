@@ -41,6 +41,8 @@ function woo_dash_register_script() {
 	$settings = array(
 		'adminUrl'           => admin_url(),
 		'embedBreadcrumbs'   => woo_dash_get_embed_breadcrumbs(),
+		'locale'   => esc_attr( get_bloginfo( 'language' ) ),
+		'currency'  => woo_dash_currency_settings(),
 	);
 
 	wp_add_inline_script(
