@@ -13,7 +13,7 @@ import PropTypes from 'prop-types';
 import Card from 'components/card';
 import DatePicker from 'components/date-picker';
 import { getAdminLink, updateQueryString } from 'lib/nav-utils';
-import { getCurrencyFormatString } from 'lib/currency';
+import { getCurrencyFormatString, formatCurrency } from 'lib/currency';
 import { getReportData } from 'lib/swagger';
 import Header from 'components/header';
 import { SummaryList, SummaryNumber } from 'components/summary';
@@ -110,22 +110,25 @@ class RevenueReport extends Component {
 
 				<SummaryList>
 					<SummaryNumber
-						value={ summaryStats.gross_revenue }
+						value={ formatCurrency( summaryStats.gross_revenue ) }
 						label={ __( 'Gross Revenue', 'woo-dash' ) }
 						delta={ 29 }
 					/>
 					<SummaryNumber
-						value={ summaryStats.refunds }
+						value={ formatCurrency( summaryStats.refunds ) }
 						label={ __( 'Refunds', 'woo-dash' ) }
 						delta={ -10 }
 						selected
 					/>
 					<SummaryNumber
-						value={ summaryStats.coupons }
+						value={ formatCurrency( summaryStats.coupons ) }
 						label={ __( 'Coupons', 'woo-dash' ) }
 						delta={ 15 }
 					/>
-					<SummaryNumber value={ summaryStats.taxes } label={ __( 'Taxes', 'woo-dash' ) } />
+					<SummaryNumber
+						value={ formatCurrency( summaryStats.taxes ) }
+						label={ __( 'Taxes', 'woo-dash' ) }
+					/>
 				</SummaryList>
 
 				<Card title={ __( 'Gross Revenue' ) }>

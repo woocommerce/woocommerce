@@ -5,6 +5,11 @@
 import { formatCurrency, getCurrencyFormatDecimal, getCurrencyFormatString } from '../index';
 
 describe( 'formatCurrency', () => {
+	it( 'should default to wcSettings or USD when currency not passed in', () => {
+		expect( formatCurrency( 9.99 ) ).toBe( '$9.99' );
+		expect( formatCurrency( 30 ) ).toBe( '$30.00' );
+	} );
+
 	it( 'should round a number to 2 decimal places in USD', () => {
 		expect( formatCurrency( 9.49258, 'USD' ) ).toBe( '$9.49' );
 		expect( formatCurrency( 30, 'USD' ) ).toBe( '$30.00' );
