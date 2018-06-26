@@ -627,7 +627,7 @@ class WC_Discounts {
 			}
 		}
 
-		if ( $coupon && $user_id && $coupon->get_usage_limit_per_user() > 0 && $coupon->get_id() && $coupon->get_data_store() ) {
+		if ( $coupon && $user_id && apply_filters( 'woocommerce_coupon_validate_user_usage_limit', $coupon->get_usage_limit_per_user() > 0, $user_id, $coupon ) && $coupon->get_id() && $coupon->get_data_store() ) {
 			$date_store  = $coupon->get_data_store();
 			$usage_count = $date_store->get_usage_by_user_id( $coupon, $user_id );
 			if ( $usage_count >= $coupon->get_usage_limit_per_user() ) {
