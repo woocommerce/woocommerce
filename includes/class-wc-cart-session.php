@@ -223,7 +223,6 @@ final class WC_Cart_Session {
 	/**
 	 * Set cart hash cookie and items in cart.
 	 *
-	 * @access private
 	 * @param bool $set Should cookies be set (true) or unset.
 	 */
 	private function set_cart_cookies( $set = true ) {
@@ -240,7 +239,6 @@ final class WC_Cart_Session {
 	/**
 	 * Get the persistent cart from the database.
 	 *
-	 * @access private
 	 * @since  3.5.0
 	 * @return array
 	 */
@@ -261,7 +259,6 @@ final class WC_Cart_Session {
 	/**
 	 * Get a cart from an order, if user has permission.
 	 *
-	 * @access private
 	 * @since  3.5.0
 	 * @param int   $order_id Order ID to try to load.
 	 * @param array $cart Current cart array.
@@ -338,7 +335,7 @@ final class WC_Cart_Session {
 		if ( $num_items_in_original_order > $num_items_added ) {
 			wc_add_notice(
 				sprintf(
-					// Translators: %d item count.
+					/* translators: %d item count */
 					_n(
 						'%d item from your previous order is currently unavailable and could not be added to your cart.',
 						'%d items from your previous order are currently unavailable and could not be added to your cart.',
