@@ -693,12 +693,6 @@ class WC_Countries {
 			unset( $fields['company'] );
 		}
 
-		$address_2_visibility = get_option( 'woocommerce_checkout_address_2_field', 'optional' );
-
-		if ( 'hidden' === $address_2_visibility ) {
-			unset( $fields['address_2'] );
-		}
-
 		if ( 'hidden' === get_option( 'woocommerce_checkout_address_2_field', 'optional' ) ) {
 			unset( $fields['address_2'] );
 		}
