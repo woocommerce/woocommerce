@@ -379,7 +379,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		}
 
 		$output .= '</select>';
-		echo $output;
+		echo $output; // WPCS: XSS ok.
 	}
 
 	/**
@@ -397,7 +397,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		}
 
 		$output .= '</select>';
-		echo $output;
+		echo $output; // WPCS: XSS ok.
 	}
 
 	/**
