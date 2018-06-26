@@ -223,11 +223,6 @@ class WC_Emails {
 		$this->emails['WC_Email_Customer_New_Account']      = include 'emails/class-wc-email-customer-new-account.php';
 
 		$this->emails = apply_filters( 'woocommerce_email_classes', $this->emails );
-
-		// include css inliner.
-		if ( ! class_exists( 'Emogrifier' ) && class_exists( 'DOMDocument' ) ) {
-			include_once dirname( __FILE__ ) . '/libraries/class-emogrifier.php';
-		}
 	}
 
 	/**
