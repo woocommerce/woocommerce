@@ -219,11 +219,11 @@
 		}
 
 		form.$form.wc_variations_image_update( variation );
-
+		
 		if ( ! variation.variation_is_visible ) {
-			template = wp.template( 'unavailable-variation-template' );
+			template = wp_template( 'unavailable-variation-template' );
 		} else {
-			template     = wp.template( 'variation-template' );
+			template     = wp_template( 'variation-template' );
 			variation_id = variation.variation_id;
 		}
 
@@ -678,6 +678,46 @@
 			}
 			return match;
 		}
+	};
+
+	/**
+	 * Avoids using wp.template where possible in order to be CSP compliant.
+	 * wp.template uses internally eval().
+	 * @param {string} templateId
+	 * @return {Function}
+	 */
+	var wp_template = function( templateId ) {
+		var html = document.getElementById( 'tmpl-' + templateId ).textContent;
+		var hard = false;
+		// any <# #> interpolate (evaluate).
+		hard = hard || /<#\s?data\./.test( html );
+		// any data that is NOT data.variation.
+		hard = hard || /{{{?\s?data\.(?!variation\.).+}}}?/.test( html );
+		// any data access deeper than 1 level e.g.
+		// data.variation.object.item
+		// data.variation.object['item']
+		// data.variation.array[0]
+		hard = hard || /{{{?\s?data\.variation\.[\w-]*[^\s}]/.test ( html );
+		if ( hard ) {
+			return wp.template( templateId );
+		}
+		return function template ( data ) {
+			var variation = data.variation || {};
+			return html.replace( /({{{?)\s?data\.variation\.([\w-]*)\s?(}}}?)/g, function( _, open, key, close ) {
+				// Error in the format, ignore.
+				if ( open.length !== close.length ) {
+					return '';
+				}
+				var replacement = variation[ key ] || '';
+				// {{{ }}} => interpolate (unescaped).
+				// {{  }}  => interpolate (escaped).
+				// https://codex.wordpress.org/Javascript_Reference/wp.template
+				if ( open.length === 2 ) {
+					return window.escape( replacement );
+				}
+				return replacement;
+			});
+		};
 	};
 
 })( jQuery, window, document );
