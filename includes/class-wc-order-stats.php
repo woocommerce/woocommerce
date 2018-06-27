@@ -3,7 +3,7 @@
  * WooCommerce Orders Stats
  *
  * Handles the orders stats database and API.
- *s
+ *
  * @package WooCommerce/Classes
  * @since   3.5.0
  */
@@ -49,21 +49,17 @@ class WC_Order_Stats {
 		if ( ! self::$background_process ) {
 			self::$background_process = new WC_Order_Stats_Background_Process();
 		}
-
-		add_action( 'init', function() {
-			self::query( '2018-06-15 15:00:00', '2018-06-15 18:00:00', array( 'fields' => array( 'start_date', 'num_orders' ) ) );
-		}, 99 );
 	}
 
 	/**
 	 * Get order stats information.
 	 *
-	 * @param string $start_time "Y-m-d H:00:00" format date.
-	 * @param string $end_time "Y-m-d H:00:00" format date.
-	 * @param array $args Optional arguments.
+	 * @param string $start_time UTC Timestamp.
+	 * @param string $end_time UTC Timestamp.
+	 * @param array  $args Optional arguments.
 	 * @return array
 	 */
-	public static function query( $start_date, $end_date, $args = array() ) {
+	public static function query( $start_time, $end_time, $args = array() ) {
 		global $wpdb;
 
 		$defaults = array(
@@ -73,8 +69,7 @@ class WC_Order_Stats {
 		$args = wp_parse_args( $args, $defaults );
 
 		$selections = array(
-			'start_date' => 'MIN(start_date) as start_date',
-			'end_date' => 'MAX(end_date) as end_date',
+			'start_time' => 'MIN(start_time) as start_time',
 			'num_orders' => 'SUM(num_orders) as num_orders',
 			'num_items_sold' => 'SUM(num_items_sold) as num_items_sold',
 			'num_products_sold' => 'SUM(num_products_sold) as num_products_sold',
@@ -84,7 +79,6 @@ class WC_Order_Stats {
 			'orders_tax_total' => 'SUM(orders_tax_total) as orders_tax_total',
 			'orders_shipping_total' => 'SUM(orders_shipping_total) as orders_shipping_total',
 			'orders_net_total' => 'SUM(orders_net_total) as orders_net_total',
-			'average_order_total' => 'AVG(average_order_total) as average_order_total',
 		);
 
 		if ( is_array( $args['fields'] ) ) {
@@ -104,9 +98,9 @@ class WC_Order_Stats {
 
 		$table_name = $wpdb->prefix . self::TABLE_NAME;
 		$query = $wpdb->prepare(
-			'SELECT ' . $selections . ' FROM ' . $table_name . ' WHERE start_date >= %s AND end_date <= %s GROUP BY ' . strtoupper( esc_sql( $args['interval'] ) ) . '(start_date);',
-			$start_date,
-			$end_date
+			'SELECT ' . $selections . ' FROM ' . $table_name . ' WHERE start_time >= %s AND start_time < %s GROUP BY ' . strtoupper( esc_sql( $args['interval'] ) ) . '(start_time);',
+			$start_time,
+			$end_time
 		);
 
 		return $wpdb->get_results( $query, ARRAY_A );
@@ -127,19 +121,17 @@ class WC_Order_Stats {
 
 		$table_name = $wpdb->prefix . self::TABLE_NAME;
 		$sql = "CREATE TABLE $table_name (
-			start_date datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
-			end_date datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
-			num_orders smallint(5) UNSIGNED DEFAULT 0 NOT NULL,
-			num_items_sold smallint(5) UNSIGNED DEFAULT 0 NOT NULL,
-			num_products_sold smallint(5) UNSIGNED DEFAULT 0 NOT NULL,
+			start_time int(11) DEFAULT 0 NOT NULL,
+			num_orders int(11) UNSIGNED DEFAULT 0 NOT NULL,
+			num_items_sold int(11) UNSIGNED DEFAULT 0 NOT NULL,
+			num_products_sold int(11) UNSIGNED DEFAULT 0 NOT NULL,
 			orders_gross_total double DEFAULT 0 NOT NULL,
 			orders_coupon_total double DEFAULT 0 NOT NULL,
 			orders_refund_total double DEFAULT 0 NOT NULL,
 			orders_tax_total double DEFAULT 0 NOT NULL,
 			orders_shipping_total double DEFAULT 0 NOT NULL,
 			orders_net_total double DEFAULT 0 NOT NULL,
-			average_order_total double DEFAULT 0 NOT NULL,
-			PRIMARY KEY (start_date)
+			PRIMARY KEY (start_time)
 		) $charset_collate;";
 
 		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
@@ -164,7 +156,7 @@ class WC_Order_Stats {
 			return;
 		}
 
-		$start_time = strtotime( $oldest->get_date_created()->date( 'Y-m-d\TH:00:00O' ) );
+		$start_time = strtotime( $oldest->get_date_created()->format( 'Y-m-d\TH:00:00O' ) );
 		$end_time = $start_time + HOUR_IN_SECONDS;
 
 		while ( $end_time < time() ) {
@@ -238,7 +230,6 @@ class WC_Order_Stats {
 			'orders_tax_total'      => 0.0,
 			'orders_shipping_total' => 0.0,
 			'orders_net_total'      => 0.0,
-			'average_order_total'   => 0.0,
 		);
 
 		$orders = wc_get_orders( array(
@@ -261,36 +252,22 @@ class WC_Order_Stats {
 		$summary['orders_shipping_total'] = self::get_orders_shipping_total( $orders );
 		$summary['orders_net_total']      = $summary['orders_gross_total'] - $summary['orders_coupon_total'] - $summary['orders_refund_total'] - $summary['orders_tax_total'] - $summary['orders_shipping_total'];
 
-		if ( $summary['num_orders'] ) {
-			$summary['average_order_total'] = wc_round_tax_total( $summary['orders_gross_total'] / $summary['num_orders'] );
-		}
-
 		return $summary;
 	}
 
 	/**
 	 * Update the database with stats data.
 	 *
-	 * @param int/string $start Timestamp or ISO date.
-	 * @param int/string $end Timestamp or ISO date.
+	 * @param int $start_time Timestamp.
 	 * @param array $data Stats data.
 	 * @return int/bool Number or rows modified or false on failure.
 	 */
-	public static function update( $start, $end, $data ) {
+	public static function update( $start_time, $data ) {
 		global $wpdb;
 		$table_name = $wpdb->prefix . self::TABLE_NAME;
 
-		// Format dates to same format used in DB.
-		if ( is_numeric( $start ) ) {
-			$start = date( 'Y-m-d H:00:00', $start );
-		}
-		if ( is_numeric( $end ) ) {
-			$end = date( 'Y-m-d H:00:00', $end );
-		}
-
 		$defaults = array(
-			'start_date'            => $start,
-			'end_date'              => $end,
+			'start_time'            => $start_time,
 			'num_orders'            => 0,
 			'num_items_sold'        => 0,
 			'num_products_sold'     => 0,
@@ -300,7 +277,6 @@ class WC_Order_Stats {
 			'orders_tax_total'      => 0.0,
 			'orders_shipping_total' => 0.0,
 			'orders_net_total'      => 0.0,
-			'average_order_total'   => 0.0,
 		);
 		$data = wp_parse_args( $data, $defaults );
 
@@ -309,12 +285,10 @@ class WC_Order_Stats {
 			return $wpdb->delete(
 				$table_name,
 				array(
-					'start_date' => $start,
-					'end_date'   => $end,
+					'start_time' => $start_time,
 				),
 				array(
-					'%s',
-					'%s',
+					'%d',
 				)
 			);
 		}
@@ -324,12 +298,10 @@ class WC_Order_Stats {
 			$table_name,
 			$data,
 			array(
-				'%s',
-				'%s',
 				'%d',
 				'%d',
 				'%d',
-				'%f',
+				'%d',
 				'%f',
 				'%f',
 				'%f',

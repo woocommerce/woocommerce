@@ -43,7 +43,7 @@ class WC_Order_Stats_Background_Process extends WC_Background_Process {
 		$end_time = ! empty( $item['end_time'] ) ? $item['end_time'] : $start_time + HOUR_IN_SECONDS;
 
 		$data = WC_Order_Stats::summarize_orders( $start_time, $end_time );
-		WC_Order_Stats::update( $start_time, $end_time, $data );
+		WC_Order_Stats::update( $start_time, $data );
 
 		return false;
 	}
