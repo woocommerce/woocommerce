@@ -14,7 +14,6 @@ import { __, sprintf } from '@wordpress/i18n';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import 'react-dates/lib/css/_datepicker.css';
-import { date as datePHPFormat, getSettings } from '@wordpress/date';
 
 /**
  * Internal dependencies
@@ -29,7 +28,7 @@ const END_DATE = 'endDate';
 // 782px is the width designated by Gutenberg's `</ Popover>` component.
 // * https://github.com/WordPress/gutenberg/blob/c8f8806d4465a83c1a0bc62d5c61377b56fa7214/components/popover/utils.js#L6
 const isMobileViewport = () => window.innerWidth < 782;
-const PHPFormatString = getSettings().formats.date;
+const shortDateFormat = __( 'MM/DD/YYYY', 'woo-dash' );
 
 class DateRange extends Component {
 	constructor( props ) {
@@ -38,8 +37,8 @@ class DateRange extends Component {
 		const { start, end } = props;
 		this.state = {
 			focusedInput: START_DATE,
-			startText: start ? datePHPFormat( PHPFormatString, start ) : '',
-			endText: end ? datePHPFormat( PHPFormatString, end ) : '',
+			startText: start ? start.format( shortDateFormat ) : '',
+			endText: end ? end.format( shortDateFormat ) : '',
 		};
 
 		this.onDatesChange = this.onDatesChange.bind( this );
@@ -50,8 +49,8 @@ class DateRange extends Component {
 
 	onDatesChange( { startDate, endDate } ) {
 		this.setState( {
-			startText: startDate ? datePHPFormat( PHPFormatString, startDate ) : '',
-			endText: endDate ? datePHPFormat( PHPFormatString, endDate ) : '',
+			startText: startDate ? startDate.format( shortDateFormat ) : '',
+			endText: endDate ? endDate.format( shortDateFormat ) : '',
 		} );
 		this.props.onSelect( {
 			start: startDate,
@@ -68,7 +67,7 @@ class DateRange extends Component {
 	onInputChange( input, event ) {
 		const value = event.target.value;
 		this.setState( { [ input ]: value } );
-		const date = toMoment( value );
+		const date = toMoment( shortDateFormat, value );
 		if ( date ) {
 			const match = input.match( /.*(?=Text)/ );
 			if ( match ) {
@@ -117,7 +116,7 @@ class DateRange extends Component {
 								"Date input describing a selected date range's start date in format %s",
 								'woo-dash'
 							),
-							PHPFormatString
+							shortDateFormat
 						) }
 					</p>
 					<span>{ __( 'to', 'woo-dash' ) }</span>
@@ -135,7 +134,7 @@ class DateRange extends Component {
 								"Date input describing a selected date range's end date in format %s",
 								'woo-dash'
 							),
-							PHPFormatString
+							shortDateFormat
 						) }
 					</p>
 				</div>
