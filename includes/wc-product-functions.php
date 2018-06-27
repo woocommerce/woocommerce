@@ -275,26 +275,35 @@ add_filter( 'post_type_link', 'wc_product_post_type_link', 10, 2 );
 /**
  * Get the placeholder image URL for products etc.
  *
- * @access public
+ * @param string $size Image size.
  * @return string
  */
-function wc_placeholder_img_src() {
-	return apply_filters( 'woocommerce_placeholder_img_src', WC()->plugin_url() . '/assets/images/placeholder.png' );
+function wc_placeholder_img_src( $size = 'woocommerce_thumbnail' ) {
+	$src                  = WC()->plugin_url() . '/assets/images/placeholder.png';
+	$placeholder_image_id = get_option( 'woocommerce_placeholder_image_id', 0 );
+
+	if ( $placeholder_image_id && wp_attachment_is_image( $placeholder_image_id ) ) {
+		$dimensions = wc_get_image_size( $size );
+		$image      = wp_get_attachment_image_src( $placeholder_image_id, array( $dimensions['width'], $dimensions['height'] ) );
+
+		if ( ! empty( $image[0] ) ) {
+			$src = $image[0];
+		}
+	}
+
+	return apply_filters( 'woocommerce_placeholder_img_src', $src );
 }
 
 /**
  * Get the placeholder image.
  *
- * @access public
- *
  * @param string $size Image size.
- *
  * @return string
  */
 function wc_placeholder_img( $size = 'woocommerce_thumbnail' ) {
 	$dimensions = wc_get_image_size( $size );
 
-	return apply_filters( 'woocommerce_placeholder_img', '<img src="' . wc_placeholder_img_src() . '" alt="' . esc_attr__( 'Placeholder', 'woocommerce' ) . '" width="' . esc_attr( $dimensions['width'] ) . '" class="woocommerce-placeholder wp-post-image" height="' . esc_attr( $dimensions['height'] ) . '" />', $size, $dimensions );
+	return apply_filters( 'woocommerce_placeholder_img', '<img src="' . wc_placeholder_img_src( $size ) . '" alt="' . esc_attr__( 'Placeholder', 'woocommerce' ) . '" width="' . esc_attr( $dimensions['width'] ) . '" class="woocommerce-placeholder wp-post-image" height="' . esc_attr( $dimensions['height'] ) . '" />', $size, $dimensions );
 }
 
 /**
