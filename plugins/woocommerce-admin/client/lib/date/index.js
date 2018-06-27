@@ -49,7 +49,7 @@ export function toMoment( format, str ) {
  * @param {Moment} end - end date
  * @return {string} - text value for the supplied date range
  */
-function getRangeLabel( start, end ) {
+export function getRangeLabel( start, end ) {
 	const isSameDay = start.isSame( end, 'day' );
 	const isSameYear = start.year() === end.year();
 	const isSameMonth = isSameYear && start.month() === end.month();
@@ -74,7 +74,7 @@ function getRangeLabel( start, end ) {
  * @param {string} compare - `previous_period` or `previous_year`
  * @return {DateValue} -  DateValue data about the selected period
  */
-function getLastPeriod( period, compare ) {
+export function getLastPeriod( period, compare ) {
 	const primaryStart = moment()
 		.startOf( period )
 		.subtract( 1, period );
@@ -122,7 +122,7 @@ function getLastPeriod( period, compare ) {
  * @param {string} compare - `previous_period` or `previous_year`
  * @return {DateValue} -  DateValue data about the selected period
  */
-function getCurrentPeriod( period, compare ) {
+export function getCurrentPeriod( period, compare ) {
 	const primaryStart = moment().startOf( period );
 	const primaryEnd = moment();
 	const daysSoFar = primaryEnd.diff( primaryStart, 'days' );

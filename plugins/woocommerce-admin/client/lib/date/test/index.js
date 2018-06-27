@@ -7,7 +7,7 @@ import moment from 'moment';
 /**
  * Internal dependencies
  */
-import { toMoment } from 'lib/date';
+import { toMoment, getLastPeriod, getCurrentPeriod, getRangeLabel } from 'lib/date';
 
 describe( 'toMoment', () => {
 	it( 'should pass through a valid Moment object as an argument', () => {
@@ -41,5 +41,380 @@ describe( 'toMoment', () => {
 	it( 'should throw on an invalid argument', () => {
 		const fn = () => toMoment( '', 77 );
 		expect( fn ).toThrow();
+	} );
+} );
+
+describe( 'getCurrentPeriod', () => {
+	it( 'should return a DateValue object with correct properties', () => {
+		const dateValue = getCurrentPeriod( 'day', 'previous_period' );
+
+		expect( dateValue.primaryStart ).toBeDefined();
+		expect( dateValue.primaryEnd ).toBeDefined();
+		expect( dateValue.secondaryStart ).toBeDefined();
+		expect( dateValue.secondaryEnd ).toBeDefined();
+	} );
+
+	// day
+	const today = moment();
+	const yesterday = moment().subtract( 1, 'days' );
+	const todayLastYear = moment().subtract( 1, 'years' );
+
+	// week
+	const thisWeekStart = moment().startOf( 'week' );
+	const lastWeekStart = thisWeekStart.clone().subtract( 1, 'week' );
+	const todayLastWeek = today.clone().subtract( 1, 'week' );
+
+	// month
+	const thisMonthStart = moment().startOf( 'month' );
+	const lastMonthStart = thisMonthStart.clone().subtract( 1, 'month' );
+	const todayLastMonth = today.clone().subtract( 1, 'month' );
+
+	// quarter
+	const thisQuarterStart = moment().startOf( 'quarter' );
+	const lastQuarterStart = thisQuarterStart.clone().subtract( 1, 'quarter' );
+	const todayLastQuarter = today.clone().subtract( 1, 'quarter' );
+
+	// year
+	const thisYearStart = moment().startOf( 'year' );
+	const lastYearStart = thisYearStart.clone().subtract( 1, 'year' );
+
+	describe( 'day', () => {
+		it( 'should return correct values for primary period', () => {
+			const dateValue = getCurrentPeriod( 'day', 'previous_period' );
+
+			expect( today.isSame( dateValue.primaryStart, 'day' ) ).toBe( true );
+			expect( today.isSame( dateValue.primaryEnd, 'day' ) ).toBe( true );
+		} );
+
+		it( 'should return correct values for previous_period', () => {
+			const dateValue = getCurrentPeriod( 'day', 'previous_period' );
+
+			expect( yesterday.isSame( dateValue.secondaryStart, 'day' ) ).toBe( true );
+			expect( yesterday.isSame( dateValue.secondaryEnd, 'day' ) ).toBe( true );
+		} );
+
+		it( 'should return correct values for previous_year', () => {
+			const dateValue = getCurrentPeriod( 'day', 'previous_year' );
+
+			expect( todayLastYear.isSame( dateValue.secondaryStart, 'day' ) ).toBe( true );
+			expect( todayLastYear.isSame( dateValue.secondaryEnd, 'day' ) ).toBe( true );
+		} );
+	} );
+
+	describe( 'week', () => {
+		it( 'should return correct values for primary period', () => {
+			const dateValue = getCurrentPeriod( 'week', 'previous_period' );
+
+			expect( thisWeekStart.isSame( dateValue.primaryStart, 'day' ) ).toBe( true );
+			expect( today.isSame( dateValue.primaryEnd, 'day' ) ).toBe( true );
+		} );
+
+		it( 'should return correct values for previous_period', () => {
+			const dateValue = getCurrentPeriod( 'week', 'previous_period' );
+
+			expect( lastWeekStart.isSame( dateValue.secondaryStart, 'day' ) ).toBe( true );
+			expect( todayLastWeek.isSame( dateValue.secondaryEnd, 'day' ) ).toBe( true );
+		} );
+
+		it( 'should return correct values for previous_year', () => {
+			const dateValue = getCurrentPeriod( 'week', 'previous_year' );
+			const daysSoFar = today.diff( thisWeekStart, 'days' );
+			const thisWeekLastYearStart = thisWeekStart
+				.clone()
+				.subtract( 1, 'years' )
+				.week( thisWeekStart.week() )
+				.startOf( 'week' );
+			const todayThisWeekLastYear = thisWeekLastYearStart.clone().add( daysSoFar, 'days' );
+
+			expect( thisWeekLastYearStart.isSame( dateValue.secondaryStart, 'day' ) ).toBe( true );
+			expect( todayThisWeekLastYear.isSame( dateValue.secondaryEnd, 'day' ) ).toBe( true );
+		} );
+	} );
+
+	describe( 'month', () => {
+		it( 'should return correct values for primary period', () => {
+			const dateValue = getCurrentPeriod( 'month', 'previous_period' );
+
+			expect( thisMonthStart.isSame( dateValue.primaryStart, 'day' ) ).toBe( true );
+			expect( today.isSame( dateValue.primaryEnd, 'day' ) ).toBe( true );
+		} );
+
+		it( 'should return correct values for previous_period', () => {
+			const dateValue = getCurrentPeriod( 'month', 'previous_period' );
+
+			expect( lastMonthStart.isSame( dateValue.secondaryStart, 'day' ) ).toBe( true );
+			expect( todayLastMonth.isSame( dateValue.secondaryEnd, 'day' ) ).toBe( true );
+		} );
+
+		it( 'should return correct values for previous_year', () => {
+			const dateValue = getCurrentPeriod( 'month', 'previous_year' );
+			const daysSoFar = today.diff( thisMonthStart, 'days' );
+
+			const thisMonthLastYearStart = thisMonthStart.clone().subtract( 1, 'years' );
+			const thisMonthLastYearEnd = thisMonthLastYearStart.clone().add( daysSoFar, 'days' );
+
+			expect( thisMonthLastYearStart.isSame( dateValue.secondaryStart, 'day' ) ).toBe( true );
+			expect( thisMonthLastYearEnd.isSame( dateValue.secondaryEnd, 'day' ) ).toBe( true );
+		} );
+	} );
+
+	describe( 'quarter', () => {
+		it( 'should return correct values for primary period', () => {
+			const dateValue = getCurrentPeriod( 'quarter', 'previous_period' );
+
+			expect( thisQuarterStart.isSame( dateValue.primaryStart, 'day' ) ).toBe( true );
+			expect( today.isSame( dateValue.primaryEnd, 'day' ) ).toBe( true );
+		} );
+
+		it( 'should return correct values for previous_period', () => {
+			const dateValue = getCurrentPeriod( 'quarter', 'previous_period' );
+
+			expect( lastQuarterStart.isSame( dateValue.secondaryStart, 'day' ) ).toBe( true );
+			expect( todayLastQuarter.isSame( dateValue.secondaryEnd, 'day' ) ).toBe( true );
+		} );
+
+		it( 'should return correct values for previous_year', () => {
+			const dateValue = getCurrentPeriod( 'quarter', 'previous_year' );
+			const daysSoFar = today.diff( thisQuarterStart, 'days' );
+
+			const thisQuarterLastYearStart = thisQuarterStart.clone().subtract( 1, 'years' );
+			const thisQuarterLastYearEnd = thisQuarterLastYearStart.clone().add( daysSoFar, 'days' );
+
+			expect( thisQuarterLastYearStart.isSame( dateValue.secondaryStart, 'day' ) ).toBe( true );
+			expect( thisQuarterLastYearEnd.isSame( dateValue.secondaryEnd, 'day' ) ).toBe( true );
+		} );
+	} );
+
+	describe( 'year', () => {
+		it( 'should return correct values for primary period', () => {
+			const dateValue = getCurrentPeriod( 'year', 'previous_period' );
+
+			expect( thisYearStart.isSame( dateValue.primaryStart, 'day' ) ).toBe( true );
+			expect( today.isSame( dateValue.primaryEnd, 'day' ) ).toBe( true );
+		} );
+
+		it( 'should return correct values for previous_period', () => {
+			const dateValue = getCurrentPeriod( 'year', 'previous_period' );
+
+			expect( lastYearStart.isSame( dateValue.secondaryStart, 'day' ) ).toBe( true );
+			expect( todayLastYear.isSame( dateValue.secondaryEnd, 'day' ) ).toBe( true );
+		} );
+
+		it( 'should return correct values for previous_year', () => {
+			const dateValue = getCurrentPeriod( 'year', 'previous_year' );
+			const daysSoFar = today.diff( thisYearStart, 'days' );
+
+			const lastYearEnd = lastYearStart.clone().add( daysSoFar, 'days' );
+
+			expect( lastYearStart.isSame( dateValue.secondaryStart, 'day' ) ).toBe( true );
+			expect( lastYearEnd.isSame( dateValue.secondaryEnd, 'day' ) ).toBe( true );
+		} );
+	} );
+} );
+
+describe( 'getLastPeriod', () => {
+	it( 'should return a DateValue object with correct properties', () => {
+		const dateValue = getLastPeriod( 'day', 'previous_period' );
+
+		expect( dateValue.primaryStart ).toBeDefined();
+		expect( dateValue.primaryEnd ).toBeDefined();
+		expect( dateValue.secondaryStart ).toBeDefined();
+		expect( dateValue.secondaryEnd ).toBeDefined();
+	} );
+
+	// day
+	const yesterday = moment().subtract( 1, 'days' );
+	const twoDaysAgo = moment().subtract( 2, 'days' );
+	const yesterdayLastYear = moment()
+		.subtract( 1, 'days' )
+		.subtract( 1, 'years' );
+
+	// week
+	const lastWeekStart = moment()
+		.startOf( 'week' )
+		.subtract( 1, 'week' );
+	const lastWeekEnd = lastWeekStart.clone().endOf( 'week' );
+
+	// month
+	const lastMonthStart = moment()
+		.startOf( 'month' )
+		.subtract( 1, 'month' );
+	const lastMonthEnd = lastMonthStart.clone().endOf( 'month' );
+
+	// quarter
+	const lastQuarterStart = moment()
+		.startOf( 'quarter' )
+		.subtract( 1, 'quarter' );
+	const lastQuarterEnd = lastQuarterStart.clone().endOf( 'quarter' );
+
+	// year
+	const lastYearStart = moment()
+		.startOf( 'year' )
+		.subtract( 1, 'year' );
+	const lastYearEnd = lastYearStart.clone().endOf( 'year' );
+	const twoYearsAgoStart = moment()
+		.startOf( 'year' )
+		.subtract( 2, 'year' );
+
+	describe( 'day', () => {
+		it( 'should return correct values for primary period', () => {
+			const dateValue = getLastPeriod( 'day', 'previous_period' );
+
+			expect( yesterday.isSame( dateValue.primaryStart, 'day' ) ).toBe( true );
+			expect( yesterday.isSame( dateValue.primaryEnd, 'day' ) ).toBe( true );
+		} );
+
+		it( 'should return correct values for previous_period', () => {
+			const dateValue = getLastPeriod( 'day', 'previous_period' );
+
+			expect( twoDaysAgo.isSame( dateValue.secondaryStart, 'day' ) ).toBe( true );
+			expect( twoDaysAgo.isSame( dateValue.secondaryEnd, 'day' ) ).toBe( true );
+		} );
+
+		it( 'should return correct values for previous_year', () => {
+			const dateValue = getLastPeriod( 'day', 'previous_year' );
+
+			expect( yesterdayLastYear.isSame( dateValue.secondaryStart, 'day' ) ).toBe( true );
+			expect( yesterdayLastYear.isSame( dateValue.secondaryEnd, 'day' ) ).toBe( true );
+		} );
+	} );
+
+	describe( 'week', () => {
+		it( 'should return correct values for primary period', () => {
+			const dateValue = getLastPeriod( 'week', 'previous_period' );
+
+			expect( lastWeekStart.isSame( dateValue.primaryStart, 'day' ) ).toBe( true );
+			expect( lastWeekEnd.isSame( dateValue.primaryEnd, 'day' ) ).toBe( true );
+		} );
+
+		it( 'should return correct values for previous_period', () => {
+			const dateValue = getLastPeriod( 'week', 'previous_period' );
+
+			const twoWeeksAgoStart = lastWeekStart.clone().subtract( 1, 'week' );
+			const twoWeeksAgoEnd = twoWeeksAgoStart.clone().endOf( 'week' );
+
+			expect( twoWeeksAgoStart.isSame( dateValue.secondaryStart, 'day' ) ).toBe( true );
+			expect( twoWeeksAgoEnd.isSame( dateValue.secondaryEnd, 'day' ) ).toBe( true );
+		} );
+
+		it( 'should return correct values for previous_year', () => {
+			const dateValue = getLastPeriod( 'week', 'previous_year' );
+
+			const lastWeekLastYearStart = lastWeekStart
+				.clone()
+				.subtract( 1, 'year' )
+				.week( lastWeekStart.week() )
+				.startOf( 'week' );
+			const lastWeekLastYearEnd = lastWeekLastYearStart.clone().endOf( 'week' );
+
+			expect( lastWeekLastYearStart.isSame( dateValue.secondaryStart, 'day' ) ).toBe( true );
+			expect( lastWeekLastYearEnd.isSame( dateValue.secondaryEnd, 'day' ) ).toBe( true );
+		} );
+	} );
+
+	describe( 'month', () => {
+		it( 'should return correct values for primary period', () => {
+			const dateValue = getLastPeriod( 'month', 'previous_period' );
+
+			expect( lastMonthStart.isSame( dateValue.primaryStart, 'day' ) ).toBe( true );
+			expect( lastMonthEnd.isSame( dateValue.primaryEnd, 'day' ) ).toBe( true );
+		} );
+
+		it( 'should return correct values for previous_period', () => {
+			const dateValue = getLastPeriod( 'month', 'previous_period' );
+			const daysDiff = lastMonthEnd.diff( lastMonthStart, 'days' );
+
+			const twoMonthsAgoEnd = lastMonthStart.clone().subtract( 1, 'days' );
+			const twoMonthsAgoStart = twoMonthsAgoEnd.clone().subtract( daysDiff, 'days' );
+
+			expect( twoMonthsAgoStart.isSame( dateValue.secondaryStart, 'day' ) ).toBe( true );
+			expect( twoMonthsAgoEnd.isSame( dateValue.secondaryEnd, 'day' ) ).toBe( true );
+		} );
+
+		it( 'should return correct values for previous_year', () => {
+			const dateValue = getLastPeriod( 'month', 'previous_year' );
+
+			const lastMonthkLastYearStart = lastMonthStart.clone().subtract( 1, 'year' );
+			const lastMonthkLastYearEnd = lastMonthkLastYearStart.clone().endOf( 'month' );
+
+			expect( lastMonthkLastYearStart.isSame( dateValue.secondaryStart, 'day' ) ).toBe( true );
+			expect( lastMonthkLastYearEnd.isSame( dateValue.secondaryEnd, 'day' ) ).toBe( true );
+		} );
+	} );
+
+	describe( 'quarter', () => {
+		it( 'should return correct values for primary period', () => {
+			const dateValue = getLastPeriod( 'quarter', 'previous_period' );
+
+			expect( lastQuarterStart.isSame( dateValue.primaryStart, 'day' ) ).toBe( true );
+			expect( lastQuarterEnd.isSame( dateValue.primaryEnd, 'day' ) ).toBe( true );
+		} );
+
+		it( 'should return correct values for previous_period', () => {
+			const dateValue = getLastPeriod( 'quarter', 'previous_period' );
+			const daysDiff = lastQuarterEnd.diff( lastQuarterStart, 'days' );
+
+			const twoQuartersAgoEnd = lastQuarterStart.clone().subtract( 1, 'days' );
+			const twoQuartersAgoStart = twoQuartersAgoEnd.clone().subtract( daysDiff, 'days' );
+
+			expect( twoQuartersAgoStart.isSame( dateValue.secondaryStart, 'day' ) ).toBe( true );
+			expect( twoQuartersAgoEnd.isSame( dateValue.secondaryEnd, 'day' ) ).toBe( true );
+		} );
+
+		it( 'should return correct values for previous_year', () => {
+			const dateValue = getLastPeriod( 'quarter', 'previous_year' );
+			const lastQuarterLastYearStart = lastQuarterStart.clone().subtract( 1, 'year' );
+			const lastQuarterLastYearEnd = lastQuarterLastYearStart.clone().endOf( 'quarter' );
+
+			expect( lastQuarterLastYearStart.isSame( dateValue.secondaryStart, 'day' ) ).toBe( true );
+			expect( lastQuarterLastYearEnd.isSame( dateValue.secondaryEnd, 'day' ) ).toBe( true );
+		} );
+	} );
+
+	describe( 'year', () => {
+		it( 'should return correct values for primary period', () => {
+			const dateValue = getLastPeriod( 'year', 'previous_period' );
+
+			expect( lastYearStart.isSame( dateValue.primaryStart, 'day' ) ).toBe( true );
+			expect( lastYearEnd.isSame( dateValue.primaryEnd, 'day' ) ).toBe( true );
+		} );
+
+		it( 'should return correct values for previous_period', () => {
+			const dateValue = getLastPeriod( 'year', 'previous_period' );
+			const twoYearsAgoEnd = twoYearsAgoStart.clone().endOf( 'year' );
+
+			expect( twoYearsAgoStart.isSame( dateValue.secondaryStart, 'day' ) ).toBe( true );
+			expect( twoYearsAgoEnd.isSame( dateValue.secondaryEnd, 'day' ) ).toBe( true );
+		} );
+
+		it( 'should return correct values for previous_period', () => {
+			const dateValue = getLastPeriod( 'year', 'previous_year' );
+			const twoYearsAgoEnd = twoYearsAgoStart.clone().endOf( 'year' );
+
+			expect( twoYearsAgoStart.isSame( dateValue.secondaryStart, 'day' ) ).toBe( true );
+			expect( twoYearsAgoEnd.isSame( dateValue.secondaryEnd, 'day' ) ).toBe( true );
+		} );
+	} );
+} );
+
+describe( 'getRangeLabel', () => {
+	it( 'should return correct string for dates on the same day', () => {
+		const label = getRangeLabel( moment( '2018-04-15' ), moment( '2018-04-15' ) );
+		expect( label ).toBe( 'Apr 15, 2018' );
+	} );
+
+	it( 'should return correct string for dates in the same month', () => {
+		const label = getRangeLabel( moment( '2018-04-01' ), moment( '2018-04-15' ) );
+		expect( label ).toBe( 'Apr 1 - 15, 2018' );
+	} );
+
+	it( 'should return correct string for dates in the same year, but different months', () => {
+		const label = getRangeLabel( moment( '2018-04-01' ), moment( '2018-05-15' ) );
+		expect( label ).toBe( 'Apr 1 - May 15, 2018' );
+	} );
+
+	it( 'should return correct string for dates in different years', () => {
+		const label = getRangeLabel( moment( '2017-04-01' ), moment( '2018-05-15' ) );
+		expect( label ).toBe( 'Apr 1, 2017 - May 15, 2018' );
 	} );
 } );
