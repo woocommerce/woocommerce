@@ -324,7 +324,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		global $wpdb;
 
 		// Get from cache if available.
-		$items = wp_cache_get( 'order-items-' . $order->get_id(), 'orders' );
+		$items = 0 < $order->get_id() ? wp_cache_get( 'order-items-' . $order->get_id(), 'orders' ) : false;
 
 		if ( false === $items ) {
 			$items = $wpdb->get_results(
@@ -333,7 +333,9 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			foreach ( $items as $item ) {
 				wp_cache_set( 'item-' . $item->order_item_id, $item, 'order-items' );
 			}
-			wp_cache_set( 'order-items-' . $order->get_id(), $items, 'orders' );
+			if ( 0 < $order->get_id() ) {
+				wp_cache_set( 'order-items-' . $order->get_id(), $items, 'orders' );
+			}
 		}
 
 		$items = wp_list_filter( $items, array( 'order_item_type' => $type ) );

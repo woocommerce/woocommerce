@@ -1372,7 +1372,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		foreach ( $this->get_shipping_methods() as $item_id => $item ) {
 			$taxes = $item->get_taxes();
 			foreach ( $taxes['total'] as $tax_rate_id => $tax ) {
-				$shipping_taxes[ $tax_rate_id ] = isset( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] + (float) $tax : (float) $tax;
+				$tax_amount = (float) $tax;
+
+				if ( 'yes' !== get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
+					$tax_amount = wc_round_tax_total( $tax_amount );
+				}
+
+				$shipping_taxes[ $tax_rate_id ] = isset( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] + $tax_amount : $tax_amount;
 			}
 		}
 
@@ -1429,13 +1435,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// Sum line item costs.
 		foreach ( $this->get_items() as $item ) {
-			$cart_subtotal += $item->get_subtotal();
-			$cart_total    += $item->get_total();
+			$cart_subtotal += round( $item->get_subtotal(), wc_get_price_decimals() );
+			$cart_total    += round( $item->get_total(), wc_get_price_decimals() );
 		}
 
 		// Sum shipping costs.
 		foreach ( $this->get_shipping_methods() as $shipping ) {
-			$shipping_total += $shipping->get_total();
+			$shipping_total += round( $shipping->get_total(), wc_get_price_decimals() );
 		}
 
 		$this->set_shipping_total( $shipping_total );
@@ -1703,7 +1709,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				// Show shipping excluding tax.
 				$shipping = wc_price( $this->get_shipping_total(), array( 'currency' => $this->get_currency() ) );
 
-				if ( $this->get_shipping_tax() !== 0 && $this->get_prices_include_tax() ) {
+				if ( (float) $this->get_shipping_tax() > 0 && $this->get_prices_include_tax() ) {
 					$shipping .= apply_filters( 'woocommerce_order_shipping_to_display_tax_label', '&nbsp;<small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>', $this, $tax_display );
 				}
 			} else {
@@ -1711,7 +1717,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				// Show shipping including tax.
 				$shipping = wc_price( $this->get_shipping_total() + $this->get_shipping_tax(), array( 'currency' => $this->get_currency() ) );
 
-				if ( $this->get_shipping_tax() !== 0 && ! $this->get_prices_include_tax() ) {
+				if ( (float) $this->get_shipping_tax() > 0 && ! $this->get_prices_include_tax() ) {
 					$shipping .= apply_filters( 'woocommerce_order_shipping_to_display_tax_label', '&nbsp;<small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>', $this, $tax_display );
 				}
 			}
