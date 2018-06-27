@@ -13,7 +13,7 @@ import PropTypes from 'prop-types';
  */
 import './style.scss';
 import DatePickerContent from './content';
-import { getDateValues, isoDateFormat } from 'lib/date';
+import { getCurrentDates, isoDateFormat } from 'lib/date';
 
 class DatePicker extends Component {
 	constructor( props ) {
@@ -67,7 +67,7 @@ class DatePicker extends Component {
 
 	getButtonLabel() {
 		const queryWithDefaults = this.addQueryDefaults( this.props.query );
-		const { primary, secondary } = getDateValues( queryWithDefaults );
+		const { primary, secondary } = getCurrentDates( queryWithDefaults );
 		return (
 			<div className="woocommerce-date-picker__toggle-label">
 				<p>
