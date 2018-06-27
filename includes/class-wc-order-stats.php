@@ -72,7 +72,6 @@ class WC_Order_Stats {
 			'start_time' => 'MIN(start_time) as start_time',
 			'num_orders' => 'SUM(num_orders) as num_orders',
 			'num_items_sold' => 'SUM(num_items_sold) as num_items_sold',
-			'num_products_sold' => 'SUM(num_products_sold) as num_products_sold',
 			'orders_gross_total' => 'SUM(orders_gross_total) as orders_gross_total',
 			'orders_coupon_total' => 'SUM(orders_coupon_total) as orders_coupon_total',
 			'orders_refund_total' => 'SUM(orders_refund_total) as orders_refund_total',
@@ -124,7 +123,6 @@ class WC_Order_Stats {
 			start_time int(11) DEFAULT 0 NOT NULL,
 			num_orders int(11) UNSIGNED DEFAULT 0 NOT NULL,
 			num_items_sold int(11) UNSIGNED DEFAULT 0 NOT NULL,
-			num_products_sold int(11) UNSIGNED DEFAULT 0 NOT NULL,
 			orders_gross_total double DEFAULT 0 NOT NULL,
 			orders_coupon_total double DEFAULT 0 NOT NULL,
 			orders_refund_total double DEFAULT 0 NOT NULL,
@@ -223,7 +221,6 @@ class WC_Order_Stats {
 		$summary = array(
 			'num_orders'            => 0,
 			'num_items_sold'        => 0,
-			'num_products_sold'     => 0,
 			'orders_gross_total'    => 0.0,
 			'orders_coupon_total'   => 0.0,
 			'orders_refund_total'   => 0.0,
@@ -244,7 +241,6 @@ class WC_Order_Stats {
 		// @todo The gross/net total logic may need tweaking. Verify that logic is correct.
 		$summary['num_orders']            = count( $orders );
 		$summary['num_items_sold']        = self::get_num_items_sold( $orders );
-		$summary['num_products_sold']     = self::get_num_products_sold( $orders );
 		$summary['orders_gross_total']    = self::get_orders_gross_total( $orders );
 		$summary['orders_coupon_total']   = self::get_orders_coupon_total( $orders );
 		$summary['orders_refund_total']   = self::get_orders_refund_total( $orders );
@@ -270,7 +266,6 @@ class WC_Order_Stats {
 			'start_time'            => $start_time,
 			'num_orders'            => 0,
 			'num_items_sold'        => 0,
-			'num_products_sold'     => 0,
 			'orders_gross_total'    => 0.0,
 			'orders_coupon_total'   => 0.0,
 			'orders_refund_total'   => 0.0,
@@ -298,7 +293,6 @@ class WC_Order_Stats {
 			$table_name,
 			$data,
 			array(
-				'%d',
 				'%d',
 				'%d',
 				'%d',
@@ -333,34 +327,6 @@ class WC_Order_Stats {
 		}
 
 		return $num_items;
-	}
-
-	/**
-	 * Get number of products sold among all orders.
-	 *
-	 * @param array $orders Array of WC_Order objects.
-	 * @return int
-	 */
-	protected static function get_num_products_sold( $orders ) {
-		$counted_products = array();
-		$num_products = 0;
-
-		foreach ( $orders as $order ) {
-			$line_items = $order->get_items( 'line_item' );
-			foreach ( $line_items as $line_item ) {
-				if ( ! method_exists( $line_item, 'get_product_id' ) ) {
-					continue;
-				}
-
-				$product_id = $line_item->get_product_id();
-				if ( ! isset( $counted_products[ $product_id ] ) ) {
-					$counted_products[ $product_id ] = 1;
-					++$num_products;
-				}
-			}
-		}
-
-		return $num_products;
 	}
 
 	/**
