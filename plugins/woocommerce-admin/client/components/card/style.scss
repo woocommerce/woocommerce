@@ -7,7 +7,7 @@
 }
 
 .woocommerce-card__header {
-	padding: 20px;
+	padding: 16px;
 	border-bottom: 1px solid $gray;
 	display: grid;
 	align-items: center;
@@ -17,15 +17,16 @@
 	}
 
 	.has-menu & {
-		grid-template-columns: 1fr 50px;
+		grid-template-columns: 1fr 24px;
 	}
 
 	.has-menu.has-action & {
-		grid-template-columns: 1fr 1fr 50px;
+		grid-template-columns: 1fr 1fr 48px;
 	}
 
 	h2 {
 		margin: 0;
+		padding: 1px 0;
 	}
 }
 
@@ -36,4 +37,13 @@
 
 .woocommerce-card__body {
 	padding: 20px;
+}
+
+.woocommerce-ellipsis-menu__toggle {
+	padding: 0;
+}
+
+.woocommerce-card__title {
+	font-size: 16px;
+	font-weight: 600;
 }
