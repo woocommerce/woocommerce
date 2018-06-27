@@ -279,15 +279,19 @@ add_filter( 'post_type_link', 'wc_product_post_type_link', 10, 2 );
  * @return string
  */
 function wc_placeholder_img_src( $size = 'woocommerce_thumbnail' ) {
-	$src                  = WC()->plugin_url() . '/assets/images/placeholder.png';
-	$placeholder_image_id = get_option( 'woocommerce_placeholder_image_id', 0 );
+	$src               = WC()->plugin_url() . '/assets/images/placeholder.png';
+	$placeholder_image = get_option( 'woocommerce_placeholder_image', 0 );
 
-	if ( $placeholder_image_id && wp_attachment_is_image( $placeholder_image_id ) ) {
-		$dimensions = wc_get_image_size( $size );
-		$image      = wp_get_attachment_image_src( $placeholder_image_id, array( $dimensions['width'], $dimensions['height'] ) );
+	if ( ! empty( $placeholder_image ) ) {
+		if ( is_numeric( $placeholder_image ) ) {
+			$dimensions = wc_get_image_size( $size );
+			$image      = wp_get_attachment_image_src( $placeholder_image, array( $dimensions['width'], $dimensions['height'] ) );
 
-		if ( ! empty( $image[0] ) ) {
-			$src = $image[0];
+			if ( ! empty( $image[0] ) ) {
+				$src = $image[0];
+			}
+		} else {
+			$src = $placeholder_image;
 		}
 	}
 

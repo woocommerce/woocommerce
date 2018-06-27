@@ -1098,9 +1098,13 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	 * @since 3.5.0
 	 */
 	private static function create_placeholder_image() {
-		$placeholder_image_id = get_option( 'woocommerce_placeholder_image_id', 0 );
+		$placeholder_image = get_option( 'woocommerce_placeholder_image', 0 );
 
-		if ( $placeholder_image_id && wp_attachment_is_image( $placeholder_image_id ) ) {
+		if ( ! is_numeric( $placeholder_image ) ) {
+			return;
+		}
+
+		if ( ! empty( $placeholder_image ) && is_numeric( $placeholder_image ) && wp_attachment_is_image( $placeholder_image ) ) {
 			return;
 		}
 
@@ -1113,7 +1117,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 		}
 
 		if ( ! file_exists( $filename ) ) {
-			update_option( 'woocommerce_placeholder_image_id', 0 );
+			update_option( 'woocommerce_placeholder_image', 0 );
 			return;
 		}
 
@@ -1127,7 +1131,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 		);
 		$attach_id  = wp_insert_attachment( $attachment, $filename );
 
-		update_option( 'woocommerce_placeholder_image_id', $attach_id );
+		update_option( 'woocommerce_placeholder_image', $attach_id );
 
 		// Make sure that this file is included, as wp_generate_attachment_metadata() depends on it.
 		require_once ABSPATH . 'wp-admin/includes/image.php';
