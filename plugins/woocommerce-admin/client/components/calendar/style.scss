@@ -1,0 +1,19 @@
+/** @format */
+
+.woocommerce-calendar {
+	.DayPicker {
+		margin: 0 auto;
+	}
+
+	.CalendarMonth_table {
+		margin-top: 10px;
+	}
+
+	&.is-mobile {
+		height: 360px;
+
+		.DayPicker {
+			width: 318px;
+		}
+	}
+}

@@ -13,7 +13,6 @@ global.wp = {
 	'components',
 	'utils',
 	'blocks',
-	'date',
 	'editor',
 	'data',
 	'core-data',
@@ -39,3 +38,7 @@ global.wcSettings = {
 	locale: 'en-US',
 	currency: { code: 'USD', precision: 2, symbol: '&#36;' },
 };
+
+Object.defineProperty( global.wp, 'date', {
+	get: () => require( 'gutenberg/packages/date' ),
+} );

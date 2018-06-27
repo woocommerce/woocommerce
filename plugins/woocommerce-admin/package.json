@@ -67,6 +67,7 @@
     "d3-selection": "^1.3.0",
     "lodash": "^4.17.10",
     "prop-types": "^15.6.1",
+    "react-dates": "^16.7.0",
     "react-slot-fill": "^2.0.1"
   }
 }

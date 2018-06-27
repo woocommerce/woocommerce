@@ -16,9 +16,9 @@ class SegmentedSelection extends Component {
 	render() {
 		const { className, options, selected, onSelect, name, legend } = this.props;
 		return (
-			<fieldset>
+			<fieldset className="woocommerce-segmented-selection">
 				<legend className="screen-reader-text">{ legend }</legend>
-				<div className={ classnames( className, 'woocommerce-segmented-selection' ) }>
+				<div className={ classnames( className, 'woocommerce-segmented-selection__container' ) }>
 					{ options.map( ( { value, label } ) => {
 						if ( ! value || ! label ) {
 							return null;
@@ -32,7 +32,7 @@ class SegmentedSelection extends Component {
 									name={ name }
 									id={ id }
 									checked={ selected === value }
-									onChange={ partial( onSelect, name, value ) }
+									onChange={ partial( onSelect, { [ name ]: value } ) }
 								/>
 								<label htmlFor={ id }>
 									<span className="woocommerce-segmented-selection__label">{ label }</span>
