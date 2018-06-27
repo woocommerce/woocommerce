@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { isNaN } from 'lodash';
+import { get, isNaN } from 'lodash';
 
 /**
  * Formats money with a given currency code. Uses site's current locale for symbol formatting
@@ -14,6 +14,11 @@ import { isNaN } from 'lodash';
  */
 export function formatCurrency( number, currency ) {
 	const locale = wcSettings.locale || 'en-US'; // Default so we don't break.
+
+	// default to wcSettings if currency is not passed in
+	if ( ! currency ) {
+		currency = get( wcSettings, 'currency.code', 'USD' );
+	}
 	if ( 'number' !== typeof number ) {
 		number = parseFloat( number );
 	}

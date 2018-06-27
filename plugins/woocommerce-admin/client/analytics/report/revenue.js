@@ -4,7 +4,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
-import { map } from 'lodash';
+import { get, map } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
@@ -12,25 +12,46 @@ import PropTypes from 'prop-types';
  */
 import Card from 'components/card';
 import DatePicker from 'components/date-picker';
+import { formatCurrency } from 'lib/currency';
 import { getAdminLink, updateQueryString } from 'lib/nav-utils';
-import { getCurrencyFormatString } from 'lib/currency';
+import { getReportData } from 'lib/swagger';
 import Header from 'components/header';
 import { SummaryList, SummaryNumber } from 'components/summary';
 import Table from 'components/table';
 import Pagination from 'components/pagination';
-
-// Mock data until we fetch from an API
-import rawData from './mock-data';
 
 class RevenueReport extends Component {
 	constructor() {
 		super();
 		this.onPageChange = this.onPageChange.bind( this );
 		this.onPerPageChange = this.onPerPageChange.bind( this );
+
+		// TODO remove this when we implement real endpoints
+		this.state = { stats: {} };
 	}
 
 	onPageChange( page ) {
 		updateQueryString( { page } );
+	}
+
+	componentDidMount() {
+		// Swagger doesn't support returning different data based on query args
+		// this is more or less to show how we will manipulate data calls based on props
+		const statsQueryArgs = {
+			interval: 'week',
+			after: '2018-04-22',
+			before: '2018-05-06',
+		};
+
+		getReportData( 'revenue/stats', statsQueryArgs ).then( response => {
+			if ( ! response.ok ) {
+				return;
+			}
+
+			response.json().then( data => {
+				this.setState( { stats: data } );
+			} );
+		} );
 	}
 
 	onPerPageChange( perPage ) {
@@ -38,30 +59,43 @@ class RevenueReport extends Component {
 	}
 
 	getRowsContent( data ) {
-		return map( data, ( row, label ) => {
+		return map( data, row => {
 			// @TODO How to create this per-report? Can use `w`, `year`, `m` to build time-specific order links
 			// we need to know which kind of report this is, and parse the `label` to get this row's date
+			const {
+				coupons,
+				gross_revenue,
+				net_revenue,
+				orders_count,
+				refunds,
+				shipping,
+				taxes,
+			} = row.subtotals;
+
 			const orderLink = (
 				<a href={ getAdminLink( '/edit.php?post_type=shop_order&w=4&year=2018' ) }>
-					{ row.order_count }
+					{ orders_count }
 				</a>
 			);
 			return [
-				label,
+				row.start_date,
 				orderLink,
-				getCurrencyFormatString( row.gross_revenue ),
-				getCurrencyFormatString( row.refunds ),
-				getCurrencyFormatString( row.coupons ),
-				getCurrencyFormatString( row.taxes ),
-				getCurrencyFormatString( row.shipping ),
-				getCurrencyFormatString( row.net_revenue ),
+				formatCurrency( gross_revenue ),
+				formatCurrency( refunds ),
+				formatCurrency( coupons ),
+				formatCurrency( taxes ),
+				formatCurrency( shipping ),
+				formatCurrency( net_revenue ),
 			];
 		} );
 	}
 
 	render() {
 		const { path, query } = this.props;
-		const rows = this.getRowsContent( rawData.intervals[ 0 ].week[ 0 ] );
+		const summaryStats = get( this.state.stats, 'totals', {} );
+		const intervalStats = get( this.state.stats, 'intervals', [] );
+		const rows = this.getRowsContent( intervalStats );
+
 		const headers = [
 			__( 'Date', 'woo-dash' ),
 			__( 'Orders', 'woo-dash' ),
@@ -85,24 +119,34 @@ class RevenueReport extends Component {
 
 				<SummaryList>
 					<SummaryNumber
-						value={ '$829.40' }
+						value={ formatCurrency( summaryStats.gross_revenue ) }
 						label={ __( 'Gross Revenue', 'woo-dash' ) }
 						delta={ 29 }
 					/>
 					<SummaryNumber
-						value={ '$24.00' }
+						value={ formatCurrency( summaryStats.refunds ) }
 						label={ __( 'Refunds', 'woo-dash' ) }
 						delta={ -10 }
 						selected
 					/>
-					<SummaryNumber value={ '$49.90' } label={ __( 'Coupons', 'woo-dash' ) } delta={ 15 } />
-					<SummaryNumber value={ '$66.39' } label={ __( 'Taxes', 'woo-dash' ) } />
+					<SummaryNumber
+						value={ formatCurrency( summaryStats.coupons ) }
+						label={ __( 'Coupons', 'woo-dash' ) }
+						delta={ 15 }
+					/>
+					<SummaryNumber
+						value={ formatCurrency( summaryStats.taxes ) }
+						label={ __( 'Taxes', 'woo-dash' ) }
+					/>
 				</SummaryList>
 
 				<Card title={ __( 'Gross Revenue' ) }>
 					<p>Graph here</p>
 					<hr />
-					<Table rows={ rows } headers={ headers } caption={ __( 'Revenue Last Week' ) } />
+					{ rows &&
+						rows.length && (
+							<Table rows={ rows } headers={ headers } caption={ __( 'Revenue Last Week' ) } />
+						) }
 				</Card>
 
 				<Pagination
@@ -112,7 +156,6 @@ class RevenueReport extends Component {
 					onPageChange={ this.onPageChange }
 					onPerPageChange={ this.onPerPageChange }
 				/>
-
 			</Fragment>
 		);
 	}
