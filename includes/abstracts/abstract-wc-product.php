@@ -1091,14 +1091,13 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Set default attributes.
+	 * Set default attributes. These will be saved as strings and should map to attribute values.
 	 *
 	 * @since 3.0.0
 	 * @param array $default_attributes List of default attributes.
 	 */
 	public function set_default_attributes( $default_attributes ) {
-		$this->set_prop( 'default_attributes',
-		array_filter( (array) $default_attributes, 'wc_array_filter_default_attributes' ) );
+		$this->set_prop( 'default_attributes', array_map( 'strval', array_filter( (array) $default_attributes, 'wc_array_filter_default_attributes' ) ) );
 	}
 
 	/**

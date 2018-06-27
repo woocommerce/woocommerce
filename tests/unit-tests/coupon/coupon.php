@@ -118,8 +118,8 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
-		update_post_meta( $product->get_id(), '_price', '10' );
-		update_post_meta( $product->get_id(), '_regular_price', '10' );
+		$product->set_regular_price( 10 );
+		$product->save();
 
 		// Create coupon
 		$coupon = WC_Helper_Coupon::create_coupon();
@@ -176,8 +176,8 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
-		update_post_meta( $product->get_id(), '_price', '10' );
-		update_post_meta( $product->get_id(), '_regular_price', '10' );
+		$product->set_regular_price( 10 );
+		$product->save();
 
 		// Create coupon
 		$coupon = WC_Helper_Coupon::create_coupon();
@@ -240,8 +240,8 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
-		update_post_meta( $product->get_id(), '_price', '10' );
-		update_post_meta( $product->get_id(), '_regular_price', '10' );
+		$product->set_regular_price( 10 );
+		$product->save();
 
 		// Create coupon
 		$coupon = WC_Helper_Coupon::create_coupon();
