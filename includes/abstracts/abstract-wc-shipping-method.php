@@ -272,7 +272,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 			'meta_data' => array(), // Array of misc meta data to store along with this rate - key value pairs.
 			'package'   => false, // Package array this rate was generated for @since 2.6.0.
 			'price_decimals' => wc_get_price_decimals(),
-		), $this ) );
+		) ), $this );
 
 		// ID and label are required.
 		if ( ! $args['id'] || ! $args['label'] ) {
