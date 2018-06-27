@@ -938,7 +938,7 @@ function wc_normalize_postcode( $postcode ) {
  * @return string
  */
 function wc_format_phone_number( $phone ) {
-	return str_replace( '.', '-', $phone );
+	return preg_replace( '/[^0-9\+]/', '', $phone );
 }
 
 /**
