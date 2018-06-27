@@ -27,6 +27,7 @@
 * Tweak - Added a warning notice before removing personal data from orders in bulk. #20481
 * Dev - generate_select_html and generate_multiselect_html functions again support the usage of integer-keyed arrays as available values. #20569
 * Dev - Allow order billing fields to use a provided 'value'. #20424
+* Dev - Add hooks needed for product custom tables feature plugin. #20520
 
 = 3.4.2 - 2018-06-05 =
 * Fix - Flexslider gallery fixes for RTL sites, and for variation image switching. #20328 #20321
