@@ -263,7 +263,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @param array $args Arguments (default: array()).
 	 */
 	public function add_rate( $args = array() ) {
-		$args = apply_filters( 'woocommerce_shipping_add_rate_args', wp_parse_args( $args, array(
+		$args = apply_filters( 'woocommerce_shipping_method_add_rate_args', wp_parse_args( $args, array(
 			'id'        => $this->get_rate_id(), // ID for the rate. If not passed, this id:instance default will be used.
 			'label'     => '', // Label for the rate.
 			'cost'      => '0', // Amount or array of costs (per item shipping).
@@ -316,7 +316,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 			$rate->add_meta_data( __( 'Items', 'woocommerce' ), implode( ', ', $items_in_package ) );
 		}
 
-		$this->rates[ $args['id'] ] = apply_filters( 'woocommerce_shipping_add_rate', $rate, $args, $this );
+		$this->rates[ $args['id'] ] = apply_filters( 'woocommerce_shipping_method_add_rate', $rate, $args, $this );
 	}
 
 	/**
