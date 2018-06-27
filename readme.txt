@@ -166,6 +166,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Enhancement - Log errors from transaction emails with logger. #20203
 * Enhancement - Improved shipping calculator experience. Shows destination country and added context to calculate shipping link. #20345
 * Enhancement - On the fly image generation for frontend, if image sizes are missing. #20011
+* Enhancement - SelectWoo enabled product categories dropdown widget. #20617
 * Fix - Check billing email is posted before using in WC_Cart::check_customer_coupons. #20180
 * Fix - Shipping postcode formatting when only posting a billing address. #20330
 * Fix - Correctly show/hide save card checkbox on tokenization form. #20506
