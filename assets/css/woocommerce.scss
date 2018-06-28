@@ -189,6 +189,10 @@ p.demo_store,
 				opacity: 0;
 			}
 
+			.woocommerce-product-gallery__image--placeholder {
+				border: 1px solid #F2F2F2;
+			}
+
 			.woocommerce-product-gallery__image:nth-child(n+2) {
 				width: 25%;
 				display: inline-block;
@@ -569,6 +573,10 @@ p.demo_store,
 
 		strong {
 			display: block;
+		}
+
+		.woocommerce-placeholder {
+			border: 1px solid #F2F2F2;
 		}
 
 		.star-rating {
@@ -1713,7 +1721,7 @@ p.demo_store,
 /**
  * Right to left styles
  */
- .rtl.woocommerce .price_label, 
+ .rtl.woocommerce .price_label,
  .rtl.woocommerce .price_label span {
 	/* rtl:ignore */
 	direction: ltr;

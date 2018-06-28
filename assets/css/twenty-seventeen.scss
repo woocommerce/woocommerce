@@ -229,6 +229,10 @@ ul.products {
 			margin-bottom: .75em;
 		}
 
+		.woocommerce-placeholder {
+			border: 1px solid #F2F2F2;
+		}
+
 		.button {
 			@include link();
 
@@ -403,6 +407,10 @@ table.variations {
 	.zoomImg {
 		background-color: #fff;
 		opacity: 0;
+	}
+
+	.woocommerce-product-gallery__image--placeholder {
+		border: 1px solid #F2F2F2;
 	}
 
 	.woocommerce-product-gallery__image:nth-child(n+2) {
