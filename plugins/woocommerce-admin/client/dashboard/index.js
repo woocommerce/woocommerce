@@ -9,7 +9,7 @@ import { Component, Fragment } from '@wordpress/element';
  * Internal dependencies
  */
 import Agenda from './widgets/agenda';
-import Header from 'components/header';
+import Header from 'layout/header';
 import Numbers from './numbers';
 
 export default class Dashboard extends Component {

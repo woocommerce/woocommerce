@@ -1,7 +1,7 @@
 ActivityCard
 ============
 
-A card designed for use in the timeline/sidebar. This is a very structured component, which expects at minimum a label and content. It can optionally also include a date, actions, an image, and a dropdown menu.
+A card designed for use in the activity panel. This is a very structured component, which expects at minimum a label and content. It can optionally also include a date, actions, an image, and a dropdown menu.
 
 ## How to use:
 

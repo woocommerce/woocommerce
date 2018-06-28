@@ -217,9 +217,9 @@ function woocommerce_embed_page_header() {
 	}
 	?>
 	<div id="woocommerce-embedded-root">
-		<div class="woocommerce-layout has-hidden-sidebar">
-			<div class="woocommerce-header is-loading">
-				<h1 class="woocommerce-header__breadcrumbs">
+		<div class="woocommerce-layout">
+			<div class="woocommerce-layout__header is-loading">
+				<h1 class="woocommerce-layout__header-breadcrumbs">
 					<span><a href="<?php echo esc_url( admin_url( 'admin.php?page=woodash#/' ) ); ?>">WooCommerce</a></span>
 					<span><?php echo $breadcrumbs; ?></span>
 				</h1>

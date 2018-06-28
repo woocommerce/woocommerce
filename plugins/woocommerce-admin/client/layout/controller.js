@@ -13,26 +13,22 @@ import Analytics from 'analytics';
 import AnalyticsReport from 'analytics/report';
 import Dashboard from 'dashboard';
 
-// TODO Remove hasOpenSideBar, as the activity panel will always be closed by default
 const getPages = () => {
 	const pages = [
 		{
 			container: Dashboard,
 			path: '/',
 			wpMenu: 'toplevel_page_woocommerce',
-			hasOpenSidebar: true,
 		},
 		{
 			container: Analytics,
 			path: '/analytics',
 			wpMenu: 'toplevel_page_woodash--analytics',
-			hasOpenSidebar: false,
 		},
 		{
 			container: AnalyticsReport,
 			path: '/analytics/:report',
 			wpMenu: 'toplevel_page_woodash--analytics',
-			hasOpenSidebar: false,
 		},
 	];
 

@@ -12,7 +12,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import './style.scss';
-import { EllipsisMenu } from '../ellipsis-menu';
+import { EllipsisMenu } from 'components/ellipsis-menu';
 import { H, Section } from 'layout/section';
 
 class ActivityCard extends Component {

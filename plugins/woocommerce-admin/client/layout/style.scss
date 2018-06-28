@@ -11,86 +11,19 @@
 }
 
 .woocommerce-layout__primary {
-	margin: $spacing 0 0 $spacing;
+	margin: 81px 0 0 $spacing;
 	.woocommerce-layout__main {
 		margin: 0 auto;
 		max-width: 640px;
 	}
 }
 
-.woocommerce-layout.has-visible-sidebar {
-	display: grid;
-	grid-template-columns: auto 360px;
-	grid-template-rows: 81px auto;
-	grid-gap: 0 $spacing;
-
-	@include breakpoint( '<782px' ) {
-		display: block;
-	}
-
-	.woocommerce-header {
-		grid-column: 1/span 2;
-	}
-}
-
-// This is a mixin so that we can use the same code for both smaller screen media queries
-// and also "hidden sidebar" pages on desktop as well.
-@mixin hidden-sidebar() {
-	position: fixed;
-	top: 32px;
-	right: 0;
-	width: 100%;
-	max-width: 400px;
-	height: calc(100vh - 32px);
-	overflow-x: hidden;
-	overflow-y: scroll;
-	transform: translate3d(100%, 0, 0);
-	transition: transform 0.15s ease-in-out;
-
-	&.is-opened {
-		transform: translate3d(0, 0, 0);
-	}
-}
-
-.woocommerce-layout.has-hidden-sidebar .woocommerce-layout__secondary {
-	@include hidden-sidebar;
-}
-
-.woocommerce-layout.has-hidden-sidebar .woocommerce-layout__main {
+.woocommerce-layout .woocommerce-layout__main {
 	padding-right: $spacing;
 	max-width: 1100px;
 }
 
-.woocommerce-layout__secondary {
-	background: $gray;
-	border-left: 1px solid $gray;
-	min-height: calc(100vh - 32px);
-	z-index: 1000;
-
-	@include breakpoint( '<782px' ) {
-		@include hidden-sidebar;
-
-		top: 46px;
-		height: calc(100vh - 46px);
-	}
-
-	.woocommerce-layout__sidebar-top {
-		display: flex;
-		justify-content: space-between;
-	}
-}
-
-// Hide the toggle buttons on larger screens (if the sidebar should be visible)
-@include breakpoint( '>782px' ) {
-	.woocommerce-layout.has-visible-sidebar .woocommerce-header__toggle,
-	.woocommerce-layout.has-visible-sidebar .woocommerce-layout__sidebar-toggle {
-		display: none;
-	}
-}
-
-.woocommerce-layout__sidebar-tabs {
-	min-height: inherit;
-
+.woocommerce-layout__activity-panel-tabs {
 	.components-tab-panel__tabs {
 		display: grid;
 		grid-template-columns: 1fr 1fr 1fr;
@@ -99,13 +32,7 @@
 		background-color: transparent;
 	}
 
-	.components-tab-panel__tab-content {
-		min-height: inherit;
-		background-color: $wp-admin-background;
-		padding: 2em;
-	}
-
-	.woocommerce-layout__sidebar-tab {
+	.woocommerce-layout__activity-panel-tab {
 		border: none;
 		outline: none;
 		cursor: pointer;
@@ -114,7 +41,6 @@
 		color: $gray-darken-30;
 
 		&.is-active {
-			background-color: $wp-admin-background;
 			color: $gray-darken-40;
 		}
 
@@ -122,6 +48,19 @@
 			font-size: 1.2em;
 		}
 	}
+}
+
+.woocommerce-layout__activity-panel-content {
+	height: calc(100vh - 81px);
+	min-height: calc(100vh - 81px);
+	background: $gray;
+	width: 515px;
+	position: fixed;
+	right: 0px;
+	top: 113px;
+	z-index: 1000;
+	overflow-x: hidden;
+	overflow-y: scroll;
 }
 
 // @TODO remove this?

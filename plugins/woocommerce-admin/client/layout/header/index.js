@@ -5,8 +5,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/utils';
 import { Fill } from 'react-slot-fill';
-import { isArray, noop } from 'lodash';
-import { IconButton } from '@wordpress/components';
+import { isArray } from 'lodash';
 import Link from 'components/link';
 import PropTypes from 'prop-types';
 
@@ -14,9 +13,10 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import './style.scss';
+import ActivityPanel from '../activity-panel';
 import WordPressNotices from './wordpress-notices';
 
-const Header = ( { sections, onToggle, isSidebarOpen, isEmbedded } ) => {
+const Header = ( { sections, isEmbedded } ) => {
 	const _sections = isArray( sections ) ? sections : [ sections ];
 
 	const documentTitle = _sections
@@ -35,8 +35,8 @@ const Header = ( { sections, onToggle, isSidebarOpen, isEmbedded } ) => {
 	);
 
 	return (
-		<div className="woocommerce-header">
-			<h1 className="woocommerce-header__breadcrumbs">
+		<div className="woocommerce-layout__header">
+			<h1 className="woocommerce-layout__header-breadcrumbs">
 				<span>
 					<Link to="/">WooCommerce</Link>
 				</span>
@@ -51,16 +51,8 @@ const Header = ( { sections, onToggle, isSidebarOpen, isEmbedded } ) => {
 					return <span key={ i }>{ sectionPiece }</span>;
 				} ) }
 			</h1>
-			<div className="woocommerce-header__buttons">
-				<div className="woocommerce-header__toggle">
-					<IconButton
-						className="woocommerce-header__button"
-						onClick={ onToggle }
-						icon="clock"
-						label={ __( 'Show Sidebar', 'woo-dash' ) }
-						aria-expanded={ isSidebarOpen }
-					/>
-				</div>
+			<div className="woocommerce-layout__header-panel">
+				<ActivityPanel />
 				<WordPressNotices />
 			</div>
 		</div>
@@ -69,13 +61,10 @@ const Header = ( { sections, onToggle, isSidebarOpen, isEmbedded } ) => {
 
 Header.propTypes = {
 	sections: PropTypes.node.isRequired,
-	onToggle: PropTypes.func.isRequired,
-	isSidebarOpen: PropTypes.bool,
 	isEmbedded: PropTypes.bool,
 };
 
 Header.defaultProps = {
-	onToggle: noop,
 	isEmbedded: false,
 };
 

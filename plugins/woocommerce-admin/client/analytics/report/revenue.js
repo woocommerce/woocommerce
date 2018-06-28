@@ -15,7 +15,7 @@ import DatePicker from 'components/date-picker';
 import { formatCurrency } from 'lib/currency';
 import { getAdminLink, updateQueryString } from 'lib/nav-utils';
 import { getReportData } from 'lib/swagger';
-import Header from 'components/header';
+import Header from 'layout/header';
 import { SummaryList, SummaryNumber } from 'components/summary';
 import Table from 'components/table';
 import Pagination from 'components/pagination';

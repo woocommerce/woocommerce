@@ -8,7 +8,7 @@ import { Component, Fragment } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import Header from 'components/header';
+import Header from 'layout/header';
 import DatePicker from 'components/date-picker';
 
 export default class extends Component {

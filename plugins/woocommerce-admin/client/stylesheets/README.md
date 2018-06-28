@@ -33,13 +33,13 @@ All layout classes use the `.woocommerce-layout__` prefix:
 
 >.woocommerce-layout\_\__[ section ]_
 
-(Example: `.woocommerce-layout__sidebar` )
+(Example: `.woocommerce-layout__activity-panel` )
 
 If the section has children elements, prefix a description with the section class name:
 
 >.woocommerce-layout\_\__[ section ]_-_[ descendant description ]_
 
-(Example: `.woocommerce-layout__sidebar-title` )
+(Example: `.woocommerce-layout__activity-panel-title` )
 
 ## Naming: Dashboard classes
 

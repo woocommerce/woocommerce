@@ -1,6 +1,6 @@
 /** @format */
 
-.woocommerce-header {
+.woocommerce-layout__header {
 	background: $white;
 	display: flex;
 	justify-content: space-between;
@@ -11,8 +11,12 @@
 	border-bottom: 1px solid $gray;
 	padding: 2px 2px 2px 12px;
 	height: 81px;
+	position: fixed;
+	width: 100%;
+	top: 32px;
+	z-index: 1000;
 
-	.woocommerce-header__breadcrumbs {
+	.woocommerce-layout__header-breadcrumbs {
 		font-size: 13px;
 		font-weight: normal;
 		padding: 9px 0 4px 0;
@@ -26,8 +30,11 @@
 	}
 }
 
-.woocommerce-header__buttons {
+.woocommerce-layout__header-panel {
 	display: flex;
 	flex-direction: row;
-	align-items: center;
+	align-items: baseline;
+	position: fixed;
+	top: 30px;
+	right: 32px;
 }

@@ -8,7 +8,7 @@ import { Component, Fragment } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import Header from 'components/header';
+import Header from 'layout/header';
 import { SummaryList, SummaryNumber } from 'components/summary';
 
 export default class extends Component {
