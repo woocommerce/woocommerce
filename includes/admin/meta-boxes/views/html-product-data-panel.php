@@ -1,8 +1,17 @@
 <?php
+/**
+ * Product data meta box.
+ *
+ * @package WooCommerce/Admin
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 ?>
+<style type="text/css">
+	#minor-publishing-actions{ display:none }
+</style>
 <div class="panel-wrap product_data">
 
 	<span class="type_box hidden"> &mdash;
