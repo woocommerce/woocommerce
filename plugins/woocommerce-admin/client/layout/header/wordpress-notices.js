@@ -3,6 +3,7 @@
  * External dependencies
  */
 import { Component } from '@wordpress/element';
+import Gridicon from 'gridicons';
 import { IconButton } from '@wordpress/components';
 import { sprintf, _n } from '@wordpress/i18n';
 
@@ -183,7 +184,7 @@ class WordPressNotices extends Component {
 		return (
 			<IconButton
 				onClick={ this.onToggle }
-				icon="wordpress-alt"
+				icon={ <Gridicon icon="my-sites" /> }
 				label={ sprintf(
 					_n( 'View %d WordPress Notice', 'View %d WordPress Notices', count, 'woo-dash' ),
 					count
