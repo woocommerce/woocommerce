@@ -191,6 +191,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Refactor "Order again" handling to separate logic better. #20606
 * Dev - Added 'woocommerce_products_admin_list_table_filters' filter to make it easier to customize the products list table filters. #20634
 * Dev - Added `woocommerce_shipping_method_add_rate_args` and `woocommerce_shipping_method_add_rate` filters. #20633
+* Dev - Added `woocommerce_coupon_validate_user_usage_limit` filter. #20630
 * Localization - Updated IT provinces. #20286
 * Localization - Eircode validation. #20330
 
