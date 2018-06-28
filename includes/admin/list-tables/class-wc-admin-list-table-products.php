@@ -337,36 +337,14 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 */
 	protected function render_products_type_filter() {
 		$current_product_type = isset( $_REQUEST['product_type'] ) ? wc_clean( wp_unslash( $_REQUEST['product_type'] ) ) : false; // WPCS: input var ok, sanitization ok.
-		$terms                = get_terms( 'product_type' );
 		$output               = '<select name="product_type" id="dropdown_product_type"><option value="">' . __( 'Filter by product type', 'woocommerce' ) . '</option>';
 
-		foreach ( $terms as $term ) {
-			$output .= '<option value="' . sanitize_title( $term->name ) . '" ';
-			$output .= selected( $term->slug, $current_product_type, false );
-			$output .= '>';
+		foreach ( wc_get_product_types() as $value => $label ) {
+			$output .= '<option value="' . esc_attr( $value ) . '" ';
+			$output .= selected( $value, $current_product_type, false );
+			$output .= '>' . esc_html( $label ) . '</option>';
 
-			switch ( $term->name ) {
-				case 'grouped':
-					$output .= __( 'Grouped product', 'woocommerce' );
-					break;
-				case 'external':
-					$output .= __( 'External/Affiliate product', 'woocommerce' );
-					break;
-				case 'variable':
-					$output .= __( 'Variable product', 'woocommerce' );
-					break;
-				case 'simple':
-					$output .= __( 'Simple product', 'woocommerce' );
-					break;
-				default:
-					// Assuming that we have other types in future.
-					$output .= ucfirst( $term->name );
-					break;
-			}
-
-			$output .= '</option>';
-
-			if ( 'simple' === $term->name ) {
+			if ( 'simple' === $value ) {
 
 				$output .= '<option value="downloadable" ';
 				$output .= selected( 'downloadable', $current_product_type, false );
