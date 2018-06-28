@@ -5,7 +5,6 @@
 import moment from 'moment';
 import { find } from 'lodash';
 import { __ } from '@wordpress/i18n';
-import { date as datePHPFormat, getSettings } from '@wordpress/date';
 
 /**
  * Internal dependencies
@@ -25,112 +24,19 @@ import { compareValues } from 'components/date-picker/compare-periods';
 
 export const isoDateFormat = 'YYYY-MM-DD';
 
-// This is temporary. This logic will be best addressed in Gutenberg's date package
-// https://github.com/WordPress/gutenberg/blob/master/packages/date/src/index.js
-// The following code is c/p from https://gist.github.com/phpmypython/f97c5f5f59f2a934599d
-const formatMap = {
-	d: 'DD',
-	D: 'ddd',
-	j: 'D',
-	l: 'dddd',
-	N: 'E',
-	S: function() {
-		return '[' + this.format( 'Do' ).replace( /\d*/g, '' ) + ']';
-	},
-	w: 'd',
-	z: function() {
-		return this.format( 'DDD' ) - 1;
-	},
-	W: 'W',
-	F: 'MMMM',
-	m: 'MM',
-	M: 'MMM',
-	n: 'M',
-	t: function() {
-		return this.daysInMonth();
-	},
-	L: function() {
-		return this.isLeapYear() ? 1 : 0;
-	},
-	o: 'GGGG',
-	Y: 'YYYY',
-	y: 'YY',
-	a: 'a',
-	A: 'A',
-	B: function() {
-		const thisUTC = this.clone().utc(),
-			// Shamelessly stolen from http://javascript.about.com/library/blswatch.htm
-			swatch = ( thisUTC.hours() + 1 ) % 24 + thisUTC.minutes() / 60 + thisUTC.seconds() / 3600;
-		return Math.floor( swatch * 1000 / 24 );
-	},
-	g: 'h',
-	G: 'H',
-	h: 'hh',
-	H: 'HH',
-	i: 'mm',
-	s: 'ss',
-	u: '[u]', // not sure if moment has this
-	e: '[e]', // moment does not have this
-	I: function() {
-		return this.isDST() ? 1 : 0;
-	},
-	O: 'ZZ',
-	P: 'Z',
-	T: '[T]', // deprecated in moment
-	Z: function() {
-		return parseInt( this.format( 'ZZ' ), 10 ) * 36;
-	},
-	c: 'YYYY-MM-DD[T]HH:mm:ssZ',
-	r: 'ddd, DD MMM YYYY HH:mm:ss ZZ',
-	U: 'X',
-};
-const formatEx = /[dDjlNSwzWFmMntLoYyaABgGhHisueIOPTZcrU]/g;
-
-function getMomentFormat( phpFormat ) {
-	return phpFormat.replace( formatEx, function( phpStr ) {
-		return typeof formatMap[ phpStr ] === 'function'
-			? formatMap[ phpStr ].call( moment )
-			: formatMap[ phpStr ];
-	} );
-}
-
-// When `wp.date.setSettings()` is called on page initialization, PHP formats
-// get saved to momentjs localeData. When react-dates attempts create date strings from
-// those formats, moment isn't able to handle them. So lets convert those to moment strings.
-// This logic should also live in Gutenberg. A PR will be made there.
-function applyMomentFormats() {
-	const settings = getSettings();
-	const longDateFormats = moment.localeData()._longDateFormat;
-	const momentLongDateFormats = Object.keys( longDateFormats ).reduce( ( formats, item ) => {
-		if ( longDateFormats[ item ] ) {
-			formats[ item ] = getMomentFormat( longDateFormats[ item ] );
-		}
-		return formats;
-	}, {} );
-	moment.updateLocale( settings.l10n.locale, {
-		longDateFormat: momentLongDateFormats,
-	} );
-}
-
-// i18n depends on this Gutenberg PR https://github.com/WordPress/gutenberg/pull/7542
-// If it has been merged, we need to applyMomentFormats().
-if ( ! moment.locale() ) {
-	applyMomentFormats();
-}
-
 /**
  * Convert a string to Moment object
  *
- * @param {string} str - localized date string
+ * @param {string} format - localized date string format
+ * @param {string} str - date string
  * @return {Moment|null} - Moment object representing given string
  */
-export function toMoment( str ) {
+export function toMoment( format, str ) {
 	if ( moment.isMoment( str ) ) {
 		return str.isValid() ? str : null;
 	}
 	if ( 'string' === typeof str ) {
-		const localeFormat = getMomentFormat( getSettings().formats.date );
-		const date = moment( str, [ isoDateFormat, localeFormat ], true );
+		const date = moment( str, [ isoDateFormat, format ], true );
 		return date.isValid ? date : null;
 	}
 	throw new Error( 'toMoment requires a string to be passed as an argument' );
@@ -147,20 +53,18 @@ function getRangeLabel( start, end ) {
 	const isSameDay = start.isSame( end, 'day' );
 	const isSameYear = start.year() === end.year();
 	const isSameMonth = isSameYear && start.month() === end.month();
-	// If the date format in settings have Full Text Month (F), replace it wtih 3 letter abbreviations (M)
-	const PHPFormat = getSettings().formats.date.replace( 'F', 'M' );
+	const fullDateFormat = __( 'MMM D, YYYY', 'woo-dash' );
+	const monthDayFormat = __( 'MMM D', 'woo-dash' );
+
 	if ( isSameDay ) {
-		return datePHPFormat( PHPFormat, start );
+		return start.format( fullDateFormat );
 	} else if ( isSameMonth ) {
 		const startDate = start.date();
-		return datePHPFormat( PHPFormat, start ).replace(
-			startDate,
-			`${ startDate } - ${ end.date() }`
-		);
+		return start.format( fullDateFormat ).replace( startDate, `${ startDate } - ${ end.date() }` );
 	} else if ( isSameYear ) {
-		return `${ start.format( __( 'MMM D', 'woo-dash' ) ) } - ${ datePHPFormat( PHPFormat, end ) }`;
+		return `${ start.format( monthDayFormat ) } - ${ end.format( fullDateFormat ) }`;
 	}
-	return `${ datePHPFormat( PHPFormat, start ) } - ${ datePHPFormat( PHPFormat, end ) }`;
+	return `${ start.format( fullDateFormat ) } - ${ end.format( fullDateFormat ) }`;
 }
 
 /**
