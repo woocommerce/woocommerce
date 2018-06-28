@@ -275,19 +275,6 @@ class WC_Order_Stats {
 		);
 		$data = wp_parse_args( $data, $defaults );
 
-		// Don't store rows that don't have useful information.
-		if ( ! $data['num_orders'] ) {
-			return $wpdb->delete(
-				$table_name,
-				array(
-					'start_time' => $start_time,
-				),
-				array(
-					'%d',
-				)
-			);
-		}
-
 		// Update or add the information to the DB.
 		return $wpdb->replace(
 			$table_name,
