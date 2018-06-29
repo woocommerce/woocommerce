@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 <style type="text/css">
-	#minor-publishing-actions{ display:none }
+	#post-preview { display:none }
 </style>
 <div class="panel-wrap product_data">
 
