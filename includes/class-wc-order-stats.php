@@ -14,6 +14,8 @@ if ( ! class_exists( 'WC_Order_Stats_Background_Process', false ) ) {
 	include_once dirname( __FILE__ ) . '/class-wc-order-stats-background-process.php';
 }
 
+// then: button in tools for repopulating everything
+
 /**
  * Order stats class.
  */
@@ -163,13 +165,7 @@ class WC_Order_Stats {
 		$end_time = $start_time + HOUR_IN_SECONDS;
 
 		while ( $end_time < time() ) {
-			self::$background_process->push_to_queue(
-				array(
-					'start_time' => $start_time,
-					'end_time' => $end_time,
-				)
-			);
-
+			self::$background_process->push_to_queue( $start_time );
 			$start_time = $end_time;
 			$end_time = $start_time + HOUR_IN_SECONDS;
 		}
@@ -183,13 +179,7 @@ class WC_Order_Stats {
 	public function queue_update_recent_orders() {
 		// Populate the stats information for the previous hour.
 		$last_hour = strtotime( date( 'Y-m-d H:00:00' ) ) - HOUR_IN_SECONDS;
-		self::$background_process->push_to_queue(
-			array(
-				'start_time' => $last_hour,
-				'end_time' => $last_hour + HOUR_IN_SECONDS,
-			)
-		);
-
+		self::$background_process->push_to_queue( $last_hour );
 		self::$background_process->save();
 	}
 
@@ -207,18 +197,10 @@ class WC_Order_Stats {
 
 		$order_statuses = self::get_report_order_statuses();
 		if ( in_array( $new_status, $order_statuses, true ) || in_array( $old_status, $order_statuses, true ) ) {
-			self::$background_process->push_to_queue(
-				array(
-					'start_time' => $new_time,
-				)
-			);
+			self::$background_process->push_to_queue( $new_time );
 
 			if ( $old_time && $new_time !== $old_time ) {
-				self::$background_process->push_to_queue(
-					array(
-						'start_time' => $old_time,
-					)
-				);
+				self::$background_process->push_to_queue( $old_time );
 			}
 
 			self::$background_process->save();
@@ -320,12 +302,6 @@ class WC_Order_Stats {
 				'%f',
 			)
 		);
-	}
-
-	protected static function schedule_recalculation( $start_time ) {
-		$existing = get_post_meta
-
-
 	}
 
 	protected static function get_report_order_statuses() {

@@ -29,18 +29,43 @@ class WC_Order_Stats_Background_Process extends WC_Background_Process {
 	}
 
 	/**
+	 * Push to queue without scheduling duplicate recalculation events.
+	 * Overrides WC_Background_Process::push_to_queue.
+	 */
+	public function push_to_queue( $data ) {
+		$data = absint( $data );
+		if ( ! in_array( $data, $this->data, true ) ) {
+			$this->data[] = $data;
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Dispatch but only if there is data to update.
+	 * Overrides WC_Background_Process::dispatch.
+	 */
+	public function dispatch() {
+		if ( ! $this->data ) {
+			return false;
+		}
+
+		return parent::dispatch();
+	}
+
+	/**
 	 * Code to execute for each item in the queue
 	 *
 	 * @param string $item Queue item to iterate over.
 	 * @return bool
 	 */
 	protected function task( $item ) {
-		if ( ! $item || empty( $item['start_time'] ) ) {
+		if ( ! $item ) {
 			return false;
 		}
 
-		$start_time = $item['start_time'];
-		$end_time = ! empty( $item['end_time'] ) ? $item['end_time'] : $start_time + HOUR_IN_SECONDS;
+		$start_time = $item;
+		$end_time = $start_time + HOUR_IN_SECONDS;
 
 		$data = WC_Order_Stats::summarize_orders( $start_time, $end_time );
 		WC_Order_Stats::update( $start_time, $data );
