@@ -35,7 +35,8 @@ class WC_Order_Stats {
 	public function __construct() {
 		add_action( 'init', array( $this, 'install' ) ); // @todo Don't do this on every page load.
 		add_action( self::CRON_EVENT, array( $this, 'queue_update_recent_orders' ) );
-		// @todo Need to also handle orders whose 'Date created' has changed by hooking into the status changed action and scheduling a recalc.
+		add_action( 'woocommerce_before_order_object_save', array( $this, 'queue_update_modified_orders' ) );
+		add_action( 'shutdown', array( $this, 'dispatch_recalculator' ) );
 
 		if ( ! empty( $_GET['repopstatsdb'] ) ) {
 			add_action( 'init', array( $this, 'queue_order_stats_repopulate_database' ) );
@@ -105,6 +106,10 @@ class WC_Order_Stats {
 		return $wpdb->get_results( $query, ARRAY_A );
 	}
 
+	public function dispatch_recalculator() {
+		self::$background_process->dispatch();
+	}
+
 	/**
 	 * Create the table that will hold the order stats information.
 	 */
@@ -145,7 +150,7 @@ class WC_Order_Stats {
 			'limit'   => 1,
 			'orderby' => 'date',
 			'order'   => 'ASC',
-			'status'  => 'completed',
+			'status'  => self::get_report_order_statuses(),
 			'type'    => 'shop_order',
 		) );
 
@@ -169,7 +174,7 @@ class WC_Order_Stats {
 			$end_time = $start_time + HOUR_IN_SECONDS;
 		}
 
-		self::$background_process->save()->dispatch();
+		self::$background_process->save();
 	}
 
 	/**
@@ -185,29 +190,39 @@ class WC_Order_Stats {
 			)
 		);
 
-		// Recalculate the stats information for orders modified in the previous hour.
-		$modified_orders = wc_get_orders(
-			array(
-				'limit' => -1,
-				'date_modified' => '>=' . $last_hour,
-			)
-		);
+		self::$background_process->save();
+	}
 
-		$scheduled_dates = array( $last_hour );
-		foreach( $modified_orders as $order ) {
-			$modified_date = strtotime( $order->get_date_modified()->date( 'Y-m-d H:00:00' ) );
-			if ( ! in_array( $modified_date, $scheduled_dates, true ) ) {
-				self::$background_process->push_to_queue(
-					array(
-						'start_time' => $modified_date,
-						'end_time' => $modified_date + HOUR_IN_SECONDS,
-					)
-				);
-				$scheduled_dates[] = $modified_date;
-			}
+	public function queue_update_modified_orders( $order ) {
+		$new_time = strtotime( $order->get_date_created()->format( 'Y-m-d\TH:00:00O' ) );
+		$old_time = false;
+		$new_status = $order->get_status();
+		$old_status = false;
+
+		if ( $order->get_id() ) {
+			$old_order = wc_get_order( $order->get_id() );
+			$old_time = strtotime( $old_order->get_date_created()->format( 'Y-m-d\TH:00:00O' ) );
+			$old_status = $old_order->get_status();
 		}
 
-		self::$background_process->save()->dispatch();
+		$order_statuses = self::get_report_order_statuses();
+		if ( in_array( $new_status, $order_statuses, true ) || in_array( $old_status, $order_statuses, true ) ) {
+			self::$background_process->push_to_queue(
+				array(
+					'start_time' => $new_time,
+				)
+			);
+
+			if ( $old_time && $new_time !== $old_time ) {
+				self::$background_process->push_to_queue(
+					array(
+						'start_time' => $old_time,
+					)
+				);
+			}
+
+			self::$background_process->save();
+		}
 	}
 
 	/**
@@ -234,11 +249,10 @@ class WC_Order_Stats {
 			'type'         => 'shop_order',
 			'orderby'      => 'date',
 			'order'        => 'ASC',
-			'status'       => 'completed',
+			'status'       => self::get_report_order_statuses(),
 			'date_created' => $start_time . '...' . $end_time,
 		) );
 
-		// @todo The gross/net total logic may need tweaking. Verify that logic is correct.
 		$summary['num_orders']            = count( $orders );
 		$summary['num_items_sold']        = self::get_num_items_sold( $orders );
 		$summary['orders_gross_total']    = self::get_orders_gross_total( $orders );
@@ -276,6 +290,20 @@ class WC_Order_Stats {
 		);
 		$data = wp_parse_args( $data, $defaults );
 
+		// Don't store rows that don't have useful information.
+		// @todo maybe remove this when on-the-fly generation is implemented
+		if ( ! $data['num_orders'] ) {
+			return $wpdb->delete(
+				$table_name,
+				array(
+					'start_time' => $start_time,
+				),
+				array(
+					'%s',
+				)
+			);
+		}
+
 		// Update or add the information to the DB.
 		return $wpdb->replace(
 			$table_name,
@@ -292,6 +320,16 @@ class WC_Order_Stats {
 				'%f',
 			)
 		);
+	}
+
+	protected static function schedule_recalculation( $start_time ) {
+		$existing = get_post_meta
+
+
+	}
+
+	protected static function get_report_order_statuses() {
+		return apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) );
 	}
 
 	/**
