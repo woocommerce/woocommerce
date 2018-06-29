@@ -120,7 +120,7 @@ class WC_Order_Stats {
 
 		$table_name = $wpdb->prefix . self::TABLE_NAME;
 		$sql = "CREATE TABLE $table_name (
-			start_time int(11) DEFAULT 0 NOT NULL,
+			start_time timestamp DEFAULT '0000-00-00 00:00:00' NOT NULL,
 			num_orders int(11) UNSIGNED DEFAULT 0 NOT NULL,
 			num_items_sold int(11) UNSIGNED DEFAULT 0 NOT NULL,
 			orders_gross_total double DEFAULT 0 NOT NULL,
@@ -261,6 +261,7 @@ class WC_Order_Stats {
 	public static function update( $start_time, $data ) {
 		global $wpdb;
 		$table_name = $wpdb->prefix . self::TABLE_NAME;
+		$start_time = date( 'Y-m-d H:00:00', $start_time );
 
 		$defaults = array(
 			'start_time'            => $start_time,
@@ -280,7 +281,7 @@ class WC_Order_Stats {
 			$table_name,
 			$data,
 			array(
-				'%d',
+				'%s',
 				'%d',
 				'%d',
 				'%f',
