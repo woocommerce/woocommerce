@@ -1,6 +1,7 @@
 == Changelog ==
 
 = 3.4.3 - 2018-06-20 =
+* Feature - Added ability to define custom placeholders and resizing of placeholders to match store aspect ratio. #20644
 * Fix - Fix label for the price filter widget on RTL sites. #20417
 * Fix - Checkout: stopPropagation when payment method selected so description tips show on radio buttons. #20432
 * Fix - Shipping zone settings: fixed title for shipping methods without settings. #20441
