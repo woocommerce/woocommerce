@@ -1359,8 +1359,10 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 			} elseif ( $object->is_type( 'grouped' ) ) {
 				foreach ( $object->get_children() as $child_id ) {
 					$child = wc_get_product( $child_id );
-					$child->set_parent_id( 0 );
-					$child->save();
+					if ( ! empty( $child ) ) {
+						$child->set_parent_id( 0 );
+						$child->save();
+					}
 				}
 			}
 
