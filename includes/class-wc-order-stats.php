@@ -14,8 +14,6 @@ if ( ! class_exists( 'WC_Order_Stats_Background_Process', false ) ) {
 	include_once dirname( __FILE__ ) . '/class-wc-order-stats-background-process.php';
 }
 
-// then: button in tools for repopulating everything
-
 /**
  * Order stats class.
  */
@@ -39,10 +37,6 @@ class WC_Order_Stats {
 		add_action( self::CRON_EVENT, array( $this, 'queue_update_recent_orders' ) );
 		add_action( 'woocommerce_before_order_object_save', array( $this, 'queue_update_modified_orders' ) );
 		add_action( 'shutdown', array( $this, 'dispatch_recalculator' ) );
-
-		if ( ! empty( $_GET['repopstatsdb'] ) ) {
-			add_action( 'init', array( $this, 'queue_order_stats_repopulate_database' ) );
-		}
 
 		// Each hour update the DB with info for the previous hour.
 		if ( ! wp_next_scheduled( self::CRON_EVENT ) ) {
@@ -108,10 +102,6 @@ class WC_Order_Stats {
 		return $wpdb->get_results( $query, ARRAY_A );
 	}
 
-	public function dispatch_recalculator() {
-		self::$background_process->dispatch();
-	}
-
 	/**
 	 * Create the table that will hold the order stats information.
 	 */
@@ -146,7 +136,7 @@ class WC_Order_Stats {
 	/**
 	 * Queue a background process that will repopulate the entire orders stats database.
 	 */
-	public function queue_order_stats_repopulate_database() {
+	public static function queue_order_stats_repopulate_database() {
 		// To get the first start time, get the oldest order and round the completion time down to the nearest hour.
 		$oldest = wc_get_orders( array(
 			'limit'   => 1,
@@ -183,6 +173,10 @@ class WC_Order_Stats {
 		self::$background_process->save();
 	}
 
+	/**
+	 * Schedule a recalculation for an order's time when the order gets updated.
+	 * This schedules for the order's current time and for the time the order used to be in if necessary.
+	 */
 	public function queue_update_modified_orders( $order ) {
 		$new_time = strtotime( $order->get_date_created()->format( 'Y-m-d\TH:00:00O' ) );
 		$old_time = false;
@@ -205,6 +199,13 @@ class WC_Order_Stats {
 
 			self::$background_process->save();
 		}
+	}
+
+	/**
+	 * Kick off any scheduled data recalculations.
+	 */
+	public function dispatch_recalculator() {
+		self::$background_process->dispatch();
 	}
 
 	/**
@@ -304,6 +305,11 @@ class WC_Order_Stats {
 		);
 	}
 
+	/**
+	 * Get the order statuses used when calculating reports.
+	 *
+	 * @return array
+	 */
 	protected static function get_report_order_statuses() {
 		return apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) );
 	}
