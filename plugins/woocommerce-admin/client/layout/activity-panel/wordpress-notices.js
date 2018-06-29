@@ -2,10 +2,12 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
+import { IconButton } from '@wordpress/components';
 import { Component } from '@wordpress/element';
 import Gridicon from 'gridicons';
-import { IconButton } from '@wordpress/components';
-import { sprintf, _n } from '@wordpress/i18n';
+import { partial } from 'lodash';
+import classnames from 'classnames';
 
 class WordPressNotices extends Component {
 	constructor() {
@@ -17,11 +19,9 @@ class WordPressNotices extends Component {
 			hasEventListeners: false,
 		};
 
-		this.onToggle = this.onToggle.bind( this );
 		this.updateCount = this.updateCount.bind( this );
 		this.showNotices = this.showNotices.bind( this );
 		this.hideNotices = this.hideNotices.bind( this );
-		this.onToggle = this.onToggle.bind( this );
 		this.initialize = this.initialize.bind( this );
 	}
 
@@ -31,6 +31,17 @@ class WordPressNotices extends Component {
 			this.initialize();
 		} else {
 			window.addEventListener( 'DOMContentLoaded', this.initialize );
+		}
+	}
+
+	componentDidUpdate( prevProps ) {
+		if ( ! prevProps.showNotices && this.props.showNotices ) {
+			this.showNotices();
+			this.maybeAddDismissEvents();
+		}
+
+		if ( prevProps.showNotices && ! this.props.showNotices ) {
+			this.hideNotices();
 		}
 	}
 
@@ -135,7 +146,12 @@ class WordPressNotices extends Component {
 	}
 
 	updateCount() {
-		this.setState( { count: this.state.count - 1 } );
+		const updatedCount = this.state.count - 1;
+		this.setState( { count: updatedCount } );
+
+		if ( updatedCount < 1 ) {
+			this.props.togglePanel( 'wpnotices' ); // Close the panel since all of the notices have been closed.
+		}
 	}
 
 	maybeAddDismissEvents() {
@@ -161,36 +177,27 @@ class WordPressNotices extends Component {
 		this.state.notices.classList.remove( 'woocommerce-layout__notice-list-show' );
 	}
 
-	onToggle() {
-		const { noticesOpen } = this.state;
-
-		if ( noticesOpen ) {
-			this.hideNotices();
-		} else {
-			this.showNotices();
-			this.maybeAddDismissEvents();
-		}
-
-		this.setState( { noticesOpen: ! noticesOpen } );
-	}
-
 	render() {
-		const { count, noticesOpen } = this.state;
+		const { count } = this.state;
+		const { showNotices, togglePanel } = this.props;
 
 		if ( count < 1 ) {
 			return null;
 		}
 
+		const className = classnames( 'woocommerce-layout__activity-panel-tab', {
+			'is-active': showNotices,
+		} );
+
 		return (
 			<IconButton
-				onClick={ this.onToggle }
+				key="wpnotices"
+				className={ className }
+				onClick={ partial( togglePanel, 'wpnotices' ) }
 				icon={ <Gridicon icon="my-sites" /> }
-				label={ sprintf(
-					_n( 'View %d WordPress Notice', 'View %d WordPress Notices', count, 'woo-dash' ),
-					count
-				) }
-				aria-expanded={ noticesOpen }
-			/>
+			>
+				{ __( 'Notices', 'woo-dash' ) }
+			</IconButton>
 		);
 	}
 }

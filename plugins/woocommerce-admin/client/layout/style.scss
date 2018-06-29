@@ -4,14 +4,13 @@
 	padding: 0;
 }
 
-.woocommerce-header {
-	min-height: 81px;
-	margin: 0;
-	padding: 8px 16px 8px 16px;
-}
-
 .woocommerce-layout__primary {
-	margin: 81px 0 0 $spacing;
+	margin: 80px 0 0 $spacing;
+
+	@include breakpoint( '>1100px' ) {
+		margin-top: 100px;
+	}
+
 	.woocommerce-layout__main {
 		margin: 0 auto;
 		max-width: 640px;
@@ -21,46 +20,6 @@
 .woocommerce-layout .woocommerce-layout__main {
 	padding-right: $spacing;
 	max-width: 1100px;
-}
-
-.woocommerce-layout__activity-panel-tabs {
-	.components-tab-panel__tabs {
-		display: grid;
-		grid-template-columns: 1fr 1fr 1fr;
-		grid-column-gap: 5px;
-		padding: 2em 2em 0;
-		background-color: transparent;
-	}
-
-	.woocommerce-layout__activity-panel-tab {
-		border: none;
-		outline: none;
-		cursor: pointer;
-		background-color: transparent;
-		padding: 1em 0.5em;
-		color: $gray-darken-30;
-
-		&.is-active {
-			color: $gray-darken-40;
-		}
-
-		h2 {
-			font-size: 1.2em;
-		}
-	}
-}
-
-.woocommerce-layout__activity-panel-content {
-	height: calc(100vh - 81px);
-	min-height: calc(100vh - 81px);
-	background: $gray;
-	width: 515px;
-	position: fixed;
-	right: 0px;
-	top: 113px;
-	z-index: 1000;
-	overflow-x: hidden;
-	overflow-y: scroll;
 }
 
 // @TODO remove this?

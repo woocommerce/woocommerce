@@ -1,0 +1,121 @@
+/** @format */
+
+.woocommerce-layout__activity-panel {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-end;
+	position: fixed;
+	top: 30px;
+	right: 0;
+	max-width: 400px;
+	height: 81px;
+
+	@include breakpoint( '782px-1100px' ) {
+		max-width: 280px;
+		height: 61px;
+	}
+
+	@include breakpoint( '<782px' ) {
+		position: fixed;
+		top: 93px;
+		background: #fff;
+		min-width: 100%;
+		height: 50px;
+		display: none;
+	}
+
+	&.is-mobile-open {
+		display: flex;
+		align-items: flex-end;
+	}
+}
+
+.woocommerce-layout__activity-panel-tabs {
+	width: 100%;
+	display: flex;
+
+	@include breakpoint( '782px-1100px' ) {
+		height: 60px;
+	}
+
+	@include breakpoint( '>1100px' ) {
+		height: 80px;
+	}
+
+	.dashicon,
+	.gridicon {
+		width: 100%;
+	}
+
+	svg {
+		width: 18px;
+		height: 18px;
+
+		@include breakpoint( '>1100px' ) {
+			width: 24px;
+			height: 24px;
+		}
+	}
+
+	.components-icon-button {
+		display: initial;
+		text-indent: 0px;
+	}
+
+	.woocommerce-layout__activity-panel-tab {
+		border: none;
+		outline: none;
+		cursor: pointer;
+		background-color: transparent;
+		padding: 0.5em 0.5em 9px 0.5em;
+		color: $gray-darken-30;
+		width: 100%;
+
+		&.is-active {
+			color: $gray-darken-40;
+			border-bottom: 3px solid $woocommerce;
+		}
+
+		&:hover,
+		&:focus,
+		&.components-button:not(:disabled):not([aria-disabled='true']):hover,
+		&.components-button:not(:disabled):not([aria-disabled='true']):focus {
+			background-color: $core-light-gray-200;
+			box-shadow: none;
+		}
+
+		font-size: 11px;
+		@include breakpoint( '>1100px' ) {
+			font-size: 13px;
+		}
+	}
+}
+
+.woocommerce-layout__activity-panel-mobile-toggle {
+	margin-right: 10px;
+	@include breakpoint( '>782px' ) {
+		display: none;
+	}
+}
+
+.woocommerce-layout__activity-panel-content {
+	height: calc(100vh - 80px);
+	min-height: calc(100vh - 80px);
+	background: $gray;
+	width: 510px;
+	position: fixed;
+	right: 0px;
+	top: 92px;
+	z-index: 1000;
+	overflow-x: hidden;
+	overflow-y: scroll;
+
+	@include breakpoint( '>1100px' ) {
+		top: 112px;
+	}
+
+	@include breakpoint( '<782px' ) {
+		top: 143px;
+		width: 100%;
+	}
+}

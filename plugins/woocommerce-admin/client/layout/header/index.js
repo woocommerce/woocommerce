@@ -14,7 +14,6 @@ import PropTypes from 'prop-types';
  */
 import './style.scss';
 import ActivityPanel from '../activity-panel';
-import WordPressNotices from './wordpress-notices';
 
 const Header = ( { sections, isEmbedded } ) => {
 	const _sections = isArray( sections ) ? sections : [ sections ];
@@ -51,10 +50,7 @@ const Header = ( { sections, isEmbedded } ) => {
 					return <span key={ i }>{ sectionPiece }</span>;
 				} ) }
 			</h1>
-			<div className="woocommerce-layout__header-panel">
-				<ActivityPanel />
-				<WordPressNotices />
-			</div>
+			<ActivityPanel />
 		</div>
 	);
 };

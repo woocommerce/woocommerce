@@ -218,14 +218,14 @@ function woocommerce_embed_page_header() {
 	?>
 	<div id="woocommerce-embedded-root">
 		<div class="woocommerce-layout">
-			<div class="woocommerce-layout__header is-loading">
+			<div class="woocommerce-layout__header is-embed-loading">
 				<h1 class="woocommerce-layout__header-breadcrumbs">
 					<span><a href="<?php echo esc_url( admin_url( 'admin.php?page=woodash#/' ) ); ?>">WooCommerce</a></span>
 					<span><?php echo $breadcrumbs; ?></span>
 				</h1>
 			</div>
 		</div>
-		<div class="woocommerce-layout__primary" id="woocommerce-layout__primary">
+		<div class="woocommerce-layout__primary is-embed-loading" id="woocommerce-layout__primary">
 			<div id="woocommerce-layout__notice-list" class="woocommerce-layout__notice-list"></div>
 		</div>
 	</div>

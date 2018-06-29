@@ -10,11 +10,20 @@
 	background: $white;
 	border-bottom: 1px solid $gray;
 	padding: 2px 2px 2px 12px;
-	height: 81px;
+	height: 80px;
 	position: fixed;
 	width: 100%;
 	top: 32px;
 	z-index: 1000;
+
+	@include breakpoint( '<782px' ) {
+		top: 46px;
+		height: 47px;
+	}
+
+	@include breakpoint( '782px-1100px' ) {
+		height: 60px;
+	}
 
 	.woocommerce-layout__header-breadcrumbs {
 		font-size: 13px;
@@ -28,13 +37,4 @@
 			margin: 0 2px 0 2px;
 		}
 	}
-}
-
-.woocommerce-layout__header-panel {
-	display: flex;
-	flex-direction: row;
-	align-items: baseline;
-	position: fixed;
-	top: 30px;
-	right: 32px;
 }
