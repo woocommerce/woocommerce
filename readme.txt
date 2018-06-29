@@ -159,6 +159,43 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 == Changelog ==
 
 = 3.5.0 - 2018-XX-XX =
+* Enhancement - Excluded children categories from WP_Query in product shortcode if cat_operator=AND. #20207
+* Enhancement - Add anchor tag example to email template preview. #20246
+* Enhancement - Introduce is_paypal_supported_currency check in setup wizard. #20244
+* Enhancement - Payment method table reordering accessibility. #19844
+* Enhancement - Log errors from transaction emails with logger. #20203
+* Enhancement - Improved shipping calculator experience. Shows destination country and added context to calculate shipping link. #20345
+* Enhancement - On the fly image generation for frontend, if image sizes are missing. #20011
+* Enhancement - SelectWoo enabled product categories dropdown widget. #20617
+* Fix - Check billing email is posted before using in WC_Cart::check_customer_coupons. #20180
+* Fix - Shipping postcode formatting when only posting a billing address. #20330
+* Fix - Correctly show/hide save card checkbox on tokenization form. #20506
+* Tweak - Show empty terms in admin product category filter dropdown. #20324
+* Tweak - Don't force default token gateway active by default. #20125
+* Tweak - Move notice output to hooked in functions. #19794
+* Tweak - Apply order bulk actions in chronological order. #20338
+* Tweak - Updated Emogrifier to 2.0. #20547
+* Tweak - Avoid using wp.template (eval) in add-to-cart-variation.js. #19496
+* Tweak - Hide Preview button when creating new products, as most fields aren't set up for it. #20650
+* Performance/Tweak - Use post_author for the order customer instead of '_customer_user' meta data. #17895
+* Performance - Exclude frontend include from REST API calls. #20000
+* Dev - REST API - Allows oAuth1.0a authentication under SSL.
+* Dev - REST API - Fix position param for images. #20497
+* Dev - Added woocommerce_increase_coupon_usage_count and woocommerce_decrease_coupon_usage_count action hooks to increase extensibility of Coupons. #19981
+* Dev - Add endpoints to account menu items filter. #19980
+* Dev - Added qty param to `wc_add_to_cart_message` filter. #19817
+* Dev - Added `woocommerce_search_products_ids` filter. #20160
+* Dev - Introduced `woocommerce_cart_calculate_shipping_address` field to allow manipulation of cart shipping calculator data. #20046
+* Dev - Introduced `woocommerce_shipping_calculator_enable_country` filter. #20046
+* Dev - Pass product id to backorder notification. #20416
+* Dev - Added woocommerce_cart_shipping_total filter to control shipping display. #20591
+* Dev - Refactor "Order again" handling to separate logic better. #20606
+* Dev - Added 'woocommerce_products_admin_list_table_filters' filter to make it easier to customize the products list table filters. #20634
+* Dev - Added `woocommerce_shipping_method_add_rate_args` and `woocommerce_shipping_method_add_rate` filters. #20633
+* Dev - Added `woocommerce_coupon_validate_user_usage_limit` filter. #20630
+* Dev - Add hooks needed for product custom tables feature plugin. #20520
+* Localization - Updated IT provinces. #20286
+* Localization - Eircode validation. #20330
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
