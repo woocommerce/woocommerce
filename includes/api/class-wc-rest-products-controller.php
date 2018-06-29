@@ -877,7 +877,7 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 			}
 		}
 
-		// Product parent ID for groups.
+		// Product parent ID.
 		if ( isset( $request['parent_id'] ) ) {
 			$product->set_parent_id( $request['parent_id'] );
 		}
@@ -1354,9 +1354,12 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 			if ( $object->is_type( 'variable' ) ) {
 				foreach ( $object->get_children() as $child_id ) {
 					$child = wc_get_product( $child_id );
-					$child->delete( true );
+					if ( ! empty( $child ) ) {
+						$child->delete( true );
+					}
 				}
-			} elseif ( $object->is_type( 'grouped' ) ) {
+			} else {
+				// For other product types, if the product has children, remove the relationship.
 				foreach ( $object->get_children() as $child_id ) {
 					$child = wc_get_product( $child_id );
 					if ( ! empty( $child ) ) {
