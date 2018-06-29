@@ -158,6 +158,9 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 
 == Changelog ==
 
+= 3.4.4 - 2018-xx-xx =
+* Dev - Added woocommerce_calculate_item_totals_taxes filter. #20586
+
 = 3.4.3 - 2018-06-20 =
 * Fix - Fix label for the price filter widget on RTL sites. #20417
 * Fix - Checkout: stopPropagation when payment method selected so description tips show on radio buttons. #20432
