@@ -10,6 +10,7 @@ import { Component, Fragment } from '@wordpress/element';
  */
 import Header from 'layout/header';
 import DatePicker from 'components/date-picker';
+import DropdownButton from 'components/dropdown-button';
 
 export default class extends Component {
 	render() {
@@ -18,6 +19,8 @@ export default class extends Component {
 			<Fragment>
 				<Header sections={ [ __( 'Analytics', 'woo-dash' ) ] } />
 				<DatePicker query={ query } path={ path } />
+				<p>Example single line button - default width 100% of container</p>
+				<DropdownButton labels={ [ 'All Products Sold' ] } />
 			</Fragment>
 		);
 	}

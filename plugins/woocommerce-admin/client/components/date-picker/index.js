@@ -2,8 +2,9 @@
 /**
  * External dependencies
  */
-import { Component } from '@wordpress/element';
-import { Button, Dropdown } from '@wordpress/components';
+import { Component, Fragment } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
+import { Dropdown } from '@wordpress/components';
 import { stringify as stringifyQueryObject } from 'qs';
 import moment from 'moment';
 import PropTypes from 'prop-types';
@@ -12,6 +13,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import './style.scss';
+import DropdownButton from 'components/dropdown-button';
 import DatePickerContent from './content';
 import { getCurrentDates, isoDateFormat } from 'lib/date';
 
@@ -68,16 +70,10 @@ class DatePicker extends Component {
 	getButtonLabel() {
 		const queryWithDefaults = this.addQueryDefaults( this.props.query );
 		const { primary, secondary } = getCurrentDates( queryWithDefaults );
-		return (
-			<div className="woocommerce-date-picker__toggle-label">
-				<p>
-					{ primary.label } ({ primary.range })
-				</p>
-				<p>
-					vs. { secondary.label } ({ secondary.range })
-				</p>
-			</div>
-		);
+		return [
+			`${ primary.label } (${ primary.range })`,
+			`${ __( 'vs.', 'woo-dash' ) } ${ secondary.label } (${ secondary.range })`,
+		];
 	}
 
 	isValidSelection( selectedTab ) {
@@ -91,33 +87,34 @@ class DatePicker extends Component {
 	render() {
 		const { period, compare, after, before } = this.state;
 		return (
-			<Dropdown
-				className="woocommerce-date-picker"
-				contentClassName="woocommerce-date-picker__content"
-				position="bottom"
-				expandOnMobile
-				renderToggle={ ( { isOpen, onToggle } ) => (
-					<Button
-						className="woocommerce-date-picker__toggle"
-						onClick={ onToggle }
-						aria-expanded={ isOpen }
-					>
-						{ this.getButtonLabel() }
-					</Button>
-				) }
-				renderContent={ ( { onClose } ) => (
-					<DatePickerContent
-						period={ period }
-						compare={ compare }
-						after={ after }
-						before={ before }
-						onSelect={ this.select }
-						onClose={ onClose }
-						getUpdatePath={ this.getUpdatePath }
-						isValidSelection={ this.isValidSelection }
-					/>
-				) }
-			/>
+			<Fragment>
+				<p>{ __( 'Date Range', 'woo-dash' ) }:</p>
+				<Dropdown
+					className="woocommerce-date-picker"
+					contentClassName="woocommerce-date-picker__content"
+					position="bottom"
+					expandOnMobile
+					renderToggle={ ( { isOpen, onToggle } ) => (
+						<DropdownButton
+							onClick={ onToggle }
+							isOpen={ isOpen }
+							labels={ this.getButtonLabel() }
+						/>
+					) }
+					renderContent={ ( { onClose } ) => (
+						<DatePickerContent
+							period={ period }
+							compare={ compare }
+							after={ after }
+							before={ before }
+							onSelect={ this.select }
+							onClose={ onClose }
+							getUpdatePath={ this.getUpdatePath }
+							isValidSelection={ this.isValidSelection }
+						/>
+					) }
+				/>
+			</Fragment>
 		);
 	}
 }

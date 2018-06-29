@@ -2,24 +2,33 @@
 
 .woocommerce-segmented-selection {
 	width: 100%;
+	color: $core-grey-dark-500;
 }
 
 .woocommerce-segmented-selection__container {
 	width: 100%;
 	grid-template-columns: 1fr 1fr;
 	display: grid;
-	border-top: 1px solid $gray;
-	border-bottom: 1px solid $gray;
+	border-top: 1px solid $core-grey-light-700;
+	border-bottom: 1px solid $core-grey-light-700;
 	grid-gap: 1px;
-	background-color: $gray;
+	background-color: $core-grey-light-700;
 }
 
 .woocommerce-segmented-selection__label {
-	background-color: $white;
-	padding: 1em;
+	background-color: $core-grey-light-100;
+	padding: 12px 12px 12px 24px;
 	position: relative;
 	display: block;
 	height: 100%;
+
+	&:active {
+		background-color: $core-grey-light-300;
+	}
+
+	&:hover {
+		background-color: $core-grey-light-200;
+	}
 }
 
 .woocommerce-segmented-selection__input {
@@ -27,23 +36,36 @@
 	position: absolute;
 	left: -9999px;
 
+	&:active + label .woocommerce-segmented-selection__label {
+		background-color: $core-grey-light-300;
+	}
+
 	&:checked + label .woocommerce-segmented-selection__label {
-		background-color: $gray-light-10;
-		padding-left: calc(1em + 20px);
+		background-color: $white;
 
 		&::before {
 			content: '';
 			width: 8px;
 			height: 8px;
-			background-color: #444;
-			border-radius: 4px;
+			background-color: $woocommerce;
 			position: absolute;
 			top: 50%;
-			transform: translate(-20px, -50%);
+			transform: translate(-16px, -50%);
 		}
 	}
 
 	&:focus + label .woocommerce-segmented-selection__label {
-		outline: 1px solid lightseagreen;
+		/**
+		Must use outline instead of border here to avoid having the
+		elements below shift by 2 pixel on focus. This trickery is needed
+		so that left and right edges can be seen as those borders are actually
+		part of the parent CSS grid.
+		 */
+		outline: 1px solid $black;
+		width: calc(100% - 1px);
+	}
+
+	&:nth-child(4n + 1):focus + label .woocommerce-segmented-selection__label {
+		transform: translateX(1px);
 	}
 }

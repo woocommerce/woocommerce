@@ -1,13 +1,20 @@
 /** @format */
 
 .woocommerce-date-picker {
-	width: 100%;
-	max-width: 360px;
+	width: 33.3%;
+
+	@include breakpoint( '<1100px' ) {
+		width: 50%;
+	}
+
+	@include breakpoint( '<782px' ) {
+		width: 100%;
+	}
 }
 
 .woocommerce-date-picker__content {
 	.components-popover__content {
-		width: 360px;
+		width: 320px;
 		padding: 1em 0;
 		border: 1px solid $gray;
 		background-color: $white;
@@ -74,7 +81,7 @@
 
 .woocommerce-date-picker__tab {
 	outline: none;
-	border: 1px solid $black;
+	border: 1px solid $woocommerce;
 	padding: 10px;
 	margin: 0;
 	border-radius: 5px 0 0 5px;
@@ -85,7 +92,7 @@
 	}
 
 	&.is-active {
-		background-color: $black;
+		background-color: $woocommerce;
 		color: $white;
 	}
 
@@ -106,57 +113,9 @@
 }
 
 .woocommerce-date-picker__text {
-	@include font-size( 14 );
-	font-weight: 200;
+	@include font-size( 12 );
+	font-weight: 100;
 	text-transform: uppercase;
 	text-align: center;
-	color: $gray-text;
-}
-
-.woocommerce-date-picker__toggle {
-	background-color: $white;
-	position: relative;
-	border: 1px solid $gray;
-	border-radius: 5px;
-	padding: 0 40px 0 0;
-
-	&::after {
-		content: '';
-		position: absolute;
-		right: 14px;
-		top: 50%;
-		transform: translateY(-50%);
-		width: 0;
-		height: 0;
-		border-style: solid;
-		border-width: 6px 6px 0 6px;
-		border-color: #444 transparent transparent transparent;
-	}
-}
-
-.woocommerce-date-picker__toggle-label {
-	text-align: left;
-	padding: 2px 7px;
-	border-right: 1px solid $gray;
-
-	p:first-child {
-		margin: 0 0 3px 0;
-		@include font-size( 14 );
-	}
-
-	p:last-child {
-		@include font-size( 12 );
-		margin: 0;
-		color: $gray-text;
-	}
-
-	@include breakpoint( '<400px' ) {
-		p:first-child {
-			@include font-size( 12 );
-		}
-
-		p:last-child {
-			@include font-size( 10 );
-		}
-	}
+	color: $core-grey-dark-500;
 }

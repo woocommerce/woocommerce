@@ -93,14 +93,14 @@ class DatePickerContent extends Component {
 								<ComparePeriods onSelect={ onSelect } compare={ compare } />
 								{ isValidSelection( selectedTab ) ? (
 									<Link
-										className="woocommerce-date-picker__update-btn"
+										className="woocommerce-date-picker__update-btn components-button is-button is-primary"
 										to={ getUpdatePath( selectedTab ) }
 										onClick={ onClose }
 									>
 										{ __( 'Update', 'woo-dash' ) }
 									</Link>
 								) : (
-									<Button className="woocommerce-date-picker__update-btn" disabled>
+									<Button className="woocommerce-date-picker__update-btn" isPrimary disabled>
 										{ __( 'Update', 'woo-dash' ) }
 									</Button>
 								) }
