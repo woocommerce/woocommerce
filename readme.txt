@@ -176,6 +176,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Apply order bulk actions in chronological order. #20338
 * Tweak - Updated Emogrifier to 2.0. #20547
 * Tweak - Avoid using wp.template (eval) in add-to-cart-variation.js. #19496
+* Tweak - Hide Preview button when creating new products, as most fields aren't set up for it. #20650
 * Performance/Tweak - Use post_author for the order customer instead of '_customer_user' meta data. #17895
 * Performance - Exclude frontend include from REST API calls. #20000
 * Dev - REST API - Allows oAuth1.0a authentication under SSL.
@@ -192,6 +193,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Added 'woocommerce_products_admin_list_table_filters' filter to make it easier to customize the products list table filters. #20634
 * Dev - Added `woocommerce_shipping_method_add_rate_args` and `woocommerce_shipping_method_add_rate` filters. #20633
 * Dev - Added `woocommerce_coupon_validate_user_usage_limit` filter. #20630
+* Dev - Add hooks needed for product custom tables feature plugin. #20520
 * Localization - Updated IT provinces. #20286
 * Localization - Eircode validation. #20330
 
