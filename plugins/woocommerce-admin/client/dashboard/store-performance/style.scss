@@ -1,0 +1,17 @@
+/** @format */
+
+.woocommerce-dashboard__store-performance {
+	.woocommerce-card__body {
+		padding: 0;
+	}
+
+	.woocommerce-summary {
+		margin: 0;
+		border-top: 0px;
+		border-bottom: 0px;
+
+		.woocommerce-summary__item {
+			border-width: 0 1px 0 0;
+		}
+	}
+}
