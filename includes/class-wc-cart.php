@@ -140,7 +140,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Gets cart contents.
 	 *
 	 * @since 3.2.0
-	 * @return array of applied coupons
+	 * @return array of cart items
 	 */
 	public function get_cart_contents() {
 		return (array) $this->cart_contents;
