@@ -20,7 +20,7 @@ const DropdownButton = props => {
 	return (
 		<Button className={ buttonClasses } aria-expanded={ isOpen } { ...otherProps }>
 			<div className="woocommerce-dropdown-button__labels">
-				{ labels.map( label => <p>{ label }</p> ) }
+				{ labels.map( label => <span>{ label }</span> ) }
 			</div>
 		</Button>
 	);

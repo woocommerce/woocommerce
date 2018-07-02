@@ -1,7 +1,7 @@
 Dropdown Button
 ====
 
-A button meant for use as the launching button in Gutenberg's `<Dropdown />` component. The button is 100% width of its container and displays single or multiple lines rendered as `<p/>` elments.
+A button useful for a launcher of a dropdown component. The button is 100% width of its container and displays single or multiple lines rendered as `<span/>` elments.
 
 ## How to use:
 

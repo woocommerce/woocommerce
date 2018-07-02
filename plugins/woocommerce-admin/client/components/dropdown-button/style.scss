@@ -40,12 +40,13 @@
 	display: flex;
 	align-items: center;
 	width: 100%;
+	justify-content: space-around;
 
 	@include breakpoint( '<400px' ) {
 		min-height: 46px;
 	}
 
-	p {
+	span {
 		width: 100%;
 		text-align: left;
 
