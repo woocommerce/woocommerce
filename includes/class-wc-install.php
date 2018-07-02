@@ -1087,6 +1087,58 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 				}
 			}
 		}
+
+		// Create attachment for placeholders.
+		self::create_placeholder_image();
+	}
+
+	/**
+	 * Create a placeholder image in the media library.
+	 *
+	 * @since 3.5.0
+	 */
+	private static function create_placeholder_image() {
+		$placeholder_image = get_option( 'woocommerce_placeholder_image', 0 );
+
+		if ( ! is_numeric( $placeholder_image ) ) {
+			return;
+		}
+
+		if ( ! empty( $placeholder_image ) && is_numeric( $placeholder_image ) && wp_attachment_is_image( $placeholder_image ) ) {
+			return;
+		}
+
+		$upload_dir = wp_upload_dir();
+		$source     = WC()->plugin_path() . '/assets/images/placeholder.png';
+		$filename   = $upload_dir['basedir'] . '/woocommerce-placeholder.png';
+
+		if ( ! file_exists( $filename ) ) {
+			copy( $source, $filename ); // @codingStandardsIgnoreLine.
+		}
+
+		if ( ! file_exists( $filename ) ) {
+			update_option( 'woocommerce_placeholder_image', 0 );
+			return;
+		}
+
+		$filetype   = wp_check_filetype( basename( $filename ), null );
+		$attachment = array(
+			'guid'           => $upload_dir['url'] . '/' . basename( $filename ),
+			'post_mime_type' => $filetype['type'],
+			'post_title'     => preg_replace( '/\.[^.]+$/', '', basename( $filename ) ),
+			'post_content'   => '',
+			'post_status'    => 'inherit',
+		);
+		$attach_id  = wp_insert_attachment( $attachment, $filename );
+
+		update_option( 'woocommerce_placeholder_image', $attach_id );
+
+		// Make sure that this file is included, as wp_generate_attachment_metadata() depends on it.
+		require_once ABSPATH . 'wp-admin/includes/image.php';
+
+		// Generate the metadata for the attachment, and update the database record.
+		$attach_data = wp_generate_attachment_metadata( $attach_id, $filename );
+		wp_update_attachment_metadata( $attach_id, $attach_data );
 	}
 
 	/**
