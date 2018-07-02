@@ -18,8 +18,8 @@ import { compareValues } from 'components/date-picker/compare-periods';
  * @typedef {Object} DateValue - Describes the date range supplied by the date picker.
  * @property {string} label - The translated value of the period.
  * @property {string} range - The human readable value of a date range.
- * @property {moment.Moment} start - Start of the date range.
- * @property {moment.Moment} end - End of the date range.
+ * @property {moment.Moment} after - Start of the date range.
+ * @property {moment.Moment} before - End of the date range.
  */
 
 export const isoDateFormat = 'YYYY-MM-DD';
@@ -45,26 +45,28 @@ export function toMoment( format, str ) {
 /**
  * Given two dates, derive a string representation
  *
- * @param {Moment} start - start date
- * @param {Moment} end - end date
+ * @param {Moment} after - start date
+ * @param {Moment} before - end date
  * @return {string} - text value for the supplied date range
  */
-export function getRangeLabel( start, end ) {
-	const isSameDay = start.isSame( end, 'day' );
-	const isSameYear = start.year() === end.year();
-	const isSameMonth = isSameYear && start.month() === end.month();
+export function getRangeLabel( after, before ) {
+	const isSameDay = after.isSame( before, 'day' );
+	const isSameYear = after.year() === before.year();
+	const isSameMonth = isSameYear && after.month() === before.month();
 	const fullDateFormat = __( 'MMM D, YYYY', 'woo-dash' );
 	const monthDayFormat = __( 'MMM D', 'woo-dash' );
 
 	if ( isSameDay ) {
-		return start.format( fullDateFormat );
+		return after.format( fullDateFormat );
 	} else if ( isSameMonth ) {
-		const startDate = start.date();
-		return start.format( fullDateFormat ).replace( startDate, `${ startDate } - ${ end.date() }` );
+		const afterDate = after.date();
+		return after
+			.format( fullDateFormat )
+			.replace( afterDate, `${ afterDate } - ${ before.date() }` );
 	} else if ( isSameYear ) {
-		return `${ start.format( monthDayFormat ) } - ${ end.format( fullDateFormat ) }`;
+		return `${ after.format( monthDayFormat ) } - ${ before.format( fullDateFormat ) }`;
 	}
-	return `${ start.format( fullDateFormat ) } - ${ end.format( fullDateFormat ) }`;
+	return `${ after.format( fullDateFormat ) } - ${ before.format( fullDateFormat ) }`;
 }
 
 /**
@@ -157,11 +159,11 @@ export function getCurrentPeriod( period, compare ) {
  *
  * @param {string} period - the chosen period
  * @param {string} compare - `previous_period` or `previous_year`
- * @param {Moment} [start] - start date if custom period
- * @param {Moment} [end] - end date if custom period
+ * @param {Moment} [after] - after date if custom period
+ * @param {Moment} [before] - before date if custom period
  * @return {DateValue} - DateValue data about the selected period
  */
-function getDateValue( period, compare, start, end ) {
+function getDateValue( period, compare, after, before ) {
 	switch ( period ) {
 		case 'today':
 			return getCurrentPeriod( 'day', compare );
@@ -184,22 +186,22 @@ function getDateValue( period, compare, start, end ) {
 		case 'last_year':
 			return getLastPeriod( 'year', compare );
 		case 'custom':
-			const difference = end.diff( start, 'days' );
+			const difference = before.diff( after, 'days' );
 			if ( 'previous_period' === compare ) {
-				const secondaryEnd = start.clone().subtract( 1, 'days' );
+				const secondaryEnd = after.clone().subtract( 1, 'days' );
 				const secondaryStart = secondaryEnd.clone().subtract( difference, 'days' );
 				return {
-					primaryStart: start,
-					primaryEnd: end,
+					primaryStart: after,
+					primaryEnd: before,
 					secondaryStart,
 					secondaryEnd,
 				};
 			}
 			return {
-				primaryStart: start,
-				primaryEnd: end,
-				secondaryStart: start.clone().subtract( 1, 'years' ),
-				secondaryEnd: end.clone().subtract( 1, 'years' ),
+				primaryStart: after,
+				primaryEnd: before,
+				secondaryStart: after.clone().subtract( 1, 'years' ),
+				secondaryEnd: before.clone().subtract( 1, 'years' ),
 			};
 	}
 }
@@ -209,30 +211,30 @@ function getDateValue( period, compare, start, end ) {
  *
  * @param {string} period - Indicates period, 'last_week', 'quarter', or 'custom'
  * @param {string} compare - Indicates the period to compare against, 'previous_period', previous_year'
- * @param {moment.Moment} [start] - If the period supplied is "custom", this is the start date
- * @param {moment.Moment} [end] - If the period supplied is "custom", this is the end date
+ * @param {moment.Moment} [after] - If the period supplied is "custom", this is the after date
+ * @param {moment.Moment} [before] - If the period supplied is "custom", this is the before date
  * @return {{primary: DateValue, secondary: DateValue}} - Primary and secondary DateValue objects
  */
-export const getCurrentDates = ( { period, compare, start, end } ) => {
+export const getCurrentDates = ( { period, compare, after, before } ) => {
 	const { primaryStart, primaryEnd, secondaryStart, secondaryEnd } = getDateValue(
 		period,
 		compare,
-		start,
-		end
+		after,
+		before
 	);
 
 	return {
 		primary: {
 			label: find( presetValues, item => item.value === period ).label,
 			range: getRangeLabel( primaryStart, primaryEnd ),
-			start: primaryStart,
-			end: primaryEnd,
+			after: primaryStart,
+			before: primaryEnd,
 		},
 		secondary: {
 			label: find( compareValues, item => item.value === compare ).label,
 			range: getRangeLabel( secondaryStart, secondaryEnd ),
-			start: secondaryStart,
-			end: secondaryEnd,
+			after: secondaryStart,
+			before: secondaryEnd,
 		},
 	};
 };

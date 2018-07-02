@@ -38,8 +38,8 @@ class DatePickerContent extends Component {
 		const {
 			period,
 			compare,
-			start,
-			end,
+			after,
+			before,
 			onSelect,
 			onClose,
 			getUpdatePath,
@@ -83,8 +83,8 @@ class DatePickerContent extends Component {
 								) }
 								{ selectedTab === 'custom' && (
 									<DateRange
-										start={ start }
-										end={ end }
+										after={ after }
+										before={ before }
 										onSelect={ onSelect }
 										inValidDays="future"
 									/>
