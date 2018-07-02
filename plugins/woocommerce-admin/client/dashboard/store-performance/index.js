@@ -14,7 +14,7 @@ import { EllipsisMenu, MenuItem, MenuTitle } from 'components/ellipsis-menu';
 import { SummaryList, SummaryNumber } from 'components/summary';
 import './style.scss';
 
-class PerformanceIndicators extends Component {
+class StorePerformance extends Component {
 	constructor() {
 		super( ...arguments );
 		this.state = {
@@ -99,4 +99,4 @@ export default compose( [
 		orders: '/wc/v2/orders?status=processing',
 		products: '/wc/v2/products',
 	} ) ),
-] )( PerformanceIndicators );
+] )( StorePerformance );
