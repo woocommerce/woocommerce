@@ -34,11 +34,11 @@ class DateRange extends Component {
 	constructor( props ) {
 		super( props );
 
-		const { start, end } = props;
+		const { after, before } = props;
 		this.state = {
 			focusedInput: START_DATE,
-			startText: start ? start.format( shortDateFormat ) : '',
-			endText: end ? end.format( shortDateFormat ) : '',
+			afterText: after ? after.format( shortDateFormat ) : '',
+			beforeText: before ? before.format( shortDateFormat ) : '',
 		};
 
 		this.onDatesChange = this.onDatesChange.bind( this );
@@ -49,12 +49,12 @@ class DateRange extends Component {
 
 	onDatesChange( { startDate, endDate } ) {
 		this.setState( {
-			startText: startDate ? startDate.format( shortDateFormat ) : '',
-			endText: endDate ? endDate.format( shortDateFormat ) : '',
+			afterText: startDate ? startDate.format( shortDateFormat ) : '',
+			beforeText: endDate ? endDate.format( shortDateFormat ) : '',
 		} );
 		this.props.onSelect( {
-			start: startDate,
-			end: endDate,
+			after: startDate,
+			before: endDate,
 		} );
 	}
 
@@ -66,15 +66,12 @@ class DateRange extends Component {
 
 	onInputChange( input, event ) {
 		const value = event.target.value;
-		this.setState( { [ input ]: value } );
+		this.setState( { [ input + 'Text' ]: value } );
 		const date = toMoment( shortDateFormat, value );
 		if ( date ) {
-			const match = input.match( /.*(?=Text)/ );
-			if ( match ) {
-				this.props.onSelect( {
-					[ match[ 0 ] ]: date,
-				} );
-			}
+			this.props.onSelect( {
+				[ input ]: date,
+			} );
 		}
 	}
 
@@ -95,22 +92,22 @@ class DateRange extends Component {
 	}
 
 	render() {
-		const { focusedInput, startText, endText } = this.state;
-		const { start, end } = this.props;
+		const { focusedInput, afterText, beforeText } = this.state;
+		const { after, before } = this.props;
 		const isOutsideRange = this.getOutsideRange();
 		const isMobile = isMobileViewport();
 		return (
 			<Fragment>
 				<div className="woocommerce-date-picker__date-inputs">
 					<input
-						value={ startText }
+						value={ afterText }
 						type="text"
-						onChange={ partial( this.onInputChange, 'startText' ) }
+						onChange={ partial( this.onInputChange, 'after' ) }
 						aria-label={ __( 'Start Date', 'woo-dash' ) }
-						id="start-date-string"
-						aria-describedby="start-date-string-message"
+						id="after-date-string"
+						aria-describedby="after-date-string-message"
 					/>
-					<p className="screen-reader-text" id="start-date-string-message">
+					<p className="screen-reader-text" id="after-date-string-message">
 						{ sprintf(
 							__(
 								"Date input describing a selected date range's start date in format %s",
@@ -121,14 +118,14 @@ class DateRange extends Component {
 					</p>
 					<span>{ __( 'to', 'woo-dash' ) }</span>
 					<input
-						value={ endText }
+						value={ beforeText }
 						type="text"
-						onChange={ partial( this.onInputChange, 'endText' ) }
+						onChange={ partial( this.onInputChange, 'before' ) }
 						aria-label={ __( 'End Date', 'woo-dash' ) }
-						id="end-date-string"
-						aria-describedby="end-date-string-message"
+						id="before-date-string"
+						aria-describedby="before-date-string-message"
 					/>
-					<p className="screen-reader-text" id="start-date-string-message">
+					<p className="screen-reader-text" id="before-date-string-message">
 						{ sprintf(
 							__(
 								"Date input describing a selected date range's end date in format %s",
@@ -147,10 +144,10 @@ class DateRange extends Component {
 						onDatesChange={ this.onDatesChange }
 						onFocusChange={ this.onFocusChange }
 						focusedInput={ focusedInput }
-						startDate={ start }
+						startDate={ after }
 						startDateId={ START_DATE }
 						startDatePlaceholderText={ 'Start Date' }
-						endDate={ end }
+						endDate={ before }
 						endDateId={ END_DATE }
 						endDatePlaceholderText={ 'End Date' }
 						orientation={ 'horizontal' }
@@ -159,7 +156,7 @@ class DateRange extends Component {
 						minimumNights={ 0 }
 						hideKeyboardShortcutsPanel
 						noBorder
-						initialVisibleMonth={ () => start || moment() }
+						initialVisibleMonth={ () => after || moment() }
 						phrases={ phrases }
 					/>
 				</div>
@@ -169,8 +166,8 @@ class DateRange extends Component {
 }
 
 DateRange.propTypes = {
-	start: PropTypes.object,
-	end: PropTypes.object,
+	after: PropTypes.object,
+	before: PropTypes.object,
 	onSelect: PropTypes.func.isRequired,
 	inValidDays: PropTypes.oneOfType( [
 		PropTypes.oneOf( [ 'past', 'future', 'none' ] ),

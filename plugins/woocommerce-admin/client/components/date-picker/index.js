@@ -29,12 +29,12 @@ class DatePicker extends Component {
 		this.setState( this.addQueryDefaults( nextProps.query ) );
 	}
 
-	addQueryDefaults( { period, compare, start, end } ) {
+	addQueryDefaults( { period, compare, after, before } ) {
 		return {
 			period: period || 'today',
 			compare: compare || 'previous_period',
-			start: start ? moment( start ) : null,
-			end: end ? moment( end ) : null,
+			after: after ? moment( after ) : null,
+			before: before ? moment( before ) : null,
 		};
 	}
 
@@ -43,22 +43,22 @@ class DatePicker extends Component {
 	}
 
 	getOtherQueries( query ) {
-		const { period, compare, start, end, ...otherQueries } = query; // eslint-disable-line no-unused-vars
+		const { period, compare, after, before, ...otherQueries } = query; // eslint-disable-line no-unused-vars
 		return otherQueries;
 	}
 
 	getUpdatePath( selectedTab ) {
 		const { path, query } = this.props;
 		const otherQueries = this.getOtherQueries( query );
-		const { period, compare, start, end } = this.state;
+		const { period, compare, after, before } = this.state;
 		const data = {
 			period: 'custom' === selectedTab ? 'custom' : period,
 			compare,
 		};
 		if ( 'custom' === selectedTab ) {
 			Object.assign( data, {
-				start: start ? start.format( isoDateFormat ) : '',
-				end: end ? end.format( isoDateFormat ) : '',
+				after: after ? after.format( isoDateFormat ) : '',
+				before: before ? before.format( isoDateFormat ) : '',
 			} );
 		}
 		const queryString = stringifyQueryObject( Object.assign( otherQueries, data ) );
@@ -81,15 +81,15 @@ class DatePicker extends Component {
 	}
 
 	isValidSelection( selectedTab ) {
-		const { compare, start, end } = this.state;
+		const { compare, after, before } = this.state;
 		if ( 'custom' === selectedTab ) {
-			return compare && start && end;
+			return compare && after && before;
 		}
 		return true;
 	}
 
 	render() {
-		const { period, compare, start, end } = this.state;
+		const { period, compare, after, before } = this.state;
 		return (
 			<Dropdown
 				className="woocommerce-date-picker"
@@ -109,8 +109,8 @@ class DatePicker extends Component {
 					<DatePickerContent
 						period={ period }
 						compare={ compare }
-						start={ start }
-						end={ end }
+						after={ after }
+						before={ before }
 						onSelect={ this.select }
 						onClose={ onClose }
 						getUpdatePath={ this.getUpdatePath }
