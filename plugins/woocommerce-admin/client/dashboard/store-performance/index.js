@@ -2,8 +2,8 @@
 /**
  * External dependencies
  */
-import { __, _n, sprintf } from '@wordpress/i18n';
-import { Button, ToggleControl, withAPIData } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
+import { ToggleControl, withAPIData } from '@wordpress/components';
 import { Component, compose } from '@wordpress/element';
 
 /**
@@ -11,8 +11,10 @@ import { Component, compose } from '@wordpress/element';
  */
 import Card from 'components/card';
 import { EllipsisMenu, MenuItem, MenuTitle } from 'components/ellipsis-menu';
+import { SummaryList, SummaryNumber } from 'components/summary';
+import './style.scss';
 
-class WidgetNumbers extends Component {
+class StorePerformance extends Component {
 	constructor() {
 		super( ...arguments );
 		this.state = {
@@ -66,35 +68,27 @@ class WidgetNumbers extends Component {
 		const { showCustomers, showProducts, showOrders } = this.state;
 
 		return (
-			<Card title={ __( 'Store Performance', 'woo-dash' ) } menu={ this.renderMenu() }>
-				<div className="woocommerce-dashboard__widget">
+			<Card
+				title={ __( 'Store Performance', 'woo-dash' ) }
+				menu={ this.renderMenu() }
+				className="woocommerce-dashboard__store-performance"
+			>
+				<SummaryList>
 					{ showCustomers && (
-						<div className="woocommerce-dashboard__widget-item">
-							{ sprintf( _n( '%d New Customer', '%d New Customers', 4, 'woo-dash' ), 4 ) }
-						</div>
-					) }
-					{ showOrders && (
-						<div className="woocommerce-dashboard__widget-item">
-							{ sprintf(
-								_n( '%d New Order', '%d New Orders', totalOrders, 'woo-dash' ),
-								totalOrders
-							) }
-						</div>
+						<SummaryNumber value={ '2' } label={ __( 'New Customers', 'woo-dash' ) } delta={ 15 } />
 					) }
 					{ showProducts && (
-						<div className="woocommerce-dashboard__widget-item">
-							{ sprintf(
-								_n( '%d Product', '%d Products', totalProducts, 'woo-dash' ),
-								totalProducts
-							) }
-						</div>
+						<SummaryNumber value={ totalProducts } label={ __( 'Total Products', 'woo-dash' ) } />
 					) }
-					<div className="woocommerce-dashboard__widget-item">
-						<Button isPrimary href="#">
-							{ __( 'View Orders', 'woo-dash' ) }
-						</Button>
-					</div>
-				</div>
+					{ showOrders && (
+						<SummaryNumber
+							value={ totalOrders }
+							selected
+							label={ __( 'Total Orders', 'woo-dash' ) }
+							delta={ -6 }
+						/>
+					) }
+				</SummaryList>
 			</Card>
 		);
 	}
@@ -105,4 +99,4 @@ export default compose( [
 		orders: '/wc/v2/orders?status=processing',
 		products: '/wc/v2/products',
 	} ) ),
-] )( WidgetNumbers );
+] )( StorePerformance );
