@@ -29,6 +29,16 @@ class WidgetCharts extends Component {
 						className="woo-dash__widget-bar-chart"
 						data={ dummyOrders }
 						height={ 300 }
+						type={ 'line' }
+						width={ 1042 }
+					/>
+				</div>
+				<div className="woo-dash__widget">
+					<D3Chart
+						className="woo-dash__widget-bar-chart"
+						data={ dummyOrders }
+						height={ 300 }
+						type={ 'bar' }
 						width={ 1042 }
 					/>
 				</div>

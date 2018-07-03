@@ -8,12 +8,13 @@ import { max as d3Max, range as d3Range } from 'd3-array';
 import { axisBottom as d3AxisBottom, axisLeft as d3AxisLeft } from 'd3-axis';
 import { format as d3Format } from 'd3-format';
 import {
-	line as d3Line,
 	scaleBand as d3ScaleBand,
 	scaleLinear as d3ScaleLinear,
 	scaleOrdinal as d3ScaleOrdinal,
 	scaleTime as d3ScaleTime,
 } from 'd3-scale';
+import { mouse as d3Mouse, select as d3Select } from 'd3-selection';
+import { line as d3Line } from 'd3-shape';
 import { interpolateViridis as d3InterpolateViridis } from 'd3-scale-chromatic';
 import { timeFormat as d3TimeFormat, utcParse as d3UTCParse } from 'd3-time-format';
 
@@ -97,15 +98,15 @@ export const getColorScale = data =>
 	d3ScaleOrdinal().range( d3Range( 0, 1.1, 100 / ( getOrderedKeys( data ).length - 1 ) / 100 ) );
 
 export const getLine = ( data, params ) => {
-	const scaleXLine = getXLineScale( data, params ),
+	const xLineScale = getXLineScale( data, params ),
 		yScale = getYScale( data, params );
 	return d3Line()
-		.x( d => scaleXLine( new Date( d.date ) ) )
+		.x( d => xLineScale( new Date( d.date ) ) )
 		.y( d => yScale( d.value ) );
 };
 
 export const drawAxis = ( node, data, params ) => {
-	const scaleX = getXScale( data, params );
+	const xScale = params.type === 'line' ? getXLineScale( data, params ) : getXScale( data, params );
 	const uniqueDates = getUniqueDates( data );
 
 	const yGrids = [];
@@ -117,12 +118,8 @@ export const drawAxis = ( node, data, params ) => {
 		.attr( 'class', 'axis' )
 		.attr( 'transform', `translate(0,${ params.height })` )
 		.call(
-			d3AxisBottom( scaleX )
-				.tickValues(
-					uniqueDates.map(
-						d => ( scaleX === getXLineScale( uniqueDates, params.width ) ? new Date( d ) : d )
-					)
-				)
+			d3AxisBottom( xScale )
+				.tickValues( uniqueDates.map( d => ( params.type === 'line' ? new Date( d ) : d ) ) )
 				.tickFormat( d => d3TimeFormat( '%d' )( d instanceof Date ? d : new Date( d ) ) )
 		);
 
@@ -159,10 +156,70 @@ export const drawAxis = ( node, data, params ) => {
 		.remove();
 };
 
+const showTooltip = ( node, data, d ) => {
+	const chartCoords = node.node().getBoundingClientRect();
+	const colorScale = getColorScale( data );
+	let [ xPosition, yPosition ] = d3Mouse( node.node() );
+	xPosition = xPosition > chartCoords.width - 200 ? xPosition - 200 : xPosition + 20;
+	yPosition = yPosition > chartCoords.height - 150 ? yPosition - 200 : yPosition + 20;
+	const keys = getOrderedKeys( data ).map(
+		( key, i ) => `
+		<li>
+			<span class="key-colour" style="background-color:${ d3InterpolateViridis(
+				colorScale( i )
+			) }"></span>
+			<span class="key-key">${ key }:</span>
+			<span class="key-value">${ d3Format( ',.0f' )( d[ key ] ) }</span>
+		</li>`
+	);
+	node
+		.select( '.tooltip' )
+		.style( 'left', xPosition + 'px' )
+		.style( 'top', yPosition + 'px' )
+		.style( 'display', 'inline-block' ).html( `
+			<div>
+				<h4>${ d.date }</h4>
+				<ul>
+				${ keys.join( '' ) }
+				</ul>
+			</div>
+		` );
+};
+
+const handleMouseOverBarChart = ( d, i, nodes, node, data ) => {
+	d3Select( nodes[ i ].parentNode )
+		.select( '.barfocus' )
+		.attr( 'opacity', '0.1' );
+	showTooltip( node, data, d );
+};
+
+const handleMouseOutBarChart = ( d, i, nodes, node ) => {
+	d3Select( nodes[ i ].parentNode )
+		.select( '.barfocus' )
+		.attr( 'opacity', '0' );
+	node.select( '.tooltip' ).style( 'display', 'none' );
+};
+
+const handleMouseOverLineChart = ( d, i, nodes, node, data ) => {
+	d3Select( nodes[ i ].parentNode )
+		.select( '.focus-grid' )
+		.attr( 'opacity', '1' );
+	showTooltip( node, data, data.find( e => e.date === d.date ) );
+};
+
+const handleMouseOutLineChart = ( d, i, nodes, node ) => {
+	d3Select( nodes[ i ].parentNode )
+		.select( '.focus-grid' )
+		.attr( 'opacity', '0' );
+	node.select( '.tooltip' ).style( 'display', 'none' );
+};
+
 export const drawLines = ( node, data, params ) => {
-	const uniqueDates = getUniqueDates( data );
-	const line = getLine( data, params );
-	const xLineScale = getXLineScale( data, params );
+	const uniqueDates = getUniqueDates( data ),
+		line = getLine( data, params ),
+		xLineScale = getXLineScale( data, params ),
+		colorScale = getColorScale( data ),
+		yScale = getYScale( data, params );
 	const dateSpaces = uniqueDates.map( ( d, i ) => {
 		const xNow = xLineScale( new Date( d ) );
 		const xPrev =
@@ -183,7 +240,11 @@ export const drawLines = ( node, data, params ) => {
 		};
 	} );
 
-	const g = node.append( 'g' );
+	const g = node
+		.select( 'svg' )
+		.select( 'g' )
+		.select( 'g' )
+		.append( 'g' );
 
 	const focus = g
 		.selectAll( '.focus-space' )
@@ -210,9 +271,9 @@ export const drawLines = ( node, data, params ) => {
 		.attr( 'y', 0 )
 		.attr( 'width', d => d.width )
 		.attr( 'height', params.height )
-		.attr( 'opacity', 0 );
-	// .on( 'mouseover', handleMouseOverLineChart )
-	// .on( 'mouseout', handleMouseOutLineChart );
+		.attr( 'opacity', 0 )
+		.on( 'mouseover', ( d, i, nodes ) => handleMouseOverLineChart( d, i, nodes, node, data ) )
+		.on( 'mouseout', ( d, i, nodes ) => handleMouseOutLineChart( d, i, nodes, node ) );
 
 	const series = g
 		.selectAll( '.line-g' )
@@ -227,7 +288,7 @@ export const drawLines = ( node, data, params ) => {
 		.attr( 'stroke-width', 3 )
 		.attr( 'stroke-linejoin', 'round' )
 		.attr( 'stroke-linecap', 'round' )
-		.attr( 'stroke', ( d, i ) => d3InterpolateViridis( getColorScale( i ) ) )
+		.attr( 'stroke', ( d, i ) => d3InterpolateViridis( colorScale( i ) ) )
 		.attr( 'd', d => line( d.values ) );
 
 	series
@@ -236,10 +297,10 @@ export const drawLines = ( node, data, params ) => {
 		.enter()
 		.append( 'circle' )
 		.attr( 'r', 3.5 )
-		.attr( 'fill', d => d3InterpolateViridis( getColorScale( d.i ) ) )
+		.attr( 'fill', d => d3InterpolateViridis( colorScale( d.i ) ) )
 		.attr( 'stroke', '#fff' )
 		.attr( 'cx', d => xLineScale( new Date( d.date ) ) )
-		.attr( 'cy', d => getYScale( d.value ) );
+		.attr( 'cy', d => yScale( d.value ) );
 };
 
 export const drawBars = ( node, data, params ) => {
@@ -247,7 +308,11 @@ export const drawBars = ( node, data, params ) => {
 		xScale = getXScale( data, params ),
 		yScale = getYScale( data, params ),
 		xGroupScale = getXGroupScale( data, params );
+
 	const barGroup = node
+		.select( 'svg' )
+		.select( 'g' )
+		.select( 'g' )
 		.append( 'g' )
 		.attr( 'class', 'bars' )
 		.selectAll( 'g' )
@@ -285,12 +350,7 @@ export const drawBars = ( node, data, params ) => {
 		.attr( 'y', 0 )
 		.attr( 'width', xGroupScale.range()[ 1 ] )
 		.attr( 'height', params.height )
-		.attr( 'opacity', '0' );
-	// .on( 'mouseover', handleMouseOverBarChart )
-	// .on( 'mouseout', handleMouseOutBarChart )
-
-	// const tooltip = d3
-	// 	.select( 'body' )
-	// 	.append( 'div' )
-	// 	.attr( 'class', 'tooltip' );
+		.attr( 'opacity', '0' )
+		.on( 'mouseover', ( d, i, nodes ) => handleMouseOverBarChart( d, i, nodes, node, data ) )
+		.on( 'mouseout', ( d, i, nodes ) => handleMouseOutBarChart( d, i, nodes, node ) );
 };

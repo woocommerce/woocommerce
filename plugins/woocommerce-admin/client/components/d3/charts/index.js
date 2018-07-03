@@ -15,12 +15,24 @@ import { timeFormat as d3TimeFormat } from 'd3-time-format';
  */
 import './style.scss';
 import D3Base from '../base';
-import { drawAxis, drawBars } from './utils';
+import { drawAxis, drawBars, drawLines } from './utils';
 
-const D3Chart = ( { className, data, height, margin, timeseries, xFormat, yFormat, width } ) => {
-	const drawChart = ( svg, params ) => {
-		const g = svg
-			.attr( 'id', 'barchart' )
+const D3Chart = ( {
+	className,
+	data,
+	height,
+	margin,
+	timeseries,
+	type,
+	xFormat,
+	yFormat,
+	width,
+} ) => {
+	const drawChart = ( node, params ) => {
+		const g = node
+			.select( 'svg' )
+			.select( 'g' )
+			.attr( 'id', 'chart' )
 			.append( 'g' )
 			.attr( 'transform', `translate(${ margin.left },${ margin.top })` );
 
@@ -29,8 +41,9 @@ const D3Chart = ( { className, data, height, margin, timeseries, xFormat, yForma
 			width: params.width - margin.left - margin.right,
 		} );
 		drawAxis( g, data, adjParams );
-		drawBars( g, data, adjParams );
-		return svg;
+		type === 'line' && drawLines( node, data, adjParams );
+		type === 'bar' && drawBars( node, data, adjParams );
+		return node;
 	};
 
 	const getParams = node => {
@@ -42,6 +55,7 @@ const D3Chart = ( { className, data, height, margin, timeseries, xFormat, yForma
 			margin,
 			width: calculatedWidth,
 			scale: width / node.offsetWidth,
+			type,
 			xFormat: timeseries ? d3TimeFormat( xFormat ) : d3Format( xFormat ),
 			yFormat: d3Format( yFormat ),
 		};
@@ -63,6 +77,7 @@ D3Chart.propTypes = {
 		top: PropTypes.number,
 	} ),
 	timeseries: PropTypes.bool,
+	type: PropTypes.string,
 	width: PropTypes.number,
 	xFormat: PropTypes.string,
 	yFormat: PropTypes.string,
@@ -77,6 +92,7 @@ D3Chart.defaultProps = {
 		top: 20,
 	},
 	timeseries: true,
+	type: 'line',
 	width: 600,
 	xFormat: '%Y-%m-%d',
 	yFormat: ',.0f',
