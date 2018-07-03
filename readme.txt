@@ -177,6 +177,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Updated Emogrifier to 2.0. #20547
 * Tweak - Avoid using wp.template (eval) in add-to-cart-variation.js. #19496
 * Tweak - Hide Preview button when creating new products, as most fields aren't set up for it. #20650
+* Tweak - For guests, store all address fields to the session whilst placing an order. #20665
 * Performance/Tweak - Use post_author for the order customer instead of '_customer_user' meta data. #17895
 * Performance - Exclude frontend include from REST API calls. #20000
 * Dev - REST API - Allows oAuth1.0a authentication under SSL.
