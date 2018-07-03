@@ -515,7 +515,7 @@ class WC_Admin_Setup_Wizard {
 		$address_2      = sanitize_text_field( $_POST['store_address_2'] );
 		$city           = sanitize_text_field( $_POST['store_city'] );
 		$country        = sanitize_text_field( $_POST['store_country'] );
-		$state          = sanitize_text_field( $_POST['store_state'] );
+		$state          = isset( $_POST['store_state'] ) ? sanitize_text_field( $_POST['store_state'] ) : false;
 		$postcode       = sanitize_text_field( $_POST['store_postcode'] );
 		$currency_code  = sanitize_text_field( $_POST['currency_code'] );
 		$product_type   = sanitize_text_field( $_POST['product_type'] );
