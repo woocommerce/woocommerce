@@ -377,22 +377,15 @@ class WC_Shortcode_My_Account {
 	 * Show the add payment method page.
 	 */
 	public static function add_payment_method() {
-
 		if ( ! is_user_logged_in() ) {
-
 			wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) );
 			exit();
-
 		} else {
-
 			do_action( 'before_woocommerce_add_payment_method' );
-
-			wc_print_notices();
 
 			wc_get_template( 'myaccount/form-add-payment-method.php' );
 
 			do_action( 'after_woocommerce_add_payment_method' );
-
 		}
 	}
 }

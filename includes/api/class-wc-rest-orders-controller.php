@@ -127,14 +127,20 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 	}
 
 	/**
-	 * Get object.
+	 * Get object. Return false if object is not of required type.
 	 *
 	 * @since  3.0.0
 	 * @param  int $id Object ID.
-	 * @return WC_Data
+	 * @return WC_Data|bool
 	 */
 	protected function get_object( $id ) {
-		return wc_get_order( $id );
+		$order = wc_get_order( $id );
+		// In case id is a refund's id (or it's not an order at all), don't expose it via /orders/ path.
+		if ( ! $order || 'shop_order_refund' === $order->get_type() ) {
+			return false;
+		}
+
+		return $order;
 	}
 
 	/**
@@ -359,15 +365,20 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 		}
 
 		if ( isset( $request['customer'] ) ) {
-			if ( ! empty( $args['meta_query'] ) ) {
-				$args['meta_query'] = array(); // WPCS: slow query ok.
-			}
+			// On WC 3.5.0 the ID of the user that placed the order was moved from the post meta _customer_user to the post_author field in the wp_posts table.
+			if ( version_compare( get_option( 'woocommerce_db_version' ), '3.5.0', '>=' ) ) {
+				$args['author'] = $request['customer'];
+			} else {
+				if ( ! empty( $args['meta_query'] ) ) {
+					$args['meta_query'] = array(); // WPCS: slow query ok.
+				}
 
-			$args['meta_query'][] = array(
-				'key'   => '_customer_user',
-				'value' => $request['customer'],
-				'type'  => 'NUMERIC',
-			);
+				$args['meta_query'][] = array(
+					'key'   => '_customer_user',
+					'value' => $request['customer'],
+					'type'  => 'NUMERIC',
+				);
+			}
 		}
 
 		// Search by product.

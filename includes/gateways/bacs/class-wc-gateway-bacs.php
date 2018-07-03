@@ -364,9 +364,6 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 			$order->payment_complete();
 		}
 
-		// Reduce stock levels.
-		wc_reduce_stock_levels( $order_id );
-
 		// Remove cart.
 		WC()->cart->empty_cart();
 

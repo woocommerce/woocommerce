@@ -32,7 +32,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			global $wp_scripts;
 
 			$screen    = get_current_screen();
-			$screen_id = $screen ? $screen->id: '';
+			$screen_id = $screen ? $screen->id : '';
 
 			// Register admin styles.
 			wp_register_style( 'woocommerce_admin_menu_styles', WC()->plugin_url() . '/assets/css/menu.css', array(), WC_VERSION );
@@ -161,23 +161,24 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 				$params = array(
 					/* translators: %s: decimal */
-					'i18n_decimal_error'               => sprintf( __( 'Please enter in decimal (%s) format without thousand separators.', 'woocommerce' ), $decimal ),
+					'i18n_decimal_error'                => sprintf( __( 'Please enter in decimal (%s) format without thousand separators.', 'woocommerce' ), $decimal ),
 					/* translators: %s: price decimal separator */
-					'i18n_mon_decimal_error'           => sprintf( __( 'Please enter in monetary decimal (%s) format without thousand separators and currency symbols.', 'woocommerce' ), wc_get_price_decimal_separator() ),
-					'i18n_country_iso_error'           => __( 'Please enter in country code with two capital letters.', 'woocommerce' ),
-					'i18_sale_less_than_regular_error' => __( 'Please enter in a value less than the regular price.', 'woocommerce' ),
-					'i18_delete_product_notice'        => __( 'This product has produced sales and may be linked to existing orders. Are you sure you want to delete it?', 'woocommerce' ),
-					'decimal_point'                    => $decimal,
-					'mon_decimal_point'                => wc_get_price_decimal_separator(),
-					'ajax_url'                         => admin_url( 'admin-ajax.php' ),
-					'strings'                          => array(
+					'i18n_mon_decimal_error'            => sprintf( __( 'Please enter in monetary decimal (%s) format without thousand separators and currency symbols.', 'woocommerce' ), wc_get_price_decimal_separator() ),
+					'i18n_country_iso_error'            => __( 'Please enter in country code with two capital letters.', 'woocommerce' ),
+					'i18n_sale_less_than_regular_error' => __( 'Please enter in a value less than the regular price.', 'woocommerce' ),
+					'i18n_delete_product_notice'        => __( 'This product has produced sales and may be linked to existing orders. Are you sure you want to delete it?', 'woocommerce' ),
+					'i18n_remove_personal_data_notice'  => __( 'This action cannot be reversed. Are you sure you wish to erase personal data from the selected orders?', 'woocommerce' ),
+					'decimal_point'                     => $decimal,
+					'mon_decimal_point'                 => wc_get_price_decimal_separator(),
+					'ajax_url'                          => admin_url( 'admin-ajax.php' ),
+					'strings'                           => array(
 						'import_products' => __( 'Import', 'woocommerce' ),
 						'export_products' => __( 'Export', 'woocommerce' ),
 					),
-					'nonces'                           => array(
+					'nonces'                            => array(
 						'gateway_toggle' => wp_create_nonce( 'woocommerce-toggle-payment-gateway-enabled' ),
 					),
-					'urls'                             => array(
+					'urls'                              => array(
 						'import_products' => current_user_can( 'import' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_importer' ) ) : null,
 						'export_products' => current_user_can( 'export' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_exporter' ) ) : null,
 					),
@@ -268,18 +269,23 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wp_enqueue_script( 'wc-admin-coupon-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-coupon' . $suffix . '.js', array( 'wc-admin-meta-boxes' ), WC_VERSION );
 			}
 			if ( in_array( str_replace( 'edit-', '', $screen_id ), array_merge( array( 'shop_coupon', 'product' ), wc_get_order_types( 'order-meta-boxes' ) ) ) ) {
-				$post_id  = isset( $post->ID ) ? $post->ID : '';
-				$currency = '';
+				$post_id            = isset( $post->ID ) ? $post->ID : '';
+				$currency           = '';
+				$remove_item_notice = __( 'Are you sure you want to remove the selected items?', 'woocommerce' );
 
 				if ( $post_id && in_array( get_post_type( $post_id ), wc_get_order_types( 'order-meta-boxes' ) ) ) {
 					$order = wc_get_order( $post_id );
 					if ( $order ) {
-						$currency = $order->get_currency();
+						$currency           = $order->get_currency();
+
+						if ( ! $order->has_status( array( 'pending', 'failed', 'cancelled' ) ) ) {
+							$remove_item_notice = $remove_item_notice . ' ' . __( "You may need to manually restore the item's stock.", 'woocommerce' );
+						}
 					}
 				}
 
 				$params = array(
-					'remove_item_notice'            => __( "Are you sure you want to remove the selected items? If you have previously reduced this item's stock, or this order was submitted by a customer, you will need to manually restore the item's stock.", 'woocommerce' ),
+					'remove_item_notice'            => $remove_item_notice,
 					'i18n_select_items'             => __( 'Please select some items.', 'woocommerce' ),
 					'i18n_do_refund'                => __( 'Are you sure you wish to process this refund? This action cannot be undone.', 'woocommerce' ),
 					'i18n_delete_refund'            => __( 'Are you sure you wish to delete this refund? This action cannot be undone.', 'woocommerce' ),

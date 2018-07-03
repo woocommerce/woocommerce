@@ -191,16 +191,18 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 					echo '<mark class="yes">' . esc_html( $environment['php_version'] ) . '</mark>';
 				} else {
 					$update_link = ' <a href="https://docs.woocommerce.com/document/how-to-update-your-php-version/" target="_blank">' . esc_html__( 'How to update your PHP version', 'woocommerce' ) . '</a>';
+					$class       = 'error';
 
 					if ( version_compare( $environment['php_version'], '5.4', '<' ) ) {
-						$notice = __( 'WooCommerce will run under this version of PHP, however, some features such as geolocation are not compatible. Support for this version will be dropped in the next major release. We recommend using PHP version 7.2 or above for greater performance and security.', 'woocommerce' ) . $update_link;
+						$notice = '<span class="dashicons dashicons-warning"></span> ' . __( 'WooCommerce will run under this version of PHP, however, some features such as geolocation are not compatible. Support for this version will be dropped in the next major release. We recommend using PHP version 7.2 or above for greater performance and security.', 'woocommerce' ) . $update_link;
 					} elseif ( version_compare( $environment['php_version'], '5.6', '<' ) ) {
-						$notice = __( 'WooCommerce will run under this version of PHP, however, it has reached end of life. We recommend using PHP version 7.2 or above for greater performance and security.', 'woocommerce' ) . $update_link;
+						$notice = '<span class="dashicons dashicons-warning"></span> ' . __( 'WooCommerce will run under this version of PHP, however, it has reached end of life. We recommend using PHP version 7.2 or above for greater performance and security.', 'woocommerce' ) . $update_link;
 					} elseif ( version_compare( $environment['php_version'], '7.2', '<' ) ) {
 						$notice = __( 'We recommend using PHP version 7.2 or above for greater performance and security.', 'woocommerce' ) . $update_link;
+						$class  = 'recommendation';
 					}
 
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html( $environment['php_version'] ) . ' - ' . wp_kses_post( $notice ) . '</mark>';
+					echo '<mark class="' . esc_attr( $class ) . '">' . esc_html( $environment['php_version'] ) . ' - ' . wp_kses_post( $notice ) . '</mark>';
 				}
 				?>
 			</td>

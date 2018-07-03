@@ -222,7 +222,12 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	 * Render columm: order_date.
 	 */
 	protected function render_order_date_column() {
-		$order_timestamp = $this->object->get_date_created()->getTimestamp();
+		$order_timestamp = $this->object->get_date_created() ? $this->object->get_date_created()->getTimestamp() : '';
+
+		if ( ! $order_timestamp ) {
+			echo '&ndash;';
+			return;
+		}
 
 		// Check if the order was created within the last 24 hours, and not in the future.
 		if ( $order_timestamp > strtotime( '-1 day', current_time( 'timestamp', true ) ) && $order_timestamp <= current_time( 'timestamp', true ) ) {
@@ -428,6 +433,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 				'_line_tax',
 				'method_id',
 				'cost',
+				'_reduced_stock',
 			)
 		);
 
@@ -623,7 +629,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	 * @return string
 	 */
 	public function handle_bulk_actions( $redirect_to, $action, $ids ) {
-		$ids     = array_map( 'absint', $ids );
+		$ids     = apply_filters( 'woocommerce_bulk_action_ids', array_reverse( array_map( 'absint', $ids ) ), $action, 'order' );
 		$changed = 0;
 
 		if ( 'remove_personal_data' === $action ) {
@@ -644,6 +650,9 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 
 			// Sanity check: bail out if this is actually not a status, or is not a registered status.
 			if ( isset( $order_statuses[ 'wc-' . $new_status ] ) ) {
+				// Initialize payment gateways in case order has hooked status transition actions.
+				wc()->payment_gateways();
+
 				foreach ( $ids as $id ) {
 					$order = wc_get_order( $id );
 					$order->update_status( $new_status, __( 'Order status changed by bulk edit:', 'woocommerce' ), true );
@@ -763,15 +772,22 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 
 		// Filter the orders by the posted customer.
 		if ( ! empty( $_GET['_customer_user'] ) ) { // WPCS: input var ok.
-			// @codingStandardsIgnoreStart
-			$query_vars['meta_query'] = array(
-				array(
-					'key'   => '_customer_user',
-					'value' => (int) $_GET['_customer_user'], // WPCS: input var ok, sanitization ok.
-					'compare' => '=',
-				),
-			);
-			// @codingStandardsIgnoreEnd
+			$customer_id = (int) $_GET['_customer_user'];  // WPCS: input var ok, sanitization ok.
+
+			// On WC 3.5.0 the ID of the user that placed the order was moved from the post meta _customer_user to the post_author field in the wp_posts table.
+			if ( version_compare( get_option( 'woocommerce_db_version' ), '3.5.0', '>=' ) ) {
+				$query_vars['author'] = $customer_id;
+			} else {
+				// @codingStandardsIgnoreStart
+				$query_vars['meta_query'] = array(
+					array(
+						'key'     => '_customer_user',
+						'value'   => $customer_id,
+						'compare' => '=',
+					),
+				);
+				// @codingStandardsIgnoreEnd
+			}
 		}
 
 		// Sorting.

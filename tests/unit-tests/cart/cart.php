@@ -56,8 +56,8 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->remove_coupons();
 
 		# Test case 2 #10573
-		update_post_meta( $product->get_id(), '_regular_price', '29.95' );
-		update_post_meta( $product->get_id(), '_price', '29.95' );
+		$product->set_regular_price( '29.95' );
+		$product->save();
 		update_post_meta( $coupon->get_id(), 'discount_type', 'percent' );
 		update_post_meta( $coupon->get_id(), 'coupon_amount', '10' );
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
@@ -123,8 +123,8 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		foreach ( $products_data as $price ) {
 			$loop_product  = WC_Helper_Product::create_simple_product();
 			$product_ids[] = $loop_product->get_id();
-			update_post_meta( $loop_product->get_id(), '_regular_price', $price );
-			update_post_meta( $loop_product->get_id(), '_price', $price );
+			$loop_product->set_regular_price( $price );
+			$loop_product->save();
 			WC()->cart->add_to_cart( $loop_product->get_id(), 1 );
 		}
 
@@ -816,9 +816,8 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		// Create dummy product
 		$product = WC_Helper_Product::create_simple_product();
 
-		// Set sold_individually to yes
-		$product->sold_individually = 'yes';
-		update_post_meta( $product->get_id(), '_sold_individually', 'yes' );
+		$product->set_sold_individually( true );
+		$product->save();
 
 		// Add the product twice to cart, should be corrected to 1. Methods returns boolean on failure, string on success.
 		$this->assertNotFalse( WC()->cart->add_to_cart( $product->get_id(), 2 ) );
@@ -1077,8 +1076,8 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	public function test_shipping_total() {
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
-		update_post_meta( $product->get_id(), '_price', '10' );
-		update_post_meta( $product->get_id(), '_regular_price', '10' );
+		$product->set_regular_price( 10 );
+		$product->save();
 
 		// Create a flat rate method
 		WC_Helper_Shipping::create_simple_flat_rate();
@@ -1120,8 +1119,8 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	public function test_cart_fee() {
 		// Create product.
 		$product = WC_Helper_Product::create_simple_product();
-		update_post_meta( $product->get_id(), '_price', '10' );
-		update_post_meta( $product->get_id(), '_regular_price', '10' );
+		$product->set_regular_price( 10 );
+		$product->save();
 
 		// We need this to have the calculate_totals() method calculate totals.
 		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
@@ -1169,8 +1168,8 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		// Create product.
 		$product = WC_Helper_Product::create_simple_product();
-		update_post_meta( $product->get_id(), '_price', '10' );
-		update_post_meta( $product->get_id(), '_regular_price', '10' );
+		$product->set_regular_price( 10 );
+		$product->save();
 
 		// We need this to have the calculate_totals() method calculate totals.
 		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
@@ -1204,8 +1203,8 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	public function test_cart_negative_fee() {
 		// Create product.
 		$product = WC_Helper_Product::create_simple_product();
-		update_post_meta( $product->get_id(), '_price', '15' );
-		update_post_meta( $product->get_id(), '_regular_price', '15' );
+		$product->set_regular_price( 15 );
+		$product->save();
 
 		// We need this to have the calculate_totals() method calculate totals.
 		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
@@ -1253,8 +1252,8 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		// Create product.
 		$product = WC_Helper_Product::create_simple_product();
-		update_post_meta( $product->get_id(), '_price', '15' );
-		update_post_meta( $product->get_id(), '_regular_price', '15' );
+		$product->set_regular_price( 15 );
+		$product->save();
 
 		// We need this to have the calculate_totals() method calculate totals.
 		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {

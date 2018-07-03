@@ -15,6 +15,7 @@ $hidden_order_itemmeta = apply_filters(
 		'_line_tax',
 		'method_id',
 		'cost',
+		'_reduced_stock',
 	)
 );
 ?><div class="view">

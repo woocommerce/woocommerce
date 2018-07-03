@@ -263,7 +263,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @param array $args Arguments (default: array()).
 	 */
 	public function add_rate( $args = array() ) {
-		$args = wp_parse_args( $args, array(
+		$args = apply_filters( 'woocommerce_shipping_method_add_rate_args', wp_parse_args( $args, array(
 			'id'        => $this->get_rate_id(), // ID for the rate. If not passed, this id:instance default will be used.
 			'label'     => '', // Label for the rate.
 			'cost'      => '0', // Amount or array of costs (per item shipping).
@@ -271,7 +271,8 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 			'calc_tax'  => 'per_order', // Calc tax per_order or per_item. Per item needs an array of costs.
 			'meta_data' => array(), // Array of misc meta data to store along with this rate - key value pairs.
 			'package'   => false, // Package array this rate was generated for @since 2.6.0.
-		) );
+			'price_decimals' => wc_get_price_decimals(),
+		) ), $this );
 
 		// ID and label are required.
 		if ( ! $args['id'] || ! $args['label'] ) {
@@ -288,7 +289,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		}
 
 		// Round the total cost after taxes have been calculated.
-		$total_cost = wc_format_decimal( $total_cost, wc_get_price_decimals() );
+		$total_cost = wc_format_decimal( $total_cost, $args['price_decimals'] );
 
 		// Create rate object.
 		$rate = new WC_Shipping_Rate();
@@ -315,7 +316,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 			$rate->add_meta_data( __( 'Items', 'woocommerce' ), implode( ', ', $items_in_package ) );
 		}
 
-		$this->rates[ $args['id'] ] = $rate;
+		$this->rates[ $args['id'] ] = apply_filters( 'woocommerce_shipping_method_add_rate', $rate, $args, $this );
 	}
 
 	/**

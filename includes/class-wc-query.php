@@ -176,8 +176,6 @@ class WC_Query {
 	/**
 	 * Add query vars.
 	 *
-	 * @access public
-	 *
 	 * @param array $vars Query vars.
 	 * @return array
 	 */
@@ -371,7 +369,6 @@ class WC_Query {
 	 *
 	 * Hooked into wpseo_ hook already, so no need for function_exist.
 	 *
-	 * @access public
 	 * @return string
 	 */
 	public function wpseo_metakey() {
@@ -515,7 +512,11 @@ class WC_Query {
 		global $wpdb, $wp_query;
 
 		if ( isset( $wp_query->queried_object, $wp_query->queried_object->term_taxonomy_id, $wp_query->queried_object->taxonomy ) && is_a( $wp_query->queried_object, 'WP_Term' ) ) {
-			$search_within_terms   = get_term_children( $wp_query->queried_object->term_taxonomy_id, $wp_query->queried_object->taxonomy );
+			$search_within_terms = get_terms( array(
+				'taxonomy' => $wp_query->queried_object->taxonomy,
+				'child_of' => $wp_query->queried_object->term_id,
+				'fields'   => 'tt_ids',
+			) );
 			$search_within_terms[] = $wp_query->queried_object->term_taxonomy_id;
 			$args['join']         .= " INNER JOIN (
 				SELECT post_id, min( meta_value+0 ) price
@@ -544,7 +545,11 @@ class WC_Query {
 		global $wpdb, $wp_query;
 
 		if ( isset( $wp_query->queried_object, $wp_query->queried_object->term_taxonomy_id, $wp_query->queried_object->taxonomy ) && is_a( $wp_query->queried_object, 'WP_Term' ) ) {
-			$search_within_terms   = get_term_children( $wp_query->queried_object->term_taxonomy_id, $wp_query->queried_object->taxonomy );
+			$search_within_terms = get_terms( array(
+				'taxonomy' => $wp_query->queried_object->taxonomy,
+				'child_of' => $wp_query->queried_object->term_id,
+				'fields'   => 'tt_ids',
+			) );
 			$search_within_terms[] = $wp_query->queried_object->term_taxonomy_id;
 			$args['join']         .= " INNER JOIN (
 				SELECT post_id, max( meta_value+0 ) price
@@ -750,21 +755,22 @@ class WC_Query {
 	public static function get_layered_nav_chosen_attributes() {
 		if ( ! is_array( self::$_chosen_attributes ) ) {
 			self::$_chosen_attributes = array();
-			$attribute_taxonomies     = wc_get_attribute_taxonomies();
 
-			if ( ! empty( $attribute_taxonomies ) ) {
-				foreach ( $attribute_taxonomies as $tax ) {
-					$attribute    = wc_sanitize_taxonomy_name( $tax->attribute_name );
-					$taxonomy     = wc_attribute_taxonomy_name( $attribute );
-					$filter_terms = ! empty( $_GET[ 'filter_' . $attribute ] ) ? explode( ',', wc_clean( wp_unslash( $_GET[ 'filter_' . $attribute ] ) ) ) : array(); // WPCS: sanitization ok, input var ok, CSRF ok.
+			if ( ! empty( $_GET ) ) { // WPCS: input var ok, CSRF ok.
+				foreach ( $_GET as $key => $value ) { // WPCS: input var ok, CSRF ok.
+					if ( 0 === strpos( $key, 'filter_' ) ) {
+						$attribute    = wc_sanitize_taxonomy_name( str_replace( 'filter_', '', $key ) );
+						$taxonomy     = wc_attribute_taxonomy_name( $attribute );
+						$filter_terms = ! empty( $value ) ? explode( ',', wc_clean( wp_unslash( $value ) ) ) : array();
 
-					if ( empty( $filter_terms ) || ! taxonomy_exists( $taxonomy ) ) {
-						continue;
+						if ( empty( $filter_terms ) || ! taxonomy_exists( $taxonomy ) || ! wc_attribute_taxonomy_id_by_name( $attribute ) ) {
+							continue;
+						}
+
+						$query_type                                     = ! empty( $_GET[ 'query_type_' . $attribute ] ) && in_array( $_GET[ 'query_type_' . $attribute ], array( 'and', 'or' ), true ) ? wc_clean( wp_unslash( $_GET[ 'query_type_' . $attribute ] ) ) : ''; // WPCS: sanitization ok, input var ok, CSRF ok.
+						self::$_chosen_attributes[ $taxonomy ]['terms'] = array_map( 'sanitize_title', $filter_terms ); // Ensures correct encoding.
+						self::$_chosen_attributes[ $taxonomy ]['query_type'] = $query_type ? $query_type : apply_filters( 'woocommerce_layered_nav_default_query_type', 'and' );
 					}
-
-					$query_type                                     = ! empty( $_GET[ 'query_type_' . $attribute ] ) && in_array( $_GET[ 'query_type_' . $attribute ], array( 'and', 'or' ), true ) ? wc_clean( wp_unslash( $_GET[ 'query_type_' . $attribute ] ) ) : ''; // WPCS: sanitization ok, input var ok, CSRF ok.
-					self::$_chosen_attributes[ $taxonomy ]['terms'] = array_map( 'sanitize_title', $filter_terms ); // Ensures correct encoding.
-					self::$_chosen_attributes[ $taxonomy ]['query_type'] = $query_type ? $query_type : apply_filters( 'woocommerce_layered_nav_default_query_type', 'and' );
 				}
 			}
 		}

@@ -89,12 +89,7 @@ abstract class WC_Log_Levels {
 	 * @return int 100 (debug) - 800 (emergency) or 0 if not recognized
 	 */
 	public static function get_level_severity( $level ) {
-		if ( self::is_valid_level( $level ) ) {
-			$severity = self::$level_to_severity[ strtolower( $level ) ];
-		} else {
-			$severity = 0;
-		}
-		return $severity;
+		return self::is_valid_level( $level ) ? self::$level_to_severity[ strtolower( $level ) ] : 0;
 	}
 
 	/**
@@ -104,11 +99,10 @@ abstract class WC_Log_Levels {
 	 * @return bool|string False if not recognized. Otherwise string representation of level.
 	 */
 	public static function get_severity_level( $severity ) {
-		if ( array_key_exists( $severity, self::$severity_to_level ) ) {
-			return self::$severity_to_level[ $severity ];
-		} else {
+		if ( ! array_key_exists( $severity, self::$severity_to_level ) ) {
 			return false;
 		}
+		return self::$severity_to_level[ $severity ];
 	}
 
 }

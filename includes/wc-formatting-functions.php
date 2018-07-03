@@ -900,6 +900,9 @@ function wc_format_postcode( $postcode, $country ) {
 		case 'GB':
 			$postcode = trim( substr_replace( $postcode, ' ', -3, 0 ) );
 			break;
+		case 'IE':
+			$postcode = trim( substr_replace( $postcode, ' ', 3, 0 ) );
+			break;
 		case 'BR':
 		case 'PL':
 			$postcode = substr_replace( $postcode, '-', -3, 0 );
@@ -938,7 +941,7 @@ function wc_normalize_postcode( $postcode ) {
  * @return string
  */
 function wc_format_phone_number( $phone ) {
-	return str_replace( '.', '-', $phone );
+	return preg_replace( '/[^0-9\+\-\s]/', '-', preg_replace( '/[\x00-\x1F\x7F-\xFF]/', '', $phone ) );
 }
 
 /**

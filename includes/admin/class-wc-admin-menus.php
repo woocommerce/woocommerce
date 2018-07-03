@@ -340,7 +340,7 @@ class WC_Admin_Menus {
 	 * @param WP_Admin_Bar $wp_admin_bar Admin bar instance.
 	 */
 	public function admin_bar_menus( $wp_admin_bar ) {
-		if ( ! is_admin() || ! is_user_logged_in() ) {
+		if ( ! is_admin() || ! is_admin_bar_showing() ) {
 			return;
 		}
 

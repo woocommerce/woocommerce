@@ -208,6 +208,22 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	}
 
 	/**
+	 * Process bulk actions.
+	 */
+	public function process_bulk_action() {
+		$action   = $this->current_action();
+		$webhooks = isset( $_REQUEST['webhook'] ) ? array_map( 'absint', (array) $_REQUEST['webhook'] ) : array(); // WPCS: input var okay, CSRF ok.
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_die( esc_html__( 'You do not have permission to edit Webhooks', 'woocommerce' ) );
+		}
+
+		if ( 'delete' === $action ) {
+			WC_Admin_Webhooks::bulk_delete( $webhooks );
+		}
+	}
+
+	/**
 	 * Generate the table navigation above or below the table.
 	 * Included to remove extra nonce input.
 	 *

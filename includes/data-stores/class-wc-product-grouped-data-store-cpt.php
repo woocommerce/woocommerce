@@ -74,11 +74,13 @@ class WC_Product_Grouped_Data_Store_CPT extends WC_Product_Data_Store_CPT implem
 		foreach ( $product->get_children( 'edit' ) as $child_id ) {
 			$child = wc_get_product( $child_id );
 			if ( $child ) {
-				$child_prices[] = $child->get_price();
+				$child_prices[] = $child->get_price( 'edit' );
 			}
 		}
 		$child_prices = array_filter( $child_prices );
 		delete_post_meta( $product->get_id(), '_price' );
+		delete_post_meta( $product->get_id(), '_sale_price' );
+		delete_post_meta( $product->get_id(), '_regular_price' );
 
 		if ( ! empty( $child_prices ) ) {
 			add_post_meta( $product->get_id(), '_price', min( $child_prices ) );

@@ -1638,8 +1638,6 @@ function wc_update_330_db_version() {
  * Update state codes for Ireland and BD.
  */
 function wc_update_340_states() {
-	global $wpdb;
-
 	$country_states = array(
 		'IE' => array(
 			'CK' => 'CO',
@@ -1714,6 +1712,23 @@ function wc_update_340_states() {
 		),
 	);
 
+	update_option( 'woocommerce_update_340_states', $country_states );
+}
+
+/**
+ * Update next state in the queue.
+ *
+ * @return bool True to run again, false if completed.
+ */
+function wc_update_340_state() {
+	global $wpdb;
+
+	$country_states = array_filter( (array) get_option( 'woocommerce_update_340_states', array() ) );
+
+	if ( empty( $country_states ) ) {
+		return false;
+	}
+
 	foreach ( $country_states as $country => $states ) {
 		foreach ( $states as $old => $new ) {
 			$wpdb->query(
@@ -1743,8 +1758,22 @@ function wc_update_340_states() {
 					'tax_rate_state' => strtoupper( $old ),
 				)
 			);
+			unset( $country_states[ $country ][ $old ] );
+
+			if ( empty( $country_states[ $country ] ) ) {
+				unset( $country_states[ $country ] );
+			}
+			break 2;
 		}
 	}
+
+	if ( ! empty( $country_states ) ) {
+		return update_option( 'woocommerce_update_340_states', $country_states );
+	}
+
+	delete_option( 'woocommerce_update_340_states' );
+
+	return false;
 }
 
 /**
@@ -1772,4 +1801,164 @@ function wc_update_340_last_active() {
  */
 function wc_update_340_db_version() {
 	WC_Install::update_db_version( '3.4.0' );
+}
+
+/**
+ * Remove duplicate foreign keys
+ *
+ * @return void
+ */
+function wc_update_343_cleanup_foreign_keys() {
+	global $wpdb;
+
+	$results = $wpdb->get_results( "
+		SELECT CONSTRAINT_NAME
+		FROM information_schema.TABLE_CONSTRAINTS
+		WHERE CONSTRAINT_SCHEMA = '{$wpdb->dbname}'
+		AND CONSTRAINT_NAME LIKE '%wc_download_log_ib%'
+		AND CONSTRAINT_TYPE = 'FOREIGN KEY'
+		AND TABLE_NAME = '{$wpdb->prefix}wc_download_log'
+	" );
+
+	if ( $results ) {
+		foreach ( $results as $fk ) {
+			$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log DROP FOREIGN KEY {$fk->CONSTRAINT_NAME}" ); // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+		}
+	}
+}
+
+/**
+ * Update DB version.
+ *
+ * @return void
+ */
+function wc_update_343_db_version() {
+	WC_Install::update_db_version( '3.4.3' );
+}
+
+/**
+ * Copy order customer_id from post meta to post_author and set post_author to 0 for refunds.
+ *
+ * Two different strategies are used to copy data depending if the update is being executed from
+ * the command line or not. If `wp wc update` is used to update the database, this function
+ * copies data in a single go that is faster but uses more resources. If the databse update was
+ * triggered from the wp-admin, this function copies data in batches which is slower but uses
+ * few resources and thus is less likely to fail on smaller servers.
+ *
+ * @param WC_Background_Updater|false $updater Background updater instance or false if function is called from `wp wc update` WP-CLI command.
+ * @return true|void Return true if near memory limit and needs to restart. Return void if update completed.
+ */
+function wc_update_350_order_customer_id( $updater = false ) {
+	global $wpdb;
+
+	$post_types              = (array) apply_filters( 'woocommerce_update_350_order_customer_id_post_types', array( 'shop_order' ) );
+	$post_types_placeholders = implode( ', ', array_fill( 0, count( $post_types ), '%s' ) );
+
+	if ( defined( 'WP_CLI' ) && WP_CLI ) {
+		// If running the update from the command-line, copy data in a single go which is faster but uses more resources.
+		$wpdb->query(
+			'CREATE TEMPORARY TABLE customers_map (post_id BIGINT(20), customer_id BIGINT(20), PRIMARY KEY(post_id))'
+		);
+
+		$wpdb->query(
+			"INSERT IGNORE INTO customers_map (SELECT post_id, meta_value FROM wp_postmeta WHERE meta_key = '_customer_user')"
+		);
+
+		$wpdb->query( 'SET sql_safe_updates=1' );
+
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE wp_posts JOIN customers_map ON wp_posts.ID = customers_map.post_id SET wp_posts.post_author = customers_map.customer_id WHERE post_type IN ({$post_types_placeholders})",  // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+				$post_types
+			)
+		);
+
+		$wpdb->update( $wpdb->posts, array( 'post_author' => 0 ), array( 'post_type' => 'shop_order_refund' ) );
+	} else {
+		// If running the update from the wp-admin, copy data in batches being careful not to use more memory than allowed.
+		$admin_orders_sql = '';
+		$admin_orders     = get_transient( 'wc_update_350_admin_orders' );
+
+		if ( false === $admin_orders ) {
+			// Get the list of orders that we don't want to change as they belong to user ID 1.
+			$admin_orders = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT ID FROM wp_posts p
+					INNER JOIN wp_postmeta pm ON p.ID = pm.post_id
+					WHERE post_type IN ({$post_types_placeholders}) AND meta_key = '_customer_user' AND meta_value = 1", // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+					$post_types
+				)
+			);
+
+			// Cache the list of orders placed by the user ID 1 as to large stores this query can be slow.
+			set_transient( 'wc_update_350_admin_orders', $admin_orders, DAY_IN_SECONDS );
+		}
+
+		if ( ! empty( $admin_orders ) ) {
+			$admin_orders_sql .= ' AND ID NOT IN (' . implode( ', ', $admin_orders ) . ') ';
+		}
+
+		// Query to get a batch of orders IDs to change.
+		$query = $wpdb->prepare(
+			// phpcs:disable WordPress.WP.PreparedSQL.NotPrepared
+			"SELECT ID FROM {$wpdb->posts}
+			WHERE post_author = 1 AND post_type IN ({$post_types_placeholders}) $admin_orders_sql
+			LIMIT 1000",
+			$post_types
+			// phpcs:enable
+		);
+
+		while ( true ) {
+			// phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+			$orders_to_update = $wpdb->get_col( $query );
+
+			// Exit loop if no more orders to update.
+			if ( ! $orders_to_update ) {
+				break;
+			}
+
+			$orders_meta_data = $wpdb->get_results(
+				// phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+				"SELECT post_id, meta_value as customer_id FROM {$wpdb->postmeta} WHERE meta_key = '_customer_user' AND post_id IN (" . implode( ', ', $orders_to_update ) . ')'
+			);
+
+			// Exit loop if no _customer_user metas exist for the list of orders to update.
+			if ( ! $orders_meta_data ) {
+				break;
+			}
+
+			// Update post_author for a batch of orders.
+			foreach ( $orders_meta_data as $order_meta ) {
+				// Stop update execution and re-enqueue it if near memory limit.
+				if ( $updater instanceof WC_Background_Updater && $updater->is_memory_exceeded() ) {
+					return true;
+				}
+
+				$wpdb->update( $wpdb->posts, array( 'post_author' => $order_meta->customer_id ), array( 'ID' => $order_meta->post_id ) );
+			}
+		}
+
+		// Set post_author to 0 instead of 1 on all shop_order_refunds.
+		while ( true ) {
+			// Stop update execution and re-enqueue it if near memory limit.
+			if ( $updater instanceof WC_Background_Updater && $updater->is_memory_exceeded() ) {
+				return true;
+			}
+
+			$updated_rows = $wpdb->query( "UPDATE {$wpdb->posts} SET post_author = 0 WHERE post_type = 'shop_order_refund' LIMIT 1000" );
+
+			if ( ! $updated_rows ) {
+				break;
+			}
+		}
+	}
+
+	wp_cache_flush();
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_350_db_version() {
+	WC_Install::update_db_version( '3.5.0' );
 }

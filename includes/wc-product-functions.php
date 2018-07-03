@@ -275,26 +275,39 @@ add_filter( 'post_type_link', 'wc_product_post_type_link', 10, 2 );
 /**
  * Get the placeholder image URL for products etc.
  *
- * @access public
+ * @param string $size Image size.
  * @return string
  */
-function wc_placeholder_img_src() {
-	return apply_filters( 'woocommerce_placeholder_img_src', WC()->plugin_url() . '/assets/images/placeholder.png' );
+function wc_placeholder_img_src( $size = 'woocommerce_thumbnail' ) {
+	$src               = WC()->plugin_url() . '/assets/images/placeholder.png';
+	$placeholder_image = get_option( 'woocommerce_placeholder_image', 0 );
+
+	if ( ! empty( $placeholder_image ) ) {
+		if ( is_numeric( $placeholder_image ) ) {
+			$dimensions = wc_get_image_size( $size );
+			$image      = wp_get_attachment_image_src( $placeholder_image, array( $dimensions['width'], $dimensions['height'] ) );
+
+			if ( ! empty( $image[0] ) ) {
+				$src = $image[0];
+			}
+		} else {
+			$src = $placeholder_image;
+		}
+	}
+
+	return apply_filters( 'woocommerce_placeholder_img_src', $src );
 }
 
 /**
  * Get the placeholder image.
  *
- * @access public
- *
  * @param string $size Image size.
- *
  * @return string
  */
 function wc_placeholder_img( $size = 'woocommerce_thumbnail' ) {
 	$dimensions = wc_get_image_size( $size );
 
-	return apply_filters( 'woocommerce_placeholder_img', '<img src="' . wc_placeholder_img_src() . '" alt="' . esc_attr__( 'Placeholder', 'woocommerce' ) . '" width="' . esc_attr( $dimensions['width'] ) . '" class="woocommerce-placeholder wp-post-image" height="' . esc_attr( $dimensions['height'] ) . '" />', $size, $dimensions );
+	return apply_filters( 'woocommerce_placeholder_img', '<img src="' . wc_placeholder_img_src( $size ) . '" alt="' . esc_attr__( 'Placeholder', 'woocommerce' ) . '" width="' . esc_attr( $dimensions['width'] ) . '" class="woocommerce-placeholder wp-post-image" height="' . esc_attr( $dimensions['height'] ) . '" />', $size, $dimensions );
 }
 
 /**
@@ -701,8 +714,8 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
 		// Alt text.
 		$alt_text = array( wp_strip_all_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ), $props['caption'], wp_strip_all_tags( $attachment->post_title ) );
 
-		if ( $product ) {
-			$alt_text[] = wp_strip_all_tags( get_the_title( $product->ID ) );
+		if ( $product && $product instanceof WC_Product ) {
+			$alt_text[] = wp_strip_all_tags( get_the_title( $product->get_id() ) );
 		}
 
 		$alt_text     = array_filter( $alt_text );

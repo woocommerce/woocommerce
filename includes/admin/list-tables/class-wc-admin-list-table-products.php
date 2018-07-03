@@ -288,12 +288,34 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * Render any custom filters and search inputs for the list table.
 	 */
 	protected function render_filters() {
+		$filters = apply_filters( 'woocommerce_products_admin_list_table_filters', array(
+			'product_category' => array( $this, 'render_products_category_filter' ),
+			'product_type'     => array( $this, 'render_products_type_filter' ),
+			'stock_status'     => array( $this, 'render_products_stock_status_filter' ),
+		) );
+
+		ob_start();
+		foreach ( $filters as $filter_callback ) {
+			call_user_func( $filter_callback );
+		}
+		$output = ob_get_clean();
+
+		echo apply_filters( 'woocommerce_product_filters', $output ); // WPCS: XSS ok.
+	}
+
+	/**
+	 * Render the product category filter for the list table.
+	 *
+	 * @since 3.5.0
+	 */
+	protected function render_products_category_filter() {
 		$categories_count = (int) wp_count_terms( 'product_cat' );
 
 		if ( $categories_count <= apply_filters( 'woocommerce_product_category_filter_threshold', 100 ) ) {
 			wc_product_dropdown_categories(
 				array(
 					'option_select_text' => __( 'Filter by category', 'woocommerce' ),
+					'hide_empty'         => 0,
 				)
 			);
 		} else {
@@ -307,7 +329,14 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			</select>
 			<?php
 		}
+	}
 
+	/**
+	 * Render the product type filter for the list table.
+	 *
+	 * @since 3.5.0
+	 */
+	protected function render_products_type_filter() {
 		$current_product_type = isset( $_REQUEST['product_type'] ) ? wc_clean( wp_unslash( $_REQUEST['product_type'] ) ) : false; // WPCS: input var ok, sanitization ok.
 		$terms                = get_terms( 'product_type' );
 		$output               = '<select name="product_type" id="dropdown_product_type"><option value="">' . __( 'Filter by product type', 'woocommerce' ) . '</option>';
@@ -351,18 +380,25 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		}
 
 		$output .= '</select>';
+		echo $output; // WPCS: XSS ok.
+	}
 
+	/**
+	 * Render the stock status filter for the list table.
+	 *
+	 * @since 3.5.0
+	 */
+	public function render_products_stock_status_filter() {
 		$current_stock_status = isset( $_REQUEST['stock_status'] ) ? wc_clean( wp_unslash( $_REQUEST['stock_status'] ) ) : false; // WPCS: input var ok, sanitization ok.
 		$stock_statuses       = wc_get_product_stock_status_options();
-		$output              .= '<select name="stock_status"><option value="">' . esc_html__( 'Filter by stock status', 'woocommerce' ) . '</option>';
+		$output               = '<select name="stock_status"><option value="">' . esc_html__( 'Filter by stock status', 'woocommerce' ) . '</option>';
 
 		foreach ( $stock_statuses as $status => $label ) {
 			$output .= '<option ' . selected( $status, $current_stock_status, false ) . ' value="' . esc_attr( $status ) . '">' . esc_html( $label ) . '</option>';
 		}
 
 		$output .= '</select>';
-
-		echo apply_filters( 'woocommerce_product_filters', $output ); // WPCS: XSS ok.
+		echo $output; // WPCS: XSS ok.
 	}
 
 	/**

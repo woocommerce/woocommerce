@@ -510,26 +510,43 @@ class WC_Email extends WC_Settings_API {
 	/**
 	 * Apply inline styles to dynamic content.
 	 *
+	 * We only inline CSS for html emails, and to do so we use Emogrifier library (if supported).
+	 *
 	 * @param string|null $content Content that will receive inline styles.
 	 * @return string
 	 */
 	public function style_inline( $content ) {
-		// make sure we only inline CSS for html emails.
-		if ( in_array( $this->get_content_type(), array( 'text/html', 'multipart/alternative' ), true ) && class_exists( 'DOMDocument' ) ) {
+		if ( in_array( $this->get_content_type(), array( 'text/html', 'multipart/alternative' ), true ) ) {
 			ob_start();
 			wc_get_template( 'emails/email-styles.php' );
 			$css = apply_filters( 'woocommerce_email_styles', ob_get_clean() );
 
-			// apply CSS styles inline for picky email clients.
-			try {
-				$emogrifier = new Emogrifier( $content, $css );
-				$content    = $emogrifier->emogrify();
-			} catch ( Exception $e ) {
-				$logger = wc_get_logger();
-				$logger->error( $e->getMessage(), array( 'source' => 'emogrifier' ) );
+			if ( $this->supports_emogrifier() ) {
+				if ( ! class_exists( 'Emogrifier' ) ) {
+					include_once dirname( dirname( __FILE__ ) ) . '/libraries/class-emogrifier.php';
+				}
+				try {
+					$emogrifier = new Emogrifier( $content, $css );
+					$content    = $emogrifier->emogrify();
+				} catch ( Exception $e ) {
+					$logger = wc_get_logger();
+					$logger->error( $e->getMessage(), array( 'source' => 'emogrifier' ) );
+				}
+			} else {
+				$content = '<style type="text/css">' . $css . '</style>' . $content;
 			}
 		}
 		return $content;
+	}
+
+	/**
+	 * Return if emogrifier library is supported.
+	 *
+	 * @since 3.5.0
+	 * @return bool
+	 */
+	protected function supports_emogrifier() {
+		return class_exists( 'DOMDocument' ) && version_compare( PHP_VERSION, '5.5', '>=' );
 	}
 
 	/**
