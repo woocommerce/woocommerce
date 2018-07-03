@@ -2,15 +2,23 @@
 
 $white: rgba(255, 255, 255, 1);
 
-// Grays
+// Grays (deprecated. Use greys below as we move to HiFi designs)
 $gray: #ccc;
 $gray-darken-10: darken($gray, 10%);
 $gray-darken-20: darken($gray, 20%);
 $gray-darken-30: darken($gray, 30%);
 $gray-darken-40: darken($gray, 40%);
 $gray-text: $gray-darken-40;
-
 $gray-light-10: lighten($gray, 10%);
+
+// Greys
+$core-grey-light-100: #f8f9f9;
+$core-grey-light-200: #f3f4f5;
+$core-grey-light-300: #f3f4f5; // same as 200? By accident?
+$core-grey-light-500: #e2e4e7;
+$core-grey-light-700: #ccd0d4;
+//$core-grey-dark-500: #E8EAEB;
+$core-grey-dark-500: #3c3d3e; // This seems really light, so I made one up
 
 $wp-admin-background: #f1f1f1;
 
