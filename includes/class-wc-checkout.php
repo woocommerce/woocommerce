@@ -790,13 +790,24 @@ class WC_Checkout {
 	 * @param array  $data  Array of data to get the value from.
 	 */
 	protected function set_customer_address_fields( $field, $key, $data ) {
-		if ( isset( $data[ "billing_{$field}" ] ) ) {
-			WC()->customer->{"set_billing_{$field}"}( $data[ "billing_{$field}" ] );
-			WC()->customer->{"set_shipping_{$field}"}( $data[ "billing_{$field}" ] );
+		$billing_value  = null;
+		$shipping_value = null;
+
+		if ( isset( $data[ "billing_{$field}" ] ) && is_callable( array( WC()->customer, "set_billing_{$field}" ) ) ) {
+			$billing_value  = $data[ "billing_{$field}" ];
+			$shipping_value = $data[ "billing_{$field}" ];
 		}
 
-		if ( isset( $data[ "shipping_{$field}" ] ) ) {
-			WC()->customer->{"set_shipping_{$field}"}( $data[ "shipping_{$field}" ] );
+		if ( isset( $data[ "shipping_{$field}" ] ) && is_callable( array( WC()->customer, "set_shipping_{$field}" ) ) ) {
+			$shipping_value = $data[ "shipping_{$field}" ];
+		}
+
+		if ( ! is_null( $billing_value ) && is_callable( array( WC()->customer, "set_billing_{$field}" ) ) ) {
+			WC()->customer->{"set_billing_{$field}"}( $billing_value );
+		}
+
+		if ( ! is_null( $shipping_value ) && is_callable( array( WC()->customer, "set_shipping_{$field}" ) ) ) {
+			WC()->customer->{"set_shipping_{$field}"}( $shipping_value );
 		}
 	}
 
@@ -809,6 +820,11 @@ class WC_Checkout {
 	protected function update_session( $data ) {
 		// Update both shipping and billing to the passed billing address first if set.
 		$address_fields = array(
+			'first_name',
+			'last_name',
+			'company',
+			'email',
+			'phone',
 			'address_1',
 			'address_2',
 			'city',
@@ -1093,10 +1109,12 @@ class WC_Checkout {
 		}
 
 		if ( is_callable( array( WC()->customer, "get_$input" ) ) ) {
-			$value = WC()->customer->{"get_$input"}() ? WC()->customer->{"get_$input"}() : null;
+			$value = WC()->customer->{"get_$input"}();
 		} elseif ( WC()->customer->meta_exists( $input ) ) {
 			$value = WC()->customer->get_meta( $input, true );
 		}
+
+		$value = $value ? $value : null; // Empty value should return null.
 
 		return apply_filters( 'default_checkout_' . $input, $value, $input );
 	}
