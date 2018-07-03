@@ -320,7 +320,11 @@ jQuery( function( $ ) {
 			}
 
 			$( document.body ).trigger( 'wc-enhanced-select-init' );
+
 			attribute_row_indexes();
+
+			$attributes.find( '.woocommerce_attribute' ).last().find( 'h3' ).click();
+
 			$wrapper.unblock();
 
 			$( document.body ).trigger( 'woocommerce_added_attribute' );
