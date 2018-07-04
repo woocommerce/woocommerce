@@ -172,8 +172,11 @@ class WC_Admin_API_Keys {
 	 * Notices.
 	 */
 	public static function notices() {
-		if ( isset( $_GET['revoked'] ) && 1 === $_GET['revoked'] ) { // WPCS: input var okay, CSRF ok.
-			WC_Admin_Settings::add_message( __( 'API key revoked successfully.', 'woocommerce' ) );
+		if ( isset( $_GET['revoked'] ) ) { // WPCS: input var okay, CSRF ok.
+			$revoked = absint( $_GET['revoked'] ); // WPCS: input var okay, CSRF ok.
+
+			/* translators: %d: count */
+			WC_Admin_Settings::add_message( sprintf( _n( '%d API key permanently revoked.', '%d API keys permanently revoked.', $revoked, 'woocommerce' ), $revoked ) );
 		}
 	}
 
@@ -191,7 +194,7 @@ class WC_Admin_API_Keys {
 			}
 		}
 
-		wp_redirect( esc_url_raw( add_query_arg( array( 'revoked' => 1 ), admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys' ) ) ) );
+		wp_safe_redirect( esc_url_raw( add_query_arg( array( 'revoked' => 1 ), admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys' ) ) ) );
 		exit();
 	}
 
@@ -221,9 +224,18 @@ class WC_Admin_API_Keys {
 	 * @param array $keys API Keys.
 	 */
 	private function bulk_revoke_key( $keys ) {
+		$qty = 0;
 		foreach ( $keys as $key_id ) {
-			$this->remove_key( $key_id );
+			$result = $this->remove_key( $key_id );
+
+			if ( $result ) {
+				$qty++;
+			}
 		}
+
+		// Redirect to webhooks page.
+		wp_safe_redirect( esc_url_raw( add_query_arg( array( 'revoked' => $qty ), admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys' ) ) ) );
+		exit();
 	}
 
 	/**
