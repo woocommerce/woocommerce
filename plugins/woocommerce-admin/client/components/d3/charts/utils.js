@@ -297,8 +297,9 @@ export const drawLines = ( node, data, params ) => {
 		.enter()
 		.append( 'circle' )
 		.attr( 'r', 3.5 )
-		.attr( 'fill', d => d3InterpolateViridis( colorScale( d.i ) ) )
-		.attr( 'stroke', '#fff' )
+		.attr( 'fill', '#fff' )
+		.attr( 'stroke', d => d3InterpolateViridis( colorScale( d.i ) ) )
+		.attr( 'stroke-width', 3 )
 		.attr( 'cx', d => xLineScale( new Date( d.date ) ) )
 		.attr( 'cy', d => yScale( d.value ) );
 };
