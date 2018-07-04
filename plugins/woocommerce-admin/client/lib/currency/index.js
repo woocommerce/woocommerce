@@ -13,7 +13,7 @@ import { get, isNaN } from 'lodash';
  * @returns {?String}                  A formatted string.
  */
 export function formatCurrency( number, currency ) {
-	const locale = wcSettings.locale || 'en-US'; // Default so we don't break.
+	const locale = wcSettings.siteLocale || 'en-US'; // Default so we don't break.
 
 	// default to wcSettings if currency is not passed in
 	if ( ! currency ) {

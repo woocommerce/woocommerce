@@ -37,6 +37,9 @@ global.wcSettings = {
 	adminUrl: 'https://vagrant.local/wp/wp-admin/',
 	locale: 'en-US',
 	currency: { code: 'USD', precision: 2, symbol: '&#36;' },
+	date: {
+		dow: 0,
+	},
 };
 
 Object.defineProperty( global.wp, 'date', {

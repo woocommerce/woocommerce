@@ -5,6 +5,7 @@
 import moment from 'moment';
 import { find } from 'lodash';
 import { __ } from '@wordpress/i18n';
+import { getSettings } from '@wordpress/date';
 
 /**
  * Internal dependencies
@@ -238,3 +239,37 @@ export const getCurrentDates = ( { period, compare, after, before } ) => {
 		},
 	};
 };
+
+export function loadLocaleData() {
+	const { date } = wcSettings;
+	const settings = getSettings();
+	const userLocale = settings.l10n.locale;
+	const { weekdaysShort } = settings.l10n;
+
+	// Keep the default Momentjs English settings for any English
+	if ( ! userLocale.match( /en_/ ) ) {
+		moment.updateLocale( userLocale, {
+			longDateFormat: {
+				L: __( 'MM/DD/YYYY', 'woo-dash' ),
+				LL: __( 'MMMM D, YYYY', 'woo-dash' ),
+				LLL: __( 'D MMMM YYYY LT', 'woo-dash' ),
+				LLLL: __( 'dddd, D MMMM YYYY LT', 'woo-dash' ),
+				LT: __( 'HH:mm', 'woo-dash' ),
+			},
+			calendar: {
+				lastDay: __( '[Yesterday at] LT', 'woo-dash' ),
+				lastWeek: __( '[Last] dddd [at] LT', 'woo-dash' ),
+				nextDay: __( '[Tomorrow at] LT', 'woo-dash' ),
+				nextWeek: __( 'dddd [at] LT', 'woo-dash' ),
+				sameDay: __( '[Today at] LT', 'woo-dash' ),
+				sameElse: __( 'L', 'woo-dash' ),
+			},
+			week: {
+				dow: Number( date.dow ),
+			},
+			weekdaysMin: weekdaysShort,
+		} );
+	}
+}
+
+loadLocaleData();

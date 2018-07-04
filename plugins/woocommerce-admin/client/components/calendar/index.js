@@ -158,6 +158,7 @@ class DateRange extends Component {
 						noBorder
 						initialVisibleMonth={ () => after || moment() }
 						phrases={ phrases }
+						firstDayOfWeek={ Number( wcSettings.date.dow ) }
 					/>
 				</div>
 			</Fragment>
