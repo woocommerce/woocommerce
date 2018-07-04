@@ -350,8 +350,11 @@ function wc_rest_check_product_reviews_permissions( $context = 'read', $object_i
 	);
 
 	$cap              = $contexts[ $context ];
-	$post_type_object = get_post_type_object( $post_type );
-	$permission       = current_user_can( $post_type_object->cap->$cap );
+	$post_type_object = get_post_type_object( 'product' );
+
+	if ( isset( $post_type_object->cap->$cap ) ) {
+		$permission = current_user_can( $post_type_object->cap->$cap );
+	}
 
 	return apply_filters( 'woocommerce_rest_check_permissions', $permission, $context, $object_id, 'product_review' );
 }
