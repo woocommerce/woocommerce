@@ -81,7 +81,7 @@ class WC_Admin_API_Keys {
 			$keys_table_list->prepare_items();
 
 			echo '<input type="hidden" name="page" value="wc-settings" />';
-			echo '<input type="hidden" name="tab" value="api" />';
+			echo '<input type="hidden" name="tab" value="advanced" />';
 			echo '<input type="hidden" name="section" value="keys" />';
 
 			$keys_table_list->views();
