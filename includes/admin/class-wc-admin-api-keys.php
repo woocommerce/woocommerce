@@ -19,6 +19,22 @@ class WC_Admin_API_Keys {
 	public function __construct() {
 		add_action( 'admin_init', array( $this, 'actions' ) );
 		add_action( 'woocommerce_settings_page_init', array( $this, 'screen_option' ) );
+		add_filter( 'woocommerce_save_settings_advanced_keys', array( $this, 'allow_save_settings' ) );
+	}
+
+	/**
+	 * Check if should allow save settings.
+	 * This prevents "Your settings have been saved." notices on the table list.
+	 *
+	 * @param  bool $allow If allow save settings.
+	 * @return bool
+	 */
+	public function allow_save_settings( $allow ) {
+		if ( ! isset( $_GET['create-key'], $_GET['edit-key'] ) ) { // WPCS: input var okay, CSRF ok.
+			return false;
+		}
+
+		return $allow;
 	}
 
 	/**
