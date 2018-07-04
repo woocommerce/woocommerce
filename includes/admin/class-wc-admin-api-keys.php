@@ -157,12 +157,12 @@ class WC_Admin_API_Keys {
 	public function actions() {
 		if ( $this->is_api_keys_settings_page() ) {
 			// Revoke key.
-			if ( isset( $_GET['revoke-key'] ) ) { // WPCS: input var okay, CSRF ok.
+			if ( isset( $_REQUEST['revoke-key'] ) ) { // WPCS: input var okay, CSRF ok.
 				$this->revoke_key();
 			}
 
 			// Bulk actions.
-			if ( isset( $_GET['action'] ) && isset( $_GET['key'] ) ) { // WPCS: input var okay, CSRF ok.
+			if ( isset( $_REQUEST['action'] ) && isset( $_REQUEST['key'] ) ) { // WPCS: input var okay, CSRF ok.
 				$this->bulk_actions();
 			}
 		}
@@ -183,8 +183,8 @@ class WC_Admin_API_Keys {
 	private function revoke_key() {
 		check_admin_referer( 'revoke' );
 
-		if ( isset( $_GET['revoke-key'] ) ) { // WPCS: input var okay, CSRF ok.
-			$key_id = absint( $_GET['revoke-key'] ); // WPCS: input var okay, CSRF ok.
+		if ( isset( $_REQUEST['revoke-key'] ) ) { // WPCS: input var okay, CSRF ok.
+			$key_id = absint( $_REQUEST['revoke-key'] ); // WPCS: input var okay, CSRF ok.
 
 			if ( $key_id ) {
 				$this->remove_key( $key_id );
@@ -205,9 +205,9 @@ class WC_Admin_API_Keys {
 			wp_die( esc_html__( 'You do not have permission to edit API Keys', 'woocommerce' ) );
 		}
 
-		if ( isset( $_GET['action'] ) ) { // WPCS: input var okay, CSRF ok.
-			$action = sanitize_text_field( wp_unslash( $_GET['action'] ) ); // WPCS: input var okay, CSRF ok.
-			$keys   = isset( $_GET['key'] ) ? array_map( 'absint', (array) $_GET['key'] ) : array(); // WPCS: input var okay, CSRF ok.
+		if ( isset( $_REQUEST['action'] ) ) { // WPCS: input var okay, CSRF ok.
+			$action = sanitize_text_field( wp_unslash( $_REQUEST['action'] ) ); // WPCS: input var okay, CSRF ok.
+			$keys   = isset( $_REQUEST['key'] ) ? array_map( 'absint', (array) $_REQUEST['key'] ) : array(); // WPCS: input var okay, CSRF ok.
 
 			if ( 'revoke' === $action ) {
 				$this->bulk_revoke_key( $keys );
