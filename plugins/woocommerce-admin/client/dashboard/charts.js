@@ -3,8 +3,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { withAPIData } from '@wordpress/components';
-import { Component, compose } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -19,9 +18,6 @@ class WidgetCharts extends Component {
 	}
 
 	render() {
-		// const { orders, products } = this.props;
-		// const totalOrders = ( orders.data && orders.data.length ) || 0;
-		// const totalProducts = ( products.data && products.data.length ) || 0;
 		return (
 			<Card title={ __( 'Store Charts', 'woo-dash' ) }>
 				<div className="woo-dash__widget">
@@ -47,9 +43,4 @@ class WidgetCharts extends Component {
 	}
 }
 
-export default compose( [
-	withAPIData( () => ( {
-		orders: '/wc/v2/orders?status=completed',
-		products: '/wc/v2/products',
-	} ) ),
-] )( WidgetCharts );
+export default WidgetCharts;

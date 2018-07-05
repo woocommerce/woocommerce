@@ -27,11 +27,8 @@ class D3Base extends Component {
 		this.updateParams();
 	}
 
-	UNSAFE_componentWillReceiveProps( nextProps ) {
-		this.updateParams( nextProps );
-	}
-
 	componentDidUpdate() {
+		this.updateParams( this.props );
 		this.draw();
 	}
 
@@ -60,7 +57,7 @@ class D3Base extends Component {
 			.selectAll( `.${ className }__tooltip` )
 			.remove();
 
-		const newNode = d3Select( this.node ).style( 'position', 'relative' );
+		const newNode = d3Select( this.node );
 
 		newNode
 			.append( 'svg' )

@@ -15,7 +15,24 @@ import { timeFormat as d3TimeFormat } from 'd3-time-format';
  */
 import './style.scss';
 import D3Base from '../base';
-import { drawAxis, drawBars, drawLines } from './utils';
+import {
+	drawAxis,
+	drawBars,
+	drawLines,
+	getColorScale,
+	getDateSpaces,
+	getOrderedKeys,
+	getLine,
+	getLineData,
+	getUniqueKeys,
+	getUniqueDates,
+	getXScale,
+	getXGroupScale,
+	getXLineScale,
+	getYMax,
+	getYScale,
+	getYTickOffset,
+} from './utils';
 
 const D3Chart = ( {
 	className,
@@ -49,14 +66,37 @@ const D3Chart = ( {
 	const getParams = node => {
 		const calculatedWidth = width || node.offsetWidth;
 		const calculatedHeight = height || node.offsetHeight;
+		const scale = width / node.offsetWidth;
+		const adjHeight = calculatedHeight - margin.top - margin.bottom;
+		const adjWidth = calculatedWidth - margin.left - margin.right;
+		const uniqueKeys = getUniqueKeys( data );
+		const orderedKeys = getOrderedKeys( data, uniqueKeys );
+		const lineData = getLineData( data, orderedKeys );
+		const yMax = getYMax( lineData );
+		const yScale = getYScale( adjHeight, yMax );
+		const uniqueDates = getUniqueDates( lineData );
+		const xLineScale = getXLineScale( uniqueDates, adjWidth );
+		const xScale = getXScale( uniqueDates, adjWidth );
 		return {
-			base: 0,
+			colorScale: getColorScale( orderedKeys ),
+			dateSpaces: getDateSpaces( uniqueDates, adjWidth, xLineScale ),
 			height: calculatedHeight,
+			line: getLine( data, xLineScale, yScale ),
+			lineData,
 			margin,
-			width: calculatedWidth,
-			scale: width / node.offsetWidth,
+			orderedKeys,
+			scale,
 			type,
+			uniqueDates,
+			uniqueKeys,
+			width: calculatedWidth,
 			xFormat: timeseries ? d3TimeFormat( xFormat ) : d3Format( xFormat ),
+			xGroupScale: getXGroupScale( orderedKeys, xScale ),
+			xLineScale,
+			xScale,
+			yMax,
+			yScale,
+			yTickOffset: getYTickOffset( adjHeight, scale, yMax ),
 			yFormat: d3Format( yFormat ),
 		};
 	};
@@ -77,7 +117,7 @@ D3Chart.propTypes = {
 		top: PropTypes.number,
 	} ),
 	timeseries: PropTypes.bool,
-	type: PropTypes.string,
+	type: PropTypes.oneOf( [ 'bar', 'line' ] ),
 	width: PropTypes.number,
 	xFormat: PropTypes.string,
 	yFormat: PropTypes.string,

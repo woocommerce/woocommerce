@@ -10,15 +10,19 @@
  */
 import { dummyOrders } from '../dummy';
 import {
-	parseDate,
-	getUniqueKeys,
+	getColorScale,
+	getDateSpaces,
 	getOrderedKeys,
 	getLineData,
+	getUniqueKeys,
+	getUniqueDates,
 	getXScale,
 	getXGroupScale,
 	getXLineScale,
-	getColorScale,
 	getYMax,
+	getYScale,
+	getYTickOffset,
+	parseDate,
 } from '../utils';
 
 const orderedKeys = [ 'Cap', 'T-Shirt', 'Sunglasses', 'Polo', 'Hoodie' ];
@@ -30,7 +34,14 @@ const orderedDates = [
 	'2018-06-03',
 	'2018-06-04',
 ];
-const testLineData = getLineData( dummyOrders );
+const testUniqueKeys = getUniqueKeys( dummyOrders );
+const testOrderedKeys = getOrderedKeys( dummyOrders, testUniqueKeys );
+const testLineData = getLineData( dummyOrders, testOrderedKeys );
+const testUniqueDates = getUniqueDates( testLineData );
+const testXScale = getXScale( testUniqueDates, 100 );
+const testXLineScale = getXLineScale( testUniqueDates, 100 );
+const testYMax = getYMax( testLineData );
+const testYScale = getYScale( 100, testYMax );
 
 describe( 'parseDate', () => {
 	it( 'correctly parse date in the expected format', () => {
@@ -42,16 +53,16 @@ describe( 'parseDate', () => {
 
 describe( 'getUniqueKeys', () => {
 	it( 'returns an array of keys excluding date', () => {
-		const testUniqueKeys = getUniqueKeys( dummyOrders );
+		// sort is a mutating action so we need a copy
+		const testUniqueKeysClone = testUniqueKeys.slice();
 		const sortedAZKeys = orderedKeys.slice();
-		expect( testUniqueKeys.sort() ).toEqual( sortedAZKeys.sort() );
+		expect( testUniqueKeysClone.sort() ).toEqual( sortedAZKeys.sort() );
 	} );
 } );
 
 describe( 'getOrderedKeys', () => {
 	it( 'returns an array of keys order by value from largest to smallest', () => {
-		const testKeys = getOrderedKeys( dummyOrders );
-		expect( testKeys ).toEqual( orderedKeys );
+		expect( testOrderedKeys ).toEqual( orderedKeys );
 	} );
 } );
 
@@ -88,20 +99,18 @@ describe( 'getLineData', () => {
 
 describe( 'getXScale', () => {
 	it( 'properly scale inputs to the provided domain and range', () => {
-		const testXScale = getXScale( dummyOrders, { width: 100 } );
 		expect( testXScale( orderedDates[ 0 ] ) ).toEqual( 3 );
 		expect( testXScale( orderedDates[ 2 ] ) ).toEqual( 35 );
 		expect( testXScale( orderedDates[ orderedDates.length - 1 ] ) ).toEqual( 83 );
 	} );
 	it( 'properly scale inputs and test the bandwidth', () => {
-		const testXScale = getXScale( dummyOrders, { width: 100 } );
 		expect( testXScale.bandwidth() ).toEqual( 14 );
 	} );
 } );
 
 describe( 'getXGroupScale', () => {
 	it( 'properly scale inputs based on the getXScale', () => {
-		const testXGroupScale = getXGroupScale( dummyOrders, { width: 100 } );
+		const testXGroupScale = getXGroupScale( testOrderedKeys, testXScale );
 		expect( testXGroupScale( orderedKeys[ 0 ] ) ).toEqual( 2 );
 		expect( testXGroupScale( orderedKeys[ 2 ] ) ).toEqual( 6 );
 		expect( testXGroupScale( orderedKeys[ orderedKeys.length - 1 ] ) ).toEqual( 10 );
@@ -110,7 +119,6 @@ describe( 'getXGroupScale', () => {
 
 describe( 'getXLineScale', () => {
 	it( 'properly scale inputs for the line', () => {
-		const testXLineScale = getXLineScale( dummyOrders, { width: 100 } );
 		expect( testXLineScale( new Date( orderedDates[ 0 ] ) ) ).toEqual( 0 );
 		expect( testXLineScale( new Date( orderedDates[ 2 ] ) ) ).toEqual( 40 );
 		expect( testXLineScale( new Date( orderedDates[ orderedDates.length - 1 ] ) ) ).toEqual( 100 );
@@ -119,8 +127,8 @@ describe( 'getXLineScale', () => {
 
 describe( 'getColorScale', () => {
 	it( 'properly scale product keys into a range of colors', () => {
-		const testColorScale = getColorScale( dummyOrders );
-		orderedKeys.map( d => testColorScale( d ) ); // without this it fails! why? how?
+		const testColorScale = getColorScale( testOrderedKeys );
+		testOrderedKeys.map( d => testColorScale( d ) ); // without this it fails! why? how?
 		expect( testColorScale( orderedKeys[ 0 ] ) ).toEqual( 0 );
 		expect( testColorScale( orderedKeys[ 2 ] ) ).toEqual( 0.5 );
 		expect( testColorScale( orderedKeys[ orderedKeys.length - 1 ] ) ).toEqual( 1 );
@@ -129,7 +137,39 @@ describe( 'getColorScale', () => {
 
 describe( 'getYMax', () => {
 	it( 'calculate the correct maximum y value', () => {
-		const testYMax = getYMax( dummyOrders );
 		expect( testYMax ).toEqual( 14139347 );
+	} );
+} );
+
+describe( 'getYScale', () => {
+	it( 'properly scale the y values given the height and maximum y value', () => {
+		expect( testYScale( 0 ) ).toEqual( 100 );
+		expect( testYScale( testYMax ) ).toEqual( 0 );
+	} );
+} );
+
+describe( 'getYTickOffset', () => {
+	it( 'properly scale the y values for the y-axis ticks given the height and maximum y value', () => {
+		const testYTickOffset1 = getYTickOffset( 100, 1, testYMax );
+		expect( testYTickOffset1( 0 ) ).toEqual( 112 );
+		expect( testYTickOffset1( testYMax ) ).toEqual( 12 );
+		const testYTickOffset2 = getYTickOffset( 100, 2, testYMax );
+		expect( testYTickOffset2( 0 ) ).toEqual( 124 );
+		expect( testYTickOffset2( testYMax ) ).toEqual( 24 );
+	} );
+} );
+
+describe( 'getdateSpaces', () => {
+	it( 'return an array used to space out the mouseover rectangles, used for tooltips', () => {
+		const testDateSpaces = getDateSpaces( testUniqueDates, 100, testXLineScale );
+		expect( testDateSpaces[ 0 ].date ).toEqual( '2018-05-30' );
+		expect( testDateSpaces[ 0 ].start ).toEqual( 0 );
+		expect( testDateSpaces[ 0 ].width ).toEqual( 10 );
+		expect( testDateSpaces[ 3 ].date ).toEqual( '2018-06-02' );
+		expect( testDateSpaces[ 3 ].start ).toEqual( 50 );
+		expect( testDateSpaces[ 3 ].width ).toEqual( 20 );
+		expect( testDateSpaces[ testDateSpaces.length - 1 ].date ).toEqual( '2018-06-04' );
+		expect( testDateSpaces[ testDateSpaces.length - 1 ].start ).toEqual( 90 );
+		expect( testDateSpaces[ testDateSpaces.length - 1 ].width ).toEqual( 10 );
 	} );
 } );
