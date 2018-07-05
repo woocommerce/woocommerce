@@ -83,6 +83,15 @@ function wc_admin_register_pages(){
 		'wc-admin#/analytics/products',
 		'wc_admin_page'
 	);
+
+	add_submenu_page(
+		'wc-admin#/analytics',
+		__( 'Orders', 'wc-admin' ),
+		__( 'Orders', 'wc-admin' ),
+		'manage_options',
+		'wc-admin#/analytics/orders',
+		'wc_admin_page'
+	);
 }
 add_action( 'admin_menu', 'wc_admin_register_pages' );
 

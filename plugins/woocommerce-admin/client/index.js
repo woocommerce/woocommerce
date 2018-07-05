@@ -13,6 +13,7 @@ import 'react-dates/initialize';
  */
 import './stylesheets/_wpadmin-reset.scss';
 import { PageLayout } from './layout';
+import 'store';
 
 render(
 	<APIProvider
