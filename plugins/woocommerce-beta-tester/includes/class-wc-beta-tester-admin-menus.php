@@ -28,13 +28,38 @@ class WC_Beta_Tester_Admin_Menus {
 	 * @return string
 	 */
 	protected function get_ticket_template() {
-		$bug_tpl = wp_remote_retrieve_body( wp_remote_get( 'https://raw.githubusercontent.com/woocommerce/woocommerce/master/.github/ISSUE_TEMPLATE/Bug_report.md' ) );
+		ob_start();
+		?>
+**Describe the bug**
+A clear and concise description of what the bug is. Please be as descriptive as possible; issues lacking detail, or for any other reason than to report a bug, may be closed without action.
 
-		$begin = strpos( $bug_tpl, '**Describe the bug**' );
-		if ( $begin ) {
-			$bug_tpl = substr( $bug_tpl, $begin );
-		}
+**To Reproduce**
+Steps to reproduce the behavior:
+1. Go to '...'
+2. Click on '....'
+3. Scroll down to '....'
+4. See error
 
+**Screenshots**
+If applicable, add screenshots to help explain your problem.
+
+**Expected behavior**
+A clear and concise description of what you expected to happen.
+
+**Isolating the problem (mark completed items with an [x]):**
+- [ ] I have deactivated other plugins and confirmed this bug occurs when only WooCommerce plugin is active.
+- [ ] This bug happens with a default WordPress theme active, or [Storefront](https://woocommerce.com/storefront/).
+- [ ] I can reproduce this bug consistently using the steps above.
+
+**WordPress Environment**
+<details>
+```
+Copy and paste the system status report from **WooCommerce > System Status** in WordPress admin.
+```
+</details>
+		<?php
+
+		$bug_tpl = ob_get_clean();
 		return $bug_tpl;
 	}
 
