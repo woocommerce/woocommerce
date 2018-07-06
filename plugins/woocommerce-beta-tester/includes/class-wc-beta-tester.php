@@ -287,8 +287,6 @@ class WC_Beta_Tester {
 			return $response;
 		}
 
-		$github_release_data = $this->get_github_release_information( $new_version );
-
 		if ( $this->is_beta_version( $new_version ) ) {
 			$warning = __( '<h1><span>&#9888;</span>This is a beta release<span>&#9888;</span></h1>', 'woocommerce-beta-tester' );
 		}
@@ -301,10 +299,9 @@ class WC_Beta_Tester {
 		$response->version       = $new_version;
 		$response->download_link = $this->get_download_url( $new_version );
 
-		$response->sections['changelog']   = make_clickable( wpautop( $github_release_data->body ) );
-		$response->sections['changelog']  .= sprintf(
-			'<p><a target="_blank" href="%s">' . __( 'Read more on GitHub', 'woocommerce-beta-tester' ) . '</a></p>',
-			'https://github.com/woocommerce/woocommerce/releases/tag/' . $response->version
+		$response->sections['changelog'] = sprintf(
+			'<p><a target="_blank" href="%s">' . __( 'Read the changelog and find out more about the release on GitHub.', 'woocommerce-beta-tester' ) . '</a></p>',
+			'https://github.com/woocommerce/woocommerce/blob/' . $response->version . '/readme.txt'
 		);
 
 		foreach ( $response->sections as $key => $section ) {
@@ -351,40 +348,6 @@ class WC_Beta_Tester {
 		} else {
 			return $update;
 		}
-	}
-
-	/**
-	 * Gets release information from GitHub.
-	 *
-	 * @param string $version Version number.
-	 * @return bool|string False on error, description otherwise
-	 */
-	public function get_github_release_information( $version ) {
-		$url         = 'https: //api.github.com/repos/woocommerce/woocommerce/releases/tags/' . $version;
-		$github_data = get_site_transient( md5( $url ) . '_github_data' );
-
-		if ( $this->overrule_transients() || empty( $github_data ) ) {
-			$github_data = wp_remote_get( $url, array(
-				'sslverify' => false,
-			) );
-
-			if ( is_wp_error( $github_data ) ) {
-				return false;
-			}
-
-			$github_data = json_decode( $github_data['body'] );
-
-			if ( empty( $github_data ) ) {
-				return false;
-			}
-
-			$github_data = $github_data;
-
-			// Refresh every 6 hours.
-			set_site_transient( md5( $url ) . '_github_data', $github_data, HOUR_IN_SECONDS * 6 );
-		}
-
-		return $github_data;
 	}
 
 	/**

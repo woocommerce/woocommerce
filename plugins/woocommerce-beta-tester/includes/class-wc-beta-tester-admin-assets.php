@@ -38,7 +38,8 @@ class WC_Beta_Tester_Admin_Assets {
 			'wc_beta_tester_version_info_params',
 			array(
 				'version'     => $version,
-				'description' => WC_Beta_Tester::instance()->get_github_release_information( $version )->body,
+				/* translators: %s: Release version number */
+				'description' => sprintf( __( 'Release of version %s', 'woocommerce-beta-tester' ), $version ),
 			)
 		);
 
