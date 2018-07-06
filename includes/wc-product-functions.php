@@ -722,7 +722,8 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
 		$props['alt'] = isset( $alt_text[0] ) ? $alt_text[0] : '';
 
 		// Large version.
-		$src                 = wp_get_attachment_image_src( $attachment_id, 'full' );
+		$full_size           = apply_filters( 'woocommerce_gallery_full_size', apply_filters( 'woocommerce_product_thumbnails_large_size', 'full' ) );
+		$src                 = wp_get_attachment_image_src( $attachment_id, $full_size );
 		$props['full_src']   = $src[0];
 		$props['full_src_w'] = $src[1];
 		$props['full_src_h'] = $src[2];
@@ -736,18 +737,21 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
 		$props['gallery_thumbnail_src_h'] = $src[2];
 
 		// Thumbnail version.
-		$src                  = wp_get_attachment_image_src( $attachment_id, 'woocommerce_thumbnail' );
+		$thumbnail_size       = apply_filters( 'woocommerce_thumbnail_size', 'woocommerce_thumbnail' );
+		$src                  = wp_get_attachment_image_src( $attachment_id, $thumbnail_size );
 		$props['thumb_src']   = $src[0];
 		$props['thumb_src_w'] = $src[1];
 		$props['thumb_src_h'] = $src[2];
 
 		// Image source.
-		$src             = wp_get_attachment_image_src( $attachment_id, 'woocommerce_single' );
+		$flexslider      = (bool) apply_filters( 'woocommerce_single_product_flexslider_enabled', get_theme_support( 'wc-product-gallery-slider' ) );
+		$image_size      = apply_filters( 'woocommerce_gallery_image_size', $flexslider ? 'woocommerce_single' : $gallery_thumbnail_size );
+		$src             = wp_get_attachment_image_src( $attachment_id, $image_size );
 		$props['src']    = $src[0];
 		$props['src_w']  = $src[1];
 		$props['src_h']  = $src[2];
-		$props['srcset'] = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $attachment_id, 'woocommerce_single' ) : false;
-		$props['sizes']  = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $attachment_id, 'woocommerce_single' ) : false;
+		$props['srcset'] = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $attachment_id, $image_size ) : false;
+		$props['sizes']  = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $attachment_id, $image_size ) : false;
 	}
 	return $props;
 }
