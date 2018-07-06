@@ -180,6 +180,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - For guests, store all address fields to the session whilst placing an order. #20665
 * Tweak - Removed 'ajax_add_to_cart' class from 'Read more' button. #20690
 * Tweak - Removed unnecessary checkout form change trigger on load of the checkout page. #20655
+* Tweak - Add image size filters to wc_get_product_attachment_props(). #20722
 * Performance/Tweak - Use post_author for the order customer instead of '_customer_user' meta data. #17895
 * Performance - Exclude frontend include from REST API calls. #20000
 * Dev - REST API - Allows oAuth1.0a authentication under SSL.
