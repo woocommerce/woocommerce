@@ -224,15 +224,14 @@ class WC_Helper_Product {
 	 *
 	 * @since 2.3
 	 *
+	 * @param string        $attribute_name Name of attribute to create.
+	 * @param array(string) $terms          Terms to create for the attribute.
 	 * @return array
 	 */
-	public static function create_attribute() {
+	public static function create_attribute( $attribute_name = 'size', $terms = array( 'small', 'large' ) ) {
 		global $wpdb;
 
 		$return = array();
-
-		$attribute_name = 'size';
-		$terms = array( 'small', 'large' );
 
 		// Create attribute.
 		$attribute = array(
@@ -245,7 +244,6 @@ class WC_Helper_Product {
 		$wpdb->insert( $wpdb->prefix . 'woocommerce_attribute_taxonomies', $attribute );
 		$return['attribute_id'] = $wpdb->insert_id;
 
-		// Register the taxonomy.
 		$array_format = array(
 			'%s',
 			'%s',
@@ -282,6 +280,8 @@ class WC_Helper_Product {
 				'name' => $attribute_name,
 			),
 		);
+
+		// Register the taxonomy.
 		register_taxonomy( 'pa_' . $attribute_name, array( 'product' ), $taxonomy_data );
 
 		// Set product attributes global.
