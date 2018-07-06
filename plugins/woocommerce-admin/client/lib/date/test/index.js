@@ -3,11 +3,12 @@
  * External dependencies
  */
 import moment from 'moment';
+import { setSettings } from '@wordpress/date';
 
 /**
  * Internal dependencies
  */
-import { toMoment, getLastPeriod, getCurrentPeriod, getRangeLabel } from 'lib/date';
+import { toMoment, getLastPeriod, getCurrentPeriod, getRangeLabel, loadLocaleData } from 'lib/date';
 
 describe( 'toMoment', () => {
 	it( 'should pass through a valid Moment object as an argument', () => {
@@ -416,5 +417,129 @@ describe( 'getRangeLabel', () => {
 	it( 'should return correct string for dates in different years', () => {
 		const label = getRangeLabel( moment( '2017-04-01' ), moment( '2018-05-15' ) );
 		expect( label ).toBe( 'Apr 1, 2017 - May 15, 2018' );
+	} );
+} );
+
+describe( 'loadLocaleData', () => {
+	beforeEach( () => {
+		// Reset to default settings
+		setSettings( {
+			l10n: {
+				locale: 'en_US',
+				months: [
+					'January',
+					'February',
+					'March',
+					'April',
+					'May',
+					'June',
+					'July',
+					'August',
+					'September',
+					'October',
+					'November',
+					'December',
+				],
+				monthsShort: [
+					'Jan',
+					'Feb',
+					'Mar',
+					'Apr',
+					'May',
+					'Jun',
+					'Jul',
+					'Aug',
+					'Sep',
+					'Oct',
+					'Nov',
+					'Dec',
+				],
+				weekdays: [ 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday' ],
+				weekdaysShort: [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ],
+				meridiem: { am: 'am', pm: 'pm', AM: 'AM', PM: 'PM' },
+				relative: { future: ' % s from now', past: '% s ago' },
+			},
+			formats: {
+				time: 'g: i a',
+				date: 'F j, Y',
+				datetime: 'F j, Y g: i a',
+			},
+			timezone: { offset: '0', string: '' },
+		} );
+
+		wcSettings = {
+			adminUrl: 'https://vagrant.local/wp/wp-admin/',
+			locale: 'en-US',
+			currency: { code: 'USD', precision: 2, symbol: '&#36;' },
+			date: {
+				dow: 0,
+			},
+		};
+	} );
+
+	function setToFrancais() {
+		setSettings( {
+			l10n: {
+				locale: 'fr_FR',
+				months: [
+					'janvier',
+					'f\u00e9vrier',
+					'mars',
+					'avril',
+					'mai',
+					'juin',
+					'juillet',
+					'ao\u00fbt',
+					'septembre',
+					'octobre',
+					'novembre',
+					'd\u00e9cembre',
+				],
+				monthsShort: [
+					'Jan',
+					'F\u00e9v',
+					'Mar',
+					'Avr',
+					'Mai',
+					'Juin',
+					'Juil',
+					'Ao\u00fbt',
+					'Sep',
+					'Oct',
+					'Nov',
+					'D\u00e9c',
+				],
+				weekdays: [ 'dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi' ],
+				weekdaysShort: [ 'dim', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam' ],
+				meridiem: { am: ' ', pm: ' ', AM: ' ', PM: ' ' },
+				relative: { future: '%s \u00e0 partir de maintenant', past: 'Il y a %s' },
+			},
+			formats: { time: 'g:i a', date: 'F j, Y', datetime: 'j F Y G \\h i \\m\\i\\n' },
+			timezone: { offset: '0', string: '' },
+		} );
+	}
+
+	it( 'should leave default momentjs data unchanged for english languages', () => {
+		loadLocaleData();
+		expect( moment.locale() ).toBe( 'en' );
+	} );
+
+	it( "should load french data on user locale 'fr-FR'", () => {
+		setToFrancais();
+		loadLocaleData();
+		expect( moment.months()[ 0 ] ).toBe( 'janvier' );
+	} );
+
+	it( "should load translated longDateFormats on user locale 'fr-FR'", () => {
+		setToFrancais();
+		loadLocaleData();
+		expect( moment.localeData()._longDateFormat.LL ).not.toBe( 'F j, Y' );
+	} );
+
+	it( "should load start of week on user locale 'fr-FR'", () => {
+		setToFrancais();
+		wcSettings.date.dow = 5;
+		loadLocaleData();
+		expect( moment.localeData()._week.dow ).toBe( 5 );
 	} );
 } );

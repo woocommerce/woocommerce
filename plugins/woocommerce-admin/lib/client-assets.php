@@ -41,8 +41,11 @@ function woo_dash_register_script() {
 	$settings = array(
 		'adminUrl'           => admin_url(),
 		'embedBreadcrumbs'   => woo_dash_get_embed_breadcrumbs(),
-		'locale'   => esc_attr( get_bloginfo( 'language' ) ),
+		'siteLocale'   => esc_attr( get_bloginfo( 'language' ) ),
 		'currency'  => woo_dash_currency_settings(),
+		'date' => array(
+			'dow' => get_option( 'start_of_week', 0 ),
+		),
 	);
 
 	wp_add_inline_script(
