@@ -198,7 +198,9 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products/' . $product->get_id() ) );
 		$data     = $response->get_data();
 
-		$this->assertEquals( array( 'small' ), $data['attributes'][0]['options'] );
+		foreach ( array( 'small', 'large' ) as $term_name ) {
+			$this->assertContains( $term_name, $data['attributes'][0]['options'] );
+		}
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v2/products/' . $product->get_id() );
 		$request->set_body_params(

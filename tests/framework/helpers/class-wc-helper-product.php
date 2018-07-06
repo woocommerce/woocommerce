@@ -152,13 +152,15 @@ class WC_Helper_Product {
 
 		wp_set_object_terms( $product_id, 'variable', 'product_type' );
 
-		// Link the product to the attribute
-		$wpdb->insert( $wpdb->prefix . 'term_relationships', array(
-			'object_id'        => $product_id,
-			'term_taxonomy_id' => $attribute_data['term_taxonomy_id'],
-			'term_order'       => 0,
-		) );
-		$return['term_taxonomy_id'] = $wpdb->insert_id;
+		// Link the product to the terms.
+		foreach ( $attribute_data['term_taxonomy_ids'] as $term_taxonomy_id ) {
+			$wpdb->insert( $wpdb->prefix . 'term_relationships', array(
+				'object_id'        => $product_id,
+				'term_taxonomy_id' => $term_taxonomy_id,
+				'term_order'       => 0,
+			) );
+			$return['term_taxonomy_ids'][] = $wpdb->insert_id;
+		}
 
 		// Create the variation
 		$variation_id = wp_insert_post( array(
@@ -230,6 +232,7 @@ class WC_Helper_Product {
 		$return = array();
 
 		$attribute_name = 'size';
+		$terms = array( 'small', 'large' );
 
 		// Create attribute
 		$attribute = array(
@@ -243,46 +246,50 @@ class WC_Helper_Product {
 		$return['attribute_id'] = $wpdb->insert_id;
 
 		// Register the taxonomy
-		$name  = wc_attribute_taxonomy_name( $attribute_name );
-		$label = $attribute_name;
-
-		// Add the term
-		$wpdb->insert( $wpdb->prefix . 'terms', array(
-			'name'       => 'small',
-			'slug'       => 'small',
-			'term_group' => 0,
-		), array(
+		$array_format = array(
 			'%s',
 			'%s',
 			'%d',
-		) );
-		$return['term_id'] = $wpdb->insert_id;
+		);
 
-		// Add the term_taxonomy
-		$wpdb->insert( $wpdb->prefix . 'term_taxonomy', array(
-			'term_id'     => $return['term_id'],
-			'taxonomy'    => 'pa_size',
-			'description' => '',
-			'parent'      => 0,
-			'count'       => 1,
-		) );
-		$return['term_taxonomy_id'] = $wpdb->insert_id;
+		foreach ( $terms as $term ) {
+			// Add the term
+			$wpdb->insert( $wpdb->prefix . 'terms', array(
+				'name'       => $term,
+				'slug'       => $term,
+				'term_group' => 0,
+			), $array_format );
+
+			$term_id              = $wpdb->insert_id;
+			$return['term_ids'][] = $term_id;
+
+			// Add the term_taxonomy
+			$wpdb->insert( $wpdb->prefix . 'term_taxonomy', array(
+				'term_id'     => $term_id,
+				'taxonomy'    => 'pa_' . $attribute_name,
+				'description' => 'Size of the product',
+				'parent'      => 0,
+				'count'       => 1,
+			) );
+			$return['term_taxonomy_ids'][] = $wpdb->insert_id;
+		}
 
 		// Delete transient
 		delete_transient( 'wc_attribute_taxonomies' );
 
 		$taxonomy_data = array(
 			'labels' => array(
-				'name' => 'size',
+				'name' => $attribute_name,
 			),
 		);
-		register_taxonomy( 'pa_size', array( 'product' ), $taxonomy_data );
+		register_taxonomy( 'pa_' . $attribute_name, array( 'product' ), $taxonomy_data );
 
 		// Set product attributes global.
 		global $wc_product_attributes;
 		$wc_product_attributes = array();
 		foreach ( wc_get_attribute_taxonomies() as $tax ) {
-			if ( $name = wc_attribute_taxonomy_name( $tax->attribute_name ) ) {
+			$name = wc_attribute_taxonomy_name( $tax->attribute_name );
+			if ( $name ) {
 				$wc_product_attributes[ $name ] = $tax;
 			}
 		}
@@ -302,7 +309,9 @@ class WC_Helper_Product {
 
 		$attribute_id = absint( $attribute_id );
 
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = $attribute_id" );
+		$wpdb->query(
+			$wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = %d", $attribute_id )
+		);
 	}
 
 	/**
