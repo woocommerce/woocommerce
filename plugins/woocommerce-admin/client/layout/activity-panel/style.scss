@@ -3,40 +3,42 @@
 .woocommerce-layout__activity-panel {
 	display: flex;
 	flex-direction: row;
-	align-items: flex-end;
+	align-items: center;
 	position: fixed;
-	top: 30px;
+	top: 31px;
 	right: 0;
-	max-width: 400px;
-	height: 81px;
+	height: 80px;
+
+	@include breakpoint( '<782px' ) {
+		position: relative;
+		background: #fff;
+		margin: 0;
+		padding: 0;
+		top: 10px;
+		width: 100vw;
+		display: none;
+		height: 60px;
+		flex: 1 100%;
+	}
 
 	@include breakpoint( '782px-1100px' ) {
 		max-width: 280px;
-		height: 61px;
+		height: 60px;
 	}
 
-	@include breakpoint( '<782px' ) {
-		position: fixed;
-		top: 93px;
-		background: #fff;
-		min-width: 100%;
-		height: 50px;
-		display: none;
+	@include breakpoint( '>1100px' ) {
+		max-width: 400px;
 	}
 
 	&.is-mobile-open {
 		display: flex;
-		align-items: flex-end;
 	}
 }
 
 .woocommerce-layout__activity-panel-tabs {
 	width: 100%;
 	display: flex;
-
-	@include breakpoint( '782px-1100px' ) {
-		height: 60px;
-	}
+	height: 60px;
 
 	@include breakpoint( '>1100px' ) {
 		height: 80px;
@@ -66,21 +68,19 @@
 		border: none;
 		outline: none;
 		cursor: pointer;
-		background-color: transparent;
-		padding: 0.5em 0.5em 9px 0.5em;
-		color: $gray-darken-30;
+		background-color: $white;
+		color: $core-grey-dark-500;
 		width: 100%;
+		height: 60px;
+		border-bottom: 3px solid $white;
 
-		&.is-active {
-			color: $gray-darken-40;
-			border-bottom: 3px solid $woocommerce;
+		@include breakpoint( '>1100px' ) {
+			height: 80px;
 		}
 
-		&:hover,
-		&:focus,
-		&.components-button:not(:disabled):not([aria-disabled='true']):hover,
-		&.components-button:not(:disabled):not([aria-disabled='true']):focus {
-			background-color: $core-light-gray-200;
+		&.is-active {
+			color: $core-grey-dark-700;
+			border-bottom: 3px solid $woocommerce;
 			box-shadow: none;
 		}
 
@@ -88,21 +88,94 @@
 		@include breakpoint( '>1100px' ) {
 			font-size: 13px;
 		}
+
+		&.has-unread:after,
+		&.woocommerce-layout__activity-panel-tab-wordpress-notices:after {
+			content: ' ';
+			position: absolute;
+			padding: 1px;
+			background: $core-orange;
+			border: 2px solid $white;
+			width: 4px;
+			height: 4px;
+			display: inline-block;
+			border-radius: 50%;
+			top: 10px;
+			left: 50%;
+
+			@include breakpoint( '782px-1100px' ) {
+				top: 8px;
+				right: 18px;
+				left: initial;
+				margin-left: 0;
+			}
+
+			@include breakpoint( '>1100px' ) {
+				top: 16px;
+				right: 28px;
+				left: initial;
+				margin-left: 0;
+			}
+		}
+
+		&:hover,
+		&.components-button:not(:disabled):not([aria-disabled='true']):hover,
+		&:focus,
+		&.components-button:not(:disabled):not([aria-disabled='true']):focus {
+			background-color: $core-grey-light-200;
+			box-shadow: none;
+
+			&.has-unread:after,
+			&.woocommerce-layout__activity-panel-tab-wordpress-notices:after {
+				border-color: $core-grey-light-200;
+			}
+		}
+
+		&:focus:not(.is-active),
+		&.components-button:not(.is-active):not(:disabled):not([aria-disabled='true']):focus,
+		&:hover:not(.is-active),
+		&.components-button:not(.is-active):not(:disabled):not([aria-disabled='true']):hover {
+			border-bottom: 3px solid $core-grey-light-200;
+			&.has-unread:after,
+			&.woocommerce-layout__activity-panel-tab-wordpress-notices:after {
+				border-color: $core-grey-light-200;
+			}
+		}
 	}
 }
 
 .woocommerce-layout__activity-panel-mobile-toggle {
 	margin-right: 10px;
+	max-width: 48px;
+	height: 46px;
+	position: fixed;
+	top: 46px;
+	right: 0;
 	@include breakpoint( '>782px' ) {
 		display: none;
 	}
 }
 
-.woocommerce-layout__activity-panel-content {
+@keyframes tabSwitch {
+	0%,
+	100% {
+		transform: translateX(0);
+	}
+	50% {
+		transform: translateX(100px);
+	}
+}
+
+@mixin activity-panel-slide {
+	transition: width 300ms cubic-bezier(0.42, 0, 0.58, 1);
+}
+
+.woocommerce-layout__activity-panel-wrapper {
 	height: calc(100vh - 80px);
 	min-height: calc(100vh - 80px);
 	background: $gray;
-	width: 510px;
+	width: 0px;
+	@include activity-panel-slide();
 	position: fixed;
 	right: 0px;
 	top: 92px;
@@ -115,7 +188,19 @@
 	}
 
 	@include breakpoint( '<782px' ) {
-		top: 143px;
-		width: 100%;
+		top: 153px;
+	}
+
+	&.is-open {
+		@include activity-panel-slide();
+		width: 510px;
+		@include breakpoint( '<782px' ) {
+			width: 100%;
+		}
+	}
+
+	.woocommerce-layout__activity-panel-content {
+		animation: tabSwitch;
+		animation-duration: 300ms;
 	}
 }

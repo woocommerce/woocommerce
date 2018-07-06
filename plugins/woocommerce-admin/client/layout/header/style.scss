@@ -5,11 +5,10 @@
 	display: flex;
 	justify-content: space-between;
 	flex-direction: row;
-	align-items: center;
 	box-sizing: border-box;
 	background: $white;
 	border-bottom: 1px solid $gray;
-	padding: 2px 2px 2px 12px;
+	padding: 0px;
 	height: 80px;
 	position: fixed;
 	width: 100%;
@@ -19,6 +18,7 @@
 	@include breakpoint( '<782px' ) {
 		top: 46px;
 		height: 47px;
+		flex-flow: row wrap;
 	}
 
 	@include breakpoint( '782px-1100px' ) {
@@ -28,13 +28,28 @@
 	.woocommerce-layout__header-breadcrumbs {
 		font-size: 13px;
 		font-weight: normal;
-		padding: 9px 0 4px 0;
-		margin-left: 35px;
+		padding: 0px;
+		margin-left: $spacing;
+		flex: 1 auto;
+
+		padding-top: 8px;
+
+		@include breakpoint( '782px-1100px' ) {
+			padding-top: 16px;
+		}
+
+		@include breakpoint( '>1100px' ) {
+			padding-top: 24px;
+		}
 
 		span + span::before {
 			content: ' / ';
 			color: $gray-text;
 			margin: 0 2px 0 2px;
+		}
+
+		a {
+			color: $woocommerce;
 		}
 	}
 }

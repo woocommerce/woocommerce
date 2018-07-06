@@ -79,6 +79,6 @@
 
 .woocommerce-pagination__page-picker-input.has-error,
 .woocommerce-pagination__page-picker-input.has-error:focus {
-	border-color: $alert-red;
-	box-shadow: 0 0 2px $alert-red;
+	border-color: $error-red;
+	box-shadow: 0 0 2px $error-red;
 }

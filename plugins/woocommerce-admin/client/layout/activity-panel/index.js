@@ -4,7 +4,8 @@
  */
 import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
-import { Component, Fragment } from '@wordpress/element';
+import clickOutside from 'react-click-outside';
+import { Component } from '@wordpress/element';
 import Gridicon from 'gridicons';
 import { IconButton } from '@wordpress/components';
 import { partial } from 'lodash';
@@ -67,52 +68,72 @@ class ActivityPanel extends Component {
 		} ) );
 	}
 
-	// TODO Replace with correct icons
+	handleClickOutside() {
+		const { isPanelOpen, currentTab } = this.state;
+
+		if ( isPanelOpen ) {
+			this.togglePanel( currentTab );
+		}
+	}
+
+	// TODO Pull in dynamic unread status/count
 	getTabs() {
 		return [
 			{
 				name: 'inbox',
 				title: __( 'Inbox', 'woo-dash' ),
 				icon: <Gridicon icon="mail" />,
+				unread: true,
 			},
 			{
 				name: 'orders',
 				title: __( 'Orders', 'woo-dash' ),
 				icon: <Gridicon icon="pages" />,
+				unread: false,
 			},
 			{
 				name: 'stock',
 				title: __( 'Stock', 'woo-dash' ),
 				icon: <Gridicon icon="clipboard" />,
+				unread: true,
 			},
 			{
 				name: 'reviews',
 				title: __( 'Reviews', 'woo-dash' ),
 				icon: <Gridicon icon="star" />,
+				unread: true,
 			},
 		];
 	}
 
+	getPanelContent( tab ) {
+		switch ( tab ) {
+			case 'orders':
+				return <OrdersList />;
+			default:
+				return <p>Coming soon…</p>;
+		}
+	}
+
 	renderPanel() {
 		const { isPanelOpen, currentTab } = this.state;
-
-		if ( ! isPanelOpen ) {
-			return null;
-		}
-
-		let panelContent;
-
-		switch ( currentTab ) {
-			case 'orders':
-				panelContent = <OrdersList />;
-				break;
-			default:
-				panelContent = <p>Coming soon…</p>;
-		}
+		const classNames = classnames( 'woocommerce-layout__activity-panel-wrapper', {
+			'is-open': isPanelOpen,
+		} );
 
 		return (
-			<Section component="div" className="woocommerce-layout__activity-panel-content">
-				{ panelContent }
+			<Section component="div" className={ classNames }>
+				{ ( isPanelOpen && (
+					<div
+						className="woocommerce-layout__activity-panel-content"
+						key={ 'activity-panel-' + currentTab }
+						id={ 'activity-panel-' + currentTab }
+						role="tabpanel"
+					>
+						{ this.getPanelContent( currentTab ) }
+					</div>
+				) ) ||
+					null }
 			</Section>
 		);
 	}
@@ -121,6 +142,7 @@ class ActivityPanel extends Component {
 		const { currentTab } = this.state;
 		const className = classnames( 'woocommerce-layout__activity-panel-tab', {
 			'is-active': tab.name === currentTab,
+			'has-unread': tab.unread,
 		} );
 
 		return (
@@ -129,6 +151,7 @@ class ActivityPanel extends Component {
 				className={ className }
 				onClick={ partial( this.togglePanel, tab.name ) }
 				icon={ tab.icon }
+				aria-controls={ 'activity-panel-' + tab.name }
 			>
 				{ tab.title }
 			</IconButton>
@@ -145,17 +168,17 @@ class ActivityPanel extends Component {
 
 		// TODO Replace the mobile toggle with the Woo bubble Gridicon once it has been added.
 		return (
-			<Fragment>
+			<div id="woocommerce-activity-panel">
 				<IconButton
 					onClick={ this.toggleMobile }
-					icon={ mobileOpen ? <Gridicon icon="cross-small" /> : 'admin-generic' }
-					label={ __( 'View Activity Panel' ) }
+					icon={ mobileOpen ? <Gridicon icon="cross-small" /> : <Gridicon icon="cog" /> }
+					label={ mobileOpen ? __( 'Close Activity Panel' ) : __( 'View Activity Panel' ) }
 					aria-expanded={ mobileOpen }
 					tooltip={ false }
 					className="woocommerce-layout__activity-panel-mobile-toggle"
 				/>
 				<div className={ panelClasses }>
-					<div className="woocommerce-layout__activity-panel-tabs">
+					<div className="woocommerce-layout__activity-panel-tabs" role="tablist">
 						{ tabs && tabs.map( this.renderTab ) }
 						<WordPressNotices
 							showNotices={ 'wpnotices' === currentTab }
@@ -164,9 +187,9 @@ class ActivityPanel extends Component {
 					</div>
 					{ this.renderPanel() }
 				</div>
-			</Fragment>
+			</div>
 		);
 	}
 }
 
-export default ActivityPanel;
+export default clickOutside( ActivityPanel );

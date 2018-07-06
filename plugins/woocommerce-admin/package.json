@@ -55,6 +55,7 @@
     "prettier": "github:automattic/calypso-prettier#c56b4251",
     "prop-types": "^15.6.1",
     "react": "^16.3.2",
+    "react-click-outside": "2.3.1",
     "react-dom": "^16.3.2",
     "react-router-dom": "^4.2.2",
     "readline-sync": "^1.4.9",

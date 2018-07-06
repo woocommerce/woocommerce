@@ -186,6 +186,7 @@ class WordPressNotices extends Component {
 		}
 
 		const className = classnames( 'woocommerce-layout__activity-panel-tab', {
+			'woocommerce-layout__activity-panel-tab-wordpress-notices': true,
 			'is-active': showNotices,
 		} );
 
