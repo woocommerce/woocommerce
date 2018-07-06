@@ -19,7 +19,7 @@ class WC_Admin_Webhooks {
 	public function __construct() {
 		add_action( 'admin_init', array( $this, 'actions' ) );
 		add_action( 'woocommerce_settings_page_init', array( $this, 'screen_option' ) );
-		add_filter( 'woocommerce_save_settings_api_webhooks', array( $this, 'allow_save_settings' ) );
+		add_filter( 'woocommerce_save_settings_advanced_webhooks', array( $this, 'allow_save_settings' ) );
 	}
 
 	/**
@@ -30,7 +30,7 @@ class WC_Admin_Webhooks {
 	 * @return bool
 	 */
 	public function allow_save_settings( $allow ) {
-		if ( ! isset( $_GET['edit-webhook'] ) ) {// WPCS: input var okay, CSRF ok.
+		if ( ! isset( $_GET['edit-webhook'] ) ) { // WPCS: input var okay, CSRF ok.
 			return false;
 		}
 
@@ -277,7 +277,7 @@ class WC_Admin_Webhooks {
 			$webhooks_table_list->prepare_items();
 
 			echo '<input type="hidden" name="page" value="wc-settings" />';
-			echo '<input type="hidden" name="tab" value="api" />';
+			echo '<input type="hidden" name="tab" value="advanced" />';
 			echo '<input type="hidden" name="section" value="webhooks" />';
 
 			$webhooks_table_list->views();
