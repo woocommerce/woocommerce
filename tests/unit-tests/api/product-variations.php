@@ -743,30 +743,14 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		// Variable product with 2 different variations.
 		$variable_product = WC_Helper_Product::create_variation_product();
 
-		// Create one variation without value.
-		$variation_id = wp_insert_post( array(
-			'post_title'  => 'Variation #' . ( $variable_product->get_id() + 3 ) . ' of Dummy Product',
-			'post_type'   => 'product_variation',
-			'post_parent' => $variable_product->get_id(),
-			'post_status' => 'publish',
-			'menu_order'  => 3,
+		// Create one variation without attribute value.
+		$variation_3 = new WC_Product_Variation();
+		$variation_3->set_props( array(
+			'parent_id'     => $variable_product->get_id(),
+			'sku'           => 'DUMMY SKU VARIABLE NOSIZE',
+			'regular_price' => 16,
 		) );
-
-		// Price related meta.
-		update_post_meta( $variation_id, '_price', '16' );
-		update_post_meta( $variation_id, '_regular_price', '16' );
-
-		// General meta.
-		update_post_meta( $variation_id, '_sku', 'DUMMY SKU VARIABLE NOVALUE' );
-		update_post_meta( $variation_id, '_manage_stock', 'no' );
-		update_post_meta( $variation_id, '_downloadable', 'no' );
-		update_post_meta( $variation_id, '_virtual', 'no' );
-		update_post_meta( $variation_id, '_stock_status', 'instock' );
-
-		// Add the variation meta to the main product.
-		update_post_meta( $variable_product->get_id(), '_max_price_variation_id', $variation_id );
-
-		wp_set_object_terms( $variation_id, 'variation', 'product_type' );
+		$variation_3->save();
 
 		$variations       = $variable_product->get_available_variations();
 
