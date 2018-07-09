@@ -1798,10 +1798,11 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return string
 	 */
 	public function get_image( $size = 'woocommerce_thumbnail', $attr = array(), $placeholder = true ) {
-		if ( has_post_thumbnail( $this->get_id() ) ) {
-			$image = get_the_post_thumbnail( $this->get_id(), $size, $attr );
-		} elseif ( ( $parent_id = wp_get_post_parent_id( $this->get_id() ) ) && has_post_thumbnail( $parent_id ) ) { // @phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found
-			$image = get_the_post_thumbnail( $parent_id, $size, $attr );
+		if ( $this->get_image_id() ) {
+			$image = wp_get_attachment_image( $this->get_image_id(), $size );
+		} elseif ( $this->get_parent_id() ) {
+			$parent_product = wc_get_product( $this->get_parent_id() );
+			$image          = $parent_product->get_image();
 		} elseif ( $placeholder ) {
 			$image = wc_placeholder_img( $size );
 		} else {
