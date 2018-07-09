@@ -22,7 +22,7 @@ function wc_template_redirect() {
 		wp_safe_redirect( get_post_type_archive_link( 'product' ) );
 		exit;
 
-	} elseif ( is_page( wc_get_page_id( 'checkout' ) ) && wc_get_page_id( 'checkout' ) !== wc_get_page_id( 'cart' ) && WC()->cart->is_empty() && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) && ! is_customize_preview() ) {
+	} elseif ( is_page( wc_get_page_id( 'checkout' ) ) && wc_get_page_id( 'checkout' ) !== wc_get_page_id( 'cart' ) && WC()->cart->is_empty() && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) && ! is_customize_preview() && apply_filters( 'woocommerce_checkout_redirect_empty_cart', true ) ) {
 
 		// When on the checkout with an empty cart, redirect to cart page.
 		wc_add_notice( __( 'Checkout is not available whilst your cart is empty.', 'woocommerce' ), 'notice' );
@@ -1188,7 +1188,7 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 					'button',
 					'product_type_' . $product->get_type(),
 					$product->is_purchasable() && $product->is_in_stock() ? 'add_to_cart_button' : '',
-					$product->supports( 'ajax_add_to_cart' ) ? 'ajax_add_to_cart' : '',
+					$product->supports( 'ajax_add_to_cart' ) && $product->is_purchasable() && $product->is_in_stock() ? 'ajax_add_to_cart' : '',
 				) ) ),
 				'attributes' => array(
 					'data-product_id'  => $product->get_id(),
@@ -1887,9 +1887,17 @@ if ( ! function_exists( 'woocommerce_shipping_calculator' ) ) {
 
 	/**
 	 * Output the cart shipping calculator.
+	 *
+	 * @param string $button_text Text for the shipping calculation toggle.
 	 */
-	function woocommerce_shipping_calculator() {
-		wc_get_template( 'cart/shipping-calculator.php' );
+	function woocommerce_shipping_calculator( $button_text = '' ) {
+		if ( 'no' === get_option( 'woocommerce_enable_shipping_calc' ) || ! WC()->cart->needs_shipping() ) {
+			return;
+		}
+		wp_enqueue_script( 'wc-country-select' );
+		wc_get_template( 'cart/shipping-calculator.php', array(
+			'button_text' => $button_text,
+		) );
 	}
 }
 
@@ -2421,7 +2429,8 @@ if ( ! function_exists( 'woocommerce_order_again_button' ) ) {
 		}
 
 		wc_get_template( 'order/order-again.php', array(
-			'order' => $order,
+			'order'           => $order,
+			'order_again_url' => wp_nonce_url( add_query_arg( 'order_again', $order->get_id(), wc_get_cart_url() ), 'woocommerce-order_again' ),
 		) );
 	}
 }
@@ -3344,6 +3353,17 @@ function wc_get_cart_undo_url( $cart_item_key ) {
 	);
 
 	return apply_filters( 'woocommerce_get_undo_url', $cart_page_url ? wp_nonce_url( add_query_arg( $query_args, $cart_page_url ), 'woocommerce-cart' ) : '', $cart_item_key );
+}
+
+/**
+ * Outputs all queued notices on WC pages.
+ *
+ * @since 3.5.0
+ */
+function woocommerce_output_all_notices() {
+	echo '<div class="woocommerce-notices-wrapper">';
+	wc_print_notices();
+	echo '</div>';
 }
 
 /**

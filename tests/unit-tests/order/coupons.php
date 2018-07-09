@@ -25,8 +25,8 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_tax_based_on', 'base' );
 
 		$product = WC_Helper_Product::create_simple_product();
-		update_post_meta( $product->get_id(), '_regular_price', '1000' );
-		update_post_meta( $product->get_id(), '_price', '1000' );
+		$product->set_regular_price( 1000 );
+		$product->save();
 		$product = wc_get_product( $product->get_id() );
 
 		$coupon = new WC_Coupon();

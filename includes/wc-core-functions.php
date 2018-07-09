@@ -150,7 +150,6 @@ function wc_update_order( $args ) {
  *
  * WC_TEMPLATE_DEBUG_MODE will prevent overrides in themes from taking priority.
  *
- * @access public
  * @param mixed  $slug Template slug.
  * @param string $name Template name (default: '').
  */
@@ -183,7 +182,6 @@ function wc_get_template_part( $slug, $name = '' ) {
 /**
  * Get other templates (e.g. product attributes) passing attributes and including the file.
  *
- * @access public
  * @param string $template_name Template name.
  * @param array  $args          Arguments. (default: array).
  * @param string $template_path Template path. (default: '').
@@ -239,7 +237,6 @@ function wc_get_template_html( $template_name, $args = array(), $template_path =
  * yourtheme/$template_name
  * $default_path/$template_name
  *
- * @access public
  * @param string $template_name Template name.
  * @param string $template_path Template path. (default: '').
  * @param string $default_path  Default path. (default: '').
@@ -1636,30 +1633,30 @@ function wc_get_logger() {
 
 	$class = apply_filters( 'woocommerce_logging_class', 'WC_Logger' );
 
-	if ( null === $logger || ! is_a( $logger, $class ) ) {
-		$implements = class_implements( $class );
-
-		if ( is_array( $implements ) && in_array( 'WC_Logger_Interface', $implements, true ) ) {
-			if ( is_object( $class ) ) {
-				$logger = $class;
-			} else {
-				$logger = new $class();
-			}
-		} else {
-			wc_doing_it_wrong(
-				__FUNCTION__,
-				sprintf(
-					/* translators: 1: class name 2: woocommerce_logging_class 3: WC_Logger_Interface */
-					__( 'The class %1$s provided by %2$s filter must implement %3$s.', 'woocommerce' ),
-					'<code>' . esc_html( is_object( $class ) ? get_class( $class ) : $class ) . '</code>',
-					'<code>woocommerce_logging_class</code>',
-					'<code>WC_Logger_Interface</code>'
-				),
-				'3.0'
-			);
-			$logger = is_a( $logger, 'WC_Logger' ) ? $logger : new WC_Logger();
-		}
+	if ( null !== $logger && is_a( $logger, $class ) ) {
+		return $logger;
 	}
+
+	$implements = class_implements( $class );
+
+	if ( is_array( $implements ) && in_array( 'WC_Logger_Interface', $implements, true ) ) {
+		$logger = is_object( $class ) ? $class : new $class();
+	} else {
+		wc_doing_it_wrong(
+			__FUNCTION__,
+			sprintf(
+				/* translators: 1: class name 2: woocommerce_logging_class 3: WC_Logger_Interface */
+				__( 'The class %1$s provided by %2$s filter must implement %3$s.', 'woocommerce' ),
+				'<code>' . esc_html( is_object( $class ) ? get_class( $class ) : $class ) . '</code>',
+				'<code>woocommerce_logging_class</code>',
+				'<code>WC_Logger_Interface</code>'
+			),
+			'3.0'
+		);
+
+		$logger = is_a( $logger, 'WC_Logger' ) ? $logger : new WC_Logger();
+	}
+
 	return $logger;
 }
 

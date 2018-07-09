@@ -175,7 +175,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 				'images'      => array(
 					array(
 						'position' => 0,
-						'src'      => 'https://cldup.com/Dr1Bczxq4q.png',
+						'src'      => 'http://cldup.com/Dr1Bczxq4q.png',
 						'alt'      => 'test upload image',
 					),
 				),
@@ -203,25 +203,29 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		}
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v2/products/' . $product->get_id() );
-		$request->set_body_params(
-			array(
-				'attributes' => array(
-					array(
-						'id'        => 0,
-						'name'      => 'pa_color',
-						'options'   => array( 'red', 'yellow' ),
-						'visible'   => false,
-						'variation' => 1,
+		$request->set_body_params( array(
+			'attributes' => array(
+				array(
+					'id'        => 0,
+					'name'      => 'pa_color',
+					'options'   => array(
+						'red',
+						'yellow',
 					),
-					array(
-						'name'      => 'pa_size',
-						'options'   => array( 'small' ),
-						'visible'   => false,
-						'variation' => 1,
-					),
+					'visible'   => false,
+					'variation' => 1,
 				),
-			)
-		);
+				array(
+					'id'        => 0,
+					'name'      => 'pa_size',
+					'options'   => array(
+						'small',
+					),
+					'visible'   => false,
+					'variation' => 1,
+				),
+			),
+		) );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 

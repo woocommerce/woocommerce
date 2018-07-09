@@ -233,6 +233,10 @@ class WC_Widget_Product_Categories extends WC_Widget {
 					)
 				)
 			);
+
+			wp_enqueue_script( 'selectWoo' );
+			wp_enqueue_style( 'select2' );
+
 			wc_enqueue_js(
 				"
 				jQuery( '.dropdown_product_cat' ).change( function() {
@@ -245,8 +249,27 @@ class WC_Widget_Product_Categories extends WC_Widget {
 							this_page = home_url + '?product_cat=' + jQuery(this).val();
 						}
 						location.href = this_page;
+					} else {
+						location.href = '" . esc_js( wc_get_page_permalink( 'shop' ) ) . "';
 					}
 				});
+
+				if ( jQuery().selectWoo ) {
+					var wc_product_cat_select = function() {
+						jQuery( '.dropdown_product_cat' ).selectWoo( {
+							placeholder: '" . esc_js( __( 'Select a category', 'woocommerce' ) ) . "',
+							minimumResultsForSearch: 5,
+							width: '100%',
+							allowClear: true,
+							language: {
+								noResults: function() {
+									return '" . esc_js( _x( 'No matches found', 'enhanced select', 'woocommerce' ) ) . "';
+								}
+							}
+						} );
+					};
+					wc_product_cat_select();
+				}
 			"
 			);
 		} else {

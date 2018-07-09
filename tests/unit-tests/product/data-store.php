@@ -11,6 +11,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	 * Make sure the default product store loads.
 	 *
 	 * @since 3.0.0
+	 * @group core-only
 	 */
 	public function test_product_store_loads() {
 		$product_store = new WC_Data_Store( 'product' );
@@ -205,9 +206,9 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$children = $product->get_children();
 
 		// Test sale prices too
-		update_post_meta( $children[0], '_price', '8' );
-		update_post_meta( $children[0], '_sale_price', '8' );
-		delete_transient( 'wc_var_prices_' . $product->get_id() );
+		$child = wc_get_product( $children[0] );
+		$child->set_sale_price( 8 );
+		$child->save();
 
 		$product = new WC_Product_Variable( $product->get_id() );
 
@@ -355,38 +356,93 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 
 		// Create a variable product with sold individually.
 		$product = new WC_Product_Variable();
+		$options = array( '1', '0', 'true', 'false' );
+
+		$attribute_1 = new WC_Product_Attribute();
+		$attribute_1->set_name( 'sample-attribute-0' );
+		$attribute_1->set_visible( true );
+		$attribute_1->set_variation( true );
+		$attribute_1->set_options( $options );
+		$attribute_2 = new WC_Product_Attribute();
+		$attribute_2->set_name( 'sample-attribute-1' );
+		$attribute_2->set_visible( true );
+		$attribute_2->set_variation( true );
+		$attribute_2->set_options( $options );
+		$attribute_3 = new WC_Product_Attribute();
+		$attribute_3->set_name( 'sample-attribute-2' );
+		$attribute_3->set_visible( true );
+		$attribute_3->set_variation( true );
+		$attribute_3->set_options( $options );
+		$attribute_4 = new WC_Product_Attribute();
+		$attribute_4->set_name( 'sample-attribute-3' );
+		$attribute_4->set_visible( true );
+		$attribute_4->set_variation( true );
+		$attribute_4->set_options( $options );
+		$attribute_5 = new WC_Product_Attribute();
+		$attribute_5->set_name( 'sample-attribute-4' );
+		$attribute_5->set_visible( true );
+		$attribute_5->set_variation( true );
+		$attribute_5->set_options( $options );
+		$attribute_6 = new WC_Product_Attribute();
+		$attribute_6->set_name( 'sample-attribute-5' );
+		$attribute_6->set_visible( true );
+		$attribute_6->set_variation( true );
+		$attribute_6->set_options( $options );
+		$attribute_7 = new WC_Product_Attribute();
+		$attribute_7->set_name( 'sample-attribute-6' );
+		$attribute_7->set_visible( true );
+		$attribute_7->set_variation( true );
+		$attribute_7->set_options( $options );
+		$attribute_8 = new WC_Product_Attribute();
+		$attribute_8->set_name( 'sample-attribute-7' );
+		$attribute_8->set_visible( true );
+		$attribute_8->set_variation( true );
+		$attribute_8->set_options( $options );
+		$attribute_9 = new WC_Product_Attribute();
+		$attribute_9->set_name( 'sample-attribute-8' );
+		$attribute_9->set_visible( true );
+		$attribute_9->set_variation( true );
+		$attribute_9->set_options( $options );
+		$attribute_10 = new WC_Product_Attribute();
+		$attribute_10->set_name( 'sample-attribute-9' );
+		$attribute_10->set_visible( true );
+		$attribute_10->set_variation( true );
+		$attribute_10->set_options( $options );
+
+		$product->set_attributes( array( $attribute_1, $attribute_2, $attribute_3, $attribute_4, $attribute_5, $attribute_6, $attribute_7, $attribute_8, $attribute_9, $attribute_10 ) );
 		$product->save();
-		$product_id = $product->get_id();
 
 		// Save with a set of FALSE equivalents and some values we expect to come through as true.  We should see
 		// string types with a value of '0' making it through filtration.
 		$test_object           = new stdClass();
 		$test_object->property = '12345';
 		$product->set_default_attributes( array(
-			'sample-attribute-false-0' => 0,
-			'sample-attribute-false-1' => false,
-			'sample-attribute-false-2' => '',
-			'sample-attribute-false-3' => null,
-			'sample-attribute-true-0'  => '0',
-			'sample-attribute-true-1'  => 1,
-			'sample-attribute-true-2'  => 'true',
-			'sample-attribute-true-3'  => 'false',
-			'sample-attribute-true-4'  => array( 'exists' => 'false' ),
-			'sample-attribute-false-4' => $test_object,
+			'sample-attribute-0' => 0,
+			'sample-attribute-1' => false,
+			'sample-attribute-2' => '',
+			'sample-attribute-3' => null,
+			'sample-attribute-4'  => '0',
+			'sample-attribute-5'  => 1,
+			'sample-attribute-6'  => 'true',
+			'sample-attribute-7'  => 'false',
+			'sample-attribute-8'  => array( 'exists' => 'false' ),
+			'sample-attribute-9' => $test_object,
 		));
 		$product->save();
+		$product_id = $product->get_id();
 
 		// Revive the product from the database and analyze results
 		$product            = wc_get_product( $product_id );
 		$default_attributes = $product->get_default_attributes();
-		$this->assertEquals( $default_attributes, array(
-			'sample-attribute-true-0'  => '0',
-			'sample-attribute-true-1'  => 1,
-			'sample-attribute-true-2'  => 'true',
-			'sample-attribute-true-3'  => 'false',
-			'sample-attribute-true-4'  => array( 'exists' => 'false' ),
-			'sample-attribute-false-4' => $test_object,
-		));
+		$this->assertEquals(
+			array(
+				'sample-attribute-4'  => '0',
+				'sample-attribute-5'  => '1',
+				'sample-attribute-6'  => 'true',
+				'sample-attribute-7'  => 'false',
+			),
+			$default_attributes
+		);
 	}
 
 	public function test_variable_child_has_dimensions() {
@@ -400,7 +456,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 
 		$product = wc_get_product( $product->get_id() );
 
-		$store = new WC_Product_Variable_Data_Store_CPT();
+		$store = WC_Data_Store::load( 'product-variable' );
 
 		$this->assertTrue( $store->child_has_dimensions( $product ) );
 	}
@@ -415,13 +471,13 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 
 		$product = wc_get_product( $product->get_id() );
 
-		$store = new WC_Product_Variable_Data_Store_CPT();
+		$store = WC_Data_Store::load( 'product-variable' );
 
 		$this->assertFalse( $store->child_has_dimensions( $product ) );
 	}
 
 	public function test_get_on_sale_products() {
-		$product_store = new WC_Product_Data_Store_CPT();
+		$product_store = WC_Data_Store::load( 'product' );
 
 		$sale_product = WC_Helper_Product::create_simple_product();
 		$sale_product->set_sale_price( 3.49 );

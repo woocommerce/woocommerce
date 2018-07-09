@@ -132,4 +132,13 @@ class WC_Background_Updater extends WC_Background_Process {
 		WC_Install::update_db_version();
 		parent::complete();
 	}
+
+	/**
+	 * See if the batch limit has been exceeded.
+	 *
+	 * @return bool
+	 */
+	public function is_memory_exceeded() {
+		return $this->memory_exceeded();
+	}
 }

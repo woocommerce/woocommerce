@@ -38,7 +38,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_bool_to_string() {
-		$this->assertEquals( array( 'yes', 'no' ), array( wc_bool_to_string( true ), wc_bool_to_string( false )	) );
+		$this->assertEquals( array( 'yes', 'no' ), array( wc_bool_to_string( true ), wc_bool_to_string( false ) ) );
 	}
 
 	/**
@@ -83,7 +83,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( 'woocommerce.pdf', wc_get_filename_from_url( 'https://woocommerce.com/woocommerce.pdf' ) );
 		$this->assertEmpty( wc_get_filename_from_url( 'ftp://wc' ) );
 		$this->assertEmpty( wc_get_filename_from_url( 'http://www.skyverge.com' ) );
-		$this->assertEquals( 'woocommerce',  wc_get_filename_from_url( 'https://woocommerce.com/woocommerce' ) );
+		$this->assertEquals( 'woocommerce', wc_get_filename_from_url( 'https://woocommerce.com/woocommerce' ) );
 	}
 
 	/**
@@ -760,6 +760,8 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_format_phone_number() {
 		$this->assertEquals( '1-610-385-0000', wc_format_phone_number( '1.610.385.0000' ) );
+		$this->assertEquals( '+47 0000 00003', wc_format_phone_number( '‭+47 0000 00003‬' ) ); // This number contains non-visible unicode chars at the beginning and end of string, should remove all those.
+		$this->assertEquals( '27 00 00 0000', wc_format_phone_number( '27 00 00 0000' ) );
 	}
 
 	/**
@@ -769,8 +771,8 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_trim_string() {
 		$this->assertEquals( 'string', wc_trim_string( 'string' ) );
-		$this->assertEquals( 's...',   wc_trim_string( 'string', 4 ) );
-		$this->assertEquals( 'st.',    wc_trim_string( 'string', 3, '.' ) );
+		$this->assertEquals( 's...', wc_trim_string( 'string', 4 ) );
+		$this->assertEquals( 'st.', wc_trim_string( 'string', 3, '.' ) );
 		$this->assertEquals( 'string¥', wc_trim_string( 'string¥', 7, '' ) );
 	}
 
@@ -894,7 +896,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_do_oembeds() {
 		// In this case should only return the URL back, since oEmbed will run other actions on frontend.
-		$this->assertEquals( "<iframe width='500' height='281' src='https://videopress.com/embed/9sRCUigm?hd=0' frameborder='0' allowfullscreen></iframe><script src='https://v0.wordpress.com/js/next/videopress-iframe.js?m=1435166243'></script>", wc_do_oembeds( 'https://wordpress.tv/2015/10/19/mike-jolley-user-onboarding-for-wordpress-plugins/' ) );
+		$this->assertEquals( "<iframe width='500' height='281' src='https://videopress.com/embed/9sRCUigm?hd=0' frameborder='0' allowfullscreen></iframe><script src='https://v0.wordpress.com/js/next/videopress-iframe.js?m=1435166243'></script>", wc_do_oembeds( 'https://wordpress.tv/2015/10/19/mike-jolley-user-onboarding-for-wordpress-plugins/' ) ); // phpcs:ignore
 	}
 
 	/**

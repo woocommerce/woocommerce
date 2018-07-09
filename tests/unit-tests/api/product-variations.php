@@ -173,7 +173,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 				'description' => 'O_O',
 				'image'       => array(
 					'position' => 0,
-					'src'      => 'https://cldup.com/Dr1Bczxq4q.png',
+					'src'      => 'http://cldup.com/Dr1Bczxq4q.png',
 					'alt'      => 'test upload image',
 				),
 				'attributes'  => array(
@@ -187,14 +187,15 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$response  = $this->server->dispatch( $request );
 		$variation = $response->get_data();
 
-		$this->assertContains( 'O_O', $variation['description'] );
-		$this->assertEquals( '8', $variation['price'] );
-		$this->assertEquals( '8', $variation['sale_price'] );
-		$this->assertEquals( '10', $variation['regular_price'] );
-		$this->assertEquals( 'FIXED-SKU', $variation['sku'] );
-		$this->assertEquals( 'medium', $variation['attributes'][0]['option'] );
-		$this->assertContains( 'Dr1Bczxq4q', $variation['image']['src'] );
-		$this->assertContains( 'test upload image', $variation['image']['alt'] );
+		$this->assertTrue( isset( $variation['description'] ), print_r( $variation, true ) );
+		$this->assertContains( 'O_O', $variation['description'], print_r( $variation, true ) );
+		$this->assertEquals( '8', $variation['price'], print_r( $variation, true ) );
+		$this->assertEquals( '8', $variation['sale_price'], print_r( $variation, true ) );
+		$this->assertEquals( '10', $variation['regular_price'], print_r( $variation, true ) );
+		$this->assertEquals( 'FIXED-SKU', $variation['sku'], print_r( $variation, true ) );
+		$this->assertEquals( 'medium', $variation['attributes'][0]['option'], print_r( $variation, true ) );
+		$this->assertContains( 'Dr1Bczxq4q', $variation['image']['src'], print_r( $variation, true ) );
+		$this->assertContains( 'test upload image', $variation['image']['alt'], print_r( $variation, true ) );
 	}
 
 	/**
@@ -321,7 +322,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 						'description' => 'Updated description.',
 						'image'       => array(
 							'position' => 0,
-							'src'      => 'https://cldup.com/Dr1Bczxq4q.png',
+							'src'      => 'http://cldup.com/Dr1Bczxq4q.png',
 							'alt'      => 'test upload image',
 						),
 					),

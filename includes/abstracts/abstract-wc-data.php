@@ -378,9 +378,10 @@ abstract class WC_Data {
 	 * Add meta data.
 	 *
 	 * @since 2.6.0
-	 * @param string $key Meta key.
-	 * @param string $value Meta value.
-	 * @param bool   $unique Should this be a unique key?.
+	 *
+	 * @param string        $key Meta key.
+	 * @param string|array  $value Meta value.
+	 * @param bool          $unique Should this be a unique key?.
 	 */
 	public function add_meta_data( $key, $value, $unique = false ) {
 		if ( $this->is_internal_meta_key( $key ) ) {
@@ -405,9 +406,10 @@ abstract class WC_Data {
 	 * Update meta data by key or ID, if provided.
 	 *
 	 * @since  2.6.0
-	 * @param  string $key Meta key.
-	 * @param  string $value Meta value.
-	 * @param  int    $meta_id Meta ID.
+	 *
+	 * @param  string       $key Meta key.
+	 * @param  string|array $value Meta value.
+	 * @param  int          $meta_id Meta ID.
 	 */
 	public function update_meta_data( $key, $value, $meta_id = 0 ) {
 		if ( $this->is_internal_meta_key( $key ) ) {
@@ -420,11 +422,34 @@ abstract class WC_Data {
 
 		$this->maybe_read_meta_data();
 
-		$array_key = $meta_id ? array_keys( wp_list_pluck( $this->meta_data, 'id' ), $meta_id ) : '';
+		$array_key = false;
+
+		if ( $meta_id ) {
+			$array_keys = array_keys( wp_list_pluck( $this->meta_data, 'id' ), $meta_id, true );
+			$array_key  = $array_keys ? current( $array_keys ) : false;
+		} else {
+			// Find matches by key.
+			$matches     = array();
+			$ids_to_keys = wp_list_pluck( $this->meta_data, 'key', 'id' );
+
+			foreach ( $this->meta_data as $meta_data_array_key => $meta ) {
+				if ( $meta->key === $key ) {
+					$matches[] = $meta_data_array_key;
+				}
+			}
+
+			if ( ! empty( $matches ) ) {
+				// Set matches to null so only one key gets the new value.
+				foreach ( $matches as $meta_data_array_key ) {
+					$this->meta_data[ $meta_data_array_key ]->value = null;
+				}
+				$array_key = current( $matches );
+			}
+		}
 
 		if ( $array_key ) {
-			$meta = $this->meta_data[ current( $array_key ) ];
-			$meta->key = $key;
+			$meta        = $this->meta_data[ $array_key ];
+			$meta->key   = $key;
 			$meta->value = $value;
 		} else {
 			$this->add_meta_data( $key, $value, true );
