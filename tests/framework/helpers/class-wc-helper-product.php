@@ -176,7 +176,8 @@ class WC_Helper_Product {
 		global $wc_product_attributes;
 		$wc_product_attributes = array();
 		foreach ( wc_get_attribute_taxonomies() as $tax ) {
-			if ( $name = wc_attribute_taxonomy_name( $tax->attribute_name ) ) {
+			$name = wc_attribute_taxonomy_name( $tax->attribute_name );
+			if ( $name ) {
 				$wc_product_attributes[ $name ] = $tax;
 			}
 		}
@@ -207,7 +208,9 @@ class WC_Helper_Product {
 
 		$attribute_id = absint( $attribute_id );
 
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = $attribute_id" );
+		$wpdb->query(
+			$wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = %d", $attribute_id )
+		);
 	}
 
 	/**
