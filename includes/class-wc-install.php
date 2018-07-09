@@ -955,6 +955,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 				'export'                 => true,
 				'import'                 => true,
 				'list_users'             => true,
+				'edit_theme_options'     => true,
 			)
 		);
 
