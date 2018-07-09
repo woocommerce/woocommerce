@@ -531,13 +531,18 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	public function test_get_products_by_category() {
 		wp_set_current_user( $this->user );
 
-		// Test product assigned to a single category.
+		// Create one product with a category.
 		$category = wp_insert_term( 'Some Category', 'product_cat' );
 
 		$product = new WC_Product_Simple();
 		$product->set_category_ids( array( $category['term_id'] ) );
 		$product->save();
 
+		// Create one product without category, i.e. Uncategorized.
+		$product_2 = new WC_Product_Simple();
+		$product_2->save();
+
+		// Test product assigned to a single category.
 		$query_params = array(
 			'category' => (string) $category['term_id'],
 		);
@@ -552,13 +557,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 			$this->assertEquals( $product->get_category_ids(), wp_list_pluck( $response_product['categories'], 'id' ) );
 		}
 
-		$product->delete( true );
-		wp_delete_term( $category['term_id'], 'product_cat' );
-
 		// Test product without categories.
-		$product_2 = new WC_Product_Simple();
-		$product_2->save();
-
 		$request          = new WP_REST_Request( 'GET', '/wc/v2/products/' . $product_2->get_id() );
 		$response         = $this->server->dispatch( $request );
 		$response_product = $response->get_data();
@@ -567,6 +566,9 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$this->assertCount( 1, $response_product['categories'] );
 		$this->assertEquals( 'uncategorized', $response_product['categories'][0]['slug'] );
 
+		// Clean up.
+		wp_delete_term( $category['term_id'], 'product_cat' );
+		$product->delete( true );
 		$product_2->delete( true );
 
 	}
@@ -605,6 +607,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 			$response_products = $response->get_data();
 
 			$this->assertEquals( 200, $response->get_status() );
+			$this->assertEquals( count( $product_ids ), count( $response_products ) );
 			foreach ( $response_products as $response_product ) {
 				$this->assertContains( $response_product['id'], $product_ids_for_type[ $product_type ], 'REST API: ' . $product_type . ' not found correctly' );
 			}
@@ -621,7 +624,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	 *
 	 * @since 3.5.0
 	 */
-	public function test_get_featured_product() {
+	public function test_get_featured_products() {
 		wp_set_current_user( $this->user );
 
 		// Create a featured product.
@@ -664,11 +667,11 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
- * Test getting products by shipping class property.
- *
- * @since 3.5.0
- */
-	public function test_get_product_by_shipping_class() {
+	 * Test getting products by shipping class property.
+	 *
+	 * @since 3.5.0
+	 */
+	public function test_get_products_by_shipping_class() {
 		wp_set_current_user( $this->user );
 
 		$shipping_class_1 = wp_insert_term( 'Bulky', 'product_shipping_class' );
@@ -691,6 +694,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		}
 
 		$product_1->delete( true );
+		wp_delete_term( $shipping_class_1['term_id'], 'product_shipping_class' );
 	}
 
 	/**
@@ -698,15 +702,18 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	 *
 	 * @since 3.5.0
 	 */
-	public function test_get_product_by_tag() {
+	public function test_get_products_by_tag() {
 		wp_set_current_user( $this->user );
 
 		$test_tag_1 = wp_insert_term( 'Tag 1', 'product_tag' );
-		$term_tag_1 = get_term_by( 'id', $test_tag_1['term_id'], 'product_tag' );
 
+		// Product with a tag.
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_tag_ids( array( $test_tag_1['term_id'] ) );
 		$product->save();
+
+		// Product without a tag.
+		$product_2 = WC_Helper_Product::create_simple_product();
 
 		$query_params = array(
 			'tag' => (string) $test_tag_1['term_id'],
@@ -722,6 +729,8 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		}
 
 		$product->delete( true );
+		$product_2->delete( true );
+		wp_delete_term( $test_tag_1['term_id'], 'product_tag' );
 	}
 
 	/**
@@ -729,7 +738,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	 *
 	 * @since 3.5.0
 	 */
-	public function test_get_product_by_attribute() {
+	public function test_get_products_by_attribute() {
 		global $wpdb;
 		wp_set_current_user( $this->user );
 
@@ -770,6 +779,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$response_products = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( count( $expected_product_ids ), count( $response_products ) );
 		foreach ( $response_products as $response_product ) {
 			$this->assertContains( $response_product['id'], $expected_product_ids );
 		}
@@ -788,6 +798,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$response_products = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( count( $expected_product_ids ), count( $response_products ) );
 		foreach ( $response_products as $response_product ) {
 			$this->assertContains( $response_product['id'], $expected_product_ids );
 		}
