@@ -1,0 +1,24 @@
+ActivityHeader
+============
+
+A component designed for use in the activity panel. It returns a title and can optionally also include a component like dropdown or Ellipsis menu.
+
+## How to use:
+
+```jsx
+import ActivityHeader from 'components/activity-header';
+
+render: function() {
+  return (
+    <ActivityHeader
+      title="Orders"
+    />
+  );
+}
+```
+
+## Props
+
+* `title`: A title for this card (required).
+* `className`: Additional class names.
+* `menu`: A dropdown menu (EllipsisMenu) shown at the top-right of the card.

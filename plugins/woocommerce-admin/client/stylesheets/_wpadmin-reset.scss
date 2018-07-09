@@ -87,6 +87,12 @@
 			display: none;
 		}
 	}
+
+	.woocommerce-layout__activity-panel {
+		@include breakpoint( '<782px' ) {
+			top: -20px;
+		}
+	}
 }
 
 .woocommerce-layout * {
@@ -156,6 +162,26 @@
 
 #wpfooter {
 	display: none;
+}
+
+.wp-responsive-open {
+	.woocommerce-layout__header {
+		margin-left: 2px;
+	}
+
+	@include breakpoint( '<782px' ) {
+		.woocommerce-layout__activity-panel-wrapper.is-open,
+		.woocommerce-layout__activity-panel-tabs {
+			width: calc(100vw - 190px);
+		}
+	}
+}
+
+@include breakpoint( '<600px' ) {
+	#wpadminbar,
+	.jetpack-masterbar #wpadminbar {
+		position: fixed;
+	}
 }
 
 // Temporary fix for compability with the Jetpack masterbar

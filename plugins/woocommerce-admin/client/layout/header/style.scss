@@ -7,13 +7,17 @@
 	flex-direction: row;
 	box-sizing: border-box;
 	background: $white;
-	border-bottom: 1px solid $gray;
+	border-bottom: 1px solid $white;
 	padding: 0px;
 	height: 80px;
 	position: fixed;
 	width: 100%;
 	top: 32px;
 	z-index: 1000;
+
+	&.is-scrolled {
+		box-shadow: 0 6px 6px 0 rgba(85, 93, 102, 0.3);
+	}
 
 	@include breakpoint( '<782px' ) {
 		top: 46px;
@@ -29,17 +33,23 @@
 		font-size: 13px;
 		font-weight: normal;
 		padding: 0px;
-		margin-left: $spacing;
 		flex: 1 auto;
-
 		padding-top: 8px;
+		height: 50px;
+		background: $white;
 
 		@include breakpoint( '782px-1100px' ) {
 			padding-top: 16px;
+			height: auto;
 		}
 
 		@include breakpoint( '>1100px' ) {
 			padding-top: 24px;
+			height: auto;
+		}
+
+		span:first-child {
+			padding-left: $spacing;
 		}
 
 		span + span::before {

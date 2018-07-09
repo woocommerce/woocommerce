@@ -1,0 +1,29 @@
+/** @format */
+
+.woocommerce-layout__activity-panel-header {
+	height: 50px;
+	background: $core-grey-light-500;
+	padding: 16px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+
+	@include breakpoint( '>782px' ) {
+		padding: 16px 24px 16px 24px;
+	}
+
+	h3 {
+		font-size: 13px;
+		font-weight: 600;
+		line-height: 16px;
+		margin: 0;
+		padding: 0;
+	}
+
+	.woocommerce-ellipsis-menu__toggle.components-button:not(:disabled):not([aria-disabled='true']):focus,
+	.woocommerce-ellipsis-menu__toggle.components-button:not(:disabled):not([aria-disabled='true']):hover {
+		box-shadow: none;
+		border-radius: 10px;
+		background: $core-grey-light-700;
+	}
+}

@@ -23,7 +23,7 @@
 	height: 100%;
 
 	&:active {
-		background-color: $core-grey-light-300;
+		background-color: $core-grey-light-200;
 	}
 
 	&:hover {
@@ -37,7 +37,7 @@
 	left: -9999px;
 
 	&:active + label .woocommerce-segmented-selection__label {
-		background-color: $core-grey-light-300;
+		background-color: $core-grey-light-200;
 	}
 
 	&:checked + label .woocommerce-segmented-selection__label {

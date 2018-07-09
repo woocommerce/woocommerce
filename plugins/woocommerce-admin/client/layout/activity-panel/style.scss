@@ -5,7 +5,6 @@
 	flex-direction: row;
 	align-items: center;
 	position: fixed;
-	top: 31px;
 	right: 0;
 	height: 80px;
 
@@ -14,7 +13,7 @@
 		background: #fff;
 		margin: 0;
 		padding: 0;
-		top: 10px;
+		top: -3px;
 		width: 100vw;
 		display: none;
 		height: 60px;
@@ -173,7 +172,8 @@
 .woocommerce-layout__activity-panel-wrapper {
 	height: calc(100vh - 80px);
 	min-height: calc(100vh - 80px);
-	background: $gray;
+	background: $core-grey-light-200;
+	box-shadow: 0 12px 12px 0 rgba(85, 93, 102, 0.3);
 	width: 0px;
 	@include activity-panel-slide();
 	position: fixed;
