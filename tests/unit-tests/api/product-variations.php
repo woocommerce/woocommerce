@@ -469,4 +469,329 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 'parent', $variation['manage_stock'] );
 	}
+
+	/**
+	 * Test getting product variations filtered by product category.
+	 *
+	 * @since 3.5.0
+	 */
+	public function test_get_variations_by_category() {
+		wp_set_current_user( $this->user );
+
+		// Create product assigned to a single category.
+		$category = wp_insert_term( 'Some Category', 'product_cat' );
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$variable_product->set_category_ids( array( $category['term_id'] ) );
+		$variable_product->save();
+		$variations = $variable_product->get_children();
+
+		$query_params = array(
+			'category' => (string) $category['term_id'],
+		);
+		$request             = new WP_REST_Request( 'GET', '/wc/v2/products/' . $variable_product->get_id() . '/variations' );
+		$request->set_query_params( $query_params );
+		$response            = $this->server->dispatch( $request );
+		$response_variations = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( count( $variations ), count( $response_variations ) );
+		foreach ( $response_variations as $response_variation ) {
+			$this->assertContains( $response_variation['id'], $variations );
+		}
+
+		// Clean up.
+		wp_delete_term( $category['term_id'], 'product_cat' );
+		$variable_product->delete( true );
+	}
+
+	/**
+	 * Test getting variations filtered by product type.
+	 *
+	 * @since 3.5.0
+	 */
+	public function test_get_variations_by_type() {
+		wp_set_current_user( $this->user );
+
+		$simple = WC_Helper_Product::create_simple_product();
+		$external = WC_Helper_Product::create_external_product();
+		$grouped = WC_Helper_Product::create_grouped_product();
+		$variable = WC_Helper_Product::create_variation_product();
+		$variations = $variable->get_children();
+
+		$query_params = array(
+			'type' => 'variable',
+		);
+		$request             = new WP_REST_Request( 'GET', '/wc/v2/products/' . $variable->get_id() . '/variations' );
+		$request->set_query_params( $query_params );
+		$response            = $this->server->dispatch( $request );
+		$response_variations = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( count( $variations ), count( $response_variations ) );
+		foreach ( $response_variations as $response_variation ) {
+			$this->assertContains( $response_variation['id'], $variations );
+		}
+
+		$query_params = array(
+			'type' => 'simple',
+		);
+		$request             = new WP_REST_Request( 'GET', '/wc/v2/products/' . $variable->get_id() . '/variations' );
+		$request->set_query_params( $query_params );
+		$response            = $this->server->dispatch( $request );
+		$response_variations = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 0, $response_variations );
+
+		$query_params = array(
+			'type' => 'external',
+		);
+		$request             = new WP_REST_Request( 'GET', '/wc/v2/products/' . $variable->get_id() . '/variations' );
+		$request->set_query_params( $query_params );
+		$response            = $this->server->dispatch( $request );
+		$response_variations = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 0, $response_variations );
+
+		$query_params = array(
+			'type' => 'grouped',
+		);
+		$request             = new WP_REST_Request( 'GET', '/wc/v2/products/' . $variable->get_id() . '/variations' );
+		$request->set_query_params( $query_params );
+		$response            = $this->server->dispatch( $request );
+		$response_variations = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 0, $response_variations );
+
+		$simple->delete( true );
+		$external->delete( true );
+		$variable->delete( true );
+		$grouped->delete( true );
+	}
+
+	/**
+	 * Test getting variations by featured property.
+	 *
+	 * @since 3.5.0
+	 */
+	public function test_get_featured_variations() {
+		wp_set_current_user( $this->user );
+
+		// Create a featured product.
+		$feat_product    = WC_Helper_Product::create_variation_product();
+		$feat_product->set_featured( true );
+		$feat_product->save();
+		$feat_variations = $feat_product->get_children();
+
+		// Create a non-featured product.
+		$nonfeat_product    = WC_Helper_Product::create_variation_product();
+		$nonfeat_product->save();
+		$nonfeat_variations = $nonfeat_product->get_children();
+
+		$query_params = array(
+			'featured' => 'true',
+		);
+		$request             = new WP_REST_Request( 'GET', '/wc/v2/products/' . $feat_product->get_id() . '/variations' );
+		$request->set_query_params( $query_params );
+		$response            = $this->server->dispatch( $request );
+		$response_variations = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( count( $feat_variations ), count( $response_variations ) );
+		foreach ( $response_variations as $response_variation ) {
+			$this->assertContains( $response_variation['id'], $feat_variations );
+		}
+
+		$query_params = array(
+			'featured' => 'false',
+		);
+		$request             = new WP_REST_Request( 'GET', '/wc/v2/products/' . $nonfeat_product->get_id() . '/variations' );
+		$request->set_query_params( $query_params );
+		$response            = $this->server->dispatch( $request );
+		$response_variations = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( count( $nonfeat_variations ), count( $response_variations ) );
+		foreach ( $response_variations as $response_variation ) {
+			$this->assertContains( $response_variation['id'], $nonfeat_variations );
+		}
+
+		$feat_product->delete( true );
+		$nonfeat_product->delete( true );
+	}
+
+	/**
+	 * Test getting products by shipping class property.
+	 *
+	 * @since 3.5.0
+	 */
+	public function test_get_variations_by_shipping_class() {
+		wp_set_current_user( $this->user );
+
+		// Shipping class can be set on product and variation level.
+		$shipping_class_1 = wp_insert_term( 'Bulky', 'product_shipping_class' );
+		$shipping_class_2 = wp_insert_term( 'Light', 'product_shipping_class' );
+
+		// Default shipping class for variations is set to Light.
+		$variable   = WC_Helper_Product::create_variation_product();
+		$variable->set_shipping_class_id( $shipping_class_2['term_id'] );
+		$variations = $variable->get_available_variations();
+
+		// Bulky shipping class for first variation.
+		$variation_0 = wc_get_product( $variations[0]['variation_id'] );
+		$variation_0->set_shipping_class_id( $shipping_class_1['term_id'] );
+		$variation_0->save();
+
+		$variable->save();
+
+		// Test Bulky shipping class.
+		$query_params = array(
+			'shipping_class' => (string) $shipping_class_1['term_id'],
+		);
+		$request             = new WP_REST_Request( 'GET', '/wc/v2/products/' . $variable->get_id() . '/variations' );
+		$request->set_query_params( $query_params );
+		$response            = $this->server->dispatch( $request );
+		$response_variations = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, count( $response_variations ) );
+		foreach ( $response_variations as $response_variation ) {
+			$this->assertEquals( $response_variation['id'], $variations[0]['variation_id'] );
+		}
+
+		// Test Light shipping class.
+		$query_params = array(
+			'shipping_class' => (string) $shipping_class_2['term_id'],
+		);
+		$request             = new WP_REST_Request( 'GET', '/wc/v2/products/' . $variable->get_id() . '/variations' );
+		$request->set_query_params( $query_params );
+		$response            = $this->server->dispatch( $request );
+		$response_variations = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, count( $response_variations ) );
+		foreach ( $response_variations as $response_variation ) {
+			$this->assertEquals( $response_variation['id'], $variations[1]['variation_id'] );
+		}
+
+		$variable->delete( true );
+		wp_delete_term( $shipping_class_1['term_id'], 'product_shipping_class' );
+		wp_delete_term( $shipping_class_2['term_id'], 'product_shipping_class' );
+	}
+
+	/**
+	 * Test getting variations filtered by tag.
+	 *
+	 * @since 3.5.0
+	 */
+	public function test_get_variations_by_tag() {
+		wp_set_current_user( $this->user );
+
+		$test_tag_1 = wp_insert_term( 'Tag 1', 'product_tag' );
+
+		// Variable product with a tag.
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$variable_product->set_tag_ids( array( $test_tag_1['term_id'] ) );
+		$variable_product->save();
+		$variations       = $variable_product->get_children();
+
+		// Variable product without a tag.
+		$variable_product_2 = WC_Helper_Product::create_variation_product();
+
+		$query_params = array(
+			'tag' => (string) $test_tag_1['term_id'],
+		);
+		$request             = new WP_REST_Request( 'GET', '/wc/v2/products/' . $variable_product->get_id() . '/variations' );
+		$request->set_query_params( $query_params );
+		$response            = $this->server->dispatch( $request );
+		$response_variations = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( count( $variations ), count( $response_variations ) );
+		foreach ( $response_variations as $response_variation ) {
+			$this->assertContains( $response_variation['id'], $variations );
+		}
+
+		$query_params = array(
+			'tag' => (string) $test_tag_1['term_id'],
+		);
+		$request             = new WP_REST_Request( 'GET', '/wc/v2/products/' . $variable_product_2->get_id() . '/variations' );
+		$request->set_query_params( $query_params );
+		$response            = $this->server->dispatch( $request );
+		$response_variations = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 0, count( $response_variations ) );
+
+		$variable_product->delete( true );
+		$variable_product_2->delete( true );
+		wp_delete_term( $test_tag_1['term_id'], 'product_tag' );
+	}
+
+	/**
+	 * Test getting product variations by global attribute.
+	 *
+	 * @since 3.5.0
+	 */
+	public function test_get_product_by_attribute() {
+		global $wpdb;
+		wp_set_current_user( $this->user );
+
+		// Variable product with 2 different variations.
+		$variable_product = WC_Helper_Product::create_variation_product();
+
+		// Create one variation without value.
+		$variation_id = wp_insert_post( array(
+			'post_title'  => 'Variation #' . ( $variable_product->get_id() + 3 ) . ' of Dummy Product',
+			'post_type'   => 'product_variation',
+			'post_parent' => $variable_product->get_id(),
+			'post_status' => 'publish',
+			'menu_order'  => 3,
+		) );
+
+		// Price related meta.
+		update_post_meta( $variation_id, '_price', '16' );
+		update_post_meta( $variation_id, '_regular_price', '16' );
+
+		// General meta.
+		update_post_meta( $variation_id, '_sku', 'DUMMY SKU VARIABLE NOVALUE' );
+		update_post_meta( $variation_id, '_manage_stock', 'no' );
+		update_post_meta( $variation_id, '_downloadable', 'no' );
+		update_post_meta( $variation_id, '_virtual', 'no' );
+		update_post_meta( $variation_id, '_stock_status', 'instock' );
+
+		// Add the variation meta to the main product.
+		update_post_meta( $variable_product->get_id(), '_max_price_variation_id', $variation_id );
+
+		wp_set_object_terms( $variation_id, 'variation', 'product_type' );
+
+		$variations       = $variable_product->get_available_variations();
+
+		foreach ( $variations as $variation ) {
+			$attrib_value = isset( $variation['attributes']['attribute_pa_size'] ) ? $variation['attributes']['attribute_pa_size'] : null;
+			// Skip testing without attribute.
+			if ( ! $attrib_value ) {
+				continue;
+			}
+			$query_params = array(
+				'attribute'      => 'pa_size',
+				'attribute_term' => (string) get_term_by( 'slug', $attrib_value, 'pa_size' )->term_id,
+			);
+			$expected_product_ids = array( $variation['variation_id'] );
+			$request             = new WP_REST_Request( 'GET', '/wc/v2/products/' . $variable_product->get_id() . '/variations' );
+			$request->set_query_params( $query_params );
+			$response            = $this->server->dispatch( $request );
+			$response_variations = $response->get_data();
+
+			$this->assertEquals( 200, $response->get_status() );
+			$this->assertEquals( 1, count( $response_variations ) );
+			foreach ( $response_variations as $response_variation ) {
+				$this->assertContains( $response_variation['id'], $expected_product_ids );
+			}
+		}
+
+		$variable_product->delete( true );
+	}
 }
