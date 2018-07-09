@@ -8,6 +8,7 @@ import { Component } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { select as d3Select } from 'd3-selection';
+import { isEqual } from 'lodash';
 
 /**
  * Internal dependencies
@@ -27,9 +28,11 @@ class D3Base extends Component {
 		this.updateParams();
 	}
 
-	componentDidUpdate() {
-		this.updateParams( this.props );
-		this.draw();
+	componentDidUpdate( prevProps ) {
+		if ( ! isEqual( prevProps, this.props ) ) {
+			this.updateParams( this.props );
+			this.draw();
+		}
 	}
 
 	componentWillUnmount() {
