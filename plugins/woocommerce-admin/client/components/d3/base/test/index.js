@@ -25,7 +25,8 @@ describe( 'D3base', () => {
 	} );
 
 	test( 'should render a result of the drawChart prop', () => {
-		const drawChart = svg => {
+		const drawChart = node => {
+			const svg = node.select( 'svg' );
 			return svg.append( 'circle' );
 		};
 		const base = mount( <D3Base drawChart={ drawChart } getParams={ noop } /> );
@@ -36,7 +37,8 @@ describe( 'D3base', () => {
 		const getParams = () => ( {
 			tagName: 'circle',
 		} );
-		const drawChart = ( svg, params ) => {
+		const drawChart = ( node, params ) => {
+			const svg = node.select( 'svg' );
 			return svg.append( params.tagName );
 		};
 		const base = mount( <D3Base drawChart={ drawChart } getParams={ getParams } /> );

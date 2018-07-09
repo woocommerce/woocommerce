@@ -4,7 +4,8 @@
     "client/**/*.js",
     "!**/node_modules/**",
     "!**/vendor/**",
-    "!**/test/**"
+    "!**/test/**",
+    "!client/**/dummy.js"
   ],
   "moduleDirectories": ["node_modules", "<rootDir>/client"],
   "moduleNameMapper": {
@@ -23,5 +24,6 @@
   ],
   "transformIgnorePatterns": [
     "node_modules/(?!(gutenberg)/)"
-  ]
+  ],
+  "verbose": true
 }

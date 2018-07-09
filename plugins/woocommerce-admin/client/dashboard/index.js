@@ -11,6 +11,7 @@ import { Component, Fragment } from '@wordpress/element';
 import Agenda from './widgets/agenda';
 import Header from 'layout/header';
 import StorePerformance from './store-performance';
+import Charts from './charts';
 
 export default class Dashboard extends Component {
 	render() {
@@ -19,6 +20,7 @@ export default class Dashboard extends Component {
 				<Header sections={ [ __( 'Dashboard', 'woo-dash' ) ] } />
 				<StorePerformance />
 				<Agenda />
+				<Charts />
 			</Fragment>
 		);
 	}

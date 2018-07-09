@@ -9,6 +9,11 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { select as d3Select } from 'd3-selection';
 
+/**
+ * Internal dependencies
+ */
+import './style.scss';
+
 class D3Base extends Component {
 	constructor() {
 		super( ...arguments );
@@ -22,11 +27,8 @@ class D3Base extends Component {
 		this.updateParams();
 	}
 
-	componentWillReceiveProps( nextProps ) {
-		this.updateParams( nextProps );
-	}
-
 	componentDidUpdate() {
+		this.updateParams( this.props );
 		this.draw();
 	}
 
@@ -51,12 +53,23 @@ class D3Base extends Component {
 		d3Select( this.node )
 			.selectAll( 'svg' )
 			.remove();
-		const newNode = d3Select( this.node )
+		d3Select( this.node )
+			.selectAll( `.${ className }__tooltip` )
+			.remove();
+
+		const newNode = d3Select( this.node );
+
+		newNode
 			.append( 'svg' )
 			.attr( 'class', `${ className }__viewbox` )
 			.attr( 'viewBox', `0 0 ${ width } ${ height }` )
 			.attr( 'preserveAspectRatio', 'xMidYMid meet' )
 			.append( 'g' );
+		newNode
+			.append( 'div' )
+			.attr( 'class', `${ className }__tooltip tooltip` )
+			.style( 'display', 'none' );
+
 		return newNode;
 	}
 
