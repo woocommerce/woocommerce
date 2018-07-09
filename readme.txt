@@ -198,6 +198,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Added `woocommerce_shipping_method_add_rate_args` and `woocommerce_shipping_method_add_rate` filters. #20633
 * Dev - Added `woocommerce_coupon_validate_user_usage_limit` filter. #20630
 * Dev - Add hooks needed for product custom tables feature plugin. #20520
+* Dev - Added new filter to 'Item in quotes' translation for messages. ##20714
 * Localization - Updated IT provinces. #20286
 * Localization - Eircode validation. #20330
 
