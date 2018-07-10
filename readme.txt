@@ -159,7 +159,10 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 == Changelog ==
 
 = 3.4.4 - 2018-xx-xx =
+* Fix - Only wordwrap plain email content. #20723
+* Fix - Better escaping on product quick edit. #20740
 * Dev - Added woocommerce_calculate_item_totals_taxes filter. #20586
+* Dev - Links to next and previous page sent out in HTTP header via REST API fixed for some endpoints.
 
 = 3.4.3 - 2018-06-20 =
 * Fix - Fix label for the price filter widget on RTL sites. #20417
