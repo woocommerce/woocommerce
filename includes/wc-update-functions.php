@@ -1837,6 +1837,25 @@ function wc_update_343_db_version() {
 }
 
 /**
+ * Recreate user roles so existing users will get the new capabilities.
+ *
+ * @return void
+ */
+function wc_update_344_recreate_roles() {
+	WC_Install::remove_roles();
+	WC_Install::create_roles();
+}
+
+/**
+ * Update DB version.
+ *
+ * @return void
+ */
+function wc_update_344_db_version() {
+	WC_Install::update_db_version( '3.4.4' );
+}
+
+/**
  * Copy order customer_id from post meta to post_author and set post_author to 0 for refunds.
  *
  * Two different strategies are used to copy data depending if the update is being executed from

@@ -109,6 +109,10 @@ class WC_Install {
 			'wc_update_343_cleanup_foreign_keys',
 			'wc_update_343_db_version',
 		),
+		'3.4.4' => array(
+			'wc_update_344_recreate_roles',
+			'wc_update_344_db_version',
+		),
 		'3.5.0' => array(
 			'wc_update_350_order_customer_id',
 			'wc_update_350_db_version',
@@ -955,6 +959,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 				'export'                 => true,
 				'import'                 => true,
 				'list_users'             => true,
+				'edit_theme_options'     => true,
 			)
 		);
 
