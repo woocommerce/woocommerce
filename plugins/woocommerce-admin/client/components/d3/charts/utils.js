@@ -20,6 +20,11 @@ import { timeFormat as d3TimeFormat, utcParse as d3UTCParse } from 'd3-time-form
 
 export const parseDate = d3UTCParse( '%Y-%m-%d' );
 
+/**
+ * Describes `getUniqueKeys`
+ * @param {array} data - The chart component's `data` prop.
+ * @returns {array} of unique category keys
+ */
 export const getUniqueKeys = data => {
 	return [
 		...new Set(
@@ -31,6 +36,12 @@ export const getUniqueKeys = data => {
 	];
 };
 
+/**
+ * Describes `getOrderedKeys`
+ * @param {array} data - The chart component's `data` prop.
+ * @param {array} uniqueKeys - from `getUniqueKeys`.
+ * @returns {array} of unique category keys ordered by cumulative total value
+ */
 export const getOrderedKeys = ( data, uniqueKeys ) =>
 	uniqueKeys
 		.map( key => ( {
@@ -40,6 +51,12 @@ export const getOrderedKeys = ( data, uniqueKeys ) =>
 		.sort( ( a, b ) => b.total - a.total )
 		.map( d => d.key );
 
+/**
+ * Describes `getLineData`
+ * @param {array} data - The chart component's `data` prop.
+ * @param {array} orderedKeys - from `getOrderedKeys`.
+ * @returns {array} an array objects with a category `key` and an array of `values` with `date` and `value` properties
+ */
 export const getLineData = ( data, orderedKeys ) =>
 	orderedKeys.map( key => ( {
 		key,
@@ -49,6 +66,11 @@ export const getLineData = ( data, orderedKeys ) =>
 		} ) ),
 	} ) );
 
+/**
+ * Describes `getUniqueDates`
+ * @param {array} lineData - from `GetLineData`
+ * @returns {array} an array of unique date values sorted from earliest to latest
+ */
 export const getUniqueDates = lineData => {
 	return [
 		...new Set(
@@ -60,44 +82,99 @@ export const getUniqueDates = lineData => {
 	].sort( ( a, b ) => parseDate( a ) - parseDate( b ) );
 };
 
+/**
+ * Describes getXScale
+ * @param {array} uniqueDates - from `getUniqueDates`
+ * @param {number} width - calculated width of the charting space
+ * @returns {function} a D3 scale of the dates
+ */
 export const getXScale = ( uniqueDates, width ) =>
 	d3ScaleBand()
 		.domain( uniqueDates )
 		.rangeRound( [ 0, width ] )
 		.paddingInner( 0.1 );
 
+/**
+ * Describes getXGroupScale
+ * @param {array} orderedKeys - from `getOrderedKeys`
+ * @param {function} xScale - from `getXScale`
+ * @returns {function} a D3 scale for each category within the xScale range
+ */
 export const getXGroupScale = ( orderedKeys, xScale ) =>
 	d3ScaleBand()
 		.domain( orderedKeys )
 		.rangeRound( [ 0, xScale.bandwidth() ] )
 		.padding( 0.07 );
 
+/**
+ * Describes getXLineScale
+ * @param {array} uniqueDates - from `getUniqueDates`
+ * @param {number} width - calculated width of the charting space
+ * @returns {function} a D3 scaletime for each date
+ */
 export const getXLineScale = ( uniqueDates, width ) =>
 	d3ScaleTime()
 		.domain( [ new Date( uniqueDates[ 0 ] ), new Date( uniqueDates[ uniqueDates.length - 1 ] ) ] )
 		.rangeRound( [ 0, width ] );
 
+/**
+ * Describes getYMax
+ * @param {array} lineData - from `getLineData`
+ * @returns {number} the maximum value in the timeseries multiplied by 4/3
+ */
 export const getYMax = lineData =>
 	Math.round( 4 / 3 * d3Max( lineData, d => d3Max( d.values.map( date => date.value ) ) ) );
 
+/**
+ * Describes getYScale
+ * @param {number} height - calculated height of the charting space
+ * @param {number} yMax - from `getYMax`
+ * @returns {function} the D3 linear scale from 0 to the value from `getYMax`
+ */
 export const getYScale = ( height, yMax ) =>
 	d3ScaleLinear()
 		.domain( [ 0, yMax ] )
 		.rangeRound( [ height, 0 ] );
 
+/**
+ * Describes getyTickOffset
+ * @param {number} height - calculated height of the charting space
+ * @param {number} scale - ratio of the expected width to calculated width (given the viewbox)
+ * @param {number} yMax - from `getYMax`
+ * @returns {function} the D3 linear scale from 0 to the value from `getYMax`, offset by 12 pixels down
+ */
 export const getYTickOffset = ( height, scale, yMax ) =>
 	d3ScaleLinear()
 		.domain( [ 0, yMax ] )
 		.rangeRound( [ height + scale * 12, scale * 12 ] );
 
+/**
+ * Describes getyTickOffset
+ * @param {array} orderedKeys - from `getOrderedKeys`
+ * @returns {function} the D3 ordinal scale of the categories
+ */
 export const getColorScale = orderedKeys =>
 	d3ScaleOrdinal().range( d3Range( 0, 1.1, 100 / ( orderedKeys.length - 1 ) / 100 ) );
 
+/**
+ * Describes getyTickOffset
+ * @param {array} data - The chart component's `data` prop.
+ * @param {function} xLineScale - from `getXLineScale`.
+ * @param {function} yScale - from `getYScale`.
+ * @returns {function} the D3 line function for plotting all category values
+ */
 export const getLine = ( data, xLineScale, yScale ) =>
 	d3Line()
 		.x( d => xLineScale( new Date( d.date ) ) )
 		.y( d => yScale( d.value ) );
 
+/**
+ * Describes getDateSpaces
+ * @param {array} uniqueDates - from `getUniqueDates`
+ * @param {number} width - calculated width of the charting space
+ * @param {function} xLineScale - from `getXLineScale`
+ * @returns {array} that icnludes the date, start (x position) and width to layout the mouseover rectangles
+ */
 export const getDateSpaces = ( uniqueDates, width, xLineScale ) =>
 	uniqueDates.map( ( d, i ) => {
 		const xNow = xLineScale( new Date( d ) );
