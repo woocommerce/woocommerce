@@ -161,8 +161,19 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 = 3.4.4 - 2018-xx-xx =
 * Fix - Only wordwrap plain email content. #20723
 * Fix - Better escaping on product quick edit. #20740
+* Fix - Log file deletion. #20730
+* Fix - Search feature in Webhooks and REST API keys settings. #20706
+* Fix - Notices in REST API keys settings screen. #20706
+* Fix - add a check to prevent WC_Geolite_Integration::get_country_iso() from generating a PHP undefined index notice when unable to determine the country code for a given IP address. #20608
+* Fix - Variable product stock display if parent is stock managed and not the variation. #20661
+* Fix - Correctly hide cost for zero cost shipping methods after placing orders. #20663
+* Fix - Disabled autocomplete to prevent datepicker overlapping. #20687
+* Fix - Prevent a PHP notice in the setup wizard when store state is not selectable. #20695
+* Tweak - Remove (optional) text from Address line 2 field. #20622 #20639
 * Dev - Added woocommerce_calculate_item_totals_taxes filter. #20586
-* Dev - Links to next and previous page sent out in HTTP header via REST API fixed for some endpoints.
+* Dev - Links to next and previous page sent out in HTTP header via REST API fixed for some endpoints. #20686
+* Dev - Better wc_format_phone_number cleaning. #20637
+
 
 = 3.4.3 - 2018-06-20 =
 * Fix - Fix label for the price filter widget on RTL sites. #20417
