@@ -4,8 +4,7 @@
     "client/**/*.js",
     "!**/node_modules/**",
     "!**/vendor/**",
-    "!**/test/**",
-    "!client/components/d3/charts/test/dummy.js"
+    "!**/test/**"
   ],
   "moduleDirectories": ["node_modules", "<rootDir>/client"],
   "moduleNameMapper": {

@@ -4,7 +4,7 @@
  * @format
  */
 
-export const dummyOrders = [
+export default [
 	{
 		date: '2018-05-30',
 		Polo: 2704659,
