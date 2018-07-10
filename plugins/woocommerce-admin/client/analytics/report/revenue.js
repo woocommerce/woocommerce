@@ -97,22 +97,22 @@ class RevenueReport extends Component {
 		const rows = this.getRowsContent( intervalStats );
 
 		const headers = [
-			__( 'Date', 'woo-dash' ),
-			__( 'Orders', 'woo-dash' ),
-			__( 'Gross Revenue', 'woo-dash' ),
-			__( 'Refunds', 'woo-dash' ),
-			__( 'Coupons', 'woo-dash' ),
-			__( 'Taxes', 'woo-dash' ),
-			__( 'Shipping', 'woo-dash' ),
-			__( 'Net Revenue', 'woo-dash' ),
+			__( 'Date', 'wc-admin' ),
+			__( 'Orders', 'wc-admin' ),
+			__( 'Gross Revenue', 'wc-admin' ),
+			__( 'Refunds', 'wc-admin' ),
+			__( 'Coupons', 'wc-admin' ),
+			__( 'Taxes', 'wc-admin' ),
+			__( 'Shipping', 'wc-admin' ),
+			__( 'Net Revenue', 'wc-admin' ),
 		];
 
 		return (
 			<Fragment>
 				<Header
 					sections={ [
-						[ '/analytics', __( 'Analytics', 'woo-dash' ) ],
-						__( 'Revenue', 'woo-dash' ),
+						[ '/analytics', __( 'Analytics', 'wc-admin' ) ],
+						__( 'Revenue', 'wc-admin' ),
 					] }
 				/>
 				<DatePicker query={ query } path={ path } />
@@ -120,23 +120,23 @@ class RevenueReport extends Component {
 				<SummaryList>
 					<SummaryNumber
 						value={ formatCurrency( summaryStats.gross_revenue ) }
-						label={ __( 'Gross Revenue', 'woo-dash' ) }
+						label={ __( 'Gross Revenue', 'wc-admin' ) }
 						delta={ 29 }
 					/>
 					<SummaryNumber
 						value={ formatCurrency( summaryStats.refunds ) }
-						label={ __( 'Refunds', 'woo-dash' ) }
+						label={ __( 'Refunds', 'wc-admin' ) }
 						delta={ -10 }
 						selected
 					/>
 					<SummaryNumber
 						value={ formatCurrency( summaryStats.coupons ) }
-						label={ __( 'Coupons', 'woo-dash' ) }
+						label={ __( 'Coupons', 'wc-admin' ) }
 						delta={ 15 }
 					/>
 					<SummaryNumber
 						value={ formatCurrency( summaryStats.taxes ) }
-						label={ __( 'Taxes', 'woo-dash' ) }
+						label={ __( 'Taxes', 'wc-admin' ) }
 					/>
 				</SummaryList>
 

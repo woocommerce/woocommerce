@@ -28,7 +28,7 @@ const END_DATE = 'endDate';
 // 782px is the width designated by Gutenberg's `</ Popover>` component.
 // * https://github.com/WordPress/gutenberg/blob/c8f8806d4465a83c1a0bc62d5c61377b56fa7214/components/popover/utils.js#L6
 const isMobileViewport = () => window.innerWidth < 782;
-const shortDateFormat = __( 'MM/DD/YYYY', 'woo-dash' );
+const shortDateFormat = __( 'MM/DD/YYYY', 'wc-admin' );
 
 class DateRange extends Component {
 	constructor( props ) {
@@ -103,7 +103,7 @@ class DateRange extends Component {
 						value={ afterText }
 						type="text"
 						onChange={ partial( this.onInputChange, 'after' ) }
-						aria-label={ __( 'Start Date', 'woo-dash' ) }
+						aria-label={ __( 'Start Date', 'wc-admin' ) }
 						id="after-date-string"
 						aria-describedby="after-date-string-message"
 					/>
@@ -111,17 +111,17 @@ class DateRange extends Component {
 						{ sprintf(
 							__(
 								"Date input describing a selected date range's start date in format %s",
-								'woo-dash'
+								'wc-admin'
 							),
 							shortDateFormat
 						) }
 					</p>
-					<span>{ __( 'to', 'woo-dash' ) }</span>
+					<span>{ __( 'to', 'wc-admin' ) }</span>
 					<input
 						value={ beforeText }
 						type="text"
 						onChange={ partial( this.onInputChange, 'before' ) }
-						aria-label={ __( 'End Date', 'woo-dash' ) }
+						aria-label={ __( 'End Date', 'wc-admin' ) }
 						id="before-date-string"
 						aria-describedby="before-date-string-message"
 					/>
@@ -129,7 +129,7 @@ class DateRange extends Component {
 						{ sprintf(
 							__(
 								"Date input describing a selected date range's end date in format %s",
-								'woo-dash'
+								'wc-admin'
 							),
 							shortDateFormat
 						) }

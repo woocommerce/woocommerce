@@ -48,22 +48,22 @@ class DatePickerContent extends Component {
 		return (
 			<Fragment>
 				<H className="screen-reader-text" tabIndex="0">
-					{ __( 'Select date range and comparison', 'woo-dash' ) }
+					{ __( 'Select date range and comparison', 'wc-admin' ) }
 				</H>
 				<Section component={ false }>
 					<H className="woocommerce-date-picker__text">
-						{ __( 'select a date range', 'woo-dash' ) }
+						{ __( 'select a date range', 'wc-admin' ) }
 					</H>
 					<TabPanel
 						tabs={ [
 							{
 								name: 'period',
-								title: __( 'Presets', 'woo-dash' ),
+								title: __( 'Presets', 'wc-admin' ),
 								className: 'woocommerce-date-picker__tab',
 							},
 							{
 								name: 'custom',
-								title: __( 'Custom', 'woo-dash' ),
+								title: __( 'Custom', 'wc-admin' ),
 								className: 'woocommerce-date-picker__tab',
 							},
 						] }
@@ -89,7 +89,7 @@ class DatePickerContent extends Component {
 										inValidDays="future"
 									/>
 								) }
-								<H className="woocommerce-date-picker__text">{ __( 'compare to', 'woo-dash' ) }</H>
+								<H className="woocommerce-date-picker__text">{ __( 'compare to', 'wc-admin' ) }</H>
 								<ComparePeriods onSelect={ onSelect } compare={ compare } />
 								{ isValidSelection( selectedTab ) ? (
 									<Link
@@ -97,11 +97,11 @@ class DatePickerContent extends Component {
 										to={ getUpdatePath( selectedTab ) }
 										onClick={ onClose }
 									>
-										{ __( 'Update', 'woo-dash' ) }
+										{ __( 'Update', 'wc-admin' ) }
 									</Link>
 								) : (
 									<Button className="woocommerce-date-picker__update-btn" isPrimary disabled>
-										{ __( 'Update', 'woo-dash' ) }
+										{ __( 'Update', 'wc-admin' ) }
 									</Button>
 								) }
 							</Fragment>

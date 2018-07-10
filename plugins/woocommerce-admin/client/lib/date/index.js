@@ -54,8 +54,8 @@ export function getRangeLabel( after, before ) {
 	const isSameDay = after.isSame( before, 'day' );
 	const isSameYear = after.year() === before.year();
 	const isSameMonth = isSameYear && after.month() === before.month();
-	const fullDateFormat = __( 'MMM D, YYYY', 'woo-dash' );
-	const monthDayFormat = __( 'MMM D', 'woo-dash' );
+	const fullDateFormat = __( 'MMM D, YYYY', 'wc-admin' );
+	const monthDayFormat = __( 'MMM D', 'wc-admin' );
 
 	if ( isSameDay ) {
 		return after.format( fullDateFormat );
@@ -250,19 +250,19 @@ export function loadLocaleData() {
 	if ( ! userLocale.match( /en_/ ) ) {
 		moment.updateLocale( userLocale, {
 			longDateFormat: {
-				L: __( 'MM/DD/YYYY', 'woo-dash' ),
-				LL: __( 'MMMM D, YYYY', 'woo-dash' ),
-				LLL: __( 'D MMMM YYYY LT', 'woo-dash' ),
-				LLLL: __( 'dddd, D MMMM YYYY LT', 'woo-dash' ),
-				LT: __( 'HH:mm', 'woo-dash' ),
+				L: __( 'MM/DD/YYYY', 'wc-admin' ),
+				LL: __( 'MMMM D, YYYY', 'wc-admin' ),
+				LLL: __( 'D MMMM YYYY LT', 'wc-admin' ),
+				LLLL: __( 'dddd, D MMMM YYYY LT', 'wc-admin' ),
+				LT: __( 'HH:mm', 'wc-admin' ),
 			},
 			calendar: {
-				lastDay: __( '[Yesterday at] LT', 'woo-dash' ),
-				lastWeek: __( '[Last] dddd [at] LT', 'woo-dash' ),
-				nextDay: __( '[Tomorrow at] LT', 'woo-dash' ),
-				nextWeek: __( 'dddd [at] LT', 'woo-dash' ),
-				sameDay: __( '[Today at] LT', 'woo-dash' ),
-				sameElse: __( 'L', 'woo-dash' ),
+				lastDay: __( '[Yesterday at] LT', 'wc-admin' ),
+				lastWeek: __( '[Last] dddd [at] LT', 'wc-admin' ),
+				nextDay: __( '[Tomorrow at] LT', 'wc-admin' ),
+				nextWeek: __( 'dddd [at] LT', 'wc-admin' ),
+				sameDay: __( '[Today at] LT', 'wc-admin' ),
+				sameElse: __( 'L', 'wc-admin' ),
 			},
 			week: {
 				dow: Number( date.dow ),

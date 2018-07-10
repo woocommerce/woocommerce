@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 
 const SummaryNumber = ( { context, delta, label, selected, value } ) => {
 	if ( ! context ) {
-		context = __( 'vs Previous Period', 'woo-dash' );
+		context = __( 'vs Previous Period', 'wc-admin' );
 	}
 
 	const classes = classnames( 'woocommerce-summary__item', {

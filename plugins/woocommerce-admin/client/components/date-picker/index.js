@@ -72,7 +72,7 @@ class DatePicker extends Component {
 		const { primary, secondary } = getCurrentDates( queryWithDefaults );
 		return [
 			`${ primary.label } (${ primary.range })`,
-			`${ __( 'vs.', 'woo-dash' ) } ${ secondary.label } (${ secondary.range })`,
+			`${ __( 'vs.', 'wc-admin' ) } ${ secondary.label } (${ secondary.range })`,
 		];
 	}
 
@@ -88,7 +88,7 @@ class DatePicker extends Component {
 		const { period, compare, after, before } = this.state;
 		return (
 			<Fragment>
-				<p>{ __( 'Date Range', 'woo-dash' ) }:</p>
+				<p>{ __( 'Date Range', 'wc-admin' ) }:</p>
 				<Dropdown
 					className="woocommerce-date-picker"
 					contentClassName="woocommerce-date-picker__content"

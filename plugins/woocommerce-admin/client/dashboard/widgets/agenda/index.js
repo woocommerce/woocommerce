@@ -21,7 +21,7 @@ class Agenda extends Component {
 	render() {
 		return (
 			<Card
-				title={ __( 'Your agenda', 'woo-dash' ) }
+				title={ __( 'Your agenda', 'wc-admin' ) }
 				className="woocommerce-dashboard__agenda-card"
 			>
 				<AgendaHeader
@@ -30,26 +30,26 @@ class Agenda extends Component {
 						'Order needs to be fulfilled',
 						'Orders need to be fulfilled',
 						2,
-						'woo-dash'
+						'wc-admin'
 					) }
 				>
-					<AgendaItem onClick={ noop } actionLabel={ __( 'Fulfill', 'woo-dash' ) }>
+					<AgendaItem onClick={ noop } actionLabel={ __( 'Fulfill', 'wc-admin' ) }>
 						Order #99
 					</AgendaItem>
 					<AgendaItem
 						href={ getAdminLink( '/edit.php?post_type=shop_order' ) }
-						actionLabel={ __( 'Fulfill', 'woo-dash' ) }
+						actionLabel={ __( 'Fulfill', 'wc-admin' ) }
 					>
 						Order #101
 					</AgendaItem>
 				</AgendaHeader>
 				<AgendaHeader
 					count={ 1 }
-					title={ _n( 'Order awaiting payment', 'Orders awaiting payment', 1, 'woo-dash' ) }
+					title={ _n( 'Order awaiting payment', 'Orders awaiting payment', 1, 'wc-admin' ) }
 					href={ getAdminLink( '/edit.php?post_status=wc-pending&post_type=shop_order' ) }
 				/>
 				<AgendaHeader
-					title={ __( 'Extensions', 'woo-dash' ) }
+					title={ __( 'Extensions', 'wc-admin' ) }
 					href={ getAdminLink( '/admin.php?page=wc-addons' ) }
 				/>
 			</Card>

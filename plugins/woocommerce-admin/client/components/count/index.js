@@ -11,7 +11,7 @@ import './style.scss';
 
 const Count = ( { count, label } ) => {
 	if ( ! label ) {
-		label = sprintf( __( 'Total %d', 'woo-dash' ), count );
+		label = sprintf( __( 'Total %d', 'wc-admin' ), count );
 	}
 
 	return (

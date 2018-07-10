@@ -85,7 +85,7 @@ class Table extends Component {
 				<table className="woocommerce-table__table">
 					<caption id={ this.captionID } className="woocommerce-table__caption">
 						{ caption }
-						{ tabIndex === '0' && <small>{ __( '(scroll to see more)', 'woo-dash' ) }</small> }
+						{ tabIndex === '0' && <small>{ __( '(scroll to see more)', 'wc-admin' ) }</small> }
 					</caption>
 					<tbody>
 						<tr>
@@ -104,8 +104,8 @@ class Table extends Component {
 											icon={ sortDir !== ASC ? 'arrow-up' : 'arrow-down' }
 											label={
 												sortDir !== ASC
-													? sprintf( __( 'Sort by %s in ascending order', 'woo-dash' ), header )
-													: sprintf( __( 'Sort by %s in descending order', 'woo-dash' ), header )
+													? sprintf( __( 'Sort by %s in ascending order', 'wc-admin' ), header )
+													: sprintf( __( 'Sort by %s in descending order', 'wc-admin' ), header )
 											}
 											onClick={ () => this.sortBy( i ) }
 										/>

@@ -22,7 +22,7 @@ class Link extends Component {
 			);
 		}
 
-		const path = wpAdmin ? getAdminLink( to ) : getAdminLink( 'admin.php?page=woodash#' + to );
+		const path = wpAdmin ? getAdminLink( to ) : getAdminLink( 'admin.php?page=wcadmin#' + to );
 		return (
 			<a href={ path } { ...props }>
 				{ children }

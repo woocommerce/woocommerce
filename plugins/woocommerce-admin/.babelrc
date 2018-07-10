@@ -11,7 +11,7 @@
 				[
 					"@wordpress/babel-plugin-makepot",
 					{
-						"output": "languages/woo-dash.pot"
+						"output": "languages/wc-admin.pot"
 					}
 				],
 				"transform-async-generator-functions"

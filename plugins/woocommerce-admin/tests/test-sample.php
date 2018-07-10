@@ -2,7 +2,7 @@
 /**
  * Class SampleTest
  *
- * @package Woo_Dash
+ * @package WC_Admin
  */
 
 /**

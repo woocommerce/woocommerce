@@ -19,19 +19,19 @@ class WidgetCharts extends Component {
 
 	render() {
 		return (
-			<Card title={ __( 'Store Charts', 'woo-dash' ) }>
-				<div className="woo-dash__widget">
+			<Card title={ __( 'Store Charts', 'wc-admin' ) }>
+				<div className="woocommerce-dashboard__widget">
 					<D3Chart
-						className="woo-dash__widget-bar-chart"
+						className="woocommerce-dashboard__widget-bar-chart"
 						data={ dummyOrders }
 						height={ 300 }
 						type={ 'line' }
 						width={ 1042 }
 					/>
 				</div>
-				<div className="woo-dash__widget">
+				<div className="woocommerce-dashboard__widget">
 					<D3Chart
-						className="woo-dash__widget-bar-chart"
+						className="woocommerce-dashboard__widget-bar-chart"
 						data={ dummyOrders }
 						height={ 300 }
 						type={ 'bar' }

@@ -30,7 +30,7 @@ function OrdersPanel( { orders } ) {
 
 	return (
 		<Fragment>
-			<ActivityHeader title={ __( 'Orders', 'woo-dash' ) } menu={ menu } />
+			<ActivityHeader title={ __( 'Orders', 'wc-admin' ) } menu={ menu } />
 			<Section>
 				{ isLoading ? (
 					<p>Loading</p>
@@ -51,15 +51,15 @@ function OrdersPanel( { orders } ) {
 						return (
 							<ActivityCard
 								key={ i }
-								label={ __( 'Order', 'woo-dash' ) }
+								label={ __( 'Order', 'wc-admin' ) }
 								icon={ <Dashicon icon="format-aside" /> }
 								date={ order.date_created }
 							>
-								<div>{ sprintf( __( '%s placed order #%d', 'woo-dash' ), name, order.id ) }</div>
+								<div>{ sprintf( __( '%s placed order #%d', 'wc-admin' ), name, order.id ) }</div>
 								<div>
 									<span>
 										{ sprintf(
-											_n( '%d product', '%d products', productsCount, 'woo-dash' ),
+											_n( '%d product', '%d products', productsCount, 'wc-admin' ),
 											productsCount
 										) }
 									</span>{' '}

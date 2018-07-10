@@ -7,4 +7,4 @@ The generated POT template file is not included in this repository. To create th
 npm run build
 ```
 
-After the build completes, you'll find a `woo-dash.pot` strings file in this directory.
+After the build completes, you'll find a `wc-admin.pot` strings file in this directory.

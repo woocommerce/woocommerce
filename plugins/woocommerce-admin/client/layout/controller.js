@@ -23,12 +23,12 @@ const getPages = () => {
 		{
 			container: Analytics,
 			path: '/analytics',
-			wpMenu: 'toplevel_page_woodash--analytics',
+			wpMenu: 'toplevel_page_wc-admin--analytics',
 		},
 		{
 			container: AnalyticsReport,
 			path: '/analytics/:report',
-			wpMenu: 'toplevel_page_woodash--analytics',
+			wpMenu: 'toplevel_page_wc-admin--analytics',
 		},
 	];
 
@@ -57,7 +57,7 @@ window.wpNavMenuClassChange = function( menuClass ) {
 		.removeClass( 'wp-menu-open' )
 		.removeClass( 'selected' )
 		.addClass( 'wp-not-current-submenu menu-top' );
-	jQuery( 'li > a[href$="admin.php?page=woodash' + window.location.hash + '"]' )
+	jQuery( 'li > a[href$="admin.php?page=wc-admin' + window.location.hash + '"]' )
 		.parent()
 		.addClass( 'current' );
 	jQuery( '#' + menuClass )

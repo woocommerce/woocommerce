@@ -12,7 +12,7 @@ import './style.scss';
 
 const SummaryList = ( { children, label } ) => {
 	if ( ! label ) {
-		label = __( 'Performance Indicators', 'woo-dash' );
+		label = __( 'Performance Indicators', 'wc-admin' );
 	}
 	return (
 		<ul className="woocommerce-summary" aria-label={ label }>

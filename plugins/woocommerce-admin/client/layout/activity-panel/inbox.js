@@ -12,7 +12,7 @@ import ActivityHeader from './activity-header';
 
 class InboxPanel extends Component {
 	render() {
-		return <ActivityHeader title={ __( 'Inbox', 'woo-dash' ) } />;
+		return <ActivityHeader title={ __( 'Inbox', 'wc-admin' ) } />;
 	}
 }
 

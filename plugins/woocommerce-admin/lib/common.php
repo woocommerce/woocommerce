@@ -6,7 +6,7 @@
  *
  * @return string Root path to the gutenberg custom fields plugin.
  */
-function woo_dash_dir_path( $file = '' ) {
+function wc_admin_dir_path( $file = '' ) {
 	return plugin_dir_path( dirname(__FILE__ ) ) . $file;
 }
 
@@ -17,7 +17,7 @@ function woo_dash_dir_path( $file = '' ) {
  *
  * @return string       Fully qualified URL pointing to the desired file.
  */
-function woo_dash_url( $path ) {
+function wc_admin_url( $path ) {
 	return plugins_url( $path, dirname( __FILE__ ) );
 }
 
@@ -31,8 +31,8 @@ function woo_dash_url( $path ) {
  *
  * @return string Current screen ID.
  */
-function woo_dash_get_current_screen_id() {
-	$current_screen    = get_current_screen();
+function wc_admin_get_current_screen_id() {
+	$current_screen = get_current_screen();
 	if ( ! $current_screen ) {
 		return false;
 	}
@@ -50,8 +50,8 @@ function woo_dash_get_current_screen_id() {
  *
  * TODO When merging to core, we should explore a better API for defining breadcrumbs, instead of just defining an array.
  */
-function woo_dash_get_embed_breadcrumbs() {
-	$current_screen_id = woo_dash_get_current_screen_id();
+function wc_admin_get_embed_breadcrumbs() {
+	$current_screen_id = wc_admin_get_current_screen_id();
 
 	// If a page has a tab, we can append that to the screen ID and show another pagination level
 	$pages_with_tabs = array(
@@ -66,123 +66,123 @@ function woo_dash_get_embed_breadcrumbs() {
 		}
 	}
 
-	$breadcrumbs = apply_filters( 'woo_dash_get_breadcrumbs', array(
-		'edit-shop_order' => __( 'Orders', 'woo-dash' ),
+	$breadcrumbs = apply_filters( 'wc_admin_get_breadcrumbs', array(
+		'edit-shop_order' => __( 'Orders', 'wc-admin' ),
 		'add-shop_order'  => array(
-			array( '/edit.php?post_type=shop_order', __( 'Orders', 'woo-dash' ) ),
-			__( 'Add New', 'woo-dash' )
+			array( '/edit.php?post_type=shop_order', __( 'Orders', 'wc-admin' ) ),
+			__( 'Add New', 'wc-admin' )
 		),
 		'shop_order'     => array(
-			array( '/edit.php?post_type=shop_order', __( 'Orders', 'woo-dash' ) ),
-			__( 'Edit Order', 'woo-dash' )
+			array( '/edit.php?post_type=shop_order', __( 'Orders', 'wc-admin' ) ),
+			__( 'Edit Order', 'wc-admin' )
 		),
-		'edit-shop_coupon' => __( 'Coupons', 'woo-dash' ),
+		'edit-shop_coupon' => __( 'Coupons', 'wc-admin' ),
 		'add-shop_coupon'  => array(
-			array( 'edit.php?post_type=shop_coupon', __( 'Coupons', 'woo-dash' ) ),
-			__( 'Add New', 'woo-dash' )
+			array( 'edit.php?post_type=shop_coupon', __( 'Coupons', 'wc-admin' ) ),
+			__( 'Add New', 'wc-admin' )
 		),
 		'shop_coupon' => array(
-			array( 'edit.php?post_type=shop_coupon', __( 'Coupons', 'woo-dash' ) ),
-			__( 'Edit Coupon', 'woo-dash' )
+			array( 'edit.php?post_type=shop_coupon', __( 'Coupons', 'wc-admin' ) ),
+			__( 'Edit Coupon', 'wc-admin' )
 		),
 		'woocommerce_page_wc-reports' => array(
-			array( 'admin.php?page=wc-reports', __( 'Reports', 'woo-dash' ) )
+			array( 'admin.php?page=wc-reports', __( 'Reports', 'wc-admin' ) )
 		),
 		'orders-woocommerce_page_wc-reports' => array(
-			array( 'admin.php?page=wc-reports', __( 'Reports', 'woo-dash' ) ),
-			__( 'Orders', 'woo-dash' )
+			array( 'admin.php?page=wc-reports', __( 'Reports', 'wc-admin' ) ),
+			__( 'Orders', 'wc-admin' )
 		),
 		'customers-woocommerce_page_wc-reports' => array(
-			array( 'admin.php?page=wc-reports', __( 'Reports', 'woo-dash' ) ),
-			__( 'Customers', 'woo-dash' )
+			array( 'admin.php?page=wc-reports', __( 'Reports', 'wc-admin' ) ),
+			__( 'Customers', 'wc-admin' )
 		),
 		'stock-woocommerce_page_wc-reports' => array(
-			array( 'admin.php?page=wc-reports', __( 'Reports', 'woo-dash' ) ),
-			__( 'Stock', 'woo-dash' )
+			array( 'admin.php?page=wc-reports', __( 'Reports', 'wc-admin' ) ),
+			__( 'Stock', 'wc-admin' )
 		),
 		'taxes-woocommerce_page_wc-reports' => array(
-			array( 'admin.php?page=wc-reports', __( 'Reports', 'woo-dash' ) ),
-			__( 'Taxes', 'woo-dash' )
+			array( 'admin.php?page=wc-reports', __( 'Reports', 'wc-admin' ) ),
+			__( 'Taxes', 'wc-admin' )
 		),
 		'woocommerce_page_wc-settings' => array(
-			array( 'admin.php?page=wc-settings', __( 'Settings', 'woo-dash' ) )
+			array( 'admin.php?page=wc-settings', __( 'Settings', 'wc-admin' ) )
 		),
 		'general-woocommerce_page_wc-settings' => array(
-			array( 'admin.php?page=wc-settings', __( 'Settings', 'woo-dash' ) ),
-			__( 'General', 'woo-dash' ),
+			array( 'admin.php?page=wc-settings', __( 'Settings', 'wc-admin' ) ),
+			__( 'General', 'wc-admin' ),
 		),
 		'products-woocommerce_page_wc-settings' => array(
-			array( 'admin.php?page=wc-settings', __( 'Settings', 'woo-dash' ) ),
-			__( 'Products', 'woo-dash' ),
+			array( 'admin.php?page=wc-settings', __( 'Settings', 'wc-admin' ) ),
+			__( 'Products', 'wc-admin' ),
 		),
 		'tax-woocommerce_page_wc-settings' => array(
-			array( 'admin.php?page=wc-settings', __( 'Settings', 'woo-dash' ) ),
-			__( 'Tax', 'woo-dash' ),
+			array( 'admin.php?page=wc-settings', __( 'Settings', 'wc-admin' ) ),
+			__( 'Tax', 'wc-admin' ),
 		),
 		'shipping-woocommerce_page_wc-settings' => array(
-			array( 'admin.php?page=wc-settings', __( 'Settings', 'woo-dash' ) ),
-			__( 'Shipping', 'woo-dash' ),
+			array( 'admin.php?page=wc-settings', __( 'Settings', 'wc-admin' ) ),
+			__( 'Shipping', 'wc-admin' ),
 		),
 		'checkout-woocommerce_page_wc-settings' => array(
-			array( 'admin.php?page=wc-settings', __( 'Settings', 'woo-dash' ) ),
-			__( 'Payments', 'woo-dash' ),
+			array( 'admin.php?page=wc-settings', __( 'Settings', 'wc-admin' ) ),
+			__( 'Payments', 'wc-admin' ),
 		),
 		'email-woocommerce_page_wc-settings' => array(
-			array( 'admin.php?page=wc-settings', __( 'Settings', 'woo-dash' ) ),
-			__( 'Emails', 'woo-dash' ),
+			array( 'admin.php?page=wc-settings', __( 'Settings', 'wc-admin' ) ),
+			__( 'Emails', 'wc-admin' ),
 		),
 		'advanced-woocommerce_page_wc-settings' => array(
-			array( 'admin.php?page=wc-settings', __( 'Settings', 'woo-dash' ) ),
-			__( 'Advanced', 'woo-dash' ),
+			array( 'admin.php?page=wc-settings', __( 'Settings', 'wc-admin' ) ),
+			__( 'Advanced', 'wc-admin' ),
 		),
 		'woocommerce_page_wc-status'  => array(
-			__( 'Status', 'woo-dash' ),
+			__( 'Status', 'wc-admin' ),
 		),
 		'status-woocommerce_page_wc-status'  => array(
-			array( 'admin.php?page=wc-status', __( 'Status', 'woo-dash' ) ),
-			__( 'System Status', 'woo-dash' ),
+			array( 'admin.php?page=wc-status', __( 'Status', 'wc-admin' ) ),
+			__( 'System Status', 'wc-admin' ),
 		),
 		'tools-woocommerce_page_wc-status'  => array(
-			array( 'admin.php?page=wc-status', __( 'Status', 'woo-dash' ) ),
-			__( 'Tools', 'woo-dash' ),
+			array( 'admin.php?page=wc-status', __( 'Status', 'wc-admin' ) ),
+			__( 'Tools', 'wc-admin' ),
 		),
 		'logs-woocommerce_page_wc-status'  => array(
-			array( 'admin.php?page=wc-status', __( 'Status', 'woo-dash' ) ),
-			__( 'Logs', 'woo-dash' ),
+			array( 'admin.php?page=wc-status', __( 'Status', 'wc-admin' ) ),
+			__( 'Logs', 'wc-admin' ),
 		),
 		'connect-woocommerce_page_wc-status'  => array(
-			array( 'admin.php?page=wc-status', __( 'Status', 'woo-dash' ) ),
-			__( 'WooCommerce Services Status', 'woo-dash' ),
+			array( 'admin.php?page=wc-status', __( 'Status', 'wc-admin' ) ),
+			__( 'WooCommerce Services Status', 'wc-admin' ),
 		),
-		'woocommerce_page_wc-addons' => __( 'Extensions', 'woo-dash' ),
-		'edit-product' => __( 'Products', 'woo-dash' ),
+		'woocommerce_page_wc-addons' => __( 'Extensions', 'wc-admin' ),
+		'edit-product' => __( 'Products', 'wc-admin' ),
 		'product_page_product_importer'  => array(
-			array( 'edit.php?post_type=product', __( 'Products', 'woo-dash' ) ),
-			__( 'Import', 'woo-dash' ),
+			array( 'edit.php?post_type=product', __( 'Products', 'wc-admin' ) ),
+			__( 'Import', 'wc-admin' ),
 		),
 		'product_page_product_exporter' =>  array(
-			array( 'edit.php?post_type=product', __( 'Products', 'woo-dash' ) ),
-			__( 'Export', 'woo-dash' ),
+			array( 'edit.php?post_type=product', __( 'Products', 'wc-admin' ) ),
+			__( 'Export', 'wc-admin' ),
 		),
 		'add-product' => array(
-			array( 'edit.php?post_type=product', __( 'Products', 'woo-dash' ) ),
-			__( 'Add New', 'woo-dash' ),
+			array( 'edit.php?post_type=product', __( 'Products', 'wc-admin' ) ),
+			__( 'Add New', 'wc-admin' ),
 		),
 		'product' => array(
-			array( 'edit.php?post_type=product', __( 'Products', 'woo-dash' ) ),
-			__( 'Edit Product', 'woo-dash' ),
+			array( 'edit.php?post_type=product', __( 'Products', 'wc-admin' ) ),
+			__( 'Edit Product', 'wc-admin' ),
 		),
 		'edit-product_cat' => array(
-			array( 'edit.php?post_type=product', __( 'Products', 'woo-dash' ) ),
-			__( 'Categories', 'woo-dash' ),
+			array( 'edit.php?post_type=product', __( 'Products', 'wc-admin' ) ),
+			__( 'Categories', 'wc-admin' ),
 		),
 		'edit-product_tag' => array(
-			array( 'edit.php?post_type=product', __( 'Products', 'woo-dash' ) ),
-			__( 'Tags', 'woo-dash' ),
+			array( 'edit.php?post_type=product', __( 'Products', 'wc-admin' ) ),
+			__( 'Tags', 'wc-admin' ),
 		),
 		'product_page_product_attributes' => array(
-			array( 'edit.php?post_type=product', __( 'Products', 'woo-dash' ) ),
-			__( 'Attributes', 'woo-dash' ),
+			array( 'edit.php?post_type=product', __( 'Products', 'wc-admin' ) ),
+			__( 'Attributes', 'wc-admin' ),
 		),
 	) );
 
@@ -197,12 +197,12 @@ function woo_dash_get_embed_breadcrumbs() {
 }
 
 /**
-  * `woo_dash_get_embed_enabled_screen_ids`,  `woo_dash_get_embed_enabled_plugin_screen_ids`,
-  * `woo_dash_get_embed_enabled_screen_ids` should be considered temporary functions for the feature plugin.
+  * `wc_admin_get_embed_enabled_screen_ids`,  `wc_admin_get_embed_enabled_plugin_screen_ids`,
+  * `wc_admin_get_embed_enabled_screen_ids` should be considered temporary functions for the feature plugin.
   *  This is separate from WC's screen_id functions so that extensions explictly have to opt-in to the feature plugin.
   *  TODO When merging to core, we should explore a better API for opting into the new header for extensions.
  */
-function woo_dash_get_embed_enabled_core_screen_ids() {
+function wc_admin_get_embed_enabled_core_screen_ids() {
 	$screens = array(
 		'edit-shop_order',
 		'shop_order',
@@ -223,23 +223,23 @@ function woo_dash_get_embed_enabled_core_screen_ids() {
 		'edit-product_tag',
 		'product_page_product_attributes',
 	);
-	return apply_filters( 'woo_dash_get_embed_enabled_core_screens_ids', $screens );
+	return apply_filters( 'wc_admin_get_embed_enabled_core_screens_ids', $screens );
 }
 
 /**
  * If any extensions want to show the new header, they can register their screen ids.
  * Separate so extensions can register support for the feature plugin separately.
  */
-function woo_dash_get_embed_enabled_plugin_screen_ids() {
+function wc_admin_get_embed_enabled_plugin_screen_ids() {
 	$screens = array();
-	return apply_filters( 'woo_dash_get_embed_enabled_plugin_screens_ids', $screens );
+	return apply_filters( 'wc_admin_get_embed_enabled_plugin_screens_ids', $screens );
 }
 
 /**
  * Returns core and plugin screen IDs for a list of screens the new header should be enabled on.
  */
-function woo_dash_get_embed_enabled_screen_ids() {
-	return array_merge( woo_dash_get_embed_enabled_core_screen_ids(), woo_dash_get_embed_enabled_plugin_screen_ids() );
+function wc_admin_get_embed_enabled_screen_ids() {
+	return array_merge( wc_admin_get_embed_enabled_core_screen_ids(), wc_admin_get_embed_enabled_plugin_screen_ids() );
 }
 
 /**
@@ -253,7 +253,7 @@ function woo_dash_get_embed_enabled_screen_ids() {
  *     @type string $symbol     Symbol for currency.
  * }
  */
-function woo_dash_currency_settings() {
+function wc_admin_currency_settings() {
 	$code = get_woocommerce_currency();
 
 	return apply_filters(

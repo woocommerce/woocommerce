@@ -12,8 +12,8 @@ import PropTypes from 'prop-types';
 import SegmentedSelection from 'components/segmented-selection';
 
 const compareValues = [
-	{ value: 'previous_period', label: __( 'Previous Period', 'woo-dash' ) },
-	{ value: 'previous_year', label: __( 'Previous Year', 'woo-dash' ) },
+	{ value: 'previous_period', label: __( 'Previous Period', 'wc-admin' ) },
+	{ value: 'previous_year', label: __( 'Previous Year', 'wc-admin' ) },
 ];
 
 class ComparePeriods extends Component {
@@ -25,7 +25,7 @@ class ComparePeriods extends Component {
 				selected={ compare }
 				onSelect={ onSelect }
 				name="compare"
-				legend={ __( 'compare to', 'woo-dash' ) }
+				legend={ __( 'compare to', 'wc-admin' ) }
 			/>
 		);
 	}

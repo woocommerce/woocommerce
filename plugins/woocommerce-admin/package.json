@@ -1,5 +1,5 @@
 {
-  "name": "woo-dash",
+  "name": "wc-admin",
   "version": "0.1.0",
   "main": "js/index.js",
   "author": "Automattic",
@@ -17,7 +17,7 @@
     "prestart": "npm run -s install-if-deps-outdated",
     "start": "webpack --watch",
     "lint": "npm run -s install-if-deps-outdated && eslint client --ext=js,jsx",
-    "i18n": "pot-to-php ./languages/woo-dash.pot ./languages/woo-dash.php woo-dash && grunt i18n",
+    "i18n": "pot-to-php ./languages/wc-admin.pot ./languages/wc-admin.php wc-admin && grunt i18n",
     "precommit": "npm run -s install-if-no-packages && node bin/pre-commit-hook.js",
     "prepush": "npm run -s install-if-no-packages && node bin/pre-push-hook.js",
     "pretest": "npm run -s install-if-no-packages",

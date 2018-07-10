@@ -10,7 +10,7 @@
 	syntaxCheck="true"
 	>
 	<testsuites>
-		<testsuite name="Woo Dash Test Suite">
+		<testsuite name="WooCommerce Admin Test Suite">
 			<directory prefix="test-" suffix=".php">./tests/</directory>
 		</testsuite>
 	</testsuites>

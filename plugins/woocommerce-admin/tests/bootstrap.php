@@ -2,7 +2,7 @@
 /**
  * PHPUnit bootstrap file
  *
- * @package Woo_Dash
+ * @package WC_Admin
  */
 
 $_tests_dir = getenv( 'WP_TESTS_DIR' );
@@ -24,7 +24,7 @@ require_once $_tests_dir . '/includes/functions.php';
  */
 function _manually_load_plugin() {
 	require dirname( dirname( dirname( __FILE__ ) ) ) . '/gutenberg/gutenberg.php';
-	require dirname( dirname( __FILE__ ) ) . '/woo-dash.php';
+	require dirname( dirname( __FILE__ ) ) . '/wc-admin.php';
 }
 tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
 

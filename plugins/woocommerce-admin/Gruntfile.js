@@ -1,3 +1,4 @@
+/* eslint-disable */
 module.exports = function( grunt ) {
 
 	'use strict';
@@ -9,7 +10,7 @@ module.exports = function( grunt ) {
 
 		addtextdomain: {
 			options: {
-				textdomain: 'woo-dash',
+				textdomain: 'wc-admin',
 			},
 			update_all_domains: {
 				options: {
@@ -24,8 +25,8 @@ module.exports = function( grunt ) {
 				options: {
 					domainPath: '/languages',
 					exclude: [ '\.git/*', 'bin/*', 'node_modules/*', 'tests/*' ],
-					mainFile: 'woo-dash.php',
-					potFilename: 'woo-dash.pot',
+					mainFile: 'wc-admin.php',
+					potFilename: 'wc-admin.pot',
 					potHeaders: {
 						poedit: true,
 						'x-poedit-keywordslist': true

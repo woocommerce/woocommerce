@@ -85,25 +85,25 @@ class ActivityPanel extends Component {
 		return [
 			{
 				name: 'inbox',
-				title: __( 'Inbox', 'woo-dash' ),
+				title: __( 'Inbox', 'wc-admin' ),
 				icon: <Gridicon icon="mail" />,
 				unread: true,
 			},
 			{
 				name: 'orders',
-				title: __( 'Orders', 'woo-dash' ),
+				title: __( 'Orders', 'wc-admin' ),
 				icon: <Gridicon icon="pages" />,
 				unread: false,
 			},
 			{
 				name: 'stock',
-				title: __( 'Stock', 'woo-dash' ),
+				title: __( 'Stock', 'wc-admin' ),
 				icon: <Gridicon icon="clipboard" />,
 				unread: true,
 			},
 			{
 				name: 'reviews',
-				title: __( 'Reviews', 'woo-dash' ),
+				title: __( 'Reviews', 'wc-admin' ),
 				icon: <Gridicon icon="star" />,
 				unread: true,
 			},

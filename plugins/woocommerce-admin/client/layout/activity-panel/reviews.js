@@ -12,7 +12,7 @@ import ActivityHeader from './activity-header';
 
 class ReviewsPanel extends Component {
 	render() {
-		return <ActivityHeader title={ __( 'Reviews', 'woo-dash' ) } />;
+		return <ActivityHeader title={ __( 'Reviews', 'wc-admin' ) } />;
 	}
 }
 

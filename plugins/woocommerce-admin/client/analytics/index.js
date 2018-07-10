@@ -17,7 +17,7 @@ export default class extends Component {
 		const { query, path } = this.props;
 		return (
 			<Fragment>
-				<Header sections={ [ __( 'Analytics', 'woo-dash' ) ] } />
+				<Header sections={ [ __( 'Analytics', 'wc-admin' ) ] } />
 				<DatePicker query={ query } path={ path } />
 				<p>Example single line button - default width 100% of container</p>
 				<DropdownButton labels={ [ 'All Products Sold' ] } />

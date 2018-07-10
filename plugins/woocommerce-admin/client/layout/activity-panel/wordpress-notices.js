@@ -103,7 +103,7 @@ class WordPressNotices extends Component {
 
 		this.setState( { count, notices, noticesOpen } );
 
-		// Move collapsed WordPress notifications into the main WooDash body
+		// Move collapsed WordPress notifications into the main wc-admin body
 		collapsedTargetArea.insertAdjacentElement( 'beforeend', notices );
 	}
 
@@ -197,7 +197,7 @@ class WordPressNotices extends Component {
 				onClick={ partial( togglePanel, 'wpnotices' ) }
 				icon={ <Gridicon icon="my-sites" /> }
 			>
-				{ __( 'Notices', 'woo-dash' ) }
+				{ __( 'Notices', 'wc-admin' ) }
 			</IconButton>
 		);
 	}

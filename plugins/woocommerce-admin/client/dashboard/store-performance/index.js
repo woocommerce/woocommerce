@@ -34,25 +34,25 @@ class StorePerformance extends Component {
 
 	renderMenu() {
 		return (
-			<EllipsisMenu label={ __( 'Choose which analytics to display', 'woo-dash' ) }>
-				<MenuTitle>{ __( 'Display Stats:', 'woo-dash' ) }</MenuTitle>
+			<EllipsisMenu label={ __( 'Choose which analytics to display', 'wc-admin' ) }>
+				<MenuTitle>{ __( 'Display Stats:', 'wc-admin' ) }</MenuTitle>
 				<MenuItem onInvoke={ this.toggle( 'showCustomers' ) }>
 					<ToggleControl
-						label={ __( 'Show Customers', 'woo-dash' ) }
+						label={ __( 'Show Customers', 'wc-admin' ) }
 						checked={ this.state.showCustomers }
 						onChange={ this.toggle( 'showCustomers' ) }
 					/>
 				</MenuItem>
 				<MenuItem onInvoke={ this.toggle( 'showProducts' ) }>
 					<ToggleControl
-						label={ __( 'Show Products', 'woo-dash' ) }
+						label={ __( 'Show Products', 'wc-admin' ) }
 						checked={ this.state.showProducts }
 						onChange={ this.toggle( 'showProducts' ) }
 					/>
 				</MenuItem>
 				<MenuItem onInvoke={ this.toggle( 'showOrders' ) }>
 					<ToggleControl
-						label={ __( 'Show Orders', 'woo-dash' ) }
+						label={ __( 'Show Orders', 'wc-admin' ) }
 						checked={ this.state.showOrders }
 						onChange={ this.toggle( 'showOrders' ) }
 					/>
@@ -69,22 +69,22 @@ class StorePerformance extends Component {
 
 		return (
 			<Card
-				title={ __( 'Store Performance', 'woo-dash' ) }
+				title={ __( 'Store Performance', 'wc-admin' ) }
 				menu={ this.renderMenu() }
 				className="woocommerce-dashboard__store-performance"
 			>
 				<SummaryList>
 					{ showCustomers && (
-						<SummaryNumber value={ '2' } label={ __( 'New Customers', 'woo-dash' ) } delta={ 15 } />
+						<SummaryNumber value={ '2' } label={ __( 'New Customers', 'wc-admin' ) } delta={ 15 } />
 					) }
 					{ showProducts && (
-						<SummaryNumber value={ totalProducts } label={ __( 'Total Products', 'woo-dash' ) } />
+						<SummaryNumber value={ totalProducts } label={ __( 'Total Products', 'wc-admin' ) } />
 					) }
 					{ showOrders && (
 						<SummaryNumber
 							value={ totalOrders }
 							selected
-							label={ __( 'Total Orders', 'woo-dash' ) }
+							label={ __( 'Total Orders', 'wc-admin' ) }
 							delta={ -6 }
 						/>
 					) }

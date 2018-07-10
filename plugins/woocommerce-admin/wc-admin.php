@@ -1,27 +1,27 @@
 <?php
 /**
- * Plugin Name: Woo Dashboard
+ * Plugin Name: WooCommerce Admin
  * Plugin URI: https://woocommerce.com/
- * Description: A feature plugin for a new Dashboard view of WooCommerce
+ * Description: A feature plugin for a modern, javascript-driven WooCommerce admin experience.
  * Author: Automattic
  * Author URI: https://woocommerce.com/
- * Text Domain: woo-dash
+ * Text Domain: woocommerce
  * Domain Path: /languages
  * Version: 0.1.0
  *
- * @package         Woo_Dash
+ * @package WC_Admin
  */
 
-if ( ! defined( 'WOO_DASH_APP' ) ) {
-	define( 'WOO_DASH_APP', 'woo-dash-app' );
+if ( ! defined( 'WC_ADMIN_APP' ) ) {
+	define( 'WC_ADMIN_APP', 'wc-admin-app' );
 }
 
 /**
  * Notify users of the plugin requirements
  */
-function woo_dash_plugins_notice() {
+function wc_admin_plugins_notice() {
 	$message = sprintf(
-		__( 'The WooCommerce Dashboard feature plugin requires both <a href="%1$s">Gutenberg</a> and <a href="%2$s">WooCommerce</a> to be installed and active.', 'woo-dash' ),
+		__( 'The WooCommerce Admin feature plugin requires both <a href="%1$s">Gutenberg</a> and <a href="%2$s">WooCommerce</a> to be installed and active.', 'wc-admin' ),
 		'https://wordpress.org/plugins/gutenberg/',
 		'https://wordpress.org/plugins/woocommerce/'
 	);
@@ -31,12 +31,12 @@ function woo_dash_plugins_notice() {
 /**
  * Set up the plugin, only if we can detect both Gutenberg and WooCommerce
  */
-function woo_dash_plugins_loaded() {
+function wc_admin_plugins_loaded() {
 	if (
 		! ( defined( 'GUTENBERG_DEVELOPMENT_MODE' ) || defined( 'GUTENBERG_VERSION' ) ) ||
 		! class_exists( 'WooCommerce' )
 	) {
-		add_action( 'admin_notices', 'woo_dash_plugins_notice' );
+		add_action( 'admin_notices', 'wc_admin_plugins_notice' );
 		return;
 	}
 
@@ -49,4 +49,4 @@ function woo_dash_plugins_loaded() {
 	// Create the Admin pages
 	require_once dirname( __FILE__ ) . '/lib/admin.php';
 }
-add_action( 'plugins_loaded', 'woo_dash_plugins_loaded' );
+add_action( 'plugins_loaded', 'wc_admin_plugins_loaded' );

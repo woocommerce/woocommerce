@@ -67,7 +67,7 @@ class Header extends Component {
 
 		document.title = decodeEntities(
 			sprintf(
-				__( '%1$s &lsaquo; %2$s &#8212; WooCommerce', 'woo-dash' ),
+				__( '%1$s &lsaquo; %2$s &#8212; WooCommerce', 'wc-admin' ),
 				documentTitle,
 				wpApiSettings.schema.name
 			)

@@ -1,11 +1,8 @@
+/** @format */
 /**
  * External dependencies
  */
 import { debounce, isArray, uniqueId } from 'lodash';
-
-/**
- * WordPress dependencies
- */
 import { Component } from '@wordpress/element';
 import { addAction, removeAction } from '@wordpress/hooks';
 
@@ -30,7 +27,7 @@ export default function useFilters( hookName ) {
 				super( props );
 
 				this.onHooksUpdated = this.onHooksUpdated.bind( this );
-				this.namespace = uniqueId( 'woo-dash/use-filters/component-' );
+				this.namespace = uniqueId( 'wc-admin/use-filters/component-' );
 				this.throttledForceUpdate = debounce( () => {
 					this.forceUpdate();
 				}, ANIMATION_FRAME_PERIOD );

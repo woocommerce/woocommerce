@@ -17,7 +17,7 @@ export default class Dashboard extends Component {
 	render() {
 		return (
 			<Fragment>
-				<Header sections={ [ __( 'Dashboard', 'woo-dash' ) ] } />
+				<Header sections={ [ __( 'Dashboard', 'wc-admin' ) ] } />
 				<StorePerformance />
 				<Agenda />
 				<Charts />

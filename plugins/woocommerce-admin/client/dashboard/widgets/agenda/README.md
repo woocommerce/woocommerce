@@ -42,20 +42,20 @@ render: function() {
 					'Order needs to be fulfilled',
 					'Orders need to be fulfilled',
 					2,
-					'woo-dash'
+					'wc-admin'
 				) }
 			>
-				<AgendaItem onClick={ noop } actionLabel={ __( 'Fulfill', 'woo-dash' ) }>Order #99</AgendaItem>
+				<AgendaItem onClick={ noop } actionLabel={ __( 'Fulfill', 'wc-admin' ) }>Order #99</AgendaItem>
 				<AgendaItem
 					href={ getWpAdminLink( '/edit.php?post_type=shop_order' ) }
-					actionLabel={ __( 'Fulfill', 'woo-dash' ) }
+					actionLabel={ __( 'Fulfill', 'wc-admin' ) }
 				>
 					Order #101
 				</AgendaItem>
 			</AgendaHeader>
 			<AgendaHeader
 				count={ 1 }
-				title={ _n( 'Order awaiting payment', 'Orders awaiting payment', 1, 'woo-dash' ) }
+				title={ _n( 'Order awaiting payment', 'Orders awaiting payment', 1, 'wc-admin' ) }
 				href={ getWpAdminLink( '/edit.php?post_status=wc-pending&post_type=shop_order' ) }
 			/>
 		</div>
