@@ -34,17 +34,7 @@ import {
 	getYTickOffset,
 } from './utils';
 
-const D3Chart = ( {
-	className,
-	data,
-	height,
-	margin,
-	timeseries,
-	type,
-	xFormat,
-	yFormat,
-	width,
-} ) => {
+const D3Chart = ( { className, data, height, margin, type, xFormat, yFormat, width } ) => {
 	const drawChart = ( node, params ) => {
 		const g = node
 			.select( 'svg' )
@@ -90,7 +80,7 @@ const D3Chart = ( {
 			uniqueDates,
 			uniqueKeys,
 			width: calculatedWidth,
-			xFormat: timeseries ? d3TimeFormat( xFormat ) : d3Format( xFormat ),
+			xFormat: d3TimeFormat( xFormat ),
 			xGroupScale: getXGroupScale( orderedKeys, xScale ),
 			xLineScale,
 			xScale,
@@ -116,7 +106,6 @@ D3Chart.propTypes = {
 		right: PropTypes.number,
 		top: PropTypes.number,
 	} ),
-	timeseries: PropTypes.bool,
 	type: PropTypes.oneOf( [ 'bar', 'line' ] ),
 	width: PropTypes.number,
 	xFormat: PropTypes.string,
@@ -131,7 +120,6 @@ D3Chart.defaultProps = {
 		right: 0,
 		top: 20,
 	},
-	timeseries: true,
 	type: 'line',
 	width: 600,
 	xFormat: '%Y-%m-%d',

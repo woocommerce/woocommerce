@@ -8,7 +8,7 @@
 /**
  * Internal dependencies
  */
-import { dummyOrders } from '../dummy';
+import { dummyOrders } from './dummy';
 import {
 	getColorScale,
 	getDateSpaces,
