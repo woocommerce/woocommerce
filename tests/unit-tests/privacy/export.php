@@ -72,7 +72,7 @@ class WC_Test_Privacy_Export extends WC_Unit_Test_Case {
 					'item_id'     => 'user',
 					'data'        => array(
 						array(
-							'name'  => 'Billing Address 1',
+							'name'  => 'Billing Street address',
 							'value' => '123 South Street',
 						),
 						array(
@@ -80,15 +80,15 @@ class WC_Test_Privacy_Export extends WC_Unit_Test_Case {
 							'value' => 'Apt 1',
 						),
 						array(
-							'name'  => 'Billing City',
+							'name'  => 'Billing Town / City',
 							'value' => 'Philadelphia',
 						),
 						array(
-							'name'  => 'Billing Postal/Zip Code',
+							'name'  => 'Billing Postcode / ZIP',
 							'value' => '19123',
 						),
 						array(
-							'name'  => 'Billing State',
+							'name'  => 'Billing State / County',
 							'value' => 'PA',
 						),
 						array(
@@ -96,11 +96,11 @@ class WC_Test_Privacy_Export extends WC_Unit_Test_Case {
 							'value' => 'US',
 						),
 						array(
-							'name'  => 'Email Address',
+							'name'  => 'Billing Email address',
 							'value' => 'customer1@test.com',
 						),
 						array(
-							'name'  => 'Shipping Address 1',
+							'name'  => 'Shipping Street address',
 							'value' => '123 South Street',
 						),
 						array(
@@ -108,15 +108,15 @@ class WC_Test_Privacy_Export extends WC_Unit_Test_Case {
 							'value' => 'Apt 1',
 						),
 						array(
-							'name'  => 'Shipping City',
+							'name'  => 'Shipping Town / City',
 							'value' => 'Philadelphia',
 						),
 						array(
-							'name'  => 'Shipping Postal/Zip Code',
+							'name'  => 'Shipping Postcode / ZIP',
 							'value' => '19123',
 						),
 						array(
-							'name'  => 'Shipping State',
+							'name'  => 'Shipping State / County',
 							'value' => 'PA',
 						),
 						array(
