@@ -350,7 +350,7 @@ class WC_Admin_Post_Types {
 				if ( ! empty( $new_sku ) ) {
 					$unique_sku = wc_product_has_unique_sku( $post_id, $new_sku );
 					if ( $unique_sku ) {
-						$product->set_sku( $new_sku );
+						$product->set_sku( wc_clean( wp_unslash( $new_sku ) ) );
 					}
 				} else {
 					$product->set_sku( '' );
