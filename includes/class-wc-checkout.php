@@ -661,11 +661,11 @@ class WC_Checkout {
 				switch ( $fieldset_key ) {
 					case 'shipping':
 						/* translators: %s: field name */
-						$field_label = sprintf( __( 'Shipping %s', 'woocommerce' ), $field_label );
+						$field_label = __( sprintf( 'Shipping %s', $field_label ), 'woocommerce' );
 						break;
 					case 'billing':
 						/* translators: %s: field name */
-						$field_label = sprintf( __( 'Billing %s', 'woocommerce' ), $field_label );
+						$field_label = __( sprintf( 'Billing %s', $field_label ), 'woocommerce' );
 						break;
 				}
 
