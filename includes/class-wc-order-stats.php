@@ -95,8 +95,8 @@ class WC_Order_Stats {
 		$table_name = $wpdb->prefix . self::TABLE_NAME;
 		$query = $wpdb->prepare(
 			'SELECT ' . $selections . ' FROM ' . $table_name . ' WHERE start_time >= %s AND start_time < %s GROUP BY ' . strtoupper( esc_sql( $args['interval'] ) ) . '(start_time);',
-			$start_time,
-			$end_time
+			date( 'Y-m-d H:00:00', $start_time ),
+			date( 'Y-m-d H:00:00', $end_time )
 		);
 
 		return $wpdb->get_results( $query, ARRAY_A );
@@ -110,9 +110,9 @@ class WC_Order_Stats {
 
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
-		$collate = '';
+		$charset_collate = '';
 		if ( $wpdb->has_cap( 'collation' ) ) {
-			$collate = $wpdb->get_charset_collate();
+			$charset_collate = $wpdb->get_charset_collate();
 		}
 
 		$table_name = $wpdb->prefix . self::TABLE_NAME;
@@ -178,7 +178,11 @@ class WC_Order_Stats {
 	 * This schedules for the order's current time and for the time the order used to be in if necessary.
 	 */
 	public function queue_update_modified_orders( $order ) {
-		$new_time = strtotime( $order->get_date_created()->format( 'Y-m-d\TH:00:00O' ) );
+		$date_created = $order->get_date_created();
+		if ( ! $date_created ) {
+			return;
+		}
+		$new_time = strtotime( $date_created->format( 'Y-m-d\TH:00:00O' ) );
 		$old_time = false;
 		$new_status = $order->get_status();
 		$old_status = false;
@@ -243,7 +247,7 @@ class WC_Order_Stats {
 		$summary['orders_refund_total']   = self::get_orders_refund_total( $orders );
 		$summary['orders_tax_total']      = self::get_orders_tax_total( $orders );
 		$summary['orders_shipping_total'] = self::get_orders_shipping_total( $orders );
-		$summary['orders_net_total']      = $summary['orders_gross_total'] - $summary['orders_coupon_total'] - $summary['orders_refund_total'] - $summary['orders_tax_total'] - $summary['orders_shipping_total'];
+		$summary['orders_net_total']      = $summary['orders_gross_total'] - $summary['orders_tax_total'] - $summary['orders_shipping_total'];
 
 		return $summary;
 	}
@@ -347,7 +351,7 @@ class WC_Order_Stats {
 		$total = 0.0;
 
 		foreach ( $orders as $order ) {
-			$total += $order->get_subtotal();
+			$total += $order->get_total();
 		}
 
 		return $total;
