@@ -33,7 +33,6 @@ class WC_Order_Stats {
 	 * Setup class.
 	 */
 	public function __construct() {
-		add_action( 'init', array( $this, 'install' ) ); // @todo Don't do this on every page load.
 		add_action( self::CRON_EVENT, array( $this, 'queue_update_recent_orders' ) );
 		add_action( 'woocommerce_before_order_object_save', array( $this, 'queue_update_modified_orders' ) );
 		add_action( 'shutdown', array( $this, 'dispatch_recalculator' ) );
@@ -100,35 +99,6 @@ class WC_Order_Stats {
 		);
 
 		return $wpdb->get_results( $query, ARRAY_A ); // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
-	}
-
-	/**
-	 * Create the table that will hold the order stats information.
-	 */
-	public function install() {
-		global $wpdb;
-
-		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-
-		$charset_collate = '';
-		if ( $wpdb->has_cap( 'collation' ) ) {
-			$charset_collate = $wpdb->get_charset_collate();
-		}
-
-		$table_name = $wpdb->prefix . self::TABLE_NAME;
-		$sql = "CREATE TABLE $table_name (
-			start_time timestamp DEFAULT '0000-00-00 00:00:00' NOT NULL,
-			num_orders int(11) UNSIGNED DEFAULT 0 NOT NULL,
-			num_items_sold int(11) UNSIGNED DEFAULT 0 NOT NULL,
-			orders_gross_total double DEFAULT 0 NOT NULL,
-			orders_coupon_total double DEFAULT 0 NOT NULL,
-			orders_refund_total double DEFAULT 0 NOT NULL,
-			orders_tax_total double DEFAULT 0 NOT NULL,
-			orders_shipping_total double DEFAULT 0 NOT NULL,
-			orders_net_total double DEFAULT 0 NOT NULL,
-			PRIMARY KEY (start_time)
-		) $charset_collate;";
-		dbDelta( $sql );
 	}
 
 	/**

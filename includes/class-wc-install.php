@@ -745,6 +745,18 @@ CREATE TABLE {$wpdb->prefix}wc_download_log (
   KEY permission_id (permission_id),
   KEY timestamp (timestamp)
 ) $collate;
+CREATE TABLE {$wpdb->prefix}wc_order_stats (
+  start_time timestamp DEFAULT '0000-00-00 00:00:00' NOT NULL,
+  num_orders int(11) UNSIGNED DEFAULT 0 NOT NULL,
+  num_items_sold int(11) UNSIGNED DEFAULT 0 NOT NULL,
+  orders_gross_total double DEFAULT 0 NOT NULL,
+  orders_coupon_total double DEFAULT 0 NOT NULL,
+  orders_refund_total double DEFAULT 0 NOT NULL,
+  orders_tax_total double DEFAULT 0 NOT NULL,
+  orders_shipping_total double DEFAULT 0 NOT NULL,
+  orders_net_total double DEFAULT 0 NOT NULL,
+  PRIMARY KEY (start_time)
+) $collate;
 		";
 
 		/**
