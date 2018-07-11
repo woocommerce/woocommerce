@@ -793,4 +793,24 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( 'American Express', wc_get_credit_card_type_label( 'american_express' ) );
 		$this->assertEquals( 'American Express', wc_get_credit_card_type_label( 'american-express' ) );
 	}
+
+	/**
+	 * Test wc_get_permalink_structure.
+	 *
+	 * @return void
+	 */
+	public function test_wc_get_permalink_structure() {
+		$expected_structure = array(
+			'product_base'           => 'product',
+			'category_base'          => 'product-category',
+			'tag_base'               => 'product-tag',
+			'attribute_base'         => '',
+			'use_verbose_page_rules' => '',
+			'product_rewrite_slug'   => 'product',
+			'category_rewrite_slug'  => 'product-category',
+			'tag_rewrite_slug'       => 'product-tag',
+			'attribute_rewrite_slug' => '',
+		);
+		$this->assertEquals( $expected_structure, wc_get_permalink_structure() );
+	}
 }
