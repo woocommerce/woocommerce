@@ -61,20 +61,20 @@ class WC_Order_Stats {
 
 		$defaults = array(
 			'interval' => 'hour', // hour, week, day, month, or year.
-			'fields' => '*',
+			'fields'   => '*',
 		);
 		$args = wp_parse_args( $args, $defaults );
 
 		$selections = array(
-			'start_time' => 'MIN(start_time) as start_time',
-			'num_orders' => 'SUM(num_orders) as num_orders',
-			'num_items_sold' => 'SUM(num_items_sold) as num_items_sold',
-			'orders_gross_total' => 'SUM(orders_gross_total) as orders_gross_total',
-			'orders_coupon_total' => 'SUM(orders_coupon_total) as orders_coupon_total',
-			'orders_refund_total' => 'SUM(orders_refund_total) as orders_refund_total',
-			'orders_tax_total' => 'SUM(orders_tax_total) as orders_tax_total',
+			'start_time'            => 'MIN(start_time) as start_time',
+			'num_orders'            => 'SUM(num_orders) as num_orders',
+			'num_items_sold'        => 'SUM(num_items_sold) as num_items_sold',
+			'orders_gross_total'    => 'SUM(orders_gross_total) as orders_gross_total',
+			'orders_coupon_total'   => 'SUM(orders_coupon_total) as orders_coupon_total',
+			'orders_refund_total'   => 'SUM(orders_refund_total) as orders_refund_total',
+			'orders_tax_total'      => 'SUM(orders_tax_total) as orders_tax_total',
 			'orders_shipping_total' => 'SUM(orders_shipping_total) as orders_shipping_total',
-			'orders_net_total' => 'SUM(orders_net_total) as orders_net_total',
+			'orders_net_total'      => 'SUM(orders_net_total) as orders_net_total',
 		);
 
 		if ( is_array( $args['fields'] ) ) {
@@ -94,12 +94,12 @@ class WC_Order_Stats {
 
 		$table_name = $wpdb->prefix . self::TABLE_NAME;
 		$query = $wpdb->prepare(
-			'SELECT ' . $selections . ' FROM ' . $table_name . ' WHERE start_time >= %s AND start_time < %s GROUP BY ' . strtoupper( esc_sql( $args['interval'] ) ) . '(start_time);',
+			'SELECT ' . $selections . ' FROM ' . $table_name . ' WHERE start_time >= %s AND start_time < %s GROUP BY ' . strtoupper( esc_sql( $args['interval'] ) ) . '(start_time);', // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
 			date( 'Y-m-d H:00:00', $start_time ),
 			date( 'Y-m-d H:00:00', $end_time )
 		);
 
-		return $wpdb->get_results( $query, ARRAY_A );
+		return $wpdb->get_results( $query, ARRAY_A ); // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
 	}
 
 	/**
@@ -128,8 +128,6 @@ class WC_Order_Stats {
 			orders_net_total double DEFAULT 0 NOT NULL,
 			PRIMARY KEY (start_time)
 		) $charset_collate;";
-
-		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 		dbDelta( $sql );
 	}
 
@@ -176,20 +174,22 @@ class WC_Order_Stats {
 	/**
 	 * Schedule a recalculation for an order's time when the order gets updated.
 	 * This schedules for the order's current time and for the time the order used to be in if necessary.
+	 *
+	 * @param WC_Order $order Order that is in the process of getting modified.
 	 */
 	public function queue_update_modified_orders( $order ) {
 		$date_created = $order->get_date_created();
 		if ( ! $date_created ) {
 			return;
 		}
-		$new_time = strtotime( $date_created->format( 'Y-m-d\TH:00:00O' ) );
-		$old_time = false;
+		$new_time   = strtotime( $date_created->format( 'Y-m-d\TH:00:00O' ) );
+		$old_time   = false;
 		$new_status = $order->get_status();
 		$old_status = false;
 
 		if ( $order->get_id() ) {
-			$old_order = wc_get_order( $order->get_id() );
-			$old_time = strtotime( $old_order->get_date_created()->format( 'Y-m-d\TH:00:00O' ) );
+			$old_order  = wc_get_order( $order->get_id() );
+			$old_time   = strtotime( $old_order->get_date_created()->format( 'Y-m-d\TH:00:00O' ) );
 			$old_status = $old_order->get_status();
 		}
 
@@ -234,8 +234,7 @@ class WC_Order_Stats {
 		$orders = wc_get_orders( array(
 			'limit'        => -1,
 			'type'         => 'shop_order',
-			'orderby'      => 'date',
-			'order'        => 'ASC',
+			'orderby'      => 'none',
 			'status'       => self::get_report_order_statuses(),
 			'date_created' => $start_time . '...' . $end_time,
 		) );
@@ -255,7 +254,7 @@ class WC_Order_Stats {
 	/**
 	 * Update the database with stats data.
 	 *
-	 * @param int $start_time Timestamp.
+	 * @param int   $start_time Timestamp.
 	 * @param array $data Stats data.
 	 * @return int/bool Number or rows modified or false on failure.
 	 */
@@ -278,7 +277,7 @@ class WC_Order_Stats {
 		$data = wp_parse_args( $data, $defaults );
 
 		// Don't store rows that don't have useful information.
-		// @todo maybe remove this when on-the-fly generation is implemented
+		// @todo maybe remove this when/if on-the-fly generation is implemented.
 		if ( ! $data['num_orders'] ) {
 			return $wpdb->delete(
 				$table_name,

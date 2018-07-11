@@ -31,6 +31,8 @@ class WC_Order_Stats_Background_Process extends WC_Background_Process {
 	/**
 	 * Push to queue without scheduling duplicate recalculation events.
 	 * Overrides WC_Background_Process::push_to_queue.
+	 *
+	 * @param integer $data Timestamp of hour to generate stats.
 	 */
 	public function push_to_queue( $data ) {
 		$data = absint( $data );
