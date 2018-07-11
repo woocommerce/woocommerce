@@ -725,4 +725,59 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 			$this->assertEquals( wc_selected( $value, $options ), $actual_result );
 		}
 	}
+
+	/**
+	 * Test wc_array_cartesian.
+	 *
+	 * @return void
+	 */
+	public function test_wc_array_cartesian() {
+		$product    = new WC_Product_Variable();
+		$attributes = array();
+
+		$attribute = new \WC_Product_Attribute();
+		$attribute->set_id( 0 );
+		$attribute->set_name( 'Attr1' );
+		$attribute->set_options( array( 'Attr1 Value 1', 'Attr1 Value 2' ) );
+		$attribute->set_position( 0 );
+		$attribute->set_visible( true );
+		$attribute->set_variation( true );
+		$attributes[] = $attribute;
+
+		$attribute = new \WC_Product_Attribute();
+		$attribute->set_id( 0 );
+		$attribute->set_name( 'Attr2' );
+		$attribute->set_options( array( 'Attr2 Value 1', 'Attr2 Value 2' ) );
+		$attribute->set_position( 0 );
+		$attribute->set_visible( true );
+		$attribute->set_variation( true );
+		$attributes[] = $attribute;
+
+		$product->set_props( array(
+			'attributes' => $attributes,
+		) );
+		$product->save();
+
+		$variation_attributes  = wc_list_pluck( array_filter( $product->get_attributes(), 'wc_attributes_array_filter_variation' ), 'get_slugs' );
+		$expected_combinations = array(
+			array(
+				'attr2' => 'Attr2 Value 1',
+				'attr1' => 'Attr1 Value 1',
+			),
+			array(
+				'attr2' => 'Attr2 Value 2',
+				'attr1' => 'Attr1 Value 1',
+			),
+			array(
+				'attr2' => 'Attr2 Value 1',
+				'attr1' => 'Attr1 Value 2',
+			),
+			array(
+				'attr2' => 'Attr2 Value 2',
+				'attr1' => 'Attr1 Value 2',
+			),
+		);
+
+		$this->assertEquals( $expected_combinations, array_reverse( wc_array_cartesian( $variation_attributes ) ) );
+	}
 }
