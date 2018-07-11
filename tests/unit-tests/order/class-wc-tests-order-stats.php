@@ -12,7 +12,7 @@ class WC_Tests_Order_Stats extends WC_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_populate_and_query() {
-		// Populate all of the data.
+		//Populate all of the data.
 		$product = new WC_Product_Simple();
 		$product->set_name( 'Test Product' );
 		$product->set_regular_price( 25 );
