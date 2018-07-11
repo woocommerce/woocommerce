@@ -16,6 +16,7 @@ import ActivityHeader from './activity-header';
 import { EllipsisMenu, MenuTitle, MenuItem } from 'components/ellipsis-menu';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
 import { getOrderRefundTotal } from 'lib/order-values';
+import Gravatar from 'components/gravatar';
 import { Section } from 'layout/section';
 
 function OrdersPanel( { orders } ) {
@@ -55,6 +56,7 @@ function OrdersPanel( { orders } ) {
 								icon={ <Dashicon icon="format-aside" /> }
 								date={ order.date_created }
 							>
+								<Gravatar user={ address.email } />
 								<div>{ sprintf( __( '%s placed order #%d', 'wc-admin' ), name, order.id ) }</div>
 								<div>
 									<span>
