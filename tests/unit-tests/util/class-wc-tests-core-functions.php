@@ -27,6 +27,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_get_woocommerce_currencies() {
+		static $currencies;
 
 		$expected_currencies = array(
 			'AED' => 'United Arab Emirates dirham',
@@ -193,6 +194,10 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 			'ZMW' => 'Zambian kwacha',
 		);
 
+		$this->assertEquals( $expected_currencies, get_woocommerce_currencies() );
+
+		// Unset cached currencies and test again.
+		unset( $currencies );
 		$this->assertEquals( $expected_currencies, get_woocommerce_currencies() );
 	}
 
