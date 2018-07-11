@@ -721,7 +721,12 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 			'index' => 0,
 		);
 
+		$site_tables = $wpdb->tables( 'all', true );
 		foreach ( $database_table_sizes as $table ) {
+			// Only include tables matching the prefix of the current site, this is to prevent displaying all tables on a MS install not relating to the current.
+			if ( is_multisite() && ! in_array( $table->name, $site_tables, true ) ) {
+				continue;
+			}
 			$table_type = in_array( $table->name, $core_tables ) ? 'woocommerce' : 'other';
 
 			$tables[ $table_type ][ $table->name ] = array(
