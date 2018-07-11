@@ -221,6 +221,32 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test wc_get_theme_support()
+	 *
+	 * @return void
+	 */
+	public function test_wc_get_theme_support() {
+		$this->assertEquals( 'default', wc_get_theme_support( '', 'default' ) );
+
+		$theme_support_options = array(
+			'thumbnail_image_width' => 150,
+			'single_image_width'    => 300,
+			'product_grid'          => array(
+				'default_rows'    => 3,
+				'min_rows'        => 2,
+				'max_rows'        => 8,
+				'default_columns' => 4,
+				'min_columns'     => 2,
+				'max_columns'     => 5,
+			),
+		);
+		add_theme_support( 'woocommerce', $theme_support_options );
+
+		$this->assertEquals( $theme_support_options, wc_get_theme_support() );
+		$this->assertEquals( $theme_support_options['product_grid'], wc_get_theme_support( 'product_grid' ) );
+	}
+
+	/**
 	 * Test get_woocommerce_api_url().
 	 *
 	 * @since 2.2
