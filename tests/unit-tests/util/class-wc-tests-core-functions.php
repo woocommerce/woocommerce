@@ -813,4 +813,13 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		);
 		$this->assertEquals( $expected_structure, wc_get_permalink_structure() );
 	}
+
+	/**
+	 * Test wc_decimal_to_fraction.
+	 *
+	 * @return void
+	 */
+	public function test_wc_decimal_to_fraction() {
+		$this->assertEquals( array( 7, 2 ), wc_decimal_to_fraction( '3.5' ) );
+	}
 }
