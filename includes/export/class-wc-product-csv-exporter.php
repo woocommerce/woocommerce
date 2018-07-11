@@ -399,13 +399,17 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 		$manage_stock   = $product->get_manage_stock( 'edit' );
 		$stock_quantity = $product->get_stock_quantity( 'edit' );
 
-		if ( $product->is_type( 'variation' && 'parent' === $manage_stock ) ) {
-			return 'parent';
-		} elseif ( $manage_stock ) {
+		if ( $manage_stock ) {
 			return $stock_quantity;
-		} else {
-			return '';
+		} else if ( $product->is_type( 'variation' ) ) {
+			if ( $product->get_parent_id( 'edit' ) ) {
+				$parent = wc_get_product( $product->get_parent_id( 'edit' ) );
+				if( $parent->get_manage_stock( 'edit' ) ) {
+					return 'parent';
+				}
+			}
 		}
+		return '';
 	}
 
 	/**
