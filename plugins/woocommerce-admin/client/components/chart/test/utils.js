@@ -25,7 +25,38 @@ import {
 	parseDate,
 } from '../utils';
 
-const orderedKeys = [ 'Cap', 'T-Shirt', 'Sunglasses', 'Polo', 'Hoodie' ];
+const orderedKeys = [
+	{
+		key: 'Cap',
+		focus: true,
+		visible: true,
+		total: 34513697,
+	},
+	{
+		key: 'T-Shirt',
+		focus: true,
+		visible: true,
+		total: 14762281,
+	},
+	{
+		key: 'Sunglasses',
+		focus: true,
+		visible: true,
+		total: 12430349,
+	},
+	{
+		key: 'Polo',
+		focus: true,
+		visible: true,
+		total: 8712807,
+	},
+	{
+		key: 'Hoodie',
+		focus: true,
+		visible: true,
+		total: 6968764,
+	},
+];
 const orderedDates = [
 	'2018-05-30',
 	'2018-05-31',
@@ -55,7 +86,7 @@ describe( 'getUniqueKeys', () => {
 	it( 'returns an array of keys excluding date', () => {
 		// sort is a mutating action so we need a copy
 		const testUniqueKeysClone = testUniqueKeys.slice();
-		const sortedAZKeys = orderedKeys.slice();
+		const sortedAZKeys = orderedKeys.map( d => d.key ).slice();
 		expect( testUniqueKeysClone.sort() ).toEqual( sortedAZKeys.sort() );
 	} );
 } );
@@ -70,7 +101,7 @@ describe( 'getLineData', () => {
 	it( 'returns a sorted array of objects with category key', () => {
 		expect( testLineData ).toBeInstanceOf( Array );
 		expect( testLineData ).toHaveLength( 5 );
-		expect( testLineData.map( d => d.key ) ).toEqual( orderedKeys );
+		expect( testLineData.map( d => d.key ) ).toEqual( orderedKeys.map( d => d.key ) );
 	} );
 
 	testLineData.forEach( d => {
@@ -111,9 +142,9 @@ describe( 'getXScale', () => {
 describe( 'getXGroupScale', () => {
 	it( 'properly scale inputs based on the getXScale', () => {
 		const testXGroupScale = getXGroupScale( testOrderedKeys, testXScale );
-		expect( testXGroupScale( orderedKeys[ 0 ] ) ).toEqual( 2 );
-		expect( testXGroupScale( orderedKeys[ 2 ] ) ).toEqual( 6 );
-		expect( testXGroupScale( orderedKeys[ orderedKeys.length - 1 ] ) ).toEqual( 10 );
+		expect( testXGroupScale( orderedKeys[ 0 ].key ) ).toEqual( 2 );
+		expect( testXGroupScale( orderedKeys[ 2 ].key ) ).toEqual( 6 );
+		expect( testXGroupScale( orderedKeys[ orderedKeys.length - 1 ].key ) ).toEqual( 10 );
 	} );
 } );
 
@@ -128,10 +159,10 @@ describe( 'getXLineScale', () => {
 describe( 'getColorScale', () => {
 	it( 'properly scale product keys into a range of colors', () => {
 		const testColorScale = getColorScale( testOrderedKeys );
-		testOrderedKeys.map( d => testColorScale( d ) ); // without this it fails! why? how?
-		expect( testColorScale( orderedKeys[ 0 ] ) ).toEqual( 0 );
-		expect( testColorScale( orderedKeys[ 2 ] ) ).toEqual( 0.5 );
-		expect( testColorScale( orderedKeys[ orderedKeys.length - 1 ] ) ).toEqual( 1 );
+		testOrderedKeys.map( d => testColorScale( d.key ) ); // without this it fails! why? how?
+		expect( testColorScale( orderedKeys[ 0 ].key ) ).toEqual( 0 );
+		expect( testColorScale( orderedKeys[ 2 ].key ) ).toEqual( 0.5 );
+		expect( testColorScale( orderedKeys[ orderedKeys.length - 1 ].key ) ).toEqual( 1 );
 	} );
 } );
 

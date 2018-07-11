@@ -26,6 +26,7 @@ class SegmentedSelection extends Component {
 						const id = uniqueId( `${ value }_` );
 						return (
 							<Fragment key={ value }>
+								{ /* eslint-disable jsx-a11y/label-has-for */ }
 								<input
 									className="woocommerce-segmented-selection__input"
 									type="radio"
@@ -37,6 +38,7 @@ class SegmentedSelection extends Component {
 								<label htmlFor={ id }>
 									<span className="woocommerce-segmented-selection__label">{ label }</span>
 								</label>
+								{ /* eslint-enable jsx-a11y/label-has-for */ }
 							</Fragment>
 						);
 					} ) }

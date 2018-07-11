@@ -46,10 +46,11 @@ export const getOrderedKeys = ( data, uniqueKeys ) =>
 	uniqueKeys
 		.map( key => ( {
 			key,
+			focus: true,
 			total: data.reduce( ( a, c ) => a + c[ key ], 0 ),
+			visible: true,
 		} ) )
-		.sort( ( a, b ) => b.total - a.total )
-		.map( d => d.key );
+		.sort( ( a, b ) => b.total - a.total );
 
 /**
  * Describes `getLineData`
@@ -58,11 +59,15 @@ export const getOrderedKeys = ( data, uniqueKeys ) =>
  * @returns {array} an array objects with a category `key` and an array of `values` with `date` and `value` properties
  */
 export const getLineData = ( data, orderedKeys ) =>
-	orderedKeys.map( key => ( {
-		key,
+	orderedKeys.map( row => ( {
+		key: row.key,
+		focus: row.focus,
+		visible: row.visible,
 		values: data.map( d => ( {
 			date: d.date,
-			value: d[ key ],
+			focus: row.focus,
+			value: d[ row.key ],
+			visible: row.visible,
 		} ) ),
 	} ) );
 
@@ -102,7 +107,7 @@ export const getXScale = ( uniqueDates, width ) =>
  */
 export const getXGroupScale = ( orderedKeys, xScale ) =>
 	d3ScaleBand()
-		.domain( orderedKeys )
+		.domain( orderedKeys.map( d => d.key ) )
 		.rangeRound( [ 0, xScale.bandwidth() ] )
 		.padding( 0.07 );
 
@@ -203,6 +208,7 @@ export const drawAxis = ( node, data, params ) => {
 	for ( let i = 0; i < 4; i++ ) {
 		yGrids.push( i / 3 * params.yMax );
 	}
+
 	node
 		.append( 'g' )
 		.attr( 'class', 'axis' )
@@ -252,14 +258,15 @@ const showTooltip = ( node, params, d ) => {
 	xPosition = xPosition > chartCoords.width - 200 ? xPosition - 200 : xPosition + 20;
 	yPosition = yPosition > chartCoords.height - 150 ? yPosition - 200 : yPosition + 20;
 	const keys = params.orderedKeys.map(
-		( key, i ) => `
+		( row, i ) => `
 		<li>
 			<span class="key-colour" style="background-color:${ d3InterpolateViridis(
 				params.colorScale( i )
 			) }"></span>
-			<span class="key-key">${ key }:</span>
-			<span class="key-value">${ d3Format( ',.0f' )( d[ key ] ) }</span>
-		</li>`
+			<span class="key-key">${ row.key }:</span>
+			<span class="key-value">${ d3Format( ',.0f' )( d[ row.key ] ) }</span>
+		</li>
+	`
 	);
 	node
 		.select( '.tooltip' )
@@ -304,18 +311,14 @@ const handleMouseOutLineChart = ( d, i, nodes, node ) => {
 };
 
 export const drawLines = ( node, data, params ) => {
-	const g = node
-		.select( 'svg' )
-		.select( 'g' )
-		.select( 'g' )
-		.append( 'g' );
-
-	const focus = g
-		.selectAll( '.focus-space' )
+	const focus = node
+		.append( 'g' )
+		.attr( 'class', 'focusspaces' )
+		.selectAll( '.focus' )
 		.data( params.dateSpaces )
 		.enter()
 		.append( 'g' )
-		.attr( 'class', 'focus-space' );
+		.attr( 'class', 'focus' );
 
 	focus
 		.append( 'line' )
@@ -341,7 +344,9 @@ export const drawLines = ( node, data, params ) => {
 		)
 		.on( 'mouseout', ( d, i, nodes ) => handleMouseOutLineChart( d, i, nodes, node ) );
 
-	const series = g
+	const series = node
+		.append( 'g' )
+		.attr( 'class', 'lines' )
 		.selectAll( '.line-g' )
 		.data( params.lineData )
 		.enter()
@@ -355,26 +360,31 @@ export const drawLines = ( node, data, params ) => {
 		.attr( 'stroke-linejoin', 'round' )
 		.attr( 'stroke-linecap', 'round' )
 		.attr( 'stroke', ( d, i ) => d3InterpolateViridis( params.colorScale( i ) ) )
+		.style( 'opacity', d => {
+			const opacity = d.focus ? 1 : 0.1;
+			return d.visible ? opacity : 0;
+		} )
 		.attr( 'd', d => params.line( d.values ) );
 
 	series
 		.selectAll( 'circle' )
-		.data( ( d, i ) => d.values.map( row => ( { ...row, i } ) ) )
+		.data( ( d, i ) => d.values.map( row => ( { ...row, i, visible: d.visible } ) ) )
 		.enter()
 		.append( 'circle' )
 		.attr( 'r', 3.5 )
 		.attr( 'fill', '#fff' )
 		.attr( 'stroke', d => d3InterpolateViridis( params.colorScale( d.i ) ) )
 		.attr( 'stroke-width', 3 )
+		.style( 'opacity', d => {
+			const opacity = d.focus ? 1 : 0.1;
+			return d.visible ? opacity : 0;
+		} )
 		.attr( 'cx', d => params.xLineScale( new Date( d.date ) ) )
 		.attr( 'cy', d => params.yScale( d.value ) );
 };
 
 export const drawBars = ( node, data, params ) => {
 	const barGroup = node
-		.select( 'svg' )
-		.select( 'g' )
-		.select( 'g' )
 		.append( 'g' )
 		.attr( 'class', 'bars' )
 		.selectAll( 'g' )
@@ -395,7 +405,14 @@ export const drawBars = ( node, data, params ) => {
 
 	barGroup
 		.selectAll( '.bar' )
-		.data( d => params.orderedKeys.map( key => ( { key: key, value: d[ key ] } ) ) )
+		.data( d =>
+			params.orderedKeys.map( row => ( {
+				key: row.key,
+				focus: row.focus,
+				value: d[ row.key ],
+				visible: row.visible,
+			} ) )
+		)
 		.enter()
 		.append( 'rect' )
 		.attr( 'class', 'bar' )
@@ -403,7 +420,11 @@ export const drawBars = ( node, data, params ) => {
 		.attr( 'y', d => params.yScale( d.value ) )
 		.attr( 'width', params.xGroupScale.bandwidth() )
 		.attr( 'height', d => params.height - params.yScale( d.value ) )
-		.attr( 'fill', ( d, i ) => d3InterpolateViridis( params.colorScale( i ) ) );
+		.attr( 'fill', ( d, i ) => d3InterpolateViridis( params.colorScale( i ) ) )
+		.style( 'opacity', d => {
+			const opacity = d.focus ? 1 : 0.1;
+			return d.visible ? opacity : 0;
+		} );
 
 	barGroup
 		.append( 'rect' )

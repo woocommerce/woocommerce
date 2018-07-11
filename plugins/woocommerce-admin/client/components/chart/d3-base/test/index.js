@@ -20,16 +20,20 @@ describe( 'D3base', () => {
 	} );
 
 	test( 'should render an svg', () => {
-		const base = mount( <D3Base drawChart={ noop } getParams={ noop } /> );
+		const getParams = () => ( { width: 100, height: 100 } );
+		const base = mount( <D3Base drawChart={ noop } getParams={ getParams } /> );
 		expect( base.render().find( 'svg' ) ).toHaveLength( 1 );
 	} );
 
 	test( 'should render a result of the drawChart prop', () => {
-		const drawChart = node => {
-			const svg = node.select( 'svg' );
+		const drawChart = svg => {
 			return svg.append( 'circle' );
 		};
-		const base = mount( <D3Base drawChart={ drawChart } getParams={ noop } /> );
+		const getParams = () => ( {
+			width: 100,
+			height: 100,
+		} );
+		const base = mount( <D3Base drawChart={ drawChart } getParams={ getParams } /> );
 		expect( base.render().find( 'circle' ) ).toHaveLength( 1 );
 	} );
 
@@ -37,8 +41,7 @@ describe( 'D3base', () => {
 		const getParams = () => ( {
 			tagName: 'circle',
 		} );
-		const drawChart = ( node, params ) => {
-			const svg = node.select( 'svg' );
+		const drawChart = ( svg, params ) => {
 			return svg.append( params.tagName );
 		};
 		const base = mount( <D3Base drawChart={ drawChart } getParams={ getParams } /> );

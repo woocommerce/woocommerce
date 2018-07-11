@@ -10,7 +10,7 @@ import { Component, Fragment } from '@wordpress/element';
  */
 import Header from 'layout/header';
 import StorePerformance from './store-performance';
-import Charts from './charts';
+import Chart from 'components/chart';
 
 export default class Dashboard extends Component {
 	render() {
@@ -18,7 +18,7 @@ export default class Dashboard extends Component {
 			<Fragment>
 				<Header sections={ [ __( 'Dashboard', 'wc-admin' ) ] } />
 				<StorePerformance />
-				<Charts />
+				<Chart />
 			</Fragment>
 		);
 	}
