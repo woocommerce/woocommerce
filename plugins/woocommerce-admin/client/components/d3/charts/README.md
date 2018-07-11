@@ -1,9 +1,23 @@
-# D3 Chart Component
+D3 Chart Component
+===
 
-A simple D3 line and bar chart component for timeseries data in React
+A simple D3 line and bar chart component for timeseries data in React.
 
-## Expected Data Format
-This component accepts timeseries `data` prop in the following format:
+## Usage
+
+```jsx
+<D3Chart
+	className="woocommerce-dashboard__*"
+	data={ timeseries }
+	height={ 200 }
+	margin={ { bottom: 30, left: 40, right: 0, top: 20 } }
+	type={ 'bar' }
+	width={ 600 }
+/>
+```
+
+### Expected Data Format
+This component accepts timeseries `data` prop in the following format (with dates following the [ISO 8601 format](https://en.wikipedia.org/wiki/ISO_8601)):
 ```
 [
 	{
@@ -21,30 +35,20 @@ For example:
 	{
 		date: '2018-06-25',
 		category1: 1234.56,
-		category2: 9876.54,
+		category2: 9876,
 		...
 	},
 	...
 ]
 ```
 
-## Sizing
-The chart component will scale into the containing `div`; however, it is possible to additionally pass in a width and height, which will scale the viewport of the chart.
+### Props
+Required props are marked with `*`.
 
-The component props can be passed in as (default values shown):
-```
-...
-height={ 200 }
-margin={ { bottom: 30, left: 40, right: 0, top: 20 } }
-width={ 600 }
-...
-```
-
-## Type
-Currently, the component only accepts 2 different types, namely `line` or `bar`. A bar chart with multiple categories will display the categories in bar groups per date. The line chart will display multiple lines, one for each category.
-
-## Axis Formats - tbc
-
-## Tooltip - tbc
-
-## Legend - tbc
+Name | Type | Default | Description
+--- | --- | --- | ---
+`data`* | `array` | none | An array of data as specified above
+`height` | `number` | `200` | Relative viewpoirt height of the `svg`
+`margin` | `object` | `{ bottom: 30, left: 40, right: 0, top: 20 }` | Margins for axis and chart padding
+`type`* | `string` | `line` | Chart type of either `line` or `bar`
+`width` | `number` | `600` | Relative viewport width of the `svg`
