@@ -40,20 +40,6 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 	protected $post_type = 'product_variation';
 
 	/**
-	 * Name of parent product table in SQL query.
-	 *
-	 * @var string
-	 */
-	protected $parent_product_table_name = 'p_wc_variation_parent';
-
-	/**
-	 * Extra clauses to add to WP_Query.
-	 *
-	 * @var array
-	 */
-	protected $clauses = array();
-
-	/**
 	 * Initialize product actions (parent).
 	 */
 	public function __construct() {
