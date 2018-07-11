@@ -176,25 +176,25 @@ class WC_Privacy_Exporters {
 		}
 
 		$props_to_export = apply_filters( 'woocommerce_privacy_export_customer_personal_data_props', array(
-			'billing_first_name'  => __( 'Billing First Name', 'woocommerce' ),
-			'billing_last_name'   => __( 'Billing Last Name', 'woocommerce' ),
-			'billing_company'     => __( 'Billing Company', 'woocommerce' ),
-			'billing_address_1'   => __( 'Billing Address 1', 'woocommerce' ),
+			'billing_first_name'  => __( 'Billing First name', 'woocommerce' ),
+			'billing_last_name'   => __( 'Billing Last name', 'woocommerce' ),
+			'billing_company'     => __( 'Billing Company name', 'woocommerce' ),
+			'billing_address_1'   => __( 'Billing Street address', 'woocommerce' ),
 			'billing_address_2'   => __( 'Billing Address 2', 'woocommerce' ),
-			'billing_city'        => __( 'Billing City', 'woocommerce' ),
-			'billing_postcode'    => __( 'Billing Postal/Zip Code', 'woocommerce' ),
-			'billing_state'       => __( 'Billing State', 'woocommerce' ),
+			'billing_city'        => __( 'Billing Town / City', 'woocommerce' ),
+			'billing_postcode'    => __( 'Billing Postcode / ZIP', 'woocommerce' ),
+			'billing_state'       => __( 'Billing State / County', 'woocommerce' ),
 			'billing_country'     => __( 'Billing Country', 'woocommerce' ),
-			'billing_phone'       => __( 'Phone Number', 'woocommerce' ),
-			'billing_email'       => __( 'Email Address', 'woocommerce' ),
-			'shipping_first_name' => __( 'Shipping First Name', 'woocommerce' ),
-			'shipping_last_name'  => __( 'Shipping Last Name', 'woocommerce' ),
-			'shipping_company'    => __( 'Shipping Company', 'woocommerce' ),
-			'shipping_address_1'  => __( 'Shipping Address 1', 'woocommerce' ),
+			'billing_phone'       => __( 'Billing Phone', 'woocommerce' ),
+			'billing_email'       => __( 'Billing Email address', 'woocommerce' ),
+			'shipping_first_name' => __( 'Shipping First name', 'woocommerce' ),
+			'shipping_last_name'  => __( 'Shipping Last name', 'woocommerce' ),
+			'shipping_company'    => __( 'Shipping Company name', 'woocommerce' ),
+			'shipping_address_1'  => __( 'Shipping Street address', 'woocommerce' ),
 			'shipping_address_2'  => __( 'Shipping Address 2', 'woocommerce' ),
-			'shipping_city'       => __( 'Shipping City', 'woocommerce' ),
-			'shipping_postcode'   => __( 'Shipping Postal/Zip Code', 'woocommerce' ),
-			'shipping_state'      => __( 'Shipping State', 'woocommerce' ),
+			'shipping_city'       => __( 'Shipping Town / City', 'woocommerce' ),
+			'shipping_postcode'   => __( 'Shipping Postcode / ZIP', 'woocommerce' ),
+			'shipping_state'      => __( 'Shipping State / County', 'woocommerce' ),
 			'shipping_country'    => __( 'Shipping Country', 'woocommerce' ),
 		), $customer );
 
@@ -245,8 +245,8 @@ class WC_Privacy_Exporters {
 			'customer_user_agent'        => __( 'Browser User Agent', 'woocommerce' ),
 			'formatted_billing_address'  => __( 'Billing Address', 'woocommerce' ),
 			'formatted_shipping_address' => __( 'Shipping Address', 'woocommerce' ),
-			'billing_phone'              => __( 'Phone Number', 'woocommerce' ),
-			'billing_email'              => __( 'Email Address', 'woocommerce' ),
+			'billing_phone'              => __( 'Billing Phone', 'woocommerce' ),
+			'billing_email'              => __( 'Billing Email address', 'woocommerce' ),
 		), $order );
 
 		foreach ( $props_to_export as $prop => $name ) {
