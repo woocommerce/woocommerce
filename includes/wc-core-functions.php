@@ -1064,7 +1064,7 @@ function wc_get_customer_default_location() {
 		case 'geolocation_ajax':
 		case 'geolocation':
 			// Exclude common bots from geolocation by user agent.
-			$ua = wc_get_user_agent();
+			$ua = strtolower( wc_get_user_agent() );
 
 			if ( ! strstr( $ua, 'bot' ) && ! strstr( $ua, 'spider' ) && ! strstr( $ua, 'crawl' ) ) {
 				$location = WC_Geolocation::geolocate_ip( '', true, false );
@@ -1093,7 +1093,7 @@ function wc_get_customer_default_location() {
  * @return string
  */
 function wc_get_user_agent() {
-	return isset( $_SERVER['HTTP_USER_AGENT'] ) ? strtolower( wc_clean( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) ) : ''; // @codingStandardsIgnoreLine
+	return isset( $_SERVER['HTTP_USER_AGENT'] ) ? wc_clean( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : ''; // @codingStandardsIgnoreLine
 }
 
 // This function can be removed when WP 3.9.2 or greater is required.
