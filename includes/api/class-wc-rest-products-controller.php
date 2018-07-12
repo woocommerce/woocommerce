@@ -608,7 +608,6 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 			'manage_stock'          => $product->managing_stock(),
 			'stock_quantity'        => $product->get_stock_quantity( $context ),
 			'in_stock'              => $product->is_in_stock(),
-			'low_stock_amount'      => $product->get_low_stock_amount( $context ),
 			'backorders'            => $product->get_backorders( $context ),
 			'backorders_allowed'    => $product->backorders_allowed(),
 			'backordered'           => $product->is_on_backorder(),
@@ -902,11 +901,6 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 				$product->set_manage_stock( $request['manage_stock'] );
 			}
 
-			// Low stock amount.
-			if ( isset( $request['low_stock_amount'] ) ) {
-				$product->set_low_stock_amount( $request['low_stock_amount'] );
-			}
-
 			// Backorders.
 			if ( isset( $request['backorders'] ) ) {
 				$product->set_backorders( $request['backorders'] );
@@ -917,13 +911,11 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 				$product->set_backorders( 'no' );
 				$product->set_stock_quantity( '' );
 				$product->set_stock_status( $stock_status );
-				$product->set_low_stock_amount( '' );
 			} elseif ( $product->is_type( 'external' ) ) {
 				$product->set_manage_stock( 'no' );
 				$product->set_backorders( 'no' );
 				$product->set_stock_quantity( '' );
 				$product->set_stock_status( 'instock' );
-				$product->set_low_stock_amount( '' );
 			} elseif ( $product->get_manage_stock() ) {
 				// Stock status is always determined by children so sync later.
 				if ( ! $product->is_type( 'variable' ) ) {
@@ -1677,12 +1669,6 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 					'description' => __( 'Controls whether or not the product is listed as "in stock" or "out of stock" on the frontend.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'default'     => true,
-					'context'     => array( 'view', 'edit' ),
-				),
-				'low_stock_amount'      => array(
-					'description' => __( 'If managing stock, this controls when low stock notifications are sent.', 'woocommerce' ),
-					'type'        => 'integer',
-					'default'     => '',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'backorders'            => array(
