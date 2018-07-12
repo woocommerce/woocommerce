@@ -517,6 +517,7 @@ describe( 'loadLocaleData', () => {
 			formats: { time: 'g:i a', date: 'F j, Y', datetime: 'j F Y G \\h i \\m\\i\\n' },
 			timezone: { offset: '0', string: '' },
 		} );
+		wcSettings.locale = 'fr_FR';
 	}
 
 	it( 'should leave default momentjs data unchanged for english languages', () => {
