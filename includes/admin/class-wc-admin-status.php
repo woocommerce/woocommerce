@@ -162,7 +162,7 @@ class WC_Admin_Status {
 	 * @return string
 	 */
 	public static function get_log_file_handle( $filename ) {
-		return substr( $filename, 0, strlen( $filename ) > 37 ? strlen( $filename ) - 37 : strlen( $filename ) - 4 );
+		return substr( $filename, 0, strlen( $filename ) > 48 ? strlen( $filename ) - 48 : strlen( $filename ) - 4 );
 	}
 
 	/**

@@ -83,19 +83,26 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	public function __construct( $data = '' ) {
 		parent::__construct( $data );
 
+		// If we already have a coupon object, read it again.
 		if ( $data instanceof WC_Coupon ) {
 			$this->set_id( absint( $data->get_id() ) );
+			$this->read_object_from_database();
+			return;
 		}
 
+		// This filter allows custom coupon objects to be created on the fly.
 		$coupon = apply_filters( 'woocommerce_get_shop_coupon_data', false, $data );
+
 		if ( $coupon ) {
 			$this->read_manual_coupon( $data, $coupon );
 			return;
-		} elseif ( is_int( $data ) && 'shop_coupon' === get_post_type( $data ) ) {
+		}
+
+		// Try to load coupon using ID or code.
+		if ( is_int( $data ) && 'shop_coupon' === get_post_type( $data ) ) {
 			$this->set_id( $data );
 		} elseif ( ! empty( $data ) ) {
 			$id = wc_get_coupon_id_by_code( $data );
-
 			// Need to support numeric strings for backwards compatibility.
 			if ( ! $id && 'shop_coupon' === get_post_type( $data ) ) {
 				$this->set_id( $data );
@@ -107,12 +114,21 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			$this->set_object_read( true );
 		}
 
+		$this->read_object_from_database();
+	}
+
+	/**
+	 * If the object has an ID, read using the data store.
+	 *
+	 * @since 3.4.1
+	 */
+	protected function read_object_from_database() {
 		$this->data_store = WC_Data_Store::load( 'coupon' );
+
 		if ( $this->get_id() > 0 ) {
 			$this->data_store->read( $this );
 		}
 	}
-
 	/**
 	 * Checks the coupon type.
 	 *

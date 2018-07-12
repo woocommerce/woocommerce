@@ -77,8 +77,11 @@ jQuery( function( $ ) {
 				$payment_methods.eq(0).prop( 'checked', true );
 			}
 
-			// Hide open descriptions.
-			$( 'div.payment_box' ).filter( ':visible' ).slideUp( 0 );
+			if ( $payment_methods.length > 1 ) {
+
+				// Hide open descriptions.
+				$( 'div.payment_box' ).filter( ':visible' ).slideUp( 0 );
+			}
 
 			// Trigger click event for selected method
 			$payment_methods.filter( ':checked' ).eq(0).trigger( 'click' );
@@ -86,7 +89,9 @@ jQuery( function( $ ) {
 		get_payment_method: function() {
 			return wc_checkout_form.$checkout_form.find( 'input[name="payment_method"]:checked' ).val();
 		},
-		payment_method_selected: function() {
+		payment_method_selected: function( e ) {
+			e.stopPropagation();
+
 			if ( $( '.payment_methods input.input-radio' ).length > 1 ) {
 				var target_payment_box = $( 'div.payment_box.' + $( this ).attr( 'ID' ) ),
 					is_checked         = $( this ).is( ':checked' );
@@ -126,7 +131,6 @@ jQuery( function( $ ) {
 			}
 		},
 		init_checkout: function() {
-			$( '#billing_country, #shipping_country, .country_to_state' ).change();
 			$( document.body ).trigger( 'update_checkout' );
 		},
 		maybe_input_changed: function( e ) {

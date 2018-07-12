@@ -45,9 +45,8 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 		if ( ! empty( $_POST ) && $this->validate_ipn() ) { // WPCS: CSRF ok.
 			$posted = wp_unslash( $_POST ); // WPCS: CSRF ok, input var ok.
 
-			// @codingStandardsIgnoreStart
+			// phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 			do_action( 'valid-paypal-standard-ipn-request', $posted );
-			// @codingStandardsIgnoreEnd
 			exit;
 		}
 
@@ -292,7 +291,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	 */
 	protected function payment_status_refunded( $order, $posted ) {
 		// Only handle full refunds, not partial.
-		if ( $order->get_total() === wc_format_decimal( $posted['mc_gross'] * -1 ) ) {
+		if ( $order->get_total() === wc_format_decimal( $posted['mc_gross'] * -1, wc_get_price_decimals() ) ) {
 
 			/* translators: %s: payment status. */
 			$order->update_status( 'refunded', sprintf( __( 'Payment %s via IPN.', 'woocommerce' ), strtolower( $posted['payment_status'] ) ) );

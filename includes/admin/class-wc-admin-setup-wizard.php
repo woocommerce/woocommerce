@@ -509,18 +509,19 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function wc_setup_store_setup_save() {
 		check_admin_referer( 'wc-setup' );
-		// @codingStandardsIgnoreStart
+
+		// phpcs:disable WordPress.VIP.SuperGlobalInputUsage.AccessDetected, WordPress.VIP.ValidatedSanitizedInput.InputNotValidated, WordPress.VIP.ValidatedSanitizedInput.MissingUnslash
 		$address        = sanitize_text_field( $_POST['store_address'] );
 		$address_2      = sanitize_text_field( $_POST['store_address_2'] );
 		$city           = sanitize_text_field( $_POST['store_city'] );
 		$country        = sanitize_text_field( $_POST['store_country'] );
-		$state          = sanitize_text_field( $_POST['store_state'] );
+		$state          = isset( $_POST['store_state'] ) ? sanitize_text_field( $_POST['store_state'] ) : false;
 		$postcode       = sanitize_text_field( $_POST['store_postcode'] );
 		$currency_code  = sanitize_text_field( $_POST['currency_code'] );
 		$product_type   = sanitize_text_field( $_POST['product_type'] );
 		$sell_in_person = isset( $_POST['sell_in_person'] ) && ( 'yes' === sanitize_text_field( $_POST['sell_in_person'] ) );
 		$tracking       = isset( $_POST['wc_tracker_checkbox'] ) && ( 'yes' === sanitize_text_field( $_POST['wc_tracker_checkbox'] ) );
-		// @codingStandardsIgnoreEnd
+		// phpcs:enable
 
 		if ( ! $state ) {
 			$state = '*';
@@ -803,7 +804,7 @@ class WC_Admin_Setup_Wizard {
 					id="<?php echo esc_attr( "{$input_prefix}[method]" ); ?>"
 					name="<?php echo esc_attr( "{$input_prefix}[method]" ); ?>"
 					class="method wc-enhanced-select"
-					data-plugins="<?php echo esc_attr( json_encode( $this->get_wcs_requisite_plugins() ) ); ?>"
+					data-plugins="<?php echo esc_attr( wp_json_encode( $this->get_wcs_requisite_plugins() ) ); ?>"
 				>
 				<?php foreach ( $shipping_methods as $method_id => $method ) : ?>
 					<option value="<?php echo esc_attr( $method_id ); ?>" <?php selected( $selected, $method_id ); ?>><?php echo esc_html( $method['name'] ); ?></option>
@@ -1116,7 +1117,46 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Is Klarna Checkout country supported
+	 * Is PayPal currency supported.
+	 *
+	 * @param string $currency Currency code.
+	 * @return boolean
+	 */
+	protected function is_paypal_supported_currency( $currency ) {
+		$supported_currencies = array(
+			'AUD',
+			'BRL',
+			'CAD',
+			'MXN',
+			'NZD',
+			'HKD',
+			'SGD',
+			'USD',
+			'EUR',
+			'JPY',
+			'TRY',
+			'NOK',
+			'CZK',
+			'DKK',
+			'HUF',
+			'ILS',
+			'MYR',
+			'PHP',
+			'PLN',
+			'SEK',
+			'CHF',
+			'TWD',
+			'THB',
+			'GBP',
+			'RMB',
+			'RUB',
+			'INR',
+		);
+		return in_array( $currency, $supported_currencies, true );
+	}
+
+	/**
+	 * Is Klarna Checkout country supported.
 	 *
 	 * @param string $country_code Country code.
 	 */
@@ -1131,7 +1171,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Is Klarna Payments country supported
+	 * Is Klarna Payments country supported.
 	 *
 	 * @param string $country_code Country code.
 	 */
@@ -1198,10 +1238,10 @@ class WC_Admin_Setup_Wizard {
 			__( 'Accept debit and credit cards in 135+ currencies, methods such as Alipay, and one-touch checkout with Apple Pay. <a href="%s" target="_blank">Learn more</a>.', 'woocommerce' ),
 			'https://woocommerce.com/products/stripe/'
 		) . '</p>';
-		$paypal_ec_description = '<p>' . sprintf(
+		$paypal_checkout_description = '<p>' . sprintf(
 			/* translators: %s: URL */
 			__( 'Safe and secure payments using credit cards or your customer\'s PayPal account. <a href="%s" target="_blank">Learn more</a>.', 'woocommerce' ),
-			'https://woocommerce.com/products/woocommerce-gateway-paypal-express-checkout/'
+			'https://woocommerce.com/products/woocommerce-gateway-paypal-checkout/'
 		) . '</p>';
 		$klarna_checkout_description = '<p>' . sprintf(
 			/* translators: %s: URL */
@@ -1246,9 +1286,9 @@ class WC_Admin_Setup_Wizard {
 				),
 			),
 			'ppec_paypal'     => array(
-				'name'        => __( 'WooCommerce PayPal Express Checkout Gateway', 'woocommerce' ),
+				'name'        => __( 'WooCommerce PayPal Checkout Gateway', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/paypal.png',
-				'description' => $paypal_ec_description,
+				'description' => $paypal_checkout_description,
 				'enabled'     => true,
 				'class'       => 'checked paypal-logo',
 				'repo-slug'   => 'woocommerce-gateway-paypal-express-checkout',
@@ -1336,15 +1376,19 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function get_wizard_in_cart_payment_gateways() {
 		$gateways = $this->get_wizard_available_in_cart_payment_gateways();
+		$country  = WC()->countries->get_base_country();
+		$currency = get_woocommerce_currency();
 
-		if ( ! current_user_can( 'install_plugins' ) ) {
-			return array( 'paypal' => $gateways['paypal'] );
-		}
-
-		$country     = WC()->countries->get_base_country();
 		$can_stripe  = $this->is_stripe_supported_country( $country );
 		$can_eway    = $this->is_eway_payments_supported_country( $country );
 		$can_payfast = ( 'ZA' === $country ); // South Africa.
+		$can_paypal  = $this->is_paypal_supported_currency( $currency );
+
+		if ( ! current_user_can( 'install_plugins' ) ) {
+			return $can_paypal ? array( 'paypal' => $gateways['paypal'] ) : array();
+		}
+
+		$spotlight = '';
 
 		if ( $this->is_klarna_checkout_supported_country( $country ) ) {
 			$spotlight = 'klarna_checkout';
@@ -1354,11 +1398,14 @@ class WC_Admin_Setup_Wizard {
 			$spotlight = 'square';
 		}
 
-		if ( isset( $spotlight ) ) {
+		if ( $spotlight ) {
 			$offered_gateways = array(
-				$spotlight    => $gateways[ $spotlight ],
-				'ppec_paypal' => $gateways['ppec_paypal'],
+				$spotlight => $gateways[ $spotlight ],
 			);
+
+			if ( $can_paypal ) {
+				$offered_gateways += array( 'ppec_paypal' => $gateways['ppec_paypal'] );
+			}
 
 			if ( $can_stripe ) {
 				$offered_gateways += array( 'stripe' => $gateways['stripe'] );
@@ -1383,7 +1430,9 @@ class WC_Admin_Setup_Wizard {
 			$offered_gateways              += array( 'stripe' => $gateways['stripe'] );
 		}
 
-		$offered_gateways += array( 'ppec_paypal' => $gateways['ppec_paypal'] );
+		if ( $can_paypal ) {
+			$offered_gateways += array( 'ppec_paypal' => $gateways['ppec_paypal'] );
+		}
 
 		if ( $can_eway ) {
 			$offered_gateways += array( 'eway' => $gateways['eway'] );
@@ -1450,7 +1499,7 @@ class WC_Admin_Setup_Wizard {
 
 		$plugins = null;
 		if ( isset( $item_info['repo-slug'] ) ) {
-			$plugin = array(
+			$plugin  = array(
 				'slug' => $item_info['repo-slug'],
 				'name' => $item_info['name'],
 			);
@@ -1503,7 +1552,7 @@ class WC_Admin_Setup_Wizard {
 									placeholder="<?php echo esc_attr( $setting['placeholder'] ); ?>"
 									<?php echo ( $setting['required'] ) ? 'required' : ''; ?>
 									<?php echo $is_checkbox ? checked( isset( $checked ) && $checked, true, false ) : ''; ?>
-									data-plugins="<?php echo esc_attr( json_encode( isset( $setting['plugins'] ) ? $setting['plugins'] : null ) ); ?>"
+									data-plugins="<?php echo esc_attr( wp_json_encode( isset( $setting['plugins'] ) ? $setting['plugins'] : null ) ); ?>"
 								/>
 								<?php if ( ! empty( $setting['description'] ) ) : ?>
 									<span class="wc-wizard-service-settings-description"><?php echo esc_html( $setting['description'] ); ?></span>
@@ -1520,7 +1569,7 @@ class WC_Admin_Setup_Wizard {
 						type="checkbox"
 						name="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>-enabled"
 						value="yes" <?php checked( $should_enable_toggle ); ?>
-						data-plugins="<?php echo esc_attr( json_encode( $plugins ) ); ?>"
+						data-plugins="<?php echo esc_attr( wp_json_encode( $plugins ) ); ?>"
 					/>
 					<label for="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>">
 				</span>
@@ -1689,7 +1738,7 @@ class WC_Admin_Setup_Wizard {
 				name="<?php echo esc_attr( 'setup_' . $type ); ?>"
 				value="yes"
 				checked
-				data-plugins="<?php echo esc_attr( json_encode( isset( $item_info['plugins'] ) ? $item_info['plugins'] : null ) ); ?>"
+				data-plugins="<?php echo esc_attr( wp_json_encode( isset( $item_info['plugins'] ) ? $item_info['plugins'] : null ) ); ?>"
 			/>
 			<label for="<?php echo esc_attr( 'wc_recommended_' . $type ); ?>">
 				<img
@@ -2106,7 +2155,7 @@ class WC_Admin_Setup_Wizard {
 
 		<div class="woocommerce-message woocommerce-newsletter">
 			<p><?php esc_html_e( "We're here for you — get tips, product updates, and inspiration straight to your mailbox.", 'woocommerce' ); ?></p>
-			<form action="//woocommerce.us8.list-manage.com/subscribe/post?u=2c1434dc56f9506bf3c3ecd21&amp;id=13860df971" method="post" target="_blank" novalidate>
+			<form action="//woocommerce.us8.list-manage.com/subscribe/post?u=2c1434dc56f9506bf3c3ecd21&amp;id=13860df971&amp;SIGNUPPAGE=plugin" method="post" target="_blank" novalidate>
 				<div class="newsletter-form-container">
 					<input
 						class="newsletter-form-email"
