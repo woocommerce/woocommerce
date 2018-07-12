@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { Component, Fragment } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Dropdown } from '@wordpress/components';
 import { stringify as stringifyQueryObject } from 'qs';
@@ -76,10 +76,9 @@ class DatePicker extends Component {
 	render() {
 		const { period, compare, after, before } = this.state;
 		return (
-			<Fragment>
+			<div className="woocommerce-date-picker">
 				<p>{ __( 'Date Range', 'wc-admin' ) }:</p>
 				<Dropdown
-					className="woocommerce-date-picker"
 					contentClassName="woocommerce-date-picker__content"
 					position="bottom"
 					expandOnMobile
@@ -103,7 +102,7 @@ class DatePicker extends Component {
 						/>
 					) }
 				/>
-			</Fragment>
+			</div>
 		);
 	}
 }

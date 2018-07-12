@@ -1,0 +1,17 @@
+/** @format */
+
+.woocommerce-products__pickers {
+	display: flex;
+
+	> div {
+		margin-right: 24px;
+	}
+
+	@include breakpoint( '<1100px' ) {
+		flex-direction: column;
+
+		> div {
+			margin-right: 0;
+		}
+	}
+}

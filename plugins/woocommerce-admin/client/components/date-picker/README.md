@@ -1,4 +1,4 @@
-Date Picker (Work in Progress)
+Date Picker
 ===
 
 Select a range of dates or single dates

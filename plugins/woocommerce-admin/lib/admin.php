@@ -74,6 +74,15 @@ function wc_admin_register_pages(){
 		'wc-admin#/analytics/revenue',
 		'wc_admin_page'
 	);
+
+	add_submenu_page(
+		'wc-admin#/analytics',
+		__( 'Products', 'wc-admin' ),
+		__( 'Products', 'wc-admin' ),
+		'manage_options',
+		'wc-admin#/analytics/products',
+		'wc_admin_page'
+	);
 }
 add_action( 'admin_menu', 'wc_admin_register_pages' );
 
