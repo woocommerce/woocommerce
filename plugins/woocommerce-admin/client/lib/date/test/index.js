@@ -527,7 +527,7 @@ describe( 'loadLocaleData', () => {
 	it( "should load french data on user locale 'fr-FR'", () => {
 		setToFrancais();
 		loadLocaleData();
-		expect( moment.months()[ 0 ] ).toBe( 'janvier' );
+		expect( moment.localeData()._months[ 0 ] ).toBe( 'janvier' );
 	} );
 
 	it( "should load translated longDateFormats on user locale 'fr-FR'", () => {
