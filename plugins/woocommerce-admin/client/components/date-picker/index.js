@@ -6,7 +6,6 @@ import { Component, Fragment } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Dropdown } from '@wordpress/components';
 import { stringify as stringifyQueryObject } from 'qs';
-import moment from 'moment';
 import PropTypes from 'prop-types';
 
 /**
@@ -15,12 +14,12 @@ import PropTypes from 'prop-types';
 import './style.scss';
 import DropdownButton from 'components/dropdown-button';
 import DatePickerContent from './content';
-import { getCurrentDates, isoDateFormat } from 'lib/date';
+import { getCurrentDates, getDateParamsFromQuery, isoDateFormat } from 'lib/date';
 
 class DatePicker extends Component {
 	constructor( props ) {
 		super( props );
-		this.state = this.addQueryDefaults( props.query );
+		this.state = getDateParamsFromQuery( props.query );
 		this.select = this.select.bind( this );
 		this.getUpdatePath = this.getUpdatePath.bind( this );
 		this.isValidSelection = this.isValidSelection.bind( this );
@@ -28,16 +27,7 @@ class DatePicker extends Component {
 
 	// @TODO change this to `getDerivedStateFromProps` in React 16.4
 	UNSAFE_componentWillReceiveProps( nextProps ) {
-		this.setState( this.addQueryDefaults( nextProps.query ) );
-	}
-
-	addQueryDefaults( { period, compare, after, before } ) {
-		return {
-			period: period || 'today',
-			compare: compare || 'previous_period',
-			after: after ? moment( after ) : null,
-			before: before ? moment( before ) : null,
-		};
+		this.setState( getDateParamsFromQuery( nextProps.query ) );
 	}
 
 	select( update ) {
@@ -68,8 +58,7 @@ class DatePicker extends Component {
 	}
 
 	getButtonLabel() {
-		const queryWithDefaults = this.addQueryDefaults( this.props.query );
-		const { primary, secondary } = getCurrentDates( queryWithDefaults );
+		const { primary, secondary } = getCurrentDates( this.props.query );
 		return [
 			`${ primary.label } (${ primary.range })`,
 			`${ __( 'vs.', 'wc-admin' ) } ${ secondary.label } (${ secondary.range })`,

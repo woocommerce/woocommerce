@@ -23,6 +23,16 @@ import { compareValues } from 'components/date-picker/compare-periods';
  * @property {moment.Moment} before - End of the date range.
  */
 
+/**
+ * DateParams Object
+ *
+ * @typedef {Object} dateParams - date parameters derived from query parameters.
+ * @property {string} period - period value, ie `last_week`
+ * @property {string} compare - compare valuer, ie previous_year
+ * @param {moment.Moment|null} after - If the period supplied is "custom", this is the after date
+ * @param {moment.Moment|null} before - If the period supplied is "custom", this is the before date
+ */
+
 export const isoDateFormat = 'YYYY-MM-DD';
 
 /**
@@ -208,15 +218,35 @@ function getDateValue( period, compare, after, before ) {
 }
 
 /**
+ * Add default date-related parameters to a query object
+ *
+ * @param {string} [period] - period value, ie `last_week`
+ * @param {string} [compare] - compare valuer, ie previous_year
+ * @param {string} [after] - date in iso date format, ie 2018-07-03
+ * @param {string} [before] - date in iso date format, ie 2018-07-03
+ * @return {DateParams} - date parameters derived from query parameters with added defaults
+ */
+export const getDateParamsFromQuery = ( { period, compare, after, before } ) => {
+	return {
+		period: period || 'today',
+		compare: compare || 'previous_period',
+		after: after ? moment( after ) : null,
+		before: before ? moment( before ) : null,
+	};
+};
+
+/**
  * Get Date Value Objects for a primary and secondary date range
  *
- * @param {string} period - Indicates period, 'last_week', 'quarter', or 'custom'
- * @param {string} compare - Indicates the period to compare against, 'previous_period', previous_year'
- * @param {moment.Moment} [after] - If the period supplied is "custom", this is the after date
- * @param {moment.Moment} [before] - If the period supplied is "custom", this is the before date
+ * @param {Object} query - date parameters derived from query parameters
+ * @property {string} [period] - period value, ie `last_week`
+ * @property {string} [compare] - compare valuer, ie previous_year
+ * @property {string} [after] - date in iso date format, ie 2018-07-03
+ * @property {string} [before] - date in iso date format, ie 2018-07-03
  * @return {{primary: DateValue, secondary: DateValue}} - Primary and secondary DateValue objects
  */
-export const getCurrentDates = ( { period, compare, after, before } ) => {
+export const getCurrentDates = query => {
+	const { period, compare, after, before } = getDateParamsFromQuery( query );
 	const { primaryStart, primaryEnd, secondaryStart, secondaryEnd } = getDateValue(
 		period,
 		compare,
@@ -240,6 +270,10 @@ export const getCurrentDates = ( { period, compare, after, before } ) => {
 	};
 };
 
+/**
+ * Gutenberg's moment instance is loaded with i18n values. If the locale isn't english
+ * we can use that data and enhance it with additional translations
+ */
 export function loadLocaleData() {
 	const { date } = wcSettings;
 	const settings = getSettings();
