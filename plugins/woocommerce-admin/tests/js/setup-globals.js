@@ -1,5 +1,10 @@
 /** @format */
 
+/**
+ * External dependencies
+ */
+import { setLocaleData } from '@wordpress/i18n';
+
 // Set up `wp.*` aliases.  Doing this because any tests importing wp stuff will
 // likely run into this.
 global.wp = {
@@ -45,3 +50,5 @@ global.wcSettings = {
 Object.defineProperty( global.wp, 'date', {
 	get: () => require( 'gutenberg/packages/date' ),
 } );
+
+setLocaleData( { '': { domain: 'wc-admin', lang: 'en_US' } }, 'wc-admin' );
