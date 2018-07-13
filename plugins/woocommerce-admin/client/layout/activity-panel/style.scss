@@ -167,6 +167,9 @@
 
 @mixin activity-panel-slide {
 	transition: width 300ms cubic-bezier(0.42, 0, 0.58, 1);
+	@media screen and (prefers-reduced-motion: reduce) {
+		transition: none;
+	}
 }
 
 .woocommerce-layout__activity-panel-wrapper {
@@ -202,5 +205,9 @@
 	.woocommerce-layout__activity-panel-content {
 		animation: tabSwitch;
 		animation-duration: 300ms;
+
+		@media screen and (prefers-reduced-motion: reduce) {
+			animation: none;
+		}
 	}
 }

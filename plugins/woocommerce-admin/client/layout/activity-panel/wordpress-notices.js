@@ -193,6 +193,8 @@ class WordPressNotices extends Component {
 				className={ className }
 				onClick={ partial( togglePanel, 'wpnotices' ) }
 				icon={ <Gridicon icon="my-sites" /> }
+				role="tab"
+				tabIndex={ showNotices ? null : -1 }
 			>
 				{ __( 'Notices', 'wc-admin' ) }
 			</IconButton>

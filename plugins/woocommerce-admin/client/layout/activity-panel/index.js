@@ -7,8 +7,8 @@ import classnames from 'classnames';
 import clickOutside from 'react-click-outside';
 import { Component } from '@wordpress/element';
 import Gridicon from 'gridicons';
-import { IconButton } from '@wordpress/components';
-import { partial, uniqueId } from 'lodash';
+import { IconButton, NavigableMenu } from '@wordpress/components';
+import { partial, uniqueId, find } from 'lodash';
 
 /**
  * Internal dependencies
@@ -131,14 +131,18 @@ class ActivityPanel extends Component {
 			'is-open': isPanelOpen,
 		} );
 
+		const tab = find( this.getTabs(), { name: currentTab } );
+		if ( ! tab ) {
+			return null;
+		}
+
 		return (
-			<div className={ classNames }>
+			<div className={ classNames } tabIndex={ 0 } role="tabpanel" aria-label={ tab.title }>
 				{ ( isPanelOpen && (
 					<div
 						className="woocommerce-layout__activity-panel-content"
 						key={ 'activity-panel-' + currentTab }
 						id={ 'activity-panel-' + currentTab }
-						role="tabpanel"
 					>
 						{ this.getPanelContent( currentTab ) }
 					</div>
@@ -148,20 +152,33 @@ class ActivityPanel extends Component {
 		);
 	}
 
-	renderTab( tab ) {
-		const { currentTab } = this.state;
+	renderTab( tab, i ) {
+		const { currentTab, isPanelOpen } = this.state;
 		const className = classnames( 'woocommerce-layout__activity-panel-tab', {
 			'is-active': tab.name === currentTab,
 			'has-unread': tab.unread,
 		} );
 
+		const selected = tab.name === currentTab;
+		let tabIndex = -1;
+
+		// Only make this item tabbable if it is the currently selected item, or the panel is closed and the item is the first item (Inbox)
+		// If wpnotices is currently selected, tabindex below should be  -1 and <WordPressNotices /> will become the tabbed element.
+		if ( selected || ( ! isPanelOpen && i === 0 && 'wpnotices' !== currentTab ) ) {
+			tabIndex = null;
+		}
+
 		return (
 			<IconButton
-				key={ tab.name }
+				role="tab"
 				className={ className }
+				tabIndex={ tabIndex }
+				aria-selected={ selected }
+				aria-controls={ 'activity-panel-' + tab.name }
+				key={ 'activity-panel-tab-' + tab.name }
+				id={ 'activity-panel-tab-' + tab.name }
 				onClick={ partial( this.togglePanel, tab.name ) }
 				icon={ tab.icon }
-				aria-controls={ 'activity-panel-' + tab.name }
 			>
 				{ tab.title }
 			</IconButton>
@@ -196,13 +213,17 @@ class ActivityPanel extends Component {
 						className="woocommerce-layout__activity-panel-mobile-toggle"
 					/>
 					<div className={ panelClasses }>
-						<div className="woocommerce-layout__activity-panel-tabs" role="tablist">
+						<NavigableMenu
+							role="tablist"
+							orientation="horizontal"
+							className="woocommerce-layout__activity-panel-tabs"
+						>
 							{ tabs && tabs.map( this.renderTab ) }
 							<WordPressNotices
 								showNotices={ 'wpnotices' === currentTab }
 								togglePanel={ this.togglePanel }
 							/>
-						</div>
+						</NavigableMenu>
 						{ this.renderPanel() }
 					</div>
 				</Section>
