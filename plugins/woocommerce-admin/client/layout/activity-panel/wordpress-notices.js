@@ -15,6 +15,8 @@ class WordPressNotices extends Component {
 		this.state = {
 			count: 0,
 			notices: null,
+			screenLinks: null,
+			screenMeta: null,
 			noticesOpen: false,
 			hasEventListeners: false,
 		};
@@ -67,19 +69,8 @@ class WordPressNotices extends Component {
 	initialize() {
 		const notices = document.getElementById( 'wp__notice-list' );
 		const noticesOpen = notices.classList.contains( 'woocommerce-layout__notice-list-show' );
-
-		// On existing classic WooCommerce pages, screen links like "help" and "screen options" display, and need to be displayed
-		// along side the notifications expansion.
+		const screenMeta = document.getElementById( 'screen-meta' );
 		const screenLinks = document.getElementById( 'screen-meta-links' );
-		if ( screenLinks ) {
-			notices.classList.add( 'has-screen-meta-links' );
-			document
-				.getElementById( 'woocommerce-layout__notice-list' )
-				.insertAdjacentElement( 'beforebegin', document.getElementById( 'screen-meta' ) );
-			document
-				.getElementById( 'woocommerce-layout__notice-list' )
-				.insertAdjacentElement( 'beforebegin', screenLinks );
-		}
 
 		const collapsedTargetArea = document.getElementById( 'woocommerce-layout__notice-list' );
 		const uncollapsedTargetArea =
@@ -101,7 +92,7 @@ class WordPressNotices extends Component {
 
 		count = count - 1; // Remove 1 for `wp-header-end` which is a child of wp__notice-list
 
-		this.setState( { count, notices, noticesOpen } );
+		this.setState( { count, notices, noticesOpen, screenMeta, screenLinks } );
 
 		// Move collapsed WordPress notifications into the main wc-admin body
 		collapsedTargetArea.insertAdjacentElement( 'beforeend', notices );
@@ -168,13 +159,19 @@ class WordPressNotices extends Component {
 	}
 
 	showNotices() {
-		this.state.notices.classList.add( 'woocommerce-layout__notice-list-show' );
-		this.state.notices.classList.remove( 'woocommerce-layout__notice-list-hide' );
+		const { notices, screenLinks, screenMeta } = this.state;
+		notices.classList.add( 'woocommerce-layout__notice-list-show' );
+		notices.classList.remove( 'woocommerce-layout__notice-list-hide' );
+		screenMeta && screenMeta.classList.add( 'is-hidden-by-notices' );
+		screenLinks && screenLinks.classList.add( 'is-hidden-by-notices' );
 	}
 
 	hideNotices() {
-		this.state.notices.classList.add( 'woocommerce-layout__notice-list-hide' );
-		this.state.notices.classList.remove( 'woocommerce-layout__notice-list-show' );
+		const { notices, screenLinks, screenMeta } = this.state;
+		notices.classList.add( 'woocommerce-layout__notice-list-hide' );
+		notices.classList.remove( 'woocommerce-layout__notice-list-show' );
+		screenMeta && screenMeta.classList.remove( 'is-hidden-by-notices' );
+		screenLinks && screenLinks.classList.remove( 'is-hidden-by-notices' );
 	}
 
 	render() {

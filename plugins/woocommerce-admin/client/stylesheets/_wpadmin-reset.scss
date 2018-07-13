@@ -58,7 +58,6 @@
 
 	.wrap {
 		padding: 20px;
-		padding-top: 0;
 	}
 
 	#screen-meta {
@@ -71,8 +70,24 @@
 		padding: 1px 12px;
 	}
 
-	#wpbody-content #wp__notice-list {
-		margin-top: 8px;
+	.woocommerce-layout__header {
+		&.is-scrolled {
+			box-shadow: 0 8px 16px 0 rgba(85, 93, 102, 0.3);
+		}
+
+		.woocommerce-layout__header-breadcrumbs {
+			margin-top: 0;
+			margin-bottom: 0;
+		}
+	}
+
+	/**
+	* Hides screen meta and links when notices are open since the elements get moved around.
+	* The !important overwrites an inline wp-admin style.
+	*/
+	#screen-meta.is-hidden-by-notices,
+	#screen-meta-links.is-hidden-by-notices {
+		display: none !important;
 	}
 
 	.woocommerce-layout__primary {
@@ -81,16 +96,6 @@
 
 		@include breakpoint( '782px-1100px' ) {
 			padding-top: 60px;
-		}
-
-		&.is-embed-loading {
-			display: none;
-		}
-	}
-
-	.woocommerce-layout__activity-panel {
-		@include breakpoint( '<782px' ) {
-			top: -20px;
 		}
 	}
 }
@@ -133,15 +138,6 @@
 
 		@include breakpoint( '600px-782px' ) {
 			margin-top: 32px;
-		}
-	}
-
-	.woocommerce-layout__notice-list-hide {
-		height: auto;
-		margin-top: -50px;
-
-		@include breakpoint( '<782px' ) {
-			margin-top: -100px;
 		}
 	}
 }

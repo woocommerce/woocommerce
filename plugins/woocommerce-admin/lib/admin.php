@@ -221,7 +221,7 @@ function woocommerce_embed_page_header() {
 			<div class="woocommerce-layout__header is-embed-loading">
 				<h1 class="woocommerce-layout__header-breadcrumbs">
 					<span><a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-admin#/' ) ); ?>">WooCommerce</a></span>
-					<span><?php echo $breadcrumbs; ?></span>
+					<?php echo $breadcrumbs; ?>
 				</h1>
 			</div>
 		</div>

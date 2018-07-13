@@ -16,12 +16,12 @@
 	z-index: 1000;
 
 	&.is-scrolled {
-		box-shadow: 0 6px 6px 0 rgba(85, 93, 102, 0.3);
+		box-shadow: 0 8px 8px 0 rgba(85, 93, 102, 0.3);
 	}
 
 	@include breakpoint( '<782px' ) {
 		top: 46px;
-		height: 47px;
+		height: 50px;
 		flex-flow: row wrap;
 	}
 
@@ -34,18 +34,18 @@
 		font-weight: normal;
 		padding: 0px;
 		flex: 1 auto;
-		padding-top: 8px;
 		height: 50px;
+		line-height: 50px;
 		background: $white;
 
 		@include breakpoint( '782px-1100px' ) {
-			padding-top: 16px;
-			height: auto;
+			height: 60px;
+			line-height: 60px;
 		}
 
 		@include breakpoint( '>1100px' ) {
-			padding-top: 24px;
-			height: auto;
+			height: 80px;
+			line-height: 80px;
 		}
 
 		span:first-child {
