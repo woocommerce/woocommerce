@@ -7,7 +7,7 @@ import { Component, createRef } from '@wordpress/element';
 import classnames from 'classnames';
 import { IconButton } from '@wordpress/components';
 import PropTypes from 'prop-types';
-import { uniqueId } from 'lodash';
+import { isEqual, uniqueId } from 'lodash';
 
 /**
  * Internal dependencies
@@ -31,6 +31,26 @@ class Table extends Component {
 		this.captionID = uniqueId( 'caption-' );
 	}
 
+	componentDidUpdate( prevProps ) {
+		if ( ! isEqual( this.props.rows, prevProps.rows ) ) {
+			/* eslint-disable react/no-did-update-set-state */
+			this.setState( {
+				rows: this.props.rows,
+			} );
+			/* eslint-enable react/no-did-update-set-state */
+		}
+	}
+
+	componentDidMount() {
+		const { scrollWidth, clientWidth } = this.container.current;
+		const scrollable = scrollWidth > clientWidth;
+		/* eslint-disable react/no-did-mount-set-state */
+		this.setState( {
+			tabIndex: scrollable ? '0' : null,
+		} );
+		/* eslint-enable react/no-did-mount-set-state */
+	}
+
 	sortBy( col ) {
 		this.setState( prevState => {
 			// Set the sort direction as inverse of current state
@@ -43,16 +63,6 @@ class Table extends Component {
 				sortDir,
 			};
 		} );
-	}
-
-	componentDidMount() {
-		const { scrollWidth, clientWidth } = this.container.current;
-		const scrollable = scrollWidth > clientWidth;
-		/* eslint-disable react/no-did-mount-set-state */
-		this.setState( {
-			tabIndex: scrollable ? '0' : null,
-		} );
-		/* eslint-enable react/no-did-mount-set-state */
 	}
 
 	isColSortable( col ) {

@@ -60,8 +60,6 @@ class RevenueReport extends Component {
 
 	getRowsContent( data ) {
 		return map( data, row => {
-			// @TODO How to create this per-report? Can use `w`, `year`, `m` to build time-specific order links
-			// we need to know which kind of report this is, and parse the `label` to get this row's date
 			const {
 				coupons,
 				gross_revenue,
@@ -72,6 +70,8 @@ class RevenueReport extends Component {
 				taxes,
 			} = row.subtotals;
 
+			// @TODO How to create this per-report? Can use `w`, `year`, `m` to build time-specific order links
+			// we need to know which kind of report this is, and parse the `label` to get this row's date
 			const orderLink = (
 				<a href={ getAdminLink( '/edit.php?post_type=shop_order&w=4&year=2018' ) }>
 					{ orders_count }
@@ -94,7 +94,7 @@ class RevenueReport extends Component {
 		const { path, query } = this.props;
 		const summaryStats = get( this.state.stats, 'totals', {} );
 		const intervalStats = get( this.state.stats, 'intervals', [] );
-		const rows = this.getRowsContent( intervalStats );
+		const rows = this.getRowsContent( intervalStats ) || [];
 
 		const headers = [
 			__( 'Date', 'wc-admin' ),
@@ -143,10 +143,8 @@ class RevenueReport extends Component {
 				<Card title={ __( 'Gross Revenue' ) }>
 					<p>Graph here</p>
 					<hr />
-					{ rows &&
-						rows.length && (
-							<Table rows={ rows } headers={ headers } caption={ __( 'Revenue Last Week' ) } />
-						) }
+					{ /* @todo Switch a placeholder view if we don't have rows */ }
+					<Table rows={ rows } headers={ headers } caption={ __( 'Revenue Last Week' ) } />
 				</Card>
 
 				<Pagination
