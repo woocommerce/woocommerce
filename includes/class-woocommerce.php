@@ -192,6 +192,7 @@ final class WooCommerce {
 					'source' => 'fatal-errors',
 				)
 			);
+			do_action( 'woocommerce_shutdown_error', $error );
 		}
 	}
 
