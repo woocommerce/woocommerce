@@ -19,6 +19,9 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+do_action('before_thankyou');
+
 ?>
 
 <div class="woocommerce-order">
