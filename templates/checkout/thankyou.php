@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-do_action('before_thankyou');
+do_action('woocommerce_before_thankyou', $order->get_id());
 
 ?>
 
