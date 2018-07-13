@@ -8,14 +8,14 @@ import clickOutside from 'react-click-outside';
 import { Component } from '@wordpress/element';
 import Gridicon from 'gridicons';
 import { IconButton } from '@wordpress/components';
-import { partial } from 'lodash';
+import { partial, uniqueId } from 'lodash';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 import ActivityPanelToggleBubble from './toggle-bubble';
-import { Section } from 'layout/section';
+import { H, Section } from 'layout/section';
 import InboxPanel from './inbox';
 import OrdersPanel from './orders';
 import StockPanel from './stock';
@@ -132,7 +132,7 @@ class ActivityPanel extends Component {
 		} );
 
 		return (
-			<Section component="div" className={ classNames }>
+			<div className={ classNames }>
 				{ ( isPanelOpen && (
 					<div
 						className="woocommerce-layout__activity-panel-content"
@@ -144,7 +144,7 @@ class ActivityPanel extends Component {
 					</div>
 				) ) ||
 					null }
-			</Section>
+			</div>
 		);
 	}
 
@@ -171,32 +171,41 @@ class ActivityPanel extends Component {
 	render() {
 		const tabs = this.getTabs();
 		const { currentTab, mobileOpen } = this.state;
-
+		const headerId = uniqueId( 'activity-panel-header_' );
 		const panelClasses = classnames( 'woocommerce-layout__activity-panel', {
 			'is-mobile-open': this.state.mobileOpen,
 		} );
 
 		// TODO Replace the mobile toggle with the Woo bubble Gridicon once it has been added.
 		return (
-			<div id="woocommerce-activity-panel">
-				<IconButton
-					onClick={ this.toggleMobile }
-					icon={ mobileOpen ? <Gridicon icon="cross-small" /> : <ActivityPanelToggleBubble /> }
-					label={ mobileOpen ? __( 'Close Activity Panel' ) : __( 'View Activity Panel' ) }
-					aria-expanded={ mobileOpen }
-					tooltip={ false }
-					className="woocommerce-layout__activity-panel-mobile-toggle"
-				/>
-				<div className={ panelClasses }>
-					<div className="woocommerce-layout__activity-panel-tabs" role="tablist">
-						{ tabs && tabs.map( this.renderTab ) }
-						<WordPressNotices
-							showNotices={ 'wpnotices' === currentTab }
-							togglePanel={ this.togglePanel }
-						/>
+			<div>
+				<H id={ headerId } className="screen-reader-text">
+					{ __( 'Store Activity', 'wc-admin' ) }
+				</H>
+				<Section component="aside" id="woocommerce-activity-panel" aria-labelledby={ headerId }>
+					<IconButton
+						onClick={ this.toggleMobile }
+						icon={ mobileOpen ? <Gridicon icon="cross-small" /> : <ActivityPanelToggleBubble /> }
+						label={
+							mobileOpen
+								? __( 'Close Activity Panel', 'wc-admin' )
+								: __( 'View Activity Panel', 'wc-admin' )
+						}
+						aria-expanded={ mobileOpen }
+						tooltip={ false }
+						className="woocommerce-layout__activity-panel-mobile-toggle"
+					/>
+					<div className={ panelClasses }>
+						<div className="woocommerce-layout__activity-panel-tabs" role="tablist">
+							{ tabs && tabs.map( this.renderTab ) }
+							<WordPressNotices
+								showNotices={ 'wpnotices' === currentTab }
+								togglePanel={ this.togglePanel }
+							/>
+						</div>
+						{ this.renderPanel() }
 					</div>
-					{ this.renderPanel() }
-				</div>
+				</Section>
 			</div>
 		);
 	}
