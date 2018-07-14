@@ -526,7 +526,7 @@ describe( 'loadLocaleData', () => {
 		expect( moment.locale() ).toBe( 'en' );
 	} );
 
-	xit( "should load french data on user locale 'fr-FR'", () => {
+	it( "should load french data on user locale 'fr-FR'", () => {
 		setToFrancais();
 		loadLocaleData();
 		expect( moment.localeData()._months[ 0 ] ).toBe( 'janvier' );

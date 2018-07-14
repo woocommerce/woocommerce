@@ -38,6 +38,8 @@ const gutenbergPackages = [
 	'date',
 	'dom',
 	'element',
+	'keycodes',
+	'deprecated',
 ];
 
 const wordPressPackages = [
