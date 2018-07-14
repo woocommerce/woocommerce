@@ -9,7 +9,14 @@ import { setLocaleData } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { toMoment, getLastPeriod, getCurrentPeriod, getRangeLabel, loadLocaleData } from 'lib/date';
+import {
+	toMoment,
+	getLastPeriod,
+	getCurrentPeriod,
+	getRangeLabel,
+	loadLocaleData,
+	getCurrentDates,
+} from 'lib/date';
 
 describe( 'toMoment', () => {
 	it( 'should pass through a valid Moment object as an argument', () => {
@@ -543,5 +550,39 @@ describe( 'loadLocaleData', () => {
 		wcSettings.date.dow = 5;
 		loadLocaleData();
 		expect( moment.localeData()._week.dow ).toBe( 5 );
+	} );
+} );
+
+describe( 'getCurrentDates', () => {
+	it( 'should return a correctly shaped object', () => {
+		const query = {};
+		const currentDates = getCurrentDates( query );
+
+		expect( currentDates.primary ).toBeDefined();
+		expect( 'string' === typeof currentDates.primary.label ).toBe( true );
+		expect( 'string' === typeof currentDates.primary.range ).toBe( true );
+		expect( moment.isMoment( currentDates.primary.after ) ).toBe( true );
+		expect( moment.isMoment( currentDates.primary.before ) ).toBe( true );
+
+		expect( currentDates.secondary ).toBeDefined();
+		expect( 'string' === typeof currentDates.secondary.label ).toBe( true );
+		expect( 'string' === typeof currentDates.secondary.range ).toBe( true );
+		expect( moment.isMoment( currentDates.secondary.after ) ).toBe( true );
+		expect( moment.isMoment( currentDates.secondary.before ) ).toBe( true );
+	} );
+
+	it( 'should correctly apply default values', () => {
+		const query = {};
+		const today = moment();
+		const yesterday = today.clone().subtract( 1, 'day' );
+		const currentDates = getCurrentDates( query );
+
+		// Ensure default period is 'today'
+		expect( today.isSame( currentDates.primary.after, 'day' ) ).toBe( true );
+		expect( today.isSame( currentDates.primary.before, 'day' ) ).toBe( true );
+
+		// Ensure default compare is `previous_period`
+		expect( yesterday.isSame( currentDates.secondary.after, 'day' ) ).toBe( true );
+		expect( yesterday.isSame( currentDates.secondary.before, 'day' ) ).toBe( true );
 	} );
 } );
