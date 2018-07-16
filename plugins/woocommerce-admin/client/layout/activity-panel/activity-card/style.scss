@@ -1,72 +1,73 @@
 /** @format */
 
 .woocommerce-activity-card {
+	position: relative;
+	padding: $gutter;
 	background: $white;
-	margin-bottom: $spacing * 2;
+	border-bottom: 1px solid $core-grey-light-400;
+	color: $gray-text;
+	@include font-size( 13 );
+	display: grid;
+	grid-template-columns: 84px 1fr;
+	grid-template-areas:
+		'icon header'
+		'icon body'
+		'icon actions';
+
+	@include breakpoint( '<782px' ) {
+		grid-template-columns: 76px 1fr;
+	}
+}
+
+.woocommerce-activity-card__unread {
+	position: absolute;
+	top: calc(#{ $gutter } - 6px);
+	right: calc(#{ $gutter } - 6px);
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: $core-orange;
+}
+
+.woocommerce-activity-card__icon {
+	grid-area: icon;
+	fill: $core-grey-light-600;
 }
 
 .woocommerce-activity-card__header {
-	display: flex;
-	align-items: center;
-	margin-bottom: $spacing * 0.5;
-	padding: $spacing $spacing 0;
+	grid-area: header;
+	margin-bottom: $gap;
+	display: grid;
+	grid-template-areas:
+		'title date'
+		'subtitle date';
 
-	.woocommerce-activity-card__icon {
-		margin-right: $spacing;
-
-		.dashicon {
-			fill: $gray-text;
-		}
-	}
-
-	.woocommerce-activity-card__label {
-		flex: 1;
+	.woocommerce-activity-card__title {
+		grid-area: title;
 		margin: 0;
-		@include font-size( 14 );
-		color: $gray-text;
-		font-weight: normal;
+		@include font-size( 13 );
 	}
 
 	.woocommerce-activity-card__date {
-		margin-left: 0.5em;
+		grid-area: date;
+		justify-self: end;
+		color: $core-grey-dark-300;
+		text-transform: uppercase;
+		@include font-size( 11 );
 	}
 
-	.woocommerce-activity-card__menu {
-		// Pull the menu up/out slightly
-		margin-right: $spacing * -0.5;
-		margin-top: $spacing * -0.5;
+	.woocommerce-activity-card__subtitle {
+		grid-area: subtitle;
 	}
 }
 
 .woocommerce-activity-card__body {
-	padding: 0 $spacing $spacing;
-	display: flex;
-
-	.woocommerce-activity-card__content {
-		flex: 1;
-	}
-
-	.woocommerce-activity-card__image {
-		border-radius: 50%;
-		overflow: hidden;
-		width: 60px;
-		align-self: flex-end;
-		border: 1px solid $gray;
-		background: #f8f8f8;
-
-		img,
-		.dashicon {
-			vertical-align: middle;
-			width: 100%;
-			height: auto;
-		}
-	}
+	grid-area: body;
 }
 
 .woocommerce-activity-card__actions {
-	padding: $spacing;
-	border-top: 1px solid $gray;
-	background: #eee;
+	grid-area: actions;
+	margin-top: $gap;
 
 	// Ensures any immediate child with a sibling has space between the items
 	& > * + * {

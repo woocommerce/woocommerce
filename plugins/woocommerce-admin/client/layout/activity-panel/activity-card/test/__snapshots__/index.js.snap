@@ -1,0 +1,248 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ActivityCard should render a basic card 1`] = `
+<section
+  className="woocommerce-activity-card"
+>
+  <span
+    aria-hidden={true}
+    className="woocommerce-activity-card__icon"
+  >
+    <t
+      icon="notice-outline"
+      size={48}
+    />
+  </span>
+  <header
+    className="woocommerce-activity-card__header"
+  >
+    <H
+      className="woocommerce-activity-card__title"
+    >
+      Inbox message
+    </H>
+  </header>
+  <Section
+    className="woocommerce-activity-card__body"
+  >
+    This card has some content
+  </Section>
+</section>
+`;
+
+exports[`ActivityCard should render a custom icon on a card 1`] = `
+<section
+  className="woocommerce-activity-card"
+>
+  <span
+    aria-hidden={true}
+    className="woocommerce-activity-card__icon"
+  >
+    <t
+      icon="customize"
+      size={24}
+    />
+  </span>
+  <header
+    className="woocommerce-activity-card__header"
+  >
+    <H
+      className="woocommerce-activity-card__title"
+    >
+      Inbox message
+    </H>
+  </header>
+  <Section
+    className="woocommerce-activity-card__body"
+  >
+    This card has some content
+  </Section>
+</section>
+`;
+
+exports[`ActivityCard should render a gravatar on a card 1`] = `
+<section
+  className="woocommerce-activity-card"
+>
+  <span
+    aria-hidden={true}
+    className="woocommerce-activity-card__icon"
+  >
+    <Gravatar
+      size={60}
+      user="admin@local.test"
+    />
+  </span>
+  <header
+    className="woocommerce-activity-card__header"
+  >
+    <H
+      className="woocommerce-activity-card__title"
+    >
+      Inbox message
+    </H>
+  </header>
+  <Section
+    className="woocommerce-activity-card__body"
+  >
+    This card has some content
+  </Section>
+</section>
+`;
+
+exports[`ActivityCard should render a timestamp on a card 1`] = `
+<section
+  className="woocommerce-activity-card"
+>
+  <span
+    aria-hidden={true}
+    className="woocommerce-activity-card__icon"
+  >
+    <t
+      icon="notice-outline"
+      size={48}
+    />
+  </span>
+  <header
+    className="woocommerce-activity-card__header"
+  >
+    <H
+      className="woocommerce-activity-card__title"
+    >
+      Inbox message
+    </H>
+    <span
+      className="woocommerce-activity-card__date"
+    >
+      3 days ago
+    </span>
+  </header>
+  <Section
+    className="woocommerce-activity-card__body"
+  >
+    This card has some content
+  </Section>
+</section>
+`;
+
+exports[`ActivityCard should render an action on a card 1`] = `
+<section
+  className="woocommerce-activity-card"
+>
+  <span
+    aria-hidden={true}
+    className="woocommerce-activity-card__icon"
+  >
+    <t
+      icon="notice-outline"
+      size={48}
+    />
+  </span>
+  <header
+    className="woocommerce-activity-card__header"
+  >
+    <H
+      className="woocommerce-activity-card__title"
+    >
+      Inbox message
+    </H>
+  </header>
+  <Section
+    className="woocommerce-activity-card__body"
+  >
+    This card has some content
+  </Section>
+  <footer
+    className="woocommerce-activity-card__actions"
+  >
+    <[object Object]
+      isDefault={true}
+      key="0"
+      onClick={[Function]}
+    >
+      Action
+    </[object Object]>
+  </footer>
+</section>
+`;
+
+exports[`ActivityCard should render an unread bubble on a card 1`] = `
+<section
+  className="woocommerce-activity-card"
+>
+  <span
+    className="woocommerce-activity-card__unread"
+  />
+  <span
+    aria-hidden={true}
+    className="woocommerce-activity-card__icon"
+  >
+    <t
+      icon="notice-outline"
+      size={48}
+    />
+  </span>
+  <header
+    className="woocommerce-activity-card__header"
+  >
+    <H
+      className="woocommerce-activity-card__title"
+    >
+      Inbox message
+    </H>
+  </header>
+  <Section
+    className="woocommerce-activity-card__body"
+  >
+    This card has some content
+  </Section>
+</section>
+`;
+
+exports[`ActivityCard should render multiple actions on a card 1`] = `
+<section
+  className="woocommerce-activity-card"
+>
+  <span
+    aria-hidden={true}
+    className="woocommerce-activity-card__icon"
+  >
+    <t
+      icon="notice-outline"
+      size={48}
+    />
+  </span>
+  <header
+    className="woocommerce-activity-card__header"
+  >
+    <H
+      className="woocommerce-activity-card__title"
+    >
+      Inbox message
+    </H>
+  </header>
+  <Section
+    className="woocommerce-activity-card__body"
+  >
+    This card has some content
+  </Section>
+  <footer
+    className="woocommerce-activity-card__actions"
+  >
+    <[object Object]
+      isPrimary={true}
+      key="0"
+      onClick={[Function]}
+    >
+      Action 1
+    </[object Object]>
+    <[object Object]
+      isDefault={true}
+      key="1"
+      onClick={[Function]}
+    >
+      Action 2
+    </[object Object]>
+  </footer>
+</section>
+`;

@@ -4,7 +4,7 @@
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { compose, Fragment } from '@wordpress/element';
-import { Dashicon, withAPIData } from '@wordpress/components';
+import { Button, withAPIData } from '@wordpress/components';
 import PropTypes from 'prop-types';
 import { noop } from 'lodash';
 
@@ -52,28 +52,35 @@ function OrdersPanel( { orders } ) {
 						return (
 							<ActivityCard
 								key={ i }
-								label={ __( 'Order', 'wc-admin' ) }
-								icon={ <Dashicon icon="format-aside" /> }
+								className="woocommerce-order-activity-card"
+								title={ sprintf( __( '%s placed order #%d', 'wc-admin' ), name, order.id ) }
+								icon={ <Gravatar user={ address.email } /> }
 								date={ order.date_created }
-							>
-								<Gravatar user={ address.email } />
-								<div>{ sprintf( __( '%s placed order #%d', 'wc-admin' ), name, order.id ) }</div>
-								<div>
-									<span>
-										{ sprintf(
-											_n( '%d product', '%d products', productsCount, 'wc-admin' ),
-											productsCount
-										) }
-									</span>{' '}
-									{ refundValue ? (
+								subtitle={
+									<div>
 										<span>
-											<s>{ formatCurrency( total, order.currency ) }</s>{' '}
-											{ formatCurrency( remainingTotal, order.currency ) }
+											{ sprintf(
+												_n( '%d product', '%d products', productsCount, 'wc-admin' ),
+												productsCount
+											) }
 										</span>
-									) : (
-										<span>{ formatCurrency( total, order.currency ) }</span>
-									) }
-								</div>
+										{ refundValue ? (
+											<span>
+												<s>{ formatCurrency( total, order.currency ) }</s>{' '}
+												{ formatCurrency( remainingTotal, order.currency ) }
+											</span>
+										) : (
+											<span>{ formatCurrency( total, order.currency ) }</span>
+										) }
+									</div>
+								}
+								actions={
+									<Button isDefault onClick={ noop }>
+										Begin fulfillment
+									</Button>
+								}
+							>
+								Pending
 							</ActivityCard>
 						);
 					} )

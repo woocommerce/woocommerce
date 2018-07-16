@@ -8,17 +8,29 @@ $gray-darken-10: darken($gray, 10%);
 $gray-darken-20: darken($gray, 20%);
 $gray-darken-30: darken($gray, 30%);
 $gray-darken-40: darken($gray, 40%);
-$gray-text: $gray-darken-40;
 $gray-light-10: lighten($gray, 10%);
 
 // Greys
 $core-grey-light-100: #f8f9f9;
 $core-grey-light-200: #f3f4f5;
 $core-grey-light-300: #edeff0;
+$core-grey-light-400: #e8eaeb;
 $core-grey-light-500: #e2e4e7;
+$core-grey-light-600: #d7dade;
 $core-grey-light-700: #ccd0d4;
+$core-grey-light-800: #b5bcc2;
+$core-grey-light-900: #a2aab2;
+$core-grey-dark-100: #86909b;
+$core-grey-dark-200: #78848f;
+$core-grey-dark-300: #6c7781; // This & below have 4.5+ contrast against white
+$core-grey-dark-400: #606a73;
 $core-grey-dark-500: #555d66;
+$core-grey-dark-600: #40464d;
 $core-grey-dark-700: #32373c;
+$core-grey-dark-800: #23282d;
+$core-grey-dark-900: #191e23;
+
+$gray-text: $core-grey-dark-500;
 
 // wp-admin
 $wp-admin-background: #f1f1f1;
@@ -29,9 +41,6 @@ $valid-green: #4ab866;
 $error-red: #d94f4f;
 $woocommerce: #95588a;
 $core-orange: #ca4a1f;
-
-// Until we create a separate variables partial
-$spacing: 16px;
 
 $button: #f0f2f4;
 $button-border: darken($button, 20%);

@@ -211,3 +211,15 @@
 		}
 	}
 }
+
+.woocommerce-order-activity-card {
+	.woocommerce-activity-card__title {
+		font-weight: normal;
+	}
+
+	.woocommerce-activity-card__subtitle {
+		span + span:before {
+			content: ' \2022 ';
+		}
+	}
+}

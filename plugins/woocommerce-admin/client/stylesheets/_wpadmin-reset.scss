@@ -1,7 +1,16 @@
 /** @format */
 
-// css resets some wp-admin specific rules so that the app fits better in the extension container
+// By using CSS variables, we can switch the spacing rhythm using a single media query
+:root {
+	--main-gap: 24px;
+}
+@media (max-width: 782px) {
+	:root {
+		--main-gap: 16px;
+	}
+}
 
+// css resets some wp-admin specific rules so that the app fits better in the extension container
 .woocommerce-page {
 	.wrap {
 		margin: 0;
