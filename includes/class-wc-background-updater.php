@@ -106,7 +106,7 @@ class WC_Background_Updater extends WC_Background_Process {
 
 		if ( is_callable( $callback ) ) {
 			$logger->info( sprintf( 'Running %s callback', $callback ), array( 'source' => 'wc_db_updates' ) );
-			$result = (bool) call_user_func( $callback );
+			$result = (bool) call_user_func( $callback, $this );
 
 			if ( $result ) {
 				$logger->info( sprintf( '%s callback needs to run again', $callback ), array( 'source' => 'wc_db_updates' ) );
