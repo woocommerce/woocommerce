@@ -253,7 +253,12 @@ if ( wc_tax_enabled() ) {
 		<?php if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) : ?>
 			<tr>
 				<td class="label"><label for="restock_refunded_items"><?php esc_html_e( 'Restock refunded items', 'woocommerce' ); ?>:</label></td>
-				<td class="total"><input type="checkbox" id="restock_refunded_items" name="restock_refunded_items" checked="checked" /></td>
+				<?php
+				if ( 'yes' === get_option( 'woocommerce_restock_refunded_items' ) ) {
+					$checked = 'checked="checked"';
+				}
+				?>
+				<td class="total"><input type="checkbox" id="restock_refunded_items" name="restock_refunded_items"<?php echo esc_attr( $checked, 'woocommerce' ); ?> /></td>
 			</tr>
 		<?php endif; ?>
 		<tr>
