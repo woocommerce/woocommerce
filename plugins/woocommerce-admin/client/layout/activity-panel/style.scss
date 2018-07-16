@@ -227,9 +227,23 @@
 .woocommerce-layout__activity-panel-avatar-flag-overlay {
 	position: relative;
 	top: -$gap-small;
+
 	.woocommerce-flag {
 		position: relative;
 		top: 16px;
 		border: 2px solid $white;
+	}
+}
+
+// Needs the double-class for specificity
+.woocommerce-activity-card.woocommerce-inbox-activity-card {
+	grid-template-columns: 72px 1fr;
+
+	@include breakpoint( '<782px' ) {
+		grid-template-columns: 64px 1fr;
+	}
+
+	.woocommerce-activity-card__header {
+		margin-bottom: $gap-small;
 	}
 }

@@ -11,8 +11,8 @@ import { noop } from 'lodash';
 /**
  * Internal dependencies
  */
-import ActivityCard from './activity-card';
-import ActivityHeader from './activity-header';
+import ActivityCard from '../activity-card';
+import ActivityHeader from '../activity-header';
 import { EllipsisMenu, MenuTitle, MenuItem } from 'components/ellipsis-menu';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
 import { getOrderRefundTotal } from 'lib/order-values';

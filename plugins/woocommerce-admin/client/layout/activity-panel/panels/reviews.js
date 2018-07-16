@@ -8,12 +8,12 @@ import { Component } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import ActivityHeader from './activity-header';
+import ActivityHeader from '../activity-header';
 
-class StockPanel extends Component {
+class ReviewsPanel extends Component {
 	render() {
-		return <ActivityHeader title={ __( 'Stock', 'wc-admin' ) } />;
+		return <ActivityHeader title={ __( 'Reviews', 'wc-admin' ) } />;
 	}
 }
 
-export default StockPanel;
+export default ReviewsPanel;

@@ -16,10 +16,10 @@ import { partial, uniqueId, find } from 'lodash';
 import './style.scss';
 import ActivityPanelToggleBubble from './toggle-bubble';
 import { H, Section } from 'layout/section';
-import InboxPanel from './inbox';
-import OrdersPanel from './orders';
-import StockPanel from './stock';
-import ReviewsPanel from './reviews';
+import InboxPanel from './panels/inbox';
+import OrdersPanel from './panels/orders';
+import StockPanel from './panels/stock';
+import ReviewsPanel from './panels/reviews';
 import WordPressNotices from './wordpress-notices';
 
 class ActivityPanel extends Component {
