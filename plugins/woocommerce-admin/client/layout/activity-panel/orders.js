@@ -17,6 +17,7 @@ import { EllipsisMenu, MenuTitle, MenuItem } from 'components/ellipsis-menu';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
 import { getOrderRefundTotal } from 'lib/order-values';
 import Gravatar from 'components/gravatar';
+import Flag from 'components/flag';
 import { Section } from 'layout/section';
 
 function OrdersPanel( { orders } ) {
@@ -28,6 +29,15 @@ function OrdersPanel( { orders } ) {
 			<MenuItem onInvoke={ noop }>Test</MenuItem>
 		</EllipsisMenu>
 	);
+
+	const gravatarWithFlag = ( order, address ) => {
+		return (
+			<div className="woocommerce-layout__activity-panel-avatar-flag-overlay">
+				<Flag order={ order } />
+				<Gravatar user={ address.email } />
+			</div>
+		);
+	};
 
 	return (
 		<Fragment>
@@ -54,7 +64,7 @@ function OrdersPanel( { orders } ) {
 								key={ i }
 								className="woocommerce-order-activity-card"
 								title={ sprintf( __( '%s placed order #%d', 'wc-admin' ), name, order.id ) }
-								icon={ <Gravatar user={ address.email } /> }
+								icon={ gravatarWithFlag( order, address ) }
 								date={ order.date_created }
 								subtitle={
 									<div>

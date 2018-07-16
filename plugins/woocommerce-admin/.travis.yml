@@ -2,6 +2,8 @@ sudo: false
 language: node_js
 node_js:
   - "8"
+before_install:
+  - git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
 script:
   - npm run lint
   - npm test
