@@ -776,6 +776,8 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( 'MasterCard', wc_get_credit_card_type_label( 'Mastercard' ) );
 		$this->assertEquals( 'American Express', wc_get_credit_card_type_label( 'american_express' ) );
 		$this->assertEquals( 'American Express', wc_get_credit_card_type_label( 'american-express' ) );
+		$this->assertEquals( '', wc_get_credit_card_type_label( '' ) );
+		$this->assertEquals( 'Random name', wc_get_credit_card_type_label( 'random-name' ) );
 	}
 
 	/**
