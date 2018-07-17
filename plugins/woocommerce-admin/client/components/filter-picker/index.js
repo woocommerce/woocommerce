@@ -158,8 +158,9 @@ class FilterPicker extends Component {
 					) }
 					renderContent={ ( { onClose } ) => (
 						<ul className="woocommerce-filter-picker__content-list" ref={ this.listRef }>
-							{ visibleFilters.map( filter => (
+							{ visibleFilters.map( ( filter, i ) => (
 								<li
+									key={ i }
 									className={ classnames( 'woocommerce-filter-picker__content-list-item', {
 										'is-selected': selectedFilter.value === filter.value,
 									} ) }
