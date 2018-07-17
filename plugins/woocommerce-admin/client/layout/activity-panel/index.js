@@ -127,14 +127,15 @@ class ActivityPanel extends Component {
 
 	renderPanel() {
 		const { isPanelOpen, currentTab } = this.state;
-		const classNames = classnames( 'woocommerce-layout__activity-panel-wrapper', {
-			'is-open': isPanelOpen,
-		} );
 
 		const tab = find( this.getTabs(), { name: currentTab } );
 		if ( ! tab ) {
-			return null;
+			return <div className="woocommerce-layout__activity-panel-wrapper" />;
 		}
+
+		const classNames = classnames( 'woocommerce-layout__activity-panel-wrapper', {
+			'is-open': isPanelOpen,
+		} );
 
 		return (
 			<div className={ classNames } tabIndex={ 0 } role="tabpanel" aria-label={ tab.title }>
