@@ -13,6 +13,7 @@ import { noop } from 'lodash';
  */
 import ActivityCard from '../activity-card';
 import ActivityHeader from '../activity-header';
+import ActivityOutboundLink from '../activity-outbound-link';
 import { EllipsisMenu, MenuTitle, MenuItem } from 'components/ellipsis-menu';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
 import { getOrderRefundTotal } from 'lib/order-values';
@@ -47,18 +48,19 @@ function OrdersPanel( { orders } ) {
 				{ isLoading ? (
 					<p>Loading</p>
 				) : (
-					data.map( ( order, i ) => {
-						// We want the billing address, but shipping can be used as a fallback.
-						const address = { ...order.shipping, ...order.billing };
-						const name = `${ address.first_name } ${ address.last_name }`;
-						const productsCount = order.line_items.reduce(
-							( total, line ) => total + line.quantity,
-							0
-						);
+					<Fragment>
+						{ data.map( ( order, i ) => {
+							// We want the billing address, but shipping can be used as a fallback.
+							const address = { ...order.shipping, ...order.billing };
+							const name = `${ address.first_name } ${ address.last_name }`;
+							const productsCount = order.line_items.reduce(
+								( total, line ) => total + line.quantity,
+								0
+							);
 
-						const total = order.total;
-						const refundValue = getOrderRefundTotal( order );
-						const remainingTotal = getCurrencyFormatDecimal( order.total ) + refundValue;
+							const total = order.total;
+							const refundValue = getOrderRefundTotal( order );
+							const remainingTotal = getCurrencyFormatDecimal( order.total ) + refundValue;
 
 						return (
 							<ActivityCard
@@ -93,8 +95,12 @@ function OrdersPanel( { orders } ) {
 							>
 								<OrderStatus order={ order } />
 							</ActivityCard>
-						);
-					} )
+							);
+						} ) }
+						<ActivityOutboundLink href={ 'edit.php?post_type=shop_order' }>
+							{ __( 'Manage all orders' ) }
+						</ActivityOutboundLink>
+					</Fragment>
 				) }
 			</Section>
 		</Fragment>

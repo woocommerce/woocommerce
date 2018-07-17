@@ -13,16 +13,24 @@ import { getAdminLink } from 'lib/nav-utils';
 
 class Link extends Component {
 	render() {
-		const { children, to, wpAdmin, ...props } = this.props;
-		if ( this.context.router && ! wpAdmin ) {
+		const { children, href, type, ...props } = this.props;
+		if ( this.context.router && 'wc-admin' === type ) {
 			return (
-				<RouterLink to={ to } { ...props }>
+				<RouterLink to={ href } { ...props }>
 					{ children }
 				</RouterLink>
 			);
 		}
 
-		const path = wpAdmin ? getAdminLink( to ) : getAdminLink( 'admin.php?page=wcadmin#' + to );
+		let path;
+		if ( 'wp-admin' === type ) {
+			path = getAdminLink( href );
+		} else if ( 'external' === type ) {
+			path = href;
+		} else {
+			path = getAdminLink( 'admin.php?page=wc-admin#' + href );
+		}
+
 		return (
 			<a href={ path } { ...props }>
 				{ children }
@@ -32,12 +40,12 @@ class Link extends Component {
 }
 
 Link.propTypes = {
-	to: PropTypes.string,
-	wpAdmin: PropTypes.bool,
+	href: PropTypes.string.isRequired,
+	type: PropTypes.oneOf( [ 'wp-admin', 'wc-admin', 'external' ] ).isRequired,
 };
 
 Link.defaultProps = {
-	wpAdmin: false,
+	type: 'wc-admin',
 };
 
 Link.contextTypes = {

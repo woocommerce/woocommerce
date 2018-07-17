@@ -1,0 +1,52 @@
+/** @format */
+
+.woocommerce-layout__activity-panel-outbound-link {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	height: 50px;
+	background: $core-grey-light-200;
+	border-bottom: 1px solid $core-grey-light-400;
+	padding: $gap $gutter;
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 18px;
+	margin: 0;
+	color: $woocommerce;
+	text-decoration: none;
+
+	.gridicon {
+		display: none;
+	}
+
+	&:hover {
+		background: $white;
+		color: $woocommerce;
+	}
+
+	&:active {
+		background: $core-grey-light-100;
+		color: $woocommerce-darker;
+	}
+
+	&:focus {
+		color: $woocommerce;
+		background: $core-grey-light-200;
+		box-shadow: inset 0 0 0 1px $box-shadow-blue, inset 0 0 0 2px #fff;
+	}
+
+	&:hover,
+	&:focus {
+		.gridicon {
+			display: initial;
+			color: $woocommerce;
+		}
+	}
+
+	&:active {
+		.gridicon {
+			display: initial;
+			color: $woocommerce-darker;
+		}
+	}
+}

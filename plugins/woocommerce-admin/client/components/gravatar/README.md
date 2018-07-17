@@ -6,7 +6,7 @@ Use `Gravatar` to display a user's Gravatar.
 ## How to use:
 
 ```jsx
-import { Gravatar } from 'components/gravatar';
+import Gravatar from 'components/gravatar';
 
 render: function() {
   return (

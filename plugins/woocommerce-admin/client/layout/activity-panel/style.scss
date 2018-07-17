@@ -186,8 +186,14 @@
 	overflow-x: hidden;
 	overflow-y: scroll;
 
+	// Extra padding is needed at the bottom of the wrapper because of our positioning, height, and overflow rules. Otherwise, some content can get cut off.
+	padding-bottom: $gap-small * 6;
+	@include breakpoint( '782px-1100px' ) {
+		padding-bottom: $gap-small;
+	}
 	@include breakpoint( '>1100px' ) {
 		top: 112px;
+		padding-bottom: $gap * 2;
 	}
 
 	@include breakpoint( '<782px' ) {

@@ -6,7 +6,7 @@ A component designed for use in the activity panel. It returns a title and can o
 ## How to use:
 
 ```jsx
-import ActivityHeader from 'components/activity-header';
+import ActivityHeader from 'layout/activity-panel/activity-header';
 
 render: function() {
   return (
