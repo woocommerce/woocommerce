@@ -309,15 +309,23 @@ class WC_Checkout {
 				$order = new WC_Order();
 			}
 
+			$fields_prefix = array(
+				'shipping'  => true,
+				'billing'   => true,
+			);
+			$shipping_fields = array(
+				'shipping_method'   => true,
+				'shipping_total'    => true,
+				'shipping_tax'      => true,
+			);
 			foreach ( $data as $key => $value ) {
 				if ( is_callable( array( $order, "set_{$key}" ) ) ) {
 					$order->{"set_{$key}"}( $value );
-
 					// Store custom fields prefixed with wither shipping_ or billing_. This is for backwards compatibility with 2.6.x.
-					// TODO: Fix conditional to only include shipping/billing address fields in a smarter way without str(i)pos.
-				} elseif ( ( 0 === stripos( $key, 'billing_' ) || 0 === stripos( $key, 'shipping_' ) )
-					&& ! in_array( $key, array( 'shipping_method', 'shipping_total', 'shipping_tax' ), true ) ) {
-					$order->update_meta_data( '_' . $key, $value );
+				} elseif ( isset( $fields_prefix[ current( explode( '_', $key ) ) ] ) ) {
+					if ( ! isset( $shipping_fields[ $key ] ) ) {
+						$order->update_meta_data( '_' . $key, $value );
+					}
 				}
 			}
 
