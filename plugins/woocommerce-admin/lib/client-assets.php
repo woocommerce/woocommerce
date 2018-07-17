@@ -43,11 +43,12 @@ function wc_admin_register_script() {
 	$settings = array(
 		'adminUrl'           => admin_url(),
 		'embedBreadcrumbs'   => wc_admin_get_embed_breadcrumbs(),
-		'siteLocale'   => esc_attr( get_bloginfo( 'language' ) ),
-		'currency'  => wc_admin_currency_settings(),
-		'date' => array(
+		'siteLocale'         => esc_attr( get_bloginfo( 'language' ) ),
+		'currency'           => wc_admin_currency_settings(),
+		'date'               => array(
 			'dow' => get_option( 'start_of_week', 0 ),
 		),
+		'orderStatuses'      => wc_get_order_statuses(),
 	);
 
 	wp_add_inline_script(

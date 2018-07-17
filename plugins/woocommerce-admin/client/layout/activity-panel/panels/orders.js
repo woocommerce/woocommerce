@@ -18,6 +18,7 @@ import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
 import { getOrderRefundTotal } from 'lib/order-values';
 import Gravatar from 'components/gravatar';
 import Flag from 'components/flag';
+import OrderStatus from 'components/order-status';
 import { Section } from 'layout/section';
 
 function OrdersPanel( { orders } ) {
@@ -90,7 +91,7 @@ function OrdersPanel( { orders } ) {
 									</Button>
 								}
 							>
-								Pending
+								<OrderStatus order={ order } />
 							</ActivityCard>
 						);
 					} )

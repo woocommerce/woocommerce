@@ -1,0 +1,26 @@
+/** @format */
+
+.woocommerce-order-status {
+	display: flex;
+	align-items: center;
+}
+
+.woocommerce-order-status__indicator {
+	width: 16px;
+	height: 16px;
+	display: block;
+	background: $core-grey-light-700;
+	margin-right: $gap-smallest * 2;
+	border-radius: 50%;
+	border: 3px solid $core-grey-light-500;
+
+	&.is-processing {
+		background: $valid-green;
+		border-color: lighten($valid-green, 20%);
+	}
+
+	&.is-on-hold {
+		background: $notice-yellow;
+		border-color: lighten($notice-yellow, 20%);
+	}
+}
