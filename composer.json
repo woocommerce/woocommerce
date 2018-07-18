@@ -18,7 +18,8 @@
     "wimg/php-compatibility": "^8.0",
     "dealerdirect/phpcodesniffer-composer-installer": "^0.4.3",
     "apigen/apigen": "^4",
-    "nette/utils": "~2.3.0"
+    "nette/utils": "~2.3.0",
+    "jdgrimes/wp-http-testcase": "^1.3"
   },
   "scripts": {
     "pre-update-cmd": [

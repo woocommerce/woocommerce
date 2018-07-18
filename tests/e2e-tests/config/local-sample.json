@@ -2,11 +2,11 @@
   "url": "http://local.wordpress.dev/",
   "users": {
     "admin": {
-      "username": "admin",
+      "username": "adm",
       "password": "password"
     },
     "customer": {
-      "username": "Customer",
+      "username": "Cust",
       "password": "password"
     }
   }
