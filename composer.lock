@@ -1,10 +1,10 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "66fee52eadec5af9fd87cafffa7360ea",
+    "content-hash": "bc2c57d2be29888a0e4c3a09ec26cbe3",
     "packages": [
         {
             "name": "composer/installers",
@@ -643,45 +643,6 @@
             ],
             "abandoned": true,
             "time": "2014-05-27T05:29:25+00:00"
-        },
-        {
-            "name": "jdgrimes/wp-http-testcase",
-            "version": "1.3.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/JDGrimes/wp-http-testcase.git",
-                "reference": "cbbea5fc813a146ad8fdf19ea564a597e5d0f8bb"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/JDGrimes/wp-http-testcase/zipball/cbbea5fc813a146ad8fdf19ea564a597e5d0f8bb",
-                "reference": "cbbea5fc813a146ad8fdf19ea564a597e5d0f8bb",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.2.0"
-            },
-            "type": "library",
-            "autoload": {
-                "classmap": [
-                    "wp-http-testcase.php"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "J.D. Grimes",
-                    "email": "jdg@codesymphony.co",
-                    "homepage": "http://codesymphony.co",
-                    "role": "Developer"
-                }
-            ],
-            "description": "PHPUnit testcase for WordPress code involving HTTP requests",
-            "homepage": "https://github.com/JDGrimes/wp-http-testcase",
-            "time": "2017-06-03T14:09:57+00:00"
         },
         {
             "name": "justinrainbow/json-schema",
