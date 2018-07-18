@@ -3,7 +3,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Component, Fragment, createRef } from '@wordpress/element';
+import { Component, Fragment } from '@wordpress/element';
 import { Dropdown, Button, Dashicon } from '@wordpress/components';
 import { stringify as stringifyQueryObject } from 'qs';
 import { omit, find, partial } from 'lodash';
@@ -14,6 +14,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import DropdownButton from 'components/dropdown-button';
+import AnimationSlider from 'components/animation-slider';
 import Link from 'components/link';
 import './style.scss';
 
@@ -24,8 +25,8 @@ class FilterPicker extends Component {
 		const { filterPaths, getQueryParamValue } = props;
 		this.state = {
 			nav: filterPaths[ getQueryParamValue() ],
+			animate: null,
 		};
-		this.listRef = createRef();
 
 		this.getSelectionPath = this.getSelectionPath.bind( this );
 		this.getOtherQueries = this.getOtherQueries.bind( this );
@@ -66,8 +67,7 @@ class FilterPicker extends Component {
 	selectSubFilters( value ) {
 		const nav = [ ...this.state.nav ];
 		nav.push( value );
-		this.setState( { nav } );
-		this.focusFirstFilter();
+		this.setState( { nav, animate: 'left' } );
 	}
 
 	getVisibleFilters( filters, nav ) {
@@ -82,17 +82,7 @@ class FilterPicker extends Component {
 	goBack() {
 		const nav = [ ...this.state.nav ];
 		nav.pop();
-		this.setState( { nav } );
-		this.focusFirstFilter();
-	}
-
-	focusFirstFilter() {
-		setTimeout( () => {
-			const list = this.listRef.current;
-			if ( list.children.length && list.children[ 0 ].children.length ) {
-				list.children[ 0 ].children[ 0 ].focus();
-			}
-		}, 0 );
+		this.setState( { nav, animate: 'right' } );
 	}
 
 	renderButton( filter, onClose ) {
@@ -129,7 +119,7 @@ class FilterPicker extends Component {
 		return (
 			<Link
 				className="woocommerce-filter-picker__content-list-item-btn components-button"
-				to={ this.getSelectionPath( filter ) }
+				href={ this.getSelectionPath( filter ) }
 				onClick={ onClose }
 			>
 				{ filter.label }
@@ -139,7 +129,8 @@ class FilterPicker extends Component {
 
 	render() {
 		const { filters } = this.props;
-		const visibleFilters = this.getVisibleFilters( filters, [ ...this.state.nav ] );
+		const { nav, animate } = this.state;
+		const visibleFilters = this.getVisibleFilters( filters, [ ...nav ] );
 		const selectedFilter = this.getSelectedFilter();
 		return (
 			<div className="woocommerce-filter-picker">
@@ -157,18 +148,22 @@ class FilterPicker extends Component {
 						/>
 					) }
 					renderContent={ ( { onClose } ) => (
-						<ul className="woocommerce-filter-picker__content-list" ref={ this.listRef }>
-							{ visibleFilters.map( ( filter, i ) => (
-								<li
-									key={ i }
-									className={ classnames( 'woocommerce-filter-picker__content-list-item', {
-										'is-selected': selectedFilter.value === filter.value,
-									} ) }
-								>
-									{ this.renderButton( filter, onClose ) }
-								</li>
-							) ) }
-						</ul>
+						<AnimationSlider animationKey={ nav } animate={ animate } focusOnChange>
+							{ () => (
+								<ul className="woocommerce-filter-picker__content-list">
+									{ visibleFilters.map( filter => (
+										<li
+											key={ filter.value }
+											className={ classnames( 'woocommerce-filter-picker__content-list-item', {
+												'is-selected': selectedFilter.value === filter.value,
+											} ) }
+										>
+											{ this.renderButton( filter, onClose ) }
+										</li>
+									) ) }
+								</ul>
+							) }
+						</AnimationSlider>
 					) }
 				/>
 			</div>

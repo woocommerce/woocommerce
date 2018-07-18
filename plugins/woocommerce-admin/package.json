@@ -78,6 +78,7 @@
     "lodash": "^4.17.10",
     "prop-types": "^15.6.1",
     "react-dates": "^16.7.0",
-    "react-slot-fill": "^2.0.1"
+    "react-slot-fill": "^2.0.1",
+    "react-transition-group": "^2.4.0"
   }
 }
