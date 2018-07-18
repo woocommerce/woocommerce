@@ -28,10 +28,12 @@ class ActivityPanel extends Component {
 		this.togglePanel = this.togglePanel.bind( this );
 		this.toggleMobile = this.toggleMobile.bind( this );
 		this.renderTab = this.renderTab.bind( this );
+		this.updateNoticeFlag = this.updateNoticeFlag.bind( this );
 		this.state = {
 			isPanelOpen: false,
 			mobileOpen: false,
 			currentTab: '',
+			hasWordPressNotices: false,
 		};
 	}
 
@@ -80,6 +82,12 @@ class ActivityPanel extends Component {
 		}
 	}
 
+	updateNoticeFlag( noticeCount ) {
+		this.setState( {
+			hasWordPressNotices: noticeCount > 0,
+		} );
+	}
+
 	// TODO Pull in dynamic unread status/count
 	getTabs() {
 		return [
@@ -99,13 +107,13 @@ class ActivityPanel extends Component {
 				name: 'stock',
 				title: __( 'Stock', 'wc-admin' ),
 				icon: <Gridicon icon="clipboard" />,
-				unread: true,
+				unread: false,
 			},
 			{
 				name: 'reviews',
 				title: __( 'Reviews', 'wc-admin' ),
 				icon: <Gridicon icon="star" />,
-				unread: true,
+				unread: false,
 			},
 		];
 	}
@@ -181,20 +189,27 @@ class ActivityPanel extends Component {
 				onClick={ partial( this.togglePanel, tab.name ) }
 				icon={ tab.icon }
 			>
-				{ tab.title }
+				{ tab.title }{' '}
+				{ tab.unread && (
+					<span className="screen-reader-text">{ __( 'unread activity', 'wc-admin' ) }</span>
+				) }
 			</IconButton>
 		);
 	}
 
 	render() {
 		const tabs = this.getTabs();
-		const { currentTab, mobileOpen } = this.state;
+		const { currentTab, mobileOpen, hasWordPressNotices } = this.state;
 		const headerId = uniqueId( 'activity-panel-header_' );
 		const panelClasses = classnames( 'woocommerce-layout__activity-panel', {
 			'is-mobile-open': this.state.mobileOpen,
 		} );
 
-		// TODO Replace the mobile toggle with the Woo bubble Gridicon once it has been added.
+		const hasUnread = hasWordPressNotices || tabs.some( tab => tab.unread );
+		const viewLabel = hasUnread
+			? __( 'View Activity Panel, you have unread activity', 'wc-admin' )
+			: __( 'View Activity Panel', 'wc-admin' );
+
 		return (
 			<div>
 				<H id={ headerId } className="screen-reader-text">
@@ -203,12 +218,14 @@ class ActivityPanel extends Component {
 				<Section component="aside" id="woocommerce-activity-panel" aria-labelledby={ headerId }>
 					<IconButton
 						onClick={ this.toggleMobile }
-						icon={ mobileOpen ? <Gridicon icon="cross-small" /> : <ActivityPanelToggleBubble /> }
-						label={
-							mobileOpen
-								? __( 'Close Activity Panel', 'wc-admin' )
-								: __( 'View Activity Panel', 'wc-admin' )
+						icon={
+							mobileOpen ? (
+								<Gridicon icon="cross-small" />
+							) : (
+								<ActivityPanelToggleBubble hasUnread={ hasUnread } />
+							)
 						}
+						label={ mobileOpen ? __( 'Close Activity Panel', 'wc-admin' ) : viewLabel }
 						aria-expanded={ mobileOpen }
 						tooltip={ false }
 						className="woocommerce-layout__activity-panel-mobile-toggle"
@@ -223,6 +240,7 @@ class ActivityPanel extends Component {
 							<WordPressNotices
 								showNotices={ 'wpnotices' === currentTab }
 								togglePanel={ this.togglePanel }
+								onCountUpdate={ this.updateNoticeFlag }
 							/>
 						</NavigableMenu>
 						{ this.renderPanel() }

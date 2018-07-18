@@ -3,11 +3,12 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { IconButton } from '@wordpress/components';
+import classnames from 'classnames';
 import { Component } from '@wordpress/element';
 import Gridicon from 'gridicons';
-import { partial } from 'lodash';
-import classnames from 'classnames';
+import { IconButton } from '@wordpress/components';
+import { partial, noop } from 'lodash';
+import PropTypes from 'prop-types';
 
 class WordPressNotices extends Component {
 	constructor() {
@@ -92,6 +93,7 @@ class WordPressNotices extends Component {
 
 		count = count - 1; // Remove 1 for `wp-header-end` which is a child of wp__notice-list
 
+		this.props.onCountUpdate( count );
 		this.setState( { count, notices, noticesOpen, screenMeta, screenLinks } );
 
 		// Move collapsed WordPress notifications into the main wc-admin body
@@ -139,6 +141,7 @@ class WordPressNotices extends Component {
 	updateCount() {
 		const updatedCount = this.state.count - 1;
 		this.setState( { count: updatedCount } );
+		this.props.onCountUpdate( updatedCount );
 
 		if ( updatedCount < 1 ) {
 			this.props.togglePanel( 'wpnotices' ); // Close the panel since all of the notices have been closed.
@@ -196,10 +199,22 @@ class WordPressNotices extends Component {
 				role="tab"
 				tabIndex={ showNotices ? null : -1 }
 			>
-				{ __( 'Notices', 'wc-admin' ) }
+				{ __( 'Notices', 'wc-admin' ) }{' '}
+				<span className="screen-reader-text">{ __( 'unread activity', 'wc-admin' ) }</span>
 			</IconButton>
 		);
 	}
 }
+
+WordPressNotices.propTypes = {
+	showNotices: PropTypes.bool,
+	togglePanel: PropTypes.func,
+	onCountUpdate: PropTypes.func,
+};
+
+WordPressNotices.defaultProps = {
+	togglePanel: noop,
+	onCountUpdate: noop,
+};
 
 export default WordPressNotices;

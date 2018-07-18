@@ -155,6 +155,20 @@
 	}
 }
 
+.woocommerce-layout__activity-panel-toggle-bubble.has-unread:after {
+	content: ' ';
+	position: absolute;
+	padding: 1px;
+	background: $core-orange;
+	border: 2px solid white;
+	width: 4px;
+	height: 4px;
+	display: inline-block;
+	border-radius: 50%;
+	top: 6px;
+	right: 4px;
+}
+
 @keyframes tabSwitch {
 	0%,
 	100% {
