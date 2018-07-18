@@ -19,7 +19,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	public function setUp() {
 		parent::setUp();
 
-		$this->csv_file = dirname( __FILE__ ) . '/sample.csv';
+		$this->csv_file = realpath( dirname( __FILE__ ) ) . '/sample.csv';
 
 		$bootstrap = WC_Unit_Tests_Bootstrap::instance();
 		require_once $bootstrap->plugin_dir . '/includes/import/class-wc-product-csv-importer.php';
@@ -100,6 +100,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		$this->assertEquals( 0, count( $results['failed'] ) );
 		$this->assertEquals( 0, count( $results['updated'] ) );
 		$this->assertEquals( 0, count( $results['skipped'] ) );
+
 	}
 
 	/**
@@ -228,7 +229,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'Music > Albums, Music',
 				'Woo',
 				'',
-				'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_1_angle.jpg, http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_1_flat.jpg',
+				null,
 				'10',
 				'90',
 				'',
@@ -338,8 +339,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'product_url'           => '',
 				'button_text'           => '',
 				'status'                => 'publish',
-				'raw_image_id'          => 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_1_angle.jpg',
-				'raw_gallery_image_ids' => array( 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_1_flat.jpg' ),
+				'raw_image_id'          => null,
 				'virtual'               => true,
 				'downloadable'          => true,
 				'manage_stock'          => false,
@@ -426,12 +426,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'product_url'           => '',
 				'button_text'           => '',
 				'status'                => 'publish',
-				'raw_image_id'          => 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_4_front.jpg',
-				'raw_gallery_image_ids' => array(
-					'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_4_back.jpg',
-					'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_3_front.jpg',
-					'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_3_back.jpg',
-				),
+				'raw_image_id'          => null,
 				'virtual'               => false,
 				'downloadable'          => false,
 				'manage_stock'          => false,
@@ -478,7 +473,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'product_url'        => '',
 				'button_text'        => '',
 				'status'             => 'publish',
-				'raw_image_id'       => 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_4_front.jpg',
+				'raw_image_id'       => null,
 				'virtual'            => false,
 				'downloadable'       => false,
 				'manage_stock'       => true,
@@ -523,7 +518,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'product_url'        => '',
 				'button_text'        => '',
 				'status'             => 'publish',
-				'raw_image_id'       => 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_3_front.jpg',
+				'raw_image_id'       => null,
 				'virtual'            => false,
 				'downloadable'       => false,
 				'manage_stock'       => true,
@@ -568,8 +563,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'product_url'           => '',
 				'button_text'           => '',
 				'status'                => 'publish',
-				'raw_image_id'          => 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_1_front.jpg',
-				'raw_gallery_image_ids' => array( 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_1_angle.jpg' ),
+				'raw_image_id'          => null,
 				'virtual'               => false,
 				'downloadable'          => false,
 				'manage_stock'          => false,
