@@ -123,17 +123,6 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test actions that print the notices.
-	 *
-	 * @since 2.2
-	 */
-	public function test_wc_print_notices_actions() {
-
-		$this->assertNotFalse( has_action( 'woocommerce_before_shop_loop', 'wc_print_notices' ) );
-		$this->assertNotFalse( has_action( 'woocommerce_before_single_product', 'wc_print_notices' ) );
-	}
-
-	/**
 	 * Test wc_print_notice() w/ success type.
 	 *
 	 * @since 2.2

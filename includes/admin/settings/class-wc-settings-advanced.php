@@ -26,9 +26,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 		$this->id    = 'advanced';
 		$this->label = __( 'Advanced', 'woocommerce' );
 
-		add_action( 'woocommerce_settings_form_method_tab_' . $this->id, array( $this, 'form_method' ) );
 		parent::__construct();
-
 		$this->notices();
 	}
 
@@ -330,20 +328,11 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	/**
 	 * Form method.
 	 *
+	 * @deprecated 3.4.4
 	 * @param  string $method Method name.
 	 * @return string
 	 */
 	public function form_method( $method ) {
-		global $current_section;
-
-		if ( 'keys' === $current_section ) {
-			if ( isset( $_GET['create-key'] ) || isset( $_GET['edit-key'] ) ) { // WPCS: input var okay, CSRF ok.
-				return 'post';
-			}
-
-			return 'get';
-		}
-
 		return 'post';
 	}
 

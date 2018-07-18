@@ -93,7 +93,7 @@ class WC_Background_Updater extends WC_Background_Process {
 	 * item from the queue.
 	 *
 	 * @param string $callback Update callback function.
-	 * @return mixed
+	 * @return string|bool
 	 */
 	protected function task( $callback ) {
 		wc_maybe_define_constant( 'WC_UPDATING', true );
@@ -102,15 +102,22 @@ class WC_Background_Updater extends WC_Background_Process {
 
 		include_once dirname( __FILE__ ) . '/wc-update-functions.php';
 
+		$result = false;
+
 		if ( is_callable( $callback ) ) {
 			$logger->info( sprintf( 'Running %s callback', $callback ), array( 'source' => 'wc_db_updates' ) );
-			call_user_func( $callback );
-			$logger->info( sprintf( 'Finished %s callback', $callback ), array( 'source' => 'wc_db_updates' ) );
+			$result = (bool) call_user_func( $callback, $this );
+
+			if ( $result ) {
+				$logger->info( sprintf( '%s callback needs to run again', $callback ), array( 'source' => 'wc_db_updates' ) );
+			} else {
+				$logger->info( sprintf( 'Finished running %s callback', $callback ), array( 'source' => 'wc_db_updates' ) );
+			}
 		} else {
 			$logger->notice( sprintf( 'Could not find %s callback', $callback ), array( 'source' => 'wc_db_updates' ) );
 		}
 
-		return false;
+		return $result ? $callback : false;
 	}
 
 	/**
@@ -124,5 +131,14 @@ class WC_Background_Updater extends WC_Background_Process {
 		$logger->info( 'Data update complete', array( 'source' => 'wc_db_updates' ) );
 		WC_Install::update_db_version();
 		parent::complete();
+	}
+
+	/**
+	 * See if the batch limit has been exceeded.
+	 *
+	 * @return bool
+	 */
+	public function is_memory_exceeded() {
+		return $this->memory_exceeded();
 	}
 }

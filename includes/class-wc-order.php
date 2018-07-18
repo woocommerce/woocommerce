@@ -102,8 +102,6 @@ class WC_Order extends WC_Abstract_Order {
 		}
 
 		try {
-			wc_transaction_query( 'start' );
-
 			do_action( 'woocommerce_pre_payment_complete', $this->get_id() );
 
 			if ( WC()->session ) {
@@ -124,20 +122,18 @@ class WC_Order extends WC_Abstract_Order {
 			} else {
 				do_action( 'woocommerce_payment_complete_order_status_' . $this->get_status(), $this->get_id() );
 			}
-
-			wc_transaction_query( 'commit' );
 		} catch ( Exception $e ) {
-			wc_transaction_query( 'rollback' );
-
+			/**
+			 * If there was an error completing the payment, log to a file and add an order note so the admin can take action.
+			 */
 			$logger = wc_get_logger();
 			$logger->error(
-				sprintf( 'Payment complete of order #%d failed!', $this->get_id() ), array(
+				sprintf( 'Error completing payment for order #%d', $this->get_id() ), array(
 					'order' => $this,
 					'error' => $e,
 				)
 			);
 			$this->add_order_note( __( 'Payment complete event failed.', 'woocommerce' ) . ' ' . $e->getMessage() );
-
 			return false;
 		}
 		return true;
@@ -320,18 +316,12 @@ class WC_Order extends WC_Abstract_Order {
 		}
 
 		try {
-			wc_transaction_query( 'start' );
-
 			$this->set_status( $new_status, $note, $manual );
 			$this->save();
-
-			wc_transaction_query( 'commit' );
 		} catch ( Exception $e ) {
-			wc_transaction_query( 'rollback' );
-
 			$logger = wc_get_logger();
 			$logger->error(
-				sprintf( 'Update status of order #%d failed!', $this->get_id() ), array(
+				sprintf( 'Error updating status for order #%d', $this->get_id() ), array(
 					'order' => $this,
 					'error' => $e,
 				)

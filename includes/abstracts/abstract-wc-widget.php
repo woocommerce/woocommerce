@@ -187,7 +187,7 @@ abstract class WC_Widget extends WP_Widget {
 					$instance[ $key ] = empty( $new_instance[ $key ] ) ? 0 : 1;
 					break;
 				default:
-					$instance[ $key ] = sanitize_text_field( $new_instance[ $key ] );
+					$instance[ $key ] = isset( $new_instance[ $key ] ) ? sanitize_text_field( $new_instance[ $key ] ) : $setting['std'];
 					break;
 			}
 

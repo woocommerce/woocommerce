@@ -323,10 +323,16 @@ class WC_Shortcode_Products {
 			}
 
 			$query_args['tax_query'][] = array(
-				'taxonomy' => 'product_cat',
-				'terms'    => $categories,
-				'field'    => $field,
-				'operator' => $this->attributes['cat_operator'],
+				'taxonomy'         => 'product_cat',
+				'terms'            => $categories,
+				'field'            => $field,
+				'operator'         => $this->attributes['cat_operator'],
+
+				/*
+				 * When cat_operator is AND, the children categories should be excluded,
+				 * as only products belonging to all the children categories would be selected.
+				 */
+				'include_children' => 'AND' === $this->attributes['cat_operator'] ? false : true,
 			);
 		}
 	}

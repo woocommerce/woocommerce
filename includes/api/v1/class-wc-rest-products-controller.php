@@ -1664,13 +1664,18 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 			if ( $product->is_type( 'variable' ) ) {
 				foreach ( $product->get_children() as $child_id ) {
 					$child = wc_get_product( $child_id );
-					$child->delete( true );
+					if ( ! empty( $child ) ) {
+						$child->delete( true );
+					}
 				}
-			} elseif ( $product->is_type( 'grouped' ) ) {
+			} else {
+				// For other product types, if the product has children, remove the relationship.
 				foreach ( $product->get_children() as $child_id ) {
 					$child = wc_get_product( $child_id );
-					$child->set_parent_id( 0 );
-					$child->save();
+					if ( ! empty( $child ) ) {
+						$child->set_parent_id( 0 );
+						$child->save();
+					}
 				}
 			}
 

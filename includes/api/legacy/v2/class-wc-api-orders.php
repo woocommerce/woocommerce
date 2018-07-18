@@ -360,8 +360,6 @@ class WC_API_Orders extends WC_API_Resource {
 	public function create_order( $data ) {
 		global $wpdb;
 
-		wc_transaction_query( 'start' );
-
 		try {
 			if ( ! isset( $data['order'] ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_missing_order_data', sprintf( __( 'No %1$s data specified to create %1$s', 'woocommerce' ), 'order' ), 400 );
@@ -466,15 +464,10 @@ class WC_API_Orders extends WC_API_Resource {
 			do_action( 'woocommerce_api_create_order', $order->get_id(), $data, $this );
 			do_action( 'woocommerce_new_order', $order->get_id() );
 
-			wc_transaction_query( 'commit' );
-
 			return $this->get_order( $order->get_id() );
-
 		} catch ( WC_Data_Exception $e ) {
-			wc_transaction_query( 'rollback' );
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => 400 ) );
 		} catch ( WC_API_Exception $e ) {
-			wc_transaction_query( 'rollback' );
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}

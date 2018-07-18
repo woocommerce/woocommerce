@@ -293,7 +293,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 				if ( jQuery().selectWoo ) {
 					var wc_layered_nav_select = function() {
 						jQuery( '.dropdown_layered_nav_" . esc_js( $taxonomy_filter_name ) . "' ).selectWoo( {
-							placeholder: '" . esc_html( $any_label ) . "',
+							placeholder: '" . esc_js( $any_label ) . "',
 							minimumResultsForSearch: 5,
 							width: '100%',
 							allowClear: " . ( $multiple ? 'false' : 'true' ) . ",
@@ -373,7 +373,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		// Maybe store a transient of the count values.
 		$cache = apply_filters( 'woocommerce_layered_nav_count_maybe_cache', true );
 		if ( true === $cache ) {
-			$cached_counts = (array) get_transient( 'wc_layered_nav_counts_' . $taxonomy );	
+			$cached_counts = (array) get_transient( 'wc_layered_nav_counts_' . $taxonomy );
 		} else {
 			$cached_counts = array();
 		}

@@ -950,7 +950,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 				'billing_city'        => 'Portland',
 				'billing_state'       => 'OR',
 				'billing_postcode'    => '97266',
-				'billing_country'     => 'USA',
+				'billing_country'     => 'US',
 				'billing_phone'       => '503-123-4567',
 				'shipping_first_name' => 'Jane',
 				'shipping_last_name'  => 'Powers',
@@ -960,7 +960,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 				'shipping_city'       => 'Milwaukie',
 				'shipping_state'      => 'OR',
 				'shipping_postcode'   => '97222',
-				'shipping_country'    => 'USA',
+				'shipping_country'    => 'US',
 			)
 		);
 		$order1->save();
@@ -978,7 +978,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 				'billing_city'        => 'Vancouver',
 				'billing_state'       => 'WA',
 				'billing_postcode'    => '97267',
-				'billing_country'     => 'USA',
+				'billing_country'     => 'US',
 				'billing_phone'       => '503-333-3333',
 				'shipping_first_name' => 'Joseph',
 				'shipping_last_name'  => 'Thunder',
@@ -988,7 +988,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 				'shipping_city'       => 'Vancouver',
 				'shipping_state'      => 'WA',
 				'shipping_postcode'   => '97233',
-				'shipping_country'    => 'USA',
+				'shipping_country'    => 'US',
 			)
 		);
 		$order2->save();
@@ -1077,7 +1077,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 
 		$orders   = wc_get_orders(
 			array(
-				'billing_country' => 'USA',
+				'billing_country' => 'US',
 				'orderby'         => 'ID',
 				'order'           => 'ASC',
 				'return'          => 'ids',
@@ -1169,7 +1169,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 
 		$orders   = wc_get_orders(
 			array(
-				'shipping_country' => 'USA',
+				'shipping_country' => 'US',
 				'orderby'          => 'ID',
 				'order'            => 'ASC',
 				'return'           => 'ids',

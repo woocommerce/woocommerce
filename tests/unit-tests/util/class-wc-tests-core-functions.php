@@ -694,4 +694,15 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 			$this->assertEquals( wc_selected( $value, $options ), $actual_result );
 		}
 	}
+
+	/**
+	 * Test wc_get_user_agent function.
+	 *
+	 * @return void
+	 */
+	public function test_wc_get_user_agent() {
+		$example_user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36';
+		$_SERVER['HTTP_USER_AGENT'] = $example_user_agent;
+		$this->assertEquals( $example_user_agent, wc_get_user_agent() );
+	}
 }

@@ -69,7 +69,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_title( $webhook ) {
-		$edit_link = admin_url( 'admin.php?page=wc-settings&amp;tab=api&amp;section=webhooks&amp;edit-webhook=' . $webhook->get_id() );
+		$edit_link = admin_url( 'admin.php?page=wc-settings&amp;tab=advanced&amp;section=webhooks&amp;edit-webhook=' . $webhook->get_id() );
 		$output    = '';
 
 		// Title.
@@ -175,7 +175,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 		$class          = empty( $_REQUEST['status'] ) ? ' class="current"' : ''; // WPCS: input var okay. CSRF ok.
 
 		/* translators: %s: count */
-		$status_links['all'] = "<a href='admin.php?page=wc-settings&amp;tab=api&amp;section=webhooks'$class>" . sprintf( _nx( 'All <span class="count">(%s)</span>', 'All <span class="count">(%s)</span>', $total_webhooks, 'posts', 'woocommerce' ), number_format_i18n( $total_webhooks ) ) . '</a>';
+		$status_links['all'] = "<a href='admin.php?page=wc-settings&amp;tab=advanced&amp;section=webhooks'$class>" . sprintf( _nx( 'All <span class="count">(%s)</span>', 'All <span class="count">(%s)</span>', $total_webhooks, 'posts', 'woocommerce' ), number_format_i18n( $total_webhooks ) ) . '</a>';
 
 		foreach ( $statuses as $status_name ) {
 			$class = '';
@@ -190,7 +190,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 
 			$label = $this->get_status_label( $status_name, $num_webhooks[ $status_name ] );
 
-			$status_links[ $status_name ] = "<a href='admin.php?page=wc-settings&amp;tab=api&amp;section=webhooks&amp;status=$status_name'$class>" . sprintf( translate_nooped_plural( $label, $num_webhooks[ $status_name ] ), number_format_i18n( $num_webhooks[ $status_name ] ) ) . '</a>';
+			$status_links[ $status_name ] = "<a href='admin.php?page=wc-settings&amp;tab=advanced&amp;section=webhooks&amp;status=$status_name'$class>" . sprintf( translate_nooped_plural( $label, $num_webhooks[ $status_name ] ), number_format_i18n( $num_webhooks[ $status_name ] ) ) . '</a>';
 		}
 
 		return $status_links;
@@ -205,6 +205,22 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 		return array(
 			'delete' => __( 'Delete permanently', 'woocommerce' ),
 		);
+	}
+
+	/**
+	 * Process bulk actions.
+	 */
+	public function process_bulk_action() {
+		$action   = $this->current_action();
+		$webhooks = isset( $_REQUEST['webhook'] ) ? array_map( 'absint', (array) $_REQUEST['webhook'] ) : array(); // WPCS: input var okay, CSRF ok.
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_die( esc_html__( 'You do not have permission to edit Webhooks', 'woocommerce' ) );
+		}
+
+		if ( 'delete' === $action ) {
+			WC_Admin_Webhooks::bulk_delete( $webhooks );
+		}
 	}
 
 	/**

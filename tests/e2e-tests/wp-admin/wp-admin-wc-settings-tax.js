@@ -95,6 +95,13 @@ test.describe( 'WooCommerce Tax Settings', function() {
 		assert.eventually.ifError( settings.hasSubTab( 'Fancy rates' ) );
 	} );
 
+	// take screenshot
+	test.afterEach( function() {
+		if ( this.currentTest.state === 'failed' ) {
+			helper.takeScreenshot( manager, this.currentTest );
+		}
+	} );
+
 	// quit browser
 	test.after( () => {
 		manager.quitBrowser();

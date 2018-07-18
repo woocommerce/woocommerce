@@ -366,6 +366,8 @@ function wc_downloadable_file_permission( $download_id, $product, $order, $qty =
 		$download->set_access_expires( strtotime( $from_date . ' + ' . $expiry . ' DAY' ) );
 	}
 
+	$download = apply_filters( 'woocommerce_downloadable_file_permission', $download, $product, $order, $qty );
+
 	return $download->save();
 }
 

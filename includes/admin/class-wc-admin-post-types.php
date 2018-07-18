@@ -76,6 +76,8 @@ class WC_Admin_Post_Types {
 	 * @since 3.3.0
 	 */
 	public function setup_screen() {
+		global $wc_list_table;
+
 		$screen_id = false;
 
 		if ( function_exists( 'get_current_screen' ) ) {
@@ -90,15 +92,15 @@ class WC_Admin_Post_Types {
 		switch ( $screen_id ) {
 			case 'edit-shop_order':
 				include_once 'list-tables/class-wc-admin-list-table-orders.php';
-				new WC_Admin_List_Table_Orders();
+				$wc_list_table = new WC_Admin_List_Table_Orders();
 				break;
 			case 'edit-shop_coupon':
 				include_once 'list-tables/class-wc-admin-list-table-coupons.php';
-				new WC_Admin_List_Table_Coupons();
+				$wc_list_table = new WC_Admin_List_Table_Coupons();
 				break;
 			case 'edit-product':
 				include_once 'list-tables/class-wc-admin-list-table-products.php';
-				new WC_Admin_List_Table_Products();
+				$wc_list_table = new WC_Admin_List_Table_Products();
 				break;
 		}
 
@@ -350,7 +352,7 @@ class WC_Admin_Post_Types {
 				if ( ! empty( $new_sku ) ) {
 					$unique_sku = wc_product_has_unique_sku( $post_id, $new_sku );
 					if ( $unique_sku ) {
-						$product->set_sku( $new_sku );
+						$product->set_sku( wc_clean( wp_unslash( $new_sku ) ) );
 					}
 				} else {
 					$product->set_sku( '' );
