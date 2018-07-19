@@ -300,7 +300,9 @@ class WC_Product_Variable extends WC_Product {
 				continue;
 			}
 
-			$available_variations[] = $this->get_available_variation( $variation );
+			if( $this->get_available_variation( $variation ) ){
+			    $available_variations[] = $this->get_available_variation( $variation );
+			}
 		}
 		$available_variations = array_filter( $available_variations );
 
