@@ -110,10 +110,10 @@ class WC_Unit_Tests_Bootstrap {
 		require_once $this->tests_dir . '/framework/vendor/class-wp-test-spy-rest-server.php';
 
 		// test cases
+		require_once $this->tests_dir . '/includes/wp-http-testcase.php';
 		require_once $this->tests_dir . '/framework/class-wc-unit-test-case.php';
 		require_once $this->tests_dir . '/framework/class-wc-api-unit-test-case.php';
 		require_once $this->tests_dir . '/framework/class-wc-rest-unit-test-case.php';
-		require_once $this->tests_dir . '/includes/wp-http-testcase.php';
 
 		// Helpers
 		require_once $this->tests_dir . '/framework/helpers/class-wc-helper-product.php';

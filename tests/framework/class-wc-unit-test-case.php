@@ -13,7 +13,7 @@
  *
  * @since 2.2
  */
-class WC_Unit_Test_Case extends WP_UnitTestCase {
+class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 
 	/**
 	 * Holds the WC_Unit_Test_Factory instance.

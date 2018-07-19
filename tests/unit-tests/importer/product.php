@@ -4,7 +4,7 @@
  * Meta
  * @package WooCommerce\Tests\Importer
  */
-class WC_Tests_Product_CSV_Importer extends WP_HTTP_TestCase {
+class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 
 	/**
 	 * Test CSV file path.
