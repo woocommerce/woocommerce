@@ -11,7 +11,7 @@ import { noop } from 'lodash';
 /**
  * Internal dependencies
  */
-import ActivityCard from '../activity-card';
+import { ActivityCard } from '../activity-card';
 import ActivityHeader from '../activity-header';
 import ActivityOutboundLink from '../activity-outbound-link';
 import { EllipsisMenu, MenuTitle, MenuItem } from 'components/ellipsis-menu';

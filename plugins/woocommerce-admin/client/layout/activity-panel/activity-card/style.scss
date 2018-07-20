@@ -74,3 +74,55 @@
 		margin-left: 0.5em;
 	}
 }
+
+.woocommerce-activity-card.is-loading {
+	.is-placeholder {
+		@include placeholder();
+		display: inline-block;
+		height: 16px;
+	}
+
+	.woocommerce-activity-card__title {
+		width: 80%;
+	}
+
+	.woocommerce-activity-card__subtitle {
+		margin-top: $gap-smallest;
+	}
+
+	.woocommerce-activity-card__date {
+		width: 100%;
+		text-align: right;
+
+		.is-placeholder {
+			// Fixed width for a fake date
+			width: 68px;
+		}
+	}
+
+	.woocommerce-activity-card__icon {
+		margin-right: $gutter;
+
+		.is-placeholder {
+			height: 48px;
+			width: 48px;
+		}
+	}
+
+	.woocommerce-activity-card__body .is-placeholder {
+		width: 100%;
+		margin-bottom: $gap-smallest;
+
+		&:last-of-type {
+			width: 65%;
+			margin-bottom: 0;
+		}
+	}
+
+	.woocommerce-activity-card__actions {
+		.is-placeholder {
+			width: 91px;
+			height: 34px;
+		}
+	}
+}

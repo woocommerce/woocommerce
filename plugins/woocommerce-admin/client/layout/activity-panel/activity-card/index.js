@@ -61,4 +61,5 @@ ActivityCard.defaultProps = {
 	unread: false,
 };
 
-export default ActivityCard;
+export { ActivityCard };
+export { default as ActivityCardPlaceholder } from './placeholder';

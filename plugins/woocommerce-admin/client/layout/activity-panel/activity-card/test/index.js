@@ -9,7 +9,7 @@ import { shallow } from 'enzyme';
 /**
  * Internal dependencies
  */
-import ActivityCard from '../';
+import { ActivityCard } from '../';
 import Gravatar from 'components/gravatar';
 
 describe( 'ActivityCard', () => {
