@@ -443,7 +443,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			unset( $query_vars['s'] );
 		}
 
-		return $query_vars;
+		return apply_filters('woocommerce_products_admin_list_table_query_filters', $query_vars);
 	}
 
 	/**
