@@ -313,6 +313,7 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 	/**
 	 * Test for request_url() method.
 	 *
+	 * @group timeout
 	 * @throws WC_Data_Exception
 	 */
 	public function test_request_url() {
