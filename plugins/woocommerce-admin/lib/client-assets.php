@@ -42,6 +42,7 @@ function wc_admin_register_script() {
 	// Settings and variables can be passed here for access in the app
 	$settings = array(
 		'adminUrl'           => admin_url(),
+		'wcAssetUrl'         => plugins_url( 'assets/', WC_PLUGIN_FILE ),
 		'embedBreadcrumbs'   => wc_admin_get_embed_breadcrumbs(),
 		'siteLocale'         => esc_attr( get_bloginfo( 'language' ) ),
 		'currency'           => wc_admin_currency_settings(),

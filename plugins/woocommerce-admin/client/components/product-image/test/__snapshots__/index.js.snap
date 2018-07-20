@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ProductImage should fallback to empty alt attribute if not passed via prop or product object 1`] = `
+<img
+  alt=""
+  className="woocommerce-product-image"
+  height={60}
+  src="https://i.cloudup.com/pt4DjwRB84-3000x3000.png"
+  width={60}
+/>
+`;
+
+exports[`ProductImage should fallback to product alt text 1`] = `
+<img
+  alt="hello world"
+  className="woocommerce-product-image"
+  height={60}
+  src="https://i.cloudup.com/pt4DjwRB84-3000x3000.png"
+  width={60}
+/>
+`;
+
+exports[`ProductImage should render a placeholder image if no product images are found 1`] = `
+<img
+  alt=""
+  className="woocommerce-product-image is-placeholder"
+  height={60}
+  src="https://woocommerce.com/wp-content/plugins/woocommerce/assets/images/placeholder.png"
+  width={60}
+/>
+`;
+
+exports[`ProductImage should render a product image 1`] = `
+<img
+  alt=""
+  className="woocommerce-product-image"
+  height={60}
+  src="https://i.cloudup.com/pt4DjwRB84-3000x3000.png"
+  width={60}
+/>
+`;
+
+exports[`ProductImage should render the passed alt prop 1`] = `
+<img
+  alt="testing"
+  className="woocommerce-product-image is-placeholder"
+  height={60}
+  src="undefinedimages/placeholder.png"
+  width={60}
+/>
+`;
