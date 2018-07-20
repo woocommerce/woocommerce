@@ -35,10 +35,24 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 		wc_add_notice( 'Bogus Error Notice', 'error' );
 		$this->assertEquals( 1, wc_notice_count( 'error' ) );
 
-		// multiple notices of different types
-		wc_add_notice( 'Bogus Notice 2', 'success' );
+		// multiple notices of different types.
+		wc_clear_notices();
+		wc_add_notice( 'Bogus 1', 'success' );
+		wc_add_notice( 'Bogus 2', 'success' );
+		wc_add_notice( 'Bogus Notice 1', 'notice' );
+		wc_add_notice( 'Bogus Notice 2', 'notice' );
+		wc_add_notice( 'Bogus Error Notice 1', 'error' );
 		wc_add_notice( 'Bogus Error Notice 2', 'error' );
-		$this->assertEquals( 4, wc_notice_count() );
+		$this->assertEquals( 6, wc_notice_count() );
+
+		// repeat with duplicates.
+		wc_add_notice( 'Bogus 1', 'success' );
+		wc_add_notice( 'Bogus 2', 'success' );
+		wc_add_notice( 'Bogus Notice 1', 'notice' );
+		wc_add_notice( 'Bogus Notice 2', 'notice' );
+		wc_add_notice( 'Bogus Error Notice 1', 'error' );
+		wc_add_notice( 'Bogus Error Notice 2', 'error' );
+		$this->assertEquals( 12, wc_notice_count() );
 	}
 
 	/**
@@ -106,17 +120,6 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 		wc_print_notices();
 
 		$this->assertEmpty( WC()->session->get( 'wc_notices' ) );
-	}
-
-	/**
-	 * Test actions that print the notices.
-	 *
-	 * @since 2.2
-	 */
-	public function test_wc_print_notices_actions() {
-
-		$this->assertNotFalse( has_action( 'woocommerce_before_shop_loop', 'wc_print_notices' ) );
-		$this->assertNotFalse( has_action( 'woocommerce_before_single_product', 'wc_print_notices' ) );
 	}
 
 	/**

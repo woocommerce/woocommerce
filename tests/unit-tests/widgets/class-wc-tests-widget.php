@@ -20,17 +20,43 @@ class WC_Tests_Widget extends WC_Unit_Test_Case {
 		$this->assertTrue( property_exists( $dummy_widget, 'widget_id' ) );
 	}
 
+	/**
+	 * Test widget caching.
+	 *
+	 * @return void
+	 */
 	public function test_caching() {
 		global $wp_widget_factory;
 		require_once 'class-dummy-widget.php';
 		register_widget( 'Dummy_Widget' );
 
 		$dummy_widget = $wp_widget_factory->widgets['Dummy_Widget'];
-		$this->assertFalse( $dummy_widget->get_cached_widget( array( 'widget_id' => $dummy_widget->widget_id ) ) );
+
+		// Uncached widget.
+		ob_start();
+		$cache_hit = $dummy_widget->get_cached_widget( array( 'widget_id' => $dummy_widget->widget_id ) );
+		$output = ob_get_clean();
+		$this->assertFalse( $cache_hit );
+		$this->assertEmpty( $output );
+
+		// Render widget to prime the cache.
+		ob_start();
 		$dummy_widget->widget( array( 'widget_id' => $dummy_widget->widget_id ), array() );
-		$this->assertTrue( $dummy_widget->get_cached_widget( array( 'widget_id' => $dummy_widget->widget_id ) ) );
+		ob_get_clean();
+
+		// Cached widget.
+		ob_start();
+		$cache_hit = $dummy_widget->get_cached_widget( array( 'widget_id' => $dummy_widget->widget_id ) );
+		$output = ob_get_clean();
+		$this->assertTrue( $cache_hit );
+		$this->assertEquals( 'Dummy', $output );
 	}
 
+	/**
+	 * Test widget form.
+	 *
+	 * @return void
+	 */
 	public function test_form() {
 		global $wp_widget_factory;
 		require_once 'class-dummy-widget.php';

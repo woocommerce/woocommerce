@@ -1,4 +1,9 @@
 <?php
+/**
+ * WC_CLI_Update_Command class file.
+ *
+ * @package WooCommerce\CLI
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -27,8 +32,8 @@ class WC_CLI_Update_Command {
 
 		$wpdb->hide_errors();
 
-		include_once( WC_ABSPATH . 'includes/class-wc-install.php' );
-		include_once( WC_ABSPATH . 'includes/wc-update-functions.php' );
+		include_once WC_ABSPATH . 'includes/class-wc-install.php';
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
 
 		$current_db_version = get_option( 'woocommerce_db_version' );
 		$update_count       = 0;
@@ -36,6 +41,7 @@ class WC_CLI_Update_Command {
 		foreach ( WC_Install::get_db_update_callbacks() as $version => $update_callbacks ) {
 			if ( version_compare( $current_db_version, $version, '<' ) ) {
 				foreach ( $update_callbacks as $update_callback ) {
+					/* translators: %s: DB update callback key */
 					WP_CLI::log( sprintf( __( 'Calling update function: %s', 'woocommerce' ), $update_callback ) );
 					call_user_func( $update_callback );
 					$update_count ++;
@@ -44,6 +50,7 @@ class WC_CLI_Update_Command {
 		}
 
 		WC_Admin_Notices::remove_notice( 'update' );
+		/* translators: 1: Number of database updates performed 2: Database version number */
 		WP_CLI::success( sprintf( __( '%1$d updates complete. Database version is %2$s', 'woocommerce' ), absint( $update_count ), get_option( 'woocommerce_db_version' ) ) );
 	}
 }

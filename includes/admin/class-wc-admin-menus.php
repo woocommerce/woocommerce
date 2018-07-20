@@ -2,15 +2,11 @@
 /**
  * Setup menus in WP admin.
  *
- * @author   Automattic
- * @category Admin
- * @package  WooCommerce/Admin
- * @version  2.5.0
+ * @package WooCommerce\Admin
+ * @version 2.5.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 if ( class_exists( 'WC_Admin_Menus', false ) ) {
 	return new WC_Admin_Menus();
@@ -39,6 +35,7 @@ class WC_Admin_Menus {
 		add_action( 'admin_head', array( $this, 'menu_order_count' ) );
 		add_filter( 'menu_order', array( $this, 'menu_order' ) );
 		add_filter( 'custom_menu_order', array( $this, 'custom_menu_order' ) );
+		add_filter( 'set-screen-option', array( $this, 'set_screen_option' ), 10, 3 );
 
 		// Add endpoints custom URLs in Appearance > Menus > Pages.
 		add_action( 'admin_head-nav-menus.php', array( $this, 'add_nav_menu_meta_boxes' ) );
@@ -69,9 +66,9 @@ class WC_Admin_Menus {
 	 */
 	public function reports_menu() {
 		if ( current_user_can( 'manage_woocommerce' ) ) {
-			add_submenu_page( 'woocommerce', __( 'Reports', 'woocommerce' ),  __( 'Reports', 'woocommerce' ) , 'view_woocommerce_reports', 'wc-reports', array( $this, 'reports_page' ) );
+			add_submenu_page( 'woocommerce', __( 'Reports', 'woocommerce' ), __( 'Reports', 'woocommerce' ), 'view_woocommerce_reports', 'wc-reports', array( $this, 'reports_page' ) );
 		} else {
-			add_menu_page( __( 'Sales reports', 'woocommerce' ),  __( 'Sales reports', 'woocommerce' ) , 'view_woocommerce_reports', 'wc-reports', array( $this, 'reports_page' ), null, '55.6' );
+			add_menu_page( __( 'Sales reports', 'woocommerce' ), __( 'Sales reports', 'woocommerce' ), 'view_woocommerce_reports', 'wc-reports', array( $this, 'reports_page' ), null, '55.6' );
 		}
 	}
 
@@ -79,7 +76,7 @@ class WC_Admin_Menus {
 	 * Add menu item.
 	 */
 	public function settings_menu() {
-		$settings_page = add_submenu_page( 'woocommerce', __( 'WooCommerce settings', 'woocommerce' ),  __( 'Settings', 'woocommerce' ) , 'manage_woocommerce', 'wc-settings', array( $this, 'settings_page' ) );
+		$settings_page = add_submenu_page( 'woocommerce', __( 'WooCommerce settings', 'woocommerce' ), __( 'Settings', 'woocommerce' ), 'manage_woocommerce', 'wc-settings', array( $this, 'settings_page' ) );
 
 		add_action( 'load-' . $settings_page, array( $this, 'settings_page_init' ) );
 	}
@@ -101,7 +98,9 @@ class WC_Admin_Menus {
 		$current_section = empty( $_REQUEST['section'] ) ? '' : sanitize_title( wp_unslash( $_REQUEST['section'] ) ); // WPCS: input var okay, CSRF ok.
 
 		// Save settings if data has been posted.
-		if ( apply_filters( '' !== $current_section ? "woocommerce_save_settings_{$current_tab}_{$current_section}" : "woocommerce_save_settings_{$current_tab}", ! empty( $_POST ) ) ) { // WPCS: input var okay, CSRF ok.
+		if ( '' !== $current_section && apply_filters( "woocommerce_save_settings_{$current_tab}_{$current_section}", ! empty( $_POST ) ) ) { // WPCS: input var okay, CSRF ok.
+			WC_Admin_Settings::save();
+		} elseif ( '' === $current_section && apply_filters( "woocommerce_save_settings_{$current_tab}", ! empty( $_POST ) ) ) { // WPCS: input var okay, CSRF ok.
 			WC_Admin_Settings::save();
 		}
 
@@ -113,13 +112,15 @@ class WC_Admin_Menus {
 		if ( ! empty( $_GET['wc_message'] ) ) { // WPCS: input var okay, CSRF ok.
 			WC_Admin_Settings::add_message( wp_kses_post( wp_unslash( $_GET['wc_message'] ) ) ); // WPCS: input var okay, CSRF ok.
 		}
+
+		do_action( 'woocommerce_settings_page_init' );
 	}
 
 	/**
 	 * Add menu item.
 	 */
 	public function status_menu() {
-		add_submenu_page( 'woocommerce', __( 'WooCommerce status', 'woocommerce' ),  __( 'Status', 'woocommerce' ) , 'manage_woocommerce', 'wc-status', array( $this, 'status_page' ) );
+		add_submenu_page( 'woocommerce', __( 'WooCommerce status', 'woocommerce' ), __( 'Status', 'woocommerce' ), 'manage_woocommerce', 'wc-status', array( $this, 'status_page' ) );
 	}
 
 	/**
@@ -221,6 +222,21 @@ class WC_Admin_Menus {
 	}
 
 	/**
+	 * Validate screen options on update.
+	 *
+	 * @param bool|int $status Screen option value. Default false to skip.
+	 * @param string   $option The option name.
+	 * @param int      $value  The number of rows to use.
+	 */
+	public function set_screen_option( $status, $option, $value ) {
+		if ( in_array( $option, array( 'woocommerce_keys_per_page', 'woocommerce_webhooks_per_page' ), true ) ) {
+			return $value;
+		}
+
+		return $status;
+	}
+
+	/**
 	 * Init the reports page.
 	 */
 	public function reports_page() {
@@ -310,6 +326,7 @@ class WC_Admin_Menus {
 				</span>
 				<span class="add-to-menu">
 					<button type="submit" class="button-secondary submit-add-to-menu right" value="<?php esc_attr_e( 'Add to menu', 'woocommerce' ); ?>" name="add-post-type-menu-item" id="submit-posttype-woocommerce-endpoints"><?php esc_html_e( 'Add to menu', 'woocommerce' ); ?></button>
+					<span class="spinner"></span>
 				</span>
 			</p>
 		</div>
@@ -323,7 +340,7 @@ class WC_Admin_Menus {
 	 * @param WP_Admin_Bar $wp_admin_bar Admin bar instance.
 	 */
 	public function admin_bar_menus( $wp_admin_bar ) {
-		if ( ! is_admin() || ! is_user_logged_in() ) {
+		if ( ! is_admin() || ! is_admin_bar_showing() ) {
 			return;
 		}
 
@@ -338,12 +355,14 @@ class WC_Admin_Menus {
 		}
 
 		// Add an option to visit the store.
-		$wp_admin_bar->add_node( array(
-			'parent' => 'site-name',
-			'id'     => 'view-store',
-			'title'  => __( 'Visit Store', 'woocommerce' ),
-			'href'   => wc_get_page_permalink( 'shop' ),
-		) );
+		$wp_admin_bar->add_node(
+			array(
+				'parent' => 'site-name',
+				'id'     => 'view-store',
+				'title'  => __( 'Visit Store', 'woocommerce' ),
+				'href'   => wc_get_page_permalink( 'shop' ),
+			)
+		);
 	}
 }
 

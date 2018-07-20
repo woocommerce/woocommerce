@@ -2,6 +2,7 @@
  * Twenty Seventeen integration styles
  */
 @import 'mixins';
+@import 'animation';
 
 /**
  * Fonts
@@ -62,6 +63,22 @@
 
 	.loader {
 		@include loader();
+	}
+
+	form .form-row {
+		.required {
+			color: firebrick;
+			text-decoration: none;
+			visibility: hidden; // Only show optional by default.
+
+			&[title] {
+				border: 0 !important;
+			}
+		}
+
+		.optional {
+			visibility: visible;
+		 }
 	}
 }
 
@@ -133,14 +150,6 @@
 	}
 	ins {
 		display: inline-block;
-	}
-}
-
-.required {
-	color: firebrick;
-
-	&[title] {
-		border-bottom: none;
 	}
 }
 
@@ -218,6 +227,10 @@ ul.products {
 		.star-rating {
 			display: block;
 			margin-bottom: .75em;
+		}
+
+		.woocommerce-placeholder {
+			border: 1px solid #F2F2F2;
 		}
 
 		.button {
@@ -393,6 +406,11 @@ table.variations {
 
 	.zoomImg {
 		background-color: #fff;
+		opacity: 0;
+	}
+
+	.woocommerce-product-gallery__image--placeholder {
+		border: 1px solid #F2F2F2;
 	}
 
 	.woocommerce-product-gallery__image:nth-child(n+2) {
@@ -403,8 +421,8 @@ table.variations {
 	.flex-control-thumbs {
 		li {
 			list-style: none;
-			float: left;
 			cursor: pointer;
+			float: left;
 		}
 
 		img {
@@ -419,6 +437,8 @@ table.variations {
 
 	img {
 		display: block;
+		width: 100%;
+		height: auto;
 	}
 }
 
@@ -561,30 +581,6 @@ table.variations {
 			}
 		}
 	}
-}
-
-/**
- * Photoswipe
- * 1. These styles are required to overwrite default theme button styles (Twenty Twelve adds gradients via background-image).
- */
-
-button.pswp__button,
-button.pswp__button:hover,
-button.pswp__button--arrow--left::before,
-button.pswp__button--arrow--right::before {
-	background-color: transparent !important; /* 1 */
-}
-
-button.pswp__button--close:hover {
-	background-position: 0 -44px;
-}
-
-button.pswp__button--zoom:hover {
-	background-position: -88px 0;
-}
-
-.pswp img {
-	max-width: none;
 }
 
 /**
@@ -826,19 +822,43 @@ button.pswp__button--zoom:hover {
 	}
 }
 
+.cart_totals {
+	th, td {
+		vertical-align: top;
+		padding: 1em 0;
+		line-height: 1.5em;
+	}
+	th {
+		padding-right: 1em;
+	}
+	.woocommerce-shipping-destination {
+		margin-bottom: 0;
+	}
+}
+
+.shipping-calculator-button {
+	margin-top: .5em;
+	display: inline-block;
+}
+
+.shipping-calculator-form {
+	margin: 1em 0 0 0;
+}
+
 #shipping_method {
 	list-style: none;
-	margin-top: 1em;
+	margin: 0;
 
 	li {
 		margin-bottom: .5em;
 
 		input {
 			float: left;
+			margin-top: 0.17em;
 		}
 
 		label {
-			line-height: 1.15;
+			line-height: 1.5em;
 		}
 	}
 }
@@ -917,13 +937,77 @@ button.pswp__button--zoom:hover {
 	}
 }
 
+.woocommerce-no-js {
+	form.woocommerce-form-login,
+	form.woocommerce-form-coupon {
+		display: block !important;
+	}
+	.woocommerce-form-login-toggle,
+	.woocommerce-form-coupon-toggle,
+	.showcoupon {
+		display: none !important;
+	}
+}
+
 .woocommerce-terms-and-conditions {
 	border: 1px solid rgba(0,0,0,.2);
 	box-shadow: inset 0 1px 2px rgba(0,0,0,.1);
 	background: rgba(0,0,0,.05);
 }
 
+.woocommerce-terms-and-conditions-link {
+	display: inline-block;
+
+	&:after {
+		content: "";
+		display: inline-block;
+		border-style: solid;
+		margin-bottom: 2px;
+		margin-left: .25em;
+		border-width: 6px 6px 0 6px;
+		border-color: #111 transparent transparent transparent;
+	}
+	&.woocommerce-terms-and-conditions-link--open:after {
+		border-width: 0 6px 6px 6px;
+		border-color: transparent transparent #111 transparent;
+	}
+}
+
 .woocommerce-checkout {
+	.woocommerce-input-wrapper {
+		.description {
+			background: royalblue;
+			color: #fff;
+			border-radius: 3px;
+			padding: 1em;
+			margin: .5em 0 0;
+			clear: both;
+			display: none;
+			position: relative;
+
+			a {
+				color: #fff;
+				text-decoration: underline;
+				border: 0;
+				box-shadow: none;
+			}
+
+			&:before {
+				left: 50%;
+				top: 0%;
+				margin-top: -4px;
+				transform: translatex(-50%) rotate(180deg);
+				content: "";
+				position: absolute;
+				border-width: 4px 6px 0 6px;
+				border-style: solid;
+				border-color: royalblue transparent transparent transparent;
+				z-index: 100;
+				display: block;
+			}
+		}
+	}
+
 	.select2-choice,
 	.select2-choice:hover {
 		box-shadow: none !important;

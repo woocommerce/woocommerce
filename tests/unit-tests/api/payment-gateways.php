@@ -47,10 +47,13 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 			'title'              => 'Check payments',
 			'description'        => 'Please send a check to Store Name, Store Street, Store Town, Store State / County, Store Postcode.',
 			'order'              => '',
-			'enabled'            => true,
+			'enabled'            => false,
 			'method_title'       => 'Check payments',
-			'method_description' => 'Allows check payments. Why would you take checks in this day and age? Well you probably would not, but it does allow you to make test purchases for testing order emails and the success pages.',
-			'settings'           => array_diff_key( $this->get_settings( 'WC_Gateway_Cheque' ), array( 'enabled' => false, 'description' => false ) ),
+			'method_description' => 'Take payments in person via checks. This offline gateway can also be useful to test purchases.',
+			'settings'           => array_diff_key( $this->get_settings( 'WC_Gateway_Cheque' ), array(
+				'enabled'     => false,
+				'description' => false,
+			) ),
 			'_links' => array(
 				'self'       => array(
 					array(
@@ -94,10 +97,13 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 			'title'              => 'PayPal',
 			'description'        => "Pay via PayPal; you can pay with your credit card if you don't have a PayPal account.",
 			'order'              => '',
-			'enabled'            => true,
+			'enabled'            => false,
 			'method_title'       => 'PayPal',
-			'method_description' => 'PayPal Standard sends customers to PayPal to enter their payment information. PayPal IPN requires fsockopen/cURL support to update order statuses after payment. Check the <a href="http://example.org/wp-admin/admin.php?page=wc-status">system status</a> page for more details.',
-			'settings'           => array_diff_key( $this->get_settings( 'WC_Gateway_Paypal' ), array( 'enabled' => false, 'description' => false ) ),
+			'method_description' => 'PayPal Standard redirects customers to PayPal to enter their payment information.',
+			'settings'           => array_diff_key( $this->get_settings( 'WC_Gateway_Paypal' ), array(
+				'enabled'     => false,
+				'description' => false,
+			) ),
 		), $paypal );
 	}
 
@@ -270,7 +276,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	 * @param string $gateway_class Name of WC_Payment_Gateway class.
 	 */
 	private function get_settings( $gateway_class ) {
-		$gateway = new $gateway_class;
+		$gateway  = new $gateway_class();
 		$settings = array();
 		$gateway->init_form_fields();
 		foreach ( $gateway->form_fields as $id => $field ) {

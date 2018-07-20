@@ -1,17 +1,15 @@
 <?php
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 /**
  * Standard log levels
  *
- * @class          WC_Log_Levels
- * @version        1.0.0
- * @package        WooCommerce/Classes
- * @category       Class
- * @author         WooThemes
+ * @version 3.2.0
+ * @package WooCommerce/Classes
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Log levels class.
  */
 abstract class WC_Log_Levels {
 
@@ -77,7 +75,7 @@ abstract class WC_Log_Levels {
 	/**
 	 * Validate a level string.
 	 *
-	 * @param string $level
+	 * @param string $level Log level.
 	 * @return bool True if $level is a valid level.
 	 */
 	public static function is_valid_level( $level ) {
@@ -87,30 +85,24 @@ abstract class WC_Log_Levels {
 	/**
 	 * Translate level string to integer.
 	 *
-	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
+	 * @param string $level Log level, options: emergency|alert|critical|error|warning|notice|info|debug.
 	 * @return int 100 (debug) - 800 (emergency) or 0 if not recognized
 	 */
 	public static function get_level_severity( $level ) {
-		if ( self::is_valid_level( $level ) ) {
-			$severity = self::$level_to_severity[ strtolower( $level ) ];
-		} else {
-			$severity = 0;
-		}
-		return $severity;
+		return self::is_valid_level( $level ) ? self::$level_to_severity[ strtolower( $level ) ] : 0;
 	}
 
 	/**
 	 * Translate severity integer to level string.
 	 *
-	 * @param int $severity
+	 * @param int $severity Serevity level.
 	 * @return bool|string False if not recognized. Otherwise string representation of level.
 	 */
 	public static function get_severity_level( $severity ) {
-		if ( array_key_exists( $severity, self::$severity_to_level ) ) {
-			return self::$severity_to_level[ $severity ];
-		} else {
+		if ( ! array_key_exists( $severity, self::$severity_to_level ) ) {
 			return false;
 		}
+		return self::$severity_to_level[ $severity ];
 	}
 
 }

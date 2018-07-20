@@ -13,90 +13,74 @@ class WC_Helper_Product {
 	 * @param $product_id
 	 */
 	public static function delete_product( $product_id ) {
-		// Delete the psot
-		wp_delete_post( $product_id, true );
+		$product = wc_get_product( $product_id );
+		if ( $product ) {
+			$product->delete( true );
+		}
 	}
 
 	/**
 	 * Create simple product.
 	 *
 	 * @since 2.3
-	 *
 	 * @return WC_Product_Simple
 	 */
 	public static function create_simple_product() {
-		// Create the product
-		$product = wp_insert_post( array(
-			'post_title'  => 'Dummy Product',
-			'post_type'   => 'product',
-			'post_status' => 'publish',
+		$product = new WC_Product_Simple();
+		$product->set_props( array(
+			'name'          => 'Dummy Product',
+			'regular_price' => 10,
+			'sku'           => 'DUMMY SKU',
+			'manage_stock'  => false,
+			'tax_status'    => 'taxable',
+			'downloadable'  => false,
+			'virtual'       => false,
+			'stock_status'  => 'instock',
+			'weight'        => '1.1',
 		) );
-		update_post_meta( $product, '_price', '10' );
-		update_post_meta( $product, '_regular_price', '10' );
-		update_post_meta( $product, '_sale_price', '' );
-		update_post_meta( $product, '_sku', 'DUMMY SKU' );
-		update_post_meta( $product, '_manage_stock', 'no' );
-		update_post_meta( $product, '_tax_status', 'taxable' );
-		update_post_meta( $product, '_downloadable', 'no' );
-		update_post_meta( $product, '_virtual', 'no' );
-		update_post_meta( $product, '_stock_status', 'instock' );
-		update_post_meta( $product, '_weight', '1.1' );
-		wp_set_object_terms( $product, 'simple', 'product_type' );
+		$product->save();
 
-		return new WC_Product_Simple( $product );
+		return wc_get_product( $product->get_id() );
 	}
 
 	/**
 	 * Create external product.
 	 *
 	 * @since 3.0.0
-	 *
 	 * @return WC_Product_External
 	 */
 	public static function create_external_product() {
-		// Create the product
-		$product = wp_insert_post( array(
-			'post_title'  => 'Dummy External Product',
-			'post_type'   => 'product',
-			'post_status' => 'publish',
+		$product = new WC_Product_External();
+		$product->set_props( array(
+			'name'          => 'Dummy External Product',
+			'regular_price' => 10,
+			'sku'           => 'DUMMY EXTERNAL SKU',
+			'product_url'   => 'http://woocommerce.com',
+			'button_text'   => 'Buy external product',
 		) );
-		update_post_meta( $product, '_price', '10' );
-		update_post_meta( $product, '_regular_price', '10' );
-		update_post_meta( $product, '_sale_price', '' );
-		update_post_meta( $product, '_sku', 'DUMMY EXTERNAL SKU' );
-		update_post_meta( $product, '_product_url', 'http://woocommerce.com' );
-		update_post_meta( $product, '_button_text', 'Buy external product' );
-		wp_set_object_terms( $product, 'external', 'product_type' );
+		$product->save();
 
-		return new WC_Product_External( $product );
+		return wc_get_product( $product->get_id() );
 	}
 
 	/**
 	 * Create grouped product.
 	 *
 	 * @since 3.0.0
-	 *
 	 * @return WC_Product_Grouped
 	 */
 	public static function create_grouped_product() {
-		// Create the product
-		$product = wp_insert_post( array(
-			'post_title'  => 'Dummy Grouped Product',
-			'post_type'   => 'product',
-			'post_status' => 'publish',
+		$simple_product_1 = self::create_simple_product();
+		$simple_product_2 = self::create_simple_product();
+		$product          = new WC_Product_Grouped();
+		$product->set_props( array(
+			'name'          => 'Dummy Grouped Product',
+			'sku'           => 'DUMMY GROUPED SKU',
 		) );
-		$simple_product_1 = self::create_simple_product( $product );
-		$simple_product_2 = self::create_simple_product( $product );
-		update_post_meta( $product, '_children', array( $simple_product_1->get_id(), $simple_product_2->get_id() ) );
-		update_post_meta( $product, '_sku', 'DUMMY GROUPED SKU' );
-		update_post_meta( $product, '_manage_stock', 'no' );
-		update_post_meta( $product, '_tax_status', 'taxable' );
-		update_post_meta( $product, '_downloadable', 'no' );
-		update_post_meta( $product, '_virtual', 'no' );
-		update_post_meta( $product, '_stock_status', 'instock' );
-		wp_set_object_terms( $product, 'grouped', 'product_type' );
+		$product->set_children( array( $simple_product_1->get_id(), $simple_product_2->get_id() ) );
+		$product->save();
 
-		return new WC_Product_Grouped( $product );
+		return wc_get_product( $product->get_id() );
 	}
 
 	/**
@@ -107,114 +91,45 @@ class WC_Helper_Product {
 	 * @return WC_Product_Variable
 	 */
 	public static function create_variation_product() {
-		global $wpdb;
-
-		// Create all attribute related things
-		$attribute_data = self::create_attribute();
-
-		// Create the product
-		$product_id = wp_insert_post( array(
-			'post_title'  => 'Dummy Product',
-			'post_type'   => 'product',
-			'post_status' => 'publish',
+		$product = new WC_Product_Variable();
+		$product->set_props( array(
+			'name' => 'Dummy Variable Product',
+			'sku'  => 'DUMMY VARIABLE SKU',
 		) );
 
-		// Set it as variable.
-		wp_set_object_terms( $product_id, 'variable', 'product_type' );
+		$attribute_data = self::create_attribute( 'size', array( 'small', 'large' ) ); // Create all attribute related things.
+		$attributes     = array();
+		$attribute      = new WC_Product_Attribute();
+		$attribute->set_id( $attribute_data['attribute_id'] );
+		$attribute->set_name( $attribute_data['attribute_taxonomy'] );
+		$attribute->set_options( $attribute_data['term_ids'] );
+		$attribute->set_position( 1 );
+		$attribute->set_visible( true );
+		$attribute->set_variation( true );
+		$attributes[] = $attribute;
 
-		// Price related meta
-		update_post_meta( $product_id, '_price', '10' );
-		update_post_meta( $product_id, '_min_variation_price', '10' );
-		update_post_meta( $product_id, '_max_variation_price', '15' );
-		update_post_meta( $product_id, '_min_variation_regular_price', '10' );
-		update_post_meta( $product_id, '_max_variation_regular_price', '15' );
+		$product->set_attributes( $attributes );
+		$product->save();
 
-		// General meta
-		update_post_meta( $product_id, '_sku', 'DUMMY SKU' );
-		update_post_meta( $product_id, '_manage_stock', 'no' );
-		update_post_meta( $product_id, '_tax_status', 'taxable' );
-		update_post_meta( $product_id, '_downloadable', 'no' );
-		update_post_meta( $product_id, '_virtual', 'no' );
-		update_post_meta( $product_id, '_stock_status', 'instock' );
-
-		// Attributes
-		update_post_meta( $product_id, '_default_attributes', array() );
-		update_post_meta( $product_id, '_product_attributes', array(
-			'pa_size' => array(
-				'name'         => 'pa_size',
-				'value'        => '',
-				'position'     => '1',
-				'is_visible'   => 0,
-				'is_variation' => 1,
-				'is_taxonomy'  => 1,
-			),
+		$variation_1 = new WC_Product_Variation();
+		$variation_1->set_props( array(
+			'parent_id'     => $product->get_id(),
+			'sku'           => 'DUMMY SKU VARIABLE SMALL',
+			'regular_price' => 10,
 		) );
+		$variation_1->set_attributes( array( 'pa_size' => 'small' ) );
+		$variation_1->save();
 
-		wp_set_object_terms( $product_id, 'variable', 'product_type' );
-
-		// Link the product to the attribute
-		$wpdb->insert( $wpdb->prefix . 'term_relationships', array(
-			'object_id'        => $product_id,
-			'term_taxonomy_id' => $attribute_data['term_taxonomy_id'],
-			'term_order'       => 0,
+		$variation_2 = new WC_Product_Variation();
+		$variation_2->set_props( array(
+			'parent_id'     => $product->get_id(),
+			'sku'           => 'DUMMY SKU VARIABLE LARGE',
+			'regular_price' => 15,
 		) );
-		$return['term_taxonomy_id'] = $wpdb->insert_id;
+		$variation_2->set_attributes( array( 'pa_size' => 'large' ) );
+		$variation_2->save();
 
-		// Create the variation
-		$variation_id = wp_insert_post( array(
-			'post_title'  => 'Variation #' . ( $product_id + 1 ) . ' of Dummy Product',
-			'post_type'   => 'product_variation',
-			'post_parent' => $product_id,
-			'post_status' => 'publish',
-			'menu_order'  => 1,
-			'post_date'   => date( 'Y-m-d H:i:s', time() - 30 ), // Makes sure post dates differ if super quick.
-		) );
-
-		// Price related meta
-		update_post_meta( $variation_id, '_price', '10' );
-		update_post_meta( $variation_id, '_regular_price', '10' );
-
-		// General meta
-		update_post_meta( $variation_id, '_sku', 'DUMMY SKU VARIABLE SMALL' );
-		update_post_meta( $variation_id, '_manage_stock', 'no' );
-		update_post_meta( $variation_id, '_downloadable', 'no' );
-		update_post_meta( $variation_id, '_virtual', 'no' );
-		update_post_meta( $variation_id, '_stock_status', 'instock' );
-
-		wp_set_object_terms( $variation_id, 'variation', 'product_type' );
-
-		// Attribute meta
-		update_post_meta( $variation_id, 'attribute_pa_size', 'small' );
-
-		// Create the variation
-		$variation_id = wp_insert_post( array(
-			'post_title'  => 'Variation #' . ( $product_id + 2 ) . ' of Dummy Product',
-			'post_type'   => 'product_variation',
-			'post_parent' => $product_id,
-			'post_status' => 'publish',
-			'menu_order'  => 2,
-		) );
-
-		// Price related meta
-		update_post_meta( $variation_id, '_price', '15' );
-		update_post_meta( $variation_id, '_regular_price', '15' );
-
-		// General meta
-		update_post_meta( $variation_id, '_sku', 'DUMMY SKU VARIABLE LARGE' );
-		update_post_meta( $variation_id, '_manage_stock', 'no' );
-		update_post_meta( $variation_id, '_downloadable', 'no' );
-		update_post_meta( $variation_id, '_virtual', 'no' );
-		update_post_meta( $variation_id, '_stock_status', 'instock' );
-
-		// Attribute meta
-		update_post_meta( $variation_id, 'attribute_pa_size', 'large' );
-
-		// Add the variation meta to the main product
-		update_post_meta( $product_id, '_max_price_variation_id', $variation_id );
-
-		wp_set_object_terms( $variation_id, 'variation', 'product_type' );
-
-		return new WC_Product_Variable( $product_id );
+		return wc_get_product( $product->get_id() );
 	}
 
 	/**
@@ -224,14 +139,9 @@ class WC_Helper_Product {
 	 *
 	 * @return array
 	 */
-	public static function create_attribute() {
+	public static function create_attribute( $attribute_name = 'size', $terms = array( 'small' ) ) {
 		global $wpdb;
 
-		$return = array();
-
-		$attribute_name = 'size';
-
-		// Create attribute
 		$attribute = array(
 			'attribute_label'   => $attribute_name,
 			'attribute_name'    => $attribute_name,
@@ -240,43 +150,25 @@ class WC_Helper_Product {
 			'attribute_public'  => 0,
 		);
 		$wpdb->insert( $wpdb->prefix . 'woocommerce_attribute_taxonomies', $attribute );
-		$return['attribute_id'] = $wpdb->insert_id;
 
-		// Register the taxonomy
+		$return = array(
+			'attribute_name'     => $attribute_name,
+			'attribute_taxonomy' => 'pa_' . $attribute_name,
+			'attribute_id'       => $wpdb->insert_id,
+			'term_ids'           => array(),
+		);
+
+		// Register the taxonomy.
 		$name  = wc_attribute_taxonomy_name( $attribute_name );
 		$label = $attribute_name;
 
-		// Add the term
-		$wpdb->insert( $wpdb->prefix . 'terms', array(
-			'name'       => 'small',
-			'slug'       => 'small',
-			'term_group' => 0,
-		), array(
-			'%s',
-			'%s',
-			'%d',
-		) );
-		$return['term_id'] = $wpdb->insert_id;
-
-		// Add the term_taxonomy
-		$wpdb->insert( $wpdb->prefix . 'term_taxonomy', array(
-			'term_id'     => $return['term_id'],
-			'taxonomy'    => 'pa_size',
-			'description' => '',
-			'parent'      => 0,
-			'count'       => 1,
-		) );
-		$return['term_taxonomy_id'] = $wpdb->insert_id;
-
-		// Delete transient
 		delete_transient( 'wc_attribute_taxonomies' );
 
-		$taxonomy_data = array(
+		register_taxonomy( 'pa_' . $attribute_name, array( 'product' ), array(
 			'labels' => array(
-				'name' => 'size',
+				'name' => $attribute_name,
 			),
-		);
-		register_taxonomy( 'pa_size', array( 'product' ), $taxonomy_data );
+		) );
 
 		// Set product attributes global.
 		global $wc_product_attributes;
@@ -284,6 +176,17 @@ class WC_Helper_Product {
 		foreach ( wc_get_attribute_taxonomies() as $tax ) {
 			if ( $name = wc_attribute_taxonomy_name( $tax->attribute_name ) ) {
 				$wc_product_attributes[ $name ] = $tax;
+			}
+		}
+
+		foreach ( $terms as $term ) {
+			$result = term_exists( $term, 'pa_' . $attribute_name );
+
+			if ( ! $result ) {
+				$result = wp_insert_term( $term, 'pa_' . $attribute_name );
+				$return['term_ids'][] = $result['term_id'];
+			} else {
+				$return['term_ids'][] = $result['term_id'];
 			}
 		}
 
@@ -324,7 +227,6 @@ class WC_Helper_Product {
 			'comment_approved'     => 1,
 			'comment_type'         => 'review',
 		);
-
 		return wp_insert_comment( $data );
 	}
 

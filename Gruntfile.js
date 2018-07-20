@@ -101,16 +101,9 @@ module.exports = function( grunt ) {
 					ext: '.min.js'
 				}]
 			},
-			simplify_commerce: {
+			flexslider: {
 				files: [{
-					expand: true,
-					cwd: 'includes/gateways/simplify-commerce/assets/js/',
-					src: [
-						'*.js',
-						'!*.min.js'
-					],
-					dest: 'includes/gateways/simplify-commerce/assets/js/',
-					ext: '.min.js'
+					'<%= dirs.js %>/flexslider/jquery.flexslider.min.js': ['<%= dirs.js %>/flexslider/jquery.flexslider.js']
 				}]
 			}
 		},
@@ -131,7 +124,7 @@ module.exports = function( grunt ) {
 			}
 		},
 
-		// Generate RTL .css files
+		// Generate RTL .css files.
 		rtlcss: {
 			woocommerce: {
 				expand: true,
@@ -171,7 +164,7 @@ module.exports = function( grunt ) {
 		watch: {
 			css: {
 				files: ['<%= dirs.css %>/*.scss'],
-				tasks: ['sass', 'rtlcss', 'cssmin', 'concat']
+				tasks: ['sass', 'rtlcss', 'postcss', 'cssmin', 'concat']
 			},
 			js: {
 				files: [
@@ -230,12 +223,13 @@ module.exports = function( grunt ) {
 			},
 			files: {
 				src:  [
-					'**/*.php',         // Include all files
-					'!apigen/**',       // Exclude apigen/
-					'!node_modules/**', // Exclude node_modules/
-					'!tests/**',        // Exclude tests/
-					'!vendor/**',       // Exclude vendor/
-					'!tmp/**'           // Exclude tmp/
+					'**/*.php',               // Include all files
+					'!apigen/**',             // Exclude apigen/
+					'!includes/libraries/**', // Exclude libraries/
+					'!node_modules/**',       // Exclude node_modules/
+					'!tests/**',              // Exclude tests/
+					'!vendor/**',             // Exclude vendor/
+					'!tmp/**'                 // Exclude tmp/
 				],
 				expand: true
 			}
@@ -247,9 +241,9 @@ module.exports = function( grunt ) {
 				stdout: true,
 				stderr: true
 			},
-			apigen: {
+			apidocs: {
 				command: [
-					'apigen generate -q',
+					'vendor/bin/apigen generate -q',
 					'cd apigen',
 					'php hook-docs.php'
 				].join( '&&' )
@@ -262,12 +256,37 @@ module.exports = function( grunt ) {
 			},
 			e2e_tests_grep: {
 				command: 'npm run --silent test:grep "' + grunt.option( 'grep' ) + '"'
+			},
+			contributors: {
+				command: [
+					'echo "Generating contributor list since <%= fromDate %>"',
+					'./node_modules/.bin/githubcontrib --owner woocommerce --repo woocommerce --fromDate <%= fromDate %> --authToken <%= authToken %> --cols 6 --sortBy contributions --format md --sortOrder desc --showlogin true > contributors.md'
+				].join( '&&' )
+			}
+		},
+
+		prompt: {
+			contributors: {
+				options: {
+					questions: [
+						{
+							config: 'fromDate',
+							type: 'input',
+							message: 'What date (YYYY-MM-DD) should we get contributions since?'
+						},
+						{
+							config: 'authToken',
+							type: 'input',
+							message: '(optional) Provide a personal access token. This will allow 5000 requests per hour rather than 60 - use if nothing is generated.'
+						}
+					]
+				}
 			}
 		},
 
 		// Clean the directory.
 		clean: {
-			apigen: {
+			apidocs: {
 				src: [ 'wc-apidocs' ]
 			}
 		},
@@ -278,9 +297,6 @@ module.exports = function( grunt ) {
 				bin: 'vendor/bin/phpcs'
 			},
 			dist: {
-				options: {
-					standard: './phpcs.ruleset.xml'
-				},
 				src:  [
 					'**/*.php',                                                  // Include all files
 					'!apigen/**',                                                // Exclude apigen/
@@ -316,7 +332,7 @@ module.exports = function( grunt ) {
 		}
 	});
 
-	// Load NPM tasks to be used here
+	// Load NPM tasks to be used here.
 	grunt.loadNpmTasks( 'grunt-sass' );
 	grunt.loadNpmTasks( 'grunt-shell' );
 	grunt.loadNpmTasks( 'grunt-phpcs' );
@@ -331,8 +347,9 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks( 'grunt-contrib-concat' );
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
 	grunt.loadNpmTasks( 'grunt-contrib-clean' );
+	grunt.loadNpmTasks( 'grunt-prompt' );
 
-	// Register tasks
+	// Register tasks.
 	grunt.registerTask( 'default', [
 		'js',
 		'css',
@@ -342,7 +359,8 @@ module.exports = function( grunt ) {
 	grunt.registerTask( 'js', [
 		'jshint',
 		'uglify:admin',
-		'uglify:frontend'
+		'uglify:frontend',
+		'uglify:flexslider'
 	]);
 
 	grunt.registerTask( 'css', [
@@ -354,8 +372,13 @@ module.exports = function( grunt ) {
 	]);
 
 	grunt.registerTask( 'docs', [
-		'clean:apigen',
-		'shell:apigen'
+		'clean:apidocs',
+		'shell:apidocs'
+	]);
+
+	grunt.registerTask( 'contributors', [
+		'prompt:contributors',
+		'shell:contributors'
 	]);
 
 	// Only an alias to 'default' task.

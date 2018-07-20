@@ -2,25 +2,22 @@
 /**
  * Republic of Ireland
  *
- * @author      WooThemes
- * @category    i18n
- * @package     WooCommerce/i18n
- * @version     3.0.0
+ * @package WooCommerce/i18n
+ * @version 3.0.0
  */
+
 global $states;
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 $states['IE'] = array(
 	'CW' => __( 'Carlow', 'woocommerce' ),
 	'CN' => __( 'Cavan', 'woocommerce' ),
 	'CE' => __( 'Clare', 'woocommerce' ),
-	'CK' => __( 'Cork', 'woocommerce' ),
+	'CO' => __( 'Cork', 'woocommerce' ),
 	'DL' => __( 'Donegal', 'woocommerce' ),
-	'DN' => __( 'Dublin', 'woocommerce' ),
-	'GY' => __( 'Galway', 'woocommerce' ),
+	'D'  => __( 'Dublin', 'woocommerce' ),
+	'G'  => __( 'Galway', 'woocommerce' ),
 	'KY' => __( 'Kerry', 'woocommerce' ),
 	'KE' => __( 'Kildare', 'woocommerce' ),
 	'KK' => __( 'Kilkenny', 'woocommerce' ),
@@ -35,9 +32,9 @@ $states['IE'] = array(
 	'OY' => __( 'Offaly', 'woocommerce' ),
 	'RN' => __( 'Roscommon', 'woocommerce' ),
 	'SO' => __( 'Sligo', 'woocommerce' ),
-	'TY' => __( 'Tipperary', 'woocommerce' ),
+	'TA' => __( 'Tipperary', 'woocommerce' ),
 	'WD' => __( 'Waterford', 'woocommerce' ),
 	'WH' => __( 'Westmeath', 'woocommerce' ),
 	'WX' => __( 'Wexford', 'woocommerce' ),
-	'WW' => __( 'Wicklow', 'woocommerce' )
+	'WW' => __( 'Wicklow', 'woocommerce' ),
 );

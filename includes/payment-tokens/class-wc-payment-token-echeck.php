@@ -1,7 +1,12 @@
 <?php
+/**
+ * Class WC_Payment_Token_eCheck file.
+ *
+ * @package WooCommerce\PaymentTokens
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit; // Exit if accessed directly.
 }
 
 /**
@@ -9,16 +14,18 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Representation of a payment token for eChecks.
  *
- * @class 		WC_Payment_Token_eCheck
+ * @class       WC_Payment_Token_ECheck
  * @version     3.0.0
- * @since		2.6.0
- * @category 	PaymentTokens
- * @package 	WooCommerce/PaymentTokens
- * @author		WooThemes
+ * @since       2.6.0
+ * @package     WooCommerce/PaymentTokens
  */
-class WC_Payment_Token_eCheck extends WC_Payment_Token {
+class WC_Payment_Token_ECheck extends WC_Payment_Token {
 
-	/** @protected string Token Type String. */
+	/**
+	 * Token Type String.
+	 *
+	 * @var string
+	 */
 	protected $type = 'eCheck';
 
 	/**
@@ -34,11 +41,16 @@ class WC_Payment_Token_eCheck extends WC_Payment_Token {
 	 * Get type to display to user.
 	 *
 	 * @since  2.6.0
-	 * @param  string $deprecated Deprecated since WooCommerce 3.0
+	 * @param  string $deprecated Deprecated since WooCommerce 3.0.
 	 * @return string
 	 */
 	public function get_display_name( $deprecated = '' ) {
-		return __( 'eCheck', 'woocommerce' );
+		$display = sprintf(
+			/* translators: 1: credit card type 2: last 4 digits 3: expiry month 4: expiry year */
+			__( 'eCheck ending in %1$s', 'woocommerce' ),
+			$this->get_last4()
+		);
+		return $display;
 	}
 
 	/**
@@ -74,7 +86,7 @@ class WC_Payment_Token_eCheck extends WC_Payment_Token {
 	 * Returns the last four digits.
 	 *
 	 * @since  2.6.0
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return string Last 4 digits
 	 */
 	public function get_last4( $context = 'view' ) {
@@ -83,8 +95,9 @@ class WC_Payment_Token_eCheck extends WC_Payment_Token {
 
 	/**
 	 * Set the last four digits.
+	 *
 	 * @since 2.6.0
-	 * @param string $last4
+	 * @param string $last4 eCheck last four digits.
 	 */
 	public function set_last4( $last4 ) {
 		$this->set_prop( 'last4', $last4 );

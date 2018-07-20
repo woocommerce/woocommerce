@@ -1,14 +1,15 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 /**
  * Enables WooCommerce, via the the command line.
  *
+ * @package WooCommerce\CLI
  * @version 3.0.0
- * @package WooCommerce
- * @author  WooCommerce
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * CLI class.
  */
 class WC_CLI {
 	/**
@@ -23,10 +24,10 @@ class WC_CLI {
 	 * Load command files.
 	 */
 	private function includes() {
-		require_once __DIR__ . '/cli/class-wc-cli-runner.php';
-		require_once __DIR__ . '/cli/class-wc-cli-rest-command.php';
-		require_once __DIR__ . '/cli/class-wc-cli-tool-command.php';
-		require_once __DIR__ . '/cli/class-wc-cli-update-command.php';
+		require_once dirname( __FILE__ ) . '/cli/class-wc-cli-runner.php';
+		require_once dirname( __FILE__ ) . '/cli/class-wc-cli-rest-command.php';
+		require_once dirname( __FILE__ ) . '/cli/class-wc-cli-tool-command.php';
+		require_once dirname( __FILE__ ) . '/cli/class-wc-cli-update-command.php';
 	}
 
 	/**
@@ -39,4 +40,4 @@ class WC_CLI {
 	}
 }
 
-new WC_CLI;
+new WC_CLI();

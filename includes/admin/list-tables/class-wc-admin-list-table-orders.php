@@ -2,10 +2,8 @@
 /**
  * List tables: orders.
  *
- * @author   WooCommerce
- * @category Admin
- * @package  WooCommerce/Admin
- * @version  3.3.0
+ * @package WooCommerce\admin
+ * @version 3.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -137,9 +135,10 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			unset( $actions['edit'] );
 		}
 
-		$actions['mark_processing'] = __( 'Change status to processing', 'woocommerce' );
-		$actions['mark_on-hold']    = __( 'Change status to on-hold', 'woocommerce' );
-		$actions['mark_completed']  = __( 'Change status to completed', 'woocommerce' );
+		$actions['mark_processing']      = __( 'Change status to processing', 'woocommerce' );
+		$actions['mark_on-hold']         = __( 'Change status to on-hold', 'woocommerce' );
+		$actions['mark_completed']       = __( 'Change status to completed', 'woocommerce' );
+		$actions['remove_personal_data'] = __( 'Remove personal data', 'woocommerce' );
 
 		return $actions;
 	}
@@ -223,9 +222,15 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	 * Render columm: order_date.
 	 */
 	protected function render_order_date_column() {
-		$order_timestamp = $this->object->get_date_created()->getTimestamp();
+		$order_timestamp = $this->object->get_date_created() ? $this->object->get_date_created()->getTimestamp() : '';
 
-		if ( $order_timestamp > strtotime( '-1 day', current_time( 'timestamp', true ) ) ) {
+		if ( ! $order_timestamp ) {
+			echo '&ndash;';
+			return;
+		}
+
+		// Check if the order was created within the last 24 hours, and not in the future.
+		if ( $order_timestamp > strtotime( '-1 day', current_time( 'timestamp', true ) ) && $order_timestamp <= current_time( 'timestamp', true ) ) {
 			$show_date = sprintf(
 				/* translators: %s: human-readable time difference */
 				_x( '%s ago', '%s = human-readable time difference', 'woocommerce' ),
@@ -375,15 +380,17 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 											<a href="{{ data.shipping_address_map_url }}" target="_blank">{{{ data.formatted_shipping_address }}}</a>
 										<# } #>
 
-										<# if ( data.data.customer_note ) { #>
-											<strong><?php esc_html_e( 'Note', 'woocommerce' ); ?></strong>
-											{{ data.data.customer_note }}
-										<# } #>
-
 										<# if ( data.shipping_via ) { #>
 											<strong><?php esc_html_e( 'Shipping method', 'woocommerce' ); ?></strong>
 											{{ data.shipping_via }}
 										<# } #>
+									</div>
+								<# } #>
+
+								<# if ( data.data.customer_note ) { #>
+									<div class="wc-order-preview-note">
+										<strong><?php esc_html_e( 'Note', 'woocommerce' ); ?></strong>
+										{{ data.data.customer_note }}
 									</div>
 								<# } #>
 							</div>
@@ -396,7 +403,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 							<div class="inner">
 								{{{ data.actions_html }}}
 
-								<a class="button button-primary button-large" href="<?php echo esc_url( admin_url( 'post.php?action=edit' ) ); ?>&post={{ data.data.id }}"><?php esc_html_e( 'Edit order', 'woocommerce' ); ?></a>
+								<a class="button button-primary button-large" aria-label="<?php esc_attr_e( 'Edit this order', 'woocommerce' ); ?>" href="<?php echo esc_url( admin_url( 'post.php?action=edit' ) ); ?>&post={{ data.data.id }}"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
 							</div>
 						</footer>
 					</section>
@@ -426,6 +433,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 				'_line_tax',
 				'method_id',
 				'cost',
+				'_reduced_stock',
 			)
 		);
 
@@ -459,9 +467,11 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 				<tbody>';
 
 		foreach ( $line_items as $item_id => $item ) {
-			$product_object = is_callable( array( $item, 'get_product' ) ) ? $item->get_product() : null;
 
-			$html .= '<tr class="wc-order-preview-table__item wc-order-preview-table__item--' . esc_attr( $item_id ) . '">';
+			$product_object = is_callable( array( $item, 'get_product' ) ) ? $item->get_product() : null;
+			$row_class      = apply_filters( 'woocommerce_admin_html_order_preview_item_class', '', $item, $order );
+
+			$html .= '<tr class="wc-order-preview-table__item wc-order-preview-table__item--' . esc_attr( $item_id ) . ( $row_class ? ' ' . esc_attr( $row_class ) : '' ) . '">';
 
 			foreach ( $columns as $column => $label ) {
 				$html .= '<td class="wc-order-preview-table__column--' . esc_attr( $column ) . '">';
@@ -479,7 +489,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 							$html .= '<table cellspacing="0" class="wc-order-item-meta">';
 
 							foreach ( $meta_data as $meta_id => $meta ) {
-								if ( in_array( $meta->key, $hidden_order_itemmeta ) ) {
+								if ( in_array( $meta->key, $hidden_order_itemmeta, true ) ) {
 									continue;
 								}
 								$html .= '<tr><th>' . wp_kses_post( $meta->display_key ) . ':</th><td>' . wp_kses_post( force_balance_tags( $meta->display_value ) ) . '</td></tr>';
@@ -528,6 +538,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			$status_actions['on-hold'] = array(
 				'url'    => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=on-hold&order_id=' . $order->get_id() ), 'woocommerce-mark-order-status' ),
 				'name'   => __( 'On-hold', 'woocommerce' ),
+				'title'  => __( 'Change order status to on-hold', 'woocommerce' ),
 				'action' => 'on-hold',
 			);
 		}
@@ -536,6 +547,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			$status_actions['processing'] = array(
 				'url'    => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=processing&order_id=' . $order->get_id() ), 'woocommerce-mark-order-status' ),
 				'name'   => __( 'Processing', 'woocommerce' ),
+				'title'  => __( 'Change order status to processing', 'woocommerce' ),
 				'action' => 'processing',
 			);
 		}
@@ -544,6 +556,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			$status_actions['complete'] = array(
 				'url'    => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=completed&order_id=' . $order->get_id() ), 'woocommerce-mark-order-status' ),
 				'name'   => __( 'Completed', 'woocommerce' ),
+				'title'  => __( 'Change order status to completed', 'woocommerce' ),
 				'action' => 'complete',
 			);
 		}
@@ -616,39 +629,49 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	 * @return string
 	 */
 	public function handle_bulk_actions( $redirect_to, $action, $ids ) {
-		// Bail out if this is not a status-changing action.
-		if ( false === strpos( $action, 'mark_' ) ) {
-			return $redirect_to;
-		}
-
-		$order_statuses = wc_get_order_statuses();
-		$new_status     = substr( $action, 5 ); // Get the status name from action.
-		$report_action  = 'marked_' . $new_status;
-
-		// Sanity check: bail out if this is actually not a status, or is
-		// not a registered status.
-		if ( ! isset( $order_statuses[ 'wc-' . $new_status ] ) ) {
-			return $redirect_to;
-		}
-
+		$ids     = apply_filters( 'woocommerce_bulk_action_ids', array_reverse( array_map( 'absint', $ids ) ), $action, 'order' );
 		$changed = 0;
-		$ids     = array_map( 'absint', $ids );
 
-		foreach ( $ids as $id ) {
-			$order = wc_get_order( $id );
-			$order->update_status( $new_status, __( 'Order status changed by bulk edit:', 'woocommerce' ), true );
-			do_action( 'woocommerce_order_edit_status', $id, $new_status );
-			$changed++;
+		if ( 'remove_personal_data' === $action ) {
+			$report_action = 'removed_personal_data';
+
+			foreach ( $ids as $id ) {
+				$order = wc_get_order( $id );
+
+				if ( $order ) {
+					do_action( 'woocommerce_remove_order_personal_data', $order );
+					$changed++;
+				}
+			}
+		} elseif ( false !== strpos( $action, 'mark_' ) ) {
+			$order_statuses = wc_get_order_statuses();
+			$new_status     = substr( $action, 5 ); // Get the status name from action.
+			$report_action  = 'marked_' . $new_status;
+
+			// Sanity check: bail out if this is actually not a status, or is not a registered status.
+			if ( isset( $order_statuses[ 'wc-' . $new_status ] ) ) {
+				// Initialize payment gateways in case order has hooked status transition actions.
+				wc()->payment_gateways();
+
+				foreach ( $ids as $id ) {
+					$order = wc_get_order( $id );
+					$order->update_status( $new_status, __( 'Order status changed by bulk edit:', 'woocommerce' ), true );
+					do_action( 'woocommerce_order_edit_status', $id, $new_status );
+					$changed++;
+				}
+			}
 		}
 
-		$redirect_to = add_query_arg(
-			array(
-				'post_type'    => $this->list_table_type,
-				$report_action => true,
-				'changed'      => $changed,
-				'ids'          => join( ',', $ids ),
-			), $redirect_to
-		);
+		if ( $changed ) {
+			$redirect_to = add_query_arg(
+				array(
+					'post_type'   => $this->list_table_type,
+					'bulk_action' => $report_action,
+					'changed'     => $changed,
+					'ids'         => join( ',', $ids ),
+				), $redirect_to
+			);
+		}
 
 		return esc_url_raw( $redirect_to );
 	}
@@ -660,22 +683,28 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		global $post_type, $pagenow;
 
 		// Bail out if not on shop order list page.
-		if ( 'edit.php' !== $pagenow || 'shop_order' !== $post_type ) {
+		if ( 'edit.php' !== $pagenow || 'shop_order' !== $post_type || ! isset( $_REQUEST['bulk_action'] ) ) { // WPCS: input var ok, CSRF ok.
 			return;
 		}
 
 		$order_statuses = wc_get_order_statuses();
+		$number         = isset( $_REQUEST['changed'] ) ? absint( $_REQUEST['changed'] ) : 0; // WPCS: input var ok, CSRF ok.
+		$bulk_action    = wc_clean( wp_unslash( $_REQUEST['bulk_action'] ) ); // WPCS: input var ok, CSRF ok.
 
 		// Check if any status changes happened.
 		foreach ( $order_statuses as $slug => $name ) {
-			if ( isset( $_REQUEST[ 'marked_' . str_replace( 'wc-', '', $slug ) ] ) ) {  // WPCS: input var ok.
-
-				$number = isset( $_REQUEST['changed'] ) ? absint( $_REQUEST['changed'] ) : 0; // WPCS: input var ok.
-				/* translators: %s: orders count */
+			if ( 'marked_' . str_replace( 'wc-', '', $slug ) === $bulk_action ) { // WPCS: input var ok, CSRF ok.
+				/* translators: %d: orders count */
 				$message = sprintf( _n( '%d order status changed.', '%d order statuses changed.', $number, 'woocommerce' ), number_format_i18n( $number ) );
 				echo '<div class="updated"><p>' . esc_html( $message ) . '</p></div>';
 				break;
 			}
+		}
+
+		if ( 'removed_personal_data' === $bulk_action ) { // WPCS: input var ok, CSRF ok.
+			/* translators: %d: orders count */
+			$message = sprintf( _n( 'Removed personal data from %d order.', 'Removed personal data from %d orders.', $number, 'woocommerce' ), number_format_i18n( $number ) );
+			echo '<div class="updated"><p>' . esc_html( $message ) . '</p></div>';
 		}
 	}
 
@@ -710,7 +739,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			);
 		}
 		?>
-		<select class="wc-customer-search" name="_customer_user" data-placeholder="<?php esc_attr_e( 'Search for a customer&hellip;', 'woocommerce' ); ?>" data-allow_clear="true">
+		<select class="wc-customer-search" name="_customer_user" data-placeholder="<?php esc_attr_e( 'Filter by registered customer', 'woocommerce' ); ?>" data-allow_clear="true">
 			<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo wp_kses_post( $user_string ); ?><option>
 		</select>
 		<?php
@@ -743,15 +772,22 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 
 		// Filter the orders by the posted customer.
 		if ( ! empty( $_GET['_customer_user'] ) ) { // WPCS: input var ok.
-			// @codingStandardsIgnoreStart
-			$query_vars['meta_query'] = array(
-				array(
-					'key'   => '_customer_user',
-					'value' => (int) $_GET['_customer_user'], // WPCS: input var ok, sanitization ok.
-					'compare' => '=',
-				),
-			);
-			// @codingStandardsIgnoreEnd
+			$customer_id = (int) $_GET['_customer_user'];  // WPCS: input var ok, sanitization ok.
+
+			// On WC 3.5.0 the ID of the user that placed the order was moved from the post meta _customer_user to the post_author field in the wp_posts table.
+			if ( version_compare( get_option( 'woocommerce_db_version' ), '3.5.0', '>=' ) ) {
+				$query_vars['author'] = $customer_id;
+			} else {
+				// @codingStandardsIgnoreStart
+				$query_vars['meta_query'] = array(
+					array(
+						'key'     => '_customer_user',
+						'value'   => $customer_id,
+						'compare' => '=',
+					),
+				);
+				// @codingStandardsIgnoreEnd
+			}
 		}
 
 		// Sorting.

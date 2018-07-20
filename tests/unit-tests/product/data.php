@@ -63,14 +63,14 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 			'menu_order'         => 2,
 			'gallery_image_ids'  => array(),
 			'download_expiry'    => -1,
-			'download_limit'     => 5,
-			'attributes'         => $attributes,
+			'download_limit'     => 5
 		);
 
 		$product = new WC_Product();
 		foreach ( $getters_and_setters as $function => $value ) {
 			$product->{"set_{$function}"}( $value );
 		}
+		$product->set_attributes( $attributes );
 		$product->set_date_on_sale_from( '1475798400' );
 		$product->set_date_on_sale_to( '1477267200' );
 		$product->save();
@@ -78,11 +78,23 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		foreach ( $getters_and_setters as $function => $value ) {
 			$this->assertEquals( $value, $product->{"get_{$function}"}(), $function );
 		}
+		$this->assertCount( 1, $product->get_attributes() );
+		$this->assertContains( current( $product->get_attributes() )->get_data(), array(
+			'attribute_id' => 0,
+			'name'         => 'Test Attribute',
+			'options'      => array( 'Fish', 'Fingers' ),
+			'position'     => 0,
+			'visible'      => true,
+			'variation'    => false,
+		) );
 		$this->assertEquals( $product->get_date_on_sale_from()->getTimestamp(), 1475798400 );
 		$this->assertEquals( $product->get_date_on_sale_to()->getTimestamp(), 1477267200 );
 
-		$image_url = media_sideload_image( 'https://cldup.com/Dr1Bczxq4q.png', $product->get_id(), '', 'src' );
-		$image_id  = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE guid='%s';", $image_url ) );
+		$image_url = media_sideload_image( 'http://cldup.com/Dr1Bczxq4q.png', $product->get_id(), '', 'src' );
+
+		$this->assertNotWPError( $image_url );
+
+		$image_id  = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE guid = %s", $image_url ) );
 		$product->set_image_id( $image_id[0] );
 		$product->save();
 		$this->assertEquals( $image_id[0], $product->get_image_id() );
@@ -246,15 +258,15 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 
 		$product = wc_get_product( $product1_id );
 		$this->assertEquals( $product1_id, $product->get_id() );
-		$this->assertEquals( '<del><span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>&#x200e;10.00</span></del> <ins><span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>&#x200e;7.00</span></ins>', $product->get_price_html() );
+		$this->assertEquals( '<del><span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>10.00</span></del> <ins><span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>7.00</span></ins>', $product->get_price_html() );
 
 		$product = wc_get_product( $product2_id );
 		$this->assertEquals( $product2_id, $product->get_id() );
-		$this->assertEquals( '<del><span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>&#x200e;20.00</span></del> <ins><span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>&#x200e;16.00</span></ins>', $product->get_price_html() );
+		$this->assertEquals( '<del><span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>20.00</span></del> <ins><span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>16.00</span></ins>', $product->get_price_html() );
 
 		$product = wc_get_product( $product3_id );
 		$this->assertEquals( $product3_id, $product->get_id() );
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>&#x200e;50.00</span>', $product->get_price_html() );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>50.00</span>', $product->get_price_html() );
 
 		// Clean up.
 		$product1->delete();

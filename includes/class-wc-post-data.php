@@ -1,19 +1,17 @@
 <?php
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 /**
- * Post Data.
+ * Post Data
  *
  * Standardises certain post data on save.
  *
- * @class 		WC_Post_Data
- * @version		2.2.0
- * @package		WooCommerce/Classes/Data
- * @category	Class
- * @author 		WooThemes
+ * @package WooCommerce/Classes/Data
+ * @version 2.2.0
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Post data class.
  */
 class WC_Post_Data {
 
@@ -45,7 +43,7 @@ class WC_Post_Data {
 		add_filter( 'wp_insert_post_data', array( __CLASS__, 'wp_insert_post_data' ) );
 		add_filter( 'oembed_response_data', array( __CLASS__, 'filter_oembed_response_data' ), 10, 2 );
 
-		// Status transitions
+		// Status transitions.
 		add_action( 'delete_post', array( __CLASS__, 'delete_post' ) );
 		add_action( 'wp_trash_post', array( __CLASS__, 'trash_post' ) );
 		add_action( 'untrashed_post', array( __CLASS__, 'untrash_post' ) );
@@ -59,14 +57,18 @@ class WC_Post_Data {
 	/**
 	 * Link to parent products when getting permalink for variation.
 	 *
-	 * @param string $permalink
-	 * @param object $post
+	 * @param string  $permalink Permalink.
+	 * @param WP_Post $post      Post data.
 	 *
 	 * @return string
 	 */
 	public static function variation_post_link( $permalink, $post ) {
-		if ( isset( $post->ID, $post->post_type ) && 'product_variation' === $post->post_type && ( $variation = wc_get_product( $post->ID ) ) && $variation->get_parent_id() ) {
-			return $variation->get_permalink();
+		if ( isset( $post->ID, $post->post_type ) && 'product_variation' === $post->post_type ) {
+			$variation = wc_get_product( $post->ID );
+
+			if ( $variation && $variation->get_parent_id() ) {
+				return $variation->get_permalink();
+			}
 		}
 		return $permalink;
 	}
@@ -85,7 +87,8 @@ class WC_Post_Data {
 
 	/**
 	 * Sync a product.
-	 * @param  int $product_id
+	 *
+	 * @param int $product_id Product ID.
 	 */
 	public static function deferred_product_sync( $product_id ) {
 		$product = wc_get_product( $product_id );
@@ -98,18 +101,18 @@ class WC_Post_Data {
 	/**
 	 * Delete transients when terms are set.
 	 *
-	 * @param int $object_id
-	 * @param mixed $terms
-	 * @param array $tt_ids
-	 * @param string $taxonomy
-	 * @param mixed $append
-	 * @param array $old_tt_ids
+	 * @param int    $object_id  Object ID.
+	 * @param mixed  $terms      An array of object terms.
+	 * @param array  $tt_ids     An array of term taxonomy IDs.
+	 * @param string $taxonomy   Taxonomy slug.
+	 * @param mixed  $append     Whether to append new terms to the old terms.
+	 * @param array  $old_tt_ids Old array of term taxonomy IDs.
 	 */
 	public static function set_object_terms( $object_id, $terms, $tt_ids, $taxonomy, $append, $old_tt_ids ) {
 		foreach ( array_merge( $tt_ids, $old_tt_ids ) as $id ) {
 			delete_transient( 'wc_ln_count_' . md5( sanitize_key( $taxonomy ) . sanitize_key( $id ) ) );
 		}
-		if ( in_array( get_post_type( $object_id ), array( 'product', 'product_variation' ) ) ) {
+		if ( in_array( get_post_type( $object_id ), array( 'product', 'product_variation' ), true ) ) {
 			self::delete_product_query_transients();
 		}
 	}
@@ -117,12 +120,12 @@ class WC_Post_Data {
 	/**
 	 * When a post status changes.
 	 *
-	 * @param string $new_status
-	 * @param string $old_status
-	 * @param object $post
+	 * @param string  $new_status New status.
+	 * @param string  $old_status Old status.
+	 * @param WP_Post $post       Post data.
 	 */
 	public static function transition_post_status( $new_status, $old_status, $post ) {
-		if ( ( 'publish' === $new_status || 'publish' === $old_status ) && in_array( $post->post_type, array( 'product', 'product_variation' ) ) ) {
+		if ( ( 'publish' === $new_status || 'publish' === $old_status ) && in_array( $post->post_type, array( 'product', 'product_variation' ), true ) ) {
 			self::delete_product_query_transients();
 		}
 	}
@@ -131,20 +134,22 @@ class WC_Post_Data {
 	 * Delete product view transients when needed e.g. when post status changes, or visibility/stock status is modified.
 	 */
 	public static function delete_product_query_transients() {
-		// Increments the transient version to invalidate cache
+		// Increments the transient version to invalidate cache.
 		WC_Cache_Helper::get_transient_version( 'product_query', true );
 
-		// If not using an external caching system, we can clear the transients out manually and avoid filling our DB
+		// If not using an external caching system, we can clear the transients out manually and avoid filling our DB.
 		if ( ! wp_using_ext_object_cache() ) {
 			global $wpdb;
 
-			$wpdb->query( "
+			$wpdb->query(
+				"
 				DELETE FROM `$wpdb->options`
 				WHERE `option_name` LIKE ('\_transient\_wc\_uf\_pid\_%')
 				OR `option_name` LIKE ('\_transient\_timeout\_wc\_uf\_pid\_%')
 				OR `option_name` LIKE ('\_transient\_wc\_products\_will\_display\_%')
 				OR `option_name` LIKE ('\_transient\_timeout\_wc\_products\_will\_display\_%')
-			" );
+			"
+			);
 		}
 	}
 
@@ -152,9 +157,9 @@ class WC_Post_Data {
 	 * Handle type changes.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Product $product
-	 * @param string $from
-	 * @param string $to
+	 * @param WC_Product $product Product data.
+	 * @param string     $from    Origin type.
+	 * @param string     $to      New type.
 	 */
 	public static function product_type_changed( $product, $from, $to ) {
 		if ( 'variable' === $from && 'variable' !== $to ) {
@@ -166,9 +171,10 @@ class WC_Post_Data {
 
 	/**
 	 * When editing a term, check for product attributes.
-	 * @param  id $term_id
-	 * @param  id $tt_id
-	 * @param  string $taxonomy
+	 *
+	 * @param  int    $term_id  Term ID.
+	 * @param  int    $tt_id    Term taxonomy ID.
+	 * @param  string $taxonomy Taxonomy slug.
 	 */
 	public static function edit_term( $term_id, $tt_id, $taxonomy ) {
 		if ( strpos( $taxonomy, 'pa_' ) === 0 ) {
@@ -180,9 +186,10 @@ class WC_Post_Data {
 
 	/**
 	 * When a term is edited, check for product attributes and update variations.
-	 * @param  id $term_id
-	 * @param  id $tt_id
-	 * @param  string $taxonomy
+	 *
+	 * @param  int    $term_id  Term ID.
+	 * @param  int    $tt_id    Term taxonomy ID.
+	 * @param  string $taxonomy Taxonomy slug.
 	 */
 	public static function edited_term( $term_id, $tt_id, $taxonomy ) {
 		if ( ! is_null( self::$editing_term ) && strpos( $taxonomy, 'pa_' ) === 0 ) {
@@ -201,23 +208,22 @@ class WC_Post_Data {
 	/**
 	 * Ensure floats are correctly converted to strings based on PHP locale.
 	 *
-	 * @param  null $check
-	 * @param  int $object_id
-	 * @param  string $meta_key
-	 * @param  mixed $meta_value
-	 * @param  mixed $prev_value
+	 * @param  null   $check      Whether to allow updating metadata for the given type.
+	 * @param  int    $object_id  Object ID.
+	 * @param  string $meta_key   Meta key.
+	 * @param  mixed  $meta_value Meta value. Must be serializable if non-scalar.
+	 * @param  mixed  $prev_value If specified, only update existing metadata entries with the specified value. Otherwise, update all entries.
 	 * @return null|bool
 	 */
 	public static function update_order_item_metadata( $check, $object_id, $meta_key, $meta_value, $prev_value ) {
 		if ( ! empty( $meta_value ) && is_float( $meta_value ) ) {
 
-			// Convert float to string
+			// Convert float to string.
 			$meta_value = wc_float_to_string( $meta_value );
 
-			// Update meta value with new string
+			// Update meta value with new string.
 			update_metadata( 'order_item', $object_id, $meta_key, $meta_value, $prev_value );
 
-			// Return
 			return true;
 		}
 		return $check;
@@ -226,28 +232,27 @@ class WC_Post_Data {
 	/**
 	 * Ensure floats are correctly converted to strings based on PHP locale.
 	 *
-	 * @param  null $check
-	 * @param  int $object_id
-	 * @param  string $meta_key
-	 * @param  mixed $meta_value
-	 * @param  mixed $prev_value
+	 * @param  null   $check      Whether to allow updating metadata for the given type.
+	 * @param  int    $object_id  Object ID.
+	 * @param  string $meta_key   Meta key.
+	 * @param  mixed  $meta_value Meta value. Must be serializable if non-scalar.
+	 * @param  mixed  $prev_value If specified, only update existing metadata entries with the specified value. Otherwise, update all entries.
 	 * @return null|bool
 	 */
 	public static function update_post_metadata( $check, $object_id, $meta_key, $meta_value, $prev_value ) {
 		// Delete product cache if someone uses meta directly.
-		if ( in_array( get_post_type( $object_id ), array( 'product', 'product_variation' ) ) ) {
+		if ( in_array( get_post_type( $object_id ), array( 'product', 'product_variation' ), true ) ) {
 			wp_cache_delete( 'product-' . $object_id, 'products' );
 		}
 
-		if ( ! empty( $meta_value ) && is_float( $meta_value ) && in_array( get_post_type( $object_id ), array_merge( wc_get_order_types(), array( 'shop_coupon', 'product', 'product_variation' ) ) ) ) {
+		if ( ! empty( $meta_value ) && is_float( $meta_value ) && in_array( get_post_type( $object_id ), array_merge( wc_get_order_types(), array( 'shop_coupon', 'product', 'product_variation' ) ), true ) ) {
 
-			// Convert float to string
+			// Convert float to string.
 			$meta_value = wc_float_to_string( $meta_value );
 
-			// Update meta value with new string
+			// Update meta value with new string.
 			update_metadata( 'post', $object_id, $meta_key, $meta_value, $prev_value );
 
-			// Return
 			return true;
 		}
 		return $check;
@@ -255,10 +260,11 @@ class WC_Post_Data {
 
 	/**
 	 * When setting stock level, ensure the stock status is kept in sync.
-	 * @param  int $meta_id
-	 * @param  int $object_id
-	 * @param  string $meta_key
-	 * @param  mixed $meta_value
+	 *
+	 * @param  int    $meta_id    Meta ID.
+	 * @param  int    $object_id  Object ID.
+	 * @param  string $meta_key   Meta key.
+	 * @param  mixed  $meta_value Meta value.
 	 * @deprecated
 	 */
 	public static function sync_product_stock_status( $meta_id, $object_id, $meta_key, $meta_value ) {}
@@ -267,7 +273,7 @@ class WC_Post_Data {
 	 * Forces the order posts to have a title in a certain format (containing the date).
 	 * Forces certain product data based on the product's type, e.g. grouped products cannot have a parent.
 	 *
-	 * @param array $data
+	 * @param array $data An array of slashed post data.
 	 * @return array
 	 */
 	public static function wp_insert_post_data( $data ) {
@@ -277,13 +283,13 @@ class WC_Post_Data {
 				$order_title .= ' &ndash; ' . date_i18n( 'F j, Y @ h:i A', strtotime( $data['post_date'] ) );
 			}
 			$data['post_title'] = $order_title;
-		} elseif ( 'product' === $data['post_type'] && isset( $_POST['product-type'] ) ) {
-			$product_type = stripslashes( $_POST['product-type'] );
+		} elseif ( 'product' === $data['post_type'] && isset( $_POST['product-type'] ) ) { // WPCS: input var ok, CSRF ok.
+			$product_type = wc_clean( wp_unslash( $_POST['product-type'] ) ); // WPCS: input var ok, CSRF ok.
 			switch ( $product_type ) {
-				case 'grouped' :
-				case 'variable' :
+				case 'grouped':
+				case 'variable':
 					$data['post_parent'] = 0;
-				break;
+					break;
 			}
 		} elseif ( 'product' === $data['post_type'] && 'auto-draft' === $data['post_status'] ) {
 			$data['post_title'] = 'AUTO-DRAFT';
@@ -301,7 +307,7 @@ class WC_Post_Data {
 	 * @return array
 	 */
 	public static function filter_oembed_response_data( $data, $post ) {
-		if ( in_array( $post->post_type, array( 'shop_order', 'shop_coupon' ) ) ) {
+		if ( in_array( $post->post_type, array( 'shop_order', 'shop_coupon' ), true ) ) {
 			return array();
 		}
 		return $data;
@@ -310,7 +316,7 @@ class WC_Post_Data {
 	/**
 	 * Removes variations etc belonging to a deleted post, and clears transients.
 	 *
-	 * @param mixed $id ID of post being deleted
+	 * @param mixed $id ID of post being deleted.
 	 */
 	public static function delete_post( $id ) {
 		if ( ! current_user_can( 'delete_posts' ) || ! $id ) {
@@ -320,18 +326,19 @@ class WC_Post_Data {
 		$post_type = get_post_type( $id );
 
 		switch ( $post_type ) {
-			case 'product' :
+			case 'product':
 				$data_store = WC_Data_Store::load( 'product-variable' );
 				$data_store->delete_variations( $id, true );
+				$parent_id = wp_get_post_parent_id( $id );
 
-				if ( $parent_id = wp_get_post_parent_id( $id ) ) {
+				if ( $parent_id ) {
 					wc_delete_product_transients( $parent_id );
 				}
 				break;
-			case 'product_variation' :
+			case 'product_variation':
 				wc_delete_product_transients( wp_get_post_parent_id( $id ) );
 				break;
-			case 'shop_order' :
+			case 'shop_order':
 				global $wpdb;
 
 				$refunds = $wpdb->get_results( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order_refund' AND post_parent = %d", $id ) );
@@ -346,9 +353,9 @@ class WC_Post_Data {
 	}
 
 	/**
-	 * woocommerce_trash_post function.
+	 * Trash post.
 	 *
-	 * @param mixed $id
+	 * @param mixed $id Post ID.
 	 */
 	public static function trash_post( $id ) {
 		if ( ! $id ) {
@@ -358,7 +365,7 @@ class WC_Post_Data {
 		$post_type = get_post_type( $id );
 
 		// If this is an order, trash any refunds too.
-		if ( in_array( $post_type, wc_get_order_types( 'order-count' ) ) ) {
+		if ( in_array( $post_type, wc_get_order_types( 'order-count' ), true ) ) {
 			global $wpdb;
 
 			$refunds = $wpdb->get_results( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order_refund' AND post_parent = %d", $id ) );
@@ -369,7 +376,7 @@ class WC_Post_Data {
 
 			wc_delete_shop_order_transients( $id );
 
-		// If this is a product, trash children variations.
+			// If this is a product, trash children variations.
 		} elseif ( 'product' === $post_type ) {
 			$data_store = WC_Data_Store::load( 'product-variable' );
 			$data_store->delete_variations( $id, false );
@@ -377,9 +384,9 @@ class WC_Post_Data {
 	}
 
 	/**
-	 * woocommerce_untrash_post function.
+	 * Untrash post.
 	 *
-	 * @param mixed $id
+	 * @param mixed $id Post ID.
 	 */
 	public static function untrash_post( $id ) {
 		if ( ! $id ) {
@@ -388,7 +395,7 @@ class WC_Post_Data {
 
 		$post_type = get_post_type( $id );
 
-		if ( in_array( $post_type, wc_get_order_types( 'order-count' ) ) ) {
+		if ( in_array( $post_type, wc_get_order_types( 'order-count' ), true ) ) {
 			global $wpdb;
 
 			$refunds = $wpdb->get_results( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order_refund' AND post_parent = %d", $id ) );
@@ -411,12 +418,12 @@ class WC_Post_Data {
 	 * Before deleting an order, do some cleanup.
 	 *
 	 * @since 3.2.0
-	 * @param int $order_id
+	 * @param int $order_id Order ID.
 	 */
 	public static function before_delete_order( $order_id ) {
-		if ( in_array( get_post_type( $order_id ), wc_get_order_types() ) ) {
+		if ( in_array( get_post_type( $order_id ), wc_get_order_types(), true ) ) {
 			// Clean up user.
-			$order       = wc_get_order( $order_id );
+			$order = wc_get_order( $order_id );
 
 			// Check for `get_customer_id`, since this may be e.g. a refund order (which doesn't implement it).
 			$customer_id = is_callable( array( $order, 'get_customer_id' ) ) ? $order->get_customer_id() : 0;
@@ -444,20 +451,22 @@ class WC_Post_Data {
 	/**
 	 * Remove item meta on permanent deletion.
 	 *
-	 * @param int $postid
+	 * @param int $postid Post ID.
 	 */
 	public static function delete_order_items( $postid ) {
 		global $wpdb;
 
-		if ( in_array( get_post_type( $postid ), wc_get_order_types() ) ) {
+		if ( in_array( get_post_type( $postid ), wc_get_order_types(), true ) ) {
 			do_action( 'woocommerce_delete_order_items', $postid );
 
-			$wpdb->query( "
+			$wpdb->query(
+				"
 				DELETE {$wpdb->prefix}woocommerce_order_items, {$wpdb->prefix}woocommerce_order_itemmeta
 				FROM {$wpdb->prefix}woocommerce_order_items
 				JOIN {$wpdb->prefix}woocommerce_order_itemmeta ON {$wpdb->prefix}woocommerce_order_items.order_item_id = {$wpdb->prefix}woocommerce_order_itemmeta.order_item_id
 				WHERE {$wpdb->prefix}woocommerce_order_items.order_id = '{$postid}';
-				" );
+				"
+			); // WPCS: unprepared SQL ok.
 
 			do_action( 'woocommerce_deleted_order_items', $postid );
 		}
@@ -466,10 +475,10 @@ class WC_Post_Data {
 	/**
 	 * Remove downloadable permissions on permanent order deletion.
 	 *
-	 * @param int $postid
+	 * @param int $postid Post ID.
 	 */
 	public static function delete_order_downloadable_permissions( $postid ) {
-		if ( in_array( get_post_type( $postid ), wc_get_order_types() ) ) {
+		if ( in_array( get_post_type( $postid ), wc_get_order_types(), true ) ) {
 			do_action( 'woocommerce_delete_order_downloadable_permissions', $postid );
 
 			$data_store = WC_Data_Store::load( 'customer-download' );
@@ -483,9 +492,9 @@ class WC_Post_Data {
 	 * Update changed downloads.
 	 *
 	 * @deprecated 3.3.0 No action is necessary on changes to download paths since download_id is no longer based on file hash.
-	 * @param int $product_id product identifier
-	 * @param int $variation_id optional product variation identifier
-	 * @param array $downloads newly set files
+	 * @param int   $product_id   Product ID.
+	 * @param int   $variation_id Variation ID. Optional product variation identifier.
+	 * @param array $downloads    Newly set files.
 	 */
 	public static function process_product_file_download_paths( $product_id, $variation_id, $downloads ) {
 		wc_deprecated_function( __FUNCTION__, '3.3' );
@@ -493,10 +502,11 @@ class WC_Post_Data {
 
 	/**
 	 * Flush meta cache for CRUD objects on direct update.
-	 * @param  int $meta_id
-	 * @param  int $object_id
-	 * @param  string $meta_key
-	 * @param  string $meta_value
+	 *
+	 * @param  int    $meta_id    Meta ID.
+	 * @param  int    $object_id  Object ID.
+	 * @param  string $meta_key   Meta key.
+	 * @param  string $meta_value Meta value.
 	 */
 	public static function flush_object_meta_cache( $meta_id, $object_id, $meta_key, $meta_value ) {
 		WC_Cache_Helper::incr_cache_prefix( 'object_' . $object_id );
@@ -507,10 +517,10 @@ class WC_Post_Data {
 	 *
 	 * @since 3.3.0
 	 * @param int    $object_id Product ID.
-	 * @param array  $terms Terms array.
-	 * @param array  $tt_ids Term ids array.
-	 * @param string $taxonomy Taxonomy name.
-	 * @param bool   $append Are we appending or setting terms.
+	 * @param array  $terms     Terms array.
+	 * @param array  $tt_ids    Term ids array.
+	 * @param string $taxonomy  Taxonomy name.
+	 * @param bool   $append    Are we appending or setting terms.
 	 */
 	public static function force_default_term( $object_id, $terms, $tt_ids, $taxonomy, $append ) {
 		if ( ! $append && 'product_cat' === $taxonomy && empty( $tt_ids ) && 'product' === get_post_type( $object_id ) ) {

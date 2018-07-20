@@ -2,8 +2,7 @@
 /**
  * Abstract Rest CRUD Controller Class
  *
- * @author   Automattic
- * @category API
+ * @class    WC_REST_CRUD_Controller
  * @package  WooCommerce/Abstracts
  * @version  3.0.0
  */
@@ -40,6 +39,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	 * @return object WC_Data object or WP_Error object.
 	 */
 	protected function get_object( $id ) {
+		// translators: %s: Class method name.
 		return new WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be overridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
 	}
 
@@ -94,7 +94,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Get object permalink.
 	 *
-	 * @param  object $object
+	 * @param  object $object Object.
 	 * @return string
 	 */
 	protected function get_permalink( $object ) {
@@ -110,6 +110,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	 * @return WP_Error|WP_REST_Response Response object on success, or WP_Error object on failure.
 	 */
 	protected function prepare_object_for_response( $object, $request ) {
+		// translators: %s: Class method name.
 		return new WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be overridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
 	}
 
@@ -122,6 +123,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	 * @return WP_Error|WC_Data The prepared item, or WP_Error object on failure.
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
+		// translators: %s: Class method name.
 		return new WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be overridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
 	}
 
@@ -192,7 +194,15 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 			return $object;
 		}
 
-		$this->update_additional_fields_for_object( $object, $request );
+		try {
+			$this->update_additional_fields_for_object( $object, $request );
+		} catch ( WC_Data_Exception $e ) {
+			$object->delete();
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
+		} catch ( WC_REST_Exception $e ) {
+			$object->delete();
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
 
 		/**
 		 * Fires after a single object is created or updated via the REST API.
@@ -231,7 +241,13 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 			return $object;
 		}
 
-		$this->update_additional_fields_for_object( $object, $request );
+		try {
+			$this->update_additional_fields_for_object( $object, $request );
+		} catch ( WC_Data_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
+		} catch ( WC_REST_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
 
 		/**
 		 * Fires after a single object is created or updated via the REST API.
@@ -354,7 +370,21 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 		$response->header( 'X-WP-Total', $query_results['total'] );
 		$response->header( 'X-WP-TotalPages', (int) $max_pages );
 
-		$base = add_query_arg( $request->get_query_params(), rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
+		$base          = $this->rest_base;
+		$attrib_prefix = '(?P<';
+		if ( strpos( $base, $attrib_prefix ) !== false ) {
+			$attrib_names = array();
+			preg_match( '/\(\?P<[^>]+>.*\)/', $base, $attrib_names, PREG_OFFSET_CAPTURE );
+			foreach ( $attrib_names as $attrib_name_match ) {
+				$beginning_offset = strlen( $attrib_prefix );
+				$attrib_name_end  = strpos( $attrib_name_match[0], '>', $attrib_name_match[1] );
+				$attrib_name      = substr( $attrib_name_match[0], $beginning_offset, $attrib_name_end - $beginning_offset );
+				if ( isset( $request[ $attrib_name ] ) ) {
+					$base  = str_replace( "(?P<$attrib_name>[\d]+)", $request[ $attrib_name ], $base );
+				}
+			}
+		}
+		$base = add_query_arg( $request->get_query_params(), rest_url( sprintf( '/%s/%s', $this->namespace, $base ) ) );
 
 		if ( $page > 1 ) {
 			$prev_page = $page - 1;

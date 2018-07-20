@@ -416,7 +416,6 @@ a.pswp__share--download:hover {
  */
 /* root element of UI */
 .pswp__ui {
-  -webkit-font-smoothing: auto;
   visibility: visible;
   opacity: 1;
   z-index: 1550; }

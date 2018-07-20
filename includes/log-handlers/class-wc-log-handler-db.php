@@ -1,6 +1,12 @@
 <?php
+/**
+ * Class WC_Log_Handler_DB file.
+ *
+ * @package WooCommerce\Log Handlers
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit; // Exit if accessed directly.
 }
 
 /**
@@ -9,19 +15,17 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @class          WC_Log_Handler_DB
  * @version        1.0.0
  * @package        WooCommerce/Classes/Log_Handlers
- * @category       Class
- * @author         WooThemes
  */
 class WC_Log_Handler_DB extends WC_Log_Handler {
 
 	/**
 	 * Handle a log entry.
 	 *
-	 * @param int $timestamp Log timestamp.
-	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
+	 * @param int    $timestamp Log timestamp.
+	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug.
 	 * @param string $message Log message.
-	 * @param array $context {
-	 *     Additional information for log handlers.
+	 * @param array  $context {
+	 *      Additional information for log handlers.
 	 *
 	 *     @type string $source Optional. Source will be available in log table.
 	 *                  If no source is provided, attempt to provide sensible default.
@@ -45,13 +49,11 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 	/**
 	 * Add a log entry to chosen file.
 	 *
-	 * @param int $timestamp Log timestamp.
-	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
+	 * @param int    $timestamp Log timestamp.
+	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug.
 	 * @param string $message Log message.
 	 * @param string $source Log source. Useful for filtering and sorting.
-	 * @param array $context {
-	 *     Context will be serialized and stored in database.
-	 * }
+	 * @param array  $context Context will be serialized and stored in database.
 	 *
 	 * @return bool True if write was successful.
 	 */
@@ -60,9 +62,9 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 
 		$insert = array(
 			'timestamp' => date( 'Y-m-d H:i:s', $timestamp ),
-			'level' => WC_Log_Levels::get_level_severity( $level ),
-			'message' => $message,
-			'source' => $source,
+			'level'     => WC_Log_Levels::get_level_severity( $level ),
+			'message'   => $message,
+			'source'    => $source,
 		);
 
 		$format = array(
@@ -70,11 +72,11 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 			'%d',
 			'%s',
 			'%s',
-			'%s', // possible serialized context
+			'%s', // possible serialized context.
 		);
 
 		if ( ! empty( $context ) ) {
-			$insert['context'] = serialize( $context );
+			$insert['context'] = serialize( $context ); // @codingStandardsIgnoreLine.
 		}
 
 		return false !== $wpdb->insert( "{$wpdb->prefix}woocommerce_log", $insert, $format );
@@ -92,9 +94,26 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 	}
 
 	/**
+	 * Clear entries for a chosen handle/source.
+	 *
+	 * @param string $source Log source.
+	 * @return bool
+	 */
+	public function clear( $source ) {
+		global $wpdb;
+
+		return $wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->prefix}woocommerce_log WHERE source = %s",
+				$source
+			)
+		);
+	}
+
+	/**
 	 * Delete selected logs from DB.
 	 *
-	 * @param int|string|array Log ID or array of Log IDs to be deleted.
+	 * @param int|string|array $log_ids Log ID or array of Log IDs to be deleted.
 	 *
 	 * @return bool
 	 */
@@ -109,12 +128,28 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 
 		$query_in = '(' . implode( ',', $format ) . ')';
 
-		$query = $wpdb->prepare(
-			"DELETE FROM {$wpdb->prefix}woocommerce_log WHERE log_id IN {$query_in}",
-			$log_ids
-		);
+		return $wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_log WHERE log_id IN {$query_in}" ); // @codingStandardsIgnoreLine.
+	}
 
-		return $wpdb->query( $query );
+	/**
+	 * Delete all logs older than a defined timestamp.
+	 *
+	 * @since 3.4.0
+	 * @param integer $timestamp Timestamp to delete logs before.
+	 */
+	public static function delete_logs_before_timestamp( $timestamp = 0 ) {
+		if ( ! $timestamp ) {
+			return;
+		}
+
+		global $wpdb;
+
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->prefix}woocommerce_log WHERE timestamp < %d",
+				$timestamp
+			)
+		);
 	}
 
 	/**
@@ -129,19 +164,20 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 
 		/**
 		 * PHP < 5.3.6 correct behavior
+		 *
 		 * @see http://php.net/manual/en/function.debug-backtrace.php#refsect1-function.debug-backtrace-parameters
 		 */
 		if ( defined( 'DEBUG_BACKTRACE_IGNORE_ARGS' ) ) {
-			$debug_backtrace_arg = DEBUG_BACKTRACE_IGNORE_ARGS;
+			$debug_backtrace_arg = DEBUG_BACKTRACE_IGNORE_ARGS; // phpcs:ignore PHPCompatibility.PHP.NewConstants.debug_backtrace_ignore_argsFound
 		} else {
 			$debug_backtrace_arg = false;
 		}
 
-		$trace = debug_backtrace( $debug_backtrace_arg );
+		$trace = debug_backtrace( $debug_backtrace_arg ); // @codingStandardsIgnoreLine.
 		foreach ( $trace as $t ) {
 			if ( isset( $t['file'] ) ) {
 				$filename = pathinfo( $t['file'], PATHINFO_FILENAME );
-				if ( ! in_array( $filename, $ignore_files ) ) {
+				if ( ! in_array( $filename, $ignore_files, true ) ) {
 					return $filename;
 				}
 			}

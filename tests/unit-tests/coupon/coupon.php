@@ -3,6 +3,7 @@
 /**
  * Class Coupon.
  * @package WooCommerce\Tests\Coupon
+ * @group coupons
  */
 class WC_Tests_Coupon extends WC_Unit_Test_Case {
 
@@ -15,17 +16,17 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		$string_code_1 = 'test';
 
 		// Coupon with a standard string code.
-		$coupon_1 = new WC_Coupon;
+		$coupon_1 = new WC_Coupon();
 		$coupon_1->set_code( $string_code_1 );
 		$coupon_1->save();
 
 		// Coupon with a string code that is the same as coupon 1's ID.
-		$coupon_2 = new WC_Coupon;
+		$coupon_2 = new WC_Coupon();
 		$coupon_2->set_code( (string) $coupon_1->get_id() );
 		$coupon_2->save();
 
-		$int_id_1 = $coupon_1->get_id();
-		$int_id_2 = $coupon_2->get_id();
+		$int_id_1      = $coupon_1->get_id();
+		$int_id_2      = $coupon_2->get_id();
 		$string_code_2 = $coupon_2->get_code();
 
 		// Test getting a coupon by integer ID.
@@ -44,6 +45,10 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		// Required for backwards compatibility, but will try and initialize coupon by code if possible first.
 		$test_coupon = new WC_Coupon( (string) $coupon_2->get_id() );
 		$this->assertEquals( $coupon_2->get_id(), $test_coupon->get_id() );
+
+		// Test getting a coupon by coupon object
+		$test_coupon = new WC_Coupon( $coupon_1 );
+		$this->assertEquals( $test_coupon->get_id(), $coupon_1->get_id() );
 	}
 
 	/**
@@ -113,8 +118,8 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
-		update_post_meta( $product->get_id(), '_price', '10' );
-		update_post_meta( $product->get_id(), '_regular_price', '10' );
+		$product->set_regular_price( 10 );
+		$product->save();
 
 		// Create coupon
 		$coupon = WC_Helper_Coupon::create_coupon();
@@ -171,8 +176,8 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
-		update_post_meta( $product->get_id(), '_price', '10' );
-		update_post_meta( $product->get_id(), '_regular_price', '10' );
+		$product->set_regular_price( 10 );
+		$product->save();
 
 		// Create coupon
 		$coupon = WC_Helper_Coupon::create_coupon();
@@ -235,8 +240,8 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
-		update_post_meta( $product->get_id(), '_price', '10' );
-		update_post_meta( $product->get_id(), '_regular_price', '10' );
+		$product->set_regular_price( 10 );
+		$product->save();
 
 		// Create coupon
 		$coupon = WC_Helper_Coupon::create_coupon();
@@ -310,5 +315,80 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		$this->assertTrue( $valid_coupon->is_valid() );
 		$this->assertFalse( $expired_coupon->is_valid() );
 		$this->assertEquals( $expired_coupon->get_error_message(), $expired_coupon->get_coupon_error( WC_Coupon::E_WC_COUPON_EXPIRED ) );
+	}
+
+	/**
+	 * Test an item limit for percent discounts.
+	 */
+	public function test_percent_discount_item_limit() {
+		// Create product
+		$product = WC_Helper_Product::create_simple_product();
+		update_post_meta( $product->get_id(), '_price', '10' );
+		update_post_meta( $product->get_id(), '_regular_price', '10' );
+
+		// Create coupon
+		$coupon = WC_Helper_Coupon::create_coupon( 'dummycoupon', array(
+			'discount_type'          => 'percent',
+			'coupon_amount'          => '5',
+			'limit_usage_to_x_items' => 1,
+		) );
+
+		// We need this to have the calculate_totals() method calculate totals.
+		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
+			define( 'WOOCOMMERCE_CHECKOUT', true );
+		}
+
+		// Add 2 products and coupon to cart.
+		WC()->cart->add_to_cart( $product->get_id(), 2 );
+		WC()->cart->add_discount( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+
+		// Test if the cart total amount is equal 19.5 (coupon only applying to one item).
+		$this->assertEquals( 19.5, WC()->cart->total );
+
+		// Clean up
+		wc_clear_notices();
+		WC()->cart->empty_cart();
+		WC()->cart->remove_coupons();
+		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	public function test_custom_discount_item_limit() {
+		// Register custom discount type.
+		WC_Helper_Coupon::register_custom_type( __FUNCTION__ );
+
+		// Create product
+		$product = WC_Helper_Product::create_simple_product();
+		update_post_meta( $product->get_id(), '_price', '10' );
+		update_post_meta( $product->get_id(), '_regular_price', '10' );
+
+		// Create coupon
+		$coupon = WC_Helper_Coupon::create_coupon( 'dummycoupon', array(
+			'discount_type'          => __FUNCTION__,
+			'coupon_amount'          => '5',
+			'limit_usage_to_x_items' => 1,
+		) );
+
+		// We need this to have the calculate_totals() method calculate totals.
+		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
+			define( 'WOOCOMMERCE_CHECKOUT', true );
+		}
+
+		// Add 4 products and coupon to cart.
+		WC()->cart->add_to_cart( $product->get_id(), 4 );
+		WC()->cart->add_discount( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+
+		// Test if the cart total amount is equal 39.5 (coupon only applying to one item).
+		$this->assertEquals( 39.5, WC()->cart->total );
+
+		// Clean up
+		wc_clear_notices();
+		WC()->cart->empty_cart();
+		WC()->cart->remove_coupons();
+		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
+		WC_Helper_Product::delete_product( $product->get_id() );
+		WC_Helper_Coupon::unregister_custom_type( __FUNCTION__ );
 	}
 }

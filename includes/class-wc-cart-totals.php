@@ -9,8 +9,8 @@
  * - if something is being stored e.g. item total, store unrounded. This is so taxes can be recalculated later accurately.
  * - if calculating a total, round (if settings allow).
  *
- * @author  Automattic
  * @package WooCommerce/Classes
+ * @version 3.2.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -102,16 +102,16 @@ final class WC_Cart_Totals {
 	 * @var array
 	 */
 	protected $totals = array(
-		'fees_total'          => 0,
-		'fees_total_tax'      => 0,
-		'items_subtotal'      => 0,
-		'items_subtotal_tax'  => 0,
-		'items_total'         => 0,
-		'items_total_tax'     => 0,
-		'total'               => 0,
-		'shipping_total'      => 0,
-		'shipping_tax_total'  => 0,
-		'discounts_total'     => 0,
+		'fees_total'         => 0,
+		'fees_total_tax'     => 0,
+		'items_subtotal'     => 0,
+		'items_subtotal_tax' => 0,
+		'items_total'        => 0,
+		'items_total_tax'    => 0,
+		'total'              => 0,
+		'shipping_total'     => 0,
+		'shipping_tax_total' => 0,
+		'discounts_total'    => 0,
 	);
 
 	/**
@@ -212,7 +212,7 @@ final class WC_Cart_Totals {
 	 * into the same format for use by this class.
 	 *
 	 * Each item is made up of the following props, in addition to those returned by get_default_item_props() for totals.
-	 * 	- key: An identifier for the item (cart item key or line item ID).
+	 *  - key: An identifier for the item (cart item key or line item ID).
 	 *  - cart_item: For carts, the cart item from the cart which may include custom data.
 	 *  - quantity: The qty for this line.
 	 *  - price: The line price in cents.
@@ -312,13 +312,12 @@ final class WC_Cart_Totals {
 							$fee->taxes               = wc_array_merge_recursive_numeric( $fee->taxes, WC_Tax::calc_tax( $fee->total * $proportion, WC_Tax::get_rates( $tax_class ) ) );
 						}
 					}
-
 				} elseif ( $fee->object->taxable ) {
 					$fee->taxes = WC_Tax::calc_tax( $fee->total, WC_Tax::get_rates( $fee->tax_class, $this->cart->get_customer() ), false );
 				}
 			}
 
-			$fee->taxes = apply_filters( 'woocommerce_cart_totals_get_fees_from_cart_taxes', $fee->taxes, $fee, $this );
+			$fee->taxes     = apply_filters( 'woocommerce_cart_totals_get_fees_from_cart_taxes', $fee->taxes, $fee, $this );
 			$fee->total_tax = array_sum( array_map( array( $this, 'round_line_tax' ), $fee->taxes ) );
 
 			// Set totals within object.
@@ -366,19 +365,22 @@ final class WC_Cart_Totals {
 
 		foreach ( $this->coupons as $coupon ) {
 			switch ( $coupon->get_discount_type() ) {
-				case 'fixed_product' :
+				case 'fixed_product':
 					$coupon->sort = 1;
 					break;
-				case 'percent' :
+				case 'percent':
 					$coupon->sort = 2;
 					break;
-				case 'fixed_cart' :
+				case 'fixed_cart':
 					$coupon->sort = 3;
 					break;
 				default:
 					$coupon->sort = 0;
 					break;
 			}
+
+			// Allow plugins to override the default order.
+			$coupon->sort = apply_filters( 'woocommerce_coupon_sort', $coupon->sort, $coupon );
 		}
 
 		uasort( $this->coupons, array( $this, 'sort_coupons_callback' ) );
@@ -388,7 +390,7 @@ final class WC_Cart_Totals {
 	 * Sort coupons so discounts apply consistently across installs.
 	 *
 	 * In order of priority;
-	 * 	- sort param
+	 *  - sort param
 	 *  - usage restriction
 	 *  - coupon value
 	 *  - ID
@@ -419,13 +421,13 @@ final class WC_Cart_Totals {
 	 */
 	protected function remove_item_base_taxes( $item ) {
 		if ( $item->price_includes_tax && $item->taxable ) {
-			$base_tax_rates           = WC_Tax::get_base_tax_rates( $item->product->get_tax_class( 'unfiltered' ) );
+			$base_tax_rates = WC_Tax::get_base_tax_rates( $item->product->get_tax_class( 'unfiltered' ) );
 
 			// Work out a new base price without the shop's base tax.
-			$taxes                    = WC_Tax::calc_tax( $item->price, $base_tax_rates, true );
+			$taxes = WC_Tax::calc_tax( $item->price, $base_tax_rates, true );
 
 			// Now we have a new item price (excluding TAX).
-			$item->price              = absint( $item->price - array_sum( $taxes ) );
+			$item->price              = round( $item->price - array_sum( $taxes ) );
 			$item->price_includes_tax = false;
 		}
 		return $item;
@@ -449,11 +451,11 @@ final class WC_Cart_Totals {
 
 			if ( $item->tax_rates !== $base_tax_rates ) {
 				// Work out a new base price without the shop's base tax.
-				$taxes       = WC_Tax::calc_tax( $item->price, $base_tax_rates, true );
-				$new_taxes   = WC_Tax::calc_tax( $item->price - array_sum( $taxes ), $item->tax_rates, false );
+				$taxes     = WC_Tax::calc_tax( $item->price, $base_tax_rates, true );
+				$new_taxes = WC_Tax::calc_tax( $item->price - array_sum( $taxes ), $item->tax_rates, false );
 
 				// Now we have a new item price.
-				$item->price = $item->price - array_sum( $taxes ) + array_sum( $new_taxes );
+				$item->price = round( $item->price - array_sum( $taxes ) + array_sum( $new_taxes ) );
 			}
 		}
 		return $item;
@@ -479,6 +481,9 @@ final class WC_Cart_Totals {
 	 * @return array of taxes
 	 */
 	protected function get_item_tax_rates( $item ) {
+		if ( ! wc_tax_enabled() ) {
+			return array();
+		}
 		$tax_class = $item->product->get_tax_class();
 		return isset( $this->item_tax_rates[ $tax_class ] ) ? $this->item_tax_rates[ $tax_class ] : $this->item_tax_rates[ $tax_class ] = WC_Tax::get_rates( $item->product->get_tax_class(), $this->cart->get_customer() );
 	}
@@ -548,7 +553,8 @@ final class WC_Cart_Totals {
 	 * Get taxes merged by type.
 	 *
 	 * @since 3.2.0
-	 * @param  array|string $types Types to merge and return. Defaults to all.
+	 * @param  bool         $in_cents If returned value should be in cents.
+	 * @param  array|string $types    Types to merge and return. Defaults to all.
 	 * @return array
 	 */
 	protected function get_merged_taxes( $in_cents = false, $types = array( 'items', 'fees', 'shipping' ) ) {
@@ -581,7 +587,7 @@ final class WC_Cart_Totals {
 	 * Combine item taxes into a single array, preserving keys.
 	 *
 	 * @since 3.2.0
-	 * @param array $taxes Taxes to combine.
+	 * @param array $item_taxes Taxes to combine.
 	 * @return array
 	 */
 	protected function combine_item_taxes( $item_taxes ) {
@@ -631,7 +637,7 @@ final class WC_Cart_Totals {
 			}
 
 			if ( $this->calculate_tax && $item->product->is_taxable() ) {
-				$total_taxes     = WC_Tax::calc_tax( $item->total, $item->tax_rates, $item->price_includes_tax );
+				$total_taxes     = apply_filters( 'woocommerce_calculate_item_totals_taxes', WC_Tax::calc_tax( $item->total, $item->tax_rates, $item->price_includes_tax ), $item, $this );
 				$item->taxes     = $total_taxes;
 				$item->total_tax = array_sum( array_map( array( $this, 'round_line_tax' ), $item->taxes ) );
 

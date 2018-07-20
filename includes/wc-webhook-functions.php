@@ -2,15 +2,11 @@
 /**
  * WooCommerce Webhook functions
  *
- * @author   Automattic
- * @category Core
- * @package  WooCommerce/Functions
- * @version  3.3.0
+ * @package WooCommerce/Functions
+ * @version 3.3.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Process webhook delivery.
@@ -39,6 +35,7 @@ add_action( 'woocommerce_webhook_process_delivery', 'wc_webhook_process_delivery
  *
  * @since 2.2.0
  * @param int   $webhook_id Webhook ID to deliver.
+ * @throws Exception        If webhook cannot be read/found and $data parameter of WC_Webhook class constructor is set.
  * @param mixed $arg        Hook argument.
  */
 function wc_deliver_webhook_async( $webhook_id, $arg ) {
@@ -98,6 +95,7 @@ function wc_get_webhook_statuses() {
  * Load webhooks.
  *
  * @since  3.3.0
+ * @throws Exception If webhook cannot be read/found and $data parameter of WC_Webhook class constructor is set.
  * @return bool
  */
 function wc_load_webhooks() {
@@ -117,11 +115,12 @@ function wc_load_webhooks() {
 /**
  * Get webhook.
  *
- * @param  int $id Webhook ID.
+ * @param  int|WC_Webhook $id Webhook ID or object.
+ * @throws Exception          If webhook cannot be read/found and $data parameter of WC_Webhook class constructor is set.
  * @return WC_Webhook|null
  */
 function wc_get_webhook( $id ) {
-	$webhook = new WC_Webhook( (int) $id );
+	$webhook = new WC_Webhook( $id );
 
 	return 0 !== $webhook->get_id() ? $webhook : null;
 }

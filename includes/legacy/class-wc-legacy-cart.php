@@ -115,7 +115,7 @@ abstract class WC_Legacy_Cart {
 				break;
 			case 'display_totals_ex_tax' :
 			case 'display_cart_ex_tax' :
-				$value = 'excl' === $this->tax_display_cart;
+				$value = ! $this->display_prices_including_tax();
 				break;
 			case 'cart_contents_weight' :
 				$value = $this->get_cart_contents_weight();

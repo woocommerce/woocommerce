@@ -1,6 +1,12 @@
 <?php
 /**
- * WC Unit Test Case
+ * Base test case for all WooCommerce tests.
+ *
+ * @package WooCommerce\Tests
+ */
+
+/**
+ * WC Unit Test Case.
  *
  * Provides WooCommerce-specific setup/tear down/assert methods, custom factories,
  * and helper functions.
@@ -9,7 +15,11 @@
  */
 class WC_Unit_Test_Case extends WP_UnitTestCase {
 
-	/** @var WC_Unit_Test_Factory instance */
+	/**
+	 * Holds the WC_Unit_Test_Factory instance.
+	 *
+	 * @var WC_Unit_Test_Factory
+	 */
 	protected $factory;
 
 	/**
@@ -21,15 +31,15 @@ class WC_Unit_Test_Case extends WP_UnitTestCase {
 
 		parent::setUp();
 
-		// Add custom factories
+		// Add custom factories.
 		$this->factory = new WC_Unit_Test_Factory();
 
-		// Setup mock WC session handler
+		// Setup mock WC session handler.
 		add_filter( 'woocommerce_session_handler', array( $this, 'set_mock_session_handler' ) );
 
 		$this->setOutputCallback( array( $this, 'filter_output' ) );
 
-		// Register post types before each test
+		// Register post types before each test.
 		WC_Post_types::register_post_types();
 		WC_Post_types::register_taxonomies();
 	}
@@ -39,7 +49,7 @@ class WC_Unit_Test_Case extends WP_UnitTestCase {
 	 * during tests.
 	 *
 	 * @since  2.2
-	 * @return string
+	 * @return string The $output string, sans newlines and tabs.
 	 */
 	public function set_mock_session_handler() {
 		return 'WC_Mock_Session_Handler';
@@ -51,6 +61,9 @@ class WC_Unit_Test_Case extends WP_UnitTestCase {
 	 * the template not matching the sample strings set in the tests.
 	 *
 	 * @since 2.2
+	 *
+	 * @param string $output The captured output.
+	 * @return string The $output string, sans newlines and tabs.
 	 */
 	public function filter_output( $output ) {
 
@@ -64,18 +77,21 @@ class WC_Unit_Test_Case extends WP_UnitTestCase {
 	 * Asserts thing is not WP_Error.
 	 *
 	 * @since 2.2
-	 * @param mixed  $actual
-	 * @param string $message
+	 * @param mixed  $actual  The object to assert is not an instance of WP_Error.
+	 * @param string $message A message to display if the assertion fails.
 	 */
 	public function assertNotWPError( $actual, $message = '' ) {
+		if ( ! $message && is_wp_error( $actual ) ) {
+			$message = $actual->get_error_message();
+		}
 		$this->assertNotInstanceOf( 'WP_Error', $actual, $message );
 	}
 
 	/**
 	 * Asserts thing is WP_Error.
 	 *
-	 * @param mixed  $actual
-	 * @param string $message
+	 * @param mixed  $actual  The object to assert is an instance of WP_Error.
+	 * @param string $message A message to display if the assertion fails.
 	 */
 	public function assertIsWPError( $actual, $message = '' ) {
 		$this->assertInstanceOf( 'WP_Error', $actual, $message );
@@ -87,9 +103,9 @@ class WC_Unit_Test_Case extends WP_UnitTestCase {
 	 * Note: can't use `throwException` as that's reserved.
 	 *
 	 * @since 3.3-dev
-	 * @param string $message
-	 * @param int    $code
-	 * @throws \Exception
+	 * @param string $message Optional. The exception message. Default is empty.
+	 * @param int    $code    Optional. The exception code. Default is empty.
+	 * @throws Exception Containing the given message and code.
 	 */
 	public function throwAnException( $message = null, $code = null ) {
 		$message = $message ? $message : "We're all doomed!";
@@ -100,9 +116,8 @@ class WC_Unit_Test_Case extends WP_UnitTestCase {
 	 * Backport assertNotFalse to PHPUnit 3.6.12 which only runs in PHP 5.2.
 	 *
 	 * @since  2.2
-	 * @param  $condition
-	 * @param  string $message
-	 * @return mixed
+	 * @param  mixed  $condition The statement to evaluate as not false.
+	 * @param  string $message   A message to display if the assertion fails.
 	 */
 	public static function assertNotFalse( $condition, $message = '' ) {
 

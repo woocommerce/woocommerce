@@ -2,16 +2,13 @@
 /**
  * Argentinian provinces
  *
- * @author   WooThemes
- * @category i18n
- * @package  WooCommerce/i18n
- * @version  2.4.0
+ * @package WooCommerce/i18n
+ * @version 2.4.0
  */
+
 global $states;
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 $states['AR'] = array(
 	'C' => __( 'Ciudad Aut&oacute;noma de Buenos Aires', 'woocommerce' ),

@@ -4,15 +4,11 @@
  *
  * Functions related to pages and menus.
  *
- * @author   Automattic
- * @category Core
  * @package  WooCommerce\Functions
  * @version  2.6.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Replace a page title with the endpoint title.
@@ -62,12 +58,18 @@ function wc_get_page_id( $page ) {
 /**
  * Retrieve page permalink.
  *
- * @param string $page page slug.
+ * @param string      $page page slug.
+ * @param string|bool $fallback Fallback URL if page is not set. Defaults to home URL. @since 3.4.0.
  * @return string
  */
-function wc_get_page_permalink( $page ) {
+function wc_get_page_permalink( $page, $fallback = null ) {
 	$page_id   = wc_get_page_id( $page );
-	$permalink = 0 < $page_id ? get_permalink( $page_id ) : get_home_url();
+	$permalink = 0 < $page_id ? get_permalink( $page_id ) : '';
+
+	if ( ! $permalink ) {
+		$permalink = is_null( $fallback ) ? get_home_url() : $fallback;
+	}
+
 	return apply_filters( 'woocommerce_get_' . $page . '_page_permalink', $permalink );
 }
 
@@ -99,7 +101,13 @@ function wc_get_endpoint_url( $endpoint, $value = '', $permalink = '' ) {
 		} else {
 			$query_string = '';
 		}
-		$url = trailingslashit( $permalink ) . $endpoint . '/' . $value . $query_string;
+		$url = trailingslashit( $permalink ) . trailingslashit( $endpoint );
+
+		if ( $value ) {
+			$url .= trailingslashit( $value );
+		}
+
+		$url .= $query_string;
 	} else {
 		$url = add_query_arg( $endpoint, $value, $permalink );
 	}
@@ -148,7 +156,7 @@ function wc_nav_menu_item_classes( $menu_items ) {
 		return $menu_items;
 	}
 
-	$shop_page      = (int) wc_get_page_id( 'shop' );
+	$shop_page      = wc_get_page_id( 'shop' );
 	$page_for_posts = (int) get_option( 'page_for_posts' );
 
 	if ( ! empty( $menu_items ) && is_array( $menu_items ) ) {
@@ -170,8 +178,8 @@ function wc_nav_menu_item_classes( $menu_items ) {
 			} elseif ( is_shop() && $shop_page === $menu_id && 'page' === $menu_item->object ) {
 				// Set active state if this is the shop page link.
 				$menu_items[ $key ]->current = true;
-				$classes[] = 'current-menu-item';
-				$classes[] = 'current_page_item';
+				$classes[]                   = 'current-menu-item';
+				$classes[]                   = 'current_page_item';
 
 			} elseif ( is_singular( 'product' ) && $shop_page === $menu_id ) {
 				// Set parent state if this is a product page.
@@ -196,21 +204,21 @@ add_filter( 'wp_nav_menu_objects', 'wc_nav_menu_item_classes', 2 );
  * @return string
  */
 function wc_list_pages( $pages ) {
-	if ( is_woocommerce() ) {
-		// Remove current_page_parent class from any item.
-		$pages = str_replace( 'current_page_parent', '', $pages );
-		// Find shop_page_id through woocommerce options.
-		$shop_page = 'page-item-' . wc_get_page_id( 'shop' );
-
-		if ( is_shop() ) {
-			// Add current_page_item class to shop page.
-			$pages = str_replace( $shop_page, $shop_page . ' current_page_item', $pages );
-		} else {
-			// Add current_page_parent class to shop page.
-			$pages = str_replace( $shop_page, $shop_page . ' current_page_parent', $pages );
-		}
+	if ( ! is_woocommerce() ) {
+		return $pages;
 	}
 
-	return $pages;
+	// Remove current_page_parent class from any item.
+	$pages = str_replace( 'current_page_parent', '', $pages );
+	// Find shop_page_id through woocommerce options.
+	$shop_page = 'page-item-' . wc_get_page_id( 'shop' );
+
+	if ( is_shop() ) {
+		// Add current_page_item class to shop page.
+		return str_replace( $shop_page, $shop_page . ' current_page_item', $pages );
+	}
+
+	// Add current_page_parent class to shop page.
+	return str_replace( $shop_page, $shop_page . ' current_page_parent', $pages );
 }
 add_filter( 'wp_list_pages', 'wc_list_pages' );
