@@ -48,7 +48,7 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 	 * @param WC_Order $order Order to which the products should be added.
 	 * @param array    $prices Array of prices to use for created products. Leave empty for default prices.
 	 */
-	protected function add_products_to_order( $order, $prices = array() ) {
+	protected function add_products_to_order( &$order, $prices = array() ) {
 		// Remove previous items.
 		foreach ( $order->get_items() as $item ) {
 			$order->remove_item( $item->get_id() );
@@ -70,7 +70,6 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 
 			$prod_count++;
 		}
-
 	}
 
 	/**
@@ -148,7 +147,7 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 
 		WC_Helper_Order::delete_order( $this->order->get_id() );
-
+		unset( $this->products, $this->order );
 	}
 
 	/**
@@ -313,6 +312,7 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 	/**
 	 * Test for request_url() method.
 	 *
+	 * @group timeout
 	 * @throws WC_Data_Exception
 	 */
 	public function test_request_url() {
