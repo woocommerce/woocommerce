@@ -54,7 +54,8 @@ const webpackConfig = {
 					use: [
 						'css-loader',
 						{
-							loader: 'postcss-loader', // postcss loader so we can use autoprefixer
+							// postcss loader so we can use autoprefixer and theme Gutenberg components
+							loader: 'postcss-loader',
 							options: {
 								config: {
 									path: 'postcss.config.js',
@@ -66,7 +67,10 @@ const webpackConfig = {
 							query: {
 								includePaths: [ 'client/stylesheets' ],
 								data:
-									'@import "_variables"; @import "_colors"; @import "_breakpoints"; @import "_mixins";',
+									'@import "_colors"; ' +
+									'@import "_variables"; ' +
+									'@import "_breakpoints"; ' +
+									'@import "_mixins"; ',
 							},
 						},
 					],
@@ -77,8 +81,13 @@ const webpackConfig = {
 	resolve: {
 		extensions: [ '.json', '.js', '.jsx' ],
 		modules: [ path.join( __dirname, 'client' ), 'node_modules' ],
+		alias: {
+			'gutenberg-components': path.resolve( __dirname, 'node_modules/@wordpress/components/src' ),
+		},
 	},
-	plugins: [ new ExtractTextPlugin( 'css/[name].css' ) ],
+	plugins: [
+		new ExtractTextPlugin( 'css/[name].css' ),
+	],
 };
 
 if ( webpackConfig.mode !== 'production' ) {

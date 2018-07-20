@@ -1,0 +1,7 @@
+/** @format */
+
+/**
+Import Gutenberg component SCSS so webpack's postcss process can handle theme-ing. This
+allows Woo themed components based on the config found in postcss.config.js
+ */
+@import 'gutenberg-components/button/style.scss';
