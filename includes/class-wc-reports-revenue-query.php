@@ -2,6 +2,15 @@
 /**
  * Class for parameter-based Revenue Reports querying
  *
+ * Example usage:
+ * $args = array(
+ *          'before' => '2018-07-19 00:00:00',
+ *          'after'  => '2018-07-05 00:00:00',
+ *          'interval' => 'week',
+ *         );
+ * $report = new WC_Reports_Revenue_Query( $args );
+ * $mydata = $report->get_data();
+ *
  * @package  WooCommerce/Classes
  * @version  3.5.0
  * @since    3.5.0
