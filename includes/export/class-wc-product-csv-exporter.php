@@ -399,7 +399,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 		$manage_stock   = $product->get_manage_stock( 'edit' );
 		$stock_quantity = $product->get_stock_quantity( 'edit' );
 
-		if ( $product->is_type( 'variation' && 'parent' === $manage_stock ) ) {
+		if ( $product->is_type( 'variation' ) && 'parent' === $manage_stock ) {
 			return 'parent';
 		} elseif ( $manage_stock ) {
 			return $stock_quantity;
