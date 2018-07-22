@@ -447,12 +447,6 @@ class WC_API_Reports extends WC_API_Resource {
 			if ( ! in_array( $filter['period'], array( 'week', 'month', 'last_month', 'year' ) ) ) {
 				$filter['period'] = 'week';
 			}
-
-			// TODO: change WC_Admin_Report class to use "week" instead, as it's more consistent with other periods
-			// allow "week" for period instead of "7day"
-			if ( 'week' === $filter['period'] ) {
-				$filter['period'] = '7day';
-			}
 		}
 
 		$this->report->calculate_current_range( $filter['period'] );
