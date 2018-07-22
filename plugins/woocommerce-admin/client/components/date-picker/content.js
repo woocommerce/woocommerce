@@ -25,7 +25,7 @@ class DatePickerContent extends Component {
 		this.onTabSelect = this.onTabSelect.bind( this );
 	}
 	onTabSelect( tab ) {
-		const { onSelect, period } = this.props;
+		const { onUpdate, period } = this.props;
 
 		/**
 		 * If the period is `custom` and the user switches tabs to view the presets,
@@ -33,7 +33,7 @@ class DatePickerContent extends Component {
 		 * `custom` value for period will result in no selection.
 		 */
 		if ( 'period' === tab && 'custom' === period ) {
-			onSelect( { period: 'today' } );
+			onUpdate( { period: 'today' } );
 		}
 	}
 
@@ -43,11 +43,17 @@ class DatePickerContent extends Component {
 			compare,
 			after,
 			before,
-			onSelect,
+			onUpdate,
 			onClose,
 			getUpdatePath,
 			isValidSelection,
 			resetCustomValues,
+			focusedInput,
+			afterText,
+			beforeText,
+			afterError,
+			beforeError,
+			shortDateFormat,
 		} = this.props;
 		return (
 			<div>
@@ -83,14 +89,20 @@ class DatePickerContent extends Component {
 						{ selectedTab => (
 							<Fragment>
 								{ selectedTab === 'period' && (
-									<PresetPeriods onSelect={ onSelect } period={ period } />
+									<PresetPeriods onSelect={ onUpdate } period={ period } />
 								) }
 								{ selectedTab === 'custom' && (
 									<DateRange
 										after={ after }
 										before={ before }
-										onSelect={ onSelect }
+										onUpdate={ onUpdate }
 										inValidDays="future"
+										focusedInput={ focusedInput }
+										afterText={ afterText }
+										beforeText={ beforeText }
+										afterError={ afterError }
+										beforeError={ beforeError }
+										shortDateFormat={ shortDateFormat }
 									/>
 								) }
 								<div
@@ -102,7 +114,7 @@ class DatePickerContent extends Component {
 									<H className="woocommerce-date-picker__text">
 										{ __( 'compare to', 'wc-admin' ) }
 									</H>
-									<ComparePeriods onSelect={ onSelect } compare={ compare } />
+									<ComparePeriods onSelect={ onUpdate } compare={ compare } />
 									<div className="woocommerce-date-picker__content-controls-btns">
 										{ selectedTab === 'custom' && (
 											<Button
@@ -147,10 +159,16 @@ class DatePickerContent extends Component {
 DatePickerContent.propTypes = {
 	period: PropTypes.string.isRequired,
 	compare: PropTypes.string.isRequired,
-	onSelect: PropTypes.func.isRequired,
+	onUpdate: PropTypes.func.isRequired,
 	onClose: PropTypes.func.isRequired,
 	getUpdatePath: PropTypes.func.isRequired,
 	resetCustomValues: PropTypes.func.isRequired,
+	focusedInput: PropTypes.string,
+	afterText: PropTypes.string,
+	beforeText: PropTypes.string,
+	afterError: PropTypes.string,
+	beforeError: PropTypes.string,
+	shortDateFormat: PropTypes.string.isRequired,
 };
 
 export default DatePickerContent;

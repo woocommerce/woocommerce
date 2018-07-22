@@ -115,7 +115,7 @@ class RevenueReport extends Component {
 						__( 'Revenue', 'wc-admin' ),
 					] }
 				/>
-				<DatePicker query={ query } path={ path } />
+				<DatePicker query={ query } path={ path } key={ JSON.stringify( query ) } />
 
 				<SummaryList>
 					<SummaryNumber

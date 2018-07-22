@@ -16,6 +16,8 @@ import {
 	getRangeLabel,
 	loadLocaleData,
 	getCurrentDates,
+	validateDateInputForRange,
+	dateValidationMessages,
 } from 'lib/date';
 
 describe( 'toMoment', () => {
@@ -589,5 +591,79 @@ describe( 'getCurrentDates', () => {
 		// Ensure default compare is `previous_period`
 		expect( yesterday.isSame( currentDates.secondary.after, 'day' ) ).toBe( true );
 		expect( yesterday.isSame( currentDates.secondary.before, 'day' ) ).toBe( true );
+	} );
+} );
+
+describe( 'validateDateInputForRange', () => {
+	const dateFormat = 'YYYY-MM-DD';
+
+	it( 'should return a valid date in Moment object', () => {
+		const validated = validateDateInputForRange( 'after', '2018-04-15', null, null, dateFormat );
+		expect( moment.isMoment( validated.date ) ).toBe( true );
+		expect( validated.error ).toBe( undefined );
+	} );
+
+	it( 'should return a null date on invalid date string', () => {
+		const validated = validateDateInputForRange(
+			'after',
+			'BAd-2018-Date-Format/15/4',
+			null,
+			null,
+			dateFormat
+		);
+		expect( validated.date ).toBe( null );
+		expect( validated.error ).toBe( dateValidationMessages.invalid );
+	} );
+
+	it( 'should return a correct error for a date in the future', () => {
+		const futureDateString = moment()
+			.add( 1, 'months' )
+			.format( dateFormat );
+		const validated = validateDateInputForRange(
+			'after',
+			futureDateString,
+			null,
+			null,
+			dateFormat
+		);
+		expect( validated.date ).toBe( null );
+		expect( validated.error ).toBe( dateValidationMessages.future );
+	} );
+
+	it( 'should return a correct error for start', () => {
+		const futureDateString = moment()
+			.add( 1, 'months' )
+			.format( dateFormat );
+		const validated = validateDateInputForRange(
+			'after',
+			futureDateString,
+			null,
+			null,
+			dateFormat
+		);
+		expect( validated.date ).toBe( null );
+		expect( validated.error ).toBe( dateValidationMessages.future );
+	} );
+
+	it( 'should return a correct error for start after end', () => {
+		const end = moment().subtract( 5, 'months' );
+		const value = end
+			.clone()
+			.add( 1, 'months' )
+			.format( dateFormat );
+		const validated = validateDateInputForRange( 'after', value, end, null, dateFormat );
+		expect( validated.date ).toBe( null );
+		expect( validated.error ).toBe( dateValidationMessages.startAfterEnd );
+	} );
+
+	it( 'should return a correct error for end after start', () => {
+		const start = moment().subtract( 5, 'months' );
+		const value = start
+			.clone()
+			.subtract( 1, 'months' )
+			.format( dateFormat );
+		const validated = validateDateInputForRange( 'before', value, null, start, dateFormat );
+		expect( validated.date ).toBe( null );
+		expect( validated.error ).toBe( dateValidationMessages.endBeforeStart );
 	} );
 } );

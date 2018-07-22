@@ -38,7 +38,7 @@ export default class extends Component {
 					] }
 				/>
 				<div className="woocommerce-products__pickers">
-					<DatePicker query={ query } path={ path } />
+					<DatePicker query={ query } path={ path } key={ JSON.stringify( query ) } />
 					<FilterPicker
 						query={ query }
 						path={ path }

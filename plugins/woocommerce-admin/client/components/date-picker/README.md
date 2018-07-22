@@ -6,7 +6,7 @@ Select a range of dates or single dates
 ## Usage
 
 ```jsx
-<DatePicker query={ query } path={ path } />
+<DatePicker query={ query } path={ path } key={ JSON.stringify( query ) } />
 ```
 
 ### Props
@@ -17,6 +17,7 @@ Name | Type | Default | Description
 --- | --- | --- | ---
 `query`* | `object` | none | The query string represented in object form
 `path`* | `string` | none | `path` parameter supplied by React-Router
+`key`| `*` | none |  Force a recalculation or reset of internal state when this key changes. Useful for a url change, for instance
 
 ## URL as the source of truth
 
