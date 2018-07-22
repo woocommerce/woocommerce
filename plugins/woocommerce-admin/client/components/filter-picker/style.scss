@@ -42,33 +42,35 @@
 
 .woocommerce-filter-picker__content-list {
 	margin: 0;
+	width: 100%;
+	min-width: 100%;
+}
 
-	.woocommerce-filter-picker__content-list-item {
-		border-bottom: 1px solid $core-grey-light-700;
-		margin: 0;
+.woocommerce-filter-picker__content-list-item {
+	border-bottom: 1px solid $core-grey-light-700;
+	margin: 0;
 
-		&:last-child {
-			border-bottom: none;
-		}
+	&:last-child {
+		border-bottom: none;
+	}
 
-		&.is-selected {
-			.woocommerce-filter-picker__content-list-item-btn {
+	&.is-selected {
+		.woocommerce-filter-picker__content-list-item-btn {
+			background-color: $white;
+
+			&.components-button:not(:disabled):not([aria-disabled='true']):focus {
 				background-color: $white;
+			}
 
-				&.components-button:not(:disabled):not([aria-disabled='true']):focus {
-					background-color: $white;
-				}
-
-				&::before {
-					content: '';
-					width: 8px;
-					height: 8px;
-					background-color: $woocommerce;
-					position: absolute;
-					top: 50%;
-					left: 1em;
-					transform: translate(50%, -50%);
-				}
+			&::before {
+				content: '';
+				width: 8px;
+				height: 8px;
+				background-color: $woocommerce;
+				position: absolute;
+				top: 50%;
+				left: 1em;
+				transform: translate(50%, -50%);
 			}
 		}
 	}
