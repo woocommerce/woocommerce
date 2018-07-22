@@ -48,7 +48,7 @@ export function toMoment( format, str ) {
 	}
 	if ( 'string' === typeof str ) {
 		const date = moment( str, [ isoDateFormat, format ], true );
-		return date.isValid ? date : null;
+		return date.isValid() ? date : null;
 	}
 	throw new Error( 'toMoment requires a string to be passed as an argument' );
 }

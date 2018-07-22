@@ -51,6 +51,11 @@ describe( 'toMoment', () => {
 		const fn = () => toMoment( '', 77 );
 		expect( fn ).toThrow();
 	} );
+
+	it( 'shoud return null on invalid date', () => {
+		const invalidDate = toMoment( 'YYYY', '2018-00-00' );
+		expect( invalidDate ).toBe( null );
+	} );
 } );
 
 describe( 'getCurrentPeriod', () => {
