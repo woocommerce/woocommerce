@@ -178,6 +178,10 @@ class WC_Reports_Interval {
 	public static function next_month_start( $datetime ) {
 		$year  = $datetime->format( 'Y' );
 		$month = (int) $datetime->format( 'm' ) + 1;
+		if ( $month > 12 ) {
+			$month = 1;
+			$year++;
+		}
 		$day   = '01';
 		return new DateTime( "$year-$month-$day 00:00:00" );
 	}
@@ -191,6 +195,10 @@ class WC_Reports_Interval {
 	public static function next_quarter_start( $datetime ) {
 		$year  = $datetime->format( 'Y' );
 		$month = (int) $datetime->format( 'm' ) + 3;
+		if ( $month > 12 ) {
+			$month = $month - 12;
+			$year++;
+		}
 		$day   = '01';
 		return new DateTime( "$year-$month-$day 00:00:00" );
 	}
