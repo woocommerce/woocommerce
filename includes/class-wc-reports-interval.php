@@ -9,9 +9,6 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'SECONDS_PER_DAY', 86400 );
-define( 'SECONDS_PER_HOUR', 3600 );
-
 /**
  * Date & time interval handling class for Reporting API.
  */
@@ -133,7 +130,7 @@ class WC_Reports_Interval {
 	public static function next_hour_start( $datetime ) {
 		// Ignoring leap seconds.
 		$timestamp          = (int) $datetime->format( 'U' );
-		$next_day_timestamp = ( floor( $timestamp / SECONDS_PER_HOUR ) + 1 ) * SECONDS_PER_HOUR;
+		$next_day_timestamp = ( floor( $timestamp / HOUR_IN_SECONDS ) + 1 ) * HOUR_IN_SECONDS;
 		$next_day           = new DateTime();
 		$next_day->setTimestamp( $next_day_timestamp );
 		return $next_day;
@@ -148,7 +145,7 @@ class WC_Reports_Interval {
 	public static function next_day_start( $datetime ) {
 		// Ignoring leap seconds.
 		$timestamp          = (int) $datetime->format( 'U' );
-		$next_day_timestamp = ( floor( $timestamp / SECONDS_PER_DAY ) + 1 ) * SECONDS_PER_DAY;
+		$next_day_timestamp = ( floor( $timestamp / DAY_IN_SECONDS ) + 1 ) * DAY_IN_SECONDS;
 		$next_day           = new DateTime();
 		$next_day->setTimestamp( $next_day_timestamp );
 		return $next_day;
