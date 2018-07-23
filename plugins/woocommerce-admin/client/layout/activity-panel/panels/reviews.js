@@ -10,6 +10,7 @@ import { Component, Fragment } from '@wordpress/element';
  */
 import ActivityHeader from '../activity-header';
 import ProductImage from 'components/product-image';
+import { ProductRating, ReviewRating, Rating } from 'components/rating';
 
 class ReviewsPanel extends Component {
 	render() {
@@ -27,6 +28,44 @@ class ReviewsPanel extends Component {
 						],
 					} }
 				/>
+				<div>
+					Rating: <Rating rating={ 4 } totalStars={ 5 } />
+				</div>
+				<div>
+					Rating: <Rating rating={ 2.5 } totalStars={ 6 } />
+				</div>
+				<div>
+					ProductRating:{' '}
+					<ProductRating
+						product={ {
+							average_rating: 2.5,
+						} }
+					/>
+				</div>
+				<div>
+					ProductRating:{' '}
+					<ProductRating
+						product={ {
+							average_rating: 4,
+						} }
+					/>
+				</div>
+				<div>
+					ReviewRating:{' '}
+					<ReviewRating
+						review={ {
+							rating: 4,
+						} }
+					/>
+				</div>
+				<div>
+					ReviewRating:{' '}
+					<ReviewRating
+						review={ {
+							rating: 1.5,
+						} }
+					/>
+				</div>
 			</Fragment>
 		);
 	}

@@ -1,0 +1,420 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ProductRating should render rating based on product object 1`] = `
+<Rating
+  rating={2.5}
+  size={18}
+  totalStars={5}
+/>
+`;
+
+exports[`Rating should render stars at a different size 1`] = `
+<div
+  aria-label="1 out of 5 stars."
+  className="woocommerce-rating"
+>
+  <t
+    icon="star"
+    key="star-0"
+    size={24}
+    style={
+      Object {
+        "height": "36px",
+        "width": "36px",
+      }
+    }
+  />
+  <t
+    icon="star"
+    key="star-1"
+    size={24}
+    style={
+      Object {
+        "height": "36px",
+        "width": "36px",
+      }
+    }
+  />
+  <t
+    icon="star"
+    key="star-2"
+    size={24}
+    style={
+      Object {
+        "height": "36px",
+        "width": "36px",
+      }
+    }
+  />
+  <t
+    icon="star"
+    key="star-3"
+    size={24}
+    style={
+      Object {
+        "height": "36px",
+        "width": "36px",
+      }
+    }
+  />
+  <t
+    icon="star"
+    key="star-4"
+    size={24}
+    style={
+      Object {
+        "height": "36px",
+        "width": "36px",
+      }
+    }
+  />
+  <div
+    className="woocommerce-rating__star-outline"
+    style={
+      Object {
+        "width": "20%",
+      }
+    }
+  >
+    <t
+      icon="star"
+      key="star-0"
+      size={24}
+      style={
+        Object {
+          "height": "36px",
+          "width": "36px",
+        }
+      }
+    />
+    <t
+      icon="star"
+      key="star-1"
+      size={24}
+      style={
+        Object {
+          "height": "36px",
+          "width": "36px",
+        }
+      }
+    />
+    <t
+      icon="star"
+      key="star-2"
+      size={24}
+      style={
+        Object {
+          "height": "36px",
+          "width": "36px",
+        }
+      }
+    />
+    <t
+      icon="star"
+      key="star-3"
+      size={24}
+      style={
+        Object {
+          "height": "36px",
+          "width": "36px",
+        }
+      }
+    />
+    <t
+      icon="star"
+      key="star-4"
+      size={24}
+      style={
+        Object {
+          "height": "36px",
+          "width": "36px",
+        }
+      }
+    />
+  </div>
+</div>
+`;
+
+exports[`Rating should render the correct amount of total stars 1`] = `
+<div
+  aria-label="4 out of 6 stars."
+  className="woocommerce-rating"
+>
+  <t
+    icon="star"
+    key="star-0"
+    size={24}
+    style={
+      Object {
+        "height": "18px",
+        "width": "18px",
+      }
+    }
+  />
+  <t
+    icon="star"
+    key="star-1"
+    size={24}
+    style={
+      Object {
+        "height": "18px",
+        "width": "18px",
+      }
+    }
+  />
+  <t
+    icon="star"
+    key="star-2"
+    size={24}
+    style={
+      Object {
+        "height": "18px",
+        "width": "18px",
+      }
+    }
+  />
+  <t
+    icon="star"
+    key="star-3"
+    size={24}
+    style={
+      Object {
+        "height": "18px",
+        "width": "18px",
+      }
+    }
+  />
+  <t
+    icon="star"
+    key="star-4"
+    size={24}
+    style={
+      Object {
+        "height": "18px",
+        "width": "18px",
+      }
+    }
+  />
+  <t
+    icon="star"
+    key="star-5"
+    size={24}
+    style={
+      Object {
+        "height": "18px",
+        "width": "18px",
+      }
+    }
+  />
+  <div
+    className="woocommerce-rating__star-outline"
+    style={
+      Object {
+        "width": "67%",
+      }
+    }
+  >
+    <t
+      icon="star"
+      key="star-0"
+      size={24}
+      style={
+        Object {
+          "height": "18px",
+          "width": "18px",
+        }
+      }
+    />
+    <t
+      icon="star"
+      key="star-1"
+      size={24}
+      style={
+        Object {
+          "height": "18px",
+          "width": "18px",
+        }
+      }
+    />
+    <t
+      icon="star"
+      key="star-2"
+      size={24}
+      style={
+        Object {
+          "height": "18px",
+          "width": "18px",
+        }
+      }
+    />
+    <t
+      icon="star"
+      key="star-3"
+      size={24}
+      style={
+        Object {
+          "height": "18px",
+          "width": "18px",
+        }
+      }
+    />
+    <t
+      icon="star"
+      key="star-4"
+      size={24}
+      style={
+        Object {
+          "height": "18px",
+          "width": "18px",
+        }
+      }
+    />
+    <t
+      icon="star"
+      key="star-5"
+      size={24}
+      style={
+        Object {
+          "height": "18px",
+          "width": "18px",
+        }
+      }
+    />
+  </div>
+</div>
+`;
+
+exports[`Rating should render the passed rating prop 1`] = `
+<div
+  aria-label="4 out of 5 stars."
+  className="woocommerce-rating"
+>
+  <t
+    icon="star"
+    key="star-0"
+    size={24}
+    style={
+      Object {
+        "height": "18px",
+        "width": "18px",
+      }
+    }
+  />
+  <t
+    icon="star"
+    key="star-1"
+    size={24}
+    style={
+      Object {
+        "height": "18px",
+        "width": "18px",
+      }
+    }
+  />
+  <t
+    icon="star"
+    key="star-2"
+    size={24}
+    style={
+      Object {
+        "height": "18px",
+        "width": "18px",
+      }
+    }
+  />
+  <t
+    icon="star"
+    key="star-3"
+    size={24}
+    style={
+      Object {
+        "height": "18px",
+        "width": "18px",
+      }
+    }
+  />
+  <t
+    icon="star"
+    key="star-4"
+    size={24}
+    style={
+      Object {
+        "height": "18px",
+        "width": "18px",
+      }
+    }
+  />
+  <div
+    className="woocommerce-rating__star-outline"
+    style={
+      Object {
+        "width": "80%",
+      }
+    }
+  >
+    <t
+      icon="star"
+      key="star-0"
+      size={24}
+      style={
+        Object {
+          "height": "18px",
+          "width": "18px",
+        }
+      }
+    />
+    <t
+      icon="star"
+      key="star-1"
+      size={24}
+      style={
+        Object {
+          "height": "18px",
+          "width": "18px",
+        }
+      }
+    />
+    <t
+      icon="star"
+      key="star-2"
+      size={24}
+      style={
+        Object {
+          "height": "18px",
+          "width": "18px",
+        }
+      }
+    />
+    <t
+      icon="star"
+      key="star-3"
+      size={24}
+      style={
+        Object {
+          "height": "18px",
+          "width": "18px",
+        }
+      }
+    />
+    <t
+      icon="star"
+      key="star-4"
+      size={24}
+      style={
+        Object {
+          "height": "18px",
+          "width": "18px",
+        }
+      }
+    />
+  </div>
+</div>
+`;
+
+exports[`ReviewRating should render rating based on review object 1`] = `
+<Rating
+  rating={1.5}
+  size={18}
+  totalStars={5}
+/>
+`;

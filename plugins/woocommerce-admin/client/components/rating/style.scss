@@ -1,0 +1,24 @@
+/** @format */
+
+.woocommerce-rating {
+	position: relative;
+	vertical-align: middle;
+	display: inline-block;
+	overflow: hidden;
+
+	.gridicon {
+		fill: $core-grey-light-600;
+	}
+
+	.woocommerce-rating__star-outline {
+		position: absolute;
+		left: 0;
+		top: 0;
+		white-space: nowrap;
+		overflow: hidden;
+
+		.gridicon {
+			fill: $core-grey-dark-500;
+		}
+	}
+}
