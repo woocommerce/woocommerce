@@ -44,6 +44,13 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	protected $product_types_to_export = array();
 
 	/**
+	 * Products belonging to what category should be exported.
+	 *
+	 * @var string
+	 */
+	protected $product_category_to_export = '';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -69,6 +76,17 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 */
 	public function set_product_types_to_export( $product_types_to_export ) {
 		$this->product_types_to_export = array_map( 'wc_clean', $product_types_to_export );
+	}
+
+	/**
+	 * Product category to export
+	 *
+	 * @since 3.5.0
+	 * @param string $product_category_to_export Product category slug to export, empty string exports all.
+	 * @return void
+	 */
+	public function set_product_category_to_export( $product_category_to_export ) {
+		$this->product_category_to_export = wc_clean( $product_category_to_export );
 	}
 
 	/**
@@ -130,8 +148,8 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * @since 3.1.0
 	 */
 	public function prepare_data_to_export() {
-		$columns  = $this->get_column_names();
-		$args     = apply_filters( "woocommerce_product_export_{$this->export_type}_query_args", array(
+		$columns = $this->get_column_names();
+		$args    = array(
 			'status'   => array( 'private', 'publish', 'draft', 'future', 'pending' ),
 			'type'     => $this->product_types_to_export,
 			'limit'    => $this->get_limit(),
@@ -141,8 +159,12 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			),
 			'return'   => 'objects',
 			'paginate' => true,
-		) );
-		$products = wc_get_products( $args );
+		);
+
+		if ( ! empty( $this->product_category_to_export ) ) {
+			$args['category'] = array( $this->product_category_to_export );
+		}
+		$products = wc_get_products( apply_filters( "woocommerce_product_export_{$this->export_type}_query_args", $args ) );
 
 		$this->total_rows = $products->total;
 		$this->row_data   = array();

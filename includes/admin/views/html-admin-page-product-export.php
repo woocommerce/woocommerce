@@ -59,6 +59,19 @@ $exporter = new WC_Product_CSV_Exporter();
 						</tr>
 						<tr>
 							<th scope="row">
+								<label for="woocommerce-exporter-category"><?php esc_html_e( 'Which product category should be exported?', 'woocommerce' ); ?></label>
+							</th>
+							<td>
+								<?php
+								wc_product_dropdown_categories( array(
+									'class'            => 'woocommerce-exporter-category wc-enhanced-select',
+									'show_option_none' => __( 'Export all categories', 'woocommerce' ),
+								) );
+								?>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row">
 								<label for="woocommerce-exporter-meta"><?php esc_html_e( 'Export custom meta?', 'woocommerce' ); ?></label>
 							</th>
 							<td>
