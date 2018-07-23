@@ -19,7 +19,7 @@ function wc_admin_register_script() {
 	wp_register_script(
 		WC_ADMIN_APP,
 		wc_admin_url( $js_entry ),
-		[ 'wp-components', 'wp-blocks', 'wp-element', 'wp-i18n', 'wp-date' ],
+		[ 'wp-blocks', 'wp-components', 'wp-date', 'wp-element', 'wp-hooks', 'wp-html-entities', 'wp-i18n', 'wp-keycodes' ],
 		filemtime( wc_admin_dir_path( $js_entry ) ),
 		true
 	);

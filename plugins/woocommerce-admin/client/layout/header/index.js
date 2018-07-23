@@ -5,7 +5,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import classnames from 'classnames';
-import { decodeEntities } from '@wordpress/utils';
+import { decodeEntities } from '@wordpress/html-entities';
 import { Fill } from 'react-slot-fill';
 import { isArray } from 'lodash';
 import Link from 'components/link';

@@ -3,8 +3,9 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { compose, Fragment } from '@wordpress/element';
 import { Button, withAPIData } from '@wordpress/components';
+import { compose } from '@wordpress/compose';
+import { Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { noop } from 'lodash';
 
@@ -62,39 +63,39 @@ function OrdersPanel( { orders } ) {
 							const refundValue = getOrderRefundTotal( order );
 							const remainingTotal = getCurrencyFormatDecimal( order.total ) + refundValue;
 
-						return (
-							<ActivityCard
-								key={ i }
-								className="woocommerce-order-activity-card"
-								title={ sprintf( __( '%s placed order #%d', 'wc-admin' ), name, order.id ) }
-								icon={ gravatarWithFlag( order, address ) }
-								date={ order.date_created }
-								subtitle={
-									<div>
-										<span>
-											{ sprintf(
-												_n( '%d product', '%d products', productsCount, 'wc-admin' ),
-												productsCount
-											) }
-										</span>
-										{ refundValue ? (
+							return (
+								<ActivityCard
+									key={ i }
+									className="woocommerce-order-activity-card"
+									title={ sprintf( __( '%s placed order #%d', 'wc-admin' ), name, order.id ) }
+									icon={ gravatarWithFlag( order, address ) }
+									date={ order.date_created }
+									subtitle={
+										<div>
 											<span>
-												<s>{ formatCurrency( total, order.currency ) }</s>{' '}
-												{ formatCurrency( remainingTotal, order.currency ) }
+												{ sprintf(
+													_n( '%d product', '%d products', productsCount, 'wc-admin' ),
+													productsCount
+												) }
 											</span>
-										) : (
-											<span>{ formatCurrency( total, order.currency ) }</span>
-										) }
-									</div>
-								}
-								actions={
-									<Button isDefault onClick={ noop }>
-										Begin fulfillment
-									</Button>
-								}
-							>
-								<OrderStatus order={ order } />
-							</ActivityCard>
+											{ refundValue ? (
+												<span>
+													<s>{ formatCurrency( total, order.currency ) }</s>{' '}
+													{ formatCurrency( remainingTotal, order.currency ) }
+												</span>
+											) : (
+												<span>{ formatCurrency( total, order.currency ) }</span>
+											) }
+										</div>
+									}
+									actions={
+										<Button isDefault onClick={ noop }>
+											Begin fulfillment
+										</Button>
+									}
+								>
+									<OrderStatus order={ order } />
+								</ActivityCard>
 							);
 						} ) }
 						<ActivityOutboundLink href={ 'edit.php?post_type=shop_order' }>

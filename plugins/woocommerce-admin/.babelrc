@@ -1,9 +1,14 @@
 {
-	"presets": [
-		"@wordpress/default"
-	],
+	"presets": [ "@wordpress/default" ],
 	"plugins": [
-		"transform-async-generator-functions"
+		"@babel/plugin-transform-async-to-generator",
+		"@wordpress/babel-plugin-import-jsx-pragma",
+		[
+			"@babel/plugin-transform-react-jsx",
+			{
+				"pragma": "wp.element.createElement",
+			},
+		],
 	],
 	"env": {
 		"production": {
@@ -11,11 +16,12 @@
 				[
 					"@wordpress/babel-plugin-makepot",
 					{
-						"output": "languages/wc-admin.pot"
-					}
+						"output": "languages/wc-admin.pot",
+					},
 				],
-				"transform-async-generator-functions"
-			]
-		}
-	}
+				"@wordpress/babel-plugin-import-jsx-pragma",
+				"@babel/plugin-transform-async-to-generator",
+			],
+		},
+	},
 }

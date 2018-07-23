@@ -3,7 +3,7 @@
  * External dependencies
  */
 import { Component } from '@wordpress/element';
-import { keycodes } from '@wordpress/utils';
+import { ENTER, SPACE } from '@wordpress/keycodes';
 import PropTypes from 'prop-types';
 
 class MenuItem extends Component {
@@ -22,7 +22,7 @@ class MenuItem extends Component {
 	}
 
 	onKeyDown( event ) {
-		if ( event.keyCode === keycodes.ENTER || event.keyCode === keycodes.SPACE ) {
+		if ( event.keyCode === ENTER || event.keyCode === SPACE ) {
 			event.preventDefault();
 			this.props.onInvoke();
 		}

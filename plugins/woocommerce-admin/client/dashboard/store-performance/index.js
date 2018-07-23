@@ -4,7 +4,8 @@
  */
 import { __ } from '@wordpress/i18n';
 import { ToggleControl, withAPIData } from '@wordpress/components';
-import { Component, compose } from '@wordpress/element';
+import { Component } from '@wordpress/element';
+import { compose } from '@wordpress/compose';
 
 /**
  * Internal dependencies

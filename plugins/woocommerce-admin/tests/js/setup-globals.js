@@ -14,31 +14,12 @@ global.wp = {
 	},
 };
 
-[
-	'components',
-	'utils',
-	'blocks',
-	'editor',
-	'data',
-	'core-data',
-	'edit-post',
-	'viewport',
-	'plugins',
-].forEach( entryPointName => {
-	Object.defineProperty( global.wp, entryPointName, {
-		get: () => require( 'gutenberg/' + entryPointName ),
-	} );
+Object.defineProperty( global.wp, 'element', {
+	get: () => require( '@wordpress/element' ),
 } );
 
-[
-	'element',
-	'dom',
-	'keycodes',
-	'deprecated',
-].forEach( packageName => {
-	Object.defineProperty( global.wp, packageName, {
-		get: () => require( 'gutenberg/packages/' + packageName ),
-	} );
+Object.defineProperty( global.wp, 'date', {
+	get: () => require( '@wordpress/date' ),
 } );
 
 global.wcSettings = {
@@ -49,9 +30,5 @@ global.wcSettings = {
 		dow: 0,
 	},
 };
-
-Object.defineProperty( global.wp, 'date', {
-	get: () => require( 'gutenberg/packages/date' ),
-} );
 
 setLocaleData( { '': { domain: 'wc-admin', lang: 'en_US' } }, 'wc-admin' );
