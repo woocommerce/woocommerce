@@ -10,7 +10,7 @@
  *
  * @since 2.2
  */
-class WC_Tests_Formatting_Functions extends WP_HTTP_TestCase {
+class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 
 	public function setUp() {
 		parent::setUp();
