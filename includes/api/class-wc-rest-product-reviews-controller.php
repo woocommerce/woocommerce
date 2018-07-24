@@ -196,6 +196,145 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 	}
 
 	/**
+	 * Get all reviews.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 *
+	 * @return array|WP_Error
+	 */
+	public function get_items( $request ) {
+		// Retrieve the list of registered collection query parameters.
+		$registered = $this->get_collection_params();
+
+		/*
+		 * This array defines mappings between public API query parameters whose
+		 * values are accepted as-passed, and their internal WP_Query parameter
+		 * name equivalents (some are the same). Only values which are also
+		 * present in $registered will be set.
+		 */
+		$parameter_mappings = array(
+			'reviewer'         => 'author__in',
+			'reviewer_email'   => 'author_email',
+			'reviewer_exclude' => 'author__not_in',
+			'exclude'          => 'comment__not_in',
+			'include'          => 'comment__in',
+			'offset'           => 'offset',
+			'order'            => 'order',
+			'per_page'         => 'number',
+			'product'          => 'post__in',
+			'search'           => 'search',
+			'status'           => 'status',
+		);
+
+		$prepared_args = array();
+
+		/*
+		 * For each known parameter which is both registered and present in the request,
+		 * set the parameter's value on the query $prepared_args.
+		 */
+		foreach ( $parameter_mappings as $api_param => $wp_param ) {
+			if ( isset( $registered[ $api_param ], $request[ $api_param ] ) ) {
+				$prepared_args[ $wp_param ] = $request[ $api_param ];
+			}
+		}
+
+		// Ensure certain parameter values default to empty strings.
+		foreach ( array( 'reviewer_email', 'search' ) as $param ) {
+			if ( ! isset( $prepared_args[ $param ] ) ) {
+				$prepared_args[ $param ] = '';
+			}
+		}
+
+		if ( isset( $registered['orderby'] ) ) {
+			$prepared_args['orderby'] = $this->normalize_query_param( $request['orderby'] );
+		}
+
+		if ( isset( $prepared_args['status'] ) ) {
+			$prepared_args['status'] = 'approved' === $prepared_args['status'] ? 'approve' : $prepared_args['status'];
+		}
+
+		$prepared_args['no_found_rows'] = false;
+		$prepared_args['date_query']    = array();
+
+		// Set before into date query. Date query must be specified as an array of an array.
+		if ( isset( $registered['before'], $request['before'] ) ) {
+			$prepared_args['date_query'][0]['before'] = $request['before'];
+		}
+
+		// Set after into date query. Date query must be specified as an array of an array.
+		if ( isset( $registered['after'], $request['after'] ) ) {
+			$prepared_args['date_query'][0]['after'] = $request['after'];
+		}
+
+		if ( isset( $registered['page'] ) && empty( $request['offset'] ) ) {
+			$prepared_args['offset'] = $prepared_args['number'] * ( absint( $request['page'] ) - 1 );
+		}
+
+		/**
+		 * Filters arguments, before passing to WP_Comment_Query, when querying reviews via the REST API.
+		 *
+		 * @since 3.5.0
+		 * @link https://developer.wordpress.org/reference/classes/wp_comment_query/
+		 * @param array           $prepared_args Array of arguments for WP_Comment_Query.
+		 * @param WP_REST_Request $request       The current request.
+		 */
+		$prepared_args = apply_filters( 'wc_rest_review_query', $prepared_args, $request );
+
+		$query        = new WP_Comment_Query();
+		$query_result = $query->query( $prepared_args );
+		$reviews      = array();
+
+		foreach ( $query_result as $review ) {
+			if ( ! wc_rest_check_product_reviews_permissions( 'read', $review->comment_ID ) ) {
+				continue;
+			}
+
+			$data      = $this->prepare_item_for_response( $review, $request );
+			$reviews[] = $this->prepare_response_for_collection( $data );
+		}
+
+		$total_reviews = (int) $query->found_comments;
+		$max_pages     = (int) $query->max_num_pages;
+
+		if ( $total_reviews < 1 ) {
+			// Out-of-bounds, run the query again without LIMIT for total count.
+			unset( $prepared_args['number'], $prepared_args['offset'] );
+
+			$query                  = new WP_Comment_Query();
+			$prepared_args['count'] = true;
+
+			$total_reviews = $query->query( $prepared_args );
+			$max_pages     = ceil( $total_reviews / $request['per_page'] );
+		}
+
+		$response = rest_ensure_response( $reviews );
+		$response->header( 'X-WP-Total', $total_reviews );
+		$response->header( 'X-WP-TotalPages', $max_pages );
+
+		$base = add_query_arg( $request->get_query_params(), rest_url( sprintf( '%s/%s', $this->namespace, $this->rest_base ) ) );
+
+		if ( $request['page'] > 1 ) {
+			$prev_page = $request['page'] - 1;
+
+			if ( $prev_page > $max_pages ) {
+				$prev_page = $max_pages;
+			}
+
+			$prev_link = add_query_arg( 'page', $prev_page, $base );
+			$response->link_header( 'prev', $prev_link );
+		}
+
+		if ( $max_pages > $request['page'] ) {
+			$next_page = $request['page'] + 1;
+			$next_link = add_query_arg( 'page', $next_page, $base );
+
+			$response->link_header( 'next', $next_link );
+		}
+
+		return $response;
+	}
+
+	/**
 	 * Get a single product review.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
@@ -224,21 +363,12 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 	 */
 	public function prepare_item_for_response( $review, $request ) {
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$status  = (string) $review->comment_approved;
-
-		$statuses = array(
-			'0'     => 'pending',
-			'1'     => 'approved',
-			'spam'  => 'spam',
-			'trash' => 'trash',
-		);
-
-		$data = array(
+		$data    = array(
 			'id'                   => (int) $review->comment_ID,
 			'date_created'         => wc_rest_prepare_date_response( $review->comment_date ),
 			'date_created_gmt'     => wc_rest_prepare_date_response( $review->comment_date_gmt ),
 			'product_id'           => (int) $review->comment_post_ID,
-			'status'               => isset( $statuses[ $status ] ) ? $statuses[ $status ] : 'pending',
+			'status'               => $this->prepare_status_response( (string) $review->comment_approved ),
 			'reviewer'             => $review->comment_author,
 			'reviewer_email'       => $review->comment_author_email,
 			'review'               => 'view' === $context ? wpautop( $review->comment_content ) : $review->comment_content,
@@ -388,8 +518,170 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		return array(
-			'context' => $this->get_context_param( array( 'default' => 'view' ) ),
+		$params = parent::get_collection_params();
+
+		$params['context']['default'] = 'view';
+
+		$params['after']            = array(
+			'description' => __( 'Limit response to reviews published after a given ISO8601 compliant date.', 'woocommerce' ),
+			'type'        => 'string',
+			'format'      => 'date-time',
 		);
+		$params['reviewer']         = array(
+			'description' => __( 'Limit result set to reviews assigned to specific user IDs.', 'woocommerce' ),
+			'type'        => 'array',
+			'items'       => array(
+				'type' => 'integer',
+			),
+		);
+		$params['reviewer_exclude'] = array(
+			'description' => __( 'Ensure result set excludes reviews assigned to specific user IDs.', 'woocommerce' ),
+			'type'        => 'array',
+			'items'       => array(
+				'type' => 'integer',
+			),
+		);
+		$params['reviewer_email']   = array(
+			'default'     => null,
+			'description' => __( 'Limit result set to that from a specific author email.', 'woocommerce' ),
+			'format'      => 'email',
+			'type'        => 'string',
+		);
+		$params['before']           = array(
+			'description' => __( 'Limit response to reviews published before a given ISO8601 compliant date.', 'woocommerce' ),
+			'type'        => 'string',
+			'format'      => 'date-time',
+		);
+		$params['exclude']          = array(
+			'description' => __( 'Ensure result set excludes specific IDs.', 'woocommerce' ),
+			'type'        => 'array',
+			'items'       => array(
+				'type' => 'integer',
+			),
+			'default'     => array(),
+		);
+		$params['include']          = array(
+			'description' => __( 'Limit result set to specific IDs.', 'woocommerce' ),
+			'type'        => 'array',
+			'items'       => array(
+				'type' => 'integer',
+			),
+			'default'     => array(),
+		);
+		$params['offset']           = array(
+			'description' => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
+			'type'        => 'integer',
+		);
+		$params['order']            = array(
+			'description' => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
+			'type'        => 'string',
+			'default'     => 'desc',
+			'enum'        => array(
+				'asc',
+				'desc',
+			),
+		);
+		$params['orderby']          = array(
+			'description' => __( 'Sort collection by object attribute.', 'woocommerce' ),
+			'type'        => 'string',
+			'default'     => 'date_gmt',
+			'enum'        => array(
+				'date',
+				'date_gmt',
+				'id',
+				'include',
+				'product',
+			),
+		);
+		$params['product']          = array(
+			'default'     => array(),
+			'description' => __( 'Limit result set to reviews assigned to specific product IDs.', 'woocommerce' ),
+			'type'        => 'array',
+			'items'       => array(
+				'type' => 'integer',
+			),
+		);
+		$params['status']           = array(
+			'default'           => 'approved',
+			'description'       => __( 'Limit result set to reviews assigned a specific status.', 'woocommerce' ),
+			'sanitize_callback' => 'sanitize_key',
+			'type'              => 'string',
+			'enum'              => array(
+				'all',
+				'hold',
+				'approved',
+				'spam',
+				'trash',
+			),
+		);
+
+		/**
+		 * Filter collection parameters for the reviews controller.
+		 *
+		 * This filter registers the collection parameter, but does not map the
+		 * collection parameter to an internal WP_Comment_Query parameter. Use the
+		 * `wc_rest_review_query` filter to set WP_Comment_Query parameters.
+		 *
+		 * @since 3.5.0
+		 *
+		 * @param array $params JSON Schema-formatted collection parameters.
+		 */
+		return apply_filters( 'wc_rest_review_collection_params', $params );
+	}
+
+	/**
+	 * Prepends internal property prefix to query parameters to match our response fields.
+	 *
+	 * @since 3.5.0
+	 * @param string $query_param Query parameter.
+	 * @return string
+	 */
+	protected function normalize_query_param( $query_param ) {
+		$prefix = 'comment_';
+
+		switch ( $query_param ) {
+			case 'id':
+				$normalized = $prefix . 'ID';
+				break;
+			case 'product':
+				$normalized = $prefix . 'post_ID';
+				break;
+				break;
+			case 'include':
+				$normalized = 'comment__in';
+				break;
+			default:
+				$normalized = $prefix . $query_param;
+				break;
+		}
+
+		return $normalized;
+	}
+
+	/**
+	 * Checks comment_approved to set comment status for single comment output.
+	 *
+	 * @since 3.5.0
+	 * @param string|int $comment_approved comment status.
+	 * @return string Comment status.
+	 */
+	protected function prepare_status_response( $comment_approved ) {
+		switch ( $comment_approved ) {
+			case 'hold':
+			case '0':
+				$status = 'hold';
+				break;
+			case 'approve':
+			case '1':
+				$status = 'approved';
+				break;
+			case 'spam':
+			case 'trash':
+			default:
+				$status = $comment_approved;
+				break;
+		}
+
+		return $status;
 	}
 }
