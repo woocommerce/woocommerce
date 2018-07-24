@@ -50,22 +50,22 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
 					'args'                => array_merge(
 						$this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
-							'product_id' => array(
+							'product_id'     => array(
 								'required'    => true,
 								'description' => __( 'Unique identifier for the product.', 'woocommerce' ),
 								'type'        => 'integer',
 							),
-							'review'     => array(
+							'review'         => array(
 								'required'    => true,
 								'type'        => 'string',
 								'description' => __( 'Review content.', 'woocommerce' ),
 							),
-							'name'       => array(
+							'reviewer'       => array(
 								'required'    => true,
 								'type'        => 'string',
 								'description' => __( 'Name of the reviewer.', 'woocommerce' ),
 							),
-							'email'      => array(
+							'reviewer_email' => array(
 								'required'    => true,
 								'type'        => 'string',
 								'description' => __( 'Email of the reviewer.', 'woocommerce' ),
@@ -234,17 +234,17 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		);
 
 		$data = array(
-			'id'               => (int) $review->comment_ID,
-			'date_created'     => wc_rest_prepare_date_response( $review->comment_date ),
-			'date_created_gmt' => wc_rest_prepare_date_response( $review->comment_date_gmt ),
-			'product_id'       => (int) $review->comment_post_ID,
-			'status'           => isset( $statuses[ $status ] ) ? $statuses[ $status ] : 'pending',
-			'reviewer'         => $review->comment_author,
-			'email'            => $review->comment_author_email,
-			'avatar_urls'      => rest_get_avatar_urls( $review->comment_author_email ),
-			'verified'         => wc_review_is_from_verified_owner( $review->comment_ID ),
-			'review'           => 'view' === $context ? wpautop( $review->comment_content ) : $review->comment_content,
-			'rating'           => (int) get_comment_meta( $review->comment_ID, 'rating', true ),
+			'id'                   => (int) $review->comment_ID,
+			'date_created'         => wc_rest_prepare_date_response( $review->comment_date ),
+			'date_created_gmt'     => wc_rest_prepare_date_response( $review->comment_date_gmt ),
+			'product_id'           => (int) $review->comment_post_ID,
+			'status'               => isset( $statuses[ $status ] ) ? $statuses[ $status ] : 'pending',
+			'reviewer'             => $review->comment_author,
+			'reviewer_email'       => $review->comment_author_email,
+			'review'               => 'view' === $context ? wpautop( $review->comment_content ) : $review->comment_content,
+			'rating'               => (int) get_comment_meta( $review->comment_ID, 'rating', true ),
+			'verified'             => wc_review_is_from_verified_owner( $review->comment_ID ),
+			'reviewer_avatar_urls' => rest_get_avatar_urls( $review->comment_author_email ),
 		);
 
 		$data = $this->add_additional_fields_to_object( $data, $request );
@@ -309,11 +309,13 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 					'description' => __( "The date the review was created, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
 				'date_created_gmt' => array(
 					'description' => __( 'The date the review was created, as GMT.', 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
 				'product_id'       => array(
 					'description' => __( 'Unique identifier for the product that the review belongs to.', 'woocommerce' ),
@@ -331,21 +333,10 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'email'            => array(
+				'reviewer_email'   => array(
 					'description' => __( 'Reviewer email.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
-				),
-				'avatar_urls'      => array(
-					'description' => __( "URLs for the reviewer's avatar.", 'woocommerce' ),
-					'type'        => 'array',
-					'context'     => array( 'view', 'edit' ),
-				),
-				'verified'         => array(
-					'description' => __( 'Shows if the reviewer bought the product or not.', 'woocommerce' ),
-					'type'        => 'boolean',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
 				),
 				'review'           => array(
 					'description' => __( 'The content of the review.', 'woocommerce' ),
@@ -357,8 +348,36 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 				),
+				'verified'         => array(
+					'description' => __( 'Shows if the reviewer bought the product or not.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
 			),
 		);
+
+		if ( get_option( 'show_avatars' ) ) {
+			$avatar_properties = array();
+			$avatar_sizes      = rest_get_avatar_sizes();
+
+			foreach ( $avatar_sizes as $size ) {
+				$avatar_properties[ $size ] = array(
+					/* translators: %d: avatar image size in pixels */
+					'description' => sprintf( __( 'Avatar URL with image size of %d pixels.', 'woocommerce' ), $size ),
+					'type'        => 'string',
+					'format'      => 'uri',
+					'context'     => array( 'embed', 'view', 'edit' ),
+				);
+			}
+			$schema['properties']['reviewer_avatar_urls'] = array(
+				'description' => __( 'Avatar URLs for the object reviewer.', 'woocommerce' ),
+				'type'        => 'object',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+				'properties'  => $avatar_properties,
+			);
+		}
 
 		return $this->add_additional_fields_schema( $schema );
 	}
