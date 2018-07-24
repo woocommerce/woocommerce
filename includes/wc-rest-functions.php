@@ -342,19 +342,17 @@ function wc_rest_check_manager_permissions( $object, $context = 'read' ) {
  * @return bool
  */
 function wc_rest_check_product_reviews_permissions( $context = 'read', $object_id = 0 ) {
-	$contexts = array(
-		'read'   => 'read_private_posts',
-		'create' => 'publish_posts',
-		'edit'   => 'edit_post',
-		'delete' => 'delete_post',
-		'batch'  => 'edit_others_posts',
+	$permission = false;
+	$contexts   = array(
+		'read'   => 'moderate_comments',
+		'create' => 'moderate_comments',
+		'edit'   => 'moderate_comments',
+		'delete' => 'moderate_comments',
+		'batch'  => 'moderate_comments',
 	);
 
-	$cap              = $contexts[ $context ];
-	$post_type_object = get_post_type_object( 'product' );
-
-	if ( isset( $post_type_object->cap->$cap ) ) {
-		$permission = current_user_can( $post_type_object->cap->$cap );
+	if ( isset( $contexts[ $context ] ) ) {
+		$permission = current_user_can( $contexts[ $context ] );
 	}
 
 	return apply_filters( 'woocommerce_rest_check_permissions', $permission, $context, $object_id, 'product_review' );
