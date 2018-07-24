@@ -432,10 +432,20 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 			'collection' => array(
 				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ),
 			),
-			'product'    => array(
-				'href' => rest_url( sprintf( '/%s/products/%d', $this->namespace, $review->comment_post_ID ) ),
-			),
 		);
+
+		if ( 0 !== (int) $review->comment_post_ID ) {
+			$links['up'] = array(
+				'href' => rest_url( sprintf( '/%s/products/%d', $this->namespace, $review->comment_post_ID ) ),
+			);
+		}
+
+		if ( 0 !== (int) $review->user_id ) {
+			$links['reviewer'] = array(
+				'href'       => rest_url( 'wp/v2/users/' . $review->user_id ),
+				'embeddable' => true,
+			);
+		}
 
 		return $links;
 	}
