@@ -73,13 +73,14 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 		}
 
 		// Handle password creation.
+		$password_generated = false;
 		if ( 'yes' === get_option( 'woocommerce_registration_generate_password' ) && empty( $password ) ) {
 			$password           = wp_generate_password();
 			$password_generated = true;
-		} elseif ( empty( $password ) ) {
+		}
+
+		if ( empty( $password ) ) {
 			return new WP_Error( 'registration-error-missing-password', __( 'Please enter an account password.', 'woocommerce' ) );
-		} else {
-			$password_generated = false;
 		}
 
 		// Use WP_Error to handle registration errors.
@@ -105,7 +106,7 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 		$customer_id = wp_insert_user( $new_customer_data );
 
 		if ( is_wp_error( $customer_id ) ) {
-			return new WP_Error( 'registration-error', '<strong>' . __( 'Error:', 'woocommerce' ) . '</strong> ' . __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce' ) );
+			return new WP_Error( 'registration-error', __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce' ) );
 		}
 
 		do_action( 'woocommerce_created_customer', $customer_id, $new_customer_data, $password_generated );
@@ -218,10 +219,14 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 	$result         = get_transient( $transient_name );
 
 	if ( false === $result ) {
-		$customer_data = array( $user_id );
+		$customer_data = array();
 
 		if ( $user_id ) {
 			$user = get_user_by( 'id', $user_id );
+
+			if ( version_compare( get_option( 'woocommerce_db_version' ), '3.5.0', '<' ) ) {
+				$customer_data[] = $user_id;
+			}
 
 			if ( isset( $user->user_email ) ) {
 				$customer_data[] = $user->user_email;
@@ -239,19 +244,31 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 			return false;
 		}
 
-		$result = $wpdb->get_col(
-			"
-			SELECT im.meta_value FROM {$wpdb->posts} AS p
-			INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
-			INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
-			INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
-			WHERE p.post_status IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
-			AND pm.meta_key IN ( '_billing_email', '_customer_user' )
-			AND im.meta_key IN ( '_product_id', '_variation_id' )
-			AND im.meta_value != 0
-			AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )
-		"
-		); // WPCS: unprepared SQL ok.
+		if ( version_compare( get_option( 'woocommerce_db_version' ), '3.5.0', '>=' ) && $user_id ) {
+			// Since WC 3.5 wp_posts.post_author is used to store the ID of the customer who placed an order.
+			$query = "SELECT im.meta_value FROM {$wpdb->posts} AS p
+				INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
+				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
+				INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
+				WHERE p.post_status IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
+				AND p.post_author = {$user_id}
+				AND pm.meta_key = '_billing_email'
+				AND im.meta_key IN ( '_product_id', '_variation_id' )
+				AND im.meta_value != 0
+				AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )";
+		} else {
+			$query = "SELECT im.meta_value FROM {$wpdb->posts} AS p
+				INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
+				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
+				INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
+				WHERE p.post_status IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
+				AND pm.meta_key IN ( '_billing_email', '_customer_user' )
+				AND im.meta_key IN ( '_product_id', '_variation_id' )
+				AND im.meta_value != 0
+				AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )";
+		}
+
+		$result = $wpdb->get_col( $query ); // WPCS: unprepared SQL ok.
 		$result = array_map( 'absint', $result );
 
 		set_transient( $transient_name, $result, DAY_IN_SECONDS * 30 );
@@ -494,7 +511,7 @@ function wc_get_customer_order_count( $user_id ) {
 }
 
 /**
- * Reset _customer_user on orders when a user is deleted.
+ * Reset customer ID on orders when a user is deleted.
  *
  * @param int $user_id User ID.
  */
@@ -507,6 +524,22 @@ function wc_reset_order_customer_id_on_deleted_user( $user_id ) {
 			'meta_value' => $user_id,
 		)
 	); // WPCS: slow query ok.
+
+	$post_types              = (array) apply_filters( 'woocommerce_reset_order_customer_id_post_types', array( 'shop_order' ) );
+	$post_types_placeholders = implode( ', ', array_fill( 0, count( $post_types ), '%s' ) );
+	$query_args              = array_merge( $post_types, array( $user_id ) );
+
+	// Since WC 3.5, the customer ID is stored both in the _customer_user postmeta and in the post_author field.
+	// In future versions of WC, the plan is to use only post_author and stop using _customer_user, but for now
+	// we have to update both places.
+	$wpdb->query(
+		// phpcs:disable WordPress.WP.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		$wpdb->prepare(
+			"UPDATE {$wpdb->posts} SET `post_author` = 0 WHERE post_type IN ({$post_types_placeholders}) AND post_author = %d",
+			$query_args
+		)
+		// phpcs:enable
+	);
 }
 
 add_action( 'deleted_user', 'wc_reset_order_customer_id_on_deleted_user' );
@@ -519,13 +552,7 @@ add_action( 'deleted_user', 'wc_reset_order_customer_id_on_deleted_user' );
  */
 function wc_review_is_from_verified_owner( $comment_id ) {
 	$verified = get_comment_meta( $comment_id, 'verified', true );
-
-	// If no "verified" meta is present, generate it (if this is a product review).
-	if ( '' === $verified ) {
-		$verified = WC_Comments::add_comment_purchase_verification( $comment_id );
-	}
-
-	return (bool) $verified;
+	return '' === $verified ? WC_Comments::add_comment_purchase_verification( $comment_id ) : (bool) $verified;
 }
 
 /**
@@ -571,16 +598,10 @@ add_action( 'profile_update', 'wc_update_profile_last_update_time', 10, 2 );
  */
 function wc_meta_update_last_update_time( $meta_id, $user_id, $meta_key, $_meta_value ) {
 	$keys_to_track = apply_filters( 'woocommerce_user_last_update_fields', array( 'first_name', 'last_name' ) );
-	$update_time   = false;
-	if ( in_array( $meta_key, $keys_to_track, true ) ) {
-		$update_time = true;
-	}
-	if ( 'billing_' === substr( $meta_key, 0, 8 ) ) {
-		$update_time = true;
-	}
-	if ( 'shipping_' === substr( $meta_key, 0, 9 ) ) {
-		$update_time = true;
-	}
+
+	$update_time = in_array( $meta_key, $keys_to_track, true ) ? true : false;
+	$update_time = 'billing_' === substr( $meta_key, 0, 8 ) ? true : $update_time;
+	$update_time = 'shipping_' === substr( $meta_key, 0, 9 ) ? true : $update_time;
 
 	if ( $update_time ) {
 		wc_set_user_last_update_time( $user_id );
@@ -694,6 +715,7 @@ add_action( 'wp_login', 'wc_maybe_store_user_agent', 10, 2 );
  */
 function wc_user_logged_in( $user_login, $user ) {
 	wc_update_user_last_active( $user->ID );
+	update_user_meta( $user->ID, '_woocommerce_load_saved_cart_after_login', 1 );
 }
 add_action( 'wp_login', 'wc_user_logged_in', 10, 2 );
 

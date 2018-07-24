@@ -902,7 +902,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		$class         = 'standard' === $class ? '' : $class;
 		$valid_classes = $this->get_valid_tax_classes();
 
-		if ( ! in_array( $class, $valid_classes ) ) {
+		if ( ! in_array( $class, $valid_classes, true ) ) {
 			$class = '';
 		}
 
@@ -1091,14 +1091,13 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Set default attributes.
+	 * Set default attributes. These will be saved as strings and should map to attribute values.
 	 *
 	 * @since 3.0.0
 	 * @param array $default_attributes List of default attributes.
 	 */
 	public function set_default_attributes( $default_attributes ) {
-		$this->set_prop( 'default_attributes',
-		array_filter( (array) $default_attributes, 'wc_array_filter_default_attributes' ) );
+		$this->set_prop( 'default_attributes', array_map( 'strval', array_filter( (array) $default_attributes, 'wc_array_filter_default_attributes' ) ) );
 	}
 
 	/**
@@ -1314,7 +1313,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			$this->set_stock_status( 'onbackorder' );
 
 			// If the stock level is changing and we do now have enough, force in stock status.
-		} elseif ( $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount', 0 ) && ( array_key_exists( 'stock_quantity', $this->get_changes() ) || array_key_exists( 'manage_stock', $this->get_changes() ) ) ) {
+		} elseif ( $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount', 0 ) ) {
 			$this->set_stock_status( 'instock' );
 		}
 	}
@@ -1799,10 +1798,11 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return string
 	 */
 	public function get_image( $size = 'woocommerce_thumbnail', $attr = array(), $placeholder = true ) {
-		if ( has_post_thumbnail( $this->get_id() ) ) {
-			$image = get_the_post_thumbnail( $this->get_id(), $size, $attr );
-		} elseif ( ( $parent_id = wp_get_post_parent_id( $this->get_id() ) ) && has_post_thumbnail( $parent_id ) ) { // @phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found
-			$image = get_the_post_thumbnail( $parent_id, $size, $attr );
+		if ( $this->get_image_id() ) {
+			$image = wp_get_attachment_image( $this->get_image_id(), $size );
+		} elseif ( $this->get_parent_id() ) {
+			$parent_product = wc_get_product( $this->get_parent_id() );
+			$image          = $parent_product->get_image();
 		} elseif ( $placeholder ) {
 			$image = wc_placeholder_img( $size );
 		} else {

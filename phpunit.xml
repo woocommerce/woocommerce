@@ -45,6 +45,6 @@
 		</whitelist>
 	</filter>
 	<listeners>
-		<listener class="JohnKary\PHPUnit\Listener\SpeedTrapListener" />
+		<listener class="SpeedTrapListener" file="tests/includes/speed-trap-listener.php" />
 	</listeners>
 </phpunit>

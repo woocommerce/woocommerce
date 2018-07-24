@@ -44,10 +44,11 @@ https://woocommerce.com/contact-us/
 
 ## Coding Guidelines
 
-- **Ensure you stick to the [WordPress Coding Standards](https://make.wordpress.org/core/handbook/coding-standards/php/)**
+- **Ensure you stick to the [WordPress Coding Standards](https://make.wordpress.org/core/handbook/best-practices/coding-standards/php/)**
 - Install our pre-commit hook using composer. It'll help with the Coding Standards. To install run `composer install` from the command line within the woocommerce plugin directory.
 - Ensure you use LF line endings in your code editor. Use [EditorConfig](http://editorconfig.org/) if your editor supports it so that indentation, line endings and other settings are auto configured.
 - When committing, reference your issue number (#1234) and include a note about the fix.
+- Ensure that your code is compatible with PHP 5.2+.
 - Push the changes to your fork and submit a pull request on the master branch of the WooCommerce repository. Existing maintenance branches will be maintained by WooCommerce developers.
 
 Please **don't** modify the changelog or update the .pot files. These will be maintained by the WooCommerce team.

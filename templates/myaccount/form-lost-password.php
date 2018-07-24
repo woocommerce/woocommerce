@@ -17,7 +17,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-wc_print_notices(); ?>
+?>
 
 <form method="post" class="woocommerce-ResetPassword lost_reset_password">
 

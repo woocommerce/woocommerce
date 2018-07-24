@@ -251,6 +251,9 @@ function wc_save_order_items( $order_id, $items ) {
 				}
 			}
 
+			// Allow other plugins to change item object before it is saved.
+			do_action( 'woocommerce_before_save_order_item', $item );
+
 			$item->save();
 		}
 	}

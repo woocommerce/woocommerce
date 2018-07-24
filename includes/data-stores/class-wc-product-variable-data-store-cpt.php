@@ -515,6 +515,8 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		$prices   = $children ? array_unique( $wpdb->get_col( "SELECT meta_value FROM $wpdb->postmeta WHERE meta_key = '_price' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )' ) ) : array(); // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
 
 		delete_post_meta( $product->get_id(), '_price' );
+		delete_post_meta( $product->get_id(), '_sale_price' );
+		delete_post_meta( $product->get_id(), '_regular_price' );
 
 		if ( $prices ) {
 			sort( $prices );

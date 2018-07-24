@@ -366,7 +366,7 @@ function wc_is_attribute_in_product_name( $attribute, $name ) {
  * @return bool
  */
 function wc_array_filter_default_attributes( $attribute ) {
-	return ( ! empty( $attribute ) || '0' === $attribute );
+	return is_scalar( $attribute ) && ( ! empty( $attribute ) || '0' === $attribute );
 }
 
 /**

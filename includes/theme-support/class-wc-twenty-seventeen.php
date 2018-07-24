@@ -48,6 +48,7 @@ class WC_Twenty_Seventeen {
 			'deps'    => '',
 			'version' => WC_VERSION,
 			'media'   => 'all',
+			'has_rtl' => true,
 		);
 
 		return apply_filters( 'woocommerce_twenty_seventeen_styles', $styles );

@@ -8,6 +8,10 @@
 
 defined( 'ABSPATH' ) || exit;
 
+if ( ! class_exists( 'WC_Privacy_Background_Process', false ) ) {
+	include_once dirname( __FILE__ ) . '/class-wc-privacy-background-process.php';
+}
+
 /**
  * WC_Privacy Class.
  */
@@ -35,16 +39,16 @@ class WC_Privacy extends WC_Abstract_Privacy {
 		include_once 'class-wc-privacy-exporters.php';
 
 		// This hook registers WooCommerce data exporters.
-		$this->add_exporter( 'woocommerce-customer-data', __( 'Customer Data', 'woocommerce' ), array( 'WC_Privacy_Exporters', 'customer_data_exporter' ) );
-		$this->add_exporter( 'woocommerce-customer-orders', __( 'Customer Orders', 'woocommerce' ), array( 'WC_Privacy_Exporters', 'order_data_exporter' ) );
-		$this->add_exporter( 'woocommerce-customer-downloads', __( 'Customer Downloads', 'woocommerce' ), array( 'WC_Privacy_Exporters', 'download_data_exporter' ) );
-		$this->add_exporter( 'woocommerce-customer-tokens', __( 'Customer Tokens', 'woocommerce' ), array( 'WC_Privacy_Exporters', 'customer_tokens_exporter' ) );
+		$this->add_exporter( 'woocommerce-customer-data', __( 'WooCommerce Customer Data', 'woocommerce' ), array( 'WC_Privacy_Exporters', 'customer_data_exporter' ) );
+		$this->add_exporter( 'woocommerce-customer-orders', __( 'WooCommerce Customer Orders', 'woocommerce' ), array( 'WC_Privacy_Exporters', 'order_data_exporter' ) );
+		$this->add_exporter( 'woocommerce-customer-downloads', __( 'WooCommerce Customer Downloads', 'woocommerce' ), array( 'WC_Privacy_Exporters', 'download_data_exporter' ) );
+		$this->add_exporter( 'woocommerce-customer-tokens', __( 'WooCommerce Customer Payment Tokens', 'woocommerce' ), array( 'WC_Privacy_Exporters', 'customer_tokens_exporter' ) );
 
 		// This hook registers WooCommerce data erasers.
-		$this->add_eraser( 'woocommerce-customer-data', __( 'Customer Data', 'woocommerce' ), array( 'WC_Privacy_Erasers', 'customer_data_eraser' ) );
-		$this->add_eraser( 'woocommerce-customer-orders', __( 'Customer Orders', 'woocommerce' ), array( 'WC_Privacy_Erasers', 'order_data_eraser' ) );
-		$this->add_eraser( 'woocommerce-customer-downloads', __( 'Customer Downloads', 'woocommerce' ), array( 'WC_Privacy_Erasers', 'download_data_eraser' ) );
-		$this->add_eraser( 'woocommerce-customer-tokens', __( 'Customer Tokens', 'woocommerce' ), array( 'WC_Privacy_Erasers', 'customer_tokens_eraser' ) );
+		$this->add_eraser( 'woocommerce-customer-data', __( 'WooCommerce Customer Data', 'woocommerce' ), array( 'WC_Privacy_Erasers', 'customer_data_eraser' ) );
+		$this->add_eraser( 'woocommerce-customer-orders', __( 'WooCommerce Customer Orders', 'woocommerce' ), array( 'WC_Privacy_Erasers', 'order_data_eraser' ) );
+		$this->add_eraser( 'woocommerce-customer-downloads', __( 'WooCommerce Customer Downloads', 'woocommerce' ), array( 'WC_Privacy_Erasers', 'download_data_eraser' ) );
+		$this->add_eraser( 'woocommerce-customer-tokens', __( 'WooCommerce Customer Payment Tokens', 'woocommerce' ), array( 'WC_Privacy_Erasers', 'customer_tokens_eraser' ) );
 
 		// Cleanup orders daily - this is a callback on a daily cron event.
 		add_action( 'woocommerce_cleanup_personal_data', array( $this, 'queue_cleanup_personal_data' ) );
@@ -165,11 +169,12 @@ class WC_Privacy extends WC_Abstract_Privacy {
 			return 0;
 		}
 
-		return self::trash_orders_query( array(
+		return self::trash_orders_query( apply_filters( 'woocommerce_trash_pending_orders_query_args', array(
 			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
 			'limit'        => $limit, // Batches of 20.
 			'status'       => 'wc-pending',
-		) );
+			'type'         => 'shop_order',
+		) ) );
 	}
 
 	/**
@@ -186,11 +191,12 @@ class WC_Privacy extends WC_Abstract_Privacy {
 			return 0;
 		}
 
-		return self::trash_orders_query( array(
+		return self::trash_orders_query( apply_filters( 'woocommerce_trash_failed_orders_query_args', array(
 			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
 			'limit'        => $limit, // Batches of 20.
 			'status'       => 'wc-failed',
-		) );
+			'type'         => 'shop_order',
+		) ) );
 	}
 
 	/**
@@ -207,11 +213,12 @@ class WC_Privacy extends WC_Abstract_Privacy {
 			return 0;
 		}
 
-		return self::trash_orders_query( array(
+		return self::trash_orders_query( apply_filters( 'woocommerce_trash_cancelled_orders_query_args', array(
 			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
 			'limit'        => $limit, // Batches of 20.
 			'status'       => 'wc-cancelled',
-		) );
+			'type'         => 'shop_order',
+		) ) );
 	}
 
 	/**
@@ -249,12 +256,13 @@ class WC_Privacy extends WC_Abstract_Privacy {
 			return 0;
 		}
 
-		return self::anonymize_orders_query( array(
+		return self::anonymize_orders_query( apply_filters( 'woocommerce_anonymize_completed_orders_query_args', array(
 			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
 			'limit'        => $limit, // Batches of 20.
 			'status'       => 'wc-completed',
 			'anonymized'   => false,
-		) );
+			'type'         => 'shop_order',
+		) ) );
 	}
 
 	/**

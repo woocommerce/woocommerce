@@ -156,6 +156,8 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			$sql .= ' AND ' . $search;
 		}
 
+		$sql = apply_filters( 'woocommerce_price_filter_sql', $sql, $meta_query_sql, $tax_query_sql );
+
 		return $wpdb->get_row( $sql ); // WPCS: unprepared SQL ok.
 	}
 }

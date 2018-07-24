@@ -67,7 +67,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 					'post_type'     => $order->get_type( 'edit' ),
 					'post_status'   => 'wc-' . ( $order->get_status( 'edit' ) ? $order->get_status( 'edit' ) : apply_filters( 'woocommerce_default_order_status', 'pending' ) ),
 					'ping_status'   => 'closed',
-					'post_author'   => 1,
+					'post_author'   => is_callable( array( $order, 'get_customer_id' ) ) ? $order->get_customer_id() : 0,
 					'post_title'    => $this->get_post_title(),
 					'post_password' => uniqid( 'order_' ),
 					'post_parent'   => $order->get_parent_id( 'edit' ),
@@ -132,10 +132,14 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		$order->save_meta_data();
 		$order->set_version( WC_VERSION );
 
+		if ( null === $order->get_date_created( 'edit' ) ) {
+			$order->set_date_created( current_time( 'timestamp', true ) );
+		}
+
 		$changes = $order->get_changes();
 
 		// Only update the post when the post data changes.
-		if ( array_intersect( array( 'date_created', 'date_modified', 'status', 'parent_id', 'post_excerpt' ), array_keys( $changes ) ) ) {
+		if ( array_intersect( array( 'date_created', 'date_modified', 'status', 'parent_id', 'post_excerpt', 'customer_id' ), array_keys( $changes ) ) ) {
 			$post_data = array(
 				'post_date'         => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getOffsetTimestamp() ),
 				'post_date_gmt'     => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
@@ -144,6 +148,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 				'post_excerpt'      => $this->get_post_excerpt( $order ),
 				'post_modified'     => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getOffsetTimestamp() ) : current_time( 'mysql' ),
 				'post_modified_gmt' => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getTimestamp() ) : current_time( 'mysql', 1 ),
+				'post_author'       => is_callable( array( $order, 'get_customer_id' ) ) ? $order->get_customer_id() : 0,
 			);
 
 			/**
@@ -161,10 +166,25 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 				wp_update_post( array_merge( array( 'ID' => $order->get_id() ), $post_data ) );
 			}
 			$order->read_meta_data( true ); // Refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
+
+			// If customer changed, update any downloadable permissions.
+			if ( in_array( 'customer_id', $changes ) ) {
+				$this->update_downloadable_permissions( $order );
+			}
 		}
 		$this->update_post_meta( $order );
 		$order->apply_changes();
 		$this->clear_caches( $order );
+	}
+
+	/**
+	 * Update downloadable permissions for a given order.
+	 *
+	 * @param WC_Order $order Order object.
+	 */
+	protected function update_downloadable_permissions( $order ) {
+		$data_store = WC_Data_Store::load( 'customer-download' );
+		$data_store->update_user_by_order_id( $order->get_id(), $order->get_customer_id(), $order->get_billing_email() );
 	}
 
 	/**
@@ -320,7 +340,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		global $wpdb;
 
 		// Get from cache if available.
-		$items = wp_cache_get( 'order-items-' . $order->get_id(), 'orders' );
+		$items = 0 < $order->get_id() ? wp_cache_get( 'order-items-' . $order->get_id(), 'orders' ) : false;
 
 		if ( false === $items ) {
 			$items = $wpdb->get_results(
@@ -329,7 +349,9 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			foreach ( $items as $item ) {
 				wp_cache_set( 'item-' . $item->order_item_id, $item, 'order-items' );
 			}
-			wp_cache_set( 'order-items-' . $order->get_id(), $items, 'orders' );
+			if ( 0 < $order->get_id() ) {
+				wp_cache_set( 'order-items-' . $order->get_id(), $items, 'orders' );
+			}
 		}
 
 		$items = wp_list_filter( $items, array( 'order_item_type' => $type ) );
