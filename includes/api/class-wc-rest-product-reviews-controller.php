@@ -363,19 +363,42 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 	 */
 	public function prepare_item_for_response( $review, $request ) {
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = array(
-			'id'                   => (int) $review->comment_ID,
-			'date_created'         => wc_rest_prepare_date_response( $review->comment_date ),
-			'date_created_gmt'     => wc_rest_prepare_date_response( $review->comment_date_gmt ),
-			'product_id'           => (int) $review->comment_post_ID,
-			'status'               => $this->prepare_status_response( (string) $review->comment_approved ),
-			'reviewer'             => $review->comment_author,
-			'reviewer_email'       => $review->comment_author_email,
-			'review'               => 'view' === $context ? wpautop( $review->comment_content ) : $review->comment_content,
-			'rating'               => (int) get_comment_meta( $review->comment_ID, 'rating', true ),
-			'verified'             => wc_review_is_from_verified_owner( $review->comment_ID ),
-			'reviewer_avatar_urls' => rest_get_avatar_urls( $review->comment_author_email ),
-		);
+		$fields  = $this->get_fields_for_response( $request );
+		$data    = array();
+
+		if ( in_array( 'id', $fields, true ) ) {
+			$data['id'] = (int) $review->comment_ID;
+		}
+		if ( in_array( 'date_created', $fields, true ) ) {
+			$data['date_created'] = wc_rest_prepare_date_response( $review->comment_date );
+		}
+		if ( in_array( 'date_created_gmt', $fields, true ) ) {
+			$data['date_created_gmt'] = wc_rest_prepare_date_response( $review->comment_date_gmt );
+		}
+		if ( in_array( 'product_id', $fields, true ) ) {
+			$data['product_id'] = (int) $review->comment_post_ID;
+		}
+		if ( in_array( 'status', $fields, true ) ) {
+			$data['status'] = $this->prepare_status_response( (string) $review->comment_approved );
+		}
+		if ( in_array( 'reviewer', $fields, true ) ) {
+			$data['reviewer'] = $review->comment_author;
+		}
+		if ( in_array( 'reviewer_email', $fields, true ) ) {
+			$data['reviewer_email'] = $review->comment_author_email;
+		}
+		if ( in_array( 'review', $fields, true ) ) {
+			$data['review'] = 'view' === $context ? wpautop( $review->comment_content ) : $review->comment_content;
+		}
+		if ( in_array( 'rating', $fields, true ) ) {
+			$data['rating'] = (int) get_comment_meta( $review->comment_ID, 'rating', true );
+		}
+		if ( in_array( 'verified', $fields, true ) ) {
+			$data['verified'] = wc_review_is_from_verified_owner( $review->comment_ID );
+		}
+		if ( in_array( 'reviewer_avatar_urls', $fields, true ) ) {
+			$data['reviewer_avatar_urls'] = rest_get_avatar_urls( $review->comment_author_email );
+		}
 
 		$data = $this->add_additional_fields_to_object( $data, $request );
 		$data = $this->filter_response_by_context( $data, $context );
@@ -383,7 +406,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );
 
-		$response->add_links( $this->prepare_links( $review, $request ) );
+		$response->add_links( $this->prepare_links( $review ) );
 
 		/**
 		 * Filter product reviews object returned from the REST API.
@@ -398,11 +421,10 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param WP_Comment      $review Product review object.
-	 * @param WP_REST_Request $request Request object.
+	 * @param WP_Comment $review Product review object.
 	 * @return array Links for the given product review.
 	 */
-	protected function prepare_links( $review, $request ) {
+	protected function prepare_links( $review ) {
 		$links = array(
 			'self'       => array(
 				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $review->comment_ID ) ),
