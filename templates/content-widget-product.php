@@ -11,7 +11,7 @@
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce/Templates
- * @version 3.3.0
+ * @version 3.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -19,6 +19,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 global $product;
+
+if ( ! is_a( $product, 'WC_Product' ) ) {
+	return;
+}
+
 ?>
 <li>
 	<?php do_action( 'woocommerce_widget_product_item_start', $args ); ?>
