@@ -74,6 +74,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'stock_quantity'     => null,
 		'stock_status'       => 'instock',
 		'backorders'         => 'no',
+		'low_stock_amount'   => '',
 		'sold_individually'  => false,
 		'weight'             => '',
 		'length'             => '',
@@ -387,6 +388,17 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function get_backorders( $context = 'view' ) {
 		return $this->get_prop( 'backorders', $context );
+	}
+
+	/**
+	 * Get low stock amount.
+	 *
+	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @since  3.5.0
+	 * @return int|string Returns empty string if value not set
+	 */
+	public function get_low_stock_amount( $context = 'view' ) {
+		return $this->get_prop( 'low_stock_amount', $context );
 	}
 
 	/**
@@ -964,6 +976,16 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
+	 * Set low stock amount.
+	 *
+	 * @param int|string $amount Empty string if value not set
+	 * @since 3.5.0
+	 */
+	public function set_low_stock_amount( $amount ) {
+		$this->set_prop( 'low_stock_amount', '' === $amount ? '' : absint( $amount ) );
+	}
+
+	/**
 	 * Set if should be sold individually.
 	 *
 	 * @since 3.0.0
@@ -1299,10 +1321,11 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @since 3.0.0
 	 */
 	public function validate_props() {
-		// Before updating, ensure stock props are all aligned. Qty and backorders are not needed if not stock managed.
+		// Before updating, ensure stock props are all aligned. Qty, backorders and low stock amount are not needed if not stock managed.
 		if ( ! $this->get_manage_stock() ) {
 			$this->set_stock_quantity( '' );
 			$this->set_backorders( 'no' );
+			$this->set_low_stock_amount( '' );
 
 			// If we are stock managing and we don't have stock, force out of stock status.
 		} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount', 0 ) && 'no' === $this->get_backorders() ) {

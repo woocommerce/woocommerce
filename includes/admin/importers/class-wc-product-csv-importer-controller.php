@@ -475,6 +475,7 @@ class WC_Product_CSV_Importer_Controller {
 					__( 'In stock?', 'woocommerce' )      => 'stock_status',
 					__( 'Stock', 'woocommerce' )          => 'stock_quantity',
 					__( 'Backorders allowed?', 'woocommerce' ) => 'backorders',
+					__( 'Low stock amount', 'woocommerce' ) => 'low_stock_amount',
 					__( 'Sold individually?', 'woocommerce' ) => 'sold_individually',
 					/* translators: %s: Weight unit */
 					sprintf( __( 'Weight (%s)', 'woocommerce' ), $weight_unit ) => 'weight',
@@ -640,6 +641,7 @@ class WC_Product_CSV_Importer_Controller {
 			'stock_status'       => __( 'In stock?', 'woocommerce' ),
 			'stock_quantity'     => _x( 'Stock', 'Quantity in stock', 'woocommerce' ),
 			'backorders'         => __( 'Backorders allowed?', 'woocommerce' ),
+			'low_stock_amount'   => __( 'Low stock amount', 'woocommerce' ),
 			'sold_individually'  => __( 'Sold individually?', 'woocommerce' ),
 			/* translators: %s: weight unit */
 			'weight'             => sprintf( __( 'Weight (%s)', 'woocommerce' ), $weight_unit ),
