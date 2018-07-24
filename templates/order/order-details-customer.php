@@ -13,7 +13,7 @@
  * @see 	https://docs.woocommerce.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates
- * @version 3.3.0
+ * @version 3.4.4
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -58,5 +58,7 @@ $show_shipping = ! wc_ship_to_billing_address_only() && $order->needs_shipping_a
 	</section><!-- /.col2-set -->
 
 	<?php endif; ?>
+
+	<?php do_action( 'woocommerce_order_details_after_customer_details', $order ); ?>
 
 </section>
