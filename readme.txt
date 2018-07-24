@@ -184,6 +184,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Removed unnecessary checkout form change trigger on load of the checkout page. #20655
 * Tweak - Add image size filters to wc_get_product_attachment_props(). #20722
 * Tweak - Only display the current site's tables for a multisite install when viewing the system status. #20731
+* Tweak - include the file path and line number where a fatal error occurred in the fatal errors log. #20787
 * Performance/Tweak - Use post_author for the order customer instead of '_customer_user' meta data. #17895
 * Performance - Exclude frontend include from REST API calls. #20000
 * Dev - REST API - Allows oAuth1.0a authentication under SSL.
@@ -202,7 +203,8 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Added `woocommerce_shipping_method_add_rate_args` and `woocommerce_shipping_method_add_rate` filters. #20633
 * Dev - Added `woocommerce_coupon_validate_user_usage_limit` filter. #20630
 * Dev - Add hooks needed for product custom tables feature plugin. #20520
-* Dev - Added new filter to 'Item in quotes' translation for messages. ##20714
+* Dev - Added new filter to 'Item in quotes' translation for messages. #20714
+* Dev - add 'woocommerce_shutdown_error' hook triggered on request termination with an error. #20787
 * Localization - Updated IT provinces. #20286
 * Localization - Eircode validation. #20330
 
