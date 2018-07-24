@@ -45,6 +45,16 @@ class WC_Unit_Test_Case extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Set up class unit test.
+	 *
+	 * @since 3.5.0
+	 */
+	public static function setUpBeforeClass() {
+		// Terms are deleted in WP_UnitTestCase::tearDownAfterClass, then e.g. Uncategorized product_cat is missing.
+		WC_Install::create_terms();
+	}
+
+	/**
 	 * Mock the WC session using the abstract class as cookies are not available.
 	 * during tests.
 	 *
