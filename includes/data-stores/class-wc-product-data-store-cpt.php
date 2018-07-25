@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/**
+/**a
  * WC Product Data Store: Stored in CPT.
  *
  * @version  3.0.0
@@ -1034,10 +1034,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @return int Matching variation ID or 0.
 	 */
 	public function find_matching_product_variation( $product, $match_attributes = array() ) {
-        global $wpdb;
+		global $wpdb;
 
 		$matched_variation  = 0;
-		$sorted_meta		= array();
+		$sorted_meta        = array();
 
 		// Get any variations of the main product
 		$variation_ids = $wpdb->get_results("
@@ -1048,8 +1048,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			AND {$wpdb->prefix}posts.post_type	  = 'product_variation'
 		", ARRAY_A);
 
-		if( $variation_ids ) {
-			foreach( $variation_ids as $ids ) {
+		if ( $variation_ids ) {
+			foreach ( $variation_ids as $ids ) {
 				$variations_string .= $ids['ID'] . ',';
 			}
 
@@ -1063,28 +1063,28 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				AND meta_key LIKE 'attribute%'
 			",
 			ARRAY_A);
- 
-			if( $attributes ) {
+
+			if ( $attributes ) {
 				// Sort them into a nice easy array for us to filter
-				foreach( $attributes as $m ) {
+				foreach ( $attributes as $m ) {
 					$sorted_meta[ $m['post_id'] ][ $m['meta_key'] ] = $m['meta_value'];
 				}
 
 				// Check each variation to find the one that matches the $match_attributes
 				// Note: Not all meta fields will be set which is why we check existance
-				foreach( $sorted_meta as $post_id => $variation ) {
+				foreach ( $sorted_meta as $post_id => $variation ) {
 					$match = true;
  
-					foreach( $match_attributes as $k => $v  ) {
-						if( array_key_exists( $k, $variation ) ) {
-							if( $variation[ $k ] != $v && !empty( $variation[ $k ] ) ) {
+					foreach ( $match_attributes as $k => $v  ) {
+						if ( array_key_exists( $k, $variation ) ) {
+							if ( $variation[ $k ] != $v && ! empty( $variation[ $k ] ) ) {
 								$match = false;
 							}
 						}
 					}
 
 					// Bingo
-					if( true == $match ) {
+					if ( true == $match ) {
 						$matched_variation = $post_id;
 					}
 				}
