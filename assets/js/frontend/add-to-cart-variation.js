@@ -4,45 +4,47 @@
 	 * VariationForm class which handles variation forms and attributes.
 	 */
 	var VariationForm = function( $form ) {
-		this.$form                = $form;
-		this.$attributeFields     = $form.find( '.variations select' );
-		this.$singleVariation     = $form.find( '.single_variation' );
-		this.$singleVariationWrap = $form.find( '.single_variation_wrap' );
-		this.$resetVariations     = $form.find( '.reset_variations' );
-		this.$product             = $form.closest( '.product' );
-		this.variationData        = $form.data( 'product_variations' );
-		this.useAjax              = false === this.variationData;
-		this.xhr                  = false;
-		this.loading              = true;
+		var self = this;
+
+		self.$form                = $form;
+		self.$attributeFields     = $form.find( '.variations select' );
+		self.$singleVariation     = $form.find( '.single_variation' );
+		self.$singleVariationWrap = $form.find( '.single_variation_wrap' );
+		self.$resetVariations     = $form.find( '.reset_variations' );
+		self.$product             = $form.closest( '.product' );
+		self.variationData        = $form.data( 'product_variations' );
+		self.useAjax              = false === self.variationData;
+		self.xhr                  = false;
+		self.loading              = true;
 
 		// Initial state.
-		this.$singleVariationWrap.show();
-		this.$form.off( '.wc-variation-form' );
+		self.$singleVariationWrap.show();
+		self.$form.off( '.wc-variation-form' );
 
 		// Methods.
-		this.getChosenAttributes    = this.getChosenAttributes.bind( this );
-		this.findMatchingVariations = this.findMatchingVariations.bind( this );
-		this.isMatch                = this.isMatch.bind( this );
-		this.toggleResetLink        = this.toggleResetLink.bind( this );
+		self.getChosenAttributes    = self.getChosenAttributes.bind( self );
+		self.findMatchingVariations = self.findMatchingVariations.bind( self );
+		self.isMatch                = self.isMatch.bind( self );
+		self.toggleResetLink        = self.toggleResetLink.bind( self );
 
 		// Events.
-		$form.on( 'click.wc-variation-form', '.reset_variations', { variationForm: this }, this.onReset );
-		$form.on( 'reload_product_variations', { variationForm: this }, this.onReload );
-		$form.on( 'hide_variation', { variationForm: this }, this.onHide );
-		$form.on( 'show_variation', { variationForm: this }, this.onShow );
-		$form.on( 'click', '.single_add_to_cart_button', { variationForm: this }, this.onAddToCart );
-		$form.on( 'reset_data', { variationForm: this }, this.onResetDisplayedVariation );
-		$form.on( 'reset_image', { variationForm: this }, this.onResetImage );
-		$form.on( 'change.wc-variation-form', '.variations select', { variationForm: this }, this.onChange );
-		$form.on( 'found_variation.wc-variation-form', { variationForm: this }, this.onFoundVariation );
-		$form.on( 'check_variations.wc-variation-form', { variationForm: this }, this.onFindVariation );
-		$form.on( 'update_variation_values.wc-variation-form', { variationForm: this }, this.onUpdateAttributes );
+		$form.on( 'click.wc-variation-form', '.reset_variations', { variationForm: self }, self.onReset );
+		$form.on( 'reload_product_variations', { variationForm: self }, self.onReload );
+		$form.on( 'hide_variation', { variationForm: self }, self.onHide );
+		$form.on( 'show_variation', { variationForm: self }, self.onShow );
+		$form.on( 'click', '.single_add_to_cart_button', { variationForm: self }, self.onAddToCart );
+		$form.on( 'reset_data', { variationForm: self }, self.onResetDisplayedVariation );
+		$form.on( 'reset_image', { variationForm: self }, self.onResetImage );
+		$form.on( 'change.wc-variation-form', '.variations select', { variationForm: self }, self.onChange );
+		$form.on( 'found_variation.wc-variation-form', { variationForm: self }, self.onFoundVariation );
+		$form.on( 'check_variations.wc-variation-form', { variationForm: self }, self.onFindVariation );
+		$form.on( 'update_variation_values.wc-variation-form', { variationForm: self }, self.onUpdateAttributes );
 
 		// Init after gallery.
 		setTimeout( function() {
 			$form.trigger( 'check_variations' );
 			$form.trigger( 'wc_variation_form' );
-			$form.loading = false;
+			self.loading = false;
 		}, 100 );
 	};
 
