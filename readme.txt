@@ -169,7 +169,15 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Correctly hide cost for zero cost shipping methods after placing orders. #20663
 * Fix - Disabled autocomplete to prevent datepicker overlapping. #20687
 * Fix - Prevent a PHP notice in the setup wizard when store state is not selectable. #20695
+* Fix - Fix logic error in WC_Product_CSV_Exporter::get_column_value_stock. #20753
+* Fix - Fixed missing notice about no product variation matching. #20762
+* Fix - Correct PHPDocs in exporter class. #20861
+* Fix - Prevent Mailchimp redirection during the Setup Wizard. #20879
+* Fix - Don't hide coupon form after coupon has been applied. #20889
 * Tweak - Remove (optional) text from Address line 2 field. #20622 #20639
+* Tweak - Removed 100% width for images on single product page using 2017 theme. #20818
+* Tweak - Add margin to best selling product title in the dashboard widget to avoid overlapping the sparkline. #20849
+* Tweak - Re-add woocommerce_order_details_after_customer_details_filter removed during WC 3.2. #20886
 * Dev - Added woocommerce_calculate_item_totals_taxes filter. #20586
 * Dev - Links to next and previous page sent out in HTTP header via REST API fixed for some endpoints. #20686
 * Dev - Better wc_format_phone_number cleaning. #20637
