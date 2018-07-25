@@ -189,6 +189,32 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	}
 
 	/**
+	 * Search box.
+	 *
+	 * @param  string $text     Button text.
+	 * @param  string $input_id Input ID.
+	 */
+	public function search_box( $text, $input_id ) {
+		if ( empty( $_REQUEST['s'] ) && ! $this->has_items() ) { // WPCS: input var okay, CSRF ok.
+			return;
+		}
+
+		$input_id     = $input_id . '-search-input';
+		$search_query = isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : ''; // WPCS: input var okay, CSRF ok.
+
+		echo '<p class="search-box">';
+		echo '<label class="screen-reader-text" for="' . esc_attr( $input_id ) . '">' . esc_html( $text ) . ':</label>';
+		echo '<input type="search" id="' . esc_attr( $input_id ) . '" name="s" value="' . esc_attr( $search_query ) . '" />';
+		submit_button(
+			$text, '', '', false,
+			array(
+				'id' => 'search-submit',
+			)
+		);
+		echo '</p>';
+	}
+
+	/**
 	 * Prepare table list items.
 	 */
 	public function prepare_items() {

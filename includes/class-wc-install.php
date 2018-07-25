@@ -109,6 +109,10 @@ class WC_Install {
 			'wc_update_343_cleanup_foreign_keys',
 			'wc_update_343_db_version',
 		),
+		'3.4.4' => array(
+			'wc_update_344_recreate_roles',
+			'wc_update_344_db_version',
+		),
 		'3.5.0' => array(
 			'wc_update_350_order_customer_id',
 			'wc_update_350_db_version',
@@ -955,6 +959,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 				'export'                 => true,
 				'import'                 => true,
 				'list_users'             => true,
+				'edit_theme_options'     => true,
 			)
 		);
 
@@ -1311,6 +1316,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			// Activate this thing.
 			if ( $activate ) {
 				try {
+					add_action( 'add_option_mailchimp_woocommerce_plugin_do_activation_redirect', array( __CLASS__, 'remove_mailchimps_redirect' ), 10, 2 );
 					$result = activate_plugin( $installed ? $installed_plugins[ $plugin_file ] : $plugin_slug . '/' . $plugin_file );
 
 					if ( is_wp_error( $result ) ) {
@@ -1329,6 +1335,20 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 				}
 			}
 		}
+	}
+
+	/**
+	 * Removes redirect added during MailChimp plugin's activation.
+	 *
+	 * @param string $option Option name.
+	 * @param string $value  Option value.
+	 */
+	public static function remove_mailchimps_redirect( $option, $value ) {
+		// Remove this action to prevent infinite looping.
+		remove_action( 'add_option_mailchimp_woocommerce_plugin_do_activation_redirect', array( __CLASS__, 'remove_mailchimps_redirect' ) );
+
+		// Update redirect back to false.
+		update_option( 'mailchimp_woocommerce_plugin_do_activation_redirect', false );
 	}
 
 	/**

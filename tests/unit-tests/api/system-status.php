@@ -24,6 +24,9 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 				'role' => 'administrator',
 			)
 		);
+
+		// Callback used by WP_HTTP_TestCase to decide whether to perform HTTP requests or to provide a mocked response.
+		$this->http_responder = array( $this, 'mock_http_responses' );
 	}
 
 	/**
@@ -375,5 +378,34 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$this->assertNotEmpty( get_post_meta( $order2->get_id(), '_billing_address_index', true ) );
 		$this->assertNotEmpty( get_post_meta( $order2->get_id(), '_shipping_address_index', true ) );
 
+	}
+
+	/**
+	 * Provides a mocked response for external requests performed by WC_REST_System_Status_Controller.
+	 * This way it is not necessary to perform a regular request to an external server which would
+	 * significantly slow down the tests.
+	 *
+	 * This function is called by WP_HTTP_TestCase::http_request_listner().
+	 *
+	 * @param array $request Request arguments.
+	 * @param string $url URL of the request.
+	 *
+	 * @return array|false mocked response or false to let WP perform a regular request.
+	 */
+	protected function mock_http_responses( $request, $url ) {
+		$mocked_response = false;
+
+		if ( in_array( $url, array( 'https://www.paypal.com/cgi-bin/webscr', 'https://woocommerce.com/wc-api/product-key-api?request=ping&network=0' ), true ) ) {
+			$mocked_response = array(
+				'response' => array( 'code' => 200 ),
+			);
+		} else if ( 'https://api.wordpress.org/themes/info/1.0/' === $url ) {
+			$mocked_response = array(
+				'body'     => 'O:8:"stdClass":12:{s:4:"name";s:7:"Default";s:4:"slug";s:7:"default";s:7:"version";s:5:"1.7.2";s:11:"preview_url";s:29:"https://wp-themes.com/default";s:6:"author";s:15:"wordpressdotorg";s:14:"screenshot_url";s:61:"//ts.w.org/wp-content/themes/default/screenshot.png?ver=1.7.2";s:6:"rating";d:100;s:11:"num_ratings";s:1:"3";s:10:"downloaded";i:296618;s:12:"last_updated";s:10:"2010-06-14";s:8:"homepage";s:37:"https://wordpress.org/themes/default/";s:13:"download_link";s:55:"https://downloads.wordpress.org/theme/default.1.7.2.zip";}',
+				'response' => array( 'code' => 200 ),
+			);
+		}
+
+		return $mocked_response;
 	}
 }

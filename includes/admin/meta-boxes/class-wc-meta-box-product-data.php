@@ -365,6 +365,7 @@ class WC_Meta_Box_Product_Data {
 				'backorders'         => isset( $_POST['_backorders'] ) ? wc_clean( wp_unslash( $_POST['_backorders'] ) ) : null,
 				'stock_status'       => wc_clean( wp_unslash( $_POST['_stock_status'] ) ),
 				'stock_quantity'     => $stock,
+				'low_stock_amount'   => wc_stock_amount( wp_unslash( $_POST['_low_stock_amount'] ) ),
 				'download_limit'     => '' === $_POST['_download_limit'] ? '' : absint( wp_unslash( $_POST['_download_limit'] ) ),
 				'download_expiry'    => '' === $_POST['_download_expiry'] ? '' : absint( wp_unslash( $_POST['_download_expiry'] ) ),
 				'downloads'          => self::prepare_downloads(
@@ -372,12 +373,12 @@ class WC_Meta_Box_Product_Data {
 					isset( $_POST['_wc_file_urls'] ) ? wp_unslash( $_POST['_wc_file_urls'] ) : array(),
 					isset( $_POST['_wc_file_hashes'] ) ? wp_unslash( $_POST['_wc_file_hashes'] ) : array()
 				),
-				'product_url'        => esc_url_raw( wp_unslash( $_POST['_product_url'] ) ),
-				'button_text'        => wc_clean( wp_unslash( $_POST['_button_text'] ) ),
-				'children'           => 'grouped' === $product_type ? self::prepare_children() : null,
-				'reviews_allowed'    => ! empty( $_POST['comment_status'] ) && 'open' === $_POST['comment_status'],
-				'attributes'         => $attributes,
-				'default_attributes' => self::prepare_set_attributes( $attributes, 'default_attribute_' ),
+				'product_url'         => esc_url_raw( wp_unslash( $_POST['_product_url'] ) ),
+				'button_text'         => wc_clean( wp_unslash( $_POST['_button_text'] ) ),
+				'children'            => 'grouped' === $product_type ? self::prepare_children() : null,
+				'reviews_allowed'     => ! empty( $_POST['comment_status'] ) && 'open' === $_POST['comment_status'],
+				'attributes'          => $attributes,
+				'default_attributes'  => self::prepare_set_attributes( $attributes, 'default_attribute_' ),
 			)
 		);
 

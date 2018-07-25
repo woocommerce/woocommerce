@@ -131,7 +131,6 @@ jQuery( function( $ ) {
 			}
 		},
 		init_checkout: function() {
-			$( '#billing_country, #shipping_country, .country_to_state' ).change();
 			$( document.body ).trigger( 'update_checkout' );
 		},
 		maybe_input_changed: function( e ) {

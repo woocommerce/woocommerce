@@ -248,16 +248,14 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 */
 	public function remove( $handle ) {
 		$removed = false;
-		$file    = self::get_log_file_path( $handle );
-
+		$file = trailingslashit( WC_LOG_DIR ) . $handle;
 		if ( $file ) {
 			if ( is_file( $file ) && is_writable( $file ) ) { // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_is_writable
-				$this->close( $handle ); // Close first to be certain no processes keep it alive after it is unlinked.
+				$this->close( $file ); // Close first to be certain no processes keep it alive after it is unlinked.
 				$removed = unlink( $file ); // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_unlink
 			}
 			do_action( 'woocommerce_log_remove', $handle, $removed );
 		}
-
 		return $removed;
 	}
 
