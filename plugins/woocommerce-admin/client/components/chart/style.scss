@@ -5,11 +5,11 @@
 	justify-content: flex-start;
 	align-items: flex-start;
 	margin: -20px;
-	border-top: 0.5px solid $core-grey-light-700;
+	border-top: 1px solid $core-grey-light-200;
 
 	.woocommerce-dashboard__widget-chart-header {
 		min-height: 50px;
-		border-top: 0.5px solid $core-grey-light-700;
+		border-top: 1px solid $core-grey-light-200;
 	}
 
 	.woocommerce-dashboard__widget-chart-body {
@@ -87,14 +87,14 @@
 	}
 	.grid {
 		line {
-			stroke: $core-grey-light-700;
-			stroke-opacity: 0.7;
+			stroke: $core-grey-light-200;
+			stroke-width: 1;
 			shape-rendering: crispEdges;
 		}
 	}
 	.tick {
 		padding-top: 10px;
-		stroke-width: 0.5;
+		stroke-width: 1;
 	}
 	.y-axis {
 		&.tick {
@@ -102,6 +102,21 @@
 				fill: $core-grey-dark-500;
 			}
 		}
+	}
+	line {
+		&.focus-grid {
+			stroke: $core-grey-light-200;
+			stroke-width: 1px;
+		}
+	}
+}
+
+.woocommerce-chart__container {
+	position: relative;
+	width: 100%;
+
+	.tooltip {
+		position: absolute;
 	}
 }
 
@@ -112,8 +127,8 @@
 
 	&.woocommerce-legend__direction-column {
 		flex-direction: column;
-		border-right: 0.5px solid $core-grey-light-700;
-		border-top: 0.5px solid $core-grey-light-700;
+		border-right: 1px solid $core-grey-light-200;
+		border-top: 1px solid $core-grey-light-200;
 		height: 300px;
 		min-width: 320px;
 
@@ -180,7 +195,7 @@
 				&:hover {
 					input {
 						~ .woocommerce-legend__item-checkmark {
-							background-color: $core-grey-light-700;
+							background-color: $core-grey-light-200;
 						}
 					}
 				}

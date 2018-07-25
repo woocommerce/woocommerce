@@ -10,6 +10,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { format as d3Format } from 'd3-format';
 import { timeFormat as d3TimeFormat } from 'd3-time-format';
+import { select as d3Select } from 'd3-selection';
 
 /**
  * Internal dependencies
@@ -72,6 +73,8 @@ class D3Chart extends Component {
 		allData: null,
 	};
 
+	tooltipRef = React.createRef();
+
 	static getDerivedStateFromProps( nextProps, prevState ) {
 		const nextAllData = [ ...nextProps.data, ...nextProps.orderedKeys ];
 
@@ -92,6 +95,7 @@ class D3Chart extends Component {
 		const adjParams = Object.assign( {}, params, {
 			height: params.height - margin.top - margin.bottom,
 			width: params.width - margin.left - margin.right,
+			tooltip: d3Select( this.tooltipRef.current ),
 		} );
 
 		drawAxis( g, data, adjParams );
@@ -146,12 +150,15 @@ class D3Chart extends Component {
 		}
 
 		return (
-			<D3Base
-				className={ classNames( this.props.className ) }
-				data={ this.state.allData }
-				drawChart={ this.drawChart }
-				getParams={ this.getParams }
-			/>
+			<div className={ classNames( 'woocommerce-chart__container', this.props.className ) }>
+				<D3Base
+					className={ classNames( this.props.className ) }
+					data={ this.state.allData }
+					drawChart={ this.drawChart }
+					getParams={ this.getParams }
+				/>
+				<div className="tooltip" ref={ this.tooltipRef } />
+			</div>
 		);
 	}
 }

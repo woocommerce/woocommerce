@@ -168,10 +168,10 @@ class WidgetCharts extends Component {
 		};
 		return (
 			<Fragment>
-				<Card>
+				<Card title={ __( 'Test Categories', 'wc-admin' ) }>
 					<ul>
 						{ this.state.products.map( d => (
-							<li style={ { display: 'inline', 'margin-right': '12px' } }>
+							<li key={ d.key } style={ { display: 'inline', marginRight: '12px' } }>
 								<label htmlFor={ d.key }>
 									<input
 										id={ d.key }

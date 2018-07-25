@@ -268,8 +268,7 @@ const showTooltip = ( node, params, d ) => {
 		</li>
 	`
 	);
-	node
-		.select( '.tooltip' )
+	params.tooltip
 		.style( 'left', xPosition + 'px' )
 		.style( 'top', yPosition + 'px' )
 		.style( 'display', 'inline-block' ).html( `
@@ -289,11 +288,11 @@ const handleMouseOverBarChart = ( d, i, nodes, node, data, params ) => {
 	showTooltip( node, params, d );
 };
 
-const handleMouseOutBarChart = ( d, i, nodes, node ) => {
+const handleMouseOutBarChart = ( d, i, nodes, params ) => {
 	d3Select( nodes[ i ].parentNode )
 		.select( '.barfocus' )
 		.attr( 'opacity', '0' );
-	node.select( '.tooltip' ).style( 'display', 'none' );
+	params.tooltip.style( 'display', 'none' );
 };
 
 const handleMouseOverLineChart = ( d, i, nodes, node, data, params ) => {
@@ -303,11 +302,11 @@ const handleMouseOverLineChart = ( d, i, nodes, node, data, params ) => {
 	showTooltip( node, params, data.find( e => e.date === d.date ) );
 };
 
-const handleMouseOutLineChart = ( d, i, nodes, node ) => {
+const handleMouseOutLineChart = ( d, i, nodes, params ) => {
 	d3Select( nodes[ i ].parentNode )
 		.select( '.focus-grid' )
 		.attr( 'opacity', '0' );
-	node.select( '.tooltip' ).style( 'display', 'none' );
+	params.tooltip.style( 'display', 'none' );
 };
 
 export const drawLines = ( node, data, params ) => {
@@ -323,8 +322,6 @@ export const drawLines = ( node, data, params ) => {
 	focus
 		.append( 'line' )
 		.attr( 'class', 'focus-grid' )
-		.style( 'stroke', 'lightgray' )
-		.style( 'stroke-width', 1 )
 		.attr( 'x1', d => params.xLineScale( new Date( d.date ) ) )
 		.attr( 'y1', 0 )
 		.attr( 'x2', d => params.xLineScale( new Date( d.date ) ) )
@@ -342,7 +339,7 @@ export const drawLines = ( node, data, params ) => {
 		.on( 'mouseover', ( d, i, nodes ) =>
 			handleMouseOverLineChart( d, i, nodes, node, data, params )
 		)
-		.on( 'mouseout', ( d, i, nodes ) => handleMouseOutLineChart( d, i, nodes, node ) );
+		.on( 'mouseout', ( d, i, nodes ) => handleMouseOutLineChart( d, i, nodes, params ) );
 
 	const series = node
 		.append( 'g' )
@@ -437,5 +434,5 @@ export const drawBars = ( node, data, params ) => {
 		.on( 'mouseover', ( d, i, nodes ) =>
 			handleMouseOverBarChart( d, i, nodes, node, data, params )
 		)
-		.on( 'mouseout', ( d, i, nodes ) => handleMouseOutBarChart( d, i, nodes, node ) );
+		.on( 'mouseout', ( d, i, nodes ) => handleMouseOutBarChart( d, i, nodes, params ) );
 };

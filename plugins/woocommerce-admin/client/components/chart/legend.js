@@ -29,7 +29,8 @@ class Legend extends Component {
 			>
 				{ data.map( ( row, i ) => (
 					<li
-						class="woocommerce-legend__item"
+						className="woocommerce-legend__item"
+						key={ row.key }
 						id={ row.key }
 						onMouseEnter={ handleLegendHover }
 						onMouseLeave={ handleLegendHover }
@@ -43,7 +44,7 @@ class Legend extends Component {
 										'woocommerce-legend__item-checkmark-checked': row.visible,
 									} ) }
 									id={ row.key }
-									style={ { 'background-color': d3InterpolateViridis( d3Color( i ) ) } }
+									style={ { backgroundColor: d3InterpolateViridis( d3Color( i ) ) } }
 								/>
 								<span className="woocommerce-legend__item-title" id={ row.key }>
 									{ row.key }
@@ -63,8 +64,8 @@ class Legend extends Component {
 Legend.propTypes = {
 	className: PropTypes.string,
 	data: PropTypes.array.isRequired,
-	handleLegendToggle: PropTypes.function,
-	handleLegendHover: PropTypes.function,
+	handleLegendToggle: PropTypes.func,
+	handleLegendHover: PropTypes.func,
 	legendDirection: PropTypes.oneOf( [ 'row', 'column' ] ),
 };
 
