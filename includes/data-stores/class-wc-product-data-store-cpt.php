@@ -1074,8 +1074,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				// Note: Not all meta fields will be set which is why we check existance
 				foreach ( $sorted_meta as $post_id => $variation ) {
 					$match = true;
- 
-					foreach ( $match_attributes as $k => $v  ) {
+
+					foreach ( $match_attributes as $k => $v ) {
 						if ( array_key_exists( $k, $variation ) ) {
 							if ( $variation[ $k ] != $v && ! empty( $variation[ $k ] ) ) {
 								$match = false;
