@@ -1,0 +1,237 @@
+/** @format */
+.woocommerce-dashboard__widget-chart {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: flex-start;
+	margin: -20px;
+	border-top: 1px solid $core-grey-light-200;
+
+	.woocommerce-dashboard__widget-chart-header {
+		min-height: 50px;
+		border-top: 1px solid $core-grey-light-200;
+	}
+
+	.woocommerce-dashboard__widget-chart-body {
+		display: flex;
+		flex-direction: row;
+		justify-content: flex-start;
+		align-items: flex-start;
+		width: 100%;
+
+		&.woocommerce-dashboard__widget-chart-body-column {
+			flex-direction: column;
+		}
+	}
+
+	.woocommerce-dashboard__widget-chart-footer {
+		width: 100%;
+
+		.woocommerce-legend {
+			&.woocommerce-legend__direction-column {
+				height: 100%;
+				min-height: none;
+			}
+		}
+	}
+
+	.key-colour {
+		width: 10px;
+		height: 10px;
+		margin-right: 8px;
+		border-radius: 2px;
+	}
+	.key-key {
+		margin-right: 6px;
+		font-weight: 600;
+	}
+	svg {
+		overflow: visible;
+	}
+	.tooltip {
+		position: absolute;
+		display: none;
+		min-width: 80px;
+		height: auto;
+		background-color: $white;
+		text-align: left;
+		padding: 6px;
+		box-shadow: 0 4px 8px 0 $gray-darken-30, 0 6px 20px 0 $gray-darken-30;
+
+		h4 {
+			text-align: center;
+			width: 100%;
+			margin: 0 auto;
+		}
+
+		ul {
+			padding-left: 7px;
+			list-style: none;
+			margin-bottom: 2px;
+			margin-top: 2px;
+			font-size: 14px;
+
+			li {
+				display: flex;
+				flex-direction: row;
+				flex-wrap: nowrap;
+				justify-content: flex-start;
+				align-items: center;
+			}
+		}
+	}
+	.bargroup {
+		&rect {
+			shape-rendering: crispEdges;
+		}
+	}
+	.grid {
+		line {
+			stroke: $core-grey-light-200;
+			stroke-width: 1;
+			shape-rendering: crispEdges;
+		}
+	}
+	.tick {
+		padding-top: 10px;
+		stroke-width: 1;
+	}
+	.y-axis {
+		&.tick {
+			&text {
+				fill: $core-grey-dark-500;
+			}
+		}
+	}
+	line {
+		&.focus-grid {
+			stroke: $core-grey-light-200;
+			stroke-width: 1px;
+		}
+	}
+}
+
+.woocommerce-chart__container {
+	position: relative;
+	width: 100%;
+
+	.tooltip {
+		position: absolute;
+	}
+}
+
+.woocommerce-legend {
+	display: flex;
+	height: 100%;
+	margin: 0;
+
+	&.woocommerce-legend__direction-column {
+		flex-direction: column;
+		border-right: 1px solid $core-grey-light-200;
+		border-top: 1px solid $core-grey-light-200;
+		height: 300px;
+		min-width: 320px;
+
+		li {
+			height: 32px;
+			margin: 0 17px;
+
+			&:first-child {
+				margin-top: 17px;
+			}
+		}
+	}
+
+	&.woocommerce-legend__direction-row {
+		flex-direction: row;
+
+		li {
+			margin: 0 0 0 30px;
+
+			button {
+				.woocommerce-legend__item-container {
+					height: 50px;
+					align-items: center;
+
+					.woocommerce-legend__item-checkmark {
+						top: 17px;
+					}
+
+					.woocommerce-legend__item-title {
+						margin-right: 17px;
+					}
+				}
+			}
+		}
+	}
+
+	li {
+		button {
+			display: inline-flex;
+			flex-direction: row;
+			flex-wrap: nowrap;
+			justify-content: space-between;
+			width: 100%;
+			border: none;
+			padding: 0;
+
+			&:focus {
+				outline: none;
+			}
+
+			.woocommerce-legend__item-container {
+				display: flex;
+				flex-direction: row;
+				flex-wrap: nowrap;
+				justify-content: space-between;
+				position: relative;
+				padding: 3px 0 3px 24px;
+				cursor: pointer;
+				font-family: 'SF UI Text';
+				font-size: 13px;
+				user-select: none;
+				width: 100%;
+
+				&:hover {
+					input {
+						~ .woocommerce-legend__item-checkmark {
+							background-color: $core-grey-light-200;
+						}
+					}
+				}
+
+				.woocommerce-legend__item-checkmark {
+					position: absolute;
+					top: 2px;
+					left: 0;
+					height: 16px;
+					width: 16px;
+					background-color: $white;
+
+					&:after {
+						content: '';
+						position: absolute;
+						display: none;
+					}
+
+					&.woocommerce-legend__item-checkmark-checked {
+						&:after {
+							display: block;
+							left: 6px;
+							top: 4px;
+							width: 3px;
+							height: 6px;
+							border: solid $white;
+							border-width: 0 2px 2px 0;
+							transform: rotate(45deg);
+						}
+					}
+				}
+
+				.woocommerce-legend__item-total {
+					font-weight: bold;
+				}
+			}
+		}
+	}
+}
