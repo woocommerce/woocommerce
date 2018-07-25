@@ -807,9 +807,9 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_decimal_to_fraction() {
 		$this->assertEquals( array( 7, 2 ), wc_decimal_to_fraction( '3.5' ) );
-  }
-  
-  /*
+	}
+
+	/***
 	 * Test wc_get_user_agent function.
 	 *
 	 * @return void
