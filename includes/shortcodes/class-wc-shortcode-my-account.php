@@ -364,7 +364,7 @@ class WC_Shortcode_My_Account {
 	 */
 	public static function set_reset_password_cookie( $value = '' ) {
 		$rp_cookie = 'wp-resetpass-' . COOKIEHASH;
-		$rp_path   = isset( $_SERVER['REQUEST_URI'] ) ? current( explode( '?', wc_clean( wp_unslash( $_SERVER['REQUEST_URI'] ) ) ) ) : ''; // WPCS: input var ok.
+		$rp_path   = isset( $_SERVER['REQUEST_URI'] ) ? current( explode( '?', wp_unslash( $_SERVER['REQUEST_URI'] ) ) ) : ''; // WPCS: input var ok, sanitization ok.
 
 		if ( $value ) {
 			setcookie( $rp_cookie, $value, 0, $rp_path, COOKIE_DOMAIN, is_ssl(), true );
