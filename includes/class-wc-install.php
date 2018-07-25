@@ -1316,6 +1316,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			// Activate this thing.
 			if ( $activate ) {
 				try {
+					add_action( 'add_option_mailchimp_woocommerce_plugin_do_activation_redirect', array( __CLASS__, 'remove_mailchimps_redirect' ), 10, 2 );
 					$result = activate_plugin( $installed ? $installed_plugins[ $plugin_file ] : $plugin_slug . '/' . $plugin_file );
 
 					if ( is_wp_error( $result ) ) {
@@ -1334,6 +1335,20 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 				}
 			}
 		}
+	}
+
+	/**
+	 * Removes redirect added during MailChimp plugin's activation.
+	 *
+	 * @param string $option Option name.
+	 * @param string $value  Option value.
+	 */
+	public static function remove_mailchimps_redirect( $option, $value ) {
+		// Remove this action to prevent infinite looping.
+		remove_action( 'add_option_mailchimp_woocommerce_plugin_do_activation_redirect', array( __CLASS__, 'remove_mailchimps_redirect' ) );
+
+		// Update redirect back to false.
+		update_option( 'mailchimp_woocommerce_plugin_do_activation_redirect', false );
 	}
 
 	/**

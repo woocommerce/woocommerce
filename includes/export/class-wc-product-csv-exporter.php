@@ -94,6 +94,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			'tax_class'          => __( 'Tax class', 'woocommerce' ),
 			'stock_status'       => __( 'In stock?', 'woocommerce' ),
 			'stock'              => __( 'Stock', 'woocommerce' ),
+			'low_stock_amount'   => __( 'Low stock amount', 'woocommerce' ),
 			'backorders'         => __( 'Backorders allowed?', 'woocommerce' ),
 			'sold_individually'  => __( 'Sold individually?', 'woocommerce' ),
 			/* translators: %s: weight */
@@ -399,7 +400,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 		$manage_stock   = $product->get_manage_stock( 'edit' );
 		$stock_quantity = $product->get_stock_quantity( 'edit' );
 
-		if ( $product->is_type( 'variation' && 'parent' === $manage_stock ) ) {
+		if ( $product->is_type( 'variation' ) && 'parent' === $manage_stock ) {
 			return 'parent';
 		} elseif ( $manage_stock ) {
 			return $stock_quantity;
@@ -441,6 +442,17 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			default:
 				return wc_string_to_bool( $backorders ) ? 1 : 0;
 		}
+	}
+
+	/**
+	 * Get low stock amount value.
+	 *
+	 * @param WC_Product $product Product being exported.
+	 * @since 3.5.0
+	 * @return int|string Empty string if value not set
+	 */
+	protected function get_column_value_low_stock_amount( $product ) {
+		return $product->managing_stock() && $product->get_low_stock_amount( 'edit' ) ? $product->get_low_stock_amount( 'edit' ) : '';
 	}
 
 	/**

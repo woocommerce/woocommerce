@@ -198,7 +198,9 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products/' . $product->get_id() ) );
 		$data     = $response->get_data();
 
-		$this->assertEquals( array( 'large', 'small' ), $data['attributes'][0]['options'] );
+		foreach ( array( 'small', 'large' ) as $term_name ) {
+			$this->assertContains( $term_name, $data['attributes'][0]['options'] );
+		}
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v2/products/' . $product->get_id() );
 		$request->set_body_params( array(
@@ -523,5 +525,290 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 		$this->assertEquals( 65, count( $properties ) );
+	}
+
+	/**
+	 * Test product category.
+	 *
+	 * @since 3.5.0
+	 */
+	public function test_get_products_by_category() {
+		wp_set_current_user( $this->user );
+
+		// Create one product with a category.
+		$category = wp_insert_term( 'Some Category', 'product_cat' );
+
+		$product = new WC_Product_Simple();
+		$product->set_category_ids( array( $category['term_id'] ) );
+		$product->save();
+
+		// Create one product without category, i.e. Uncategorized.
+		$product_2 = new WC_Product_Simple();
+		$product_2->save();
+
+		// Test product assigned to a single category.
+		$query_params = array(
+			'category' => (string) $category['term_id'],
+		);
+		$request           = new WP_REST_Request( 'GET', '/wc/v2/products' );
+		$request->set_query_params( $query_params );
+		$response          = $this->server->dispatch( $request );
+		$response_products = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		foreach ( $response_products as $response_product ) {
+			$this->assertEquals( $product->get_id(), $response_product['id'] );
+			$this->assertEquals( $product->get_category_ids(), wp_list_pluck( $response_product['categories'], 'id' ) );
+		}
+
+		// Test product without categories.
+		$request          = new WP_REST_Request( 'GET', '/wc/v2/products/' . $product_2->get_id() );
+		$response         = $this->server->dispatch( $request );
+		$response_product = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $response_product['categories'] );
+		$this->assertEquals( 'uncategorized', $response_product['categories'][0]['slug'] );
+
+		// Clean up.
+		wp_delete_term( $category['term_id'], 'product_cat' );
+		$product->delete( true );
+		$product_2->delete( true );
+
+	}
+
+	/**
+	 * Test getting products by product type.
+	 *
+	 * @since 3.5.0
+	 */
+	public function test_get_products_by_type() {
+		wp_set_current_user( $this->user );
+
+		$simple = WC_Helper_Product::create_simple_product();
+		$external = WC_Helper_Product::create_external_product();
+		$grouped = WC_Helper_Product::create_grouped_product();
+		$variable = WC_Helper_Product::create_variation_product();
+
+		$product_ids_for_type = array(
+			'simple'   => array( $simple->get_id() ),
+			'external' => array( $external->get_id() ),
+			'grouped'  => array( $grouped->get_id() ),
+			'variable' => array( $variable->get_id() ),
+		);
+
+		foreach ( $grouped->get_children() as $additional_product ) {
+			$product_ids_for_type['simple'][] = $additional_product;
+		}
+
+		foreach ( $product_ids_for_type as $product_type => $product_ids ) {
+			$query_params = array(
+				'type' => $product_type,
+			);
+			$request           = new WP_REST_Request( 'GET', '/wc/v2/products' );
+			$request->set_query_params( $query_params );
+			$response          = $this->server->dispatch( $request );
+			$response_products = $response->get_data();
+
+			$this->assertEquals( 200, $response->get_status() );
+			$this->assertEquals( count( $product_ids ), count( $response_products ) );
+			foreach ( $response_products as $response_product ) {
+				$this->assertContains( $response_product['id'], $product_ids_for_type[ $product_type ], 'REST API: ' . $product_type . ' not found correctly' );
+			}
+		}
+
+		$simple->delete( true );
+		$external->delete( true );
+		$variable->delete( true );
+		$grouped->delete( true );
+	}
+
+	/**
+	 * Test getting products by featured property.
+	 *
+	 * @since 3.5.0
+	 */
+	public function test_get_featured_products() {
+		wp_set_current_user( $this->user );
+
+		// Create a featured product.
+		$feat_product = WC_Helper_Product::create_simple_product();
+		$feat_product->set_featured( true );
+		$feat_product->save();
+
+		// Create a non-featured product.
+		$nonfeat_product = WC_Helper_Product::create_simple_product();
+		$nonfeat_product->save();
+
+		$query_params = array(
+			'featured' => 'true',
+		);
+		$request           = new WP_REST_Request( 'GET', '/wc/v2/products' );
+		$request->set_query_params( $query_params );
+		$response          = $this->server->dispatch( $request );
+		$response_products = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		foreach ( $response_products as $response_product ) {
+			$this->assertEquals( $feat_product->get_id(), $response_product['id'], 'REST API: Featured product not found correctly' );
+		}
+
+		$query_params = array(
+			'featured' => 'false',
+		);
+		$request           = new WP_REST_Request( 'GET', '/wc/v2/products' );
+		$request->set_query_params( $query_params );
+		$response          = $this->server->dispatch( $request );
+		$response_products = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		foreach ( $response_products as $response_product ) {
+			$this->assertEquals( $nonfeat_product->get_id(), $response_product['id'], 'REST API: Featured product not found correctly' );
+		}
+
+		$feat_product->delete( true );
+		$nonfeat_product->delete( true );
+	}
+
+	/**
+	 * Test getting products by shipping class property.
+	 *
+	 * @since 3.5.0
+	 */
+	public function test_get_products_by_shipping_class() {
+		wp_set_current_user( $this->user );
+
+		$shipping_class_1 = wp_insert_term( 'Bulky', 'product_shipping_class' );
+
+		$product_1 = new WC_Product_Simple();
+		$product_1->set_shipping_class_id( $shipping_class_1['term_id'] );
+		$product_1->save();
+
+		$query_params = array(
+			'shipping_class' => (string) $shipping_class_1['term_id'],
+		);
+		$request           = new WP_REST_Request( 'GET', '/wc/v2/products' );
+		$request->set_query_params( $query_params );
+		$response          = $this->server->dispatch( $request );
+		$response_products = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		foreach ( $response_products as $response_product ) {
+			$this->assertEquals( $product_1->get_id(), $response_product['id'] );
+		}
+
+		$product_1->delete( true );
+		wp_delete_term( $shipping_class_1['term_id'], 'product_shipping_class' );
+	}
+
+	/**
+	 * Test getting products by tag.
+	 *
+	 * @since 3.5.0
+	 */
+	public function test_get_products_by_tag() {
+		wp_set_current_user( $this->user );
+
+		$test_tag_1 = wp_insert_term( 'Tag 1', 'product_tag' );
+
+		// Product with a tag.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_tag_ids( array( $test_tag_1['term_id'] ) );
+		$product->save();
+
+		// Product without a tag.
+		$product_2 = WC_Helper_Product::create_simple_product();
+
+		$query_params = array(
+			'tag' => (string) $test_tag_1['term_id'],
+		);
+		$request           = new WP_REST_Request( 'GET', '/wc/v2/products' );
+		$request->set_query_params( $query_params );
+		$response          = $this->server->dispatch( $request );
+		$response_products = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		foreach ( $response_products as $response_product ) {
+			$this->assertEquals( $product->get_id(), $response_product['id'] );
+		}
+
+		$product->delete( true );
+		$product_2->delete( true );
+		wp_delete_term( $test_tag_1['term_id'], 'product_tag' );
+	}
+
+	/**
+	 * Test getting products by global attribute.
+	 *
+	 * @since 3.5.0
+	 */
+	public function test_get_products_by_attribute() {
+		global $wpdb;
+		wp_set_current_user( $this->user );
+
+		// Variable product with 2 different variations.
+		$variable_product = WC_Helper_Product::create_variation_product();
+
+		// Terms created by variable product.
+		$term_large = get_term_by( 'slug', 'large', 'pa_size' );
+		$term_small = get_term_by( 'slug', 'small', 'pa_size' );
+
+		// Simple product without attribute.
+		$product_1 = WC_Helper_Product::create_simple_product();
+
+		// Simple product with attribute size = large.
+		$product_2 = WC_Helper_Product::create_simple_product();
+		$product_2->set_attributes( array( 'pa_size' => 'large' ) );
+		$product_2->save();
+
+		// Link the product to the term.
+		$wpdb->insert( $wpdb->prefix . 'term_relationships', array(
+			'object_id'        => $product_2->get_id(),
+			'term_taxonomy_id' => $term_large->term_id,
+			'term_order'       => 0,
+		) );
+
+		// Products with attribute size == large.
+		$expected_product_ids = array(
+			$variable_product->get_id(),
+			$product_2->get_id(),
+		);
+		$query_params = array(
+			'attribute'      => 'pa_size',
+			'attribute_term' => (string) $term_large->term_id,
+		);
+		$request           = new WP_REST_Request( 'GET', '/wc/v2/products' );
+		$request->set_query_params( $query_params );
+		$response          = $this->server->dispatch( $request );
+		$response_products = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( count( $expected_product_ids ), count( $response_products ) );
+		foreach ( $response_products as $response_product ) {
+			$this->assertContains( $response_product['id'], $expected_product_ids );
+		}
+
+		// Products with attribute size == small.
+		$expected_product_ids = array(
+			$variable_product->get_id(),
+		);
+		$query_params = array(
+			'attribute'      => 'pa_size',
+			'attribute_term' => (string) $term_small->term_id,
+		);
+		$request           = new WP_REST_Request( 'GET', '/wc/v2/products' );
+		$request->set_query_params( $query_params );
+		$response          = $this->server->dispatch( $request );
+		$response_products = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( count( $expected_product_ids ), count( $response_products ) );
+		foreach ( $response_products as $response_product ) {
+			$this->assertContains( $response_product['id'], $expected_product_ids );
+		}
+
+		$variable_product->delete( true );
+		$product_1->delete( true );
+		$product_2->delete( true );
 	}
 }

@@ -28,12 +28,13 @@ matrix:
     dist: precise
   - php: 7.2
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1 RUN_E2E=1
-  - php: 7.2
+  - php: 7.1
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
   allow_failures:
   - env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
 
 before_script:
+  - phpenv config-rm xdebug.ini
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
   - bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
   - bash tests/bin/travis.sh before

@@ -12,10 +12,11 @@
  */
 class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 
-	public function tearDown() {
-		update_option( 'woocommerce_price_num_decimals', '2' );
-		update_option( 'woocommerce_price_decimal_sep', '.' );
-		update_option( 'woocommerce_price_thousand_sep', ',' );
+	public function setUp() {
+		parent::setUp();
+
+		// Callback used by WP_HTTP_TestCase to decide whether to perform HTTP requests or to provide a mocked response.
+		$this->http_responder = array( $this, 'mock_http_responses' );
 	}
 
 	/**
@@ -896,7 +897,35 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_do_oembeds() {
 		// In this case should only return the URL back, since oEmbed will run other actions on frontend.
-		$this->assertEquals( "<iframe width='500' height='281' src='https://videopress.com/embed/9sRCUigm?hd=0' frameborder='0' allowfullscreen></iframe><script src='https://v0.wordpress.com/js/next/videopress-iframe.js?m=1435166243'></script>", wc_do_oembeds( 'https://wordpress.tv/2015/10/19/mike-jolley-user-onboarding-for-wordpress-plugins/' ) ); // phpcs:ignore
+		$this->assertEquals(
+			"<iframe width='500' height='281' src='https://videopress.com/embed/9sRCUigm?hd=0' frameborder='0' allowfullscreen></iframe><script src='https://v0.wordpress.com/js/next/videopress-iframe.js?m=1435166243'></script>", // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+			wc_do_oembeds( 'https://wordpress.tv/2015/10/19/mike-jolley-user-onboarding-for-wordpress-plugins/' )
+		);
+	}
+
+	/**
+	 * Provides a mocked response for the oembed test. This way it is not necessary to perform
+	 * a regular request to an external server which would significantly slow down the tests.
+	 *
+	 * This function is called by WP_HTTP_TestCase::http_request_listner().
+	 *
+	 * @param array $request Request arguments.
+	 * @param string $url URL of the request.
+	 *
+	 * @return array|false mocked response or false to let WP perform a regular request.
+	 */
+	protected function mock_http_responses( $request, $url ) {
+		$mocked_response = false;
+
+		if ( false !== strpos( $url, 'https://wordpress.tv/oembed/' ) ) {
+			$mocked_response = array(
+				// phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+				'body'     => '{"type":"video","version":"1.0","title":null,"width":500,"height":281,"html":"<iframe width=\'500\' height=\'281\' src=\'https:\/\/videopress.com\/embed\/9sRCUigm?hd=0\' frameborder=\'0\' allowfullscreen><\/iframe><script src=\'https:\/\/v0.wordpress.com\/js\/next\/videopress-iframe.js?m=1435166243\'><\/script>"}',
+				'response' => array( 'code' => 200 ),
+			);
+		}
+
+		return $mocked_response;
 	}
 
 	/**

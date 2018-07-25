@@ -255,6 +255,66 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Products_Controller 
 		$args = parent::prepare_objects_query( $request );
 
 		$args['post_parent'] = $request['product_id'];
+		$taxonomies = isset( $args['tax_query'] ) ? $args['tax_query'] : array();
+
+		$parent_query = new WC_REST_Products_Controller();
+		$parent_request = clone $request;
+		$parent_request['include'] = array( $request['product_id'] );
+		// Shipping class can be set separately for variations and parent product. Unlike for attributes, the parent
+		// does not have all shipping classes of the variations assigned to it, so the parent filtering should ignore
+		// shipping class.
+		$parent_request['shipping_class'] = '';
+		$query_args    = $parent_query->prepare_objects_query( $parent_request );
+		$query_results = $parent_query->get_objects( $query_args );
+
+		// In case the parent does not fulfil the constraints, no variations should be returned.
+		if ( 0 === $query_results['total'] ) {
+			$args['post_parent'] = 0;
+		}
+
+		// Ignore taxonomy queries, as they were already matched against parent (or will be transformed to meta query
+		// later on).
+		unset( $args['tax_query'] );
+
+		$GLOBALS['wpdb']->query( 'SET SESSION SQL_BIG_SELECTS=1' );
+		// Attributes needs to be transformed to meta query, shipping class to taxonomy.
+		foreach ( $taxonomies as $taxonomy ) {
+			// Ignore taxonomies tied to parent product.
+			if ( in_array( $taxonomy['taxonomy'], array( 'product_type', 'product_visibility', 'product_cat', 'product_tag' ), true ) ) {
+				continue;
+			}
+			// Shipping class can be associated with either the parent or the individual variation.
+			if ( 'product_shipping_class' === $taxonomy['taxonomy'] ) {
+				// If requested shipping class is different from parent's shipping class, it's assigned to variation,
+				// so passing the taxonomy query forward to check against variations.
+				if ( $query_results['total'] > 0 && $taxonomy['terms'][0] !== $query_results['objects'][0]->get_shipping_class_id() ) {
+					$args['tax_query'][] = $taxonomy;
+					continue;
+				} else {
+					// In case the request should to return variations with shipping class equal to parent's shipping class,
+					// there are no records in taxonomy relationship table.
+					$args['tax_query'][] = array(
+						'taxonomy' => 'product_shipping_class',
+						'operator' => 'NOT EXISTS',
+					);
+					continue;
+				}
+			}
+
+			// Attributes switched to meta query.
+			if ( 'term_id' === $taxonomy['field'] ) {
+				$terms = wc_get_product_terms( $request['product_id'], $taxonomy['taxonomy'], array( 'fields' => 'slugs' ) );
+				$value = isset( $terms[ $taxonomy['terms'][0] ] ) ? $terms[ $taxonomy['terms'][0] ] : null;
+			} else {
+				$value = $taxonomy['terms'][0];
+			}
+			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+				$args, array(
+					'key'   => 'attribute_' . $taxonomy['taxonomy'],
+					'value' => $value,
+				)
+			);
+		}
 
 		return $args;
 	}
