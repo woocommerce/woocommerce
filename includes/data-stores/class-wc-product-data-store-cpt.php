@@ -1034,61 +1034,64 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @return int Matching variation ID or 0.
 	 */
 	public function find_matching_product_variation( $product, $match_attributes = array() ) {
-		$query_args = array(
-			'post_parent' => $product->get_id(),
-			'post_type'   => 'product_variation',
-			'orderby'     => 'menu_order',
-			'order'       => 'ASC',
-			'fields'      => 'ids',
-			'post_status' => 'publish',
-			'numberposts' => 1,
-			'meta_query'  => array(), // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_query
-		);
+        global $wpdb;
 
-		// Allow large queries in case user has many variations or attributes.
-		$GLOBALS['wpdb']->query( 'SET SESSION SQL_BIG_SELECTS=1' );
+		$matched_variation  = 0;
+		$sorted_meta		= array();
 
-		foreach ( $product->get_attributes() as $attribute ) {
-			if ( ! $attribute->get_variation() ) {
-				continue;
+		// Get any variations of the main product
+		$variation_ids = $wpdb->get_results("
+			SELECT ID
+			FROM {$wpdb->prefix}posts
+			WHERE {$wpdb->prefix}posts.post_parent  = " . $product->get_id() . "
+			AND {$wpdb->prefix}posts.post_status	= 'publish'
+			AND {$wpdb->prefix}posts.post_type	  = 'product_variation'
+		", ARRAY_A);
+
+		if( $variation_ids ) {
+			foreach( $variation_ids as $ids ) {
+				$variations_string .= $ids['ID'] . ',';
 			}
 
-			$attribute_field_name = 'attribute_' . sanitize_title( $attribute->get_name() );
+			$variations_string = rtrim( $variations_string, ',' );
 
-			if ( ! isset( $match_attributes[ $attribute_field_name ] ) ) {
-				return 0;
+			// Get the attributes of the variations
+			$attributes = $wpdb->get_results("
+				SELECT * FROM {$wpdb->prefix}postmeta
+				WHERE post_id
+				IN($variations_string)
+				AND meta_key LIKE 'attribute%'
+			",
+			ARRAY_A);
+ 
+			if( $attributes ) {
+				// Sort them into a nice easy array for us to filter
+				foreach( $attributes as $m ) {
+					$sorted_meta[ $m['post_id'] ][ $m['meta_key'] ] = $m['meta_value'];
+				}
+
+				// Check each variation to find the one that matches the $match_attributes
+				// Note: Not all meta fields will be set which is why we check existance
+				foreach( $sorted_meta as $post_id => $variation ) {
+					$match = true;
+ 
+					foreach( $match_attributes as $k => $v  ) {
+						if( array_key_exists( $k, $variation ) ) {
+							if( $variation[ $k ] != $v && !empty( $variation[ $k ] ) ) {
+								$match = false;
+							}
+						}
+					}
+
+					// Bingo
+					if( true == $match ) {
+						$matched_variation = $post_id;
+					}
+				}
 			}
-
-			// Note not wc_clean here to prevent removal of entities.
-			$value = $match_attributes[ $attribute_field_name ];
-
-			$query_args['meta_query'][] = array(
-				'relation' => 'OR',
-				array(
-					'key'     => $attribute_field_name,
-					'value'   => array( '', $value ),
-					'compare' => 'IN',
-				),
-				array(
-					'key'     => $attribute_field_name,
-					'compare' => 'NOT EXISTS',
-				),
-			);
 		}
 
-		$variations = get_posts( $query_args );
-
-		if ( $variations && ! is_wp_error( $variations ) ) {
-			return current( $variations );
-		} elseif ( version_compare( get_post_meta( $product->get_id(), '_product_version', true ), '2.4.0', '<' ) ) {
-			/**
-			 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
-			 * Fallback is here because there are cases where data will be 'synced' but the product version will remain the same.
-			 */
-			return ( array_map( 'sanitize_title', $match_attributes ) === $match_attributes ) ? 0 : $this->find_matching_product_variation( $product, array_map( 'sanitize_title', $match_attributes ) );
-		}
-
-		return 0;
+		return $matched_variation;
 	}
 
 	/**
