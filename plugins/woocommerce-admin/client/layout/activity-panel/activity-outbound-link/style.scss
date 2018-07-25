@@ -26,7 +26,7 @@
 
 	&:active {
 		background: $core-grey-light-100;
-		color: $woocommerce-darker;
+		color: $woocommerce-700;
 	}
 
 	&:focus {
@@ -46,7 +46,7 @@
 	&:active {
 		.gridicon {
 			display: initial;
-			color: $woocommerce-darker;
+			color: $woocommerce-700;
 		}
 	}
 }
