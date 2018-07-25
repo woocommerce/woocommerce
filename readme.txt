@@ -158,7 +158,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 
 == Changelog ==
 
-= 3.4.4 - 2018-xx-xx =
+= 3.4.4 - 2018-07-25 =
 * Fix - Only wordwrap plain email content. #20723
 * Fix - Better escaping on product quick edit. #20740
 * Fix - Log file deletion. #20730
