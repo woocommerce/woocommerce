@@ -182,7 +182,6 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Links to next and previous page sent out in HTTP header via REST API fixed for some endpoints. #20686
 * Dev - Better wc_format_phone_number cleaning. #20637
 
-
 = 3.4.3 - 2018-06-20 =
 * Fix - Fix label for the price filter widget on RTL sites. #20417
 * Fix - Checkout: stopPropagation when payment method selected so description tips show on radio buttons. #20432
