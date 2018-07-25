@@ -79,6 +79,7 @@ class WC_Reports_Revenue_Data_Store extends WC_Reports_Data_Store implements WC_
 								{$intervals_query['where_clause']}
 							GROUP BY
 								time_interval
+							LIMIT 0, {$intervals_query['per_page']}
 							) AS tt"
 			); // WPCS: cache ok, DB call ok.
 
@@ -118,9 +119,13 @@ class WC_Reports_Revenue_Data_Store extends WC_Reports_Data_Store implements WC_
 				'intervals' => $intervals,
 			);
 
-			$this->fill_in_missing_intervals( $query_args['after'], $query_args['before'], $query_args['interval'], $data );
-			$this->sort_intervals( $data, $query_args['orderby'], $query_args['order'] );
-			$this->remove_extra_records( $data, $query_args['page'] - 1, $intervals_query['per_page'] );
+			if ( $db_records_within_interval < $intervals_query['per_page'] ) {
+				$this->fill_in_missing_intervals( $query_args['after'], $query_args['before'], $query_args['interval'], $data );
+				$this->sort_intervals( $data, $query_args['orderby'], $query_args['order'] );
+				$this->remove_extra_records( $data, $query_args['page'] - 1, $intervals_query['per_page'] );
+			} else {
+				$this->update_dates( $query_args['after'], $query_args['before'], $query_args['interval'], $data );
+			}
 
 			wp_cache_set( $cache_key, $data, $this->cache_group, 3600 );
 		}

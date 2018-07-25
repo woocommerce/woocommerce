@@ -24,24 +24,18 @@ class WC_Reports_Interval {
 		$first_day_of_week = absint( get_option( 'start_of_week' ) );
 
 		if ( 1 === $first_day_of_week ) {
-			// Week begins on Monday.
-			$week_format = '%v';
-			$year_format = '%x';
-		} elseif ( 0 === $first_day_of_week ) {
-			// Week begins on Sunday.
-			$week_format = '%V';
-			$year_format = '%X';
+			// Week begins on Monday, ISO 8601.
+			$week_format = "DATE_FORMAT(hour, '%x-%v')";
 		} else {
-			// TODO: there are some countries where the week starts on Saturday (Egypt, etc), how to handle it in MySQL?
-			// maybe adapt this: https://stackoverflow.com/questions/10656996/week-of-the-year-for-weeks-starting-with-saturday.
-			$week_format = '%V';
-			$year_format = '%X';
+			// Week begins on day other than specified by ISO 8601.
+			$week_format = "CONCAT(YEAR(hour), '-', LPAD( FLOOR( ( DAYOFYEAR(hour) + ( ( DATE_FORMAT(MAKEDATE(YEAR(hour),1), '%w') - $first_day_of_week + 7 ) % 7 ) - 1 ) / 7  ) + 1 , 2, '0'))";
+
 		}
 
 		$mysql_date_format_mapping = array(
 			'hour'    => "DATE_FORMAT(hour, '%Y-%m-%d %k')",
 			'day'     => "DATE_FORMAT(hour, '%Y-%m-%d')",
-			'week'    => "DATE_FORMAT(hour, '$year_format-$week_format')",
+			'week'    => $week_format,
 			'month'   => "DATE_FORMAT(hour, '%Y-%m')",
 			'quarter' => "CONCAT(YEAR(hour), '-', QUARTER(hour))",
 			'year'    => 'YEAR(hour)',
@@ -82,6 +76,43 @@ class WC_Reports_Interval {
 	}
 
 	/**
+	 * Returns simple week number for the DateTime, if week starts on $first_day_of_week.
+	 *
+	 * The first week of the year is considered to be the week containing January 1.
+	 * The second week starts on next $first_day_of_week.
+	 *
+	 * @param DateTime $datetime          Date for which the week number is to be calculated.
+	 * @param int      $first_day_of_week 0 for Sunday to 6 for Saturday.
+	 * @return int
+	 */
+	public static function simple_week_number( $datetime, $first_day_of_week ) {
+		$beg_of_year_day          = new DateTime( "{$datetime->format('Y')}-01-01" );
+		$adj_day_beg_of_year      = ( (int) $beg_of_year_day->format( 'w' ) - $first_day_of_week + 7 ) % 7;
+		$days_since_start_of_year = (int) $datetime->format( 'z' ) + 1;
+
+		return (int) floor( ( ( $days_since_start_of_year + $adj_day_beg_of_year - 1 ) / 7 ) ) + 1;
+	}
+
+	/**
+	 * Returns ISO 8601 week number for the DateTime, if week starts on Monday,
+	 * otherwise returns simple week number.
+	 *
+	 * @see WC_Reports_Interval::simple_week_number()
+	 *
+	 * @param DateTime $datetime          Date for which the week number is to be calculated.
+	 * @param int      $first_day_of_week 0 for Sunday to 6 for Saturday.
+	 * @return int
+	 */
+	public static function week_number( $datetime, $first_day_of_week ) {
+		if ( 1 === $first_day_of_week ) {
+			$week_number = (int) $datetime->format( 'W' );
+		} else {
+			$week_number = WC_Reports_Interval::simple_week_number( $datetime, $first_day_of_week );
+		}
+		return $week_number;
+	}
+
+	/**
 	 * Returns time interval id for the DateTime.
 	 *
 	 * @param string   $time_interval Time interval type (week, day, etc).
@@ -100,21 +131,11 @@ class WC_Reports_Interval {
 
 		// If the week does not begin on Monday.
 		$first_day_of_week = absint( get_option( 'start_of_week' ) );
-		if ( 0 === $first_day_of_week ) {
-			$first_day_of_week = 7;
-		}
+
 		if ( 'week' === $time_interval && 1 !== $first_day_of_week ) {
-			// Side note: strftime week number %U is odd, so something else is needed.
-			$week_no     = $datetime->format( 'W' );
-			$year_no     = $datetime->format( 'Y' ); // maybe 'o' need to be used?
-			$day_of_week = $datetime->format( 'N' );
-			if ( $day_of_week >= $first_day_of_week ) {
-				$week_no++;
-			}
-			// TODO: this is not right, just an interim solution.
-			if ( $week_no >= 52 ) {
-				$week_no = 1;
-			}
+			$week_no = WC_Reports_Interval::simple_week_number( $datetime, $first_day_of_week );
+			$week_no = str_pad( $week_no, 2, '0', STR_PAD_LEFT );
+			$year_no = $datetime->format( 'Y' );
 			return "$year_no-$week_no";
 		}
 
@@ -122,7 +143,7 @@ class WC_Reports_Interval {
 	}
 
 	/**
-	 * Returns DateTime object representing the next hour start.
+	 * Returns a new DateTime object representing the next hour start.
 	 *
 	 * @param DateTime $datetime Date and time.
 	 * @return DateTime
@@ -137,7 +158,7 @@ class WC_Reports_Interval {
 	}
 
 	/**
-	 * Returns DateTime object representing the next day start.
+	 * Returns a new DateTime object representing the next day start.
 	 *
 	 * @param DateTime $datetime Date and time.
 	 * @return DateTime
@@ -159,18 +180,19 @@ class WC_Reports_Interval {
 	 */
 	public static function next_week_start( $datetime ) {
 		$first_day_of_week = absint( get_option( 'start_of_week' ) );
-		if ( $datetime->format( 'w' ) === $first_day_of_week ) {
-			return $datetime->modify( '+1 week' );
-		} else {
-			do {
-				$datetime = WC_Reports_Interval::next_day_start( $datetime );
-			} while ( $first_day_of_week !== (int) $datetime->format( 'w' ) );
-		}
+
+		$initial_week_no = WC_Reports_Interval::week_number( $datetime, $first_day_of_week );
+
+		do {
+			$datetime = WC_Reports_Interval::next_day_start( $datetime );
+			$current_week_no = WC_Reports_Interval::week_number( $datetime, $first_day_of_week );
+		} while ( $current_week_no === $initial_week_no );
+
 		return $datetime;
 	}
 
 	/**
-	 * Returns DateTime object representing the next month start.
+	 * Returns a new DateTime object representing the next month start.
 	 *
 	 * @param DateTime $datetime Date and time.
 	 * @return DateTime
@@ -187,7 +209,7 @@ class WC_Reports_Interval {
 	}
 
 	/**
-	 * Returns DateTime object representing the next quarter start.
+	 * Returns a new DateTime object representing the next quarter start.
 	 *
 	 * @param DateTime $datetime Date and time.
 	 * @return DateTime
@@ -204,7 +226,7 @@ class WC_Reports_Interval {
 	}
 
 	/**
-	 * Return DateTime object representing the next year start.
+	 * Return a new DateTime object representing the next year start.
 	 *
 	 * @param DateTime $datetime Date and time.
 	 * @return DateTime

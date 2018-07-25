@@ -153,16 +153,17 @@ class WC_Reports_Data_Store {
 		while ( $datetime <= $end_datetime ) {
 			$next_end = WC_Reports_Interval::iterate( $datetime, $time_interval );
 
-			$time_id = WC_Reports_Interval::time_interval_id( $time_interval, $datetime );
+			$time_id      = WC_Reports_Interval::time_interval_id( $time_interval, $datetime );
+			$interval_end = ( $next_end > $end_datetime ? $end_datetime : $next_end )->format( 'Y-m-d H:i:s' );
 			if ( array_key_exists( $time_id, $time_ids ) ) {
 				$record             = $data->intervals[ $time_ids[ $time_id ] ];
 				$record->date_start = $datetime->format( 'Y-m-d H:i:s' );
-				$record->date_end   = ( $next_end > $end_datetime ? $end_datetime : $next_end )->format( 'Y-m-d H:i:s' );
+				$record->date_end   = $interval_end;
 			} else {
 				$record_arr                  = array();
 				$record_arr['time_interval'] = $time_id;
 				$record_arr['date_start']    = $datetime->format( 'Y-m-d H:i:s' );
-				$record_arr['date_end']      = ( $next_end > $end_datetime ? $end_datetime : $next_end )->format( 'Y-m-d H:i:s' );
+				$record_arr['date_end']      = $interval_end;
 
 				// Totals object used to get all needed properties.
 				$totals_arr = get_object_vars( $data->totals );
@@ -172,6 +173,36 @@ class WC_Reports_Data_Store {
 
 				$data->intervals[] = (object) array_merge( $record_arr, $totals_arr );
 			}
+			$datetime = $next_end;
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Updates dates for intervals.
+	 *
+	 * @param DateTime $datetime_start Start date.
+	 * @param DateTime $datetime_end   End date.
+	 * @param string   $time_interval  Time interval, e.g. day, week, month.
+	 * @param stdClass $data           Data with SQL extracted intervals.
+	 * @return stdClass
+	 */
+	protected function update_dates( $datetime_start, $datetime_end, $time_interval, &$data ) {
+		$end_datetime = new DateTime( $datetime_end );
+		$time_ids     = array_flip( wp_list_pluck( $data->intervals, 'time_interval' ) );
+		$datetime     = new DateTime( $datetime_start );
+		while ( $datetime <= $end_datetime ) {
+			$next_end = WC_Reports_Interval::iterate( $datetime, $time_interval );
+
+			$time_id      = WC_Reports_Interval::time_interval_id( $time_interval, $datetime );
+			$interval_end = ( $next_end > $end_datetime ? $end_datetime : $next_end )->format( 'Y-m-d H:i:s' );
+			if ( array_key_exists( $time_id, $time_ids ) ) {
+				$record             = $data->intervals[ $time_ids[ $time_id ] ];
+				$record->date_start = $datetime->format( 'Y-m-d H:i:s' );
+				$record->date_end   = $interval_end;
+			}
+
 			$datetime = $next_end;
 		}
 
