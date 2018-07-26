@@ -141,16 +141,24 @@
 }
 
 .woocommerce-layout__notice-list-hide {
-	opacity: 0;
-	height: 0;
-	overflow: hidden;
+	display: none;
+}
+
+@keyframes slideDown {
+	0% {
+		transform: translateY(-100%);
+		opacity: 0;
+	}
+	100% {
+		transform: translateY(0);
+		opacity: 1;
+	}
 }
 
 .woocommerce-layout__notice-list-show {
-	opacity: 1;
-	height: auto;
-	transition: opacity 1s ease-in-out;
 	margin-top: 100px;
+	animation: slideDown;
+	animation-duration: 1s;
 
 	&.has-screen-meta-links {
 		display: inline-block;
