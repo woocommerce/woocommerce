@@ -32,9 +32,42 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		$tax_rates = WC_Tax::get_rates();
 
-		$this->assertEquals( $tax_rates, array( $tax_rate_id => array( 'rate' => '20.0000', 'label' => 'VAT', 'shipping' => 'yes', 'compound' => 'no' ) ) );
+		$this->assertSame( $tax_rates, array(
+			$tax_rate_id => array(
+				'rate' => 20.0,
+				'label' => 'VAT',
+				'shipping' => 'yes',
+				'compound' => 'no',
+			),
+		) );
 
 		WC_Tax::_delete_tax_rate( $tax_rate_id );
+
+		$tax_rate_catch_all = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '0.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+
+		$tax_rate_catch_all_id = WC_Tax::_insert_tax_rate( $tax_rate_catch_all );
+
+		$tax_rates = WC_Tax::get_rates();
+		$this->assertSame( $tax_rates, array(
+			$tax_rate_catch_all_id => array(
+				'rate' => 0.0,
+				'label' => 'VAT',
+				'shipping' => 'yes',
+				'compound' => 'no',
+			),
+		) );
+
+		WC_Tax::_delete_tax_rate( $tax_rate_catch_all_id );
 	}
 
 	/**
