@@ -335,6 +335,7 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/class-wc-shortcodes.php';
 		include_once WC_ABSPATH . 'includes/class-wc-logger.php';
 		include_once WC_ABSPATH . 'includes/queue/class-wc-action-queue.php';
+		include_once WC_ABSPATH . 'includes/queue/class-wc-queue.php';
 
 		/**
 		 * Data stores - used to store and retrieve CRUD object data from the database.
@@ -656,6 +657,15 @@ final class WooCommerce {
 			$wpdb->woocommerce_termmeta = $wpdb->prefix . 'woocommerce_termmeta';
 			$wpdb->tables[]             = 'woocommerce_termmeta';
 		}
+	}
+
+	/**
+	 * Get queue instance.
+	 *
+	 * @return WC_Queue_Interface
+	 */
+	public function queue() {
+		return WC_Queue::instance();
 	}
 
 	/**
