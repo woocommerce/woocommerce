@@ -276,6 +276,7 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/interfaces/class-wc-logger-interface.php';
 		include_once WC_ABSPATH . 'includes/interfaces/class-wc-log-handler-interface.php';
 		include_once WC_ABSPATH . 'includes/interfaces/class-wc-webhooks-data-store-interface.php';
+		include_once WC_ABSPATH . 'includes/interfaces/class-wc-queue-interface.php';
 
 		/**
 		 * Abstract classes.
