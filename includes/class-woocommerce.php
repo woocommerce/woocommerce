@@ -274,6 +274,7 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/interfaces/class-wc-logger-interface.php';
 		include_once WC_ABSPATH . 'includes/interfaces/class-wc-log-handler-interface.php';
 		include_once WC_ABSPATH . 'includes/interfaces/class-wc-webhooks-data-store-interface.php';
+		include_once WC_ABSPATH . 'includes/interfaces/class-wc-reports-data-store-interface.php';
 
 		/**
 		 * Abstract classes.
@@ -331,6 +332,7 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/class-wc-structured-data.php';
 		include_once WC_ABSPATH . 'includes/class-wc-shortcodes.php';
 		include_once WC_ABSPATH . 'includes/class-wc-logger.php';
+		include_once WC_ABSPATH . 'includes/class-wc-reports-revenue-query.php';
 
 		/**
 		 * Data stores - used to store and retrieve CRUD object data from the database.
@@ -359,6 +361,8 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-data-store-cpt.php';
 		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-refund-data-store-cpt.php';
 		include_once WC_ABSPATH . 'includes/data-stores/class-wc-webhook-data-store.php';
+		include_once WC_ABSPATH . 'includes/data-stores/class-wc-reports-data-store.php';
+		include_once WC_ABSPATH . 'includes/data-stores/class-wc-reports-revenue-data-store.php';
 
 		/**
 		 * REST API.
