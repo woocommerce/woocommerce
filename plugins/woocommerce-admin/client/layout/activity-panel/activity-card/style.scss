@@ -32,32 +32,54 @@
 .woocommerce-activity-card__icon {
 	grid-area: icon;
 	fill: $core-grey-light-600;
+
+	@include breakpoint( '<782px' ) {
+		.gridicon,
+		img {
+			height: 24px;
+			width: 24px;
+			margin-left: $gap-small;
+		}
+	}
 }
 
 .woocommerce-activity-card__header {
-	grid-area: header;
 	margin-bottom: $gap;
-	display: grid;
-	grid-template-areas:
-		'title date'
-		'subtitle date';
+	display: flex;
+	flex-direction: column-reverse;
 
 	.woocommerce-activity-card__title {
-		grid-area: title;
 		margin: 0;
 		@include font-size( 13 );
 	}
 
 	.woocommerce-activity-card__date {
-		grid-area: date;
-		justify-self: end;
 		color: $core-grey-dark-300;
 		text-transform: uppercase;
 		@include font-size( 11 );
+		margin-bottom: $gap-small;
 	}
 
-	.woocommerce-activity-card__subtitle {
-		grid-area: subtitle;
+	@include breakpoint( '>782px' ) {
+		grid-area: header;
+		display: grid;
+		grid-template-areas:
+			'title date'
+			'subtitle date';
+
+		.woocommerce-activity-card__title {
+			grid-area: title;
+		}
+
+		.woocommerce-activity-card__date {
+			grid-area: date;
+			justify-self: end;
+			margin-bottom: 0;
+		}
+
+		.woocommerce-activity-card__subtitle {
+			grid-area: subtitle;
+		}
 	}
 }
 
@@ -92,7 +114,12 @@
 
 	.woocommerce-activity-card__date {
 		width: 100%;
-		text-align: right;
+		margin-bottom: $gap;
+
+		@include breakpoint( '>782px' ) {
+			text-align: right;
+			margin-bottom: 0;
+		}
 
 		.is-placeholder {
 			// Fixed width for a fake date
@@ -106,6 +133,16 @@
 		.is-placeholder {
 			height: 48px;
 			width: 48px;
+		}
+
+		@include breakpoint( '<782px' ) {
+			.gridicon,
+			img,
+			.is-placeholder {
+				height: 24px;
+				width: 24px;
+				margin-left: $gap-small;
+			}
 		}
 	}
 
