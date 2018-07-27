@@ -39,12 +39,21 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 	protected static $background_process;
 
 	/**
-	 * Setup class.
+	 * Constructor.
 	 */
 	public function __construct() {
-		add_action( self::CRON_EVENT, array( $this, 'queue_update_recent_orders' ) );
-		add_action( 'woocommerce_before_order_object_save', array( $this, 'queue_update_modified_orders' ) );
-		add_action( 'shutdown', array( $this, 'dispatch_recalculator' ) );
+		if ( ! self::$background_process ) {
+			self::$background_process = new WC_Order_Stats_Background_Process();
+		}
+	}
+
+	/**
+	 * Set up all the hooks for maintaining and populating table data.
+	 */
+	public static function init() {
+		add_action( self::CRON_EVENT, array( __CLASS__, 'queue_update_recent_orders' ) );
+		add_action( 'woocommerce_before_order_object_save', array( __CLASS__, 'queue_update_modified_orders' ) );
+		add_action( 'shutdown', array( __CLASS__, 'dispatch_recalculator' ) );
 
 		// Each hour update the DB with info for the previous hour.
 		if ( ! wp_next_scheduled( self::CRON_EVENT ) ) {
@@ -104,19 +113,19 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 			$totals     = $wpdb->get_results(
 				"SELECT
 							{$selections}
-						FROM 
+						FROM
 							{$table_name}
-						WHERE 
-							1=1 
+						WHERE
+							1=1
 							{$totals_query['where_clause']}"); // WPCS: cache ok, DB call ok.
 
 			$db_records_within_interval = $wpdb->get_var(
 				"SELECT COUNT(*) FROM (
 							SELECT
 								{$intervals_query['select_clause']} AS time_interval
-							FROM 
+							FROM
 								{$table_name}
-							WHERE 
+							WHERE
 								1=1
 								{$intervals_query['where_clause']}
 							GROUP BY
@@ -134,14 +143,14 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 				"SELECT
 							{$intervals_query['select_clause']} AS time_interval
 							{$selections}
-						FROM 
+						FROM
 							{$table_name}
-						WHERE 
+						WHERE
 							1=1
 							{$intervals_query['where_clause']}
 						GROUP BY
 							time_interval
-						ORDER BY 
+						ORDER BY
 							{$intervals_query['order_by_clause']}
 						LIMIT {$intervals_query['offset']}, {$intervals_query['per_page']}"
 			); // WPCS: cache ok, DB call ok.
@@ -202,7 +211,7 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 	/**
 	 * Queue a background process that will update the database with stats info from the last hour.
 	 */
-	public function queue_update_recent_orders() {
+	public static function queue_update_recent_orders() {
 		// Populate the stats information for the previous hour.
 		$last_hour = strtotime( date( 'Y-m-d H:00:00' ) ) - HOUR_IN_SECONDS;
 		self::$background_process->push_to_queue( $last_hour );
@@ -215,7 +224,7 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 	 *
 	 * @param WC_Order $order Order that is in the process of getting modified.
 	 */
-	public function queue_update_modified_orders( $order ) {
+	public static function queue_update_modified_orders( $order ) {
 		$date_created = $order->get_date_created();
 		if ( ! $date_created ) {
 			return;
@@ -246,7 +255,7 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 	/**
 	 * Kick off any scheduled data recalculations.
 	 */
-	public function dispatch_recalculator() {
+	public static function dispatch_recalculator() {
 		self::$background_process->dispatch();
 	}
 
@@ -315,7 +324,6 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 		$data = wp_parse_args( $data, $defaults );
 
 		// Don't store rows that don't have useful information.
-		// @todo maybe remove this when/if on-the-fly generation is implemented.
 		if ( ! $data['num_orders'] ) {
 			return $wpdb->delete(
 				$table_name,

@@ -488,6 +488,7 @@ final class WooCommerce {
 		}
 
 		$this->load_webhooks();
+		$this->initialize_reports();
 
 		// Init action.
 		do_action( 'woocommerce_init' );
@@ -635,6 +636,15 @@ final class WooCommerce {
 		}
 
 		wc_load_webhooks();
+	}
+
+	/**
+	 * Initialize the reports classes.
+	 *
+	 * @since 3.5.0
+	 */
+	private function initialize_reports() {
+		WC_Reports_Orders_Data_Store::init();
 	}
 
 	/**
