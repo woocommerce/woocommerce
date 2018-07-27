@@ -24,7 +24,7 @@ class WC_Reports_Revenue_Data_Store extends WC_Reports_Data_Store implements WC_
 	 * @since 3.5.0
 	 * @var int
 	 */
-	protected $table_name = 'order_stats';
+	protected $table_name = 'wc_order_stats';
 
 	/**
 	 * Report name.
@@ -59,7 +59,7 @@ class WC_Reports_Revenue_Data_Store extends WC_Reports_Data_Store implements WC_
 							SUM(orders_shipping_total) AS shipping, 
 							SUM(orders_tax_total) AS taxes, 
 							SUM(orders_refund_total) AS refunds,
-							SUM(orders_gross_total) - SUM(orders_coupon_total) - SUM(orders_shipping_total) - SUM(orders_tax_total) - SUM(orders_refund_total) AS net_revenue,
+							SUM(orders_net_total) AS net_revenue,
 							SUM(num_orders) AS orders_count,
 							SUM(num_items_sold) AS items_sold
 						FROM 
@@ -88,14 +88,14 @@ class WC_Reports_Revenue_Data_Store extends WC_Reports_Data_Store implements WC_
 			$intervals = $wpdb->get_results(
 				"SELECT
 							{$intervals_query['select_clause']} AS time_interval,
-							MIN(hour) AS date_start,
-							MAX(hour) AS date_end,
+							MIN(start_time) AS date_start,
+							MAX(start_time) AS date_end,
 							SUM(orders_gross_total) AS gross_revenue, 
 							SUM(orders_coupon_total) AS coupons, 
 							SUM(orders_shipping_total) AS shipping, 
 							SUM(orders_tax_total) AS taxes, 
 							SUM(orders_refund_total) AS refunds,
-							SUM(orders_gross_total) - SUM(orders_coupon_total) - SUM(orders_shipping_total) - SUM(orders_tax_total) - SUM(orders_refund_total) AS net_revenue,
+							SUM(orders_net_total) AS net_revenue,
 							SUM(num_orders) AS orders_count,
 							SUM(num_items_sold) AS items_sold
 						FROM 

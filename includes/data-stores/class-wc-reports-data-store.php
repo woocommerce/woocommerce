@@ -231,13 +231,13 @@ class WC_Reports_Data_Store {
 
 		if ( isset( $query_args['before'] ) && '' !== $query_args['before'] ) {
 			$hour                          = $query_args['before'];
-			$totals_query['where_clause'] .= " AND hour <= '$hour'";
+			$totals_query['where_clause'] .= " AND start_time <= '$hour'";
 
 		}
 
 		if ( isset( $query_args['after'] ) && '' !== $query_args['after'] ) {
 			$hour                          = $query_args['after'];
-			$totals_query['where_clause'] .= " AND hour >= '$hour'";
+			$totals_query['where_clause'] .= " AND start_time >= '$hour'";
 		}
 
 		return $totals_query;
@@ -255,13 +255,13 @@ class WC_Reports_Data_Store {
 
 		if ( isset( $query_args['before'] ) && '' !== $query_args['before'] ) {
 			$hour                             = $query_args['before'];
-			$intervals_query['where_clause'] .= " AND hour <= '$hour'";
+			$intervals_query['where_clause'] .= " AND start_time <= '$hour'";
 
 		}
 
 		if ( isset( $query_args['after'] ) && '' !== $query_args['after'] ) {
 			$hour                             = $query_args['after'];
-			$intervals_query['where_clause'] .= " AND hour >= '$hour'";
+			$intervals_query['where_clause'] .= " AND start_time >= '$hour'";
 		}
 
 		if ( isset( $query_args['interval'] ) && '' !== $query_args['interval'] ) {
