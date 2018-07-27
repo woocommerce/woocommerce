@@ -15,6 +15,8 @@ if ( ! class_exists( 'WC_Background_Process', false ) ) {
 
 /**
  * WC_Order_Stats_Background_Process class.
+ *
+ * @todo use Action Scheduler instead of this.
  */
 class WC_Order_Stats_Background_Process extends WC_Background_Process {
 

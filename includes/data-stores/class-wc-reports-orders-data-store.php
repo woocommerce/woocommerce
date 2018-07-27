@@ -75,6 +75,17 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 	public function get_data( $query_args ) {
 		global $wpdb;
 
+		$defaults = array(
+			'per_page' => get_option( 'posts_per_page' ), // not sure if this should be the default.
+			'page'     => 1,
+			'order'    => 'DESC',
+			'orderby'  => 'date',
+			'before'   => '',
+			'after'    => '',
+			'interval' => 'week',
+		);
+		$query_args = wp_parse_args( $query_args, $defaults );
+
 		$cache_key = $this->get_cache_key( $query_args );
 		$data      = wp_cache_get( $cache_key, $this->cache_group );
 
@@ -117,7 +128,8 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 							{$table_name}
 						WHERE
 							1=1
-							{$totals_query['where_clause']}"); // WPCS: cache ok, DB call ok.
+							{$totals_query['where_clause']}"
+			); // WPCS: cache ok, DB call ok.
 
 			$db_records_within_interval = $wpdb->get_var(
 				"SELECT COUNT(*) FROM (
