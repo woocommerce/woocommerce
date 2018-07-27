@@ -702,9 +702,8 @@ class WC_Checkout {
 						/* translators: %s: email address */
 						$errors->add( 'validation', sprintf( __( '%s is not a valid email address.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ) );
 						continue;
-					}else{
-						$data[ $key ] = sanitize_email( $data[ $key ] );
 					}
+					$data[ $key ] = sanitize_email( $data[ $key ] );
 				}
 
 				if ( '' !== $data[ $key ] && in_array( 'state', $format, true ) ) {
