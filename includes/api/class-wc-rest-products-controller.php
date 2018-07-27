@@ -236,8 +236,13 @@ class WC_REST_Products_Controller extends WC_REST_Legacy_Products_Controller {
 			}
 		}
 
+		// Build tax_query if taxonomies are set.
 		if ( ! empty( $tax_query ) ) {
-			$args['tax_query'] = array_merge($tax_query, $args['tax_query']); // WPCS: slow query ok.
+			if ( empty( $args['tax_query'] ) ) {
+				$args['tax_query'] = $tax_query; // WPCS: slow query ok.
+			} else {
+				$args['tax_query'] = array_merge( $tax_query, $args['tax_query'] ); // WPCS: slow query ok.
+			}
 		}
 
 		// Filter featured.
