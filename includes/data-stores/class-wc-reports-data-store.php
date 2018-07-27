@@ -39,13 +39,6 @@ class WC_Reports_Data_Store {
 	 */
 	protected $table_name = '';
 
-	/**
-	 * Name of the report.
-	 *
-	 * @var string
-	 */
-	protected $report_name = '';
-
 	// TODO: this does not really belong here, maybe factor out the comparison as separate class.
 	/**
 	 * Order by property, used in the cmp function.
@@ -62,22 +55,13 @@ class WC_Reports_Data_Store {
 	private $order = '';
 
 	/**
-	 * Returnss name of this report.
-	 *
-	 * @return int
-	 */
-	protected function get_report_name() {
-		return $this->report_name;
-	}
-
-	/**
 	 * Returns string to be used as cache key for the data.
 	 *
 	 * @param array $params Query parameters.
 	 * @return string
 	 */
 	protected function get_cache_key( $params ) {
-		return 'woocommerce_' . $this->get_report_name() . '_' . md5( implode( '-', $params ) . date( 'Y-m-d_H:i' ) );
+		return 'woocommerce_' . $this->table_name . '_' . md5( implode( '-', $params ) . date( 'Y-m-d_H:i' ) );
 	}
 
 	/**
