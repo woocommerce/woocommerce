@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Reports_Revenue_Store class file.
+ * WC_Reports_Orders_Data_Store class file.
  *
  * @package WooCommerce/Classes
  * @since 3.5.0
@@ -11,12 +11,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC Product Data Store: Stored in CPT.
- * //extends WC_Data_Store_WP.
+ * WC_Reports_Orders_Data_Store.
  *
  * @version  3.5.0
  */
-class WC_Reports_Revenue_Data_Store extends WC_Reports_Data_Store implements WC_Reports_Data_Store_Interface {
+class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_Reports_Data_Store_Interface {
 
 	/**
 	 * Table used to get the data.
@@ -61,7 +60,9 @@ class WC_Reports_Revenue_Data_Store extends WC_Reports_Data_Store implements WC_
 							SUM(orders_refund_total) AS refunds,
 							SUM(orders_net_total) AS net_revenue,
 							SUM(num_orders) AS orders_count,
-							SUM(num_items_sold) AS items_sold
+							SUM(num_items_sold) AS items_sold,
+							items_sold / orders_count AS avg_items_per_order,
+							gross_revenue / orders_count AS avg_order_value
 						FROM 
 							{$table_name}
 						WHERE 
@@ -75,7 +76,7 @@ class WC_Reports_Revenue_Data_Store extends WC_Reports_Data_Store implements WC_
 							FROM 
 								{$table_name}
 							WHERE 
-								1 = 1
+								1=1
 								{$intervals_query['where_clause']}
 							GROUP BY
 								time_interval
@@ -97,11 +98,13 @@ class WC_Reports_Revenue_Data_Store extends WC_Reports_Data_Store implements WC_
 							SUM(orders_refund_total) AS refunds,
 							SUM(orders_net_total) AS net_revenue,
 							SUM(num_orders) AS orders_count,
-							SUM(num_items_sold) AS items_sold
+							SUM(num_items_sold) AS items_sold,
+							items_sold / orders_count AS avg_items_per_order,
+							gross_revenue / orders_count AS avg_order_value
 						FROM 
 							{$table_name}
 						WHERE 
-							1 = 1
+							1=1
 							{$intervals_query['where_clause']}
 						GROUP BY
 							time_interval

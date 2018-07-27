@@ -362,7 +362,7 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-refund-data-store-cpt.php';
 		include_once WC_ABSPATH . 'includes/data-stores/class-wc-webhook-data-store.php';
 		include_once WC_ABSPATH . 'includes/data-stores/class-wc-reports-data-store.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-reports-revenue-data-store.php';
+		include_once WC_ABSPATH . 'includes/data-stores/class-wc-reports-orders-data-store.php';
 
 		/**
 		 * REST API.
