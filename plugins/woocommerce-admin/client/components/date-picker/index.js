@@ -23,6 +23,7 @@ class DatePicker extends Component {
 		this.select = this.select.bind( this );
 		this.getUpdatePath = this.getUpdatePath.bind( this );
 		this.isValidSelection = this.isValidSelection.bind( this );
+		this.resetCustomValues = this.resetCustomValues.bind( this );
 	}
 
 	// @TODO change this to `getDerivedStateFromProps` in React 16.4
@@ -73,6 +74,13 @@ class DatePicker extends Component {
 		return true;
 	}
 
+	resetCustomValues() {
+		this.setState( {
+			after: null,
+			before: null,
+		} );
+	}
+
 	render() {
 		const { period, compare, after, before } = this.state;
 		return (
@@ -99,6 +107,7 @@ class DatePicker extends Component {
 							onClose={ onClose }
 							getUpdatePath={ this.getUpdatePath }
 							isValidSelection={ this.isValidSelection }
+							resetCustomValues={ this.resetCustomValues }
 						/>
 					) }
 				/>
