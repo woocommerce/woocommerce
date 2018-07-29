@@ -697,13 +697,14 @@ class WC_Checkout {
 				}
 
 				if ( in_array( 'email', $format, true ) && '' !== $data[ $key ] ) {
+					$email_is_valid = is_email( $data[ $key ] );
+					$data[ $key ] = sanitize_email( $data[ $key ] );
 
-					if ( $validate_fieldset && ! is_email( $data[ $key ] ) ) {
+					if ( $validate_fieldset && ! $email_is_valid ) {
 						/* translators: %s: email address */
 						$errors->add( 'validation', sprintf( __( '%s is not a valid email address.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ) );
 						continue;
 					}
-					$data[ $key ] = sanitize_email( $data[ $key ] );
 				}
 
 				if ( '' !== $data[ $key ] && in_array( 'state', $format, true ) ) {
