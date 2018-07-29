@@ -11,6 +11,7 @@ import PropTypes from 'prop-types';
 import ExampleReport from './example';
 import RevenueReport from './revenue';
 import ProductsReport from './products';
+import OrdersReport from './orders/';
 
 class Report extends Component {
 	render() {
@@ -20,6 +21,8 @@ class Report extends Component {
 				return <RevenueReport { ...this.props } />;
 			case 'products':
 				return <ProductsReport { ...this.props } />;
+			case 'orders':
+				return <OrdersReport { ...this.props } />;
 			default:
 				return <ExampleReport />;
 		}
