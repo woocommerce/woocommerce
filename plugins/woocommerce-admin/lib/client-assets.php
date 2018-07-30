@@ -6,13 +6,11 @@ function wc_admin_register_script() {
 	// Are we displaying the full React app or just embedding the header on a classic screen?
 	$screen_id = wc_admin_get_current_screen_id();
 
-	error_log( $screen_id );
-
 	if ( in_array( $screen_id, wc_admin_get_embed_enabled_screen_ids() ) ) {
-		$js_entry = 'dist/embedded.js';
+		$js_entry  = 'dist/embedded.js';
 		$css_entry = 'dist/css/embedded.css';
 	} else {
-		$js_entry = 'dist/index.js';
+		$js_entry  = 'dist/index.js';
 		$css_entry = 'dist/css/index.css';
 	}
 
