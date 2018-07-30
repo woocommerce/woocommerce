@@ -61,7 +61,7 @@ class WC_Reports_Data_Store {
 	 * @return string
 	 */
 	protected function get_cache_key( $params ) {
-		return 'woocommerce_' . $this->table_name . '_' . md5( implode( '-', $params ) . date( 'Y-m-d_H:i' ) );
+		return 'woocommerce_' . $this->table_name . '_' . md5( wp_json_encode( $params ) . date( 'Y-m-d_H' ) );
 	}
 
 	/**
