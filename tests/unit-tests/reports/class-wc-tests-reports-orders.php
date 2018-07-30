@@ -2,17 +2,28 @@
 
 /**
  * Reports order stats tests.
+ *
  * @package WooCommerce\Tests\Orders
+ * @todo Finish up unit testing to verify bug-free order reports.
  */
 class WC_Tests_Reports_Orders extends WC_Unit_Test_Case {
+
+	/**
+	 * Delete everything in the order stats lookup table.
+	 */
+	protected function reset_stats_db() {
+		global $wpdb;
+		$wpdb->query( "DELETE FROM $wpdb->prefix" . WC_Reports_Orders_Data_Store::TABLE_NAME ); // @codingStandardsIgnoreLine.
+	}
 
 	/**
 	 * Test the calculations and querying works correctly for the base case of 1 order.
 	 *
 	 * @since 3.5.0
-	 * @todo Why does this test take 10s to run?
 	 */
 	public function test_populate_and_query() {
+		$this->reset_stats_db();
+
 		// Populate all of the data.
 		$product = new WC_Product_Simple();
 		$product->set_name( 'Test Product' );
@@ -54,8 +65,8 @@ class WC_Tests_Reports_Orders extends WC_Unit_Test_Case {
 		$args = array();
 		$expected_stats = array(
 			'totals' => array(
-				'date_start'            => '',
-				'date_end'              => '',
+				'date_start'            => date( 'Y-m-d H:00:00', $start_time ),
+				'date_end'              => date( 'Y-m-d H:00:00', $end_time ),
 				'num_orders'            => '1',
 				'num_items_sold'        => '4',
 				'orders_gross_total'    => '97',
@@ -64,14 +75,14 @@ class WC_Tests_Reports_Orders extends WC_Unit_Test_Case {
 				'orders_tax_total'      => '7',
 				'orders_shipping_total' => '10',
 				'orders_net_total'      => '80',
-				'avg_items_per_order'   => '4',
+				'avg_items_per_order'   => '4.0000',
 				'avg_order_value'       => '97',
 			),
 			'intervals' => array(
 				array(
 					'time_interval'         => '',
-					'date_start'            => '',
-					'date_end'              => '',
+					'date_start'            => date( 'Y-m-d H:00:00', $start_time ),
+					'date_end'              => date( 'Y-m-d H:00:00', $end_time ),
 					'num_orders'            => '1',
 					'num_items_sold'        => '4',
 					'orders_gross_total'    => '97',
@@ -81,6 +92,7 @@ class WC_Tests_Reports_Orders extends WC_Unit_Test_Case {
 					'orders_shipping_total' => '10',
 					'orders_net_total'      => '80',
 					'avg_order_value'       => '97',
+					'avg_items_per_order'   => '4.0000',
 				),
 			),
 		);
