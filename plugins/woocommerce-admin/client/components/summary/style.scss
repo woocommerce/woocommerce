@@ -1,72 +1,247 @@
 /** @format */
 
-.woocommerce-summary {
-	display: grid;
-	grid-template-columns: repeat(4, 1fr);
-	border-width: 0 1px 1px 0;
-	border-style: solid;
-	border-color: #e5e8ec;
+// Set up some local color variables to make the CSS more clear
+$outer-border: $core-grey-light-700;
+$inner-border: $core-grey-light-500;
 
-	@include breakpoint( '<600px' ) {
-		grid-template-columns: repeat(2, 1fr);
+// A local mixin to generate the grid template and border logic
+@mixin make-cols( $i ) {
+	grid-template-columns: repeat($i, 1fr);
+
+	.woocommerce-summary__item-container:nth-of-type(#{$i}n) .woocommerce-summary__item {
+		border-right-color: $outer-border;
+	}
+}
+
+@mixin wrap-contents() {
+	.woocommerce-summary__item-value,
+	.woocommerce-summary__item-delta {
+		min-width: 100%;
 	}
 
-	@include breakpoint( '<400px' ) {
+	.woocommerce-summary__item-prev-label,
+	.woocommerce-summary__item-prev-value {
+		display: block;
+	}
+}
+
+@mixin reset-wrap() {
+	.woocommerce-summary__item-value,
+	.woocommerce-summary__item-delta {
+		min-width: auto;
+	}
+
+	.woocommerce-summary__item-prev-label,
+	.woocommerce-summary__item-prev-value {
+		display: inline;
+	}
+}
+
+.woocommerce-summary {
+	display: grid;
+	border-width: 1px 0 0 1px;
+	border-style: solid;
+	border-color: $outer-border;
+	background-color: $core-grey-light-300;
+	box-shadow: inset -1px -1px 0 $outer-border;
+
+	.woocommerce-summary__item-data {
+		display: flex;
+		flex-wrap: wrap;
+	}
+
+	.woocommerce-summary__item-value,
+	.woocommerce-summary__item-delta {
+		flex: 1 0 auto;
+	}
+
+	.woocommerce-summary__item-delta {
+		flex: 0;
+		display: flex;
+		flex-wrap: none;
+	}
+
+	&.has-one-item,
+	&.has-1-items {
 		grid-template-columns: 1fr;
+	}
+
+	&.has-2-items {
+		@include make-cols( 2 );
+	}
+
+	&.has-3-items {
+		@include make-cols( 3 );
+	}
+
+	&.has-4-items,
+	&.has-7-items,
+	&.has-8-items {
+		@include make-cols( 4 );
+	}
+
+	&.has-5-items,
+	&.has-9-items,
+	&.has-10-items {
+		@include make-cols( 5 );
+		@include wrap-contents;
+	}
+
+	&.has-6-items {
+		@include make-cols( 6 );
+		@include wrap-contents;
+	}
+
+	@include breakpoint( '<1365px' ) {
+		&.has-4-items,
+		&.has-7-items,
+		&.has-8-items {
+			@include wrap-contents;
+		}
+
+		&.has-6-items,
+		&.has-9-items {
+			@include make-cols( 3 );
+			@include reset-wrap;
+		}
+
+		&.has-10-items {
+			@include make-cols( 4 );
+		}
+
+		&.has-9-items,
+		&.has-10-items {
+			.woocommerce-summary__item-container:nth-of-type(5n) .woocommerce-summary__item {
+				border-right-color: $inner-border;
+			}
+		}
+	}
+}
+
+.woocommerce-summary__item-container {
+	margin-bottom: 0;
+	width: 100%;
+
+	&:last-of-type .woocommerce-summary__item {
+		// Make sure the last item always uses the outer-border color.
+		border-right-color: $outer-border !important;
 	}
 }
 
 .woocommerce-summary__item {
-	margin-bottom: 0;
+	display: block;
+	height: 100%;
 	padding: $spacing;
-	width: 100%;
-	background: $white;
-	border-width: 1px 0 0 1px;
-	border-style: solid;
-	border-color: #e5e8ec;
+	background-color: $core-grey-light-100;
+	border-bottom: 1px solid $outer-border;
+	border-right: 1px solid $inner-border;
+	text-decoration: none;
 
-	&.is-selected {
-		border-top: 0;
-		background: #f8f9fa;
-		box-shadow: inset 0 4px 0 $woocommerce;
+	&:hover {
+		background-color: $core-grey-light-200;
 	}
 
-	.woocommerce-summary__item-label,
-	.woocommerce-summary__item-value,
-	.woocommerce-summary__item-delta {
-		display: block;
+	&:active {
+		background-color: $core-grey-light-300;
+	}
+
+	&:focus {
+		box-shadow: inset -2px -2px 0 $black, inset 2px 2px 0 $black;
+	}
+
+	&.is-selected {
+		margin-top: -1px;
+		height: calc(100% + 1px); // Hack to avoid double border
+
+		&:focus {
+			box-shadow: inset -2px -2px 0 $black, inset 2px 2px 0 $black, inset 0 4px 0 $woocommerce;
+		}
 	}
 
 	.woocommerce-summary__item-label {
-		margin-bottom: $spacing/2;
+		display: block;
+		margin-bottom: $gap;
+		@include font-size( 11 );
+		text-transform: uppercase;
+		color: $core-grey-dark-300;
 	}
 
 	.woocommerce-summary__item-value {
-		@include font-size( 24 );
-		margin-bottom: $spacing;
+		margin-bottom: $gap-smallest;
+		@include font-size( 18 );
+		font-weight: 500;
+		color: $core-grey-dark-900;
 	}
 
 	.woocommerce-summary__item-delta {
-		@include font-size( 11 );
+		margin-bottom: $gap-small;
+		@include font-size( 18 );
+		font-weight: 300;
+		color: $core-grey-dark-500;
+	}
+
+	&.is-selected {
+		background: $white;
+		box-shadow: inset 0 4px 0 $woocommerce;
+
+		.woocommerce-summary__item-value {
+			font-weight: 600;
+		}
+
+		.woocommerce-summary__item-delta {
+			font-weight: 400;
+		}
+	}
+
+	&.is-good-trend .woocommerce-summary__item-delta {
+		color: $valid-green;
+	}
+
+	&.is-bad-trend .woocommerce-summary__item-delta {
+		color: $error-red;
 	}
 
 	.woocommerce-summary__item-delta-icon {
 		vertical-align: middle;
 		margin-right: 3px;
-		margin-top: -3px;
+		fill: currentColor;
 
-		&.dashicons-arrow-up-alt {
+		&.gridicons-arrow-up {
 			transform: rotate(45deg);
-			fill: $valid-green;
 		}
 
-		&.dashicons-arrow-down-alt {
+		&.gridicons-arrow-down {
 			transform: rotate(-45deg);
-			fill: $error-red;
 		}
 	}
 
-	.woocommerce-summary__item-delta-label {
-		margin-left: 5px;
+	.woocommerce-summary__item-prev-label,
+	.woocommerce-summary__item-prev-value {
+		@include font-size( 13 );
+		color: $core-grey-dark-500;
+	}
+}
+
+.woocommerce-card {
+	.woocommerce-summary {
+		background-color: $core-grey-light-100;
+		border: none;
+	}
+
+	.woocommerce-summary__item {
+		background-color: $white;
+
+		&:hover {
+			background-color: $core-grey-light-200;
+		}
+
+		&:active {
+			background-color: $core-grey-light-300;
+		}
+	}
+
+	.woocommerce-summary__item.is-selected {
+		margin-top: 0;
+		box-shadow: none;
 	}
 }

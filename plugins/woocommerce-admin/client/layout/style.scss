@@ -5,21 +5,16 @@
 }
 
 .woocommerce-layout__primary {
-	margin: 80px 0 0 $spacing;
+	margin: 80px 0 0 $gutter;
 
 	@include breakpoint( '>1100px' ) {
 		margin-top: 100px;
 	}
-
-	.woocommerce-layout__main {
-		margin: 0 auto;
-		max-width: 640px;
-	}
 }
 
 .woocommerce-layout .woocommerce-layout__main {
-	padding-right: $spacing;
-	max-width: 1100px;
+	padding-right: $gutter;
+	max-width: 100%;
 }
 
 // @TODO remove this?

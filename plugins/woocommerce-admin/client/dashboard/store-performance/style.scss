@@ -1,17 +1,18 @@
 /** @format */
 
 .woocommerce-dashboard__store-performance {
+	border-bottom: 0;
+	border-right: 0;
+
+	.woocommerce-card__header {
+		border-right: 1px solid $core-grey-light-700;
+	}
+
 	.woocommerce-card__body {
 		padding: 0;
 	}
 
 	.woocommerce-summary {
 		margin: 0;
-		border-top: 0px;
-		border-bottom: 0px;
-
-		.woocommerce-summary__item {
-			border-width: 0 1px 0 0;
-		}
 	}
 }

@@ -76,17 +76,30 @@ class StorePerformance extends Component {
 			>
 				<SummaryList>
 					{ showCustomers && (
-						<SummaryNumber value={ '2' } label={ __( 'New Customers', 'wc-admin' ) } delta={ 15 } />
+						<SummaryNumber
+							label={ __( 'New Customers', 'wc-admin' ) }
+							value={ '2' }
+							prevLabel={ __( 'Previous Week:', 'wc-admin' ) }
+							prevValue={ 3 }
+							delta={ -33 }
+						/>
 					) }
 					{ showProducts && (
-						<SummaryNumber value={ totalProducts } label={ __( 'Total Products', 'wc-admin' ) } />
+						<SummaryNumber
+							label={ __( 'Total Products', 'wc-admin' ) }
+							value={ totalProducts }
+							prevLabel={ __( 'Previous Week:', 'wc-admin' ) }
+							prevValue={ totalProducts }
+							delta={ 0 }
+						/>
 					) }
 					{ showOrders && (
 						<SummaryNumber
-							value={ totalOrders }
-							selected
 							label={ __( 'Total Orders', 'wc-admin' ) }
-							delta={ -6 }
+							value={ totalOrders }
+							prevLabel={ __( 'Previous Week:', 'wc-admin' ) }
+							prevValue={ totalOrders }
+							delta={ 0 }
 						/>
 					) }
 				</SummaryList>
@@ -97,7 +110,7 @@ class StorePerformance extends Component {
 
 export default compose( [
 	withAPIData( () => ( {
-		orders: '/wc/v2/orders?status=processing',
-		products: '/wc/v2/products',
+		orders: '/wc/v3/orders?status=processing',
+		products: '/wc/v3/products',
 	} ) ),
 ] )( StorePerformance );
