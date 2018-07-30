@@ -307,3 +307,51 @@ export function loadLocaleData() {
 }
 
 loadLocaleData();
+
+export const dateValidationMessages = {
+	invalid: __( 'Invalid date', 'wc-admin' ),
+	future: __( 'Select a date in the past', 'wc-admin' ),
+	startAfterEnd: __( 'Start date must be before end date', 'wc-admin' ),
+	endBeforeStart: __( 'Start date must be before end date', 'wc-admin' ),
+};
+
+/**
+ * Validate text input supplied for a date range.
+ *
+ * @param {string} type - Designate begining or end of range, eg `before` or `after`.
+ * @param {string} value - User input value
+ * @param {Moment|null} [before] - If already designated, the before date parameter
+ * @param {Moment|null} [after] - If already designated, the after date parameter
+ * @param {string} format - The expected date format in a user's locale
+ * @return {Object} validatedDate - validated date oject
+ * @param {Moment|null} validatedDate.date - A resulting Moment date object or null, if invalid
+ * @param {string} validatedDate.error - An optional error message if date is invalid
+ */
+export function validateDateInputForRange( type, value, before, after, format ) {
+	const date = toMoment( format, value );
+	if ( ! date ) {
+		return {
+			date: null,
+			error: dateValidationMessages.invalid,
+		};
+	}
+	if ( moment().isBefore( date, 'day' ) ) {
+		return {
+			date: null,
+			error: dateValidationMessages.future,
+		};
+	}
+	if ( 'after' === type && before && date.isAfter( before, 'day' ) ) {
+		return {
+			date: null,
+			error: dateValidationMessages.startAfterEnd,
+		};
+	}
+	if ( 'before' === type && after && date.isBefore( after, 'day' ) ) {
+		return {
+			date: null,
+			error: dateValidationMessages.endBeforeStart,
+		};
+	}
+	return { date };
+}

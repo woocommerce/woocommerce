@@ -16,22 +16,35 @@ import DropdownButton from 'components/dropdown-button';
 import DatePickerContent from './content';
 import { getCurrentDates, getDateParamsFromQuery, isoDateFormat } from 'lib/date';
 
+const shortDateFormat = __( 'MM/DD/YYYY', 'wc-admin' );
+
 class DatePicker extends Component {
 	constructor( props ) {
 		super( props );
-		this.state = getDateParamsFromQuery( props.query );
-		this.select = this.select.bind( this );
+		this.state = this.getResetState( props );
+
+		this.update = this.update.bind( this );
 		this.getUpdatePath = this.getUpdatePath.bind( this );
 		this.isValidSelection = this.isValidSelection.bind( this );
 		this.resetCustomValues = this.resetCustomValues.bind( this );
 	}
 
-	// @TODO change this to `getDerivedStateFromProps` in React 16.4
-	UNSAFE_componentWillReceiveProps( nextProps ) {
-		this.setState( getDateParamsFromQuery( nextProps.query ) );
+	getResetState( props ) {
+		const { period, compare, before, after } = getDateParamsFromQuery( props.query );
+		return {
+			period,
+			compare,
+			before,
+			after,
+			focusedInput: 'startDate',
+			afterText: after ? after.format( shortDateFormat ) : '',
+			beforeText: before ? before.format( shortDateFormat ) : '',
+			afterError: null,
+			beforeError: null,
+		};
 	}
 
-	select( update ) {
+	update( update ) {
 		this.setState( update );
 	}
 
@@ -78,11 +91,26 @@ class DatePicker extends Component {
 		this.setState( {
 			after: null,
 			before: null,
+			focusedInput: 'startDate',
+			afterText: '',
+			beforeText: '',
+			afterError: null,
+			beforeError: null,
 		} );
 	}
 
 	render() {
-		const { period, compare, after, before } = this.state;
+		const {
+			period,
+			compare,
+			after,
+			before,
+			focusedInput,
+			afterText,
+			beforeText,
+			afterError,
+			beforeError,
+		} = this.state;
 		return (
 			<div className="woocommerce-date-picker">
 				<p>{ __( 'Date Range', 'wc-admin' ) }:</p>
@@ -103,11 +131,17 @@ class DatePicker extends Component {
 							compare={ compare }
 							after={ after }
 							before={ before }
-							onSelect={ this.select }
+							onUpdate={ this.update }
 							onClose={ onClose }
 							getUpdatePath={ this.getUpdatePath }
 							isValidSelection={ this.isValidSelection }
 							resetCustomValues={ this.resetCustomValues }
+							focusedInput={ focusedInput }
+							afterText={ afterText }
+							beforeText={ beforeText }
+							afterError={ afterError }
+							beforeError={ beforeError }
+							shortDateFormat={ shortDateFormat }
 						/>
 					) }
 				/>

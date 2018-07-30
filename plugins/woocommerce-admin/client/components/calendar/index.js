@@ -18,30 +18,18 @@ import 'react-dates/lib/css/_datepicker.css';
 /**
  * Internal dependencies
  */
-import { toMoment } from 'lib/date';
+import { validateDateInputForRange } from 'lib/date';
 import DateInput from './input';
 import phrases from './phrases';
 import './style.scss';
 
-const START_DATE = 'startDate';
-
 // 782px is the width designated by Gutenberg's `</ Popover>` component.
 // * https://github.com/WordPress/gutenberg/blob/c8f8806d4465a83c1a0bc62d5c61377b56fa7214/components/popover/utils.js#L6
 const isMobileViewport = () => window.innerWidth < 782;
-const shortDateFormat = __( 'MM/DD/YYYY', 'wc-admin' );
 
 class DateRange extends Component {
 	constructor( props ) {
 		super( props );
-
-		const { after, before } = props;
-		this.state = {
-			focusedInput: START_DATE,
-			afterText: after ? after.format( shortDateFormat ) : '',
-			beforeText: before ? before.format( shortDateFormat ) : '',
-			afterError: null,
-			beforeError: null,
-		};
 
 		this.onDatesChange = this.onDatesChange.bind( this );
 		this.onFocusChange = this.onFocusChange.bind( this );
@@ -49,83 +37,38 @@ class DateRange extends Component {
 		this.getOutsideRange = this.getOutsideRange.bind( this );
 	}
 
-	componentDidUpdate( prevProps ) {
-		const { after, before } = this.props;
-		/**
-		 * Check if props have been reset. If so, reset internal state. Disabling
-		 * eslint here because this setState cannot cause infinte loop
-		 */
-		/* eslint-disable react/no-did-update-set-state */
-		if ( ( prevProps.before || prevProps.after ) && ( null === after && null === before ) ) {
-			this.setState( {
-				focusedInput: START_DATE,
-				afterText: '',
-				beforeText: '',
-				afterError: null,
-				beforeError: null,
-			} );
-		}
-		/* eslint-enable react/no-did-update-set-state */
-	}
-
 	onDatesChange( { startDate, endDate } ) {
-		this.setState( {
+		const { onUpdate, shortDateFormat } = this.props;
+		onUpdate( {
+			after: startDate,
+			before: endDate,
 			afterText: startDate ? startDate.format( shortDateFormat ) : '',
 			beforeText: endDate ? endDate.format( shortDateFormat ) : '',
 			afterError: null,
 			beforeError: null,
 		} );
-		this.props.onSelect( {
-			after: startDate,
-			before: endDate,
-		} );
 	}
 
 	onFocusChange( focusedInput ) {
-		this.setState( {
-			focusedInput: ! focusedInput ? START_DATE : focusedInput,
+		this.props.onUpdate( {
+			focusedInput: ! focusedInput ? 'startDate' : focusedInput,
 		} );
-	}
-
-	getValidatedDate( input, value ) {
-		const { after, before } = this.props;
-		const date = toMoment( shortDateFormat, value );
-		if ( ! date ) {
-			return {
-				date: null,
-				error: __( 'Invalid date', 'wc-admin' ),
-			};
-		}
-		if ( moment().isBefore( date, 'day' ) ) {
-			return {
-				date: null,
-				error: __( 'Select a date in the past', 'wc-admin' ),
-			};
-		}
-		if ( 'after' === input && before && date.isAfter( before, 'day' ) ) {
-			return {
-				date: null,
-				error: __( 'Start date must be before end date', 'wc-admin' ),
-			};
-		}
-		if ( 'before' === input && after && date.isBefore( after, 'day' ) ) {
-			return {
-				date: null,
-				error: __( 'Start date must be before end date', 'wc-admin' ),
-			};
-		}
-		return { date };
 	}
 
 	onInputChange( input, event ) {
 		const value = event.target.value;
-		const { date, error } = this.getValidatedDate( input, value );
-		this.setState( {
+		const { after, before, shortDateFormat } = this.props;
+		const { date, error } = validateDateInputForRange(
+			input,
+			value,
+			before,
+			after,
+			shortDateFormat
+		);
+		this.props.onUpdate( {
+			[ input ]: date,
 			[ input + 'Text' ]: value,
 			[ input + 'Error' ]: value.length > 0 ? error : null,
-		} );
-		this.props.onSelect( {
-			[ input ]: date,
 		} );
 	}
 
@@ -156,8 +99,16 @@ class DateRange extends Component {
 	}
 
 	render() {
-		const { focusedInput, afterText, beforeText, afterError, beforeError } = this.state;
-		const { after, before } = this.props;
+		const {
+			after,
+			before,
+			focusedInput,
+			afterText,
+			beforeText,
+			afterError,
+			beforeError,
+			shortDateFormat,
+		} = this.props;
 		const isOutsideRange = this.getOutsideRange();
 		const isMobile = isMobileViewport();
 		const isDoubleCalendar = isMobile && window.innerWidth > 624;
@@ -224,11 +175,17 @@ class DateRange extends Component {
 DateRange.propTypes = {
 	after: PropTypes.object,
 	before: PropTypes.object,
-	onSelect: PropTypes.func.isRequired,
+	onUpdate: PropTypes.func.isRequired,
 	inValidDays: PropTypes.oneOfType( [
 		PropTypes.oneOf( [ 'past', 'future', 'none' ] ),
 		PropTypes.func,
 	] ),
+	focusedInput: PropTypes.string,
+	afterText: PropTypes.string,
+	beforeText: PropTypes.string,
+	afterError: PropTypes.string,
+	beforeError: PropTypes.string,
+	shortDateFormat: PropTypes.string.isRequired,
 };
 
 export { DateRange };
