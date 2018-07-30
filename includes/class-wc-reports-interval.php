@@ -25,20 +25,20 @@ class WC_Reports_Interval {
 
 		if ( 1 === $first_day_of_week ) {
 			// Week begins on Monday, ISO 8601.
-			$week_format = "DATE_FORMAT(hour, '%x-%v')";
+			$week_format = "DATE_FORMAT(start_time, '%x-%v')";
 		} else {
-			// Week begins on day other than specified by ISO 8601.
-			$week_format = "CONCAT(YEAR(hour), '-', LPAD( FLOOR( ( DAYOFYEAR(hour) + ( ( DATE_FORMAT(MAKEDATE(YEAR(hour),1), '%w') - $first_day_of_week + 7 ) % 7 ) - 1 ) / 7  ) + 1 , 2, '0'))";
+			// Week begins on day other than specified by ISO 8601, needs to be in sync with function simple_week_number.
+			$week_format = "CONCAT(YEAR(start_time), '-', LPAD( FLOOR( ( DAYOFYEAR(start_time) + ( ( DATE_FORMAT(MAKEDATE(YEAR(start_time),1), '%w') - $first_day_of_week + 7 ) % 7 ) - 1 ) / 7  ) + 1 , 2, '0'))";
 
 		}
 
 		$mysql_date_format_mapping = array(
-			'hour'    => "DATE_FORMAT(hour, '%Y-%m-%d %k')",
-			'day'     => "DATE_FORMAT(hour, '%Y-%m-%d')",
+			'hour'    => "DATE_FORMAT(start_time, '%Y-%m-%d %k')",
+			'day'     => "DATE_FORMAT(start_time, '%Y-%m-%d')",
 			'week'    => $week_format,
-			'month'   => "DATE_FORMAT(hour, '%Y-%m')",
-			'quarter' => "CONCAT(YEAR(hour), '-', QUARTER(hour))",
-			'year'    => 'YEAR(hour)',
+			'month'   => "DATE_FORMAT(start_time, '%Y-%m')",
+			'quarter' => "CONCAT(YEAR(start_time), '-', QUARTER(start_time))",
+			'year'    => 'YEAR(start_time)',
 
 		);
 
@@ -184,7 +184,7 @@ class WC_Reports_Interval {
 		$initial_week_no = WC_Reports_Interval::week_number( $datetime, $first_day_of_week );
 
 		do {
-			$datetime = WC_Reports_Interval::next_day_start( $datetime );
+			$datetime        = WC_Reports_Interval::next_day_start( $datetime );
 			$current_week_no = WC_Reports_Interval::week_number( $datetime, $first_day_of_week );
 		} while ( $current_week_no === $initial_week_no );
 
@@ -204,7 +204,7 @@ class WC_Reports_Interval {
 			$month = 1;
 			$year++;
 		}
-		$day   = '01';
+		$day = '01';
 		return new DateTime( "$year-$month-$day 00:00:00" );
 	}
 
@@ -221,7 +221,7 @@ class WC_Reports_Interval {
 			$month = $month - 12;
 			$year++;
 		}
-		$day   = '01';
+		$day = '01';
 		return new DateTime( "$year-$month-$day 00:00:00" );
 	}
 

@@ -39,13 +39,6 @@ class WC_Reports_Data_Store {
 	 */
 	protected $table_name = '';
 
-	/**
-	 * Name of the report.
-	 *
-	 * @var string
-	 */
-	protected $report_name = '';
-
 	// TODO: this does not really belong here, maybe factor out the comparison as separate class.
 	/**
 	 * Order by property, used in the cmp function.
@@ -62,22 +55,13 @@ class WC_Reports_Data_Store {
 	private $order = '';
 
 	/**
-	 * Returnss name of this report.
-	 *
-	 * @return int
-	 */
-	protected function get_report_name() {
-		return $this->report_name;
-	}
-
-	/**
 	 * Returns string to be used as cache key for the data.
 	 *
 	 * @param array $params Query parameters.
 	 * @return string
 	 */
 	protected function get_cache_key( $params ) {
-		return 'woocommerce_' . $this->get_report_name() . '_' . md5( implode( '-', $params ) . date( 'Y-m-d_H:i' ) );
+		return 'woocommerce_' . $this->table_name . '_' . md5( wp_json_encode( $params ) . date( 'Y-m-d_H' ) );
 	}
 
 	/**
@@ -231,13 +215,13 @@ class WC_Reports_Data_Store {
 
 		if ( isset( $query_args['before'] ) && '' !== $query_args['before'] ) {
 			$hour                          = $query_args['before'];
-			$totals_query['where_clause'] .= " AND hour <= '$hour'";
+			$totals_query['where_clause'] .= " AND start_time <= '$hour'";
 
 		}
 
 		if ( isset( $query_args['after'] ) && '' !== $query_args['after'] ) {
 			$hour                          = $query_args['after'];
-			$totals_query['where_clause'] .= " AND hour >= '$hour'";
+			$totals_query['where_clause'] .= " AND start_time >= '$hour'";
 		}
 
 		return $totals_query;
@@ -255,13 +239,13 @@ class WC_Reports_Data_Store {
 
 		if ( isset( $query_args['before'] ) && '' !== $query_args['before'] ) {
 			$hour                             = $query_args['before'];
-			$intervals_query['where_clause'] .= " AND hour <= '$hour'";
+			$intervals_query['where_clause'] .= " AND start_time <= '$hour'";
 
 		}
 
 		if ( isset( $query_args['after'] ) && '' !== $query_args['after'] ) {
 			$hour                             = $query_args['after'];
-			$intervals_query['where_clause'] .= " AND hour >= '$hour'";
+			$intervals_query['where_clause'] .= " AND start_time >= '$hour'";
 		}
 
 		if ( isset( $query_args['interval'] ) && '' !== $query_args['interval'] ) {
