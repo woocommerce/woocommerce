@@ -26,25 +26,12 @@ function keyListener( methodToCall, event ) {
 class Pagination extends Component {
 	constructor( props ) {
 		super( props );
-		this.state = {
-			pageInputValue: props.page,
-		};
 
 		this.previousPage = this.previousPage.bind( this );
 		this.nextPage = this.nextPage.bind( this );
-		this.selectPage = this.selectPage.bind( this );
 		this.selectPageListener = keyListener.bind( this, 'selectPage' );
 		this.onPageValueChange = this.onPageValueChange.bind( this );
 		this.perPageChange = this.perPageChange.bind( this );
-	}
-
-	static getDerivedStateFromProps( props, state ) {
-		if ( props.page !== state.pageInputValue ) {
-			return {
-				pageInputValue: props.page,
-			};
-		}
-		return null;
 	}
 
 	previousPage( event ) {
@@ -65,15 +52,6 @@ class Pagination extends Component {
 		onPageChange( page + 1 );
 	}
 
-	selectPage( event ) {
-		event.stopPropagation();
-		const { onPageChange } = this.props;
-		if ( this.state.pageInputValue < 1 || this.state.pageInputValue > this.pageCount ) {
-			return;
-		}
-		onPageChange( parseInt( this.state.pageInputValue ) );
-	}
-
 	perPageChange( perPage ) {
 		const { onPerPageChange, onPageChange, total, page } = this.props;
 		onPerPageChange( parseInt( perPage ) );
@@ -84,7 +62,8 @@ class Pagination extends Component {
 	}
 
 	onPageValueChange( event ) {
-		this.setState( { pageInputValue: event.target.value } );
+		const { onPageChange } = this.props;
+		onPageChange( parseInt( event.target.value ) );
 	}
 
 	renderPageArrows() {
@@ -134,7 +113,8 @@ class Pagination extends Component {
 	}
 
 	renderPagePicker() {
-		const isError = this.state.pageInputValue < 1 || this.state.pageInputValue > this.pageCount;
+		const { page } = this.props;
+		const isError = page < 1 || page > this.pageCount;
 		const inputClass = classNames( 'woocommerce-pagination__page-picker-input', {
 			'has-error': isError,
 		} );
@@ -151,8 +131,7 @@ class Pagination extends Component {
 						type="number"
 						onChange={ this.onPageValueChange }
 						onKeyDown={ this.selectPageListener }
-						onBlur={ this.selectPage }
-						value={ this.state.pageInputValue }
+						value={ page }
 						min={ 1 }
 						max={ this.pageCount }
 					/>
