@@ -54,6 +54,14 @@ const webpackConfig = {
 					use: [
 						'css-loader',
 						{
+							loader: 'postcss-loader', // postcss loader so we can use autoprefixer
+							options: {
+								config: {
+									path: 'postcss.config.js',
+								},
+							},
+						},
+						{
 							loader: 'sass-loader',
 							query: {
 								includePaths: [ 'client/stylesheets' ],

@@ -26,12 +26,14 @@
     "test:watch": "npm run test -- --watch"
   },
   "devDependencies": {
+    "autoprefixer": "9.0.1",
     "@babel/core": "^7.0.0-beta.54",
     "@babel/plugin-transform-async-to-generator": "^7.0.0-beta.54",
     "@wordpress/api-request": "^1.0.0-alpha.3",
     "@wordpress/babel-plugin-import-jsx-pragma": "^1.0.1",
     "@wordpress/babel-plugin-makepot": "^2.0.1",
     "@wordpress/babel-preset-default": "^2.0.2",
+    "@wordpress/browserslist-config": "^2.2.0",
     "@wordpress/components": "^1.0.1",
     "@wordpress/date": "^1.0.1",
     "@wordpress/element": "^1.0.1",
@@ -61,6 +63,7 @@
     "history": "^4.7.2",
     "husky": "^0.14.3",
     "node-sass": "^4.9.0",
+    "postcss-loader": "^2.1.6",
     "prettier": "github:automattic/calypso-prettier#c56b4251",
     "prop-types": "^15.6.1",
     "react": "^16.3.2",
