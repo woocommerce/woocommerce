@@ -481,9 +481,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * Updates a comment.
-	 *
-	 * @since 4.7.0
+	 * Updates a review.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response Response object on success, or error object on failure.
@@ -566,6 +564,75 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		$response = $this->prepare_item_for_response( $review, $request );
 
 		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * Deletes a review.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response Response object on success, or error object on failure.
+	 */
+	public function delete_item( $request ) {
+		$review = $this->get_review( $request['id'] );
+		if ( is_wp_error( $review ) ) {
+			return $review;
+		}
+
+		$force = isset( $request['force'] ) ? (bool) $request['force'] : false;
+
+		/**
+		 * Filters whether a review can be trashed.
+		 *
+		 * Return false to disable trash support for the post.
+		 *
+		 * @since 3.5.0
+		 * @param bool       $supports_trash Whether the post type support trashing.
+		 * @param WP_Comment $review         The review object being considered for trashing support.
+		 */
+		$supports_trash = apply_filters( 'woocommerce_rest_product_review_trashable', ( EMPTY_TRASH_DAYS > 0 ), $review );
+
+		$request->set_param( 'context', 'edit' );
+
+		if ( $force ) {
+			$previous = $this->prepare_item_for_response( $review, $request );
+			$result   = wp_delete_comment( $review->comment_ID, true );
+			$response = new WP_REST_Response();
+			$response->set_data(
+				array(
+					'deleted'  => true,
+					'previous' => $previous->get_data(),
+				)
+			);
+		} else {
+			// If this type doesn't support trashing, error out.
+			if ( ! $supports_trash ) {
+				/* translators: %s: force=true */
+				return new WP_Error( 'woocommerce_rest_trash_not_supported', sprintf( __( "The object does not support trashing. Set '%s' to delete.", 'woocommerce' ), 'force=true' ), array( 'status' => 501 ) );
+			}
+
+			if ( 'trash' === $review->comment_approved ) {
+				return new WP_Error( 'woocommerce_rest_already_trashed', __( 'The object has already been trashed.', 'woocommerce' ), array( 'status' => 410 ) );
+			}
+
+			$result   = wp_trash_comment( $review->comment_ID );
+			$review   = get_comment( $review->comment_ID );
+			$response = $this->prepare_item_for_response( $review, $request );
+		}
+
+		if ( ! $result ) {
+			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'The object cannot be deleted.', 'woocommerce' ), array( 'status' => 500 ) );
+		}
+
+		/**
+		 * Fires after a review is deleted via the REST API.
+		 *
+		 * @param WP_Comment       $review   The deleted review data.
+		 * @param WP_REST_Response $response The response returned from the API.
+		 * @param WP_REST_Request  $request  The request sent to the API.
+		 */
+		do_action( 'woocommerce_rest_delete_review', $review, $response, $request );
+
+		return $response;
 	}
 
 	/**
@@ -922,7 +989,6 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		 * `wc_rest_review_query` filter to set WP_Comment_Query parameters.
 		 *
 		 * @since 3.5.0
-		 *
 		 * @param array $params JSON Schema-formatted collection parameters.
 		 */
 		return apply_filters( 'woocommerce_rest_product_review_collection_params', $params );
