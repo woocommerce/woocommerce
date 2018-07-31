@@ -469,17 +469,103 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
-		$id     = (int) $request['id'];
-		$review = get_comment( $id );
-
-		if ( ! $review ) {
-			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), array( 'status' => 404 ) );
+		$review = $this->get_review( $request['id'] );
+		if ( is_wp_error( $review ) ) {
+			return $review;
 		}
 
 		$data     = $this->prepare_item_for_response( $review, $request );
 		$response = rest_ensure_response( $data );
 
 		return $response;
+	}
+
+	/**
+	 * Updates a comment.
+	 *
+	 * @since 4.7.0
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response Response object on success, or error object on failure.
+	 */
+	public function update_item( $request ) {
+		$review = $this->get_review( $request['id'] );
+		if ( is_wp_error( $review ) ) {
+			return $review;
+		}
+
+		$id = (int) $review->comment_ID;
+
+		if ( isset( $request['type'] ) && 'review' !== get_comment_type( $id ) ) {
+			return new WP_Error( 'woocommerce_rest_review_invalid_type', __( 'Sorry, you are not allowed to change the comment type.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$prepared_args = $this->prepare_item_for_database( $request );
+		if ( is_wp_error( $prepared_args ) ) {
+			return $prepared_args;
+		}
+
+		if ( ! empty( $prepared_args['comment_post_ID'] ) ) {
+			if ( 'product' !== get_post_type( (int) $prepared_args['comment_post_ID'] ) ) {
+				return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			}
+		}
+
+		if ( empty( $prepared_args ) && isset( $request['status'] ) ) {
+			// Only the comment status is being changed.
+			$change = $this->handle_status_param( $request['status'], $id );
+
+			if ( ! $change ) {
+				return new WP_Error( 'woocommerce_rest_review_failed_edit', __( 'Updating review status failed.', 'woocommerce' ), array( 'status' => 500 ) );
+			}
+		} elseif ( ! empty( $prepared_args ) ) {
+			if ( is_wp_error( $prepared_args ) ) {
+				return $prepared_args;
+			}
+
+			if ( isset( $prepared_args['comment_content'] ) && empty( $prepared_args['comment_content'] ) ) {
+				return new WP_Error( 'woocommerce_rest_review_content_invalid', __( 'Invalid revivew content.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
+
+			$prepared_args['comment_ID'] = $id;
+
+			$check_comment_lengths = wp_check_comment_data_max_lengths( $prepared_args );
+			if ( is_wp_error( $check_comment_lengths ) ) {
+				$error_code = str_replace( array( 'comment_author', 'comment_content' ), array( 'reviewer', 'review_content' ), $check_comment_lengths->get_error_code() );
+				return new WP_Error( 'woocommerce_rest_' . $error_code, __( 'Product review field exceeds maximum length allowed.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
+
+			$updated = wp_update_comment( wp_slash( (array) $prepared_args ) );
+
+			if ( false === $updated ) {
+				return new WP_Error( 'woocommerce_rest_comment_failed_edit', __( 'Updating review failed.', 'woocommerce' ), array( 'status' => 500 ) );
+			}
+
+			if ( isset( $request['status'] ) ) {
+				$this->handle_status_param( $request['status'], $id );
+			}
+		}
+
+		if ( ! empty( $request['rating'] ) ) {
+			update_comment_meta( $id, 'rating', $request['rating'] );
+		}
+
+		$review = get_comment( $id );
+
+		/** This action is documented in includes/api/class-wc-rest-product-reviews-controller.php */
+		do_action( 'woocommerce_rest_insert_product_review', $review, $request, false );
+
+		$fields_update = $this->update_additional_fields_for_object( $review, $request );
+
+		if ( is_wp_error( $fields_update ) ) {
+			return $fields_update;
+		}
+
+		$request->set_param( 'context', 'edit' );
+
+		$response = $this->prepare_item_for_response( $review, $request );
+
+		return rest_ensure_response( $response );
 	}
 
 	/**
@@ -843,6 +929,37 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 	}
 
 	/**
+	 * Get the reivew, if the ID is valid.
+	 *
+	 * @since 3.5.0
+	 * @param int $id Supplied ID.
+	 * @return WP_Comment|WP_Error Comment object if ID is valid, WP_Error otherwise.
+	 */
+	protected function get_review( $id ) {
+		$id    = (int) $id;
+		$error = new WP_Error( 'woocommerce_rest_review_invalid_id', __( 'Invalid review ID.', 'woocommerce' ), array( 'status' => 404 ) );
+
+		if ( 0 >= $id ) {
+			return $error;
+		}
+
+		$review = get_comment( $id );
+		if ( empty( $review ) ) {
+			return $error;
+		}
+
+		if ( ! empty( $review->comment_post_ID ) ) {
+			$post = get_post( (int) $review->comment_post_ID );
+
+			if ( 'product' !== get_post_type( (int) $review->comment_post_ID ) ) {
+				return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			}
+		}
+
+		return $review;
+	}
+
+	/**
 	 * Prepends internal property prefix to query parameters to match our response fields.
 	 *
 	 * @since 3.5.0
@@ -901,12 +1018,12 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 	 * Sets the comment_status of a given review object when creating or updating a review.
 	 *
 	 * @since 3.5.0
-	 * @param string|int $new_status New comment status.
-	 * @param int        $comment_id Comment ID.
+	 * @param string|int $new_status New review status.
+	 * @param int        $id         Review ID.
 	 * @return bool Whether the status was changed.
 	 */
-	protected function handle_status_param( $new_status, $comment_id ) {
-		$old_status = wp_get_comment_status( $comment_id );
+	protected function handle_status_param( $new_status, $id ) {
+		$old_status = wp_get_comment_status( $id );
 
 		if ( $new_status === $old_status ) {
 			return false;
@@ -916,23 +1033,23 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 			case 'approved':
 			case 'approve':
 			case '1':
-				$changed = wp_set_comment_status( $comment_id, 'approve' );
+				$changed = wp_set_comment_status( $id, 'approve' );
 				break;
 			case 'hold':
 			case '0':
-				$changed = wp_set_comment_status( $comment_id, 'hold' );
+				$changed = wp_set_comment_status( $id, 'hold' );
 				break;
 			case 'spam':
-				$changed = wp_spam_comment( $comment_id );
+				$changed = wp_spam_comment( $id );
 				break;
 			case 'unspam':
-				$changed = wp_unspam_comment( $comment_id );
+				$changed = wp_unspam_comment( $id );
 				break;
 			case 'trash':
-				$changed = wp_trash_comment( $comment_id );
+				$changed = wp_trash_comment( $id );
 				break;
 			case 'untrash':
-				$changed = wp_untrash_comment( $comment_id );
+				$changed = wp_untrash_comment( $id );
 				break;
 			default:
 				$changed = false;
