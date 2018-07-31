@@ -8,20 +8,12 @@ import { Component } from '@wordpress/element';
 import { IconButton, SelectControl } from '@wordpress/components';
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
-import { noop, uniqueId } from 'lodash';
+import { isFinite, noop, uniqueId } from 'lodash';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-
-function keyListener( methodToCall, event ) {
-	switch ( event.key ) {
-		case 'Enter':
-			this[ methodToCall ]( event );
-			break;
-	}
-}
 
 class Pagination extends Component {
 	constructor( props ) {
@@ -29,9 +21,9 @@ class Pagination extends Component {
 
 		this.previousPage = this.previousPage.bind( this );
 		this.nextPage = this.nextPage.bind( this );
-		this.selectPageListener = keyListener.bind( this, 'selectPage' );
 		this.onPageValueChange = this.onPageValueChange.bind( this );
 		this.perPageChange = this.perPageChange.bind( this );
+		this.selectInputValue = this.selectInputValue.bind( this );
 	}
 
 	previousPage( event ) {
@@ -63,7 +55,15 @@ class Pagination extends Component {
 
 	onPageValueChange( event ) {
 		const { onPageChange } = this.props;
-		onPageChange( parseInt( event.target.value ) );
+		const newPage = parseInt( event.target.value, 10 );
+
+		if ( isFinite( newPage ) ) {
+			onPageChange( newPage );
+		}
+	}
+
+	selectInputValue( event ) {
+		event.target.select();
 	}
 
 	renderPageArrows() {
@@ -129,8 +129,8 @@ class Pagination extends Component {
 						className={ inputClass }
 						aria-invalid={ isError }
 						type="number"
+						onClick={ this.selectInputValue }
 						onChange={ this.onPageValueChange }
-						onKeyDown={ this.selectPageListener }
 						value={ page }
 						min={ 1 }
 						max={ this.pageCount }
