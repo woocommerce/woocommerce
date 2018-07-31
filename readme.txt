@@ -172,6 +172,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Check billing email is posted before using in WC_Cart::check_customer_coupons. #20180
 * Fix - Shipping postcode formatting when only posting a billing address. #20330
 * Fix - Correctly show/hide save card checkbox on tokenization form. #20506
+* Fix/Tweak - Fire `woocommerce_grant_product_download_access` hook after the download has its ID set. #20905
 * Tweak - Show empty terms in admin product category filter dropdown. #20324
 * Tweak - Don't force default token gateway active by default. #20125
 * Tweak - Move notice output to hooked in functions. #19794
