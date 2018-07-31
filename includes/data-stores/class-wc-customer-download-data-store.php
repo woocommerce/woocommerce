@@ -61,12 +61,12 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 			apply_filters( 'woocommerce_downloadable_file_permission_format', $format, $data )
 		);
 
-		do_action( 'woocommerce_grant_product_download_access', $data );
-
 		if ( $result ) {
 			$download->set_id( $wpdb->insert_id );
 			$download->apply_changes();
 		}
+
+		do_action( 'woocommerce_grant_product_download_access', $data );
 	}
 
 	/**
