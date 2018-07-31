@@ -29,6 +29,7 @@ class WC_Tests_API_Product_Reviews extends WC_REST_Unit_Test_Case {
 		$routes = $this->server->get_routes();
 		$this->assertArrayHasKey( '/wc/v3/products/reviews', $routes );
 		$this->assertArrayHasKey( '/wc/v3/products/reviews/(?P<id>[\d]+)', $routes );
+		$this->assertArrayHasKey( '/wc/v3/products/reviews/batch', $routes );
 	}
 
 	/**
