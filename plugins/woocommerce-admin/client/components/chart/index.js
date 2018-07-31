@@ -163,7 +163,7 @@ class WidgetCharts extends Component {
 		const margin = {
 			bottom: 50,
 			left: 50,
-			right: 20,
+			right: 0,
 			top: 0,
 		};
 		return (
@@ -202,8 +202,8 @@ class WidgetCharts extends Component {
 								height={ 300 }
 								margin={ margin }
 								orderedKeys={ this.state.orderedKeys }
-								type={ 'line' }
-								width={ chartDirection === 'row' ? 722 : 1042 }
+								type={ 'bar' }
+								width={ chartDirection === 'row' ? 762 : 1082 }
 							/>
 						</div>
 						{ this.state.bodyWidth < WIDE_BREAKPOINT && (

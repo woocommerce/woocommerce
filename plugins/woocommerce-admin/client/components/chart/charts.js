@@ -150,7 +150,10 @@ class D3Chart extends Component {
 		}
 
 		return (
-			<div className={ classNames( 'woocommerce-chart__container', this.props.className ) }>
+			<div
+				className={ classNames( 'woocommerce-chart__container', this.props.className ) }
+				style={ { maxHeight: this.props.height } }
+			>
 				<D3Base
 					className={ classNames( this.props.className ) }
 					data={ this.state.allData }
