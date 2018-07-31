@@ -868,7 +868,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			"{$wpdb->prefix}woocommerce_shipping_zones",
 			"{$wpdb->prefix}woocommerce_tax_rate_locations",
 			"{$wpdb->prefix}woocommerce_tax_rates",
-			"{$wpdb->prefix}wc_order_product_lookup",
+			"{$wpdb->prefix}wc_order_stats",
 			"{$wpdb->prefix}wc_order_product_lookup",
 		);
 
