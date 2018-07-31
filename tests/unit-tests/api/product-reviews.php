@@ -3,10 +3,10 @@
  * Tests for the product reviews REST API.
  *
  * @package WooCommerce\Tests\API
- * @since 3.0.0
+ * @since 3.5.0
  */
 
-class Product_Reviews extends WC_REST_Unit_Test_Case {
+class WC_Tests_API_Product_Reviews extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Setup our test server, endpoints, and user info.
