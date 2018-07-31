@@ -114,6 +114,18 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace, '/' . $this->rest_base . '/batch', array(
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'batch_items' ),
+					'permission_callback' => array( $this, 'batch_items_permissions_check' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+				),
+				'schema' => array( $this, 'get_public_batch_schema' ),
+			)
+		);
 	}
 
 	/**
@@ -190,6 +202,20 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 
 		if ( $review && ! wc_rest_check_product_reviews_permissions( 'delete', $review->comment_ID ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Check if a given request has access batch create, update and delete items.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return boolean|WP_Error
+	 */
+	public function batch_items_permissions_check( $request ) {
+		if ( ! wc_rest_check_product_reviews_permissions( 'create' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -379,6 +405,8 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 			$prepared_review['comment_agent'] = $request['author_user_agent'];
 		} elseif ( $request->get_header( 'user_agent' ) ) {
 			$prepared_review['comment_agent'] = $request->get_header( 'user_agent' );
+		} else {
+			$prepared_review['comment_agent'] = '';
 		}
 
 		$check_comment_lengths = wp_check_comment_data_max_lengths( $prepared_review );
@@ -821,6 +849,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 				'status'           => array(
 					'description' => __( 'Status of the review', 'woocommerce' ),
 					'type'        => 'string',
+					'default'     => 'approved',
 					'enum'        => array( 'approved', 'hold', 'spam', 'unspam', 'trash', 'untrash' ),
 					'context'     => array( 'view', 'edit' ),
 				),
