@@ -86,10 +86,14 @@ interface WC_Queue_Interface {
 	public function cancel( $hook, $args = array(), $group = '' );
 
 	/**
+	 * Get the date and time for the next scheduled occurence of an action with a given hook
+	 * (an optionally that matches certain args and group), if any.
+	 *
 	 * @param string $hook
 	 * @param array $args
 	 * @param string $group
 	 * @return int|bool The timestamp for the next occurrence, or false if nothing was found
+	 * @return WC_DateTime|null The date and time for the next occurrence, or null if there is no pending, scheduled action for the given hook
 	 */
 	public function get_next( $hook, $args = null, $group = '' );
 
