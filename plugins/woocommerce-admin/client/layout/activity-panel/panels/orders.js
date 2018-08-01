@@ -3,8 +3,7 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { Button, withAPIData } from '@wordpress/components';
-import { compose } from '@wordpress/compose';
+import { Button } from '@wordpress/components';
 import { Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { noop } from 'lodash';
@@ -112,8 +111,4 @@ OrdersPanel.propTypes = {
 	orders: PropTypes.object.isRequired,
 };
 
-export default compose( [
-	withAPIData( () => ( {
-		orders: '/wc/v3/orders',
-	} ) ),
-] )( OrdersPanel );
+export default OrdersPanel;
