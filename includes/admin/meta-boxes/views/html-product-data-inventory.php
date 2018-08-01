@@ -94,7 +94,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			array(
 				'id'            => '_stock_status',
 				'value'         => $product_object->get_stock_status( 'edit' ),
-				'wrapper_class' => 'stock_status_field hide_if_variable hide_if_external',
+				'wrapper_class' => 'stock_status_field hide_if_variable hide_if_external hide_if_grouped',
 				'label'         => __( 'Stock status', 'woocommerce' ),
 				'options'       => wc_get_product_stock_status_options(),
 				'desc_tip'      => true,
