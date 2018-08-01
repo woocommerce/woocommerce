@@ -3,9 +3,8 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { ToggleControl, withAPIData } from '@wordpress/components';
+import { ToggleControl } from '@wordpress/components';
 import { Component } from '@wordpress/element';
-import { compose } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -63,9 +62,8 @@ class StorePerformance extends Component {
 	}
 
 	render() {
-		const { orders, products } = this.props;
-		const totalOrders = ( orders.data && orders.data.length ) || 0;
-		const totalProducts = ( products.data && products.data.length ) || 0;
+		const totalOrders = 10;
+		const totalProducts = 1000;
 		const { showCustomers, showProducts, showOrders } = this.state;
 
 		return (
@@ -108,9 +106,4 @@ class StorePerformance extends Component {
 	}
 }
 
-export default compose( [
-	withAPIData( () => ( {
-		orders: '/wc/v3/orders?status=processing',
-		products: '/wc/v3/products',
-	} ) ),
-] )( StorePerformance );
+export default StorePerformance;

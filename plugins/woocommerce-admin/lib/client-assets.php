@@ -35,7 +35,6 @@ function wc_admin_register_script() {
 	wp_add_inline_script( WC_ADMIN_APP, $content, 'before' );
 
 	wp_enqueue_script( 'wp-api' );
-	gutenberg_extend_wp_api_backbone_client();
 
 	// Settings and variables can be passed here for access in the app
 	$settings = array(
@@ -48,6 +47,7 @@ function wc_admin_register_script() {
 			'dow' => get_option( 'start_of_week', 0 ),
 		),
 		'orderStatuses'      => wc_get_order_statuses(),
+		'siteTitle'          => get_bloginfo( 'name' ),
 	);
 
 	wp_add_inline_script(
