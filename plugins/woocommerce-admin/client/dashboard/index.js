@@ -12,7 +12,7 @@ import './style.scss';
 import Header from 'layout/header';
 import StorePerformance from './store-performance';
 import TopSellingProducts from './top-selling-products';
-import Chart from 'components/chart';
+import Chart from 'components/chart/example';
 import Card from 'components/card';
 
 export default class Dashboard extends Component {
