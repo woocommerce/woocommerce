@@ -72,6 +72,8 @@ class WC_Shortcodes {
 		call_user_func( $function, $atts );
 		echo empty( $wrapper['after'] ) ? '</div>' : $wrapper['after'];
 		// @codingStandardsIgnoreEnd
+		//make sure the wrapper wraps around navigation links
+		echo '<div class="clearfix"></div>';
 
 		return ob_get_clean();
 	}
