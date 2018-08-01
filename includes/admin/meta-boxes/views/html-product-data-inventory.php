@@ -1,4 +1,10 @@
 <?php
+/**
+ * Displays the inventory tab in the product data meta box.
+ *
+ * @package WooCommerce\Admin
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
