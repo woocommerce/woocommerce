@@ -4,34 +4,31 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
-import { get, map } from 'lodash';
+import { format as formatDate } from '@wordpress/date';
+import { map, noop } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
  * Internal dependencies
  */
-import Card from 'components/card';
 import DatePicker from 'components/date-picker';
-import { formatCurrency } from 'lib/currency';
+import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
 import { getAdminLink, updateQueryString } from 'lib/nav-utils';
 import { getReportData } from 'lib/swagger';
 import Header from 'layout/header';
 import { SummaryList, SummaryNumber } from 'components/summary';
-import Table from 'components/table';
-import Pagination from 'components/pagination';
+import { TableCard } from 'components/table';
+
+// Mock data until we fetch from an API
+import rawData from './mock-data';
 
 class RevenueReport extends Component {
 	constructor() {
 		super();
-		this.onPageChange = this.onPageChange.bind( this );
-		this.onPerPageChange = this.onPerPageChange.bind( this );
+		this.onQueryChange = this.onQueryChange.bind( this );
 
 		// TODO remove this when we implement real endpoints
 		this.state = { stats: {} };
-	}
-
-	onPageChange( page ) {
-		updateQueryString( { page } );
 	}
 
 	componentDidMount() {
@@ -48,17 +45,37 @@ class RevenueReport extends Component {
 				return;
 			}
 
-			response.json().then( data => {
-				this.setState( { stats: data } );
+			response.json().then( () => {
+				// Ignore data, just use our fake data once we have a response
+				this.setState( { stats: rawData } );
 			} );
 		} );
 	}
 
-	onPerPageChange( perPage ) {
-		updateQueryString( { per_page: perPage } );
+	/**
+	 * This function returns an event handler for the given `param`
+	 * @param {string} param The parameter in the querystring which should be updated (ex `page`, `per_page`)
+	 * @return {function} A callback which will update `param` to the passed value when called.
+	 */
+	onQueryChange( param ) {
+		return value => updateQueryString( { [ param ]: value } );
 	}
 
-	getRowsContent( data ) {
+	getHeadersContent() {
+		return [
+			__( 'Select', 'wc-admin' ),
+			__( 'Date', 'wc-admin' ),
+			__( 'Orders', 'wc-admin' ),
+			__( 'Gross Revenue', 'wc-admin' ),
+			__( 'Refunds', 'wc-admin' ),
+			__( 'Coupons', 'wc-admin' ),
+			__( 'Taxes', 'wc-admin' ),
+			__( 'Shipping', 'wc-admin' ),
+			__( 'Net Revenue', 'wc-admin' ),
+		];
+	}
+
+	getRowsContent( data = [] ) {
 		return map( data, row => {
 			const {
 				coupons,
@@ -78,34 +95,81 @@ class RevenueReport extends Component {
 				</a>
 			);
 			return [
-				row.start_date,
-				orderLink,
-				formatCurrency( gross_revenue ),
-				formatCurrency( refunds ),
-				formatCurrency( coupons ),
-				formatCurrency( taxes ),
-				formatCurrency( shipping ),
-				formatCurrency( net_revenue ),
+				{
+					display: <input type="checkbox" />,
+					value: false,
+				},
+				{
+					display: formatDate( 'm/d/Y', row.date_start ),
+					value: row.date_start,
+				},
+				{
+					display: orderLink,
+					value: Number( orders_count ),
+				},
+				{
+					display: formatCurrency( gross_revenue ),
+					value: getCurrencyFormatDecimal( gross_revenue ),
+				},
+				{
+					display: formatCurrency( refunds ),
+					value: getCurrencyFormatDecimal( refunds ),
+				},
+				{
+					display: formatCurrency( coupons ),
+					value: getCurrencyFormatDecimal( coupons ),
+				},
+				{
+					display: formatCurrency( taxes ),
+					value: getCurrencyFormatDecimal( taxes ),
+				},
+				{
+					display: formatCurrency( shipping ),
+					value: getCurrencyFormatDecimal( shipping ),
+				},
+				{
+					display: formatCurrency( net_revenue ),
+					value: getCurrencyFormatDecimal( net_revenue ),
+				},
 			];
 		} );
 	}
 
+	getSummaryContent( data = {} ) {
+		return [
+			{
+				label: __( 'gross revenue', 'wc-admin' ),
+				value: formatCurrency( data.gross_revenue ),
+			},
+			{
+				label: __( 'refunds', 'wc-admin' ),
+				value: formatCurrency( data.refunds ),
+			},
+			{
+				label: __( 'coupons', 'wc-admin' ),
+				value: formatCurrency( data.coupons ),
+			},
+			{
+				label: __( 'taxes', 'wc-admin' ),
+				value: formatCurrency( data.taxes ),
+			},
+			{
+				label: __( 'shipping', 'wc-admin' ),
+				value: formatCurrency( data.shipping ),
+			},
+			{
+				label: __( 'net revenue', 'wc-admin' ),
+				value: formatCurrency( data.net_revenue ),
+			},
+		];
+	}
+
 	render() {
 		const { path, query } = this.props;
-		const summaryStats = get( this.state.stats, 'totals', {} );
-		const intervalStats = get( this.state.stats, 'intervals', [] );
-		const rows = this.getRowsContent( intervalStats ) || [];
-
-		const headers = [
-			__( 'Date', 'wc-admin' ),
-			__( 'Orders', 'wc-admin' ),
-			__( 'Gross Revenue', 'wc-admin' ),
-			__( 'Refunds', 'wc-admin' ),
-			__( 'Coupons', 'wc-admin' ),
-			__( 'Taxes', 'wc-admin' ),
-			__( 'Shipping', 'wc-admin' ),
-			__( 'Net Revenue', 'wc-admin' ),
-		];
+		const { totals = {}, intervals = [] } = this.state.stats;
+		const summary = this.getSummaryContent( totals ) || [];
+		const rows = this.getRowsContent( intervals ) || [];
+		const headers = this.getHeadersContent();
 
 		return (
 			<Fragment>
@@ -119,40 +183,36 @@ class RevenueReport extends Component {
 
 				<SummaryList>
 					<SummaryNumber
-						value={ formatCurrency( summaryStats.gross_revenue ) }
+						value={ formatCurrency( totals.gross_revenue ) }
 						label={ __( 'Gross Revenue', 'wc-admin' ) }
 						delta={ 29 }
 					/>
 					<SummaryNumber
-						value={ formatCurrency( summaryStats.refunds ) }
+						value={ formatCurrency( totals.refunds ) }
 						label={ __( 'Refunds', 'wc-admin' ) }
 						delta={ -10 }
 						selected
 					/>
 					<SummaryNumber
-						value={ formatCurrency( summaryStats.coupons ) }
+						value={ formatCurrency( totals.coupons ) }
 						label={ __( 'Coupons', 'wc-admin' ) }
 						delta={ 15 }
 					/>
 					<SummaryNumber
-						value={ formatCurrency( summaryStats.taxes ) }
+						value={ formatCurrency( totals.taxes ) }
 						label={ __( 'Taxes', 'wc-admin' ) }
 					/>
 				</SummaryList>
 
-				<Card title={ __( 'Gross Revenue' ) }>
-					<p>Graph here</p>
-					<hr />
-					{ /* @todo Switch a placeholder view if we don't have rows */ }
-					<Table rows={ rows } headers={ headers } caption={ __( 'Revenue Last Week' ) } />
-				</Card>
-
-				<Pagination
-					page={ parseInt( query.page ) || 1 }
-					perPage={ parseInt( query.per_page ) || 25 }
-					total={ 5000 }
-					onPageChange={ this.onPageChange }
-					onPerPageChange={ this.onPerPageChange }
+				<TableCard
+					title={ __( 'Revenue Last Week', 'wc-admin' ) }
+					rows={ rows }
+					rowHeader={ 1 }
+					headers={ headers }
+					onClickDownload={ noop }
+					onQueryChange={ this.onQueryChange }
+					query={ query }
+					summary={ summary }
 				/>
 			</Fragment>
 		);

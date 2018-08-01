@@ -2,164 +2,99 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
-import { Component, createRef } from '@wordpress/element';
-import classnames from 'classnames';
-import { IconButton } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
+import { IconButton, ToggleControl } from '@wordpress/components';
+import { noop } from 'lodash';
 import PropTypes from 'prop-types';
-import { isEqual, uniqueId } from 'lodash';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
+import Card from 'components/card';
+import { EllipsisMenu, MenuItem, MenuTitle } from 'components/ellipsis-menu';
+import Pagination from 'components/pagination';
+import Table from './table';
+import TableSummary from './summary';
 
-const ASC = 'ascending';
-const DESC = 'descending';
+// @todo Handle toggling columns
 
-class Table extends Component {
-	constructor( props ) {
-		super( props );
-		this.state = {
-			tabIndex: null,
-			rows: props.rows || [],
-			sortedBy: null,
-			sortDir: 'none',
-		};
-		this.container = createRef();
-		this.sortBy = this.sortBy.bind( this );
-		this.captionID = uniqueId( 'caption-' );
-	}
+const TableCard = ( {
+	headers,
+	onClickDownload,
+	onQueryChange,
+	query,
+	rows,
+	rowHeader,
+	summary,
+	title,
+} ) => {
+	return (
+		<Card
+			className="woocommerce-table"
+			title={ title }
+			action={
+				onClickDownload && (
+					<IconButton onClick={ onClickDownload } icon="arrow-down" size={ 18 } isDefault>
+						{ __( 'Download', 'wc-admin' ) }
+					</IconButton>
+				)
+			}
+			menu={
+				<EllipsisMenu label={ __( 'Choose which values to display', 'wc-admin' ) }>
+					<MenuTitle>{ __( 'Columns:', 'wc-admin' ) }</MenuTitle>
+					{ headers.map( ( label, i ) => (
+						<MenuItem key={ i } onInvoke={ noop }>
+							<ToggleControl label={ label } checked={ true } onChange={ noop } />
+						</MenuItem>
+					) ) }
+				</EllipsisMenu>
+			}
+		>
+			{ /* @todo Switch a placeholder view if we don't have rows */ }
+			<Table rows={ rows } headers={ headers } rowHeader={ rowHeader } caption={ title } />
 
-	componentDidUpdate( prevProps ) {
-		if ( ! isEqual( this.props.rows, prevProps.rows ) ) {
-			/* eslint-disable react/no-did-update-set-state */
-			this.setState( {
-				rows: this.props.rows,
-			} );
-			/* eslint-enable react/no-did-update-set-state */
-		}
-	}
+			{ summary && <TableSummary data={ summary } /> }
 
-	componentDidMount() {
-		const { scrollWidth, clientWidth } = this.container.current;
-		const scrollable = scrollWidth > clientWidth;
-		/* eslint-disable react/no-did-mount-set-state */
-		this.setState( {
-			tabIndex: scrollable ? '0' : null,
-		} );
-		/* eslint-enable react/no-did-mount-set-state */
-	}
+			<Pagination
+				page={ parseInt( query.page ) || 1 }
+				perPage={ parseInt( query.per_page ) || 25 }
+				total={ 5000 }
+				onPageChange={ onQueryChange( 'page' ) }
+				onPerPageChange={ onQueryChange( 'per_page' ) }
+			/>
+		</Card>
+	);
+};
 
-	sortBy( col ) {
-		this.setState( prevState => {
-			// Set the sort direction as inverse of current state
-			const sortDir = prevState.sortDir === ASC ? DESC : ASC;
-			return {
-				rows: prevState.rows
-					.slice( 0 )
-					.sort( ( a, b ) => ( sortDir === ASC ? a[ col ] > b[ col ] : a[ col ] < b[ col ] ) ),
-				sortedBy: col,
-				sortDir,
-			};
-		} );
-	}
-
-	isColSortable( col ) {
-		const { sortable, rows: [ first ] } = this.props;
-		if ( ! first ) {
-			return false;
-		}
-
-		// The table is not set to be sortable, we don't need to check cols.
-		if ( ! sortable ) {
-			return false;
-		}
-
-		return 'object' !== typeof first[ col ];
-	}
-
-	render() {
-		const { caption, classNames, headers, rowHeader } = this.props;
-		const { rows, sortedBy, sortDir, tabIndex } = this.state;
-		const classes = classnames( 'woocommerce-table', classNames );
-
-		return (
-			<div
-				className={ classes }
-				ref={ this.container }
-				tabIndex={ tabIndex }
-				aria-labelledby={ this.captionID }
-				role="group"
-			>
-				<table className="woocommerce-table__table">
-					<caption id={ this.captionID } className="woocommerce-table__caption">
-						{ caption }
-						{ tabIndex === '0' && <small>{ __( '(scroll to see more)', 'wc-admin' ) }</small> }
-					</caption>
-					<tbody>
-						<tr>
-							{ headers.map( ( header, i ) => (
-								<th
-									role="columnheader"
-									scope="col"
-									key={ i }
-									aria-sort={ sortedBy === i ? sortDir : 'none' }
-									className={ classnames( 'woocommerce-table__header', {
-										'is-sorted': sortedBy === i,
-									} ) }
-								>
-									{ this.isColSortable( i ) && (
-										<IconButton
-											icon={ sortDir !== ASC ? 'arrow-up' : 'arrow-down' }
-											label={
-												sortDir !== ASC
-													? sprintf( __( 'Sort by %s in ascending order', 'wc-admin' ), header )
-													: sprintf( __( 'Sort by %s in descending order', 'wc-admin' ), header )
-											}
-											onClick={ () => this.sortBy( i ) }
-										/>
-									) }
-									{ header }
-								</th>
-							) ) }
-						</tr>
-						{ rows.map( ( row, i ) => (
-							<tr key={ i }>
-								{ row.map(
-									( cell, j ) =>
-										rowHeader === j ? (
-											<th scope="row" key={ j } className="woocommerce-table__item">
-												{ cell }
-											</th>
-										) : (
-											<td key={ j } className="woocommerce-table__item">
-												{ cell }
-											</td>
-										)
-								) }
-							</tr>
-						) ) }
-					</tbody>
-				</table>
-			</div>
-		);
-	}
-}
-
-Table.propTypes = {
-	caption: PropTypes.string.isRequired,
-	className: PropTypes.string,
+TableCard.propTypes = {
 	headers: PropTypes.arrayOf( PropTypes.node ),
-	rows: PropTypes.arrayOf( PropTypes.arrayOf( PropTypes.node ) ).isRequired,
+	onQueryChange: PropTypes.func,
+	onClickDownload: PropTypes.func,
+	query: PropTypes.object,
 	rowHeader: PropTypes.oneOfType( [ PropTypes.number, PropTypes.bool ] ),
-	sortable: PropTypes.bool,
+	rows: PropTypes.arrayOf(
+		PropTypes.arrayOf(
+			PropTypes.shape( {
+				display: PropTypes.node,
+				value: PropTypes.oneOfType( [ PropTypes.string, PropTypes.number, PropTypes.bool ] ),
+			} )
+		)
+	).isRequired,
+	summary: PropTypes.arrayOf(
+		PropTypes.shape( {
+			label: PropTypes.node,
+			value: PropTypes.oneOfType( [ PropTypes.string, PropTypes.number ] ),
+		} )
+	),
+	title: PropTypes.string.isRequired,
 };
 
-Table.defaultProps = {
-	headers: [],
+TableCard.defaultProps = {
+	onQueryChange: noop,
+	query: {},
 	rowHeader: 0,
-	sortable: true,
+	rows: [],
 };
 
-export default Table;
+export { TableCard, Table, TableSummary };

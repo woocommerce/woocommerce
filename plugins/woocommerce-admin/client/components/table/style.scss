@@ -1,26 +1,36 @@
 /** @format */
 
 .woocommerce-table {
-	overflow-x: auto;
-	background: white;
+	.woocommerce-card__body {
+		padding: 0;
+		padding-bottom: $gap;
+	}
+
+	.woocommerce-card__action,
+	.woocommerce-card__menu {
+		justify-self: flex-end;
+	}
 }
 
 .woocommerce-table__caption {
 	@include font-size( 24 );
-	margin-bottom: $spacing;
 	text-align: left;
 }
 
 .woocommerce-table__table {
-	border-collapse: collapse;
-	border: 1px solid $gray;
-	width: 100%;
+	overflow-x: auto;
+	margin-bottom: $gap;
+
+	table {
+		border-collapse: collapse;
+		width: 100%;
+	}
 }
 
 .woocommerce-table__header,
 .woocommerce-table__item {
-	padding: $spacing/2;
-	border-bottom: 1px solid $gray;
+	padding: $gap $gap-large;
+	border-bottom: 1px solid $core-grey-light-500;
 	text-align: left;
 }
 
@@ -31,15 +41,76 @@ th.woocommerce-table__item {
 }
 
 .woocommerce-table__header {
+	padding: $gap-smaller $gap-large;
 	background-color: #f8f9fa;
+	border-bottom: 1px solid $core-grey-light-700;
 
 	& + .woocommerce-table__header {
-		border-left: 1px solid $gray;
+		border-left: 1px solid $core-grey-light-700;
 	}
 
-	.components-icon-button {
-		margin-right: 5px;
-		padding: 0;
+	.components-button.is-button {
+		padding: $gap-smaller $gap $gap-smaller 0;
+		height: auto;
+		width: 100%;
 		vertical-align: middle;
+		line-height: 1;
+		border: none;
+		background: transparent;
+		box-shadow: none !important;
+
+		// @todo Add interactive styles
+		&:hover {
+			box-shadow: none !important;
+		}
+
+		&:active {
+			box-shadow: none !important;
+		}
+	}
+
+	&.is-sortable {
+		padding: 0;
+
+		.gridicon {
+			visibility: hidden;
+			margin-left: $gap-smallest;
+		}
+
+		&.is-sorted .components-button,
+		.components-button:hover,
+		.components-button:focus {
+			.gridicon {
+				visibility: visible;
+			}
+		}
+	}
+}
+
+.woocommerce-table__summary {
+	margin: $gap 0;
+	text-align: center;
+}
+
+.woocommerce-table__summary-item {
+	display: inline-block;
+	margin-bottom: 0;
+
+	.woocommerce-table__summary-label,
+	.woocommerce-table__summary-value {
+		display: inline-block;
+	}
+
+	.woocommerce-table__summary-label {
+		margin-left: $gap-smallest;
+	}
+
+	.woocommerce-table__summary-value {
+		font-weight: 600;
+	}
+
+	& + .woocommerce-table__summary-item:before {
+		content: '/';
+		margin: 0 $gap-smallest;
 	}
 }
