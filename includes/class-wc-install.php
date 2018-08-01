@@ -807,13 +807,14 @@ CREATE TABLE {$wpdb->prefix}wc_order_stats (
   PRIMARY KEY (start_time)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}wc_order_product_lookup (
+  order_item_id BIGINT UNSIGNED NOT NULL,
   order_id BIGINT UNSIGNED NOT NULL,
   product_id BIGINT UNSIGNED NOT NULL,
-  order_item_id BIGINT UNSIGNED NOT NULL,
   customer_id BIGINT UNSIGNED NULL,
   date_completed datetime NOT NULL,
   product_qty INT UNSIGNED NOT NULL,
   product_gross_revenue double DEFAULT 0 NOT NULL,
+  PRIMARY KEY  (order_item_id)
   KEY order_id (order_id),
   KEY product_id (product_id),
   KEY customer_id (customer_id),
