@@ -33,22 +33,67 @@ class WC_REST_Reports_Revenue_Stats_Controller extends WC_REST_Reports_Controlle
 	protected $rest_base = 'reports/revenue/stats';
 
 	/**
+	 * Maps query arguments from the REST request.
+	 *
+	 * @param array $request Request array.
+	 * @return array
+	 */
+	protected function prepare_reports_query( $request ) {
+		$args             = array();
+		$args['before']   = $request['before'];
+		$args['after']    = $request['after'];
+		$args['interval'] = $request['interval'];
+		$args['page']     = $request['page'];
+		$args['per_page'] = $request['per_page'];
+		$args['orderby']  = $request['orderby'];
+		$args['order']    = $request['order'];
+
+		return $args;
+	}
+
+	/**
 	 * Get all reports.
 	 *
 	 * @param WP_REST_Request $request Request data.
 	 * @return array|WP_Error
 	 */
 	public function get_items( $request ) {
-		// @todo Apply reports interface.
-		$data    = array();
-		$reports = array();
+		$query_args      = $this->prepare_reports_query( $request );
+		$reports_revenue = new WC_Reports_Revenue_Query( $query_args );
+		$report_data     = $reports_revenue->get_data();
 
-		foreach ( $reports as $report ) {
-			$item   = $this->prepare_item_for_response( (object) $report, $request );
-			$data[] = $this->prepare_response_for_collection( $item );
+		$out_data = array(
+			'totals'    => get_object_vars( $report_data->totals ),
+			'intervals' => array(),
+		);
+
+		foreach ( $report_data->intervals as $interval_data ) {
+			$item                    = $this->prepare_item_for_response( (object) $interval_data, $request );
+			$out_data['intervals'][] = $this->prepare_response_for_collection( $item );
 		}
 
-		return rest_ensure_response( $data );
+		$response = rest_ensure_response( $out_data );
+		$response->header( 'X-WP-Total', (int) $report_data->total );
+		$response->header( 'X-WP-TotalPages', (int) $report_data->pages );
+
+		$page      = $report_data->page_no;
+		$max_pages = $report_data->pages;
+		$base      = add_query_arg( $request->get_query_params(), rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
+		if ( $page > 1 ) {
+			$prev_page = $page - 1;
+			if ( $prev_page > $max_pages ) {
+				$prev_page = $max_pages;
+			}
+			$prev_link = add_query_arg( 'page', $prev_page, $base );
+			$response->link_header( 'prev', $prev_link );
+		}
+		if ( $max_pages > $page ) {
+			$next_page = $page + 1;
+			$next_link = add_query_arg( 'page', $next_page, $base );
+			$response->link_header( 'next', $next_link );
+		}
+
+		return $response;
 	}
 
 	/**
@@ -59,8 +104,7 @@ class WC_REST_Reports_Revenue_Stats_Controller extends WC_REST_Reports_Controlle
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $report, $request ) {
-		// @todo Apply reports interface.
-		$data = array();
+		$data = get_object_vars( $report );
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = $this->add_additional_fields_to_object( $data, $request );
