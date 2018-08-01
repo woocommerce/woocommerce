@@ -57,7 +57,7 @@ class Pagination extends Component {
 		const { onPageChange } = this.props;
 		const newPage = parseInt( event.target.value, 10 );
 
-		if ( isFinite( newPage ) ) {
+		if ( isFinite( newPage ) && this.pageCount && this.pageCount >= newPage ) {
 			onPageChange( newPage );
 		}
 	}
