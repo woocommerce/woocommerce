@@ -40,9 +40,17 @@ class WC_REST_Reports_Products_Controller extends WC_REST_Reports_Controller {
 	 * @return array|WP_Error
 	 */
 	public function get_items( $request ) {
+		$args = array();
+		$registered = array_keys( $this->get_collection_params() );
+		foreach ( $registered as $param_name ) {
+			if ( isset( $request[ $param_name ] ) ) {
+				$args[ $param_name ] = $request[ $param_name ];
+			}
+		}
+
 		// @todo Apply reports interface.
+		$reports = array(); // $reports = new WC_Report_Products_Query( $args );
 		$data    = array();
-		$reports = array();
 
 		foreach ( $reports as $report ) {
 			$item   = $this->prepare_item_for_response( (object) $report, $request );
@@ -79,7 +87,7 @@ class WC_REST_Reports_Products_Controller extends WC_REST_Reports_Controller {
 		 * @param object           $report   The original report object.
 		 * @param WP_REST_Request  $request  Request used to generate the response.
 		 */
-		return apply_filters( 'woocommerce_rest_prepare_report_revenue_stats', $response, $report, $request );
+		return apply_filters( 'woocommerce_rest_prepare_report_products', $response, $report, $request );
 	}
 
 	/**
