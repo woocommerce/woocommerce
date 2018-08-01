@@ -811,14 +811,14 @@ CREATE TABLE {$wpdb->prefix}wc_order_product_lookup (
   order_id BIGINT UNSIGNED NOT NULL,
   product_id BIGINT UNSIGNED NOT NULL,
   customer_id BIGINT UNSIGNED NULL,
-  date_completed datetime NOT NULL,
+  date_created datetime NOT NULL,
   product_qty INT UNSIGNED NOT NULL,
   product_gross_revenue double DEFAULT 0 NOT NULL,
   PRIMARY KEY  (order_item_id)
   KEY order_id (order_id),
   KEY product_id (product_id),
   KEY customer_id (customer_id),
-  KEY date_completed (date_completed)
+  KEY date_created (date_created)
 ) $collate;
 
 		";
