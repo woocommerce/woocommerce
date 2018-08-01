@@ -83,6 +83,7 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 			'before'   => '',
 			'after'    => '',
 			'interval' => 'week',
+			'fields'   => '*',
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
 

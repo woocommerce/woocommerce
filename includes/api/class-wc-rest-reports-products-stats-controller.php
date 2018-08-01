@@ -39,12 +39,28 @@ class WC_REST_Reports_Products_Stats_Controller extends WC_REST_Reports_Controll
 	 * @return array|WP_Error
 	 */
 	public function get_items( $request ) {
-		// @todo Apply reports interface.
 		$data    = array();
-		$reports = array();
 
-		foreach ( $reports as $report ) {
-			$item   = $this->prepare_item_for_response( (object) $report, $request );
+		$args = array(
+			'fields' => array(
+				'num_items_sold',
+				'gross_revenue',
+				'orders_gross_total',
+			),
+		);
+
+		foreach ( array_keys( $this->get_collection_params() ) as $arg ) {
+			if ( isset( $request[ $arg ] ) ) {
+				$args[ $arg ] = $request[ $arg ];
+			}
+		}
+
+		$query = new WC_Reports_Revenue_Query( $args );
+		$stats = $query->get_data();
+
+		// @todo Do this properly
+		foreach ( $stats as $stat ) {
+			$item   = $this->prepare_item_for_response( (object) $stat, $request );
 			$data[] = $this->prepare_response_for_collection( $item );
 		}
 
