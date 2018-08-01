@@ -1059,6 +1059,7 @@ function wc_order_product_lookup_entry( $order_id ) {
 				'customer_id'           => $order->get_customer_id( 'edit' ),
 				'product_qty'           => $order_item->get_quantity( 'edit' ),
 				'product_gross_revenue' => $order_item->get_subtotal( 'edit' ),
+				'date_created'          => $order->get_date_created()->getTimestamp(),
 			),
 			array(
 				'%d',
@@ -1067,6 +1068,7 @@ function wc_order_product_lookup_entry( $order_id ) {
 				'%d',
 				'%d',
 				'%f',
+				'%s',
 			)
 		);
 	}
