@@ -66,7 +66,11 @@ class Header extends Component {
 			.join( ' &lsaquo; ' );
 
 		document.title = decodeEntities(
-			sprintf( __( '%1$s &lsaquo; %2$s &#8212; WooCommerce', 'wc-admin' ), documentTitle, 'wc/v2' )
+			sprintf(
+				__( '%1$s &lsaquo; %2$s &#8212; WooCommerce', 'wc-admin' ),
+				documentTitle,
+				wcSettings.siteTitle
+			)
 		);
 
 		const className = classnames( 'woocommerce-layout__header', {
