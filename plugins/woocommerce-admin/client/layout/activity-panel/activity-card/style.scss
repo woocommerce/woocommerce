@@ -46,11 +46,17 @@
 .woocommerce-activity-card__header {
 	margin-bottom: $gap;
 	display: flex;
-	flex-direction: column-reverse;
+	flex-direction: column;
+
+	a {
+		color: $woocommerce;
+		text-decoration: none;
+	}
 
 	.woocommerce-activity-card__title {
 		margin: 0;
 		@include font-size( 13 );
+		order: 2;
 	}
 
 	.woocommerce-activity-card__date {
@@ -58,6 +64,11 @@
 		text-transform: uppercase;
 		@include font-size( 11 );
 		margin-bottom: $gap-small;
+		order: 1;
+	}
+
+	.woocommerce-activity-card__subtitle {
+		order: 3;
 	}
 
 	@include breakpoint( '>782px' ) {

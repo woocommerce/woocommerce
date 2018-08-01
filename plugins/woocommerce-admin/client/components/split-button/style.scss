@@ -11,7 +11,6 @@
 
 	.woocommerce-split-button__main-action,
 	.woocommerce-split-button__menu-toggle {
-		padding: ($gap-smallest * 2) $gap-large ($gap-smallest * 2) $gap-small;
 		line-height: 26px;
 		height: 42px;
 		border-radius: 3px;
@@ -26,16 +25,19 @@
 	}
 
 	.woocommerce-split-button__main-action {
-		padding: $gap-small;
+		padding: 0 $gap-small;
 		border-top-right-radius: 0;
 		border-bottom-right-radius: 0;
 		border-right: 0;
+		height: 32px;
 	}
 
 	.woocommerce-split-button__menu-toggle {
 		border-top-left-radius: 0;
 		border-bottom-left-radius: 0;
-		padding: $gap-smallest * 2;
+		padding: $gap-smallest;
+		height: 32px;
+		width: 32px;
 	}
 
 	.woocommerce-split-button__menu-popover.is-mobile {
@@ -66,10 +68,6 @@
 		.woocommerce-split-button__main-action.components-button .gridicon,
 		.woocommerce-split-button__main-action.components-button .dashicon {
 			margin-right: $gap-smallest * 2;
-		}
-
-		.woocommerce-split-button__main-action {
-			padding: ($gap-smallest * 2) $gap-large ($gap-smallest * 2) $gap-small;
 		}
 	}
 
@@ -106,6 +104,8 @@
 
 	.dashicons-arrow-down {
 		fill: $core-grey-dark-500;
+		height: 20px;
+		width: 20px;
 	}
 
 	.woocommerce-split-button__menu-toggle.is-active,

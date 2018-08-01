@@ -267,3 +267,48 @@
 		margin-bottom: $gap-small;
 	}
 }
+
+.woocommerce-review-activity-card {
+	.woocommerce-review-activity-card__verified {
+		margin-left: $gap-small;
+		display: inline-flex;
+		position: relative;
+		top: $gap-smallest;
+		color: $valid-green;
+		@include font-size( 12 );
+
+		.gridicon {
+			margin-right: $gap-smallest;
+			fill: $valid-green;
+		}
+	}
+
+	.woocommerce-review-activity-card__image-overlay {
+		margin-left: -$gap-large;
+		img.woocommerce-gravatar {
+			left: $gap-large;
+			position: relative;
+			top: -42px;
+			border: 2px solid $white;
+		}
+	}
+
+	@include breakpoint( '<782px' ) {
+		.woocommerce-review-activity-card__image-overlay {
+			margin-top: $gap-smallest;
+		}
+
+		.woocommerce-activity-card__icon img.woocommerce-gravatar {
+			margin-left: 0;
+			width: 18px;
+			height: 18px;
+			left: 32px;
+			top: -28px;
+		}
+
+		.woocommerce-activity-card__icon img.woocommerce-product-image {
+			width: 38px;
+			height: 38px;
+		}
+	}
+}

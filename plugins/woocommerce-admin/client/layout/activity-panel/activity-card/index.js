@@ -52,7 +52,7 @@ ActivityCard.propTypes = {
 	date: PropTypes.string,
 	icon: PropTypes.node,
 	subtitle: PropTypes.node,
-	title: PropTypes.string.isRequired,
+	title: PropTypes.oneOfType( [ PropTypes.string, PropTypes.node ] ).isRequired,
 	unread: PropTypes.bool,
 };
 
