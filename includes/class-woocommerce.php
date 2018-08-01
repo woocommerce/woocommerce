@@ -276,6 +276,7 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/interfaces/class-wc-logger-interface.php';
 		include_once WC_ABSPATH . 'includes/interfaces/class-wc-log-handler-interface.php';
 		include_once WC_ABSPATH . 'includes/interfaces/class-wc-webhooks-data-store-interface.php';
+		include_once WC_ABSPATH . 'includes/interfaces/class-wc-queue-interface.php';
 
 		/**
 		 * Abstract classes.
@@ -333,6 +334,8 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/class-wc-structured-data.php';
 		include_once WC_ABSPATH . 'includes/class-wc-shortcodes.php';
 		include_once WC_ABSPATH . 'includes/class-wc-logger.php';
+		include_once WC_ABSPATH . 'includes/queue/class-wc-action-queue.php';
+		include_once WC_ABSPATH . 'includes/queue/class-wc-queue.php';
 
 		/**
 		 * Data stores - used to store and retrieve CRUD object data from the database.
@@ -369,6 +372,11 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/class-wc-api.php';
 		include_once WC_ABSPATH . 'includes/class-wc-auth.php';
 		include_once WC_ABSPATH . 'includes/class-wc-register-wp-admin-settings.php';
+
+		/**
+		 * Libraries
+		 */
+		include_once WC_ABSPATH . 'includes/libraries/action-scheduler/action-scheduler.php';
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			include_once WC_ABSPATH . 'includes/class-wc-cli.php';
@@ -649,6 +657,15 @@ final class WooCommerce {
 			$wpdb->woocommerce_termmeta = $wpdb->prefix . 'woocommerce_termmeta';
 			$wpdb->tables[]             = 'woocommerce_termmeta';
 		}
+	}
+
+	/**
+	 * Get queue instance.
+	 *
+	 * @return WC_Queue_Interface
+	 */
+	public function queue() {
+		return WC_Queue::instance();
 	}
 
 	/**
