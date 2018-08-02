@@ -1,0 +1,13 @@
+/** @format */
+
+.woocommerce-dashboard__columns {
+	display: flex;
+	flex-direction: row;
+	margin-left: -20px;
+
+	.woocommerce-dashboard__column {
+		flex: 1 0 50%;
+		margin-left: 20px;
+		max-width: calc(50% - 20px);
+	}
+}
