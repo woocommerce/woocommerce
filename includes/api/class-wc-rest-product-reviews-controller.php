@@ -264,7 +264,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		}
 
 		// Ensure certain parameter values default to empty strings.
-		foreach ( array( 'reviewer_email', 'search' ) as $param ) {
+		foreach ( array( 'author_email', 'search' ) as $param ) {
 			if ( ! isset( $prepared_args[ $param ] ) ) {
 				$prepared_args[ $param ] = '';
 			}
@@ -305,6 +305,10 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		 */
 		$prepared_args = apply_filters( 'woocommerce_rest_product_review_query', $prepared_args, $request );
 
+		// Make sure that returns only reviews.
+		$prepared_args['type'] = 'review';
+
+		// Query reviews.
 		$query        = new WP_Comment_Query();
 		$query_result = $query->query( $prepared_args );
 		$reviews      = array();
