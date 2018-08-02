@@ -18,13 +18,16 @@ import AnimationSlider from 'components/animation-slider';
 import Link from 'components/link';
 import './style.scss';
 
+export const FILTER_PARAM = 'filter';
+export const DEFAULT_FILTER_PARAM = 'all';
+
 class FilterPicker extends Component {
 	constructor( props ) {
 		super( props );
 
-		const { filterPaths, getQueryParamValue } = props;
+		const { filterPaths, query } = props;
 		this.state = {
-			nav: filterPaths[ getQueryParamValue() ],
+			nav: filterPaths[ this.getQueryParamValue( query ) ],
 			animate: null,
 		};
 
@@ -36,24 +39,27 @@ class FilterPicker extends Component {
 		this.goBack = this.goBack.bind( this );
 	}
 
+	getQueryParamValue( query ) {
+		return query[ FILTER_PARAM ] || DEFAULT_FILTER_PARAM;
+	}
+
 	getOtherQueries( query ) {
-		const { queryParam } = this.props;
-		return omit( query, queryParam );
+		return omit( query, FILTER_PARAM );
 	}
 
 	getSelectionPath( filter ) {
-		const { path, query, queryParam } = this.props;
+		const { path, query } = this.props;
 		const otherQueries = this.getOtherQueries( query );
 		const data = {
-			[ queryParam ]: filter.value,
+			[ FILTER_PARAM ]: filter.value,
 		};
 		const queryString = stringifyQueryObject( Object.assign( otherQueries, data ) );
 		return `${ path }?${ queryString }`;
 	}
 
 	getSelectedFilter() {
-		const { filters, getQueryParamValue, filterPaths } = this.props;
-		const value = getQueryParamValue();
+		const { filters, filterPaths, query } = this.props;
+		const value = this.getQueryParamValue( query );
 		const filterPath = filterPaths[ value ];
 		const visibleFilters = this.getVisibleFilters( filters, [ ...filterPath ] );
 		return find( visibleFilters, filter => filter.value === value );
@@ -176,8 +182,6 @@ FilterPicker.propTypes = {
 	query: PropTypes.object.isRequired,
 	filters: PropTypes.array.isRequired,
 	filterPaths: PropTypes.object.isRequired,
-	queryParam: PropTypes.string.isRequired,
-	getQueryParamValue: PropTypes.func.isRequired,
 };
 
 export default FilterPicker;

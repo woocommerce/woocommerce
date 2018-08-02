@@ -15,17 +15,6 @@ import { filters, filterPaths } from './constants';
 import './style.scss';
 
 export default class extends Component {
-	constructor() {
-		super();
-
-		this.getQueryParamValue = this.getQueryParamValue.bind( this );
-	}
-
-	getQueryParamValue() {
-		const { query } = this.props;
-		return query.product || 'all';
-	}
-
 	render() {
 		const { query, path } = this.props;
 
@@ -44,8 +33,6 @@ export default class extends Component {
 						path={ path }
 						filters={ filters }
 						filterPaths={ filterPaths }
-						queryParam="product"
-						getQueryParamValue={ this.getQueryParamValue }
 					/>
 				</div>
 			</Fragment>
