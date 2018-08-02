@@ -46,15 +46,52 @@ class WC_Tests_API_Reports_Products_Stats extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_reports() {
+		WC_Helper_Reports::reset_stats_dbs();
 		wp_set_current_user( $this->user );
 
-		// @todo update after report interface is done.
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint ) );
+		$time = time();
+		$stats_data = array(
+			'num_orders'            => 1,
+			'num_items_sold'        => 2,
+			'orders_gross_total'    => 20.0,
+			'orders_coupon_total'   => 0.0,
+			'orders_refund_total'   => 0.0,
+			'orders_tax_total'      => 0.0,
+			'orders_shipping_total' => 5.0,
+			'orders_net_total'      => 15.0,
+		);
+		WC_Reports_Orders_Data_Store::update( $time, $stats_data );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params( array(
+			'before' => date( 'Y-m-d H:00:00', $time + DAY_IN_SECONDS ),
+			'after' => date( 'Y-m-d H:00:00', $time - DAY_IN_SECONDS ),
+			'interval' => 'day',
+		) );
+
+		$response = $this->server->dispatch( $request );
 		$reports  = $response->get_data();
 
+		$expected_reports = array(
+			'totals' => array(
+				'num_items_sold' => 2,
+				'gross_revenue' => 20.0,
+				'orders_count' => 1,
+			),
+			'intervals' => array(
+				array(
+					'time_interval' => date( 'Y-m-d', $time ),
+					'num_items_sold' => 2,
+					'gross_revenue' => 20.0,
+					'orders_count' => 1,
+					'date_start' => date( 'Y-m-d 00:00:00', $time ),
+					'date_end' => date( 'Y-m-d 00:00:00', $time + DAY_IN_SECONDS ),
+				),
+			),
+		);
+
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 0, count( $reports ) ); // @todo update results after implement report interface.
-		$this->assertEquals( array(), $reports ); // @todo update results after implement report interface.
+		$this->assertEquals( $expected_reports, $reports );
 	}
 
 	/**
