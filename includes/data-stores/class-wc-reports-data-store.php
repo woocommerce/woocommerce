@@ -100,70 +100,6 @@ class WC_Reports_Data_Store {
 	}
 
 	/**
-	 * Sorts intervals according to user's request.
-	 *
-	 * They are pre-sorted in SQL, but after adding gaps, they need to be sorted including the added ones.
-	 *
-	 * @param stdClass $data      Data object, must contain an array under $data->intervals.
-	 * @param string   $sort_by   Ordering property.
-	 * @param string   $direction DESC/ASC.
-	 */
-	protected function sort_intervals( &$data, $sort_by, $direction ) {
-		$this->order_by = $this->normalize_order_by( $sort_by );
-		$this->order    = $direction;
-		usort( $data->intervals, array( $this, 'interval_cmp' ) );
-	}
-
-	/**
-	 * Fills in interval gaps from DB with 0-filled objects.
-	 *
-	 * @param array    $db_intervals   Array of all intervals present in the db.
-	 * @param DateTime $datetime_start Start date.
-	 * @param DateTime $datetime_end   End date.
-	 * @param string   $time_interval  Time interval, e.g. day, week, month.
-	 * @param stdClass $data           Data with SQL extracted intervals.
-	 * @return stdClass
-	 */
-	protected function fill_in_missing_intervals( $db_intervals, $datetime_start, $datetime_end, $time_interval, &$data ) {
-		// TODO: this is ugly and messy.
-		// At this point, we don't know when we can stop iterating, as the ordering can be based on any value.
-		$end_datetime = new DateTime( $datetime_end );
-		$time_ids     = array_flip( wp_list_pluck( $data->intervals, 'time_interval' ) );
-		$db_intervals = array_flip( $db_intervals );
-		$datetime     = new DateTime( $datetime_start );
-
-		// Totals object used to get all needed properties.
-		$totals_arr = get_object_vars( $data->totals );
-		foreach ( $totals_arr as $key => $val ) {
-			$totals_arr[ $key ] = 0;
-		}
-
-		while ( $datetime <= $end_datetime ) {
-			$next_end = WC_Reports_Interval::iterate( $datetime, $time_interval );
-			$time_id  = WC_Reports_Interval::time_interval_id( $time_interval, $datetime );
-			// Either create fill-zero interval or use data from db.
-			$interval_end = ( $next_end > $end_datetime ? $end_datetime : $next_end )->format( 'Y-m-d H:i:s' );
-			if ( array_key_exists( $time_id, $time_ids ) ) {
-				$record             = $data->intervals[ $time_ids[ $time_id ] ];
-				$record->date_start = $datetime->format( 'Y-m-d H:i:s' );
-				$record->date_end   = $interval_end;
-			} elseif ( array_key_exists( $time_id, $db_intervals ) ) {
-				// Do nothing.
-			} else {
-				$record_arr                  = array();
-				$record_arr['time_interval'] = $time_id;
-				$record_arr['date_start']    = $datetime->format( 'Y-m-d H:i:s' );
-				$record_arr['date_end']      = $interval_end;
-
-				$data->intervals[] = (object) array_merge( $record_arr, $totals_arr );
-			}
-			$datetime = $next_end;
-		}
-
-		return $data;
-	}
-
-	/**
 	 * Updates dates for intervals.
 	 *
 	 * @param DateTime $datetime_start Start date.
@@ -191,35 +127,6 @@ class WC_Reports_Data_Store {
 		}
 
 		return $data;
-	}
-
-	/**
-	 * Removes extra records from intervals so that only requested number of records get returned.
-	 *
-	 * @param stdClass $data           Data from whose intervals the records get removed.
-	 * @param int      $page_no        Offset requested by the user.
-	 * @param int      $items_per_page Number of records requested by the user.
-	 * @param int      $db_interval_count
-	 * @param int      $expected_interval_count
-	 * @param string   $order_by
-	 */
-	protected function remove_extra_records( &$data, $page_no, $items_per_page, $db_interval_count, $expected_interval_count, $order_by ) {
-		if ( 'date' === strtolower( $order_by ) ) {
-			$offset = 0;
-		} else {
-			$offset = ( $page_no - 1 ) * $items_per_page - $db_interval_count;
-			$offset = $offset < 0 ? 0 : $offset;
-		}
-
-		$count = $expected_interval_count - ( $page_no - 1 ) * $items_per_page;
-		if ( $count < 0 ) {
-			$count = 0;
-		} elseif ( $count > $items_per_page ) {
-			$count = $items_per_page;
-		}
-
-		$data->intervals = array_slice( $data->intervals, $offset, $count );
-
 	}
 
 	/**
