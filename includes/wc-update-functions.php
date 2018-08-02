@@ -1976,6 +1976,64 @@ function wc_update_350_order_customer_id( $updater = false ) {
 }
 
 /**
+ * Populate the wc_order_product_lookup table based on all orders and order items in the store.
+ *
+ * @param WC_Background_Updater|boolean $updater Background updater instance or false if function is called from `wp wc update` WP-CLI command.
+ * @return boolean|void Return true when the function needs to be requed due to memory limit nearing or void when done.
+ */
+function wc_update_350_order_product_lookup( $updater = false ) {
+	global $wpdb;
+
+	$orders = get_transient( 'wc_update_350_all_orders' );
+	if ( false === $orders ) {
+		$orders = wc_get_orders( array(
+			'limit'  => -1,
+			'return' => 'ids',
+		) );
+		set_transient( 'wc_update_350_all_orders', $orders, DAY_IN_SECONDS );
+	}
+
+	// Process orders untill close to running out of memory timeouts on large sites then requeue.
+	foreach ( $orders as $order_id ) {
+		$order_count++;
+		$order = wc_get_order( $order_id );
+		if ( ! $order ) {
+			continue;
+		}
+		foreach ( $order->get_items() as $order_item ) {
+			$wpdb->replace(
+				$wpdb->prefix . 'wc_order_product_lookup',
+				array(
+					'order_item_id'         => $order_item->get_id(),
+					'order_id'              => $order->get_id(),
+					'product_id'            => $order_item->get_product_id( 'edit' ),
+					'customer_id'           => $order->get_customer_id( 'edit' ),
+					'product_qty'           => $order_item->get_quantity( 'edit' ),
+					'product_gross_revenue' => $order_item->get_subtotal( 'edit' ),
+					'date_created'          => $order->get_date_created()->getTimestamp(),
+				),
+				array(
+					'%d',
+					'%d',
+					'%d',
+					'%d',
+					'%d',
+					'%f',
+					'%s',
+				)
+			);
+		}
+		// Pop the order ID from the array for updating the transient later should we near memory exhaustion.
+		unset( $orders[ $order_id ] );
+		if ( $updater instanceof WC_Background_Updater && $updater->is_memory_exceeded() ) {
+			// Update the transient for the next run to avoid processing the same orders again.
+			set_transient( 'wc_update_350_all_orders', $orders, DAY_IN_SECONDS );
+			return true;
+		}
+	}
+}
+
+/**
  * Update DB Version.
  */
 function wc_update_350_db_version() {
