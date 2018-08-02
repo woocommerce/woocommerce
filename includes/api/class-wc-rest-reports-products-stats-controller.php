@@ -39,32 +39,55 @@ class WC_REST_Reports_Products_Stats_Controller extends WC_REST_Reports_Controll
 	 * @return array|WP_Error
 	 */
 	public function get_items( $request ) {
-		$data    = array();
-
-		$args = array(
+		$query_args = array(
 			'fields' => array(
 				'num_items_sold',
 				'gross_revenue',
-				'orders_gross_total',
+				'orders_count',
 			),
 		);
 
 		foreach ( array_keys( $this->get_collection_params() ) as $arg ) {
 			if ( isset( $request[ $arg ] ) ) {
-				$args[ $arg ] = $request[ $arg ];
+				$query_args[ $arg ] = $request[ $arg ];
 			}
 		}
 
-		$query = new WC_Reports_Revenue_Query( $args );
-		$stats = $query->get_data();
+		$query = new WC_Reports_Revenue_Query( $query_args );
+		$report_data = $query->get_data();
 
-		// @todo Do this properly
-		foreach ( $stats as $stat ) {
-			$item   = $this->prepare_item_for_response( (object) $stat, $request );
-			$data[] = $this->prepare_response_for_collection( $item );
+		$out_data = array(
+			'totals'    => get_object_vars( $report_data->totals ),
+			'intervals' => array(),
+		);
+
+		foreach ( $report_data->intervals as $interval_data ) {
+			$item                    = $this->prepare_item_for_response( (object) $interval_data, $request );
+			$out_data['intervals'][] = $this->prepare_response_for_collection( $item );
 		}
 
-		return rest_ensure_response( $data );
+		$response = rest_ensure_response( $out_data );
+		$response->header( 'X-WP-Total', (int) $report_data->total );
+		$response->header( 'X-WP-TotalPages', (int) $report_data->pages );
+
+		$page      = $report_data->page_no;
+		$max_pages = $report_data->pages;
+		$base      = add_query_arg( $request->get_query_params(), rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
+		if ( $page > 1 ) {
+			$prev_page = $page - 1;
+			if ( $prev_page > $max_pages ) {
+				$prev_page = $max_pages;
+			}
+			$prev_link = add_query_arg( 'page', $prev_page, $base );
+			$response->link_header( 'prev', $prev_link );
+		}
+		if ( $max_pages > $page ) {
+			$next_page = $page + 1;
+			$next_link = add_query_arg( 'page', $next_page, $base );
+			$response->link_header( 'next', $next_link );
+		}
+
+		return $response;
 	}
 
 	/**
@@ -75,8 +98,7 @@ class WC_REST_Reports_Products_Stats_Controller extends WC_REST_Reports_Controll
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $report, $request ) {
-		// @todo Apply reports interface.
-		$data = array();
+		$data = get_object_vars( $report );
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = $this->add_additional_fields_to_object( $data, $request );
