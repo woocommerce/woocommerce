@@ -812,7 +812,7 @@ CREATE TABLE {$wpdb->prefix}wc_order_product_lookup (
   order_id BIGINT UNSIGNED NOT NULL,
   product_id BIGINT UNSIGNED NOT NULL,
   customer_id BIGINT UNSIGNED NULL,
-  date_created timestamp NOT NULL,
+  date_created timestamp DEFAULT '0000-00-00 00:00:00' NOT NULL,
   product_qty INT UNSIGNED NOT NULL,
   product_gross_revenue double DEFAULT 0 NOT NULL,
   PRIMARY KEY  (order_item_id),

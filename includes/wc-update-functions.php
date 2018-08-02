@@ -2006,10 +2006,10 @@ function wc_update_350_order_product_lookup( $updater = false ) {
 					'order_item_id'         => $order_item->get_id(),
 					'order_id'              => $order->get_id(),
 					'product_id'            => $order_item->get_product_id( 'edit' ),
-					'customer_id'           => $order->get_customer_id( 'edit' ),
+					'customer_id'           => ( 0 < $order->get_customer_id( 'edit' ) ) ? $order->get_customer_id( 'edit' ) : null,
 					'product_qty'           => $order_item->get_quantity( 'edit' ),
 					'product_gross_revenue' => $order_item->get_subtotal( 'edit' ),
-					'date_created'          => $order->get_date_created()->getTimestamp(),
+					'date_created'          => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
 				),
 				array(
 					'%d',
