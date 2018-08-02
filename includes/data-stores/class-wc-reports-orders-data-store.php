@@ -172,27 +172,25 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 
 			$totals = (object) $this->cast_numbers( $totals[0] );
 
-
-			$db_intervals = $wpdb->get_col(
-				"SELECT
-							{$intervals_query['select_clause']} AS time_interval
-						FROM
-							{$table_name}
-						WHERE
-							1=1
-							{$intervals_query['where_clause']}
-						GROUP BY
-							time_interval"
+			$db_interval_count = (int) $wpdb->get_var(
+				"SELECT COUNT(*) FROM (
+							SELECT
+								{$intervals_query['select_clause']} AS time_interval
+							FROM
+								{$table_name}
+							WHERE
+								1=1
+								{$intervals_query['where_clause']}
+							GROUP BY
+								time_interval
+				  			) AS tt"
 			); // WPCS: cache ok, DB call ok.
-			$db_interval_count       = count( $db_intervals );
-			$expected_interval_count = WC_Reports_Interval::intervals_between( $query_args['after'], $query_args['before'], $query_args['interval'] );
-			$total_pages             = (int) ceil( $expected_interval_count / $intervals_query['per_page'] );
+
+			$total_pages = (int) ceil( $db_interval_count / $intervals_query['per_page'] );
 
 			if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
 				return array();
 			}
-
-			$this->update_intervals_sql_params( $intervals_query, $query_args, $db_interval_count, $expected_interval_count );
 
 			if ( '' !== $selections ) {
 				$selections = ',' . $selections;
@@ -225,12 +223,12 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 			$data = (object) array(
 				'totals'    => $totals,
 				'intervals' => $intervals,
-				'total'     => $expected_interval_count,
+				'total'     => $db_interval_count,
 				'pages'     => $total_pages,
 				'page_no'   => (int) $query_args['page'],
 			);
 
-			$this->update_dates( $query_args['adj_after'], $query_args['adj_before'], $query_args['interval'], $data );
+			$this->update_interval_boundary_dates( $query_args['after'], $query_args['before'], $query_args['interval'], $data );
 			wp_cache_set( $cache_key, $data, $this->cache_group );
 		}
 
