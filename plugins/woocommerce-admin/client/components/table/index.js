@@ -3,8 +3,9 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { Component } from '@wordpress/element';
 import { IconButton, ToggleControl } from '@wordpress/components';
-import { noop } from 'lodash';
+import { fill, isArray, first, noop } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
@@ -17,55 +18,89 @@ import Pagination from 'components/pagination';
 import Table from './table';
 import TableSummary from './summary';
 
-// @todo Handle toggling columns
+class TableCard extends Component {
+	constructor( props ) {
+		super( props );
+		this.state = {
+			showCols: fill( Array( props.headers.length ), true ),
+		};
+		this.toggleCols = this.toggleCols.bind( this );
+	}
 
-const TableCard = ( {
-	headers,
-	onClickDownload,
-	onQueryChange,
-	query,
-	rows,
-	rowHeader,
-	summary,
-	title,
-} ) => {
-	return (
-		<Card
-			className="woocommerce-table"
-			title={ title }
-			action={
-				onClickDownload && (
-					<IconButton onClick={ onClickDownload } icon="arrow-down" size={ 18 } isDefault>
-						{ __( 'Download', 'wc-admin' ) }
-					</IconButton>
-				)
-			}
-			menu={
-				<EllipsisMenu label={ __( 'Choose which values to display', 'wc-admin' ) }>
-					<MenuTitle>{ __( 'Columns:', 'wc-admin' ) }</MenuTitle>
-					{ headers.map( ( label, i ) => (
-						<MenuItem key={ i } onInvoke={ noop }>
-							<ToggleControl label={ label } checked={ true } onChange={ noop } />
-						</MenuItem>
-					) ) }
-				</EllipsisMenu>
-			}
-		>
-			{ /* @todo Switch a placeholder view if we don't have rows */ }
-			<Table rows={ rows } headers={ headers } rowHeader={ rowHeader } caption={ title } />
+	toggleCols( col ) {
+		return () => {
+			this.setState( prevState => ( {
+				showCols: prevState.showCols.map( ( toggled, i ) => ( col === i ? ! toggled : toggled ) ),
+			} ) );
+		};
+	}
 
-			{ summary && <TableSummary data={ summary } /> }
+	filterCols( rows = [] ) {
+		const { showCols } = this.state;
+		// Header is a 1d array
+		if ( ! isArray( first( rows ) ) ) {
+			return rows.filter( ( col, i ) => showCols[ i ] );
+		}
+		// Rows is a 2d array
+		return rows.map( row => row.filter( ( col, i ) => showCols[ i ] ) );
+	}
 
-			<Pagination
-				page={ parseInt( query.page ) || 1 }
-				perPage={ parseInt( query.per_page ) || 25 }
-				total={ 5000 }
-				onPageChange={ onQueryChange( 'page' ) }
-				onPerPageChange={ onQueryChange( 'per_page' ) }
-			/>
-		</Card>
-	);
-};
+	render() {
+		const { onClickDownload, onQueryChange, query, rowHeader, summary, title } = this.props;
+		const { showCols } = this.state;
+		const allHeaders = this.props.headers;
+		const headers = this.filterCols( this.props.headers );
+		const rows = this.filterCols( this.props.rows );
+
+		return (
+			<Card
+				className="woocommerce-table"
+				title={ title }
+				action={
+					onClickDownload && (
+						<IconButton onClick={ onClickDownload } icon="arrow-down" size={ 18 } isDefault>
+							{ __( 'Download', 'wc-admin' ) }
+						</IconButton>
+					)
+				}
+				menu={
+					<EllipsisMenu label={ __( 'Choose which values to display', 'wc-admin' ) }>
+						<MenuTitle>{ __( 'Columns:', 'wc-admin' ) }</MenuTitle>
+						{ allHeaders.map( ( label, i ) => (
+							<MenuItem key={ i } onInvoke={ this.toggleCols( i ) }>
+								<ToggleControl
+									label={ label }
+									checked={ !! showCols[ i ] }
+									onChange={ this.toggleCols( i ) }
+								/>
+							</MenuItem>
+						) ) }
+					</EllipsisMenu>
+				}
+			>
+				{ /* @todo Switch a placeholder view if we don't have rows */ }
+				<Table
+					rows={ rows }
+					headers={ headers }
+					rowHeader={ rowHeader }
+					caption={ title }
+					sort={ query.order_by }
+					onSort={ onQueryChange( 'order_by' ) }
+				/>
+
+				{ summary && <TableSummary data={ summary } /> }
+
+				<Pagination
+					page={ parseInt( query.page ) || 1 }
+					perPage={ parseInt( query.per_page ) || 25 }
+					total={ 5000 }
+					onPageChange={ onQueryChange( 'page' ) }
+					onPerPageChange={ onQueryChange( 'per_page' ) }
+				/>
+			</Card>
+		);
+	}
+}
 
 TableCard.propTypes = {
 	headers: PropTypes.arrayOf( PropTypes.node ),
