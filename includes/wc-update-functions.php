@@ -1995,7 +1995,6 @@ function wc_update_350_order_product_lookup( $updater = false ) {
 
 	// Process orders untill close to running out of memory timeouts on large sites then requeue.
 	foreach ( $orders as $order_id ) {
-		$order_count++;
 		$order = wc_get_order( $order_id );
 		if ( ! $order ) {
 			continue;
