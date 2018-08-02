@@ -43,7 +43,6 @@ class WC_Reports_Data_Store {
 	 * Returns string to be used as cache key for the data.
 	 *
 	 * @param array $params Query parameters.
-	 *
 	 * @return string
 	 */
 	protected function get_cache_key( $params ) {
@@ -54,7 +53,6 @@ class WC_Reports_Data_Store {
 	 * Normalizes order_by clause to match to SQL query.
 	 *
 	 * @param string $order_by Order by option requeste by user.
-	 *
 	 * @return string
 	 */
 	protected function normalize_order_by( $order_by ) {
@@ -74,7 +72,6 @@ class WC_Reports_Data_Store {
 	 * @param DateTime $datetime_end End date.
 	 * @param string   $time_interval Time interval, e.g. day, week, month.
 	 * @param stdClass $data Data with SQL extracted intervals.
-	 *
 	 * @return stdClass
 	 */
 	protected function update_interval_boundary_dates( $datetime_start, $datetime_end, $time_interval, &$data ) {
@@ -102,22 +99,21 @@ class WC_Reports_Data_Store {
 	 * Fills where clause of SQL request for 'Totals' section of data response based on user supplied parameters.
 	 *
 	 * @param array $query_args Parameters supplied by the user.
-	 *
 	 * @return array
 	 */
 	protected function get_totals_sql_params( $query_args ) {
 		$totals_query['where_clause'] = '';
 
 		if ( isset( $query_args['before'] ) && '' !== $query_args['before'] ) {
-			$datetime                     = new DateTime( $query_args['before'] );
-			$datetime_str                 = $datetime->format( WC_Reports_Interval::$iso_datetime_format );
+			$datetime                      = new DateTime( $query_args['before'] );
+			$datetime_str                  = $datetime->format( WC_Reports_Interval::$iso_datetime_format );
 			$totals_query['where_clause'] .= " AND start_time <= '$datetime_str'";
 
 		}
 
 		if ( isset( $query_args['after'] ) && '' !== $query_args['after'] ) {
-			$datetime                     = new DateTime( $query_args['after'] );
-			$datetime_str                 = $datetime->format( WC_Reports_Interval::$iso_datetime_format );
+			$datetime                      = new DateTime( $query_args['after'] );
+			$datetime_str                  = $datetime->format( WC_Reports_Interval::$iso_datetime_format );
 			$totals_query['where_clause'] .= " AND start_time >= '$datetime_str'";
 		}
 
@@ -128,7 +124,6 @@ class WC_Reports_Data_Store {
 	 * Fills clauses of SQL request for 'Intervals' section of data response based on user supplied parameters.
 	 *
 	 * @param array $query_args Parameters supplied by the user.
-	 *
 	 * @return array
 	 */
 	protected function get_intervals_sql_params( $query_args ) {
@@ -136,15 +131,15 @@ class WC_Reports_Data_Store {
 		$intervals_query['where_clause'] = '';
 
 		if ( isset( $query_args['before'] ) && '' !== $query_args['before'] ) {
-			$datetime                        = new DateTime( $query_args['before'] );
-			$datetime_str                    = $datetime->format( WC_Reports_Interval::$iso_datetime_format );
+			$datetime                         = new DateTime( $query_args['before'] );
+			$datetime_str                     = $datetime->format( WC_Reports_Interval::$iso_datetime_format );
 			$intervals_query['where_clause'] .= " AND start_time <= '$datetime_str'";
 
 		}
 
 		if ( isset( $query_args['after'] ) && '' !== $query_args['after'] ) {
-			$datetime                        = new DateTime( $query_args['after'] );
-			$datetime_str                    = $datetime->format( WC_Reports_Interval::$iso_datetime_format );
+			$datetime                         = new DateTime( $query_args['after'] );
+			$datetime_str                     = $datetime->format( WC_Reports_Interval::$iso_datetime_format );
 			$intervals_query['where_clause'] .= " AND start_time >= '$datetime_str'";
 		}
 
