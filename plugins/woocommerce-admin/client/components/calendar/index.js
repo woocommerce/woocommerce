@@ -18,14 +18,11 @@ import 'react-dates/lib/css/_datepicker.css';
 /**
  * Internal dependencies
  */
-import { validateDateInputForRange } from 'lib/date';
 import DateInput from './input';
+import { isMobileViewport } from 'lib/ui';
 import phrases from './phrases';
+import { validateDateInputForRange } from 'lib/date';
 import './style.scss';
-
-// 782px is the width designated by Gutenberg's `</ Popover>` component.
-// * https://github.com/WordPress/gutenberg/blob/c8f8806d4465a83c1a0bc62d5c61377b56fa7214/components/popover/utils.js#L6
-const isMobileViewport = () => window.innerWidth < 782;
 
 class DateRange extends Component {
 	constructor( props ) {

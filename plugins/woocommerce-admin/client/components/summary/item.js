@@ -3,6 +3,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
+import { Button } from '@wordpress/components';
 import classnames from 'classnames';
 import Gridicon from 'gridicons';
 import { isUndefined } from 'lodash';
@@ -17,12 +18,16 @@ const SummaryNumber = ( {
 	delta,
 	href,
 	label,
+	onToggle,
 	prevLabel,
 	prevValue,
 	reverseTrend,
 	selected,
 	value,
 } ) => {
+	const liClasses = classnames( 'woocommerce-summary__item-container', {
+		'is-dropdown-button': onToggle,
+	} );
 	const classes = classnames( 'woocommerce-summary__item', {
 		'is-selected': selected,
 		'is-good-trend': reverseTrend ? delta < 0 : delta > 0,
@@ -40,9 +45,21 @@ const SummaryNumber = ( {
 		screenReaderLabel = sprintf( __( 'No change from %s', 'wc-admin' ), prevLabel );
 	}
 
+	const Container = onToggle ? Button : Link;
+	const containerProps = {
+		className: classes,
+		'aria-current': selected ? 'page' : null,
+	};
+	if ( ! onToggle ) {
+		containerProps.href = href;
+		containerProps.role = 'menuitem';
+	} else {
+		containerProps.onClick = onToggle;
+	}
+
 	return (
-		<li className="woocommerce-summary__item-container">
-			<Link className={ classes } href={ href }>
+		<li className={ liClasses }>
+			<Container { ...containerProps }>
 				<span className="woocommerce-summary__item-label">{ label }</span>
 
 				<span className="woocommerce-summary__item-data">
@@ -65,7 +82,11 @@ const SummaryNumber = ( {
 				<span className="woocommerce-summary__item-prev-value">
 					{ ! isUndefined( prevValue ) ? prevValue : __( 'N/A', 'wc-admin' ) }
 				</span>
-			</Link>
+
+				{ onToggle ? (
+					<Gridicon className="woocommerce-summary__toggle" icon="chevron-down" size={ 24 } />
+				) : null }
+			</Container>
 		</li>
 	);
 };
@@ -74,6 +95,7 @@ SummaryNumber.propTypes = {
 	delta: PropTypes.number,
 	href: PropTypes.string.isRequired,
 	label: PropTypes.string.isRequired,
+	onToggle: PropTypes.func,
 	prevLabel: PropTypes.string,
 	prevValue: PropTypes.oneOfType( [ PropTypes.number, PropTypes.string ] ),
 	reverseTrend: PropTypes.bool,

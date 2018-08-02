@@ -30,6 +30,7 @@ render: function() {
 * `value` (required): A string or number value to display - a string is allowed so we can accept currency formatting.
 * `href` (required): An internal link to the report focused on this number.
 * `delta`: A number to represent the percentage change since the last comparison period - positive numbers will show a green up arrow, negative numbers will show a red down arrow. If omitted, no change value will display.
+* `onToggle`: A function used to switch the given SummaryNumber to a button, and called on click.
 * `prevLabel`: A string description of the previous value's timeframe, ex "Previous Year:". Defaults to "Previous Period:".
 * `prevValue`: A string or number value to display - a string is allowed so we can accept currency formatting. If omitted, this section won't display.
 * `selected`: A boolean used to show a highlight style on this number. Defaults to false.

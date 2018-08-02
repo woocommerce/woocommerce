@@ -4,35 +4,69 @@
  */
 import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
+import { Children, cloneElement } from '@wordpress/element';
+import { Dropdown, NavigableMenu } from '@wordpress/components';
 import PropTypes from 'prop-types';
 import { uniqueId } from 'lodash';
 
 /**
  * Internal dependencies
  */
+import { isMobileViewport, isTabletViewport } from 'lib/ui';
 import './style.scss';
 
 const SummaryList = ( { children, label } ) => {
 	if ( ! label ) {
 		label = __( 'Performance Indicators', 'wc-admin' );
 	}
-	// We default to "one" because we can't have empty children. If `children` is just one item,
-	// it's not an array and .length is undefined.
-	let hasItemsClass = 'has-one-item';
-	if ( children && children.length ) {
-		const length = children.filter( Boolean ).length;
-		hasItemsClass = length < 10 ? `has-${ length }-items` : 'has-10-items';
-	}
-	const classes = classnames( 'woocommerce-summary', hasItemsClass );
+	const isDropdownBreakpoint = isTabletViewport() || isMobileViewport();
+
+	// We default to "one" because we can't have empty children.
+	const itemCount = Children.count( children ) || 1;
+	const hasItemsClass = itemCount < 10 ? `has-${ itemCount }-items` : 'has-10-items';
+	const classes = classnames( 'woocommerce-summary', {
+		[ hasItemsClass ]: ! isDropdownBreakpoint,
+	} );
 
 	const instanceId = uniqueId( 'woocommerce-summary-helptext-' );
-	return (
-		<nav aria-label={ label } aria-describedby={ instanceId }>
+	const menu = (
+		<NavigableMenu
+			aria-label={ label }
+			aria-describedby={ instanceId }
+			orientation={ isDropdownBreakpoint ? 'vertical' : 'horizontal' }
+			stopNavigationEvents
+		>
 			<p id={ instanceId } className="screen-reader-text">
-				{ __( 'View the report for the selected data point.', 'wc-admin' ) }
+				{ __(
+					'List of data points available for filtering. Use arrow keys to cycle through ' +
+						'the list. Click a data point for a detailed report.',
+					'wc-admin'
+				) }
 			</p>
 			<ul className={ classes }>{ children }</ul>
-		</nav>
+		</NavigableMenu>
+	);
+
+	// On large screens, or if there are not multiple SummaryNumbers, we'll display the plain list.
+	if ( ! isDropdownBreakpoint || itemCount < 2 ) {
+		return menu;
+	}
+
+	const items = Children.toArray( children );
+	const selected = items.find( item => !! item.props.selected );
+	if ( ! selected ) {
+		return menu;
+	}
+
+	return (
+		<Dropdown
+			className="woocommerce-summary"
+			position="bottom"
+			headerTitle={ label }
+			expandOnMobile
+			renderToggle={ ( { onToggle } ) => cloneElement( selected, { onToggle } ) }
+			renderContent={ () => menu }
+		/>
 	);
 };
 

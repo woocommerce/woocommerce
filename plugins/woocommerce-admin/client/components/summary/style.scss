@@ -38,12 +38,21 @@ $inner-border: $core-grey-light-500;
 }
 
 .woocommerce-summary {
+	margin: $gap 0;
 	display: grid;
 	border-width: 1px 0 0 1px;
 	border-style: solid;
 	border-color: $outer-border;
 	background-color: $core-grey-light-300;
 	box-shadow: inset -1px -1px 0 $outer-border;
+
+	.components-popover__content & {
+		max-height: 100%;
+		margin-top: 0;
+		margin-bottom: 0;
+		overflow-y: scroll;
+		border: none;
+	}
 
 	.woocommerce-summary__item-data {
 		display: flex;
@@ -116,6 +125,19 @@ $inner-border: $core-grey-light-500;
 			}
 		}
 	}
+
+	@include breakpoint( '<782px' ) {
+		.woocommerce-summary__item-container:only-child {
+			margin-left: -16px;
+			margin-right: -16px;
+			width: auto;
+
+			& .woocommerce-summary__item {
+				// Remove the border when the button is edge-to-edge
+				border-right: none;
+			}
+		}
+	}
 }
 
 .woocommerce-summary__item-container {
@@ -125,6 +147,15 @@ $inner-border: $core-grey-light-500;
 	&:last-of-type .woocommerce-summary__item {
 		// Make sure the last item always uses the outer-border color.
 		border-right-color: $outer-border !important;
+	}
+
+	&.is-dropdown-button {
+		padding: 0;
+		list-style: none;
+
+		.components-button {
+			text-align: left;
+		}
 	}
 }
 
@@ -146,7 +177,8 @@ $inner-border: $core-grey-light-500;
 	}
 
 	&:focus {
-		box-shadow: inset -2px -2px 0 $black, inset 2px 2px 0 $black;
+		// !important to override button styles
+		box-shadow: inset -2px -2px 0 $black, inset 2px 2px 0 $black !important;
 	}
 
 	&.is-selected {
@@ -154,7 +186,18 @@ $inner-border: $core-grey-light-500;
 		height: calc(100% + 1px); // Hack to avoid double border
 
 		&:focus {
-			box-shadow: inset -2px -2px 0 $black, inset 2px 2px 0 $black, inset 0 4px 0 $woocommerce;
+			// !important to override button styles
+			box-shadow: inset -2px -2px 0 $black, inset 2px 2px 0 $black, inset 0 4px 0 $woocommerce !important;
+		}
+	}
+
+	.is-dropdown-button & {
+		position: relative;
+		width: 100%;
+		padding-right: 2 * $gap + 24px;
+
+		@include breakpoint( '<782px' ) {
+			border-right: none;
 		}
 	}
 
@@ -219,6 +262,12 @@ $inner-border: $core-grey-light-500;
 	.woocommerce-summary__item-prev-value {
 		@include font-size( 13 );
 		color: $core-grey-dark-500;
+	}
+
+	.woocommerce-summary__toggle {
+		position: absolute;
+		top: 44px;
+		right: $gap;
 	}
 }
 
