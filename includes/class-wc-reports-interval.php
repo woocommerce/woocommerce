@@ -150,55 +150,6 @@ class WC_Reports_Interval {
 	}
 
 	/**
-	 * Calculates number of time intervals between two dates.
-	 *
-	 * @param string $start    Start date & time.
-	 * @param string $end      End date & time.
-	 * @param string $interval Time interval increment, e.g. hour, day, week.
-	 * @return int
-	 */
-	public static function intervals_between( $start, $end, $interval ) {
-		$start_datetime = new DateTime( $start );
-		$end_datetime   = new DateTime( $end );
-		$diff_timestamp = (int) $end_datetime->format( 'U' ) - (int) $start_datetime->format( 'U' );
-		$diff_datetime  = $end_datetime->diff( $start_datetime );
-
-		switch ( $interval ) {
-			case 'hour':
-				return (int) ceil( ( (int) $diff_timestamp ) / HOUR_IN_SECONDS );
-			case 'day':
-				return (int) ceil( ( (int) $diff_timestamp ) / DAY_IN_SECONDS );
-			case 'month':
-				$month_diff = $diff_datetime->m;
-				if ( $diff_datetime->d > 0 || $diff_datetime->h > 0 || $diff_datetime->i > 0 || $diff_datetime->s > 0 ) {
-					$month_diff++;
-				}
-				return $month_diff;
-			case 'querter':
-				$month_diff = $diff_datetime->m;
-				if ( $diff_datetime->d > 0 || $diff_datetime->h > 0 || $diff_datetime->i > 0 || $diff_datetime->s > 0 ) {
-					$month_diff++;
-				}
-				return (int) ceil( $month_diff / 3 );
-			case 'year':
-				$year_diff = $diff_datetime->y;
-				if ( $diff_datetime->m > 0 || $diff_datetime->d > 0 || $diff_datetime->h > 0 || $diff_datetime->i > 0 || $diff_datetime->s > 0 ) {
-					$year_diff++;
-				}
-				return $year_diff;
-			case 'week':
-				// TODO: optimize? approximately day count / 7, but year end is tricky, a week can have less days.
-				$week_count = 0;
-				do {
-					$start_datetime = WC_Reports_Interval::next_week_start( $start_datetime );
-					$week_count++;
-				} while ( $start_datetime <= $end_datetime );
-				return $week_count;
-		}
-		return 0;
-	}
-
-	/**
 	 * Returns a new DateTime object representing the next hour start.
 	 *
 	 * @param DateTime $datetime Date and time.

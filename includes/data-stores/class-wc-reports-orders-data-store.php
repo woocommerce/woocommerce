@@ -91,72 +91,6 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 		return $retyped_array;
 	}
 
-
-	/**
-	 * Returns expected number of items on the page in case of date ordering.
-	 *
-	 * @param $expected_interval_count
-	 * @param $items_per_page
-	 * @param $page_no
-	 *
-	 * @return float|int
-	 */
-	protected function expected_intervals_on_page( $expected_interval_count, $items_per_page, $page_no ) {
-		$total_pages = (int) ceil( $expected_interval_count / $items_per_page );
-		if ( $page_no < $total_pages ) {
-			return $items_per_page;
-		} elseif ( $page_no === $total_pages ) {
-			return $expected_interval_count - ( $page_no - 1 ) * $items_per_page;
-		} else {
-			return 0;
-		}
-	}
-
-	/**
-	 * Returns true if there are any intervals that need to be filled in the response.
-	 *
-	 * @param $expected_interval_count
-	 * @param $db_records
-	 * @param $items_per_page
-	 * @param $page_no
-	 * @param $order
-	 * @param $order_by
-	 * @param $intervals_count
-	 *
-	 * @return bool
-	 */
-	protected function intervals_missing( $expected_interval_count, $db_records, $items_per_page, $page_no, $order, $order_by, $intervals_count ) {
-		if ( $expected_interval_count > $db_records ) {
-			if ( 'date' === $order_by ) {
-				$expected_intervals_on_page = $this->expected_intervals_on_page( $expected_interval_count, $items_per_page, $page_no );
-				if ( $intervals_count < $expected_intervals_on_page ) {
-					return true;
-				} else {
-					return false;
-				}
-			} else {
-				if ( 'desc' === $order ) {
-					if ( $page_no > floor( $db_records / $items_per_page ) ) {
-						return true;
-					} else {
-						return false;
-					}
-				} elseif ( 'asc' === $order ) {
-					if ( $page_no <= ceil( ( $expected_interval_count - $db_records ) / $items_per_page ) ) {
-						return true;
-					} else {
-						return false;
-					}
-				} else {
-					// Invalid ordering.
-					return false;
-				}
-			}
-		} else {
-			return false;
-		}
-	}
-
 	/**
 	 * Returns the report data based on parameters supplied by the user.
 	 *
@@ -239,27 +173,25 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 
 			$totals = (object) $this->cast_numbers( $totals[0] );
 
-
-			$db_intervals = $wpdb->get_col(
-				"SELECT
-							{$intervals_query['select_clause']} AS time_interval
-						FROM
-							{$table_name}
-						WHERE
-							1=1
-							{$intervals_query['where_clause']}
-						GROUP BY
-							time_interval"
+			$db_interval_count = (int) $wpdb->get_var(
+				"SELECT COUNT(*) FROM (
+							SELECT
+								{$intervals_query['select_clause']} AS time_interval
+							FROM
+								{$table_name}
+							WHERE
+								1=1
+								{$intervals_query['where_clause']}
+							GROUP BY
+								time_interval
+				  			) AS tt"
 			); // WPCS: cache ok, DB call ok.
-			$db_interval_count       = count( $db_intervals );
-			$expected_interval_count = WC_Reports_Interval::intervals_between( $query_args['after'], $query_args['before'], $query_args['interval'] );
-			$total_pages             = (int) ceil( $expected_interval_count / $intervals_query['per_page'] );
+
+			$total_pages = (int) ceil( $db_interval_count / $intervals_query['per_page'] );
 
 			if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
 				return array();
 			}
-
-			$this->update_intervals_sql_params( $intervals_query, $query_args, $db_interval_count, $expected_interval_count );
 
 			if ( '' !== $selections ) {
 				$selections = ',' . $selections;
@@ -292,19 +224,12 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 			$data = (object) array(
 				'totals'    => $totals,
 				'intervals' => $intervals,
-				'total'     => $expected_interval_count,
+				'total'     => $db_interval_count,
 				'pages'     => $total_pages,
 				'page_no'   => (int) $query_args['page'],
 			);
 
-			if ( $this->intervals_missing( $expected_interval_count, $db_interval_count, $intervals_query['per_page'], $query_args['page'], $query_args['order'], $query_args['orderby'], count( $intervals ) ) ) {
-				$this->fill_in_missing_intervals( $db_intervals, $query_args['adj_after'], $query_args['adj_before'], $query_args['interval'], $data );
-				$this->sort_intervals( $data, $query_args['orderby'], $query_args['order'] );
-				$this->remove_extra_records( $data, $query_args['page'], $intervals_query['per_page'], $db_interval_count, $expected_interval_count, $query_args['orderby'] );
-			} else {
-				$this->update_dates( $query_args['adj_after'], $query_args['adj_before'], $query_args['interval'], $data );
-			}
-
+			$this->update_interval_boundary_dates( $query_args['after'], $query_args['before'], $query_args['interval'], $data );
 			wp_cache_set( $cache_key, $data, $this->cache_group );
 		}
 
@@ -455,19 +380,6 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 			'orders_net_total'      => 0.0,
 		);
 		$data = wp_parse_args( $data, $defaults );
-
-		// Don't store rows that don't have useful information.
-		if ( ! $data['num_orders'] ) {
-			return $wpdb->delete(
-				$table_name,
-				array(
-					'start_time' => $start_time,
-				),
-				array(
-					'%s',
-				)
-			);
-		}
 
 		// Update or add the information to the DB.
 		return $wpdb->replace(
