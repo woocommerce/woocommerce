@@ -65,6 +65,98 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 		}
 	}
 
+	protected function cast_numbers( $array ) {
+		$type_for = array(
+			'date_start'          => 'strval',
+			'date_end'            => 'strval',
+			'orders_count'        => 'intval',
+			'num_items_sold'      => 'intval',
+			'gross_revenue'       => 'floatval',
+			'coupons'             => 'floatval',
+			'refunds'             => 'floatval',
+			'taxes'               => 'floatval',
+			'shipping'            => 'floatval',
+			'net_revenue'         => 'floatval',
+			'avg_items_per_order' => 'floatval',
+			'avg_order_value'     => 'floatval',
+		);
+		$retyped_array = array();
+		foreach ( $array as $key => $value ) {
+			if ( isset( $type_for[ $key ] ) ) {
+				$retyped_array[ $key ] = $type_for[ $key ]( $value );
+			} else {
+				$retyped_array[ $key ] = $value;
+			}
+		}
+		return $retyped_array;
+	}
+
+
+	/**
+	 * Returns expected number of items on the page in case of date ordering.
+	 *
+	 * @param $expected_interval_count
+	 * @param $items_per_page
+	 * @param $page_no
+	 *
+	 * @return float|int
+	 */
+	protected function expected_intervals_on_page( $expected_interval_count, $items_per_page, $page_no ) {
+		$total_pages = (int) ceil( $expected_interval_count / $items_per_page );
+		if ( $page_no < $total_pages ) {
+			return $items_per_page;
+		} elseif ( $page_no === $total_pages ) {
+			return $expected_interval_count - ( $page_no - 1 ) * $items_per_page;
+		} else {
+			return 0;
+		}
+	}
+
+	/**
+	 * Returns true if there are any intervals that need to be filled in the response.
+	 *
+	 * @param $expected_interval_count
+	 * @param $db_records
+	 * @param $items_per_page
+	 * @param $page_no
+	 * @param $order
+	 * @param $order_by
+	 * @param $intervals_count
+	 *
+	 * @return bool
+	 */
+	protected function intervals_missing( $expected_interval_count, $db_records, $items_per_page, $page_no, $order, $order_by, $intervals_count ) {
+		if ( $expected_interval_count > $db_records ) {
+			if ( 'date' === $order_by ) {
+				$expected_intervals_on_page = $this->expected_intervals_on_page( $expected_interval_count, $items_per_page, $page_no );
+				if ( $intervals_count < $expected_intervals_on_page ) {
+					return true;
+				} else {
+					return false;
+				}
+			} else {
+				if ( 'desc' === $order ) {
+					if ( $page_no > floor( $db_records / $items_per_page ) ) {
+						return true;
+					} else {
+						return false;
+					}
+				} elseif ( 'asc' === $order ) {
+					if ( $page_no <= ceil( ( $expected_interval_count - $db_records ) / $items_per_page ) ) {
+						return true;
+					} else {
+						return false;
+					}
+				} else {
+					// Invalid ordering.
+					return false;
+				}
+			}
+		} else {
+			return false;
+		}
+	}
+
 	/**
 	 * Returns the report data based on parameters supplied by the user.
 	 *
@@ -73,15 +165,20 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 	 * @return array            Data.
 	 */
 	public function get_data( $query_args ) {
+		// TODO: split this humongous method.
 		global $wpdb;
 
+		$now       = new DateTime();
+		$week      = DateInterval::createFromDateString( '7 days' );
+		$week_back = $now->sub( $week );
+
 		$defaults = array(
-			'per_page' => get_option( 'posts_per_page' ), // not sure if this should be the default.
+			'per_page' => get_option( 'posts_per_page' ),
 			'page'     => 1,
 			'order'    => 'DESC',
 			'orderby'  => 'date',
-			'before'   => '',
-			'after'    => '',
+			'before'   => $now->format( WC_Reports_Interval::$iso_datetime_format ),
+			'after'    => $week_back->format( WC_Reports_Interval::$iso_datetime_format ),
 			'interval' => 'week',
 			'fields'   => '*',
 		);
@@ -95,18 +192,18 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 			$intervals_query = $this->get_intervals_sql_params( $query_args );
 
 			$selections = array(
-				'date_start'            => 'MIN(start_time) AS date_start',
-				'date_end'              => 'MAX(start_time) AS date_end',
-				'num_orders'            => 'SUM(num_orders) as num_orders',
-				'num_items_sold'        => 'SUM(num_items_sold) as num_items_sold',
-				'orders_gross_total'    => 'SUM(orders_gross_total) AS orders_gross_total',
-				'orders_coupon_total'   => 'SUM(orders_coupon_total) AS orders_coupon_total',
-				'orders_refund_total'   => 'SUM(orders_refund_total) AS orders_refund_total',
-				'orders_tax_total'      => 'SUM(orders_tax_total) AS orders_tax_total',
-				'orders_shipping_total' => 'SUM(orders_shipping_total) AS orders_shipping_total',
-				'orders_net_total'      => 'SUM(orders_net_total) AS orders_net_total',
-				'avg_items_per_order'   => 'num_items_sold / num_orders AS avg_items_per_order',
-				'avg_order_value'       => 'orders_gross_total / num_orders AS avg_order_value',
+				'date_start'          => 'MIN(start_time) AS date_start',
+				'date_end'            => 'MAX(start_time) AS date_end',
+				'orders_count'        => 'SUM(num_orders) as orders_count',
+				'num_items_sold'      => 'SUM(num_items_sold) as num_items_sold',
+				'gross_revenue'       => 'SUM(orders_gross_total) AS gross_revenue',
+				'coupons'             => 'SUM(orders_coupon_total) AS coupons',
+				'refunds'             => 'SUM(orders_refund_total) AS refunds',
+				'taxes'               => 'SUM(orders_tax_total) AS taxes',
+				'shipping'            => 'SUM(orders_shipping_total) AS shipping',
+				'net_revenue'         => 'SUM(orders_net_total) AS net_revenue',
+				'avg_items_per_order' => 'num_items_sold / num_orders AS avg_items_per_order',
+				'avg_order_value'     => 'orders_gross_total / num_orders AS avg_order_value',
 			);
 
 			if ( isset( $query_args['fields'] ) && is_array( $query_args['fields'] ) ) {
@@ -129,25 +226,40 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 							{$table_name}
 						WHERE
 							1=1
-							{$totals_query['where_clause']}"
+							{$totals_query['where_clause']}", ARRAY_A
 			); // WPCS: cache ok, DB call ok.
 
-			$db_records_within_interval = $wpdb->get_var(
-				"SELECT COUNT(*) FROM (
-							SELECT
-								{$intervals_query['select_clause']} AS time_interval
-							FROM
-								{$table_name}
-							WHERE
-								1=1
-								{$intervals_query['where_clause']}
-							GROUP BY
-								time_interval
-							LIMIT 0, {$intervals_query['per_page']}
-							) AS tt"
-			); // WPCS: cache ok, DB call ok.
+			if ( null === $totals ) {
+				return new WP_Error( 'woocommerce_reports_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ) );
+			}
 
-			$this->update_intervals_sql_params( $intervals_query, $db_records_within_interval );
+			// Specification says these are not included in totals.
+			unset( $totals[0]['date_start'] );
+			unset( $totals[0]['date_end'] );
+
+			$totals = (object) $this->cast_numbers( $totals[0] );
+
+
+			$db_intervals = $wpdb->get_col(
+				"SELECT
+							{$intervals_query['select_clause']} AS time_interval
+						FROM
+							{$table_name}
+						WHERE
+							1=1
+							{$intervals_query['where_clause']}
+						GROUP BY
+							time_interval"
+			); // WPCS: cache ok, DB call ok.
+			$db_interval_count       = count( $db_intervals );
+			$expected_interval_count = WC_Reports_Interval::intervals_between( $query_args['after'], $query_args['before'], $query_args['interval'] );
+			$total_pages             = (int) ceil( $expected_interval_count / $intervals_query['per_page'] );
+
+			if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
+				return array();
+			}
+
+			$this->update_intervals_sql_params( $intervals_query, $query_args, $db_interval_count, $expected_interval_count );
 
 			if ( '' !== $selections ) {
 				$selections = ',' . $selections;
@@ -165,27 +277,35 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 							time_interval
 						ORDER BY
 							{$intervals_query['order_by_clause']}
-						LIMIT {$intervals_query['offset']}, {$intervals_query['per_page']}"
+						{$intervals_query['limit']}", ARRAY_A
 			); // WPCS: cache ok, DB call ok.
 
-			if ( ! $totals || ! $intervals ) {
+			if ( null === $intervals ) {
 				return new WP_Error( 'woocommerce_reports_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ) );
 			}
 
-			$data = (object) array(
-				'totals'    => $totals[0],
-				'intervals' => $intervals,
-			);
-
-			if ( $db_records_within_interval < $intervals_query['per_page'] ) {
-				$this->fill_in_missing_intervals( $query_args['after'], $query_args['before'], $query_args['interval'], $data );
-				$this->sort_intervals( $data, $query_args['orderby'], $query_args['order'] );
-				$this->remove_extra_records( $data, $query_args['page'] - 1, $intervals_query['per_page'] );
-			} else {
-				$this->update_dates( $query_args['after'], $query_args['before'], $query_args['interval'], $data );
+			foreach ( $intervals as $key => $interval ) {
+				$intervals[ $key ] = (object) $this->cast_numbers( $interval );
 			}
 
-			wp_cache_set( $cache_key, $data, $this->cache_group, 3600 );
+
+			$data = (object) array(
+				'totals'    => $totals,
+				'intervals' => $intervals,
+				'total'     => $expected_interval_count,
+				'pages'     => $total_pages,
+				'page_no'   => (int) $query_args['page'],
+			);
+
+			if ( $this->intervals_missing( $expected_interval_count, $db_interval_count, $intervals_query['per_page'], $query_args['page'], $query_args['order'], $query_args['orderby'], count( $intervals ) ) ) {
+				$this->fill_in_missing_intervals( $db_intervals, $query_args['adj_after'], $query_args['adj_before'], $query_args['interval'], $data );
+				$this->sort_intervals( $data, $query_args['orderby'], $query_args['order'] );
+				$this->remove_extra_records( $data, $query_args['page'], $intervals_query['per_page'], $db_interval_count, $expected_interval_count, $query_args['orderby'] );
+			} else {
+				$this->update_dates( $query_args['adj_after'], $query_args['adj_before'], $query_args['interval'], $data );
+			}
+
+			wp_cache_set( $cache_key, $data, $this->cache_group );
 		}
 
 		return $data;
@@ -210,12 +330,12 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 		}
 
 		$start_time = strtotime( $oldest->get_date_created()->format( 'Y-m-d\TH:00:00O' ) );
-		$end_time = $start_time + HOUR_IN_SECONDS;
+		$end_time   = $start_time + HOUR_IN_SECONDS;
 
 		while ( $end_time < time() ) {
 			self::$background_process->push_to_queue( $start_time );
 			$start_time = $end_time;
-			$end_time = $start_time + HOUR_IN_SECONDS;
+			$end_time   = $start_time + HOUR_IN_SECONDS;
 		}
 
 		self::$background_process->save();

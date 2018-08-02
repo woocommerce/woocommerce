@@ -117,43 +117,43 @@ class WC_Reports_Data_Store {
 	/**
 	 * Fills in interval gaps from DB with 0-filled objects.
 	 *
+	 * @param array    $db_intervals   Array of all intervals present in the db.
 	 * @param DateTime $datetime_start Start date.
 	 * @param DateTime $datetime_end   End date.
 	 * @param string   $time_interval  Time interval, e.g. day, week, month.
 	 * @param stdClass $data           Data with SQL extracted intervals.
 	 * @return stdClass
 	 */
-	protected function fill_in_missing_intervals( $datetime_start, $datetime_end, $time_interval, &$data ) {
-		// TODO: this is incredibly basic for now,
-		// need to think about how to handle at least:
-		// - weeks starting on Saturday, Sunday, Monday, Wednesday, etc.
-		// - incorrect +1 month.
-		// - time zones, DST.
-		// - more?
+	protected function fill_in_missing_intervals( $db_intervals, $datetime_start, $datetime_end, $time_interval, &$data ) {
+		// TODO: this is ugly and messy.
 		// At this point, we don't know when we can stop iterating, as the ordering can be based on any value.
 		$end_datetime = new DateTime( $datetime_end );
 		$time_ids     = array_flip( wp_list_pluck( $data->intervals, 'time_interval' ) );
+		$db_intervals = array_flip( $db_intervals );
 		$datetime     = new DateTime( $datetime_start );
+
+		// Totals object used to get all needed properties.
+		$totals_arr = get_object_vars( $data->totals );
+		foreach ( $totals_arr as $key => $val ) {
+			$totals_arr[ $key ] = 0;
+		}
+
 		while ( $datetime <= $end_datetime ) {
 			$next_end = WC_Reports_Interval::iterate( $datetime, $time_interval );
-
-			$time_id      = WC_Reports_Interval::time_interval_id( $time_interval, $datetime );
+			$time_id  = WC_Reports_Interval::time_interval_id( $time_interval, $datetime );
+			// Either create fill-zero interval or use data from db.
 			$interval_end = ( $next_end > $end_datetime ? $end_datetime : $next_end )->format( 'Y-m-d H:i:s' );
 			if ( array_key_exists( $time_id, $time_ids ) ) {
 				$record             = $data->intervals[ $time_ids[ $time_id ] ];
 				$record->date_start = $datetime->format( 'Y-m-d H:i:s' );
 				$record->date_end   = $interval_end;
+			} elseif ( array_key_exists( $time_id, $db_intervals ) ) {
+				// Do nothing.
 			} else {
 				$record_arr                  = array();
 				$record_arr['time_interval'] = $time_id;
 				$record_arr['date_start']    = $datetime->format( 'Y-m-d H:i:s' );
 				$record_arr['date_end']      = $interval_end;
-
-				// Totals object used to get all needed properties.
-				$totals_arr = get_object_vars( $data->totals );
-				foreach ( $totals_arr as $key => $val ) {
-					$totals_arr[ $key ] = 0;
-				}
 
 				$data->intervals[] = (object) array_merge( $record_arr, $totals_arr );
 			}
@@ -196,12 +196,30 @@ class WC_Reports_Data_Store {
 	/**
 	 * Removes extra records from intervals so that only requested number of records get returned.
 	 *
-	 * @param stdClass $data   Data from whose intervals the records get removed.
-	 * @param int      $offset Offset requested by the user.
-	 * @param int      $count  Number of records requested by the user.
+	 * @param stdClass $data           Data from whose intervals the records get removed.
+	 * @param int      $page_no        Offset requested by the user.
+	 * @param int      $items_per_page Number of records requested by the user.
+	 * @param int      $db_interval_count
+	 * @param int      $expected_interval_count
+	 * @param string   $order_by
 	 */
-	protected function remove_extra_records( &$data, $offset, $count ) {
-		$data->intervals = array_slice( $data->intervals, $offset * $count, $count );
+	protected function remove_extra_records( &$data, $page_no, $items_per_page, $db_interval_count, $expected_interval_count, $order_by ) {
+		if ( 'date' === strtolower( $order_by ) ) {
+			$offset = 0;
+		} else {
+			$offset = ( $page_no - 1 ) * $items_per_page - $db_interval_count;
+			$offset = $offset < 0 ? 0 : $offset;
+		}
+
+		$count = $expected_interval_count - ( $page_no - 1 ) * $items_per_page;
+		if ( $count < 0 ) {
+			$count = 0;
+		} elseif ( $count > $items_per_page ) {
+			$count = $items_per_page;
+		}
+
+		$data->intervals = array_slice( $data->intervals, $offset, $count );
+
 	}
 
 	/**
@@ -214,14 +232,16 @@ class WC_Reports_Data_Store {
 		$totals_query['where_clause'] = '';
 
 		if ( isset( $query_args['before'] ) && '' !== $query_args['before'] ) {
-			$hour                          = $query_args['before'];
-			$totals_query['where_clause'] .= " AND start_time <= '$hour'";
+			$datetime                      = new DateTime( $query_args['before'] );
+			$datetime_str                  = $datetime->format( WC_Reports_Interval::$iso_datetime_format );
+			$totals_query['where_clause'] .= " AND start_time <= '$datetime_str'";
 
 		}
 
 		if ( isset( $query_args['after'] ) && '' !== $query_args['after'] ) {
-			$hour                          = $query_args['after'];
-			$totals_query['where_clause'] .= " AND start_time >= '$hour'";
+			$datetime                      = new DateTime( $query_args['after'] );
+			$datetime_str                  = $datetime->format( WC_Reports_Interval::$iso_datetime_format );
+			$totals_query['where_clause'] .= " AND start_time >= '$datetime_str'";
 		}
 
 		return $totals_query;
@@ -234,18 +254,20 @@ class WC_Reports_Data_Store {
 	 * @return array
 	 */
 	protected function get_intervals_sql_params( $query_args ) {
-		$intervals_query = array();
+		$intervals_query                 = array();
 		$intervals_query['where_clause'] = '';
 
 		if ( isset( $query_args['before'] ) && '' !== $query_args['before'] ) {
-			$hour                             = $query_args['before'];
-			$intervals_query['where_clause'] .= " AND start_time <= '$hour'";
+			$datetime                         = new DateTime( $query_args['before'] );
+			$datetime_str                     = $datetime->format( WC_Reports_Interval::$iso_datetime_format );
+			$intervals_query['where_clause'] .= " AND start_time <= '$datetime_str'";
 
 		}
 
 		if ( isset( $query_args['after'] ) && '' !== $query_args['after'] ) {
-			$hour                             = $query_args['after'];
-			$intervals_query['where_clause'] .= " AND start_time >= '$hour'";
+			$datetime                         = new DateTime( $query_args['after'] );
+			$datetime_str                     = $datetime->format( WC_Reports_Interval::$iso_datetime_format );
+			$intervals_query['where_clause'] .= " AND start_time >= '$datetime_str'";
 		}
 
 		if ( isset( $query_args['interval'] ) && '' !== $query_args['interval'] ) {
@@ -262,6 +284,8 @@ class WC_Reports_Data_Store {
 		if ( isset( $query_args['page'] ) ) {
 			$intervals_query['offset'] = ( (int) $query_args['page'] - 1 ) * $intervals_query['per_page'];
 		}
+
+		$intervals_query['limit'] = "LIMIT {$intervals_query['offset']}, {$intervals_query['per_page']}";
 
 		$intervals_query['order_by_clause'] = '';
 		if ( isset( $query_args['orderby'] ) ) {
@@ -283,12 +307,89 @@ class WC_Reports_Data_Store {
 	 * If there are less records in the database than time intervals, then we need to remap offset in SQL query
 	 * to fetch correct records.
 	 *
-	 * @param array $intervals_query            Array with clauses for the Intervals SQL query.
-	 * @param int   $db_records_within_interval Number of records in the db for requested time period.
+	 * @param array $intervals_query Array with clauses for the Intervals SQL query.
+	 * @param int   $db_records      Number of records in the db for requested time period.
 	 */
-	protected function update_intervals_sql_params( &$intervals_query, $db_records_within_interval ) {
-		$page_no                   = floor( ( $db_records_within_interval - 1 ) / $intervals_query['per_page'] ) + 1;
-		$intervals_query['offset'] = ( $page_no - 1 ) * $intervals_query['per_page'];
+	protected function update_intervals_sql_params( &$intervals_query, &$query_args, $db_interval_count, $expected_interval_count ) {
+		if ( $db_interval_count === $expected_interval_count ) {
+			return;
+		}
+
+		if ( 'date' === strtolower( $query_args['orderby'] ) ) {
+			// page X in request translates to slightly different dates in the db, in case some
+			// records are missing from the db.
+			if ( 'asc' === strtolower( $query_args['order'] ) ) {
+				// ORDER BY date ASC.
+				$new_start_date = new DateTime( $query_args['after'] );
+
+				$intervals_to_skip = ( $query_args['page'] - 1 ) * $intervals_query['per_page'];
+				$latest_end_date   = new DateTime( $query_args['before'] );
+				for ( $i = 0; $i < $intervals_to_skip; $i++ ) {
+					if ( $new_start_date > $latest_end_date ) {
+						$new_start_date = $latest_end_date;
+						break;
+					}
+					$new_start_date = WC_Reports_Interval::iterate( $new_start_date, $query_args['interval'] );
+				}
+
+				$new_end_date = clone $new_start_date;
+				for ( $i = 0; $i < $intervals_query['per_page']; $i++ ) {
+					if ( $new_end_date > $latest_end_date ) {
+						$new_end_date = $latest_end_date;
+						break;
+					}
+					$new_end_date = WC_Reports_Interval::iterate( $new_end_date, $query_args['interval'] );
+				}
+			} else {
+				// ORDER BY date DESC.
+				$new_end_date        = new DateTime( $query_args['before'] );
+				$intervals_to_skip   = ( $query_args['page'] - 1 ) * $intervals_query['per_page'];
+				$earliest_start_date = new DateTime( $query_args['after'] );
+				for ( $i = 0; $i < $intervals_to_skip; $i++ ) {
+					if ( $new_end_date < $earliest_start_date ) {
+						$new_end_date = $earliest_start_date;
+						break;
+					}
+					$new_end_date = WC_Reports_Interval::iterate( $new_end_date, $query_args['interval'], true );
+				}
+
+				$new_start_date = clone $new_end_date;
+
+				for ( $i = 0; $i < $intervals_query['per_page']; $i++ ) {
+					if ( $new_start_date < $earliest_start_date ) {
+						$new_start_date = $earliest_start_date;
+						break;
+					}
+					$new_start_date = WC_Reports_Interval::iterate( $new_start_date, $query_args['interval'], true );
+				}
+			}
+
+			$query_args['adj_after']  = $new_start_date->format( WC_Reports_Interval::$iso_datetime_format );
+			$query_args['adj_before'] = $new_end_date->format( WC_Reports_Interval::$iso_datetime_format );
+
+			$intervals_query['where_clause']  = '';
+			$intervals_query['where_clause'] .= " AND start_time <= '{$query_args['adj_before']}'";
+			$intervals_query['where_clause'] .= " AND start_time >= '{$query_args['adj_after']}'";
+			$intervals_query['limit']         = 'LIMIT 0,' . $intervals_query['per_page'];
+
+		} else {
+			if ( 'asc' === $query_args['order'] ) {
+				$offset = ( ( $query_args['page'] - 1 ) * $intervals_query['per_page'] ) - ( $expected_interval_count - $db_interval_count );
+				$offset = $offset < 0 ? 0 : $offset;
+
+				$count = $query_args['page'] * $intervals_query['per_page'] - ( $expected_interval_count - $db_interval_count );
+
+				if ( $count < 0 ) {
+					$count = 0;
+				} elseif ( $count > $intervals_query['per_page'] ) {
+					$count = $intervals_query['per_page'];
+				}
+				$intervals_query['limit'] = 'LIMIT ' . $offset . ',' . $count;
+			}
+			// Otherwise no change in limit clause.
+			$query_args['adj_after']  = $query_args['after'];
+			$query_args['adj_before'] = $query_args['before'];
+		}
 	}
 
 }

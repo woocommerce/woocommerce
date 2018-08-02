@@ -42,14 +42,14 @@ class WC_Reports_Revenue_Query extends WC_Reports_Query {
 			'fields' => array(
 				'date_start',
 				'date_end',
-				'num_orders',
+				'orders_count',
 				'num_items_sold',
-				'orders_gross_total',
-				'orders_coupon_total',
-				'orders_refund_total',
-				'orders_tax_total',
-				'orders_shipping_total',
-				'orders_net_total',
+				'gross_revenue',
+				'coupons',
+				'refunds',
+				'taxes',
+				'shipping',
+				'net_revenue',
 			),
 		);
 	}
