@@ -15,6 +15,13 @@ defined( 'ABSPATH' ) || exit;
 class WC_Reports_Interval {
 
 	/**
+	 * Format string for ISO DateTime formatter.
+	 *
+	 * @var string
+	 */
+	public static $iso_datetime_format = 'Y-m-d\TH:i:s\Z';
+
+	/**
 	 * Returns date format to be used as grouping clause in SQL.
 	 *
 	 * @param string $time_interval Time interval.
@@ -143,30 +150,81 @@ class WC_Reports_Interval {
 	}
 
 	/**
+	 * Calculates number of time intervals between two dates.
+	 *
+	 * @param string $start    Start date & time.
+	 * @param string $end      End date & time.
+	 * @param string $interval Time interval increment, e.g. hour, day, week.
+	 * @return int
+	 */
+	public static function intervals_between( $start, $end, $interval ) {
+		$start_datetime = new DateTime( $start );
+		$end_datetime   = new DateTime( $end );
+		$diff_timestamp = (int) $end_datetime->format( 'U' ) - (int) $start_datetime->format( 'U' );
+		$diff_datetime  = $end_datetime->diff( $start_datetime );
+
+		switch ( $interval ) {
+			case 'hour':
+				return (int) ceil( ( (int) $diff_timestamp ) / HOUR_IN_SECONDS );
+			case 'day':
+				return (int) ceil( ( (int) $diff_timestamp ) / DAY_IN_SECONDS );
+			case 'month':
+				$month_diff = $diff_datetime->m;
+				if ( $diff_datetime->d > 0 || $diff_datetime->h > 0 || $diff_datetime->i > 0 || $diff_datetime->s > 0 ) {
+					$month_diff++;
+				}
+				return $month_diff;
+			case 'querter':
+				$month_diff = $diff_datetime->m;
+				if ( $diff_datetime->d > 0 || $diff_datetime->h > 0 || $diff_datetime->i > 0 || $diff_datetime->s > 0 ) {
+					$month_diff++;
+				}
+				return (int) ceil( $month_diff / 3 );
+			case 'year':
+				$year_diff = $diff_datetime->y;
+				if ( $diff_datetime->m > 0 || $diff_datetime->d > 0 || $diff_datetime->h > 0 || $diff_datetime->i > 0 || $diff_datetime->s > 0 ) {
+					$year_diff++;
+				}
+				return $year_diff;
+			case 'week':
+				// TODO: optimize? approximately day count / 7, but year end is tricky, a week can have less days.
+				$week_count = 0;
+				do {
+					$start_datetime = WC_Reports_Interval::next_week_start( $start_datetime );
+					$week_count++;
+				} while ( $start_datetime <= $end_datetime );
+				return $week_count;
+		}
+		return 0;
+	}
+
+	/**
 	 * Returns a new DateTime object representing the next hour start.
 	 *
 	 * @param DateTime $datetime Date and time.
+	 * @param bool     $reversed Going backwards in time instead of forward.
 	 * @return DateTime
 	 */
-	public static function next_hour_start( $datetime ) {
-		// Ignoring leap seconds.
-		$timestamp          = (int) $datetime->format( 'U' );
-		$next_day_timestamp = ( floor( $timestamp / HOUR_IN_SECONDS ) + 1 ) * HOUR_IN_SECONDS;
-		$next_day           = new DateTime();
-		$next_day->setTimestamp( $next_day_timestamp );
-		return $next_day;
+	public static function next_hour_start( $datetime, $reversed = false ) {
+		$hour_increment         = $reversed ? -1 : 1;
+		$timestamp              = (int) $datetime->format( 'U' );
+		$hours_offset_timestamp = ( floor( $timestamp / HOUR_IN_SECONDS ) + $hour_increment ) * HOUR_IN_SECONDS;
+		$hours_offset_time      = new DateTime();
+		$hours_offset_time->setTimestamp( $hours_offset_timestamp );
+		return $hours_offset_time;
 	}
 
 	/**
 	 * Returns a new DateTime object representing the next day start.
 	 *
 	 * @param DateTime $datetime Date and time.
+	 * @param bool     $reversed Going backwards in time instead of forward.
 	 * @return DateTime
 	 */
-	public static function next_day_start( $datetime ) {
-		// Ignoring leap seconds.
+	public static function next_day_start( $datetime, $reversed = false ) {
+		$day_increment      = $reversed ? -1 : 1;
 		$timestamp          = (int) $datetime->format( 'U' );
-		$next_day_timestamp = ( floor( $timestamp / DAY_IN_SECONDS ) + 1 ) * DAY_IN_SECONDS;
+		$next_day_timestamp = ( floor( $timestamp / DAY_IN_SECONDS ) + $day_increment ) * DAY_IN_SECONDS;
 		$next_day           = new DateTime();
 		$next_day->setTimestamp( $next_day_timestamp );
 		return $next_day;
@@ -176,17 +234,24 @@ class WC_Reports_Interval {
 	 * Returns DateTime object representing the next week start.
 	 *
 	 * @param DateTime $datetime Date and time.
+	 * @param bool     $reversed Going backwards in time instead of forward.
 	 * @return DateTime
 	 */
-	public static function next_week_start( $datetime ) {
+	public static function next_week_start( $datetime, $reversed = false ) {
 		$first_day_of_week = absint( get_option( 'start_of_week' ) );
-
-		$initial_week_no = WC_Reports_Interval::week_number( $datetime, $first_day_of_week );
+		$initial_week_no   = WC_Reports_Interval::week_number( $datetime, $first_day_of_week );
 
 		do {
-			$datetime        = WC_Reports_Interval::next_day_start( $datetime );
+			$datetime        = WC_Reports_Interval::next_day_start( $datetime, $reversed );
 			$current_week_no = WC_Reports_Interval::week_number( $datetime, $first_day_of_week );
 		} while ( $current_week_no === $initial_week_no );
+
+		// The week boundary is actually next midnight when going in reverse, so set it to day -1 at 23:59:59.
+		if ( $reversed ) {
+			$timestamp            = (int) $datetime->format( 'U' );
+			$end_of_day_timestamp = floor( $timestamp / DAY_IN_SECONDS ) * DAY_IN_SECONDS + DAY_IN_SECONDS - 1;
+			$datetime->setTimestamp( $end_of_day_timestamp );
+		}
 
 		return $datetime;
 	}
@@ -195,11 +260,13 @@ class WC_Reports_Interval {
 	 * Returns a new DateTime object representing the next month start.
 	 *
 	 * @param DateTime $datetime Date and time.
+	 * @param bool     $reversed Going backwards in time instead of forward.
 	 * @return DateTime
 	 */
-	public static function next_month_start( $datetime ) {
-		$year  = $datetime->format( 'Y' );
-		$month = (int) $datetime->format( 'm' ) + 1;
+	public static function next_month_start( $datetime, $reversed = false ) {
+		$month_increment = $reversed ? -1 : 1;
+		$year            = $datetime->format( 'Y' );
+		$month           = (int) $datetime->format( 'm' ) + $month_increment;
 		if ( $month > 12 ) {
 			$month = 1;
 			$year++;
@@ -212,11 +279,13 @@ class WC_Reports_Interval {
 	 * Returns a new DateTime object representing the next quarter start.
 	 *
 	 * @param DateTime $datetime Date and time.
+	 * @param bool     $reversed Going backwards in time instead of forward.
 	 * @return DateTime
 	 */
-	public static function next_quarter_start( $datetime ) {
-		$year  = $datetime->format( 'Y' );
-		$month = (int) $datetime->format( 'm' ) + 3;
+	public static function next_quarter_start( $datetime, $reversed = false ) {
+		$month_increment = $reversed ? -3 : 3;
+		$year            = $datetime->format( 'Y' );
+		$month           = (int) $datetime->format( 'm' ) + $month_increment;
 		if ( $month > 12 ) {
 			$month = $month - 12;
 			$year++;
@@ -229,12 +298,14 @@ class WC_Reports_Interval {
 	 * Return a new DateTime object representing the next year start.
 	 *
 	 * @param DateTime $datetime Date and time.
+	 * @param bool     $reversed Going backwards in time instead of forward.
 	 * @return DateTime
 	 */
-	public static function next_year_start( $datetime ) {
-		$year  = (int) $datetime->format( 'Y' ) + 1;
-		$month = '01';
-		$day   = '01';
+	public static function next_year_start( $datetime, $reversed = false ) {
+		$year_increment = $reversed ? -1 : 1;
+		$year           = (int) $datetime->format( 'Y' ) + $year_increment;
+		$month          = '01';
+		$day            = '01';
 		return new DateTime( "$year-$month-$day 00:00:00" );
 	}
 
@@ -245,10 +316,11 @@ class WC_Reports_Interval {
 	 *
 	 * @param DateTime $datetime      Date and time.
 	 * @param string   $time_interval Time interval, e.g. week, day, hour.
+	 * @param bool     $reversed Going backwards in time instead of forward.
 	 * @return DateTime
 	 */
-	public static function iterate( $datetime, $time_interval ) {
-		return call_user_func( array( __CLASS__, "next_{$time_interval}_start" ), $datetime );
+	public static function iterate( $datetime, $time_interval, $reversed = false ) {
+		return call_user_func( array( __CLASS__, "next_{$time_interval}_start" ), $datetime, $reversed );
 	}
 
 }
