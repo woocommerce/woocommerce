@@ -144,15 +144,11 @@ class WC_Reports_Data_Store {
 			// Either create fill-zero interval or use data from db.
 			$interval_end = ( $next_end > $end_datetime ? $end_datetime : $next_end )->format( 'Y-m-d H:i:s' );
 			if ( array_key_exists( $time_id, $time_ids ) ) {
-				// Interval exists on another page.
-				if ( array_key_exists( $time_id, $db_intervals ) ) {
-					$datetime = $next_end;
-					continue;
-				}
-
 				$record             = $data->intervals[ $time_ids[ $time_id ] ];
 				$record->date_start = $datetime->format( 'Y-m-d H:i:s' );
 				$record->date_end   = $interval_end;
+			} elseif ( array_key_exists( $time_id, $db_intervals ) ) {
+				// Do nothing.
 			} else {
 				$record_arr                  = array();
 				$record_arr['time_interval'] = $time_id;
