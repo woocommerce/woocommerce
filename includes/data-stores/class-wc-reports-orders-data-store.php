@@ -92,36 +92,33 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 	 * @return array            Data.
 	 */
 	public function get_data( $query_args ) {
-		// TODO: split this humongous method.
 		global $wpdb;
 
-		$now       = new DateTime();
-		$week      = DateInterval::createFromDateString( '7 days' );
-		$week_back = $now->sub( $week );
+		$table_name = $wpdb->prefix . self::TABLE_NAME;
+		$now       = time();
+		$week_back = $now - WEEK_IN_SECONDS;
 
 		$defaults = array(
 			'per_page' => get_option( 'posts_per_page' ),
 			'page'     => 1,
 			'order'    => 'DESC',
 			'orderby'  => 'date',
-			'before'   => $now->format( WC_Reports_Interval::$iso_datetime_format ),
-			'after'    => $week_back->format( WC_Reports_Interval::$iso_datetime_format ),
+			'before'   => date( WC_Reports_Interval::$iso_datetime_format, $now ),
+			'after'    => date( WC_Reports_Interval::$iso_datetime_format, $week_back ),
 			'interval' => 'week',
+			'fields'   => '*',
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
 
 		$cache_key = $this->get_cache_key( $query_args );
 		$data      = wp_cache_get( $cache_key, $this->cache_group );
 
-		if ( true || false === $data ) {
-			$totals_query    = $this->get_totals_sql_params( $query_args );
-			$intervals_query = $this->get_intervals_sql_params( $query_args );
+		if ( false === $data ) {
 
-			// todo
 			$selections = array(
 				'date_start'          => 'MIN(date_created) AS date_start',
 				'date_end'            => 'MAX(date_created) AS date_end',
-				//'orders_count'        => 'SUM(num_orders) as orders_count',
+				'orders_count'        => 'COUNT(*) as orders_count',
 				'num_items_sold'      => 'SUM(num_items_sold) as num_items_sold',
 				'gross_revenue'       => 'SUM(gross_total) AS gross_revenue',
 				'coupons'             => 'SUM(coupon_total) AS coupons',
@@ -129,8 +126,8 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 				'taxes'               => 'SUM(tax_total) AS taxes',
 				'shipping'            => 'SUM(shipping_total) AS shipping',
 				'net_revenue'         => 'SUM(net_total) AS net_revenue',
-			//	'avg_items_per_order' => 'num_items_sold / num_orders AS avg_items_per_order',
-			//	'avg_order_value'     => 'gross_total / num_orders AS avg_order_value',
+				'avg_items_per_order' => 'AVG(num_items_sold) AS avg_items_per_order',
+				'avg_order_value'     => 'AVG(gross_total) AS avg_order_value',
 			);
 
 			if ( isset( $query_args['fields'] ) && is_array( $query_args['fields'] ) ) {
@@ -140,20 +137,22 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 						$keep[ $field ] = $selections[ $field ];
 					}
 				}
-				$selections = implode( ',', $keep );
+				$selections = implode( ', ', $keep );
 			} else {
-				$selections = implode( ',', $selections );
+				$selections = implode( ', ', $selections );
 			}
 
-			$table_name = $wpdb->prefix . self::TABLE_NAME;
-			$totals     = $wpdb->get_results(
+			$totals_query    = $this->get_totals_sql_params( $query_args );
+			$intervals_query = $this->get_intervals_sql_params( $query_args );
+
+			$totals = $wpdb->get_results(
 				"SELECT
-							{$selections}
-						FROM
-							{$table_name}
-						WHERE
-							1=1
-							{$totals_query['where_clause']}", ARRAY_A
+						{$selections}
+					FROM
+						{$table_name}
+					WHERE
+						1=1
+						{$totals_query['where_clause']}", ARRAY_A
 			); // WPCS: cache ok, DB call ok.
 
 			if ( null === $totals ) {
@@ -177,11 +176,10 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 								{$intervals_query['where_clause']}
 							GROUP BY
 								time_interval
-				  			) AS tt"
+					  		) AS tt"
 			); // WPCS: cache ok, DB call ok.
 
 			$total_pages = (int) ceil( $db_interval_count / $intervals_query['per_page'] );
-
 			if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
 				return array();
 			}
@@ -189,6 +187,7 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 			if ( '' !== $selections ) {
 				$selections = ',' . $selections;
 			}
+
 			$intervals = $wpdb->get_results(
 				"SELECT
 							{$intervals_query['select_clause']} AS time_interval

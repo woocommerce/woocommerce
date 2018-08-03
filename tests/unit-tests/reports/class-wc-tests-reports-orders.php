@@ -48,39 +48,40 @@ class WC_Tests_Reports_Orders extends WC_Unit_Test_Case {
 		$start_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getTimestamp() );
 		$end_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getTimestamp() + HOUR_IN_SECONDS );
 
-		$args = array();
+		$args = array( 'interval' => 'hour' );
 		$expected_stats = array(
 			'totals' => array(
-				'date_start'            => $start_time,
-				'date_end'              => $end_time,
-				'num_orders'            => '1',
-				'num_items_sold'        => '4',
-				'orders_gross_total'    => '97',
-				'orders_coupon_total'   => '20',
-				'orders_refund_total'   => '0',
-				'orders_tax_total'      => '7',
-				'orders_shipping_total' => '10',
-				'orders_net_total'      => '80',
-				'avg_items_per_order'   => '4.0000',
-				'avg_order_value'       => '97',
+				'orders_count'        => 1,
+				'num_items_sold'      => 4,
+				'avg_items_per_order' => 4,
+				'avg_order_value'     => 97,
+				'gross_revenue'       => 97,
+				'coupons'             => 20,
+				'refunds'             => 0,
+				'taxes'               => 7,
+				'shipping'            => 10,
+				'net_revenue'         => 80,
 			),
 			'intervals' => array(
 				array(
-					'time_interval'         => '',
-					'date_start'            => $start_time,
-					'date_end'              => $end_time,
-					'num_orders'            => '1',
-					'num_items_sold'        => '4',
-					'orders_gross_total'    => '97',
-					'orders_coupon_total'   => '20',
-					'orders_refund_total'   => '0',
-					'orders_tax_total'      => '7',
-					'orders_shipping_total' => '10',
-					'orders_net_total'      => '80',
-					'avg_order_value'       => '97',
-					'avg_items_per_order'   => '4.0000',
+					'time_interval'       => date( 'Y-m-d H', $order->get_date_created()->getTimestamp() ),
+					'date_start'          => $start_time,
+					'date_end'            => $end_time,
+					'orders_count'        => 1,
+					'num_items_sold'      => 4,
+					'avg_order_value'     => 97,
+					'avg_items_per_order' => 4,
+					'gross_revenue'       => 97,
+					'coupons'             => 20,
+					'refunds'             => 0,
+					'taxes'               => 7,
+					'shipping'            => 10,
+					'net_revenue'         => 80,
 				),
 			),
+			'total'   => 1,
+			'pages'   => 1,
+			'page_no' => 1,
 		);
 
 		// Test retrieving the stats from the data store.
