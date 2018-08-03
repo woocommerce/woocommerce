@@ -32,20 +32,20 @@ class WC_Reports_Interval {
 
 		if ( 1 === $first_day_of_week ) {
 			// Week begins on Monday, ISO 8601.
-			$week_format = "DATE_FORMAT(start_time, '%x-%v')";
+			$week_format = "DATE_FORMAT(date_created, '%x-%v')";
 		} else {
 			// Week begins on day other than specified by ISO 8601, needs to be in sync with function simple_week_number.
-			$week_format = "CONCAT(YEAR(start_time), '-', LPAD( FLOOR( ( DAYOFYEAR(start_time) + ( ( DATE_FORMAT(MAKEDATE(YEAR(start_time),1), '%w') - $first_day_of_week + 7 ) % 7 ) - 1 ) / 7  ) + 1 , 2, '0'))";
+			$week_format = "CONCAT(YEAR(date_created), '-', LPAD( FLOOR( ( DAYOFYEAR(date_created) + ( ( DATE_FORMAT(MAKEDATE(YEAR(date_created),1), '%w') - $first_day_of_week + 7 ) % 7 ) - 1 ) / 7  ) + 1 , 2, '0'))";
 
 		}
 
 		$mysql_date_format_mapping = array(
-			'hour'    => "DATE_FORMAT(start_time, '%Y-%m-%d %k')",
-			'day'     => "DATE_FORMAT(start_time, '%Y-%m-%d')",
+			'hour'    => "DATE_FORMAT(date_created, '%Y-%m-%d %k')",
+			'day'     => "DATE_FORMAT(date_created, '%Y-%m-%d')",
 			'week'    => $week_format,
-			'month'   => "DATE_FORMAT(start_time, '%Y-%m')",
-			'quarter' => "CONCAT(YEAR(start_time), '-', QUARTER(start_time))",
-			'year'    => 'YEAR(start_time)',
+			'month'   => "DATE_FORMAT(date_created, '%Y-%m')",
+			'quarter' => "CONCAT(YEAR(date_created), '-', QUARTER(date_created))",
+			'year'    => 'YEAR(date_created)',
 
 		);
 

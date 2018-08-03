@@ -22,6 +22,8 @@ class WC_Tests_Reports_Orders extends WC_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_populate_and_query() {
+				global $wpdb;
+
 		$this->reset_stats_db();
 
 		// Populate all of the data.
@@ -40,33 +42,17 @@ class WC_Tests_Reports_Orders extends WC_Unit_Test_Case {
 		$order->set_total( 97 ); // $25x4 products + $10 shipping - $20 discount + $7 tax.
 		$order->save();
 
-		// Test the calculations.
-		$start_time = time() - HOUR_IN_SECONDS;
-		$end_time = time() + 1;
-
 		$data_store = new WC_Reports_Orders_Data_Store();
+		$data_store::update( $order );
 
-		$data = $data_store::summarize_orders( $start_time, $end_time );
-
-		$expected_data = array(
-			'num_orders'            => 1,
-			'num_items_sold'        => 4,
-			'orders_gross_total'    => 97.0,
-			'orders_coupon_total'   => 20.0,
-			'orders_refund_total'   => 0.0,
-			'orders_tax_total'      => 7.0,
-			'orders_shipping_total' => 10.0,
-			'orders_net_total'      => 80.0,
-		);
-		$this->assertEquals( $expected_data, $data );
-
-		$data_store::update( $start_time, $data );
+		$start_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getTimestamp() );
+		$end_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getTimestamp() + HOUR_IN_SECONDS );
 
 		$args = array();
 		$expected_stats = array(
 			'totals' => array(
-				'date_start'            => date( 'Y-m-d H:00:00', $start_time ),
-				'date_end'              => date( 'Y-m-d H:00:00', $end_time ),
+				'date_start'            => $start_time,
+				'date_end'              => $end_time,
 				'num_orders'            => '1',
 				'num_items_sold'        => '4',
 				'orders_gross_total'    => '97',
@@ -81,8 +67,8 @@ class WC_Tests_Reports_Orders extends WC_Unit_Test_Case {
 			'intervals' => array(
 				array(
 					'time_interval'         => '',
-					'date_start'            => date( 'Y-m-d H:00:00', $start_time ),
-					'date_end'              => date( 'Y-m-d H:00:00', $end_time ),
+					'date_start'            => $start_time,
+					'date_end'              => $end_time,
 					'num_orders'            => '1',
 					'num_items_sold'        => '4',
 					'orders_gross_total'    => '97',
