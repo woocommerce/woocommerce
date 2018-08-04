@@ -51,7 +51,7 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 	 * Set up all the hooks for maintaining and populating table data.
 	 */
 	public static function init() {
-//		add_action( 'woocommerce_before_order_object_save', array( __CLASS__, 'queue_update_modified_orders' ) );
+		add_action( 'save_post', array( __CLASS__, 'sync_order' ) );
 
 		if ( ! self::$background_process ) {
 			self::$background_process = new WC_Order_Stats_Background_Process();
@@ -253,6 +253,24 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 	}
 
 	/**
+	 * Add order information to the lookup table when orders are created or modified.
+	 *
+	 * @param int $post_id Post ID.
+	 */
+	public static function sync_order( $post_id ) {
+		if ( 'shop_order' !== get_post_type( $post_id ) ) {
+			return;
+		}
+
+		$order = wc_get_order( $post_id );
+		if ( ! $order ) {
+			return;
+		}
+
+		self::update( $order );
+	}
+
+	/**
 	 * Update the database with stats data.
 	 *
 	 * @param WC_Order $order Order to update row for.
@@ -267,16 +285,23 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 			return false;
 		}
 
+		if ( ! in_array( $order->get_status(), self::get_report_order_statuses() ) ) {
+			$wpdb->delete( $table_name, array(
+				'order_id' => $order->get_id(),
+			) );
+			return;
+		}
+
 		$data = array(
-			'order_id' => $order->get_id(),
-			'date_created' => $order->get_date_created()->date( 'Y-m-d H:i:s' ),
+			'order_id'       => $order->get_id(),
+			'date_created'   => $order->get_date_created()->date( 'Y-m-d H:i:s' ),
 			'num_items_sold' => self::get_num_items_sold( $order ),
-			'gross_total' => $order->get_total(),
-			'coupon_total' => $order->get_total_discount(),
-			'refund_total' => $order->get_total_refunded(),
-			'tax_total' => $order->get_total_tax(),
+			'gross_total'    => $order->get_total(),
+			'coupon_total'   => $order->get_total_discount(),
+			'refund_total'   => $order->get_total_refunded(),
+			'tax_total'      => $order->get_total_tax(),
 			'shipping_total' => $order->get_shipping_total(),
-			'net_total' => $order->get_total() - $order->get_total_tax() - $order->get_shipping_total(),
+			'net_total'      => $order->get_total() - $order->get_total_tax() - $order->get_shipping_total(),
 		);
 
 		// Update or add the information to the DB.
