@@ -88,7 +88,6 @@ class WC_Regenerate_Images {
 				return image_get_intermediate_size( $attachment_id, array( absint( $size_data['width'] ), absint( $size_data['height'] ) ) );
 			}
 
-			return false;
 		}
 
 		return $data;
