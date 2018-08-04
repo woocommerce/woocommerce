@@ -74,5 +74,6 @@ class WC_Order_Stats_Background_Process extends WC_Background_Process {
 		}
 
 		WC_Reports_Orders_Data_Store::update( $order );
+		return false;
 	}
 }
