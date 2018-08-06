@@ -3,18 +3,17 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { Component, createRef } from '@wordpress/element';
+import { Component, createRef, Fragment } from '@wordpress/element';
 import classnames from 'classnames';
 import { IconButton } from '@wordpress/components';
+import { find, get, isEqual, noop, uniqueId } from 'lodash';
 import Gridicon from 'gridicons';
 import PropTypes from 'prop-types';
-import { isEqual, uniqueId } from 'lodash';
 
-const ASC = 'ascending';
-const DESC = 'descending';
+const ASC = 'asc';
+const DESC = 'desc';
 
 const getDisplay = cell => cell.display || null;
-const getValue = cell => cell.value || 0;
 
 class Table extends Component {
 	constructor( props ) {
@@ -22,11 +21,10 @@ class Table extends Component {
 		this.state = {
 			tabIndex: null,
 			rows: props.rows || [],
-			sortedBy: null,
-			sortDir: 'none',
 		};
 		this.container = createRef();
 		this.sortBy = this.sortBy.bind( this );
+		this.headersID = uniqueId( 'header-' );
 		this.captionID = uniqueId( 'caption-' );
 	}
 
@@ -50,38 +48,26 @@ class Table extends Component {
 		/* eslint-enable react/no-did-mount-set-state */
 	}
 
-	isColSortable( col ) {
-		const { rows: [ first ] } = this.props;
-		if ( ! first || ! first[ col ] ) {
-			return false;
-		}
-
-		return false !== first[ col ].value;
-	}
-
-	sortBy( col ) {
-		this.setState( prevState => {
-			// Set the sort direction as inverse of current state
-			const sortDir = prevState.sortDir === ASC ? DESC : ASC;
-			return {
-				rows: prevState.rows
-					.slice( 0 )
-					.sort(
-						( a, b ) =>
-							sortDir === ASC
-								? getValue( a[ col ] ) > getValue( b[ col ] )
-								: getValue( a[ col ] ) < getValue( b[ col ] )
-					),
-				sortedBy: col,
-				sortDir,
-			};
-		} );
+	sortBy( key ) {
+		const { headers, query } = this.props;
+		return () => {
+			const currentKey =
+				query.orderby || get( find( headers, { defaultSort: true } ), 'key', false );
+			const currentDir = query.order || DESC;
+			let dir = DESC;
+			if ( key === currentKey ) {
+				dir = DESC === currentDir ? ASC : DESC;
+			}
+			this.props.onSort( key, dir );
+		};
 	}
 
 	render() {
-		const { caption, classNames, headers, rowHeader } = this.props;
-		const { rows, sortedBy, sortDir, tabIndex } = this.state;
+		const { caption, classNames, headers, query, rowHeader } = this.props;
+		const { rows, tabIndex } = this.state;
 		const classes = classnames( 'woocommerce-table__table', classNames );
+		const sortedBy = query.orderby || get( find( headers, { defaultSort: true } ), 'key', false );
+		const sortDir = query.order || DESC;
 
 		return (
 			<div
@@ -99,39 +85,49 @@ class Table extends Component {
 					<tbody>
 						<tr>
 							{ headers.map( ( header, i ) => {
-								const isSortable = this.isColSortable( i );
+								const { isSortable, key, label } = header;
+								const thProps = {
+									className: classnames( 'woocommerce-table__header', {
+										'is-sortable': isSortable,
+										'is-sorted': sortedBy === key,
+									} ),
+								};
+								if ( isSortable ) {
+									thProps[ 'aria-sort' ] = 'none';
+									if ( sortedBy === key ) {
+										thProps[ 'aria-sort' ] = sortDir === ASC ? 'ascending' : 'descending';
+									}
+								}
+								// We only sort by ascending if the col is already sorted descending
+								const iconLabel =
+									sortedBy === key && sortDir !== ASC
+										? sprintf( __( 'Sort by %s in ascending order', 'wc-admin' ), label )
+										: sprintf( __( 'Sort by %s in descending order', 'wc-admin' ), label );
+
 								return (
-									<th
-										role="columnheader"
-										scope="col"
-										key={ i }
-										aria-sort={ sortedBy === i ? sortDir : 'none' }
-										className={ classnames( 'woocommerce-table__header', {
-											'is-sortable': isSortable,
-											'is-sorted': sortedBy === i,
-										} ) }
-									>
+									<th role="columnheader" scope="col" key={ i } { ...thProps }>
 										{ isSortable ? (
-											<IconButton
-												icon={
-													sortDir === ASC ? (
-														<Gridicon size={ 18 } icon="chevron-up" />
-													) : (
-														<Gridicon size={ 18 } icon="chevron-down" />
-													)
-												}
-												label={
-													sortDir !== ASC
-														? sprintf( __( 'Sort by %s in ascending order', 'wc-admin' ), header )
-														: sprintf( __( 'Sort by %s in descending order', 'wc-admin' ), header )
-												}
-												onClick={ () => this.sortBy( i ) }
-												isDefault
-											>
-												{ header }
-											</IconButton>
+											<Fragment>
+												<IconButton
+													icon={
+														sortedBy === key && sortDir === ASC ? (
+															<Gridicon size={ 18 } icon="chevron-up" />
+														) : (
+															<Gridicon size={ 18 } icon="chevron-down" />
+														)
+													}
+													aria-describedby={ `${ this.headersID }-${ i }` }
+													onClick={ this.sortBy( key ) }
+													isDefault
+												>
+													{ label }
+												</IconButton>
+												<span className="screen-reader-text" id={ `${ this.headersID }-${ i }` }>
+													{ iconLabel }
+												</span>
+											</Fragment>
 										) : (
-											header
+											label
 										) }
 									</th>
 								);
@@ -163,7 +159,17 @@ class Table extends Component {
 Table.propTypes = {
 	caption: PropTypes.string.isRequired,
 	className: PropTypes.string,
-	headers: PropTypes.arrayOf( PropTypes.node ),
+	headers: PropTypes.arrayOf(
+		PropTypes.shape( {
+			defaultSort: PropTypes.bool,
+			isSortable: PropTypes.bool,
+			key: PropTypes.string,
+			label: PropTypes.string,
+			required: PropTypes.bool,
+		} )
+	),
+	onSort: PropTypes.func,
+	query: PropTypes.object,
 	rows: PropTypes.arrayOf(
 		PropTypes.arrayOf(
 			PropTypes.shape( {
@@ -177,6 +183,8 @@ Table.propTypes = {
 
 Table.defaultProps = {
 	headers: [],
+	onSort: noop,
+	query: {},
 	rowHeader: 0,
 };
 

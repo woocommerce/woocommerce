@@ -32,12 +32,12 @@ render: function() {
 
 ### `TableCard` props
 
-* `headers`: An array of column headers
+* `headers`: An array of column headers (see `Table` props).
 * `onQueryChange`: A function which returns a callback function to update the query string for a given `param`.
 * `onClickDownload`: A callback function which handles then "download" button press. Optional, if not used, the button won't appear.
 * `query`: An object of the query parameters passed to the page, ex `{ page: 2, per_page: 5 }`.
-* `rows` (required): An array of arrays of display/value object pairs. `display` is used for rendering, strings or elements are best here. `value` is used for sorting, and should be a string or number. A column with `false` value will not be sortable.
-* `rowHeader`: Which column should be the row header, defaults to the first item (`0`) (but could be set to `1`, if the first col is checkboxes, for example). Set to false to disable row headers.
+* `rows` (required): An array of arrays of display/value object pairs (see `Table` props).
+* `rowHeader`: Which column should be the row header, defaults to the first item (`0`) (see `Table` props).
 * `summary`: An array of objects with `label` & `value` properties, which display in a line under the table. Optional, can be left off to show no summary.
 * `title` (required): The title used in the card header, also used as the caption for the content in this table
 
@@ -48,8 +48,14 @@ render: function() {
 
 * `caption` (required): A label for the content in this table
 * `className`: Optional additional classes
-* `headers`: An array of column headers
-* `rows` (required): An array of arrays of renderable elements, strings or numbers are best for sorting
+* `headers`: An array of column headers, as objects with the following properties:
+  * `headers[].defaultSort`: Boolean, true if this column is the default for sorting. Only one column should have this set.
+  * `headers[].isSortable`: Boolean, true if this column is sortable.
+  * `headers[].key`: The API parameter name for this column, passed to `orderby` when sorting via API.
+  * `headers[].label`: The display label for this column.
+  * `headers[].required`: Boolean, true if this column should always display in the table (not shown in toggle-able list).
+* `onSort`: A function called when sortable table headers are clicked, gets the `header.key` as argument.
+* `rows` (required): An array of arrays of display/value object pairs. `display` is used for rendering, strings or elements are best here. `value` is used for sorting, and should be a string or number. A column with `false` value will not be sortable.
 * `rowHeader`: Which column should be the row header, defaults to the first item (`0`) (but could be set to `1`, if the first col is checkboxes, for example). Set to false to disable row headers.
 
 ### `TableSummary` props

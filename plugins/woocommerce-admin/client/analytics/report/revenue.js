@@ -54,24 +54,70 @@ class RevenueReport extends Component {
 
 	/**
 	 * This function returns an event handler for the given `param`
+	 * @todo Move handling of this to a library?
 	 * @param {string} param The parameter in the querystring which should be updated (ex `page`, `per_page`)
 	 * @return {function} A callback which will update `param` to the passed value when called.
 	 */
 	onQueryChange( param ) {
-		return value => updateQueryString( { [ param ]: value } );
+		switch ( param ) {
+			case 'sort':
+				return ( key, dir ) => updateQueryString( { orderby: key, order: dir } );
+			default:
+				return value => updateQueryString( { [ param ]: value } );
+		}
 	}
 
 	getHeadersContent() {
 		return [
-			__( 'Select', 'wc-admin' ),
-			__( 'Date', 'wc-admin' ),
-			__( 'Orders', 'wc-admin' ),
-			__( 'Gross Revenue', 'wc-admin' ),
-			__( 'Refunds', 'wc-admin' ),
-			__( 'Coupons', 'wc-admin' ),
-			__( 'Taxes', 'wc-admin' ),
-			__( 'Shipping', 'wc-admin' ),
-			__( 'Net Revenue', 'wc-admin' ),
+			{
+				label: __( 'Date', 'wc-admin' ),
+				key: 'date_start',
+				required: true,
+				defaultSort: true,
+				isSortable: true,
+			},
+			{
+				label: __( 'Orders', 'wc-admin' ),
+				key: 'orders_count',
+				required: false,
+				isSortable: true,
+			},
+			{
+				label: __( 'Gross Revenue', 'wc-admin' ),
+				key: 'gross_revenue',
+				required: true,
+				isSortable: true,
+			},
+			{
+				label: __( 'Refunds', 'wc-admin' ),
+				key: 'refunds',
+				required: false,
+				isSortable: true,
+			},
+			{
+				label: __( 'Coupons', 'wc-admin' ),
+				key: 'coupons',
+				required: false,
+				isSortable: true,
+			},
+			{
+				label: __( 'Taxes', 'wc-admin' ),
+				key: 'taxes',
+				required: false,
+				isSortable: false, // For example
+			},
+			{
+				label: __( 'Shipping', 'wc-admin' ),
+				key: 'shipping',
+				required: false,
+				isSortable: true,
+			},
+			{
+				label: __( 'Net Revenue', 'wc-admin' ),
+				key: 'net_revenue',
+				required: false,
+				isSortable: true,
+			},
 		];
 	}
 
@@ -95,10 +141,6 @@ class RevenueReport extends Component {
 				</a>
 			);
 			return [
-				{
-					display: <input type="checkbox" />,
-					value: false,
-				},
 				{
 					display: formatDate( 'm/d/Y', row.date_start ),
 					value: row.date_start,
@@ -207,7 +249,6 @@ class RevenueReport extends Component {
 				<TableCard
 					title={ __( 'Revenue Last Week', 'wc-admin' ) }
 					rows={ rows }
-					rowHeader={ 1 }
 					headers={ headers }
 					onClickDownload={ noop }
 					onQueryChange={ this.onQueryChange }

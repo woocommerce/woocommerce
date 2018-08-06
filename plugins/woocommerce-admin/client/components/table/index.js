@@ -5,7 +5,7 @@
 import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { IconButton, ToggleControl } from '@wordpress/components';
-import { fill, isArray, first, noop } from 'lodash';
+import { fill, find, findIndex, first, isArray, noop } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
@@ -27,10 +27,22 @@ class TableCard extends Component {
 		this.toggleCols = this.toggleCols.bind( this );
 	}
 
-	toggleCols( col ) {
+	toggleCols( selected ) {
+		const { headers, query, onQueryChange } = this.props;
 		return () => {
+			// Handle hiding a sorted column
+			if ( query.orderby ) {
+				const sortBy = findIndex( headers, { key: query.orderby } );
+				if ( sortBy === selected ) {
+					const defaultSort = find( headers, { defaultSort: true } ) || first( headers ) || {};
+					onQueryChange( 'sort' )( defaultSort.key, 'desc' );
+				}
+			}
+
 			this.setState( prevState => ( {
-				showCols: prevState.showCols.map( ( toggled, i ) => ( col === i ? ! toggled : toggled ) ),
+				showCols: prevState.showCols.map(
+					( toggled, i ) => ( selected === i ? ! toggled : toggled )
+				),
 			} ) );
 		};
 	}
@@ -66,15 +78,20 @@ class TableCard extends Component {
 				menu={
 					<EllipsisMenu label={ __( 'Choose which values to display', 'wc-admin' ) }>
 						<MenuTitle>{ __( 'Columns:', 'wc-admin' ) }</MenuTitle>
-						{ allHeaders.map( ( label, i ) => (
-							<MenuItem key={ i } onInvoke={ this.toggleCols( i ) }>
-								<ToggleControl
-									label={ label }
-									checked={ !! showCols[ i ] }
-									onChange={ this.toggleCols( i ) }
-								/>
-							</MenuItem>
-						) ) }
+						{ allHeaders.map( ( { label, required }, i ) => {
+							if ( required ) {
+								return null;
+							}
+							return (
+								<MenuItem key={ i } onInvoke={ this.toggleCols( i ) }>
+									<ToggleControl
+										label={ label }
+										checked={ !! showCols[ i ] }
+										onChange={ this.toggleCols( i ) }
+									/>
+								</MenuItem>
+							);
+						} ) }
 					</EllipsisMenu>
 				}
 			>
@@ -84,8 +101,8 @@ class TableCard extends Component {
 					headers={ headers }
 					rowHeader={ rowHeader }
 					caption={ title }
-					sort={ query.order_by }
-					onSort={ onQueryChange( 'order_by' ) }
+					query={ query }
+					onSort={ onQueryChange( 'sort' ) }
 				/>
 
 				{ summary && <TableSummary data={ summary } /> }
@@ -103,7 +120,15 @@ class TableCard extends Component {
 }
 
 TableCard.propTypes = {
-	headers: PropTypes.arrayOf( PropTypes.node ),
+	headers: PropTypes.arrayOf(
+		PropTypes.shape( {
+			defaultSort: PropTypes.bool,
+			isSortable: PropTypes.bool,
+			key: PropTypes.string,
+			label: PropTypes.string,
+			required: PropTypes.bool,
+		} )
+	),
 	onQueryChange: PropTypes.func,
 	onClickDownload: PropTypes.func,
 	query: PropTypes.object,
