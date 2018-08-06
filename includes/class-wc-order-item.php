@@ -186,7 +186,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @param string $value Item name.
 	 */
 	public function set_name( $value ) {
-		$this->set_prop( 'name', wc_clean( $value ) );
+		$this->set_prop( 'name', wp_check_invalid_utf8( $value ) );
 	}
 
 	/*
