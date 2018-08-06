@@ -45,8 +45,8 @@ class WC_Tests_Reports_Orders extends WC_Unit_Test_Case {
 		$data_store = new WC_Reports_Orders_Data_Store();
 		$data_store::update( $order );
 
-		$start_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getTimestamp() );
-		$end_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getTimestamp() + HOUR_IN_SECONDS );
+		$start_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
+		$end_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() + HOUR_IN_SECONDS );
 
 		$args = array( 'interval' => 'hour' );
 		$expected_stats = array(
@@ -64,19 +64,23 @@ class WC_Tests_Reports_Orders extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'time_interval'       => date( 'Y-m-d H', $order->get_date_created()->getTimestamp() ),
-					'date_start'          => $start_time,
-					'date_end'            => $end_time,
-					'orders_count'        => 1,
-					'num_items_sold'      => 4,
-					'avg_order_value'     => 97,
-					'avg_items_per_order' => 4,
-					'gross_revenue'       => 97,
-					'coupons'             => 20,
-					'refunds'             => 0,
-					'taxes'               => 7,
-					'shipping'            => 10,
-					'net_revenue'         => 80,
+					'interval'       => 'hour',
+					'date_start'     => $start_time,
+					'date_start_gmt' => date( 'Y-m-d H:00:00', $order->get_date_created()->getTimestamp() ),
+					'date_end'       => $end_time,
+					'date_end_gmt'   => date( 'Y-m-d H:00:00', $order->get_date_created()->getTimestamp() + HOUR_IN_SECONDS ),
+					'subtotals'      => array(
+						'gross_revenue'       => 97,
+						'net_revenue'         => 80,
+						'coupons'             => 20,
+						'shipping'            => 10,
+						'taxes'               => 7,
+						'refunds'             => 0,
+						'orders_count'        => 1,
+						'num_items_sold'      => 4,
+						'avg_items_per_order' => 4,
+						'avg_order_value'     => 97,
+					),
 				),
 			),
 			'total'   => 1,
