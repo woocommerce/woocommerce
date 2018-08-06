@@ -22,6 +22,13 @@ class WC_Reports_Interval {
 	public static $iso_datetime_format = 'Y-m-d\TH:i:s\Z';
 
 	/**
+	 * Format string for use in SQL queries.
+	 *
+	 * @var string
+	 */
+	public static $sql_datetime_format = 'Y-m-d H:i:s';
+
+	/**
 	 * Returns date format to be used as grouping clause in SQL.
 	 *
 	 * @param string $time_interval Time interval.

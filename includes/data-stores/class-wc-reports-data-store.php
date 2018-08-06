@@ -37,7 +37,7 @@ class WC_Reports_Data_Store {
 	 *
 	 * @var string
 	 */
-	protected $table_name = '';
+	const TABLE_NAME = '';
 
 	/**
 	 * Returns string to be used as cache key for the data.
@@ -46,7 +46,7 @@ class WC_Reports_Data_Store {
 	 * @return string
 	 */
 	protected function get_cache_key( $params ) {
-		return 'woocommerce_' . $this->table_name . '_' . md5( wp_json_encode( $params ) . date( 'Y-m-d_H' ) );
+		return 'woocommerce_' . $this::TABLE_NAME . '_' . md5( wp_json_encode( $params ) );
 	}
 
 	/**
@@ -143,18 +143,21 @@ class WC_Reports_Data_Store {
 	 * @return array
 	 */
 	protected function get_totals_sql_params( $query_args ) {
-		$totals_query['where_clause'] = '';
+		$totals_query = array(
+			'from_clause'  => '',
+			'where_clause' => '',
+		);
 
 		if ( isset( $query_args['before'] ) && '' !== $query_args['before'] ) {
 			$datetime                      = new DateTime( $query_args['before'] );
-			$datetime_str                  = $datetime->format( WC_Reports_Interval::$iso_datetime_format );
+			$datetime_str                  = $datetime->format( WC_Reports_Interval::$sql_datetime_format );
 			$totals_query['where_clause'] .= " AND date_created <= '$datetime_str'";
 
 		}
 
 		if ( isset( $query_args['after'] ) && '' !== $query_args['after'] ) {
 			$datetime                      = new DateTime( $query_args['after'] );
-			$datetime_str                  = $datetime->format( WC_Reports_Interval::$iso_datetime_format );
+			$datetime_str                  = $datetime->format( WC_Reports_Interval::$sql_datetime_format );
 			$totals_query['where_clause'] .= " AND date_created >= '$datetime_str'";
 		}
 
@@ -168,19 +171,21 @@ class WC_Reports_Data_Store {
 	 * @return array
 	 */
 	protected function get_intervals_sql_params( $query_args ) {
-		$intervals_query                 = array();
-		$intervals_query['where_clause'] = '';
+		$intervals_query = array(
+			'from_clause'  => '',
+			'where_clause' => '',
+		);
 
 		if ( isset( $query_args['before'] ) && '' !== $query_args['before'] ) {
 			$datetime                         = new DateTime( $query_args['before'] );
-			$datetime_str                     = $datetime->format( WC_Reports_Interval::$iso_datetime_format );
+			$datetime_str                     = $datetime->format( WC_Reports_Interval::$sql_datetime_format );
 			$intervals_query['where_clause'] .= " AND date_created <= '$datetime_str'";
 
 		}
 
 		if ( isset( $query_args['after'] ) && '' !== $query_args['after'] ) {
 			$datetime                         = new DateTime( $query_args['after'] );
-			$datetime_str                     = $datetime->format( WC_Reports_Interval::$iso_datetime_format );
+			$datetime_str                     = $datetime->format( WC_Reports_Interval::$sql_datetime_format );
 			$intervals_query['where_clause'] .= " AND date_created >= '$datetime_str'";
 		}
 

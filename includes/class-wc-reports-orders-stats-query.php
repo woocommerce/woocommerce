@@ -52,9 +52,9 @@ class WC_Reports_Orders_Stats_Query extends WC_Reports_Query {
 	 * @return array
 	 */
 	public function get_data() {
-		$args    = apply_filters( 'woocommerce_reports_revenue_query_args', $this->get_query_vars() );
+		$args    = apply_filters( 'woocommerce_reports_orders_stats_query_args', $this->get_query_vars() );
 		$results = WC_Data_Store::load( $this::REPORT_NAME )->get_data( $args );
-		return apply_filters( 'woocommerce_reports_revenue_select_query', $results, $args );
+		return apply_filters( 'woocommerce_reports_orders_stats_select_query', $results, $args );
 	}
 
 }
