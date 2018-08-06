@@ -23,10 +23,12 @@ export default class Dashboard extends Component {
 				<Chart />
 				<div className="woocommerce-dashboard__columns">
 					<div>
-						<Card title={ __( 'Top Selling Products', 'wc-admin' ) } />
+						<Card title={ __( 'Column 1/1', 'wc-admin' ) } />
+						<Card title={ __( '1/2 Top Selling Products', 'wc-admin' ) } />
 					</div>
 					<div>
-						<Card title={ __( 'Orders', 'wc-admin' ) } />
+						<Card title={ __( 'Column 2/1 Orders', 'wc-admin' ) } />
+						<Card title={ __( 'Column 2/2', 'wc-admin' ) } />
 					</div>
 				</div>
 			</Fragment>
