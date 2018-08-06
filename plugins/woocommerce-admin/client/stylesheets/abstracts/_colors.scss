@@ -33,7 +33,6 @@ $core-grey-dark-900: #191e23;
 $gray-text: $core-grey-dark-500;
 
 // WooCommerce Purples
-$woocommerce: #95588a;
 $woocommerce-100: #ffd7ff;
 $woocommerce-200: #e2a5d7;
 $woocommerce-300: #c88bbd;
@@ -43,6 +42,7 @@ $woocommerce-600: #7c3f71;
 $woocommerce-700: #622557;
 $woocommerce-800: #490c3e;
 $woocommerce-900: #2f0024;
+$woocommerce: $woocommerce-500;
 
 // Gutenberg
 $button-hover: #fafafa;

@@ -312,3 +312,47 @@
 		}
 	}
 }
+
+.woocommerce-layout__notice-list-hide {
+	display: none;
+}
+
+@keyframes slideDown {
+	0% {
+		transform: translateY(-100%);
+		opacity: 0;
+	}
+	100% {
+		transform: translateY(0);
+		opacity: 1;
+	}
+}
+
+.woocommerce-layout__notice-list-show {
+	margin-top: 100px;
+	animation: slideDown;
+	animation-duration: 1s;
+
+	&.has-screen-meta-links {
+		display: inline-block;
+		width: 100%;
+	}
+
+	@include breakpoint( '<782px' ) {
+		margin-top: 115px;
+	}
+}
+
+#wp__notice-list-uncollapsed {
+	visibility: hidden;
+	margin: -2px 0 0;
+}
+
+#wp__notice-list {
+	padding-right: 20px;
+}
+
+.woocommerce-layout__notice-list .jitm-card {
+	margin: 5px 15px 2px;
+	padding: 1px 12px;
+}

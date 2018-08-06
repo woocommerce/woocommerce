@@ -1,0 +1,119 @@
+/** @format */
+// css resets some wp-admin specific rules so that the app fits better in the extension container
+.woocommerce-page {
+	.wrap {
+		margin: 0;
+	}
+
+	#wpcontent,
+	#wpbody-content {
+		padding: 0;
+		overflow-x: hidden !important;
+	}
+
+	@include breakpoint( '<782px' ) {
+		// WP breakpoint for mobile menu
+		.wp-responsive-open #wpbody {
+			right: -14.5em;
+		}
+	}
+
+	@include breakpoint( '>960px' ) {
+		#toplevel_page_woocommerce.menu-top > a:focus,
+		#toplevel_page_wcadmin--analytics.menu-top > a:focus {
+			padding-bottom: 1px;
+		}
+	}
+
+	.wp-has-current-submenu:after {
+		right: 0;
+		border: 8px solid transparent;
+		content: ' ';
+		height: 0;
+		width: 0;
+		position: absolute;
+		pointer-events: none;
+		border-right-color: #f1f1f1;
+		top: 0;
+		margin-top: 10px;
+
+		@include breakpoint( '<960px' ) {
+			border-width: 4px;
+			margin-top: 14px;
+		}
+	}
+}
+
+.woocommerce-layout * {
+	box-sizing: border-box;
+}
+
+#wpfooter {
+	display: none;
+}
+
+.wp-responsive-open {
+	.woocommerce-layout__header {
+		margin-left: 2px;
+	}
+
+	@include breakpoint( '<782px' ) {
+		.woocommerce-layout__activity-panel-wrapper.is-open,
+		.woocommerce-layout__activity-panel-tabs {
+			width: calc(100vw - 190px);
+		}
+	}
+}
+
+@include breakpoint( '<600px' ) {
+	#wpadminbar,
+	.jetpack-masterbar #wpadminbar {
+		position: fixed;
+	}
+}
+
+// Temporary fix for compability with the Jetpack masterbar
+// See https://github.com/Automattic/jetpack/issues/9608
+// !important rules overwrite some existing !important rules
+.jetpack-masterbar {
+	@include breakpoint( '<782px' ) {
+		&.wp-admin .wrap h1 {
+			padding-left: 0;
+		}
+
+		#wpadminbar li.menupop.my-sites {
+			margin-left: 55px;
+		}
+
+		#wpadminbar #wp-admin-bar-menu-toggle {
+			top: -5px;
+			left: -5px;
+			width: 60px;
+
+			.ab-icon:before {
+				color: $white;
+			}
+
+			a {
+				padding: 0 8px 4px 8px !important;
+			}
+
+			a:hover {
+				background: #333;
+			}
+		}
+
+		.wp-responsive-open #wpadminbar #wp-admin-bar-menu-toggle {
+			left: -5px;
+			width: 60px;
+
+			.ab-icon:before {
+				color: $white !important;
+			}
+
+			a {
+				background: #333;
+			}
+		}
+	}
+}

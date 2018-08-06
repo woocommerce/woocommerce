@@ -65,7 +65,7 @@ const webpackConfig = {
 						{
 							loader: 'sass-loader',
 							query: {
-								includePaths: [ 'client/stylesheets' ],
+								includePaths: [ 'client/stylesheets/abstracts' ],
 								data:
 									'@import "_colors"; ' +
 									'@import "_variables"; ' +

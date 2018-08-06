@@ -11,7 +11,7 @@ import 'react-dates/initialize';
 /**
  * Internal dependencies
  */
-import './stylesheets/_wpadmin-reset.scss';
+import './stylesheets/_index.scss';
 import { PageLayout } from './layout';
 import 'store';
 
