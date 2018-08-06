@@ -12,7 +12,7 @@ import './style.scss';
 import Header from 'layout/header';
 import StorePerformance from './store-performance';
 import Chart from 'components/chart';
-import Card from '../components/card';
+import Card from 'components/card';
 
 export default class Dashboard extends Component {
 	render() {
@@ -22,10 +22,10 @@ export default class Dashboard extends Component {
 				<StorePerformance />
 				<Chart />
 				<div className="woocommerce-dashboard__columns">
-					<div className="woocommerce-dashboard__column">
+					<div>
 						<Card title={ __( 'Top Selling Products', 'wc-admin' ) } />
 					</div>
-					<div className="woocommerce-dashboard__column">
+					<div>
 						<Card title={ __( 'Orders', 'wc-admin' ) } />
 					</div>
 				</div>
