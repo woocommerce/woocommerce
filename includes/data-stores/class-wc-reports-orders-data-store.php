@@ -58,10 +58,14 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 		}
 	}
 
+	/**
+	 * Casts strings returned from the database to appropriate data types for output.
+	 *
+	 * @param array $array Associative array of values extracted from the database.
+	 * @return array|WP_Error
+	 */
 	protected function cast_numbers( $array ) {
 		$type_for = array(
-			'date_start'          => 'strval',
-			'date_end'            => 'strval',
 			'orders_count'        => 'intval',
 			'num_items_sold'      => 'intval',
 			'gross_revenue'       => 'floatval',
@@ -98,6 +102,7 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 		$now       = time();
 		$week_back = $now - WEEK_IN_SECONDS;
 
+		// These defaults are only applied when not using REST API, as the API has its own defaults.
 		$defaults = array(
 			'per_page' => get_option( 'posts_per_page' ),
 			'page'     => 1,
@@ -116,8 +121,6 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 		if ( false === $data ) {
 
 			$selections = array(
-				'date_start'          => 'MIN(date_created) AS date_start',
-				'date_end'            => 'MAX(date_created) AS date_end',
 				'orders_count'        => 'COUNT(*) as orders_count',
 				'num_items_sold'      => 'SUM(num_items_sold) as num_items_sold',
 				'gross_revenue'       => 'SUM(gross_total) AS gross_revenue',
@@ -190,6 +193,7 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 
 			$intervals = $wpdb->get_results(
 				"SELECT
+							MAX(date_created) AS datetime_anchor,
 							{$intervals_query['select_clause']} AS time_interval
 							{$selections}
 						FROM
@@ -208,10 +212,8 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 				return new WP_Error( 'woocommerce_reports_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ) );
 			}
 
-			foreach ( $intervals as $key => $interval ) {
-				$intervals[ $key ] = (object) $this->cast_numbers( $interval );
-			}
-
+			$this->update_interval_boundary_dates( $query_args['after'], $query_args['before'], $query_args['interval'], $intervals );
+			$this->create_interval_subtotals( $intervals );
 
 			$data = (object) array(
 				'totals'    => $totals,
@@ -221,7 +223,7 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 				'page_no'   => (int) $query_args['page'],
 			);
 
-			$this->update_interval_boundary_dates( $query_args['after'], $query_args['before'], $query_args['interval'], $data );
+
 			wp_cache_set( $cache_key, $data, $this->cache_group );
 		}
 

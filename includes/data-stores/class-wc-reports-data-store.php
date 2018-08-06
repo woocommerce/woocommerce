@@ -71,28 +71,69 @@ class WC_Reports_Data_Store {
 	 * @param DateTime $datetime_start Start date.
 	 * @param DateTime $datetime_end End date.
 	 * @param string   $time_interval Time interval, e.g. day, week, month.
-	 * @param stdClass $data Data with SQL extracted intervals.
-	 * @return stdClass
+	 * @param array    $intervals Array of intervals extracted from SQL db.
 	 */
-	protected function update_interval_boundary_dates( $datetime_start, $datetime_end, $time_interval, &$data ) {
-		$end_datetime = new DateTime( $datetime_end );
-		$time_ids     = array_flip( wp_list_pluck( $data->intervals, 'time_interval' ) );
-		$datetime     = new DateTime( $datetime_start );
-		while ( $datetime <= $end_datetime ) {
-			$next_end = WC_Reports_Interval::iterate( $datetime, $time_interval );
+	protected function update_interval_boundary_dates( $datetime_start, $datetime_end, $time_interval, &$intervals ) {
+		foreach ( $intervals as $key => $interval ) {
+			$datetime = new DateTime( $interval['datetime_anchor'] );
+			$one_sec  = new DateInterval( 'PT1S' );
 
-			$time_id      = WC_Reports_Interval::time_interval_id( $time_interval, $datetime );
-			$interval_end = ( $next_end > $end_datetime ? $end_datetime : $next_end )->format( 'Y-m-d H:i:s' );
-			if ( array_key_exists( $time_id, $time_ids ) ) {
-				$record             = $data->intervals[ $time_ids[ $time_id ] ];
-				$record->date_start = $datetime->format( 'Y-m-d H:i:s' );
-				$record->date_end   = $interval_end;
+			$prev_start = WC_Reports_Interval::iterate( $datetime, $time_interval, true );
+			$prev_start->add( $one_sec );
+			if ( $datetime_start ) {
+				$start_datetime                  = new DateTime( $datetime_start );
+				$intervals[ $key ]['date_start'] = ( $prev_start < $start_datetime ? $start_datetime : $prev_start )->format( 'Y-m-d H:i:s' );
+			} else {
+				$intervals[ $key ]['date_start'] = $prev_start->format( 'Y-m-d H:i:s' );
 			}
 
-			$datetime = $next_end;
-		}
+			$next_end = WC_Reports_Interval::iterate( $datetime, $time_interval );
+			$next_end->sub( $one_sec );
+			if ( $datetime_end ) {
+				$end_datetime                  = new DateTime( $datetime_end );
+				$intervals[ $key ]['date_end'] = ( $next_end > $end_datetime ? $end_datetime : $next_end )->format( 'Y-m-d H:i:s' );
+			} else {
+				$intervals[ $key ]['date_end'] = $next_end->format( 'Y-m-d H:i:s' );
+			}
 
-		return $data;
+			$intervals[ $key ]['interval'] = $time_interval;
+		}
+	}
+
+	/**
+	 * Casts strings returned from the database to appropriate data types for output.
+	 *
+	 * @param array $array Associative array of values extracted from the database.
+	 * @return array|WP_Error
+	 */
+	protected function cast_numbers( $array ) {
+		/* translators: %s: Method name */
+		return new WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be overridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
+	}
+
+	/**
+	 * Change structure of intervals to form a correct response.
+	 *
+	 * @param array $intervals Time interval, e.g. day, week, month.
+	 */
+	protected function create_interval_subtotals( &$intervals ) {
+		foreach ( $intervals as $key => $interval ) {
+			// Move intervals result to subtotals object.
+			$intervals[ $key ] = array(
+				'interval'       => $interval['interval'],
+				'date_start'     => $interval['date_start'],
+				'date_start_gmt' => $interval['date_start'],
+				'date_end'       => $interval['date_end'],
+				'date_end_gmt'   => $interval['date_end'],
+			);
+
+			unset( $interval['interval'] );
+			unset( $interval['date_start'] );
+			unset( $interval['date_end'] );
+			unset( $interval['datetime_anchor'] );
+			unset( $interval['time_interval'] );
+			$intervals[ $key ]['subtotals'] = (object) $this->cast_numbers( $interval );
+		}
 	}
 
 	/**

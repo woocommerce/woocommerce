@@ -157,10 +157,15 @@ class WC_Reports_Interval {
 	 * @return DateTime
 	 */
 	public static function next_hour_start( $datetime, $reversed = false ) {
-		$hour_increment         = $reversed ? -1 : 1;
+		$hour_increment         = $reversed ? 0 : 1;
 		$timestamp              = (int) $datetime->format( 'U' );
 		$hours_offset_timestamp = ( floor( $timestamp / HOUR_IN_SECONDS ) + $hour_increment ) * HOUR_IN_SECONDS;
-		$hours_offset_time      = new DateTime();
+
+		if ( $reversed ) {
+			$hours_offset_timestamp --;
+		}
+
+		$hours_offset_time = new DateTime();
 		$hours_offset_time->setTimestamp( $hours_offset_timestamp );
 		return $hours_offset_time;
 	}
@@ -178,6 +183,14 @@ class WC_Reports_Interval {
 		$next_day_timestamp = ( floor( $timestamp / DAY_IN_SECONDS ) + $day_increment ) * DAY_IN_SECONDS;
 		$next_day           = new DateTime();
 		$next_day->setTimestamp( $next_day_timestamp );
+
+		// The day boundary is actually next midnight when going in reverse, so set it to day -1 at 23:59:59.
+		if ( $reversed ) {
+			$timestamp            = (int) $next_day->format( 'U' );
+			$end_of_day_timestamp = floor( $timestamp / DAY_IN_SECONDS ) * DAY_IN_SECONDS + DAY_IN_SECONDS - 1;
+			$next_day->setTimestamp( $end_of_day_timestamp );
+		}
+
 		return $next_day;
 	}
 
@@ -215,15 +228,26 @@ class WC_Reports_Interval {
 	 * @return DateTime
 	 */
 	public static function next_month_start( $datetime, $reversed = false ) {
-		$month_increment = $reversed ? -1 : 1;
+		$month_increment = 1;
 		$year            = $datetime->format( 'Y' );
-		$month           = (int) $datetime->format( 'm' ) + $month_increment;
-		if ( $month > 12 ) {
-			$month = 1;
-			$year++;
+		$month           = (int) $datetime->format( 'm' );
+
+		if ( $reversed ) {
+			$beg_of_month_datetime       = new DateTime( "$year-$month-01 00:00:00" );
+			$timestamp                   = (int) $beg_of_month_datetime->format( 'U' );
+			$end_of_prev_month_timestamp = $timestamp - 1;
+			$datetime->setTimestamp( $end_of_prev_month_timestamp );
+		} else {
+			$month += $month_increment;
+			if ( $month > 12 ) {
+				$month = 1;
+				$year ++;
+			}
+			$day      = '01';
+			$datetime = new DateTime( "$year-$month-$day 00:00:00" );
 		}
-		$day = '01';
-		return new DateTime( "$year-$month-$day 00:00:00" );
+
+		return $datetime;
 	}
 
 	/**
@@ -234,15 +258,31 @@ class WC_Reports_Interval {
 	 * @return DateTime
 	 */
 	public static function next_quarter_start( $datetime, $reversed = false ) {
-		$month_increment = $reversed ? -3 : 3;
+		$month_increment = 3;
 		$year            = $datetime->format( 'Y' );
-		$month           = (int) $datetime->format( 'm' ) + $month_increment;
-		if ( $month > 12 ) {
-			$month = $month - 12;
-			$year++;
+		$month           = (int) $datetime->format( 'm' );
+
+		if ( $reversed ) {
+			$month += -1 * $month_increment;
+			if ( $month < 1 ) {
+				$month = $month + 12;
+				$year --;
+			}
+			$beg_of_month_datetime       = new DateTime( "$year-$month-01 00:00:00" );
+			$timestamp                   = (int) $beg_of_month_datetime->format( 'U' );
+			$end_of_prev_month_timestamp = $timestamp - 1;
+			$datetime->setTimestamp( $end_of_prev_month_timestamp );
+		} else {
+			$month += $month_increment;
+			if ( $month > 12 ) {
+				$month = 1;
+				$year ++;
+			}
+			$day      = '01';
+			$datetime = new DateTime( "$year-$month-$day 00:00:00" );
 		}
-		$day = '01';
-		return new DateTime( "$year-$month-$day 00:00:00" );
+
+		return $datetime;
 	}
 
 	/**
@@ -253,11 +293,22 @@ class WC_Reports_Interval {
 	 * @return DateTime
 	 */
 	public static function next_year_start( $datetime, $reversed = false ) {
-		$year_increment = $reversed ? -1 : 1;
-		$year           = (int) $datetime->format( 'Y' ) + $year_increment;
+		$year_increment = 1;
+		$year           = (int) $datetime->format( 'Y' );
 		$month          = '01';
 		$day            = '01';
-		return new DateTime( "$year-$month-$day 00:00:00" );
+
+		if ( $reversed ) {
+			$datetime                   = new DateTime( "$year-$month-$day 00:00:00" );
+			$timestamp                  = (int) $datetime->format( 'U' );
+			$end_of_prev_year_timestamp = $timestamp - 1;
+			$datetime->setTimestamp( $end_of_prev_year_timestamp );
+		} else {
+			$year    += $year_increment;
+			$datetime = new DateTime( "$year-$month-$day 00:00:00" );
+		}
+
+		return $datetime;
 	}
 
 	/**
