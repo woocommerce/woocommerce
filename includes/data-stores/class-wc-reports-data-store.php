@@ -107,14 +107,14 @@ class WC_Reports_Data_Store {
 		if ( isset( $query_args['before'] ) && '' !== $query_args['before'] ) {
 			$datetime                      = new DateTime( $query_args['before'] );
 			$datetime_str                  = $datetime->format( WC_Reports_Interval::$iso_datetime_format );
-			$totals_query['where_clause'] .= " AND start_time <= '$datetime_str'";
+			$totals_query['where_clause'] .= " AND date_created <= '$datetime_str'";
 
 		}
 
 		if ( isset( $query_args['after'] ) && '' !== $query_args['after'] ) {
 			$datetime                      = new DateTime( $query_args['after'] );
 			$datetime_str                  = $datetime->format( WC_Reports_Interval::$iso_datetime_format );
-			$totals_query['where_clause'] .= " AND start_time >= '$datetime_str'";
+			$totals_query['where_clause'] .= " AND date_created >= '$datetime_str'";
 		}
 
 		return $totals_query;
@@ -133,14 +133,14 @@ class WC_Reports_Data_Store {
 		if ( isset( $query_args['before'] ) && '' !== $query_args['before'] ) {
 			$datetime                         = new DateTime( $query_args['before'] );
 			$datetime_str                     = $datetime->format( WC_Reports_Interval::$iso_datetime_format );
-			$intervals_query['where_clause'] .= " AND start_time <= '$datetime_str'";
+			$intervals_query['where_clause'] .= " AND date_created <= '$datetime_str'";
 
 		}
 
 		if ( isset( $query_args['after'] ) && '' !== $query_args['after'] ) {
 			$datetime                         = new DateTime( $query_args['after'] );
 			$datetime_str                     = $datetime->format( WC_Reports_Interval::$iso_datetime_format );
-			$intervals_query['where_clause'] .= " AND start_time >= '$datetime_str'";
+			$intervals_query['where_clause'] .= " AND date_created >= '$datetime_str'";
 		}
 
 		if ( isset( $query_args['interval'] ) && '' !== $query_args['interval'] ) {
