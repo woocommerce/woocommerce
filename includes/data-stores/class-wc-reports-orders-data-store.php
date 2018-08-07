@@ -196,7 +196,7 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 			'fields'       => '*',
 			'categories'   => array(),
 			'coupons'      => array(),
-			'order_status' => 'completed',
+			'order_status' => self::get_report_order_statuses(),
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
 
