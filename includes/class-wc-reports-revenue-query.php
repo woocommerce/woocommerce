@@ -25,16 +25,16 @@ defined( 'ABSPATH' ) || exit;
  */
 class WC_Reports_Revenue_Query extends WC_Reports_Query {
 
+	const REPORT_NAME = 'report-revenue-stats';
+
 	/**
-	 * Valid query vars for Revenue report.
+	 * Valid fields for Revenue report.
 	 *
 	 * @return array
 	 */
 	protected function get_default_query_vars() {
 		return array(
 			'fields' => array(
-				'date_start',
-				'date_end',
 				'orders_count',
 				'num_items_sold',
 				'gross_revenue',
@@ -54,7 +54,7 @@ class WC_Reports_Revenue_Query extends WC_Reports_Query {
 	 */
 	public function get_data() {
 		$args    = apply_filters( 'woocommerce_reports_revenue_query_args', $this->get_query_vars() );
-		$results = WC_Data_Store::load( 'revenue-report' )->get_data( $args );
+		$results = WC_Data_Store::load( $this::REPORT_NAME )->get_data( $args );
 		return apply_filters( 'woocommerce_reports_revenue_select_query', $results, $args );
 	}
 

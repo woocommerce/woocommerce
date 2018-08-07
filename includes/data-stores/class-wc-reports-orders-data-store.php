@@ -58,10 +58,14 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 		}
 	}
 
+	/**
+	 * Casts strings returned from the database to appropriate data types for output.
+	 *
+	 * @param array $array Associative array of values extracted from the database.
+	 * @return array|WP_Error
+	 */
 	protected function cast_numbers( $array ) {
-		$type_for = array(
-			'date_start'          => 'strval',
-			'date_end'            => 'strval',
+		$type_for      = array(
 			'orders_count'        => 'intval',
 			'num_items_sold'      => 'intval',
 			'gross_revenue'       => 'floatval',
@@ -85,6 +89,88 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 	}
 
 	/**
+	 * Returns an array of products belonging to given categories.
+	 *
+	 * @param $categories
+	 * @return array|stdClass
+	 */
+	protected function get_products_by_cat_ids( $categories ) {
+		$product_categories = get_categories( array(
+			'hide_empty' => 0,
+			'taxonomy'   => 'product_cat',
+		) );
+		$cat_slugs          = array();
+		$categories         = array_flip( $categories );
+		foreach ( $product_categories as $product_cat ) {
+			if ( key_exists( $product_cat->cat_ID, $categories ) ) {
+				$cat_slugs[] = $product_cat->slug;
+			}
+		}
+		$args = array(
+			'category' => $cat_slugs,
+			'limit'    => -1,
+		);
+		return wc_get_products( $args );
+	}
+
+	/**
+	 * Updates the totals and intervals database queries with parameters used for Orders report: categories, coupons and order status.
+	 *
+	 * @param array $query_args      Query arguments supplied by the user.
+	 * @param array $totals_query    Array of options for totals db query.
+	 * @param array $intervals_query Array of options for intervals db query.
+	 */
+	protected function orders_stats_sql_filter( $query_args, &$totals_query, &$intervals_query ) {
+		// TODO: performance of all of this?
+		global $wpdb;
+
+		$where_clause = '';
+		$from_clause  = '';
+
+		$orders_stats_table = $wpdb->prefix . self::TABLE_NAME;
+		if ( count( $query_args['categories'] ) > 0 ) {
+			$allowed_products     = $this->get_products_by_cat_ids( $query_args['categories'] );
+			$allowed_product_ids  = wp_list_pluck( $allowed_products, 'id' );
+			$allowed_products_str = implode( ',', $allowed_product_ids );
+
+			$where_clause .= " AND {$orders_stats_table}.order_id IN ( 
+			SELECT 
+				DISTINCT {$wpdb->prefix}wc_order_product_lookup.order_id
+			FROM 
+				{$wpdb->prefix}wc_order_product_lookup
+			WHERE 
+				{$wpdb->prefix}wc_order_product_lookup.product_id IN ({$allowed_products_str})
+			)";
+		}
+
+		if ( count( $query_args['coupons'] ) > 0 ) {
+			$allowed_coupons_str = implode( ', ', $query_args['coupons'] );
+
+			$where_clause .= " AND {$orders_stats_table}.order_id IN ( 
+			SELECT 
+				DISTINCT {$wpdb->prefix}wc_order_coupon_lookup.order_id
+			FROM 
+				{$wpdb->prefix}wc_order_coupon_lookup
+			WHERE 
+				{$wpdb->prefix}wc_order_coupon_lookup.coupon_id IN ({$allowed_coupons_str})
+			)";
+		}
+
+		if ( '' !== $query_args['order_status'] ) {
+			$from_clause  .= " JOIN {$wpdb->prefix}posts ON {$orders_stats_table}.order_id = {$wpdb->prefix}posts.ID";
+			$where_clause .= " AND {$wpdb->prefix}posts.post_status = 'wc-{$query_args['order_status']}'";
+		}
+
+		// To avoid requesting the subqueries twice, the result is applied to all queries passed to the method.
+		$totals_query['where_clause']    .= $where_clause;
+		$totals_query['from_clause']     .= $from_clause;
+		$intervals_query['where_clause'] .= $where_clause;
+		$intervals_query['from_clause']  .= $from_clause;
+
+	}
+
+
+	/**
 	 * Returns the report data based on parameters supplied by the user.
 	 *
 	 * @since 3.5.0
@@ -95,18 +181,22 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 		global $wpdb;
 
 		$table_name = $wpdb->prefix . self::TABLE_NAME;
-		$now       = time();
-		$week_back = $now - WEEK_IN_SECONDS;
+		$now        = time();
+		$week_back  = $now - WEEK_IN_SECONDS;
 
-		$defaults = array(
-			'per_page' => get_option( 'posts_per_page' ),
-			'page'     => 1,
-			'order'    => 'DESC',
-			'orderby'  => 'date',
-			'before'   => date( WC_Reports_Interval::$iso_datetime_format, $now ),
-			'after'    => date( WC_Reports_Interval::$iso_datetime_format, $week_back ),
-			'interval' => 'week',
-			'fields'   => '*',
+		// These defaults are only applied when not using REST API, as the API has its own defaults that overwrite these.
+		$defaults   = array(
+			'per_page'     => get_option( 'posts_per_page' ),
+			'page'         => 1,
+			'order'        => 'DESC',
+			'orderby'      => 'date',
+			'before'       => date( WC_Reports_Interval::$iso_datetime_format, $now ),
+			'after'        => date( WC_Reports_Interval::$iso_datetime_format, $week_back ),
+			'interval'     => 'week',
+			'fields'       => '*',
+			'categories'   => array(),
+			'coupons'      => array(),
+			'order_status' => self::get_report_order_statuses(),
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
 
@@ -116,8 +206,6 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 		if ( false === $data ) {
 
 			$selections = array(
-				'date_start'          => 'MIN(date_created) AS date_start',
-				'date_end'            => 'MAX(date_created) AS date_end',
 				'orders_count'        => 'COUNT(*) as orders_count',
 				'num_items_sold'      => 'SUM(num_items_sold) as num_items_sold',
 				'gross_revenue'       => 'SUM(gross_total) AS gross_revenue',
@@ -145,11 +233,15 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 			$totals_query    = $this->get_totals_sql_params( $query_args );
 			$intervals_query = $this->get_intervals_sql_params( $query_args );
 
+			// Additional filtering for Orders report.
+			$this->orders_stats_sql_filter( $query_args, $totals_query, $intervals_query );
+
 			$totals = $wpdb->get_results(
 				"SELECT
 						{$selections}
 					FROM
 						{$table_name}
+						{$totals_query['from_clause']}
 					WHERE
 						1=1
 						{$totals_query['where_clause']}", ARRAY_A
@@ -171,6 +263,7 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 								{$intervals_query['select_clause']} AS time_interval
 							FROM
 								{$table_name}
+								{$intervals_query['from_clause']}
 							WHERE
 								1=1
 								{$intervals_query['where_clause']}
@@ -190,10 +283,12 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 
 			$intervals = $wpdb->get_results(
 				"SELECT
+							MAX(date_created) AS datetime_anchor,
 							{$intervals_query['select_clause']} AS time_interval
 							{$selections}
 						FROM
 							{$table_name}
+							{$intervals_query['from_clause']}
 						WHERE
 							1=1
 							{$intervals_query['where_clause']}
@@ -208,10 +303,8 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 				return new WP_Error( 'woocommerce_reports_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ) );
 			}
 
-			foreach ( $intervals as $key => $interval ) {
-				$intervals[ $key ] = (object) $this->cast_numbers( $interval );
-			}
-
+			$this->update_interval_boundary_dates( $query_args['after'], $query_args['before'], $query_args['interval'], $intervals );
+			$this->create_interval_subtotals( $intervals );
 
 			$data = (object) array(
 				'totals'    => $totals,
@@ -221,7 +314,6 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 				'page_no'   => (int) $query_args['page'],
 			);
 
-			$this->update_interval_boundary_dates( $query_args['after'], $query_args['before'], $query_args['interval'], $data );
 			wp_cache_set( $cache_key, $data, $this->cache_group );
 		}
 

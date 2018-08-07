@@ -333,6 +333,7 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/class-wc-shortcodes.php';
 		include_once WC_ABSPATH . 'includes/class-wc-logger.php';
 		include_once WC_ABSPATH . 'includes/class-wc-reports-revenue-query.php';
+		include_once WC_ABSPATH . 'includes/class-wc-reports-orders-stats-query.php';
 
 		/**
 		 * Data stores - used to store and retrieve CRUD object data from the database.
