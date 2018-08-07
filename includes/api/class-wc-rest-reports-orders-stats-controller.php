@@ -62,8 +62,8 @@ class WC_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Controller
 	 * @return array|WP_Error
 	 */
 	public function get_items( $request ) {
-		$query_args = $this->prepare_reports_query( $request );
-		// $data_store  = new WC_Reports_Orders_Data_Store( $query_args ); @todo need to merge this class first.
+		$query_args  = $this->prepare_reports_query( $request );
+		$data_store  = new WC_Reports_Orders_Data_Store( $query_args );
 		$report_data = $data_store->get_data();
 
 		$out_data = array(
