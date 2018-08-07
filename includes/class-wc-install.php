@@ -115,6 +115,7 @@ class WC_Install {
 		),
 		'3.5.0' => array(
 			'wc_update_350_order_customer_id',
+			'wc_update_350_order_product_lookup',
 			'wc_update_350_db_version',
 		),
 	);
@@ -807,6 +808,21 @@ CREATE TABLE {$wpdb->prefix}wc_order_stats (
   PRIMARY KEY (order_id),
   KEY date_created (date_created)
 ) $collate;
+CREATE TABLE {$wpdb->prefix}wc_order_product_lookup (
+  order_item_id BIGINT UNSIGNED NOT NULL,
+  order_id BIGINT UNSIGNED NOT NULL,
+  product_id BIGINT UNSIGNED NOT NULL,
+  customer_id BIGINT UNSIGNED NULL,
+  date_created timestamp DEFAULT '0000-00-00 00:00:00' NOT NULL,
+  product_qty INT UNSIGNED NOT NULL,
+  product_gross_revenue double DEFAULT 0 NOT NULL,
+  PRIMARY KEY  (order_item_id),
+  KEY order_id (order_id),
+  KEY product_id (product_id),
+  KEY customer_id (customer_id),
+  KEY date_created (date_created)
+) $collate;
+
 		";
 
 		/**
@@ -855,6 +871,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			"{$wpdb->prefix}woocommerce_shipping_zones",
 			"{$wpdb->prefix}woocommerce_tax_rate_locations",
 			"{$wpdb->prefix}woocommerce_tax_rates",
+			"{$wpdb->prefix}wc_order_stats",
+			"{$wpdb->prefix}wc_order_product_lookup",
 		);
 
 		if ( ! function_exists( 'get_term_meta' ) ) {
