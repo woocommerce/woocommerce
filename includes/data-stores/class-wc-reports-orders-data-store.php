@@ -91,7 +91,7 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 	/**
 	 * Returns an array of products belonging to given categories.
 	 *
-	 * @param $categories
+	 * @param array $categories List of categories IDs.
 	 * @return array|stdClass
 	 */
 	protected function get_products_by_cat_ids( $categories ) {
@@ -128,37 +128,37 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 		$from_clause  = '';
 
 		$orders_stats_table = $wpdb->prefix . self::TABLE_NAME;
-		if ( count( $query_args['categories'] ) > 0 ) {
+		if ( is_array( $query_args['categories'] ) && count( $query_args['categories'] ) > 0 ) {
 			$allowed_products     = $this->get_products_by_cat_ids( $query_args['categories'] );
 			$allowed_product_ids  = wp_list_pluck( $allowed_products, 'id' );
 			$allowed_products_str = implode( ',', $allowed_product_ids );
 
-			$where_clause .= " AND {$orders_stats_table}.order_id IN ( 
-			SELECT 
+			$where_clause .= " AND {$orders_stats_table}.order_id IN (
+			SELECT
 				DISTINCT {$wpdb->prefix}wc_order_product_lookup.order_id
-			FROM 
+			FROM
 				{$wpdb->prefix}wc_order_product_lookup
-			WHERE 
+			WHERE
 				{$wpdb->prefix}wc_order_product_lookup.product_id IN ({$allowed_products_str})
 			)";
 		}
 
-		if ( count( $query_args['coupons'] ) > 0 ) {
+		if ( is_array( $query_args['coupons'] ) && count( $query_args['coupons'] ) > 0 ) {
 			$allowed_coupons_str = implode( ', ', $query_args['coupons'] );
 
-			$where_clause .= " AND {$orders_stats_table}.order_id IN ( 
-			SELECT 
+			$where_clause .= " AND {$orders_stats_table}.order_id IN (
+			SELECT
 				DISTINCT {$wpdb->prefix}wc_order_coupon_lookup.order_id
-			FROM 
+			FROM
 				{$wpdb->prefix}wc_order_coupon_lookup
-			WHERE 
+			WHERE
 				{$wpdb->prefix}wc_order_coupon_lookup.coupon_id IN ({$allowed_coupons_str})
 			)";
 		}
 
 		if ( '' !== $query_args['order_status'] ) {
 			$from_clause  .= " JOIN {$wpdb->prefix}posts ON {$orders_stats_table}.order_id = {$wpdb->prefix}posts.ID";
-			$where_clause .= " AND {$wpdb->prefix}posts.post_status = 'wc-{$query_args['order_status']}'";
+			$where_clause .= " AND {$wpdb->prefix}posts.post_status IN ( '" . implode( "','", $query_args['order_status'] ) . "' ) ";
 		}
 
 		// To avoid requesting the subqueries twice, the result is applied to all queries passed to the method.
@@ -166,9 +166,7 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 		$totals_query['from_clause']     .= $from_clause;
 		$intervals_query['where_clause'] .= $where_clause;
 		$intervals_query['from_clause']  .= $from_clause;
-
 	}
-
 
 	/**
 	 * Returns the report data based on parameters supplied by the user.
@@ -245,8 +243,7 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 					WHERE
 						1=1
 						{$totals_query['where_clause']}", ARRAY_A
-			); // WPCS: cache ok, DB call ok.
-
+			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 			if ( null === $totals ) {
 				return new WP_Error( 'woocommerce_reports_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ) );
 			}
@@ -270,7 +267,7 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 							GROUP BY
 								time_interval
 					  		) AS tt"
-			); // WPCS: cache ok, DB call ok.
+			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 			$total_pages = (int) ceil( $db_interval_count / $intervals_query['per_page'] );
 			if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
@@ -297,7 +294,7 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 						ORDER BY
 							{$intervals_query['order_by_clause']}
 						{$intervals_query['limit']}", ARRAY_A
-			); // WPCS: cache ok, DB call ok.
+			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 			if ( null === $intervals ) {
 				return new WP_Error( 'woocommerce_reports_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ) );
@@ -333,7 +330,7 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 			'limit'  => -1,
 			'status' => self::get_report_order_statuses(),
 			'type'   => 'shop_order',
-    		'return' => 'ids',
+			'return' => 'ids',
 		) );
 
 		foreach ( $order_ids as $id ) {
@@ -366,8 +363,7 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 	 * Update the database with stats data.
 	 *
 	 * @param WC_Order $order Order to update row for.
-	 * @param array $data Stats data.
-	 * @return int/bool Number or rows modified or false on failure.
+	 * @return int|bool Number or rows modified or false on failure.
 	 */
 	public static function update( $order ) {
 		global $wpdb;
@@ -377,7 +373,7 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 			return false;
 		}
 
-		if ( ! in_array( $order->get_status(), self::get_report_order_statuses() ) ) {
+		if ( ! in_array( $order->get_status(), self::get_report_order_statuses(), true ) ) {
 			$wpdb->delete( $table_name, array(
 				'order_id' => $order->get_id(),
 			) );
