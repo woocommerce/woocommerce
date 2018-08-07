@@ -260,9 +260,11 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 
 			// If the prices are not stored for this hash, generate them and add to the transient.
 			if ( empty( $transient_cached_prices_array[ $price_hash ] ) ) {
-				$prices         = array();
-				$regular_prices = array();
-				$sale_prices    = array();
+				$prices_array = array(
+					'price'         => array(),
+					'regular_price' => array(),
+					'sale_price'    => array(),
+				);
 				$variation_ids  = $product->get_visible_children();
 				foreach ( $variation_ids as $variation_id ) {
 					$variation = wc_get_product( $variation_id );
@@ -325,18 +327,19 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 							}
 						}
 
-						$prices[ $variation_id ]         = wc_format_decimal( $price, wc_get_price_decimals() );
-						$regular_prices[ $variation_id ] = wc_format_decimal( $regular_price, wc_get_price_decimals() );
-						$sale_prices[ $variation_id ]    = wc_format_decimal( $sale_price . '.00', wc_get_price_decimals() );
+						$prices_array['price'][ $variation_id ] 		= wc_format_decimal( $price, wc_get_price_decimals() );
+						$prices_array['regular_price'][ $variation_id ] = wc_format_decimal( $regular_price, wc_get_price_decimals() );
+						$prices_array['sale_price'][ $variation_id ]    = wc_format_decimal( $sale_price . '.00', wc_get_price_decimals() );
+						$prices_array = apply_filters( 'woocommerce_variation_prices_array', $prices_array, $variation, $for_display );
 					}
-				}
+				}		
 
-				$transient_cached_prices_array[ $price_hash ] = array(
-					'price'         => $prices,
-					'regular_price' => $regular_prices,
-					'sale_price'    => $sale_prices,
-				);
-
+				$transient_cached_prices_array[ $price_hash ] = apply_filters( 'woocommerce_variation_prices_transient_array', array(
+					'price'         => $prices_array['price'],
+					'regular_price' => $prices_array['regular_price'],
+					'sale_price'    => $prices_array['sale_price'],
+				), $prices_array, $product );
+				
 				set_transient( $transient_name, wp_json_encode( $transient_cached_prices_array ), DAY_IN_SECONDS * 30 );
 			}
 
