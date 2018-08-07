@@ -28,7 +28,7 @@ class WC_Reports_Revenue_Query extends WC_Reports_Query {
 	const REPORT_NAME = 'report-revenue-stats';
 
 	/**
-	 * Valid query vars for Revenue report.
+	 * Valid fields for Revenue report.
 	 *
 	 * @return array
 	 */

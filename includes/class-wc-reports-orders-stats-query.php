@@ -31,7 +31,7 @@ class WC_Reports_Orders_Stats_Query extends WC_Reports_Query {
 	const REPORT_NAME = 'report-orders-stats';
 
 	/**
-	 * Valid query vars for Revenue report.
+	 * Valid fields for Orders report.
 	 *
 	 * @return array
 	 */
