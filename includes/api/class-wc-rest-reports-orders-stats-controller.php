@@ -318,12 +318,15 @@ class WC_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Controller
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['order_status'] = array(
-			'default'           => 'any',
-			'description'       => __( 'Limit result set to orders assigned a specific status.', 'woocommerce' ),
-			'type'              => 'string',
-			'enum'              => array_merge( array( 'any' ), $this->get_order_statuses() ),
-			'sanitize_callback' => 'sanitize_key',
+			'default'           => array( 'completed', 'processing', 'on-hold' ),
+			'description'       => __( 'Limit result set to orders assigned one or more statuses', 'woocommerce' ),
+			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_slug_list',
 			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'enum' => $this->get_order_statuses(),
+				'type' => 'string',
+			),
 		);
 
 		return $params;
