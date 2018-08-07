@@ -158,7 +158,7 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 
 		if ( '' !== $query_args['order_status'] ) {
 			$from_clause  .= " JOIN {$wpdb->prefix}posts ON {$orders_stats_table}.order_id = {$wpdb->prefix}posts.ID";
-			$where_clause .= " AND {$wpdb->prefix}posts.post_status = 'wc-{$query_args['order_status']}'";
+			$where_clause .= " AND {$wpdb->prefix}posts.post_status IN ( '" . implode( "','", $query_args['order_status'] ) . "' ) ";
 		}
 
 		// To avoid requesting the subqueries twice, the result is applied to all queries passed to the method.
@@ -166,9 +166,7 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 		$totals_query['from_clause']     .= $from_clause;
 		$intervals_query['where_clause'] .= $where_clause;
 		$intervals_query['from_clause']  .= $from_clause;
-
 	}
-
 
 	/**
 	 * Returns the report data based on parameters supplied by the user.
