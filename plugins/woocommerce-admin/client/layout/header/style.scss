@@ -13,7 +13,7 @@
 	position: fixed;
 	width: 100%;
 	top: 32px;
-	z-index: 1000;
+	z-index: 99999; /* component-popover is 99990 */
 
 	&.is-scrolled {
 		box-shadow: 0 8px 8px 0 rgba(85, 93, 102, 0.3);
