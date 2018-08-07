@@ -39,14 +39,18 @@ class WC_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Controller
 	 * @return array
 	 */
 	protected function prepare_reports_query( $request ) {
-		$args             = array();
-		$args['before']   = $request['before'];
-		$args['after']    = $request['after'];
-		$args['interval'] = $request['interval'];
-		$args['page']     = $request['page'];
-		$args['per_page'] = $request['per_page'];
-		$args['orderby']  = $request['orderby'];
-		$args['order']    = $request['order'];
+		$args                 = array();
+		$args['before']       = $request['before'];
+		$args['after']        = $request['after'];
+		$args['interval']     = $request['interval'];
+		$args['page']         = $request['page'];
+		$args['per_page']     = $request['per_page'];
+		$args['orderby']      = $request['orderby'];
+		$args['order']        = $request['order'];
+		$args['categories']   = $request['categories'];
+		$args['coupons']      = $request['coupons'];
+		$args['products']     = $request['products'];
+		$args['order_status'] = $request['order_status'];
 
 		return $args;
 	}
