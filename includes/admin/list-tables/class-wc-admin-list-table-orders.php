@@ -172,6 +172,8 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			$user  = get_user_by( 'id', $this->object->get_customer_id() );
 			$buyer = ucwords( $user->display_name );
 		}
+		
+		$buyer = apply_filters( 'woocommerce_render_order_number_buyer', $buyer, $this->object );
 
 		if ( $this->object->get_status() === 'trash' ) {
 			echo '<strong>#' . esc_attr( $this->object->get_order_number() ) . ' ' . esc_html( $buyer ) . '</strong>';
