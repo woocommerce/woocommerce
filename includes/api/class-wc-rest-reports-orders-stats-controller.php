@@ -47,9 +47,9 @@ class WC_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Controller
 		$args['per_page']     = $request['per_page'];
 		$args['orderby']      = $request['orderby'];
 		$args['order']        = $request['order'];
-		$args['categories']   = $request['categories'];
-		$args['coupons']      = $request['coupons'];
-		$args['products']     = $request['products'];
+		$args['categories']   = (array) $request['categories'];
+		$args['coupons']      = (array) $request['coupons'];
+		$args['products']     = (array) $request['products'];
 		$args['order_status'] = $request['order_status'];
 
 		return $args;
@@ -65,6 +65,8 @@ class WC_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Controller
 		$query_args  = $this->prepare_reports_query( $request );
 		$data_store  = new WC_Reports_Orders_Data_Store();
 		$report_data = $data_store->get_data( $query_args );
+
+		error_log( print_r( $report_data, true ) );
 
 		$out_data = array(
 			'totals'    => get_object_vars( $report_data->totals ),
