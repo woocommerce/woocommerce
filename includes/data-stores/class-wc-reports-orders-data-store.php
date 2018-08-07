@@ -128,30 +128,30 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 		$from_clause  = '';
 
 		$orders_stats_table = $wpdb->prefix . self::TABLE_NAME;
-		if ( count( $query_args['categories'] ) > 0 ) {
+		if ( is_array( $query_args['categories'] ) && count( $query_args['categories'] ) > 0 ) {
 			$allowed_products     = $this->get_products_by_cat_ids( $query_args['categories'] );
 			$allowed_product_ids  = wp_list_pluck( $allowed_products, 'id' );
 			$allowed_products_str = implode( ',', $allowed_product_ids );
 
-			$where_clause .= " AND {$orders_stats_table}.order_id IN ( 
-			SELECT 
+			$where_clause .= " AND {$orders_stats_table}.order_id IN (
+			SELECT
 				DISTINCT {$wpdb->prefix}wc_order_product_lookup.order_id
-			FROM 
+			FROM
 				{$wpdb->prefix}wc_order_product_lookup
-			WHERE 
+			WHERE
 				{$wpdb->prefix}wc_order_product_lookup.product_id IN ({$allowed_products_str})
 			)";
 		}
 
-		if ( count( $query_args['coupons'] ) > 0 ) {
+		if ( is_array( $query_args['coupons'] ) && count( $query_args['coupons'] ) > 0 ) {
 			$allowed_coupons_str = implode( ', ', $query_args['coupons'] );
 
-			$where_clause .= " AND {$orders_stats_table}.order_id IN ( 
-			SELECT 
+			$where_clause .= " AND {$orders_stats_table}.order_id IN (
+			SELECT
 				DISTINCT {$wpdb->prefix}wc_order_coupon_lookup.order_id
-			FROM 
+			FROM
 				{$wpdb->prefix}wc_order_coupon_lookup
-			WHERE 
+			WHERE
 				{$wpdb->prefix}wc_order_coupon_lookup.coupon_id IN ({$allowed_coupons_str})
 			)";
 		}
@@ -233,7 +233,7 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 			$totals_query    = $this->get_totals_sql_params( $query_args );
 			$intervals_query = $this->get_intervals_sql_params( $query_args );
 
-			// Additional filtering for Orders report.
+			// Additional filtering131 for Orders report.
 			$this->orders_stats_sql_filter( $query_args, $totals_query, $intervals_query );
 
 			$totals = $wpdb->get_results(
