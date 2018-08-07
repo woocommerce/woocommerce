@@ -63,8 +63,8 @@ class WC_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Controller
 	 */
 	public function get_items( $request ) {
 		$query_args  = $this->prepare_reports_query( $request );
-		$data_store  = new WC_Reports_Orders_Data_Store( $query_args );
-		$report_data = $data_store->get_data();
+		$data_store  = new WC_Reports_Orders_Data_Store();
+		$report_data = $data_store->get_data( $query_args );
 
 		$out_data = array(
 			'totals'    => get_object_vars( $report_data->totals ),
@@ -164,7 +164,7 @@ class WC_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Controller
 
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'report_revenue_stats',
+			'title'      => 'report_orders_stats',
 			'type'       => 'object',
 			'properties' => array(
 				'totals'    => array(
