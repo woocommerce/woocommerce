@@ -111,4 +111,11 @@ OrdersPanel.propTypes = {
 	orders: PropTypes.object.isRequired,
 };
 
+OrdersPanel.defaultProps = {
+	orders: {
+		data: [],
+		isLoading: false,
+	},
+};
+
 export default OrdersPanel;
