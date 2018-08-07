@@ -1073,4 +1073,4 @@ function wc_order_product_lookup_entry( $order_id ) {
 		);
 	}
 }
-add_action( 'woocommerce_new_order', 'wc_order_product_lookup_entry', 10, 1 );
+add_action( 'save_post', 'wc_order_product_lookup_entry', 10, 1 );
