@@ -233,7 +233,7 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 			$totals_query    = $this->get_totals_sql_params( $query_args );
 			$intervals_query = $this->get_intervals_sql_params( $query_args );
 
-			// Additional filtering131 for Orders report.
+			// Additional filtering for Orders report.
 			$this->orders_stats_sql_filter( $query_args, $totals_query, $intervals_query );
 
 			$totals = $wpdb->get_results(
