@@ -48,7 +48,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 *
 	 * @var string
 	 */
-	protected $product_category_to_export = '';
+	protected $product_category_to_export = array();
 
 	/**
 	 * Constructor.
@@ -86,7 +86,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * @return void
 	 */
 	public function set_product_category_to_export( $product_category_to_export ) {
-		$this->product_category_to_export = wc_clean( $product_category_to_export );
+		$this->product_category_to_export = array_map( 'wc_clean', $product_category_to_export );
 	}
 
 	/**
@@ -162,7 +162,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 		);
 
 		if ( ! empty( $this->product_category_to_export ) ) {
-			$args['category'] = array( $this->product_category_to_export );
+			$args['category'] = $this->product_category_to_export;
 		}
 		$products = wc_get_products( apply_filters( "woocommerce_product_export_{$this->export_type}_query_args", $args ) );
 

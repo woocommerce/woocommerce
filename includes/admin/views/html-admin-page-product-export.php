@@ -62,11 +62,11 @@ $exporter = new WC_Product_CSV_Exporter();
 								<label for="woocommerce-exporter-category"><?php esc_html_e( 'Which product category should be exported?', 'woocommerce' ); ?></label>
 							</th>
 							<td>
+								<select id="woocommerce-exporter-category" class="woocommerce-exporter-category wc-enhanced-select" style="width:100%;" multiple data-placeholder="<?php esc_attr_e( 'Export all categories', 'woocommerce' ); ?>">
 								<?php
-								wc_product_dropdown_categories( array(
-									'class'            => 'woocommerce-exporter-category wc-enhanced-select',
-									'show_option_none' => __( 'Export all categories', 'woocommerce' ),
-								) );
+								foreach ( get_categories( array( 'taxonomy' => 'product_cat' ) ) as $category ) {
+									echo '<option value="' . esc_attr( $category->slug ) . '">' . esc_html( $category->name ) . '</option>';
+								}
 								?>
 							</td>
 						</tr>
