@@ -66,8 +66,6 @@ class WC_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Controller
 		$data_store  = new WC_Reports_Orders_Data_Store();
 		$report_data = $data_store->get_data( $query_args );
 
-		error_log( print_r( $report_data, true ) );
-
 		$out_data = array(
 			'totals'    => get_object_vars( $report_data->totals ),
 			'intervals' => array(),
