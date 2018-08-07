@@ -14,17 +14,28 @@ import Legend from './legend';
 
 const WIDE_BREAKPOINT = 1130;
 
+function getOrderedKeys( data ) {
+	return [
+		...new Set(
+			data.reduce( ( accum, curr ) => {
+				Object.keys( curr ).forEach( key => key !== 'date' && accum.push( key ) );
+				return accum;
+			}, [] )
+		),
+	]
+		.map( key => ( {
+			key,
+			total: data.reduce( ( a, c ) => a + c[ key ], 0 ),
+		} ) )
+		.sort( ( a, b ) => b.total - a.total );
+}
+
 class Chart extends Component {
 	constructor( props ) {
 		super( props );
-		this.getOrderedKeys = this.getOrderedKeys.bind( this );
 		this.state = {
-			data: props.data,
-			orderedKeys: this.getOrderedKeys( props.data ).map( d => ( {
-				...d,
-				visible: true,
-				focus: true,
-			} ) ),
+			data: null,
+			orderedKeys: null,
 			bodyWidth: document.getElementById( 'wpbody' ).getBoundingClientRect().width,
 		};
 		this.handleLegendToggle = this.handleLegendToggle.bind( this );
@@ -32,16 +43,23 @@ class Chart extends Component {
 		this.updateDimensions = this.updateDimensions.bind( this );
 	}
 
-	// @TODO change this to `getDerivedStateFromProps` in React 16.4
-	UNSAFE_componentWillReceiveProps( nextProps ) {
-		this.setState( {
-			data: nextProps.data,
-			orderedKeys: this.getOrderedKeys( nextProps.data ).map( d => ( {
-				...d,
-				visible: true,
-				focus: true,
-			} ) ),
-		} );
+	static getDerivedStateFromProps( nextProps, prevState ) {
+		if ( prevState.data !== nextProps.data ) {
+			return {
+				data: nextProps.data,
+				orderedKeys: getOrderedKeys( nextProps.data ).map( d => ( {
+					...d,
+					visible: true,
+					focus: true,
+				} ) ),
+			};
+		}
+
+		return null;
+	}
+
+	shouldComponentUpdate( nextProps, nextState ) {
+		return this.state.data !== null && this.state.data !== nextState.data;
 	}
 
 	componentDidMount() {
@@ -50,22 +68,6 @@ class Chart extends Component {
 
 	componentWillUnmount() {
 		window.removeEventListener( 'resize', this.updateDimensions );
-	}
-
-	getOrderedKeys( data ) {
-		return [
-			...new Set(
-				data.reduce( ( accum, curr ) => {
-					Object.keys( curr ).forEach( key => key !== 'date' && accum.push( key ) );
-					return accum;
-				}, [] )
-			),
-		]
-			.map( key => ( {
-				key,
-				total: data.reduce( ( a, c ) => a + c[ key ], 0 ),
-			} ) )
-			.sort( ( a, b ) => b.total - a.total );
 	}
 
 	handleLegendToggle( event ) {
