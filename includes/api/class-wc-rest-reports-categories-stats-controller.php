@@ -59,9 +59,9 @@ class WC_REST_Reports_Categories_Stats_Controller extends WC_REST_Reports_Contro
 	 * @return array|WP_Error
 	 */
 	public function get_items( $request ) {
-		$query_args  = $this->prepare_reports_query( $request );
-		$data_store  = new WC_Reports_Orders_Data_Store(); // @todo change to correct data store.
-		$report_data = $data_store->get_data( $query_args );
+		$query_args       = $this->prepare_reports_query( $request );
+		$categories_query = new WC_Reports_Orders_Stats_Query( $query_args ); // @todo change to correct class.
+		$report_data      = $categories_query->get_data();
 
 		$out_data = array(
 			'totals'    => get_object_vars( $report_data->totals ),
@@ -134,7 +134,7 @@ class WC_REST_Reports_Categories_Stats_Controller extends WC_REST_Reports_Contro
 	public function get_item_schema() {
 		$totals = array(
 			'items_sold'     => array(
-				'description' => __( 'Number of items sold.', 'woocommerce' ),
+				'description' => __( 'Amount of items sold.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
