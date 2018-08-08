@@ -176,7 +176,7 @@ class WC_Shortcode_Products {
 			'post_status'         => 'publish',
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => false === wc_string_to_bool( $this->attributes['paginate'] ),
-			'orderby'             => $this->attributes['orderby'],
+			'orderby'             => empty( $_GET['orderby'] ) ? $this->attributes['orderby'] : wc_clean( wp_unslash( $_GET['orderby'] ) ),
 			'order'               => strtoupper( $this->attributes['order'] ),
 		);
 
