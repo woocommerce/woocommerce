@@ -15,15 +15,13 @@
  * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     1.6.4
+ * @version     3.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-?>
-
-<?php do_action( 'woocommerce_share' ); // Sharing plugins can hook into here
+do_action( 'woocommerce_share' ); // Sharing plugins can hook into here
 
 /* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */
