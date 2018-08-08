@@ -68,12 +68,12 @@ class WC_Order_Stats_Background_Process extends WC_Background_Process {
 			return false;
 		}
 
-		$start_time = $item;
-		$end_time = $start_time + HOUR_IN_SECONDS;
+		$order = wc_get_order( $item );
+		if ( ! $order ) {
+			return false;
+		}
 
-		$data = WC_Reports_Orders_Data_Store::summarize_orders( $start_time, $end_time );
-		WC_Reports_Orders_Data_Store::update( $start_time, $data );
-
+		WC_Reports_Orders_Data_Store::update( $order );
 		return false;
 	}
 }

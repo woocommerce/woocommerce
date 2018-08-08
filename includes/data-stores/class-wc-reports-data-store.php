@@ -37,7 +37,7 @@ class WC_Reports_Data_Store {
 	 *
 	 * @var string
 	 */
-	protected $table_name = '';
+	const TABLE_NAME = '';
 
 	/**
 	 * Returns string to be used as cache key for the data.
@@ -46,7 +46,7 @@ class WC_Reports_Data_Store {
 	 * @return string
 	 */
 	protected function get_cache_key( $params ) {
-		return 'woocommerce_' . $this->table_name . '_' . md5( wp_json_encode( $params ) . date( 'Y-m-d_H' ) );
+		return 'woocommerce_' . $this::TABLE_NAME . '_' . md5( wp_json_encode( $params ) );
 	}
 
 	/**
@@ -71,28 +71,69 @@ class WC_Reports_Data_Store {
 	 * @param DateTime $datetime_start Start date.
 	 * @param DateTime $datetime_end End date.
 	 * @param string   $time_interval Time interval, e.g. day, week, month.
-	 * @param stdClass $data Data with SQL extracted intervals.
-	 * @return stdClass
+	 * @param array    $intervals Array of intervals extracted from SQL db.
 	 */
-	protected function update_interval_boundary_dates( $datetime_start, $datetime_end, $time_interval, &$data ) {
-		$end_datetime = new DateTime( $datetime_end );
-		$time_ids     = array_flip( wp_list_pluck( $data->intervals, 'time_interval' ) );
-		$datetime     = new DateTime( $datetime_start );
-		while ( $datetime <= $end_datetime ) {
-			$next_end = WC_Reports_Interval::iterate( $datetime, $time_interval );
+	protected function update_interval_boundary_dates( $datetime_start, $datetime_end, $time_interval, &$intervals ) {
+		foreach ( $intervals as $key => $interval ) {
+			$datetime = new DateTime( $interval['datetime_anchor'] );
+			$one_sec  = new DateInterval( 'PT1S' );
 
-			$time_id      = WC_Reports_Interval::time_interval_id( $time_interval, $datetime );
-			$interval_end = ( $next_end > $end_datetime ? $end_datetime : $next_end )->format( 'Y-m-d H:i:s' );
-			if ( array_key_exists( $time_id, $time_ids ) ) {
-				$record             = $data->intervals[ $time_ids[ $time_id ] ];
-				$record->date_start = $datetime->format( 'Y-m-d H:i:s' );
-				$record->date_end   = $interval_end;
+			$prev_start = WC_Reports_Interval::iterate( $datetime, $time_interval, true );
+			$prev_start->add( $one_sec );
+			if ( $datetime_start ) {
+				$start_datetime                  = new DateTime( $datetime_start );
+				$intervals[ $key ]['date_start'] = ( $prev_start < $start_datetime ? $start_datetime : $prev_start )->format( 'Y-m-d H:i:s' );
+			} else {
+				$intervals[ $key ]['date_start'] = $prev_start->format( 'Y-m-d H:i:s' );
 			}
 
-			$datetime = $next_end;
-		}
+			$next_end = WC_Reports_Interval::iterate( $datetime, $time_interval );
+			$next_end->sub( $one_sec );
+			if ( $datetime_end ) {
+				$end_datetime                  = new DateTime( $datetime_end );
+				$intervals[ $key ]['date_end'] = ( $next_end > $end_datetime ? $end_datetime : $next_end )->format( 'Y-m-d H:i:s' );
+			} else {
+				$intervals[ $key ]['date_end'] = $next_end->format( 'Y-m-d H:i:s' );
+			}
 
-		return $data;
+			$intervals[ $key ]['interval'] = $time_interval;
+		}
+	}
+
+	/**
+	 * Casts strings returned from the database to appropriate data types for output.
+	 *
+	 * @param array $array Associative array of values extracted from the database.
+	 * @return array|WP_Error
+	 */
+	protected function cast_numbers( $array ) {
+		/* translators: %s: Method name */
+		return new WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be overridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
+	}
+
+	/**
+	 * Change structure of intervals to form a correct response.
+	 *
+	 * @param array $intervals Time interval, e.g. day, week, month.
+	 */
+	protected function create_interval_subtotals( &$intervals ) {
+		foreach ( $intervals as $key => $interval ) {
+			// Move intervals result to subtotals object.
+			$intervals[ $key ] = array(
+				'interval'       => $interval['interval'],
+				'date_start'     => $interval['date_start'],
+				'date_start_gmt' => $interval['date_start'],
+				'date_end'       => $interval['date_end'],
+				'date_end_gmt'   => $interval['date_end'],
+			);
+
+			unset( $interval['interval'] );
+			unset( $interval['date_start'] );
+			unset( $interval['date_end'] );
+			unset( $interval['datetime_anchor'] );
+			unset( $interval['time_interval'] );
+			$intervals[ $key ]['subtotals'] = (object) $this->cast_numbers( $interval );
+		}
 	}
 
 	/**
@@ -102,19 +143,22 @@ class WC_Reports_Data_Store {
 	 * @return array
 	 */
 	protected function get_totals_sql_params( $query_args ) {
-		$totals_query['where_clause'] = '';
+		$totals_query = array(
+			'from_clause'  => '',
+			'where_clause' => '',
+		);
 
 		if ( isset( $query_args['before'] ) && '' !== $query_args['before'] ) {
 			$datetime                      = new DateTime( $query_args['before'] );
-			$datetime_str                  = $datetime->format( WC_Reports_Interval::$iso_datetime_format );
-			$totals_query['where_clause'] .= " AND start_time <= '$datetime_str'";
+			$datetime_str                  = $datetime->format( WC_Reports_Interval::$sql_datetime_format );
+			$totals_query['where_clause'] .= " AND date_created <= '$datetime_str'";
 
 		}
 
 		if ( isset( $query_args['after'] ) && '' !== $query_args['after'] ) {
 			$datetime                      = new DateTime( $query_args['after'] );
-			$datetime_str                  = $datetime->format( WC_Reports_Interval::$iso_datetime_format );
-			$totals_query['where_clause'] .= " AND start_time >= '$datetime_str'";
+			$datetime_str                  = $datetime->format( WC_Reports_Interval::$sql_datetime_format );
+			$totals_query['where_clause'] .= " AND date_created >= '$datetime_str'";
 		}
 
 		return $totals_query;
@@ -127,20 +171,22 @@ class WC_Reports_Data_Store {
 	 * @return array
 	 */
 	protected function get_intervals_sql_params( $query_args ) {
-		$intervals_query                 = array();
-		$intervals_query['where_clause'] = '';
+		$intervals_query = array(
+			'from_clause'  => '',
+			'where_clause' => '',
+		);
 
 		if ( isset( $query_args['before'] ) && '' !== $query_args['before'] ) {
 			$datetime                         = new DateTime( $query_args['before'] );
-			$datetime_str                     = $datetime->format( WC_Reports_Interval::$iso_datetime_format );
-			$intervals_query['where_clause'] .= " AND start_time <= '$datetime_str'";
+			$datetime_str                     = $datetime->format( WC_Reports_Interval::$sql_datetime_format );
+			$intervals_query['where_clause'] .= " AND date_created <= '$datetime_str'";
 
 		}
 
 		if ( isset( $query_args['after'] ) && '' !== $query_args['after'] ) {
 			$datetime                         = new DateTime( $query_args['after'] );
-			$datetime_str                     = $datetime->format( WC_Reports_Interval::$iso_datetime_format );
-			$intervals_query['where_clause'] .= " AND start_time >= '$datetime_str'";
+			$datetime_str                     = $datetime->format( WC_Reports_Interval::$sql_datetime_format );
+			$intervals_query['where_clause'] .= " AND date_created >= '$datetime_str'";
 		}
 
 		if ( isset( $query_args['interval'] ) && '' !== $query_args['interval'] ) {
