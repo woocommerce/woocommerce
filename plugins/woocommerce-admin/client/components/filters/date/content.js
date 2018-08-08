@@ -12,10 +12,10 @@ import classnames from 'classnames';
  * Internal dependencies
  */
 import ComparePeriods from './compare-periods';
-import { H, Section } from 'layout/section';
-import PresetPeriods from './preset-periods';
-import Link from 'components/link';
 import { DateRange } from 'components/calendar';
+import { H, Section } from 'layout/section';
+import Link from 'components/link';
+import PresetPeriods from './preset-periods';
 
 const isMobileViewport = () => window.innerWidth < 782;
 
@@ -61,7 +61,7 @@ class DatePickerContent extends Component {
 					{ __( 'Select date range and comparison', 'wc-admin' ) }
 				</H>
 				<Section component={ false }>
-					<H className="woocommerce-date-picker__text">
+					<H className="woocommerce-filters-date__text">
 						{ __( 'select a date range', 'wc-admin' ) }
 					</H>
 					<TabPanel
@@ -69,15 +69,15 @@ class DatePickerContent extends Component {
 							{
 								name: 'period',
 								title: __( 'Presets', 'wc-admin' ),
-								className: 'woocommerce-date-picker__tab',
+								className: 'woocommerce-filters-date__tab',
 							},
 							{
 								name: 'custom',
 								title: __( 'Custom', 'wc-admin' ),
-								className: 'woocommerce-date-picker__tab',
+								className: 'woocommerce-filters-date__tab',
 							},
 						] }
-						className="woocommerce-date-picker__tabs"
+						className="woocommerce-filters-date__tabs"
 						activeClass="is-active"
 						initialTabName={
 							'custom' === period
@@ -106,19 +106,19 @@ class DatePickerContent extends Component {
 									/>
 								) }
 								<div
-									className={ classnames( 'woocommerce-date-picker__content-controls', {
+									className={ classnames( 'woocommerce-filters-date__content-controls', {
 										'is-sticky-bottom': selectedTab === 'custom' && isMobileViewport(),
 										'is-custom': selectedTab === 'custom',
 									} ) }
 								>
-									<H className="woocommerce-date-picker__text">
+									<H className="woocommerce-filters-date__text">
 										{ __( 'compare to', 'wc-admin' ) }
 									</H>
 									<ComparePeriods onSelect={ onUpdate } compare={ compare } />
-									<div className="woocommerce-date-picker__content-controls-btns">
+									<div className="woocommerce-filters-date__button-group">
 										{ selectedTab === 'custom' && (
 											<Button
-												className="woocommerce-date-picker__content-controls-btn"
+												className="woocommerce-filters-date__button"
 												isPrimary
 												onClick={ resetCustomValues }
 												disabled={ ! ( after || before ) }
@@ -128,20 +128,14 @@ class DatePickerContent extends Component {
 										) }
 										{ isValidSelection( selectedTab ) ? (
 											<Link
-												/* eslint-disable max-len */
-												className="woocommerce-date-picker__content-controls-btn components-button is-button is-primary"
-												/* eslint-enable max-len */
+												className="woocommerce-filters-date__button components-button is-button is-primary"
 												href={ getUpdatePath( selectedTab ) }
 												onClick={ onClose }
 											>
 												{ __( 'Update', 'wc-admin' ) }
 											</Link>
 										) : (
-											<Button
-												className="woocommerce-date-picker__content-controls-btn"
-												isPrimary
-												disabled
-											>
+											<Button className="woocommerce-filters-date__button" isPrimary disabled>
 												{ __( 'Update', 'wc-admin' ) }
 											</Button>
 										) }

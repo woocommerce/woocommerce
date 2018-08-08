@@ -13,12 +13,10 @@ import { partial } from 'lodash';
 /**
  * Internal dependencies
  */
-import Header from 'layout/header/index';
 import Card from 'components/card';
-import DatePicker from 'components/date-picker';
-import FilterPicker, { FILTER_PARAM } from 'components/filter-picker';
-import AdvancedFilters from 'components/advanced-filters';
 import { filters, filterPaths, advancedFilterConfig } from './constants';
+import Header from 'layout/header/index';
+import { ReportFilters } from 'components/filters';
 import './style.scss';
 
 class OrdersReport extends Component {
@@ -46,21 +44,14 @@ class OrdersReport extends Component {
 						__( 'Orders', 'wc-admin' ),
 					] }
 				/>
-				<div className="woocommerce-orders__pickers">
-					<DatePicker query={ query } path={ path } key={ JSON.stringify( query ) } />
-					<FilterPicker
-						query={ query }
-						path={ path }
-						filters={ filters }
-						filterPaths={ filterPaths }
-					/>
-				</div>
-				{ 'advanced' === query[ FILTER_PARAM ] && (
-					<AdvancedFilters
-						config={ advancedFilterConfig }
-						filterTitle={ __( 'Orders', 'wc-admin' ) }
-					/>
-				) }
+				<ReportFilters
+					query={ query }
+					path={ path }
+					filters={ filters }
+					filterPaths={ filterPaths }
+					advancedConfig={ advancedFilterConfig }
+				/>
+
 				<p>Below is a temporary example</p>
 				<Card title="Orders">
 					<table style={ { width: '100%' } }>

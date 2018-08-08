@@ -1,0 +1,63 @@
+/** @format */
+
+.woocommerce-filters {
+	.woocommerce-filters__basic-filters {
+		display: flex;
+		margin-bottom: $gap-large;
+
+		> div {
+			margin-right: $gap-large;
+		}
+
+		@include breakpoint( '<1100px' ) {
+			flex-direction: column;
+
+			> div {
+				margin-right: 0;
+			}
+		}
+	}
+}
+
+.woocommerce-filters-date,
+.woocommerce-filters-filter {
+	width: 33.3%;
+
+	@include breakpoint( '<1100px' ) {
+		width: 50%;
+	}
+
+	@include breakpoint( '<782px' ) {
+		width: 100%;
+	}
+}
+
+.woocommerce-filters-date__content,
+.woocommerce-filters-filter__content {
+	.components-popover__content {
+		width: 320px;
+		border: 1px solid $core-grey-light-700;
+		background-color: $white;
+	}
+
+	&.is-mobile {
+		.components-popover__content {
+			width: 100%;
+			height: 100%;
+		}
+	}
+}
+
+.woocommerce-filters__compare .woocommerce-card__body {
+	padding: 0;
+}
+
+.woocommerce-filters__compare-body {
+	padding: $gap;
+	background-color: $core-grey-light-100;
+	border-bottom: 1px solid $core-grey-light-500;
+}
+
+.woocommerce-filters__compare-footer {
+	padding: $gap;
+}

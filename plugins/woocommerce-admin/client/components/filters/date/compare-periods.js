@@ -10,18 +10,14 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import SegmentedSelection from 'components/segmented-selection';
-
-const compareValues = [
-	{ value: 'previous_period', label: __( 'Previous Period', 'wc-admin' ) },
-	{ value: 'previous_year', label: __( 'Previous Year', 'wc-admin' ) },
-];
+import { periods } from 'lib/date';
 
 class ComparePeriods extends Component {
 	render() {
 		const { onSelect, compare } = this.props;
 		return (
 			<SegmentedSelection
-				options={ compareValues }
+				options={ periods }
 				selected={ compare }
 				onSelect={ onSelect }
 				name="compare"
@@ -36,5 +32,4 @@ ComparePeriods.propTypes = {
 	compare: PropTypes.string,
 };
 
-export { compareValues };
 export default ComparePeriods;

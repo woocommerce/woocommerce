@@ -5,61 +5,50 @@
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { Dropdown, Button, Dashicon } from '@wordpress/components';
-import { stringify as stringifyQueryObject } from 'qs';
-import { omit, find, partial } from 'lodash';
+import { find, partial } from 'lodash';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
 
 /**
  * Internal dependencies
  */
-import DropdownButton from 'components/dropdown-button';
 import AnimationSlider from 'components/animation-slider';
+import DropdownButton from 'components/dropdown-button';
+import { getNewPath, getQuery } from 'lib/nav-utils';
 import Link from 'components/link';
 import './style.scss';
 
-export const FILTER_PARAM = 'filter';
-export const DEFAULT_FILTER_PARAM = 'all';
+export const DEFAULT_FILTER = 'all';
 
 class FilterPicker extends Component {
 	constructor( props ) {
 		super( props );
 
-		const { filterPaths, query } = props;
+		const { filterPaths } = props;
 		this.state = {
-			nav: filterPaths[ this.getQueryParamValue( query ) ],
+			nav: filterPaths[ this.getFilterValue() ],
 			animate: null,
 		};
 
 		this.getSelectionPath = this.getSelectionPath.bind( this );
-		this.getOtherQueries = this.getOtherQueries.bind( this );
 		this.getSelectedFilter = this.getSelectedFilter.bind( this );
 		this.selectSubFilters = this.selectSubFilters.bind( this );
 		this.getVisibleFilters = this.getVisibleFilters.bind( this );
 		this.goBack = this.goBack.bind( this );
 	}
 
-	getQueryParamValue( query ) {
-		return query[ FILTER_PARAM ] || DEFAULT_FILTER_PARAM;
-	}
-
-	getOtherQueries( query ) {
-		return omit( query, FILTER_PARAM );
+	getFilterValue() {
+		const query = getQuery();
+		return query.filter || DEFAULT_FILTER;
 	}
 
 	getSelectionPath( filter ) {
-		const { path, query } = this.props;
-		const otherQueries = this.getOtherQueries( query );
-		const data = {
-			[ FILTER_PARAM ]: filter.value,
-		};
-		const queryString = stringifyQueryObject( Object.assign( otherQueries, data ) );
-		return `${ path }?${ queryString }`;
+		return getNewPath( { filter: filter.value } );
 	}
 
 	getSelectedFilter() {
-		const { filters, filterPaths, query } = this.props;
-		const value = this.getQueryParamValue( query );
+		const { filters, filterPaths } = this.props;
+		const value = this.getFilterValue();
 		const filterPath = filterPaths[ value ];
 		const visibleFilters = this.getVisibleFilters( filters, [ ...filterPath ] );
 		return find( visibleFilters, filter => filter.value === value );
@@ -95,7 +84,7 @@ class FilterPicker extends Component {
 		if ( filter.subFilters ) {
 			return (
 				<Button
-					className="woocommerce-filter-picker__content-list-item-btn"
+					className="woocommerce-filters-filter__button"
 					onClick={ partial( this.selectSubFilters, filter.value ) }
 				>
 					{ filter.label }
@@ -107,7 +96,7 @@ class FilterPicker extends Component {
 			return (
 				<Fragment>
 					<Button
-						className="woocommerce-filter-picker__content-list-item-btn has-parent-nav"
+						className="woocommerce-filters-filter__button has-parent-nav"
 						onClick={ this.goBack }
 					>
 						<Dashicon icon="arrow-left-alt2" />
@@ -124,7 +113,7 @@ class FilterPicker extends Component {
 
 		return (
 			<Link
-				className="woocommerce-filter-picker__content-list-item-btn components-button"
+				className="woocommerce-filters-filter__button components-button"
 				href={ this.getSelectionPath( filter ) }
 				onClick={ onClose }
 			>
@@ -139,10 +128,10 @@ class FilterPicker extends Component {
 		const visibleFilters = this.getVisibleFilters( filters, [ ...nav ] );
 		const selectedFilter = this.getSelectedFilter();
 		return (
-			<div className="woocommerce-filter-picker">
+			<div className="woocommerce-filters-filter">
 				<p>{ __( 'Show', 'wc-admin' ) }:</p>
 				<Dropdown
-					contentClassName="woocommerce-filter-picker__content"
+					contentClassName="woocommerce-filters-filter__content"
 					position="bottom"
 					expandOnMobile
 					headerTitle={ __( 'filter report to show:', 'wc-admin' ) }
@@ -156,11 +145,11 @@ class FilterPicker extends Component {
 					renderContent={ ( { onClose } ) => (
 						<AnimationSlider animationKey={ nav } animate={ animate } focusOnChange>
 							{ () => (
-								<ul className="woocommerce-filter-picker__content-list">
+								<ul className="woocommerce-filters-filter__content-list">
 									{ visibleFilters.map( filter => (
 										<li
 											key={ filter.value }
-											className={ classnames( 'woocommerce-filter-picker__content-list-item', {
+											className={ classnames( 'woocommerce-filters-filter__content-list-item', {
 												'is-selected': selectedFilter.value === filter.value,
 											} ) }
 										>
@@ -178,8 +167,6 @@ class FilterPicker extends Component {
 }
 
 FilterPicker.propTypes = {
-	path: PropTypes.string.isRequired,
-	query: PropTypes.object.isRequired,
 	filters: PropTypes.array.isRequired,
 	filterPaths: PropTypes.object.isRequired,
 };

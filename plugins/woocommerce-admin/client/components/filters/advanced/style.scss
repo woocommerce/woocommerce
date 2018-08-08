@@ -1,6 +1,6 @@
 /** @format */
 
-.woocommerce-advanced-filters {
+.woocommerce-filters-advanced {
 	margin: $gap-large 0;
 
 	.woocommerce-card__header {
@@ -18,17 +18,17 @@
 	}
 }
 
-.woocommerce-advanced-filters__title-select {
+.woocommerce-filters-advanced__title-select {
 	width: 70px;
 	display: inline-block;
 	margin: 0 $gap-smaller;
 }
 
-.woocommerce-advanced-filters__list {
+.woocommerce-filters-advanced__list {
 	margin: 0;
 }
 
-.woocommerce-advanced-filters__list-item {
+.woocommerce-filters-advanced__list-item {
 	padding: $gap-smaller $gap;
 	margin: 0;
 	display: grid;
@@ -44,7 +44,7 @@
 		margin: 0;
 	}
 
-	.woocommerce-advanced-filters__remove {
+	.woocommerce-filters-advanced__remove {
 		width: 40px;
 		height: 38px;
 		align-self: center;
@@ -55,7 +55,7 @@
 	}
 }
 
-.woocommerce-advanced-filters__add-filter {
+.woocommerce-filters-advanced__add-filter {
 	padding: $gap-small;
 	margin: 0;
 	color: $woocommerce;
@@ -76,7 +76,7 @@
 	}
 }
 
-.woocommerce-advanced-filters__fieldset {
+.woocommerce-filters-advanced__fieldset {
 	display: grid;
 	grid-template-columns: 100px 150px auto;
 
@@ -86,7 +86,7 @@
 	}
 }
 
-.woocommerce-advanced-filters__fieldset-legend {
+.woocommerce-filters-advanced__fieldset-legend {
 	align-self: center;
 
 	@include breakpoint( '<782px' ) {
@@ -95,7 +95,7 @@
 	}
 }
 
-.woocommerce-advanced-filters__add-btn {
+.woocommerce-filters-advanced__add-button {
 	color: inherit;
 	padding: $gap-smaller;
 
@@ -113,7 +113,7 @@
 	}
 }
 
-.woocommerce-advanced-filters__controls {
+.woocommerce-filters-advanced__controls {
 	padding: $gap-smaller $gap;
 
 	& > button {
@@ -121,7 +121,7 @@
 	}
 }
 
-.woocommerce-advanced-filters__add-dropdown {
+.woocommerce-filters-advanced__add-dropdown {
 	padding: $gap-smaller 0;
 
 	li {
@@ -143,7 +143,7 @@
 	}
 }
 
-.woocommerce-advanced-filters__list-selector {
+.woocommerce-filters-advanced__list-selector {
 	padding: 0 0 0 $gap-smaller;
 
 	@include breakpoint( '<782px' ) {
@@ -151,7 +151,7 @@
 	}
 }
 
-.woocommerce-advanced-filters__list-specifier {
+.woocommerce-filters-advanced__list-specifier {
 	@include breakpoint( '<782px' ) {
 		padding: $gap-smallest 0;
 	}

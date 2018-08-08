@@ -5,23 +5,22 @@
 import { Component } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Dropdown } from '@wordpress/components';
-import { stringify as stringifyQueryObject } from 'qs';
-import PropTypes from 'prop-types';
 
 /**
  * Internal dependencies
  */
-import './style.scss';
-import DropdownButton from 'components/dropdown-button';
 import DatePickerContent from './content';
+import DropdownButton from 'components/dropdown-button';
 import { getCurrentDates, getDateParamsFromQuery, isoDateFormat } from 'lib/date';
+import { getNewPath, getQuery } from 'lib/nav-utils';
+import './style.scss';
 
 const shortDateFormat = __( 'MM/DD/YYYY', 'wc-admin' );
 
 class DatePicker extends Component {
 	constructor( props ) {
 		super( props );
-		this.state = this.getResetState( props );
+		this.state = this.getResetState();
 
 		this.update = this.update.bind( this );
 		this.getUpdatePath = this.getUpdatePath.bind( this );
@@ -29,8 +28,8 @@ class DatePicker extends Component {
 		this.resetCustomValues = this.resetCustomValues.bind( this );
 	}
 
-	getResetState( props ) {
-		const { period, compare, before, after } = getDateParamsFromQuery( props.query );
+	getResetState() {
+		const { period, compare, before, after } = getDateParamsFromQuery( getQuery() );
 		return {
 			period,
 			compare,
@@ -48,31 +47,21 @@ class DatePicker extends Component {
 		this.setState( update );
 	}
 
-	getOtherQueries( query ) {
-		const { period, compare, after, before, ...otherQueries } = query; // eslint-disable-line no-unused-vars
-		return otherQueries;
-	}
-
 	getUpdatePath( selectedTab ) {
-		const { path, query } = this.props;
-		const otherQueries = this.getOtherQueries( query );
 		const { period, compare, after, before } = this.state;
 		const data = {
 			period: 'custom' === selectedTab ? 'custom' : period,
 			compare,
 		};
 		if ( 'custom' === selectedTab ) {
-			Object.assign( data, {
-				after: after ? after.format( isoDateFormat ) : '',
-				before: before ? before.format( isoDateFormat ) : '',
-			} );
+			data.after = after ? after.format( isoDateFormat ) : '';
+			data.before = before ? before.format( isoDateFormat ) : '';
 		}
-		const queryString = stringifyQueryObject( Object.assign( otherQueries, data ) );
-		return `${ path }?${ queryString }`;
+		return getNewPath( data );
 	}
 
 	getButtonLabel() {
-		const { primary, secondary } = getCurrentDates( this.props.query );
+		const { primary, secondary } = getCurrentDates( getQuery() );
 		return [
 			`${ primary.label } (${ primary.range })`,
 			`${ __( 'vs.', 'wc-admin' ) } ${ secondary.label } (${ secondary.range })`,
@@ -112,10 +101,10 @@ class DatePicker extends Component {
 			beforeError,
 		} = this.state;
 		return (
-			<div className="woocommerce-date-picker">
+			<div className="woocommerce-filters-date">
 				<p>{ __( 'Date Range', 'wc-admin' ) }:</p>
 				<Dropdown
-					contentClassName="woocommerce-date-picker__content"
+					contentClassName="woocommerce-filters-date__content"
 					position="bottom"
 					expandOnMobile
 					renderToggle={ ( { isOpen, onToggle } ) => (
@@ -149,10 +138,5 @@ class DatePicker extends Component {
 		);
 	}
 }
-
-DatePicker.propTypes = {
-	path: PropTypes.string.isRequired,
-	query: PropTypes.object.isRequired,
-};
 
 export default DatePicker;
