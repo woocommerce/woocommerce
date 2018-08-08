@@ -1,6 +1,6 @@
 <?php
 /**
- * Class for parameter-based Revenue Reports querying
+ * Class for parameter-based Orders Reports querying
  *
  * Example usage:
  * $args = array(
@@ -9,7 +9,7 @@
  *          'interval'     => 'week',
  *          'categories'   => array(15, 18),
  *          'coupons'      => array(138),
- *          'order_status' => 'completed',
+ *          'order_status' => array('completed'),
  *         );
  * $report = new WC_Reports_Orders_Stats_Query( $args );
  * $mydata = $report->get_data();

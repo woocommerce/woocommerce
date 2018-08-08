@@ -113,6 +113,11 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 		return wc_get_products( $args );
 	}
 
+	protected function normalize_order_status( $status ) {
+		$status = trim( $status );
+		return 'wc-' . $status;
+	}
+
 	/**
 	 * Updates the totals and intervals database queries with parameters used for Orders report: categories, coupons and order status.
 	 *
@@ -156,9 +161,11 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 			)";
 		}
 
-		if ( '' !== $query_args['order_status'] ) {
+		if ( is_array( $query_args['order_status'] ) && count( $query_args['order_status'] ) > 0 ) {
+			$statuses = array_map( array( $this, 'normalize_order_status' ), $query_args['order_status'] );
+
 			$from_clause  .= " JOIN {$wpdb->prefix}posts ON {$orders_stats_table}.order_id = {$wpdb->prefix}posts.ID";
-			$where_clause .= " AND {$wpdb->prefix}posts.post_status IN ( '" . implode( "','", $query_args['order_status'] ) . "' ) ";
+			$where_clause .= " AND {$wpdb->prefix}posts.post_status IN ( '" . implode( "','", $statuses ) . "' ) ";
 		}
 
 		// To avoid requesting the subqueries twice, the result is applied to all queries passed to the method.
@@ -182,7 +189,7 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 		$now        = time();
 		$week_back  = $now - WEEK_IN_SECONDS;
 
-		// These defaults are only applied when not using REST API, as the API has its own defaults that overwrite these.
+		// These defaults are only applied when not using REST API, as the API has its own defaults that overwrite these for most values (except before, after, etc).
 		$defaults   = array(
 			'per_page'     => get_option( 'posts_per_page' ),
 			'page'         => 1,
