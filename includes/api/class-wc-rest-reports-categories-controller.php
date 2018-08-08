@@ -136,7 +136,7 @@ class WC_REST_Reports_Categories_Controller extends WC_REST_Reports_Controller {
 	protected function prepare_links( $object ) {
 		$links = array(
 			'category' => array(
-				'href' => rest_url( sprintf( '/%s/products/categories/%d', $this->namespace, $object->product_id ) ),
+				'href' => rest_url( sprintf( '/%s/products/categories/%d', $this->namespace, $object->category_id ) ),
 			),
 		);
 
