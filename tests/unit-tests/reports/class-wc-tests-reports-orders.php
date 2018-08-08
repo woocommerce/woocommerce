@@ -9,12 +9,22 @@
 class WC_Tests_Reports_Orders extends WC_Unit_Test_Case {
 
 	/**
+	 * Delete everything in the order stats lookup table.
+	 */
+	protected function reset_stats_db() {
+		global $wpdb;
+		$wpdb->query( "DELETE FROM $wpdb->prefix" . WC_Reports_Orders_Data_Store::TABLE_NAME ); // @codingStandardsIgnoreLine.
+	}
+
+	/**
 	 * Test the calculations and querying works correctly for the base case of 1 order.
 	 *
 	 * @since 3.5.0
 	 */
 	public function test_populate_and_query() {
-		WC_Helper_Reports::reset_stats_dbs();
+				global $wpdb;
+
+		$this->reset_stats_db();
 
 		// Populate all of the data.
 		$product = new WC_Product_Simple();
@@ -32,61 +42,50 @@ class WC_Tests_Reports_Orders extends WC_Unit_Test_Case {
 		$order->set_total( 97 ); // $25x4 products + $10 shipping - $20 discount + $7 tax.
 		$order->save();
 
-		// Test the calculations.
-		$start_time = time() - HOUR_IN_SECONDS;
-		$end_time = time() + 1;
-
 		$data_store = new WC_Reports_Orders_Data_Store();
+		$data_store::update( $order );
 
-		$data = $data_store::summarize_orders( $start_time, $end_time );
+		$start_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
+		$end_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() + HOUR_IN_SECONDS );
 
-		$expected_data = array(
-			'num_orders'            => 1,
-			'num_items_sold'        => 4,
-			'orders_gross_total'    => 97.0,
-			'orders_coupon_total'   => 20.0,
-			'orders_refund_total'   => 0.0,
-			'orders_tax_total'      => 7.0,
-			'orders_shipping_total' => 10.0,
-			'orders_net_total'      => 80.0,
-		);
-		$this->assertEquals( $expected_data, $data );
-
-		$data_store::update( $start_time, $data );
-
-		$args = array();
+		$args = array( 'interval' => 'hour' );
 		$expected_stats = array(
 			'totals' => array(
-				'date_start'            => date( 'Y-m-d H:00:00', $start_time ),
-				'date_end'              => date( 'Y-m-d H:00:00', $end_time ),
-				'num_orders'            => '1',
-				'num_items_sold'        => '4',
-				'orders_gross_total'    => '97',
-				'orders_coupon_total'   => '20',
-				'orders_refund_total'   => '0',
-				'orders_tax_total'      => '7',
-				'orders_shipping_total' => '10',
-				'orders_net_total'      => '80',
-				'avg_items_per_order'   => '4.0000',
-				'avg_order_value'       => '97',
+				'orders_count'        => 1,
+				'num_items_sold'      => 4,
+				'avg_items_per_order' => 4,
+				'avg_order_value'     => 97,
+				'gross_revenue'       => 97,
+				'coupons'             => 20,
+				'refunds'             => 0,
+				'taxes'               => 7,
+				'shipping'            => 10,
+				'net_revenue'         => 80,
 			),
 			'intervals' => array(
 				array(
-					'time_interval'         => '',
-					'date_start'            => date( 'Y-m-d H:00:00', $start_time ),
-					'date_end'              => date( 'Y-m-d H:00:00', $end_time ),
-					'num_orders'            => '1',
-					'num_items_sold'        => '4',
-					'orders_gross_total'    => '97',
-					'orders_coupon_total'   => '20',
-					'orders_refund_total'   => '0',
-					'orders_tax_total'      => '7',
-					'orders_shipping_total' => '10',
-					'orders_net_total'      => '80',
-					'avg_order_value'       => '97',
-					'avg_items_per_order'   => '4.0000',
+					'interval'       => 'hour',
+					'date_start'     => $start_time,
+					'date_start_gmt' => date( 'Y-m-d H:00:00', $order->get_date_created()->getTimestamp() ),
+					'date_end'       => $end_time,
+					'date_end_gmt'   => date( 'Y-m-d H:00:00', $order->get_date_created()->getTimestamp() + HOUR_IN_SECONDS ),
+					'subtotals'      => array(
+						'gross_revenue'       => 97,
+						'net_revenue'         => 80,
+						'coupons'             => 20,
+						'shipping'            => 10,
+						'taxes'               => 7,
+						'refunds'             => 0,
+						'orders_count'        => 1,
+						'num_items_sold'      => 4,
+						'avg_items_per_order' => 4,
+						'avg_order_value'     => 97,
+					),
 				),
 			),
+			'total'   => 1,
+			'pages'   => 1,
+			'page_no' => 1,
 		);
 
 		// Test retrieving the stats from the data store.

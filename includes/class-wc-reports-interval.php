@@ -22,6 +22,13 @@ class WC_Reports_Interval {
 	public static $iso_datetime_format = 'Y-m-d\TH:i:s\Z';
 
 	/**
+	 * Format string for use in SQL queries.
+	 *
+	 * @var string
+	 */
+	public static $sql_datetime_format = 'Y-m-d H:i:s';
+
+	/**
 	 * Returns date format to be used as grouping clause in SQL.
 	 *
 	 * @param string $time_interval Time interval.
@@ -32,20 +39,20 @@ class WC_Reports_Interval {
 
 		if ( 1 === $first_day_of_week ) {
 			// Week begins on Monday, ISO 8601.
-			$week_format = "DATE_FORMAT(start_time, '%x-%v')";
+			$week_format = "DATE_FORMAT(date_created, '%x-%v')";
 		} else {
 			// Week begins on day other than specified by ISO 8601, needs to be in sync with function simple_week_number.
-			$week_format = "CONCAT(YEAR(start_time), '-', LPAD( FLOOR( ( DAYOFYEAR(start_time) + ( ( DATE_FORMAT(MAKEDATE(YEAR(start_time),1), '%w') - $first_day_of_week + 7 ) % 7 ) - 1 ) / 7  ) + 1 , 2, '0'))";
+			$week_format = "CONCAT(YEAR(date_created), '-', LPAD( FLOOR( ( DAYOFYEAR(date_created) + ( ( DATE_FORMAT(MAKEDATE(YEAR(date_created),1), '%w') - $first_day_of_week + 7 ) % 7 ) - 1 ) / 7  ) + 1 , 2, '0'))";
 
 		}
 
 		$mysql_date_format_mapping = array(
-			'hour'    => "DATE_FORMAT(start_time, '%Y-%m-%d %k')",
-			'day'     => "DATE_FORMAT(start_time, '%Y-%m-%d')",
+			'hour'    => "DATE_FORMAT(date_created, '%Y-%m-%d %k')",
+			'day'     => "DATE_FORMAT(date_created, '%Y-%m-%d')",
 			'week'    => $week_format,
-			'month'   => "DATE_FORMAT(start_time, '%Y-%m')",
-			'quarter' => "CONCAT(YEAR(start_time), '-', QUARTER(start_time))",
-			'year'    => 'YEAR(start_time)',
+			'month'   => "DATE_FORMAT(date_created, '%Y-%m')",
+			'quarter' => "CONCAT(YEAR(date_created), '-', QUARTER(date_created))",
+			'year'    => 'YEAR(date_created)',
 
 		);
 
@@ -157,10 +164,15 @@ class WC_Reports_Interval {
 	 * @return DateTime
 	 */
 	public static function next_hour_start( $datetime, $reversed = false ) {
-		$hour_increment         = $reversed ? -1 : 1;
+		$hour_increment         = $reversed ? 0 : 1;
 		$timestamp              = (int) $datetime->format( 'U' );
 		$hours_offset_timestamp = ( floor( $timestamp / HOUR_IN_SECONDS ) + $hour_increment ) * HOUR_IN_SECONDS;
-		$hours_offset_time      = new DateTime();
+
+		if ( $reversed ) {
+			$hours_offset_timestamp --;
+		}
+
+		$hours_offset_time = new DateTime();
 		$hours_offset_time->setTimestamp( $hours_offset_timestamp );
 		return $hours_offset_time;
 	}
@@ -178,6 +190,14 @@ class WC_Reports_Interval {
 		$next_day_timestamp = ( floor( $timestamp / DAY_IN_SECONDS ) + $day_increment ) * DAY_IN_SECONDS;
 		$next_day           = new DateTime();
 		$next_day->setTimestamp( $next_day_timestamp );
+
+		// The day boundary is actually next midnight when going in reverse, so set it to day -1 at 23:59:59.
+		if ( $reversed ) {
+			$timestamp            = (int) $next_day->format( 'U' );
+			$end_of_day_timestamp = floor( $timestamp / DAY_IN_SECONDS ) * DAY_IN_SECONDS + DAY_IN_SECONDS - 1;
+			$next_day->setTimestamp( $end_of_day_timestamp );
+		}
+
 		return $next_day;
 	}
 
@@ -215,15 +235,26 @@ class WC_Reports_Interval {
 	 * @return DateTime
 	 */
 	public static function next_month_start( $datetime, $reversed = false ) {
-		$month_increment = $reversed ? -1 : 1;
+		$month_increment = 1;
 		$year            = $datetime->format( 'Y' );
-		$month           = (int) $datetime->format( 'm' ) + $month_increment;
-		if ( $month > 12 ) {
-			$month = 1;
-			$year++;
+		$month           = (int) $datetime->format( 'm' );
+
+		if ( $reversed ) {
+			$beg_of_month_datetime       = new DateTime( "$year-$month-01 00:00:00" );
+			$timestamp                   = (int) $beg_of_month_datetime->format( 'U' );
+			$end_of_prev_month_timestamp = $timestamp - 1;
+			$datetime->setTimestamp( $end_of_prev_month_timestamp );
+		} else {
+			$month += $month_increment;
+			if ( $month > 12 ) {
+				$month = 1;
+				$year ++;
+			}
+			$day      = '01';
+			$datetime = new DateTime( "$year-$month-$day 00:00:00" );
 		}
-		$day = '01';
-		return new DateTime( "$year-$month-$day 00:00:00" );
+
+		return $datetime;
 	}
 
 	/**
@@ -234,15 +265,31 @@ class WC_Reports_Interval {
 	 * @return DateTime
 	 */
 	public static function next_quarter_start( $datetime, $reversed = false ) {
-		$month_increment = $reversed ? -3 : 3;
+		$month_increment = 3;
 		$year            = $datetime->format( 'Y' );
-		$month           = (int) $datetime->format( 'm' ) + $month_increment;
-		if ( $month > 12 ) {
-			$month = $month - 12;
-			$year++;
+		$month           = (int) $datetime->format( 'm' );
+
+		if ( $reversed ) {
+			$month += -1 * $month_increment;
+			if ( $month < 1 ) {
+				$month = $month + 12;
+				$year --;
+			}
+			$beg_of_month_datetime       = new DateTime( "$year-$month-01 00:00:00" );
+			$timestamp                   = (int) $beg_of_month_datetime->format( 'U' );
+			$end_of_prev_month_timestamp = $timestamp - 1;
+			$datetime->setTimestamp( $end_of_prev_month_timestamp );
+		} else {
+			$month += $month_increment;
+			if ( $month > 12 ) {
+				$month = 1;
+				$year ++;
+			}
+			$day      = '01';
+			$datetime = new DateTime( "$year-$month-$day 00:00:00" );
 		}
-		$day = '01';
-		return new DateTime( "$year-$month-$day 00:00:00" );
+
+		return $datetime;
 	}
 
 	/**
@@ -253,11 +300,22 @@ class WC_Reports_Interval {
 	 * @return DateTime
 	 */
 	public static function next_year_start( $datetime, $reversed = false ) {
-		$year_increment = $reversed ? -1 : 1;
-		$year           = (int) $datetime->format( 'Y' ) + $year_increment;
+		$year_increment = 1;
+		$year           = (int) $datetime->format( 'Y' );
 		$month          = '01';
 		$day            = '01';
-		return new DateTime( "$year-$month-$day 00:00:00" );
+
+		if ( $reversed ) {
+			$datetime                   = new DateTime( "$year-$month-$day 00:00:00" );
+			$timestamp                  = (int) $datetime->format( 'U' );
+			$end_of_prev_year_timestamp = $timestamp - 1;
+			$datetime->setTimestamp( $end_of_prev_year_timestamp );
+		} else {
+			$year    += $year_increment;
+			$datetime = new DateTime( "$year-$month-$day 00:00:00" );
+		}
+
+		return $datetime;
 	}
 
 	/**
