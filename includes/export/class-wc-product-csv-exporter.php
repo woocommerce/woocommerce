@@ -44,6 +44,13 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	protected $product_types_to_export = array();
 
 	/**
+	 * Products belonging to what category should be exported.
+	 *
+	 * @var string
+	 */
+	protected $product_category_to_export = array();
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -69,6 +76,17 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 */
 	public function set_product_types_to_export( $product_types_to_export ) {
 		$this->product_types_to_export = array_map( 'wc_clean', $product_types_to_export );
+	}
+
+	/**
+	 * Product category to export
+	 *
+	 * @since 3.5.0
+	 * @param string $product_category_to_export Product category slug to export, empty string exports all.
+	 * @return void
+	 */
+	public function set_product_category_to_export( $product_category_to_export ) {
+		$this->product_category_to_export = array_map( 'wc_clean', $product_category_to_export );
 	}
 
 	/**
@@ -131,8 +149,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * @since 3.1.0
 	 */
 	public function prepare_data_to_export() {
-		$columns  = $this->get_column_names();
-		$args     = apply_filters( "woocommerce_product_export_{$this->export_type}_query_args", array(
+		$args = array(
 			'status'   => array( 'private', 'publish', 'draft', 'future', 'pending' ),
 			'type'     => $this->product_types_to_export,
 			'limit'    => $this->get_limit(),
@@ -142,45 +159,85 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			),
 			'return'   => 'objects',
 			'paginate' => true,
-		) );
-		$products = wc_get_products( $args );
+		);
 
-		$this->total_rows = $products->total;
-		$this->row_data   = array();
+		if ( ! empty( $this->product_category_to_export ) ) {
+			$args['category'] = $this->product_category_to_export;
+		}
+		$products = wc_get_products( apply_filters( "woocommerce_product_export_{$this->export_type}_query_args", $args ) );
+
+		$this->total_rows  = $products->total;
+		$this->row_data    = array();
+		$variable_products = array();
 
 		foreach ( $products->products as $product ) {
-			$row = array();
-			foreach ( $columns as $column_id => $column_name ) {
-				$column_id = strstr( $column_id, ':' ) ? current( explode( ':', $column_id ) ) : $column_id;
-				$value     = '';
+			// Check if the category is set, this means we need to fetch variations seperately as they are not tied to a category.
+			if ( ! empty( $args['category'] ) && $product->is_type( 'variable' ) ) {
+				$variable_products[] = $product->get_id();
+			}
 
-				// Skip some columns if dynamically handled later or if we're being selective.
-				if ( in_array( $column_id, array( 'downloads', 'attributes', 'meta' ), true ) || ! $this->is_column_exporting( $column_id ) ) {
+			$this->row_data[] = $this->generate_row_data( $product );
+		}
+
+		// If a category was selected we loop through the variations as they are not tied to a category so will be excluded by default.
+		if ( ! empty( $variable_products ) ) {
+			foreach ( $variable_products as $parent_id ) {
+				$products = wc_get_products( array(
+					'parent' => $parent_id,
+					'type'   => array( 'variation' ),
+					'return' => 'objects',
+					'limit'  => -1,
+				) );
+
+				if ( ! $products ) {
 					continue;
 				}
 
-				if ( has_filter( "woocommerce_product_export_{$this->export_type}_column_{$column_id}" ) ) {
-					// Filter for 3rd parties.
-					$value = apply_filters( "woocommerce_product_export_{$this->export_type}_column_{$column_id}", '', $product, $column_id );
-
-				} elseif ( is_callable( array( $this, "get_column_value_{$column_id}" ) ) ) {
-					// Handle special columns which don't map 1:1 to product data.
-					$value = $this->{"get_column_value_{$column_id}"}( $product );
-
-				} elseif ( is_callable( array( $product, "get_{$column_id}" ) ) ) {
-					// Default and custom handling.
-					$value = $product->{"get_{$column_id}"}( 'edit' );
+				foreach ( $products as $product ) {
+					$this->row_data[] = $this->generate_row_data( $product );
 				}
+			}
+		}
+	}
 
-				$row[ $column_id ] = $value;
+	/**
+	 * Take a product and generate row data from it for export.
+	 *
+	 * @param WC_Product $product WC_Product object.
+	 * @return array
+	 */
+	protected function generate_row_data( $product ) {
+		$columns = $this->get_column_names();
+		$row     = array();
+		foreach ( $columns as $column_id => $column_name ) {
+			$column_id = strstr( $column_id, ':' ) ? current( explode( ':', $column_id ) ) : $column_id;
+			$value     = '';
+
+			// Skip some columns if dynamically handled later or if we're being selective.
+			if ( in_array( $column_id, array( 'downloads', 'attributes', 'meta' ), true ) || ! $this->is_column_exporting( $column_id ) ) {
+				continue;
 			}
 
-			$this->prepare_downloads_for_export( $product, $row );
-			$this->prepare_attributes_for_export( $product, $row );
-			$this->prepare_meta_for_export( $product, $row );
+			if ( has_filter( "woocommerce_product_export_{$this->export_type}_column_{$column_id}" ) ) {
+				// Filter for 3rd parties.
+				$value = apply_filters( "woocommerce_product_export_{$this->export_type}_column_{$column_id}", '', $product, $column_id );
 
-			$this->row_data[] = apply_filters( 'woocommerce_product_export_row_data', $row, $product );
+			} elseif ( is_callable( array( $this, "get_column_value_{$column_id}" ) ) ) {
+				// Handle special columns which don't map 1:1 to product data.
+				$value = $this->{"get_column_value_{$column_id}"}( $product );
+
+			} elseif ( is_callable( array( $product, "get_{$column_id}" ) ) ) {
+				// Default and custom handling.
+				$value = $product->{"get_{$column_id}"}( 'edit' );
+			}
+
+			$row[ $column_id ] = $value;
 		}
+
+		$this->prepare_downloads_for_export( $product, $row );
+		$this->prepare_attributes_for_export( $product, $row );
+		$this->prepare_meta_for_export( $product, $row );
+		return apply_filters( 'woocommerce_product_export_row_data', $row, $product );
 	}
 
 	/**
