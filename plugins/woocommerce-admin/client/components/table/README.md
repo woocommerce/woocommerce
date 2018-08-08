@@ -32,6 +32,7 @@ render: function() {
 
 ### `TableCard` props
 
+* `isCompact`: Applies `is-compact` class and hides pagination.
 * `headers`: An array of column headers (see `Table` props).
 * `onQueryChange`: A function which returns a callback function to update the query string for a given `param`.
 * `onClickDownload`: A callback function which handles then "download" button press. Optional, if not used, the button won't appear.

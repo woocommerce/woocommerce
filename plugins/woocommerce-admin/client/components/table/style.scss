@@ -6,6 +6,12 @@
 		padding-bottom: $gap;
 	}
 
+	&.is-compact {
+		.woocommerce-card__body {
+			padding-bottom: 0;
+		}
+	}
+
 	.woocommerce-card__action,
 	.woocommerce-card__menu {
 		justify-self: flex-end;
@@ -24,6 +30,14 @@
 	table {
 		border-collapse: collapse;
 		width: 100%;
+	}
+
+	.is-compact & {
+		margin-bottom: 0px;
+
+		tr:last-child {
+			border-bottom-style: hidden;
+		}
 	}
 }
 
