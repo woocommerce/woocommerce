@@ -160,6 +160,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 
 = 3.5.0 - 2018-XX-XX =
 * Feature - Option has been added on the inventory tab of the edit product page to set a low stock threshold for individual products. #20260
+* Feature - Add ability to export products by category to the CSV exporter. #20870
 * Enhancement - Excluded children categories from WP_Query in product shortcode if cat_operator=AND. #20207
 * Enhancement - Add anchor tag example to email template preview. #20246
 * Enhancement - Introduce is_paypal_supported_currency check in setup wizard. #20244
