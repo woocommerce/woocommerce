@@ -263,9 +263,12 @@ class WC_REST_Reports_Categories_Controller extends WC_REST_Reports_Controller {
 		);
 		$params['categories'] = array(
 			'description'       => __( 'Limit result set to all items that have the specified term assigned in the categories taxonomy.', 'woocommerce' ),
-			'type'              => 'string',
+			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'type' => 'integer',
+			),
 		);
 
 		return $params;
