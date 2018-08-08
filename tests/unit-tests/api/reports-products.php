@@ -81,11 +81,10 @@ class WC_Tests_API_Reports_Products extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 5, count( $properties ) );
+		$this->assertEquals( 4, count( $properties ) );
 		$this->assertArrayHasKey( 'product_id', $properties );
 		$this->assertArrayHasKey( 'items_sold', $properties );
 		$this->assertArrayHasKey( 'gross_revenue', $properties );
 		$this->assertArrayHasKey( 'orders_count', $properties );
-		$this->assertArrayHasKey( '_links', $properties );
 	}
 }

@@ -143,30 +143,6 @@ class WC_REST_Reports_Products_Controller extends WC_REST_Reports_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'description' => __( 'Number of orders product appeared in.', 'woocommerce' ),
 				),
-				'_links' => array(
-					'type'        => 'object',
-					'context'     => array( 'view', 'edit' ),
-					'description' => __( 'Links to detailed product reports.', 'woocommerce' ),
-					'properties'  => array(
-						'product' => array(
-							'type'     => 'array',
-							'readonly' => true,
-							'context'  => array( 'view', 'edit' ),
-							'items' => array(
-								'type'       => 'object',
-								'readonly'   => true,
-								'context'    => array( 'view', 'edit' ),
-								'properties' => array(
-									'href' => array(
-										'type'     => 'string',
-										'readonly' => true,
-										'context'  => array( 'view', 'edit' ),
-									),
-								),
-							),
-						),
-					),
-				),
 			),
 		);
 
