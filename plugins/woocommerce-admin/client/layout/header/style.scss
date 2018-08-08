@@ -6,7 +6,6 @@
 	justify-content: space-between;
 	flex-direction: row;
 	box-sizing: border-box;
-	background: $white;
 	border-bottom: 1px solid $white;
 	padding: 0px;
 	height: 80px;
@@ -32,7 +31,7 @@
 	.woocommerce-layout__header-breadcrumbs {
 		font-size: 13px;
 		font-weight: normal;
-		padding: 0px;
+		padding: 0 0 0 $gutter-large;
 		flex: 1 auto;
 		height: 50px;
 		line-height: 50px;
@@ -46,10 +45,6 @@
 		@include breakpoint( '>1100px' ) {
 			height: 80px;
 			line-height: 80px;
-		}
-
-		span:first-child {
-			padding-left: $spacing;
 		}
 
 		span + span::before {

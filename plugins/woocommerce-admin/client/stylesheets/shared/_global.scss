@@ -2,10 +2,17 @@
 
 // By using CSS variables, we can switch the spacing rhythm using a single media query.
 :root {
+	--large-gap: 40px;
 	--main-gap: 24px;
+}
+@media (max-width: 1100px) {
+	:root {
+		--large-gap: 24px;
+	}
 }
 @media (max-width: 782px) {
 	:root {
+		--large-gap: 16px;
 		--main-gap: 16px;
 	}
 }

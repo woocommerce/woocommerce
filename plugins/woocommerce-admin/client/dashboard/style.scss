@@ -3,9 +3,19 @@
 .woocommerce-dashboard__columns {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
-	grid-column-gap: $gutter;
+	grid-column-gap: $gap-large;
 
 	@include breakpoint( '<1100px' ) {
 		grid-template-columns: 1fr;
 	}
+}
+
+.woocommerce-dashboard__widget {
+	display: flex;
+	align-items: center;
+	text-align: center;
+}
+
+.woocommerce-dashboard__widget-item {
+	flex: 1;
 }

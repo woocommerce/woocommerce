@@ -5,7 +5,7 @@
 }
 
 .woocommerce-layout__primary {
-	margin: 80px 0 0 $gutter;
+	margin: 80px 0 0 $gutter-large;
 
 	@include breakpoint( '>1100px' ) {
 		margin-top: 100px;
@@ -13,17 +13,6 @@
 }
 
 .woocommerce-layout .woocommerce-layout__main {
-	padding-right: $gutter;
+	padding-right: $gutter-large;
 	max-width: 100%;
-}
-
-// @TODO remove this?
-.woocommerce-dashboard__widget {
-	display: flex;
-	align-items: center;
-	text-align: center;
-}
-
-.woocommerce-dashboard__widget-item {
-	flex: 1;
 }
