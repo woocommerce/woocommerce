@@ -334,9 +334,9 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 					}
 				}		
 
-				// Add all pricing data to the transient array
+				// Add all pricing data to the transient array.
 				foreach( $prices_array as $key => $values ) {
-					$transient_cached_prices_array[$price_hash][$key] = $values;
+					$transient_cached_prices_array[ $price_hash ][ $key ] = $values;
 				}
 				
 				set_transient( $transient_name, wp_json_encode( $transient_cached_prices_array ), DAY_IN_SECONDS * 30 );
