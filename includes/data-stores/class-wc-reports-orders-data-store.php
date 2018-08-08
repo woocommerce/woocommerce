@@ -149,11 +149,12 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 			WHERE
 				{$wpdb->prefix}wc_order_product_lookup.product_id IN ({$allowed_products_str})
 			)";
+		}
 
-			if ( is_array( $query_args['coupons'] ) && count( $query_args['coupons'] ) > 0 ) {
-				$allowed_coupons_str = implode( ', ', $query_args['coupons'] );
+		if ( is_array( $query_args['coupons'] ) && count( $query_args['coupons'] ) > 0 ) {
+			$allowed_coupons_str = implode( ', ', $query_args['coupons'] );
 
-				$where_clause .= " AND {$orders_stats_table}.order_id IN (
+			$where_clause .= " AND {$orders_stats_table}.order_id IN (
 			SELECT
 				DISTINCT {$wpdb->prefix}wc_order_coupon_lookup.order_id
 			FROM
@@ -161,7 +162,6 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 			WHERE
 				{$wpdb->prefix}wc_order_coupon_lookup.coupon_id IN ({$allowed_coupons_str})
 			)";
-			}
 		}
 
 		if ( is_array( $query_args['order_status'] ) && count( $query_args['order_status'] ) > 0 ) {
@@ -205,6 +205,7 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 			'categories'   => array(),
 			'coupons'      => array(),
 			'order_status' => parent::get_report_order_statuses(),
+			'products'     => array(),
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
 
