@@ -5,8 +5,8 @@
  */
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import { isEmpty } from 'lodash';
+import { Component, createRef } from '@wordpress/element';
+import { isEmpty, isEqual } from 'lodash';
 import { select as d3Select } from 'd3-selection';
 
 /**
@@ -38,23 +38,28 @@ export default class D3Base extends Component {
 		params: null,
 		drawChart: null,
 		getParams: null,
+		width: null,
 	};
 
-	chartRef = React.createRef();
+	chartRef = createRef();
 
 	static getDerivedStateFromProps( nextProps, prevState ) {
 		let state = {};
 
-		if ( nextProps.data !== prevState.data ) {
+		if ( ! isEqual( nextProps.data, prevState.data ) ) {
 			state = { ...state, data: nextProps.data };
 		}
 
-		if ( nextProps.drawChart !== prevState.drawChart ) {
+		if ( ! isEqual( nextProps.drawChart, prevState.drawChart ) ) {
 			state = { ...state, drawChart: nextProps.drawChart };
 		}
 
-		if ( nextProps.getParams !== prevState.getParams ) {
+		if ( ! isEqual( nextProps.getParams, prevState.getParams ) ) {
 			state = { ...state, getParams: nextProps.getParams };
+		}
+
+		if ( nextProps.width !== prevState.width ) {
+			state = { ...state, width: nextProps.width };
 		}
 
 		if ( ! isEmpty( state ) ) {
@@ -72,8 +77,9 @@ export default class D3Base extends Component {
 
 	shouldComponentUpdate( nextProps, nextState ) {
 		return (
-			( nextState.params !== null && this.state.params !== nextState.params ) ||
-			this.state.data !== nextState.data
+			( nextState.params !== null && ! isEqual( this.state.params, nextState.params ) ) ||
+			! isEqual( this.state.data, nextState.data ) ||
+			this.state.width !== nextState.width
 		);
 	}
 

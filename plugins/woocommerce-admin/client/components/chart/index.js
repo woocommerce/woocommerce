@@ -3,7 +3,8 @@
  * External dependencies
  */
 import classNames from 'classnames';
-import { Component } from '@wordpress/element';
+import { isEqual } from 'lodash';
+import { Component, createRef } from '@wordpress/element';
 import PropTypes from 'prop-types';
 
 /**
@@ -11,8 +12,9 @@ import PropTypes from 'prop-types';
  */
 import D3Chart from './charts';
 import Legend from './legend';
+import { gap, gaplarge } from 'stylesheets/abstracts/_variables.scss';
 
-const WIDE_BREAKPOINT = 1130;
+const WIDE_BREAKPOINT = 1100;
 
 function getOrderedKeys( data ) {
 	return [
@@ -26,6 +28,8 @@ function getOrderedKeys( data ) {
 		.map( key => ( {
 			key,
 			total: data.reduce( ( a, c ) => a + c[ key ], 0 ),
+			visible: true,
+			focus: true,
 		} ) )
 		.sort( ( a, b ) => b.total - a.total );
 }
@@ -33,33 +37,30 @@ function getOrderedKeys( data ) {
 class Chart extends Component {
 	constructor( props ) {
 		super( props );
+		this.chartRef = createRef();
+		const wpBody = document.getElementById( 'wpbody' ).getBoundingClientRect().width;
+		const wpWrap = document.getElementById( 'wpwrap' ).getBoundingClientRect().width;
+		const calcGap = wpWrap > 782 ? gaplarge.match( /\d+/ )[ 0 ] : gap.match( /\d+/ )[ 0 ];
 		this.state = {
-			data: null,
-			orderedKeys: null,
-			bodyWidth: document.getElementById( 'wpbody' ).getBoundingClientRect().width,
+			data: props.data,
+			orderedKeys: getOrderedKeys( props.data ),
+			width: wpBody - 2 * calcGap,
 		};
 		this.handleLegendToggle = this.handleLegendToggle.bind( this );
 		this.handleLegendHover = this.handleLegendHover.bind( this );
 		this.updateDimensions = this.updateDimensions.bind( this );
 	}
 
-	static getDerivedStateFromProps( nextProps, prevState ) {
-		if ( prevState.data !== nextProps.data ) {
-			return {
-				data: nextProps.data,
-				orderedKeys: getOrderedKeys( nextProps.data ).map( d => ( {
-					...d,
-					visible: true,
-					focus: true,
-				} ) ),
-			};
+	componentDidUpdate( prevProps ) {
+		const { data } = this.props;
+		if ( ! isEqual( [ ...data ].sort(), [ ...prevProps.data ].sort() ) ) {
+			/* eslint-disable react/no-did-update-set-state */
+			this.setState( {
+				data,
+				orderedKeys: getOrderedKeys( data ),
+			} );
+			/* eslint-enable react/no-did-update-set-state */
 		}
-
-		return null;
-	}
-
-	shouldComponentUpdate( nextProps, nextState ) {
-		return this.state.data !== null && this.state.data !== nextState.data;
 	}
 
 	componentDidMount() {
@@ -93,18 +94,17 @@ class Chart extends Component {
 
 	updateDimensions() {
 		this.setState( {
-			bodyWidth: document.getElementById( 'wpbody' ).getBoundingClientRect().width,
+			width: this.chartRef.current.offsetWidth,
 		} );
 	}
 
 	render() {
-		const { bodyWidth, data, orderedKeys } = this.state;
-		const legendDirection =
-			orderedKeys.length <= 2 && bodyWidth > WIDE_BREAKPOINT ? 'row' : 'column';
-		const chartDirection = orderedKeys.length > 2 && bodyWidth > WIDE_BREAKPOINT ? 'row' : 'column';
+		const { data, orderedKeys, width } = this.state;
+		const legendDirection = orderedKeys.length <= 2 && width > WIDE_BREAKPOINT ? 'row' : 'column';
+		const chartDirection = orderedKeys.length > 2 && width > WIDE_BREAKPOINT ? 'row' : 'column';
 		const legend = (
 			<Legend
-				className={ 'woocommerce_dashboard__widget-legend' }
+				className={ 'woocommerce-chart__legend' }
 				data={ orderedKeys }
 				handleLegendHover={ this.handleLegendHover }
 				handleLegendToggle={ this.handleLegendToggle }
@@ -118,29 +118,27 @@ class Chart extends Component {
 			top: 0,
 		};
 		return (
-			<div className="woocommerce-dashboard__widget woocommerce-dashboard__widget-chart">
-				<div className="woocommerce-dashboard__widget-chart-header">
-					{ bodyWidth > WIDE_BREAKPOINT && legendDirection === 'row' && legend }
+			<div className="woocommerce-chart" ref={ this.chartRef }>
+				<div className="woocommerce-chart__header">
+					{ width > WIDE_BREAKPOINT && legendDirection === 'row' && legend }
 				</div>
 				<div
 					className={ classNames(
-						'woocommerce-dashboard__widget-chart-body',
-						`woocommerce-dashboard__widget-chart-body-${ chartDirection }`
+						'woocommerce-chart__body',
+						`woocommerce-chart__body-${ chartDirection }`
 					) }
 				>
-					{ bodyWidth > WIDE_BREAKPOINT && legendDirection === 'column' && legend }
+					{ width > WIDE_BREAKPOINT && legendDirection === 'column' && legend }
 					<D3Chart
 						data={ data }
 						height={ 300 }
 						margin={ margin }
 						orderedKeys={ orderedKeys }
-						type={ 'bar' }
-						width={ chartDirection === 'row' ? 762 : 1082 }
+						type={ 'line' }
+						width={ chartDirection === 'row' ? width - 320 : width }
 					/>
 				</div>
-				{ bodyWidth < WIDE_BREAKPOINT && (
-					<div className="woocommerce-dashboard__widget-chart-footer">{ legend }</div>
-				) }
+				{ width < WIDE_BREAKPOINT && <div className="woocommerce-chart__footer">{ legend }</div> }
 			</div>
 		);
 	}
@@ -149,6 +147,10 @@ class Chart extends Component {
 Chart.propTypes = {
 	data: PropTypes.array.isRequired,
 	title: PropTypes.string,
+};
+
+Chart.defaultProps = {
+	data: [],
 };
 
 export default Chart;
