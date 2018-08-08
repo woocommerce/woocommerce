@@ -5,7 +5,7 @@
 	grid-template-columns: 1fr 1fr;
 	grid-column-gap: $gutter;
 
-	@include breakpoint( '<782px' ) {
+	@include breakpoint( '<1100px' ) {
 		grid-template-columns: 1fr;
 	}
 }
