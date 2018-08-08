@@ -334,11 +334,10 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 					}
 				}		
 
-				$transient_cached_prices_array[ $price_hash ] = apply_filters( 'woocommerce_variation_prices_transient_array', array(
-					'price'         => $prices_array['price'],
-					'regular_price' => $prices_array['regular_price'],
-					'sale_price'    => $prices_array['sale_price'],
-				), $prices_array, $product );
+				// Add all pricing data to the transient array
+				foreach( $prices_array as $key => $values ) {
+					$transient_cached_prices_array[$price_hash][$key] = $values;
+				}
 				
 				set_transient( $transient_name, wp_json_encode( $transient_cached_prices_array ), DAY_IN_SECONDS * 30 );
 			}
