@@ -1145,15 +1145,16 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function remove_cart_item( $cart_item_key ) {
 		if ( isset( $this->cart_contents[ $cart_item_key ] ) ) {
+			$removed_product_id = $this->cart_contents[ $cart_item_key ]['product_id']; 
 			$this->removed_cart_contents[ $cart_item_key ] = $this->cart_contents[ $cart_item_key ];
 
 			unset( $this->removed_cart_contents[ $cart_item_key ]['data'] );
 
-			do_action( 'woocommerce_remove_cart_item', $cart_item_key, $this );
+			do_action( 'woocommerce_remove_cart_item', $cart_item_key, $this, $removed_product_id );
 
 			unset( $this->cart_contents[ $cart_item_key ] );
 
-			do_action( 'woocommerce_cart_item_removed', $cart_item_key, $this );
+			do_action( 'woocommerce_cart_item_removed', $cart_item_key, $this, $removed_product_id );
 
 			return true;
 		}
