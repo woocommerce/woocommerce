@@ -103,9 +103,9 @@ class WC_Tests_API_Reports_Categories_Stats extends WC_REST_Unit_Test_Case {
 
 		$subtotals = $properties['intervals']['items']['properties']['subtotals']['properties'];
 		$this->assertEquals( 4, count( $subtotals ) );
-		$this->assertArrayHasKey( 'items_sold', $totals );
-		$this->assertArrayHasKey( 'gross_revenue', $totals );
-		$this->assertArrayHasKey( 'orders_count', $totals );
-		$this->assertArrayHasKey( 'products_count', $totals );
+		$this->assertArrayHasKey( 'items_sold', $subtotals );
+		$this->assertArrayHasKey( 'gross_revenue', $subtotals );
+		$this->assertArrayHasKey( 'orders_count', $subtotals );
+		$this->assertArrayHasKey( 'products_count', $subtotals );
 	}
 }
