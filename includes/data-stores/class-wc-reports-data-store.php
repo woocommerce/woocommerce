@@ -39,6 +39,10 @@ class WC_Reports_Data_Store {
 	 */
 	const TABLE_NAME = '';
 
+	protected $column_types = array();
+
+	protected $report_columns = array();
+
 	/**
 	 * Returns string to be used as cache key for the data.
 	 *
@@ -47,6 +51,59 @@ class WC_Reports_Data_Store {
 	 */
 	protected function get_cache_key( $params ) {
 		return 'woocommerce_' . $this::TABLE_NAME . '_' . md5( wp_json_encode( $params ) );
+	}
+
+	/**
+	 * Casts strings returned from the database to appropriate data types for output.
+	 *
+	 * @param array $array Associative array of values extracted from the database.
+	 * @return array|WP_Error
+	 */
+	protected function cast_numbers( $array ) {
+		$retyped_array = array();
+		foreach ( $array as $column_name => $value ) {
+			if ( isset( $this->column_types[ $column_name ] ) ) {
+				$retyped_array[ $column_name ] = $this->column_types[ $column_name ]( $value );
+			} else {
+				$retyped_array[ $column_name ] = $value;
+			}
+		}
+		return $retyped_array;
+	}
+
+	/**
+	 * @param $query_args
+	 * @return array|string
+	 */
+	protected function selected_columns( $query_args ) {
+		$selections = $this->report_columns;
+
+		if ( isset( $query_args['fields'] ) && is_array( $query_args['fields'] ) ) {
+			$keep = array();
+			foreach ( $query_args['fields'] as $field ) {
+				if ( isset( $selections[ $field ] ) ) {
+					$keep[ $field ] = $selections[ $field ];
+				}
+			}
+			$selections = implode( ', ', $keep );
+		} else {
+			$selections = implode( ', ', $selections );
+		}
+		return $selections;
+	}
+
+	/**
+	 * Get the order statuses used when calculating reports.
+	 *
+	 * @return array
+	 */
+	protected static function get_report_order_statuses() {
+		return apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) );
+	}
+
+	protected function normalize_order_status( $status ) {
+		$status = trim( $status );
+		return 'wc-' . $status;
 	}
 
 	/**
@@ -101,17 +158,6 @@ class WC_Reports_Data_Store {
 	}
 
 	/**
-	 * Casts strings returned from the database to appropriate data types for output.
-	 *
-	 * @param array $array Associative array of values extracted from the database.
-	 * @return array|WP_Error
-	 */
-	protected function cast_numbers( $array ) {
-		/* translators: %s: Method name */
-		return new WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be overridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
-	}
-
-	/**
 	 * Change structure of intervals to form a correct response.
 	 *
 	 * @param array $intervals Time interval, e.g. day, week, month.
@@ -142,26 +188,56 @@ class WC_Reports_Data_Store {
 	 * @param array $query_args Parameters supplied by the user.
 	 * @return array
 	 */
-	protected function get_totals_sql_params( $query_args ) {
-		$totals_query = array(
+	protected function get_time_period_sql_params( $query_args ) {
+		$sql_query = array(
 			'from_clause'  => '',
 			'where_clause' => '',
 		);
 
 		if ( isset( $query_args['before'] ) && '' !== $query_args['before'] ) {
-			$datetime                      = new DateTime( $query_args['before'] );
-			$datetime_str                  = $datetime->format( WC_Reports_Interval::$sql_datetime_format );
-			$totals_query['where_clause'] .= " AND date_created <= '$datetime_str'";
+			$datetime                   = new DateTime( $query_args['before'] );
+			$datetime_str               = $datetime->format( WC_Reports_Interval::$sql_datetime_format );
+			$sql_query['where_clause'] .= " AND date_created <= '$datetime_str'";
 
 		}
 
 		if ( isset( $query_args['after'] ) && '' !== $query_args['after'] ) {
-			$datetime                      = new DateTime( $query_args['after'] );
-			$datetime_str                  = $datetime->format( WC_Reports_Interval::$sql_datetime_format );
-			$totals_query['where_clause'] .= " AND date_created >= '$datetime_str'";
+			$datetime                   = new DateTime( $query_args['after'] );
+			$datetime_str               = $datetime->format( WC_Reports_Interval::$sql_datetime_format );
+			$sql_query['where_clause'] .= " AND date_created >= '$datetime_str'";
 		}
 
-		return $totals_query;
+		return $sql_query;
+	}
+
+	protected function get_limit_sql_params( $query_args ) {
+		$sql_query['per_page'] = get_option( 'posts_per_page' );
+		if ( isset( $query_args['per_page'] ) && is_numeric( $query_args['per_page'] ) ) {
+			$sql_query['per_page'] = (int) $query_args['per_page'];
+		}
+
+		$sql_query['offset'] = 0;
+		if ( isset( $query_args['page'] ) ) {
+			$sql_query['offset'] = ( (int) $query_args['page'] - 1 ) * $sql_query['per_page'];
+		}
+
+		$sql_query['limit'] = "LIMIT {$sql_query['offset']}, {$sql_query['per_page']}";
+		return $sql_query;
+	}
+
+	protected function get_order_by_sql_params( $query_args ) {
+		$sql_query['order_by_clause'] = '';
+		if ( isset( $query_args['orderby'] ) ) {
+			$sql_query['order_by_clause'] = $this->normalize_order_by( $query_args['orderby'] );
+		}
+
+		if ( isset( $query_args['order'] ) ) {
+			$sql_query['order_by_clause'] .= ' ' . $query_args['order'];
+		} else {
+			$sql_query['order_by_clause'] .= ' DESC';
+		}
+
+		return $sql_query;
 	}
 
 	/**
@@ -176,46 +252,16 @@ class WC_Reports_Data_Store {
 			'where_clause' => '',
 		);
 
-		if ( isset( $query_args['before'] ) && '' !== $query_args['before'] ) {
-			$datetime                         = new DateTime( $query_args['before'] );
-			$datetime_str                     = $datetime->format( WC_Reports_Interval::$sql_datetime_format );
-			$intervals_query['where_clause'] .= " AND date_created <= '$datetime_str'";
-
-		}
-
-		if ( isset( $query_args['after'] ) && '' !== $query_args['after'] ) {
-			$datetime                         = new DateTime( $query_args['after'] );
-			$datetime_str                     = $datetime->format( WC_Reports_Interval::$sql_datetime_format );
-			$intervals_query['where_clause'] .= " AND date_created >= '$datetime_str'";
-		}
+		$intervals_query = array_merge( $intervals_query, $this->get_time_period_sql_params( $query_args ) );
 
 		if ( isset( $query_args['interval'] ) && '' !== $query_args['interval'] ) {
 			$interval                         = $query_args['interval'];
 			$intervals_query['select_clause'] = WC_Reports_Interval::mysql_datetime_format( $interval );
 		}
 
-		$intervals_query['per_page'] = get_option( 'posts_per_page' );
-		if ( isset( $query_args['per_page'] ) && is_numeric( $query_args['per_page'] ) ) {
-			$intervals_query['per_page'] = (int) $query_args['per_page'];
-		}
+		$intervals_query = array_merge( $intervals_query, $this->get_limit_sql_params( $query_args ) );
 
-		$intervals_query['offset'] = 0;
-		if ( isset( $query_args['page'] ) ) {
-			$intervals_query['offset'] = ( (int) $query_args['page'] - 1 ) * $intervals_query['per_page'];
-		}
-
-		$intervals_query['limit'] = "LIMIT {$intervals_query['offset']}, {$intervals_query['per_page']}";
-
-		$intervals_query['order_by_clause'] = '';
-		if ( isset( $query_args['orderby'] ) ) {
-			$intervals_query['order_by_clause'] = $this->normalize_order_by( $query_args['orderby'] );
-		}
-
-		if ( isset( $query_args['order'] ) ) {
-			$intervals_query['order_by_clause'] .= ' ' . $query_args['order'];
-		} else {
-			$intervals_query['order_by_clause'] .= ' DESC';
-		}
+		$intervals_query = array_merge( $intervals_query, $this->get_order_by_sql_params( $query_args ) );
 
 		return $intervals_query;
 	}

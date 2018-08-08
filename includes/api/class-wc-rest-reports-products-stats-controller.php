@@ -53,7 +53,7 @@ class WC_REST_Reports_Products_Stats_Controller extends WC_REST_Reports_Controll
 			}
 		}
 
-		$query = new WC_Reports_Revenue_Query( $query_args );
+		$query       = new WC_Reports_Revenue_Query( $query_args );
 		$report_data = $query->get_data();
 
 		$out_data = array(
@@ -287,6 +287,24 @@ class WC_REST_Reports_Products_Stats_Controller extends WC_REST_Reports_Controll
 				'year',
 			),
 			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['categories'] = array(
+			'description'       => __( 'Limit result to items from the specified categories.', 'woocommerce' ),
+			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_id_list',
+			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'type' => 'integer',
+			),
+		);
+		$params['products']   = array(
+			'description'       => __( 'Limit result to items with specified product ids.', 'woocommerce' ),
+			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_id_list',
+			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'type' => 'integer',
+			),
 		);
 
 		return $params;

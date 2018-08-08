@@ -48,12 +48,13 @@ class WC_REST_Reports_Products_Controller extends WC_REST_Reports_Controller {
 			}
 		}
 
-		// @todo Apply reports interface.
-		$reports = array(); // $reports = new WC_Report_Products_Query( $args );
-		$data    = array();
+		$reports       = new WC_Reports_Products_Query( $args );
+		$products_data = $reports->get_data();
 
-		foreach ( $reports as $report ) {
-			$item   = $this->prepare_item_for_response( (object) $report, $request );
+		$data = array();
+
+		foreach ( $products_data as $product_data ) {
+			$item   = $this->prepare_item_for_response( (object) $product_data, $request );
 			$data[] = $this->prepare_response_for_collection( $item );
 		}
 
@@ -68,8 +69,7 @@ class WC_REST_Reports_Products_Controller extends WC_REST_Reports_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $report, $request ) {
-		// @todo Apply reports interface.
-		$data = array();
+		$data = get_object_vars( $report );
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = $this->add_additional_fields_to_object( $data, $request );
@@ -77,6 +77,7 @@ class WC_REST_Reports_Products_Controller extends WC_REST_Reports_Controller {
 
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );
+		$response->add_links( $this->prepare_links( $report, $request ) );
 
 		/**
 		 * Filter a report returned from the API.
@@ -88,6 +89,23 @@ class WC_REST_Reports_Products_Controller extends WC_REST_Reports_Controller {
 		 * @param WP_REST_Request  $request  Request used to generate the response.
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_report_products', $response, $report, $request );
+	}
+
+	/**
+	 * Prepare links for the request.
+	 *
+	 * @param WC_Data         $object  Object data.
+	 * @param WP_REST_Request $request Request object.
+	 * @return array                   Links for the given post.
+	 */
+	protected function prepare_links( $object, $request ) {
+		$links = array(
+			'product'       => array(
+				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, 'products', $object->product_id ) ),
+			),
+		);
+
+		return $links;
 	}
 
 	/**
@@ -161,9 +179,9 @@ class WC_REST_Reports_Products_Controller extends WC_REST_Reports_Controller {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params             = array();
-		$params['context']  = $this->get_context_param( array( 'default' => 'view' ) );
-		$params['page']     = array(
+		$params               = array();
+		$params['context']    = $this->get_context_param( array( 'default' => 'view' ) );
+		$params['page']       = array(
 			'description'       => __( 'Current page of the collection.', 'woocommerce' ),
 			'type'              => 'integer',
 			'default'           => 1,
@@ -171,7 +189,7 @@ class WC_REST_Reports_Products_Controller extends WC_REST_Reports_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 			'minimum'           => 1,
 		);
-		$params['per_page'] = array(
+		$params['per_page']   = array(
 			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce' ),
 			'type'              => 'integer',
 			'default'           => 10,
@@ -180,26 +198,26 @@ class WC_REST_Reports_Products_Controller extends WC_REST_Reports_Controller {
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['after']    = array(
+		$params['after']      = array(
 			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['before']   = array(
+		$params['before']     = array(
 			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['order']    = array(
+		$params['order']      = array(
 			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'desc',
 			'enum'              => array( 'asc', 'desc' ),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['orderby']  = array(
+		$params['orderby']    = array(
 			'description'       => __( 'Sort collection by object attribute.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'date',
@@ -213,10 +231,21 @@ class WC_REST_Reports_Products_Controller extends WC_REST_Reports_Controller {
 		);
 		$params['categories'] = array(
 			'description'       => __( 'Limit result to items from the specified categories.', 'woocommerce' ),
-			'type'              => 'integer',
-			'sanitize_callback' => 'absint',
+			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
-			'minimum'           => 1,
+			'items'             => array(
+				'type' => 'integer',
+			),
+		);
+		$params['products']   = array(
+			'description'       => __( 'Limit result to items with specified product ids.', 'woocommerce' ),
+			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_id_list',
+			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'type' => 'integer',
+			),
 		);
 
 		return $params;
