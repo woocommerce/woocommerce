@@ -3,7 +3,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import classnames from 'classnames';
 import { Component } from '@wordpress/element';
 import { IconButton, ToggleControl } from '@wordpress/components';
 import { fill, find, findIndex, first, isArray, noop } from 'lodash';
@@ -59,26 +58,15 @@ class TableCard extends Component {
 	}
 
 	render() {
-		const {
-			isCompact,
-			onClickDownload,
-			onQueryChange,
-			query,
-			rowHeader,
-			summary,
-			title,
-		} = this.props;
+		const { onClickDownload, onQueryChange, query, rowHeader, summary, title } = this.props;
 		const { showCols } = this.state;
 		const allHeaders = this.props.headers;
 		const headers = this.filterCols( this.props.headers );
 		const rows = this.filterCols( this.props.rows );
-		const classNames = classnames( 'woocommerce-table', {
-			'is-compact': isCompact,
-		} );
 
 		return (
 			<Card
-				className={ classNames }
+				className="woocommerce-table"
 				title={ title }
 				action={
 					onClickDownload && (
@@ -119,15 +107,13 @@ class TableCard extends Component {
 
 				{ summary && <TableSummary data={ summary } /> }
 
-				{ ! isCompact && (
-					<Pagination
-						page={ parseInt( query.page ) || 1 }
-						perPage={ parseInt( query.per_page ) || 25 }
-						total={ 5000 }
-						onPageChange={ onQueryChange( 'page' ) }
-						onPerPageChange={ onQueryChange( 'per_page' ) }
-					/>
-				) }
+				<Pagination
+					page={ parseInt( query.page ) || 1 }
+					perPage={ parseInt( query.per_page ) || 25 }
+					total={ 5000 }
+					onPageChange={ onQueryChange( 'page' ) }
+					onPerPageChange={ onQueryChange( 'per_page' ) }
+				/>
 			</Card>
 		);
 	}
@@ -143,7 +129,6 @@ TableCard.propTypes = {
 			required: PropTypes.bool,
 		} )
 	),
-	isCompact: PropTypes.bool,
 	onQueryChange: PropTypes.func,
 	onClickDownload: PropTypes.func,
 	query: PropTypes.object,
@@ -166,7 +151,6 @@ TableCard.propTypes = {
 };
 
 TableCard.defaultProps = {
-	isCompact: false,
 	onQueryChange: noop,
 	query: {},
 	rowHeader: 0,
