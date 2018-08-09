@@ -1,7 +1,7 @@
 Filter Picker
 ===
 
-Modify a url query parameter via a dropdown selection of configurable options
+Modify a url query parameter via a dropdown selection of configurable options. This component manipulates the `filter` query parameter.
 
 ## Usage
 
@@ -36,21 +36,12 @@ const renderFilterPicker = ( { path, query } ) {
 		other_fish: [ 'lunch', 'fish' ],
 	};
 	
-	const queryParam = 'meal';
-	
-	const getQueryParamValue = () => {
-		const { query } = this.props;
-		return return query[ queryParam ] || 'breakfast';
-	}
-	
 	return (
 		<FilterPicker
 			query={ query }
 			path={ path }
 			filters={ filters }
 			filterPaths={ filterPaths }
-			queryParam={ queryParam } 
-			getQueryParamValue={ getQueryParamValue }
 		/>
 	);
 }
@@ -62,5 +53,3 @@ const renderFilterPicker = ( { path, query } ) {
 * `path` (required): Parameter supplied by React-Router
 * `filters` (required): An array of filters and subFilters to construct the menu
 * `filterPaths` (required): A map of representing the structure of the tree. Required for faster lookups than searches
-* `queryParam` (required): The query parameter to update
-* `getQueryParamValue` (required): A function used to obtain the current value represented in the url

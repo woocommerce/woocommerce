@@ -39,7 +39,7 @@ Card.propTypes = {
 	menu: PropTypes.shape( {
 		type: PropTypes.oneOf( [ EllipsisMenu ] ),
 	} ),
-	title: PropTypes.string.isRequired,
+	title: PropTypes.oneOfType( [ PropTypes.string, PropTypes.node ] ).isRequired,
 };
 
 export default Card;
