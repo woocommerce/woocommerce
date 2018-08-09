@@ -616,7 +616,7 @@ class WC_Checkout {
 						$value = isset( $_POST[ $key ] ) ? wc_sanitize_textarea( wp_unslash( $_POST[ $key ] ) ) : ''; // WPCS: input var ok, CSRF ok.
 						break;
 					case 'password':
-						$value = isset( $_POST[ $key ] ) ? wp_check_invalid_utf8( wp_unslash( $_POST[ $key ] ) ) : ''; // WPCS: input var ok, CSRF ok.
+						$value = isset( $_POST[ $key ] ) ? wp_check_invalid_utf8( wp_unslash( $_POST[ $key ] ) ) : ''; // WPCS: input var ok, CSRF ok, sanitization ok.
 						break;
 					default:
 						$value = isset( $_POST[ $key ] ) ? wc_clean( wp_unslash( $_POST[ $key ] ) ) : ''; // WPCS: input var ok, CSRF ok.
