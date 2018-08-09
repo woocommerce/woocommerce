@@ -1058,6 +1058,10 @@ class WC_Countries {
 						'state' => array(
 							'required' => false,
 						),
+						'city'  => array(
+							'required' => false,
+							'hidden'   => true,
+						),
 					),
 					'SK' => array(
 						'postcode' => array(
