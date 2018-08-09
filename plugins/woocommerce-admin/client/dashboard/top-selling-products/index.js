@@ -79,8 +79,6 @@ class TopSellingProducts extends Component {
 		} );
 	}
 
-	onQueryChange() {}
-
 	render() {
 		const rows = this.getRowsContent( mockData ) || [];
 		const headers = this.getHeadersContent();
