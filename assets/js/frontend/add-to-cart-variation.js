@@ -594,6 +594,7 @@
 			$product_img.wc_set_variation_attr( 'srcset', variation.image.srcset );
 			$product_img.wc_set_variation_attr( 'sizes', variation.image.sizes );
 			$product_img.wc_set_variation_attr( 'title', variation.image.title );
+			$product_img.wc_set_variation_attr( 'data-caption', variation.image.caption );
 			$product_img.wc_set_variation_attr( 'alt', variation.image.alt );
 			$product_img.wc_set_variation_attr( 'data-src', variation.image.full_src );
 			$product_img.wc_set_variation_attr( 'data-large_image', variation.image.full_src );
@@ -632,6 +633,7 @@
 		$product_img.wc_reset_variation_attr( 'srcset' );
 		$product_img.wc_reset_variation_attr( 'sizes' );
 		$product_img.wc_reset_variation_attr( 'title' );
+		$product_img.wc_reset_variation_attr( 'data-caption' );
 		$product_img.wc_reset_variation_attr( 'alt' );
 		$product_img.wc_reset_variation_attr( 'data-src' );
 		$product_img.wc_reset_variation_attr( 'data-large_image' );
