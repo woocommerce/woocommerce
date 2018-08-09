@@ -4,15 +4,16 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
-import { map, noop } from 'lodash';
+import { map } from 'lodash';
 
 /**
  * Internal dependencies
  */
+import Card from 'components/card';
 import { getAdminLink } from 'lib/nav-utils';
 import { numberFormat } from 'lib/number';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
-import { TableCard } from 'components/table';
+import { Table } from 'components/table';
 import './style.scss';
 
 // Mock data until we fetch from an API
@@ -83,20 +84,12 @@ class TopSellingProducts extends Component {
 	render() {
 		const rows = this.getRowsContent( mockData ) || [];
 		const headers = this.getHeadersContent();
-		const query = {
-			per_page: 5,
-			total: 5,
-		};
+		const title = __( 'Top Selling Products', 'wc-admin' );
 
 		return (
-			<TableCard
-				title={ __( 'Top Selling Products', 'wc-admin' ) }
-				rows={ rows }
-				headers={ headers }
-				onQueryChange={ noop }
-				query={ query }
-				isCompact
-			/>
+			<Card title={ title } className="woocommerce-top-selling-products">
+				<Table caption={ title } rows={ rows } headers={ headers } />
+			</Card>
 		);
 	}
 }
