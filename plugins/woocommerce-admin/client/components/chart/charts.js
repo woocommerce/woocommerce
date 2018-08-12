@@ -7,10 +7,12 @@
 import { Component, createRef } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { isEqual } from 'lodash';
+import { findIndex, isEqual } from 'lodash';
 import { format as d3Format } from 'd3-format';
 import { timeFormat as d3TimeFormat } from 'd3-time-format';
 import { select as d3Select } from 'd3-selection';
+import { range as d3Range } from 'd3-array';
+import { scaleOrdinal as d3ScaleOrdinal } from 'd3-scale';
 
 /**
  * Internal dependencies
@@ -21,7 +23,6 @@ import {
 	drawAxis,
 	drawBars,
 	drawLines,
-	getColorScale,
 	getDateSpaces,
 	getOrderedKeys,
 	getLine,
@@ -67,7 +68,8 @@ class D3Chart extends Component {
 	}
 
 	drawChart = ( node, params ) => {
-		const { data, margin, type } = this.props;
+		const { margin, type } = this.props;
+		const { data } = this.state;
 		const g = node
 			.attr( 'id', 'chart' )
 			.append( 'g' )
@@ -79,7 +81,7 @@ class D3Chart extends Component {
 			tooltip: d3Select( this.tooltipRef.current ),
 		} );
 
-		drawAxis( g, data, adjParams );
+		drawAxis( g, adjParams );
 		type === 'line' && drawLines( g, data, adjParams );
 		type === 'bar' && drawBars( g, data, adjParams );
 
@@ -95,15 +97,18 @@ class D3Chart extends Component {
 		const adjHeight = calculatedHeight - margin.top - margin.bottom;
 		const adjWidth = calculatedWidth - margin.left - margin.right;
 		const uniqueKeys = getUniqueKeys( data );
-		const newOrderedKeys = orderedKeys ? orderedKeys : getOrderedKeys( data, uniqueKeys );
-		const lineData = getLineData( data, orderedKeys );
+		const newOrderedKeys = orderedKeys || getOrderedKeys( data, uniqueKeys );
+		const lineData = getLineData( data, newOrderedKeys );
 		const yMax = getYMax( lineData );
 		const yScale = getYScale( adjHeight, yMax );
 		const uniqueDates = getUniqueDates( lineData );
 		const xLineScale = getXLineScale( uniqueDates, adjWidth );
 		const xScale = getXScale( uniqueDates, adjWidth );
+		const colorScale = d3ScaleOrdinal().range(
+			d3Range( 0, 1.1, 100 / ( newOrderedKeys.length - 1 ) / 100 )
+		);
 		return {
-			colorScale: getColorScale( orderedKeys ),
+			colorScale: key => colorScale( findIndex( orderedKeys, d => d.key === key ) ),
 			dateSpaces: getDateSpaces( uniqueDates, adjWidth, xLineScale ),
 			height: calculatedHeight,
 			line: getLine( data, xLineScale, yScale ),
@@ -130,7 +135,6 @@ class D3Chart extends Component {
 		if ( ! this.props.data ) {
 			return null; // TODO: improve messaging
 		}
-
 		return (
 			<div
 				className={ classNames( 'woocommerce-chart__container', this.props.className ) }
@@ -168,6 +172,7 @@ D3Chart.propTypes = {
 };
 
 D3Chart.defaultProps = {
+	data: [],
 	height: 200,
 	margin: {
 		bottom: 30,

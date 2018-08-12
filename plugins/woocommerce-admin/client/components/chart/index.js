@@ -44,20 +44,23 @@ class Chart extends Component {
 		this.state = {
 			data: props.data,
 			orderedKeys: getOrderedKeys( props.data ),
+			visibleData: [ ...props.data ],
 			width: wpBody - 2 * calcGap,
 		};
 		this.handleLegendToggle = this.handleLegendToggle.bind( this );
 		this.handleLegendHover = this.handleLegendHover.bind( this );
 		this.updateDimensions = this.updateDimensions.bind( this );
+		this.getVisibleData = this.getVisibleData.bind( this );
 	}
 
 	componentDidUpdate( prevProps ) {
 		const { data } = this.props;
+		const orderedKeys = getOrderedKeys( data );
 		if ( ! isEqual( [ ...data ].sort(), [ ...prevProps.data ].sort() ) ) {
 			/* eslint-disable react/no-did-update-set-state */
 			this.setState( {
-				data,
-				orderedKeys: getOrderedKeys( data ),
+				orderedKeys: orderedKeys,
+				visibleData: this.getVisibleData( data, orderedKeys ),
 			} );
 			/* eslint-enable react/no-did-update-set-state */
 		}
@@ -72,11 +75,14 @@ class Chart extends Component {
 	}
 
 	handleLegendToggle( event ) {
+		const { data } = this.props;
+		const orderedKeys = this.state.orderedKeys.map( d => ( {
+			...d,
+			visible: d.key === event.target.id ? ! d.visible : d.visible,
+		} ) );
 		this.setState( {
-			orderedKeys: this.state.orderedKeys.map( d => ( {
-				...d,
-				visible: d.key === event.target.id ? ! d.visible : d.visible,
-			} ) ),
+			orderedKeys,
+			visibleData: this.getVisibleData( data, orderedKeys ),
 		} );
 	}
 
@@ -98,8 +104,19 @@ class Chart extends Component {
 		} );
 	}
 
+	getVisibleData( data, orderedKeys ) {
+		const visibleKeys = orderedKeys.filter( d => d.visible );
+		return data.map( d => {
+			const newRow = { date: d.date };
+			visibleKeys.forEach( row => {
+				newRow[ row.key ] = d[ row.key ];
+			} );
+			return newRow;
+		} );
+	}
+
 	render() {
-		const { data, orderedKeys, width } = this.state;
+		const { orderedKeys, visibleData, width } = this.state;
 		const legendDirection = orderedKeys.length <= 2 && width > WIDE_BREAKPOINT ? 'row' : 'column';
 		const chartDirection = orderedKeys.length > 2 && width > WIDE_BREAKPOINT ? 'row' : 'column';
 		const legend = (
@@ -130,7 +147,7 @@ class Chart extends Component {
 				>
 					{ width > WIDE_BREAKPOINT && legendDirection === 'column' && legend }
 					<D3Chart
-						data={ data }
+						data={ visibleData }
 						height={ 300 }
 						margin={ margin }
 						orderedKeys={ orderedKeys }
