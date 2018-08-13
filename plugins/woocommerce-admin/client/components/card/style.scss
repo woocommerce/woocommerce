@@ -1,13 +1,13 @@
 /** @format */
 
 .woocommerce-card {
-	margin-bottom: 20px;
+	margin-bottom: $gap-large;
 	background: white;
 	border: 1px solid $core-grey-light-700;
 }
 
 .woocommerce-card__header {
-	padding: 16px;
+	padding: ($gap - 3) $gap;
 	border-bottom: 1px solid $core-grey-light-700;
 	display: grid;
 	align-items: center;
@@ -23,11 +23,6 @@
 	.has-menu.has-action & {
 		grid-template-columns: 1fr 1fr 48px;
 	}
-
-	h2 {
-		margin: 0;
-		padding: 1px 0;
-	}
 }
 
 .woocommerce-card__action,
@@ -36,7 +31,7 @@
 }
 
 .woocommerce-card__body {
-	padding: 20px;
+	padding: $gap;
 }
 
 .woocommerce-ellipsis-menu__toggle {
@@ -44,6 +39,11 @@
 }
 
 .woocommerce-card__title {
-	font-size: 16px;
+	margin: 0;
+	// EllipsisMenu is 24px, so to match we add 6px padding around the
+	// heading text, which we know is 18px from line-height.
+	padding: 3px 0;
+	@include font-size( 15 );
+	line-height: 1.2;
 	font-weight: 600;
 }

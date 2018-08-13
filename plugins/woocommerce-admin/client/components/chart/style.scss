@@ -4,7 +4,7 @@
 	flex-direction: column;
 	justify-content: flex-start;
 	align-items: flex-start;
-	margin: -20px;
+	margin: -$gap;
 	border-top: 1px solid $core-grey-light-200;
 
 	.woocommerce-chart__header {
