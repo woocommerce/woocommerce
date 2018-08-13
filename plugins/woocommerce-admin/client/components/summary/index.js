@@ -63,8 +63,7 @@ const SummaryList = ( { children, label } ) => {
 			className="woocommerce-summary"
 			position="bottom"
 			headerTitle={ label }
-			expandOnMobile
-			renderToggle={ ( { onToggle } ) => cloneElement( selected, { onToggle } ) }
+			renderToggle={ ( { isOpen, onToggle } ) => cloneElement( selected, { onToggle, isOpen } ) }
 			renderContent={ () => menu }
 		/>
 	);

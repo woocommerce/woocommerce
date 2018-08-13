@@ -17,6 +17,7 @@ import Link from 'components/link';
 const SummaryNumber = ( {
 	delta,
 	href,
+	isOpen,
 	label,
 	onToggle,
 	prevLabel,
@@ -27,6 +28,7 @@ const SummaryNumber = ( {
 } ) => {
 	const liClasses = classnames( 'woocommerce-summary__item-container', {
 		'is-dropdown-button': onToggle,
+		'is-dropdown-expanded': isOpen,
 	} );
 	const classes = classnames( 'woocommerce-summary__item', {
 		'is-selected': selected,
@@ -55,6 +57,7 @@ const SummaryNumber = ( {
 		containerProps.role = 'menuitem';
 	} else {
 		containerProps.onClick = onToggle;
+		containerProps[ 'aria-expanded' ] = isOpen;
 	}
 
 	return (
@@ -94,6 +97,7 @@ const SummaryNumber = ( {
 SummaryNumber.propTypes = {
 	delta: PropTypes.number,
 	href: PropTypes.string.isRequired,
+	isOpen: PropTypes.bool,
 	label: PropTypes.string.isRequired,
 	onToggle: PropTypes.func,
 	prevLabel: PropTypes.string,
@@ -105,6 +109,7 @@ SummaryNumber.propTypes = {
 
 SummaryNumber.defaultProps = {
 	href: '/analytics',
+	isOpen: false,
 	prevLabel: __( 'Previous Period:', 'wc-admin' ),
 	reverseTrend: false,
 	selected: false,

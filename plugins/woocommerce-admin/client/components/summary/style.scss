@@ -46,6 +46,39 @@ $inner-border: $core-grey-light-500;
 	background-color: $core-grey-light-300;
 	box-shadow: inset -1px -1px 0 $outer-border;
 
+	// Specificity
+	.components-popover.components-popover {
+		// !important to override element-level styles
+		position: static !important;
+		top: auto !important;
+		left: auto !important;
+		right: auto !important;
+		bottom: auto !important;
+		margin-top: 0 !important;
+		margin-left: 0;
+
+		.components-popover__header {
+			display: none;
+		}
+
+		.components-popover__content {
+			position: static;
+			left: auto;
+			right: auto;
+			margin: 0;
+			width: 100%;
+			max-width: 100% !important;
+			max-height: 100% !important;
+			box-shadow: none;
+			border: none;
+			transform: none;
+
+			.woocommerce-summary__item.is-selected {
+				display: none;
+			}
+		}
+	}
+
 	.components-popover__content & {
 		max-height: 100%;
 		margin-top: 0;
@@ -126,15 +159,32 @@ $inner-border: $core-grey-light-500;
 		}
 	}
 
+	@include breakpoint( '<1100px' ) {
+		.woocommerce-summary__item {
+			// One-col layout for all items means right border is always "outer"
+			border-right-color: $outer-border;
+		}
+	}
+
 	@include breakpoint( '<782px' ) {
+		.woocommerce-summary__item-container.is-dropdown-button,
 		.woocommerce-summary__item-container:only-child {
 			margin-left: -16px;
 			margin-right: -16px;
 			width: auto;
 
-			& .woocommerce-summary__item {
+			.woocommerce-summary__item {
 				// Remove the border when the button is edge-to-edge
 				border-right: none;
+			}
+		}
+		.components-popover.components-popover {
+			margin-left: -16px;
+			margin-right: -16px;
+
+			.woocommerce-summary__item-container {
+				margin-left: 0;
+				margin-right: 0;
 			}
 		}
 	}
@@ -268,6 +318,30 @@ $inner-border: $core-grey-light-500;
 		position: absolute;
 		top: 44px;
 		right: $gap;
+		transition: transform ease 0.2s;
+	}
+
+	.is-dropdown-expanded & {
+		.woocommerce-summary__toggle {
+			transform: rotate(-180deg);
+		}
+	}
+
+	.components-popover__content & {
+		.woocommerce-summary__item-label {
+			margin-bottom: 0;
+		}
+
+		.woocommerce-summary__item-value,
+		.woocommerce-summary__item-delta {
+			@include font-size( 13 );
+			margin-bottom: 0;
+		}
+
+		.woocommerce-summary__item-prev-label,
+		.woocommerce-summary__item-prev-value {
+			@include font-size( 11 );
+		}
 	}
 }
 
