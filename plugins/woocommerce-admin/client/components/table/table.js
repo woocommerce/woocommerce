@@ -85,11 +85,12 @@ class Table extends Component {
 					<tbody>
 						<tr>
 							{ headers.map( ( header, i ) => {
-								const { isSortable, key, label } = header;
+								const { isSortable, isNumeric, key, label } = header;
 								const thProps = {
 									className: classnames( 'woocommerce-table__header', {
 										'is-sortable': isSortable,
 										'is-sorted': sortedBy === key,
+										'is-numeric': isNumeric,
 									} ),
 								};
 								if ( isSortable ) {
@@ -135,18 +136,18 @@ class Table extends Component {
 						</tr>
 						{ rows.map( ( row, i ) => (
 							<tr key={ i }>
-								{ row.map(
-									( cell, j ) =>
-										rowHeader === j ? (
-											<th scope="row" key={ j } className="woocommerce-table__item">
-												{ getDisplay( cell ) }
-											</th>
-										) : (
-											<td key={ j } className="woocommerce-table__item">
-												{ getDisplay( cell ) }
-											</td>
-										)
-								) }
+								{ row.map( ( cell, j ) => {
+									const { isNumeric } = headers[ j ];
+									const Cell = rowHeader === j ? 'th' : 'td';
+									const cellClasses = classnames( 'woocommerce-table__item', {
+										'is-numeric': isNumeric,
+									} );
+									return (
+										<Cell scope="row" key={ j } className={ cellClasses }>
+											{ getDisplay( cell ) }
+										</Cell>
+									);
+								} ) }
 							</tr>
 						) ) }
 					</tbody>

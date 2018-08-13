@@ -29,3 +29,24 @@
 		opacity: 0.7;
 	}
 }
+
+.woocommerce-layout {
+	a:link,
+	a:visited,
+	.components-button.is-link {
+		color: $woocommerce-500;
+	}
+
+	a:hover,
+	a:active,
+	a:focus,
+	.components-button.is-link:hover,
+	.components-button.is-link:active,
+	.components-button.is-link:focus {
+		color: $woocommerce-400;
+	}
+
+	a:focus {
+		box-shadow: 0 0 0 1px $woocommerce-300, 0 0 2px 1px rgba($woocommerce-300, 0.8);
+	}
+}

@@ -50,6 +50,7 @@ render: function() {
 * `className`: Optional additional classes
 * `headers`: An array of column headers, as objects with the following properties:
   * `headers[].defaultSort`: Boolean, true if this column is the default for sorting. Only one column should have this set.
+  * `headers[].isNumeric`: Boolean, true if this column is a number value.
   * `headers[].isSortable`: Boolean, true if this column is sortable.
   * `headers[].key`: The API parameter name for this column, passed to `orderby` when sorting via API.
   * `headers[].label`: The display label for this column.

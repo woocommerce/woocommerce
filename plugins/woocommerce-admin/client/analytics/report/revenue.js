@@ -87,36 +87,42 @@ class RevenueReport extends Component {
 				key: 'gross_revenue',
 				required: true,
 				isSortable: true,
+				isNumeric: true,
 			},
 			{
 				label: __( 'Refunds', 'wc-admin' ),
 				key: 'refunds',
 				required: false,
 				isSortable: true,
+				isNumeric: true,
 			},
 			{
 				label: __( 'Coupons', 'wc-admin' ),
 				key: 'coupons',
 				required: false,
 				isSortable: true,
+				isNumeric: true,
 			},
 			{
 				label: __( 'Taxes', 'wc-admin' ),
 				key: 'taxes',
 				required: false,
 				isSortable: false, // For example
+				isNumeric: true,
 			},
 			{
 				label: __( 'Shipping', 'wc-admin' ),
 				key: 'shipping',
 				required: false,
 				isSortable: true,
+				isNumeric: true,
 			},
 			{
 				label: __( 'Net Revenue', 'wc-admin' ),
 				key: 'net_revenue',
 				required: false,
 				isSortable: true,
+				isNumeric: true,
 			},
 		];
 	}
