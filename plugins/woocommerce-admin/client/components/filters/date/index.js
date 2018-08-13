@@ -2,8 +2,8 @@
 /**
  * External dependencies
  */
+import { Component, createRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Component } from '@wordpress/element';
 import { Dropdown } from '@wordpress/components';
 import PropTypes from 'prop-types';
 
@@ -26,10 +26,19 @@ class DatePicker extends Component {
 		super( props );
 		this.state = this.getResetState();
 
+		this.dropdownRef = createRef();
+
 		this.update = this.update.bind( this );
 		this.onSelect = this.onSelect.bind( this );
 		this.isValidSelection = this.isValidSelection.bind( this );
 		this.resetCustomValues = this.resetCustomValues.bind( this );
+		this.refreshDropdown = this.refreshDropdown.bind( this );
+	}
+
+	refreshDropdown() {
+		setTimeout( () => {
+			this.dropdownRef.current.popoverRef && this.dropdownRef.current.popoverRef.current.refresh();
+		} );
 	}
 
 	getResetState() {
@@ -115,6 +124,7 @@ class DatePicker extends Component {
 			<div className="woocommerce-filters-date">
 				<p>{ __( 'Date Range', 'wc-admin' ) }:</p>
 				<Dropdown
+					ref={ this.dropdownRef }
 					contentClassName="woocommerce-filters-date__content"
 					position="bottom"
 					expandOnMobile
@@ -142,6 +152,7 @@ class DatePicker extends Component {
 							afterError={ afterError }
 							beforeError={ beforeError }
 							shortDateFormat={ shortDateFormat }
+							refreshDropdown={ this.refreshDropdown }
 						/>
 					) }
 				/>

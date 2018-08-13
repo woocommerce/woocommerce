@@ -24,7 +24,7 @@ class DatePickerContent extends Component {
 		this.onTabSelect = this.onTabSelect.bind( this );
 	}
 	onTabSelect( tab ) {
-		const { onUpdate, period } = this.props;
+		const { onUpdate, period, refreshDropdown } = this.props;
 
 		/**
 		 * If the period is `custom` and the user switches tabs to view the presets,
@@ -34,6 +34,8 @@ class DatePickerContent extends Component {
 		if ( 'period' === tab && 'custom' === period ) {
 			onUpdate( { period: 'today' } );
 		}
+
+		refreshDropdown();
 	}
 
 	render() {
@@ -78,11 +80,7 @@ class DatePickerContent extends Component {
 						] }
 						className="woocommerce-filters-date__tabs"
 						activeClass="is-active"
-						initialTabName={
-							'custom' === period
-								? 'custom'
-								: 'period' /* Open to current tab https://github.com/WordPress/gutenberg/pull/6885 */
-						}
+						initialTabName={ 'custom' === period ? 'custom' : 'period' }
 						onSelect={ this.onTabSelect }
 					>
 						{ selectedTab => (
