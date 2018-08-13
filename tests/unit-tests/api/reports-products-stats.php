@@ -49,18 +49,25 @@ class WC_Tests_API_Reports_Products_Stats extends WC_REST_Unit_Test_Case {
 		WC_Helper_Reports::reset_stats_dbs();
 		wp_set_current_user( $this->user );
 
+		// Populate all of the data.
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
 		$time = time();
-		$stats_data = array(
-			'num_orders'            => 1,
-			'num_items_sold'        => 2,
-			'orders_gross_total'    => 20.0,
-			'orders_coupon_total'   => 0.0,
-			'orders_refund_total'   => 0.0,
-			'orders_tax_total'      => 0.0,
-			'orders_shipping_total' => 5.0,
-			'orders_net_total'      => 15.0,
-		);
-		WC_Reports_Orders_Data_Store::update( $time, $stats_data );
+
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$order->set_status( 'completed' );
+		$order->set_shipping_total( 10 );
+		$order->set_discount_total( 20 );
+		$order->set_discount_tax( 0 );
+		$order->set_cart_tax( 5 );
+		$order->set_shipping_tax( 2 );
+		$order->set_total( 97 ); // $25x4 products + $10 shipping - $20 discount + $7 tax.
+		$order->save();
+
+		WC_Reports_Orders_Data_Store::update( $order );
 
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params( array(
@@ -74,18 +81,22 @@ class WC_Tests_API_Reports_Products_Stats extends WC_REST_Unit_Test_Case {
 
 		$expected_reports = array(
 			'totals' => array(
-				'num_items_sold' => 2,
-				'gross_revenue' => 20.0,
-				'orders_count' => 1,
+				'items_sold'    => 4,
+				'gross_revenue' => 100.0,
+				'orders_count'  => 1,
 			),
 			'intervals' => array(
 				array(
-					'time_interval' => date( 'Y-m-d', $time ),
-					'num_items_sold' => 2,
-					'gross_revenue' => 20.0,
-					'orders_count' => 1,
-					'date_start' => date( 'Y-m-d 00:00:00', $time ),
-					'date_end' => date( 'Y-m-d 00:00:00', $time + DAY_IN_SECONDS ),
+					'interval'       => 'day',
+					'date_start'     => date( 'Y-m-d 00:00:00', $time ),
+					'date_start_gmt' => date( 'Y-m-d 00:00:00', $time ),
+					'date_end'       => date( 'Y-m-d 00:00:00', $time + DAY_IN_SECONDS ),
+					'date_end_gmt'   => date( 'Y-m-d 00:00:00', $time + DAY_IN_SECONDS ),
+					'subtotals'      => array(
+						'items_sold'    => 4,
+						'gross_revenue' => 100.0,
+						'orders_count'  => 1,
+					),
 				),
 			),
 		);
