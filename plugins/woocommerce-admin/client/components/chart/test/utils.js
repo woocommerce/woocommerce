@@ -10,7 +10,6 @@
  */
 import dummyOrders from './fixtures/dummy';
 import {
-	getColorScale,
 	getDateSpaces,
 	getOrderedKeys,
 	getLineData,
@@ -153,16 +152,6 @@ describe( 'getXLineScale', () => {
 		expect( testXLineScale( new Date( orderedDates[ 0 ] ) ) ).toEqual( 0 );
 		expect( testXLineScale( new Date( orderedDates[ 2 ] ) ) ).toEqual( 40 );
 		expect( testXLineScale( new Date( orderedDates[ orderedDates.length - 1 ] ) ) ).toEqual( 100 );
-	} );
-} );
-
-describe( 'getColorScale', () => {
-	it( 'properly scale product keys into a range of colors', () => {
-		const testColorScale = getColorScale( testOrderedKeys );
-		testOrderedKeys.map( d => testColorScale( d.key ) ); // without this it fails! why? how?
-		expect( testColorScale( orderedKeys[ 0 ].key ) ).toEqual( 0 );
-		expect( testColorScale( orderedKeys[ 2 ].key ) ).toEqual( 0.5 );
-		expect( testColorScale( orderedKeys[ orderedKeys.length - 1 ].key ) ).toEqual( 1 );
 	} );
 } );
 

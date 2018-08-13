@@ -4,18 +4,17 @@
  * External dependencies
  */
 
-import { max as d3Max, range as d3Range } from 'd3-array';
+import { findIndex } from 'lodash';
+import { max as d3Max } from 'd3-array';
 import { axisBottom as d3AxisBottom, axisLeft as d3AxisLeft } from 'd3-axis';
 import { format as d3Format } from 'd3-format';
 import {
 	scaleBand as d3ScaleBand,
 	scaleLinear as d3ScaleLinear,
-	scaleOrdinal as d3ScaleOrdinal,
 	scaleTime as d3ScaleTime,
 } from 'd3-scale';
 import { mouse as d3Mouse, select as d3Select } from 'd3-selection';
 import { line as d3Line } from 'd3-shape';
-import { interpolateViridis as d3InterpolateViridis } from 'd3-scale-chromatic';
 import { timeFormat as d3TimeFormat, utcParse as d3UTCParse } from 'd3-time-format';
 
 export const parseDate = d3UTCParse( '%Y-%m-%d' );
@@ -87,6 +86,14 @@ export const getUniqueDates = lineData => {
 	].sort( ( a, b ) => parseDate( a ) - parseDate( b ) );
 };
 
+export const getColor = ( key, params ) => {
+	const keyValue =
+		params.orderedKeys.length > 1
+			? findIndex( params.orderedKeys, d => d.key === key ) / ( params.orderedKeys.length - 1 )
+			: 0;
+	return params.colorScheme( keyValue );
+};
+
 /**
  * Describes getXScale
  * @param {array} uniqueDates - from `getUniqueDates`
@@ -107,7 +114,7 @@ export const getXScale = ( uniqueDates, width ) =>
  */
 export const getXGroupScale = ( orderedKeys, xScale ) =>
 	d3ScaleBand()
-		.domain( orderedKeys.map( d => d.key ) )
+		.domain( orderedKeys.filter( d => d.visible ).map( d => d.key ) )
 		.rangeRound( [ 0, xScale.bandwidth() ] )
 		.padding( 0.07 );
 
@@ -155,20 +162,11 @@ export const getYTickOffset = ( height, scale, yMax ) =>
 
 /**
  * Describes getyTickOffset
- * @param {array} orderedKeys - from `getOrderedKeys`
- * @returns {function} the D3 ordinal scale of the categories
- */
-export const getColorScale = orderedKeys =>
-	d3ScaleOrdinal().range( d3Range( 0, 1.1, 100 / ( orderedKeys.length - 1 ) / 100 ) );
-
-/**
- * Describes getyTickOffset
- * @param {array} data - The chart component's `data` prop.
  * @param {function} xLineScale - from `getXLineScale`.
  * @param {function} yScale - from `getYScale`.
  * @returns {function} the D3 line function for plotting all category values
  */
-export const getLine = ( data, xLineScale, yScale ) =>
+export const getLine = ( xLineScale, yScale ) =>
 	d3Line()
 		.x( d => xLineScale( new Date( d.date ) ) )
 		.y( d => yScale( d.value ) );
@@ -201,7 +199,7 @@ export const getDateSpaces = ( uniqueDates, width, xLineScale ) =>
 		};
 	} );
 
-export const drawAxis = ( node, data, params ) => {
+export const drawAxis = ( node, params ) => {
 	const xScale = params.type === 'line' ? params.xLineScale : params.xScale;
 
 	const yGrids = [];
@@ -257,17 +255,16 @@ const showTooltip = ( node, params, d ) => {
 	let [ xPosition, yPosition ] = d3Mouse( node.node() );
 	xPosition = xPosition > chartCoords.width - 200 ? xPosition - 200 : xPosition + 20;
 	yPosition = yPosition > chartCoords.height - 150 ? yPosition - 200 : yPosition + 20;
-	const keys = params.orderedKeys.map(
-		( row, i ) => `
-		<li>
-			<span class="key-colour" style="background-color:${ d3InterpolateViridis(
-				params.colorScale( i )
-			) }"></span>
-			<span class="key-key">${ row.key }:</span>
-			<span class="key-value">${ d3Format( ',.0f' )( d[ row.key ] ) }</span>
-		</li>
-	`
+	const keys = params.orderedKeys.filter( row => row.visible ).map(
+		row => `
+				<li>
+					<span class="key-colour" style="background-color:${ getColor( row.key, params ) }"></span>
+					<span class="key-key">${ row.key }:</span>
+					<span class="key-value">${ d3Format( ',.0f' )( d[ row.key ] ) }</span>
+				</li>
+			`
 	);
+
 	params.tooltip
 		.style( 'left', xPosition + 'px' )
 		.style( 'top', yPosition + 'px' )
@@ -345,7 +342,7 @@ export const drawLines = ( node, data, params ) => {
 		.append( 'g' )
 		.attr( 'class', 'lines' )
 		.selectAll( '.line-g' )
-		.data( params.lineData )
+		.data( params.lineData.filter( d => d.visible ) )
 		.enter()
 		.append( 'g' )
 		.attr( 'class', 'line-g' );
@@ -356,7 +353,7 @@ export const drawLines = ( node, data, params ) => {
 		.attr( 'stroke-width', 3 )
 		.attr( 'stroke-linejoin', 'round' )
 		.attr( 'stroke-linecap', 'round' )
-		.attr( 'stroke', ( d, i ) => d3InterpolateViridis( params.colorScale( i ) ) )
+		.attr( 'stroke', d => getColor( d.key, params ) )
 		.style( 'opacity', d => {
 			const opacity = d.focus ? 1 : 0.1;
 			return d.visible ? opacity : 0;
@@ -365,12 +362,12 @@ export const drawLines = ( node, data, params ) => {
 
 	series
 		.selectAll( 'circle' )
-		.data( ( d, i ) => d.values.map( row => ( { ...row, i, visible: d.visible } ) ) )
+		.data( ( d, i ) => d.values.map( row => ( { ...row, i, visible: d.visible, key: d.key } ) ) )
 		.enter()
 		.append( 'circle' )
 		.attr( 'r', 3.5 )
 		.attr( 'fill', '#fff' )
-		.attr( 'stroke', d => d3InterpolateViridis( params.colorScale( d.i ) ) )
+		.attr( 'stroke', d => getColor( d.key, params ) )
 		.attr( 'stroke-width', 3 )
 		.style( 'opacity', d => {
 			const opacity = d.focus ? 1 : 0.1;
@@ -403,7 +400,7 @@ export const drawBars = ( node, data, params ) => {
 	barGroup
 		.selectAll( '.bar' )
 		.data( d =>
-			params.orderedKeys.map( row => ( {
+			params.orderedKeys.filter( row => row.visible ).map( row => ( {
 				key: row.key,
 				focus: row.focus,
 				value: d[ row.key ],
@@ -417,7 +414,7 @@ export const drawBars = ( node, data, params ) => {
 		.attr( 'y', d => params.yScale( d.value ) )
 		.attr( 'width', params.xGroupScale.bandwidth() )
 		.attr( 'height', d => params.height - params.yScale( d.value ) )
-		.attr( 'fill', ( d, i ) => d3InterpolateViridis( params.colorScale( i ) ) )
+		.attr( 'fill', d => getColor( d.key, params ) )
 		.style( 'opacity', d => {
 			const opacity = d.focus ? 1 : 0.1;
 			return d.visible ? opacity : 0;

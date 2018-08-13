@@ -2,79 +2,69 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
-import { Component, Fragment } from '@wordpress/element';
+import { isEqual } from 'lodash';
+import { Component, createRef } from '@wordpress/element';
+import PropTypes from 'prop-types';
+import { interpolateViridis as d3InterpolateViridis } from 'd3-scale-chromatic';
 
 /**
  * Internal dependencies
  */
-import Card from 'components/card';
 import D3Chart from './charts';
-import dummyOrders from './test/fixtures/dummy';
 import Legend from './legend';
+import { gap, gaplarge } from 'stylesheets/abstracts/_variables.scss';
 
-const WIDE_BREAKPOINT = 1130;
+const WIDE_BREAKPOINT = 1100;
 
-class WidgetCharts extends Component {
-	constructor() {
-		super( ...arguments );
-		this.getOrderedKeys = this.getOrderedKeys.bind( this );
-		this.handleLegendHover = this.handleLegendHover.bind( this );
-		this.handleLegendToggle = this.handleLegendToggle.bind( this );
-		this.updateDimensions = this.updateDimensions.bind( this );
-		this.handleChange = this.handleChange.bind( this );
-		this.getSomeOrders = this.getSomeOrders.bind( this );
-		const products = [
-			{
-				key: 'date',
-				selected: true,
-			},
-			{
-				key: 'Cap',
-				selected: true,
-			},
-			{
-				key: 'T-Shirt',
-				selected: true,
-			},
-			{
-				key: 'Sunglasses',
-				selected: true,
-			},
-			{
-				key: 'Polo',
-				selected: true,
-			},
-			{
-				key: 'Hoodie',
-				selected: true,
-			},
-		];
-		const someOrders = this.getSomeOrders( products );
+function getOrderedKeys( data ) {
+	return [
+		...new Set(
+			data.reduce( ( accum, curr ) => {
+				Object.keys( curr ).forEach( key => key !== 'date' && accum.push( key ) );
+				return accum;
+			}, [] )
+		),
+	]
+		.map( key => ( {
+			key,
+			total: data.reduce( ( a, c ) => a + c[ key ], 0 ),
+			visible: true,
+			focus: true,
+		} ) )
+		.sort( ( a, b ) => b.total - a.total );
+}
+
+class Chart extends Component {
+	constructor( props ) {
+		super( props );
+		this.chartRef = createRef();
+		const wpBody = document.getElementById( 'wpbody' ).getBoundingClientRect().width;
+		const wpWrap = document.getElementById( 'wpwrap' ).getBoundingClientRect().width;
+		const calcGap = wpWrap > 782 ? gaplarge.match( /\d+/ )[ 0 ] : gap.match( /\d+/ )[ 0 ];
 		this.state = {
-			products,
-			orderedKeys: this.getOrderedKeys( someOrders ).map( d => ( {
-				...d,
-				visible: true,
-				focus: true,
-			} ) ),
-			someOrders,
-			bodyWidth: document.getElementById( 'wpbody' ).getBoundingClientRect().width,
+			data: props.data,
+			orderedKeys: getOrderedKeys( props.data ),
+			visibleData: [ ...props.data ],
+			width: wpBody - 2 * calcGap,
 		};
+		this.handleLegendToggle = this.handleLegendToggle.bind( this );
+		this.handleLegendHover = this.handleLegendHover.bind( this );
+		this.updateDimensions = this.updateDimensions.bind( this );
+		this.getVisibleData = this.getVisibleData.bind( this );
 	}
 
-	getSomeOrders( products ) {
-		return dummyOrders.map( d => {
-			return Object.keys( d )
-				.filter( key =>
-					products
-						.filter( k => k.selected )
-						.map( k => k.key )
-						.includes( key )
-				)
-				.reduce( ( accum, current ) => ( { ...accum, [ current ]: d[ current ] } ), {} );
-		} );
+	componentDidUpdate( prevProps ) {
+		const { data } = this.props;
+		const orderedKeys = getOrderedKeys( data );
+		if ( ! isEqual( [ ...data ].sort(), [ ...prevProps.data ].sort() ) ) {
+			/* eslint-disable react/no-did-update-set-state */
+			this.setState( {
+				orderedKeys: orderedKeys,
+				visibleData: this.getVisibleData( data, orderedKeys ),
+			} );
+			/* eslint-enable react/no-did-update-set-state */
+		}
 	}
 
 	componentDidMount() {
@@ -85,42 +75,15 @@ class WidgetCharts extends Component {
 		window.removeEventListener( 'resize', this.updateDimensions );
 	}
 
-	getOrderedKeys( data ) {
-		return [
-			...new Set(
-				data.reduce( ( accum, curr ) => {
-					Object.keys( curr ).forEach( key => key !== 'date' && accum.push( key ) );
-					return accum;
-				}, [] )
-			),
-		]
-			.map( key => ( {
-				key,
-				total: data.reduce( ( a, c ) => a + c[ key ], 0 ),
-			} ) )
-			.sort( ( a, b ) => b.total - a.total );
-	}
-
-	handleChange( event ) {
-		const products = this.state.products.map( d => ( {
-			...d,
-			selected: d.key === event.target.id ? ! d.selected : d.selected,
-		} ) );
-		const someOrders = this.getSomeOrders( products );
-		const orderedKeys = this.getOrderedKeys( someOrders ).map( d => ( {
-			...d,
-			visible: true,
-			focus: true,
-		} ) );
-		this.setState( { products, orderedKeys, someOrders } );
-	}
-
 	handleLegendToggle( event ) {
+		const { data } = this.props;
+		const orderedKeys = this.state.orderedKeys.map( d => ( {
+			...d,
+			visible: d.key === event.target.id ? ! d.visible : d.visible,
+		} ) );
 		this.setState( {
-			orderedKeys: this.state.orderedKeys.map( d => ( {
-				...d,
-				visible: d.key === event.target.id ? ! d.visible : d.visible,
-			} ) ),
+			orderedKeys,
+			visibleData: this.getVisibleData( data, orderedKeys ),
 		} );
 	}
 
@@ -138,23 +101,30 @@ class WidgetCharts extends Component {
 
 	updateDimensions() {
 		this.setState( {
-			bodyWidth: document.getElementById( 'wpbody' ).getBoundingClientRect().width,
+			width: this.chartRef.current.offsetWidth,
+		} );
+	}
+
+	getVisibleData( data, orderedKeys ) {
+		const visibleKeys = orderedKeys.filter( d => d.visible );
+		return data.map( d => {
+			const newRow = { date: d.date };
+			visibleKeys.forEach( row => {
+				newRow[ row.key ] = d[ row.key ];
+			} );
+			return newRow;
 		} );
 	}
 
 	render() {
-		const legendDirection =
-			this.state.orderedKeys.length <= 2 && this.state.bodyWidth > WIDE_BREAKPOINT
-				? 'row'
-				: 'column';
-		const chartDirection =
-			this.state.orderedKeys.length > 2 && this.state.bodyWidth > WIDE_BREAKPOINT
-				? 'row'
-				: 'column';
+		const { orderedKeys, visibleData, width } = this.state;
+		const legendDirection = orderedKeys.length <= 2 && width > WIDE_BREAKPOINT ? 'row' : 'column';
+		const chartDirection = orderedKeys.length > 2 && width > WIDE_BREAKPOINT ? 'row' : 'column';
 		const legend = (
 			<Legend
-				className={ 'woocommerce_dashboard__widget-legend' }
-				data={ this.state.orderedKeys }
+				className={ 'woocommerce-chart__legend' }
+				colorScheme={ d3InterpolateViridis }
+				data={ orderedKeys }
 				handleLegendHover={ this.handleLegendHover }
 				handleLegendToggle={ this.handleLegendToggle }
 				legendDirection={ legendDirection }
@@ -163,57 +133,44 @@ class WidgetCharts extends Component {
 		const margin = {
 			bottom: 50,
 			left: 50,
-			right: 20,
+			right: 10,
 			top: 0,
 		};
 		return (
-			<Fragment>
-				<Card title={ __( 'Test Categories', 'wc-admin' ) }>
-					<ul>
-						{ this.state.products.map( d => (
-							<li key={ d.key } style={ { display: 'inline', marginRight: '12px' } }>
-								<label htmlFor={ d.key }>
-									<input
-										id={ d.key }
-										type="checkbox"
-										onChange={ this.handleChange }
-										checked={ d.selected }
-									/>{' '}
-									{ d.key }
-								</label>
-							</li>
-						) ) }
-					</ul>
-				</Card>
-				<Card title={ __( 'Store Charts', 'wc-admin' ) }>
-					<div className="woocommerce-dashboard__widget woocommerce-dashboard__widget-chart">
-						<div className="woocommerce-dashboard__widget-chart-header">
-							{ this.state.bodyWidth > WIDE_BREAKPOINT && legendDirection === 'row' && legend }
-						</div>
-						<div
-							className={ classNames(
-								'woocommerce-dashboard__widget-chart-body',
-								`woocommerce-dashboard__widget-chart-body-${ chartDirection }`
-							) }
-						>
-							{ this.state.bodyWidth > WIDE_BREAKPOINT && legendDirection === 'column' && legend }
-							<D3Chart
-								data={ this.state.someOrders }
-								height={ 300 }
-								margin={ margin }
-								orderedKeys={ this.state.orderedKeys }
-								type={ 'line' }
-								width={ chartDirection === 'row' ? 722 : 1042 }
-							/>
-						</div>
-						{ this.state.bodyWidth < WIDE_BREAKPOINT && (
-							<div className="woocommerce-dashboard__widget-chart-footer">{ legend }</div>
-						) }
-					</div>
-				</Card>
-			</Fragment>
+			<div className="woocommerce-chart" ref={ this.chartRef }>
+				<div className="woocommerce-chart__header">
+					{ width > WIDE_BREAKPOINT && legendDirection === 'row' && legend }
+				</div>
+				<div
+					className={ classNames(
+						'woocommerce-chart__body',
+						`woocommerce-chart__body-${ chartDirection }`
+					) }
+				>
+					{ width > WIDE_BREAKPOINT && legendDirection === 'column' && legend }
+					<D3Chart
+						colorScheme={ d3InterpolateViridis }
+						data={ visibleData }
+						height={ 300 }
+						margin={ margin }
+						orderedKeys={ orderedKeys }
+						type={ 'line' }
+						width={ chartDirection === 'row' ? width - 320 : width }
+					/>
+				</div>
+				{ width < WIDE_BREAKPOINT && <div className="woocommerce-chart__footer">{ legend }</div> }
+			</div>
 		);
 	}
 }
 
-export default WidgetCharts;
+Chart.propTypes = {
+	data: PropTypes.array.isRequired,
+	title: PropTypes.string,
+};
+
+Chart.defaultProps = {
+	data: [],
+};
+
+export default Chart;

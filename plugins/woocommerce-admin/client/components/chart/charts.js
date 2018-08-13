@@ -3,9 +3,8 @@
 /**
  * External dependencies
  */
-
-import React from 'react';
-import { Component } from '@wordpress/element';
+import { isEqual } from 'lodash';
+import { Component, createRef } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { format as d3Format } from 'd3-format';
@@ -21,7 +20,6 @@ import {
 	drawAxis,
 	drawBars,
 	drawLines,
-	getColorScale,
 	getDateSpaces,
 	getOrderedKeys,
 	getLine,
@@ -37,52 +35,33 @@ import {
 } from './utils';
 
 class D3Chart extends Component {
-	static propTypes = {
-		className: PropTypes.string,
-		data: PropTypes.array.isRequired,
-		height: PropTypes.number,
-		legend: PropTypes.array,
-		margin: PropTypes.shape( {
-			bottom: PropTypes.number,
-			left: PropTypes.number,
-			right: PropTypes.number,
-			top: PropTypes.number,
-		} ),
-		orderedKeys: PropTypes.array,
-		type: PropTypes.oneOf( [ 'bar', 'line' ] ),
-		width: PropTypes.number,
-		xFormat: PropTypes.string,
-		yFormat: PropTypes.string,
-	};
+	constructor( props ) {
+		super( props );
+		this.getAllData = this.getAllData.bind( this );
+		this.state = {
+			allData: this.getAllData( props ),
+			width: props.width,
+		};
+		this.tooltipRef = createRef();
+	}
 
-	static defaultProps = {
-		height: 200,
-		margin: {
-			bottom: 30,
-			left: 40,
-			right: 0,
-			top: 20,
-		},
-		type: 'line',
-		width: 600,
-		xFormat: '%Y-%m-%d',
-		yFormat: ',.0f',
-	};
-
-	state = {
-		allData: null,
-	};
-
-	tooltipRef = React.createRef();
-
-	static getDerivedStateFromProps( nextProps, prevState ) {
-		const nextAllData = [ ...nextProps.data, ...nextProps.orderedKeys ];
-
-		if ( prevState.allData !== nextAllData ) {
-			return { allData: nextAllData };
+	componentDidUpdate( prevProps, prevState ) {
+		const { width } = this.props;
+		/* eslint-disable react/no-did-update-set-state */
+		if ( width !== prevProps.width ) {
+			this.setState( { width } );
 		}
+		const nextAllData = this.getAllData( this.props );
+		if ( ! isEqual( [ ...nextAllData ].sort(), [ ...prevState.allData ].sort() ) ) {
+			this.setState( { allData: nextAllData } );
+		}
+		/* eslint-enable react/no-did-update-set-state */
+	}
 
-		return null;
+	getAllData( props ) {
+		const orderedKeys =
+			props.orderedKeys || getOrderedKeys( props.data, getUniqueKeys( props.data ) );
+		return [ ...props.data, ...orderedKeys ];
 	}
 
 	drawChart = ( node, params ) => {
@@ -97,8 +76,7 @@ class D3Chart extends Component {
 			width: params.width - margin.left - margin.right,
 			tooltip: d3Select( this.tooltipRef.current ),
 		} );
-
-		drawAxis( g, data, adjParams );
+		drawAxis( g, adjParams );
 		type === 'line' && drawLines( g, data, adjParams );
 		type === 'bar' && drawBars( g, data, adjParams );
 
@@ -106,25 +84,26 @@ class D3Chart extends Component {
 	};
 
 	getParams = node => {
-		const { data, height, margin, orderedKeys, type, width, xFormat, yFormat } = this.props;
+		const { colorScheme, data, height, margin, orderedKeys, type, xFormat, yFormat } = this.props;
+		const { width } = this.state;
 		const calculatedWidth = width || node.offsetWidth;
 		const calculatedHeight = height || node.offsetHeight;
 		const scale = width / node.offsetWidth;
 		const adjHeight = calculatedHeight - margin.top - margin.bottom;
 		const adjWidth = calculatedWidth - margin.left - margin.right;
 		const uniqueKeys = getUniqueKeys( data );
-		const newOrderedKeys = orderedKeys ? orderedKeys : getOrderedKeys( data, uniqueKeys );
-		const lineData = getLineData( data, orderedKeys );
+		const newOrderedKeys = orderedKeys || getOrderedKeys( data, uniqueKeys );
+		const lineData = getLineData( data, newOrderedKeys );
 		const yMax = getYMax( lineData );
 		const yScale = getYScale( adjHeight, yMax );
 		const uniqueDates = getUniqueDates( lineData );
 		const xLineScale = getXLineScale( uniqueDates, adjWidth );
 		const xScale = getXScale( uniqueDates, adjWidth );
 		return {
-			colorScale: getColorScale( orderedKeys ),
+			colorScheme,
 			dateSpaces: getDateSpaces( uniqueDates, adjWidth, xLineScale ),
 			height: calculatedHeight,
-			line: getLine( data, xLineScale, yScale ),
+			line: getLine( xLineScale, yScale ),
 			lineData,
 			margin,
 			orderedKeys: newOrderedKeys,
@@ -148,19 +127,56 @@ class D3Chart extends Component {
 		if ( ! this.props.data ) {
 			return null; // TODO: improve messaging
 		}
-
 		return (
-			<div className={ classNames( 'woocommerce-chart__container', this.props.className ) }>
+			<div
+				className={ classNames( 'woocommerce-chart__container', this.props.className ) }
+				style={ { height: this.props.height } }
+			>
 				<D3Base
 					className={ classNames( this.props.className ) }
 					data={ this.state.allData }
 					drawChart={ this.drawChart }
 					getParams={ this.getParams }
+					width={ this.state.width }
 				/>
 				<div className="tooltip" ref={ this.tooltipRef } />
 			</div>
 		);
 	}
 }
+
+D3Chart.propTypes = {
+	colorScheme: PropTypes.func,
+	className: PropTypes.string,
+	data: PropTypes.array.isRequired,
+	height: PropTypes.number,
+	legend: PropTypes.array,
+	margin: PropTypes.shape( {
+		bottom: PropTypes.number,
+		left: PropTypes.number,
+		right: PropTypes.number,
+		top: PropTypes.number,
+	} ),
+	orderedKeys: PropTypes.array,
+	type: PropTypes.oneOf( [ 'bar', 'line' ] ),
+	width: PropTypes.number,
+	xFormat: PropTypes.string,
+	yFormat: PropTypes.string,
+};
+
+D3Chart.defaultProps = {
+	data: [],
+	height: 200,
+	margin: {
+		bottom: 30,
+		left: 40,
+		right: 0,
+		top: 20,
+	},
+	type: 'line',
+	width: 600,
+	xFormat: '%Y-%m-%d',
+	yFormat: ',.0f',
+};
 
 export default D3Chart;

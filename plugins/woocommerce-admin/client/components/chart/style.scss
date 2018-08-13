@@ -1,5 +1,5 @@
 /** @format */
-.woocommerce-dashboard__widget-chart {
+.woocommerce-chart {
 	display: flex;
 	flex-direction: column;
 	justify-content: flex-start;
@@ -7,24 +7,24 @@
 	margin: -20px;
 	border-top: 1px solid $core-grey-light-200;
 
-	.woocommerce-dashboard__widget-chart-header {
+	.woocommerce-chart__header {
 		min-height: 50px;
 		border-top: 1px solid $core-grey-light-200;
 	}
 
-	.woocommerce-dashboard__widget-chart-body {
+	.woocommerce-chart__body {
 		display: flex;
 		flex-direction: row;
 		justify-content: flex-start;
 		align-items: flex-start;
 		width: 100%;
 
-		&.woocommerce-dashboard__widget-chart-body-column {
+		&.woocommerce-chart__body-column {
 			flex-direction: column;
 		}
 	}
 
-	.woocommerce-dashboard__widget-chart-footer {
+	.woocommerce-chart__footer {
 		width: 100%;
 
 		.woocommerce-legend {
@@ -167,6 +167,7 @@
 
 	li {
 		button {
+			background-color: $white;
 			display: inline-flex;
 			flex-direction: row;
 			flex-wrap: nowrap;
@@ -187,7 +188,6 @@
 				position: relative;
 				padding: 3px 0 3px 24px;
 				cursor: pointer;
-				font-family: 'SF UI Text';
 				font-size: 13px;
 				user-select: none;
 				width: 100%;

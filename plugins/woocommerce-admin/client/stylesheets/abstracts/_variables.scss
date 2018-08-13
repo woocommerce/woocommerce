@@ -20,3 +20,8 @@ $light-gray-500: $core-grey-light-500;
 $dark-gray-300: $core-grey-dark-300;
 $dark-gray-900: $core-grey-dark-900;
 $alert-red: $error-red;
+
+:export {
+	gaplarge: $gap-large;
+	gap: $gap;
+}
