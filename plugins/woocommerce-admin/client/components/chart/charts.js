@@ -3,16 +3,13 @@
 /**
  * External dependencies
  */
-
+import { isEqual } from 'lodash';
 import { Component, createRef } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { findIndex, isEqual } from 'lodash';
 import { format as d3Format } from 'd3-format';
 import { timeFormat as d3TimeFormat } from 'd3-time-format';
 import { select as d3Select } from 'd3-selection';
-import { range as d3Range } from 'd3-array';
-import { scaleOrdinal as d3ScaleOrdinal } from 'd3-scale';
 
 /**
  * Internal dependencies
@@ -68,8 +65,7 @@ class D3Chart extends Component {
 	}
 
 	drawChart = ( node, params ) => {
-		const { margin, type } = this.props;
-		const { data } = this.state;
+		const { data, margin, type } = this.props;
 		const g = node
 			.attr( 'id', 'chart' )
 			.append( 'g' )
@@ -80,7 +76,6 @@ class D3Chart extends Component {
 			width: params.width - margin.left - margin.right,
 			tooltip: d3Select( this.tooltipRef.current ),
 		} );
-
 		drawAxis( g, adjParams );
 		type === 'line' && drawLines( g, data, adjParams );
 		type === 'bar' && drawBars( g, data, adjParams );
@@ -89,7 +84,7 @@ class D3Chart extends Component {
 	};
 
 	getParams = node => {
-		const { data, height, margin, orderedKeys, type, xFormat, yFormat } = this.props;
+		const { colorScheme, data, height, margin, orderedKeys, type, xFormat, yFormat } = this.props;
 		const { width } = this.state;
 		const calculatedWidth = width || node.offsetWidth;
 		const calculatedHeight = height || node.offsetHeight;
@@ -104,14 +99,11 @@ class D3Chart extends Component {
 		const uniqueDates = getUniqueDates( lineData );
 		const xLineScale = getXLineScale( uniqueDates, adjWidth );
 		const xScale = getXScale( uniqueDates, adjWidth );
-		const colorScale = d3ScaleOrdinal().range(
-			d3Range( 0, 1.1, 100 / ( newOrderedKeys.length - 1 ) / 100 )
-		);
 		return {
-			colorScale: key => colorScale( findIndex( orderedKeys, d => d.key === key ) ),
+			colorScheme,
 			dateSpaces: getDateSpaces( uniqueDates, adjWidth, xLineScale ),
 			height: calculatedHeight,
-			line: getLine( data, xLineScale, yScale ),
+			line: getLine( xLineScale, yScale ),
 			lineData,
 			margin,
 			orderedKeys: newOrderedKeys,
@@ -154,6 +146,7 @@ class D3Chart extends Component {
 }
 
 D3Chart.propTypes = {
+	colorScheme: PropTypes.func,
 	className: PropTypes.string,
 	data: PropTypes.array.isRequired,
 	height: PropTypes.number,

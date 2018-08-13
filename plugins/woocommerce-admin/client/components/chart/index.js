@@ -6,6 +6,7 @@ import classNames from 'classnames';
 import { isEqual } from 'lodash';
 import { Component, createRef } from '@wordpress/element';
 import PropTypes from 'prop-types';
+import { interpolateViridis as d3InterpolateViridis } from 'd3-scale-chromatic';
 
 /**
  * Internal dependencies
@@ -122,6 +123,7 @@ class Chart extends Component {
 		const legend = (
 			<Legend
 				className={ 'woocommerce-chart__legend' }
+				colorScheme={ d3InterpolateViridis }
 				data={ orderedKeys }
 				handleLegendHover={ this.handleLegendHover }
 				handleLegendToggle={ this.handleLegendToggle }
@@ -147,6 +149,7 @@ class Chart extends Component {
 				>
 					{ width > WIDE_BREAKPOINT && legendDirection === 'column' && legend }
 					<D3Chart
+						colorScheme={ d3InterpolateViridis }
 						data={ visibleData }
 						height={ 300 }
 						margin={ margin }
