@@ -139,6 +139,7 @@ class Chart extends Component {
 		return (
 			<div className="woocommerce-chart" ref={ this.chartRef }>
 				<div className="woocommerce-chart__header">
+					<span className="woocommerce-chart__title">{ this.props.title }</span>
 					{ width > WIDE_BREAKPOINT && legendDirection === 'row' && legend }
 				</div>
 				<div
