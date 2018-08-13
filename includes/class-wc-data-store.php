@@ -56,6 +56,7 @@ class WC_Data_Store {
 		'report-revenue-stats'  => 'WC_Reports_Orders_Data_Store',
 		'report-orders-stats'   => 'WC_Reports_Orders_Data_Store',
 		'report-products'       => 'WC_Reports_Products_Data_Store',
+		'report-products-stats' => 'WC_Reports_Products_Stats_Data_Store',
 	);
 
 	/**

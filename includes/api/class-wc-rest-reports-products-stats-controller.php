@@ -41,7 +41,7 @@ class WC_REST_Reports_Products_Stats_Controller extends WC_REST_Reports_Controll
 	public function get_items( $request ) {
 		$query_args = array(
 			'fields' => array(
-				'num_items_sold',
+				'items_sold',
 				'gross_revenue',
 				'orders_count',
 			),
@@ -53,7 +53,7 @@ class WC_REST_Reports_Products_Stats_Controller extends WC_REST_Reports_Controll
 			}
 		}
 
-		$query       = new WC_Reports_Revenue_Query( $query_args );
+		$query       = new WC_Reports_Products_Stats_Query( $query_args );
 		$report_data = $query->get_data();
 
 		$out_data = array(

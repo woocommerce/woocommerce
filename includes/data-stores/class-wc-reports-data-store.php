@@ -266,4 +266,53 @@ class WC_Reports_Data_Store {
 		return $intervals_query;
 	}
 
+	/**
+	 * Returns an array of products belonging to given categories.
+	 *
+	 * @param array $categories List of categories IDs.
+	 * @return array|stdClass
+	 */
+	protected function get_products_by_cat_ids( $categories ) {
+		$product_categories = get_categories( array(
+			'hide_empty' => 0,
+			'taxonomy'   => 'product_cat',
+		) );
+		$cat_slugs          = array();
+		$categories         = array_flip( $categories );
+		foreach ( $product_categories as $product_cat ) {
+			if ( key_exists( $product_cat->cat_ID, $categories ) ) {
+				$cat_slugs[] = $product_cat->slug;
+			}
+		}
+		$args = array(
+			'category' => $cat_slugs,
+			'limit'    => -1,
+		);
+		return wc_get_products( $args );
+	}
+
+	/**
+	 * Returned products allowed
+	 *
+	 * @param $query_args Parameters supplied by the user.
+	 *
+	 * @return array
+	 */
+	protected function get_allowed_products( $query_args ) {
+		$allowed_products   = array();
+		if ( is_array( $query_args['categories'] ) && count( $query_args['categories'] ) > 0 ) {
+			$allowed_products = $this->get_products_by_cat_ids( $query_args['categories'] );
+			$allowed_products = wp_list_pluck( $allowed_products, 'id' );
+		}
+
+		if ( is_array( $query_args['products'] ) && count( $query_args['products'] ) > 0 ) {
+			if ( count( $allowed_products ) > 0 ) {
+				$allowed_products = array_intersect( $allowed_products, $query_args['products'] );
+			} else {
+				$allowed_products = $query_args['products'];
+			}
+		}
+		return $allowed_products;
+	}
+
 }

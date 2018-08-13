@@ -40,7 +40,7 @@ class WC_REST_Reports_Products_Controller extends WC_REST_Reports_Controller {
 	 * @return array|WP_Error
 	 */
 	public function get_items( $request ) {
-		$args = array();
+		$args       = array();
 		$registered = array_keys( $this->get_collection_params() );
 		foreach ( $registered as $param_name ) {
 			if ( isset( $request[ $param_name ] ) ) {
@@ -77,7 +77,7 @@ class WC_REST_Reports_Products_Controller extends WC_REST_Reports_Controller {
 
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );
-		$response->add_links( $this->prepare_links( $report, $request ) );
+		$response->add_links( $this->prepare_links( $report ) );
 
 		/**
 		 * Filter a report returned from the API.
@@ -94,13 +94,12 @@ class WC_REST_Reports_Products_Controller extends WC_REST_Reports_Controller {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param WC_Data         $object  Object data.
-	 * @param WP_REST_Request $request Request object.
-	 * @return array                   Links for the given post.
+	 * @param WC_Data $object Object data.
+	 * @return array          Links for the given post.
 	 */
-	protected function prepare_links( $object, $request ) {
+	protected function prepare_links( $object ) {
 		$links = array(
-			'product'       => array(
+			'product' => array(
 				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, 'products', $object->product_id ) ),
 			),
 		);

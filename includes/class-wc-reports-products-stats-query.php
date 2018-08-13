@@ -1,6 +1,6 @@
 <?php
 /**
- * Class for parameter-based Products Report querying
+ * Class for parameter-based Products Stats Report querying
  *
  * Example usage:
  * $args = array(
@@ -8,9 +8,9 @@
  *          'after'        => '2018-07-05 00:00:00',
  *          'page'         => 2,
  *          'categories'   => array(15, 18),
- *          'products'     => array(1,2,3)
+ *          'product_ids'  => array(1,2,3)
  *         );
- * $report = new WC_Reports_Products_Query( $args );
+ * $report = new WC_Reports_Products_Stats_Query( $args );
  * $mydata = $report->get_data();
  *
  * @package  WooCommerce/Classes
@@ -25,9 +25,9 @@ defined( 'ABSPATH' ) || exit;
  *
  * @version  3.5.0
  */
-class WC_Reports_Products_Query extends WC_Reports_Query {
+class WC_Reports_Products_Stats_Query extends WC_Reports_Query {
 
-	const REPORT_NAME = 'report-products';
+	const REPORT_NAME = 'report-products-stats';
 
 	/**
 	 * Valid fields for Products report.
@@ -44,9 +44,9 @@ class WC_Reports_Products_Query extends WC_Reports_Query {
 	 * @return array
 	 */
 	public function get_data() {
-		$args    = apply_filters( 'woocommerce_reports_products_query_args', $this->get_query_vars() );
+		$args    = apply_filters( 'woocommerce_reports_products_stats_query_args', $this->get_query_vars() );
 		$results = WC_Data_Store::load( $this::REPORT_NAME )->get_data( $args );
-		return apply_filters( 'woocommerce_reports_products_select_query', $results, $args );
+		return apply_filters( 'woocommerce_reports_products_stats_select_query', $results, $args );
 	}
 
 }

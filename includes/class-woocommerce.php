@@ -335,6 +335,7 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/class-wc-reports-revenue-query.php';
 		include_once WC_ABSPATH . 'includes/class-wc-reports-orders-stats-query.php';
 		include_once WC_ABSPATH . 'includes/class-wc-reports-products-query.php';
+		include_once WC_ABSPATH . 'includes/class-wc-reports-products-stats-query.php';
 
 		/**
 		 * Data stores - used to store and retrieve CRUD object data from the database.
@@ -366,6 +367,7 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/data-stores/class-wc-reports-data-store.php';
 		include_once WC_ABSPATH . 'includes/data-stores/class-wc-reports-orders-data-store.php';
 		include_once WC_ABSPATH . 'includes/data-stores/class-wc-reports-products-data-store.php';
+		include_once WC_ABSPATH . 'includes/data-stores/class-wc-reports-products-stats-data-store.php';
 
 		/**
 		 * REST API.
