@@ -190,6 +190,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - include the file path and line number where a fatal error occurred in the fatal errors log. #20787
 * Tweak - Cast tax rate to float so that it can be treated as number further on in the code. #20910
 * Tweak - Send webhooks using Action Scheduler. #20030
+* Tweak - Update customer's ip address on successful payment. #21038
 * Performance/Tweak - Use post_author for the order customer instead of '_customer_user' meta data. #17895
 * Performance - Exclude frontend include from REST API calls. #20000
 * Dev - REST API - Allows oAuth1.0a authentication under SSL.
