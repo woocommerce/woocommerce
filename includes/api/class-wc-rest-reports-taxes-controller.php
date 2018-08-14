@@ -135,7 +135,7 @@ class WC_REST_Reports_Taxes_Controller extends WC_REST_Reports_Controller {
 	 */
 	protected function prepare_links( $object ) {
 		$links = array(
-			'category' => array(
+			'tax' => array(
 				'href' => rest_url( sprintf( '/%s/taxes/%d', $this->namespace, $object->category_id ) ),
 			),
 		);
