@@ -176,9 +176,14 @@ class WC_Shortcode_Products {
 			'post_status'         => 'publish',
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => false === wc_string_to_bool( $this->attributes['paginate'] ),
-			'orderby'             => $this->attributes['orderby'],
-			'order'               => strtoupper( $this->attributes['order'] ),
+			'orderby'             => empty( $_GET['orderby'] ) ? $this->attributes['orderby'] : wc_clean( wp_unslash( $_GET['orderby'] ) ),
 		);
+
+		$orderby_value         = explode( '-', $query_args['orderby'] );
+		$orderby               = esc_attr( $orderby_value[0] );
+		$order                 = ! empty( $orderby_value[1] ) ? $orderby_value[1] : strtoupper( $this->attributes['order'] );
+		$query_args['orderby'] = $orderby;
+		$query_args['order']   = $order;
 
 		if ( wc_string_to_bool( $this->attributes['paginate'] ) ) {
 			$this->attributes['page'] = absint( empty( $_GET['product-page'] ) ? 1 : $_GET['product-page'] ); // WPCS: input var ok, CSRF ok.
