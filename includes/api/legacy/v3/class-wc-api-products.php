@@ -1556,13 +1556,13 @@ class WC_API_Products extends WC_API_Resource {
 			if ( isset( $data['sale_price_dates_from'] ) ) {
 				$date_from = $data['sale_price_dates_from'];
 			} else {
-				$date_from = $product->get_date_on_sale_from() ? date( 'Y-m-d', $product->get_date_on_sale_from()->getTimestamp() ) : '';
+				$date_from = $product->get_date_on_sale_from() ? $product->get_date_on_sale_from()->format( 'Y-m-d' ) : '';
 			}
 
 			if ( isset( $data['sale_price_dates_to'] ) ) {
 				$date_to = $data['sale_price_dates_to'];
 			} else {
-				$date_to = $product->get_date_on_sale_to() ? date( 'Y-m-d', $product->get_date_on_sale_to()->getTimestamp() ) : '';
+				$date_to = $product->get_date_on_sale_to() ? $product->get_date_on_sale_to()->format( 'Y-m-d' ) : '';
 			}
 
 			if ( $date_to && ! $date_from ) {
