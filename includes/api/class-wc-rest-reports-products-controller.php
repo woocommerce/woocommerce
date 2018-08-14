@@ -243,6 +243,13 @@ class WC_REST_Reports_Products_Controller extends WC_REST_Reports_Controller {
 				'type' => 'integer',
 			),
 		);
+		$params['extended_product_info'] = array(
+			'description'       => __( 'Add additional piece of info about each product to the report.', 'woocommerce' ),
+			'type'              => 'boolean',
+			'default'           => false,
+			'sanitize_callback' => 'wc_string_to_bool',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
 
 		return $params;
 	}

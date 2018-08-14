@@ -30,6 +30,11 @@ class WC_Reports_Products_Data_Store extends WC_Reports_Data_Store implements WC
 		'items_sold'    => 'intval',
 		'gross_revenue' => 'floatval',
 		'orders_count'  => 'intval',
+		// Extended attributes
+		'name'          => 'strval',
+		'price'         => 'floatval',
+		'image'         => 'strval',
+		'permalink'     => 'strval',
 	);
 
 	protected $report_columns = array(
@@ -37,6 +42,13 @@ class WC_Reports_Products_Data_Store extends WC_Reports_Data_Store implements WC
 		'items_sold'    => 'SUM(product_qty) as items_sold',
 		'gross_revenue' => 'SUM(product_gross_revenue) AS gross_revenue',
 		'orders_count'  => 'COUNT(DISTINCT order_id) as orders_count',
+	);
+
+	protected $extended_attributes = array(
+		'name',
+		'price',
+		'image',
+		'permalink',
 	);
 
 
@@ -79,6 +91,20 @@ class WC_Reports_Products_Data_Store extends WC_Reports_Data_Store implements WC
 		return $order_by;
 	}
 
+	protected function include_extended_product_info( &$products_data ) {
+		foreach ( $products_data as $key => $product_data ) {
+			$product = wc_get_product( $product_data['product_id'] );
+			$extended_attributes = apply_filters( 'woocommerce_rest_reports_products_extended_attributes', $this->extended_attributes, $product_data );
+			foreach ( $extended_attributes as $extended_attribute ) {
+				$function = 'get_' . $extended_attribute;
+				if ( is_callable( array( $product, $function ) ) ) {
+					$value                                        = $product->{$function}();
+					$products_data[ $key ][ $extended_attribute ] = $value;
+				}
+			}
+		}
+	}
+
 	/**
 	 * Returns the report data based on parameters supplied by the user.
 	 *
@@ -95,17 +121,19 @@ class WC_Reports_Products_Data_Store extends WC_Reports_Data_Store implements WC
 
 		// These defaults are only partially applied when used via REST API, as that has its own defaults.
 		$defaults   = array(
-			'per_page'     => get_option( 'posts_per_page' ),
-			'page'         => 1,
-			'order'        => 'DESC',
-			'orderby'      => 'date',
-			'before'       => date( WC_Reports_Interval::$iso_datetime_format, $now ),
-			'after'        => date( WC_Reports_Interval::$iso_datetime_format, $week_back ),
-			'fields'       => '*',
-			'categories'   => array(),
-			'products'     => array(),
-			// TODO: This is not a parameter for products reports per se, but maybe we should restricts order statuses here, too?
-			'order_status' => parent::get_report_order_statuses(),
+			'per_page'              => get_option( 'posts_per_page' ),
+			'page'                  => 1,
+			'order'                 => 'DESC',
+			'orderby'               => 'date',
+			'before'                => date( WC_Reports_Interval::$iso_datetime_format, $now ),
+			'after'                 => date( WC_Reports_Interval::$iso_datetime_format, $week_back ),
+			'fields'                => '*',
+			'categories'            => array(),
+			'products'              => array(),
+			'extended_product_info' => false,
+			// This is not a parameter for products reports per se, but maybe we should restricts order statuses here, too?
+			'order_status'          => parent::get_report_order_statuses(),
+
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
 
@@ -158,6 +186,9 @@ class WC_Reports_Products_Data_Store extends WC_Reports_Data_Store implements WC
 				return new WP_Error( 'woocommerce_reports_products_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ) );
 			}
 
+			if ( $query_args['extended_product_info'] ) {
+				$this->include_extended_product_info( $product_data );
+			}
 			$product_data = array_map( array( $this, 'cast_numbers' ), $product_data );
 			$data         = (object) array(
 				'data'    => $product_data,
