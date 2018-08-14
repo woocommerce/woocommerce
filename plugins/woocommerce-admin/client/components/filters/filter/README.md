@@ -8,7 +8,7 @@ Modify a url query parameter via a dropdown selection of configurable options. T
 ```jsx
 import FilterPicker from 'components/filter-picker';
 
-const renderFilterPicker = ( { path, query } ) {
+const renderFilterPicker = () => {
 	const filters = [
 		{ label: 'Breakfast', value: 'breakfast' },
 		{ label: 'Lunch', value: 'lunch', subFilters: [
@@ -23,7 +23,7 @@ const renderFilterPicker = ( { path, query } ) {
 		] },
 		{ label: 'Dinner', value: 'dinner' },
 	];
-	
+
 	const filterPaths = {
 		breakfast: [],
 		lunch: [],
@@ -35,11 +35,9 @@ const renderFilterPicker = ( { path, query } ) {
 		cod: [ 'lunch', 'fish' ],
 		other_fish: [ 'lunch', 'fish' ],
 	};
-	
+
 	return (
 		<FilterPicker
-			query={ query }
-			path={ path }
 			filters={ filters }
 			filterPaths={ filterPaths }
 		/>
@@ -49,7 +47,5 @@ const renderFilterPicker = ( { path, query } ) {
 
 ### Props
 
-* `query` (required): The query string represented in object form
-* `path` (required): Parameter supplied by React-Router
 * `filters` (required): An array of filters and subFilters to construct the menu
 * `filterPaths` (required): A map of representing the structure of the tree. Required for faster lookups than searches

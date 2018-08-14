@@ -75,7 +75,7 @@ class AdvancedFilters extends Component {
 			<Fragment>
 				<span>{ sprintf( __( '%s Match', 'wc-admin' ), filterTitle ) }</span>
 				<SelectControl
-					className="woocommerce-advanced-filters__title-select"
+					className="woocommerce-filters-advanced__title-select"
 					options={ matches }
 					value={ match.value }
 					onChange={ this.onMatchChange }
@@ -95,7 +95,7 @@ class AdvancedFilters extends Component {
 		if ( 'SelectControl' === input.component ) {
 			return (
 				<SelectControl
-					className="woocommerce-advanced-filters__list-select"
+					className="woocommerce-filters-advanced__list-select"
 					options={ input.options }
 					value={ filter.value }
 					onChange={ partial( this.onFilterChange, filter.key, 'value' ) }
@@ -150,23 +150,23 @@ class AdvancedFilters extends Component {
 		const { config } = this.props;
 		const availableFilterKeys = this.getAvailableFilterKeys();
 		return (
-			<Card className="woocommerce-advanced-filters" title={ this.getTitle() }>
-				<ul className="woocommerce-advanced-filters__list" ref={ this.filterListRef }>
+			<Card className="woocommerce-filters-advanced" title={ this.getTitle() }>
+				<ul className="woocommerce-filters-advanced__list" ref={ this.filterListRef }>
 					{ this.state.activeFilters.map( filter => {
 						const { key, rule } = filter;
 						const filterConfig = config[ key ];
 						return (
-							<li className="woocommerce-advanced-filters__list-item" key={ key }>
+							<li className="woocommerce-filters-advanced__list-item" key={ key }>
 								{ /*eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex*/ }
 								<fieldset tabIndex="0">
 									{ /*eslint-enable-next-line jsx-a11y/no-noninteractive-tabindex*/ }
 									<legend className="screen-reader-text">{ filterConfig.label }</legend>
-									<div className="woocommerce-advanced-filters__fieldset">
-										<div className="woocommerce-advanced-filters__fieldset-legend">
+									<div className="woocommerce-filters-advanced__fieldset">
+										<div className="woocommerce-filters-advanced__fieldset-legend">
 											{ filterConfig.label }
 										</div>
 										<SelectControl
-											className="woocommerce-advanced-filters__list-specifier"
+											className="woocommerce-filters-advanced__list-specifier"
 											options={ filterConfig.rules }
 											value={ rule }
 											onChange={ partial( this.onFilterChange, key, 'rule' ) }
@@ -175,13 +175,13 @@ class AdvancedFilters extends Component {
 												filterConfig.addLabel
 											) }
 										/>
-										<div className="woocommerce-advanced-filters__list-selector">
+										<div className="woocommerce-filters-advanced__list-selector">
 											{ this.getSelector( filter ) }
 										</div>
 									</div>
 								</fieldset>
 								<IconButton
-									className="woocommerce-advanced-filters__remove"
+									className="woocommerce-filters-advanced__remove"
 									label={ sprintf( __( 'Remove %s filter', 'wc-admin' ), filterConfig.label ) }
 									onClick={ partial( this.removeFilter, key ) }
 									icon={ <Gridicon icon="cross-small" /> }
@@ -191,12 +191,12 @@ class AdvancedFilters extends Component {
 					} ) }
 				</ul>
 				{ availableFilterKeys.length > 0 && (
-					<div className="woocommerce-advanced-filters__add-filter">
+					<div className="woocommerce-filters-advanced__add-filter">
 						<Dropdown
 							position="bottom center"
 							renderToggle={ ( { isOpen, onToggle } ) => (
 								<IconButton
-									className="woocommerce-advanced-filters__add-btn"
+									className="woocommerce-filters-advanced__add-button"
 									icon={ <Gridicon icon="add-outline" /> }
 									onClick={ onToggle }
 									aria-expanded={ isOpen }
@@ -205,7 +205,7 @@ class AdvancedFilters extends Component {
 								</IconButton>
 							) }
 							renderContent={ ( { onClose } ) => (
-								<ul className="woocommerce-advanced-filters__add-dropdown">
+								<ul className="woocommerce-filters-advanced__add-dropdown">
 									{ availableFilterKeys.map( key => (
 										<li key={ key }>
 											<Button onClick={ partial( this.addFilter, key, onClose ) }>
@@ -219,7 +219,7 @@ class AdvancedFilters extends Component {
 					</div>
 				) }
 
-				<div className="woocommerce-advanced-filters__controls">
+				<div className="woocommerce-filters-advanced__controls">
 					<Button isPrimary>{ __( 'Filter', 'wc-admin' ) }</Button>
 					<Button isLink onClick={ this.clearAllFilters }>
 						{ __( 'Clear all filters', 'wc-admin' ) }

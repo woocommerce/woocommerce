@@ -11,11 +11,11 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import DatePicker from 'components/date-picker';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
 import { getAdminLink, updateQueryString } from 'lib/nav-utils';
 import { getReportData } from 'lib/swagger';
 import Header from 'layout/header';
+import { ReportFilters } from 'components/filters';
 import { SummaryList, SummaryNumber } from 'components/summary';
 import { TableCard } from 'components/table';
 
@@ -227,7 +227,7 @@ class RevenueReport extends Component {
 						__( 'Revenue', 'wc-admin' ),
 					] }
 				/>
-				<DatePicker query={ query } path={ path } key={ JSON.stringify( query ) } />
+				<ReportFilters query={ query } path={ path } />
 
 				<SummaryList>
 					<SummaryNumber

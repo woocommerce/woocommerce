@@ -8,12 +8,6 @@ import { __ } from '@wordpress/i18n';
 import { getSettings } from '@wordpress/date';
 
 /**
- * Internal dependencies
- */
-import { presetValues } from 'components/date-picker/preset-periods';
-import { compareValues } from 'components/date-picker/compare-periods';
-
-/**
  * DateValue Object
  *
  * @typedef {Object} DateValue - Describes the date range supplied by the date picker.
@@ -34,6 +28,25 @@ import { compareValues } from 'components/date-picker/compare-periods';
  */
 
 export const isoDateFormat = 'YYYY-MM-DD';
+
+export const presetValues = [
+	{ value: 'today', label: __( 'Today', 'wc-admin' ) },
+	{ value: 'yesterday', label: __( 'Yesterday', 'wc-admin' ) },
+	{ value: 'week', label: __( 'Week to Date', 'wc-admin' ) },
+	{ value: 'last_week', label: __( 'Last Week', 'wc-admin' ) },
+	{ value: 'month', label: __( 'Month to Date', 'wc-admin' ) },
+	{ value: 'last_month', label: __( 'Last Month', 'wc-admin' ) },
+	{ value: 'quarter', label: __( 'Quarter to Date', 'wc-admin' ) },
+	{ value: 'last_quarter', label: __( 'Last Quarter', 'wc-admin' ) },
+	{ value: 'year', label: __( 'Year to Date', 'wc-admin' ) },
+	{ value: 'last_year', label: __( 'Last Year', 'wc-admin' ) },
+	{ value: 'custom', label: __( 'Custom', 'wc-admin' ) },
+];
+
+export const periods = [
+	{ value: 'previous_period', label: __( 'Previous Period', 'wc-admin' ) },
+	{ value: 'previous_year', label: __( 'Previous Year', 'wc-admin' ) },
+];
 
 /**
  * Convert a string to Moment object
@@ -262,7 +275,7 @@ export const getCurrentDates = query => {
 			before: primaryEnd,
 		},
 		secondary: {
-			label: find( compareValues, item => item.value === compare ).label,
+			label: find( periods, item => item.value === compare ).label,
 			range: getRangeLabel( secondaryStart, secondaryEnd ),
 			after: secondaryStart,
 			before: secondaryEnd,
