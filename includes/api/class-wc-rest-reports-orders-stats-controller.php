@@ -50,7 +50,7 @@ class WC_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Controller
 		$args['categories']   = (array) $request['categories'];
 		$args['coupons']      = (array) $request['coupons'];
 		$args['products']     = (array) $request['products'];
-		$args['order_status'] = $request['order_status'];
+		$args['order_status'] = (array) $request['order_status'];
 
 		return $args;
 	}
@@ -62,9 +62,9 @@ class WC_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Controller
 	 * @return array|WP_Error
 	 */
 	public function get_items( $request ) {
-		$query_args  = $this->prepare_reports_query( $request );
-		$data_store  = new WC_Reports_Orders_Data_Store();
-		$report_data = $data_store->get_data( $query_args );
+		$query_args   = $this->prepare_reports_query( $request );
+		$orders_query = new WC_Reports_Orders_Stats_Query( $query_args );
+		$report_data  = $orders_query->get_data();
 
 		$out_data = array(
 			'totals'    => get_object_vars( $report_data->totals ),
@@ -72,7 +72,7 @@ class WC_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Controller
 		);
 
 		foreach ( $report_data->intervals as $interval_data ) {
-			$item                    = $this->prepare_item_for_response( (object) $interval_data, $request );
+			$item                    = $this->prepare_item_for_response( $interval_data, $request );
 			$out_data['intervals'][] = $this->prepare_response_for_collection( $item );
 		}
 
@@ -103,12 +103,12 @@ class WC_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Controller
 	/**
 	 * Prepare a report object for serialization.
 	 *
-	 * @param stdClass        $report  Report data.
+	 * @param Array           $report  Report data.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $report, $request ) {
-		$data = get_object_vars( $report );
+		$data = $report;
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = $this->add_additional_fields_to_object( $data, $request );
