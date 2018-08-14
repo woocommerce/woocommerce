@@ -1938,4 +1938,15 @@ class WC_Cart extends WC_Legacy_Cart {
 		$this->fees_api->remove_all_fees();
 		do_action( 'woocommerce_cart_reset', $this, false );
 	}
+
+	/**
+	 * Returns the hash based on cart contents.
+	 *
+	 * @return string hash for cart content
+	 */
+	public function get_cart_hash() {
+		$hash = $this->session->get_cart_for_session() ? md5( json_encode( $this->session->get_cart_for_session() ) ) : '';
+
+		return apply_filters( 'woocommerce_add_to_cart_hash', $hash, $this->get_cart_for_session() );
+	}
 }

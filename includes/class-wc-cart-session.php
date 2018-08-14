@@ -228,7 +228,7 @@ final class WC_Cart_Session {
 	private function set_cart_cookies( $set = true ) {
 		if ( $set ) {
 			wc_setcookie( 'woocommerce_items_in_cart', 1 );
-			wc_setcookie( 'woocommerce_cart_hash', md5( wp_json_encode( $this->get_cart_for_session() ) ) );
+			wc_setcookie( 'woocommerce_cart_hash', WC()->cart->get_cart_hash() );
 		} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) { // WPCS: input var ok.
 			wc_setcookie( 'woocommerce_items_in_cart', 0, time() - HOUR_IN_SECONDS );
 			wc_setcookie( 'woocommerce_cart_hash', '', time() - HOUR_IN_SECONDS );
