@@ -57,6 +57,9 @@ jQuery( function( $ ) {
 
 				$( document.body ).trigger( 'wc_fragments_refreshed' );
 			}
+		},
+		error: function() {
+			$( document.body ).trigger( 'wc_fragments_ajax_error' );
 		}
 	};
 
