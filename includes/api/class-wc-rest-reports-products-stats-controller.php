@@ -62,7 +62,7 @@ class WC_REST_Reports_Products_Stats_Controller extends WC_REST_Reports_Controll
 		);
 
 		foreach ( $report_data->intervals as $interval_data ) {
-			$item                    = $this->prepare_item_for_response( (object) $interval_data, $request );
+			$item                    = $this->prepare_item_for_response( $interval_data, $request );
 			$out_data['intervals'][] = $this->prepare_response_for_collection( $item );
 		}
 
@@ -93,12 +93,12 @@ class WC_REST_Reports_Products_Stats_Controller extends WC_REST_Reports_Controll
 	/**
 	 * Prepare a report object for serialization.
 	 *
-	 * @param stdClass        $report  Report data.
+	 * @param Array           $report  Report data.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $report, $request ) {
-		$data = get_object_vars( $report );
+		$data = $report;
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = $this->add_additional_fields_to_object( $data, $request );

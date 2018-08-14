@@ -42,12 +42,17 @@ class WC_Tests_Reports_Products extends WC_Unit_Test_Case {
 
 		// Test retrieving the stats through the data store.
 		$data = $data_store->get_data( $args );
-		$expected_data = array(
-			array(
-				'product_id'    => $product->get_id(),
-				'items_sold'    => 4,
-				'gross_revenue' => 100.0, // $25 * 4.
-				'orders_count'  => 1,
+		$expected_data = (object) array(
+			'total'   => 1,
+			'pages'   => 1,
+			'page_no' => 1,
+			'data'    => array(
+				0 => array(
+					'product_id'    => $product->get_id(),
+					'items_sold'    => 4,
+					'gross_revenue' => 100.0, // $25 * 4.
+					'orders_count'  => 1,
+				),
 			),
 		);
 		$this->assertEquals( $expected_data, $data );

@@ -83,8 +83,8 @@ class WC_Reports_Products_Data_Store extends WC_Reports_Data_Store implements WC
 	 * Returns the report data based on parameters supplied by the user.
 	 *
 	 * @since 3.5.0
-	 * @param array $query_args Query parameters.
-	 * @return array|WP_Error   Data.
+	 * @param array $query_args  Query parameters.
+	 * @return stdClass|WP_Error Data.
 	 */
 	public function get_data( $query_args ) {
 		global $wpdb;
@@ -109,10 +109,10 @@ class WC_Reports_Products_Data_Store extends WC_Reports_Data_Store implements WC
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
 
-		$cache_key    = $this->get_cache_key( $query_args );
-		$product_data = wp_cache_get( $cache_key, $this->cache_group );
+		$cache_key = $this->get_cache_key( $query_args );
+		$data      = wp_cache_get( $cache_key, $this->cache_group );
 
-		if ( false === $product_data ) {
+		if ( false === $data ) {
 
 			$selections       = $this->selected_columns( $query_args );
 			$sql_query_params = $this->get_sql_query_params( $query_args );
@@ -159,11 +159,17 @@ class WC_Reports_Products_Data_Store extends WC_Reports_Data_Store implements WC
 			}
 
 			$product_data = array_map( array( $this, 'cast_numbers' ), $product_data );
+			$data         = (object) array(
+				'data'    => $product_data,
+				'total'   => $db_records_count,
+				'pages'   => $total_pages,
+				'page_no' => (int) $query_args['page'],
+			);
 
-			wp_cache_set( $cache_key, $product_data, $this->cache_group );
+			wp_cache_set( $cache_key, $data, $this->cache_group );
 		}
 
-		return $product_data;
+		return $data;
 	}
 
 }

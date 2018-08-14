@@ -53,23 +53,44 @@ class WC_REST_Reports_Products_Controller extends WC_REST_Reports_Controller {
 
 		$data = array();
 
-		foreach ( $products_data as $product_data ) {
-			$item   = $this->prepare_item_for_response( (object) $product_data, $request );
+		foreach ( $products_data->data as $product_data ) {
+			$item   = $this->prepare_item_for_response( $product_data, $request );
 			$data[] = $this->prepare_response_for_collection( $item );
 		}
 
-		return rest_ensure_response( $data );
+		$response = rest_ensure_response( $data );
+		$response->header( 'X-WP-Total', (int) $products_data->total );
+		$response->header( 'X-WP-TotalPages', (int) $products_data->pages );
+
+		$page      = $products_data->page_no;
+		$max_pages = $products_data->pages;
+		$base      = add_query_arg( $request->get_query_params(), rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
+		if ( $page > 1 ) {
+			$prev_page = $page - 1;
+			if ( $prev_page > $max_pages ) {
+				$prev_page = $max_pages;
+			}
+			$prev_link = add_query_arg( 'page', $prev_page, $base );
+			$response->link_header( 'prev', $prev_link );
+		}
+		if ( $max_pages > $page ) {
+			$next_page = $page + 1;
+			$next_link = add_query_arg( 'page', $next_page, $base );
+			$response->link_header( 'next', $next_link );
+		}
+
+		return $response;
 	}
 
 	/**
 	 * Prepare a report object for serialization.
 	 *
-	 * @param stdClass        $report  Report data.
+	 * @param Array           $report  Report data.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $report, $request ) {
-		$data = get_object_vars( $report );
+		$data = $report;
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = $this->add_additional_fields_to_object( $data, $request );
@@ -94,13 +115,13 @@ class WC_REST_Reports_Products_Controller extends WC_REST_Reports_Controller {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param WC_Data $object Object data.
-	 * @return array          Links for the given post.
+	 * @param Array $object Object data.
+	 * @return array        Links for the given post.
 	 */
 	protected function prepare_links( $object ) {
 		$links = array(
 			'product' => array(
-				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, 'products', $object->product_id ) ),
+				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, 'products', $object['product_id'] ) ),
 			),
 		);
 

@@ -145,8 +145,8 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 	 * Returns the report data based on parameters supplied by the user.
 	 *
 	 * @since 3.5.0
-	 * @param array $query_args Query parameters.
-	 * @return array            Data.
+	 * @param array $query_args  Query parameters.
+	 * @return stdClass|WP_Error Data.
 	 */
 	public function get_data( $query_args ) {
 		global $wpdb;

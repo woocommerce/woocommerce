@@ -292,17 +292,16 @@ class WC_Reports_Data_Store {
 	}
 
 	/**
-	 * Returned products allowed
+	 * Returns ids of allowed products, based on query arguments from the user.
 	 *
-	 * @param $query_args Parameters supplied by the user.
-	 *
+	 * @param array $query_args Parameters supplied by the user.
 	 * @return array
 	 */
 	protected function get_allowed_products( $query_args ) {
-		$allowed_products   = array();
+		$allowed_products = array();
 		if ( is_array( $query_args['categories'] ) && count( $query_args['categories'] ) > 0 ) {
 			$allowed_products = $this->get_products_by_cat_ids( $query_args['categories'] );
-			$allowed_products = wp_list_pluck( $allowed_products, 'id' );
+			$allowed_products = wc_list_pluck( $allowed_products, 'get_id' );
 		}
 
 		if ( is_array( $query_args['products'] ) && count( $query_args['products'] ) > 0 ) {

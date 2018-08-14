@@ -26,10 +26,11 @@ class WC_Reports_Products_Stats_Data_Store extends WC_Reports_Products_Data_Stor
 	/**
 	 * Updates the database query with parameters used for Products Stats report: categories and order status.
 	 *
-	 * @param array $query_args Query arguments supplied by the user.
-	 * @return array            Array of parameters used for SQL query.
+	 * @param array $query_args       Query arguments supplied by the user.
+	 * @param array $totals_params    SQL parameters for the totals query.
+	 * @param array $intervals_params SQL parameters for the intervals query.
 	 */
-	protected function get_sql_query_params( $query_args, &$totals_params, &$intervals_params ) {
+	protected function update_sql_query_params( $query_args, &$totals_params, &$intervals_params ) {
 		global $wpdb;
 
 		$allowed_products      = $this->get_allowed_products( $query_args );
@@ -49,12 +50,11 @@ class WC_Reports_Products_Stats_Data_Store extends WC_Reports_Products_Data_Stor
 			$products_where_clause .= " AND {$wpdb->prefix}posts.post_status IN ( '" . implode( "','", $statuses ) . "' ) ";
 		}
 
-		$totals_params = array_merge( $totals_params, $this->get_time_period_sql_params( $query_args ) );
+		$totals_params                  = array_merge( $totals_params, $this->get_time_period_sql_params( $query_args ) );
+		$totals_params['where_clause'] .= $products_where_clause;
+		$totals_params['from_clause']  .= $products_from_clause;
 
-		$intervals_params = array_merge( $intervals_params, $this->get_intervals_sql_params( $query_args ) );
-
-		$totals_params['where_clause']    .= $products_where_clause;
-		$totals_params['from_clause']     .= $products_from_clause;
+		$intervals_params                  = array_merge( $intervals_params, $this->get_intervals_sql_params( $query_args ) );
 		$intervals_params['where_clause'] .= $products_where_clause;
 		$intervals_params['from_clause']  .= $products_from_clause;
 	}
@@ -63,8 +63,8 @@ class WC_Reports_Products_Stats_Data_Store extends WC_Reports_Products_Data_Stor
 	 * Returns the report data based on parameters supplied by the user.
 	 *
 	 * @since 3.5.0
-	 * @param array $query_args Query parameters.
-	 * @return array|WP_Error   Data.
+	 * @param array $query_args  Query parameters.
+	 * @return stdClass|WP_Error Data.
 	 */
 	public function get_data( $query_args ) {
 		global $wpdb;
@@ -97,7 +97,7 @@ class WC_Reports_Products_Stats_Data_Store extends WC_Reports_Products_Data_Stor
 			$selections      = $this->selected_columns( $query_args );
 			$totals_query    = array();
 			$intervals_query = array();
-			$this->get_sql_query_params( $query_args, $totals_query, $intervals_query );
+			$this->update_sql_query_params( $query_args, $totals_query, $intervals_query );
 
 			$db_records_count = (int) $wpdb->get_var(
 				"SELECT COUNT(*) FROM (
