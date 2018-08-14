@@ -827,7 +827,7 @@ CREATE TABLE {$wpdb->prefix}wc_order_coupon_lookup (
   coupon_id BIGINT UNSIGNED NOT NULL,
   date_created timestamp DEFAULT '0000-00-00 00:00:00' NOT NULL,
   coupon_gross_discount double DEFAULT 0 NOT NULL,
-  PRIMARY KEY  (order_id),
+  KEY order_id (order_id),
   KEY coupon_id (coupon_id),
   KEY date_created (date_created)
 ) $collate;
