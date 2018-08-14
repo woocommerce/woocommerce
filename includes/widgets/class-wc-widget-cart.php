@@ -77,6 +77,9 @@ class WC_Widget_Cart extends WC_Widget {
 	/**
 	 * This method provides the JS script which will execute on addition of a new widget.
 	 *
+	 * @todo 1. In this function there is a redundency of code, which needs to be fixed.
+	 *       2. Also sort out a better way to fix the raw JS code block. May be using `wc_enqueue_js()`.
+	 *
 	 * @return void
 	 */
 	private function enqueue_ajax_script() {
