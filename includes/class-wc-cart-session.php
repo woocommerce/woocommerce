@@ -130,7 +130,7 @@ final class WC_Cart_Session {
 			}
 		}
 
-		// If it's not empty, it's been already populated by the loop above
+		// If it's not empty, it's been already populated by the loop above.
 		if ( ! empty( $cart_contents ) ) {
 			$this->cart->set_cart_contents( apply_filters( 'woocommerce_cart_contents_changed', $cart_contents ) );
 		}
