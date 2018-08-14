@@ -1093,6 +1093,8 @@ class WC_Cart extends WC_Legacy_Cart {
 				);
 			}
 
+			$this->cart_contents = apply_filters( 'woocommerce_cart_contents_changed', $this->cart_contents );
+
 			do_action( 'woocommerce_add_to_cart', $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data );
 
 			return $cart_item_key;
