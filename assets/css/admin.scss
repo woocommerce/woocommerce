@@ -3527,16 +3527,13 @@
 			 box-sizing: border-box;
 			 vertical-align: top;
 		 }
-		 
+
 		 input[type="datetime-local"],
 		 input[type="date"],
+		 input[type="time"],
 		 input[type="week"],
 		 input[type="tel"] {
 			 width: 200px;
-		 }
-		 
-		 input[type="time"] {
-			 width: 100px;
 		 }
 
 		 select {
