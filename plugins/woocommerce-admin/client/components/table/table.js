@@ -6,7 +6,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { Component, createRef, Fragment } from '@wordpress/element';
 import classnames from 'classnames';
 import { IconButton } from '@wordpress/components';
-import { find, get, isEqual, noop, uniqueId } from 'lodash';
+import { find, get, noop, uniqueId } from 'lodash';
 import Gridicon from 'gridicons';
 import PropTypes from 'prop-types';
 
@@ -20,22 +20,11 @@ class Table extends Component {
 		super( props );
 		this.state = {
 			tabIndex: null,
-			rows: props.rows || [],
 		};
 		this.container = createRef();
 		this.sortBy = this.sortBy.bind( this );
 		this.headersID = uniqueId( 'header-' );
 		this.captionID = uniqueId( 'caption-' );
-	}
-
-	componentDidUpdate( prevProps ) {
-		if ( ! isEqual( this.props.rows, prevProps.rows ) ) {
-			/* eslint-disable react/no-did-update-set-state */
-			this.setState( {
-				rows: this.props.rows,
-			} );
-			/* eslint-enable react/no-did-update-set-state */
-		}
 	}
 
 	componentDidMount() {
@@ -63,8 +52,8 @@ class Table extends Component {
 	}
 
 	render() {
-		const { caption, classNames, headers, query, rowHeader } = this.props;
-		const { rows, tabIndex } = this.state;
+		const { caption, classNames, headers, query, rowHeader, rows } = this.props;
+		const { tabIndex } = this.state;
 		const classes = classnames( 'woocommerce-table__table', classNames );
 		const sortedBy = query.orderby || get( find( headers, { defaultSort: true } ), 'key', false );
 		const sortDir = query.order || DESC;
