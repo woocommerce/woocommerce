@@ -61,9 +61,10 @@ class WC_Reports_Data_Store {
 	 */
 	protected function cast_numbers( $array ) {
 		$retyped_array = array();
+		$column_types = apply_filters( 'woocommerce_rest_reports_column_types', $this->column_types, $array );
 		foreach ( $array as $column_name => $value ) {
-			if ( isset( $this->column_types[ $column_name ] ) ) {
-				$retyped_array[ $column_name ] = $this->column_types[ $column_name ]( $value );
+			if ( isset( $column_types[ $column_name ] ) ) {
+				$retyped_array[ $column_name ] = $column_types[ $column_name ]( $value );
 			} else {
 				$retyped_array[ $column_name ] = $value;
 			}
