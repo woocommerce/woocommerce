@@ -978,7 +978,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Set low stock amount.
 	 *
-	 * @param int|string $amount Empty string if value not set
+	 * @param int|string $amount Empty string if value not set.
 	 * @since 3.5.0
 	 */
 	public function set_low_stock_amount( $amount ) {
