@@ -77,6 +77,13 @@ class WC_Reports_Categories_Data_Store extends WC_Reports_Data_Store implements 
 
 		$order_product_lookup_table = $wpdb->prefix . self::TABLE_NAME;
 
+		$allowed_products = $this->get_allowed_products( $query_args );
+
+		if ( count( $allowed_products ) > 0 ) {
+			$allowed_products_str              = implode( ',', $allowed_products );
+			$sql_query_params['where_clause'] .= " AND {$order_product_lookup_table}.product_id IN ({$allowed_products_str})";
+		}
+
 		if ( is_array( $query_args['order_status'] ) && count( $query_args['order_status'] ) > 0 ) {
 			$statuses = array_map( array( $this, 'normalize_order_status' ), $query_args['order_status'] );
 
@@ -162,15 +169,16 @@ class WC_Reports_Categories_Data_Store extends WC_Reports_Data_Store implements 
 
 		// These defaults are only partially applied when used via REST API, as that has its own defaults.
 		$defaults   = array(
-			'per_page'              => get_option( 'posts_per_page' ),
-			'page'                  => 1,
-			'order'                 => 'DESC',
-			'orderby'               => 'date',
-			'before'                => date( WC_Reports_Interval::$iso_datetime_format, $now ),
-			'after'                 => date( WC_Reports_Interval::$iso_datetime_format, $week_back ),
-			'fields'                => '*',
+			'per_page'     => get_option( 'posts_per_page' ),
+			'page'         => 1,
+			'order'        => 'DESC',
+			'orderby'      => 'date',
+			'before'       => date( WC_Reports_Interval::$iso_datetime_format, $now ),
+			'after'        => date( WC_Reports_Interval::$iso_datetime_format, $week_back ),
+			'fields'       => '*',
+			'categories'   => array(),
 			// This is not a parameter for products reports per se, but maybe we should restricts order statuses here, too?
-			'order_status'          => parent::get_report_order_statuses(),
+			'order_status' => parent::get_report_order_statuses(),
 
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
