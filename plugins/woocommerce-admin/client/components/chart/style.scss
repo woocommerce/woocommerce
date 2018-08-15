@@ -10,6 +10,20 @@
 	.woocommerce-chart__header {
 		min-height: 50px;
 		border-top: 1px solid $core-grey-light-200;
+		display: flex;
+		flex-wrap: nowrap;
+		flex-direction: row;
+		justify-content: flex-start;
+		align-items: center;
+
+		.woocommerce-chart__title {
+			height: 18px;
+			color: $black;
+			font-size: 15px;
+			font-weight: 600;
+			line-height: 18px;
+			margin-left: $gap;
+		}
 	}
 
 	.woocommerce-chart__body {
@@ -121,6 +135,7 @@
 }
 
 .woocommerce-legend {
+	color: $black;
 	display: flex;
 	height: 100%;
 	margin: 0;
