@@ -1104,7 +1104,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		$attributes = array_fill_keys( array_keys( $this->get_attributes( 'edit' ) ), null );
 		foreach ( $raw_attributes as $attribute ) {
 			if ( is_a( $attribute, 'WC_Product_Attribute' ) ) {
-				$attributes[ sanitize_title( $attribute->get_name() ) ] = $attribute;
+				$attributes[ sanitize_text_field( $attribute->get_name() ) ] = $attribute;
 			}
 		}
 
