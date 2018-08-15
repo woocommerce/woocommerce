@@ -60,3 +60,13 @@ export const updateQueryString = query => {
 	const newPath = getNewPath( query );
 	history.push( newPath );
 };
+
+/**
+ * Converts a query object to a query string.
+ *
+ * @param {Object} query parameters to be converted.
+ * @return {String} Query string.
+ */
+export const stringifyQuery = query => {
+	return query ? '?' + stringify( query ) : '';
+};
