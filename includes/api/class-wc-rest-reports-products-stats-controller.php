@@ -44,6 +44,7 @@ class WC_REST_Reports_Products_Stats_Controller extends WC_REST_Reports_Controll
 				'items_sold',
 				'gross_revenue',
 				'orders_count',
+				'products_count',
 			),
 		);
 

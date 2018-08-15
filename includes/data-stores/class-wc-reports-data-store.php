@@ -39,8 +39,18 @@ class WC_Reports_Data_Store {
 	 */
 	const TABLE_NAME = '';
 
+	/**
+	 * Mapping columns to data type to return correct response types.
+	 *
+	 * @var array
+	 */
 	protected $column_types = array();
 
+	/**
+	 * SQL columns to select in the db query.
+	 *
+	 * @var array
+	 */
 	protected $report_columns = array();
 
 	/**
@@ -50,6 +60,7 @@ class WC_Reports_Data_Store {
 	 * @return string
 	 */
 	protected function get_cache_key( $params ) {
+		// TODO: this is not working in PHP 5.2 (but revenue class has static methods, so it cannot use object property).
 		return 'woocommerce_' . $this::TABLE_NAME . '_' . md5( wp_json_encode( $params ) );
 	}
 
@@ -61,7 +72,7 @@ class WC_Reports_Data_Store {
 	 */
 	protected function cast_numbers( $array ) {
 		$retyped_array = array();
-		$column_types = apply_filters( 'woocommerce_rest_reports_column_types', $this->column_types, $array );
+		$column_types  = apply_filters( 'woocommerce_rest_reports_column_types', $this->column_types, $array );
 		foreach ( $array as $column_name => $value ) {
 			if ( isset( $column_types[ $column_name ] ) ) {
 				$retyped_array[ $column_name ] = $column_types[ $column_name ]( $value );
@@ -73,8 +84,10 @@ class WC_Reports_Data_Store {
 	}
 
 	/**
-	 * @param $query_args
-	 * @return array|string
+	 * Returns a list of columns selected by the query_args formatted as a comma separated string.
+	 *
+	 * @param array $query_args User-supplied options.
+	 * @return string
 	 */
 	protected function selected_columns( $query_args ) {
 		$selections = $this->report_columns;
@@ -102,6 +115,12 @@ class WC_Reports_Data_Store {
 		return apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) );
 	}
 
+	/**
+	 * Maps order status provided by the user to the one used in the database.
+	 *
+	 * @param string $status Order status.
+	 * @return string
+	 */
 	protected function normalize_order_status( $status ) {
 		$status = trim( $status );
 		return 'wc-' . $status;
@@ -134,10 +153,10 @@ class WC_Reports_Data_Store {
 	protected function update_interval_boundary_dates( $datetime_start, $datetime_end, $time_interval, &$intervals ) {
 		foreach ( $intervals as $key => $interval ) {
 			$datetime = new DateTime( $interval['datetime_anchor'] );
-			$one_sec  = new DateInterval( 'PT1S' );
 
-			$prev_start = WC_Reports_Interval::iterate( $datetime, $time_interval, true );
-			$prev_start->add( $one_sec );
+			$prev_start           = WC_Reports_Interval::iterate( $datetime, $time_interval, true );
+			$prev_start_timestamp = (int) $prev_start->format( 'U' ) + 1;
+			$prev_start->setTimestamp( $prev_start_timestamp );
 			if ( $datetime_start ) {
 				$start_datetime                  = new DateTime( $datetime_start );
 				$intervals[ $key ]['date_start'] = ( $prev_start < $start_datetime ? $start_datetime : $prev_start )->format( 'Y-m-d H:i:s' );
@@ -145,8 +164,9 @@ class WC_Reports_Data_Store {
 				$intervals[ $key ]['date_start'] = $prev_start->format( 'Y-m-d H:i:s' );
 			}
 
-			$next_end = WC_Reports_Interval::iterate( $datetime, $time_interval );
-			$next_end->sub( $one_sec );
+			$next_end           = WC_Reports_Interval::iterate( $datetime, $time_interval );
+			$next_end_timestamp = (int) $next_end->format( 'U' ) - 1;
+			$next_end->setTimestamp( $next_end_timestamp );
 			if ( $datetime_end ) {
 				$end_datetime                  = new DateTime( $datetime_end );
 				$intervals[ $key ]['date_end'] = ( $next_end > $end_datetime ? $end_datetime : $next_end )->format( 'Y-m-d H:i:s' );
@@ -184,7 +204,7 @@ class WC_Reports_Data_Store {
 	}
 
 	/**
-	 * Fills where clause of SQL request for 'Totals' section of data response based on user supplied parameters.
+	 * Fills WHERE clause of SQL request for 'Totals' section of data response based on user supplied parameters.
 	 *
 	 * @param array $query_args Parameters supplied by the user.
 	 * @return array
@@ -211,6 +231,12 @@ class WC_Reports_Data_Store {
 		return $sql_query;
 	}
 
+	/**
+	 * Fills LIMIT clause of SQL request based on user supplied parameters.
+	 *
+	 * @param array $query_args Parameters supplied by the user.
+	 * @return array
+	 */
 	protected function get_limit_sql_params( $query_args ) {
 		$sql_query['per_page'] = get_option( 'posts_per_page' );
 		if ( isset( $query_args['per_page'] ) && is_numeric( $query_args['per_page'] ) ) {
@@ -226,6 +252,12 @@ class WC_Reports_Data_Store {
 		return $sql_query;
 	}
 
+	/**
+	 * Fills ORDER BY clause of SQL request based on user supplied parameters.
+	 *
+	 * @param array $query_args Parameters supplied by the user.
+	 * @return array
+	 */
 	protected function get_order_by_sql_params( $query_args ) {
 		$sql_query['order_by_clause'] = '';
 		if ( isset( $query_args['orderby'] ) ) {
@@ -242,7 +274,7 @@ class WC_Reports_Data_Store {
 	}
 
 	/**
-	 * Fills clauses of SQL request for 'Intervals' section of data response based on user supplied parameters.
+	 * Fills FROM and WHERE clauses of SQL request for 'Intervals' section of data response based on user supplied parameters.
 	 *
 	 * @param array $query_args Parameters supplied by the user.
 	 * @return array
@@ -300,12 +332,12 @@ class WC_Reports_Data_Store {
 	 */
 	protected function get_allowed_products( $query_args ) {
 		$allowed_products = array();
-		if ( is_array( $query_args['categories'] ) && count( $query_args['categories'] ) > 0 ) {
+		if ( isset( $query_args['categories'] ) && is_array( $query_args['categories'] ) && count( $query_args['categories'] ) > 0 ) {
 			$allowed_products = $this->get_products_by_cat_ids( $query_args['categories'] );
 			$allowed_products = wc_list_pluck( $allowed_products, 'get_id' );
 		}
 
-		if ( is_array( $query_args['products'] ) && count( $query_args['products'] ) > 0 ) {
+		if ( isset( $query_args['products'] ) && is_array( $query_args['products'] ) && count( $query_args['products'] ) > 0 ) {
 			if ( count( $allowed_products ) > 0 ) {
 				$allowed_products = array_intersect( $allowed_products, $query_args['products'] );
 			} else {
