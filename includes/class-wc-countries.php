@@ -1005,6 +1005,16 @@ class WC_Countries {
 							'label'    => __( 'Province', 'woocommerce' ),
 						),
 					),
+					'NG' => array(
+						'postcode' => array(
+							'label' => __( 'Postcode', 'woocommerce' ),
+							'required' => false,
+							'hidden'   => true,
+						),
+						'state'    => array(
+							'label'    => __( 'State', 'woocommerce' ),
+						),
+					),
 					'NZ' => array(
 						'postcode' => array(
 							'label' => __( 'Postcode', 'woocommerce' ),
