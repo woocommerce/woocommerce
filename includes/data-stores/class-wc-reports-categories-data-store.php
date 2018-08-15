@@ -56,9 +56,9 @@ class WC_Reports_Categories_Data_Store extends WC_Reports_Data_Store implements 
 	 * @var array
 	 */
 	protected $report_columns = array(
-		'items_sold'     => 'SUM(product_qty) as items_sold',
-		'gross_revenue'  => 'SUM(product_gross_revenue) AS gross_revenue',
-		'orders_count'   => 'COUNT(DISTINCT order_id) as orders_count',
+		'items_sold'    => 'SUM(product_qty) as items_sold',
+		'gross_revenue' => 'SUM(product_gross_revenue) AS gross_revenue',
+		'orders_count'  => 'COUNT(DISTINCT order_id) as orders_count',
 		// 'products_count' is not a SQL column at the moment, see below.
 	);
 
