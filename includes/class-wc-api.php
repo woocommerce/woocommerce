@@ -234,7 +234,6 @@ class WC_API extends WC_Legacy_API {
 		include_once dirname( __FILE__ ) . '/api/class-wc-rest-data-currencies-controller.php';
 		include_once dirname( __FILE__ ) . '/api/class-wc-rest-reports-controller.php';
 		include_once dirname( __FILE__ ) . '/api/class-wc-rest-reports-categories-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-reports-categories-stats-controller.php';
 		include_once dirname( __FILE__ ) . '/api/class-wc-rest-reports-coupons-controller.php';
 		include_once dirname( __FILE__ ) . '/api/class-wc-rest-reports-coupons-stats-controller.php';
 		include_once dirname( __FILE__ ) . '/api/class-wc-rest-reports-customers-controller.php';
@@ -336,7 +335,6 @@ class WC_API extends WC_Legacy_API {
 			'WC_REST_Reports_Revenue_Stats_Controller',
 			'WC_REST_Reports_Orders_Stats_Controller',
 			'WC_REST_Reports_Categories_Controller',
-			'WC_REST_Reports_Categories_Stats_Controller',
 			'WC_REST_Settings_Controller',
 			'WC_REST_Setting_Options_Controller',
 			'WC_REST_Shipping_Zones_Controller',

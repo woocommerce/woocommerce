@@ -60,17 +60,14 @@ class WC_REST_Reports_Categories_Controller extends WC_REST_Reports_Controller {
 	 */
 	public function get_items( $request ) {
 		$query_args       = $this->prepare_reports_query( $request );
-		$categories_query = new WC_Reports_Orders_Stats_Query( $query_args ); // @todo change to correct class.
+		$categories_query = new WC_Reports_Categories_Query( $query_args );
 		$report_data      = $categories_query->get_data();
 
-		$out_data = array(
-			'totals'    => get_object_vars( $report_data->totals ),
-			'intervals' => array(),
-		);
+		$out_data = array();
 
-		foreach ( $report_data->intervals as $interval_data ) {
-			$item                    = $this->prepare_item_for_response( (object) $interval_data, $request );
-			$out_data['intervals'][] = $this->prepare_response_for_collection( $item );
+		foreach ( $report_data->data as $datum ) {
+			$item       = $this->prepare_item_for_response( $datum, $request );
+			$out_data[] = $this->prepare_response_for_collection( $item );
 		}
 
 		$response = rest_ensure_response( $out_data );
@@ -105,7 +102,7 @@ class WC_REST_Reports_Categories_Controller extends WC_REST_Reports_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $report, $request ) {
-		$data = get_object_vars( $report );
+		$data = $report;
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = $this->add_additional_fields_to_object( $data, $request );
@@ -136,7 +133,7 @@ class WC_REST_Reports_Categories_Controller extends WC_REST_Reports_Controller {
 	protected function prepare_links( $object ) {
 		$links = array(
 			'category' => array(
-				'href' => rest_url( sprintf( '/%s/products/categories/%d', $this->namespace, $object->category_id ) ),
+				'href' => rest_url( sprintf( '/%s/products/categories/%d', $this->namespace, $object['category_id'] ) ),
 			),
 		);
 
