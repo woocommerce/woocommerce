@@ -1074,3 +1074,42 @@ function wc_order_product_lookup_entry( $order_id ) {
 	}
 }
 add_action( 'save_post', 'wc_order_product_lookup_entry', 10, 1 );
+
+/**
+ * Make an entry in the wc_order_tax_lookup table for an order.
+ *
+ * @since 3.5.0
+ * @param int $order_id Order ID.
+ * @return void
+ */
+function wc_order_tax_lookup_entry( $order_id ) {
+	global $wpdb;
+
+	$order = wc_get_order( $order_id );
+	if ( ! $order ) {
+		return;
+	}
+
+	foreach ( $order->get_items( 'tax' ) as $tax_item ) {
+		$wpdb->replace(
+			$wpdb->prefix . 'wc_order_tax_lookup',
+			array(
+				'order_id'     => $order->get_id(),
+				'date_created' => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
+				'tax_rate_id'  => $tax_item->get_rate_id(),
+				'shipping_tax' => $tax_item->get_shipping_tax_total(),
+				'order_tax'    => $tax_item->get_tax_total(),
+				'total_tax'    => $tax_item->get_tax_total() + $tax_item->get_shipping_tax_total(),
+			),
+			array(
+				'%d',
+				'%s',
+				'%d',
+				'%f',
+				'%f',
+				'%f',
+			)
+		);
+	}
+}
+add_action( 'save_post', 'wc_order_tax_lookup_entry', 10, 1 );
