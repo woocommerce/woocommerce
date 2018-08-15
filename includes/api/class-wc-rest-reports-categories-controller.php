@@ -63,6 +63,14 @@ class WC_REST_Reports_Categories_Controller extends WC_REST_Reports_Controller {
 		$categories_query = new WC_Reports_Categories_Query( $query_args );
 		$report_data      = $categories_query->get_data();
 
+		if ( is_wp_error( $report_data ) ) {
+			return $report_data;
+		}
+
+		if ( ! isset( $report_data->data ) || ! isset( $report_data->page_no ) || ! isset( $report_data->pages ) ) {
+			return new WP_Error( 'woocommerce_rest_reports_categories_invalid_response', __( 'Invalid response from data store.', 'woocommerce' ), array( 'status' => 500 ) );
+		}
+
 		$out_data = array();
 
 		foreach ( $report_data->data as $datum ) {

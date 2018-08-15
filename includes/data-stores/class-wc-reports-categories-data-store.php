@@ -187,6 +187,12 @@ class WC_Reports_Categories_Data_Store extends WC_Reports_Data_Store implements 
 		$data      = wp_cache_get( $cache_key, $this->cache_group );
 
 		if ( false === $data ) {
+			$data = (object) array(
+				'data'    => array(),
+				'total'   => 0,
+				'pages'   => 0,
+				'page_no' => 0,
+			);
 
 			$selections       = $this->selected_columns( $query_args );
 			$sql_query_params = $this->get_sql_query_params( $query_args );
@@ -208,7 +214,7 @@ class WC_Reports_Categories_Data_Store extends WC_Reports_Data_Store implements 
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 			if ( null === $products_data ) {
-				return new WP_Error( 'woocommerce_reports_products_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ) );
+				return new WP_Error( 'woocommerce_reports_categories_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ), array( 'status' => 500 ) );
 			}
 
 			// Group by category without a helper table, worst case we add it and change the SQL afterwards.
@@ -238,7 +244,7 @@ class WC_Reports_Categories_Data_Store extends WC_Reports_Data_Store implements 
 			$record_count = count( $categories_data );
 			$total_pages  = (int) ceil( $record_count / $query_args['per_page'] );
 			if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
-				return new stdClass();
+				return $data;
 			}
 
 			$this->sort_records( $categories_data, $query_args['orderby'], $query_args['order'] );
