@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Reports_Products_Data_Store class file.
+ * WC_Reports_Products_Stats_Data_Store class file.
  *
  * @package WooCommerce/Classes
  * @since 3.5.0
@@ -10,17 +10,37 @@ defined( 'ABSPATH' ) || exit;
 
 
 /**
- * WC_Reports_Products_Data_Store.
+ * WC_Reports_Products_Stats_Data_Store.
  *
  * @version  3.5.0
  */
 class WC_Reports_Products_Stats_Data_Store extends WC_Reports_Products_Data_Store implements WC_Reports_Data_Store_Interface {
 
+	/**
+	 * Mapping columns to data type to return correct response types.
+	 *
+	 * @var array
+	 */
+	protected $column_types = array(
+		'date_start'     => 'strval',
+		'date_end'       => 'strval',
+		'product_id'     => 'intval',
+		'items_sold'     => 'intval',
+		'gross_revenue'  => 'floatval',
+		'orders_count'   => 'intval',
+		'products_count' => 'intval',
+	);
 
+	/**
+	 * SQL columns to select in the db query.
+	 *
+	 * @var array
+	 */
 	protected $report_columns = array(
-		'items_sold'    => 'SUM(product_qty) as items_sold',
-		'gross_revenue' => 'SUM(product_gross_revenue) AS gross_revenue',
-		'orders_count'  => 'COUNT(DISTINCT order_id) as orders_count',
+		'items_sold'     => 'SUM(product_qty) as items_sold',
+		'gross_revenue'  => 'SUM(product_gross_revenue) AS gross_revenue',
+		'orders_count'   => 'COUNT(DISTINCT order_id) as orders_count',
+		'products_count' => 'COUNT(DISTINCT product_id) as products_count',
 	);
 
 	/**
@@ -85,7 +105,7 @@ class WC_Reports_Products_Stats_Data_Store extends WC_Reports_Products_Data_Stor
 			'categories'   => array(),
 			'interval'     => 'week',
 			'products'     => array(),
-			// TODO: This is not a parameter for products reports per se, but maybe we should restricts order statuses here, too?
+			// This is not a parameter for products reports per se, but we should probably restricts order statuses here, too.
 			'order_status' => parent::get_report_order_statuses(),
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );

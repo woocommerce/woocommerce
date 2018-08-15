@@ -81,9 +81,10 @@ class WC_Tests_API_Reports_Products_Stats extends WC_REST_Unit_Test_Case {
 
 		$expected_reports = array(
 			'totals' => array(
-				'items_sold'    => 4,
-				'gross_revenue' => 100.0,
-				'orders_count'  => 1,
+				'items_sold'     => 4,
+				'gross_revenue'  => 100.0,
+				'orders_count'   => 1,
+				'products_count' => 1,
 			),
 			'intervals' => array(
 				array(
@@ -93,9 +94,10 @@ class WC_Tests_API_Reports_Products_Stats extends WC_REST_Unit_Test_Case {
 					'date_end'       => date( 'Y-m-d 00:00:00', $time + DAY_IN_SECONDS ),
 					'date_end_gmt'   => date( 'Y-m-d 00:00:00', $time + DAY_IN_SECONDS ),
 					'subtotals'      => (object) array(
-						'items_sold'    => 4,
-						'gross_revenue' => 100.0,
-						'orders_count'  => 1,
+						'items_sold'     => 4,
+						'gross_revenue'  => 100.0,
+						'orders_count'   => 1,
+						'products_count' => 1,
 					),
 				),
 			),
