@@ -978,7 +978,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Set low stock amount.
 	 *
-	 * @param int|string $amount Empty string if value not set
+	 * @param int|string $amount Empty string if value not set.
 	 * @since 3.5.0
 	 */
 	public function set_low_stock_amount( $amount ) {
@@ -1104,7 +1104,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		$attributes = array_fill_keys( array_keys( $this->get_attributes( 'edit' ) ), null );
 		foreach ( $raw_attributes as $attribute ) {
 			if ( is_a( $attribute, 'WC_Product_Attribute' ) ) {
-				$attributes[ sanitize_title( $attribute->get_name() ) ] = $attribute;
+				$attributes[ sanitize_text_field( $attribute->get_name() ) ] = $attribute;
 			}
 		}
 
