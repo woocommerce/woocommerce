@@ -33,18 +33,21 @@ class TopSellingProducts extends Component {
 				key: 'items_sold',
 				required: false,
 				isSortable: false,
+				isNumeric: true,
 			},
 			{
 				label: __( 'Orders', 'wc-admin' ),
 				key: 'orders_count',
 				required: false,
 				isSortable: false,
+				isNumeric: true,
 			},
 			{
 				label: __( 'Gross Revenue', 'wc-admin' ),
 				key: 'gross_revenue',
 				required: true,
 				isSortable: false,
+				isNumeric: true,
 			},
 		];
 	}
