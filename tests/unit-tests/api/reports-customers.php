@@ -41,23 +41,6 @@ class WC_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting reports.
-	 *
-	 * @since 3.5.0
-	 */
-	public function test_get_reports() {
-		wp_set_current_user( $this->user );
-
-		// @todo update after report interface is done.
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint ) );
-		$reports  = $response->get_data();
-
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 0, count( $reports ) ); // @todo update results after implement report interface.
-		$this->assertEquals( array(), $reports ); // @todo update results after implement report interface.
-	}
-
-	/**
 	 * Test getting reports without valid permissions.
 	 *
 	 * @since 3.5.0
@@ -81,7 +64,7 @@ class WC_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 5, count( $properties ) );
+		$this->assertEquals( 7, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'customer_id', $properties );
 		$this->assertArrayHasKey( 'date_last_active', $properties );
@@ -89,5 +72,22 @@ class WC_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'orders_count', $properties );
 		$this->assertArrayHasKey( 'total_spend', $properties );
 		$this->assertArrayHasKey( 'avg_order_value', $properties );
+	}
+
+	/**
+	 * Test getting reports.
+	 *
+	 * @since 3.5.0
+	 */
+	public function test_get_reports() {
+		wp_set_current_user( $this->user );
+
+		// @todo update after report interface is done.
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint ) );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 0, count( $reports ) ); // @todo update results after implement report interface.
+		$this->assertEquals( array(), $reports ); // @todo update results after implement report interface.
 	}
 }
