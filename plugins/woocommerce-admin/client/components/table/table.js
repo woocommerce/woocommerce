@@ -127,12 +127,13 @@ class Table extends Component {
 							<tr key={ i }>
 								{ row.map( ( cell, j ) => {
 									const { isNumeric } = headers[ j ];
-									const Cell = rowHeader === j ? 'th' : 'td';
+									const isHeader = rowHeader === j;
+									const Cell = isHeader ? 'th' : 'td';
 									const cellClasses = classnames( 'woocommerce-table__item', {
 										'is-numeric': isNumeric,
 									} );
 									return (
-										<Cell scope="row" key={ j } className={ cellClasses }>
+										<Cell scope={ isHeader ? 'row' : null } key={ j } className={ cellClasses }>
 											{ getDisplay( cell ) }
 										</Cell>
 									);
