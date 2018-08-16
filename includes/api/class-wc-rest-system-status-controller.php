@@ -796,7 +796,7 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 				$version_data = get_transient( md5( $plugin ) . '_version_data' );
 				if ( false === $version_data ) {
 					$changelog = wp_safe_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $dirname . '/changelog.txt' );
-					if ( '200' === wp_remote_retrieve_response_code( $changelog ) ) {
+					if ( 200 === wp_remote_retrieve_response_code( $changelog ) ) {
 						$cl_lines = explode( "\n", wp_remote_retrieve_body( $changelog ) );
 						if ( ! empty( $cl_lines ) ) {
 							foreach ( $cl_lines as $line_num => $cl_line ) {
@@ -821,28 +821,20 @@ class WC_REST_System_Status_Controller extends WC_REST_Controller {
 						);
 						$request = array(
 							'action'  => 'plugin_information',
-							'request' => wp_json_encode( $args ),
+							'request' => serialize( $args ),
 						);
 						$plugin_info = wp_safe_remote_post( 'http://api.wordpress.org/plugins/info/1.0/', array( 'body' => $request ) );
-						if ( '200' === wp_remote_retrieve_response_code( $plugin_info ) ) {
-							$body     = wp_remote_retrieve_body( $plugin_info );
-							$cl_lines = explode( "\n", $body->changelog );
-							if ( ! empty( $cl_lines ) ) {
-								foreach ( $cl_lines as $line_num => $cl_line ) {
-									if ( preg_match( '/^[0-9]/', $cl_line ) ) {
-										$date         = $body->last_updated;
-										$version      = $body->version;
-										$update       = trim( str_replace( '*', '', $cl_lines[ $line_num + 1 ] ) );
-										$version_data = array(
-											'date'      => $date,
-											'version'   => $version,
-											'update'    => $update,
-											'changelog' => $body->changelog,
-										);
-										set_transient( md5( $plugin ) . '_version_data', $version_data, DAY_IN_SECONDS );
-										break;
-									}
-								}
+						if ( 200 === wp_remote_retrieve_response_code( $plugin_info ) ) {
+							$body = maybe_unserialize( wp_remote_retrieve_body( $plugin_info ) );
+							if ( is_object( $body ) && isset( $body->sections['changelog'] ) ) {
+								$version_data = array(
+									'date'      => $body->last_updated,
+									'version'   => $body->version,
+									'update'    => $body->sections['changelog'],
+									'changelog' => $body->sections['changelog'],
+								);
+								set_transient( md5( $plugin ) . '_version_data', $version_data, DAY_IN_SECONDS );
+								break;
 							}
 						}
 					}
