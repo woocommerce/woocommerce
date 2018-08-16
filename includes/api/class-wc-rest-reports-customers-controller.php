@@ -70,6 +70,7 @@ class WC_REST_Reports_Customers_Controller extends WC_REST_Reports_Controller {
 		$customers_query = new WC_Reports_Orders_Stats_Query( $query_args ); // @todo change to correct class.
 		$report_data     = $customers_query->get_data();
 		$out_data        = array(
+			'totals'    => get_object_vars( $report_data->totals ),
 			'customers' => array(),
 		);
 		foreach ( $report_data->customers as $customer_data ) {
