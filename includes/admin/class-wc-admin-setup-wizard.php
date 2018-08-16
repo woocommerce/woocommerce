@@ -193,6 +193,11 @@ class WC_Admin_Setup_Wizard {
 			unset( $default_steps['shipping'] );
 		}
 
+		// Hide activate section when the user does not have capabilities to install plugins, think multiside admins not being a super admin.
+		if ( ! current_user_can( 'install_plugins' ) ) {
+			unset( $default_steps['activate'] );
+		}
+
 		// Whether or not there is a pending background install of Jetpack.
 		$pending_jetpack = ! class_exists( 'Jetpack' ) && get_option( 'woocommerce_setup_background_installing_jetpack' );
 
