@@ -228,6 +228,34 @@ final class WooCommerce {
 	}
 
 	/**
+	 * Returns true if the request is a REST API request.
+	 *
+	 * @return bool
+	 */
+	private static function is_rest_api_request() {
+		$request_uri = $_SERVER['REQUEST_URI']; // @codingStandardsIgnoreLine
+		if ( empty( $request_uri ) ) {
+			return false;
+		}
+
+		// Legacy API.
+		if ( 0 === strpos( $request_uri, '/wc-api/' ) ) {
+			return true;
+		}
+
+		// New REST API.
+		$rest_prefix = trailingslashit( rest_get_url_prefix() );
+
+		// Check if this is WC endpoint.
+		$woocommerce = ( false !== strpos( $request_uri, $rest_prefix . 'wc/' ) );
+
+		// Allow third party plugins use our authentication methods.
+		$third_party = ( false !== strpos( $request_uri, $rest_prefix . 'wc-' ) );
+
+		return apply_filters( 'woocommerce_rest_is_request_to_rest_api', $woocommerce || $third_party );
+	}
+
+	/**
 	 * What type of request is this?
 	 *
 	 * @param  string $type admin, ajax, cron or frontend.
@@ -242,7 +270,7 @@ final class WooCommerce {
 			case 'cron':
 				return defined( 'DOING_CRON' );
 			case 'frontend':
-				return ( ! is_admin() || defined( 'DOING_AJAX' ) ) && ! defined( 'DOING_CRON' ) && ! defined( 'REST_REQUEST' );
+				return ( ! is_admin() || defined( 'DOING_AJAX' ) ) && ! defined( 'DOING_CRON' ) && ! self::is_rest_api_request();
 		}
 	}
 
