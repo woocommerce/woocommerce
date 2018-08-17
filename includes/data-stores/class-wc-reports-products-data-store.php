@@ -23,6 +23,11 @@ class WC_Reports_Products_Data_Store extends WC_Reports_Data_Store implements WC
 	 */
 	const TABLE_NAME = 'wc_order_product_lookup';
 
+	/**
+	 * Mapping columns to data type to return correct response types.
+	 *
+	 * @var array
+	 */
 	protected $column_types = array(
 		'date_start'    => 'strval',
 		'date_end'      => 'strval',
@@ -30,13 +35,18 @@ class WC_Reports_Products_Data_Store extends WC_Reports_Data_Store implements WC
 		'items_sold'    => 'intval',
 		'gross_revenue' => 'floatval',
 		'orders_count'  => 'intval',
-		// Extended attributes
+		// Extended attributes.
 		'name'          => 'strval',
 		'price'         => 'floatval',
 		'image'         => 'strval',
 		'permalink'     => 'strval',
 	);
 
+	/**
+	 * SQL columns to select in the db query and their mapping to SQL code.
+	 *
+	 * @var array
+	 */
 	protected $report_columns = array(
 		'product_id'    => 'product_id',
 		'items_sold'    => 'SUM(product_qty) as items_sold',
@@ -44,6 +54,11 @@ class WC_Reports_Products_Data_Store extends WC_Reports_Data_Store implements WC
 		'orders_count'  => 'COUNT(DISTINCT order_id) as orders_count',
 	);
 
+	/**
+	 * Extended product attributes to include in the data.
+	 *
+	 * @var array
+	 */
 	protected $extended_attributes = array(
 		'name',
 		'price',
@@ -83,6 +98,12 @@ class WC_Reports_Products_Data_Store extends WC_Reports_Data_Store implements WC
 		return $sql_query_params;
 	}
 
+	/**
+	 * Maps ordering specified by the user to columns in the database/fields in the data.
+	 *
+	 * @param string $order_by Sorting criterion.
+	 * @return string
+	 */
 	protected function normalize_order_by( $order_by ) {
 		if ( 'date' === $order_by ) {
 			return 'date_created';
@@ -91,6 +112,11 @@ class WC_Reports_Products_Data_Store extends WC_Reports_Data_Store implements WC
 		return $order_by;
 	}
 
+	/**
+	 * Enriches the product data with attributes specified by the extended_attributes.
+	 *
+	 * @param array $products_data Product data.
+	 */
 	protected function include_extended_product_info( &$products_data ) {
 		foreach ( $products_data as $key => $product_data ) {
 			$product = wc_get_product( $product_data['product_id'] );
@@ -108,7 +134,6 @@ class WC_Reports_Products_Data_Store extends WC_Reports_Data_Store implements WC
 	/**
 	 * Returns the report data based on parameters supplied by the user.
 	 *
-	 * @since 3.5.0
 	 * @param array $query_args  Query parameters.
 	 * @return stdClass|WP_Error Data.
 	 */
@@ -131,7 +156,7 @@ class WC_Reports_Products_Data_Store extends WC_Reports_Data_Store implements WC
 			'categories'            => array(),
 			'products'              => array(),
 			'extended_product_info' => false,
-			// This is not a parameter for products reports per se, but maybe we should restricts order statuses here, too?
+			// This is not a parameter for products reports per se, but we want to only take into account selected order types.
 			'order_status'          => parent::get_report_order_statuses(),
 
 		);
