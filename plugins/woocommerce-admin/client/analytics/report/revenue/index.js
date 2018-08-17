@@ -11,6 +11,8 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
+import Card from 'components/card';
+import Chart from 'components/chart';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
 import { getAdminLink, updateQueryString } from 'lib/nav-utils';
 import { getReportData } from 'lib/swagger';
@@ -21,6 +23,25 @@ import { TableCard } from 'components/table';
 
 // Mock data until we fetch from an API
 import rawData from './mock-data';
+import testData from './data';
+const charts = {
+	gross_revenue: {
+		label: __( 'Gross Revenue', 'wc-admin' ),
+		type: 'currency',
+	},
+	refunds: {
+		label: __( 'Refunds', 'wc-admin' ),
+		type: 'currency',
+	},
+	coupons: {
+		label: __( 'Coupons', 'wc-admin' ),
+		type: 'currency',
+	},
+	taxes: {
+		label: __( 'Taxes', 'wc-admin' ),
+		type: 'currency',
+	},
+};
 
 class RevenueReport extends Component {
 	constructor() {
@@ -212,12 +233,59 @@ class RevenueReport extends Component {
 		];
 	}
 
+	// TODO since this pattern will exist on every report, this possibly should become a component
+	getChartSummaryNumbers() {
+		const { totals = {} } = this.state.stats;
+		const selectedChart = this.getSelectedChart();
+
+		const summaryNumbers = map( charts, ( chart, key ) => {
+			const { label, type } = chart;
+			const isSelected = selectedChart === key;
+			let value = totals[ key ];
+
+			switch ( type ) {
+				// TODO: implement other format handlers
+				case 'currency':
+					value = formatCurrency( value );
+					break;
+			}
+
+			const onClick = () => {
+				this.onQueryChange( 'chart' )( key );
+			};
+
+			return (
+				<SummaryNumber
+					key={ key }
+					value={ value }
+					label={ label }
+					selected={ isSelected }
+					delta={ 0 }
+					onToggle={ onClick }
+				/>
+			);
+		} );
+
+		return <SummaryList>{ summaryNumbers }</SummaryList>;
+	}
+
+	getSelectedChart() {
+		const { query } = this.props;
+		const { chart } = query;
+		if ( chart && charts[ chart ] ) {
+			return chart;
+		}
+
+		return 'gross_revenue';
+	}
+
 	render() {
 		const { path, query } = this.props;
 		const { totals = {}, intervals = [] } = this.state.stats;
 		const summary = this.getSummaryContent( totals ) || [];
 		const rows = this.getRowsContent( intervals ) || [];
 		const headers = this.getHeadersContent();
+		const selectedChart = this.getSelectedChart();
 
 		return (
 			<Fragment>
@@ -229,28 +297,10 @@ class RevenueReport extends Component {
 				/>
 				<ReportFilters query={ query } path={ path } />
 
-				<SummaryList>
-					<SummaryNumber
-						value={ formatCurrency( totals.gross_revenue ) }
-						label={ __( 'Gross Revenue', 'wc-admin' ) }
-						delta={ 29 }
-					/>
-					<SummaryNumber
-						value={ formatCurrency( totals.refunds ) }
-						label={ __( 'Refunds', 'wc-admin' ) }
-						delta={ -10 }
-						selected
-					/>
-					<SummaryNumber
-						value={ formatCurrency( totals.coupons ) }
-						label={ __( 'Coupons', 'wc-admin' ) }
-						delta={ 15 }
-					/>
-					<SummaryNumber
-						value={ formatCurrency( totals.taxes ) }
-						label={ __( 'Taxes', 'wc-admin' ) }
-					/>
-				</SummaryList>
+				{ this.getChartSummaryNumbers() }
+				<Card title="">
+					<Chart data={ testData[ selectedChart ] } title={ charts[ selectedChart ].label } />
+				</Card>
 
 				<TableCard
 					title={ __( 'Revenue Last Week', 'wc-admin' ) }
