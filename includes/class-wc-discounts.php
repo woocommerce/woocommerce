@@ -765,11 +765,11 @@ class WC_Discounts {
 	 */
 	protected function validate_coupon_sale_items( $coupon ) {
 		if ( $coupon->get_exclude_sale_items() ) {
-			$valid = false;
+			$valid = true;
 
 			foreach ( $this->get_items_to_validate() as $item ) {
-				if ( $item->product && ! $item->product->is_on_sale() ) {
-					$valid = true;
+				if ( $item->product && $item->product->is_on_sale() ) {
+					$valid = false;
 					break;
 				}
 			}
