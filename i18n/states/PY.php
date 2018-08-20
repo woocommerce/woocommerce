@@ -11,7 +11,7 @@ global $states;
 defined( 'ABSPATH' ) || exit;
 
 $states['PY'] = array(
-    'Alto Paraguay' => 'Alto Paraguay', 'woocommerce' ),
+    'Alto Paraguay' => __( 'Alto Paraguay', 'woocommerce' ),
     'Alto Paraná' => __( 'Alto Paran&aacute;', 'woocommerce' ),
     'Amambay' => __( 'Amambay', 'woocommerce' ),
     'Asuncion' => __( 'Asunci&oacute;n', 'woocommerce' ),
