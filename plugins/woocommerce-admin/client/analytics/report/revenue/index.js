@@ -14,7 +14,7 @@ import PropTypes from 'prop-types';
 import Card from 'components/card';
 import Chart from 'components/chart';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
-import { getAdminLink, updateQueryString } from 'lib/nav-utils';
+import { getAdminLink, getNewPath, updateQueryString } from 'lib/nav-utils';
 import { getReportData } from 'lib/swagger';
 import Header from 'layout/header';
 import { ReportFilters } from 'components/filters';
@@ -250,9 +250,7 @@ class RevenueReport extends Component {
 					break;
 			}
 
-			const onClick = () => {
-				this.onQueryChange( 'chart' )( key );
-			};
+			const href = getNewPath( { chart: key } );
 
 			return (
 				<SummaryNumber
@@ -261,7 +259,7 @@ class RevenueReport extends Component {
 					label={ label }
 					selected={ isSelected }
 					delta={ 0 }
-					onToggle={ onClick }
+					href={ href }
 				/>
 			);
 		} );
