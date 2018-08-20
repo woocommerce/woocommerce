@@ -483,6 +483,16 @@ return array(
 			),
 		),
 	),
+	'PY' => array(
+		'currency_code'  => '₲', // G uppercase striped
+		'currency_pos'   => 'left',
+		'thousand_sep'   => '.',
+		'decimal_sep'    => ',',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+		'tax_rates'      => array(),
+	),
 	'RO' => array(
 		'currency_code'  => 'RON',
 		'currency_pos'   => 'right_space',
