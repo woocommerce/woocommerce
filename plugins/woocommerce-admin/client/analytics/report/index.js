@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import ExampleReport from './example';
-import RevenueReport from './revenue/';
+import RevenueReport from './revenue';
 import ProductsReport from './products';
 import OrdersReport from './orders/';
 
