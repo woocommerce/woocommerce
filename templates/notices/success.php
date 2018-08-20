@@ -27,5 +27,18 @@ if ( ! $messages ) {
 ?>
 
 <?php foreach ( $messages as $message ) : ?>
-	<div class="woocommerce-message" role="alert"><?php echo wp_kses_post( $message ); ?></div>
+	<div class="woocommerce-message" role="alert">
+		<?php
+			echo wp_kses( $message,
+				array_replace_recursive(
+					wp_kses_allowed_html( 'post' ),
+					array(
+						'a' => array(
+							'tabindex' => true,
+						),
+					)
+				) // phpcs:ignore PHPCompatibility.PHP.NewFunctions.array_replace_recursiveFound
+			);
+		?>
+	</div>
 <?php endforeach; ?>
