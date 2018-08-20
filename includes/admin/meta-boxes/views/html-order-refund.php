@@ -52,7 +52,11 @@ $who_refunded = new WP_User( $refund->get_refunded_by() );
 
 	<td class="line_cost" width="1%">
 		<div class="view">
-			<?php echo wp_kses_post( wc_price( '-' . $refund->get_amount() ) ); ?>
+			<?php
+			echo wp_kses_post(
+				wc_price( '-' . $refund->get_amount(), array( 'currency' => $refund->get_currency() ) )
+			);
+			?>
 		</div>
 	</td>
 
