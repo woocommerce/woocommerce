@@ -9,11 +9,10 @@ import { map } from 'lodash';
 /**
  * Internal dependencies
  */
-import Card from 'components/card';
+import { Card, Table } from '@woocommerce/components';
 import { getAdminLink } from 'lib/nav-utils';
 import { numberFormat } from 'lib/number';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
-import { Table } from 'components/table';
 import './style.scss';
 
 // Mock data until we fetch from an API

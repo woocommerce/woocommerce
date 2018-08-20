@@ -12,7 +12,7 @@ import { Dropdown } from '@wordpress/components';
 import DatePickerContent from './content';
 import DropdownButton from 'components/dropdown-button';
 import { getCurrentDates, getDateParamsFromQuery, isoDateFormat } from 'lib/date';
-import { getNewPath, getQuery } from 'lib/nav-utils';
+import { getQuery, updateQueryString } from 'lib/nav-utils';
 import './style.scss';
 
 const shortDateFormat = __( 'MM/DD/YYYY', 'wc-admin' );
@@ -23,7 +23,7 @@ class DatePicker extends Component {
 		this.state = this.getResetState();
 
 		this.update = this.update.bind( this );
-		this.getUpdatePath = this.getUpdatePath.bind( this );
+		this.onSelect = this.onSelect.bind( this );
 		this.isValidSelection = this.isValidSelection.bind( this );
 		this.resetCustomValues = this.resetCustomValues.bind( this );
 	}
@@ -47,17 +47,20 @@ class DatePicker extends Component {
 		this.setState( update );
 	}
 
-	getUpdatePath( selectedTab ) {
-		const { period, compare, after, before } = this.state;
-		const data = {
-			period: 'custom' === selectedTab ? 'custom' : period,
-			compare,
+	onSelect( selectedTab, onClose ) {
+		return event => {
+			const { period, compare, after, before } = this.state;
+			const data = {
+				period: 'custom' === selectedTab ? 'custom' : period,
+				compare,
+			};
+			if ( 'custom' === selectedTab ) {
+				data.after = after ? after.format( isoDateFormat ) : '';
+				data.before = before ? before.format( isoDateFormat ) : '';
+			}
+			updateQueryString( data );
+			onClose( event );
 		};
-		if ( 'custom' === selectedTab ) {
-			data.after = after ? after.format( isoDateFormat ) : '';
-			data.before = before ? before.format( isoDateFormat ) : '';
-		}
-		return getNewPath( data );
 	}
 
 	getButtonLabel() {
@@ -122,7 +125,7 @@ class DatePicker extends Component {
 							before={ before }
 							onUpdate={ this.update }
 							onClose={ onClose }
-							getUpdatePath={ this.getUpdatePath }
+							onSelect={ this.onSelect }
 							isValidSelection={ this.isValidSelection }
 							resetCustomValues={ this.resetCustomValues }
 							focusedInput={ focusedInput }

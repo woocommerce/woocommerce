@@ -9,11 +9,11 @@ import { Component, Fragment } from '@wordpress/element';
  * Internal dependencies
  */
 import './style.scss';
+import { Card } from '@woocommerce/components';
+import ChartExample from 'components/chart/example';
 import Header from 'layout/header';
 import StorePerformance from './store-performance';
 import TopSellingProducts from './top-selling-products';
-import Chart from 'components/chart/example';
-import Card from 'components/card';
 
 export default class Dashboard extends Component {
 	render() {
@@ -21,7 +21,7 @@ export default class Dashboard extends Component {
 			<Fragment>
 				<Header sections={ [ __( 'Dashboard', 'wc-admin' ) ] } />
 				<StorePerformance />
-				<Chart />
+				<ChartExample />
 				<div className="woocommerce-dashboard__columns">
 					<div>
 						<TopSellingProducts />

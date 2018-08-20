@@ -14,12 +14,18 @@ global.wp = {
 	},
 };
 
+global.wc = {};
+
 Object.defineProperty( global.wp, 'element', {
 	get: () => require( '@wordpress/element' ),
 } );
 
 Object.defineProperty( global.wp, 'date', {
 	get: () => require( '@wordpress/date' ),
+} );
+
+Object.defineProperty( global.wc, 'components', {
+	get: () => require( '@woocommerce/components' ),
 } );
 
 global.wcSettings = {

@@ -10,7 +10,7 @@ import { shallow } from 'enzyme';
  * Internal dependencies
  */
 import { ActivityCard } from '../';
-import Gravatar from 'components/gravatar';
+import { Gravatar } from '@woocommerce/components';
 
 describe( 'ActivityCard', () => {
 	test( 'should have correct title', () => {

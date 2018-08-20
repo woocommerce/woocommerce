@@ -14,7 +14,6 @@ import classnames from 'classnames';
 import ComparePeriods from './compare-periods';
 import { DateRange } from 'components/calendar';
 import { H, Section } from 'layout/section';
-import Link from 'components/link';
 import PresetPeriods from './preset-periods';
 
 const isMobileViewport = () => window.innerWidth < 782;
@@ -45,7 +44,7 @@ class DatePickerContent extends Component {
 			before,
 			onUpdate,
 			onClose,
-			getUpdatePath,
+			onSelect,
 			isValidSelection,
 			resetCustomValues,
 			focusedInput,
@@ -127,13 +126,13 @@ class DatePickerContent extends Component {
 											</Button>
 										) }
 										{ isValidSelection( selectedTab ) ? (
-											<Link
-												className="woocommerce-filters-date__button components-button is-button is-primary"
-												href={ getUpdatePath( selectedTab ) }
-												onClick={ onClose }
+											<Button
+												className="woocommerce-filters-date__button"
+												onClick={ onSelect( selectedTab, onClose ) }
+												isPrimary
 											>
 												{ __( 'Update', 'wc-admin' ) }
-											</Link>
+											</Button>
 										) : (
 											<Button className="woocommerce-filters-date__button" isPrimary disabled>
 												{ __( 'Update', 'wc-admin' ) }
@@ -155,7 +154,7 @@ DatePickerContent.propTypes = {
 	compare: PropTypes.string.isRequired,
 	onUpdate: PropTypes.func.isRequired,
 	onClose: PropTypes.func.isRequired,
-	getUpdatePath: PropTypes.func.isRequired,
+	onSelect: PropTypes.func.isRequired,
 	resetCustomValues: PropTypes.func.isRequired,
 	focusedInput: PropTypes.string,
 	afterText: PropTypes.string,

@@ -7,7 +7,9 @@ import { shallow } from 'enzyme';
 /**
  * Internal dependencies
  */
-import { ReviewRating, ProductRating, Rating } from '../';
+import Rating from '../';
+import ProductRating from '../product';
+import ReviewRating from '../review';
 
 describe( 'Rating', () => {
 	test( 'should render the passed rating prop', () => {
@@ -28,28 +30,22 @@ describe( 'Rating', () => {
 
 describe( 'ReviewRating', () => {
 	test( 'should render rating based on review object', () => {
-		const rating = shallow(
-			<ReviewRating
-				review={ {
-					review: 'Nice T-shirt!',
-					rating: 1.5,
-				} }
-			/>
-		);
+		const review = {
+			review: 'Nice T-shirt!',
+			rating: 1.5,
+		};
+		const rating = shallow( <ReviewRating review={ review } /> );
 		expect( rating ).toMatchSnapshot();
 	} );
 } );
 
 describe( 'ProductRating', () => {
 	test( 'should render rating based on product object', () => {
-		const rating = shallow(
-			<ProductRating
-				product={ {
-					name: 'Test Product',
-					average_rating: 2.5,
-				} }
-			/>
-		);
+		const product = {
+			name: 'Test Product',
+			average_rating: 2.5,
+		};
+		const rating = shallow( <ProductRating product={ product } /> );
 		expect( rating ).toMatchSnapshot();
 	} );
 } );

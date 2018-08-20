@@ -9,6 +9,7 @@ const ExtractTextPlugin = require( 'extract-text-webpack-plugin' );
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 const externals = {
+	'@woocommerce/components': { this: [ 'wc', 'components' ] },
 	'@wordpress/blocks': { this: [ 'wp', 'blocks' ] },
 	'@wordpress/components': { this: [ 'wp', 'components' ] },
 	'@wordpress/compose': { this: [ 'wp', 'compose' ] },
@@ -31,6 +32,7 @@ const webpackConfig = {
 	mode: NODE_ENV,
 	entry: {
 		index: './client/index.js',
+		components: './client/components/index.js',
 		embedded: './client/embedded.js',
 	},
 	output: {
@@ -85,9 +87,7 @@ const webpackConfig = {
 			'gutenberg-components': path.resolve( __dirname, 'node_modules/@wordpress/components/src' ),
 		},
 	},
-	plugins: [
-		new ExtractTextPlugin( 'css/[name].css' ),
-	],
+	plugins: [ new ExtractTextPlugin( 'css/[name].css' ) ],
 };
 
 if ( webpackConfig.mode !== 'production' ) {

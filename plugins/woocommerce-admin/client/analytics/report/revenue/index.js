@@ -11,15 +11,18 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import Card from 'components/card';
-import Chart from 'components/chart';
+import {
+	Card,
+	Chart,
+	ReportFilters,
+	SummaryList,
+	SummaryNumber,
+	TableCard,
+} from '@woocommerce/components';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
 import { getAdminLink, updateQueryString } from 'lib/nav-utils';
 import { getReportData } from 'lib/swagger';
 import Header from 'layout/header';
-import { ReportFilters } from 'components/filters';
-import { SummaryList, SummaryNumber } from 'components/summary';
-import { TableCard } from 'components/table';
 
 // Mock data until we fetch from an API
 import rawData from './mock-data';

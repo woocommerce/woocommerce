@@ -9,7 +9,7 @@ import { Component, Fragment } from '@wordpress/element';
  * Internal dependencies
  */
 import Header from 'layout/header';
-import { SummaryList, SummaryNumber } from 'components/summary';
+import { SummaryList, SummaryNumber } from '@woocommerce/components';
 
 export default class extends Component {
 	render() {

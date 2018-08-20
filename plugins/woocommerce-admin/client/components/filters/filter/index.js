@@ -14,8 +14,7 @@ import PropTypes from 'prop-types';
  */
 import AnimationSlider from 'components/animation-slider';
 import DropdownButton from 'components/dropdown-button';
-import { getNewPath, getQuery } from 'lib/nav-utils';
-import Link from 'components/link';
+import { getQuery, updateQueryString } from 'lib/nav-utils';
 import './style.scss';
 
 export const DEFAULT_FILTER = 'all';
@@ -30,7 +29,6 @@ class FilterPicker extends Component {
 			animate: null,
 		};
 
-		this.getSelectionPath = this.getSelectionPath.bind( this );
 		this.getSelectedFilter = this.getSelectedFilter.bind( this );
 		this.selectSubFilters = this.selectSubFilters.bind( this );
 		this.getVisibleFilters = this.getVisibleFilters.bind( this );
@@ -40,10 +38,6 @@ class FilterPicker extends Component {
 	getFilterValue() {
 		const query = getQuery();
 		return query.filter || DEFAULT_FILTER;
-	}
-
-	getSelectionPath( filter ) {
-		return getNewPath( { filter: filter.value } );
 	}
 
 	getSelectedFilter() {
@@ -111,14 +105,15 @@ class FilterPicker extends Component {
 			);
 		}
 
+		const onClick = event => {
+			onClose( event );
+			updateQueryString( { filter: filter.value } );
+		};
+
 		return (
-			<Link
-				className="woocommerce-filters-filter__button components-button"
-				href={ this.getSelectionPath( filter ) }
-				onClick={ onClose }
-			>
+			<Button className="woocommerce-filters-filter__button" onClick={ onClick }>
 				{ filter.label }
-			</Link>
+			</Button>
 		);
 	}
 

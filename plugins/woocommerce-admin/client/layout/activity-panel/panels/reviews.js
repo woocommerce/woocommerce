@@ -13,12 +13,8 @@ import { noop } from 'lodash';
  */
 import { ActivityCard, ActivityCardPlaceholder } from '../activity-card';
 import ActivityHeader from '../activity-header';
-import Gravatar from 'components/gravatar';
-import Link from 'components/link';
-import ProductImage from 'components/product-image';
-import { ReviewRating } from 'components/rating';
+import { Gravatar, Link, ProductImage, ReviewRating, SplitButton } from '@woocommerce/components';
 import { Section } from 'layout/section';
-import SplitButton from 'components/split-button';
 
 // TODO Pull proper data from the API
 const demoReviews = [

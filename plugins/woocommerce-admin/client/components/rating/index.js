@@ -64,6 +64,4 @@ Rating.defaultProps = {
 	size: 18,
 };
 
-export { Rating };
-export { default as ProductRating } from './product';
-export { default as ReviewRating } from './review';
+export default Rating;

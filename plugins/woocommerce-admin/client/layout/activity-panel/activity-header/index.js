@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import './style.scss';
-import { EllipsisMenu } from 'components/ellipsis-menu';
+import { EllipsisMenu } from '@woocommerce/components';
 import { H } from 'layout/section';
 
 class ActivityHeader extends Component {

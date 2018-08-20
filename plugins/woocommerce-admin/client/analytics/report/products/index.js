@@ -10,7 +10,7 @@ import { Component, Fragment } from '@wordpress/element';
  */
 import { filterPaths, filters } from './constants';
 import Header from 'layout/header';
-import { ReportFilters } from 'components/filters';
+import { ReportFilters } from '@woocommerce/components';
 import './style.scss';
 
 export default class extends Component {

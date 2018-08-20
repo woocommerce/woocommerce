@@ -14,12 +14,16 @@ import { noop } from 'lodash';
 import { ActivityCard } from '../activity-card';
 import ActivityHeader from '../activity-header';
 import ActivityOutboundLink from '../activity-outbound-link';
-import { EllipsisMenu, MenuTitle, MenuItem } from 'components/ellipsis-menu';
+import {
+	EllipsisMenu,
+	Gravatar,
+	Flag,
+	MenuTitle,
+	MenuItem,
+	OrderStatus,
+} from '@woocommerce/components';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
 import { getOrderRefundTotal } from 'lib/order-values';
-import Gravatar from 'components/gravatar';
-import Flag from 'components/flag';
-import OrderStatus from 'components/order-status';
 import { Section } from 'layout/section';
 
 function OrdersPanel( { orders } ) {

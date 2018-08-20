@@ -11,7 +11,7 @@ import Gridicon from 'gridicons';
  * Internal dependencies
  */
 import './style.scss';
-import Link from 'components/link';
+import { Link } from '@woocommerce/components';
 
 const ActivityOutboundLink = props => {
 	const { href, type, className, children, ...restOfProps } = props;

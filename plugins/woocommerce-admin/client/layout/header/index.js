@@ -8,7 +8,6 @@ import classnames from 'classnames';
 import { decodeEntities } from '@wordpress/html-entities';
 import { Fill } from 'react-slot-fill';
 import { isArray } from 'lodash';
-import Link from 'components/link';
 import PropTypes from 'prop-types';
 import ReactDom from 'react-dom';
 
@@ -17,6 +16,7 @@ import ReactDom from 'react-dom';
  */
 import './style.scss';
 import ActivityPanel from '../activity-panel';
+import { Link } from '@woocommerce/components';
 
 class Header extends Component {
 	constructor() {

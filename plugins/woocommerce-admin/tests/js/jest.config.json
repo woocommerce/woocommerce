@@ -8,7 +8,8 @@
   ],
   "moduleDirectories": ["node_modules", "<rootDir>/client"],
   "moduleNameMapper": {
-    "tinymce": "<rootDir>/tests/js/mocks/tinymce"
+    "tinymce": "<rootDir>/tests/js/mocks/tinymce",
+    "@woocommerce/components": "<rootDir>/client/components"
   },
   "setupFiles": [
     "<rootDir>/node_modules/@wordpress/jest-preset-default/scripts/setup-globals.js",
