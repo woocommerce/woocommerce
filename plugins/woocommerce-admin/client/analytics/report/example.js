@@ -8,19 +8,12 @@ import { Component, Fragment } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import Header from 'layout/header';
 import { SummaryList, SummaryNumber } from '@woocommerce/components';
 
 export default class extends Component {
 	render() {
 		return (
 			<Fragment>
-				<Header
-					sections={ [
-						[ '/analytics', __( 'Analytics', 'wc-admin' ) ],
-						__( 'Report Title', 'wc-admin' ),
-					] }
-				/>
 				<h2>One Data Point</h2>
 				<SummaryList>
 					<SummaryNumber

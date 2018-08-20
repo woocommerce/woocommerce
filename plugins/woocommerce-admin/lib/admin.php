@@ -29,12 +29,37 @@ function wc_admin_is_embed_enabled_wc_page() {
 }
 
 /**
- * Register menu pages for the Dashboard and Analytics sections
+ * Add a single page to a given parent top-level-item.
+ *
+ * @param array $options {
+ *     Array describing the menu item.
+ *
+ *     @type string $title Menu title
+ *     @type string $parent Parent path or menu ID
+ *     @type string $path Path for this page, full path in app context; ex /analytics/report
+ * }
  */
-function wc_admin_register_pages(){
+function wc_admin_register_page( $options ) {
+	$defaults = array(
+		'parent' => '/analytics',
+	);
+	$options  = wp_parse_args( $options, $defaults );
+	add_submenu_page(
+		'/' === $options['parent'][0] ? "wc-admin#{$options['parent']}" : $options['parent'],
+		$options['title'],
+		$options['title'],
+		'manage_options',
+		"wc-admin#{$options['path']}",
+		'wc_admin_page'
+	);
+}
+
+/**
+ * Register menu pages for the Dashboard and Analytics sections.
+ */
+function wc_admin_register_pages() {
 	global $menu, $submenu;
 
-	// woocommerce_page_wc-admin
 	add_submenu_page(
 		'woocommerce',
 		__( 'WooCommerce Dashboard', 'wc-admin' ),
@@ -44,8 +69,6 @@ function wc_admin_register_pages(){
 		'wc_admin_page'
 	);
 
-
-	// toplevel_page_wooanalytics
 	add_menu_page(
 		__( 'WooCommerce Analytics', 'wc-admin' ),
 		__( 'Analytics', 'wc-admin' ),
@@ -53,45 +76,32 @@ function wc_admin_register_pages(){
 		'wc-admin#/analytics',
 		'wc_admin_page',
 		'dashicons-chart-bar',
-		56 // After WooCommerce & Product menu items
+		56 // After WooCommerce & Product menu items.
 	);
 
-	// TODO: Remove. Test report link
-	add_submenu_page(
-		'wc-admin#/analytics',
-		__( 'Report Title', 'wc-admin' ),
-		__( 'Report Title', 'wc-admin' ),
-		'manage_options',
-		'wc-admin#/analytics/test',
-		'wc_admin_page'
-	);
+	wc_admin_register_page( array(
+		'title'  => __( 'Report Title', 'wc-admin' ),
+		'parent' => '/analytics',
+		'path'   => '/analytics/test',
+	) );
 
-	add_submenu_page(
-		'wc-admin#/analytics',
-		__( 'Revenue', 'wc-admin' ),
-		__( 'Revenue', 'wc-admin' ),
-		'manage_options',
-		'wc-admin#/analytics/revenue',
-		'wc_admin_page'
-	);
+	wc_admin_register_page( array(
+		'title'  => __( 'Revenue', 'wc-admin' ),
+		'parent' => '/analytics',
+		'path'   => '/analytics/revenue',
+	) );
 
-	add_submenu_page(
-		'wc-admin#/analytics',
-		__( 'Products', 'wc-admin' ),
-		__( 'Products', 'wc-admin' ),
-		'manage_options',
-		'wc-admin#/analytics/products',
-		'wc_admin_page'
-	);
+	wc_admin_register_page( array(
+		'title'  => __( 'Products', 'wc-admin' ),
+		'parent' => '/analytics',
+		'path'   => '/analytics/products',
+	) );
 
-	add_submenu_page(
-		'wc-admin#/analytics',
-		__( 'Orders', 'wc-admin' ),
-		__( 'Orders', 'wc-admin' ),
-		'manage_options',
-		'wc-admin#/analytics/orders',
-		'wc_admin_page'
-	);
+	wc_admin_register_page( array(
+		'title'  => __( 'Orders', 'wc-admin' ),
+		'parent' => '/analytics',
+		'path'   => '/analytics/orders',
+	) );
 }
 add_action( 'admin_menu', 'wc_admin_register_pages' );
 
@@ -103,7 +113,7 @@ add_action( 'admin_menu', 'wc_admin_register_pages' );
  */
 function wc_admin_link_structure() {
 	global $submenu;
-	// User does not have capabilites to see the submenu
+	// User does not have capabilites to see the submenu.
 	if ( ! current_user_can( 'manage_woocommerce' ) ) {
 		return;
 	}
@@ -120,21 +130,23 @@ function wc_admin_link_structure() {
 		return;
 	}
 
-	$menu    = $submenu['woocommerce'][ $wc_admin_key ];
-	$menu[2] = 'admin.php?page=wc-admin#/';
-	unset( $submenu['woocommerce'][ $wc_admin_key ] );
+	$menu = $submenu['woocommerce'][ $wc_admin_key ];
 
+	// Move menu item to top of array.
+	unset( $submenu['woocommerce'][ $wc_admin_key ] );
 	array_unshift( $submenu['woocommerce'], $menu );
+
+	// Rename "Analytics" to Overview (otherwise this reads Analytics > Analytics).
 	$submenu['wc-admin#/analytics'][0][0] = __( 'Overview', 'wc-admin' );
 }
 
-// priority is 20 to run after https://github.com/woocommerce/woocommerce/blob/a55ae325306fc2179149ba9b97e66f32f84fdd9c/includes/admin/class-wc-admin-menus.php#L165
+// priority is 20 to run after https://github.com/woocommerce/woocommerce/blob/a55ae325306fc2179149ba9b97e66f32f84fdd9c/includes/admin/class-wc-admin-menus.php#L165.
 add_action( 'admin_head', 'wc_admin_link_structure', 20 );
 
 /**
  * Load the assets on the admin pages
  */
-function wc_admin_enqueue_script(){
+function wc_admin_enqueue_script() {
 	if ( ! wc_admin_is_admin_page() && ! wc_admin_is_embed_enabled_wc_page() ) {
 		return;
 	}

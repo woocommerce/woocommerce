@@ -2,7 +2,6 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { Button } from '@wordpress/components';
@@ -15,7 +14,6 @@ import { partial } from 'lodash';
  */
 import { Card, ReportFilters } from '@woocommerce/components';
 import { filters, filterPaths, advancedFilterConfig } from './constants';
-import Header from 'layout/header/index';
 import './style.scss';
 
 class OrdersReport extends Component {
@@ -37,12 +35,6 @@ class OrdersReport extends Component {
 		const { orders, orderIds, query, path } = this.props;
 		return (
 			<Fragment>
-				<Header
-					sections={ [
-						[ '/analytics', __( 'Analytics', 'wc-admin' ) ],
-						__( 'Orders', 'wc-admin' ),
-					] }
-				/>
 				<ReportFilters
 					query={ query }
 					path={ path }
@@ -50,7 +42,6 @@ class OrdersReport extends Component {
 					filterPaths={ filterPaths }
 					advancedConfig={ advancedFilterConfig }
 				/>
-
 				<p>Below is a temporary example</p>
 				<Card title="Orders">
 					<table style={ { width: '100%' } }>

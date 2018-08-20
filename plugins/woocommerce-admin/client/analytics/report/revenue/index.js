@@ -22,7 +22,6 @@ import {
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
 import { getAdminLink, updateQueryString } from 'lib/nav-utils';
 import { getReportData } from 'lib/swagger';
-import Header from 'layout/header';
 
 // Mock data until we fetch from an API
 import rawData from './mock-data';
@@ -292,12 +291,6 @@ class RevenueReport extends Component {
 
 		return (
 			<Fragment>
-				<Header
-					sections={ [
-						[ '/analytics', __( 'Analytics', 'wc-admin' ) ],
-						__( 'Revenue', 'wc-admin' ),
-					] }
-				/>
 				<ReportFilters query={ query } path={ path } />
 
 				{ this.getChartSummaryNumbers() }
