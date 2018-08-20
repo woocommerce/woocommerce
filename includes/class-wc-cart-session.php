@@ -44,7 +44,7 @@ final class WC_Cart_Session {
 	 * Register methods for this object on the appropriate WordPress hooks.
 	 */
 	public function init() {
-		add_action( 'wp_loaded', array( $this, 'get_cart_from_session' ) );
+		add_action( 'parse_request', array( $this, 'get_cart_from_session' ), 20 );
 		add_action( 'woocommerce_cart_emptied', array( $this, 'destroy_cart_session' ) );
 		add_action( 'wp', array( $this, 'maybe_set_cart_cookies' ), 99 );
 		add_action( 'woocommerce_add_to_cart', array( $this, 'maybe_set_cart_cookies' ) );
@@ -164,7 +164,7 @@ final class WC_Cart_Session {
 	 * @since 3.2.0
 	 */
 	public function maybe_set_cart_cookies() {
-		if ( ! headers_sent() && did_action( 'wp_loaded' ) ) {
+		if ( ! headers_sent() && did_action( 'parse_request' ) ) {
 			if ( ! $this->cart->is_empty() ) {
 				$this->set_cart_cookies( true );
 			} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) { // WPCS: input var ok.

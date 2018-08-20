@@ -40,7 +40,7 @@ class WC_Query {
 	public function __construct() {
 		add_action( 'init', array( $this, 'add_endpoints' ) );
 		if ( ! is_admin() ) {
-			add_action( 'wp_loaded', array( $this, 'get_errors' ), 20 );
+			add_action( 'parse_request', array( $this, 'get_errors' ), 30 );
 			add_filter( 'query_vars', array( $this, 'add_query_vars' ), 0 );
 			add_action( 'parse_request', array( $this, 'parse_request' ), 0 );
 			add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );

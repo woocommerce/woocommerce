@@ -20,14 +20,14 @@ class WC_Form_Handler {
 		add_action( 'template_redirect', array( __CLASS__, 'redirect_reset_password_link' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'save_address' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'save_account_details' ) );
-		add_action( 'wp_loaded', array( __CLASS__, 'checkout_action' ), 20 );
-		add_action( 'wp_loaded', array( __CLASS__, 'process_login' ), 20 );
-		add_action( 'wp_loaded', array( __CLASS__, 'process_registration' ), 20 );
-		add_action( 'wp_loaded', array( __CLASS__, 'process_lost_password' ), 20 );
-		add_action( 'wp_loaded', array( __CLASS__, 'process_reset_password' ), 20 );
-		add_action( 'wp_loaded', array( __CLASS__, 'cancel_order' ), 20 );
-		add_action( 'wp_loaded', array( __CLASS__, 'update_cart_action' ), 20 );
-		add_action( 'wp_loaded', array( __CLASS__, 'add_to_cart_action' ), 20 );
+		add_action( 'parse_request', array( __CLASS__, 'checkout_action' ), 30 );
+		add_action( 'parse_request', array( __CLASS__, 'process_login' ), 30 );
+		add_action( 'parse_request', array( __CLASS__, 'process_registration' ), 30 );
+		add_action( 'parse_request', array( __CLASS__, 'process_lost_password' ), 30 );
+		add_action( 'parse_request', array( __CLASS__, 'process_reset_password' ), 30 );
+		add_action( 'parse_request', array( __CLASS__, 'cancel_order' ), 30 );
+		add_action( 'parse_request', array( __CLASS__, 'update_cart_action' ), 30 );
+		add_action( 'parse_request', array( __CLASS__, 'add_to_cart_action' ), 30 );
 
 		// May need $wp global to access query vars.
 		add_action( 'wp', array( __CLASS__, 'pay_action' ), 20 );
@@ -707,6 +707,11 @@ class WC_Form_Handler {
 	public static function add_to_cart_action( $url = false ) {
 		if ( empty( $_REQUEST['add-to-cart'] ) || ! is_numeric( $_REQUEST['add-to-cart'] ) ) {
 			return;
+		}
+
+		// If funciton is called from parse_request action, it gets a WP object as the $url parameter.
+		if ( is_a( $url, 'WP' ) ) {
+			$url = false;
 		}
 
 		wc_nocache_headers();
