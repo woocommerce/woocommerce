@@ -3,7 +3,7 @@
  * External dependencies
  */
 import { dispatch } from '@wordpress/data';
-import apiRequest from '@wordpress/api-request';
+import apiFetch from '@wordpress/api-fetch';
 
 export default {
 	setOrders( orders ) {
@@ -23,7 +23,7 @@ export default {
 			// Lets be optimistic
 			dispatch( 'wc-admin' ).updateOrder( order );
 			try {
-				const updatedOrder = await apiRequest( {
+				const updatedOrder = await apiFetch( {
 					path: '/wc/v3/orders/' + order.id,
 					method: 'PUT',
 					data: order,

@@ -10,6 +10,7 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 
 const externals = {
 	'@woocommerce/components': { this: [ 'wc', 'components' ] },
+	'@wordpress/api-fetch': { this: [ 'wp', 'apiFetch' ] },
 	'@wordpress/blocks': { this: [ 'wp', 'blocks' ] },
 	'@wordpress/components': { this: [ 'wp', 'components' ] },
 	'@wordpress/compose': { this: [ 'wp', 'compose' ] },
@@ -20,7 +21,6 @@ const externals = {
 	'@wordpress/html-entities': { this: [ 'wp', 'htmlEntities' ] },
 	'@wordpress/i18n': { this: [ 'wp', 'i18n' ] },
 	'@wordpress/keycodes': { this: [ 'wp', 'keycodes' ] },
-	'@wordpress/api-request': { this: [ 'wp', 'apiRequest' ] },
 	jquery: 'jQuery',
 	tinymce: 'tinymce',
 	moment: 'moment',

@@ -3,7 +3,7 @@
 /**
  * External dependencies
  */
-const { apiFetch } = wp;
+import apiFetch from '@wordpress/api-fetch';
 import { dispatch } from '@wordpress/data';
 
 /**

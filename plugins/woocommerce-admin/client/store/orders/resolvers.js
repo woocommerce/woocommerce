@@ -3,12 +3,12 @@
  * External dependencies
  */
 import { dispatch } from '@wordpress/data';
-import apiRequest from '@wordpress/api-request';
+import apiFetch from '@wordpress/api-fetch';
 
 export default {
 	async getOrders() {
 		try {
-			const orders = await apiRequest( { path: '/wc/v3/orders' } );
+			const orders = await apiFetch( { path: '/wc/v3/orders' } );
 			dispatch( 'wc-admin' ).setOrders( orders );
 		} catch ( error ) {
 			if ( error && error.responseJSON ) {
