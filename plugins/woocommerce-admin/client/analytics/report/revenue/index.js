@@ -20,7 +20,7 @@ import {
 	TableCard,
 } from '@woocommerce/components';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
-import { getAdminLink, updateQueryString } from 'lib/nav-utils';
+import { getAdminLink, getNewPath, updateQueryString } from 'lib/nav-utils';
 import { getReportData } from 'lib/swagger';
 
 // Mock data until we fetch from an API
@@ -252,9 +252,7 @@ class RevenueReport extends Component {
 					break;
 			}
 
-			const onClick = () => {
-				this.onQueryChange( 'chart' )( key );
-			};
+			const href = getNewPath( { chart: key } );
 
 			return (
 				<SummaryNumber
@@ -263,7 +261,7 @@ class RevenueReport extends Component {
 					label={ label }
 					selected={ isSelected }
 					delta={ 0 }
-					onToggle={ onClick }
+					href={ href }
 				/>
 			);
 		} );
