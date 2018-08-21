@@ -237,11 +237,8 @@ function woocommerce_product_loop() {
 /**
  * Output generator tag to aid debugging.
  *
- * @access public
- *
  * @param string $gen Generator.
  * @param string $type Type.
- *
  * @return string
  */
 function wc_generator_tag( $gen, $type ) {
