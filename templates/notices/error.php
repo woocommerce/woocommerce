@@ -11,9 +11,8 @@
  * the readme will list any important changes.
  *
  * @see         https://docs.woocommerce.com/document/template-structure/
- * @author      WooThemes
  * @package     WooCommerce/Templates
- * @version     3.3.0
+ * @version     3.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -29,16 +28,7 @@ if ( ! $messages ) {
 	<?php foreach ( $messages as $message ) : ?>
 		<li>
 			<?php
-				echo wp_kses( $message,
-					array_replace_recursive(
-						wp_kses_allowed_html( 'post' ),
-						array(
-							'a' => array(
-								'tabindex' => true,
-							),
-						)
-					) // phpcs:ignore PHPCompatibility.PHP.NewFunctions.array_replace_recursiveFound
-				);
+				echo wc_kses_notice( $message ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 			?>
 		</li>
 	<?php endforeach; ?>

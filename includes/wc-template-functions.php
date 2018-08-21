@@ -3397,3 +3397,23 @@ if ( ! function_exists( 'woocommerce_product_reviews_tab' ) ) {
 		wc_deprecated_function( 'woocommerce_product_reviews_tab', '2.4' );
 	}
 }
+
+/**
+ * Filters out the same tags as wp_kses_post, but allows tabindex for <a> element.
+ *
+ * @since 3.5.0
+ * @param string $message Content to filter through kses.
+ * @return string
+ */
+function wc_kses_notice( $message ) {
+	return wp_kses( $message,
+		array_replace_recursive( // phpcs:ignore PHPCompatibility.PHP.NewFunctions.array_replace_recursiveFound
+			wp_kses_allowed_html( 'post' ),
+			array(
+				'a' => array(
+					'tabindex' => true,
+				),
+			)
+		)
+	);
+}
