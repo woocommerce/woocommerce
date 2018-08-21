@@ -55,9 +55,11 @@ export const getNewPath = ( query, path = getPath(), currentQuery = getQuery() )
  * Updates the query parameters of the current page.
  *
  * @param {Object} query object of params to be updated.
+ * @param {String} path Relative path (defaults to current path).
+ * @param {Object} currentQuery object of current query params (defaults to current querystring).
  */
-export const updateQueryString = query => {
-	const newPath = getNewPath( query );
+export const updateQueryString = ( query, path = getPath(), currentQuery = getQuery() ) => {
+	const newPath = getNewPath( query, path, currentQuery );
 	history.push( newPath );
 };
 

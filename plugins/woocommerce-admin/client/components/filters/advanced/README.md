@@ -50,6 +50,9 @@ render: function() {
 ## AdvancedFilters Props
 
 * `config` (required): The configuration object required to render filters
+* `filterTitle` (required): Name of this filter, used in translations
+* `path` (required): The `path` parameter supplied by React-Router
+* `query`: The query string represented in object form
 
 ## config object jsDoc
 

@@ -14,7 +14,7 @@ import PropTypes from 'prop-types';
  */
 import AnimationSlider from 'components/animation-slider';
 import DropdownButton from 'components/dropdown-button';
-import { getQuery, updateQueryString } from 'lib/nav-utils';
+import { updateQueryString } from 'lib/nav-utils';
 import './style.scss';
 
 export const DEFAULT_FILTER = 'all';
@@ -25,7 +25,7 @@ class FilterPicker extends Component {
 
 		const { filterPaths } = props;
 		this.state = {
-			nav: filterPaths[ this.getFilterValue() ],
+			nav: filterPaths[ this.getFilterValue( props ) ],
 			animate: null,
 		};
 
@@ -35,14 +35,13 @@ class FilterPicker extends Component {
 		this.goBack = this.goBack.bind( this );
 	}
 
-	getFilterValue() {
-		const query = getQuery();
+	getFilterValue( { query } ) {
 		return query.filter || DEFAULT_FILTER;
 	}
 
 	getSelectedFilter() {
 		const { filters, filterPaths } = this.props;
-		const value = this.getFilterValue();
+		const value = this.getFilterValue( this.props );
 		const filterPath = filterPaths[ value ];
 		const visibleFilters = this.getVisibleFilters( filters, [ ...filterPath ] );
 		return find( visibleFilters, filter => filter.value === value );
@@ -105,9 +104,10 @@ class FilterPicker extends Component {
 			);
 		}
 
+		const { path, query } = this.props;
 		const onClick = event => {
 			onClose( event );
-			updateQueryString( { filter: filter.value } );
+			updateQueryString( { filter: filter.value }, path, query );
 		};
 
 		return (
@@ -164,6 +164,12 @@ class FilterPicker extends Component {
 FilterPicker.propTypes = {
 	filters: PropTypes.array.isRequired,
 	filterPaths: PropTypes.object.isRequired,
+	path: PropTypes.string.isRequired,
+	query: PropTypes.object,
+};
+
+FilterPicker.defaultProps = {
+	query: {},
 };
 
 export default FilterPicker;

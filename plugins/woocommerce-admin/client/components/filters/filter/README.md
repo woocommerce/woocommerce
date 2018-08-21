@@ -40,6 +40,8 @@ const renderFilterPicker = () => {
 		<FilterPicker
 			filters={ filters }
 			filterPaths={ filterPaths }
+			path={ path }
+			query={ query }
 		/>
 	);
 }
@@ -49,3 +51,5 @@ const renderFilterPicker = () => {
 
 * `filters` (required): An array of filters and subFilters to construct the menu
 * `filterPaths` (required): A map of representing the structure of the tree. Required for faster lookups than searches
+* `path` (required): The `path` parameter supplied by React-Router
+* `query`: The query string represented in object form

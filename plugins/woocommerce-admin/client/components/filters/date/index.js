@@ -2,9 +2,10 @@
 /**
  * External dependencies
  */
-import { Component } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { Component } from '@wordpress/element';
 import { Dropdown } from '@wordpress/components';
+import PropTypes from 'prop-types';
 
 /**
  * Internal dependencies
@@ -12,7 +13,7 @@ import { Dropdown } from '@wordpress/components';
 import DatePickerContent from './content';
 import DropdownButton from 'components/dropdown-button';
 import { getCurrentDates, getDateParamsFromQuery, isoDateFormat } from 'lib/date';
-import { getQuery, updateQueryString } from 'lib/nav-utils';
+import { updateQueryString } from 'lib/nav-utils';
 import './style.scss';
 
 const shortDateFormat = __( 'MM/DD/YYYY', 'wc-admin' );
@@ -29,7 +30,7 @@ class DatePicker extends Component {
 	}
 
 	getResetState() {
-		const { period, compare, before, after } = getDateParamsFromQuery( getQuery() );
+		const { period, compare, before, after } = getDateParamsFromQuery( this.props.query );
 		return {
 			period,
 			compare,
@@ -48,6 +49,7 @@ class DatePicker extends Component {
 	}
 
 	onSelect( selectedTab, onClose ) {
+		const { path, query } = this.props;
 		return event => {
 			const { period, compare, after, before } = this.state;
 			const data = {
@@ -58,13 +60,13 @@ class DatePicker extends Component {
 				data.after = after ? after.format( isoDateFormat ) : '';
 				data.before = before ? before.format( isoDateFormat ) : '';
 			}
-			updateQueryString( data );
+			updateQueryString( data, path, query );
 			onClose( event );
 		};
 	}
 
 	getButtonLabel() {
-		const { primary, secondary } = getCurrentDates( getQuery() );
+		const { primary, secondary } = getCurrentDates( this.props.query );
 		return [
 			`${ primary.label } (${ primary.range })`,
 			`${ __( 'vs.', 'wc-admin' ) } ${ secondary.label } (${ secondary.range })`,
@@ -141,5 +143,14 @@ class DatePicker extends Component {
 		);
 	}
 }
+
+DatePicker.propTypes = {
+	path: PropTypes.string.isRequired,
+	query: PropTypes.object,
+};
+
+DatePicker.defaultProps = {
+	query: {},
+};
 
 export default DatePicker;

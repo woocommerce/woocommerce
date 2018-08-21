@@ -233,6 +233,12 @@ class AdvancedFilters extends Component {
 AdvancedFilters.propTypes = {
 	config: PropTypes.object.isRequired,
 	filterTitle: PropTypes.string.isRequired,
+	path: PropTypes.string.isRequired,
+	query: PropTypes.object,
+};
+
+AdvancedFilters.defaultProps = {
+	query: {},
 };
 
 export default AdvancedFilters;
