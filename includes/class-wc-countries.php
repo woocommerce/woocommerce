@@ -793,7 +793,6 @@ class WC_Countries {
 					'BH' => array(
 						'postcode' => array(
 							'required' => false,
-							'hidden'   => true,
 						),
 						'state'    => array(
 							'required' => false,
