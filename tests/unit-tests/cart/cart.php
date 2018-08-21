@@ -5,25 +5,20 @@
  * @package WooCommerce\Tests\Cart
  */
 class WC_Tests_Cart extends WC_Unit_Test_Case {
+	public function tearDown() {
+		parent::tearDown();
+
+		WC()->cart->empty_cart();
+	}
 
 	/**
 	 * Test some discount logic which has caused issues in the past.
-	 * Tickets:
-	 *  https://github.com/woocommerce/woocommerce/issues/10573
+	 * Ticket:
 	 *  https://github.com/woocommerce/woocommerce/issues/10963
 	 *
 	 * Due to discounts being split amongst products in cart.
 	 */
-	public function test_cart_get_discounted_price() {
-		global $wpdb;
-
-		// We need this to have the calculate_totals() method calculate totals
-		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
-			define( 'WOOCOMMERCE_CHECKOUT', true );
-		}
-
-		# Test case 1 #10963
-
+	public function test_cart_get_discounted_price_issue_10963() {
 		// Create dummy coupon - fixed cart, 1 value
 		$coupon  = WC_Helper_Coupon::create_coupon();
 
@@ -50,45 +45,14 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->calculate_totals();
 		$this->assertEquals( '29.00', number_format( WC()->cart->total, 2, '.', '' ) );
 		$this->assertEquals( '1.00', number_format( WC()->cart->discount_cart, 2, '.', '' ) );
+	}
 
-		// Clean up the cart
-		WC()->cart->empty_cart();
-		WC()->cart->remove_coupons();
-
-		# Test case 2 #10573
-		$product->set_regular_price( '29.95' );
-		$product->save();
-		update_post_meta( $coupon->get_id(), 'discount_type', 'percent' );
-		update_post_meta( $coupon->get_id(), 'coupon_amount', '10' );
-		update_option( 'woocommerce_prices_include_tax', 'yes' );
-		update_option( 'woocommerce_calc_taxes', 'yes' );
-		$tax_rate = array(
-			'tax_rate_country'  => '',
-			'tax_rate_state'    => '',
-			'tax_rate'          => '10.0000',
-			'tax_rate_name'     => 'TAX',
-			'tax_rate_priority' => '1',
-			'tax_rate_compound' => '0',
-			'tax_rate_shipping' => '1',
-			'tax_rate_order'    => '1',
-			'tax_rate_class'    => '',
-		);
-		WC_Tax::_insert_tax_rate( $tax_rate );
-		$product = wc_get_product( $product->get_id() );
-
-		WC()->cart->add_to_cart( $product->get_id(), 1 );
-		WC()->cart->add_discount( $coupon->get_code() );
-
-		WC()->cart->calculate_totals();
-		$cart_item = current( WC()->cart->get_cart() );
-		$this->assertEquals( '24.51', number_format( $cart_item['line_total'], 2, '.', '' ) );
-
-		// Cleanup
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
-		WC()->cart->empty_cart();
-		WC()->cart->remove_coupons();
-		WC_Helper_Product::delete_product( $product->get_id() );
+	/**
+	 * Ticket: https://github.com/woocommerce/woocommerce/issues/11626
+	 */
+	public function test_cart_get_discounted_price_issue_11626() {
+		// Create dummy coupon - fixed cart, 1 value
+		$coupon  = WC_Helper_Coupon::create_coupon();
 
 		# Test case 3 #11626
 		update_post_meta( $coupon->get_id(), 'discount_type', 'percent' );
@@ -131,22 +95,44 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->add_discount( $coupon->get_code() );
 		WC()->cart->calculate_totals();
 		$this->assertEquals( '16.55', WC()->cart->total );
+	}
 
-		// Cleanup
-		WC()->cart->empty_cart();
-		WC()->cart->remove_coupons();
+	/**
+	 * Ticket: https://github.com/woocommerce/woocommerce/issues/10573
+	 */
+	public function test_cart_get_discounted_price_issue_10573() {
+		// Create dummy coupon - fixed cart, 1 value
+		$coupon  = WC_Helper_Coupon::create_coupon();
 
-		foreach ( $product_ids as $product_id ) {
-			WC_Helper_Product::delete_product( $product_id );
-		}
+		// Create dummy product - price will be 10
+		$product = WC_Helper_Product::create_simple_product();
 
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
-		update_option( 'woocommerce_prices_include_tax', 'no' );
-		update_option( 'woocommerce_calc_taxes', 'no' );
+		$product->set_regular_price( '29.95' );
+		$product->save();
+		update_post_meta( $coupon->get_id(), 'discount_type', 'percent' );
+		update_post_meta( $coupon->get_id(), 'coupon_amount', '10' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '10.0000',
+			'tax_rate_name'     => 'TAX',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+		WC_Tax::_insert_tax_rate( $tax_rate );
+		$product = wc_get_product( $product->get_id() );
 
-		// Delete coupon
-		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->add_discount( $coupon->get_code() );
+
+		WC()->cart->calculate_totals();
+		$cart_item = current( WC()->cart->get_cart() );
+		$this->assertEquals( '24.51', number_format( $cart_item['line_total'], 2, '.', '' ) );
 	}
 
 	/**
@@ -156,12 +142,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * @since 3.2
 	 */
 	public function test_discount_cart_rounding() {
-		global $wpdb;
-
 		# Test with no taxes.
-		WC()->cart->empty_cart();
-		WC()->cart->remove_coupons();
-
 		$product = new WC_Product_Simple();
 		$product->set_regular_price( 51.86 );
 		$product->save();
@@ -206,16 +187,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->calculate_totals();
 		$cart_item = current( WC()->cart->get_cart() );
 		$this->assertEquals( '33.69', number_format( $cart_item['line_total'] + $cart_item['line_tax'], 2, '.', '' ) );
-
-		// Clean up.
-		WC()->cart->empty_cart();
-		WC()->cart->remove_coupons();
-		WC_Helper_Product::delete_product( $product->get_id() );
-		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
-		update_option( 'woocommerce_prices_include_tax', 'no' );
-		update_option( 'woocommerce_calc_taxes', 'no' );
 	}
 
 	/**
@@ -225,8 +196,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * @since 3.3
 	 */
 	public function test_out_of_base_discounts_inclusive_tax() {
-		global $wpdb;
-
 		// Set up tax options.
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
@@ -359,19 +328,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$this->assertEquals( '8.33', wc_format_decimal( WC()->cart->get_discount_total(), 2 ), 'Discount total out of base' );
 		$this->assertEquals( '0.00', wc_format_decimal( WC()->cart->get_total_tax(), 2 ) );
 		$this->assertEquals( '0.00', wc_format_decimal( WC()->cart->get_total( 'edit' ), 2 ) );
-
-		// Clean up.
-		WC()->cart->empty_cart();
-		WC()->cart->remove_coupons();
-		remove_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_us_shipping' ) );
-		WC_Helper_Product::delete_product( $product->get_id() );
-		WC_Helper_Coupon::delete_coupon( $ten_coupon->get_id() );
-		WC_Helper_Coupon::delete_coupon( $half_coupon->get_id() );
-		WC_Helper_Coupon::delete_coupon( $full_coupon->get_id() );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
-		update_option( 'woocommerce_prices_include_tax', 'no' );
-		update_option( 'woocommerce_calc_taxes', 'no' );
 	}
 
 	/**
@@ -381,8 +337,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * @since 3.3
 	 */
 	public function test_out_of_base_discounts_inclusive_tax_no_oob_tax() {
-		global $wpdb;
-
 		// Set up tax options.
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
@@ -477,19 +431,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$this->assertEquals( '20.83', wc_format_decimal( WC()->cart->get_discount_total(), 2 ), 'Discount total out of base' );
 		$this->assertEquals( '0.00', wc_format_decimal( WC()->cart->get_total_tax(), 2 ) );
 		$this->assertEquals( '0.00', wc_format_decimal( WC()->cart->get_total( 'edit' ), 2 ) );
-
-		// Clean up.
-		WC()->cart->empty_cart();
-		WC()->cart->remove_coupons();
-		remove_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_us_shipping' ) );
-		WC_Helper_Product::delete_product( $product->get_id() );
-		WC_Helper_Coupon::delete_coupon( $ten_coupon->get_id() );
-		WC_Helper_Coupon::delete_coupon( $half_coupon->get_id() );
-		WC_Helper_Coupon::delete_coupon( $full_coupon->get_id() );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
-		update_option( 'woocommerce_prices_include_tax', 'no' );
-		update_option( 'woocommerce_calc_taxes', 'no' );
 	}
 
 
@@ -522,8 +463,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * @since 3.2.6
 	 */
 	public function test_inclusive_tax_rounding() {
-		global $wpdb;
-
 		// Store is set to enter product prices inclusive tax.
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
@@ -556,11 +495,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC_Cache_Helper::get_transient_version( 'shipping', true );
 		WC()->shipping->load_shipping_methods();
 
-		// We need this to have the calculate_totals() method calculate totals.
-		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
-			define( 'WOOCOMMERCE_CHECKOUT', true );
-		}
-
 		// Create the product and add it to the cart.
 		$product = new WC_Product_Simple();
 		$product->set_regular_price( '149.14' );
@@ -573,21 +507,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->calculate_totals();
 		$this->assertEquals( '154.04', wc_format_decimal( WC()->cart->get_total( 'edit' ), 2 ) );
 		$this->assertEquals( '24.59', wc_format_decimal( WC()->cart->get_total_tax(), 2 ) );
-
-		// Clean up.
-		WC()->cart->empty_cart();
-		WC_Helper_Product::delete_product( $product->get_id() );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
-		update_option( 'woocommerce_prices_include_tax', 'no' );
-		update_option( 'woocommerce_calc_taxes', 'no' );
-
-		// Delete the flat rate method
-		WC()->session->set( 'chosen_shipping_methods', array() );
-		delete_option( 'woocommerce_flat_rate_settings' );
-		delete_option( 'woocommerce_flat_rate' );
-		WC_Cache_Helper::get_transient_version( 'shipping', true );
-		WC()->shipping->unregister_shipping_methods();
 	}
 
 	/**
@@ -597,11 +516,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * @since 3.2.6
 	 */
 	public function test_exclusive_tax_rounding() {
-		global $wpdb;
-
-		// todo remove this line when previous test stops failing.
-		WC()->cart->empty_cart();
-
 		// Store is set to enter product prices excluding tax.
 		update_option( 'woocommerce_prices_include_tax', 'no' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
@@ -635,15 +549,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		WC()->cart->calculate_totals();
 		$this->assertEquals( '115.00', wc_format_decimal( WC()->cart->get_total( 'edit' ), 2 ) );
-
-		// Clean up.
-		WC()->cart->empty_cart();
-		WC_Helper_Product::delete_product( $product1->get_id() );
-		WC_Helper_Product::delete_product( $product2->get_id() );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
-		update_option( 'woocommerce_prices_include_tax', 'no' );
-		update_option( 'woocommerce_calc_taxes', 'no' );
 	}
 
 	/**
@@ -653,13 +558,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * @since 3.2.6
 	 */
 	public function test_exclusive_tax_rounding_and_totals() {
-		global $wpdb;
-
-		WC()->cart->empty_cart();
-		WC()->cart->remove_coupons();
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
-
 		$product_data = array(
 			// price, quantity.
 			array( 2.13, 1 ),
@@ -697,11 +595,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			WC()->cart->add_to_cart( $data[0]->get_id(), $data[1] );
 		}
 
-		// We need this to have the calculate_totals() method calculate totals.
-		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
-			define( 'WOOCOMMERCE_CHECKOUT', true );
-		}
-
 		WC()->cart->calculate_totals();
 
 		$cart_totals = WC()->cart->get_totals();
@@ -710,16 +603,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$this->assertEquals( '2.44', wc_format_decimal( $cart_totals['cart_contents_tax'], 2 ) );
 		$this->assertEquals( '44.17', wc_format_decimal( $cart_totals['cart_contents_total'], 2 ) );
 		$this->assertEquals( '46.61', wc_format_decimal( $cart_totals['total'], 2 ) );
-
-		// Clean up.
-		WC()->cart->empty_cart();
-		foreach ( $products as $data ) {
-			WC_Helper_Product::delete_product( $data[0]->get_id() );
-		}
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
-		update_option( 'woocommerce_prices_include_tax', 'no' );
-		update_option( 'woocommerce_calc_taxes', 'no' );
 	}
 
 	/**
@@ -744,23 +627,14 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_add_to_cart_simple() {
-
 		// Create dummy product
 		$product = WC_Helper_Product::create_simple_product();
-
-		WC()->cart->empty_cart();
 
 		// Add the product to the cart. Methods returns boolean on failure, string on success.
 		$this->assertNotFalse( WC()->cart->add_to_cart( $product->get_id(), 1 ) );
 
 		// Check if the item is in the cart
 		$this->assertEquals( 1, WC()->cart->get_cart_contents_count() );
-
-		// Clean up the cart
-		WC()->cart->empty_cart();
-
-		// Clean up product
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -778,12 +652,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		// Add product to cart
 		$this->assertFalse( WC()->cart->add_to_cart( $product->get_id(), 1 ) );
-
-		// Clean up the cart
-		WC()->cart->empty_cart();
-
-		// Clean up product
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -801,10 +669,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		// Check if the item is in the cart
 		$this->assertEquals( 1, WC()->cart->get_cart_contents_count() );
-
-		// Clean up the cart
-		WC()->cart->empty_cart();
-		$product->delete( true );
 	}
 
 	/**
@@ -824,12 +688,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		// Check if the item is in the cart
 		$this->assertEquals( 1, WC()->cart->get_cart_contents_count() );
-
-		// Clean up the cart
-		WC()->cart->empty_cart();
-
-		// Clean up product
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -838,7 +696,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_find_product_in_cart() {
-
 		// Create dummy product
 		$product = WC_Helper_Product::create_simple_product();
 
@@ -850,13 +707,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		// Get the product from the cart
 		$this->assertNotEquals( '', WC()->cart->find_product_in_cart( $cart_id ) );
-
-		// Clean up the cart
-		WC()->cart->empty_cart();
-
-		// Clean up product
-		WC_Helper_Product::delete_product( $product->get_id() );
-
 	}
 
 	/**
@@ -941,12 +791,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		// Check if there are 0 items in cart now
 		$this->assertEquals( 0, WC()->cart->get_cart_contents_count() );
-
-		// Clean up the cart
-		WC()->cart->empty_cart();
-
-		// Clean up product
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -964,13 +808,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		// Check cart validity, should pass
 		$this->assertTrue( WC()->cart->check_cart_item_validity() );
-
-		// Clean up the cart
-		WC()->cart->empty_cart();
-
-		// Clean up product
-		WC_Helper_Product::delete_product( $product->get_id() );
-
 	}
 
 	/**
@@ -979,26 +816,14 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_get_total() {
-
 		// Create dummy product
 		$product = WC_Helper_Product::create_simple_product();
-
-		// We need this to have the calculate_totals() method calculate totals
-		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
-			define( 'WOOCOMMERCE_CHECKOUT', true );
-		}
 
 		// Add product to cart
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
 		// Check
 		$this->assertEquals( apply_filters( 'woocommerce_cart_total', wc_price( WC()->cart->total ) ), WC()->cart->get_total() );
-
-		// Clean up the cart
-		WC()->cart->empty_cart();
-
-		// Clean up product
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -1007,8 +832,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_get_total_ex_tax() {
-		global $wpdb;
-
 		// Set calc taxes option.
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		$tax_rate = array(
@@ -1027,11 +850,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		// Create dummy product.
 		$product = WC_Helper_Product::create_simple_product();
 
-		// We need this to have the calculate_totals() method calculate totals.
-		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
-			define( 'WOOCOMMERCE_CHECKOUT', true );
-		}
-
 		// Add 10 fee.
 		WC_Helper_Fee::add_cart_fee( 'taxed' );
 
@@ -1041,18 +859,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		// Check.
 		$this->assertEquals( wc_price( 22 ), WC()->cart->get_total() );
 		$this->assertEquals( wc_price( 20 ), WC()->cart->get_total_ex_tax() );
-		$tax_totals = WC()->cart->get_tax_totals();
-
-		// Clean up the cart.
-		WC()->cart->empty_cart();
-
-		// Clean up product.
-		WC_Helper_Product::delete_product( $product->get_id() );
-
-		// Restore option.
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
-		update_option( 'woocommerce_calc_taxes', 'no' );
 	}
 
 	/**
@@ -1082,11 +888,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		// Create a flat rate method
 		WC_Helper_Shipping::create_simple_flat_rate();
 
-		// We need this to have the calculate_totals() method calculate totals
-		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
-			define( 'WOOCOMMERCE_CHECKOUT', true );
-		}
-
 		// Add product to cart
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
@@ -1099,16 +900,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		// Test if the cart total amount is equal 20
 		$this->assertEquals( 20, WC()->cart->total );
-
-		// Clean up the cart
-		WC()->cart->empty_cart();
-
-		// Delete the flat rate method
-		WC()->session->set( 'chosen_shipping_methods', array() );
-		WC_Helper_Shipping::delete_simple_flat_rate();
-
-		// Delete product
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -1122,11 +913,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$product->set_regular_price( 10 );
 		$product->save();
 
-		// We need this to have the calculate_totals() method calculate totals.
-		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
-			define( 'WOOCOMMERCE_CHECKOUT', true );
-		}
-
 		// Add fee.
 		WC_Helper_Fee::add_cart_fee();
 
@@ -1135,12 +921,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		// Test if the cart total amount is equal 20.
 		$this->assertEquals( 20, WC()->cart->total );
-
-		// Clean up.
-		wc_clear_notices();
-		WC()->cart->empty_cart();
-		WC_Helper_Fee::remove_cart_fee();
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -1149,8 +929,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * @since 3.2
 	 */
 	public function test_cart_fee_taxes() {
-		global $wpdb;
-
 		// Set up taxes.
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		$tax_rate = array(
@@ -1171,11 +949,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$product->set_regular_price( 10 );
 		$product->save();
 
-		// We need this to have the calculate_totals() method calculate totals.
-		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
-			define( 'WOOCOMMERCE_CHECKOUT', true );
-		}
-
 		// Add fee.
 		WC_Helper_Fee::add_cart_fee( 'taxed' );
 
@@ -1184,15 +957,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		// Test if the cart total amount is equal 22 ($10 item + $10 fee + 10% taxes).
 		$this->assertEquals( 22, WC()->cart->total );
-
-		// Clean up.
-		wc_clear_notices();
-		WC()->cart->empty_cart();
-		WC_Helper_Fee::remove_cart_fee( 'taxed' );
-		WC_Helper_Product::delete_product( $product->get_id() );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
-		update_option( 'woocommerce_calc_taxes', 'no' );
 	}
 
 	/**
@@ -1206,11 +970,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$product->set_regular_price( 15 );
 		$product->save();
 
-		// We need this to have the calculate_totals() method calculate totals.
-		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
-			define( 'WOOCOMMERCE_CHECKOUT', true );
-		}
-
 		// Add fee.
 		WC_Helper_Fee::add_cart_fee( 'negative' );
 
@@ -1219,12 +978,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		// Test if the cart total amount is equal 5.
 		$this->assertEquals( 5, WC()->cart->total );
-
-		// Clean up.
-		wc_clear_notices();
-		WC()->cart->empty_cart();
-		WC_Helper_Fee::remove_cart_fee( 'negative' );
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -1233,8 +986,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * @since 3.2
 	 */
 	public function test_cart_negative_fee_taxes() {
-		global $wpdb;
-
 		// Set up taxes.
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		$tax_rate = array(
@@ -1255,11 +1006,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$product->set_regular_price( 15 );
 		$product->save();
 
-		// We need this to have the calculate_totals() method calculate totals.
-		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
-			define( 'WOOCOMMERCE_CHECKOUT', true );
-		}
-
 		// Add fee.
 		WC_Helper_Fee::add_cart_fee( 'negative-taxed' );
 
@@ -1268,15 +1014,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		// Test if the cart total amount is equal 5.50 ($15 item - $10 negative fee + 10% tax).
 		$this->assertEquals( 5.50, WC()->cart->total );
-
-		// Clean up.
-		wc_clear_notices();
-		WC()->cart->empty_cart();
-		WC_Helper_Fee::remove_cart_fee( 'negative-taxed' );
-		WC_Helper_Product::delete_product( $product->get_id() );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
-		update_option( 'woocommerce_calc_taxes', 'no' );
 	}
 
 	/**
@@ -1290,16 +1027,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->add_discount( $coupon->get_code() );
 
 		$this->assertEquals( count( WC()->cart->get_coupons() ), 1 );
-
-		// Clean up the cart
-		WC()->cart->empty_cart();
-
-		// Remove coupons
-		WC()->cart->remove_coupons();
-
-		// Delete coupon
-		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
-
 	}
 
 	/**
@@ -1334,12 +1061,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		$this->assertEquals( count( $coupons ), 1 );
 		$this->assertEquals( 'code1', reset( $coupons )->get_code() );
-
-		// Clean up
-		WC()->cart->empty_cart();
-		WC()->cart->remove_coupons();
-		WC_Helper_Coupon::delete_coupon( $coupon->get_code() );
-		WC_Helper_Coupon::delete_coupon( $iu_coupon->get_code() );
 	}
 
 	public function test_add_individual_use_coupon_removal() {
@@ -1356,12 +1077,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$this->assertEquals( count( $coupons ), 1 );
 		$this->assertEquals( 'code1', reset( $coupons )->get_code() );
 		$this->assertEquals( 1, did_action( 'woocommerce_removed_coupon' ) );
-
-		// Clean up
-		WC()->cart->empty_cart();
-		WC()->cart->remove_coupons();
-		WC_Helper_Coupon::delete_coupon( $coupon->get_code() );
-		WC_Helper_Coupon::delete_coupon( $iu_coupon->get_code() );
 	}
 
 	public function test_add_individual_use_coupon_double_individual() {
@@ -1380,12 +1095,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		$this->assertEquals( count( $coupons ), 1 );
 		$this->assertEquals( 'code2', reset( $coupons )->get_code() );
-
-		// Clean up
-		WC()->cart->empty_cart();
-		WC()->cart->remove_coupons();
-		WC_Helper_Coupon::delete_coupon( $iu_coupon1->get_code() );
-		WC_Helper_Coupon::delete_coupon( $iu_coupon2->get_code() );
 	}
 
 	public function test_clone_cart() {
@@ -1442,10 +1151,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		$this->assertEquals( 1, array_sum( WC()->cart->get_cart_item_quantities() ) );
-		// Clean up the cart.
-		WC()->cart->empty_cart();
-		// Clean up product.
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	public function test_get_cart_contents_weight() {
@@ -1453,10 +1158,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		$this->assertEquals( 1.1, WC()->cart->get_cart_contents_weight() );
-		// Clean up the cart.
-		WC()->cart->empty_cart();
-		// Clean up product.
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	public function test_check_cart_items() {
@@ -1464,10 +1165,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		$this->assertEquals( true, WC()->cart->check_cart_items() );
-		// Clean up the cart.
-		WC()->cart->empty_cart();
-		// Clean up product.
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	public function test_check_cart_item_stock() {
@@ -1475,10 +1172,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		$this->assertEquals( true, WC()->cart->check_cart_item_stock() );
-		// Clean up the cart.
-		WC()->cart->empty_cart();
-		// Clean up product.
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	public function test_get_cross_sells() {
@@ -1486,15 +1179,9 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		$this->assertEquals( array(), WC()->cart->get_cross_sells() );
-		// Clean up the cart.
-		WC()->cart->empty_cart();
-		// Clean up product.
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	public function test_get_tax_totals() {
-		global $wpdb;
-
 		// Set calc taxes option.
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		$tax_rate = array(
@@ -1513,11 +1200,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		// Create dummy product.
 		$product = WC_Helper_Product::create_simple_product();
 
-		// We need this to have the calculate_totals() method calculate totals.
-		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
-			define( 'WOOCOMMERCE_CHECKOUT', true );
-		}
-
 		// Add product to cart (10).
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
@@ -1527,17 +1209,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$this->assertEquals( 1, $tax_totals['TAX-1']->amount );
 		$this->assertEquals( false, $tax_totals['TAX-1']->is_compound );
 		$this->assertEquals( 'TAX', $tax_totals['TAX-1']->label );
-
-		// Clean up the cart.
-		WC()->cart->empty_cart();
-
-		// Clean up product.
-		WC_Helper_Product::delete_product( $product->get_id() );
-
-		// Restore option.
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
-		update_option( 'woocommerce_calc_taxes', 'no' );
 	}
 
 	/**
