@@ -217,6 +217,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - New filter 'woocommerce_admin_meta_boxes_variations_count' to customize the shown count of variations. #21067
 * Localization - Updated IT provinces. #20286
 * Localization - Eircode validation. #20330
+* Localization - Disable postcode requirement for Bahrain. #21103
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
