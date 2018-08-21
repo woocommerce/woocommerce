@@ -10,23 +10,23 @@ global $states;
 
 defined( 'ABSPATH' ) || exit;
 
-$states['PY'] = array(
-    'Alto Paraguay' => __( 'Alto Paraguay', 'woocommerce' ),
-    'Alto Paraná' => __( 'Alto Paran&aacute;', 'woocommerce' ),
-    'Amambay' => __( 'Amambay', 'woocommerce' ),
-    'Asuncion' => __( 'Asunci&oacute;n', 'woocommerce' ),
-    'Boqueron' => __( ' Boquer&oacute;n', 'woocommerce' ),
-    'Caaguazu' => __( 'Caaguaz&uacute;', 'woocommerce' ),
-    'Caazapa' => __( 'Caazap&aacute;', 'woocommerce' ),
-    'Canindeyú' => __( 'Canindey&uacute;', 'woocommerce' ),
-    'Central' => __( 'Central', 'woocommerce' ),
-    'Concepcion' => __( 'Concepci&oacute;n', 'woocommerce' ),
-    'Cordillera' => __( 'Cordillera', 'woocommerce' ),
-    'Guaira' => __( 'Guair&aacute;', 'woocommerce' ),
-    'Itapua' => __( 'Itap&uacute;a', 'woocommerce' ),
-    'Misiones' => __( 'Misiones', 'woocommerce' ),
-    'Ñeembucu' => __( '&Ntilde;eembuc&uacute;', 'woocommerce' ), 
-    'Paraguari' => __( 'Paraguar&iacute;', 'woocommerce' ),
-    'Presidente Hayes' => __( 'Presidente Hayes', 'woocommerce' ),
-    'San Pedro' => __( 'San Pedro', 'woocommerce' )
+$states['PYG'] = array(
+    'PY-16' => __( 'Alto Paraguay', 'woocommerce' ),
+    'PY-10' => __( 'Alto Paran&aacute;', 'woocommerce' ),
+    'PY-13' => __( 'Amambay', 'woocommerce' ),
+    'PY-ASU' => __( 'Asunci&oacute;n', 'woocommerce' ),
+    'PY-19' => __( ' Boquer&oacute;n', 'woocommerce' ),
+    'PY-5' => __( 'Caaguaz&uacute;', 'woocommerce' ),
+    'PY-6' => __( 'Caazap&aacute;', 'woocommerce' ),
+    'PY-14' => __( 'Canindey&uacute;', 'woocommerce' ),
+    'PY-11' => __( 'Central', 'woocommerce' ),
+    'PY-1' => __( 'Concepci&oacute;n', 'woocommerce' ),
+    'PY-3' => __( 'Cordillera', 'woocommerce' ),
+    'PY-4' => __( 'Guair&aacute;', 'woocommerce' ),
+    'PY-7' => __( 'Itap&uacute;a', 'woocommerce' ),
+    'PY-8' => __( 'Misiones', 'woocommerce' ),
+    'PY-12' => __( '&Ntilde;eembuc&uacute;', 'woocommerce' ), 
+    'PY-9' => __( 'Paraguar&iacute;', 'woocommerce' ),
+    'PY-15' => __( 'Presidente Hayes', 'woocommerce' ),
+    'PY-2' => __( 'San Pedro', 'woocommerce' )
 );

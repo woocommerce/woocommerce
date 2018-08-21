@@ -484,7 +484,7 @@ return array(
 		),
 	),
 	'PY' => array(
-		'currency_code'  => '₲', // G uppercase striped
+		'currency_code'  => 'PYG', // G uppercase striped
 		'currency_pos'   => 'left',
 		'thousand_sep'   => '.',
 		'decimal_sep'    => ',',
