@@ -349,6 +349,28 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v2/system_status/tools/not_a_real_tool' ) );
 		$this->assertEquals( 404, $response->get_status() );
+
+		// Test _fields for execute system tool request.
+		$query_params = array(
+			'_fields' => (string) 'id,success,nonexisting',
+		);
+		$request      = new WP_REST_Request( 'PUT', '/wc/v2/system_status/tools/recount_terms' );
+		$request->set_query_params( $query_params );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'recount_terms', $data['id'] );
+		$this->assertTrue( $data['success'] );
+
+		foreach ( $data as $item ) {
+			// Fields that are not requested are not returned in response.
+			$this->assertTrue( ! isset( $item['action'] ) );
+			$this->assertTrue( ! isset( $item['name'] ) );
+			$this->assertTrue( ! isset( $item['description'] ) );
+			// Non existing field is ignored.
+			$this->assertTrue( ! isset( $item['nonexisting'] ) );
+		}
 	}
 
 	/**
