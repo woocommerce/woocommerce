@@ -1,7 +1,7 @@
 Feature plugin for the Gutenberg Products block.
 
 **Getting started with the stable version:**
-1. The stable version is available on WordPress.org. You can get it [here](#updatethiswhenpluginislive).
+1. The stable version is available on WordPress.org. You can get it [here](https://wordpress.org/plugins/woo-gutenberg-products-block/).
 2. Activate the plugin.
 3. On Gutenberg posts you should now have a Products block available.
 

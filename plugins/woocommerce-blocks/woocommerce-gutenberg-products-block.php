@@ -43,6 +43,10 @@ function wgpb_register_products_block() {
  * Register extra scripts needed.
  */
 function wgpb_extra_gutenberg_scripts() {
+	if ( ! function_exists( 'wc_get_theme_support' ) ) {
+		return;
+	}
+
 	wp_enqueue_script(
 		'react-transition-group',
 		plugins_url( 'assets/js/vendor/react-transition-group.js', __FILE__ ),
