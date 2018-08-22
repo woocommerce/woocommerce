@@ -255,7 +255,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		);
 
 		$query_params = array(
-			'_fields' => (string) 'id,name,nonexisting',
+			'_fields' => 'id,name,nonexisting',
 		);
 		$request = new WP_REST_Request( 'GET', '/wc/v2/system_status/tools' );
 		$request->set_query_params( $query_params );
@@ -352,7 +352,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 
 		// Test _fields for execute system tool request.
 		$query_params = array(
-			'_fields' => (string) 'id,success,nonexisting',
+			'_fields' => 'id,success,nonexisting',
 		);
 		$request      = new WP_REST_Request( 'PUT', '/wc/v2/system_status/tools/recount_terms' );
 		$request->set_query_params( $query_params );
