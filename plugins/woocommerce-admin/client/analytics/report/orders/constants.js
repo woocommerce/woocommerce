@@ -11,9 +11,9 @@ export const filters = [
 		value: 'single',
 		subFilters: [
 			{
-				label: __( 'Single Order', 'wc-admin' ),
 				component: 'Search',
 				value: 'single_order',
+				path: [ 'single' ],
 			},
 		],
 	},
@@ -21,15 +21,6 @@ export const filters = [
 	{ label: __( 'Top Orders by Gross Sales', 'wc-admin' ), value: 'top_sales' },
 	{ label: __( 'Advanced Filters', 'wc-admin' ), value: 'advanced' },
 ];
-
-export const filterPaths = {
-	all: [],
-	single: [],
-	single_order: [ 'single' ],
-	top_items: [],
-	top_sales: [],
-	advanced: [],
-};
 
 export const advancedFilterConfig = {
 	status: {

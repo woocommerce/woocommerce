@@ -13,7 +13,7 @@ import { partial } from 'lodash';
  * Internal dependencies
  */
 import { Card, ReportFilters } from '@woocommerce/components';
-import { filters, filterPaths, advancedFilterConfig } from './constants';
+import { filters, advancedFilterConfig } from './constants';
 import './style.scss';
 
 class OrdersReport extends Component {
@@ -39,7 +39,6 @@ class OrdersReport extends Component {
 					query={ query }
 					path={ path }
 					filters={ filters }
-					filterPaths={ filterPaths }
 					advancedConfig={ advancedFilterConfig }
 				/>
 				<p>Below is a temporary example</p>

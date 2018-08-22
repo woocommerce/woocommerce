@@ -12,14 +12,12 @@ Add a collection of report filters to a page. This uses `DatePicker` & `FilterPi
 // To add FilterPicker too, pass through filter config:
 <ReportFilters
 	filters={ filters }
-	filterPaths={ filterPaths }
 	path={ path }
 	query={ query } />
 ```
 
 - `advancedConfig`: Config option passed through to `AdvancedFilters`
 - `filters`: Config option passed through to `FilterPicker` - if not used, `FilterPicker` is not displayed.
-- `filterPaths`: Config option passed through to `FilterPicker`
 - `path` (required): The `path` parameter supplied by React-Router
 - `query`: The query string represented in object form
 

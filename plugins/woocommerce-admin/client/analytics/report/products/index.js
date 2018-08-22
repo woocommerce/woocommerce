@@ -7,7 +7,7 @@ import { Component, Fragment } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { filterPaths, filters } from './constants';
+import { filters } from './constants';
 import { ReportFilters } from '@woocommerce/components';
 import './style.scss';
 
@@ -17,12 +17,7 @@ export default class extends Component {
 
 		return (
 			<Fragment>
-				<ReportFilters
-					query={ query }
-					path={ path }
-					filters={ filters }
-					filterPaths={ filterPaths }
-				/>
+				<ReportFilters query={ query } path={ path } filters={ filters } />
 			</Fragment>
 		);
 	}

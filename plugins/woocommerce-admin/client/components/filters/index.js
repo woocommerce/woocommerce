@@ -18,7 +18,7 @@ import FilterPicker from './filter';
 import { H, Section } from 'layout/section';
 import './style.scss';
 
-const ReportFilters = ( { advancedConfig, filters, filterPaths, query, path } ) => {
+const ReportFilters = ( { advancedConfig, filters, query, path } ) => {
 	let advancedCard = false;
 	switch ( query.filter ) {
 		case 'compare':
@@ -58,12 +58,7 @@ const ReportFilters = ( { advancedConfig, filters, filterPaths, query, path } ) 
 				<div className="woocommerce-filters__basic-filters">
 					<DatePicker key={ JSON.stringify( query ) } query={ query } path={ path } />
 					{ !! filters.length && (
-						<FilterPicker
-							filters={ filters }
-							filterPaths={ filterPaths }
-							query={ query }
-							path={ path }
-						/>
+						<FilterPicker filters={ filters } query={ query } path={ path } />
 					) }
 				</div>
 				{ false !== advancedCard && (
@@ -77,7 +72,6 @@ const ReportFilters = ( { advancedConfig, filters, filterPaths, query, path } ) 
 ReportFilters.propTypes = {
 	advancedConfig: PropTypes.object,
 	filters: PropTypes.array,
-	filterPaths: PropTypes.object,
 	path: PropTypes.string.isRequired,
 	query: PropTypes.object,
 };
@@ -85,7 +79,6 @@ ReportFilters.propTypes = {
 ReportFilters.defaultProps = {
 	advancedConfig: {},
 	filters: [],
-	filterPaths: {},
 	query: {},
 };
 
