@@ -294,9 +294,23 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $item, $request ) {
-		$context = empty( $request['context'] ) ? 'view' : $request['context'];
-		$data    = $this->add_additional_fields_to_object( $item, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
+		$context           = empty( $request['context'] ) ? 'view' : $request['context'];
+		$fields            = $this->get_fields_for_response( $request );
+		$selectable_fields = array(
+			'id',
+			'name',
+			'action',
+			'description',
+		);
+		$data              = array();
+		foreach ( $selectable_fields as $selected_field_name ) {
+			if ( in_array( $selected_field_name, $fields, true ) ) {
+				$data[ $selected_field_name ] = $item[ $selected_field_name ];
+			}
+		}
+
+		$data = $this->add_additional_fields_to_object( $data, $request );
+		$data = $this->filter_response_by_context( $data, $context );
 
 		$response = rest_ensure_response( $data );
 
