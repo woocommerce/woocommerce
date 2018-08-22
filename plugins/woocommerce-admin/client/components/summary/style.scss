@@ -202,9 +202,16 @@ $inner-border: $core-grey-light-500;
 	&.is-dropdown-button {
 		padding: 0;
 		list-style: none;
+		border-bottom: 1px solid $outer-border;
+		border-right: 1px solid $outer-border;
 
 		.components-button {
 			text-align: left;
+			display: block;
+		}
+
+		@include breakpoint( '<782px' ) {
+			border-right: none;
 		}
 	}
 }
