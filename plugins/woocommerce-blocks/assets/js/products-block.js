@@ -1201,6 +1201,9 @@ registerBlockType('woocommerce/products', {
 			} else if ('price_asc' === orderby) {
 				shortcode_atts.set('orderby', 'price');
 				shortcode_atts.set('order', 'ASC');
+			} else if ('date' === orderby) {
+				shortcode_atts.set('orderby', 'date');
+				shortcode_atts.set('order', 'DESC');
 			} else {
 				shortcode_atts.set('orderby', orderby);
 			}
