@@ -1628,11 +1628,19 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		// Handle SKU.
 		if ( $manual_queries['sku'] ) {
-			$wp_query_args['meta_query'][] = array(
-				'key'     => '_sku',
-				'value'   => $manual_queries['sku'],
-				'compare' => 'LIKE',
-			);
+			// Check for existing values if wildcard is used.
+			if ( '*' === $manual_queries['sku'] ) {
+				$wp_query_args['meta_query'][] = array(
+					'key'     => '_sku',
+					'compare' => 'EXISTS',
+				);
+			} else {
+				$wp_query_args['meta_query'][] = array(
+					'key'     => '_sku',
+					'value'   => $manual_queries['sku'],
+					'compare' => 'LIKE',
+				);
+			}
 		}
 
 		// Handle featured.
