@@ -275,9 +275,15 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 			// Fields that are not requested are not returned in response.
 			$this->assertTrue( ! isset( $item['action'] ) );
 			$this->assertTrue( ! isset( $item['description'] ) );
+			// Links are part of data in collections, so excluded if not explicitly requested.
+			$this->assertTrue( ! isset( $item['_links'] ) );
 			// Non existing field is ignored.
 			$this->assertTrue( ! isset( $item['nonexisting'] ) );
 		}
+
+		// Links are part of data, not links in collections.
+		$links = $response->get_links();
+		$this->assertEquals( 0, count( $links ) );
 	}
 
 	/**
@@ -312,6 +318,28 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'Term counts', $data['name'] );
 		$this->assertEquals( 'Recount terms', $data['action'] );
 		$this->assertEquals( 'This tool will recount product terms - useful when changing your settings in a way which hides products from the catalog.', $data['description'] );
+
+		// Test for _fields query parameter.
+		$query_params = array(
+			'_fields' => 'id,name,nonexisting',
+		);
+		$request = new WP_REST_Request( 'GET', '/wc/v2/system_status/tools/recount_terms' );
+		$request->set_query_params( $query_params );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$this->assertEquals( 'recount_terms', $data['id'] );
+		$this->assertEquals( 'Term counts', $data['name'] );
+		$this->assertTrue( ! isset( $data['action'] ) );
+		$this->assertTrue( ! isset( $data['description'] ) );
+		// Links are part of links, not data in single items.
+		$this->assertTrue( ! isset( $data['_links'] ) );
+
+		// Links are part of links, not data in single item response.
+		$links = $response->get_links();
+		$this->assertEquals( 1, count( $links ) );
 	}
 
 	/**
@@ -368,9 +396,15 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 			$this->assertTrue( ! isset( $item['action'] ) );
 			$this->assertTrue( ! isset( $item['name'] ) );
 			$this->assertTrue( ! isset( $item['description'] ) );
+			// Links are part of links, not data in single item response.
+			$this->assertTrue( ! isset( $item['_links'] ) );
 			// Non existing field is ignored.
 			$this->assertTrue( ! isset( $item['nonexisting'] ) );
 		}
+
+		// Links are part of links, not data in single item response.
+		$links = $response->get_links();
+		$this->assertEquals( 1, count( $links ) );
 	}
 
 	/**
