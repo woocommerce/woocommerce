@@ -193,7 +193,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Cast tax rate to float so that it can be treated as number further on in the code. #20910
 * Tweak - Send webhooks using Action Scheduler. #20030
 * Tweak - Update customer's ip address on successful payment. #21038
-* Tweak - Make postcode field optional and hidden for Nigeria and label State. #21056
+* Tweak - Changed wc_clean to checking for valid utf8 for line items and password. #20993
 * Performance/Tweak - Use post_author for the order customer instead of '_customer_user' meta data. #17895
 * Performance - Exclude frontend include from REST API calls. #20000
 * Dev - REST API - Allows oAuth1.0a authentication under SSL.
@@ -218,6 +218,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Localization - Updated IT provinces. #20286
 * Localization - Eircode validation. #20330
 * Localization - Disable postcode requirement for Bahrain. #21103
+* Localization - Make postcode field optional and hidden for Nigeria and label State. #21056
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
