@@ -5,7 +5,7 @@
 	position: relative;
 	border: 1px solid $core-grey-light-500;
 	color: $core-grey-dark-500;
-	border-radius: 5px;
+	border-radius: 4px;
 	padding: 0 40px 0 0;
 	width: 100%;
 
@@ -20,6 +20,13 @@
 		border-style: solid;
 		border-width: 6px 6px 0 6px;
 		border-color: $core-grey-dark-500 transparent transparent transparent;
+		transition: transform ease 0.2s;
+	}
+
+	&.is-open {
+		&::after {
+			transform: translateY(-50%) rotate(180deg);
+		}
 	}
 
 	&:hover,
@@ -35,8 +42,8 @@
 
 .woocommerce-dropdown-button__labels {
 	text-align: left;
-	padding: 5px 10px;
-	min-height: 52px;
+	padding: 8px 12px;
+	min-height: 48px;
 	display: flex;
 	align-items: center;
 	width: 100%;
@@ -56,9 +63,8 @@
 		}
 
 		&:first-child {
-			margin: 0 0 3px 0;
-			@include font-size( 14 );
-			font-weight: 500;
+			@include font-size( 13 );
+			font-weight: 600;
 		}
 
 		@include breakpoint( '<400px' ) {
