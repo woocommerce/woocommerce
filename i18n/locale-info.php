@@ -484,14 +484,24 @@ return array(
 		),
 	),
 	'PY' => array(
-		'currency_code'  => 'PYG', // G uppercase striped
+		'currency_code'  => 'PYG',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => '.',
 		'decimal_sep'    => ',',
 		'num_decimals'   => 2,
 		'weight_unit'    => 'kg',
 		'dimension_unit' => 'cm',
-		'tax_rates'      => array(),
+		'tax_rates'      => array(
+			'' => array(
+				array(
+					'country'  => 'PY',
+					'state'    => '',
+					'rate'     => '10.0000',
+					'name'     => 'VAT',
+					'shipping' => true,
+				),
+			),
+		),
 	),
 	'RO' => array(
 		'currency_code'  => 'RON',
