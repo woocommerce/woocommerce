@@ -74,8 +74,8 @@ const PRODUCTS_BLOCK_DISPLAY_SETTINGS = {
  * @return bool
  */
 function supportsOrderby( display ) {
-	return ! ( PRODUCTS_BLOCK_DISPLAY_SETTINGS.hasOwnProperty( display ) 
-	&& PRODUCTS_BLOCK_DISPLAY_SETTINGS[ display ].hasOwnProperty( 'no_orderby' ) 
+	return ! ( PRODUCTS_BLOCK_DISPLAY_SETTINGS.hasOwnProperty( display )
+	&& PRODUCTS_BLOCK_DISPLAY_SETTINGS[ display ].hasOwnProperty( 'no_orderby' )
 	&& PRODUCTS_BLOCK_DISPLAY_SETTINGS[ display ].no_orderby );
 }
 
@@ -834,6 +834,9 @@ registerBlockType( 'woocommerce/products', {
 			} else if ( 'price_asc' === orderby ) {
 				shortcode_atts.set( 'orderby', 'price' );
 				shortcode_atts.set( 'order', 'ASC' )
+			} else if ( 'date' === orderby ) {
+				shortcode_atts.set( 'orderby', 'date' );
+				shortcode_atts.set( 'order', 'DESC' )
 			} else {
 				shortcode_atts.set( 'orderby', orderby );
 			}
