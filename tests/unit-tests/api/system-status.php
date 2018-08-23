@@ -380,6 +380,40 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 
 	}
 
+
+	/**
+	 * Test system_status _filter query parameter.
+	 */
+	public function test_get_system_status_info_filtered() {
+		wp_set_current_user( $this->user );
+
+		$query_params = array(
+			'_fields' => 'theme,settings,nonexisting',
+		);
+		$request      = new WP_REST_Request( 'GET', '/wc/v2/system_status' );
+		$request->set_query_params( $query_params );
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 2, count( $data ) );
+
+		// Selected fields returned in the response.
+		$this->assertArrayHasKey( 'theme', $data );
+		$this->assertArrayHasKey( 'settings', $data );
+
+		// Fields not selected omitted from response.
+		$this->assertArrayNotHasKey( 'environment', $data );
+		$this->assertArrayNotHasKey( 'database', $data );
+		$this->assertArrayNotHasKey( 'active_plugins', $data );
+		$this->assertArrayNotHasKey( 'security', $data );
+		$this->assertArrayNotHasKey( 'pages', $data );
+
+		// Non existing field is ignored.
+		$this->assertArrayNotHasKey( 'nonexisting', $data );
+	}
+
 	/**
 	 * Provides a mocked response for external requests performed by WC_REST_System_Status_Controller.
 	 * This way it is not necessary to perform a regular request to an external server which would
