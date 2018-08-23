@@ -20,7 +20,7 @@
 		border-style: solid;
 		border-width: 6px 6px 0 6px;
 		border-color: $core-grey-dark-500 transparent transparent transparent;
-		transition: transform ease 0.2s;
+		@include animate-transform;
 	}
 
 	&.is-open {

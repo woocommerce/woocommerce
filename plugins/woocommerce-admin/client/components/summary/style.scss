@@ -325,7 +325,7 @@ $inner-border: $core-grey-light-500;
 		position: absolute;
 		top: 44px;
 		right: $gap;
-		transition: transform ease 0.2s;
+		@include animate-transform;
 	}
 
 	.is-dropdown-expanded & {

@@ -68,4 +68,11 @@ The CSSTransition element creates a containing div without a class
 		animation: slide-out-right;
 		animation-duration: $duration;
 	}
+
+	@media screen and (prefers-reduced-motion: reduce) {
+		.slide-enter-active,
+		.slide-exit-active {
+			animation: none !important;
+		}
+	}
 }
