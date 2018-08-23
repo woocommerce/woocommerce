@@ -12,7 +12,7 @@
 		}
 
 		.components-tab-panel__tab-content {
-			height: calc(100% - 38px);
+			height: calc(100% - 36px);
 		}
 	}
 }
@@ -37,10 +37,16 @@
 .woocommerce-filters-date__tab {
 	outline: none;
 	border: 1px solid $woocommerce;
-	padding: 10px;
+	padding: 9px;
 	margin: 0;
 	border-radius: 5px 0 0 5px;
+	color: $woocommerce;
 	background-color: transparent;
+
+	&:hover {
+		background-color: lighten($woocommerce, 50%);
+		cursor: pointer;
+	}
 
 	&:last-child {
 		border-radius: 0 5px 5px 0;
@@ -95,6 +101,7 @@
 
 .woocommerce-filters-date__button {
 	justify-content: center;
-	width: 50%;
-	margin: 0 1em;
+	width: 40%;
+	height: 34px !important;
+	margin: 0 0.75em !important;
 }
