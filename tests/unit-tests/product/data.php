@@ -100,7 +100,6 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		$product->set_image_id( $image_id[0] );
 		$product->save();
 		$this->assertEquals( $image_id[0], $product->get_image_id() );
-		$product->delete( true );
 	}
 
 	/**
@@ -224,8 +223,6 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_external_product_getters_and_setters() {
-		$time = time();
-
 		$getters_and_setters = array(
 			'button_text' => 'Test Button Text',
 			'product_url' => 'https://wordpress.org',
@@ -269,10 +266,5 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		$product = wc_get_product( $product3_id );
 		$this->assertEquals( $product3_id, $product->get_id() );
 		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>50.00</span>', $product->get_price_html() );
-
-		// Clean up.
-		$product1->delete();
-		$product2->delete();
-		$product3->delete();
 	}
 }

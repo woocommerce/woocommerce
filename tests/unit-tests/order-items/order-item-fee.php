@@ -41,7 +41,6 @@ class WC_Tests_Order_Item_Fee extends WC_Unit_Test_Case {
 	 * @since 3.2.0
 	 */
 	public function test_calculate_taxes() {
-		global $wpdb;
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		$tax_rate = array(
 			'tax_rate_country'  => '',
@@ -98,10 +97,5 @@ class WC_Tests_Order_Item_Fee extends WC_Unit_Test_Case {
 		$expected    = array( '-0.5' );
 		$this->assertEquals( $expected, $total_taxes );
 		$this->assertEquals( '-0.5', $fee->get_total_tax() );
-
-		// Clean up.
-		WC_Helper_Order::delete_order( $order->get_id() );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 	}
 }

@@ -72,31 +72,6 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		WC()->cart->remove_coupons();
 
-		foreach ( $this->products as $product ) {
-			$product->delete( true );
-		}
-
-		foreach ( $this->coupons as $code => $coupon ) {
-			$coupon->delete( true );
-
-			// Temporarily necessary until https://github.com/woocommerce/woocommerce/pull/16767 is implemented.
-			wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, 'coupons' );
-		}
-
-		foreach ( $this->orders as $order ) {
-			$order->delete( true );
-		}
-
-		if ( $this->last_test_data ) {
-			if ( isset( $this->last_test_data['wc_options'] ) ) {
-				foreach ( $this->last_test_data['wc_options'] as $_option_name => $_option_value ) {
-					update_option( $_option_name, $_option_value['revert'] );
-				}
-			}
-
-			$this->last_test_data = null;
-		}
-
 		parent::tearDown();
 	}
 
@@ -137,7 +112,6 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		$discounts = new WC_Discounts();
 		$discounts->set_items_from_cart( false );
 		$this->assertEquals( array(), $discounts->get_items() );
-		$product->delete( true );
 	}
 
 	/**
@@ -174,7 +148,6 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		$discounts->set_items_from_cart( WC()->cart );
 		$discounts->apply_coupon( $coupon );
 		$this->assertEquals( 0, $discounts->get_discounted_price( current( $discounts->get_items() ) ), print_r( $discounts->get_discounts(), true ) );
-		$product->delete( true );
 	}
 
 	/**
@@ -225,10 +198,6 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		}
 
 		$this->assertEquals( $test_data['expected_total_discount'], $discount_total, 'Failed (' . print_r( $test_data, true ) . ' - ' . print_r( $discounts->get_discounts(), true ) . ')' );
-
-		foreach ( $products as $product ) {
-			$product->delete( true );
-		}
 	}
 
 	/**
@@ -1423,13 +1392,5 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		$this->assertEquals( 20, $discount_total );
 
 		remove_filter( 'woocommerce_coupon_get_discount_amount', array( $this, 'filter_woocommerce_coupon_get_discount_amount' ) );
-		WC()->cart->empty_cart();
-		WC()->cart->remove_coupons();
-		$product->delete( true );
-		$product2->delete( true );
-		$coupon->delete( true );
-
-		// Temporarily necessary until https://github.com/woocommerce/woocommerce/pull/16767 is implemented.
-		wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_test', 'coupons' );
 	}
 }

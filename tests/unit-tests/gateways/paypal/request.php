@@ -141,18 +141,6 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Clean up order, tax, deletes all products in order, too.
-	 */
-	protected function clean_up() {
-		global $wpdb;
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
-
-		WC_Helper_Order::delete_order( $this->order->get_id() );
-		unset( $this->products, $this->order );
-	}
-
-	/**
 	 * Check if the shipping tax is included in the total according to $shipping_tax_included.
 	 *
 	 * @param array $query_array           Request URL parsed into associative array.
@@ -221,10 +209,6 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 		$this->assertEquals( '_cart', $query_array['cmd'] );
 
 		$this->check_shipping_tax( $query_array, $shipping_tax_included );
-
-		// Remove order and created products.
-		$this->clean_up();
-
 	}
 
 
@@ -280,9 +264,6 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 		}
 
 		$this->check_shipping_tax( $query_array, $shipping_tax_included );
-
-		// Remove order and created products.
-		$this->clean_up();
 	}
 
 	/**

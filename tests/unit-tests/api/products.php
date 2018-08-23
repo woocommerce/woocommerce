@@ -570,11 +570,6 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$this->assertCount( 1, $response_product['categories'] );
 		$this->assertEquals( 'uncategorized', $response_product['categories'][0]['slug'] );
 
-		// Clean up.
-		wp_delete_term( $category['term_id'], 'product_cat' );
-		$product->delete( true );
-		$product_2->delete( true );
-
 	}
 
 	/**
@@ -616,11 +611,6 @@ class Products_API extends WC_REST_Unit_Test_Case {
 				$this->assertContains( $response_product['id'], $product_ids_for_type[ $product_type ], 'REST API: ' . $product_type . ' not found correctly' );
 			}
 		}
-
-		$simple->delete( true );
-		$external->delete( true );
-		$variable->delete( true );
-		$grouped->delete( true );
 	}
 
 	/**
@@ -665,9 +655,6 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		foreach ( $response_products as $response_product ) {
 			$this->assertEquals( $nonfeat_product->get_id(), $response_product['id'], 'REST API: Featured product not found correctly' );
 		}
-
-		$feat_product->delete( true );
-		$nonfeat_product->delete( true );
 	}
 
 	/**
@@ -696,9 +683,6 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		foreach ( $response_products as $response_product ) {
 			$this->assertEquals( $product_1->get_id(), $response_product['id'] );
 		}
-
-		$product_1->delete( true );
-		wp_delete_term( $shipping_class_1['term_id'], 'product_shipping_class' );
 	}
 
 	/**
@@ -731,10 +715,6 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		foreach ( $response_products as $response_product ) {
 			$this->assertEquals( $product->get_id(), $response_product['id'] );
 		}
-
-		$product->delete( true );
-		$product_2->delete( true );
-		wp_delete_term( $test_tag_1['term_id'], 'product_tag' );
 	}
 
 	/**
@@ -806,9 +786,5 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		foreach ( $response_products as $response_product ) {
 			$this->assertContains( $response_product['id'], $expected_product_ids );
 		}
-
-		$variable_product->delete( true );
-		$product_1->delete( true );
-		$product_2->delete( true );
 	}
 }

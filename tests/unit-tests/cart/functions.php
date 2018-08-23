@@ -47,17 +47,10 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 		// Make sure pages exist
 		WC_Install::create_pages();
 
-		// Get the original setting
-		$o_setting = get_option( 'woocommerce_force_ssl_checkout' );
-
 		// Force SSL checkout
 		update_option( 'woocommerce_force_ssl_checkout', 'no' );
 
 		$this->assertEquals( $this->get_checkout_url(), wc_get_checkout_url() );
-
-		// Restore option
-		update_option( 'woocommerce_force_ssl_checkout', $o_setting );
-
 	}
 
 	/**
@@ -69,17 +62,10 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 		// Make sure pages exist
 		WC_Install::create_pages();
 
-		// Get the original setting
-		$o_setting = get_option( 'woocommerce_force_ssl_checkout' );
-
 		// Force SSL checkout
 		update_option( 'woocommerce_force_ssl_checkout', 'yes' );
 
 		$this->assertEquals( $this->get_checkout_url(), wc_get_checkout_url() );
-
-		// Restore option
-		update_option( 'woocommerce_force_ssl_checkout', $o_setting );
-
 	}
 
 	/**
@@ -99,9 +85,6 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 
 		// Check if the cart is empty
 		$this->assertEquals( 0, WC()->cart->get_cart_contents_count() );
-
-		// Delete the previously created product
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -126,8 +109,6 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
 		$this->expectOutputString( wc_price( $product->get_price( 'edit' ) ), wc_cart_totals_subtotal_html() );
-
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -139,8 +120,6 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 		$coupon = WC_Helper_Coupon::create_coupon();
 
 		$this->expectOutputString( apply_filters( 'woocommerce_cart_totals_coupon_label', 'Coupon: ' . $coupon->get_code() ), wc_cart_totals_coupon_label( $coupon ) );
-
-		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
 	}
 
 	/**

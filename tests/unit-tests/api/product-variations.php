@@ -499,10 +499,6 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		foreach ( $response_variations as $response_variation ) {
 			$this->assertContains( $response_variation['id'], $variations );
 		}
-
-		// Clean up.
-		wp_delete_term( $category['term_id'], 'product_cat' );
-		$variable_product->delete( true );
 	}
 
 	/**
@@ -565,11 +561,6 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( 0, $response_variations );
-
-		$simple->delete( true );
-		$external->delete( true );
-		$variable->delete( true );
-		$grouped->delete( true );
 	}
 
 	/**
@@ -618,9 +609,6 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		foreach ( $response_variations as $response_variation ) {
 			$this->assertContains( $response_variation['id'], $nonfeat_variations );
 		}
-
-		$feat_product->delete( true );
-		$nonfeat_product->delete( true );
 	}
 
 	/**
@@ -676,10 +664,6 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		foreach ( $response_variations as $response_variation ) {
 			$this->assertEquals( $response_variation['id'], $variations[1]['variation_id'] );
 		}
-
-		$variable->delete( true );
-		wp_delete_term( $shipping_class_1['term_id'], 'product_shipping_class' );
-		wp_delete_term( $shipping_class_2['term_id'], 'product_shipping_class' );
 	}
 
 	/**
@@ -725,10 +709,6 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 0, count( $response_variations ) );
-
-		$variable_product->delete( true );
-		$variable_product_2->delete( true );
-		wp_delete_term( $test_tag_1['term_id'], 'product_tag' );
 	}
 
 	/**
@@ -737,7 +717,6 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_product_by_attribute() {
-		global $wpdb;
 		wp_set_current_user( $this->user );
 
 		// Variable product with 2 different variations.
@@ -776,7 +755,5 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 				$this->assertContains( $response_variation['id'], $expected_product_ids );
 			}
 		}
-
-		$variable_product->delete( true );
 	}
 }

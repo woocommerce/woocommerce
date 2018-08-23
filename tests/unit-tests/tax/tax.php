@@ -10,11 +10,6 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 	 * Get rates.
 	 */
 	public function test_get_rates() {
-		global $wpdb;
-
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
-
 		$customer_location = WC_Tax::get_tax_location();
 		$tax_rate          = array(
 			'tax_rate_country'  => $customer_location[0],
@@ -70,19 +65,12 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 				),
 			)
 		);
-
-		WC_Tax::_delete_tax_rate( $tax_rate_catch_all_id );
 	}
 
 	/**
 	 * Get rates.
 	 */
 	public function test_get_shipping_tax_rates() {
-		global $wpdb;
-
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
-
 		$customer_location = WC_Tax::get_tax_location();
 		$tax_rate          = array(
 			'tax_rate_country'  => $customer_location[0],
@@ -110,19 +98,12 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 				),
 			), print_r( $tax_rates, true )
 		);
-
-		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 
 	/**
 	 * Get rates.
 	 */
 	public function test_get_base_tax_rates() {
-		global $wpdb;
-
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
-
 		$tax_rate = array(
 			'tax_rate_country'  => 'GB',
 			'tax_rate_state'    => '',
@@ -149,19 +130,12 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 				),
 			)
 		);
-
-		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 
 	/**
 	 * Find tax rates.
 	 */
 	public function test_find_rates() {
-		global $wpdb;
-
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
-
 		$tax_rate = array(
 			'tax_rate_country'  => 'GB',
 			'tax_rate_state'    => '',
@@ -196,19 +170,12 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 				),
 			)
 		);
-
-		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 
 	/**
 	 * Find tax rates.
 	 */
 	public function test_find_shipping_rates() {
-		global $wpdb;
-
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
-
 		$tax_rate = array(
 			'tax_rate_country'  => 'GB',
 			'tax_rate_state'    => '',
@@ -243,19 +210,12 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 				),
 			)
 		);
-
-		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 
 	/**
 	 * Test tax amounts.
 	 */
 	public function test_calc_tax() {
-		global $wpdb;
-
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
-
 		$tax_rate = array(
 			'tax_rate_country'  => 'GB',
 			'tax_rate_state'    => '',
@@ -287,19 +247,12 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		$calced_tax = WC_Tax::calc_tax( '9.99', $tax_rates, false, false );
 
 		$this->assertEquals( $calced_tax, array( $tax_rate_id => '1.998' ) );
-
-		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 
 	/**
 	 * Test compound tax amounts
 	 */
 	public function test_calc_compound_tax() {
-		global $wpdb;
-
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
-
 		update_option( 'woocommerce_default_country', 'CA' );
 		update_option( 'woocommerce_default_state', 'QC' );
 
@@ -360,22 +313,12 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		 */
 		$this->assertEquals( round( $calced_tax[ $tax_rate_1_id ], 4 ), 4.3889 );
 		$this->assertEquals( round( $calced_tax[ $tax_rate_2_id ], 4 ), 7.8341 );
-
-		WC_Tax::_delete_tax_rate( $tax_rate_1_id );
-		WC_Tax::_delete_tax_rate( $tax_rate_2_id );
-		update_option( 'woocommerce_default_country', 'GB' );
-		update_option( 'woocommerce_default_state', '' );
 	}
 
 	/**
 	 * Shipping tax amounts.
 	 */
 	public function test_calc_shipping_tax() {
-		global $wpdb;
-
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
-
 		$tax_rate = array(
 			'tax_rate_country'  => 'GB',
 			'tax_rate_state'    => '',
@@ -403,16 +346,12 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		$calced_tax = WC_Tax::calc_shipping_tax( '10', $tax_rates );
 
 		$this->assertEquals( $calced_tax, array( $tax_rate_id => '2' ) );
-
-		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 
 	/**
 	 * Test rate labels.
 	 */
 	public function test_get_rate_label() {
-		global $wpdb;
-
 		$tax_rate = array(
 			'tax_rate_country'  => 'GB',
 			'tax_rate_state'    => '',
@@ -428,16 +367,12 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
 		$this->assertEquals( WC_Tax::get_rate_label( $tax_rate_id ), 'VAT' );
-
-		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 
 	/**
 	 * Test rate percent.
 	 */
 	public function test_get_rate_percent() {
-		global $wpdb;
-
 		$tax_rate = array(
 			'tax_rate_country'  => 'GB',
 			'tax_rate_state'    => '',
@@ -453,16 +388,12 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
 		$this->assertEquals( WC_Tax::get_rate_percent( $tax_rate_id ), '20%' );
-
-		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 
 	/**
 	 * Test rate code.
 	 */
 	public function test_get_rate_code() {
-		global $wpdb;
-
 		$tax_rate = array(
 			'tax_rate_country'  => 'GB',
 			'tax_rate_state'    => '',
@@ -478,16 +409,12 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
 		$this->assertEquals( WC_Tax::get_rate_code( $tax_rate_id ), 'GB-VAT-1' );
-
-		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 
 	/**
 	 * Test is compound.
 	 */
 	public function test_is_compound() {
-		global $wpdb;
-
 		$tax_rate = array(
 			'tax_rate_country'  => 'GB',
 			'tax_rate_state'    => '',
@@ -503,8 +430,6 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
 		$this->assertTrue( WC_Tax::is_compound( $tax_rate_id ) );
-
-		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 
 	/**
@@ -572,8 +497,6 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		$this->assertEquals( $new_row->tax_rate_shipping, '1' );
 		$this->assertEquals( $new_row->tax_rate_order, '1' );
 		$this->assertEquals( $new_row->tax_rate_class, '' );
-
-		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 
 	/**
@@ -607,8 +530,6 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		WC_Tax::_update_tax_rate( $tax_rate_id, $tax_rate );
 
 		$this->assertNotFalse( $wpdb->last_result );
-
-		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 
 	/**
@@ -637,8 +558,6 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		WC_Tax::_delete_tax_rate( $tax_rate_id );
 
 		$this->assertNotFalse( $wpdb->last_result );
-
-		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 
 	/**
@@ -668,8 +587,6 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		$results = $wpdb->get_col( $wpdb->prepare( "SELECT location_code FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d ORDER BY location_code ASC", $tax_rate_id ) );
 
 		$this->assertEquals( array( '12345', '90210...90215' ), $results );
-
-		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 
 	/**
@@ -699,7 +616,5 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		$results = $wpdb->get_col( $wpdb->prepare( "SELECT location_code FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d ORDER BY location_code ASC", $tax_rate_id ) );
 
 		$this->assertEquals( array( 'SOMEWHERE', 'SOMEWHERE_ELSE' ), $results );
-
-		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 }
