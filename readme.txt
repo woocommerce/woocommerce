@@ -194,6 +194,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Send webhooks using Action Scheduler. #20030
 * Tweak - Update customer's ip address on successful payment. #21038
 * Tweak - Changed wc_clean to checking for valid utf8 for line items and password. #20993
+* Tweak - Add to cart notice actions (View cart/Continue shopping) now have tabindex 1 for improved accessibility. #21108
 * Performance/Tweak - Use post_author for the order customer instead of '_customer_user' meta data. #17895
 * Performance - Exclude frontend include from REST API calls. #20000
 * Dev - REST API - Allows oAuth1.0a authentication under SSL.
