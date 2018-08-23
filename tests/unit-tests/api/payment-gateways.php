@@ -270,6 +270,69 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test system_status _filter query parameter.
+	 */
+	public function test_get_payment_gateways_info_filtered() {
+		wp_set_current_user( $this->user );
+
+		$query_params = array(
+			'_fields' => 'id,title,nonexisting',
+		);
+		$request      = new WP_REST_Request( 'GET', '/wc/v2/payment_gateways' );
+		$request->set_query_params( $query_params );
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+		$this->assertEquals( 200, $response->get_status() );
+
+		$one_gateway_info = reset( $data );
+		$this->assertEquals( 2, count( $one_gateway_info ) );
+
+		// Selected fields returned in the response.
+		$this->assertArrayHasKey( 'id', $one_gateway_info );
+		$this->assertArrayHasKey( 'title', $one_gateway_info );
+
+		// Fields not selected omitted from response.
+		$this->assertArrayNotHasKey( 'order', $one_gateway_info );
+		$this->assertArrayNotHasKey( 'enabled', $one_gateway_info );
+		$this->assertArrayNotHasKey( 'method_title', $one_gateway_info );
+
+		// Non existing field is ignored.
+		$this->assertArrayNotHasKey( 'nonexisting', $one_gateway_info );
+	}
+
+	/**
+	 * Test system_status _filter query parameter when getting one gateway's info.
+	 */
+	public function test_get_payment_gateway_info_filtered() {
+		wp_set_current_user( $this->user );
+
+		$query_params = array(
+			'_fields' => 'id,title,nonexisting',
+		);
+		$request      = new WP_REST_Request( 'GET', '/wc/v2/payment_gateways/paypal' );
+		$request->set_query_params( $query_params );
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+		$this->assertEquals( 200, $response->get_status() );
+
+		$this->assertEquals( 2, count( $data ) );
+
+		// Selected fields returned in the response.
+		$this->assertArrayHasKey( 'id', $data );
+		$this->assertArrayHasKey( 'title', $data );
+
+		// Fields not selected omitted from response.
+		$this->assertArrayNotHasKey( 'order', $data );
+		$this->assertArrayNotHasKey( 'enabled', $data );
+		$this->assertArrayNotHasKey( 'method_title', $data );
+
+		// Non existing field is ignored.
+		$this->assertArrayNotHasKey( 'nonexisting', $data );
+	}
+
+	/**
 	 * Loads a particular gateway's settings so we can correctly test API output.
 	 *
 	 * @since 3.0.0
