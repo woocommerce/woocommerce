@@ -32,10 +32,6 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 
 		$this->ids = array();
 
-		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
-			define( 'WOOCOMMERCE_CHECKOUT', 1 );
-		}
-
 		$tax_rate    = array(
 			'tax_rate_country'  => '',
 			'tax_rate_state'    => '',
@@ -110,23 +106,9 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		WC()->session->set( 'chosen_shipping_methods', array() );
 		WC_Helper_Shipping::delete_simple_flat_rate();
-		update_option( 'woocommerce_calc_taxes', 'no' );
 		remove_action( 'woocommerce_cart_calculate_fees', array( $this, 'add_cart_fees_callback' ) );
 
-		foreach ( $this->ids['products'] as $product ) {
-			$product->delete( true );
-		}
-
-		foreach ( $this->ids['coupons'] as $coupon ) {
-			$coupon->delete( true );
-			wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $coupon->get_code(), 'coupons' );
-		}
-
-		foreach ( $this->ids['tax_rate_ids'] as $tax_rate_id ) {
-			WC_Tax::_delete_tax_rate( $tax_rate_id );
-		}
-
-		$this->ids = array();
+		parent::tearDown();
 	}
 
 	/**

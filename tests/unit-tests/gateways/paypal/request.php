@@ -58,12 +58,14 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 		$prod_count = 0;
 		foreach ( $this->products as $product ) {
 			$item = new WC_Order_Item_Product();
-			$item->set_props( array(
-				'product'  => $product,
-				'quantity' => 3,
-				'subtotal' => $prices ? $prices[ $prod_count ] : wc_get_price_excluding_tax( $product, array( 'qty' => 3 ) ),
-				'total'    => $prices ? $prices[ $prod_count ] : wc_get_price_excluding_tax( $product, array( 'qty' => 3 ) ),
-			) );
+			$item->set_props(
+				array(
+					'product'  => $product,
+					'quantity' => 3,
+					'subtotal' => $prices ? $prices[ $prod_count ] : wc_get_price_excluding_tax( $product, array( 'qty' => 3 ) ),
+					'total'    => $prices ? $prices[ $prod_count ] : wc_get_price_excluding_tax( $product, array( 'qty' => 3 ) ),
+				)
+			);
 
 			$item->save();
 			$order->add_item( $item );
@@ -139,18 +141,6 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Clean up order, tax, deletes all products in order, too.
-	 */
-	protected function clean_up() {
-		global $wpdb;
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
-
-		WC_Helper_Order::delete_order( $this->order->get_id() );
-		unset( $this->products, $this->order );
-	}
-
-	/**
 	 * Check if the shipping tax is included in the total according to $shipping_tax_included.
 	 *
 	 * @param array $query_array           Request URL parsed into associative array.
@@ -162,8 +152,10 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 			$shipping_total += $this->order->get_shipping_tax();
 		}
 		$epsilon = 0.01;
-		$this->assertTrue( abs( $shipping_total - floatval( $query_array['shipping_1'] ) ) < $epsilon,
-		'Shipping tax mismatch: shipping total=' . $shipping_total . ' vs request shipping=' . $query_array['shipping_1'] );
+		$this->assertTrue(
+			abs( $shipping_total - floatval( $query_array['shipping_1'] ) ) < $epsilon,
+			'Shipping tax mismatch: shipping total=' . $shipping_total . ' vs request shipping=' . $query_array['shipping_1']
+		);
 
 	}
 
@@ -203,7 +195,7 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 		$query_string = wp_parse_url( $request_url, PHP_URL_QUERY )
 			? wp_parse_url( $request_url, PHP_URL_QUERY )
 			: '';
-		$query_array = array();
+		$query_array  = array();
 		parse_str( $query_string, $query_array );
 		foreach ( $fields_limited_to_127_chars as $field_name ) {
 			$this->assertLessThanOrEqual( 127, strlen( $query_array[ $field_name ] ) );
@@ -217,10 +209,6 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 		$this->assertEquals( '_cart', $query_array['cmd'] );
 
 		$this->check_shipping_tax( $query_array, $shipping_tax_included );
-
-		// Remove order and created products.
-		$this->clean_up();
-
 	}
 
 
@@ -251,7 +239,7 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 		$query_string = wp_parse_url( $request_url, PHP_URL_QUERY )
 			? wp_parse_url( $request_url, PHP_URL_QUERY )
 			: '';
-		$query_array = array();
+		$query_array  = array();
 		parse_str( $query_string, $query_array );
 
 		// Check that there are $product_count line items in the request URL.
@@ -276,9 +264,6 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 		}
 
 		$this->check_shipping_tax( $query_array, $shipping_tax_included );
-
-		// Remove order and created products.
-		$this->clean_up();
 	}
 
 	/**
@@ -291,7 +276,7 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 	 */
 	protected function check_negative_amount( $testmode ) {
 		$shipping_tax_included = true;
-		$product_prices = array( 6, 6, 6, 6, -3 );
+		$product_prices        = array( 6, 6, 6, 6, -3 );
 		$this->check_small_order( count( $product_prices ), $shipping_tax_included, $testmode, $product_prices );
 	}
 
@@ -317,9 +302,11 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 	 */
 	public function test_request_url() {
 		// User set up.
-		$this->user = $this->factory->user->create( array(
-			'role' => 'administrator',
-		) );
+		$this->user = $this->factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
 		wp_set_current_user( $this->user );
 
 		// wc_tax_enabled(), wc_prices_include_tax() and WC_Gateway_Paypal_Request::prepare_line_items() determine if
