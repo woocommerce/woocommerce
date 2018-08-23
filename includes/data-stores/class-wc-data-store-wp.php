@@ -237,7 +237,7 @@ class WC_Data_Store_WP {
 					);
 				} else {
 					$wp_query_args['meta_query'][] = array(
-						'key'     => '_123' . $key,
+						'key'     => '_' . $key,
 						'value'   => $value,
 						'compare' => is_array( $value ) ? 'IN' : '=',
 					);
