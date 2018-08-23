@@ -17,7 +17,7 @@
 
 .woocommerce-segmented-selection__label {
 	background-color: $core-grey-light-100;
-	padding: 12px 12px 12px 36px;
+	padding: $gap-small $gap-small $gap-small $gap-larger;
 	position: relative;
 	display: block;
 	height: 100%;
