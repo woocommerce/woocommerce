@@ -13,7 +13,7 @@ class WC_Tests_Order_Item_Fee extends WC_Unit_Test_Case {
 	 * @since 3.2.0
 	 */
 	public function test_setters_getters() {
-		$fee = new WC_Order_Item_Fee;
+		$fee = new WC_Order_Item_Fee();
 
 		$fee->set_amount( '20.00' );
 		$this->assertEquals( '20.00', $fee->get_amount() );
@@ -58,40 +58,44 @@ class WC_Tests_Order_Item_Fee extends WC_Unit_Test_Case {
 		$order = WC_Helper_Order::create_order();
 
 		// Positive fee.
-		$fee = new WC_Order_Item_Fee;
+		$fee = new WC_Order_Item_Fee();
 		$fee->set_amount( '5.00' );
 		$fee->set_total( '5.00' );
 		$fee->set_order_id( $order->get_id() );
 
-		$fee->calculate_taxes( array(
-			'country' => 'US',
-			'state' => 'OR',
-			'postcode' => 97266,
-			'city' => 'Portland',
-		) );
+		$fee->calculate_taxes(
+			array(
+				'country'  => 'US',
+				'state'    => 'OR',
+				'postcode' => 97266,
+				'city'     => 'Portland',
+			)
+		);
 
-		$taxes = $fee->get_taxes();
+		$taxes       = $fee->get_taxes();
 		$total_taxes = array_values( $taxes['total'] );
-		$expected = array( '0.5' );
+		$expected    = array( '0.5' );
 		$this->assertEquals( $expected, $total_taxes );
 		$this->assertEquals( '0.5', $fee->get_total_tax() );
 
 		// Negative fee.
-		$fee = new WC_Order_Item_Fee;
+		$fee = new WC_Order_Item_Fee();
 		$fee->set_amount( '-5.00' );
 		$fee->set_total( '-5.00' );
 		$fee->set_order_id( $order->get_id() );
 
-		$fee->calculate_taxes( array(
-			'country' => 'US',
-			'state' => 'OR',
-			'postcode' => 97266,
-			'city' => 'Portland',
-		) );
+		$fee->calculate_taxes(
+			array(
+				'country'  => 'US',
+				'state'    => 'OR',
+				'postcode' => 97266,
+				'city'     => 'Portland',
+			)
+		);
 
-		$taxes = $fee->get_taxes();
+		$taxes       = $fee->get_taxes();
 		$total_taxes = array_values( $taxes['total'] );
-		$expected = array( '-0.5' );
+		$expected    = array( '-0.5' );
 		$this->assertEquals( $expected, $total_taxes );
 		$this->assertEquals( '-0.5', $fee->get_total_tax() );
 

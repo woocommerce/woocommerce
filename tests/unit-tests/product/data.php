@@ -63,7 +63,7 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 			'menu_order'         => 2,
 			'gallery_image_ids'  => array(),
 			'download_expiry'    => -1,
-			'download_limit'     => 5
+			'download_limit'     => 5,
 		);
 
 		$product = new WC_Product();
@@ -79,14 +79,16 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 			$this->assertEquals( $value, $product->{"get_{$function}"}(), $function );
 		}
 		$this->assertCount( 1, $product->get_attributes() );
-		$this->assertContains( current( $product->get_attributes() )->get_data(), array(
-			'attribute_id' => 0,
-			'name'         => 'Test Attribute',
-			'options'      => array( 'Fish', 'Fingers' ),
-			'position'     => 0,
-			'visible'      => true,
-			'variation'    => false,
-		) );
+		$this->assertContains(
+			current( $product->get_attributes() )->get_data(), array(
+				'attribute_id' => 0,
+				'name'         => 'Test Attribute',
+				'options'      => array( 'Fish', 'Fingers' ),
+				'position'     => 0,
+				'visible'      => true,
+				'variation'    => false,
+			)
+		);
 		$this->assertEquals( $product->get_date_on_sale_from()->getTimestamp(), 1475798400 );
 		$this->assertEquals( $product->get_date_on_sale_to()->getTimestamp(), 1477267200 );
 
@@ -94,7 +96,7 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 
 		$this->assertNotWPError( $image_url );
 
-		$image_id  = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE guid = %s", $image_url ) );
+		$image_id = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE guid = %s", $image_url ) );
 		$product->set_image_id( $image_id[0] );
 		$product->save();
 		$this->assertEquals( $image_id[0], $product->get_image_id() );

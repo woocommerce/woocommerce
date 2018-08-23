@@ -32,14 +32,16 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		$tax_rates = WC_Tax::get_rates();
 
-		$this->assertSame( $tax_rates, array(
-			$tax_rate_id => array(
-				'rate' => 20.0,
-				'label' => 'VAT',
-				'shipping' => 'yes',
-				'compound' => 'no',
-			),
-		) );
+		$this->assertSame(
+			$tax_rates, array(
+				$tax_rate_id => array(
+					'rate'     => 20.0,
+					'label'    => 'VAT',
+					'shipping' => 'yes',
+					'compound' => 'no',
+				),
+			)
+		);
 
 		WC_Tax::_delete_tax_rate( $tax_rate_id );
 
@@ -58,14 +60,16 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		$tax_rate_catch_all_id = WC_Tax::_insert_tax_rate( $tax_rate_catch_all );
 
 		$tax_rates = WC_Tax::get_rates();
-		$this->assertSame( $tax_rates, array(
-			$tax_rate_catch_all_id => array(
-				'rate' => 0.0,
-				'label' => 'VAT',
-				'shipping' => 'yes',
-				'compound' => 'no',
-			),
-		) );
+		$this->assertSame(
+			$tax_rates, array(
+				$tax_rate_catch_all_id => array(
+					'rate'     => 0.0,
+					'label'    => 'VAT',
+					'shipping' => 'yes',
+					'compound' => 'no',
+				),
+			)
+		);
 
 		WC_Tax::_delete_tax_rate( $tax_rate_catch_all_id );
 	}
@@ -80,7 +84,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
 
 		$customer_location = WC_Tax::get_tax_location();
-		$tax_rate = array(
+		$tax_rate          = array(
 			'tax_rate_country'  => $customer_location[0],
 			'tax_rate_state'    => '',
 			'tax_rate'          => '20.0000',
@@ -96,7 +100,16 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		$tax_rates = WC_Tax::get_shipping_tax_rates();
 
-		$this->assertEquals( $tax_rates, array( $tax_rate_id => array( 'rate' => '20.0000', 'label' => 'VAT', 'shipping' => 'yes', 'compound' => 'no' ) ), print_r( $tax_rates, true ) );
+		$this->assertEquals(
+			$tax_rates, array(
+				$tax_rate_id => array(
+					'rate'     => '20.0000',
+					'label'    => 'VAT',
+					'shipping' => 'yes',
+					'compound' => 'no',
+				),
+			), print_r( $tax_rates, true )
+		);
 
 		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
@@ -126,7 +139,16 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		$tax_rates = WC_Tax::get_base_tax_rates();
 
-		$this->assertEquals( $tax_rates, array( $tax_rate_id => array( 'rate' => '20.0000', 'label' => 'VAT', 'shipping' => 'yes', 'compound' => 'no' ) ) );
+		$this->assertEquals(
+			$tax_rates, array(
+				$tax_rate_id => array(
+					'rate'     => '20.0000',
+					'label'    => 'VAT',
+					'shipping' => 'yes',
+					'compound' => 'no',
+				),
+			)
+		);
 
 		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
@@ -154,15 +176,26 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
-		$tax_rates = WC_Tax::find_rates( array(
-			'country'   => 'GB',
-			'state'     => 'Cambs',
-			'postcode'  => 'PE14 1XX',
-			'city'      => 'Somewhere',
-			'tax_class' => '',
-		) );
+		$tax_rates = WC_Tax::find_rates(
+			array(
+				'country'   => 'GB',
+				'state'     => 'Cambs',
+				'postcode'  => 'PE14 1XX',
+				'city'      => 'Somewhere',
+				'tax_class' => '',
+			)
+		);
 
-		$this->assertEquals( $tax_rates, array( $tax_rate_id => array( 'rate' => '20.0000', 'label' => 'VAT', 'shipping' => 'yes', 'compound' => 'no' ) ) );
+		$this->assertEquals(
+			$tax_rates, array(
+				$tax_rate_id => array(
+					'rate'     => '20.0000',
+					'label'    => 'VAT',
+					'shipping' => 'yes',
+					'compound' => 'no',
+				),
+			)
+		);
 
 		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
@@ -190,15 +223,26 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
-		$tax_rates = WC_Tax::find_shipping_rates( array(
-			'country'   => 'GB',
-			'state'     => 'Cambs',
-			'postcode'  => 'PE14 1XX',
-			'city'      => 'Somewhere',
-			'tax_class' => '',
-		) );
+		$tax_rates = WC_Tax::find_shipping_rates(
+			array(
+				'country'   => 'GB',
+				'state'     => 'Cambs',
+				'postcode'  => 'PE14 1XX',
+				'city'      => 'Somewhere',
+				'tax_class' => '',
+			)
+		);
 
-		$this->assertEquals( $tax_rates, array( $tax_rate_id => array( 'rate' => '20.0000', 'label' => 'VAT', 'shipping' => 'yes', 'compound' => 'no' ) ) );
+		$this->assertEquals(
+			$tax_rates, array(
+				$tax_rate_id => array(
+					'rate'     => '20.0000',
+					'label'    => 'VAT',
+					'shipping' => 'yes',
+					'compound' => 'no',
+				),
+			)
+		);
 
 		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
@@ -226,13 +270,15 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
-		$tax_rates = WC_Tax::find_rates( array(
-			'country'   => 'GB',
-			'state'     => 'Cambs',
-			'postcode'  => 'PE14 1XX',
-			'city'      => 'Somewhere',
-			'tax_class' => '',
-		) );
+		$tax_rates = WC_Tax::find_rates(
+			array(
+				'country'   => 'GB',
+				'state'     => 'Cambs',
+				'postcode'  => 'PE14 1XX',
+				'city'      => 'Somewhere',
+				'tax_class' => '',
+			)
+		);
 
 		$calced_tax = WC_Tax::calc_tax( '9.99', $tax_rates, true, false );
 
@@ -258,43 +304,50 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_default_state', 'QC' );
 
 		$tax_rate_1 = array(
-		  'tax_rate_country'  => 'CA',
-		  'tax_rate_state'    => '',
-		  'tax_rate'          => '5.0000',
-		  'tax_rate_name'     => 'GST',
-		  'tax_rate_priority' => '1',
-		  'tax_rate_compound' => '0',
-		  'tax_rate_shipping' => '1',
-		  'tax_rate_order'    => '1',
-		  'tax_rate_class'    => '',
+			'tax_rate_country'  => 'CA',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '5.0000',
+			'tax_rate_name'     => 'GST',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
 		);
 
 		$tax_rate_2 = array(
-		  'tax_rate_country'  => 'CA',
-		  'tax_rate_state'    => 'QC',
-		  'tax_rate'          => '8.5000',
-		  'tax_rate_name'     => 'PST',
-		  'tax_rate_priority' => '2',
-		  'tax_rate_compound' => '1',
-		  'tax_rate_shipping' => '1',
-		  'tax_rate_order'    => '2',
-		  'tax_rate_class'    => '',
+			'tax_rate_country'  => 'CA',
+			'tax_rate_state'    => 'QC',
+			'tax_rate'          => '8.5000',
+			'tax_rate_name'     => 'PST',
+			'tax_rate_priority' => '2',
+			'tax_rate_compound' => '1',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '2',
+			'tax_rate_class'    => '',
 		);
 
 		$tax_rate_1_id = WC_Tax::_insert_tax_rate( $tax_rate_1 );
 		$tax_rate_2_id = WC_Tax::_insert_tax_rate( $tax_rate_2 );
 
-		$tax_rates = WC_Tax::find_rates( array(
-		  'country'   => 'CA',
-		  'state'     => 'QC',
-		  'postcode'  => '12345',
-		  'city'      => '',
-		  'tax_class' => '',
-		) );
+		$tax_rates = WC_Tax::find_rates(
+			array(
+				'country'   => 'CA',
+				'state'     => 'QC',
+				'postcode'  => '12345',
+				'city'      => '',
+				'tax_class' => '',
+			)
+		);
 
 		// prices exclusive of tax
 		$calced_tax = WC_Tax::calc_tax( '100', $tax_rates, false, false );
-		$this->assertEquals( $calced_tax, array( $tax_rate_1_id => '5.0000', $tax_rate_2_id => '8.925' ) );
+		$this->assertEquals(
+			$calced_tax, array(
+				$tax_rate_1_id => '5.0000',
+				$tax_rate_2_id => '8.925',
+			)
+		);
 
 		// prices inclusive of tax
 		$calced_tax = WC_Tax::calc_tax( '100', $tax_rates, true, false );
@@ -337,13 +390,15 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
-		$tax_rates = WC_Tax::find_rates( array(
-			'country'   => 'GB',
-			'state'     => 'Cambs',
-			'postcode'  => 'PE14 1XX',
-			'city'      => 'Somewhere',
-			'tax_class' => '',
-		) );
+		$tax_rates = WC_Tax::find_rates(
+			array(
+				'country'   => 'GB',
+				'state'     => 'Cambs',
+				'postcode'  => 'PE14 1XX',
+				'city'      => 'Somewhere',
+				'tax_class' => '',
+			)
+		);
 
 		$calced_tax = WC_Tax::calc_shipping_tax( '10', $tax_rates );
 
@@ -545,7 +600,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		// Update a rate
 		$tax_rate = array(
-			'tax_rate_country'  => 'US',
+			'tax_rate_country' => 'US',
 		);
 
 		// Run function
@@ -592,8 +647,8 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 	public function test__update_tax_rate_postcodes() {
 		global $wpdb;
 
-		$to_save = '12345;90210...90215';
-		$tax_rate          = array(
+		$to_save  = '12345;90210...90215';
+		$tax_rate = array(
 			'tax_rate_country'  => 'GB',
 			'tax_rate_state'    => '',
 			'tax_rate'          => '20.0000',

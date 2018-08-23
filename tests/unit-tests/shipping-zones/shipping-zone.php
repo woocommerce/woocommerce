@@ -87,7 +87,7 @@ class WC_Tests_Shipping_Zone extends WC_Unit_Test_Case {
 
 		// Assert
 		$this->assertTrue( is_array( $zone->get_zone_locations() ) );
-		$this->assertTrue( 2 === sizeof( $zone->get_zone_locations() ) );
+		$this->assertTrue( 2 === count( $zone->get_zone_locations() ) );
 
 		// Clean
 		WC_Helper_Shipping_Zones::remove_mock_zones();
@@ -141,7 +141,7 @@ class WC_Tests_Shipping_Zone extends WC_Unit_Test_Case {
 		$methods = $zone->get_shipping_methods();
 
 		// Assert
-		$this->assertTrue( 1 === sizeof( $methods ) );
+		$this->assertTrue( 1 === count( $methods ) );
 		$this->assertInstanceOf( 'WC_Shipping_Method', current( $methods ) );
 
 		// Clean
@@ -251,28 +251,32 @@ class WC_Tests_Shipping_Zone extends WC_Unit_Test_Case {
 		// Test
 		$zone = WC_Shipping_Zones::get_zone( 1 );
 		$zone->clear_locations();
-		$zone->set_locations( array(
+		$zone->set_locations(
 			array(
-				'code' => 'US',
-				'type' => 'country',
-			),
-			array(
-				'code' => '90210',
-				'type' => 'postcode',
-			),
-		) );
+				array(
+					'code' => 'US',
+					'type' => 'country',
+				),
+				array(
+					'code' => '90210',
+					'type' => 'postcode',
+				),
+			)
+		);
 
 		// Assert
-		$this->assertEquals( $zone->get_zone_locations(), array(
-			0 => (object) array(
-				'code' => 'US',
-				'type' => 'country',
-			),
-			1 => (object) array(
-				'code' => '90210',
-				'type' => 'postcode',
-			),
-		) );
+		$this->assertEquals(
+			$zone->get_zone_locations(), array(
+				0 => (object) array(
+					'code' => 'US',
+					'type' => 'country',
+				),
+				1 => (object) array(
+					'code' => '90210',
+					'type' => 'postcode',
+				),
+			)
+		);
 
 		// Clean
 		WC_Helper_Shipping_Zones::remove_mock_zones();
@@ -306,7 +310,7 @@ class WC_Tests_Shipping_Zone extends WC_Unit_Test_Case {
 		WC_Helper_Shipping_Zones::create_mock_zones();
 
 		// Test
-		$zone        = WC_Shipping_Zones::get_zone( 1 );
+		$zone = WC_Shipping_Zones::get_zone( 1 );
 		$zone->add_shipping_method( 'flat_rate' );
 		$zone->add_shipping_method( 'free_shipping' );
 
@@ -314,7 +318,7 @@ class WC_Tests_Shipping_Zone extends WC_Unit_Test_Case {
 		$methods = $zone->get_shipping_methods();
 
 		// Assert
-		$this->assertTrue( 2 === sizeof( $methods ) );
+		$this->assertTrue( 2 === count( $methods ) );
 		$this->assertInstanceOf( 'WC_Shipping_Method', current( $methods ) );
 
 		// Clean

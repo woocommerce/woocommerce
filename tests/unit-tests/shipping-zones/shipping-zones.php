@@ -18,7 +18,7 @@ class WC_Tests_Shipping_Zones extends WC_Unit_Test_Case {
 
 		// Assert
 		$this->assertTrue( is_array( $zones ) );
-		$this->assertTrue( 4 === sizeof( $zones ) );
+		$this->assertTrue( 4 === count( $zones ) );
 
 		// Clean
 		WC_Helper_Shipping_Zones::remove_mock_zones();
@@ -100,7 +100,7 @@ class WC_Tests_Shipping_Zones extends WC_Unit_Test_Case {
 		$zones = WC_Shipping_Zones::get_zones();
 
 		// Assert
-		$this->assertTrue( 3 === sizeof( $zones ) );
+		$this->assertTrue( 3 === count( $zones ) );
 
 		// Clean
 		WC_Helper_Shipping_Zones::remove_mock_zones();
@@ -114,34 +114,42 @@ class WC_Tests_Shipping_Zones extends WC_Unit_Test_Case {
 		WC_Helper_Shipping_Zones::create_mock_zones();
 
 		// Test
-		$zone1 = WC_Shipping_Zones::get_zone_matching_package( array(
-			'destination' => array(
-				'country'  => 'GB',
-				'state'    => 'Cambs',
-				'postcode' => 'CB23 1GG',
-			),
-		) );
-		$zone2 = WC_Shipping_Zones::get_zone_matching_package( array(
-			'destination' => array(
-				'country'  => 'GB',
-				'state'    => 'Cambs',
-				'postcode' => 'PE12 1BG',
-			),
-		) );
-		$zone3 = WC_Shipping_Zones::get_zone_matching_package( array(
-			'destination' => array(
-				'country'  => 'US',
-				'state'    => 'CA',
-				'postcode' => '90210',
-			),
-		) );
-		$zone4 = WC_Shipping_Zones::get_zone_matching_package( array(
-			'destination' => array(
-				'country'  => 'US',
-				'state'    => 'AL',
-				'postcode' => '12345',
-			),
-		) );
+		$zone1 = WC_Shipping_Zones::get_zone_matching_package(
+			array(
+				'destination' => array(
+					'country'  => 'GB',
+					'state'    => 'Cambs',
+					'postcode' => 'CB23 1GG',
+				),
+			)
+		);
+		$zone2 = WC_Shipping_Zones::get_zone_matching_package(
+			array(
+				'destination' => array(
+					'country'  => 'GB',
+					'state'    => 'Cambs',
+					'postcode' => 'PE12 1BG',
+				),
+			)
+		);
+		$zone3 = WC_Shipping_Zones::get_zone_matching_package(
+			array(
+				'destination' => array(
+					'country'  => 'US',
+					'state'    => 'CA',
+					'postcode' => '90210',
+				),
+			)
+		);
+		$zone4 = WC_Shipping_Zones::get_zone_matching_package(
+			array(
+				'destination' => array(
+					'country'  => 'US',
+					'state'    => 'AL',
+					'postcode' => '12345',
+				),
+			)
+		);
 
 		// Assert
 		$this->assertEquals( 'Local', $zone1->get_zone_name() );
