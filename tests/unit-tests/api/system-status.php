@@ -404,14 +404,14 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'settings', $data );
 
 		// Fields not selected omitted from response.
-		$this->assertTrue( ! isset( $data['environment'] ) );
-		$this->assertTrue( ! isset( $data['database'] ) );
-		$this->assertTrue( ! isset( $data['active_plugins'] ) );
-		$this->assertTrue( ! isset( $data['security'] ) );
-		$this->assertTrue( ! isset( $data['pages'] ) );
+		$this->assertArrayNotHasKey( 'environment', $data );
+		$this->assertArrayNotHasKey( 'database', $data );
+		$this->assertArrayNotHasKey( 'active_plugins', $data );
+		$this->assertArrayNotHasKey( 'security', $data );
+		$this->assertArrayNotHasKey( 'pages', $data );
 
 		// Non existing field is ignored.
-		$this->assertTrue( ! isset( $data['nonexisting'] ) );
+		$this->assertArrayNotHasKey( 'nonexisting', $data );
 	}
 
 	/**
