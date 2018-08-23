@@ -28,7 +28,7 @@ if ( ! $messages ) {
 	<?php foreach ( $messages as $message ) : ?>
 		<li>
 			<?php
-				echo wc_kses_notice( $message ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+				echo wc_kses_notice( $message );
 			?>
 		</li>
 	<?php endforeach; ?>
