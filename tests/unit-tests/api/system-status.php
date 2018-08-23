@@ -253,6 +253,37 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 			),
 			$data
 		);
+
+		$query_params = array(
+			'_fields' => 'id,name,nonexisting',
+		);
+		$request = new WP_REST_Request( 'GET', '/wc/v2/system_status/tools' );
+		$request->set_query_params( $query_params );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( count( $raw_tools ), count( $data ) );
+		$this->assertContains(
+			array(
+				'id'          => 'reset_tracking',
+				'name'        => 'Reset usage tracking',
+			),
+			$data
+		);
+		foreach ( $data as $item ) {
+			// Fields that are not requested are not returned in response.
+			$this->assertArrayNotHasKey( 'action', $item );
+			$this->assertArrayNotHasKey( 'description', $item );
+			// Links are part of data in collections, so excluded if not explicitly requested.
+			$this->assertArrayNotHasKey( '_links', $item );
+			// Non existing field is ignored.
+			$this->assertArrayNotHasKey( 'nonexisting', $item );
+		}
+
+		// Links are part of data, not links in collections.
+		$links = $response->get_links();
+		$this->assertEquals( 0, count( $links ) );
 	}
 
 	/**
@@ -287,6 +318,28 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'Term counts', $data['name'] );
 		$this->assertEquals( 'Recount terms', $data['action'] );
 		$this->assertEquals( 'This tool will recount product terms - useful when changing your settings in a way which hides products from the catalog.', $data['description'] );
+
+		// Test for _fields query parameter.
+		$query_params = array(
+			'_fields' => 'id,name,nonexisting',
+		);
+		$request = new WP_REST_Request( 'GET', '/wc/v2/system_status/tools/recount_terms' );
+		$request->set_query_params( $query_params );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$this->assertEquals( 'recount_terms', $data['id'] );
+		$this->assertEquals( 'Term counts', $data['name'] );
+		$this->assertArrayNotHasKey( 'action', $data );
+		$this->assertArrayNotHasKey( 'description', $data );
+		// Links are part of links, not data in single items.
+		$this->assertArrayNotHasKey( '_links', $data );
+
+		// Links are part of links, not data in single item response.
+		$links = $response->get_links();
+		$this->assertEquals( 1, count( $links ) );
 	}
 
 	/**
@@ -324,6 +377,32 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v2/system_status/tools/not_a_real_tool' ) );
 		$this->assertEquals( 404, $response->get_status() );
+
+		// Test _fields for execute system tool request.
+		$query_params = array(
+			'_fields' => 'id,success,nonexisting',
+		);
+		$request      = new WP_REST_Request( 'PUT', '/wc/v2/system_status/tools/recount_terms' );
+		$request->set_query_params( $query_params );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'recount_terms', $data['id'] );
+		$this->assertTrue( $data['success'] );
+
+		// Fields that are not requested are not returned in response.
+		$this->assertArrayNotHasKey( 'action', $data );
+		$this->assertArrayNotHasKey( 'name', $data );
+		$this->assertArrayNotHasKey( 'description', $data );
+		// Links are part of links, not data in single item response.
+		$this->assertArrayNotHasKey( '_links', $data );
+		// Non existing field is ignored.
+		$this->assertArrayNotHasKey( 'nonexisting', $data );
+
+		// Links are part of links, not data in single item response.
+		$links = $response->get_links();
+		$this->assertEquals( 1, count( $links ) );
 	}
 
 	/**
