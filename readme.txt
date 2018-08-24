@@ -216,6 +216,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Added new filter to 'Item in quotes' translation for messages. #20714
 * Dev - Add 'woocommerce_shutdown_error' hook triggered on request termination with an error. #20787
 * Dev - New filter 'woocommerce_admin_meta_boxes_variations_count' to customize the shown count of variations. #21067
+* Dev - Added ability to query products that have a field set in wc_get_products/WC_Product_Query using the wildcard symbol '*'. #21162
 * Localization - Updated IT provinces. #20286
 * Localization - Eircode validation. #20330
 * Localization - Disable postcode requirement for Bahrain. #21103
