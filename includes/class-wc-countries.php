@@ -1064,7 +1064,7 @@ class WC_Countries {
 					'RO' => array(
 						'state' => array(
 							'label'    => __( 'County', 'woocommerce' ),
-							'required' => false,
+							'required' => true,
 						),
 					),
 					'SG' => array(
