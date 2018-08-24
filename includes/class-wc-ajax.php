@@ -631,7 +631,7 @@ class WC_AJAX {
 			$i          = -1;
 
 			foreach ( $data['attribute_names'] as $attribute_name ) {
-				$attribute = isset( $attributes[$attribute_name] ) ? $attributes[$attribute_name] : false;
+				$attribute = isset( $attributes[ $attribute_name ] ) ? $attributes[ $attribute_name ] : false;
 				if ( ! $attribute ) {
 					continue;
 				}
