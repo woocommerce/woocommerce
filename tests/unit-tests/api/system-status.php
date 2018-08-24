@@ -254,7 +254,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$query_params = array(
 			'_fields' => 'id,name,nonexisting',
 		);
-		$request = new WP_REST_Request( 'GET', '/wc/v2/system_status/tools' );
+		$request = new WP_REST_Request( 'GET', '/wc/v3/system_status/tools' );
 		$request->set_query_params( $query_params );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
@@ -320,7 +320,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$query_params = array(
 			'_fields' => 'id,name,nonexisting',
 		);
-		$request = new WP_REST_Request( 'GET', '/wc/v2/system_status/tools/recount_terms' );
+		$request = new WP_REST_Request( 'GET', '/wc/v3/system_status/tools/recount_terms' );
 		$request->set_query_params( $query_params );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
@@ -379,7 +379,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$query_params = array(
 			'_fields' => 'id,success,nonexisting',
 		);
-		$request      = new WP_REST_Request( 'PUT', '/wc/v2/system_status/tools/recount_terms' );
+		$request      = new WP_REST_Request( 'PUT', '/wc/v3/system_status/tools/recount_terms' );
 		$request->set_query_params( $query_params );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
