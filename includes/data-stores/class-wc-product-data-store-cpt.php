@@ -1631,8 +1631,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			// Check for existing values if wildcard is used.
 			if ( '*' === $manual_queries['sku'] ) {
 				$wp_query_args['meta_query'][] = array(
-					'key'     => '_sku',
-					'compare' => 'EXISTS',
+					array(
+						'key'     => '_sku',
+						'compare' => 'EXISTS',
+					),
+					array(
+						'key'     => '_sku',
+						'value'   => '',
+						'compare' => '!=',
+					),
 				);
 			} else {
 				$wp_query_args['meta_query'][] = array(

@@ -232,8 +232,15 @@ class WC_Data_Store_WP {
 				// Check for existing values if wildcard is used.
 				if ( '*' === $value ) {
 					$wp_query_args['meta_query'][] = array(
-						'key'     => '_' . $key,
-						'compare' => 'EXISTS',
+						array(
+							'key'     => '_' . $key,
+							'compare' => 'EXISTS',
+						),
+						array(
+							'key'     => '_' . $key,
+							'value'   => '',
+							'compare' => '!=',
+						),
 					);
 				} else {
 					$wp_query_args['meta_query'][] = array(

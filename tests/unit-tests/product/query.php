@@ -65,9 +65,18 @@ class WC_Tests_WC_Product_Query extends WC_Unit_Test_Case {
 		$results = $query->get_products();
 		$this->assertEquals( 1, count( $results ) );
 
+		$product3 = new WC_Product_Simple();
+		$product3->save();
+
 		// Get multiple products using wildcard.
 		$query = new WC_Product_Query();
 		$query->set( 'sku', '*' );
+		$results = $query->get_products();
+		$this->assertEquals( 2, count( $results ) );
+
+		// Test another field using wildcard.
+		$query = new WC_Product_Query();
+		$query->set( 'sale_price', '*' );
 		$results = $query->get_products();
 		$this->assertEquals( 2, count( $results ) );
 	}
