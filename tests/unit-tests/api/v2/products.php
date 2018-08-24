@@ -6,7 +6,7 @@
  * @since 3.0.0
  */
 
-class Products_API extends WC_REST_Unit_Test_Case {
+class Products_API_V2 extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Setup our test server, endpoints, and user info.
@@ -28,9 +28,9 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();
-		$this->assertArrayHasKey( '/wc/v3/products', $routes );
-		$this->assertArrayHasKey( '/wc/v3/products/(?P<id>[\d]+)', $routes );
-		$this->assertArrayHasKey( '/wc/v3/products/batch', $routes );
+		$this->assertArrayHasKey( '/wc/v2/products', $routes );
+		$this->assertArrayHasKey( '/wc/v2/products/(?P<id>[\d]+)', $routes );
+		$this->assertArrayHasKey( '/wc/v2/products/batch', $routes );
 	}
 
 	/**
@@ -43,7 +43,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		WC_Helper_Product::create_external_product();
 		sleep( 1 ); // So both products have different timestamps.
 		WC_Helper_Product::create_simple_product();
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/products' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products' ) );
 		$products = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -63,7 +63,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	public function test_get_products_without_permission() {
 		wp_set_current_user( 0 );
 		WC_Helper_Product::create_simple_product();
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/products' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products' ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
 
@@ -75,7 +75,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	public function test_get_product() {
 		wp_set_current_user( $this->user );
 		$simple   = WC_Helper_Product::create_external_product();
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/products/' . $simple->get_id() ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products/' . $simple->get_id() ) );
 		$product  = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -99,7 +99,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	public function test_get_product_without_permission() {
 		wp_set_current_user( 0 );
 		$product  = WC_Helper_Product::create_simple_product();
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products/' . $product->get_id() ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
 
@@ -112,12 +112,12 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 		$product = WC_Helper_Product::create_simple_product();
 
-		$request = new WP_REST_Request( 'DELETE', '/wc/v3/products/' . $product->get_id() );
+		$request = new WP_REST_Request( 'DELETE', '/wc/v2/products/' . $product->get_id() );
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
-		$response   = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/products' ) );
+		$response   = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products' ) );
 		$variations = $response->get_data();
 		$this->assertEquals( 0, count( $variations ) );
 	}
@@ -130,7 +130,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	public function test_delete_product_without_permission() {
 		wp_set_current_user( 0 );
 		$product = WC_Helper_Product::create_simple_product();
-		$request = new WP_REST_Request( 'DELETE', '/wc/v3/products/' . $product->get_id() );
+		$request = new WP_REST_Request( 'DELETE', '/wc/v2/products/' . $product->get_id() );
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 401, $response->get_status() );
@@ -143,7 +143,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_delete_product_with_invalid_id() {
 		wp_set_current_user( 0 );
-		$request = new WP_REST_Request( 'DELETE', '/wc/v3/products/0' );
+		$request = new WP_REST_Request( 'DELETE', '/wc/v2/products/0' );
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 404, $response->get_status() );
@@ -159,14 +159,14 @@ class Products_API extends WC_REST_Unit_Test_Case {
 
 		// test simple products
 		$product  = WC_Helper_Product::create_simple_product();
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products/' . $product->get_id() ) );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 'DUMMY SKU', $data['sku'] );
 		$this->assertEquals( 10, $data['regular_price'] );
 		$this->assertEmpty( $data['sale_price'] );
 
-		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product->get_id() );
+		$request = new WP_REST_Request( 'PUT', '/wc/v2/products/' . $product->get_id() );
 		$request->set_body_params(
 			array(
 				'sku'         => 'FIXED-SKU',
@@ -195,12 +195,12 @@ class Products_API extends WC_REST_Unit_Test_Case {
 
 		// test variable product (variations are tested in product-variations.php)
 		$product  = WC_Helper_Product::create_variation_product();
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products/' . $product->get_id() ) );
 		$data     = $response->get_data();
 
 		$this->assertEquals( array( 'large', 'small' ), $data['attributes'][0]['options'] );
 
-		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product->get_id() );
+		$request = new WP_REST_Request( 'PUT', '/wc/v2/products/' . $product->get_id() );
 		$request->set_body_params( array(
 			'attributes' => array(
 				array(
@@ -233,13 +233,13 @@ class Products_API extends WC_REST_Unit_Test_Case {
 
 		// test external product
 		$product  = WC_Helper_Product::create_external_product();
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products/' . $product->get_id() ) );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 'Buy external product', $data['button_text'] );
 		$this->assertEquals( 'http://woocommerce.com', $data['external_url'] );
 
-		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product->get_id() );
+		$request = new WP_REST_Request( 'PUT', '/wc/v2/products/' . $product->get_id() );
 		$request->set_body_params(
 			array(
 				'button_text'  => 'Test API Update',
@@ -261,7 +261,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	public function test_update_product_without_permission() {
 		wp_set_current_user( 0 );
 		$product = WC_Helper_Product::create_simple_product();
-		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product->get_id() );
+		$request = new WP_REST_Request( 'PUT', '/wc/v2/products/' . $product->get_id() );
 		$request->set_body_params(
 			array(
 				'sku' => 'FIXED-SKU-NO-PERMISSION',
@@ -279,7 +279,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	public function test_update_product_with_invalid_id() {
 		wp_set_current_user( $this->user );
 		$product = WC_Helper_Product::create_simple_product();
-		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/0' );
+		$request = new WP_REST_Request( 'PUT', '/wc/v2/products/0' );
 		$request->set_body_params(
 			array(
 				'sku' => 'FIXED-SKU-INVALID-ID',
@@ -297,7 +297,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	public function test_create_product() {
 		wp_set_current_user( $this->user );
 
-		$request = new WP_REST_Request( 'POST', '/wc/v3/products/shipping_classes' );
+		$request = new WP_REST_Request( 'POST', '/wc/v2/products/shipping_classes' );
 		$request->set_body_params(
 			array(
 				'name' => 'Test',
@@ -308,7 +308,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$shipping_class_id = $data['id'];
 
 		// Create simple
-		$request = new WP_REST_Request( 'POST', '/wc/v3/products' );
+		$request = new WP_REST_Request( 'POST', '/wc/v2/products' );
 		$request->set_body_params(
 			array(
 				'type'           => 'simple',
@@ -330,7 +330,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $shipping_class_id, $data['shipping_class_id'] );
 
 		// Create external
-		$request = new WP_REST_Request( 'POST', '/wc/v3/products' );
+		$request = new WP_REST_Request( 'POST', '/wc/v2/products' );
 		$request->set_body_params(
 			array(
 				'type'          => 'external',
@@ -354,7 +354,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'https://wordpress.org', $data['external_url'] );
 
 		// Create variable
-		$request = new WP_REST_Request( 'POST', '/wc/v3/products' );
+		$request = new WP_REST_Request( 'POST', '/wc/v2/products' );
 		$request->set_body_params(
 			array(
 				'type'       => 'variable',
@@ -382,7 +382,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'variable', $data['type'] );
 		$this->assertEquals( array( 'small', 'medium' ), $data['attributes'][0]['options'] );
 
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/products' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products' ) );
 		$products = $response->get_data();
 		$this->assertEquals( 3, count( $products ) );
 	}
@@ -395,7 +395,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	public function test_create_product_without_permission() {
 		wp_set_current_user( 0 );
 
-		$request = new WP_REST_Request( 'POST', '/wc/v3/products' );
+		$request = new WP_REST_Request( 'POST', '/wc/v2/products' );
 		$request->set_body_params(
 			array(
 				'name'          => 'Test Product',
@@ -413,7 +413,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 		$product   = WC_Helper_Product::create_simple_product();
 		$product_2 = WC_Helper_Product::create_simple_product();
-		$request   = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
+		$request   = new WP_REST_Request( 'POST', '/wc/v2/products/batch' );
 		$request->set_body_params(
 			array(
 				'update' => array(
@@ -453,7 +453,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'simple', $data['create'][1]['type'] );
 		$this->assertEquals( $product_2->get_id(), $data['delete'][0]['id'] );
 
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request  = new WP_REST_Request( 'GET', '/wc/v2/products' );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
@@ -481,7 +481,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		}
 
 		// Test filtering with status=publish
-		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request = new WP_REST_Request( 'GET', '/wc/v2/products' );
 		$request->set_param( 'status', 'publish' );
 		$response = $this->server->dispatch( $request );
 		$products = $response->get_data();
@@ -492,7 +492,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		}
 
 		// Test filtering with status=draft
-		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request = new WP_REST_Request( 'GET', '/wc/v2/products' );
 		$request->set_param( 'status', 'draft' );
 		$response = $this->server->dispatch( $request );
 		$products = $response->get_data();
@@ -503,7 +503,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		}
 
 		// Test filtering with no filters - which should return 'any' (all 8)
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request  = new WP_REST_Request( 'GET', '/wc/v2/products' );
 		$response = $this->server->dispatch( $request );
 		$products = $response->get_data();
 
@@ -518,7 +518,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	public function test_product_schema() {
 		wp_set_current_user( $this->user );
 		$product    = WC_Helper_Product::create_simple_product();
-		$request    = new WP_REST_Request( 'OPTIONS', '/wc/v3/products/' . $product->get_id() );
+		$request    = new WP_REST_Request( 'OPTIONS', '/wc/v2/products/' . $product->get_id() );
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
