@@ -630,7 +630,8 @@ class WC_AJAX {
 			$attributes = $product->get_attributes( 'edit' );
 			$i          = -1;
 
-			foreach ( $attributes as $attribute ) {
+			foreach ( $data['attribute_names'] as $attribute_name ) {
+				$attribute = isset( $attributes[ $attribute_name ] ) ? $attributes[ $attribute_name ] : false;
 				if ( ! $attribute ) {
 					continue;
 				}
