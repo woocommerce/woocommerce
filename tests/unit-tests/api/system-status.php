@@ -385,21 +385,25 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$query_params = array(
 			'_fields' => 'theme,settings,nonexisting',
 		);
-		$request      = new WP_REST_Request( 'GET', '/wc/v2/system_status' );
+		$request      = new WP_REST_Request( 'GET', '/wc/v3/system_status' );
 		$request->set_query_params( $query_params );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
+
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 2, count( $data ) );
+
 		// Selected fields returned in the response.
 		$this->assertArrayHasKey( 'theme', $data );
 		$this->assertArrayHasKey( 'settings', $data );
+
 		// Fields not selected omitted from response.
 		$this->assertArrayNotHasKey( 'environment', $data );
 		$this->assertArrayNotHasKey( 'database', $data );
 		$this->assertArrayNotHasKey( 'active_plugins', $data );
 		$this->assertArrayNotHasKey( 'security', $data );
 		$this->assertArrayNotHasKey( 'pages', $data );
+
 		// Non existing field is ignored.
 		$this->assertArrayNotHasKey( 'nonexisting', $data );
 	}
