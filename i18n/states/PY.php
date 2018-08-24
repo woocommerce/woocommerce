@@ -3,7 +3,7 @@
  * Paraguay states
  *
  * @package WooCommerce/i18n
- * @version 3.4.4
+ * @version 3.5.0
  */
 
 global $states;
@@ -23,7 +23,7 @@ $states['PYG'] = array(
 	'PY-9' => __( 'Paraguar&iacute;', 'woocommerce' ),
 	'PY-10' => __( 'Alto Paran&aacute;', 'woocommerce' ),
 	'PY-11' => __( 'Central', 'woocommerce' ),
-	'PY-12' => __( '&Ntilde;eembuc&uacute;', 'woocommerce' ), 
+	'PY-12' => __( '&Ntilde;eembuc&uacute;', 'woocommerce' ),
 	'PY-13' => __( 'Amambay', 'woocommerce' ),
 	'PY-14' => __( 'Canindey&uacute;', 'woocommerce' ),
 	'PY-15' => __( 'Presidente Hayes', 'woocommerce' ),
