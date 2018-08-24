@@ -699,8 +699,6 @@ class WC_Checkout {
 				}
 
 				if ( in_array( 'phone', $format, true ) ) {
-					$data[ $key ] = wc_format_phone_number( $data[ $key ] );
-
 					if ( $validate_fieldset && '' !== $data[ $key ] && ! WC_Validation::is_phone( $data[ $key ] ) ) {
 						/* translators: %s: phone number */
 						$errors->add( 'validation', sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ) );

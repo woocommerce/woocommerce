@@ -761,8 +761,9 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_format_phone_number() {
 		$this->assertEquals( '1-610-385-0000', wc_format_phone_number( '1.610.385.0000' ) );
-		$this->assertEquals( '+47 0000 00003', wc_format_phone_number( '‭+47 0000 00003‬' ) ); // This number contains non-visible unicode chars at the beginning and end of string, should remove all those.
+		$this->assertEquals( '', wc_format_phone_number( '‭+47 0000 00003‬' ) ); // This number contains non-visible unicode chars at the beginning and end of string, should remove all those.
 		$this->assertEquals( '27 00 00 0000', wc_format_phone_number( '27 00 00 0000' ) );
+		$this->assertEquals( '', wc_format_phone_number( '1-800-not a phone number' ) );
 	}
 
 	/**
