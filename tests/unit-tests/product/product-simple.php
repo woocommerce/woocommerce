@@ -22,9 +22,6 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		$product->save();
 
 		$this->assertEquals( 'Read more', $product->add_to_cart_text() );
-
-		// Delete product
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -37,9 +34,6 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 
 		$this->assertEquals( 'Add to cart', $product->single_add_to_cart_text() );
-
-		// Delete product
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -52,9 +46,6 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 
 		$this->assertEquals( 'Dummy Product', $product->get_name() );
-
-		// Delete product
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -67,9 +58,6 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 
 		$this->assertEquals( get_permalink( $product->get_id() ), $product->get_permalink() );
-
-		// Delete product
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -82,9 +70,6 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 
 		$this->assertEquals( 'DUMMY SKU', $product->get_sku() );
-
-		// Delete product
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -101,9 +86,6 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		$product->manage_stock = 'yes';
 
 		$this->assertEquals( 0, $product->get_stock_quantity() );
-
-		// Delete product
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -119,9 +101,6 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		$this->assertFalse( $product->is_type( 'grouped' ) );
 		$this->assertFalse( $product->is_type( 'variable' ) );
 		$this->assertFalse( $product->is_type( 'external' ) );
-
-		// Delete product
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -140,9 +119,6 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 
 		$product->set_downloadable( 'no' );
 		$this->assertFalse( $product->is_downloadable() );
-
-		// Delete product
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -161,9 +137,6 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 
 		$product->set_virtual( 'no' );
 		$this->assertFalse( $product->is_virtual() );
-
-		// Delete product
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -180,9 +153,6 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 
 		$product->set_virtual( 'no' );
 		$this->assertTrue( $product->needs_shipping() );
-
-		// Delete product
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -199,9 +169,6 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 
 		$product->set_sold_individually( 'no' );
 		$this->assertFalse( $product->is_sold_individually() );
-
-		// Delete product
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -221,9 +188,6 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 
 		$product->set_backorders( 'no' );
 		$this->assertFalse( $product->backorders_allowed() );
-
-		// Delete product
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -248,8 +212,5 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		$product->set_backorders( 'yes' );
 		$product->set_manage_stock( 'no' );
 		$this->assertFalse( $product->backorders_require_notification() );
-
-		// Delete product
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 }
