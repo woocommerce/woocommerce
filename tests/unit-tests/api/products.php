@@ -3,7 +3,7 @@
  * Tests for Products API.
  *
  * @package WooCommerce\Tests\API
- * @since 3.0.0
+ * @since 3.5.0
  */
 
 class Products_API extends WC_REST_Unit_Test_Case {
@@ -24,7 +24,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test route registration.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();
@@ -36,7 +36,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting products.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_get_products() {
 		wp_set_current_user( $this->user );
@@ -58,7 +58,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting products without permission.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_get_products_without_permission() {
 		wp_set_current_user( 0 );
@@ -70,7 +70,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting a single product.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_get_product() {
 		wp_set_current_user( $this->user );
@@ -94,7 +94,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting single product without permission.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_get_product_without_permission() {
 		wp_set_current_user( 0 );
@@ -106,7 +106,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test deleting a single product.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_delete_product() {
 		wp_set_current_user( $this->user );
@@ -125,7 +125,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test deleting a single product without permission.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_delete_product_without_permission() {
 		wp_set_current_user( 0 );
@@ -139,7 +139,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test deleting a single product with an invalid ID.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_delete_product_with_invalid_id() {
 		wp_set_current_user( 0 );
@@ -152,7 +152,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test editing a single product. Tests multiple product types.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_update_product() {
 		wp_set_current_user( $this->user );
@@ -256,7 +256,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test updating a single product without permission.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_update_product_without_permission() {
 		wp_set_current_user( 0 );
@@ -274,7 +274,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test updating a single product with an invalid ID.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_update_product_with_invalid_id() {
 		wp_set_current_user( $this->user );
@@ -292,7 +292,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test creating a single product.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_create_product() {
 		wp_set_current_user( $this->user );
@@ -390,7 +390,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test creating a single product without permission.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_create_product_without_permission() {
 		wp_set_current_user( 0 );
@@ -408,6 +408,8 @@ class Products_API extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test batch managing products.
+	 *
+	 * @since 3.5.0
 	 */
 	public function test_products_batch() {
 		wp_set_current_user( $this->user );
@@ -464,7 +466,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	 * Tests to make sure you can filter products post statuses by both
 	 * the status query arg and WP_Query.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_products_filter_post_status() {
 		wp_set_current_user( $this->user );
@@ -513,7 +515,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test product schema.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_product_schema() {
 		wp_set_current_user( $this->user );

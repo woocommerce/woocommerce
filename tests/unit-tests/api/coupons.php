@@ -2,7 +2,7 @@
 /**
  * Coupon API Tests
  * @package WooCommerce\Tests\API
- * @since 3.0.0
+ * @since 3.5.0
  */
 class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 
@@ -10,9 +10,9 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Setup test coupon data.
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
-	 public function setUp() {
+	public function setUp() {
 		parent::setUp();
 		$this->endpoint = new WC_REST_Coupons_Controller();
 		$this->user = $this->factory->user->create( array(
@@ -22,7 +22,7 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test route registration.
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();
@@ -33,7 +33,7 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test getting coupons.
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_get_coupons() {
 		wp_set_current_user( $this->user );
@@ -92,7 +92,7 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test getting coupons without valid permissions.
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_get_coupons_without_permission() {
 		wp_set_current_user( 0 );
@@ -102,7 +102,7 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test getting a single coupon.
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_get_coupon() {
 		wp_set_current_user( $this->user );
@@ -145,7 +145,7 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test getting a single coupon with an invalid ID.
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_get_coupon_invalid_id() {
 		wp_set_current_user( $this->user );
@@ -155,7 +155,7 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test getting a single coupon without valid permissions.
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_get_coupon_without_permission() {
 		wp_set_current_user( 0 );
@@ -166,7 +166,7 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test creating a single coupon.
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_create_coupon() {
 		wp_set_current_user( $this->user );
@@ -215,7 +215,7 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test creating a single coupon with invalid fields.
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_create_coupon_invalid_fields() {
 		wp_set_current_user( $this->user );
@@ -234,7 +234,7 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test creating a single coupon without valid permissions.
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_create_coupon_without_permission() {
 		wp_set_current_user( 0 );
@@ -254,7 +254,7 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test updating a single coupon.
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_update_coupon() {
 		wp_set_current_user( $this->user );
@@ -282,7 +282,7 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test updating a single coupon with an invalid ID.
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_update_coupon_invalid_id() {
 		wp_set_current_user( $this->user );
@@ -301,7 +301,7 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test updating a single coupon without valid permissions.
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_update_coupon_without_permission() {
 		wp_set_current_user( 0 );
@@ -320,7 +320,7 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test deleting a single coupon.
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_delete_coupon() {
 		wp_set_current_user( $this->user );
@@ -333,7 +333,7 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test deleting a single coupon with an invalid ID.
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_delete_coupon_invalid_id() {
 		wp_set_current_user( $this->user );
@@ -346,7 +346,7 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test deleting a single coupon without valid permissions.
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_delete_coupon_without_permission() {
 		wp_set_current_user( 0 );
@@ -359,7 +359,7 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test batch operations on coupons.
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_batch_coupon() {
 		wp_set_current_user( $this->user );
@@ -406,7 +406,7 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test coupon schema.
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_coupon_schema() {
 		wp_set_current_user( $this->user );

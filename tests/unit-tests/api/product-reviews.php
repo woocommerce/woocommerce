@@ -23,7 +23,7 @@ class WC_Tests_API_Product_Reviews extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test route registration.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();
@@ -35,7 +35,7 @@ class WC_Tests_API_Product_Reviews extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting all product reviews.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_get_product_reviews() {
 		wp_set_current_user( $this->user );
@@ -87,7 +87,7 @@ class WC_Tests_API_Product_Reviews extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests to make sure product reviews cannot be viewed without valid permissions.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_get_product_reviews_without_permission() {
 		wp_set_current_user( 0 );
@@ -99,7 +99,7 @@ class WC_Tests_API_Product_Reviews extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests to make sure an error is returned when an invalid product is loaded.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_get_product_reviews_invalid_product() {
 		wp_set_current_user( $this->user );
@@ -110,7 +110,7 @@ class WC_Tests_API_Product_Reviews extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests getting a single product review.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_get_product_review() {
 		wp_set_current_user( $this->user );
@@ -141,7 +141,7 @@ class WC_Tests_API_Product_Reviews extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests getting a single product review without the correct permissions.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_get_product_review_without_permission() {
 		wp_set_current_user( 0 );
@@ -154,7 +154,7 @@ class WC_Tests_API_Product_Reviews extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests getting a product review with an invalid ID.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_get_product_review_invalid_id() {
 		wp_set_current_user( $this->user );
@@ -166,7 +166,7 @@ class WC_Tests_API_Product_Reviews extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests creating a product review.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_create_product_review() {
 		wp_set_current_user( $this->user );
@@ -205,7 +205,7 @@ class WC_Tests_API_Product_Reviews extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests creating a product review without required fields.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_create_product_review_invalid_fields() {
 		wp_set_current_user( $this->user );
@@ -254,7 +254,7 @@ class WC_Tests_API_Product_Reviews extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests updating a product review.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_update_product_review() {
 		wp_set_current_user( $this->user );
@@ -288,7 +288,7 @@ class WC_Tests_API_Product_Reviews extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests updating a product review without the correct permissions.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_update_product_review_without_permission() {
 		wp_set_current_user( 0 );
@@ -312,7 +312,7 @@ class WC_Tests_API_Product_Reviews extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests that updating a product review with an invalid id fails.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_update_product_review_invalid_id() {
 		wp_set_current_user( $this->user );
@@ -335,7 +335,7 @@ class WC_Tests_API_Product_Reviews extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test deleting a product review.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_delete_product_review() {
 		wp_set_current_user( $this->user );
@@ -351,7 +351,7 @@ class WC_Tests_API_Product_Reviews extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test deleting a product review without permission/creds.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_delete_product_without_permission() {
 		wp_set_current_user( 0 );
@@ -367,7 +367,7 @@ class WC_Tests_API_Product_Reviews extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test deleting a product review with an invalid id.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_delete_product_review_invalid_id() {
 		wp_set_current_user( $this->user );
@@ -383,6 +383,8 @@ class WC_Tests_API_Product_Reviews extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test batch managing product reviews.
+	 *
+	 * @since 3.5.0
 	 */
 	public function test_product_reviews_batch() {
 		wp_set_current_user( $this->user );
@@ -436,7 +438,7 @@ class WC_Tests_API_Product_Reviews extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test the product review schema.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_product_review_schema() {
 		wp_set_current_user( $this->user );

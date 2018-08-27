@@ -2,8 +2,9 @@
 
 /**
  * Shipping Zones API Tests
+ *
  * @package WooCommerce\Tests\API
- * @since 3.0.0
+ * @since 3.5.0
  */
 class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 
@@ -50,7 +51,8 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test route registration.
-	 * @since 3.0.0
+	 *
+	 * @since 3.5.0
 	 */
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();
@@ -63,7 +65,8 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test getting all Shipping Zones.
-	 * @since 3.0.0
+	 *
+	 * @since 3.5.0
 	 */
 	public function test_get_zones() {
 		wp_set_current_user( $this->user );
@@ -76,13 +79,13 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( count( $data ), 1 );
 		$this->assertContains(
 			array(
-				'id'     => 0,
+				'id'     => $data[0]['id'],
 				'name'   => 'Locations not covered by your other zones',
 				'order'  => 0,
 				'_links' => array(
 					'self'        => array(
 						array(
-							'href' => rest_url( '/wc/v3/shipping/zones/0' ),
+							'href' => rest_url( '/wc/v3/shipping/zones/' . $data[0]['id'] ),
 						),
 					),
 					'collection'  => array(
@@ -92,7 +95,7 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 					),
 					'describedby' => array(
 						array(
-							'href' => rest_url( '/wc/v3/shipping/zones/0/locations' ),
+							'href' => rest_url( '/wc/v3/shipping/zones/' . $data[0]['id'] . '/locations' ),
 						),
 					),
 				),
@@ -109,13 +112,13 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( count( $data ), 2 );
 		$this->assertContains(
 			array(
-				'id'     => 1,
+				'id'     => $data[1]['id'],
 				'name'   => 'Zone 1',
 				'order'  => 0,
 				'_links' => array(
 					'self'        => array(
 						array(
-							'href' => rest_url( '/wc/v3/shipping/zones/1' ),
+							'href' => rest_url( '/wc/v3/shipping/zones/' . $data[1]['id'] ),
 						),
 					),
 					'collection'  => array(
@@ -125,7 +128,7 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 					),
 					'describedby' => array(
 						array(
-							'href' => rest_url( '/wc/v3/shipping/zones/1/locations' ),
+							'href' => rest_url( '/wc/v3/shipping/zones/' . $data[1]['id'] . '/locations' ),
 						),
 					),
 				),
@@ -135,7 +138,8 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test /shipping/zones without valid permissions/creds.
-	 * @since 3.0.0
+	 *
+	 * @since 3.5.0
 	 */
 	public function test_get_shipping_zones_without_permission() {
 		wp_set_current_user( 0 );
@@ -146,7 +150,8 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test /shipping/zones while Shipping is disabled in WooCommerce.
-	 * @since 3.0.0
+	 *
+	 * @since 3.5.0
 	 */
 	public function test_get_shipping_zones_disabled_shipping() {
 		wp_set_current_user( $this->user );
@@ -161,7 +166,8 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test Shipping Zone schema.
-	 * @since 3.0.0
+	 *
+	 * @since 3.5.0
 	 */
 	public function test_get_shipping_zone_schema() {
 		$request    = new WP_REST_Request( 'OPTIONS', '/wc/v3/shipping/zones' );
@@ -177,7 +183,8 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test Shipping Zone create endpoint.
-	 * @since 3.0.0
+	 *
+	 * @since 3.5.0
 	 */
 	public function test_create_shipping_zone() {
 		wp_set_current_user( $this->user );
@@ -221,7 +228,8 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test Shipping Zone create endpoint.
-	 * @since 3.0.0
+	 *
+	 * @since 3.5.0
 	 */
 	public function test_create_shipping_zone_without_permission() {
 		wp_set_current_user( 0 );
@@ -239,7 +247,8 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test Shipping Zone update endpoint.
-	 * @since 3.0.0
+	 *
+	 * @since 3.5.0
 	 */
 	public function test_update_shipping_zone() {
 		wp_set_current_user( $this->user );
@@ -285,7 +294,8 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test Shipping Zone update endpoint with a bad zone ID.
-	 * @since 3.0.0
+	 *
+	 * @since 3.5.0
 	 */
 	public function test_update_shipping_zone_invalid_id() {
 		wp_set_current_user( $this->user );
@@ -304,7 +314,8 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test Shipping Zone delete endpoint.
-	 * @since 3.0.0
+	 *
+	 * @since 3.5.0
 	 */
 	public function test_delete_shipping_zone() {
 		wp_set_current_user( $this->user );
@@ -320,7 +331,8 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test Shipping Zone delete endpoint without permissions.
-	 * @since 3.0.0
+	 *
+	 * @since 3.5.0
 	 */
 	public function test_delete_shipping_zone_without_permission() {
 		wp_set_current_user( 0 );
@@ -334,7 +346,8 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test Shipping Zone delete endpoint with a bad zone ID.
-	 * @since 3.0.0
+	 *
+	 * @since 3.5.0
 	 */
 	public function test_delete_shipping_zone_invalid_id() {
 		wp_set_current_user( $this->user );
@@ -345,7 +358,8 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test getting a single Shipping Zone.
-	 * @since 3.0.0
+	 *
+	 * @since 3.5.0
 	 */
 	public function test_get_single_shipping_zone() {
 		wp_set_current_user( $this->user );
@@ -383,7 +397,8 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test getting a single Shipping Zone with a bad zone ID.
-	 * @since 3.0.0
+	 *
+	 * @since 3.5.0
 	 */
 	public function test_get_single_shipping_zone_invalid_id() {
 		wp_set_current_user( $this->user );
@@ -395,7 +410,8 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test getting Shipping Zone Locations.
-	 * @since 3.0.0
+	 *
+	 * @since 3.5.0
 	 */
 	public function test_get_locations() {
 		wp_set_current_user( $this->user );
@@ -439,7 +455,8 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test getting Shipping Zone Locations with a bad zone ID.
-	 * @since 3.0.0
+	 *
+	 * @since 3.5.0
 	 */
 	public function test_get_locations_invalid_id() {
 		wp_set_current_user( $this->user );
@@ -451,7 +468,8 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test Shipping Zone Locations update endpoint.
-	 * @since 3.0.0
+	 *
+	 * @since 3.5.0
 	 */
 	public function test_update_locations() {
 		wp_set_current_user( $this->user );
@@ -540,7 +558,8 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test updating Shipping Zone Locations with a bad zone ID.
-	 * @since 3.0.0
+	 *
+	 * @since 3.5.0
 	 */
 	public function test_update_locations_invalid_id() {
 		wp_set_current_user( $this->user );
@@ -552,7 +571,8 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test getting all Shipping Zone Methods and getting a single Shipping Zone Method.
-	 * @since 3.0.0
+	 *
+	 * @since 3.5.0
 	 */
 	public function test_get_methods() {
 		wp_set_current_user( $this->user );
@@ -626,7 +646,8 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test getting all Shipping Zone Methods with a bad zone ID.
-	 * @since 3.0.0
+	 *
+	 * @since 3.5.0
 	 */
 	public function test_get_methods_invalid_zone_id() {
 		wp_set_current_user( $this->user );
@@ -642,7 +663,8 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test getting a single Shipping Zone Method with a bad ID.
-	 * @since 3.0.0
+	 *
+	 * @since 3.5.0
 	 */
 	public function test_get_methods_invalid_method_id() {
 		wp_set_current_user( $this->user );
@@ -655,7 +677,8 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test updating a Shipping Zone Method.
-	 * @since 3.0.0
+	 *
+	 * @since 3.5.0
 	 */
 	public function test_update_methods() {
 		wp_set_current_user( $this->user );
@@ -751,7 +774,8 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test creating a Shipping Zone Method.
-	 * @since 3.0.0
+	 *
+	 * @since 3.5.0
 	 */
 	public function test_create_method() {
 		wp_set_current_user( $this->user );
@@ -775,7 +799,8 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test deleting a Shipping Zone Method.
-	 * @since 3.0.0
+	 *
+	 * @since 3.5.0
 	 */
 	public function test_delete_method() {
 		wp_set_current_user( $this->user );

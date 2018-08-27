@@ -3,7 +3,7 @@
  * Tests for the Customers REST API.
  *
  * @package WooCommerce\Tests\API
- * @since 3.0.0
+ * @since 3.5.0
  */
 
 class Customers extends WC_REST_Unit_Test_Case {
@@ -19,7 +19,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test route registration.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();
@@ -32,7 +32,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting customers.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_get_customers() {
 		wp_set_current_user( 1 );
@@ -108,7 +108,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting customers without valid permissions.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_get_customers_without_permission() {
 		wp_set_current_user( 0 );
@@ -119,7 +119,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test creating a new customer.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_create_customer() {
 		wp_set_current_user( 1 );
@@ -256,7 +256,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test creating customers without valid permissions.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_create_customer_without_permission() {
 		wp_set_current_user( 0 );
@@ -273,7 +273,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting a single customer.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_get_customer() {
 		wp_set_current_user( 1 );
@@ -327,7 +327,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting a single customer without valid permissions.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_get_customer_without_permission() {
 		wp_set_current_user( 0 );
@@ -339,7 +339,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting a single customer with an invalid ID.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_get_customer_invalid_id() {
 		wp_set_current_user( 1 );
@@ -350,7 +350,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test updating a customer.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_update_customer() {
 		wp_set_current_user( 1 );
@@ -376,7 +376,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test updating a customer without valid permissions.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_update_customer_without_permission() {
 		wp_set_current_user( 0 );
@@ -388,7 +388,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test updating a customer with an invalid ID.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_update_customer_invalid_id() {
 		wp_set_current_user( 1 );
@@ -400,7 +400,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test deleting a customer.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_delete_customer() {
 		wp_set_current_user( 1 );
@@ -414,7 +414,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test deleting a customer with an invalid ID.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_delete_customer_invalid_id() {
 		wp_set_current_user( 1 );
@@ -427,7 +427,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test deleting a customer without valid permissions.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_delete_customer_without_permission() {
 		wp_set_current_user( 0 );
@@ -441,7 +441,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test customer batch endpoint.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_batch_customer() {
 		wp_set_current_user( 1 );
@@ -490,7 +490,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test customer schema.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_customer_schema() {
 		wp_set_current_user( 1 );

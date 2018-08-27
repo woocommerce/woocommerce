@@ -76,13 +76,13 @@ class WC_Tests_API_Shipping_Zones_V2 extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( count( $data ), 1 );
 		$this->assertContains(
 			array(
-				'id'     => 0,
+				'id'     => $data[0]['id'],
 				'name'   => 'Locations not covered by your other zones',
 				'order'  => 0,
 				'_links' => array(
 					'self'        => array(
 						array(
-							'href' => rest_url( '/wc/v2/shipping/zones/0' ),
+							'href' => rest_url( '/wc/v2/shipping/zones/' . $data[0]['id'] ),
 						),
 					),
 					'collection'  => array(
@@ -92,7 +92,7 @@ class WC_Tests_API_Shipping_Zones_V2 extends WC_REST_Unit_Test_Case {
 					),
 					'describedby' => array(
 						array(
-							'href' => rest_url( '/wc/v2/shipping/zones/0/locations' ),
+							'href' => rest_url( '/wc/v2/shipping/zones/' . $data[0]['id'] . '/locations' ),
 						),
 					),
 				),
@@ -109,13 +109,13 @@ class WC_Tests_API_Shipping_Zones_V2 extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( count( $data ), 2 );
 		$this->assertContains(
 			array(
-				'id'     => 1,
+				'id'     => $data[1]['id'],
 				'name'   => 'Zone 1',
 				'order'  => 0,
 				'_links' => array(
 					'self'        => array(
 						array(
-							'href' => rest_url( '/wc/v2/shipping/zones/1' ),
+							'href' => rest_url( '/wc/v2/shipping/zones/' . $data[1]['id'] ),
 						),
 					),
 					'collection'  => array(
@@ -125,7 +125,7 @@ class WC_Tests_API_Shipping_Zones_V2 extends WC_REST_Unit_Test_Case {
 					),
 					'describedby' => array(
 						array(
-							'href' => rest_url( '/wc/v2/shipping/zones/1/locations' ),
+							'href' => rest_url( '/wc/v2/shipping/zones/' . $data[1]['id'] . '/locations' ),
 						),
 					),
 				),
