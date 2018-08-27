@@ -280,7 +280,6 @@ class Products_API extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_update_product_with_invalid_id() {
 		wp_set_current_user( $this->user );
-		$product = WC_Helper_Product::create_simple_product();
 		$request = new WP_REST_Request( 'PUT', '/wc/v2/products/0' );
 		$request->set_body_params(
 			array(
