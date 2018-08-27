@@ -170,7 +170,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							'value'             => wc_stock_amount( $variation_object->get_stock_quantity( 'edit' ) ),
 							'label'             => __( 'Stock quantity', 'woocommerce' ),
 							'desc_tip'          => true,
-							'description'       => __( "Enter a number to set stock quantity at the variation level. Use a variation’s 'Manage stock?' check box above to enable/disable stock management at the variation level.", 'woocommerce' ),
+							'description'       => __( "Enter a number to set stock quantity at the variation level. Use a variation's 'Manage stock?' check box above to enable/disable stock management at the variation level.", 'woocommerce' ),
 							'type'              => 'number',
 							'custom_attributes' => array(
 								'step' => 'any',
