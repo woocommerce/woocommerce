@@ -44,7 +44,6 @@ class WC_Geolocation {
 	 * @var array
 	 */
 	private static $ip_lookup_apis = array(
-		'icanhazip'         => 'http://icanhazip.com',
 		'ipify'             => 'http://api.ipify.org/',
 		'ipecho'            => 'http://ipecho.net/plain',
 		'ident'             => 'http://ident.me',
