@@ -1,0 +1,60 @@
+/** @format */
+
+.woocommerce-search {
+	position: relative;
+
+	.woocommerce-search__input {
+		width: 100%;
+		padding: $gap-small;
+		border: 1px solid $core-grey-light-700;
+	}
+
+	.woocommerce-search__autocomplete-results {
+		display: flex;
+		flex-direction: column;
+		align-items: stretch;
+		border: 1px solid $core-grey-light-700;
+
+		&:empty {
+			display: none;
+		}
+	}
+
+	// This a single `button` in the autocomplete popover
+	.woocommerce-search__autocomplete-result {
+		margin-bottom: 0;
+		display: flex;
+		flex-direction: row;
+		flex-grow: 1;
+		flex-shrink: 0;
+		align-items: center;
+		padding: $gap-small;
+		color: $woocommerce;
+		text-decoration: underline; // @todo Not actually a link, should underline?
+		text-align: left;
+		background: $core-grey-light-100;
+		border-bottom: 1px solid $core-grey-light-500;
+
+		&:last-of-type {
+			border-bottom: none;
+		}
+
+		&:hover {
+			box-shadow: none;
+			color: $woocommerce;
+			background: $core-grey-light-200;
+		}
+
+		&.is-selected,
+		&:focus,
+		&:active {
+			color: $woocommerce;
+			background: $white;
+			box-shadow: inset 0 0 0 1px $core-grey-light-200, inset 0 0 0 2px $black;
+		}
+
+		.woocommerce-search__result-thumbnail {
+			margin-right: $gap-small;
+		}
+	}
+}
