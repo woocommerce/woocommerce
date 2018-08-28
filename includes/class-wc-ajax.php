@@ -2394,7 +2394,7 @@ class WC_AJAX {
 				WC_Tax::_update_tax_rate_postcodes( $tax_rate_id, $postcode );
 			}
 			if ( isset( $data['city'] ) ) {
-				WC_Tax::_update_tax_rate_cities( $tax_rate_id, array_map( 'wc_clean', $data['city'] ) );
+				WC_Tax::_update_tax_rate_cities( $tax_rate_id, array_map( 'wc_clean', array_map( 'wp_unslash', $data['city'] ) ) );
 			}
 		}
 
