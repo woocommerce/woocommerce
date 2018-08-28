@@ -28,7 +28,7 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 	protected function create_products( $product_count = 30 ) {
 		$this->products = array();
 		for ( $i = 0; $i < $product_count; $i++ ) {
-			$product = WC_Helper_Product::create_simple_product();
+			$product = WC_Helper_Product::create_simple_product( false );
 			$product->set_name( 'Dummy Product ' . $i );
 			$this->products[] = $product;
 

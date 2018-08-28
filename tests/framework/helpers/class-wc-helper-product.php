@@ -25,11 +25,12 @@ class WC_Helper_Product {
 	 * @since 2.3
 	 * @return WC_Product_Simple
 	 */
-	public static function create_simple_product() {
+	public static function create_simple_product( $save = true ) {
 		$product = new WC_Product_Simple();
 		$product->set_props( array(
 			'name'          => 'Dummy Product',
 			'regular_price' => 10,
+			'price'         => 10,
 			'sku'           => 'DUMMY SKU',
 			'manage_stock'  => false,
 			'tax_status'    => 'taxable',
@@ -38,9 +39,13 @@ class WC_Helper_Product {
 			'stock_status'  => 'instock',
 			'weight'        => '1.1',
 		) );
-		$product->save();
 
-		return wc_get_product( $product->get_id() );
+		if ( $save ) {
+			$product->save();
+			return wc_get_product( $product->get_id() );
+		} else {
+			return $product;
+		}
 	}
 
 	/**
