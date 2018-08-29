@@ -35,7 +35,7 @@
 .woocommerce-filters-date__content,
 .woocommerce-filters-filter__content {
 	.components-popover__content {
-		width: 320px;
+		width: 322px;
 		border: 1px solid $core-grey-light-700;
 		background-color: $white;
 	}
@@ -44,6 +44,7 @@
 		.components-popover__content {
 			width: 100%;
 			height: 100%;
+			border: none;
 		}
 	}
 }

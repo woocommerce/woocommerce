@@ -53,6 +53,12 @@
 	.DayPicker_weekHeader_li {
 		color: $core-grey-dark-400;
 	}
+
+	.DayPickerNavigation_button {
+		&:focus {
+			outline: 2px solid #bfe7f3;
+		}
+	}
 }
 
 .woocommerce-calendar__inputs {
