@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, claudiulodro,
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
 Requires at least: 4.7
 Tested up to: 4.9
-Stable tag: 3.4.4
+Stable tag: 3.4.5
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -157,6 +157,23 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 6. A product archive (grid).
 
 == Changelog ==
+
+= 3.4.5 - 2018-08-29 =
+* Fix - Tweak sanitization when resetting password cookie. #20901
+* Fix - Use `+` instead of `array_merge` when appending parent to tax class to fix issues with numeric tax class names. #20916
+* Fix - Correct translation for North Khorasan. #20972
+* Fix - Unify scroll-to notices for all browsers. #20992
+* Fix - Prevent multiple slashing of variation's SKU. #21019
+* Fix - Variation image in fullscreen now shows correct caption for the respective image. #21022
+* Fix - Vertically center admin order action buttons. #21053
+* Fix - Correct context for shipping packages translation. #21065
+* Fix - Add permission checks for installing Jetpack on the setup wizard. #21072
+* Fix - Use refund currency instead of store default currency when displaying refund amount in the edit order screen. #21106
+* Fix - Fix a typo in REST API customer schema. #21171
+* Fix - Use entire sentence for checkout address_2 placeholder string. #21186
+* Fix - Only suppress comments number on unsupported theme shop page. #21191
+* Fix - Don't allow users without manage_product_terms permissions to create categories using the product importer. #21192
+* Fix - Correct sale coupon restriction logic. #21219
 
 = 3.4.4 - 2018-07-25 =
 * Fix - Only wordwrap plain email content. #20723
