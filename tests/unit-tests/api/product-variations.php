@@ -168,7 +168,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'PUT', '/wc/v2/products/' . $product->get_id() . '/variations/' . $variation_id );
 		$request->set_body_params(
 			array(
-				'sku'         => 'FIXED-SKU',
+				'sku'         => 'FIXED-\'SKU',
 				'sale_price'  => '8',
 				'description' => 'O_O',
 				'image'       => array(
@@ -191,7 +191,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( '8', $variation['price'] );
 		$this->assertEquals( '8', $variation['sale_price'] );
 		$this->assertEquals( '10', $variation['regular_price'] );
-		$this->assertEquals( 'FIXED-SKU', $variation['sku'] );
+		$this->assertEquals( 'FIXED-\'SKU', $variation['sku'] );
 		$this->assertEquals( 'medium', $variation['attributes'][0]['option'] );
 		$this->assertContains( 'Dr1Bczxq4q', $variation['image']['src'] );
 		$this->assertContains( 'test upload image', $variation['image']['alt'] );
