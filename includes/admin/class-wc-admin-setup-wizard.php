@@ -1273,9 +1273,10 @@ class WC_Admin_Setup_Wizard {
 				'repo-slug'   => 'woocommerce-gateway-stripe',
 				'settings'    => array(
 					'create_account' => array(
-						'label'       => __( 'Create a new Stripe account for me', 'woocommerce' ),
+						'label'       => __( 'Set up Stripe for me using this email:', 'woocommerce' ),
 						'type'        => 'checkbox',
 						'value'       => 'yes',
+						'default'     => 'yes',
 						'placeholder' => '',
 						'required'    => false,
 						'plugins'     => $this->get_wcs_requisite_plugins(),
@@ -1285,7 +1286,6 @@ class WC_Admin_Setup_Wizard {
 						'type'        => 'email',
 						'value'       => $user_email,
 						'placeholder' => __( 'Stripe email address', 'woocommerce' ),
-						'description' => __( "Enter your email address and we'll handle account creation. Powered by WooCommerce Services and Jetpack.", 'woocommerce' ),
 						'required'    => true,
 					),
 				),
@@ -1299,9 +1299,10 @@ class WC_Admin_Setup_Wizard {
 				'repo-slug'   => 'woocommerce-gateway-paypal-express-checkout',
 				'settings'    => array(
 					'reroute_requests' => array(
-						'label'       => __( 'Accept payments without linking a PayPal account', 'woocommerce' ),
+						'label'       => __( 'Set up PayPal for me using this email:', 'woocommerce' ),
 						'type'        => 'checkbox',
 						'value'       => 'yes',
+						'default'     => 'yes',
 						'placeholder' => '',
 						'required'    => false,
 						'plugins'     => $this->get_wcs_requisite_plugins(),
@@ -1311,7 +1312,6 @@ class WC_Admin_Setup_Wizard {
 						'type'        => 'email',
 						'value'       => $user_email,
 						'placeholder' => __( 'Email address to receive payments', 'woocommerce' ),
-						'description' => __( "Enter your email address and we'll authenticate payments for you. Powered by WooCommerce Services and Jetpack.", 'woocommerce' ),
 						'required'    => true,
 					),
 				),
@@ -1532,6 +1532,8 @@ class WC_Admin_Setup_Wizard {
 								$checked = false;
 								if ( isset( $previously_saved_settings[ $setting_id ] ) ) {
 									$checked = 'yes' === $previously_saved_settings[ $setting_id ];
+								} elseif ( false === $previously_saved_settings && isset( $setting['default'] ) ) {
+									$checked = 'yes' === $setting['default'];
 								}
 							}
 							if ( 'email' === $setting['type'] ) {
