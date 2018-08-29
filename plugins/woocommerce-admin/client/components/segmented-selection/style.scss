@@ -56,17 +56,6 @@
 	}
 
 	&:focus + label .woocommerce-segmented-selection__label {
-		/**
-		Must use outline instead of border here to avoid having the
-		elements below shift by 2 pixel on focus. This trickery is needed
-		so that left and right edges can be seen as those borders are actually
-		part of the parent CSS grid.
-		 */
-		outline: 1px solid $black;
-		width: calc(100% - 1px);
-	}
-
-	&:nth-child(4n + 1):focus + label .woocommerce-segmented-selection__label {
-		transform: translateX(1px);
+		box-shadow: inset 0 0 0 1px $black;
 	}
 }

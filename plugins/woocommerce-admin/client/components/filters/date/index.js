@@ -59,6 +59,9 @@ class DatePicker extends Component {
 			if ( 'custom' === selectedTab ) {
 				data.after = after ? after.format( isoDateFormat ) : '';
 				data.before = before ? before.format( isoDateFormat ) : '';
+			} else {
+				data.after = undefined;
+				data.before = undefined;
 			}
 			updateQueryString( data, path, query );
 			onClose( event );
