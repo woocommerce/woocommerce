@@ -12,6 +12,90 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test tax rounding.
+	 * Ticket:
+	 *  https://github.com/woocommerce/woocommerce/issues/21021
+	 */
+	public function test_cart_get_total_issue_21021() {
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_tax_round_at_subtotal', 'yes' );
+
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '23.0000',
+			'tax_rate_name'     => 'TAX23',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '23percent',
+		);
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '5.0000',
+			'tax_rate_name'     => 'TAX5',
+			'tax_rate_priority' => '2',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '0',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '5percent',
+		);
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		// Create product with price 19
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 19 );
+		$product->set_regular_price(19 );
+		$product->set_tax_class('5percent');
+		$product->save();
+
+		// Create product with price 59
+		$product2 = WC_Helper_Product::create_simple_product();
+		$product2->set_price( 59 );
+		$product2->set_regular_price(59 );
+		$product->set_tax_class('5percent');
+		$product2->save();
+
+
+		// Create a flat rate method.
+		$flat_rate_settings = array(
+			'enabled'      => 'yes',
+			'title'        => 'Flat rate',
+			'availability' => 'all',
+			'countries'    => '',
+			'tax_status'   => 'taxable',
+			'cost'         => '8.05',
+		);
+		update_option( 'woocommerce_flat_rate_settings', $flat_rate_settings );
+		update_option( 'woocommerce_flat_rate', array() );
+		WC_Cache_Helper::get_transient_version( 'shipping', true );
+		WC()->shipping->load_shipping_methods();
+
+		WC()->cart->empty_cart();
+
+		// Set the flat_rate shipping method
+		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate' ) );
+
+		// Add product to cart x1, calc and test
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate' ) );
+		WC()->cart->calculate_totals();
+		$this->assertEquals( 28.9, WC()->cart->total );
+
+		// Add product2 to cart
+		WC()->cart->add_to_cart( $product2->get_id(), 1 );
+		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate' ) );
+		WC()->cart->calculate_totals();
+		$this->assertEquals( 87.9, WC()->cart->total );
+
+	}
+
+	/**
 	 * Test some discount logic which has caused issues in the past.
 	 * Ticket:
 	 *  https://github.com/woocommerce/woocommerce/issues/10963
