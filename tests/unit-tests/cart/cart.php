@@ -50,15 +50,15 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		// Create product with price 19
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_price( 19 );
-		$product->set_regular_price(19 );
-		$product->set_tax_class('5percent');
+		$product->set_regular_price( 19 );
+		$product->set_tax_class( '5percent' );
 		$product->save();
 
 		// Create product with price 59
 		$product2 = WC_Helper_Product::create_simple_product();
 		$product2->set_price( 59 );
-		$product2->set_regular_price(59 );
-		$product->set_tax_class('5percent');
+		$product2->set_regular_price( 59 );
+		$product->set_tax_class( '5percent' );
 		$product2->save();
 
 		// Create a flat rate method.
