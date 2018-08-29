@@ -237,6 +237,16 @@ class WC_Admin_Setup_Wizard {
 			array(
 				'pending_jetpack_install' => $pending_jetpack ? 'yes' : 'no',
 				'states'                  => WC()->countries->get_states(),
+				'current_step'            => isset( $this->steps[ $this->step ] ) ? $this->step : false,
+				'i18n'                    => array(
+					'extra_plugins' => array(
+						'payment' => array(
+							'stripe_create_account'                              => __( 'Stripe setup is powered by Jetpack and WooCommerce Services.', 'woocommerce' ),
+							'ppec_paypal_reroute_requests'                       => __( 'PayPal setup is powered by Jetpack and WooCommerce Services.', 'woocommerce' ),
+							'stripe_create_account,ppec_paypal_reroute_requests' => __( 'Stripe and PayPal setup are powered by Jetpack and WooCommerce Services.', 'woocommerce' ),
+						),
+					),
+				),
 			)
 		);
 
