@@ -227,6 +227,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Localization - Disable postcode requirement for Bahrain. #21103
 * Localization - Make postcode field optional and hidden for Nigeria and label State. #21056
 * Localization - Make Romania state selection mandatory. #21180
+* Localization - Make city field optional and hidden for Singapore addresses. #21016
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
