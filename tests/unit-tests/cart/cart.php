@@ -32,7 +32,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			'tax_rate_order'    => '1',
 			'tax_rate_class'    => '23percent',
 		);
-		WC_Tax::_insert_tax_rate( $tax_rate );
+		$tax_rate_23 = WC_Tax::_insert_tax_rate( $tax_rate );
 
 		$tax_rate = array(
 			'tax_rate_country'  => '',
@@ -45,7 +45,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			'tax_rate_order'    => '1',
 			'tax_rate_class'    => '5percent',
 		);
-		WC_Tax::_insert_tax_rate( $tax_rate );
+		$tax_rate_5 = WC_Tax::_insert_tax_rate( $tax_rate );
 
 		// Create product with price 19
 		$product = WC_Helper_Product::create_simple_product();
@@ -60,7 +60,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$product2->set_regular_price(59 );
 		$product->set_tax_class('5percent');
 		$product2->save();
-
 
 		// Create a flat rate method.
 		$flat_rate_settings = array(
@@ -92,6 +91,12 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate' ) );
 		WC()->cart->calculate_totals();
 		$this->assertEquals( 87.9, WC()->cart->total );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+		WC_Helper_Product::delete_product( $product2->get_id() );
+
+		WC_Tax::_delete_tax_rate( $tax_rate_23 );
+		WC_Tax::_delete_tax_rate( $tax_rate_5 );
 
 	}
 
