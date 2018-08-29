@@ -5,6 +5,8 @@
 import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { map } from 'lodash';
+import { compose } from '@wordpress/compose';
+import { withSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -13,12 +15,10 @@ import { Card, Table } from '@woocommerce/components';
 import { getAdminLink } from 'lib/nav-utils';
 import { numberFormat } from 'lib/number';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
+import { NAMESPACE } from 'store/constants';
 import './style.scss';
 
-// Mock data until we fetch from an API
-import mockData from './mock-data';
-
-class TopSellingProducts extends Component {
+export class TopSellingProducts extends Component {
 	getHeadersContent() {
 		return [
 			{
@@ -51,7 +51,7 @@ class TopSellingProducts extends Component {
 		];
 	}
 
-	getRowsContent( data = [] ) {
+	getRowsContent( data ) {
 		return map( data, row => {
 			const { product_id, items_sold, gross_revenue, orders_count } = row;
 
@@ -82,7 +82,10 @@ class TopSellingProducts extends Component {
 	}
 
 	render() {
-		const rows = this.getRowsContent( mockData ) || [];
+		const { data, isRequesting, isError } = this.props;
+
+		// @TODO We will need to update it with a loading/empty data indicator
+		const rows = isRequesting || isError ? [] : this.getRowsContent( data );
 		const headers = this.getHeadersContent();
 		const title = __( 'Top Selling Products', 'wc-admin' );
 
@@ -94,4 +97,18 @@ class TopSellingProducts extends Component {
 	}
 }
 
-export default TopSellingProducts;
+export default compose(
+	withSelect( select => {
+		const { getReportStats, isReportStatsRequesting, isReportStatsError } = select( 'wc-admin' );
+		const endpoint = NAMESPACE + 'reports/products';
+		// @TODO We will need to add the date parameters from the Date Picker
+		// { after: '2018-04-22', before: '2018-05-06' }
+		const query = { orderby: 'items_sold' };
+
+		const data = getReportStats( endpoint, query );
+		const isRequesting = isReportStatsRequesting( endpoint, query );
+		const isError = isReportStatsError( endpoint, query );
+
+		return { data, isRequesting, isError };
+	} )
+)( TopSellingProducts );
