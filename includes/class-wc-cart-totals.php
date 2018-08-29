@@ -591,7 +591,7 @@ final class WC_Cart_Totals {
 	 * @param array $taxes Taxes to round.
 	 * @return array
 	 */
-	protected function round_merged_taxes( $taxes ) {
+	protected function round_merged_taxes( array $taxes ) {
 		if ( $this->round_at_subtotal() ) {
 			foreach ( $taxes as $rate_id => $tax ) {
 				$taxes[ $rate_id ] = wc_round_tax_total( $tax, 0 );
