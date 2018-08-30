@@ -1249,13 +1249,13 @@ p.jetpack-terms {
 	border: 1px solid #ebebeb;
 	border-radius: 4px;
 	padding: 2.5em;
+}
 
-	li {
-		list-style: none;
+.wc-setup-content .recommended-item {
+	list-style: none;
 
-		&:last-child label {
-			margin-bottom: 0; // Avoid extra space at the end of the list.
-		}
+	&:last-child label {
+		margin-bottom: 0; // Avoid extra space at the end of the list.
 	}
 
 	label {
@@ -1295,6 +1295,17 @@ p.jetpack-terms {
 			background-color: #209bbb;
 			height: 2em;
 			padding: ( 3.5em - 2em ) / 2;
+		}
+
+		&.recommended-item-icon-woocommerce_services {
+			background-color: #f0f0f0;
+			max-height: 1.5em;
+			padding: 1.3em .7em;
+		}
+
+		&.recommended-item-icon-shipstation {
+			background-color: #f0f0f0;
+			padding: .3em;
 		}
 	}
 

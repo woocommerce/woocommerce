@@ -929,6 +929,35 @@ class WC_Admin_Setup_Wizard {
 				</ul>
 			<?php endif; ?>
 
+			<ul>
+			<?php
+			if ( $this->is_wcs_shipping_labels_supported_country( $country_code ) ) :
+				$this->display_recommended_item( array(
+					'type'        => 'woocommerce_services',
+					'title'       => __( 'Print shipping labels at home', 'woocommerce' ),
+					'description' => __( 'We recommend WooCommerce Services & Jetpack. These plugins will save you time at the Post Office by enabling you to print your shipping labels at home.', 'woocommerce' ),
+					'img_url'     => WC()->plugin_url() . '/assets/images/obw-woocommerce-services-icon.png',
+					'img_alt'     => __( 'WooCommerce Services icon', 'woocommerce' ),
+					'plugins'     => $this->get_wcs_requisite_plugins(),
+				) );
+			elseif ( $this->is_shipstation_supported_country( $country_code ) ) :
+				$this->display_recommended_item( array(
+					'type'        => 'shipstation',
+					'title'       => __( 'Print shipping labels at home', 'woocommerce' ),
+					'description' => __( 'We recommend using ShipStation to save time at the Post Office by printing your shipping labels at home. Try ShipStation free for 30 days.', 'woocommerce' ),
+					'img_url'     => WC()->plugin_url() . '/assets/images/obw-shipstation-icon.png',
+					'img_alt'     => __( 'ShipStation icon', 'woocommerce' ),
+					'plugins'     => array(
+						array(
+							'name' => __( 'ShipStation', 'woocommerce' ),
+							'slug' => 'woocommerce-shipstation',
+						),
+					),
+				) );
+			endif;
+			?>
+			</ul>
+
 			<div class="wc-setup-shipping-units">
 				<div class="wc-setup-shipping-unit">
 					<p>
@@ -1215,6 +1244,32 @@ class WC_Admin_Setup_Wizard {
 		$supported_countries = array(
 			'AU', // Australia.
 			'NZ', // New Zealand.
+		);
+		return in_array( $country_code, $supported_countries, true );
+	}
+
+	/**
+	 * Is ShipStation country supported
+	 *
+	 * @param string $country_code Country code.
+	 */
+	protected function is_shipstation_supported_country( $country_code ) {
+		$supported_countries = array(
+			'AU', // Australia.
+			'CA', // Canada.
+			'GB', // United Kingdom.
+		);
+		return in_array( $country_code, $supported_countries, true );
+	}
+
+	/**
+	 * Is WooCommerce Services shipping label country supported
+	 *
+	 * @param string $country_code Country code.
+	 */
+	protected function is_wcs_shipping_labels_supported_country( $country_code ) {
+		$supported_countries = array(
+			'US', // United States.
 		);
 		return in_array( $country_code, $supported_countries, true );
 	}
