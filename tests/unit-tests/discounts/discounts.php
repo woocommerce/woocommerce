@@ -1440,14 +1440,14 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 	 */
 	public function test_is_coupon_valid_sale_items() {
 
-		$product1 = new WC_Product_Simple();
-		$product1->set_regular_price( 20 );
-		$product1->save();
+		$product_no_sale = new WC_Product_Simple();
+		$product_no_sale->set_regular_price( 20 );
+		$product_no_sale->save();
 
-		$product2 = new WC_Product_Simple();
-		$product2->set_regular_price( 20 );
-		$product2->set_sale_price( 10 );
-		$product2->save();
+		$product_sale = new WC_Product_Simple();
+		$product_sale->set_regular_price( 20 );
+		$product_sale->set_sale_price( 10 );
+		$product_sale->save();
 
 		$coupon_cart = new WC_Coupon();
 		$coupon_cart->set_props( array(
@@ -1482,8 +1482,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		$coupon_product_no_sale->save();
 
 		WC()->cart->empty_cart();
-		WC()->cart->add_to_cart( $product1->get_id(), 1 );
-		WC()->cart->add_to_cart( $product2->get_id(), 1 );
+		WC()->cart->add_to_cart( $product_no_sale->get_id(), 1 );
+		WC()->cart->add_to_cart( $product_sale->get_id(), 1 );
 		$discounts = new WC_Discounts( WC()->cart );
 
 		// Cart coupon with no sale restriction should be valid if sale item is in cart.
