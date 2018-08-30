@@ -52,7 +52,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			'class'            => 'select short',
 		);
 		?>
-		<p class="form-field dimensions_field">
+		<p class="form-field shipping_class_field">
 			<label for="product_shipping_class"><?php esc_html_e( 'Shipping class', 'woocommerce' ); ?></label>
 			<?php wp_dropdown_categories( $args ); ?>
 			<?php echo wc_help_tip( __( 'Shipping classes are used by certain shipping methods to group similar products.', 'woocommerce' ) ); ?>
