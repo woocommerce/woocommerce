@@ -1314,13 +1314,13 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Returns if an order has been paid for based on the order status.
+	 * Returns if an order has been paid.
 	 *
 	 * @since 2.5.0
 	 * @return bool
 	 */
 	public function is_paid() {
-		return apply_filters( 'woocommerce_order_is_paid', $this->has_status( wc_get_is_paid_statuses() ), $this );
+		return apply_filters( 'woocommerce_order_is_paid', ( ! empty( $this->get_date_paid( 'edit' ) ) || $this->has_status( wc_get_is_paid_statuses() ) ), $this );
 	}
 
 	/**
