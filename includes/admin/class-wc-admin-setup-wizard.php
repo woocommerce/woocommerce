@@ -770,10 +770,6 @@ class WC_Admin_Setup_Wizard {
 	 */
 	protected function get_wizard_shipping_methods( $country_code, $currency_code ) {
 		$shipping_methods = array(
-			'live_rates'    => array(
-				'name'        => __( 'Live Rates', 'woocommerce' ),
-				'description' => __( 'Powered by WooCommerce Services and Jetpack.', 'woocommerce' ),
-			),
 			'flat_rate'     => array(
 				'name'        => __( 'Flat Rate', 'woocommerce' ),
 				'description' => __( 'Set a fixed price to cover shipping costs.', 'woocommerce' ),
@@ -792,12 +788,6 @@ class WC_Admin_Setup_Wizard {
 			),
 		);
 
-		$live_rate_carrier = $this->get_wcs_shipping_carrier( $country_code, $currency_code );
-
-		if ( false === $live_rate_carrier || ! current_user_can( 'install_plugins' ) ) {
-			unset( $shipping_methods['live_rates'] );
-		}
-
 		return $shipping_methods;
 	}
 
@@ -809,8 +799,7 @@ class WC_Admin_Setup_Wizard {
 	 * @param string $input_prefix Input prefix.
 	 */
 	protected function shipping_method_selection_form( $country_code, $currency_code, $input_prefix ) {
-		$live_rate_carrier = $this->get_wcs_shipping_carrier( $country_code, $currency_code );
-		$selected          = $live_rate_carrier ? 'live_rates' : 'flat_rate';
+		$selected          = 'flat_rate';
 		$shipping_methods  = $this->get_wizard_shipping_methods( $country_code, $currency_code );
 		?>
 		<div class="wc-wizard-shipping-method-select">
@@ -875,27 +864,21 @@ class WC_Admin_Setup_Wizard {
 		$existing_zones        = WC_Shipping_Zones::get_zones();
 		$dimension_unit        = get_option( 'woocommerce_dimension_unit' );
 		$weight_unit           = get_option( 'woocommerce_weight_unit' );
+		$intro_text            = '';
 
-		if ( ! empty( $existing_zones ) ) {
-			$intro_text = __( 'How would you like units on your store displayed?', 'woocommerce' );
-		} elseif ( $wcs_carrier ) {
-			$intro_text = sprintf(
-				/* translators: %1$s: country name including the 'the' prefix, %2$s: shipping carrier name */
-				__( "You're all set up to ship anywhere in %1\$s, and outside of it. We recommend using <strong>live rates</strong> (which are powered by our WooCommerce Services plugin and Jetpack) to get accurate %2\$s shipping prices to cover the cost of order fulfillment.", 'woocommerce' ),
-				$prefixed_country_name,
-				$wcs_carrier
-			);
-		} else {
+		if ( empty( $existing_zones ) ) {
 			$intro_text = sprintf(
 				/* translators: %s: country name including the 'the' prefix if needed */
-				__( "You can choose which countries you'll be shipping to and with which methods. To get started, we've set you up with shipping inside and outside of %s.", 'woocommerce' ),
+				__( "We've created two Shipping Zones - for %s and for the rest of the world. Below you can set Flat Rate shipping costs for these Zones or offer Free Shipping.", 'woocommerce' ),
 				$prefixed_country_name
 			);
 		}
 
 		?>
 		<h1><?php esc_html_e( 'Shipping', 'woocommerce' ); ?></h1>
+		<?php if ( $intro_text ) : ?>
 		<p><?php echo wp_kses_post( $intro_text ); ?></p>
+		<?php endif; ?>
 		<form method="post">
 			<?php if ( empty( $existing_zones ) ) : ?>
 				<ul class="wc-wizard-services shipping">
