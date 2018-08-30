@@ -105,3 +105,8 @@
 		margin: 0 $gap-small;
 	}
 }
+
+.woocommerce-filters-date__content.is-center:not(.is-mobile) > .components-popover__content {
+	transform: none;
+	margin-left: -160px;
+}
