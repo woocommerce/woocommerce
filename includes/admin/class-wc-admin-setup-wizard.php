@@ -1017,11 +1017,6 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_shipping_save() {
 		check_admin_referer( 'wc-setup' );
 
-		// If going through this step again, remove the live rates options.
-		// in case the user saved different settings this time.
-		delete_option( 'woocommerce_setup_domestic_live_rates_zone' );
-		delete_option( 'woocommerce_setup_intl_live_rates_zone' );
-
 		// @codingStandardsIgnoreStart
 		$setup_domestic   = isset( $_POST['shipping_zones']['domestic']['enabled'] ) && ( 'yes' === $_POST['shipping_zones']['domestic']['enabled'] );
 		$domestic_method  = isset( $_POST['shipping_zones']['domestic']['method'] ) ? sanitize_text_field( wp_unslash( $_POST['shipping_zones']['domestic']['method'] ) ) : '';
@@ -1042,14 +1037,6 @@ class WC_Admin_Setup_Wizard {
 			exit;
 		}
 
-		// Install WooCommerce Services if live rates were selected.
-		if (
-			( $setup_domestic && 'live_rates' === $domestic_method ) ||
-			( $setup_intl && 'live_rates' === $intl_method )
-		) {
-			$this->install_woocommerce_services();
-		}
-
 		/*
 		 * If enabled, create a shipping zone containing the country the
 		 * store is located in, with the selected method preconfigured.
@@ -1060,14 +1047,7 @@ class WC_Admin_Setup_Wizard {
 			$zone = new WC_Shipping_Zone( null );
 			$zone->set_zone_order( 0 );
 			$zone->add_location( $country, 'country' );
-
-			if ( 'live_rates' === $domestic_method ) {
-				// Signal WooCommerce Services to setup the domestic zone.
-				update_option( 'woocommerce_setup_domestic_live_rates_zone', true, 'no' );
-			} else {
-				$instance_id = $zone->add_shipping_method( $domestic_method );
-			}
-
+			$instance_id = $zone->add_shipping_method( $domestic_method );
 			$zone->save();
 
 			// Save chosen shipping method settings (using REST controller for convenience).
@@ -1085,15 +1065,10 @@ class WC_Admin_Setup_Wizard {
 
 		// If enabled, set the selected method for the "rest of world" zone.
 		if ( $setup_intl ) {
-			if ( 'live_rates' === $intl_method ) {
-				// Signal WooCommerce Services to setup the international zone.
-				update_option( 'woocommerce_setup_intl_live_rates_zone', true, 'no' );
-			} else {
-				$zone        = new WC_Shipping_Zone( 0 );
-				$instance_id = $zone->add_shipping_method( $intl_method );
+			$zone        = new WC_Shipping_Zone( 0 );
+			$instance_id = $zone->add_shipping_method( $intl_method );
 
-				$zone->save();
-			}
+			$zone->save();
 
 			// Save chosen shipping method settings (using REST controller for convenience).
 			if ( isset( $instance_id ) && ! empty( $_POST['shipping_zones']['intl'][ $intl_method ] ) ) { // WPCS: input var ok.
