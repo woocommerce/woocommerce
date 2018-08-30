@@ -764,19 +764,21 @@ class WC_Discounts {
 	 * @return bool
 	 */
 	protected function validate_coupon_sale_items( $coupon ) {
-		if ( $coupon->get_exclude_sale_items() && 'fixed_product' !== $coupon->get_discount_type() ) {
-			$valid = true;
+		if ( ! $coupon->get_exclude_sale_items() ) {
+			return true;
+		}
 
-			foreach ( $this->get_items_to_validate() as $item ) {
-				if ( $item->product && $item->product->is_on_sale() ) {
-					$valid = false;
-					break;
-				}
-			}
+		$valid = ( 'fixed_product' !== $coupon->get_discount_type() );
 
-			if ( ! $valid ) {
-				throw new Exception( __( 'Sorry, this coupon is not valid for sale items.', 'woocommerce' ), 110 );
+		foreach ( $this->get_items_to_validate() as $item ) {
+			if ( $item->product && ! $item->product->is_on_sale() ) {
+				$valid = ! $valid;
+				break;
 			}
+		}
+
+		if ( ! $valid ) {
+			throw new Exception( __( 'Sorry, this coupon is not valid for sale items.', 'woocommerce' ), 110 );
 		}
 
 		return true;
