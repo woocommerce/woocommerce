@@ -14,6 +14,7 @@
 
 .woocommerce-calendar__react-dates {
 	width: 100%;
+	overflow-x: hidden;
 
 	.DayPicker {
 		margin: 0 auto;
@@ -52,6 +53,12 @@
 
 	.DayPicker_weekHeader_li {
 		color: $core-grey-dark-400;
+	}
+
+	.DayPickerNavigation_button {
+		&:focus {
+			outline: 2px solid #bfe7f3;
+		}
 	}
 }
 
