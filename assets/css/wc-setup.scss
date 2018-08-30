@@ -960,8 +960,12 @@ h3.jetpack-reasons {
 		display: block;
 	}
 	
-	.plugin-install-info-list-item:not(:last-child)::after {
+	.plugin-install-info-list-item::after {
 		content: ', ';
+	}
+
+	.plugin-install-info-list-item:last-of-type::after {
+		content: '. ';
 	}
 
 	a {
