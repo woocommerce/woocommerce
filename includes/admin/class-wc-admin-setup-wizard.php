@@ -747,26 +747,6 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Get the WCS shipping carrier for a given country code.
-	 *
-	 * Can also be used to determine if WCS supports a given country.
-	 *
-	 * @param string $country_code Country Code.
-	 * @param string $currency_code Currecy Code.
-	 * @return bool|string Carrier name if supported, boolean False otherwise.
-	 */
-	protected function get_wcs_shipping_carrier( $country_code, $currency_code ) {
-		switch ( array( $country_code, $currency_code ) ) {
-			case array( 'US', 'USD' ):
-				return 'USPS';
-			case array( 'CA', 'CAD' ):
-				return 'Canada Post';
-			default:
-				return false;
-		}
-	}
-
-	/**
 	 * Get shipping methods based on country code.
 	 *
 	 * @param string $country_code Country code.
@@ -865,7 +845,6 @@ class WC_Admin_Setup_Wizard {
 		$country_name          = WC()->countries->countries[ $country_code ];
 		$prefixed_country_name = WC()->countries->estimated_for_prefix( $country_code ) . $country_name;
 		$currency_code         = get_woocommerce_currency();
-		$wcs_carrier           = $this->get_wcs_shipping_carrier( $country_code, $currency_code );
 		$existing_zones        = WC_Shipping_Zones::get_zones();
 		$dimension_unit        = get_option( 'woocommerce_dimension_unit' );
 		$weight_unit           = get_option( 'woocommerce_weight_unit' );
