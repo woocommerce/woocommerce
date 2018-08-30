@@ -767,6 +767,7 @@ body {
 
 // Shipping list of services
 .wc-wizard-services.shipping {
+	margin: 0;
 
 	.wc-wizard-service-name {
 		font-weight: normal;
@@ -852,13 +853,15 @@ body {
 		line-height: 1.5em;
 		font-size: 13px;
 		margin-bottom: 0.25em;
+		text-align: center;
 	}
 
 	.wc-setup-shipping-unit {
 		margin-bottom: 1.75em;
 
 		.select2 {
-			min-width: 100%; // widen dropdowns
+			min-width: 125px; // widen dropdowns
+			top: -5px; // vertically align dropdown value with surrounding text
 		}
 	}
 }
@@ -1341,4 +1344,10 @@ p.jetpack-terms {
 	 #tiptip_holder.tip_top #tiptip_arrow_inner {
 		 border-top-color: #5f6973;
 	 }
- }
+}
+
+.wc-setup-shipping-recommended {
+	border-bottom: 1px solid #eee;
+	margin-top: 0;
+	padding: 30px 0;
+}

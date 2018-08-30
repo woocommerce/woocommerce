@@ -838,6 +838,51 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
+	 * Render a product weight unit dropdown.
+	 *
+	 * @return string
+	 */
+	protected function get_product_weight_selection() {
+		$weight_unit = get_option( 'woocommerce_weight_unit' );
+		ob_start();
+		?>
+		<span class="wc-setup-shipping-unit">
+			<select id="weight_unit" name="weight_unit" class="wc-enhanced-select">
+				<option value="kg" <?php selected( $weight_unit, 'kg' ); ?>><?php esc_html_e( 'Kilograms', 'woocommerce' ); ?></option>
+				<option value="g" <?php selected( $weight_unit, 'g' ); ?>><?php esc_html_e( 'Grams', 'woocommerce' ); ?></option>
+				<option value="lbs" <?php selected( $weight_unit, 'lbs' ); ?>><?php esc_html_e( 'Pounds', 'woocommerce' ); ?></option>
+				<option value="oz" <?php selected( $weight_unit, 'oz' ); ?>><?php esc_html_e( 'Ounces', 'woocommerce' ); ?></option>
+			</select>
+		</span>
+		<?php
+
+		return ob_get_clean();
+	}
+
+	/**
+	 * Render a product dimension unit dropdown.
+	 *
+	 * @return string
+	 */
+	protected function get_product_dimension_selection() {
+		$dimension_unit = get_option( 'woocommerce_dimension_unit' );
+		ob_start();
+		?>
+		<span class="wc-setup-shipping-unit">
+			<select id="dimension_unit" name="dimension_unit" class="wc-enhanced-select">
+				<option value="m" <?php selected( $dimension_unit, 'm' ); ?>><?php esc_html_e( 'Meters', 'woocommerce' ); ?></option>
+				<option value="cm" <?php selected( $dimension_unit, 'cm' ); ?>><?php esc_html_e( 'Centimeters', 'woocommerce' ); ?></option>
+				<option value="mm" <?php selected( $dimension_unit, 'mm' ); ?>><?php esc_html_e( 'Millimeters', 'woocommerce' ); ?></option>
+				<option value="in" <?php selected( $dimension_unit, 'in' ); ?>><?php esc_html_e( 'Inches', 'woocommerce' ); ?></option>
+				<option value="yd" <?php selected( $dimension_unit, 'yd' ); ?>><?php esc_html_e( 'Yards', 'woocommerce' ); ?></option>
+			</select>
+		</span>
+		<?php
+
+		return ob_get_clean();
+	}
+
+	/**
 	 * Shipping.
 	 */
 	public function wc_setup_shipping() {
@@ -846,8 +891,6 @@ class WC_Admin_Setup_Wizard {
 		$prefixed_country_name = WC()->countries->estimated_for_prefix( $country_code ) . $country_name;
 		$currency_code         = get_woocommerce_currency();
 		$existing_zones        = WC_Shipping_Zones::get_zones();
-		$dimension_unit        = get_option( 'woocommerce_dimension_unit' );
-		$weight_unit           = get_option( 'woocommerce_weight_unit' );
 		$intro_text            = '';
 
 		if ( empty( $existing_zones ) ) {
@@ -857,6 +900,9 @@ class WC_Admin_Setup_Wizard {
 				$prefixed_country_name
 			);
 		}
+
+		$is_wcs_labels_supported  = $this->is_wcs_shipping_labels_supported_country( $country_code );
+		$is_shipstation_supported = $this->is_shipstation_supported_country( $country_code );
 
 		?>
 		<h1><?php esc_html_e( 'Shipping', 'woocommerce' ); ?></h1>
@@ -929,9 +975,10 @@ class WC_Admin_Setup_Wizard {
 				</ul>
 			<?php endif; ?>
 
-			<ul>
+		<?php if ( $is_wcs_labels_supported || $is_shipstation_supported ) : ?>
+			<ul class="wc-setup-shipping-recommended">
 			<?php
-			if ( $this->is_wcs_shipping_labels_supported_country( $country_code ) ) :
+			if ( $is_wcs_labels_supported ) :
 				$this->display_recommended_item( array(
 					'type'        => 'woocommerce_services',
 					'title'       => __( 'Print shipping labels at home', 'woocommerce' ),
@@ -940,7 +987,7 @@ class WC_Admin_Setup_Wizard {
 					'img_alt'     => __( 'WooCommerce Services icon', 'woocommerce' ),
 					'plugins'     => $this->get_wcs_requisite_plugins(),
 				) );
-			elseif ( $this->is_shipstation_supported_country( $country_code ) ) :
+			elseif ( $is_shipstation_supported ) :
 				$this->display_recommended_item( array(
 					'type'        => 'shipstation',
 					'title'       => __( 'Print shipping labels at home', 'woocommerce' ),
@@ -955,51 +1002,20 @@ class WC_Admin_Setup_Wizard {
 					),
 				) );
 			endif;
-			?>
+		endif;
+		?>
 			</ul>
 
 			<div class="wc-setup-shipping-units">
-				<div class="wc-setup-shipping-unit">
-					<p>
-						<label for="weight_unit">
-							<?php
-								printf(
-									wp_kses(
-										__( '<strong>Weight unit</strong>—used to calculate shipping rates, and more.', 'woocommerce' ),
-										array( 'strong' => array() )
-									)
-								);
-							?>
-						</label>
-					</p>
-					<select id="weight_unit" name="weight_unit" class="wc-enhanced-select">
-						<option value="kg" <?php selected( $weight_unit, 'kg' ); ?>><?php esc_html_e( 'kg', 'woocommerce' ); ?></option>
-						<option value="g" <?php selected( $weight_unit, 'g' ); ?>><?php esc_html_e( 'g', 'woocommerce' ); ?></option>
-						<option value="lbs" <?php selected( $weight_unit, 'lbs' ); ?>><?php esc_html_e( 'lbs', 'woocommerce' ); ?></option>
-						<option value="oz" <?php selected( $weight_unit, 'oz' ); ?>><?php esc_html_e( 'oz', 'woocommerce' ); ?></option>
-					</select>
-				</div>
-				<div class="wc-setup-shipping-unit">
-					<p>
-						<label for="dimension_unit">
-							<?php
-								printf(
-									wp_kses(
-										__( '<strong>Dimension unit</strong>—helps for accurate package selection.', 'woocommerce' ),
-										array( 'strong' => array() )
-									)
-								);
-							?>
-						</label>
-					</p>
-					<select id="dimension_unit" name="dimension_unit" class="wc-enhanced-select">
-						<option value="m" <?php selected( $dimension_unit, 'm' ); ?>><?php esc_html_e( 'm', 'woocommerce' ); ?></option>
-						<option value="cm" <?php selected( $dimension_unit, 'cm' ); ?>><?php esc_html_e( 'cm', 'woocommerce' ); ?></option>
-						<option value="mm" <?php selected( $dimension_unit, 'mm' ); ?>><?php esc_html_e( 'mm', 'woocommerce' ); ?></option>
-						<option value="in" <?php selected( $dimension_unit, 'in' ); ?>><?php esc_html_e( 'in', 'woocommerce' ); ?></option>
-						<option value="yd" <?php selected( $dimension_unit, 'yd' ); ?>><?php esc_html_e( 'yd', 'woocommerce' ); ?></option>
-					</select>
-				</div>
+				<p>
+					<?php
+						printf(
+							__( 'We\'ll use %1$s for product weight and %2$s for product dimensions.', 'woocommerce' ),
+							$this->get_product_weight_selection(),
+							$this->get_product_dimension_selection()
+						);
+					?>
+				</p>
 			</div>
 
 			<p class="wc-setup-actions step">
