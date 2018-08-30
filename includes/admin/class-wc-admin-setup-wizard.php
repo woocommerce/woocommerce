@@ -1031,6 +1031,23 @@ class WC_Admin_Setup_Wizard {
 		update_option( 'woocommerce_weight_unit', $weight_unit );
 		update_option( 'woocommerce_dimension_unit', $dimension_unit );
 
+		$setup_wcs_labels  = isset( $_POST['setup_woocommerce_services'] ) && 'yes' === $_POST['setup_woocommerce_services'];
+		$setup_shipstation = isset( $_POST['setup_shipstation'] ) && 'yes' === $_POST['setup_shipstation'];
+
+		if ( $setup_wcs_labels ) {
+			$this->install_woocommerce_services();
+		}
+
+		if ( $setup_shipstation ) {
+			$this->install_plugin(
+				'woocommerce-shipstation',
+				array(
+					'name'      => __( 'ShipStation', 'woocommerce' ),
+					'repo-slug' => 'woocommerce-shipstation',
+				)
+			);
+		}
+
 		// For now, limit this setup to the first run.
 		if ( ! empty( $existing_zones ) ) {
 			wp_safe_redirect( esc_url_raw( $this->get_next_step_link() ) );
