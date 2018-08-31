@@ -69,5 +69,5 @@ function generateMarkdown( docObject ) {
 	let markdownString = getTitle( docObject.displayName ) + '\n';
 	markdownString += getDescription( docObject.description ) + '\n';
 	markdownString += getProps( docObject.props );
-	return markdownString;
+	return markdownString + '\n';
 }

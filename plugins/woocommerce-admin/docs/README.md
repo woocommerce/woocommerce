@@ -1,0 +1,27 @@
+# WooCommerce Admin
+
+This is a feature plugin for a modern, javascript-driven WooCommerce Admin experience.
+
+---
+
+:warning: This project is in active development, and is not ready for general use. You can follow the features in development by looking at the [project's issues](https://github.com/woocommerce/wc-admin/issues). **We do not recommend running this on production sites.**
+
+---
+
+## Prerequisites
+
+[Gutenberg](https://wordpress.org/plugins/gutenberg/) and [WooCommerce](https://wordpress.org/plugins/woocommerce/) should be installed prior to activating the WooCommerce Admin feature plugin. You also need v3 of the WooCommerce REST API, which you can get by installing the feature branch of WooCommerce. [Clone the feature branch from github](https://github.com/woocommerce/woocommerce/tree/feature/rest-api-v3), or [download a zip of WooCommerce](https://github.com/woocommerce/woocommerce/archive/feature/rest-api-v3.zip).
+
+For better debugging, it's also recommended you add `define( 'SCRIPT_DEBUG', true );` to your wp-config. This will load the unminified version of all libraries, and specifically the development build of React.
+
+## Development
+
+After cloning the repo, install dependencies with `npm install`. Now you can build the files using one of these commands:
+
+ - `npm run build` : Build a production version
+ - `npm start` : Build a development version, watch files for changes
+
+There are also some helper scripts:
+
+ - `npm run lint` : Run eslint over the javascript files
+ - `npm run i18n` : Create a PHP file with the strings from the javascript files, [used to get around lack of JS support in WordPress.org](https://github.com/WordPress/packages/tree/master/packages/i18n#build).
