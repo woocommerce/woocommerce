@@ -115,6 +115,7 @@ class WC_Install {
 		),
 		'3.5.0' => array(
 			'wc_update_350_order_customer_id',
+			'wc_update_350_change_woocommerce_sessions_schema',
 			'wc_update_350_db_version',
 		),
 	);
@@ -627,8 +628,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_sessions (
   session_key char(32) NOT NULL,
   session_value longtext NOT NULL,
   session_expiry BIGINT UNSIGNED NOT NULL,
-  PRIMARY KEY  (session_key),
-  UNIQUE KEY session_id (session_id)
+  PRIMARY KEY  (session_id),
+  UNIQUE KEY session_key (session_key)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_api_keys (
   key_id BIGINT UNSIGNED NOT NULL auto_increment,
