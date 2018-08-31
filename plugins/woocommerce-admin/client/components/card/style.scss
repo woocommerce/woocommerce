@@ -4,6 +4,15 @@
 	margin-bottom: $gap-large;
 	background: white;
 	border: 1px solid $core-grey-light-700;
+
+	@include breakpoint( '<782px' ) {
+		margin-left: -16px;
+		margin-right: -16px;
+		margin-bottom: $gap-small;
+		border-left: none;
+		border-right: none;
+		width: auto;
+	}
 }
 
 .woocommerce-card__header {
