@@ -14,6 +14,10 @@ import PropTypes from 'prop-types';
  */
 import './style.scss';
 
+/**
+ * Use `Rating` to display a set of stars, filled, empty or half-filled, that represents a
+ * rating in a scale between 0 and the prop `totalStars` (default 5).
+ */
 class Rating extends Component {
 	stars() {
 		const { size, totalStars } = this.props;
@@ -52,9 +56,21 @@ class Rating extends Component {
 }
 
 Rating.propTypes = {
+	/**
+	 * Number of stars that should be filled. You can pass a partial number of stars like `2.5`.
+	 */
 	rating: PropTypes.number,
+	/**
+	 * The total number of stars the rating is out of.
+	 */
 	totalStars: PropTypes.number,
+	/**
+	 * The size in pixels the stars should be rendered at.
+	 */
 	size: PropTypes.number,
+	/**
+	 * Additional CSS classes.
+	 */
 	className: PropTypes.string,
 };
 

@@ -15,6 +15,10 @@ import { product } from './autocompleters';
 import Tag from 'components/tag';
 import './style.scss';
 
+/**
+ * A search box which autocompletes results while typing, allowing for the user to select an existing object
+ * (product, order, customer, etc). Currently only products are supported.
+ */
 class Search extends Component {
 	constructor( props ) {
 		super( props );
@@ -116,7 +120,13 @@ class Search extends Component {
 }
 
 Search.propTypes = {
+	/**
+	 * Function called when selected results change, passed result list.
+	 */
 	onChange: PropTypes.func,
+	/**
+	 * The object type to be used in searching.
+	 */
 	type: PropTypes.oneOf( [ 'products', 'orders', 'customers' ] ).isRequired,
 };
 

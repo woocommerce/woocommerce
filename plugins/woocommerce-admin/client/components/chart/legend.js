@@ -13,6 +13,9 @@ import './style.scss';
 import { formatCurrency } from 'lib/currency';
 import { getColor } from './utils';
 
+/**
+ * A legend specifically designed for the WooCommerce admin charts.
+ */
 class Legend extends Component {
 	render() {
 		const {
@@ -69,11 +72,29 @@ class Legend extends Component {
 }
 
 Legend.propTypes = {
+	/**
+	 * Additional CSS classes.
+	 */
 	className: PropTypes.string,
+	/**
+	 * A chromatic color function to be passed down to d3.
+	 */
 	colorScheme: PropTypes.func,
+	/**
+	 * An array of `orderedKeys`.
+	 */
 	data: PropTypes.array.isRequired,
+	/**
+	 * Handles `onClick` event.
+	 */
 	handleLegendToggle: PropTypes.func,
+	/**
+	 * Handles `onMouseEnter`/`onMouseLeave` events.
+	 */
 	handleLegendHover: PropTypes.func,
+	/**
+	 * Display legend items as a `row` or `column` inside a flex-box.
+	 */
 	legendDirection: PropTypes.oneOf( [ 'row', 'column' ] ),
 };
 

@@ -11,6 +11,11 @@ import PropTypes from 'prop-types';
  */
 import './style.scss';
 
+/**
+ * Use `OrderStatus` to display a badge with human-friendly text describing the current order status.
+ *
+ * @return { object } -
+ */
 const OrderStatus = ( { order, className } ) => {
 	const { status } = order;
 	const { orderStatuses } = wcSettings;
@@ -28,7 +33,13 @@ const OrderStatus = ( { order, className } ) => {
 };
 
 OrderStatus.propTypes = {
+	/**
+	 * The order to display a status for.
+	 */
 	order: PropTypes.object.isRequired,
+	/**
+	 * Additional CSS classes.
+	 */
 	className: PropTypes.string,
 };
 

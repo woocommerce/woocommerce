@@ -20,6 +20,9 @@ const matches = [
 	{ value: 'any', label: __( 'Any', 'wc-admin' ) },
 ];
 
+/**
+ * Displays a configurable set of filters which can modify query parameters.
+ */
 class AdvancedFilters extends Component {
 	constructor( props ) {
 		super( props );
@@ -231,9 +234,28 @@ class AdvancedFilters extends Component {
 }
 
 AdvancedFilters.propTypes = {
-	config: PropTypes.object.isRequired,
+	/**
+	 * The configuration object required to render filters.
+	 */
+	config: PropTypes.objectOf(
+		PropTypes.shape( {
+			label: PropTypes.string,
+			addLabel: PropTypes.string,
+			rules: PropTypes.arrayOf( PropTypes.object ),
+			input: PropTypes.object,
+		} )
+	).isRequired,
+	/**
+	 * Name of this filter, used in translations.
+	 */
 	filterTitle: PropTypes.string.isRequired,
+	/**
+	 * The `path` parameter supplied by React-Router.
+	 */
 	path: PropTypes.string.isRequired,
+	/**
+	 * The query string represented in object form.
+	 */
 	query: PropTypes.object,
 };
 

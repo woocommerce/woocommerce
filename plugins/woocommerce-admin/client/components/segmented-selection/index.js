@@ -12,6 +12,9 @@ import { partial, uniqueId } from 'lodash';
  */
 import './style.scss';
 
+/**
+ * Create a panel of styled selectable options rendering stylized checkboxes and labels
+ */
 class SegmentedSelection extends Component {
 	render() {
 		const { className, options, selected, onSelect, name, legend } = this.props;
@@ -49,16 +52,34 @@ class SegmentedSelection extends Component {
 }
 
 SegmentedSelection.propTypes = {
+	/**
+	 * Additional CSS classes.
+	 */
 	className: PropTypes.string,
+	/**
+	 * An Array of options to render. The array needs to be composed of objects with properties `label` and `value`.
+	 */
 	options: PropTypes.arrayOf(
 		PropTypes.shape( {
 			value: PropTypes.string.isRequired,
 			label: PropTypes.string.isRequired,
 		} )
 	).isRequired,
+	/**
+	 * Value of selected item.
+	 */
 	selected: PropTypes.string,
+	/**
+	 * Callback to be executed after selection
+	 */
 	onSelect: PropTypes.func.isRequired,
+	/**
+	 * This will be the key in the key and value arguments supplied to `onSelect`.
+	 */
 	name: PropTypes.string.isRequired,
+	/**
+	 * Create a legend visible to screen readers.
+	 */
 	legend: PropTypes.string.isRequired,
 };
 

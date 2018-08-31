@@ -12,6 +12,9 @@ import PropTypes from 'prop-types';
  */
 import './style.scss';
 
+/**
+ * This is a dropdown menu hidden behind a vertical ellipsis icon. When clicked, the inner MenuItems are displayed.
+ */
 class EllipsisMenu extends Component {
 	render() {
 		const { children, label } = this.props;
@@ -53,7 +56,14 @@ class EllipsisMenu extends Component {
 }
 
 EllipsisMenu.propTypes = {
+	/**
+	 * The label shown when hovering/focusing on the icon button.
+	 */
 	label: PropTypes.string.isRequired,
+	/**
+	 * A list of `MenuTitle`/`MenuItem` components
+	 */
+	children: PropTypes.node,
 };
 
 export default EllipsisMenu;

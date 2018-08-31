@@ -35,6 +35,9 @@ function getOrderedKeys( data ) {
 		.sort( ( a, b ) => b.total - a.total );
 }
 
+/**
+ * A chart container using d3, to display timeseries data with an interactive legend.
+ */
 class Chart extends Component {
 	constructor( props ) {
 		super( props );
@@ -166,7 +169,13 @@ class Chart extends Component {
 }
 
 Chart.propTypes = {
+	/**
+	 * An array of data.
+	 */
 	data: PropTypes.array.isRequired,
+	/**
+	 * A title describing this chart.
+	 */
 	title: PropTypes.string,
 };
 

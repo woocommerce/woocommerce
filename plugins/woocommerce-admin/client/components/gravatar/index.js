@@ -14,6 +14,11 @@ import crypto from 'crypto';
  */
 import './style.scss';
 
+/**
+ * Display a users Gravatar.
+ *
+ * @return { object } -
+ */
 const Gravatar = ( { alt, title, size, user, className } ) => {
 	const classes = classnames( 'woocommerce-gravatar', className, {
 		'is-placeholder': ! user,
@@ -62,10 +67,25 @@ const Gravatar = ( { alt, title, size, user, className } ) => {
 };
 
 Gravatar.propTypes = {
+	/**
+	 * The address to hash for displaying a Gravatar. Can be an email address or WP-API user object.
+	 */
 	user: PropTypes.oneOfType( [ PropTypes.object, PropTypes.string ] ),
+	/**
+	 * Text to display as the image alt attribute.
+	 */
 	alt: PropTypes.string,
+	/**
+	 * Text to use for the image's title
+	 */
 	title: PropTypes.string,
+	/**
+	 * Default 60. The size of Gravatar to request.
+	 */
 	size: PropTypes.number,
+	/**
+	 * Additional CSS classes.
+	 */
 	className: PropTypes.string,
 };
 

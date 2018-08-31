@@ -24,6 +24,9 @@ import phrases from './phrases';
 import { validateDateInputForRange } from 'lib/date';
 import './style.scss';
 
+/**
+ * This is wrapper for a [react-dates](https://github.com/airbnb/react-dates) powered calendar.
+ */
 class DateRange extends Component {
 	constructor( props ) {
 		super( props );
@@ -170,18 +173,49 @@ class DateRange extends Component {
 }
 
 DateRange.propTypes = {
+	/**
+	 * A moment date object representing the selected start. `null` for no selection.
+	 */
 	after: PropTypes.object,
+	/**
+	 * A string error message, shown to the user.
+	 */
+	afterError: PropTypes.string,
+	/**
+	 * The start date in human-readable format. Displayed in the text input.
+	 */
+	afterText: PropTypes.string,
+	/**
+	 * A moment date object representing the selected end. `null` for no selection.
+	 */
 	before: PropTypes.object,
-	onUpdate: PropTypes.func.isRequired,
+	/**
+	 * A string error message, shown to the user.
+	 */
+	beforeError: PropTypes.string,
+	/**
+	 * The end date in human-readable format. Displayed in the text input.
+	 */
+	beforeText: PropTypes.string,
+	/**
+	 * String identifying which is the currently focused input (start or end).
+	 */
+	focusedInput: PropTypes.string,
+	/**
+	 * Optionally invalidate certain days. `past`, `future`, `none`, or function are accepted.
+	 * A function will be passed to react-dates' `isOutsideRange` prop
+	 */
 	invalidDays: PropTypes.oneOfType( [
 		PropTypes.oneOf( [ 'past', 'future', 'none' ] ),
 		PropTypes.func,
 	] ),
-	focusedInput: PropTypes.string,
-	afterText: PropTypes.string,
-	beforeText: PropTypes.string,
-	afterError: PropTypes.string,
-	beforeError: PropTypes.string,
+	/**
+	 * A function called upon selection of a date.
+	 */
+	onUpdate: PropTypes.func.isRequired,
+	/**
+	 * The date format in moment.js-style tokens.
+	 */
 	shortDateFormat: PropTypes.string.isRequired,
 };
 

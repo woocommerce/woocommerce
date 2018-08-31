@@ -15,6 +15,9 @@ const DESC = 'desc';
 
 const getDisplay = cell => cell.display || null;
 
+/**
+ * A table component, without the Card wrapper. This is a basic table display, sortable, but no default filtering.
+ */
 class Table extends Component {
 	constructor( props ) {
 		super( props );
@@ -149,28 +152,79 @@ class Table extends Component {
 }
 
 Table.propTypes = {
+	/**
+	 * Controls whether this component is hidden from screen readers. Used by the loading state, before there is data to read.
+	 * Don't use this on real tables unless the table data is loaded elsewhere on the page.
+	 */
 	ariaHidden: PropTypes.bool,
+	/**
+	 * A label for the content in this table
+	 */
 	caption: PropTypes.string.isRequired,
+	/**
+	 * Additional CSS classes.
+	 */
 	className: PropTypes.string,
+	/**
+	 * An array of column headers, as objects.
+	 */
 	headers: PropTypes.arrayOf(
 		PropTypes.shape( {
+			/**
+			 * Boolean, true if this column is the default for sorting. Only one column should have this set.
+			 */
 			defaultSort: PropTypes.bool,
+			/**
+			 * Boolean, true if this column is a number value.
+			 */
+			isNumeric: PropTypes.bool,
+			/**
+			 * Boolean, true if this column is sortable.
+			 */
 			isSortable: PropTypes.bool,
+			/**
+			 * The API parameter name for this column, passed to `orderby` when sorting via API.
+			 */
 			key: PropTypes.string,
+			/**
+			 * The display label for this column.
+			 */
 			label: PropTypes.string,
+			/**
+			 * Boolean, true if this column should always display in the table (not shown in toggle-able list).
+			 */
 			required: PropTypes.bool,
 		} )
 	),
+	/**
+	 * A function called when sortable table headers are clicked, gets the `header.key` as argument.
+	 */
 	onSort: PropTypes.func,
+	/**
+	 * The query string represented in object form
+	 */
 	query: PropTypes.object,
+	/**
+	 * An array of arrays of display/value object pairs.
+	 */
 	rows: PropTypes.arrayOf(
 		PropTypes.arrayOf(
 			PropTypes.shape( {
+				/**
+				 * Display value, used for rendering- strings or elements are best here.
+				 */
 				display: PropTypes.node,
+				/**
+				 * "Real" value used for sorting, and should be a string or number. A column with `false` value will not be sortable.
+				 */
 				value: PropTypes.oneOfType( [ PropTypes.string, PropTypes.number, PropTypes.bool ] ),
 			} )
 		)
 	).isRequired,
+	/**
+	 * Which column should be the row header, defaults to the first item (`0`) (but could be set to `1`, if the first col
+	 * is checkboxes, for example). Set to false to disable row headers.
+	 */
 	rowHeader: PropTypes.oneOfType( [ PropTypes.number, PropTypes.bool ] ),
 };
 

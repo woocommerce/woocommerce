@@ -19,6 +19,10 @@ import './style.scss';
 
 export const DEFAULT_FILTER = 'all';
 
+/**
+ * Modify a url query parameter via a dropdown selection of configurable options.
+ * This component manipulates the `filter` query parameter.
+ */
 class FilterPicker extends Component {
 	constructor( props ) {
 		super( props );
@@ -176,8 +180,41 @@ class FilterPicker extends Component {
 }
 
 FilterPicker.propTypes = {
-	filters: PropTypes.array.isRequired,
+	/**
+	 * An array of filters and subFilters to construct the menu.
+	 */
+	filters: PropTypes.arrayOf(
+		PropTypes.shape( {
+			/**
+			 * A custom component used instead of a button, might have special handling for filtering. TBD, not yet implemented.
+			 */
+			component: PropTypes.string,
+			/**
+			 * The label for this filter. Optional only for custom component filters.
+			 */
+			label: PropTypes.string,
+			/**
+			 * An array representing the "path" to this filter, if nested.
+			 */
+			path: PropTypes.string,
+			/**
+			 * An array of more filter objects that act as "children" to this item.
+			 * This set of filters is shown if the parent filter is clicked.
+			 */
+			subFilters: PropTypes.array,
+			/**
+			 * The value for this filter, used to set the `filter` query param when clicked, if there are no `subFilters`.
+			 */
+			value: PropTypes.string.isRequired,
+		} )
+	).isRequired,
+	/**
+	 * The `path` parameter supplied by React-Router.
+	 */
 	path: PropTypes.string.isRequired,
+	/**
+	 * The query string represented in object form.
+	 */
 	query: PropTypes.object,
 };
 

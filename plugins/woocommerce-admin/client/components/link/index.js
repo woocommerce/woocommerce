@@ -11,6 +11,10 @@ import { Link as RouterLink } from 'react-router-dom';
  */
 import { getAdminLink } from 'lib/nav-utils';
 
+/**
+ * Use `Link` to create a link to another resource. It accepts a type to automatically
+ * create wp-admin links, wc-admin links, and external links.
+ */
 class Link extends Component {
 	render() {
 		const { children, href, type, ...props } = this.props;
@@ -40,7 +44,13 @@ class Link extends Component {
 }
 
 Link.propTypes = {
+	/**
+	 * The resource to link to.
+	 */
 	href: PropTypes.string.isRequired,
+	/**
+	 * Type of link. For wp-admin and wc-admin, the correct prefix is appended.
+	 */
 	type: PropTypes.oneOf( [ 'wp-admin', 'wc-admin', 'external' ] ).isRequired,
 };
 

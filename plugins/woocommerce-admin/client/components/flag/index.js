@@ -12,6 +12,11 @@ import PropTypes from 'prop-types';
  */
 import './style.scss';
 
+/**
+ * Use the `Flag` component to display a country's flag.
+ *
+ * @return { object } -
+ */
 const Flag = ( { code, order, round, height, width, className } ) => {
 	const classes = classnames( 'woocommerce-flag', className, {
 		'is-round': round,
@@ -42,11 +47,29 @@ const Flag = ( { code, order, round, height, width, className } ) => {
 };
 
 Flag.propTypes = {
+	/**
+	 * Two letter, three letter or three digit country code.
+	 */
 	code: PropTypes.string,
+	/**
+	 * An order can be passed instead of `code` and the code will automatically be pulled from the billing or shipping data.
+	 */
 	order: PropTypes.object,
+	/**
+	 * True to display a rounded flag.
+	 */
 	round: PropTypes.bool,
+	/**
+	 * Flag image height.
+	 */
 	height: PropTypes.number,
+	/**
+	 * Flag image width.
+	 */
 	width: PropTypes.number,
+	/**
+	 * Additional CSS classes.
+	 */
 	className: PropTypes.string,
 };
 

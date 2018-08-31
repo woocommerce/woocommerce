@@ -24,5 +24,4 @@ render: function() {
 * `size`: Default 60. The size of Gravatar to request.
 * `alt`: Text to display as the image alt attribute.
 * `title`: Text to use for the image's title
-* `fallback`: Default `mp`. Gravatar default fallback mode. See https://en.gravatar.com/site/implement/images/.
 * `className`: Additional CSS classes.

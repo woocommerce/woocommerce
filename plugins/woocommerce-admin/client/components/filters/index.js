@@ -18,6 +18,12 @@ import FilterPicker from './filter';
 import { H, Section } from 'layout/section';
 import './style.scss';
 
+/**
+ * Add a collection of report filters to a page. This uses `DatePicker` & `FilterPicker` for the "basic" filters, and `AdvancedFilters`
+ * or a comparison card if "advanced" or "compare" are picked from `FilterPicker`.
+ *
+ * @return { object } -
+ */
 const ReportFilters = ( { advancedConfig, filters, query, path } ) => {
 	let advancedCard = false;
 	switch ( query.filter ) {
@@ -70,9 +76,21 @@ const ReportFilters = ( { advancedConfig, filters, query, path } ) => {
 };
 
 ReportFilters.propTypes = {
+	/**
+	 * Config option passed through to `AdvancedFilters`
+	 */
 	advancedConfig: PropTypes.object,
+	/**
+	 * Config option passed through to `FilterPicker` - if not used, `FilterPicker` is not displayed.
+	 */
 	filters: PropTypes.array,
+	/**
+	 * The `path` parameter supplied by React-Router
+	 */
 	path: PropTypes.string.isRequired,
+	/**
+	 * The query string represented in object form
+	 */
 	query: PropTypes.object,
 };
 

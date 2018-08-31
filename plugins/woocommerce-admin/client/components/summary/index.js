@@ -15,6 +15,12 @@ import { uniqueId } from 'lodash';
 import { isMobileViewport, isTabletViewport } from 'lib/ui';
 import './style.scss';
 
+/**
+ * A container element for a list of SummaryNumbers. This component handles detecting & switching to
+ * the mobile format on smaller screens.
+ *
+ * @return { object } -
+ */
 const SummaryList = ( { children, label } ) => {
 	if ( ! label ) {
 		label = __( 'Performance Indicators', 'wc-admin' );
@@ -70,7 +76,13 @@ const SummaryList = ( { children, label } ) => {
 };
 
 SummaryList.propTypes = {
+	/**
+	 * A list of `<SummaryNumber />`s
+	 */
 	children: PropTypes.node.isRequired,
+	/**
+	 * An optional label of this group, read to screen reader users. Defaults to "Performance Indicators".
+	 */
 	label: PropTypes.string,
 };
 

@@ -9,6 +9,11 @@ import PropTypes from 'prop-types';
  */
 import './style.scss';
 
+/**
+ * Display a number with a styled border.
+ *
+ * @return { object } -
+ */
 const Count = ( { count, label } ) => {
 	if ( ! label ) {
 		label = sprintf( __( 'Total %d', 'wc-admin' ), count );
@@ -22,7 +27,13 @@ const Count = ( { count, label } ) => {
 };
 
 Count.propTypes = {
+	/**
+	 * Value of the number to be displayed.
+	 */
 	count: PropTypes.number.isRequired,
+	/**
+	 * A translated label with the number in context, used for screen readers.
+	 */
 	label: PropTypes.string,
 };
 

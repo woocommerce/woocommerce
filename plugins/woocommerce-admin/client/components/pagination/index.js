@@ -15,6 +15,10 @@ import { isFinite, noop, uniqueId } from 'lodash';
  */
 import './style.scss';
 
+/**
+ * Use `Pagination` to allow navigation between pages that represent a collection of items.
+ * The component allows for selecting a new page and items per page options.
+ */
 class Pagination extends Component {
 	constructor( props ) {
 		super( props );
@@ -182,11 +186,29 @@ class Pagination extends Component {
 }
 
 Pagination.propTypes = {
+	/**
+	 * The current page of the collection.
+	 */
 	page: PropTypes.number.isRequired,
+	/**
+	 * A function to execute when the page is changed.
+	 */
 	onPageChange: PropTypes.func,
+	/**
+	 * The amount of results that are being displayed per page.
+	 */
 	perPage: PropTypes.number.isRequired,
+	/**
+	 * A function to execute when the per page option is changed.
+	 */
 	onPerPageChange: PropTypes.func,
+	/**
+	 * The total number of results.
+	 */
 	total: PropTypes.number.isRequired,
+	/**
+	 * Additional classNames.
+	 */
 	className: PropTypes.string,
 };
 

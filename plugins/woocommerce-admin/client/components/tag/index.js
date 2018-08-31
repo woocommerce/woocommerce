@@ -14,6 +14,12 @@ import { withInstanceId } from '@wordpress/compose';
  */
 import './style.scss';
 
+/**
+ * This component can be used to show an item styled as a "tag", optionally with an `X` + "remove".
+ * Generally this is used in a collection of selected items, see the Search component.
+ *
+ * @return { object } -
+ */
 const Tag = ( { id, instanceId, label, remove, removeLabel, screenReaderLabel, className } ) => {
 	screenReaderLabel = screenReaderLabel || label;
 	const classes = classnames( 'woocommerce-tag', className, {
@@ -41,10 +47,25 @@ const Tag = ( { id, instanceId, label, remove, removeLabel, screenReaderLabel, c
 };
 
 Tag.propTypes = {
+	/**
+	 * The ID for this item, used in the remove function.
+	 */
 	id: PropTypes.number.isRequired,
+	/**
+	 * The name for this item, displayed as the tag's text.
+	 */
 	label: PropTypes.string.isRequired,
+	/**
+	 * A function called when the remove X is clicked. If not used, no X icon will display.
+	 */
 	remove: PropTypes.func,
+	/**
+	 * The label for removing this item (shown when hovering on X, or read to screen reader users). Defaults to "Remove tag".
+	 */
 	removeLabel: PropTypes.string,
+	/**
+	 * A more descriptive label for screen reader users. Defaults to the `name` prop.
+	 */
 	screenReaderLabel: PropTypes.string,
 };
 

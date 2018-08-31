@@ -20,6 +20,14 @@ import Pagination from 'components/pagination';
 import Table from './table';
 import TableSummary from './summary';
 
+/**
+ * This is an accessible, sortable, and scrollable table for displaying tabular data (like revenue and other analytics data).
+ * It accepts `headers` for column headers, and `rows` for the table content.
+ * `rowHeader` can be used to define the index of the row header (or false if no header).
+ *
+ * `TableCard` serves as Card wrapper & contains a card header, `<Table />`, `<TableSummary />`, and `<Pagination />`.
+ * This includes filtering and comparison functionality for report pages.
+ */
 class TableCard extends Component {
 	constructor( props ) {
 		super( props );
@@ -122,6 +130,9 @@ class TableCard extends Component {
 }
 
 TableCard.propTypes = {
+	/**
+	 * An array of column headers (see `Table` props).
+	 */
 	headers: PropTypes.arrayOf(
 		PropTypes.shape( {
 			defaultSort: PropTypes.bool,
@@ -131,10 +142,25 @@ TableCard.propTypes = {
 			required: PropTypes.bool,
 		} )
 	),
+	/**
+	 * A function which returns a callback function to update the query string for a given `param`.
+	 */
 	onQueryChange: PropTypes.func,
+	/**
+	 * A callback function which handles then "download" button press. Optional, if not used, the button won't appear.
+	 */
 	onClickDownload: PropTypes.func,
+	/**
+	 *  An object of the query parameters passed to the page, ex `{ page: 2, per_page: 5 }`.
+	 */
 	query: PropTypes.object,
+	/**
+	 * An array of arrays of display/value object pairs (see `Table` props).
+	 */
 	rowHeader: PropTypes.oneOfType( [ PropTypes.number, PropTypes.bool ] ),
+	/**
+	 * Which column should be the row header, defaults to the first item (`0`) (see `Table` props).
+	 */
 	rows: PropTypes.arrayOf(
 		PropTypes.arrayOf(
 			PropTypes.shape( {
@@ -143,12 +169,19 @@ TableCard.propTypes = {
 			} )
 		)
 	).isRequired,
+	/**
+	 * An array of objects with `label` & `value` properties, which display in a line under the table.
+	 * Optional, can be left off to show no summary.
+	 */
 	summary: PropTypes.arrayOf(
 		PropTypes.shape( {
 			label: PropTypes.node,
 			value: PropTypes.oneOfType( [ PropTypes.string, PropTypes.number ] ),
 		} )
 	),
+	/**
+	 * The title used in the card header, also used as the caption for the content in this table.
+	 */
 	title: PropTypes.string.isRequired,
 };
 

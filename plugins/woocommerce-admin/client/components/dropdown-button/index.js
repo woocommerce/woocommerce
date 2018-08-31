@@ -11,6 +11,13 @@ import classnames from 'classnames';
  */
 import './style.scss';
 
+/**
+ * A button useful for a launcher of a dropdown component. The button is 100% width of its container and displays
+ * single or multiple lines rendered as `<span/>` elments.
+ *
+ * @param { object } props Props passed to component.
+ * @return { object } -
+ */
 const DropdownButton = props => {
 	const { labels, isOpen, ...otherProps } = props;
 	const buttonClasses = classnames( 'woocommerce-dropdown-button', {
@@ -27,7 +34,13 @@ const DropdownButton = props => {
 };
 
 DropdownButton.propTypes = {
+	/**
+	 * An array of elements to be rendered as the content of the button.
+	 */
 	labels: PropTypes.array,
+	/**
+	 * Boolean describing if the dropdown in open or not.
+	 */
 	isOpen: PropTypes.bool,
 };
 

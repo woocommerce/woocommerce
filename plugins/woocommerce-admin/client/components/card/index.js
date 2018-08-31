@@ -14,6 +14,9 @@ import EllipsisMenu from 'components/ellipsis-menu';
 import { H, Section } from 'layout/section';
 import { validateComponent } from 'lib/proptype-validator';
 
+/**
+ * A basic card component with a header. The header can contain a title, an action, and an `EllipsisMenu` menu.
+ */
 class Card extends Component {
 	render() {
 		const { action, children, menu, title } = this.props;
@@ -35,9 +38,21 @@ class Card extends Component {
 }
 
 Card.propTypes = {
+	/**
+	 * One "primary" action for this card, appears in the card header.
+	 */
 	action: PropTypes.node,
+	/**
+	 * Additional CSS classes.
+	 */
 	className: PropTypes.string,
+	/**
+	 * An `EllipsisMenu`, with filters used to control the content visible in this card
+	 */
 	menu: validateComponent( EllipsisMenu ),
+	/**
+	 * The title to use for this card.
+	 */
 	title: PropTypes.oneOfType( [ PropTypes.string, PropTypes.node ] ).isRequired,
 };
 

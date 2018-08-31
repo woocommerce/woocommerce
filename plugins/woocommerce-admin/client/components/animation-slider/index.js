@@ -12,6 +12,10 @@ import PropTypes from 'prop-types';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import './style.scss';
 
+/**
+ * This component creates slideable content controlled by an animate prop to direct the contents to slide left or right.
+ * All other props are passed to `CSSTransition`. More info at http://reactcommunity.org/react-transition-group/css-transition
+ */
 class AnimationSlider extends Component {
 	constructor() {
 		super();
@@ -62,9 +66,21 @@ class AnimationSlider extends Component {
 }
 
 AnimationSlider.propTypes = {
+	/**
+	 * A function returning rendered content with argument status, reflecting `CSSTransition` status.
+	 */
 	children: PropTypes.func.isRequired,
+	/**
+	 * A unique identifier for each slideable page.
+	 */
 	animationKey: PropTypes.any.isRequired,
+	/**
+	 * null, 'left', 'right', to designate which direction to slide on a change.
+	 */
 	animate: PropTypes.oneOf( [ null, 'left', 'right' ] ),
+	/**
+	 * When set to true, the first focusable element will be focused after an animation has finished.
+	 */
 	focusOnChange: PropTypes.bool,
 };
 

@@ -34,10 +34,15 @@ import {
 	getYTickOffset,
 } from './utils';
 
+/**
+ * A simple D3 line and bar chart component for timeseries data in React.
+ */
 class D3Chart extends Component {
 	constructor( props ) {
 		super( props );
+		this.drawChart = this.drawChart.bind( this );
 		this.getAllData = this.getAllData.bind( this );
+		this.getParams = this.getParams.bind( this );
 		this.state = {
 			allData: this.getAllData( props ),
 			width: props.width,
@@ -64,7 +69,7 @@ class D3Chart extends Component {
 		return [ ...props.data, ...orderedKeys ];
 	}
 
-	drawChart = ( node, params ) => {
+	drawChart( node, params ) {
 		const { data, margin, type } = this.props;
 		const g = node
 			.attr( 'id', 'chart' )
@@ -81,9 +86,9 @@ class D3Chart extends Component {
 		type === 'bar' && drawBars( g, data, adjParams );
 
 		return node;
-	};
+	}
 
-	getParams = node => {
+	getParams( node ) {
 		const { colorScheme, data, height, margin, orderedKeys, type, xFormat, yFormat } = this.props;
 		const { width } = this.state;
 		const calculatedWidth = width || node.offsetWidth;
@@ -121,7 +126,7 @@ class D3Chart extends Component {
 			yTickOffset: getYTickOffset( adjHeight, scale, yMax ),
 			yFormat: d3Format( yFormat ),
 		};
-	};
+	}
 
 	render() {
 		if ( ! this.props.data ) {
@@ -146,21 +151,54 @@ class D3Chart extends Component {
 }
 
 D3Chart.propTypes = {
-	colorScheme: PropTypes.func,
+	/**
+	 * Additional CSS classes.
+	 */
 	className: PropTypes.string,
+	/**
+	 * A chromatic color function to be passed down to d3.
+	 */
+	colorScheme: PropTypes.func,
+	/**
+	 * An array of data.
+	 */
 	data: PropTypes.array.isRequired,
+	/**
+	 * Relative viewpoirt height of the `svg`.
+	 */
 	height: PropTypes.number,
+	/**
+	 * @todo Remove – not used?
+	 */
 	legend: PropTypes.array,
+	/**
+	 * Margins for axis and chart padding.
+	 */
 	margin: PropTypes.shape( {
 		bottom: PropTypes.number,
 		left: PropTypes.number,
 		right: PropTypes.number,
 		top: PropTypes.number,
 	} ),
+	/**
+	 * The list of labels for this chart.
+	 */
 	orderedKeys: PropTypes.array,
+	/**
+	 * Chart type of either `line` or `bar`.
+	 */
 	type: PropTypes.oneOf( [ 'bar', 'line' ] ),
+	/**
+	 * Relative viewport width of the `svg`.
+	 */
 	width: PropTypes.number,
+	/**
+	 * A datetime formatting string, passed to d3TimeFormat.
+	 */
 	xFormat: PropTypes.string,
+	/**
+	 * A number formatting string, passed to d3Format.
+	 */
 	yFormat: PropTypes.string,
 };
 

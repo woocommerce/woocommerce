@@ -13,6 +13,11 @@ import { noop } from 'lodash';
  */
 import './style.scss';
 
+/**
+ * A component for displaying a button with a main action plus a secondary set of actions behind a menu toggle.
+ *
+ * @return { object } -
+ */
 const SplitButton = ( {
 	isPrimary,
 	mainIcon,
@@ -100,18 +105,48 @@ const SplitButton = ( {
 };
 
 SplitButton.propTypes = {
+	/**
+	 * Whether the button is styled as a primary button.
+	 */
 	isPrimary: PropTypes.bool,
+	/**
+	 * Icon for the main button.
+	 */
 	mainIcon: PropTypes.node,
+	/**
+	 * Label for the main button.
+	 */
 	mainLabel: PropTypes.string,
+	/**
+	 * Function to activate when the the main button is clicked.
+	 */
 	onClick: PropTypes.func,
+	/**
+	 * Label to display for the menu of actions, used as a heading on the mobile popover and for accessible text.
+	 */
 	menuLabel: PropTypes.string,
+	/**
+	 * An array of additional actions. Accepts additional icon, label, and onClick props.
+	 */
 	controls: PropTypes.arrayOf(
 		PropTypes.shape( {
-			icon: PropTypes.node,
-			label: PropTypes.string,
+			/**
+			 * Icon used in button, passed to `IconButton`. Can be either string (dashicon name) or Gridicon.
+			 */
+			icon: PropTypes.oneOfType( [ PropTypes.string, PropTypes.element ] ),
+			/**
+			 * Label displayed for this button.
+			 */
+			label: PropTypes.string.isRequired,
+			/**
+			 * Click handler for this button.
+			 */
 			onClick: PropTypes.func,
 		} )
 	).isRequired,
+	/**
+	 * Additional CSS classes.
+	 */
 	className: PropTypes.string,
 };
 
