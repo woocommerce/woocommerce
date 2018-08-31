@@ -20,9 +20,16 @@ import mockData from '../__mocks__/mock-data';
 jest.mock( '@woocommerce/components', () => ( {
 	...require.requireActual( '@woocommerce/components' ),
 	Table: () => null,
+	TablePlaceholder: () => null,
 } ) );
 
 describe( 'TopSellingProducts', () => {
+	test( 'should render placeholder table while requesting', () => {
+		const topSellingProducts = shallow( <TopSellingProducts data={ {} } isRequesting={ true } /> );
+
+		expect( topSellingProducts.find( 'TablePlaceholder' ).length ).toBe( 1 );
+	} );
+
 	test( 'should render correct data in the table', () => {
 		const topSellingProducts = shallow( <TopSellingProducts data={ mockData } /> );
 		const table = topSellingProducts.find( 'Table' );

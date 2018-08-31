@@ -158,3 +158,4 @@ TableCard.defaultProps = {
 };
 
 export { TableCard, Table, TableSummary };
+export { default as TablePlaceholder } from './placeholder';

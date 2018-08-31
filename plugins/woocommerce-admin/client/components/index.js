@@ -27,6 +27,6 @@ export { default as Search } from './search';
 export { default as SegmentedSelection } from './segmented-selection';
 export { default as SplitButton } from './split-button';
 export { SummaryList, SummaryNumber } from './summary';
-export { TableCard, Table, TableSummary } from './table';
+export { TableCard, Table, TableSummary, TablePlaceholder } from './table';
 export { default as Tag } from './tag';
 export { default as useFilters } from './higher-order/use-filters';

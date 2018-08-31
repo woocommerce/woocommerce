@@ -9,6 +9,8 @@ This is an accessible, sortable, and scrollable table for displaying tabular dat
 
 `TableSummary` can also be used alone, and will display the list of data passed in on a single line.
 
+`TablePlaceholder` behaves like `Table` but displays placeholder boxes instead of data. Can be used while loading.
+
 ## How to use:
 
 ```jsx
@@ -62,6 +64,12 @@ render: function() {
 ### `TableSummary` props
 
 * `data`: An array of objects with `label` & `value` properties, which display on a single line.
+
+### `TablePlaceholder` props
+
+* `caption` (required): A label for the content in this table
+* `headers`: An array of column headers (see `Table` props).
+* `numberOfRows`: An integer with the number of rows to display. Defaults to 5.
 
 ## Rows Format
 

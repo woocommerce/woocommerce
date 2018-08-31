@@ -52,7 +52,7 @@ class Table extends Component {
 	}
 
 	render() {
-		const { caption, classNames, headers, query, rowHeader, rows } = this.props;
+		const { ariaHidden, caption, classNames, headers, query, rowHeader, rows } = this.props;
 		const { tabIndex } = this.state;
 		const classes = classnames( 'woocommerce-table__table', classNames );
 		const sortedBy = query.orderby || get( find( headers, { defaultSort: true } ), 'key', false );
@@ -63,6 +63,7 @@ class Table extends Component {
 				className={ classes }
 				ref={ this.container }
 				tabIndex={ tabIndex }
+				aria-hidden={ ariaHidden }
 				aria-labelledby={ this.captionID }
 				role="group"
 			>
@@ -148,6 +149,7 @@ class Table extends Component {
 }
 
 Table.propTypes = {
+	ariaHidden: PropTypes.bool,
 	caption: PropTypes.string.isRequired,
 	className: PropTypes.string,
 	headers: PropTypes.arrayOf(
@@ -173,6 +175,7 @@ Table.propTypes = {
 };
 
 Table.defaultProps = {
+	ariaHidden: false,
 	headers: [],
 	onSort: noop,
 	query: {},

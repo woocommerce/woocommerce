@@ -53,11 +53,23 @@
 		}
 	}
 
+	.is-placeholder {
+		@include placeholder();
+		display: inline-block;
+		height: 16px;
+		max-width: 120px;
+		width: 80%;
+	}
+
 	&.is-numeric {
 		text-align: right;
 
 		button {
 			justify-content: flex-end;
+		}
+
+		.is-placeholder {
+			max-width: 40px;
 		}
 	}
 }
