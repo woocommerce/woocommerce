@@ -12,7 +12,7 @@ import classnames from 'classnames';
  * Internal dependencies
  */
 import ComparePeriods from './compare-periods';
-import { DateRange } from 'components/calendar';
+import DateRange from 'components/calendar';
 import { H, Section } from 'layout/section';
 import PresetPeriods from './preset-periods';
 
@@ -95,7 +95,7 @@ class DatePickerContent extends Component {
 										after={ after }
 										before={ before }
 										onUpdate={ onUpdate }
-										inValidDays="future"
+										invalidDays="future"
 										focusedInput={ focusedInput }
 										afterText={ afterText }
 										beforeText={ beforeText }

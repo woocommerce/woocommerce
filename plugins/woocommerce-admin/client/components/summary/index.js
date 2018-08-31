@@ -74,5 +74,4 @@ SummaryList.propTypes = {
 	label: PropTypes.string,
 };
 
-export { SummaryList };
-export { default as SummaryNumber } from './item';
+export default SummaryList;

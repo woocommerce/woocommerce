@@ -13,7 +13,9 @@ import PropTypes from 'prop-types';
  */
 import './style.scss';
 import Card from 'components/card';
-import { EllipsisMenu, MenuItem, MenuTitle } from 'components/ellipsis-menu';
+import EllipsisMenu from 'components/ellipsis-menu';
+import MenuItem from 'components/ellipsis-menu/menu-item';
+import MenuTitle from 'components/ellipsis-menu/menu-title';
 import Pagination from 'components/pagination';
 import Table from './table';
 import TableSummary from './summary';
@@ -157,5 +159,4 @@ TableCard.defaultProps = {
 	rows: [],
 };
 
-export { TableCard, Table, TableSummary };
-export { default as TablePlaceholder } from './placeholder';
+export default TableCard;

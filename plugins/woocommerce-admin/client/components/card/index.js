@@ -10,8 +10,9 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import './style.scss';
-import { EllipsisMenu } from 'components/ellipsis-menu';
+import EllipsisMenu from 'components/ellipsis-menu';
 import { H, Section } from 'layout/section';
+import { validateComponent } from 'lib/proptype-validator';
 
 class Card extends Component {
 	render() {
@@ -36,9 +37,7 @@ class Card extends Component {
 Card.propTypes = {
 	action: PropTypes.node,
 	className: PropTypes.string,
-	menu: PropTypes.shape( {
-		type: PropTypes.oneOf( [ EllipsisMenu ] ),
-	} ),
+	menu: validateComponent( EllipsisMenu ),
 	title: PropTypes.oneOfType( [ PropTypes.string, PropTypes.node ] ).isRequired,
 };
 

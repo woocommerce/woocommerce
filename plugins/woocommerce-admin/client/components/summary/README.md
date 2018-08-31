@@ -6,7 +6,7 @@ A list of "summary numbers", performance indicators for a given store. `SummaryL
 ## How to use:
 
 ```jsx
-import { SummaryList, SummaryNumber } from 'components/summary';
+import { SummaryList, SummaryNumber } from '@woocommerce/components';
 
 render: function() {
   return (

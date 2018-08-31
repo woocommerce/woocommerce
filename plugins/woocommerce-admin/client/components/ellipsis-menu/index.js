@@ -56,6 +56,4 @@ EllipsisMenu.propTypes = {
 	label: PropTypes.string.isRequired,
 };
 
-export { EllipsisMenu };
-export { default as MenuItem } from './menu-item';
-export { default as MenuTitle } from './menu-title';
+export default EllipsisMenu;

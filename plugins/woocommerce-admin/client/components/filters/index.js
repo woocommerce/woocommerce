@@ -82,7 +82,4 @@ ReportFilters.defaultProps = {
 	query: {},
 };
 
-export { ReportFilters };
-export { AdvancedFilters };
-export { DatePicker };
-export { FilterPicker };
+export default ReportFilters;

@@ -8,7 +8,7 @@ The last component in this set is `MenuTitle`, which is another valid Menu child
 ## How to use:
 
 ```jsx
-import { EllipsisMenu, MenuItem, MenuTitle } from 'components/ellipsis-menu';
+import { EllipsisMenu, MenuItem, MenuTitle } from '@woocommerce/components';
 
 render: function() {
   return (

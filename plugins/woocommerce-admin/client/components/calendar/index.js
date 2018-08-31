@@ -70,9 +70,9 @@ class DateRange extends Component {
 	}
 
 	getOutsideRange() {
-		const { inValidDays } = this.props;
-		if ( 'string' === typeof inValidDays ) {
-			switch ( inValidDays ) {
+		const { invalidDays } = this.props;
+		if ( 'string' === typeof invalidDays ) {
+			switch ( invalidDays ) {
 				case 'past':
 					return day => isInclusivelyBeforeDay( day, moment() );
 				case 'future':
@@ -82,7 +82,7 @@ class DateRange extends Component {
 					return undefined;
 			}
 		}
-		return 'function' === typeof inValidDays ? inValidDays : undefined;
+		return 'function' === typeof invalidDays ? invalidDays : undefined;
 	}
 
 	setTnitialVisibleMonth( isDoubleCalendar, before ) {
@@ -173,7 +173,7 @@ DateRange.propTypes = {
 	after: PropTypes.object,
 	before: PropTypes.object,
 	onUpdate: PropTypes.func.isRequired,
-	inValidDays: PropTypes.oneOfType( [
+	invalidDays: PropTypes.oneOfType( [
 		PropTypes.oneOf( [ 'past', 'future', 'none' ] ),
 		PropTypes.func,
 	] ),
@@ -185,4 +185,4 @@ DateRange.propTypes = {
 	shortDateFormat: PropTypes.string.isRequired,
 };
 
-export { DateRange };
+export default DateRange;
