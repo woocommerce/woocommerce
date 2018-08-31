@@ -244,7 +244,7 @@ class WC_Download_Handler {
 		$remote_file      = true;
 
 		// See if path needs an abspath prepended to work.
-		if ( file_exists( ABSPATH . $file_path ) ) {
+		if ( '//' !== substr( $file_path, 0, 2 ) && file_exists( ABSPATH . $file_path ) ) {
 			$remote_file = false;
 			$file_path   = ABSPATH . $file_path;
 
