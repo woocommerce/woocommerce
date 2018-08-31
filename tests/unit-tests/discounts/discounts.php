@@ -1434,12 +1434,68 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test the is_coupon_valid logic with sale items.
+	 * Test the percent coupon logic with and without sale items.
 	 *
-	 * @since 3.4.5
+	 * @since 3.4.6
 	 */
-	public function test_is_coupon_valid_sale_items() {
+	public function test_is_coupon_valid_percent_sale_items() {
+		$product_no_sale = new WC_Product_Simple();
+		$product_no_sale->set_regular_price( 20 );
+		$product_no_sale->save();
 
+		$product_sale = new WC_Product_Simple();
+		$product_sale->set_regular_price( 20 );
+		$product_sale->set_sale_price( 10 );
+		$product_sale->save();
+
+		$coupon_percent = new WC_Coupon();
+		$coupon_percent->set_props( array(
+			'amount'             => 10,
+			'discount_type'      => 'percent',
+			'exclude_sale_items' => false,
+		) );
+		$coupon_percent->save();
+
+		$coupon_percent_no_sale = new WC_Coupon();
+		$coupon_percent_no_sale->set_props( array(
+			'amount'             => 10,
+			'discount_type'      => 'percent',
+			'exclude_sale_items' => true,
+		) );
+		$coupon_percent_no_sale->save();
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product_no_sale->get_id(), 1 );
+		$discounts = new WC_Discounts( WC()->cart );
+
+		// Percent coupons should be valid when no sale items are in the cart.
+		$this->assertTrue( $discounts->is_coupon_valid( $coupon_percent ) );
+		$this->assertTrue( $discounts->is_coupon_valid( $coupon_percent_no_sale ) );
+
+		// Percent coupons should be valid when sale items are in the cart.
+		WC()->cart->add_to_cart( $product_sale->get_id(), 1 );
+		$discounts = new WC_Discounts( WC()->cart );
+		$this->assertTrue( $discounts->is_coupon_valid( $coupon_percent ) );
+		$this->assertTrue( $discounts->is_coupon_valid( $coupon_percent_no_sale ) );
+
+		// Sale-allowed coupons should apply discount to both cart items.
+		$discounts->apply_coupon( $coupon_percent );
+		$coupon_discounts = array_sum( $discounts->get_discounts_by_coupon() );
+		$this->assertEquals( 3.0, $coupon_discounts ); // 10% off $20 + 10% off $10.
+
+		// No-sale coupons should only apply discount to non-sale items.
+		$discounts = new WC_Discounts( WC()->cart );
+		$discounts->apply_coupon( $coupon_percent_no_sale );
+		$coupon_discounts = array_sum( $discounts->get_discounts_by_coupon() );
+		$this->assertEquals( 2.0, $coupon_discounts ); // 10% off $20.
+	}
+
+	/**
+	 * Test the fixed cart coupon logic with and without sale items.
+	 *
+	 * @since 3.4.6
+	 */
+	public function test_is_coupon_valid_fixed_cart_sale_items() {
 		$product_no_sale = new WC_Product_Simple();
 		$product_no_sale->set_regular_price( 20 );
 		$product_no_sale->save();
@@ -1465,6 +1521,41 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		) );
 		$coupon_cart_no_sale->save();
 
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product_no_sale->get_id(), 1 );
+		$discounts = new WC_Discounts( WC()->cart );
+
+		// Fixed cart coupons should be valid when no sale items are in the cart.
+		$this->assertTrue( $discounts->is_coupon_valid( $coupon_cart ) );
+		$this->assertTrue( $discounts->is_coupon_valid( $coupon_cart_no_sale ) );
+
+		// No-sale fixed cart coupons should not be valid when sale items are in the cart.
+		WC()->cart->add_to_cart( $product_sale->get_id(), 1 );
+		$discounts = new WC_Discounts( WC()->cart );
+		$this->assertTrue( $discounts->is_coupon_valid( $coupon_cart ) );
+		$this->assertTrue( is_wp_error( $discounts->is_coupon_valid( $coupon_cart_no_sale ) ) );
+
+		// Sale-allowed coupons should apply discount to total cart.
+		$discounts->apply_coupon( $coupon_cart );
+		$coupon_discounts = array_sum( $discounts->get_discounts_by_coupon() );
+		$this->assertEquals( 5.0, $coupon_discounts ); // $5 fixed cart discount.
+	}
+
+	/**
+	 * Test the per product coupon logic with and without sale items.
+	 *
+	 * @since 3.4.6
+	 */
+	public function test_is_coupon_valid_fixed_product_sale_items() {
+		$product_no_sale = new WC_Product_Simple();
+		$product_no_sale->set_regular_price( 20 );
+		$product_no_sale->save();
+
+		$product_sale = new WC_Product_Simple();
+		$product_sale->set_regular_price( 20 );
+		$product_sale->set_sale_price( 10 );
+		$product_sale->save();
+
 		$coupon_product = new WC_Coupon();
 		$coupon_product->set_props( array(
 			'amount'             => 5,
@@ -1483,27 +1574,27 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 
 		WC()->cart->empty_cart();
 		WC()->cart->add_to_cart( $product_no_sale->get_id(), 1 );
-		WC()->cart->add_to_cart( $product_sale->get_id(), 1 );
 		$discounts = new WC_Discounts( WC()->cart );
 
-		// Cart coupon with no sale restriction should be valid if sale item is in cart.
-		$this->assertTrue( $discounts->is_coupon_valid( $coupon_cart ) );
-
-		// Cart coupon with sale restriction should not be valid if sale item is in cart.
-		$this->assertTrue( is_wp_error( $discounts->is_coupon_valid( $coupon_cart_no_sale ) ) );
-
-		// Product coupon with no sale restriction should be valid if sale item is in cart.
+		// Per product coupons should be valid when no sale items are in the cart.
 		$this->assertTrue( $discounts->is_coupon_valid( $coupon_product ) );
-
-		// Product coupon with sale restriction should be valid if sale item is in cart,
-		// but it should not apply the discount to the sale item.
 		$this->assertTrue( $discounts->is_coupon_valid( $coupon_product_no_sale ) );
 
-		$discounts->apply_coupon( $coupon_product_no_sale );
-		$coupon_discounts = $discounts->get_discounts_by_coupon();
-		$coupon_discount = reset( $coupon_discounts );
+		// Per product coupons should be valid when sale items are in the cart.
+		WC()->cart->add_to_cart( $product_sale->get_id(), 1 );
+		$discounts = new WC_Discounts( WC()->cart );
+		$this->assertTrue( $discounts->is_coupon_valid( $coupon_product ) );
+		$this->assertTrue( $discounts->is_coupon_valid( $coupon_product_no_sale ) );
 
-		// $5 coupon should only get applied to the one cart item not on sale.
-		$this->assertEquals( 5, $coupon_discount );
+		// Sale-allowed coupons should apply discount to each item.
+		$discounts->apply_coupon( $coupon_product );
+		$coupon_discounts = array_sum( $discounts->get_discounts_by_coupon() );
+		$this->assertEquals( 10.0, $coupon_discounts ); // $5 discount for 2 products.
+
+		// No-sale coupons should only apply discount to non-sale items.
+		$discounts = new WC_Discounts( WC()->cart );
+		$discounts->apply_coupon( $coupon_product_no_sale );
+		$coupon_discounts = array_sum( $discounts->get_discounts_by_coupon() );
+		$this->assertEquals( 5.0, $coupon_discounts ); // $5 discount for 1 product.
 	}
 }
