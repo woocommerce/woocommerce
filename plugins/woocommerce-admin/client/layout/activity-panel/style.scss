@@ -64,6 +64,8 @@
 	}
 
 	.woocommerce-layout__activity-panel-tab {
+		flex-direction: column;
+		justify-content: center;
 		border: none;
 		outline: none;
 		cursor: pointer;
