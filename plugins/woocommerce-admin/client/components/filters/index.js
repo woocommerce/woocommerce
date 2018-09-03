@@ -46,6 +46,7 @@ class ReportFilters extends Component {
 			return (
 				<div className="woocommerce-filters__advanced-filters">
 					<AdvancedFilters
+						key={ JSON.stringify( query ) }
 						config={ advancedConfig }
 						filterTitle={ __( 'Orders', 'wc-admin' ) }
 						path={ path }

@@ -29,12 +29,16 @@
 }
 
 .woocommerce-filters-advanced__list-item {
-	padding: $gap-smaller $gap;
+	padding: 0 $gap 0 0;
 	margin: 0;
 	display: grid;
 	grid-template-columns: auto 40px;
 	background-color: $core-grey-light-100;
 	border-bottom: 1px solid $core-grey-light-700;
+
+	fieldset {
+		padding: $gap-smaller $gap;
+	}
 
 	&:hover {
 		background-color: $core-grey-light-200;
@@ -116,7 +120,7 @@
 .woocommerce-filters-advanced__controls {
 	padding: $gap-smaller $gap;
 
-	& > button {
+	.components-button {
 		margin-right: $gap;
 	}
 }
@@ -144,8 +148,6 @@
 }
 
 .woocommerce-filters-advanced__list-selector {
-	padding: 0 0 0 $gap-smaller;
-
 	@include breakpoint( '<782px' ) {
 		padding: $gap-smallest 0;
 	}
@@ -154,5 +156,13 @@
 .woocommerce-filters-advanced__list-specifier {
 	@include breakpoint( '<782px' ) {
 		padding: $gap-smallest 0;
+	}
+
+	& + .woocommerce-filters-advanced__list-selector {
+		padding: 0 0 0 $gap-smaller;
+
+		@include breakpoint( '<782px' ) {
+			padding: $gap-smallest 0;
+		}
 	}
 }

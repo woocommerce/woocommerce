@@ -28,7 +28,7 @@ export const advancedFilterConfig = {
 		addLabel: __( 'Order Status', 'wc-admin' ),
 		rules: [
 			{ value: 'is', label: __( 'Is', 'wc-admin' ) },
-			{ value: 'is-not', label: __( 'Is Not', 'wc-admin' ) },
+			{ value: 'is_not', label: __( 'Is Not', 'wc-admin' ) },
 		],
 		input: {
 			component: 'SelectControl',
@@ -43,28 +43,28 @@ export const advancedFilterConfig = {
 			],
 		},
 	},
-	product: {
+	product_id: {
 		label: __( 'Product', 'wc-admin' ),
 		addLabel: __( 'Products', 'wc-admin' ),
 		rules: [
 			{ value: 'includes', label: __( 'Includes', 'wc-admin' ) },
 			{ value: 'excludes', label: __( 'Excludes', 'wc-admin' ) },
 			{ value: 'is', label: __( 'Is', 'wc-admin' ) },
-			{ value: 'is-not', label: __( 'Is Not', 'wc-admin' ) },
+			{ value: 'is_not', label: __( 'Is Not', 'wc-admin' ) },
 		],
 		input: {
 			component: 'Search',
 			type: 'products',
 		},
 	},
-	coupon: {
+	code: {
 		label: __( 'Coupon Code', 'wc-admin' ),
 		addLabel: __( 'Coupon Codes', 'wc-admin' ),
 		rules: [
 			{ value: 'includes', label: __( 'Includes', 'wc-admin' ) },
 			{ value: 'excludes', label: __( 'Excludes', 'wc-admin' ) },
 			{ value: 'is', label: __( 'Is', 'wc-admin' ) },
-			{ value: 'is-not', label: __( 'Is Not', 'wc-admin' ) },
+			{ value: 'is_not', label: __( 'Is Not', 'wc-admin' ) },
 		],
 		input: {
 			component: 'Search',
@@ -74,9 +74,12 @@ export const advancedFilterConfig = {
 	customer: {
 		label: __( 'Customer is', 'wc-admin' ),
 		addLabel: __( 'Customer Type', 'wc-admin' ),
-		rules: [
-			{ value: 'new', label: __( 'New', 'wc-admin' ) },
-			{ value: 'returning', label: __( 'Returning', 'wc-admin' ) },
-		],
+		input: {
+			component: 'SelectControl',
+			options: [
+				{ value: 'new', label: __( 'New', 'wc-admin' ) },
+				{ value: 'returning', label: __( 'Returning', 'wc-admin' ) },
+			],
+		},
 	},
 };

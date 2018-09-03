@@ -13,7 +13,11 @@ import Gridicon from 'gridicons';
  * Internal dependencies
  */
 import Card from 'components/card';
-import Search from 'components/search';
+import Link from 'components/link';
+import SelectFilter from './select-filter';
+import SearchFilter from './search-filter';
+import { getActiveFiltersFromQuery, getQueryFromActiveFilters } from './utils';
+import { getNewPath } from 'lib/nav-utils';
 import './style.scss';
 
 const matches = [
@@ -27,25 +31,22 @@ const matches = [
 class AdvancedFilters extends Component {
 	constructor( props ) {
 		super( props );
+		const activeFiltersFromQuery = getActiveFiltersFromQuery( props.query, props.config );
 		this.state = {
 			match: matches[ 0 ],
-			activeFilters: [
-				/**
-				 * Example activeFilter
-				 * { key: ‘product’, rule: ‘includes’, value: [ ‘one’, ‘two’ ] }
-				 */
-			],
+			activeFilters: activeFiltersFromQuery,
+			previousFilters: activeFiltersFromQuery,
 		};
 
 		this.filterListRef = createRef();
 
 		this.onMatchChange = this.onMatchChange.bind( this );
 		this.onFilterChange = this.onFilterChange.bind( this );
-		this.getSelector = this.getSelector.bind( this );
 		this.getAvailableFilterKeys = this.getAvailableFilterKeys.bind( this );
 		this.addFilter = this.addFilter.bind( this );
 		this.removeFilter = this.removeFilter.bind( this );
-		this.clearAllFilters = this.clearAllFilters.bind( this );
+		this.clearFilters = this.clearFilters.bind( this );
+		this.getUpdateHref = this.getUpdateHref.bind( this );
 	}
 
 	onMatchChange( value ) {
@@ -90,35 +91,6 @@ class AdvancedFilters extends Component {
 		);
 	}
 
-	getSelector( filter ) {
-		const filterConfig = this.props.config[ filter.key ];
-		const { input } = filterConfig;
-		if ( ! input ) {
-			return null;
-		}
-		if ( 'SelectControl' === input.component ) {
-			return (
-				<SelectControl
-					className="woocommerce-filters-advanced__list-select"
-					options={ input.options }
-					value={ filter.value }
-					onChange={ partial( this.onFilterChange, filter.key, 'value' ) }
-					aria-label={ sprintf( __( 'Select %s', 'wc-admin' ), filterConfig.label ) }
-				/>
-			);
-		}
-		if ( 'Search' === input.component ) {
-			return (
-				<Search
-					onChange={ partial( this.onFilterChange, filter.key, 'value' ) }
-					type={ input.type }
-					selected={ filter.value }
-				/>
-			);
-		}
-		return null;
-	}
-
 	getAvailableFilterKeys() {
 		const { config } = this.props;
 		const activeFilterKeys = this.state.activeFilters.map( f => f.key );
@@ -127,9 +99,15 @@ class AdvancedFilters extends Component {
 
 	addFilter( key, onClose ) {
 		const filterConfig = this.props.config[ key ];
-		const newFilter = { key, rule: filterConfig.rules[ 0 ] };
+		const newFilter = { key };
+		if ( Array.isArray( filterConfig.rules ) && filterConfig.rules.length ) {
+			newFilter.rule = filterConfig.rules[ 0 ].value;
+		}
 		if ( filterConfig.input && filterConfig.input.options ) {
-			newFilter.value = filterConfig.input.options[ 0 ];
+			newFilter.value = filterConfig.input.options[ 0 ].value;
+		}
+		if ( filterConfig.input && 'Search' === filterConfig.input.component ) {
+			newFilter.value = [];
 		}
 		this.setState( state => {
 			return {
@@ -144,20 +122,29 @@ class AdvancedFilters extends Component {
 		} );
 	}
 
-	clearAllFilters() {
+	clearFilters() {
 		this.setState( {
 			activeFilters: [],
 		} );
 	}
 
+	getUpdateHref( activeFilters ) {
+		const { previousFilters } = this.state;
+		const { path, query } = this.props;
+		const updatedQuery = getQueryFromActiveFilters( activeFilters, previousFilters );
+		return getNewPath( updatedQuery, path, query );
+	}
+
 	render() {
 		const { config } = this.props;
+		const { activeFilters } = this.state;
 		const availableFilterKeys = this.getAvailableFilterKeys();
+		const updateHref = this.getUpdateHref( activeFilters );
 		return (
 			<Card className="woocommerce-filters-advanced" title={ this.getTitle() }>
 				<ul className="woocommerce-filters-advanced__list" ref={ this.filterListRef }>
-					{ this.state.activeFilters.map( filter => {
-						const { key, rule } = filter;
+					{ activeFilters.map( filter => {
+						const { key } = filter;
 						const filterConfig = config[ key ];
 						return (
 							<li className="woocommerce-filters-advanced__list-item" key={ key }>
@@ -166,22 +153,20 @@ class AdvancedFilters extends Component {
 									{ /*eslint-enable-next-line jsx-a11y/no-noninteractive-tabindex*/ }
 									<legend className="screen-reader-text">{ filterConfig.label }</legend>
 									<div className="woocommerce-filters-advanced__fieldset">
-										<div className="woocommerce-filters-advanced__fieldset-legend">
-											{ filterConfig.label }
-										</div>
-										<SelectControl
-											className="woocommerce-filters-advanced__list-specifier"
-											options={ filterConfig.rules }
-											value={ rule }
-											onChange={ partial( this.onFilterChange, key, 'rule' ) }
-											aria-label={ sprintf(
-												__( 'Select a %s filter match', 'wc-admin' ),
-												filterConfig.addLabel
-											) }
-										/>
-										<div className="woocommerce-filters-advanced__list-selector">
-											{ this.getSelector( filter ) }
-										</div>
+										{ 'SelectControl' === filterConfig.input.component && (
+											<SelectFilter
+												filter={ filter }
+												config={ filterConfig }
+												onFilterChange={ this.onFilterChange }
+											/>
+										) }
+										{ 'Search' === filterConfig.input.component && (
+											<SearchFilter
+												filter={ filter }
+												config={ filterConfig }
+												onFilterChange={ this.onFilterChange }
+											/>
+										) }
 									</div>
 								</fieldset>
 								<IconButton
@@ -224,10 +209,17 @@ class AdvancedFilters extends Component {
 				) }
 
 				<div className="woocommerce-filters-advanced__controls">
-					<Button isPrimary>{ __( 'Filter', 'wc-admin' ) }</Button>
-					<Button isLink onClick={ this.clearAllFilters }>
+					<Link
+						className="components-button is-primary is-button"
+						type="wc-admin"
+						disabled={ window.location.hash.substr( 1 ) === updateHref }
+						href={ updateHref }
+					>
+						{ __( 'Filter', 'wc-admin' ) }
+					</Link>
+					<Link type="wc-admin" href={ this.getUpdateHref( [] ) } onClick={ this.clearFilters }>
 						{ __( 'Clear all filters', 'wc-admin' ) }
-					</Button>
+					</Link>
 				</div>
 			</Card>
 		);
