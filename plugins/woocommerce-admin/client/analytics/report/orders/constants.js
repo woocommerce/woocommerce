@@ -53,7 +53,8 @@ export const advancedFilterConfig = {
 			{ value: 'is-not', label: __( 'Is Not', 'wc-admin' ) },
 		],
 		input: {
-			component: 'FormTokenField',
+			component: 'Search',
+			type: 'products',
 		},
 	},
 	coupon: {
@@ -66,7 +67,8 @@ export const advancedFilterConfig = {
 			{ value: 'is-not', label: __( 'Is Not', 'wc-admin' ) },
 		],
 		input: {
-			component: 'FormTokenField',
+			component: 'Search',
+			type: 'products', // For now. "coupons" autocompleter required
 		},
 	},
 	customer: {
