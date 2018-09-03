@@ -722,7 +722,7 @@ class WC_Tax {
 	 * @return array Array of class slugs ("reduced-rate", "zero-rate", etc).
 	 */
 	public static function get_tax_class_slugs() {
-		return array_map( 'sanitize_title', self::get_tax_classes() );
+		return apply_filters( 'woocommerce_tax_class_slugs', array_map( 'sanitize_title', self::get_tax_classes() ) );
 	}
 
 	/**
