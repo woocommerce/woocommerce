@@ -5,7 +5,6 @@
 import classnames from 'classnames';
 import { cloneElement, Component } from '@wordpress/element';
 import Gridicon from 'gridicons';
-import { isArray } from 'lodash';
 import { moment } from '@wordpress/date';
 import PropTypes from 'prop-types';
 
@@ -19,7 +18,7 @@ class ActivityCard extends Component {
 	render() {
 		const { actions, className, children, date, icon, subtitle, title, unread } = this.props;
 		const cardClassName = classnames( 'woocommerce-activity-card', className );
-		const actionsList = isArray( actions ) ? actions : [ actions ];
+		const actionsList = Array.isArray( actions ) ? actions : [ actions ];
 
 		return (
 			<section className={ cardClassName }>

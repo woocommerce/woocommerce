@@ -5,7 +5,7 @@
 import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { IconButton, ToggleControl } from '@wordpress/components';
-import { fill, find, findIndex, first, isArray, noop } from 'lodash';
+import { fill, find, findIndex, first, noop } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
@@ -60,7 +60,7 @@ class TableCard extends Component {
 	filterCols( rows = [] ) {
 		const { showCols } = this.state;
 		// Header is a 1d array
-		if ( ! isArray( first( rows ) ) ) {
+		if ( ! Array.isArray( first( rows ) ) ) {
 			return rows.filter( ( col, i ) => showCols[ i ] );
 		}
 		// Rows is a 2d array

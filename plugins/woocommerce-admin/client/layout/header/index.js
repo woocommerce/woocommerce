@@ -7,7 +7,6 @@ import { Component } from '@wordpress/element';
 import classnames from 'classnames';
 import { decodeEntities } from '@wordpress/html-entities';
 import { Fill } from 'react-slot-fill';
-import { isArray } from 'lodash';
 import PropTypes from 'prop-types';
 import ReactDom from 'react-dom';
 
@@ -56,11 +55,11 @@ class Header extends Component {
 	render() {
 		const { sections, isEmbedded } = this.props;
 		const { isScrolled } = this.state;
-		const _sections = isArray( sections ) ? sections : [ sections ];
+		const _sections = Array.isArray( sections ) ? sections : [ sections ];
 
 		const documentTitle = _sections
 			.map( section => {
-				return isArray( section ) ? section[ 1 ] : section;
+				return Array.isArray( section ) ? section[ 1 ] : section;
 			} )
 			.reverse()
 			.join( ' &lsaquo; ' );
@@ -84,7 +83,7 @@ class Header extends Component {
 						<Link href="/">WooCommerce</Link>
 					</span>
 					{ _sections.map( ( section, i ) => {
-						const sectionPiece = isArray( section ) ? (
+						const sectionPiece = Array.isArray( section ) ? (
 							<Link href={ section[ 0 ] } type={ isEmbedded ? 'wp-admin' : 'wc-admin' }>
 								{ section[ 1 ] }
 							</Link>
