@@ -22,10 +22,15 @@ export default {
 		}
 
 		try {
-			const report = await apiFetch( {
+			const response = await apiFetch( {
 				path: apiPath,
+				parse: false,
 			} );
-			dispatch( 'wc-admin' ).setReportStats( endpoint, report, query );
+
+			const report = await response.json();
+			const totalResults = parseInt( response.headers.get( 'x-wp-total' ) );
+			const totalPages = parseInt( response.headers.get( 'x-wp-totalpages' ) );
+			dispatch( 'wc-admin' ).setReportStats( endpoint, report, query, totalResults, totalPages );
 		} catch ( error ) {
 			dispatch( 'wc-admin' ).setReportStatsError( endpoint, query );
 		}

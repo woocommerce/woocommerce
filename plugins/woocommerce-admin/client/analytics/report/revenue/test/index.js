@@ -11,7 +11,7 @@ import { TableCard } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
-import RevenueReport from '../';
+import { RevenueReport } from '../';
 import mockData from '../__mocks__/mock-data';
 import mockCSV from '../__mocks__/mock-csv';
 import { downloadCSVFile } from 'lib/csv';
@@ -27,15 +27,24 @@ describe( 'RevenueReport', () => {
 	test( 'should save CSV when clicking on download', () => {
 		global.Blob = ( content, options ) => ( { content, options } );
 
+		const primaryData = {
+			data: mockData,
+		};
+
 		const revenueReport = shallow(
-			<RevenueReport params={ { report: 'revenue' } } path="/analytics/revenue" query={ {} } />
+			<RevenueReport
+				params={ { report: 'revenue' } }
+				path="/analytics/revenue" query={ {} }
+				primaryData={ primaryData }
+				secondaryData={ primaryData }
+			/>
 		);
-		revenueReport.setState( { stats: mockData } );
+
 		const tableCard = revenueReport.find( TableCard );
 		tableCard.props().onClickDownload();
 
 		expect( downloadCSVFile ).toHaveBeenCalledWith(
-			'revenue-' + moment().format( 'YYYY-MM-DD' ) + '.csv',
+			'revenue-' + moment().format( 'YYYY-MM-DD' ) + '-orderby-date_start-order-asc.csv',
 			mockCSV
 		);
 	} );

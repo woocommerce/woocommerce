@@ -9,7 +9,7 @@ import { merge } from 'lodash';
  * Internal dependencies
  */
 import { ERROR } from 'store/constants';
-import { getJsonString } from 'store/util';
+import { getJsonString } from 'store/utils';
 
 const DEFAULT_STATE = {};
 
@@ -18,7 +18,13 @@ export default function reportStatsReducer( state = DEFAULT_STATE, action ) {
 		const queryKey = getJsonString( action.query );
 		return merge( {}, state, {
 			[ action.endpoint ]: {
-				[ queryKey ]: action.report,
+				[ queryKey ]: {
+					data: {
+						...action.report,
+					},
+					totalResults: action.totalResults,
+					totalPages: action.totalPages,
+				},
 			},
 		} );
 	}

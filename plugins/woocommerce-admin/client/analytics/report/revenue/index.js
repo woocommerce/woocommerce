@@ -4,9 +4,11 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
+import { compose } from '@wordpress/compose';
 import { format as formatDate } from '@wordpress/date';
-import { map } from 'lodash';
+import { map, find, orderBy } from 'lodash';
 import PropTypes from 'prop-types';
+import { withSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -22,59 +24,15 @@ import {
 import { downloadCSVFile, generateCSVDataFromTable, generateCSVFileName } from 'lib/csv';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
 import { getAdminLink, getNewPath, updateQueryString } from 'lib/nav-utils';
-import { getReportData } from 'lib/swagger';
+import { getAllReportData, isReportDataEmpty } from 'store/reports/utils';
+import { getCurrentDates, isoDateFormat, getPreviousDate, getDateDifferenceInDays } from 'lib/date';
+import { MAX_PER_PAGE } from 'store/constants';
 
-// Mock data until we fetch from an API
-import mockData from './__mocks__/mock-data';
-import testData from './data';
-const charts = {
-	gross_revenue: {
-		label: __( 'Gross Revenue', 'wc-admin' ),
-		type: 'currency',
-	},
-	refunds: {
-		label: __( 'Refunds', 'wc-admin' ),
-		type: 'currency',
-	},
-	coupons: {
-		label: __( 'Coupons', 'wc-admin' ),
-		type: 'currency',
-	},
-	taxes: {
-		label: __( 'Taxes', 'wc-admin' ),
-		type: 'currency',
-	},
-};
-
-class RevenueReport extends Component {
+export class RevenueReport extends Component {
 	constructor() {
 		super();
 		this.onDownload = this.onDownload.bind( this );
 		this.onQueryChange = this.onQueryChange.bind( this );
-
-		// TODO remove this when we implement real endpoints
-		this.state = { stats: {} };
-	}
-
-	componentDidMount() {
-		// Swagger doesn't support returning different data based on query args
-		// this is more or less to show how we will manipulate data calls based on props
-		const statsQueryArgs = {
-			interval: 'week',
-			after: '2018-04-22',
-			before: '2018-05-06',
-		};
-
-		getReportData( 'revenue/stats', statsQueryArgs ).then( response => {
-			if ( ! response.ok ) {
-				return;
-			}
-
-			response.json().then( () => {
-				// Ignore data, just use our fake data once we have a response
-				this.setState( { stats: mockData } );
-			} );
-		} );
 	}
 
 	onDownload( headers, rows, query ) {
@@ -143,7 +101,7 @@ class RevenueReport extends Component {
 				label: __( 'Taxes', 'wc-admin' ),
 				key: 'taxes',
 				required: false,
-				isSortable: false, // For example
+				isSortable: true,
 				isNumeric: true,
 			},
 			{
@@ -178,7 +136,11 @@ class RevenueReport extends Component {
 			// @TODO How to create this per-report? Can use `w`, `year`, `m` to build time-specific order links
 			// we need to know which kind of report this is, and parse the `label` to get this row's date
 			const orderLink = (
-				<a href={ getAdminLink( '/edit.php?post_type=shop_order&w=4&year=2018' ) }>
+				<a
+					href={ getAdminLink(
+						'edit.php?post_type=shop_order&m=' + formatDate( 'Ymd', row.date_start )
+					) }
+				>
 					{ orders_count }
 				</a>
 			);
@@ -219,49 +181,78 @@ class RevenueReport extends Component {
 		} );
 	}
 
-	getSummaryContent( data = {} ) {
+	getCharts() {
 		return [
 			{
-				label: __( 'gross revenue', 'wc-admin' ),
-				value: formatCurrency( data.gross_revenue ),
+				key: 'gross_revenue',
+				label: __( 'Gross Revenue', 'wc-admin' ),
+				type: 'currency',
 			},
 			{
-				label: __( 'refunds', 'wc-admin' ),
-				value: formatCurrency( data.refunds ),
+				key: 'refunds',
+				label: __( 'Refunds', 'wc-admin' ),
+				type: 'currency',
 			},
 			{
-				label: __( 'coupons', 'wc-admin' ),
-				value: formatCurrency( data.coupons ),
+				key: 'coupons',
+				label: __( 'Coupons', 'wc-admin' ),
+				type: 'currency',
 			},
 			{
-				label: __( 'taxes', 'wc-admin' ),
-				value: formatCurrency( data.taxes ),
+				key: 'taxes',
+				label: __( 'Taxes', 'wc-admin' ),
+				type: 'currency',
 			},
 			{
-				label: __( 'shipping', 'wc-admin' ),
-				value: formatCurrency( data.shipping ),
+				key: 'shipping',
+				label: __( 'Shipping', 'wc-admin' ),
+				type: 'currency',
 			},
 			{
-				label: __( 'net revenue', 'wc-admin' ),
-				value: formatCurrency( data.net_revenue ),
+				key: 'net_revenue',
+				label: __( 'Net Revenue', 'wc-admin' ),
+				type: 'currency',
 			},
 		];
 	}
 
-	// TODO since this pattern will exist on every report, this possibly should become a component
-	getChartSummaryNumbers() {
-		const { totals = {} } = this.state.stats;
-		const selectedChart = this.getSelectedChart();
+	getSelectedChart() {
+		const { query } = this.props;
+		const charts = this.getCharts();
 
-		const summaryNumbers = map( charts, ( chart, key ) => {
-			const { label, type } = chart;
-			const isSelected = selectedChart === key;
-			let value = totals[ key ];
+		const chart = find( charts, { key: query.chart } );
+		if ( chart ) {
+			return chart;
+		}
+
+		return charts[ 0 ];
+	}
+
+	// TODO since this pattern will exist on every report, this possibly should become a component
+	renderChartSummaryNumbers() {
+		const selectedChart = this.getSelectedChart();
+		const { primaryData, secondaryData } = this.props;
+		const { totals } = primaryData.data;
+		const secondaryTotals = secondaryData.data.totals || {};
+
+		const summaryNumbers = map( this.getCharts(), chart => {
+			const { key, label, type } = chart;
+			const isSelected = selectedChart.key === key;
+
+			let value = parseFloat( totals[ key ] );
+			let secondaryValue =
+				( secondaryTotals[ key ] && parseFloat( secondaryTotals[ key ] ) ) || undefined;
+
+			let delta = 0;
+			if ( secondaryValue && secondaryValue !== 0 ) {
+				delta = Math.round( ( value - secondaryValue ) / secondaryValue * 100 );
+			}
 
 			switch ( type ) {
 				// TODO: implement other format handlers
 				case 'currency':
 					value = formatCurrency( value );
+					secondaryValue = secondaryValue && formatCurrency( secondaryValue );
 					break;
 			}
 
@@ -273,7 +264,8 @@ class RevenueReport extends Component {
 					value={ value }
 					label={ label }
 					selected={ isSelected }
-					delta={ 0 }
+					prevValue={ secondaryValue }
+					delta={ delta }
 					href={ href }
 				/>
 			);
@@ -282,42 +274,109 @@ class RevenueReport extends Component {
 		return <SummaryList>{ summaryNumbers }</SummaryList>;
 	}
 
-	getSelectedChart() {
-		const { query } = this.props;
-		const { chart } = query;
-		if ( chart && charts[ chart ] ) {
-			return chart;
-		}
+	renderChart() {
+		const { primaryData, secondaryData, query } = this.props;
+		const { primary, secondary } = getCurrentDates( query );
+		const selectedChart = this.getSelectedChart();
 
-		return 'gross_revenue';
+		const primaryKey = `${ primary.label } (${ primary.range })`;
+		const secondaryKey = `${ secondary.label } (${ secondary.range })`;
+
+		const difference = getDateDifferenceInDays( primary.after, secondary.after );
+
+		const chartData = primaryData.data.intervals.map( function( interval ) {
+			const date = formatDate( 'Y-m-d', interval.date_start );
+			const secondaryDate = getPreviousDate( date, difference, query.compare );
+			const secondaryInterval = find( secondaryData.data.intervals, {
+				date_start: secondaryDate.format( isoDateFormat ) + ' 00:00:00',
+			} );
+
+			return {
+				date,
+				[ primaryKey ]: interval.subtotals[ selectedChart.key ] || 0,
+				[ secondaryKey ]:
+					( secondaryInterval && secondaryInterval.subtotals[ selectedChart.key ] ) || 0,
+			};
+		} );
+
+		return (
+			<Card title="">
+				<Chart data={ chartData } title={ selectedChart.label } />
+			</Card>
+		);
+	}
+
+	renderTable() {
+		const { primaryData, query } = this.props;
+		const intervals = primaryData.data.intervals;
+
+		const page = parseInt( query.page ) || 1;
+		const rowsPerPage = parseInt( query.per_page ) || 25;
+
+		const rows =
+			this.getRowsContent(
+				orderBy(
+					intervals,
+					function( interval ) {
+						return 'undefined' === typeof interval.subtotals[ query.orderby ]
+							? interval.date_start
+							: interval.subtotals[ query.orderby ];
+					},
+					query.order || 'asc'
+				).slice( ( page - 1 ) * rowsPerPage, page * rowsPerPage )
+			) || [];
+
+		const headers = this.getHeadersContent();
+
+		const tableQuery = { ...query, orderby: query.orderby || 'date_start', order: query.order || 'asc' };
+		return (
+			<TableCard
+				title={ __( 'Revenue', 'wc-admin' ) }
+				rows={ rows }
+				totalRows={ intervals.length }
+				rowsPerPage={ rowsPerPage }
+				headers={ headers }
+				onClickDownload={ this.onDownload( headers, rows, tableQuery ) }
+				onQueryChange={ this.onQueryChange }
+				query={ tableQuery }
+				summary={ null }
+			/>
+		);
 	}
 
 	render() {
-		const { path, query } = this.props;
-		const { totals = {}, intervals = [] } = this.state.stats;
-		const summary = this.getSummaryContent( totals ) || [];
-		const rows = this.getRowsContent( intervals ) || [];
-		const headers = this.getHeadersContent();
-		const selectedChart = this.getSelectedChart();
+		const { path, query, primaryData, secondaryData } = this.props;
+
+		// TODO The loading, error, and empty messages below are all temporary.
+		// So we need to use an actual EmptyState components and add in a loading indicator.
+		const tempMessage = message => {
+			return (
+				<div>
+					<ReportFilters query={ query } path={ path } />
+					<p>{ message }</p>
+				</div>
+			);
+		};
+
+		if ( isReportDataEmpty( primaryData ) ) {
+			return tempMessage( 'Empty Data' );
+		}
+
+		if ( primaryData.isRequesting || secondaryData.isRequesting ) {
+			return tempMessage( 'Loading...' );
+		}
+
+		if ( primaryData.isError || secondaryData.isError ) {
+			return tempMessage( 'Error' );
+		}
 
 		return (
 			<Fragment>
 				<ReportFilters query={ query } path={ path } />
 
-				{ this.getChartSummaryNumbers() }
-				<Card title="">
-					<Chart data={ testData[ selectedChart ] } title={ charts[ selectedChart ].label } />
-				</Card>
-
-				<TableCard
-					title={ __( 'Revenue Last Week', 'wc-admin' ) }
-					rows={ rows }
-					headers={ headers }
-					onClickDownload={ this.onDownload( headers, rows, query ) }
-					onQueryChange={ this.onQueryChange }
-					query={ query }
-					summary={ summary }
-				/>
+				{ this.renderChartSummaryNumbers() }
+				{ this.renderChart() }
+				{ this.renderTable() }
 			</Fragment>
 		);
 	}
@@ -329,4 +388,39 @@ RevenueReport.propTypes = {
 	query: PropTypes.object.isRequired,
 };
 
-export default RevenueReport;
+export default compose(
+	withSelect( ( select, props ) => {
+		const { query } = props;
+		const datesFromQuery = getCurrentDates( query );
+		const baseArgs = {
+			order: 'asc',
+			interval: 'day', // TODO support other intervals
+			per_page: MAX_PER_PAGE,
+		};
+
+		const primaryData = getAllReportData(
+			'revenue',
+			{
+				...baseArgs,
+				after: datesFromQuery.primary.after,
+				before: datesFromQuery.primary.before,
+			},
+			select
+		);
+
+		const secondaryData = getAllReportData(
+			'revenue',
+			{
+				...baseArgs,
+				after: datesFromQuery.secondary.after,
+				before: datesFromQuery.secondary.before,
+			},
+			select
+		);
+
+		return {
+			primaryData,
+			secondaryData,
+		};
+	} )
+)( RevenueReport );

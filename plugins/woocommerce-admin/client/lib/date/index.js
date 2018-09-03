@@ -5,7 +5,7 @@
 import moment from 'moment';
 import { find } from 'lodash';
 import { __ } from '@wordpress/i18n';
-import { getSettings } from '@wordpress/date';
+import { getSettings, format as formatDate } from '@wordpress/date';
 
 /**
  * DateValue Object
@@ -271,16 +271,45 @@ export const getCurrentDates = query => {
 		primary: {
 			label: find( presetValues, item => item.value === period ).label,
 			range: getRangeLabel( primaryStart, primaryEnd ),
-			after: primaryStart,
-			before: primaryEnd,
+			after: primaryStart.format( isoDateFormat ),
+			before: primaryEnd.format( isoDateFormat ),
 		},
 		secondary: {
 			label: find( periods, item => item.value === compare ).label,
 			range: getRangeLabel( secondaryStart, secondaryEnd ),
-			after: secondaryStart,
-			before: secondaryEnd,
+			after: secondaryStart.format( isoDateFormat ),
+			before: secondaryEnd.format( isoDateFormat ),
 		},
 	};
+};
+
+/**
+ * Calculates the date difference between two dates. Used in calculating a matching date for previous period.
+ *
+ * @param {String} date - Date to compare
+ * @param {String} date2 - Seconary date to compare
+ * @return {Int}  - Difference in days.
+ */
+export const getDateDifferenceInDays = ( date, date2 ) => {
+	const _date = toMoment( isoDateFormat, formatDate( 'Y-m-d', date ) );
+	const _date2 = toMoment( isoDateFormat, formatDate( 'Y-m-d', date2 ) );
+	return _date.diff( _date2, 'days' );
+};
+
+/**
+ * Get the previous date for either the previous period of year.
+ *
+ * @param {String} date - Base date
+ * @param {Int} difference - The difference in days for the previous period. See `getDateDifferenceInDays`.
+ * @param {String} compare - `previous_period`  or `previous_year`
+ * @return {String}  - Calculated date
+ */
+export const getPreviousDate = ( date, difference, compare ) => {
+	const dateMoment = toMoment( isoDateFormat, formatDate( 'Y-m-d', date ) );
+	if ( 'previous_period' === compare ) {
+		return dateMoment.clone().subtract( difference, 'days' );
+	}
+	return dateMoment.clone().subtract( 1, 'years' );
 };
 
 /**

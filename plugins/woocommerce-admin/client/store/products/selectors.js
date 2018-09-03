@@ -10,7 +10,7 @@ import { select } from '@wordpress/data';
  * Internal dependencies
  */
 import { ERROR } from 'store/constants';
-import { getJsonString } from 'store/util';
+import { getJsonString } from 'store/utils';
 
 /**
  * Returns revenue report details for a specific report query.

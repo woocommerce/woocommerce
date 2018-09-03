@@ -68,7 +68,16 @@ class TableCard extends Component {
 	}
 
 	render() {
-		const { onClickDownload, onQueryChange, query, rowHeader, summary, title } = this.props;
+		const {
+			onClickDownload,
+			onQueryChange,
+			query,
+			rowHeader,
+			summary,
+			title,
+			totalRows,
+			rowsPerPage,
+		} = this.props;
 		const { showCols } = this.state;
 		const allHeaders = this.props.headers;
 		const headers = this.filterCols( this.props.headers );
@@ -119,8 +128,8 @@ class TableCard extends Component {
 
 				<Pagination
 					page={ parseInt( query.page ) || 1 }
-					perPage={ parseInt( query.per_page ) || 25 }
-					total={ 5000 }
+					perPage={ rowsPerPage }
+					total={ totalRows }
 					onPageChange={ onQueryChange( 'page' ) }
 					onPerPageChange={ onQueryChange( 'per_page' ) }
 				/>
@@ -183,6 +192,8 @@ TableCard.propTypes = {
 	 * The title used in the card header, also used as the caption for the content in this table.
 	 */
 	title: PropTypes.string.isRequired,
+	totalRows: PropTypes.number.isRequired,
+	rowsPerPage: PropTypes.number.isRequired,
 };
 
 TableCard.defaultProps = {

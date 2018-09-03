@@ -12,7 +12,7 @@ import deepFreeze from 'deep-freeze';
  */
 import { ERROR } from 'store/constants';
 import reportStatsReducer from '../reducer';
-import { getJsonString } from 'store/util';
+import { getJsonString } from 'store/utils';
 
 describe( 'reportStatsReducer()', () => {
 	it( 'returns an empty data object by default', () => {
@@ -41,10 +41,16 @@ describe( 'reportStatsReducer()', () => {
 			endpoint,
 			query,
 			report,
+			totalResults: 3,
+			totalPages: 1,
 		} );
 
 		const queryKey = getJsonString( query );
-		expect( state[ endpoint ][ queryKey ] ).toEqual( report );
+		expect( state[ endpoint ][ queryKey ] ).toEqual( {
+			data: { ...report },
+			totalResults: 3,
+			totalPages: 1,
+		} );
 	} );
 
 	it( 'tracks multiple queries per endpoint in report data', () => {
@@ -56,7 +62,7 @@ describe( 'reportStatsReducer()', () => {
 		const otherQueryKey = getJsonString( otherQuery );
 		const otherQueryState = {
 			revenue: {
-				[ otherQueryKey ]: { totals: 1000 },
+				[ otherQueryKey ]: { data: { totals: 1000 } },
 			},
 		};
 		const originalState = deepFreeze( otherQueryState );
@@ -79,11 +85,17 @@ describe( 'reportStatsReducer()', () => {
 			endpoint,
 			query,
 			report,
+			totalResults: 3,
+			totalPages: 1,
 		} );
 
 		const queryKey = getJsonString( query );
-		expect( state[ endpoint ][ queryKey ] ).toEqual( report );
-		expect( state[ endpoint ][ otherQueryKey ].totals ).toEqual( 1000 );
+		expect( state[ endpoint ][ queryKey ] ).toEqual( {
+			data: { ...report },
+			totalResults: 3,
+			totalPages: 1,
+		} );
+		expect( state[ endpoint ][ otherQueryKey ].data.totals ).toEqual( 1000 );
 	} );
 
 	it( 'tracks multiple endpoints in report data', () => {
@@ -95,7 +107,7 @@ describe( 'reportStatsReducer()', () => {
 		const productsQueryKey = getJsonString( productsQuery );
 		const productsQueryState = {
 			products: {
-				[ productsQueryKey ]: { totals: 1999 },
+				[ productsQueryKey ]: { data: { totals: 1999 } },
 			},
 		};
 		const originalState = deepFreeze( productsQueryState );
@@ -118,11 +130,17 @@ describe( 'reportStatsReducer()', () => {
 			endpoint,
 			query,
 			report,
+			totalResults: 3,
+			totalPages: 1,
 		} );
 
 		const queryKey = getJsonString( query );
-		expect( state[ endpoint ][ queryKey ] ).toEqual( report );
-		expect( state.products[ productsQueryKey ].totals ).toEqual( 1999 );
+		expect( state[ endpoint ][ queryKey ] ).toEqual( {
+			data: { ...report },
+			totalResults: 3,
+			totalPages: 1,
+		} );
+		expect( state.products[ productsQueryKey ].data.totals ).toEqual( 1999 );
 	} );
 
 	it( 'returns with received error data', () => {

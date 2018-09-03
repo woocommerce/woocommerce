@@ -12,7 +12,7 @@ import deepFreeze from 'deep-freeze';
  */
 import { ERROR } from 'store/constants';
 import productsReducer, { DEFAULT_STATE } from '../reducer';
-import { getJsonString } from 'store/util';
+import { getJsonString } from 'store/utils';
 
 describe( 'productsReducer', () => {
 	it( 'returns default state by default', () => {

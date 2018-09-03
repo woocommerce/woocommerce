@@ -15,6 +15,8 @@ import { isFinite, noop, uniqueId } from 'lodash';
  */
 import './style.scss';
 
+const PER_PAGE_OPTIONS = [ 25, 50, 75, 100 ];
+
 /**
  * Use `Pagination` to allow navigation between pages that represent a collection of items.
  * The component allows for selecting a new page and items per page options.
@@ -50,6 +52,7 @@ class Pagination extends Component {
 
 	perPageChange( perPage ) {
 		const { onPerPageChange, onPageChange, total, page } = this.props;
+
 		onPerPageChange( parseInt( perPage ) );
 		const newMaxPage = Math.ceil( total / parseInt( perPage ) );
 		if ( page > newMaxPage ) {
@@ -146,20 +149,17 @@ class Pagination extends Component {
 
 	renderPerPagePicker() {
 		// TODO Replace this with a styleized Select drop-down/control?
+		const pickerOptions = PER_PAGE_OPTIONS.map( option => {
+			return { value: option, label: option };
+		} );
+
 		return (
 			<div className="woocommerce-pagination__per-page-picker">
 				<SelectControl
 					label={ __( 'Rows per page', 'wc-admin' ) }
 					value={ this.props.perPage }
 					onChange={ this.perPageChange }
-					options={ [
-						{ value: '25', label: '25' },
-						{ value: '50', label: '50' },
-						{ value: '75', label: '75' },
-						{ value: '100', label: '100' },
-						{ value: '250', label: '250' },
-						{ value: '500', label: '500' },
-					] }
+					options={ pickerOptions }
 				/>
 			</div>
 		);
@@ -169,11 +169,16 @@ class Pagination extends Component {
 		const { total, perPage, className } = this.props;
 		this.pageCount = Math.ceil( total / perPage );
 
-		if ( this.pageCount <= 1 ) {
-			return null;
-		}
-
 		const classes = classNames( 'woocommerce-pagination', className );
+
+		if ( this.pageCount <= 1 ) {
+			return (
+				( total > PER_PAGE_OPTIONS[ 0 ] && (
+					<div className={ classes }>{ this.renderPerPagePicker() }</div>
+				) ) ||
+				null
+			);
+		}
 
 		return (
 			<div className={ classes }>

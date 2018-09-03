@@ -42,6 +42,8 @@ render: function() {
 * `rowHeader`: Which column should be the row header, defaults to the first item (`0`) (see `Table` props).
 * `summary`: An array of objects with `label` & `value` properties, which display in a line under the table. Optional, can be left off to show no summary.
 * `title` (required): The title used in the card header, also used as the caption for the content in this table
+* `totalRows` (required): The total number of rows (across all pages).
+* `rowsPerPage` (required): The total number of rows to display per page.
 
 
 `rows`, `headers`, `rowHeader`, and `title` are passed through to `<Table />`. `summary` is passed through as `data` to `<TableSummary />`. `query.page`, `query.per_page`, and `onQueryChange` are passed through to `<Pagination />`.

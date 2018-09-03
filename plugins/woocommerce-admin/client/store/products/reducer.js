@@ -8,7 +8,7 @@ import { get } from 'lodash';
  * Internal dependencies
  */
 import { ERROR } from 'store/constants';
-import { getJsonString } from 'store/util';
+import { getJsonString } from 'store/utils';
 
 export const DEFAULT_STATE = {
 	queries: {},

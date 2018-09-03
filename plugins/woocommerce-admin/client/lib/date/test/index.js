@@ -18,6 +18,9 @@ import {
 	getCurrentDates,
 	validateDateInputForRange,
 	dateValidationMessages,
+	isoDateFormat,
+	getDateDifferenceInDays,
+	getPreviousDate,
 } from 'lib/date';
 
 describe( 'toMoment', () => {
@@ -568,29 +571,31 @@ describe( 'getCurrentDates', () => {
 		expect( currentDates.primary ).toBeDefined();
 		expect( 'string' === typeof currentDates.primary.label ).toBe( true );
 		expect( 'string' === typeof currentDates.primary.range ).toBe( true );
-		expect( moment.isMoment( currentDates.primary.after ) ).toBe( true );
-		expect( moment.isMoment( currentDates.primary.before ) ).toBe( true );
+		expect( 'string' === typeof currentDates.primary.after ).toBe( true );
+		expect( 'string' === typeof currentDates.primary.before ).toBe( true );
 
 		expect( currentDates.secondary ).toBeDefined();
 		expect( 'string' === typeof currentDates.secondary.label ).toBe( true );
 		expect( 'string' === typeof currentDates.secondary.range ).toBe( true );
-		expect( moment.isMoment( currentDates.secondary.after ) ).toBe( true );
-		expect( moment.isMoment( currentDates.secondary.before ) ).toBe( true );
+		expect( 'string' === typeof currentDates.secondary.after ).toBe( true );
+		expect( 'string' === typeof currentDates.secondary.before ).toBe( true );
 	} );
 
 	it( 'should correctly apply default values', () => {
 		const query = {};
-		const today = moment();
-		const yesterday = today.clone().subtract( 1, 'day' );
+		const today = moment().format( isoDateFormat );
+		const yesterday = moment()
+			.subtract( 1, 'day' )
+			.format( isoDateFormat );
 		const currentDates = getCurrentDates( query );
 
 		// Ensure default period is 'today'
-		expect( today.isSame( currentDates.primary.after, 'day' ) ).toBe( true );
-		expect( today.isSame( currentDates.primary.before, 'day' ) ).toBe( true );
+		expect( currentDates.primary.after ).toBe( today );
+		expect( currentDates.primary.before ).toBe( today );
 
 		// Ensure default compare is `previous_period`
-		expect( yesterday.isSame( currentDates.secondary.after, 'day' ) ).toBe( true );
-		expect( yesterday.isSame( currentDates.secondary.before, 'day' ) ).toBe( true );
+		expect( currentDates.secondary.after ).toBe( yesterday );
+		expect( currentDates.secondary.before ).toBe( yesterday );
 	} );
 } );
 
@@ -665,5 +670,23 @@ describe( 'validateDateInputForRange', () => {
 		const validated = validateDateInputForRange( 'before', value, null, start, dateFormat );
 		expect( validated.date ).toBe( null );
 		expect( validated.error ).toBe( dateValidationMessages.endBeforeStart );
+	} );
+} );
+
+describe( 'getDateDifferenceInDays', () => {
+	it( 'should calculate the day difference between two dates', () => {
+		const difference = getDateDifferenceInDays( '2018-08-22', '2018-05-22' );
+		expect( difference ).toBe( 92 );
+	} );
+} );
+
+describe( 'getPreviousDate', () => {
+	it( 'should return valid date for previous period', () => {
+		const previousDate = getPreviousDate( '2018-08-21', 92, 'previous_period' );
+		expect( previousDate.format( isoDateFormat ) ).toBe( '2018-05-21' );
+	} );
+	it( 'should return valid date for previous year', () => {
+		const previousDate = getPreviousDate( '2018-08-21', 92, 'previous_year' );
+		expect( previousDate.format( isoDateFormat ) ).toBe( '2017-08-21' );
 	} );
 } );
