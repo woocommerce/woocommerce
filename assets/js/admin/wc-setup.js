@@ -162,6 +162,7 @@ jQuery( function( $ ) {
 		if ( $( this ).is( ':checked' ) ) {
 			$( this ).closest( '.wc-wizard-service-settings' )
 				.find( 'input.payment-email-input' )
+				.attr( 'type', 'email' )
 				.prop( 'required', true );
 			$( this ).closest( '.wc-wizard-service-settings' )
 				.find( '.wc-wizard-service-setting-stripe_email, .wc-wizard-service-setting-ppec_paypal_email' )
@@ -169,6 +170,7 @@ jQuery( function( $ ) {
 		} else {
 			$( this ).closest( '.wc-wizard-service-settings' )
 				.find( 'input.payment-email-input' )
+				.attr( 'type', null )
 				.prop( 'required', false );
 			$( this ).closest( '.wc-wizard-service-settings' )
 				.find( '.wc-wizard-service-setting-stripe_email, .wc-wizard-service-setting-ppec_paypal_email' )
