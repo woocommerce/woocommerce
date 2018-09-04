@@ -12,7 +12,7 @@
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce/Templates
- * @version 3.4.0
+ * @version 3.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -69,7 +69,7 @@ do_action( 'woocommerce_before_customer_login_form' ); ?>
 
 		<h2><?php esc_html_e( 'Register', 'woocommerce' ); ?></h2>
 
-		<form method="post" class="woocommerce-form woocommerce-form-register register"<?php do_action( 'woocommerce_register_form_tag' ); ?>>
+		<form method="post" class="woocommerce-form woocommerce-form-register register" <?php do_action( 'woocommerce_register_form_tag' ); ?> >
 
 			<?php do_action( 'woocommerce_register_form_start' ); ?>
 
