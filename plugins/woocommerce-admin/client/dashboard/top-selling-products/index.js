@@ -4,7 +4,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
-import { map } from 'lodash';
+import { get, map } from 'lodash';
 import { compose } from '@wordpress/compose';
 import { withSelect } from '@wordpress/data';
 
@@ -109,10 +109,10 @@ export default compose(
 		// { after: '2018-04-22', before: '2018-05-06' }
 		const query = { orderby: 'items_sold' };
 
-		const data = getReportStats( endpoint, query );
+		const stats = getReportStats( endpoint, query );
 		const isRequesting = isReportStatsRequesting( endpoint, query );
 		const isError = isReportStatsError( endpoint, query );
 
-		return { data, isRequesting, isError };
+		return { data: get( stats, 'data', [] ), isRequesting, isError };
 	} )
 )( TopSellingProducts );

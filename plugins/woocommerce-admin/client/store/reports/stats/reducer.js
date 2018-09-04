@@ -19,9 +19,7 @@ export default function reportStatsReducer( state = DEFAULT_STATE, action ) {
 		return merge( {}, state, {
 			[ action.endpoint ]: {
 				[ queryKey ]: {
-					data: {
-						...action.report,
-					},
+					data: action.report,
 					totalResults: action.totalResults,
 					totalPages: action.totalPages,
 				},

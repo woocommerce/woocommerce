@@ -45,7 +45,7 @@ describe( 'TopSellingProducts', () => {
 	} );
 
 	test( 'should load report stats from API', () => {
-		const getReportStatsMock = jest.fn().mockReturnValue( mockData );
+		const getReportStatsMock = jest.fn().mockReturnValue( { data: mockData } );
 		const isReportStatsRequestingMock = jest.fn().mockReturnValue( false );
 		const isReportStatsErrorMock = jest.fn().mockReturnValue( false );
 		const registry = createRegistry();
