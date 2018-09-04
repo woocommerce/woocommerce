@@ -23,39 +23,30 @@ class Search extends Component {
 	constructor( props ) {
 		super( props );
 		this.state = {
-			selected: [],
 			value: '',
 		};
 
 		this.selectResult = this.selectResult.bind( this );
 		this.removeResult = this.removeResult.bind( this );
-		this.triggerChange = this.triggerChange.bind( this );
 		this.updateSearch = this.updateSearch.bind( this );
 	}
 
 	selectResult( value ) {
+		const { selected, onChange } = this.props;
 		// Check if this is already selected
-		const isSelected = findIndex( this.state.selected, { id: value.id } );
+		const isSelected = findIndex( selected, { id: value.id } );
 		if ( -1 === isSelected ) {
-			this.setState(
-				( { selected } ) => ( { selected: [ ...selected, value ], value: '' } ),
-				this.triggerChange
-			);
+			this.setState( { value: '' } );
+			onChange( [ ...selected, value ] );
 		}
 	}
 
 	removeResult( id ) {
 		return () => {
-			this.setState( ( { selected } ) => {
-				const i = findIndex( selected, { id } );
-				return { selected: [ ...selected.slice( 0, i ), ...selected.slice( i + 1 ) ] };
-			}, this.triggerChange );
+			const { selected, onChange } = this.props;
+			const i = findIndex( selected, { id } );
+			onChange( [ ...selected.slice( 0, i ), ...selected.slice( i + 1 ) ] );
 		};
-	}
-
-	triggerChange() {
-		const { onChange } = this.props;
-		onChange( this.state.selected );
 	}
 
 	updateSearch( onChange ) {
@@ -77,7 +68,8 @@ class Search extends Component {
 
 	render() {
 		const autocompleter = this.getAutocompleter();
-		const { selected = [], value = '' } = this.state;
+		const { selected } = this.props;
+		const { value = '' } = this.state;
 		return (
 			<div className="woocommerce-search">
 				<Autocomplete completer={ autocompleter } onSelect={ this.selectResult }>
@@ -128,10 +120,20 @@ Search.propTypes = {
 	 * The object type to be used in searching.
 	 */
 	type: PropTypes.oneOf( [ 'products', 'orders', 'customers' ] ).isRequired,
+	/**
+	 * An array of objects describing selected values
+	 */
+	selected: PropTypes.arrayOf(
+		PropTypes.shape( {
+			id: PropTypes.number.isRequired,
+			label: PropTypes.string.isRequired,
+		} )
+	),
 };
 
 Search.defaultProps = {
 	onChange: noop,
+	selected: [],
 };
 
 export default Search;
