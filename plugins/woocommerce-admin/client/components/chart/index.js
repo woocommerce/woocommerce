@@ -136,7 +136,7 @@ class Chart extends Component {
 		const margin = {
 			bottom: 50,
 			left: 80,
-			right: 10,
+			right: 30,
 			top: 0,
 		};
 		return (

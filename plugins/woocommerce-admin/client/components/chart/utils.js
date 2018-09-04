@@ -16,6 +16,10 @@ import {
 import { mouse as d3Mouse, select as d3Select } from 'd3-selection';
 import { line as d3Line } from 'd3-shape';
 import { utcParse as d3UTCParse } from 'd3-time-format';
+/**
+ * Internal dependencies
+ */
+import { formatCurrency } from 'lib/currency';
 
 export const parseDate = d3UTCParse( '%Y-%m-%dT%H:%M:%S' );
 
@@ -220,13 +224,17 @@ export const drawAxis = ( node, params ) => {
 	node
 		.append( 'g' )
 		.attr( 'class', 'axis axis-month' )
-		.attr( 'transform', `translate(15, ${ params.height + 20 })` )
+		.attr( 'transform', `translate(3, ${ params.height + 20 })` )
 		.call(
 			d3AxisBottom( xScale )
 				.tickValues( params.uniqueDates.map( d => ( params.type === 'line' ? new Date( d ) : d ) ) )
-				.tickFormat( d => d3TimeFormat( '%b %Y' )( d instanceof Date ? d : new Date( d ) ) )
+				.tickFormat( d => params.xFormat( d instanceof Date ? d : new Date( d ) ) )
 		)
 		.call( g => g.select( '.domain' ).remove() );
+
+	node
+		.selectAll( '.axis-month .tick text' )
+		.style( 'font-size', `${ Math.round( params.scale * 10 ) }px` );
 
 	node
 		.append( 'g' )
@@ -246,7 +254,7 @@ export const drawAxis = ( node, params ) => {
 		.call(
 			d3AxisLeft( params.yScale )
 				.tickValues( yGrids )
-				.tickSize( -params.width - params.margin.left )
+				.tickSize( -params.width - params.margin.left - params.margin.right )
 				.tickFormat( '' )
 		)
 		.call( g => g.select( '.domain' ).remove() );
@@ -281,10 +289,12 @@ const showTooltip = ( node, params, d ) => {
 	yPosition = yPosition > chartCoords.height - 150 ? yPosition - 200 : yPosition + 20;
 	const keys = params.orderedKeys.filter( row => row.visible ).map(
 		row => `
-				<li>
-					<span class="key-colour" style="background-color:${ getColor( row.key, params ) }"></span>
-					<span class="key-key">${ row.key }:</span>
-					<span class="key-value">${ d3Format( ',.0f' )( d[ row.key ] ) }</span>
+				<li class="key-row">
+					<div class="key-container">
+						<span class="key-colour" style="background-color:${ getColor( row.key, params ) }"></span>
+						<span class="key-key">${ row.key }:</span>
+					</div>
+					<span class="key-value">${ formatCurrency( d[ row.key ] ) }</span>
 				</li>
 			`
 	);
@@ -292,7 +302,7 @@ const showTooltip = ( node, params, d ) => {
 	params.tooltip
 		.style( 'left', xPosition + 'px' )
 		.style( 'top', yPosition + 'px' )
-		.style( 'display', 'inline-block' ).html( `
+		.style( 'display', 'flex' ).html( `
 			<div>
 				<h4>${ params.tooltipFormat( d.date instanceof Date ? d.date : new Date( d.date ) ) }</h4>
 				<ul>
@@ -313,7 +323,7 @@ const handleMouseOutBarChart = ( d, i, nodes, params ) => {
 	d3Select( nodes[ i ].parentNode )
 		.select( '.barfocus' )
 		.attr( 'opacity', '0' );
-	params.tooltip.style( 'display', 'none' );
+	params.tooltip.style( 'display', 'flex' );
 };
 
 const handleMouseOverLineChart = ( d, i, nodes, node, data, params ) => {
@@ -389,16 +399,20 @@ export const drawLines = ( node, data, params ) => {
 		.data( ( d, i ) => d.values.map( row => ( { ...row, i, visible: d.visible, key: d.key } ) ) )
 		.enter()
 		.append( 'circle' )
-		.attr( 'r', 3.5 )
-		.attr( 'fill', '#fff' )
-		.attr( 'stroke', d => getColor( d.key, params ) )
+		.attr( 'r', 6 )
+		.attr( 'fill', d => getColor( d.key, params ) )
+		.attr( 'stroke', '#fff' )
 		.attr( 'stroke-width', 3 )
 		.style( 'opacity', d => {
 			const opacity = d.focus ? 1 : 0.1;
 			return d.visible ? opacity : 0;
 		} )
 		.attr( 'cx', d => params.xLineScale( new Date( d.date ) ) )
-		.attr( 'cy', d => params.yScale( d.value ) );
+		.attr( 'cy', d => params.yScale( d.value ) )
+		.on( 'mouseover', ( d, i, nodes ) =>
+			handleMouseOverLineChart( d, i, nodes, node, data, params )
+		)
+		.on( 'mouseout', ( d, i, nodes ) => handleMouseOutLineChart( d, i, nodes, params ) );
 };
 
 export const drawBars = ( node, data, params ) => {
@@ -442,7 +456,11 @@ export const drawBars = ( node, data, params ) => {
 		.style( 'opacity', d => {
 			const opacity = d.focus ? 1 : 0.1;
 			return d.visible ? opacity : 0;
-		} );
+		} )
+		.on( 'mouseover', ( d, i, nodes ) =>
+			handleMouseOverBarChart( d, i, nodes, node, data, params )
+		)
+		.on( 'mouseout', ( d, i, nodes ) => handleMouseOutBarChart( d, i, nodes, params ) );
 
 	barGroup
 		.append( 'rect' )
