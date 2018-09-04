@@ -140,6 +140,10 @@ class WC_Breadcrumb {
 			$post = get_post( $post_id ); // WPCS: override ok.
 		}
 
+		if ( ! $permalink ) {
+			$permalink = get_permalink( $post );
+		}
+
 		if ( 'product' === get_post_type( $post ) ) {
 			$this->prepend_shop_page();
 
