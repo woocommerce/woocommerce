@@ -100,15 +100,31 @@
 		}
 	}
 	.grid {
-		line {
-			stroke: $core-grey-light-200;
-			stroke-width: 1;
-			shape-rendering: crispEdges;
+		.tick {
+			line {
+				stroke: $core-grey-light-200;
+				stroke-width: 1;
+				shape-rendering: crispEdges;
+			}
+
+			&:first-child {
+				line {
+					stroke: $core-grey-dark-500;
+				}
+			}
 		}
 	}
 	.tick {
 		padding-top: 10px;
 		stroke-width: 1;
+	}
+	.axis-month {
+		.tick {
+			display: none;
+			&:first-child {
+				display: inline;
+			}
+		}
 	}
 	.y-axis {
 		&.tick {

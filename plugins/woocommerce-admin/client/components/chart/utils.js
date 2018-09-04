@@ -219,6 +219,28 @@ export const drawAxis = ( node, params ) => {
 
 	node
 		.append( 'g' )
+		.attr( 'class', 'axis axis-month' )
+		.attr( 'transform', `translate(15, ${ params.height + 20 })` )
+		.call(
+			d3AxisBottom( xScale )
+				.tickValues( params.uniqueDates.map( d => ( params.type === 'line' ? new Date( d ) : d ) ) )
+				.tickFormat( d => d3TimeFormat( '%b %Y' )( d instanceof Date ? d : new Date( d ) ) )
+		)
+		.call( g => g.select( '.domain' ).remove() );
+
+	node
+		.append( 'g' )
+		.attr( 'class', 'pipes' )
+		.attr( 'transform', `translate(0, ${ params.height })` )
+		.call(
+			d3AxisBottom( xScale )
+				.tickValues( params.uniqueDates.map( d => ( params.type === 'line' ? new Date( d ) : d ) ) )
+				.tickSize( 5 )
+				.tickFormat( '' )
+		);
+
+	node
+		.append( 'g' )
 		.attr( 'class', 'grid' )
 		.attr( 'transform', `translate(-${ params.margin.left },0)` )
 		.call(
@@ -232,6 +254,8 @@ export const drawAxis = ( node, params ) => {
 	node
 		.append( 'g' )
 		.attr( 'class', 'axis y-axis' )
+		.attr( 'transform', 'translate(-20, 0)' )
+		.attr( 'text-anchor', 'left' )
 		.call(
 			d3AxisLeft( params.yTickOffset )
 				.tickValues( yGrids )
