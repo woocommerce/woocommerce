@@ -300,17 +300,136 @@ export const getDateDifferenceInDays = ( date, date2 ) => {
  * Get the previous date for either the previous period of year.
  *
  * @param {String} date - Base date
- * @param {Int} difference - The difference in days for the previous period. See `getDateDifferenceInDays`.
+ * @param {String} date1 - primary start
+ * @param {String} date2 - secondary start
  * @param {String} compare - `previous_period`  or `previous_year`
+ * @param {String} interval - interval
  * @return {String}  - Calculated date
  */
-export const getPreviousDate = ( date, difference, compare ) => {
+export const getPreviousDate = ( date, date1, date2, compare, interval ) => {
 	const dateMoment = toMoment( isoDateFormat, formatDate( 'Y-m-d', date ) );
+	const _date1 = toMoment( isoDateFormat, formatDate( 'Y-m-d', date1 ) );
+	const _date2 = toMoment( isoDateFormat, formatDate( 'Y-m-d', date2 ) );
 	if ( 'previous_period' === compare ) {
-		return dateMoment.clone().subtract( difference, 'days' );
+		const difference = _date1.diff( _date2, interval );
+		return dateMoment.clone().subtract( difference, interval );
 	}
 	return dateMoment.clone().subtract( 1, 'years' );
 };
+
+/**
+ * Returns the allowed selectable intervals for a specific query.
+ *
+ * @param  {Object} query Current query
+ * @return {Array} Array containing allowed intervals.
+ */
+export function getAllowedIntervalsForQuery( query ) {
+	let allowed = [];
+	if ( 'custom' === query.period ) {
+		const { primary } = getCurrentDates( query );
+		const differenceInDays = getDateDifferenceInDays( primary.before, primary.after );
+		if ( differenceInDays > 728 ) {
+			allowed = [ 'day', 'week', 'month', 'quarter', 'year' ];
+		} else if ( differenceInDays > 364 ) {
+			allowed = [ 'day', 'week', 'month', 'quarter' ];
+		} else if ( differenceInDays > 90 ) {
+			allowed = [ 'day', 'week', 'month' ];
+		} else if ( differenceInDays > 7 ) {
+			allowed = [ 'day', 'week' ];
+		} else if ( differenceInDays > 1 && differenceInDays <= 7 ) {
+			allowed = [ 'day' ];
+		} else if ( differenceInDays <= 1 ) {
+			allowed = [ 'hour' ];
+		} else {
+			allowed = [ 'day' ];
+		}
+	} else {
+		switch ( query.period ) {
+			case 'today':
+			case 'yesterday':
+				allowed = [ 'hour' ];
+				break;
+			case 'week':
+			case 'last_week':
+				allowed = [ 'day' ];
+				break;
+			case 'month':
+			case 'last_month':
+				allowed = [ 'day', 'week' ];
+				break;
+			case 'quarter':
+			case 'last_quarter':
+				allowed = [ 'day', 'week', 'month' ];
+				break;
+			case 'year':
+			case 'last_year':
+				allowed = [ 'day', 'week', 'month', 'quarter' ];
+				break;
+			default:
+				allowed = [ 'day' ];
+				break;
+		}
+	}
+	return allowed;
+}
+
+/**
+ * Returns the current interval to use.
+ *
+ * @param  {Object} query Current query
+ * @return {String} Current interval.
+ */
+export function getIntervalForQuery( query ) {
+	const allowed = getAllowedIntervalsForQuery( query );
+	const defaultInterval = allowed[ 0 ];
+	let current = query.interval || defaultInterval;
+	if ( query.interval && ! allowed.includes( query.interval ) ) {
+		current = defaultInterval;
+	}
+
+	return current;
+}
+
+/**
+ * Returns date formats for the current interval.
+ * See https://github.com/d3/d3-time-format for chart formats.
+ *
+ * @param  {String} interval Interval to get date formats for.
+ * @return {String} Current interval.
+ */
+export function getDateFormatsForInterval( interval ) {
+	let tooltipFormat = '%B %d %Y';
+	let xFormat = '%Y-%m-%d';
+	let tableFormat = 'm/d/Y';
+
+	switch ( interval ) {
+		case 'hour':
+			tooltipFormat = '%I %p';
+			xFormat = '%I %p';
+			tableFormat = 'h A';
+			break;
+		case 'week':
+			tooltipFormat = __( 'Week of %B %d %Y', 'wc-admin' );
+			break;
+		case 'quarter':
+		case 'month':
+			tooltipFormat = '%B %Y';
+			xFormat = '%b %y';
+			tableFormat = 'M Y';
+			break;
+		case 'year':
+			tooltipFormat = '%Y';
+			xFormat = '%Y';
+			tableFormat = 'Y';
+			break;
+	}
+
+	return {
+		tooltipFormat,
+		xFormat,
+		tableFormat,
+	};
+}
 
 /**
  * Gutenberg's moment instance is loaded with i18n values. If the locale isn't english

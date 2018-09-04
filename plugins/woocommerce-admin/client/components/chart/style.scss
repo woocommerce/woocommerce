@@ -199,6 +199,15 @@
 	}
 }
 
+.woocommerce-chart__interval-select {
+	margin: 0;
+
+	.components-select-control__input {
+		border: 0;
+		box-shadow: none;
+	}
+}
+
 .woocommerce-chart__container {
 	position: relative;
 	width: 100%;

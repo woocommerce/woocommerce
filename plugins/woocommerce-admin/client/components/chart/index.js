@@ -2,10 +2,11 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
 import { isEqual, partial } from 'lodash';
 import { Component, createRef } from '@wordpress/element';
-import { IconButton } from '@wordpress/components';
+import { IconButton, SelectControl } from '@wordpress/components';
 import PropTypes from 'prop-types';
 import { interpolateViridis as d3InterpolateViridis } from 'd3-scale-chromatic';
 import Gridicon from 'gridicons';
@@ -16,6 +17,7 @@ import Gridicon from 'gridicons';
 import D3Chart from './charts';
 import Legend from './legend';
 import { gap, gaplarge } from 'stylesheets/abstracts/_variables.scss';
+import { updateQueryString } from 'lib/nav-utils';
 
 const WIDE_BREAKPOINT = 1100;
 
@@ -139,9 +141,50 @@ class Chart extends Component {
 		} );
 	}
 
+	setInterval( interval ) {
+		updateQueryString( { interval } );
+	}
+
+	renderIntervalSelector() {
+		const { interval, allowedIntervals } = this.props;
+		if ( ! allowedIntervals || allowedIntervals.length < 1 ) {
+			return null;
+		}
+
+		const intervalLabels = {
+			hour: __( 'By hour', 'wc-admin' ),
+			day: __( 'By day', 'wc-admin' ),
+			week: __( 'By week', 'wc-admin' ),
+			month: __( 'By month', 'wc-admin' ),
+			quarter: __( 'By quarter', 'wc-admin' ),
+			year: __( 'By year', 'wc-admin' ),
+		};
+
+		return (
+			<SelectControl
+				className="woocommerce-chart__interval-select"
+				value={ interval }
+				options={ allowedIntervals.map( allowedInterval => ( {
+					value: allowedInterval,
+					label: intervalLabels[ allowedInterval ],
+				} ) ) }
+				onChange={ this.setInterval }
+			/>
+		);
+	}
+
 	render() {
 		const { orderedKeys, type, visibleData, width } = this.state;
-		const { dateParser, layout, title, tooltipFormat, xFormat, x2Format, yFormat } = this.props;
+		const {
+			dateParser,
+			layout,
+			title,
+			tooltipFormat,
+			xFormat,
+			x2Format,
+			yFormat,
+			interval,
+		} = this.props;
 		const legendDirection = layout === 'standard' && width > WIDE_BREAKPOINT ? 'row' : 'column';
 		const chartDirection = layout === 'comparison' && width > WIDE_BREAKPOINT ? 'row' : 'column';
 		const legend = (
@@ -165,6 +208,7 @@ class Chart extends Component {
 				<div className="woocommerce-chart__header">
 					<span className="woocommerce-chart__title">{ title }</span>
 					{ width > WIDE_BREAKPOINT && legendDirection === 'row' && legend }
+					{ this.renderIntervalSelector() }
 					<div className="woocommerce-chart__types">
 						<IconButton
 							className={ classNames( 'woocommerce-chart__type-button', {
@@ -198,6 +242,7 @@ class Chart extends Component {
 						orderedKeys={ orderedKeys }
 						tooltipFormat={ tooltipFormat }
 						type={ type }
+						interval={ interval }
 						width={ chartDirection === 'row' ? width - 320 : width }
 						xFormat={ xFormat }
 						x2Format={ x2Format }
@@ -247,6 +292,18 @@ Chart.propTypes = {
 	 * Chart type of either `line` or `bar`.
 	 */
 	type: PropTypes.oneOf( [ 'bar', 'line' ] ),
+	/**
+	 * Information about the currently selected interval, and set of allowed intervals for the chart. See `getIntervalsForQuery`.
+	 */
+	intervalData: PropTypes.object,
+	/**
+	 * Interval specification (hourly, daily, weekly etc).
+	 */
+	interval: PropTypes.oneOf( [ 'hour', 'day', 'week', 'month', 'quarter', 'year' ] ),
+	/**
+	 * Allowed intervals to show in a dropdown.
+	 */
+	allowedIntervals: PropTypes.array,
 };
 
 Chart.defaultProps = {
@@ -258,6 +315,7 @@ Chart.defaultProps = {
 	yFormat: '$.3s',
 	layout: 'standard',
 	type: 'line',
+	interval: 'day',
 };
 
 export default Chart;

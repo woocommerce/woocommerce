@@ -29,7 +29,14 @@ import { downloadCSVFile, generateCSVDataFromTable, generateCSVFileName } from '
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
 import { getAdminLink, getNewPath, updateQueryString } from 'lib/nav-utils';
 import { getAllReportData, isReportDataEmpty } from 'store/reports/utils';
-import { getCurrentDates, isoDateFormat, getPreviousDate, getDateDifferenceInDays } from 'lib/date';
+import {
+	getCurrentDates,
+	isoDateFormat,
+	getPreviousDate,
+	getIntervalForQuery,
+	getAllowedIntervalsForQuery,
+	getDateFormatsForInterval,
+} from 'lib/date';
 import { MAX_PER_PAGE } from 'store/constants';
 
 export class RevenueReport extends Component {
@@ -126,6 +133,10 @@ export class RevenueReport extends Component {
 	}
 
 	getRowsContent( data = [] ) {
+		const { query } = this.props;
+		const currentInterval = getIntervalForQuery( query );
+		const formats = getDateFormatsForInterval( currentInterval );
+
 		return map( data, row => {
 			const {
 				coupons,
@@ -150,7 +161,7 @@ export class RevenueReport extends Component {
 			);
 			return [
 				{
-					display: formatDate( 'm/d/Y', row.date_start ),
+					display: formatDate( formats.tableFormat, row.date_start ),
 					value: row.date_start,
 				},
 				{
@@ -280,23 +291,46 @@ export class RevenueReport extends Component {
 
 	renderChart() {
 		const { primaryData, secondaryData, query } = this.props;
+
+		const currentInterval = getIntervalForQuery( query );
+		const allowedIntervals = getAllowedIntervalsForQuery( query );
+		const formats = getDateFormatsForInterval( currentInterval );
+
 		const { primary, secondary } = getCurrentDates( query );
 		const selectedChart = this.getSelectedChart();
 
 		const primaryKey = `${ primary.label } (${ primary.range })`;
 		const secondaryKey = `${ secondary.label } (${ secondary.range })`;
 
-		const difference = getDateDifferenceInDays( primary.after, secondary.after );
-
-		const chartData = primaryData.data.intervals.map( function( interval ) {
-			const date = formatDate( 'Y-m-d', interval.date_start );
-			const secondaryDate = getPreviousDate( date, difference, query.compare );
-			const secondaryInterval = find( secondaryData.data.intervals, {
-				date_start: secondaryDate.format( isoDateFormat ) + ' 00:00:00',
-			} );
-
+		const chartData = primaryData.data.intervals.map( function( interval, index ) {
+			const secondaryDate = getPreviousDate(
+				formatDate( 'Y-m-d', interval.date_start ),
+				primary.after,
+				secondary.after,
+				query.compare,
+				currentInterval
+			);
+			/**
+			 *  When looking at weeks, getting the previous date doesn't always work
+			 *  because subtracting the correct number of weeks from `interval.date_start`
+			 *  yeilds the start of the week correct week, but not necessarily the of the
+			 *  period in question.
+			 *
+			 *  When https://github.com/woocommerce/woocommerce/issues/21298 is resolved and
+			 *  data will be zero-filled, there is a strong argument for all this logic to be
+			 *  removed in favor of simply matching up the indices in each array of data.
+			 */
+			const secondaryInterval =
+				0 === index && 'week' === currentInterval
+					? secondaryData.data.intervals[ 0 ]
+					: find( secondaryData.data.intervals, {
+							date_start:
+								secondaryDate.format( isoDateFormat ) +
+								' ' +
+								formatDate( 'H:i:s', interval.date_start ),
+						} );
 			return {
-				date,
+				date: formatDate( 'Y-m-d\\TH:i:s', interval.date_start ),
 				[ primaryKey ]: interval.subtotals[ selectedChart.key ] || 0,
 				[ secondaryKey ]:
 					( secondaryInterval && secondaryInterval.subtotals[ selectedChart.key ] ) || 0,
@@ -305,7 +339,15 @@ export class RevenueReport extends Component {
 
 		return (
 			<Card title="">
-				<Chart data={ chartData } title={ selectedChart.label } dateParser={ '%Y-%m-%d' } />
+				<Chart
+					data={ chartData }
+					title={ selectedChart.label }
+					interval={ currentInterval }
+					allowedIntervals={ allowedIntervals }
+					tooltipFormat={ formats.tooltipFormat }
+					xFormat={ formats.xFormat }
+					dateParser={ '%Y-%m-%d' }
+				/>
 			</Card>
 		);
 	}
@@ -433,9 +475,10 @@ export default compose(
 	withSelect( ( select, props ) => {
 		const { query } = props;
 		const datesFromQuery = getCurrentDates( query );
+		const interval = getIntervalForQuery( query );
 		const baseArgs = {
 			order: 'asc',
-			interval: 'day', // TODO support other intervals
+			interval: interval,
 			per_page: MAX_PER_PAGE,
 		};
 
