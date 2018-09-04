@@ -51,9 +51,7 @@ function _wc_get_cached_product_terms( $product_id, $taxonomy, $args = array() )
 		return $terms;
 	}
 
-	// @codingStandardsIgnoreStart
 	$terms = wp_get_post_terms( $product_id, $taxonomy, $args );
-	// @codingStandardsIgnoreEnd
 
 	wp_cache_add( $cache_key, $terms, $cache_group );
 
