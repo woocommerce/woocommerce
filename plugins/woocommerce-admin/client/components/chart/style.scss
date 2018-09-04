@@ -159,8 +159,13 @@
 		min-width: 320px;
 
 		li {
-			height: 32px;
-			margin: 0 17px;
+			margin: 0;
+			padding: 0;
+
+			button {
+				height: 32px;
+				padding: 0 17px;
+			}
 
 			&:first-child {
 				margin-top: 17px;
@@ -192,6 +197,22 @@
 	}
 
 	li {
+		&.woocommerce-legend__item {
+			button {
+				&:hover {
+					background-color: none;
+				}
+			}
+
+			&.woocommerce-legend__item-checked {
+				button {
+					&:hover {
+						background-color: $core-grey-light-100;
+					}
+				}
+			}
+		}
+
 		button {
 			background-color: $white;
 			display: inline-flex;

@@ -39,7 +39,9 @@ class Legend extends Component {
 			>
 				{ data.map( row => (
 					<li
-						className="woocommerce-legend__item"
+						className={ classNames( 'woocommerce-legend__item', {
+							'woocommerce-legend__item-checked': row.visible,
+						} ) }
 						key={ row.key }
 						id={ row.key }
 						onMouseEnter={ handleLegendHover }
