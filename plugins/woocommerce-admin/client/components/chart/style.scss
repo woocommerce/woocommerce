@@ -25,6 +25,7 @@
 			font-weight: 600;
 			line-height: 18px;
 			margin-left: $gap;
+			margin-right: $gap;
 		}
 	}
 
@@ -223,9 +224,12 @@
 		flex-direction: row;
 
 		li {
-			margin: 0 0 0 30px;
+			padding: 0;
+			margin: 0;
 
 			button {
+				padding: 0 17px;
+
 				.woocommerce-legend__item-container {
 					height: 50px;
 					align-items: center;
