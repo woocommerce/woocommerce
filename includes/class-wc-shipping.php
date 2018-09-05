@@ -209,7 +209,6 @@ class WC_Shipping {
 	/**
 	 * Returns all registered shipping methods for usage.
 	 *
-	 * @access public
 	 * @return array
 	 */
 	public function get_shipping_methods() {
@@ -222,7 +221,6 @@ class WC_Shipping {
 	/**
 	 * Get an array of shipping classes.
 	 *
-	 * @access public
 	 * @return array
 	 */
 	public function get_shipping_classes() {
