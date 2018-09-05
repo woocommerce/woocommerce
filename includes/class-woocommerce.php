@@ -94,6 +94,13 @@ final class WooCommerce {
 	public $structured_data = null;
 
 	/**
+	 * Versioned transients instance.
+	 *
+	 * @var WC_Versioned_Transients
+	 */
+	public $transients = null;
+
+	/**
 	 * Array of deprecated hook handlers.
 	 *
 	 * @var array of WC_Deprecated_Hooks
@@ -322,6 +329,7 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/class-wc-countries.php';
 		include_once WC_ABSPATH . 'includes/class-wc-integrations.php';
 		include_once WC_ABSPATH . 'includes/class-wc-cache-helper.php';
+		include_once WC_ABSPATH . 'includes/class-wc-versioned-transients.php';
 		include_once WC_ABSPATH . 'includes/class-wc-https.php';
 		include_once WC_ABSPATH . 'includes/class-wc-deprecated-action-hooks.php';
 		include_once WC_ABSPATH . 'includes/class-wc-deprecated-filter-hooks.php';
@@ -395,8 +403,10 @@ final class WooCommerce {
 		}
 
 		$this->theme_support_includes();
-		$this->query = new WC_Query();
-		$this->api   = new WC_API();
+		$this->query      = new WC_Query();
+		$this->api        = new WC_API();
+		$this->transients = new WC_Versioned_Transients();
+		$this->transients->init();
 	}
 
 	/**
