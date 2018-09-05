@@ -68,6 +68,7 @@ class WC_REST_Reports_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Get reports list.
 	 *
+	 * @since 3.5.0
 	 * @return array
 	 */
 	protected function get_reports() {
