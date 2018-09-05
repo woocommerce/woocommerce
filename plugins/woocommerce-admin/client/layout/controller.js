@@ -42,13 +42,14 @@ class Controller extends Component {
 		const search = this.props.location.search.substring( 1 );
 		const query = parse( search );
 		const page = find( getPages(), { path } );
-		window.wpNavMenuClassChange( page.wpMenu );
+		window.wpNavMenuClassChange( page.wpMenu, this.props.location.pathname );
 		return createElement( page.container, { params, path: url, pathMatch: path, query } );
 	}
 }
 
 // When the route changes, we need to update wp-admin's menu with the correct section & current link
-window.wpNavMenuClassChange = function( menuClass ) {
+window.wpNavMenuClassChange = function( menuClass, pathname ) {
+	const path = '/' === pathname ? '' : '#' + pathname;
 	jQuery( '.current' ).each( function( i, obj ) {
 		jQuery( obj ).removeClass( 'current' );
 	} );
@@ -57,7 +58,7 @@ window.wpNavMenuClassChange = function( menuClass ) {
 		.removeClass( 'wp-menu-open' )
 		.removeClass( 'selected' )
 		.addClass( 'wp-not-current-submenu menu-top' );
-	jQuery( 'li > a[href$="admin.php?page=wc-admin' + window.location.hash + '"]' )
+	jQuery( 'li > a[href$="admin.php?page=wc-admin' + path + '"]' )
 		.parent()
 		.addClass( 'current' );
 	jQuery( '#' + menuClass )
