@@ -1945,8 +1945,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return string hash for cart content
 	 */
 	public function get_cart_hash() {
-		$hash = $this->session->get_cart_for_session() ? md5( json_encode( $this->session->get_cart_for_session() ) ) : '';
+		$cart = $this->session->get_cart_for_session();
+		$hash = $cart ? md5( json_encode( $cart ) ) : '';
 
-		return apply_filters( 'woocommerce_add_to_cart_hash', $hash, $this->get_cart_for_session() );
+		return apply_filters( 'woocommerce_add_to_cart_hash', $hash, $cart );
 	}
 }
