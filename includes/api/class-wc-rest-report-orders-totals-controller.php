@@ -1,6 +1,6 @@
 <?php
 /**
- * REST API Reports Orders Count controller
+ * REST API Reports Orders Totals controller
  *
  * Handles requests to the /reports/orders/count endpoint.
  *
@@ -11,12 +11,12 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * REST API Reports Orders Count controller class.
+ * REST API Reports Orders Totals controller class.
  *
  * @package WooCommerce/API
  * @extends WC_REST_Reports_Controller
  */
-class WC_REST_Report_Orders_Count_Controller extends WC_REST_Reports_Controller {
+class WC_REST_Report_Orders_Totals_Controller extends WC_REST_Reports_Controller {
 
 	/**
 	 * Endpoint namespace.
@@ -30,7 +30,7 @@ class WC_REST_Report_Orders_Count_Controller extends WC_REST_Reports_Controller 
 	 *
 	 * @var string
 	 */
-	protected $rest_base = 'reports/orders/count';
+	protected $rest_base = 'reports/orders/totals';
 
 	/**
 	 * Get reports list.
@@ -39,18 +39,18 @@ class WC_REST_Report_Orders_Count_Controller extends WC_REST_Reports_Controller 
 	 * @return array
 	 */
 	protected function get_reports() {
-		$counts = wp_count_posts( 'shop_order' );
+		$totals = wp_count_posts( 'shop_order' );
 		$data   = array();
 
 		foreach ( wc_get_order_statuses() as $slug => $name ) {
-			if ( ! isset( $counts->$slug ) ) {
+			if ( ! isset( $totals->$slug ) ) {
 				continue;
 			}
 
 			$data[] = array(
 				'slug'  => $slug,
 				'name'  => $name,
-				'total' => (int) $counts->$slug,
+				'total' => (int) $totals->$slug,
 			);
 		}
 
@@ -98,7 +98,7 @@ class WC_REST_Report_Orders_Count_Controller extends WC_REST_Reports_Controller 
 	public function get_item_schema() {
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'report',
+			'title'      => 'report_order_total',
 			'type'       => 'object',
 			'properties' => array(
 				'slug'  => array(
