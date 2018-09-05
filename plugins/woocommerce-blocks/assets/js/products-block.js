@@ -576,94 +576,185 @@ var ProductPreview = function (_React$Component4) {
 /**
  * Renders a preview of what the block will look like with current settings.
  */
-/*const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
-
-	const { columns, rows, display, display_setting, orderby } = attributes;
-
-	let query = {
-		per_page: rows * columns,
-	};
-
-	if ( 'specific' === display ) {
-		query.include = display_setting.join( ',' );
-		query.per_page = display_setting.length;
-	} else if ( 'category' === display ) {
-		query.category = display_setting.join( ',' );
-	} else if ( 'attribute' === display && display_setting.length ) {
-		query.attribute = getAttributeSlug( display_setting[0] );
-
-		if ( display_setting.length > 1 ) {
-			query.attribute_term = display_setting.slice( 1 ).join( ',' );
-		}
-	} else if ( 'featured' === display ) {
-		query.featured = 1;
-	} else if ( 'on_sale' === display ) {
-		query.on_sale = 1;
-	}
-
-	if ( supportsOrderby( display ) ) {
-		if ( 'price_desc' === orderby ) {
-			query.orderby = 'price';
-			query.order = 'desc';
-		} else if ( 'price_asc' === orderby ) {
-			query.orderby = 'price';
-			query.order = 'asc';
-		} else if ( 'title' === orderby ) {
-			query.orderby = 'title';
-			query.order = 'asc';
-		} else {
-			query.orderby = orderby;
-		}
-	}
-
-	let query_string = '?';
-	for ( const key of Object.keys( query ) ) {
-		query_string += key + '=' + query[ key ] + '&';
-	}
-
-	return {
-		// @todo Switch this to use WC core API when possible.
-		products: '/wgbp/v3/products' + query_string
-	};
-
-} )( ( { products, attributes } ) => {
-
-	if ( ! products.data ) {
-		return __( 'Loading' );
-	}
-
-	if ( 0 === products.data.length ) {
-		return __( 'No products found' );
-	}
-
-	const classes = "wc-products-block-preview cols-" + attributes.columns;
-
-	return (
-		<div className={ classes }>
-			{ products.data.map( ( product ) => (
-				<ProductPreview key={ product.id } product={ product } attributes={ attributes } />
-			) ) }
-		</div>
-	);
-} );*/
 
 
 var ProductsBlockPreview = function (_React$Component5) {
 	_inherits(ProductsBlockPreview, _React$Component5);
 
+	/**
+  * Constructor
+  */
 	function ProductsBlockPreview(props) {
 		_classCallCheck(this, ProductsBlockPreview);
 
-		return _possibleConstructorReturn(this, (ProductsBlockPreview.__proto__ || Object.getPrototypeOf(ProductsBlockPreview)).call(this, props));
+		var _this7 = _possibleConstructorReturn(this, (ProductsBlockPreview.__proto__ || Object.getPrototypeOf(ProductsBlockPreview)).call(this, props));
+
+		_this7.state = {
+			products: [],
+			loaded: false,
+			query: ''
+		};
+
+		_this7.updatePreview = _this7.updatePreview.bind(_this7);
+		_this7.getQuery = _this7.getQuery.bind(_this7);
+		return _this7;
 	}
 
+	/**
+  * Get the preview when component is first loaded.
+  */
+
+
 	_createClass(ProductsBlockPreview, [{
+		key: 'componentDidMount',
+		value: function componentDidMount() {
+			if (this.getQuery() !== this.state.query) {
+				this.updatePreview();
+			}
+		}
+
+		/**
+   * Update the preview when component is updated.
+   */
+
+	}, {
+		key: 'componentDidUpdate',
+		value: function componentDidUpdate() {
+			if (this.getQuery() !== this.state.query && this.state.loaded) {
+				this.updatePreview();
+			}
+		}
+
+		/**
+   * Get the endpoint for the current state of the component.
+   *
+   * @return string
+   */
+
+	}, {
+		key: 'getQuery',
+		value: function getQuery() {
+			var _props$attributes = this.props.attributes,
+			    columns = _props$attributes.columns,
+			    rows = _props$attributes.rows,
+			    display = _props$attributes.display,
+			    display_setting = _props$attributes.display_setting,
+			    orderby = _props$attributes.orderby;
+
+
+			var query = {
+				per_page: rows * columns
+			};
+
+			if ('specific' === display) {
+				query.include = display_setting.join(',');
+				query.per_page = display_setting.length;
+			} else if ('category' === display) {
+				query.category = display_setting.join(',');
+			} else if ('attribute' === display && display_setting.length) {
+				query.attribute = (0, _attributeSelect.getAttributeSlug)(display_setting[0]);
+
+				if (display_setting.length > 1) {
+					query.attribute_term = display_setting.slice(1).join(',');
+				}
+			} else if ('featured' === display) {
+				query.featured = 1;
+			} else if ('on_sale' === display) {
+				query.on_sale = 1;
+			}
+
+			if (supportsOrderby(display)) {
+				if ('price_desc' === orderby) {
+					query.orderby = 'price';
+					query.order = 'desc';
+				} else if ('price_asc' === orderby) {
+					query.orderby = 'price';
+					query.order = 'asc';
+				} else if ('title' === orderby) {
+					query.orderby = 'title';
+					query.order = 'asc';
+				} else {
+					query.orderby = orderby;
+				}
+			}
+
+			var query_string = '?';
+			var _iteratorNormalCompletion = true;
+			var _didIteratorError = false;
+			var _iteratorError = undefined;
+
+			try {
+				for (var _iterator = Object.keys(query)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+					var key = _step.value;
+
+					query_string += key + '=' + query[key] + '&';
+				}
+			} catch (err) {
+				_didIteratorError = true;
+				_iteratorError = err;
+			} finally {
+				try {
+					if (!_iteratorNormalCompletion && _iterator.return) {
+						_iterator.return();
+					}
+				} finally {
+					if (_didIteratorError) {
+						throw _iteratorError;
+					}
+				}
+			}
+
+			var endpoint = '/wgbp/v3/products' + query_string;
+			return endpoint;
+		}
+
+		/**
+   * Update the preview with the latest settings.
+   */
+
+	}, {
+		key: 'updatePreview',
+		value: function updatePreview() {
+			var self = this;
+			var query = this.getQuery();
+
+			self.setState({
+				loaded: false
+			});
+
+			apiFetch({ path: query }).then(function (products) {
+				self.setState({
+					products: products,
+					loaded: true,
+					query: query
+				});
+			});
+		}
+
+		/**
+   * Render.
+   */
+
+	}, {
 		key: 'render',
 		value: function render() {
+			if (!this.state.loaded) {
+				return __('Loading');
+			}
+
+			if (0 === this.state.products.length) {
+				return __('No products found');
+			}
+
+			var classes = "wc-products-block-preview cols-" + this.props.attributes.columns;
+			var self = this;
+
 			return wp.element.createElement(
 				'div',
-				{ className: 'wc-products-block-preview cols-3' },
-				'THIS'
+				{ className: classes },
+				this.state.products.map(function (product) {
+					return wp.element.createElement(ProductPreview, { key: product.id, product: product, attributes: self.props.attributes });
+				})
 			);
 		}
 	}]);
@@ -985,6 +1076,7 @@ var ProductsBlock = function (_React$Component7) {
 	}, {
 		key: 'getPreview',
 		value: function getPreview() {
+			console.log(this.props.attributes);
 			return wp.element.createElement(ProductsBlockPreview, { attributes: this.props.attributes });
 		}
 
@@ -1121,12 +1213,12 @@ registerBlockType('woocommerce/products', {
   * @return string
   */
 	save: function save(props) {
-		var _props$attributes = props.attributes,
-		    rows = _props$attributes.rows,
-		    columns = _props$attributes.columns,
-		    display = _props$attributes.display,
-		    display_setting = _props$attributes.display_setting,
-		    orderby = _props$attributes.orderby;
+		var _props$attributes2 = props.attributes,
+		    rows = _props$attributes2.rows,
+		    columns = _props$attributes2.columns,
+		    display = _props$attributes2.display,
+		    display_setting = _props$attributes2.display_setting,
+		    orderby = _props$attributes2.orderby;
 
 
 		var shortcode_atts = new Map();
@@ -1174,13 +1266,13 @@ registerBlockType('woocommerce/products', {
 
 		// Build the shortcode string out of the set shortcode attributes.
 		var shortcode = '[products';
-		var _iteratorNormalCompletion = true;
-		var _didIteratorError = false;
-		var _iteratorError = undefined;
+		var _iteratorNormalCompletion2 = true;
+		var _didIteratorError2 = false;
+		var _iteratorError2 = undefined;
 
 		try {
-			for (var _iterator = shortcode_atts[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-				var _ref = _step.value;
+			for (var _iterator2 = shortcode_atts[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+				var _ref = _step2.value;
 
 				var _ref2 = _slicedToArray(_ref, 2);
 
@@ -1190,16 +1282,16 @@ registerBlockType('woocommerce/products', {
 				shortcode += ' ' + key + '="' + value + '"';
 			}
 		} catch (err) {
-			_didIteratorError = true;
-			_iteratorError = err;
+			_didIteratorError2 = true;
+			_iteratorError2 = err;
 		} finally {
 			try {
-				if (!_iteratorNormalCompletion && _iterator.return) {
-					_iterator.return();
+				if (!_iteratorNormalCompletion2 && _iterator2.return) {
+					_iterator2.return();
 				}
 			} finally {
-				if (_didIteratorError) {
-					throw _iteratorError;
+				if (_didIteratorError2) {
+					throw _iteratorError2;
 				}
 			}
 		}

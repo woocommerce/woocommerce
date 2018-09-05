@@ -354,86 +354,134 @@ class ProductPreview extends React.Component {
 /**
  * Renders a preview of what the block will look like with current settings.
  */
-/*const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
-
-	const { columns, rows, display, display_setting, orderby } = attributes;
-
-	let query = {
-		per_page: rows * columns,
-	};
-
-	if ( 'specific' === display ) {
-		query.include = display_setting.join( ',' );
-		query.per_page = display_setting.length;
-	} else if ( 'category' === display ) {
-		query.category = display_setting.join( ',' );
-	} else if ( 'attribute' === display && display_setting.length ) {
-		query.attribute = getAttributeSlug( display_setting[0] );
-
-		if ( display_setting.length > 1 ) {
-			query.attribute_term = display_setting.slice( 1 ).join( ',' );
-		}
-	} else if ( 'featured' === display ) {
-		query.featured = 1;
-	} else if ( 'on_sale' === display ) {
-		query.on_sale = 1;
-	}
-
-	if ( supportsOrderby( display ) ) {
-		if ( 'price_desc' === orderby ) {
-			query.orderby = 'price';
-			query.order = 'desc';
-		} else if ( 'price_asc' === orderby ) {
-			query.orderby = 'price';
-			query.order = 'asc';
-		} else if ( 'title' === orderby ) {
-			query.orderby = 'title';
-			query.order = 'asc';
-		} else {
-			query.orderby = orderby;
-		}
-	}
-
-	let query_string = '?';
-	for ( const key of Object.keys( query ) ) {
-		query_string += key + '=' + query[ key ] + '&';
-	}
-
-	return {
-		// @todo Switch this to use WC core API when possible.
-		products: '/wgbp/v3/products' + query_string
-	};
-
-} )( ( { products, attributes } ) => {
-
-	if ( ! products.data ) {
-		return __( 'Loading' );
-	}
-
-	if ( 0 === products.data.length ) {
-		return __( 'No products found' );
-	}
-
-	const classes = "wc-products-block-preview cols-" + attributes.columns;
-
-	return (
-		<div className={ classes }>
-			{ products.data.map( ( product ) => (
-				<ProductPreview key={ product.id } product={ product } attributes={ attributes } />
-			) ) }
-		</div>
-	);
-} );*/
 class ProductsBlockPreview extends React.Component {
 
+	/**
+	 * Constructor
+	 */
 	constructor( props ) {
 		super( props );
+		this.state = {
+			products: [],
+			loaded: false,
+			query: '',
+		};
+
+		this.updatePreview = this.updatePreview.bind( this );
+		this.getQuery = this.getQuery.bind( this );
 	}
 
+	/**
+	 * Get the preview when component is first loaded.
+	 */
+	componentDidMount() {
+		if ( this.getQuery() !== this.state.query ) {
+			this.updatePreview();
+		}
+	}
+
+	/**
+	 * Update the preview when component is updated.
+	 */
+	componentDidUpdate() {
+		if ( this.getQuery() !== this.state.query && this.state.loaded ) {
+			this.updatePreview();
+		}
+	}
+
+	/**
+	 * Get the endpoint for the current state of the component.
+	 *
+	 * @return string
+	 */
+	getQuery() {
+		const { columns, rows, display, display_setting, orderby } = this.props.attributes;
+
+		let query = {
+			per_page: rows * columns,
+		};
+
+		if ( 'specific' === display ) {
+			query.include = display_setting.join( ',' );
+			query.per_page = display_setting.length;
+		} else if ( 'category' === display ) {
+			query.category = display_setting.join( ',' );
+		} else if ( 'attribute' === display && display_setting.length ) {
+			query.attribute = getAttributeSlug( display_setting[0] );
+
+			if ( display_setting.length > 1 ) {
+				query.attribute_term = display_setting.slice( 1 ).join( ',' );
+			}
+		} else if ( 'featured' === display ) {
+			query.featured = 1;
+		} else if ( 'on_sale' === display ) {
+			query.on_sale = 1;
+		}
+
+		if ( supportsOrderby( display ) ) {
+			if ( 'price_desc' === orderby ) {
+				query.orderby = 'price';
+				query.order = 'desc';
+			} else if ( 'price_asc' === orderby ) {
+				query.orderby = 'price';
+				query.order = 'asc';
+			} else if ( 'title' === orderby ) {
+				query.orderby = 'title';
+				query.order = 'asc';
+			} else {
+				query.orderby = orderby;
+			}
+		}
+
+		let query_string = '?';
+		for ( const key of Object.keys( query ) ) {
+			query_string += key + '=' + query[ key ] + '&';
+		}
+
+		const endpoint = '/wgbp/v3/products' + query_string;
+		return endpoint;
+	}
+
+	/**
+	 * Update the preview with the latest settings.
+	 */
+	updatePreview() {
+		const self = this;
+		const query = this.getQuery();
+
+		self.setState( {
+			loaded: false
+		} );
+
+		apiFetch( { path: query } ).then( products => {
+			self.setState( {
+				products: products,
+				loaded: true,
+				query: query
+			} );
+		} );
+	}
+
+	/**
+	 * Render.
+	 */
 	render() {
+		if ( ! this.state.loaded ) {
+			return __( 'Loading' );
+		}
+
+		if ( 0 === this.state.products.length ) {
+			return __( 'No products found' );
+		}
+
+		const classes = "wc-products-block-preview cols-" + this.props.attributes.columns;
+		const self = this;
+
 		return (
-			<div className="wc-products-block-preview cols-3">
-				THIS
+			<div className={ classes }>
+				{ this.state.products.map( ( product ) => (
+					<ProductPreview key={ product.id } product={ product } attributes={ self.props.attributes } />
+				) ) }
 			</div>
 		);
 	}
@@ -702,6 +750,7 @@ class ProductsBlock extends React.Component {
 	 * @return Component
 	 */
 	getPreview() {
+		console.log( this.props.attributes );
 		return <ProductsBlockPreview attributes={ this.props.attributes } />;
 	}
 
