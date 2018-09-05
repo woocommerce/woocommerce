@@ -1,5 +1,6 @@
 const { __ } = wp.i18n;
-const { Toolbar, withAPIData, Dropdown, Dashicon } = wp.components;
+const { Toolbar, Dropdown, Dashicon } = wp.components;
+const { apiFetch } = wp;
 
 /**
  * Product data cache.
@@ -176,7 +177,7 @@ class ProductsSpecificSearchField extends React.Component {
 /**
  * Render product search results based on the text entered into the textbox.
  */
-const ProductSpecificSearchResults = withAPIData( ( props ) => {
+/*const ProductSpecificSearchResults = withAPIData( ( props ) => {
 
 		if ( ! props.searchString.length ) {
 			return {
@@ -208,7 +209,8 @@ const ProductSpecificSearchResults = withAPIData( ( props ) => {
 			isDropdownOpenCallback={ isDropdownOpenCallback }
 		/>
 	}
-);
+);*/
+const ProductSpecificSearchResults = null;
 
 /**
  * The dropdown of search results.
@@ -298,7 +300,7 @@ class ProductSpecificSearchResultsDropdownElement extends React.Component {
 /**
  * List preview of selected products.
  */
-const ProductSpecificSelectedProducts = withAPIData( ( props ) => {
+/*const ProductSpecificSelectedProducts = withAPIData( ( props ) => {
 		if ( ! props.productIds.length ) {
 			return {
 				products: []
@@ -365,4 +367,5 @@ const ProductSpecificSelectedProducts = withAPIData( ( props ) => {
 			</div>
 		);
 	}
-);
+);*/
+const ProductSpecificSelectedProducts = null;
