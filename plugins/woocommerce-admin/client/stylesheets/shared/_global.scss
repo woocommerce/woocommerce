@@ -49,4 +49,14 @@
 	a:focus {
 		box-shadow: 0 0 0 1px $woocommerce-300, 0 0 2px 1px rgba($woocommerce-300, 0.8);
 	}
+
+	.components-button.is-button.is-primary {
+		color: $white;
+	}
+
+	.components-button.is-button.is-primary:hover,
+	.components-button.is-button.is-primary:active,
+	.components-button.is-button.is-primary:focus {
+		color: $white;
+	}
 }

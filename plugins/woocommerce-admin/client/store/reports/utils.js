@@ -45,6 +45,7 @@ export function getAllReportData( endpoint, query, select ) {
 	const { getReportStats, isReportStatsRequesting, isReportStatsError } = select( 'wc-admin' );
 
 	const response = {
+		isEmpty: false,
 		isError: false,
 		isRequesting: false,
 		data: {
@@ -62,6 +63,8 @@ export function getAllReportData( endpoint, query, select ) {
 		return { ...response, isRequesting: true };
 	} else if ( isReportStatsError( endpoint, query ) ) {
 		return { ...response, isError: true };
+	} else if ( isReportDataEmpty( stats ) ) {
+		return { ...response, isEmpty: true };
 	}
 
 	const totals = ( stats && stats.data && stats.data.totals ) || null;

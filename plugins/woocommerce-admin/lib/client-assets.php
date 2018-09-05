@@ -57,10 +57,16 @@ function wc_admin_register_script() {
 
 	wp_enqueue_script( 'wp-api' );
 
+	/**
+	 * TODO: On merge, once plugin images are added to core WooCommerce, `wcAdminAssetUrl` can be retired, and 
+	 * `wcAssetUrl` can be used in its place throughout the codebase.
+	 */
+
 	// Settings and variables can be passed here for access in the app.
 	$settings = array(
 		'adminUrl'         => admin_url(),
 		'wcAssetUrl'       => plugins_url( 'assets/', WC_PLUGIN_FILE ),
+		'wcAdminAssetUrl'  => plugins_url( 'images/', wc_admin_dir_path( 'wc-admin.php' ) ), // Temporary for plugin. See above.
 		'embedBreadcrumbs' => wc_admin_get_embed_breadcrumbs(),
 		'siteLocale'       => esc_attr( get_bloginfo( 'language' ) ),
 		'currency'         => wc_admin_currency_settings(),

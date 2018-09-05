@@ -10,7 +10,7 @@ import { isUndefined } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
- * External dependencies
+ * Internal dependencies
  */
 import Link from 'components/link';
 

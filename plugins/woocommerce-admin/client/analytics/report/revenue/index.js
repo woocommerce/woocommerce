@@ -16,10 +16,14 @@ import { withSelect } from '@wordpress/data';
 import {
 	Card,
 	Chart,
+	ChartPlaceholder,
+	EmptyContent,
 	ReportFilters,
 	SummaryList,
+	SummaryListPlaceholder,
 	SummaryNumber,
 	TableCard,
+	TablePlaceholder,
 } from '@woocommerce/components';
 import { downloadCSVFile, generateCSVDataFromTable, generateCSVFileName } from 'lib/csv';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
@@ -328,7 +332,11 @@ export class RevenueReport extends Component {
 
 		const headers = this.getHeadersContent();
 
-		const tableQuery = { ...query, orderby: query.orderby || 'date_start', order: query.order || 'asc' };
+		const tableQuery = {
+			...query,
+			orderby: query.orderby || 'date_start',
+			order: query.order || 'asc',
+		};
 		return (
 			<TableCard
 				title={ __( 'Revenue', 'wc-admin' ) }
@@ -344,30 +352,63 @@ export class RevenueReport extends Component {
 		);
 	}
 
+	renderPlaceholder() {
+		const { path, query } = this.props;
+		const headers = this.getHeadersContent();
+		const charts = this.getCharts();
+		return (
+			<Fragment>
+				<ReportFilters query={ query } path={ path } />
+
+				<span className="screen-reader-text">
+					{ __( 'Your requested data is loading', 'wc-admin' ) }
+				</span>
+
+				<SummaryListPlaceholder numberOfItems={ charts.length } />
+				<ChartPlaceholder />
+				<Card
+					title={ __( 'Revenue', 'wc-admin' ) }
+					className="woocommerce-analytics__table-placeholder"
+				>
+					<TablePlaceholder caption={ __( 'Revenue', 'wc-admin' ) } headers={ headers } />
+				</Card>
+			</Fragment>
+		);
+	}
+
 	render() {
 		const { path, query, primaryData, secondaryData } = this.props;
 
-		// TODO The loading, error, and empty messages below are all temporary.
-		// So we need to use an actual EmptyState components and add in a loading indicator.
-		const tempMessage = message => {
-			return (
-				<div>
-					<ReportFilters query={ query } path={ path } />
-					<p>{ message }</p>
-				</div>
-			);
-		};
-
-		if ( isReportDataEmpty( primaryData ) ) {
-			return tempMessage( 'Empty Data' );
-		}
-
 		if ( primaryData.isRequesting || secondaryData.isRequesting ) {
-			return tempMessage( 'Loading...' );
+			return this.renderPlaceholder();
 		}
 
-		if ( primaryData.isError || secondaryData.isError ) {
-			return tempMessage( 'Error' );
+		if ( isReportDataEmpty( primaryData ) || primaryData.isError || secondaryData.isError ) {
+			let title, actionLabel, actionURL, actionCallback;
+			if ( primaryData.isError || secondaryData.isError ) {
+				title = __( 'There was an error getting your stats. Please try again.', 'wc-admin' );
+				actionLabel = __( 'Reload', 'wc-admin' );
+				actionCallback = () => {
+					// TODO Add tracking for how often an error is displayed, and the reload action is clicked.
+					window.location.reload();
+				};
+			} else {
+				title = __( 'No results could be found for this date range.', 'wc-admin' );
+				actionLabel = __( 'View Orders', 'wc-admin' );
+				actionURL = getAdminLink( 'edit.php?post_type=shop_order' );
+			}
+
+			return (
+				<Fragment>
+					<ReportFilters query={ query } path={ path } />
+					<EmptyContent
+						title={ title }
+						actionLabel={ actionLabel }
+						actionURL={ actionURL }
+						actionCallback={ actionCallback }
+					/>
+				</Fragment>
+			);
 		}
 
 		return (

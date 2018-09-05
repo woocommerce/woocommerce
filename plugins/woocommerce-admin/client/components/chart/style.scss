@@ -123,6 +123,17 @@
 			stroke-width: 1px;
 		}
 	}
+
+	&.is-placeholder {
+		@include placeholder();
+		display: inline-block;
+		height: 200px;
+		width: 100%;
+		margin: 0;
+		padding: 0;
+		margin-bottom: $gap;
+		border: 1px solid $core-grey-light-700;
+	}
 }
 
 .woocommerce-chart__container {

@@ -11,6 +11,9 @@ import PropTypes from 'prop-types';
  */
 import Table from './table';
 
+/**
+ * `TablePlaceholder` behaves like `Table` but displays placeholder boxes instead of data. This can be used while loading.
+ */
 class TablePlaceholder extends Component {
 	render() {
 		const { caption, headers, numberOfRows } = this.props;
@@ -32,7 +35,13 @@ class TablePlaceholder extends Component {
 }
 
 TablePlaceholder.propTypes = {
+	/**
+	 * A label for the content in this table.
+	 */
 	caption: PropTypes.string.isRequired,
+	/**
+	 * An array of column headers (see `Table` props).
+	 */
 	headers: PropTypes.arrayOf(
 		PropTypes.shape( {
 			defaultSort: PropTypes.bool,
@@ -42,6 +51,9 @@ TablePlaceholder.propTypes = {
 			required: PropTypes.bool,
 		} )
 	),
+	/**
+	 * An integer with the number of rows to display.
+	 */
 	numberOfRows: PropTypes.number,
 };
 

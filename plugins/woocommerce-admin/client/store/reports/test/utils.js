@@ -38,6 +38,7 @@ describe( 'isReportDataEmpty()', () => {
 describe( 'getAllReportData()', () => {
 	const select = jest.fn().mockReturnValue( {} );
 	const response = {
+		isEmpty: false,
 		isError: false,
 		isRequesting: false,
 		data: {
@@ -207,5 +208,23 @@ describe( 'getAllReportData()', () => {
 		} );
 		const result = getAllReportData( 'revenue', {}, select );
 		expect( result ).toEqual( { ...response, isError: true } );
+	} );
+
+	it( 'returns empty state if a query returns no data', () => {
+		setIsReportStatsRequesting( () => {
+			return false;
+		} );
+		setIsReportStatsError( () => {
+			return false;
+		} );
+		setGetReportStats( () => {
+			return {
+				totalResults: undefined,
+				data: {},
+			};
+		} );
+
+		const result = getAllReportData( 'revenue', {}, select );
+		expect( result ).toEqual( { ...response, isEmpty: true } );
 	} );
 } );

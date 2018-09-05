@@ -11,6 +11,7 @@ import { find } from 'lodash';
 /**
  * Internal dependencies
  */
+import './style.scss';
 import ExampleReport from './example';
 import Header from 'layout/header';
 import OrdersReport from './orders';
