@@ -9,6 +9,7 @@ import { Component, Fragment } from '@wordpress/element';
  * Internal dependencies
  */
 import './style.scss';
+import ChartExample from 'components/chart/example-hour';
 import Header from 'layout/header';
 import StorePerformance from './store-performance';
 import TopSellingProducts from './top-selling-products';
@@ -19,6 +20,7 @@ export default class Dashboard extends Component {
 			<Fragment>
 				<Header sections={ [ __( 'Dashboard', 'wc-admin' ) ] } />
 				<StorePerformance />
+				<ChartExample />
 				<div className="woocommerce-dashboard__columns">
 					<div>
 						<TopSellingProducts />

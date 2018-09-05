@@ -158,8 +158,11 @@ class Chart extends Component {
 						height={ 300 }
 						margin={ margin }
 						orderedKeys={ orderedKeys }
-						type={ 'line' }
+						tooltipFormat={ this.props.tooltipFormat }
+						type={ this.props.type }
 						width={ chartDirection === 'row' ? width - 320 : width }
+						xFormat={ this.props.xFormat }
+						yFormat={ this.props.yFormat }
 					/>
 				</div>
 				{ width < WIDE_BREAKPOINT && <div className="woocommerce-chart__footer">{ legend }</div> }
@@ -177,10 +180,29 @@ Chart.propTypes = {
 	 * A title describing this chart.
 	 */
 	title: PropTypes.string,
+	/**
+	 * A datetime formatting string to format the title of the toolip, passed to d3TimeFormat.
+	 */
+	tooltipFormat: PropTypes.string,
+	/**
+	 * Chart type of either `line` or `bar`.
+	 */
+	type: PropTypes.oneOf( [ 'bar', 'line' ] ),
+	/**
+	 * A datetime formatting string, passed to d3TimeFormat.
+	 */
+	xFormat: PropTypes.string,
+	/**
+	 * A number formatting string, passed to d3Format.
+	 */
+	yFormat: PropTypes.string,
 };
 
 Chart.defaultProps = {
 	data: [],
+	tooltipFormat: '%Y-%m-%d',
+	xFormat: '%Y-%m-%d',
+	yFormat: '.3s',
 };
 
 export default Chart;
