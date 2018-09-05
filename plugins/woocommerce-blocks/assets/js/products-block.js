@@ -96,12 +96,13 @@ var _wp$editor = wp.editor,
     BlockControls = _wp$editor.BlockControls;
 var _wp$components = wp.components,
     Toolbar = _wp$components.Toolbar,
-    withAPIData = _wp$components.withAPIData,
     Dropdown = _wp$components.Dropdown,
     Dashicon = _wp$components.Dashicon,
     RangeControl = _wp$components.RangeControl,
     Tooltip = _wp$components.Tooltip,
     SelectControl = _wp$components.SelectControl;
+var _wp = wp,
+    apiFetch = _wp.apiFetch;
 
 
 /**
@@ -575,46 +576,39 @@ var ProductPreview = function (_React$Component4) {
 /**
  * Renders a preview of what the block will look like with current settings.
  */
+/*const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
 
+	const { columns, rows, display, display_setting, orderby } = attributes;
 
-var ProductsBlockPreview = withAPIData(function (_ref) {
-	var attributes = _ref.attributes;
-	var columns = attributes.columns,
-	    rows = attributes.rows,
-	    display = attributes.display,
-	    display_setting = attributes.display_setting,
-	    orderby = attributes.orderby;
-
-
-	var query = {
-		per_page: rows * columns
+	let query = {
+		per_page: rows * columns,
 	};
 
-	if ('specific' === display) {
-		query.include = display_setting.join(',');
+	if ( 'specific' === display ) {
+		query.include = display_setting.join( ',' );
 		query.per_page = display_setting.length;
-	} else if ('category' === display) {
-		query.category = display_setting.join(',');
-	} else if ('attribute' === display && display_setting.length) {
-		query.attribute = (0, _attributeSelect.getAttributeSlug)(display_setting[0]);
+	} else if ( 'category' === display ) {
+		query.category = display_setting.join( ',' );
+	} else if ( 'attribute' === display && display_setting.length ) {
+		query.attribute = getAttributeSlug( display_setting[0] );
 
-		if (display_setting.length > 1) {
-			query.attribute_term = display_setting.slice(1).join(',');
+		if ( display_setting.length > 1 ) {
+			query.attribute_term = display_setting.slice( 1 ).join( ',' );
 		}
-	} else if ('featured' === display) {
+	} else if ( 'featured' === display ) {
 		query.featured = 1;
-	} else if ('on_sale' === display) {
+	} else if ( 'on_sale' === display ) {
 		query.on_sale = 1;
 	}
 
-	if (supportsOrderby(display)) {
-		if ('price_desc' === orderby) {
+	if ( supportsOrderby( display ) ) {
+		if ( 'price_desc' === orderby ) {
 			query.orderby = 'price';
 			query.order = 'desc';
-		} else if ('price_asc' === orderby) {
+		} else if ( 'price_asc' === orderby ) {
 			query.orderby = 'price';
 			query.order = 'asc';
-		} else if ('title' === orderby) {
+		} else if ( 'title' === orderby ) {
 			query.orderby = 'title';
 			query.order = 'asc';
 		} else {
@@ -622,188 +616,163 @@ var ProductsBlockPreview = withAPIData(function (_ref) {
 		}
 	}
 
-	var query_string = '?';
-	var _iteratorNormalCompletion = true;
-	var _didIteratorError = false;
-	var _iteratorError = undefined;
-
-	try {
-		for (var _iterator = Object.keys(query)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-			var key = _step.value;
-
-			query_string += key + '=' + query[key] + '&';
-		}
-	} catch (err) {
-		_didIteratorError = true;
-		_iteratorError = err;
-	} finally {
-		try {
-			if (!_iteratorNormalCompletion && _iterator.return) {
-				_iterator.return();
-			}
-		} finally {
-			if (_didIteratorError) {
-				throw _iteratorError;
-			}
-		}
+	let query_string = '?';
+	for ( const key of Object.keys( query ) ) {
+		query_string += key + '=' + query[ key ] + '&';
 	}
 
 	return {
 		// @todo Switch this to use WC core API when possible.
 		products: '/wgbp/v3/products' + query_string
 	};
-})(function (_ref2) {
-	var products = _ref2.products,
-	    attributes = _ref2.attributes;
 
+} )( ( { products, attributes } ) => {
 
-	if (!products.data) {
-		return __('Loading');
+	if ( ! products.data ) {
+		return __( 'Loading' );
 	}
 
-	if (0 === products.data.length) {
-		return __('No products found');
+	if ( 0 === products.data.length ) {
+		return __( 'No products found' );
 	}
 
-	var classes = "wc-products-block-preview cols-" + attributes.columns;
+	const classes = "wc-products-block-preview cols-" + attributes.columns;
 
-	return wp.element.createElement(
-		'div',
-		{ className: classes },
-		products.data.map(function (product) {
-			return wp.element.createElement(ProductPreview, { key: product.id, product: product, attributes: attributes });
-		})
+	return (
+		<div className={ classes }>
+			{ products.data.map( ( product ) => (
+				<ProductPreview key={ product.id } product={ product } attributes={ attributes } />
+			) ) }
+		</div>
 	);
-});
+} );*/
+
+
+var ProductsBlockPreview = function (_React$Component5) {
+	_inherits(ProductsBlockPreview, _React$Component5);
+
+	function ProductsBlockPreview(props) {
+		_classCallCheck(this, ProductsBlockPreview);
+
+		return _possibleConstructorReturn(this, (ProductsBlockPreview.__proto__ || Object.getPrototypeOf(ProductsBlockPreview)).call(this, props));
+	}
+
+	_createClass(ProductsBlockPreview, [{
+		key: 'render',
+		value: function render() {
+			return wp.element.createElement(
+				'div',
+				{ className: 'wc-products-block-preview cols-3' },
+				'THIS'
+			);
+		}
+	}]);
+
+	return ProductsBlockPreview;
+}(React.Component);
 
 /**
  * Information about current block settings rendered in the sidebar.
  */
-var ProductsBlockSidebarInfo = withAPIData(function (_ref3) {
-	var attributes = _ref3.attributes;
-	var display = attributes.display,
-	    display_setting = attributes.display_setting;
+/*const ProductsBlockSidebarInfo = withAPIData( ( { attributes } ) => {
 
+	const { display, display_setting } = attributes;
 
-	if ('attribute' === display && display_setting.length) {
-		var ID = (0, _attributeSelect.getAttributeID)(display_setting[0]);
-		var terms = display_setting.slice(1).join(', ');
-		var endpoints = {
-			attributeInfo: '/wc/v2/products/attributes/' + ID
-		};
+	if ( 'attribute' === display && display_setting.length ) {
+		const ID        = getAttributeID( display_setting[0] );
+		const terms     = display_setting.slice( 1 ).join( ', ' );
+		const endpoints = {
+			attributeInfo: '/wc/v2/products/attributes/' + ID,
+		}
 
-		if (terms.length) {
+		if ( terms.length ) {
 			endpoints.termInfo = '/wc/v2/products/attributes/' + ID + '/terms?include=' + terms;
 		}
 
 		return endpoints;
-	} else if ('category' === display && display_setting.length) {
+
+	} else if ( 'category' === display && display_setting.length ) {
 		return {
-			categoriesInfo: '/wc/v2/products/categories?include=' + display_setting.join(',')
+			categoriesInfo: '/wc/v2/products/categories?include=' + display_setting.join( ',' ),
 		};
 	}
 
 	return {};
-})(function (_ref4) {
-	var attributes = _ref4.attributes,
-	    categoriesInfo = _ref4.categoriesInfo,
-	    attributeInfo = _ref4.attributeInfo,
-	    termInfo = _ref4.termInfo;
 
+} )( ( { attributes, categoriesInfo, attributeInfo, termInfo } ) => {
 
-	var descriptions = [
-	// Standard description of selected scope.
-	PRODUCTS_BLOCK_DISPLAY_SETTINGS[attributes.display].title];
+	let descriptions = [
+		// Standard description of selected scope.
+		PRODUCTS_BLOCK_DISPLAY_SETTINGS[ attributes.display ].title
+	];
 
 	// Description of categories selected scope.
-	if (categoriesInfo && categoriesInfo.data && categoriesInfo.data.length) {
-		var descriptionText = __('Product categories: ');
-		var categories = [];
-		var _iteratorNormalCompletion2 = true;
-		var _didIteratorError2 = false;
-		var _iteratorError2 = undefined;
-
-		try {
-			for (var _iterator2 = categoriesInfo.data[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-				var category = _step2.value;
-
-				categories.push(category.name);
-			}
-		} catch (err) {
-			_didIteratorError2 = true;
-			_iteratorError2 = err;
-		} finally {
-			try {
-				if (!_iteratorNormalCompletion2 && _iterator2.return) {
-					_iterator2.return();
-				}
-			} finally {
-				if (_didIteratorError2) {
-					throw _iteratorError2;
-				}
-			}
+	if ( categoriesInfo && categoriesInfo.data && categoriesInfo.data.length ) {
+		let descriptionText = __( 'Product categories: ' );
+		const categories = [];
+		for ( let category of categoriesInfo.data ) {
+			categories.push( category.name );
 		}
+		descriptionText += categories.join( ', ' );
 
-		descriptionText += categories.join(', ');
-
-		descriptions = [descriptionText];
+		descriptions = [
+			descriptionText
+		];
 
 		// Description of attributes selected scope.
-	} else if (attributeInfo && attributeInfo.data) {
-		descriptions = [__('Attribute: ') + attributeInfo.data.name];
+	} else if ( attributeInfo && attributeInfo.data ) {
+		descriptions = [
+			__( 'Attribute: ' ) + attributeInfo.data.name
+		];
 
-		if (termInfo && termInfo.data && termInfo.data.length) {
-			var termDescriptionText = __("Terms: ");
-			var terms = [];
-			var _iteratorNormalCompletion3 = true;
-			var _didIteratorError3 = false;
-			var _iteratorError3 = undefined;
-
-			try {
-				for (var _iterator3 = termInfo.data[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-					var term = _step3.value;
-
-					terms.push(term.name);
-				}
-			} catch (err) {
-				_didIteratorError3 = true;
-				_iteratorError3 = err;
-			} finally {
-				try {
-					if (!_iteratorNormalCompletion3 && _iterator3.return) {
-						_iterator3.return();
-					}
-				} finally {
-					if (_didIteratorError3) {
-						throw _iteratorError3;
-					}
-				}
+		if ( termInfo && termInfo.data && termInfo.data.length ) {
+			let termDescriptionText = __( "Terms: " );
+			const terms = []
+			for ( const term of termInfo.data ) {
+				terms.push( term.name );
 			}
-
-			termDescriptionText += terms.join(', ');
-			descriptions.push(termDescriptionText);
+			termDescriptionText += terms.join( ', ' );
+			descriptions.push( termDescriptionText );
 		}
 	}
 
-	return wp.element.createElement(
-		'div',
-		null,
-		descriptions.map(function (description) {
-			return wp.element.createElement(
-				'div',
-				{ className: 'scope-description' },
-				description
-			);
-		})
+	return (
+		<div>
+			{ descriptions.map( ( description ) => (
+				<div className="scope-description">{ description }</div>
+			) ) }
+		</div>
 	);
-});
+} );*/
+
+
+var ProductsBlockSidebarInfo = function (_React$Component6) {
+	_inherits(ProductsBlockSidebarInfo, _React$Component6);
+
+	function ProductsBlockSidebarInfo(props) {
+		_classCallCheck(this, ProductsBlockSidebarInfo);
+
+		return _possibleConstructorReturn(this, (ProductsBlockSidebarInfo.__proto__ || Object.getPrototypeOf(ProductsBlockSidebarInfo)).call(this, props));
+	}
+
+	_createClass(ProductsBlockSidebarInfo, [{
+		key: 'render',
+		value: function render() {
+			return "sidebar";
+		}
+	}]);
+
+	return ProductsBlockSidebarInfo;
+}(React.Component);
+
+;
 
 /**
  * The main products block UI.
  */
 
-var ProductsBlock = function (_React$Component5) {
-	_inherits(ProductsBlock, _React$Component5);
+var ProductsBlock = function (_React$Component7) {
+	_inherits(ProductsBlock, _React$Component7);
 
 	/**
   * Constructor.
@@ -811,14 +780,14 @@ var ProductsBlock = function (_React$Component5) {
 	function ProductsBlock(props) {
 		_classCallCheck(this, ProductsBlock);
 
-		var _this7 = _possibleConstructorReturn(this, (ProductsBlock.__proto__ || Object.getPrototypeOf(ProductsBlock)).call(this, props));
+		var _this9 = _possibleConstructorReturn(this, (ProductsBlock.__proto__ || Object.getPrototypeOf(ProductsBlock)).call(this, props));
 
-		_this7.getInspectorControls = _this7.getInspectorControls.bind(_this7);
-		_this7.getToolbarControls = _this7.getToolbarControls.bind(_this7);
-		_this7.getBlockDescription = _this7.getBlockDescription.bind(_this7);
-		_this7.getPreview = _this7.getPreview.bind(_this7);
-		_this7.getSettingsEditor = _this7.getSettingsEditor.bind(_this7);
-		return _this7;
+		_this9.getInspectorControls = _this9.getInspectorControls.bind(_this9);
+		_this9.getToolbarControls = _this9.getToolbarControls.bind(_this9);
+		_this9.getBlockDescription = _this9.getBlockDescription.bind(_this9);
+		_this9.getPreview = _this9.getPreview.bind(_this9);
+		_this9.getSettingsEditor = _this9.getSettingsEditor.bind(_this9);
+		return _this9;
 	}
 
 	/**
@@ -1205,32 +1174,32 @@ registerBlockType('woocommerce/products', {
 
 		// Build the shortcode string out of the set shortcode attributes.
 		var shortcode = '[products';
-		var _iteratorNormalCompletion4 = true;
-		var _didIteratorError4 = false;
-		var _iteratorError4 = undefined;
+		var _iteratorNormalCompletion = true;
+		var _didIteratorError = false;
+		var _iteratorError = undefined;
 
 		try {
-			for (var _iterator4 = shortcode_atts[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-				var _ref5 = _step4.value;
+			for (var _iterator = shortcode_atts[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+				var _ref = _step.value;
 
-				var _ref6 = _slicedToArray(_ref5, 2);
+				var _ref2 = _slicedToArray(_ref, 2);
 
-				var key = _ref6[0];
-				var value = _ref6[1];
+				var key = _ref2[0];
+				var value = _ref2[1];
 
 				shortcode += ' ' + key + '="' + value + '"';
 			}
 		} catch (err) {
-			_didIteratorError4 = true;
-			_iteratorError4 = err;
+			_didIteratorError = true;
+			_iteratorError = err;
 		} finally {
 			try {
-				if (!_iteratorNormalCompletion4 && _iterator4.return) {
-					_iterator4.return();
+				if (!_iteratorNormalCompletion && _iterator.return) {
+					_iterator.return();
 				}
 			} finally {
-				if (_didIteratorError4) {
-					throw _iteratorError4;
+				if (_didIteratorError) {
+					throw _iteratorError;
 				}
 			}
 		}
@@ -1267,9 +1236,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var __ = wp.i18n.__;
 var _wp$components = wp.components,
     Toolbar = _wp$components.Toolbar,
-    withAPIData = _wp$components.withAPIData,
     Dropdown = _wp$components.Dropdown,
     Dashicon = _wp$components.Dashicon;
+var _wp = wp,
+    apiFetch = _wp.apiFetch;
 
 /**
  * Product data cache.
@@ -1495,72 +1465,42 @@ var ProductsSpecificSearchField = function (_React$Component2) {
 /**
  * Render product search results based on the text entered into the textbox.
  */
+/*const ProductSpecificSearchResults = withAPIData( ( props ) => {
 
+		if ( ! props.searchString.length ) {
+			return {
+				products: []
+			};
+		}
 
-var ProductSpecificSearchResults = withAPIData(function (props) {
-
-	if (!props.searchString.length) {
 		return {
-			products: []
+			products: '/wc/v2/products?per_page=10&search=' + props.searchString,
 		};
-	}
-
-	return {
-		products: '/wc/v2/products?per_page=10&search=' + props.searchString
-	};
-})(function (_ref) {
-	var products = _ref.products,
-	    addOrRemoveProductCallback = _ref.addOrRemoveProductCallback,
-	    selectedProducts = _ref.selectedProducts,
-	    isDropdownOpenCallback = _ref.isDropdownOpenCallback;
-
-	if (!products.data) {
-		return null;
-	}
-
-	if (0 === products.data.length) {
-		return wp.element.createElement(
-			'span',
-			{ className: 'wc-products-list-card__search-no-results' },
-			' ',
-			__('No products found'),
-			' '
-		);
-	}
-
-	// Populate the cache.
-	var _iteratorNormalCompletion = true;
-	var _didIteratorError = false;
-	var _iteratorError = undefined;
-
-	try {
-		for (var _iterator = products.data[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-			var product = _step.value;
-
-			PRODUCT_DATA[product.id] = product;
+	} )( ( { products, addOrRemoveProductCallback, selectedProducts, isDropdownOpenCallback } ) => {
+		if ( ! products.data ) {
+			return null;
 		}
-	} catch (err) {
-		_didIteratorError = true;
-		_iteratorError = err;
-	} finally {
-		try {
-			if (!_iteratorNormalCompletion && _iterator.return) {
-				_iterator.return();
-			}
-		} finally {
-			if (_didIteratorError) {
-				throw _iteratorError;
-			}
-		}
-	}
 
-	return wp.element.createElement(ProductSpecificSearchResultsDropdown, {
-		products: products.data,
-		addOrRemoveProductCallback: addOrRemoveProductCallback,
-		selectedProducts: selectedProducts,
-		isDropdownOpenCallback: isDropdownOpenCallback
-	});
-});
+		if ( 0 === products.data.length ) {
+			return <span className="wc-products-list-card__search-no-results"> { __( 'No products found' ) } </span>;
+		}
+
+		// Populate the cache.
+		for ( let product of products.data ) {
+			PRODUCT_DATA[ product.id ] = product;
+		}
+
+		return <ProductSpecificSearchResultsDropdown
+			products={ products.data }
+			addOrRemoveProductCallback={ addOrRemoveProductCallback }
+			selectedProducts={ selectedProducts }
+			isDropdownOpenCallback={ isDropdownOpenCallback }
+		/>
+	}
+);*/
+
+
+var ProductSpecificSearchResults = null;
 
 /**
  * The dropdown of search results.
@@ -1611,13 +1551,13 @@ var ProductSpecificSearchResultsDropdown = function (_React$Component3) {
 
 			var productElements = [];
 
-			var _iteratorNormalCompletion2 = true;
-			var _didIteratorError2 = false;
-			var _iteratorError2 = undefined;
+			var _iteratorNormalCompletion = true;
+			var _didIteratorError = false;
+			var _iteratorError = undefined;
 
 			try {
-				for (var _iterator2 = products[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-					var product = _step2.value;
+				for (var _iterator = products[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+					var product = _step.value;
 
 					productElements.push(wp.element.createElement(ProductSpecificSearchResultsDropdownElement, {
 						product: product,
@@ -1626,16 +1566,16 @@ var ProductSpecificSearchResultsDropdown = function (_React$Component3) {
 					}));
 				}
 			} catch (err) {
-				_didIteratorError2 = true;
-				_iteratorError2 = err;
+				_didIteratorError = true;
+				_iteratorError = err;
 			} finally {
 				try {
-					if (!_iteratorNormalCompletion2 && _iterator2.return) {
-						_iterator2.return();
+					if (!_iteratorNormalCompletion && _iterator.return) {
+						_iterator.return();
 					}
 				} finally {
-					if (_didIteratorError2) {
-						throw _iteratorError2;
+					if (_didIteratorError) {
+						throw _iteratorError;
 					}
 				}
 			}
@@ -1716,165 +1656,77 @@ var ProductSpecificSearchResultsDropdownElement = function (_React$Component4) {
 /**
  * List preview of selected products.
  */
+/*const ProductSpecificSelectedProducts = withAPIData( ( props ) => {
+		if ( ! props.productIds.length ) {
+			return {
+				products: []
+			};
+		}
 
+		// Determine which products are not already in the cache and only fetch uncached products.
+		let uncachedProducts = [];
+		for( const productId of props.productIds ) {
+			if ( ! PRODUCT_DATA.hasOwnProperty( productId ) ) {
+				uncachedProducts.push( productId );
+			}
+		}
 
-var ProductSpecificSelectedProducts = withAPIData(function (props) {
-	if (!props.productIds.length) {
 		return {
-			products: []
+			products: uncachedProducts.length ? '/wc/v2/products?include=' + uncachedProducts.join( ',' ) : []
 		};
+	} )( ( { productIds, products, columns, addOrRemoveProduct } ) => {
+
+		// Add new products to cache.
+		if ( products.data ) {
+			for ( const product of products.data ) {
+				PRODUCT_DATA[ product.id ] = product;
+			}
+		}
+
+		const productElements = [];
+
+		for ( const productId of productIds ) {
+
+			// Skip products that aren't in the cache yet or failed to fetch.
+			if ( ! PRODUCT_DATA.hasOwnProperty( productId ) ) {
+				continue;
+			}
+
+			const productData = PRODUCT_DATA[ productId ];
+
+			productElements.push(
+				<li className="wc-products-list-card__item" key={ productData.id + '-specific-select-edit' } >
+					<div className="wc-products-list-card__content">
+						<img src={ productData.images[0].src } />
+						<span className="wc-products-list-card__content-item-name">{ productData.name }</span>
+						<button
+							type="button"
+							id={ 'product-' + productData.id }
+							onClick={ function() { addOrRemoveProduct( productData.id ) } } >
+								<Dashicon icon="no-alt" />
+						</button>
+					</div>
+				</li>
+			);
+		}
+
+		return (
+			<div className={ 'wc-products-list-card__results-wrapper wc-products-list-card__results-wrapper--cols-' + columns }>
+				<div role="menu" className="wc-products-list-card__results" aria-orientation="vertical" aria-label={ __( 'Selected products' ) }>
+
+					{ productElements.length > 0 && <h3>{ __( 'Selected products' ) }</h3> }
+
+					<ul>
+						{ productElements }
+					</ul>
+				</div>
+			</div>
+		);
 	}
-
-	// Determine which products are not already in the cache and only fetch uncached products.
-	var uncachedProducts = [];
-	var _iteratorNormalCompletion3 = true;
-	var _didIteratorError3 = false;
-	var _iteratorError3 = undefined;
-
-	try {
-		for (var _iterator3 = props.productIds[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-			var productId = _step3.value;
-
-			if (!PRODUCT_DATA.hasOwnProperty(productId)) {
-				uncachedProducts.push(productId);
-			}
-		}
-	} catch (err) {
-		_didIteratorError3 = true;
-		_iteratorError3 = err;
-	} finally {
-		try {
-			if (!_iteratorNormalCompletion3 && _iterator3.return) {
-				_iterator3.return();
-			}
-		} finally {
-			if (_didIteratorError3) {
-				throw _iteratorError3;
-			}
-		}
-	}
-
-	return {
-		products: uncachedProducts.length ? '/wc/v2/products?include=' + uncachedProducts.join(',') : []
-	};
-})(function (_ref2) {
-	var productIds = _ref2.productIds,
-	    products = _ref2.products,
-	    columns = _ref2.columns,
-	    addOrRemoveProduct = _ref2.addOrRemoveProduct;
+);*/
 
 
-	// Add new products to cache.
-	if (products.data) {
-		var _iteratorNormalCompletion4 = true;
-		var _didIteratorError4 = false;
-		var _iteratorError4 = undefined;
-
-		try {
-			for (var _iterator4 = products.data[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-				var product = _step4.value;
-
-				PRODUCT_DATA[product.id] = product;
-			}
-		} catch (err) {
-			_didIteratorError4 = true;
-			_iteratorError4 = err;
-		} finally {
-			try {
-				if (!_iteratorNormalCompletion4 && _iterator4.return) {
-					_iterator4.return();
-				}
-			} finally {
-				if (_didIteratorError4) {
-					throw _iteratorError4;
-				}
-			}
-		}
-	}
-
-	var productElements = [];
-
-	var _loop = function _loop(productId) {
-
-		// Skip products that aren't in the cache yet or failed to fetch.
-		if (!PRODUCT_DATA.hasOwnProperty(productId)) {
-			return 'continue';
-		}
-
-		var productData = PRODUCT_DATA[productId];
-
-		productElements.push(wp.element.createElement(
-			'li',
-			{ className: 'wc-products-list-card__item', key: productData.id + '-specific-select-edit' },
-			wp.element.createElement(
-				'div',
-				{ className: 'wc-products-list-card__content' },
-				wp.element.createElement('img', { src: productData.images[0].src }),
-				wp.element.createElement(
-					'span',
-					{ className: 'wc-products-list-card__content-item-name' },
-					productData.name
-				),
-				wp.element.createElement(
-					'button',
-					{
-						type: 'button',
-						id: 'product-' + productData.id,
-						onClick: function onClick() {
-							addOrRemoveProduct(productData.id);
-						} },
-					wp.element.createElement(Dashicon, { icon: 'no-alt' })
-				)
-			)
-		));
-	};
-
-	var _iteratorNormalCompletion5 = true;
-	var _didIteratorError5 = false;
-	var _iteratorError5 = undefined;
-
-	try {
-		for (var _iterator5 = productIds[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-			var productId = _step5.value;
-
-			var _ret = _loop(productId);
-
-			if (_ret === 'continue') continue;
-		}
-	} catch (err) {
-		_didIteratorError5 = true;
-		_iteratorError5 = err;
-	} finally {
-		try {
-			if (!_iteratorNormalCompletion5 && _iterator5.return) {
-				_iterator5.return();
-			}
-		} finally {
-			if (_didIteratorError5) {
-				throw _iteratorError5;
-			}
-		}
-	}
-
-	return wp.element.createElement(
-		'div',
-		{ className: 'wc-products-list-card__results-wrapper wc-products-list-card__results-wrapper--cols-' + columns },
-		wp.element.createElement(
-			'div',
-			{ role: 'menu', className: 'wc-products-list-card__results', 'aria-orientation': 'vertical', 'aria-label': __('Selected products') },
-			productElements.length > 0 && wp.element.createElement(
-				'h3',
-				null,
-				__('Selected products')
-			),
-			wp.element.createElement(
-				'ul',
-				null,
-				productElements
-			)
-		)
-	);
-});
+var ProductSpecificSelectedProducts = null;
 
 /***/ }),
 /* 2 */
@@ -1900,9 +1752,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var __ = wp.i18n.__;
 var _wp$components = wp.components,
     Toolbar = _wp$components.Toolbar,
-    withAPIData = _wp$components.withAPIData,
     Dropdown = _wp$components.Dropdown,
     Dashicon = _wp$components.Dashicon;
+var _wp = wp,
+    apiFetch = _wp.apiFetch;
 
 /**
  * When the display mode is 'Product category' search for and select product categories to pull products from.
@@ -2061,220 +1914,143 @@ var ProductCategoryFilter = function ProductCategoryFilter(_ref) {
 /**
  * Fetch and build a tree of product categories.
  */
-var ProductCategoryList = withAPIData(function (props) {
-	return {
-		categories: '/wc/v2/products/categories'
-	};
-})(function (_ref2) {
-	var categories = _ref2.categories,
-	    filterQuery = _ref2.filterQuery,
-	    selectedCategories = _ref2.selectedCategories,
-	    checkboxChange = _ref2.checkboxChange,
-	    accordionToggle = _ref2.accordionToggle,
-	    openAccordion = _ref2.openAccordion,
-	    firstLoad = _ref2.firstLoad,
-	    setFirstLoad = _ref2.setFirstLoad;
-
-	if (!categories.data) {
-		return __('Loading');
-	}
-
-	if (0 === categories.data.length) {
-		return __('No categories found');
-	}
-
-	var handleCategoriesToCheck = function handleCategoriesToCheck(evt, parent, categories) {
-		var ids = getCategoryChildren(parent, categories).map(function (category) {
-			return category.id;
-		});
-
-		ids.push(parent.id);
-
-		checkboxChange(evt.target.checked, ids);
-	};
-
-	var getCategoryChildren = function getCategoryChildren(parent, categories) {
-		var children = [];
-
-		categories.filter(function (category) {
-			return category.parent === parent.id;
-		}).forEach(function (category) {
-			children.push(category);
-			children.push.apply(children, _toConsumableArray(getCategoryChildren(category, categories)));
-		});
-
-		return children;
-	};
-
-	var categoryHasChildren = function categoryHasChildren(parent, categories) {
-		return !!getCategoryChildren(parent, categories).length;
-	};
-
-	var isIndeterminate = function isIndeterminate(category, categories) {
-
-		// Currect category selected?
-		if (selectedCategories.includes(category.id)) {
-			return false;
+/*const ProductCategoryList = withAPIData( ( props ) => {
+		return {
+			categories: '/wc/v2/products/categories'
+		};
+	} )( ( { categories, filterQuery, selectedCategories, checkboxChange, accordionToggle, openAccordion, firstLoad, setFirstLoad } ) => {
+		if ( ! categories.data ) {
+			return __( 'Loading' );
 		}
 
-		// Has children?
-		var children = getCategoryChildren(category, categories).map(function (category) {
-			return category.id;
-		});
+		if ( 0 === categories.data.length ) {
+			return __( 'No categories found' );
+		}
 
-		var _iteratorNormalCompletion = true;
-		var _didIteratorError = false;
-		var _iteratorError = undefined;
+		const handleCategoriesToCheck = ( evt, parent, categories ) => {
+			let ids = getCategoryChildren( parent, categories ).map( category => {
+				return category.id;
+			} );
 
-		try {
-			for (var _iterator = children[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-				var child = _step.value;
+			ids.push( parent.id );
 
-				if (selectedCategories.includes(child)) {
+			checkboxChange( evt.target.checked, ids );
+		};
+
+		const getCategoryChildren = ( parent, categories ) => {
+			let children = [];
+
+			categories.filter( ( category ) => category.parent === parent.id ).forEach( function( category ) {
+				children.push( category );
+				children.push( ...getCategoryChildren( category, categories ) );
+			} );
+
+			return children;
+		};
+
+		const categoryHasChildren = ( parent, categories ) => {
+			return !! getCategoryChildren( parent, categories ).length;
+		};
+
+		const isIndeterminate = ( category, categories ) => {
+
+			// Currect category selected?
+			if ( selectedCategories.includes( category.id ) ) {
+				return false;
+			}
+
+			// Has children?
+			let children = getCategoryChildren( category, categories ).map( category => {
+				return category.id;
+			} );
+
+			for ( let child of children ) {
+				if ( selectedCategories.includes( child ) ) {
 					return true;
 				}
 			}
-		} catch (err) {
-			_didIteratorError = true;
-			_iteratorError = err;
-		} finally {
-			try {
-				if (!_iteratorNormalCompletion && _iterator.return) {
-					_iterator.return();
-				}
-			} finally {
-				if (_didIteratorError) {
-					throw _iteratorError;
-				}
+
+			return false;
+		}
+
+		const AccordionButton = ( { category, categories } ) => {
+			let icon = 'arrow-down-alt2';
+
+			if ( openAccordion.includes( category.id ) ) {
+				icon = 'arrow-up-alt2';
 			}
-		}
 
-		return false;
-	};
+			let style = null;
 
-	var AccordionButton = function AccordionButton(_ref3) {
-		var category = _ref3.category,
-		    categories = _ref3.categories;
-
-		var icon = 'arrow-down-alt2';
-
-		if (openAccordion.includes(category.id)) {
-			icon = 'arrow-up-alt2';
-		}
-
-		var style = null;
-
-		if (!categoryHasChildren(category, categories)) {
-			style = {
-				visibility: 'hidden'
+			if ( ! categoryHasChildren( category, categories ) ) {
+				style = {
+					visibility: 'hidden',
+				};
 			};
+
+			return (
+				<button onClick={ () => accordionToggle( category.id ) } className="wc-products-list-card__accordion-button" style={ style } type="button">
+					<Dashicon icon={ icon } />
+				</button>
+			);
 		};
 
-		return wp.element.createElement(
-			"button",
-			{ onClick: function onClick() {
-					return accordionToggle(category.id);
-				}, className: "wc-products-list-card__accordion-button", style: style, type: "button" },
-			wp.element.createElement(Dashicon, { icon: icon })
-		);
-	};
+		const CategoryTree = ( { categories, parent } ) => {
+			let filteredCategories = categories.filter( ( category ) => category.parent === parent );
 
-	var CategoryTree = function CategoryTree(_ref4) {
-		var categories = _ref4.categories,
-		    parent = _ref4.parent;
+			if ( firstLoad && selectedCategories.length > 0 ) {
+				categoriesData.filter( ( category ) => category.parent === 0 ).forEach( function( category ) {
+					let children = getCategoryChildren( category, categoriesData );
 
-		var filteredCategories = categories.filter(function (category) {
-			return category.parent === parent;
-		});
-
-		if (firstLoad && selectedCategories.length > 0) {
-			categoriesData.filter(function (category) {
-				return category.parent === 0;
-			}).forEach(function (category) {
-				var children = getCategoryChildren(category, categoriesData);
-
-				var _iteratorNormalCompletion2 = true;
-				var _didIteratorError2 = false;
-				var _iteratorError2 = undefined;
-
-				try {
-					for (var _iterator2 = children[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-						var child = _step2.value;
-
-						if (selectedCategories.includes(child.id) && !openAccordion.includes(category.id)) {
-							accordionToggle(category.id);
+					for ( let child of children ) {
+						if ( selectedCategories.includes( child.id ) && ! openAccordion.includes( category.id ) ) {
+							accordionToggle( category.id );
 							break;
 						}
 					}
-				} catch (err) {
-					_didIteratorError2 = true;
-					_iteratorError2 = err;
-				} finally {
-					try {
-						if (!_iteratorNormalCompletion2 && _iterator2.return) {
-							_iterator2.return();
-						}
-					} finally {
-						if (_didIteratorError2) {
-							throw _iteratorError2;
-						}
-					}
-				}
-			});
+				} );
 
-			setFirstLoad(false);
+				setFirstLoad( false );
+			}
+
+			return ( filteredCategories.length > 0 ) && (
+				<ul>
+					{ filteredCategories.map( ( category ) => (
+						<li key={ category.id } className={ ( openAccordion.includes( category.id ) ? 'wc-products-list-card__item wc-products-list-card__accordion-open' : 'wc-products-list-card__item' ) }>
+							<label className={ ( 0 === category.parent ) ? 'wc-products-list-card__content' : ''  } htmlFor={ 'product-category-' + category.id }>
+								<input type="checkbox"
+								       id={ 'product-category-' + category.id }
+								       value={ category.id }
+								       checked={ selectedCategories.includes( category.id ) }
+								       onChange={ ( evt ) => handleCategoriesToCheck( evt, category, categories ) }
+								       ref={ el => el && ( el.indeterminate = isIndeterminate( category, categories ) ) }
+								/> { category.name }
+								{ 0 === category.parent &&
+									<AccordionButton category={ category } categories={ categories } />
+								}
+								<span className="wc-products-list-card__taxonomy-count">{ category.count }</span>
+							</label>
+							<CategoryTree categories={ categories } parent={ category.id } />
+						</li>
+					) ) }
+				</ul>
+			);
+		};
+
+		let categoriesData = categories.data;
+
+		if ( '' !== filterQuery ) {
+			categoriesData = categoriesData.filter( category => category.slug.includes( filterQuery.toLowerCase() ) );
 		}
 
-		return filteredCategories.length > 0 && wp.element.createElement(
-			"ul",
-			null,
-			filteredCategories.map(function (category) {
-				return wp.element.createElement(
-					"li",
-					{ key: category.id, className: openAccordion.includes(category.id) ? 'wc-products-list-card__item wc-products-list-card__accordion-open' : 'wc-products-list-card__item' },
-					wp.element.createElement(
-						"label",
-						{ className: 0 === category.parent ? 'wc-products-list-card__content' : '', htmlFor: 'product-category-' + category.id },
-						wp.element.createElement("input", { type: "checkbox",
-							id: 'product-category-' + category.id,
-							value: category.id,
-							checked: selectedCategories.includes(category.id),
-							onChange: function onChange(evt) {
-								return handleCategoriesToCheck(evt, category, categories);
-							},
-							ref: function ref(el) {
-								return el && (el.indeterminate = isIndeterminate(category, categories));
-							}
-						}),
-						" ",
-						category.name,
-						0 === category.parent && wp.element.createElement(AccordionButton, { category: category, categories: categories }),
-						wp.element.createElement(
-							"span",
-							{ className: "wc-products-list-card__taxonomy-count" },
-							category.count
-						)
-					),
-					wp.element.createElement(CategoryTree, { categories: categories, parent: category.id })
-				);
-			})
+		return (
+			<div className="wc-products-list-card__results">
+				<CategoryTree categories={ categoriesData } parent={ 0 } />
+			</div>
 		);
-	};
-
-	var categoriesData = categories.data;
-
-	if ('' !== filterQuery) {
-		categoriesData = categoriesData.filter(function (category) {
-			return category.slug.includes(filterQuery.toLowerCase());
-		});
 	}
-
-	return wp.element.createElement(
-		"div",
-		{ className: "wc-products-list-card__results" },
-		wp.element.createElement(CategoryTree, { categories: categoriesData, parent: 0 })
-	);
-});
+);*/
+var ProductCategoryList = null;
 
 /***/ }),
 /* 3 */
@@ -2302,9 +2078,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var __ = wp.i18n.__;
 var _wp$components = wp.components,
     Toolbar = _wp$components.Toolbar,
-    withAPIData = _wp$components.withAPIData,
     Dropdown = _wp$components.Dropdown,
     Dashicon = _wp$components.Dashicon;
+var _wp = wp,
+    apiFetch = _wp.apiFetch;
 
 /**
  * Get the identifier for an attribute. The identifier can be used to determine
@@ -2511,72 +2288,48 @@ var ProductAttributeFilter = function ProductAttributeFilter(props) {
 /**
  * List of attributes.
  */
-var ProductAttributeList = withAPIData(function (props) {
-	return {
-		attributes: '/wc/v2/products/attributes'
-	};
-})(function (_ref) {
-	var attributes = _ref.attributes,
-	    selectedAttribute = _ref.selectedAttribute,
-	    filterQuery = _ref.filterQuery,
-	    selectedTerms = _ref.selectedTerms,
-	    setSelectedAttribute = _ref.setSelectedAttribute,
-	    addTerm = _ref.addTerm,
-	    removeTerm = _ref.removeTerm;
+/*const ProductAttributeList = withAPIData( ( props ) => {
+		return {
+			attributes: '/wc/v2/products/attributes'
+		};
+	} )( ( { attributes, selectedAttribute, filterQuery, selectedTerms, setSelectedAttribute, addTerm, removeTerm } ) => {
+		if ( ! attributes.data ) {
+			return __( 'Loading' );
+		}
 
-	if (!attributes.data) {
-		return __('Loading');
-	}
+		if ( 0 === attributes.data.length ) {
+			return __( 'No attributes found' );
+		}
 
-	if (0 === attributes.data.length) {
-		return __('No attributes found');
-	}
 
-	var filter = filterQuery.toLowerCase();
-	var attributeElements = [];
-	var _iteratorNormalCompletion2 = true;
-	var _didIteratorError2 = false;
-	var _iteratorError2 = undefined;
-
-	try {
-		for (var _iterator2 = attributes.data[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-			var attribute = _step2.value;
-
+		const filter = filterQuery.toLowerCase();
+		let attributeElements = [];
+		for ( let attribute of attributes.data ) {
 			// Filter out attributes that don't match the search query.
-			if (filter.length && -1 === attribute.name.toLowerCase().indexOf(filter)) {
+			if ( filter.length && -1 === attribute.name.toLowerCase().indexOf( filter ) ) {
 				continue;
 			}
 
-			attributeElements.push(wp.element.createElement(ProductAttributeElement, {
-				attribute: attribute,
-				selectedAttribute: selectedAttribute,
-				selectedTerms: selectedTerms,
-				setSelectedAttribute: setSelectedAttribute,
-				addTerm: addTerm,
-				removeTerm: removeTerm
-			}));
+			attributeElements.push(
+				<ProductAttributeElement 
+					attribute={ attribute } 
+					selectedAttribute={ selectedAttribute } 
+					selectedTerms={ selectedTerms } 
+					setSelectedAttribute={ setSelectedAttribute}
+					addTerm={ addTerm }
+					removeTerm={ removeTerm } 
+				/>
+			);
 		}
-	} catch (err) {
-		_didIteratorError2 = true;
-		_iteratorError2 = err;
-	} finally {
-		try {
-			if (!_iteratorNormalCompletion2 && _iterator2.return) {
-				_iterator2.return();
-			}
-		} finally {
-			if (_didIteratorError2) {
-				throw _iteratorError2;
-			}
-		}
-	}
 
-	return wp.element.createElement(
-		'div',
-		{ className: 'wc-products-list-card__results' },
-		attributeElements
-	);
-});
+		return (
+			<div className="wc-products-list-card__results">
+				{ attributeElements }
+			</div>
+		);
+	}
+);*/
+var ProductAttributeList = null;
 
 /**
  * One product attribute.
@@ -2675,82 +2428,49 @@ var ProductAttributeElement = function (_React$Component2) {
 /**
  * The list of terms in an attribute.
  */
-
-
-var AttributeTerms = withAPIData(function (props) {
-	return {
-		terms: '/wc/v2/products/attributes/' + props.attribute.id + '/terms'
-	};
-})(function (_ref2) {
-	var terms = _ref2.terms,
-	    selectedTerms = _ref2.selectedTerms,
-	    attribute = _ref2.attribute,
-	    addTerm = _ref2.addTerm,
-	    removeTerm = _ref2.removeTerm;
-
-	if (!terms.data) {
-		return wp.element.createElement(
-			'ul',
-			null,
-			wp.element.createElement(
-				'li',
-				null,
-				__('Loading')
-			)
-		);
-	}
-
-	if (0 === terms.data.length) {
-		return wp.element.createElement(
-			'ul',
-			null,
-			wp.element.createElement(
-				'li',
-				null,
-				__('No terms found')
-			)
-		);
-	}
-
-	/**
-  * Add or remove selected terms.
-  *
-  * @param evt Event object
-  */
-	function handleTermChange(evt) {
-		if (evt.target.checked) {
-			addTerm(evt.target.value);
-		} else {
-			removeTerm(evt.target.value);
+/*const AttributeTerms = withAPIData( ( props ) => {
+		return {
+			terms: '/wc/v2/products/attributes/' + props.attribute.id + '/terms'
+		};
+	} )( ( { terms, selectedTerms, attribute, addTerm, removeTerm } ) => {
+		if ( ! terms.data ) {
+			return ( <ul><li>{ __( 'Loading' ) }</li></ul> );
 		}
-	}
 
-	return wp.element.createElement(
-		'ul',
-		null,
-		terms.data.map(function (term) {
-			return wp.element.createElement(
-				'li',
-				{ className: 'wc-products-list-card__item' },
-				wp.element.createElement(
-					'label',
-					{ className: 'wc-products-list-card__content' },
-					wp.element.createElement('input', { type: 'checkbox',
-						value: term.id,
-						onChange: handleTermChange,
-						checked: selectedTerms.includes(String(term.id))
-					}),
-					term.name,
-					wp.element.createElement(
-						'span',
-						{ className: 'wc-products-list-card__taxonomy-count' },
-						term.count
-					)
-				)
-			);
-		})
-	);
-});
+		if ( 0 === terms.data.length ) {
+			return ( <ul><li>{ __( 'No terms found' ) }</li></ul> );
+		}
+
+		function handleTermChange( evt ) {
+			if ( evt.target.checked ) {
+				addTerm( evt.target.value );
+			} else {
+				removeTerm( evt.target.value );
+			}
+		}
+
+		return (
+			<ul>
+				{ terms.data.map( ( term ) => (
+					<li className="wc-products-list-card__item">
+						<label className="wc-products-list-card__content">
+							<input type="checkbox"
+								value={ term.id }
+								onChange={ handleTermChange }
+								checked={ selectedTerms.includes( String( term.id ) ) }
+							/>
+							{ term.name }
+							<span className="wc-products-list-card__taxonomy-count">{ term.count }</span>
+						</label>
+					</li>
+				) ) }
+			</ul>
+		);
+	}
+);*/
+
+
+var AttributeTerms = null;
 
 /***/ })
 /******/ ]);

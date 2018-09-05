@@ -1,5 +1,6 @@
 const { __ } = wp.i18n;
-const { Toolbar, withAPIData, Dropdown, Dashicon } = wp.components;
+const { Toolbar, Dropdown, Dashicon } = wp.components;
+const { apiFetch } = wp;
 
 /**
  * When the display mode is 'Product category' search for and select product categories to pull products from.
@@ -124,7 +125,7 @@ const ProductCategoryFilter = ( { filterResults } ) => {
 /**
  * Fetch and build a tree of product categories.
  */
-const ProductCategoryList = withAPIData( ( props ) => {
+/*const ProductCategoryList = withAPIData( ( props ) => {
 		return {
 			categories: '/wc/v2/products/categories'
 		};
@@ -259,4 +260,5 @@ const ProductCategoryList = withAPIData( ( props ) => {
 			</div>
 		);
 	}
-);
+);*/
+const ProductCategoryList = null;

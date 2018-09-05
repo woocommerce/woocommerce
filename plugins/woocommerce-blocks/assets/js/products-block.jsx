@@ -2,7 +2,8 @@ const { __ } = wp.i18n;
 const { RawHTML } = wp.element;
 const { registerBlockType } = wp.blocks;
 const { InspectorControls, BlockControls } = wp.editor;
-const { Toolbar, withAPIData, Dropdown, Dashicon, RangeControl, Tooltip, SelectControl } = wp.components;
+const { Toolbar, Dropdown, Dashicon, RangeControl, Tooltip, SelectControl } = wp.components;
+const { apiFetch } = wp;
 
 import { ProductsSpecificSelect } from './views/specific-select.jsx';
 import { ProductsCategorySelect } from './views/category-select.jsx';
@@ -353,7 +354,7 @@ class ProductPreview extends React.Component {
 /**
  * Renders a preview of what the block will look like with current settings.
  */
-const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
+/*const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
 
 	const { columns, rows, display, display_setting, orderby } = attributes;
 
@@ -422,12 +423,27 @@ const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
 			) ) }
 		</div>
 	);
-} );
+} );*/
+class ProductsBlockPreview extends React.Component {
+
+	constructor( props ) {
+		super( props );
+	}
+
+	render() {
+		return (
+			<div className="wc-products-block-preview cols-3">
+				THIS
+			</div>
+		);
+	}
+}
+
 
 /**
  * Information about current block settings rendered in the sidebar.
  */
-const ProductsBlockSidebarInfo = withAPIData( ( { attributes } ) => {
+/*const ProductsBlockSidebarInfo = withAPIData( ( { attributes } ) => {
 
 	const { display, display_setting } = attributes;
 
@@ -496,7 +512,19 @@ const ProductsBlockSidebarInfo = withAPIData( ( { attributes } ) => {
 			) ) }
 		</div>
 	);
-} );
+} );*/
+class ProductsBlockSidebarInfo extends React.Component {
+
+	constructor( props ) {
+		super( props );
+	}
+
+	render() {
+		return (
+			"sidebar"
+		);
+	}
+};
 
 /**
  * The main products block UI.

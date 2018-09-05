@@ -1,5 +1,6 @@
 const { __ } = wp.i18n;
-const { Toolbar, withAPIData, Dropdown, Dashicon } = wp.components;
+const { Toolbar, Dropdown, Dashicon } = wp.components;
+const { apiFetch } = wp;
 
 /**
  * Get the identifier for an attribute. The identifier can be used to determine
@@ -158,7 +159,7 @@ const ProductAttributeFilter = ( props ) => {
 /**
  * List of attributes.
  */
-const ProductAttributeList = withAPIData( ( props ) => {
+/*const ProductAttributeList = withAPIData( ( props ) => {
 		return {
 			attributes: '/wc/v2/products/attributes'
 		};
@@ -198,7 +199,8 @@ const ProductAttributeList = withAPIData( ( props ) => {
 			</div>
 		);
 	}
-);
+);*/
+const ProductAttributeList = null;
 
 /**
  * One product attribute.
@@ -277,7 +279,7 @@ class ProductAttributeElement extends React.Component {
 /**
  * The list of terms in an attribute.
  */
-const AttributeTerms = withAPIData( ( props ) => {
+/*const AttributeTerms = withAPIData( ( props ) => {
 		return {
 			terms: '/wc/v2/products/attributes/' + props.attribute.id + '/terms'
 		};
@@ -290,11 +292,6 @@ const AttributeTerms = withAPIData( ( props ) => {
 			return ( <ul><li>{ __( 'No terms found' ) }</li></ul> );
 		}
 
-		/**
-		 * Add or remove selected terms.
-		 *
-		 * @param evt Event object
-		 */
 		function handleTermChange( evt ) {
 			if ( evt.target.checked ) {
 				addTerm( evt.target.value );
@@ -321,4 +318,5 @@ const AttributeTerms = withAPIData( ( props ) => {
 			</ul>
 		);
 	}
-);
+);*/
+const AttributeTerms = null;
