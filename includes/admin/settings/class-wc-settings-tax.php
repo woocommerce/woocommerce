@@ -124,7 +124,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 		// Invalidate caches.
 		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
-		WC_Cache_Helper::get_transient_version( 'shipping', true );
+		WC()->transients->invalidate_group_version( 'shipping' );
 	}
 
 	/**

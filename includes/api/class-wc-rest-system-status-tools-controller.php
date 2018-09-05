@@ -418,7 +418,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_Controller {
 					}
 				}
 
-				WC_Cache_Helper::get_transient_version( 'shipping', true );
+				WC()->transients->invalidate_group_version( 'shipping' );
 				$message = __( 'Product transients cleared', 'woocommerce' );
 				break;
 

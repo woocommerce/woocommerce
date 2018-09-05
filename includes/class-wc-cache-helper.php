@@ -112,68 +112,6 @@ class WC_Cache_Helper {
 	}
 
 	/**
-	 * Get transient version.
-	 *
-	 * When using transients with unpredictable names, e.g. those containing an md5
-	 * hash in the name, we need a way to invalidate them all at once.
-	 *
-	 * When using default WP transients we're able to do this with a DB query to
-	 * delete transients manually.
-	 *
-	 * With external cache however, this isn't possible. Instead, this function is used
-	 * to append a unique string (based on time()) to each transient. When transients
-	 * are invalidated, the transient version will increment and data will be regenerated.
-	 *
-	 * Raised in issue https://github.com/woocommerce/woocommerce/issues/5777.
-	 * Adapted from ideas in http://tollmanz.com/invalidation-schemes/.
-	 *
-	 * @param  string  $group   Name for the group of transients we need to invalidate.
-	 * @param  boolean $refresh true to force a new version.
-	 * @return string transient version based on time(), 10 digits.
-	 */
-	public static function get_transient_version( $group, $refresh = false ) {
-		$transient_name  = $group . '-transient-version';
-		$transient_value = get_transient( $transient_name );
-
-		if ( false === $transient_value || true === $refresh ) {
-			self::delete_version_transients( $transient_value );
-
-			$transient_value = (string) time();
-
-			set_transient( $transient_name, $transient_value );
-		}
-
-		return $transient_value;
-	}
-
-	/**
-	 * When the transient version increases, this is used to remove all past transients to avoid filling the DB.
-	 *
-	 * Note; this only works on transients appended with the transient version, and when object caching is not being used.
-	 *
-	 * @since  2.3.10
-	 * @param string $version Version of the transient to remove.
-	 */
-	public static function delete_version_transients( $version = '' ) {
-		if ( ! wp_using_ext_object_cache() && ! empty( $version ) ) {
-			global $wpdb;
-
-			$limit = apply_filters( 'woocommerce_delete_version_transients_limit', 1000 );
-
-			if ( ! $limit ) {
-				return;
-			}
-
-			$affected = $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s ORDER BY option_id LIMIT %d;", '\_transient\_%' . $version, $limit ) ); // WPCS: cache ok, db call ok.
-
-			// If affected rows is equal to limit, there are more rows to delete. Delete in 30 secs.
-			if ( $affected === $limit ) {
-				wp_schedule_single_event( time() + 30, 'delete_version_transients', array( $version ) );
-			}
-		}
-	}
-
-	/**
 	 * Set constants to prevent caching by some plugins.
 	 *
 	 * @param  mixed $return Value to return. Previously hooked into a filter.
@@ -234,6 +172,70 @@ class WC_Cache_Helper {
 
 			foreach ( $clear_ids as $id ) {
 				wp_cache_delete( 'product-category-hierarchy-' . $id, 'product_cat' );
+			}
+		}
+	}
+
+	/**
+	 * Deprecated methods
+	 */
+
+	/**
+	 * Get transient version.
+	 *
+	 * When using transients with unpredictable names, e.g. those containing an md5
+	 * hash in the name, we need a way to invalidate them all at once.
+	 *
+	 * When using default WP transients we're able to do this with a DB query to
+	 * delete transients manually.
+	 *
+	 * With external cache however, this isn't possible. Instead, this function is used
+	 * to append a unique string (based on time()) to each transient. When transients
+	 * are invalidated, the transient version will increment and data will be regenerated.
+	 *
+	 * Raised in issue https://github.com/woocommerce/woocommerce/issues/5777.
+	 * Adapted from ideas in http://tollmanz.com/invalidation-schemes/.
+	 *
+	 * @param  string  $group   Name for the group of transients we need to invalidate.
+	 * @param  boolean $refresh true to force a new version.
+	 * @return string transient version based on time(), 10 digits.
+	 */
+	public static function get_transient_version( $group, $refresh = false ) {
+		$transient_name  = $group . '-transient-version';
+		$transient_value = get_transient( $transient_name );
+
+		if ( false === $transient_value || true === $refresh ) {
+			self::delete_version_transients( $transient_value );
+
+			set_transient( $transient_name, $transient_value );
+		}
+
+		return $transient_value;
+	}
+
+	/**
+	 * When the transient version increases, this is used to remove all past transients to avoid filling the DB.
+	 *
+	 * Note; this only works on transients appended with the transient version, and when object caching is not being used.
+	 *
+	 * @since  2.3.10
+	 * @param string $version Version of the transient to remove.
+	 */
+	public static function delete_version_transients( $version = '' ) {
+		if ( ! wp_using_ext_object_cache() && ! empty( $version ) ) {
+			global $wpdb;
+
+			$limit = apply_filters( 'woocommerce_delete_version_transients_limit', 1000 );
+
+			if ( ! $limit ) {
+				return;
+			}
+
+			$affected = $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s ORDER BY option_id LIMIT %d;", '\_transient\_%' . $version, $limit ) ); // WPCS: cache ok, db call ok.
+
+			// If affected rows is equal to limit, there are more rows to delete. Delete in 30 secs.
+			if ( $affected === $limit ) {
+				wp_schedule_single_event( time() + 30, 'delete_version_transients', array( $version ) );
 			}
 		}
 	}

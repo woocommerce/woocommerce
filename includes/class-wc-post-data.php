@@ -135,7 +135,7 @@ class WC_Post_Data {
 	 */
 	public static function delete_product_query_transients() {
 		// Increments the transient version to invalidate cache.
-		WC_Cache_Helper::get_transient_version( 'product_query', true );
+		WC()->transients->invalidate_group_version( 'product_query' );
 
 		// If not using an external caching system, we can clear the transients out manually and avoid filling our DB.
 		if ( ! wp_using_ext_object_cache() ) {

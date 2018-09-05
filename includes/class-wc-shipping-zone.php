@@ -414,7 +414,7 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 			do_action( 'woocommerce_shipping_zone_method_added', $instance_id, $type, $this->get_id() );
 		}
 
-		WC_Cache_Helper::get_transient_version( 'shipping', true );
+		WC()->transients->invalidate_group_version( 'shipping' );
 
 		return $instance_id;
 	}
@@ -438,7 +438,7 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 			do_action( 'woocommerce_shipping_zone_method_deleted', $instance_id, $method->method_id, $this->get_id() );
 		}
 
-		WC_Cache_Helper::get_transient_version( 'shipping', true );
+		WC()->transients->invalidate_group_version( 'shipping' );
 
 		return true;
 	}

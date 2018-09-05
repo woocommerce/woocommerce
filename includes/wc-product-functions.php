@@ -143,7 +143,7 @@ function wc_delete_product_transients( $post_id = 0 ) {
 	}
 
 	// Increments the transient version to invalidate cache.
-	WC_Cache_Helper::get_transient_version( 'product', true );
+	WC()->transients->invalidate_group_version( 'product' );
 
 	do_action( 'woocommerce_delete_product_transients', $post_id );
 }
@@ -442,7 +442,7 @@ function wc_scheduled_sales() {
 		}
 		do_action( 'wc_after_products_ending_sales', $product_ids );
 
-		WC_Cache_Helper::get_transient_version( 'product', true );
+		WC()->transients->invalidate_group_version( 'product' );
 		delete_transient( 'wc_products_onsale' );
 	}
 }

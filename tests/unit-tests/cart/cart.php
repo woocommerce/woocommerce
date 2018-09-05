@@ -492,7 +492,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		);
 		update_option( 'woocommerce_flat_rate_settings', $flat_rate_settings );
 		update_option( 'woocommerce_flat_rate', array() );
-		WC_Cache_Helper::get_transient_version( 'shipping', true );
+		WC()->transients->invalidate_group_version( 'shipping' );
 		WC()->shipping->load_shipping_methods();
 
 		// Create the product and add it to the cart.

@@ -194,7 +194,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		}
 
 		// Increments the transient version to invalidate cache.
-		WC_Cache_Helper::get_transient_version( 'shipping', true );
+		WC()->transients->invalidate_group_version( 'shipping' );
 	}
 
 	/**

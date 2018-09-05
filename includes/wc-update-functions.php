@@ -962,7 +962,7 @@ function wc_update_241_variations() {
 	}
 
 	// Invalidate old transients such as wc_var_price.
-	WC_Cache_Helper::get_transient_version( 'product', true );
+	WC()->transients->invalidate_group_version( 'product' );
 }
 
 /**

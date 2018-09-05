@@ -442,7 +442,7 @@ function wc_delete_shop_order_transients( $order = 0 ) {
 	}
 
 	// Increments the transient version to invalidate cache.
-	WC_Cache_Helper::get_transient_version( 'orders', true );
+	WC()->transients->invalidate_group_version( 'orders' );
 
 	// Do the same for regular cache.
 	WC_Cache_Helper::incr_cache_prefix( 'orders' );
