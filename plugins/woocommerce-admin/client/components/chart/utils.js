@@ -17,7 +17,7 @@ import { mouse as d3Mouse, select as d3Select } from 'd3-selection';
 import { line as d3Line } from 'd3-shape';
 import { utcParse as d3UTCParse } from 'd3-time-format';
 
-export const parseDate = d3UTCParse( '%Y-%m-%dT%H:%M:%SZ' );
+export const parseDate = d3UTCParse( '%Y-%m-%dT%H:%M:%S' );
 
 /**
  * Describes `getUniqueKeys`
