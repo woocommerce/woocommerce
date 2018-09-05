@@ -12,7 +12,6 @@ import { find } from 'lodash';
  * Internal dependencies
  */
 import './style.scss';
-import ExampleReport from './example';
 import Header from 'layout/header';
 import OrdersReport from './orders';
 import ProductsReport from './products';
@@ -37,11 +36,6 @@ const getReports = () => {
 			report: 'orders',
 			title: __( 'Orders', 'wc-admin' ),
 			component: OrdersReport,
-		},
-		{
-			report: 'test',
-			title: __( 'Example', 'wc-admin' ),
-			component: ExampleReport,
 		},
 	] );
 

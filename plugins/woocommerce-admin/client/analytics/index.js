@@ -8,7 +8,6 @@ import { Component, Fragment } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { Card, Search } from '@woocommerce/components';
 import Header from 'layout/header';
 
 export default class extends Component {
@@ -28,9 +27,6 @@ export default class extends Component {
 		return (
 			<Fragment>
 				<Header sections={ [ __( 'Analytics', 'wc-admin' ) ] } />
-				<Card title="Overview Section">
-					<Search onChange={ this.onChange } type="products" selected={ this.state.selected } />
-				</Card>
 			</Fragment>
 		);
 	}
