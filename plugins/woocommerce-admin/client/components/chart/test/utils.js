@@ -157,7 +157,7 @@ describe( 'getXLineScale', () => {
 
 describe( 'getYMax', () => {
 	it( 'calculate the correct maximum y value', () => {
-		expect( testYMax ).toEqual( 14139347 );
+		expect( testYMax ).toEqual( 15000000 );
 	} );
 } );
 

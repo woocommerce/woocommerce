@@ -5,12 +5,12 @@
 	justify-content: flex-start;
 	align-items: flex-start;
 	margin: -$gap;
-	border-top: 1px solid $core-grey-light-200;
+	border-top: 1px solid $core-grey-light-700;
 
 	.woocommerce-chart__header {
 		min-height: 50px;
-		border-top: 1px solid $core-grey-light-200;
-		border-bottom: 1px solid $core-grey-dark-500;
+		border-top: 1px solid $core-grey-light-700;
+		border-bottom: 1px solid $core-grey-light-700;
 		display: flex;
 		flex-wrap: nowrap;
 		flex-direction: row;
@@ -48,6 +48,8 @@
 			&.woocommerce-legend__direction-column {
 				height: 100%;
 				min-height: none;
+				border-right: none;
+				margin-bottom: $gap;
 			}
 		}
 	}
@@ -56,7 +58,7 @@
 		overflow: visible;
 	}
 	.tooltip {
-		border: 1px solid $core-grey-light-200;
+		border: 1px solid $core-grey-light-700;
 		position: absolute;
 		display: none;
 		min-width: 324px;
@@ -105,8 +107,8 @@
 
 						.key-colour {
 							display: inline-block;
-							width: 10px;
-							height: 10px;
+							width: 16px;
+							height: 16px;
 							margin-right: 8px;
 						}
 						.key-key {
@@ -128,7 +130,7 @@
 	.grid {
 		.tick {
 			line {
-				stroke: $core-grey-light-200;
+				stroke: $core-grey-light-500;
 				stroke-width: 1;
 				shape-rendering: crispEdges;
 			}
@@ -167,7 +169,7 @@
 	}
 	line {
 		&.focus-grid {
-			stroke: $core-grey-light-200;
+			stroke: $core-grey-light-700;
 			stroke-width: 1px;
 		}
 	}
@@ -201,7 +203,7 @@
 
 	&.woocommerce-legend__direction-column {
 		flex-direction: column;
-		border-right: 1px solid $core-grey-dark-500;
+		border-right: 1px solid $core-grey-light-700;
 		height: 300px;
 		min-width: 320px;
 
