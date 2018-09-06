@@ -178,6 +178,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - orderby and order parameters in WC_Customer_Download_Log_Data_Store::get_download_logs() were ignored. #20931
 * Fix - Unslash city name to prevent double escape in tax settings. #21205
 * Fix - Updated phone validation logic. #21188
+* Fix - Fix weight and dimensions cache of variable products if childs doesn't have any of those params. #21244
 * Fix/Tweak - Fire `woocommerce_grant_product_download_access` hook after the download has its ID set. #20905
 * Tweak - Show empty terms in admin product category filter dropdown. #20324
 * Tweak - Don't force default token gateway active by default. #20125
