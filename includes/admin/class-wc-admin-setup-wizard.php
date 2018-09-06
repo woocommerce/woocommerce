@@ -144,6 +144,11 @@ class WC_Admin_Setup_Wizard {
 			|| $this->should_show_mailchimp();
 	}
 
+	/**
+	 * Register/enqueue scripts and styles for the Setup Wizard.
+	 *
+	 * Hooked onto 'admin_enqueue_scripts'.
+	 */
 	public function enqueue_scripts() {
 		// Whether or not there is a pending background install of Jetpack.
 		$pending_jetpack = ! class_exists( 'Jetpack' ) && get_option( 'woocommerce_setup_background_installing_jetpack' );
@@ -907,7 +912,7 @@ class WC_Admin_Setup_Wizard {
 		?>
 		<h1><?php esc_html_e( 'Shipping', 'woocommerce' ); ?></h1>
 		<?php if ( $intro_text ) : ?>
-		<p><?php echo wp_kses_post( $intro_text ); ?></p>
+			<p><?php echo wp_kses_post( $intro_text ); ?></p>
 		<?php endif; ?>
 		<form method="post">
 			<?php if ( empty( $existing_zones ) ) : ?>
@@ -951,23 +956,23 @@ class WC_Admin_Setup_Wizard {
 					<li class="wc-wizard-service-info">
 						<p>
 						<?php
-						wp_kses(
-							printf(
+						printf(
+							wp_kses(
 								/* translators: %1$s: live rates tooltip text, %2$s: shipping extensions URL */
 								__( 'If you\'d like to offer <span class="help_tip" data-tip="%1$s">live rates</span> from a specific carrier (e.g. UPS) you can find a variety of extensions available for WooCommerce <a href="%2$s" target="_blank">here</a>.', 'woocommerce' ),
-								esc_attr__( 'A live rate is the exact cost to ship an order, quoted directly from the shipping carrier.', 'woocommerce' ),
-								'https://woocommerce.com/product-category/woocommerce-extensions/shipping-methods/shipping-carriers/'
+								array(
+									'span' => array(
+										'class'    => array(),
+										'data-tip' => array(),
+									),
+									'a' => array(
+										'href'   => array(),
+										'target' => array(),
+									),
+								)
 							),
-							array(
-								'span' => array(
-									'class'    => array(),
-									'data-tip' => array(),
-								),
-								'a' => array(
-									'href'   => array(),
-									'target' => array(),
-								),
-							)
+							esc_attr__( 'A live rate is the exact cost to ship an order, quoted directly from the shipping carrier.', 'woocommerce' ),
+							'https://woocommerce.com/product-category/woocommerce-extensions/shipping-methods/shipping-carriers/'
 						);
 						?>
 						</p>
@@ -1009,10 +1014,27 @@ class WC_Admin_Setup_Wizard {
 			<div class="wc-setup-shipping-units">
 				<p>
 					<?php
-						printf(
-							__( 'We\'ll use %1$s for product weight and %2$s for product dimensions.', 'woocommerce' ),
-							$this->get_product_weight_selection(),
-							$this->get_product_dimension_selection()
+						echo wp_kses(
+							sprintf(
+								/* translators: %1$s: weight unit dropdown, %2$s: dimension unit dropdown */
+								esc_html__( 'We\'ll use %1$s for product weight and %2$s for product dimensions.', 'woocommerce' ),
+								$this->get_product_weight_selection(),
+								$this->get_product_dimension_selection()
+							),
+							array(
+								'span' => array(
+									'class' => array(),
+								),
+								'select' => array(
+									'id'    => array(),
+									'name'  => array(),
+									'class' => array(),
+								),
+								'option' => array(
+									'value'    => array(),
+									'selected' => array(),
+								),
+							)
 						);
 					?>
 				</p>
