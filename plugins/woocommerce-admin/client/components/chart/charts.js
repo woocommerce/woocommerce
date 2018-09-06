@@ -7,7 +7,6 @@ import { isEqual } from 'lodash';
 import { Component, createRef } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { format as d3Format } from 'd3-format';
 import { timeFormat as d3TimeFormat } from 'd3-time-format';
 import { select as d3Select } from 'd3-selection';
 
@@ -89,7 +88,17 @@ class D3Chart extends Component {
 	}
 
 	getParams( node ) {
-		const { colorScheme, data, height, margin, orderedKeys, type, xFormat, yFormat } = this.props;
+		const {
+			colorScheme,
+			data,
+			height,
+			margin,
+			orderedKeys,
+			tooltipFormat,
+			type,
+			xFormat,
+			yFormat,
+		} = this.props;
 		const { width } = this.state;
 		const calculatedWidth = width || node.offsetWidth;
 		const calculatedHeight = height || node.offsetHeight;
@@ -113,6 +122,7 @@ class D3Chart extends Component {
 			margin,
 			orderedKeys: newOrderedKeys,
 			scale,
+			tooltipFormat: d3TimeFormat( tooltipFormat ),
 			type,
 			uniqueDates,
 			uniqueKeys,
@@ -124,7 +134,7 @@ class D3Chart extends Component {
 			yMax,
 			yScale,
 			yTickOffset: getYTickOffset( adjHeight, scale, yMax ),
-			yFormat: d3Format( yFormat ),
+			yFormat,
 		};
 	}
 
@@ -168,9 +178,9 @@ D3Chart.propTypes = {
 	 */
 	height: PropTypes.number,
 	/**
-	 * @todo Remove – not used?
+	 * Interval specification (hourly, daily, weekly etc.)
 	 */
-	legend: PropTypes.array,
+	interval: PropTypes.oneOf( [ 'hour', 'day', 'week', 'month', 'quater', 'year' ] ),
 	/**
 	 * Margins for axis and chart padding.
 	 */
@@ -184,6 +194,10 @@ D3Chart.propTypes = {
 	 * The list of labels for this chart.
 	 */
 	orderedKeys: PropTypes.array,
+	/**
+	 * A datetime formatting string to format the title of the toolip, passed to d3TimeFormat.
+	 */
+	tooltipFormat: PropTypes.string,
 	/**
 	 * Chart type of either `line` or `bar`.
 	 */
@@ -211,10 +225,11 @@ D3Chart.defaultProps = {
 		right: 0,
 		top: 20,
 	},
+	tooltipFormat: '%Y-%m-%d',
 	type: 'line',
 	width: 600,
 	xFormat: '%Y-%m-%d',
-	yFormat: ',.0f',
+	yFormat: '.3s',
 };
 
 export default D3Chart;

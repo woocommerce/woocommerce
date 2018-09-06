@@ -1,3 +1,5 @@
+/** @format */
+
 /**
  * /* eslint-disable quote-props
  *
@@ -6,7 +8,7 @@
 
 export default [
 	{
-		date: '2018-05-30',
+		date: '2018-05-30T00:00:00',
 		Polo: 2704659,
 		'T-Shirt': 4499890,
 		Hoodie: 2159981,
@@ -14,7 +16,7 @@ export default [
 		Cap: 10604510,
 	},
 	{
-		date: '2018-05-31',
+		date: '2018-05-31T00:00:00',
 		Polo: 2027307,
 		'T-Shirt': 3277946,
 		Hoodie: 1420518,
@@ -22,7 +24,7 @@ export default [
 		Cap: 7017731,
 	},
 	{
-		date: '2018-06-01',
+		date: '2018-06-01T00:00:00',
 		Polo: 1208495,
 		'T-Shirt': 2141490,
 		Hoodie: 1058031,
@@ -30,7 +32,7 @@ export default [
 		Cap: 5355235,
 	},
 	{
-		date: '2018-06-02',
+		date: '2018-06-02T00:00:00',
 		Polo: 1140516,
 		'T-Shirt': 1938695,
 		Hoodie: 925060,
@@ -38,7 +40,7 @@ export default [
 		Cap: 4782119,
 	},
 	{
-		date: '2018-06-03',
+		date: '2018-06-03T00:00:00',
 		Polo: 894368,
 		'T-Shirt': 1558919,
 		Hoodie: 725973,
@@ -46,7 +48,7 @@ export default [
 		Cap: 3596343,
 	},
 	{
-		date: '2018-06-04',
+		date: '2018-06-04T00:00:00',
 		Polo: 737462,
 		'T-Shirt': 1345341,
 		Hoodie: 679201,

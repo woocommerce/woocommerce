@@ -15,9 +15,9 @@ import {
 } from 'd3-scale';
 import { mouse as d3Mouse, select as d3Select } from 'd3-selection';
 import { line as d3Line } from 'd3-shape';
-import { timeFormat as d3TimeFormat, utcParse as d3UTCParse } from 'd3-time-format';
+import { utcParse as d3UTCParse } from 'd3-time-format';
 
-export const parseDate = d3UTCParse( '%Y-%m-%d' );
+export const parseDate = d3UTCParse( '%Y-%m-%dT%H:%M:%S' );
 
 /**
  * Describes `getUniqueKeys`
@@ -214,7 +214,7 @@ export const drawAxis = ( node, params ) => {
 		.call(
 			d3AxisBottom( xScale )
 				.tickValues( params.uniqueDates.map( d => ( params.type === 'line' ? new Date( d ) : d ) ) )
-				.tickFormat( d => d3TimeFormat( '%d' )( d instanceof Date ? d : new Date( d ) ) )
+				.tickFormat( d => params.xFormat( d instanceof Date ? d : new Date( d ) ) )
 		);
 
 	node
@@ -235,7 +235,7 @@ export const drawAxis = ( node, params ) => {
 		.call(
 			d3AxisLeft( params.yTickOffset )
 				.tickValues( yGrids )
-				.tickFormat( d => ( d !== 0 ? d3Format( '.3s' )( d ) : 0 ) )
+				.tickFormat( d => ( d !== 0 ? d3Format( params.yFormat )( d ) : 0 ) )
 		);
 
 	node
@@ -270,7 +270,7 @@ const showTooltip = ( node, params, d ) => {
 		.style( 'top', yPosition + 'px' )
 		.style( 'display', 'inline-block' ).html( `
 			<div>
-				<h4>${ d.date }</h4>
+				<h4>${ params.tooltipFormat( d.date instanceof Date ? d.date : new Date( d.date ) ) }</h4>
 				<ul>
 				${ keys.join( '' ) }
 				</ul>
