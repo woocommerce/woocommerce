@@ -10,7 +10,7 @@ import { Component } from '@wordpress/element';
  */
 import Card from 'components/card';
 import Chart from './index';
-import dummyOrders from './test/fixtures/dummy';
+import dummyOrders from './test/fixtures/dummy-hour';
 
 class WidgetCharts extends Component {
 	render() {
