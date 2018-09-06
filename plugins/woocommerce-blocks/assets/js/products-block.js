@@ -787,7 +787,7 @@ var ProductsBlockSidebarInfo = function (_React$Component6) {
 			termsQuery: ''
 		};
 
-		_this8.updatePreview = _this8.updatePreview.bind(_this8);
+		_this8.updateInfo = _this8.updateInfo.bind(_this8);
 		_this8.getQueries = _this8.getQueries.bind(_this8);
 		return _this8;
 	}
