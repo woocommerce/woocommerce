@@ -1710,7 +1710,8 @@ var ProductSpecificSearchResults = function (_React$Component3) {
 
 		_this3.state = {
 			products: [],
-			query: ''
+			query: '',
+			loaded: false
 		};
 
 		_this3.updateResults = _this3.updateResults.bind(_this3);
@@ -1768,7 +1769,8 @@ var ProductSpecificSearchResults = function (_React$Component3) {
 			var query = this.getQuery();
 
 			self.setState({
-				query: query
+				query: query,
+				loaded: false
 			});
 
 			if (query.length) {
@@ -1776,13 +1778,15 @@ var ProductSpecificSearchResults = function (_React$Component3) {
 					// Only update the results if they are for the latest query.
 					if (query === self.getQuery()) {
 						self.setState({
-							products: products
+							products: products,
+							loaded: true
 						});
 					}
 				});
 			} else {
 				self.setState({
-					products: []
+					products: [],
+					loaded: true
 				});
 			}
 		}
@@ -1794,7 +1798,7 @@ var ProductSpecificSearchResults = function (_React$Component3) {
 	}, {
 		key: 'render',
 		value: function render() {
-			if (!this.getQuery().length) {
+			if (!this.state.loaded || !this.state.query.length) {
 				return null;
 			}
 
