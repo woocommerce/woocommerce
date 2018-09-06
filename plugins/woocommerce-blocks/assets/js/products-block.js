@@ -76,9 +76,9 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _specificSelect = __webpack_require__(2);
+var _specificSelect = __webpack_require__(1);
 
-var _categorySelect = __webpack_require__(1);
+var _categorySelect = __webpack_require__(2);
 
 var _attributeSelect = __webpack_require__(3);
 
@@ -1450,6 +1450,790 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var __ = wp.i18n.__;
+var _wp$components = wp.components,
+    Toolbar = _wp$components.Toolbar,
+    Dropdown = _wp$components.Dropdown,
+    Dashicon = _wp$components.Dashicon;
+var _wp = wp,
+    apiFetch = _wp.apiFetch;
+
+/**
+ * Product data cache.
+ * Reduces the number of API calls and makes UI smoother and faster.
+ */
+
+var PRODUCT_DATA = {};
+
+/**
+ * When the display mode is 'Specific products' search for and add products to the block.
+ */
+
+var ProductsSpecificSelect = exports.ProductsSpecificSelect = function (_React$Component) {
+	_inherits(ProductsSpecificSelect, _React$Component);
+
+	/**
+  * Constructor.
+  */
+	function ProductsSpecificSelect(props) {
+		_classCallCheck(this, ProductsSpecificSelect);
+
+		var _this = _possibleConstructorReturn(this, (ProductsSpecificSelect.__proto__ || Object.getPrototypeOf(ProductsSpecificSelect)).call(this, props));
+
+		_this.state = {
+			selectedProducts: props.selected_display_setting || []
+		};
+		return _this;
+	}
+
+	/**
+  * Add a product to the list of selected products.
+  *
+  * @param id int Product ID.
+  */
+
+
+	_createClass(ProductsSpecificSelect, [{
+		key: 'addOrRemoveProduct',
+		value: function addOrRemoveProduct(id) {
+			var selectedProducts = this.state.selectedProducts;
+
+			if (!selectedProducts.includes(id)) {
+				selectedProducts.push(id);
+			} else {
+				selectedProducts = selectedProducts.filter(function (product) {
+					return product !== id;
+				});
+			}
+
+			this.setState({
+				selectedProducts: selectedProducts
+			});
+
+			/**
+    * We need to copy the existing data into a new array.
+    * We can't just push the new product onto the end of the existing array because Gutenberg seems
+    * to do some sort of check by reference to determine whether to *actually* update the attribute
+    * and will not update it if we just pass back the same array with an extra element on the end.
+    */
+			this.props.update_display_setting_callback(selectedProducts.slice());
+		}
+
+		/**
+   * Render the product specific select screen.
+   */
+
+	}, {
+		key: 'render',
+		value: function render() {
+			return wp.element.createElement(
+				'div',
+				{ className: 'wc-products-list-card wc-products-list-card--specific' },
+				wp.element.createElement(ProductsSpecificSearchField, {
+					addOrRemoveProductCallback: this.addOrRemoveProduct.bind(this),
+					selectedProducts: this.state.selectedProducts
+				}),
+				wp.element.createElement(ProductSpecificSelectedProducts, {
+					columns: this.props.attributes.columns,
+					productIds: this.state.selectedProducts,
+					addOrRemoveProduct: this.addOrRemoveProduct.bind(this)
+				})
+			);
+		}
+	}]);
+
+	return ProductsSpecificSelect;
+}(React.Component);
+
+/**
+ * Product search area
+ */
+
+
+var ProductsSpecificSearchField = function (_React$Component2) {
+	_inherits(ProductsSpecificSearchField, _React$Component2);
+
+	/**
+  * Constructor.
+  */
+	function ProductsSpecificSearchField(props) {
+		_classCallCheck(this, ProductsSpecificSearchField);
+
+		var _this2 = _possibleConstructorReturn(this, (ProductsSpecificSearchField.__proto__ || Object.getPrototypeOf(ProductsSpecificSearchField)).call(this, props));
+
+		_this2.state = {
+			searchText: '',
+			dropdownOpen: false
+		};
+
+		_this2.updateSearchResults = _this2.updateSearchResults.bind(_this2);
+		_this2.setWrapperRef = _this2.setWrapperRef.bind(_this2);
+		_this2.handleClickOutside = _this2.handleClickOutside.bind(_this2);
+		_this2.isDropdownOpen = _this2.isDropdownOpen.bind(_this2);
+		return _this2;
+	}
+
+	/**
+  * Hook in the listener for closing menu when clicked outside.
+  */
+
+
+	_createClass(ProductsSpecificSearchField, [{
+		key: 'componentDidMount',
+		value: function componentDidMount() {
+			document.addEventListener('mousedown', this.handleClickOutside);
+		}
+
+		/**
+   * Remove the listener for closing menu when clicked outside.
+   */
+
+	}, {
+		key: 'componentWillUnmount',
+		value: function componentWillUnmount() {
+			document.removeEventListener('mousedown', this.handleClickOutside);
+		}
+
+		/**
+   * Set the wrapper reference.
+   *
+   * @param node DOMNode
+   */
+
+	}, {
+		key: 'setWrapperRef',
+		value: function setWrapperRef(node) {
+			this.wrapperRef = node;
+		}
+
+		/**
+   * Close the menu when user clicks outside the search area.
+   */
+
+	}, {
+		key: 'handleClickOutside',
+		value: function handleClickOutside(evt) {
+			if (this.wrapperRef && !this.wrapperRef.contains(event.target)) {
+				this.setState({
+					searchText: ''
+				});
+			}
+		}
+	}, {
+		key: 'isDropdownOpen',
+		value: function isDropdownOpen(isOpen) {
+			this.setState({
+				dropdownOpen: !!isOpen
+			});
+		}
+
+		/**
+   * Event handler for updating results when text is typed into the input.
+   *
+   * @param evt Event object.
+   */
+
+	}, {
+		key: 'updateSearchResults',
+		value: function updateSearchResults(evt) {
+			this.setState({
+				searchText: evt.target.value
+			});
+		}
+
+		/**
+   * Render the product search UI.
+   */
+
+	}, {
+		key: 'render',
+		value: function render() {
+			var divClass = 'wc-products-list-card__search-wrapper';
+
+			return wp.element.createElement(
+				'div',
+				{ className: divClass + (this.state.dropdownOpen ? ' ' + divClass + '--with-results' : ''), ref: this.setWrapperRef },
+				wp.element.createElement(
+					'div',
+					{ className: 'wc-products-list-card__input-wrapper' },
+					wp.element.createElement(Dashicon, { icon: 'search' }),
+					wp.element.createElement('input', { type: 'search',
+						className: 'wc-products-list-card__search',
+						value: this.state.searchText,
+						placeholder: __('Search for products to display'),
+						onChange: this.updateSearchResults
+					})
+				),
+				wp.element.createElement(ProductSpecificSearchResults, {
+					searchString: this.state.searchText,
+					addOrRemoveProductCallback: this.props.addOrRemoveProductCallback,
+					selectedProducts: this.props.selectedProducts,
+					isDropdownOpenCallback: this.isDropdownOpen
+				})
+			);
+		}
+	}]);
+
+	return ProductsSpecificSearchField;
+}(React.Component);
+
+/**
+ * Render product search results based on the text entered into the textbox.
+ */
+
+
+var ProductSpecificSearchResults = function (_React$Component3) {
+	_inherits(ProductSpecificSearchResults, _React$Component3);
+
+	/**
+  * Constructor.
+  */
+	function ProductSpecificSearchResults(props) {
+		_classCallCheck(this, ProductSpecificSearchResults);
+
+		var _this3 = _possibleConstructorReturn(this, (ProductSpecificSearchResults.__proto__ || Object.getPrototypeOf(ProductSpecificSearchResults)).call(this, props));
+
+		_this3.state = {
+			products: [],
+			query: ''
+		};
+
+		_this3.updateResults = _this3.updateResults.bind(_this3);
+		_this3.getQuery = _this3.getQuery.bind(_this3);
+		return _this3;
+	}
+
+	/**
+  * Get the preview when component is first loaded.
+  */
+
+
+	_createClass(ProductSpecificSearchResults, [{
+		key: 'componentDidMount',
+		value: function componentDidMount() {
+			this.updateResults();
+		}
+
+		/**
+   * Update the preview when component is updated.
+   */
+
+	}, {
+		key: 'componentDidUpdate',
+		value: function componentDidUpdate() {
+			if (this.getQuery() !== this.state.query) {
+				this.updateResults();
+			}
+		}
+
+		/**
+   * Get the endpoint for the current state of the component.
+   *
+   * @return string
+   */
+
+	}, {
+		key: 'getQuery',
+		value: function getQuery() {
+			if (!this.props.searchString.length) {
+				return '';
+			}
+
+			return '/wc/v2/products?per_page=10&search=' + this.props.searchString;
+		}
+
+		/**
+   * Update the search results.
+   */
+
+	}, {
+		key: 'updateResults',
+		value: function updateResults() {
+			var self = this;
+			var query = this.getQuery();
+
+			self.setState({
+				query: query
+			});
+
+			if (query.length) {
+				apiFetch({ path: query }).then(function (products) {
+					self.setState({
+						products: products
+					});
+				});
+			} else {
+				self.setState({
+					products: []
+				});
+			}
+		}
+
+		/**
+   * Render.
+   */
+
+	}, {
+		key: 'render',
+		value: function render() {
+			if (!this.getQuery().length) {
+				return null;
+			}
+
+			if (0 === this.state.products.length) {
+				return wp.element.createElement(
+					'span',
+					{ className: 'wc-products-list-card__search-no-results' },
+					' ',
+					__('No products found'),
+					' '
+				);
+			}
+
+			// Populate the cache.
+			var _iteratorNormalCompletion = true;
+			var _didIteratorError = false;
+			var _iteratorError = undefined;
+
+			try {
+				for (var _iterator = this.state.products[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+					var product = _step.value;
+
+					PRODUCT_DATA[product.id] = product;
+				}
+			} catch (err) {
+				_didIteratorError = true;
+				_iteratorError = err;
+			} finally {
+				try {
+					if (!_iteratorNormalCompletion && _iterator.return) {
+						_iterator.return();
+					}
+				} finally {
+					if (_didIteratorError) {
+						throw _iteratorError;
+					}
+				}
+			}
+
+			return wp.element.createElement(ProductSpecificSearchResultsDropdown, {
+				products: this.state.products,
+				addOrRemoveProductCallback: this.props.addOrRemoveProductCallback,
+				selectedProducts: this.props.selectedProducts,
+				isDropdownOpenCallback: this.props.isDropdownOpenCallback
+			});
+		}
+	}]);
+
+	return ProductSpecificSearchResults;
+}(React.Component);
+
+/**
+ * The dropdown of search results.
+ */
+
+
+var ProductSpecificSearchResultsDropdown = function (_React$Component4) {
+	_inherits(ProductSpecificSearchResultsDropdown, _React$Component4);
+
+	function ProductSpecificSearchResultsDropdown() {
+		_classCallCheck(this, ProductSpecificSearchResultsDropdown);
+
+		return _possibleConstructorReturn(this, (ProductSpecificSearchResultsDropdown.__proto__ || Object.getPrototypeOf(ProductSpecificSearchResultsDropdown)).apply(this, arguments));
+	}
+
+	_createClass(ProductSpecificSearchResultsDropdown, [{
+		key: 'componentDidMount',
+
+
+		/**
+   * Set the state of the dropdown to open.
+   */
+		value: function componentDidMount() {
+			this.props.isDropdownOpenCallback(true);
+		}
+
+		/**
+   * Set the state of the dropdown to closed.
+   */
+
+	}, {
+		key: 'componentWillUnmount',
+		value: function componentWillUnmount() {
+			this.props.isDropdownOpenCallback(false);
+		}
+
+		/**
+   * Render dropdown.
+   */
+
+	}, {
+		key: 'render',
+		value: function render() {
+			var _props = this.props,
+			    products = _props.products,
+			    addOrRemoveProductCallback = _props.addOrRemoveProductCallback,
+			    selectedProducts = _props.selectedProducts;
+
+
+			var productElements = [];
+
+			var _iteratorNormalCompletion2 = true;
+			var _didIteratorError2 = false;
+			var _iteratorError2 = undefined;
+
+			try {
+				for (var _iterator2 = products[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+					var product = _step2.value;
+
+					productElements.push(wp.element.createElement(ProductSpecificSearchResultsDropdownElement, {
+						product: product,
+						addOrRemoveProductCallback: addOrRemoveProductCallback,
+						selected: selectedProducts.includes(product.id)
+					}));
+				}
+			} catch (err) {
+				_didIteratorError2 = true;
+				_iteratorError2 = err;
+			} finally {
+				try {
+					if (!_iteratorNormalCompletion2 && _iterator2.return) {
+						_iterator2.return();
+					}
+				} finally {
+					if (_didIteratorError2) {
+						throw _iteratorError2;
+					}
+				}
+			}
+
+			return wp.element.createElement(
+				'div',
+				{ role: 'menu', className: 'wc-products-list-card__search-results', 'aria-orientation': 'vertical', 'aria-label': __('Products list') },
+				wp.element.createElement(
+					'div',
+					null,
+					productElements
+				)
+			);
+		}
+	}]);
+
+	return ProductSpecificSearchResultsDropdown;
+}(React.Component);
+
+/**
+ * One search result.
+ */
+
+
+var ProductSpecificSearchResultsDropdownElement = function (_React$Component5) {
+	_inherits(ProductSpecificSearchResultsDropdownElement, _React$Component5);
+
+	/**
+  * Constructor.
+  */
+	function ProductSpecificSearchResultsDropdownElement(props) {
+		_classCallCheck(this, ProductSpecificSearchResultsDropdownElement);
+
+		var _this5 = _possibleConstructorReturn(this, (ProductSpecificSearchResultsDropdownElement.__proto__ || Object.getPrototypeOf(ProductSpecificSearchResultsDropdownElement)).call(this, props));
+
+		_this5.handleClick = _this5.handleClick.bind(_this5);
+		return _this5;
+	}
+
+	/**
+  * Add product to main list and change UI to show it was added.
+  */
+
+
+	_createClass(ProductSpecificSearchResultsDropdownElement, [{
+		key: 'handleClick',
+		value: function handleClick() {
+			this.props.addOrRemoveProductCallback(this.props.product.id);
+		}
+
+		/**
+   * Render one result in the search results.
+   */
+
+	}, {
+		key: 'render',
+		value: function render() {
+			var product = this.props.product;
+			var icon = this.props.selected ? wp.element.createElement(Dashicon, { icon: 'yes' }) : null;
+
+			return wp.element.createElement(
+				'div',
+				{ className: 'wc-products-list-card__content' + (this.props.selected ? ' wc-products-list-card__content--added' : ''), onClick: this.handleClick },
+				wp.element.createElement('img', { src: product.images[0].src }),
+				wp.element.createElement(
+					'span',
+					{ className: 'wc-products-list-card__content-item-name' },
+					product.name
+				),
+				icon
+			);
+		}
+	}]);
+
+	return ProductSpecificSearchResultsDropdownElement;
+}(React.Component);
+
+/**
+ * List preview of selected products.
+ */
+
+
+var ProductSpecificSelectedProducts = function (_React$Component6) {
+	_inherits(ProductSpecificSelectedProducts, _React$Component6);
+
+	/**
+  * Constructor
+  */
+	function ProductSpecificSelectedProducts(props) {
+		_classCallCheck(this, ProductSpecificSelectedProducts);
+
+		var _this6 = _possibleConstructorReturn(this, (ProductSpecificSelectedProducts.__proto__ || Object.getPrototypeOf(ProductSpecificSelectedProducts)).call(this, props));
+
+		_this6.state = {
+			query: ''
+		};
+
+		_this6.updateProductCache = _this6.updateProductCache.bind(_this6);
+		_this6.getQuery = _this6.getQuery.bind(_this6);
+
+		return _this6;
+	}
+
+	/**
+  * Get the preview when component is first loaded.
+  */
+
+
+	_createClass(ProductSpecificSelectedProducts, [{
+		key: 'componentDidMount',
+		value: function componentDidMount() {
+			this.updateProductCache();
+		}
+
+		/**
+   * Update the preview when component is updated.
+   */
+
+	}, {
+		key: 'componentDidUpdate',
+		value: function componentDidUpdate() {
+			if (this.getQuery() !== this.state.query) {
+				this.updateProductCache();
+			}
+		}
+
+		/**
+   * Get the endpoint for the current state of the component.
+   */
+
+	}, {
+		key: 'getQuery',
+		value: function getQuery() {
+			if (!this.props.productIds.length) {
+				return '';
+			}
+
+			// Determine which products are not already in the cache and only fetch uncached products.
+			var uncachedProducts = [];
+			var _iteratorNormalCompletion3 = true;
+			var _didIteratorError3 = false;
+			var _iteratorError3 = undefined;
+
+			try {
+				for (var _iterator3 = this.props.productIds[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+					var productId = _step3.value;
+
+					if (!PRODUCT_DATA.hasOwnProperty(productId)) {
+						uncachedProducts.push(productId);
+					}
+				}
+			} catch (err) {
+				_didIteratorError3 = true;
+				_iteratorError3 = err;
+			} finally {
+				try {
+					if (!_iteratorNormalCompletion3 && _iterator3.return) {
+						_iterator3.return();
+					}
+				} finally {
+					if (_didIteratorError3) {
+						throw _iteratorError3;
+					}
+				}
+			}
+
+			return uncachedProducts.length ? '/wc/v2/products?include=' + uncachedProducts.join(',') : '';
+		}
+
+		/**
+   * Add newly fetched products to the cache.
+   */
+
+	}, {
+		key: 'updateProductCache',
+		value: function updateProductCache() {
+			var self = this;
+			var query = this.getQuery();
+
+			self.setState({
+				query: query
+			});
+
+			// Add new products to cache.
+			if (query.length) {
+				apiFetch({ path: query }).then(function (products) {
+					if (products.length) {
+						var _iteratorNormalCompletion4 = true;
+						var _didIteratorError4 = false;
+						var _iteratorError4 = undefined;
+
+						try {
+							for (var _iterator4 = products[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+								var product = _step4.value;
+
+								PRODUCT_DATA[product.id] = product;
+							}
+						} catch (err) {
+							_didIteratorError4 = true;
+							_iteratorError4 = err;
+						} finally {
+							try {
+								if (!_iteratorNormalCompletion4 && _iterator4.return) {
+									_iterator4.return();
+								}
+							} finally {
+								if (_didIteratorError4) {
+									throw _iteratorError4;
+								}
+							}
+						}
+					}
+				});
+			}
+		}
+
+		/**
+   * Render.
+   */
+
+	}, {
+		key: 'render',
+		value: function render() {
+			var self = this;
+			var productElements = [];
+
+			var _loop = function _loop(productId) {
+
+				// Skip products that aren't in the cache yet or failed to fetch.
+				if (!PRODUCT_DATA.hasOwnProperty(productId)) {
+					return 'continue';
+				}
+
+				var productData = PRODUCT_DATA[productId];
+
+				productElements.push(wp.element.createElement(
+					'li',
+					{ className: 'wc-products-list-card__item', key: productData.id + '-specific-select-edit' },
+					wp.element.createElement(
+						'div',
+						{ className: 'wc-products-list-card__content' },
+						wp.element.createElement('img', { src: productData.images[0].src }),
+						wp.element.createElement(
+							'span',
+							{ className: 'wc-products-list-card__content-item-name' },
+							productData.name
+						),
+						wp.element.createElement(
+							'button',
+							{
+								type: 'button',
+								id: 'product-' + productData.id,
+								onClick: function onClick() {
+									self.props.addOrRemoveProduct(productData.id);
+								} },
+							wp.element.createElement(Dashicon, { icon: 'no-alt' })
+						)
+					)
+				));
+			};
+
+			var _iteratorNormalCompletion5 = true;
+			var _didIteratorError5 = false;
+			var _iteratorError5 = undefined;
+
+			try {
+				for (var _iterator5 = this.props.productIds[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+					var productId = _step5.value;
+
+					var _ret = _loop(productId);
+
+					if (_ret === 'continue') continue;
+				}
+			} catch (err) {
+				_didIteratorError5 = true;
+				_iteratorError5 = err;
+			} finally {
+				try {
+					if (!_iteratorNormalCompletion5 && _iterator5.return) {
+						_iterator5.return();
+					}
+				} finally {
+					if (_didIteratorError5) {
+						throw _iteratorError5;
+					}
+				}
+			}
+
+			return wp.element.createElement(
+				'div',
+				{ className: 'wc-products-list-card__results-wrapper wc-products-list-card__results-wrapper--cols-' + this.props.columns },
+				wp.element.createElement(
+					'div',
+					{ role: 'menu', className: 'wc-products-list-card__results', 'aria-orientation': 'vertical', 'aria-label': __('Selected products') },
+					productElements.length > 0 && wp.element.createElement(
+						'h3',
+						null,
+						__('Selected products')
+					),
+					wp.element.createElement(
+						'ul',
+						null,
+						productElements
+					)
+				)
+			);
+		}
+	}]);
+
+	return ProductSpecificSelectedProducts;
+}(React.Component);
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -1928,520 +2712,6 @@ var ProductCategoryList = function (_React$Component2) {
 
 	return ProductCategoryList;
 }(React.Component);
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var __ = wp.i18n.__;
-var _wp$components = wp.components,
-    Toolbar = _wp$components.Toolbar,
-    Dropdown = _wp$components.Dropdown,
-    Dashicon = _wp$components.Dashicon;
-var _wp = wp,
-    apiFetch = _wp.apiFetch;
-
-/**
- * Product data cache.
- * Reduces the number of API calls and makes UI smoother and faster.
- */
-
-var PRODUCT_DATA = {};
-
-/**
- * When the display mode is 'Specific products' search for and add products to the block.
- *
- * @todo Add the functionality and everything.
- */
-
-var ProductsSpecificSelect = exports.ProductsSpecificSelect = function (_React$Component) {
-	_inherits(ProductsSpecificSelect, _React$Component);
-
-	/**
-  * Constructor.
-  */
-	function ProductsSpecificSelect(props) {
-		_classCallCheck(this, ProductsSpecificSelect);
-
-		var _this = _possibleConstructorReturn(this, (ProductsSpecificSelect.__proto__ || Object.getPrototypeOf(ProductsSpecificSelect)).call(this, props));
-
-		_this.state = {
-			selectedProducts: props.selected_display_setting || []
-		};
-		return _this;
-	}
-
-	/**
-  * Add a product to the list of selected products.
-  *
-  * @param id int Product ID.
-  */
-
-
-	_createClass(ProductsSpecificSelect, [{
-		key: 'addOrRemoveProduct',
-		value: function addOrRemoveProduct(id) {
-			var selectedProducts = this.state.selectedProducts;
-
-			if (!selectedProducts.includes(id)) {
-				selectedProducts.push(id);
-			} else {
-				selectedProducts = selectedProducts.filter(function (product) {
-					return product !== id;
-				});
-			}
-
-			this.setState({
-				selectedProducts: selectedProducts
-			});
-
-			/**
-    * We need to copy the existing data into a new array.
-    * We can't just push the new product onto the end of the existing array because Gutenberg seems
-    * to do some sort of check by reference to determine whether to *actually* update the attribute
-    * and will not update it if we just pass back the same array with an extra element on the end.
-    */
-			this.props.update_display_setting_callback(selectedProducts.slice());
-		}
-
-		/**
-   * Render the product specific select screen.
-   */
-
-	}, {
-		key: 'render',
-		value: function render() {
-			return wp.element.createElement(
-				'div',
-				{ className: 'wc-products-list-card wc-products-list-card--specific' },
-				wp.element.createElement(ProductsSpecificSearchField, {
-					addOrRemoveProductCallback: this.addOrRemoveProduct.bind(this),
-					selectedProducts: this.state.selectedProducts
-				}),
-				wp.element.createElement(ProductSpecificSelectedProducts, {
-					columns: this.props.attributes.columns,
-					productIds: this.state.selectedProducts,
-					addOrRemoveProduct: this.addOrRemoveProduct.bind(this)
-				})
-			);
-		}
-	}]);
-
-	return ProductsSpecificSelect;
-}(React.Component);
-
-/**
- * Product search area
- */
-
-
-var ProductsSpecificSearchField = function (_React$Component2) {
-	_inherits(ProductsSpecificSearchField, _React$Component2);
-
-	/**
-  * Constructor.
-  */
-	function ProductsSpecificSearchField(props) {
-		_classCallCheck(this, ProductsSpecificSearchField);
-
-		var _this2 = _possibleConstructorReturn(this, (ProductsSpecificSearchField.__proto__ || Object.getPrototypeOf(ProductsSpecificSearchField)).call(this, props));
-
-		_this2.state = {
-			searchText: '',
-			dropdownOpen: false
-		};
-
-		_this2.updateSearchResults = _this2.updateSearchResults.bind(_this2);
-		_this2.setWrapperRef = _this2.setWrapperRef.bind(_this2);
-		_this2.handleClickOutside = _this2.handleClickOutside.bind(_this2);
-		_this2.isDropdownOpen = _this2.isDropdownOpen.bind(_this2);
-		return _this2;
-	}
-
-	/**
-  * Hook in the listener for closing menu when clicked outside.
-  */
-
-
-	_createClass(ProductsSpecificSearchField, [{
-		key: 'componentDidMount',
-		value: function componentDidMount() {
-			document.addEventListener('mousedown', this.handleClickOutside);
-		}
-
-		/**
-   * Remove the listener for closing menu when clicked outside.
-   */
-
-	}, {
-		key: 'componentWillUnmount',
-		value: function componentWillUnmount() {
-			document.removeEventListener('mousedown', this.handleClickOutside);
-		}
-
-		/**
-   * Set the wrapper reference.
-   *
-   * @param node DOMNode
-   */
-
-	}, {
-		key: 'setWrapperRef',
-		value: function setWrapperRef(node) {
-			this.wrapperRef = node;
-		}
-
-		/**
-   * Close the menu when user clicks outside the search area.
-   */
-
-	}, {
-		key: 'handleClickOutside',
-		value: function handleClickOutside(evt) {
-			if (this.wrapperRef && !this.wrapperRef.contains(event.target)) {
-				this.setState({
-					searchText: ''
-				});
-			}
-		}
-	}, {
-		key: 'isDropdownOpen',
-		value: function isDropdownOpen(isOpen) {
-			this.setState({
-				dropdownOpen: !!isOpen
-			});
-		}
-
-		/**
-   * Event handler for updating results when text is typed into the input.
-   *
-   * @param evt Event object.
-   */
-
-	}, {
-		key: 'updateSearchResults',
-		value: function updateSearchResults(evt) {
-			this.setState({
-				searchText: evt.target.value
-			});
-		}
-
-		/**
-   * Render the product search UI.
-   */
-
-	}, {
-		key: 'render',
-		value: function render() {
-			var divClass = 'wc-products-list-card__search-wrapper';
-
-			return wp.element.createElement(
-				'div',
-				{ className: divClass + (this.state.dropdownOpen ? ' ' + divClass + '--with-results' : ''), ref: this.setWrapperRef },
-				wp.element.createElement(
-					'div',
-					{ className: 'wc-products-list-card__input-wrapper' },
-					wp.element.createElement(Dashicon, { icon: 'search' }),
-					wp.element.createElement('input', { type: 'search',
-						className: 'wc-products-list-card__search',
-						value: this.state.searchText,
-						placeholder: __('Search for products to display'),
-						onChange: this.updateSearchResults
-					})
-				),
-				wp.element.createElement(ProductSpecificSearchResults, {
-					searchString: this.state.searchText,
-					addOrRemoveProductCallback: this.props.addOrRemoveProductCallback,
-					selectedProducts: this.props.selectedProducts,
-					isDropdownOpenCallback: this.isDropdownOpen
-				})
-			);
-		}
-	}]);
-
-	return ProductsSpecificSearchField;
-}(React.Component);
-
-/**
- * Render product search results based on the text entered into the textbox.
- */
-/*const ProductSpecificSearchResults = withAPIData( ( props ) => {
-
-		if ( ! props.searchString.length ) {
-			return {
-				products: []
-			};
-		}
-
-		return {
-			products: '/wc/v2/products?per_page=10&search=' + props.searchString,
-		};
-	} )( ( { products, addOrRemoveProductCallback, selectedProducts, isDropdownOpenCallback } ) => {
-		if ( ! products.data ) {
-			return null;
-		}
-
-		if ( 0 === products.data.length ) {
-			return <span className="wc-products-list-card__search-no-results"> { __( 'No products found' ) } </span>;
-		}
-
-		// Populate the cache.
-		for ( let product of products.data ) {
-			PRODUCT_DATA[ product.id ] = product;
-		}
-
-		return <ProductSpecificSearchResultsDropdown
-			products={ products.data }
-			addOrRemoveProductCallback={ addOrRemoveProductCallback }
-			selectedProducts={ selectedProducts }
-			isDropdownOpenCallback={ isDropdownOpenCallback }
-		/>
-	}
-);*/
-
-
-var ProductSpecificSearchResults = null;
-
-/**
- * The dropdown of search results.
- */
-
-var ProductSpecificSearchResultsDropdown = function (_React$Component3) {
-	_inherits(ProductSpecificSearchResultsDropdown, _React$Component3);
-
-	function ProductSpecificSearchResultsDropdown() {
-		_classCallCheck(this, ProductSpecificSearchResultsDropdown);
-
-		return _possibleConstructorReturn(this, (ProductSpecificSearchResultsDropdown.__proto__ || Object.getPrototypeOf(ProductSpecificSearchResultsDropdown)).apply(this, arguments));
-	}
-
-	_createClass(ProductSpecificSearchResultsDropdown, [{
-		key: 'componentDidMount',
-
-
-		/**
-   * Set the state of the dropdown to open.
-   */
-		value: function componentDidMount() {
-			this.props.isDropdownOpenCallback(true);
-		}
-
-		/**
-   * Set the state of the dropdown to closed.
-   */
-
-	}, {
-		key: 'componentWillUnmount',
-		value: function componentWillUnmount() {
-			this.props.isDropdownOpenCallback(false);
-		}
-
-		/**
-   * Render dropdown.
-   */
-
-	}, {
-		key: 'render',
-		value: function render() {
-			var _props = this.props,
-			    products = _props.products,
-			    addOrRemoveProductCallback = _props.addOrRemoveProductCallback,
-			    selectedProducts = _props.selectedProducts;
-
-
-			var productElements = [];
-
-			var _iteratorNormalCompletion = true;
-			var _didIteratorError = false;
-			var _iteratorError = undefined;
-
-			try {
-				for (var _iterator = products[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-					var product = _step.value;
-
-					productElements.push(wp.element.createElement(ProductSpecificSearchResultsDropdownElement, {
-						product: product,
-						addOrRemoveProductCallback: addOrRemoveProductCallback,
-						selected: selectedProducts.includes(product.id)
-					}));
-				}
-			} catch (err) {
-				_didIteratorError = true;
-				_iteratorError = err;
-			} finally {
-				try {
-					if (!_iteratorNormalCompletion && _iterator.return) {
-						_iterator.return();
-					}
-				} finally {
-					if (_didIteratorError) {
-						throw _iteratorError;
-					}
-				}
-			}
-
-			return wp.element.createElement(
-				'div',
-				{ role: 'menu', className: 'wc-products-list-card__search-results', 'aria-orientation': 'vertical', 'aria-label': __('Products list') },
-				wp.element.createElement(
-					'div',
-					null,
-					productElements
-				)
-			);
-		}
-	}]);
-
-	return ProductSpecificSearchResultsDropdown;
-}(React.Component);
-
-/**
- * One search result.
- */
-
-
-var ProductSpecificSearchResultsDropdownElement = function (_React$Component4) {
-	_inherits(ProductSpecificSearchResultsDropdownElement, _React$Component4);
-
-	/**
-  * Constructor.
-  */
-	function ProductSpecificSearchResultsDropdownElement(props) {
-		_classCallCheck(this, ProductSpecificSearchResultsDropdownElement);
-
-		var _this4 = _possibleConstructorReturn(this, (ProductSpecificSearchResultsDropdownElement.__proto__ || Object.getPrototypeOf(ProductSpecificSearchResultsDropdownElement)).call(this, props));
-
-		_this4.handleClick = _this4.handleClick.bind(_this4);
-		return _this4;
-	}
-
-	/**
-  * Add product to main list and change UI to show it was added.
-  */
-
-
-	_createClass(ProductSpecificSearchResultsDropdownElement, [{
-		key: 'handleClick',
-		value: function handleClick() {
-			this.props.addOrRemoveProductCallback(this.props.product.id);
-		}
-
-		/**
-   * Render one result in the search results.
-   */
-
-	}, {
-		key: 'render',
-		value: function render() {
-			var product = this.props.product;
-			var icon = this.props.selected ? wp.element.createElement(Dashicon, { icon: 'yes' }) : null;
-
-			return wp.element.createElement(
-				'div',
-				{ className: 'wc-products-list-card__content' + (this.props.selected ? ' wc-products-list-card__content--added' : ''), onClick: this.handleClick },
-				wp.element.createElement('img', { src: product.images[0].src }),
-				wp.element.createElement(
-					'span',
-					{ className: 'wc-products-list-card__content-item-name' },
-					product.name
-				),
-				icon
-			);
-		}
-	}]);
-
-	return ProductSpecificSearchResultsDropdownElement;
-}(React.Component);
-
-/**
- * List preview of selected products.
- */
-/*const ProductSpecificSelectedProducts = withAPIData( ( props ) => {
-		if ( ! props.productIds.length ) {
-			return {
-				products: []
-			};
-		}
-
-		// Determine which products are not already in the cache and only fetch uncached products.
-		let uncachedProducts = [];
-		for( const productId of props.productIds ) {
-			if ( ! PRODUCT_DATA.hasOwnProperty( productId ) ) {
-				uncachedProducts.push( productId );
-			}
-		}
-
-		return {
-			products: uncachedProducts.length ? '/wc/v2/products?include=' + uncachedProducts.join( ',' ) : []
-		};
-	} )( ( { productIds, products, columns, addOrRemoveProduct } ) => {
-
-		// Add new products to cache.
-		if ( products.data ) {
-			for ( const product of products.data ) {
-				PRODUCT_DATA[ product.id ] = product;
-			}
-		}
-
-		const productElements = [];
-
-		for ( const productId of productIds ) {
-
-			// Skip products that aren't in the cache yet or failed to fetch.
-			if ( ! PRODUCT_DATA.hasOwnProperty( productId ) ) {
-				continue;
-			}
-
-			const productData = PRODUCT_DATA[ productId ];
-
-			productElements.push(
-				<li className="wc-products-list-card__item" key={ productData.id + '-specific-select-edit' } >
-					<div className="wc-products-list-card__content">
-						<img src={ productData.images[0].src } />
-						<span className="wc-products-list-card__content-item-name">{ productData.name }</span>
-						<button
-							type="button"
-							id={ 'product-' + productData.id }
-							onClick={ function() { addOrRemoveProduct( productData.id ) } } >
-								<Dashicon icon="no-alt" />
-						</button>
-					</div>
-				</li>
-			);
-		}
-
-		return (
-			<div className={ 'wc-products-list-card__results-wrapper wc-products-list-card__results-wrapper--cols-' + columns }>
-				<div role="menu" className="wc-products-list-card__results" aria-orientation="vertical" aria-label={ __( 'Selected products' ) }>
-
-					{ productElements.length > 0 && <h3>{ __( 'Selected products' ) }</h3> }
-
-					<ul>
-						{ productElements }
-					</ul>
-				</div>
-			</div>
-		);
-	}
-);*/
-
-
-var ProductSpecificSelectedProducts = null;
 
 /***/ }),
 /* 3 */

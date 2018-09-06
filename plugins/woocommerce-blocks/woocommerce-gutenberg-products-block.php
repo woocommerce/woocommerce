@@ -14,7 +14,7 @@
 
 defined( 'ABSPATH' ) || die();
 
-define( 'WGPB_VERSION', rand().'1.1.1' );
+define( 'WGPB_VERSION', '1.1.1' );
 
 /**
  * Load up the assets if Gutenberg is active.
