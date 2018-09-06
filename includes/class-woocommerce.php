@@ -486,8 +486,9 @@ final class WooCommerce {
 			$this->session = new $session_class();
 			$this->session->init();
 
-			$this->cart     = new WC_Cart();
 			$this->customer = new WC_Customer( get_current_user_id(), true );
+			// Cart needs the customer info.
+			$this->cart = new WC_Cart();
 
 			// Customer should be saved during shutdown.
 			add_action( 'shutdown', array( $this->customer, 'save' ), 10 );
