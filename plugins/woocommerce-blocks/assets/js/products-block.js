@@ -608,9 +608,7 @@ var ProductsBlockPreview = function (_React$Component5) {
 	_createClass(ProductsBlockPreview, [{
 		key: 'componentDidMount',
 		value: function componentDidMount() {
-			if (this.getQuery() !== this.state.query) {
-				this.updatePreview();
-			}
+			this.updatePreview();
 		}
 
 		/**
@@ -719,14 +717,14 @@ var ProductsBlockPreview = function (_React$Component5) {
 			var query = this.getQuery();
 
 			self.setState({
-				loaded: false
+				loaded: false,
+				query: query
 			});
 
 			apiFetch({ path: query }).then(function (products) {
 				self.setState({
 					products: products,
-					loaded: true,
-					query: query
+					loaded: true
 				});
 			});
 		}
@@ -765,91 +763,225 @@ var ProductsBlockPreview = function (_React$Component5) {
 /**
  * Information about current block settings rendered in the sidebar.
  */
-/*const ProductsBlockSidebarInfo = withAPIData( ( { attributes } ) => {
-
-	const { display, display_setting } = attributes;
-
-	if ( 'attribute' === display && display_setting.length ) {
-		const ID        = getAttributeID( display_setting[0] );
-		const terms     = display_setting.slice( 1 ).join( ', ' );
-		const endpoints = {
-			attributeInfo: '/wc/v2/products/attributes/' + ID,
-		}
-
-		if ( terms.length ) {
-			endpoints.termInfo = '/wc/v2/products/attributes/' + ID + '/terms?include=' + terms;
-		}
-
-		return endpoints;
-
-	} else if ( 'category' === display && display_setting.length ) {
-		return {
-			categoriesInfo: '/wc/v2/products/categories?include=' + display_setting.join( ',' ),
-		};
-	}
-
-	return {};
-
-} )( ( { attributes, categoriesInfo, attributeInfo, termInfo } ) => {
-
-	let descriptions = [
-		// Standard description of selected scope.
-		PRODUCTS_BLOCK_DISPLAY_SETTINGS[ attributes.display ].title
-	];
-
-	// Description of categories selected scope.
-	if ( categoriesInfo && categoriesInfo.data && categoriesInfo.data.length ) {
-		let descriptionText = __( 'Product categories: ' );
-		const categories = [];
-		for ( let category of categoriesInfo.data ) {
-			categories.push( category.name );
-		}
-		descriptionText += categories.join( ', ' );
-
-		descriptions = [
-			descriptionText
-		];
-
-		// Description of attributes selected scope.
-	} else if ( attributeInfo && attributeInfo.data ) {
-		descriptions = [
-			__( 'Attribute: ' ) + attributeInfo.data.name
-		];
-
-		if ( termInfo && termInfo.data && termInfo.data.length ) {
-			let termDescriptionText = __( "Terms: " );
-			const terms = []
-			for ( const term of termInfo.data ) {
-				terms.push( term.name );
-			}
-			termDescriptionText += terms.join( ', ' );
-			descriptions.push( termDescriptionText );
-		}
-	}
-
-	return (
-		<div>
-			{ descriptions.map( ( description ) => (
-				<div className="scope-description">{ description }</div>
-			) ) }
-		</div>
-	);
-} );*/
 
 
 var ProductsBlockSidebarInfo = function (_React$Component6) {
 	_inherits(ProductsBlockSidebarInfo, _React$Component6);
 
+	/**
+  * Constructor
+  */
 	function ProductsBlockSidebarInfo(props) {
 		_classCallCheck(this, ProductsBlockSidebarInfo);
 
-		return _possibleConstructorReturn(this, (ProductsBlockSidebarInfo.__proto__ || Object.getPrototypeOf(ProductsBlockSidebarInfo)).call(this, props));
+		var _this8 = _possibleConstructorReturn(this, (ProductsBlockSidebarInfo.__proto__ || Object.getPrototypeOf(ProductsBlockSidebarInfo)).call(this, props));
+
+		_this8.state = {
+			categoriesInfo: [],
+			categoriesQuery: '',
+
+			attributeInfo: false,
+			attributeQuery: '',
+
+			termsInfo: [],
+			termsQuery: ''
+		};
+
+		_this8.updatePreview = _this8.updatePreview.bind(_this8);
+		_this8.getQueries = _this8.getQueries.bind(_this8);
+		return _this8;
 	}
 
+	/**
+  * Populate info when component is first loaded.
+  */
+
+
 	_createClass(ProductsBlockSidebarInfo, [{
+		key: 'componentDidMount',
+		value: function componentDidMount() {
+			this.updateInfo();
+		}
+
+		/**
+   * Get endpoints for the current state of the component.
+   *
+   * @return object
+   */
+
+	}, {
+		key: 'getQueries',
+		value: function getQueries() {
+			var _props$attributes2 = this.props.attributes,
+			    display = _props$attributes2.display,
+			    display_setting = _props$attributes2.display_setting;
+
+			var endpoints = {
+				attribute: '',
+				terms: '',
+				categories: ''
+			};
+
+			if ('attribute' === display && display_setting.length) {
+				var ID = (0, _attributeSelect.getAttributeID)(display_setting[0]);
+				var terms = display_setting.slice(1).join(', ');
+
+				endpoints.attribute = '/wc/v2/products/attributes/' + ID;
+
+				if (terms.length) {
+					endpoints.terms = '/wc/v2/products/attributes/' + ID + '/terms?include=' + terms;
+				}
+			} else if ('category' === display && display_setting.length) {
+				endpoints.categories = '/wc/v2/products/categories?include=' + display_setting.join(',');
+			}
+
+			return endpoints;
+		}
+
+		/**
+   * Get the latest info for the sidebar information area.
+   */
+
+	}, {
+		key: 'updateInfo',
+		value: function updateInfo() {
+			var self = this;
+			var queries = this.getQueries();
+
+			this.setState({
+				categoriesQuery: queries.categories,
+				attributeQuery: queries.attribute,
+				termsQuery: queries.terms
+			});
+
+			if (queries.categories.length) {
+				apiFetch({ path: query.categories }).then(function (categories) {
+					self.setState({
+						categoriesInfo: categories
+					});
+				});
+			} else {
+				self.setState({
+					categoriesInfo: []
+				});
+			}
+
+			if (queries.attribute.length) {
+				apiFetch({ path: query.attribute }).then(function (attribute) {
+					self.setState({
+						attributeInfo: attribute
+					});
+				});
+			} else {
+				self.setState({
+					attributeInfo: false
+				});
+			}
+
+			if (queries.terms.length) {
+				apiFetch({ path: query.categories }).then(function (categories) {
+					self.setState({
+						categoriesInfo: categories
+					});
+				});
+			} else {
+				self.setState({
+					categoriesInfo: []
+				});
+			}
+		}
+
+		/**
+   * Render.
+   */
+
+	}, {
 		key: 'render',
 		value: function render() {
-			return "sidebar";
+			var descriptions = [
+			// Standard description of selected scope.
+			PRODUCTS_BLOCK_DISPLAY_SETTINGS[this.props.attributes.display].title];
+
+			if (this.state.categoriesInfo.length) {
+				var descriptionText = __('Product categories: ');
+				var categories = [];
+				var _iteratorNormalCompletion2 = true;
+				var _didIteratorError2 = false;
+				var _iteratorError2 = undefined;
+
+				try {
+					for (var _iterator2 = this.state.categoriesInfo[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+						var category = _step2.value;
+
+						categories.push(category.name);
+					}
+				} catch (err) {
+					_didIteratorError2 = true;
+					_iteratorError2 = err;
+				} finally {
+					try {
+						if (!_iteratorNormalCompletion2 && _iterator2.return) {
+							_iterator2.return();
+						}
+					} finally {
+						if (_didIteratorError2) {
+							throw _iteratorError2;
+						}
+					}
+				}
+
+				descriptionText += categories.join(', ');
+
+				descriptions = [descriptionText];
+
+				// Description of attributes selected scope.
+			} else if (this.state.attributeInfo) {
+				descriptions = [__('Attribute: ') + this.state.attributeInfo.name];
+
+				if (this.state.termInfo.length) {
+					var termDescriptionText = __("Terms: ");
+					var terms = [];
+					var _iteratorNormalCompletion3 = true;
+					var _didIteratorError3 = false;
+					var _iteratorError3 = undefined;
+
+					try {
+						for (var _iterator3 = this.state.termInfo[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+							var term = _step3.value;
+
+							terms.push(term.name);
+						}
+					} catch (err) {
+						_didIteratorError3 = true;
+						_iteratorError3 = err;
+					} finally {
+						try {
+							if (!_iteratorNormalCompletion3 && _iterator3.return) {
+								_iterator3.return();
+							}
+						} finally {
+							if (_didIteratorError3) {
+								throw _iteratorError3;
+							}
+						}
+					}
+
+					termDescriptionText += terms.join(', ');
+					descriptions.push(termDescriptionText);
+				}
+			}
+
+			return wp.element.createElement(
+				'div',
+				null,
+				descriptions.map(function (description) {
+					return wp.element.createElement(
+						'div',
+						{ className: 'scope-description' },
+						description
+					);
+				})
+			);
 		}
 	}]);
 
@@ -1076,7 +1208,6 @@ var ProductsBlock = function (_React$Component7) {
 	}, {
 		key: 'getPreview',
 		value: function getPreview() {
-			console.log(this.props.attributes);
 			return wp.element.createElement(ProductsBlockPreview, { attributes: this.props.attributes });
 		}
 
@@ -1213,12 +1344,12 @@ registerBlockType('woocommerce/products', {
   * @return string
   */
 	save: function save(props) {
-		var _props$attributes2 = props.attributes,
-		    rows = _props$attributes2.rows,
-		    columns = _props$attributes2.columns,
-		    display = _props$attributes2.display,
-		    display_setting = _props$attributes2.display_setting,
-		    orderby = _props$attributes2.orderby;
+		var _props$attributes3 = props.attributes,
+		    rows = _props$attributes3.rows,
+		    columns = _props$attributes3.columns,
+		    display = _props$attributes3.display,
+		    display_setting = _props$attributes3.display_setting,
+		    orderby = _props$attributes3.orderby;
 
 
 		var shortcode_atts = new Map();
@@ -1266,13 +1397,13 @@ registerBlockType('woocommerce/products', {
 
 		// Build the shortcode string out of the set shortcode attributes.
 		var shortcode = '[products';
-		var _iteratorNormalCompletion2 = true;
-		var _didIteratorError2 = false;
-		var _iteratorError2 = undefined;
+		var _iteratorNormalCompletion4 = true;
+		var _didIteratorError4 = false;
+		var _iteratorError4 = undefined;
 
 		try {
-			for (var _iterator2 = shortcode_atts[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-				var _ref = _step2.value;
+			for (var _iterator4 = shortcode_atts[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+				var _ref = _step4.value;
 
 				var _ref2 = _slicedToArray(_ref, 2);
 
@@ -1282,16 +1413,16 @@ registerBlockType('woocommerce/products', {
 				shortcode += ' ' + key + '="' + value + '"';
 			}
 		} catch (err) {
-			_didIteratorError2 = true;
-			_iteratorError2 = err;
+			_didIteratorError4 = true;
+			_iteratorError4 = err;
 		} finally {
 			try {
-				if (!_iteratorNormalCompletion2 && _iterator2.return) {
-					_iterator2.return();
+				if (!_iteratorNormalCompletion4 && _iterator4.return) {
+					_iterator4.return();
 				}
 			} finally {
-				if (_didIteratorError2) {
-					throw _iteratorError2;
+				if (_didIteratorError4) {
+					throw _iteratorError4;
 				}
 			}
 		}

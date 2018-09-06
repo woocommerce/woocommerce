@@ -375,9 +375,7 @@ class ProductsBlockPreview extends React.Component {
 	 * Get the preview when component is first loaded.
 	 */
 	componentDidMount() {
-		if ( this.getQuery() !== this.state.query ) {
-			this.updatePreview();
-		}
+		this.updatePreview();
 	}
 
 	/**
@@ -450,14 +448,14 @@ class ProductsBlockPreview extends React.Component {
 		const query = this.getQuery();
 
 		self.setState( {
-			loaded: false
+			loaded: false,
+			query: query
 		} );
 
 		apiFetch( { path: query } ).then( products => {
 			self.setState( {
 				products: products,
-				loaded: true,
-				query: query
+				loaded: true
 			} );
 		} );
 	}
@@ -491,85 +489,159 @@ class ProductsBlockPreview extends React.Component {
 /**
  * Information about current block settings rendered in the sidebar.
  */
-/*const ProductsBlockSidebarInfo = withAPIData( ( { attributes } ) => {
+class ProductsBlockSidebarInfo extends React.Component {
 
-	const { display, display_setting } = attributes;
+	/**
+	 * Constructor
+	 */
+	constructor( props ) {
+		super( props );
 
-	if ( 'attribute' === display && display_setting.length ) {
-		const ID        = getAttributeID( display_setting[0] );
-		const terms     = display_setting.slice( 1 ).join( ', ' );
+		this.state = {
+			categoriesInfo: [],
+			categoriesQuery: '',
+
+			attributeInfo: false,
+			attributeQuery: '',
+
+			termsInfo: [],
+			termsQuery: ''
+		};
+
+		this.updatePreview = this.updatePreview.bind( this );
+		this.getQueries = this.getQueries.bind( this );
+	}
+
+	/**
+	 * Populate info when component is first loaded.
+	 */
+	componentDidMount() {
+		this.updateInfo();
+	}
+
+	/**
+	 * Get endpoints for the current state of the component.
+	 *
+	 * @return object
+	 */
+	getQueries() {
+		const { display, display_setting } = this.props.attributes;
 		const endpoints = {
-			attributeInfo: '/wc/v2/products/attributes/' + ID,
-		}
+			attribute: '',
+			terms: '',
+			categories: ''
+		};
 
-		if ( terms.length ) {
-			endpoints.termInfo = '/wc/v2/products/attributes/' + ID + '/terms?include=' + terms;
+		if ( 'attribute' === display && display_setting.length ) {
+			const ID        = getAttributeID( display_setting[0] );
+			const terms     = display_setting.slice( 1 ).join( ', ' );
+
+			endpoints.attribute = '/wc/v2/products/attributes/' + ID;
+
+			if ( terms.length ) {
+				endpoints.terms = '/wc/v2/products/attributes/' + ID + '/terms?include=' + terms;
+			}
+		} else if ( 'category' === display && display_setting.length ) {
+			endpoints.categories = '/wc/v2/products/categories?include=' + display_setting.join( ',' );
 		}
 
 		return endpoints;
-
-	} else if ( 'category' === display && display_setting.length ) {
-		return {
-			categoriesInfo: '/wc/v2/products/categories?include=' + display_setting.join( ',' ),
-		};
 	}
 
-	return {};
+	/**
+	 * Get the latest info for the sidebar information area.
+	 */
+	updateInfo() {
+		const self = this;
+		const queries = this.getQueries();
 
-} )( ( { attributes, categoriesInfo, attributeInfo, termInfo } ) => {
+		this.setState( {
+			categoriesQuery: queries.categories,
+			attributeQuery: queries.attribute,
+			termsQuery: queries.terms
+		} );
 
-	let descriptions = [
-		// Standard description of selected scope.
-		PRODUCTS_BLOCK_DISPLAY_SETTINGS[ attributes.display ].title
-	];
-
-	// Description of categories selected scope.
-	if ( categoriesInfo && categoriesInfo.data && categoriesInfo.data.length ) {
-		let descriptionText = __( 'Product categories: ' );
-		const categories = [];
-		for ( let category of categoriesInfo.data ) {
-			categories.push( category.name );
+		if ( queries.categories.length ) {
+			apiFetch( { path: query.categories } ).then( categories => {
+				self.setState( {
+					categoriesInfo: categories,
+				} );
+			} );
+		} else {
+			self.setState( {
+				categoriesInfo: [],
+			} );
 		}
-		descriptionText += categories.join( ', ' );
 
-		descriptions = [
-			descriptionText
-		];
+		if ( queries.attribute.length ) {
+			apiFetch( { path: query.attribute } ).then( attribute => {
+				self.setState( {
+					attributeInfo: attribute,
+				} );
+			} );
+		} else {
+			self.setState( {
+				attributeInfo: false,
+			} );
+		}
 
-		// Description of attributes selected scope.
-	} else if ( attributeInfo && attributeInfo.data ) {
-		descriptions = [
-			__( 'Attribute: ' ) + attributeInfo.data.name
-		];
-
-		if ( termInfo && termInfo.data && termInfo.data.length ) {
-			let termDescriptionText = __( "Terms: " );
-			const terms = []
-			for ( const term of termInfo.data ) {
-				terms.push( term.name );
-			}
-			termDescriptionText += terms.join( ', ' );
-			descriptions.push( termDescriptionText );
+		if ( queries.terms.length ) {
+			apiFetch( { path: query.categories } ).then( categories => {
+				self.setState( {
+					categoriesInfo: categories,
+				} );
+			} );
+		} else {
+			self.setState( {
+				categoriesInfo: [],
+			} );
 		}
 	}
 
-	return (
-		<div>
-			{ descriptions.map( ( description ) => (
-				<div className="scope-description">{ description }</div>
-			) ) }
-		</div>
-	);
-} );*/
-class ProductsBlockSidebarInfo extends React.Component {
-
-	constructor( props ) {
-		super( props );
-	}
-
+	/**
+	 * Render.
+	 */
 	render() {
+		let descriptions = [
+			// Standard description of selected scope.
+			PRODUCTS_BLOCK_DISPLAY_SETTINGS[ this.props.attributes.display ].title
+		];
+
+		if ( this.state.categoriesInfo.length ) {
+			let descriptionText = __( 'Product categories: ' );
+			const categories = [];
+			for ( let category of this.state.categoriesInfo ) {
+				categories.push( category.name );
+			}
+			descriptionText += categories.join( ', ' );
+
+			descriptions = [
+				descriptionText
+			];
+
+			// Description of attributes selected scope.
+		} else if ( this.state.attributeInfo ) {
+			descriptions = [
+				__( 'Attribute: ' ) + this.state.attributeInfo.name
+			];
+
+			if ( this.state.termInfo.length ) {
+				let termDescriptionText = __( "Terms: " );
+				const terms = []
+				for ( const term of this.state.termInfo ) {
+					terms.push( term.name );
+				}
+				termDescriptionText += terms.join( ', ' );
+				descriptions.push( termDescriptionText );
+			}
+		}
+
 		return (
-			"sidebar"
+			<div>
+				{ descriptions.map( ( description ) => (
+					<div className="scope-description">{ description }</div>
+				) ) }
+			</div>
 		);
 	}
 };
@@ -750,7 +822,6 @@ class ProductsBlock extends React.Component {
 	 * @return Component
 	 */
 	getPreview() {
-		console.log( this.props.attributes );
 		return <ProductsBlockPreview attributes={ this.props.attributes } />;
 	}
 
