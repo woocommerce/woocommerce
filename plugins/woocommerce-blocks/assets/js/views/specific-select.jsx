@@ -185,6 +185,7 @@ class ProductSpecificSearchResults extends React.Component {
 		this.state = {
 			products: [],
 			query: '',
+			loaded: false
 		};
 
 		this.updateResults = this.updateResults.bind( this );
@@ -228,7 +229,8 @@ class ProductSpecificSearchResults extends React.Component {
 		const query = this.getQuery();
 
 		self.setState( {
-			query: query
+			query: query,
+			loaded: false
 		} );
 
 		if ( query.length ) {
@@ -237,12 +239,14 @@ class ProductSpecificSearchResults extends React.Component {
 				if ( query === self.getQuery() ) {
 					self.setState( {
 						products: products,
+						loaded: true
 					} );
 				}
 			} );
 		} else {
 			self.setState( {
 				products: [],
+				loaded: true
 			} );
 		}
 	}
@@ -251,7 +255,7 @@ class ProductSpecificSearchResults extends React.Component {
 	 * Render.
 	 */
 	render() {
-		if ( ! this.getQuery().length ) {
+		if ( ! this.state.loaded || ! this.state.query.length ) {
 			return null;
 		}
 
