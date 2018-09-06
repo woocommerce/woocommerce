@@ -57,12 +57,12 @@ const orderedKeys = [
 	},
 ];
 const orderedDates = [
-	'2018-05-30',
-	'2018-05-31',
-	'2018-06-01',
-	'2018-06-02',
-	'2018-06-03',
-	'2018-06-04',
+	'2018-05-30T00:00:00',
+	'2018-05-31T00:00:00',
+	'2018-06-01T00:00:00',
+	'2018-06-02T00:00:00',
+	'2018-06-03T00:00:00',
+	'2018-06-04T00:00:00',
 ];
 const testUniqueKeys = getUniqueKeys( dummyOrders );
 const testOrderedKeys = getOrderedKeys( dummyOrders, testUniqueKeys );
@@ -75,7 +75,7 @@ const testYScale = getYScale( 100, testYMax );
 
 describe( 'parseDate', () => {
 	it( 'correctly parse date in the expected format', () => {
-		const testDate = parseDate( '2018-06-30' );
+		const testDate = parseDate( '2018-06-30T00:00:00' );
 		const expectedDate = new Date( Date.UTC( 2018, 5, 30 ) );
 		expect( testDate.getTime() ).toEqual( expectedDate.getTime() );
 	} );
@@ -182,13 +182,13 @@ describe( 'getYTickOffset', () => {
 describe( 'getdateSpaces', () => {
 	it( 'return an array used to space out the mouseover rectangles, used for tooltips', () => {
 		const testDateSpaces = getDateSpaces( testUniqueDates, 100, testXLineScale );
-		expect( testDateSpaces[ 0 ].date ).toEqual( '2018-05-30' );
+		expect( testDateSpaces[ 0 ].date ).toEqual( '2018-05-30T00:00:00' );
 		expect( testDateSpaces[ 0 ].start ).toEqual( 0 );
 		expect( testDateSpaces[ 0 ].width ).toEqual( 10 );
-		expect( testDateSpaces[ 3 ].date ).toEqual( '2018-06-02' );
+		expect( testDateSpaces[ 3 ].date ).toEqual( '2018-06-02T00:00:00' );
 		expect( testDateSpaces[ 3 ].start ).toEqual( 50 );
 		expect( testDateSpaces[ 3 ].width ).toEqual( 20 );
-		expect( testDateSpaces[ testDateSpaces.length - 1 ].date ).toEqual( '2018-06-04' );
+		expect( testDateSpaces[ testDateSpaces.length - 1 ].date ).toEqual( '2018-06-04T00:00:00' );
 		expect( testDateSpaces[ testDateSpaces.length - 1 ].start ).toEqual( 90 );
 		expect( testDateSpaces[ testDateSpaces.length - 1 ].width ).toEqual( 10 );
 	} );
