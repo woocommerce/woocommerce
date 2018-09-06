@@ -504,7 +504,7 @@ class WC_Product_Variable extends WC_Product {
 
 		if ( false === $has_weight ) {
 			$has_weight = $this->data_store->child_has_weight( $this );
-			set_transient( $transient_name, ( int ) $has_weight, DAY_IN_SECONDS * 30 );
+			set_transient( $transient_name, (int) $has_weight, DAY_IN_SECONDS * 30 );
 		}
 
 		return (bool) $has_weight;
@@ -521,7 +521,7 @@ class WC_Product_Variable extends WC_Product {
 
 		if ( false === $has_dimension ) {
 			$has_dimension = $this->data_store->child_has_dimensions( $this );
-			set_transient( $transient_name, ( int ) $has_dimension, DAY_IN_SECONDS * 30 );
+			set_transient( $transient_name, (int) $has_dimension, DAY_IN_SECONDS * 30 );
 		}
 
 		return (bool) $has_dimension;
