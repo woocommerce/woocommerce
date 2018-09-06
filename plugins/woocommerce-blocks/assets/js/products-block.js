@@ -1773,9 +1773,12 @@ var ProductSpecificSearchResults = function (_React$Component3) {
 
 			if (query.length) {
 				apiFetch({ path: query }).then(function (products) {
-					self.setState({
-						products: products
-					});
+					// Only update the results if they are for the latest query.
+					if (query === self.getQuery()) {
+						self.setState({
+							products: products
+						});
+					}
 				});
 			} else {
 				self.setState({
@@ -2012,7 +2015,8 @@ var ProductSpecificSelectedProducts = function (_React$Component6) {
 		var _this6 = _possibleConstructorReturn(this, (ProductSpecificSelectedProducts.__proto__ || Object.getPrototypeOf(ProductSpecificSelectedProducts)).call(this, props));
 
 		_this6.state = {
-			query: ''
+			query: '',
+			loaded: false
 		};
 
 		_this6.updateProductCache = _this6.updateProductCache.bind(_this6);
@@ -2039,7 +2043,7 @@ var ProductSpecificSelectedProducts = function (_React$Component6) {
 	}, {
 		key: 'componentDidUpdate',
 		value: function componentDidUpdate() {
-			if (this.getQuery() !== this.state.query) {
+			if (this.state.loaded && this.getQuery() !== this.state.query) {
 				this.updateProductCache();
 			}
 		}
@@ -2098,7 +2102,8 @@ var ProductSpecificSelectedProducts = function (_React$Component6) {
 			var query = this.getQuery();
 
 			self.setState({
-				query: query
+				query: query,
+				loaded: false
 			});
 
 			// Add new products to cache.
@@ -2130,6 +2135,10 @@ var ProductSpecificSelectedProducts = function (_React$Component6) {
 							}
 						}
 					}
+
+					self.setState({
+						loaded: true
+					});
 				});
 			}
 		}
