@@ -10,26 +10,28 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see 	    https://docs.woocommerce.com/document/template-structure/
- * @author  WooThemes
+ * @see https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce/Templates/Emails/Plain
- * @version 2.3.0
+ * @version 3.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit; // Exit if accessed directly.
 }
 
-echo "= " . $email_heading . " =\n\n";
+echo '= ' . esc_html( $email_heading ) . " =\n\n";
 
-echo __( 'Someone requested that the password be reset for the following account:', 'woocommerce' ) . "\r\n\r\n";
-echo esc_url( network_home_url( '/' ) ) . "\r\n\r\n";
-echo sprintf( __( 'Username: %s', 'woocommerce' ), $user_login ) . "\r\n\r\n";
-echo __( 'If this was a mistake, just ignore this email and nothing will happen.', 'woocommerce' ) . "\r\n\r\n";
-echo __( 'To reset your password, visit the following address:', 'woocommerce' ) . "\r\n\r\n";
-
-echo esc_url( add_query_arg( array( 'key' => $reset_key, 'id' => $user_id ), wc_get_endpoint_url( 'lost-password', '', wc_get_page_permalink( 'myaccount' ) ) ) ) . "\r\n";
+/* translators: %s Customer first name */
+echo esc_html__( 'Hi %s,', 'woocommerce' ) . "\n\n";
+echo esc_html__( 'Someone (hopefully you) has requested a password reset for the following account on:', 'woocommerce' ) . "\n\n";
+/* translators: %s Store name */
+printf( esc_html__( 'Store: %s', 'woocommerce' ), wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES ) ) . "\n\n";// phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+/* translators: %s Customer username */
+printf( esc_html__( 'Username: %s', 'woocommerce' ), $user_login ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+echo esc_html__( 'If this was a mistake, just ignore this email and nothing will happen. Otherwise, follow this link to reset your password now:', 'woocommerce' ) . "\n\n";
+echo esc_url( add_query_arg( array( 'key' => $reset_key, 'id' => $user_id ), wc_get_endpoint_url( 'lost-password', '', wc_get_page_permalink( 'myaccount' ) ) ) ) . "\n\n"; // phpcs:ignore
+echo esc_html__( 'Good luck!', 'woocommerce' ) . "\n\n";
 
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
-echo apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) );
+echo apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) );// phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
