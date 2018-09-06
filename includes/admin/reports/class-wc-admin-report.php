@@ -83,6 +83,7 @@ class WC_Admin_Report {
 			'group_by'            => '',
 			'order_by'            => '',
 			'limit'               => '',
+			'offset'              => '',
 			'filter_range'        => false,
 			'nocache'             => false,
 			'debug'               => false,
@@ -319,6 +320,10 @@ class WC_Admin_Report {
 		if ( $limit ) {
 			$query['limit'] = "LIMIT {$limit}";
 		}
+		
+		if ( $offset ) {
+            $query['offset'] = "OFFSET {$offset}";
+        }
 
 		$query          = apply_filters( 'woocommerce_reports_get_order_report_query', $query );
 		$query          = implode( ' ', $query );
