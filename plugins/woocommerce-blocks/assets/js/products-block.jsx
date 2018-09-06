@@ -519,6 +519,16 @@ class ProductsBlockSidebarInfo extends React.Component {
 		this.updateInfo();
 	}
 
+	componentDidUpdate() {
+		const queries = this.getQueries();
+
+		if ( this.state.categoriesQuery !== queries.categories ||
+			 this.state.attributeQuery !== queries.attribute ||
+			 this.state.termsQuery !== queries.terms ) {
+			this.updateInfo();
+		}
+	}
+
 	/**
 	 * Get endpoints for the current state of the component.
 	 *
@@ -562,7 +572,7 @@ class ProductsBlockSidebarInfo extends React.Component {
 		} );
 
 		if ( queries.categories.length ) {
-			apiFetch( { path: query.categories } ).then( categories => {
+			apiFetch( { path: queries.categories } ).then( categories => {
 				self.setState( {
 					categoriesInfo: categories,
 				} );
@@ -574,7 +584,7 @@ class ProductsBlockSidebarInfo extends React.Component {
 		}
 
 		if ( queries.attribute.length ) {
-			apiFetch( { path: query.attribute } ).then( attribute => {
+			apiFetch( { path: queries.attribute } ).then( attribute => {
 				self.setState( {
 					attributeInfo: attribute,
 				} );
@@ -586,14 +596,14 @@ class ProductsBlockSidebarInfo extends React.Component {
 		}
 
 		if ( queries.terms.length ) {
-			apiFetch( { path: query.categories } ).then( categories => {
+			apiFetch( { path: queries.terms } ).then( terms => {
 				self.setState( {
-					categoriesInfo: categories,
+					termsInfo: terms,
 				} );
 			} );
 		} else {
 			self.setState( {
-				categoriesInfo: [],
+				termsInfo: [],
 			} );
 		}
 	}
@@ -625,10 +635,10 @@ class ProductsBlockSidebarInfo extends React.Component {
 				__( 'Attribute: ' ) + this.state.attributeInfo.name
 			];
 
-			if ( this.state.termInfo.length ) {
+			if ( this.state.termsInfo.length ) {
 				let termDescriptionText = __( "Terms: " );
 				const terms = []
-				for ( const term of this.state.termInfo ) {
+				for ( const term of this.state.termsInfo ) {
 					terms.push( term.name );
 				}
 				termDescriptionText += terms.join( ', ' );

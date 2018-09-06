@@ -802,6 +802,15 @@ var ProductsBlockSidebarInfo = function (_React$Component6) {
 		value: function componentDidMount() {
 			this.updateInfo();
 		}
+	}, {
+		key: 'componentDidUpdate',
+		value: function componentDidUpdate() {
+			var queries = this.getQueries();
+
+			if (this.state.categoriesQuery !== queries.categories || this.state.attributeQuery !== queries.attribute || this.state.termsQuery !== queries.terms) {
+				this.updateInfo();
+			}
+		}
 
 		/**
    * Get endpoints for the current state of the component.
@@ -855,7 +864,7 @@ var ProductsBlockSidebarInfo = function (_React$Component6) {
 			});
 
 			if (queries.categories.length) {
-				apiFetch({ path: query.categories }).then(function (categories) {
+				apiFetch({ path: queries.categories }).then(function (categories) {
 					self.setState({
 						categoriesInfo: categories
 					});
@@ -867,7 +876,7 @@ var ProductsBlockSidebarInfo = function (_React$Component6) {
 			}
 
 			if (queries.attribute.length) {
-				apiFetch({ path: query.attribute }).then(function (attribute) {
+				apiFetch({ path: queries.attribute }).then(function (attribute) {
 					self.setState({
 						attributeInfo: attribute
 					});
@@ -879,14 +888,14 @@ var ProductsBlockSidebarInfo = function (_React$Component6) {
 			}
 
 			if (queries.terms.length) {
-				apiFetch({ path: query.categories }).then(function (categories) {
+				apiFetch({ path: queries.terms }).then(function (terms) {
 					self.setState({
-						categoriesInfo: categories
+						termsInfo: terms
 					});
 				});
 			} else {
 				self.setState({
-					categoriesInfo: []
+					termsInfo: []
 				});
 			}
 		}
@@ -938,7 +947,7 @@ var ProductsBlockSidebarInfo = function (_React$Component6) {
 			} else if (this.state.attributeInfo) {
 				descriptions = [__('Attribute: ') + this.state.attributeInfo.name];
 
-				if (this.state.termInfo.length) {
+				if (this.state.termsInfo.length) {
 					var termDescriptionText = __("Terms: ");
 					var terms = [];
 					var _iteratorNormalCompletion3 = true;
@@ -946,7 +955,7 @@ var ProductsBlockSidebarInfo = function (_React$Component6) {
 					var _iteratorError3 = undefined;
 
 					try {
-						for (var _iterator3 = this.state.termInfo[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+						for (var _iterator3 = this.state.termsInfo[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
 							var term = _step3.value;
 
 							terms.push(term.name);
