@@ -47,3 +47,15 @@
 	outline: 2px solid transparent;
 	outline-offset: -2px;
 }
+
+// Sets positions for children of grid elements
+@mixin set-grid-item-position( $wrap-after, $number-of-items ) {
+	@for $i from 1 through $number-of-items {
+		&:nth-child(#{$i}) {
+			grid-column-start: #{($i - 1) % $wrap-after + 1};
+			grid-column-end: #{($i - 1) % $wrap-after + 2};
+			grid-row-start: #{floor(($i - 1) / $wrap-after) + 1};
+			grid-row-end: #{floor(($i - 1) / $wrap-after) + 2};
+		}
+	}
+}
