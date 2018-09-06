@@ -76,9 +76,9 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _specificSelect = __webpack_require__(1);
+var _specificSelect = __webpack_require__(2);
 
-var _categorySelect = __webpack_require__(2);
+var _categorySelect = __webpack_require__(1);
 
 var _attributeSelect = __webpack_require__(3);
 
@@ -1319,6 +1319,330 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var __ = wp.i18n.__;
+var _wp$components = wp.components,
+    Toolbar = _wp$components.Toolbar,
+    Dropdown = _wp$components.Dropdown,
+    Dashicon = _wp$components.Dashicon;
+var _wp = wp,
+    apiFetch = _wp.apiFetch;
+
+/**
+ * When the display mode is 'Product category' search for and select product categories to pull products from.
+ */
+
+var ProductsCategorySelect = exports.ProductsCategorySelect = function (_React$Component) {
+	_inherits(ProductsCategorySelect, _React$Component);
+
+	/**
+  * Constructor.
+  */
+	function ProductsCategorySelect(props) {
+		_classCallCheck(this, ProductsCategorySelect);
+
+		var _this = _possibleConstructorReturn(this, (ProductsCategorySelect.__proto__ || Object.getPrototypeOf(ProductsCategorySelect)).call(this, props));
+
+		_this.state = {
+			selectedCategories: props.selected_display_setting,
+			openAccordion: [],
+			filterQuery: '',
+			firstLoad: true
+		};
+
+		_this.checkboxChange = _this.checkboxChange.bind(_this);
+		_this.accordionToggle = _this.accordionToggle.bind(_this);
+		_this.filterResults = _this.filterResults.bind(_this);
+		_this.setFirstLoad = _this.setFirstLoad.bind(_this);
+		return _this;
+	}
+
+	/**
+  * Handle checkbox toggle.
+  *
+  * @param Checked? boolean checked
+  * @param Categories array categories
+  */
+
+
+	_createClass(ProductsCategorySelect, [{
+		key: "checkboxChange",
+		value: function checkboxChange(checked, categories) {
+			var selectedCategories = this.state.selectedCategories;
+
+			selectedCategories = selectedCategories.filter(function (category) {
+				return !categories.includes(category);
+			});
+
+			if (checked) {
+				var _selectedCategories;
+
+				(_selectedCategories = selectedCategories).push.apply(_selectedCategories, _toConsumableArray(categories));
+			}
+
+			this.setState({
+				selectedCategories: selectedCategories
+			});
+
+			this.props.update_display_setting_callback(selectedCategories);
+		}
+
+		/**
+   * Handle accordion toggle.
+   *
+   * @param Category ID category
+   */
+
+	}, {
+		key: "accordionToggle",
+		value: function accordionToggle(category) {
+			var openAccordions = this.state.openAccordion;
+
+			if (openAccordions.includes(category)) {
+				openAccordions = openAccordions.filter(function (c) {
+					return c !== category;
+				});
+			} else {
+				openAccordions.push(category);
+			}
+
+			this.setState({
+				openAccordion: openAccordions
+			});
+		}
+
+		/**
+   * Filter categories.
+   *
+   * @param Event object evt
+   */
+
+	}, {
+		key: "filterResults",
+		value: function filterResults(evt) {
+			this.setState({
+				filterQuery: evt.target.value
+			});
+		}
+
+		/**
+   * Update firstLoad state.
+   *
+   * @param Booolean loaded
+   */
+
+	}, {
+		key: "setFirstLoad",
+		value: function setFirstLoad(loaded) {
+			this.setState({
+				firstLoad: !!loaded
+			});
+		}
+
+		/**
+   * Render the list of categories and the search input.
+   */
+
+	}, {
+		key: "render",
+		value: function render() {
+			return wp.element.createElement(
+				"div",
+				{ className: "wc-products-list-card wc-products-list-card--taxonomy wc-products-list-card--taxonomy-category" },
+				wp.element.createElement(ProductCategoryFilter, { filterResults: this.filterResults }),
+				wp.element.createElement(ProductCategoryList, {
+					filterQuery: this.state.filterQuery,
+					selectedCategories: this.state.selectedCategories,
+					checkboxChange: this.checkboxChange,
+					accordionToggle: this.accordionToggle,
+					openAccordion: this.state.openAccordion,
+					firstLoad: this.state.firstLoad,
+					setFirstLoad: this.setFirstLoad
+				})
+			);
+		}
+	}]);
+
+	return ProductsCategorySelect;
+}(React.Component);
+
+/**
+ * The category search input.
+ */
+
+
+var ProductCategoryFilter = function ProductCategoryFilter(_ref) {
+	var filterResults = _ref.filterResults;
+
+	return wp.element.createElement(
+		"div",
+		{ className: "wc-products-list-card__input-wrapper" },
+		wp.element.createElement(Dashicon, { icon: "search" }),
+		wp.element.createElement("input", { className: "wc-products-list-card__search", type: "search", placeholder: __('Search for categories'), onChange: filterResults })
+	);
+};
+
+/**
+ * Fetch and build a tree of product categories.
+ */
+/*const ProductCategoryList = withAPIData( ( props ) => {
+		return {
+			categories: '/wc/v2/products/categories'
+		};
+	} )( ( { categories, filterQuery, selectedCategories, checkboxChange, accordionToggle, openAccordion, firstLoad, setFirstLoad } ) => {
+		if ( ! categories.data ) {
+			return __( 'Loading' );
+		}
+
+		if ( 0 === categories.data.length ) {
+			return __( 'No categories found' );
+		}
+
+		const handleCategoriesToCheck = ( evt, parent, categories ) => {
+			let ids = getCategoryChildren( parent, categories ).map( category => {
+				return category.id;
+			} );
+
+			ids.push( parent.id );
+
+			checkboxChange( evt.target.checked, ids );
+		};
+
+		const getCategoryChildren = ( parent, categories ) => {
+			let children = [];
+
+			categories.filter( ( category ) => category.parent === parent.id ).forEach( function( category ) {
+				children.push( category );
+				children.push( ...getCategoryChildren( category, categories ) );
+			} );
+
+			return children;
+		};
+
+		const categoryHasChildren = ( parent, categories ) => {
+			return !! getCategoryChildren( parent, categories ).length;
+		};
+
+		const isIndeterminate = ( category, categories ) => {
+
+			// Currect category selected?
+			if ( selectedCategories.includes( category.id ) ) {
+				return false;
+			}
+
+			// Has children?
+			let children = getCategoryChildren( category, categories ).map( category => {
+				return category.id;
+			} );
+
+			for ( let child of children ) {
+				if ( selectedCategories.includes( child ) ) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		const AccordionButton = ( { category, categories } ) => {
+			let icon = 'arrow-down-alt2';
+
+			if ( openAccordion.includes( category.id ) ) {
+				icon = 'arrow-up-alt2';
+			}
+
+			let style = null;
+
+			if ( ! categoryHasChildren( category, categories ) ) {
+				style = {
+					visibility: 'hidden',
+				};
+			};
+
+			return (
+				<button onClick={ () => accordionToggle( category.id ) } className="wc-products-list-card__accordion-button" style={ style } type="button">
+					<Dashicon icon={ icon } />
+				</button>
+			);
+		};
+
+		const CategoryTree = ( { categories, parent } ) => {
+			let filteredCategories = categories.filter( ( category ) => category.parent === parent );
+
+			if ( firstLoad && selectedCategories.length > 0 ) {
+				categoriesData.filter( ( category ) => category.parent === 0 ).forEach( function( category ) {
+					let children = getCategoryChildren( category, categoriesData );
+
+					for ( let child of children ) {
+						if ( selectedCategories.includes( child.id ) && ! openAccordion.includes( category.id ) ) {
+							accordionToggle( category.id );
+							break;
+						}
+					}
+				} );
+
+				setFirstLoad( false );
+			}
+
+			return ( filteredCategories.length > 0 ) && (
+				<ul>
+					{ filteredCategories.map( ( category ) => (
+						<li key={ category.id } className={ ( openAccordion.includes( category.id ) ? 'wc-products-list-card__item wc-products-list-card__accordion-open' : 'wc-products-list-card__item' ) }>
+							<label className={ ( 0 === category.parent ) ? 'wc-products-list-card__content' : ''  } htmlFor={ 'product-category-' + category.id }>
+								<input type="checkbox"
+								       id={ 'product-category-' + category.id }
+								       value={ category.id }
+								       checked={ selectedCategories.includes( category.id ) }
+								       onChange={ ( evt ) => handleCategoriesToCheck( evt, category, categories ) }
+								       ref={ el => el && ( el.indeterminate = isIndeterminate( category, categories ) ) }
+								/> { category.name }
+								{ 0 === category.parent &&
+									<AccordionButton category={ category } categories={ categories } />
+								}
+								<span className="wc-products-list-card__taxonomy-count">{ category.count }</span>
+							</label>
+							<CategoryTree categories={ categories } parent={ category.id } />
+						</li>
+					) ) }
+				</ul>
+			);
+		};
+
+		let categoriesData = categories.data;
+
+		if ( '' !== filterQuery ) {
+			categoriesData = categoriesData.filter( category => category.slug.includes( filterQuery.toLowerCase() ) );
+		}
+
+		return (
+			<div className="wc-products-list-card__results">
+				<CategoryTree categories={ categoriesData } parent={ 0 } />
+			</div>
+		);
+	}
+);*/
+var ProductCategoryList = null;
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -1821,330 +2145,6 @@ var ProductSpecificSearchResultsDropdownElement = function (_React$Component4) {
 var ProductSpecificSelectedProducts = null;
 
 /***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var __ = wp.i18n.__;
-var _wp$components = wp.components,
-    Toolbar = _wp$components.Toolbar,
-    Dropdown = _wp$components.Dropdown,
-    Dashicon = _wp$components.Dashicon;
-var _wp = wp,
-    apiFetch = _wp.apiFetch;
-
-/**
- * When the display mode is 'Product category' search for and select product categories to pull products from.
- */
-
-var ProductsCategorySelect = exports.ProductsCategorySelect = function (_React$Component) {
-	_inherits(ProductsCategorySelect, _React$Component);
-
-	/**
-  * Constructor.
-  */
-	function ProductsCategorySelect(props) {
-		_classCallCheck(this, ProductsCategorySelect);
-
-		var _this = _possibleConstructorReturn(this, (ProductsCategorySelect.__proto__ || Object.getPrototypeOf(ProductsCategorySelect)).call(this, props));
-
-		_this.state = {
-			selectedCategories: props.selected_display_setting,
-			openAccordion: [],
-			filterQuery: '',
-			firstLoad: true
-		};
-
-		_this.checkboxChange = _this.checkboxChange.bind(_this);
-		_this.accordionToggle = _this.accordionToggle.bind(_this);
-		_this.filterResults = _this.filterResults.bind(_this);
-		_this.setFirstLoad = _this.setFirstLoad.bind(_this);
-		return _this;
-	}
-
-	/**
-  * Handle checkbox toggle.
-  *
-  * @param Checked? boolean checked
-  * @param Categories array categories
-  */
-
-
-	_createClass(ProductsCategorySelect, [{
-		key: "checkboxChange",
-		value: function checkboxChange(checked, categories) {
-			var selectedCategories = this.state.selectedCategories;
-
-			selectedCategories = selectedCategories.filter(function (category) {
-				return !categories.includes(category);
-			});
-
-			if (checked) {
-				var _selectedCategories;
-
-				(_selectedCategories = selectedCategories).push.apply(_selectedCategories, _toConsumableArray(categories));
-			}
-
-			this.setState({
-				selectedCategories: selectedCategories
-			});
-
-			this.props.update_display_setting_callback(selectedCategories);
-		}
-
-		/**
-   * Handle accordion toggle.
-   *
-   * @param Category ID category
-   */
-
-	}, {
-		key: "accordionToggle",
-		value: function accordionToggle(category) {
-			var openAccordions = this.state.openAccordion;
-
-			if (openAccordions.includes(category)) {
-				openAccordions = openAccordions.filter(function (c) {
-					return c !== category;
-				});
-			} else {
-				openAccordions.push(category);
-			}
-
-			this.setState({
-				openAccordion: openAccordions
-			});
-		}
-
-		/**
-   * Filter categories.
-   *
-   * @param Event object evt
-   */
-
-	}, {
-		key: "filterResults",
-		value: function filterResults(evt) {
-			this.setState({
-				filterQuery: evt.target.value
-			});
-		}
-
-		/**
-   * Update firstLoad state.
-   *
-   * @param Booolean loaded
-   */
-
-	}, {
-		key: "setFirstLoad",
-		value: function setFirstLoad(loaded) {
-			this.setState({
-				firstLoad: !!loaded
-			});
-		}
-
-		/**
-   * Render the list of categories and the search input.
-   */
-
-	}, {
-		key: "render",
-		value: function render() {
-			return wp.element.createElement(
-				"div",
-				{ className: "wc-products-list-card wc-products-list-card--taxonomy wc-products-list-card--taxonomy-category" },
-				wp.element.createElement(ProductCategoryFilter, { filterResults: this.filterResults }),
-				wp.element.createElement(ProductCategoryList, {
-					filterQuery: this.state.filterQuery,
-					selectedCategories: this.state.selectedCategories,
-					checkboxChange: this.checkboxChange,
-					accordionToggle: this.accordionToggle,
-					openAccordion: this.state.openAccordion,
-					firstLoad: this.state.firstLoad,
-					setFirstLoad: this.setFirstLoad
-				})
-			);
-		}
-	}]);
-
-	return ProductsCategorySelect;
-}(React.Component);
-
-/**
- * The category search input.
- */
-
-
-var ProductCategoryFilter = function ProductCategoryFilter(_ref) {
-	var filterResults = _ref.filterResults;
-
-	return wp.element.createElement(
-		"div",
-		{ className: "wc-products-list-card__input-wrapper" },
-		wp.element.createElement(Dashicon, { icon: "search" }),
-		wp.element.createElement("input", { className: "wc-products-list-card__search", type: "search", placeholder: __('Search for categories'), onChange: filterResults })
-	);
-};
-
-/**
- * Fetch and build a tree of product categories.
- */
-/*const ProductCategoryList = withAPIData( ( props ) => {
-		return {
-			categories: '/wc/v2/products/categories'
-		};
-	} )( ( { categories, filterQuery, selectedCategories, checkboxChange, accordionToggle, openAccordion, firstLoad, setFirstLoad } ) => {
-		if ( ! categories.data ) {
-			return __( 'Loading' );
-		}
-
-		if ( 0 === categories.data.length ) {
-			return __( 'No categories found' );
-		}
-
-		const handleCategoriesToCheck = ( evt, parent, categories ) => {
-			let ids = getCategoryChildren( parent, categories ).map( category => {
-				return category.id;
-			} );
-
-			ids.push( parent.id );
-
-			checkboxChange( evt.target.checked, ids );
-		};
-
-		const getCategoryChildren = ( parent, categories ) => {
-			let children = [];
-
-			categories.filter( ( category ) => category.parent === parent.id ).forEach( function( category ) {
-				children.push( category );
-				children.push( ...getCategoryChildren( category, categories ) );
-			} );
-
-			return children;
-		};
-
-		const categoryHasChildren = ( parent, categories ) => {
-			return !! getCategoryChildren( parent, categories ).length;
-		};
-
-		const isIndeterminate = ( category, categories ) => {
-
-			// Currect category selected?
-			if ( selectedCategories.includes( category.id ) ) {
-				return false;
-			}
-
-			// Has children?
-			let children = getCategoryChildren( category, categories ).map( category => {
-				return category.id;
-			} );
-
-			for ( let child of children ) {
-				if ( selectedCategories.includes( child ) ) {
-					return true;
-				}
-			}
-
-			return false;
-		}
-
-		const AccordionButton = ( { category, categories } ) => {
-			let icon = 'arrow-down-alt2';
-
-			if ( openAccordion.includes( category.id ) ) {
-				icon = 'arrow-up-alt2';
-			}
-
-			let style = null;
-
-			if ( ! categoryHasChildren( category, categories ) ) {
-				style = {
-					visibility: 'hidden',
-				};
-			};
-
-			return (
-				<button onClick={ () => accordionToggle( category.id ) } className="wc-products-list-card__accordion-button" style={ style } type="button">
-					<Dashicon icon={ icon } />
-				</button>
-			);
-		};
-
-		const CategoryTree = ( { categories, parent } ) => {
-			let filteredCategories = categories.filter( ( category ) => category.parent === parent );
-
-			if ( firstLoad && selectedCategories.length > 0 ) {
-				categoriesData.filter( ( category ) => category.parent === 0 ).forEach( function( category ) {
-					let children = getCategoryChildren( category, categoriesData );
-
-					for ( let child of children ) {
-						if ( selectedCategories.includes( child.id ) && ! openAccordion.includes( category.id ) ) {
-							accordionToggle( category.id );
-							break;
-						}
-					}
-				} );
-
-				setFirstLoad( false );
-			}
-
-			return ( filteredCategories.length > 0 ) && (
-				<ul>
-					{ filteredCategories.map( ( category ) => (
-						<li key={ category.id } className={ ( openAccordion.includes( category.id ) ? 'wc-products-list-card__item wc-products-list-card__accordion-open' : 'wc-products-list-card__item' ) }>
-							<label className={ ( 0 === category.parent ) ? 'wc-products-list-card__content' : ''  } htmlFor={ 'product-category-' + category.id }>
-								<input type="checkbox"
-								       id={ 'product-category-' + category.id }
-								       value={ category.id }
-								       checked={ selectedCategories.includes( category.id ) }
-								       onChange={ ( evt ) => handleCategoriesToCheck( evt, category, categories ) }
-								       ref={ el => el && ( el.indeterminate = isIndeterminate( category, categories ) ) }
-								/> { category.name }
-								{ 0 === category.parent &&
-									<AccordionButton category={ category } categories={ categories } />
-								}
-								<span className="wc-products-list-card__taxonomy-count">{ category.count }</span>
-							</label>
-							<CategoryTree categories={ categories } parent={ category.id } />
-						</li>
-					) ) }
-				</ul>
-			);
-		};
-
-		let categoriesData = categories.data;
-
-		if ( '' !== filterQuery ) {
-			categoriesData = categoriesData.filter( category => category.slug.includes( filterQuery.toLowerCase() ) );
-		}
-
-		return (
-			<div className="wc-products-list-card__results">
-				<CategoryTree categories={ categoriesData } parent={ 0 } />
-			</div>
-		);
-	}
-);*/
-var ProductCategoryList = null;
-
-/***/ }),
 /* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -2380,64 +2380,197 @@ var ProductAttributeFilter = function ProductAttributeFilter(props) {
 /**
  * List of attributes.
  */
-/*const ProductAttributeList = withAPIData( ( props ) => {
-		return {
-			attributes: '/wc/v2/products/attributes'
+
+var ProductAttributeList = function (_React$Component2) {
+	_inherits(ProductAttributeList, _React$Component2);
+
+	/**
+  * Constructor
+  */
+	function ProductAttributeList(props) {
+		_classCallCheck(this, ProductAttributeList);
+
+		var _this2 = _possibleConstructorReturn(this, (ProductAttributeList.__proto__ || Object.getPrototypeOf(ProductAttributeList)).call(this, props));
+
+		_this2.state = {
+			attributes: [],
+			loaded: false,
+			query: ''
 		};
-	} )( ( { attributes, selectedAttribute, filterQuery, selectedTerms, setSelectedAttribute, addTerm, removeTerm } ) => {
-		if ( ! attributes.data ) {
-			return __( 'Loading' );
+
+		_this2.updatePreview = _this2.updatePreview.bind(_this2);
+		_this2.getQuery = _this2.getQuery.bind(_this2);
+		return _this2;
+	}
+
+	/**
+  * Get the preview when component is first loaded.
+  */
+
+
+	_createClass(ProductAttributeList, [{
+		key: 'componentDidMount',
+		value: function componentDidMount() {
+			if (this.getQuery() !== this.state.query) {
+				this.updatePreview();
+			}
 		}
 
-		if ( 0 === attributes.data.length ) {
-			return __( 'No attributes found' );
+		/**
+   * Update the preview when component is updated.
+   */
+
+	}, {
+		key: 'componentDidUpdate',
+		value: function componentDidUpdate() {
+			if (this.getQuery() !== this.state.query && this.state.loaded) {
+				this.updatePreview();
+			}
 		}
 
+		/**
+   * Get the endpoint for the current state of the component.
+   *
+   * @return string
+   */
 
-		const filter = filterQuery.toLowerCase();
-		let attributeElements = [];
-		for ( let attribute of attributes.data ) {
-			// Filter out attributes that don't match the search query.
-			if ( filter.length && -1 === attribute.name.toLowerCase().indexOf( filter ) ) {
-				continue;
+	}, {
+		key: 'getQuery',
+		value: function getQuery() {
+			var endpoint = '/wc/v2/products/attributes';
+			return endpoint;
+		}
+
+		/**
+   * Update the preview with the latest settings.
+   */
+
+	}, {
+		key: 'updatePreview',
+		value: function updatePreview() {
+			var self = this;
+			var query = this.getQuery();
+
+			self.setState({
+				loaded: false
+			});
+
+			apiFetch({ path: query }).then(function (attributes) {
+				self.setState({
+					attributes: attributes,
+					loaded: true,
+					query: query
+				});
+			});
+		}
+
+		/**
+   * Render.
+   */
+
+	}, {
+		key: 'render',
+		value: function render() {
+			var _props = this.props,
+			    selectedAttribute = _props.selectedAttribute,
+			    filterQuery = _props.filterQuery,
+			    selectedTerms = _props.selectedTerms,
+			    setSelectedAttribute = _props.setSelectedAttribute,
+			    addTerm = _props.addTerm,
+			    removeTerm = _props.removeTerm;
+
+
+			if (!this.state.loaded) {
+				return wp.element.createElement(
+					'ul',
+					null,
+					wp.element.createElement(
+						'li',
+						null,
+						__('Loading')
+					)
+				);
 			}
 
-			attributeElements.push(
-				<ProductAttributeElement 
-					attribute={ attribute } 
-					selectedAttribute={ selectedAttribute } 
-					selectedTerms={ selectedTerms } 
-					setSelectedAttribute={ setSelectedAttribute}
-					addTerm={ addTerm }
-					removeTerm={ removeTerm } 
-				/>
+			if (0 === this.state.attributes.length) {
+				return wp.element.createElement(
+					'ul',
+					null,
+					wp.element.createElement(
+						'li',
+						null,
+						__('No attributes found')
+					)
+				);
+			}
+
+			var filter = filterQuery.toLowerCase();
+			var attributeElements = [];
+
+			var _iteratorNormalCompletion2 = true;
+			var _didIteratorError2 = false;
+			var _iteratorError2 = undefined;
+
+			try {
+				for (var _iterator2 = this.state.attributes[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+					var attribute = _step2.value;
+
+					// Filter out attributes that don't match the search query.
+					if (filter.length && -1 === attribute.name.toLowerCase().indexOf(filter)) {
+						continue;
+					}
+
+					attributeElements.push(wp.element.createElement(ProductAttributeElement, {
+						attribute: attribute,
+						selectedAttribute: selectedAttribute,
+						selectedTerms: selectedTerms,
+						setSelectedAttribute: setSelectedAttribute,
+						addTerm: addTerm,
+						removeTerm: removeTerm
+					}));
+				}
+			} catch (err) {
+				_didIteratorError2 = true;
+				_iteratorError2 = err;
+			} finally {
+				try {
+					if (!_iteratorNormalCompletion2 && _iterator2.return) {
+						_iterator2.return();
+					}
+				} finally {
+					if (_didIteratorError2) {
+						throw _iteratorError2;
+					}
+				}
+			}
+
+			return wp.element.createElement(
+				'div',
+				{ className: 'wc-products-list-card__results' },
+				attributeElements
 			);
 		}
+	}]);
 
-		return (
-			<div className="wc-products-list-card__results">
-				{ attributeElements }
-			</div>
-		);
-	}
-);*/
-var ProductAttributeList = null;
+	return ProductAttributeList;
+}(React.Component);
 
 /**
  * One product attribute.
  */
 
-var ProductAttributeElement = function (_React$Component2) {
-	_inherits(ProductAttributeElement, _React$Component2);
+
+var ProductAttributeElement = function (_React$Component3) {
+	_inherits(ProductAttributeElement, _React$Component3);
 
 	function ProductAttributeElement(props) {
 		_classCallCheck(this, ProductAttributeElement);
 
-		var _this2 = _possibleConstructorReturn(this, (ProductAttributeElement.__proto__ || Object.getPrototypeOf(ProductAttributeElement)).call(this, props));
+		var _this3 = _possibleConstructorReturn(this, (ProductAttributeElement.__proto__ || Object.getPrototypeOf(ProductAttributeElement)).call(this, props));
 
-		_this2.handleAttributeChange = _this2.handleAttributeChange.bind(_this2);
-		_this2.handleTermChange = _this2.handleTermChange.bind(_this2);
-		return _this2;
+		_this3.handleAttributeChange = _this3.handleAttributeChange.bind(_this3);
+		_this3.handleTermChange = _this3.handleTermChange.bind(_this3);
+		return _this3;
 	}
 
 	/**
@@ -2520,49 +2653,172 @@ var ProductAttributeElement = function (_React$Component2) {
 /**
  * The list of terms in an attribute.
  */
-/*const AttributeTerms = withAPIData( ( props ) => {
-		return {
-			terms: '/wc/v2/products/attributes/' + props.attribute.id + '/terms'
+
+
+var AttributeTerms = function (_React$Component4) {
+	_inherits(AttributeTerms, _React$Component4);
+
+	/**
+  * Constructor
+  */
+	function AttributeTerms(props) {
+		_classCallCheck(this, AttributeTerms);
+
+		var _this4 = _possibleConstructorReturn(this, (AttributeTerms.__proto__ || Object.getPrototypeOf(AttributeTerms)).call(this, props));
+
+		_this4.state = {
+			terms: [],
+			loaded: false,
+			query: ''
 		};
-	} )( ( { terms, selectedTerms, attribute, addTerm, removeTerm } ) => {
-		if ( ! terms.data ) {
-			return ( <ul><li>{ __( 'Loading' ) }</li></ul> );
-		}
 
-		if ( 0 === terms.data.length ) {
-			return ( <ul><li>{ __( 'No terms found' ) }</li></ul> );
-		}
+		_this4.updatePreview = _this4.updatePreview.bind(_this4);
+		_this4.getQuery = _this4.getQuery.bind(_this4);
+		return _this4;
+	}
 
-		function handleTermChange( evt ) {
-			if ( evt.target.checked ) {
-				addTerm( evt.target.value );
-			} else {
-				removeTerm( evt.target.value );
+	/**
+  * Get the preview when component is first loaded.
+  */
+
+
+	_createClass(AttributeTerms, [{
+		key: 'componentDidMount',
+		value: function componentDidMount() {
+			if (this.getQuery() !== this.state.query) {
+				this.updatePreview();
 			}
 		}
 
-		return (
-			<ul>
-				{ terms.data.map( ( term ) => (
-					<li className="wc-products-list-card__item">
-						<label className="wc-products-list-card__content">
-							<input type="checkbox"
-								value={ term.id }
-								onChange={ handleTermChange }
-								checked={ selectedTerms.includes( String( term.id ) ) }
-							/>
-							{ term.name }
-							<span className="wc-products-list-card__taxonomy-count">{ term.count }</span>
-						</label>
-					</li>
-				) ) }
-			</ul>
-		);
-	}
-);*/
+		/**
+   * Update the preview when component is updated.
+   */
+
+	}, {
+		key: 'componentDidUpdate',
+		value: function componentDidUpdate() {
+			if (this.getQuery() !== this.state.query && this.state.loaded) {
+				this.updatePreview();
+			}
+		}
+
+		/**
+   * Get the endpoint for the current state of the component.
+   *
+   * @return string
+   */
+
+	}, {
+		key: 'getQuery',
+		value: function getQuery() {
+			var endpoint = '/wc/v2/products/attributes/' + this.props.attribute.id + '/terms';
+			return endpoint;
+		}
+
+		/**
+   * Update the preview with the latest settings.
+   */
+
+	}, {
+		key: 'updatePreview',
+		value: function updatePreview() {
+			var self = this;
+			var query = this.getQuery();
+
+			self.setState({
+				loaded: false
+			});
+
+			apiFetch({ path: query }).then(function (terms) {
+				self.setState({
+					terms: terms,
+					loaded: true,
+					query: query
+				});
+			});
+		}
+
+		/**
+   * Render.
+   */
+
+	}, {
+		key: 'render',
+		value: function render() {
+			var _props2 = this.props,
+			    selectedTerms = _props2.selectedTerms,
+			    attribute = _props2.attribute,
+			    addTerm = _props2.addTerm,
+			    removeTerm = _props2.removeTerm;
 
 
-var AttributeTerms = null;
+			if (!this.state.loaded) {
+				return wp.element.createElement(
+					'ul',
+					null,
+					wp.element.createElement(
+						'li',
+						null,
+						__('Loading')
+					)
+				);
+			}
+
+			if (0 === this.state.terms.length) {
+				return wp.element.createElement(
+					'ul',
+					null,
+					wp.element.createElement(
+						'li',
+						null,
+						__('No terms found')
+					)
+				);
+			}
+
+			/**
+    * Add or remove selected terms.
+    *
+    * @param evt Event object
+    */
+			function handleTermChange(evt) {
+				if (evt.target.checked) {
+					addTerm(evt.target.value);
+				} else {
+					removeTerm(evt.target.value);
+				}
+			}
+
+			return wp.element.createElement(
+				'ul',
+				null,
+				this.state.terms.map(function (term) {
+					return wp.element.createElement(
+						'li',
+						{ className: 'wc-products-list-card__item' },
+						wp.element.createElement(
+							'label',
+							{ className: 'wc-products-list-card__content' },
+							wp.element.createElement('input', { type: 'checkbox',
+								value: term.id,
+								onChange: handleTermChange,
+								checked: selectedTerms.includes(String(term.id))
+							}),
+							term.name,
+							wp.element.createElement(
+								'span',
+								{ className: 'wc-products-list-card__taxonomy-count' },
+								term.count
+							)
+						)
+					);
+				})
+			);
+		}
+	}]);
+
+	return AttributeTerms;
+}(React.Component);
 
 /***/ })
 /******/ ]);
