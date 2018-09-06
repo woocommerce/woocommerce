@@ -180,11 +180,7 @@ D3Chart.propTypes = {
 	/**
 	 * Interval specification (hourly, daily, weekly etc.)
 	 */
-	interval: PropTypes.oneOf( [ 'hourly', 'daily', 'weekly', 'monthly', 'quaterly', 'yearly' ] ),
-	/**
-	 * @todo Remove – not used?
-	 */
-	legend: PropTypes.array,
+	interval: PropTypes.oneOf( [ 'hour', 'day', 'week', 'month', 'quater', 'year' ] ),
 	/**
 	 * Margins for axis and chart padding.
 	 */
