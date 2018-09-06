@@ -53,11 +53,7 @@ do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, 
  */
 do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email );
 
-?>
-<p>
-<?php _e( 'We hope to see you again soon.', 'woocommerce' ); // phpcs:ignore WordPress.XSS.EscapeOutput ?>
-</p>
-<?php
+_e( 'We hope to see you again soon.', 'woocommerce' ); // phpcs:ignore WordPress.XSS.EscapeOutput
 
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 

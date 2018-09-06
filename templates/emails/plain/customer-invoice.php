@@ -10,10 +10,9 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see 	    https://docs.woocommerce.com/document/template-structure/
- * @author		WooThemes
- * @package 	WooCommerce/Templates/Emails/Plain
- * @version		2.5.0
+ * @see https://docs.woocommerce.com/document/template-structure/
+ * @package WooCommerce/Templates/Emails/Plain
+ * @version 3.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -22,14 +21,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 echo '= ' . esc_html( $email_heading ) . " =\n\n";
 
-if ( $order->has_status( 'pending' ) ) {
+/* translators: %s: Customer first name */
+printf( __( 'Hi %s,', 'woocommerce' ), $order->get_first_name() ) . "\n\n"; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 
-	echo sprintf(
-		/* translators: %1s item is the name of the site, %2s is a html link */
-		esc_html__( 'An order has been created for you on %1$s. %2$s', 'woocommerce' ),
+if ( $order->has_status( 'pending' ) ) {
+	printf(
+		wp_kses(
+			/* translators: %1$s Site title, %2$s Order pay link */
+			__( 'An order has been created for you on %1$s. Your invoice is below, with a link to make payment when you’re ready: %1$s', 'woocommerce' ),
+			array(
+				'a' => array(
+					'href' => array(),
+				),
+			)
+		),
 		esc_html( get_bloginfo( 'name', 'display' ) ),
-		esc_url( $order->get_checkout_payment_url() )
+		'<a href="' . esc_url( $order->get_checkout_payment_url() ) . '">' . esc_html__( 'Pay for this order', 'woocommerce' ) . '</a>'
 	) . "\n\n";
+
+} else {
+	/* translators: %s Order date */
+	printf( __( 'Here are the details of your order placed on %s:', 'woocommerce' ), wc_format_datetime( $this->object->get_date_created() ) ) . "\n\n"; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 }
 
 echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
@@ -60,6 +72,8 @@ do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, 
  * @hooked WC_Emails::email_address() Shows email address
  */
 do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email );
+
+_e( 'Have a great day.', 'woocommerce' ); // phpcs:ignore WordPress.XSS.EscapeOutput
 
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
