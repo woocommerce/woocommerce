@@ -125,16 +125,82 @@ const ProductCategoryFilter = ( { filterResults } ) => {
 /**
  * Fetch and build a tree of product categories.
  */
-/*const ProductCategoryList = withAPIData( ( props ) => {
-		return {
-			categories: '/wc/v2/products/categories'
+class ProductCategoryList extends React.Component {
+
+	/**
+	 * Constructor
+	 */
+	constructor( props ) {
+		super( props );
+		this.state = {
+			categories: [],
+			loaded: false,
+			query: '',
 		};
-	} )( ( { categories, filterQuery, selectedCategories, checkboxChange, accordionToggle, openAccordion, firstLoad, setFirstLoad } ) => {
-		if ( ! categories.data ) {
+
+		this.updatePreview = this.updatePreview.bind( this );
+		this.getQuery = this.getQuery.bind( this );
+	}
+
+	/**
+	 * Get the preview when component is first loaded.
+	 */
+	componentDidMount() {
+		if ( this.getQuery() !== this.state.query ) {
+			this.updatePreview();
+		}
+	}
+
+	/**
+	 * Update the preview when component is updated.
+	 */
+	componentDidUpdate() {
+		if ( this.getQuery() !== this.state.query && this.state.loaded ) {
+			this.updatePreview();
+		}
+	}
+
+	/**
+	 * Get the endpoint for the current state of the component.
+	 *
+	 * @return string
+	 */
+	getQuery() {
+		const endpoint = '/wc/v2/products/categories';
+		return endpoint;
+	}
+
+	/**
+	 * Update the preview with the latest settings.
+	 */
+	updatePreview() {
+		const self = this;
+		const query = this.getQuery();
+
+		self.setState( {
+			loaded: false
+		} );
+
+		apiFetch( { path: query } ).then( categories => {
+			self.setState( {
+				categories: categories,
+				loaded: true,
+				query: query
+			} );
+		} );
+	}
+
+	/**
+	 * Render.
+	 */
+	render() {
+		const { filterQuery, selectedCategories, checkboxChange, accordionToggle, openAccordion, firstLoad, setFirstLoad } = this.props;
+
+		if ( ! this.state.loaded ) {
 			return __( 'Loading' );
 		}
 
-		if ( 0 === categories.data.length ) {
+		if ( 0 === this.state.categories.length ) {
 			return __( 'No categories found' );
 		}
 
@@ -248,7 +314,7 @@ const ProductCategoryFilter = ( { filterResults } ) => {
 			);
 		};
 
-		let categoriesData = categories.data;
+		let categoriesData = this.state.categories;
 
 		if ( '' !== filterQuery ) {
 			categoriesData = categoriesData.filter( category => category.slug.includes( filterQuery.toLowerCase() ) );
@@ -260,5 +326,4 @@ const ProductCategoryFilter = ( { filterResults } ) => {
 			</div>
 		);
 	}
-);*/
-const ProductCategoryList = null;
+}

@@ -1623,143 +1623,311 @@ var ProductCategoryFilter = function ProductCategoryFilter(_ref) {
 /**
  * Fetch and build a tree of product categories.
  */
-/*const ProductCategoryList = withAPIData( ( props ) => {
-		return {
-			categories: '/wc/v2/products/categories'
+
+var ProductCategoryList = function (_React$Component2) {
+	_inherits(ProductCategoryList, _React$Component2);
+
+	/**
+  * Constructor
+  */
+	function ProductCategoryList(props) {
+		_classCallCheck(this, ProductCategoryList);
+
+		var _this2 = _possibleConstructorReturn(this, (ProductCategoryList.__proto__ || Object.getPrototypeOf(ProductCategoryList)).call(this, props));
+
+		_this2.state = {
+			categories: [],
+			loaded: false,
+			query: ''
 		};
-	} )( ( { categories, filterQuery, selectedCategories, checkboxChange, accordionToggle, openAccordion, firstLoad, setFirstLoad } ) => {
-		if ( ! categories.data ) {
-			return __( 'Loading' );
+
+		_this2.updatePreview = _this2.updatePreview.bind(_this2);
+		_this2.getQuery = _this2.getQuery.bind(_this2);
+		return _this2;
+	}
+
+	/**
+  * Get the preview when component is first loaded.
+  */
+
+
+	_createClass(ProductCategoryList, [{
+		key: "componentDidMount",
+		value: function componentDidMount() {
+			if (this.getQuery() !== this.state.query) {
+				this.updatePreview();
+			}
 		}
 
-		if ( 0 === categories.data.length ) {
-			return __( 'No categories found' );
+		/**
+   * Update the preview when component is updated.
+   */
+
+	}, {
+		key: "componentDidUpdate",
+		value: function componentDidUpdate() {
+			if (this.getQuery() !== this.state.query && this.state.loaded) {
+				this.updatePreview();
+			}
 		}
 
-		const handleCategoriesToCheck = ( evt, parent, categories ) => {
-			let ids = getCategoryChildren( parent, categories ).map( category => {
-				return category.id;
-			} );
+		/**
+   * Get the endpoint for the current state of the component.
+   *
+   * @return string
+   */
 
-			ids.push( parent.id );
-
-			checkboxChange( evt.target.checked, ids );
-		};
-
-		const getCategoryChildren = ( parent, categories ) => {
-			let children = [];
-
-			categories.filter( ( category ) => category.parent === parent.id ).forEach( function( category ) {
-				children.push( category );
-				children.push( ...getCategoryChildren( category, categories ) );
-			} );
-
-			return children;
-		};
-
-		const categoryHasChildren = ( parent, categories ) => {
-			return !! getCategoryChildren( parent, categories ).length;
-		};
-
-		const isIndeterminate = ( category, categories ) => {
-
-			// Currect category selected?
-			if ( selectedCategories.includes( category.id ) ) {
-				return false;
-			}
-
-			// Has children?
-			let children = getCategoryChildren( category, categories ).map( category => {
-				return category.id;
-			} );
-
-			for ( let child of children ) {
-				if ( selectedCategories.includes( child ) ) {
-					return true;
-				}
-			}
-
-			return false;
+	}, {
+		key: "getQuery",
+		value: function getQuery() {
+			var endpoint = '/wc/v2/products/categories';
+			return endpoint;
 		}
 
-		const AccordionButton = ( { category, categories } ) => {
-			let icon = 'arrow-down-alt2';
+		/**
+   * Update the preview with the latest settings.
+   */
 
-			if ( openAccordion.includes( category.id ) ) {
-				icon = 'arrow-up-alt2';
+	}, {
+		key: "updatePreview",
+		value: function updatePreview() {
+			var self = this;
+			var query = this.getQuery();
+
+			self.setState({
+				loaded: false
+			});
+
+			apiFetch({ path: query }).then(function (categories) {
+				self.setState({
+					categories: categories,
+					loaded: true,
+					query: query
+				});
+			});
+		}
+
+		/**
+   * Render.
+   */
+
+	}, {
+		key: "render",
+		value: function render() {
+			var _props = this.props,
+			    filterQuery = _props.filterQuery,
+			    selectedCategories = _props.selectedCategories,
+			    checkboxChange = _props.checkboxChange,
+			    accordionToggle = _props.accordionToggle,
+			    openAccordion = _props.openAccordion,
+			    firstLoad = _props.firstLoad,
+			    setFirstLoad = _props.setFirstLoad;
+
+
+			if (!this.state.loaded) {
+				return __('Loading');
 			}
 
-			let style = null;
+			if (0 === this.state.categories.length) {
+				return __('No categories found');
+			}
 
-			if ( ! categoryHasChildren( category, categories ) ) {
-				style = {
-					visibility: 'hidden',
-				};
+			var handleCategoriesToCheck = function handleCategoriesToCheck(evt, parent, categories) {
+				var ids = getCategoryChildren(parent, categories).map(function (category) {
+					return category.id;
+				});
+
+				ids.push(parent.id);
+
+				checkboxChange(evt.target.checked, ids);
 			};
 
-			return (
-				<button onClick={ () => accordionToggle( category.id ) } className="wc-products-list-card__accordion-button" style={ style } type="button">
-					<Dashicon icon={ icon } />
-				</button>
-			);
-		};
+			var getCategoryChildren = function getCategoryChildren(parent, categories) {
+				var children = [];
 
-		const CategoryTree = ( { categories, parent } ) => {
-			let filteredCategories = categories.filter( ( category ) => category.parent === parent );
+				categories.filter(function (category) {
+					return category.parent === parent.id;
+				}).forEach(function (category) {
+					children.push(category);
+					children.push.apply(children, _toConsumableArray(getCategoryChildren(category, categories)));
+				});
 
-			if ( firstLoad && selectedCategories.length > 0 ) {
-				categoriesData.filter( ( category ) => category.parent === 0 ).forEach( function( category ) {
-					let children = getCategoryChildren( category, categoriesData );
+				return children;
+			};
 
-					for ( let child of children ) {
-						if ( selectedCategories.includes( child.id ) && ! openAccordion.includes( category.id ) ) {
-							accordionToggle( category.id );
-							break;
+			var categoryHasChildren = function categoryHasChildren(parent, categories) {
+				return !!getCategoryChildren(parent, categories).length;
+			};
+
+			var isIndeterminate = function isIndeterminate(category, categories) {
+
+				// Currect category selected?
+				if (selectedCategories.includes(category.id)) {
+					return false;
+				}
+
+				// Has children?
+				var children = getCategoryChildren(category, categories).map(function (category) {
+					return category.id;
+				});
+
+				var _iteratorNormalCompletion = true;
+				var _didIteratorError = false;
+				var _iteratorError = undefined;
+
+				try {
+					for (var _iterator = children[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+						var child = _step.value;
+
+						if (selectedCategories.includes(child)) {
+							return true;
 						}
 					}
-				} );
+				} catch (err) {
+					_didIteratorError = true;
+					_iteratorError = err;
+				} finally {
+					try {
+						if (!_iteratorNormalCompletion && _iterator.return) {
+							_iterator.return();
+						}
+					} finally {
+						if (_didIteratorError) {
+							throw _iteratorError;
+						}
+					}
+				}
 
-				setFirstLoad( false );
+				return false;
+			};
+
+			var AccordionButton = function AccordionButton(_ref2) {
+				var category = _ref2.category,
+				    categories = _ref2.categories;
+
+				var icon = 'arrow-down-alt2';
+
+				if (openAccordion.includes(category.id)) {
+					icon = 'arrow-up-alt2';
+				}
+
+				var style = null;
+
+				if (!categoryHasChildren(category, categories)) {
+					style = {
+						visibility: 'hidden'
+					};
+				};
+
+				return wp.element.createElement(
+					"button",
+					{ onClick: function onClick() {
+							return accordionToggle(category.id);
+						}, className: "wc-products-list-card__accordion-button", style: style, type: "button" },
+					wp.element.createElement(Dashicon, { icon: icon })
+				);
+			};
+
+			var CategoryTree = function CategoryTree(_ref3) {
+				var categories = _ref3.categories,
+				    parent = _ref3.parent;
+
+				var filteredCategories = categories.filter(function (category) {
+					return category.parent === parent;
+				});
+
+				if (firstLoad && selectedCategories.length > 0) {
+					categoriesData.filter(function (category) {
+						return category.parent === 0;
+					}).forEach(function (category) {
+						var children = getCategoryChildren(category, categoriesData);
+
+						var _iteratorNormalCompletion2 = true;
+						var _didIteratorError2 = false;
+						var _iteratorError2 = undefined;
+
+						try {
+							for (var _iterator2 = children[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+								var child = _step2.value;
+
+								if (selectedCategories.includes(child.id) && !openAccordion.includes(category.id)) {
+									accordionToggle(category.id);
+									break;
+								}
+							}
+						} catch (err) {
+							_didIteratorError2 = true;
+							_iteratorError2 = err;
+						} finally {
+							try {
+								if (!_iteratorNormalCompletion2 && _iterator2.return) {
+									_iterator2.return();
+								}
+							} finally {
+								if (_didIteratorError2) {
+									throw _iteratorError2;
+								}
+							}
+						}
+					});
+
+					setFirstLoad(false);
+				}
+
+				return filteredCategories.length > 0 && wp.element.createElement(
+					"ul",
+					null,
+					filteredCategories.map(function (category) {
+						return wp.element.createElement(
+							"li",
+							{ key: category.id, className: openAccordion.includes(category.id) ? 'wc-products-list-card__item wc-products-list-card__accordion-open' : 'wc-products-list-card__item' },
+							wp.element.createElement(
+								"label",
+								{ className: 0 === category.parent ? 'wc-products-list-card__content' : '', htmlFor: 'product-category-' + category.id },
+								wp.element.createElement("input", { type: "checkbox",
+									id: 'product-category-' + category.id,
+									value: category.id,
+									checked: selectedCategories.includes(category.id),
+									onChange: function onChange(evt) {
+										return handleCategoriesToCheck(evt, category, categories);
+									},
+									ref: function ref(el) {
+										return el && (el.indeterminate = isIndeterminate(category, categories));
+									}
+								}),
+								" ",
+								category.name,
+								0 === category.parent && wp.element.createElement(AccordionButton, { category: category, categories: categories }),
+								wp.element.createElement(
+									"span",
+									{ className: "wc-products-list-card__taxonomy-count" },
+									category.count
+								)
+							),
+							wp.element.createElement(CategoryTree, { categories: categories, parent: category.id })
+						);
+					})
+				);
+			};
+
+			var categoriesData = this.state.categories;
+
+			if ('' !== filterQuery) {
+				categoriesData = categoriesData.filter(function (category) {
+					return category.slug.includes(filterQuery.toLowerCase());
+				});
 			}
 
-			return ( filteredCategories.length > 0 ) && (
-				<ul>
-					{ filteredCategories.map( ( category ) => (
-						<li key={ category.id } className={ ( openAccordion.includes( category.id ) ? 'wc-products-list-card__item wc-products-list-card__accordion-open' : 'wc-products-list-card__item' ) }>
-							<label className={ ( 0 === category.parent ) ? 'wc-products-list-card__content' : ''  } htmlFor={ 'product-category-' + category.id }>
-								<input type="checkbox"
-								       id={ 'product-category-' + category.id }
-								       value={ category.id }
-								       checked={ selectedCategories.includes( category.id ) }
-								       onChange={ ( evt ) => handleCategoriesToCheck( evt, category, categories ) }
-								       ref={ el => el && ( el.indeterminate = isIndeterminate( category, categories ) ) }
-								/> { category.name }
-								{ 0 === category.parent &&
-									<AccordionButton category={ category } categories={ categories } />
-								}
-								<span className="wc-products-list-card__taxonomy-count">{ category.count }</span>
-							</label>
-							<CategoryTree categories={ categories } parent={ category.id } />
-						</li>
-					) ) }
-				</ul>
+			return wp.element.createElement(
+				"div",
+				{ className: "wc-products-list-card__results" },
+				wp.element.createElement(CategoryTree, { categories: categoriesData, parent: 0 })
 			);
-		};
-
-		let categoriesData = categories.data;
-
-		if ( '' !== filterQuery ) {
-			categoriesData = categoriesData.filter( category => category.slug.includes( filterQuery.toLowerCase() ) );
 		}
+	}]);
 
-		return (
-			<div className="wc-products-list-card__results">
-				<CategoryTree categories={ categoriesData } parent={ 0 } />
-			</div>
-		);
-	}
-);*/
-var ProductCategoryList = null;
+	return ProductCategoryList;
+}(React.Component);
 
 /***/ }),
 /* 2 */
