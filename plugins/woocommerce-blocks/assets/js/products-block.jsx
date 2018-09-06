@@ -508,7 +508,7 @@ class ProductsBlockSidebarInfo extends React.Component {
 			termsQuery: ''
 		};
 
-		this.updatePreview = this.updatePreview.bind( this );
+		this.updateInfo = this.updateInfo.bind( this );
 		this.getQueries = this.getQueries.bind( this );
 	}
 
