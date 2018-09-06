@@ -233,9 +233,12 @@ class ProductSpecificSearchResults extends React.Component {
 
 		if ( query.length ) {
 			apiFetch( { path: query } ).then( products => {
-				self.setState( {
-					products: products,
-				} );
+				// Only update the results if they are for the latest query.
+				if ( query === self.getQuery() ) {
+					self.setState( {
+						products: products,
+					} );
+				}
 			} );
 		} else {
 			self.setState( {
@@ -368,6 +371,7 @@ class ProductSpecificSelectedProducts extends React.Component {
 		super( props );
 		this.state = {
 			query: '',
+			loaded: false,
 		};
 
 		this.updateProductCache = this.updateProductCache.bind( this );
@@ -386,7 +390,7 @@ class ProductSpecificSelectedProducts extends React.Component {
 	 * Update the preview when component is updated.
 	 */
 	componentDidUpdate() {
-		if ( this.getQuery() !== this.state.query ) {
+		if ( this.state.loaded && this.getQuery() !== this.state.query ) {
 			this.updateProductCache();
 		}
 	}
@@ -418,7 +422,8 @@ class ProductSpecificSelectedProducts extends React.Component {
 		const query = this.getQuery();
 
 		self.setState( {
-			query: query
+			query: query,
+			loaded: false,
 		} );
 
 		// Add new products to cache.
@@ -429,6 +434,10 @@ class ProductSpecificSelectedProducts extends React.Component {
 						PRODUCT_DATA[ product.id ] = product;
 					}
 				}
+
+				self.setState( {
+					loaded: true,
+				} );
 			} );
 		}
 	}
