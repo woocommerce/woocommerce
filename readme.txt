@@ -203,6 +203,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Remove empty space in mini-cart template. #21261
 * Performance/Tweak - Use post_author for the order customer instead of '_customer_user' meta data. #17895
 * Performance - Exclude frontend include from REST API calls. #20000
+* Performance - Improve performance of the query to delete version transients by removing unneeded "ORDER BY". #21274
 * Dev - REST API - Allows oAuth1.0a authentication under SSL.
 * Dev - REST API - Fix position param for images. #20497
 * Dev - REST API - Handle children products deletion regardless of type. #20670
