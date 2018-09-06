@@ -49,7 +49,7 @@ do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, 
  */
 do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email );
 
-_e( 'Thanks for shopping with us.', 'woocommerce' ) . "\n\n"; // phpcs:ignore WordPress.XSS.EscapeOutput
+_e( 'Woo!', 'woocommerce' ) . "\n\n"; // phpcs:ignore WordPress.XSS.EscapeOutput
 
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 

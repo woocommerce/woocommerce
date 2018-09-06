@@ -52,7 +52,7 @@ do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_
 
 ?>
 <p>
-<?php _e( 'Thanks for shopping with us.', 'woocommerce' ); // phpcs:ignore WordPress.XSS.EscapeOutput ?>
+<?php _e( 'Woo!', 'woocommerce' ); // phpcs:ignore WordPress.XSS.EscapeOutput ?>
 </p>
 <?php
 
