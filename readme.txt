@@ -199,6 +199,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Add to cart notice actions (View cart/Continue shopping) now have tabindex 1 for improved accessibility. #21108
 * Tweak - Remove icanhazip from geolocation services. #21198
 * Tweak - Remove unnecessary aria-required attributes from product reviews template. #21211
+* Tweak - Added hidden label for screen readers on checkout address line 2 input. #21193
 * Performance/Tweak - Use post_author for the order customer instead of '_customer_user' meta data. #17895
 * Performance - Exclude frontend include from REST API calls. #20000
 * Dev - REST API - Allows oAuth1.0a authentication under SSL.
