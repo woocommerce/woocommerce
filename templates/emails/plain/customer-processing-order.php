@@ -23,8 +23,8 @@ echo '= ' . $email_heading . " =\n\n"; // phpcs:ignore WordPress.XSS.EscapeOutpu
 
 /* translators: %s: Customer first name */
 printf( __( 'Hi %s,', 'woocommerce' ), $order->get_first_name() ) . "\n\n"; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
-/* translators: %s: Site title */
-printf( __( 'Your %s order has been marked complete on our side. We hope you enjoy it!', 'woocommerce' ), wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES ) ) . "\n\n"; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+/* translators: %s: Order number */
+printf( __( 'Just to let you know -- your payment has been confirmed, and order %s is now being processed:', 'woocommerce' ), $order->get_order_number() ) . "\n\n"; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 
 echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
