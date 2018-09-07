@@ -144,14 +144,12 @@ export const getXLineScale = ( uniqueDates, width ) =>
 		.rangeRound( [ 0, width ] );
 
 /**
- * Describes getYMax
+ * Describes and rounds the maximum y value to the nearest thousadn, ten-thousand, million etc.
  * @param {array} lineData - from `getLineData`
  * @returns {number} the maximum value in the timeseries multiplied by 4/3
  */
 export const getYMax = lineData => {
-	const yMax = Math.round(
-		4 / 3 * d3Max( lineData, d => d3Max( d.values.map( date => date.value ) ) )
-	);
+	const yMax = 4 / 3 * d3Max( lineData, d => d3Max( d.values.map( date => date.value ) ) );
 	const pow3Y = Math.pow( 10, ( ( Math.log( yMax ) * Math.LOG10E + 1 ) | 0 ) - 2 ) * 3;
 	return Math.ceil( yMax / pow3Y ) * pow3Y;
 };
