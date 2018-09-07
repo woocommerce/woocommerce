@@ -4,10 +4,10 @@
  * External dependencies
  */
 
-import { findIndex } from 'lodash';
+import { findIndex, get } from 'lodash';
 import { max as d3Max } from 'd3-array';
 import { axisBottom as d3AxisBottom, axisLeft as d3AxisLeft } from 'd3-axis';
-import { format as d3Format } from 'd3-format';
+import { format as d3Format, formatDefaultLocale as d3FormatDefaultLocale } from 'd3-format';
 import {
 	scaleBand as d3ScaleBand,
 	scaleLinear as d3ScaleLinear,
@@ -23,6 +23,16 @@ import { formatCurrency } from 'lib/currency';
 
 export const parseDate = d3UTCParse( '%Y-%m-%dT%H:%M:%S' );
 
+function decodeSymbol( str ) {
+	return str.replace( /&#(\d+);/g, ( match, dec ) => String.fromCharCode( dec ) );
+}
+
+d3FormatDefaultLocale( {
+	decimal: '.',
+	thousands: ',',
+	grouping: [ 3 ],
+	currency: [ decodeSymbol( get( wcSettings, 'currency.symbol', '' ) ), '' ],
+} );
 /**
  * Describes `getUniqueKeys`
  * @param {array} data - The chart component's `data` prop.
@@ -272,7 +282,7 @@ export const drawAxis = ( node, params ) => {
 		.call(
 			d3AxisLeft( params.yTickOffset )
 				.tickValues( yGrids )
-				.tickFormat( d => ( d !== 0 ? d3Format( params.yFormat )( d ) : 0 ) )
+				.tickFormat( d => d3Format( params.yFormat )( d !== 0 ? d : 0 ) )
 		);
 
 	node

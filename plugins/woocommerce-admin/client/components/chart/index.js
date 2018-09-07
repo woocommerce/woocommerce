@@ -216,7 +216,7 @@ Chart.defaultProps = {
 	tooltipFormat: '%Y-%m-%d',
 	xFormat: '%d',
 	x2Format: '%b %Y',
-	yFormat: '.3s',
+	yFormat: '$.3s',
 };
 
 export default Chart;
