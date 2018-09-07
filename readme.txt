@@ -202,6 +202,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Remove unnecessary aria-required attributes from product reviews template. #21211
 * Tweak - Added hidden label for screen readers on checkout address line 2 input. #21193
 * Tweak - Remove empty space in mini-cart template. #21261
+* Tweak - Tax display in cart now depends on whether customer is tax exempt. #21292
 * Performance/Tweak - Use post_author for the order customer instead of '_customer_user' meta data. #17895
 * Performance - Exclude frontend include from REST API calls. #20000
 * Performance - Improve performance of the query to delete version transients by removing unneeded "ORDER BY". #21274
