@@ -170,6 +170,7 @@ class Chart extends Component {
 						type={ this.props.type }
 						width={ chartDirection === 'row' ? width - 320 : width }
 						xFormat={ this.props.xFormat }
+						x2Format={ this.props.x2Format }
 						yFormat={ this.props.yFormat }
 					/>
 				</div>
@@ -201,6 +202,10 @@ Chart.propTypes = {
 	 */
 	xFormat: PropTypes.string,
 	/**
+	 * A datetime formatting string, passed to d3TimeFormat.
+	 */
+	x2Format: PropTypes.string,
+	/**
 	 * A number formatting string, passed to d3Format.
 	 */
 	yFormat: PropTypes.string,
@@ -209,7 +214,8 @@ Chart.propTypes = {
 Chart.defaultProps = {
 	data: [],
 	tooltipFormat: '%Y-%m-%d',
-	xFormat: '%Y-%m-%d',
+	xFormat: '%d',
+	x2Format: '%b %Y',
 	yFormat: '.3s',
 };
 

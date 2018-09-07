@@ -97,6 +97,7 @@ class D3Chart extends Component {
 			tooltipFormat,
 			type,
 			xFormat,
+			x2Format,
 			yFormat,
 		} = this.props;
 		const { width } = this.state;
@@ -128,6 +129,7 @@ class D3Chart extends Component {
 			uniqueKeys,
 			width: calculatedWidth,
 			xFormat: d3TimeFormat( xFormat ),
+			x2Format: d3TimeFormat( x2Format ),
 			xGroupScale: getXGroupScale( orderedKeys, xScale ),
 			xLineScale,
 			xScale,
@@ -211,6 +213,10 @@ D3Chart.propTypes = {
 	 */
 	xFormat: PropTypes.string,
 	/**
+	 * A datetime formatting string, passed to d3TimeFormat.
+	 */
+	x2Format: PropTypes.string,
+	/**
 	 * A number formatting string, passed to d3Format.
 	 */
 	yFormat: PropTypes.string,
@@ -229,6 +235,7 @@ D3Chart.defaultProps = {
 	type: 'line',
 	width: 600,
 	xFormat: '%Y-%m-%d',
+	x2Format: '',
 	yFormat: '.3s',
 };
 

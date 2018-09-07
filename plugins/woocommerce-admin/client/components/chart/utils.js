@@ -233,7 +233,7 @@ export const drawAxis = ( node, params ) => {
 		.call(
 			d3AxisBottom( xScale )
 				.tickValues( params.uniqueDates.map( d => ( params.type === 'line' ? new Date( d ) : d ) ) )
-				.tickFormat( d => params.xFormat( d instanceof Date ? d : new Date( d ) ) )
+				.tickFormat( d => params.x2Format( d instanceof Date ? d : new Date( d ) ) )
 		)
 		.call( g => g.select( '.domain' ).remove() );
 
@@ -267,8 +267,8 @@ export const drawAxis = ( node, params ) => {
 	node
 		.append( 'g' )
 		.attr( 'class', 'axis y-axis' )
-		.attr( 'transform', 'translate(-20, 0)' )
-		.attr( 'text-anchor', 'left' )
+		.attr( 'transform', 'translate(-50, 0)' )
+		.attr( 'text-anchor', 'start' )
 		.call(
 			d3AxisLeft( params.yTickOffset )
 				.tickValues( yGrids )

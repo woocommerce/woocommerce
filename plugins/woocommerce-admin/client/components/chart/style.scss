@@ -161,6 +161,7 @@
 		}
 	}
 	.y-axis {
+		text-anchor: start;
 		&.tick {
 			&text {
 				fill: $core-grey-dark-500;
