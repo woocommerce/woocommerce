@@ -52,7 +52,7 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 	<p>
 	<?php
 		/* translators: %s Order date */
-		printf( __( 'Here are the details of your order placed on %s:', 'woocommerce' ), wc_format_datetime( $this->object->get_date_created() ) ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+		printf( __( 'Here are the details of your order placed on %s:', 'woocommerce' ), wc_format_datetime( $order->get_date_created() ) ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 	?>
 	</p>
 <?php
