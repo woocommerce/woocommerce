@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { Component, Fragment } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import { partial, uniqueId } from 'lodash';
@@ -28,7 +28,7 @@ class SegmentedSelection extends Component {
 						}
 						const id = uniqueId( `${ value }_` );
 						return (
-							<Fragment key={ value }>
+							<div className="woocommerce-segmented-selection__item" key={ value }>
 								{ /* eslint-disable jsx-a11y/label-has-for */ }
 								<input
 									className="woocommerce-segmented-selection__input"
@@ -42,7 +42,7 @@ class SegmentedSelection extends Component {
 									<span className="woocommerce-segmented-selection__label">{ label }</span>
 								</label>
 								{ /* eslint-enable jsx-a11y/label-has-for */ }
-							</Fragment>
+							</div>
 						);
 					} ) }
 				</div>

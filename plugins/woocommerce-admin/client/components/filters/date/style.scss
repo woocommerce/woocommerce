@@ -35,6 +35,10 @@
 }
 
 .woocommerce-filters-date__tab {
+	@include set-grid-item-position( 2, 2 );
+}
+
+.woocommerce-filters-date__tab {
 	outline: none;
 	border: 1px solid $woocommerce;
 	padding: $gap-smaller;

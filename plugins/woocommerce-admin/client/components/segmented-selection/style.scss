@@ -11,8 +11,25 @@
 	display: grid;
 	border-top: 1px solid $core-grey-light-700;
 	border-bottom: 1px solid $core-grey-light-700;
-	grid-gap: 1px;
 	background-color: $core-grey-light-700;
+}
+
+.woocommerce-segmented-selection__item {
+	display: block;
+	@include set-grid-item-position( 2, 10 );
+
+	&:nth-child(2n) {
+		border-left: 1px solid $core-grey-light-700;
+		border-top: 1px solid $core-grey-light-700;
+	}
+
+	&:nth-child(2n + 1) {
+		border-top: 1px solid $core-grey-light-700;
+	}
+
+	&:nth-child(-n + 2) {
+		border-top: 0;
+	}
 }
 
 .woocommerce-segmented-selection__label {
