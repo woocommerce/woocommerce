@@ -306,7 +306,7 @@ const showTooltip = ( node, params, d ) => {
 		row => `
 				<li class="key-row">
 					<div class="key-container">
-						<span class="key-colour" style="background-color:${ getColor( row.key, params ) }"></span>
+						<span class="key-color" style="background-color:${ getColor( row.key, params ) }"></span>
 						<span class="key-key">${ row.key }:</span>
 					</div>
 					<span class="key-value">${ formatCurrency( d[ row.key ] ) }</span>
