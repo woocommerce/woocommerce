@@ -4,7 +4,7 @@ Tags: gutenberg, woocommerce, woo commerce, products
 Requires at least: 4.7
 Tested up to: 4.9
 Requires PHP: 5.2
-Stable tag: 1.1.1
+Stable tag: 1.1.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -52,6 +52,9 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 3. The completed Products block when inserted into a post.
 
 == Changelog ==
+
+== 1.1.2 - 2018-09-07 =
+* Fix - Refactor to remove withAPIData usage, as the class was removed in Gutenberg 3.7. 
 
 == 1.1.1 - 2018-08-22 =
 * Fix - Make Newness ordering order correctly on frontend.

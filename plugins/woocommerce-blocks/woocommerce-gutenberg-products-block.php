@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce Gutenberg Products Block
  * Plugin URI: https://github.com/woocommerce/woocommerce-gutenberg-products-block
  * Description: WooCommerce Products block for the Gutenberg editor.
- * Version: 1.1.1
+ * Version: 1.1.2
  * Author: Automattic
  * Author URI: https://woocommerce.com
  * Text Domain:  woocommerce
@@ -14,7 +14,7 @@
 
 defined( 'ABSPATH' ) || die();
 
-define( 'WGPB_VERSION', '1.1.1' );
+define( 'WGPB_VERSION', '1.1.2' );
 
 /**
  * Load up the assets if Gutenberg is active.
