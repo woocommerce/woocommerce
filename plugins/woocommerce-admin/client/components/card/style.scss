@@ -34,6 +34,10 @@
 	}
 }
 
+.woocommerce-card__header-item {
+	@include set-grid-item-position( 3, 3 );
+}
+
 .woocommerce-card__action,
 .woocommerce-card__menu {
 	text-align: right;

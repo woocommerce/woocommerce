@@ -27,9 +27,13 @@ class Card extends Component {
 		return (
 			<div className={ className }>
 				<div className="woocommerce-card__header">
-					<H className="woocommerce-card__title">{ title }</H>
-					{ action && <div className="woocommerce-card__action">{ action }</div> }
-					{ menu && <div className="woocommerce-card__menu">{ menu }</div> }
+					<H className="woocommerce-card__title woocommerce-card__header-item">{ title }</H>
+					{ action && (
+						<div className="woocommerce-card__action woocommerce-card__header-item">{ action }</div>
+					) }
+					{ menu && (
+						<div className="woocommerce-card__menu woocommerce-card__header-item">{ menu }</div>
+					) }
 				</div>
 				<Section className="woocommerce-card__body">{ children }</Section>
 			</div>
