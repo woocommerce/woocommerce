@@ -8,17 +8,16 @@ import apiFetch from '@wordpress/api-fetch';
  * Internal dependencies
  */
 import { computeSuggestionMatch } from './utils';
-import ProductImage from 'components/product-image';
 import { stringifyQuery } from 'lib/nav-utils';
 
 /**
- * A products completer.
+ * A product categories completer.
  * See https://github.com/WordPress/gutenberg/tree/master/packages/components/src/autocomplete#the-completer-interface
  *
  * @type {Completer}
  */
 export default {
-	name: 'products',
+	name: 'product_cats',
 	className: 'woocommerce-search__product-result',
 	options( search ) {
 		let payload = '';
@@ -26,28 +25,21 @@ export default {
 			const query = {
 				search: encodeURIComponent( search ),
 				per_page: 10,
-				orderby: 'popularity',
+				orderby: 'count',
 			};
 			payload = stringifyQuery( query );
 		}
-		return apiFetch( { path: '/wc/v3/products' + payload } );
+		return apiFetch( { path: '/wc/v3/products/categories' + payload } );
 	},
 	isDebounced: true,
-	getOptionKeywords( product ) {
-		return [ product.name ];
+	getOptionKeywords( cat ) {
+		return [ cat.name ];
 	},
-	getOptionLabel( product, query ) {
-		const match = computeSuggestionMatch( product.name, query ) || {};
+	getOptionLabel( cat, query ) {
+		const match = computeSuggestionMatch( cat.name, query ) || {};
+		// @todo bring back ProductImage, but allow for product category image
 		return [
-			<ProductImage
-				key="thumbnail"
-				className="woocommerce-search__result-thumbnail"
-				product={ product }
-				width={ 18 }
-				height={ 18 }
-				alt=""
-			/>,
-			<span key="name" className="woocommerce-search__result-name" aria-label={ product.name }>
+			<span key="name" className="woocommerce-search__result-name" aria-label={ cat.name }>
 				{ match.suggestionBeforeMatch }
 				<strong className="components-form-token-field__suggestion-match">
 					{ match.suggestionMatch }
@@ -58,10 +50,10 @@ export default {
 	},
 	// This is slightly different than gutenberg/Autocomplete, we don't support different methods
 	// of replace/insertion, so we can just return the value.
-	getOptionCompletion( product ) {
+	getOptionCompletion( cat ) {
 		const value = {
-			id: product.id,
-			label: product.name,
+			id: cat.id,
+			label: cat.name,
 		};
 		return value;
 	},
