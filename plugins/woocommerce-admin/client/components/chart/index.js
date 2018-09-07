@@ -84,16 +84,24 @@ class Chart extends Component {
 			...d,
 			visible: d.key === event.target.id ? ! d.visible : d.visible,
 		} ) );
-		this.setState( {
-			orderedKeys,
-			visibleData: this.getVisibleData( data, orderedKeys ),
-		} );
+		const copyEvent = { ...event }; // can't pass a synthetic event into the hover handler
+		this.setState(
+			{
+				orderedKeys,
+				visibleData: this.getVisibleData( data, orderedKeys ),
+			},
+			() => {
+				this.handleLegendHover( copyEvent );
+			}
+		);
 	}
 
 	handleLegendHover( event ) {
+		const hoverTarget = this.state.orderedKeys.filter( d => d.key === event.target.id )[ 0 ];
 		this.setState( {
 			orderedKeys: this.state.orderedKeys.map( d => {
-				const enterFocus = d.key === event.target.id ? true : false;
+				let enterFocus = d.key === event.target.id ? true : false;
+				enterFocus = ! hoverTarget.visible ? true : enterFocus;
 				return {
 					...d,
 					focus: event.type === 'mouseleave' || event.type === 'blur' ? true : enterFocus,
@@ -135,8 +143,8 @@ class Chart extends Component {
 		);
 		const margin = {
 			bottom: 50,
-			left: 50,
-			right: 10,
+			left: 80,
+			right: 30,
 			top: 0,
 		};
 		return (
@@ -162,6 +170,7 @@ class Chart extends Component {
 						type={ this.props.type }
 						width={ chartDirection === 'row' ? width - 320 : width }
 						xFormat={ this.props.xFormat }
+						x2Format={ this.props.x2Format }
 						yFormat={ this.props.yFormat }
 					/>
 				</div>
@@ -193,6 +202,10 @@ Chart.propTypes = {
 	 */
 	xFormat: PropTypes.string,
 	/**
+	 * A datetime formatting string, passed to d3TimeFormat.
+	 */
+	x2Format: PropTypes.string,
+	/**
 	 * A number formatting string, passed to d3Format.
 	 */
 	yFormat: PropTypes.string,
@@ -201,8 +214,9 @@ Chart.propTypes = {
 Chart.defaultProps = {
 	data: [],
 	tooltipFormat: '%Y-%m-%d',
-	xFormat: '%Y-%m-%d',
-	yFormat: '.3s',
+	xFormat: '%d',
+	x2Format: '%b %Y',
+	yFormat: '$.3s',
 };
 
 export default Chart;

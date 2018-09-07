@@ -4,10 +4,10 @@
  * External dependencies
  */
 
-import { findIndex } from 'lodash';
+import { findIndex, get } from 'lodash';
 import { max as d3Max } from 'd3-array';
 import { axisBottom as d3AxisBottom, axisLeft as d3AxisLeft } from 'd3-axis';
-import { format as d3Format } from 'd3-format';
+import { format as d3Format, formatDefaultLocale as d3FormatDefaultLocale } from 'd3-format';
 import {
 	scaleBand as d3ScaleBand,
 	scaleLinear as d3ScaleLinear,
@@ -16,9 +16,23 @@ import {
 import { mouse as d3Mouse, select as d3Select } from 'd3-selection';
 import { line as d3Line } from 'd3-shape';
 import { utcParse as d3UTCParse } from 'd3-time-format';
+/**
+ * Internal dependencies
+ */
+import { formatCurrency } from 'lib/currency';
 
 export const parseDate = d3UTCParse( '%Y-%m-%dT%H:%M:%S' );
 
+function decodeSymbol( str ) {
+	return str.replace( /&#(\d+);/g, ( match, dec ) => String.fromCharCode( dec ) );
+}
+
+d3FormatDefaultLocale( {
+	decimal: '.',
+	thousands: ',',
+	grouping: [ 3 ],
+	currency: [ decodeSymbol( get( wcSettings, 'currency.symbol', '' ) ), '' ],
+} );
 /**
  * Describes `getUniqueKeys`
  * @param {array} data - The chart component's `data` prop.
@@ -130,12 +144,15 @@ export const getXLineScale = ( uniqueDates, width ) =>
 		.rangeRound( [ 0, width ] );
 
 /**
- * Describes getYMax
+ * Describes and rounds the maximum y value to the nearest thousadn, ten-thousand, million etc.
  * @param {array} lineData - from `getLineData`
  * @returns {number} the maximum value in the timeseries multiplied by 4/3
  */
-export const getYMax = lineData =>
-	Math.round( 4 / 3 * d3Max( lineData, d => d3Max( d.values.map( date => date.value ) ) ) );
+export const getYMax = lineData => {
+	const yMax = 4 / 3 * d3Max( lineData, d => d3Max( d.values.map( date => date.value ) ) );
+	const pow3Y = Math.pow( 10, ( ( Math.log( yMax ) * Math.LOG10E + 1 ) | 0 ) - 2 ) * 3;
+	return Math.ceil( yMax / pow3Y ) * pow3Y;
+};
 
 /**
  * Describes getYScale
@@ -219,12 +236,38 @@ export const drawAxis = ( node, params ) => {
 
 	node
 		.append( 'g' )
+		.attr( 'class', 'axis axis-month' )
+		.attr( 'transform', `translate(3, ${ params.height + 20 })` )
+		.call(
+			d3AxisBottom( xScale )
+				.tickValues( params.uniqueDates.map( d => ( params.type === 'line' ? new Date( d ) : d ) ) )
+				.tickFormat( d => params.x2Format( d instanceof Date ? d : new Date( d ) ) )
+		)
+		.call( g => g.select( '.domain' ).remove() );
+
+	node
+		.selectAll( '.axis-month .tick text' )
+		.style( 'font-size', `${ Math.round( params.scale * 10 ) }px` );
+
+	node
+		.append( 'g' )
+		.attr( 'class', 'pipes' )
+		.attr( 'transform', `translate(0, ${ params.height })` )
+		.call(
+			d3AxisBottom( xScale )
+				.tickValues( params.uniqueDates.map( d => ( params.type === 'line' ? new Date( d ) : d ) ) )
+				.tickSize( 5 )
+				.tickFormat( '' )
+		);
+
+	node
+		.append( 'g' )
 		.attr( 'class', 'grid' )
 		.attr( 'transform', `translate(-${ params.margin.left },0)` )
 		.call(
 			d3AxisLeft( params.yScale )
 				.tickValues( yGrids )
-				.tickSize( -params.width - params.margin.left )
+				.tickSize( -params.width - params.margin.left - params.margin.right )
 				.tickFormat( '' )
 		)
 		.call( g => g.select( '.domain' ).remove() );
@@ -232,10 +275,12 @@ export const drawAxis = ( node, params ) => {
 	node
 		.append( 'g' )
 		.attr( 'class', 'axis y-axis' )
+		.attr( 'transform', 'translate(-50, 0)' )
+		.attr( 'text-anchor', 'start' )
 		.call(
 			d3AxisLeft( params.yTickOffset )
 				.tickValues( yGrids )
-				.tickFormat( d => ( d !== 0 ? d3Format( params.yFormat )( d ) : 0 ) )
+				.tickFormat( d => d3Format( params.yFormat )( d !== 0 ? d : 0 ) )
 		);
 
 	node
@@ -253,14 +298,16 @@ export const drawAxis = ( node, params ) => {
 const showTooltip = ( node, params, d ) => {
 	const chartCoords = node.node().getBoundingClientRect();
 	let [ xPosition, yPosition ] = d3Mouse( node.node() );
-	xPosition = xPosition > chartCoords.width - 200 ? xPosition - 200 : xPosition + 20;
+	xPosition = xPosition > chartCoords.width - 340 ? xPosition - 340 : xPosition + 100;
 	yPosition = yPosition > chartCoords.height - 150 ? yPosition - 200 : yPosition + 20;
 	const keys = params.orderedKeys.filter( row => row.visible ).map(
 		row => `
-				<li>
-					<span class="key-colour" style="background-color:${ getColor( row.key, params ) }"></span>
-					<span class="key-key">${ row.key }:</span>
-					<span class="key-value">${ d3Format( ',.0f' )( d[ row.key ] ) }</span>
+				<li class="key-row">
+					<div class="key-container">
+						<span class="key-color" style="background-color:${ getColor( row.key, params ) }"></span>
+						<span class="key-key">${ row.key }:</span>
+					</div>
+					<span class="key-value">${ formatCurrency( d[ row.key ] ) }</span>
 				</li>
 			`
 	);
@@ -268,7 +315,7 @@ const showTooltip = ( node, params, d ) => {
 	params.tooltip
 		.style( 'left', xPosition + 'px' )
 		.style( 'top', yPosition + 'px' )
-		.style( 'display', 'inline-block' ).html( `
+		.style( 'display', 'flex' ).html( `
 			<div>
 				<h4>${ params.tooltipFormat( d.date instanceof Date ? d.date : new Date( d.date ) ) }</h4>
 				<ul>
@@ -289,7 +336,7 @@ const handleMouseOutBarChart = ( d, i, nodes, params ) => {
 	d3Select( nodes[ i ].parentNode )
 		.select( '.barfocus' )
 		.attr( 'opacity', '0' );
-	params.tooltip.style( 'display', 'none' );
+	params.tooltip.style( 'display', 'flex' );
 };
 
 const handleMouseOverLineChart = ( d, i, nodes, node, data, params ) => {
@@ -307,6 +354,48 @@ const handleMouseOutLineChart = ( d, i, nodes, params ) => {
 };
 
 export const drawLines = ( node, data, params ) => {
+	const series = node
+		.append( 'g' )
+		.attr( 'class', 'lines' )
+		.selectAll( '.line-g' )
+		.data( params.lineData.filter( d => d.visible ) )
+		.enter()
+		.append( 'g' )
+		.attr( 'class', 'line-g' );
+
+	series
+		.append( 'path' )
+		.attr( 'fill', 'none' )
+		.attr( 'stroke-width', 3 )
+		.attr( 'stroke-linejoin', 'round' )
+		.attr( 'stroke-linecap', 'round' )
+		.attr( 'stroke', d => getColor( d.key, params ) )
+		.style( 'opacity', d => {
+			const opacity = d.focus ? 1 : 0.1;
+			return d.visible ? opacity : 0;
+		} )
+		.attr( 'd', d => params.line( d.values ) );
+
+	series
+		.selectAll( 'circle' )
+		.data( ( d, i ) => d.values.map( row => ( { ...row, i, visible: d.visible, key: d.key } ) ) )
+		.enter()
+		.append( 'circle' )
+		.attr( 'r', 6 )
+		.attr( 'fill', d => getColor( d.key, params ) )
+		.attr( 'stroke', '#fff' )
+		.attr( 'stroke-width', 3 )
+		.style( 'opacity', d => {
+			const opacity = d.focus ? 1 : 0.1;
+			return d.visible ? opacity : 0;
+		} )
+		.attr( 'cx', d => params.xLineScale( new Date( d.date ) ) )
+		.attr( 'cy', d => params.yScale( d.value ) )
+		.on( 'mouseover', ( d, i, nodes ) =>
+			handleMouseOverLineChart( d, i, nodes, node, data, params )
+		)
+		.on( 'mouseout', ( d, i, nodes ) => handleMouseOutLineChart( d, i, nodes, params ) );
+
 	const focus = node
 		.append( 'g' )
 		.attr( 'class', 'focusspaces' )
@@ -337,44 +426,6 @@ export const drawLines = ( node, data, params ) => {
 			handleMouseOverLineChart( d, i, nodes, node, data, params )
 		)
 		.on( 'mouseout', ( d, i, nodes ) => handleMouseOutLineChart( d, i, nodes, params ) );
-
-	const series = node
-		.append( 'g' )
-		.attr( 'class', 'lines' )
-		.selectAll( '.line-g' )
-		.data( params.lineData.filter( d => d.visible ) )
-		.enter()
-		.append( 'g' )
-		.attr( 'class', 'line-g' );
-
-	series
-		.append( 'path' )
-		.attr( 'fill', 'none' )
-		.attr( 'stroke-width', 3 )
-		.attr( 'stroke-linejoin', 'round' )
-		.attr( 'stroke-linecap', 'round' )
-		.attr( 'stroke', d => getColor( d.key, params ) )
-		.style( 'opacity', d => {
-			const opacity = d.focus ? 1 : 0.1;
-			return d.visible ? opacity : 0;
-		} )
-		.attr( 'd', d => params.line( d.values ) );
-
-	series
-		.selectAll( 'circle' )
-		.data( ( d, i ) => d.values.map( row => ( { ...row, i, visible: d.visible, key: d.key } ) ) )
-		.enter()
-		.append( 'circle' )
-		.attr( 'r', 3.5 )
-		.attr( 'fill', '#fff' )
-		.attr( 'stroke', d => getColor( d.key, params ) )
-		.attr( 'stroke-width', 3 )
-		.style( 'opacity', d => {
-			const opacity = d.focus ? 1 : 0.1;
-			return d.visible ? opacity : 0;
-		} )
-		.attr( 'cx', d => params.xLineScale( new Date( d.date ) ) )
-		.attr( 'cy', d => params.yScale( d.value ) );
 };
 
 export const drawBars = ( node, data, params ) => {
@@ -418,7 +469,11 @@ export const drawBars = ( node, data, params ) => {
 		.style( 'opacity', d => {
 			const opacity = d.focus ? 1 : 0.1;
 			return d.visible ? opacity : 0;
-		} );
+		} )
+		.on( 'mouseover', ( d, i, nodes ) =>
+			handleMouseOverBarChart( d, i, nodes, node, data, params )
+		)
+		.on( 'mouseout', ( d, i, nodes ) => handleMouseOutBarChart( d, i, nodes, params ) );
 
 	barGroup
 		.append( 'rect' )

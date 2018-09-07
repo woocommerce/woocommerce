@@ -9,7 +9,7 @@ import { Component, Fragment } from '@wordpress/element';
  * Internal dependencies
  */
 import './style.scss';
-import ChartExample from 'components/chart/example-hour';
+import ChartExample from 'components/chart/example';
 import Header from 'layout/header';
 import StorePerformance from './store-performance';
 import TopSellingProducts from './top-selling-products';

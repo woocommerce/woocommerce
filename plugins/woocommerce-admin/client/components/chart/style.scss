@@ -5,16 +5,18 @@
 	justify-content: flex-start;
 	align-items: flex-start;
 	margin: -$gap;
-	border-top: 1px solid $core-grey-light-200;
+	border-top: 1px solid $core-grey-light-700;
 
 	.woocommerce-chart__header {
 		min-height: 50px;
-		border-top: 1px solid $core-grey-light-200;
+		border-top: 1px solid $core-grey-light-700;
+		border-bottom: 1px solid $core-grey-light-700;
 		display: flex;
 		flex-wrap: nowrap;
 		flex-direction: row;
 		justify-content: flex-start;
 		align-items: center;
+		width: 100%;
 
 		.woocommerce-chart__title {
 			height: 18px;
@@ -23,6 +25,7 @@
 			font-weight: 600;
 			line-height: 18px;
 			margin-left: $gap;
+			margin-right: $gap;
 		}
 	}
 
@@ -45,41 +48,41 @@
 			&.woocommerce-legend__direction-column {
 				height: 100%;
 				min-height: none;
+				border-right: none;
+				margin-bottom: $gap;
 			}
 		}
 	}
 
-	.key-colour {
-		width: 10px;
-		height: 10px;
-		margin-right: 8px;
-		border-radius: 2px;
-	}
-	.key-key {
-		margin-right: 6px;
-		font-weight: 600;
-	}
 	svg {
 		overflow: visible;
 	}
 	.tooltip {
+		border: 1px solid $core-grey-light-700;
 		position: absolute;
 		display: none;
-		min-width: 80px;
+		min-width: 324px;
 		height: auto;
 		background-color: $white;
 		text-align: left;
-		padding: 6px;
-		box-shadow: 0 4px 8px 0 $gray-darken-30, 0 6px 20px 0 $gray-darken-30;
+		padding: 17px;
+		box-shadow: 0 3px 20px 0 rgba(18, 24, 30, 0.1), 0 1px 3px 0 rgba(18, 24, 30, 0.1);
+		flex-direction: column;
+		flex-wrap: nowrap;
+		justify-content: flex-start;
 
 		h4 {
-			text-align: center;
+			text-align: left;
+			line-height: 18px;
 			width: 100%;
-			margin: 0 auto;
+			text-transform: uppercase;
+			font-size: 11px;
+			color: $core-grey-dark-100;
+			opacity: 0.6;
+			margin-top: 0;
 		}
 
 		ul {
-			padding-left: 7px;
 			list-style: none;
 			margin-bottom: 2px;
 			margin-top: 2px;
@@ -91,6 +94,31 @@
 				flex-wrap: nowrap;
 				justify-content: flex-start;
 				align-items: center;
+
+				&.key-row {
+					display: flex;
+					flex-direction: row;
+					justify-content: space-between;
+					width: 100%;
+
+					.key-container {
+						width: 100%;
+						min-width: 100px;
+
+						.key-color {
+							display: inline-block;
+							width: 16px;
+							height: 16px;
+							margin-right: 8px;
+						}
+						.key-key {
+							margin-right: 6px;
+						}
+					}
+					.key-value {
+						font-weight: 600;
+					}
+				}
 			}
 		}
 	}
@@ -100,17 +128,40 @@
 		}
 	}
 	.grid {
-		line {
-			stroke: $core-grey-light-200;
-			stroke-width: 1;
-			shape-rendering: crispEdges;
+		.tick {
+			line {
+				stroke: $core-grey-light-500;
+				stroke-width: 1;
+				shape-rendering: crispEdges;
+			}
+
+			&:first-child {
+				line {
+					stroke: $core-grey-dark-500;
+				}
+			}
+
+			&:last-child {
+				line {
+					opacity: 0;
+				}
+			}
 		}
 	}
 	.tick {
 		padding-top: 10px;
 		stroke-width: 1;
 	}
+	.axis-month {
+		.tick {
+			opacity: 0;
+			&:first-child {
+				opacity: 1;
+			}
+		}
+	}
 	.y-axis {
+		text-anchor: start;
 		&.tick {
 			&text {
 				fill: $core-grey-dark-500;
@@ -119,7 +170,7 @@
 	}
 	line {
 		&.focus-grid {
-			stroke: $core-grey-light-200;
+			stroke: $core-grey-light-700;
 			stroke-width: 1px;
 		}
 	}
@@ -153,14 +204,18 @@
 
 	&.woocommerce-legend__direction-column {
 		flex-direction: column;
-		border-right: 1px solid $core-grey-light-200;
-		border-top: 1px solid $core-grey-light-200;
+		border-right: 1px solid $core-grey-light-700;
 		height: 300px;
 		min-width: 320px;
 
 		li {
-			height: 32px;
-			margin: 0 17px;
+			margin: 0;
+			padding: 0;
+
+			button {
+				height: 32px;
+				padding: 0 17px;
+			}
 
 			&:first-child {
 				margin-top: 17px;
@@ -172,9 +227,12 @@
 		flex-direction: row;
 
 		li {
-			margin: 0 0 0 30px;
+			padding: 0;
+			margin: 0;
 
 			button {
+				padding: 0 17px;
+
 				.woocommerce-legend__item-container {
 					height: 50px;
 					align-items: center;
@@ -192,6 +250,14 @@
 	}
 
 	li {
+		&.woocommerce-legend__item {
+			button {
+				&:hover {
+					background-color: $core-grey-light-100;
+				}
+			}
+		}
+
 		button {
 			background-color: $white;
 			display: inline-flex;
