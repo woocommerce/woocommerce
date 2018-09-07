@@ -1,5 +1,6 @@
 const { __ } = wp.i18n;
-const { Toolbar, withAPIData, Dropdown, Dashicon } = wp.components;
+const { Toolbar, Dropdown, Dashicon } = wp.components;
+const { apiFetch } = wp;
 
 /**
  * Get the identifier for an attribute. The identifier can be used to determine
@@ -158,36 +159,102 @@ const ProductAttributeFilter = ( props ) => {
 /**
  * List of attributes.
  */
-const ProductAttributeList = withAPIData( ( props ) => {
-		return {
-			attributes: '/wc/v2/products/attributes'
+class ProductAttributeList extends React.Component {
+
+	/**
+	 * Constructor
+	 */
+	constructor( props ) {
+		super( props );
+		this.state = {
+			attributes: [],
+			loaded: false,
+			query: '',
 		};
-	} )( ( { attributes, selectedAttribute, filterQuery, selectedTerms, setSelectedAttribute, addTerm, removeTerm } ) => {
-		if ( ! attributes.data ) {
-			return __( 'Loading' );
+
+		this.updatePreview = this.updatePreview.bind( this );
+		this.getQuery = this.getQuery.bind( this );
+	}
+
+	/**
+	 * Get the preview when component is first loaded.
+	 */
+	componentDidMount() {
+		if ( this.getQuery() !== this.state.query ) {
+			this.updatePreview();
+		}
+	}
+
+	/**
+	 * Update the preview when component is updated.
+	 */
+	componentDidUpdate() {
+		if ( this.getQuery() !== this.state.query && this.state.loaded ) {
+			this.updatePreview();
+		}
+	}
+
+	/**
+	 * Get the endpoint for the current state of the component.
+	 *
+	 * @return string
+	 */
+	getQuery() {
+		const endpoint = '/wc/v2/products/attributes';
+		return endpoint;
+	}
+
+	/**
+	 * Update the preview with the latest settings.
+	 */
+	updatePreview() {
+		const self = this;
+		const query = this.getQuery();
+
+		self.setState( {
+			loaded: false
+		} );
+
+		apiFetch( { path: query } ).then( attributes => {
+			self.setState( {
+				attributes: attributes,
+				loaded: true,
+				query: query
+			} );
+		} );
+	}
+
+	/**
+	 * Render.
+	 */
+	render() {
+		const { selectedAttribute, filterQuery, selectedTerms, setSelectedAttribute, addTerm, removeTerm } = this.props;
+
+		if ( ! this.state.loaded ) {
+			return ( <ul><li>{ __( 'Loading' ) }</li></ul> );
 		}
 
-		if ( 0 === attributes.data.length ) {
-			return __( 'No attributes found' );
+		if ( 0 === this.state.attributes.length ) {
+			return ( <ul><li>{ __( 'No attributes found' ) }</li></ul> );
 		}
-
 
 		const filter = filterQuery.toLowerCase();
 		let attributeElements = [];
-		for ( let attribute of attributes.data ) {
+
+		for ( let attribute of this.state.attributes ) {
 			// Filter out attributes that don't match the search query.
 			if ( filter.length && -1 === attribute.name.toLowerCase().indexOf( filter ) ) {
 				continue;
 			}
 
 			attributeElements.push(
-				<ProductAttributeElement 
-					attribute={ attribute } 
-					selectedAttribute={ selectedAttribute } 
-					selectedTerms={ selectedTerms } 
+				<ProductAttributeElement
+					attribute={ attribute }
+					selectedAttribute={ selectedAttribute }
+					selectedTerms={ selectedTerms }
 					setSelectedAttribute={ setSelectedAttribute}
 					addTerm={ addTerm }
-					removeTerm={ removeTerm } 
+					removeTerm={ removeTerm }
 				/>
 			);
 		}
@@ -198,7 +265,7 @@ const ProductAttributeList = withAPIData( ( props ) => {
 			</div>
 		);
 	}
-);
+}
 
 /**
  * One product attribute.
@@ -277,16 +344,82 @@ class ProductAttributeElement extends React.Component {
 /**
  * The list of terms in an attribute.
  */
-const AttributeTerms = withAPIData( ( props ) => {
-		return {
-			terms: '/wc/v2/products/attributes/' + props.attribute.id + '/terms'
+class AttributeTerms extends React.Component {
+
+	/**
+	 * Constructor
+	 */
+	constructor( props ) {
+		super( props );
+		this.state = {
+			terms: [],
+			loaded: false,
+			query: '',
 		};
-	} )( ( { terms, selectedTerms, attribute, addTerm, removeTerm } ) => {
-		if ( ! terms.data ) {
+
+		this.updatePreview = this.updatePreview.bind( this );
+		this.getQuery = this.getQuery.bind( this );
+	}
+
+	/**
+	 * Get the preview when component is first loaded.
+	 */
+	componentDidMount() {
+		if ( this.getQuery() !== this.state.query ) {
+			this.updatePreview();
+		}
+	}
+
+	/**
+	 * Update the preview when component is updated.
+	 */
+	componentDidUpdate() {
+		if ( this.getQuery() !== this.state.query && this.state.loaded ) {
+			this.updatePreview();
+		}
+	}
+
+	/**
+	 * Get the endpoint for the current state of the component.
+	 *
+	 * @return string
+	 */
+	getQuery() {
+		const endpoint = '/wc/v2/products/attributes/' + this.props.attribute.id + '/terms';
+		return endpoint;
+	}
+
+	/**
+	 * Update the preview with the latest settings.
+	 */
+	updatePreview() {
+		const self = this;
+		const query = this.getQuery();
+
+		self.setState( {
+			loaded: false
+		} );
+
+		apiFetch( { path: query } ).then( terms => {
+			self.setState( {
+				terms: terms,
+				loaded: true,
+				query: query
+			} );
+		} );
+	}
+
+	/**
+	 * Render.
+	 */
+	render() {
+		const { selectedTerms, attribute, addTerm, removeTerm } = this.props;
+
+		if ( ! this.state.loaded ) {
 			return ( <ul><li>{ __( 'Loading' ) }</li></ul> );
 		}
 
-		if ( 0 === terms.data.length ) {
+		if ( 0 === this.state.terms.length ) {
 			return ( <ul><li>{ __( 'No terms found' ) }</li></ul> );
 		}
 
@@ -305,7 +438,7 @@ const AttributeTerms = withAPIData( ( props ) => {
 
 		return (
 			<ul>
-				{ terms.data.map( ( term ) => (
+				{ this.state.terms.map( ( term ) => (
 					<li className="wc-products-list-card__item">
 						<label className="wc-products-list-card__content">
 							<input type="checkbox"
@@ -321,4 +454,4 @@ const AttributeTerms = withAPIData( ( props ) => {
 			</ul>
 		);
 	}
-);
+}

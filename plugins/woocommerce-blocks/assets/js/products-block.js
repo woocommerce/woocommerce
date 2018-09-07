@@ -96,12 +96,13 @@ var _wp$editor = wp.editor,
     BlockControls = _wp$editor.BlockControls;
 var _wp$components = wp.components,
     Toolbar = _wp$components.Toolbar,
-    withAPIData = _wp$components.withAPIData,
     Dropdown = _wp$components.Dropdown,
     Dashicon = _wp$components.Dashicon,
     RangeControl = _wp$components.RangeControl,
     Tooltip = _wp$components.Tooltip,
     SelectControl = _wp$components.SelectControl;
+var _wp = wp,
+    apiFetch = _wp.apiFetch;
 
 
 /**
@@ -577,233 +578,433 @@ var ProductPreview = function (_React$Component4) {
  */
 
 
-var ProductsBlockPreview = withAPIData(function (_ref) {
-	var attributes = _ref.attributes;
-	var columns = attributes.columns,
-	    rows = attributes.rows,
-	    display = attributes.display,
-	    display_setting = attributes.display_setting,
-	    orderby = attributes.orderby;
+var ProductsBlockPreview = function (_React$Component5) {
+	_inherits(ProductsBlockPreview, _React$Component5);
 
+	/**
+  * Constructor
+  */
+	function ProductsBlockPreview(props) {
+		_classCallCheck(this, ProductsBlockPreview);
 
-	var query = {
-		per_page: rows * columns
-	};
+		var _this7 = _possibleConstructorReturn(this, (ProductsBlockPreview.__proto__ || Object.getPrototypeOf(ProductsBlockPreview)).call(this, props));
 
-	if ('specific' === display) {
-		query.include = display_setting.join(',');
-		query.per_page = display_setting.length;
-	} else if ('category' === display) {
-		query.category = display_setting.join(',');
-	} else if ('attribute' === display && display_setting.length) {
-		query.attribute = (0, _attributeSelect.getAttributeSlug)(display_setting[0]);
+		_this7.state = {
+			products: [],
+			loaded: false,
+			query: ''
+		};
 
-		if (display_setting.length > 1) {
-			query.attribute_term = display_setting.slice(1).join(',');
-		}
-	} else if ('featured' === display) {
-		query.featured = 1;
-	} else if ('on_sale' === display) {
-		query.on_sale = 1;
+		_this7.updatePreview = _this7.updatePreview.bind(_this7);
+		_this7.getQuery = _this7.getQuery.bind(_this7);
+		return _this7;
 	}
 
-	if (supportsOrderby(display)) {
-		if ('price_desc' === orderby) {
-			query.orderby = 'price';
-			query.order = 'desc';
-		} else if ('price_asc' === orderby) {
-			query.orderby = 'price';
-			query.order = 'asc';
-		} else if ('title' === orderby) {
-			query.orderby = 'title';
-			query.order = 'asc';
-		} else {
-			query.orderby = orderby;
+	/**
+  * Get the preview when component is first loaded.
+  */
+
+
+	_createClass(ProductsBlockPreview, [{
+		key: 'componentDidMount',
+		value: function componentDidMount() {
+			this.updatePreview();
 		}
-	}
 
-	var query_string = '?';
-	var _iteratorNormalCompletion = true;
-	var _didIteratorError = false;
-	var _iteratorError = undefined;
+		/**
+   * Update the preview when component is updated.
+   */
 
-	try {
-		for (var _iterator = Object.keys(query)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-			var key = _step.value;
-
-			query_string += key + '=' + query[key] + '&';
-		}
-	} catch (err) {
-		_didIteratorError = true;
-		_iteratorError = err;
-	} finally {
-		try {
-			if (!_iteratorNormalCompletion && _iterator.return) {
-				_iterator.return();
-			}
-		} finally {
-			if (_didIteratorError) {
-				throw _iteratorError;
+	}, {
+		key: 'componentDidUpdate',
+		value: function componentDidUpdate() {
+			if (this.getQuery() !== this.state.query && this.state.loaded) {
+				this.updatePreview();
 			}
 		}
-	}
 
-	return {
-		// @todo Switch this to use WC core API when possible.
-		products: '/wgbp/v3/products' + query_string
-	};
-})(function (_ref2) {
-	var products = _ref2.products,
-	    attributes = _ref2.attributes;
+		/**
+   * Get the endpoint for the current state of the component.
+   *
+   * @return string
+   */
+
+	}, {
+		key: 'getQuery',
+		value: function getQuery() {
+			var _props$attributes = this.props.attributes,
+			    columns = _props$attributes.columns,
+			    rows = _props$attributes.rows,
+			    display = _props$attributes.display,
+			    display_setting = _props$attributes.display_setting,
+			    orderby = _props$attributes.orderby;
 
 
-	if (!products.data) {
-		return __('Loading');
-	}
+			var query = {
+				per_page: rows * columns
+			};
 
-	if (0 === products.data.length) {
-		return __('No products found');
-	}
+			if ('specific' === display) {
+				query.include = display_setting.join(',');
+				query.per_page = display_setting.length;
+			} else if ('category' === display) {
+				query.category = display_setting.join(',');
+			} else if ('attribute' === display && display_setting.length) {
+				query.attribute = (0, _attributeSelect.getAttributeSlug)(display_setting[0]);
 
-	var classes = "wc-products-block-preview cols-" + attributes.columns;
+				if (display_setting.length > 1) {
+					query.attribute_term = display_setting.slice(1).join(',');
+				}
+			} else if ('featured' === display) {
+				query.featured = 1;
+			} else if ('on_sale' === display) {
+				query.on_sale = 1;
+			}
 
-	return wp.element.createElement(
-		'div',
-		{ className: classes },
-		products.data.map(function (product) {
-			return wp.element.createElement(ProductPreview, { key: product.id, product: product, attributes: attributes });
-		})
-	);
-});
+			if (supportsOrderby(display)) {
+				if ('price_desc' === orderby) {
+					query.orderby = 'price';
+					query.order = 'desc';
+				} else if ('price_asc' === orderby) {
+					query.orderby = 'price';
+					query.order = 'asc';
+				} else if ('title' === orderby) {
+					query.orderby = 'title';
+					query.order = 'asc';
+				} else {
+					query.orderby = orderby;
+				}
+			}
+
+			var query_string = '?';
+			var _iteratorNormalCompletion = true;
+			var _didIteratorError = false;
+			var _iteratorError = undefined;
+
+			try {
+				for (var _iterator = Object.keys(query)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+					var key = _step.value;
+
+					query_string += key + '=' + query[key] + '&';
+				}
+			} catch (err) {
+				_didIteratorError = true;
+				_iteratorError = err;
+			} finally {
+				try {
+					if (!_iteratorNormalCompletion && _iterator.return) {
+						_iterator.return();
+					}
+				} finally {
+					if (_didIteratorError) {
+						throw _iteratorError;
+					}
+				}
+			}
+
+			var endpoint = '/wgbp/v3/products' + query_string;
+			return endpoint;
+		}
+
+		/**
+   * Update the preview with the latest settings.
+   */
+
+	}, {
+		key: 'updatePreview',
+		value: function updatePreview() {
+			var self = this;
+			var query = this.getQuery();
+
+			self.setState({
+				loaded: false,
+				query: query
+			});
+
+			apiFetch({ path: query }).then(function (products) {
+				self.setState({
+					products: products,
+					loaded: true
+				});
+			});
+		}
+
+		/**
+   * Render.
+   */
+
+	}, {
+		key: 'render',
+		value: function render() {
+			if (!this.state.loaded) {
+				return __('Loading');
+			}
+
+			if (0 === this.state.products.length) {
+				return __('No products found');
+			}
+
+			var classes = "wc-products-block-preview cols-" + this.props.attributes.columns;
+			var self = this;
+
+			return wp.element.createElement(
+				'div',
+				{ className: classes },
+				this.state.products.map(function (product) {
+					return wp.element.createElement(ProductPreview, { key: product.id, product: product, attributes: self.props.attributes });
+				})
+			);
+		}
+	}]);
+
+	return ProductsBlockPreview;
+}(React.Component);
 
 /**
  * Information about current block settings rendered in the sidebar.
  */
-var ProductsBlockSidebarInfo = withAPIData(function (_ref3) {
-	var attributes = _ref3.attributes;
-	var display = attributes.display,
-	    display_setting = attributes.display_setting;
 
 
-	if ('attribute' === display && display_setting.length) {
-		var ID = (0, _attributeSelect.getAttributeID)(display_setting[0]);
-		var terms = display_setting.slice(1).join(', ');
-		var endpoints = {
-			attributeInfo: '/wc/v2/products/attributes/' + ID
+var ProductsBlockSidebarInfo = function (_React$Component6) {
+	_inherits(ProductsBlockSidebarInfo, _React$Component6);
+
+	/**
+  * Constructor
+  */
+	function ProductsBlockSidebarInfo(props) {
+		_classCallCheck(this, ProductsBlockSidebarInfo);
+
+		var _this8 = _possibleConstructorReturn(this, (ProductsBlockSidebarInfo.__proto__ || Object.getPrototypeOf(ProductsBlockSidebarInfo)).call(this, props));
+
+		_this8.state = {
+			categoriesInfo: [],
+			categoriesQuery: '',
+
+			attributeInfo: false,
+			attributeQuery: '',
+
+			termsInfo: [],
+			termsQuery: ''
 		};
 
-		if (terms.length) {
-			endpoints.termInfo = '/wc/v2/products/attributes/' + ID + '/terms?include=' + terms;
-		}
-
-		return endpoints;
-	} else if ('category' === display && display_setting.length) {
-		return {
-			categoriesInfo: '/wc/v2/products/categories?include=' + display_setting.join(',')
-		};
+		_this8.updateInfo = _this8.updateInfo.bind(_this8);
+		_this8.getQueries = _this8.getQueries.bind(_this8);
+		return _this8;
 	}
 
-	return {};
-})(function (_ref4) {
-	var attributes = _ref4.attributes,
-	    categoriesInfo = _ref4.categoriesInfo,
-	    attributeInfo = _ref4.attributeInfo,
-	    termInfo = _ref4.termInfo;
+	/**
+  * Populate info when component is first loaded.
+  */
 
 
-	var descriptions = [
-	// Standard description of selected scope.
-	PRODUCTS_BLOCK_DISPLAY_SETTINGS[attributes.display].title];
+	_createClass(ProductsBlockSidebarInfo, [{
+		key: 'componentDidMount',
+		value: function componentDidMount() {
+			this.updateInfo();
+		}
+	}, {
+		key: 'componentDidUpdate',
+		value: function componentDidUpdate() {
+			var queries = this.getQueries();
 
-	// Description of categories selected scope.
-	if (categoriesInfo && categoriesInfo.data && categoriesInfo.data.length) {
-		var descriptionText = __('Product categories: ');
-		var categories = [];
-		var _iteratorNormalCompletion2 = true;
-		var _didIteratorError2 = false;
-		var _iteratorError2 = undefined;
-
-		try {
-			for (var _iterator2 = categoriesInfo.data[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-				var category = _step2.value;
-
-				categories.push(category.name);
-			}
-		} catch (err) {
-			_didIteratorError2 = true;
-			_iteratorError2 = err;
-		} finally {
-			try {
-				if (!_iteratorNormalCompletion2 && _iterator2.return) {
-					_iterator2.return();
-				}
-			} finally {
-				if (_didIteratorError2) {
-					throw _iteratorError2;
-				}
+			if (this.state.categoriesQuery !== queries.categories || this.state.attributeQuery !== queries.attribute || this.state.termsQuery !== queries.terms) {
+				this.updateInfo();
 			}
 		}
 
-		descriptionText += categories.join(', ');
+		/**
+   * Get endpoints for the current state of the component.
+   *
+   * @return object
+   */
 
-		descriptions = [descriptionText];
+	}, {
+		key: 'getQueries',
+		value: function getQueries() {
+			var _props$attributes2 = this.props.attributes,
+			    display = _props$attributes2.display,
+			    display_setting = _props$attributes2.display_setting;
 
-		// Description of attributes selected scope.
-	} else if (attributeInfo && attributeInfo.data) {
-		descriptions = [__('Attribute: ') + attributeInfo.data.name];
+			var endpoints = {
+				attribute: '',
+				terms: '',
+				categories: ''
+			};
 
-		if (termInfo && termInfo.data && termInfo.data.length) {
-			var termDescriptionText = __("Terms: ");
-			var terms = [];
-			var _iteratorNormalCompletion3 = true;
-			var _didIteratorError3 = false;
-			var _iteratorError3 = undefined;
+			if ('attribute' === display && display_setting.length) {
+				var ID = (0, _attributeSelect.getAttributeID)(display_setting[0]);
+				var terms = display_setting.slice(1).join(', ');
 
-			try {
-				for (var _iterator3 = termInfo.data[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-					var term = _step3.value;
+				endpoints.attribute = '/wc/v2/products/attributes/' + ID;
 
-					terms.push(term.name);
+				if (terms.length) {
+					endpoints.terms = '/wc/v2/products/attributes/' + ID + '/terms?include=' + terms;
 				}
-			} catch (err) {
-				_didIteratorError3 = true;
-				_iteratorError3 = err;
-			} finally {
+			} else if ('category' === display && display_setting.length) {
+				endpoints.categories = '/wc/v2/products/categories?include=' + display_setting.join(',');
+			}
+
+			return endpoints;
+		}
+
+		/**
+   * Get the latest info for the sidebar information area.
+   */
+
+	}, {
+		key: 'updateInfo',
+		value: function updateInfo() {
+			var self = this;
+			var queries = this.getQueries();
+
+			this.setState({
+				categoriesQuery: queries.categories,
+				attributeQuery: queries.attribute,
+				termsQuery: queries.terms
+			});
+
+			if (queries.categories.length) {
+				apiFetch({ path: queries.categories }).then(function (categories) {
+					self.setState({
+						categoriesInfo: categories
+					});
+				});
+			} else {
+				self.setState({
+					categoriesInfo: []
+				});
+			}
+
+			if (queries.attribute.length) {
+				apiFetch({ path: queries.attribute }).then(function (attribute) {
+					self.setState({
+						attributeInfo: attribute
+					});
+				});
+			} else {
+				self.setState({
+					attributeInfo: false
+				});
+			}
+
+			if (queries.terms.length) {
+				apiFetch({ path: queries.terms }).then(function (terms) {
+					self.setState({
+						termsInfo: terms
+					});
+				});
+			} else {
+				self.setState({
+					termsInfo: []
+				});
+			}
+		}
+
+		/**
+   * Render.
+   */
+
+	}, {
+		key: 'render',
+		value: function render() {
+			var descriptions = [
+			// Standard description of selected scope.
+			PRODUCTS_BLOCK_DISPLAY_SETTINGS[this.props.attributes.display].title];
+
+			if (this.state.categoriesInfo.length) {
+				var descriptionText = __('Product categories: ');
+				var categories = [];
+				var _iteratorNormalCompletion2 = true;
+				var _didIteratorError2 = false;
+				var _iteratorError2 = undefined;
+
 				try {
-					if (!_iteratorNormalCompletion3 && _iterator3.return) {
-						_iterator3.return();
+					for (var _iterator2 = this.state.categoriesInfo[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+						var category = _step2.value;
+
+						categories.push(category.name);
 					}
+				} catch (err) {
+					_didIteratorError2 = true;
+					_iteratorError2 = err;
 				} finally {
-					if (_didIteratorError3) {
-						throw _iteratorError3;
+					try {
+						if (!_iteratorNormalCompletion2 && _iterator2.return) {
+							_iterator2.return();
+						}
+					} finally {
+						if (_didIteratorError2) {
+							throw _iteratorError2;
+						}
 					}
+				}
+
+				descriptionText += categories.join(', ');
+
+				descriptions = [descriptionText];
+
+				// Description of attributes selected scope.
+			} else if (this.state.attributeInfo) {
+				descriptions = [__('Attribute: ') + this.state.attributeInfo.name];
+
+				if (this.state.termsInfo.length) {
+					var termDescriptionText = __("Terms: ");
+					var terms = [];
+					var _iteratorNormalCompletion3 = true;
+					var _didIteratorError3 = false;
+					var _iteratorError3 = undefined;
+
+					try {
+						for (var _iterator3 = this.state.termsInfo[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+							var term = _step3.value;
+
+							terms.push(term.name);
+						}
+					} catch (err) {
+						_didIteratorError3 = true;
+						_iteratorError3 = err;
+					} finally {
+						try {
+							if (!_iteratorNormalCompletion3 && _iterator3.return) {
+								_iterator3.return();
+							}
+						} finally {
+							if (_didIteratorError3) {
+								throw _iteratorError3;
+							}
+						}
+					}
+
+					termDescriptionText += terms.join(', ');
+					descriptions.push(termDescriptionText);
 				}
 			}
 
-			termDescriptionText += terms.join(', ');
-			descriptions.push(termDescriptionText);
-		}
-	}
-
-	return wp.element.createElement(
-		'div',
-		null,
-		descriptions.map(function (description) {
 			return wp.element.createElement(
 				'div',
-				{ className: 'scope-description' },
-				description
+				null,
+				descriptions.map(function (description) {
+					return wp.element.createElement(
+						'div',
+						{ className: 'scope-description' },
+						description
+					);
+				})
 			);
-		})
-	);
-});
+		}
+	}]);
+
+	return ProductsBlockSidebarInfo;
+}(React.Component);
+
+;
 
 /**
  * The main products block UI.
  */
 
-var ProductsBlock = function (_React$Component5) {
-	_inherits(ProductsBlock, _React$Component5);
+var ProductsBlock = function (_React$Component7) {
+	_inherits(ProductsBlock, _React$Component7);
 
 	/**
   * Constructor.
@@ -811,14 +1012,14 @@ var ProductsBlock = function (_React$Component5) {
 	function ProductsBlock(props) {
 		_classCallCheck(this, ProductsBlock);
 
-		var _this7 = _possibleConstructorReturn(this, (ProductsBlock.__proto__ || Object.getPrototypeOf(ProductsBlock)).call(this, props));
+		var _this9 = _possibleConstructorReturn(this, (ProductsBlock.__proto__ || Object.getPrototypeOf(ProductsBlock)).call(this, props));
 
-		_this7.getInspectorControls = _this7.getInspectorControls.bind(_this7);
-		_this7.getToolbarControls = _this7.getToolbarControls.bind(_this7);
-		_this7.getBlockDescription = _this7.getBlockDescription.bind(_this7);
-		_this7.getPreview = _this7.getPreview.bind(_this7);
-		_this7.getSettingsEditor = _this7.getSettingsEditor.bind(_this7);
-		return _this7;
+		_this9.getInspectorControls = _this9.getInspectorControls.bind(_this9);
+		_this9.getToolbarControls = _this9.getToolbarControls.bind(_this9);
+		_this9.getBlockDescription = _this9.getBlockDescription.bind(_this9);
+		_this9.getPreview = _this9.getPreview.bind(_this9);
+		_this9.getSettingsEditor = _this9.getSettingsEditor.bind(_this9);
+		return _this9;
 	}
 
 	/**
@@ -1152,12 +1353,12 @@ registerBlockType('woocommerce/products', {
   * @return string
   */
 	save: function save(props) {
-		var _props$attributes = props.attributes,
-		    rows = _props$attributes.rows,
-		    columns = _props$attributes.columns,
-		    display = _props$attributes.display,
-		    display_setting = _props$attributes.display_setting,
-		    orderby = _props$attributes.orderby;
+		var _props$attributes3 = props.attributes,
+		    rows = _props$attributes3.rows,
+		    columns = _props$attributes3.columns,
+		    display = _props$attributes3.display,
+		    display_setting = _props$attributes3.display_setting,
+		    orderby = _props$attributes3.orderby;
 
 
 		var shortcode_atts = new Map();
@@ -1211,12 +1412,12 @@ registerBlockType('woocommerce/products', {
 
 		try {
 			for (var _iterator4 = shortcode_atts[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-				var _ref5 = _step4.value;
+				var _ref = _step4.value;
 
-				var _ref6 = _slicedToArray(_ref5, 2);
+				var _ref2 = _slicedToArray(_ref, 2);
 
-				var key = _ref6[0];
-				var value = _ref6[1];
+				var key = _ref2[0];
+				var value = _ref2[1];
 
 				shortcode += ' ' + key + '="' + value + '"';
 			}
@@ -1267,9 +1468,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var __ = wp.i18n.__;
 var _wp$components = wp.components,
     Toolbar = _wp$components.Toolbar,
-    withAPIData = _wp$components.withAPIData,
     Dropdown = _wp$components.Dropdown,
     Dashicon = _wp$components.Dashicon;
+var _wp = wp,
+    apiFetch = _wp.apiFetch;
 
 /**
  * Product data cache.
@@ -1280,8 +1482,6 @@ var PRODUCT_DATA = {};
 
 /**
  * When the display mode is 'Specific products' search for and add products to the block.
- *
- * @todo Add the functionality and everything.
  */
 
 var ProductsSpecificSelect = exports.ProductsSpecificSelect = function (_React$Component) {
@@ -1497,77 +1697,166 @@ var ProductsSpecificSearchField = function (_React$Component2) {
  */
 
 
-var ProductSpecificSearchResults = withAPIData(function (props) {
+var ProductSpecificSearchResults = function (_React$Component3) {
+	_inherits(ProductSpecificSearchResults, _React$Component3);
 
-	if (!props.searchString.length) {
-		return {
-			products: []
+	/**
+  * Constructor.
+  */
+	function ProductSpecificSearchResults(props) {
+		_classCallCheck(this, ProductSpecificSearchResults);
+
+		var _this3 = _possibleConstructorReturn(this, (ProductSpecificSearchResults.__proto__ || Object.getPrototypeOf(ProductSpecificSearchResults)).call(this, props));
+
+		_this3.state = {
+			products: [],
+			query: '',
+			loaded: false
 		};
+
+		_this3.updateResults = _this3.updateResults.bind(_this3);
+		_this3.getQuery = _this3.getQuery.bind(_this3);
+		return _this3;
 	}
 
-	return {
-		products: '/wc/v2/products?per_page=10&search=' + props.searchString
-	};
-})(function (_ref) {
-	var products = _ref.products,
-	    addOrRemoveProductCallback = _ref.addOrRemoveProductCallback,
-	    selectedProducts = _ref.selectedProducts,
-	    isDropdownOpenCallback = _ref.isDropdownOpenCallback;
+	/**
+  * Get the preview when component is first loaded.
+  */
 
-	if (!products.data) {
-		return null;
-	}
 
-	if (0 === products.data.length) {
-		return wp.element.createElement(
-			'span',
-			{ className: 'wc-products-list-card__search-no-results' },
-			' ',
-			__('No products found'),
-			' '
-		);
-	}
-
-	// Populate the cache.
-	var _iteratorNormalCompletion = true;
-	var _didIteratorError = false;
-	var _iteratorError = undefined;
-
-	try {
-		for (var _iterator = products.data[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-			var product = _step.value;
-
-			PRODUCT_DATA[product.id] = product;
+	_createClass(ProductSpecificSearchResults, [{
+		key: 'componentDidMount',
+		value: function componentDidMount() {
+			this.updateResults();
 		}
-	} catch (err) {
-		_didIteratorError = true;
-		_iteratorError = err;
-	} finally {
-		try {
-			if (!_iteratorNormalCompletion && _iterator.return) {
-				_iterator.return();
-			}
-		} finally {
-			if (_didIteratorError) {
-				throw _iteratorError;
+
+		/**
+   * Update the preview when component is updated.
+   */
+
+	}, {
+		key: 'componentDidUpdate',
+		value: function componentDidUpdate() {
+			if (this.getQuery() !== this.state.query) {
+				this.updateResults();
 			}
 		}
-	}
 
-	return wp.element.createElement(ProductSpecificSearchResultsDropdown, {
-		products: products.data,
-		addOrRemoveProductCallback: addOrRemoveProductCallback,
-		selectedProducts: selectedProducts,
-		isDropdownOpenCallback: isDropdownOpenCallback
-	});
-});
+		/**
+   * Get the endpoint for the current state of the component.
+   *
+   * @return string
+   */
+
+	}, {
+		key: 'getQuery',
+		value: function getQuery() {
+			if (!this.props.searchString.length) {
+				return '';
+			}
+
+			return '/wc/v2/products?per_page=10&search=' + this.props.searchString;
+		}
+
+		/**
+   * Update the search results.
+   */
+
+	}, {
+		key: 'updateResults',
+		value: function updateResults() {
+			var self = this;
+			var query = this.getQuery();
+
+			self.setState({
+				query: query,
+				loaded: false
+			});
+
+			if (query.length) {
+				apiFetch({ path: query }).then(function (products) {
+					// Only update the results if they are for the latest query.
+					if (query === self.getQuery()) {
+						self.setState({
+							products: products,
+							loaded: true
+						});
+					}
+				});
+			} else {
+				self.setState({
+					products: [],
+					loaded: true
+				});
+			}
+		}
+
+		/**
+   * Render.
+   */
+
+	}, {
+		key: 'render',
+		value: function render() {
+			if (!this.state.loaded || !this.state.query.length) {
+				return null;
+			}
+
+			if (0 === this.state.products.length) {
+				return wp.element.createElement(
+					'span',
+					{ className: 'wc-products-list-card__search-no-results' },
+					' ',
+					__('No products found'),
+					' '
+				);
+			}
+
+			// Populate the cache.
+			var _iteratorNormalCompletion = true;
+			var _didIteratorError = false;
+			var _iteratorError = undefined;
+
+			try {
+				for (var _iterator = this.state.products[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+					var product = _step.value;
+
+					PRODUCT_DATA[product.id] = product;
+				}
+			} catch (err) {
+				_didIteratorError = true;
+				_iteratorError = err;
+			} finally {
+				try {
+					if (!_iteratorNormalCompletion && _iterator.return) {
+						_iterator.return();
+					}
+				} finally {
+					if (_didIteratorError) {
+						throw _iteratorError;
+					}
+				}
+			}
+
+			return wp.element.createElement(ProductSpecificSearchResultsDropdown, {
+				products: this.state.products,
+				addOrRemoveProductCallback: this.props.addOrRemoveProductCallback,
+				selectedProducts: this.props.selectedProducts,
+				isDropdownOpenCallback: this.props.isDropdownOpenCallback
+			});
+		}
+	}]);
+
+	return ProductSpecificSearchResults;
+}(React.Component);
 
 /**
  * The dropdown of search results.
  */
 
-var ProductSpecificSearchResultsDropdown = function (_React$Component3) {
-	_inherits(ProductSpecificSearchResultsDropdown, _React$Component3);
+
+var ProductSpecificSearchResultsDropdown = function (_React$Component4) {
+	_inherits(ProductSpecificSearchResultsDropdown, _React$Component4);
 
 	function ProductSpecificSearchResultsDropdown() {
 		_classCallCheck(this, ProductSpecificSearchResultsDropdown);
@@ -1660,8 +1949,8 @@ var ProductSpecificSearchResultsDropdown = function (_React$Component3) {
  */
 
 
-var ProductSpecificSearchResultsDropdownElement = function (_React$Component4) {
-	_inherits(ProductSpecificSearchResultsDropdownElement, _React$Component4);
+var ProductSpecificSearchResultsDropdownElement = function (_React$Component5) {
+	_inherits(ProductSpecificSearchResultsDropdownElement, _React$Component5);
 
 	/**
   * Constructor.
@@ -1669,10 +1958,10 @@ var ProductSpecificSearchResultsDropdownElement = function (_React$Component4) {
 	function ProductSpecificSearchResultsDropdownElement(props) {
 		_classCallCheck(this, ProductSpecificSearchResultsDropdownElement);
 
-		var _this4 = _possibleConstructorReturn(this, (ProductSpecificSearchResultsDropdownElement.__proto__ || Object.getPrototypeOf(ProductSpecificSearchResultsDropdownElement)).call(this, props));
+		var _this5 = _possibleConstructorReturn(this, (ProductSpecificSearchResultsDropdownElement.__proto__ || Object.getPrototypeOf(ProductSpecificSearchResultsDropdownElement)).call(this, props));
 
-		_this4.handleClick = _this4.handleClick.bind(_this4);
-		return _this4;
+		_this5.handleClick = _this5.handleClick.bind(_this5);
+		return _this5;
 	}
 
 	/**
@@ -1718,163 +2007,241 @@ var ProductSpecificSearchResultsDropdownElement = function (_React$Component4) {
  */
 
 
-var ProductSpecificSelectedProducts = withAPIData(function (props) {
-	if (!props.productIds.length) {
-		return {
-			products: []
+var ProductSpecificSelectedProducts = function (_React$Component6) {
+	_inherits(ProductSpecificSelectedProducts, _React$Component6);
+
+	/**
+  * Constructor
+  */
+	function ProductSpecificSelectedProducts(props) {
+		_classCallCheck(this, ProductSpecificSelectedProducts);
+
+		var _this6 = _possibleConstructorReturn(this, (ProductSpecificSelectedProducts.__proto__ || Object.getPrototypeOf(ProductSpecificSelectedProducts)).call(this, props));
+
+		_this6.state = {
+			query: '',
+			loaded: false
 		};
+
+		_this6.updateProductCache = _this6.updateProductCache.bind(_this6);
+		_this6.getQuery = _this6.getQuery.bind(_this6);
+
+		return _this6;
 	}
 
-	// Determine which products are not already in the cache and only fetch uncached products.
-	var uncachedProducts = [];
-	var _iteratorNormalCompletion3 = true;
-	var _didIteratorError3 = false;
-	var _iteratorError3 = undefined;
+	/**
+  * Get the preview when component is first loaded.
+  */
 
-	try {
-		for (var _iterator3 = props.productIds[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-			var productId = _step3.value;
 
-			if (!PRODUCT_DATA.hasOwnProperty(productId)) {
-				uncachedProducts.push(productId);
+	_createClass(ProductSpecificSelectedProducts, [{
+		key: 'componentDidMount',
+		value: function componentDidMount() {
+			this.updateProductCache();
+		}
+
+		/**
+   * Update the preview when component is updated.
+   */
+
+	}, {
+		key: 'componentDidUpdate',
+		value: function componentDidUpdate() {
+			if (this.state.loaded && this.getQuery() !== this.state.query) {
+				this.updateProductCache();
 			}
 		}
-	} catch (err) {
-		_didIteratorError3 = true;
-		_iteratorError3 = err;
-	} finally {
-		try {
-			if (!_iteratorNormalCompletion3 && _iterator3.return) {
-				_iterator3.return();
+
+		/**
+   * Get the endpoint for the current state of the component.
+   */
+
+	}, {
+		key: 'getQuery',
+		value: function getQuery() {
+			if (!this.props.productIds.length) {
+				return '';
 			}
-		} finally {
-			if (_didIteratorError3) {
-				throw _iteratorError3;
-			}
-		}
-	}
 
-	return {
-		products: uncachedProducts.length ? '/wc/v2/products?include=' + uncachedProducts.join(',') : []
-	};
-})(function (_ref2) {
-	var productIds = _ref2.productIds,
-	    products = _ref2.products,
-	    columns = _ref2.columns,
-	    addOrRemoveProduct = _ref2.addOrRemoveProduct;
+			// Determine which products are not already in the cache and only fetch uncached products.
+			var uncachedProducts = [];
+			var _iteratorNormalCompletion3 = true;
+			var _didIteratorError3 = false;
+			var _iteratorError3 = undefined;
 
-
-	// Add new products to cache.
-	if (products.data) {
-		var _iteratorNormalCompletion4 = true;
-		var _didIteratorError4 = false;
-		var _iteratorError4 = undefined;
-
-		try {
-			for (var _iterator4 = products.data[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-				var product = _step4.value;
-
-				PRODUCT_DATA[product.id] = product;
-			}
-		} catch (err) {
-			_didIteratorError4 = true;
-			_iteratorError4 = err;
-		} finally {
 			try {
-				if (!_iteratorNormalCompletion4 && _iterator4.return) {
-					_iterator4.return();
+				for (var _iterator3 = this.props.productIds[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+					var productId = _step3.value;
+
+					if (!PRODUCT_DATA.hasOwnProperty(productId)) {
+						uncachedProducts.push(productId);
+					}
 				}
+			} catch (err) {
+				_didIteratorError3 = true;
+				_iteratorError3 = err;
 			} finally {
-				if (_didIteratorError4) {
-					throw _iteratorError4;
+				try {
+					if (!_iteratorNormalCompletion3 && _iterator3.return) {
+						_iterator3.return();
+					}
+				} finally {
+					if (_didIteratorError3) {
+						throw _iteratorError3;
+					}
 				}
 			}
-		}
-	}
 
-	var productElements = [];
-
-	var _loop = function _loop(productId) {
-
-		// Skip products that aren't in the cache yet or failed to fetch.
-		if (!PRODUCT_DATA.hasOwnProperty(productId)) {
-			return 'continue';
+			return uncachedProducts.length ? '/wc/v2/products?include=' + uncachedProducts.join(',') : '';
 		}
 
-		var productData = PRODUCT_DATA[productId];
+		/**
+   * Add newly fetched products to the cache.
+   */
 
-		productElements.push(wp.element.createElement(
-			'li',
-			{ className: 'wc-products-list-card__item', key: productData.id + '-specific-select-edit' },
-			wp.element.createElement(
+	}, {
+		key: 'updateProductCache',
+		value: function updateProductCache() {
+			var self = this;
+			var query = this.getQuery();
+
+			self.setState({
+				query: query,
+				loaded: false
+			});
+
+			// Add new products to cache.
+			if (query.length) {
+				apiFetch({ path: query }).then(function (products) {
+					if (products.length) {
+						var _iteratorNormalCompletion4 = true;
+						var _didIteratorError4 = false;
+						var _iteratorError4 = undefined;
+
+						try {
+							for (var _iterator4 = products[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+								var product = _step4.value;
+
+								PRODUCT_DATA[product.id] = product;
+							}
+						} catch (err) {
+							_didIteratorError4 = true;
+							_iteratorError4 = err;
+						} finally {
+							try {
+								if (!_iteratorNormalCompletion4 && _iterator4.return) {
+									_iterator4.return();
+								}
+							} finally {
+								if (_didIteratorError4) {
+									throw _iteratorError4;
+								}
+							}
+						}
+					}
+
+					self.setState({
+						loaded: true
+					});
+				});
+			}
+		}
+
+		/**
+   * Render.
+   */
+
+	}, {
+		key: 'render',
+		value: function render() {
+			var self = this;
+			var productElements = [];
+
+			var _loop = function _loop(productId) {
+
+				// Skip products that aren't in the cache yet or failed to fetch.
+				if (!PRODUCT_DATA.hasOwnProperty(productId)) {
+					return 'continue';
+				}
+
+				var productData = PRODUCT_DATA[productId];
+
+				productElements.push(wp.element.createElement(
+					'li',
+					{ className: 'wc-products-list-card__item', key: productData.id + '-specific-select-edit' },
+					wp.element.createElement(
+						'div',
+						{ className: 'wc-products-list-card__content' },
+						wp.element.createElement('img', { src: productData.images[0].src }),
+						wp.element.createElement(
+							'span',
+							{ className: 'wc-products-list-card__content-item-name' },
+							productData.name
+						),
+						wp.element.createElement(
+							'button',
+							{
+								type: 'button',
+								id: 'product-' + productData.id,
+								onClick: function onClick() {
+									self.props.addOrRemoveProduct(productData.id);
+								} },
+							wp.element.createElement(Dashicon, { icon: 'no-alt' })
+						)
+					)
+				));
+			};
+
+			var _iteratorNormalCompletion5 = true;
+			var _didIteratorError5 = false;
+			var _iteratorError5 = undefined;
+
+			try {
+				for (var _iterator5 = this.props.productIds[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+					var productId = _step5.value;
+
+					var _ret = _loop(productId);
+
+					if (_ret === 'continue') continue;
+				}
+			} catch (err) {
+				_didIteratorError5 = true;
+				_iteratorError5 = err;
+			} finally {
+				try {
+					if (!_iteratorNormalCompletion5 && _iterator5.return) {
+						_iterator5.return();
+					}
+				} finally {
+					if (_didIteratorError5) {
+						throw _iteratorError5;
+					}
+				}
+			}
+
+			return wp.element.createElement(
 				'div',
-				{ className: 'wc-products-list-card__content' },
-				wp.element.createElement('img', { src: productData.images[0].src }),
+				{ className: 'wc-products-list-card__results-wrapper wc-products-list-card__results-wrapper--cols-' + this.props.columns },
 				wp.element.createElement(
-					'span',
-					{ className: 'wc-products-list-card__content-item-name' },
-					productData.name
-				),
-				wp.element.createElement(
-					'button',
-					{
-						type: 'button',
-						id: 'product-' + productData.id,
-						onClick: function onClick() {
-							addOrRemoveProduct(productData.id);
-						} },
-					wp.element.createElement(Dashicon, { icon: 'no-alt' })
+					'div',
+					{ role: 'menu', className: 'wc-products-list-card__results', 'aria-orientation': 'vertical', 'aria-label': __('Selected products') },
+					productElements.length > 0 && wp.element.createElement(
+						'h3',
+						null,
+						__('Selected products')
+					),
+					wp.element.createElement(
+						'ul',
+						null,
+						productElements
+					)
 				)
-			)
-		));
-	};
-
-	var _iteratorNormalCompletion5 = true;
-	var _didIteratorError5 = false;
-	var _iteratorError5 = undefined;
-
-	try {
-		for (var _iterator5 = productIds[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-			var productId = _step5.value;
-
-			var _ret = _loop(productId);
-
-			if (_ret === 'continue') continue;
+			);
 		}
-	} catch (err) {
-		_didIteratorError5 = true;
-		_iteratorError5 = err;
-	} finally {
-		try {
-			if (!_iteratorNormalCompletion5 && _iterator5.return) {
-				_iterator5.return();
-			}
-		} finally {
-			if (_didIteratorError5) {
-				throw _iteratorError5;
-			}
-		}
-	}
+	}]);
 
-	return wp.element.createElement(
-		'div',
-		{ className: 'wc-products-list-card__results-wrapper wc-products-list-card__results-wrapper--cols-' + columns },
-		wp.element.createElement(
-			'div',
-			{ role: 'menu', className: 'wc-products-list-card__results', 'aria-orientation': 'vertical', 'aria-label': __('Selected products') },
-			productElements.length > 0 && wp.element.createElement(
-				'h3',
-				null,
-				__('Selected products')
-			),
-			wp.element.createElement(
-				'ul',
-				null,
-				productElements
-			)
-		)
-	);
-});
+	return ProductSpecificSelectedProducts;
+}(React.Component);
 
 /***/ }),
 /* 2 */
@@ -1900,9 +2267,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var __ = wp.i18n.__;
 var _wp$components = wp.components,
     Toolbar = _wp$components.Toolbar,
-    withAPIData = _wp$components.withAPIData,
     Dropdown = _wp$components.Dropdown,
     Dashicon = _wp$components.Dashicon;
+var _wp = wp,
+    apiFetch = _wp.apiFetch;
 
 /**
  * When the display mode is 'Product category' search for and select product categories to pull products from.
@@ -2061,220 +2429,311 @@ var ProductCategoryFilter = function ProductCategoryFilter(_ref) {
 /**
  * Fetch and build a tree of product categories.
  */
-var ProductCategoryList = withAPIData(function (props) {
-	return {
-		categories: '/wc/v2/products/categories'
-	};
-})(function (_ref2) {
-	var categories = _ref2.categories,
-	    filterQuery = _ref2.filterQuery,
-	    selectedCategories = _ref2.selectedCategories,
-	    checkboxChange = _ref2.checkboxChange,
-	    accordionToggle = _ref2.accordionToggle,
-	    openAccordion = _ref2.openAccordion,
-	    firstLoad = _ref2.firstLoad,
-	    setFirstLoad = _ref2.setFirstLoad;
 
-	if (!categories.data) {
-		return __('Loading');
-	}
+var ProductCategoryList = function (_React$Component2) {
+	_inherits(ProductCategoryList, _React$Component2);
 
-	if (0 === categories.data.length) {
-		return __('No categories found');
-	}
+	/**
+  * Constructor
+  */
+	function ProductCategoryList(props) {
+		_classCallCheck(this, ProductCategoryList);
 
-	var handleCategoriesToCheck = function handleCategoriesToCheck(evt, parent, categories) {
-		var ids = getCategoryChildren(parent, categories).map(function (category) {
-			return category.id;
-		});
+		var _this2 = _possibleConstructorReturn(this, (ProductCategoryList.__proto__ || Object.getPrototypeOf(ProductCategoryList)).call(this, props));
 
-		ids.push(parent.id);
-
-		checkboxChange(evt.target.checked, ids);
-	};
-
-	var getCategoryChildren = function getCategoryChildren(parent, categories) {
-		var children = [];
-
-		categories.filter(function (category) {
-			return category.parent === parent.id;
-		}).forEach(function (category) {
-			children.push(category);
-			children.push.apply(children, _toConsumableArray(getCategoryChildren(category, categories)));
-		});
-
-		return children;
-	};
-
-	var categoryHasChildren = function categoryHasChildren(parent, categories) {
-		return !!getCategoryChildren(parent, categories).length;
-	};
-
-	var isIndeterminate = function isIndeterminate(category, categories) {
-
-		// Currect category selected?
-		if (selectedCategories.includes(category.id)) {
-			return false;
-		}
-
-		// Has children?
-		var children = getCategoryChildren(category, categories).map(function (category) {
-			return category.id;
-		});
-
-		var _iteratorNormalCompletion = true;
-		var _didIteratorError = false;
-		var _iteratorError = undefined;
-
-		try {
-			for (var _iterator = children[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-				var child = _step.value;
-
-				if (selectedCategories.includes(child)) {
-					return true;
-				}
-			}
-		} catch (err) {
-			_didIteratorError = true;
-			_iteratorError = err;
-		} finally {
-			try {
-				if (!_iteratorNormalCompletion && _iterator.return) {
-					_iterator.return();
-				}
-			} finally {
-				if (_didIteratorError) {
-					throw _iteratorError;
-				}
-			}
-		}
-
-		return false;
-	};
-
-	var AccordionButton = function AccordionButton(_ref3) {
-		var category = _ref3.category,
-		    categories = _ref3.categories;
-
-		var icon = 'arrow-down-alt2';
-
-		if (openAccordion.includes(category.id)) {
-			icon = 'arrow-up-alt2';
-		}
-
-		var style = null;
-
-		if (!categoryHasChildren(category, categories)) {
-			style = {
-				visibility: 'hidden'
-			};
+		_this2.state = {
+			categories: [],
+			loaded: false,
+			query: ''
 		};
 
-		return wp.element.createElement(
-			"button",
-			{ onClick: function onClick() {
-					return accordionToggle(category.id);
-				}, className: "wc-products-list-card__accordion-button", style: style, type: "button" },
-			wp.element.createElement(Dashicon, { icon: icon })
-		);
-	};
+		_this2.updatePreview = _this2.updatePreview.bind(_this2);
+		_this2.getQuery = _this2.getQuery.bind(_this2);
+		return _this2;
+	}
 
-	var CategoryTree = function CategoryTree(_ref4) {
-		var categories = _ref4.categories,
-		    parent = _ref4.parent;
+	/**
+  * Get the preview when component is first loaded.
+  */
 
-		var filteredCategories = categories.filter(function (category) {
-			return category.parent === parent;
-		});
 
-		if (firstLoad && selectedCategories.length > 0) {
-			categoriesData.filter(function (category) {
-				return category.parent === 0;
-			}).forEach(function (category) {
-				var children = getCategoryChildren(category, categoriesData);
+	_createClass(ProductCategoryList, [{
+		key: "componentDidMount",
+		value: function componentDidMount() {
+			if (this.getQuery() !== this.state.query) {
+				this.updatePreview();
+			}
+		}
 
-				var _iteratorNormalCompletion2 = true;
-				var _didIteratorError2 = false;
-				var _iteratorError2 = undefined;
+		/**
+   * Update the preview when component is updated.
+   */
+
+	}, {
+		key: "componentDidUpdate",
+		value: function componentDidUpdate() {
+			if (this.getQuery() !== this.state.query && this.state.loaded) {
+				this.updatePreview();
+			}
+		}
+
+		/**
+   * Get the endpoint for the current state of the component.
+   *
+   * @return string
+   */
+
+	}, {
+		key: "getQuery",
+		value: function getQuery() {
+			var endpoint = '/wc/v2/products/categories';
+			return endpoint;
+		}
+
+		/**
+   * Update the preview with the latest settings.
+   */
+
+	}, {
+		key: "updatePreview",
+		value: function updatePreview() {
+			var self = this;
+			var query = this.getQuery();
+
+			self.setState({
+				loaded: false
+			});
+
+			apiFetch({ path: query }).then(function (categories) {
+				self.setState({
+					categories: categories,
+					loaded: true,
+					query: query
+				});
+			});
+		}
+
+		/**
+   * Render.
+   */
+
+	}, {
+		key: "render",
+		value: function render() {
+			var _props = this.props,
+			    filterQuery = _props.filterQuery,
+			    selectedCategories = _props.selectedCategories,
+			    checkboxChange = _props.checkboxChange,
+			    accordionToggle = _props.accordionToggle,
+			    openAccordion = _props.openAccordion,
+			    firstLoad = _props.firstLoad,
+			    setFirstLoad = _props.setFirstLoad;
+
+
+			if (!this.state.loaded) {
+				return __('Loading');
+			}
+
+			if (0 === this.state.categories.length) {
+				return __('No categories found');
+			}
+
+			var handleCategoriesToCheck = function handleCategoriesToCheck(evt, parent, categories) {
+				var ids = getCategoryChildren(parent, categories).map(function (category) {
+					return category.id;
+				});
+
+				ids.push(parent.id);
+
+				checkboxChange(evt.target.checked, ids);
+			};
+
+			var getCategoryChildren = function getCategoryChildren(parent, categories) {
+				var children = [];
+
+				categories.filter(function (category) {
+					return category.parent === parent.id;
+				}).forEach(function (category) {
+					children.push(category);
+					children.push.apply(children, _toConsumableArray(getCategoryChildren(category, categories)));
+				});
+
+				return children;
+			};
+
+			var categoryHasChildren = function categoryHasChildren(parent, categories) {
+				return !!getCategoryChildren(parent, categories).length;
+			};
+
+			var isIndeterminate = function isIndeterminate(category, categories) {
+
+				// Currect category selected?
+				if (selectedCategories.includes(category.id)) {
+					return false;
+				}
+
+				// Has children?
+				var children = getCategoryChildren(category, categories).map(function (category) {
+					return category.id;
+				});
+
+				var _iteratorNormalCompletion = true;
+				var _didIteratorError = false;
+				var _iteratorError = undefined;
 
 				try {
-					for (var _iterator2 = children[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-						var child = _step2.value;
+					for (var _iterator = children[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+						var child = _step.value;
 
-						if (selectedCategories.includes(child.id) && !openAccordion.includes(category.id)) {
-							accordionToggle(category.id);
-							break;
+						if (selectedCategories.includes(child)) {
+							return true;
 						}
 					}
 				} catch (err) {
-					_didIteratorError2 = true;
-					_iteratorError2 = err;
+					_didIteratorError = true;
+					_iteratorError = err;
 				} finally {
 					try {
-						if (!_iteratorNormalCompletion2 && _iterator2.return) {
-							_iterator2.return();
+						if (!_iteratorNormalCompletion && _iterator.return) {
+							_iterator.return();
 						}
 					} finally {
-						if (_didIteratorError2) {
-							throw _iteratorError2;
+						if (_didIteratorError) {
+							throw _iteratorError;
 						}
 					}
 				}
-			});
 
-			setFirstLoad(false);
-		}
+				return false;
+			};
 
-		return filteredCategories.length > 0 && wp.element.createElement(
-			"ul",
-			null,
-			filteredCategories.map(function (category) {
+			var AccordionButton = function AccordionButton(_ref2) {
+				var category = _ref2.category,
+				    categories = _ref2.categories;
+
+				var icon = 'arrow-down-alt2';
+
+				if (openAccordion.includes(category.id)) {
+					icon = 'arrow-up-alt2';
+				}
+
+				var style = null;
+
+				if (!categoryHasChildren(category, categories)) {
+					style = {
+						visibility: 'hidden'
+					};
+				};
+
 				return wp.element.createElement(
-					"li",
-					{ key: category.id, className: openAccordion.includes(category.id) ? 'wc-products-list-card__item wc-products-list-card__accordion-open' : 'wc-products-list-card__item' },
-					wp.element.createElement(
-						"label",
-						{ className: 0 === category.parent ? 'wc-products-list-card__content' : '', htmlFor: 'product-category-' + category.id },
-						wp.element.createElement("input", { type: "checkbox",
-							id: 'product-category-' + category.id,
-							value: category.id,
-							checked: selectedCategories.includes(category.id),
-							onChange: function onChange(evt) {
-								return handleCategoriesToCheck(evt, category, categories);
-							},
-							ref: function ref(el) {
-								return el && (el.indeterminate = isIndeterminate(category, categories));
-							}
-						}),
-						" ",
-						category.name,
-						0 === category.parent && wp.element.createElement(AccordionButton, { category: category, categories: categories }),
-						wp.element.createElement(
-							"span",
-							{ className: "wc-products-list-card__taxonomy-count" },
-							category.count
-						)
-					),
-					wp.element.createElement(CategoryTree, { categories: categories, parent: category.id })
+					"button",
+					{ onClick: function onClick() {
+							return accordionToggle(category.id);
+						}, className: "wc-products-list-card__accordion-button", style: style, type: "button" },
+					wp.element.createElement(Dashicon, { icon: icon })
 				);
-			})
-		);
-	};
+			};
 
-	var categoriesData = categories.data;
+			var CategoryTree = function CategoryTree(_ref3) {
+				var categories = _ref3.categories,
+				    parent = _ref3.parent;
 
-	if ('' !== filterQuery) {
-		categoriesData = categoriesData.filter(function (category) {
-			return category.slug.includes(filterQuery.toLowerCase());
-		});
-	}
+				var filteredCategories = categories.filter(function (category) {
+					return category.parent === parent;
+				});
 
-	return wp.element.createElement(
-		"div",
-		{ className: "wc-products-list-card__results" },
-		wp.element.createElement(CategoryTree, { categories: categoriesData, parent: 0 })
-	);
-});
+				if (firstLoad && selectedCategories.length > 0) {
+					categoriesData.filter(function (category) {
+						return category.parent === 0;
+					}).forEach(function (category) {
+						var children = getCategoryChildren(category, categoriesData);
+
+						var _iteratorNormalCompletion2 = true;
+						var _didIteratorError2 = false;
+						var _iteratorError2 = undefined;
+
+						try {
+							for (var _iterator2 = children[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+								var child = _step2.value;
+
+								if (selectedCategories.includes(child.id) && !openAccordion.includes(category.id)) {
+									accordionToggle(category.id);
+									break;
+								}
+							}
+						} catch (err) {
+							_didIteratorError2 = true;
+							_iteratorError2 = err;
+						} finally {
+							try {
+								if (!_iteratorNormalCompletion2 && _iterator2.return) {
+									_iterator2.return();
+								}
+							} finally {
+								if (_didIteratorError2) {
+									throw _iteratorError2;
+								}
+							}
+						}
+					});
+
+					setFirstLoad(false);
+				}
+
+				return filteredCategories.length > 0 && wp.element.createElement(
+					"ul",
+					null,
+					filteredCategories.map(function (category) {
+						return wp.element.createElement(
+							"li",
+							{ key: category.id, className: openAccordion.includes(category.id) ? 'wc-products-list-card__item wc-products-list-card__accordion-open' : 'wc-products-list-card__item' },
+							wp.element.createElement(
+								"label",
+								{ className: 0 === category.parent ? 'wc-products-list-card__content' : '', htmlFor: 'product-category-' + category.id },
+								wp.element.createElement("input", { type: "checkbox",
+									id: 'product-category-' + category.id,
+									value: category.id,
+									checked: selectedCategories.includes(category.id),
+									onChange: function onChange(evt) {
+										return handleCategoriesToCheck(evt, category, categories);
+									},
+									ref: function ref(el) {
+										return el && (el.indeterminate = isIndeterminate(category, categories));
+									}
+								}),
+								" ",
+								category.name,
+								0 === category.parent && wp.element.createElement(AccordionButton, { category: category, categories: categories }),
+								wp.element.createElement(
+									"span",
+									{ className: "wc-products-list-card__taxonomy-count" },
+									category.count
+								)
+							),
+							wp.element.createElement(CategoryTree, { categories: categories, parent: category.id })
+						);
+					})
+				);
+			};
+
+			var categoriesData = this.state.categories;
+
+			if ('' !== filterQuery) {
+				categoriesData = categoriesData.filter(function (category) {
+					return category.slug.includes(filterQuery.toLowerCase());
+				});
+			}
+
+			return wp.element.createElement(
+				"div",
+				{ className: "wc-products-list-card__results" },
+				wp.element.createElement(CategoryTree, { categories: categoriesData, parent: 0 })
+			);
+		}
+	}]);
+
+	return ProductCategoryList;
+}(React.Component);
 
 /***/ }),
 /* 3 */
@@ -2302,9 +2761,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var __ = wp.i18n.__;
 var _wp$components = wp.components,
     Toolbar = _wp$components.Toolbar,
-    withAPIData = _wp$components.withAPIData,
     Dropdown = _wp$components.Dropdown,
     Dashicon = _wp$components.Dashicon;
+var _wp = wp,
+    apiFetch = _wp.apiFetch;
 
 /**
  * Get the identifier for an attribute. The identifier can be used to determine
@@ -2511,88 +2971,197 @@ var ProductAttributeFilter = function ProductAttributeFilter(props) {
 /**
  * List of attributes.
  */
-var ProductAttributeList = withAPIData(function (props) {
-	return {
-		attributes: '/wc/v2/products/attributes'
-	};
-})(function (_ref) {
-	var attributes = _ref.attributes,
-	    selectedAttribute = _ref.selectedAttribute,
-	    filterQuery = _ref.filterQuery,
-	    selectedTerms = _ref.selectedTerms,
-	    setSelectedAttribute = _ref.setSelectedAttribute,
-	    addTerm = _ref.addTerm,
-	    removeTerm = _ref.removeTerm;
 
-	if (!attributes.data) {
-		return __('Loading');
+var ProductAttributeList = function (_React$Component2) {
+	_inherits(ProductAttributeList, _React$Component2);
+
+	/**
+  * Constructor
+  */
+	function ProductAttributeList(props) {
+		_classCallCheck(this, ProductAttributeList);
+
+		var _this2 = _possibleConstructorReturn(this, (ProductAttributeList.__proto__ || Object.getPrototypeOf(ProductAttributeList)).call(this, props));
+
+		_this2.state = {
+			attributes: [],
+			loaded: false,
+			query: ''
+		};
+
+		_this2.updatePreview = _this2.updatePreview.bind(_this2);
+		_this2.getQuery = _this2.getQuery.bind(_this2);
+		return _this2;
 	}
 
-	if (0 === attributes.data.length) {
-		return __('No attributes found');
-	}
+	/**
+  * Get the preview when component is first loaded.
+  */
 
-	var filter = filterQuery.toLowerCase();
-	var attributeElements = [];
-	var _iteratorNormalCompletion2 = true;
-	var _didIteratorError2 = false;
-	var _iteratorError2 = undefined;
 
-	try {
-		for (var _iterator2 = attributes.data[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-			var attribute = _step2.value;
-
-			// Filter out attributes that don't match the search query.
-			if (filter.length && -1 === attribute.name.toLowerCase().indexOf(filter)) {
-				continue;
-			}
-
-			attributeElements.push(wp.element.createElement(ProductAttributeElement, {
-				attribute: attribute,
-				selectedAttribute: selectedAttribute,
-				selectedTerms: selectedTerms,
-				setSelectedAttribute: setSelectedAttribute,
-				addTerm: addTerm,
-				removeTerm: removeTerm
-			}));
-		}
-	} catch (err) {
-		_didIteratorError2 = true;
-		_iteratorError2 = err;
-	} finally {
-		try {
-			if (!_iteratorNormalCompletion2 && _iterator2.return) {
-				_iterator2.return();
-			}
-		} finally {
-			if (_didIteratorError2) {
-				throw _iteratorError2;
+	_createClass(ProductAttributeList, [{
+		key: 'componentDidMount',
+		value: function componentDidMount() {
+			if (this.getQuery() !== this.state.query) {
+				this.updatePreview();
 			}
 		}
-	}
 
-	return wp.element.createElement(
-		'div',
-		{ className: 'wc-products-list-card__results' },
-		attributeElements
-	);
-});
+		/**
+   * Update the preview when component is updated.
+   */
+
+	}, {
+		key: 'componentDidUpdate',
+		value: function componentDidUpdate() {
+			if (this.getQuery() !== this.state.query && this.state.loaded) {
+				this.updatePreview();
+			}
+		}
+
+		/**
+   * Get the endpoint for the current state of the component.
+   *
+   * @return string
+   */
+
+	}, {
+		key: 'getQuery',
+		value: function getQuery() {
+			var endpoint = '/wc/v2/products/attributes';
+			return endpoint;
+		}
+
+		/**
+   * Update the preview with the latest settings.
+   */
+
+	}, {
+		key: 'updatePreview',
+		value: function updatePreview() {
+			var self = this;
+			var query = this.getQuery();
+
+			self.setState({
+				loaded: false
+			});
+
+			apiFetch({ path: query }).then(function (attributes) {
+				self.setState({
+					attributes: attributes,
+					loaded: true,
+					query: query
+				});
+			});
+		}
+
+		/**
+   * Render.
+   */
+
+	}, {
+		key: 'render',
+		value: function render() {
+			var _props = this.props,
+			    selectedAttribute = _props.selectedAttribute,
+			    filterQuery = _props.filterQuery,
+			    selectedTerms = _props.selectedTerms,
+			    setSelectedAttribute = _props.setSelectedAttribute,
+			    addTerm = _props.addTerm,
+			    removeTerm = _props.removeTerm;
+
+
+			if (!this.state.loaded) {
+				return wp.element.createElement(
+					'ul',
+					null,
+					wp.element.createElement(
+						'li',
+						null,
+						__('Loading')
+					)
+				);
+			}
+
+			if (0 === this.state.attributes.length) {
+				return wp.element.createElement(
+					'ul',
+					null,
+					wp.element.createElement(
+						'li',
+						null,
+						__('No attributes found')
+					)
+				);
+			}
+
+			var filter = filterQuery.toLowerCase();
+			var attributeElements = [];
+
+			var _iteratorNormalCompletion2 = true;
+			var _didIteratorError2 = false;
+			var _iteratorError2 = undefined;
+
+			try {
+				for (var _iterator2 = this.state.attributes[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+					var attribute = _step2.value;
+
+					// Filter out attributes that don't match the search query.
+					if (filter.length && -1 === attribute.name.toLowerCase().indexOf(filter)) {
+						continue;
+					}
+
+					attributeElements.push(wp.element.createElement(ProductAttributeElement, {
+						attribute: attribute,
+						selectedAttribute: selectedAttribute,
+						selectedTerms: selectedTerms,
+						setSelectedAttribute: setSelectedAttribute,
+						addTerm: addTerm,
+						removeTerm: removeTerm
+					}));
+				}
+			} catch (err) {
+				_didIteratorError2 = true;
+				_iteratorError2 = err;
+			} finally {
+				try {
+					if (!_iteratorNormalCompletion2 && _iterator2.return) {
+						_iterator2.return();
+					}
+				} finally {
+					if (_didIteratorError2) {
+						throw _iteratorError2;
+					}
+				}
+			}
+
+			return wp.element.createElement(
+				'div',
+				{ className: 'wc-products-list-card__results' },
+				attributeElements
+			);
+		}
+	}]);
+
+	return ProductAttributeList;
+}(React.Component);
 
 /**
  * One product attribute.
  */
 
-var ProductAttributeElement = function (_React$Component2) {
-	_inherits(ProductAttributeElement, _React$Component2);
+
+var ProductAttributeElement = function (_React$Component3) {
+	_inherits(ProductAttributeElement, _React$Component3);
 
 	function ProductAttributeElement(props) {
 		_classCallCheck(this, ProductAttributeElement);
 
-		var _this2 = _possibleConstructorReturn(this, (ProductAttributeElement.__proto__ || Object.getPrototypeOf(ProductAttributeElement)).call(this, props));
+		var _this3 = _possibleConstructorReturn(this, (ProductAttributeElement.__proto__ || Object.getPrototypeOf(ProductAttributeElement)).call(this, props));
 
-		_this2.handleAttributeChange = _this2.handleAttributeChange.bind(_this2);
-		_this2.handleTermChange = _this2.handleTermChange.bind(_this2);
-		return _this2;
+		_this3.handleAttributeChange = _this3.handleAttributeChange.bind(_this3);
+		_this3.handleTermChange = _this3.handleTermChange.bind(_this3);
+		return _this3;
 	}
 
 	/**
@@ -2677,80 +3246,170 @@ var ProductAttributeElement = function (_React$Component2) {
  */
 
 
-var AttributeTerms = withAPIData(function (props) {
-	return {
-		terms: '/wc/v2/products/attributes/' + props.attribute.id + '/terms'
-	};
-})(function (_ref2) {
-	var terms = _ref2.terms,
-	    selectedTerms = _ref2.selectedTerms,
-	    attribute = _ref2.attribute,
-	    addTerm = _ref2.addTerm,
-	    removeTerm = _ref2.removeTerm;
+var AttributeTerms = function (_React$Component4) {
+	_inherits(AttributeTerms, _React$Component4);
 
-	if (!terms.data) {
-		return wp.element.createElement(
-			'ul',
-			null,
-			wp.element.createElement(
-				'li',
-				null,
-				__('Loading')
-			)
-		);
-	}
+	/**
+  * Constructor
+  */
+	function AttributeTerms(props) {
+		_classCallCheck(this, AttributeTerms);
 
-	if (0 === terms.data.length) {
-		return wp.element.createElement(
-			'ul',
-			null,
-			wp.element.createElement(
-				'li',
-				null,
-				__('No terms found')
-			)
-		);
+		var _this4 = _possibleConstructorReturn(this, (AttributeTerms.__proto__ || Object.getPrototypeOf(AttributeTerms)).call(this, props));
+
+		_this4.state = {
+			terms: [],
+			loaded: false,
+			query: ''
+		};
+
+		_this4.updatePreview = _this4.updatePreview.bind(_this4);
+		_this4.getQuery = _this4.getQuery.bind(_this4);
+		return _this4;
 	}
 
 	/**
-  * Add or remove selected terms.
-  *
-  * @param evt Event object
+  * Get the preview when component is first loaded.
   */
-	function handleTermChange(evt) {
-		if (evt.target.checked) {
-			addTerm(evt.target.value);
-		} else {
-			removeTerm(evt.target.value);
-		}
-	}
 
-	return wp.element.createElement(
-		'ul',
-		null,
-		terms.data.map(function (term) {
-			return wp.element.createElement(
-				'li',
-				{ className: 'wc-products-list-card__item' },
-				wp.element.createElement(
-					'label',
-					{ className: 'wc-products-list-card__content' },
-					wp.element.createElement('input', { type: 'checkbox',
-						value: term.id,
-						onChange: handleTermChange,
-						checked: selectedTerms.includes(String(term.id))
-					}),
-					term.name,
+
+	_createClass(AttributeTerms, [{
+		key: 'componentDidMount',
+		value: function componentDidMount() {
+			if (this.getQuery() !== this.state.query) {
+				this.updatePreview();
+			}
+		}
+
+		/**
+   * Update the preview when component is updated.
+   */
+
+	}, {
+		key: 'componentDidUpdate',
+		value: function componentDidUpdate() {
+			if (this.getQuery() !== this.state.query && this.state.loaded) {
+				this.updatePreview();
+			}
+		}
+
+		/**
+   * Get the endpoint for the current state of the component.
+   *
+   * @return string
+   */
+
+	}, {
+		key: 'getQuery',
+		value: function getQuery() {
+			var endpoint = '/wc/v2/products/attributes/' + this.props.attribute.id + '/terms';
+			return endpoint;
+		}
+
+		/**
+   * Update the preview with the latest settings.
+   */
+
+	}, {
+		key: 'updatePreview',
+		value: function updatePreview() {
+			var self = this;
+			var query = this.getQuery();
+
+			self.setState({
+				loaded: false
+			});
+
+			apiFetch({ path: query }).then(function (terms) {
+				self.setState({
+					terms: terms,
+					loaded: true,
+					query: query
+				});
+			});
+		}
+
+		/**
+   * Render.
+   */
+
+	}, {
+		key: 'render',
+		value: function render() {
+			var _props2 = this.props,
+			    selectedTerms = _props2.selectedTerms,
+			    attribute = _props2.attribute,
+			    addTerm = _props2.addTerm,
+			    removeTerm = _props2.removeTerm;
+
+
+			if (!this.state.loaded) {
+				return wp.element.createElement(
+					'ul',
+					null,
 					wp.element.createElement(
-						'span',
-						{ className: 'wc-products-list-card__taxonomy-count' },
-						term.count
+						'li',
+						null,
+						__('Loading')
 					)
-				)
+				);
+			}
+
+			if (0 === this.state.terms.length) {
+				return wp.element.createElement(
+					'ul',
+					null,
+					wp.element.createElement(
+						'li',
+						null,
+						__('No terms found')
+					)
+				);
+			}
+
+			/**
+    * Add or remove selected terms.
+    *
+    * @param evt Event object
+    */
+			function handleTermChange(evt) {
+				if (evt.target.checked) {
+					addTerm(evt.target.value);
+				} else {
+					removeTerm(evt.target.value);
+				}
+			}
+
+			return wp.element.createElement(
+				'ul',
+				null,
+				this.state.terms.map(function (term) {
+					return wp.element.createElement(
+						'li',
+						{ className: 'wc-products-list-card__item' },
+						wp.element.createElement(
+							'label',
+							{ className: 'wc-products-list-card__content' },
+							wp.element.createElement('input', { type: 'checkbox',
+								value: term.id,
+								onChange: handleTermChange,
+								checked: selectedTerms.includes(String(term.id))
+							}),
+							term.name,
+							wp.element.createElement(
+								'span',
+								{ className: 'wc-products-list-card__taxonomy-count' },
+								term.count
+							)
+						)
+					);
+				})
 			);
-		})
-	);
-});
+		}
+	}]);
+
+	return AttributeTerms;
+}(React.Component);
 
 /***/ })
 /******/ ]);

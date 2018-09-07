@@ -2,7 +2,8 @@ const { __ } = wp.i18n;
 const { RawHTML } = wp.element;
 const { registerBlockType } = wp.blocks;
 const { InspectorControls, BlockControls } = wp.editor;
-const { Toolbar, withAPIData, Dropdown, Dashicon, RangeControl, Tooltip, SelectControl } = wp.components;
+const { Toolbar, Dropdown, Dashicon, RangeControl, Tooltip, SelectControl } = wp.components;
+const { apiFetch } = wp;
 
 import { ProductsSpecificSelect } from './views/specific-select.jsx';
 import { ProductsCategorySelect } from './views/category-select.jsx';
@@ -353,150 +354,307 @@ class ProductPreview extends React.Component {
 /**
  * Renders a preview of what the block will look like with current settings.
  */
-const ProductsBlockPreview = withAPIData( ( { attributes } ) => {
+class ProductsBlockPreview extends React.Component {
 
-	const { columns, rows, display, display_setting, orderby } = attributes;
+	/**
+	 * Constructor
+	 */
+	constructor( props ) {
+		super( props );
+		this.state = {
+			products: [],
+			loaded: false,
+			query: '',
+		};
 
-	let query = {
-		per_page: rows * columns,
-	};
-
-	if ( 'specific' === display ) {
-		query.include = display_setting.join( ',' );
-		query.per_page = display_setting.length;
-	} else if ( 'category' === display ) {
-		query.category = display_setting.join( ',' );
-	} else if ( 'attribute' === display && display_setting.length ) {
-		query.attribute = getAttributeSlug( display_setting[0] );
-
-		if ( display_setting.length > 1 ) {
-			query.attribute_term = display_setting.slice( 1 ).join( ',' );
-		}
-	} else if ( 'featured' === display ) {
-		query.featured = 1;
-	} else if ( 'on_sale' === display ) {
-		query.on_sale = 1;
+		this.updatePreview = this.updatePreview.bind( this );
+		this.getQuery = this.getQuery.bind( this );
 	}
 
-	if ( supportsOrderby( display ) ) {
-		if ( 'price_desc' === orderby ) {
-			query.orderby = 'price';
-			query.order = 'desc';
-		} else if ( 'price_asc' === orderby ) {
-			query.orderby = 'price';
-			query.order = 'asc';
-		} else if ( 'title' === orderby ) {
-			query.orderby = 'title';
-			query.order = 'asc';
-		} else {
-			query.orderby = orderby;
+	/**
+	 * Get the preview when component is first loaded.
+	 */
+	componentDidMount() {
+		this.updatePreview();
+	}
+
+	/**
+	 * Update the preview when component is updated.
+	 */
+	componentDidUpdate() {
+		if ( this.getQuery() !== this.state.query && this.state.loaded ) {
+			this.updatePreview();
 		}
 	}
 
-	let query_string = '?';
-	for ( const key of Object.keys( query ) ) {
-		query_string += key + '=' + query[ key ] + '&';
+	/**
+	 * Get the endpoint for the current state of the component.
+	 *
+	 * @return string
+	 */
+	getQuery() {
+		const { columns, rows, display, display_setting, orderby } = this.props.attributes;
+
+		let query = {
+			per_page: rows * columns,
+		};
+
+		if ( 'specific' === display ) {
+			query.include = display_setting.join( ',' );
+			query.per_page = display_setting.length;
+		} else if ( 'category' === display ) {
+			query.category = display_setting.join( ',' );
+		} else if ( 'attribute' === display && display_setting.length ) {
+			query.attribute = getAttributeSlug( display_setting[0] );
+
+			if ( display_setting.length > 1 ) {
+				query.attribute_term = display_setting.slice( 1 ).join( ',' );
+			}
+		} else if ( 'featured' === display ) {
+			query.featured = 1;
+		} else if ( 'on_sale' === display ) {
+			query.on_sale = 1;
+		}
+
+		if ( supportsOrderby( display ) ) {
+			if ( 'price_desc' === orderby ) {
+				query.orderby = 'price';
+				query.order = 'desc';
+			} else if ( 'price_asc' === orderby ) {
+				query.orderby = 'price';
+				query.order = 'asc';
+			} else if ( 'title' === orderby ) {
+				query.orderby = 'title';
+				query.order = 'asc';
+			} else {
+				query.orderby = orderby;
+			}
+		}
+
+		let query_string = '?';
+		for ( const key of Object.keys( query ) ) {
+			query_string += key + '=' + query[ key ] + '&';
+		}
+
+		const endpoint = '/wgbp/v3/products' + query_string;
+		return endpoint;
 	}
 
-	return {
-		// @todo Switch this to use WC core API when possible.
-		products: '/wgbp/v3/products' + query_string
-	};
+	/**
+	 * Update the preview with the latest settings.
+	 */
+	updatePreview() {
+		const self = this;
+		const query = this.getQuery();
 
-} )( ( { products, attributes } ) => {
+		self.setState( {
+			loaded: false,
+			query: query
+		} );
 
-	if ( ! products.data ) {
-		return __( 'Loading' );
+		apiFetch( { path: query } ).then( products => {
+			self.setState( {
+				products: products,
+				loaded: true
+			} );
+		} );
 	}
 
-	if ( 0 === products.data.length ) {
-		return __( 'No products found' );
+	/**
+	 * Render.
+	 */
+	render() {
+		if ( ! this.state.loaded ) {
+			return __( 'Loading' );
+		}
+
+		if ( 0 === this.state.products.length ) {
+			return __( 'No products found' );
+		}
+
+		const classes = "wc-products-block-preview cols-" + this.props.attributes.columns;
+		const self = this;
+
+		return (
+			<div className={ classes }>
+				{ this.state.products.map( ( product ) => (
+					<ProductPreview key={ product.id } product={ product } attributes={ self.props.attributes } />
+				) ) }
+			</div>
+		);
 	}
+}
 
-	const classes = "wc-products-block-preview cols-" + attributes.columns;
-
-	return (
-		<div className={ classes }>
-			{ products.data.map( ( product ) => (
-				<ProductPreview key={ product.id } product={ product } attributes={ attributes } />
-			) ) }
-		</div>
-	);
-} );
 
 /**
  * Information about current block settings rendered in the sidebar.
  */
-const ProductsBlockSidebarInfo = withAPIData( ( { attributes } ) => {
+class ProductsBlockSidebarInfo extends React.Component {
 
-	const { display, display_setting } = attributes;
+	/**
+	 * Constructor
+	 */
+	constructor( props ) {
+		super( props );
 
-	if ( 'attribute' === display && display_setting.length ) {
-		const ID        = getAttributeID( display_setting[0] );
-		const terms     = display_setting.slice( 1 ).join( ', ' );
-		const endpoints = {
-			attributeInfo: '/wc/v2/products/attributes/' + ID,
+		this.state = {
+			categoriesInfo: [],
+			categoriesQuery: '',
+
+			attributeInfo: false,
+			attributeQuery: '',
+
+			termsInfo: [],
+			termsQuery: ''
+		};
+
+		this.updateInfo = this.updateInfo.bind( this );
+		this.getQueries = this.getQueries.bind( this );
+	}
+
+	/**
+	 * Populate info when component is first loaded.
+	 */
+	componentDidMount() {
+		this.updateInfo();
+	}
+
+	componentDidUpdate() {
+		const queries = this.getQueries();
+
+		if ( this.state.categoriesQuery !== queries.categories ||
+			 this.state.attributeQuery !== queries.attribute ||
+			 this.state.termsQuery !== queries.terms ) {
+			this.updateInfo();
 		}
+	}
 
-		if ( terms.length ) {
-			endpoints.termInfo = '/wc/v2/products/attributes/' + ID + '/terms?include=' + terms;
+	/**
+	 * Get endpoints for the current state of the component.
+	 *
+	 * @return object
+	 */
+	getQueries() {
+		const { display, display_setting } = this.props.attributes;
+		const endpoints = {
+			attribute: '',
+			terms: '',
+			categories: ''
+		};
+
+		if ( 'attribute' === display && display_setting.length ) {
+			const ID        = getAttributeID( display_setting[0] );
+			const terms     = display_setting.slice( 1 ).join( ', ' );
+
+			endpoints.attribute = '/wc/v2/products/attributes/' + ID;
+
+			if ( terms.length ) {
+				endpoints.terms = '/wc/v2/products/attributes/' + ID + '/terms?include=' + terms;
+			}
+		} else if ( 'category' === display && display_setting.length ) {
+			endpoints.categories = '/wc/v2/products/categories?include=' + display_setting.join( ',' );
 		}
 
 		return endpoints;
-
-	} else if ( 'category' === display && display_setting.length ) {
-		return {
-			categoriesInfo: '/wc/v2/products/categories?include=' + display_setting.join( ',' ),
-		};
 	}
 
-	return {};
+	/**
+	 * Get the latest info for the sidebar information area.
+	 */
+	updateInfo() {
+		const self = this;
+		const queries = this.getQueries();
 
-} )( ( { attributes, categoriesInfo, attributeInfo, termInfo } ) => {
+		this.setState( {
+			categoriesQuery: queries.categories,
+			attributeQuery: queries.attribute,
+			termsQuery: queries.terms
+		} );
 
-	let descriptions = [
-		// Standard description of selected scope.
-		PRODUCTS_BLOCK_DISPLAY_SETTINGS[ attributes.display ].title
-	];
-
-	// Description of categories selected scope.
-	if ( categoriesInfo && categoriesInfo.data && categoriesInfo.data.length ) {
-		let descriptionText = __( 'Product categories: ' );
-		const categories = [];
-		for ( let category of categoriesInfo.data ) {
-			categories.push( category.name );
+		if ( queries.categories.length ) {
+			apiFetch( { path: queries.categories } ).then( categories => {
+				self.setState( {
+					categoriesInfo: categories,
+				} );
+			} );
+		} else {
+			self.setState( {
+				categoriesInfo: [],
+			} );
 		}
-		descriptionText += categories.join( ', ' );
 
-		descriptions = [
-			descriptionText
+		if ( queries.attribute.length ) {
+			apiFetch( { path: queries.attribute } ).then( attribute => {
+				self.setState( {
+					attributeInfo: attribute,
+				} );
+			} );
+		} else {
+			self.setState( {
+				attributeInfo: false,
+			} );
+		}
+
+		if ( queries.terms.length ) {
+			apiFetch( { path: queries.terms } ).then( terms => {
+				self.setState( {
+					termsInfo: terms,
+				} );
+			} );
+		} else {
+			self.setState( {
+				termsInfo: [],
+			} );
+		}
+	}
+
+	/**
+	 * Render.
+	 */
+	render() {
+		let descriptions = [
+			// Standard description of selected scope.
+			PRODUCTS_BLOCK_DISPLAY_SETTINGS[ this.props.attributes.display ].title
 		];
 
-		// Description of attributes selected scope.
-	} else if ( attributeInfo && attributeInfo.data ) {
-		descriptions = [
-			__( 'Attribute: ' ) + attributeInfo.data.name
-		];
-
-		if ( termInfo && termInfo.data && termInfo.data.length ) {
-			let termDescriptionText = __( "Terms: " );
-			const terms = []
-			for ( const term of termInfo.data ) {
-				terms.push( term.name );
+		if ( this.state.categoriesInfo.length ) {
+			let descriptionText = __( 'Product categories: ' );
+			const categories = [];
+			for ( let category of this.state.categoriesInfo ) {
+				categories.push( category.name );
 			}
-			termDescriptionText += terms.join( ', ' );
-			descriptions.push( termDescriptionText );
-		}
-	}
+			descriptionText += categories.join( ', ' );
 
-	return (
-		<div>
-			{ descriptions.map( ( description ) => (
-				<div className="scope-description">{ description }</div>
-			) ) }
-		</div>
-	);
-} );
+			descriptions = [
+				descriptionText
+			];
+
+			// Description of attributes selected scope.
+		} else if ( this.state.attributeInfo ) {
+			descriptions = [
+				__( 'Attribute: ' ) + this.state.attributeInfo.name
+			];
+
+			if ( this.state.termsInfo.length ) {
+				let termDescriptionText = __( "Terms: " );
+				const terms = []
+				for ( const term of this.state.termsInfo ) {
+					terms.push( term.name );
+				}
+				termDescriptionText += terms.join( ', ' );
+				descriptions.push( termDescriptionText );
+			}
+		}
+
+		return (
+			<div>
+				{ descriptions.map( ( description ) => (
+					<div className="scope-description">{ description }</div>
+				) ) }
+			</div>
+		);
+	}
+};
 
 /**
  * The main products block UI.
