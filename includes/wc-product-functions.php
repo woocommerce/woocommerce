@@ -457,6 +457,10 @@ add_action( 'woocommerce_scheduled_sales', 'wc_scheduled_sales' );
 function wc_get_attachment_image_attributes( $attr ) {
 	if ( isset( $attr['src'] ) && strstr( $attr['src'], 'woocommerce_uploads/' ) ) {
 		$attr['src'] = wc_placeholder_img_src();
+
+		if ( isset( $attr['srcset'] ) ) {
+			$attr['srcset'] = '';
+		}
 	}
 	return $attr;
 }

@@ -1013,7 +1013,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 			'src'    => 'https://wc.local/wp-content/woocommerce_uploads/my-image.jpg',
 			'class'  => 'attachment-woocommerce_thumbnail size-woocommerce_thumbnail',
 			'alt'    => '',
-			'srcset' => '',
+			'srcset' => 'https://wc.local/wp-content/woocommerce_uploads/my-image-250x250.jpg 250w, https://wc.local/wp-content/woocommerce_uploads/my-image-350x350 350w',
 			'sizes'  => '(max-width: 250px) 100vw, 250px',
 		);
 		$expected_attr = array(
