@@ -90,7 +90,7 @@ if ( ! class_exists( 'WC_Email_Customer_Completed_Order', false ) ) :
 		 * @return string
 		 */
 		public function get_default_heading() {
-			return __( 'Thanks for shipping with us', 'woocommerce' );
+			return __( 'Thanks for shopping with us', 'woocommerce' );
 		}
 
 		/**
