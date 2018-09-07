@@ -290,7 +290,7 @@ export const drawAxis = ( node, params ) => {
 const showTooltip = ( node, params, d ) => {
 	const chartCoords = node.node().getBoundingClientRect();
 	let [ xPosition, yPosition ] = d3Mouse( node.node() );
-	xPosition = xPosition > chartCoords.width - 200 ? xPosition - 200 : xPosition + 20;
+	xPosition = xPosition > chartCoords.width - 340 ? xPosition - 340 : xPosition + 100;
 	yPosition = yPosition > chartCoords.height - 150 ? yPosition - 200 : yPosition + 20;
 	const keys = params.orderedKeys.filter( row => row.visible ).map(
 		row => `
@@ -346,37 +346,6 @@ const handleMouseOutLineChart = ( d, i, nodes, params ) => {
 };
 
 export const drawLines = ( node, data, params ) => {
-	const focus = node
-		.append( 'g' )
-		.attr( 'class', 'focusspaces' )
-		.selectAll( '.focus' )
-		.data( params.dateSpaces )
-		.enter()
-		.append( 'g' )
-		.attr( 'class', 'focus' );
-
-	focus
-		.append( 'line' )
-		.attr( 'class', 'focus-grid' )
-		.attr( 'x1', d => params.xLineScale( new Date( d.date ) ) )
-		.attr( 'y1', 0 )
-		.attr( 'x2', d => params.xLineScale( new Date( d.date ) ) )
-		.attr( 'y2', params.height )
-		.attr( 'opacity', '0' );
-
-	focus
-		.append( 'rect' )
-		.attr( 'class', 'focus-g' )
-		.attr( 'x', d => d.start )
-		.attr( 'y', 0 )
-		.attr( 'width', d => d.width )
-		.attr( 'height', params.height )
-		.attr( 'opacity', 0 )
-		.on( 'mouseover', ( d, i, nodes ) =>
-			handleMouseOverLineChart( d, i, nodes, node, data, params )
-		)
-		.on( 'mouseout', ( d, i, nodes ) => handleMouseOutLineChart( d, i, nodes, params ) );
-
 	const series = node
 		.append( 'g' )
 		.attr( 'class', 'lines' )
@@ -414,6 +383,37 @@ export const drawLines = ( node, data, params ) => {
 		} )
 		.attr( 'cx', d => params.xLineScale( new Date( d.date ) ) )
 		.attr( 'cy', d => params.yScale( d.value ) )
+		.on( 'mouseover', ( d, i, nodes ) =>
+			handleMouseOverLineChart( d, i, nodes, node, data, params )
+		)
+		.on( 'mouseout', ( d, i, nodes ) => handleMouseOutLineChart( d, i, nodes, params ) );
+
+	const focus = node
+		.append( 'g' )
+		.attr( 'class', 'focusspaces' )
+		.selectAll( '.focus' )
+		.data( params.dateSpaces )
+		.enter()
+		.append( 'g' )
+		.attr( 'class', 'focus' );
+
+	focus
+		.append( 'line' )
+		.attr( 'class', 'focus-grid' )
+		.attr( 'x1', d => params.xLineScale( new Date( d.date ) ) )
+		.attr( 'y1', 0 )
+		.attr( 'x2', d => params.xLineScale( new Date( d.date ) ) )
+		.attr( 'y2', params.height )
+		.attr( 'opacity', '0' );
+
+	focus
+		.append( 'rect' )
+		.attr( 'class', 'focus-g' )
+		.attr( 'x', d => d.start )
+		.attr( 'y', 0 )
+		.attr( 'width', d => d.width )
+		.attr( 'height', params.height )
+		.attr( 'opacity', 0 )
 		.on( 'mouseover', ( d, i, nodes ) =>
 			handleMouseOverLineChart( d, i, nodes, node, data, params )
 		)
