@@ -252,15 +252,7 @@
 		&.woocommerce-legend__item {
 			button {
 				&:hover {
-					background-color: none;
-				}
-			}
-
-			&.woocommerce-legend__item-checked {
-				button {
-					&:hover {
-						background-color: $core-grey-light-100;
-					}
+					background-color: $core-grey-light-100;
 				}
 			}
 		}

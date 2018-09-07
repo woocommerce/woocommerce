@@ -84,16 +84,24 @@ class Chart extends Component {
 			...d,
 			visible: d.key === event.target.id ? ! d.visible : d.visible,
 		} ) );
-		this.setState( {
-			orderedKeys,
-			visibleData: this.getVisibleData( data, orderedKeys ),
-		} );
+		const copyEvent = { ...event }; // can't pass a synthetic event into the hover handler
+		this.setState(
+			{
+				orderedKeys,
+				visibleData: this.getVisibleData( data, orderedKeys ),
+			},
+			() => {
+				this.handleLegendHover( copyEvent );
+			}
+		);
 	}
 
 	handleLegendHover( event ) {
+		const hoverTarget = this.state.orderedKeys.filter( d => d.key === event.target.id )[ 0 ];
 		this.setState( {
 			orderedKeys: this.state.orderedKeys.map( d => {
-				const enterFocus = d.key === event.target.id ? true : false;
+				let enterFocus = d.key === event.target.id ? true : false;
+				enterFocus = ! hoverTarget.visible ? true : enterFocus;
 				return {
 					...d,
 					focus: event.type === 'mouseleave' || event.type === 'blur' ? true : enterFocus,
