@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 echo '= ' . esc_html( $email_heading ) . " =\n\n";
 
 /* translators: %s Customer first name */
-echo esc_html__( 'Hi %s,', 'woocommerce' ) . "\n\n";
+echo sprintf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $user_login ) ) . "\n\n";
 /* translators: %1$s: Site title, %2$s: Username, %3$s: My account link */
 echo sprintf( esc_html__( 'Thanks for creating an account on %1$s. As a reminder, the username you chose is %2$s. You can access your account area to view orders, change your password, and more at: %3$s', 'woocommerce' ), esc_html( $blogname ), '<strong>' . esc_html( $user_login ) . '</strong>', esc_html( wc_get_page_permalink( 'myaccount' ) ) ) . "\n\n";
 
