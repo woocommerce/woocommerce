@@ -32,7 +32,6 @@ import {
 	getYScale,
 	getYTickOffset,
 } from './utils';
-import { formatCurrency } from '../../lib/currency';
 
 /**
  * A simple D3 line and bar chart component for timeseries data in React.
