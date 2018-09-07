@@ -57,6 +57,19 @@ function wc_admin_register_script() {
 
 	wp_enqueue_script( 'wp-api' );
 
+	// Add Tracks script to the DOM if tracking is opted in
+	$tracking_enabled = 'yes' === get_option( 'woocommerce_allow_tracking', 'no' );
+	if( $tracking_enabled ) {
+		$tracking_script  = "var wc_tracking_script = document.createElement( 'script' );\n";
+		$tracking_script .= "wc_tracking_script.src = '//stats.wp.com/w.js';\n"; //TODO Version/cache buster
+		$tracking_script .= "wc_tracking_script.type = 'text/javascript';\n";
+		$tracking_script .= "wc_tracking_script.async = true;\n";
+		$tracking_script .= "wc_tracking_script.defer = true;\n";
+		$tracking_script .= "window._tkq = window._tkq || [];\n";
+		$tracking_script .= "document.head.appendChild( wc_tracking_script );\n";
+		wp_add_inline_script( 'wc-components', $tracking_script, 'before' );
+	}
+
 	/**
 	 * TODO: On merge, once plugin images are added to core WooCommerce, `wcAdminAssetUrl` can be retired, and 
 	 * `wcAssetUrl` can be used in its place throughout the codebase.
@@ -75,6 +88,7 @@ function wc_admin_register_script() {
 		),
 		'orderStatuses'    => wc_get_order_statuses(),
 		'siteTitle'        => get_bloginfo( 'name' ),
+		'trackingEnabled'  => $tracking_enabled,
 	);
 
 	wp_add_inline_script(
