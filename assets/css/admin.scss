@@ -3693,7 +3693,12 @@
 		 td.forminp {
 			 input, textarea {
 				 width: 448px;
+				 padding: 6px 11px;
 			 }
+		 }
+		 
+		 .select2-container--default .select2-selection--multiple .select2-selection__rendered {
+			 padding: 0;
 		 }
 	 }
  }
