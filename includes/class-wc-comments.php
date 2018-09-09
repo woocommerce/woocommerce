@@ -412,6 +412,7 @@ class WC_Comments {
 	/**
 	 * Update comment type of product reviews.
 	 *
+	 * @since 3.5.0
 	 * @param array $comment_data Comment data.
 	 * @return array
 	 */
