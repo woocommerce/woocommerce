@@ -37,6 +37,7 @@ class WC_Tests_API_Reports_Products_Totals extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_reports() {
 		wp_set_current_user( $this->user );
+		WC_Install::create_terms();
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/reports/products/totals' ) );
 		$report   = $response->get_data();
