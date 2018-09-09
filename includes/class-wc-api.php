@@ -222,6 +222,7 @@ class WC_API extends WC_Legacy_API {
 		include_once dirname( __FILE__ ) . '/api/class-wc-rest-report-products-totals-controller.php';
 		include_once dirname( __FILE__ ) . '/api/class-wc-rest-report-customers-totals-controller.php';
 		include_once dirname( __FILE__ ) . '/api/class-wc-rest-report-coupons-totals-controller.php';
+		include_once dirname( __FILE__ ) . '/api/class-wc-rest-report-reviews-totals-controller.php';
 		include_once dirname( __FILE__ ) . '/api/class-wc-rest-settings-controller.php';
 		include_once dirname( __FILE__ ) . '/api/class-wc-rest-setting-options-controller.php';
 		include_once dirname( __FILE__ ) . '/api/class-wc-rest-shipping-zones-controller.php';
