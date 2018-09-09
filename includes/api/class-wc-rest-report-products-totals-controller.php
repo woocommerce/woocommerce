@@ -40,9 +40,15 @@ class WC_REST_Report_Products_Totals_Controller extends WC_REST_Reports_Controll
 	 */
 	protected function get_reports() {
 		$types = wc_get_product_types();
+		$terms = get_terms(
+			array(
+				'taxonomy'   => 'product_type',
+				'hide_empty' => false,
+			)
+		);
 		$data  = array();
 
-		foreach ( get_terms( 'product_type' ) as $product_type ) {
+		foreach ( $terms as $product_type ) {
 			if ( ! isset( $types[ $product_type->name ] ) ) {
 				continue;
 			}

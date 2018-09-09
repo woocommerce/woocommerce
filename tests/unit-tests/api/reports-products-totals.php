@@ -41,9 +41,15 @@ class WC_Tests_API_Reports_Products_Totals extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/reports/products/totals' ) );
 		$report   = $response->get_data();
 		$types    = wc_get_product_types();
+		$terms    = get_terms(
+			array(
+				'taxonomy'   => 'product_type',
+				'hide_empty' => false,
+			)
+		);
 		$data     = array();
 
-		foreach ( get_terms( 'product_type' ) as $product_type ) {
+		foreach ( $terms as $product_type ) {
 			if ( ! isset( $types[ $product_type->name ] ) ) {
 				continue;
 			}
