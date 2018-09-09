@@ -48,6 +48,9 @@ class WC_Comments {
 
 		// Review of verified purchase.
 		add_action( 'comment_post', array( __CLASS__, 'add_comment_purchase_verification' ) );
+
+		// Set comment type.
+		add_action( 'preprocess_comment', array( __CLASS__, 'update_comment_type' ), 1 );
 	}
 
 	/**
@@ -404,6 +407,20 @@ class WC_Comments {
 		$data_store->update_rating_counts( $product );
 
 		return $counts;
+	}
+
+	/**
+	 * Update comment type of product reviews.
+	 *
+	 * @param array $comment_data Comment data.
+	 * @return array
+	 */
+	public static function update_comment_type( $comment_data ) {
+		if ( ! is_admin() && isset( $_POST['comment_post_ID'] ) && 'product' === get_post_type( absint( $_POST['comment_post_ID'] ) ) ) { // WPCS: input var ok, CSRF ok.
+			$comment_data['comment_type'] = 'review';
+		}
+
+		return $comment_data;
 	}
 }
 
