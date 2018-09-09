@@ -41,6 +41,24 @@ class WC_REST_Report_Reviews_Totals_Controller extends WC_REST_Reports_Controlle
 	protected function get_reports() {
 		$data = array();
 
+		$query_data = array(
+			'count'      => true,
+			'post_type'  => 'product',
+			'meta_key'   => 'rating', // WPCS: slow query ok.
+			'meta_value' => '', // WPCS: slow query ok.
+		);
+
+		for ( $i = 1; $i <= 5; $i++ ) {
+			$query_data['meta_value'] = $i;
+
+			$data[] = array(
+				'slug'  => 'rated_' . $i . '_out_of_5',
+				/* translators: %s: average rating */
+				'name'  => sprintf( __( 'Rated %s out of 5', 'woocommerce' ), $i ),
+				'total' => (int) get_comments( $query_data ),
+			);
+		}
+
 		return $data;
 	}
 
