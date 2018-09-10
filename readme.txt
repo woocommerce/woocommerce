@@ -184,6 +184,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Show parent variable product in shipping class admin screen when variation has shipping class. #21278
 * Fix - Correctly excluded administrators from "Customer list" report. #21304
 * Fix/Tweak - Fire `woocommerce_grant_product_download_access` hook after the download has its ID set. #20905
+* Fix/Tweak/Performance - Change wp_woocommerce_sessions primary key to session_id. #21245
 * Tweak - Show empty terms in admin product category filter dropdown. #20324
 * Tweak - Don't force default token gateway active by default. #20125
 * Tweak - Move notice output to hooked in functions. #19794
