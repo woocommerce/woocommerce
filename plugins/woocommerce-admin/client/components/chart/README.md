@@ -8,6 +8,7 @@ A simple D3 line and bar chart component for timeseries data in React.
 ```jsx
 <Chart
 	data={ timeseries }
+	dateParser={ '%Y-%m-%d' }
 	tooltipFormat={ 'Date is %Y-%m-%d' }
 	type={ 'bar' }
 	xFormat={ '%d' }
@@ -20,7 +21,7 @@ This component accepts timeseries `data` prop in the following format (with date
 ```
 [
 	{
-		date: '%Y-%m-%dT%H:%M:%S', // string
+		date: '%Y-%m-%d', // string in `dateParser` format (see below)
 		category1: value, // number
 		category2: value, // number
 		...
@@ -32,7 +33,7 @@ For example:
 ```
 [
 	{
-		date: '2018-06-25T00:00:00',
+		date: '2018-06-25',
 		category1: 1234.56,
 		category2: 9876,
 		...
@@ -47,6 +48,7 @@ Required props are marked with `*`.
 Name | Type | Default | Description
 --- | --- | --- | ---
 `data`* | `array` | none | An array of data as specified above(below)
+`dateParser` | `string` | `%Y-%m-%dT%H:%M:%S` | Format to parse datetimes in the data
 `type`* | `string` | `line` | Chart type of either `line` or `bar`
 `title` | `string` | none | Chart title
 `tooltipFormat` | `string` | `%Y-%m-%d` | Title and format of the tooltip title

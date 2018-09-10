@@ -305,7 +305,7 @@ export class RevenueReport extends Component {
 
 		return (
 			<Card title="">
-				<Chart data={ chartData } title={ selectedChart.label } />
+				<Chart data={ chartData } title={ selectedChart.label } dateParser={ '%Y-%m-%d' } />
 			</Card>
 		);
 	}

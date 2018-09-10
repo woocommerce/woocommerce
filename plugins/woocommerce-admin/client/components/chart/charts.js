@@ -7,7 +7,7 @@ import { isEqual } from 'lodash';
 import { Component, createRef } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { timeFormat as d3TimeFormat } from 'd3-time-format';
+import { timeFormat as d3TimeFormat, utcParse as d3UTCParse } from 'd3-time-format';
 import { select as d3Select } from 'd3-selection';
 
 /**
@@ -91,6 +91,7 @@ class D3Chart extends Component {
 		const {
 			colorScheme,
 			data,
+			dateParser,
 			height,
 			margin,
 			orderedKeys,
@@ -111,7 +112,8 @@ class D3Chart extends Component {
 		const lineData = getLineData( data, newOrderedKeys );
 		const yMax = getYMax( lineData );
 		const yScale = getYScale( adjHeight, yMax );
-		const uniqueDates = getUniqueDates( lineData );
+		const parseDate = d3UTCParse( dateParser );
+		const uniqueDates = getUniqueDates( lineData, parseDate );
 		const xLineScale = getXLineScale( uniqueDates, adjWidth );
 		const xScale = getXScale( uniqueDates, adjWidth );
 		return {
@@ -122,6 +124,7 @@ class D3Chart extends Component {
 			lineData,
 			margin,
 			orderedKeys: newOrderedKeys,
+			parseDate,
 			scale,
 			tooltipFormat: d3TimeFormat( tooltipFormat ),
 			type,
@@ -176,6 +179,10 @@ D3Chart.propTypes = {
 	 */
 	data: PropTypes.array.isRequired,
 	/**
+	 * Format to parse dates into d3 time format
+	 */
+	dateParser: PropTypes.string.isRequired,
+	/**
 	 * Relative viewpoirt height of the `svg`.
 	 */
 	height: PropTypes.number,
@@ -224,6 +231,7 @@ D3Chart.propTypes = {
 
 D3Chart.defaultProps = {
 	data: [],
+	dateParser: '%Y-%m-%dT%H:%M:%S',
 	height: 200,
 	margin: {
 		bottom: 30,

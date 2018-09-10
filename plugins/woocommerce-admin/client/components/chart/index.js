@@ -17,22 +17,24 @@ import { gap, gaplarge } from 'stylesheets/abstracts/_variables.scss';
 
 const WIDE_BREAKPOINT = 1100;
 
-function getOrderedKeys( data ) {
-	return [
+function getOrderedKeys( props ) {
+	const updatedKeys = [
 		...new Set(
-			data.reduce( ( accum, curr ) => {
+			props.data.reduce( ( accum, curr ) => {
 				Object.keys( curr ).forEach( key => key !== 'date' && accum.push( key ) );
 				return accum;
 			}, [] )
 		),
-	]
-		.map( key => ( {
-			key,
-			total: data.reduce( ( a, c ) => a + c[ key ], 0 ),
-			visible: true,
-			focus: true,
-		} ) )
-		.sort( ( a, b ) => b.total - a.total );
+	].map( key => ( {
+		key,
+		total: props.data.reduce( ( a, c ) => a + c[ key ], 0 ),
+		visible: true,
+		focus: true,
+	} ) );
+	if ( props.layout === 'comparison' ) {
+		updatedKeys.sort( ( a, b ) => b.total - a.total );
+	}
+	return updatedKeys;
 }
 
 /**
@@ -47,7 +49,7 @@ class Chart extends Component {
 		const calcGap = wpWrap > 782 ? gaplarge.match( /\d+/ )[ 0 ] : gap.match( /\d+/ )[ 0 ];
 		this.state = {
 			data: props.data,
-			orderedKeys: getOrderedKeys( props.data ),
+			orderedKeys: getOrderedKeys( props ),
 			visibleData: [ ...props.data ],
 			width: wpBody - 2 * calcGap,
 		};
@@ -59,7 +61,7 @@ class Chart extends Component {
 
 	componentDidUpdate( prevProps ) {
 		const { data } = this.props;
-		const orderedKeys = getOrderedKeys( data );
+		const orderedKeys = getOrderedKeys( this.props );
 		if ( ! isEqual( [ ...data ].sort(), [ ...prevProps.data ].sort() ) ) {
 			/* eslint-disable react/no-did-update-set-state */
 			this.setState( {
@@ -129,10 +131,18 @@ class Chart extends Component {
 
 	render() {
 		const { orderedKeys, visibleData, width } = this.state;
-		const legendDirection =
-			this.props.layout === 'standard' && width > WIDE_BREAKPOINT ? 'row' : 'column';
-		const chartDirection =
-			this.props.layout === 'comparison' && width > WIDE_BREAKPOINT ? 'row' : 'column';
+		const {
+			dateParser,
+			layout,
+			title,
+			tooltipFormat,
+			type,
+			xFormat,
+			x2Format,
+			yFormat,
+		} = this.props;
+		const legendDirection = layout === 'standard' && width > WIDE_BREAKPOINT ? 'row' : 'column';
+		const chartDirection = layout === 'comparison' && width > WIDE_BREAKPOINT ? 'row' : 'column';
 		const legend = (
 			<Legend
 				className={ 'woocommerce-chart__legend' }
@@ -152,7 +162,7 @@ class Chart extends Component {
 		return (
 			<div className="woocommerce-chart" ref={ this.chartRef }>
 				<div className="woocommerce-chart__header">
-					<span className="woocommerce-chart__title">{ this.props.title }</span>
+					<span className="woocommerce-chart__title">{ title }</span>
 					{ width > WIDE_BREAKPOINT && legendDirection === 'row' && legend }
 				</div>
 				<div
@@ -165,15 +175,16 @@ class Chart extends Component {
 					<D3Chart
 						colorScheme={ d3InterpolateViridis }
 						data={ visibleData }
+						dateParser={ dateParser }
 						height={ 300 }
 						margin={ margin }
 						orderedKeys={ orderedKeys }
-						tooltipFormat={ this.props.tooltipFormat }
-						type={ this.props.type }
+						tooltipFormat={ tooltipFormat }
+						type={ type }
 						width={ chartDirection === 'row' ? width - 320 : width }
-						xFormat={ this.props.xFormat }
-						x2Format={ this.props.x2Format }
-						yFormat={ this.props.yFormat }
+						xFormat={ xFormat }
+						x2Format={ x2Format }
+						yFormat={ yFormat }
 					/>
 				</div>
 				{ width < WIDE_BREAKPOINT && <div className="woocommerce-chart__footer">{ legend }</div> }
@@ -187,6 +198,10 @@ Chart.propTypes = {
 	 * An array of data.
 	 */
 	data: PropTypes.array.isRequired,
+	/**
+	 * Format to parse dates into d3 time format
+	 */
+	dateParser: PropTypes.string.isRequired,
 	/**
 	 * A datetime formatting string to format the title of the toolip, passed to d3TimeFormat.
 	 */
@@ -219,6 +234,7 @@ Chart.propTypes = {
 
 Chart.defaultProps = {
 	data: [],
+	dateParser: '%Y-%m-%dT%H:%M:%S',
 	tooltipFormat: '%Y-%m-%d',
 	xFormat: '%d',
 	x2Format: '%b %Y',
