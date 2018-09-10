@@ -1303,6 +1303,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		$params['stock_status'] = array(
 			'description'       => __( 'Limit result set to products with specified stock status.', 'woocommerce' ),
 			'type'              => 'string',
+			'enum'              => array_keys( wc_get_product_stock_status_options() ),
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
