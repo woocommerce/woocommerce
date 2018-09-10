@@ -9,9 +9,9 @@
  * System Status REST Tests.
  *
  * @package WooCommerce\Tests\API
- * @since 3.5.0
+ * @since 3.0
  */
-class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
+class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Setup our test server.
@@ -31,19 +31,19 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();
-		$this->assertArrayHasKey( '/wc/v3/system_status', $routes );
-		$this->assertArrayHasKey( '/wc/v3/system_status/tools', $routes );
-		$this->assertArrayHasKey( '/wc/v3/system_status/tools/(?P<id>[\w-]+)', $routes );
+		$this->assertArrayHasKey( '/wc/v2/system_status', $routes );
+		$this->assertArrayHasKey( '/wc/v2/system_status/tools', $routes );
+		$this->assertArrayHasKey( '/wc/v2/system_status/tools/(?P<id>[\w-]+)', $routes );
 	}
 
 	/**
 	 * Test to make sure system status cannot be accessed without valid creds
 	 *
-	 * @since 3.5.0
+	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_without_permission() {
 		wp_set_current_user( 0 );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/system_status' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
 
@@ -51,11 +51,11 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	 * Test to make sure root properties are present.
 	 * (environment, theme, database, etc).
 	 *
-	 * @since 3.5.0
+	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_returns_root_properties() {
 		wp_set_current_user( $this->user );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/system_status' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
 		$data     = $response->get_data();
 
 		$this->assertArrayHasKey( 'environment', $data );
@@ -70,11 +70,11 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test to make sure environment response is correct.
 	 *
-	 * @since 3.5.0
+	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_environment() {
 		wp_set_current_user( $this->user );
-		$response    = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/system_status' ) );
+		$response    = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
 		$data        = $response->get_data();
 		$environment = (array) $data['environment'];
 
@@ -90,12 +90,12 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test to make sure database response is correct.
 	 *
-	 * @since 3.5.0
+	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_database() {
 		global $wpdb;
 		wp_set_current_user( $this->user );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/system_status' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
 		$data     = $response->get_data();
 		$database = (array) $data['database'];
 
@@ -109,14 +109,14 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test to make sure active plugins response is correct.
 	 *
-	 * @since 3.5.0
+	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_active_plugins() {
 		wp_set_current_user( $this->user );
 
 		$actual_plugins = array( 'hello.php' );
 		update_option( 'active_plugins', $actual_plugins );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/system_status' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
 		update_option( 'active_plugins', array() );
 
 		$data    = $response->get_data();
@@ -129,13 +129,13 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test to make sure theme response is correct.
 	 *
-	 * @since 3.5.0
+	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_theme() {
 		wp_set_current_user( $this->user );
 		$active_theme = wp_get_theme();
 
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/system_status' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
 		$data     = $response->get_data();
 		$theme    = (array) $data['theme'];
 
@@ -146,7 +146,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test to make sure settings response is correct.
 	 *
-	 * @since 3.5.0
+	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_settings() {
 		wp_set_current_user( $this->user );
@@ -157,7 +157,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 			$term_response[ $term->slug ] = strtolower( $term->name );
 		}
 
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/system_status' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
 		$data     = $response->get_data();
 		$settings = (array) $data['settings'];
 
@@ -170,12 +170,12 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test to make sure security response is correct.
 	 *
-	 * @since 3.5.0
+	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_security() {
 		wp_set_current_user( $this->user );
 
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/system_status' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
 		$data     = $response->get_data();
 		$settings = (array) $data['security'];
 
@@ -187,11 +187,11 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test to make sure pages response is correct.
 	 *
-	 * @since 3.5.0
+	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_pages() {
 		wp_set_current_user( $this->user );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/system_status' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
 		$data     = $response->get_data();
 		$pages    = $data['pages'];
 		$this->assertEquals( 5, count( $pages ) );
@@ -200,10 +200,10 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test system status schema.
 	 *
-	 * @since 3.5.0
+	 * @since 3.0.0
 	 */
 	public function test_system_status_schema() {
-		$request    = new WP_REST_Request( 'OPTIONS', '/wc/v3/system_status' );
+		$request    = new WP_REST_Request( 'OPTIONS', '/wc/v2/system_status' );
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
@@ -220,7 +220,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test to make sure get_items (all tools) response is correct.
 	 *
-	 * @since 3.5.0
+	 * @since 3.0.0
 	 */
 	public function test_get_system_tools() {
 		wp_set_current_user( $this->user );
@@ -228,7 +228,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$tools_controller = new WC_REST_System_Status_Tools_Controller();
 		$raw_tools        = $tools_controller->get_tools();
 
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/system_status/tools' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status/tools' ) );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -242,7 +242,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 				'_links'      => array(
 					'item' => array(
 						array(
-							'href'       => rest_url( '/wc/v3/system_status/tools/reset_tracking' ),
+							'href'       => rest_url( '/wc/v2/system_status/tools/reset_tracking' ),
 							'embeddable' => true,
 						),
 					),
@@ -250,54 +250,23 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 			),
 			$data
 		);
-
-		$query_params = array(
-			'_fields' => 'id,name,nonexisting',
-		);
-		$request = new WP_REST_Request( 'GET', '/wc/v3/system_status/tools' );
-		$request->set_query_params( $query_params );
-		$response = $this->server->dispatch( $request );
-		$data     = $response->get_data();
-
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( count( $raw_tools ), count( $data ) );
-		$this->assertContains(
-			array(
-				'id'          => 'reset_tracking',
-				'name'        => 'Reset usage tracking',
-			),
-			$data
-		);
-		foreach ( $data as $item ) {
-			// Fields that are not requested are not returned in response.
-			$this->assertArrayNotHasKey( 'action', $item );
-			$this->assertArrayNotHasKey( 'description', $item );
-			// Links are part of data in collections, so excluded if not explicitly requested.
-			$this->assertArrayNotHasKey( '_links', $item );
-			// Non existing field is ignored.
-			$this->assertArrayNotHasKey( 'nonexisting', $item );
-		}
-
-		// Links are part of data, not links in collections.
-		$links = $response->get_links();
-		$this->assertEquals( 0, count( $links ) );
 	}
 
 	/**
 	 * Test to make sure system status tools cannot be accessed without valid creds
 	 *
-	 * @since 3.5.0
+	 * @since 3.0.0
 	 */
 	public function test_get_system_status_tools_without_permission() {
 		wp_set_current_user( 0 );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/system_status/tools' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status/tools' ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
 
 	/**
 	 * Test to make sure we can load a single tool correctly.
 	 *
-	 * @since 3.5.0
+	 * @since 3.0.0
 	 */
 	public function test_get_system_tool() {
 		wp_set_current_user( $this->user );
@@ -306,7 +275,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$raw_tools        = $tools_controller->get_tools();
 		$raw_tool         = $raw_tools['recount_terms'];
 
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/system_status/tools/recount_terms' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status/tools/recount_terms' ) );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -315,45 +284,23 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'Term counts', $data['name'] );
 		$this->assertEquals( 'Recount terms', $data['action'] );
 		$this->assertEquals( 'This tool will recount product terms - useful when changing your settings in a way which hides products from the catalog.', $data['description'] );
-
-		// Test for _fields query parameter.
-		$query_params = array(
-			'_fields' => 'id,name,nonexisting',
-		);
-		$request = new WP_REST_Request( 'GET', '/wc/v3/system_status/tools/recount_terms' );
-		$request->set_query_params( $query_params );
-		$response = $this->server->dispatch( $request );
-		$data     = $response->get_data();
-
-		$this->assertEquals( 200, $response->get_status() );
-
-		$this->assertEquals( 'recount_terms', $data['id'] );
-		$this->assertEquals( 'Term counts', $data['name'] );
-		$this->assertArrayNotHasKey( 'action', $data );
-		$this->assertArrayNotHasKey( 'description', $data );
-		// Links are part of links, not data in single items.
-		$this->assertArrayNotHasKey( '_links', $data );
-
-		// Links are part of links, not data in single item response.
-		$links = $response->get_links();
-		$this->assertEquals( 1, count( $links ) );
 	}
 
 	/**
 	 * Test to make sure a single system status toolscannot be accessed without valid creds.
 	 *
-	 * @since 3.5.0
+	 * @since 3.0.0
 	 */
 	public function test_get_system_status_tool_without_permission() {
 		wp_set_current_user( 0 );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/system_status/tools/recount_terms' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status/tools/recount_terms' ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
 
 	/**
 	 * Test to make sure we can RUN a tool correctly.
 	 *
-	 * @since 3.5.0
+	 * @since 3.0.0
 	 */
 	public function test_execute_system_tool() {
 		wp_set_current_user( $this->user );
@@ -362,7 +309,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$raw_tools        = $tools_controller->get_tools();
 		$raw_tool         = $raw_tools['recount_terms'];
 
-		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v3/system_status/tools/recount_terms' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v2/system_status/tools/recount_terms' ) );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 'recount_terms', $data['id'] );
@@ -372,54 +319,28 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$this->assertTrue( $data['success'] );
 		$this->assertEquals( 1, did_action( 'woocommerce_rest_insert_system_status_tool' ) );
 
-		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v3/system_status/tools/not_a_real_tool' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v2/system_status/tools/not_a_real_tool' ) );
 		$this->assertEquals( 404, $response->get_status() );
-
-		// Test _fields for execute system tool request.
-		$query_params = array(
-			'_fields' => 'id,success,nonexisting',
-		);
-		$request      = new WP_REST_Request( 'PUT', '/wc/v3/system_status/tools/recount_terms' );
-		$request->set_query_params( $query_params );
-		$response = $this->server->dispatch( $request );
-		$data     = $response->get_data();
-
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 'recount_terms', $data['id'] );
-		$this->assertTrue( $data['success'] );
-
-		// Fields that are not requested are not returned in response.
-		$this->assertArrayNotHasKey( 'action', $data );
-		$this->assertArrayNotHasKey( 'name', $data );
-		$this->assertArrayNotHasKey( 'description', $data );
-		// Links are part of links, not data in single item response.
-		$this->assertArrayNotHasKey( '_links', $data );
-		// Non existing field is ignored.
-		$this->assertArrayNotHasKey( 'nonexisting', $data );
-
-		// Links are part of links, not data in single item response.
-		$links = $response->get_links();
-		$this->assertEquals( 1, count( $links ) );
 	}
 
 	/**
 	 * Test to make sure a tool cannot be run without valid creds.
 	 *
-	 * @since 3.5.0
+	 * @since 3.0.0
 	 */
 	public function test_execute_system_status_tool_without_permission() {
 		wp_set_current_user( 0 );
-		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v3/system_status/tools/recount_terms' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v2/system_status/tools/recount_terms' ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
 
 	/**
 	 * Test system status schema.
 	 *
-	 * @since 3.5.0
+	 * @since 3.0.0
 	 */
 	public function test_system_status_tool_schema() {
-		$request    = new WP_REST_Request( 'OPTIONS', '/wc/v3/system_status/tools' );
+		$request    = new WP_REST_Request( 'OPTIONS', '/wc/v2/system_status/tools' );
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
@@ -435,8 +356,6 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test execute_tool() with the "add_order_indexes" tool.
-	 *
-	 * @since 3.5.0
 	 */
 	public function test_execute_system_tool_add_order_indexes() {
 		wp_set_current_user( $this->user );
@@ -448,7 +367,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		delete_post_meta( $order2->get_id(), '_shipping_address_index' );
 
 		$controller = new WC_REST_System_Status_Tools_Controller();
-		$response   = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v3/system_status/tools/add_order_indexes' ) );
+		$response   = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v2/system_status/tools/add_order_indexes' ) );
 		$data       = $response->get_data();
 
 		$this->assertTrue( $data['success'] );
@@ -457,36 +376,4 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$this->assertNotEmpty( get_post_meta( $order2->get_id(), '_shipping_address_index', true ) );
 
 	}
-
-	/**
-	 * Test system_status _filter query parameter.
-	 */
-	public function test_get_system_status_info_filtered() {
-		wp_set_current_user( $this->user );
-		$query_params = array(
-			'_fields' => 'theme,settings,nonexisting',
-		);
-		$request      = new WP_REST_Request( 'GET', '/wc/v3/system_status' );
-		$request->set_query_params( $query_params );
-		$response = $this->server->dispatch( $request );
-		$data     = $response->get_data();
-
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 2, count( $data ) );
-
-		// Selected fields returned in the response.
-		$this->assertArrayHasKey( 'theme', $data );
-		$this->assertArrayHasKey( 'settings', $data );
-
-		// Fields not selected omitted from response.
-		$this->assertArrayNotHasKey( 'environment', $data );
-		$this->assertArrayNotHasKey( 'database', $data );
-		$this->assertArrayNotHasKey( 'active_plugins', $data );
-		$this->assertArrayNotHasKey( 'security', $data );
-		$this->assertArrayNotHasKey( 'pages', $data );
-
-		// Non existing field is ignored.
-		$this->assertArrayNotHasKey( 'nonexisting', $data );
-	}
-
 }
