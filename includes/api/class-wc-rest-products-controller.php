@@ -78,6 +78,8 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * @return array
 	 */
 	protected function prepare_objects_query( $request ) {
+		$args = WC_REST_CRUD_Controller::prepare_objects_query( $request );
+
 		// Set post_status.
 		$args['post_status'] = $request['status'];
 
