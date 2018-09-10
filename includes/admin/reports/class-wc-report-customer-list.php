@@ -265,7 +265,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 		 */
 		$admin_users = new WP_User_Query(
 			array(
-				'role'   => 'administrator1',
+				'role'   => 'administrator',
 				'fields' => 'ID',
 			)
 		);
