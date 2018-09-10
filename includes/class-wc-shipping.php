@@ -231,24 +231,6 @@ class WC_Shipping {
 					'orderby'    => 'name',
 				)
 			);
-			// Update counts for variations -> parent products.
-			$counts   = array();
-			$term_ids = wp_list_pluck( $classes, 'term_id' );
-			foreach ( $term_ids as $term_id ) {
-				$parent_products = array();
-				$product_ids     = get_objects_in_term( $term_id, 'product_shipping_class' );
-				$products        = array_map( 'wc_get_product', $product_ids );
-				foreach ( $products as $product ) {
-					$id                     = $product->get_parent_id() ? $product->get_parent_id() : $product->get_id();
-					$parent_products[ $id ] = true;
-				}
-				$counts[ $term_id ] = count( array_keys( $parent_products ) );
-			}
-
-			foreach ( $classes as $i => $class ) {
-				$classes[ $i ]->count = $counts[ $class->term_id ];
-			}
-
 			$this->shipping_classes = ! is_wp_error( $classes ) ? $classes : array();
 		}
 		return apply_filters( 'woocommerce_get_shipping_classes', $this->shipping_classes );
