@@ -417,7 +417,7 @@ class WC_Comments {
 	 * @return array
 	 */
 	public static function update_comment_type( $comment_data ) {
-		if ( ! is_admin() && isset( $_POST['comment_post_ID'] ) && 'product' === get_post_type( absint( $_POST['comment_post_ID'] ) ) ) { // WPCS: input var ok, CSRF ok.
+		if ( ! is_admin() && isset( $_POST['comment_post_ID'], $comment_data['comment_type'] ) && '' === $comment_data['comment_type'] && 'product' === get_post_type( absint( $_POST['comment_post_ID'] ) ) ) { // WPCS: input var ok, CSRF ok.
 			$comment_data['comment_type'] = 'review';
 		}
 
