@@ -50,6 +50,9 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 			'enabled'            => false,
 			'method_title'       => 'Check payments',
 			'method_description' => 'Take payments in person via checks. This offline gateway can also be useful to test purchases.',
+			'method_supports'    => array(
+				'products',
+			),
 			'settings'           => array_diff_key( $this->get_settings( 'WC_Gateway_Cheque' ), array(
 				'enabled'     => false,
 				'description' => false,
@@ -100,6 +103,10 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 			'enabled'            => false,
 			'method_title'       => 'PayPal',
 			'method_description' => 'PayPal Standard redirects customers to PayPal to enter their payment information.',
+			'method_supports'    => array(
+				'products',
+				'refunds',
+			),
 			'settings'           => array_diff_key( $this->get_settings( 'WC_Gateway_Paypal' ), array(
 				'enabled'     => false,
 				'description' => false,
@@ -258,7 +265,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 8, count( $properties ) );
+		$this->assertEquals( 9, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'title', $properties );
 		$this->assertArrayHasKey( 'description', $properties );
@@ -266,6 +273,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'enabled', $properties );
 		$this->assertArrayHasKey( 'method_title', $properties );
 		$this->assertArrayHasKey( 'method_description', $properties );
+		$this->assertArrayHasKey( 'method_supports', $properties );
 		$this->assertArrayHasKey( 'settings', $properties );
 	}
 
@@ -284,8 +292,8 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 			if ( empty( $field['title'] ) || empty( $field['type'] ) ) {
 				continue;
 			}
-			// Ignore 'title' settings/fields -- they are UI only
-			if ( 'title' === $field['type'] ) {
+			// Ignore 'enabled' and 'description', to be in line with \WC_REST_Payment_Gateways_Controller::get_settings.
+			if ( in_array( $id, array( 'enabled', 'description' ), true ) ) {
 				continue;
 			}
 			$data = array(
