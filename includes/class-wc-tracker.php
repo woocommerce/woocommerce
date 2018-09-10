@@ -116,6 +116,7 @@ class WC_Tracker {
 		$data['users']              = self::get_user_counts();
 		$data['products']           = self::get_product_counts();
 		$data['orders']             = self::get_orders();
+		$data['reviews']            = self::get_review_counts();
 
 		// Payment gateway info.
 		$data['gateways']           = self::get_active_payment_gateways();
@@ -319,6 +320,32 @@ class WC_Tracker {
 		$order_totals = self::get_order_totals();
 
 		return array_merge( $order_dates, $order_counts, $order_totals );
+	}
+
+	/**
+	 * Get review counts for different statuses.
+	 *
+	 * @return array
+	 */
+	private static function get_review_counts() {
+		global $wpdb;
+		$review_count = array();
+		$counts       = $wpdb->get_results( "
+			SELECT comment_approved, COUNT(*) AS num_reviews
+			FROM {$wpdb->comments}
+			WHERE comment_type = 'review'
+			GROUP BY comment_approved
+			", ARRAY_A );
+		if ( $counts ) {
+			foreach ( $counts as $count ) {
+				if ( 1 === $count['comment_approved'] ) {
+					$review_count['approved'] = $count['num_reviews'];
+				} else {
+					$review_count['pending'] = $count['num_reviews'];
+				}
+			}
+		}
+		return $review_count;
 	}
 
 	/**
