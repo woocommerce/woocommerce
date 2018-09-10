@@ -117,6 +117,7 @@ class WC_Tracker {
 		$data['products']           = self::get_product_counts();
 		$data['orders']             = self::get_orders();
 		$data['reviews']            = self::get_review_counts();
+		$data['categories']         = self::get_category_counts();
 
 		// Payment gateway info.
 		$data['gateways']           = self::get_active_payment_gateways();
@@ -346,6 +347,15 @@ class WC_Tracker {
 			}
 		}
 		return $review_count;
+	}
+
+	/**
+	 * Get the number of product categories.
+	 *
+	 * @return int
+	 */
+	private static function get_category_counts() {
+		return wp_count_terms( 'product_cat' );
 	}
 
 	/**
