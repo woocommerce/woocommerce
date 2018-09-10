@@ -93,7 +93,7 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 		$transaction = wc_clean( wp_unslash( $_REQUEST['tx'] ) ); // WPCS: input var ok, CSRF ok, sanitization ok.
 		$order       = $this->get_paypal_order( $order_id );
 
-		if ( ! $order || ! $order->has_status( 'pending' ) ) {
+		if ( ! $order || ! $order->needs_payment() ) {
 			return false;
 		}
 

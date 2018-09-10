@@ -32,9 +32,6 @@ class WC_Tests_Gateways extends WC_Unit_Test_Case {
 		$gateway->supports[] = 'refunds';
 
 		$this->assertTrue( $gateway->can_refund_order( $order ) );
-
-		// Cleanup.
-		$order->delete( true );
 	}
 
 	/**
@@ -66,10 +63,6 @@ class WC_Tests_Gateways extends WC_Unit_Test_Case {
 		$order->set_transaction_id( '' );
 		$order->save();
 		$this->assertFalse( $gateway->can_refund_order( $order ) );
-
-		// Cleanup.
-		delete_option( 'woocommerce_paypal_settings' );
-		$order->delete( true );
 	}
 }
 

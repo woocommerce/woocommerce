@@ -3,7 +3,7 @@
  * Locales information
  *
  * @package WooCommerce/i18n
- * @version 3.4.0
+ * @version 3.5.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -477,6 +477,26 @@ return array(
 					'country'  => 'PL',
 					'state'    => '',
 					'rate'     => '23.0000',
+					'name'     => 'VAT',
+					'shipping' => true,
+				),
+			),
+		),
+	),
+	'PY' => array(
+		'currency_code'  => 'PYG',
+		'currency_pos'   => 'left',
+		'thousand_sep'   => '.',
+		'decimal_sep'    => ',',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+		'tax_rates'      => array(
+			'' => array(
+				array(
+					'country'  => 'PY',
+					'state'    => '',
+					'rate'     => '10.0000',
 					'name'     => 'VAT',
 					'shipping' => true,
 				),

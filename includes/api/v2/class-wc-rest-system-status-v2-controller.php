@@ -228,7 +228,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
-						'mysql_version_string'      => array(
+						'mysql_version_string'             => array(
 							'description' => __( 'MySQL version string.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
@@ -796,18 +796,42 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 				$version_data = get_transient( md5( $plugin ) . '_version_data' );
 				if ( false === $version_data ) {
 					$changelog = wp_safe_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $dirname . '/changelog.txt' );
-					$cl_lines  = explode( "\n", wp_remote_retrieve_body( $changelog ) );
-					if ( ! empty( $cl_lines ) ) {
-						foreach ( $cl_lines as $line_num => $cl_line ) {
-							if ( preg_match( '/^[0-9]/', $cl_line ) ) {
-								$date         = str_replace( '.', '-', trim( substr( $cl_line, 0, strpos( $cl_line, '-' ) ) ) );
-								$version      = preg_replace( '~[^0-9,.]~', '', stristr( $cl_line, 'version' ) );
-								$update       = trim( str_replace( '*', '', $cl_lines[ $line_num + 1 ] ) );
+					if ( 200 === wp_remote_retrieve_response_code( $changelog ) ) {
+						$cl_lines = explode( "\n", wp_remote_retrieve_body( $changelog ) );
+						if ( ! empty( $cl_lines ) ) {
+							foreach ( $cl_lines as $line_num => $cl_line ) {
+								if ( preg_match( '/^[0-9]/', $cl_line ) ) {
+									$date         = str_replace( '.', '-', trim( substr( $cl_line, 0, strpos( $cl_line, '-' ) ) ) );
+									$version      = preg_replace( '~[^0-9,.]~', '', stristr( $cl_line, 'version' ) );
+									$update       = trim( str_replace( '*', '', $cl_lines[ $line_num + 1 ] ) );
+									$version_data = array(
+										'date'      => $date,
+										'version'   => $version,
+										'update'    => $update,
+										'changelog' => $changelog,
+									);
+									set_transient( md5( $plugin ) . '_version_data', $version_data, DAY_IN_SECONDS );
+									break;
+								}
+							}
+						}
+					} else {
+						$args    = (object) array(
+							'slug' => $dirname,
+						);
+						$request = array(
+							'action'  => 'plugin_information',
+							'request' => serialize( $args ),
+						);
+						$plugin_info = wp_safe_remote_post( 'http://api.wordpress.org/plugins/info/1.0/', array( 'body' => $request ) );
+						if ( 200 === wp_remote_retrieve_response_code( $plugin_info ) ) {
+							$body = maybe_unserialize( wp_remote_retrieve_body( $plugin_info ) );
+							if ( is_object( $body ) && isset( $body->sections['changelog'] ) ) {
 								$version_data = array(
-									'date'      => $date,
-									'version'   => $version,
-									'update'    => $update,
-									'changelog' => $changelog,
+									'date'      => $body->last_updated,
+									'version'   => $body->version,
+									'update'    => $body->sections['changelog'],
+									'changelog' => $body->sections['changelog'],
 								);
 								set_transient( md5( $plugin ) . '_version_data', $version_data, DAY_IN_SECONDS );
 								break;

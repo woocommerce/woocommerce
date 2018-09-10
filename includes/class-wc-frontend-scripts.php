@@ -256,12 +256,12 @@ class WC_Frontend_Scripts {
 			),
 			'wc-add-to-cart'             => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/add-to-cart' . $suffix . '.js' ),
-				'deps'    => array( 'jquery' ),
+				'deps'    => array( 'jquery', 'jquery-blockui' ),
 				'version' => WC_VERSION,
 			),
 			'wc-add-to-cart-variation'   => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/add-to-cart-variation' . $suffix . '.js' ),
-				'deps'    => array( 'jquery', 'wp-util' ),
+				'deps'    => array( 'jquery', 'wp-util', 'jquery-blockui' ),
 				'version' => WC_VERSION,
 			),
 			'wc-geolocation'             => array(

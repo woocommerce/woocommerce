@@ -130,8 +130,6 @@ class WC_Form_Handler {
 								}
 								break;
 							case 'phone' :
-								$_POST[ $key ] = wc_format_phone_number( $_POST[ $key ] );
-
 								if ( ! WC_Validation::is_phone( $_POST[ $key ] ) ) {
 									wc_add_notice( sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . $field['label'] . '</strong>' ), 'error' );
 								}

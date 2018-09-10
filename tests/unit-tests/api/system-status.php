@@ -24,6 +24,9 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 				'role' => 'administrator',
 			)
 		);
+
+		// Callback used by WP_HTTP_TestCase to decide whether to perform HTTP requests or to provide a mocked response.
+		$this->http_responder = array( $this, 'mock_http_responses' );
 	}
 
 	/**
@@ -102,8 +105,8 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( get_option( 'woocommerce_db_version' ), $database['wc_database_version'] );
 		$this->assertEquals( $wpdb->prefix, $database['database_prefix'] );
 		$this->assertEquals( WC_Geolocation::get_local_database_path(), $database['maxmind_geoip_database'] );
-		$this->assertArrayHasKey( 'woocommerce', $database['database_tables'], print_r( $database, true ) );
-		$this->assertArrayHasKey( $wpdb->prefix . 'woocommerce_payment_tokens', $database['database_tables']['woocommerce'], print_r( $database, true ) );
+		$this->assertArrayHasKey( 'woocommerce', $database['database_tables'], wc_print_r( $database, true ) );
+		$this->assertArrayHasKey( $wpdb->prefix . 'woocommerce_payment_tokens', $database['database_tables']['woocommerce'], wc_print_r( $database, true ) );
 	}
 
 	/**
@@ -254,7 +257,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$query_params = array(
 			'_fields' => 'id,name,nonexisting',
 		);
-		$request = new WP_REST_Request( 'GET', '/wc/v3/system_status/tools' );
+		$request      = new WP_REST_Request( 'GET', '/wc/v3/system_status/tools' );
 		$request->set_query_params( $query_params );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
@@ -263,8 +266,8 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( count( $raw_tools ), count( $data ) );
 		$this->assertContains(
 			array(
-				'id'          => 'reset_tracking',
-				'name'        => 'Reset usage tracking',
+				'id'   => 'reset_tracking',
+				'name' => 'Reset usage tracking',
 			),
 			$data
 		);
@@ -320,7 +323,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$query_params = array(
 			'_fields' => 'id,name,nonexisting',
 		);
-		$request = new WP_REST_Request( 'GET', '/wc/v3/system_status/tools/recount_terms' );
+		$request      = new WP_REST_Request( 'GET', '/wc/v3/system_status/tools/recount_terms' );
 		$request->set_query_params( $query_params );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
@@ -459,34 +462,31 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test system_status _filter query parameter.
+	 * Provides a mocked response for external requests performed by WC_REST_System_Status_Controller.
+	 * This way it is not necessary to perform a regular request to an external server which would
+	 * significantly slow down the tests.
+	 *
+	 * This function is called by WP_HTTP_TestCase::http_request_listner().
+	 *
+	 * @param array $request Request arguments.
+	 * @param string $url URL of the request.
+	 *
+	 * @return array|false mocked response or false to let WP perform a regular request.
 	 */
-	public function test_get_system_status_info_filtered() {
-		wp_set_current_user( $this->user );
-		$query_params = array(
-			'_fields' => 'theme,settings,nonexisting',
-		);
-		$request      = new WP_REST_Request( 'GET', '/wc/v3/system_status' );
-		$request->set_query_params( $query_params );
-		$response = $this->server->dispatch( $request );
-		$data     = $response->get_data();
+	protected function mock_http_responses( $request, $url ) {
+		$mocked_response = false;
 
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 2, count( $data ) );
+		if ( in_array( $url, array( 'https://www.paypal.com/cgi-bin/webscr', 'https://woocommerce.com/wc-api/product-key-api?request=ping&network=0' ), true ) ) {
+			$mocked_response = array(
+				'response' => array( 'code' => 200 ),
+			);
+		} elseif ( 'https://api.wordpress.org/themes/info/1.0/' === $url ) {
+			$mocked_response = array(
+				'body'     => 'O:8:"stdClass":12:{s:4:"name";s:7:"Default";s:4:"slug";s:7:"default";s:7:"version";s:5:"1.7.2";s:11:"preview_url";s:29:"https://wp-themes.com/default";s:6:"author";s:15:"wordpressdotorg";s:14:"screenshot_url";s:61:"//ts.w.org/wp-content/themes/default/screenshot.png?ver=1.7.2";s:6:"rating";d:100;s:11:"num_ratings";s:1:"3";s:10:"downloaded";i:296618;s:12:"last_updated";s:10:"2010-06-14";s:8:"homepage";s:37:"https://wordpress.org/themes/default/";s:13:"download_link";s:55:"https://downloads.wordpress.org/theme/default.1.7.2.zip";}',
+				'response' => array( 'code' => 200 ),
+			);
+		}
 
-		// Selected fields returned in the response.
-		$this->assertArrayHasKey( 'theme', $data );
-		$this->assertArrayHasKey( 'settings', $data );
-
-		// Fields not selected omitted from response.
-		$this->assertArrayNotHasKey( 'environment', $data );
-		$this->assertArrayNotHasKey( 'database', $data );
-		$this->assertArrayNotHasKey( 'active_plugins', $data );
-		$this->assertArrayNotHasKey( 'security', $data );
-		$this->assertArrayNotHasKey( 'pages', $data );
-
-		// Non existing field is ignored.
-		$this->assertArrayNotHasKey( 'nonexisting', $data );
+		return $mocked_response;
 	}
-
 }

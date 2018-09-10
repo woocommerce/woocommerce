@@ -264,7 +264,7 @@ abstract class WC_CSV_Exporter {
 	 * Export rows in CSV format.
 	 *
 	 * @since 3.1.0
-	 * @return array
+	 * @return string
 	 */
 	protected function export_rows() {
 		$data   = $this->get_data_to_export();
@@ -395,7 +395,7 @@ abstract class WC_CSV_Exporter {
 	 * @since 3.1.0
 	 * @param  array  $term_ids Term IDs to format.
 	 * @param  string $taxonomy Taxonomy name.
-	 * @return array
+	 * @return string
 	 */
 	public function format_term_ids( $term_ids, $taxonomy ) {
 		$term_ids = wp_parse_id_list( $term_ids );

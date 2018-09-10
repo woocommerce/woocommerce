@@ -150,7 +150,7 @@ class WC_Structured_Data {
 	 */
 	public function output_structured_data() {
 		$types = $this->get_data_type_for_page();
-		$data  = wc_clean( $this->get_structured_data( $types ) );
+		$data  = $this->get_structured_data( $types );
 
 		if ( $data ) {
 			echo '<script type="application/ld+json">' . wp_json_encode( $data ) . '</script>';

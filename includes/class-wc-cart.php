@@ -104,7 +104,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	public function __construct() {
 		$this->session          = new WC_Cart_Session( $this );
 		$this->fees_api         = new WC_Cart_Fees( $this );
-		$this->tax_display_cart = get_option( 'woocommerce_tax_display_cart' );
+		$this->tax_display_cart = $this->is_tax_displayed();
 
 		// Register hooks for the objects.
 		$this->session->init();
@@ -1062,7 +1062,7 @@ class WC_Cart extends WC_Legacy_Cart {
 						sprintf(
 							'<a href="%s" class="button wc-forward">%s</a> %s',
 							wc_get_cart_url(),
-							__( 'View Cart', 'woocommerce' ),
+							__( 'View cart', 'woocommerce' ),
 							/* translators: 1: quantity in stock 2: current quantity */
 							sprintf( __( 'You cannot add that amount to the cart &mdash; we have %1$s in stock and you already have %2$s in your cart.', 'woocommerce' ), wc_format_stock_quantity_for_display( $product_data->get_stock_quantity(), $product_data ), wc_format_stock_quantity_for_display( $products_qty_in_cart[ $product_data->get_stock_managed_by_id() ], $product_data ) )
 						)
@@ -1092,6 +1092,8 @@ class WC_Cart extends WC_Legacy_Cart {
 					), $cart_item_key
 				);
 			}
+
+			$this->cart_contents = apply_filters( 'woocommerce_cart_contents_changed', $this->cart_contents );
 
 			do_action( 'woocommerce_add_to_cart', $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data );
 
@@ -1937,5 +1939,18 @@ class WC_Cart extends WC_Legacy_Cart {
 		$this->totals = $this->default_totals;
 		$this->fees_api->remove_all_fees();
 		do_action( 'woocommerce_cart_reset', $this, false );
+	}
+
+	/**
+	 * Returns 'incl' if tax should be included in cart, otherwise returns 'excl'.
+	 *
+	 * @return string
+	 */
+	private function is_tax_displayed() {
+		if ( $this->get_customer() && $this->get_customer()->get_is_vat_exempt() ) {
+			return 'excl';
+		}
+
+		return get_option( 'woocommerce_tax_display_cart' );
 	}
 }

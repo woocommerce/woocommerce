@@ -419,7 +419,7 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 
 			// Customer password.
 			if ( isset( $request['password'] ) ) {
-				$customer->set_password( wc_clean( $request['password'] ) );
+				$customer->set_password( $request['password'] );
 			}
 
 			$this->update_customer_meta_fields( $customer, $request );

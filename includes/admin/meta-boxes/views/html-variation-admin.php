@@ -170,7 +170,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							'value'             => wc_stock_amount( $variation_object->get_stock_quantity( 'edit' ) ),
 							'label'             => __( 'Stock quantity', 'woocommerce' ),
 							'desc_tip'          => true,
-							'description'       => __( "Enter a quantity to enable stock management at variation level, or leave blank to use the parent product's options.", 'woocommerce' ),
+							'description'       => __( "Enter a number to set stock quantity at the variation level. Use a variation's 'Manage stock?' check box above to enable/disable stock management at the variation level.", 'woocommerce' ),
 							'type'              => 'number',
 							'custom_attributes' => array(
 								'step' => 'any',
@@ -311,7 +311,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							'name'          => "variable_tax_class[{$loop}]",
 							'value'         => $variation_object->get_tax_class( 'edit' ),
 							'label'         => __( 'Tax class', 'woocommerce' ),
-							'options'       => array_merge( array( 'parent' => __( 'Same as parent', 'woocommerce' ) ), wc_get_product_tax_class_options() ),
+							'options'       => array( 'parent' => __( 'Same as parent', 'woocommerce' ) ) + wc_get_product_tax_class_options(),
 							'desc_tip'      => 'true',
 							'description'   => __( 'Choose a tax class for this product. Tax classes are used to apply different tax rates specific to certain types of product.', 'woocommerce' ),
 							'wrapper_class' => 'form-row form-row-full',
