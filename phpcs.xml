@@ -41,6 +41,7 @@
 		<exclude name="WordPress.VIP.RestrictedVariables.user_meta__wpdb__usermeta" />
 		<exclude name="WordPress.VIP.PostsPerPage.posts_per_page_posts_per_page" />
 		<exclude name="WordPress.VIP.RestrictedVariables.cache_constraints___COOKIE" />
+		<exclude name="WordPress.VIP.RestrictedVariables.cache_constraints___SERVER__REMOTE_ADDR__" />
 	</rule>
 	<rule ref="WordPress.VIP.ValidatedSanitizedInput">
 		<properties>
