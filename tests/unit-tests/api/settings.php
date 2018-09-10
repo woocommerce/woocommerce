@@ -133,7 +133,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		$data = $response->get_data();
 		$properties = $data['schema']['properties'];
-		$this->assertEquals( 9, count( $properties ) );
+		$this->assertEquals( 10, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'label', $properties );
 		$this->assertArrayHasKey( 'description', $properties );
@@ -143,6 +143,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'placeholder', $properties );
 		$this->assertArrayHasKey( 'type', $properties );
 		$this->assertArrayHasKey( 'options', $properties );
+		$this->assertArrayHasKey( 'group_id', $properties );
 	}
 
 	/**
@@ -451,7 +452,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 					),
 				),
 			),
-	), $data );
+		), $data );
 
 		// test get single
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/settings/products/woocommerce_dimension_unit' ) );
@@ -518,6 +519,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 			'default'     => '',
 			'tip'         => 'Available placeholders: <code>{site_title}, {order_date}, {order_number}</code>',
 			'value'       => '',
+			'group_id'    => 'email_new_order',
 		), $setting );
 
 		// test update
@@ -536,6 +538,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 			'default'     => '',
 			'tip'         => 'Available placeholders: <code>{site_title}, {order_date}, {order_number}</code>',
 			'value'       => 'This is my subject',
+			'group_id'    => 'email_new_order',
 		), $setting );
 
 		// test updating another subject and making sure it works with a "similar" id
