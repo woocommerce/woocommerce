@@ -15,13 +15,10 @@ import {
 } from 'd3-scale';
 import { mouse as d3Mouse, select as d3Select } from 'd3-selection';
 import { line as d3Line } from 'd3-shape';
-import { utcParse as d3UTCParse } from 'd3-time-format';
 /**
  * Internal dependencies
  */
 import { formatCurrency } from 'lib/currency';
-
-export const parseDate = d3UTCParse( '%Y-%m-%dT%H:%M:%S' );
 
 function decodeSymbol( str ) {
 	return str.replace( /&#(\d+);/g, ( match, dec ) => String.fromCharCode( dec ) );
@@ -87,9 +84,10 @@ export const getLineData = ( data, orderedKeys ) =>
 /**
  * Describes `getUniqueDates`
  * @param {array} lineData - from `GetLineData`
+ * @param {function} parseDate - D3 time format parser
  * @returns {array} an array of unique date values sorted from earliest to latest
  */
-export const getUniqueDates = lineData => {
+export const getUniqueDates = ( lineData, parseDate ) => {
 	return [
 		...new Set(
 			lineData.reduce( ( accum, { values } ) => {
@@ -101,10 +99,21 @@ export const getUniqueDates = lineData => {
 };
 
 export const getColor = ( key, params ) => {
-	const keyValue =
-		params.orderedKeys.length > 1
-			? findIndex( params.orderedKeys, d => d.key === key ) / ( params.orderedKeys.length - 1 )
-			: 0;
+	const smallColorScales = [
+		[],
+		[ 0.5 ],
+		[ 0.333, 0.667 ],
+		[ 0.2, 0.5, 0.8 ],
+		[ 0.12, 0.375, 0.625, 0.88 ],
+	];
+	let keyValue = 0;
+	const len = params.orderedKeys.length;
+	const idx = findIndex( params.orderedKeys, d => d.key === key );
+	if ( len < 5 ) {
+		keyValue = smallColorScales[ len ][ idx ];
+	} else {
+		keyValue = idx / ( params.orderedKeys.length - 1 );
+	}
 	return params.colorScheme( keyValue );
 };
 

@@ -93,7 +93,7 @@ class WidgetCharts extends Component {
 					</ul>
 				</Card>
 				<Card title={ __( 'Store Charts', 'wc-admin' ) }>
-					<Chart data={ this.state.someOrders } title="Example Chart" />
+					<Chart data={ this.state.someOrders } title="Example Chart" layout="comparison" />
 				</Card>
 			</Fragment>
 		);

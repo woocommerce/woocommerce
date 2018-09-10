@@ -4,6 +4,7 @@
  * @format
  */
 // import { noop } from 'lodash';
+import { utcParse as d3UTCParse } from 'd3-time-format';
 
 /**
  * Internal dependencies
@@ -21,7 +22,6 @@ import {
 	getYMax,
 	getYScale,
 	getYTickOffset,
-	parseDate,
 } from '../utils';
 
 const orderedKeys = [
@@ -64,10 +64,11 @@ const orderedDates = [
 	'2018-06-03T00:00:00',
 	'2018-06-04T00:00:00',
 ];
+const parseDate = d3UTCParse( '%Y-%m-%dT%H:%M:%S' );
 const testUniqueKeys = getUniqueKeys( dummyOrders );
 const testOrderedKeys = getOrderedKeys( dummyOrders, testUniqueKeys );
 const testLineData = getLineData( dummyOrders, testOrderedKeys );
-const testUniqueDates = getUniqueDates( testLineData );
+const testUniqueDates = getUniqueDates( testLineData, parseDate );
 const testXScale = getXScale( testUniqueDates, 100 );
 const testXLineScale = getXLineScale( testUniqueDates, 100 );
 const testYMax = getYMax( testLineData );
