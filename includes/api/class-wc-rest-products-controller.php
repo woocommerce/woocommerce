@@ -171,14 +171,12 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 		// Filter product by stock_status.
 		if ( ! empty( $request['stock_status'] ) ) {
-			if ( in_array( $request['stock_status'], array_keys( wc_get_product_stock_status_options() ), true ) ) {
-				$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
-					$args, array(
-						'key'   => '_stock_status',
-						'value' => $request['stock_status'],
-					)
-				);
-			}
+			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+				$args, array(
+					'key'   => '_stock_status',
+					'value' => $request['stock_status'],
+				)
+			);
 		}
 
 		// Filter by on sale products.
@@ -498,10 +496,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 		// Stock status; stock_status has priority over in_stock.
 		if ( isset( $request['stock_status'] ) ) {
-			$valid_stock_statuses = wc_get_product_stock_status_options();
-			if ( in_array( $request['stock_status'], array_keys( $valid_stock_statuses ), true ) ) {
-				$stock_status = $request['stock_status'];
-			}
+			$stock_status = $request['stock_status'];
 		} else {
 			$stock_status = $product->get_stock_status();
 		}
@@ -1303,6 +1298,15 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	public function get_collection_params() {
 		$params                    = parent::get_collection_params();
 		$params['orderby']['enum'] = array_merge( $params['orderby']['enum'], array( 'price', 'popularity', 'rating' ) );
+
+		unset( $params['in_stock'] );
+		$params['stock_status'] = array(
+			'description'       => __( 'Limit result set to products with specified stock status.', 'woocommerce' ),
+			'type'              => 'string',
+			'sanitize_callback' => 'sanitize_text_field',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
 		return $params;
 	}
 
