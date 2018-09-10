@@ -388,7 +388,6 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'date_on_sale_from', $properties );
 		$this->assertArrayHasKey( 'date_on_sale_to', $properties );
 		$this->assertArrayHasKey( 'on_sale', $properties );
-		$this->assertArrayHasKey( 'visible', $properties );
 		$this->assertArrayHasKey( 'purchasable', $properties );
 		$this->assertArrayHasKey( 'virtual', $properties );
 		$this->assertArrayHasKey( 'downloadable', $properties );
