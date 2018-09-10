@@ -1397,6 +1397,11 @@ class WC_REST_Orders_V2_Controller extends WC_REST_Legacy_Orders_Controller {
 								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
+							'instance_id'    => array(
+								'description' => __( 'Shipping instance ID.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+							),
 							'total'        => array(
 								'description' => __( 'Line total (after discounts).', 'woocommerce' ),
 								'type'        => 'string',

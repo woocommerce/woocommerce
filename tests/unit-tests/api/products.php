@@ -6,7 +6,7 @@
  * @since 3.5.0
  */
 
-class Products_API extends WC_REST_Unit_Test_Case {
+class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Setup our test server, endpoints, and user info.
@@ -158,9 +158,10 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 
 		// test simple products
-		$product  = WC_Helper_Product::create_simple_product();
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() ) );
-		$data     = $response->get_data();
+		$product      = WC_Helper_Product::create_simple_product();
+		$response     = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() ) );
+		$data         = $response->get_data();
+		$date_created = date( 'Y-m-d\TH:i:s', current_time( 'timestamp' ) );
 
 		$this->assertEquals( 'DUMMY SKU', $data['sku'] );
 		$this->assertEquals( 10, $data['regular_price'] );
@@ -169,10 +170,11 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product->get_id() );
 		$request->set_body_params(
 			array(
-				'sku'         => 'FIXED-SKU',
-				'sale_price'  => '8',
-				'description' => 'Testing',
-				'images'      => array(
+				'sku'          => 'FIXED-SKU',
+				'sale_price'   => '8',
+				'description'  => 'Testing',
+				'date_created' => $date_created,
+				'images'       => array(
 					array(
 						'position' => 0,
 						'src'      => 'http://cldup.com/Dr1Bczxq4q.png',
@@ -189,6 +191,7 @@ class Products_API extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( '8', $data['sale_price'] );
 		$this->assertEquals( '10', $data['regular_price'] );
 		$this->assertEquals( 'FIXED-SKU', $data['sku'] );
+		$this->assertEquals( $date_created, $data['date_created'] );
 		$this->assertContains( 'Dr1Bczxq4q', $data['images'][0]['src'] );
 		$this->assertContains( 'test upload image', $data['images'][0]['alt'] );
 		$product->delete( true );

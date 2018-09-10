@@ -161,14 +161,32 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	}
 
 	/**
-	 * Add new options for 'orderby' to the collection params.
+	 * Prepare a single product for create or update.
 	 *
-	 * @return array
+	 * @param  WP_REST_Request $request Request object.
+	 * @param  bool            $creating If is creating a new object.
+	 * @return WP_Error|WC_Data
 	 */
-	public function get_collection_params() {
-		$params                    = parent::get_collection_params();
-		$params['orderby']['enum'] = array_merge( $params['orderby']['enum'], array( 'price', 'popularity', 'rating' ) );
-		return $params;
+	protected function prepare_object_for_database( $request, $creating = false ) {
+		$product = parent::prepare_object_for_database( $request, $creating );
+
+		if ( ! empty( $request['date_created'] ) ) {
+			$date = rest_parse_date( $request['date_created'] );
+
+			if ( $date ) {
+				$product->set_date_created( $date );
+			}
+		}
+
+		if ( ! empty( $request['date_created_gmt'] ) ) {
+			$date = rest_parse_date( $request['date_created_gmt'], true );
+
+			if ( $date ) {
+				$product->set_date_created_gmt( $date );
+			}
+		}
+
+		return $product;
 	}
 
 	/**
@@ -211,13 +229,11 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					'description' => __( "The date the product was created, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
 				),
 				'date_created_gmt'      => array(
 					'description' => __( 'The date the product was created, as GMT.', 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
 				),
 				'date_modified'         => array(
 					'description' => __( "The date the product was last modified, in the site's timezone.", 'woocommerce' ),
@@ -786,5 +802,16 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			),
 		);
 		return $this->add_additional_fields_schema( $schema );
+	}
+
+	/**
+	 * Add new options for 'orderby' to the collection params.
+	 *
+	 * @return array
+	 */
+	public function get_collection_params() {
+		$params                    = parent::get_collection_params();
+		$params['orderby']['enum'] = array_merge( $params['orderby']['enum'], array( 'price', 'popularity', 'rating' ) );
+		return $params;
 	}
 }
