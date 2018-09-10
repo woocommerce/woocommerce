@@ -140,14 +140,6 @@ class WC_Settings_Products extends WC_Settings_Page {
 					),
 
 					array(
-						'title'   => __( 'Restock refunded items', 'woocommerce' ),
-						'desc'    => __( 'Uncheck this to default to NOT restocking items when refunding', 'woocommerce' ),
-						'id'      => 'woocommerce_restock_refunded_items',
-						'default' => 'yes',
-						'type'    => 'checkbox',
-					),
-
-					array(
 						'title'             => __( 'Hold stock (minutes)', 'woocommerce' ),
 						'desc'              => __( 'Hold stock (for unpaid orders) for x minutes. When this limit is reached, the pending order will be cancelled. Leave blank to disable.', 'woocommerce' ),
 						'id'                => 'woocommerce_hold_stock_minutes',
