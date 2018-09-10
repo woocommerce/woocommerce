@@ -129,8 +129,10 @@ class Chart extends Component {
 
 	render() {
 		const { orderedKeys, visibleData, width } = this.state;
-		const legendDirection = orderedKeys.length <= 2 && width > WIDE_BREAKPOINT ? 'row' : 'column';
-		const chartDirection = orderedKeys.length > 2 && width > WIDE_BREAKPOINT ? 'row' : 'column';
+		const legendDirection =
+			this.props.layout === 'standard' && width > WIDE_BREAKPOINT ? 'row' : 'column';
+		const chartDirection =
+			this.props.layout === 'comparison' && width > WIDE_BREAKPOINT ? 'row' : 'column';
 		const legend = (
 			<Legend
 				className={ 'woocommerce-chart__legend' }
@@ -186,10 +188,6 @@ Chart.propTypes = {
 	 */
 	data: PropTypes.array.isRequired,
 	/**
-	 * A title describing this chart.
-	 */
-	title: PropTypes.string,
-	/**
 	 * A datetime formatting string to format the title of the toolip, passed to d3TimeFormat.
 	 */
 	tooltipFormat: PropTypes.string,
@@ -209,6 +207,14 @@ Chart.propTypes = {
 	 * A number formatting string, passed to d3Format.
 	 */
 	yFormat: PropTypes.string,
+	/**
+	 * `standard` (default) legend layout in the header or `comparison` moves legend layout to the left
+	 */
+	layout: PropTypes.oneOf( [ 'standard', 'comparison' ] ),
+	/**
+	 * A title describing this chart.
+	 */
+	title: PropTypes.string,
 };
 
 Chart.defaultProps = {
@@ -217,6 +223,7 @@ Chart.defaultProps = {
 	xFormat: '%d',
 	x2Format: '%b %Y',
 	yFormat: '$.3s',
+	layout: 'standard',
 };
 
 export default Chart;
