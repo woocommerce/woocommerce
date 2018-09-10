@@ -1295,7 +1295,7 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 			'menu_order' => __( 'Default sorting', 'woocommerce' ),
 			'popularity' => __( 'Sort by popularity', 'woocommerce' ),
 			'rating'     => __( 'Sort by average rating', 'woocommerce' ),
-			'date'       => __( 'Sort by newness', 'woocommerce' ),
+			'date'       => __( 'Sort by latest', 'woocommerce' ),
 			'price'      => __( 'Sort by price: low to high', 'woocommerce' ),
 			'price-desc' => __( 'Sort by price: high to low', 'woocommerce' ),
 		) );
