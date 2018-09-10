@@ -111,6 +111,7 @@ class WC_Tracker {
 		$data['jetpack_is_staging'] = ( class_exists( 'Jetpack' ) && is_callable( 'Jetpack::is_staging_site' ) && Jetpack::is_staging_site() ) ? 'yes' : 'no';
 		$data['connect_installed']  = class_exists( 'WC_Connect_Loader' ) ? 'yes' : 'no';
 		$data['connect_active']     = ( class_exists( 'WC_Connect_Loader' ) && wp_next_scheduled( 'wc_connect_fetch_service_schemas' ) ) ? 'yes' : 'no';
+		$data['helper_connected']   = self::get_helper_connected();
 
 		// Store count info.
 		$data['users']              = self::get_user_counts();
@@ -259,6 +260,21 @@ class WC_Tracker {
 			'inactive_plugins' => $plugins,
 		);
 	}
+
+	/**
+	 * Check to see if the helper is connected to woocommerce.com
+	 *
+	 * @return string
+	 */
+	private static function get_helper_connected() {
+		if ( class_exists( 'WC_Helper_Options' ) && is_callable( 'WC_Helper_Options::get' ) ) {
+			$authenticated = WC_Helper_Options::get( 'auth' );
+		} else {
+			$authenticated = '';
+		}
+		return ( ! empty( $authenticated ) ) ? 'yes' : 'no';
+	}
+
 
 	/**
 	 * Get user totals based on user role.
