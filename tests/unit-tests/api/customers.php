@@ -86,8 +86,6 @@ class Customers extends WC_REST_Unit_Test_Case {
 				'country'    => 'US',
 			),
 			'is_paying_customer' => false,
-			'orders_count'       => 0,
-			'total_spent'        => '0.00',
 			'avatar_url'         => $customer_1->get_avatar_url(),
 			'meta_data'          => array(),
 			'_links'             => array(
@@ -172,8 +170,6 @@ class Customers extends WC_REST_Unit_Test_Case {
 			),
 			'is_paying_customer' => false,
 			'meta_data'          => array(),
-			'orders_count'       => 0,
-			'total_spent'        => '0.00',
 			'avatar_url'         => $data['avatar_url'],
 		), $data );
 
@@ -235,8 +231,6 @@ class Customers extends WC_REST_Unit_Test_Case {
 			),
 			'is_paying_customer' => false,
 			'meta_data'          => array(),
-			'orders_count'       => 0,
-			'total_spent'        => '0.00',
 			'avatar_url'         => $data['avatar_url'],
 		), $data );
 
@@ -318,8 +312,6 @@ class Customers extends WC_REST_Unit_Test_Case {
 			'last_name'          => '',
 			'role'               => 'customer',
 			'username'           => 'get_customer_test',
-			'orders_count'       => 0,
-			'total_spent'        => '0.00',
 			'avatar_url'         => $data['avatar_url'],
 		), $data );
 	}
@@ -499,7 +491,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 18, count( $properties ) );
+		$this->assertEquals( 16, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'date_created', $properties );
 		$this->assertArrayHasKey( 'date_created_gmt', $properties );
@@ -511,8 +503,6 @@ class Customers extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'role', $properties );
 		$this->assertArrayHasKey( 'username', $properties );
 		$this->assertArrayHasKey( 'password', $properties );
-		$this->assertArrayHasKey( 'orders_count', $properties );
-		$this->assertArrayHasKey( 'total_spent', $properties );
 		$this->assertArrayHasKey( 'avatar_url', $properties );
 		$this->assertArrayHasKey( 'billing', $properties );
 		$this->assertArrayHasKey( 'first_name', $properties['billing']['properties'] );
