@@ -9,13 +9,29 @@
 /**
  * Internal dependencies
  */
-import {
-	getUrlKey,
-	getSearchFilterValue,
-	getActiveFiltersFromQuery,
-	getUrlValue,
-	getQueryFromActiveFilters,
-} from '../utils';
+import { getUrlKey, getActiveFiltersFromQuery, getQueryFromActiveFilters } from '../utils';
+
+const config = {
+	with_select: {
+		rules: [ { value: 'is' } ],
+		input: {
+			component: 'SelectControl',
+			options: [ { value: 'pending' } ],
+		},
+	},
+	with_search: {
+		rules: [ { value: 'includes' } ],
+		input: {
+			component: 'Search',
+		},
+	},
+	with_no_rules: {
+		input: {
+			component: 'SelectControl',
+			options: [ { value: 'pending' } ],
+		},
+	},
+};
 
 describe( 'getUrlKey', () => {
 	it( 'should return a correctly formatted string', () => {
@@ -29,51 +45,11 @@ describe( 'getUrlKey', () => {
 	} );
 } );
 
-describe( 'getSearchFilterValue', () => {
-	it( 'should convert url query param into value readable by Search component', () => {
-		const str = '1,2,3';
-		const values = getSearchFilterValue( str );
-		expect( Array.isArray( values ) ).toBeTruthy();
-		expect( values[ 0 ] ).toBe( '1' );
-		expect( values[ 1 ] ).toBe( '2' );
-		expect( values[ 2 ] ).toBe( '3' );
-	} );
-
-	it( 'should convert an empty string into an empty array', () => {
-		const str = '';
-		const values = getSearchFilterValue( str );
-		expect( Array.isArray( values ) ).toBeTruthy();
-		expect( values.length ).toBe( 0 );
-	} );
-} );
-
 describe( 'getActiveFiltersFromQuery', () => {
-	const config = {
-		with_select: {
-			rules: [ { value: 'is' } ],
-			input: {
-				component: 'SelectControl',
-				options: [ { value: 'pending' } ],
-			},
-		},
-		with_search: {
-			rules: [ { value: 'includes' } ],
-			input: {
-				component: 'Search',
-			},
-		},
-		with_no_rules: {
-			input: {
-				component: 'SelectControl',
-				options: [ { value: 'pending' } ],
-			},
-		},
-	};
-
 	it( 'should return activeFilters from a query', () => {
 		const query = {
 			with_select_is: 'pending',
-			with_search_includes: '',
+			with_search_includes: '1,2,3',
 			with_no_rules: 'pending',
 		};
 
@@ -91,7 +67,7 @@ describe( 'getActiveFiltersFromQuery', () => {
 		const with_search = activeFilters[ 1 ];
 		expect( with_search.key ).toBe( 'with_search' );
 		expect( with_search.rule ).toBe( 'includes' );
-		expect( with_search.value ).toEqual( [] );
+		expect( with_search.value ).toEqual( '1,2,3' );
 
 		// with_search
 		const with_no_rules = activeFilters[ 2 ];
@@ -119,28 +95,6 @@ describe( 'getActiveFiltersFromQuery', () => {
 	} );
 } );
 
-describe( 'getUrlValue', () => {
-	it( 'should pass through a string', () => {
-		const value = getUrlValue( 'my string' );
-		expect( value ).toBe( 'my string' );
-	} );
-
-	it( 'should return null for a non-string value', () => {
-		const value = getUrlValue( {} );
-		expect( value ).toBeNull();
-	} );
-
-	it( 'should return null for an empty array', () => {
-		const value = getUrlValue( [] );
-		expect( value ).toBeNull();
-	} );
-
-	it( 'should return comma separated values when given an array', () => {
-		const value = getUrlValue( [ 1, 2, 3 ] );
-		expect( value ).toBe( '1,2,3' );
-	} );
-} );
-
 describe( 'getQueryFromActiveFilters', () => {
 	it( 'should return a query object from activeFilters', () => {
 		const activeFilters = [
@@ -148,32 +102,27 @@ describe( 'getQueryFromActiveFilters', () => {
 			{
 				key: 'things',
 				rule: 'includes',
-				value: [ 1, 2, 3 ],
+				value: '1,2,3',
 			},
 			{ key: 'customer', value: 'new' },
 		];
 
-		const query = getQueryFromActiveFilters( activeFilters );
-		expect( query.status_is ).toBe( 'open' );
-		expect( query.things_includes ).toBe( '1,2,3' );
-		expect( query.customer ).toBe( 'new' );
+		const query = {};
+		const nextQuery = getQueryFromActiveFilters( activeFilters, query, config );
+		expect( nextQuery.status_is ).toBe( 'open' );
+		expect( nextQuery.things_includes ).toBe( '1,2,3' );
+		expect( nextQuery.customer ).toBe( 'new' );
 	} );
 
 	it( 'should remove parameters from the previous filters', () => {
-		const nextFilters = [];
-		const previousFilters = [
-			{ key: 'status', rule: 'is', value: 'open' },
-			{
-				key: 'things',
-				rule: 'includes',
-				value: [ 1, 2, 3 ],
-			},
-			{ key: 'customer', value: 'new' },
-		];
+		const activeFilters = [];
+		const query = {
+			with_select_is: 'complete',
+			with_search_includes: '45',
+		};
 
-		const query = getQueryFromActiveFilters( nextFilters, previousFilters );
-		expect( query.status_is ).toBeUndefined();
-		expect( query.things_includes ).toBeUndefined();
-		expect( query.customer ).toBeUndefined();
+		const nextQuery = getQueryFromActiveFilters( activeFilters, query, config );
+		expect( nextQuery.with_select_is ).toBeUndefined();
+		expect( nextQuery.with_search_includes ).toBeUndefined();
 	} );
 } );

@@ -14,27 +14,38 @@ import PropTypes from 'prop-types';
 import Search from 'components/search';
 
 class SearchFilter extends Component {
-	constructor() {
-		super();
+	constructor( { filter, config } ) {
+		super( ...arguments );
 		this.onSearchChange = this.onSearchChange.bind( this );
+		this.state = {
+			selected: [],
+		};
+
+		this.updateLabels = this.updateLabels.bind( this );
+
+		if ( filter.value.length ) {
+			config.input.getLabels( filter.value ).then( this.updateLabels );
+		}
+	}
+
+	updateLabels( data ) {
+		const selected = data.map( p => ( { id: p.id, label: p.name } ) );
+		this.setState( { selected } );
 	}
 
 	onSearchChange( values ) {
+		this.setState( {
+			selected: values,
+		} );
 		const { filter, onFilterChange } = this.props;
-		const nextValues = values.map( value => value.id );
-		onFilterChange( filter.key, 'value', nextValues );
+		const idList = values.map( value => value.id ).join( ',' );
+		onFilterChange( filter.key, 'value', idList );
 	}
 
 	render() {
 		const { filter, config, onFilterChange } = this.props;
-		const { key, rule, value } = filter;
-		const selected = value.map( id => {
-			// For now
-			return {
-				id: parseInt( id, 10 ),
-				label: id.toString(),
-			};
-		} );
+		const { selected } = this.state;
+		const { key, rule } = filter;
 		return (
 			<Fragment>
 				<div className="woocommerce-filters-advanced__fieldset-legend">{ config.label }</div>
@@ -75,7 +86,7 @@ SearchFilter.propTypes = {
 	filter: PropTypes.shape( {
 		key: PropTypes.string,
 		rule: PropTypes.string,
-		value: PropTypes.array,
+		value: PropTypes.string,
 	} ).isRequired,
 	/**
 	 * Function to be called on update.

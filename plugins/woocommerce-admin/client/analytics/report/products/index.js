@@ -7,7 +7,7 @@ import { Component, Fragment } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { filters } from './constants';
+import { filters } from './config';
 import { ReportFilters } from '@woocommerce/components';
 import './style.scss';
 

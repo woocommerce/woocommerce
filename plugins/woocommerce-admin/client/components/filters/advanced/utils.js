@@ -19,22 +19,12 @@ export const getUrlKey = ( key, rule ) => {
 };
 
 /**
- * Convert url values to array of objects for <Search /> component
- *
- * @param {string} str - url query parameter value
- * @return {array} - array of Search values
- */
-export const getSearchFilterValue = str => {
-	return str.length ? str.trim().split( ',' ) : [];
-};
-
-/**
  * Describe activeFilter object.
  *
  * @typedef {Object} activeFilter
  * @property {string} key - filter key.
  * @property {string} [rule] - a modifying rule for a filter, eg 'includes' or 'is_not'.
- * @property {string|array} value - filter value(s).
+ * @property {string} value - filter value(s).
  */
 
 /**
@@ -54,9 +44,7 @@ export const getActiveFiltersFromQuery = ( query, config ) => {
 				} );
 
 				if ( match ) {
-					const rawValue = query[ getUrlKey( configKey, match.value ) ];
-					const value =
-						'Search' === filter.input.component ? getSearchFilterValue( rawValue ) : rawValue;
+					const value = query[ getUrlKey( configKey, match.value ) ];
 					return {
 						key: configKey,
 						rule: match.value,
@@ -77,39 +65,26 @@ export const getActiveFiltersFromQuery = ( query, config ) => {
 };
 
 /**
- * Create a string value for url. Return a string directly or concatenate ids if supplied
- * an array of objects.
- *
- * @param {string|array} value - value of an activeFilter
- * @return {string|null} - url query param value
- */
-export const getUrlValue = value => {
-	if ( Array.isArray( value ) ) {
-		return value.length ? value.join( ',' ) : null;
-	}
-	return 'string' === typeof value ? value : null;
-};
-
-/**
  * Given activeFilters, create a new query object to update the url. Use previousFilters to
  * Remove unused params.
  *
- * @param {activeFilters[]} nextFilters - activeFilters shown in the UI
- * @param {activeFilters[]} previousFilters - filters represented by the current url
+ * @param {activeFilters[]} activeFilters - activeFilters shown in the UI
+ * @param {object} query - the current url query object
+ * @param {object} config - config object
  * @return {object} - query object representing the new parameters
  */
-export const getQueryFromActiveFilters = ( nextFilters, previousFilters = [] ) => {
-	const previousData = previousFilters.reduce( ( query, filter ) => {
-		query[ getUrlKey( filter.key, filter.rule ) ] = undefined;
-		return query;
+export const getQueryFromActiveFilters = ( activeFilters, query, config ) => {
+	const previousFilters = getActiveFiltersFromQuery( query, config );
+	const previousData = previousFilters.reduce( ( data, filter ) => {
+		data[ getUrlKey( filter.key, filter.rule ) ] = undefined;
+		return data;
 	}, {} );
-	const data = nextFilters.reduce( ( query, filter ) => {
-		const urlValue = getUrlValue( filter.value );
-		if ( urlValue ) {
-			query[ getUrlKey( filter.key, filter.rule ) ] = urlValue;
+	const nextData = activeFilters.reduce( ( data, filter ) => {
+		if ( filter.value ) {
+			data[ getUrlKey( filter.key, filter.rule ) ] = filter.value;
 		}
-		return query;
+		return data;
 	}, {} );
 
-	return { ...previousData, ...data };
+	return { ...previousData, ...nextData };
 };
