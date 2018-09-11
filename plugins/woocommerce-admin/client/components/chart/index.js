@@ -3,10 +3,12 @@
  * External dependencies
  */
 import classNames from 'classnames';
-import { isEqual } from 'lodash';
+import { isEqual, partial } from 'lodash';
 import { Component, createRef } from '@wordpress/element';
+import { IconButton } from '@wordpress/components';
 import PropTypes from 'prop-types';
 import { interpolateViridis as d3InterpolateViridis } from 'd3-scale-chromatic';
+import Gridicon from 'gridicons';
 
 /**
  * Internal dependencies
@@ -50,9 +52,11 @@ class Chart extends Component {
 		this.state = {
 			data: props.data,
 			orderedKeys: getOrderedKeys( props ),
+			type: props.type,
 			visibleData: [ ...props.data ],
 			width: wpBody - 2 * calcGap,
 		};
+		this.handleTypeToggle = this.handleTypeToggle.bind( this );
 		this.handleLegendToggle = this.handleLegendToggle.bind( this );
 		this.handleLegendHover = this.handleLegendHover.bind( this );
 		this.updateDimensions = this.updateDimensions.bind( this );
@@ -78,6 +82,12 @@ class Chart extends Component {
 
 	componentWillUnmount() {
 		window.removeEventListener( 'resize', this.updateDimensions );
+	}
+
+	handleTypeToggle( type ) {
+		if ( this.state.type !== type ) {
+			this.setState( { type } );
+		}
 	}
 
 	handleLegendToggle( event ) {
@@ -130,17 +140,8 @@ class Chart extends Component {
 	}
 
 	render() {
-		const { orderedKeys, visibleData, width } = this.state;
-		const {
-			dateParser,
-			layout,
-			title,
-			tooltipFormat,
-			type,
-			xFormat,
-			x2Format,
-			yFormat,
-		} = this.props;
+		const { orderedKeys, type, visibleData, width } = this.state;
+		const { dateParser, layout, title, tooltipFormat, xFormat, x2Format, yFormat } = this.props;
 		const legendDirection = layout === 'standard' && width > WIDE_BREAKPOINT ? 'row' : 'column';
 		const chartDirection = layout === 'comparison' && width > WIDE_BREAKPOINT ? 'row' : 'column';
 		const legend = (
@@ -164,6 +165,22 @@ class Chart extends Component {
 				<div className="woocommerce-chart__header">
 					<span className="woocommerce-chart__title">{ title }</span>
 					{ width > WIDE_BREAKPOINT && legendDirection === 'row' && legend }
+					<div className="woocommerce-chart__types">
+						<IconButton
+							className={ classNames( 'woocommerce-chart__type-button', {
+								'woocommerce-chart__type-button-selected': type === 'line',
+							} ) }
+							icon={ <Gridicon icon="line-graph" /> }
+							onClick={ partial( this.handleTypeToggle, 'line' ) }
+						/>
+						<IconButton
+							className={ classNames( 'woocommerce-chart__type-button', {
+								'woocommerce-chart__type-button-selected': type === 'bar',
+							} ) }
+							icon={ <Gridicon icon="stats-alt" /> }
+							onClick={ partial( this.handleTypeToggle, 'bar' ) }
+						/>
+					</div>
 				</div>
 				<div
 					className={ classNames(
@@ -207,10 +224,6 @@ Chart.propTypes = {
 	 */
 	tooltipFormat: PropTypes.string,
 	/**
-	 * Chart type of either `line` or `bar`.
-	 */
-	type: PropTypes.oneOf( [ 'bar', 'line' ] ),
-	/**
 	 * A datetime formatting string, passed to d3TimeFormat.
 	 */
 	xFormat: PropTypes.string,
@@ -230,6 +243,10 @@ Chart.propTypes = {
 	 * A title describing this chart.
 	 */
 	title: PropTypes.string,
+	/**
+	 * Chart type of either `line` or `bar`.
+	 */
+	type: PropTypes.oneOf( [ 'bar', 'line' ] ),
 };
 
 Chart.defaultProps = {
@@ -240,6 +257,7 @@ Chart.defaultProps = {
 	x2Format: '%b %Y',
 	yFormat: '$.3s',
 	layout: 'standard',
+	type: 'line',
 };
 
 export default Chart;

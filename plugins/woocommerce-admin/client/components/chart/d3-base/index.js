@@ -31,6 +31,8 @@ export default class D3Base extends Component {
 		data: PropTypes.any, // required to detect changes in data
 		drawChart: PropTypes.func.isRequired,
 		getParams: PropTypes.func.isRequired,
+		type: PropTypes.string,
+		width: PropTypes.number,
 	};
 
 	state = {
@@ -38,6 +40,7 @@ export default class D3Base extends Component {
 		params: null,
 		drawChart: null,
 		getParams: null,
+		type: null,
 		width: null,
 	};
 
@@ -62,6 +65,10 @@ export default class D3Base extends Component {
 			state = { ...state, width: nextProps.width };
 		}
 
+		if ( nextProps.type !== prevState.type ) {
+			state = { ...state, type: nextProps.type };
+		}
+
 		if ( ! isEmpty( state ) ) {
 			return { ...state, params: null };
 		}
@@ -79,7 +86,8 @@ export default class D3Base extends Component {
 		return (
 			( nextState.params !== null && ! isEqual( this.state.params, nextState.params ) ) ||
 			! isEqual( this.state.data, nextState.data ) ||
-			this.state.width !== nextState.width
+			this.state.width !== nextState.width ||
+			this.state.type !== nextState.type
 		);
 	}
 
