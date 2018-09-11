@@ -340,26 +340,26 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_update_order_add_coupons() {
 		wp_set_current_user( $this->user );
+
 		$order      = WC_Helper_Order::create_order();
 		$order_item = current( $order->get_items() );
 		$coupon     = WC_Helper_Coupon::create_coupon( 'fake-coupon' );
 		$coupon->set_amount( 5 );
 		$coupon->save();
+
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
 		$request->set_body_params(
 			array(
-				'coupon_lines' => array(
-					array(
-						'code'           => 'fake-coupon',
-						'discount_total' => '5',
-						'discount_tax'   => '0',
-					),
-				),
 				'line_items'   => array(
 					array(
 						'id'         => $order_item->get_id(),
 						'product_id' => $order_item->get_product_id(),
-						'total'      => '35.00',
+						'subtotal'   => '35.00',
+					),
+				),
+				'coupon_lines' => array(
+					array(
+						'code' => 'fake-coupon',
 					),
 				),
 			)
