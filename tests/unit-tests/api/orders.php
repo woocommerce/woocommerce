@@ -120,8 +120,8 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_item_refund_id() {
 		wp_set_current_user( $this->user );
-		$order  = WC_Helper_Order::create_order();
-		$refund = wc_create_refund( array(
+		$order    = WC_Helper_Order::create_order();
+		$refund   = wc_create_refund( array(
 			'order_id' => $order->get_id(),
 		) );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/orders/' . $refund->get_id() ) );
