@@ -113,19 +113,61 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Order_Notes_V2_Controller {
 	 * @return array
 	 */
 	public function get_item_schema() {
-		$schema                                = parent::get_item_schema();
-		$schema['properties']['author']        = array(
-			'description' => __( 'Order note author.', 'woocommerce' ),
-			'type'        => 'string',
-			'readonly'    => true,
-			'context'     => array( 'view', 'edit' ),
+		$schema = array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'order_note',
+			'type'       => 'object',
+			'properties' => array(
+				'id'               => array(
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+					'type'        => 'integer',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'author'           => array(
+					'description' => __( 'Order note author.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'date_created'     => array(
+					'description' => __( "The date the order note was created, in the site's timezone.", 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'date_created'     => array(
+					'description' => __( "The date the order note was created, in the site's timezone.", 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'date_created_gmt' => array(
+					'description' => __( 'The date the order note was created, as GMT.', 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'note'             => array(
+					'description' => __( 'Order note content.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'customer_note'    => array(
+					'description' => __( 'If true, the note will be shown to customers and they will be notified. If false, the note will be for admin reference only.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'default'     => false,
+					'context'     => array( 'view', 'edit' ),
+				),
+				'added_by_user'    => array(
+					'description' => __( 'If true, this note will be attributed to the current user. If false, the note will be attributed to the system.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'default'     => false,
+					'context'     => array( 'edit' ),
+				),
+			),
 		);
-		$schema['properties']['added_by_user'] = array(
-			'description' => __( 'If true, this note will be attributed to the current user. If false, the note will be attributed to the system.', 'woocommerce' ),
-			'type'        => 'boolean',
-			'default'     => false,
-			'context'     => array( 'edit' ),
-		);
-		return $schema;
+
+		return $this->add_additional_fields_schema( $schema );
 	}
 }
