@@ -236,6 +236,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Check for `needs_payment` instead of `has_status( 'pending' )` in PayPal PDT handler for custom order status support. #21200
 * Dev - Added form action hooks for edit account and login templates. #21248
 * Dev - Add action for when system tools are run. #21270
+* Dev - Add - woocommerce_restock_refunded_items filter to control default state of the restock option when refunding items on an order. #21314
 * Localization - Updated IT provinces. #20286
 * Localization - Eircode validation. #20330
 * Localization - Disable postcode requirement for Bahrain. #21103
