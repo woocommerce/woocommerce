@@ -4,6 +4,8 @@
  */
 import { Component } from '@wordpress/element';
 import moment from 'moment';
+import 'core-js/fn/object/assign';
+import 'core-js/fn/array/from';
 import {
 	DayPickerRangeController,
 	isInclusivelyAfterDay,
