@@ -72,8 +72,15 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 							foreach ( $value as $item ) {
 								if ( is_array( $item ) ) {
 									if ( $this->item_is_null( $item ) || ( isset( $item['quantity'] ) && 0 === $item['quantity'] ) ) {
-										if ( ! empty( $item['id'] ) ) {
-											$order->remove_item( $item['id'] );
+										if ( ! empty( $item['id'] ) && empty( $item['code'] ) ) {
+											$coupons = $order->get_items( 'coupon' );
+
+											foreach ( $coupons as $item_id => $coupon ) {
+												if ( $item_id === $item['id'] ) {
+													$order->remove_coupon( $coupon->get_code() );
+													break;
+												}
+											}
 										} elseif ( ! empty( $item['code'] ) ) {
 											$order->remove_coupon( wc_clean( $item['code'] ) );
 										}
