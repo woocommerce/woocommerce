@@ -420,6 +420,33 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests updating an order with an invalid coupon.
+	 *
+	 * @since 3.5.0
+	 */
+	public function test_invalid_coupon() {
+		wp_set_current_user( $this->user );
+		$order   = WC_Helper_Order::create_order();
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+
+		$request->set_body_params(
+			array(
+				'coupon_lines' => array(
+					array(
+						'code' => 'NON_EXISTING_COUPON',
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_invalid_coupon', $data['code'] );
+		$this->assertEquals( 'Coupon "non_existing_coupon" does not exist!', $data['message'] );
+	}
+
+	/**
 	 * Tests updating an order without the correct permissions.
 	 *
 	 * @since 3.5.0
