@@ -26,6 +26,54 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 	protected $namespace = 'wc/v3';
 
 	/**
+	 * Calculate coupons.
+	 *
+	 * @throws WC_REST_Exception When fails to set any item.
+	 * @param WP_REST_Request $request Request object.
+	 * @param WC_Order        $order   Order data.
+	 * @return bool
+	 */
+	protected function calculate_coupons( $request, $order ) {
+		if ( ! isset( $request['coupon_lines'] ) || ! is_array( $request['coupon_lines'] ) ) {
+			return false;
+		}
+
+		foreach ( $request['coupon_lines'] as $item ) {
+			if ( is_array( $item ) ) {
+				$coupons = $order->get_items( 'coupon' );
+
+				if ( $this->item_is_null( $item ) || ( isset( $item['quantity'] ) && 0 === $item['quantity'] ) ) {
+					if ( ! empty( $item['id'] ) && empty( $item['code'] ) ) {
+						foreach ( $coupons as $item_id => $coupon ) {
+							if ( $item_id === $item['id'] ) {
+								$order->remove_coupon( $coupon->get_code() );
+								break;
+							}
+						}
+					} elseif ( ! empty( $item['code'] ) ) {
+						$order->remove_coupon( wc_clean( $item['code'] ) );
+					}
+				} else {
+					if ( ! empty( $item['id'] ) ) {
+						if ( empty( $item['code'] ) ) {
+							throw new WC_REST_Exception( 'woocommerce_rest_invalid_coupon_coupon', __( 'Coupon code is required.', 'woocommerce' ), 400 );
+						}
+					}
+
+					// Remove first to ensure coupon calculation is correct.
+					foreach ( $coupons as $coupon ) {
+						$order->remove_coupon( $coupon->get_code() );
+					}
+
+					$order->apply_coupon( wc_clean( $item['code'] ) );
+				}
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 * Prepare a single order for create or update.
 	 *
 	 * @throws WC_REST_Exception When fails to set any item.
@@ -45,8 +93,9 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 
 			if ( ! is_null( $value ) ) {
 				switch ( $key ) {
+					case 'coupon_lines':
 					case 'status':
-						// Status change should be done later so transitions have new data.
+						// Change should be done later so transitions have new data.
 						break;
 					case 'billing':
 					case 'shipping':
@@ -62,36 +111,6 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 										$order->remove_item( $item['id'] );
 									} else {
 										$this->set_item( $order, $key, $item );
-									}
-								}
-							}
-						}
-						break;
-					case 'coupon_lines':
-						if ( is_array( $value ) ) {
-							foreach ( $value as $item ) {
-								if ( is_array( $item ) ) {
-									if ( $this->item_is_null( $item ) || ( isset( $item['quantity'] ) && 0 === $item['quantity'] ) ) {
-										if ( ! empty( $item['id'] ) && empty( $item['code'] ) ) {
-											$coupons = $order->get_items( 'coupon' );
-
-											foreach ( $coupons as $item_id => $coupon ) {
-												if ( $item_id === $item['id'] ) {
-													$order->remove_coupon( $coupon->get_code() );
-													break;
-												}
-											}
-										} elseif ( ! empty( $item['code'] ) ) {
-											$order->remove_coupon( wc_clean( $item['code'] ) );
-										}
-									} else {
-										if ( ! empty( $item['id'] ) ) {
-											if ( empty( $item['code'] ) ) {
-												throw new WC_REST_Exception( 'woocommerce_rest_invalid_coupon_coupon', __( 'Coupon code is required.', 'woocommerce' ), 400 );
-											}
-										}
-
-										$order->apply_coupon( wc_clean( $item['code'] ) );
 									}
 								}
 							}
@@ -124,6 +143,74 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 		 * @param bool            $creating If is creating a new object.
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}_object", $order, $request, $creating );
+	}
+
+	/**
+	 * Save an object data.
+	 *
+	 * @since  3.0.0
+	 * @throws WC_REST_Exception But all errors are validated before returning any data.
+	 * @param  WP_REST_Request $request  Full details about the request.
+	 * @param  bool            $creating If is creating a new object.
+	 * @return WC_Data|WP_Error
+	 */
+	protected function save_object( $request, $creating = false ) {
+		try {
+			$object = $this->prepare_object_for_database( $request, $creating );
+
+			if ( is_wp_error( $object ) ) {
+				return $object;
+			}
+
+			// Make sure gateways are loaded so hooks from gateways fire on save/create.
+			WC()->payment_gateways();
+
+			if ( ! is_null( $request['customer_id'] ) && 0 !== $request['customer_id'] ) {
+				// Make sure customer exists.
+				if ( false === get_user_by( 'id', $request['customer_id'] ) ) {
+					throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id', __( 'Customer ID is invalid.', 'woocommerce' ), 400 );
+				}
+
+				// Make sure customer is part of blog.
+				if ( is_multisite() && ! is_user_member_of_blog( $request['customer_id'] ) ) {
+					throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id_network', __( 'Customer ID does not belong to this site.', 'woocommerce' ), 400 );
+				}
+			}
+
+			if ( $creating ) {
+				$object->set_created_via( 'rest-api' );
+				$object->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
+				$object->calculate_totals();
+			} else {
+				// If items have changed, recalculate order totals.
+				if ( isset( $request['billing'] ) || isset( $request['shipping'] ) || isset( $request['line_items'] ) || isset( $request['shipping_lines'] ) || isset( $request['fee_lines'] ) || isset( $request['coupon_lines'] ) ) {
+					$object->calculate_totals( true );
+				}
+			}
+
+			// Set coupons.
+			$this->calculate_coupons( $request, $object );
+
+			// Set status.
+			if ( ! empty( $request['status'] ) ) {
+				$object->set_status( $request['status'] );
+			}
+
+			$object->save();
+
+			// Actions for after the order is saved.
+			if ( true === $request['set_paid'] ) {
+				if ( $creating || $object->needs_payment() ) {
+					$object->payment_complete( $request['transaction_id'] );
+				}
+			}
+
+			return $this->get_object( $object->get_id() );
+		} catch ( WC_Data_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
+		} catch ( WC_REST_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
 	}
 
 	/**
