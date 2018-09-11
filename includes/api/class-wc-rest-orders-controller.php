@@ -38,34 +38,23 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 			return false;
 		}
 
+		// Remove all coupons first to ensure calculation is correct.
+		foreach ( $order->get_items( 'coupon' ) as $coupon ) {
+			$order->remove_coupon( $coupon->get_code() );
+		}
+
 		foreach ( $request['coupon_lines'] as $item ) {
 			if ( is_array( $item ) ) {
-				$coupons = $order->get_items( 'coupon' );
-
-				if ( $this->item_is_null( $item ) || ( isset( $item['quantity'] ) && 0 === $item['quantity'] ) ) {
-					if ( ! empty( $item['id'] ) && empty( $item['code'] ) ) {
-						foreach ( $coupons as $item_id => $coupon ) {
-							if ( $item_id === $item['id'] ) {
-								$order->remove_coupon( $coupon->get_code() );
-								break;
-							}
-						}
-					} elseif ( ! empty( $item['code'] ) ) {
-						$order->remove_coupon( wc_clean( $item['code'] ) );
-					}
-				} else {
-					if ( ! empty( $item['id'] ) ) {
-						if ( empty( $item['code'] ) ) {
-							throw new WC_REST_Exception( 'woocommerce_rest_invalid_coupon_coupon', __( 'Coupon code is required.', 'woocommerce' ), 400 );
-						}
+				if ( empty( $item['id'] ) ) {
+					if ( empty( $item['code'] ) ) {
+						throw new WC_REST_Exception( 'woocommerce_rest_invalid_coupon', __( 'Coupon code is required.', 'woocommerce' ), 400 );
 					}
 
-					// Remove first to ensure coupon calculation is correct.
-					foreach ( $coupons as $coupon ) {
-						$order->remove_coupon( $coupon->get_code() );
-					}
+					$results = $order->apply_coupon( wc_clean( $item['code'] ) );
 
-					$order->apply_coupon( wc_clean( $item['code'] ) );
+					if ( is_wp_error( $results ) ) {
+						throw new WC_REST_Exception( 'woocommerce_rest_' . $results->get_error_code(), $results->get_error_message(), 400 );
+					}
 				}
 			}
 		}
