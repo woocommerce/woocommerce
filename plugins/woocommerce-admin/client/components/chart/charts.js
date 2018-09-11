@@ -44,13 +44,14 @@ class D3Chart extends Component {
 		this.getParams = this.getParams.bind( this );
 		this.state = {
 			allData: this.getAllData( props ),
+			type: props.type,
 			width: props.width,
 		};
 		this.tooltipRef = createRef();
 	}
 
 	componentDidUpdate( prevProps, prevState ) {
-		const { width } = this.props;
+		const { type, width } = this.props;
 		/* eslint-disable react/no-did-update-set-state */
 		if ( width !== prevProps.width ) {
 			this.setState( { width } );
@@ -58,6 +59,9 @@ class D3Chart extends Component {
 		const nextAllData = this.getAllData( this.props );
 		if ( ! isEqual( [ ...nextAllData ].sort(), [ ...prevState.allData ].sort() ) ) {
 			this.setState( { allData: nextAllData } );
+		}
+		if ( type !== prevProps.type ) {
+			this.setState( { type } );
 		}
 		/* eslint-enable react/no-did-update-set-state */
 	}
@@ -157,6 +161,7 @@ class D3Chart extends Component {
 					data={ this.state.allData }
 					drawChart={ this.drawChart }
 					getParams={ this.getParams }
+					type={ this.state.type }
 					width={ this.state.width }
 				/>
 				<div className="tooltip" ref={ this.tooltipRef } />

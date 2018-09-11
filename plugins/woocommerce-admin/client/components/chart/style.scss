@@ -14,7 +14,7 @@
 		display: flex;
 		flex-wrap: nowrap;
 		flex-direction: row;
-		justify-content: flex-start;
+		justify-content: space-between;
 		align-items: center;
 		width: 100%;
 
@@ -26,6 +26,18 @@
 			line-height: 18px;
 			margin-left: $gap;
 			margin-right: $gap;
+		}
+
+		.woocommerce-chart__type-button {
+			&.components-icon-button {
+				color: $core-grey-light-700;
+				&.woocommerce-chart__type-button-selected {
+					color: $core-grey-dark-500;
+				}
+				&:hover {
+					box-shadow: none;
+				}
+			}
 		}
 	}
 
