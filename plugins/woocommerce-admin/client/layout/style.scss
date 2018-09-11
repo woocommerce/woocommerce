@@ -5,6 +5,7 @@
 }
 
 .woocommerce-layout__primary {
+	margin: 80px 0 0 $fallback-gutter-large;
 	margin: 80px 0 0 $gutter-large;
 
 	@include breakpoint( '>1100px' ) {
@@ -13,6 +14,7 @@
 }
 
 .woocommerce-layout .woocommerce-layout__main {
+	padding-right: $fallback-gutter-large;
 	padding-right: $gutter-large;
 	max-width: 100%;
 }

@@ -2,6 +2,7 @@
 
 .woocommerce-activity-card {
 	position: relative;
+	padding: $fallback-gutter;
 	padding: $gutter;
 	background: $white;
 	border-bottom: 1px solid $core-grey-light-400;
@@ -21,7 +22,9 @@
 
 .woocommerce-activity-card__unread {
 	position: absolute;
+	top: calc(#{ $fallback-gutter } - 6px);
 	top: calc(#{ $gutter } - 6px);
+	right: calc(#{ $fallback-gutter } - 6px);
 	right: calc(#{ $gutter } - 6px);
 	width: 6px;
 	height: 6px;
@@ -139,6 +142,7 @@
 	}
 
 	.woocommerce-activity-card__icon {
+		margin-right: $fallback-gutter;
 		margin-right: $gutter;
 
 		.is-placeholder {
