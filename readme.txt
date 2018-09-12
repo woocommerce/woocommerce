@@ -159,6 +159,94 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 == Changelog ==
 
 = 3.5.0 - 2018-XX-XX =
+* Feature - REST API v3. #20111
+* Feature - Option has been added on the inventory tab of the edit product page to set a low stock threshold for individual products. #20260
+* Feature - Add ability to export products by category to the CSV exporter. #20870
+* Enhancement - Excluded children categories from WP_Query in product shortcode if cat_operator=AND. #20207
+* Enhancement - Add anchor tag example to email template preview. #20246
+* Enhancement - Introduce is_paypal_supported_currency check in setup wizard. #20244
+* Enhancement - Payment method table reordering accessibility. #19844
+* Enhancement - Log errors from transaction emails with logger. #20203
+* Enhancement - Improved shipping calculator experience. Shows destination country and added context to calculate shipping link. #20345
+* Enhancement - On the fly image generation for frontend, if image sizes are missing. #20011
+* Enhancement - SelectWoo enabled product categories dropdown widget. #20617
+* Enhancement - Make it easier to read and act upon the outdated template notice. #20732
+* Enhancement - Styled date, time, etc. inputs in admin to match styling of other inputs. #21013
+* Enhancement - Show update notices on the System Status page for WordPress.org hosted Official WooCommerce extensions. #21073
+* Enhancement - Better wording for transactional emails. #21288
+* Fix - Check billing email is posted before using in WC_Cart::check_customer_coupons. #20180
+* Fix - Shipping postcode formatting when only posting a billing address. #20330
+* Fix - Correctly show/hide save card checkbox on tokenization form. #20506
+* Fix - orderby and order parameters in WC_Customer_Download_Log_Data_Store::get_download_logs() were ignored. #20931
+* Fix - Unslash city name to prevent double escape in tax settings. #21205
+* Fix - Updated phone validation logic. #21188
+* Fix - Fix weight and dimensions cache of variable products if childs doesn't have any of those params. #21244
+* Fix - Correctly replace images in the woocommerce_uploads folder with the placeholder image. #20848
+* Fix - Show parent variable product in shipping class admin screen when variation has shipping class. #21278
+* Fix - Correctly excluded administrators from "Customer list" report. #21304
+* Fix - Update quick edit logic to show/hide Stock qty and Backorders fields. #21301
+* Fix - Fix Layered Nav Widget where special HTML entities did not display correctly in the "Any %s" string. #21312
+* Fix - Set the is_checkout javascript parameter on any page that uses the checkout filter or shortcode. #21328
+* Fix/Tweak - Fire `woocommerce_grant_product_download_access` hook after the download has its ID set. #20905
+* Fix/Tweak/Performance - Change wp_woocommerce_sessions primary key to session_id. #21245
+* Tweak - Show empty terms in admin product category filter dropdown. #20324
+* Tweak - Don't force default token gateway active by default. #20125
+* Tweak - Move notice output to hooked in functions. #19794
+* Tweak - Apply order bulk actions in chronological order. #20338
+* Tweak - Updated Emogrifier to 2.0. #20547
+* Tweak - Avoid using wp.template (eval) in add-to-cart-variation.js. #19496
+* Tweak - Hide Preview button when creating new products, as most fields aren't set up for it. #20650
+* Tweak - For guests, store all address fields to the session whilst placing an order. #20665
+* Tweak - Removed 'ajax_add_to_cart' class from 'Read more' button. #20690
+* Tweak - Removed unnecessary checkout form change trigger on load of the checkout page. #20655
+* Tweak - Add image size filters to wc_get_product_attachment_props(). #20722
+* Tweak - Only display the current site's tables for a multisite install when viewing the system status. #20731
+* Tweak - include the file path and line number where a fatal error occurred in the fatal errors log. #20787
+* Tweak - Cast tax rate to float so that it can be treated as number further on in the code. #20910
+* Tweak - Send webhooks using Action Scheduler. #20030
+* Tweak - Update customer's ip address on successful payment. #21038
+* Tweak - Changed wc_clean to checking for valid utf8 for line items and password. #20993
+* Tweak - Add to cart notice actions (View cart/Continue shopping) now have tabindex 1 for improved accessibility. #21108
+* Tweak - Remove icanhazip from geolocation services. #21198
+* Tweak - Remove unnecessary aria-required attributes from product reviews template. #21211
+* Tweak - Added hidden label for screen readers on checkout address line 2 input. #21193
+* Tweak - Remove empty space in mini-cart template. #21261
+* Tweak - Tax display in cart now depends on whether customer is tax exempt. #21292
+* Tweak - Change sort dropdown option "Sort by newness" to "Sort by latest". #21311
+* Performance/Tweak - Use post_author for the order customer instead of '_customer_user' meta data. #17895
+* Performance - Exclude frontend include from REST API calls. #20000
+* Performance - Improve performance of the query to delete version transients by removing unneeded "ORDER BY". #21274
+* Dev - REST API - Allows oAuth1.0a authentication under SSL.
+* Dev - REST API - Fix position param for images. #20497
+* Dev - REST API - Handle children products deletion regardless of type. #20670
+* Dev - Added woocommerce_increase_coupon_usage_count and woocommerce_decrease_coupon_usage_count action hooks to increase extensibility of Coupons. #19981
+* Dev - Add endpoints to account menu items filter. #19980
+* Dev - Added qty param to `wc_add_to_cart_message` filter. #19817
+* Dev - Added `woocommerce_search_products_ids` filter. #20160
+* Dev - Introduced `woocommerce_cart_calculate_shipping_address` field to allow manipulation of cart shipping calculator data. #20046
+* Dev - Introduced `woocommerce_shipping_calculator_enable_country` filter. #20046
+* Dev - Pass product id to backorder notification. #20416
+* Dev - Added woocommerce_cart_shipping_total filter to control shipping display. #20591
+* Dev - Refactor "Order again" handling to separate logic better. #20606
+* Dev - Added 'woocommerce_products_admin_list_table_filters' filter to make it easier to customize the products list table filters. #20634
+* Dev - Added `woocommerce_shipping_method_add_rate_args` and `woocommerce_shipping_method_add_rate` filters. #20633
+* Dev - Added `woocommerce_coupon_validate_user_usage_limit` filter. #20630
+* Dev - Add hooks needed for product custom tables feature plugin. #20520
+* Dev - Added new filter to 'Item in quotes' translation for messages. #20714
+* Dev - Add 'woocommerce_shutdown_error' hook triggered on request termination with an error. #20787
+* Dev - New filter 'woocommerce_admin_meta_boxes_variations_count' to customize the shown count of variations. #21067
+* Dev - Added ability to query products that have a field set in wc_get_products/WC_Product_Query using the wildcard symbol '*'. #21162
+* Dev - Added a JavaScript events before and after the order total recalculation on the Edit Order page. #21181
+* Dev - Check for `needs_payment` instead of `has_status( 'pending' )` in PayPal PDT handler for custom order status support. #21200
+* Dev - Added form action hooks for edit account and login templates. #21248
+* Dev - Add action for when system tools are run. #21270
+* Dev - Add - woocommerce_restock_refunded_items filter to control default state of the restock option when refunding items on an order. #21314
+* Localization - Updated IT provinces. #20286
+* Localization - Eircode validation. #20330
+* Localization - Disable postcode requirement for Bahrain. #21103
+* Localization - Make postcode field optional and hidden for Nigeria and label State. #21056
+* Localization - Make Romania state selection mandatory. #21180
+* Localization - Make city field optional and hidden for Singapore addresses. #21016
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
