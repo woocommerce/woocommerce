@@ -681,12 +681,43 @@ describe( 'getDateDifferenceInDays', () => {
 } );
 
 describe( 'getPreviousDate', () => {
-	it( 'should return valid date for previous period', () => {
-		const previousDate = getPreviousDate( '2018-08-21', 92, 'previous_period' );
-		expect( previousDate.format( isoDateFormat ) ).toBe( '2018-05-21' );
+	it( 'should return valid date for previous period by days', () => {
+		const date = '2018-08-21';
+		const primaryStart = '2018-08-25';
+		const secondaryStart = '2018-08-15';
+		const previousDate = getPreviousDate(
+			date,
+			primaryStart,
+			secondaryStart,
+			'previous_period',
+			'day'
+		);
+		expect( previousDate.format( isoDateFormat ) ).toBe( '2018-08-11' );
+	} );
+	it( 'should return valid date for previous period by months', () => {
+		const date = '2018-08-21';
+		const primaryStart = '2018-08-01';
+		const secondaryStart = '2018-07-01';
+		const previousDate = getPreviousDate(
+			date,
+			primaryStart,
+			secondaryStart,
+			'previous_period',
+			'month'
+		);
+		expect( previousDate.format( isoDateFormat ) ).toBe( '2018-07-21' );
 	} );
 	it( 'should return valid date for previous year', () => {
-		const previousDate = getPreviousDate( '2018-08-21', 92, 'previous_year' );
+		const date = '2018-08-21';
+		const primaryStart = '2018-08-01';
+		const secondaryStart = '2018-07-01';
+		const previousDate = getPreviousDate(
+			date,
+			primaryStart,
+			secondaryStart,
+			'previous_year',
+			'day'
+		);
 		expect( previousDate.format( isoDateFormat ) ).toBe( '2017-08-21' );
 	} );
 } );

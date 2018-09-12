@@ -194,7 +194,7 @@ D3Chart.propTypes = {
 	/**
 	 * Interval specification (hourly, daily, weekly etc.)
 	 */
-	interval: PropTypes.oneOf( [ 'hour', 'day', 'week', 'month', 'quater', 'year' ] ),
+	interval: PropTypes.oneOf( [ 'hour', 'day', 'week', 'month', 'quarter', 'year' ] ),
 	/**
 	 * Margins for axis and chart padding.
 	 */
