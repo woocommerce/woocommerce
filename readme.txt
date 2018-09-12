@@ -173,6 +173,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Enhancement - Make it easier to read and act upon the outdated template notice. #20732
 * Enhancement - Styled date, time, etc. inputs in admin to match styling of other inputs. #21013
 * Enhancement - Show update notices on the System Status page for WordPress.org hosted Official WooCommerce extensions. #21073
+* Enhancement - Better wording for transactional emails. #21288
 * Fix - Check billing email is posted before using in WC_Cart::check_customer_coupons. #20180
 * Fix - Shipping postcode formatting when only posting a billing address. #20330
 * Fix - Correctly show/hide save card checkbox on tokenization form. #20506
