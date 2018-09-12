@@ -39,6 +39,16 @@ export const getAdminLink = path => {
 };
 
 /**
+ * Converts a query object to a query string.
+ *
+ * @param {Object} query parameters to be converted.
+ * @return {String} Query string.
+ */
+export const stringifyQuery = query => {
+	return query ? '?' + stringify( query ) : '';
+};
+
+/**
  * Return a URL with set query parameters.
  *
  * @param {Object} query object of params to be updated.
@@ -47,8 +57,8 @@ export const getAdminLink = path => {
  * @return {String}  Updated URL merging query params into existing params.
  */
 export const getNewPath = ( query, path = getPath(), currentQuery = getQuery() ) => {
-	const queryString = stringify( { ...currentQuery, ...query } );
-	return `${ path }?${ queryString }`;
+	const queryString = stringifyQuery( { ...currentQuery, ...query } );
+	return `${ path }${ queryString }`;
 };
 
 /**
@@ -61,14 +71,4 @@ export const getNewPath = ( query, path = getPath(), currentQuery = getQuery() )
 export const updateQueryString = ( query, path = getPath(), currentQuery = getQuery() ) => {
 	const newPath = getNewPath( query, path, currentQuery );
 	history.push( newPath );
-};
-
-/**
- * Converts a query object to a query string.
- *
- * @param {Object} query parameters to be converted.
- * @return {String} Query string.
- */
-export const stringifyQuery = query => {
-	return query ? '?' + stringify( query ) : '';
 };
