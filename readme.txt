@@ -186,6 +186,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Correctly excluded administrators from "Customer list" report. #21304
 * Fix - Update quick edit logic to show/hide Stock qty and Backorders fields. #21301
 * Fix - Fix Layered Nav Widget where special HTML entities did not display correctly in the "Any %s" string. #21312
+* Fix - Set the is_checkout javascript parameter on any page that uses the checkout filter or shortcode. #21328
 * Fix/Tweak - Fire `woocommerce_grant_product_download_access` hook after the download has its ID set. #20905
 * Fix/Tweak/Performance - Change wp_woocommerce_sessions primary key to session_id. #21245
 * Tweak - Show empty terms in admin product category filter dropdown. #20324
