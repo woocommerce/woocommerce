@@ -408,7 +408,11 @@ export function getDateFormatsForInterval( interval ) {
 			xFormat = '%I %p';
 			tableFormat = 'h A';
 			break;
+		case 'day':
+			xFormat = '%d';
+			break;
 		case 'week':
+			xFormat = '%d';
 			tooltipFormat = __( 'Week of %B %d %Y', 'wc-admin' );
 			break;
 		case 'quarter':
