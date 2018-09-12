@@ -4,10 +4,10 @@
  * External dependencies
  */
 
-import { findIndex, get } from 'lodash';
+import { findIndex } from 'lodash';
 import { max as d3Max } from 'd3-array';
 import { axisBottom as d3AxisBottom, axisLeft as d3AxisLeft } from 'd3-axis';
-import { format as d3Format, formatDefaultLocale as d3FormatDefaultLocale } from 'd3-format';
+import { format as d3Format } from 'd3-format';
 import {
 	scaleBand as d3ScaleBand,
 	scaleLinear as d3ScaleLinear,
@@ -20,16 +20,6 @@ import { line as d3Line } from 'd3-shape';
  */
 import { formatCurrency } from 'lib/currency';
 
-function decodeSymbol( str ) {
-	return str.replace( /&#(\d+);/g, ( match, dec ) => String.fromCharCode( dec ) );
-}
-
-d3FormatDefaultLocale( {
-	decimal: '.',
-	thousands: ',',
-	grouping: [ 3 ],
-	currency: [ decodeSymbol( get( wcSettings, 'currency.symbol', '' ) ), '' ],
-} );
 /**
  * Describes `getUniqueKeys`
  * @param {array} data - The chart component's `data` prop.
