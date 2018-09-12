@@ -66,7 +66,7 @@ if ( ! class_exists( 'WC_Email_Failed_Order', false ) ) :
 		 * @return string
 		 */
 		public function get_default_heading() {
-			return __( 'Order Failed: {order_number}', 'woocommerce' );
+			return __( 'Order Failed: #{order_number}', 'woocommerce' );
 		}
 
 		/**

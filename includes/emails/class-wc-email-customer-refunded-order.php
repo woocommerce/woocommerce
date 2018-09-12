@@ -70,9 +70,9 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 		 */
 		public function get_default_subject( $partial = false ) {
 			if ( $partial ) {
-				return __( 'Your {site_title} order {order_number} has been partially refunded', 'woocommerce' );
+				return __( 'Your {site_title} order #{order_number} has been partially refunded', 'woocommerce' );
 			} else {
-				return __( 'Your {site_title} order {order_number} has been refunded', 'woocommerce' );
+				return __( 'Your {site_title} order #{order_number} has been refunded', 'woocommerce' );
 			}
 		}
 
