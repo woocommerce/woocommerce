@@ -346,7 +346,7 @@ export class RevenueReport extends Component {
 					allowedIntervals={ allowedIntervals }
 					tooltipFormat={ formats.tooltipFormat }
 					xFormat={ formats.xFormat }
-					dateParser={ '%Y-%m-%d' }
+					dateParser={ '%Y-%m-%dT%H:%M:%S' }
 				/>
 			</Card>
 		);
