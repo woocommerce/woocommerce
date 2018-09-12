@@ -337,7 +337,7 @@ class WC_Structured_Data {
 				),
 			);
 
-			if ( ! empty( $crumb[1] ) && count( $crumbs ) !== $key + 1 ) {
+			if ( ! empty( $crumb[1] ) ) {
 				$markup['itemListElement'][ $key ]['item'] += array( '@id' => $crumb[1] );
 			}
 		}
