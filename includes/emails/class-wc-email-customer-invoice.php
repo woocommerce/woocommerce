@@ -54,7 +54,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		 */
 		public function get_default_subject( $paid = false ) {
 			if ( $paid ) {
-				return __( 'Invoice for order {order_number} on {site_title}', 'woocommerce' );
+				return __( 'Invoice for order #{order_number} on {site_title}', 'woocommerce' );
 			} else {
 				return __( 'Your latest {site_title} invoice', 'woocommerce' );
 			}
@@ -69,9 +69,9 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		 */
 		public function get_default_heading( $paid = false ) {
 			if ( $paid ) {
-				return __( 'Invoice for order {order_number}', 'woocommerce' );
+				return __( 'Invoice for order #{order_number}', 'woocommerce' );
 			} else {
-				return __( 'Your invoice for order {order_number}', 'woocommerce' );
+				return __( 'Your invoice for order #{order_number}', 'woocommerce' );
 			}
 		}
 

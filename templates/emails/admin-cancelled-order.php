@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 
 <?php /* translators: %1$s: Customer full name. %2$s: Order numer */ ?>
-<p><?php printf( __( 'Alas. Just to let you know -- %1$s has cancelled order %2$s:', 'woocommerce' ), $order->get_formatted_billing_full_name(), $order->get_order_number() ); ?></p><?php // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
+<p><?php printf( esc_html__( 'Alas. Just to let you know -- %1$s has cancelled order #%2$s:', 'woocommerce' ), esc_html( $order->get_formatted_billing_full_name() ), esc_html( $order->get_order_number() ) ); ?></p>
 
 <?php
 
@@ -49,7 +49,7 @@ do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, 
 do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email );
 ?>
 <p>
-<?php _e( 'Read more about <a href="https://docs.woocommerce.com/document/managing-orders/">managing orders</a>, or get tips for <a href="https://woocommerce.com/2018/03/10-ways-to-make-your-next-sale/">making your next sale</a>.', 'woocommerce' ); // phpcs:ignore WordPress.XSS.EscapeOutput ?>
+<?php esc_html_e( 'Thanks for reading.', 'woocommerce' ); ?>
 </p>
 <?php
 

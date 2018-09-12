@@ -60,7 +60,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 		 * @return string
 		 */
 		public function get_default_subject() {
-			return __( '{site_title} has a new order -- woo!', 'woocommerce' );
+			return __( '[{site_title}]: New order #{order_number}', 'woocommerce' );
 		}
 
 		/**
@@ -70,7 +70,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 		 * @return string
 		 */
 		public function get_default_heading() {
-			return __( 'New Order: {order_number}', 'woocommerce' );
+			return __( 'New Order: #{order_number}', 'woocommerce' );
 		}
 
 		/**

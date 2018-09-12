@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 echo '= ' . esc_html( $email_heading ) . " =\n\n";
 
 /* translators: %s Customer first name */
-printf( esc_html__( 'Hi %s,', 'woocommerce' ), $order->get_billing_first_name() ) . "\n\n"; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+echo sprintf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $order->get_billing_first_name() ) ) . "\n\n";
 echo esc_html__( 'The following note has been added to your order:', 'woocommerce' ) . "\n\n";
 
 echo "----------\n\n";
@@ -57,8 +57,8 @@ do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, 
  */
 do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email );
 
-esc_html_e( 'Have a great day.', 'woocommerce' );
+echo esc_html__( 'Thanks for reading.', 'woocommerce' ) . "\n\n";
 
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
-echo apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+echo esc_html( apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) ) );

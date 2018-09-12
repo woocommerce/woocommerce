@@ -56,7 +56,7 @@ if ( ! class_exists( 'WC_Email_Failed_Order', false ) ) :
 		 * @return string
 		 */
 		public function get_default_subject() {
-			return __( '{site_title}: Order {order_number} has failed', 'woocommerce' );
+			return __( '[{site_title}]: Order #{order_number} has failed', 'woocommerce' );
 		}
 
 		/**

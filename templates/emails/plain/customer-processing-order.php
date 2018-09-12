@@ -19,12 +19,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-echo '= ' . $email_heading . " =\n\n"; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+echo '= ' . esc_html( $email_heading ) . " =\n\n";
 
 /* translators: %s: Customer first name */
-printf( __( 'Hi %s,', 'woocommerce' ), $order->get_billing_first_name() ) . "\n\n"; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+echo sprintf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $order->get_billing_first_name() ) ) . "\n\n";
 /* translators: %s: Order number */
-printf( __( 'Just to let you know -- your payment has been confirmed, and order %s is now being processed:', 'woocommerce' ), $order->get_order_number() ) . "\n\n"; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+echo sprintf( esc_html__( 'Just to let you know -- your payment has been confirmed, and order #%s is now being processed:', 'woocommerce' ), esc_html( $order->get_order_number() ) ) . "\n\n";
 
 echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
@@ -49,8 +49,8 @@ do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, 
  */
 do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email );
 
-_e( 'Woo!', 'woocommerce' ) . "\n\n"; // phpcs:ignore WordPress.XSS.EscapeOutput
+echo esc_html_e( 'Thanks!', 'woocommerce' ) . "\n\n";
 
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
-echo apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+echo esc_html( apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) ) );

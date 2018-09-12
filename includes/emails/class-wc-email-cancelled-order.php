@@ -57,7 +57,7 @@ if ( ! class_exists( 'WC_Email_Cancelled_Order', false ) ) :
 		 * @return string
 		 */
 		public function get_default_subject() {
-			return __( '{site_title}: {order_billing_full_name} has cancelled order {order_number}', 'woocommerce' );
+			return __( '[{site_title}]: {order_billing_full_name} has cancelled order #{order_number}', 'woocommerce' );
 		}
 
 		/**
@@ -67,7 +67,7 @@ if ( ! class_exists( 'WC_Email_Cancelled_Order', false ) ) :
 		 * @return string
 		 */
 		public function get_default_heading() {
-			return __( 'Order Cancelled: {order_number}', 'woocommerce' );
+			return __( 'Order Cancelled: #{order_number}', 'woocommerce' );
 		}
 
 		/**

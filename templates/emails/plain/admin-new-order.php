@@ -19,10 +19,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-echo '= ' . $email_heading . " =\n\n"; // phpcs:ignore WordPress
+echo '= ' . esc_html( $email_heading ) . " =\n\n";
 
 /* translators: %s: Customer billing full name */
-echo sprintf( __( 'You’ve received the following order from %s.', 'woocommerce' ), $order->get_formatted_billing_full_name() ) . "\n\n"; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+echo sprintf( esc_html__( 'You’ve received the following order from %s:', 'woocommerce' ), esc_html( $order->get_formatted_billing_full_name() ) ) . "\n\n";
 
 echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
@@ -47,8 +47,8 @@ do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, 
  */
 do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email );
 
+echo esc_html__( 'Over to you.', 'woocommerce' ) . "\n\n";
+
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
-echo __( 'Woo! Over to you.', 'woocommerce' ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
-
-echo apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+echo esc_html( apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) ) );

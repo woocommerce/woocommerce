@@ -52,7 +52,7 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 	<p>
 	<?php
 		/* translators: %s Order date */
-		printf( __( 'Here are the details of your order placed on %s:', 'woocommerce' ), wc_format_datetime( $order->get_date_created() ) ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+		printf( esc_html__( 'Here are the details of your order placed on %s:', 'woocommerce' ), esc_html( wc_format_datetime( $order->get_date_created() ) ) );
 	?>
 	</p>
 <?php
@@ -85,7 +85,7 @@ do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_
 
 ?>
 <p>
-<?php esc_html_e( 'Have a great day.', 'woocommerce' ); ?>
+<?php esc_html_e( 'Thanks for reading.', 'woocommerce' ); ?>
 </p>
 <?php
 
