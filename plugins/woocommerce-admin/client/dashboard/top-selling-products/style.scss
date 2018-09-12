@@ -4,6 +4,13 @@
 		padding: 0;
 	}
 
+	.woocommerce-top-selling-products__empty-message {
+		background: $core-grey-light-100;
+		color: $core-grey-dark-500;
+		padding: $gap-largest 0;
+		text-align: center;
+	}
+
 	.woocommerce-table__table {
 		margin-bottom: 0;
 

@@ -81,21 +81,37 @@ export class TopSellingProducts extends Component {
 		} );
 	}
 
-	render() {
+	getCardContents( title ) {
 		const { data, isRequesting, isError } = this.props;
 
-		// @TODO We will need to update it with a error/empty data indicator
 		const rows = isRequesting || isError ? [] : this.getRowsContent( data );
 		const headers = this.getHeadersContent();
+
+		if ( isRequesting ) {
+			return <TablePlaceholder caption={ title } headers={ headers } />;
+		}
+
+		if ( isError ) {
+			// @TODO An error notice should be displayed when there is an error
+		}
+
+		if ( rows.length === 0 ) {
+			return (
+				<div className="woocommerce-top-selling-products__empty-message">
+					{ __( 'When new orders arrive, popular products will be listed here.', 'wc-admin' ) }
+				</div>
+			);
+		}
+
+		return <Table caption={ title } rows={ rows } headers={ headers } />;
+	}
+
+	render() {
 		const title = __( 'Top Selling Products', 'wc-admin' );
 
 		return (
 			<Card title={ title } className="woocommerce-top-selling-products">
-				{ isRequesting ? (
-					<TablePlaceholder caption={ title } headers={ headers } />
-				) : (
-					<Table caption={ title } rows={ rows } headers={ headers } />
-				) }
+				{ this.getCardContents( title ) }
 			</Card>
 		);
 	}
