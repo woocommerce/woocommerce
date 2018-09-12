@@ -42,6 +42,7 @@ if ( ! class_exists( 'WC_Email_Customer_On_Hold_Order', false ) ) :
 			// Triggers for this email.
 			add_action( 'woocommerce_order_status_pending_to_on-hold_notification', array( $this, 'trigger' ), 10, 2 );
 			add_action( 'woocommerce_order_status_failed_to_on-hold_notification', array( $this, 'trigger' ), 10, 2 );
+			add_action( 'woocommerce_order_status_cancelled_to_on-hold_notification', array( $this, 'trigger' ), 10, 2 );
 
 			// Call parent constructor.
 			parent::__construct();
