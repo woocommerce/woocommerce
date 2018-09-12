@@ -140,6 +140,7 @@ class AdvancedFilters extends Component {
 		const { activeFilters } = this.state;
 		const availableFilterKeys = this.getAvailableFilterKeys();
 		const updateHref = this.getUpdateHref( activeFilters );
+		const updateDisabled = window.location.hash && window.location.hash.substr( 1 ) === updateHref;
 		return (
 			<Card className="woocommerce-filters-advanced" title={ this.getTitle() }>
 				<ul className="woocommerce-filters-advanced__list" ref={ this.filterListRef }>
@@ -209,14 +210,20 @@ class AdvancedFilters extends Component {
 				) }
 
 				<div className="woocommerce-filters-advanced__controls">
-					<Link
-						className="components-button is-primary is-button"
-						type="wc-admin"
-						disabled={ window.location.hash.substr( 1 ) === updateHref }
-						href={ updateHref }
-					>
-						{ __( 'Filter', 'wc-admin' ) }
-					</Link>
+					{ updateDisabled && (
+						<Button isPrimary disabled>
+							{ __( 'Filter', 'wc-admin' ) }
+						</Button>
+					) }
+					{ ! updateDisabled && (
+						<Link
+							className="components-button is-primary is-button"
+							type="wc-admin"
+							href={ updateHref }
+						>
+							{ __( 'Filter', 'wc-admin' ) }
+						</Link>
+					) }
 					<Link type="wc-admin" href={ this.getUpdateHref( [] ) } onClick={ this.clearFilters }>
 						{ __( 'Clear all filters', 'wc-admin' ) }
 					</Link>

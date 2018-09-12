@@ -119,6 +119,8 @@
 
 .woocommerce-filters-advanced__controls {
 	padding: $gap-smaller $gap;
+	display: flex;
+	align-items: center;
 
 	.components-button {
 		margin-right: $gap;
