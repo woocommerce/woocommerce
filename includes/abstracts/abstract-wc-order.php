@@ -1702,7 +1702,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	public function get_shipping_to_display( $tax_display = '' ) {
 		$tax_display = $tax_display ? $tax_display : get_option( 'woocommerce_tax_display_cart' );
 
-		if ( 0 < (float) $this->get_shipping_total() ) {
+		if ( 0 < abs( (float) $this->get_shipping_total() ) ) {
 
 			if ( 'excl' === $tax_display ) {
 
