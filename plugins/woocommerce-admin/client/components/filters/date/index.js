@@ -37,7 +37,7 @@ class DatePicker extends Component {
 
 	refreshDropdown() {
 		setTimeout( () => {
-			this.dropdownRef.current.popoverRef && this.dropdownRef.current.popoverRef.current.refresh();
+			this.dropdownRef.current.refresh();
 		} );
 	}
 
