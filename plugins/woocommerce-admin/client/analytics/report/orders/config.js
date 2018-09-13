@@ -4,6 +4,11 @@
  */
 import { __ } from '@wordpress/i18n';
 
+/**
+ * Internal dependencies
+ */
+import { getProductLabelsById } from 'analytics/report/products/config';
+
 export const filters = [
 	{ label: __( 'All Orders', 'wc-admin' ), value: 'all' },
 	{
@@ -55,6 +60,7 @@ export const advancedFilterConfig = {
 		input: {
 			component: 'Search',
 			type: 'products',
+			getLabels: getProductLabelsById,
 		},
 	},
 	code: {

@@ -9,6 +9,31 @@ import apiFetch from '@wordpress/api-fetch';
  * Internal dependencies
  */
 import { stringifyQuery } from 'lib/nav-utils';
+import { NAMESPACE } from 'store/constants';
+
+export const getProductLabelsById = queryString => {
+	const idList = queryString
+		.split( ',' )
+		.map( id => parseInt( id, 10 ) )
+		.filter( Boolean );
+	const payload = stringifyQuery( {
+		include: idList.join( ',' ),
+		per_page: idList.length,
+	} );
+	return apiFetch( { path: NAMESPACE + 'products' + payload } );
+};
+
+export const getCategoryLabelsById = queryString => {
+	const idList = queryString
+		.split( ',' )
+		.map( id => parseInt( id, 10 ) )
+		.filter( Boolean );
+	const payload = stringifyQuery( {
+		include: idList.join( ',' ),
+		per_page: idList.length,
+	} );
+	return apiFetch( { path: NAMESPACE + 'products/categories' + payload } );
+};
 
 export const filters = [
 	{ label: __( 'All Products', 'wc-admin' ), value: 'all' },
@@ -29,17 +54,7 @@ export const filters = [
 		settings: {
 			type: 'products',
 			param: 'product',
-			getLabels: function( queryString ) {
-				const idList = queryString
-					.split( ',' )
-					.map( id => parseInt( id, 10 ) )
-					.filter( Boolean );
-				const payload = stringifyQuery( {
-					include: idList.join( ',' ),
-					per_page: idList.length,
-				} );
-				return apiFetch( { path: '/wc/v3/products' + payload } );
-			},
+			getLabels: getProductLabelsById,
 			labels: {
 				title: __( 'Compare Products', 'wc-admin' ),
 				update: __( 'Compare', 'wc-admin' ),
@@ -52,17 +67,7 @@ export const filters = [
 		settings: {
 			type: 'product_cats',
 			param: 'product_cat',
-			getLabels: function( queryString ) {
-				const idList = queryString
-					.split( ',' )
-					.map( id => parseInt( id, 10 ) )
-					.filter( Boolean );
-				const payload = stringifyQuery( {
-					include: idList.join( ',' ),
-					per_page: idList.length,
-				} );
-				return apiFetch( { path: '/wc/v3/products/categories' + payload } );
-			},
+			getLabels: getCategoryLabelsById,
 			labels: {
 				title: __( 'Compare Product Categories', 'wc-admin' ),
 				update: __( 'Compare', 'wc-admin' ),

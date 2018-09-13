@@ -31,11 +31,9 @@ const matches = [
 class AdvancedFilters extends Component {
 	constructor( props ) {
 		super( props );
-		const activeFiltersFromQuery = getActiveFiltersFromQuery( props.query, props.config );
 		this.state = {
 			match: matches[ 0 ],
-			activeFilters: activeFiltersFromQuery,
-			previousFilters: activeFiltersFromQuery,
+			activeFilters: getActiveFiltersFromQuery( props.query, props.config ),
 		};
 
 		this.filterListRef = createRef();
@@ -107,7 +105,7 @@ class AdvancedFilters extends Component {
 			newFilter.value = filterConfig.input.options[ 0 ].value;
 		}
 		if ( filterConfig.input && 'Search' === filterConfig.input.component ) {
-			newFilter.value = [];
+			newFilter.value = '';
 		}
 		this.setState( state => {
 			return {
@@ -129,9 +127,8 @@ class AdvancedFilters extends Component {
 	}
 
 	getUpdateHref( activeFilters ) {
-		const { previousFilters } = this.state;
-		const { path, query } = this.props;
-		const updatedQuery = getQueryFromActiveFilters( activeFilters, previousFilters );
+		const { path, query, config } = this.props;
+		const updatedQuery = getQueryFromActiveFilters( activeFilters, query, config );
 		return getNewPath( updatedQuery, path, query );
 	}
 

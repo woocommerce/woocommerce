@@ -13,7 +13,7 @@ import { partial } from 'lodash';
  * Internal dependencies
  */
 import { Card, ReportFilters } from '@woocommerce/components';
-import { filters, advancedFilterConfig } from './constants';
+import { filters, advancedFilterConfig } from './config';
 import './style.scss';
 
 class OrdersReport extends Component {
