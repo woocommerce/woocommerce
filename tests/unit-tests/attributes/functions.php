@@ -98,9 +98,29 @@ class WC_Tests_Attributes_Functions extends WC_Unit_Test_Case {
 		) );
 		$product->save();
 
+		// Check everything looks good before updating the attribute.
 		$meta_before_update = $wpdb->get_results( "SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = '_product_attributes' AND post_id = " . $product->get_id(), ARRAY_A );
 		$product_meta_before_update = @unserialize( $meta_before_update[0]['meta_value'] );
 		$this->assertNotFalse( $product_meta_before_update, 'Meta should be an unserializable string' );
+
+		$expected_local_attribute_data = array(
+			'name' => 'Test Local Attribute',
+			'value' => 'Fish | Fingers | s:7:"pa_test',
+			'position' => 0,
+			'is_visible' => 1,
+			'is_variation' => 0,
+			'is_taxonomy' => 0,
+		);
+		$expected_global_attribute_data = array(
+			'name' => 'pa_test',
+			'value' => '',
+			'position' => 1,
+			'is_visible' => 1,
+			'is_variation' => 0,
+			'is_taxonomy' => 1,
+		);
+		$this->assertEquals( $expected_local_attribute_data, $product_meta_before_update['Test Local Attribute'] );
+		$this->assertEquals( $expected_global_attribute_data, $product_meta_before_update['pa_test'] );
 
 		// Update the global attribute.
 		$updated_global_attribute_id = wc_create_attribute(
@@ -118,7 +138,17 @@ class WC_Tests_Attributes_Functions extends WC_Unit_Test_Case {
 		$product_meta_after_update = @unserialize( $meta_after_update[0]['meta_value'] );
 		$this->assertNotFalse( $product_meta_after_update, 'Meta should be an unserializable string' );
 
-		// @todo check individual attribute values are good once meta after update is unserializable.
+		$expected_global_attribute_data = array(
+			'name' => 'pa_testupdate',
+			'value' => '',
+			'position' => 1,
+			'is_visible' => 1,
+			'is_variation' => 0,
+			'is_taxonomy' => 1,
+		);
+		$this->assertEquals( $product_meta_before_update['Test Local Attribute'], $product_meta_after_update['Test Local Attribute'] );
+		$this->assertEquals( $expected_global_attribute_data, $product_meta_after_update['pa_testupdate'] );
+		$this->assertArrayNotHasKey( 'pa_test', $product_meta_after_update );
 	}
 
 	/**
