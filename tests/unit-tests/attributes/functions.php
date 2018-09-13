@@ -66,6 +66,62 @@ class WC_Tests_Attributes_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that updating a global attribute will not modify local attribute data.
+	 *
+	 * @since 3.4.6
+	 */
+	public function test_wc_create_attribute_serialized_data() {
+		global $wpdb;
+
+		$global_attribute_data = WC_Helper_Product::create_attribute( 'test', array( 'Chicken', 'Nuggets' ) );
+
+		$local_attribute = new WC_Product_Attribute();
+		$local_attribute->set_id( 0 );
+		$local_attribute->set_name( 'Test Local Attribute' );
+		$local_attribute->set_options( array( 'Fish', 'Fingers', 's:7:"pa_test' ) );
+		$local_attribute->set_position( 0 );
+		$local_attribute->set_visible( true );
+		$local_attribute->set_variation( false );
+
+		$global_attribute = new WC_Product_Attribute();
+		$global_attribute->set_id( $global_attribute_data['attribute_id'] );
+		$global_attribute->set_name( $global_attribute_data['attribute_taxonomy'] );
+		$global_attribute->set_options( $global_attribute_data['term_ids'] );
+		$global_attribute->set_position( 1 );
+		$global_attribute->set_visible( true );
+		$global_attribute->set_variation( false );
+
+		$product = new WC_Product_Simple();
+		$product->set_attributes( array(
+			'test-local' => $local_attribute,
+			'test-global' => $global_attribute,
+		) );
+		$product->save();
+
+		$meta_before_update = $wpdb->get_results( "SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = '_product_attributes' AND post_id = " . $product->get_id(), ARRAY_A );
+		$product_meta_before_update = @unserialize( $meta_before_update[0]['meta_value'] );
+		$this->assertNotFalse( $product_meta_before_update, 'Meta should be an unserializable string' );
+
+		// Update the global attribute.
+		$updated_global_attribute_id = wc_create_attribute(
+			array(
+				'id' => $global_attribute_data['attribute_id'],
+				'name' => 'Test Update',
+				'old_slug' => 'test',
+				'slug' => 'testupdate',
+			)
+		);
+		$this->assertEquals( $updated_global_attribute_id, $global_attribute_data['attribute_id'] );
+
+		// Changes to the global attribute should update in the product without causing side-effects.
+		$meta_after_update = $wpdb->get_results( "SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = '_product_attributes' AND post_id = " . $product->get_id(), ARRAY_A );
+		$product_meta_after_update = @unserialize( $meta_after_update[0]['meta_value'] );
+		$this->assertNotFalse( $product_meta_after_update, 'Meta should be an unserializable string' );
+
+		// @todo check individual attribute values are good once meta after update is unserializable.
+	}
+
+	/**
 	 * Tests wc_update_attribute().
 	 *
 	 * @since 3.2.0
