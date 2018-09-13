@@ -123,7 +123,7 @@ export default compose(
 		const endpoint = NAMESPACE + 'reports/products';
 		// @TODO We will need to add the date parameters from the Date Picker
 		// { after: '2018-04-22', before: '2018-05-06' }
-		const query = { orderby: 'items_sold' };
+		const query = { orderby: 'items_sold', per_page: 5 };
 
 		const stats = getReportStats( endpoint, query );
 		const isRequesting = isReportStatsRequesting( endpoint, query );

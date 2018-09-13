@@ -34,6 +34,7 @@
 
 .woocommerce-table__header,
 .woocommerce-table__item {
+	@include font-size( 13 );
 	padding: $gap $gap-large;
 	border-bottom: 1px solid $core-grey-light-500;
 	text-align: left;

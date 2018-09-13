@@ -4,10 +4,17 @@
 		padding: 0;
 	}
 
+	$row-text-height: 1.1375rem;
+	$row-height: #{$gap * 2} + #{$row-text-height} + 1px;
+	$header-row-height: #{$gap-smaller * 2} + #{$row-text-height} + 1px;
 	.woocommerce-top-selling-products__empty-message {
+		align-items: center;
 		background: $core-grey-light-100;
 		color: $core-grey-dark-500;
-		padding: $gap-largest 0;
+		display: flex;
+		height: calc((#{$row-height}) * 5 + #{$header-row-height});
+		justify-content: center;
+		padding: $gap;
 		text-align: center;
 	}
 
