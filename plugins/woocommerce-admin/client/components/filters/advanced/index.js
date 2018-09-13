@@ -183,6 +183,7 @@ class AdvancedFilters extends Component {
 				{ availableFilterKeys.length > 0 && (
 					<div className="woocommerce-filters-advanced__add-filter">
 						<Dropdown
+							className="woocommerce-filters-advanced__add-filter-dropdown"
 							position="bottom center"
 							renderToggle={ ( { isOpen, onToggle } ) => (
 								<IconButton
