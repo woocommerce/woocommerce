@@ -362,6 +362,11 @@ function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
 				if ( user_can( $args[0], 'administrator' ) && ! current_user_can( 'administrator' ) ) {
 					$caps[] = 'do_not_allow';
 				}
+
+				// Shop managers can only edit customer info.
+				if ( current_user_can( 'shop_manager' ) && ! user_can( $args[0], 'customer' ) ) {
+					$caps[] = 'do_not_allow';
+				}
 			}
 			break;
 	}
