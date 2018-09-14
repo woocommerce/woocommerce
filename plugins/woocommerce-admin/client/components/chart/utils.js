@@ -21,6 +21,23 @@ import { line as d3Line } from 'd3-shape';
 import { formatCurrency } from 'lib/currency';
 
 /**
+ * Describes `smallestFactor`
+ * @param {number} inputNum - any double or integer
+ * @returns {integer} smallest factor of num
+ */
+export const getFactors = inputNum => {
+	const num_factors = [];
+	for ( let i = 1; i <= Math.floor( Math.sqrt( inputNum ) ); i += 1 ) {
+		if ( inputNum % i === 0 ) {
+			num_factors.push( i );
+			inputNum / i !== i && num_factors.push( inputNum / i );
+		}
+	}
+	num_factors.sort( ( x, y ) => x - y ); // numeric sort
+	return num_factors;
+};
+
+/**
  * Describes `getUniqueKeys`
  * @param {array} data - The chart component's `data` prop.
  * @returns {array} of unique category keys
@@ -188,6 +205,74 @@ export const getLine = ( xLineScale, yScale ) =>
 		.y( d => yScale( d.value ) );
 
 /**
+ * Describes getXTicks
+ * @param {array} uniqueDates - all the unique dates from the input data for the chart
+ * @param {integer} width - calculated page width
+ * @param {string} layout - standard, comparison or compact chart types
+ * @returns {integer} number of x-axis ticks based on width and chart layout
+ */
+export const getXTicks = ( uniqueDates, width, layout ) => {
+	// caluclate the maximum number of ticks allowed in the x-axis based on the width
+	// and layout of the chart
+	let ticks = 16;
+	if ( width < 783 ) {
+		ticks = 7;
+	} else if ( width >= 783 && width < 1129 ) {
+		ticks = 12;
+	} else if ( width >= 1130 && width < 1365 ) {
+		if ( layout === 'standard' ) {
+			ticks = 16;
+		} else if ( layout === 'comparison' ) {
+			ticks = 12;
+		} else if ( layout === 'compact' ) {
+			ticks = 7;
+		}
+	} else if ( width >= 1365 ) {
+		if ( layout === 'standard' ) {
+			ticks = 31;
+		} else if ( layout === 'comparison' ) {
+			ticks = 16;
+		} else if ( layout === 'compact' ) {
+			ticks = 12;
+		}
+	}
+	if ( uniqueDates.length <= ticks ) {
+		return uniqueDates;
+	}
+	let factors = [];
+	let i = 0;
+	//  first we get all the factors of the length of the uniqieDates array
+	// if the number is a prime number or near prime (with 3 factors) then we
+	// step down by 1 integer and try again
+	while ( factors.length <= 3 ) {
+		factors = getFactors( uniqueDates.length - ( 1 + i ) );
+		i += 1;
+	}
+	let newTicks = [];
+	let factorIndex = 0;
+	// newTicks is the first tick plus the smallest factor (initiallY) etc.
+	// however, if we still end up with too many ticks we look at the next factor
+	// and try again unttil we have fewer ticks than the max
+	while ( newTicks.length > ticks || newTicks.length === 0 ) {
+		if ( newTicks.length > ticks ) {
+			factorIndex += 1;
+			newTicks = [];
+		}
+		for ( let idx = 0; idx < uniqueDates.length; idx = idx + factors[ factorIndex ] ) {
+			newTicks.push( uniqueDates[ idx ] );
+		}
+	}
+	// if, for some reason, the first or last date is missing from the newTicks array, add it back in
+	if ( newTicks[ 0 ] !== uniqueDates[ 0 ] ) {
+		newTicks.unshift( uniqueDates[ 0 ] );
+	}
+	if ( newTicks[ newTicks.length - 1 ] !== uniqueDates[ uniqueDates.length - 1 ] ) {
+		newTicks.push( uniqueDates[ uniqueDates.length - 1 ] );
+	}
+	return newTicks;
+};
+
+/**
  * Describes getDateSpaces
  * @param {array} uniqueDates - from `getUniqueDates`
  * @param {number} width - calculated width of the charting space
@@ -223,13 +308,15 @@ export const drawAxis = ( node, params ) => {
 		yGrids.push( i / 3 * params.yMax );
 	}
 
+	const ticks = params.xTicks.map( d => ( params.type === 'line' ? new Date( d ) : d ) );
+
 	node
 		.append( 'g' )
 		.attr( 'class', 'axis' )
 		.attr( 'transform', `translate(0,${ params.height })` )
 		.call(
 			d3AxisBottom( xScale )
-				.tickValues( params.uniqueDates.map( d => ( params.type === 'line' ? new Date( d ) : d ) ) )
+				.tickValues( ticks )
 				.tickFormat( d => params.xFormat( d instanceof Date ? d : new Date( d ) ) )
 		);
 
@@ -239,7 +326,7 @@ export const drawAxis = ( node, params ) => {
 		.attr( 'transform', `translate(3, ${ params.height + 20 })` )
 		.call(
 			d3AxisBottom( xScale )
-				.tickValues( params.uniqueDates.map( d => ( params.type === 'line' ? new Date( d ) : d ) ) )
+				.tickValues( ticks )
 				.tickFormat( ( d, i ) => {
 					const monthDate = d instanceof Date ? d : new Date( d );
 					return monthDate.getDate() === 1 || i === 0 ? params.x2Format( monthDate ) : '';
@@ -257,7 +344,7 @@ export const drawAxis = ( node, params ) => {
 		.attr( 'transform', `translate(0, ${ params.height })` )
 		.call(
 			d3AxisBottom( xScale )
-				.tickValues( params.uniqueDates.map( d => ( params.type === 'line' ? new Date( d ) : d ) ) )
+				.tickValues( ticks )
 				.tickSize( 5 )
 				.tickFormat( '' )
 		);
@@ -384,25 +471,26 @@ export const drawLines = ( node, data, params ) => {
 		} )
 		.attr( 'd', d => params.line( d.values ) );
 
-	series
-		.selectAll( 'circle' )
-		.data( ( d, i ) => d.values.map( row => ( { ...row, i, visible: d.visible, key: d.key } ) ) )
-		.enter()
-		.append( 'circle' )
-		.attr( 'r', 6 )
-		.attr( 'fill', d => getColor( d.key, params ) )
-		.attr( 'stroke', '#fff' )
-		.attr( 'stroke-width', 3 )
-		.style( 'opacity', d => {
-			const opacity = d.focus ? 1 : 0.1;
-			return d.visible ? opacity : 0;
-		} )
-		.attr( 'cx', d => params.xLineScale( new Date( d.date ) ) )
-		.attr( 'cy', d => params.yScale( d.value ) )
-		.on( 'mouseover', ( d, i, nodes ) =>
-			handleMouseOverLineChart( d, i, nodes, node, data, params )
-		)
-		.on( 'mouseout', ( d, i, nodes ) => handleMouseOutLineChart( d, i, nodes, params ) );
+	params.uniqueDates.length < 50 &&
+		series
+			.selectAll( 'circle' )
+			.data( ( d, i ) => d.values.map( row => ( { ...row, i, visible: d.visible, key: d.key } ) ) )
+			.enter()
+			.append( 'circle' )
+			.attr( 'r', 6 )
+			.attr( 'fill', d => getColor( d.key, params ) )
+			.attr( 'stroke', '#fff' )
+			.attr( 'stroke-width', 3 )
+			.style( 'opacity', d => {
+				const opacity = d.focus ? 1 : 0.1;
+				return d.visible ? opacity : 0;
+			} )
+			.attr( 'cx', d => params.xLineScale( new Date( d.date ) ) )
+			.attr( 'cy', d => params.yScale( d.value ) )
+			.on( 'mouseover', ( d, i, nodes ) =>
+				handleMouseOverLineChart( d, i, nodes, node, data, params )
+			)
+			.on( 'mouseout', ( d, i, nodes ) => handleMouseOutLineChart( d, i, nodes, params ) );
 
 	const focus = node
 		.append( 'g' )

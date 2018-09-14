@@ -23,6 +23,7 @@ import {
 	getOrderedKeys,
 	getLine,
 	getLineData,
+	getXTicks,
 	getUniqueKeys,
 	getUniqueDates,
 	getXScale,
@@ -97,6 +98,7 @@ class D3Chart extends Component {
 			data,
 			dateParser,
 			height,
+			layout,
 			margin,
 			orderedKeys,
 			tooltipFormat,
@@ -120,6 +122,7 @@ class D3Chart extends Component {
 		const uniqueDates = getUniqueDates( lineData, parseDate );
 		const xLineScale = getXLineScale( uniqueDates, adjWidth );
 		const xScale = getXScale( uniqueDates, adjWidth );
+		const xTicks = getXTicks( uniqueDates, adjWidth, layout );
 		return {
 			colorScheme,
 			dateSpaces: getDateSpaces( uniqueDates, adjWidth, xLineScale ),
@@ -139,6 +142,7 @@ class D3Chart extends Component {
 			x2Format: d3TimeFormat( x2Format ),
 			xGroupScale: getXGroupScale( orderedKeys, xScale ),
 			xLineScale,
+			xTicks,
 			xScale,
 			yMax,
 			yScale,
@@ -196,6 +200,11 @@ D3Chart.propTypes = {
 	 */
 	interval: PropTypes.oneOf( [ 'hour', 'day', 'week', 'month', 'quarter', 'year' ] ),
 	/**
+	 * `standard` (default) legend layout in the header or `comparison` moves legend layout
+	 * to the left or 'compact' has the legend below
+	 */
+	layout: PropTypes.oneOf( [ 'standard', 'comparison', 'compact' ] ),
+	/**
 	 * Margins for axis and chart padding.
 	 */
 	margin: PropTypes.shape( {
@@ -244,6 +253,7 @@ D3Chart.defaultProps = {
 		right: 0,
 		top: 20,
 	},
+	layout: 'standard',
 	tooltipFormat: '%Y-%m-%d',
 	type: 'line',
 	width: 600,
