@@ -400,6 +400,7 @@ export function getIntervalForQuery( query ) {
 export function getDateFormatsForInterval( interval ) {
 	let tooltipFormat = '%B %d %Y';
 	let xFormat = '%Y-%m-%d';
+	let x2Format = '%b %y';
 	let tableFormat = 'm/d/Y';
 
 	switch ( interval ) {
@@ -419,6 +420,7 @@ export function getDateFormatsForInterval( interval ) {
 		case 'month':
 			tooltipFormat = '%B %Y';
 			xFormat = '%b %y';
+			x2Format = '';
 			tableFormat = 'M Y';
 			break;
 		case 'year':
@@ -431,6 +433,7 @@ export function getDateFormatsForInterval( interval ) {
 	return {
 		tooltipFormat,
 		xFormat,
+		x2Format,
 		tableFormat,
 	};
 }

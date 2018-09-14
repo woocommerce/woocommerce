@@ -2,7 +2,8 @@
 /**
  * External dependencies
  */
-import he from 'he';
+
+import { decodeEntities } from '@wordpress/html-entities';
 import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
 import { get, isEqual, partial } from 'lodash';
@@ -27,7 +28,7 @@ d3FormatDefaultLocale( {
 	decimal: '.',
 	thousands: ',',
 	grouping: [ 3 ],
-	currency: [ he.decode( get( wcSettings, 'currency.symbol', '' ) ), '' ],
+	currency: [ decodeEntities( get( wcSettings, 'currency.symbol', '' ) ), '' ],
 } );
 
 function getOrderedKeys( props ) {
