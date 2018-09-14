@@ -53,17 +53,15 @@ export class TopSellingProducts extends Component {
 
 	getRowsContent( data ) {
 		return map( data, row => {
-			const { product_id, items_sold, gross_revenue, orders_count } = row;
+			const { product_id, items_sold, gross_revenue, orders_count, name } = row;
 
-			// @TODO We also will need to have product data to properly display the product name here
-			const productName = `Product ${ product_id }`;
 			const productLink = (
-				<a href={ getAdminLink( `/post.php?post=${ product_id }&action=edit` ) }>{ productName }</a>
+				<a href={ getAdminLink( `/post.php?post=${ product_id }&action=edit` ) }>{ name }</a>
 			);
 			return [
 				{
 					display: productLink,
-					value: productName,
+					value: name,
 				},
 				{
 					display: numberFormat( items_sold ),
@@ -123,7 +121,7 @@ export default compose(
 		const endpoint = NAMESPACE + 'reports/products';
 		// @TODO We will need to add the date parameters from the Date Picker
 		// { after: '2018-04-22', before: '2018-05-06' }
-		const query = { orderby: 'items_sold', per_page: 5 };
+		const query = { orderby: 'items_sold', per_page: 5, extended_product_info: 1 };
 
 		const stats = getReportStats( endpoint, query );
 		const isRequesting = isReportStatsRequesting( endpoint, query );
