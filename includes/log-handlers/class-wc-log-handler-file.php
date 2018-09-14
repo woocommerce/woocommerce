@@ -249,7 +249,8 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	public function remove( $handle ) {
 		$removed = false;
 		$file = trailingslashit( WC_LOG_DIR ) . $handle;
-		if ( $file ) {
+
+		if ( 0 === stripos( realpath( $file ), WC_LOG_DIR ) ) {
 			if ( is_file( $file ) && is_writable( $file ) ) { // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_is_writable
 				$this->close( $file ); // Close first to be certain no processes keep it alive after it is unlinked.
 				$removed = unlink( $file ); // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_unlink
