@@ -2,13 +2,16 @@
 /**
  * External dependencies
  */
+
+import { decodeEntities } from '@wordpress/html-entities';
 import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
-import { isEqual, partial } from 'lodash';
+import { get, isEqual, partial } from 'lodash';
 import { Component, createRef } from '@wordpress/element';
 import { IconButton, SelectControl } from '@wordpress/components';
 import PropTypes from 'prop-types';
 import { interpolateViridis as d3InterpolateViridis } from 'd3-scale-chromatic';
+import { formatDefaultLocale as d3FormatDefaultLocale } from 'd3-format';
 import Gridicon from 'gridicons';
 
 /**
@@ -20,6 +23,13 @@ import { gap, gaplarge } from 'stylesheets/abstracts/_variables.scss';
 import { updateQueryString } from 'lib/nav-utils';
 
 const WIDE_BREAKPOINT = 1100;
+
+d3FormatDefaultLocale( {
+	decimal: '.',
+	thousands: ',',
+	grouping: [ 3 ],
+	currency: [ decodeEntities( get( wcSettings, 'currency.symbol', '' ) ), '' ],
+} );
 
 function getOrderedKeys( props ) {
 	const updatedKeys = [
