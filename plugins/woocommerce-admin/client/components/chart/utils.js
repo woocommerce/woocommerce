@@ -242,7 +242,13 @@ export const drawAxis = ( node, params ) => {
 				.tickValues( params.uniqueDates.map( d => ( params.type === 'line' ? new Date( d ) : d ) ) )
 				.tickFormat( ( d, i ) => {
 					const monthDate = d instanceof Date ? d : new Date( d );
-					return monthDate.getDate() === 1 || i === 0 ? params.x2Format( monthDate ) : '';
+					let prevMonth = i !== 0 ? params.uniqueDates[ i - 1 ] : params.uniqueDates[ i ];
+					prevMonth = prevMonth instanceof Date ? prevMonth : new Date( prevMonth );
+					return monthDate.getDate() === 1 ||
+						i === 0 ||
+						params.x2Format( monthDate ) !== params.x2Format( prevMonth )
+						? params.x2Format( monthDate )
+						: '';
 				} )
 		)
 		.call( g => g.select( '.domain' ).remove() );
