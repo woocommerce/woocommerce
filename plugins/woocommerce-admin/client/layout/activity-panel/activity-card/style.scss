@@ -77,15 +77,17 @@
 	@include breakpoint( '>782px' ) {
 		grid-area: header;
 		display: grid;
-		grid-template-areas:
+		grid-template:
 			'title date'
-			'subtitle date';
+			'subtitle date' /
+			1fr auto;
 
 		.woocommerce-activity-card__title {
 			grid-area: title;
 		}
 
 		.woocommerce-activity-card__date {
+			display: block;
 			grid-area: date;
 			justify-self: end;
 			margin-bottom: 0;
