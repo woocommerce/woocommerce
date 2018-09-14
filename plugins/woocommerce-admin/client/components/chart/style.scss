@@ -1,15 +1,22 @@
 /** @format */
 .woocommerce-chart {
-	display: flex;
-	flex-direction: column;
-	justify-content: flex-start;
-	align-items: flex-start;
-	margin: -$gap;
-	border-top: 1px solid $core-grey-light-700;
+	margin-top: -$gap;
+	margin-bottom: $gap-large;
+	background: white;
+	border: 1px solid $core-grey-light-700;
+	border-top: 0;
+
+	@include breakpoint( '<782px' ) {
+		margin-left: -16px;
+		margin-right: -16px;
+		margin-bottom: $gap-small;
+		border-left: none;
+		border-right: none;
+		width: auto;
+	}
 
 	.woocommerce-chart__header {
 		min-height: 50px;
-		border-top: 1px solid $core-grey-light-700;
 		border-bottom: 1px solid $core-grey-light-700;
 		display: flex;
 		flex-wrap: nowrap;
@@ -181,13 +188,9 @@
 
 	&.is-placeholder {
 		@include placeholder();
-		display: inline-block;
 		height: 200px;
 		width: 100%;
-		margin: 0;
 		padding: 0;
-		margin-bottom: $gap;
-		border: 1px solid $core-grey-light-700;
 	}
 }
 
