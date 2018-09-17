@@ -191,6 +191,8 @@ class WC_Admin_Api_Init {
 			KEY customer_id (customer_id),
 			KEY date_created (date_created)
 		  ) $collate;";
+
+		return $tables;
 	}
 
 	protected function create_db_tables() {
