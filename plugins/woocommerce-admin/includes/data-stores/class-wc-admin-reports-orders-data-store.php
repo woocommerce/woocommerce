@@ -8,7 +8,7 @@
 defined( 'ABSPATH' ) || exit;
 
 if ( ! class_exists( 'WC_Admin_Order_Stats_Background_Process', false ) ) {
-	include_once WC_ABSPATH . 'includes/class-wc-admin-order-stats-background-process.php';
+	include_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-order-stats-background-process.php';
 }
 
 /**

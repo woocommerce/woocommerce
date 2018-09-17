@@ -16,6 +16,10 @@ if ( ! defined( 'WC_ADMIN_APP' ) ) {
 	define( 'WC_ADMIN_APP', 'wc-admin-app' );
 }
 
+if ( ! defined( 'WC_ADMIN_ABSPATH' ) ) {
+	define( 'WC_ADMIN_ABSPATH', dirname( __FILE__ ) );
+}
+
 /**
  * Notify users of the plugin requirements
  */
