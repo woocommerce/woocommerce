@@ -76,7 +76,7 @@ class WC_Admin_Api_Init {
 		WC_Admin_Reports_Orders_Data_Store::init();
 	}
 
-	public static function order_product_lookup_store_init() {
+	public static function order_product_lookup_store_init( $updater = false ) {
 		global $wpdb;
 
 		$orders = get_transient( 'wc_update_350_all_orders' );
@@ -141,6 +141,8 @@ class WC_Admin_Api_Init {
 	}
 
 	public static function add_report_tables( $wc_tables ) {
+		global $wpdb;
+
 		return array_merge(
 			$wc_tables,
 			array(
