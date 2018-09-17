@@ -3,37 +3,12 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
  */
-import { getIdsFromQuery, stringifyQuery } from 'lib/nav-utils';
+import { getRequestByIdString } from 'lib/async-requests';
 import { NAMESPACE } from 'store/constants';
-
-export function getProductLabelsById( queryString = '' ) {
-	const idList = getIdsFromQuery( queryString );
-	if ( idList.length < 1 ) {
-		return Promise.resolve( [] );
-	}
-	const payload = stringifyQuery( {
-		include: idList.join( ',' ),
-		per_page: idList.length,
-	} );
-	return apiFetch( { path: `${ NAMESPACE }products${ payload }` } );
-}
-
-export function getCategoryLabelsById( queryString = '' ) {
-	const idList = getIdsFromQuery( queryString );
-	if ( idList.length < 1 ) {
-		return Promise.resolve( [] );
-	}
-	const payload = stringifyQuery( {
-		include: idList.join( ',' ),
-		per_page: idList.length,
-	} );
-	return apiFetch( { path: `${ NAMESPACE }products/categories${ payload }` } );
-}
 
 export const filters = [
 	{ label: __( 'All Products', 'wc-admin' ), value: 'all' },
@@ -54,7 +29,10 @@ export const filters = [
 		settings: {
 			type: 'products',
 			param: 'product',
-			getLabels: getProductLabelsById,
+			getLabels: getRequestByIdString( NAMESPACE + 'products', product => ( {
+				id: product.id,
+				label: product.name,
+			} ) ),
 			labels: {
 				helpText: __( 'Select at least two products to compare', 'wc-admin' ),
 				placeholder: __( 'Search for products to compare', 'wc-admin' ),
@@ -69,7 +47,10 @@ export const filters = [
 		settings: {
 			type: 'product_cats',
 			param: 'product_cat',
-			getLabels: getCategoryLabelsById,
+			getLabels: getRequestByIdString( NAMESPACE + 'products/categories', category => ( {
+				id: category.id,
+				label: category.name,
+			} ) ),
 			labels: {
 				helpText: __( 'Select at least two product categories to compare', 'wc-admin' ),
 				placeholder: __( 'Search for product categories to compare', 'wc-admin' ),

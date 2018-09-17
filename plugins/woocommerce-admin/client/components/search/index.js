@@ -12,7 +12,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import Autocomplete from './autocomplete';
-import { product, productCategory } from './autocompleters';
+import { product, productCategory, coupons } from './autocompleters';
 import Tag from 'components/tag';
 import './style.scss';
 
@@ -64,6 +64,8 @@ class Search extends Component {
 				return product;
 			case 'product_cats':
 				return productCategory;
+			case 'coupons':
+				return coupons;
 			default:
 				return {};
 		}
@@ -125,7 +127,8 @@ Search.propTypes = {
 	/**
 	 * The object type to be used in searching.
 	 */
-	type: PropTypes.oneOf( [ 'products', 'product_cats', 'orders', 'customers' ] ).isRequired,
+	type: PropTypes.oneOf( [ 'products', 'product_cats', 'orders', 'customers', 'coupons' ] )
+		.isRequired,
 	/**
 	 * A placeholder for the search input.
 	 */

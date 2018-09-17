@@ -7,7 +7,8 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { getProductLabelsById } from 'analytics/report/products/config';
+import { getRequestByIdString } from 'lib/async-requests';
+import { NAMESPACE } from 'store/constants';
 
 export const filters = [
 	{ label: __( 'All Orders', 'wc-admin' ), value: 'all' },
@@ -69,7 +70,10 @@ export const advancedFilterConfig = {
 		input: {
 			component: 'Search',
 			type: 'products',
-			getLabels: getProductLabelsById,
+			getLabels: getRequestByIdString( NAMESPACE + 'products', product => ( {
+				id: product.id,
+				label: product.name,
+			} ) ),
 		},
 	},
 	code: {
@@ -88,7 +92,11 @@ export const advancedFilterConfig = {
 		],
 		input: {
 			component: 'Search',
-			type: 'products', // For now. "coupons" autocompleter required
+			type: 'coupons',
+			getLabels: getRequestByIdString( NAMESPACE + 'coupons', coupon => ( {
+				id: coupon.id,
+				label: coupon.code,
+			} ) ),
 		},
 	},
 	customer: {

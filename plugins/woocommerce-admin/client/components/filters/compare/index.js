@@ -57,8 +57,7 @@ class CompareFilter extends Component {
 		return getNewPath( { [ param ]: undefined }, path, query );
 	}
 
-	updateLabels( data ) {
-		const selected = data.map( p => ( { id: p.id, label: p.name } ) );
+	updateLabels( selected ) {
 		this.setState( { selected } );
 	}
 
