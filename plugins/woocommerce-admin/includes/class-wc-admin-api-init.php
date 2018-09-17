@@ -5,7 +5,7 @@ class WC_Admin_Api_Init {
 
 	public function __construct() {
 		// Initialize classes.
-		add_action( 'plugins_loaded', array( $this, 'init_classes' ) );
+		add_action( 'plugins_loaded', array( $this, 'init_classes' ), 19 );
 		// Hook in data stores.
 		add_filter( 'woocommerce_data_stores', array( 'WC_Admin_Api_Init', 'add_data_stores' ) );
 		// Add wc-admin report tables to list of WooCommerce tables.
