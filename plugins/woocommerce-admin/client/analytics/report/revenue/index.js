@@ -27,7 +27,7 @@ import {
 } from '@woocommerce/components';
 import { downloadCSVFile, generateCSVDataFromTable, generateCSVFileName } from 'lib/csv';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
-import { getAdminLink, getNewPath, updateQueryString } from 'lib/nav-utils';
+import { getAdminLink, getNewPath, onQueryChange } from 'lib/nav-utils';
 import { getAllReportData, isReportDataEmpty } from 'store/reports/utils';
 import {
 	getCurrentDates,
@@ -43,7 +43,6 @@ export class RevenueReport extends Component {
 	constructor() {
 		super();
 		this.onDownload = this.onDownload.bind( this );
-		this.onQueryChange = this.onQueryChange.bind( this );
 	}
 
 	onDownload( headers, rows, query ) {
@@ -55,21 +54,6 @@ export class RevenueReport extends Component {
 				generateCSVDataFromTable( headers, rows )
 			);
 		};
-	}
-
-	/**
-	 * This function returns an event handler for the given `param`
-	 * @todo Move handling of this to a library?
-	 * @param {string} param The parameter in the querystring which should be updated (ex `page`, `per_page`)
-	 * @return {function} A callback which will update `param` to the passed value when called.
-	 */
-	onQueryChange( param ) {
-		switch ( param ) {
-			case 'sort':
-				return ( key, dir ) => updateQueryString( { orderby: key, order: dir } );
-			default:
-				return value => updateQueryString( { [ param ]: value } );
-		}
 	}
 
 	getHeadersContent() {
@@ -386,7 +370,7 @@ export class RevenueReport extends Component {
 				rowsPerPage={ rowsPerPage }
 				headers={ headers }
 				onClickDownload={ this.onDownload( headers, rows, tableQuery ) }
-				onQueryChange={ this.onQueryChange }
+				onQueryChange={ onQueryChange }
 				query={ tableQuery }
 				summary={ null }
 			/>

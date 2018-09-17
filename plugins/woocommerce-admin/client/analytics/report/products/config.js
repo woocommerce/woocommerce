@@ -8,32 +8,26 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import { stringifyQuery } from 'lib/nav-utils';
+import { getIdsFromQuery, stringifyQuery } from 'lib/nav-utils';
 import { NAMESPACE } from 'store/constants';
 
-export const getProductLabelsById = queryString => {
-	const idList = queryString
-		.split( ',' )
-		.map( id => parseInt( id, 10 ) )
-		.filter( Boolean );
+export function getProductLabelsById( queryString ) {
+	const idList = getIdsFromQuery( queryString );
 	const payload = stringifyQuery( {
 		include: idList.join( ',' ),
 		per_page: idList.length,
 	} );
-	return apiFetch( { path: NAMESPACE + 'products' + payload } );
-};
+	return apiFetch( { path: `${ NAMESPACE }products${ payload }` } );
+}
 
-export const getCategoryLabelsById = queryString => {
-	const idList = queryString
-		.split( ',' )
-		.map( id => parseInt( id, 10 ) )
-		.filter( Boolean );
+export function getCategoryLabelsById( queryString ) {
+	const idList = getIdsFromQuery( queryString );
 	const payload = stringifyQuery( {
 		include: idList.join( ',' ),
 		per_page: idList.length,
 	} );
-	return apiFetch( { path: NAMESPACE + 'products/categories' + payload } );
-};
+	return apiFetch( { path: `${ NAMESPACE }products/categories${ payload }` } );
+}
 
 export const filters = [
 	{ label: __( 'All Products', 'wc-admin' ), value: 'all' },
