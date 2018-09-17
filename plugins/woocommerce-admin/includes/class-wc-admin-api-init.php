@@ -13,8 +13,8 @@ class WC_Admin_Api_Init {
 		// REST API extensions init.
 		add_action( 'rest_api_init', array( $this, 'rest_api_init' ) );
 		// Initialize report classes.
-		add_action( 'plugins_loaded', array( 'WC_Admin_Api_Init', 'orders_data_store_init' ), 20 );
-		add_action( 'plugins_loaded', array( 'WC_Admin_Api_Init', 'order_product_lookup_store_init' ), 20 );
+		add_action( 'woocommerce_after_register_post_type', array( 'WC_Admin_Api_Init', 'orders_data_store_init' ), 20 );
+		add_action( 'woocommerce_after_register_post_type', array( 'WC_Admin_Api_Init', 'order_product_lookup_store_init' ), 20 );
 
 		// Create tables.
 		$this->create_db_tables();
