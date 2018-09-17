@@ -1373,8 +1373,8 @@ class WC_Cart extends WC_Legacy_Cart {
 			}
 		}
 
-		// If we're on the cart page, the user has not calculated shipping, and there is no calculator available, hide the area.
-		if ( is_cart() && ! $this->get_customer()->has_calculated_shipping() && 'no' === get_option( 'woocommerce_enable_shipping_calc' ) ) {
+		// If we're on the cart page, the user has not calculated shipping, hide the area.
+		if ( is_cart() && ! $this->get_customer()->has_calculated_shipping() ) {
 			return false;
 		}
 
