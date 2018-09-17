@@ -91,7 +91,7 @@ class WC_Admin_Api_Init {
 			set_transient( 'wc_update_350_all_orders', $orders, DAY_IN_SECONDS );
 		}
 
-		// Process orders untill close to running out of memory timeouts on large sites then requeue.
+		// Process orders until close to running out of memory timeouts on large sites then requeue.
 		foreach ( $orders as $order_id ) {
 			$order = wc_get_order( $order_id );
 			if ( ! $order ) {
@@ -99,7 +99,7 @@ class WC_Admin_Api_Init {
 			}
 			foreach ( $order->get_items() as $order_item ) {
 				$wpdb->replace(
-					$wpdb->prefix . 'wc_order_product_lookup',
+					$wpdb->prefix . 'wc_admin_order_product_lookup',
 					array(
 						'order_item_id'         => $order_item->get_id(),
 						'order_id'              => $order->get_id(),
