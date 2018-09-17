@@ -2,9 +2,7 @@
 /**
  * Class for time interval handling for reports
  *
- * @package  WooCommerce/Classes
- * @version  3.5.0
- * @since    3.5.0
+ * @package  WooCommerce Admin/Classes
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -66,7 +64,6 @@ class WC_Admin_Reports_Interval {
 	 * @return int|null
 	 */
 	public static function quarter( $datetime ) {
-		// TODO: is there a smarter way? Is floor((m - 1)/3) + 1 better?
 		switch ( (int) $datetime->format( 'm' ) ) {
 			case 1:
 			case 2:

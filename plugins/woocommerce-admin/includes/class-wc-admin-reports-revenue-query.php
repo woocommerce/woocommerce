@@ -8,22 +8,19 @@
  *          'after'  => '2018-07-05 00:00:00',
  *          'interval' => 'week',
  *         );
- * $report = new WC_Reports_Revenue_Query( $args );
+ * $report = new WC_Admin_Reports_Revenue_Query( $args );
  * $mydata = $report->get_data();
  *
- * @package  WooCommerce/Classes
- * @version  3.5.0
- * @since    3.5.0
+ * @package  WooCommerce Admin/Classes
  */
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * WC_Reports_Revenue_Query
+ * WC_Admin_Reports_Revenue_Query
  *
- * @version  3.5.0
  */
-class WC_Reports_Revenue_Query extends WC_Reports_Query {
+class WC_Admin_Reports_Revenue_Query extends WC_Admin_Reports_Query {
 
 	const REPORT_NAME = 'report-revenue-stats';
 

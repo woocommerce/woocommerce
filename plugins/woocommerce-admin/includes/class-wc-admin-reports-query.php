@@ -2,19 +2,16 @@
 /**
  * Class for parameter-based Reports querying
  *
- * @package  WooCommerce/Classes
- * @version  3.5.0
- * @since    3.5.0
+ * @package  WooCommerce Admin/Classes
  */
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * WC_Reports_Query
+ * WC_Admin_Reports_Query
  *
- * @version  3.5.0
  */
-abstract class WC_Reports_Query extends WC_Object_Query {
+abstract class WC_Admin_Reports_Query extends WC_Object_Query {
 
 	/**
 	 * Get report data matching the current query vars.

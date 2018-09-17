@@ -11,22 +11,20 @@
  *          'coupons'      => array(138),
  *          'order_status' => array('completed'),
  *         );
- * $report = new WC_Reports_Orders_Stats_Query( $args );
+ * $report = new WC_Admin_Reports_Orders_Stats_Query( $args );
  * $mydata = $report->get_data();
  *
- * @package  WooCommerce/Classes
- * @version  3.5.0
- * @since    3.5.0
+ * @package  WooCommerce Admin/Classes
+
  */
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * WC_Reports_Orders_Stats_Query
+ * WC_Admin_Reports_Orders_Stats_Query
  *
- * @version  3.5.0
  */
-class WC_Reports_Orders_Stats_Query extends WC_Reports_Query {
+class WC_Admin_Reports_Orders_Stats_Query extends WC_Admin_Reports_Query {
 
 	const REPORT_NAME = 'report-orders-stats';
 

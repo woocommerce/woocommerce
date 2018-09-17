@@ -10,12 +10,11 @@
  *          'categories'   => array(15, 18),
  *          'products'     => array(1,2,3)
  *         );
- * $report = new WC_Reports_Products_Query( $args );
+ * $report = new WC_Admin_Reports_Products_Query( $args );
  * $mydata = $report->get_data();
  *
- * @package  WooCommerce/Classes
- * @version  3.5.0
- * @since    3.5.0
+ * @package  WooCommerce Admin/Classes
+
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -23,9 +22,8 @@ defined( 'ABSPATH' ) || exit;
 /**
  * WC_Reports_Products_Query
  *
- * @version  3.5.0
  */
-class WC_Reports_Products_Query extends WC_Reports_Query {
+class WC_Admin_Reports_Products_Query extends WC_Admin_Reports_Query {
 
 	const REPORT_NAME = 'report-products';
 

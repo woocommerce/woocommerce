@@ -14,8 +14,6 @@
  * $mydata = $report->get_data();
  *
  * @package  WooCommerce Admin/Classes
- * @version  3.5.0
- * @since    3.5.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -23,7 +21,6 @@ defined( 'ABSPATH' ) || exit;
 /**
  * WC_Admin_Reports_Products_Query
  *
- * @version  3.5.0
  */
 class WC_Admin_Reports_Products_Stats_Query extends WC_Admin_Reports_Query {
 
