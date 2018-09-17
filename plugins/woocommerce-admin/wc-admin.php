@@ -41,7 +41,7 @@ function wc_admin_plugins_loaded() {
 	}
 
 	// Initialize the WC API extensions.
-	require_once dirname( __FILE__ ) . 'includes/class-wc-admin-api-init.php';
+	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-api-init.php';
 
 	// Some common utilities
 	require_once dirname( __FILE__ ) . '/lib/common.php';
