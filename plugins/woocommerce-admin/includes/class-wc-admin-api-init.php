@@ -22,39 +22,39 @@ class WC_Admin_Api_Init {
 
 	public function init_classes() {
 		// Interfaces.
-		require_once( dirname( __FILE__ ) . '/interfaces/class-wc-admin-reports-data-store-interface.php' );
+		require_once dirname( __FILE__ ) . '/interfaces/class-wc-admin-reports-data-store-interface.php';
 
 		// Query classes for reports.
-		require_once( dirname( __FILE__ ) . '/class-wc-admin-reports-revenue-query.php' );
-		require_once( dirname( __FILE__ ) . '/class-wc-admin-reports-orders-stats-query.php' );
-		require_once( dirname( __FILE__ ) . '/class-wc-admin-reports-products-query.php' );
-		require_once( dirname( __FILE__ ) . '/class-wc-admin-reports-products-stats-query.php' );
-		require_once( dirname( __FILE__ ) . '/class-wc-admin-reports-categories-query.php' );
+		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-revenue-query.php';
+		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-orders-stats-query.php';
+		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-products-query.php';
+		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-products-stats-query.php';
+		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-categories-query.php';
 
 		// Reports data stores.
-		require_once( dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-data-store.php' );
-		require_once( dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-orders-data-store.php' );
-		require_once( dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-products-data-store.php' );
-		require_once( dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-products-stats-data-store.php' );
-		require_once( dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-categories-data-store.php' );
+		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-data-store.php';
+		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-orders-data-store.php';
+		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-products-data-store.php';
+		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-products-stats-data-store.php';
+		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-categories-data-store.php';
 	}
 
 	public function rest_api_init() {
-		require_once( dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-controller.php' );
-		require_once( dirname( __FILE__ ) . '/api/class-wc-admin-rest-system-status-tools-controller.php' );
-		require_once( dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-categories-controller.php' );
-		require_once( dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-coupons-controller.php' );
-		require_once( dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-coupons-stats-controller.php' );
-		require_once( dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-customers-controller.php' );
-		require_once( dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-downloads-controller.php' );
-		require_once( dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-downloads-files-controller.php' );
-		require_once( dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-downloads-stats-controller.php' );
-		require_once( dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-orders-stats-controller.php' );
-		require_once( dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-products-controller.php' );
-		require_once( dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-products-stats-controller.php' );
-		require_once( dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-revenue-stats-controller.php' );
-		require_once( dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-taxes-controller.php' );
-		require_once( dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-taxes-stats-controller.php' );
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-system-status-tools-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-categories-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-coupons-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-coupons-stats-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-customers-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-downloads-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-downloads-files-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-downloads-stats-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-orders-stats-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-products-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-products-stats-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-revenue-stats-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-taxes-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-taxes-stats-controller.php';
 
 		$controllers = array(
 			'WC_Admin_REST_Reports_Controller',
@@ -189,7 +189,7 @@ class WC_Admin_Api_Init {
 	}
 
 	protected function create_db_tables() {
-		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
 		dbDelta( self::get_schema() );
 	}
