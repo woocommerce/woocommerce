@@ -329,7 +329,7 @@ export const drawAxis = ( node, params ) => {
 				.tickValues( ticks )
 				.tickFormat( ( d, i ) => {
 					const monthDate = d instanceof Date ? d : new Date( d );
-					let prevMonth = i !== 0 ? params.uniqueDates[ i - 1 ] : params.uniqueDates[ i ];
+					let prevMonth = i !== 0 ? ticks[ i - 1 ] : ticks[ i ];
 					prevMonth = prevMonth instanceof Date ? prevMonth : new Date( prevMonth );
 					return monthDate.getDate() === 1 ||
 						i === 0 ||
