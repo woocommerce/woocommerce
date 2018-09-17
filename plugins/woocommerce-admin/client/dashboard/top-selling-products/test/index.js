@@ -43,7 +43,7 @@ describe( 'TopSellingProducts', () => {
 		const table = topSellingProducts.find( 'Table' );
 		const firstRow = table.props().rows[ 0 ];
 
-		expect( firstRow[ 0 ].value ).toBe( `Product ${ mockData[ 0 ].product_id }` );
+		expect( firstRow[ 0 ].value ).toBe( mockData[ 0 ].name );
 		expect( firstRow[ 1 ].display ).toBe( numberFormat( mockData[ 0 ].items_sold ) );
 		expect( firstRow[ 1 ].value ).toBe( mockData[ 0 ].items_sold );
 		expect( firstRow[ 2 ].display ).toBe( numberFormat( mockData[ 0 ].orders_count ) );
@@ -73,7 +73,7 @@ describe( 'TopSellingProducts', () => {
 		const topSellingProducts = topSellingProductsWrapper.root.findByType( TopSellingProducts );
 
 		const endpoint = '/wc/v3/reports/products';
-		const query = { orderby: 'items_sold', per_page: 5 };
+		const query = { orderby: 'items_sold', per_page: 5, extended_product_info: 1 };
 
 		expect( getReportStatsMock.mock.calls[ 0 ][ 1 ] ).toBe( endpoint );
 		expect( getReportStatsMock.mock.calls[ 0 ][ 2 ] ).toEqual( query );

@@ -79,6 +79,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	grid-column-start: 2;
 }
 
 .woocommerce-calendar__input {
@@ -93,6 +94,14 @@
 		path {
 			fill: $core-grey-dark-300;
 		}
+	}
+
+	&:first-child {
+		grid-column-start: 1;
+	}
+
+	&:last-child {
+		grid-column-start: 3;
 	}
 
 	&.is-empty {

@@ -338,18 +338,16 @@ export class RevenueReport extends Component {
 		} );
 
 		return (
-			<Card title="">
-				<Chart
-					data={ chartData }
-					title={ selectedChart.label }
-					interval={ currentInterval }
-					allowedIntervals={ allowedIntervals }
-					tooltipFormat={ formats.tooltipFormat }
-					xFormat={ formats.xFormat }
-					x2Format={ formats.x2Format }
-					dateParser={ '%Y-%m-%dT%H:%M:%S' }
-				/>
-			</Card>
+			<Chart
+				data={ chartData }
+				title={ selectedChart.label }
+				interval={ currentInterval }
+				allowedIntervals={ allowedIntervals }
+				tooltipFormat={ formats.tooltipFormat }
+				xFormat={ formats.xFormat }
+				x2Format={ formats.x2Format }
+				dateParser={ '%Y-%m-%dT%H:%M:%S' }
+			/>
 		);
 	}
 

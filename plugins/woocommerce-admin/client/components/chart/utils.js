@@ -13,12 +13,29 @@ import {
 	scaleLinear as d3ScaleLinear,
 	scaleTime as d3ScaleTime,
 } from 'd3-scale';
-import { mouse as d3Mouse, select as d3Select } from 'd3-selection';
+import { event as d3Event, mouse as d3Mouse, select as d3Select } from 'd3-selection';
 import { line as d3Line } from 'd3-shape';
 /**
  * Internal dependencies
  */
 import { formatCurrency } from 'lib/currency';
+
+/**
+ * Describes `smallestFactor`
+ * @param {number} inputNum - any double or integer
+ * @returns {integer} smallest factor of num
+ */
+export const getFactors = inputNum => {
+	const num_factors = [];
+	for ( let i = 1; i <= Math.floor( Math.sqrt( inputNum ) ); i += 1 ) {
+		if ( inputNum % i === 0 ) {
+			num_factors.push( i );
+			inputNum / i !== i && num_factors.push( inputNum / i );
+		}
+	}
+	num_factors.sort( ( x, y ) => x - y ); // numeric sort
+	return num_factors;
+};
 
 /**
  * Describes `getUniqueKeys`
@@ -188,6 +205,74 @@ export const getLine = ( xLineScale, yScale ) =>
 		.y( d => yScale( d.value ) );
 
 /**
+ * Describes getXTicks
+ * @param {array} uniqueDates - all the unique dates from the input data for the chart
+ * @param {integer} width - calculated page width
+ * @param {string} layout - standard, comparison or compact chart types
+ * @returns {integer} number of x-axis ticks based on width and chart layout
+ */
+export const getXTicks = ( uniqueDates, width, layout ) => {
+	// caluclate the maximum number of ticks allowed in the x-axis based on the width
+	// and layout of the chart
+	let ticks = 16;
+	if ( width < 783 ) {
+		ticks = 7;
+	} else if ( width >= 783 && width < 1129 ) {
+		ticks = 12;
+	} else if ( width >= 1130 && width < 1365 ) {
+		if ( layout === 'standard' ) {
+			ticks = 16;
+		} else if ( layout === 'comparison' ) {
+			ticks = 12;
+		} else if ( layout === 'compact' ) {
+			ticks = 7;
+		}
+	} else if ( width >= 1365 ) {
+		if ( layout === 'standard' ) {
+			ticks = 31;
+		} else if ( layout === 'comparison' ) {
+			ticks = 16;
+		} else if ( layout === 'compact' ) {
+			ticks = 12;
+		}
+	}
+	if ( uniqueDates.length <= ticks ) {
+		return uniqueDates;
+	}
+	let factors = [];
+	let i = 0;
+	//  first we get all the factors of the length of the uniqieDates array
+	// if the number is a prime number or near prime (with 3 factors) then we
+	// step down by 1 integer and try again
+	while ( factors.length <= 3 ) {
+		factors = getFactors( uniqueDates.length - ( 1 + i ) );
+		i += 1;
+	}
+	let newTicks = [];
+	let factorIndex = 0;
+	// newTicks is the first tick plus the smallest factor (initiallY) etc.
+	// however, if we still end up with too many ticks we look at the next factor
+	// and try again unttil we have fewer ticks than the max
+	while ( newTicks.length > ticks || newTicks.length === 0 ) {
+		if ( newTicks.length > ticks ) {
+			factorIndex += 1;
+			newTicks = [];
+		}
+		for ( let idx = 0; idx < uniqueDates.length; idx = idx + factors[ factorIndex ] ) {
+			newTicks.push( uniqueDates[ idx ] );
+		}
+	}
+	// if, for some reason, the first or last date is missing from the newTicks array, add it back in
+	if ( newTicks[ 0 ] !== uniqueDates[ 0 ] ) {
+		newTicks.unshift( uniqueDates[ 0 ] );
+	}
+	if ( newTicks[ newTicks.length - 1 ] !== uniqueDates[ uniqueDates.length - 1 ] ) {
+		newTicks.push( uniqueDates[ uniqueDates.length - 1 ] );
+	}
+	return newTicks;
+};
+
+/**
  * Describes getDateSpaces
  * @param {array} uniqueDates - from `getUniqueDates`
  * @param {number} width - calculated width of the charting space
@@ -223,13 +308,15 @@ export const drawAxis = ( node, params ) => {
 		yGrids.push( i / 3 * params.yMax );
 	}
 
+	const ticks = params.xTicks.map( d => ( params.type === 'line' ? new Date( d ) : d ) );
+
 	node
 		.append( 'g' )
 		.attr( 'class', 'axis' )
 		.attr( 'transform', `translate(0,${ params.height })` )
 		.call(
 			d3AxisBottom( xScale )
-				.tickValues( params.uniqueDates.map( d => ( params.type === 'line' ? new Date( d ) : d ) ) )
+				.tickValues( ticks )
 				.tickFormat( d => params.xFormat( d instanceof Date ? d : new Date( d ) ) )
 		);
 
@@ -239,7 +326,7 @@ export const drawAxis = ( node, params ) => {
 		.attr( 'transform', `translate(3, ${ params.height + 20 })` )
 		.call(
 			d3AxisBottom( xScale )
-				.tickValues( params.uniqueDates.map( d => ( params.type === 'line' ? new Date( d ) : d ) ) )
+				.tickValues( ticks )
 				.tickFormat( ( d, i ) => {
 					const monthDate = d instanceof Date ? d : new Date( d );
 					let prevMonth = i !== 0 ? params.uniqueDates[ i - 1 ] : params.uniqueDates[ i ];
@@ -263,7 +350,7 @@ export const drawAxis = ( node, params ) => {
 		.attr( 'transform', `translate(0, ${ params.height })` )
 		.call(
 			d3AxisBottom( xScale )
-				.tickValues( params.uniqueDates.map( d => ( params.type === 'line' ? new Date( d ) : d ) ) )
+				.tickValues( ticks )
 				.tickSize( 5 )
 				.tickFormat( '' )
 		);
@@ -303,9 +390,9 @@ export const drawAxis = ( node, params ) => {
 		.remove();
 };
 
-const showTooltip = ( node, params, d ) => {
+const showTooltip = ( node, params, d, position ) => {
 	const chartCoords = node.node().getBoundingClientRect();
-	let [ xPosition, yPosition ] = d3Mouse( node.node() );
+	let [ xPosition, yPosition ] = position ? position : d3Mouse( node.node() );
 	xPosition = xPosition > chartCoords.width - 340 ? xPosition - 340 : xPosition + 100;
 	yPosition = yPosition > chartCoords.height - 150 ? yPosition - 200 : yPosition + 20;
 	const keys = params.orderedKeys.filter( row => row.visible ).map(
@@ -333,25 +420,25 @@ const showTooltip = ( node, params, d ) => {
 		` );
 };
 
-const handleMouseOverBarChart = ( d, i, nodes, node, data, params ) => {
+const handleMouseOverBarChart = ( d, i, nodes, node, data, params, position ) => {
 	d3Select( nodes[ i ].parentNode )
 		.select( '.barfocus' )
 		.attr( 'opacity', '0.1' );
-	showTooltip( node, params, d );
+	showTooltip( node, params, d, position );
 };
 
 const handleMouseOutBarChart = ( d, i, nodes, params ) => {
 	d3Select( nodes[ i ].parentNode )
 		.select( '.barfocus' )
 		.attr( 'opacity', '0' );
-	params.tooltip.style( 'display', 'flex' );
+	params.tooltip.style( 'display', 'none' );
 };
 
-const handleMouseOverLineChart = ( d, i, nodes, node, data, params ) => {
+const handleMouseOverLineChart = ( d, i, nodes, node, data, params, position ) => {
 	d3Select( nodes[ i ].parentNode )
 		.select( '.focus-grid' )
 		.attr( 'opacity', '1' );
-	showTooltip( node, params, data.find( e => e.date === d.date ) );
+	showTooltip( node, params, data.find( e => e.date === d.date ), position );
 };
 
 const handleMouseOutLineChart = ( d, i, nodes, params ) => {
@@ -359,6 +446,12 @@ const handleMouseOutLineChart = ( d, i, nodes, params ) => {
 		.select( '.focus-grid' )
 		.attr( 'opacity', '0' );
 	params.tooltip.style( 'display', 'none' );
+};
+
+const calculatePositionInChart = ( element, chart ) => {
+	const elementCoords = element.getBoundingClientRect();
+	const chartCoords = chart.getBoundingClientRect();
+	return [ elementCoords.x - chartCoords.x, elementCoords.y - chartCoords.y ];
 };
 
 export const drawLines = ( node, data, params ) => {
@@ -384,25 +477,26 @@ export const drawLines = ( node, data, params ) => {
 		} )
 		.attr( 'd', d => params.line( d.values ) );
 
-	series
-		.selectAll( 'circle' )
-		.data( ( d, i ) => d.values.map( row => ( { ...row, i, visible: d.visible, key: d.key } ) ) )
-		.enter()
-		.append( 'circle' )
-		.attr( 'r', 6 )
-		.attr( 'fill', d => getColor( d.key, params ) )
-		.attr( 'stroke', '#fff' )
-		.attr( 'stroke-width', 3 )
-		.style( 'opacity', d => {
-			const opacity = d.focus ? 1 : 0.1;
-			return d.visible ? opacity : 0;
-		} )
-		.attr( 'cx', d => params.xLineScale( new Date( d.date ) ) )
-		.attr( 'cy', d => params.yScale( d.value ) )
-		.on( 'mouseover', ( d, i, nodes ) =>
-			handleMouseOverLineChart( d, i, nodes, node, data, params )
-		)
-		.on( 'mouseout', ( d, i, nodes ) => handleMouseOutLineChart( d, i, nodes, params ) );
+	params.uniqueDates.length < 50 &&
+		series
+			.selectAll( 'circle' )
+			.data( ( d, i ) => d.values.map( row => ( { ...row, i, visible: d.visible, key: d.key } ) ) )
+			.enter()
+			.append( 'circle' )
+			.attr( 'r', 6 )
+			.attr( 'fill', d => getColor( d.key, params ) )
+			.attr( 'stroke', '#fff' )
+			.attr( 'stroke-width', 3 )
+			.style( 'opacity', d => {
+				const opacity = d.focus ? 1 : 0.1;
+				return d.visible ? opacity : 0;
+			} )
+			.attr( 'cx', d => params.xLineScale( new Date( d.date ) ) )
+			.attr( 'cy', d => params.yScale( d.value ) )
+			.on( 'mouseover', ( d, i, nodes ) =>
+				handleMouseOverLineChart( d, i, nodes, node, data, params )
+			)
+			.on( 'mouseout', ( d, i, nodes ) => handleMouseOutLineChart( d, i, nodes, params ) );
 
 	const focus = node
 		.append( 'g' )
@@ -430,10 +524,15 @@ export const drawLines = ( node, data, params ) => {
 		.attr( 'width', d => d.width )
 		.attr( 'height', params.height )
 		.attr( 'opacity', 0 )
+		.attr( 'tabindex', '0' )
 		.on( 'mouseover', ( d, i, nodes ) =>
 			handleMouseOverLineChart( d, i, nodes, node, data, params )
 		)
-		.on( 'mouseout', ( d, i, nodes ) => handleMouseOutLineChart( d, i, nodes, params ) );
+		.on( 'focus', ( d, i, nodes ) => {
+			const position = calculatePositionInChart( d3Event.target, node.node() );
+			handleMouseOverLineChart( d, i, nodes, node, data, params, position );
+		} )
+		.on( 'mouseout blur', ( d, i, nodes ) => handleMouseOutLineChart( d, i, nodes, params ) );
 };
 
 export const drawBars = ( node, data, params ) => {
@@ -491,8 +590,13 @@ export const drawBars = ( node, data, params ) => {
 		.attr( 'width', params.xGroupScale.range()[ 1 ] )
 		.attr( 'height', params.height )
 		.attr( 'opacity', '0' )
+		.attr( 'tabindex', '0' )
 		.on( 'mouseover', ( d, i, nodes ) =>
 			handleMouseOverBarChart( d, i, nodes, node, data, params )
 		)
-		.on( 'mouseout', ( d, i, nodes ) => handleMouseOutBarChart( d, i, nodes, params ) );
+		.on( 'focus', ( d, i, nodes ) => {
+			const position = calculatePositionInChart( d3Event.target, node.node() );
+			handleMouseOverBarChart( d, i, nodes, node, data, params, position );
+		} )
+		.on( 'mouseout blur', ( d, i, nodes ) => handleMouseOutBarChart( d, i, nodes, params ) );
 };
