@@ -11,7 +11,7 @@
   },
   "require-dev": {
     "squizlabs/php_codesniffer": "*",
-    "wp-coding-standards/wpcs": "^0.14",
+    "wp-coding-standards/wpcs": "^1.1",
     "phpunit/phpunit": "6.*",
     "woocommerce/woocommerce-git-hooks": "*",
     "woocommerce/woocommerce-sniffs": "*",
