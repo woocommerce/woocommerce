@@ -4,8 +4,7 @@
  *
  * Handles requests to the /reports/products/stats endpoint.
  *
- * @package WooCommerce/API
- * @since   3.5.0
+ * @package WooCommerce Admin/API
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -16,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
  * @package WooCommerce/API
  * @extends WC_REST_Reports_Controller
  */
-class WC_REST_Reports_Products_Stats_Controller extends WC_REST_Reports_Controller {
+class WC_Admin_REST_Reports_Products_Stats_Controller extends WC_REST_Reports_Controller {
 
 	/**
 	 * Endpoint namespace.

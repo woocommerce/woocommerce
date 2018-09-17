@@ -4,8 +4,7 @@
  *
  * Handles requests to the /system_status/tools/* endpoints.
  *
- * @package WooCommerce/API
- * @since   3.0.0
+ * @package WooCommerce Admin/API
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -13,10 +12,10 @@ defined( 'ABSPATH' ) || exit;
 /**
  * System status tools controller.
  *
- * @package WooCommerce/API
- * @extends WC_REST_System_Status_Tools_V2_Controller
+ * @package WooCommerce Admin/API
+ * @extends WC_REST_System_Status_Tools_Controller
  */
-class WC_REST_System_Status_Tools_Controller extends WC_REST_System_Status_Tools_V2_Controller {
+class WC_Admin_REST_System_Status_Tools_Controller extends WC_REST_System_Status_Tools_Controller {
 
 	/**
 	 * Endpoint namespace.
@@ -56,7 +55,7 @@ class WC_REST_System_Status_Tools_Controller extends WC_REST_System_Status_Tools
 
 		switch ( $tool ) {
 			case 'rebuild_stats':
-				WC_Reports_Orders_Data_Store::queue_order_stats_repopulate_database();
+				WC_Admin_Reports_Orders_Data_Store::queue_order_stats_repopulate_database();
 				$message = __( 'Rebuilding reports data in the background . . .', 'woocommerce' );
 				break;
 			default:

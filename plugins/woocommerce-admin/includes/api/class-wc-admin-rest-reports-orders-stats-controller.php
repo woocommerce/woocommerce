@@ -4,8 +4,7 @@
  *
  * Handles requests to the /reports/orders/stats endpoint.
  *
- * @package WooCommerce/API
- * @since   3.5.0
+ * @package WooCommerce Admin/API
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -16,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
  * @package WooCommerce/API
  * @extends WC_REST_Reports_Controller
  */
-class WC_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Controller {
+class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Controller {
 
 	/**
 	 * Endpoint namespace.
@@ -63,7 +62,7 @@ class WC_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Controller
 	 */
 	public function get_items( $request ) {
 		$query_args   = $this->prepare_reports_query( $request );
-		$orders_query = new WC_Reports_Orders_Stats_Query( $query_args );
+		$orders_query = new WC_Admin_Reports_Orders_Stats_Query( $query_args );
 		$report_data  = $orders_query->get_data();
 
 		$out_data = array(
