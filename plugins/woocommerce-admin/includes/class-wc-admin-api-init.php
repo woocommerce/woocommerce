@@ -23,6 +23,9 @@ class WC_Admin_Api_Init {
 	public function init_classes() {
 		// Interfaces.
 		require_once dirname( __FILE__ ) . '/interfaces/class-wc-admin-reports-data-store-interface.php';
+		require_once dirname( __FILE__ ) . '/interfaces/class-wc-reports-data-store-interface.php';
+		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-query.php';
+
 
 		// Query classes for reports.
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-revenue-query.php';
