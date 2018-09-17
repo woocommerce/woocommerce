@@ -122,7 +122,7 @@ class WC_Gateway_Paypal_Request {
 				'page_style'    => $this->gateway->get_option( 'page_style' ),
 				'image_url'     => esc_url_raw( $this->gateway->get_option( 'image_url' ) ),
 				'paymentaction' => $this->gateway->get_option( 'paymentaction' ),
-				'bn'            => 'WooThemes_Cart',
+				'bn'            => 'WooCommerce_Cart',
 				'invoice'       => $this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), 127 ),
 				'custom'        => wp_json_encode(
 					array(
