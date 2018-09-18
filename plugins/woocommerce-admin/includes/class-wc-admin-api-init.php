@@ -204,6 +204,7 @@ class WC_Admin_Api_Init {
 				"{$wpdb->prefix}wc_admin_order_stats",
 				"{$wpdb->prefix}wc_admin_order_product_lookup",
 				"{$wpdb->prefix}wc_order_tax_lookup",
+				"{$wpdb->prefix}wc_order_coupon_lookup",
 			)
 		);
 	}
@@ -253,6 +254,15 @@ class WC_Admin_Api_Init {
 		  	KEY order_id (order_id),
 		  	KEY tax_rate_id (tax_rate_id),
 		  	KEY date_created (date_created)
+		  ) $collate;
+		  CREATE TABLE {$wpdb->prefix}wc_order_coupon_lookup (
+			order_id BIGINT UNSIGNED NOT NULL,
+			coupon_id BIGINT UNSIGNED NOT NULL,
+			date_created timestamp DEFAULT '0000-00-00 00:00:00' NOT NULL,
+			coupon_gross_discount double DEFAULT 0 NOT NULL,
+			KEY order_id (order_id),
+			KEY coupon_id (coupon_id),
+			KEY date_created (date_created)
 		  ) $collate;";
 
 		return $tables;
