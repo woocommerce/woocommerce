@@ -201,6 +201,7 @@ class WC_Admin_Api_Init {
 				// TODO: will this work on multisite?
 				"{$wpdb->prefix}wc_admin_order_stats",
 				"{$wpdb->prefix}wc_admin_order_product_lookup",
+				"{$wpdb->prefix}wc_order_tax_lookup",
 			)
 		);
 	}
@@ -239,6 +240,17 @@ class WC_Admin_Api_Init {
 			KEY product_id (product_id),
 			KEY customer_id (customer_id),
 			KEY date_created (date_created)
+		  ) $collate;
+		  CREATE TABLE {$wpdb->prefix}wc_order_tax_lookup (
+		  	order_id BIGINT UNSIGNED NOT NULL,
+		  	tax_rate_id BIGINT UNSIGNED NOT NULL,
+		  	date_created timestamp DEFAULT '0000-00-00 00:00:00' NOT NULL,
+		  	shipping_tax double DEFAULT 0 NOT NULL,
+		  	order_tax double DEFAULT 0 NOT NULL,
+		  	total_tax double DEFAULT 0 NOT NULL,
+		  	KEY order_id (order_id),
+		  	KEY tax_rate_id (tax_rate_id),
+		  	KEY date_created (date_created)
 		  ) $collate;";
 
 		return $tables;
