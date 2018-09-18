@@ -110,3 +110,26 @@ A boolean used to show a highlight style on this number.
 
 A string or number value to display - a string is allowed so we can accept currency formatting.
 
+`SummaryListPlaceholder` (component)
+====================================
+
+`SummaryListPlaceholder` behaves like `SummaryList` but displays placeholder summary items instead of data.
+This can be used while loading data.
+
+Props
+-----
+
+### `numberOfItems`
+
+- **Required**
+- Type: Number
+- Default: null
+
+An integer with the number of summary items to display.
+
+### `numberOfRows`
+
+- Type: undefined
+- Default: `5`
+
+

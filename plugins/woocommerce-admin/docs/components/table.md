@@ -11,6 +11,13 @@ This includes filtering and comparison functionality for report pages.
 Props
 -----
 
+### `compareBy`
+
+- Type: String
+- Default: null
+
+The string to use as a query parameter when comparing row items.
+
 ### `headers`
 
 - Type: Array
@@ -22,6 +29,14 @@ Props
 - Default: null
 
 An array of column headers (see `Table` props).
+
+### `ids`
+
+- Type: Array
+Number
+- Default: null
+
+A list of IDs, matching to the row list so that ids[ 0 ] contains the object ID for the object displayed in row[ 0 ].
 
 ### `onQueryChange`
 
@@ -61,6 +76,14 @@ Array
 
 Which column should be the row header, defaults to the first item (`0`) (see `Table` props).
 
+### `rowsPerPage`
+
+- **Required**
+- Type: Number
+- Default: null
+
+The total number of rows to display per page.
+
 ### `summary`
 
 - Type: Array
@@ -79,10 +102,18 @@ Optional, can be left off to show no summary.
 
 The title used in the card header, also used as the caption for the content in this table.
 
+### `totalRows`
+
+- **Required**
+- Type: Number
+- Default: null
+
+The total number of rows (across all pages).
+
 `TablePlaceholder` (component)
 ==============================
 
-
+`TablePlaceholder` behaves like `Table` but displays placeholder boxes instead of data. This can be used while loading.
 
 Props
 -----
@@ -93,6 +124,7 @@ Props
 - Type: String
 - Default: null
 
+A label for the content in this table.
 
 ### `headers`
 
@@ -104,12 +136,14 @@ Props
   - required: Boolean
 - Default: null
 
+An array of column headers (see `Table` props).
 
 ### `numberOfRows`
 
 - Type: Number
 - Default: `5`
 
+An integer with the number of rows to display.
 
 `TableSummary` (component)
 ==========================
@@ -166,7 +200,7 @@ Additional CSS classes.
   - isNumeric: Boolean - Boolean, true if this column is a number value.
   - isSortable: Boolean - Boolean, true if this column is sortable.
   - key: String - The API parameter name for this column, passed to `orderby` when sorting via API.
-  - label: String - The display label for this column.
+  - label: ReactNode - The display label for this column.
   - required: Boolean - Boolean, true if this column should always display in the table (not shown in toggle-able list).
 - Default: `[]`
 

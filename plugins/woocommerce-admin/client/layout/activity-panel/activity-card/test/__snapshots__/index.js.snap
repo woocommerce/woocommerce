@@ -155,13 +155,13 @@ exports[`ActivityCard should render an action on a card 1`] = `
   <footer
     className="woocommerce-activity-card__actions"
   >
-    <[object Object]
+    <ForwardRef(Button)
       isDefault={true}
       key="0"
       onClick={[Function]}
     >
       Action
-    </[object Object]>
+    </ForwardRef(Button)>
   </footer>
 </section>
 `;
@@ -229,20 +229,20 @@ exports[`ActivityCard should render multiple actions on a card 1`] = `
   <footer
     className="woocommerce-activity-card__actions"
   >
-    <[object Object]
+    <ForwardRef(Button)
       isPrimary={true}
       key="0"
       onClick={[Function]}
     >
       Action 1
-    </[object Object]>
-    <[object Object]
+    </ForwardRef(Button)>
+    <ForwardRef(Button)
       isDefault={true}
       key="1"
       onClick={[Function]}
     >
       Action 2
-    </[object Object]>
+    </ForwardRef(Button)>
   </footer>
 </section>
 `;

@@ -17,8 +17,17 @@ Function called when selected results change, passed result list.
 ### `type`
 
 - **Required**
-- Type: One of: 'products', 'orders', 'customers'
+- Type: One of: 'products', 'product_cats', 'orders', 'customers'
 - Default: null
 
 The object type to be used in searching.
+
+### `selected`
+
+- Type: Array
+  - id: Number
+  - label: String
+- Default: `[]`
+
+An array of objects describing selected values.
 
