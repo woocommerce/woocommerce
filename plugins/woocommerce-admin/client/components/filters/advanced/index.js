@@ -5,7 +5,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { Component, Fragment, createRef } from '@wordpress/element';
 import { SelectControl, Button, Dropdown, IconButton } from '@wordpress/components';
-import { partial, findIndex, find, difference } from 'lodash';
+import { partial, findIndex, difference } from 'lodash';
 import PropTypes from 'prop-types';
 import Gridicon from 'gridicons';
 
@@ -29,11 +29,11 @@ const matches = [
  * Displays a configurable set of filters which can modify query parameters.
  */
 class AdvancedFilters extends Component {
-	constructor( props ) {
-		super( props );
+	constructor( { query, config } ) {
+		super( ...arguments );
 		this.state = {
-			match: matches[ 0 ],
-			activeFilters: getActiveFiltersFromQuery( props.query, props.config ),
+			match: query.match || 'all',
+			activeFilters: getActiveFiltersFromQuery( query, config ),
 		};
 
 		this.filterListRef = createRef();
@@ -47,10 +47,8 @@ class AdvancedFilters extends Component {
 		this.getUpdateHref = this.getUpdateHref.bind( this );
 	}
 
-	onMatchChange( value ) {
-		this.setState( {
-			match: find( matches, match => value === match.value ),
-		} );
+	onMatchChange( match ) {
+		this.setState( { match } );
 	}
 
 	onFilterChange( key, property, value ) {
@@ -80,7 +78,7 @@ class AdvancedFilters extends Component {
 				<SelectControl
 					className="woocommerce-filters-advanced__title-select"
 					options={ matches }
-					value={ match.value }
+					value={ match }
 					onChange={ this.onMatchChange }
 					aria-label={ __( 'Match any or all filters', 'wc-admin' ) }
 				/>
@@ -123,20 +121,22 @@ class AdvancedFilters extends Component {
 	clearFilters() {
 		this.setState( {
 			activeFilters: [],
+			match: 'all',
 		} );
 	}
 
-	getUpdateHref( activeFilters ) {
+	getUpdateHref( activeFilters, matchValue ) {
 		const { path, query, config } = this.props;
 		const updatedQuery = getQueryFromActiveFilters( activeFilters, query, config );
-		return getNewPath( updatedQuery, path, query );
+		const match = matchValue === 'all' ? undefined : matchValue;
+		return getNewPath( { ...updatedQuery, match }, path, query );
 	}
 
 	render() {
 		const { config } = this.props;
-		const { activeFilters } = this.state;
+		const { activeFilters, match } = this.state;
 		const availableFilterKeys = this.getAvailableFilterKeys();
-		const updateHref = this.getUpdateHref( activeFilters );
+		const updateHref = this.getUpdateHref( activeFilters, match );
 		const updateDisabled = window.location.hash && window.location.hash.substr( 1 ) === updateHref;
 		return (
 			<Card className="woocommerce-filters-advanced" title={ this.getTitle() }>
