@@ -9,22 +9,12 @@
 class WC_Tests_Reports_Orders extends WC_Unit_Test_Case {
 
 	/**
-	 * Delete everything in the order stats lookup table.
-	 */
-	protected function reset_stats_db() {
-		global $wpdb;
-		$wpdb->query( "DELETE FROM $wpdb->prefix" . WC_Reports_Orders_Data_Store::TABLE_NAME ); // @codingStandardsIgnoreLine.
-	}
-
-	/**
 	 * Test the calculations and querying works correctly for the base case of 1 order.
 	 *
 	 * @since 3.5.0
 	 */
 	public function test_populate_and_query() {
-				global $wpdb;
-
-		$this->reset_stats_db();
+		WC_Helper_Reports::reset_stats_dbs();
 
 		// Populate all of the data.
 		$product = new WC_Product_Simple();

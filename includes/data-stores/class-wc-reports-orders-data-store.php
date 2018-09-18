@@ -31,6 +31,32 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 	 */
 	const CRON_EVENT = 'wc_order_stats_update';
 
+	protected $column_types = array(
+		'orders_count'        => 'intval',
+		'num_items_sold'      => 'intval',
+		'gross_revenue'       => 'floatval',
+		'coupons'             => 'floatval',
+		'refunds'             => 'floatval',
+		'taxes'               => 'floatval',
+		'shipping'            => 'floatval',
+		'net_revenue'         => 'floatval',
+		'avg_items_per_order' => 'floatval',
+		'avg_order_value'     => 'floatval',
+	);
+
+	protected $report_columns = array(
+		'orders_count'        => 'COUNT(*) as orders_count',
+		'num_items_sold'      => 'SUM(num_items_sold) as num_items_sold',
+		'gross_revenue'       => 'SUM(gross_total) AS gross_revenue',
+		'coupons'             => 'SUM(coupon_total) AS coupons',
+		'refunds'             => 'SUM(refund_total) AS refunds',
+		'taxes'               => 'SUM(tax_total) AS taxes',
+		'shipping'            => 'SUM(shipping_total) AS shipping',
+		'net_revenue'         => 'SUM(net_total) AS net_revenue',
+		'avg_items_per_order' => 'AVG(num_items_sold) AS avg_items_per_order',
+		'avg_order_value'     => 'AVG(gross_total) AS avg_order_value',
+	);
+
 	/**
 	 * Background process to populate order stats.
 	 *
@@ -59,66 +85,6 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 	}
 
 	/**
-	 * Casts strings returned from the database to appropriate data types for output.
-	 *
-	 * @param array $array Associative array of values extracted from the database.
-	 * @return array|WP_Error
-	 */
-	protected function cast_numbers( $array ) {
-		$type_for      = array(
-			'orders_count'        => 'intval',
-			'num_items_sold'      => 'intval',
-			'gross_revenue'       => 'floatval',
-			'coupons'             => 'floatval',
-			'refunds'             => 'floatval',
-			'taxes'               => 'floatval',
-			'shipping'            => 'floatval',
-			'net_revenue'         => 'floatval',
-			'avg_items_per_order' => 'floatval',
-			'avg_order_value'     => 'floatval',
-		);
-		$retyped_array = array();
-		foreach ( $array as $key => $value ) {
-			if ( isset( $type_for[ $key ] ) ) {
-				$retyped_array[ $key ] = $type_for[ $key ]( $value );
-			} else {
-				$retyped_array[ $key ] = $value;
-			}
-		}
-		return $retyped_array;
-	}
-
-	/**
-	 * Returns an array of products belonging to given categories.
-	 *
-	 * @param array $categories List of categories IDs.
-	 * @return array|stdClass
-	 */
-	protected function get_products_by_cat_ids( $categories ) {
-		$product_categories = get_categories( array(
-			'hide_empty' => 0,
-			'taxonomy'   => 'product_cat',
-		) );
-		$cat_slugs          = array();
-		$categories         = array_flip( $categories );
-		foreach ( $product_categories as $product_cat ) {
-			if ( key_exists( $product_cat->cat_ID, $categories ) ) {
-				$cat_slugs[] = $product_cat->slug;
-			}
-		}
-		$args = array(
-			'category' => $cat_slugs,
-			'limit'    => -1,
-		);
-		return wc_get_products( $args );
-	}
-
-	protected function normalize_order_status( $status ) {
-		$status = trim( $status );
-		return 'wc-' . $status;
-	}
-
-	/**
 	 * Updates the totals and intervals database queries with parameters used for Orders report: categories, coupons and order status.
 	 *
 	 * @param array $query_args      Query arguments supplied by the user.
@@ -133,10 +99,10 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 		$from_clause  = '';
 
 		$orders_stats_table = $wpdb->prefix . self::TABLE_NAME;
-		if ( is_array( $query_args['categories'] ) && count( $query_args['categories'] ) > 0 ) {
-			$allowed_products     = $this->get_products_by_cat_ids( $query_args['categories'] );
-			$allowed_product_ids  = wp_list_pluck( $allowed_products, 'id' );
-			$allowed_products_str = implode( ',', $allowed_product_ids );
+		$allowed_products   = $this->get_allowed_products( $query_args );
+
+		if ( count( $allowed_products ) > 0 ) {
+			$allowed_products_str = implode( ',', $allowed_products );
 
 			$where_clause .= " AND {$orders_stats_table}.order_id IN (
 			SELECT
@@ -179,8 +145,8 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 	 * Returns the report data based on parameters supplied by the user.
 	 *
 	 * @since 3.5.0
-	 * @param array $query_args Query parameters.
-	 * @return array            Data.
+	 * @param array $query_args  Query parameters.
+	 * @return stdClass|WP_Error Data.
 	 */
 	public function get_data( $query_args ) {
 		global $wpdb;
@@ -201,7 +167,8 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 			'fields'       => '*',
 			'categories'   => array(),
 			'coupons'      => array(),
-			'order_status' => self::get_report_order_statuses(),
+			'order_status' => parent::get_report_order_statuses(),
+			'products'     => array(),
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
 
@@ -210,32 +177,8 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 
 		if ( false === $data ) {
 
-			$selections = array(
-				'orders_count'        => 'COUNT(*) as orders_count',
-				'num_items_sold'      => 'SUM(num_items_sold) as num_items_sold',
-				'gross_revenue'       => 'SUM(gross_total) AS gross_revenue',
-				'coupons'             => 'SUM(coupon_total) AS coupons',
-				'refunds'             => 'SUM(refund_total) AS refunds',
-				'taxes'               => 'SUM(tax_total) AS taxes',
-				'shipping'            => 'SUM(shipping_total) AS shipping',
-				'net_revenue'         => 'SUM(net_total) AS net_revenue',
-				'avg_items_per_order' => 'AVG(num_items_sold) AS avg_items_per_order',
-				'avg_order_value'     => 'AVG(gross_total) AS avg_order_value',
-			);
-
-			if ( isset( $query_args['fields'] ) && is_array( $query_args['fields'] ) ) {
-				$keep = array();
-				foreach ( $query_args['fields'] as $field ) {
-					if ( isset( $selections[ $field ] ) ) {
-						$keep[ $field ] = $selections[ $field ];
-					}
-				}
-				$selections = implode( ', ', $keep );
-			} else {
-				$selections = implode( ', ', $selections );
-			}
-
-			$totals_query    = $this->get_totals_sql_params( $query_args );
+			$selections      = $this->selected_columns( $query_args );
+			$totals_query    = $this->get_time_period_sql_params( $query_args );
 			$intervals_query = $this->get_intervals_sql_params( $query_args );
 
 			// Additional filtering for Orders report.
@@ -282,7 +225,7 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 			}
 
 			if ( '' !== $selections ) {
-				$selections = ',' . $selections;
+				$selections = ', ' . $selections;
 			}
 
 			$intervals = $wpdb->get_results(
@@ -335,7 +278,7 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 		// that will not work well on DBs with more than a few hundred orders.
 		$order_ids = wc_get_orders( array(
 			'limit'  => -1,
-			'status' => self::get_report_order_statuses(),
+			'status' => parent::get_report_order_statuses(),
 			'type'   => 'shop_order',
 			'return' => 'ids',
 		) );
@@ -380,7 +323,7 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 			return false;
 		}
 
-		if ( ! in_array( $order->get_status(), self::get_report_order_statuses(), true ) ) {
+		if ( ! in_array( $order->get_status(), parent::get_report_order_statuses(), true ) ) {
 			$wpdb->delete( $table_name, array(
 				'order_id' => $order->get_id(),
 			) );
@@ -415,15 +358,6 @@ class WC_Reports_Orders_Data_Store extends WC_Reports_Data_Store implements WC_R
 				'%f',
 			)
 		);
-	}
-
-	/**
-	 * Get the order statuses used when calculating reports.
-	 *
-	 * @return array
-	 */
-	protected static function get_report_order_statuses() {
-		return apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) );
 	}
 
 	/**
