@@ -39,6 +39,22 @@ class WC_Admin_Status {
 
 			if ( array_key_exists( $action, $tools ) ) {
 				$response = $tools_controller->execute_tool( $action );
+
+				$tool = $tools[ $action ];
+				$tool = array(
+					'id'          => $action,
+					'name'        => $tool['name'],
+					'action'      => $tool['button'],
+					'description' => $tool['desc'],
+				);
+				$tool = array_merge( $tool, $response );
+
+				/**
+				 * Fires after a WooCommerce system status tool has been executed.
+				 *
+				 * @param array  $tool  Details about the tool that has been executed.
+				 */
+				do_action( 'woocommerce_system_status_tool_executed', $tool );
 			} else {
 				$response = array(
 					'success' => false,

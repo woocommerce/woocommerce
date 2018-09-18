@@ -358,12 +358,13 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 			foreach ( $_terms as $index => $_term ) {
 				// Check if category exists. Parent must be empty string or null if doesn't exists.
-				// @codingStandardsIgnoreStart
 				$term = term_exists( $_term, 'product_cat', $parent );
-				// @codingStandardsIgnoreEnd
 
 				if ( is_array( $term ) ) {
 					$term_id = $term['term_id'];
+					// Don't allow users without capabilities to create new categories.
+				} elseif ( ! current_user_can( 'manage_product_terms' ) ) {
+					break;
 				} else {
 					$term = wp_insert_term( $_term, 'product_cat', array( 'parent' => intval( $parent ) ) );
 
@@ -571,6 +572,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'short_description' => array( $this, 'parse_skip_field' ),
 			'description'       => array( $this, 'parse_skip_field' ),
 			'manage_stock'      => array( $this, 'parse_bool_field' ),
+			'low_stock_amount'  => array( $this, 'parse_stock_quantity_field' ),
 			'backorders'        => array( $this, 'parse_backorders_field' ),
 			'stock_status'      => array( $this, 'parse_bool_field' ),
 			'sold_individually' => array( $this, 'parse_bool_field' ),

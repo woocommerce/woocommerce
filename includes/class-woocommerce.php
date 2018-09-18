@@ -183,14 +183,16 @@ final class WooCommerce {
 	 */
 	public function log_errors() {
 		$error = error_get_last();
-		if ( E_ERROR === $error['type'] ) {
+		if ( in_array( $error['type'], array( E_ERROR, E_PARSE, E_COMPILE_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR ) ) ) {
 			$logger = wc_get_logger();
 			$logger->critical(
-				$error['message'] . PHP_EOL,
+				/* translators: 1: error message 2: file name and path 3: line number */
+				sprintf( __( '%1$s in %2$s on line %3$s', 'woocommerce' ), $error['message'], $error['file'], $error['line'] ) . PHP_EOL,
 				array(
 					'source' => 'fatal-errors',
 				)
 			);
+			do_action( 'woocommerce_shutdown_error', $error );
 		}
 	}
 
@@ -275,6 +277,7 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/interfaces/class-wc-log-handler-interface.php';
 		include_once WC_ABSPATH . 'includes/interfaces/class-wc-webhooks-data-store-interface.php';
 		include_once WC_ABSPATH . 'includes/interfaces/class-wc-reports-data-store-interface.php';
+		include_once WC_ABSPATH . 'includes/interfaces/class-wc-queue-interface.php';
 
 		/**
 		 * Abstract classes.
@@ -332,6 +335,8 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/class-wc-structured-data.php';
 		include_once WC_ABSPATH . 'includes/class-wc-shortcodes.php';
 		include_once WC_ABSPATH . 'includes/class-wc-logger.php';
+		include_once WC_ABSPATH . 'includes/queue/class-wc-action-queue.php';
+		include_once WC_ABSPATH . 'includes/queue/class-wc-queue.php';
 
 		/**
 		 * Query classes for reports.
@@ -385,6 +390,11 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/class-wc-api.php';
 		include_once WC_ABSPATH . 'includes/class-wc-auth.php';
 		include_once WC_ABSPATH . 'includes/class-wc-register-wp-admin-settings.php';
+
+		/**
+		 * Libraries
+		 */
+		include_once WC_ABSPATH . 'includes/libraries/action-scheduler/action-scheduler.php';
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			include_once WC_ABSPATH . 'includes/class-wc-cli.php';
@@ -494,8 +504,9 @@ final class WooCommerce {
 			$this->session = new $session_class();
 			$this->session->init();
 
-			$this->cart     = new WC_Cart();
 			$this->customer = new WC_Customer( get_current_user_id(), true );
+			// Cart needs the customer info.
+			$this->cart = new WC_Cart();
 
 			// Customer should be saved during shutdown.
 			add_action( 'shutdown', array( $this->customer, 'save' ), 10 );
@@ -675,6 +686,15 @@ final class WooCommerce {
 			$wpdb->woocommerce_termmeta = $wpdb->prefix . 'woocommerce_termmeta';
 			$wpdb->tables[]             = 'woocommerce_termmeta';
 		}
+	}
+
+	/**
+	 * Get queue instance.
+	 *
+	 * @return WC_Queue_Interface
+	 */
+	public function queue() {
+		return WC_Queue::instance();
 	}
 
 	/**

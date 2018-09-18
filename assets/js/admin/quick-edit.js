@@ -70,11 +70,11 @@ jQuery(function( $ ) {
 
 		if ( product_supports_stock_fields ) {
 			if ( 'yes' === manage_stock ) {
-				$( '.stock_fields' ).show().removeAttr( 'style' );
+				$( '.stock_qty_field, .backorder_field', '.inline-edit-row' ).show().removeAttr( 'style' );
 				$( '.stock_status_field' ).hide();
 				$( '.manage_stock_field input' ).prop( 'checked', true );
 			} else {
-				$( '.stock_qty_field', '.inline-edit-row' ).hide();
+				$( '.stock_qty_field, .backorder_field', '.inline-edit-row' ).hide();
 				$( '.stock_status_field' ).show().removeAttr( 'style' );
 				$( '.manage_stock_field input' ).prop( 'checked', false );
 			}
@@ -103,10 +103,10 @@ jQuery(function( $ ) {
 	$( '#the-list' ).on( 'change', '.inline-edit-row input[name="_manage_stock"]', function() {
 
 		if ( $( this ).is( ':checked' ) ) {
-			$( '.stock_qty_field', '.inline-edit-row' ).show().removeAttr( 'style' );
+			$( '.stock_qty_field, .backorder_field', '.inline-edit-row' ).show().removeAttr( 'style' );
 			$( '.stock_status_field' ).hide();
 		} else {
-			$( '.stock_qty_field', '.inline-edit-row' ).hide();
+			$( '.stock_qty_field, .backorder_field', '.inline-edit-row' ).hide();
 			$( '.stock_status_field' ).show().removeAttr( 'style' );
 		}
 

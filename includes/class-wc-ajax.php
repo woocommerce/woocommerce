@@ -630,7 +630,8 @@ class WC_AJAX {
 			$attributes = $product->get_attributes( 'edit' );
 			$i          = -1;
 
-			foreach ( $attributes as $attribute ) {
+			foreach ( $data['attribute_names'] as $attribute_name ) {
+				$attribute = isset( $attributes[ $attribute_name ] ) ? $attributes[ $attribute_name ] : false;
 				if ( ! $attribute ) {
 					continue;
 				}
@@ -2393,7 +2394,7 @@ class WC_AJAX {
 				WC_Tax::_update_tax_rate_postcodes( $tax_rate_id, $postcode );
 			}
 			if ( isset( $data['city'] ) ) {
-				WC_Tax::_update_tax_rate_cities( $tax_rate_id, array_map( 'wc_clean', $data['city'] ) );
+				WC_Tax::_update_tax_rate_cities( $tax_rate_id, array_map( 'wc_clean', array_map( 'wp_unslash', $data['city'] ) ) );
 			}
 		}
 

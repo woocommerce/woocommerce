@@ -51,9 +51,6 @@ class WC_Tests_Customer extends WC_Unit_Test_Case {
 
 		// Clean up the cart
 		WC()->cart->empty_cart();
-
-		// Clean up product
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -100,8 +97,5 @@ class WC_Tests_Customer extends WC_Unit_Test_Case {
 
 		// Clean up the cart
 		WC()->cart->empty_cart();
-
-		// Clean up product
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 }

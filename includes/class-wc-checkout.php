@@ -309,15 +309,23 @@ class WC_Checkout {
 				$order = new WC_Order();
 			}
 
+			$fields_prefix = array(
+				'shipping'  => true,
+				'billing'   => true,
+			);
+			$shipping_fields = array(
+				'shipping_method'   => true,
+				'shipping_total'    => true,
+				'shipping_tax'      => true,
+			);
 			foreach ( $data as $key => $value ) {
 				if ( is_callable( array( $order, "set_{$key}" ) ) ) {
 					$order->{"set_{$key}"}( $value );
-
 					// Store custom fields prefixed with wither shipping_ or billing_. This is for backwards compatibility with 2.6.x.
-					// TODO: Fix conditional to only include shipping/billing address fields in a smarter way without str(i)pos.
-				} elseif ( ( 0 === stripos( $key, 'billing_' ) || 0 === stripos( $key, 'shipping_' ) )
-					&& ! in_array( $key, array( 'shipping_method', 'shipping_total', 'shipping_tax' ), true ) ) {
-					$order->update_meta_data( '_' . $key, $value );
+				} elseif ( isset( $fields_prefix[ current( explode( '_', $key ) ) ] ) ) {
+					if ( ! isset( $shipping_fields[ $key ] ) ) {
+						$order->update_meta_data( '_' . $key, $value );
+					}
 				}
 			}
 
@@ -615,6 +623,9 @@ class WC_Checkout {
 					case 'textarea':
 						$value = isset( $_POST[ $key ] ) ? wc_sanitize_textarea( wp_unslash( $_POST[ $key ] ) ) : ''; // WPCS: input var ok, CSRF ok.
 						break;
+					case 'password':
+						$value = isset( $_POST[ $key ] ) ? wp_unslash( $_POST[ $key ] ) : ''; // WPCS: input var ok, CSRF ok, sanitization ok.
+						break;
 					default:
 						$value = isset( $_POST[ $key ] ) ? wc_clean( wp_unslash( $_POST[ $key ] ) ) : ''; // WPCS: input var ok, CSRF ok.
 						break;
@@ -688,8 +699,6 @@ class WC_Checkout {
 				}
 
 				if ( in_array( 'phone', $format, true ) ) {
-					$data[ $key ] = wc_format_phone_number( $data[ $key ] );
-
 					if ( $validate_fieldset && '' !== $data[ $key ] && ! WC_Validation::is_phone( $data[ $key ] ) ) {
 						/* translators: %s: phone number */
 						$errors->add( 'validation', sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ) );
@@ -697,9 +706,10 @@ class WC_Checkout {
 				}
 
 				if ( in_array( 'email', $format, true ) && '' !== $data[ $key ] ) {
+					$email_is_valid = is_email( $data[ $key ] );
 					$data[ $key ] = sanitize_email( $data[ $key ] );
 
-					if ( $validate_fieldset && ! is_email( $data[ $key ] ) ) {
+					if ( $validate_fieldset && ! $email_is_valid ) {
 						/* translators: %s: email address */
 						$errors->add( 'validation', sprintf( __( '%s is not a valid email address.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ) );
 						continue;

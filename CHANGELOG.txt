@@ -1,5 +1,46 @@
 == Changelog ==
 
+= 3.4.5 - 2018-08-29 =
+* Fix - Tweak sanitization when resetting password cookie. #20901
+* Fix - Use `+` instead of `array_merge` when appending parent to tax class to fix issues with numeric tax class names. #20916
+* Fix - Correct translation for North Khorasan. #20972
+* Fix - Unify scroll-to notices for all browsers. #20992
+* Fix - Prevent multiple slashing of variation's SKU. #21019
+* Fix - Variation image in fullscreen now shows correct caption for the respective image. #21022
+* Fix - Vertically center admin order action buttons. #21053
+* Fix - Correct context for shipping packages translation. #21065
+* Fix - Add permission checks for installing Jetpack on the setup wizard. #21072
+* Fix - Use refund currency instead of store default currency when displaying refund amount in the edit order screen. #21106
+* Fix - Fix a typo in REST API customer schema. #21171
+* Fix - Use entire sentence for checkout address_2 placeholder string. #21186
+* Fix - Only suppress comments number on unsupported theme shop page. #21191
+* Fix - Don't allow users without manage_product_terms permissions to create categories using the product importer. #21192
+* Fix - Correct sale coupon restriction logic. #21219
+
+= 3.4.4 - 2018-07-25 =
+* Fix - Only wordwrap plain email content. #20723
+* Fix - Better escaping on product quick edit. #20740
+* Fix - Log file deletion. #20730
+* Fix - Search feature in Webhooks and REST API keys settings. #20706
+* Fix - Notices in REST API keys settings screen. #20706
+* Fix - add a check to prevent WC_Geolite_Integration::get_country_iso() from generating a PHP undefined index notice when unable to determine the country code for a given IP address. #20608
+* Fix - Variable product stock display if parent is stock managed and not the variation. #20661
+* Fix - Correctly hide cost for zero cost shipping methods after placing orders. #20663
+* Fix - Disabled autocomplete to prevent datepicker overlapping. #20687
+* Fix - Prevent a PHP notice in the setup wizard when store state is not selectable. #20695
+* Fix - Fix logic error in WC_Product_CSV_Exporter::get_column_value_stock. #20753
+* Fix - Fixed missing notice about no product variation matching. #20762
+* Fix - Correct PHPDocs in exporter class. #20861
+* Fix - Prevent Mailchimp redirection during the Setup Wizard. #20879
+* Fix - Don't hide coupon form after coupon has been applied. #20889
+* Tweak - Remove (optional) text from Address line 2 field. #20622 #20639
+* Tweak - Removed 100% width for images on single product page using 2017 theme. #20818
+* Tweak - Add margin to best selling product title in the dashboard widget to avoid overlapping the sparkline. #20849
+* Tweak - Re-add woocommerce_order_details_after_customer_details_filter removed during WC 3.2. #20886
+* Dev - Added woocommerce_calculate_item_totals_taxes filter. #20586
+* Dev - Links to next and previous page sent out in HTTP header via REST API fixed for some endpoints. #20686
+* Dev - Better wc_format_phone_number cleaning. #20637
+
 = 3.4.3 - 2018-06-20 =
 * Fix - Fix label for the price filter widget on RTL sites. #20417
 * Fix - Checkout: stopPropagation when payment method selected so description tips show on radio buttons. #20432

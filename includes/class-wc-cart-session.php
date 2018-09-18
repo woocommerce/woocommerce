@@ -130,6 +130,11 @@ final class WC_Cart_Session {
 			}
 		}
 
+		// If it's not empty, it's been already populated by the loop above.
+		if ( ! empty( $cart_contents ) ) {
+			$this->cart->set_cart_contents( apply_filters( 'woocommerce_cart_contents_changed', $cart_contents ) );
+		}
+
 		do_action( 'woocommerce_cart_loaded_from_session', $this->cart );
 
 		if ( $update_cart_session || is_null( WC()->session->get( 'cart_totals', null ) ) ) {

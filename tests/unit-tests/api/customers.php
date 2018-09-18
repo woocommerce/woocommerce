@@ -3,7 +3,7 @@
  * Tests for the Customers REST API.
  *
  * @package WooCommerce\Tests\API
- * @since 3.0.0
+ * @since 3.5.0
  */
 
 class Customers extends WC_REST_Unit_Test_Case {
@@ -19,20 +19,20 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test route registration.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();
 
-		$this->assertArrayHasKey( '/wc/v2/customers', $routes );
-		$this->assertArrayHasKey( '/wc/v2/customers/(?P<id>[\d]+)', $routes );
-		$this->assertArrayHasKey( '/wc/v2/customers/batch', $routes );
+		$this->assertArrayHasKey( '/wc/v3/customers', $routes );
+		$this->assertArrayHasKey( '/wc/v3/customers/(?P<id>[\d]+)', $routes );
+		$this->assertArrayHasKey( '/wc/v3/customers/batch', $routes );
 	}
 
 	/**
 	 * Test getting customers.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_get_customers() {
 		wp_set_current_user( 1 );
@@ -40,7 +40,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 		$customer_1 = WC_Helper_Customer::create_customer();
 		WC_Helper_Customer::create_customer( 'test2', 'test2', 'test2@woo.local' );
 
-		$request = new WP_REST_Request( 'GET', '/wc/v2/customers' );
+		$request = new WP_REST_Request( 'GET', '/wc/v3/customers' );
 		$request->set_query_params( array(
 			'orderby' => 'id',
 		) );
@@ -86,19 +86,17 @@ class Customers extends WC_REST_Unit_Test_Case {
 				'country'    => 'US',
 			),
 			'is_paying_customer' => false,
-			'orders_count'       => 0,
-			'total_spent'        => '0.00',
 			'avatar_url'         => $customer_1->get_avatar_url(),
 			'meta_data'          => array(),
 			'_links'             => array(
 				'self'       => array(
 					array(
-						'href' => rest_url( '/wc/v2/customers/' . $customer_1->get_id() . '' ),
+						'href' => rest_url( '/wc/v3/customers/' . $customer_1->get_id() . '' ),
 					),
 				),
 				'collection' => array(
 					array(
-						'href' => rest_url( '/wc/v2/customers' ),
+						'href' => rest_url( '/wc/v3/customers' ),
 					),
 				),
 			),
@@ -108,24 +106,24 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting customers without valid permissions.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_get_customers_without_permission() {
 		wp_set_current_user( 0 );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/customers' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/customers' ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
 
 	/**
 	 * Test creating a new customer.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_create_customer() {
 		wp_set_current_user( 1 );
 
 		// Test just the basics first..
-		$request = new WP_REST_Request( 'POST', '/wc/v2/customers' );
+		$request = new WP_REST_Request( 'POST', '/wc/v3/customers' );
 		$request->set_body_params( array(
 			'username' => 'create_customer_test',
 			'password' => 'test123',
@@ -172,13 +170,11 @@ class Customers extends WC_REST_Unit_Test_Case {
 			),
 			'is_paying_customer' => false,
 			'meta_data'          => array(),
-			'orders_count'       => 0,
-			'total_spent'        => '0.00',
 			'avatar_url'         => $data['avatar_url'],
 		), $data );
 
 		// Test extra data
-		$request = new WP_REST_Request( 'POST', '/wc/v2/customers' );
+		$request = new WP_REST_Request( 'POST', '/wc/v3/customers' );
 		$request->set_body_params( array(
 			'username' => 'create_customer_test2',
 			'password' => 'test123',
@@ -235,13 +231,11 @@ class Customers extends WC_REST_Unit_Test_Case {
 			),
 			'is_paying_customer' => false,
 			'meta_data'          => array(),
-			'orders_count'       => 0,
-			'total_spent'        => '0.00',
 			'avatar_url'         => $data['avatar_url'],
 		), $data );
 
 		// Test without required field
-		$request = new WP_REST_Request( 'POST', '/wc/v2/customers' );
+		$request = new WP_REST_Request( 'POST', '/wc/v3/customers' );
 		$request->set_body_params( array(
 			'username' => 'create_customer_test3',
 			'first_name' => 'Test',
@@ -256,11 +250,11 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test creating customers without valid permissions.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_create_customer_without_permission() {
 		wp_set_current_user( 0 );
-		$request = new WP_REST_Request( 'POST', '/wc/v2/customers' );
+		$request = new WP_REST_Request( 'POST', '/wc/v3/customers' );
 		$request->set_body_params( array(
 			'username' => 'create_customer_test_without_permission',
 			'password' => 'test123',
@@ -273,12 +267,12 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting a single customer.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_get_customer() {
 		wp_set_current_user( 1 );
 		$customer = WC_Helper_Customer::create_customer( 'get_customer_test', 'test123', 'get_customer_test@woo.local' );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/customers/' . $customer->get_id() ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/customers/' . $customer->get_id() ) );
 		$data = $response->get_data();
 
 		$this->assertEquals( array(
@@ -318,8 +312,6 @@ class Customers extends WC_REST_Unit_Test_Case {
 			'last_name'          => '',
 			'role'               => 'customer',
 			'username'           => 'get_customer_test',
-			'orders_count'       => 0,
-			'total_spent'        => '0.00',
 			'avatar_url'         => $data['avatar_url'],
 		), $data );
 	}
@@ -327,41 +319,41 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting a single customer without valid permissions.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_get_customer_without_permission() {
 		wp_set_current_user( 0 );
 		$customer = WC_Helper_Customer::create_customer( 'get_customer_test_without_permission', 'test123', 'get_customer_test_without_permission@woo.local' );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/customers/' . $customer->get_id() ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/customers/' . $customer->get_id() ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
 
 	/**
 	 * Test getting a single customer with an invalid ID.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_get_customer_invalid_id() {
 		wp_set_current_user( 1 );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/customers/0' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/customers/0' ) );
 		$this->assertEquals( 404, $response->get_status() );
 	}
 
 	/**
 	 * Test updating a customer.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_update_customer() {
 		wp_set_current_user( 1 );
 		$customer = WC_Helper_Customer::create_customer( 'update_customer_test', 'test123', 'update_customer_test@woo.local' );
 
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/customers/' . $customer->get_id() ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/customers/' . $customer->get_id() ) );
 		$data     = $response->get_data();
 		$this->assertEquals( 'update_customer_test', $data['username'] );
 		$this->assertEquals( 'update_customer_test@woo.local', $data['email'] );
 
-		$request = new WP_REST_Request( 'PUT', '/wc/v2/customers/' . $customer->get_id() );
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/customers/' . $customer->get_id() );
 		$request->set_body_params( array(
 			'email'      => 'updated_email@woo.local',
 			'first_name' => 'UpdatedTest',
@@ -376,23 +368,23 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test updating a customer without valid permissions.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_update_customer_without_permission() {
 		wp_set_current_user( 0 );
 		$customer = WC_Helper_Customer::create_customer( 'update_customer_test_without_permission', 'test123', 'update_customer_test_without_permission@woo.local' );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/customers/' . $customer->get_id() ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/customers/' . $customer->get_id() ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
 
 	/**
 	 * Test updating a customer with an invalid ID.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_update_customer_invalid_id() {
 		wp_set_current_user( 1 );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/customers/0' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/customers/0' ) );
 		$this->assertEquals( 404, $response->get_status() );
 	}
 
@@ -400,12 +392,12 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test deleting a customer.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_delete_customer() {
 		wp_set_current_user( 1 );
 		$customer = WC_Helper_Customer::create_customer( 'delete_customer_test', 'test123', 'delete_customer_test@woo.local' );
-		$request  = new WP_REST_Request( 'DELETE', '/wc/v2/customers/' . $customer->get_id() );
+		$request  = new WP_REST_Request( 'DELETE', '/wc/v3/customers/' . $customer->get_id() );
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
@@ -414,11 +406,11 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test deleting a customer with an invalid ID.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_delete_customer_invalid_id() {
 		wp_set_current_user( 1 );
-		$request  = new WP_REST_Request( 'DELETE', '/wc/v2/customers/0' );
+		$request  = new WP_REST_Request( 'DELETE', '/wc/v3/customers/0' );
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 400, $response->get_status() );
@@ -427,12 +419,12 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test deleting a customer without valid permissions.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_delete_customer_without_permission() {
 		wp_set_current_user( 0 );
 		$customer = WC_Helper_Customer::create_customer( 'delete_customer_test_without_permission', 'test123', 'delete_customer_test_without_permission@woo.local' );
-		$request  = new WP_REST_Request( 'DELETE', '/wc/v2/customers/' . $customer->get_id() );
+		$request  = new WP_REST_Request( 'DELETE', '/wc/v3/customers/' . $customer->get_id() );
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 401, $response->get_status() );
@@ -441,7 +433,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test customer batch endpoint.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_batch_customer() {
 		wp_set_current_user( 1 );
@@ -451,7 +443,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 		$customer_3 = WC_Helper_Customer::create_customer( 'test_batch_customer3', 'test123', 'test_batch_customer3@woo.local' );
 		$customer_4 = WC_Helper_Customer::create_customer( 'test_batch_customer4', 'test123', 'test_batch_customer4@woo.local' );
 
-		$request = new WP_REST_Request( 'POST', '/wc/v2/customers/batch' );
+		$request = new WP_REST_Request( 'POST', '/wc/v3/customers/batch' );
 		$request->set_body_params( array(
 			'update' => array(
 				array(
@@ -480,7 +472,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $customer_2->get_id(), $data['delete'][0]['id'] );
 		$this->assertEquals( $customer_3->get_id(), $data['delete'][1]['id'] );
 
-		$request = new WP_REST_Request( 'GET', '/wc/v2/customers' );
+		$request = new WP_REST_Request( 'GET', '/wc/v3/customers' );
 		$response = $this->server->dispatch( $request );
 		$data = $response->get_data();
 
@@ -490,16 +482,16 @@ class Customers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test customer schema.
 	 *
-	 * @since 3.0.0
+	 * @since 3.5.0
 	 */
 	public function test_customer_schema() {
 		wp_set_current_user( 1 );
-		$request = new WP_REST_Request( 'OPTIONS', '/wc/v2/customers' );
+		$request = new WP_REST_Request( 'OPTIONS', '/wc/v3/customers' );
 		$response = $this->server->dispatch( $request );
 		$data = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 18, count( $properties ) );
+		$this->assertEquals( 16, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'date_created', $properties );
 		$this->assertArrayHasKey( 'date_created_gmt', $properties );
@@ -511,8 +503,6 @@ class Customers extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'role', $properties );
 		$this->assertArrayHasKey( 'username', $properties );
 		$this->assertArrayHasKey( 'password', $properties );
-		$this->assertArrayHasKey( 'orders_count', $properties );
-		$this->assertArrayHasKey( 'total_spent', $properties );
 		$this->assertArrayHasKey( 'avatar_url', $properties );
 		$this->assertArrayHasKey( 'billing', $properties );
 		$this->assertArrayHasKey( 'first_name', $properties['billing']['properties'] );
