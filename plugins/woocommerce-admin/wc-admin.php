@@ -16,6 +16,10 @@ if ( ! defined( 'WC_ADMIN_APP' ) ) {
 	define( 'WC_ADMIN_APP', 'wc-admin-app' );
 }
 
+if ( ! defined( 'WC_ADMIN_ABSPATH' ) ) {
+	define( 'WC_ADMIN_ABSPATH', dirname( __FILE__ ) );
+}
+
 /**
  * Notify users of the plugin requirements
  */
@@ -39,6 +43,9 @@ function wc_admin_plugins_loaded() {
 		add_action( 'admin_notices', 'wc_admin_plugins_notice' );
 		return;
 	}
+
+	// Initialize the WC API extensions.
+	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-api-init.php';
 
 	// Some common utilities
 	require_once dirname( __FILE__ ) . '/lib/common.php';
