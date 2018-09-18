@@ -23,12 +23,12 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 	 *
 	 * @var string
 	 */
-	const TABLE_NAME = 'wc_admin_order_stats';
+	const TABLE_NAME = 'wc_order_stats';
 
 	/**
 	 * Cron event name.
 	 */
-	const CRON_EVENT = 'wc_admin_order_stats_update';
+	const CRON_EVENT = 'wc_order_stats_update';
 
 	protected $column_types = array(
 		'orders_count'        => 'intval',
@@ -170,11 +170,11 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 
 			$where_clause .= " AND {$orders_stats_table}.order_id IN (
 			SELECT
-				DISTINCT {$wpdb->prefix}wc_admin_order_product_lookup.order_id
+				DISTINCT {$wpdb->prefix}wc_order_product_lookup.order_id
 			FROM
-				{$wpdb->prefix}wc_admin_order_product_lookup
+				{$wpdb->prefix}wc_order_product_lookup
 			WHERE
-				{$wpdb->prefix}wc_admin_order_product_lookup.product_id IN ({$allowed_products_str})
+				{$wpdb->prefix}wc_order_product_lookup.product_id IN ({$allowed_products_str})
 			)";
 		}
 
