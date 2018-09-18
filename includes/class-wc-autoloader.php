@@ -65,29 +65,40 @@ class WC_Autoloader {
 	public function autoload( $class ) {
 		$class = strtolower( $class );
 
-		if ( 0 !== strpos( $class, 'wc_' ) ) {
+		if ( 'wc' !== substr( $class, 0, 2 ) ) {
 			return;
 		}
 
 		$file = $this->get_file_name_from_class( $class );
-		$path = '';
+		$path = $this->include_path;
 
-		if ( 0 === strpos( $class, 'wc_addons_gateway_' ) ) {
-			$path = $this->include_path . 'gateways/' . substr( str_replace( '_', '-', $class ), 18 ) . '/';
-		} elseif ( 0 === strpos( $class, 'wc_gateway_' ) ) {
-			$path = $this->include_path . 'gateways/' . substr( str_replace( '_', '-', $class ), 11 ) . '/';
-		} elseif ( 0 === strpos( $class, 'wc_shipping_' ) ) {
-			$path = $this->include_path . 'shipping/' . substr( str_replace( '_', '-', $class ), 12 ) . '/';
-		} elseif ( 0 === strpos( $class, 'wc_shortcode_' ) ) {
-			$path = $this->include_path . 'shortcodes/';
-		} elseif ( 0 === strpos( $class, 'wc_meta_box' ) ) {
-			$path = $this->include_path . 'admin/meta-boxes/';
-		} elseif ( 0 === strpos( $class, 'wc_admin' ) ) {
-			$path = $this->include_path . 'admin/';
-		} elseif ( 0 === strpos( $class, 'wc_payment_token_' ) ) {
-			$path = $this->include_path . 'payment-tokens/';
-		} elseif ( 0 === strpos( $class, 'wc_log_handler_' ) ) {
-			$path = $this->include_path . 'log-handlers/';
+		switch ( true ) {
+			case ( 'wc_addons_gateway_' === substr( $class, 0, 18 ) ):
+				$path .= 'gateways/' . substr( str_replace( '_', '-', $class ), 18 ) . '/';
+				break;
+			case ( 'wc_gateway_' === substr( $class, 0, 11 ) ):
+				$path .= 'gateways/' . substr( str_replace( '_', '-', $class ), 11 ) . '/';
+				break;
+			case ( 'wc_shipping_' === substr( $class, 0, 12 ) ):
+				$path .= 'shipping/' . substr( str_replace( '_', '-', $class ), 12 ) . '/';
+				break;
+			case ( 'wc_shortcode_' === substr( $class, 0, 13 ) ):
+				$path .= 'shortcodes/';
+				break;
+			case ( 'wc_meta_box' === substr( $class, 0, 11 ) ):
+				$path .= 'admin/meta-boxes/';
+				break;
+			case ( 'wc_admin' === substr( $class, 0, 8 ) ):
+				$path .= 'admin/';
+				break;
+			case ( 'wc_payment_token_' === substr( $class, 0, 17 ) ):
+				$path .= 'payment-tokens/';
+				break;
+			case ( 'wc_log_handler_' === substr( $class, 0, 15 ) ):
+				$path .= 'log-handlers/';
+				break;
+			default:
+				$path = '';
 		}
 
 		if ( empty( $path ) || ! $this->load_file( $path . $file ) ) {
