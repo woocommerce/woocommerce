@@ -1,8 +1,20 @@
 <?php
+/**
+ * REST API bootstrap.
+ *
+ * @package WooCommerce Admin/Classes
+ */
 
+defined( 'ABSPATH' ) || exit;
 
+/**
+ * WC_Admin_Api_Init class.
+ */
 class WC_Admin_Api_Init {
 
+	/**
+	 * Boostrap REST API.
+	 */
 	public function __construct() {
 		// Initialize classes.
 		add_action( 'plugins_loaded', array( $this, 'init_classes' ), 19 );
@@ -22,6 +34,9 @@ class WC_Admin_Api_Init {
 		$this->create_db_tables();
 	}
 
+	/**
+	 * Init classes.
+	 */
 	public function init_classes() {
 		// Interfaces.
 		require_once dirname( __FILE__ ) . '/interfaces/class-wc-admin-reports-data-store-interface.php';
@@ -45,6 +60,9 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-categories-data-store.php';
 	}
 
+	/**
+	 * Init REST API.
+	 */
 	public function rest_api_init() {
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-system-status-tools-controller.php';
@@ -82,6 +100,12 @@ class WC_Admin_Api_Init {
 		}
 	}
 
+	/**
+	 * Filter REST API endpoints.
+	 *
+	 * @param array $endpoints List of endpoints.
+	 * @return array
+	 */
 	public static function filter_rest_endpoints( $endpoints ) {
 		// Override GET /wc/v3/system_status/tools.
 		if ( isset( $endpoints['/wc/v3/system_status/tools'] )
@@ -114,6 +138,12 @@ class WC_Admin_Api_Init {
 		return $endpoints;
 	}
 
+	/**
+	 * Adds regenerate tool.
+	 *
+	 * @param array $tools List of tools.
+	 * @return array
+	 */
 	public static function add_regenerate_tool( $tools ) {
 		return array_merge(
 			$tools,
@@ -128,11 +158,20 @@ class WC_Admin_Api_Init {
 		);
 	}
 
+	/**
+	 * Init orders data store.
+	 */
 	public static function orders_data_store_init() {
 		WC_Admin_Reports_Orders_Data_Store::init();
 	}
 
-	public static function order_product_lookup_store_init( $updater = false ) {
+	/**
+	 * Init orders product looup store.
+	 *
+	 * @param WC_Background_Updater|null $updater Updater instance.
+	 * @return bool
+	 */
+	public static function order_product_lookup_store_init( $updater = null ) {
 		global $wpdb;
 
 		$orders = get_transient( 'wc_update_350_all_orders' );
@@ -181,8 +220,16 @@ class WC_Admin_Api_Init {
 				return true;
 			}
 		}
+
+		return true;
 	}
 
+	/**
+	 * Adds data stores.
+	 *
+	 * @param array $data_stores List of data stores.
+	 * @return array
+	 */
 	public static function add_data_stores( $data_stores ) {
 		return array_merge(
 			$data_stores,
@@ -196,6 +243,12 @@ class WC_Admin_Api_Init {
 		);
 	}
 
+	/**
+	 * Adds report tables.
+	 *
+	 * @param array $wc_tables List of WooCommerce tables.
+	 * @return array
+	 */
 	public static function add_report_tables( $wc_tables ) {
 		global $wpdb;
 
@@ -211,6 +264,11 @@ class WC_Admin_Api_Init {
 		);
 	}
 
+	/**
+	 * Get database schema.
+	 *
+	 * @return string
+	 */
 	private static function get_schema() {
 		global $wpdb;
 
@@ -270,6 +328,9 @@ class WC_Admin_Api_Init {
 		return $tables;
 	}
 
+	/**
+	 * Create database tables.
+	 */
 	protected function create_db_tables() {
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
