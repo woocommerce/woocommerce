@@ -14,9 +14,9 @@ defined( 'ABSPATH' ) || exit;
  * REST API Reports controller class.
  *
  * @package WooCommerce/API
- * @extends WC_REST_Controller
+ * @extends WC_REST_Reports_V2_Controller
  */
-class WC_REST_Reports_Controller extends WC_REST_Controller {
+class WC_REST_Reports_Controller extends WC_REST_Reports_V2_Controller {
 
 	/**
 	 * Endpoint namespace.
@@ -26,9 +26,10 @@ class WC_REST_Reports_Controller extends WC_REST_Controller {
 	protected $namespace = 'wc/v3';
 
 	/**
-	 * Route base.
+	 * Get reports list.
 	 *
-	 * @var string
+	 * @since 3.5.0
+	 * @return array
 	 */
 	protected $rest_base = 'reports';
 
@@ -69,7 +70,7 @@ class WC_REST_Reports_Controller extends WC_REST_Controller {
 	 */
 	public function get_items( $request ) {
 		$data    = array();
-		$reports = array(
+    $reports = array(
 			array(
 				'slug'        => 'revenue/stats',
 				'description' => __( 'Stats about revenue.', 'woocommerce' ),
@@ -77,6 +78,10 @@ class WC_REST_Reports_Controller extends WC_REST_Controller {
 			array(
 				'slug'        => 'orders/stats',
 				'description' => __( 'Stats about orders.', 'woocommerce' ),
+			),
+			array(
+				'slug'        => 'orders/totals',
+				'description' => __( 'Orders totals.', 'woocommerce' ),
 			),
 			array(
 				'slug'        => 'products',
@@ -87,6 +92,14 @@ class WC_REST_Reports_Controller extends WC_REST_Controller {
 				'description' => __( 'Stats about products.', 'woocommerce' ),
 			),
 			array(
+				'slug'        => 'products/totals',
+				'description' => __( 'Products totals.', 'woocommerce' ),
+            ),
+			array(
+				'slug'        => 'reviews/totals',
+				'description' => __( 'Reviews totals.', 'woocommerce' ),
+			),
+			array(
 				'slug'        => 'categories',
 				'description' => __( 'Product categories detailed reports.', 'woocommerce' ),
 			),
@@ -95,12 +108,28 @@ class WC_REST_Reports_Controller extends WC_REST_Controller {
 				'description' => __( 'Stats about product categories.', 'woocommerce' ),
 			),
 			array(
+				'slug'        => 'categories/totals',
+				'description' => __( 'Categories totals.', 'woocommerce' ),
+			),
+			array(
+				'slug'        => 'tags/totals',
+				'description' => __( 'Tags totals.', 'woocommerce' ),
+            ),
+			array(
+				'slug'        => 'attributes/totals',
+				'description' => __( 'Attributes totals.', 'woocommerce' ),
+			),
+			array(
 				'slug'        => 'coupons',
 				'description' => __( 'Coupons detailed reports.', 'woocommerce' ),
 			),
 			array(
 				'slug'        => 'coupons/stats',
 				'description' => __( 'Stats about coupons.', 'woocommerce' ),
+            ),
+			array(
+				'slug'        => 'coupons/totals',
+				'description' => __( 'Coupons totals.', 'woocommerce' ),
 			),
 			array(
 				'slug'        => 'taxes',
@@ -125,7 +154,11 @@ class WC_REST_Reports_Controller extends WC_REST_Controller {
 			array(
 				'slug'        => 'customers',
 				'description' => __( 'Customers detailed reports.', 'woocommerce' ),
-			),
+            ),
+			array(
+				'slug'        => 'customers/totals',
+				'description' => __( 'Customers totals.', 'woocommerce' ),
+            ),
 		);
 
 		foreach ( $reports as $report ) {
@@ -214,5 +247,4 @@ class WC_REST_Reports_Controller extends WC_REST_Controller {
 		return array(
 			'context' => $this->get_context_param( array( 'default' => 'view' ) ),
 		);
-	}
 }

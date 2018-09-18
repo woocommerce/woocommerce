@@ -61,7 +61,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			'tax_class'             => $object->get_tax_class(),
 			'manage_stock'          => $object->managing_stock(),
 			'stock_quantity'        => $object->get_stock_quantity(),
-			'in_stock'              => $object->is_in_stock(),
+			'stock_status'          => $object->get_stock_status(),
 			'backorders'            => $object->get_backorders(),
 			'backorders_allowed'    => $object->backorders_allowed(),
 			'backordered'           => $object->is_on_backorder(),
@@ -169,8 +169,8 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			$variation->set_manage_stock( $request['manage_stock'] );
 		}
 
-		if ( isset( $request['in_stock'] ) ) {
-			$variation->set_stock_status( true === $request['in_stock'] ? 'instock' : 'outofstock' );
+		if ( isset( $request['stock_status'] ) ) {
+			$variation->set_stock_status( $request['stock_status'] );
 		}
 
 		if ( isset( $request['backorders'] ) ) {
@@ -567,10 +567,10 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'in_stock'              => array(
-					'description' => __( 'Controls whether or not the variation is listed as "in stock" or "out of stock" on the frontend.', 'woocommerce' ),
-					'type'        => 'boolean',
-					'default'     => true,
+				'stock_status'          => array(
+					'description' => __( 'Controls the stock status of the product: "instock", "outofstock" or "onbackorder".', 'woocommerce' ),
+					'type'        => 'string',
+					'enum'        => array_keys( wc_get_product_stock_status_options() ),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'backorders'            => array(
@@ -745,5 +745,159 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			),
 		);
 		return $this->add_additional_fields_schema( $schema );
+	}
+
+	/**
+	 * Prepare objects query.
+	 *
+	 * @since  3.0.0
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return array
+	 */
+	protected function prepare_objects_query( $request ) {
+		$args = WC_REST_CRUD_Controller::prepare_objects_query( $request );
+
+		// Set post_status.
+		$args['post_status'] = $request['status'];
+
+		// Taxonomy query to filter products by type, category,
+		// tag, shipping class, and attribute.
+		$tax_query = array();
+
+		// Map between taxonomy name and arg's key.
+		$taxonomies = array(
+			'product_cat'            => 'category',
+			'product_tag'            => 'tag',
+			'product_shipping_class' => 'shipping_class',
+		);
+
+		// Set tax_query for each passed arg.
+		foreach ( $taxonomies as $taxonomy => $key ) {
+			if ( ! empty( $request[ $key ] ) ) {
+				$tax_query[] = array(
+					'taxonomy' => $taxonomy,
+					'field'    => 'term_id',
+					'terms'    => $request[ $key ],
+				);
+			}
+		}
+
+		// Filter product type by slug.
+		if ( ! empty( $request['type'] ) ) {
+			$tax_query[] = array(
+				'taxonomy' => 'product_type',
+				'field'    => 'slug',
+				'terms'    => $request['type'],
+			);
+		}
+
+		// Filter by attribute and term.
+		if ( ! empty( $request['attribute'] ) && ! empty( $request['attribute_term'] ) ) {
+			if ( in_array( $request['attribute'], wc_get_attribute_taxonomy_names(), true ) ) {
+				$tax_query[] = array(
+					'taxonomy' => $request['attribute'],
+					'field'    => 'term_id',
+					'terms'    => $request['attribute_term'],
+				);
+			}
+		}
+
+		if ( ! empty( $tax_query ) ) {
+			$args['tax_query'] = $tax_query; // WPCS: slow query ok.
+		}
+
+		// Filter featured.
+		if ( is_bool( $request['featured'] ) ) {
+			$args['tax_query'][] = array(
+				'taxonomy' => 'product_visibility',
+				'field'    => 'name',
+				'terms'    => 'featured',
+				'operator' => true === $request['featured'] ? 'IN' : 'NOT IN',
+			);
+		}
+
+		// Filter by sku.
+		if ( ! empty( $request['sku'] ) ) {
+			$skus = explode( ',', $request['sku'] );
+			// Include the current string as a SKU too.
+			if ( 1 < count( $skus ) ) {
+				$skus[] = $request['sku'];
+			}
+
+			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+				$args, array(
+					'key'     => '_sku',
+					'value'   => $skus,
+					'compare' => 'IN',
+				)
+			);
+		}
+
+		// Filter by tax class.
+		if ( ! empty( $request['tax_class'] ) ) {
+			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+				$args, array(
+					'key'   => '_tax_class',
+					'value' => 'standard' !== $request['tax_class'] ? $request['tax_class'] : '',
+				)
+			);
+		}
+
+		// Price filter.
+		if ( ! empty( $request['min_price'] ) || ! empty( $request['max_price'] ) ) {
+			$args['meta_query'] = $this->add_meta_query( $args, wc_get_min_max_price_meta_query( $request ) );  // WPCS: slow query ok.
+		}
+
+		// Filter product based on stock_status.
+		if ( ! empty( $request['stock_status'] ) ) {
+			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+				$args, array(
+					'key'   => '_stock_status',
+					'value' => $request['stock_status'],
+				)
+			);
+		}
+
+		// Filter by on sale products.
+		if ( is_bool( $request['on_sale'] ) ) {
+			$on_sale_key = $request['on_sale'] ? 'post__in' : 'post__not_in';
+			$on_sale_ids = wc_get_product_ids_on_sale();
+
+			// Use 0 when there's no on sale products to avoid return all products.
+			$on_sale_ids = empty( $on_sale_ids ) ? array( 0 ) : $on_sale_ids;
+
+			$args[ $on_sale_key ] += $on_sale_ids;
+		}
+
+		// Force the post_type argument, since it's not a user input variable.
+		if ( ! empty( $request['sku'] ) ) {
+			$args['post_type'] = array( 'product', 'product_variation' );
+		} else {
+			$args['post_type'] = $this->post_type;
+		}
+
+		$args['post_parent'] = $request['product_id'];
+
+		return $args;
+	}
+
+	/**
+	 * Get the query params for collections of attachments.
+	 *
+	 * @return array
+	 */
+	public function get_collection_params() {
+		$params = parent::get_collection_params();
+
+		unset( $params['in_stock'] );
+		$params['stock_status'] = array(
+			'description'       => __( 'Limit result set to products with specified stock status.', 'woocommerce' ),
+			'type'              => 'string',
+			'enum'              => array_keys( wc_get_product_stock_status_options() ),
+			'sanitize_callback' => 'sanitize_text_field',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		return $params;
 	}
 }

@@ -111,11 +111,14 @@ class WC_Tracker {
 		$data['jetpack_is_staging'] = ( class_exists( 'Jetpack' ) && is_callable( 'Jetpack::is_staging_site' ) && Jetpack::is_staging_site() ) ? 'yes' : 'no';
 		$data['connect_installed']  = class_exists( 'WC_Connect_Loader' ) ? 'yes' : 'no';
 		$data['connect_active']     = ( class_exists( 'WC_Connect_Loader' ) && wp_next_scheduled( 'wc_connect_fetch_service_schemas' ) ) ? 'yes' : 'no';
+		$data['helper_connected']   = self::get_helper_connected();
 
 		// Store count info.
 		$data['users']              = self::get_user_counts();
 		$data['products']           = self::get_product_counts();
 		$data['orders']             = self::get_orders();
+		$data['reviews']            = self::get_review_counts();
+		$data['categories']         = self::get_category_counts();
 
 		// Payment gateway info.
 		$data['gateways']           = self::get_active_payment_gateways();
@@ -259,6 +262,21 @@ class WC_Tracker {
 	}
 
 	/**
+	 * Check to see if the helper is connected to woocommerce.com
+	 *
+	 * @return string
+	 */
+	private static function get_helper_connected() {
+		if ( class_exists( 'WC_Helper_Options' ) && is_callable( 'WC_Helper_Options::get' ) ) {
+			$authenticated = WC_Helper_Options::get( 'auth' );
+		} else {
+			$authenticated = '';
+		}
+		return ( ! empty( $authenticated ) ) ? 'yes' : 'no';
+	}
+
+
+	/**
 	 * Get user totals based on user role.
 	 *
 	 * @return array
@@ -319,6 +337,41 @@ class WC_Tracker {
 		$order_totals = self::get_order_totals();
 
 		return array_merge( $order_dates, $order_counts, $order_totals );
+	}
+
+	/**
+	 * Get review counts for different statuses.
+	 *
+	 * @return array
+	 */
+	private static function get_review_counts() {
+		global $wpdb;
+		$review_count = array();
+		$counts       = $wpdb->get_results( "
+			SELECT comment_approved, COUNT(*) AS num_reviews
+			FROM {$wpdb->comments}
+			WHERE comment_type = 'review'
+			GROUP BY comment_approved
+			", ARRAY_A );
+		if ( $counts ) {
+			foreach ( $counts as $count ) {
+				if ( 1 === $count['comment_approved'] ) {
+					$review_count['approved'] = $count['num_reviews'];
+				} else {
+					$review_count['pending'] = $count['num_reviews'];
+				}
+			}
+		}
+		return $review_count;
+	}
+
+	/**
+	 * Get the number of product categories.
+	 *
+	 * @return int
+	 */
+	private static function get_category_counts() {
+		return wp_count_terms( 'product_cat' );
 	}
 
 	/**

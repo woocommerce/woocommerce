@@ -1074,3 +1074,39 @@ function wc_order_product_lookup_entry( $order_id ) {
 	}
 }
 add_action( 'save_post', 'wc_order_product_lookup_entry', 10, 1 );
+
+/**
+ * Make an entry in the wc_order_coupon_lookup table for an order.
+ *
+ * @since 3.5.0
+ * @param int $order_id Order ID.
+ * @return void
+ */
+function wc_order_coupon_lookup_entry( $order_id ) {
+	global $wpdb;
+
+	$order = wc_get_order( $order_id );
+	if ( ! $order ) {
+		return;
+	}
+
+	$coupon_items = $order->get_items( 'coupon' );
+	foreach ( $coupon_items as $coupon_item ) {
+		$wpdb->replace(
+			$wpdb->prefix . 'wc_order_coupon_lookup',
+			array(
+				'order_id'              => $order_id,
+				'coupon_id'             => $coupon_item->get_id(),
+				'coupon_gross_discount' => $coupon_item->get_discount(),
+				'date_created'          => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
+			),
+			array(
+				'%d',
+				'%d',
+				'%f',
+				'%s',
+			)
+		);
+	}
+}
+add_action( 'save_post', 'wc_order_coupon_lookup_entry', 10, 1 );

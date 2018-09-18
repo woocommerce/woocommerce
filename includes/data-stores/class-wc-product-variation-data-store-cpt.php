@@ -353,6 +353,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 				'sku'                => get_post_meta( $product->get_parent_id(), '_sku', true ),
 				'manage_stock'       => get_post_meta( $product->get_parent_id(), '_manage_stock', true ),
 				'backorders'         => get_post_meta( $product->get_parent_id(), '_backorders', true ),
+				'low_stock_amount'   => get_post_meta( $product->get_parent_id(), '_low_stock_amount', true ),
 				'stock_quantity'     => wc_stock_amount( get_post_meta( $product->get_parent_id(), '_stock', true ) ),
 				'weight'             => get_post_meta( $product->get_parent_id(), '_weight', true ),
 				'length'             => get_post_meta( $product->get_parent_id(), '_length', true ),
