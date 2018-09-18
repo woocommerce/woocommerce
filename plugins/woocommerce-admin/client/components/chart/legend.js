@@ -29,6 +29,8 @@ class Legend extends Component {
 			orderedKeys: data,
 			colorScheme,
 		};
+		const numberOfRowsVisible = data.filter( row => row.visible ).length;
+
 		return (
 			<ul
 				className={ classNames(
@@ -49,7 +51,11 @@ class Legend extends Component {
 						onBlur={ handleLegendHover }
 						onFocus={ handleLegendHover }
 					>
-						<button onClick={ handleLegendToggle } id={ row.key }>
+						<button
+							onClick={ handleLegendToggle }
+							id={ row.key }
+							disabled={ row.visible && numberOfRowsVisible <= 1 }
+						>
 							<div className="woocommerce-legend__item-container" id={ row.key }>
 								<span
 									className={ classNames( 'woocommerce-legend__item-checkmark', {
