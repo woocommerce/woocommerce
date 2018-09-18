@@ -58,7 +58,7 @@ class WC_Admin_REST_Reports_Revenue_Stats_Controller extends WC_REST_Reports_Con
 	 */
 	public function get_items( $request ) {
 		$query_args      = $this->prepare_reports_query( $request );
-		$reports_revenue = new WC_Reports_Revenue_Query( $query_args );
+		$reports_revenue = new WC_Admin_Reports_Revenue_Query( $query_args );
 		$report_data     = $reports_revenue->get_data();
 
 		$out_data = array(

@@ -47,7 +47,7 @@ class WC_Admin_REST_Reports_Products_Controller extends WC_REST_Reports_Controll
 			}
 		}
 
-		$reports       = new WC_Reports_Products_Query( $args );
+		$reports       = new WC_Admin_Reports_Products_Query( $args );
 		$products_data = $reports->get_data();
 
 		$data = array();

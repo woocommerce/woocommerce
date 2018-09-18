@@ -320,8 +320,6 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 						{$intervals_query['limit']}", ARRAY_A
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
-			echo $wpdb->last_query;
-
 			if ( null === $intervals ) {
 				return new WP_Error( 'woocommerce_reports_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ) );
 			}

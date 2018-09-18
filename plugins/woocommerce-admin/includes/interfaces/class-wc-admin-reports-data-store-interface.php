@@ -3,7 +3,7 @@
  * Reports Data Store Interface
  *
  * @version  3.5.0
- * @package  WooCommerce/Interface
+ * @package  WooCommerce Admin/Interface
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 3.5.0
  */
-interface WC_Reports_Data_Store_Interface {
+interface WC_Admin_Reports_Data_Store_Interface {
 
 	/**
 	 * Get the data based on args.

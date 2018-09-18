@@ -12,6 +12,8 @@ class WC_Admin_Api_Init {
 		add_filter( 'woocommerce_install_get_tables', array( 'WC_Admin_Api_Init', 'add_report_tables' ) );
 		// REST API extensions init.
 		add_action( 'rest_api_init', array( $this, 'rest_api_init' ) );
+		add_filter( 'rest_endpoints', array( 'WC_Admin_Api_Init', 'filter_rest_endpoints' ), 10, 1 );
+		add_filter( 'woocommerce_debug_tools', array( 'WC_Admin_Api_Init', 'add_regenerate_tool' ) );
 		// Initialize report classes.
 		add_action( 'woocommerce_after_register_post_type', array( 'WC_Admin_Api_Init', 'orders_data_store_init' ), 20 );
 		add_action( 'woocommerce_after_register_post_type', array( 'WC_Admin_Api_Init', 'order_product_lookup_store_init' ), 20 );
@@ -23,9 +25,10 @@ class WC_Admin_Api_Init {
 	public function init_classes() {
 		// Interfaces.
 		require_once dirname( __FILE__ ) . '/interfaces/class-wc-admin-reports-data-store-interface.php';
-		require_once dirname( __FILE__ ) . '/interfaces/class-wc-reports-data-store-interface.php';
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-query.php';
 
+		// Common date time code.
+		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-interval.php';
 
 		// Query classes for reports.
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-revenue-query.php';
@@ -73,6 +76,52 @@ class WC_Admin_Api_Init {
 			$this->$controller = new $controller();
 			$this->$controller->register_routes();
 		}
+	}
+
+	public static function filter_rest_endpoints( $endpoints ) {
+		// Override GET /wc/v3/system_status/tools.
+		if ( isset( $endpoints['/wc/v3/system_status/tools'] )
+		     && isset( $endpoints['/wc/v3/system_status/tools'][1] )
+		     && isset( $endpoints['/wc/v3/system_status/tools'][0] )
+		     && $endpoints['/wc/v3/system_status/tools'][1]['callback'][0] instanceof WC_Admin_REST_System_Status_Tools_Controller
+		) {
+			$endpoints['/wc/v3/system_status/tools'][0] = $endpoints['/wc/v3/system_status/tools'][1];
+		}
+		// // Override GET & PUT for /wc/v3/system_status/tools.
+		if ( isset( $endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'] )
+		     && isset( $endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][3] )
+		     && isset( $endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][2] )
+		     && $endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][2]['callback'][0] instanceof WC_Admin_REST_System_Status_Tools_Controller
+		     && $endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][3]['callback'][0] instanceof WC_Admin_REST_System_Status_Tools_Controller
+		) {
+			$endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][0] = $endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][2];
+			$endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][1] = $endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][3];
+		}
+
+		// Override GET /wc/v3/reports.
+		if ( isset( $endpoints['/wc/v3/reports'] )
+		     && isset( $endpoints['/wc/v3/reports'][1] )
+		     && isset( $endpoints['/wc/v3/reports'][0] )
+		     && $endpoints['/wc/v3/reports'][1]['callback'][0] instanceof WC_Admin_REST_Reports_Controller
+		) {
+			$endpoints['/wc/v3/reports'][0] = $endpoints['/wc/v3/reports'][1];
+		}
+
+		return $endpoints;
+	}
+
+	public static function add_regenerate_tool( $tools ) {
+		return array_merge(
+			$tools,
+			array(
+				'rebuild_stats' => array(
+					'name'     => __( 'Rebuild reports data', 'woocommerce' ),
+					'button'   => __( 'Rebuild reports', 'woocommerce' ),
+					'desc'     => __( 'This tool will rebuild all of the information used by the reports.', 'woocommerce' ),
+					'callback' => array( 'WC_Admin_Reports_Orders_Data_Store', 'queue_order_stats_repopulate_database' ),
+				),
+			)
+		);
 	}
 
 	public static function orders_data_store_init() {
@@ -134,11 +183,11 @@ class WC_Admin_Api_Init {
 		return array_merge(
 			$data_stores,
 			array(
-				'report-revenue-stats'  => 'WC_Reports_Orders_Data_Store',
-				'report-orders-stats'   => 'WC_Reports_Orders_Data_Store',
-				'report-products'       => 'WC_Reports_Products_Data_Store',
-				'report-products-stats' => 'WC_Reports_Products_Stats_Data_Store',
-				'report-categories'     => 'WC_Reports_Categories_Data_Store',
+				'report-revenue-stats'  => 'WC_Admin_Reports_Orders_Data_Store',
+				'report-orders-stats'   => 'WC_Admin_Reports_Orders_Data_Store',
+				'report-products'       => 'WC_Admin_Reports_Products_Data_Store',
+				'report-products-stats' => 'WC_Admin_Reports_Products_Stats_Data_Store',
+				'report-categories'     => 'WC_Admin_Reports_Categories_Data_Store',
 			)
 		);
 	}

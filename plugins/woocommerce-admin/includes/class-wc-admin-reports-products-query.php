@@ -20,7 +20,7 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * WC_Reports_Products_Query
+ * WC_Admin_Reports_Products_Query
  *
  */
 class WC_Admin_Reports_Products_Query extends WC_Admin_Reports_Query {
