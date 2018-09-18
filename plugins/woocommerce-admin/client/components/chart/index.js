@@ -8,7 +8,7 @@ import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
 import { get, isEqual, partial } from 'lodash';
 import { Component, createRef } from '@wordpress/element';
-import { IconButton, SelectControl } from '@wordpress/components';
+import { IconButton, NavigableMenu, SelectControl } from '@wordpress/components';
 import PropTypes from 'prop-types';
 import { interpolateViridis as d3InterpolateViridis } from 'd3-scale-chromatic';
 import { formatDefaultLocale as d3FormatDefaultLocale } from 'd3-format';
@@ -219,12 +219,20 @@ class Chart extends Component {
 					<span className="woocommerce-chart__title">{ title }</span>
 					{ width > WIDE_BREAKPOINT && legendDirection === 'row' && legend }
 					{ this.renderIntervalSelector() }
-					<div className="woocommerce-chart__types">
+					<NavigableMenu
+						className="woocommerce-chart__types"
+						orientation="horizontal"
+						role="menubar"
+					>
 						<IconButton
 							className={ classNames( 'woocommerce-chart__type-button', {
 								'woocommerce-chart__type-button-selected': type === 'line',
 							} ) }
 							icon={ <Gridicon icon="line-graph" /> }
+							title={ __( 'Line chart', 'wc-admin' ) }
+							aria-checked={ type === 'line' }
+							role="menuitemradio"
+							tabIndex={ type === 'line' ? 0 : -1 }
 							onClick={ partial( this.handleTypeToggle, 'line' ) }
 						/>
 						<IconButton
@@ -232,9 +240,13 @@ class Chart extends Component {
 								'woocommerce-chart__type-button-selected': type === 'bar',
 							} ) }
 							icon={ <Gridicon icon="stats-alt" /> }
+							title={ __( 'Bar chart', 'wc-admin' ) }
+							aria-checked={ type === 'bar' }
+							role="menuitemradio"
+							tabIndex={ type === 'bar' ? 0 : -1 }
 							onClick={ partial( this.handleTypeToggle, 'bar' ) }
 						/>
-					</div>
+					</NavigableMenu>
 				</div>
 				<div
 					className={ classNames(
