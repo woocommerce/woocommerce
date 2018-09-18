@@ -87,14 +87,14 @@ class WC_Product_Download implements ArrayAccess {
 	 * @return boolean
 	 */
 	public function is_allowed_filetype() {
-		$file_url = $this->get_file();
+		$file_path = $this->get_file();
 
 		// File types for URL-based files located on the server should get validated.
 		$is_file_on_server = false;
-		if ( false !== stripos( $file_url, network_site_url( '/', 'https' ) ) ||
-			false !== stripos( $file_url, network_site_url( '/', 'https' ) ) ||
-			false !== stripos( $file_url, site_url( '/', 'https' ) ) ||
-			false !== stripos( $file_url, site_url( '/', 'http' ) )
+		if ( false !== stripos( $file_path, network_site_url( '/', 'https' ) ) ||
+			false !== stripos( $file_path, network_site_url( '/', 'https' ) ) ||
+			false !== stripos( $file_path, site_url( '/', 'https' ) ) ||
+			false !== stripos( $file_path, site_url( '/', 'http' ) )
 		) {
 			$is_file_on_server = true;
 		}
