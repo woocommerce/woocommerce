@@ -13,7 +13,7 @@
  *
  * @since 2.2
  */
-class WC_Unit_Test_Case extends WP_UnitTestCase {
+class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 
 	/**
 	 * Holds the WC_Unit_Test_Factory instance.
@@ -42,6 +42,18 @@ class WC_Unit_Test_Case extends WP_UnitTestCase {
 		// Register post types before each test.
 		WC_Post_types::register_post_types();
 		WC_Post_types::register_taxonomies();
+	}
+
+	/**
+	 * Set up class unit test.
+	 *
+	 * @since 3.5.0
+	 */
+	public static function setUpBeforeClass() {
+		parent::setUpBeforeClass();
+
+		// Terms are deleted in WP_UnitTestCase::tearDownAfterClass, then e.g. Uncategorized product_cat is missing.
+		WC_Install::create_terms();
 	}
 
 	/**

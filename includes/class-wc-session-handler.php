@@ -212,7 +212,7 @@ class WC_Session_Handler extends WC_Session {
 		if ( $this->_dirty && $this->has_session() ) {
 			global $wpdb;
 
-			$wpdb->replace( // @codingStandardsIgnoreLine.
+			$wpdb->replace(
 				$this->_table,
 				array(
 					'session_key'    => $this->_customer_id,
@@ -309,7 +309,7 @@ class WC_Session_Handler extends WC_Session {
 
 		wp_cache_delete( $this->get_cache_prefix() . $customer_id, WC_SESSION_CACHE_GROUP );
 
-		$wpdb->delete( // @codingStandardsIgnoreLine.
+		$wpdb->delete(
 			$this->_table,
 			array(
 				'session_key' => $customer_id,
@@ -326,7 +326,6 @@ class WC_Session_Handler extends WC_Session {
 	public function update_session_timestamp( $customer_id, $timestamp ) {
 		global $wpdb;
 
-		// @codingStandardsIgnoreStart.
 		$wpdb->update(
 			$this->_table,
 			array(
@@ -336,9 +335,8 @@ class WC_Session_Handler extends WC_Session {
 				'session_key' => $customer_id,
 			),
 			array(
-				'%d'
+				'%d',
 			)
 		);
-		// @codingStandardsIgnoreEnd.
 	}
 }

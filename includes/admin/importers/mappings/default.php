@@ -55,6 +55,7 @@ function wc_importer_default_english_mappings( $mappings ) {
 		'In stock?'                               => 'stock_status',
 		'Stock'                                   => 'stock_quantity',
 		'Backorders allowed?'                     => 'backorders',
+		'Low stock amount'                        => 'low_stock_amount',
 		'Sold individually?'                      => 'sold_individually',
 		sprintf( 'Weight (%s)', $weight_unit )    => 'weight',
 		sprintf( 'Length (%s)', $dimension_unit ) => 'length',

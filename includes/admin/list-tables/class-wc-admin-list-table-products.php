@@ -39,6 +39,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		add_filter( 'query_vars', array( $this, 'add_custom_query_var' ) );
 		add_filter( 'views_edit-product', array( $this, 'product_views' ) );
 		add_filter( 'get_search_query', array( $this, 'search_label' ) );
+		add_filter( 'posts_clauses', array( $this, 'add_variation_parents_for_shipping_class' ), 10, 2 );
 	}
 
 	/**
@@ -145,7 +146,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	}
 
 	/**
-	 * Render columm: name.
+	 * Render column: name.
 	 */
 	protected function render_name_column() {
 		global $post;
@@ -187,6 +188,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				<div class="tax_status">' . esc_html( $this->object->get_tax_status() ) . '</div>
 				<div class="tax_class">' . esc_html( $this->object->get_tax_class() ) . '</div>
 				<div class="backorders">' . esc_html( $this->object->get_backorders() ) . '</div>
+				<div class="low_stock_amount">' . esc_html( $this->object->get_low_stock_amount() ) . '</div>
 			</div>
 		';
 	}
@@ -496,4 +498,26 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 
 		return wc_clean( wp_unslash( $_GET['s'] ) ); // WPCS: input var ok, sanitization ok.
 	}
+
+	/**
+	 * Modifies post query so that it includes parent products whose variations have particular shipping class assigned.
+	 *
+	 * @param array    $pieces   Array of SELECT statement pieces (from, where, etc).
+	 * @param WP_Query $wp_query WP_Query instance.
+	 * @return array             Array of products, including parents of variations.
+	 */
+	public function add_variation_parents_for_shipping_class( $pieces, $wp_query ) {
+		global $wpdb;
+		if ( isset( $_GET['product_shipping_class'] ) && '0' !== $_GET['product_shipping_class'] ) { // WPCS: input var ok.
+			$replaced_where   = str_replace( ".post_type = 'product'", ".post_type = 'product_variation'", $pieces['where'] );
+			$pieces['where'] .= " OR {$wpdb->posts}.ID in (
+				SELECT {$wpdb->posts}.post_parent FROM 
+				wp_posts  LEFT JOIN {$wpdb->term_relationships} ON ({$wpdb->posts}.ID = {$wpdb->term_relationships}.object_id)
+				WHERE 1=1 $replaced_where
+			)";
+			return $pieces;
+		}
+		return $pieces;
+	}
+
 }

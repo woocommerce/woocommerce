@@ -616,10 +616,10 @@ class WC_Countries {
 	 * @return array
 	 */
 	public function get_default_address_fields() {
-		$address_2_placeholder = __( 'Apartment, suite, unit etc.', 'woocommerce' );
-
 		if ( 'optional' === get_option( 'woocommerce_checkout_address_2_field', 'optional' ) ) {
-			$address_2_placeholder .= ' (' . __( 'optional', 'woocommerce' ) . ')';
+			$address_2_placeholder = __( 'Apartment, suite, unit etc. (optional)', 'woocommerce' );
+		} else {
+			$address_2_placeholder = __( 'Apartment, suite, unit etc.', 'woocommerce' );
 		}
 
 		$fields = array(
@@ -662,6 +662,8 @@ class WC_Countries {
 				'priority'     => 50,
 			),
 			'address_2'  => array(
+				'label'        => __( 'Apartment, suite, or unit.', 'woocommerce' ),
+				'label_class'  => 'screen-reader-text',
 				'placeholder'  => esc_attr( $address_2_placeholder ),
 				'class'        => array( 'form-row-wide', 'address-field' ),
 				'autocomplete' => 'address-line2',
@@ -791,7 +793,10 @@ class WC_Countries {
 						),
 					),
 					'BH' => array(
-						'state' => array(
+						'postcode' => array(
+							'required' => false,
+						),
+						'state'    => array(
 							'required' => false,
 						),
 					),
@@ -1005,6 +1010,16 @@ class WC_Countries {
 							'label'    => __( 'Province', 'woocommerce' ),
 						),
 					),
+					'NG' => array(
+						'postcode' => array(
+							'label' => __( 'Postcode', 'woocommerce' ),
+							'required' => false,
+							'hidden'   => true,
+						),
+						'state'    => array(
+							'label'    => __( 'State', 'woocommerce' ),
+						),
+					),
 					'NZ' => array(
 						'postcode' => array(
 							'label' => __( 'Postcode', 'woocommerce' ),
@@ -1051,12 +1066,16 @@ class WC_Countries {
 					'RO' => array(
 						'state' => array(
 							'label'    => __( 'County', 'woocommerce' ),
-							'required' => false,
+							'required' => true,
 						),
 					),
 					'SG' => array(
 						'state' => array(
 							'required' => false,
+						),
+						'city'  => array(
+							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'SK' => array(

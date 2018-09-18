@@ -200,7 +200,7 @@ class WC_Admin_Taxonomies {
 			$image = wc_placeholder_img_src();
 		}
 		?>
-		<tr class="form-field">
+		<tr class="form-field term-display-type-wrap">
 			<th scope="row" valign="top"><label><?php _e( 'Display type', 'woocommerce' ); ?></label></th>
 			<td>
 				<select id="display_type" name="display_type" class="postform">
@@ -211,7 +211,7 @@ class WC_Admin_Taxonomies {
 				</select>
 			</td>
 		</tr>
-		<tr class="form-field">
+		<tr class="form-field term-thumbnail-wrap">
 			<th scope="row" valign="top"><label><?php _e( 'Thumbnail', 'woocommerce' ); ?></label></th>
 			<td>
 				<div id="product_cat_thumbnail" style="float: left; margin-right: 10px;"><img src="<?php echo esc_url( $image ); ?>" width="60px" height="60px" /></div>

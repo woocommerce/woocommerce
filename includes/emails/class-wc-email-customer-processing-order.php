@@ -17,7 +17,7 @@ if ( ! class_exists( 'WC_Email_Customer_Processing_Order', false ) ) :
 	 * An email sent to the customer when a new order is paid for.
 	 *
 	 * @class       WC_Email_Customer_Processing_Order
-	 * @version     2.0.0
+	 * @version     3.5.0
 	 * @package     WooCommerce/Classes/Emails
 	 * @extends     WC_Email
 	 */
@@ -41,6 +41,7 @@ if ( ! class_exists( 'WC_Email_Customer_Processing_Order', false ) ) :
 			);
 
 			// Triggers for this email.
+			add_action( 'woocommerce_order_status_cancelled_to_processing_notification', array( $this, 'trigger' ), 10, 2 );
 			add_action( 'woocommerce_order_status_failed_to_processing_notification', array( $this, 'trigger' ), 10, 2 );
 			add_action( 'woocommerce_order_status_on-hold_to_processing_notification', array( $this, 'trigger' ), 10, 2 );
 			add_action( 'woocommerce_order_status_pending_to_processing_notification', array( $this, 'trigger' ), 10, 2 );
@@ -56,7 +57,7 @@ if ( ! class_exists( 'WC_Email_Customer_Processing_Order', false ) ) :
 		 * @return string
 		 */
 		public function get_default_subject() {
-			return __( 'Your {site_title} order receipt from {order_date}', 'woocommerce' );
+			return __( 'Payment received for your order', 'woocommerce' );
 		}
 
 		/**
@@ -66,7 +67,7 @@ if ( ! class_exists( 'WC_Email_Customer_Processing_Order', false ) ) :
 		 * @return string
 		 */
 		public function get_default_heading() {
-			return __( 'Thank you for your order', 'woocommerce' );
+			return __( 'Thank you for your payment', 'woocommerce' );
 		}
 
 		/**
@@ -99,7 +100,6 @@ if ( ! class_exists( 'WC_Email_Customer_Processing_Order', false ) ) :
 		/**
 		 * Get content html.
 		 *
-		 * @access public
 		 * @return string
 		 */
 		public function get_content_html() {
@@ -117,7 +117,6 @@ if ( ! class_exists( 'WC_Email_Customer_Processing_Order', false ) ) :
 		/**
 		 * Get content plain.
 		 *
-		 * @access public
 		 * @return string
 		 */
 		public function get_content_plain() {

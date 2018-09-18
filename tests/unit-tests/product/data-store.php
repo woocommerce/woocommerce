@@ -227,7 +227,6 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 
 		$expected_attributes = array( 'pa_size' => array( 'small', 'large' ) );
 		$this->assertEquals( $expected_attributes, $product->get_variation_attributes() );
-		$product->delete();
 	}
 
 	/**
@@ -315,7 +314,6 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$product->set_name( 'Renamed Variable Product' );
 		$product->save();
 		$this->assertEquals( 'Renamed Variable Product', $product->get_name() );
-		$product->delete();
 	}
 
 	public function test_variation_save_attributes() {
@@ -674,11 +672,5 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$this->assertContains( $product2->get_id(), $results );
 		$this->assertNotContains( $product3->get_id(), $results );
 		$this->assertNotContains( $product4->get_id(), $results );
-
-		// Clean up.
-		$product->delete();
-		$product2->delete();
-		$product3->delete();
-		$product4->delete();
 	}
 }
