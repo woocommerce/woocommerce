@@ -70,6 +70,8 @@ class WC_Admin_Api_Init {
 			'WC_Admin_REST_Reports_Revenue_Stats_Controller',
 			'WC_Admin_REST_Reports_Orders_Stats_Controller',
 			'WC_Admin_REST_Reports_Categories_Controller',
+			'WC_Admin_REST_Reports_Taxes_Controller',
+			'WC_Admin_REST_Reports_Taxes_Stats_Controller',
 		);
 
 		foreach ( $controllers as $controller ) {
