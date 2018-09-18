@@ -334,6 +334,8 @@ class WC_API extends WC_Legacy_API {
 			'WC_REST_Reports_Products_Controller',
 			'WC_REST_Reports_Revenue_Stats_Controller',
 			'WC_REST_Reports_Orders_Stats_Controller',
+			'WC_REST_Reports_Coupons_Controller',
+			'WC_REST_Reports_Coupons_Stats_Controller',
 			'WC_REST_Reports_Categories_Controller',
 			'WC_REST_Settings_Controller',
 			'WC_REST_Setting_Options_Controller',
