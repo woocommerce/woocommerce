@@ -35,36 +35,36 @@ class WC_REST_Reports_Controller extends WC_REST_Reports_V2_Controller {
 		$reports = parent::get_reports();
 
 		$reports[] = array(
-			'slug'        => 'orders/count',
-			'description' => __( 'Orders stats count.', 'woocommerce' ),
+			'slug'        => 'orders/totals',
+			'description' => __( 'Orders totals.', 'woocommerce' ),
 		);
 		$reports[] = array(
-			'slug'        => 'products/count',
-			'description' => __( 'Customers stats count.', 'woocommerce' ),
+			'slug'        => 'products/totals',
+			'description' => __( 'Customers totals.', 'woocommerce' ),
 		);
 		$reports[] = array(
-			'slug'        => 'customers/count',
-			'description' => __( 'Customers stats count.', 'woocommerce' ),
+			'slug'        => 'customers/totals',
+			'description' => __( 'Customers totals.', 'woocommerce' ),
 		);
 		$reports[] = array(
-			'slug'        => 'coupons/count',
-			'description' => __( 'Coupons stats count.', 'woocommerce' ),
+			'slug'        => 'coupons/totals',
+			'description' => __( 'Coupons totals.', 'woocommerce' ),
 		);
 		$reports[] = array(
-			'slug'        => 'reviews/count',
-			'description' => __( 'Reviews stats count.', 'woocommerce' ),
+			'slug'        => 'reviews/totals',
+			'description' => __( 'Reviews totals.', 'woocommerce' ),
 		);
 		$reports[] = array(
-			'slug'        => 'categories/count',
-			'description' => __( 'Categories stats count.', 'woocommerce' ),
+			'slug'        => 'categories/totals',
+			'description' => __( 'Categories totals.', 'woocommerce' ),
 		);
 		$reports[] = array(
-			'slug'        => 'tags/count',
-			'description' => __( 'Tags stats count.', 'woocommerce' ),
+			'slug'        => 'tags/totals',
+			'description' => __( 'Tags totals.', 'woocommerce' ),
 		);
 		$reports[] = array(
-			'slug'        => 'attributes/count',
-			'description' => __( 'Attributes stats count.', 'woocommerce' ),
+			'slug'        => 'attributes/totals',
+			'description' => __( 'Attributes totals.', 'woocommerce' ),
 		);
 
 		return $reports;
