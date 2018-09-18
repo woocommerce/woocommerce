@@ -294,7 +294,6 @@ function wc_register_order_type( $type, $args = array() ) {
 /**
  * Return the count of processing orders.
  *
- * @access public
  * @return int
  */
 function wc_processing_order_count() {
@@ -1034,3 +1033,80 @@ function wc_create_order_note( $order_id, $note, $is_customer_note = false, $add
 function wc_delete_order_note( $note_id ) {
 	return wp_delete_comment( $note_id, true );
 }
+
+/**
+ * Make an entry in the wc_order_product_lookup table for an order.
+ *
+ * @since 3.5.0
+ * @param int $order_id Order ID.
+ * @return void
+ */
+function wc_order_product_lookup_entry( $order_id ) {
+	global $wpdb;
+
+	$order = wc_get_order( $order_id );
+	if ( ! $order ) {
+		return;
+	}
+
+	foreach ( $order->get_items() as $order_item ) {
+		$wpdb->replace(
+			$wpdb->prefix . 'wc_order_product_lookup',
+			array(
+				'order_item_id'         => $order_item->get_id(),
+				'order_id'              => $order->get_id(),
+				'product_id'            => $order_item->get_product_id( 'edit' ),
+				'customer_id'           => ( 0 < $order->get_customer_id( 'edit' ) ) ? $order->get_customer_id( 'edit' ) : null,
+				'product_qty'           => $order_item->get_quantity( 'edit' ),
+				'product_gross_revenue' => $order_item->get_subtotal( 'edit' ),
+				'date_created'          => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
+			),
+			array(
+				'%d',
+				'%d',
+				'%d',
+				'%d',
+				'%d',
+				'%f',
+				'%s',
+			)
+		);
+	}
+}
+add_action( 'save_post', 'wc_order_product_lookup_entry', 10, 1 );
+
+/**
+ * Make an entry in the wc_order_coupon_lookup table for an order.
+ *
+ * @since 3.5.0
+ * @param int $order_id Order ID.
+ * @return void
+ */
+function wc_order_coupon_lookup_entry( $order_id ) {
+	global $wpdb;
+
+	$order = wc_get_order( $order_id );
+	if ( ! $order ) {
+		return;
+	}
+
+	$coupon_items = $order->get_items( 'coupon' );
+	foreach ( $coupon_items as $coupon_item ) {
+		$wpdb->replace(
+			$wpdb->prefix . 'wc_order_coupon_lookup',
+			array(
+				'order_id'              => $order_id,
+				'coupon_id'             => $coupon_item->get_id(),
+				'coupon_gross_discount' => $coupon_item->get_discount(),
+				'date_created'          => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
+			),
+			array(
+				'%d',
+				'%d',
+				'%f',
+				'%s',
+			)
+		);
+	}
+}
+add_action( 'save_post', 'wc_order_coupon_lookup_entry', 10, 1 );

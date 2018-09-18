@@ -239,6 +239,20 @@ class WC_API extends WC_Legacy_API {
 		include_once dirname( __FILE__ ) . '/api/class-wc-rest-data-continents-controller.php';
 		include_once dirname( __FILE__ ) . '/api/class-wc-rest-data-countries-controller.php';
 		include_once dirname( __FILE__ ) . '/api/class-wc-rest-data-currencies-controller.php';
+		include_once dirname( __FILE__ ) . '/api/class-wc-rest-reports-controller.php';
+		include_once dirname( __FILE__ ) . '/api/class-wc-rest-reports-categories-controller.php';
+		include_once dirname( __FILE__ ) . '/api/class-wc-rest-reports-coupons-controller.php';
+		include_once dirname( __FILE__ ) . '/api/class-wc-rest-reports-coupons-stats-controller.php';
+		include_once dirname( __FILE__ ) . '/api/class-wc-rest-reports-customers-controller.php';
+		include_once dirname( __FILE__ ) . '/api/class-wc-rest-reports-downloads-controller.php';
+		include_once dirname( __FILE__ ) . '/api/class-wc-rest-reports-downloads-files-controller.php';
+		include_once dirname( __FILE__ ) . '/api/class-wc-rest-reports-downloads-stats-controller.php';
+		include_once dirname( __FILE__ ) . '/api/class-wc-rest-reports-orders-stats-controller.php';
+		include_once dirname( __FILE__ ) . '/api/class-wc-rest-reports-products-controller.php';
+		include_once dirname( __FILE__ ) . '/api/class-wc-rest-reports-products-stats-controller.php';
+		include_once dirname( __FILE__ ) . '/api/class-wc-rest-reports-revenue-stats-controller.php';
+		include_once dirname( __FILE__ ) . '/api/class-wc-rest-reports-taxes-controller.php';
+		include_once dirname( __FILE__ ) . '/api/class-wc-rest-reports-taxes-stats-controller.php';
 	}
 
 	/**
@@ -321,7 +335,17 @@ class WC_API extends WC_Legacy_API {
 			'WC_REST_Product_Shipping_Classes_Controller',
 			'WC_REST_Product_Tags_Controller',
 			'WC_REST_Products_Controller',
+			'WC_REST_Reports_Products_Stats_Controller',
 			'WC_REST_Product_Variations_Controller',
+			'WC_REST_Reports_Controller',
+			'WC_REST_Reports_Products_Controller',
+			'WC_REST_Reports_Revenue_Stats_Controller',
+			'WC_REST_Reports_Orders_Stats_Controller',
+			'WC_REST_Reports_Coupons_Controller',
+			'WC_REST_Reports_Coupons_Stats_Controller',
+			'WC_REST_Reports_Categories_Controller',
+			'WC_REST_Reports_Taxes_Controller',
+			'WC_REST_Reports_Taxes_Stats_Controller',
 			'WC_REST_Report_Sales_Controller',
 			'WC_REST_Report_Top_Sellers_Controller',
 			'WC_REST_Report_Orders_Totals_Controller',
