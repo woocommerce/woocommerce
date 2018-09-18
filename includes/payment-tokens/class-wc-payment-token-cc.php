@@ -81,35 +81,18 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	 * @return boolean True if the passed data is valid
 	 */
 	public function validate() {
-		if ( false === parent::validate() ) {
-			return false;
+		switch ( true ) {
+			case ( false === parent::validate() ):
+			case ( ! $this->get_last4( 'edit' ) ):
+			case ( ! $this->get_expiry_year( 'edit' ) ):
+			case ( ! $this->get_expiry_month( 'edit' ) ):
+			case ( ! $this->get_card_type( 'edit' ) ):
+			case ( 4 !== strlen( $this->get_expiry_year( 'edit' ) ) ):
+			case ( 2 !== strlen( $this->get_expiry_month( 'edit' ) ) ):
+				return false;
+			default:
+				return true;
 		}
-
-		if ( ! $this->get_last4( 'edit' ) ) {
-			return false;
-		}
-
-		if ( ! $this->get_expiry_year( 'edit' ) ) {
-			return false;
-		}
-
-		if ( ! $this->get_expiry_month( 'edit' ) ) {
-			return false;
-		}
-
-		if ( ! $this->get_card_type( 'edit' ) ) {
-			return false;
-		}
-
-		if ( 4 !== strlen( $this->get_expiry_year( 'edit' ) ) ) {
-			return false;
-		}
-
-		if ( 2 !== strlen( $this->get_expiry_month( 'edit' ) ) ) {
-			return false;
-		}
-
-		return true;
 	}
 
 	/**
