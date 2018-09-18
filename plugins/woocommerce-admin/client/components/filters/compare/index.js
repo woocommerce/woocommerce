@@ -4,14 +4,15 @@
  */
 import { Button } from '@wordpress/components';
 import { Component } from '@wordpress/element';
+import { isEqual } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
  * Internal dependencies
  */
 import Card from 'components/card';
+import { getIdsFromQuery, updateQueryString } from 'lib/nav-utils';
 import Search from 'components/search';
-import { updateQueryString } from 'lib/nav-utils';
 
 /**
  * Displays a card + search used to filter results as a comparison between objects.
@@ -31,12 +32,20 @@ class CompareFilter extends Component {
 		}
 	}
 
-	componentDidUpdate( { param } ) {
-		if ( param !== this.props.param ) {
+	componentDidUpdate( { param: prevParam, query: prevQuery } ) {
+		const { getLabels, param, path, query } = this.props;
+		if ( prevParam !== param ) {
 			/* eslint-disable react/no-did-update-set-state */
 			this.setState( { selected: [] } );
-			updateQueryString( { [ param ]: '' }, this.props.path, this.props.query );
 			/* eslint-enable react/no-did-update-set-state */
+			updateQueryString( { [ param ]: '' }, path, query );
+			return;
+		}
+
+		const prevIds = getIdsFromQuery( prevQuery[ param ] );
+		const currentIds = getIdsFromQuery( query[ param ] );
+		if ( ! isEqual( prevIds.sort(), currentIds.sort() ) ) {
+			getLabels( query[ param ] ).then( this.updateLabels );
 		}
 	}
 

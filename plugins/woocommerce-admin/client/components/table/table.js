@@ -6,9 +6,10 @@ import { __, sprintf } from '@wordpress/i18n';
 import { Component, createRef, Fragment } from '@wordpress/element';
 import classnames from 'classnames';
 import { IconButton } from '@wordpress/components';
-import { find, get, noop, uniqueId } from 'lodash';
+import { find, get, noop } from 'lodash';
 import Gridicon from 'gridicons';
 import PropTypes from 'prop-types';
+import { withInstanceId } from '@wordpress/compose';
 
 const ASC = 'asc';
 const DESC = 'desc';
@@ -26,8 +27,6 @@ class Table extends Component {
 		};
 		this.container = createRef();
 		this.sortBy = this.sortBy.bind( this );
-		this.headersID = uniqueId( 'header-' );
-		this.captionID = uniqueId( 'caption-' );
 	}
 
 	componentDidMount() {
@@ -55,7 +54,16 @@ class Table extends Component {
 	}
 
 	render() {
-		const { ariaHidden, caption, classNames, headers, query, rowHeader, rows } = this.props;
+		const {
+			ariaHidden,
+			caption,
+			classNames,
+			headers,
+			instanceId,
+			query,
+			rowHeader,
+			rows,
+		} = this.props;
 		const { tabIndex } = this.state;
 		const classes = classnames( 'woocommerce-table__table', classNames );
 		const sortedBy = query.orderby || get( find( headers, { defaultSort: true } ), 'key', false );
@@ -67,11 +75,14 @@ class Table extends Component {
 				ref={ this.container }
 				tabIndex={ tabIndex }
 				aria-hidden={ ariaHidden }
-				aria-labelledby={ this.captionID }
+				aria-labelledby={ `caption-${ instanceId }` }
 				role="group"
 			>
 				<table>
-					<caption id={ this.captionID } className="woocommerce-table__caption screen-reader-text">
+					<caption
+						id={ `caption-${ instanceId }` }
+						className="woocommerce-table__caption screen-reader-text"
+					>
 						{ caption }
 						{ tabIndex === '0' && <small>{ __( '(scroll to see more)', 'wc-admin' ) }</small> }
 					</caption>
@@ -79,6 +90,7 @@ class Table extends Component {
 						<tr>
 							{ headers.map( ( header, i ) => {
 								const { isSortable, isNumeric, key, label } = header;
+								const labelId = `header-${ instanceId } -${ i }`;
 								const thProps = {
 									className: classnames( 'woocommerce-table__header', {
 										'is-sortable': isSortable,
@@ -110,13 +122,13 @@ class Table extends Component {
 															<Gridicon size={ 18 } icon="chevron-down" />
 														)
 													}
-													aria-describedby={ `${ this.headersID }-${ i }` }
+													aria-describedby={ labelId }
 													onClick={ this.sortBy( key ) }
 													isDefault
 												>
 													{ label }
 												</IconButton>
-												<span className="screen-reader-text" id={ `${ this.headersID }-${ i }` }>
+												<span className="screen-reader-text" id={ labelId }>
 													{ iconLabel }
 												</span>
 											</Fragment>
@@ -189,7 +201,7 @@ Table.propTypes = {
 			/**
 			 * The display label for this column.
 			 */
-			label: PropTypes.string,
+			label: PropTypes.node,
 			/**
 			 * Boolean, true if this column should always display in the table (not shown in toggle-able list).
 			 */
@@ -236,4 +248,4 @@ Table.defaultProps = {
 	rowHeader: 0,
 };
 
-export default Table;
+export default withInstanceId( Table );

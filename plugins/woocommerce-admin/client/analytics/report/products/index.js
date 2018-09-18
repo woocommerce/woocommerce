@@ -139,6 +139,8 @@ export default class extends Component {
 				totalRows={ 500 }
 				rowsPerPage={ rowsPerPage }
 				headers={ headers }
+				compareBy={ 'product' }
+				ids={ products.map( p => p.product_id ) }
 				onClickDownload={ noop }
 				onQueryChange={ onQueryChange }
 				query={ tableQuery }

@@ -22,6 +22,11 @@ import './style.scss';
  */
 const Tag = ( { id, instanceId, label, remove, removeLabel, screenReaderLabel, className } ) => {
 	screenReaderLabel = screenReaderLabel || label;
+	if ( ! label ) {
+		// A null label probably means something went wrong
+		// @todo Maybe this should be a loading indicator?
+		return null;
+	}
 	const classes = classnames( 'woocommerce-tag', className, {
 		'has-remove': !! remove,
 	} );

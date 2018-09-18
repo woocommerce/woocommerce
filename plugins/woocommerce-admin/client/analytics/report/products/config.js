@@ -11,8 +11,11 @@ import apiFetch from '@wordpress/api-fetch';
 import { getIdsFromQuery, stringifyQuery } from 'lib/nav-utils';
 import { NAMESPACE } from 'store/constants';
 
-export function getProductLabelsById( queryString ) {
+export function getProductLabelsById( queryString = '' ) {
 	const idList = getIdsFromQuery( queryString );
+	if ( idList.length < 1 ) {
+		return Promise.resolve( [] );
+	}
 	const payload = stringifyQuery( {
 		include: idList.join( ',' ),
 		per_page: idList.length,
@@ -20,8 +23,11 @@ export function getProductLabelsById( queryString ) {
 	return apiFetch( { path: `${ NAMESPACE }products${ payload }` } );
 }
 
-export function getCategoryLabelsById( queryString ) {
+export function getCategoryLabelsById( queryString = '' ) {
 	const idList = getIdsFromQuery( queryString );
+	if ( idList.length < 1 ) {
+		return Promise.resolve( [] );
+	}
 	const payload = stringifyQuery( {
 		include: idList.join( ',' ),
 		per_page: idList.length,

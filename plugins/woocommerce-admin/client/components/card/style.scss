@@ -22,15 +22,15 @@
 	align-items: center;
 
 	.has-action & {
-		grid-template-columns: 1fr 1fr;
+		grid-template-columns: auto 1fr;
 	}
 
 	.has-menu & {
-		grid-template-columns: 1fr 24px;
+		grid-template-columns: auto 24px;
 	}
 
 	.has-menu.has-action & {
-		grid-template-columns: 1fr 1fr 48px;
+		grid-template-columns: auto 1fr 48px;
 	}
 }
 
@@ -52,7 +52,7 @@
 }
 
 .woocommerce-card__title {
-	margin: 0;
+	margin: 0 $gap 0 0;
 	// EllipsisMenu is 24px, so to match we add 6px padding around the
 	// heading text, which we know is 18px from line-height.
 	padding: 3px 0;
