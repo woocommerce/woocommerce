@@ -98,7 +98,7 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 		ob_start();
 
 		$found         = false;
-		$rating_filter = isset( $_GET['rating_filter'] ) ? array_filter( array_map( 'absint', explode( ',', wp_unslash( $_GET['rating_filter'] ) ) ) ) : array(); // WPCS: input var ok, CSRF ok, sanitization ok.
+		$rating_filter = isset( $_GET['rating_filter'] ) ? absint( wp_unslash( $_GET['rating_filter'] ) ) : ''; // WPCS: input var ok, CSRF ok, sanitization ok.
 
 		$this->widget_start( $args, $instance );
 
