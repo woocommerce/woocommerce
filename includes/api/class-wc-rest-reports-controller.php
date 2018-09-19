@@ -40,7 +40,7 @@ class WC_REST_Reports_Controller extends WC_REST_Reports_V2_Controller {
 		);
 		$reports[] = array(
 			'slug'        => 'products/totals',
-			'description' => __( 'Customers totals.', 'woocommerce' ),
+			'description' => __( 'Products totals.', 'woocommerce' ),
 		);
 		$reports[] = array(
 			'slug'        => 'customers/totals',
