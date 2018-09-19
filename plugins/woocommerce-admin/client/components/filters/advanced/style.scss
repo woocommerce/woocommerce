@@ -16,6 +16,10 @@
 		padding: 0;
 		margin: 0;
 	}
+
+	.components-base-control__field {
+		margin-bottom: 0;
+	}
 }
 
 .woocommerce-filters-advanced__title-select {
@@ -156,6 +160,18 @@
 .woocommerce-filters-advanced__list-selector {
 	@include breakpoint( '<782px' ) {
 		padding: $gap-smallest 0;
+	}
+
+	.components-spinner {
+		margin: auto;
+		display: block;
+		float: none;
+		top: 50%;
+		transform: translateY(-50%);
+
+		@include breakpoint( '<782px' ) {
+			transform: none;
+		}
 	}
 }
 
