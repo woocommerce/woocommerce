@@ -62,7 +62,7 @@ class Legend extends Component {
 										'woocommerce-legend__item-checkmark-checked': row.visible,
 									} ) }
 									id={ row.key }
-									style={ { backgroundColor: getColor( row.key, colorParams ) } }
+									style={ { color: getColor( row.key, colorParams ) } }
 								/>
 								<span className="woocommerce-legend__item-title" id={ row.key }>
 									{ row.key }
