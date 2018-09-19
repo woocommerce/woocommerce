@@ -143,25 +143,25 @@ class AdvancedFilters extends Component {
 				<ul className="woocommerce-filters-advanced__list" ref={ this.filterListRef }>
 					{ activeFilters.map( filter => {
 						const { key } = filter;
-						const filterConfig = config[ key ];
+						const { input, labels } = config[ key ];
 						return (
 							<li className="woocommerce-filters-advanced__list-item" key={ key }>
 								{ /*eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex*/ }
 								<fieldset tabIndex="0">
 									{ /*eslint-enable-next-line jsx-a11y/no-noninteractive-tabindex*/ }
-									<legend className="screen-reader-text">{ filterConfig.label }</legend>
+									<legend className="screen-reader-text">{ labels.title }</legend>
 									<div className="woocommerce-filters-advanced__fieldset">
-										{ 'SelectControl' === filterConfig.input.component && (
+										{ 'SelectControl' === input.component && (
 											<SelectFilter
 												filter={ filter }
-												config={ filterConfig }
+												config={ config[ key ] }
 												onFilterChange={ this.onFilterChange }
 											/>
 										) }
-										{ 'Search' === filterConfig.input.component && (
+										{ 'Search' === input.component && (
 											<SearchFilter
 												filter={ filter }
-												config={ filterConfig }
+												config={ config[ key ] }
 												onFilterChange={ this.onFilterChange }
 											/>
 										) }
@@ -169,7 +169,7 @@ class AdvancedFilters extends Component {
 								</fieldset>
 								<IconButton
 									className="woocommerce-filters-advanced__remove"
-									label={ sprintf( __( 'Remove %s filter', 'wc-admin' ), filterConfig.label ) }
+									label={ labels.remove }
 									onClick={ partial( this.removeFilter, key ) }
 									icon={ <Gridicon icon="cross-small" /> }
 								/>
@@ -197,7 +197,7 @@ class AdvancedFilters extends Component {
 									{ availableFilterKeys.map( key => (
 										<li key={ key }>
 											<Button onClick={ partial( this.addFilter, key, onClose ) }>
-												{ config[ key ].addLabel }
+												{ config[ key ].labels.add }
 											</Button>
 										</li>
 									) ) }
@@ -237,8 +237,12 @@ AdvancedFilters.propTypes = {
 	 */
 	config: PropTypes.objectOf(
 		PropTypes.shape( {
-			label: PropTypes.string,
-			addLabel: PropTypes.string,
+			labels: PropTypes.shape( {
+				add: PropTypes.string,
+				placeholder: PropTypes.string,
+				remove: PropTypes.string,
+				title: PropTypes.string,
+			} ),
 			rules: PropTypes.arrayOf( PropTypes.object ),
 			input: PropTypes.object,
 		} )

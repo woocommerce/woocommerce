@@ -2,11 +2,11 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { SelectControl } from '@wordpress/components';
 import { partial } from 'lodash';
 import PropTypes from 'prop-types';
+import { withInstanceId } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -43,26 +43,34 @@ class SearchFilter extends Component {
 	}
 
 	render() {
-		const { filter, config, onFilterChange } = this.props;
+		const { config, filter, instanceId, onFilterChange } = this.props;
 		const { selected } = this.state;
 		const { key, rule } = filter;
+		const { input, labels, rules } = config;
 		return (
 			<Fragment>
-				<div className="woocommerce-filters-advanced__fieldset-legend">{ config.label }</div>
+				<div
+					id={ `${ key }-${ instanceId }` }
+					className="woocommerce-filters-advanced__fieldset-legend"
+				>
+					{ labels.title }
+				</div>
 				{ rule && (
 					<SelectControl
 						className="woocommerce-filters-advanced__list-specifier"
-						options={ config.rules }
+						options={ rules }
 						value={ rule }
 						onChange={ partial( onFilterChange, key, 'rule' ) }
-						aria-label={ sprintf( __( 'Select a %s filter match', 'wc-admin' ), config.addLabel ) }
+						aria-label={ labels.rule }
 					/>
 				) }
 				<div className="woocommerce-filters-advanced__list-selector">
 					<Search
 						onChange={ this.onSearchChange }
-						type={ config.input.type }
+						type={ input.type }
+						placeholder={ labels.placeholder }
 						selected={ selected }
+						ariaLabelledby={ `${ key }-${ instanceId }` }
 					/>
 				</div>
 			</Fragment>
@@ -75,8 +83,11 @@ SearchFilter.propTypes = {
 	 * The configuration object for the single filter to be rendered.
 	 */
 	config: PropTypes.shape( {
-		label: PropTypes.string,
-		addLabel: PropTypes.string,
+		labels: PropTypes.shape( {
+			placeholder: PropTypes.string,
+			rule: PropTypes.string,
+			title: PropTypes.string,
+		} ),
 		rules: PropTypes.arrayOf( PropTypes.object ),
 		input: PropTypes.object,
 	} ).isRequired,
@@ -94,4 +105,4 @@ SearchFilter.propTypes = {
 	onFilterChange: PropTypes.func.isRequired,
 };
 
-export default SearchFilter;
+export default withInstanceId( SearchFilter );
