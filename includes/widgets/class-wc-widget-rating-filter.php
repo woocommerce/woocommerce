@@ -104,6 +104,11 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 
 		echo '<ul>';
 
+		$link = get_permalink( wc_get_page_id( 'shop' ) );
+		if ( is_product_category() ) {
+			$link = get_term_link( get_queried_object_id() );
+		}
+
 		for ( $rating = 5; $rating >= 1; $rating-- ) {
 			$count = $this->get_filtered_product_count( $rating );
 			if ( empty( $count ) ) {
@@ -111,7 +116,6 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 			}
 			$found = true;
 
-			$link = get_permalink( wc_get_page_id( 'shop' ) );
 			$link = $count > 0 ? add_query_arg( 'rating_filter', $rating, $link ) : remove_query_arg( 'rating_filter' );
 			$link = apply_filters( 'woocommerce_rating_filter_link', $link );
 
