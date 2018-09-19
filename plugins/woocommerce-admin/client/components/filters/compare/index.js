@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { Button } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { isEqual } from 'lodash';
 import PropTypes from 'prop-types';
@@ -11,7 +11,9 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import Card from 'components/card';
-import { getIdsFromQuery, updateQueryString } from 'lib/nav-utils';
+import CompareButton from './button';
+import Link from 'components/link';
+import { getIdsFromQuery, getNewPath, updateQueryString } from 'lib/nav-utils';
 import Search from 'components/search';
 
 /**
@@ -24,6 +26,7 @@ class CompareFilter extends Component {
 			selected: [],
 		};
 
+		this.clearQuery = this.clearQuery.bind( this );
 		this.updateQuery = this.updateQuery.bind( this );
 		this.updateLabels = this.updateLabels.bind( this );
 
@@ -49,6 +52,11 @@ class CompareFilter extends Component {
 		}
 	}
 
+	clearQuery() {
+		const { param, path, query } = this.props;
+		return getNewPath( { [ param ]: undefined }, path, query );
+	}
+
 	updateLabels( data ) {
 		const selected = data.map( p => ( { id: p.id, label: p.name } ) );
 		this.setState( { selected } );
@@ -70,15 +78,23 @@ class CompareFilter extends Component {
 					<Search
 						type={ type }
 						selected={ selected }
+						placeholder={ labels.placeholder }
 						onChange={ value => {
 							this.setState( { selected: value } );
 						} }
 					/>
 				</div>
 				<div className="woocommerce-filters__compare-footer">
-					<Button onClick={ this.updateQuery } isDefault>
+					<CompareButton
+						count={ selected.length }
+						helpText={ labels.helpText }
+						onClick={ this.updateQuery }
+					>
 						{ labels.update }
-					</Button>
+					</CompareButton>
+					<Link type="wc-admin" href={ this.clearQuery() }>
+						{ __( 'Clear all', 'wc-admin' ) }
+					</Link>
 				</div>
 			</Card>
 		);
@@ -94,6 +110,10 @@ CompareFilter.propTypes = {
 	 * Object of localized labels.
 	 */
 	labels: PropTypes.shape( {
+		/**
+		 * Label for the search placeholder.
+		 */
+		placeholder: PropTypes.string,
 		/**
 		 * Label for the card title.
 		 */

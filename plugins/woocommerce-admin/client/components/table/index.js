@@ -3,10 +3,10 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Button, IconButton, ToggleControl } from '@wordpress/components';
 import classnames from 'classnames';
 import { Component } from '@wordpress/element';
 import { fill, find, findIndex, first, isEqual, noop, partial, uniq } from 'lodash';
+import { IconButton, ToggleControl } from '@wordpress/components';
 import PropTypes from 'prop-types';
 
 /**
@@ -14,6 +14,7 @@ import PropTypes from 'prop-types';
  */
 import './style.scss';
 import Card from 'components/card';
+import CompareButton from 'components/filters/compare/button';
 import EllipsisMenu from 'components/ellipsis-menu';
 import { getIdsFromQuery } from 'lib/nav-utils';
 import MenuItem from 'components/ellipsis-menu/menu-item';
@@ -163,7 +164,7 @@ class TableCard extends Component {
 			title,
 			totalRows,
 		} = this.props;
-		const { showCols } = this.state;
+		const { selectedRows, showCols } = this.state;
 		const allHeaders = this.props.headers;
 		let headers = this.filterCols( this.props.headers );
 		let rows = this.filterCols( this.props.rows );
@@ -185,9 +186,14 @@ class TableCard extends Component {
 				title={ title }
 				action={ [
 					compareBy && (
-						<Button key="compare" onClick={ this.onCompare } isDefault>
+						<CompareButton
+							key="compare"
+							count={ selectedRows.length }
+							helpText={ __( 'Select at least two items to compare', 'wc-admin' ) }
+							onClick={ this.onCompare }
+						>
 							{ __( 'Compare', 'wc-admin' ) }
-						</Button>
+						</CompareButton>
 					),
 					compareBy && (
 						<div key="search" style={ { padding: '4px 12px', color: '#6c7781' } }>

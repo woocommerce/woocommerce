@@ -5,6 +5,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { findIndex, noop } from 'lodash';
+import Gridicon from 'gridicons';
 import PropTypes from 'prop-types';
 
 /**
@@ -70,17 +71,20 @@ class Search extends Component {
 
 	render() {
 		const autocompleter = this.getAutocompleter();
-		const { selected } = this.props;
+		const { ariaLabelledby, placeholder, selected } = this.props;
 		const { value = '' } = this.state;
 		return (
 			<div className="woocommerce-search">
+				<Gridicon className="woocommerce-search__icon" icon="search" />
 				<Autocomplete completer={ autocompleter } onSelect={ this.selectResult }>
 					{ ( { listBoxId, activeId, onChange } ) => (
 						<input
 							type="search"
 							value={ value }
+							placeholder={ placeholder }
 							className="woocommerce-search__input"
 							onChange={ this.updateSearch( onChange ) }
+							aria-labelledby={ ariaLabelledby }
 							aria-owns={ listBoxId }
 							aria-activedescendant={ activeId }
 						/>
@@ -122,6 +126,10 @@ Search.propTypes = {
 	 * The object type to be used in searching.
 	 */
 	type: PropTypes.oneOf( [ 'products', 'product_cats', 'orders', 'customers' ] ).isRequired,
+	/**
+	 * A placeholder for the search input.
+	 */
+	placeholder: PropTypes.string,
 	/**
 	 * An array of objects describing selected values.
 	 */

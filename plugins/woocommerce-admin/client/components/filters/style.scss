@@ -61,4 +61,10 @@
 
 .woocommerce-filters__compare-footer {
 	padding: $gap;
+	display: flex;
+	align-items: center;
+
+	.components-button {
+		margin-right: $gap;
+	}
 }

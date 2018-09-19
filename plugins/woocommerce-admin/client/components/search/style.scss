@@ -3,9 +3,16 @@
 .woocommerce-search {
 	position: relative;
 
+	.woocommerce-search__icon {
+		position: absolute;
+		top: 10px;
+		left: 10px;
+		fill: $core-grey-light-900;
+	}
+
 	.woocommerce-search__input {
 		width: 100%;
-		padding: $gap-small;
+		padding: $gap-small $gap-small $gap-small 36px;
 		border: 1px solid $core-grey-light-700;
 	}
 
