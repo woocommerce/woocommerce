@@ -189,6 +189,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Fix Layered Nav Widget where special HTML entities did not display correctly in the "Any %s" string. #21312
 * Fix - Set the is_checkout javascript parameter on any page that uses the checkout filter or shortcode. #21328
 * Fix - Fix cron_interval property support in WP_Background_Process. #21353
+* Fix - CSS Changes to make text fields line up on the shipping settings page. #21247
 * Fix/Tweak - Fire `woocommerce_grant_product_download_access` hook after the download has its ID set. #20905
 * Fix/Tweak/Performance - Change wp_woocommerce_sessions primary key to session_id. #21245
 * Tweak - Show empty terms in admin product category filter dropdown. #20324
