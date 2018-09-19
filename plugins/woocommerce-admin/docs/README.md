@@ -10,7 +10,7 @@ This is a feature plugin for a modern, javascript-driven WooCommerce Admin exper
 
 ## Prerequisites
 
-[Gutenberg](https://wordpress.org/plugins/gutenberg/) and [WooCommerce](https://wordpress.org/plugins/woocommerce/) should be installed prior to activating the WooCommerce Admin feature plugin. You also need v3 of the WooCommerce REST API, which you can get by installing the feature branch of WooCommerce. [Clone the feature branch from github](https://github.com/woocommerce/woocommerce/tree/feature/rest-api-v3), or [download a zip of WooCommerce](https://github.com/woocommerce/woocommerce/archive/feature/rest-api-v3.zip).
+[Gutenberg](https://wordpress.org/plugins/gutenberg/) and [WooCommerce](https://wordpress.org/plugins/woocommerce/) should be installed prior to activating the WooCommerce Admin feature plugin.
 
 For better debugging, it's also recommended you add `define( 'SCRIPT_DEBUG', true );` to your wp-config. This will load the unminified version of all libraries, and specifically the development build of React.
 
