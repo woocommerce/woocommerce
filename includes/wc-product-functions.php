@@ -284,7 +284,6 @@ function wc_placeholder_img_src( $size = 'woocommerce_thumbnail' ) {
 
 	if ( ! empty( $placeholder_image ) ) {
 		if ( is_numeric( $placeholder_image ) ) {
-			$dimensions = wc_get_image_size( $size );
 			$image      = wp_get_attachment_image_src( $placeholder_image, $size );
 
 			if ( ! empty( $image[0] ) ) {
