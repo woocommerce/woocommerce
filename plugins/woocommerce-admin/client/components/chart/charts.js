@@ -102,6 +102,7 @@ class D3Chart extends Component {
 			margin,
 			orderedKeys,
 			tooltipFormat,
+			tooltipTitle,
 			type,
 			xFormat,
 			x2Format,
@@ -134,6 +135,7 @@ class D3Chart extends Component {
 			parseDate,
 			scale,
 			tooltipFormat: d3TimeFormat( tooltipFormat ),
+			tooltipTitle,
 			type,
 			uniqueDates,
 			uniqueKeys,
@@ -218,9 +220,14 @@ D3Chart.propTypes = {
 	 */
 	orderedKeys: PropTypes.array,
 	/**
-	 * A datetime formatting string to format the title of the toolip, passed to d3TimeFormat.
+	 * A datetime formatting string to format the date displayed as the title of the toolip
+	 * if `tooltipTitle` is missing, passed to d3TimeFormat.
 	 */
 	tooltipFormat: PropTypes.string,
+	/**
+	 * A string to use as a title for the tooltip. Takes preference over `tooltipFormat`.
+	 */
+	tooltipTitle: PropTypes.string,
 	/**
 	 * Chart type of either `line` or `bar`.
 	 */

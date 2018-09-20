@@ -4,7 +4,7 @@
  * External dependencies
  */
 
-import { findIndex } from 'lodash';
+import { findIndex, get } from 'lodash';
 import { max as d3Max } from 'd3-array';
 import { axisBottom as d3AxisBottom, axisLeft as d3AxisLeft } from 'd3-axis';
 import { format as d3Format } from 'd3-format';
@@ -64,7 +64,7 @@ export const getOrderedKeys = ( data, uniqueKeys ) =>
 		.map( key => ( {
 			key,
 			focus: true,
-			total: data.reduce( ( a, c ) => a + c[ key ], 0 ),
+			total: data.reduce( ( a, c ) => a + c[ key ].value, 0 ),
 			visible: true,
 		} ) )
 		.sort( ( a, b ) => b.total - a.total );
@@ -83,7 +83,7 @@ export const getLineData = ( data, orderedKeys ) =>
 		values: data.map( d => ( {
 			date: d.date,
 			focus: row.focus,
-			value: d[ row.key ],
+			value: get( d, [ row.key, 'value' ], 0 ),
 			visible: row.visible,
 		} ) ),
 	} ) );
@@ -400,19 +400,23 @@ const showTooltip = ( node, params, d, position ) => {
 				<li class="key-row">
 					<div class="key-container">
 						<span class="key-color" style="background-color:${ getColor( row.key, params ) }"></span>
-						<span class="key-key">${ row.key }:</span>
+						<span class="key-key">${ d[ row.key ].label ? d[ row.key ].label : row.key }</span>
 					</div>
-					<span class="key-value">${ formatCurrency( d[ row.key ] ) }</span>
+					<span class="key-value">${ formatCurrency( d[ row.key ].value ) }</span>
 				</li>
 			`
 	);
+
+	const tooltipTitle = params.tooltipTitle
+		? params.tooltipTitle
+		: params.tooltipFormat( d.date instanceof Date ? d.date : new Date( d.date ) );
 
 	params.tooltip
 		.style( 'left', xPosition + 'px' )
 		.style( 'top', yPosition + 'px' )
 		.style( 'display', 'flex' ).html( `
 			<div>
-				<h4>${ params.tooltipFormat( d.date instanceof Date ? d.date : new Date( d.date ) ) }</h4>
+				<h4>${ tooltipTitle }</h4>
 				<ul>
 				${ keys.join( '' ) }
 				</ul>
@@ -561,7 +565,7 @@ export const drawBars = ( node, data, params ) => {
 			params.orderedKeys.filter( row => row.visible ).map( row => ( {
 				key: row.key,
 				focus: row.focus,
-				value: d[ row.key ],
+				value: d[ row.key ].value,
 				visible: row.visible,
 			} ) )
 		)
