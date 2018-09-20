@@ -75,15 +75,24 @@ interface WC_Queue_Interface {
 	public function schedule_cron( $timestamp, $cron_schedule, $hook, $args = array(), $group = '' );
 
 	/**
-	 * Dequeue all actions with a matching hook (and optionally matching args and group) so they are not run.
+	 * Dequeue the next scheduled instance of an action with a matching hook (and optionally matching args and group).
 	 *
-	 * Any recurring actions with a matching hook will also be cancelled, not just the next scheduled action.
+	 * Any recurring actions with a matching hook should also be cancelled, not just the next scheduled action.
 	 *
 	 * @param string $hook The hook that the job will trigger
 	 * @param array $args Args that would have been passed to the job
 	 * @param string $group
 	 */
 	public function cancel( $hook, $args = array(), $group = '' );
+
+	/**
+	 * Dequeue all actions with a matching hook (and optionally matching args and group) so no matching actions are ever run.
+	 *
+	 * @param string $hook The hook that the job will trigger
+	 * @param array $args Args that would have been passed to the job
+	 * @param string $group
+	 */
+	public function cancel_all( $hook, $args = array(), $group = '' );
 
 	/**
 	 * Get the date and time for the next scheduled occurence of an action with a given hook

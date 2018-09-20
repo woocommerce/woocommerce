@@ -83,13 +83,16 @@ class WC_Action_Queue implements WC_Queue_Interface {
 	}
 
 	/**
-	 * Dequeue all actions with a matching hook (and optionally matching args and group) so they are not run.
+	 * Dequeue the next scheduled instance of an action with a matching hook (and optionally matching args and group).
 	 *
-	 * Any recurring actions with a matching hook will also be cancelled, not just the next scheduled action.
+	 * Any recurring actions with a matching hook should also be cancelled, not just the next scheduled action.
 	 *
-	 * Technically, one action in a recurring or Cron action is scheduled at any one point in time. The next
-	 * in the sequence is scheduled after the previous one is run, so only the next scheduled action needs to
-	 * be cancelled/dequeued to stop the sequence.
+	 * While technically only the next instance of a recurring or cron action is unscheduled by this method, that will also
+	 * prevent all future instances of that recurring or cron action from being run. Recurring and cron actions are scheduled
+	 * in a sequence instead of all being scheduled at once. Each successive occurrence of a recurring action is scheduled
+	 * only after the former action is run. As the next instance is never run, because it's unscheduled by this function,
+	 * then the following instance will never be scheduled (or exist), which is effectively the same as being unscheduled
+	 * by this method also.
 	 *
 	 * @param string $hook The hook that the job will trigger.
 	 * @param array  $args Args that would have been passed to the job.
@@ -97,6 +100,17 @@ class WC_Action_Queue implements WC_Queue_Interface {
 	 */
 	public function cancel( $hook, $args = array(), $group = '' ) {
 		as_unschedule_action( $hook, $args, $group );
+	}
+
+	/**
+	 * Dequeue all actions with a matching hook (and optionally matching args and group) so no matching actions are ever run.
+	 *
+	 * @param string $hook The hook that the job will trigger.
+	 * @param array  $args Args that would have been passed to the job.
+	 * @param string $group Group name.
+	 */
+	public function cancel_all( $hook, $args = array(), $group = '' ) {
+		as_unschedule_all_actions( $hook, $args, $group );
 	}
 
 	/**
