@@ -21,7 +21,7 @@ class WC_Admin_Api_Init {
 		// Hook in data stores.
 		add_filter( 'woocommerce_data_stores', array( 'WC_Admin_Api_Init', 'add_data_stores' ) );
 		// Add wc-admin report tables to list of WooCommerce tables.
-		add_filter( 'woocommerce_install_get_tables', array( 'WC_Admin_Api_Init', 'add_report_tables' ) );
+		add_filter( 'woocommerce_install_get_tables', array( 'WC_Admin_Api_Init', 'add_tables' ) );
 		// REST API extensions init.
 		add_action( 'rest_api_init', array( $this, 'rest_api_init' ) );
 		add_filter( 'rest_endpoints', array( 'WC_Admin_Api_Init', 'filter_rest_endpoints' ), 10, 1 );
@@ -37,6 +37,7 @@ class WC_Admin_Api_Init {
 	public function init_classes() {
 		// Interfaces.
 		require_once dirname( __FILE__ ) . '/interfaces/class-wc-admin-reports-data-store-interface.php';
+		require_once dirname( __FILE__ ) . '/interfaces/class-wc-admin-notes-data-store-interface.php';
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-query.php';
 
 		// Common date time code.
@@ -49,7 +50,7 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-products-stats-query.php';
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-categories-query.php';
 
-		// Reports data stores.
+		// Data stores.
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-data-store.php';
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-orders-data-store.php';
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-products-data-store.php';
@@ -58,6 +59,10 @@ class WC_Admin_Api_Init {
 
 		// Data triggers.
 		require_once dirname( __FILE__ ) . '/wc-admin-order-functions.php';
+		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-notes-data-store.php';
+
+		// CRUD classes.
+		require_once dirname( __FILE__ ) . '/class-wc-admin-notes.php';
 	}
 
 	/**
@@ -248,17 +253,18 @@ class WC_Admin_Api_Init {
 				'report-products'       => 'WC_Admin_Reports_Products_Data_Store',
 				'report-products-stats' => 'WC_Admin_Reports_Products_Stats_Data_Store',
 				'report-categories'     => 'WC_Admin_Reports_Categories_Data_Store',
+				'admin-notes'           => 'WC_Admin_Notes_Data_Store',
 			)
 		);
 	}
 
 	/**
-	 * Adds report tables.
+	 * Adds new tables.
 	 *
 	 * @param array $wc_tables List of WooCommerce tables.
 	 * @return array
 	 */
-	public static function add_report_tables( $wc_tables ) {
+	public static function add_tables( $wc_tables ) {
 		global $wpdb;
 
 		return array_merge(
@@ -269,6 +275,8 @@ class WC_Admin_Api_Init {
 				"{$wpdb->prefix}wc_order_product_lookup",
 				"{$wpdb->prefix}wc_order_tax_lookup",
 				"{$wpdb->prefix}wc_order_coupon_lookup",
+				"{$wpdb->prefix}woocommerce_admin_notes",
+				"{$wpdb->prefix}woocommerce_admin_note_actions",
 			)
 		);
 	}
@@ -332,7 +340,31 @@ class WC_Admin_Api_Init {
 			KEY order_id (order_id),
 			KEY coupon_id (coupon_id),
 			KEY date_created (date_created)
-		  ) $collate;";
+		  ) $collate;
+			CREATE TABLE {$wpdb->prefix}woocommerce_admin_notes (
+				note_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+				note_type varchar(20) NOT NULL,
+				note_locale varchar(20) NOT NULL,
+				note_title longtext NOT NULL,
+				note_content longtext NOT NULL,
+				note_icon varchar(200) NOT NULL,
+				note_data longtext NULL default null,
+				status varchar(200) NOT NULL,
+				source varchar(200) NOT NULL,
+				date_created datetime NOT NULL default '0000-00-00 00:00:00',
+				date_reminder datetime NULL default null,
+				PRIMARY KEY (note_id)
+				) $collate;
+			CREATE TABLE {$wpdb->prefix}woocommerce_admin_note_actions (
+				action_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+				note_id BIGINT UNSIGNED NOT NULL,
+				action_name varchar(255) NOT NULL,
+				action_label varchar(255) NOT NULL,
+				action_query longtext NOT NULL,
+				PRIMARY KEY (action_id),
+				KEY note_id (note_id)
+				) $collate;
+			";
 
 		return $tables;
 	}
