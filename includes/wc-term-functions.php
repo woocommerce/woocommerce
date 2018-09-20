@@ -480,6 +480,12 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 
 	foreach ( (array) $taxonomies as $taxonomy ) {
 		if ( taxonomy_is_product_attribute( $taxonomy ) || in_array( $taxonomy, apply_filters( 'woocommerce_sortable_taxonomies', array( 'product_cat' ) ), true ) ) {
+
+			// Don't modify the orderby when we're ordering attributes by name.
+			if ( taxonomy_is_product_attribute( $taxonomy ) && 'name' === wc_attribute_orderby( $taxonomy ) ) {
+				return $clauses;
+			}
+
 			$found = true;
 			break;
 		}
