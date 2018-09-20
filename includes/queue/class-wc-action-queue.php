@@ -41,7 +41,7 @@ class WC_Action_Queue implements WC_Queue_Interface {
 	 * @return string The action ID.
 	 */
 	public function schedule_single( $timestamp, $hook, $args = array(), $group = '' ) {
-		return wc_schedule_single_action( $timestamp, $hook, $args, $group );
+		return as_schedule_single_action( $timestamp, $hook, $args, $group );
 	}
 
 	/**
@@ -55,7 +55,7 @@ class WC_Action_Queue implements WC_Queue_Interface {
 	 * @return string The action ID.
 	 */
 	public function schedule_recurring( $timestamp, $interval_in_seconds, $hook, $args = array(), $group = '' ) {
-		return wc_schedule_recurring_action( $timestamp, $interval_in_seconds, $hook, $args, $group );
+		return as_schedule_recurring_action( $timestamp, $interval_in_seconds, $hook, $args, $group );
 	}
 
 	/**
@@ -79,7 +79,7 @@ class WC_Action_Queue implements WC_Queue_Interface {
 	 * @return string The action ID
 	 */
 	public function schedule_cron( $timestamp, $cron_schedule, $hook, $args = array(), $group = '' ) {
-		return wc_schedule_cron_action( $timestamp, $cron_schedule, $hook, $args, $group );
+		return as_schedule_cron_action( $timestamp, $cron_schedule, $hook, $args, $group );
 	}
 
 	/**
@@ -96,7 +96,7 @@ class WC_Action_Queue implements WC_Queue_Interface {
 	 * @param string $group Group name.
 	 */
 	public function cancel( $hook, $args = array(), $group = '' ) {
-		wc_unschedule_action( $hook, $args, $group );
+		as_unschedule_action( $hook, $args, $group );
 	}
 
 	/**
@@ -110,7 +110,7 @@ class WC_Action_Queue implements WC_Queue_Interface {
 	 */
 	public function get_next( $hook, $args = null, $group = '' ) {
 
-		$next_timestamp = wc_next_scheduled_action( $hook, $args, $group );
+		$next_timestamp = as_next_scheduled_action( $hook, $args, $group );
 
 		if ( $next_timestamp ) {
 			return wc_string_to_datetime( $next_timestamp );
@@ -141,6 +141,6 @@ class WC_Action_Queue implements WC_Queue_Interface {
 	 * @return array
 	 */
 	public function search( $args = array(), $return_format = OBJECT ) {
-		return wc_get_scheduled_actions( $args, $return_format );
+		return as_get_scheduled_actions( $args, $return_format );
 	}
 }
