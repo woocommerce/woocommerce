@@ -337,7 +337,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 				$this->sort_intervals( $data, $query_args['orderby'], $query_args['order'] );
 				$this->remove_extra_records( $data, $query_args['page'], $intervals_query['per_page'], $db_interval_count, $expected_interval_count, $query_args['orderby'] );
 			} else {
-				$this->update_interval_boundary_dates( $query_args['adj_after'], $query_args['adj_before'], $query_args['interval'], $data->intervals );
+				$this->update_interval_boundary_dates( $query_args['after'], $query_args['before'], $query_args['interval'], $data->intervals );
 			}
 			$this->create_interval_subtotals( $data->intervals );
 
