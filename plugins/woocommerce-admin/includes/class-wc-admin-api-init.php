@@ -31,7 +31,7 @@ class WC_Admin_Api_Init {
 		add_action( 'woocommerce_after_register_post_type', array( 'WC_Admin_Api_Init', 'order_product_lookup_store_init' ), 20 );
 
 		// Create tables.
-		$this->create_db_tables();
+		self::create_db_tables();
 	}
 
 	/**
@@ -331,10 +331,17 @@ class WC_Admin_Api_Init {
 	/**
 	 * Create database tables.
 	 */
-	protected function create_db_tables() {
+	public static function create_db_tables() {
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
 		dbDelta( self::get_schema() );
+	}
+
+	/**
+	 * Install plugin.
+	 */
+	public static function install() {
+		self::create_db_tables();
 	}
 
 }
