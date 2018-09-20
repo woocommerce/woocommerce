@@ -41,6 +41,29 @@ class ActionScheduler_wpPostStore_Test extends ActionScheduler_UnitTestCase {
 		$this->assertEquals($action->get_group(), $retrieved->get_group());
 	}
 
+	/**
+	 * @expectedException ActionScheduler_InvalidActionException
+	 * @dataProvider provide_bad_args
+	 *
+	 * @param string $content
+	 */
+	public function test_action_bad_args( $content ) {
+		$store   = new ActionScheduler_wpPostStore();
+		$post_id = wp_insert_post( array(
+			'post_type'    => ActionScheduler_wpPostStore::POST_TYPE,
+			'post_status'  => ActionScheduler_Store::STATUS_PENDING,
+			'post_content' => $content,
+		) );
+
+		$store->fetch_action( $post_id );
+	}
+
+	public function provide_bad_args() {
+		return array(
+			array( '{"bad_json":true}}' ),
+		);
+	}
+
 	public function test_cancel_action() {
 		$time = as_get_datetime_object();
 		$schedule = new ActionScheduler_SimpleSchedule($time);
