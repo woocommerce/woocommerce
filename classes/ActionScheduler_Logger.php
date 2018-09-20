@@ -41,7 +41,58 @@ abstract class ActionScheduler_Logger {
 	 */
 	abstract public function get_logs( $action_id );
 
-	abstract public function init();
 
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function init() {
+		add_action( 'action_scheduler_stored_action', array( $this, 'log_stored_action' ), 10, 1 );
+		add_action( 'action_scheduler_canceled_action', array( $this, 'log_canceled_action' ), 10, 1 );
+		add_action( 'action_scheduler_before_execute', array( $this, 'log_started_action' ), 10, 1 );
+		add_action( 'action_scheduler_after_execute', array( $this, 'log_completed_action' ), 10, 1 );
+		add_action( 'action_scheduler_failed_execution', array( $this, 'log_failed_action' ), 10, 2 );
+		add_action( 'action_scheduler_failed_action', array( $this, 'log_timed_out_action' ), 10, 2 );
+		add_action( 'action_scheduler_unexpected_shutdown', array( $this, 'log_unexpected_shutdown' ), 10, 2 );
+		add_action( 'action_scheduler_reset_action', array( $this, 'log_reset_action' ), 10, 1 );
+		add_action( 'action_scheduler_execution_ignored', array( $this, 'log_ignored_action' ), 10, 1 );
+	}
+
+	public function log_stored_action( $action_id ) {
+		$this->log( $action_id, __( 'action created', 'action-scheduler' ) );
+	}
+
+	public function log_canceled_action( $action_id ) {
+		$this->log( $action_id, __( 'action canceled', 'action-scheduler' ) );
+	}
+
+	public function log_started_action( $action_id ) {
+		$this->log( $action_id, __( 'action started', 'action-scheduler' ) );
+	}
+
+	public function log_completed_action( $action_id ) {
+		$this->log( $action_id, __( 'action complete', 'action-scheduler' ) );
+	}
+
+	public function log_failed_action( $action_id, \Exception $exception ) {
+		$this->log( $action_id, sprintf( __( 'action failed: %s', 'action-scheduler' ), $exception->getMessage() ) );
+	}
+
+	public function log_timed_out_action( $action_id, $timeout ) {
+		$this->log( $action_id, sprintf( __( 'action timed out after %s seconds', 'action-scheduler' ), $timeout ) );
+	}
+
+	public function log_unexpected_shutdown( $action_id, $error ) {
+		if ( ! empty( $error ) ) {
+			$this->log( $action_id, sprintf( __( 'unexpected shutdown: PHP Fatal error %s in %s on line %s', 'action-scheduler' ), $error['message'], $error['file'], $error['line'] ) );
+		}
+	}
+
+	public function log_reset_action( $action_id ) {
+		$this->log( $action_id, __( 'action reset', 'action_scheduler' ) );
+	}
+
+	public function log_ignored_action( $action_id ) {
+		$this->log( $action_id, __( 'action ignored', 'action-scheduler' ) );
+	}
 }
  

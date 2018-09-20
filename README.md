@@ -38,6 +38,90 @@ The events logged by default include when an action:
 
 Actions can also be grouped together using a custom taxonomy named `action-group`.
 
+## Usage
+
+There are two ways to install Action Scheduler:
+
+1. as a library within your plugin or theme; or
+1. as a regular WordPress plugin
+
+### Usage as a Library
+
+To use Action Scheduler as a library:
+
+1. include the Action Scheduler codebase
+1. load the library by including the `action-scheduler.php` file
+
+#### Including Action Scheduler Codebase
+
+Using a [subtree in your plugin, theme or site's Git repository](https://www.atlassian.com/blog/git/alternatives-to-git-submodule-git-subtree) to include Action Scheduler is the recommended method. Composer can also be used.
+
+To include Action Scheduler as a git subtree:
+
+##### Step 1. Add the Repository as a Remote
+
+```
+git remote add -f subtree-action-scheduler https://github.com/Prospress/action-scheduler.git
+```
+
+Adding the subtree as a remote allows us to refer to it in short from via the name `subtree-action-scheduler`, instead of the full GitHub URL.
+
+##### Step 2. Add the Repo as a Subtree
+
+```
+git subtree add --prefix libraries/action-scheduler subtree-action-scheduler master --squash
+```
+
+This will add the `master` branch of Action Scheduler to your repository in the folder `libraries/action-scheduler`.
+
+You can change the `--prefix` to change where the code is included. Or change the `master` branch to a tag, like `2.1.0` to include only a stable version.
+
+##### Step 3. Update the Subtree
+
+To update Action Scheduler to a new version, use the commands:
+
+```
+git fetch subtree-action-scheduler master
+git subtree pull --prefix libraries/action-scheduler subtree-action-scheduler master --squash
+```
+
+#### Loading Action Scheduler
+
+To load Action Scheduler, you only need to include `action-scheduler.php` file, e.g.
+
+```php
+<?php
+require_once( plugin_dir_path( __FILE__ ) . '/libraries/action-scheduler/action-scheduler.php' );
+```
+
+There is no need to call any functions or do else to initialize Action Scheduler.
+
+When the `action-scheduler.php` file is included, Action Scheduler will register the version in that file and then load the most recent version of itself on the site. It will also load the most recent version of [all API functions](https://github.com/prospress/action-scheduler#api-functions).
+
+#### Load Order
+
+Action Scheduler will register its version on `'plugins_loaded'` with priority `0` - after all other plugin codebases has been loaded. Therefore **the `action-scheduler.php` file must be included before `'plugins_loaded'` priority `0`**.
+
+It is recommended to load it _when the file including it is included_. However, if you need to load it on a hook, then the hook must occur before `'plugins_loaded'`, or you can use `'plugins_loaded'` with negative priority, like `-10`.
+
+Action Scheduler will later initialize itself on `'init'` with priority `1`.  Action Scheduler APIs should not be used until after `'init'` with priority `1`.
+
+### Usage as a Plugin
+
+Action Scheduler includes the necessary file headers to be used as a plugin.
+
+To install it as a plugin:
+
+1. Download the .zip archive of the latest [stable release](https://github.com/Prospress/action-scheduler/releases)
+1. Go to the **Plugins > Add New > Upload** administration screen on your WordPress site
+1. Select the archive file you just downloaded
+1. Click **Install Now**
+1. Click **Activate**
+
+Or clone the Git repository into your site's `wp-content/plugins` folder.
+
+Using Action Scheduler as a plugin can be handy for developing against newer versions, rather than having to update the subtree in your codebase. **When installed as a plugin, Action Scheduler does not provide any user interfaces for scheduling actions**. The only way to interact with Action Scheduler is via code.
+
 ## Managing Scheduled Actions
 
 Action Scheduler has a built in administration screen for monitoring, debugging and manually triggering scheduled actions.
@@ -62,7 +146,7 @@ Still have questions? Check out the [FAQ below](#faq).
 
 Action Scheduler has custom [WP CLI](http://wp-cli.org) commands available for processing actions.
 
-For many sites, WP CLI is a much better choice for running queues of actions than the default WP Cron runner. These are some common cases where WP CLI is a better option:
+For large sites, WP CLI is a much better choice for running queues of actions than the default WP Cron runner. These are some common cases where WP CLI is a better option:
 
 * long-running tasks - Tasks that take a significant amount of time to run
 * large queues - A large number of tasks will naturally take a longer time
@@ -70,7 +154,7 @@ For many sites, WP CLI is a much better choice for running queues of actions tha
 
 With a regular web request, you may have to deal with script timeouts enforced by hosts, or other restraints that make it more challenging to run Action Scheduler tasks. Utilizing WP CLI to run commands directly on the server give you more freedom. This means that you typically don't have the same constraints of a normal web request.
 
-If you choose to utilize WP CLI exclusively, you can disable the normal WP CLI queue runner by installing the [Action Scheduler - Disable Default Queue Runner](https://github.com/Prospress/action-scheduler-disable-default-runner) plugin. Note that if you do this, you **must** run Action Scheduler manually.
+If you choose to utilize WP CLI exclusively, you can disable the normal WP CLI queue runner by installing the [Action Scheduler - Disable Default Queue Runner](https://github.com/Prospress/action-scheduler-disable-default-runner) plugin. Note that if you do this, you **must** run Action Scheduler via WP CLI or another method, otherwise no scheduled actions will be processed.
  
 ### Commands
 
@@ -87,9 +171,31 @@ These are the commands available to use with Action Scheduler:
 
 The best way to get a full list of commands and their available options is to use WP CLI itself. This can be done by running `wp action-scheduler` to list all Action Scheduler commands, or by including the `--help` flag with any of the individual commands. This will provide all relevant parameters and flags for the command.
 
-### Improving Performance with `--group`
+### Cautionary Note on Action Dependencies when using `--group` or `--hooks` Options
 
-Being able to run queues for specific groups of actions is valuable at scale. Why? Because it means you can restrict the concurrency for similar actions.
+The `--group` and `--hooks` options should be used with caution if you have an implicit dependency between scheduled actions based on their schedule.
+
+For example, consider two scheduled actions for the same subscription:
+
+* `scheduled_payment` scheduled for `2015-11-13 00:00:00` and
+* `scheduled_expiration` scheduled for `2015-11-13 00:01:00`.
+
+Under normal conditions, Action Scheduler will ensure the `scheduled_payment` action is run before the `scheduled_expiration` action. Becuase that's how they are scheduled.
+
+However, when using the `--hooks` option, the `scheduled_payment` and `scheduled_expiration` actions will be processed in separate queues. As a result, this dependency is not guaranteed.
+
+For example, consider a site with both:
+
+* 100,000 `scheduled_payment` actions, scheduled for `2015-11-13 00:00:00`
+* 100 `scheduled_expiration` actions, scheduled for `2015-11-13 00:01:00`
+
+If two queue runners are running alongside each other with each runner dedicated to just one of these hooks, the queue runner handling expiration hooks will complete the processing of the expiration hooks more quickly than the queue runner handling all the payment actions.
+
+**Because of this, the `--group` and `--hooks` options should be used with caution to avoid processing actions with an implicit dependency based on their schedule in separate queues.**
+
+### Improving Performance with `--group` or `--hooks`
+
+Being able to run queues for specific hooks or groups of actions is valuable at scale. Why? Because it means you can restrict the concurrency for similar actions.
 
 For example, let's say you have 300,000 actions queued up comprised of:
 
@@ -115,13 +221,18 @@ The Action Scheduler API functions are designed to mirror the WordPress [WP-Cron
 
 Functions return similar values and accept similar arguments to their WP-Cron counterparts. The notable differences are:
 
-* `wc_schedule_single_action()` & `wc_schedule_recurring_action()` will return the post ID of the scheduled action rather than boolean indicating whether the event was scheduled
-* `wc_schedule_recurring_action()` takes an interval in seconds as the recurring interval rather than an arbitrary string
-* `wc_schedule_single_action()` & `wc_schedule_recurring_action()` can accept a `$group` parameter to group different actions for the one plugin together.
-* the `wp_` prefix is substituted with `wc_` and the term `event` is replaced with `action`
+* `as_schedule_single_action()` & `as_schedule_recurring_action()` will return the post ID of the scheduled action rather than boolean indicating whether the event was scheduled
+* `as_schedule_recurring_action()` takes an interval in seconds as the recurring interval rather than an arbitrary string
+* `as_schedule_single_action()` & `as_schedule_recurring_action()` can accept a `$group` parameter to group different actions for the one plugin together.
+* the `wp_` prefix is substituted with `as_` and the term `event` is replaced with `action`
 
+### API Function Availability
 
-#### Function Reference / `wc_schedule_single_action()`
+As mentioned in the [Usage - Load Order](#load-order) section, Action Scheduler will initialize itself on the `'init'` hook with priority `1`. While API functions are loaded prior to this and call be called, they should not be called until after `'init'` with priority `1`, because each component, like the data store, has not yet been initialized.
+
+Do not use Action Scheduler API functions prior to `'init'` hook with priority `1`. Doing so could lead to unexpected results, like data being stored in the incorrect location.
+
+#### Function Reference / `as_schedule_single_action()`
 
 ##### Description
 
@@ -130,7 +241,7 @@ Schedule an action to run one time.
 ##### Usage
 
 ```php
-<?php wc_schedule_single_action( $timestamp, $hook, $args, $group ); ?>
+<?php as_schedule_single_action( $timestamp, $hook, $args, $group ); ?>
 ````
 
 ##### Parameters
@@ -145,7 +256,7 @@ Schedule an action to run one time.
 (integer) the action's ID in the [posts](http://codex.wordpress.org/Database_Description#Table_Overview) table.
 
 
-#### Function Reference / `wc_schedule_recurring_action()`
+#### Function Reference / `as_schedule_recurring_action()`
 
 ##### Description
 
@@ -154,7 +265,7 @@ Schedule an action to run repeatedly with a specified interval in seconds.
 ##### Usage
 
 ```php
-<?php wc_schedule_recurring_action( $timestamp, $interval_in_seconds, $hook, $args, $group ); ?>
+<?php as_schedule_recurring_action( $timestamp, $interval_in_seconds, $hook, $args, $group ); ?>
 ````
 
 ##### Parameters
@@ -170,7 +281,7 @@ Schedule an action to run repeatedly with a specified interval in seconds.
 (integer) the action's ID in the [posts](http://codex.wordpress.org/Database_Description#Table_Overview) table.
 
 
-#### Function Reference / `wc_schedule_cron_action()`
+#### Function Reference / `as_schedule_cron_action()`
 
 ##### Description
 
@@ -179,7 +290,7 @@ Schedule an action that recurs on a cron-like schedule.
 ##### Usage
 
 ```php
-<?php wc_schedule_cron_action( $timestamp, $schedule, $hook, $args, $group ); ?>
+<?php as_schedule_cron_action( $timestamp, $schedule, $hook, $args, $group ); ?>
 ````
 
 ##### Parameters
@@ -195,7 +306,7 @@ Schedule an action that recurs on a cron-like schedule.
 (integer) the action's ID in the [posts](http://codex.wordpress.org/Database_Description#Table_Overview) table.
 
 
-#### Function Reference / `wc_unschedule_action()`
+#### Function Reference / `as_unschedule_action()`
 
 ##### Description
 
@@ -204,7 +315,7 @@ Cancel the next occurrence of a job.
 ##### Usage
 
 ```php
-<?php wc_unschedule_action( $hook, $args, $group ); ?>
+<?php as_unschedule_action( $hook, $args, $group ); ?>
 ````
 
 ##### Parameters
@@ -218,7 +329,7 @@ Cancel the next occurrence of a job.
 (null)
 
 
-#### Function Reference / `wc_next_scheduled_action()`
+#### Function Reference / `as_next_scheduled_action()`
 
 ##### Description
 
@@ -227,7 +338,7 @@ Returns the next timestamp for a scheduled action.
 ##### Usage
 
 ```php
-<?php wc_next_scheduled_action( $hook, $args, $group ); ?>
+<?php as_next_scheduled_action( $hook, $args, $group ); ?>
 ````
 
 ##### Parameters
@@ -241,7 +352,7 @@ Returns the next timestamp for a scheduled action.
 (integer|boolean) The timestamp for the next occurrence, or false if nothing was found.
 
 
-#### Function Reference / `wc_get_scheduled_actions()`
+#### Function Reference / `as_get_scheduled_actions()`
 
 ##### Description
 
@@ -250,7 +361,7 @@ Find scheduled actions.
 ##### Usage
 
 ```php
-<?php wc_get_scheduled_actions( $args, $return_format ); ?>
+<?php as_get_scheduled_actions( $args, $return_format ); ?>
 ````
 
 ##### Parameters
