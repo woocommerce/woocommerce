@@ -96,6 +96,12 @@ function wc_admin_register_pages() {
 		'parent' => '/analytics',
 		'path'   => '/analytics/orders',
 	) );
+
+	wc_admin_register_page( array(
+		'title'  => __( 'Coupons', 'wc-admin' ),
+		'parent' => '/analytics',
+		'path'   => '/analytics/coupons',
+	) );
 }
 add_action( 'admin_menu', 'wc_admin_register_pages' );
 

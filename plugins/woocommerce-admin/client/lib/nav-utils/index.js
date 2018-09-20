@@ -4,6 +4,7 @@
  */
 import history from 'lib/history';
 import { parse, stringify } from 'qs';
+import { uniq } from 'lodash';
 
 /**
  * Returns a string with the site's wp-admin URL appended. JS version of `admin_url`.
@@ -35,10 +36,12 @@ export const stringifyQuery = query => ( query ? '?' + stringify( query ) : '' )
  * @return {Array} List of IDs converted to numbers.
  */
 export function getIdsFromQuery( queryString = '' ) {
-	return queryString
-		.split( ',' )
-		.map( id => parseInt( id, 10 ) )
-		.filter( Boolean );
+	return uniq(
+		queryString
+			.split( ',' )
+			.map( id => parseInt( id, 10 ) )
+			.filter( Boolean )
+	);
 }
 
 /**

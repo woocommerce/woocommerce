@@ -14,7 +14,6 @@ import { partial } from 'lodash';
  */
 import { Card, ReportFilters } from '@woocommerce/components';
 import { filters, advancedFilterConfig } from './config';
-import './style.scss';
 
 class OrdersReport extends Component {
 	constructor( props ) {
