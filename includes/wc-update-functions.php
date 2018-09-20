@@ -1976,6 +1976,17 @@ function wc_update_350_order_customer_id( $updater = false ) {
 }
 
 /**
+ * Set the comment type to 'review' for product reviews that don't have a comment type.
+ */
+function wc_update_350_reviews_comment_type() {
+	global $wpdb;
+
+	$wpdb->query(
+		"UPDATE {$wpdb->prefix}comments JOIN {$wpdb->prefix}posts ON {$wpdb->prefix}posts.ID = {$wpdb->prefix}comments.comment_post_ID AND ( {$wpdb->prefix}posts.post_type = 'product' OR {$wpdb->prefix}posts.post_type = 'product_variation' ) SET {$wpdb->prefix}comments.comment_type = 'review' WHERE {$wpdb->prefix}comments.comment_type = ''"
+	);
+}
+
+/**
  * Update DB Version.
  */
 function wc_update_350_db_version() {
