@@ -332,7 +332,7 @@ Chart.propTypes = {
 Chart.defaultProps = {
 	data: [],
 	dateParser: '%Y-%m-%dT%H:%M:%S',
-	tooltipFormat: '%Y-%m-%d',
+	tooltipFormat: '%B %d, %Y',
 	xFormat: '%d',
 	x2Format: '%b %Y',
 	yFormat: '$.3s',

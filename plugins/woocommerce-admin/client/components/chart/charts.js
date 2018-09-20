@@ -254,7 +254,7 @@ D3Chart.defaultProps = {
 		top: 20,
 	},
 	layout: 'standard',
-	tooltipFormat: '%Y-%m-%d',
+	tooltipFormat: '%B %d, %Y',
 	type: 'line',
 	width: 600,
 	xFormat: '%Y-%m-%d',
