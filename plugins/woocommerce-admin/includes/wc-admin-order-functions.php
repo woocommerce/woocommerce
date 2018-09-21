@@ -17,7 +17,7 @@ function wc_admin_order_product_lookup_entry( $order_id ) {
 
 	foreach ( $order->get_items() as $order_item ) {
 		$wpdb->replace(
-			$wpdb->prefix . 'wc_admin_order_product_lookup',
+			$wpdb->prefix . 'wc_order_product_lookup',
 			array(
 				'order_item_id'         => $order_item->get_id(),
 				'order_id'              => $order->get_id(),
