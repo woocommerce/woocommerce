@@ -91,7 +91,7 @@ function install_wc_admin() {
  * Manually load the plugin being tested.
  */
 function _manually_load_plugin() {
-	require dirname( dirname( dirname( __FILE__ ) ) ) . '/gutenberg/gutenberg.php';
+	//require dirname( dirname( dirname( __FILE__ ) ) ) . '/gutenberg/gutenberg.php';
 	load_wc();
 	require dirname( dirname( __FILE__ ) ) . '/wc-admin.php';
 }

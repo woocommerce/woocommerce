@@ -11,9 +11,6 @@ before_script:
   - phpenv config-rm xdebug.ini
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
   - bash bin/install-wp-tests.sh wc_admin_test root '' localhost $WP_VERSION
-  - curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-  - chmod +x wp-cli.phar
-  - ./wp-cli.phar plugin install gutenberg --activate --path=$WP_CORE_DIR
   - bash bin/travis.sh before
 
 
