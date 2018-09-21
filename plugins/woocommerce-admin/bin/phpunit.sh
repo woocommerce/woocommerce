@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 WORKING_DIR="$PWD"
-cd "/tmp/wordpress"
+cd "/tmp/wordpress/wp-content/plugins/wc-admin/"
 ls -l
 phpunit -c phpunit.xml.dist
 cd "$WORKING_DIR"
