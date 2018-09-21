@@ -97,8 +97,9 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 
 		ob_start();
 
-		$found         = false;
-		$rating_filter = isset( $_GET['rating_filter'] ) ? absint( wp_unslash( $_GET['rating_filter'] ) ) : ''; // WPCS: input var ok, CSRF ok, sanitization ok.
+		$found = false;
+
+		$_GET['rating_filter'] = isset( $_GET['rating_filter'] ) ? absint( wp_unslash( $_GET['rating_filter'] ) ) : 0; // WPCS: input var ok, CSRF ok, sanitization ok.
 
 		$this->widget_start( $args, $instance );
 
@@ -109,17 +110,19 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 			$link = get_term_link( get_queried_object_id() );
 		}
 
-		for ( $rating = 5; $rating >= 1; $rating-- ) {
+		for ( $rating = 5; $rating > 0; $rating-- ) {
 			$count = $this->get_filtered_product_count( $rating );
 			if ( empty( $count ) ) {
 				continue;
 			}
 			$found = true;
 
-			$link = $count > 0 ? add_query_arg( 'rating_filter', $rating, $link ) : remove_query_arg( 'rating_filter' );
+			$_GET['rating_filter'] = $rating;
+
+			$link = $count > 0 ? add_query_arg( $_GET, $link ) : remove_query_arg( 'rating_filter' ); // WPCS: input var ok, CSRF ok.
 			$link = apply_filters( 'woocommerce_rating_filter_link', $link );
 
-			$class = $rating === $rating_filter ? 'wc-layered-nav-rating chosen' : 'wc-layered-nav-rating';
+			$class = $rating === $_GET['rating_filter'] ? 'wc-layered-nav-rating chosen' : 'wc-layered-nav-rating'; // WPCS: input var ok, CSRF ok.
 
 			$rating_html = wc_get_star_rating_html( $rating );
 			$count_html  = esc_html( apply_filters( 'woocommerce_rating_filter_count', "({$count})", $count, $rating ) );
