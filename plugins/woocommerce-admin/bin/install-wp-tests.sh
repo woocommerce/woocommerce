@@ -150,7 +150,8 @@ install_db() {
 install_deps() {
 
 	# Script Variables
-	WP_CORE_DIR="$HOME/wordpress"
+	# WP_CORE_DIR="$HOME/wordpress"
+	WP_SITE_URL="http://local.wordpress.test"
 	BRANCH=$TRAVIS_BRANCH
 	REPO=$TRAVIS_REPO_SLUG
 	WORKING_DIR="$PWD"
