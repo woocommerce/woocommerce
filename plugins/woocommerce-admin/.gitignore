@@ -13,3 +13,6 @@ languages/*
 !languages/README.md
 
 .idea
+
+# Composer
+/vendor/
