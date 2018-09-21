@@ -61,7 +61,7 @@ class WC_Admin_Tests_Reports_Revenue_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => date( 'Y-m-d H', $order->get_date_created()->getTimestamp() ),
+					'interval'       => date( 'Y-m-d G', $order->get_date_created()->getTimestamp() ),
 					'date_start'     => $start_time,
 					'date_start_gmt' => $start_time,
 					'date_end'       => $end_time,
@@ -102,7 +102,7 @@ class WC_Admin_Tests_Reports_Revenue_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => date( 'Y-m-d H', $order->get_date_created()->getTimestamp() ),
+					'interval'       => date( 'Y-m-d G', $order->get_date_created()->getTimestamp() ),
 					'date_start'     => $start_time,
 					'date_start_gmt' => $start_time,
 					'date_end'       => $end_time,
