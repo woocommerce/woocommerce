@@ -9,6 +9,14 @@ php:
 env:
   - WP_VERSION=latest WP_MULTISITE=0
 
+matrix:
+  fast_finish: true
+  include:
+  - php: 5.3
+    dist: precise
+  - php: 7.2
+    env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
+
 before_script:
   - phpenv config-rm xdebug.ini
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
