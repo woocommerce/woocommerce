@@ -1002,7 +1002,7 @@ class WC_Admin_Setup_Wizard {
 					'plugins'     => array(
 						array(
 							'name' => __( 'ShipStation', 'woocommerce' ),
-							'slug' => 'woocommerce-shipstation',
+							'slug' => 'woocommerce-shipstation-integration',
 						),
 					),
 				) );
