@@ -26,12 +26,9 @@ class WC_Admin_Api_Init {
 		add_action( 'rest_api_init', array( $this, 'rest_api_init' ) );
 		add_filter( 'rest_endpoints', array( 'WC_Admin_Api_Init', 'filter_rest_endpoints' ), 10, 1 );
 		add_filter( 'woocommerce_debug_tools', array( 'WC_Admin_Api_Init', 'add_regenerate_tool' ) );
-		// Initialize report classes.
-		add_action( 'woocommerce_after_register_post_type', array( 'WC_Admin_Api_Init', 'orders_data_store_init' ), 20 );
-		add_action( 'woocommerce_after_register_post_type', array( 'WC_Admin_Api_Init', 'order_product_lookup_store_init' ), 20 );
 
-		// Create tables.
-		self::create_db_tables();
+		// Initialize Orders data store class's static vars.
+		add_action( 'woocommerce_after_register_post_type', array( 'WC_Admin_Api_Init', 'orders_data_store_init' ), 20 );
 	}
 
 	/**
@@ -166,7 +163,7 @@ class WC_Admin_Api_Init {
 	}
 
 	/**
-	 * Init orders product looup store.
+	 * Init orders product lookup store.
 	 *
 	 * @param WC_Background_Updater|null $updater Updater instance.
 	 * @return bool
@@ -341,7 +338,11 @@ class WC_Admin_Api_Init {
 	 * Install plugin.
 	 */
 	public static function install() {
+		// Create tables.
 		self::create_db_tables();
+
+		// Initialize report tables.
+		add_action( 'woocommerce_after_register_post_type', array( 'WC_Admin_Api_Init', 'order_product_lookup_store_init' ), 20 );
 	}
 
 }
