@@ -541,13 +541,13 @@ function wc_create_attribute( $args ) {
 			$metadatas = $wpdb->get_results(
 				$wpdb->prepare(
 					"SELECT post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = '_product_attributes' AND meta_value LIKE %s",
-					'%' . $old_taxonomy_name . '%'
+					'%' . $wpdb->esc_like( $old_taxonomy_name ) . '%'
 				),
 			ARRAY_A );
 			foreach ( $metadatas as $metadata ) {
 				$product_id = $metadata['post_id'];
-				$unserialized_data = @unserialize( $metadata['meta_value'] );
-				if ( ! $unserialized_data || ! isset( $unserialized_data[ $old_taxonomy_name ] ) ) {
+				$unserialized_data = maybe_unserialize( $metadata['meta_value'] );
+				if ( ! $unserialized_data || ! is_array( $unserialized_data ) || ! isset( $unserialized_data[ $old_taxonomy_name ] ) ) {
 					continue;
 				}
 
