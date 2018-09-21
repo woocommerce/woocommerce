@@ -62,6 +62,7 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-notes-data-store.php';
 
 		// CRUD classes.
+		require_once dirname( __FILE__ ) . '/class-wc-admin-note.php';
 		require_once dirname( __FILE__ ) . '/class-wc-admin-notes.php';
 	}
 
@@ -343,12 +344,13 @@ class WC_Admin_Api_Init {
 		  ) $collate;
 			CREATE TABLE {$wpdb->prefix}woocommerce_admin_notes (
 				note_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-				note_type varchar(20) NOT NULL,
-				note_locale varchar(20) NOT NULL,
-				note_title longtext NOT NULL,
-				note_content longtext NOT NULL,
-				note_icon varchar(200) NOT NULL,
-				note_data longtext NULL default null,
+				name varchar(255) NOT NULL,
+				type varchar(20) NOT NULL,
+				locale varchar(20) NOT NULL,
+				title longtext NOT NULL,
+				content longtext NOT NULL,
+				icon varchar(200) NOT NULL,
+				content_data longtext NULL default null,
 				status varchar(200) NOT NULL,
 				source varchar(200) NOT NULL,
 				date_created datetime NOT NULL default '0000-00-00 00:00:00',
@@ -358,9 +360,9 @@ class WC_Admin_Api_Init {
 			CREATE TABLE {$wpdb->prefix}woocommerce_admin_note_actions (
 				action_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 				note_id BIGINT UNSIGNED NOT NULL,
-				action_name varchar(255) NOT NULL,
-				action_label varchar(255) NOT NULL,
-				action_query longtext NOT NULL,
+				name varchar(255) NOT NULL,
+				label varchar(255) NOT NULL,
+				query longtext NOT NULL,
 				PRIMARY KEY (action_id),
 				KEY note_id (note_id)
 				) $collate;
