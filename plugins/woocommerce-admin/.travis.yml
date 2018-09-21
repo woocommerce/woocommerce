@@ -1,7 +1,25 @@
 sudo: false
-language: node_js
+
+language: php
+php:
+  - 5.6
+  - 7.0
+  - 7.1
+
+env:
+  - WP_VERSION=latest WP_MULTISITE=0
+
+before_script:
+  - phpenv config-rm xdebug.ini
+  - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  - bash bin/install-wp-tests.sh wc_admin_test root '' localhost $WP_VERSION
+  - bash bin/travis.sh before
+
+
 node_js:
   - "8"
 script:
   - npm run lint
   - npm test
+  - bash bin/phpunit.sh
+  - bash bin/phpcs.sh
