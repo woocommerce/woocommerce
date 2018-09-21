@@ -13,7 +13,7 @@ import Gridicon from 'gridicons';
 import { ActivityCard, ActivityCardPlaceholder } from '../activity-card';
 import ActivityHeader from '../activity-header';
 import { getAdminLink } from 'lib/nav-utils';
-import { Section } from 'layout/section';
+import { Section } from '@woocommerce/components';
 
 const demoNotices = [
 	{

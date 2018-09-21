@@ -22,6 +22,7 @@
   * [ProductImage](components/product-image.md)
   * [Rating](components/rating.md)
   * [Search](components/search.md)
+  * [Section](components/section.md)
   * [SegmentedSelection](components/segmented-selection.md)
   * [SplitButton](components/split-button.md)
   * [Summary](components/summary.md)

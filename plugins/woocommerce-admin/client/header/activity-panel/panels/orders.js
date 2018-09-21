@@ -21,10 +21,10 @@ import {
 	MenuTitle,
 	MenuItem,
 	OrderStatus,
+	Section,
 } from '@woocommerce/components';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
 import { getOrderRefundTotal } from 'lib/order-values';
-import { Section } from 'layout/section';
 
 function OrdersPanel( { orders } ) {
 	const { data = [], isLoading } = orders;

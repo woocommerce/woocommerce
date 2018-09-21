@@ -12,7 +12,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import './style.scss';
-import { H, Section } from 'layout/section';
+import { H, Section } from '@woocommerce/components';
 
 class ActivityCard extends Component {
 	render() {

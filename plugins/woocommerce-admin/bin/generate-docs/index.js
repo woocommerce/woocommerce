@@ -5,7 +5,7 @@
  */
 const fs = require( 'fs' );
 const path = require( 'path' );
-const { parse } = require( 'react-docgen' );
+const { parse, resolver } = require( 'react-docgen' );
 
 /**
  * Internal dependencies
@@ -47,14 +47,27 @@ console.log( `Wrote docs for ${ files.length } files.` );
  *
  * @param { string } fileName The absolute path of this file.
  * @param { string } content Content of this file.
+ * @param { boolean } multiple If there are multiple exports in this file, we need to use a different resolver.
  */
-function buildDocs( fileName, content ) {
+function buildDocs( fileName, content, multiple = false ) {
+	const mdFileName = getMdFileName( fileName );
+	let markdown;
+
 	try {
-		const docObject = parse( content );
-		const mdFileName = getMdFileName( fileName );
-		const markdown = generateMarkdown( docObject );
+		if ( multiple ) {
+			const docObject = parse( content, resolver.findAllExportedComponentDefinitions );
+			markdown = docObject.map( doc => generateMarkdown( doc ) ).join( '\n\n' );
+		} else {
+			const docObject = parse( content );
+			markdown = generateMarkdown( docObject );
+		}
 		fs.appendFileSync( mdFileName, markdown );
 	} catch ( parseErr ) {
+		if ( ! multiple ) {
+			// The most likely error is that there are multiple exported components
+			buildDocs( fileName, content, true );
+			return;
+		}
 		console.warn( fileName, parseErr );
 	}
 }

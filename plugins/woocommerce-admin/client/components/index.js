@@ -22,6 +22,7 @@ export { default as EmptyContent } from './empty-content';
 export { default as Flag } from './flag';
 export { default as FilterPicker } from './filters/filter';
 export { default as Gravatar } from './gravatar';
+export { H, Section } from './section';
 export { default as ImageAsset } from './image-asset';
 export { default as Link } from './link';
 export { default as MenuItem } from './ellipsis-menu/menu-item';

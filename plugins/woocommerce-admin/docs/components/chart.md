@@ -23,9 +23,17 @@ Format to parse dates into d3 time format
 ### `tooltipFormat`
 
 - Type: String
-- Default: `'%Y-%m-%d'`
+- Default: `'%B %d, %Y'`
 
-A datetime formatting string to format the title of the toolip, passed to d3TimeFormat.
+A datetime formatting string to format the date displayed as the title of the toolip
+if `tooltipTitle` is missing, passed to d3TimeFormat.
+
+### `tooltipTitle`
+
+- Type: String
+- Default: null
+
+A string to use as a title for the tooltip. Takes preference over `tooltipFormat`.
 
 ### `xFormat`
 
@@ -175,9 +183,17 @@ The list of labels for this chart.
 ### `tooltipFormat`
 
 - Type: String
-- Default: `'%Y-%m-%d'`
+- Default: `'%B %d, %Y'`
 
-A datetime formatting string to format the title of the toolip, passed to d3TimeFormat.
+A datetime formatting string to format the date displayed as the title of the toolip
+if `tooltipTitle` is missing, passed to d3TimeFormat.
+
+### `tooltipTitle`
+
+- Type: String
+- Default: null
+
+A string to use as a title for the tooltip. Takes preference over `tooltipFormat`.
 
 ### `type`
 
@@ -270,6 +286,4 @@ Display legend items as a `row` or `column` inside a flex-box.
 
 `ChartPlaceholder` displays a large loading indiciator for use in place of a `Chart` while data is loading.
 
-Props
------
 

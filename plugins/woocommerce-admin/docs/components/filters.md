@@ -50,8 +50,11 @@ Props
 
 - **Required**
 - Type: Object
-  - label: String
-  - addLabel: String
+  - labels: Object
+  - add: String
+  - placeholder: String
+  - remove: String
+  - title: String
   - rules: Array
 Object
   - input: Object

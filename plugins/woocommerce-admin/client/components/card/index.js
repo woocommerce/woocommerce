@@ -11,7 +11,7 @@ import PropTypes from 'prop-types';
  */
 import './style.scss';
 import EllipsisMenu from 'components/ellipsis-menu';
-import { H, Section } from 'layout/section';
+import { H, Section } from 'components/section';
 import { validateComponent } from 'lib/proptype-validator';
 
 /**

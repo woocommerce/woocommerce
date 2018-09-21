@@ -15,7 +15,7 @@ import { partial, uniqueId, find } from 'lodash';
  */
 import './style.scss';
 import ActivityPanelToggleBubble from './toggle-bubble';
-import { H, Section } from 'layout/section';
+import { H, Section } from '@woocommerce/components';
 import OrdersPanel from './panels/orders';
 import StockPanel from './panels/stock';
 import ReviewsPanel from './panels/reviews';

@@ -14,7 +14,7 @@ import AdvancedFilters from './advanced';
 import CompareFilter from './compare';
 import DatePicker from './date';
 import FilterPicker from './filter';
-import { H, Section } from 'layout/section';
+import { H, Section } from 'components/section';
 import './style.scss';
 
 /**

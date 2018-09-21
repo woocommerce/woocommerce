@@ -22,6 +22,13 @@ Function called when selected results change, passed result list.
 
 The object type to be used in searching.
 
+### `placeholder`
+
+- Type: String
+- Default: null
+
+A placeholder for the search input.
+
 ### `selected`
 
 - Type: Array

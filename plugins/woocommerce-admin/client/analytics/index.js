@@ -8,7 +8,7 @@ import { Component, Fragment } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import Header from 'layout/header';
+import Header from 'header';
 
 export default class extends Component {
 	constructor( props ) {

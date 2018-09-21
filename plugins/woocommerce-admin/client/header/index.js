@@ -14,7 +14,7 @@ import ReactDom from 'react-dom';
  * Internal dependencies
  */
 import './style.scss';
-import ActivityPanel from '../activity-panel';
+import ActivityPanel from './activity-panel';
 import { Link } from '@woocommerce/components';
 
 class Header extends Component {

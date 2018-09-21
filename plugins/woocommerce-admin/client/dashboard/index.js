@@ -10,7 +10,7 @@ import { Component, Fragment } from '@wordpress/element';
  */
 import './style.scss';
 import ChartExample from 'components/chart/example';
-import Header from 'layout/header';
+import Header from 'header';
 import StorePerformance from './store-performance';
 import TopSellingProducts from './top-selling-products';
 

@@ -28,7 +28,10 @@ function camelCaseDash( string ) {
  */
 function getDescription( description = '' ) {
 	// eslint requires valid jsdoc, but we can remove this because it's implicit.
-	return description.replace( '@return { object } -', '' ) + '\n';
+	description = description
+		.replace( '@return { object } -', '' )
+		.replace( '@param { object } props -', '' );
+	return description + '\n';
 }
 
 /**
@@ -70,6 +73,9 @@ function getPropDefaultValue( value ) {
  * @return { string } Formatted string.
  */
 function getProps( props = {} ) {
+	if ( Object.keys( props ).length < 1 ) {
+		return '';
+	}
 	const title = 'Props';
 	const lines = [ title, stringOfLength( '-', title.length ), '' ];
 	Object.keys( props ).map( key => {
@@ -124,7 +130,9 @@ function getPropType( type ) {
 			value = 'One of type: ' + type.value.map( v => v.name ).join( ', ' );
 			break;
 		default:
-			value = ( labels[ type.name ] || type.name ) + ( type.description ? ` - ${ type.description }` : '' );
+			value =
+				( labels[ type.name ] || type.name ) +
+				( type.description ? ` - ${ type.description }` : '' );
 	}
 
 	return value;

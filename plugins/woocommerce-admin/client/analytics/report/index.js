@@ -12,7 +12,7 @@ import { find } from 'lodash';
  * Internal dependencies
  */
 import './style.scss';
-import Header from 'layout/header';
+import Header from 'header';
 import OrdersReport from './orders';
 import ProductsReport from './products';
 import RevenueReport from './revenue';

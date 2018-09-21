@@ -12,8 +12,8 @@ import { get } from 'lodash';
  * Internal dependencies
  */
 import './style.scss';
-import Header from 'layout/header';
 import { Controller, getPages } from './controller';
+import Header from 'header';
 import history from 'lib/history';
 import Notices from './notices';
 import { recordPageView } from 'lib/tracks';

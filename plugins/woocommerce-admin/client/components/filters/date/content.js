@@ -13,7 +13,7 @@ import classnames from 'classnames';
  */
 import ComparePeriods from './compare-periods';
 import DateRange from 'components/calendar';
-import { H, Section } from 'layout/section';
+import { H, Section } from 'components/section';
 import PresetPeriods from './preset-periods';
 
 const isMobileViewport = () => window.innerWidth < 782;
