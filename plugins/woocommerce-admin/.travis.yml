@@ -5,7 +5,7 @@ php:
   - 7.2
 
 env:
-  - WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
+  - WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1 WP_CORE_DIR=/tmp/wordpress
 
 before_script:
   - phpenv config-rm xdebug.ini
@@ -13,7 +13,7 @@ before_script:
   - bash bin/install-wp-tests.sh wc_admin_test root '' localhost $WP_VERSION
   - curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
   - chmod +x wp-cli.phar
-  - ./wp-cli.phar plugin install gutenberg --activate
+  - ./wp-cli.phar plugin install gutenberg --activate --path=$WP_CORE_DIR
   - bash bin/travis.sh before
 
 
