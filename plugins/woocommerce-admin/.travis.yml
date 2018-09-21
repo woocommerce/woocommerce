@@ -2,26 +2,18 @@ sudo: false
 
 language: php
 php:
-  - 5.6
-  - 7.0
-  - 7.1
+  - 7.2
 
 env:
-  - WP_VERSION=latest WP_MULTISITE=0
-
-matrix:
-  fast_finish: true
-  include:
-  - php: 5.3
-    dist: precise
-  - php: 7.2
-    env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
+  - WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
 
 before_script:
   - phpenv config-rm xdebug.ini
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
   - bash bin/install-wp-tests.sh wc_admin_test root '' localhost $WP_VERSION
-  - wp plugin install gutenberg --activate
+  - curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+  - chmod +x wp-cli.phar
+  - ./wp-cli.phar plugin install gutenberg --activate
   - bash bin/travis.sh before
 
 
