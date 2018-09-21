@@ -106,18 +106,18 @@ class WC_Admin_Api_Init {
 	public static function filter_rest_endpoints( $endpoints ) {
 		// Override GET /wc/v3/system_status/tools.
 		if ( isset( $endpoints['/wc/v3/system_status/tools'] )
-		     && isset( $endpoints['/wc/v3/system_status/tools'][1] )
-		     && isset( $endpoints['/wc/v3/system_status/tools'][0] )
-		     && $endpoints['/wc/v3/system_status/tools'][1]['callback'][0] instanceof WC_Admin_REST_System_Status_Tools_Controller
+			&& isset( $endpoints['/wc/v3/system_status/tools'][1] )
+			&& isset( $endpoints['/wc/v3/system_status/tools'][0] )
+			&& $endpoints['/wc/v3/system_status/tools'][1]['callback'][0] instanceof WC_Admin_REST_System_Status_Tools_Controller
 		) {
 			$endpoints['/wc/v3/system_status/tools'][0] = $endpoints['/wc/v3/system_status/tools'][1];
 		}
 		// // Override GET & PUT for /wc/v3/system_status/tools.
 		if ( isset( $endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'] )
-		     && isset( $endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][3] )
-		     && isset( $endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][2] )
-		     && $endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][2]['callback'][0] instanceof WC_Admin_REST_System_Status_Tools_Controller
-		     && $endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][3]['callback'][0] instanceof WC_Admin_REST_System_Status_Tools_Controller
+			&& isset( $endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][3] )
+			&& isset( $endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][2] )
+			&& $endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][2]['callback'][0] instanceof WC_Admin_REST_System_Status_Tools_Controller
+			&& $endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][3]['callback'][0] instanceof WC_Admin_REST_System_Status_Tools_Controller
 		) {
 			$endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][0] = $endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][2];
 			$endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][1] = $endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][3];
@@ -125,9 +125,9 @@ class WC_Admin_Api_Init {
 
 		// Override GET /wc/v3/reports.
 		if ( isset( $endpoints['/wc/v3/reports'] )
-		     && isset( $endpoints['/wc/v3/reports'][1] )
-		     && isset( $endpoints['/wc/v3/reports'][0] )
-		     && $endpoints['/wc/v3/reports'][1]['callback'][0] instanceof WC_Admin_REST_Reports_Controller
+			&& isset( $endpoints['/wc/v3/reports'][1] )
+			&& isset( $endpoints['/wc/v3/reports'][0] )
+			&& $endpoints['/wc/v3/reports'][1]['callback'][0] instanceof WC_Admin_REST_Reports_Controller
 		) {
 			$endpoints['/wc/v3/reports'][0] = $endpoints['/wc/v3/reports'][1];
 		}
@@ -176,8 +176,8 @@ class WC_Admin_Api_Init {
 	 * @param WC_Background_Updater|null $updater Updater instance.
 	 * @return bool
 	 */
-	// TODO: this needs to be updated a bit, as it no longer runs as a part of WC_Install, there is no bg updater.
 	public static function order_product_lookup_store_init( $updater = null ) {
+		// TODO: this needs to be updated a bit, as it no longer runs as a part of WC_Install, there is no bg updater.
 		global $wpdb;
 
 		$orders = get_transient( 'wc_update_350_all_orders' );
