@@ -147,6 +147,42 @@ install_db() {
 	mysqladmin create $DB_NAME --user="$DB_USER" --password="$DB_PASS"$EXTRA
 }
 
+install_deps() {
+
+	# Script Variables
+	WP_CORE_DIR="$HOME/wordpress"
+
+
+	WP_SITE_URL="http://localhost:8080"
+	BRANCH=$TRAVIS_BRANCH
+	REPO=$TRAVIS_REPO_SLUG
+	WORKING_DIR="$PWD"
+
+	if [ "$TRAVIS_PULL_REQUEST_BRANCH" != "" ]; then
+		BRANCH=$TRAVIS_PULL_REQUEST_BRANCH
+		REPO=$TRAVIS_PULL_REQUEST_SLUG
+	fi
+
+	# Set up nginx to run the server
+	mkdir -p "$WP_CORE_DIR"
+
+	# Set up WordPress using wp-cli
+	cd "$WP_CORE_DIR"
+
+	curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+	php wp-cli.phar core download --version=$WP_VERSION
+	php wp-cli.phar core config --dbname=$DB_NAME --dbuser=$DB_USER --dbpass=$DB_PASS --dbhost=$DB_HOST --dbprefix=wc_admin_2_
+	php wp-cli.phar core install --url="$WP_SITE_URL" --title="Example" --admin_user=admin --admin_password=password --admin_email=info@example.com --path=$WP_CORE_DIR --skip-email
+	php wp-cli.phar search-replace "http://local.wordpress.test" "$WP_SITE_URL"
+	php wp-cli.phar plugin install gutenberg --activate
+	php wp-cli.phar plugin install woocommerce --activate
+	php wp-cli.phar plugin install https://github.com/$REPO/archive/$BRANCH.zip --activate
+
+	cd "$WORKING_DIR"
+
+}
+
 install_wp
 install_test_suite
 install_db
+install_deps
