@@ -136,6 +136,14 @@ class WC_Admin_Api_Init {
 	}
 
 	/**
+	 * Regenerate data for reports.
+	 */
+	public static function regenrate_report_data() {
+		WC_Admin_Reports_Orders_Data_Store::queue_order_stats_repopulate_database();
+		self::order_product_lookup_store_init();
+	}
+
+	/**
 	 * Adds regenerate tool.
 	 *
 	 * @param array $tools List of tools.
@@ -149,7 +157,7 @@ class WC_Admin_Api_Init {
 					'name'     => __( 'Rebuild reports data', 'woocommerce' ),
 					'button'   => __( 'Rebuild reports', 'woocommerce' ),
 					'desc'     => __( 'This tool will rebuild all of the information used by the reports.', 'woocommerce' ),
-					'callback' => array( 'WC_Admin_Reports_Orders_Data_Store', 'queue_order_stats_repopulate_database' ),
+					'callback' => array( 'WC_Admin_Api_Init', 'regenrate_report_data' ),
 				),
 			)
 		);
@@ -168,6 +176,7 @@ class WC_Admin_Api_Init {
 	 * @param WC_Background_Updater|null $updater Updater instance.
 	 * @return bool
 	 */
+	// TODO: this needs to be updated a bit, as it no longer runs as a part of WC_Install, there is no bg updater.
 	public static function order_product_lookup_store_init( $updater = null ) {
 		global $wpdb;
 
