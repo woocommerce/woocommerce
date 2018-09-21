@@ -172,7 +172,10 @@ install_deps() {
 	php wp-cli.phar core config --dbname=$DB_NAME --dbuser=$DB_USER --dbpass=$DB_PASS --dbhost=$DB_HOST --dbprefix=wc_admin_2_
 	php wp-cli.phar core install --url="$WP_SITE_URL" --title="Example" --admin_user=admin --admin_password=password --admin_email=info@example.com --path=$WP_CORE_DIR --skip-email
 	php wp-cli.phar plugin install gutenberg --activate
-	php wp-cli.phar plugin install woocommerce --activate
+	cd "wp-content/plugins/"
+	git clone https://github.com/woocommerce/woocommerce.git
+	cd "$WP_CORE_DIR"
+	php wp-cli.phar plugin activate woocommerce
 	php wp-cli.phar plugin install https://github.com/$REPO/archive/$BRANCH.zip --activate
 
 	cd "$WORKING_DIR"
