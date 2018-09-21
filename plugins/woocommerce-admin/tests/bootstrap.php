@@ -29,25 +29,6 @@ function load_wc() {
 	require_once wc_dir() . '/woocommerce.php';
 }
 
-function install_wc() {
-	// Clean existing install first.
-	define( 'WP_UNINSTALL_PLUGIN', true );
-	define( 'WC_REMOVE_ALL_DATA', true );
-	include wc_dir() . '/uninstall.php';
-
-	WC_Install::install();
-
-	// Reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374.
-	if ( version_compare( $GLOBALS['wp_version'], '4.7', '<' ) ) {
-		$GLOBALS['wp_roles']->reinit();
-	} else {
-		$GLOBALS['wp_roles'] = null; // WPCS: override ok.
-		wp_roles();
-	}
-
-	echo esc_html( 'Installing WooCommerce...' . PHP_EOL );
-}
-
 function wc_test_includes() {
 	$wc_tests_framework_base_dir = wc_dir() . '/tests/';
 
@@ -96,7 +77,6 @@ function _manually_load_plugin() {
 	require dirname( dirname( __FILE__ ) ) . '/wc-admin.php';
 }
 tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
-tests_add_filter( 'setup_theme', 'install_wc' );
 tests_add_filter( 'setup_theme', 'install_wc_admin' );
 
 // Start up the WP testing environment.
