@@ -12,35 +12,33 @@ import { stringifyQuery } from 'lib/nav-utils';
 import { NAMESPACE } from 'store/constants';
 
 /**
- * A product categories completer.
+ * A coupon completer.
  * See https://github.com/WordPress/gutenberg/tree/master/packages/components/src/autocomplete#the-completer-interface
  *
  * @type {Completer}
  */
 export default {
-	name: 'product_cats',
-	className: 'woocommerce-search__product-result',
+	name: 'coupons',
+	className: 'woocommerce-search__coupon-result',
 	options( search ) {
 		let payload = '';
 		if ( search ) {
 			const query = {
 				search: encodeURIComponent( search ),
 				per_page: 10,
-				orderby: 'count',
 			};
 			payload = stringifyQuery( query );
 		}
-		return apiFetch( { path: `${ NAMESPACE }products/categories${ payload }` } );
+		return apiFetch( { path: `${ NAMESPACE }coupons${ payload }` } );
 	},
 	isDebounced: true,
-	getOptionKeywords( cat ) {
-		return [ cat.name ];
+	getOptionKeywords( coupon ) {
+		return [ coupon.code ];
 	},
-	getOptionLabel( cat, query ) {
-		const match = computeSuggestionMatch( cat.name, query ) || {};
-		// @todo bring back ProductImage, but allow for product category image
+	getOptionLabel( coupon, query ) {
+		const match = computeSuggestionMatch( coupon.code, query ) || {};
 		return [
-			<span key="name" className="woocommerce-search__result-name" aria-label={ cat.name }>
+			<span key="name" className="woocommerce-search__result-name" aria-label={ coupon.code }>
 				{ match.suggestionBeforeMatch }
 				<strong className="components-form-token-field__suggestion-match">
 					{ match.suggestionMatch }
@@ -51,10 +49,10 @@ export default {
 	},
 	// This is slightly different than gutenberg/Autocomplete, we don't support different methods
 	// of replace/insertion, so we can just return the value.
-	getOptionCompletion( cat ) {
+	getOptionCompletion( coupon ) {
 		const value = {
-			id: cat.id,
-			label: cat.name,
+			id: coupon.id,
+			label: coupon.code,
 		};
 		return value;
 	},

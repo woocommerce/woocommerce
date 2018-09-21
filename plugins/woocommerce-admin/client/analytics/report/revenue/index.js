@@ -315,9 +315,14 @@ export class RevenueReport extends Component {
 						} );
 			return {
 				date: formatDate( 'Y-m-d\\TH:i:s', interval.date_start ),
-				[ primaryKey ]: interval.subtotals[ selectedChart.key ] || 0,
-				[ secondaryKey ]:
-					( secondaryInterval && secondaryInterval.subtotals[ selectedChart.key ] ) || 0,
+				[ primaryKey ]: {
+					label: formatDate( 'd F, Y', secondaryDate ),
+					value: interval.subtotals[ selectedChart.key ] || 0,
+				},
+				[ secondaryKey ]: {
+					label: formatDate( 'd F, Y', interval.date_start ),
+					value: ( secondaryInterval && secondaryInterval.subtotals[ selectedChart.key ] ) || 0,
+				},
 			};
 		} );
 
@@ -327,7 +332,7 @@ export class RevenueReport extends Component {
 				title={ selectedChart.label }
 				interval={ currentInterval }
 				allowedIntervals={ allowedIntervals }
-				tooltipFormat={ formats.tooltipFormat }
+				tooltipTitle={ selectedChart.label }
 				xFormat={ formats.xFormat }
 				x2Format={ formats.x2Format }
 				dateParser={ '%Y-%m-%dT%H:%M:%S' }

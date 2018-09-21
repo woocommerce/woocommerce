@@ -10,6 +10,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { computeSuggestionMatch } from './utils';
 import ProductImage from 'components/product-image';
 import { stringifyQuery } from 'lib/nav-utils';
+import { NAMESPACE } from 'store/constants';
 
 /**
  * A products completer.
@@ -30,7 +31,7 @@ export default {
 			};
 			payload = stringifyQuery( query );
 		}
-		return apiFetch( { path: '/wc/v3/products' + payload } );
+		return apiFetch( { path: `${ NAMESPACE }products${ payload }` } );
 	},
 	isDebounced: true,
 	getOptionKeywords( product ) {

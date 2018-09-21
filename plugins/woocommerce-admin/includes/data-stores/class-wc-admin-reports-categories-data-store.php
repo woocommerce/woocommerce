@@ -19,7 +19,7 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 	 *
 	 * @var string
 	 */
-	const TABLE_NAME = 'wc_admin_order_product_lookup';
+	const TABLE_NAME = 'wc_order_product_lookup';
 
 	/**
 	 * Order by setting used for sorting categories data.

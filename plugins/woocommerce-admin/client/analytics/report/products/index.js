@@ -14,7 +14,6 @@ import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
 import { numberFormat } from 'lib/number';
 import { getAdminLink, onQueryChange } from 'lib/nav-utils';
 import { ReportFilters, TableCard } from '@woocommerce/components';
-import './style.scss';
 
 import products from './__mocks__/data';
 

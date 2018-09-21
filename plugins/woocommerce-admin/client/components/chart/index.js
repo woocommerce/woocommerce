@@ -41,7 +41,7 @@ function getOrderedKeys( props ) {
 		),
 	].map( key => ( {
 		key,
-		total: props.data.reduce( ( a, c ) => a + c[ key ], 0 ),
+		total: props.data.reduce( ( a, c ) => a + c[ key ].value, 0 ),
 		visible: true,
 		focus: true,
 	} ) );
@@ -190,6 +190,7 @@ class Chart extends Component {
 			layout,
 			title,
 			tooltipFormat,
+			tooltipTitle,
 			xFormat,
 			x2Format,
 			yFormat,
@@ -263,6 +264,7 @@ class Chart extends Component {
 						margin={ margin }
 						orderedKeys={ orderedKeys }
 						tooltipFormat={ tooltipFormat }
+						tooltipTitle={ tooltipTitle }
 						type={ type }
 						interval={ interval }
 						width={ chartDirection === 'row' ? width - 320 : width }
@@ -287,9 +289,14 @@ Chart.propTypes = {
 	 */
 	dateParser: PropTypes.string.isRequired,
 	/**
-	 * A datetime formatting string to format the title of the toolip, passed to d3TimeFormat.
+	 * A datetime formatting string to format the date displayed as the title of the toolip
+	 * if `tooltipTitle` is missing, passed to d3TimeFormat.
 	 */
 	tooltipFormat: PropTypes.string,
+	/**
+	 * A string to use as a title for the tooltip. Takes preference over `tooltipFormat`.
+	 */
+	tooltipTitle: PropTypes.string,
 	/**
 	 * A datetime formatting string, passed to d3TimeFormat.
 	 */
@@ -332,7 +339,7 @@ Chart.propTypes = {
 Chart.defaultProps = {
 	data: [],
 	dateParser: '%Y-%m-%dT%H:%M:%S',
-	tooltipFormat: '%Y-%m-%d',
+	tooltipFormat: '%B %d, %Y',
 	xFormat: '%d',
 	x2Format: '%b %Y',
 	yFormat: '$.3s',

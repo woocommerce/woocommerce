@@ -191,7 +191,7 @@ class WC_Admin_Api_Init {
 			}
 			foreach ( $order->get_items() as $order_item ) {
 				$wpdb->replace(
-					$wpdb->prefix . 'wc_admin_order_product_lookup',
+					$wpdb->prefix . 'wc_order_product_lookup',
 					array(
 						'order_item_id'         => $order_item->get_id(),
 						'order_id'              => $order->get_id(),
@@ -256,8 +256,8 @@ class WC_Admin_Api_Init {
 			$wc_tables,
 			array(
 				// TODO: will this work on multisite?
-				"{$wpdb->prefix}wc_admin_order_stats",
-				"{$wpdb->prefix}wc_admin_order_product_lookup",
+				"{$wpdb->prefix}wc_order_stats",
+				"{$wpdb->prefix}wc_order_product_lookup",
 				"{$wpdb->prefix}wc_order_tax_lookup",
 				"{$wpdb->prefix}wc_order_coupon_lookup",
 			)
@@ -277,7 +277,7 @@ class WC_Admin_Api_Init {
 		}
 
 		$tables = "
-		CREATE TABLE {$wpdb->prefix}wc_admin_order_stats (
+		CREATE TABLE {$wpdb->prefix}wc_order_stats (
 			order_id bigint(20) unsigned NOT NULL,
 			date_created timestamp DEFAULT '0000-00-00 00:00:00' NOT NULL,
 			num_items_sold int(11) UNSIGNED DEFAULT 0 NOT NULL,
@@ -290,7 +290,7 @@ class WC_Admin_Api_Init {
 			PRIMARY KEY (order_id),
 			KEY date_created (date_created)
 		  ) $collate;
-		  CREATE TABLE {$wpdb->prefix}wc_admin_order_product_lookup (
+		  CREATE TABLE {$wpdb->prefix}wc_order_product_lookup (
 			order_item_id BIGINT UNSIGNED NOT NULL,
 			order_id BIGINT UNSIGNED NOT NULL,
 			product_id BIGINT UNSIGNED NOT NULL,

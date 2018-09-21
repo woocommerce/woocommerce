@@ -28,8 +28,7 @@ class SearchFilter extends Component {
 		}
 	}
 
-	updateLabels( data ) {
-		const selected = data.map( p => ( { id: p.id, label: p.name } ) );
+	updateLabels( selected ) {
 		this.setState( { selected } );
 	}
 

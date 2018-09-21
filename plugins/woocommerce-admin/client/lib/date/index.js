@@ -308,13 +308,16 @@ export const getDateDifferenceInDays = ( date, date2 ) => {
  */
 export const getPreviousDate = ( date, date1, date2, compare, interval ) => {
 	const dateMoment = toMoment( isoDateFormat, formatDate( 'Y-m-d', date ) );
+
+	if ( 'previous_year' === compare ) {
+		return dateMoment.clone().subtract( 1, 'years' );
+	}
+
 	const _date1 = toMoment( isoDateFormat, formatDate( 'Y-m-d', date1 ) );
 	const _date2 = toMoment( isoDateFormat, formatDate( 'Y-m-d', date2 ) );
-	if ( 'previous_period' === compare ) {
-		const difference = _date1.diff( _date2, interval );
-		return dateMoment.clone().subtract( difference, interval );
-	}
-	return dateMoment.clone().subtract( 1, 'years' );
+	const difference = _date1.diff( _date2, interval );
+
+	return dateMoment.clone().subtract( difference, interval );
 };
 
 /**
