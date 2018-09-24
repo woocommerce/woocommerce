@@ -55,6 +55,9 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-products-data-store.php';
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-products-stats-data-store.php';
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-categories-data-store.php';
+
+		// Data triggers.
+		require_once dirname( __FILE__ ) . '/wc-admin-order-functions.php';
 	}
 
 	/**
