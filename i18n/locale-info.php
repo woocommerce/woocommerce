@@ -9,6 +9,16 @@
 defined( 'ABSPATH' ) || exit;
 
 return array(
+	'AO' => array(
+		'currency_code'  => 'AOA',
+		'currency_pos'   => 'left',
+		'thousand_sep'   => ',',
+		'decimal_sep'    => '.',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+		'tax_rates'      => array(),
+	),
 	'AU' => array(
 		'currency_code'  => 'AUD',
 		'currency_pos'   => 'left',
