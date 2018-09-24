@@ -18,7 +18,7 @@ class WC_Admin_Notes {
 	 * @return array Array of arrays.
 	 */
 	public static function get_notes( $context = 'admin' ) {
-		$data_store = WC_Data_Store::load( 'admin-notes' );
+		$data_store = WC_Data_Store::load( 'admin-note' );
 		$raw_notes  = $data_store->get_notes();
 		$notes      = array();
 		foreach ( (array) $raw_notes as $raw_note ) {

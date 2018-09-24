@@ -254,7 +254,7 @@ class WC_Admin_Api_Init {
 				'report-products'       => 'WC_Admin_Reports_Products_Data_Store',
 				'report-products-stats' => 'WC_Admin_Reports_Products_Stats_Data_Store',
 				'report-categories'     => 'WC_Admin_Reports_Categories_Data_Store',
-				'admin-notes'           => 'WC_Admin_Notes_Data_Store',
+				'admin-note'            => 'WC_Admin_Notes_Data_Store',
 			)
 		);
 	}

@@ -4,8 +4,6 @@
  *
  * The WooCommerce admin notes class gets admin notes data from storage and checks validity.
  *
- * @package WooCommerce/Classes
- * @version 3.0.0
  */
 defined( 'ABSPATH' ) || exit;
 
@@ -16,9 +14,9 @@ class WC_Admin_Note extends WC_Data {
 	const E_WC_ADMIN_NOTE_ACTIONED = 'actioned';
 
 	// Note types
-	const E_WC_ADMIN_NOTE_DISMISSABLE = 'dismissable';
 	const E_WC_ADMIN_NOTE_ERROR = 'error';
 	const E_WC_ADMIN_NOTE_WARNING = 'warning';
+	const E_WC_ADMIN_NOTE_UPDATE = 'update'; // i.e. a new version is available
 	const E_WC_ADMIN_NOTE_INFORMATIONAL = 'info';
 
 	/**
@@ -75,7 +73,7 @@ class WC_Admin_Note extends WC_Data {
 			$this->set_object_read( true );
 		}
 
-		$this->data_store = WC_Data_Store::load( 'admin-notes' );
+		$this->data_store = WC_Data_Store::load( 'admin-note' );
 		if ( $this->get_id() > 0 ) {
 			$this->data_store->read( $this );
 		}
