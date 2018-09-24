@@ -189,17 +189,19 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 	public function test_wc_load_webhooks_status_and_limit( $status ) {
 		global $wp_filter;
 
-		$webhook_one = $this->create_webhook( 'action.woocommerce_one_test', $status );
-		$webhook_two = $this->create_webhook( 'action.woocommerce_two_test', $status );
+		$action_one  = 'woocommerce_one_test_status_' . $status;
+		$webhook_one = $this->create_webhook( 'action.' . $action_one, $status );
+		$action_two  = 'woocommerce_two_test_status_' . $status;
+		$webhook_two = $this->create_webhook( 'action.' . $action_two, $status );
 
 		$this->assertTrue( wc_load_webhooks( $status, 1 ) );
-		$this->assertFalse( isset( $wp_filter['woocommerce_one_test'] ) );
+		$this->assertFalse( isset( $wp_filter[ $action_one ] ) );
 
 		// Only active webhooks are loaded.
 		if ( 'active' === $status ) {
-			$this->assertTrue( isset( $wp_filter['woocommerce_two_test'] ) );
+			$this->assertTrue( isset( $wp_filter[ $action_two ] ) );
 		} else {
-			$this->assertFalse( isset( $wp_filter['woocommerce_two_test'] ) );
+			$this->assertFalse( isset( $wp_filter[ $action_two ] ) );
 		}
 
 		$webhook_two->delete( true );
@@ -207,9 +209,9 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 		$this->assertTrue( wc_load_webhooks( $status, 1 ) );
 
 		if ( 'active' === $status ) {
-			$this->assertTrue( isset( $wp_filter['woocommerce_one_test'] ) );
+			$this->assertTrue( isset( $wp_filter[ $action_one ] ) );
 		} else {
-			$this->assertFalse( isset( $wp_filter['woocommerce_one_test'] ) );
+			$this->assertFalse( isset( $wp_filter[ $action_one ] ) );
 		}
 
 		$webhook_one->delete( true );
