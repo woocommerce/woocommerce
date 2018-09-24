@@ -644,7 +644,7 @@ final class WooCommerce {
 			return;
 		}
 
-		wc_load_webhooks();
+		wc_load_webhooks( 'active' );
 	}
 
 	/**
