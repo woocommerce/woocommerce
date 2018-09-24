@@ -276,7 +276,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 						{$totals_query['where_clause']}", ARRAY_A
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 			if ( null === $totals ) {
-				return new WP_Error( 'woocommerce_reports_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ) );
+				return new WP_Error( 'woocommerce_reports_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'wc-admin' ) );
 			}
 
 			// Specification says these are not included in totals.
@@ -331,7 +331,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 			if ( null === $intervals ) {
-				return new WP_Error( 'woocommerce_reports_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ) );
+				return new WP_Error( 'woocommerce_reports_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'wc-admin' ) );
 			}
 
 			$data = (object) array(

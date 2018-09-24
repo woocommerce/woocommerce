@@ -154,9 +154,9 @@ class WC_Admin_Api_Init {
 			$tools,
 			array(
 				'rebuild_stats' => array(
-					'name'     => __( 'Rebuild reports data', 'woocommerce' ),
-					'button'   => __( 'Rebuild reports', 'woocommerce' ),
-					'desc'     => __( 'This tool will rebuild all of the information used by the reports.', 'woocommerce' ),
+					'name'     => __( 'Rebuild reports data', 'wc-admin' ),
+					'button'   => __( 'Rebuild reports', 'wc-admin' ),
+					'desc'     => __( 'This tool will rebuild all of the information used by the reports.', 'wc-admin' ),
 					'callback' => array( 'WC_Admin_Api_Init', 'regenrate_report_data' ),
 				),
 			)
