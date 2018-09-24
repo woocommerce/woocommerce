@@ -12,23 +12,25 @@ if ( ! $_tests_dir ) {
 }
 
 if ( ! file_exists( $_tests_dir . '/includes/functions.php' ) ) {
-	echo "Could not find $_tests_dir/includes/functions.php, have you run bin/install-wp-tests.sh ?" . PHP_EOL;
+	echo "Could not find $_tests_dir/includes/functions.php, have you run bin/install-wp-tests.sh ?" . PHP_EOL; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 	exit( 1 );
 }
 
 // Give access to tests_add_filter() function.
 require_once $_tests_dir . '/includes/functions.php';
 
+/**
+ * Returns WooCommerce main directory.
+ *
+ * @return string
+ */
 function wc_dir() {
 	return dirname( dirname( dirname( __FILE__ ) ) ) . '/woocommerce';
 }
 
-function load_wc() {
-	define( 'WC_TAX_ROUNDING_MODE', 'auto' );
-	define( 'WC_USE_TRANSACTIONS', false );
-	require_once wc_dir() . '/woocommerce.php';
-}
-
+/**
+ * Adds WooCommerce testing framework classes.
+ */
 function wc_test_includes() {
 	$wc_tests_framework_base_dir = wc_dir() . '/tests/';
 
@@ -60,24 +62,19 @@ function wc_test_includes() {
 	require_once $wc_tests_framework_base_dir . '/framework/helpers/class-wc-helper-settings.php';
 }
 
-function install_wc_admin() {
-	require_once dirname( dirname( __FILE__ ) ) . '/includes/class-wc-admin-api-init.php';
-
-	WC_Admin_Api_Init::install();
-
-	echo esc_html( 'Installing WC Admin...' . PHP_EOL );
-}
-
 /**
  * Manually load the plugin being tested.
  */
 function _manually_load_plugin() {
 	require dirname( dirname( dirname( __FILE__ ) ) ) . '/gutenberg/gutenberg.php';
-	load_wc();
+
+	define( 'WC_TAX_ROUNDING_MODE', 'auto' );
+	define( 'WC_USE_TRANSACTIONS', false );
+	require_once wc_dir() . '/woocommerce.php';
+
 	require dirname( dirname( __FILE__ ) ) . '/wc-admin.php';
 }
 tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
-tests_add_filter( 'setup_theme', 'install_wc_admin' );
 
 // Start up the WP testing environment.
 require $_tests_dir . '/includes/bootstrap.php';
