@@ -196,23 +196,12 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 
 		$this->assertTrue( wc_load_webhooks( $status, 1 ) );
 		$this->assertFalse( isset( $wp_filter[ $action_one ] ) );
-
-		// Only active webhooks are loaded.
-		if ( 'active' === $status ) {
-			$this->assertTrue( isset( $wp_filter[ $action_two ] ) );
-		} else {
-			$this->assertFalse( isset( $wp_filter[ $action_two ] ) );
-		}
+		$this->assertTrue( isset( $wp_filter[ $action_two ] ) );
 
 		$webhook_two->delete( true );
 
 		$this->assertTrue( wc_load_webhooks( $status, 1 ) );
-
-		if ( 'active' === $status ) {
-			$this->assertTrue( isset( $wp_filter[ $action_one ] ) );
-		} else {
-			$this->assertFalse( isset( $wp_filter[ $action_one ] ) );
-		}
+		$this->assertTrue( isset( $wp_filter[ $action_one ] ) );
 
 		$webhook_one->delete( true );
 		$this->assertFalse( wc_load_webhooks( $status, 1 ) );
