@@ -128,11 +128,12 @@ function wc_get_webhook_statuses() {
  *
  * @since  3.3.0
  * @throws Exception If webhook cannot be read/found and $data parameter of WC_Webhook class constructor is set.
+ * @param  string   $status Optional - status to filter results by. Must be a key in return value of @see wc_get_webhook_statuses(). @since 3.5.0.
  * @return bool
  */
-function wc_load_webhooks() {
+function wc_load_webhooks( $status = '' ) {
 	$data_store = WC_Data_Store::load( 'webhook' );
-	$webhooks   = $data_store->get_webhooks_ids();
+	$webhooks   = $data_store->get_webhooks_ids( $status );
 	$loaded     = false;
 
 	foreach ( $webhooks as $webhook_id ) {

@@ -59,7 +59,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 		$webhook->set_id( $webhook_id );
 		$webhook->apply_changes();
 
-		delete_transient( 'woocommerce_webhook_ids' );
+		$this->delete_transients( $webhook->get_status( 'edit' ) );
 		WC_Cache_Helper::incr_cache_prefix( 'webhooks' );
 		do_action( 'woocommerce_new_webhook', $webhook_id );
 	}
@@ -180,7 +180,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 			array( '%d' )
 		); // WPCS: cache ok, DB call ok.
 
-		delete_transient( 'woocommerce_webhook_ids' );
+		$this->delete_transients( 'all' );
 		WC_Cache_Helper::incr_cache_prefix( 'webhooks' );
 		do_action( 'woocommerce_webhook_deleted', $webhook->get_id(), $webhook );
 	}
@@ -200,18 +200,31 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 	 * Get all webhooks IDs.
 	 *
 	 * @since  3.3.0
+	 * @throws InvalidArgumentException If a $status value is passed in that is not in the known wc_get_webhook_statuses() keys.
+	 * @param  string   $status Optional - status to filter results by. Must be a key in return value of @see wc_get_webhook_statuses(). @since 3.5.0.
 	 * @return int[]
 	 */
-	public function get_webhooks_ids() {
+	public function get_webhooks_ids( $status = '' ) {
 		global $wpdb;
 
-		$ids = get_transient( 'woocommerce_webhook_ids' );
+		if ( ! empty( $status ) ) {
+			$this->validate_status( $status );
+		}
+
+		$ids = get_transient( $this->get_transient_key( $status ) );
 
 		if ( false === $ids ) {
-			$results = $wpdb->get_results( "SELECT webhook_id FROM {$wpdb->prefix}wc_webhooks" ); // WPCS: cache ok, DB call ok.
+
+			$query = "SELECT webhook_id FROM {$wpdb->prefix}wc_webhooks";
+
+			if ( ! empty( $status ) ) {
+				$query .= $wpdb->prepare( " AND status = %s", $status );
+			}
+
+			$results = $wpdb->get_results( $query ); // WPCS: cache ok, DB call ok.
 			$ids     = array_map( 'intval', wp_list_pluck( $results, 'webhook_id' ) );
 
-			set_transient( 'woocommerce_webhook_ids', $ids );
+			set_transient( $this->get_transient_key( $status ), $ids );
 		}
 
 		return $ids;
@@ -348,5 +361,51 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 		}
 
 		return $counts;
+	}
+
+	/**
+	 * Check if a given string is in known statuses, based on return value of @see wc_get_webhook_statuses().
+	 *
+	 * @since  3.5.0
+	 * @throws InvalidArgumentException If $status is not empty and not in the known wc_get_webhook_statuses() keys.
+	 * @param  string $status Status to check.
+	 */
+	private function validate_status( $status ) {
+		if ( ! array_key_exists( $status, wc_get_webhook_statuses() ) ) {
+			throw new InvalidArgumentException( sprintf( 'Invalid status given: %s. Status must be one of: %s.', $status, implode( ', ', array_keys( wc_get_webhook_statuses() ) ) ) );
+		}
+	}
+
+	/**
+	 * Get the transient key used to cache a set of webhook IDs, optionally filtered by status.
+	 *
+	 * @since  3.5.0
+	 * @param  string $status Optional - status of cache key.
+	 * @return string
+	 */
+	private function get_transient_key( $status = '' ) {
+		return empty( $status ) ? 'woocommerce_webhook_ids' : sprintf( 'woocommerce_webhook_ids_status_%s', $status );
+	}
+
+	/**
+	 * Delete the transients used to cache a set of webhook IDs, optionally filtered by status.
+	 *
+	 * @since 3.5.0
+	 * @param string $status Optional - status of cache to delete, or 'all' to delete all caches.
+	 */
+	private function delete_transients( $status = '' ) {
+
+		// Always delete the non-filtered cache.
+		delete_transient( $this->get_transient_key( '' ) );
+
+		if ( ! empty( $status ) ) {
+			if ( 'all' === $status ) {
+				foreach ( wc_get_webhook_statuses() as $status_key => $status_string ) {
+					delete_transient( $this->get_transient_key( $status_key ) );
+				}
+			} else {
+				delete_transient( $this->get_transient_key( $status ) );
+			}
+		}
 	}
 }

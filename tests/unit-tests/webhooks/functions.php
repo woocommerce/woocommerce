@@ -109,12 +109,58 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 		$this->assertFalse( wc_load_webhooks() );
 	}
 
-	protected function create_webhook( $topic = 'action.woocommerce_some_action' ) {
+	/**
+	 * Provide webhook statuses for tests.
+	 *
+	 * @since 3.5.0
+	 */
+	public function provider_webhook_statuses() {
+
+		$webhook_statuses = array();
+
+		foreach ( wc_get_webhook_statuses() as $status_key => $status_string ) {
+			$webhook_statuses[] = array( $status_key );
+		}
+
+		return $webhook_statuses;
+	}
+
+	/**
+	 * Test the $status param on wc_load_webhooks().
+	 *
+	 * @dataProvider provider_webhook_statuses
+	 * @param string $status The status of the webhook to test.
+	 * @since 3.5.0
+	 */
+	public function test_wc_load_webhooks_status( $status ) {
+
+		$webhook = $this->create_webhook( 'action.woocommerce_some_action', $status );
+
+		$this->assertTrue( wc_load_webhooks( '' ) );
+		$this->assertTrue( wc_load_webhooks( $status ) );
+
+		// Find a different, but still valid status.
+		$other_status = ( 'active' === $status ) ? 'disabled' : 'active';
+
+		$this->assertFalse( wc_load_webhooks( $other_status ) );
+
+		$webhook->delete( true );
+		$this->assertFalse( wc_load_webhooks( $status ) );
+	}
+
+	/**
+	 * @expectedException InvalidArgumentException
+	 */
+	public function test_wc_load_webhooks_status_invalid() {
+		wc_load_webhooks( 'invalid_status' );
+	}
+
+	protected function create_webhook( $topic = 'action.woocommerce_some_action', $status = 'active' ) {
 
 		$webhook = new WC_Webhook();
 		$webhook->set_props(
 			array(
-				'status'       => 'active',
+				'status'       => $status,
 				'name'         => 'Testing webhook',
 				'user_id'      => 0,
 				'delivery_url' => 'https://requestb.in/17jajv31',
