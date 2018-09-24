@@ -96,7 +96,7 @@ class WC_Action_Queue implements WC_Queue_Interface {
 	 *
 	 * @param string $hook The hook that the job will trigger.
 	 * @param array  $args Args that would have been passed to the job.
-	 * @param string $group Group name.
+	 * @param string $group The group the job is assigned to (if any).
 	 */
 	public function cancel( $hook, $args = array(), $group = '' ) {
 		as_unschedule_action( $hook, $args, $group );
@@ -107,7 +107,7 @@ class WC_Action_Queue implements WC_Queue_Interface {
 	 *
 	 * @param string $hook The hook that the job will trigger.
 	 * @param array  $args Args that would have been passed to the job.
-	 * @param string $group Group name.
+	 * @param string $group The group the job is assigned to (if any).
 	 */
 	public function cancel_all( $hook, $args = array(), $group = '' ) {
 		as_unschedule_all_actions( $hook, $args, $group );
@@ -117,9 +117,9 @@ class WC_Action_Queue implements WC_Queue_Interface {
 	 * Get the date and time for the next scheduled occurence of an action with a given hook
 	 * (an optionally that matches certain args and group), if any.
 	 *
-	 * @param string $hook Hook name.
-	 * @param array  $args Arguments.
-	 * @param string $group Group name.
+	 * @param string $hook The hook that the job will trigger.
+	 * @param array  $args Filter to a hook with matching args that will be passed to the job when it runs.
+	 * @param string $group Filter to only actions assigned to a specific group.
 	 * @return WC_DateTime|null The date and time for the next occurrence, or null if there is no pending, scheduled action for the given hook.
 	 */
 	public function get_next( $hook, $args = null, $group = '' ) {
