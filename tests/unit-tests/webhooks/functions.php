@@ -103,6 +103,14 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 	 * @since 3.2.0
 	 */
 	public function test_wc_load_webhooks() {
+		$webhook = $this->create_webhook();
+		$this->assertTrue( wc_load_webhooks() );
+		$webhook->delete( true );
+		$this->assertFalse( wc_load_webhooks() );
+	}
+
+	protected function create_webhook( $topic = 'action.woocommerce_some_action' ) {
+
 		$webhook = new WC_Webhook();
 		$webhook->set_props(
 			array(
@@ -111,15 +119,12 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 				'user_id'      => 0,
 				'delivery_url' => 'https://requestb.in/17jajv31',
 				'secret'       => 'secret',
-				'topic'        => 'action.woocommerce_some_action',
+				'topic'        => $topic,
 				'api_version'  => 2,
 			)
 		);
 		$webhook->save();
 
-		$this->assertTrue( wc_load_webhooks() );
-
-		$webhook->delete( true );
-		$this->assertFalse( wc_load_webhooks() );
+		return $webhook;
 	}
 }
