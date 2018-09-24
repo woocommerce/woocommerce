@@ -20,6 +20,7 @@ function wc_webhook_process_delivery( $webhook, $arg ) {
 	// so as to avoid delays or failures in delivery from affecting the
 	// user who triggered it.
 	if ( apply_filters( 'woocommerce_webhook_deliver_async', true, $webhook, $arg ) ) {
+
 		$queue_args = array(
 			'webhook_id' => $webhook->get_id(),
 			'arg'        => $arg,
