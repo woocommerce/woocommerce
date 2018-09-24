@@ -49,7 +49,7 @@ class WC_Tests_API_Reports_Orders_Totals extends WC_REST_Unit_Test_Case {
 			}
 
 			$data[] = array(
-				'slug'  => $slug,
+				'slug'  => str_replace( 'wc-', '', $slug ),
 				'name'  => $name,
 				'total' => (int) $totals->$slug,
 			);

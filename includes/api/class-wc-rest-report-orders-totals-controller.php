@@ -48,7 +48,7 @@ class WC_REST_Report_Orders_Totals_Controller extends WC_REST_Reports_Controller
 			}
 
 			$data[] = array(
-				'slug'  => $slug,
+				'slug'  => str_replace( 'wc-', '', $slug ),
 				'name'  => $name,
 				'total' => (int) $totals->$slug,
 			);
