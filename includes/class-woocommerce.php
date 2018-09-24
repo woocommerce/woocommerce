@@ -644,7 +644,9 @@ final class WooCommerce {
 			return;
 		}
 
-		wc_load_webhooks( 'active' );
+		$limit = apply_filters( 'woocommerce_load_webhooks_limit', 100 );
+
+		wc_load_webhooks( 'active', $limit );
 	}
 
 	/**
