@@ -13,20 +13,26 @@ To avoid class name collisions between elements of the woo app and to the enclos
 
 Any default export of a folder's `index.js` **must** be prefixed with `woocommerce-` followed by the directory name in which it resides:
 
->.woocommerce-_[ directory name ]_
+```
+.woocommerce-[ directory name ]
+```
 
 (Example: `.woocommerce-card` from `components/card/index.js`)
 
 For any descendant of the top-level (`index.js`) element, prefix using the top-level element's class name separated by two underscores:
 
->.woocommerce-_[ directory name ]_\_\__[ descendant description ]_
+```
+.woocommerce-[ directory name ]__[ descendant description ]
+```
 
 (Example: `.woocommerce-card__title`, or `.woocommerce-ellipsis-menu__item`)
 
 For optional variations of an element or its descendants, you may use a modifier class, but you **must not** apply styles to the modifier class directly; only as an additional selector to the element to which the modifier applies:
 
->.woocommerce-_[ directory name ]_.is-_[ modifier description ]_
->.woocommerce-_[ directory name ]_\_\__[ descendant description ]_.is-_[ modifier description ]_
+```
+.woocommerce-[ directory name ].is-[ modifier description ]
+.woocommerce-[ directory name ]__[ descendant description ].is-[ modifier description ]
+```
 
 (Example: `.woocommerce-ellipsis-menu__item.is-active` )
 
@@ -38,13 +44,17 @@ You may observe that these conventions adhere closely to the [BEM (Blocks, Eleme
 
 All layout classes use the `.woocommerce-layout__` prefix:
 
->.woocommerce-layout\_\__[ section ]_
+```
+.woocommerce-layout__[ section ]
+```
 
 (Example: `.woocommerce-layout__activity-panel` )
 
 If the section has children elements, prefix a description with the section class name:
 
->.woocommerce-layout\_\__[ section ]_-_[ descendant description ]_
+```
+.woocommerce-layout__[ section ]-[ descendant description ]
+```
 
 (Example: `.woocommerce-layout__activity-panel-title` )
 
@@ -52,7 +62,9 @@ If the section has children elements, prefix a description with the section clas
 
 All dashboard components use the `.woocommerce-dashboard__` prefix:
 
->.woocommerce-dashboard\_\__[ section ]_
+```
+.woocommerce-dashboard__[ section ]
+```
 
 (Example: `.woocommerce-dashboard__widget` )
 

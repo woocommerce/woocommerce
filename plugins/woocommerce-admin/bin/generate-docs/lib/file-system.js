@@ -27,9 +27,12 @@ function deleteExistingDocs() {
 	}
 
 	const files = fs.readdirSync( DOCS_FOLDER );
-	files.map( file => fs.unlinkSync( path.resolve( DOCS_FOLDER, file ) ) );
-	fs.rmdirSync( DOCS_FOLDER );
-	fs.mkdirSync( DOCS_FOLDER );
+	files.map( file => {
+		if ( 'README.md' === file ) {
+			return;
+		}
+		fs.unlinkSync( path.resolve( DOCS_FOLDER, file ) );
+	} );
 }
 
 /**
@@ -151,8 +154,8 @@ function writeTableOfContents( files ) {
 		return `  * [${ name }](components/${ doc })`;
 	} ).join( '\n' );
 
-	const TocFile = path.resolve( DOCS_FOLDER, '../_sidebar.md' );
-	fs.writeFileSync( TocFile, '* Home\n\n  * [Overview](/)\n\n* Components\n\n' + TOC );
+	const TocFile = path.resolve( DOCS_FOLDER, '_sidebar.md' );
+	fs.writeFileSync( TocFile, '* [Home](/)\n\n* [Components](components/)\n\n' + TOC + '\n' );
 }
 
 module.exports = {

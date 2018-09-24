@@ -18,6 +18,37 @@ const getDisplay = cell => cell.display || null;
 
 /**
  * A table component, without the Card wrapper. This is a basic table display, sortable, but no default filtering.
+ *
+ * Row data should be passed to the component as a list of arrays, where each array is a row in the table.
+ * Headers are passed in separately as an array of objects with column-related properties. For example,
+ * this data would render the following table.
+ *
+ * ```js
+ * const headers = [ { label: 'Month' }, { label: 'Orders' }, { label: 'Revenue' } ];
+ * const rows = [
+ * 	[
+ * 		{ display: 'January', value: 1 },
+ * 		{ display: 10, value: 10 },
+ * 		{ display: '$530.00', value: 530 },
+ * 	],
+ * 	[
+ * 		{ display: 'February', value: 2 },
+ * 		{ display: 13, value: 13 },
+ * 		{ display: '$675.00', value: 675 },
+ * 	],
+ * 	[
+ * 		{ display: 'March', value: 3 },
+ * 		{ display: 9, value: 9 },
+ * 		{ display: '$460.00', value: 460 },
+ * 	],
+ * ]
+ * ```
+ *
+ * |   Month  | Orders | Revenue |
+ * | ---------|--------|---------|
+ * | January  |     10 | $530.00 |
+ * | February |     13 | $675.00 |
+ * | March    |      9 | $460.00 |
  */
 class Table extends Component {
 	constructor( props ) {
