@@ -214,16 +214,13 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 		$ids = get_transient( $this->get_transient_key( $status ) );
 
 		if ( false === $ids ) {
-
-			$query = "SELECT webhook_id FROM {$wpdb->prefix}wc_webhooks";
-
-			if ( ! empty( $status ) ) {
-				$query .= $wpdb->prepare( " AND status = %s", $status );
-			}
-
-			$results = $wpdb->get_results( $query ); // WPCS: cache ok, DB call ok.
-			$ids     = array_map( 'intval', wp_list_pluck( $results, 'webhook_id' ) );
-
+			$ids = $this->search_webhooks(
+				array(
+					'limit'  => -1,
+					'status' => $status,
+				)
+			);
+			$ids = array_map( 'intval', $ids );
 			set_transient( $this->get_transient_key( $status ), $ids );
 		}
 
