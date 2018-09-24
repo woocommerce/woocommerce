@@ -88,3 +88,23 @@ export const getQueryFromActiveFilters = ( activeFilters, query, config ) => {
 
 	return { ...previousData, ...nextData };
 };
+
+/**
+ * Get the url query key from the filter key and rule.
+ *
+ * @param {object} config - a filter config object.
+ * @param {array} options - select options.
+ * @return {string|undefined}  - the value of the default option.
+ */
+export const getDefaultOptionValue = ( config, options ) => {
+	const { defaultOption } = config.input;
+	if ( config.input.defaultOption ) {
+		const option = find( options, { value: defaultOption } );
+		if ( ! option ) {
+			console.warn( `invalid defaultOption ${ defaultOption } supplied to ${ config.labels.add }` );
+			return undefined;
+		}
+		return option.value;
+	}
+	return options[ 0 ].value;
+};

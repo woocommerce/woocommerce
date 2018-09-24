@@ -16,7 +16,11 @@ import Card from 'components/card';
 import Link from 'components/link';
 import SelectFilter from './select-filter';
 import SearchFilter from './search-filter';
-import { getActiveFiltersFromQuery, getQueryFromActiveFilters } from './utils';
+import {
+	getActiveFiltersFromQuery,
+	getQueryFromActiveFilters,
+	getDefaultOptionValue,
+} from './utils';
 import { getNewPath } from 'lib/nav-utils';
 import './style.scss';
 
@@ -100,7 +104,7 @@ class AdvancedFilters extends Component {
 			newFilter.rule = filterConfig.rules[ 0 ].value;
 		}
 		if ( filterConfig.input && filterConfig.input.options ) {
-			newFilter.value = filterConfig.input.options[ 0 ].value;
+			newFilter.value = getDefaultOptionValue( filterConfig, filterConfig.input.options );
 		}
 		if ( filterConfig.input && 'Search' === filterConfig.input.component ) {
 			newFilter.value = '';
