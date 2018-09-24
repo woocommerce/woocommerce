@@ -30,6 +30,11 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 	 */
 	const CRON_EVENT = 'wc_order_stats_update';
 
+	/**
+	 * Type for each column to cast values correctly later.
+	 *
+	 * @var array
+	 */
 	protected $column_types = array(
 		'orders_count'        => 'intval',
 		'num_items_sold'      => 'intval',
@@ -43,6 +48,11 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 		'avg_order_value'     => 'floatval',
 	);
 
+	/**
+	 * SQL definition for each column.
+	 *
+	 * @var array
+	 */
 	protected $report_columns = array(
 		'orders_count'        => 'COUNT(*) as orders_count',
 		'num_items_sold'      => 'SUM(num_items_sold) as num_items_sold',
@@ -86,9 +96,9 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 	/**
 	 * Returns expected number of items on the page in case of date ordering.
 	 *
-	 * @param $expected_interval_count
-	 * @param $items_per_page
-	 * @param $page_no
+	 * @param int $expected_interval_count Expected number of intervals in total.
+	 * @param int $items_per_page          Number of items per page.
+	 * @param int $page_no                 Page number.
 	 *
 	 * @return float|int
 	 */
@@ -106,13 +116,13 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 	/**
 	 * Returns true if there are any intervals that need to be filled in the response.
 	 *
-	 * @param $expected_interval_count
-	 * @param $db_records
-	 * @param $items_per_page
-	 * @param $page_no
-	 * @param $order
-	 * @param $order_by
-	 * @param $intervals_count
+	 * @param int    $expected_interval_count Expected number of intervals in total.
+	 * @param int    $db_records              Total number of records for given period in the database.
+	 * @param int    $items_per_page          Number of items per page.
+	 * @param int    $page_no                 Page number.
+	 * @param string $order                   asc or desc.
+	 * @param string $order_by                Column by which the result will be sorted.
+	 * @param int    $intervals_count         Number of records for given (possibly shortened) time interval.
 	 *
 	 * @return bool
 	 */
@@ -393,7 +403,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 	 * Update the database with stats data.
 	 *
 	 * @param WC_Order $order Order to update row for.
-	 * @return int|bool Number or rows modified or false on failure.
+	 * @return int|bool|null Number or rows modified or false on failure.
 	 */
 	public static function update( $order ) {
 		global $wpdb;

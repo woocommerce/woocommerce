@@ -5,7 +5,7 @@
  * Description: A feature plugin for a modern, javascript-driven WooCommerce admin experience.
  * Author: Automattic
  * Author URI: https://woocommerce.com/
- * Text Domain: woocommerce
+ * Text Domain: wc-admin
  * Domain Path: /languages
  * Version: 0.1.0
  *
@@ -29,6 +29,7 @@ if ( ! defined( 'WC_ADMIN_PLUGIN_FILE' ) ) {
  */
 function wc_admin_plugins_notice() {
 	$message = sprintf(
+		/* translators: 1: URL of Gutenberg plugin, 2: URL of WooCommerce plugin */
 		__( 'The WooCommerce Admin feature plugin requires both <a href="%1$s">Gutenberg</a> and <a href="%2$s">WooCommerce</a> to be installed and active.', 'wc-admin' ),
 		'https://wordpress.org/plugins/gutenberg/',
 		'https://wordpress.org/plugins/woocommerce/'
@@ -36,11 +37,19 @@ function wc_admin_plugins_notice() {
 	printf( '<div class="error"><p>%s</p></div>', $message ); /* WPCS: xss ok. */
 }
 
+/**
+ * Returns true if all dependencies for the wc-admin plugin are loaded.
+ *
+ * @return bool
+ */
 function dependencies_satisfied() {
 	return ( defined( 'GUTENBERG_DEVELOPMENT_MODE' ) || defined( 'GUTENBERG_VERSION' ) )
 			&& class_exists( 'WooCommerce' );
 }
 
+/**
+ * Activates wc-admin plugin when installed.
+ */
 function activate_wc_admin_plugin() {
 	if ( ! dependencies_satisfied() ) {
 		return;
@@ -65,13 +74,13 @@ function wc_admin_plugins_loaded() {
 	// Initialize the WC API extensions.
 	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-api-init.php';
 
-	// Some common utilities
+	// Some common utilities.
 	require_once dirname( __FILE__ ) . '/lib/common.php';
 
-	// Register script files
+	// Register script files.
 	require_once dirname( __FILE__ ) . '/lib/client-assets.php';
 
-	// Create the Admin pages
+	// Create the Admin pages.
 	require_once dirname( __FILE__ ) . '/lib/admin.php';
 }
 add_action( 'plugins_loaded', 'wc_admin_plugins_loaded' );

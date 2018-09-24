@@ -7,6 +7,9 @@
  */
 class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 
+	/**
+	 * Test quarter function.
+	 */
 	public function test_quarter() {
 		$datetime = new DateTime( '2017-12-31T00:00:00Z' );
 		$this->assertEquals( 4, WC_Admin_Reports_Interval::quarter( $datetime ) );
@@ -36,49 +39,295 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 		$this->assertEquals( 4, WC_Admin_Reports_Interval::quarter( $datetime ) );
 	}
 
+	/**
+	 * Test simple week number function.
+	 */
 	public function test_simple_week_number() {
 		$expected_week_no = array(
-			'2010-12-24' => array( 1 => 52, 2 => 52, 3 => 52, 4 => 52, 5 => 52, 6 => 52, 7 => 52, ),
-			'2010-12-25' => array( 1 => 52, 2 => 52, 3 => 52, 4 => 52, 5 => 52, 6 => 53, 7 => 52, ),
-			'2010-12-26' => array( 1 => 52, 2 => 52, 3 => 52, 4 => 52, 5 => 52, 6 => 53, 7 => 53, ),
-			'2010-12-27' => array( 1 => 53, 2 => 52, 3 => 52, 4 => 52, 5 => 52, 6 => 53, 7 => 53, ),
-			'2010-12-28' => array( 1 => 53, 2 => 53, 3 => 52, 4 => 52, 5 => 52, 6 => 53, 7 => 53, ),
-			'2010-12-29' => array( 1 => 53, 2 => 53, 3 => 53, 4 => 52, 5 => 52, 6 => 53, 7 => 53, ),
-			'2010-12-30' => array( 1 => 53, 2 => 53, 3 => 53, 4 => 53, 5 => 52, 6 => 53, 7 => 53, ),
-			'2010-12-31' => array( 1 => 53, 2 => 53, 3 => 53, 4 => 53, 5 => 53, 6 => 53, 7 => 53, ),
-			'2011-01-01' => array( 1 => 1, 2 => 1, 3 => 1, 4 => 1, 5 => 1, 6 => 1, 7 => 1, ),
-			'2011-01-02' => array( 1 => 1, 2 => 1, 3 => 1, 4 => 1, 5 => 1, 6 => 1, 7 => 2, ),
-			'2011-01-03' => array( 1 => 2, 2 => 1, 3 => 1, 4 => 1, 5 => 1, 6 => 1, 7 => 2, ),
-			'2011-01-04' => array( 1 => 2, 2 => 2, 3 => 1, 4 => 1, 5 => 1, 6 => 1, 7 => 2, ),
-			'2011-01-05' => array( 1 => 2, 2 => 2, 3 => 2, 4 => 1, 5 => 1, 6 => 1, 7 => 2, ),
-			'2011-01-06' => array( 1 => 2, 2 => 2, 3 => 2, 4 => 2, 5 => 1, 6 => 1, 7 => 2, ),
-			'2011-01-07' => array( 1 => 2, 2 => 2, 3 => 2, 4 => 2, 5 => 2, 6 => 1, 7 => 2, ),
-			'2011-01-08' => array( 1 => 2, 2 => 2, 3 => 2, 4 => 2, 5 => 2, 6 => 2, 7 => 2, ),
-			'2011-01-09' => array( 1 => 2, 2 => 2, 3 => 2, 4 => 2, 5 => 2, 6 => 2, 7 => 3, ),
-			'2011-01-10' => array( 1 => 3, 2 => 2, 3 => 2, 4 => 2, 5 => 2, 6 => 2, 7 => 3, ),
-			'2011-12-26' => array( 1 => 53, 2 => 52, 3 => 52, 4 => 52, 5 => 52, 6 => 52, 7 => 53, ),
-			'2011-12-27' => array( 1 => 53, 2 => 53, 3 => 52, 4 => 52, 5 => 52, 6 => 52, 7 => 53, ),
-			'2011-12-28' => array( 1 => 53, 2 => 53, 3 => 53, 4 => 52, 5 => 52, 6 => 52, 7 => 53, ),
-			'2011-12-29' => array( 1 => 53, 2 => 53, 3 => 53, 4 => 53, 5 => 52, 6 => 52, 7 => 53, ),
-			'2011-12-30' => array( 1 => 53, 2 => 53, 3 => 53, 4 => 53, 5 => 53, 6 => 52, 7 => 53, ),
-			'2011-12-31' => array( 1 => 53, 2 => 53, 3 => 53, 4 => 53, 5 => 53, 6 => 53, 7 => 53, ),
-			'2012-01-01' => array( 1 => 1, 2 => 1, 3 => 1, 4 => 1, 5 => 1, 6 => 1, 7 => 1, ),
-			'2012-01-02' => array( 1 => 2, 2 => 1, 3 => 1, 4 => 1, 5 => 1, 6 => 1, 7 => 1, ),
-			'2012-01-03' => array( 1 => 2, 2 => 2, 3 => 1, 4 => 1, 5 => 1, 6 => 1, 7 => 1, ),
-			'2012-01-04' => array( 1 => 2, 2 => 2, 3 => 2, 4 => 1, 5 => 1, 6 => 1, 7 => 1, ),
-			'2012-01-05' => array( 1 => 2, 2 => 2, 3 => 2, 4 => 2, 5 => 1, 6 => 1, 7 => 1, ),
-			'2012-01-06' => array( 1 => 2, 2 => 2, 3 => 2, 4 => 2, 5 => 2, 6 => 1, 7 => 1, ),
+			'2010-12-24' => array(
+				1 => 52,
+				2 => 52,
+				3 => 52,
+				4 => 52,
+				5 => 52,
+				6 => 52,
+				7 => 52,
+			),
+			'2010-12-25' => array(
+				1 => 52,
+				2 => 52,
+				3 => 52,
+				4 => 52,
+				5 => 52,
+				6 => 53,
+				7 => 52,
+			),
+			'2010-12-26' => array(
+				1 => 52,
+				2 => 52,
+				3 => 52,
+				4 => 52,
+				5 => 52,
+				6 => 53,
+				7 => 53,
+			),
+			'2010-12-27' => array(
+				1 => 53,
+				2 => 52,
+				3 => 52,
+				4 => 52,
+				5 => 52,
+				6 => 53,
+				7 => 53,
+			),
+			'2010-12-28' => array(
+				1 => 53,
+				2 => 53,
+				3 => 52,
+				4 => 52,
+				5 => 52,
+				6 => 53,
+				7 => 53,
+			),
+			'2010-12-29' => array(
+				1 => 53,
+				2 => 53,
+				3 => 53,
+				4 => 52,
+				5 => 52,
+				6 => 53,
+				7 => 53,
+			),
+			'2010-12-30' => array(
+				1 => 53,
+				2 => 53,
+				3 => 53,
+				4 => 53,
+				5 => 52,
+				6 => 53,
+				7 => 53,
+			),
+			'2010-12-31' => array(
+				1 => 53,
+				2 => 53,
+				3 => 53,
+				4 => 53,
+				5 => 53,
+				6 => 53,
+				7 => 53,
+			),
+			'2011-01-01' => array(
+				1 => 1,
+				2 => 1,
+				3 => 1,
+				4 => 1,
+				5 => 1,
+				6 => 1,
+				7 => 1,
+			),
+			'2011-01-02' => array(
+				1 => 1,
+				2 => 1,
+				3 => 1,
+				4 => 1,
+				5 => 1,
+				6 => 1,
+				7 => 2,
+			),
+			'2011-01-03' => array(
+				1 => 2,
+				2 => 1,
+				3 => 1,
+				4 => 1,
+				5 => 1,
+				6 => 1,
+				7 => 2,
+			),
+			'2011-01-04' => array(
+				1 => 2,
+				2 => 2,
+				3 => 1,
+				4 => 1,
+				5 => 1,
+				6 => 1,
+				7 => 2,
+			),
+			'2011-01-05' => array(
+				1 => 2,
+				2 => 2,
+				3 => 2,
+				4 => 1,
+				5 => 1,
+				6 => 1,
+				7 => 2,
+			),
+			'2011-01-06' => array(
+				1 => 2,
+				2 => 2,
+				3 => 2,
+				4 => 2,
+				5 => 1,
+				6 => 1,
+				7 => 2,
+			),
+			'2011-01-07' => array(
+				1 => 2,
+				2 => 2,
+				3 => 2,
+				4 => 2,
+				5 => 2,
+				6 => 1,
+				7 => 2,
+			),
+			'2011-01-08' => array(
+				1 => 2,
+				2 => 2,
+				3 => 2,
+				4 => 2,
+				5 => 2,
+				6 => 2,
+				7 => 2,
+			),
+			'2011-01-09' => array(
+				1 => 2,
+				2 => 2,
+				3 => 2,
+				4 => 2,
+				5 => 2,
+				6 => 2,
+				7 => 3,
+			),
+			'2011-01-10' => array(
+				1 => 3,
+				2 => 2,
+				3 => 2,
+				4 => 2,
+				5 => 2,
+				6 => 2,
+				7 => 3,
+			),
+			'2011-12-26' => array(
+				1 => 53,
+				2 => 52,
+				3 => 52,
+				4 => 52,
+				5 => 52,
+				6 => 52,
+				7 => 53,
+			),
+			'2011-12-27' => array(
+				1 => 53,
+				2 => 53,
+				3 => 52,
+				4 => 52,
+				5 => 52,
+				6 => 52,
+				7 => 53,
+			),
+			'2011-12-28' => array(
+				1 => 53,
+				2 => 53,
+				3 => 53,
+				4 => 52,
+				5 => 52,
+				6 => 52,
+				7 => 53,
+			),
+			'2011-12-29' => array(
+				1 => 53,
+				2 => 53,
+				3 => 53,
+				4 => 53,
+				5 => 52,
+				6 => 52,
+				7 => 53,
+			),
+			'2011-12-30' => array(
+				1 => 53,
+				2 => 53,
+				3 => 53,
+				4 => 53,
+				5 => 53,
+				6 => 52,
+				7 => 53,
+			),
+			'2011-12-31' => array(
+				1 => 53,
+				2 => 53,
+				3 => 53,
+				4 => 53,
+				5 => 53,
+				6 => 53,
+				7 => 53,
+			),
+			'2012-01-01' => array(
+				1 => 1,
+				2 => 1,
+				3 => 1,
+				4 => 1,
+				5 => 1,
+				6 => 1,
+				7 => 1,
+			),
+			'2012-01-02' => array(
+				1 => 2,
+				2 => 1,
+				3 => 1,
+				4 => 1,
+				5 => 1,
+				6 => 1,
+				7 => 1,
+			),
+			'2012-01-03' => array(
+				1 => 2,
+				2 => 2,
+				3 => 1,
+				4 => 1,
+				5 => 1,
+				6 => 1,
+				7 => 1,
+			),
+			'2012-01-04' => array(
+				1 => 2,
+				2 => 2,
+				3 => 2,
+				4 => 1,
+				5 => 1,
+				6 => 1,
+				7 => 1,
+			),
+			'2012-01-05' => array(
+				1 => 2,
+				2 => 2,
+				3 => 2,
+				4 => 2,
+				5 => 1,
+				6 => 1,
+				7 => 1,
+			),
+			'2012-01-06' => array(
+				1 => 2,
+				2 => 2,
+				3 => 2,
+				4 => 2,
+				5 => 2,
+				6 => 1,
+				7 => 1,
+			),
 		);
 
 		foreach ( $expected_week_no as $date => $week_numbers ) {
 			for ( $first_day_of_week = 1; $first_day_of_week <= 7; $first_day_of_week++ ) {
 				$datetime = new DateTime( $date );
-				$this->assertEquals( $expected_week_no[$date][$first_day_of_week], WC_Admin_Reports_Interval::simple_week_number( $datetime, $first_day_of_week ), "First day of week: $first_day_of_week; Date: $date" );
+				$this->assertEquals( $expected_week_no[ $date ][ $first_day_of_week ], WC_Admin_Reports_Interval::simple_week_number( $datetime, $first_day_of_week ), "First day of week: $first_day_of_week; Date: $date" );
 			}
 		}
 
 	}
 
+	/**
+	 * Testing ISO week number function.
+	 */
 	public function test_ISO_week_no() {
 		$expected_week_no = array(
 			'2010-12-24' => 51,
@@ -114,12 +363,15 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 		);
 		foreach ( $expected_week_no as $date => $week_numbers ) {
 			$datetime = new DateTime( $date );
-			$this->assertEquals( $expected_week_no[$date], WC_Admin_Reports_Interval::week_number( $datetime, 1 ), "ISO week number for date: $date" );
+			$this->assertEquals( $expected_week_no[ $date ], WC_Admin_Reports_Interval::week_number( $datetime, 1 ), "ISO week number for date: $date" );
 		}
 	}
 
+	/**
+	 * Test function counting intervals between two datetimes.
+	 */
 	public function test_intervals_between() {
-		// please note that all intervals are inclusive on both sides
+		// Please note that all intervals are inclusive on both sides.
 		$test_settings = array(
 			// 0 interval length, should just return 1.
 			array(
@@ -336,6 +588,9 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 		}
 	}
 
+	/**
+	 * Test function that returns beginning of next hour.
+	 */
 	public function test_next_hour_start() {
 		$settings = array(
 			'2017-12-30T00:00:00Z' => array(
@@ -356,6 +611,9 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 		}
 	}
 
+	/**
+	 * Test function that returns beginning of next day.
+	 */
 	public function test_next_day_start() {
 		$settings = array(
 			'2017-12-30T00:00:00Z' => array(
@@ -376,6 +634,9 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 		}
 	}
 
+	/**
+	 * Test function that returns beginning of next week, for weeks starting on Monday.
+	 */
 	public function test_next_week_start_ISO_week() {
 		update_option( 'start_of_week', 1 );
 		$settings = array(
@@ -421,6 +682,9 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 		}
 	}
 
+	/**
+	 * Test function that returns beginning of next week, for weeks starting on Sunday.
+	 */
 	public function test_next_week_start_Sunday_based_week() {
 		update_option( 'start_of_week', 7 );
 		$settings = array(
@@ -450,6 +714,9 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 		}
 	}
 
+	/**
+	 * Test function that returns beginning of next month.
+	 */
 	public function test_next_month_start() {
 		$settings = array(
 			'2017-12-30T00:00:00Z' => array(
@@ -471,6 +738,9 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 		}
 	}
 
+	/**
+	 * Test function that returns beginning of next quarter.
+	 */
 	public function test_next_quarter_start() {
 		$settings = array(
 			'2017-12-31T00:00:00Z' => array(
@@ -495,6 +765,9 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 		}
 	}
 
+	/**
+	 * Test function that returns beginning of next year.
+	 */
 	public function test_next_year_start() {
 		$settings = array(
 			'2017-12-31T23:59:59Z' => array(
