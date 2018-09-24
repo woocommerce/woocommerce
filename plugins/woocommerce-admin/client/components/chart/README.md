@@ -22,8 +22,8 @@ This component accepts timeseries `data` prop in the following format (with date
 [
 	{
 		date: '%Y-%m-%d', // string in `dateParser` format (see below)
-		category1: { label: 'label', value: value }, // string (optional), number
-		category2: { label: 'label', value: value }, // string (optional), number
+		category1: { labelDate: date, value: value }, // string (optional), number
+		category2: { labelDate: date, value: value }, // string (optional), number
 		...
 	},
 	...
@@ -34,7 +34,7 @@ For example:
 [
 	{
 		date: '2018-06-25',
-		category1: { label: 'Tooltip label', value: 1234.56 },
+		category1: { labelDate: '2018-09-09 00:00:00', value: 1234.56 },
 		category2: { value: 9876 },
 		...
 	},
@@ -50,6 +50,7 @@ Name | Type | Default | Description
 `data`* | `array` | none | An array of data as specified above
 `dateParser` | `string` | `%Y-%m-%dT%H:%M:%S` | Format to parse datetimes in the data
 `type`* | `string` | `line` | Chart type of either `line` or `bar`
+`pointLabelFormat` | `string` | `` | Date format of the point labels (might be used in tooltips and ARIA properties)
 `title` | `string` | none | Chart title
 `tooltipFormat` | `string` | `%B %d, %Y` | Title and format of the tooltip title date if `tooltipTitle` is missing
 `tooltipTitle` | `string` | `` | Title and format of the tooltip title

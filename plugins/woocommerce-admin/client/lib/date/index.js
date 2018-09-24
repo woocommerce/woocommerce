@@ -401,6 +401,7 @@ export function getIntervalForQuery( query ) {
  * @return {String} Current interval.
  */
 export function getDateFormatsForInterval( interval ) {
+	let pointLabelFormat = 'F j, Y';
 	let tooltipFormat = '%B %d %Y';
 	let xFormat = '%Y-%m-%d';
 	let x2Format = '%b %y';
@@ -408,6 +409,7 @@ export function getDateFormatsForInterval( interval ) {
 
 	switch ( interval ) {
 		case 'hour':
+			pointLabelFormat = 'h A';
 			tooltipFormat = '%I %p';
 			xFormat = '%I %p';
 			tableFormat = 'h A';
@@ -421,12 +423,14 @@ export function getDateFormatsForInterval( interval ) {
 			break;
 		case 'quarter':
 		case 'month':
+			pointLabelFormat = 'F Y';
 			tooltipFormat = '%B %Y';
 			xFormat = '%b %y';
 			x2Format = '';
 			tableFormat = 'M Y';
 			break;
 		case 'year':
+			pointLabelFormat = 'Y';
 			tooltipFormat = '%Y';
 			xFormat = '%Y';
 			tableFormat = 'Y';
@@ -434,6 +438,7 @@ export function getDateFormatsForInterval( interval ) {
 	}
 
 	return {
+		pointLabelFormat,
 		tooltipFormat,
 		xFormat,
 		x2Format,

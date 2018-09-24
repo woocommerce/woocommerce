@@ -15,6 +15,7 @@ import {
 } from 'd3-scale';
 import { event as d3Event, mouse as d3Mouse, select as d3Select } from 'd3-selection';
 import { line as d3Line } from 'd3-shape';
+import { format as formatDate } from '@wordpress/date';
 /**
  * Internal dependencies
  */
@@ -390,6 +391,9 @@ export const drawAxis = ( node, params ) => {
 		.remove();
 };
 
+const getTooltipRowLabel = ( d, row, params ) =>
+	d[ row.key ].labelDate ? formatDate( params.pointLabelFormat, d[ row.key ].labelDate ) : row.key;
+
 const showTooltip = ( node, params, d, position ) => {
 	const chartCoords = node.node().getBoundingClientRect();
 	let [ xPosition, yPosition ] = position ? position : d3Mouse( node.node() );
@@ -400,7 +404,7 @@ const showTooltip = ( node, params, d, position ) => {
 				<li class="key-row">
 					<div class="key-container">
 						<span class="key-color" style="background-color:${ getColor( row.key, params ) }"></span>
-						<span class="key-key">${ d[ row.key ].label ? d[ row.key ].label : row.key }</span>
+						<span class="key-key">${ getTooltipRowLabel( d, row, params ) }</span>
 					</div>
 					<span class="key-value">${ formatCurrency( d[ row.key ].value ) }</span>
 				</li>

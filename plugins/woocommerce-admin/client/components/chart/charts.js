@@ -101,6 +101,7 @@ class D3Chart extends Component {
 			layout,
 			margin,
 			orderedKeys,
+			pointLabelFormat,
 			tooltipFormat,
 			tooltipTitle,
 			type,
@@ -132,6 +133,7 @@ class D3Chart extends Component {
 			lineData,
 			margin,
 			orderedKeys: newOrderedKeys,
+			pointLabelFormat,
 			parseDate,
 			scale,
 			tooltipFormat: d3TimeFormat( tooltipFormat ),
@@ -206,6 +208,10 @@ D3Chart.propTypes = {
 	 * to the left or 'compact' has the legend below
 	 */
 	layout: PropTypes.oneOf( [ 'standard', 'comparison', 'compact' ] ),
+	/**
+	 * Date format of the point labels (might be used in tooltips and ARIA properties).
+	 */
+	pointLabelFormat: PropTypes.string,
 	/**
 	 * Margins for axis and chart padding.
 	 */

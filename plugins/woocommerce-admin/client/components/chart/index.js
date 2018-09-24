@@ -188,6 +188,7 @@ class Chart extends Component {
 		const {
 			dateParser,
 			layout,
+			pointLabelFormat,
 			title,
 			tooltipFormat,
 			tooltipTitle,
@@ -263,6 +264,7 @@ class Chart extends Component {
 						height={ 300 }
 						margin={ margin }
 						orderedKeys={ orderedKeys }
+						pointLabelFormat={ pointLabelFormat }
 						tooltipFormat={ tooltipFormat }
 						tooltipTitle={ tooltipTitle }
 						type={ type }
@@ -288,6 +290,10 @@ Chart.propTypes = {
 	 * Format to parse dates into d3 time format
 	 */
 	dateParser: PropTypes.string.isRequired,
+	/**
+	 * Date format of the point labels (might be used in tooltips and ARIA properties).
+	 */
+	pointLabelFormat: PropTypes.string,
 	/**
 	 * A datetime formatting string to format the date displayed as the title of the toolip
 	 * if `tooltipTitle` is missing, passed to d3TimeFormat.
