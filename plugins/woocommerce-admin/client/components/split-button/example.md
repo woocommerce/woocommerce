@@ -1,15 +1,7 @@
-SplitButton
-============
-
-A component for displaying a button with a main action plus a secondary set of actions behind a menu toggle.
-
-## How to use:
-
 ```jsx
-import SplitButton from 'components/split-button';
+import { SplitButton } from '@woocommerce/components';
 
-render: function() {
-  return (
+const MySplitButton = () => (
 	<div>
 		<SplitButton
 			isPrimary
@@ -36,7 +28,8 @@ render: function() {
 					onClick: () => alert( 'Primary Left clicked' ),
 				},
 			] }
-				/>
+		/>
+
 		<SplitButton
 			mainIcon={ <Gridicon icon="pencil" /> }
 			menuLabel="Select an action"
@@ -57,21 +50,12 @@ render: function() {
 					onClick: () => alert( 'Icon Only Down clicked' ),
 				},
 				{
+					label: 'Left',
 					icon: <Gridicon icon="arrow-left" />,
 					onClick: () => alert( 'Icon Only Left clicked' ),
 				},
 			] }
 		/>
 	</div>
-  );
-}
+);
 ```
-## Props
-
-* `isPrimary`: Default false. Whether the button is styled as a primary button.
-* `mainIcon`: Icon for the main button.
-* `mainLabel`: Label for the main button.
-* `onClick`: Function to activate when the the main button is clicked.
-* `menuLabel`: Label to display for the menu of actions, used as a heading on the mobile popover and for accessible text.
-* `controls`: An array of additional actions. Accepts additional icon, label, and onClick props.
-* `className`: Additional CSS classes.

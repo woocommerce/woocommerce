@@ -49,6 +49,7 @@ const webpackConfig = {
 				loader: 'babel-loader',
 				exclude: /node_modules/,
 			},
+			{ test: /\.md$/, use: 'raw-loader' },
 			{
 				test: /\.(scss|css)$/,
 				use: ExtractTextPlugin.extract( {
