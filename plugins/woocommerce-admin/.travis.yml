@@ -5,16 +5,18 @@ php:
   - 7.1
 
 env:
-  - WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1 WP_CORE_DIR=/tmp/wordpress
-  - NODE_RELEASE=8.x
+  - WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1 WP_CORE_DIR=/tmp/wordpress NODE_RELEASE=8.x
 
 before_script:
   - phpenv config-rm xdebug.ini
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
   - bash bin/install-wp-tests.sh wc_admin_test root '' localhost $WP_VERSION
   - bash bin/travis.sh before
-  - sudo rm -rf ~/.nvm - curl -sL "https://deb.nodesource.com/setup_${NODE_RELEASE}" | sudo -E bash -
+  - sudo rm -rf ~/.nvm
+  - curl -sL "https://deb.nodesource.com/setup_${NODE_RELEASE}" | sudo -E bash -
   - sudo apt-get install -y nodejs
+  - node --version
+  - npm --version
 
 
 install:
