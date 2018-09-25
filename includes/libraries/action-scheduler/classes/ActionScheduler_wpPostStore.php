@@ -11,8 +11,12 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 	/** @var DateTimeZone */
 	protected $local_timezone = NULL;
 
+	/** @var int */
+	private static $max_index_length = 191;
+
 	public function save_action( ActionScheduler_Action $action, DateTime $scheduled_date = NULL ){
 		try {
+			$this->validate_action( $action );
 			$post_array = $this->create_post_array( $action, $scheduled_date );
 			$post_id = $this->save_post_array( $post_array );
 			$this->save_post_schedule( $post_id, $action->get_schedule() );
@@ -91,6 +95,12 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 	protected function make_action_from_post( $post ) {
 		$hook = $post->post_title;
 		$args = json_decode( $post->post_content, true );
+
+		// Handle args that do not decode properly.
+		if ( JSON_ERROR_NONE !== json_last_error() || ! is_array( $args ) ) {
+			throw ActionScheduler_InvalidActionException::from_decoding_args( $post->ID );
+		}
+
 		$schedule = get_post_meta( $post->ID, self::SCHEDULE_META_KEY, true );
 		if ( empty($schedule) ) {
 			$schedule = new ActionScheduler_NullSchedule();
@@ -410,18 +420,18 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 	 * @param string $action_id
 	 *
 	 * @throws InvalidArgumentException
-	 * @return DateTime The date the action is schedule to run, or the date that it ran.
+	 * @return ActionScheduler_DateTime The date the action is schedule to run, or the date that it ran.
 	 */
 	public function get_date( $action_id ) {
-		$date = $this->get_date_gmt( $action_id );
-		return $date->setTimezone( $this->get_local_timezone() );
+		$next = $this->get_date_gmt( $action_id );
+		return ActionScheduler_TimezoneHelper::set_local_timezone( $next );
 	}
 
 	/**
 	 * @param string $action_id
 	 *
 	 * @throws InvalidArgumentException
-	 * @return DateTime The date the action is schedule to run, or the date that it ran.
+	 * @return ActionScheduler_DateTime The date the action is schedule to run, or the date that it ran.
 	 */
 	public function get_date_gmt( $action_id ) {
 		$post = get_post($action_id);
@@ -713,6 +723,21 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 		remove_filter( 'wp_insert_post_data', array( $this, 'filter_insert_post_data' ), 10 );
 		if ( is_wp_error($result) ) {
 			throw new RuntimeException($result->get_error_message());
+		}
+	}
+
+	/**
+	 * InnoDB indexes have a maximum size of 767 bytes by default, which is only 191 characters with utf8mb4.
+	 *
+	 * Previously, AS wasn't concerned about args length, as we used the (unindex) post_content column. However,
+	 * as we prepare to move to custom tables, and can use an indexed VARCHAR column instead, we want to warn
+	 * developers of this impending requirement.
+	 *
+	 * @param ActionScheduler_Action $action
+	 */
+	protected function validate_action( ActionScheduler_Action $action ) {
+		if ( strlen( json_encode( $action->get_args() ) ) > self::$max_index_length ) {
+			_doing_it_wrong( 'ActionScheduler_Action::$args', sprintf( 'To ensure the action args column can be indexed, action args should not be more than %d characters when encoded as JSON. Support for strings longer than this will be removed in a future version.', self::$max_index_length ), '2.1.0' );
 		}
 	}
 

@@ -19,6 +19,7 @@ class ActionScheduler_FatalErrorMonitor {
 		add_action( 'shutdown', array( $this, 'handle_unexpected_shutdown' ) );
 		add_action( 'action_scheduler_before_execute', array( $this, 'track_current_action' ), 0, 1 );
 		add_action( 'action_scheduler_after_execute',  array( $this, 'untrack_action' ), 0, 0 );
+		add_action( 'action_scheduler_execution_ignored',  array( $this, 'untrack_action' ), 0, 0 );
 		add_action( 'action_scheduler_failed_execution',  array( $this, 'untrack_action' ), 0, 0 );
 	}
 
@@ -26,9 +27,10 @@ class ActionScheduler_FatalErrorMonitor {
 		$this->claim = NULL;
 		$this->untrack_action();
 		remove_action( 'shutdown', array( $this, 'handle_unexpected_shutdown' ) );
-		remove_action( 'action_scheduler_before_execute', array( $this, 'track_current_action' ), 0, 1 );
-		remove_action( 'action_scheduler_after_execute',  array( $this, 'untrack_action' ), 0, 0 );
-		remove_action( 'action_scheduler_failed_execution',  array( $this, 'untrack_action' ), 0, 0 );
+		remove_action( 'action_scheduler_before_execute', array( $this, 'track_current_action' ), 0 );
+		remove_action( 'action_scheduler_after_execute',  array( $this, 'untrack_action' ), 0 );
+		remove_action( 'action_scheduler_execution_ignored',  array( $this, 'untrack_action' ), 0 );
+		remove_action( 'action_scheduler_failed_execution',  array( $this, 'untrack_action' ), 0 );
 	}
 
 	public function track_current_action( $action_id ) {
@@ -51,4 +53,3 @@ class ActionScheduler_FatalErrorMonitor {
 		}
 	}
 }
- 

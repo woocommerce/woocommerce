@@ -41,7 +41,7 @@ class WC_Action_Queue implements WC_Queue_Interface {
 	 * @return string The action ID.
 	 */
 	public function schedule_single( $timestamp, $hook, $args = array(), $group = '' ) {
-		return wc_schedule_single_action( $timestamp, $hook, $args, $group );
+		return as_schedule_single_action( $timestamp, $hook, $args, $group );
 	}
 
 	/**
@@ -55,7 +55,7 @@ class WC_Action_Queue implements WC_Queue_Interface {
 	 * @return string The action ID.
 	 */
 	public function schedule_recurring( $timestamp, $interval_in_seconds, $hook, $args = array(), $group = '' ) {
-		return wc_schedule_recurring_action( $timestamp, $interval_in_seconds, $hook, $args, $group );
+		return as_schedule_recurring_action( $timestamp, $interval_in_seconds, $hook, $args, $group );
 	}
 
 	/**
@@ -79,38 +79,52 @@ class WC_Action_Queue implements WC_Queue_Interface {
 	 * @return string The action ID
 	 */
 	public function schedule_cron( $timestamp, $cron_schedule, $hook, $args = array(), $group = '' ) {
-		return wc_schedule_cron_action( $timestamp, $cron_schedule, $hook, $args, $group );
+		return as_schedule_cron_action( $timestamp, $cron_schedule, $hook, $args, $group );
 	}
 
 	/**
-	 * Dequeue all actions with a matching hook (and optionally matching args and group) so they are not run.
+	 * Dequeue the next scheduled instance of an action with a matching hook (and optionally matching args and group).
 	 *
-	 * Any recurring actions with a matching hook will also be cancelled, not just the next scheduled action.
+	 * Any recurring actions with a matching hook should also be cancelled, not just the next scheduled action.
 	 *
-	 * Technically, one action in a recurring or Cron action is scheduled at any one point in time. The next
-	 * in the sequence is scheduled after the previous one is run, so only the next scheduled action needs to
-	 * be cancelled/dequeued to stop the sequence.
+	 * While technically only the next instance of a recurring or cron action is unscheduled by this method, that will also
+	 * prevent all future instances of that recurring or cron action from being run. Recurring and cron actions are scheduled
+	 * in a sequence instead of all being scheduled at once. Each successive occurrence of a recurring action is scheduled
+	 * only after the former action is run. As the next instance is never run, because it's unscheduled by this function,
+	 * then the following instance will never be scheduled (or exist), which is effectively the same as being unscheduled
+	 * by this method also.
 	 *
 	 * @param string $hook The hook that the job will trigger.
 	 * @param array  $args Args that would have been passed to the job.
-	 * @param string $group Group name.
+	 * @param string $group The group the job is assigned to (if any).
 	 */
 	public function cancel( $hook, $args = array(), $group = '' ) {
-		wc_unschedule_action( $hook, $args, $group );
+		as_unschedule_action( $hook, $args, $group );
+	}
+
+	/**
+	 * Dequeue all actions with a matching hook (and optionally matching args and group) so no matching actions are ever run.
+	 *
+	 * @param string $hook The hook that the job will trigger.
+	 * @param array  $args Args that would have been passed to the job.
+	 * @param string $group The group the job is assigned to (if any).
+	 */
+	public function cancel_all( $hook, $args = array(), $group = '' ) {
+		as_unschedule_all_actions( $hook, $args, $group );
 	}
 
 	/**
 	 * Get the date and time for the next scheduled occurence of an action with a given hook
 	 * (an optionally that matches certain args and group), if any.
 	 *
-	 * @param string $hook Hook name.
-	 * @param array  $args Arguments.
-	 * @param string $group Group name.
+	 * @param string $hook The hook that the job will trigger.
+	 * @param array  $args Filter to a hook with matching args that will be passed to the job when it runs.
+	 * @param string $group Filter to only actions assigned to a specific group.
 	 * @return WC_DateTime|null The date and time for the next occurrence, or null if there is no pending, scheduled action for the given hook.
 	 */
 	public function get_next( $hook, $args = null, $group = '' ) {
 
-		$next_timestamp = wc_next_scheduled_action( $hook, $args, $group );
+		$next_timestamp = as_next_scheduled_action( $hook, $args, $group );
 
 		if ( $next_timestamp ) {
 			return wc_string_to_datetime( $next_timestamp );
@@ -141,6 +155,6 @@ class WC_Action_Queue implements WC_Queue_Interface {
 	 * @return array
 	 */
 	public function search( $args = array(), $return_format = OBJECT ) {
-		return wc_get_scheduled_actions( $args, $return_format );
+		return as_get_scheduled_actions( $args, $return_format );
 	}
 }
