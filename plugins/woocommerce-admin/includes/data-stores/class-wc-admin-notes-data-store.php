@@ -18,7 +18,8 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Admin_Not
 	 * @param WC_Admin_Note
 	 */
 	public function create( &$note ) {
-		$note->set_date_created( current_time( 'timestamp' ) );
+		$date_created = current_time( 'timestamp', 1 );
+		$note->set_date_created( $date_created );
 
 		global $wpdb;
 
@@ -29,12 +30,13 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Admin_Not
 			'title'         => $note->get_title(),
 			'content'       => $note->get_content(),
 			'icon'          => $note->get_icon(),
-			'content_data'  => '', // TODO $note->get_content_data(),
 			'status'        => $note->get_status(),
 			'source'        => $note->get_source(),
-			'date_created'  => '2018-09-21 22:45:16', // TODO $note->get_date_created(),
-			'date_reminder' => '', // TODO $note->get_date_reminder(),
 		);
+
+		$note_to_be_inserted['content_data']  = wp_json_encode( $note->get_content_data(), JSON_FORCE_OBJECT );
+		$note_to_be_inserted['date_created']  = gmdate( 'Y-m-d H:i:s', $date_created );
+		$note_to_be_inserted['date_reminder'] = null;
 
 		$wpdb->insert( $wpdb->prefix . 'woocommerce_admin_notes', $note_to_be_inserted );
 		$note_id = $wpdb->insert_id;
@@ -79,7 +81,7 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Admin_Not
 			$note->set_title( $note_row->title );
 			$note->set_content( $note_row->content );
 			$note->set_icon( $note_row->icon );
-			$note->set_content_data( $note_row->content_data );
+			$note->set_content_data( json_decode( $note_row->content_data ) );
 			$note->set_status( $note_row->status );
 			$note->set_source( $note_row->source );
 			$note->set_date_created( $note_row->date_created );
@@ -101,6 +103,7 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Admin_Not
 	public function update( &$note ) {
 		global $wpdb;
 		if ( $note->get_id() ) {
+
 			$wpdb->update(
 				$wpdb->prefix . 'woocommerce_admin_notes', array(
 					'name'          => $note->get_name(),
@@ -109,7 +112,7 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Admin_Not
 					'title'         => $note->get_title(),
 					'content'       => $note->get_content(),
 					'icon'          => $note->get_icon(),
-					'content_data'  => $note->get_content_data(),
+					'content_data'  => wp_json_encode( $note->get_content_data(), JSON_FORCE_OBJECT ),
 					'status'        => $note->get_status(),
 					'source'        => $note->get_source(),
 					'date_created'  => $note->get_date_created(),
