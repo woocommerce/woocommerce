@@ -123,7 +123,6 @@ class WC_Countries {
 			'MT' => array(),
 			'NL' => array(),
 			'NO' => array(),
-			'PL' => array(),
 			'PT' => array(),
 			'RE' => array(),
 			'SG' => array(),
