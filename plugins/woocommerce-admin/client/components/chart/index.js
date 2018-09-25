@@ -188,6 +188,7 @@ class Chart extends Component {
 		const {
 			dateParser,
 			layout,
+			mode,
 			pointLabelFormat,
 			title,
 			tooltipFormat,
@@ -263,6 +264,7 @@ class Chart extends Component {
 						dateParser={ dateParser }
 						height={ 300 }
 						margin={ margin }
+						mode={ mode }
 						orderedKeys={ orderedKeys }
 						pointLabelFormat={ pointLabelFormat }
 						tooltipFormat={ tooltipFormat }
@@ -321,6 +323,11 @@ Chart.propTypes = {
 	 */
 	layout: PropTypes.oneOf( [ 'standard', 'comparison', 'compact' ] ),
 	/**
+	 * `item-comparison` (default) or `time-comparison`, this is used to generate correct
+	 * ARIA properties.
+	 */
+	mode: PropTypes.oneOf( [ 'item-comparison', 'time-comparison' ] ),
+	/**
 	 * A title describing this chart.
 	 */
 	title: PropTypes.string,
@@ -350,6 +357,7 @@ Chart.defaultProps = {
 	x2Format: '%b %Y',
 	yFormat: '$.3s',
 	layout: 'standard',
+	mode: 'item-comparison',
 	type: 'line',
 	interval: 'day',
 };

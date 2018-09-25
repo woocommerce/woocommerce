@@ -100,6 +100,7 @@ class D3Chart extends Component {
 			height,
 			layout,
 			margin,
+			mode,
 			orderedKeys,
 			pointLabelFormat,
 			tooltipFormat,
@@ -132,6 +133,7 @@ class D3Chart extends Component {
 			line: getLine( xLineScale, yScale ),
 			lineData,
 			margin,
+			mode,
 			orderedKeys: newOrderedKeys,
 			pointLabelFormat,
 			parseDate,
@@ -222,6 +224,11 @@ D3Chart.propTypes = {
 		top: PropTypes.number,
 	} ),
 	/**
+	 * `items-comparison` (default) or `time-comparison`, this is used to generate correct
+	 * ARIA properties.
+	 */
+	mode: PropTypes.oneOf( [ 'item-comparison', 'time-comparison' ] ),
+	/**
 	 * The list of labels for this chart.
 	 */
 	orderedKeys: PropTypes.array,
@@ -267,6 +274,7 @@ D3Chart.defaultProps = {
 		top: 20,
 	},
 	layout: 'standard',
+	mode: 'item-comparison',
 	tooltipFormat: '%B %d, %Y',
 	type: 'line',
 	width: 600,

@@ -332,6 +332,7 @@ export class RevenueReport extends Component {
 				title={ selectedChart.label }
 				interval={ currentInterval }
 				allowedIntervals={ allowedIntervals }
+				mode="time-comparison"
 				pointLabelFormat={ formats.pointLabelFormat }
 				tooltipTitle={ selectedChart.label }
 				xFormat={ formats.xFormat }
