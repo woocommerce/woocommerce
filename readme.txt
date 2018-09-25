@@ -246,6 +246,9 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Added form action hooks for edit account and login templates. #21248
 * Dev - Add action for when system tools are run. #21270
 * Dev - Add - woocommerce_restock_refunded_items filter to control default state of the restock option when refunding items on an order. #21314
+* Dev - Add an extensible/swappable job queue via WC_Action_Queue and WC_Queue_Interface. #20030
+* Dev - Use WC_Action_Queue for schedule and delivery of webhooks. #20030
+* Dev - Include Action Scheduler v2.1.0 and use it for the default job queue. #21424 /  #20030
 * Localization - Updated IT provinces. #20286
 * Localization - Eircode validation. #20330
 * Localization - Disable postcode requirement for Bahrain. #21103
