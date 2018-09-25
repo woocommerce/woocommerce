@@ -81,6 +81,46 @@ class WC_Admin_Note extends WC_Data {
 
 	/*
 	|--------------------------------------------------------------------------
+	| Helpers
+	|--------------------------------------------------------------------------
+	|
+	| Methods for getting allowed types, statuses.
+	|
+	*/
+
+	/**
+	 * Get allowed types.
+	 *
+	 * @return array
+	 */
+	static public function get_allowed_types() {
+		$allowed_types = array(
+			self::E_WC_ADMIN_NOTE_ERROR,
+			self::E_WC_ADMIN_NOTE_WARNING,
+			self::E_WC_ADMIN_NOTE_UPDATE,
+			self::E_WC_ADMIN_NOTE_INFORMATIONAL,
+		);
+
+		return apply_filters( 'woocommerce_admin_note_types', $allowed_types );
+	}
+
+	/**
+	 * Get allowed statuses.
+	 *
+	 * @return array
+	 */
+	static public function get_allowed_statuses() {
+		$allowed_statuses = array(
+			self::E_WC_ADMIN_NOTE_ACTIONED,
+			self::E_WC_ADMIN_NOTE_UNACTIONED,
+		);
+
+		return apply_filters( 'woocommerce_admin_note_statuses', $allowed_statuses );
+	}
+
+
+	/*
+	|--------------------------------------------------------------------------
 	| Getters
 	|--------------------------------------------------------------------------
 	|
@@ -243,15 +283,7 @@ class WC_Admin_Note extends WC_Data {
 			$this->error( 'admin_note_invalid_data', __( 'The admin note type prop cannot be empty.', 'woocommerce' ) );
 		}
 
-		$allowed_types = array(
-			self::E_WC_ADMIN_NOTE_ERROR,
-			self::E_WC_ADMIN_NOTE_WARNING,
-			self::E_WC_ADMIN_NOTE_UPDATE,
-			self::E_WC_ADMIN_NOTE_INFORMATIONAL,
-		);
-		$allowed_types = apply_filters( 'woocommerce_admin_note_types', $allowed_types );
-
-		if ( ! in_array( $type, $allowed_types ) ) {
+		if ( ! in_array( $type, self::get_allowed_types() ) ) {
 			$this->error(
 				'admin_note_invalid_data',
 				sprintf(
@@ -342,13 +374,7 @@ class WC_Admin_Note extends WC_Data {
 			$this->error( 'admin_note_invalid_data', __( 'The admin note status prop cannot be empty.', 'woocommerce' ) );
 		}
 
-		$allowed_statuses = array(
-			self::E_WC_ADMIN_NOTE_ACTIONED,
-			self::E_WC_ADMIN_NOTE_UNACTIONED,
-		);
-		$allowed_statuses = apply_filters( 'woocommerce_admin_note_statuses', $allowed_statuses );
-
-		if ( ! in_array( $status, $allowed_statuses ) ) {
+		if ( ! in_array( $status, self::get_allowed_statuses() ) ) {
 			$this->error(
 				'admin_note_invalid_data',
 				sprintf(
