@@ -986,4 +986,15 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 			),
 		), wc_array_merge_recursive_numeric( $a, $b, $c ) );
 	}
+
+	/**
+	 * Test the wc_sanitize_endpoint_slug function
+	 *
+	 * @return void
+	 */
+	public function test_wc_sanitize_endpoint_slug() {
+		$this->assertEquals( 'a-valid-slug', wc_sanitize_endpoint_slug( 'a-valid-slug' ) );
+		$this->assertEquals( 'an-invalid-slug', wc_sanitize_endpoint_slug( 'An invalid slug' ) );
+		$this->assertEquals( 'case-slug', wc_sanitize_endpoint_slug( 'case-SLUG' ) );
+	}
 }

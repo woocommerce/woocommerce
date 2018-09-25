@@ -1060,6 +1060,10 @@ h3.jetpack-reasons {
 		color: #444;
 		background-color: #fff;
 		display: inline-block;
+
+		&[disabled] {
+			color: #aaa;
+		}
 	}
 }
 
