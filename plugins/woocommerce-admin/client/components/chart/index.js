@@ -198,8 +198,8 @@ class Chart extends Component {
 			yFormat,
 			interval,
 		} = this.props;
-		const legendDirection = layout === 'standard' && width > WIDE_BREAKPOINT ? 'row' : 'column';
-		const chartDirection = layout === 'comparison' && width > WIDE_BREAKPOINT ? 'row' : 'column';
+		const legendDirection = layout === 'standard' && width >= WIDE_BREAKPOINT ? 'row' : 'column';
+		const chartDirection = layout === 'comparison' && width >= WIDE_BREAKPOINT ? 'row' : 'column';
 		const legend = (
 			<Legend
 				className={ 'woocommerce-chart__legend' }
@@ -220,7 +220,7 @@ class Chart extends Component {
 			<div className="woocommerce-chart" ref={ this.chartRef }>
 				<div className="woocommerce-chart__header">
 					<span className="woocommerce-chart__title">{ title }</span>
-					{ width > WIDE_BREAKPOINT && legendDirection === 'row' && legend }
+					{ width >= WIDE_BREAKPOINT && legendDirection === 'row' && legend }
 					{ this.renderIntervalSelector() }
 					<NavigableMenu
 						className="woocommerce-chart__types"
@@ -257,7 +257,7 @@ class Chart extends Component {
 						`woocommerce-chart__body-${ chartDirection }`
 					) }
 				>
-					{ width > WIDE_BREAKPOINT && legendDirection === 'column' && legend }
+					{ width >= WIDE_BREAKPOINT && legendDirection === 'column' && legend }
 					<D3Chart
 						colorScheme={ d3InterpolateViridis }
 						data={ visibleData }
