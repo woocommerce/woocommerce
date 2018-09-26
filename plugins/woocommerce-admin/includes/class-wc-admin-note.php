@@ -4,20 +4,25 @@
  *
  * The WooCommerce admin notes class gets admin notes data from storage and checks validity.
  *
+ * @package WooCommerce Admin/Classes
  */
+
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * WC_Admin_Note class.
+ */
 class WC_Admin_Note extends WC_Data {
 
-	// Note types
-	const E_WC_ADMIN_NOTE_ERROR = 'error';
-	const E_WC_ADMIN_NOTE_WARNING = 'warning';
-	const E_WC_ADMIN_NOTE_UPDATE = 'update'; // i.e. a new version is available
+	// Note types.
+	const E_WC_ADMIN_NOTE_ERROR         = 'error';
+	const E_WC_ADMIN_NOTE_WARNING       = 'warning';
+	const E_WC_ADMIN_NOTE_UPDATE        = 'update'; // i.e. a new version is available.
 	const E_WC_ADMIN_NOTE_INFORMATIONAL = 'info';
 
-	// Note status codes
+	// Note status codes.
 	const E_WC_ADMIN_NOTE_UNACTIONED = 'unactioned';
-	const E_WC_ADMIN_NOTE_ACTIONED = 'actioned';
+	const E_WC_ADMIN_NOTE_ACTIONED   = 'actioned';
 
 	/**
 	 * This is the name of this object type.
@@ -265,7 +270,7 @@ class WC_Admin_Note extends WC_Data {
 	 * @param string $name Note name.
 	 */
 	public function set_name( $name ) {
-		// Don't allow empty names
+		// Don't allow empty names.
 		if ( empty( $name ) ) {
 			$this->error( 'admin_note_invalid_data', __( 'The admin note name prop cannot be empty.', 'woocommerce' ) );
 		}
@@ -287,6 +292,7 @@ class WC_Admin_Note extends WC_Data {
 			$this->error(
 				'admin_note_invalid_data',
 				sprintf(
+					/* translators: %s: admin note type. */
 					__( 'The admin note type prop (%s) is not one of the supported types.', 'woocommerce' ),
 					$type
 				)
@@ -329,8 +335,8 @@ class WC_Admin_Note extends WC_Data {
 	 */
 	public function set_content( $content ) {
 		$allowed_html = array(
-			'br' => array(),
-			'em' => array(),
+			'br'     => array(),
+			'em'     => array(),
 			'strong' => array(),
 		);
 
@@ -359,12 +365,12 @@ class WC_Admin_Note extends WC_Data {
 	/**
 	 * Set note data for potential re-localization.
 	 *
-	 * @param object $data Note data.
+	 * @param object $content_data Note data.
 	 */
 	public function set_content_data( $content_data ) {
 		$allowed_type = false;
 
-		// Make sure $content_data is stdClass Object or an array
+		// Make sure $content_data is stdClass Object or an array.
 		if ( ! ( $content_data instanceof stdClass ) ) {
 			$this->error( 'admin_note_invalid_data', __( 'The admin note content_data prop must be an instance of stdClass.', 'woocommerce' ) );
 		}
@@ -386,6 +392,7 @@ class WC_Admin_Note extends WC_Data {
 			$this->error(
 				'admin_note_invalid_data',
 				sprintf(
+					/* translators: %s: admin note status property. */
 					__( 'The admin note status prop (%s) is not one of the supported statuses.', 'woocommerce' ),
 					$status
 				)
@@ -432,9 +439,13 @@ class WC_Admin_Note extends WC_Data {
 
 	/**
 	 * Add an action to the note
+	 *
+	 * @param string $name Label name (not presented to user).
+	 * @param string $label Note label (e.g. presented as button label).
+	 * @param string $query Note query (for redirect).
 	 */
 	public function add_action( $name, $label, $query ) {
-		$name = wc_clean( $name );
+		$name  = wc_clean( $name );
 		$label = wc_clean( $label );
 		$query = wc_clean( $query );
 
@@ -456,7 +467,7 @@ class WC_Admin_Note extends WC_Data {
 			'query' => $query,
 		);
 
-		$note_actions = $this->get_prop( 'actions', 'edit' );
+		$note_actions   = $this->get_prop( 'actions', 'edit' );
 		$note_actions[] = (object) $action;
 		$this->set_prop( 'actions', $note_actions );
 	}

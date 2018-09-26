@@ -1,5 +1,4 @@
 <?php
-
 /**
  * WC_Admin_Note_Data_Store class file.
  *
@@ -15,7 +14,7 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Method to create a new note in the database.
 	 *
-	 * @param WC_Admin_Note
+	 * @param WC_Admin_Note $note Admin note.
 	 */
 	public function create( &$note ) {
 		$date_created = current_time( 'timestamp', 1 );
@@ -24,14 +23,14 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 		global $wpdb;
 
 		$note_to_be_inserted = array(
-			'name'          => $note->get_name(),
-			'type'          => $note->get_type(),
-			'locale'        => $note->get_locale(),
-			'title'         => $note->get_title(),
-			'content'       => $note->get_content(),
-			'icon'          => $note->get_icon(),
-			'status'        => $note->get_status(),
-			'source'        => $note->get_source(),
+			'name'    => $note->get_name(),
+			'type'    => $note->get_type(),
+			'locale'  => $note->get_locale(),
+			'title'   => $note->get_title(),
+			'content' => $note->get_content(),
+			'icon'    => $note->get_icon(),
+			'status'  => $note->get_status(),
+			'source'  => $note->get_source(),
 		);
 
 		$note_to_be_inserted['content_data']  = wp_json_encode( $note->get_content_data(), JSON_FORCE_OBJECT );
@@ -51,7 +50,8 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Method to read a note.
 	 *
-	 * @param WC_Admin_Note
+	 * @param WC_Admin_Note $note Admin note.
+	 * @throws Exception Throws exception when invalid data is found.
 	 */
 	public function read( &$note ) {
 		global $wpdb;
@@ -98,7 +98,7 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Updates a note in the database.
 	 *
-	 * @param WC_Admin_Note
+	 * @param WC_Admin_Note $note Admin note.
 	 */
 	public function update( &$note ) {
 		global $wpdb;
@@ -130,8 +130,8 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Deletes a note from the database.
 	 *
-	 * @param WC_Admin_Note
-	 * @param array $args Array of args to pass to the delete method (not used).
+	 * @param WC_Admin_Note $note Admin note.
+	 * @param array         $args Array of args to pass to the delete method (not used).
 	 */
 	public function delete( &$note, $args = array() ) {
 		$note_id = $note->get_id();
@@ -147,8 +147,7 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Read actions from the database.
 	 *
-	 * @param WC_Admin_Note $note Note object.
-	 *
+	 * @param WC_Admin_Note $note Admin note.
 	 */
 	private function read_actions( &$note ) {
 		global $wpdb;

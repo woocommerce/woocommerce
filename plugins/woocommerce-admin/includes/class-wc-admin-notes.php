@@ -2,6 +2,7 @@
 /**
  * Handles storage and retrieval of admin notes
  *
+ * @package WooCommerce Admin/Classes
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
