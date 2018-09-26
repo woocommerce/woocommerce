@@ -79,7 +79,7 @@
 	.tooltip {
 		border: 1px solid $core-grey-light-700;
 		position: absolute;
-		display: none;
+		display: flex;
 		min-width: 324px;
 		height: auto;
 		background-color: $white;
@@ -89,6 +89,8 @@
 		flex-direction: column;
 		flex-wrap: nowrap;
 		justify-content: flex-start;
+		pointer-events: none;
+		visibility: hidden;
 
 		h4 {
 			text-align: left;
