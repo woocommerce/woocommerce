@@ -14,10 +14,14 @@
     "install-if-no-packages": "node bin/install-if-no-packages.js",
     "prebuild": "npm run -s install-if-deps-outdated",
     "build": "cross-env NODE_ENV=production webpack",
+    "postbuild": "npm run -s i18n:php && npm run -s i18n:pot",
     "prestart": "npm run -s install-if-deps-outdated",
     "start": "webpack --watch",
     "lint": "npm run -s install-if-deps-outdated && eslint client --ext=js,jsx",
-    "i18n": "pot-to-php ./languages/wc-admin.pot ./languages/wc-admin.php wc-admin && grunt i18n",
+    "i18n:js": "cross-env NODE_ENV=production babel client -o /dev/null",
+    "i18n:php": "pot-to-php ./languages/wc-admin.pot ./languages/wc-admin.php wc-admin",
+    "i18n:pot": "grunt makepot",
+    "i18n": "npm run -s i18n:js && npm run -s i18n:php && npm run -s i18n:pot",
     "precommit": "npm run -s install-if-no-packages && node bin/pre-commit-hook.js",
     "prepush": "npm run -s install-if-no-packages && node bin/pre-push-hook.js",
     "pretest": "npm run -s install-if-no-packages",
@@ -27,6 +31,7 @@
     "docs": "node ./bin/generate-docs"
   },
   "devDependencies": {
+    "@babel/cli": "^7.1.0",
     "@babel/core": "^7.1.0",
     "@babel/plugin-transform-async-to-generator": "^7.1.0",
     "@babel/runtime-corejs2": "^7.0.0",

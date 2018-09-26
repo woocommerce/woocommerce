@@ -5,21 +5,6 @@ module.exports = function( grunt ) {
 
 	// Project configuration
 	grunt.initConfig( {
-
-		pkg: grunt.file.readJSON( 'package.json' ),
-
-		addtextdomain: {
-			options: {
-				textdomain: 'wc-admin',
-			},
-			update_all_domains: {
-				options: {
-					updateDomains: true
-				},
-				src: [ '*.php', '**/*.php', '!\.git/**/*', '!bin/**/*', '!node_modules/**/*', '!tests/**/*' ]
-			}
-		},
-
 		makepot: {
 			target: {
 				options: {
@@ -38,8 +23,8 @@ module.exports = function( grunt ) {
 		},
 	} );
 
+	// Load NPM tasks to be used here.
 	grunt.loadNpmTasks( 'grunt-wp-i18n' );
-	grunt.registerTask( 'i18n', ['addtextdomain', 'makepot'] );
 
 	grunt.util.linefeed = '\n';
 

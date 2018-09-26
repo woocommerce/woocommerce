@@ -1,9 +1,4 @@
-/**
- * /* eslint-disable
- *
- * @format
- */
-
+/** @format */
 const path = require( 'path' );
 const ExtractTextPlugin = require( 'extract-text-webpack-plugin' );
 const NODE_ENV = process.env.NODE_ENV || 'development';
