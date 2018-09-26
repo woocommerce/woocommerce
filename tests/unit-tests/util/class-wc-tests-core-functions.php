@@ -301,7 +301,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 
 		$logger = wc_get_logger();
 
-		$this->assertInstanceOf( 'WC_Logger_Instance', $logger, '`wc_get_logger()` should return valid Dummy_WC_Logger instance' );
+		$this->assertInstanceOf( 'WC_Logger_Interface', $logger, '`wc_get_logger()` should return valid Dummy_WC_Logger instance' );
 	}
 
 	/**
