@@ -68,6 +68,8 @@ final class WC_Cart_Session {
 		$this->cart->set_removed_cart_contents( WC()->session->get( 'removed_cart_contents', array() ) );
 
 		$update_cart_session = false; // Flag to indicate the stored cart should be updated.
+		$order_again         = false; // Flag to indicate whether this is a re-order.
+
 		$cart                = WC()->session->get( 'cart', null );
 		$merge_saved_cart    = (bool) get_user_meta( get_current_user_id(), '_woocommerce_load_saved_cart_after_login', true );
 
@@ -83,7 +85,8 @@ final class WC_Cart_Session {
 
 		// Populate cart from order.
 		if ( isset( $_GET['order_again'], $_GET['_wpnonce'] ) && is_user_logged_in() && wp_verify_nonce( wp_unslash( $_GET['_wpnonce'] ), 'woocommerce-order_again' ) ) { // WPCS: input var ok, sanitization ok.
-			$cart = $this->populate_cart_from_order( absint( $_GET['order_again'] ), $cart ); // WPCS: input var ok.
+			$cart        = $this->populate_cart_from_order( absint( $_GET['order_again'] ), $cart ); // WPCS: input var ok.
+			$order_again = true;
 		}
 
 		// Prime caches to reduce future queries.
@@ -140,6 +143,12 @@ final class WC_Cart_Session {
 		if ( $update_cart_session || is_null( WC()->session->get( 'cart_totals', null ) ) ) {
 			WC()->session->set( 'cart', $this->get_cart_for_session() );
 			$this->cart->calculate_totals();
+		}
+
+		// If this is a re-order, redirect to the cart page to get rid of the `order_again` query string.
+		if ( $order_again ) {
+			wp_redirect( wc_get_page_permalink( 'cart' ) );
+			exit;
 		}
 	}
 
