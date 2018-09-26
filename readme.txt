@@ -191,6 +191,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Fix cron_interval property support in WP_Background_Process. #21353
 * Fix - CSS Changes to make text fields line up on the shipping settings page. #21247
 * Fix - Add extra null check to fix an issue with select payment fields using disabed select as placeholders. #21391
+* Fix - Don't modify attributes orderby when sorting by name. #21408
 * Fix/Tweak - Fire `woocommerce_grant_product_download_access` hook after the download has its ID set. #20905
 * Fix/Tweak/Performance - Change wp_woocommerce_sessions primary key to session_id. #21245
 * Tweak - Show empty terms in admin product category filter dropdown. #20324
@@ -219,6 +220,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Change sort dropdown option "Sort by newness" to "Sort by latest". #21311
 * Tweak - Sanitize endpoint slugs upon saving. #21355
 * Tweak - Ignore converting float meta value for registered post meta. #21333
+* Tweak - Remove 'order_again' query string to avoid multiple re-orders. #21444
 * Performance/Tweak - Use post_author for the order customer instead of '_customer_user' meta data. #17895
 * Performance - Exclude frontend include from REST API calls. #20000
 * Performance - Improve performance of the query to delete version transients by removing unneeded "ORDER BY". #21274
@@ -250,6 +252,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Add an extensible/swappable job queue via WC_Action_Queue and WC_Queue_Interface. #20030
 * Dev - Use WC_Action_Queue for schedule and delivery of webhooks. #20030
 * Dev - Include Action Scheduler v2.1.0 and use it for the default job queue. #21424 /  #20030
+* Dev - Save reviews under the 'review' comment type. #21305
 * Localization - Updated IT provinces. #20286
 * Localization - Eircode validation. #20330
 * Localization - Disable postcode requirement for Bahrain. #21103
