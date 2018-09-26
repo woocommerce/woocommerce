@@ -73,8 +73,12 @@ class Search extends Component {
 
 	render() {
 		const autocompleter = this.getAutocompleter();
-		const { ariaLabelledby, placeholder, selected } = this.props;
+		const { placeholder, selected } = this.props;
 		const { value = '' } = this.state;
+		const aria = {
+			'aria-labelledby': this.props[ 'aria-labelledby' ],
+			'aria-label': this.props[ 'aria-label' ],
+		};
 		return (
 			<div className="woocommerce-search">
 				<Gridicon className="woocommerce-search__icon" icon="search" />
@@ -86,9 +90,9 @@ class Search extends Component {
 							placeholder={ placeholder }
 							className="woocommerce-search__input"
 							onChange={ this.updateSearch( onChange ) }
-							aria-labelledby={ ariaLabelledby }
 							aria-owns={ listBoxId }
 							aria-activedescendant={ activeId }
+							{ ...aria }
 						/>
 					) }
 				</Autocomplete>
