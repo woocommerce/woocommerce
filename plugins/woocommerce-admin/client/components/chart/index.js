@@ -19,6 +19,7 @@ import Gridicon from 'gridicons';
  */
 import D3Chart from './charts';
 import Legend from './legend';
+import { H, Section } from 'components/section';
 import { gap, gaplarge } from 'stylesheets/abstracts/_variables.scss';
 import { updateQueryString } from 'lib/nav-utils';
 
@@ -219,7 +220,7 @@ class Chart extends Component {
 		return (
 			<div className="woocommerce-chart" ref={ this.chartRef }>
 				<div className="woocommerce-chart__header">
-					<span className="woocommerce-chart__title">{ title }</span>
+					<H className="woocommerce-chart__title">{ title }</H>
 					{ width >= WIDE_BREAKPOINT && legendDirection === 'row' && legend }
 					{ this.renderIntervalSelector() }
 					<NavigableMenu
@@ -251,33 +252,35 @@ class Chart extends Component {
 						/>
 					</NavigableMenu>
 				</div>
-				<div
-					className={ classNames(
-						'woocommerce-chart__body',
-						`woocommerce-chart__body-${ chartDirection }`
-					) }
-				>
-					{ width >= WIDE_BREAKPOINT && legendDirection === 'column' && legend }
-					<D3Chart
-						colorScheme={ d3InterpolateViridis }
-						data={ visibleData }
-						dateParser={ dateParser }
-						height={ 300 }
-						margin={ margin }
-						mode={ mode }
-						orderedKeys={ orderedKeys }
-						pointLabelFormat={ pointLabelFormat }
-						tooltipFormat={ tooltipFormat }
-						tooltipTitle={ tooltipTitle }
-						type={ type }
-						interval={ interval }
-						width={ chartDirection === 'row' ? width - 320 : width }
-						xFormat={ xFormat }
-						x2Format={ x2Format }
-						yFormat={ yFormat }
-					/>
-				</div>
-				{ width < WIDE_BREAKPOINT && <div className="woocommerce-chart__footer">{ legend }</div> }
+				<Section component={ false }>
+					<div
+						className={ classNames(
+							'woocommerce-chart__body',
+							`woocommerce-chart__body-${ chartDirection }`
+						) }
+					>
+						{ width >= WIDE_BREAKPOINT && legendDirection === 'column' && legend }
+						<D3Chart
+							colorScheme={ d3InterpolateViridis }
+							data={ visibleData }
+							dateParser={ dateParser }
+							height={ 300 }
+							margin={ margin }
+							mode={ mode }
+							orderedKeys={ orderedKeys }
+							pointLabelFormat={ pointLabelFormat }
+							tooltipFormat={ tooltipFormat }
+							tooltipTitle={ tooltipTitle }
+							type={ type }
+							interval={ interval }
+							width={ chartDirection === 'row' ? width - 320 : width }
+							xFormat={ xFormat }
+							x2Format={ x2Format }
+							yFormat={ yFormat }
+						/>
+					</div>
+					{ width < WIDE_BREAKPOINT && <div className="woocommerce-chart__footer">{ legend }</div> }
+				</Section>
 			</div>
 		);
 	}
