@@ -405,7 +405,7 @@ class WC_Admin_Post_Types {
 		$manage_stock = ! empty( $_REQUEST['_manage_stock'] ) && 'grouped' !== $product->get_type() ? 'yes' : 'no'; // WPCS: input var ok, sanitization ok.
 		$backorders   = ! empty( $_REQUEST['_backorders'] ) ? wc_clean( $_REQUEST['_backorders'] ) : 'no'; // WPCS: input var ok, sanitization ok.
 		$stock_status = ! empty( $_REQUEST['_stock_status'] ) ? wc_clean( $_REQUEST['_stock_status'] ) : 'instock'; // WPCS: input var ok, sanitization ok.
-		$stock_amount = 'yes' === $manage_stock && ! empty( $_REQUEST['_stock'] ) ? wc_stock_amount( $_REQUEST['_stock'] ) : ''; // WPCS: input var ok, sanitization ok.
+		$stock_amount = 'yes' === $manage_stock && is_numeric( $_REQUEST['_stock'] ) ? wc_stock_amount( $_REQUEST['_stock'] ) : ''; // WPCS: input var ok, sanitization ok.
 
 		$product->set_manage_stock( $manage_stock );
 		$product->set_backorders( $backorders );
