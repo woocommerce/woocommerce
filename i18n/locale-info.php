@@ -19,27 +19,27 @@ return array(
 		'dimension_unit' => 'cm',
 		'tax_rates'      => array(),
 	),
+    'AU' => array(
+        'currency_code'  => 'AUD',
+        'currency_pos'   => 'left',
+        'thousand_sep'   => ',',
+        'decimal_sep'    => '.',
+        'num_decimals'   => 2,
+        'weight_unit'    => 'kg',
+        'dimension_unit' => 'cm',
+        'tax_rates'      => array(
+            '' => array(
+                array(
+                    'country'  => 'AU',
+                    'state'    => '',
+                    'rate'     => '10.0000',
+                    'name'     => 'GST',
+                    'shipping' => true,
+                ),
+            ),
+        ),
+    ),
 
-	'AU' => array(
-		'currency_code'  => 'AUD',
-		'currency_pos'   => 'left',
-		'thousand_sep'   => ',',
-		'decimal_sep'    => '.',
-		'num_decimals'   => 2,
-		'weight_unit'    => 'kg',
-		'dimension_unit' => 'cm',
-		'tax_rates'      => array(
-			'' => array(
-				array(
-					'country'  => 'AU',
-					'state'    => '',
-					'rate'     => '10.0000',
-					'name'     => 'GST',
-					'shipping' => true,
-				),
-			),
-		),
-	),
 	'BD' => array(
 		'currency_code'  => 'BDT',
 		'currency_pos'   => 'left',
@@ -494,16 +494,27 @@ return array(
 			),
 		),
 	),
-	'PT' => array(
-		'currency_code'  => 'EUR',
-		'currency_pos'   => 'right',
-		'thousand_sep'   => '.',
-		'decimal_sep'    => ',',
-		'num_decimals'   => 2,
-		'weight_unit'    => 'kg',
-		'dimension_unit' => 'cm',
-		'tax_rates'      => array(),
-	),
+    'PT' => array(
+        'currency_code'  => 'EUR',
+        'currency_pos'   => 'right',
+        'thousand_sep'   => '.',
+        'decimal_sep'    => ',',
+        'num_decimals'   => 2,
+        'weight_unit'    => 'kg',
+        'dimension_unit' => 'cm',
+        'tax_rates'      => array(
+            '' => array(
+                array(
+                    'country'  => 'PT',
+                    'state'    => '',
+                    'rate'     => '23.0000',
+                    'name'     => 'VAT',
+                    'shipping' => true,
+                ),
+            ),
+        ),
+    ),
+
 	'PY' => array(
 		'currency_code'  => 'PYG',
 		'currency_pos'   => 'left',

@@ -124,6 +124,7 @@ class WC_Countries {
 			'NL' => array(),
 			'NO' => array(),
 			'PL' => array(),
+			'PT' => array(),
 			'RE' => array(),
 			'SG' => array(),
 			'SK' => array(),
