@@ -15,14 +15,14 @@ defined( 'ABSPATH' ) || exit;
 class WC_Admin_Note extends WC_Data {
 
 	// Note types.
-	const E_WC_ADMIN_NOTE_ERROR         = 'error';
-	const E_WC_ADMIN_NOTE_WARNING       = 'warning';
-	const E_WC_ADMIN_NOTE_UPDATE        = 'update'; // i.e. a new version is available.
-	const E_WC_ADMIN_NOTE_INFORMATIONAL = 'info';
+	const E_WC_ADMIN_NOTE_ERROR         = 'error';   // used for presenting error conditions.
+	const E_WC_ADMIN_NOTE_WARNING       = 'warning'; // used for presenting warning conditions.
+	const E_WC_ADMIN_NOTE_UPDATE        = 'update';  // i.e. used when a new version is available.
+	const E_WC_ADMIN_NOTE_INFORMATIONAL = 'info';    // used for presenting informational messages.
 
 	// Note status codes.
-	const E_WC_ADMIN_NOTE_UNACTIONED = 'unactioned';
-	const E_WC_ADMIN_NOTE_ACTIONED   = 'actioned';
+	const E_WC_ADMIN_NOTE_UNACTIONED = 'unactioned'; // the note has not yet been actioned by a user.
+	const E_WC_ADMIN_NOTE_ACTIONED   = 'actioned';   // the note has had its action completed by a user.
 
 	/**
 	 * This is the name of this object type.
