@@ -328,6 +328,14 @@ class WC_Admin_Note extends WC_Data {
 	 * @param string $content Note content.
 	 */
 	public function set_content( $content ) {
+		$allowed_html = array(
+			'br' => array(),
+			'em' => array(),
+			'strong' => array(),
+		);
+
+		$content = wp_kses( $content, $allowed_html );
+
 		if ( empty( $content ) ) {
 			$this->error( 'admin_note_invalid_data', __( 'The admin note content prop cannot be empty.', 'woocommerce' ) );
 		}
@@ -426,32 +434,30 @@ class WC_Admin_Note extends WC_Data {
 	 * Add an action to the note
 	 */
 	public function add_action( $name, $label, $query ) {
-		if ( 0 !== $this->get_id() ) {
-			$name = wc_clean( $name );
-			$label = wc_clean( $label );
-			$query = wc_clean( $query );
+		$name = wc_clean( $name );
+		$label = wc_clean( $label );
+		$query = wc_clean( $query );
 
-			if ( empty( $name ) ) {
-				$this->error( 'admin_note_invalid_data', __( 'The admin note action name prop cannot be empty.', 'woocommerce' ) );
-			}
-
-			if ( empty( $label ) ) {
-				$this->error( 'admin_note_invalid_data', __( 'The admin note action label prop cannot be empty.', 'woocommerce' ) );
-			}
-
-			if ( empty( $query ) ) {
-				$this->error( 'admin_note_invalid_data', __( 'The admin note action query prop cannot be empty.', 'woocommerce' ) );
-			}
-
-			$action = array(
-				'name'  => $name,
-				'label' => $label,
-				'query' => $query,
-			);
-
-			$note_actions = $this->get_prop( 'actions', 'edit' );
-			$note_actions[] = (object) $action;
-			$this->set_prop( 'actions', $note_actions );
+		if ( empty( $name ) ) {
+			$this->error( 'admin_note_invalid_data', __( 'The admin note action name prop cannot be empty.', 'woocommerce' ) );
 		}
+
+		if ( empty( $label ) ) {
+			$this->error( 'admin_note_invalid_data', __( 'The admin note action label prop cannot be empty.', 'woocommerce' ) );
+		}
+
+		if ( empty( $query ) ) {
+			$this->error( 'admin_note_invalid_data', __( 'The admin note action query prop cannot be empty.', 'woocommerce' ) );
+		}
+
+		$action = array(
+			'name'  => $name,
+			'label' => $label,
+			'query' => $query,
+		);
+
+		$note_actions = $this->get_prop( 'actions', 'edit' );
+		$note_actions[] = (object) $action;
+		$this->set_prop( 'actions', $note_actions );
 	}
 }

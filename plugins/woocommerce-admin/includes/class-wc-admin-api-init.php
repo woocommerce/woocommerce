@@ -37,7 +37,6 @@ class WC_Admin_Api_Init {
 	public function init_classes() {
 		// Interfaces.
 		require_once dirname( __FILE__ ) . '/interfaces/class-wc-admin-reports-data-store-interface.php';
-		require_once dirname( __FILE__ ) . '/interfaces/class-wc-admin-notes-data-store-interface.php';
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-query.php';
 
 		// Common date time code.

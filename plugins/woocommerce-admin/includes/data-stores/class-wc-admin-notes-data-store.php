@@ -11,7 +11,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * WC Admin Note Data Store (Custom Tables)
  */
-class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Admin_Notes_Data_Store_Interface, WC_Object_Data_Store_Interface {
+class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Data_Store_Interface {
 	/**
 	 * Method to create a new note in the database.
 	 *
@@ -42,7 +42,7 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Admin_Not
 		$note_id = $wpdb->insert_id;
 		$note->set_id( $note_id );
 		$note->save_meta_data();
-		// TODO $note->save_actions( $note );
+		$this->save_actions( $note );
 		$note->apply_changes();
 
 		do_action( 'woocommerce_new_note', $note_id );
@@ -122,7 +122,7 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Admin_Not
 		}
 
 		$note->save_meta_data();
-		// TODO $note->save_actions( $note );
+		$this->save_actions( $note );
 		$note->apply_changes();
 		do_action( 'woocommerce_update_note', $note->get_id() );
 	}
@@ -176,7 +176,7 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Admin_Not
 	 */
 	private function save_actions( &$note ) {
 		$changed_props = array_keys( $note->get_changes() );
-		if ( ! in_array( 'note_actions', $changed_props, true ) ) {
+		if ( ! in_array( 'actions', $changed_props, true ) ) {
 			return false;
 		}
 
@@ -192,26 +192,6 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Admin_Not
 				)
 			);
 		}
-	}
-
-	/**
-	 * Mark a note as actioned
-	 *
-	 * @param WC_Admin_Note $note Note object.
-	 */
-	public function mark_note_as_actioned( &$note ) {
-		$note->set_status( E_WC_ADMIN_NOTE_ACTIONED );
-	}
-
-	/**
-	 * Mark a note for reminder
-	 *
-	 * @param WC_Admin_Note $note Note object.
-	 * @param int           $days Number of days until reminder
-	 */
-	public function mark_note_for_reminder( &$note, $days = 3 ) {
-		$when = current_time( 'timestamp', 1 ) + intval( $days ) * DAY_IN_SECONDS;
-		$note->set_date_reminder( $when );
 	}
 
 	/**
