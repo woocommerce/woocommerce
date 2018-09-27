@@ -92,7 +92,7 @@ class WC_Product_Download implements ArrayAccess {
 		// File types for URL-based files located on the server should get validated.
 		$is_file_on_server = false;
 		if ( false !== stripos( $file_path, network_site_url( '/', 'https' ) ) ||
-			false !== stripos( $file_path, network_site_url( '/', 'https' ) ) ||
+			false !== stripos( $file_path, network_site_url( '/', 'http' ) ) ||
 			false !== stripos( $file_path, site_url( '/', 'https' ) ) ||
 			false !== stripos( $file_path, site_url( '/', 'http' ) )
 		) {
