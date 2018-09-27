@@ -247,7 +247,7 @@ class WC_Download_Handler {
 		if ( '//' === substr( $file_path, 0, 2 ) ) {
 			return array(
 				'remote_file' => true,
-				'file_path'   => $file_path,
+				'file_path'   => is_ssl() ? 'https:' . $file_path : 'http:' . $file_path,
 			);
 		}
 
