@@ -419,7 +419,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 			'refund_total'   => $order->get_total_refunded(),
 			'tax_total'      => $order->get_total_tax(),
 			'shipping_total' => $order->get_shipping_total(),
-			'net_total'      => $order->get_total() - $order->get_total_tax() - $order->get_shipping_total(),
+			'net_total'      => (float) $order->get_total() - (float) $order->get_total_tax() - (float) $order->get_shipping_total(),
 		);
 
 		// Update or add the information to the DB.
