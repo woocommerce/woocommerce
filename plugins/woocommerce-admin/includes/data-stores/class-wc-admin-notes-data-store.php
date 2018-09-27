@@ -33,7 +33,9 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 			'source'  => $note->get_source(),
 		);
 
-		$note_to_be_inserted['content_data']  = wp_json_encode( $note->get_content_data(), JSON_FORCE_OBJECT );
+		$encoding_options = defined( 'JSON_FORCE_OBJECT' ) ? JSON_FORCE_OBJECT : 0;
+
+		$note_to_be_inserted['content_data']  = wp_json_encode( $note->get_content_data(), $encoding_options );
 		$note_to_be_inserted['date_created']  = gmdate( 'Y-m-d H:i:s', $date_created );
 		$note_to_be_inserted['date_reminder'] = null;
 
@@ -91,7 +93,7 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 			$note->set_object_read( true );
 			do_action( 'woocommerce_admin_note_loaded', $note );
 		} else {
-			throw new Exception( __( 'Invalid data store for admin note.', 'woocommerce' ) );
+			throw new Exception( __( 'Invalid data store for admin note.', 'wc-admin' ) );
 		}
 	}
 
@@ -102,8 +104,9 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	public function update( &$note ) {
 		global $wpdb;
-		if ( $note->get_id() ) {
+		$encoding_options = defined( 'JSON_FORCE_OBJECT' ) ? JSON_FORCE_OBJECT : 0;
 
+		if ( $note->get_id() ) {
 			$wpdb->update(
 				$wpdb->prefix . 'woocommerce_admin_notes', array(
 					'name'          => $note->get_name(),
@@ -112,7 +115,7 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 					'title'         => $note->get_title(),
 					'content'       => $note->get_content(),
 					'icon'          => $note->get_icon(),
-					'content_data'  => wp_json_encode( $note->get_content_data(), JSON_FORCE_OBJECT ),
+					'content_data'  => wp_json_encode( $note->get_content_data(), $encoding_options ),
 					'status'        => $note->get_status(),
 					'source'        => $note->get_source(),
 					'date_created'  => $note->get_date_created(),
