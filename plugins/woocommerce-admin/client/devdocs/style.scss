@@ -1,0 +1,58 @@
+/** @format */
+
+.woocommerce_devdocs {
+	@include breakpoint( '>1100px' ) {
+		&.is-list {
+			column-gap: $gap-large;
+			columns: 2;
+		}
+
+		.woocommerce-devdocs__card {
+			break-inside: avoid;
+			margin-bottom: $gap-larger;
+		}
+	}
+
+	.woocommerce-devdocs__card {
+		background-color: transparent;
+
+		& > .woocommerce-card__header {
+			background-color: $white;
+		}
+
+		& > .woocommerce-card__body {
+			padding: 0;
+		}
+	}
+
+	.woocommerce-devdocs__example {
+		padding: $gap;
+		box-shadow: inset 0 2px 1px rgba($core-grey-dark-800, 0.075);
+
+		// Grid background
+		background-image: linear-gradient(rgba($core-grey-dark-800, 0.05) 1px, transparent 1px),
+			linear-gradient(90deg, rgba($core-grey-dark-800, 0.05) 1px, transparent 1px),
+			linear-gradient(rgba($core-grey-dark-800, 0.025) 1px, transparent 1px),
+			linear-gradient(90deg, rgba($core-grey-dark-800, 0.025) 1px, transparent 1px);
+		background-size: 32px 32px, 32px 32px, 8px 8px, 8px 8px;
+		background-position: -1px -1px, -1px -1px, -1px -1px, -1px -1px;
+	}
+
+	.woocommerce-devdocs__docs {
+		max-width: 600px;
+		margin: 0 auto;
+		padding: $gap;
+
+		ul {
+			list-style: disc;
+			padding-left: 1.5em;
+		}
+
+		h1 code,
+		h2 code,
+		h3 code,
+		h4 code {
+			font-size: 0.9em;
+		}
+	}
+}

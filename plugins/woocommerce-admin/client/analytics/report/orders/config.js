@@ -10,6 +10,8 @@ import { __ } from '@wordpress/i18n';
 import { getRequestByIdString } from 'lib/async-requests';
 import { NAMESPACE } from 'store/constants';
 
+const { orderStatuses } = wcSettings;
+
 export const filters = [
 	{ label: __( 'All Orders', 'wc-admin' ), value: 'all' },
 	{
@@ -42,15 +44,11 @@ export const advancedFilterConfig = {
 		],
 		input: {
 			component: 'SelectControl',
-			options: [
-				{ value: 'pending', label: __( 'Pending', 'wc-admin' ) },
-				{ value: 'processing', label: __( 'Processing', 'wc-admin' ) },
-				{ value: 'on-hold', label: __( 'On Hold', 'wc-admin' ) },
-				{ value: 'completed', label: __( 'Completed', 'wc-admin' ) },
-				{ value: 'refunded', label: __( 'Refunded', 'wc-admin' ) },
-				{ value: 'cancelled', label: __( 'Cancelled', 'wc-admin' ) },
-				{ value: 'failed', label: __( 'Failed', 'wc-admin' ) },
-			],
+			options: Object.keys( orderStatuses ).map( key => ( {
+				value: key,
+				label: orderStatuses[ key ],
+			} ) ),
+			defaultOption: 'wc-cancelled',
 		},
 	},
 	product_id: {
@@ -112,6 +110,7 @@ export const advancedFilterConfig = {
 				{ value: 'new', label: __( 'New', 'wc-admin' ) },
 				{ value: 'returning', label: __( 'Returning', 'wc-admin' ) },
 			],
+			defaultOption: 'new',
 		},
 	},
 };

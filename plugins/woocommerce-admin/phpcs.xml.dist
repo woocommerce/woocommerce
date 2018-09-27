@@ -6,7 +6,7 @@
 	<description>WooCommerce dev PHP_CodeSniffer ruleset.</description>
 
 	<!-- Exclude paths -->
-		<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
 	<exclude-pattern>*/vendor/*</exclude-pattern>
 
 	<!-- Configs -->
@@ -50,6 +50,7 @@
 		</properties>
 	</rule>
 	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
+		<exclude-pattern>includes/**/abstract-*.php</exclude-pattern>
 		<exclude-pattern>tests/*</exclude-pattern>
 	</rule>
 	<rule ref="Generic.Commenting">

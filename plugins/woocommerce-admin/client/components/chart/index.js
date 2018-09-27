@@ -19,6 +19,7 @@ import Gridicon from 'gridicons';
  */
 import D3Chart from './charts';
 import Legend from './legend';
+import { H, Section } from 'components/section';
 import { gap, gaplarge } from 'stylesheets/abstracts/_variables.scss';
 import { updateQueryString } from 'lib/nav-utils';
 
@@ -188,6 +189,8 @@ class Chart extends Component {
 		const {
 			dateParser,
 			layout,
+			mode,
+			pointLabelFormat,
 			title,
 			tooltipFormat,
 			tooltipTitle,
@@ -196,8 +199,8 @@ class Chart extends Component {
 			yFormat,
 			interval,
 		} = this.props;
-		const legendDirection = layout === 'standard' && width > WIDE_BREAKPOINT ? 'row' : 'column';
-		const chartDirection = layout === 'comparison' && width > WIDE_BREAKPOINT ? 'row' : 'column';
+		const legendDirection = layout === 'standard' && width >= WIDE_BREAKPOINT ? 'row' : 'column';
+		const chartDirection = layout === 'comparison' && width >= WIDE_BREAKPOINT ? 'row' : 'column';
 		const legend = (
 			<Legend
 				className={ 'woocommerce-chart__legend' }
@@ -217,8 +220,8 @@ class Chart extends Component {
 		return (
 			<div className="woocommerce-chart" ref={ this.chartRef }>
 				<div className="woocommerce-chart__header">
-					<span className="woocommerce-chart__title">{ title }</span>
-					{ width > WIDE_BREAKPOINT && legendDirection === 'row' && legend }
+					<H className="woocommerce-chart__title">{ title }</H>
+					{ width >= WIDE_BREAKPOINT && legendDirection === 'row' && legend }
 					{ this.renderIntervalSelector() }
 					<NavigableMenu
 						className="woocommerce-chart__types"
@@ -249,31 +252,35 @@ class Chart extends Component {
 						/>
 					</NavigableMenu>
 				</div>
-				<div
-					className={ classNames(
-						'woocommerce-chart__body',
-						`woocommerce-chart__body-${ chartDirection }`
-					) }
-				>
-					{ width > WIDE_BREAKPOINT && legendDirection === 'column' && legend }
-					<D3Chart
-						colorScheme={ d3InterpolateViridis }
-						data={ visibleData }
-						dateParser={ dateParser }
-						height={ 300 }
-						margin={ margin }
-						orderedKeys={ orderedKeys }
-						tooltipFormat={ tooltipFormat }
-						tooltipTitle={ tooltipTitle }
-						type={ type }
-						interval={ interval }
-						width={ chartDirection === 'row' ? width - 320 : width }
-						xFormat={ xFormat }
-						x2Format={ x2Format }
-						yFormat={ yFormat }
-					/>
-				</div>
-				{ width < WIDE_BREAKPOINT && <div className="woocommerce-chart__footer">{ legend }</div> }
+				<Section component={ false }>
+					<div
+						className={ classNames(
+							'woocommerce-chart__body',
+							`woocommerce-chart__body-${ chartDirection }`
+						) }
+					>
+						{ width >= WIDE_BREAKPOINT && legendDirection === 'column' && legend }
+						<D3Chart
+							colorScheme={ d3InterpolateViridis }
+							data={ visibleData }
+							dateParser={ dateParser }
+							height={ 300 }
+							margin={ margin }
+							mode={ mode }
+							orderedKeys={ orderedKeys }
+							pointLabelFormat={ pointLabelFormat }
+							tooltipFormat={ tooltipFormat }
+							tooltipTitle={ tooltipTitle }
+							type={ type }
+							interval={ interval }
+							width={ chartDirection === 'row' ? width - 320 : width }
+							xFormat={ xFormat }
+							x2Format={ x2Format }
+							yFormat={ yFormat }
+						/>
+					</div>
+					{ width < WIDE_BREAKPOINT && <div className="woocommerce-chart__footer">{ legend }</div> }
+				</Section>
 			</div>
 		);
 	}
@@ -288,6 +295,10 @@ Chart.propTypes = {
 	 * Format to parse dates into d3 time format
 	 */
 	dateParser: PropTypes.string.isRequired,
+	/**
+	 * Date format of the point labels (might be used in tooltips and ARIA properties).
+	 */
+	pointLabelFormat: PropTypes.string,
 	/**
 	 * A datetime formatting string to format the date displayed as the title of the toolip
 	 * if `tooltipTitle` is missing, passed to d3TimeFormat.
@@ -314,6 +325,11 @@ Chart.propTypes = {
 	 * to the left or 'compact' has the legend below
 	 */
 	layout: PropTypes.oneOf( [ 'standard', 'comparison', 'compact' ] ),
+	/**
+	 * `item-comparison` (default) or `time-comparison`, this is used to generate correct
+	 * ARIA properties.
+	 */
+	mode: PropTypes.oneOf( [ 'item-comparison', 'time-comparison' ] ),
 	/**
 	 * A title describing this chart.
 	 */
@@ -344,6 +360,7 @@ Chart.defaultProps = {
 	x2Format: '%b %Y',
 	yFormat: '$.3s',
 	layout: 'standard',
+	mode: 'item-comparison',
 	type: 'line',
 	interval: 'day',
 };
