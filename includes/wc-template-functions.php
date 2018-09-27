@@ -237,11 +237,8 @@ function woocommerce_product_loop() {
 /**
  * Output generator tag to aid debugging.
  *
- * @access public
- *
  * @param string $gen Generator.
  * @param string $type Type.
- *
  * @return string
  */
 function wc_generator_tag( $gen, $type ) {
@@ -626,7 +623,7 @@ function wc_get_product_class( $class = '', $product_id = null ) {
 	if ( apply_filters( 'woocommerce_get_product_class_include_taxonomies', false ) ) {
 		$taxonomies = get_taxonomies( array( 'public' => true ) );
 		foreach ( (array) $taxonomies as $taxonomy ) {
-			if ( is_object_in_taxonomy( $post->post_type, $taxonomy ) && in_array( $taxonomy, array( 'product_cat', 'product_tag' ), true ) ) {
+			if ( is_object_in_taxonomy( $post->post_type, $taxonomy ) && ! in_array( $taxonomy, array( 'product_cat', 'product_tag' ), true ) ) {
 				$classes = array_merge( $classes, wc_get_product_taxonomy_class( (array) get_the_terms( $post->ID, $taxonomy ), $taxonomy ) );
 			}
 		}
@@ -1298,7 +1295,7 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 			'menu_order' => __( 'Default sorting', 'woocommerce' ),
 			'popularity' => __( 'Sort by popularity', 'woocommerce' ),
 			'rating'     => __( 'Sort by average rating', 'woocommerce' ),
-			'date'       => __( 'Sort by newness', 'woocommerce' ),
+			'date'       => __( 'Sort by latest', 'woocommerce' ),
 			'price'      => __( 'Sort by price: low to high', 'woocommerce' ),
 			'price-desc' => __( 'Sort by price: high to low', 'woocommerce' ),
 		) );

@@ -66,4 +66,47 @@ class WC_REST_Settings_Controller extends WC_REST_Settings_V2_Controller {
 
 		return $response;
 	}
+
+	/**
+	 * Get the groups schema, conforming to JSON Schema.
+	 *
+	 * @since  3.0.0
+	 * @return array
+	 */
+	public function get_item_schema() {
+		$schema = array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'setting_group',
+			'type'       => 'object',
+			'properties' => array(
+				'id'          => array(
+					'description' => __( 'A unique identifier that can be used to link settings together.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'label'       => array(
+					'description' => __( 'A human readable label for the setting used in interfaces.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'description' => array(
+					'description' => __( 'A human readable description for the setting used in interfaces.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'parent_id'   => array(
+					'description' => __( 'ID of parent grouping.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'sub_groups'  => array(
+					'description' => __( 'IDs for settings sub groups.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+			),
+		);
+
+		return $this->add_additional_fields_schema( $schema );
+	}
 }

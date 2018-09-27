@@ -284,8 +284,7 @@ function wc_placeholder_img_src( $size = 'woocommerce_thumbnail' ) {
 
 	if ( ! empty( $placeholder_image ) ) {
 		if ( is_numeric( $placeholder_image ) ) {
-			$dimensions = wc_get_image_size( $size );
-			$image      = wp_get_attachment_image_src( $placeholder_image, array( $dimensions['width'], $dimensions['height'] ) );
+			$image      = wp_get_attachment_image_src( $placeholder_image, $size );
 
 			if ( ! empty( $image[0] ) ) {
 				$src = $image[0];
@@ -455,8 +454,12 @@ add_action( 'woocommerce_scheduled_sales', 'wc_scheduled_sales' );
  * @return array
  */
 function wc_get_attachment_image_attributes( $attr ) {
-	if ( strstr( $attr['src'][0], 'woocommerce_uploads/' ) ) {
-		$attr['src'][0] = wc_placeholder_img_src();
+	if ( isset( $attr['src'] ) && strstr( $attr['src'], 'woocommerce_uploads/' ) ) {
+		$attr['src'] = wc_placeholder_img_src();
+
+		if ( isset( $attr['srcset'] ) ) {
+			$attr['srcset'] = '';
+		}
 	}
 	return $attr;
 }

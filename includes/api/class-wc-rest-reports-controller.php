@@ -14,9 +14,9 @@ defined( 'ABSPATH' ) || exit;
  * REST API Reports controller class.
  *
  * @package WooCommerce/API
- * @extends WC_REST_Controller
+ * @extends WC_REST_Reports_V2_Controller
  */
-class WC_REST_Reports_Controller extends WC_REST_Controller {
+class WC_REST_Reports_Controller extends WC_REST_Reports_V2_Controller {
 
 	/**
 	 * Endpoint namespace.
@@ -26,9 +26,47 @@ class WC_REST_Reports_Controller extends WC_REST_Controller {
 	protected $namespace = 'wc/v3';
 
 	/**
-	 * Route base.
+	 * Get reports list.
 	 *
-	 * @var string
+	 * @since 3.5.0
+	 * @return array
 	 */
-	protected $rest_base = 'reports';
+	protected function get_reports() {
+		$reports = parent::get_reports();
+
+		$reports[] = array(
+			'slug'        => 'orders/totals',
+			'description' => __( 'Orders totals.', 'woocommerce' ),
+		);
+		$reports[] = array(
+			'slug'        => 'products/totals',
+			'description' => __( 'Products totals.', 'woocommerce' ),
+		);
+		$reports[] = array(
+			'slug'        => 'customers/totals',
+			'description' => __( 'Customers totals.', 'woocommerce' ),
+		);
+		$reports[] = array(
+			'slug'        => 'coupons/totals',
+			'description' => __( 'Coupons totals.', 'woocommerce' ),
+		);
+		$reports[] = array(
+			'slug'        => 'reviews/totals',
+			'description' => __( 'Reviews totals.', 'woocommerce' ),
+		);
+		$reports[] = array(
+			'slug'        => 'categories/totals',
+			'description' => __( 'Categories totals.', 'woocommerce' ),
+		);
+		$reports[] = array(
+			'slug'        => 'tags/totals',
+			'description' => __( 'Tags totals.', 'woocommerce' ),
+		);
+		$reports[] = array(
+			'slug'        => 'attributes/totals',
+			'description' => __( 'Attributes totals.', 'woocommerce' ),
+		);
+
+		return $reports;
+	}
 }

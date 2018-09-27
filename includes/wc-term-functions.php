@@ -25,11 +25,11 @@ function wc_get_object_terms( $object_id, $taxonomy, $field = null, $index_key =
 	// Test if terms exists. get_the_terms() return false when it finds no terms.
 	$terms = get_the_terms( $object_id, $taxonomy );
 
-	if ( ! $terms || is_wp_error( $terms ) || is_null( $field ) ) {
+	if ( ! $terms || is_wp_error( $terms ) ) {
 		return array();
 	}
 
-	return wp_list_pluck( $terms, $field, $index_key );
+	return is_null( $field ) ? $terms : wp_list_pluck( $terms, $field, $index_key );
 }
 
 /**
@@ -51,9 +51,7 @@ function _wc_get_cached_product_terms( $product_id, $taxonomy, $args = array() )
 		return $terms;
 	}
 
-	// @codingStandardsIgnoreStart
 	$terms = wp_get_post_terms( $product_id, $taxonomy, $args );
-	// @codingStandardsIgnoreEnd
 
 	wp_cache_add( $cache_key, $terms, $cache_group );
 
@@ -482,6 +480,12 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 
 	foreach ( (array) $taxonomies as $taxonomy ) {
 		if ( taxonomy_is_product_attribute( $taxonomy ) || in_array( $taxonomy, apply_filters( 'woocommerce_sortable_taxonomies', array( 'product_cat' ) ), true ) ) {
+
+			// Don't modify the orderby when we're ordering attributes by name.
+			if ( taxonomy_is_product_attribute( $taxonomy ) && 'name' === wc_attribute_orderby( $taxonomy ) ) {
+				return $clauses;
+			}
+
 			$found = true;
 			break;
 		}

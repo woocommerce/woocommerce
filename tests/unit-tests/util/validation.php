@@ -27,7 +27,7 @@ class WC_Tests_Validation extends WC_Unit_Test_Case {
 			array( true, WC_Validation::is_phone( '+00 000 00 00 000' ) ),
 			array( true, WC_Validation::is_phone( '+00-000-00-00-000' ) ),
 			array( true, WC_Validation::is_phone( '(000) 00 00 000' ) ),
-			array( false, WC_Validation::is_phone( '+00.000.00.00.000' ) ),
+			array( true, WC_Validation::is_phone( '+00.000.00.00.000' ) ),
 			array( false, WC_Validation::is_phone( '+00 aaa dd ee fff' ) ),
 		);
 	}

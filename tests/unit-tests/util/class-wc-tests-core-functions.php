@@ -27,6 +27,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_get_woocommerce_currencies() {
+		static $currencies;
 
 		$expected_currencies = array(
 			'AED' => 'United Arab Emirates dirham',
@@ -194,6 +195,10 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		);
 
 		$this->assertEquals( $expected_currencies, get_woocommerce_currencies() );
+
+		// Unset cached currencies and test again.
+		unset( $currencies );
+		$this->assertEquals( $expected_currencies, get_woocommerce_currencies() );
 	}
 
 	/**
@@ -213,6 +218,32 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		foreach ( array_keys( get_woocommerce_currencies() ) as $currency_code ) {
 			$this->assertInternalType( 'string', get_woocommerce_currency_symbol( $currency_code ) );
 		}
+	}
+
+	/**
+	 * Test wc_get_theme_support()
+	 *
+	 * @return void
+	 */
+	public function test_wc_get_theme_support() {
+		$this->assertEquals( 'default', wc_get_theme_support( '', 'default' ) );
+
+		$theme_support_options = array(
+			'thumbnail_image_width' => 150,
+			'single_image_width'    => 300,
+			'product_grid'          => array(
+				'default_rows'    => 3,
+				'min_rows'        => 2,
+				'max_rows'        => 8,
+				'default_columns' => 4,
+				'min_columns'     => 2,
+				'max_columns'     => 5,
+			),
+		);
+		add_theme_support( 'woocommerce', $theme_support_options );
+
+		$this->assertEquals( $theme_support_options, wc_get_theme_support() );
+		$this->assertEquals( $theme_support_options['product_grid'], wc_get_theme_support( 'product_grid' ) );
 	}
 
 	/**
@@ -693,6 +724,89 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 			$actual_result = $result ? " selected='selected'" : '';
 			$this->assertEquals( wc_selected( $value, $options ), $actual_result );
 		}
+	}
+
+	/**
+	 * Test wc_array_cartesian.
+	 *
+	 * @return void
+	 */
+	public function test_wc_array_cartesian() {
+		$array = array(
+			'attr1' => array(
+				'Attr1 Value 1',
+				'Attr1 Value 2',
+			),
+			'attr2' => array(
+				'Attr2 Value 1',
+				'Attr2 Value 2',
+			),
+		);
+
+		$expected_combinations = array(
+			array(
+				'attr2' => 'Attr2 Value 1',
+				'attr1' => 'Attr1 Value 1',
+			),
+			array(
+				'attr2' => 'Attr2 Value 2',
+				'attr1' => 'Attr1 Value 1',
+			),
+			array(
+				'attr2' => 'Attr2 Value 1',
+				'attr1' => 'Attr1 Value 2',
+			),
+			array(
+				'attr2' => 'Attr2 Value 2',
+				'attr1' => 'Attr1 Value 2',
+			),
+		);
+
+		$this->assertEquals( $expected_combinations, array_reverse( wc_array_cartesian( $array ) ) );
+	}
+
+	/**
+	 * Test wc_get_credit_card_type_label.
+	 *
+	 * @return void
+	 */
+	public function test_wc_get_credit_card_type_label() {
+		$this->assertEquals( 'Visa', wc_get_credit_card_type_label( 'visa' ) );
+		$this->assertEquals( 'JCB', wc_get_credit_card_type_label( 'jCb' ) );
+		$this->assertEquals( 'MasterCard', wc_get_credit_card_type_label( 'Mastercard' ) );
+		$this->assertEquals( 'American Express', wc_get_credit_card_type_label( 'american_express' ) );
+		$this->assertEquals( 'American Express', wc_get_credit_card_type_label( 'american-express' ) );
+		$this->assertEquals( '', wc_get_credit_card_type_label( '' ) );
+		$this->assertEquals( 'Random name', wc_get_credit_card_type_label( 'random-name' ) );
+	}
+
+	/**
+	 * Test wc_get_permalink_structure.
+	 *
+	 * @return void
+	 */
+	public function test_wc_get_permalink_structure() {
+		$expected_structure = array(
+			'product_base'           => 'product',
+			'category_base'          => 'product-category',
+			'tag_base'               => 'product-tag',
+			'attribute_base'         => '',
+			'use_verbose_page_rules' => '',
+			'product_rewrite_slug'   => 'product',
+			'category_rewrite_slug'  => 'product-category',
+			'tag_rewrite_slug'       => 'product-tag',
+			'attribute_rewrite_slug' => '',
+		);
+		$this->assertEquals( $expected_structure, wc_get_permalink_structure() );
+	}
+
+	/**
+	 * Test wc_decimal_to_fraction.
+	 *
+	 * @return void
+	 */
+	public function test_wc_decimal_to_fraction() {
+		$this->assertEquals( array( 7, 2 ), wc_decimal_to_fraction( '3.5' ) );
 	}
 
 	/**

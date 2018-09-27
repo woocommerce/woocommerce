@@ -55,6 +55,7 @@ class WC_Admin_Setup_Wizard {
 		if ( apply_filters( 'woocommerce_enable_setup_wizard', true ) && current_user_can( 'manage_woocommerce' ) ) {
 			add_action( 'admin_menu', array( $this, 'admin_menus' ) );
 			add_action( 'admin_init', array( $this, 'setup_wizard' ) );
+			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 		}
 	}
 
@@ -144,6 +145,62 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
+	 * Register/enqueue scripts and styles for the Setup Wizard.
+	 *
+	 * Hooked onto 'admin_enqueue_scripts'.
+	 */
+	public function enqueue_scripts() {
+		// Whether or not there is a pending background install of Jetpack.
+		$pending_jetpack = ! class_exists( 'Jetpack' ) && get_option( 'woocommerce_setup_background_installing_jetpack' );
+		$suffix          = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+
+		wp_register_script( 'jquery-blockui', WC()->plugin_url() . '/assets/js/jquery-blockui/jquery.blockUI' . $suffix . '.js', array( 'jquery' ), '2.70', true );
+		wp_register_script( 'selectWoo', WC()->plugin_url() . '/assets/js/selectWoo/selectWoo.full' . $suffix . '.js', array( 'jquery' ), '1.0.0' );
+		wp_register_script( 'wc-enhanced-select', WC()->plugin_url() . '/assets/js/admin/wc-enhanced-select' . $suffix . '.js', array( 'jquery', 'selectWoo' ), WC_VERSION );
+		wp_localize_script(
+			'wc-enhanced-select',
+			'wc_enhanced_select_params',
+			array(
+				'i18n_no_matches'           => _x( 'No matches found', 'enhanced select', 'woocommerce' ),
+				'i18n_ajax_error'           => _x( 'Loading failed', 'enhanced select', 'woocommerce' ),
+				'i18n_input_too_short_1'    => _x( 'Please enter 1 or more characters', 'enhanced select', 'woocommerce' ),
+				'i18n_input_too_short_n'    => _x( 'Please enter %qty% or more characters', 'enhanced select', 'woocommerce' ),
+				'i18n_input_too_long_1'     => _x( 'Please delete 1 character', 'enhanced select', 'woocommerce' ),
+				'i18n_input_too_long_n'     => _x( 'Please delete %qty% characters', 'enhanced select', 'woocommerce' ),
+				'i18n_selection_too_long_1' => _x( 'You can only select 1 item', 'enhanced select', 'woocommerce' ),
+				'i18n_selection_too_long_n' => _x( 'You can only select %qty% items', 'enhanced select', 'woocommerce' ),
+				'i18n_load_more'            => _x( 'Loading more results&hellip;', 'enhanced select', 'woocommerce' ),
+				'i18n_searching'            => _x( 'Searching&hellip;', 'enhanced select', 'woocommerce' ),
+				'ajax_url'                  => admin_url( 'admin-ajax.php' ),
+				'search_products_nonce'     => wp_create_nonce( 'search-products' ),
+				'search_customers_nonce'    => wp_create_nonce( 'search-customers' ),
+			)
+		);
+		wp_enqueue_style( 'woocommerce_admin_styles', WC()->plugin_url() . '/assets/css/admin.css', array(), WC_VERSION );
+		wp_enqueue_style( 'wc-setup', WC()->plugin_url() . '/assets/css/wc-setup.css', array( 'dashicons', 'install' ), WC_VERSION );
+
+		wp_register_script( 'wc-setup', WC()->plugin_url() . '/assets/js/admin/wc-setup' . $suffix . '.js', array( 'jquery', 'wc-enhanced-select', 'jquery-blockui', 'wp-util', 'jquery-tiptip' ), WC_VERSION );
+		wp_localize_script(
+			'wc-setup',
+			'wc_setup_params',
+			array(
+				'pending_jetpack_install' => $pending_jetpack ? 'yes' : 'no',
+				'states'                  => WC()->countries->get_states(),
+				'current_step'            => isset( $this->steps[ $this->step ] ) ? $this->step : false,
+				'i18n'                    => array(
+					'extra_plugins' => array(
+						'payment' => array(
+							'stripe_create_account'                              => __( 'Stripe setup is powered by Jetpack and WooCommerce Services.', 'woocommerce' ),
+							'ppec_paypal_reroute_requests'                       => __( 'PayPal setup is powered by Jetpack and WooCommerce Services.', 'woocommerce' ),
+							'stripe_create_account,ppec_paypal_reroute_requests' => __( 'Stripe and PayPal setup are powered by Jetpack and WooCommerce Services.', 'woocommerce' ),
+						),
+					),
+				),
+			)
+		);
+	}
+
+	/**
 	 * Show the setup wizard.
 	 */
 	public function setup_wizard() {
@@ -193,47 +250,13 @@ class WC_Admin_Setup_Wizard {
 			unset( $default_steps['shipping'] );
 		}
 
-		// Whether or not there is a pending background install of Jetpack.
-		$pending_jetpack = ! class_exists( 'Jetpack' ) && get_option( 'woocommerce_setup_background_installing_jetpack' );
+		// Hide activate section when the user does not have capabilities to install plugins, think multiside admins not being a super admin.
+		if ( ! current_user_can( 'install_plugins' ) ) {
+			unset( $default_steps['activate'] );
+		}
 
 		$this->steps = apply_filters( 'woocommerce_setup_wizard_steps', $default_steps );
 		$this->step  = isset( $_GET['step'] ) ? sanitize_key( $_GET['step'] ) : current( array_keys( $this->steps ) ); // WPCS: CSRF ok, input var ok.
-		$suffix      = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
-
-		wp_register_script( 'jquery-blockui', WC()->plugin_url() . '/assets/js/jquery-blockui/jquery.blockUI' . $suffix . '.js', array( 'jquery' ), '2.70', true );
-		wp_register_script( 'selectWoo', WC()->plugin_url() . '/assets/js/selectWoo/selectWoo.full' . $suffix . '.js', array( 'jquery' ), '1.0.0' );
-		wp_register_script( 'wc-enhanced-select', WC()->plugin_url() . '/assets/js/admin/wc-enhanced-select' . $suffix . '.js', array( 'jquery', 'selectWoo' ), WC_VERSION );
-		wp_localize_script(
-			'wc-enhanced-select',
-			'wc_enhanced_select_params',
-			array(
-				'i18n_no_matches'           => _x( 'No matches found', 'enhanced select', 'woocommerce' ),
-				'i18n_ajax_error'           => _x( 'Loading failed', 'enhanced select', 'woocommerce' ),
-				'i18n_input_too_short_1'    => _x( 'Please enter 1 or more characters', 'enhanced select', 'woocommerce' ),
-				'i18n_input_too_short_n'    => _x( 'Please enter %qty% or more characters', 'enhanced select', 'woocommerce' ),
-				'i18n_input_too_long_1'     => _x( 'Please delete 1 character', 'enhanced select', 'woocommerce' ),
-				'i18n_input_too_long_n'     => _x( 'Please delete %qty% characters', 'enhanced select', 'woocommerce' ),
-				'i18n_selection_too_long_1' => _x( 'You can only select 1 item', 'enhanced select', 'woocommerce' ),
-				'i18n_selection_too_long_n' => _x( 'You can only select %qty% items', 'enhanced select', 'woocommerce' ),
-				'i18n_load_more'            => _x( 'Loading more results&hellip;', 'enhanced select', 'woocommerce' ),
-				'i18n_searching'            => _x( 'Searching&hellip;', 'enhanced select', 'woocommerce' ),
-				'ajax_url'                  => admin_url( 'admin-ajax.php' ),
-				'search_products_nonce'     => wp_create_nonce( 'search-products' ),
-				'search_customers_nonce'    => wp_create_nonce( 'search-customers' ),
-			)
-		);
-		wp_enqueue_style( 'woocommerce_admin_styles', WC()->plugin_url() . '/assets/css/admin.css', array(), WC_VERSION );
-		wp_enqueue_style( 'wc-setup', WC()->plugin_url() . '/assets/css/wc-setup.css', array( 'dashicons', 'install' ), WC_VERSION );
-
-		wp_register_script( 'wc-setup', WC()->plugin_url() . '/assets/js/admin/wc-setup' . $suffix . '.js', array( 'jquery', 'wc-enhanced-select', 'jquery-blockui', 'wp-util' ), WC_VERSION );
-		wp_localize_script(
-			'wc-setup',
-			'wc_setup_params',
-			array(
-				'pending_jetpack_install' => $pending_jetpack ? 'yes' : 'no',
-				'states'                  => WC()->countries->get_states(),
-			)
-		);
 
 		// @codingStandardsIgnoreStart
 		if ( ! empty( $_POST['save_step'] ) && isset( $this->steps[ $this->step ]['handler'] ) ) {
@@ -280,6 +303,7 @@ class WC_Admin_Setup_Wizard {
 	 * Setup Wizard Header.
 	 */
 	public function setup_wizard_header() {
+		set_current_screen();
 		?>
 		<!DOCTYPE html>
 		<html <?php language_attributes(); ?>>
@@ -287,6 +311,7 @@ class WC_Admin_Setup_Wizard {
 			<meta name="viewport" content="width=device-width" />
 			<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 			<title><?php esc_html_e( 'WooCommerce &rsaquo; Setup Wizard', 'woocommerce' ); ?></title>
+			<?php do_action( 'admin_enqueue_scripts' ); ?>
 			<?php wp_print_scripts( 'wc-setup' ); ?>
 			<?php do_action( 'admin_print_styles' ); ?>
 			<?php do_action( 'admin_head' ); ?>
@@ -727,26 +752,6 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Get the WCS shipping carrier for a given country code.
-	 *
-	 * Can also be used to determine if WCS supports a given country.
-	 *
-	 * @param string $country_code Country Code.
-	 * @param string $currency_code Currecy Code.
-	 * @return bool|string Carrier name if supported, boolean False otherwise.
-	 */
-	protected function get_wcs_shipping_carrier( $country_code, $currency_code ) {
-		switch ( array( $country_code, $currency_code ) ) {
-			case array( 'US', 'USD' ):
-				return 'USPS';
-			case array( 'CA', 'CAD' ):
-				return 'Canada Post';
-			default:
-				return false;
-		}
-	}
-
-	/**
 	 * Get shipping methods based on country code.
 	 *
 	 * @param string $country_code Country code.
@@ -755,10 +760,6 @@ class WC_Admin_Setup_Wizard {
 	 */
 	protected function get_wizard_shipping_methods( $country_code, $currency_code ) {
 		$shipping_methods = array(
-			'live_rates'    => array(
-				'name'        => __( 'Live Rates', 'woocommerce' ),
-				'description' => __( 'Powered by WooCommerce Services and Jetpack.', 'woocommerce' ),
-			),
 			'flat_rate'     => array(
 				'name'        => __( 'Flat Rate', 'woocommerce' ),
 				'description' => __( 'Set a fixed price to cover shipping costs.', 'woocommerce' ),
@@ -777,12 +778,6 @@ class WC_Admin_Setup_Wizard {
 			),
 		);
 
-		$live_rate_carrier = $this->get_wcs_shipping_carrier( $country_code, $currency_code );
-
-		if ( false === $live_rate_carrier || ! current_user_can( 'install_plugins' ) ) {
-			unset( $shipping_methods['live_rates'] );
-		}
-
 		return $shipping_methods;
 	}
 
@@ -794,8 +789,7 @@ class WC_Admin_Setup_Wizard {
 	 * @param string $input_prefix Input prefix.
 	 */
 	protected function shipping_method_selection_form( $country_code, $currency_code, $input_prefix ) {
-		$live_rate_carrier = $this->get_wcs_shipping_carrier( $country_code, $currency_code );
-		$selected          = $live_rate_carrier ? 'live_rates' : 'flat_rate';
+		$selected          = 'flat_rate';
 		$shipping_methods  = $this->get_wizard_shipping_methods( $country_code, $currency_code );
 		?>
 		<div class="wc-wizard-shipping-method-select">
@@ -849,6 +843,51 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
+	 * Render a product weight unit dropdown.
+	 *
+	 * @return string
+	 */
+	protected function get_product_weight_selection() {
+		$weight_unit = get_option( 'woocommerce_weight_unit' );
+		ob_start();
+		?>
+		<span class="wc-setup-shipping-unit">
+			<select id="weight_unit" name="weight_unit" class="wc-enhanced-select">
+				<option value="kg" <?php selected( $weight_unit, 'kg' ); ?>><?php esc_html_e( 'Kilograms', 'woocommerce' ); ?></option>
+				<option value="g" <?php selected( $weight_unit, 'g' ); ?>><?php esc_html_e( 'Grams', 'woocommerce' ); ?></option>
+				<option value="lbs" <?php selected( $weight_unit, 'lbs' ); ?>><?php esc_html_e( 'Pounds', 'woocommerce' ); ?></option>
+				<option value="oz" <?php selected( $weight_unit, 'oz' ); ?>><?php esc_html_e( 'Ounces', 'woocommerce' ); ?></option>
+			</select>
+		</span>
+		<?php
+
+		return ob_get_clean();
+	}
+
+	/**
+	 * Render a product dimension unit dropdown.
+	 *
+	 * @return string
+	 */
+	protected function get_product_dimension_selection() {
+		$dimension_unit = get_option( 'woocommerce_dimension_unit' );
+		ob_start();
+		?>
+		<span class="wc-setup-shipping-unit">
+			<select id="dimension_unit" name="dimension_unit" class="wc-enhanced-select">
+				<option value="m" <?php selected( $dimension_unit, 'm' ); ?>><?php esc_html_e( 'Meters', 'woocommerce' ); ?></option>
+				<option value="cm" <?php selected( $dimension_unit, 'cm' ); ?>><?php esc_html_e( 'Centimeters', 'woocommerce' ); ?></option>
+				<option value="mm" <?php selected( $dimension_unit, 'mm' ); ?>><?php esc_html_e( 'Millimeters', 'woocommerce' ); ?></option>
+				<option value="in" <?php selected( $dimension_unit, 'in' ); ?>><?php esc_html_e( 'Inches', 'woocommerce' ); ?></option>
+				<option value="yd" <?php selected( $dimension_unit, 'yd' ); ?>><?php esc_html_e( 'Yards', 'woocommerce' ); ?></option>
+			</select>
+		</span>
+		<?php
+
+		return ob_get_clean();
+	}
+
+	/**
 	 * Shipping.
 	 */
 	public function wc_setup_shipping() {
@@ -856,31 +895,25 @@ class WC_Admin_Setup_Wizard {
 		$country_name          = WC()->countries->countries[ $country_code ];
 		$prefixed_country_name = WC()->countries->estimated_for_prefix( $country_code ) . $country_name;
 		$currency_code         = get_woocommerce_currency();
-		$wcs_carrier           = $this->get_wcs_shipping_carrier( $country_code, $currency_code );
 		$existing_zones        = WC_Shipping_Zones::get_zones();
-		$dimension_unit        = get_option( 'woocommerce_dimension_unit' );
-		$weight_unit           = get_option( 'woocommerce_weight_unit' );
+		$intro_text            = '';
 
-		if ( ! empty( $existing_zones ) ) {
-			$intro_text = __( 'How would you like units on your store displayed?', 'woocommerce' );
-		} elseif ( $wcs_carrier ) {
-			$intro_text = sprintf(
-				/* translators: %1$s: country name including the 'the' prefix, %2$s: shipping carrier name */
-				__( "You're all set up to ship anywhere in %1\$s, and outside of it. We recommend using <strong>live rates</strong> (which are powered by our WooCommerce Services plugin and Jetpack) to get accurate %2\$s shipping prices to cover the cost of order fulfillment.", 'woocommerce' ),
-				$prefixed_country_name,
-				$wcs_carrier
-			);
-		} else {
+		if ( empty( $existing_zones ) ) {
 			$intro_text = sprintf(
 				/* translators: %s: country name including the 'the' prefix if needed */
-				__( "You can choose which countries you'll be shipping to and with which methods. To get started, we've set you up with shipping inside and outside of %s.", 'woocommerce' ),
+				__( "We've created two Shipping Zones - for %s and for the rest of the world. Below you can set Flat Rate shipping costs for these Zones or offer Free Shipping.", 'woocommerce' ),
 				$prefixed_country_name
 			);
 		}
 
+		$is_wcs_labels_supported  = $this->is_wcs_shipping_labels_supported_country( $country_code );
+		$is_shipstation_supported = $this->is_shipstation_supported_country( $country_code );
+
 		?>
 		<h1><?php esc_html_e( 'Shipping', 'woocommerce' ); ?></h1>
-		<p><?php echo wp_kses_post( $intro_text ); ?></p>
+		<?php if ( $intro_text ) : ?>
+			<p><?php echo wp_kses_post( $intro_text ); ?></p>
+		<?php endif; ?>
 		<form method="post">
 			<?php if ( empty( $existing_zones ) ) : ?>
 				<ul class="wc-wizard-services shipping">
@@ -920,51 +953,91 @@ class WC_Admin_Setup_Wizard {
 							</span>
 						</div>
 					</li>
+					<li class="wc-wizard-service-info">
+						<p>
+						<?php
+						printf(
+							wp_kses(
+								/* translators: %1$s: live rates tooltip text, %2$s: shipping extensions URL */
+								__( 'If you\'d like to offer <span class="help_tip" data-tip="%1$s">live rates</span> from a specific carrier (e.g. UPS) you can find a variety of extensions available for WooCommerce <a href="%2$s" target="_blank">here</a>.', 'woocommerce' ),
+								array(
+									'span' => array(
+										'class'    => array(),
+										'data-tip' => array(),
+									),
+									'a' => array(
+										'href'   => array(),
+										'target' => array(),
+									),
+								)
+							),
+							esc_attr__( 'A live rate is the exact cost to ship an order, quoted directly from the shipping carrier.', 'woocommerce' ),
+							'https://woocommerce.com/product-category/woocommerce-extensions/shipping-methods/shipping-carriers/'
+						);
+						?>
+						</p>
+					</li>
 				</ul>
 			<?php endif; ?>
 
+		<?php if ( $is_wcs_labels_supported || $is_shipstation_supported ) : ?>
+			<ul class="wc-setup-shipping-recommended">
+			<?php
+			if ( $is_wcs_labels_supported ) :
+				$this->display_recommended_item( array(
+					'type'        => 'woocommerce_services',
+					'title'       => __( 'Print shipping labels at home', 'woocommerce' ),
+					'description' => __( 'We recommend WooCommerce Services & Jetpack. These plugins will save you time at the Post Office by enabling you to print your shipping labels at home.', 'woocommerce' ),
+					'img_url'     => WC()->plugin_url() . '/assets/images/obw-woocommerce-services-icon.png',
+					'img_alt'     => __( 'WooCommerce Services icon', 'woocommerce' ),
+					'plugins'     => $this->get_wcs_requisite_plugins(),
+				) );
+			elseif ( $is_shipstation_supported ) :
+				$this->display_recommended_item( array(
+					'type'        => 'shipstation',
+					'title'       => __( 'Print shipping labels at home', 'woocommerce' ),
+					'description' => __( 'We recommend using ShipStation to save time at the Post Office by printing your shipping labels at home. Try ShipStation free for 30 days.', 'woocommerce' ),
+					'img_url'     => WC()->plugin_url() . '/assets/images/obw-shipstation-icon.png',
+					'img_alt'     => __( 'ShipStation icon', 'woocommerce' ),
+					'plugins'     => array(
+						array(
+							'name' => __( 'ShipStation', 'woocommerce' ),
+							'slug' => 'woocommerce-shipstation-integration',
+						),
+					),
+				) );
+			endif;
+		endif;
+		?>
+			</ul>
+
 			<div class="wc-setup-shipping-units">
-				<div class="wc-setup-shipping-unit">
-					<p>
-						<label for="weight_unit">
-							<?php
-								printf(
-									wp_kses(
-										__( '<strong>Weight unit</strong>—used to calculate shipping rates, and more.', 'woocommerce' ),
-										array( 'strong' => array() )
-									)
-								);
-							?>
-						</label>
-					</p>
-					<select id="weight_unit" name="weight_unit" class="wc-enhanced-select">
-						<option value="kg" <?php selected( $weight_unit, 'kg' ); ?>><?php esc_html_e( 'kg', 'woocommerce' ); ?></option>
-						<option value="g" <?php selected( $weight_unit, 'g' ); ?>><?php esc_html_e( 'g', 'woocommerce' ); ?></option>
-						<option value="lbs" <?php selected( $weight_unit, 'lbs' ); ?>><?php esc_html_e( 'lbs', 'woocommerce' ); ?></option>
-						<option value="oz" <?php selected( $weight_unit, 'oz' ); ?>><?php esc_html_e( 'oz', 'woocommerce' ); ?></option>
-					</select>
-				</div>
-				<div class="wc-setup-shipping-unit">
-					<p>
-						<label for="dimension_unit">
-							<?php
-								printf(
-									wp_kses(
-										__( '<strong>Dimension unit</strong>—helps for accurate package selection.', 'woocommerce' ),
-										array( 'strong' => array() )
-									)
-								);
-							?>
-						</label>
-					</p>
-					<select id="dimension_unit" name="dimension_unit" class="wc-enhanced-select">
-						<option value="m" <?php selected( $dimension_unit, 'm' ); ?>><?php esc_html_e( 'm', 'woocommerce' ); ?></option>
-						<option value="cm" <?php selected( $dimension_unit, 'cm' ); ?>><?php esc_html_e( 'cm', 'woocommerce' ); ?></option>
-						<option value="mm" <?php selected( $dimension_unit, 'mm' ); ?>><?php esc_html_e( 'mm', 'woocommerce' ); ?></option>
-						<option value="in" <?php selected( $dimension_unit, 'in' ); ?>><?php esc_html_e( 'in', 'woocommerce' ); ?></option>
-						<option value="yd" <?php selected( $dimension_unit, 'yd' ); ?>><?php esc_html_e( 'yd', 'woocommerce' ); ?></option>
-					</select>
-				</div>
+				<p>
+					<?php
+						echo wp_kses(
+							sprintf(
+								/* translators: %1$s: weight unit dropdown, %2$s: dimension unit dropdown */
+								esc_html__( 'We\'ll use %1$s for product weight and %2$s for product dimensions.', 'woocommerce' ),
+								$this->get_product_weight_selection(),
+								$this->get_product_dimension_selection()
+							),
+							array(
+								'span' => array(
+									'class' => array(),
+								),
+								'select' => array(
+									'id'    => array(),
+									'name'  => array(),
+									'class' => array(),
+								),
+								'option' => array(
+									'value'    => array(),
+									'selected' => array(),
+								),
+							)
+						);
+					?>
+				</p>
 			</div>
 
 			<p class="wc-setup-actions step">
@@ -982,11 +1055,6 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_shipping_save() {
 		check_admin_referer( 'wc-setup' );
 
-		// If going through this step again, remove the live rates options.
-		// in case the user saved different settings this time.
-		delete_option( 'woocommerce_setup_domestic_live_rates_zone' );
-		delete_option( 'woocommerce_setup_intl_live_rates_zone' );
-
 		// @codingStandardsIgnoreStart
 		$setup_domestic   = isset( $_POST['shipping_zones']['domestic']['enabled'] ) && ( 'yes' === $_POST['shipping_zones']['domestic']['enabled'] );
 		$domestic_method  = isset( $_POST['shipping_zones']['domestic']['method'] ) ? sanitize_text_field( wp_unslash( $_POST['shipping_zones']['domestic']['method'] ) ) : '';
@@ -1001,18 +1069,27 @@ class WC_Admin_Setup_Wizard {
 		update_option( 'woocommerce_weight_unit', $weight_unit );
 		update_option( 'woocommerce_dimension_unit', $dimension_unit );
 
+		$setup_wcs_labels  = isset( $_POST['setup_woocommerce_services'] ) && 'yes' === $_POST['setup_woocommerce_services'];
+		$setup_shipstation = isset( $_POST['setup_shipstation'] ) && 'yes' === $_POST['setup_shipstation'];
+
+		if ( $setup_wcs_labels ) {
+			$this->install_woocommerce_services();
+		}
+
+		if ( $setup_shipstation ) {
+			$this->install_plugin(
+				'woocommerce-shipstation',
+				array(
+					'name'      => __( 'ShipStation', 'woocommerce' ),
+					'repo-slug' => 'woocommerce-shipstation',
+				)
+			);
+		}
+
 		// For now, limit this setup to the first run.
 		if ( ! empty( $existing_zones ) ) {
 			wp_safe_redirect( esc_url_raw( $this->get_next_step_link() ) );
 			exit;
-		}
-
-		// Install WooCommerce Services if live rates were selected.
-		if (
-			( $setup_domestic && 'live_rates' === $domestic_method ) ||
-			( $setup_intl && 'live_rates' === $intl_method )
-		) {
-			$this->install_woocommerce_services();
 		}
 
 		/*
@@ -1025,14 +1102,7 @@ class WC_Admin_Setup_Wizard {
 			$zone = new WC_Shipping_Zone( null );
 			$zone->set_zone_order( 0 );
 			$zone->add_location( $country, 'country' );
-
-			if ( 'live_rates' === $domestic_method ) {
-				// Signal WooCommerce Services to setup the domestic zone.
-				update_option( 'woocommerce_setup_domestic_live_rates_zone', true, 'no' );
-			} else {
-				$instance_id = $zone->add_shipping_method( $domestic_method );
-			}
-
+			$instance_id = $zone->add_shipping_method( $domestic_method );
 			$zone->save();
 
 			// Save chosen shipping method settings (using REST controller for convenience).
@@ -1050,15 +1120,10 @@ class WC_Admin_Setup_Wizard {
 
 		// If enabled, set the selected method for the "rest of world" zone.
 		if ( $setup_intl ) {
-			if ( 'live_rates' === $intl_method ) {
-				// Signal WooCommerce Services to setup the international zone.
-				update_option( 'woocommerce_setup_intl_live_rates_zone', true, 'no' );
-			} else {
-				$zone        = new WC_Shipping_Zone( 0 );
-				$instance_id = $zone->add_shipping_method( $intl_method );
+			$zone        = new WC_Shipping_Zone( 0 );
+			$instance_id = $zone->add_shipping_method( $intl_method );
 
-				$zone->save();
-			}
+			$zone->save();
 
 			// Save chosen shipping method settings (using REST controller for convenience).
 			if ( isset( $instance_id ) && ! empty( $_POST['shipping_zones']['intl'][ $intl_method ] ) ) { // WPCS: input var ok.
@@ -1214,6 +1279,32 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
+	 * Is ShipStation country supported
+	 *
+	 * @param string $country_code Country code.
+	 */
+	protected function is_shipstation_supported_country( $country_code ) {
+		$supported_countries = array(
+			'AU', // Australia.
+			'CA', // Canada.
+			'GB', // United Kingdom.
+		);
+		return in_array( $country_code, $supported_countries, true );
+	}
+
+	/**
+	 * Is WooCommerce Services shipping label country supported
+	 *
+	 * @param string $country_code Country code.
+	 */
+	protected function is_wcs_shipping_labels_supported_country( $country_code ) {
+		$supported_countries = array(
+			'US', // United States.
+		);
+		return in_array( $country_code, $supported_countries, true );
+	}
+
+	/**
 	 * Helper method to retrieve the current user's email address.
 	 *
 	 * @return string Email address
@@ -1268,9 +1359,10 @@ class WC_Admin_Setup_Wizard {
 				'repo-slug'   => 'woocommerce-gateway-stripe',
 				'settings'    => array(
 					'create_account' => array(
-						'label'       => __( 'Create a new Stripe account for me', 'woocommerce' ),
+						'label'       => __( 'Set up Stripe for me using this email:', 'woocommerce' ),
 						'type'        => 'checkbox',
 						'value'       => 'yes',
+						'default'     => 'yes',
 						'placeholder' => '',
 						'required'    => false,
 						'plugins'     => $this->get_wcs_requisite_plugins(),
@@ -1280,7 +1372,6 @@ class WC_Admin_Setup_Wizard {
 						'type'        => 'email',
 						'value'       => $user_email,
 						'placeholder' => __( 'Stripe email address', 'woocommerce' ),
-						'description' => __( "Enter your email address and we'll handle account creation. Powered by WooCommerce Services and Jetpack.", 'woocommerce' ),
 						'required'    => true,
 					),
 				),
@@ -1294,9 +1385,10 @@ class WC_Admin_Setup_Wizard {
 				'repo-slug'   => 'woocommerce-gateway-paypal-express-checkout',
 				'settings'    => array(
 					'reroute_requests' => array(
-						'label'       => __( 'Accept payments without linking a PayPal account', 'woocommerce' ),
+						'label'       => __( 'Set up PayPal for me using this email:', 'woocommerce' ),
 						'type'        => 'checkbox',
 						'value'       => 'yes',
+						'default'     => 'yes',
 						'placeholder' => '',
 						'required'    => false,
 						'plugins'     => $this->get_wcs_requisite_plugins(),
@@ -1306,7 +1398,6 @@ class WC_Admin_Setup_Wizard {
 						'type'        => 'email',
 						'value'       => $user_email,
 						'placeholder' => __( 'Email address to receive payments', 'woocommerce' ),
-						'description' => __( "Enter your email address and we'll authenticate payments for you. Powered by WooCommerce Services and Jetpack.", 'woocommerce' ),
 						'required'    => true,
 					),
 				),
@@ -1527,6 +1618,8 @@ class WC_Admin_Setup_Wizard {
 								$checked = false;
 								if ( isset( $previously_saved_settings[ $setting_id ] ) ) {
 									$checked = 'yes' === $previously_saved_settings[ $setting_id ];
+								} elseif ( false === $previously_saved_settings && isset( $setting['default'] ) ) {
+									$checked = 'yes' === $setting['default'];
 								}
 							}
 							if ( 'email' === $setting['type'] ) {

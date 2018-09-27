@@ -1880,14 +1880,14 @@ function wc_update_350_order_customer_id( $updater = false ) {
 		);
 
 		$wpdb->query(
-			"INSERT IGNORE INTO customers_map (SELECT post_id, meta_value FROM wp_postmeta WHERE meta_key = '_customer_user')"
+			"INSERT IGNORE INTO customers_map (SELECT post_id, meta_value FROM {$wpdb->prefix}postmeta WHERE meta_key = '_customer_user')"
 		);
 
 		$wpdb->query( 'SET sql_safe_updates=1' );
 
 		$wpdb->query(
 			$wpdb->prepare(
-				"UPDATE wp_posts JOIN customers_map ON wp_posts.ID = customers_map.post_id SET wp_posts.post_author = customers_map.customer_id WHERE post_type IN ({$post_types_placeholders})",  // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+				"UPDATE {$wpdb->prefix}posts JOIN customers_map ON {$wpdb->prefix}posts.ID = customers_map.post_id SET {$wpdb->prefix}posts.post_author = customers_map.customer_id WHERE post_type IN ({$post_types_placeholders})",  // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
 				$post_types
 			)
 		);
@@ -1902,8 +1902,8 @@ function wc_update_350_order_customer_id( $updater = false ) {
 			// Get the list of orders that we don't want to change as they belong to user ID 1.
 			$admin_orders = $wpdb->get_col(
 				$wpdb->prepare(
-					"SELECT ID FROM wp_posts p
-					INNER JOIN wp_postmeta pm ON p.ID = pm.post_id
+					"SELECT ID FROM {$wpdb->prefix}posts p
+					INNER JOIN {$wpdb->prefix}postmeta pm ON p.ID = pm.post_id
 					WHERE post_type IN ({$post_types_placeholders}) AND meta_key = '_customer_user' AND meta_value = 1", // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
 					$post_types
 				)
@@ -1973,6 +1973,35 @@ function wc_update_350_order_customer_id( $updater = false ) {
 	}
 
 	wp_cache_flush();
+}
+
+/**
+ * Set the comment type to 'review' for product reviews that don't have a comment type.
+ */
+function wc_update_350_reviews_comment_type() {
+	global $wpdb;
+
+	$wpdb->query(
+		"UPDATE {$wpdb->prefix}comments JOIN {$wpdb->prefix}posts ON {$wpdb->prefix}posts.ID = {$wpdb->prefix}comments.comment_post_ID AND ( {$wpdb->prefix}posts.post_type = 'product' OR {$wpdb->prefix}posts.post_type = 'product_variation' ) SET {$wpdb->prefix}comments.comment_type = 'review' WHERE {$wpdb->prefix}comments.comment_type = ''"
+	);
+}
+
+/**
+ * Change wp_woocommerce_sessions schema to use a bigint auto increment field
+ * instead of char(32) field as the primary key. Doing this change primarily as
+ * it should reduce the occurrence of deadlocks (see
+ * https://github.com/woocommerce/woocommerce/issues/20912), but also because
+ * it is not a good practice to use a char(32) field as the primary key of a
+ * table.
+ *
+ * @return void
+ */
+function wc_update_350_change_woocommerce_sessions_schema() {
+	global $wpdb;
+
+	$wpdb->query(
+		"ALTER TABLE `{$wpdb->prefix}woocommerce_sessions` DROP PRIMARY KEY, DROP KEY `session_id`, ADD PRIMARY KEY(`session_id`), ADD UNIQUE KEY(`session_key`)"
+	);
 }
 
 /**

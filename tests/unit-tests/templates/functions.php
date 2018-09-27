@@ -11,9 +11,9 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Test wc_get_product_class().
 	 *
-	 * @covers wc_product_class()
-	 * @covers wc_product_post_class()
-	 * @covers wc_get_product_taxonomy_class()
+	 * @covers ::wc_product_class()
+	 * @covers ::wc_product_post_class()
+	 * @covers ::wc_get_product_taxonomy_class()
 	 * @since 3.4.0
 	 */
 	public function test_wc_get_product_class() {

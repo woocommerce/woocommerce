@@ -19,6 +19,9 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	public function setUp() {
 		parent::setUp();
 
+		// Callback used by WP_HTTP_TestCase to decide whether to perform HTTP requests or to provide a mocked response.
+		$this->http_responder = array( $this, 'mock_http_responses' );
+
 		$this->csv_file = dirname( __FILE__ ) . '/sample.csv';
 
 		$bootstrap = WC_Unit_Tests_Bootstrap::instance();
@@ -585,5 +588,30 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		}
 
 		$this->assertEquals( $items, $parsed_data );
+	}
+
+	/**
+	 * Provides a mocked response for all images that are imported together with the products.
+	 * This way it is not necessary to perform a regular request to an external server which would
+	 * significantly slow down the tests.
+	 *
+	 * This function is called by WP_HTTP_TestCase::http_request_listner().
+	 *
+	 * @param array $request Request arguments.
+	 * @param string $url URL of the request.
+	 *
+	 * @return array|false mocked response or false to let WP perform a regular request.
+	 */
+	protected function mock_http_responses( $request, $url ) {
+		$mocked_response = false;
+
+		if ( false !== strpos( $url, 'http://demo.woothemes.com' ) ) {
+			$mocked_response = array(
+				'body'     => 'Mocked response',
+				'response' => array( 'code' => 200 ),
+			);
+		}
+
+		return $mocked_response;
 	}
 }
