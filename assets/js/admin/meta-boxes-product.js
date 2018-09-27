@@ -466,8 +466,8 @@ jQuery( function( $ ) {
 
 				// Make sure the dropdown is not disabled for empty value attributes.
 				var nr_elements = original_data.length / 6;
-				for ( i = 0; i < nr_elements; i++ ) {
-					if ( typeof( original_data ) != 'undefined' && original_data[ i * 6 + 2 ].value === '' ) {
+				for ( var i = 0; i < nr_elements; i++ ) {
+					if ( typeof( original_data ) !== 'undefined' && original_data[ i * 6 + 2 ].value === '' ) {
 						$( 'select.attribute_taxonomy' ).find( 'option[value="' + original_data[ i * 6 ].value + '"]' ).removeAttr( 'disabled' );
 					}
 				}
