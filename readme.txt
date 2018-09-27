@@ -193,6 +193,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Add extra null check to fix an issue with select payment fields using disabed select as placeholders. #21391
 * Fix - Don't modify attributes orderby when sorting by name. #21408
 * Fix - Allow saving a stock quantity of 0 using quick edit. #21447
+* Fix - Change the query used to save session data to the database to protect against deadlocks. #21455
 * Fix/Tweak - Fire `woocommerce_grant_product_download_access` hook after the download has its ID set. #20905
 * Fix/Tweak/Performance - Change wp_woocommerce_sessions primary key to session_id. #21245
 * Tweak - Show empty terms in admin product category filter dropdown. #20324
