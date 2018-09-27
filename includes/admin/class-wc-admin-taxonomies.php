@@ -456,16 +456,17 @@ class WC_Admin_Taxonomies {
 	 * @return void
 	 */
 	public function scripts_at_product_cat_screen_footer() {
-		if ( ! isset( $_GET['taxonomy'] ) || 'product_cat' !== $_GET['taxonomy'] ) { // WPCS: ok
+		if ( ! isset( $_GET['taxonomy'] ) || 'product_cat' !== $_GET['taxonomy'] ) {
 			return;
 		}
+		// Ensure the tooltip is displayed when the image column is disabled on product categories
 		wc_enqueue_js("
 			(function( $ ) {
 				'use strict';
-				var product_cat = $('tr#tag-" . $this->default_cat_id . "');
-				product_cat.find('th').empty();
-				product_cat.find('td.thumb span').detach('span').appendTo(product_cat.find('th'));
-			})(jQuery);
+				var product_cat = $( 'tr#tag-" . absint( $this->default_cat_id ) . "' );
+				product_cat.find( 'th' ).empty();
+				product_cat.find( 'td.thumb span' ).detach( 'span' ).appendTo( product_cat.find( 'th' ) );
+			})( jQuery );
 		");
 	}
 }
