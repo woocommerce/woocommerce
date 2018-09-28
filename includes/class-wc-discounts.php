@@ -765,11 +765,11 @@ class WC_Discounts {
 	 */
 	protected function validate_coupon_sale_items( $coupon ) {
 		if ( $coupon->get_exclude_sale_items() ) {
-			$valid = false;
+			$valid = true;
 
 			foreach ( $this->get_items_to_validate() as $item ) {
-				if ( $item->product && ! $item->product->is_on_sale() ) {
-					$valid = true;
+				if ( $item->product && $item->product->is_on_sale() ) {
+					$valid = false;
 					break;
 				}
 			}
@@ -820,6 +820,7 @@ class WC_Discounts {
 	 */
 	protected function validate_coupon_eligible_items( $coupon ) {
 		if ( ! $coupon->is_type( wc_get_product_coupon_types() ) ) {
+			$this->validate_coupon_sale_items( $coupon );
 			$this->validate_coupon_excluded_product_ids( $coupon );
 			$this->validate_coupon_excluded_product_categories( $coupon );
 		}
@@ -946,7 +947,6 @@ class WC_Discounts {
 			$this->validate_coupon_maximum_amount( $coupon );
 			$this->validate_coupon_product_ids( $coupon );
 			$this->validate_coupon_product_categories( $coupon );
-			$this->validate_coupon_sale_items( $coupon );
 			$this->validate_coupon_excluded_items( $coupon );
 			$this->validate_coupon_eligible_items( $coupon );
 

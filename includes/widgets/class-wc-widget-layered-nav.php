@@ -293,7 +293,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 				if ( jQuery().selectWoo ) {
 					var wc_layered_nav_select = function() {
 						jQuery( '.dropdown_layered_nav_" . esc_js( $taxonomy_filter_name ) . "' ).selectWoo( {
-							placeholder: '" . esc_js( $any_label ) . "',
+							placeholder: '" . wp_json_encode( (string) wp_specialchars_decode( $any_label, ENT_QUOTES ) ) . "',
 							minimumResultsForSearch: 5,
 							width: '100%',
 							allowClear: " . ( $multiple ? 'false' : 'true' ) . ",

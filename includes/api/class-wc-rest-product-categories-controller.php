@@ -14,16 +14,16 @@ defined( 'ABSPATH' ) || exit;
  * REST API Product Categories controller class.
  *
  * @package WooCommerce/API
- * @extends WC_REST_Product_Categories_V1_Controller
+ * @extends WC_REST_Product_Categories_V2_Controller
  */
-class WC_REST_Product_Categories_Controller extends WC_REST_Product_Categories_V1_Controller {
+class WC_REST_Product_Categories_Controller extends WC_REST_Product_Categories_V2_Controller {
 
 	/**
 	 * Endpoint namespace.
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v2';
+	protected $namespace = 'wc/v3';
 
 	/**
 	 * Prepare a single product category output for response.
@@ -63,7 +63,7 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Product_Categories_V
 				'date_modified'     => wc_rest_prepare_date_response( $attachment->post_modified ),
 				'date_modified_gmt' => wc_rest_prepare_date_response( $attachment->post_modified_gmt ),
 				'src'               => wp_get_attachment_url( $image_id ),
-				'title'             => get_the_title( $attachment ),
+				'name'              => get_the_title( $attachment ),
 				'alt'               => get_post_meta( $image_id, '_wp_attachment_image_alt', true ),
 			);
 		}
@@ -181,7 +181,7 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Product_Categories_V
 							'format'      => 'uri',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'title'             => array(
+						'name'             => array(
 							'description' => __( 'Image name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),

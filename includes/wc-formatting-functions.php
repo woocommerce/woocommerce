@@ -941,6 +941,9 @@ function wc_normalize_postcode( $postcode ) {
  * @return string
  */
 function wc_format_phone_number( $phone ) {
+	if ( ! WC_Validation::is_phone( $phone ) ) {
+		return '';
+	}
 	return preg_replace( '/[^0-9\+\-\s]/', '-', preg_replace( '/[\x00-\x1F\x7F-\xFF]/', '', $phone ) );
 }
 
@@ -1376,3 +1379,27 @@ function wc_parse_relative_date_option( $raw_value ) {
 
 	return $value;
 }
+
+/**
+ * Format the endpoint slug, strip out anything not allowed in a url.
+ *
+ * @since 3.5.0
+ * @param string $raw_value The raw value.
+ * @return string
+ */
+function wc_sanitize_endpoint_slug( $raw_value ) {
+	return sanitize_title( $raw_value );
+}
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_checkout_pay_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_checkout_order_received_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_add_payment_method_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_delete_payment_method_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_set_default_payment_method_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_orders_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_view_order_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_downloads_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_edit_account_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_edit_address_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_payment_methods_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_lost_password_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_logout_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );

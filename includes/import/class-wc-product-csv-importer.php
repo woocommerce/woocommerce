@@ -358,12 +358,13 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 			foreach ( $_terms as $index => $_term ) {
 				// Check if category exists. Parent must be empty string or null if doesn't exists.
-				// @codingStandardsIgnoreStart
 				$term = term_exists( $_term, 'product_cat', $parent );
-				// @codingStandardsIgnoreEnd
 
 				if ( is_array( $term ) ) {
 					$term_id = $term['term_id'];
+					// Don't allow users without capabilities to create new categories.
+				} elseif ( ! current_user_can( 'manage_product_terms' ) ) {
+					break;
 				} else {
 					$term = wp_insert_term( $_term, 'product_cat', array( 'parent' => intval( $parent ) ) );
 

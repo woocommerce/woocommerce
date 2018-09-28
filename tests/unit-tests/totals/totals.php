@@ -86,8 +86,6 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 		WC()->cart->add_discount( $coupon->get_code() );
 
 		add_action( 'woocommerce_cart_calculate_fees', array( $this, 'add_cart_fees_callback' ) );
-
-		$this->totals = new WC_Cart_Totals( WC()->cart );
 	}
 
 	/**
@@ -108,6 +106,8 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 		WC_Helper_Shipping::delete_simple_flat_rate();
 		remove_action( 'woocommerce_cart_calculate_fees', array( $this, 'add_cart_fees_callback' ) );
 
+		WC()->customer->set_is_vat_exempt( false );
+
 		parent::tearDown();
 	}
 
@@ -115,6 +115,9 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 	 * Test get and set items.
 	 */
 	public function test_get_totals() {
+		WC()->customer->set_is_vat_exempt( false );
+		$this->totals = new WC_Cart_Totals( WC()->cart );
+
 		$this->assertEquals(
 			array(
 				'fees_total'          => 40.00,
@@ -134,9 +137,36 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test get totals for tax exempt customer.
+	 */
+	public function test_get_totals_tax_exempt_customer() {
+		WC()->customer->set_is_vat_exempt( true );
+		$this->totals = new WC_Cart_Totals( WC()->cart );
+
+		$this->assertEquals(
+			array(
+				'fees_total'          => 40.00,
+				'fees_total_tax'      => 0.00,
+				'items_subtotal'      => 40.00,
+				'items_subtotal_tax'  => 0.00,
+				'items_total'         => 36.00,
+				'items_total_tax'     => 0.00,
+				'total'               => 86.00,
+				'shipping_total'      => 10,
+				'shipping_tax_total'  => 0.00,
+				'discounts_total'     => 4.00,
+				'discounts_tax_total' => 0.00,
+			),
+			$this->totals->get_totals()
+		);
+	}
+
+	/**
 	 * Test that cart totals get updated.
 	 */
 	public function test_cart_totals() {
+		WC()->customer->set_is_vat_exempt( false );
+		$this->totals = new WC_Cart_Totals( WC()->cart );
 		$cart = WC()->cart;
 
 		$this->assertEquals( 40.00, $cart->get_fee_total() );
@@ -163,5 +193,39 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 		$this->assertEquals( 40.00, $cart->fee_total );
 		$this->assertEquals( 10, $cart->shipping_total );
 		$this->assertEquals( 2, $cart->shipping_tax_total );
+	}
+
+	/**
+	 * Test that cart totals get updated for tax exempt customer.
+	 */
+	public function test_cart_totals_tax_exempt_customer() {
+		WC()->customer->set_is_vat_exempt( true );
+		$this->totals = new WC_Cart_Totals( WC()->cart );
+		$cart = WC()->cart;
+
+		$this->assertEquals( 40.00, $cart->get_fee_total() );
+		$this->assertEquals( 36.00, $cart->get_cart_contents_total() );
+		$this->assertEquals( 86.00, $cart->get_total( 'edit' ) );
+		$this->assertEquals( 40.00, $cart->get_subtotal() );
+		$this->assertEquals( 0.00, $cart->get_subtotal_tax() );
+		$this->assertEquals( 0.00, $cart->get_cart_contents_tax() );
+		$this->assertEquals( 0.00, array_sum( $cart->get_cart_contents_taxes() ) );
+		$this->assertEquals( 0.00, $cart->get_fee_tax() );
+		$this->assertEquals( 0.00, array_sum( $cart->get_fee_taxes() ) );
+		$this->assertEquals( 4, $cart->get_discount_total() );
+		$this->assertEquals( 0.00, $cart->get_discount_tax() );
+		$this->assertEquals( 10, $cart->get_shipping_total() );
+		$this->assertEquals( 0.00, $cart->get_shipping_tax() );
+
+		$this->assertEquals( 36.00, $cart->cart_contents_total );
+		$this->assertEquals( 86.00, $cart->total );
+		$this->assertEquals( 40.00, $cart->subtotal );
+		$this->assertEquals( 40.00, $cart->subtotal_ex_tax );
+		$this->assertEquals( 0.00, $cart->tax_total );
+		$this->assertEquals( 4, $cart->discount_cart );
+		$this->assertEquals( 0.00, $cart->discount_cart_tax );
+		$this->assertEquals( 40.00, $cart->fee_total );
+		$this->assertEquals( 10, $cart->shipping_total );
+		$this->assertEquals( 0.00, $cart->shipping_tax_total );
 	}
 }

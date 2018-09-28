@@ -693,10 +693,9 @@
  }
 
  .taxonomy-product_cat {
-	 .column-thumb .woocommerce-help-tip {
+	 .check-column .woocommerce-help-tip {
 		 font-size: 1.5em;
-		 margin: 0 0 0 -34px;
-		 padding: 0px 2px 5px;
+		 margin: -3px 0 0 5px;
 		 display: block;
 		 position: absolute;
 	 }
@@ -3004,7 +3003,6 @@
 	 td.forminp {
 		 input, textarea {
 			 padding: 8px;
-			 width: 448px;
 			 max-width: 100% !important;
 		 }
 		 .wc-shipping-zone-region-select {
@@ -3686,6 +3684,20 @@
 		 .wc_payment_gateways_wrapper,
 		 .wc_emails_wrapper {
 			 padding: 0 15px 10px 0;
+		 }
+	 }
+	 
+	 .wc-shipping-zone-settings {
+	 
+		 td.forminp {
+			 input, textarea {
+				 width: 448px;
+				 padding: 6px 11px;
+			 }
+			 
+			 .select2-search input {
+				 padding: 6px;
+			 }
 		 }
 	 }
  }

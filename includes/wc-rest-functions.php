@@ -332,3 +332,28 @@ function wc_rest_check_manager_permissions( $object, $context = 'read' ) {
 
 	return apply_filters( 'woocommerce_rest_check_permissions', $permission, $context, 0, $object );
 }
+
+/**
+ * Check product reviews permissions on REST API.
+ *
+ * @since 3.5.0
+ * @param string $context   Request context.
+ * @param string $object_id Object ID.
+ * @return bool
+ */
+function wc_rest_check_product_reviews_permissions( $context = 'read', $object_id = 0 ) {
+	$permission = false;
+	$contexts   = array(
+		'read'   => 'moderate_comments',
+		'create' => 'moderate_comments',
+		'edit'   => 'moderate_comments',
+		'delete' => 'moderate_comments',
+		'batch'  => 'moderate_comments',
+	);
+
+	if ( isset( $contexts[ $context ] ) ) {
+		$permission = current_user_can( $contexts[ $context ] );
+	}
+
+	return apply_filters( 'woocommerce_rest_check_permissions', $permission, $context, $object_id, 'product_review' );
+}

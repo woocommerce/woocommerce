@@ -104,7 +104,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	public function __construct() {
 		$this->session          = new WC_Cart_Session( $this );
 		$this->fees_api         = new WC_Cart_Fees( $this );
-		$this->tax_display_cart = get_option( 'woocommerce_tax_display_cart' );
+		$this->tax_display_cart = $this->is_tax_displayed();
 
 		// Register hooks for the objects.
 		$this->session->init();
@@ -1373,8 +1373,8 @@ class WC_Cart extends WC_Legacy_Cart {
 			}
 		}
 
-		// If we're on the cart page, the user has not calculated shipping, and there is no calculator available, hide the area.
-		if ( is_cart() && ! $this->get_customer()->has_calculated_shipping() && 'no' === get_option( 'woocommerce_enable_shipping_calc' ) ) {
+		// If we're on the cart page, the user has not calculated shipping, hide the area.
+		if ( is_cart() && ! $this->get_customer()->has_calculated_shipping() ) {
 			return false;
 		}
 
@@ -1939,5 +1939,18 @@ class WC_Cart extends WC_Legacy_Cart {
 		$this->totals = $this->default_totals;
 		$this->fees_api->remove_all_fees();
 		do_action( 'woocommerce_cart_reset', $this, false );
+	}
+
+	/**
+	 * Returns 'incl' if tax should be included in cart, otherwise returns 'excl'.
+	 *
+	 * @return string
+	 */
+	private function is_tax_displayed() {
+		if ( $this->get_customer() && $this->get_customer()->get_is_vat_exempt() ) {
+			return 'excl';
+		}
+
+		return get_option( 'woocommerce_tax_display_cart' );
 	}
 }
