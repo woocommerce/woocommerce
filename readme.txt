@@ -158,10 +158,11 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 
 == Changelog ==
 
-= 3.5.0 - 2018-XX-XX =
+= 3.5.0 - 2018-10-XX =
 * Feature - REST API v3. #20111
 * Feature - Option has been added on the inventory tab of the edit product page to set a low stock threshold for individual products. #20260
 * Feature - Add ability to export products by category to the CSV exporter. #20870
+* Feature - Ability to define custom product placeholder images that will resize to correct store aspect ratio. #20644
 * Enhancement - Excluded children categories from WP_Query in product shortcode if cat_operator=AND. #20207
 * Enhancement - Add anchor tag example to email template preview. #20246
 * Enhancement - Introduce is_paypal_supported_currency check in setup wizard. #20244
@@ -187,6 +188,13 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Update quick edit logic to show/hide Stock qty and Backorders fields. #21301
 * Fix - Fix Layered Nav Widget where special HTML entities did not display correctly in the "Any %s" string. #21312
 * Fix - Set the is_checkout javascript parameter on any page that uses the checkout filter or shortcode. #21328
+* Fix - Fix cron_interval property support in WP_Background_Process. #21353
+* Fix - CSS Changes to make text fields line up on the shipping settings page. #21247
+* Fix - Add extra null check to fix an issue with select payment fields using disabed select as placeholders. #21391
+* Fix - Don't modify attributes orderby when sorting by name. #21408
+* Fix - Allow saving a stock quantity of 0 using quick edit. #21447
+* Fix - Change the query used to save session data to the database to protect against deadlocks. #21455
+* Fix - Make sure default category tooltip is rendered when the image column is deactivated. #21410
 * Fix/Tweak - Fire `woocommerce_grant_product_download_access` hook after the download has its ID set. #20905
 * Fix/Tweak/Performance - Change wp_woocommerce_sessions primary key to session_id. #21245
 * Tweak - Show empty terms in admin product category filter dropdown. #20324
@@ -213,6 +221,11 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Remove empty space in mini-cart template. #21261
 * Tweak - Tax display in cart now depends on whether customer is tax exempt. #21292
 * Tweak - Change sort dropdown option "Sort by newness" to "Sort by latest". #21311
+* Tweak - Sanitize endpoint slugs upon saving. #21355
+* Tweak - Ignore converting float meta value for registered post meta. #21333
+* Tweak - Remove 'order_again' query string to avoid multiple re-orders. #21444
+* Tweak - Remove Netherlands Antilles from the North America continent definitions. #21449
+* Tweak - Display label and meta on the same line in order emails to match frontend Order Details styling. #21456
 * Performance/Tweak - Use post_author for the order customer instead of '_customer_user' meta data. #17895
 * Performance - Exclude frontend include from REST API calls. #20000
 * Performance - Improve performance of the query to delete version transients by removing unneeded "ORDER BY". #21274
@@ -241,6 +254,10 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Added form action hooks for edit account and login templates. #21248
 * Dev - Add action for when system tools are run. #21270
 * Dev - Add - woocommerce_restock_refunded_items filter to control default state of the restock option when refunding items on an order. #21314
+* Dev - Add an extensible/swappable job queue via WC_Action_Queue and WC_Queue_Interface. #20030
+* Dev - Use WC_Action_Queue for schedule and delivery of webhooks. #20030
+* Dev - Include Action Scheduler v2.1.0 and use it for the default job queue. #21424 /  #20030
+* Dev - Save reviews under the 'review' comment type. #21305
 * Localization - Updated IT provinces. #20286
 * Localization - Eircode validation. #20330
 * Localization - Disable postcode requirement for Bahrain. #21103
