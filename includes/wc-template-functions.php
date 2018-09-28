@@ -3023,11 +3023,13 @@ if ( ! function_exists( 'wc_display_item_meta' ) ) {
 			'separator' => '</li><li>',
 			'echo'      => true,
 			'autop'     => false,
+			'label_before' => '<strong class="wc-item-meta-label">',
+			'label_after' => ':</strong> ',
 		) );
 
 		foreach ( $item->get_formatted_meta_data() as $meta_id => $meta ) {
 			$value     = $args['autop'] ? wp_kses_post( $meta->display_value ) : wp_kses_post( make_clickable( trim( $meta->display_value ) ) );
-			$strings[] = '<strong class="wc-item-meta-label">' . wp_kses_post( $meta->display_key ) . ':</strong> ' . $value;
+			$strings[] = $args['label_before'] . wp_kses_post( $meta->display_key ) . $args['label_after'] . $value;
 		}
 
 		if ( $strings ) {
