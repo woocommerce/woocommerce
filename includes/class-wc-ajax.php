@@ -647,12 +647,12 @@ class WC_AJAX {
 			}
 
 			$response['html'] = ob_get_clean();
-
-			wp_send_json_success( $response );
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
-		wp_die();
+
+		// wp_send_json_success must be outside the try block not to break phpunit tests
+		wp_send_json_success( $response );
 	}
 
 	/**
@@ -897,14 +897,13 @@ class WC_AJAX {
 
 			ob_start();
 			include 'admin/meta-boxes/views/html-order-items.php';
-			wp_send_json_success(
-				array(
-					'html' => ob_get_clean(),
-				)
-			);
+			$response['html'] = ob_get_clean();
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
+
+		// wp_send_json_success must be outside the try block not to break phpunit tests
+		wp_send_json_success( $response );
 	}
 
 	/**
@@ -953,15 +952,13 @@ class WC_AJAX {
 
 			ob_start();
 			include 'admin/meta-boxes/views/html-order-items.php';
-
-			wp_send_json_success(
-				array(
-					'html' => ob_get_clean(),
-				)
-			);
+			$response['html'] = ob_get_clean();
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
+
+		// wp_send_json_success must be outside the try block not to break phpunit tests
+		wp_send_json_success( $response );
 	}
 
 	/**
@@ -988,15 +985,13 @@ class WC_AJAX {
 
 			ob_start();
 			include 'admin/meta-boxes/views/html-order-shipping.php';
-
-			wp_send_json_success(
-				array(
-					'html' => ob_get_clean(),
-				)
-			);
+			$response['html'] = ob_get_clean();
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
+
+		// wp_send_json_success must be outside the try block not to break phpunit tests
+		wp_send_json_success( $response );
 	}
 
 	/**
@@ -1023,15 +1018,13 @@ class WC_AJAX {
 
 			ob_start();
 			include 'admin/meta-boxes/views/html-order-items.php';
-
-			wp_send_json_success(
-				array(
-					'html' => ob_get_clean(),
-				)
-			);
+			$response['html'] = ob_get_clean();
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
+
+		// wp_send_json_success must be outside the try block not to break phpunit tests
+		wp_send_json_success( $response );
 	}
 
 	/**
@@ -1055,15 +1048,13 @@ class WC_AJAX {
 
 			ob_start();
 			include 'admin/meta-boxes/views/html-order-items.php';
-
-			wp_send_json_success(
-				array(
-					'html' => ob_get_clean(),
-				)
-			);
+			$response['html'] = ob_get_clean();
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
+
+		// wp_send_json_success must be outside the try block not to break phpunit tests
+		wp_send_json_success( $response );
 	}
 
 	/**
@@ -1084,15 +1075,13 @@ class WC_AJAX {
 
 			ob_start();
 			include 'admin/meta-boxes/views/html-order-items.php';
-
-			wp_send_json_success(
-				array(
-					'html' => ob_get_clean(),
-				)
-			);
+			$response['html'] = ob_get_clean();
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
+
+		// wp_send_json_success must be outside the try block not to break phpunit tests
+		wp_send_json_success( $response );
 	}
 
 	/**
@@ -1140,15 +1129,13 @@ class WC_AJAX {
 
 			ob_start();
 			include 'admin/meta-boxes/views/html-order-items.php';
-
-			wp_send_json_success(
-				array(
-					'html' => ob_get_clean(),
-				)
-			);
+			$response['html'] = ob_get_clean();
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
+
+		// wp_send_json_success must be outside the try block not to break phpunit tests
+		wp_send_json_success( $response );
 	}
 
 	/**
@@ -1172,15 +1159,13 @@ class WC_AJAX {
 
 			ob_start();
 			include 'admin/meta-boxes/views/html-order-items.php';
-
-			wp_send_json_success(
-				array(
-					'html' => ob_get_clean(),
-				)
-			);
+			$response['html'] = ob_get_clean();
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
+
+		// wp_send_json_success must be outside the try block not to break phpunit tests
+		wp_send_json_success( $response );
 	}
 
 	/**
@@ -1688,12 +1673,12 @@ class WC_AJAX {
 			if ( did_action( 'woocommerce_order_fully_refunded' ) ) {
 				$response_data['status'] = 'fully_refunded';
 			}
-
-			wp_send_json_success( $response_data );
-
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
+
+		// wp_send_json_success must be outside the try block not to break phpunit tests
+		wp_send_json_success( $response_data );
 	}
 
 	/**
@@ -1813,11 +1798,12 @@ class WC_AJAX {
 				$data['message']         = __( 'API Key generated successfully. Make sure to copy your new keys now as the secret key will be hidden once you leave this page.', 'woocommerce' );
 				$data['revoke_url']      = '<a style="color: #a00; text-decoration: none;" href="' . esc_url( wp_nonce_url( add_query_arg( array( 'revoke-key' => $key_id ), admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys' ) ), 'revoke' ) ) . '">' . __( 'Revoke key', 'woocommerce' ) . '</a>';
 			}
-
-			wp_send_json_success( $data );
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'message' => $e->getMessage() ) );
 		}
+
+		// wp_send_json_success must be outside the try block not to break phpunit tests
+		wp_send_json_success( $data );
 	}
 
 	/**
