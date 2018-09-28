@@ -115,7 +115,7 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 	 */
 	private function sort_callback( $a, $b ) {
 		if ( '' === $this->order_by || '' === $this->order ) {
-			return new WP_Error( 'woocommerce_reports_categories_sort_failed', __( 'Sorry, fetching categories data failed.', 'woocommerce' ) );
+			return new WP_Error( 'woocommerce_reports_categories_sort_failed', __( 'Sorry, fetching categories data failed.', 'wc-admin' ) );
 		}
 		if ( $a[ $this->order_by ] === $b[ $this->order_by ] ) {
 			return 0;
@@ -212,7 +212,7 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 			if ( null === $products_data ) {
-				return new WP_Error( 'woocommerce_reports_categories_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ), array( 'status' => 500 ) );
+				return new WP_Error( 'woocommerce_reports_categories_result_failed', __( 'Sorry, fetching revenue data failed.', 'wc-admin' ), array( 'status' => 500 ) );
 			}
 
 			// Group by category without a helper table, worst case we add it and change the SQL afterwards.

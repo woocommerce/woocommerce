@@ -67,7 +67,7 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_REST_Reports_Contro
 		}
 
 		if ( ! isset( $report_data->data ) || ! isset( $report_data->page_no ) || ! isset( $report_data->pages ) ) {
-			return new WP_Error( 'woocommerce_rest_reports_categories_invalid_response', __( 'Invalid response from data store.', 'woocommerce' ), array( 'status' => 500 ) );
+			return new WP_Error( 'woocommerce_rest_reports_categories_invalid_response', __( 'Invalid response from data store.', 'wc-admin' ), array( 'status' => 500 ) );
 		}
 
 		$out_data = array();
@@ -159,31 +159,31 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_REST_Reports_Contro
 			'type'       => 'object',
 			'properties' => array(
 				'category_id'    => array(
-					'description' => __( 'Category ID.', 'woocommerce' ),
+					'description' => __( 'Category ID.', 'wc-admin' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'items_sold'     => array(
-					'description' => __( 'Amount of items sold.', 'woocommerce' ),
+					'description' => __( 'Amount of items sold.', 'wc-admin' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'gross_revenue'  => array(
-					'description' => __( 'Gross revenue.', 'woocommerce' ),
+					'description' => __( 'Gross revenue.', 'wc-admin' ),
 					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'orders_count'   => array(
-					'description' => __( 'Amount of orders.', 'woocommerce' ),
+					'description' => __( 'Amount of orders.', 'wc-admin' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'products_count' => array(
-					'description' => __( 'Amount of products.', 'woocommerce' ),
+					'description' => __( 'Amount of products.', 'wc-admin' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -203,7 +203,7 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_REST_Reports_Contro
 		$params               = array();
 		$params['context']    = $this->get_context_param( array( 'default' => 'view' ) );
 		$params['page']       = array(
-			'description'       => __( 'Current page of the collection.', 'woocommerce' ),
+			'description'       => __( 'Current page of the collection.', 'wc-admin' ),
 			'type'              => 'integer',
 			'default'           => 1,
 			'sanitize_callback' => 'absint',
@@ -211,7 +211,7 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_REST_Reports_Contro
 			'minimum'           => 1,
 		);
 		$params['per_page']   = array(
-			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce' ),
+			'description'       => __( 'Maximum number of items to be returned in result set.', 'wc-admin' ),
 			'type'              => 'integer',
 			'default'           => 10,
 			'minimum'           => 1,
@@ -220,26 +220,26 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_REST_Reports_Contro
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['after']      = array(
-			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce' ),
+			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'wc-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['before']     = array(
-			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce' ),
+			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'wc-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['order']      = array(
-			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
+			'description'       => __( 'Order sort attribute ascending or descending.', 'wc-admin' ),
 			'type'              => 'string',
 			'default'           => 'desc',
 			'enum'              => array( 'asc', 'desc' ),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['orderby']    = array(
-			'description'       => __( 'Sort collection by object attribute.', 'woocommerce' ),
+			'description'       => __( 'Sort collection by object attribute.', 'wc-admin' ),
 			'type'              => 'string',
 			'default'           => 'date',
 			'enum'              => array(
@@ -252,7 +252,7 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_REST_Reports_Contro
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['interval']   = array(
-			'description'       => __( 'Time interval to use for buckets in the returned data.', 'woocommerce' ),
+			'description'       => __( 'Time interval to use for buckets in the returned data.', 'wc-admin' ),
 			'type'              => 'string',
 			'default'           => 'week',
 			'enum'              => array(
@@ -266,7 +266,7 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_REST_Reports_Contro
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['categories'] = array(
-			'description'       => __( 'Limit result set to all items that have the specified term assigned in the categories taxonomy.', 'woocommerce' ),
+			'description'       => __( 'Limit result set to all items that have the specified term assigned in the categories taxonomy.', 'wc-admin' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',

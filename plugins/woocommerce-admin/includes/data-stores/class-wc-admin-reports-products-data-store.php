@@ -205,7 +205,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 			if ( null === $product_data ) {
-				return new WP_Error( 'woocommerce_reports_products_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ) );
+				return new WP_Error( 'woocommerce_reports_products_result_failed', __( 'Sorry, fetching revenue data failed.', 'wc-admin' ) );
 			}
 
 			if ( $query_args['extended_product_info'] ) {
