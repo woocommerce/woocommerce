@@ -220,12 +220,11 @@ function wc_product_post_type_link( $permalink, $post ) {
 	$terms = get_the_terms( $post->ID, 'product_cat' );
 
 	if ( ! empty( $terms ) ) {
-                // Find the child terms.
-                $child_terms = wp_filter_object_list( $terms, array( 'parent' => 0 ), 'not');
-                if ( ! empty( $child_terms ) ) {
-                        $terms = $child_terms;
-                }
-            
+		// Find the child terms.
+		$child_terms = wp_filter_object_list( $terms, array( 'parent' => 0 ), 'not' );
+		if ( ! empty( $child_terms ) ) {
+			$terms = $child_terms;
+		}
 		if ( function_exists( 'wp_list_sort' ) ) {
 			$terms = wp_list_sort( $terms, 'term_id', 'ASC' );
 		} else {
