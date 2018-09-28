@@ -21,6 +21,7 @@
     "i18n:js": "cross-env NODE_ENV=production babel client -o /dev/null",
     "i18n:php": "pot-to-php ./languages/wc-admin.pot ./languages/wc-admin.php wc-admin",
     "i18n:pot": "grunt makepot",
+    "i18n:check": "grunt checktextdomain",
     "i18n": "npm run -s i18n:js && npm run -s i18n:php && npm run -s i18n:pot",
     "precommit": "npm run -s install-if-no-packages && node bin/pre-commit-hook.js",
     "prepush": "npm run -s install-if-no-packages && node bin/pre-push-hook.js",
