@@ -978,7 +978,7 @@ class WC_AJAX {
 			$order_id         = absint( $_POST['order_id'] );
 			$order            = wc_get_order( $order_id );
 			$order_taxes      = $order->get_taxes();
-			$shipping_methods = WC()->shipping() ? WC()->shipping->load_shipping_methods() : array();
+			$shipping_methods = WC()->shipping() ? WC()->shipping()->load_shipping_methods() : array();
 
 			// Add new shipping
 			$item = new WC_Order_Item_Shipping();
