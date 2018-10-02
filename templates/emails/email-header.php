@@ -36,9 +36,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<?php
 								if ( $img = get_option( 'woocommerce_email_header_image' ) ) {
 									// if the path is relative, make it absolute
-									if (parse_url($img, PHP_URL_SCHEME) === null && parse_url($img, PHP_URL_HOST) === null) {
-										$img = site_url($img);
+									if ( null === parse_url( $img, PHP_URL_SCHEME ) && null === parse_url( $img, PHP_URL_HOST ) ) {
+										$img = site_url( $img );
 									}
+
 									echo '<p style="margin-top:0;"><img src="' . esc_url( $img ) . '" alt="' . get_bloginfo( 'name', 'display' ) . '" /></p>';
 								}
 							?>
