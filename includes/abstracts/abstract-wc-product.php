@@ -1747,7 +1747,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function get_formatted_name() {
 		if ( $this->get_sku() ) {
-			$identifier = $this->get_sku();
+			$identifier = $this->get_sku() . ' - # ' . $this->get_id();
 		} else {
 			$identifier = '#' . $this->get_id();
 		}
