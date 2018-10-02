@@ -98,7 +98,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 */
 	public function get_formatted_name() {
 		if ( $this->get_sku() ) {
-			$identifier = $this->get_sku();
+			$identifier = $this->get_sku() . ' - #' . $this->get_id();
 		} else {
 			$identifier = '#' . $this->get_id();
 		}
