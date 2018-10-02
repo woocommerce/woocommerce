@@ -38,7 +38,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 									// if the path is relative, make it absolute
 									if ( '//' === substr( $img, 0, 2 ) ) {
 										// assume https
-										$img = 'https' . $img;
+										$img = 'https:' . $img;
 									} elseif ( null === parse_url( $img, PHP_URL_SCHEME ) && null === parse_url( $img, PHP_URL_HOST ) ) {
 										$img = site_url( $img );
 									}
