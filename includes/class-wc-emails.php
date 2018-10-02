@@ -18,7 +18,7 @@ class WC_Emails {
 	/**
 	 * Array of email notification classes
 	 *
-	 * @var array
+	 * @var WC_Email[]
 	 */
 	public $emails = array();
 
@@ -231,7 +231,7 @@ class WC_Emails {
 	/**
 	 * Return the email classes - used in admin to load settings.
 	 *
-	 * @return array
+	 * @return WC_Email[]
 	 */
 	public function get_emails() {
 		return $this->emails;

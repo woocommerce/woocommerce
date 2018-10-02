@@ -51,7 +51,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 		if ( ! defined( 'WC_INSTALLING' ) ) {
 			// Load shipping methods so we can show any global options they may have.
-			$shipping_methods = WC()->shipping->load_shipping_methods();
+			$shipping_methods = WC()->shipping()->load_shipping_methods();
 
 			foreach ( $shipping_methods as $method ) {
 				if ( ! $method->has_settings() ) {
@@ -146,7 +146,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		global $current_section, $hide_save_button;
 
 		// Load shipping methods so we can show any global options they may have.
-		$shipping_methods = WC()->shipping->load_shipping_methods();
+		$shipping_methods = WC()->shipping()->load_shipping_methods();
 
 		if ( '' === $current_section ) {
 			$this->output_zones_screen();

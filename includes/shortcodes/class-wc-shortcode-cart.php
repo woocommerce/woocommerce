@@ -22,7 +22,7 @@ class WC_Shortcode_Cart {
 	 */
 	public static function calculate_shipping() {
 		try {
-			WC()->shipping->reset_shipping();
+			WC()->shipping()->reset_shipping();
 
 			$address = array();
 

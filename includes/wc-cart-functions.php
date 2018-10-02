@@ -203,7 +203,7 @@ function wc_cart_totals_subtotal_html() {
  * Get shipping methods.
  */
 function wc_cart_totals_shipping_html() {
-	$packages           = WC()->shipping->get_packages();
+	$packages           = WC()->shipping()->get_packages();
 	$first              = true;
 
 	foreach ( $packages as $i => $package ) {

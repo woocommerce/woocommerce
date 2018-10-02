@@ -401,7 +401,7 @@ class WC_Tracker {
 	 */
 	private static function get_active_shipping_methods() {
 		$active_methods   = array();
-		$shipping_methods = WC()->shipping->get_shipping_methods();
+		$shipping_methods = WC()->shipping()->get_shipping_methods();
 		foreach ( $shipping_methods as $id => $shipping_method ) {
 			if ( isset( $shipping_method->enabled ) && 'yes' === $shipping_method->enabled ) {
 				$active_methods[ $id ] = array(

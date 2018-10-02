@@ -737,7 +737,7 @@ function wc_update_240_shipping_methods() {
 	foreach ( $shipping_methods as $flat_rate_option_key => $shipping_method ) {
 		// Stop this running more than once if routine is repeated.
 		if ( version_compare( $shipping_method->get_option( 'version', 0 ), '2.4.0', '<' ) ) {
-			$has_classes                      = count( WC()->shipping->get_shipping_classes() ) > 0;
+			$has_classes                      = count( WC()->shipping()->get_shipping_classes() ) > 0;
 			$cost_key                         = $has_classes ? 'no_class_cost' : 'cost';
 			$min_fee                          = $shipping_method->get_option( 'minimum_fee' );
 			$math_cost_strings                = array(
@@ -752,7 +752,7 @@ function wc_update_240_shipping_methods() {
 				$math_cost_strings[ $cost_key ][] = strstr( $fee, '%' ) ? '[fee percent="' . str_replace( '%', '', $fee ) . '" min="' . esc_attr( $min_fee ) . '"]' : $fee;
 			}
 
-			foreach ( WC()->shipping->get_shipping_classes() as $shipping_class ) {
+			foreach ( WC()->shipping()->get_shipping_classes() as $shipping_class ) {
 				$rate_key                       = 'class_cost_' . $shipping_class->slug;
 				$math_cost_strings[ $rate_key ] = $math_cost_strings['no_class_cost'];
 			}
