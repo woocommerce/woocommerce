@@ -401,7 +401,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	}
 
 	/**
-	 * Return all calculated coupon totals.
+	 * Sets the array of calculated coupon totals.
 	 *
 	 * @since 3.2.0
 	 * @param array $value Value to set.
@@ -410,7 +410,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		$this->coupon_discount_totals = (array) $value;
 	}
 	/**
-	 * Return all calculated coupon tax totals.
+	 * Sets the array of calculated coupon tax totals.
 	 *
 	 * @since 3.2.0
 	 * @param array $value Value to set.
