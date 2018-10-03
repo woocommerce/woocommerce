@@ -195,6 +195,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Allow saving a stock quantity of 0 using quick edit. #21447
 * Fix - Change the query used to save session data to the database to protect against deadlocks. #21455
 * Fix - Make sure default category tooltip is rendered when the image column is deactivated. #21410
+* Fix - Fix warning when using logger instance in woocommerce_logging_class filter. #21448
 * Fix/Tweak - Fire `woocommerce_grant_product_download_access` hook after the download has its ID set. #20905
 * Fix/Tweak/Performance - Change wp_woocommerce_sessions primary key to session_id. #21245
 * Tweak - Show empty terms in admin product category filter dropdown. #20324
