@@ -174,8 +174,11 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		switch ( $current_section ) {
 			case 'options':
 				WC_Admin_Settings::save_fields( $this->get_settings() );
+				do_action( 'woocommerce_update_options_' . $this->id . '_options' );
 				break;
 			case 'classes':
+				do_action( 'woocommerce_update_options_' . $this->id . '_classes' );
+				break;
 			case '':
 				break;
 			default:
@@ -187,10 +190,6 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 					}
 				}
 				break;
-		}
-
-		if ( $current_section ) {
-			do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section );
 		}
 
 		// Increments the transient version to invalidate cache.
