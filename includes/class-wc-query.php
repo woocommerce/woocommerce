@@ -459,6 +459,9 @@ class WC_Query {
 		);
 
 		switch ( $orderby ) {
+			case 'id':
+				$args['orderby'] = 'ID';
+				break;
 			case 'menu_order':
 				$args['orderby'] = 'menu_order title';
 				break;
