@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 echo '= ' . esc_html( $email_heading ) . " =\n\n";
 
 /* translators: %1$s: Customer full name. %2$s: Order numer */
-echo sprintf( esc_html__( 'Alas. Just to let you know -- %1$s has cancelled order #%2$s:', 'woocommerce' ), esc_html( $order->get_formatted_billing_full_name() ), esc_html( $order->get_order_number() ) ) . "\n\n";
+echo sprintf( esc_html__( 'Alas. Just to let you know &mdash; %1$s has cancelled order #%2$s:', 'woocommerce' ), esc_html( $order->get_formatted_billing_full_name() ), esc_html( $order->get_order_number() ) ) . "\n\n";
 
 echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 

@@ -13,7 +13,7 @@ WooCommerce is a powerful, extendable eCommerce plugin that helps you sell anyth
 
 WooCommerce is a free eCommerce plugin that allows you to sell anything, beautifully. Built to integrate seamlessly with WordPress, WooCommerce is the world’s favorite eCommerce solution that gives both store owners and developers complete control.
 
-With endless flexibility and access to hundreds of free and premium WordPress extensions, WooCommerce now powers 30% of all online stores -- more than any other platform.
+With endless flexibility and access to hundreds of free and premium WordPress extensions, WooCommerce now powers 30% of all online stores &mdash; more than any other platform.
 
 [youtube https://www.youtube.com/watch?v=1KahlicghaE]
 
@@ -28,10 +28,10 @@ Offer free shipping, flat rate shipping, or make real-time calculations. Limit y
 = Extensive payment options =
 WooCommerce comes bundled with the ability to accept major credit cards, PayPal, BACS (bank transfers), and cash on delivery. Need additional options? More than 140 region-specific gateways integrate with WooCommerce, including popular choices like Stripe, Authorize.Net, and Amazon Payments.
 
-= You control it all -- forever =
+= You control it all &mdash; forever =
 WooCommerce gives you complete control of your store, from taxes to stock levels to customer accounts. Add and remove extensions, change your design, and switch settings as you please. It’s all under your control.
 
-One of the biggest risks of using a hosted eCommerce platform is what happens to your store if the provider closes up shop. With WooCommerce, you have complete control, so there’s never any reason to worry. Your data belongs to you -- and it’s kept secure, thanks to regular audits by industry leaders.
+One of the biggest risks of using a hosted eCommerce platform is what happens to your store if the provider closes up shop. With WooCommerce, you have complete control, so there’s never any reason to worry. Your data belongs to you &mdash; and it’s kept secure, thanks to regular audits by industry leaders.
 
 = Define your style with Storefront =
 
@@ -41,11 +41,11 @@ Define your style even further by customizing Storefront to your liking or choos
 
 = Built with developers in mind =
 
-Extendable, adaptable, and open source -- WooCommerce was created with developers in mind. With its strong, robust framework, you can scale your client’s store all the way from basic to high-end (infinity and beyond).
+Extendable, adaptable, and open source &mdash; WooCommerce was created with developers in mind. With its strong, robust framework, you can scale your client’s store all the way from basic to high-end (infinity and beyond).
 
 Built with a REST API, WooCommerce can integrate with virtually any service. Your store’s data can be accessed anywhere, anytime, 100% securely. WooCommerce allows developers to easily create, modify, and grow a store that meets their specifications.
 
-No matter the size of the store you want to build, WooCommerce will scale to meet your requirements. With a growing collection of more than 300 extensions, you can enhance each store’s features to meet your client’s unique needs -- or even create your own solution.
+No matter the size of the store you want to build, WooCommerce will scale to meet your requirements. With a growing collection of more than 300 extensions, you can enhance each store’s features to meet your client’s unique needs &mdash; or even create your own solution.
 
 If security is a concern, rest easy. WooCommerce is audited by a dedicated team of developers working around the clock to identify and patch any and all discovered bugs.
 
