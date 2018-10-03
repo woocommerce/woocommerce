@@ -442,7 +442,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		);
 
 		// Track failures.
-		// Check for a success, which is a 2xx, 301 or 302 Response Code
+		// Check for a success, which is a 2xx, 301 or 302 Response Code.
 		if ( intval( $response_code ) >= 200 && intval( $response_code ) < 303 ) {
 			$this->set_failure_count( 0 );
 			$this->save();
