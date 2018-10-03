@@ -199,6 +199,8 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Use uppercase "ID" when sorting product queries by ID. #21461
 * Fix - Consistently escape the gateway ID in the checkout payment method template. #21439
 * Fix - Avoid treating HTTP 301 and 302 codes as failures for webhooks. #21491 
+* Fix - Add address_1 to shipping packages info in WC_Cart:: get_shipping_packages to make it work correctly in address formatting functions. #21493
+* Fix - Don't fire two of the same action when saving shipping settings. #21494
 * Fix/Tweak - Fire `woocommerce_grant_product_download_access` hook after the download has its ID set. #20905
 * Fix/Tweak/Performance - Change wp_woocommerce_sessions primary key to session_id. #21245
 * Tweak - Show empty terms in admin product category filter dropdown. #20324
