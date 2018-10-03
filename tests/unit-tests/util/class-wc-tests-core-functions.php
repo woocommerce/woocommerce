@@ -268,8 +268,8 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 * @since 2.4
 	 */
 	public function test_wc_get_log_file_path() {
-		$log_dir   = trailingslashit( WC_LOG_DIR );
-		$hash_name = sanitize_file_name( wp_hash( 'unit-tests' ) );
+		$log_dir     = trailingslashit( WC_LOG_DIR );
+		$hash_name   = sanitize_file_name( wp_hash( 'unit-tests' ) );
 		$date_suffix = date( 'Y-m-d', current_time( 'timestamp', true ) );
 
 		$this->assertEquals( $log_dir . 'unit-tests-' . $date_suffix . '-' . $hash_name . '.log', wc_get_log_file_path( 'unit-tests' ) );
@@ -291,6 +291,26 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		$this->assertInstanceOf( 'WC_Logger', $log_a );
 		$this->assertInstanceOf( 'WC_Logger', $log_b );
 		$this->assertSame( $log_a, $log_b, '`wc_get_logger()` should return the same instance' );
+	}
+
+	/**
+	 * Test wc_get_logger() to check if can return instance when given in filter.
+	 */
+	public function test_wc_get_logger_for_instance() {
+		add_filter( 'woocommerce_logging_class', array( $this, 'return_valid_logger_instance' ) );
+
+		$logger = wc_get_logger();
+
+		$this->assertInstanceOf( 'WC_Logger_Interface', $logger, '`wc_get_logger()` should return valid Dummy_WC_Logger instance' );
+	}
+
+	/**
+	 * Return valid logger instance that implements WC_Logger_Interface.
+	 *
+	 * @return WC_Logger_Interface
+	 */
+	public function return_valid_logger_instance() {
+		return new Dummy_WC_Logger();
 	}
 
 	/**
@@ -326,7 +346,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals(
 			array(
 				'country' => 'US',
-				'state' => 'CA',
+				'state'   => 'CA',
 			),
 			wc_format_country_state_string( 'US:CA' )
 		);
@@ -335,7 +355,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals(
 			array(
 				'country' => 'US-CA',
-				'state' => '',
+				'state'   => '',
 			),
 			wc_format_country_state_string( 'US-CA' )
 		);
@@ -483,26 +503,32 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_currency', $new_currency );
 
 		// New order should be created using shop currency.
-		$order = wc_create_order( array(
-			'status'      => 'pending',
-			'customer_id' => 1,
-			'created_via' => 'unit tests',
-			'cart_hash'   => '',
-		) );
+		$order = wc_create_order(
+			array(
+				'status'      => 'pending',
+				'customer_id' => 1,
+				'created_via' => 'unit tests',
+				'cart_hash'   => '',
+			)
+		);
 		$this->assertEquals( $new_currency, $order->get_currency() );
 
 		update_option( 'woocommerce_currency', $old_currency );
 
 		// Currency should not change when order is updated.
-		$order = wc_update_order( array(
-			'customer_id' => 2,
-			'order_id'    => $order->get_id(),
-		) );
+		$order = wc_update_order(
+			array(
+				'customer_id' => 2,
+				'order_id'    => $order->get_id(),
+			)
+		);
 		$this->assertEquals( $new_currency, $order->get_currency() );
 
-		$order = wc_update_order( array(
-			'customer_id' => 2,
-		) );
+		$order = wc_update_order(
+			array(
+				'customer_id' => 2,
+			)
+		);
 		$this->assertInstanceOf( 'WP_Error', $order );
 	}
 
@@ -577,25 +603,29 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_wc_get_page_children() {
-		$page_id = wp_insert_post( array(
-			'post_title'  => 'Parent Page',
-			'post_type'   => 'page',
-			'post_name'   => 'parent-page',
-			'post_status' => 'publish',
-			'post_author' => 1,
-			'menu_order'  => 0,
-		) );
+		$page_id = wp_insert_post(
+			array(
+				'post_title'  => 'Parent Page',
+				'post_type'   => 'page',
+				'post_name'   => 'parent-page',
+				'post_status' => 'publish',
+				'post_author' => 1,
+				'menu_order'  => 0,
+			)
+		);
 
-		$child_page_id = wp_insert_post( array(
-			'post_parent' => $page_id,
-			'post_title'  => 'Parent Page',
-			'post_type'   => 'page',
-			'post_name'   => 'parent-page',
-			'post_status' => 'publish',
-			'post_author' => 1,
-			'menu_order'  => 0,
-		) );
-		$children = wc_get_page_children( $page_id );
+		$child_page_id = wp_insert_post(
+			array(
+				'post_parent' => $page_id,
+				'post_title'  => 'Parent Page',
+				'post_type'   => 'page',
+				'post_name'   => 'parent-page',
+				'post_status' => 'publish',
+				'post_author' => 1,
+				'menu_order'  => 0,
+			)
+		);
+		$children      = wc_get_page_children( $page_id );
 		$this->assertEquals( $child_page_id, $children[0] );
 
 		wp_delete_post( $page_id, true );
@@ -721,7 +751,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 
 		foreach ( $test_cases as $test_case ) {
 			list( $value, $options, $result ) = $test_case;
-			$actual_result = $result ? " selected='selected'" : '';
+			$actual_result                    = $result ? " selected='selected'" : '';
 			$this->assertEquals( wc_selected( $value, $options ), $actual_result );
 		}
 	}
@@ -815,7 +845,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_wc_get_user_agent() {
-		$example_user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36';
+		$example_user_agent         = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36';
 		$_SERVER['HTTP_USER_AGENT'] = $example_user_agent;
 		$this->assertEquals( $example_user_agent, wc_get_user_agent() );
 	}
