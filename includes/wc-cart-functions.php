@@ -184,7 +184,7 @@ function wc_clear_cart_after_payment() {
 
 		if ( $order && $order->get_id() > 0 ) {
 			// If the order has not failed, or is not pending, the order must have gone through.
-			if ( ! $order->has_status( array( 'failed', 'pending', 'cancelled' ) ) ) {
+			if ( ! $order->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_clear_cart_after_payment_exemption', array( 'failed', 'pending', 'cancelled' ) ) ) ) {
 				WC()->cart->empty_cart();
 			}
 		}
