@@ -651,7 +651,7 @@ class WC_AJAX {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
 
-		// wp_send_json_success must be outside the try block not to break phpunit tests
+		// wp_send_json_success must be outside the try block not to break phpunit tests.
 		wp_send_json_success( $response );
 	}
 
@@ -902,7 +902,7 @@ class WC_AJAX {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
 
-		// wp_send_json_success must be outside the try block not to break phpunit tests
+		// wp_send_json_success must be outside the try block not to break phpunit tests.
 		wp_send_json_success( $response );
 	}
 
@@ -957,7 +957,7 @@ class WC_AJAX {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
 
-		// wp_send_json_success must be outside the try block not to break phpunit tests
+		// wp_send_json_success must be outside the try block not to break phpunit tests.
 		wp_send_json_success( $response );
 	}
 
@@ -990,7 +990,7 @@ class WC_AJAX {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
 
-		// wp_send_json_success must be outside the try block not to break phpunit tests
+		// wp_send_json_success must be outside the try block not to break phpunit tests.
 		wp_send_json_success( $response );
 	}
 
@@ -1023,7 +1023,7 @@ class WC_AJAX {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
 
-		// wp_send_json_success must be outside the try block not to break phpunit tests
+		// wp_send_json_success must be outside the try block not to break phpunit tests.
 		wp_send_json_success( $response );
 	}
 
@@ -1053,7 +1053,7 @@ class WC_AJAX {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
 
-		// wp_send_json_success must be outside the try block not to break phpunit tests
+		// wp_send_json_success must be outside the try block not to break phpunit tests.
 		wp_send_json_success( $response );
 	}
 
@@ -1080,7 +1080,7 @@ class WC_AJAX {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
 
-		// wp_send_json_success must be outside the try block not to break phpunit tests
+		// wp_send_json_success must be outside the try block not to break phpunit tests.
 		wp_send_json_success( $response );
 	}
 
@@ -1134,7 +1134,7 @@ class WC_AJAX {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
 
-		// wp_send_json_success must be outside the try block not to break phpunit tests
+		// wp_send_json_success must be outside the try block not to break phpunit tests.
 		wp_send_json_success( $response );
 	}
 
@@ -1164,7 +1164,7 @@ class WC_AJAX {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
 
-		// wp_send_json_success must be outside the try block not to break phpunit tests
+		// wp_send_json_success must be outside the try block not to break phpunit tests.
 		wp_send_json_success( $response );
 	}
 
@@ -1677,7 +1677,7 @@ class WC_AJAX {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
 
-		// wp_send_json_success must be outside the try block not to break phpunit tests
+		// wp_send_json_success must be outside the try block not to break phpunit tests.
 		wp_send_json_success( $response_data );
 	}
 
@@ -1802,7 +1802,7 @@ class WC_AJAX {
 			wp_send_json_error( array( 'message' => $e->getMessage() ) );
 		}
 
-		// wp_send_json_success must be outside the try block not to break phpunit tests
+		// wp_send_json_success must be outside the try block not to break phpunit tests.
 		wp_send_json_success( $data );
 	}
 
