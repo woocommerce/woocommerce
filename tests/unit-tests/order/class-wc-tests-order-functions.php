@@ -1272,6 +1272,18 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test wc_sanitize_order_id().
+	 *
+	 * @testWith ["123", 123]
+	 *           ["#123", 123]
+	 *           ["# 123", 123]
+	 *           ["Order #123", 123]
+	 */
+	public function test_wc_sanitize_order_id( $id, $expected ) {
+		$this->assertSame( $expected, wc_sanitize_order_id( $id ) );
+	}
+
+	/**
 	 * Test wc_get_order_note().
 	 *
 	 * @since 3.2.0
