@@ -26,17 +26,10 @@ echo sprintf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $order->get_billi
 
 if ( $order->has_status( 'pending' ) ) {
 	echo sprintf(
-		wp_kses(
-			/* translators: %1$s Site title, %2$s Order pay link */
-			__( 'An order has been created for you on %1$s. Your invoice is below, with a link to make payment when you’re ready: %1$s', 'woocommerce' ),
-			array(
-				'a' => array(
-					'href' => array(),
-				),
-			)
-		),
+		/* translators: %1$s Site title, %2$s Order pay link */
+		__( 'An order has been created for you on %1$s. Your invoice is below, with a link to make payment when you’re ready: %2$s', 'woocommerce' ),
 		esc_html( get_bloginfo( 'name', 'display' ) ),
-		'<a href="' . esc_url( $order->get_checkout_payment_url() ) . '">' . esc_html__( 'Pay for this order', 'woocommerce' ) . '</a>'
+		esc_url( $order->get_checkout_payment_url() )
 	) . "\n\n";
 
 } else {
