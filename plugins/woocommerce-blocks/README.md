@@ -19,7 +19,7 @@ The source code is in the products-block.jsx file and the compiled code is in pr
 
 **Gutenberg Tutorial and Docs**: https://wordpress.org/gutenberg/handbook/blocks/
 
-**Using API in Gutenberg**: https://github.com/WordPress/gutenberg/tree/213c64bb495946deffa3b6fe260f95b87de5774a/components/higher-order/with-api-data
+**Using API in Gutenberg**: https://github.com/WordPress/gutenberg/tree/master/packages/api-fetch
 
 ### Vision for the Feature
 
