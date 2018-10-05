@@ -248,7 +248,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 */
 	public function remove( $handle ) {
 		$removed = false;
-		$logs = $this->get_log_files();
+		$logs    = $this->get_log_files();
 
 		if ( isset( $logs[ $handle ] ) && $logs[ $handle ] ) {
 			$file = realpath( trailingslashit( WC_LOG_DIR ) . $logs[ $handle ] );
