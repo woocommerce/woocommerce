@@ -945,6 +945,28 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: status_transition
+	 */
+	public function test_status_transition_handles_transition_errors() {
+		$object = new WC_Order();
+		$object->save();
+
+		add_filter( 'woocommerce_order_status_on-hold', array( $this, 'throwAnException' ) );
+		$object->update_status( 'on-hold' );
+		remove_filter( 'woocommerce_order_status_on-hold', array( $this, 'throwAnException' ) );
+
+		$note = current(
+			wc_get_order_notes(
+				array(
+					'order_id' => $object->get_id(),
+				)
+			)
+		);
+
+		$this->assertContains( __( 'Error during status transition.', 'woocommerce' ), $note->content );
+	}
+
+	/**
 	 * Test: get_billing_first_name
 	 */
 	public function test_get_billing_first_name() {
