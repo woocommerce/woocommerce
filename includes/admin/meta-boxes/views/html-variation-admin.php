@@ -53,12 +53,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 		/**
 		 * woocommerce_variation_header action.
 		 *
-		 * @since 2.5.0
+		 * @since 3.6.0
 		 *
-		 * @param array   $variation_data
 		 * @param WP_Post $variation
 		 */
-		do_action( 'woocommerce_variation_header', $variation_data, $variation ); ?>
+		do_action( 'woocommerce_variation_header', $variation ); ?>
 	</h3>
 	<div class="woocommerce_variable_attributes wc-metabox-content" style="display: none;">
 		<div class="data">
