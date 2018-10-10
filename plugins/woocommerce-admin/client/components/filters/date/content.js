@@ -83,7 +83,7 @@ class DatePickerContent extends Component {
 						initialTabName={ 'custom' === period ? 'custom' : 'period' }
 						onSelect={ this.onTabSelect }
 					>
-						{ selectedTab => (
+						{ ( { name: selectedTab } ) => (
 							<Fragment>
 								{ selectedTab === 'period' && (
 									<PresetPeriods onSelect={ onUpdate } period={ period } />
