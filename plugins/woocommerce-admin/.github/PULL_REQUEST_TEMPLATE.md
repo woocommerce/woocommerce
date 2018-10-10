@@ -2,18 +2,11 @@
 
 Fixes #
 
-### Good Description:
-
-### Changes proposed in this PR:
-
-## -
-
-*
-
-### Clear Detailed Test instructions:
-
-## -
-
-* Please test around this issue
+_Replace this with a good description of your changes & reasoning._
 
 ### Screenshots
+
+### Detailed test instructions:
+
+ - Ex: Open page `url`
+ - Click XYZ…
