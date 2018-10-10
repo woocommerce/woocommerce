@@ -5,7 +5,7 @@
 /**
  * Internal dependencies
  */
-import { isReportDataEmpty, getAllReportData } from '../utils';
+import { isReportDataEmpty, getReportChartData } from '../utils';
 
 describe( 'isReportDataEmpty()', () => {
 	it( 'returns false if report is valid', () => {
@@ -34,8 +34,7 @@ describe( 'isReportDataEmpty()', () => {
 	} );
 } );
 
-// TODO Use more general selectors from https://github.com/woocommerce/wc-admin/pull/307
-describe( 'getAllReportData()', () => {
+describe( 'getReportChartData()', () => {
 	const select = jest.fn().mockReturnValue( {} );
 	const response = {
 		isEmpty: false,
@@ -77,7 +76,7 @@ describe( 'getAllReportData()', () => {
 		setIsReportStatsRequesting( () => {
 			return true;
 		} );
-		const result = getAllReportData( 'revenue', {}, select );
+		const result = getReportChartData( 'revenue', {}, select );
 		expect( result ).toEqual( { ...response, isRequesting: true } );
 	} );
 
@@ -88,7 +87,7 @@ describe( 'getAllReportData()', () => {
 		setIsReportStatsError( () => {
 			return true;
 		} );
-		const result = getAllReportData( 'revenue', {}, select );
+		const result = getReportChartData( 'revenue', {}, select );
 		expect( result ).toEqual( { ...response, isError: true } );
 	} );
 
@@ -123,7 +122,7 @@ describe( 'getAllReportData()', () => {
 			};
 		} );
 
-		const result = getAllReportData( 'revenue', {}, select );
+		const result = getReportChartData( 'revenue', {}, select );
 		expect( result ).toEqual( { ...response, data: { ...data } } );
 	} );
 
@@ -169,7 +168,7 @@ describe( 'getAllReportData()', () => {
 			};
 		} );
 
-		const actualResponse = getAllReportData( 'revenue', {}, select );
+		const actualResponse = getReportChartData( 'revenue', {}, select );
 		const expectedResponse = {
 			...response,
 			data: {
@@ -192,7 +191,7 @@ describe( 'getAllReportData()', () => {
 			return false;
 		} );
 
-		const result = getAllReportData( 'revenue', {}, select );
+		const result = getReportChartData( 'revenue', {}, select );
 		expect( result ).toEqual( { ...response, isRequesting: true } );
 	} );
 
@@ -206,7 +205,7 @@ describe( 'getAllReportData()', () => {
 			}
 			return false;
 		} );
-		const result = getAllReportData( 'revenue', {}, select );
+		const result = getReportChartData( 'revenue', {}, select );
 		expect( result ).toEqual( { ...response, isError: true } );
 	} );
 
@@ -224,7 +223,7 @@ describe( 'getAllReportData()', () => {
 			};
 		} );
 
-		const result = getAllReportData( 'revenue', {}, select );
+		const result = getReportChartData( 'revenue', {}, select );
 		expect( result ).toEqual( { ...response, isEmpty: true } );
 	} );
 } );

@@ -29,13 +29,17 @@ describe( 'RevenueReport', () => {
 
 		const primaryData = {
 			data: mockData,
+			totalResults: 7,
+			totalPages: 1,
 		};
 
 		const revenueReport = shallow(
 			<RevenueReport
 				params={ { report: 'revenue' } }
-				path="/analytics/revenue" query={ {} }
+				path="/analytics/revenue"
+				query={ {} }
 				primaryData={ primaryData }
+				tableData={ primaryData }
 				secondaryData={ primaryData }
 			/>
 		);
@@ -44,7 +48,7 @@ describe( 'RevenueReport', () => {
 		tableCard.props().onClickDownload();
 
 		expect( downloadCSVFile ).toHaveBeenCalledWith(
-			'revenue-' + moment().format( 'YYYY-MM-DD' ) + '-orderby-date_start-order-asc.csv',
+			'revenue-' + moment().format( 'YYYY-MM-DD' ) + '.csv',
 			mockCSV
 		);
 	} );

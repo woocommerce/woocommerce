@@ -34,14 +34,13 @@ export function isReportDataEmpty( report ) {
 
 /**
  * Returns all of the data needed to render a chart with summary numbers on a report page.
- * TODO Use more general selectors from https://github.com/woocommerce/wc-admin/pull/307
  *
  * @param  {String} endpoint Report  API Endpoint
  * @param  {Object} query  API arguments
  * @param {object} select Instance of @wordpress/select
  * @return {Object}  Object containing API request information (response, fetching, and error details)
  */
-export function getAllReportData( endpoint, query, select ) {
+export function getReportChartData( endpoint, query, select ) {
 	const { getReportStats, isReportStatsRequesting, isReportStatsError } = select( 'wc-admin' );
 
 	const response = {

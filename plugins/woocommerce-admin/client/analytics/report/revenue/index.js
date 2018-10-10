@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { format as formatDate } from '@wordpress/date';
-import { map, find, orderBy } from 'lodash';
+import { map, find, isEqual } from 'lodash';
 import PropTypes from 'prop-types';
 import { withSelect } from '@wordpress/data';
 
@@ -28,10 +28,9 @@ import {
 import { downloadCSVFile, generateCSVDataFromTable, generateCSVFileName } from 'lib/csv';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
 import { getAdminLink, getNewPath, onQueryChange } from 'lib/nav-utils';
-import { getAllReportData, isReportDataEmpty } from 'store/reports/utils';
+import { getReportChartData } from 'store/reports/utils';
 import {
 	getCurrentDates,
-	isoDateFormat,
 	getPreviousDate,
 	getIntervalForQuery,
 	getAllowedIntervalsForQuery,
@@ -42,7 +41,38 @@ import { MAX_PER_PAGE } from 'store/constants';
 export class RevenueReport extends Component {
 	constructor() {
 		super();
+		this.state = {
+			primaryTotals: null,
+			secondaryTotals: null,
+		};
 		this.onDownload = this.onDownload.bind( this );
+	}
+
+	// Track primary and secondary 'totals' indepdent of query.
+	// We don't want each little query update (interval, sorting, etc)
+	componentDidUpdate( prevProps ) {
+		/* eslint-disable react/no-did-update-set-state */
+
+		if ( ! isEqual( prevProps.dates, this.props.dates ) ) {
+			this.setState( {
+				primaryTotals: null,
+				secondaryTotals: null,
+			} );
+		}
+
+		const { secondaryData, primaryData } = this.props;
+		if ( ! isEqual( prevProps.secondaryData, secondaryData ) ) {
+			if ( secondaryData && secondaryData.data && secondaryData.data.totals ) {
+				this.setState( { secondaryTotals: secondaryData.data.totals } );
+			}
+		}
+
+		if ( ! isEqual( prevProps.primaryData, primaryData ) ) {
+			if ( primaryData && primaryData.data && primaryData.data.totals ) {
+				this.setState( { primaryTotals: primaryData.data.totals } );
+			}
+		}
+		/* eslint-enable react/no-did-update-set-state */
 	}
 
 	onDownload( headers, rows, query ) {
@@ -60,7 +90,7 @@ export class RevenueReport extends Component {
 		return [
 			{
 				label: __( 'Date', 'wc-admin' ),
-				key: 'date_start',
+				key: 'date',
 				required: true,
 				defaultSort: true,
 				isSortable: true,
@@ -230,9 +260,13 @@ export class RevenueReport extends Component {
 	// TODO since this pattern will exist on every report, this possibly should become a component
 	renderChartSummaryNumbers() {
 		const selectedChart = this.getSelectedChart();
-		const { primaryData, secondaryData } = this.props;
-		const { totals } = primaryData.data;
-		const secondaryTotals = secondaryData.data.totals || {};
+		const charts = this.getCharts();
+		if ( ! this.state.primaryTotals || ! this.state.secondaryTotals ) {
+			return <SummaryListPlaceholder numberOfItems={ charts.length } />;
+		}
+
+		const totals = this.state.primaryTotals || {};
+		const secondaryTotals = this.state.secondaryTotals || {};
 
 		const summaryNumbers = map( this.getCharts(), chart => {
 			const { key, label, type } = chart;
@@ -276,6 +310,17 @@ export class RevenueReport extends Component {
 	renderChart() {
 		const { primaryData, secondaryData, query } = this.props;
 
+		if ( primaryData.isRequesting || secondaryData.isRequesting ) {
+			return (
+				<Fragment>
+					<span className="screen-reader-text">
+						{ __( 'Your requested data is loading', 'wc-admin' ) }
+					</span>
+					<ChartPlaceholder />
+				</Fragment>
+			);
+		}
+
 		const currentInterval = getIntervalForQuery( query );
 		const allowedIntervals = getAllowedIntervalsForQuery( query );
 		const formats = getDateFormatsForInterval( currentInterval );
@@ -294,25 +339,8 @@ export class RevenueReport extends Component {
 				query.compare,
 				currentInterval
 			);
-			/**
-			 *  When looking at weeks, getting the previous date doesn't always work
-			 *  because subtracting the correct number of weeks from `interval.date_start`
-			 *  yeilds the start of the week correct week, but not necessarily the of the
-			 *  period in question.
-			 *
-			 *  When https://github.com/woocommerce/woocommerce/issues/21298 is resolved and
-			 *  data will be zero-filled, there is a strong argument for all this logic to be
-			 *  removed in favor of simply matching up the indices in each array of data.
-			 */
-			const secondaryInterval =
-				0 === index && 'week' === currentInterval
-					? secondaryData.data.intervals[ 0 ]
-					: find( secondaryData.data.intervals, {
-							date_start:
-								secondaryDate.format( isoDateFormat ) +
-								' ' +
-								formatDate( 'H:i:s', interval.date_start ),
-						} );
+
+			const secondaryInterval = secondaryData.data.intervals[ index ];
 			return {
 				date: formatDate( 'Y-m-d\\TH:i:s', interval.date_start ),
 				[ primaryKey ]: {
@@ -343,37 +371,35 @@ export class RevenueReport extends Component {
 	}
 
 	renderTable() {
-		const { primaryData, query } = this.props;
-		const intervals = primaryData.data.intervals;
-
-		const page = parseInt( query.page ) || 1;
-		const rowsPerPage = parseInt( query.per_page ) || 25;
-
-		const rows =
-			this.getRowsContent(
-				orderBy(
-					intervals,
-					function( interval ) {
-						return 'undefined' === typeof interval.subtotals[ query.orderby ]
-							? interval.date_start
-							: interval.subtotals[ query.orderby ];
-					},
-					query.order || 'asc'
-				).slice( ( page - 1 ) * rowsPerPage, page * rowsPerPage )
-			) || [];
-
+		const { isTableDataRequesting, tableData, tableQuery } = this.props;
 		const headers = this.getHeadersContent();
 
-		const tableQuery = {
-			...query,
-			orderby: query.orderby || 'date_start',
-			order: query.order || 'asc',
-		};
+		if ( isTableDataRequesting ) {
+			return (
+				<Card
+					title={ __( 'Revenue', 'wc-admin' ) }
+					className="woocommerce-analytics__table-placeholder"
+				>
+					<TablePlaceholder
+						caption={ __( 'Revenue', 'wc-admin' ) }
+						headers={ headers }
+						query={ tableQuery }
+					/>
+				</Card>
+			);
+		}
+
+		const intervals = tableData.data.intervals;
+		const rows = this.getRowsContent( intervals );
+
+		const rowsPerPage =
+			( tableQuery && tableQuery.per_page && parseInt( tableQuery.per_page ) ) || 25;
+
 		return (
 			<TableCard
 				title={ __( 'Revenue', 'wc-admin' ) }
 				rows={ rows }
-				totalRows={ intervals.length }
+				totalRows={ tableData.totalResults }
 				rowsPerPage={ rowsPerPage }
 				headers={ headers }
 				onClickDownload={ this.onDownload( headers, rows, tableQuery ) }
@@ -384,38 +410,10 @@ export class RevenueReport extends Component {
 		);
 	}
 
-	renderPlaceholder() {
-		const { path, query } = this.props;
-		const headers = this.getHeadersContent();
-		const charts = this.getCharts();
-		return (
-			<Fragment>
-				<ReportFilters query={ query } path={ path } />
-
-				<span className="screen-reader-text">
-					{ __( 'Your requested data is loading', 'wc-admin' ) }
-				</span>
-
-				<SummaryListPlaceholder numberOfItems={ charts.length } />
-				<ChartPlaceholder />
-				<Card
-					title={ __( 'Revenue', 'wc-admin' ) }
-					className="woocommerce-analytics__table-placeholder"
-				>
-					<TablePlaceholder caption={ __( 'Revenue', 'wc-admin' ) } headers={ headers } />
-				</Card>
-			</Fragment>
-		);
-	}
-
 	render() {
-		const { path, query, primaryData, secondaryData } = this.props;
+		const { path, query, primaryData, secondaryData, isTableDataError } = this.props;
 
-		if ( primaryData.isRequesting || secondaryData.isRequesting ) {
-			return this.renderPlaceholder();
-		}
-
-		if ( isReportDataEmpty( primaryData ) || primaryData.isError || secondaryData.isError ) {
+		if ( primaryData.isError || secondaryData.isError || isTableDataError ) {
 			let title, actionLabel, actionURL, actionCallback;
 			if ( primaryData.isError || secondaryData.isError ) {
 				title = __( 'There was an error getting your stats. Please try again.', 'wc-admin' );
@@ -464,6 +462,7 @@ RevenueReport.propTypes = {
 export default compose(
 	withSelect( ( select, props ) => {
 		const { query } = props;
+		const { getReportStats, isReportStatsRequesting, isReportStatsError } = select( 'wc-admin' );
 		const datesFromQuery = getCurrentDates( query );
 		const interval = getIntervalForQuery( query );
 		const baseArgs = {
@@ -472,7 +471,7 @@ export default compose(
 			per_page: MAX_PER_PAGE,
 		};
 
-		const primaryData = getAllReportData(
+		const primaryData = getReportChartData(
 			'revenue',
 			{
 				...baseArgs,
@@ -482,7 +481,7 @@ export default compose(
 			select
 		);
 
-		const secondaryData = getAllReportData(
+		const secondaryData = getReportChartData(
 			'revenue',
 			{
 				...baseArgs,
@@ -492,9 +491,42 @@ export default compose(
 			select
 		);
 
+		// TODO Support hour here when viewing a single day
+		const tableQuery = {
+			interval: 'day',
+			orderby: query.orderby || 'date',
+			order: query.order || 'asc',
+			page: query.page || 1,
+			per_page: query.per_page || 25,
+			after: datesFromQuery.primary.after + 'T00:00:00+00:00',
+			before: datesFromQuery.primary.before + 'T23:59:59+00:00',
+		};
+		const tableData = getReportStats( 'revenue', tableQuery );
+		const isTableDataError = isReportStatsError( 'revenue', tableQuery );
+		const isTableDataRequesting = isReportStatsRequesting( 'revenue', tableQuery );
+
+		const primaryDates = {
+			after: datesFromQuery.primary.after,
+			before: datesFromQuery.primary.before,
+		};
+		const secondaryDates = {
+			after: datesFromQuery.secondary.after,
+			before: datesFromQuery.secondary.before,
+		};
+
+		const dates = {
+			primaryDates,
+			secondaryDates,
+		};
+
 		return {
+			dates,
 			primaryData,
 			secondaryData,
+			tableQuery,
+			tableData,
+			isTableDataError,
+			isTableDataRequesting,
 		};
 	} )
 )( RevenueReport );
