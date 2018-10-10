@@ -62,7 +62,7 @@
 	}
 
 	&:focus {
-		box-shadow: inset 0 -1px 0 #00435d, 0 0 0 2px #bfe7f3;
+		box-shadow: inset 0 -1px 0 $button-focus-inner, 0 0 0 2px $button-focus-outer;
 	}
 }
 
