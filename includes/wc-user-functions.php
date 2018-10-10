@@ -353,11 +353,11 @@ function wc_modify_editable_roles( $roles ) {
 		unset( $roles['administrator'] );
 	}
 
-	if ( current_user_can( 'shop_manager' ) && isset( $roles['customer'] ) ) {
-		return array(
-			'customer' => $roles['customer'],
-		);
+	if ( current_user_can( 'shop_manager' ) ) {
+		$shop_manager_editable_roles = apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) );
+		return array_intersect_key( $roles, array_flip( $shop_manager_editable_roles ) );
 	}
+
 	return $roles;
 }
 add_filter( 'editable_roles', 'wc_modify_editable_roles' );
@@ -389,7 +389,8 @@ function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
 				// Shop managers can only edit customer info.
 				if ( current_user_can( 'shop_manager' ) ) {
 					$userdata = get_userdata( $args[0] );
-					if ( property_exists( $userdata, 'roles' ) && ! empty( $userdata->roles ) && ! in_array( 'customer', $userdata->roles ) ) {
+					$shop_manager_editable_roles = apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) );
+					if ( property_exists( $userdata, 'roles' ) && ! empty( $userdata->roles ) && ! array_intersect( $userdata->roles, $shop_manager_editable_roles ) ) {
 						$caps[] = 'do_not_allow';
 					}
 				}
