@@ -113,12 +113,5 @@ class WC_Tests_User_Functions extends WC_Unit_Test_Case {
 		$this->assertContains( 'do_not_allow', $caps );
 		$caps = map_meta_cap( 'edit_user', $manager_id, $customer_id );
 		$this->assertEquals( array( 'edit_users' ), $caps );
-
-		// Customers should not be able to edit or promote anyone.
-		wp_set_current_user( $customer_id );
-		$caps = map_meta_cap( 'edit_user', $customer_id, $admin_id );
-		$this->assertContains( 'do_not_allow', $caps );
-		$caps = map_meta_cap( 'edit_user', $customer_id, $editor_id );
-		$this->assertContains( 'do_not_allow', $caps );
 	}
 }
