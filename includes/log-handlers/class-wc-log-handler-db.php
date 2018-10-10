@@ -146,8 +146,8 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 
 		$wpdb->query(
 			$wpdb->prepare(
-				"DELETE FROM {$wpdb->prefix}woocommerce_log WHERE timestamp < %d",
-				$timestamp
+				"DELETE FROM {$wpdb->prefix}woocommerce_log WHERE timestamp < %s",
+				date( 'Y-m-d H:i:s', $timestamp )
 			)
 		);
 	}
