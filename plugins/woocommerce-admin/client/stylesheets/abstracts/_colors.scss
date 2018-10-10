@@ -48,6 +48,9 @@ $woocommerce: $woocommerce-500;
 $button-hover: #fafafa;
 $button-focus-inner: #00435d;
 $button-focus-outer: #bfe7f3;
+$input-active-border: #00a0d2;
+$input-active-inner: $button-focus-inner;
+$input-active-outer: $button-focus-outer;
 
 // wp-admin
 $wp-admin-background: #f1f1f1;

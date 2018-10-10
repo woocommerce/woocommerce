@@ -20,6 +20,13 @@ An array of data.
 
 Format to parse dates into d3 time format
 
+### `pointLabelFormat`
+
+- Type: String
+- Default: null
+
+Date format of the point labels (might be used in tooltips and ARIA properties).
+
 ### `tooltipFormat`
 
 - Type: String
@@ -63,6 +70,14 @@ A number formatting string, passed to d3Format.
 
 `standard` (default) legend layout in the header or `comparison` moves legend layout
 to the left or 'compact' has the legend below
+
+### `mode`
+
+- Type: One of: 'item-comparison', 'time-comparison'
+- Default: `'item-comparison'`
+
+`item-comparison` (default) or `time-comparison`, this is used to generate correct
+ARIA properties.
 
 ### `title`
 
@@ -157,6 +172,13 @@ Interval specification (hourly, daily, weekly etc.)
 `standard` (default) legend layout in the header or `comparison` moves legend layout
 to the left or 'compact' has the legend below
 
+### `pointLabelFormat`
+
+- Type: String
+- Default: null
+
+Date format of the point labels (might be used in tooltips and ARIA properties).
+
 ### `margin`
 
 - Type: Object
@@ -172,6 +194,14 @@ to the left or 'compact' has the legend below
 }`
 
 Margins for axis and chart padding.
+
+### `mode`
+
+- Type: One of: 'item-comparison', 'time-comparison'
+- Default: `'item-comparison'`
+
+`items-comparison` (default) or `time-comparison`, this is used to generate correct
+ARIA properties.
 
 ### `orderedKeys`
 

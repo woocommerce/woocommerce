@@ -70,6 +70,7 @@ class SearchFilter extends Component {
 						placeholder={ labels.placeholder }
 						selected={ selected }
 						ariaLabelledby={ `${ key }-${ instanceId }` }
+						inlineTags
 					/>
 				</div>
 			</Fragment>
