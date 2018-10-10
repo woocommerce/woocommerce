@@ -2,8 +2,6 @@
 
 Fixes #
 
-Link to P2:
-
 ### Good Description:
 
 ### Changes proposed in this PR:
