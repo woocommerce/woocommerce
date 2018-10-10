@@ -72,9 +72,11 @@ window.wpNavMenuClassChange = function( menuClass, pathname ) {
 	submenu.classList.add( 'wp-not-current-submenu' );
 	submenu.classList.add( 'menu-top' );
 
-	document
-		.querySelector( `li > a[href$="admin.php?page=wc-admin${ path }"]` )
-		.parentElement.classList.add( 'current' );
+	Array.from(
+		document.querySelectorAll( `li > a[href$="admin.php?page=wc-admin${ path }"]` )
+	).forEach( function( item ) {
+		item.parentElement.classList.add( 'current' );
+	} );
 
 	const currentMenu = document.querySelector( '#' + menuClass );
 	currentMenu.classList.remove( 'wp-not-current-submenu' );
