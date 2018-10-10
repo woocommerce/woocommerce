@@ -1,8 +1,8 @@
 <?php
 /**
- * REST API Reports categories controller
+ * REST API Admin Notes controller
  *
- * Handles requests to the /reports/categories endpoint.
+ * Handles requests to the admin notes endpoint.
  *
  * @package WooCommerce Admin/API
  */
@@ -10,10 +10,10 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * REST API Reports categories controller class.
+ * REST API Admin Notes controller class.
  *
  * @package WooCommerce/API
- * @extends WC_REST_Reports_Controller
+ * @extends WC_REST_CRUD_Controller
  */
 class WC_Admin_REST_Admin_Notes_Controller extends WC_REST_CRUD_Controller {
 
@@ -32,7 +32,7 @@ class WC_Admin_REST_Admin_Notes_Controller extends WC_REST_CRUD_Controller {
 	protected $rest_base = 'admin/notes';
 
 	/**
-	 * Register the routes for Shipping Zones.
+	 * Register the routes for admin notes.
 	 */
 	public function register_routes() {
 		register_rest_route(
@@ -102,7 +102,7 @@ class WC_Admin_REST_Admin_Notes_Controller extends WC_REST_CRUD_Controller {
 	}
 
 	/**
-	 * Check whether a given request has permission to read notes.
+	 * Check whether a given request has permission to read a single note.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
