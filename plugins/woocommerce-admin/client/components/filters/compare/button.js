@@ -15,13 +15,13 @@ const CompareButton = ( { count, children, helpText, onClick } ) =>
 	count < 2 ? (
 		<Tooltip text={ helpText }>
 			<span>
-				<Button isDefault disabled={ true }>
+				<Button className="woocommerce-compare-button" isDefault disabled={ true }>
 					{ children }
 				</Button>
 			</span>
 		</Tooltip>
 	) : (
-		<Button isDefault onClick={ onClick }>
+		<Button className="woocommerce-compare-button" isDefault onClick={ onClick }>
 			{ children }
 		</Button>
 	);

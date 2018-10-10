@@ -81,7 +81,7 @@ class Search extends Component {
 		};
 		return (
 			<div className="woocommerce-search">
-				<Gridicon className="woocommerce-search__icon" icon="search" />
+				<Gridicon className="woocommerce-search__icon" icon="search" size={ 18 } />
 				<Autocomplete completer={ autocompleter } onSelect={ this.selectResult }>
 					{ ( { listBoxId, activeId, onChange } ) => (
 						<input

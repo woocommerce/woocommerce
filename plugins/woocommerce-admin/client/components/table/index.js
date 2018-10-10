@@ -20,6 +20,7 @@ import { getIdsFromQuery } from 'lib/nav-utils';
 import MenuItem from 'components/ellipsis-menu/menu-item';
 import MenuTitle from 'components/ellipsis-menu/menu-title';
 import Pagination from 'components/pagination';
+import Search from 'components/search';
 import Table from './table';
 import TableSummary from './summary';
 
@@ -41,6 +42,7 @@ class TableCard extends Component {
 		};
 		this.toggleCols = this.toggleCols.bind( this );
 		this.onCompare = this.onCompare.bind( this );
+		this.onSearch = this.onSearch.bind( this );
 		this.selectRow = this.selectRow.bind( this );
 		this.selectAllRows = this.selectAllRows.bind( this );
 	}
@@ -81,6 +83,15 @@ class TableCard extends Component {
 		const { selectedRows } = this.state;
 		if ( compareBy ) {
 			onQueryChange( 'compare' )( compareBy, selectedRows.join( ',' ) );
+		}
+	}
+
+	onSearch( value ) {
+		const { compareBy, onQueryChange } = this.props;
+		const { selectedRows } = this.state;
+		if ( compareBy ) {
+			const ids = value.map( v => v.id );
+			onQueryChange( 'compare' )( compareBy, [ ...selectedRows, ...ids ].join( ',' ) );
 		}
 	}
 
@@ -155,6 +166,7 @@ class TableCard extends Component {
 	render() {
 		const {
 			compareBy,
+			labels,
 			onClickDownload,
 			onQueryChange,
 			query,
@@ -189,26 +201,32 @@ class TableCard extends Component {
 						<CompareButton
 							key="compare"
 							count={ selectedRows.length }
-							helpText={ __( 'Select at least two items to compare', 'wc-admin' ) }
+							helpText={
+								labels.helpText || __( 'Select at least two items to compare', 'wc-admin' )
+							}
 							onClick={ this.onCompare }
 						>
-							{ __( 'Compare', 'wc-admin' ) }
+							{ labels.compareButton || __( 'Compare', 'wc-admin' ) }
 						</CompareButton>
 					),
 					compareBy && (
-						<div key="search" style={ { padding: '4px 12px', color: '#6c7781' } }>
-							Placeholder for search
-						</div>
+						<Search
+							key="search"
+							placeholder={ labels.placeholder || __( 'Search by item name', 'wc-admin' ) }
+							type={ compareBy + 's' }
+							onChange={ this.onSearch }
+						/>
 					),
 					onClickDownload && (
 						<IconButton
 							key="download"
+							className="woocommerce-table__download-button"
 							onClick={ onClickDownload }
 							icon="arrow-down"
 							size={ 18 }
 							isDefault
 						>
-							{ __( 'Download', 'wc-admin' ) }
+							{ labels.downloadButton || __( 'Download', 'wc-admin' ) }
 						</IconButton>
 					),
 				] }
@@ -272,6 +290,15 @@ TableCard.propTypes = {
 			required: PropTypes.bool,
 		} )
 	),
+	/**
+	 * Custom labels for table header actions.
+	 */
+	labels: PropTypes.shape( {
+		compareButton: PropTypes.string,
+		downloadButton: PropTypes.string,
+		helpText: PropTypes.string,
+		placeholder: PropTypes.string,
+	} ),
 	/**
 	 * A list of IDs, matching to the row list so that ids[ 0 ] contains the object ID for the object displayed in row[ 0 ].
 	 */

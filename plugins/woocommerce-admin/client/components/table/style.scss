@@ -13,10 +13,19 @@
 
 	&.has-compare {
 		.woocommerce-card__action {
+			align-items: center;
 			text-align: left;
 			display: grid;
 			width: 100%;
 			grid-template-columns: auto 1fr auto;
+		}
+		.woocommerce-search {
+			margin: 0 $gap;
+		}
+		.woocommerce-compare-button,
+		.woocommerce-table__download-button {
+			padding: 3px $gap-small;
+			height: auto;
 		}
 	}
 }
