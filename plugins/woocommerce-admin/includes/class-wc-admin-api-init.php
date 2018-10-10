@@ -69,6 +69,7 @@ class WC_Admin_Api_Init {
 	 * Init REST API.
 	 */
 	public function rest_api_init() {
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-admin-notes-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-system-status-tools-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-categories-controller.php';
@@ -86,6 +87,7 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-taxes-stats-controller.php';
 
 		$controllers = array(
+			'WC_Admin_REST_Admin_Notes_Controller',
 			'WC_Admin_REST_Reports_Controller',
 			'WC_Admin_REST_System_Status_Tools_Controller',
 			'WC_Admin_REST_Reports_Products_Controller',

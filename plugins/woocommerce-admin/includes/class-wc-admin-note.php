@@ -68,7 +68,7 @@ class WC_Admin_Note extends WC_Data {
 
 		if ( $data instanceof WC_Admin_Note ) {
 			$this->set_id( absint( $data->get_id() ) );
-		} elseif ( is_numeric( $data ) && 'admin-note' === get_post_type( $data ) ) {
+		} elseif ( is_numeric( $data ) ) {
 			$this->set_id( $data );
 		} elseif ( is_object( $data ) && ! empty( $data->note_id ) ) {
 			$this->set_id( $data->note_id );
