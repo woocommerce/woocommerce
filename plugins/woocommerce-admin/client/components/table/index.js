@@ -166,7 +166,7 @@ class TableCard extends Component {
 	render() {
 		const {
 			compareBy,
-			labels,
+			labels = {},
 			onClickDownload,
 			onQueryChange,
 			query,
