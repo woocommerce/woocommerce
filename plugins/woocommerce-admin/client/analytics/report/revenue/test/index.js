@@ -33,11 +33,19 @@ describe( 'RevenueReport', () => {
 			totalPages: 1,
 		};
 
+		const summaryNumbers = {
+			totals: {
+				primary: {},
+				secondary: {},
+			},
+		};
+
 		const revenueReport = shallow(
 			<RevenueReport
 				params={ { report: 'revenue' } }
 				path="/analytics/revenue"
 				query={ {} }
+				summaryNumbers={ summaryNumbers }
 				primaryData={ primaryData }
 				tableData={ primaryData }
 				secondaryData={ primaryData }
