@@ -449,7 +449,6 @@ export class RevenueReport extends Component {
 
 				{ this.renderChartSummaryNumbers() }
 				{ this.renderChart() }
-				{ this.renderTable() }
 			</Fragment>
 		);
 	}

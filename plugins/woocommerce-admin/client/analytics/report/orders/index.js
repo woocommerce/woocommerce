@@ -5,13 +5,17 @@
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
+import { format as formatDate } from '@wordpress/date';
+import PropTypes from 'prop-types';
 import { withSelect } from '@wordpress/data';
-import { map, isEqual } from 'lodash';
+import { map, find, isEqual } from 'lodash';
 
 /**
  * Internal dependencies
  */
 import {
+	Chart,
+	ChartPlaceholder,
 	ReportFilters,
 	SummaryList,
 	SummaryListPlaceholder,
@@ -21,7 +25,14 @@ import { filters, advancedFilterConfig } from './config';
 import { formatCurrency } from 'lib/currency';
 import { getNewPath } from 'lib/nav-utils';
 import { getReportChartData } from 'store/reports/utils';
-import { getCurrentDates, getDateParamsFromQuery, getIntervalForQuery } from 'lib/date';
+import {
+	getAllowedIntervalsForQuery,
+	getCurrentDates,
+	getDateParamsFromQuery,
+	getDateFormatsForInterval,
+	getIntervalForQuery,
+	getPreviousDate,
+} from 'lib/date';
 import { MAX_PER_PAGE } from 'store/constants';
 import OrdersReportTable from './table';
 
@@ -157,6 +168,69 @@ class OrdersReport extends Component {
 		return <SummaryList>{ summaryNumbers }</SummaryList>;
 	}
 
+	renderChart() {
+		const { primaryData, secondaryData, query } = this.props;
+
+		if ( primaryData.isRequesting || secondaryData.isRequesting ) {
+			return (
+				<Fragment>
+					<span className="screen-reader-text">
+						{ __( 'Your requested data is loading', 'wc-admin' ) }
+					</span>
+					<ChartPlaceholder />
+				</Fragment>
+			);
+		}
+
+		const currentInterval = getIntervalForQuery( query );
+		const allowedIntervals = getAllowedIntervalsForQuery( query );
+		const formats = getDateFormatsForInterval( currentInterval );
+
+		const { primary, secondary } = getCurrentDates( query );
+		const selectedChart = this.getSelectedChart();
+
+		const primaryKey = `${ primary.label } (${ primary.range })`;
+		const secondaryKey = `${ secondary.label } (${ secondary.range })`;
+
+		const chartData = primaryData.data.intervals.map( function( interval, index ) {
+			const secondaryDate = getPreviousDate(
+				formatDate( 'Y-m-d', interval.date_start ),
+				primary.after,
+				secondary.after,
+				query.compare,
+				currentInterval
+			);
+
+			const secondaryInterval = secondaryData.data.intervals[ index ];
+			return {
+				date: formatDate( 'Y-m-d\\TH:i:s', interval.date_start ),
+				[ primaryKey ]: {
+					labelDate: interval.date_start,
+					value: interval.subtotals[ selectedChart.key ] || 0,
+				},
+				[ secondaryKey ]: {
+					labelDate: secondaryDate,
+					value: ( secondaryInterval && secondaryInterval.subtotals[ selectedChart.key ] ) || 0,
+				},
+			};
+		} );
+
+		return (
+			<Chart
+				data={ chartData }
+				title={ selectedChart.label }
+				interval={ currentInterval }
+				allowedIntervals={ allowedIntervals }
+				mode="time-comparison"
+				pointLabelFormat={ formats.pointLabelFormat }
+				tooltipTitle={ selectedChart.label }
+				xFormat={ formats.xFormat }
+				x2Format={ formats.x2Format }
+				dateParser={ '%Y-%m-%dT%H:%M:%S' }
+			/>
+		);
+	}
+
 	render() {
 		const { isRequesting, orders, path, query } = this.props;
 
@@ -169,11 +243,18 @@ class OrdersReport extends Component {
 					advancedConfig={ advancedFilterConfig }
 				/>
 				{ this.renderChartSummaryNumbers() }
+				{ this.renderChart() }
 				<OrdersReportTable isRequesting={ isRequesting } orders={ orders } query={ query } />
 			</Fragment>
 		);
 	}
 }
+
+OrdersReport.propTypes = {
+	params: PropTypes.object.isRequired,
+	path: PropTypes.string.isRequired,
+	query: PropTypes.object.isRequired,
+};
 
 export default compose(
 	withSelect( ( select, props ) => {
