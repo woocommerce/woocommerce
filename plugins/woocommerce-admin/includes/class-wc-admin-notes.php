@@ -19,7 +19,7 @@ class WC_Admin_Notes {
 	 * @param array  $args Arguments to pass to the query( e.g. per_page and page).
 	 * @return array Array of arrays.
 	 */
-	public static function get_notes( $context = 'admin', $args = array() ) {
+	public static function get_notes( $context = 'edit', $args = array() ) {
 		$data_store = WC_Data_Store::load( 'admin-note' );
 		$raw_notes  = $data_store->get_notes( $args );
 		$notes      = array();
