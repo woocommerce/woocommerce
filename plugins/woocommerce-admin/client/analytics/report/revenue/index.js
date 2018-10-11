@@ -30,11 +30,12 @@ import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
 import { getAdminLink, getNewPath, onQueryChange } from 'lib/nav-utils';
 import { getReportChartData } from 'store/reports/utils';
 import {
-	getCurrentDates,
-	getPreviousDate,
-	getIntervalForQuery,
 	getAllowedIntervalsForQuery,
+	getCurrentDates,
 	getDateFormatsForInterval,
+	getDateParamsFromQuery,
+	getIntervalForQuery,
+	getPreviousDate,
 } from 'lib/date';
 import { MAX_PER_PAGE } from 'store/constants';
 
@@ -269,6 +270,7 @@ export class RevenueReport extends Component {
 
 		const totals = this.state.primaryTotals || {};
 		const secondaryTotals = this.state.secondaryTotals || {};
+		const { compare } = getDateParamsFromQuery( this.props.query );
 
 		const summaryNumbers = map( this.getCharts(), chart => {
 			const { key, label, type } = chart;
@@ -300,6 +302,11 @@ export class RevenueReport extends Component {
 					label={ label }
 					selected={ isSelected }
 					prevValue={ secondaryValue }
+					prevLabel={
+						'previous_period' === compare
+							? __( 'Previous Period:', 'wc-admin' )
+							: __( 'Previous Year:', 'wc-admin' )
+					}
 					delta={ delta }
 					href={ href }
 				/>
