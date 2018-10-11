@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, claudiulodro,
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
 Requires at least: 4.7
 Tested up to: 4.9
-Stable tag: 3.4.5
+Stable tag: 3.4.6
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -157,6 +157,11 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 6. A product archive (grid).
 
 == Changelog ==
+
+= 3.4.6 - 2018-10-11 =
+* Fix - Security issues
+* Fix - Allow percent coupons with sale restrictions to apply to carts with sale items in them. #21241
+* Fix - Prevent multiple slashing of variation's SKU. #21019
 
 = 3.4.5 - 2018-08-29 =
 * Fix - Tweak sanitization when resetting password cookie. #20901

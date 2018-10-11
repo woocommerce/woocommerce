@@ -10,7 +10,7 @@ class WC_Tests_Attributes_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Create a dummy attribute.
 	 *
-	 * @since 2.3
+	 * @since 3.4.6
 	 *
 	 * @param string        $attribute_name Name of attribute to create.
 	 * @param array(string) $terms          Terms to create for the attribute.
