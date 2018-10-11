@@ -241,5 +241,4 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 
 		return $wpdb->get_var( $query ); // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
 	}
-
 }
