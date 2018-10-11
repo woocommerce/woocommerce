@@ -95,7 +95,6 @@ class Search extends Component {
 							id={ item.id }
 							label={ item.label }
 							remove={ this.removeResult }
-							removeLabel={ __( 'Remove product', 'wc-admin' ) }
 							screenReaderLabel={ screenReaderLabel }
 						/>
 					);
