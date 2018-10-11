@@ -1012,3 +1012,23 @@ function wc_get_core_supported_themes() {
 	wc_deprecated_function( 'wc_get_core_supported_themes()', '3.3' );
 	return array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
 }
+
+
+/**
+ * Deprecate the 'woocommerce_loaded' action to document issues with it and discourage usage.
+ *
+ * This needs to be done on a callback to 'plugins_loaded', rather than inline when ths
+ * 'woocommerce_loaded' action is triggered, to ensure that the has_action() check accounts for
+ * all plugins. Otherwise, those plugins affected - the ones attaching callbacks to the action
+ * after the action is triggered - would not cause this notice to be displayed.
+ *
+ * @since 3.6.0
+ */
+function wc_deprecate_woocommerce_loaded() {
+
+	if ( has_action( 'woocommerce_loaded' ) ) {
+		$deprecated_notice = __( 'The woocommerce_loaded action is triggered inconsistently because the time when it is called is based on the WooCommerce plugin folder name, which can vary between sites.', 'woocommerce' );
+		wc_deprecated_hook( 'woocommerce_loaded', '3.6.0', 'plugins_loaded', $deprecated_notice );
+	}
+}
+add_filter( 'plugins_loaded', 'wc_deprecate_woocommerce_loaded' );
