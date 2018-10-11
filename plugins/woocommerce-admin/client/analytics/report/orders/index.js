@@ -8,7 +8,7 @@ import { compose } from '@wordpress/compose';
 import { format as formatDate } from '@wordpress/date';
 import PropTypes from 'prop-types';
 import { withSelect } from '@wordpress/data';
-import { map, find, isEqual } from 'lodash';
+import { map, find } from 'lodash';
 
 /**
  * Internal dependencies
@@ -16,6 +16,7 @@ import { map, find, isEqual } from 'lodash';
 import {
 	Chart,
 	ChartPlaceholder,
+	EmptyContent,
 	ReportFilters,
 	SummaryList,
 	SummaryListPlaceholder,
@@ -23,8 +24,8 @@ import {
 } from '@woocommerce/components';
 import { filters, advancedFilterConfig } from './config';
 import { formatCurrency } from 'lib/currency';
-import { getNewPath } from 'lib/nav-utils';
-import { getReportChartData } from 'store/reports/utils';
+import { getAdminLink, getNewPath } from 'lib/nav-utils';
+import { getReportChartData, getSummaryNumbers } from 'store/reports/utils';
 import {
 	getAllowedIntervalsForQuery,
 	getCurrentDates,
@@ -39,38 +40,6 @@ import OrdersReportTable from './table';
 class OrdersReport extends Component {
 	constructor( props ) {
 		super( props );
-
-		this.state = {
-			primaryTotals: null,
-			secondaryTotals: null,
-		};
-	}
-
-	// Track primary and secondary 'totals' indepdent of query.
-	// We don't want each little query update (interval, sorting, etc)
-	componentDidUpdate( prevProps ) {
-		/* eslint-disable react/no-did-update-set-state */
-
-		if ( ! isEqual( prevProps.dates, this.props.dates ) ) {
-			this.setState( {
-				primaryTotals: null,
-				secondaryTotals: null,
-			} );
-		}
-
-		const { secondaryData, primaryData } = this.props;
-		if ( ! isEqual( prevProps.secondaryData, secondaryData ) ) {
-			if ( secondaryData && secondaryData.data && secondaryData.data.totals ) {
-				this.setState( { secondaryTotals: secondaryData.data.totals } );
-			}
-		}
-
-		if ( ! isEqual( prevProps.primaryData, primaryData ) ) {
-			if ( primaryData && primaryData.data && primaryData.data.totals ) {
-				this.setState( { primaryTotals: primaryData.data.totals } );
-			}
-		}
-		/* eslint-enable react/no-did-update-set-state */
 	}
 
 	getCharts() {
@@ -113,18 +82,17 @@ class OrdersReport extends Component {
 	renderChartSummaryNumbers() {
 		const selectedChart = this.getSelectedChart();
 		const charts = this.getCharts();
-		if ( ! this.state.primaryTotals || ! this.state.secondaryTotals ) {
+		if ( this.props.summaryNumbers.isRequesting ) {
 			return <SummaryListPlaceholder numberOfItems={ charts.length } />;
 		}
 
-		const totals = this.state.primaryTotals || {};
-		const secondaryTotals = this.state.secondaryTotals || {};
+		const totals = this.props.summaryNumbers.totals.primary || {};
+		const secondaryTotals = this.props.summaryNumbers.totals.secondary || {};
 		const { compare } = getDateParamsFromQuery( this.props.query );
 
 		const summaryNumbers = map( this.getCharts(), chart => {
 			const { key, label, type } = chart;
 			const isSelected = selectedChart.key === key;
-
 			let value = parseFloat( totals[ key ] );
 			let secondaryValue =
 				( secondaryTotals[ key ] && parseFloat( secondaryTotals[ key ] ) ) || undefined;
@@ -140,8 +108,6 @@ class OrdersReport extends Component {
 					secondaryValue = secondaryValue && formatCurrency( secondaryValue );
 					break;
 				case 'number':
-					value = value;
-					secondaryValue = secondaryValue;
 					break;
 			}
 
@@ -232,7 +198,43 @@ class OrdersReport extends Component {
 	}
 
 	render() {
-		const { isRequesting, orders, path, query } = this.props;
+		const {
+			isRequesting,
+			orders,
+			path,
+			query,
+			primaryData,
+			secondaryData,
+			summaryNumbers,
+		} = this.props;
+
+		if ( primaryData.isError || secondaryData.isError || summaryNumbers.isError ) {
+			let title, actionLabel, actionURL, actionCallback;
+			if ( primaryData.isError || secondaryData.isError ) {
+				title = __( 'There was an error getting your stats. Please try again.', 'wc-admin' );
+				actionLabel = __( 'Reload', 'wc-admin' );
+				actionCallback = () => {
+					// TODO Add tracking for how often an error is displayed, and the reload action is clicked.
+					window.location.reload();
+				};
+			} else {
+				title = __( 'No results could be found for this date range.', 'wc-admin' );
+				actionLabel = __( 'View Orders', 'wc-admin' );
+				actionURL = getAdminLink( 'edit.php?post_type=shop_order' );
+			}
+
+			return (
+				<Fragment>
+					<ReportFilters query={ query } path={ path } />
+					<EmptyContent
+						title={ title }
+						actionLabel={ actionLabel }
+						actionURL={ actionURL }
+						actionCallback={ actionCallback }
+					/>
+				</Fragment>
+			);
+		}
 
 		return (
 			<Fragment>
@@ -270,6 +272,15 @@ export default compose(
 			per_page: MAX_PER_PAGE,
 		};
 
+		const summaryNumbers = getSummaryNumbers(
+			'orders',
+			{
+				primary: datesFromQuery.primary,
+				secondary: datesFromQuery.secondary,
+			},
+			select
+		);
+
 		const primaryData = getReportChartData(
 			'orders',
 			{
@@ -294,6 +305,7 @@ export default compose(
 			orders,
 			primaryData,
 			secondaryData,
+			summaryNumbers,
 		};
 	} )
 )( OrdersReport );
