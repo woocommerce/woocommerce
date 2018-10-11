@@ -35,6 +35,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	 * Remove filters.
 	 */
 	public function tearDown() {
+		parent::tearDown();
 		remove_filter( 'woocommerce_product_csv_importer_check_import_file_path', '__return_false' );
 	}
 
