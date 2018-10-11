@@ -6,16 +6,6 @@
  * @since 3.0.0
  */
 class WC_Tests_Log_Handler_DB extends WC_Unit_Test_Case {
-	public function setUp() {
-		parent::setUp();
-		WC_Log_Handler_DB::flush();
-	}
-
-	public function tearDown() {
-		WC_Log_Handler_DB::flush();
-		parent::tearDown();
-	}
-
 	/**
 	 * Test handle writes to database correctly.
 	 *
