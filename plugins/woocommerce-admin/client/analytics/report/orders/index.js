@@ -4,34 +4,23 @@
  */
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { Button } from '@wordpress/components';
-import { withSelect, withDispatch } from '@wordpress/data';
-import moment from 'moment';
-import { partial } from 'lodash';
+import { withSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import { Card, ReportFilters } from '@woocommerce/components';
+import { ReportFilters } from '@woocommerce/components';
 import { filters, advancedFilterConfig } from './config';
+import OrdersReportTable from './table';
 
 class OrdersReport extends Component {
 	constructor( props ) {
 		super( props );
-
-		this.toggleStatus = this.toggleStatus.bind( this );
-	}
-
-	toggleStatus( order ) {
-		const { requestUpdateOrder } = this.props;
-		const updatedOrder = { ...order };
-		const status = updatedOrder.status === 'completed' ? 'processing' : 'completed';
-		updatedOrder.status = status;
-		requestUpdateOrder( updatedOrder );
 	}
 
 	render() {
-		const { orders, orderIds, query, path } = this.props;
+		const { isRequesting, orders, path, query } = this.props;
+
 		return (
 			<Fragment>
 				<ReportFilters
@@ -40,39 +29,7 @@ class OrdersReport extends Component {
 					filters={ filters }
 					advancedConfig={ advancedFilterConfig }
 				/>
-				<p>Below is a temporary example</p>
-				<Card title="Orders">
-					<table style={ { width: '100%' } }>
-						<thead>
-							<tr style={ { textAlign: 'left' } }>
-								<th>Id</th>
-								<th>Date</th>
-								<th>Total</th>
-								<th>Status</th>
-								<th>Action</th>
-							</tr>
-						</thead>
-						<tbody>
-							{ orderIds &&
-								orderIds.map( id => {
-									const order = orders[ id ];
-									return (
-										<tr key={ id }>
-											<td>{ id }</td>
-											<td>{ moment( order.date_created ).format( 'LL' ) }</td>
-											<td>{ order.total }</td>
-											<td>{ order.status }</td>
-											<td>
-												<Button isPrimary onClick={ partial( this.toggleStatus, order ) }>
-													Toggle Status
-												</Button>
-											</td>
-										</tr>
-									);
-								} ) }
-						</tbody>
-					</table>
-				</Card>
+				<OrdersReportTable isRequesting={ isRequesting } orders={ orders } query={ query } />
 			</Fragment>
 		);
 	}
@@ -80,17 +37,9 @@ class OrdersReport extends Component {
 
 export default compose(
 	withSelect( select => {
-		const { getOrders, getOrderIds } = select( 'wc-admin' );
-		return {
-			orders: getOrders(),
-			orderIds: getOrderIds(),
-		};
-	} ),
-	withDispatch( dispatch => {
-		return {
-			requestUpdateOrder: function( updatedOrder ) {
-				dispatch( 'wc-admin' ).requestUpdateOrder( updatedOrder );
-			},
-		};
+		const { getOrders } = select( 'wc-admin' );
+		const orders = getOrders();
+		const isRequesting = select( 'core/data' ).isResolving( 'wc-admin', 'getOrders' );
+		return { isRequesting, orders };
 	} )
 )( OrdersReport );
