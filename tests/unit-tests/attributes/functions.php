@@ -8,6 +8,61 @@
 class WC_Tests_Attributes_Functions extends WC_Unit_Test_Case {
 
 	/**
+	 * Create a dummy attribute.
+	 *
+	 * @since 2.3
+	 *
+	 * @param string        $attribute_name Name of attribute to create.
+	 * @param array(string) $terms          Terms to create for the attribute.
+	 * @return array
+	 */
+	public static function create_attribute( $attribute_name = 'size', $terms = array( 'small' ) ) {
+		global $wpdb;
+		$attribute = array(
+			'attribute_label'   => $attribute_name,
+			'attribute_name'    => $attribute_name,
+			'attribute_type'    => 'select',
+			'attribute_orderby' => 'menu_order',
+			'attribute_public'  => 0,
+		);
+		$wpdb->insert( $wpdb->prefix . 'woocommerce_attribute_taxonomies', $attribute );
+		$return = array(
+			'attribute_name'     => $attribute_name,
+			'attribute_taxonomy' => 'pa_' . $attribute_name,
+			'attribute_id'       => $wpdb->insert_id,
+			'term_ids'           => array(),
+		);
+		// Register the taxonomy.
+		$name  = wc_attribute_taxonomy_name( $attribute_name );
+		$label = $attribute_name;
+		delete_transient( 'wc_attribute_taxonomies' );
+		register_taxonomy( 'pa_' . $attribute_name, array( 'product' ), array(
+			'labels' => array(
+				'name' => $attribute_name,
+			),
+		) );
+		// Set product attributes global.
+		global $wc_product_attributes;
+		$wc_product_attributes = array();
+		foreach ( wc_get_attribute_taxonomies() as $tax ) {
+			$name = wc_attribute_taxonomy_name( $tax->attribute_name );
+			if ( $name ) {
+				$wc_product_attributes[ $name ] = $tax;
+			}
+		}
+		foreach ( $terms as $term ) {
+			$result = term_exists( $term, 'pa_' . $attribute_name );
+			if ( ! $result ) {
+				$result = wp_insert_term( $term, 'pa_' . $attribute_name );
+				$return['term_ids'][] = $result['term_id'];
+			} else {
+				$return['term_ids'][] = $result['term_id'];
+			}
+		}
+		return $return;
+	}
+
+	/**
 	 * Tests wc_get_attribute().
 	 *
 	 * @since 3.2.0
@@ -73,7 +128,7 @@ class WC_Tests_Attributes_Functions extends WC_Unit_Test_Case {
 	public function test_wc_create_attribute_serialized_data() {
 		global $wpdb;
 
-		$global_attribute_data = WC_Helper_Product::create_attribute( 'test', array( 'Chicken', 'Nuggets' ) );
+		$global_attribute_data = self::create_attribute( 'test', array( 'Chicken', 'Nuggets' ) );
 
 		$local_attribute = new WC_Product_Attribute();
 		$local_attribute->set_id( 0 );
