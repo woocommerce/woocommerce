@@ -90,7 +90,22 @@ class WC_Admin_REST_Admin_Notes_Controller extends WC_REST_CRUD_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function get_items( $request ) {
-		$notes = WC_Admin_Notes::get_notes();
+		$per_page = isset( $request['per_page'] ) ? intval( $request['per_page'] ) : 10;
+		if ( $per_page <= 0 ) {
+			$per_page = 1;
+		}
+
+		$page = isset( $request['page'] ) ? intval( $request['page'] ) : 1;
+		if ( $page <= 0 ) {
+			$page = 1;
+		}
+
+		$args = array(
+			'per_page' => $per_page,
+			'page'     => $page,
+		);
+
+		$notes = WC_Admin_Notes::get_notes( 'edit', $args );
 
 		$data = array();
 		foreach ( (array) $notes as $note_obj ) {
@@ -98,7 +113,11 @@ class WC_Admin_REST_Admin_Notes_Controller extends WC_REST_CRUD_Controller {
 			$note   = $this->prepare_response_for_collection( $note );
 			$data[] = $note;
 		}
-		return rest_ensure_response( $data );
+
+		$response = rest_ensure_response( $data );
+		$response->header( 'X-WP-Total', WC_Admin_Notes::get_notes_count() );
+
+		return $response;
 	}
 
 	/**

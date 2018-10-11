@@ -33,7 +33,7 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 			'source'  => $note->get_source(),
 		);
 
-		$encoding_options = defined( 'JSON_FORCE_OBJECT' ) ? JSON_FORCE_OBJECT : 0;
+		$encoding_options = defined( 'JSON_FORCE_OBJECT' ) ? JSON_FORCE_OBJECT : 0; // phpcs:ignore PHPCompatibility.PHP.NewConstants
 
 		$note_to_be_inserted['content_data']  = wp_json_encode( $note->get_content_data(), $encoding_options );
 		$note_to_be_inserted['date_created']  = gmdate( 'Y-m-d H:i:s', $date_created );
@@ -104,7 +104,7 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	public function update( &$note ) {
 		global $wpdb;
-		$encoding_options = defined( 'JSON_FORCE_OBJECT' ) ? JSON_FORCE_OBJECT : 0;
+		$encoding_options = defined( 'JSON_FORCE_OBJECT' ) ? JSON_FORCE_OBJECT : 0; // phpcs:ignore PHPCompatibility.PHP.NewConstants
 
 		if ( $note->get_id() ) {
 			$wpdb->update(
@@ -199,10 +199,50 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Return an ordered list of notes.
 	 *
+	 * @param array $args Query arguments.
 	 * @return array An array of objects containing a note id.
 	 */
-	public function get_notes() {
+	public function get_notes( $args = array() ) {
 		global $wpdb;
-		return $wpdb->get_results( "SELECT note_id, title, content FROM {$wpdb->prefix}woocommerce_admin_notes order by note_id ASC;" );
+
+		// Build the query.
+		$query = "
+			SELECT note_id, title, content
+			FROM {$wpdb->prefix}woocommerce_admin_notes
+			ORDER BY note_id DESC
+		";
+
+		$per_page = isset( $args['per_page'] ) ? intval( $args['per_page'] ) : 10;
+		if ( $per_page <= 0 ) {
+			$per_page = 1;
+		}
+
+		$page = isset( $args['page'] ) ? intval( $args['page'] ) : 1;
+		if ( $page <= 0 ) {
+			$page = 1;
+		}
+
+		$offset     = $per_page * ( $page - 1 );
+		$pagination = sprintf( ' LIMIT %d, %d', $offset, $per_page );
+
+		return $wpdb->get_results( $query . $pagination ); // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
 	}
+
+	/**
+	 * Return a count of notes.
+	 *
+	 * @return array An array of objects containing a note id.
+	 */
+	public function get_notes_count() {
+		global $wpdb;
+
+		// Build the query.
+		$query = "
+			SELECT COUNT(*)
+			FROM {$wpdb->prefix}woocommerce_admin_notes
+		";
+
+		return $wpdb->get_var( $query ); // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+	}
+
 }
