@@ -27,6 +27,8 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		$bootstrap = WC_Unit_Tests_Bootstrap::instance();
 		require_once $bootstrap->plugin_dir . '/includes/import/class-wc-product-csv-importer.php';
 		require_once $bootstrap->plugin_dir . '/includes/admin/importers/class-wc-product-csv-importer-controller.php';
+
+		add_filter( 'woocommerce_product_csv_importer_check_import_file_path', '__return_false' );
 	}
 
 	/**
