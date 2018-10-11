@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withSelect } from '@wordpress/data';
-import { map } from 'lodash';
+import { map, isEqual } from 'lodash';
 
 /**
  * Internal dependencies
@@ -35,6 +35,33 @@ class OrdersReport extends Component {
 		};
 	}
 
+	// Track primary and secondary 'totals' indepdent of query.
+	// We don't want each little query update (interval, sorting, etc)
+	componentDidUpdate( prevProps ) {
+		/* eslint-disable react/no-did-update-set-state */
+
+		if ( ! isEqual( prevProps.dates, this.props.dates ) ) {
+			this.setState( {
+				primaryTotals: null,
+				secondaryTotals: null,
+			} );
+		}
+
+		const { secondaryData, primaryData } = this.props;
+		if ( ! isEqual( prevProps.secondaryData, secondaryData ) ) {
+			if ( secondaryData && secondaryData.data && secondaryData.data.totals ) {
+				this.setState( { secondaryTotals: secondaryData.data.totals } );
+			}
+		}
+
+		if ( ! isEqual( prevProps.primaryData, primaryData ) ) {
+			if ( primaryData && primaryData.data && primaryData.data.totals ) {
+				this.setState( { primaryTotals: primaryData.data.totals } );
+			}
+		}
+		/* eslint-enable react/no-did-update-set-state */
+	}
+
 	getCharts() {
 		return [
 			{
@@ -53,7 +80,7 @@ class OrdersReport extends Component {
 				type: 'number',
 			},
 			{
-				key: 'Orders Count',
+				key: 'orders_count',
 				label: __( 'Orders Count', 'wc-admin' ),
 				type: 'number',
 			},
