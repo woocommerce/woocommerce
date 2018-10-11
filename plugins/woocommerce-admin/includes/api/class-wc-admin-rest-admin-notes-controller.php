@@ -137,9 +137,13 @@ class WC_Admin_REST_Admin_Notes_Controller extends WC_REST_CRUD_Controller {
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $data, $request ) {
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
+		$context                   = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$data                      = $this->add_additional_fields_to_object( $data, $request );
+		$data['date_created_gmt']  = wc_rest_prepare_date_response( $data['date_created'] );
+		$data['date_created']      = wc_rest_prepare_date_response( $data['date_created'], false );
+		$data['date_reminder_gmt'] = wc_rest_prepare_date_response( $data['date_reminder'] );
+		$data['date_reminder']     = wc_rest_prepare_date_response( $data['date_reminder'], false );
+		$data                      = $this->filter_response_by_context( $data, $context );
 
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );
