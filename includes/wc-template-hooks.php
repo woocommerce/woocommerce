@@ -292,7 +292,7 @@ add_action( 'woocommerce_register_form', 'wc_registration_privacy_policy_text', 
 /**
  * Notices.
  */
-add_action( 'woocommerce_cart_is_empty', 'woocommerce_output_all_notices', 10 );
+add_action( 'woocommerce_cart_is_empty', 'woocommerce_output_all_notices', 5 );
 add_action( 'woocommerce_shortcode_before_product_cat_loop', 'woocommerce_output_all_notices', 10 );
 add_action( 'woocommerce_before_shop_loop', 'woocommerce_output_all_notices', 10 );
 add_action( 'woocommerce_before_single_product', 'woocommerce_output_all_notices', 10 );
