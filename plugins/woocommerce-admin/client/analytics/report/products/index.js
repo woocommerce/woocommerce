@@ -24,6 +24,7 @@ export default class extends Component {
 				label: __( 'Product Title', 'wc-admin' ),
 				key: 'name',
 				required: true,
+				isLeftAligned: true,
 				isSortable: true,
 			},
 			{

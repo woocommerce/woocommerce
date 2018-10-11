@@ -120,10 +120,11 @@ class Table extends Component {
 					<tbody>
 						<tr>
 							{ headers.map( ( header, i ) => {
-								const { isSortable, isNumeric, key, label } = header;
+								const { isLeftAligned, isSortable, isNumeric, key, label } = header;
 								const labelId = `header-${ instanceId } -${ i }`;
 								const thProps = {
 									className: classnames( 'woocommerce-table__header', {
+										'is-left-aligned': isLeftAligned,
 										'is-sortable': isSortable,
 										'is-sorted': sortedBy === key,
 										'is-numeric': isNumeric,
@@ -173,10 +174,11 @@ class Table extends Component {
 						{ rows.map( ( row, i ) => (
 							<tr key={ i }>
 								{ row.map( ( cell, j ) => {
-									const { isNumeric } = headers[ j ];
+									const { isLeftAligned, isNumeric } = headers[ j ];
 									const isHeader = rowHeader === j;
 									const Cell = isHeader ? 'th' : 'td';
 									const cellClasses = classnames( 'woocommerce-table__item', {
+										'is-left-aligned': isLeftAligned,
 										'is-numeric': isNumeric,
 									} );
 									return (
@@ -217,6 +219,10 @@ Table.propTypes = {
 			 * Boolean, true if this column is the default for sorting. Only one column should have this set.
 			 */
 			defaultSort: PropTypes.bool,
+			/**
+			 * Boolean, true if this column should be aligned to the left.
+			 */
+			isLeftAligned: PropTypes.bool,
 			/**
 			 * Boolean, true if this column is a number value.
 			 */

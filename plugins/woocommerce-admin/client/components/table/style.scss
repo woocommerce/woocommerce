@@ -58,9 +58,11 @@
 	text-align: left;
 
 	a {
-		display: block;
-		margin: ($gap*-1) ($gap-large*-1);
-		padding: $gap $gap-large;
+		&:not(.is-inline) {
+			display: block;
+			margin: ($gap*-1) ($gap-large*-1);
+			padding: $gap $gap-large;
+		}
 
 		&:hover,
 		&:focus {
@@ -80,21 +82,28 @@
 		width: 80%;
 	}
 
-	&.is-numeric {
+	&:not(.is-left-aligned) {
 		text-align: right;
+
+		.rtl & {
+			text-align: left;
+		}
 
 		button {
 			justify-content: flex-end;
 		}
+	}
 
-		.is-placeholder {
-			max-width: 40px;
-		}
+	&.is-numeric .is-placeholder {
+		max-width: 40px;
 	}
 }
 
-.woocommerce-table__header,
 th.woocommerce-table__item {
+	font-weight: normal;
+}
+
+.woocommerce-table__header {
 	font-weight: bold;
 	white-space: nowrap;
 }
@@ -106,6 +115,11 @@ th.woocommerce-table__item {
 
 	& + .woocommerce-table__header {
 		border-left: 1px solid $core-grey-light-700;
+
+		.rtl & {
+			border-left: 0;
+			border-right: 1px solid $core-grey-light-700;
+		}
 	}
 
 	.components-button.is-button {
@@ -117,6 +131,10 @@ th.woocommerce-table__item {
 		border: none;
 		background: transparent;
 		box-shadow: none !important;
+
+		.rtl & {
+			padding: $gap-smaller 0 $gap-smaller $gap-large;
+		}
 
 		// @todo Add interactive styles
 		&:hover {

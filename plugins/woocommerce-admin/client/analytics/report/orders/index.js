@@ -5,16 +5,13 @@
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { Button } from '@wordpress/components';
-import { withSelect, withDispatch } from '@wordpress/data';
-import moment from 'moment';
-import { map, partial } from 'lodash';
+import { withSelect } from '@wordpress/data';
+import { map } from 'lodash';
 
 /**
  * Internal dependencies
  */
 import {
-	Card,
 	ReportFilters,
 	SummaryList,
 	SummaryListPlaceholder,
@@ -26,6 +23,7 @@ import { getNewPath } from 'lib/nav-utils';
 import { getReportChartData } from 'store/reports/utils';
 import { getCurrentDates, getDateParamsFromQuery, getIntervalForQuery } from 'lib/date';
 import { MAX_PER_PAGE } from 'store/constants';
+import OrdersReportTable from './table';
 
 class OrdersReport extends Component {
 	constructor( props ) {
@@ -35,8 +33,6 @@ class OrdersReport extends Component {
 			primaryTotals: null,
 			secondaryTotals: null,
 		};
-
-		this.toggleStatus = this.toggleStatus.bind( this );
 	}
 
 	getCharts() {
@@ -76,14 +72,6 @@ class OrdersReport extends Component {
 		return charts[ 0 ];
 	}
 
-	toggleStatus( order ) {
-		const { requestUpdateOrder } = this.props;
-		const updatedOrder = { ...order };
-		const status = updatedOrder.status === 'completed' ? 'processing' : 'completed';
-		updatedOrder.status = status;
-		requestUpdateOrder( updatedOrder );
-	}
-
 	renderChartSummaryNumbers() {
 		const selectedChart = this.getSelectedChart();
 		const charts = this.getCharts();
@@ -109,7 +97,6 @@ class OrdersReport extends Component {
 			}
 
 			switch ( type ) {
-				// TODO: implement other format handlers
 				case 'currency':
 					value = formatCurrency( value );
 					secondaryValue = secondaryValue && formatCurrency( secondaryValue );
@@ -144,7 +131,8 @@ class OrdersReport extends Component {
 	}
 
 	render() {
-		const { orders, orderIds, query, path } = this.props;
+		const { isRequesting, orders, path, query } = this.props;
+
 		return (
 			<Fragment>
 				<ReportFilters
@@ -154,39 +142,7 @@ class OrdersReport extends Component {
 					advancedConfig={ advancedFilterConfig }
 				/>
 				{ this.renderChartSummaryNumbers() }
-				<p>Below is a temporary example</p>
-				<Card title="Orders">
-					<table style={ { width: '100%' } }>
-						<thead>
-							<tr style={ { textAlign: 'left' } }>
-								<th>Id</th>
-								<th>Date</th>
-								<th>Total</th>
-								<th>Status</th>
-								<th>Action</th>
-							</tr>
-						</thead>
-						<tbody>
-							{ orderIds &&
-								orderIds.map( id => {
-									const order = orders[ id ];
-									return (
-										<tr key={ id }>
-											<td>{ id }</td>
-											<td>{ moment( order.date_created ).format( 'LL' ) }</td>
-											<td>{ order.total }</td>
-											<td>{ order.status }</td>
-											<td>
-												<Button isPrimary onClick={ partial( this.toggleStatus, order ) }>
-													Toggle Status
-												</Button>
-											</td>
-										</tr>
-									);
-								} ) }
-						</tbody>
-					</table>
-				</Card>
+				<OrdersReportTable isRequesting={ isRequesting } orders={ orders } query={ query } />
 			</Fragment>
 		);
 	}
@@ -194,7 +150,9 @@ class OrdersReport extends Component {
 
 export default compose(
 	withSelect( ( select, props ) => {
-		const { getOrders, getOrderIds } = select( 'wc-admin' );
+		const { getOrders } = select( 'wc-admin' );
+		const orders = getOrders();
+		const isRequesting = select( 'core/data' ).isResolving( 'wc-admin', 'getOrders' );
 		const { query } = props;
 		const interval = getIntervalForQuery( query );
 		const datesFromQuery = getCurrentDates( query );
@@ -224,17 +182,10 @@ export default compose(
 			select
 		);
 		return {
-			orders: getOrders(),
-			orderIds: getOrderIds(),
+			isRequesting,
+			orders,
 			primaryData,
 			secondaryData,
-		};
-	} ),
-	withDispatch( dispatch => {
-		return {
-			requestUpdateOrder: function( updatedOrder ) {
-				dispatch( 'wc-admin' ).requestUpdateOrder( updatedOrder );
-			},
 		};
 	} )
 )( OrdersReport );

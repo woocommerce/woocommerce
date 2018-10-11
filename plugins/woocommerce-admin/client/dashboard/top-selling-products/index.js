@@ -25,6 +25,7 @@ export class TopSellingProducts extends Component {
 				label: __( 'Product', 'wc-admin' ),
 				key: 'product',
 				required: true,
+				isLeftAligned: true,
 				isSortable: false,
 			},
 			{
