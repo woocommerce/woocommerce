@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { format as formatDate } from '@wordpress/date';
-import { map, find, isEqual } from 'lodash';
+import { map, find } from 'lodash';
 import PropTypes from 'prop-types';
 import { withSelect } from '@wordpress/data';
 
@@ -28,51 +28,21 @@ import {
 import { downloadCSVFile, generateCSVDataFromTable, generateCSVFileName } from 'lib/csv';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
 import { getAdminLink, getNewPath, onQueryChange } from 'lib/nav-utils';
-import { getReportChartData } from 'store/reports/utils';
+import { getReportChartData, getSummaryNumbers } from 'store/reports/utils';
 import {
-	getCurrentDates,
-	getPreviousDate,
-	getIntervalForQuery,
 	getAllowedIntervalsForQuery,
+	getCurrentDates,
 	getDateFormatsForInterval,
+	getDateParamsFromQuery,
+	getIntervalForQuery,
+	getPreviousDate,
 } from 'lib/date';
 import { MAX_PER_PAGE } from 'store/constants';
 
 export class RevenueReport extends Component {
 	constructor() {
 		super();
-		this.state = {
-			primaryTotals: null,
-			secondaryTotals: null,
-		};
 		this.onDownload = this.onDownload.bind( this );
-	}
-
-	// Track primary and secondary 'totals' indepdent of query.
-	// We don't want each little query update (interval, sorting, etc)
-	componentDidUpdate( prevProps ) {
-		/* eslint-disable react/no-did-update-set-state */
-
-		if ( ! isEqual( prevProps.dates, this.props.dates ) ) {
-			this.setState( {
-				primaryTotals: null,
-				secondaryTotals: null,
-			} );
-		}
-
-		const { secondaryData, primaryData } = this.props;
-		if ( ! isEqual( prevProps.secondaryData, secondaryData ) ) {
-			if ( secondaryData && secondaryData.data && secondaryData.data.totals ) {
-				this.setState( { secondaryTotals: secondaryData.data.totals } );
-			}
-		}
-
-		if ( ! isEqual( prevProps.primaryData, primaryData ) ) {
-			if ( primaryData && primaryData.data && primaryData.data.totals ) {
-				this.setState( { primaryTotals: primaryData.data.totals } );
-			}
-		}
-		/* eslint-enable react/no-did-update-set-state */
 	}
 
 	onDownload( headers, rows, query ) {
@@ -263,12 +233,13 @@ export class RevenueReport extends Component {
 	renderChartSummaryNumbers() {
 		const selectedChart = this.getSelectedChart();
 		const charts = this.getCharts();
-		if ( ! this.state.primaryTotals || ! this.state.secondaryTotals ) {
+		if ( this.props.summaryNumbers.isRequesting ) {
 			return <SummaryListPlaceholder numberOfItems={ charts.length } />;
 		}
 
-		const totals = this.state.primaryTotals || {};
-		const secondaryTotals = this.state.secondaryTotals || {};
+		const totals = this.props.summaryNumbers.totals.primary || {};
+		const secondaryTotals = this.props.summaryNumbers.totals.secondary || {};
+		const { compare } = getDateParamsFromQuery( this.props.query );
 
 		const summaryNumbers = map( this.getCharts(), chart => {
 			const { key, label, type } = chart;
@@ -300,6 +271,11 @@ export class RevenueReport extends Component {
 					label={ label }
 					selected={ isSelected }
 					prevValue={ secondaryValue }
+					prevLabel={
+						'previous_period' === compare
+							? __( 'Previous Period:', 'wc-admin' )
+							: __( 'Previous Year:', 'wc-admin' )
+					}
 					delta={ delta }
 					href={ href }
 				/>
@@ -413,9 +389,21 @@ export class RevenueReport extends Component {
 	}
 
 	render() {
-		const { path, query, primaryData, secondaryData, isTableDataError } = this.props;
+		const {
+			path,
+			query,
+			primaryData,
+			secondaryData,
+			summaryNumbers,
+			isTableDataError,
+		} = this.props;
 
-		if ( primaryData.isError || secondaryData.isError || isTableDataError ) {
+		if (
+			primaryData.isError ||
+			secondaryData.isError ||
+			isTableDataError ||
+			summaryNumbers.isError
+		) {
 			let title, actionLabel, actionURL, actionCallback;
 			if ( primaryData.isError || secondaryData.isError ) {
 				title = __( 'There was an error getting your stats. Please try again.', 'wc-admin' );
@@ -472,6 +460,15 @@ export default compose(
 			per_page: MAX_PER_PAGE,
 		};
 
+		const summaryNumbers = getSummaryNumbers(
+			'revenue',
+			{
+				primary: datesFromQuery.primary,
+				secondary: datesFromQuery.secondary,
+			},
+			select
+		);
+
 		const primaryData = getReportChartData(
 			'revenue',
 			{
@@ -506,22 +503,8 @@ export default compose(
 		const isTableDataError = isReportStatsError( 'revenue', tableQuery );
 		const isTableDataRequesting = isReportStatsRequesting( 'revenue', tableQuery );
 
-		const primaryDates = {
-			after: datesFromQuery.primary.after,
-			before: datesFromQuery.primary.before,
-		};
-		const secondaryDates = {
-			after: datesFromQuery.secondary.after,
-			before: datesFromQuery.secondary.before,
-		};
-
-		const dates = {
-			primaryDates,
-			secondaryDates,
-		};
-
 		return {
-			dates,
+			summaryNumbers,
 			primaryData,
 			secondaryData,
 			tableQuery,
