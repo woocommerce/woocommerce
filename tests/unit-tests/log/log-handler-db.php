@@ -6,6 +6,12 @@
  * @since 3.0.0
  */
 class WC_Tests_Log_Handler_DB extends WC_Unit_Test_Case {
+	public function setUp() {
+		parent::setUp();
+
+		$this->handler = new WC_Log_Handler_DB( array( 'threshold' => 'debug' ) );
+	}
+
 	/**
 	 * Test handle writes to database correctly.
 	 *
@@ -14,7 +20,6 @@ class WC_Tests_Log_Handler_DB extends WC_Unit_Test_Case {
 	public function test_handle() {
 		global $wpdb;
 
-		$handler = new WC_Log_Handler_DB( array( 'threshold' => 'debug' ) );
 		$time    = time();
 		$context = array(
 			1,
@@ -24,16 +29,16 @@ class WC_Tests_Log_Handler_DB extends WC_Unit_Test_Case {
 			'key' => 'value',
 		);
 
-		$handler->handle( $time, 'debug', 'msg_debug', array( 'source' => 'source_debug' ) );
-		$handler->handle( $time, 'info', 'msg_info', array( 'source' => 'source_info' ) );
-		$handler->handle( $time, 'notice', 'msg_notice', array( 'source' => 'source_notice' ) );
-		$handler->handle( $time, 'warning', 'msg_warning', array( 'source' => 'source_warning' ) );
-		$handler->handle( $time, 'error', 'msg_error', array( 'source' => 'source_error' ) );
-		$handler->handle( $time, 'critical', 'msg_critical', array( 'source' => 'source_critical' ) );
-		$handler->handle( $time, 'alert', 'msg_alert', array( 'source' => 'source_alert' ) );
-		$handler->handle( $time, 'emergency', 'msg_emergency', array( 'source' => 'source_emergency' ) );
+		$this->handler->handle( $time, 'debug', 'msg_debug', array( 'source' => 'source_debug' ) );
+		$this->handler->handle( $time, 'info', 'msg_info', array( 'source' => 'source_info' ) );
+		$this->handler->handle( $time, 'notice', 'msg_notice', array( 'source' => 'source_notice' ) );
+		$this->handler->handle( $time, 'warning', 'msg_warning', array( 'source' => 'source_warning' ) );
+		$this->handler->handle( $time, 'error', 'msg_error', array( 'source' => 'source_error' ) );
+		$this->handler->handle( $time, 'critical', 'msg_critical', array( 'source' => 'source_critical' ) );
+		$this->handler->handle( $time, 'alert', 'msg_alert', array( 'source' => 'source_alert' ) );
+		$this->handler->handle( $time, 'emergency', 'msg_emergency', array( 'source' => 'source_emergency' ) );
 
-		$handler->handle( $time, 'debug', 'context_test', $context );
+		$this->handler->handle( $time, 'debug', 'context_test', $context );
 
 		$log_entries = $wpdb->get_results( "SELECT timestamp, level, message, source, context FROM {$wpdb->prefix}woocommerce_log", ARRAY_A );
 
@@ -116,10 +121,9 @@ class WC_Tests_Log_Handler_DB extends WC_Unit_Test_Case {
 	public function test_flush() {
 		global $wpdb;
 
-		$handler = new WC_Log_Handler_DB( array( 'threshold' => 'debug' ) );
-		$time    = time();
+		$time = time();
 
-		$handler->handle( $time, 'debug', '', array() );
+		$this->handler->handle( $time, 'debug', '', array() );
 
 		$log_entries = $wpdb->get_results( "SELECT timestamp, level, message, source FROM {$wpdb->prefix}woocommerce_log" );
 		$this->assertCount( 1, $log_entries );
@@ -128,6 +132,19 @@ class WC_Tests_Log_Handler_DB extends WC_Unit_Test_Case {
 
 		$log_entries = $wpdb->get_results( "SELECT timestamp, level, message, source FROM {$wpdb->prefix}woocommerce_log" );
 		$this->assertCount( 0, $log_entries );
+	}
+
+	public function test_delete_logs_before_timestamp() {
+		global $wpdb;
+
+		$time = time();
+		$this->handler->handle( $time, 'debug', '', array() );
+		$this->handler->handle( $time - 10, 'debug', '', array() );
+
+		$this->handler->delete_logs_before_timestamp( $time );
+
+		$log_count = $wpdb->get_var( "SELECT count(*) FROM {$wpdb->prefix}woocommerce_log" );
+		$this->assertEquals( 1, $log_count );
 	}
 
 }
