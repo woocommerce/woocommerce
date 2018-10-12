@@ -33,9 +33,7 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 			'source'  => $note->get_source(),
 		);
 
-		$encoding_options = defined( 'JSON_FORCE_OBJECT' ) ? JSON_FORCE_OBJECT : 0; // phpcs:ignore PHPCompatibility.PHP.NewConstants
-
-		$note_to_be_inserted['content_data']  = wp_json_encode( $note->get_content_data(), $encoding_options );
+		$note_to_be_inserted['content_data']  = wp_json_encode( $note->get_content_data() );
 		$note_to_be_inserted['date_created']  = gmdate( 'Y-m-d H:i:s', $date_created );
 		$note_to_be_inserted['date_reminder'] = null;
 
@@ -104,7 +102,6 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	public function update( &$note ) {
 		global $wpdb;
-		$encoding_options = defined( 'JSON_FORCE_OBJECT' ) ? JSON_FORCE_OBJECT : 0; // phpcs:ignore PHPCompatibility.PHP.NewConstants
 
 		if ( $note->get_id() ) {
 			$wpdb->update(
@@ -115,7 +112,7 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 					'title'         => $note->get_title(),
 					'content'       => $note->get_content(),
 					'icon'          => $note->get_icon(),
-					'content_data'  => wp_json_encode( $note->get_content_data(), $encoding_options ),
+					'content_data'  => wp_json_encode( $note->get_content_data() ),
 					'status'        => $note->get_status(),
 					'source'        => $note->get_source(),
 					'date_created'  => $note->get_date_created(),
@@ -214,7 +211,7 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 
 		$per_page = isset( $args['per_page'] ) ? intval( $args['per_page'] ) : 10;
 		if ( $per_page <= 0 ) {
-			$per_page = 1;
+			$per_page = 10;
 		}
 
 		$page = isset( $args['page'] ) ? intval( $args['page'] ) : 1;

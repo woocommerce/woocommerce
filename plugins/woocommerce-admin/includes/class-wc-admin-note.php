@@ -288,7 +288,7 @@ class WC_Admin_Note extends WC_Data {
 			$this->error( 'admin_note_invalid_data', __( 'The admin note type prop cannot be empty.', 'wc-admin' ) );
 		}
 
-		if ( ! in_array( $type, self::get_allowed_types() ) ) {
+		if ( ! in_array( $type, self::get_allowed_types(), true ) ) {
 			$this->error(
 				'admin_note_invalid_data',
 				sprintf(
@@ -388,7 +388,7 @@ class WC_Admin_Note extends WC_Data {
 			$this->error( 'admin_note_invalid_data', __( 'The admin note status prop cannot be empty.', 'wc-admin' ) );
 		}
 
-		if ( ! in_array( $status, self::get_allowed_statuses() ) ) {
+		if ( ! in_array( $status, self::get_allowed_statuses(), true ) ) {
 			$this->error(
 				'admin_note_invalid_data',
 				sprintf(
