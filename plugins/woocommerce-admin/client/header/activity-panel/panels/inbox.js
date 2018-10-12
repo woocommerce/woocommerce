@@ -14,6 +14,7 @@ import { withSelect } from '@wordpress/data';
  */
 import { ActivityCard, ActivityCardPlaceholder } from '../activity-card';
 import ActivityHeader from '../activity-header';
+import sanitizeHTML from 'lib/sanitize-html';
 import { Section } from '@woocommerce/components';
 
 class InboxPanel extends Component {
@@ -53,7 +54,7 @@ class InboxPanel extends Component {
 								unread={ 'unread' === notes[ key ].status }
 								actions={ getButtonsFromActions( notes[ key ].actions ) }
 							>
-								{ notes[ key ].content }
+								<span dangerouslySetInnerHTML={ sanitizeHTML( notes[ key ].content ) } />
 							</ActivityCard>
 						) )
 					) }
