@@ -7,6 +7,7 @@ import { Button } from '@wordpress/components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import Gridicon from 'gridicons';
+import { sortBy } from 'lodash';
 import { withSelect } from '@wordpress/data';
 
 /**
@@ -32,6 +33,9 @@ class InboxPanel extends Component {
 			) );
 		};
 
+		const notesArray = Object.keys( notes ).map( key => notes[ key ] );
+		const sortedNotesArray = sortBy( notesArray, id => -id );
+
 		return (
 			<Fragment>
 				<ActivityHeader title={ __( 'Inbox', 'wc-admin' ) } />
@@ -44,17 +48,17 @@ class InboxPanel extends Component {
 							lines={ 2 }
 						/>
 					) : (
-						Object.keys( notes ).map( key => (
+						sortedNotesArray.map( note => (
 							<ActivityCard
-								key={ notes[ key ].id }
+								key={ note.id }
 								className="woocommerce-inbox-activity-card"
-								title={ notes[ key ].title }
-								date={ notes[ key ].date_created }
-								icon={ <Gridicon icon={ notes[ key ].icon } size={ 48 } /> }
-								unread={ 'unread' === notes[ key ].status }
-								actions={ getButtonsFromActions( notes[ key ].actions ) }
+								title={ note.title }
+								date={ note.date_created }
+								icon={ <Gridicon icon={ note.icon } size={ 48 } /> }
+								unread={ 'unread' === note.status }
+								actions={ getButtonsFromActions( note.actions ) }
 							>
-								<span dangerouslySetInnerHTML={ sanitizeHTML( notes[ key ].content ) } />
+								<span dangerouslySetInnerHTML={ sanitizeHTML( note.content ) } />
 							</ActivityCard>
 						) )
 					) }
