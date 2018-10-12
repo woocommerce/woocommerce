@@ -57,7 +57,7 @@ class OrdersReport extends Component {
 			{
 				key: 'avg_items_per_order',
 				label: __( 'Average Items Per Order', 'wc-admin' ),
-				type: 'number',
+				type: 'average',
 			},
 			{
 				key: 'orders_count',
@@ -103,6 +103,10 @@ class OrdersReport extends Component {
 			}
 
 			switch ( type ) {
+				case 'average':
+					value = Math.round( value );
+					secondaryValue = secondaryValue && Math.round( secondaryValue );
+					break;
 				case 'currency':
 					value = formatCurrency( value );
 					secondaryValue = secondaryValue && formatCurrency( secondaryValue );
