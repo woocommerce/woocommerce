@@ -489,7 +489,7 @@ export const drawLines = ( node, data, params ) => {
 		.append( 'g' )
 		.attr( 'class', 'lines' )
 		.selectAll( '.line-g' )
-		.data( params.lineData.filter( d => d.visible ) )
+		.data( params.lineData.filter( d => d.visible ).reverse() )
 		.enter()
 		.append( 'g' )
 		.attr( 'class', 'line-g' )
