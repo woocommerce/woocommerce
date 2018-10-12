@@ -16,6 +16,7 @@ import { partial, uniqueId, find } from 'lodash';
 import './style.scss';
 import ActivityPanelToggleBubble from './toggle-bubble';
 import { H, Section } from '@woocommerce/components';
+import InboxPanel from './panels/inbox';
 import OrdersPanel from './panels/orders';
 import StockPanel from './panels/stock';
 import ReviewsPanel from './panels/reviews';
@@ -92,6 +93,12 @@ class ActivityPanel extends Component {
 	getTabs() {
 		return [
 			{
+				name: 'inbox',
+				title: __( 'Inbox', 'wc-admin' ),
+				icon: <Gridicon icon="mail" />,
+				unread: true,
+			},
+			{
 				name: 'orders',
 				title: __( 'Orders', 'wc-admin' ),
 				icon: <Gridicon icon="pages" />,
@@ -114,6 +121,8 @@ class ActivityPanel extends Component {
 
 	getPanelContent( tab ) {
 		switch ( tab ) {
+			case 'inbox':
+				return <InboxPanel />;
 			case 'orders':
 				return <OrdersPanel />;
 			case 'stock':
