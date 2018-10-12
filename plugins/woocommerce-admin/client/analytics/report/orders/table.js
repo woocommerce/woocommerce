@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { format as formatDate } from '@wordpress/date';
 import { map, orderBy } from 'lodash';
@@ -10,7 +10,14 @@ import { map, orderBy } from 'lodash';
 /**
  * Internal dependencies
  */
-import { Card, OrderStatus, TableCard, TablePlaceholder } from '@woocommerce/components';
+import {
+	Card,
+	Link,
+	OrderStatus,
+	TableCard,
+	TablePlaceholder,
+	ViewMoreList,
+} from '@woocommerce/components';
 import { downloadCSVFile, generateCSVDataFromTable, generateCSVFileName } from 'lib/csv';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
 import { getIntervalForQuery, getDateFormatsForInterval } from 'lib/date';
@@ -140,6 +147,20 @@ export default class OrdersReportTable extends Component {
 				net_revenue,
 			} = row;
 
+			const products = line_items
+				.sort( ( itemA, itemB ) => itemB.quantity - itemA.quantity )
+				.map( item => ( {
+					label: item.name,
+					href: 'post.php?post=' + item.product_id + '&action=edit',
+					quantity: item.quantity,
+				} ) );
+
+			const coupons = coupon_lines.map( coupon => ( {
+				label: coupon.code,
+				// @TODO It should link to the coupons report
+				href: 'edit.php?s=' + coupon.code + '&post_type=shop_coupon',
+			} ) );
+
 			return [
 				{
 					display: formatDate( tableFormat, date_created ),
@@ -161,32 +182,21 @@ export default class OrdersReportTable extends Component {
 				},
 				{
 					display: this.renderList(
-						line_items.map( item => ( {
-							href: getAdminLink( 'post.php?post=' + item.product_id + '&action=edit' ),
-							label: item.name,
+						products.length ? [ products[ 0 ] ] : [],
+						products.map( product => ( {
+							label: sprintf( __( '%s× %s', 'wc-admin' ), product.quantity, product.label ),
+							href: product.href,
 						} ) )
 					),
-					value: line_items
-						.map( item => item.name )
-						.join()
-						.toLowerCase(),
+					value: products.map( product => product.label ).join( ' ' ),
 				},
 				{
 					display: items_sold,
 					value: items_sold,
 				},
 				{
-					display: this.renderList(
-						coupon_lines.map( coupon => ( {
-							// @TODO It should link to the coupons report.
-							href: getAdminLink( 'edit.php?s=' + coupon.code + '&post_type=shop_coupon' ),
-							label: coupon.code,
-						} ) )
-					),
-					value: coupon_lines
-						.map( item => item.code )
-						.join()
-						.toLowerCase(),
+					display: this.renderList( coupons.length ? [ coupons[ 0 ] ] : [], coupons ),
+					value: coupons.map( item => item.code ).join( ' ' ),
 				},
 				{
 					display: formatCurrency( net_revenue, currency ),
@@ -196,16 +206,21 @@ export default class OrdersReportTable extends Component {
 		} );
 	}
 
-	renderList( items ) {
-		// @TODO Use ViewMore component if there are many items.
-		return items.map( ( item, i ) => (
-			<Fragment key={ i }>
-				{ i > 0 ? ', ' : null }
-				<a className={ items.length > 1 ? 'is-inline' : null } href={ item.href }>
-					{ item.label }
-				</a>
-			</Fragment>
+	renderLinks( items = [] ) {
+		return items.map( item => (
+			<Link href={ item.href } type={ 'wp-admin' }>
+				{ item.label }
+			</Link>
 		) );
+	}
+
+	renderList( visibleItems, popoverItems ) {
+		return (
+			<Fragment>
+				{ this.renderLinks( visibleItems ) }
+				{ popoverItems.length > 1 && <ViewMoreList items={ this.renderLinks( popoverItems ) } /> }
+			</Fragment>
+		);
 	}
 
 	renderPlaceholderTable() {

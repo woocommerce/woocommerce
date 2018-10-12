@@ -22,5 +22,6 @@
   { "component": "SplitButton" },
   { "component": "Summary", "render": "MySummaryList" },
   { "component": "Table" },
-  { "component": "Tag" }
+  { "component": "Tag" },
+  { "component": "ViewMoreList" }
 ]

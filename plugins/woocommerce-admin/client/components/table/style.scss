@@ -57,13 +57,13 @@
 	border-bottom: 1px solid $core-grey-light-500;
 	text-align: left;
 
-	a {
-		&:not(.is-inline) {
-			display: block;
-			margin: ($gap*-1) ($gap-large*-1);
-			padding: $gap $gap-large;
-		}
+	> a:only-child {
+		display: block;
+		margin: ($gap*-1) ($gap-large*-1);
+		padding: $gap $gap-large;
+	}
 
+	a {
 		&:hover,
 		&:focus {
 			color: $woocommerce-700;
