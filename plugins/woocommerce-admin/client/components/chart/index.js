@@ -358,7 +358,7 @@ Chart.defaultProps = {
 	tooltipFormat: '%B %d, %Y',
 	xFormat: '%d',
 	x2Format: '%b %Y',
-	yFormat: '$.3s',
+	yFormat: '$.1s',
 	layout: 'standard',
 	mode: 'item-comparison',
 	type: 'line',
