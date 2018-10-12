@@ -25,5 +25,8 @@
 		"wpcalypso/import-no-redux-combine-reducers": 0,
 		"wpcalypso/jsx-classname-namespace": 0,
 		"wpcalypso/redux-no-bound-selectors": 1,
+		"jsx-a11y/label-has-for": [ "error", {
+			"required": "id"
+		} ]
 	},
 }
