@@ -280,7 +280,7 @@ D3Chart.defaultProps = {
 	width: 600,
 	xFormat: '%Y-%m-%d',
 	x2Format: '',
-	yFormat: '.1s',
+	yFormat: '.3s',
 };
 
 export default D3Chart;
