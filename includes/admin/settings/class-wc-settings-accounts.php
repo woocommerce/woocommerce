@@ -31,6 +31,11 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 	 * @return array
 	 */
 	public function get_settings() {
+		$erasure_text = esc_html( 'account erasure request', 'woocommerce' );
+		if ( current_user_can( 'manage_privacy_options' ) ) {
+			$erasure_text = sprintf( '<a href="%s">%s</a>', esc_url( admin_url( 'tools.php?page=remove_personal_data' ) ), $erasure_text );
+		}
+
 		$settings = apply_filters(
 			'woocommerce_' . $this->id . '_settings', array(
 				array(
@@ -93,7 +98,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 					'title'         => __( 'Account erasure requests', 'woocommerce' ),
 					'desc'          => __( 'Remove personal data from orders', 'woocommerce' ),
 					/* Translators: %s URL to erasure request screen. */
-					'desc_tip'      => sprintf( __( 'When handling an <a href="%s">account erasure request</a>, should personal data within orders be retained or removed?', 'woocommerce' ), esc_url( admin_url( 'tools.php?page=remove_personal_data' ) ) ),
+					'desc_tip'      => sprintf( esc_html__( 'When handling an %s, should personal data within orders be retained or removed?', 'woocommerce' ), $erasure_text ),
 					'id'            => 'woocommerce_erasure_request_removes_order_data',
 					'type'          => 'checkbox',
 					'default'       => 'no',
@@ -103,7 +108,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				array(
 					'desc'          => __( 'Remove access to downloads', 'woocommerce' ),
 					/* Translators: %s URL to erasure request screen. */
-					'desc_tip'      => sprintf( __( 'When handling an <a href="%s">account erasure request</a>, should access to downloadable files be revoked and download logs cleared?', 'woocommerce' ), esc_url( admin_url( 'tools.php?page=remove_personal_data' ) ) ),
+					'desc_tip'      => sprintf( esc_html__( 'When handling an %s, should access to downloadable files be revoked and download logs cleared?', 'woocommerce' ), $erasure_text ),
 					'id'            => 'woocommerce_erasure_request_removes_download_data',
 					'type'          => 'checkbox',
 					'default'       => 'no',
