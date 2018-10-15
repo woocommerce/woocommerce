@@ -279,7 +279,7 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 /**
  * Checks if the current user has a role.
  *
- * @param string       $role The role.
+ * @param string $role The role.
  * @return bool
  */
 function wc_current_user_has_role( $role ) {
@@ -294,13 +294,15 @@ function wc_current_user_has_role( $role ) {
  * @return bool
  */
 function wc_user_has_role( $user, $role ) {
-    if ( ! is_object( $user ) )
-        $user = get_userdata( $user );
+	if ( ! is_object( $user ) ) {
+		$user = get_userdata( $user );
+	}
  
-    if ( ! $user || ! $user->exists() )
-        return false;
+	if ( ! $user || ! $user->exists() ) {
+		return false;
+	}
 
-    return in_array( $role, $user->roles, true );
+	return in_array( $role, $user->roles, true );
 }
 
 /**
