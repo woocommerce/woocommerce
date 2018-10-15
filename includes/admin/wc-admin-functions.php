@@ -208,7 +208,7 @@ function wc_save_order_items( $order_id, $items ) {
 			$item_data = array();
 
 			foreach ( $data_keys as $key => $default ) {
-				$item_data[ $key ] = isset( $items[ $key ][ $item_id ] ) ? wp_check_invalid_utf8( wp_unslash( $items[ $key ][ $item_id ] ) ) : $default;
+				$item_data[ $key ] = isset( $items[ $key ][ $item_id ] ) ? wc_check_invalid_utf8( wp_unslash( $items[ $key ][ $item_id ] ) ) : $default;
 			}
 
 			if ( '0' === $item_data['order_item_qty'] ) {
