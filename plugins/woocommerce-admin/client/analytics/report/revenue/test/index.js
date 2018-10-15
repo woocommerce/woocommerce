@@ -12,8 +12,8 @@ import { TableCard } from '@woocommerce/components';
  * Internal dependencies
  */
 import { RevenueReport } from '../';
-import mockData from '../__mocks__/mock-data';
-import mockCSV from '../__mocks__/mock-csv';
+import mockData from '../__mocks__/revenue-mock-data';
+import mockCSV from '../__mocks__/revenue-mock-csv';
 import { downloadCSVFile } from 'lib/csv';
 
 jest.mock( 'lib/csv', () => ( {

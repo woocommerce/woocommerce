@@ -13,7 +13,7 @@ import { createRegistry, RegistryProvider } from '@wordpress/data';
 import TopSellingProductsWithSelect, { TopSellingProducts } from '../';
 import { numberFormat } from 'lib/number';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
-import mockData from '../__mocks__/mock-data';
+import mockData from '../__mocks__/top-selling-products-mock-data';
 
 // Mock <Table> to avoid tests failing due to it using DOM properties that
 // are not available on TestRenderer.
