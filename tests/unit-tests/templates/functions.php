@@ -65,4 +65,39 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 		$product->delete( true );
 		wp_delete_term( $category['term_id'], 'product_cat' );
 	}
+
+	public function test_wc_dropdown_variation_attribute_options_no_attributes() {
+		$this->expectOutputString( '<select id="" class="" name="attribute_" data-attribute_name="attribute_" data-show_option_none="yes"><option value="">Choose an option</option></select>' );
+
+		wc_dropdown_variation_attribute_options();
+	}
+
+	public function test_wc_dropdown_variation_attribute_options_should_return_attributes_list() {
+		$product = WC_Helper_Product::create_variation_product();
+
+		$this->expectOutputString( '<select id="pa_size" class="" name="attribute_pa_size" data-attribute_name="attribute_pa_size" data-show_option_none="yes"><option value="">Choose an option</option><option value="large" >large</option><option value="small" >small</option></select>' );
+
+		wc_dropdown_variation_attribute_options(
+			array(
+				'product' => $product,
+				'attribute' => 'pa_size',
+			)
+		);
+	}
+
+	public function test_wc_dropdown_variation_attribute_options_should_return_attributes_list_and_selected_element() {
+		$product = WC_Helper_Product::create_variation_product();
+		$_REQUEST['attribute_pa_size'] = 'large';
+
+		$this->expectOutputString( '<select id="pa_size" class="" name="attribute_pa_size" data-attribute_name="attribute_pa_size" data-show_option_none="yes"><option value="">Choose an option</option><option value="large"  selected=\'selected\'>large</option><option value="small" >small</option></select>' );
+
+		wc_dropdown_variation_attribute_options(
+			array(
+				'product' => $product,
+				'attribute' => 'pa_size',
+			)
+		);
+
+		unset( $_REQUEST['attribute_pa_size'] );
+	}
 }
