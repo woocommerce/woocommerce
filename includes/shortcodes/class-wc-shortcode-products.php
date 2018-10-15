@@ -288,7 +288,13 @@ class WC_Shortcode_Products {
 
 			if ( $terms && is_numeric( $terms[0] ) ) {
 				$terms = array_map( 'absint', $terms );
-				$field = 'term_id';
+				$query_args['tax_query']['relation'] = 'OR';
+				$query_args['tax_query'][] = array(
+					'taxonomy' => $taxonomy,
+					'terms'    => $terms,
+					'field'    => 'term_id',
+					'operator' => $this->attributes['terms_operator'],
+				);
 			}
 
 			// If no terms were specified get all products that are in the attribute taxonomy.
@@ -299,9 +305,15 @@ class WC_Shortcode_Products {
 						'fields'   => 'ids',
 					)
 				);
-				$field = 'term_id';
+				$query_args['tax_query'][] = array(
+					'taxonomy' => $taxonomy,
+					'terms'    => $terms,
+					'field'    => 'term_id',
+					'operator' => $this->attributes['terms_operator'],
+				);
 			}
 
+			// We always need to search based on the slug as well, this is to accommodate numeric slugs.
 			$query_args['tax_query'][] = array(
 				'taxonomy' => $taxonomy,
 				'terms'    => $terms,
@@ -324,9 +336,22 @@ class WC_Shortcode_Products {
 
 			if ( is_numeric( $categories[0] ) ) {
 				$categories = array_map( 'absint', $categories );
-				$field      = 'term_id';
+				$query_args['tax_query']['relation'] = 'OR';
+				$query_args['tax_query'][] = array(
+					'taxonomy'         => 'product_cat',
+					'terms'            => $categories,
+					'field'            => 'term_id',
+					'operator'         => $this->attributes['cat_operator'],
+
+					/*
+					 * When cat_operator is AND, the children categories should be excluded,
+					 * as only products belonging to all the children categories would be selected.
+					 */
+					'include_children' => 'AND' === $this->attributes['cat_operator'] ? false : true,
+				);
 			}
 
+			// We always need to search based on the slug as well, this is to accommodate numeric slugs.
 			$query_args['tax_query'][] = array(
 				'taxonomy'         => 'product_cat',
 				'terms'            => $categories,
