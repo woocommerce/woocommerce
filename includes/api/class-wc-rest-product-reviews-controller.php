@@ -554,7 +554,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 			}
 
 			if ( isset( $prepared_args['comment_content'] ) && empty( $prepared_args['comment_content'] ) ) {
-				return new WP_Error( 'woocommerce_rest_review_content_invalid', __( 'Invalid revivew content.', 'woocommerce' ), array( 'status' => 400 ) );
+				return new WP_Error( 'woocommerce_rest_review_content_invalid', __( 'Invalid review content.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 
 			$prepared_args['comment_ID'] = $id;
