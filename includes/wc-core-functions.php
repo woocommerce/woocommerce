@@ -1633,7 +1633,7 @@ function wc_get_logger() {
 
 	$class = apply_filters( 'woocommerce_logging_class', 'WC_Logger' );
 
-	if ( null !== $logger && is_a( $logger, $class ) ) {
+	if ( null !== $logger && is_string( $class ) && is_a( $logger, $class ) ) {
 		return $logger;
 	}
 

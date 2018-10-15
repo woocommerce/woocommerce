@@ -86,7 +86,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 
 		// products shortcode with attributes.
 		$shortcode2 = new WC_Shortcode_Products( array(
-			'orderby' => 'id',
+			'orderby' => 'ID',
 			'order'   => 'DESC',
 		) );
 		$expected2  = array(
@@ -94,7 +94,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'post_status'         => 'publish',
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => true,
-			'orderby'             => 'id',
+			'orderby'             => 'ID',
 			'order'               => 'DESC',
 			'posts_per_page'      => '-1',
 			'meta_query'          => $meta_query,
