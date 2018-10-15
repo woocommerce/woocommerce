@@ -38,5 +38,6 @@ function wc() {
 	return WooCommerce::instance();
 }
 
-// Global for backwards compatibility.
-$GLOBALS['woocommerce'] = wc();
+// Launch the plugin.
+add_action( 'plugins_loaded', 'wc', 0 );
+

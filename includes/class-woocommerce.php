@@ -113,6 +113,8 @@ final class WooCommerce {
 	public static function instance() {
 		if ( is_null( self::$_instance ) ) {
 			self::$_instance = new self();
+			// Global for backwards compatibility.
+			$GLOBALS['woocommerce'] = self::$_instance;
 		}
 		return self::$_instance;
 	}
