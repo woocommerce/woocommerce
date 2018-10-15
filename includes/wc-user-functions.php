@@ -378,11 +378,11 @@ add_filter( 'user_has_cap', 'wc_customer_has_capability', 10, 3 );
 function wc_modify_editable_roles( $roles ) {
 	if ( ! wc_current_user_has_role( 'administrator' ) ) {
 		unset( $roles['administrator'] );
-	}
 
-	if ( wc_current_user_has_role( 'shop_manager' ) ) {
-		$shop_manager_editable_roles = apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) );
-		return array_intersect_key( $roles, array_flip( $shop_manager_editable_roles ) );
+		if ( wc_current_user_has_role( 'shop_manager' ) ) {
+			$shop_manager_editable_roles = apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) );
+			return array_intersect_key( $roles, array_flip( $shop_manager_editable_roles ) );
+		}
 	}
 
 	return $roles;
@@ -409,16 +409,18 @@ function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
 			if ( ! isset( $args[0] ) || $args[0] === $user_id ) {
 				break;
 			} else {
-				if ( wc_user_has_role( $args[0], 'administrator' ) && ! wc_current_user_has_role( 'administrator' ) ) {
-					$caps[] = 'do_not_allow';
-				}
-
-				// Shop managers can only edit customer info.
-				if ( wc_current_user_has_role( 'shop_manager' ) ) {
-					$userdata = get_userdata( $args[0] );
-					$shop_manager_editable_roles = apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) );
-					if ( property_exists( $userdata, 'roles' ) && ! empty( $userdata->roles ) && ! array_intersect( $userdata->roles, $shop_manager_editable_roles ) ) {
+				if ( ! wc_current_user_has_role( 'administrator' ) ) {
+					if ( wc_user_has_role( $args[0], 'administrator' ) ) {
 						$caps[] = 'do_not_allow';
+					}
+
+					// Shop managers can only edit customer info.
+					if ( wc_current_user_has_role( 'shop_manager' ) ) {
+						$userdata = get_userdata( $args[0] );
+						$shop_manager_editable_roles = apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) );
+						if ( property_exists( $userdata, 'roles' ) && ! empty( $userdata->roles ) && ! array_intersect( $userdata->roles, $shop_manager_editable_roles ) ) {
+							$caps[] = 'do_not_allow';
+						}
 					}
 				}
 			}
