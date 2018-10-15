@@ -203,6 +203,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Don't fire two of the same action when saving shipping settings. #21494
 * Fix - Remove double condition for address line 2 in `WC_Countries::get_default_address_fields`.  #20629
 * Fix - Correctly handle shorthand values for memory_limit in php.ini. #21557
+* Fix - Product shortcode numeric term slug matching. #21560
 * Fix/Tweak - Fire `woocommerce_grant_product_download_access` hook after the download has its ID set. #20905
 * Fix/Tweak/Performance - Change wp_woocommerce_sessions primary key to session_id. #21245
 * Tweak - Show empty terms in admin product category filter dropdown. #20324
