@@ -195,6 +195,18 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Allow saving a stock quantity of 0 using quick edit. #21447
 * Fix - Change the query used to save session data to the database to protect against deadlocks. #21455
 * Fix - Make sure default category tooltip is rendered when the image column is deactivated. #21410
+* Fix - Fix warning when using logger instance in woocommerce_logging_class filter. #21448
+* Fix - Use uppercase "ID" when sorting product queries by ID. #21461
+* Fix - Consistently escape the gateway ID in the checkout payment method template. #21439
+* Fix - Avoid treating HTTP 301 and 302 codes as failures for webhooks. #21491 
+* Fix - Add address_1 to shipping packages info in WC_Cart:: get_shipping_packages to make it work correctly in address formatting functions. #21493
+* Fix - Don't fire two of the same action when saving shipping settings. #21494
+* Fix - Remove double condition for address line 2 in `WC_Countries::get_default_address_fields`.  #20629
+* Fix - Correctly handle shorthand values for memory_limit in php.ini. #21557
+* Fix - Product shortcode numeric term slug matching. #21560
+* Fix - Remove the erasure tools links from the descriptions of the erasure settings for users without the manage_privacy_options capability. #21565
+* Fix - Don't double urldecode posted variation attributes. #21570
+* Fix - New helper functions wc_user_has_role and wc_current_user_has_role to correctly check user roles. #21569
 * Fix/Tweak - Fire `woocommerce_grant_product_download_access` hook after the download has its ID set. #20905
 * Fix/Tweak/Performance - Change wp_woocommerce_sessions primary key to session_id. #21245
 * Tweak - Show empty terms in admin product category filter dropdown. #20324
@@ -226,6 +238,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Remove 'order_again' query string to avoid multiple re-orders. #21444
 * Tweak - Remove Netherlands Antilles from the North America continent definitions. #21449
 * Tweak - Display label and meta on the same line in order emails to match frontend Order Details styling. #21456
+* Tweak - Use wp_get_upload_dir for geolite DB path. #21550
 * Performance/Tweak - Use post_author for the order customer instead of '_customer_user' meta data. #17895
 * Performance - Exclude frontend include from REST API calls. #20000
 * Performance - Improve performance of the query to delete version transients by removing unneeded "ORDER BY". #21274
