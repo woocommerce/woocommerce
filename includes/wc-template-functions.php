@@ -2776,7 +2776,7 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 		// Get selected value.
 		if ( false === $args['selected'] && $args['attribute'] && $args['product'] instanceof WC_Product ) {
 			$selected_key     = 'attribute_' . sanitize_title( $args['attribute'] );
-			$args['selected'] = isset( $_REQUEST[ $selected_key ] ) ? wc_clean( urldecode( wp_unslash( $_REQUEST[ $selected_key ] ) ) ) : $args['product']->get_variation_default_attribute( $args['attribute'] ); // WPCS: input var ok, CSRF ok, sanitization ok.
+			$args['selected'] = isset( $_REQUEST[ $selected_key ] ) ? wc_clean( wp_unslash( $_REQUEST[ $selected_key ] ) ) : $args['product']->get_variation_default_attribute( $args['attribute'] ); // WPCS: input var ok, CSRF ok, sanitization ok.
 		}
 
 		$options               = $args['options'];
