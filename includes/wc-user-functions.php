@@ -260,6 +260,33 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 }
 
 /**
+ * Checks if the current user has a role.
+ *
+ * @param string       $role The role.
+ * @return bool
+ */
+function wc_current_user_has_role( $role ) {
+	return wc_user_has_role( wp_get_current_user(), $role );
+}
+
+/**
+ * Checks if a user has a role.
+ *
+ * @param int|\WP_User $user The user.
+ * @param string       $role The role.
+ * @return bool
+ */
+function wc_user_has_role( $user, $role ) {
+    if ( ! is_object( $user ) )
+        $user = get_userdata( $user );
+ 
+    if ( ! $user || ! $user->exists() )
+        return false;
+
+    return in_array( $role, $user->roles, true );
+}
+
+/**
  * Checks if a user has a certain capability.
  *
  * @param array $allcaps All capabilities.
@@ -332,11 +359,11 @@ add_filter( 'user_has_cap', 'wc_customer_has_capability', 10, 3 );
  * @return array
  */
 function wc_modify_editable_roles( $roles ) {
-	if ( ! current_user_can( 'administrator' ) ) {
+	if ( ! wc_current_user_has_role( 'administrator' ) ) {
 		unset( $roles['administrator'] );
 	}
 
-	if ( current_user_can( 'shop_manager' ) ) {
+	if ( wc_current_user_has_role( 'shop_manager' ) ) {
 		$shop_manager_editable_roles = apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) );
 		return array_intersect_key( $roles, array_flip( $shop_manager_editable_roles ) );
 	}
@@ -365,12 +392,12 @@ function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
 			if ( ! isset( $args[0] ) || $args[0] === $user_id ) {
 				break;
 			} else {
-				if ( user_can( $args[0], 'administrator' ) && ! current_user_can( 'administrator' ) ) {
+				if ( wc_user_has_role( $args[0], 'administrator' ) && ! wc_current_user_has_role( 'administrator' ) ) {
 					$caps[] = 'do_not_allow';
 				}
 
 				// Shop managers can only edit customer info.
-				if ( current_user_can( 'shop_manager' ) ) {
+				if ( wc_current_user_has_role( 'shop_manager' ) ) {
 					$userdata = get_userdata( $args[0] );
 					$shop_manager_editable_roles = apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) );
 					if ( property_exists( $userdata, 'roles' ) && ! empty( $userdata->roles ) && ! array_intersect( $userdata->roles, $shop_manager_editable_roles ) ) {
