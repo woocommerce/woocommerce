@@ -287,14 +287,15 @@ class WC_Shortcode_Products {
 			$field    = 'slug';
 
 			if ( $terms && is_numeric( $terms[0] ) ) {
+				$field = 'term_id';
 				$terms = array_map( 'absint', $terms );
-				$query_args['tax_query']['relation'] = 'OR';
-				$query_args['tax_query'][] = array(
-					'taxonomy' => $taxonomy,
-					'terms'    => $terms,
-					'field'    => 'term_id',
-					'operator' => $this->attributes['terms_operator'],
-				);
+				// Check numeric slugs.
+				foreach ( $terms as $term ) {
+					$the_term = get_term_by( 'slug', $term, $taxonomy );
+					if ( false !== $the_term ) {
+						$terms[] = $the_term->term_id;
+					}
+				}
 			}
 
 			// If no terms were specified get all products that are in the attribute taxonomy.
@@ -305,12 +306,7 @@ class WC_Shortcode_Products {
 						'fields'   => 'ids',
 					)
 				);
-				$query_args['tax_query'][] = array(
-					'taxonomy' => $taxonomy,
-					'terms'    => $terms,
-					'field'    => 'term_id',
-					'operator' => $this->attributes['terms_operator'],
-				);
+				$field = 'term_id';
 			}
 
 			// We always need to search based on the slug as well, this is to accommodate numeric slugs.
@@ -335,23 +331,17 @@ class WC_Shortcode_Products {
 			$field      = 'slug';
 
 			if ( is_numeric( $categories[0] ) ) {
+				$field = 'term_id';
 				$categories = array_map( 'absint', $categories );
-				$query_args['tax_query']['relation'] = 'OR';
-				$query_args['tax_query'][] = array(
-					'taxonomy'         => 'product_cat',
-					'terms'            => $categories,
-					'field'            => 'term_id',
-					'operator'         => $this->attributes['cat_operator'],
-
-					/*
-					 * When cat_operator is AND, the children categories should be excluded,
-					 * as only products belonging to all the children categories would be selected.
-					 */
-					'include_children' => 'AND' === $this->attributes['cat_operator'] ? false : true,
-				);
+				// Check numeric slugs.
+				foreach ( $categories as $cat ) {
+					$the_cat = get_term_by( 'slug', $cat, 'product_cat' );
+					if ( false !== $the_cat ) {
+						$categories[] = $the_cat->term_id;
+					}
+				}
 			}
 
-			// We always need to search based on the slug as well, this is to accommodate numeric slugs.
 			$query_args['tax_query'][] = array(
 				'taxonomy'         => 'product_cat',
 				'terms'            => $categories,
