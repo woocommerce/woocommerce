@@ -91,7 +91,7 @@ class WC_Product_CSV_Importer_Controller {
 	 * @return bool
 	 */
 	public static function is_file_valid_csv( $file, $check_path = true ) {
-		if ( $check_path && apply_filters( 'woocommerce_product_csv_importer_check_import_file_path', true ) && 0 !== stripos( $file, ABSPATH ) ) {
+		if ( $check_path && apply_filters( 'woocommerce_product_csv_importer_check_import_file_path', true ) && false !== stripos( $file, '://' ) ) {
 			return false;
 		}
 
