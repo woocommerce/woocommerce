@@ -378,6 +378,9 @@ add_filter( 'user_has_cap', 'wc_customer_has_capability', 10, 3 );
  * @return array
  */
 function wc_modify_editable_roles( $roles ) {
+	if ( is_multisite() && is_super_admin() ) {
+		return $roles;
+	}
 	if ( ! wc_current_user_has_role( 'administrator' ) ) {
 		unset( $roles['administrator'] );
 
