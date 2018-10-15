@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, claudiulodro,
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
 Requires at least: 4.7
 Tested up to: 4.9
-Stable tag: 3.4.5
+Stable tag: 3.4.6
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -158,7 +158,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 
 == Changelog ==
 
-= 3.5.0 - 2018-10-XX =
+= 3.5.0 - 2018-10-17 =
 * Feature - REST API v3. #20111
 * Feature - Option has been added on the inventory tab of the edit product page to set a low stock threshold for individual products. #20260
 * Feature - Add ability to export products by category to the CSV exporter. #20870
