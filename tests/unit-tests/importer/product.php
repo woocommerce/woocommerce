@@ -27,16 +27,6 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		$bootstrap = WC_Unit_Tests_Bootstrap::instance();
 		require_once $bootstrap->plugin_dir . '/includes/import/class-wc-product-csv-importer.php';
 		require_once $bootstrap->plugin_dir . '/includes/admin/importers/class-wc-product-csv-importer-controller.php';
-
-		add_filter( 'woocommerce_product_csv_importer_check_import_file_path', '__return_false' );
-	}
-
-	/**
-	 * Remove filters.
-	 */
-	public function tearDown() {
-		parent::tearDown();
-		remove_filter( 'woocommerce_product_csv_importer_check_import_file_path', '__return_false' );
 	}
 
 	/**
@@ -623,5 +613,15 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		}
 
 		return $mocked_response;
+	}
+
+	/**
+	 * Test WC_Product_CSV_Importer_Controller::is_file_valid_csv.
+	 */
+	public function test_is_file_valid_csv() {
+		$this->assertTrue( WC_Product_CSV_Importer_Controller::is_file_valid_csv( 'C:/wamp64/www/test.local/wp-content/uploads/2018/10/products_all_gg-1.csv' ) );
+		$this->assertTrue( WC_Product_CSV_Importer_Controller::is_file_valid_csv( '/srv/www/woodev/wp-content/uploads/2018/10/1098488_single.csv' ) );
+		$this->assertFalse( WC_Product_CSV_Importer_Controller::is_file_valid_csv( '/srv/www/woodev/wp-content/uploads/2018/10/img.jpg' ) );
+		$this->assertFalse( WC_Product_CSV_Importer_Controller::is_file_valid_csv( 'file:///srv/www/woodev/wp-content/uploads/2018/10/1098488_single.csv' ) );
 	}
 }
