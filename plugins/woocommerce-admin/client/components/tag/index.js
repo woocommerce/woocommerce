@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { Fragment } from '@wordpress/element';
 import classnames from 'classnames';
 import { Button, Dashicon, IconButton, Popover } from '@wordpress/components';
@@ -27,7 +27,6 @@ const Tag = ( {
 	label,
 	popoverContents,
 	remove,
-	removeLabel,
 	screenReaderLabel,
 	setState,
 	className,
@@ -76,7 +75,7 @@ const Tag = ( {
 					className="woocommerce-tag__remove"
 					icon={ <Dashicon icon="dismiss" size={ 20 } /> }
 					onClick={ remove( id ) }
-					label={ removeLabel }
+					label={ sprintf( __( 'Remove %s', 'wc-admin' ), label ) }
 					aria-describedby={ labelId }
 				/>
 			) }
@@ -102,17 +101,9 @@ Tag.propTypes = {
 	 */
 	remove: PropTypes.func,
 	/**
-	 * The label for removing this item (shown when hovering on X, or read to screen reader users). Defaults to "Remove tag".
-	 */
-	removeLabel: PropTypes.string,
-	/**
 	 * A more descriptive label for screen reader users. Defaults to the `name` prop.
 	 */
 	screenReaderLabel: PropTypes.string,
-};
-
-Tag.defaultProps = {
-	removeLabel: __( 'Remove tag', 'wc-admin' ),
 };
 
 export default withState( {
