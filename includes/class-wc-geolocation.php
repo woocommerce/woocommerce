@@ -237,7 +237,7 @@ class WC_Geolocation {
 	 * @return string
 	 */
 	public static function get_local_database_path( $deprecated = '2' ) {
-		$upload_dir = wp_upload_dir();
+		$upload_dir = wp_get_upload_dir();
 
 		return apply_filters( 'woocommerce_geolocation_local_database_path', $upload_dir['basedir'] . '/GeoLite2-Country.mmdb', $deprecated );
 	}
