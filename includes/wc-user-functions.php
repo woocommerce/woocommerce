@@ -403,6 +403,9 @@ add_filter( 'editable_roles', 'wc_modify_editable_roles' );
  * @return array
  */
 function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
+	if ( is_multisite() && is_super_admin() ) {
+		return $caps;
+	}
 	switch ( $cap ) {
 		case 'edit_user':
 		case 'remove_user':
