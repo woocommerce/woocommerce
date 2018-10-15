@@ -113,14 +113,14 @@ class Search extends Component {
 
 	render() {
 		const autocompleter = this.getAutocompleter();
-		const { placeholder, inlineTags, selected, instanceId } = this.props;
+		const { placeholder, inlineTags, selected, instanceId, className } = this.props;
 		const { value = '', isActive } = this.state;
 		const aria = {
 			'aria-labelledby': this.props[ 'aria-labelledby' ],
 			'aria-label': this.props[ 'aria-label' ],
 		};
 		return (
-			<div className="woocommerce-search">
+			<div className={ classnames( 'woocommerce-search', className ) }>
 				<Gridicon className="woocommerce-search__icon" icon="search" size={ 18 } />
 				<Autocomplete completer={ autocompleter } onSelect={ this.selectResult }>
 					{ ( { listBoxId, activeId, onChange } ) =>
@@ -186,6 +186,10 @@ class Search extends Component {
 }
 
 Search.propTypes = {
+	/**
+	 * Class name applied to parent div.
+	 */
+	className: PropTypes.string,
 	/**
 	 * Function called when selected results change, passed result list.
 	 */

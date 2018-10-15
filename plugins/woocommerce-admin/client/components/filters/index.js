@@ -45,12 +45,7 @@ class ReportFilters extends Component {
 		if ( 'advanced' === query.filter ) {
 			return (
 				<div className="woocommerce-filters__advanced-filters">
-					<AdvancedFilters
-						config={ advancedConfig }
-						filterTitle={ __( 'Orders', 'wc-admin' ) }
-						path={ path }
-						query={ query }
-					/>
+					<AdvancedFilters config={ advancedConfig } path={ path } query={ query } />
 				</div>
 			);
 		}
