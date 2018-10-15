@@ -280,7 +280,7 @@ function wc_user_has_role( $user, $role ) {
 	if ( ! is_object( $user ) ) {
 		$user = get_userdata( $user );
 	}
- 
+
 	if ( ! $user || ! $user->exists() ) {
 		return false;
 	}
