@@ -609,6 +609,19 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 			);
 		}
 
-		return $params;
+		/**
+		 * Filter collection parameters for the posts controller.
+		 *
+		 * The dynamic part of the filter `$this->post_type` refers to the post
+		 * type slug for the controller.
+		 *
+		 * This filter registers the collection parameter, but does not map the
+		 * collection parameter to an internal WP_Query parameter. Use the
+		 * `rest_{$this->post_type}_query` filter to set WP_Query parameters.
+		 *
+		 * @param array        $query_params JSON Schema-formatted collection parameters.
+		 * @param WP_Post_Type $post_type    Post type object.
+		 */
+		return apply_filters( "rest_{$this->post_type}_collection_params", $params, $this->post_type );
 	}
 }
