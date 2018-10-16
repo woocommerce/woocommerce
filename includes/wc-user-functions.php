@@ -378,6 +378,9 @@ add_filter( 'user_has_cap', 'wc_customer_has_capability', 10, 3 );
  * @return array
  */
 function wc_modify_editable_roles( $roles ) {
+	if ( is_multisite() && is_super_admin() ) {
+		return $roles;
+	}
 	if ( ! wc_current_user_has_role( 'administrator' ) ) {
 		unset( $roles['administrator'] );
 
@@ -403,6 +406,9 @@ add_filter( 'editable_roles', 'wc_modify_editable_roles' );
  * @return array
  */
 function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
+	if ( is_multisite() && is_super_admin() ) {
+		return $caps;
+	}
 	switch ( $cap ) {
 		case 'edit_user':
 		case 'remove_user':
@@ -414,10 +420,8 @@ function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
 				if ( ! wc_current_user_has_role( 'administrator' ) ) {
 					if ( wc_user_has_role( $args[0], 'administrator' ) ) {
 						$caps[] = 'do_not_allow';
-					}
-
-					// Shop managers can only edit customer info.
-					if ( wc_current_user_has_role( 'shop_manager' ) ) {
+					} elseif ( wc_current_user_has_role( 'shop_manager' ) ) {
+						// Shop managers can only edit customer info.
 						$userdata = get_userdata( $args[0] );
 						$shop_manager_editable_roles = apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) );
 						if ( property_exists( $userdata, 'roles' ) && ! empty( $userdata->roles ) && ! array_intersect( $userdata->roles, $shop_manager_editable_roles ) ) {
