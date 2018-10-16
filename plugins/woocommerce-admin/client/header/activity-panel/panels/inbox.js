@@ -14,12 +14,32 @@ import { withSelect } from '@wordpress/data';
  */
 import { ActivityCard, ActivityCardPlaceholder } from '../activity-card';
 import ActivityHeader from '../activity-header';
+import { EmptyContent, Section } from '@woocommerce/components';
 import sanitizeHTML from 'lib/sanitize-html';
-import { Section } from '@woocommerce/components';
 
 class InboxPanel extends Component {
 	render() {
-		const { isRequesting, notes } = this.props;
+		const { isError, isRequesting, notes } = this.props;
+
+		if ( isError ) {
+			const title = __( 'There was an error getting your inbox. Please try again.', 'wc-admin' );
+			const actionLabel = __( 'Reload', 'wc-admin' );
+			const actionCallback = () => {
+				// TODO Add tracking for how often an error is displayed, and the reload action is clicked.
+				window.location.reload();
+			};
+
+			return (
+				<Fragment>
+					<EmptyContent
+						title={ title }
+						actionLabel={ actionLabel }
+						actionURL={ null }
+						actionCallback={ actionCallback }
+					/>
+				</Fragment>
+			);
+		}
 
 		const getButtonsFromActions = actions => {
 			if ( ! actions ) {
