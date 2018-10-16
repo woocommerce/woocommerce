@@ -158,7 +158,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 
 == Changelog ==
 
-= 3.5.0 - 2018-10-XX =
+= 3.5.0 - 2018-10-17 =
 * Feature - REST API v3. #20111
 * Feature - Option has been added on the inventory tab of the edit product page to set a low stock threshold for individual products. #20260
 * Feature - Add ability to export products by category to the CSV exporter. #20870
@@ -207,6 +207,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Remove the erasure tools links from the descriptions of the erasure settings for users without the manage_privacy_options capability. #21565
 * Fix - Don't double urldecode posted variation attributes. #21570
 * Fix - New helper functions wc_user_has_role and wc_current_user_has_role to correctly check user roles. #21569
+* Fix - Don't double-sanitize cart images. #21574
 * Fix/Tweak - Fire `woocommerce_grant_product_download_access` hook after the download has its ID set. #20905
 * Fix/Tweak/Performance - Change wp_woocommerce_sessions primary key to session_id. #21245
 * Tweak - Show empty terms in admin product category filter dropdown. #20324
