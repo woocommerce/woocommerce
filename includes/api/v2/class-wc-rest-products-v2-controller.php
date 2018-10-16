@@ -1606,10 +1606,9 @@ class WC_REST_Products_V2_Controller extends WC_REST_Legacy_Products_Controller 
 						'type'       => 'object',
 						'properties' => array(
 							'id'   => array(
-								'description' => __( 'File MD5 hash.', 'woocommerce' ),
+								'description' => __( 'File ID.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
 							),
 							'name' => array(
 								'description' => __( 'File name.', 'woocommerce' ),
