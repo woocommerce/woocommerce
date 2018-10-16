@@ -1,5 +1,3 @@
-/\*_ @format _/
-
 Fixes #
 
 _Replace this with a good description of your changes & reasoning._
