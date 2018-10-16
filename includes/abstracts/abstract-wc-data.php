@@ -634,9 +634,6 @@ abstract class WC_Data {
 
 		foreach ( $props as $prop => $value ) {
 			try {
-				if ( 'meta_data' === $prop ) {
-					continue;
-				}
 				$setter = "set_$prop";
 				if ( ! is_null( $value ) && is_callable( array( $this, $setter ) ) ) {
 					$reflection = new ReflectionMethod( $this, $setter );
