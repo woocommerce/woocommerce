@@ -20,8 +20,6 @@ import { ERROR } from 'store/constants';
  * @return {Array} Notes
  */
 function getNotes( state, query = {} ) {
-	console.log( 'in getNotes, query = ', query );
-	console.log( 'in getNotes, state = ', state );
 	return get( state, [ 'notes' ], getJsonString( query ), [] );
 }
 

@@ -80,8 +80,6 @@ export default compose(
 		const isError = isGetNotesError( inboxQuery );
 		const isRequesting = isGetNotesRequesting( inboxQuery );
 
-		console.log( notes );
-
 		return { notes, isError, isRequesting };
 	} )
 )( InboxPanel );
