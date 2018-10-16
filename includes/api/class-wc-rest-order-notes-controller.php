@@ -136,12 +136,6 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Order_Notes_V2_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'date_created'     => array(
-					'description' => __( "The date the order note was created, in the site's timezone.", 'woocommerce' ),
-					'type'        => 'date-time',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
 				'date_created_gmt' => array(
 					'description' => __( 'The date the order note was created, as GMT.', 'woocommerce' ),
 					'type'        => 'date-time',
