@@ -1,5 +1,3 @@
-/\*_ @format _/
-
 ---
 
 name: Feature request
