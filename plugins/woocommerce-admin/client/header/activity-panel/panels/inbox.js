@@ -20,7 +20,7 @@ import { Section } from '@woocommerce/components';
 
 class InboxPanel extends Component {
 	render() {
-		const { loading, notes } = this.props;
+		const { isRequesting, notes } = this.props;
 
 		const getButtonsFromActions = actions => {
 			if ( ! actions ) {
@@ -40,7 +40,7 @@ class InboxPanel extends Component {
 			<Fragment>
 				<ActivityHeader title={ __( 'Inbox', 'wc-admin' ) } />
 				<Section>
-					{ loading ? (
+					{ isRequesting ? (
 						<ActivityCardPlaceholder
 							className="woocommerce-inbox-activity-card"
 							hasAction
@@ -70,9 +70,18 @@ class InboxPanel extends Component {
 
 export default compose(
 	withSelect( select => {
-		const { getNotes } = select( 'wc-admin' );
-		const notes = getNotes();
-		const loading = select( 'core/data' ).isResolving( 'wc-admin', 'getNotes' );
-		return { loading, notes };
+		const { getNotes, isGetNotesError, isGetNotesRequesting } = select( 'wc-admin' );
+		const inboxQuery = {
+			page: 1,
+			per_page: 25,
+		};
+
+		const notes = getNotes( inboxQuery );
+		const isError = isGetNotesError( inboxQuery );
+		const isRequesting = isGetNotesRequesting( inboxQuery );
+
+		console.log( notes );
+
+		return { notes, isError, isRequesting };
 	} )
 )( InboxPanel );
