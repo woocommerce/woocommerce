@@ -1429,9 +1429,8 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
-		$term    = wc_clean( wp_unslash( $_GET['term'] ) );
-		$exclude = array();
-		$limit   = '';
+		$term  = wc_clean( wp_unslash( $_GET['term'] ) );
+		$limit = '';
 
 		if ( empty( $term ) ) {
 			wp_die();
