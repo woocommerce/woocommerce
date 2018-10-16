@@ -8,7 +8,7 @@ import { compose } from '@wordpress/compose';
 import { format as formatDate } from '@wordpress/date';
 import PropTypes from 'prop-types';
 import { withSelect } from '@wordpress/data';
-import { map, find } from 'lodash';
+import { find, get, map } from 'lodash';
 
 /**
  * Internal dependencies
@@ -203,7 +203,8 @@ class OrdersReport extends Component {
 
 	render() {
 		const {
-			isRequesting,
+			isTableDataError,
+			isTableDataRequesting,
 			orders,
 			path,
 			query,
@@ -212,9 +213,14 @@ class OrdersReport extends Component {
 			summaryNumbers,
 		} = this.props;
 
-		if ( primaryData.isError || secondaryData.isError || summaryNumbers.isError ) {
+		if (
+			primaryData.isError ||
+			secondaryData.isError ||
+			isTableDataError ||
+			summaryNumbers.isError
+		) {
 			let title, actionLabel, actionURL, actionCallback;
-			if ( primaryData.isError || secondaryData.isError ) {
+			if ( primaryData.isError || secondaryData.isError || isTableDataError ) {
 				title = __( 'There was an error getting your stats. Please try again.', 'wc-admin' );
 				actionLabel = __( 'Reload', 'wc-admin' );
 				actionCallback = () => {
@@ -250,7 +256,16 @@ class OrdersReport extends Component {
 				/>
 				{ this.renderChartSummaryNumbers() }
 				{ this.renderChart() }
-				<OrdersReportTable isRequesting={ isRequesting } orders={ orders } query={ query } />
+				<OrdersReportTable
+					isRequesting={ isTableDataRequesting }
+					orders={ orders }
+					query={ query }
+					totalRows={ get(
+						primaryData,
+						[ 'data', 'totals', 'orders_count' ],
+						Object.keys( orders ).length
+					) }
+				/>
 			</Fragment>
 		);
 	}
@@ -264,9 +279,6 @@ OrdersReport.propTypes = {
 
 export default compose(
 	withSelect( ( select, props ) => {
-		const { getOrders } = select( 'wc-admin' );
-		const orders = getOrders();
-		const isRequesting = select( 'core/data' ).isResolving( 'wc-admin', 'getOrders' );
 		const { query } = props;
 		const interval = getIntervalForQuery( query );
 		const datesFromQuery = getCurrentDates( query );
@@ -304,8 +316,24 @@ export default compose(
 			},
 			select
 		);
+
+		const { getOrders, isGetOrdersError, isGetOrdersRequesting } = select( 'wc-admin' );
+		const tableQuery = {
+			orderby: query.orderby || 'date',
+			order: query.order || 'asc',
+			page: query.page || 1,
+			per_page: query.per_page || 25,
+			after: datesFromQuery.primary.after + 'T00:00:00+00:00',
+			before: datesFromQuery.primary.before + 'T23:59:59+00:00',
+			status: [ 'processing', 'on-hold', 'completed' ],
+		};
+		const orders = getOrders( tableQuery );
+		const isTableDataError = isGetOrdersError( tableQuery );
+		const isTableDataRequesting = isGetOrdersRequesting( tableQuery );
+
 		return {
-			isRequesting,
+			isTableDataError,
+			isTableDataRequesting,
 			orders,
 			primaryData,
 			secondaryData,

@@ -1,29 +1,31 @@
 /** @format */
 
-const DEFAULT_STATE = {
-	orders: {},
-	ids: [],
-};
+/**
+ * External dependencies
+ */
+import { merge } from 'lodash';
+
+/**
+ * Internal dependencies
+ */
+import { ERROR } from 'store/constants';
+import { getJsonString } from 'store/utils';
+
+const DEFAULT_STATE = {};
 
 export default function ordersReducer( state = DEFAULT_STATE, action ) {
+	const queryKey = getJsonString( action.query );
+
 	switch ( action.type ) {
 		case 'SET_ORDERS':
-			const { orders } = action;
-			const ordersMap = orders.reduce( ( map, order ) => {
-				map[ order.id ] = order;
-				return map;
-			}, {} );
-			return {
-				...state,
-				orders: Object.assign( {}, state.orders, ordersMap ),
-			};
-		case 'UPDATE_ORDER':
-			const updatedOrders = { ...state.orders };
-			updatedOrders[ action.order.id ] = action.order;
-			return {
-				...state,
-				orders: updatedOrders,
-			};
+			return merge( {}, state, {
+				[ queryKey ]: action.orders,
+			} );
+
+		case 'SET_ORDERS_ERROR':
+			return merge( {}, state, {
+				[ queryKey ]: ERROR,
+			} );
 	}
 
 	return state;
