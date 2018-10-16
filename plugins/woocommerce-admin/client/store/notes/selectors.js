@@ -20,7 +20,7 @@ import { ERROR } from 'store/constants';
  * @return {Array} Notes
  */
 function getNotes( state, query = {} ) {
-	return get( state, [ 'notes' ], getJsonString( query ), [] );
+	return get( state, [ 'notes', getJsonString( query ) ], [] );
 }
 
 export default {
