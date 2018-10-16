@@ -358,10 +358,12 @@ class WC_REST_Orders_V2_Controller extends WC_REST_Legacy_Orders_Controller {
 		$args = parent::prepare_objects_query( $request );
 
 		// Set post_status.
-		if ( 'any' !== $request['status'] ) {
+		if ( in_array( $request['status'], $this->get_order_statuses(), true ) ) {
 			$args['post_status'] = 'wc-' . $request['status'];
-		} else {
+		} elseif ( 'any' === $request['status'] ) {
 			$args['post_status'] = 'any';
+		} else {
+			$args['post_status'] = $request['status'];
 		}
 
 		if ( isset( $request['customer'] ) ) {
@@ -1674,7 +1676,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_Legacy_Orders_Controller {
 			'default'           => 'any',
 			'description'       => __( 'Limit result set to orders assigned a specific status.', 'woocommerce' ),
 			'type'              => 'string',
-			'enum'              => array_merge( array( 'any' ), $this->get_order_statuses() ),
+			'enum'              => array_merge( array( 'any', 'trash' ), $this->get_order_statuses() ),
 			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
