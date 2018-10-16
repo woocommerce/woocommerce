@@ -1430,7 +1430,7 @@ class WC_AJAX {
 		}
 
 		$term  = wc_clean( wp_unslash( $_GET['term'] ) );
-		$limit = '';
+		$limit = 0;
 
 		if ( empty( $term ) ) {
 			wp_die();
