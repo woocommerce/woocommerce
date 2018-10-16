@@ -7,7 +7,6 @@ import { Button } from '@wordpress/components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import Gridicon from 'gridicons';
-import { sortBy } from 'lodash';
 import { withSelect } from '@wordpress/data';
 
 /**
@@ -34,7 +33,6 @@ class InboxPanel extends Component {
 		};
 
 		const notesArray = Object.keys( notes ).map( key => notes[ key ] );
-		const sortedNotesArray = sortBy( notesArray, id => -id );
 
 		return (
 			<Fragment>
@@ -48,7 +46,7 @@ class InboxPanel extends Component {
 							lines={ 2 }
 						/>
 					) : (
-						sortedNotesArray.map( note => (
+						notesArray.map( note => (
 							<ActivityCard
 								key={ note.id }
 								className="woocommerce-inbox-activity-card"
