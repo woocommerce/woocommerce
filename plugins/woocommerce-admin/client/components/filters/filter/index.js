@@ -5,8 +5,8 @@
 import { __ } from '@wordpress/i18n';
 import { Button, Dropdown, IconButton } from '@wordpress/components';
 import classnames from 'classnames';
-import { Component, Fragment } from '@wordpress/element';
-import { find, omit, partial } from 'lodash';
+import { Component } from '@wordpress/element';
+import { find, omit, partial, pick, last, get, includes } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
@@ -14,6 +14,7 @@ import PropTypes from 'prop-types';
  */
 import AnimationSlider from 'components/animation-slider';
 import DropdownButton from 'components/dropdown-button';
+import Search from 'components/search';
 import { updateQueryString } from 'lib/nav-utils';
 import './style.scss';
 
@@ -27,15 +28,28 @@ class FilterPicker extends Component {
 	constructor( props ) {
 		super( props );
 
-		const { path = [] } = this.getFilter();
+		const selectedFilter = this.getFilter();
 		this.state = {
-			nav: path,
+			nav: selectedFilter.path || [],
 			animate: null,
+			selectedTag: null,
 		};
 
-		this.selectSubFilters = this.selectSubFilters.bind( this );
+		this.selectSubFilter = this.selectSubFilter.bind( this );
 		this.getVisibleFilters = this.getVisibleFilters.bind( this );
+		this.updateSelectedTag = this.updateSelectedTag.bind( this );
+		this.onTagChange = this.onTagChange.bind( this );
 		this.goBack = this.goBack.bind( this );
+
+		if ( selectedFilter.settings && selectedFilter.settings.getLabels ) {
+			const { query } = this.props;
+			const { param, getLabels } = selectedFilter.settings;
+			getLabels( query[ param ] ).then( this.updateSelectedTag );
+		}
+	}
+
+	updateSelectedTag( tags ) {
+		this.setState( { selectedTag: tags[ 0 ] } );
 	}
 
 	getAllFilters( filters ) {
@@ -59,8 +73,11 @@ class FilterPicker extends Component {
 		return find( allFilters, { value } ) || {};
 	}
 
-	getLabels( selectedFilter ) {
-		// @TODO: handle single product secondary labels
+	getButtonLabel( selectedFilter ) {
+		if ( 'Search' === selectedFilter.component ) {
+			const { selectedTag } = this.state;
+			return [ selectedTag && selectedTag.label, get( selectedFilter, 'settings.labels.button' ) ];
+		}
 		return selectedFilter ? [ selectedFilter.label ] : [];
 	}
 
@@ -73,7 +90,7 @@ class FilterPicker extends Component {
 		return this.getVisibleFilters( nextFilters && nextFilters.subFilters, nav.slice( 1 ) );
 	}
 
-	selectSubFilters( value ) {
+	selectSubFilter( value ) {
 		// Add the value onto the nav path
 		this.setState( prevState => ( { nav: [ ...prevState.nav, value ], animate: 'left' } ) );
 	}
@@ -83,41 +100,59 @@ class FilterPicker extends Component {
 		this.setState( prevState => ( { nav: prevState.nav.slice( 0, -1 ), animate: 'right' } ) );
 	}
 
-	renderButton( filter, onClose ) {
-		if ( filter.subFilters ) {
-			return (
-				<Button
-					className="woocommerce-filters-filter__button"
-					onClick={ partial( this.selectSubFilters, filter.value ) }
-				>
-					{ filter.label }
-				</Button>
-			);
-		}
-
-		if ( filter.component ) {
-			return (
-				<Fragment>
-					{ filter.label && (
-						<span className="woocommerce-filters-filter__button">{ filter.label }</span>
-					) }
-					<input
-						type="text"
-						style={ { width: '100%', margin: '0' } }
-						placeholder="Search Placeholder"
-					/>
-				</Fragment>
-			);
-		}
-
+	update( value, additionalQueries = {} ) {
 		const { path, query } = this.props;
-		const onClick = event => {
+		// Keep only time related queries when updating to a new filter
+		const timeRelatedQueries = pick( query, [ 'period', 'compare', 'before', 'after' ] );
+		const update = {
+			filter: 'all' === value ? undefined : value,
+			...additionalQueries,
+		};
+		updateQueryString( update, path, timeRelatedQueries );
+	}
+
+	onTagChange( filter, onClose, tags ) {
+		const tag = last( tags );
+		const { value, settings } = filter;
+		const { param } = settings;
+		if ( tag ) {
+			this.update( value, { [ param ]: tag.id } );
+			onClose();
+		} else {
+			this.update( 'all' );
+		}
+		this.updateSelectedTag( [ tag ] );
+	}
+
+	renderButton( filter, onClose ) {
+		if ( filter.component ) {
+			const { type, labels } = filter.settings;
+			const { selectedTag } = this.state;
+			return (
+				<Search
+					className="woocommerce-filters-filter__search"
+					type={ type }
+					placeholder={ labels.placeholder }
+					selected={ selectedTag ? [ selectedTag ] : [] }
+					onChange={ partial( this.onTagChange, filter, onClose ) }
+					inlineTags
+				/>
+			);
+		}
+
+		const selectFilter = event => {
 			onClose( event );
-			updateQueryString( { filter: filter.value }, path, query );
+			this.update( filter.value );
+			this.setState( { selectedTag: null } );
 		};
 
+		const selectSubFilter = partial( this.selectSubFilter, filter.value );
+
 		return (
-			<Button className="woocommerce-filters-filter__button" onClick={ onClick }>
+			<Button
+				className="woocommerce-filters-filter__button"
+				onClick={ filter.subFilters ? selectSubFilter : selectFilter }
+			>
 				{ filter.label }
 			</Button>
 		);
@@ -141,7 +176,7 @@ class FilterPicker extends Component {
 						<DropdownButton
 							onClick={ onToggle }
 							isOpen={ isOpen }
-							labels={ this.getLabels( selectedFilter ) }
+							labels={ this.getButtonLabel( selectedFilter ) }
 						/>
 					) }
 					renderContent={ ( { onClose } ) => (
@@ -163,7 +198,9 @@ class FilterPicker extends Component {
 										<li
 											key={ filter.value }
 											className={ classnames( 'woocommerce-filters-filter__content-list-item', {
-												'is-selected': selectedFilter.value === filter.value,
+												'is-selected':
+													selectedFilter.value === filter.value ||
+													( selectedFilter.path && includes( selectedFilter.path, filter.value ) ),
 											} ) }
 										>
 											{ this.renderButton( filter, onClose ) }
