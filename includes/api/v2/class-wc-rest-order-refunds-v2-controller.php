@@ -388,6 +388,7 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 					'description' => __( 'If the payment was refunded via the API.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view' ),
+					'readonly'    => true,
 				),
 				'meta_data'        => array(
 					'description' => __( 'Meta data.', 'woocommerce' ),
