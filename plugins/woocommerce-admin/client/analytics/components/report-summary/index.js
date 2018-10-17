@@ -17,9 +17,15 @@ import { getNewPath } from 'lib/nav-utils';
 import { SummaryList, SummaryListPlaceholder, SummaryNumber } from '@woocommerce/components';
 import { getCurrentDates, getDateParamsFromQuery } from 'lib/date';
 import { getSummaryNumbers } from 'store/reports/utils';
+import ReportError from 'analytics/components/report-error';
 class ReportSummary extends Component {
 	render() {
 		const { selectedChart, charts } = this.props;
+
+		if ( this.props.summaryNumbers.isError ) {
+			return <ReportError isError />;
+		}
+
 		if ( this.props.summaryNumbers.isRequesting ) {
 			return <SummaryListPlaceholder numberOfItems={ charts.length } />;
 		}

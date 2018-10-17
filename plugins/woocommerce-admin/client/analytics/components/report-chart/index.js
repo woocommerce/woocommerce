@@ -22,10 +22,15 @@ import {
 } from 'lib/date';
 import { getReportChartData } from 'store/reports/utils';
 import { MAX_PER_PAGE } from 'store/constants';
+import ReportError from 'analytics/components/report-error';
 
 class ReportChart extends Component {
 	render() {
 		const { primaryData, secondaryData, selectedChart, query } = this.props;
+
+		if ( primaryData.isError || secondaryData.isError ) {
+			return <ReportError isError />;
+		}
 
 		if ( primaryData.isRequesting || secondaryData.isRequesting ) {
 			return (
