@@ -40,7 +40,7 @@ class ReportChart extends Component {
 
 		const currentInterval = getIntervalForQuery( query );
 		const allowedIntervals = getAllowedIntervalsForQuery( query );
-		const formats = getDateFormatsForInterval( currentInterval );
+		const formats = getDateFormatsForInterval( currentInterval, primaryData.data.intervals.length );
 		const { primary, secondary } = getCurrentDates( query );
 		const primaryKey = `${ primary.label } (${ primary.range })`;
 		const secondaryKey = `${ secondary.label } (${ secondary.range })`;
