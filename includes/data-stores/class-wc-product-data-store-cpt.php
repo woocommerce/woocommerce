@@ -744,7 +744,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 						continue;
 
 					} elseif ( $attribute->is_taxonomy() ) {
-						wp_set_object_terms( $product->get_id(), wp_list_pluck( $attribute->get_terms(), 'term_id' ), $attribute->get_name() );
+						wp_set_object_terms( $product->get_id(), wp_list_pluck( (array) $attribute->get_terms(), 'term_id' ), $attribute->get_name() );
 					} else {
 						$value = wc_implode_text_attributes( $attribute->get_options() );
 					}
