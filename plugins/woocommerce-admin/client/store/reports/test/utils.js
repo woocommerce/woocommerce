@@ -76,7 +76,7 @@ describe( 'getReportChartData()', () => {
 		setIsReportStatsRequesting( () => {
 			return true;
 		} );
-		const result = getReportChartData( 'revenue', {}, select );
+		const result = getReportChartData( 'revenue', 'primary', {}, select );
 		expect( result ).toEqual( { ...response, isRequesting: true } );
 	} );
 
@@ -87,7 +87,7 @@ describe( 'getReportChartData()', () => {
 		setIsReportStatsError( () => {
 			return true;
 		} );
-		const result = getReportChartData( 'revenue', {}, select );
+		const result = getReportChartData( 'revenue', 'primary', {}, select );
 		expect( result ).toEqual( { ...response, isError: true } );
 	} );
 
@@ -122,7 +122,7 @@ describe( 'getReportChartData()', () => {
 			};
 		} );
 
-		const result = getReportChartData( 'revenue', {}, select );
+		const result = getReportChartData( 'revenue', 'primary', {}, select );
 		expect( result ).toEqual( { ...response, data: { ...data } } );
 	} );
 
@@ -168,7 +168,7 @@ describe( 'getReportChartData()', () => {
 			};
 		} );
 
-		const actualResponse = getReportChartData( 'revenue', {}, select );
+		const actualResponse = getReportChartData( 'revenue', 'primary', {}, select );
 		const expectedResponse = {
 			...response,
 			data: {
@@ -191,7 +191,7 @@ describe( 'getReportChartData()', () => {
 			return false;
 		} );
 
-		const result = getReportChartData( 'revenue', {}, select );
+		const result = getReportChartData( 'revenue', 'primary', {}, select );
 		expect( result ).toEqual( { ...response, isRequesting: true } );
 	} );
 
@@ -205,7 +205,7 @@ describe( 'getReportChartData()', () => {
 			}
 			return false;
 		} );
-		const result = getReportChartData( 'revenue', {}, select );
+		const result = getReportChartData( 'revenue', 'primary', {}, select );
 		expect( result ).toEqual( { ...response, isError: true } );
 	} );
 
@@ -223,7 +223,7 @@ describe( 'getReportChartData()', () => {
 			};
 		} );
 
-		const result = getReportChartData( 'revenue', {}, select );
+		const result = getReportChartData( 'revenue', 'primary', {}, select );
 		expect( result ).toEqual( { ...response, isEmpty: true } );
 	} );
 } );
@@ -239,15 +239,11 @@ describe( 'getSummaryNumbers()', () => {
 		},
 	};
 
-	const dates = {
-		primary: {
-			after: '2018-10-10',
-			before: '2018-10-10',
-		},
-		secondary: {
-			after: '2018-10-09',
-			before: '2018-10-09',
-		},
+	const query = {
+		after: '2018-10-10',
+		before: '2018-10-10',
+		period: 'custom',
+		compare: 'previous_period',
 	};
 
 	beforeAll( () => {
@@ -280,7 +276,7 @@ describe( 'getSummaryNumbers()', () => {
 		setIsReportStatsRequesting( () => {
 			return true;
 		} );
-		const result = getSummaryNumbers( 'revenue', dates, select );
+		const result = getSummaryNumbers( 'revenue', query, select );
 		expect( result ).toEqual( { ...response, isRequesting: true } );
 	} );
 
@@ -291,7 +287,7 @@ describe( 'getSummaryNumbers()', () => {
 		setIsReportStatsError( () => {
 			return true;
 		} );
-		const result = getSummaryNumbers( 'revenue', dates, select );
+		const result = getSummaryNumbers( 'revenue', query, select );
 		expect( result ).toEqual( { ...response, isError: true } );
 	} );
 
@@ -319,8 +315,8 @@ describe( 'getSummaryNumbers()', () => {
 			};
 		} );
 
-		setGetReportStats( ( endpoint, query ) => {
-			if ( '2018-10-10T00:00:00+00:00' === query.after ) {
+		setGetReportStats( ( endpoint, _query ) => {
+			if ( '2018-10-10T00:00:00+00:00' === _query.after ) {
 				return {
 					data: {
 						totals: totals.primary,
@@ -336,7 +332,7 @@ describe( 'getSummaryNumbers()', () => {
 			};
 		} );
 
-		const result = getSummaryNumbers( 'revenue', dates, select );
+		const result = getSummaryNumbers( 'revenue', query, select );
 		expect( result ).toEqual( { ...response, totals } );
 	} );
 } );
