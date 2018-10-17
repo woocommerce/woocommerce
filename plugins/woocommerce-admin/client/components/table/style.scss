@@ -104,14 +104,11 @@ th.woocommerce-table__item {
 }
 
 .woocommerce-table__header {
-	font-weight: bold;
-	white-space: nowrap;
-}
-
-.woocommerce-table__header {
 	padding: $gap-smaller $gap-large;
 	background-color: #f8f9fa;
 	border-bottom: 1px solid $core-grey-light-700;
+	font-weight: bold;
+	white-space: nowrap;
 
 	& + .woocommerce-table__header {
 		border-left: 1px solid $core-grey-light-700;
@@ -119,6 +116,15 @@ th.woocommerce-table__item {
 		.rtl & {
 			border-left: 0;
 			border-right: 1px solid $core-grey-light-700;
+		}
+	}
+
+	&.is-left-aligned.is-sortable {
+		padding-left: $gap;
+		svg {
+			display: inline-flex;
+			order: 1;
+			margin-left: 0;
 		}
 	}
 
