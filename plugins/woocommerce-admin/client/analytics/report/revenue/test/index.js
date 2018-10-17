@@ -12,8 +12,8 @@ import { TableCard } from '@woocommerce/components';
  * Internal dependencies
  */
 import { RevenueReport } from '../';
-import mockData from '../__mocks__/mock-data';
-import mockCSV from '../__mocks__/mock-csv';
+import mockData from '../__mocks__/revenue-mock-data';
+import mockCSV from '../__mocks__/revenue-mock-csv';
 import { downloadCSVFile } from 'lib/csv';
 
 jest.mock( 'lib/csv', () => ( {
@@ -29,13 +29,25 @@ describe( 'RevenueReport', () => {
 
 		const primaryData = {
 			data: mockData,
+			totalResults: 7,
+			totalPages: 1,
+		};
+
+		const summaryNumbers = {
+			totals: {
+				primary: {},
+				secondary: {},
+			},
 		};
 
 		const revenueReport = shallow(
 			<RevenueReport
 				params={ { report: 'revenue' } }
-				path="/analytics/revenue" query={ {} }
+				path="/analytics/revenue"
+				query={ {} }
+				summaryNumbers={ summaryNumbers }
 				primaryData={ primaryData }
+				tableData={ primaryData }
 				secondaryData={ primaryData }
 			/>
 		);
@@ -44,7 +56,7 @@ describe( 'RevenueReport', () => {
 		tableCard.props().onClickDownload();
 
 		expect( downloadCSVFile ).toHaveBeenCalledWith(
-			'revenue-' + moment().format( 'YYYY-MM-DD' ) + '-orderby-date_start-order-asc.csv',
+			'revenue-' + moment().format( 'YYYY-MM-DD' ) + '.csv',
 			mockCSV
 		);
 	} );

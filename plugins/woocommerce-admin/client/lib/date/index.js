@@ -322,6 +322,8 @@ export const getPreviousDate = ( date, date1, date2, compare, interval ) => {
 
 /**
  * Returns the allowed selectable intervals for a specific query.
+ * TODO Add support for hours. `` if ( differenceInDays <= 1 ) { allowed = [ 'hour' ]; }
+ * Today/yesterday/default: allowed = [ 'hour' ];
  *
  * @param  {Object} query Current query
  * @return {Array} Array containing allowed intervals.
@@ -341,17 +343,11 @@ export function getAllowedIntervalsForQuery( query ) {
 			allowed = [ 'day', 'week' ];
 		} else if ( differenceInDays > 1 && differenceInDays <= 7 ) {
 			allowed = [ 'day' ];
-		} else if ( differenceInDays <= 1 ) {
-			allowed = [ 'hour' ];
 		} else {
 			allowed = [ 'day' ];
 		}
 	} else {
 		switch ( query.period ) {
-			case 'today':
-			case 'yesterday':
-				allowed = [ 'hour' ];
-				break;
 			case 'week':
 			case 'last_week':
 				allowed = [ 'day' ];
@@ -393,14 +389,17 @@ export function getIntervalForQuery( query ) {
 	return current;
 }
 
+export const dayTicksThreshold = 180;
+
 /**
  * Returns date formats for the current interval.
  * See https://github.com/d3/d3-time-format for chart formats.
  *
  * @param  {String} interval Interval to get date formats for.
+ * @param  {Int}    [ticks] Number of ticks the axis will have.
  * @return {String} Current interval.
  */
-export function getDateFormatsForInterval( interval ) {
+export function getDateFormatsForInterval( interval, ticks = 0 ) {
 	let pointLabelFormat = 'F j, Y';
 	let tooltipFormat = '%B %d %Y';
 	let xFormat = '%Y-%m-%d';
@@ -415,7 +414,12 @@ export function getDateFormatsForInterval( interval ) {
 			tableFormat = 'h A';
 			break;
 		case 'day':
-			xFormat = '%d';
+			if ( ticks < dayTicksThreshold ) {
+				xFormat = '%d';
+			} else {
+				xFormat = '%b';
+				x2Format = '%Y';
+			}
 			break;
 		case 'week':
 			xFormat = '%d';
@@ -427,13 +431,11 @@ export function getDateFormatsForInterval( interval ) {
 			tooltipFormat = '%B %Y';
 			xFormat = '%b %y';
 			x2Format = '';
-			tableFormat = 'M Y';
 			break;
 		case 'year':
 			pointLabelFormat = 'Y';
 			tooltipFormat = '%Y';
 			xFormat = '%Y';
-			tableFormat = 'Y';
 			break;
 	}
 

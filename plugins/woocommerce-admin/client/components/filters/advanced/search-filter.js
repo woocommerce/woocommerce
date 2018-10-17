@@ -2,11 +2,12 @@
 /**
  * External dependencies
  */
-import { Component, Fragment } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import { SelectControl } from '@wordpress/components';
-import { partial } from 'lodash';
+import { find, partial } from 'lodash';
 import PropTypes from 'prop-types';
-import { withInstanceId } from '@wordpress/compose';
+import interpolateComponents from 'interpolate-components';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -41,39 +42,66 @@ class SearchFilter extends Component {
 		onFilterChange( filter.key, 'value', idList );
 	}
 
+	getLegend( filter, config ) {
+		const { selected } = this.state;
+		const rule = find( config.rules, { value: filter.rule } ) || {};
+		const filterStr = selected.map( item => item.label ).join( ', ' );
+
+		return interpolateComponents( {
+			mixedString: config.labels.title,
+			components: {
+				filter: <span>{ filterStr }</span>,
+				rule: <span>{ rule.label }</span>,
+			},
+		} );
+	}
+
 	render() {
-		const { config, filter, instanceId, onFilterChange } = this.props;
+		const { config, filter, onFilterChange, isEnglish } = this.props;
 		const { selected } = this.state;
 		const { key, rule } = filter;
 		const { input, labels, rules } = config;
-		return (
-			<Fragment>
-				<div
-					id={ `${ key }-${ instanceId }` }
-					className="woocommerce-filters-advanced__fieldset-legend"
-				>
-					{ labels.title }
-				</div>
-				{ rule && (
+		const children = interpolateComponents( {
+			mixedString: labels.title,
+			components: {
+				rule: (
 					<SelectControl
-						className="woocommerce-filters-advanced__list-specifier"
+						className="woocommerce-filters-advanced__rule"
 						options={ rules }
 						value={ rule }
 						onChange={ partial( onFilterChange, key, 'rule' ) }
 						aria-label={ labels.rule }
 					/>
-				) }
-				<div className="woocommerce-filters-advanced__list-selector">
+				),
+				filter: (
 					<Search
+						className="woocommerce-filters-advanced__input"
 						onChange={ this.onSearchChange }
 						type={ input.type }
 						placeholder={ labels.placeholder }
 						selected={ selected }
-						ariaLabelledby={ `${ key }-${ instanceId }` }
+						inlineTags
+						aria-label={ labels.filter }
 					/>
+				),
+			},
+		} );
+		/*eslint-disable jsx-a11y/no-noninteractive-tabindex*/
+		return (
+			<fieldset tabIndex="0">
+				<legend className="screen-reader-text">
+					{ this.getLegend( filter, config, selected ) }
+				</legend>
+				<div
+					className={ classnames( 'woocommerce-filters-advanced__fieldset', {
+						'is-english': isEnglish,
+					} ) }
+				>
+					{ children }
 				</div>
-			</Fragment>
+			</fieldset>
 		);
+		/*eslint-enable jsx-a11y/no-noninteractive-tabindex*/
 	}
 }
 
@@ -104,4 +132,4 @@ SearchFilter.propTypes = {
 	onFilterChange: PropTypes.func.isRequired,
 };
 
-export default withInstanceId( SearchFilter );
+export default SearchFilter;

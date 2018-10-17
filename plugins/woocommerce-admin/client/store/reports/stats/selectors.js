@@ -43,7 +43,7 @@ export default {
 	 *
 	 * @param  {Object} state     Current state
 	 * @param  {String} endpoint  Stats endpoint
-	 * @param  {Object} query     Report query paremters
+	 * @param  {Object} query     Report query parameters
 	 * @return {Boolean}          True if the `getReportStats` request has failed, false otherwise
 	 */
 	isReportStatsError( state, endpoint, query ) {

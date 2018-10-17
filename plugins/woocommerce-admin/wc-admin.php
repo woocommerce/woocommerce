@@ -30,7 +30,7 @@ if ( ! defined( 'WC_ADMIN_PLUGIN_FILE' ) ) {
 function wc_admin_plugins_notice() {
 	$message = sprintf(
 		/* translators: 1: URL of Gutenberg plugin, 2: URL of WooCommerce plugin */
-		__( 'The WooCommerce Admin feature plugin requires both <a href="%1$s">Gutenberg</a> and <a href="%2$s">WooCommerce</a> to be installed and active.', 'wc-admin' ),
+		__( 'The WooCommerce Admin feature plugin requires both <a href="%1$s">Gutenberg</a> and <a href="%2$s">WooCommerce</a> (>3.5) to be installed and active.', 'wc-admin' ),
 		'https://wordpress.org/plugins/gutenberg/',
 		'https://wordpress.org/plugins/woocommerce/'
 	);
@@ -44,7 +44,7 @@ function wc_admin_plugins_notice() {
  */
 function dependencies_satisfied() {
 	return ( defined( 'GUTENBERG_DEVELOPMENT_MODE' ) || defined( 'GUTENBERG_VERSION' ) )
-			&& class_exists( 'WooCommerce' );
+			&& class_exists( 'WooCommerce' ) && version_compare( WC_VERSION, '3.5', '>' );
 }
 
 /**

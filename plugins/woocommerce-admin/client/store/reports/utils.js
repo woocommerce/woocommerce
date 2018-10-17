@@ -33,15 +33,70 @@ export function isReportDataEmpty( report ) {
 }
 
 /**
+ * Returns summary number totals needed to render a report page.
+ *
+ * @param  {String} endpoint Report  API Endpoint
+ * @param  {Object} dates  Primary and secondary dates.
+ * @param {object} select Instance of @wordpress/select
+ * @return {Object}  Object containing summary number responses.
+ */
+export function getSummaryNumbers( endpoint, dates, select ) {
+	const { getReportStats, isReportStatsRequesting, isReportStatsError } = select( 'wc-admin' );
+	const response = {
+		isRequesting: false,
+		isError: false,
+		totals: {
+			primary: null,
+			secondary: null,
+		},
+	};
+
+	const baseQuery = {
+		interval: 'day',
+		per_page: 1, // We only need the `totals` part of the response.
+	};
+
+	const primaryQuery = {
+		...baseQuery,
+		after: dates.primary.after + 'T00:00:00+00:00',
+		before: dates.primary.before + 'T23:59:59+00:00',
+	};
+	const primary = getReportStats( endpoint, primaryQuery );
+	if ( isReportStatsRequesting( endpoint, primaryQuery ) ) {
+		return { ...response, isRequesting: true };
+	} else if ( isReportStatsError( endpoint, primaryQuery ) ) {
+		return { ...response, isError: true };
+	}
+
+	const primaryTotals = ( primary && primary.data && primary.data.totals ) || null;
+
+	const secondaryQuery = {
+		...baseQuery,
+		per_page: 1,
+		after: dates.secondary.after + 'T00:00:00+00:00',
+		before: dates.secondary.before + 'T23:59:59+00:00',
+	};
+	const secondary = getReportStats( endpoint, secondaryQuery );
+	if ( isReportStatsRequesting( endpoint, secondaryQuery ) ) {
+		return { ...response, isRequesting: true };
+	} else if ( isReportStatsError( endpoint, secondaryQuery ) ) {
+		return { ...response, isError: true };
+	}
+
+	const secondaryTotals = ( secondary && secondary.data && secondary.data.totals ) || null;
+
+	return { ...response, totals: { primary: primaryTotals, secondary: secondaryTotals } };
+}
+
+/**
  * Returns all of the data needed to render a chart with summary numbers on a report page.
- * TODO Use more general selectors from https://github.com/woocommerce/wc-admin/pull/307
  *
  * @param  {String} endpoint Report  API Endpoint
  * @param  {Object} query  API arguments
  * @param {object} select Instance of @wordpress/select
  * @return {Object}  Object containing API request information (response, fetching, and error details)
  */
-export function getAllReportData( endpoint, query, select ) {
+export function getReportChartData( endpoint, query, select ) {
 	const { getReportStats, isReportStatsRequesting, isReportStatsError } = select( 'wc-admin' );
 
 	const response = {

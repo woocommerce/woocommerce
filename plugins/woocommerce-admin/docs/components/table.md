@@ -30,6 +30,17 @@ The string to use as a query parameter when comparing row items.
 
 An array of column headers (see `Table` props).
 
+### `labels`
+
+- Type: Object
+  - compareButton: String
+  - downloadButton: String
+  - helpText: String
+  - placeholder: String
+- Default: null
+
+Custom labels for table header actions.
+
 ### `ids`
 
 - Type: Array
@@ -117,6 +128,13 @@ The total number of rows (across all pages).
 
 Props
 -----
+
+### `query`
+
+- Type: Object
+- Default: null
+
+An object of the query parameters passed to the page, ex `{ page: 2, per_page: 5 }`.
 
 ### `caption`
 

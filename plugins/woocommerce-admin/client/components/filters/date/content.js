@@ -83,12 +83,12 @@ class DatePickerContent extends Component {
 						initialTabName={ 'custom' === period ? 'custom' : 'period' }
 						onSelect={ this.onTabSelect }
 					>
-						{ selectedTab => (
+						{ selected => (
 							<Fragment>
-								{ selectedTab === 'period' && (
+								{ selected.name === 'period' && (
 									<PresetPeriods onSelect={ onUpdate } period={ period } />
 								) }
-								{ selectedTab === 'custom' && (
+								{ selected.name === 'custom' && (
 									<DateRange
 										after={ after }
 										before={ before }
@@ -104,8 +104,8 @@ class DatePickerContent extends Component {
 								) }
 								<div
 									className={ classnames( 'woocommerce-filters-date__content-controls', {
-										'is-sticky-bottom': selectedTab === 'custom' && isMobileViewport(),
-										'is-custom': selectedTab === 'custom',
+										'is-sticky-bottom': selected.name === 'custom' && isMobileViewport(),
+										'is-custom': selected.name === 'custom',
 									} ) }
 								>
 									<H className="woocommerce-filters-date__text">
@@ -113,7 +113,7 @@ class DatePickerContent extends Component {
 									</H>
 									<ComparePeriods onSelect={ onUpdate } compare={ compare } />
 									<div className="woocommerce-filters-date__button-group">
-										{ selectedTab === 'custom' && (
+										{ selected.name === 'custom' && (
 											<Button
 												className="woocommerce-filters-date__button"
 												isDefault
@@ -123,10 +123,10 @@ class DatePickerContent extends Component {
 												{ __( 'Reset', 'wc-admin' ) }
 											</Button>
 										) }
-										{ isValidSelection( selectedTab ) ? (
+										{ isValidSelection( selected.name ) ? (
 											<Button
 												className="woocommerce-filters-date__button"
-												onClick={ onSelect( selectedTab, onClose ) }
+												onClick={ onSelect( selected.name, onClose ) }
 												isPrimary
 											>
 												{ __( 'Update', 'wc-admin' ) }

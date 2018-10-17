@@ -1,34 +1,32 @@
+/** @format */
+
 {
-    "root": true,
-    "parser": "babel-eslint",
-    "extends": [
-        "wpcalypso/react",
-        "plugin:jsx-a11y/recommended"
-    ],
-    "plugins": [
-        "jsx-a11y",
-        "jest"
-    ],
-    "env": {
-        "browser": true,
-        "jest/globals": true,
-        "node": true
-    },
-    "globals": {
-        "jQuery": true,
-        "wp": true,
-        "wpApiSettings": true,
-        "wcSettings": true
-    },
-    "rules": {
-        "camelcase": 0,
-        "indent": 0,
-        "max-len": [ 2, { "code": 140 } ],
-        "no-console": 1,
-        "react/no-danger": 0,
-        "react/react-in-jsx-scope": 0,
-        "wpcalypso/import-no-redux-combine-reducers": 0,
-        "wpcalypso/jsx-classname-namespace": 0,
-        "wpcalypso/redux-no-bound-selectors": 1
-    }
+	"root": true,
+	"parser": "babel-eslint",
+	"extends": [ "wpcalypso/react", "plugin:jsx-a11y/recommended" ],
+	"plugins": [ "jsx-a11y", "jest" ],
+	"env": {
+		"browser": true,
+		"jest/globals": true,
+		"node": true,
+	},
+	"globals": {
+		"wp": true,
+		"wpApiSettings": true,
+		"wcSettings": true,
+	},
+	"rules": {
+		"camelcase": 0,
+		"indent": 0,
+		"max-len": [ 2, { "code": 140 } ],
+		"no-console": 1,
+		"react/no-danger": 0,
+		"react/react-in-jsx-scope": 0,
+		"wpcalypso/import-no-redux-combine-reducers": 0,
+		"wpcalypso/jsx-classname-namespace": 0,
+		"wpcalypso/redux-no-bound-selectors": 1,
+		"jsx-a11y/label-has-for": [ "error", {
+			"required": "id"
+		} ]
+	},
 }

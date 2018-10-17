@@ -6,38 +6,19 @@ import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { format as formatDate } from '@wordpress/date';
-import { map, find, orderBy } from 'lodash';
+import { map } from 'lodash';
 import PropTypes from 'prop-types';
 import { withSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import {
-	Card,
-	Chart,
-	ChartPlaceholder,
-	EmptyContent,
-	ReportFilters,
-	SummaryList,
-	SummaryListPlaceholder,
-	SummaryNumber,
-	TableCard,
-	TablePlaceholder,
-} from '@woocommerce/components';
+import { Card, ReportFilters, TableCard, TablePlaceholder } from '@woocommerce/components';
 import { downloadCSVFile, generateCSVDataFromTable, generateCSVFileName } from 'lib/csv';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
-import { getAdminLink, getNewPath, onQueryChange } from 'lib/nav-utils';
-import { getAllReportData, isReportDataEmpty } from 'store/reports/utils';
-import {
-	getCurrentDates,
-	isoDateFormat,
-	getPreviousDate,
-	getIntervalForQuery,
-	getAllowedIntervalsForQuery,
-	getDateFormatsForInterval,
-} from 'lib/date';
-import { MAX_PER_PAGE } from 'store/constants';
+import { getAdminLink, onQueryChange } from 'lib/nav-utils';
+import { getCurrentDates, getDateFormatsForInterval, getIntervalForQuery } from 'lib/date';
+import OrdersReportChart from './chart';
 
 export class RevenueReport extends Component {
 	constructor() {
@@ -60,9 +41,10 @@ export class RevenueReport extends Component {
 		return [
 			{
 				label: __( 'Date', 'wc-admin' ),
-				key: 'date_start',
+				key: 'date',
 				required: true,
 				defaultSort: true,
+				isLeftAligned: true,
 				isSortable: true,
 			},
 			{
@@ -70,6 +52,7 @@ export class RevenueReport extends Component {
 				key: 'orders_count',
 				required: false,
 				isSortable: true,
+				isNumeric: true,
 			},
 			{
 				label: __( 'Gross Revenue', 'wc-admin' ),
@@ -180,200 +163,36 @@ export class RevenueReport extends Component {
 		} );
 	}
 
-	getCharts() {
-		return [
-			{
-				key: 'gross_revenue',
-				label: __( 'Gross Revenue', 'wc-admin' ),
-				type: 'currency',
-			},
-			{
-				key: 'refunds',
-				label: __( 'Refunds', 'wc-admin' ),
-				type: 'currency',
-			},
-			{
-				key: 'coupons',
-				label: __( 'Coupons', 'wc-admin' ),
-				type: 'currency',
-			},
-			{
-				key: 'taxes',
-				label: __( 'Taxes', 'wc-admin' ),
-				type: 'currency',
-			},
-			{
-				key: 'shipping',
-				label: __( 'Shipping', 'wc-admin' ),
-				type: 'currency',
-			},
-			{
-				key: 'net_revenue',
-				label: __( 'Net Revenue', 'wc-admin' ),
-				type: 'currency',
-			},
-		];
-	}
-
-	getSelectedChart() {
-		const { query } = this.props;
-		const charts = this.getCharts();
-
-		const chart = find( charts, { key: query.chart } );
-		if ( chart ) {
-			return chart;
-		}
-
-		return charts[ 0 ];
-	}
-
-	// TODO since this pattern will exist on every report, this possibly should become a component
-	renderChartSummaryNumbers() {
-		const selectedChart = this.getSelectedChart();
-		const { primaryData, secondaryData } = this.props;
-		const { totals } = primaryData.data;
-		const secondaryTotals = secondaryData.data.totals || {};
-
-		const summaryNumbers = map( this.getCharts(), chart => {
-			const { key, label, type } = chart;
-			const isSelected = selectedChart.key === key;
-
-			let value = parseFloat( totals[ key ] );
-			let secondaryValue =
-				( secondaryTotals[ key ] && parseFloat( secondaryTotals[ key ] ) ) || undefined;
-
-			let delta = 0;
-			if ( secondaryValue && secondaryValue !== 0 ) {
-				delta = Math.round( ( value - secondaryValue ) / secondaryValue * 100 );
-			}
-
-			switch ( type ) {
-				// TODO: implement other format handlers
-				case 'currency':
-					value = formatCurrency( value );
-					secondaryValue = secondaryValue && formatCurrency( secondaryValue );
-					break;
-			}
-
-			const href = getNewPath( { chart: key } );
-
-			return (
-				<SummaryNumber
-					key={ key }
-					value={ value }
-					label={ label }
-					selected={ isSelected }
-					prevValue={ secondaryValue }
-					delta={ delta }
-					href={ href }
-				/>
-			);
-		} );
-
-		return <SummaryList>{ summaryNumbers }</SummaryList>;
-	}
-
-	renderChart() {
-		const { primaryData, secondaryData, query } = this.props;
-
-		const currentInterval = getIntervalForQuery( query );
-		const allowedIntervals = getAllowedIntervalsForQuery( query );
-		const formats = getDateFormatsForInterval( currentInterval );
-
-		const { primary, secondary } = getCurrentDates( query );
-		const selectedChart = this.getSelectedChart();
-
-		const primaryKey = `${ primary.label } (${ primary.range })`;
-		const secondaryKey = `${ secondary.label } (${ secondary.range })`;
-
-		const chartData = primaryData.data.intervals.map( function( interval, index ) {
-			const secondaryDate = getPreviousDate(
-				formatDate( 'Y-m-d', interval.date_start ),
-				primary.after,
-				secondary.after,
-				query.compare,
-				currentInterval
-			);
-			/**
-			 *  When looking at weeks, getting the previous date doesn't always work
-			 *  because subtracting the correct number of weeks from `interval.date_start`
-			 *  yeilds the start of the week correct week, but not necessarily the of the
-			 *  period in question.
-			 *
-			 *  When https://github.com/woocommerce/woocommerce/issues/21298 is resolved and
-			 *  data will be zero-filled, there is a strong argument for all this logic to be
-			 *  removed in favor of simply matching up the indices in each array of data.
-			 */
-			const secondaryInterval =
-				0 === index && 'week' === currentInterval
-					? secondaryData.data.intervals[ 0 ]
-					: find( secondaryData.data.intervals, {
-							date_start:
-								secondaryDate.format( isoDateFormat ) +
-								' ' +
-								formatDate( 'H:i:s', interval.date_start ),
-						} );
-			return {
-				date: formatDate( 'Y-m-d\\TH:i:s', interval.date_start ),
-				[ primaryKey ]: {
-					labelDate: interval.date_start,
-					value: interval.subtotals[ selectedChart.key ] || 0,
-				},
-				[ secondaryKey ]: {
-					labelDate: secondaryDate,
-					value: ( secondaryInterval && secondaryInterval.subtotals[ selectedChart.key ] ) || 0,
-				},
-			};
-		} );
-
-		return (
-			<Chart
-				data={ chartData }
-				title={ selectedChart.label }
-				interval={ currentInterval }
-				allowedIntervals={ allowedIntervals }
-				mode="time-comparison"
-				pointLabelFormat={ formats.pointLabelFormat }
-				tooltipTitle={ selectedChart.label }
-				xFormat={ formats.xFormat }
-				x2Format={ formats.x2Format }
-				dateParser={ '%Y-%m-%dT%H:%M:%S' }
-			/>
-		);
-	}
-
 	renderTable() {
-		const { primaryData, query } = this.props;
-		const intervals = primaryData.data.intervals;
-
-		const page = parseInt( query.page ) || 1;
-		const rowsPerPage = parseInt( query.per_page ) || 25;
-
-		const rows =
-			this.getRowsContent(
-				orderBy(
-					intervals,
-					function( interval ) {
-						return 'undefined' === typeof interval.subtotals[ query.orderby ]
-							? interval.date_start
-							: interval.subtotals[ query.orderby ];
-					},
-					query.order || 'asc'
-				).slice( ( page - 1 ) * rowsPerPage, page * rowsPerPage )
-			) || [];
-
+		const { isTableDataRequesting, tableData, tableQuery } = this.props;
 		const headers = this.getHeadersContent();
 
-		const tableQuery = {
-			...query,
-			orderby: query.orderby || 'date_start',
-			order: query.order || 'asc',
-		};
+		if ( isTableDataRequesting ) {
+			return (
+				<Card
+					title={ __( 'Revenue', 'wc-admin' ) }
+					className="woocommerce-analytics__table-placeholder"
+				>
+					<TablePlaceholder
+						caption={ __( 'Revenue', 'wc-admin' ) }
+						headers={ headers }
+						query={ tableQuery }
+					/>
+				</Card>
+			);
+		}
+
+		const intervals = tableData.data.intervals;
+		const rows = this.getRowsContent( intervals );
+
+		const rowsPerPage =
+			( tableQuery && tableQuery.per_page && parseInt( tableQuery.per_page ) ) || 25;
+
 		return (
 			<TableCard
 				title={ __( 'Revenue', 'wc-admin' ) }
 				rows={ rows }
-				totalRows={ intervals.length }
+				totalRows={ tableData.totalResults }
 				rowsPerPage={ rowsPerPage }
 				headers={ headers }
 				onClickDownload={ this.onDownload( headers, rows, tableQuery ) }
@@ -384,71 +203,14 @@ export class RevenueReport extends Component {
 		);
 	}
 
-	renderPlaceholder() {
-		const { path, query } = this.props;
-		const headers = this.getHeadersContent();
-		const charts = this.getCharts();
-		return (
-			<Fragment>
-				<ReportFilters query={ query } path={ path } />
-
-				<span className="screen-reader-text">
-					{ __( 'Your requested data is loading', 'wc-admin' ) }
-				</span>
-
-				<SummaryListPlaceholder numberOfItems={ charts.length } />
-				<ChartPlaceholder />
-				<Card
-					title={ __( 'Revenue', 'wc-admin' ) }
-					className="woocommerce-analytics__table-placeholder"
-				>
-					<TablePlaceholder caption={ __( 'Revenue', 'wc-admin' ) } headers={ headers } />
-				</Card>
-			</Fragment>
-		);
-	}
-
 	render() {
-		const { path, query, primaryData, secondaryData } = this.props;
-
-		if ( primaryData.isRequesting || secondaryData.isRequesting ) {
-			return this.renderPlaceholder();
-		}
-
-		if ( isReportDataEmpty( primaryData ) || primaryData.isError || secondaryData.isError ) {
-			let title, actionLabel, actionURL, actionCallback;
-			if ( primaryData.isError || secondaryData.isError ) {
-				title = __( 'There was an error getting your stats. Please try again.', 'wc-admin' );
-				actionLabel = __( 'Reload', 'wc-admin' );
-				actionCallback = () => {
-					// TODO Add tracking for how often an error is displayed, and the reload action is clicked.
-					window.location.reload();
-				};
-			} else {
-				title = __( 'No results could be found for this date range.', 'wc-admin' );
-				actionLabel = __( 'View Orders', 'wc-admin' );
-				actionURL = getAdminLink( 'edit.php?post_type=shop_order' );
-			}
-
-			return (
-				<Fragment>
-					<ReportFilters query={ query } path={ path } />
-					<EmptyContent
-						title={ title }
-						actionLabel={ actionLabel }
-						actionURL={ actionURL }
-						actionCallback={ actionCallback }
-					/>
-				</Fragment>
-			);
-		}
+		const { path, query } = this.props;
 
 		return (
 			<Fragment>
 				<ReportFilters query={ query } path={ path } />
 
-				{ this.renderChartSummaryNumbers() }
-				{ this.renderChart() }
+				<OrdersReportChart query={ query } />
 				{ this.renderTable() }
 			</Fragment>
 		);
@@ -464,37 +226,28 @@ RevenueReport.propTypes = {
 export default compose(
 	withSelect( ( select, props ) => {
 		const { query } = props;
+		const { getReportStats, isReportStatsRequesting, isReportStatsError } = select( 'wc-admin' );
 		const datesFromQuery = getCurrentDates( query );
-		const interval = getIntervalForQuery( query );
-		const baseArgs = {
-			order: 'asc',
-			interval: interval,
-			per_page: MAX_PER_PAGE,
+
+		// TODO Support hour here when viewing a single day
+		const tableQuery = {
+			interval: 'day',
+			orderby: query.orderby || 'date',
+			order: query.order || 'asc',
+			page: query.page || 1,
+			per_page: query.per_page || 25,
+			after: datesFromQuery.primary.after + 'T00:00:00+00:00',
+			before: datesFromQuery.primary.before + 'T23:59:59+00:00',
 		};
-
-		const primaryData = getAllReportData(
-			'revenue',
-			{
-				...baseArgs,
-				after: datesFromQuery.primary.after,
-				before: datesFromQuery.primary.before,
-			},
-			select
-		);
-
-		const secondaryData = getAllReportData(
-			'revenue',
-			{
-				...baseArgs,
-				after: datesFromQuery.secondary.after,
-				before: datesFromQuery.secondary.before,
-			},
-			select
-		);
+		const tableData = getReportStats( 'revenue', tableQuery );
+		const isTableDataError = isReportStatsError( 'revenue', tableQuery );
+		const isTableDataRequesting = isReportStatsRequesting( 'revenue', tableQuery );
 
 		return {
-			primaryData,
-			secondaryData,
+			tableQuery,
+			tableData,
+			isTableDataError,
+			isTableDataRequesting,
 		};
 	} )
 )( RevenueReport );

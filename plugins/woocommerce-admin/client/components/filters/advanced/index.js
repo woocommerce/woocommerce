@@ -2,12 +2,13 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
-import { Component, Fragment, createRef } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
+import { Component, createRef } from '@wordpress/element';
 import { SelectControl, Button, Dropdown, IconButton } from '@wordpress/components';
 import { partial, findIndex, difference } from 'lodash';
 import PropTypes from 'prop-types';
 import Gridicon from 'gridicons';
+import interpolateComponents from 'interpolate-components';
 
 /**
  * Internal dependencies
@@ -37,7 +38,7 @@ class AdvancedFilters extends Component {
 		super( ...arguments );
 		this.state = {
 			match: query.match || 'all',
-			activeFilters: getActiveFiltersFromQuery( query, config ),
+			activeFilters: getActiveFiltersFromQuery( query, config.filters ),
 		};
 
 		this.filterListRef = createRef();
@@ -75,30 +76,31 @@ class AdvancedFilters extends Component {
 
 	getTitle() {
 		const { match } = this.state;
-		const { filterTitle } = this.props;
-		return (
-			<Fragment>
-				<span>{ sprintf( __( '%s Match', 'wc-admin' ), filterTitle ) }</span>
-				<SelectControl
-					className="woocommerce-filters-advanced__title-select"
-					options={ matches }
-					value={ match }
-					onChange={ this.onMatchChange }
-					aria-label={ __( 'Match any or all filters', 'wc-admin' ) }
-				/>
-				<span>{ __( 'Filters', 'wc-admin' ) }</span>
-			</Fragment>
-		);
+		const { config } = this.props;
+		return interpolateComponents( {
+			mixedString: config.title,
+			components: {
+				select: (
+					<SelectControl
+						className="woocommerce-filters-advanced__title-select"
+						options={ matches }
+						value={ match }
+						onChange={ this.onMatchChange }
+						aria-label={ __( 'Choose to apply any or all filters', 'wc-admin' ) }
+					/>
+				),
+			},
+		} );
 	}
 
 	getAvailableFilterKeys() {
 		const { config } = this.props;
 		const activeFilterKeys = this.state.activeFilters.map( f => f.key );
-		return difference( Object.keys( config ), activeFilterKeys );
+		return difference( Object.keys( config.filters ), activeFilterKeys );
 	}
 
 	addFilter( key, onClose ) {
-		const filterConfig = this.props.config[ key ];
+		const filterConfig = this.props.config.filters[ key ];
 		const newFilter = { key };
 		if ( Array.isArray( filterConfig.rules ) && filterConfig.rules.length ) {
 			newFilter.rule = filterConfig.rules[ 0 ].value;
@@ -131,9 +133,14 @@ class AdvancedFilters extends Component {
 
 	getUpdateHref( activeFilters, matchValue ) {
 		const { path, query, config } = this.props;
-		const updatedQuery = getQueryFromActiveFilters( activeFilters, query, config );
+		const updatedQuery = getQueryFromActiveFilters( activeFilters, query, config.filters );
 		const match = matchValue === 'all' ? undefined : matchValue;
 		return getNewPath( { ...updatedQuery, match }, path, query );
+	}
+
+	isEnglish() {
+		const { siteLocale } = wcSettings;
+		return /en-/.test( siteLocale );
 	}
 
 	render() {
@@ -142,35 +149,31 @@ class AdvancedFilters extends Component {
 		const availableFilterKeys = this.getAvailableFilterKeys();
 		const updateHref = this.getUpdateHref( activeFilters, match );
 		const updateDisabled = window.location.hash && window.location.hash.substr( 1 ) === updateHref;
+		const isEnglish = this.isEnglish();
 		return (
 			<Card className="woocommerce-filters-advanced" title={ this.getTitle() }>
 				<ul className="woocommerce-filters-advanced__list" ref={ this.filterListRef }>
 					{ activeFilters.map( filter => {
 						const { key } = filter;
-						const { input, labels } = config[ key ];
+						const { input, labels } = config.filters[ key ];
 						return (
 							<li className="woocommerce-filters-advanced__list-item" key={ key }>
-								{ /*eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex*/ }
-								<fieldset tabIndex="0">
-									{ /*eslint-enable-next-line jsx-a11y/no-noninteractive-tabindex*/ }
-									<legend className="screen-reader-text">{ labels.title }</legend>
-									<div className="woocommerce-filters-advanced__fieldset">
-										{ 'SelectControl' === input.component && (
-											<SelectFilter
-												filter={ filter }
-												config={ config[ key ] }
-												onFilterChange={ this.onFilterChange }
-											/>
-										) }
-										{ 'Search' === input.component && (
-											<SearchFilter
-												filter={ filter }
-												config={ config[ key ] }
-												onFilterChange={ this.onFilterChange }
-											/>
-										) }
-									</div>
-								</fieldset>
+								{ 'SelectControl' === input.component && (
+									<SelectFilter
+										filter={ filter }
+										config={ config.filters[ key ] }
+										onFilterChange={ this.onFilterChange }
+										isEnglish={ isEnglish }
+									/>
+								) }
+								{ 'Search' === input.component && (
+									<SearchFilter
+										filter={ filter }
+										config={ config.filters[ key ] }
+										onFilterChange={ this.onFilterChange }
+										isEnglish={ isEnglish }
+									/>
+								) }
 								<IconButton
 									className="woocommerce-filters-advanced__remove"
 									label={ labels.remove }
@@ -201,7 +204,7 @@ class AdvancedFilters extends Component {
 									{ availableFilterKeys.map( key => (
 										<li key={ key }>
 											<Button onClick={ partial( this.addFilter, key, onClose ) }>
-												{ config[ key ].labels.add }
+												{ config.filters[ key ].labels.add }
 											</Button>
 										</li>
 									) ) }
@@ -239,24 +242,24 @@ AdvancedFilters.propTypes = {
 	/**
 	 * The configuration object required to render filters.
 	 */
-	config: PropTypes.objectOf(
-		PropTypes.shape( {
-			labels: PropTypes.shape( {
-				add: PropTypes.string,
-				placeholder: PropTypes.string,
-				remove: PropTypes.string,
-				title: PropTypes.string,
-			} ),
-			rules: PropTypes.arrayOf( PropTypes.object ),
-			input: PropTypes.object,
-		} )
-	).isRequired,
+	config: PropTypes.shape( {
+		title: PropTypes.string,
+		filters: PropTypes.objectOf(
+			PropTypes.shape( {
+				labels: PropTypes.shape( {
+					add: PropTypes.string,
+					remove: PropTypes.string,
+					rule: PropTypes.string,
+					title: PropTypes.string,
+					filter: PropTypes.string,
+				} ),
+				rules: PropTypes.arrayOf( PropTypes.object ),
+				input: PropTypes.object,
+			} )
+		),
+	} ).isRequired,
 	/**
 	 * Name of this filter, used in translations.
-	 */
-	filterTitle: PropTypes.string.isRequired,
-	/**
-	 * The `path` parameter supplied by React-Router.
 	 */
 	path: PropTypes.string.isRequired,
 	/**

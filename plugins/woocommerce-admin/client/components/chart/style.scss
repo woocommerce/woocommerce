@@ -202,7 +202,12 @@
 	justify-content: center;
 	margin: 0 0 0 auto;
 	min-height: 50px;
-	padding: 0 $gap;
+	padding: 8px $gap 0 $gap;
+
+	@include breakpoint( '<782px' ) {
+		padding: 0 $gap;
+		margin-top: -8px;
+	}
 
 	.rtl & {
 		margin: 0 auto 0 0;
