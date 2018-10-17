@@ -267,4 +267,81 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		$this->assertEquals( $product3_id, $product->get_id() );
 		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>50.00</span>', $product->get_price_html() );
 	}
+
+	public function test_get_image_should_return_product_image() {
+		$product = new WC_Product();
+		$image_url = $this->set_product_image( $product );
+
+		$this->assertEquals(
+			'<img width="186" height="144" src="' . $image_url . '" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="" />',
+			$product->get_image()
+		);
+
+		$this->assertEquals(
+			'<img width="186" height="144" src="' . $image_url . '" class="attachment-single size-single" alt="" />',
+			$product->get_image( 'single' )
+		);
+
+		$this->assertEquals(
+			'<img width="186" height="144" src="' . $image_url . '" class="custom-class" alt="" />',
+			$product->get_image( 'single', array( 'class' => 'custom-class' ) )
+		);
+	}
+
+	public function test_get_image_should_return_parent_product_image() {
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$variations = $variable_product->get_children();
+		$variation_1 = wc_get_product( $variations[0] );
+		$image_url = $this->set_product_image( $variable_product );
+
+		$this->assertEquals(
+			'<img width="186" height="144" src="' . $image_url . '" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="" />',
+			$variation_1->get_image()
+		);
+
+		$this->assertEquals(
+			'<img width="186" height="144" src="' . $image_url . '" class="attachment-single size-single" alt="" />',
+			$variation_1->get_image( 'single' )
+		);
+
+		$this->assertEquals(
+			'<img width="186" height="144" src="' . $image_url . '" class="custom-class" alt="" />',
+			$variation_1->get_image( 'single', array( 'class' => 'custom-class' ) )
+		);
+	}
+
+	public function test_get_image_should_return_place_holder_image() {
+		$product = new WC_Product();
+		$image_url = wc_placeholder_img_src();
+		$expected_result = '<img src="' . $image_url . '" alt="Placeholder" width="300" class="woocommerce-placeholder wp-post-image" height="300" />';
+
+		$this->assertEquals( $expected_result, $product->get_image() );
+		$this->assertEquals( $expected_result, $product->get_image( 'woocommerce_thumbnail', array(), true ) );
+	}
+
+	public function test_get_image_should_return_empty_string() {
+		$product = new WC_Product();
+		$this->assertEquals( '', $product->get_image( 'woocommerce_thumbnail', array(), false ) );
+	}
+
+	/**
+	 * Helper method to define a image for a product and return its URL.
+	 *
+	 * @param WC_Product $product Product object.
+	 * @return string image URL.
+	 */
+	protected function set_product_image( $product ) {
+		global $wpdb;
+
+		// TODO: find a way to set the product image without performing a HTTP request to make the tests faster.
+		$image_url = media_sideload_image( 'http://cldup.com/Dr1Bczxq4q.png', $product->get_id(), '', 'src' );
+
+		$this->assertNotWPError( $image_url );
+
+		$image_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE guid = %s", $image_url ) );
+		$product->set_image_id( $image_id );
+		$product->save();
+
+		return $image_url;
+	}
 }
