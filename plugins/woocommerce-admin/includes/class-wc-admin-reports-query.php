@@ -9,7 +9,6 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Reports_Query
- *
  */
 abstract class WC_Admin_Reports_Query extends WC_Object_Query {
 

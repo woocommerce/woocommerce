@@ -9,7 +9,6 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Reports_Products_Data_Store.
- *
  */
 class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store implements WC_Admin_Reports_Data_Store_Interface {
 
