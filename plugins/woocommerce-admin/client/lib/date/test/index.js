@@ -10,6 +10,7 @@ import { setLocaleData } from '@wordpress/i18n';
  * Internal dependencies
  */
 import {
+	appendTimestamp,
 	toMoment,
 	getLastPeriod,
 	getCurrentPeriod,
@@ -22,6 +23,20 @@ import {
 	getDateDifferenceInDays,
 	getPreviousDate,
 } from 'lib/date';
+
+describe( 'appendTimestamp', () => {
+	it( 'should append `start` timestamp', () => {
+		expect( appendTimestamp( '2018-01-01', 'start' ) ).toEqual( '2018-01-01T00:00:00+00:00' );
+	} );
+
+	it( 'should append `end` timestamp', () => {
+		expect( appendTimestamp( '2018-01-01', 'end' ) ).toEqual( '2018-01-01T23:59:59+00:00' );
+	} );
+
+	it( 'should throw and error if `timeOfDay` is not valid', () => {
+		expect( () => appendTimestamp( '2018-01-01' ) ).toThrow( Error );
+	} );
+} );
 
 describe( 'toMoment', () => {
 	it( 'should pass through a valid Moment object as an argument', () => {

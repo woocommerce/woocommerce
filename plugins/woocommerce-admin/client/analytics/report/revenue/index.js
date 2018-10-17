@@ -17,7 +17,7 @@ import { Card, ReportFilters, TableCard, TablePlaceholder } from '@woocommerce/c
 import { downloadCSVFile, generateCSVDataFromTable, generateCSVFileName } from 'lib/csv';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
 import { getAdminLink, onQueryChange } from 'lib/nav-utils';
-import { getCurrentDates, getDateFormatsForInterval, getIntervalForQuery } from 'lib/date';
+import { appendTimestamp, getCurrentDates, getDateFormatsForInterval, getIntervalForQuery } from 'lib/date';
 import OrdersReportChart from './chart';
 
 export class RevenueReport extends Component {
@@ -236,8 +236,8 @@ export default compose(
 			order: query.order || 'asc',
 			page: query.page || 1,
 			per_page: query.per_page || 25,
-			after: datesFromQuery.primary.after + 'T00:00:00+00:00',
-			before: datesFromQuery.primary.before + 'T23:59:59+00:00',
+			after: appendTimestamp( datesFromQuery.primary.after, 'start' ),
+			before: appendTimestamp( datesFromQuery.primary.before, 'end' ),
 		};
 		const tableData = getReportStats( 'revenue', tableQuery );
 		const isTableDataError = isReportStatsError( 'revenue', tableQuery );

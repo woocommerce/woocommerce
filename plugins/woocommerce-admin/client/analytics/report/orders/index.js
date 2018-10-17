@@ -15,7 +15,7 @@ import { get } from 'lodash';
 import { EmptyContent, ReportFilters } from '@woocommerce/components';
 import { filters, advancedFilterConfig } from './config';
 import { getAdminLink } from 'lib/nav-utils';
-import { getCurrentDates, getIntervalForQuery } from 'lib/date';
+import { appendTimestamp, getCurrentDates, getIntervalForQuery } from 'lib/date';
 import { getReportChartData } from 'store/reports/utils';
 import { MAX_PER_PAGE } from 'store/constants';
 import OrdersReportChart from './chart';
@@ -122,8 +122,8 @@ export default compose(
 			order: query.order || 'asc',
 			page: query.page || 1,
 			per_page: query.per_page || 25,
-			after: datesFromQuery.primary.after + 'T00:00:00+00:00',
-			before: datesFromQuery.primary.before + 'T23:59:59+00:00',
+			after: appendTimestamp( datesFromQuery.primary.after, 'start' ),
+			before: appendTimestamp( datesFromQuery.primary.before, 'end' ),
 			status: [ 'processing', 'on-hold', 'completed' ],
 		};
 		const orders = getOrders( tableQuery );

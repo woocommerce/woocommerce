@@ -9,6 +9,7 @@ import { forEach, isNull } from 'lodash';
  * Internal dependencies
  */
 import { MAX_PER_PAGE } from 'store/constants';
+import { appendTimestamp } from 'lib/date';
 
 /**
  * Returns true if a report object is empty.
@@ -58,8 +59,8 @@ export function getSummaryNumbers( endpoint, dates, select ) {
 
 	const primaryQuery = {
 		...baseQuery,
-		after: dates.primary.after + 'T00:00:00+00:00',
-		before: dates.primary.before + 'T23:59:59+00:00',
+		after: appendTimestamp( dates.primary.after, 'start' ),
+		before: appendTimestamp( dates.primary.before, 'end' ),
 	};
 	const primary = getReportStats( endpoint, primaryQuery );
 	if ( isReportStatsRequesting( endpoint, primaryQuery ) ) {
@@ -73,8 +74,8 @@ export function getSummaryNumbers( endpoint, dates, select ) {
 	const secondaryQuery = {
 		...baseQuery,
 		per_page: 1,
-		after: dates.secondary.after + 'T00:00:00+00:00',
-		before: dates.secondary.before + 'T23:59:59+00:00',
+		after: appendTimestamp( dates.secondary.after, 'start' ),
+		before: appendTimestamp( dates.secondary.before, 'end' ),
 	};
 	const secondary = getReportStats( endpoint, secondaryQuery );
 	if ( isReportStatsRequesting( endpoint, secondaryQuery ) ) {
@@ -109,8 +110,8 @@ export function getReportChartData( endpoint, query, select ) {
 		},
 	};
 
-	query.after += 'T00:00:00+00:00';
-	query.before += 'T23:59:59+00:00';
+	query.after = appendTimestamp( query.after, 'start' );
+	query.before = appendTimestamp( query.before, 'end' );
 
 	const stats = getReportStats( endpoint, query );
 
