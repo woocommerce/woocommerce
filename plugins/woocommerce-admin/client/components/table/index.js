@@ -15,6 +15,7 @@ import PropTypes from 'prop-types';
 import './style.scss';
 import Card from 'components/card';
 import CompareButton from 'components/filters/compare/button';
+import DowloadIcon from './download-icon';
 import EllipsisMenu from 'components/ellipsis-menu';
 import { getIdsFromQuery } from 'lib/nav-utils';
 import MenuItem from 'components/ellipsis-menu/menu-item';
@@ -222,10 +223,9 @@ class TableCard extends Component {
 							key="download"
 							className="woocommerce-table__download-button"
 							onClick={ onClickDownload }
-							icon="arrow-down"
-							size={ 18 }
-							isDefault
+							isLink
 						>
+							<DowloadIcon />
 							{ labels.downloadButton || __( 'Download', 'wc-admin' ) }
 						</IconButton>
 					),

@@ -22,13 +22,23 @@
 		.woocommerce-search {
 			margin: 0 $gap;
 		}
-		.woocommerce-compare-button,
-		.woocommerce-table__download-button {
+		.woocommerce-compare-button {
 			padding: 3px $gap-small;
 			height: auto;
 		}
 	}
 
+	button.woocommerce-table__download-button.is-link {
+		padding: 6px $gap-small;
+		color: #000000;
+		text-decoration: none;
+		svg {
+			margin-right: $gap-smaller;
+			max-width: 18px;
+			width: 24px;
+			max-width: 24px;
+		}
+    
 	.woocommerce-pagination {
 		padding-top: $gap;
 		padding-bottom: $gap;
