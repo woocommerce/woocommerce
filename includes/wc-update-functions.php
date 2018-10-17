@@ -2004,11 +2004,11 @@ function wc_update_350_change_woocommerce_sessions_schema() {
 		FROM information_schema.TABLE_CONSTRAINTS
 		WHERE CONSTRAINT_SCHEMA = '{$wpdb->dbname}'
 		AND CONSTRAINT_TYPE = 'UNIQUE'
-		AND CONSTRAINT_NAME = 'session_key'
+		AND CONSTRAINT_NAME = 'session_id'
 		AND TABLE_NAME = '{$wpdb->prefix}woocommerce_sessions'
 	" );
 
-	if ( ! $results ) {
+	if ( $results ) {
 		$wpdb->query(
 			"ALTER TABLE `{$wpdb->prefix}woocommerce_sessions` DROP KEY `session_id`, ADD UNIQUE KEY(`session_key`)"
 		);
