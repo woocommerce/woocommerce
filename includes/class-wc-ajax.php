@@ -1759,6 +1759,13 @@ class WC_AJAX {
 			$permissions = ( in_array( $_POST['permissions'], array( 'read', 'write', 'read_write' ) ) ) ? sanitize_text_field( $_POST['permissions'] ) : 'read';
 			$user_id     = absint( $_POST['user'] );
 
+			// Check if current user can edit other users.
+			if ( $user_id && ! current_user_can( 'edit_user', $user_id ) ) {
+				if ( get_current_user_id() !== $user_id ) {
+					throw new Exception( __( 'You do not have permission to assign API Keys to the selected user.', 'woocommerce' ) );
+				}
+			}
+
 			if ( 0 < $key_id ) {
 				$data = array(
 					'user_id'     => $user_id,
