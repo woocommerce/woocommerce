@@ -279,8 +279,8 @@ function wc_rest_check_user_permissions( $context = 'read', $object_id = 0 ) {
 		'batch'  => 'promote_users',
 	);
 
-	// Prevent shop_managers of doing changes or delete adminstrators.
-	if ( ! in_array( $context, array( 'create', 'batch' ), true ) && wc_current_user_has_role( 'shop_manager' ) ) {
+	// Check to allow shop_managers to manage only customers.
+	if ( in_array( $context, array( 'edit', 'delete' ), true ) && wc_current_user_has_role( 'shop_manager' ) ) {
 		$permission                  = false;
 		$user_data                   = get_userdata( $object_id );
 		$shop_manager_editable_roles = apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) );
