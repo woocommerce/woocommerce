@@ -926,8 +926,9 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'stock_status'          => array(
-					'description' => __( 'Controls the stock status of the product: "instock", "outofstock" or "onbackorder".', 'woocommerce' ),
+					'description' => __( 'Controls the stock status of the product.', 'woocommerce' ),
 					'type'        => 'string',
+					'default'     => 'instock',
 					'enum'        => array_keys( wc_get_product_stock_status_options() ),
 					'context'     => array( 'view', 'edit' ),
 				),
