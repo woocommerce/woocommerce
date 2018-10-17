@@ -17,6 +17,10 @@
 		padding: 2px;
 	}
 
+	.components-form-toggle.is-checked .components-form-toggle__track {
+		background-color: $woocommerce;
+	}
+
 	.woocommerce-ellipsis-menu__content {
 		width: 100%;
 	}
