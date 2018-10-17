@@ -926,8 +926,9 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'stock_status'          => array(
-					'description' => __( 'Controls the stock status of the product: "instock", "outofstock" or "onbackorder".', 'woocommerce' ),
+					'description' => __( 'Controls the stock status of the product.', 'woocommerce' ),
 					'type'        => 'string',
+					'default'     => 'instock',
 					'enum'        => array_keys( wc_get_product_stock_status_options() ),
 					'context'     => array( 'view', 'edit' ),
 				),
@@ -1329,7 +1330,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		$data = parent::get_product_data( $product, $context );
 
 		// Replace in_stock with stock_status.
-		$pos  = array_search( 'in_stock', array_keys( $data ) );
+		$pos             = array_search( 'in_stock', array_keys( $data ), true );
 		$array_section_1 = array_slice( $data, 0, $pos, true );
 		$array_section_2 = array_slice( $data, $pos + 1, null, true );
 
