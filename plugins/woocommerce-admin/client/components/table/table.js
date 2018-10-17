@@ -73,7 +73,7 @@ class Table extends Component {
 		window.addEventListener( 'resize', this.updateTableShadow );
 	}
 
-	componentDidUnmount() {
+	componentWillUnmount() {
 		window.removeEventListener( 'resize', this.updateTableShadow );
 	}
 
