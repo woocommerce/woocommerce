@@ -55,6 +55,7 @@ class Table extends Component {
 		super( props );
 		this.state = {
 			tabIndex: null,
+			isScrollable: false,
 		};
 		this.container = createRef();
 		this.sortBy = this.sortBy.bind( this );
@@ -68,6 +69,12 @@ class Table extends Component {
 			tabIndex: scrollable ? '0' : null,
 		} );
 		/* eslint-enable react/no-did-mount-set-state */
+		this.updateTableShadow();
+		window.addEventListener( 'resize', this.updateTableShadow );
+	}
+
+	componentDidUnmount() {
+		window.removeEventListener( 'resize', this.updateTableShadow );
 	}
 
 	sortBy( key ) {
@@ -84,6 +91,14 @@ class Table extends Component {
 		};
 	}
 
+	updateTableShadow = () => {
+		const table = this.container.current;
+		const scrolledToEnd = table.scrollWidth - table.scrollLeft <= table.offsetWidth;
+		this.setState( {
+			isScrollable: scrolledToEnd ? false : true,
+		} );
+	};
+
 	render() {
 		const {
 			ariaHidden,
@@ -96,7 +111,9 @@ class Table extends Component {
 			rows,
 		} = this.props;
 		const { tabIndex } = this.state;
-		const classes = classnames( 'woocommerce-table__table', classNames );
+		const classes = classnames( 'woocommerce-table__table', classNames, {
+			'is-scrollable': this.state.isScrollable,
+		} );
 		const sortedBy = query.orderby || get( find( headers, { defaultSort: true } ), 'key', false );
 		const sortDir = query.order || DESC;
 
@@ -108,6 +125,7 @@ class Table extends Component {
 				aria-hidden={ ariaHidden }
 				aria-labelledby={ `caption-${ instanceId }` }
 				role="group"
+				onScroll={ this.updateTableShadow }
 			>
 				<table>
 					<caption

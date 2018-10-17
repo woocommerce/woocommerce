@@ -3,7 +3,7 @@
 .woocommerce-table {
 	.woocommerce-card__body {
 		padding: 0;
-		padding-bottom: $gap;
+		position: relative;
 	}
 
 	.woocommerce-card__action,
@@ -28,6 +28,14 @@
 			height: auto;
 		}
 	}
+
+	.woocommerce-pagination {
+		padding-top: $gap;
+		padding-bottom: $gap;
+		z-index: 1;
+		background: white;
+		position: relative;
+	}
 }
 
 .woocommerce-table__caption {
@@ -37,7 +45,21 @@
 
 .woocommerce-table__table {
 	overflow-x: auto;
-	margin-bottom: $gap;
+
+	&:after {
+		content: '';
+		position: absolute;
+		right: 0;
+		top: 0;
+		width: 41px;
+		height: 100%;
+		background: linear-gradient(90deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.2));
+		visibility: hidden;
+	}
+
+	&.is-scrollable:after {
+		visibility: visible;
+	}
 
 	table {
 		border-collapse: collapse;
