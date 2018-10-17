@@ -33,6 +33,13 @@ export function isReportDataEmpty( report ) {
 	return false;
 }
 
+/**
+ * Constructs and returns a query associated with a Report data request.
+ *
+ * @param  {String} dataType 'primary' or 'secondary'.
+ * @param  {Object} query  query parameters in the url.
+ * @returns {Object} data request query parameters.
+ */
 function getRequestQuery( dataType, query ) {
 	const datesFromQuery = getCurrentDates( query );
 	const interval = getIntervalForQuery( query );
