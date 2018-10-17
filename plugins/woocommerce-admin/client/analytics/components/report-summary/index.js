@@ -15,7 +15,7 @@ import PropTypes from 'prop-types';
 import { formatCurrency } from 'lib/currency';
 import { getNewPath } from 'lib/nav-utils';
 import { SummaryList, SummaryListPlaceholder, SummaryNumber } from '@woocommerce/components';
-import { getCurrentDates, getDateParamsFromQuery } from 'lib/date';
+import { getDateParamsFromQuery } from 'lib/date';
 import { getSummaryNumbers } from 'store/reports/utils';
 import ReportError from 'analytics/components/report-error';
 class ReportSummary extends Component {
@@ -93,15 +93,7 @@ ReportSummary.propTypes = {
 export default compose(
 	withSelect( ( select, props ) => {
 		const { query, endpoint } = props;
-		const datesFromQuery = getCurrentDates( query );
-		const summaryNumbers = getSummaryNumbers(
-			endpoint,
-			{
-				primary: datesFromQuery.primary,
-				secondary: datesFromQuery.secondary,
-			},
-			select
-		);
+		const summaryNumbers = getSummaryNumbers( endpoint, query, select );
 
 		return {
 			summaryNumbers,
