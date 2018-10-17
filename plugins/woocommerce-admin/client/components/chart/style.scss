@@ -179,8 +179,9 @@
 			}
 		}
 	}
-	line {
-		&.focus-grid {
+
+	.focus-grid {
+		line {
 			stroke: $core-grey-light-700;
 			stroke-width: 1px;
 		}

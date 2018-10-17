@@ -3,7 +3,7 @@
 /**
  * External dependencies
  */
-import { findIndex, get } from 'lodash';
+import { find, findIndex, get } from 'lodash';
 import { max as d3Max } from 'd3-array';
 import { axisBottom as d3AxisBottom, axisLeft as d3AxisLeft } from 'd3-axis';
 import { format as d3Format } from 'd3-format';
@@ -320,13 +320,15 @@ export const getXTicks = ( uniqueDates, width, layout, interval ) => {
 
 /**
  * Describes getDateSpaces
+ * @param {array} data - The chart component's `data` prop.
  * @param {array} uniqueDates - from `getUniqueDates`
  * @param {number} width - calculated width of the charting space
  * @param {function} xLineScale - from `getXLineScale`
  * @returns {array} that icnludes the date, start (x position) and width to layout the mouseover rectangles
  */
-export const getDateSpaces = ( uniqueDates, width, xLineScale ) =>
+export const getDateSpaces = ( data, uniqueDates, width, xLineScale ) =>
 	uniqueDates.map( ( d, i ) => {
+		const datapoints = find( data, { date: d } );
 		const xNow = xLineScale( new Date( d ) );
 		const xPrev =
 			i >= 1
@@ -343,6 +345,15 @@ export const getDateSpaces = ( uniqueDates, width, xLineScale ) =>
 			date: d,
 			start: uniqueDates.length > 1 ? xStart : 0,
 			width: uniqueDates.length > 1 ? xWidth : width,
+			values: Object.keys( datapoints )
+				.filter( key => key !== 'date' )
+				.map( key => {
+					return {
+						key,
+						value: datapoints[ key ].value,
+						date: d,
+					};
+				} ),
 		};
 	} );
 
@@ -589,14 +600,31 @@ export const drawLines = ( node, data, params ) => {
 		.append( 'g' )
 		.attr( 'class', 'focus' );
 
-	focus
-		.append( 'line' )
+	const focusGrid = focus
+		.append( 'g' )
 		.attr( 'class', 'focus-grid' )
+		.attr( 'opacity', '0' );
+
+	focusGrid
+		.append( 'line' )
 		.attr( 'x1', d => params.xLineScale( new Date( d.date ) ) )
 		.attr( 'y1', 0 )
 		.attr( 'x2', d => params.xLineScale( new Date( d.date ) ) )
 		.attr( 'y2', params.height )
-		.attr( 'opacity', '0' );
+		.style( 'opacity', 1 );
+
+	focusGrid
+		.selectAll( 'circle' )
+		.data( d => d.values )
+		.enter()
+		.append( 'circle' )
+		.attr( 'r', 8 )
+		.attr( 'fill', d => getColor( d.key, params ) )
+		.attr( 'stroke', '#fff' )
+		.attr( 'stroke-width', 4 )
+		.style( 'opacity', 1 )
+		.attr( 'cx', d => params.xLineScale( new Date( d.date ) ) )
+		.attr( 'cy', d => params.yScale( d.value ) );
 
 	focus
 		.append( 'rect' )

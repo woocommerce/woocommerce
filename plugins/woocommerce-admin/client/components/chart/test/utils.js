@@ -182,7 +182,7 @@ describe( 'getYTickOffset', () => {
 
 describe( 'getdateSpaces', () => {
 	it( 'return an array used to space out the mouseover rectangles, used for tooltips', () => {
-		const testDateSpaces = getDateSpaces( testUniqueDates, 100, testXLineScale );
+		const testDateSpaces = getDateSpaces( dummyOrders, testUniqueDates, 100, testXLineScale );
 		expect( testDateSpaces[ 0 ].date ).toEqual( '2018-05-30T00:00:00' );
 		expect( testDateSpaces[ 0 ].start ).toEqual( 0 );
 		expect( testDateSpaces[ 0 ].width ).toEqual( 10 );
