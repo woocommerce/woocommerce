@@ -14,19 +14,6 @@ const { orderStatuses } = wcSettings;
 
 export const filters = [
 	{ label: __( 'All Orders', 'wc-admin' ), value: 'all' },
-	{
-		label: __( 'Single Order', 'wc-admin' ),
-		value: 'single',
-		subFilters: [
-			{
-				component: 'Search',
-				value: 'single_order',
-				path: [ 'single' ],
-			},
-		],
-	},
-	{ label: __( 'Top Orders by Items Sold', 'wc-admin' ), value: 'top_items' },
-	{ label: __( 'Top Orders by Gross Sales', 'wc-admin' ), value: 'top_sales' },
 	{ label: __( 'Advanced Filters', 'wc-admin' ), value: 'advanced' },
 ];
 
