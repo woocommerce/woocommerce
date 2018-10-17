@@ -10,6 +10,10 @@ export default [
 		key: 'orders_count',
 	},
 	{
+		label: 'Description',
+		key: 'description',
+	},
+	{
 		label: 'Gross Revenue',
 		key: 'gross_revenue',
 	},

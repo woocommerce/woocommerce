@@ -24,6 +24,7 @@ export default class extends Component {
 				label: __( 'Product Title', 'wc-admin' ),
 				key: 'name',
 				required: true,
+				isLeftAligned: true,
 				isSortable: true,
 			},
 			{
@@ -125,6 +126,10 @@ export default class extends Component {
 
 		const rows = this.getRowsContent( products );
 		const headers = this.getHeadersContent();
+		const labels = {
+			helpText: __( 'Select at least two products to compare', 'wc-admin' ),
+			placeholder: __( 'Search by product name or SKU', 'wc-admin' ),
+		};
 
 		const tableQuery = {
 			...query,
@@ -139,6 +144,7 @@ export default class extends Component {
 				rowsPerPage={ rowsPerPage }
 				headers={ headers }
 				compareBy={ 'product' }
+				labels={ labels }
 				ids={ products.map( p => p.product_id ) }
 				onClickDownload={ noop }
 				onQueryChange={ onQueryChange }

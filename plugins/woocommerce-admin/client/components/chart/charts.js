@@ -99,6 +99,7 @@ class D3Chart extends Component {
 			dateParser,
 			height,
 			layout,
+			interval,
 			margin,
 			mode,
 			orderedKeys,
@@ -125,7 +126,7 @@ class D3Chart extends Component {
 		const uniqueDates = getUniqueDates( lineData, parseDate );
 		const xLineScale = getXLineScale( uniqueDates, adjWidth );
 		const xScale = getXScale( uniqueDates, adjWidth );
-		const xTicks = getXTicks( uniqueDates, adjWidth, layout );
+		const xTicks = getXTicks( uniqueDates, adjWidth, layout, interval );
 		return {
 			colorScheme,
 			dateSpaces: getDateSpaces( uniqueDates, adjWidth, xLineScale ),

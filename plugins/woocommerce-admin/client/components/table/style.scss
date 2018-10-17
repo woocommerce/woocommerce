@@ -13,10 +13,19 @@
 
 	&.has-compare {
 		.woocommerce-card__action {
+			align-items: center;
 			text-align: left;
 			display: grid;
 			width: 100%;
 			grid-template-columns: auto 1fr auto;
+		}
+		.woocommerce-search {
+			margin: 0 $gap;
+		}
+		.woocommerce-compare-button,
+		.woocommerce-table__download-button {
+			padding: 3px $gap-small;
+			height: auto;
 		}
 	}
 }
@@ -48,11 +57,13 @@
 	border-bottom: 1px solid $core-grey-light-500;
 	text-align: left;
 
-	a {
+	> a:only-child {
 		display: block;
 		margin: ($gap*-1) ($gap-large*-1);
 		padding: $gap $gap-large;
+	}
 
+	a {
 		&:hover,
 		&:focus {
 			color: $woocommerce-700;
@@ -71,21 +82,28 @@
 		width: 80%;
 	}
 
-	&.is-numeric {
+	&:not(.is-left-aligned) {
 		text-align: right;
+
+		.rtl & {
+			text-align: left;
+		}
 
 		button {
 			justify-content: flex-end;
 		}
+	}
 
-		.is-placeholder {
-			max-width: 40px;
-		}
+	&.is-numeric .is-placeholder {
+		max-width: 40px;
 	}
 }
 
-.woocommerce-table__header,
 th.woocommerce-table__item {
+	font-weight: normal;
+}
+
+.woocommerce-table__header {
 	font-weight: bold;
 	white-space: nowrap;
 }
@@ -97,6 +115,11 @@ th.woocommerce-table__item {
 
 	& + .woocommerce-table__header {
 		border-left: 1px solid $core-grey-light-700;
+
+		.rtl & {
+			border-left: 0;
+			border-right: 1px solid $core-grey-light-700;
+		}
 	}
 
 	.components-button.is-button {
@@ -108,6 +131,10 @@ th.woocommerce-table__item {
 		border: none;
 		background: transparent;
 		box-shadow: none !important;
+
+		.rtl & {
+			padding: $gap-smaller 0 $gap-smaller $gap-large;
+		}
 
 		// @todo Add interactive styles
 		&:hover {

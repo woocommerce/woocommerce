@@ -16,7 +16,6 @@ const externals = {
 	'@wordpress/html-entities': { this: [ 'wp', 'htmlEntities' ] },
 	'@wordpress/i18n': { this: [ 'wp', 'i18n' ] },
 	'@wordpress/keycodes': { this: [ 'wp', 'keycodes' ] },
-	jquery: 'jQuery',
 	tinymce: 'tinymce',
 	moment: 'moment',
 	react: 'React',

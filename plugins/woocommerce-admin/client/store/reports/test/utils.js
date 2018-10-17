@@ -5,7 +5,7 @@
 /**
  * Internal dependencies
  */
-import { isReportDataEmpty, getAllReportData } from '../utils';
+import { isReportDataEmpty, getReportChartData, getSummaryNumbers } from '../utils';
 
 describe( 'isReportDataEmpty()', () => {
 	it( 'returns false if report is valid', () => {
@@ -34,8 +34,7 @@ describe( 'isReportDataEmpty()', () => {
 	} );
 } );
 
-// TODO Use more general selectors from https://github.com/woocommerce/wc-admin/pull/307
-describe( 'getAllReportData()', () => {
+describe( 'getReportChartData()', () => {
 	const select = jest.fn().mockReturnValue( {} );
 	const response = {
 		isEmpty: false,
@@ -77,7 +76,7 @@ describe( 'getAllReportData()', () => {
 		setIsReportStatsRequesting( () => {
 			return true;
 		} );
-		const result = getAllReportData( 'revenue', {}, select );
+		const result = getReportChartData( 'revenue', {}, select );
 		expect( result ).toEqual( { ...response, isRequesting: true } );
 	} );
 
@@ -88,7 +87,7 @@ describe( 'getAllReportData()', () => {
 		setIsReportStatsError( () => {
 			return true;
 		} );
-		const result = getAllReportData( 'revenue', {}, select );
+		const result = getReportChartData( 'revenue', {}, select );
 		expect( result ).toEqual( { ...response, isError: true } );
 	} );
 
@@ -123,7 +122,7 @@ describe( 'getAllReportData()', () => {
 			};
 		} );
 
-		const result = getAllReportData( 'revenue', {}, select );
+		const result = getReportChartData( 'revenue', {}, select );
 		expect( result ).toEqual( { ...response, data: { ...data } } );
 	} );
 
@@ -169,7 +168,7 @@ describe( 'getAllReportData()', () => {
 			};
 		} );
 
-		const actualResponse = getAllReportData( 'revenue', {}, select );
+		const actualResponse = getReportChartData( 'revenue', {}, select );
 		const expectedResponse = {
 			...response,
 			data: {
@@ -192,7 +191,7 @@ describe( 'getAllReportData()', () => {
 			return false;
 		} );
 
-		const result = getAllReportData( 'revenue', {}, select );
+		const result = getReportChartData( 'revenue', {}, select );
 		expect( result ).toEqual( { ...response, isRequesting: true } );
 	} );
 
@@ -206,7 +205,7 @@ describe( 'getAllReportData()', () => {
 			}
 			return false;
 		} );
-		const result = getAllReportData( 'revenue', {}, select );
+		const result = getReportChartData( 'revenue', {}, select );
 		expect( result ).toEqual( { ...response, isError: true } );
 	} );
 
@@ -224,7 +223,120 @@ describe( 'getAllReportData()', () => {
 			};
 		} );
 
-		const result = getAllReportData( 'revenue', {}, select );
+		const result = getReportChartData( 'revenue', {}, select );
 		expect( result ).toEqual( { ...response, isEmpty: true } );
+	} );
+} );
+
+describe( 'getSummaryNumbers()', () => {
+	const select = jest.fn().mockReturnValue( {} );
+	const response = {
+		isError: false,
+		isRequesting: false,
+		totals: {
+			primary: null,
+			secondary: null,
+		},
+	};
+
+	const dates = {
+		primary: {
+			after: '2018-10-10',
+			before: '2018-10-10',
+		},
+		secondary: {
+			after: '2018-10-09',
+			before: '2018-10-09',
+		},
+	};
+
+	beforeAll( () => {
+		select( 'wc-admin' ).getReportStats = jest.fn().mockReturnValue( {} );
+		select( 'wc-admin' ).isReportStatsRequesting = jest.fn().mockReturnValue( false );
+		select( 'wc-admin' ).isReportStatsError = jest.fn().mockReturnValue( false );
+	} );
+
+	afterAll( () => {
+		select( 'wc-admin' ).getReportStats.mockRestore();
+		select( 'wc-admin' ).isReportStatsRequesting.mockRestore();
+		select( 'wc-admin' ).isReportStatsError.mockRestore();
+	} );
+
+	function setGetReportStats( func ) {
+		select( 'wc-admin' ).getReportStats.mockImplementation( ( ...args ) => func( ...args ) );
+	}
+
+	function setIsReportStatsRequesting( func ) {
+		select( 'wc-admin' ).isReportStatsRequesting.mockImplementation( ( ...args ) =>
+			func( ...args )
+		);
+	}
+
+	function setIsReportStatsError( func ) {
+		select( 'wc-admin' ).isReportStatsError.mockImplementation( ( ...args ) => func( ...args ) );
+	}
+
+	it( 'returns isRequesting if a request is in progress', () => {
+		setIsReportStatsRequesting( () => {
+			return true;
+		} );
+		const result = getSummaryNumbers( 'revenue', dates, select );
+		expect( result ).toEqual( { ...response, isRequesting: true } );
+	} );
+
+	it( 'returns isError if request errors', () => {
+		setIsReportStatsRequesting( () => {
+			return false;
+		} );
+		setIsReportStatsError( () => {
+			return true;
+		} );
+		const result = getSummaryNumbers( 'revenue', dates, select );
+		expect( result ).toEqual( { ...response, isError: true } );
+	} );
+
+	it( 'returns results after queries finish', () => {
+		const totals = {
+			primary: {
+				orders_count: 115,
+				gross_revenue: 13966.92,
+			},
+			secondary: {
+				orders_count: 85,
+				gross_revenue: 10406.1,
+			},
+		};
+
+		setIsReportStatsRequesting( () => {
+			return false;
+		} );
+		setIsReportStatsError( () => {
+			return false;
+		} );
+		setGetReportStats( () => {
+			return {
+				totals,
+			};
+		} );
+
+		setGetReportStats( ( endpoint, query ) => {
+			if ( '2018-10-10T00:00:00+00:00' === query.after ) {
+				return {
+					data: {
+						totals: totals.primary,
+						intervals: [],
+					},
+				};
+			}
+			return {
+				data: {
+					totals: totals.secondary,
+					intervals: [],
+				},
+			};
+		} );
+
+		const result = getSummaryNumbers( 'revenue', dates, select );
+		expect( result ).toEqual( { ...response, totals } );
 	} );
 } );

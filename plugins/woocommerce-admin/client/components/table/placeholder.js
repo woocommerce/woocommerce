@@ -16,7 +16,7 @@ import Table from './table';
  */
 class TablePlaceholder extends Component {
 	render() {
-		const { caption, headers, numberOfRows } = this.props;
+		const { caption, headers, numberOfRows, query } = this.props;
 		const rows = range( numberOfRows ).map( () =>
 			headers.map( () => ( { display: <span className="is-placeholder" /> } ) )
 		);
@@ -29,12 +29,17 @@ class TablePlaceholder extends Component {
 				headers={ headers }
 				rowHeader={ false }
 				rows={ rows }
+				query={ query }
 			/>
 		);
 	}
 }
 
 TablePlaceholder.propTypes = {
+	/**
+	 *  An object of the query parameters passed to the page, ex `{ page: 2, per_page: 5 }`.
+	 */
+	query: PropTypes.object,
 	/**
 	 * A label for the content in this table.
 	 */
