@@ -32,10 +32,10 @@
     "docs": "node ./bin/generate-docs"
   },
   "devDependencies": {
-    "@babel/cli": "7.1.0",
-    "@babel/core": "7.1.0",
+    "@babel/cli": "7.1.2",
+    "@babel/core": "7.1.2",
     "@babel/plugin-transform-async-to-generator": "7.1.0",
-    "@babel/runtime-corejs2": "7.0.0",
+    "@babel/runtime-corejs2": "7.1.2",
     "@wordpress/api-fetch": "2.0.0",
     "@wordpress/babel-plugin-import-jsx-pragma": "1.1.0",
     "@wordpress/babel-plugin-makepot": "2.1.0",
