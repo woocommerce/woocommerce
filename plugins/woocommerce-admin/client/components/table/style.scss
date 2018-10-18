@@ -80,6 +80,9 @@
 	tr:hover,
 	tr:focus-within {
 		background-color: $core-grey-light-200;
+		td {
+			background: transparent;
+		}
 	}
 }
 
@@ -125,6 +128,10 @@
 		max-width: 40px;
 	}
 
+	&.is-sorted {
+		background-color: $core-grey-light-100;
+  }
+  
 	&.is-checkbox-column {
 		width: 33px;
 		max-width: 33px;
