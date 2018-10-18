@@ -1,0 +1,10 @@
+/** @format */
+
+.woocommerce-orders-table__status {
+	flex-direction: row-reverse;
+
+	.woocommerce-order-status__indicator {
+		margin-right: 0;
+		margin-left: $gap-smallest * 2;
+	}
+}

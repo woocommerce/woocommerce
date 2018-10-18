@@ -22,6 +22,7 @@ import { downloadCSVFile, generateCSVDataFromTable, generateCSVFileName } from '
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
 import { getIntervalForQuery, getDateFormatsForInterval } from 'lib/date';
 import { getAdminLink, onQueryChange } from 'lib/nav-utils';
+import './style.scss';
 
 export default class OrdersReportTable extends Component {
 	constructor( props ) {
@@ -53,7 +54,6 @@ export default class OrdersReportTable extends Component {
 				label: __( 'Order #', 'wc-admin' ),
 				key: 'id',
 				required: true,
-				isLeftAligned: true,
 				isSortable: true,
 			},
 			{
@@ -171,7 +171,9 @@ export default class OrdersReportTable extends Component {
 					value: id,
 				},
 				{
-					display: <OrderStatus order={ { status } } />,
+					display: (
+						<OrderStatus className="woocommerce-orders-table__status" order={ { status } } />
+					),
 					value: status,
 				},
 				{
