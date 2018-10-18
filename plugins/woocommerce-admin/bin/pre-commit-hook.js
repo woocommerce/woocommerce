@@ -33,7 +33,7 @@ function parseGitDiffToPathArray( command ) {
 		.split( '\n' )
 		.map( name => name.trim() )
 		.filter(
-			name => name.endsWith( '.js' ) || name.endsWith( '.jsx' ) || name.endsWith( '.scss' )
+			name => name.endsWith( '.js' ) || name.endsWith( '.jsx' ) || name.endsWith( '.scss' ) || name.endsWith( '.php' )
 		);
 }
 
@@ -73,7 +73,7 @@ files.forEach( file => {
 // linting should happen after formatting
 const lintResult = spawnSync(
 	'eslint',
-	[ ...files.filter( file => ! file.endsWith( '.scss' ) ) ],
+	[ ...files.filter( file => ! file.endsWith( '.scss' ) && ! file.endsWith( '.php' ) ) ],
 	{
 		shell: true,
 		stdio: 'inherit',
@@ -88,4 +88,51 @@ if ( lintResult.status ) {
 			'repeat the commit command with --no-verify to avoid this check.'
 	);
 	process.exit( 1 );
+}
+
+// PHP Lint.
+let hasPhpLintErrors = false;
+let phpFiles = '';
+
+files.forEach( file => {
+	if ( ! file.endsWith( '.php' ) ) {
+		return;
+	}
+
+	try {
+		execSync( `php -l -d display_errors=0 ${ file }` );
+	} catch( err ) {
+		hasPhpLintErrors = true;
+	}
+
+	phpFiles += '' + file;
+} );
+
+if ( hasPhpLintErrors ) {
+	console.log(
+		chalk.red( 'COMMIT ABORTED:' ),
+		'The PHP linter reported some errors. ' +
+			'Fix all PHP syntax errors found, ' +
+			'and repeat the commit command.'
+	);
+	process.exit( 1 );
+}
+
+// Check PHP files with PHPCS.
+if ( phpFiles ) {
+	console.log( 'Running PHP_CodeSniffer...' );
+	try {
+		execSync( `./vendor/bin/phpcs --encoding=utf-8 -n -p ${ phpFiles }` );
+	} catch( err ) {
+		console.log( err.stdout.toString( 'utf8' ) );
+
+		console.log(
+			chalk.red( 'COMMIT ABORTED:' ),
+			'Fix all PHP_CodeSniffer errors before continue. \n' +
+				'Run the following command to automatic fix some of the errors: \n' +
+				`./vendor/bin/phpcbf ${ phpFiles }`
+		);
+
+		process.exit( 1 );
+	}
 }

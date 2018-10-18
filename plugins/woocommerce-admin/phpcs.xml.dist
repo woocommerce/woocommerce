@@ -6,15 +6,6 @@
 	<description>WooCommerce dev PHP_CodeSniffer ruleset.</description>
 
 	<!-- Exclude paths -->
-	<exclude-pattern>tests/cli/</exclude-pattern>
-	<exclude-pattern>apigen/</exclude-pattern>
-	<exclude-pattern>includes/gateways/simplify-commerce</exclude-pattern>
-	<exclude-pattern>includes/libraries/</exclude-pattern>
-	<exclude-pattern>includes/legacy/</exclude-pattern>
-	<exclude-pattern>includes/api/legacy/</exclude-pattern>
-	<exclude-pattern>includes/api/v1/</exclude-pattern>
-	<exclude-pattern>includes/class-wc-geo-ip.php</exclude-pattern>
-	<exclude-pattern>includes/wc-deprecated-functions.php</exclude-pattern>
 	<exclude-pattern>*/node_modules/*</exclude-pattern>
 	<exclude-pattern>*/vendor/*</exclude-pattern>
 
@@ -69,25 +60,5 @@
 		<exclude-pattern>tests/</exclude-pattern>
 		<exclude name="Squiz.Commenting.LongConditionClosingComment" />
 		<exclude name="Squiz.Commenting.PostStatementComment" />
-	</rule>
-	<rule ref="PEAR.Functions.FunctionCallSignature.EmptyLine">
-		<exclude-pattern>tests/e2e-tests/</exclude-pattern>
-	</rule>
-	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
-		<exclude-pattern>i18n/</exclude-pattern>
-	</rule>
-
-	<!-- CLI commands require PHP >= 5.5 instead of 5.2 -->
-	<rule ref="PHPCompatibility.PHP.NewLanguageConstructs.t_ns_separatorFound">
-		<exclude-pattern>includes/cli/</exclude-pattern>
-	</rule>
-	<rule ref="PHPCompatibility.PHP.NewFunctions.array_columnFound">
-		<exclude-pattern>includes/cli/</exclude-pattern>
-	</rule>
-	<rule ref="PHPCompatibility.PHP.NewClosure.Found">
-		<exclude-pattern>includes/cli/</exclude-pattern>
-	</rule>
-	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
-		<exclude-pattern>i18n/</exclude-pattern>
 	</rule>
 </ruleset>
