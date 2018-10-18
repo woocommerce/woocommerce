@@ -193,17 +193,11 @@ export default class ProductsReportTable extends Component {
 	}
 
 	render() {
-		const { isError, isRequesting, query } = this.props;
+		const { isError, isRequesting, tableQuery } = this.props;
 
 		if ( isError ) {
 			return <ReportError isError />;
 		}
-
-		const tableQuery = {
-			...query,
-			orderby: query.orderby || 'items_sold',
-			order: query.order || 'desc',
-		};
 
 		if ( isRequesting ) {
 			return this.renderPlaceholderTable( tableQuery );

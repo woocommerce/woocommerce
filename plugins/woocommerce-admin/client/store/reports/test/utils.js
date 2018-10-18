@@ -5,7 +5,8 @@
 /**
  * Internal dependencies
  */
-import { isReportDataEmpty, getReportChartData, getSummaryNumbers } from '../utils';
+import { isReportDataEmpty, getReportChartData, getSummaryNumbers, getFilterQuery } from '../utils';
+import * as ordersConfig from 'analytics/report/orders/config';
 
 describe( 'isReportDataEmpty()', () => {
 	it( 'returns false if report is valid', () => {
@@ -334,5 +335,99 @@ describe( 'getSummaryNumbers()', () => {
 
 		const result = getSummaryNumbers( 'revenue', query, select );
 		expect( result ).toEqual( { ...response, totals } );
+	} );
+} );
+
+describe( 'getFilterQuery', () => {
+	/**
+	 * Mock the orders config
+	 */
+	const filters = [
+		{ value: 'top_meal', query: { lunch: 'burritos' } },
+		{ value: 'top_dessert', query: { dinner: 'ice_cream' } },
+		{ value: 'compare-cuisines', settings: { param: 'region' } },
+		{
+			value: 'food_destination',
+			subFilters: [ { value: 'choose_a_european_city', settings: { param: 'european_cities' } } ],
+		},
+	];
+
+	const advancedFilters = {
+		filters: {
+			mexican: {
+				rules: [ { value: 'is' }, { value: 'is_not' } ],
+			},
+			french: {
+				rules: [ { value: 'includes' }, { value: 'excludes' } ],
+			},
+		},
+	};
+
+	ordersConfig.filters = filters;
+	ordersConfig.advancedFilters = advancedFilters;
+
+	it( 'should return an empty object if no filter param is given', () => {
+		const query = {};
+		const filterQuery = getFilterQuery( 'orders', query );
+
+		expect( filterQuery ).toEqual( {} );
+	} );
+
+	it( 'should return an empty object if filter parameter is not in configs', () => {
+		const query = { filter: 'canned_meat' };
+		const filterQuery = getFilterQuery( 'orders', query );
+
+		expect( filterQuery ).toEqual( {} );
+	} );
+
+	it( 'should return the query for a filter defined in the configs', () => {
+		const query = { filter: 'top_meal' };
+		const filterQuery = getFilterQuery( 'orders', query );
+
+		expect( filterQuery ).toEqual( { lunch: 'burritos' } );
+	} );
+
+	it( 'should return the query for an advanced filter', () => {
+		const query = { filter: 'advanced', mexican_is: 'delicious' };
+		const filterQuery = getFilterQuery( 'orders', query );
+
+		expect( filterQuery ).toEqual( { mexican_is: 'delicious', match: 'all' } );
+	} );
+
+	it( 'should ignore other queries not defined by filter configs', () => {
+		const query = {
+			filter: 'advanced',
+			mexican_is_not: 'healthy',
+			orderby: 'calories',
+			topping: 'salsa-verde',
+		};
+		const filterQuery = getFilterQuery( 'orders', query );
+
+		expect( filterQuery ).toEqual( { mexican_is_not: 'healthy', match: 'all' } );
+	} );
+
+	it( 'should apply the match parameter advanced filters', () => {
+		const query = {
+			filter: 'advanced',
+			french_includes: 'le-fromage',
+			match: 'any',
+		};
+		const filterQuery = getFilterQuery( 'orders', query );
+
+		expect( filterQuery ).toEqual( { french_includes: 'le-fromage', match: 'any' } );
+	} );
+
+	it( 'should return the query for compare filters', () => {
+		const query = { filter: 'compare-cuisines', region: 'vietnam,malaysia,thailand' };
+		const filterQuery = getFilterQuery( 'orders', query );
+
+		expect( filterQuery ).toEqual( { region: 'vietnam,malaysia,thailand' } );
+	} );
+
+	it( 'should return the query for subFilters', () => {
+		const query = { filter: 'choose_a_european_city', european_cities: 'paris,rome,barcelona' };
+		const filterQuery = getFilterQuery( 'orders', query );
+
+		expect( filterQuery ).toEqual( { european_cities: 'paris,rome,barcelona' } );
 	} );
 } );

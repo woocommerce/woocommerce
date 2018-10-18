@@ -14,7 +14,7 @@ import { filters } from './config';
 import { ReportFilters } from '@woocommerce/components';
 import { appendTimestamp, getCurrentDates } from 'lib/date';
 import { QUERY_DEFAULTS } from 'store/constants';
-import { getReportChartData } from 'store/reports/utils';
+import { getFilterQuery, getReportChartData } from 'store/reports/utils';
 import ProductsReportChart from './chart';
 import ProductsReportTable from './table';
 
@@ -27,6 +27,7 @@ class ProductsReport extends Component {
 			primaryData,
 			products,
 			query,
+			tableQuery,
 		} = this.props;
 
 		return (
@@ -38,6 +39,7 @@ class ProductsReport extends Component {
 					isRequesting={ isProductsRequesting || primaryData.isRequesting }
 					products={ products }
 					query={ query }
+					tableQuery={ tableQuery }
 					totalRows={ get(
 						primaryData,
 						[ 'data', 'totals', 'products_count' ],
@@ -56,6 +58,7 @@ export default compose(
 		const primaryData = getReportChartData( 'products', 'primary', query, select );
 
 		const { getProducts, isGetProductsError, isGetProductsRequesting } = select( 'wc-admin' );
+		const filterQuery = getFilterQuery( 'products', query );
 		const tableQuery = {
 			orderby: query.orderby || 'items_sold',
 			order: query.order || 'desc',
@@ -64,6 +67,7 @@ export default compose(
 			after: appendTimestamp( datesFromQuery.primary.after, 'start' ),
 			before: appendTimestamp( datesFromQuery.primary.before, 'end' ),
 			extended_product_info: true,
+			...filterQuery,
 		};
 		const products = getProducts( tableQuery );
 		const isProductsError = isGetProductsError( tableQuery );
@@ -74,6 +78,7 @@ export default compose(
 			isProductsRequesting,
 			primaryData,
 			products,
+			tableQuery,
 		};
 	} )
 )( ProductsReport );

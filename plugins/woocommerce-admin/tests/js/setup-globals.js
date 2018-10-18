@@ -35,6 +35,15 @@ global.wcSettings = {
 	date: {
 		dow: 0,
 	},
+	orderStatuses: {
+		'wc-pending': 'Pending payment',
+		'wc-processing': 'Processing',
+		'wc-on-hold': 'On hold',
+		'wc-completed': 'Completed',
+		'wc-cancelled': 'Cancelled',
+		'wc-refunded': 'Refunded',
+		'wc-failed': 'Failed',
+	},
 };
 
 setLocaleData( { '': { domain: 'wc-admin', lang: 'en_US' } }, 'wc-admin' );
