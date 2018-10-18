@@ -14,10 +14,11 @@ import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
 import { numberFormat } from 'lib/number';
 import { getAdminLink, onQueryChange } from 'lib/nav-utils';
 import { ReportFilters, TableCard } from '@woocommerce/components';
+import ProductsReportChart from './chart';
 
 import products from './__mocks__/data';
 
-export default class extends Component {
+class ProductsReport extends Component {
 	getHeadersContent() {
 		return [
 			{
@@ -160,9 +161,11 @@ export default class extends Component {
 		return (
 			<Fragment>
 				<ReportFilters query={ query } path={ path } filters={ filters } />
-
+				<ProductsReportChart query={ query } />
 				{ this.renderTable() }
 			</Fragment>
 		);
 	}
 }
+
+export default ProductsReport;
