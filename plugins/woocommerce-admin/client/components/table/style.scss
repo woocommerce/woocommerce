@@ -92,18 +92,12 @@
 
 	> a:only-child {
 		display: block;
-		margin: ($gap*-1) ($gap-large*-1);
-		padding: $gap $gap-large;
 	}
 
 	a {
 		&:hover,
 		&:focus {
 			color: $woocommerce-700;
-		}
-
-		&:focus {
-			box-shadow: none;
 		}
 	}
 
