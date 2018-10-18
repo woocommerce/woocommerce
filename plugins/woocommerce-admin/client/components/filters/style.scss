@@ -72,3 +72,16 @@
 		margin-right: $gap;
 	}
 }
+
+.woocommerce-filters-filter__search {
+	.woocommerce-search__autocomplete-results {
+		position: static;
+	}
+	.woocommerce-search__inline-container {
+		overflow: hidden;
+
+		&:not(.is-active) {
+			border: none;
+		}
+	}
+}

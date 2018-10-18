@@ -41,7 +41,7 @@ class CompareFilter extends Component {
 			/* eslint-disable react/no-did-update-set-state */
 			this.setState( { selected: [] } );
 			/* eslint-enable react/no-did-update-set-state */
-			updateQueryString( { [ param ]: '' }, path, query );
+			updateQueryString( { [ param ]: undefined }, path, query );
 			return;
 		}
 

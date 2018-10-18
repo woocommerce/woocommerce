@@ -14,12 +14,24 @@ export const filters = [
 	{ label: __( 'All Products', 'wc-admin' ), value: 'all' },
 	{
 		label: __( 'Single Product', 'wc-admin' ),
-		value: 'single',
+		value: 'single_product',
 		subFilters: [
 			{
 				component: 'Search',
-				value: 'single_search',
-				path: [ 'single' ],
+				value: 'product',
+				path: [ 'single_product' ],
+				settings: {
+					type: 'products',
+					param: 'product',
+					getLabels: getRequestByIdString( NAMESPACE + 'products', product => ( {
+						id: product.id,
+						label: product.name,
+					} ) ),
+					labels: {
+						placeholder: __( 'Type to search for a product', 'wc-admin' ),
+						button: __( 'Single Product', 'wc-admin' ),
+					},
+				},
 			},
 		],
 	},
@@ -59,6 +71,12 @@ export const filters = [
 			},
 		},
 	},
-	{ label: __( 'Top Products by Items Sold', 'wc-admin' ), value: 'top_items' },
-	{ label: __( 'Top Products by Gross Sales', 'wc-admin' ), value: 'top_sales' },
+	{
+		label: __( 'Top Products by Items Sold', 'wc-admin' ),
+		value: 'top_items',
+	},
+	{
+		label: __( 'Top Products by Gross Sales', 'wc-admin' ),
+		value: 'top_sales',
+	},
 ];
