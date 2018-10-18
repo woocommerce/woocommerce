@@ -18,6 +18,8 @@ import { SummaryList, SummaryListPlaceholder, SummaryNumber } from '@woocommerce
 import { getDateParamsFromQuery } from 'lib/date';
 import { getSummaryNumbers } from 'store/reports/utils';
 import ReportError from 'analytics/components/report-error';
+import { numberFormat } from 'lib/number';
+
 class ReportSummary extends Component {
 	render() {
 		const { selectedChart, charts } = this.props;
@@ -56,6 +58,8 @@ class ReportSummary extends Component {
 					secondaryValue = secondaryValue && formatCurrency( secondaryValue );
 					break;
 				case 'number':
+					value = numberFormat( value );
+					secondaryValue = secondaryValue && numberFormat( secondaryValue );
 					break;
 			}
 

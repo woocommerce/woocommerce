@@ -17,6 +17,11 @@ class OrdersReportChart extends Component {
 	getCharts() {
 		return [
 			{
+				key: 'orders_count',
+				label: __( 'Orders Count', 'wc-admin' ),
+				type: 'number',
+			},
+			{
 				key: 'net_revenue',
 				label: __( 'Net Revenue', 'wc-admin' ),
 				type: 'currency',
@@ -30,11 +35,6 @@ class OrdersReportChart extends Component {
 				key: 'avg_items_per_order',
 				label: __( 'Average Items Per Order', 'wc-admin' ),
 				type: 'average',
-			},
-			{
-				key: 'orders_count',
-				label: __( 'Orders Count', 'wc-admin' ),
-				type: 'number',
 			},
 		];
 	}
