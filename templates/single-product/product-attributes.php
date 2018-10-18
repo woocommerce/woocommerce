@@ -23,6 +23,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 <table class="shop_attributes">
+
+	<?php do_action( 'woocommerce_shop_attributes_before_dimensions' ); ?>
+
 	<?php if ( $display_dimensions && $product->has_weight() ) : ?>
 		<tr>
 			<th><?php _e( 'Weight', 'woocommerce' ) ?></th>
@@ -36,6 +39,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<td class="product_dimensions"><?php echo esc_html( wc_format_dimensions( $product->get_dimensions( false ) ) ); ?></td>
 		</tr>
 	<?php endif; ?>
+
+	<?php do_action( 'woocommerce_shop_attributes_after_dimensions' ); ?>
 
 	<?php foreach ( $attributes as $attribute ) : ?>
 		<tr>
@@ -68,4 +73,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			?></td>
 		</tr>
 	<?php endforeach; ?>
+
+	<?php do_action( 'woocommerce_shop_attributes_after_attributes' ); ?>
+
 </table>
