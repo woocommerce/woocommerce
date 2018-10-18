@@ -603,7 +603,7 @@ function wc_get_product_class( $class = '', $product_id = null ) {
 	}
 
 	// Post thumbnails.
-	if ( current_theme_supports( 'post-thumbnails' ) && has_post_thumbnail( $post->ID ) && ! is_attachment( $post ) && ! $post_password_required ) {
+	if ( current_theme_supports( 'post-thumbnails' ) && $product->get_image_id() && ! is_attachment( $post ) && ! $post_password_required ) {
 		$classes[] = 'has-post-thumbnail';
 	}
 

@@ -367,7 +367,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_Legacy_Products_Controller 
 		$attachment_ids = array();
 
 		// Add featured image.
-		if ( has_post_thumbnail( $product->get_id() ) ) {
+		if ( $product->get_image_id() ) {
 			$attachment_ids[] = $product->get_image_id();
 		}
 
