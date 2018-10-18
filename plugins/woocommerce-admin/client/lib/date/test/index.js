@@ -599,18 +599,25 @@ describe( 'getCurrentDates', () => {
 	it( 'should correctly apply default values', () => {
 		const query = {};
 		const today = moment().format( isoDateFormat );
-		const yesterday = moment()
-			.subtract( 1, 'day' )
+		const startOfMonth = moment()
+			.startOf( 'month' )
+			.format( isoDateFormat );
+		const startOfMonthYearAgo = moment()
+			.startOf( 'month' )
+			.subtract( 1, 'year' )
+			.format( isoDateFormat );
+		const todayLastYear = moment()
+			.subtract( 1, 'year' )
 			.format( isoDateFormat );
 		const currentDates = getCurrentDates( query );
 
-		// Ensure default period is 'today'
-		expect( currentDates.primary.after ).toBe( today );
+		// Ensure default period is 'month'
+		expect( currentDates.primary.after ).toBe( startOfMonth );
 		expect( currentDates.primary.before ).toBe( today );
 
 		// Ensure default compare is `previous_period`
-		expect( currentDates.secondary.after ).toBe( yesterday );
-		expect( currentDates.secondary.before ).toBe( yesterday );
+		expect( currentDates.secondary.after ).toBe( startOfMonthYearAgo );
+		expect( currentDates.secondary.before ).toBe( todayLastYear );
 	} );
 } );
 
