@@ -13,14 +13,14 @@ defined( 'ABSPATH' ) || exit;
  * WC_Admin_Notes_New_Sales_Record
  */
 class WC_Admin_Notes_New_Sales_Record {
-	const RECORD_DATE_OPTION_KEY   = 'woocommerce_sales_record_date'; // YYYY-MM-DD.
+	const RECORD_DATE_OPTION_KEY   = 'woocommerce_sales_record_date'; // ISO 8601 (YYYY-MM-DD) date.
 	const RECORD_AMOUNT_OPTION_KEY = 'woocommerce_sales_record_amount';
 
 	/**
 	 * Sales Record constructor.
 	 */
 	public function __construct() {
-		add_action( 'admin_footer', array( $this, 'sum_yesterdays_sales' ) );
+		add_action( 'admin_footer', array( $this, 'possibly_add_sales_record_note' ) );
 	}
 
 	/**
@@ -49,32 +49,32 @@ class WC_Admin_Notes_New_Sales_Record {
 		$total     = $this->sum_sales_for_date( $yesterday );
 
 		// No sales yesterday? Bail.
-		if ( 0 <= $total ) {
+		if ( 0 >= $total ) {
 			return;
 		}
 
-		$record_date = get_option( RECORD_DATE_OPTION_KEY, '' );
-		$record_amt  = floatval( get_option( RECORD_AMOUNT_OPTION_KEY, 0 ) );
+		$record_date = get_option( self::RECORD_DATE_OPTION_KEY, '' );
+		$record_amt  = floatval( get_option( self::RECORD_AMOUNT_OPTION_KEY, 0 ) );
 
 		// No previous entry? Just enter what we have and return without generating a note.
 		if ( empty( $record_date ) ) {
-			update_option( RECORD_DATE_OPTION_KEY, $yesterday );
-			update_option( RECORD_AMOUNT_OPTION_KEY, $total );
-			return;
+			update_option( self::RECORD_DATE_OPTION_KEY, $yesterday );
+			update_option( self::RECORD_AMOUNT_OPTION_KEY, $total );
+				return;
 		}
 
 		// Otherwise, if yesterdays total bested the record, update AND generate a note.
 		if ( $total > $record_amt ) {
-			update_option( RECORD_DATE_OPTION_KEY, $yesterday );
-			update_option( RECORD_AMOUNT_OPTION_KEY, $total );
+			update_option( self::RECORD_DATE_OPTION_KEY, $yesterday );
+			update_option( self::RECORD_AMOUNT_OPTION_KEY, $total );
 
-			$formatted_yesterday   = 'October 16th';
-			$formatted_total       = '$160.00';
-			$formatted_record_date = 'May 23rd';
-			$formatted_record_amt  = '$100.00';
+			$formatted_yesterday   = date( 'F jS', strtotime( $yesterday ) );
+			$formatted_total       = html_entity_decode( strip_tags( wc_price( $total ) ) );
+			$formatted_record_date = date( 'F jS', strtotime( $record_date ) );
+			$formatted_record_amt  = html_entity_decode( strip_tags( wc_price( $record_amt ) ) );
 
-			$note_content = sprintf(
-				/* translators: */
+			$content = sprintf(
+				/* translators: 1 and 4: Date (e.g. October 16th), 2 and 3: Amount (e.g. $160.00) */
 				__( 'Woohoo, %1$s was your record day for sales! Net revenue was %2$s beating the previous record of %3$s set on %4$s.', 'wc-admin' ),
 				$formatted_yesterday,
 				$formatted_total,
@@ -82,16 +82,27 @@ class WC_Admin_Notes_New_Sales_Record {
 				$formatted_record_date
 			);
 
-			// TODO: Delete any pre-existing notes named wc-admin-new-sales-record.
+			$content_data = (object) array(
+				'old_record_date' => $record_date,
+				'old_record_amt'  => $record_amt,
+				'new_record_date' => $yesterday,
+				'new_record_amt'  => $total,
+			);
+
+			$name = 'wc-admin-new-sales-record';
+			// We only want one sales record note at any time in the inbox, so we delete any other first.
+			WC_Admin_Notes::delete_notes_with_name( $name );
+
+			// And now, create our new note.
 			$note = new WC_Admin_Note();
 			$note->set_title( __( 'New sales record!', 'wc-admin' ) );
-			$note->set_content( $note_content );
-			$note->set_content_data( '{}' );
+			$note->set_content( $content );
+			$note->set_content_data( $content_data );
 			$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 			$note->set_icon( 'trophy' );
-			$note->set_name( 'wc-admin-new-sales-record' );
+			$note->set_name( $name );
 			$note->set_source( 'wc-admin' );
-			$note->add_action( 'view-report', __( 'View report', 'wc-admin' ), '' );
+			$note->add_action( 'view-report', __( 'View report', 'wc-admin' ), '?page=wc-admin#/analytics' );
 			$note->save();
 		}
 	}

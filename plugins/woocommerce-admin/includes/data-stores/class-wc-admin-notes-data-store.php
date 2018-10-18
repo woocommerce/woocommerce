@@ -135,13 +135,13 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	public function delete( &$note, $args = array() ) {
 		$note_id = $note->get_id();
-		if ( $note->get_id() ) {
+		if ( $note_id ) {
 			global $wpdb;
 			$wpdb->delete( $wpdb->prefix . 'woocommerce_admin_notes', array( 'note_id' => $note_id ) );
 			$wpdb->delete( $wpdb->prefix . 'woocommerce_admin_note_actions', array( 'note_id' => $note_id ) );
 			$note->set_id( null );
 		}
-		do_action( 'woocommerce_trash_note', $id );
+		do_action( 'woocommerce_trash_note', $note_id );
 	}
 
 	/**
@@ -240,6 +240,22 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 		";
 
 		return $wpdb->get_var( $query ); // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+	}
+
+	/**
+	 * Find all the notes with a given name.
+	 *
+	 * @param string $name Name to search for.
+	 * @return array An array of matching note ids.
+	 */
+	public function get_notes_with_name( $name ) {
+		global $wpdb;
+		return $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT note_id FROM {$wpdb->prefix}woocommerce_admin_notes WHERE name = %s ORDER BY note_id ASC;",
+				$name
+			)
+		);
 	}
 
 }
