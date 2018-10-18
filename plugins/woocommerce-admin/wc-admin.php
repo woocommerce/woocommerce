@@ -63,6 +63,17 @@ function activate_wc_admin_plugin() {
 register_activation_hook( WC_ADMIN_PLUGIN_FILE, 'activate_wc_admin_plugin' );
 
 /**
+ * Deactivate wc-admin plugin if dependencies not satisfied.
+ */
+function deactivate_wc_admin_plugin() {
+	if ( ! dependencies_satisfied() ) {
+		deactivate_plugins( plugin_basename( WC_ADMIN_PLUGIN_FILE ) );
+		unset( $_GET['activate'] );
+	}
+}
+add_action( 'admin_init', 'deactivate_wc_admin_plugin' );
+
+/**
  * Set up the plugin, only if we can detect both Gutenberg and WooCommerce
  */
 function wc_admin_plugins_loaded() {
