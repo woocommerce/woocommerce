@@ -138,10 +138,10 @@ class Table extends Component {
 					<tbody>
 						<tr>
 							{ headers.map( ( header, i ) => {
-								const { isLeftAligned, isSortable, isNumeric, key, label } = header;
+								const { cellClassName, isLeftAligned, isSortable, isNumeric, key, label } = header;
 								const labelId = `header-${ instanceId } -${ i }`;
 								const thProps = {
-									className: classnames( 'woocommerce-table__header', {
+									className: classnames( 'woocommerce-table__header', cellClassName, {
 										'is-left-aligned': isLeftAligned,
 										'is-sortable': isSortable,
 										'is-sorted': sortedBy === key,
@@ -192,10 +192,10 @@ class Table extends Component {
 						{ rows.map( ( row, i ) => (
 							<tr key={ i }>
 								{ row.map( ( cell, j ) => {
-									const { isLeftAligned, isNumeric } = headers[ j ];
+									const { cellClassName, isLeftAligned, isNumeric } = headers[ j ];
 									const isHeader = rowHeader === j;
 									const Cell = isHeader ? 'th' : 'td';
-									const cellClasses = classnames( 'woocommerce-table__item', {
+									const cellClasses = classnames( 'woocommerce-table__item', cellClassName, {
 										'is-left-aligned': isLeftAligned,
 										'is-numeric': isNumeric,
 									} );

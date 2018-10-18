@@ -152,6 +152,7 @@ class TableCard extends Component {
 		const { selectedRows } = this.state;
 		const isAllChecked = ids.length === selectedRows.length;
 		return {
+			cellClassName: 'is-checkbox-column',
 			label: (
 				<input
 					type="checkbox"

@@ -124,6 +124,16 @@
 	&.is-numeric .is-placeholder {
 		max-width: 40px;
 	}
+
+	&.is-checkbox-column {
+		width: 33px;
+		max-width: 33px;
+		padding-right: 0;
+		padding-left: 17px;
+		& + th {
+			border-left: 0;
+		}
+	}
 }
 
 th.woocommerce-table__item {
