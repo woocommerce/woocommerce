@@ -100,7 +100,7 @@ export default compose(
 	withSelect( ( select, props ) => {
 		const { query, endpoint } = props;
 		const primaryData = getReportChartData( endpoint, 'primary', query, select );
-		const secondaryData = getReportChartData( endpoint, 'primary', query, select );
+		const secondaryData = getReportChartData( endpoint, 'secondary', query, select );
 		return {
 			primaryData,
 			secondaryData,
