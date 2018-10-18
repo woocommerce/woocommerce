@@ -29,7 +29,7 @@ class WC_Admin_Notes_New_Sales_Record {
 	 * @param string $date Date for sales to sum (i.e. YYYY-MM-DD).
 	 * @return floatval
 	 */
-	public function sum_sales_for_date( $date ) {
+	public static function sum_sales_for_date( $date ) {
 		$order_query = new WC_Order_Query( array( 'date_created' => $date ) );
 		$orders      = $order_query->get_orders();
 		$total       = 0;
@@ -44,9 +44,9 @@ class WC_Admin_Notes_New_Sales_Record {
 	/**
 	 * Possibly add a sales record note.
 	 */
-	public function possibly_add_sales_record_note() {
+	public static function possibly_add_sales_record_note() {
 		$yesterday = date( 'Y-m-d', current_time( 'timestamp', 0 ) - DAY_IN_SECONDS );
-		$total     = $this->sum_sales_for_date( $yesterday );
+		$total     = self::sum_sales_for_date( $yesterday );
 
 		// No sales yesterday? Bail.
 		if ( 0 >= $total ) {
@@ -107,6 +107,3 @@ class WC_Admin_Notes_New_Sales_Record {
 		}
 	}
 }
-
-// TODO Call schedule_recurring for once each day at 1 am or something.
-new WC_Admin_Notes_New_Sales_Record();
