@@ -743,7 +743,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		}
 
 		if ( isset( $request['review'] ) ) {
-			$prepared_review['comment_content'] = $request['review'];
+			$prepared_review['comment_content'] = wp_filter_post_kses( $request['review'] );
 		}
 
 		if ( isset( $request['product_id'] ) ) {
@@ -847,11 +847,11 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 				),
 				'product_id'       => array(
 					'description' => __( 'Unique identifier for the product that the review belongs to.', 'woocommerce' ),
-					'type'        => 'string',
+					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'status'           => array(
-					'description' => __( 'Status of the review', 'woocommerce' ),
+					'description' => __( 'Status of the review.', 'woocommerce' ),
 					'type'        => 'string',
 					'default'     => 'approved',
 					'enum'        => array( 'approved', 'hold', 'spam', 'unspam', 'trash', 'untrash' ),
