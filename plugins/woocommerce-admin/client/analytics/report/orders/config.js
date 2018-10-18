@@ -14,11 +14,6 @@ const { orderStatuses } = wcSettings;
 
 export const filters = [
 	{ label: __( 'All Orders', 'wc-admin' ), value: 'all' },
-	{ label: __( 'New Customers', 'wc-admin' ), value: 'new_customers' },
-	{
-		label: __( 'Returning Customers', 'wc-admin' ),
-		value: 'returning_customers',
-	},
 	{ label: __( 'Advanced Filters', 'wc-admin' ), value: 'advanced' },
 ];
 
