@@ -743,7 +743,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		}
 
 		if ( isset( $request['review'] ) ) {
-			$prepared_review['comment_content'] = wp_filter_post_kses( $request['review'] );
+			$prepared_review['comment_content'] = $request['review'];
 		}
 
 		if ( isset( $request['product_id'] ) ) {
@@ -865,12 +865,16 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 				'reviewer_email'   => array(
 					'description' => __( 'Reviewer email.', 'woocommerce' ),
 					'type'        => 'string',
+					'format'      => 'email',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'review'           => array(
 					'description' => __( 'The content of the review.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
+					'arg_options' => array(
+						'sanitize_callback' => 'wp_filter_post_kses',
+					),
 				),
 				'rating'           => array(
 					'description' => __( 'Review rating (0 to 5).', 'woocommerce' ),
