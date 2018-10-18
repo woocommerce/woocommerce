@@ -93,5 +93,8 @@ function wc_admin_plugins_loaded() {
 
 	// Create the Admin pages.
 	require_once dirname( __FILE__ ) . '/lib/admin.php';
+
+	// Admin note providers.
+	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-notes-new-sales-record.php';
 }
 add_action( 'plugins_loaded', 'wc_admin_plugins_loaded' );
