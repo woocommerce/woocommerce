@@ -54,7 +54,7 @@ class WC_Admin_REST_Reports_Controller extends WC_REST_Reports_Controller {
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'reports', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'wc-admin' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -71,59 +71,59 @@ class WC_Admin_REST_Reports_Controller extends WC_REST_Reports_Controller {
 		$reports = array(
 			array(
 				'slug'        => 'revenue/stats',
-				'description' => __( 'Stats about revenue.', 'woocommerce' ),
+				'description' => __( 'Stats about revenue.', 'wc-admin' ),
 			),
 			array(
 				'slug'        => 'orders/stats',
-				'description' => __( 'Stats about orders.', 'woocommerce' ),
+				'description' => __( 'Stats about orders.', 'wc-admin' ),
 			),
 			array(
 				'slug'        => 'products',
-				'description' => __( 'Products detailed reports.', 'woocommerce' ),
+				'description' => __( 'Products detailed reports.', 'wc-admin' ),
 			),
 			array(
 				'slug'        => 'products/stats',
-				'description' => __( 'Stats about products.', 'woocommerce' ),
+				'description' => __( 'Stats about products.', 'wc-admin' ),
 			),
 			array(
 				'slug'        => 'categories',
-				'description' => __( 'Product categories detailed reports.', 'woocommerce' ),
+				'description' => __( 'Product categories detailed reports.', 'wc-admin' ),
 			),
 			array(
 				'slug'        => 'categories/stats',
-				'description' => __( 'Stats about product categories.', 'woocommerce' ),
+				'description' => __( 'Stats about product categories.', 'wc-admin' ),
 			),
 			array(
 				'slug'        => 'coupons',
-				'description' => __( 'Coupons detailed reports.', 'woocommerce' ),
+				'description' => __( 'Coupons detailed reports.', 'wc-admin' ),
 			),
 			array(
 				'slug'        => 'coupons/stats',
-				'description' => __( 'Stats about coupons.', 'woocommerce' ),
+				'description' => __( 'Stats about coupons.', 'wc-admin' ),
 			),
 			array(
 				'slug'        => 'taxes',
-				'description' => __( 'Taxes detailed reports.', 'woocommerce' ),
+				'description' => __( 'Taxes detailed reports.', 'wc-admin' ),
 			),
 			array(
 				'slug'        => 'taxes/stats',
-				'description' => __( 'Stats about taxes.', 'woocommerce' ),
+				'description' => __( 'Stats about taxes.', 'wc-admin' ),
 			),
 			array(
 				'slug'        => 'downloads',
-				'description' => __( 'Product downloads detailed reports.', 'woocommerce' ),
+				'description' => __( 'Product downloads detailed reports.', 'wc-admin' ),
 			),
 			array(
 				'slug'        => 'downloads/files',
-				'description' => __( 'Product download files detailed reports.', 'woocommerce' ),
+				'description' => __( 'Product download files detailed reports.', 'wc-admin' ),
 			),
 			array(
 				'slug'        => 'downloads/stats',
-				'description' => __( 'Stats about product downloads.', 'woocommerce' ),
+				'description' => __( 'Stats about product downloads.', 'wc-admin' ),
 			),
 			array(
 				'slug'        => 'customers',
-				'description' => __( 'Customers detailed reports.', 'woocommerce' ),
+				'description' => __( 'Customers detailed reports.', 'wc-admin' ),
 			),
 		);
 
@@ -187,13 +187,13 @@ class WC_Admin_REST_Reports_Controller extends WC_REST_Reports_Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'slug'        => array(
-					'description' => __( 'An alphanumeric identifier for the resource.', 'woocommerce' ),
+					'description' => __( 'An alphanumeric identifier for the resource.', 'wc-admin' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'description' => array(
-					'description' => __( 'A human-readable description of the resource.', 'woocommerce' ),
+					'description' => __( 'A human-readable description of the resource.', 'wc-admin' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
