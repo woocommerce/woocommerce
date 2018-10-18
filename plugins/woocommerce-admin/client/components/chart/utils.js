@@ -610,8 +610,7 @@ export const drawLines = ( node, data, params ) => {
 		.attr( 'x1', d => params.xLineScale( new Date( d.date ) ) )
 		.attr( 'y1', 0 )
 		.attr( 'x2', d => params.xLineScale( new Date( d.date ) ) )
-		.attr( 'y2', params.height )
-		.style( 'opacity', 1 );
+		.attr( 'y2', params.height );
 
 	focusGrid
 		.selectAll( 'circle' )
@@ -622,7 +621,6 @@ export const drawLines = ( node, data, params ) => {
 		.attr( 'fill', d => getColor( d.key, params ) )
 		.attr( 'stroke', '#fff' )
 		.attr( 'stroke-width', 4 )
-		.style( 'opacity', 1 )
 		.attr( 'cx', d => params.xLineScale( new Date( d.date ) ) )
 		.attr( 'cy', d => params.yScale( d.value ) );
 
