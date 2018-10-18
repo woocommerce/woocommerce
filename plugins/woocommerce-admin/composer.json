@@ -11,11 +11,11 @@
   },
   "require-dev": {
     "squizlabs/php_codesniffer": "*",
-    "wp-coding-standards/wpcs": "^0.14",
-    "phpunit/phpunit": "6.*",
+    "wp-coding-standards/wpcs": "0.14.1",
+    "phpunit/phpunit": "6.5.13",
     "woocommerce/woocommerce-sniffs": "*",
-    "wimg/php-compatibility": "^8.0",
-    "dealerdirect/phpcodesniffer-composer-installer": "^0.4.3"
+    "wimg/php-compatibility": "8.2.0",
+    "dealerdirect/phpcodesniffer-composer-installer": "0.4.4"
   },
   "scripts": {
     "test": [
