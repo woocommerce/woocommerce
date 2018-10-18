@@ -9,7 +9,7 @@ import { forEach, isNull } from 'lodash';
  * Internal dependencies
  */
 import { MAX_PER_PAGE } from 'store/constants';
-import { appendTimestamp } from 'lib/date';
+import { appendTimestamp, getCurrentDates, getIntervalForQuery } from 'lib/date';
 
 /**
  * Returns true if a report object is empty.
@@ -34,14 +34,33 @@ export function isReportDataEmpty( report ) {
 }
 
 /**
+ * Constructs and returns a query associated with a Report data request.
+ *
+ * @param  {String} dataType 'primary' or 'secondary'.
+ * @param  {Object} query  query parameters in the url.
+ * @returns {Object} data request query parameters.
+ */
+function getRequestQuery( dataType, query ) {
+	const datesFromQuery = getCurrentDates( query );
+	const interval = getIntervalForQuery( query );
+	return {
+		order: 'asc',
+		interval,
+		per_page: MAX_PER_PAGE,
+		after: appendTimestamp( datesFromQuery[ dataType ].after, 'start' ),
+		before: appendTimestamp( datesFromQuery[ dataType ].before, 'end' ),
+	};
+}
+
+/**
  * Returns summary number totals needed to render a report page.
  *
  * @param  {String} endpoint Report  API Endpoint
- * @param  {Object} dates  Primary and secondary dates.
+ * @param  {Object} query  query parameters in the url
  * @param {object} select Instance of @wordpress/select
  * @return {Object}  Object containing summary number responses.
  */
-export function getSummaryNumbers( endpoint, dates, select ) {
+export function getSummaryNumbers( endpoint, query, select ) {
 	const { getReportStats, isReportStatsRequesting, isReportStatsError } = select( 'wc-admin' );
 	const response = {
 		isRequesting: false,
@@ -52,16 +71,7 @@ export function getSummaryNumbers( endpoint, dates, select ) {
 		},
 	};
 
-	const baseQuery = {
-		interval: 'day',
-		per_page: 1, // We only need the `totals` part of the response.
-	};
-
-	const primaryQuery = {
-		...baseQuery,
-		after: appendTimestamp( dates.primary.after, 'start' ),
-		before: appendTimestamp( dates.primary.before, 'end' ),
-	};
+	const primaryQuery = getRequestQuery( 'primary', query );
 	const primary = getReportStats( endpoint, primaryQuery );
 	if ( isReportStatsRequesting( endpoint, primaryQuery ) ) {
 		return { ...response, isRequesting: true };
@@ -71,12 +81,7 @@ export function getSummaryNumbers( endpoint, dates, select ) {
 
 	const primaryTotals = ( primary && primary.data && primary.data.totals ) || null;
 
-	const secondaryQuery = {
-		...baseQuery,
-		per_page: 1,
-		after: appendTimestamp( dates.secondary.after, 'start' ),
-		before: appendTimestamp( dates.secondary.before, 'end' ),
-	};
+	const secondaryQuery = getRequestQuery( 'secondary', query );
 	const secondary = getReportStats( endpoint, secondaryQuery );
 	if ( isReportStatsRequesting( endpoint, secondaryQuery ) ) {
 		return { ...response, isRequesting: true };
@@ -93,11 +98,12 @@ export function getSummaryNumbers( endpoint, dates, select ) {
  * Returns all of the data needed to render a chart with summary numbers on a report page.
  *
  * @param  {String} endpoint Report  API Endpoint
- * @param  {Object} query  API arguments
+ * @param  {String} dataType 'primary' or 'secondary'
+ * @param  {Object} query  query parameters in the url
  * @param {object} select Instance of @wordpress/select
  * @return {Object}  Object containing API request information (response, fetching, and error details)
  */
-export function getReportChartData( endpoint, query, select ) {
+export function getReportChartData( endpoint, dataType, query, select ) {
 	const { getReportStats, isReportStatsRequesting, isReportStatsError } = select( 'wc-admin' );
 
 	const response = {
@@ -110,14 +116,12 @@ export function getReportChartData( endpoint, query, select ) {
 		},
 	};
 
-	query.after = appendTimestamp( query.after, 'start' );
-	query.before = appendTimestamp( query.before, 'end' );
+	const requestQuery = getRequestQuery( dataType, query );
+	const stats = getReportStats( endpoint, requestQuery );
 
-	const stats = getReportStats( endpoint, query );
-
-	if ( isReportStatsRequesting( endpoint, query ) ) {
+	if ( isReportStatsRequesting( endpoint, requestQuery ) ) {
 		return { ...response, isRequesting: true };
-	} else if ( isReportStatsError( endpoint, query ) ) {
+	} else if ( isReportStatsError( endpoint, requestQuery ) ) {
 		return { ...response, isError: true };
 	} else if ( isReportDataEmpty( stats ) ) {
 		return { ...response, isEmpty: true };
@@ -135,17 +139,17 @@ export function getReportChartData( endpoint, query, select ) {
 		const totalPages = Math.ceil( stats.totalResults / MAX_PER_PAGE );
 
 		for ( let i = 2; i <= totalPages; i++ ) {
-			const _query = { ...query, page: i };
-			const _data = getReportStats( endpoint, _query );
-			if ( isReportStatsRequesting( endpoint, _query ) ) {
+			const nextQuery = { ...requestQuery, page: i };
+			const _data = getReportStats( endpoint, nextQuery );
+			if ( isReportStatsRequesting( endpoint, nextQuery ) ) {
 				continue;
 			}
-			if ( isReportStatsError( endpoint, _query ) ) {
+			if ( isReportStatsError( endpoint, nextQuery ) ) {
 				isError = true;
 				isFetching = false;
 				break;
 			}
-			if ( ! isReportStatsRequesting( endpoint, _query ) ) {
+			if ( ! isReportStatsRequesting( endpoint, nextQuery ) ) {
 				pagedData.push( _data );
 				if ( i === totalPages ) {
 					isFetching = false;

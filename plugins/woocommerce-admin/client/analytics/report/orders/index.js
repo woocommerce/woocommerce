@@ -15,9 +15,8 @@ import { get } from 'lodash';
 import { EmptyContent, ReportFilters } from '@woocommerce/components';
 import { filters, advancedFilterConfig } from './config';
 import { getAdminLink } from 'lib/nav-utils';
-import { appendTimestamp, getCurrentDates, getIntervalForQuery } from 'lib/date';
+import { appendTimestamp, getCurrentDates } from 'lib/date';
 import { getReportChartData } from 'store/reports/utils';
-import { MAX_PER_PAGE } from 'store/constants';
 import OrdersReportChart from './chart';
 import OrdersReportTable from './table';
 
@@ -98,23 +97,8 @@ OrdersReport.propTypes = {
 export default compose(
 	withSelect( ( select, props ) => {
 		const { query } = props;
-		const interval = getIntervalForQuery( query );
 		const datesFromQuery = getCurrentDates( query );
-		const baseArgs = {
-			order: 'asc',
-			interval: interval,
-			per_page: MAX_PER_PAGE,
-		};
-
-		const primaryData = getReportChartData(
-			'orders',
-			{
-				...baseArgs,
-				after: datesFromQuery.primary.after,
-				before: datesFromQuery.primary.before,
-			},
-			select
-		);
+		const primaryData = getReportChartData( 'orders', 'primary', query, select );
 
 		const { getOrders, isGetOrdersError, isGetOrdersRequesting } = select( 'wc-admin' );
 		const tableQuery = {

@@ -21,7 +21,6 @@ import {
 	getPreviousDate,
 } from 'lib/date';
 import { getReportChartData } from 'store/reports/utils';
-import { MAX_PER_PAGE } from 'store/constants';
 import ReportError from 'analytics/components/report-error';
 
 class ReportChart extends Component {
@@ -100,32 +99,8 @@ ReportChart.propTypes = {
 export default compose(
 	withSelect( ( select, props ) => {
 		const { query, endpoint } = props;
-		const interval = getIntervalForQuery( query );
-		const datesFromQuery = getCurrentDates( query );
-		const baseArgs = {
-			order: 'asc',
-			interval: interval,
-			per_page: MAX_PER_PAGE,
-		};
-		const primaryData = getReportChartData(
-			endpoint,
-			{
-				...baseArgs,
-				after: datesFromQuery.primary.after,
-				before: datesFromQuery.primary.before,
-			},
-			select
-		);
-
-		const secondaryData = getReportChartData(
-			endpoint,
-			{
-				...baseArgs,
-				after: datesFromQuery.secondary.after,
-				before: datesFromQuery.secondary.before,
-			},
-			select
-		);
+		const primaryData = getReportChartData( endpoint, 'primary', query, select );
+		const secondaryData = getReportChartData( endpoint, 'primary', query, select );
 		return {
 			primaryData,
 			secondaryData,
