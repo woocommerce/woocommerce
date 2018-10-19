@@ -17,13 +17,6 @@ class WC_Admin_Notes_New_Sales_Record {
 	const RECORD_AMOUNT_OPTION_KEY = 'woocommerce_sales_record_amount';
 
 	/**
-	 * Sales Record constructor.
-	 */
-	public function __construct() {
-		add_action( 'admin_footer', array( $this, 'possibly_add_sales_record_note' ) );
-	}
-
-	/**
 	 * Returns the total of yesterday's sales.
 	 *
 	 * @param string $date Date for sales to sum (i.e. YYYY-MM-DD).
