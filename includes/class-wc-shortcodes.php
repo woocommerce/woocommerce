@@ -475,7 +475,7 @@ class WC_Shortcodes {
 		$args = array(
 			'posts_per_page'      => 1,
 			'post_type'           => 'product',
-			'post_status'         => 'publish',
+			'post_status'         => ( ! empty( $atts['status'] ) ) ? $atts['status'] : 'publish',
 			'ignore_sticky_posts' => 1,
 			'no_found_rows'       => 1,
 		);

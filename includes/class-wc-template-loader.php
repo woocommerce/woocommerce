@@ -493,7 +493,7 @@ class WC_Template_Loader {
 		remove_filter( 'the_content', array( __CLASS__, 'unsupported_theme_product_content_filter' ) );
 
 		if ( is_product() ) {
-			$content = do_shortcode( '[product_page id="' . get_the_ID() . '" show_title=0]' );
+			$content = do_shortcode( '[product_page id="' . get_the_ID() . '" show_title=0 status="any"]' );
 		}
 
 		self::$in_content_filter = false;
