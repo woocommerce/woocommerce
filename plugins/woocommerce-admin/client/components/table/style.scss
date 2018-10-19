@@ -30,13 +30,12 @@
 
 	button.woocommerce-table__download-button.is-link {
 		padding: 6px $gap-small;
-		color: #000000;
+		color: #000;
 		text-decoration: none;
 		svg {
 			margin-right: $gap-smaller;
-			max-width: 18px;
+			height: 24px;
 			width: 24px;
-			max-width: 24px;
 		}
 	}
 
@@ -130,8 +129,8 @@
 
 	&.is-sorted {
 		background-color: $core-grey-light-100;
-  }
-  
+	}
+
 	&.is-checkbox-column {
 		width: 33px;
 		max-width: 33px;

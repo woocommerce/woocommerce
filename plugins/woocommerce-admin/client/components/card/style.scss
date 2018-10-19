@@ -36,6 +36,7 @@
 
 .woocommerce-card__header-item {
 	@include set-grid-item-position( 3, 3 );
+	-ms-grid-row-align: center;
 }
 
 .woocommerce-card__action,
