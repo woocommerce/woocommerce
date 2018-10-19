@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d96eee18bb3e015826b3b55fbcd58516",
+    "content-hash": "59bd6e647dc6d3e4daddac45c9aab8d5",
     "packages": [
         {
             "name": "composer/installers",
@@ -1568,16 +1568,16 @@
         },
         {
             "name": "squizlabs/php_codesniffer",
-            "version": "3.3.1",
+            "version": "3.3.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/squizlabs/PHP_CodeSniffer.git",
-                "reference": "628a481780561150481a9ec74709092b9759b3ec"
+                "reference": "6ad28354c04b364c3c71a34e4a18b629cc3b231e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/squizlabs/PHP_CodeSniffer/zipball/628a481780561150481a9ec74709092b9759b3ec",
-                "reference": "628a481780561150481a9ec74709092b9759b3ec",
+                "url": "https://api.github.com/repos/squizlabs/PHP_CodeSniffer/zipball/6ad28354c04b364c3c71a34e4a18b629cc3b231e",
+                "reference": "6ad28354c04b364c3c71a34e4a18b629cc3b231e",
                 "shasum": ""
             },
             "require": {
@@ -1615,7 +1615,7 @@
                 "phpcs",
                 "standards"
             ],
-            "time": "2018-07-26T23:47:18+00:00"
+            "time": "2018-09-23T23:08:17+00:00"
         },
         {
             "name": "theseer/tokenizer",
@@ -1709,16 +1709,16 @@
         },
         {
             "name": "wimg/php-compatibility",
-            "version": "8.2.0",
+            "version": "9.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCompatibility/PHPCompatibility.git",
-                "reference": "eaf613c1a8265bcfd7b0ab690783f2aef519f78a"
+                "reference": "e9f4047e5edf53c88f36f1dafc0d49454ce13e25"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCompatibility/PHPCompatibility/zipball/eaf613c1a8265bcfd7b0ab690783f2aef519f78a",
-                "reference": "eaf613c1a8265bcfd7b0ab690783f2aef519f78a",
+                "url": "https://api.github.com/repos/PHPCompatibility/PHPCompatibility/zipball/e9f4047e5edf53c88f36f1dafc0d49454ce13e25",
+                "reference": "e9f4047e5edf53c88f36f1dafc0d49454ce13e25",
                 "shasum": ""
             },
             "require": {
@@ -1736,29 +1736,34 @@
                 "roave/security-advisories": "dev-master || Helps prevent installing dependencies with known security issues."
             },
             "type": "phpcodesniffer-standard",
-            "autoload": {
-                "psr-4": {
-                    "PHPCompatibility\\": "PHPCompatibility/"
-                }
-            },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "LGPL-3.0-or-later"
             ],
             "authors": [
                 {
+                    "name": "Contributors",
+                    "homepage": "https://github.com/PHPCompatibility/PHPCompatibility/graphs/contributors"
+                },
+                {
                     "name": "Wim Godden",
+                    "homepage": "https://github.com/wimg",
+                    "role": "lead"
+                },
+                {
+                    "name": "Juliette Reinders Folmer",
+                    "homepage": "https://github.com/jrfnl",
                     "role": "lead"
                 }
             ],
-            "description": "A set of sniffs for PHP_CodeSniffer that checks for PHP version compatibility.",
+            "description": "A set of sniffs for PHP_CodeSniffer that checks for PHP cross-version compatibility.",
             "homepage": "http://techblog.wimgodden.be/tag/codesniffer/",
             "keywords": [
                 "compatibility",
                 "phpcs",
                 "standards"
             ],
-            "time": "2018-07-17T13:42:26+00:00"
+            "time": "2018-10-07T17:38:02+00:00"
         },
         {
             "name": "woocommerce/woocommerce-sniffs",
