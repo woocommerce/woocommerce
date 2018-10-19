@@ -196,9 +196,10 @@ class Chart extends Component {
 			tooltipTitle,
 			xFormat,
 			x2Format,
-			yFormat,
 			interval,
+			valueType,
 		} = this.props;
+		let { yFormat } = this.props;
 		const legendDirection = layout === 'standard' && width >= WIDE_BREAKPOINT ? 'row' : 'column';
 		const chartDirection = layout === 'comparison' && width >= WIDE_BREAKPOINT ? 'row' : 'column';
 		const legend = (
@@ -209,6 +210,7 @@ class Chart extends Component {
 				handleLegendHover={ this.handleLegendHover }
 				handleLegendToggle={ this.handleLegendToggle }
 				legendDirection={ legendDirection }
+				valueType={ valueType }
 			/>
 		);
 		const margin = {
@@ -217,6 +219,18 @@ class Chart extends Component {
 			right: 30,
 			top: 0,
 		};
+
+		switch ( valueType ) {
+			case 'average':
+				yFormat = '.0f';
+				break;
+			case 'currency':
+				yFormat = '$.3s';
+				break;
+			case 'number':
+				yFormat = '.0f';
+				break;
+		}
 		return (
 			<div className="woocommerce-chart" ref={ this.chartRef }>
 				<div className="woocommerce-chart__header">
@@ -277,6 +291,7 @@ class Chart extends Component {
 							xFormat={ xFormat }
 							x2Format={ x2Format }
 							yFormat={ yFormat }
+							valueType={ valueType }
 						/>
 					</div>
 					{ width < WIDE_BREAKPOINT && <div className="woocommerce-chart__footer">{ legend }</div> }
@@ -350,6 +365,10 @@ Chart.propTypes = {
 	 * Allowed intervals to show in a dropdown.
 	 */
 	allowedIntervals: PropTypes.array,
+	/**
+	 * What type of data is to be displayed? Number, Average, String?
+	 */
+	valueType: PropTypes.string,
 };
 
 Chart.defaultProps = {

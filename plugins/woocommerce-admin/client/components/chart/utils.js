@@ -451,6 +451,21 @@ export const drawAxis = ( node, params ) => {
 const getTooltipRowLabel = ( d, row, params ) =>
 	d[ row.key ].labelDate ? formatDate( params.pointLabelFormat, d[ row.key ].labelDate ) : row.key;
 
+const getFormatedTotal = ( total, valueType ) => {
+	let rowTotal = total;
+	switch ( valueType ) {
+		case 'average':
+			rowTotal = Math.round( total );
+			break;
+		case 'currency':
+			rowTotal = formatCurrency( total );
+			break;
+		case 'number':
+			break;
+	}
+	return rowTotal;
+};
+
 const showTooltip = ( params, d, position ) => {
 	const keys = params.orderedKeys.filter( row => row.visible ).map(
 		row => `
@@ -459,7 +474,7 @@ const showTooltip = ( params, d, position ) => {
 						<span class="key-color" style="background-color:${ getColor( row.key, params ) }"></span>
 						<span class="key-key">${ getTooltipRowLabel( d, row, params ) }</span>
 					</div>
-					<span class="key-value">${ formatCurrency( d[ row.key ].value ) }</span>
+					<span class="key-value">${ getFormatedTotal( d[ row.key ].value, params.valueType ) }</span>
 				</li>
 			`
 	);

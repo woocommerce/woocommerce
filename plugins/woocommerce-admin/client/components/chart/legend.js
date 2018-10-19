@@ -13,6 +13,21 @@ import './style.scss';
 import { formatCurrency } from 'lib/currency';
 import { getColor } from './utils';
 
+function getFormatedTotal( total, valueType ) {
+	let rowTotal = total;
+	switch ( valueType ) {
+		case 'average':
+			rowTotal = Math.round( total );
+			break;
+		case 'currency':
+			rowTotal = formatCurrency( total );
+			break;
+		case 'number':
+			break;
+	}
+	return rowTotal;
+}
+
 /**
  * A legend specifically designed for the WooCommerce admin charts.
  */
@@ -24,6 +39,7 @@ class Legend extends Component {
 			handleLegendHover,
 			handleLegendToggle,
 			legendDirection,
+			valueType,
 		} = this.props;
 		const colorParams = {
 			orderedKeys: data,
@@ -68,7 +84,7 @@ class Legend extends Component {
 									{ row.key }
 								</span>
 								<span className="woocommerce-legend__item-total" id={ row.key }>
-									{ formatCurrency( row.total ) }
+									{ getFormatedTotal( row.total, valueType ) }
 								</span>
 							</div>
 						</button>
@@ -104,6 +120,10 @@ Legend.propTypes = {
 	 * Display legend items as a `row` or `column` inside a flex-box.
 	 */
 	legendDirection: PropTypes.oneOf( [ 'row', 'column' ] ),
+	/**
+	 * What type of data is to be displayed? Number, Average, String?
+	 */
+	valueType: PropTypes.string,
 };
 
 Legend.defaultProps = {

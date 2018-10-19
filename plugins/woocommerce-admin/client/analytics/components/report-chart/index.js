@@ -71,7 +71,6 @@ class ReportChart extends Component {
 				},
 			};
 		} );
-
 		return (
 			<Chart
 				data={ chartData }
@@ -84,6 +83,7 @@ class ReportChart extends Component {
 				xFormat={ formats.xFormat }
 				x2Format={ formats.x2Format }
 				dateParser={ '%Y-%m-%dT%H:%M:%S' }
+				valueType={ selectedChart.type }
 			/>
 		);
 	}

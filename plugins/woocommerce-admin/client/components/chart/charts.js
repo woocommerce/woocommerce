@@ -84,6 +84,7 @@ class D3Chart extends Component {
 			height: params.height - margin.top - margin.bottom,
 			width: params.width - margin.left - margin.right,
 			tooltip: d3Select( this.tooltipRef.current ),
+			valueType: params.valueType,
 		} );
 		drawAxis( g, adjParams );
 		type === 'line' && drawLines( g, data, adjParams );
@@ -110,6 +111,7 @@ class D3Chart extends Component {
 			xFormat,
 			x2Format,
 			yFormat,
+			valueType,
 		} = this.props;
 		const { width } = this.state;
 		const calculatedWidth = width || node.offsetWidth;
@@ -155,6 +157,7 @@ class D3Chart extends Component {
 			yScale,
 			yTickOffset: getYTickOffset( adjHeight, scale, yMax ),
 			yFormat,
+			valueType,
 		};
 	}
 
