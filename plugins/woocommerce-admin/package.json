@@ -96,7 +96,7 @@
     "react-router-dom": "4.3.1",
     "react-world-flags": "1.2.4",
     "readline-sync": "1.4.9",
-    "recast": "0.15.5",
+    "recast": "0.16.0",
     "sass-loader": "7.1.0",
     "style-loader": "0.23.0",
     "webpack": "4.19.1",
