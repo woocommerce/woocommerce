@@ -847,11 +847,11 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 				),
 				'product_id'       => array(
 					'description' => __( 'Unique identifier for the product that the review belongs to.', 'woocommerce' ),
-					'type'        => 'string',
+					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'status'           => array(
-					'description' => __( 'Status of the review', 'woocommerce' ),
+					'description' => __( 'Status of the review.', 'woocommerce' ),
 					'type'        => 'string',
 					'default'     => 'approved',
 					'enum'        => array( 'approved', 'hold', 'spam', 'unspam', 'trash', 'untrash' ),
@@ -865,12 +865,16 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 				'reviewer_email'   => array(
 					'description' => __( 'Reviewer email.', 'woocommerce' ),
 					'type'        => 'string',
+					'format'      => 'email',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'review'           => array(
 					'description' => __( 'The content of the review.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
+					'arg_options' => array(
+						'sanitize_callback' => 'wp_filter_post_kses',
+					),
 				),
 				'rating'           => array(
 					'description' => __( 'Review rating (0 to 5).', 'woocommerce' ),
@@ -926,26 +930,6 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 			'type'        => 'string',
 			'format'      => 'date-time',
 		);
-		$params['reviewer']         = array(
-			'description' => __( 'Limit result set to reviews assigned to specific user IDs.', 'woocommerce' ),
-			'type'        => 'array',
-			'items'       => array(
-				'type' => 'integer',
-			),
-		);
-		$params['reviewer_exclude'] = array(
-			'description' => __( 'Ensure result set excludes reviews assigned to specific user IDs.', 'woocommerce' ),
-			'type'        => 'array',
-			'items'       => array(
-				'type' => 'integer',
-			),
-		);
-		$params['reviewer_email']   = array(
-			'default'     => null,
-			'description' => __( 'Limit result set to that from a specific author email.', 'woocommerce' ),
-			'format'      => 'email',
-			'type'        => 'string',
-		);
 		$params['before']           = array(
 			'description' => __( 'Limit response to reviews published before a given ISO8601 compliant date.', 'woocommerce' ),
 			'type'        => 'string',
@@ -991,6 +975,26 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 				'include',
 				'product',
 			),
+		);
+		$params['reviewer']         = array(
+			'description' => __( 'Limit result set to reviews assigned to specific user IDs.', 'woocommerce' ),
+			'type'        => 'array',
+			'items'       => array(
+				'type' => 'integer',
+			),
+		);
+		$params['reviewer_exclude'] = array(
+			'description' => __( 'Ensure result set excludes reviews assigned to specific user IDs.', 'woocommerce' ),
+			'type'        => 'array',
+			'items'       => array(
+				'type' => 'integer',
+			),
+		);
+		$params['reviewer_email']   = array(
+			'default'     => null,
+			'description' => __( 'Limit result set to that from a specific author email.', 'woocommerce' ),
+			'format'      => 'email',
+			'type'        => 'string',
 		);
 		$params['product']          = array(
 			'default'     => array(),
