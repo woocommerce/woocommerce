@@ -1492,11 +1492,12 @@ class WC_API_Orders extends WC_API_Resource {
 	 *
 	 * @param string $order_id order ID
 	 * @param int $id
-	 * @param string $fields fields to limit response to
+	 * @param string|null $fields fields to limit response to
+	 * @param array $filter
 	 *
 	 * @return array|WP_Error
 	 */
-	public function get_order_refund( $order_id, $id, $fields = null ) {
+	public function get_order_refund( $order_id, $id, $fields = null, $filter = array() ) {
 		try {
 			// Validate order ID
 			$order_id = $this->validate_request( $order_id, $this->post_type, 'read' );
