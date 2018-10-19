@@ -206,11 +206,10 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Product shortcode numeric term slug matching. #21560
 * Fix - Remove the erasure tools links from the descriptions of the erasure settings for users without the manage_privacy_options capability. #21565
 * Fix - Don't double urldecode posted variation attributes. #21570
-* Fix - New helper functions wc_user_has_role and wc_current_user_has_role to correctly check user roles. #21569
 * Fix - Don't double-sanitize cart images. #21574
 * Fix - Check if ID exists and is not empty before set Product's download ID in API. #21588
-* Fix - Check for multisite and user roles instead of using current_user_can. #21569 #21575
 * Fix - Ensure wp_list_pluck() gets a array and not possibly null in WC_Product_Data_Store_CPT::update_attributes. #21591
+* Fix - Trim CSV header rows to prevent leading/trailing whitespace issues. #21614
 * Fix/Tweak - Fire `woocommerce_grant_product_download_access` hook after the download has its ID set. #20905
 * Fix/Tweak/Performance - Change wp_woocommerce_sessions primary key to session_id. #21245
 * Tweak - Show empty terms in admin product category filter dropdown. #20324
