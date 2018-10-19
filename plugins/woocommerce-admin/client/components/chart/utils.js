@@ -533,20 +533,23 @@ const calculateTooltipPosition = ( element, chart, elementWidthRatio = 1 ) => {
 	const tooltipMargin = 24;
 
 	let xPosition =
-		elementCoords.x + elementCoords.width * elementWidthRatio + tooltipMargin - chartCoords.x;
-	let yPosition = elementCoords.y + tooltipMargin - chartCoords.y;
+		elementCoords.left + elementCoords.width * elementWidthRatio + tooltipMargin - chartCoords.left;
+	let yPosition = elementCoords.top + tooltipMargin - chartCoords.top;
 	if ( xPosition + tooltipSize.width + tooltipMargin > chartCoords.width ) {
 		xPosition = Math.max(
 			0,
-			elementCoords.x +
+			elementCoords.left +
 				elementCoords.width * ( 1 - elementWidthRatio ) -
 				tooltipSize.width -
 				tooltipMargin -
-				chartCoords.x
+				chartCoords.left
 		);
 	}
 	if ( yPosition + tooltipSize.height + tooltipMargin > chartCoords.height ) {
-		yPosition = Math.max( 0, elementCoords.y - tooltipSize.height - tooltipMargin - chartCoords.y );
+		yPosition = Math.max(
+			0,
+			elementCoords.top - tooltipSize.height - tooltipMargin - chartCoords.top
+		);
 	}
 
 	return { x: xPosition, y: yPosition };
