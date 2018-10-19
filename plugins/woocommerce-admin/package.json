@@ -98,7 +98,7 @@
     "readline-sync": "1.4.9",
     "recast": "0.16.0",
     "sass-loader": "7.1.0",
-    "style-loader": "0.23.0",
+    "style-loader": "0.23.1",
     "webpack": "4.19.1",
     "webpack-cli": "3.1.0"
   },
