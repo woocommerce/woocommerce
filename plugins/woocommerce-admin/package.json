@@ -66,7 +66,7 @@
     "docsify-cli": "github:docsifyjs/docsify-cli#5df38996",
     "eslint": "5.7.0",
     "eslint-config-wpcalypso": "4.0.1",
-    "eslint-loader": "2.1.0",
+    "eslint-loader": "2.1.1",
     "eslint-plugin-jest": "21.22.0",
     "eslint-plugin-jsx-a11y": "6.1.1",
     "eslint-plugin-react": "7.11.1",
