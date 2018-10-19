@@ -4,7 +4,7 @@
  */
 import codeBlocks from 'gfm-code-blocks';
 import { Component } from '@wordpress/element';
-import { LiveError, LivePreview, LiveProvider } from 'react-live';
+// import { LiveError, LivePreview, LiveProvider } from 'react-live';
 // Used to provide scope in LivePreview
 import { addFilter } from '@wordpress/hooks';
 import { withState } from '@wordpress/compose';
@@ -43,6 +43,7 @@ class Example extends Component {
 	}
 
 	render() {
+		/*eslint-disable */
 		const { code } = this.state;
 		const scope = {
 			...wpComponents,
@@ -55,6 +56,8 @@ class Example extends Component {
 			Gridicon,
 		};
 
+		return null;
+
 		return code ? (
 			<LiveProvider
 				code={ code }
@@ -66,6 +69,7 @@ class Example extends Component {
 				<LivePreview />
 			</LiveProvider>
 		) : null;
+		/*eslint-enable */
 	}
 }
 
