@@ -99,7 +99,7 @@
     "recast": "0.16.0",
     "sass-loader": "7.1.0",
     "style-loader": "0.23.1",
-    "webpack": "4.19.1",
+    "webpack": "4.21.0",
     "webpack-cli": "3.1.0"
   },
   "dependencies": {
