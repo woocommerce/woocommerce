@@ -16,11 +16,12 @@ class WC_Admin_Notes {
 	 * Get notes from the database.
 	 *
 	 * @param string $context Getting notes for what context. Valid values: view, edit.
+	 * @param array  $args Arguments to pass to the query( e.g. per_page and page).
 	 * @return array Array of arrays.
 	 */
-	public static function get_notes( $context = 'admin' ) {
+	public static function get_notes( $context = 'edit', $args = array() ) {
 		$data_store = WC_Data_Store::load( 'admin-note' );
-		$raw_notes  = $data_store->get_notes();
+		$raw_notes  = $data_store->get_notes( $args );
 		$notes      = array();
 		foreach ( (array) $raw_notes as $raw_note ) {
 			$note                               = new WC_Admin_Note( $raw_note );
@@ -57,5 +58,15 @@ class WC_Admin_Notes {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Get the total number of notes
+	 *
+	 * @return int
+	 */
+	public static function get_notes_count() {
+		$data_store = WC_Data_Store::load( 'admin-note' );
+		return $data_store->get_notes_count();
 	}
 }
