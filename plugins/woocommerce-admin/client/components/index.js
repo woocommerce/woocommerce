@@ -43,6 +43,7 @@ export { default as SummaryListPlaceholder } from './summary/placeholder';
 export { default as SummaryNumber } from './summary/item';
 export { default as Table } from './table/table';
 export { default as TableCard } from './table';
+export { default as EmptyTable } from './table/empty';
 export { default as TablePlaceholder } from './table/placeholder';
 export { default as TableSummary } from './table/summary';
 export { default as Tag } from './tag';

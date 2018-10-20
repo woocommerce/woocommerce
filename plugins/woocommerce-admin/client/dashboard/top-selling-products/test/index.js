@@ -33,9 +33,7 @@ describe( 'TopSellingProducts', () => {
 	test( 'should render empty message when there are no rows', () => {
 		const topSellingProducts = shallow( <TopSellingProducts data={ {} } /> );
 
-		expect(
-			topSellingProducts.find( '.woocommerce-top-selling-products__empty-message' ).length
-		).toBe( 1 );
+		expect( topSellingProducts.find( 'EmptyTable' ).length ).toBe( 1 );
 	} );
 
 	test( 'should render correct data in the table', () => {

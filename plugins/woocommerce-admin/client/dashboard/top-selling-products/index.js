@@ -11,7 +11,7 @@ import { withSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { Card, Table, TablePlaceholder } from '@woocommerce/components';
+import { Card, EmptyTable, Table, TablePlaceholder } from '@woocommerce/components';
 import { getAdminLink } from 'lib/nav-utils';
 import { numberFormat } from 'lib/number';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
@@ -96,9 +96,9 @@ export class TopSellingProducts extends Component {
 
 		if ( rows.length === 0 ) {
 			return (
-				<div className="woocommerce-top-selling-products__empty-message">
+				<EmptyTable>
 					{ __( 'When new orders arrive, popular products will be listed here.', 'wc-admin' ) }
-				</div>
+				</EmptyTable>
 			);
 		}
 

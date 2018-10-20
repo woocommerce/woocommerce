@@ -63,6 +63,13 @@ const MyTable = () => (
 				headers={ headers }
 			/>
 		</Section>
+
+		<H>Empty Table</H>
+		<Section component={ false }>
+			<EmptyTable>
+				There are no entries.
+			</EmptyTable>
+		</Section>
 	</div>
 );
 ```

@@ -28,6 +28,22 @@
 		}
 	}
 
+	$row-text-height: 1.1375rem;
+	$row-height: #{$gap * 2} + #{$row-text-height} + 1px;
+	$header-row-height: #{$gap-smaller * 2} + #{$row-text-height} + 1px;
+	&.is-empty {
+		align-items: center;
+		background: $core-grey-light-100;
+		color: $core-grey-dark-500;
+		display: flex;
+		// Default to 5 rows for browsers not supporting custom properties (IE11)
+		height: calc(#{$header-row-height} + (#{$row-height}) * 5);
+		height: calc(#{$header-row-height} + (#{$row-height}) * var(--number-of-rows));
+		justify-content: center;
+		padding: $gap;
+		text-align: center;
+	}
+
 	button.woocommerce-table__download-button.is-link {
 		padding: 6px $gap-small;
 		color: #000;
