@@ -15,20 +15,22 @@
  * @version     3.5.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+if (!defined('ABSPATH')) {
+    exit;
 }
 
-if ( ! $messages ) {
-	return;
+if (!$messages) {
+    return;
 }
 
 ?>
 
-<?php foreach ( $messages as $message ) : ?>
-	<div class="woocommerce-message" role="alert">
+	<ul class="woocommerce-message" role="alert">
+<?php foreach ($messages as $message): ?>
+	<li>
 		<?php
-			echo wc_kses_notice( $message );
-		?>
-	</div>
-<?php endforeach; ?>
+echo wc_kses_notice($message);
+?>
+	</li>
+<?php endforeach;?>
+	</ul>

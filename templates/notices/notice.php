@@ -15,20 +15,22 @@
  * @version     3.5.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
+if (!defined('ABSPATH')) {
+    exit; // Exit if accessed directly.
 }
 
-if ( ! $messages ) {
-	return;
+if (!$messages) {
+    return;
 }
 
 ?>
 
-<?php foreach ( $messages as $message ) : ?>
-	<div class="woocommerce-info">
-		<?php
-			echo wc_kses_notice( $message );
-		?>
-	</div>
-<?php endforeach; ?>
+	<ul class="woocommerce-info">
+<?php foreach ($messages as $message): ?>
+		<li>
+			<?php
+echo wc_kses_notice($message);
+?>
+		</li>
+<?php endforeach;?>
+	</ul>
