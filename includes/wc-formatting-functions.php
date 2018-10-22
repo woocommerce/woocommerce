@@ -378,7 +378,7 @@ function wc_clean( $var ) {
 }
 
 /**
- * wp_check_invalid_utf8 with recursive array support.
+ * Function wp_check_invalid_utf8 with recursive array support.
  *
  * @param string|array $var Data to sanitize.
  * @return string|array
