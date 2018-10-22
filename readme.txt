@@ -210,6 +210,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Check if ID exists and is not empty before set Product's download ID in API. #21588
 * Fix - Ensure wp_list_pluck() gets a array and not possibly null in WC_Product_Data_Store_CPT::update_attributes. #21591
 * Fix - Trim CSV header rows to prevent leading/trailing whitespace issues. #21614
+* Fix - Show draft products in previews on unsupported themes. #21619
 * Fix/Tweak - Fire `woocommerce_grant_product_download_access` hook after the download has its ID set. #20905
 * Fix/Tweak/Performance - Change wp_woocommerce_sessions primary key to session_id. #21245
 * Tweak - Show empty terms in admin product category filter dropdown. #20324
