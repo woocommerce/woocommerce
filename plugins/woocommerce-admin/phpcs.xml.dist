@@ -34,12 +34,12 @@
 		<exclude name="WordPress.VIP.RestrictedVariables.cache_constraints___COOKIE" />
 		<exclude name="WordPress.VIP.RestrictedVariables.cache_constraints___SERVER__REMOTE_ADDR__" />
 	</rule>
-	<rule ref="WordPress.VIP.ValidatedSanitizedInput">
+	<rule ref="WordPress.Security.ValidatedSanitizedInput">
 		<properties>
 			<property name="customSanitizingFunctions" type="array" value="wc_clean,wc_sanitize_tooltip,wc_format_decimal,wc_stock_amount,wc_sanitize_permalink,wc_sanitize_textarea" />
 		</properties>
 	</rule>
-	<rule ref="WordPress.XSS.EscapeOutput">
+	<rule ref="WordPress.Security.EscapeOutput">
 		<properties>
 			<property name="customEscapingFunctions" type="array" value="wc_help_tip,wc_sanitize_tooltip,wc_selected,wc_kses_notice" />
 		</properties>
