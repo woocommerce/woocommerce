@@ -198,118 +198,108 @@ class WC_Admin_REST_Admin_Notes_Controller extends WC_REST_CRUD_Controller {
 	}
 
 	/**
-	 * Retrieves the item's schema for display / public consumption purposes.
+	 * Get the note's schema, conforming to JSON Schema.
 	 *
-	 * @return array Public item schema data.
+	 * @return array
 	 */
-	public function get_public_item_schema() {
-		$schema = parent::get_public_item_schema();
-
-		$schema['properties']['id'] = array(
-			'description' => __( 'ID of the note record.', 'wc-admin' ),
-			'type'        => 'integer',
-			'context'     => array( 'view', 'edit' ),
-			'readonly'    => true,
+	public function get_item_schema() {
+		$schema = array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'note',
+			'type'       => 'object',
+			'properties' => array(
+				'id'                => array(
+					'description' => __( 'ID of the note record.', 'wc-admin' ),
+					'type'        => 'integer',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'name'              => array(
+					'description' => __( 'Name of the note.', 'wc-admin' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'type'              => array(
+					'description' => __( 'The type of the note (e.g. error, warning, etc.).', 'wc-admin' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'locale'            => array(
+					'description' => __( 'Locale used for the note title and content.', 'wc-admin' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'title'             => array(
+					'description' => __( 'Title of the note.', 'wc-admin' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'content'           => array(
+					'description' => __( 'Content of the note.', 'wc-admin' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'icon'              => array(
+					'description' => __( 'Icon (gridicon) for the note.', 'wc-admin' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'content_data'      => array(
+					'description' => __( 'Content data for the note. JSON string. Available for re-localization.', 'wc-admin' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'status'            => array(
+					'description' => __( 'The status of the note (e.g. unactioned, actioned).', 'wc-admin' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'source'            => array(
+					'description' => __( 'Source of the note.', 'wc-admin' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'date_created'      => array(
+					'description' => __( 'Date the note was created.', 'wc-admin' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'date_created_gmt'  => array(
+					'description' => __( 'Date the note was created (GMT).', 'wc-admin' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'date_reminder'     => array(
+					'description' => __( 'Date after which the user should be reminded of the note, if any.', 'wc-admin' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'date_reminder_gmt' => array(
+					'description' => __( 'Date after which the user should be reminded of the note, if any (GMT).', 'wc-admin' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'actions'           => array(
+					'description' => __( 'An array of actions, if any, for the note.', 'wc-admin' ),
+					'type'        => 'array',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+			),
 		);
-
-		$schema['properties']['name'] = array(
-			'description' => __( 'Name of the note.', 'wc-admin' ),
-			'type'        => 'string',
-			'context'     => array( 'view', 'edit' ),
-			'readonly'    => true,
-		);
-
-		$schema['properties']['type'] = array(
-			'description' => __( 'The type of the note (e.g. error, warning, etc.).', 'wc-admin' ),
-			'type'        => 'string',
-			'context'     => array( 'view', 'edit' ),
-			'readonly'    => true,
-		);
-
-		$schema['properties']['locale'] = array(
-			'description' => __( 'Locale used for the note title and content.', 'wc-admin' ),
-			'type'        => 'string',
-			'context'     => array( 'view', 'edit' ),
-			'readonly'    => true,
-		);
-
-		$schema['properties']['title'] = array(
-			'description' => __( 'Title of the note.', 'wc-admin' ),
-			'type'        => 'string',
-			'context'     => array( 'view', 'edit' ),
-			'readonly'    => true,
-		);
-
-		$schema['properties']['content'] = array(
-			'description' => __( 'Content of the note.', 'wc-admin' ),
-			'type'        => 'string',
-			'context'     => array( 'view', 'edit' ),
-			'readonly'    => true,
-		);
-
-		$schema['properties']['icon'] = array(
-			'description' => __( 'Icon (gridicon) for the note.', 'wc-admin' ),
-			'type'        => 'string',
-			'context'     => array( 'view', 'edit' ),
-			'readonly'    => true,
-		);
-
-		$schema['properties']['content_data'] = array(
-			'description' => __( 'Content data for the note. JSON string. Available for re-localization.', 'wc-admin' ),
-			'type'        => 'string',
-			'context'     => array( 'view', 'edit' ),
-			'readonly'    => true,
-		);
-
-		$schema['properties']['status'] = array(
-			'description' => __( 'The status of the note (e.g. unactioned, actioned).', 'wc-admin' ),
-			'type'        => 'string',
-			'context'     => array( 'view', 'edit' ),
-			'readonly'    => true,
-		);
-
-		$schema['properties']['source'] = array(
-			'description' => __( 'Source of the note.', 'wc-admin' ),
-			'type'        => 'string',
-			'context'     => array( 'view', 'edit' ),
-			'readonly'    => true,
-		);
-
-		$schema['properties']['date_created'] = array(
-			'description' => __( 'Date the note was created.', 'wc-admin' ),
-			'type'        => 'string',
-			'context'     => array( 'view', 'edit' ),
-			'readonly'    => true,
-		);
-
-		$schema['properties']['date_created_gmt'] = array(
-			'description' => __( 'Date the note was created (GMT).', 'wc-admin' ),
-			'type'        => 'string',
-			'context'     => array( 'view', 'edit' ),
-			'readonly'    => true,
-		);
-
-		$schema['properties']['date_reminder'] = array(
-			'description' => __( 'Date after which the user should be reminded of the note, if any.', 'wc-admin' ),
-			'type'        => 'string',
-			'context'     => array( 'view', 'edit' ),
-			'readonly'    => true,
-		);
-
-		$schema['properties']['date_reminder_gmt'] = array(
-			'description' => __( 'Date after which the user should be reminded of the note, if any (GMT).', 'wc-admin' ),
-			'type'        => 'string',
-			'context'     => array( 'view', 'edit' ),
-			'readonly'    => true,
-		);
-
-		$schema['properties']['actions'] = array(
-			'description' => __( 'An array of actions, if any, for the note.', 'wc-admin' ),
-			'type'        => 'array',
-			'context'     => array( 'view', 'edit' ),
-			'readonly'    => true,
-		);
-
-		return $schema;
+		return $this->add_additional_fields_schema( $schema );
 	}
 }
