@@ -14,14 +14,12 @@
  * $mydata = $report->get_data();
  *
  * @package  WooCommerce Admin/Classes
-
  */
 
 defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Reports_Products_Query
- *
  */
 class WC_Admin_Reports_Products_Query extends WC_Admin_Reports_Query {
 

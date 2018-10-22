@@ -91,7 +91,7 @@ class WC_Admin_Reports_Products_Stats_Data_Store extends WC_Admin_Reports_Produc
 		$week_back  = $now - WEEK_IN_SECONDS;
 
 		// These defaults are only partially applied when used via REST API, as that has its own defaults.
-		$defaults   = array(
+		$defaults = array(
 			'per_page'     => get_option( 'posts_per_page' ),
 			'page'         => 1,
 			'order'        => 'DESC',
@@ -144,7 +144,8 @@ class WC_Admin_Reports_Products_Stats_Data_Store extends WC_Admin_Reports_Produc
 						{$totals_query['from_clause']}
 					WHERE
 						1=1
-						{$totals_query['where_clause']}", ARRAY_A
+						{$totals_query['where_clause']}",
+				ARRAY_A
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 			if ( null === $totals ) {
@@ -170,7 +171,8 @@ class WC_Admin_Reports_Products_Stats_Data_Store extends WC_Admin_Reports_Produc
 							time_interval
 						ORDER BY
 							{$intervals_query['order_by_clause']}
-						{$intervals_query['limit']}", ARRAY_A
+						{$intervals_query['limit']}",
+				ARRAY_A
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 			if ( null === $intervals ) {

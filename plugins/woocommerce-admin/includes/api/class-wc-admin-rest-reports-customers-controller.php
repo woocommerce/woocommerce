@@ -73,7 +73,7 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 			'customers' => array(),
 		);
 		foreach ( $report_data->customers as $customer_data ) {
-			$item_data = $this->prepare_item_for_response( (object) $customer_data, $request );
+			$item_data               = $this->prepare_item_for_response( (object) $customer_data, $request );
 			$out_data['customers'][] = $item_data;
 		}
 		$response = rest_ensure_response( $out_data );
@@ -204,21 +204,21 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params             = array();
-		$params['context']  = $this->get_context_param( array( 'default' => 'view' ) );
-		$params['before']   = array(
+		$params                        = array();
+		$params['context']             = $this->get_context_param( array( 'default' => 'view' ) );
+		$params['before']              = array(
 			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'wc-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['after']    = array(
+		$params['after']               = array(
 			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'wc-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['page']     = array(
+		$params['page']                = array(
 			'description'       => __( 'Current page of the collection.', 'wc-admin' ),
 			'type'              => 'integer',
 			'default'           => 1,
@@ -226,7 +226,7 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 			'validate_callback' => 'rest_validate_request_arg',
 			'minimum'           => 1,
 		);
-		$params['per_page'] = array(
+		$params['per_page']            = array(
 			'description'       => __( 'Maximum number of items to be returned in result set.', 'wc-admin' ),
 			'type'              => 'integer',
 			'default'           => 10,
@@ -235,66 +235,66 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['name']    = array(
+		$params['name']                = array(
 			'description'       => __( 'Limit response to objects with a specfic customer name.', 'wc-admin' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['username']    = array(
+		$params['username']            = array(
 			'description'       => __( 'Limit response to objects with a specfic username.', 'wc-admin' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['email']    = array(
+		$params['email']               = array(
 			'description'       => __( 'Limit response to objects equal to an email.', 'wc-admin' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['country']    = array(
+		$params['country']             = array(
 			'description'       => __( 'Limit response to objects with a specfic country.', 'wc-admin' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['last_active_before']    = array(
+		$params['last_active_before']  = array(
 			'description'       => __( 'Limit response to objects last active before (or at) a given ISO8601 compliant datetime.', 'wc-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['last_active_after']    = array(
+		$params['last_active_after']   = array(
 			'description'       => __( 'Limit response to objects last active after (or at) a given ISO8601 compliant datetime.', 'wc-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['order_count_min']    = array(
+		$params['order_count_min']     = array(
 			'description'       => __( 'Limit response to objects with an order count greater than or equal to given integer.', 'wc-admin' ),
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['order_count_max']    = array(
+		$params['order_count_max']     = array(
 			'description'       => __( 'Limit response to objects with an order count less than or equal to given integer.', 'wc-admin' ),
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['total_spend_min']    = array(
+		$params['total_spend_min']     = array(
 			'description'       => __( 'Limit response to objects with a total order spend greater than or equal to given number.', 'wc-admin' ),
 			'type'              => 'number',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['total_spend_max']    = array(
+		$params['total_spend_max']     = array(
 			'description'       => __( 'Limit response to objects with a total order spend less than or equal to given number.', 'wc-admin' ),
 			'type'              => 'number',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['avg_order_value_min']    = array(
+		$params['avg_order_value_min'] = array(
 			'description'       => __( 'Limit response to objects with an average order spend greater than or equal to given number.', 'wc-admin' ),
 			'type'              => 'number',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['avg_order_value_max']    = array(
+		$params['avg_order_value_max'] = array(
 			'description'       => __( 'Limit response to objects with an average order spend less than or equal to given number.', 'wc-admin' ),
 			'type'              => 'number',
 			'validate_callback' => 'rest_validate_request_arg',

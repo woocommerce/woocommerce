@@ -192,10 +192,12 @@ class WC_Admin_Api_Init {
 
 		$orders = get_transient( 'wc_update_350_all_orders' );
 		if ( false === $orders ) {
-			$orders = wc_get_orders( array(
-				'limit'  => -1,
-				'return' => 'ids',
-			) );
+			$orders = wc_get_orders(
+				array(
+					'limit'  => -1,
+					'return' => 'ids',
+				)
+			);
 			set_transient( 'wc_update_350_all_orders', $orders, DAY_IN_SECONDS );
 		}
 

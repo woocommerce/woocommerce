@@ -382,7 +382,7 @@ class WC_Admin_Reports_Data_Store {
 		foreach ( $intervals as $key => $interval ) {
 			$datetime = new DateTime( $interval['datetime_anchor'] );
 
-			$prev_start           = WC_Admin_Reports_Interval::iterate( $datetime, $time_interval, true );
+			$prev_start = WC_Admin_Reports_Interval::iterate( $datetime, $time_interval, true );
 			// TODO: not sure if the +1/-1 here are correct, especially as they are applied before the ?: below.
 			$prev_start_timestamp = (int) $prev_start->format( 'U' ) + 1;
 			$prev_start->setTimestamp( $prev_start_timestamp );
@@ -535,10 +535,12 @@ class WC_Admin_Reports_Data_Store {
 	 * @return array|stdClass
 	 */
 	protected function get_products_by_cat_ids( $categories ) {
-		$product_categories = get_categories( array(
-			'hide_empty' => 0,
-			'taxonomy'   => 'product_cat',
-		) );
+		$product_categories = get_categories(
+			array(
+				'hide_empty' => 0,
+				'taxonomy'   => 'product_cat',
+			)
+		);
 		$cat_slugs          = array();
 		$categories         = array_flip( $categories );
 		foreach ( $product_categories as $product_cat ) {

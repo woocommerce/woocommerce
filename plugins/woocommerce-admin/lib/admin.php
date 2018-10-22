@@ -79,36 +79,46 @@ function wc_admin_register_pages() {
 		56 // After WooCommerce & Product menu items.
 	);
 
-	wc_admin_register_page( array(
-		'title'  => __( 'Revenue', 'wc-admin' ),
-		'parent' => '/analytics',
-		'path'   => '/analytics/revenue',
-	) );
+	wc_admin_register_page(
+		array(
+			'title'  => __( 'Revenue', 'wc-admin' ),
+			'parent' => '/analytics',
+			'path'   => '/analytics/revenue',
+		)
+	);
 
-	wc_admin_register_page( array(
-		'title'  => __( 'Products', 'wc-admin' ),
-		'parent' => '/analytics',
-		'path'   => '/analytics/products',
-	) );
+	wc_admin_register_page(
+		array(
+			'title'  => __( 'Products', 'wc-admin' ),
+			'parent' => '/analytics',
+			'path'   => '/analytics/products',
+		)
+	);
 
-	wc_admin_register_page( array(
-		'title'  => __( 'Orders', 'wc-admin' ),
-		'parent' => '/analytics',
-		'path'   => '/analytics/orders',
-	) );
+	wc_admin_register_page(
+		array(
+			'title'  => __( 'Orders', 'wc-admin' ),
+			'parent' => '/analytics',
+			'path'   => '/analytics/orders',
+		)
+	);
 
-	wc_admin_register_page( array(
-		'title'  => __( 'Coupons', 'wc-admin' ),
-		'parent' => '/analytics',
-		'path'   => '/analytics/coupons',
-	) );
+	wc_admin_register_page(
+		array(
+			'title'  => __( 'Coupons', 'wc-admin' ),
+			'parent' => '/analytics',
+			'path'   => '/analytics/coupons',
+		)
+	);
 
 	if ( defined( 'WP_DEBUG' ) && WP_DEBUG && defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) {
-		wc_admin_register_page( array(
-			'title'  => 'DevDocs',
-			'parent' => 'woocommerce', // Exposed on the main menu for now.
-			'path'   => '/devdocs',
-		) );
+		wc_admin_register_page(
+			array(
+				'title'  => 'DevDocs',
+				'parent' => 'woocommerce', // Exposed on the main menu for now.
+				'path'   => '/devdocs',
+			)
+		);
 	}
 }
 add_action( 'admin_menu', 'wc_admin_register_pages' );
@@ -171,7 +181,7 @@ function wc_admin_admin_body_class( $admin_body_class = '' ) {
 		return $admin_body_class;
 	}
 
-	$classes = explode( ' ', trim( $admin_body_class ) );
+	$classes   = explode( ' ', trim( $admin_body_class ) );
 	$classes[] = 'woocommerce-page';
 	if ( wc_admin_is_embed_enabled_wc_page() ) {
 		$classes[] = 'woocommerce-embed-page';
@@ -211,28 +221,28 @@ function wc_admin_admin_title( $admin_title ) {
 		$pieces   = array();
 
 		foreach ( $sections as $section ) {
-			$pieces[] = is_array( $section ) ? $section[ 1 ] : $section;
+			$pieces[] = is_array( $section ) ? $section[1] : $section;
 		}
 
 		$pieces = array_reverse( $pieces );
-		$title = implode( ' &lsaquo; ', $pieces );
+		$title  = implode( ' &lsaquo; ', $pieces );
 	} else {
 		$title = __( 'Dashboard', 'wc-admin' );
 	}
 
 	return sprintf( __( '%1$s &lsaquo; %2$s &#8212; WooCommerce', 'wc-admin' ), $title, get_bloginfo( 'name' ) );
 }
-add_filter( 'admin_title',  'wc_admin_admin_title' );
+add_filter( 'admin_title', 'wc_admin_admin_title' );
 
 /**
  * Set up a div for the app to render into.
  */
-function wc_admin_page(){
+function wc_admin_page() {
 	?>
 	<div class="wrap">
 		<div id="root"></div>
 	</div>
-<?php
+	<?php
 }
 
 /**
@@ -250,7 +260,7 @@ function woocommerce_embed_page_header() {
 	$sections    = is_array( $sections ) ? $sections : array( $sections );
 	$breadcrumbs = '';
 	foreach ( $sections as $section ) {
-		$piece = is_array( $section ) ? '<a href="' . esc_url( admin_url( $section[ 0 ] ) ) .'">' . $section[ 1 ] . '</a>' : $section;
+		$piece        = is_array( $section ) ? '<a href="' . esc_url( admin_url( $section[0] ) ) . '">' . $section[1] . '</a>' : $section;
 		$breadcrumbs .= '<span>' . $piece . '</span>';
 	}
 	?>

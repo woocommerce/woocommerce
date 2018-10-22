@@ -39,15 +39,15 @@ class WC_Admin_Tests_Reports_Revenue_Stats extends WC_Unit_Test_Case {
 		$data_store::update( $order );
 
 		$start_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
-		$end_time = date( 'Y-m-d H:59:59', $order->get_date_created()->getOffsetTimestamp() );
+		$end_time   = date( 'Y-m-d H:59:59', $order->get_date_created()->getOffsetTimestamp() );
 
-		$args = array(
+		$args           = array(
 			'interval' => 'hour',
 			'after'    => $start_time,
 			'before'   => $end_time,
 		);
 		$expected_stats = array(
-			'totals' => array(
+			'totals'    => array(
 				'orders_count'        => 1,
 				'num_items_sold'      => 4,
 				'gross_revenue'       => 97,
@@ -80,9 +80,9 @@ class WC_Admin_Tests_Reports_Revenue_Stats extends WC_Unit_Test_Case {
 					),
 				),
 			),
-			'total'   => 1,
-			'pages'   => 1,
-			'page_no' => 1,
+			'total'     => 1,
+			'pages'     => 1,
+			'page_no'   => 1,
 		);
 
 		// Test retrieving the stats from the data store.
@@ -90,15 +90,15 @@ class WC_Admin_Tests_Reports_Revenue_Stats extends WC_Unit_Test_Case {
 
 		// Test retrieving the stats through the query class.
 		$expected_stats = array(
-			'totals' => array(
-				'orders_count'        => 1,
-				'num_items_sold'      => 4,
-				'gross_revenue'       => 97,
-				'coupons'             => 20,
-				'refunds'             => 0,
-				'taxes'               => 7,
-				'shipping'            => 10,
-				'net_revenue'         => 80,
+			'totals'    => array(
+				'orders_count'   => 1,
+				'num_items_sold' => 4,
+				'gross_revenue'  => 97,
+				'coupons'        => 20,
+				'refunds'        => 0,
+				'taxes'          => 7,
+				'shipping'       => 10,
+				'net_revenue'    => 80,
 			),
 			'intervals' => array(
 				array(
@@ -108,22 +108,22 @@ class WC_Admin_Tests_Reports_Revenue_Stats extends WC_Unit_Test_Case {
 					'date_end'       => $end_time,
 					'date_end_gmt'   => $end_time,
 					'subtotals'      => array(
-						'orders_count'        => 1,
-						'num_items_sold'      => 4,
-						'gross_revenue'       => 97,
-						'coupons'             => 20,
-						'refunds'             => 0,
-						'taxes'               => 7,
-						'shipping'            => 10,
-						'net_revenue'         => 80,
+						'orders_count'   => 1,
+						'num_items_sold' => 4,
+						'gross_revenue'  => 97,
+						'coupons'        => 20,
+						'refunds'        => 0,
+						'taxes'          => 7,
+						'shipping'       => 10,
+						'net_revenue'    => 80,
 					),
 				),
 			),
-			'total'   => 1,
-			'pages'   => 1,
-			'page_no' => 1,
+			'total'     => 1,
+			'pages'     => 1,
+			'page_no'   => 1,
 		);
-		$query = new WC_Admin_Reports_Revenue_Query( $args );
+		$query          = new WC_Admin_Reports_Revenue_Query( $args );
 		$this->assertEquals( $expected_stats, json_decode( json_encode( $query->get_data() ), true ) );
 	}
 

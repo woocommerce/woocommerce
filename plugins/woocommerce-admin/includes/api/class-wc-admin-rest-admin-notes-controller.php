@@ -36,7 +36,9 @@ class WC_Admin_REST_Admin_Notes_Controller extends WC_REST_CRUD_Controller {
 	 */
 	public function register_routes() {
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base, array(
+			$this->namespace,
+			'/' . $this->rest_base,
+			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
@@ -47,7 +49,9 @@ class WC_Admin_REST_Admin_Notes_Controller extends WC_REST_CRUD_Controller {
 		);
 
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/(?P<id>[\d-]+)', array(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d-]+)',
+			array(
 				'args'   => array(
 					'id' => array(
 						'description' => __( 'Unique ID for the resource.', 'wc-admin' ),
@@ -171,14 +175,16 @@ class WC_Admin_REST_Admin_Notes_Controller extends WC_REST_CRUD_Controller {
 
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );
-		$response->add_links( array(
-			'self'       => array(
-				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $data['id'] ) ),
-			),
-			'collection' => array(
-				'href' => rest_url( sprintf( '%s/%s', $this->namespace, $this->rest_base ) ),
-			),
-		) );
+		$response->add_links(
+			array(
+				'self'       => array(
+					'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $data['id'] ) ),
+				),
+				'collection' => array(
+					'href' => rest_url( sprintf( '%s/%s', $this->namespace, $this->rest_base ) ),
+				),
+			)
+		);
 		/**
 		 * Filter a note returned from the API.
 		 *

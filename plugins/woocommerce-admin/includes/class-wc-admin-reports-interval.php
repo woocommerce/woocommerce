@@ -118,7 +118,7 @@ class WC_Admin_Reports_Interval {
 		if ( 1 === $first_day_of_week ) {
 			$week_number = (int) $datetime->format( 'W' );
 		} else {
-			$week_number = WC_Admin_Reports_Interval::simple_week_number( $datetime, $first_day_of_week );
+			$week_number = self::simple_week_number( $datetime, $first_day_of_week );
 		}
 		return $week_number;
 	}
@@ -136,7 +136,7 @@ class WC_Admin_Reports_Interval {
 			'day'     => 'Y-m-d',
 			'week'    => 'o-W',
 			'month'   => 'Y-m',
-			'quarter' => 'Y-' . WC_Admin_Reports_Interval::quarter( $datetime ),
+			'quarter' => 'Y-' . self::quarter( $datetime ),
 			'year'    => 'Y',
 		);
 
@@ -144,7 +144,7 @@ class WC_Admin_Reports_Interval {
 		$first_day_of_week = absint( get_option( 'start_of_week' ) );
 
 		if ( 'week' === $time_interval && 1 !== $first_day_of_week ) {
-			$week_no = WC_Admin_Reports_Interval::simple_week_number( $datetime, $first_day_of_week );
+			$week_no = self::simple_week_number( $datetime, $first_day_of_week );
 			$week_no = str_pad( $week_no, 2, '0', STR_PAD_LEFT );
 			$year_no = $datetime->format( 'Y' );
 			return "$year_no-$week_no";
@@ -176,7 +176,7 @@ class WC_Admin_Reports_Interval {
 				// TODO: optimize? approximately day count / 7, but year end is tricky, a week can have fewer days.
 				$week_count = 0;
 				do {
-					$start_datetime = WC_Admin_Reports_Interval::next_week_start( $start_datetime );
+					$start_datetime = self::next_week_start( $start_datetime );
 					$week_count++;
 				} while ( $start_datetime <= $end_datetime );
 				return $week_count;
@@ -192,7 +192,7 @@ class WC_Admin_Reports_Interval {
 				// Year diff in quarters: (end_year - start_year - 1) * 4.
 				$year_diff_in_quarters = ( (int) $end_datetime->format( 'Y' ) - (int) $start_datetime->format( 'Y' ) - 1 ) * 4;
 				// All the quarters in end_date year plus quarters from X to 4 in the start_date year.
-				$quarter_diff = WC_Admin_Reports_Interval::quarter( $end_datetime ) + ( 4 - WC_Admin_Reports_Interval::quarter( $start_datetime ) );
+				$quarter_diff = self::quarter( $end_datetime ) + ( 4 - self::quarter( $start_datetime ) );
 				// Add quarters for number of years between end_date and start_date.
 				$quarter_diff += $year_diff_in_quarters + 1;
 				return $quarter_diff;
@@ -257,11 +257,11 @@ class WC_Admin_Reports_Interval {
 	 */
 	public static function next_week_start( $datetime, $reversed = false ) {
 		$first_day_of_week = absint( get_option( 'start_of_week' ) );
-		$initial_week_no   = WC_Admin_Reports_Interval::week_number( $datetime, $first_day_of_week );
+		$initial_week_no   = self::week_number( $datetime, $first_day_of_week );
 
 		do {
-			$datetime        = WC_Admin_Reports_Interval::next_day_start( $datetime, $reversed );
-			$current_week_no = WC_Admin_Reports_Interval::week_number( $datetime, $first_day_of_week );
+			$datetime        = self::next_day_start( $datetime, $reversed );
+			$current_week_no = self::week_number( $datetime, $first_day_of_week );
 		} while ( $current_week_no === $initial_week_no );
 
 		// The week boundary is actually next midnight when going in reverse, so set it to day -1 at 23:59:59.
@@ -401,9 +401,9 @@ class WC_Admin_Reports_Interval {
 	 * @return DateTime
 	 */
 	public static function iterate( $datetime, $time_interval, $reversed = false ) {
-//		$result_datetime           =
-//		$result_timestamp_adjusted = $result_datetime->format( 'U' ) - 1;
-//		$result_datetime->setTimestamp( $result_timestamp_adjusted );
+		// $result_datetime           =
+		// $result_timestamp_adjusted = $result_datetime->format( 'U' ) - 1;
+		// $result_datetime->setTimestamp( $result_timestamp_adjusted );
 		return call_user_func( array( __CLASS__, "next_{$time_interval}_start" ), $datetime, $reversed );
 	}
 

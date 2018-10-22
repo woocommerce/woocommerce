@@ -50,7 +50,7 @@ class WC_Admin_REST_System_Status_Tools_Controller extends WC_REST_System_Status
 	 * @return array
 	 */
 	public function execute_tool( $tool ) {
-		$ran = true;
+		$ran     = true;
 		$message = '';
 
 		switch ( $tool ) {

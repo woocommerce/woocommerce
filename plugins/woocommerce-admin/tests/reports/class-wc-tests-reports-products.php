@@ -35,7 +35,7 @@ class WC_Tests_Reports_Products extends WC_Unit_Test_Case {
 		$data_store = new WC_Admin_Reports_Products_Data_Store();
 		$start_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
 		$end_time   = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() + HOUR_IN_SECONDS );
-		$args = array(
+		$args       = array(
 			'after'  => $start_time,
 			'before' => $end_time,
 		);

@@ -18,7 +18,6 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Reports_Revenue_Query
- *
  */
 class WC_Admin_Reports_Revenue_Query extends WC_Admin_Reports_Query {
 
@@ -38,7 +37,7 @@ class WC_Admin_Reports_Revenue_Query extends WC_Admin_Reports_Query {
 			'before'   => '',
 			'after'    => '',
 			'interval' => 'week',
-			'fields' => array(
+			'fields'   => array(
 				'orders_count',
 				'num_items_sold',
 				'gross_revenue',

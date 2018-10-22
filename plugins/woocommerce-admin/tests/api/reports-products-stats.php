@@ -70,17 +70,19 @@ class WC_Tests_API_Reports_Products_Stats extends WC_REST_Unit_Test_Case {
 		WC_Admin_Reports_Orders_Data_Store::update( $order );
 
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
-		$request->set_query_params( array(
-			'before' => date( 'Y-m-d H:00:00', $time + DAY_IN_SECONDS ),
-			'after' => date( 'Y-m-d H:00:00', $time - DAY_IN_SECONDS ),
-			'interval' => 'day',
-		) );
+		$request->set_query_params(
+			array(
+				'before'   => date( 'Y-m-d H:00:00', $time + DAY_IN_SECONDS ),
+				'after'    => date( 'Y-m-d H:00:00', $time - DAY_IN_SECONDS ),
+				'interval' => 'day',
+			)
+		);
 
 		$response = $this->server->dispatch( $request );
 		$reports  = $response->get_data();
 
 		$expected_reports = array(
-			'totals' => array(
+			'totals'    => array(
 				'items_sold'     => 4,
 				'gross_revenue'  => 100.0,
 				'orders_count'   => 1,

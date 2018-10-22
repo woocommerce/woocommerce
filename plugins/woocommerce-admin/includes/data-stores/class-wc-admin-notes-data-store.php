@@ -105,7 +105,8 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 
 		if ( $note->get_id() ) {
 			$wpdb->update(
-				$wpdb->prefix . 'woocommerce_admin_notes', array(
+				$wpdb->prefix . 'woocommerce_admin_notes',
+				array(
 					'name'          => $note->get_name(),
 					'type'          => $note->get_type(),
 					'locale'        => $note->get_locale(),
@@ -117,7 +118,8 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 					'source'        => $note->get_source(),
 					'date_created'  => $note->get_date_created(),
 					'date_reminder' => $note->get_date_reminder(),
-				), array( 'note_id' => $note->get_id() )
+				),
+				array( 'note_id' => $note->get_id() )
 			);
 		}
 
@@ -183,7 +185,8 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 		$wpdb->delete( $wpdb->prefix . 'woocommerce_admin_note_actions', array( 'note_id' => $note->get_id() ) );
 		foreach ( $note->get_actions( 'edit' ) as $action ) {
 			$wpdb->insert(
-				$wpdb->prefix . 'woocommerce_admin_note_actions', array(
+				$wpdb->prefix . 'woocommerce_admin_note_actions',
+				array(
 					'note_id' => $note->get_id(),
 					'name'    => $action->name,
 					'label'   => $action->label,

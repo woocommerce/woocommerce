@@ -165,7 +165,7 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 		$week_back  = $now - WEEK_IN_SECONDS;
 
 		// These defaults are only partially applied when used via REST API, as that has its own defaults.
-		$defaults   = array(
+		$defaults = array(
 			'per_page'     => get_option( 'posts_per_page' ),
 			'page'         => 1,
 			'order'        => 'DESC',
@@ -207,7 +207,8 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 						{$sql_query_params['where_clause']}
 					GROUP BY
 						product_id
-					", ARRAY_A
+					",
+				ARRAY_A
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 			if ( null === $products_data ) {

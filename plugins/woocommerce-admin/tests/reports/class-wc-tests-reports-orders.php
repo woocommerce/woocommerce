@@ -86,7 +86,7 @@ class WC_Tests_Reports_Orders extends WC_Unit_Test_Case {
 		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $args ) ), true ) );
 
 		// Test retrieving the stats through the query class.
-		$query = new WC_Admin_Reports_Orders_Stats_Query( $args );
+		$query          = new WC_Admin_Reports_Orders_Stats_Query( $args );
 		$expected_stats = array(
 			'totals'    => array(
 				'net_revenue'         => 80,
