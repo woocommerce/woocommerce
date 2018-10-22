@@ -32,6 +32,13 @@ class WC_Admin_REST_Reports_Products_Stats_Controller extends WC_REST_Reports_Co
 	protected $rest_base = 'reports/products/stats';
 
 	/**
+	 * Constructor.
+	 */
+	public function __construct() {
+		add_filter( 'woocommerce_reports_products_stats_select_query', array( $this, 'set_default_report_data' ) );
+	}
+
+	/**
 	 * Get all reports.
 	 *
 	 * @param WP_REST_Request $request Request data.
@@ -211,6 +218,27 @@ class WC_Admin_REST_Reports_Products_Stats_Controller extends WC_REST_Reports_Co
 		);
 
 		return $this->add_additional_fields_schema( $schema );
+	}
+
+	/**
+	 * Set the default results to 0 if API returns an empty array
+	 *
+	 * @param Mixed $results Report data.
+	 * @return object
+	 */
+	public function set_default_report_data( $results ) {
+		if ( empty( $results ) ) {
+			$results = new stdClass();
+			$results->total = 0;
+			$results->totals = new stdClass();
+			$results->totals->items_sold = 0;
+			$results->totals->gross_revenue = 0;
+			$results->totals->orders_count = 0;
+			$results->intervals = array();
+			$results->pages = 1;
+			$results->page_no = 1;
+		}
+		return $results;
 	}
 
 	/**
