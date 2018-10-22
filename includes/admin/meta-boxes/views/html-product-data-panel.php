@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 
-<?php if ( 'publish' === get_post_status() ): ?>
+<?php if ( 'publish' === get_post_status() ) : ?>
 	<style type="text/css">
 		#post-preview { display:none }
 	</style>
