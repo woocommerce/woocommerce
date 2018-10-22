@@ -23,7 +23,7 @@ function wc_admin_register_script() {
 	wp_register_script(
 		'wc-components',
 		wc_admin_url( 'dist/components.js' ),
-		[ 'wp-components', 'wp-data', 'wp-element', 'wp-hooks', 'wp-i18n', 'wp-keycodes' ],
+		array( 'wp-components', 'wp-data', 'wp-element', 'wp-hooks', 'wp-i18n', 'wp-keycodes' ),
 		filemtime( wc_admin_dir_path( 'dist/components.js' ) ),
 		true
 	);
@@ -31,14 +31,14 @@ function wc_admin_register_script() {
 	wp_register_style(
 		'wc-components',
 		wc_admin_url( 'dist/css/components.css' ),
-		[ 'wp-edit-blocks' ],
+		array( 'wp-edit-blocks' ),
 		filemtime( wc_admin_dir_path( 'dist/css/components.css' ) )
 	);
 
 	wp_register_script(
 		WC_ADMIN_APP,
 		wc_admin_url( $js_entry ),
-		[ 'wc-components', 'wp-date', 'wp-html-entities', 'wp-keycodes' ],
+		array( 'wc-components', 'wp-date', 'wp-html-entities', 'wp-keycodes' ),
 		filemtime( wc_admin_dir_path( $js_entry ) ),
 		true
 	);
@@ -46,7 +46,7 @@ function wc_admin_register_script() {
 	wp_register_style(
 		WC_ADMIN_APP,
 		wc_admin_url( $css_entry ),
-		[ 'wc-components' ],
+		array( 'wc-components' ),
 		filemtime( wc_admin_dir_path( $css_entry ) )
 	);
 
@@ -55,9 +55,9 @@ function wc_admin_register_script() {
 	$content     = 'wp.i18n.setLocaleData( ' . json_encode( $locale_data ) . ', "wc-admin" );';
 	wp_add_inline_script( 'wc-components', $content, 'before' );
 
-	// Add Tracks script to the DOM if tracking is opted in.
+	// Add Tracks script to the DOM if tracking is opted in, and Jetpack is installed/activated.
 	$tracking_enabled = 'yes' === get_option( 'woocommerce_allow_tracking', 'no' );
-	if ( $tracking_enabled ) {
+	if ( $tracking_enabled && defined( 'JETPACK__VERSION' ) ) {
 		$tracking_script  = "var wc_tracking_script = document.createElement( 'script' );\n";
 		$tracking_script .= "wc_tracking_script.src = '//stats.wp.com/w.js';\n"; // TODO Version/cache buster.
 		$tracking_script .= "wc_tracking_script.type = 'text/javascript';\n";
