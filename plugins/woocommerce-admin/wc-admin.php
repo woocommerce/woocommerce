@@ -50,10 +50,10 @@ function dependencies_satisfied() {
 /**
  * Daily events to run.
  */
-function wc_admin_daily() {
+function do_wc_admin_daily() {
 	WC_Admin_Notes_New_Sales_Record::possibly_add_sales_record_note();
 }
-add_action( 'wc_admin_daily', 'wc_admin_daily' );
+add_action( 'wc_admin_daily', 'do_wc_admin_daily' );
 
 /**
  * Activates wc-admin plugin when installed.
