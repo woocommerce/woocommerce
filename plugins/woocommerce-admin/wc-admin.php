@@ -48,6 +48,14 @@ function dependencies_satisfied() {
 }
 
 /**
+ * Daily events to run.
+ */
+function do_wc_admin_daily() {
+	WC_Admin_Notes_New_Sales_Record::possibly_add_sales_record_note();
+}
+add_action( 'wc_admin_daily', 'do_wc_admin_daily' );
+
+/**
  * Activates wc-admin plugin when installed.
  */
 function activate_wc_admin_plugin() {
@@ -59,19 +67,30 @@ function activate_wc_admin_plugin() {
 
 	WC_Admin_Api_Init::install();
 
+	if ( ! wp_next_scheduled( 'wc_admin_daily' ) ) {
+		wp_schedule_event( time(), 'daily', 'wc_admin_daily' );
+	}
 }
 register_activation_hook( WC_ADMIN_PLUGIN_FILE, 'activate_wc_admin_plugin' );
 
 /**
  * Deactivate wc-admin plugin if dependencies not satisfied.
  */
-function deactivate_wc_admin_plugin() {
+function possibly_deactivate_wc_admin_plugin() {
 	if ( ! dependencies_satisfied() ) {
 		deactivate_plugins( plugin_basename( WC_ADMIN_PLUGIN_FILE ) );
 		unset( $_GET['activate'] );
 	}
 }
-add_action( 'admin_init', 'deactivate_wc_admin_plugin' );
+add_action( 'admin_init', 'possibly_deactivate_wc_admin_plugin' );
+
+/**
+ * On deactivating the wc-admin plugin.
+ */
+function deactivate_wc_admin_plugin() {
+	wp_clear_scheduled_hook( 'wc_admin_daily' );
+}
+register_deactivation_hook( WC_ADMIN_PLUGIN_FILE, 'deactivate_wc_admin_plugin' );
 
 /**
  * Set up the plugin, only if we can detect both Gutenberg and WooCommerce
@@ -93,5 +112,8 @@ function wc_admin_plugins_loaded() {
 
 	// Create the Admin pages.
 	require_once dirname( __FILE__ ) . '/lib/admin.php';
+
+	// Admin note providers.
+	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-notes-new-sales-record.php';
 }
 add_action( 'plugins_loaded', 'wc_admin_plugins_loaded' );
