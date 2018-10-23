@@ -422,7 +422,7 @@ export function getDateFormatsForInterval( interval, ticks = 0 ) {
 	let pointLabelFormat = 'F j, Y';
 	let tooltipFormat = '%B %d %Y';
 	let xFormat = '%Y-%m-%d';
-	let x2Format = '%b %y';
+	let x2Format = '%b %Y';
 	let tableFormat = 'm/d/Y';
 
 	switch ( interval ) {
@@ -448,7 +448,7 @@ export function getDateFormatsForInterval( interval, ticks = 0 ) {
 		case 'month':
 			pointLabelFormat = 'F Y';
 			tooltipFormat = '%B %Y';
-			xFormat = '%b %y';
+			xFormat = '%b %Y';
 			x2Format = '';
 			break;
 		case 'year':
