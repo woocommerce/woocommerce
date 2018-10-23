@@ -48,16 +48,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 		?>
 		<input type="hidden" name="variable_post_id[<?php echo esc_attr( $loop ); ?>]" value="<?php echo esc_attr( $variation_id ); ?>" />
 		<input type="hidden" class="variation_menu_order" name="variation_menu_order[<?php echo esc_attr( $loop ); ?>]" value="<?php echo esc_attr( $variation_object->get_menu_order( 'edit' ) ); ?>" />
-		
+
 		<?php
 		/**
 		 * woocommerce_variation_header action.
 		 *
 		 * @since 3.6.0
 		 *
-		 * @param WP_Post $variation
+		 * @param WP_Post $variation .
 		 */
-		do_action( 'woocommerce_variation_header', $variation ); ?>
+		do_action( 'woocommerce_variation_header', $variation );
+		?>
 	</h3>
 	<div class="woocommerce_variable_attributes wc-metabox-content" style="display: none;">
 		<div class="data">
