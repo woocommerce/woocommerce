@@ -1,5 +1,11 @@
 <?php
 /**
+ * Admin functions
+ *
+ * @package WC_Admin
+ */
+
+/**
  * Returns true if we are on a JS powered admin page.
  */
 function wc_admin_is_admin_page() {
@@ -155,7 +161,7 @@ function wc_admin_link_structure() {
 	array_unshift( $submenu['woocommerce'], $menu );
 
 	// Rename "Analytics" to Overview (otherwise this reads Analytics > Analytics).
-	$submenu['wc-admin#/analytics'][0][0] = __( 'Overview', 'wc-admin' );
+	$submenu['wc-admin#/analytics'][0][0] = __( 'Overview', 'wc-admin' ); // WPCS: override ok.
 }
 
 // priority is 20 to run after https://github.com/woocommerce/woocommerce/blob/a55ae325306fc2179149ba9b97e66f32f84fdd9c/includes/admin/class-wc-admin-menus.php#L165.
@@ -174,6 +180,11 @@ function wc_admin_enqueue_script() {
 }
 add_action( 'admin_enqueue_scripts', 'wc_admin_enqueue_script' );
 
+/**
+ * Adds an admin body class.
+ *
+ * @param string $admin_body_class Body class to add.
+ */
 function wc_admin_admin_body_class( $admin_body_class = '' ) {
 	global $hook_suffix;
 
@@ -191,16 +202,21 @@ function wc_admin_admin_body_class( $admin_body_class = '' ) {
 }
 add_filter( 'admin_body_class', 'wc_admin_admin_body_class' );
 
-
+/**
+ * Runs before admin notices action and hides them.
+ */
 function wc_admin_admin_before_notices() {
 	if ( ! wc_admin_is_admin_page() && ! wc_admin_is_embed_enabled_wc_page() ) {
 		return;
 	}
 	echo '<div class="woocommerce-layout__notice-list-hide" id="wp__notice-list">';
-	echo '<div class="wp-header-end" id="woocommerce-layout__notice-catcher"></div>'; // https://github.com/WordPress/WordPress/blob/f6a37e7d39e2534d05b9e542045174498edfe536/wp-admin/js/common.js#L737
+	echo '<div class="wp-header-end" id="woocommerce-layout__notice-catcher"></div>'; // https://github.com/WordPress/WordPress/blob/f6a37e7d39e2534d05b9e542045174498edfe536/wp-admin/js/common.js#L737.
 }
 add_action( 'admin_notices', 'wc_admin_admin_before_notices', 0 );
 
+/**
+ * Runs after admin notices and closes div.
+ */
 function wc_admin_admin_after_notices() {
 	if ( ! wc_admin_is_admin_page() && ! wc_admin_is_embed_enabled_wc_page() ) {
 		return;
@@ -209,7 +225,13 @@ function wc_admin_admin_after_notices() {
 }
 add_action( 'admin_notices', 'wc_admin_admin_after_notices', PHP_INT_MAX );
 
-// TODO Can we do some URL rewriting so we can figure out which page they are on server side?
+/**
+ * Edits Admin title based on section of wc-admin.
+ *
+ * @TODO Can we do some URL rewriting so we can figure out which page they are on server side?
+ *
+ * @param string $admin_title Modifies admin title.
+ */
 function wc_admin_admin_title( $admin_title ) {
 	if ( ! wc_admin_is_admin_page() && ! wc_admin_is_embed_enabled_wc_page() ) {
 		return $admin_title;
@@ -229,7 +251,7 @@ function wc_admin_admin_title( $admin_title ) {
 	} else {
 		$title = __( 'Dashboard', 'wc-admin' );
 	}
-
+	/* translators: %1$s: updated title, %2$s: blog info name */
 	return sprintf( __( '%1$s &lsaquo; %2$s &#8212; WooCommerce', 'wc-admin' ), $title, get_bloginfo( 'name' ) );
 }
 add_filter( 'admin_title', 'wc_admin_admin_title' );
@@ -246,6 +268,25 @@ function wc_admin_page() {
 }
 
 /**
+ * Outputs a breadcrumb
+ *
+ * @param array $section Section to create breadcrumb from.
+ */
+function wc_admin_output_breadcrumb( $section ) {
+	?>
+	<span>
+	<?php if ( is_array( $section ) ) : ?>
+		<a href="<?php echo esc_url( admin_url( $section[0] ) ); ?>">
+			<?php echo esc_html( $section[1] ); ?>
+		</a>
+	<?php else : ?>
+		<?php echo esc_html( $section ); ?>
+	<?php endif; ?>
+	</span>
+	<?php
+}
+
+/**
  * Set up a div for the header embed to render into.
  * The initial contents here are meant as a place loader for when the PHP page initialy loads.
 
@@ -256,20 +297,17 @@ function woocommerce_embed_page_header() {
 		return;
 	}
 
-	$sections    = wc_admin_get_embed_breadcrumbs();
-	$sections    = is_array( $sections ) ? $sections : array( $sections );
-	$breadcrumbs = '';
-	foreach ( $sections as $section ) {
-		$piece        = is_array( $section ) ? '<a href="' . esc_url( admin_url( $section[0] ) ) . '">' . $section[1] . '</a>' : $section;
-		$breadcrumbs .= '<span>' . $piece . '</span>';
-	}
+	$sections = wc_admin_get_embed_breadcrumbs();
+	$sections = is_array( $sections ) ? $sections : array( $sections );
 	?>
 	<div id="woocommerce-embedded-root">
 		<div class="woocommerce-layout">
 			<div class="woocommerce-layout__header is-embed-loading">
 				<h1 class="woocommerce-layout__header-breadcrumbs">
 					<span><a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-admin#/' ) ); ?>">WooCommerce</a></span>
-					<?php echo $breadcrumbs; ?>
+					<?php foreach ( $sections as $section ) : ?>
+						<?php wc_admin_output_breadcrumb( $section ); ?>
+					<?php endforeach; ?>
 				</h1>
 			</div>
 		</div>
