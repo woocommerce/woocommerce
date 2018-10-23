@@ -32,7 +32,7 @@ class WC_Admin_Reports_Interval {
 	 * @param string $time_interval Time interval.
 	 * @return mixed
 	 */
-	public static function mysql_datetime_format( $time_interval ) {
+	public static function db_datetime_format( $time_interval ) {
 		$first_day_of_week = absint( get_option( 'start_of_week' ) );
 
 		if ( 1 === $first_day_of_week ) {

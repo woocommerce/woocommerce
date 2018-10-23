@@ -138,9 +138,8 @@ class WC_Admin_Reports_Data_Store {
 				$record               = &$data->intervals[ $time_ids[ $time_id ] ];
 				$record['date_start'] = $datetime->format( 'Y-m-d H:i:s' );
 				$record['date_end']   = $interval_end;
-			} elseif ( array_key_exists( $time_id, $db_intervals ) ) {
+			} elseif ( ! array_key_exists( $time_id, $db_intervals ) ) {
 				// For intervals present in the db outside of this time frame, do nothing.
-			} else {
 				// For intervals not present in the db, fabricate it.
 				$record_arr                  = array();
 				$record_arr['time_interval'] = $time_id;
@@ -159,9 +158,9 @@ class WC_Admin_Reports_Data_Store {
 	 * @param stdClass $data           Data from whose intervals the records get removed.
 	 * @param int      $page_no        Offset requested by the user.
 	 * @param int      $items_per_page Number of records requested by the user.
-	 * @param int      $db_interval_count
-	 * @param int      $expected_interval_count
-	 * @param string   $order_by
+	 * @param int      $db_interval_count Database interval count.
+	 * @param int      $expected_interval_count Expected interval count on the output.
+	 * @param string   $order_by Order by field.
 	 */
 	protected function remove_extra_records( &$data, $page_no, $items_per_page, $db_interval_count, $expected_interval_count, $order_by ) {
 		if ( 'date' === strtolower( $order_by ) ) {
@@ -186,7 +185,9 @@ class WC_Admin_Reports_Data_Store {
 	 * to fetch correct records.
 	 *
 	 * @param array $intervals_query Array with clauses for the Intervals SQL query.
-	 * @param int   $db_records      Number of records in the db for requested time period.
+	 * @param array $query_args Query arguements.
+	 * @param int   $db_interval_count Database interval count.
+	 * @param int   $expected_interval_count Expected interval count on the output.
 	 */
 	protected function update_intervals_sql_params( &$intervals_query, &$query_args, $db_interval_count, $expected_interval_count ) {
 		if ( $db_interval_count === $expected_interval_count ) {
@@ -518,7 +519,7 @@ class WC_Admin_Reports_Data_Store {
 
 		if ( isset( $query_args['interval'] ) && '' !== $query_args['interval'] ) {
 			$interval                         = $query_args['interval'];
-			$intervals_query['select_clause'] = WC_Admin_Reports_Interval::mysql_datetime_format( $interval );
+			$intervals_query['select_clause'] = WC_Admin_Reports_Interval::db_datetime_format( $interval );
 		}
 
 		$intervals_query = array_merge( $intervals_query, $this->get_limit_sql_params( $query_args ) );
