@@ -268,9 +268,6 @@ const getXTicksFromIncrementFactor = ( uniqueDates, incrementFactor ) => {
 	if ( ticks[ 0 ] !== uniqueDates[ 0 ] ) {
 		ticks.unshift( uniqueDates[ 0 ] );
 	}
-	if ( ticks[ ticks.length - 1 ] !== uniqueDates[ uniqueDates.length - 1 ] ) {
-		ticks.push( uniqueDates[ uniqueDates.length - 1 ] );
-	}
 
 	return ticks;
 };
