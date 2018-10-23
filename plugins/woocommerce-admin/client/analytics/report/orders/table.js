@@ -225,7 +225,7 @@ export default class OrdersReportTable extends Component {
 		);
 	}
 
-	renderPlaceholderTable() {
+	renderPlaceholderTable( tableQuery ) {
 		const headers = this.getHeadersContent();
 
 		return (
@@ -233,26 +233,24 @@ export default class OrdersReportTable extends Component {
 				title={ __( 'Orders', 'wc-admin' ) }
 				className="woocommerce-analytics__table-placeholder"
 			>
-				<TablePlaceholder caption={ __( 'Orders', 'wc-admin' ) } headers={ headers } />
+				<TablePlaceholder
+					caption={ __( 'Orders', 'wc-admin' ) }
+					headers={ headers }
+					query={ tableQuery }
+				/>
 			</Card>
 		);
 	}
 
-	renderTable() {
+	renderTable( tableQuery ) {
 		const { orders, query, totalRows } = this.props;
 
-		const rowsPerPage = parseInt( query.per_page ) || 25;
+		const rowsPerPage = parseInt( tableQuery.per_page ) || 25;
 		const rows = this.getRowsContent(
-			orderBy( this.formatTableData( orders ), query.orderby || 'date', query.order || 'asc' )
+			orderBy( this.formatTableData( orders ), tableQuery.orderby, tableQuery.order )
 		);
 
 		const headers = this.getHeadersContent();
-
-		const tableQuery = {
-			...query,
-			orderby: query.orderby || 'date',
-			order: query.order || 'asc',
-		};
 
 		return (
 			<TableCard
@@ -261,7 +259,7 @@ export default class OrdersReportTable extends Component {
 				totalRows={ totalRows }
 				rowsPerPage={ rowsPerPage }
 				headers={ headers }
-				onClickDownload={ this.onDownload( headers, rows, tableQuery ) }
+				onClickDownload={ this.onDownload( headers, rows, query ) }
 				onQueryChange={ onQueryChange }
 				query={ tableQuery }
 				summary={ null }
@@ -270,8 +268,16 @@ export default class OrdersReportTable extends Component {
 	}
 
 	render() {
-		const { isRequesting } = this.props;
+		const { isRequesting, query } = this.props;
 
-		return isRequesting ? this.renderPlaceholderTable() : this.renderTable();
+		const tableQuery = {
+			...query,
+			orderby: query.orderby || 'date',
+			order: query.order || 'asc',
+		};
+
+		return isRequesting
+			? this.renderPlaceholderTable( tableQuery )
+			: this.renderTable( tableQuery );
 	}
 }
