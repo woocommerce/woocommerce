@@ -7,7 +7,7 @@
   "prefer-stable": true,
   "minimum-stability": "dev",
   "require": {
-    "composer/installers": "~1.2"
+    "composer/installers": "~1.6"
   },
   "require-dev": {
     "squizlabs/php_codesniffer": "*",
