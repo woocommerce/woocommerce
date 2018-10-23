@@ -1,5 +1,11 @@
 <?php
 /**
+ * Common lib functions
+ *
+ * @package WooCommerce Admin
+ */
+
+/**
  * Retrieves the root plugin path.
  *
  * @param  string $file Optional relative path of the desired file.
@@ -53,16 +59,16 @@ function wc_admin_get_current_screen_id() {
 function wc_admin_get_embed_breadcrumbs() {
 	$current_screen_id = wc_admin_get_current_screen_id();
 
-	// If a page has a tab, we can append that to the screen ID and show another pagination level
+	// If a page has a tab, we can append that to the screen ID and show another pagination level.
 	$pages_with_tabs = array(
 		'wc-reports'  => 'orders',
 		'wc-settings' => 'general',
 		'wc-status'   => 'status',
 	);
-	$tab             = '';
-	if ( ! empty( $_GET['page'] ) ) {
-		if ( in_array( $_GET['page'], array_keys( $pages_with_tabs ) ) ) {
-			$tab = ! empty( $_GET['tab'] ) ? $_GET['tab'] . '-' : $pages_with_tabs[ $_GET['page'] ] . '-';
+	$get_tab         = isset( $_GET['tab'] ) && sanitize_text_field( wp_unslash( $_GET['tab'] ) );
+	if ( ! isset( $_GET['page'] ) ) {
+		if ( in_array( wp_unslash( $_GET['page'] ), array_keys( $pages_with_tabs ) ) ) {
+			$tab = ! empty( $get_tab ) ? $get_tab . '-' : $pages_with_tabs[ $get_page ] . '-';
 		}
 	}
 
