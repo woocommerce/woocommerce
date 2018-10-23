@@ -23,8 +23,6 @@ defined( 'ABSPATH' ) || exit;
  */
 class WC_Admin_Reports_Products_Stats_Query extends WC_Admin_Reports_Query {
 
-	const REPORT_NAME = 'report-products-stats';
-
 	/**
 	 * Valid fields for Products report.
 	 *
@@ -40,8 +38,10 @@ class WC_Admin_Reports_Products_Stats_Query extends WC_Admin_Reports_Query {
 	 * @return array
 	 */
 	public function get_data() {
-		$args    = apply_filters( 'woocommerce_reports_products_stats_query_args', $this->get_query_vars() );
-		$results = WC_Data_Store::load( $this::REPORT_NAME )->get_data( $args );
+		$args = apply_filters( 'woocommerce_reports_products_stats_query_args', $this->get_query_vars() );
+
+		$data_store = WC_Data_Store::load( 'report-products-stats' );
+		$results    = $data_store->get_data( $args );
 		return apply_filters( 'woocommerce_reports_products_stats_select_query', $results, $args );
 	}
 
