@@ -70,6 +70,7 @@ function activate_wc_admin_plugin() {
 	if ( ! wp_next_scheduled( 'wc_admin_daily' ) ) {
 		wp_schedule_event( time(), 'daily', 'wc_admin_daily' );
 	}
+
 }
 register_activation_hook( WC_ADMIN_PLUGIN_FILE, 'activate_wc_admin_plugin' );
 
@@ -115,5 +116,14 @@ function wc_admin_plugins_loaded() {
 
 	// Admin note providers.
 	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-notes-new-sales-record.php';
+	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-notes-settings-notes.php';
 }
 add_action( 'plugins_loaded', 'wc_admin_plugins_loaded' );
+
+/**
+ * Things to do after WooCommerce updates.
+ */
+function wc_admin_woocommerce_updated() {
+	WC_Admin_Notes_Settings_Notes::add_notes_for_settings_that_have_moved();
+}
+add_action( 'woocommerce_updated', 'wc_admin_woocommerce_updated' );

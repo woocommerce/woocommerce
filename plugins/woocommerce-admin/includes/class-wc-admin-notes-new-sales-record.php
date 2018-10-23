@@ -13,6 +13,7 @@ defined( 'ABSPATH' ) || exit;
  * WC_Admin_Notes_New_Sales_Record
  */
 class WC_Admin_Notes_New_Sales_Record {
+	const NOTE_NAME                = 'wc-admin-new-sales-record';
 	const RECORD_DATE_OPTION_KEY   = 'woocommerce_sales_record_date'; // ISO 8601 (YYYY-MM-DD) date.
 	const RECORD_AMOUNT_OPTION_KEY = 'woocommerce_sales_record_amount';
 
@@ -82,9 +83,8 @@ class WC_Admin_Notes_New_Sales_Record {
 				'new_record_amt'  => $total,
 			);
 
-			$name = 'wc-admin-new-sales-record';
 			// We only want one sales record note at any time in the inbox, so we delete any other first.
-			WC_Admin_Notes::delete_notes_with_name( $name );
+			WC_Admin_Notes::delete_notes_with_name( self::NOTE_NAME );
 
 			// And now, create our new note.
 			$note = new WC_Admin_Note();
@@ -93,7 +93,7 @@ class WC_Admin_Notes_New_Sales_Record {
 			$note->set_content_data( $content_data );
 			$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 			$note->set_icon( 'trophy' );
-			$note->set_name( $name );
+			$note->set_name( self::NOTE_NAME );
 			$note->set_source( 'wc-admin' );
 			$note->add_action( 'view-report', __( 'View report', 'wc-admin' ), '?page=wc-admin#/analytics' );
 			$note->save();
