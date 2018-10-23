@@ -13,7 +13,7 @@ import PropTypes from 'prop-types';
 import ReportChart from 'analytics/components/report-chart';
 import ReportSummary from 'analytics/components/report-summary';
 
-class OrdersReportChart extends Component {
+class RevenueReportChart extends Component {
 	getCharts() {
 		return [
 			{
@@ -81,8 +81,8 @@ class OrdersReportChart extends Component {
 	}
 }
 
-OrdersReportChart.propTypes = {
+RevenueReportChart.propTypes = {
 	query: PropTypes.object.isRequired,
 };
 
-export default OrdersReportChart;
+export default RevenueReportChart;
