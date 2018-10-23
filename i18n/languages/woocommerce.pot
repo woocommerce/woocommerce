@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 3.5.0-rc.2\n"
+"Project-Id-Version: WooCommerce 3.5.0\n"
 "Report-Msgid-Bugs-To: https://github.com/woocommerce/woocommerce/issues\n"
-"POT-Creation-Date: 2018-10-15 18:50:05+00:00\n"
+"POT-Creation-Date: 2018-10-23 16:14:01+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -5970,11 +5970,11 @@ msgstr ""
 #: includes/abstracts/abstract-wc-rest-controller.php:113
 #: includes/api/legacy/v2/class-wc-api-coupons.php:529
 #: includes/api/legacy/v2/class-wc-api-customers.php:792
-#: includes/api/legacy/v2/class-wc-api-orders.php:1782
+#: includes/api/legacy/v2/class-wc-api-orders.php:1783
 #: includes/api/legacy/v2/class-wc-api-products.php:2311
 #: includes/api/legacy/v3/class-wc-api-coupons.php:529
 #: includes/api/legacy/v3/class-wc-api-customers.php:782
-#: includes/api/legacy/v3/class-wc-api-orders.php:1827
+#: includes/api/legacy/v3/class-wc-api-orders.php:1828
 #: includes/api/legacy/v3/class-wc-api-products.php:3124
 #: includes/api/legacy/v3/class-wc-api-taxes.php:465
 #. translators: %s: items limit
@@ -6142,7 +6142,7 @@ msgstr ""
 
 #: includes/abstracts/abstract-wc-rest-crud-controller.php:547
 #: includes/abstracts/abstract-wc-rest-posts-controller.php:634
-#: includes/api/class-wc-rest-product-reviews-controller.php:955
+#: includes/api/class-wc-rest-product-reviews-controller.php:939
 #: includes/api/v1/class-wc-rest-customers-controller.php:865
 #: includes/api/v1/class-wc-rest-webhooks-controller.php:714
 msgid "Ensure result set excludes specific IDs."
@@ -6158,7 +6158,7 @@ msgstr ""
 #: includes/abstracts/abstract-wc-rest-crud-controller.php:565
 #: includes/abstracts/abstract-wc-rest-posts-controller.php:652
 #: includes/abstracts/abstract-wc-rest-terms-controller.php:708
-#: includes/api/class-wc-rest-product-reviews-controller.php:971
+#: includes/api/class-wc-rest-product-reviews-controller.php:955
 #: includes/api/v1/class-wc-rest-customers-controller.php:883
 #: includes/api/v1/class-wc-rest-taxes-controller.php:675
 #: includes/api/v1/class-wc-rest-webhooks-controller.php:732
@@ -6168,7 +6168,7 @@ msgstr ""
 #: includes/abstracts/abstract-wc-rest-crud-controller.php:571
 #: includes/abstracts/abstract-wc-rest-posts-controller.php:658
 #: includes/abstracts/abstract-wc-rest-terms-controller.php:715
-#: includes/api/class-wc-rest-product-reviews-controller.php:975
+#: includes/api/class-wc-rest-product-reviews-controller.php:959
 #: includes/api/v1/class-wc-rest-customers-controller.php:890
 #: includes/api/v1/class-wc-rest-taxes-controller.php:682
 #: includes/api/v1/class-wc-rest-webhooks-controller.php:738
@@ -6177,7 +6177,7 @@ msgstr ""
 
 #: includes/abstracts/abstract-wc-rest-crud-controller.php:578
 #: includes/abstracts/abstract-wc-rest-posts-controller.php:665
-#: includes/api/class-wc-rest-product-reviews-controller.php:984
+#: includes/api/class-wc-rest-product-reviews-controller.php:968
 #: includes/api/v1/class-wc-rest-customers-controller.php:898
 #: includes/api/v1/class-wc-rest-taxes-controller.php:690
 #: includes/api/v1/class-wc-rest-webhooks-controller.php:745
@@ -6342,7 +6342,7 @@ msgstr ""
 #: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:92
 #: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:355
 #: includes/api/v2/class-wc-rest-orders-v2-controller.php:82
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:842
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:844
 #: includes/api/v2/class-wc-rest-payment-gateways-v2-controller.php:54
 #: includes/api/v2/class-wc-rest-product-categories-v2-controller.php:103
 #: includes/api/v2/class-wc-rest-product-reviews-v2-controller.php:153
@@ -7516,7 +7516,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-menus.php:79
 #: includes/admin/views/html-admin-page-status-report.php:604
-#: includes/class-wc-install.php:1159
+#: includes/class-wc-install.php:1174
 msgid "Settings"
 msgstr ""
 
@@ -8120,8 +8120,8 @@ msgstr ""
 #: includes/api/class-wc-rest-customers-controller.php:231
 #: includes/api/v2/class-wc-rest-customers-v2-controller.php:215
 #: includes/api/v2/class-wc-rest-customers-v2-controller.php:278
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1006
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1069
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1008
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1071
 msgid "Address line 1"
 msgstr ""
 
@@ -8135,8 +8135,8 @@ msgstr ""
 #: includes/api/class-wc-rest-customers-controller.php:236
 #: includes/api/v2/class-wc-rest-customers-v2-controller.php:220
 #: includes/api/v2/class-wc-rest-customers-v2-controller.php:283
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1011
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1074
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1013
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1076
 #: includes/customizer/class-wc-shop-customizer.php:678
 msgid "Address line 2"
 msgstr ""
@@ -11619,8 +11619,8 @@ msgstr ""
 
 #: includes/admin/meta-boxes/views/html-product-data-inventory.php:101
 #: includes/admin/meta-boxes/views/html-variation-admin.php:222
-#: includes/api/v1/class-wc-rest-products-controller.php:1957
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1674
+#: includes/api/v1/class-wc-rest-products-controller.php:1956
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1673
 msgid ""
 "Controls whether or not the product is listed as \"in stock\" or \"out of "
 "stock\" on the frontend."
@@ -11651,7 +11651,7 @@ msgid ""
 "current product."
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-product-data-panel.php:20
+#: includes/admin/meta-boxes/views/html-product-data-panel.php:23
 msgid "Product Type"
 msgstr ""
 
@@ -15681,8 +15681,8 @@ msgstr ""
 #: includes/api/v1/class-wc-rest-orders-controller.php:1101
 #: includes/api/v2/class-wc-rest-customers-v2-controller.php:200
 #: includes/api/v2/class-wc-rest-customers-v2-controller.php:263
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:991
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1054
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:993
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1056
 msgid "First name."
 msgstr ""
 
@@ -15694,8 +15694,8 @@ msgstr ""
 #: includes/api/v1/class-wc-rest-orders-controller.php:1106
 #: includes/api/v2/class-wc-rest-customers-v2-controller.php:205
 #: includes/api/v2/class-wc-rest-customers-v2-controller.php:268
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:996
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1059
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:998
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1061
 msgid "Last name."
 msgstr ""
 
@@ -15707,8 +15707,8 @@ msgstr ""
 #: includes/api/v1/class-wc-rest-orders-controller.php:1111
 #: includes/api/v2/class-wc-rest-customers-v2-controller.php:210
 #: includes/api/v2/class-wc-rest-customers-v2-controller.php:273
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1001
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1064
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1003
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1066
 msgid "Company name."
 msgstr ""
 
@@ -15721,8 +15721,8 @@ msgstr ""
 #: includes/api/v1/class-wc-rest-taxes-controller.php:597
 #: includes/api/v2/class-wc-rest-customers-v2-controller.php:225
 #: includes/api/v2/class-wc-rest-customers-v2-controller.php:288
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1016
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1079
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1018
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1081
 msgid "City name."
 msgstr ""
 
@@ -15734,8 +15734,8 @@ msgstr ""
 #: includes/api/v1/class-wc-rest-orders-controller.php:1131
 #: includes/api/v2/class-wc-rest-customers-v2-controller.php:230
 #: includes/api/v2/class-wc-rest-customers-v2-controller.php:293
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1021
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1084
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1023
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1086
 msgid "ISO code or name of the state, province or district."
 msgstr ""
 
@@ -15747,8 +15747,8 @@ msgstr ""
 #: includes/api/v1/class-wc-rest-orders-controller.php:1136
 #: includes/api/v2/class-wc-rest-customers-v2-controller.php:235
 #: includes/api/v2/class-wc-rest-customers-v2-controller.php:298
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1026
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1089
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1028
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1091
 msgid "Postal code."
 msgstr ""
 
@@ -15765,7 +15765,7 @@ msgstr ""
 #: includes/api/v1/class-wc-rest-customers-controller.php:773
 #: includes/api/v1/class-wc-rest-orders-controller.php:1083
 #: includes/api/v2/class-wc-rest-customers-v2-controller.php:245
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1036
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1038
 msgid "Email address."
 msgstr ""
 
@@ -15773,7 +15773,7 @@ msgstr ""
 #: includes/api/v1/class-wc-rest-customers-controller.php:779
 #: includes/api/v1/class-wc-rest-orders-controller.php:1089
 #: includes/api/v2/class-wc-rest-customers-v2-controller.php:251
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1042
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1044
 msgid "Phone number."
 msgstr ""
 
@@ -15799,16 +15799,16 @@ msgstr ""
 #: includes/api/class-wc-rest-products-controller.php:1270
 #: includes/api/v2/class-wc-rest-coupons-v2-controller.php:495
 #: includes/api/v2/class-wc-rest-customers-v2-controller.php:334
-#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:393
-#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:516
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1146
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1258
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1349
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1440
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1538
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1596
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:973
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:2018
+#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:394
+#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:517
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1148
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1260
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1351
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1442
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1540
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1598
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:972
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:2017
 msgid "Meta data."
 msgstr ""
 
@@ -15817,16 +15817,16 @@ msgstr ""
 #: includes/api/class-wc-rest-products-controller.php:1277
 #: includes/api/v2/class-wc-rest-coupons-v2-controller.php:502
 #: includes/api/v2/class-wc-rest-customers-v2-controller.php:341
-#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:400
-#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:524
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1153
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1265
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1356
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1447
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1545
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1603
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:980
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:2025
+#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:401
+#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:525
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1155
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1267
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1358
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1449
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1547
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1605
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:979
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:2024
 msgid "Meta ID."
 msgstr ""
 
@@ -15837,16 +15837,16 @@ msgstr ""
 #: includes/api/v1/class-wc-rest-orders-controller.php:1319
 #: includes/api/v2/class-wc-rest-coupons-v2-controller.php:508
 #: includes/api/v2/class-wc-rest-customers-v2-controller.php:347
-#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:406
-#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:530
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1159
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1271
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1362
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1453
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1551
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1609
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:986
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:2031
+#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:407
+#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:531
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1161
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1273
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1364
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1455
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1553
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1611
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:985
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:2030
 msgid "Meta key."
 msgstr ""
 
@@ -15857,16 +15857,16 @@ msgstr ""
 #: includes/api/v1/class-wc-rest-orders-controller.php:1331
 #: includes/api/v2/class-wc-rest-coupons-v2-controller.php:513
 #: includes/api/v2/class-wc-rest-customers-v2-controller.php:352
-#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:411
-#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:536
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1164
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1276
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1367
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1458
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1556
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1614
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:991
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:2036
+#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:412
+#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:537
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1166
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1278
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1369
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1460
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1558
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1616
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:990
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:2035
 msgid "Meta value."
 msgstr ""
 
@@ -15952,18 +15952,14 @@ msgid "List of supported states in a given country."
 msgstr ""
 
 #: includes/api/class-wc-rest-data-controller.php:101
-msgid "Information about the amount of various objects on this site."
-msgstr ""
-
-#: includes/api/class-wc-rest-data-controller.php:105
 msgid "List of supported currencies."
 msgstr ""
 
-#: includes/api/class-wc-rest-data-controller.php:172
+#: includes/api/class-wc-rest-data-controller.php:168
 msgid "Data resource ID."
 msgstr ""
 
-#: includes/api/class-wc-rest-data-controller.php:178
+#: includes/api/class-wc-rest-data-controller.php:174
 msgid "Data resource description."
 msgstr ""
 
@@ -16012,31 +16008,30 @@ msgid "Order note author."
 msgstr ""
 
 #: includes/api/class-wc-rest-order-notes-controller.php:134
-#: includes/api/class-wc-rest-order-notes-controller.php:140
 #: includes/api/v1/class-wc-rest-order-notes-controller.php:407
 #: includes/api/v2/class-wc-rest-order-notes-v2-controller.php:135
 msgid "The date the order note was created, in the site's timezone."
 msgstr ""
 
-#: includes/api/class-wc-rest-order-notes-controller.php:146
+#: includes/api/class-wc-rest-order-notes-controller.php:140
 #: includes/api/v2/class-wc-rest-order-notes-v2-controller.php:141
 msgid "The date the order note was created, as GMT."
 msgstr ""
 
-#: includes/api/class-wc-rest-order-notes-controller.php:152
+#: includes/api/class-wc-rest-order-notes-controller.php:146
 #: includes/api/v1/class-wc-rest-order-notes-controller.php:70
 #: includes/api/v2/class-wc-rest-order-notes-v2-controller.php:147
 msgid "Order note content."
 msgstr ""
 
-#: includes/api/class-wc-rest-order-notes-controller.php:157
+#: includes/api/class-wc-rest-order-notes-controller.php:151
 #: includes/api/v2/class-wc-rest-order-notes-v2-controller.php:152
 msgid ""
 "If true, the note will be shown to customers and they will be notified. If "
 "false, the note will be for admin reference only."
 msgstr ""
 
-#: includes/api/class-wc-rest-order-notes-controller.php:163
+#: includes/api/class-wc-rest-order-notes-controller.php:157
 msgid ""
 "If true, this note will be attributed to the current user. If false, the "
 "note will be attributed to the system."
@@ -16049,8 +16044,8 @@ msgid "Refund amount must be greater than zero."
 msgstr ""
 
 #: includes/api/class-wc-rest-order-refunds-controller.php:64
-#: includes/api/legacy/v2/class-wc-api-orders.php:1610
-#: includes/api/legacy/v3/class-wc-api-orders.php:1655
+#: includes/api/legacy/v2/class-wc-api-orders.php:1611
+#: includes/api/legacy/v3/class-wc-api-orders.php:1656
 #: includes/api/v1/class-wc-rest-order-refunds-controller.php:308
 #: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:296
 msgid "Cannot create order refund, please try again."
@@ -16060,7 +16055,7 @@ msgstr ""
 #: includes/api/legacy/v2/class-wc-api-orders.php:1159
 #: includes/api/legacy/v3/class-wc-api-orders.php:1204
 #: includes/api/v1/class-wc-rest-orders-controller.php:744
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:742
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:744
 msgid "Coupon code is required."
 msgstr ""
 
@@ -16071,20 +16066,20 @@ msgstr ""
 #: includes/api/legacy/v3/class-wc-api-orders.php:423
 #: includes/api/legacy/v3/class-wc-api-orders.php:573
 #: includes/api/v1/class-wc-rest-orders-controller.php:539
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:530
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:532
 msgid "Customer ID is invalid."
 msgstr ""
 
 #: includes/api/class-wc-rest-orders-controller.php:165
 #: includes/api/legacy/class-wc-rest-legacy-orders-controller.php:254
 #: includes/api/v1/class-wc-rest-orders-controller.php:544
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:535
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:537
 msgid "Customer ID does not belong to this site."
 msgstr ""
 
-#: includes/api/class-wc-rest-orders-controller.php:254
+#: includes/api/class-wc-rest-orders-controller.php:257
 #: includes/api/v1/class-wc-rest-orders-controller.php:1603
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1675
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1677
 msgid "Limit result set to orders assigned a specific status."
 msgstr ""
 
@@ -16203,9 +16198,9 @@ msgstr ""
 #: includes/api/class-wc-rest-product-categories-controller.php:109
 #: includes/api/class-wc-rest-products-controller.php:1080
 #: includes/api/v1/class-wc-rest-product-categories-controller.php:180
-#: includes/api/v1/class-wc-rest-products-controller.php:2107
+#: includes/api/v1/class-wc-rest-products-controller.php:2106
 #: includes/api/v2/class-wc-rest-product-categories-v2-controller.php:109
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1824
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1823
 msgid "Category name."
 msgstr ""
 
@@ -16250,11 +16245,11 @@ msgstr ""
 #: includes/api/class-wc-rest-product-variations-controller.php:643
 #: includes/api/class-wc-rest-products-controller.php:1129
 #: includes/api/v1/class-wc-rest-product-categories-controller.php:221
-#: includes/api/v1/class-wc-rest-products-controller.php:2156
-#: includes/api/v1/class-wc-rest-products-controller.php:2489
+#: includes/api/v1/class-wc-rest-products-controller.php:2155
+#: includes/api/v1/class-wc-rest-products-controller.php:2487
 #: includes/api/v2/class-wc-rest-product-categories-v2-controller.php:150
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:891
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1873
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:890
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1872
 msgid "Image ID."
 msgstr ""
 
@@ -16262,11 +16257,11 @@ msgstr ""
 #: includes/api/class-wc-rest-product-variations-controller.php:648
 #: includes/api/class-wc-rest-products-controller.php:1134
 #: includes/api/v1/class-wc-rest-product-categories-controller.php:226
-#: includes/api/v1/class-wc-rest-products-controller.php:2161
-#: includes/api/v1/class-wc-rest-products-controller.php:2494
+#: includes/api/v1/class-wc-rest-products-controller.php:2160
+#: includes/api/v1/class-wc-rest-products-controller.php:2492
 #: includes/api/v2/class-wc-rest-product-categories-v2-controller.php:155
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:896
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1878
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:895
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1877
 msgid "The date the image was created, in the site's timezone."
 msgstr ""
 
@@ -16274,8 +16269,8 @@ msgstr ""
 #: includes/api/class-wc-rest-product-variations-controller.php:654
 #: includes/api/class-wc-rest-products-controller.php:1140
 #: includes/api/v2/class-wc-rest-product-categories-v2-controller.php:161
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:902
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1884
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:901
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1883
 msgid "The date the image was created, as GMT."
 msgstr ""
 
@@ -16283,11 +16278,11 @@ msgstr ""
 #: includes/api/class-wc-rest-product-variations-controller.php:660
 #: includes/api/class-wc-rest-products-controller.php:1146
 #: includes/api/v1/class-wc-rest-product-categories-controller.php:232
-#: includes/api/v1/class-wc-rest-products-controller.php:2167
-#: includes/api/v1/class-wc-rest-products-controller.php:2500
+#: includes/api/v1/class-wc-rest-products-controller.php:2166
+#: includes/api/v1/class-wc-rest-products-controller.php:2498
 #: includes/api/v2/class-wc-rest-product-categories-v2-controller.php:167
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:908
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1890
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:907
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1889
 msgid "The date the image was last modified, in the site's timezone."
 msgstr ""
 
@@ -16295,8 +16290,8 @@ msgstr ""
 #: includes/api/class-wc-rest-product-variations-controller.php:666
 #: includes/api/class-wc-rest-products-controller.php:1152
 #: includes/api/v2/class-wc-rest-product-categories-v2-controller.php:173
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:914
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1896
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:913
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1895
 msgid "The date the image was last modified, as GMT."
 msgstr ""
 
@@ -16304,11 +16299,11 @@ msgstr ""
 #: includes/api/class-wc-rest-product-variations-controller.php:672
 #: includes/api/class-wc-rest-products-controller.php:1158
 #: includes/api/v1/class-wc-rest-product-categories-controller.php:238
-#: includes/api/v1/class-wc-rest-products-controller.php:2173
-#: includes/api/v1/class-wc-rest-products-controller.php:2506
+#: includes/api/v1/class-wc-rest-products-controller.php:2172
+#: includes/api/v1/class-wc-rest-products-controller.php:2504
 #: includes/api/v2/class-wc-rest-product-categories-v2-controller.php:179
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:920
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1902
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:919
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1901
 msgid "Image URL."
 msgstr ""
 
@@ -16316,11 +16311,11 @@ msgstr ""
 #: includes/api/class-wc-rest-product-variations-controller.php:678
 #: includes/api/class-wc-rest-products-controller.php:1164
 #: includes/api/v1/class-wc-rest-product-categories-controller.php:244
-#: includes/api/v1/class-wc-rest-products-controller.php:2179
-#: includes/api/v1/class-wc-rest-products-controller.php:2512
+#: includes/api/v1/class-wc-rest-products-controller.php:2178
+#: includes/api/v1/class-wc-rest-products-controller.php:2510
 #: includes/api/v2/class-wc-rest-product-categories-v2-controller.php:185
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:926
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1908
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:925
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1907
 msgid "Image name."
 msgstr ""
 
@@ -16328,11 +16323,11 @@ msgstr ""
 #: includes/api/class-wc-rest-product-variations-controller.php:683
 #: includes/api/class-wc-rest-products-controller.php:1169
 #: includes/api/v1/class-wc-rest-product-categories-controller.php:249
-#: includes/api/v1/class-wc-rest-products-controller.php:2184
-#: includes/api/v1/class-wc-rest-products-controller.php:2517
+#: includes/api/v1/class-wc-rest-products-controller.php:2183
+#: includes/api/v1/class-wc-rest-products-controller.php:2515
 #: includes/api/v2/class-wc-rest-product-categories-v2-controller.php:190
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:931
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1913
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:930
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1912
 msgid "Image alternative text."
 msgstr ""
 
@@ -16403,7 +16398,7 @@ msgstr ""
 
 #: includes/api/class-wc-rest-product-reviews-controller.php:380
 #: includes/api/class-wc-rest-product-reviews-controller.php:540
-#: includes/api/class-wc-rest-product-reviews-controller.php:1054
+#: includes/api/class-wc-rest-product-reviews-controller.php:1058
 #: includes/api/v1/class-wc-rest-product-reviews-controller.php:209
 #: includes/api/v1/class-wc-rest-product-reviews-controller.php:234
 #: includes/api/v1/class-wc-rest-product-reviews-controller.php:260
@@ -16470,7 +16465,7 @@ msgid "Unique identifier for the product that the review belongs to."
 msgstr ""
 
 #: includes/api/class-wc-rest-product-reviews-controller.php:854
-msgid "Status of the review"
+msgid "Status of the review."
 msgstr ""
 
 #: includes/api/class-wc-rest-product-reviews-controller.php:861
@@ -16485,67 +16480,67 @@ msgstr ""
 msgid "Reviewer email."
 msgstr ""
 
-#: includes/api/class-wc-rest-product-reviews-controller.php:871
+#: includes/api/class-wc-rest-product-reviews-controller.php:872
 #: includes/api/v1/class-wc-rest-product-reviews-controller.php:532
 #: includes/api/v2/class-wc-rest-product-reviews-v2-controller.php:159
 msgid "The content of the review."
 msgstr ""
 
-#: includes/api/class-wc-rest-product-reviews-controller.php:876
+#: includes/api/class-wc-rest-product-reviews-controller.php:880
 #: includes/api/v1/class-wc-rest-product-reviews-controller.php:542
 #: includes/api/v2/class-wc-rest-product-reviews-v2-controller.php:174
 msgid "Review rating (0 to 5)."
 msgstr ""
 
-#: includes/api/class-wc-rest-product-reviews-controller.php:881
+#: includes/api/class-wc-rest-product-reviews-controller.php:885
 #: includes/api/v1/class-wc-rest-product-reviews-controller.php:557
 #: includes/api/v2/class-wc-rest-product-reviews-v2-controller.php:189
 msgid "Shows if the reviewer bought the product or not."
 msgstr ""
 
-#: includes/api/class-wc-rest-product-reviews-controller.php:896
+#: includes/api/class-wc-rest-product-reviews-controller.php:900
 #. translators: %d: avatar image size in pixels
 msgid "Avatar URL with image size of %d pixels."
 msgstr ""
 
-#: includes/api/class-wc-rest-product-reviews-controller.php:903
+#: includes/api/class-wc-rest-product-reviews-controller.php:907
 msgid "Avatar URLs for the object reviewer."
 msgstr ""
 
-#: includes/api/class-wc-rest-product-reviews-controller.php:925
+#: includes/api/class-wc-rest-product-reviews-controller.php:929
 msgid "Limit response to reviews published after a given ISO8601 compliant date."
 msgstr ""
 
-#: includes/api/class-wc-rest-product-reviews-controller.php:930
-msgid "Limit result set to reviews assigned to specific user IDs."
-msgstr ""
-
-#: includes/api/class-wc-rest-product-reviews-controller.php:937
-msgid "Ensure result set excludes reviews assigned to specific user IDs."
-msgstr ""
-
-#: includes/api/class-wc-rest-product-reviews-controller.php:945
-msgid "Limit result set to that from a specific author email."
-msgstr ""
-
-#: includes/api/class-wc-rest-product-reviews-controller.php:950
+#: includes/api/class-wc-rest-product-reviews-controller.php:934
 msgid "Limit response to reviews published before a given ISO8601 compliant date."
 msgstr ""
 
-#: includes/api/class-wc-rest-product-reviews-controller.php:963
+#: includes/api/class-wc-rest-product-reviews-controller.php:947
 #: includes/api/v1/class-wc-rest-customers-controller.php:874
 msgid "Limit result set to specific IDs."
 msgstr ""
 
-#: includes/api/class-wc-rest-product-reviews-controller.php:997
+#: includes/api/class-wc-rest-product-reviews-controller.php:980
+msgid "Limit result set to reviews assigned to specific user IDs."
+msgstr ""
+
+#: includes/api/class-wc-rest-product-reviews-controller.php:987
+msgid "Ensure result set excludes reviews assigned to specific user IDs."
+msgstr ""
+
+#: includes/api/class-wc-rest-product-reviews-controller.php:995
+msgid "Limit result set to that from a specific author email."
+msgstr ""
+
+#: includes/api/class-wc-rest-product-reviews-controller.php:1001
 msgid "Limit result set to reviews assigned to specific product IDs."
 msgstr ""
 
-#: includes/api/class-wc-rest-product-reviews-controller.php:1005
+#: includes/api/class-wc-rest-product-reviews-controller.php:1009
 msgid "Limit result set to reviews assigned a specific status."
 msgstr ""
 
-#: includes/api/class-wc-rest-product-reviews-controller.php:1039
+#: includes/api/class-wc-rest-product-reviews-controller.php:1043
 msgid "Invalid review ID."
 msgstr ""
 
@@ -16565,13 +16560,13 @@ msgid "#%s is an invalid image ID."
 msgstr ""
 
 #: includes/api/class-wc-rest-product-variations-controller.php:414
-#: includes/api/v1/class-wc-rest-products-controller.php:2277
+#: includes/api/v1/class-wc-rest-products-controller.php:2276
 #: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:663
 msgid "The date the variation was created, in the site's timezone."
 msgstr ""
 
 #: includes/api/class-wc-rest-product-variations-controller.php:420
-#: includes/api/v1/class-wc-rest-products-controller.php:2283
+#: includes/api/v1/class-wc-rest-products-controller.php:2282
 #: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:669
 msgid "The date the variation was last modified, in the site's timezone."
 msgstr ""
@@ -16582,7 +16577,7 @@ msgid "Variation description."
 msgstr ""
 
 #: includes/api/class-wc-rest-product-variations-controller.php:431
-#: includes/api/v1/class-wc-rest-products-controller.php:2289
+#: includes/api/v1/class-wc-rest-products-controller.php:2288
 #: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:680
 msgid "Variation URL."
 msgstr ""
@@ -16590,26 +16585,26 @@ msgstr ""
 #: includes/api/class-wc-rest-product-variations-controller.php:438
 #: includes/api/class-wc-rest-products-controller.php:781
 #: includes/api/v1/class-wc-rest-products-controller.php:1811
-#: includes/api/v1/class-wc-rest-products-controller.php:2296
+#: includes/api/v1/class-wc-rest-products-controller.php:2295
 #: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:687
 #: includes/api/v2/class-wc-rest-products-v2-controller.php:1525
 msgid "Unique identifier."
 msgstr ""
 
 #: includes/api/class-wc-rest-product-variations-controller.php:443
-#: includes/api/v1/class-wc-rest-products-controller.php:2301
+#: includes/api/v1/class-wc-rest-products-controller.php:2300
 #: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:692
 msgid "Current variation price."
 msgstr ""
 
 #: includes/api/class-wc-rest-product-variations-controller.php:449
-#: includes/api/v1/class-wc-rest-products-controller.php:2307
+#: includes/api/v1/class-wc-rest-products-controller.php:2306
 #: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:698
 msgid "Variation regular price."
 msgstr ""
 
 #: includes/api/class-wc-rest-product-variations-controller.php:454
-#: includes/api/v1/class-wc-rest-products-controller.php:2312
+#: includes/api/v1/class-wc-rest-products-controller.php:2311
 #: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:703
 msgid "Variation sale price."
 msgstr ""
@@ -16638,7 +16633,7 @@ msgid "End date of sale price, in the site's timezone."
 msgstr ""
 
 #: includes/api/class-wc-rest-product-variations-controller.php:479
-#: includes/api/v1/class-wc-rest-products-controller.php:2327
+#: includes/api/v1/class-wc-rest-products-controller.php:2326
 #: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:728
 msgid "Shows if the variation is on sale."
 msgstr ""
@@ -16648,19 +16643,19 @@ msgid "Variation status."
 msgstr ""
 
 #: includes/api/class-wc-rest-product-variations-controller.php:492
-#: includes/api/v1/class-wc-rest-products-controller.php:2333
+#: includes/api/v1/class-wc-rest-products-controller.php:2332
 #: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:740
 msgid "Shows if the variation can be bought."
 msgstr ""
 
 #: includes/api/class-wc-rest-product-variations-controller.php:498
-#: includes/api/v1/class-wc-rest-products-controller.php:2344
+#: includes/api/v1/class-wc-rest-products-controller.php:2343
 #: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:746
 msgid "If the variation is virtual."
 msgstr ""
 
 #: includes/api/class-wc-rest-product-variations-controller.php:504
-#: includes/api/v1/class-wc-rest-products-controller.php:2350
+#: includes/api/v1/class-wc-rest-products-controller.php:2349
 #: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:752
 msgid "If the variation is downloadable."
 msgstr ""
@@ -16668,7 +16663,7 @@ msgstr ""
 #: includes/api/class-wc-rest-product-variations-controller.php:510
 #: includes/api/class-wc-rest-products-controller.php:858
 #: includes/api/v1/class-wc-rest-products-controller.php:1878
-#: includes/api/v1/class-wc-rest-products-controller.php:2356
+#: includes/api/v1/class-wc-rest-products-controller.php:2355
 #: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:758
 #: includes/api/v2/class-wc-rest-products-v2-controller.php:1602
 msgid "List of downloadable files."
@@ -16677,193 +16672,191 @@ msgstr ""
 #: includes/api/class-wc-rest-product-variations-controller.php:517
 #: includes/api/class-wc-rest-products-controller.php:865
 #: includes/api/v1/class-wc-rest-products-controller.php:1885
-#: includes/api/v1/class-wc-rest-products-controller.php:2363
+#: includes/api/v1/class-wc-rest-products-controller.php:2362
 #: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:765
 #: includes/api/v2/class-wc-rest-products-v2-controller.php:1609
-msgid "File MD5 hash."
+msgid "File ID."
 msgstr ""
 
-#: includes/api/class-wc-rest-product-variations-controller.php:523
-#: includes/api/class-wc-rest-products-controller.php:871
+#: includes/api/class-wc-rest-product-variations-controller.php:522
+#: includes/api/class-wc-rest-products-controller.php:870
 #: includes/api/v1/class-wc-rest-customer-downloads-controller.php:223
-#: includes/api/v1/class-wc-rest-products-controller.php:1891
-#: includes/api/v1/class-wc-rest-products-controller.php:2369
+#: includes/api/v1/class-wc-rest-products-controller.php:1890
+#: includes/api/v1/class-wc-rest-products-controller.php:2367
 #: includes/api/v2/class-wc-rest-customer-downloads-v2-controller.php:147
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:771
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1615
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:770
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1614
 msgid "File name."
 msgstr ""
 
-#: includes/api/class-wc-rest-product-variations-controller.php:528
-#: includes/api/class-wc-rest-products-controller.php:876
+#: includes/api/class-wc-rest-product-variations-controller.php:527
+#: includes/api/class-wc-rest-products-controller.php:875
 #: includes/api/v1/class-wc-rest-customer-downloads-controller.php:229
-#: includes/api/v1/class-wc-rest-products-controller.php:1896
-#: includes/api/v1/class-wc-rest-products-controller.php:2374
+#: includes/api/v1/class-wc-rest-products-controller.php:1895
+#: includes/api/v1/class-wc-rest-products-controller.php:2372
 #: includes/api/v2/class-wc-rest-customer-downloads-v2-controller.php:153
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:776
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1620
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:775
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1619
 msgid "File URL."
 msgstr ""
 
-#: includes/api/class-wc-rest-product-variations-controller.php:536
-#: includes/api/class-wc-rest-products-controller.php:884
-#: includes/api/v1/class-wc-rest-products-controller.php:1904
-#: includes/api/v1/class-wc-rest-products-controller.php:2382
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:784
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1628
+#: includes/api/class-wc-rest-product-variations-controller.php:535
+#: includes/api/class-wc-rest-products-controller.php:883
+#: includes/api/v1/class-wc-rest-products-controller.php:1903
+#: includes/api/v1/class-wc-rest-products-controller.php:2380
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:783
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1627
 msgid "Number of times downloadable files can be downloaded after purchase."
 msgstr ""
 
-#: includes/api/class-wc-rest-product-variations-controller.php:542
-#: includes/api/class-wc-rest-products-controller.php:890
-#: includes/api/v1/class-wc-rest-products-controller.php:1910
-#: includes/api/v1/class-wc-rest-products-controller.php:2388
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:790
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1634
+#: includes/api/class-wc-rest-product-variations-controller.php:541
+#: includes/api/class-wc-rest-products-controller.php:889
+#: includes/api/v1/class-wc-rest-products-controller.php:1909
+#: includes/api/v1/class-wc-rest-products-controller.php:2386
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:789
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1633
 msgid "Number of days until access to downloadable files expires."
 msgstr ""
 
-#: includes/api/class-wc-rest-product-variations-controller.php:548
-#: includes/api/class-wc-rest-products-controller.php:907
-#: includes/api/v1/class-wc-rest-products-controller.php:1934
-#: includes/api/v1/class-wc-rest-products-controller.php:2394
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:796
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1651
+#: includes/api/class-wc-rest-product-variations-controller.php:547
+#: includes/api/class-wc-rest-products-controller.php:906
+#: includes/api/v1/class-wc-rest-products-controller.php:1933
+#: includes/api/v1/class-wc-rest-products-controller.php:2392
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:795
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1650
 msgid "Tax status."
 msgstr ""
 
-#: includes/api/class-wc-rest-product-variations-controller.php:555
-#: includes/api/class-wc-rest-products-controller.php:914
-#: includes/api/v1/class-wc-rest-products-controller.php:1941
-#: includes/api/v1/class-wc-rest-products-controller.php:2401
+#: includes/api/class-wc-rest-product-variations-controller.php:554
+#: includes/api/class-wc-rest-products-controller.php:913
+#: includes/api/v1/class-wc-rest-products-controller.php:1940
+#: includes/api/v1/class-wc-rest-products-controller.php:2399
 #: includes/api/v1/class-wc-rest-taxes-controller.php:635
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:803
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1658
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:802
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1657
 msgid "Tax class."
 msgstr ""
 
-#: includes/api/class-wc-rest-product-variations-controller.php:560
-#: includes/api/v1/class-wc-rest-products-controller.php:2406
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:808
+#: includes/api/class-wc-rest-product-variations-controller.php:559
+#: includes/api/v1/class-wc-rest-products-controller.php:2404
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:807
 msgid "Stock management at variation level."
 msgstr ""
 
-#: includes/api/class-wc-rest-product-variations-controller.php:566
-#: includes/api/class-wc-rest-products-controller.php:925
-#: includes/api/v1/class-wc-rest-products-controller.php:1952
-#: includes/api/v1/class-wc-rest-products-controller.php:2412
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:814
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1669
+#: includes/api/class-wc-rest-product-variations-controller.php:565
+#: includes/api/class-wc-rest-products-controller.php:924
+#: includes/api/v1/class-wc-rest-products-controller.php:1951
+#: includes/api/v1/class-wc-rest-products-controller.php:2410
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:813
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1668
 msgid "Stock quantity."
 msgstr ""
 
-#: includes/api/class-wc-rest-product-variations-controller.php:571
-#: includes/api/class-wc-rest-products-controller.php:930
-msgid ""
-"Controls the stock status of the product: \"instock\", \"outofstock\" or "
-"\"onbackorder\"."
+#: includes/api/class-wc-rest-product-variations-controller.php:570
+#: includes/api/class-wc-rest-products-controller.php:929
+msgid "Controls the stock status of the product."
 msgstr ""
 
 #: includes/api/class-wc-rest-product-variations-controller.php:577
 #: includes/api/class-wc-rest-products-controller.php:936
-#: includes/api/v1/class-wc-rest-products-controller.php:1963
-#: includes/api/v1/class-wc-rest-products-controller.php:2423
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:825
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1680
+#: includes/api/v1/class-wc-rest-products-controller.php:1962
+#: includes/api/v1/class-wc-rest-products-controller.php:2421
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:824
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1679
 msgid "If managing stock, this controls if backorders are allowed."
 msgstr ""
 
 #: includes/api/class-wc-rest-product-variations-controller.php:584
 #: includes/api/class-wc-rest-products-controller.php:943
-#: includes/api/v1/class-wc-rest-products-controller.php:1970
-#: includes/api/v1/class-wc-rest-products-controller.php:2430
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:832
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1687
+#: includes/api/v1/class-wc-rest-products-controller.php:1969
+#: includes/api/v1/class-wc-rest-products-controller.php:2428
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:831
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1686
 msgid "Shows if backorders are allowed."
 msgstr ""
 
 #: includes/api/class-wc-rest-product-variations-controller.php:590
-#: includes/api/v1/class-wc-rest-products-controller.php:2436
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:838
+#: includes/api/v1/class-wc-rest-products-controller.php:2434
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:837
 msgid "Shows if the variation is on backordered."
 msgstr ""
 
 #: includes/api/class-wc-rest-product-variations-controller.php:597
-#: includes/api/v1/class-wc-rest-products-controller.php:2443
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:845
+#: includes/api/v1/class-wc-rest-products-controller.php:2441
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:844
 #. translators: %s: weight unit
 msgid "Variation weight (%s)."
 msgstr ""
 
 #: includes/api/class-wc-rest-product-variations-controller.php:602
-#: includes/api/v1/class-wc-rest-products-controller.php:2448
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:850
+#: includes/api/v1/class-wc-rest-products-controller.php:2446
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:849
 msgid "Variation dimensions."
 msgstr ""
 
 #: includes/api/class-wc-rest-product-variations-controller.php:608
-#: includes/api/v1/class-wc-rest-products-controller.php:2454
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:856
+#: includes/api/v1/class-wc-rest-products-controller.php:2452
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:855
 #. translators: %s: dimension unit
 msgid "Variation length (%s)."
 msgstr ""
 
 #: includes/api/class-wc-rest-product-variations-controller.php:614
-#: includes/api/v1/class-wc-rest-products-controller.php:2460
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:862
+#: includes/api/v1/class-wc-rest-products-controller.php:2458
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:861
 #. translators: %s: dimension unit
 msgid "Variation width (%s)."
 msgstr ""
 
 #: includes/api/class-wc-rest-product-variations-controller.php:620
-#: includes/api/v1/class-wc-rest-products-controller.php:2466
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:868
+#: includes/api/v1/class-wc-rest-products-controller.php:2464
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:867
 #. translators: %s: dimension unit
 msgid "Variation height (%s)."
 msgstr ""
 
 #: includes/api/class-wc-rest-product-variations-controller.php:627
 #: includes/api/class-wc-rest-products-controller.php:1004
-#: includes/api/v1/class-wc-rest-products-controller.php:2031
-#: includes/api/v1/class-wc-rest-products-controller.php:2473
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:875
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1748
+#: includes/api/v1/class-wc-rest-products-controller.php:2030
+#: includes/api/v1/class-wc-rest-products-controller.php:2471
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:874
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1747
 msgid "Shipping class slug."
 msgstr ""
 
 #: includes/api/class-wc-rest-product-variations-controller.php:632
 #: includes/api/class-wc-rest-products-controller.php:1009
-#: includes/api/v1/class-wc-rest-products-controller.php:2036
-#: includes/api/v1/class-wc-rest-products-controller.php:2478
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:880
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1753
+#: includes/api/v1/class-wc-rest-products-controller.php:2035
+#: includes/api/v1/class-wc-rest-products-controller.php:2476
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:879
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1752
 msgid "Shipping class ID."
 msgstr ""
 
 #: includes/api/class-wc-rest-product-variations-controller.php:638
-#: includes/api/v1/class-wc-rest-products-controller.php:2484
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:886
+#: includes/api/v1/class-wc-rest-products-controller.php:2482
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:885
 msgid "Variation image data."
 msgstr ""
 
 #: includes/api/class-wc-rest-product-variations-controller.php:690
 #: includes/api/class-wc-rest-products-controller.php:1177
-#: includes/api/v1/class-wc-rest-products-controller.php:2197
-#: includes/api/v1/class-wc-rest-products-controller.php:2529
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:943
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1926
+#: includes/api/v1/class-wc-rest-products-controller.php:2196
+#: includes/api/v1/class-wc-rest-products-controller.php:2527
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:942
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1925
 msgid "List of attributes."
 msgstr ""
 
 #: includes/api/class-wc-rest-product-variations-controller.php:697
 #: includes/api/class-wc-rest-products-controller.php:1184
 #: includes/api/class-wc-rest-products-controller.php:1229
-#: includes/api/v1/class-wc-rest-products-controller.php:2204
-#: includes/api/v1/class-wc-rest-products-controller.php:2246
-#: includes/api/v1/class-wc-rest-products-controller.php:2536
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:950
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1933
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1978
+#: includes/api/v1/class-wc-rest-products-controller.php:2203
+#: includes/api/v1/class-wc-rest-products-controller.php:2245
+#: includes/api/v1/class-wc-rest-products-controller.php:2534
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:949
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1932
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1977
 #: includes/cli/class-wc-cli-runner.php:114
 msgid "Attribute ID."
 msgstr ""
@@ -16872,29 +16865,29 @@ msgstr ""
 #: includes/api/class-wc-rest-products-controller.php:1189
 #: includes/api/class-wc-rest-products-controller.php:1234
 #: includes/api/v1/class-wc-rest-product-attributes-controller.php:462
-#: includes/api/v1/class-wc-rest-products-controller.php:2209
-#: includes/api/v1/class-wc-rest-products-controller.php:2251
-#: includes/api/v1/class-wc-rest-products-controller.php:2541
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:955
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1938
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1983
+#: includes/api/v1/class-wc-rest-products-controller.php:2208
+#: includes/api/v1/class-wc-rest-products-controller.php:2250
+#: includes/api/v1/class-wc-rest-products-controller.php:2539
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:954
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1937
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1982
 msgid "Attribute name."
 msgstr ""
 
 #: includes/api/class-wc-rest-product-variations-controller.php:707
 #: includes/api/class-wc-rest-products-controller.php:1239
-#: includes/api/v1/class-wc-rest-products-controller.php:2256
-#: includes/api/v1/class-wc-rest-products-controller.php:2546
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:960
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1988
+#: includes/api/v1/class-wc-rest-products-controller.php:2255
+#: includes/api/v1/class-wc-rest-products-controller.php:2544
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:959
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1987
 msgid "Selected attribute term name."
 msgstr ""
 
 #: includes/api/class-wc-rest-product-variations-controller.php:715
 #: includes/api/class-wc-rest-products-controller.php:1265
-#: includes/api/v1/class-wc-rest-products-controller.php:2566
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:968
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:2013
+#: includes/api/v1/class-wc-rest-products-controller.php:2564
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:967
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:2012
 msgid "Menu order, used to custom sort products."
 msgstr ""
 
@@ -16909,8 +16902,8 @@ msgstr ""
 #: includes/api/v1/class-wc-rest-products-controller.php:1745
 #: includes/api/v1/class-wc-rest-report-top-sellers-controller.php:152
 #: includes/api/v2/class-wc-rest-customer-downloads-v2-controller.php:99
-#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:433
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1185
+#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:434
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1187
 #: includes/api/v2/class-wc-rest-products-v2-controller.php:1447
 msgid "Product name."
 msgstr ""
@@ -17039,218 +17032,218 @@ msgstr ""
 msgid "If the product is downloadable."
 msgstr ""
 
-#: includes/api/class-wc-rest-products-controller.php:896
-#: includes/api/v1/class-wc-rest-products-controller.php:1923
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1640
+#: includes/api/class-wc-rest-products-controller.php:895
+#: includes/api/v1/class-wc-rest-products-controller.php:1922
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1639
 msgid "Product external URL. Only for external products."
 msgstr ""
 
-#: includes/api/class-wc-rest-products-controller.php:902
-#: includes/api/v1/class-wc-rest-products-controller.php:1929
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1646
+#: includes/api/class-wc-rest-products-controller.php:901
+#: includes/api/v1/class-wc-rest-products-controller.php:1928
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1645
 msgid "Product external button text. Only for external products."
 msgstr ""
 
-#: includes/api/class-wc-rest-products-controller.php:919
-#: includes/api/v1/class-wc-rest-products-controller.php:1946
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1663
+#: includes/api/class-wc-rest-products-controller.php:918
+#: includes/api/v1/class-wc-rest-products-controller.php:1945
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1662
 msgid "Stock management at product level."
 msgstr ""
 
 #: includes/api/class-wc-rest-products-controller.php:949
-#: includes/api/v1/class-wc-rest-products-controller.php:1976
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1693
+#: includes/api/v1/class-wc-rest-products-controller.php:1975
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1692
 msgid "Shows if the product is on backordered."
 msgstr ""
 
 #: includes/api/class-wc-rest-products-controller.php:955
-#: includes/api/v1/class-wc-rest-products-controller.php:1982
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1699
+#: includes/api/v1/class-wc-rest-products-controller.php:1981
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1698
 msgid "Allow one item to be bought in a single order."
 msgstr ""
 
 #: includes/api/class-wc-rest-products-controller.php:962
-#: includes/api/v1/class-wc-rest-products-controller.php:1989
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1706
+#: includes/api/v1/class-wc-rest-products-controller.php:1988
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1705
 #. translators: %s: weight unit
 msgid "Product weight (%s)."
 msgstr ""
 
 #: includes/api/class-wc-rest-products-controller.php:967
-#: includes/api/v1/class-wc-rest-products-controller.php:1994
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1711
+#: includes/api/v1/class-wc-rest-products-controller.php:1993
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1710
 msgid "Product dimensions."
 msgstr ""
 
 #: includes/api/class-wc-rest-products-controller.php:973
-#: includes/api/v1/class-wc-rest-products-controller.php:2000
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1717
+#: includes/api/v1/class-wc-rest-products-controller.php:1999
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1716
 #. translators: %s: dimension unit
 msgid "Product length (%s)."
 msgstr ""
 
 #: includes/api/class-wc-rest-products-controller.php:979
-#: includes/api/v1/class-wc-rest-products-controller.php:2006
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1723
+#: includes/api/v1/class-wc-rest-products-controller.php:2005
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1722
 #. translators: %s: dimension unit
 msgid "Product width (%s)."
 msgstr ""
 
 #: includes/api/class-wc-rest-products-controller.php:985
-#: includes/api/v1/class-wc-rest-products-controller.php:2012
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1729
+#: includes/api/v1/class-wc-rest-products-controller.php:2011
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1728
 #. translators: %s: dimension unit
 msgid "Product height (%s)."
 msgstr ""
 
 #: includes/api/class-wc-rest-products-controller.php:992
-#: includes/api/v1/class-wc-rest-products-controller.php:2019
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1736
+#: includes/api/v1/class-wc-rest-products-controller.php:2018
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1735
 msgid "Shows if the product need to be shipped."
 msgstr ""
 
 #: includes/api/class-wc-rest-products-controller.php:998
-#: includes/api/v1/class-wc-rest-products-controller.php:2025
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1742
+#: includes/api/v1/class-wc-rest-products-controller.php:2024
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1741
 msgid "Shows whether or not the product shipping is taxable."
 msgstr ""
 
 #: includes/api/class-wc-rest-products-controller.php:1015
-#: includes/api/v1/class-wc-rest-products-controller.php:2042
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1759
+#: includes/api/v1/class-wc-rest-products-controller.php:2041
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1758
 msgid "Allow reviews."
 msgstr ""
 
 #: includes/api/class-wc-rest-products-controller.php:1021
-#: includes/api/v1/class-wc-rest-products-controller.php:2048
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1765
+#: includes/api/v1/class-wc-rest-products-controller.php:2047
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1764
 msgid "Reviews average rating."
 msgstr ""
 
 #: includes/api/class-wc-rest-products-controller.php:1027
-#: includes/api/v1/class-wc-rest-products-controller.php:2054
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1771
+#: includes/api/v1/class-wc-rest-products-controller.php:2053
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1770
 msgid "Amount of reviews that the product have."
 msgstr ""
 
 #: includes/api/class-wc-rest-products-controller.php:1033
-#: includes/api/v1/class-wc-rest-products-controller.php:2060
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1777
+#: includes/api/v1/class-wc-rest-products-controller.php:2059
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1776
 msgid "List of related products IDs."
 msgstr ""
 
 #: includes/api/class-wc-rest-products-controller.php:1042
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1786
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1785
 msgid "List of up-sell products IDs."
 msgstr ""
 
 #: includes/api/class-wc-rest-products-controller.php:1050
-#: includes/api/v1/class-wc-rest-products-controller.php:2077
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1794
+#: includes/api/v1/class-wc-rest-products-controller.php:2076
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1793
 msgid "List of cross-sell products IDs."
 msgstr ""
 
 #: includes/api/class-wc-rest-products-controller.php:1058
-#: includes/api/v1/class-wc-rest-products-controller.php:2085
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1802
+#: includes/api/v1/class-wc-rest-products-controller.php:2084
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1801
 msgid "Product parent ID."
 msgstr ""
 
 #: includes/api/class-wc-rest-products-controller.php:1063
-#: includes/api/v1/class-wc-rest-products-controller.php:2090
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1807
+#: includes/api/v1/class-wc-rest-products-controller.php:2089
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1806
 msgid "Optional note to send the customer after purchase."
 msgstr ""
 
 #: includes/api/class-wc-rest-products-controller.php:1068
-#: includes/api/v1/class-wc-rest-products-controller.php:2095
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1812
+#: includes/api/v1/class-wc-rest-products-controller.php:2094
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1811
 msgid "List of categories."
 msgstr ""
 
 #: includes/api/class-wc-rest-products-controller.php:1075
-#: includes/api/v1/class-wc-rest-products-controller.php:2102
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1819
+#: includes/api/v1/class-wc-rest-products-controller.php:2101
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1818
 msgid "Category ID."
 msgstr ""
 
 #: includes/api/class-wc-rest-products-controller.php:1086
-#: includes/api/v1/class-wc-rest-products-controller.php:2113
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1830
+#: includes/api/v1/class-wc-rest-products-controller.php:2112
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1829
 msgid "Category slug."
 msgstr ""
 
 #: includes/api/class-wc-rest-products-controller.php:1095
-#: includes/api/v1/class-wc-rest-products-controller.php:2122
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1839
+#: includes/api/v1/class-wc-rest-products-controller.php:2121
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1838
 msgid "List of tags."
 msgstr ""
 
 #: includes/api/class-wc-rest-products-controller.php:1102
-#: includes/api/v1/class-wc-rest-products-controller.php:2129
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1846
+#: includes/api/v1/class-wc-rest-products-controller.php:2128
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1845
 msgid "Tag ID."
 msgstr ""
 
 #: includes/api/class-wc-rest-products-controller.php:1107
 #: includes/api/v1/class-wc-rest-product-tags-controller.php:100
-#: includes/api/v1/class-wc-rest-products-controller.php:2134
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1851
+#: includes/api/v1/class-wc-rest-products-controller.php:2133
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1850
 msgid "Tag name."
 msgstr ""
 
 #: includes/api/class-wc-rest-products-controller.php:1113
-#: includes/api/v1/class-wc-rest-products-controller.php:2140
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1857
+#: includes/api/v1/class-wc-rest-products-controller.php:2139
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1856
 msgid "Tag slug."
 msgstr ""
 
 #: includes/api/class-wc-rest-products-controller.php:1122
-#: includes/api/v1/class-wc-rest-products-controller.php:2149
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1866
+#: includes/api/v1/class-wc-rest-products-controller.php:2148
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1865
 msgid "List of images."
 msgstr ""
 
 #: includes/api/class-wc-rest-products-controller.php:1194
-#: includes/api/v1/class-wc-rest-products-controller.php:2214
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1943
+#: includes/api/v1/class-wc-rest-products-controller.php:2213
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1942
 msgid "Attribute position."
 msgstr ""
 
 #: includes/api/class-wc-rest-products-controller.php:1199
-#: includes/api/v1/class-wc-rest-products-controller.php:2219
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1948
+#: includes/api/v1/class-wc-rest-products-controller.php:2218
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1947
 msgid ""
 "Define if the attribute is visible on the \"Additional information\" tab in "
 "the product's page."
 msgstr ""
 
 #: includes/api/class-wc-rest-products-controller.php:1205
-#: includes/api/v1/class-wc-rest-products-controller.php:2225
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1954
+#: includes/api/v1/class-wc-rest-products-controller.php:2224
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1953
 msgid "Define if the attribute can be used as variation."
 msgstr ""
 
 #: includes/api/class-wc-rest-products-controller.php:1211
-#: includes/api/v1/class-wc-rest-products-controller.php:2231
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1960
+#: includes/api/v1/class-wc-rest-products-controller.php:2230
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1959
 msgid "List of available term names of the attribute."
 msgstr ""
 
 #: includes/api/class-wc-rest-products-controller.php:1222
-#: includes/api/v1/class-wc-rest-products-controller.php:2239
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1971
+#: includes/api/v1/class-wc-rest-products-controller.php:2238
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1970
 msgid "Defaults variation attributes."
 msgstr ""
 
 #: includes/api/class-wc-rest-products-controller.php:1247
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1996
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1995
 msgid "List of variations IDs."
 msgstr ""
 
 #: includes/api/class-wc-rest-products-controller.php:1256
-#: includes/api/v1/class-wc-rest-products-controller.php:2557
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:2005
+#: includes/api/v1/class-wc-rest-products-controller.php:2555
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:2004
 msgid "List of grouped products ID."
 msgstr ""
 
@@ -17658,7 +17651,7 @@ msgstr ""
 #: includes/api/legacy/v2/class-wc-api-customers.php:349
 #: includes/api/legacy/v2/class-wc-api-orders.php:365
 #: includes/api/legacy/v2/class-wc-api-orders.php:1285
-#: includes/api/legacy/v2/class-wc-api-orders.php:1578
+#: includes/api/legacy/v2/class-wc-api-orders.php:1579
 #: includes/api/legacy/v2/class-wc-api-products.php:214
 #: includes/api/legacy/v2/class-wc-api-products.php:2024
 #: includes/api/legacy/v2/class-wc-api-webhooks.php:171
@@ -17666,7 +17659,7 @@ msgstr ""
 #: includes/api/legacy/v3/class-wc-api-customers.php:350
 #: includes/api/legacy/v3/class-wc-api-orders.php:400
 #: includes/api/legacy/v3/class-wc-api-orders.php:1330
-#: includes/api/legacy/v3/class-wc-api-orders.php:1623
+#: includes/api/legacy/v3/class-wc-api-orders.php:1624
 #: includes/api/legacy/v3/class-wc-api-products.php:263
 #: includes/api/legacy/v3/class-wc-api-products.php:707
 #: includes/api/legacy/v3/class-wc-api-products.php:964
@@ -17695,7 +17688,7 @@ msgstr ""
 #: includes/api/legacy/v2/class-wc-api-customers.php:404
 #: includes/api/legacy/v2/class-wc-api-orders.php:504
 #: includes/api/legacy/v2/class-wc-api-orders.php:1344
-#: includes/api/legacy/v2/class-wc-api-orders.php:1657
+#: includes/api/legacy/v2/class-wc-api-orders.php:1658
 #: includes/api/legacy/v2/class-wc-api-products.php:323
 #: includes/api/legacy/v2/class-wc-api-products.php:2107
 #: includes/api/legacy/v2/class-wc-api-webhooks.php:242
@@ -17703,7 +17696,7 @@ msgstr ""
 #: includes/api/legacy/v3/class-wc-api-customers.php:405
 #: includes/api/legacy/v3/class-wc-api-orders.php:542
 #: includes/api/legacy/v3/class-wc-api-orders.php:1389
-#: includes/api/legacy/v3/class-wc-api-orders.php:1702
+#: includes/api/legacy/v3/class-wc-api-orders.php:1703
 #: includes/api/legacy/v3/class-wc-api-products.php:377
 #: includes/api/legacy/v3/class-wc-api-products.php:784
 #: includes/api/legacy/v3/class-wc-api-products.php:1009
@@ -17724,11 +17717,11 @@ msgstr ""
 
 #: includes/api/legacy/v2/class-wc-api-coupons.php:521
 #: includes/api/legacy/v2/class-wc-api-customers.php:784
-#: includes/api/legacy/v2/class-wc-api-orders.php:1774
+#: includes/api/legacy/v2/class-wc-api-orders.php:1775
 #: includes/api/legacy/v2/class-wc-api-products.php:2303
 #: includes/api/legacy/v3/class-wc-api-coupons.php:521
 #: includes/api/legacy/v3/class-wc-api-customers.php:774
-#: includes/api/legacy/v3/class-wc-api-orders.php:1819
+#: includes/api/legacy/v3/class-wc-api-orders.php:1820
 #: includes/api/legacy/v3/class-wc-api-products.php:3116
 #: includes/api/legacy/v3/class-wc-api-taxes.php:457
 msgid "No %1$s data specified to create/edit %1$s"
@@ -17770,16 +17763,16 @@ msgid "Provided order currency is invalid."
 msgstr ""
 
 #: includes/api/legacy/v2/class-wc-api-orders.php:521
-#: includes/api/legacy/v2/class-wc-api-orders.php:1591
+#: includes/api/legacy/v2/class-wc-api-orders.php:1592
 #: includes/api/legacy/v3/class-wc-api-orders.php:559
-#: includes/api/legacy/v3/class-wc-api-orders.php:1636
+#: includes/api/legacy/v3/class-wc-api-orders.php:1637
 msgid "Order ID is invalid"
 msgstr ""
 
 #: includes/api/legacy/v2/class-wc-api-orders.php:844
 #: includes/api/legacy/v3/class-wc-api-orders.php:888
 #: includes/api/v1/class-wc-rest-orders-controller.php:782
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:779
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:781
 msgid "Order item ID provided is not associated with order."
 msgstr ""
 
@@ -17826,7 +17819,7 @@ msgstr ""
 #: includes/api/legacy/v2/class-wc-api-orders.php:1036
 #: includes/api/legacy/v3/class-wc-api-orders.php:1081
 #: includes/api/v1/class-wc-rest-orders-controller.php:698
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:694
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:696
 msgid "Shipping method ID is required."
 msgstr ""
 
@@ -17905,53 +17898,53 @@ msgstr ""
 msgid "Permanently deleted order note"
 msgstr ""
 
-#: includes/api/legacy/v2/class-wc-api-orders.php:1511
-#: includes/api/legacy/v2/class-wc-api-orders.php:1673
-#: includes/api/legacy/v2/class-wc-api-orders.php:1734
-#: includes/api/legacy/v3/class-wc-api-orders.php:1556
-#: includes/api/legacy/v3/class-wc-api-orders.php:1718
-#: includes/api/legacy/v3/class-wc-api-orders.php:1779
+#: includes/api/legacy/v2/class-wc-api-orders.php:1512
+#: includes/api/legacy/v2/class-wc-api-orders.php:1674
+#: includes/api/legacy/v2/class-wc-api-orders.php:1735
+#: includes/api/legacy/v3/class-wc-api-orders.php:1557
+#: includes/api/legacy/v3/class-wc-api-orders.php:1719
+#: includes/api/legacy/v3/class-wc-api-orders.php:1780
 #: includes/api/v1/class-wc-rest-order-refunds-controller.php:133
 #: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:195
 msgid "Invalid order refund ID."
 msgstr ""
 
-#: includes/api/legacy/v2/class-wc-api-orders.php:1518
-#: includes/api/legacy/v2/class-wc-api-orders.php:1680
-#: includes/api/legacy/v2/class-wc-api-orders.php:1741
-#: includes/api/legacy/v3/class-wc-api-orders.php:1563
-#: includes/api/legacy/v3/class-wc-api-orders.php:1725
-#: includes/api/legacy/v3/class-wc-api-orders.php:1786
+#: includes/api/legacy/v2/class-wc-api-orders.php:1519
+#: includes/api/legacy/v2/class-wc-api-orders.php:1681
+#: includes/api/legacy/v2/class-wc-api-orders.php:1742
+#: includes/api/legacy/v3/class-wc-api-orders.php:1564
+#: includes/api/legacy/v3/class-wc-api-orders.php:1726
+#: includes/api/legacy/v3/class-wc-api-orders.php:1787
 msgid "An order refund with the provided ID could not be found."
 msgstr ""
 
-#: includes/api/legacy/v2/class-wc-api-orders.php:1585
-#: includes/api/legacy/v3/class-wc-api-orders.php:1630
+#: includes/api/legacy/v2/class-wc-api-orders.php:1586
+#: includes/api/legacy/v3/class-wc-api-orders.php:1631
 msgid "You do not have permission to create order refunds"
 msgstr ""
 
-#: includes/api/legacy/v2/class-wc-api-orders.php:1598
-#: includes/api/legacy/v3/class-wc-api-orders.php:1643
+#: includes/api/legacy/v2/class-wc-api-orders.php:1599
+#: includes/api/legacy/v3/class-wc-api-orders.php:1644
 msgid "Refund amount is required."
 msgstr ""
 
-#: includes/api/legacy/v2/class-wc-api-orders.php:1600
-#: includes/api/legacy/v3/class-wc-api-orders.php:1645
+#: includes/api/legacy/v2/class-wc-api-orders.php:1601
+#: includes/api/legacy/v3/class-wc-api-orders.php:1646
 msgid "Refund amount must be positive."
 msgstr ""
 
-#: includes/api/legacy/v2/class-wc-api-orders.php:1627
-#: includes/api/legacy/v3/class-wc-api-orders.php:1672
+#: includes/api/legacy/v2/class-wc-api-orders.php:1628
+#: includes/api/legacy/v3/class-wc-api-orders.php:1673
 #: includes/wc-order-functions.php:644
 msgid ""
 "An error occurred while attempting to create the refund using the payment "
 "gateway API."
 msgstr ""
 
-#: includes/api/legacy/v2/class-wc-api-orders.php:1685
-#: includes/api/legacy/v2/class-wc-api-orders.php:1746
-#: includes/api/legacy/v3/class-wc-api-orders.php:1730
-#: includes/api/legacy/v3/class-wc-api-orders.php:1791
+#: includes/api/legacy/v2/class-wc-api-orders.php:1686
+#: includes/api/legacy/v2/class-wc-api-orders.php:1747
+#: includes/api/legacy/v3/class-wc-api-orders.php:1731
+#: includes/api/legacy/v3/class-wc-api-orders.php:1792
 msgid "The order refund ID provided is not associated with the order."
 msgstr ""
 
@@ -18337,7 +18330,7 @@ msgstr ""
 #: includes/api/v1/class-wc-rest-orders-controller.php:1540
 #: includes/api/v2/class-wc-rest-coupons-v2-controller.php:61
 #: includes/api/v2/class-wc-rest-coupons-v2-controller.php:341
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1580
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1582
 msgid "Coupon code."
 msgstr ""
 
@@ -18489,7 +18482,7 @@ msgstr ""
 #: includes/api/v1/class-wc-rest-customer-downloads-controller.php:199
 #: includes/api/v1/class-wc-rest-orders-controller.php:942
 #: includes/api/v2/class-wc-rest-customer-downloads-v2-controller.php:117
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:859
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:861
 msgid "Order key."
 msgstr ""
 
@@ -18653,8 +18646,8 @@ msgstr ""
 
 #: includes/api/v1/class-wc-rest-order-refunds-controller.php:366
 #: includes/api/v1/class-wc-rest-orders-controller.php:1210
-#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:419
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1172
+#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:420
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1174
 msgid "Line items data."
 msgstr ""
 
@@ -18664,70 +18657,70 @@ msgstr ""
 #: includes/api/v1/class-wc-rest-orders-controller.php:1403
 #: includes/api/v1/class-wc-rest-orders-controller.php:1463
 #: includes/api/v1/class-wc-rest-orders-controller.php:1534
-#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:427
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1179
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1307
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1385
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1476
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1574
+#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:428
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1181
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1309
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1387
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1478
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1576
 msgid "Item ID."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-order-refunds-controller.php:386
 #: includes/api/v1/class-wc-rest-orders-controller.php:1229
-#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:545
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1284
+#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:546
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1286
 msgid "Product SKU."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-order-refunds-controller.php:392
 #: includes/api/v1/class-wc-rest-orders-controller.php:1235
 #: includes/api/v1/class-wc-rest-report-top-sellers-controller.php:158
-#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:439
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1190
+#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:440
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1192
 #: includes/cli/class-wc-cli-runner.php:110
 msgid "Product ID."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-order-refunds-controller.php:398
 #: includes/api/v1/class-wc-rest-orders-controller.php:1240
-#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:445
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1195
+#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:446
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1197
 msgid "Variation ID, if applicable."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-order-refunds-controller.php:404
 #: includes/api/v1/class-wc-rest-orders-controller.php:1245
-#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:451
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1200
+#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:452
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1202
 msgid "Quantity ordered."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-order-refunds-controller.php:410
 #: includes/api/v1/class-wc-rest-orders-controller.php:1250
-#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:457
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1205
+#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:458
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1207
 msgid "Tax class of product."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-order-refunds-controller.php:416
 #: includes/api/v1/class-wc-rest-orders-controller.php:1256
-#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:551
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1290
+#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:552
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1292
 msgid "Product price."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-order-refunds-controller.php:422
 #: includes/api/v1/class-wc-rest-orders-controller.php:1262
-#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:463
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1210
+#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:464
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1212
 msgid "Line subtotal (before discounts)."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-order-refunds-controller.php:428
 #: includes/api/v1/class-wc-rest-orders-controller.php:1267
-#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:469
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1215
+#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:470
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1217
 msgid "Line subtotal tax (before discounts)."
 msgstr ""
 
@@ -18735,10 +18728,10 @@ msgstr ""
 #: includes/api/v1/class-wc-rest-orders-controller.php:1272
 #: includes/api/v1/class-wc-rest-orders-controller.php:1419
 #: includes/api/v1/class-wc-rest-orders-controller.php:1485
-#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:475
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1221
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1406
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1498
+#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:476
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1223
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1408
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1500
 msgid "Line total (after discounts)."
 msgstr ""
 
@@ -18746,10 +18739,10 @@ msgstr ""
 #: includes/api/v1/class-wc-rest-orders-controller.php:1277
 #: includes/api/v1/class-wc-rest-orders-controller.php:1424
 #: includes/api/v1/class-wc-rest-orders-controller.php:1490
-#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:481
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1226
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1411
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1503
+#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:482
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1228
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1413
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1505
 msgid "Line total tax (after discounts)."
 msgstr ""
 
@@ -18757,10 +18750,10 @@ msgstr ""
 #: includes/api/v1/class-wc-rest-orders-controller.php:1282
 #: includes/api/v1/class-wc-rest-orders-controller.php:1430
 #: includes/api/v1/class-wc-rest-orders-controller.php:1495
-#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:487
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1232
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1417
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1509
+#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:488
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1234
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1419
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1511
 msgid "Line taxes."
 msgstr ""
 
@@ -18769,11 +18762,11 @@ msgstr ""
 #: includes/api/v1/class-wc-rest-orders-controller.php:1363
 #: includes/api/v1/class-wc-rest-orders-controller.php:1438
 #: includes/api/v1/class-wc-rest-orders-controller.php:1503
-#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:495
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1240
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1319
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1425
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1517
+#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:496
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1242
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1321
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1427
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1519
 msgid "Tax rate ID."
 msgstr ""
 
@@ -18781,19 +18774,19 @@ msgstr ""
 #: includes/api/v1/class-wc-rest-orders-controller.php:1296
 #: includes/api/v1/class-wc-rest-orders-controller.php:1444
 #: includes/api/v1/class-wc-rest-orders-controller.php:1509
-#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:501
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1245
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1431
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1523
+#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:502
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1247
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1433
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1525
 msgid "Tax total."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-order-refunds-controller.php:466
 #: includes/api/v1/class-wc-rest-orders-controller.php:1302
 #: includes/api/v1/class-wc-rest-orders-controller.php:1515
-#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:507
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1250
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1529
+#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:508
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1252
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1531
 msgid "Tax subtotal."
 msgstr ""
 
@@ -18809,285 +18802,285 @@ msgstr ""
 
 #: includes/api/v1/class-wc-rest-order-refunds-controller.php:522
 #: includes/api/v1/class-wc-rest-orders-controller.php:1623
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1695
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1697
 msgid "Number of decimal points to use in each resource."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:626
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:602
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:604
 msgid "Product ID or SKU is required."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:721
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:718
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:720
 msgid "Fee name is required."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:930
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:848
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:850
 msgid "Parent order ID."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:935
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:877
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:879
 msgid "Order status."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:948
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:853
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:855
 msgid "Order number."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:954
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:884
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:886
 msgid "Currency the order was created with, in ISO format."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:961
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:871
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:873
 msgid "Version of WooCommerce which last updated the order."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:967
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:957
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:959
 msgid "True the prices included tax during checkout."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:973
 #: includes/api/v2/class-wc-rest-customers-v2-controller.php:136
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:897
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:899
 msgid "The date the order was created, as GMT."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:979
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:909
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:911
 msgid "The date the order was last modified, as GMT."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:985
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:963
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:965
 msgid "User ID who owns the order. 0 for guests."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:991
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:915
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:917
 msgid "Total discount amount for the order."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:997
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:921
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:923
 msgid "Total discount tax amount for the order."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1003
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:927
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:929
 msgid "Total shipping amount for the order."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1009
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:933
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:935
 msgid "Total shipping tax amount for the order."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1015
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:939
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:941
 msgid "Sum of line item taxes only."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1021
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:945
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:947
 msgid "Grand total."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1027
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:951
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:953
 msgid "Sum of all taxes."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1033
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:986
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:988
 msgid "Billing address."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1078
 #: includes/api/v1/class-wc-rest-orders-controller.php:1141
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1031
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1094
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1033
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1096
 msgid "Country code in ISO 3166-1 alpha-2 format."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1096
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1049
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1051
 msgid "Shipping address."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1148
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1101
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1103
 msgid "Payment method ID."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1153
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1106
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1108
 msgid "Payment method title."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1158
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1654
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1656
 msgid ""
 "Define if the order is paid. It will set the status to processing and "
 "reduce stock items."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1164
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1111
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1113
 msgid "Unique transaction ID."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1169
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:969
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:971
 msgid "Customer's IP address."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1175
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:975
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:977
 msgid "User agent of the customer."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1181
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:865
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:867
 msgid "Shows where the order was created."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1187
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:981
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:983
 msgid "Note left by customer during checkout."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1192
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1128
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1130
 msgid "The date the order was completed, in the site's timezone."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1198
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1116
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1118
 msgid "The date the order was paid, in the site's timezone."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1204
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1140
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1142
 msgid "MD5 hash of cart items to ensure orders are not modified."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1343
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1299
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1301
 msgid "Tax lines data."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1357
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1313
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1315
 msgid "Tax rate code."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1369
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1325
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1327
 msgid "Tax rate label."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1375
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1331
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1333
 msgid "Show if is a compound tax rate."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1381
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1337
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1339
 msgid "Tax total (not including shipping taxes)."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1387
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1343
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1345
 msgid "Shipping tax total."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1396
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1378
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1380
 msgid "Shipping lines data."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1409
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1391
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1393
 msgid "Shipping method name."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1414
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1396
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1398
 #: includes/api/v2/class-wc-rest-shipping-zone-methods-v2-controller.php:47
 #: includes/api/v2/class-wc-rest-shipping-zone-methods-v2-controller.php:464
 msgid "Shipping method ID."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1456
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1469
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1471
 msgid "Fee lines data."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1469
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1482
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1484
 msgid "Fee name."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1474
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1487
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1489
 msgid "Tax class of fee."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1479
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1492
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1494
 msgid "Tax status of fee."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1527
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1567
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1569
 msgid "Coupons line data."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1545
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1585
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1587
 msgid "Discount total."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1550
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1590
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1592
 msgid "Discount total tax."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1559
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1625
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1627
 msgid "List of refunds."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1567
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1633
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1635
 #: includes/cli/class-wc-cli-runner.php:113
 msgid "Refund ID."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1573
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1639
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1641
 msgid "Refund reason."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1579
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1645
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1647
 msgid "Refund total."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1610
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1682
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1684
 msgid "Limit result set to orders assigned a specific customer."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-orders-controller.php:1616
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1688
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1690
 msgid "Limit result set to orders assigned a specific product."
 msgstr ""
 
@@ -19165,91 +19158,91 @@ msgid "Invalid post ID."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-products-controller.php:1832
-#: includes/api/v1/class-wc-rest-products-controller.php:2317
+#: includes/api/v1/class-wc-rest-products-controller.php:2316
 msgid "Start date of sale price."
 msgstr ""
 
 #: includes/api/v1/class-wc-rest-products-controller.php:1837
-#: includes/api/v1/class-wc-rest-products-controller.php:2322
+#: includes/api/v1/class-wc-rest-products-controller.php:2321
 msgid "End date of sale price."
 msgstr ""
 
-#: includes/api/v1/class-wc-rest-products-controller.php:1916
+#: includes/api/v1/class-wc-rest-products-controller.php:1915
 msgid "Download type, this controls the schema on the front-end."
 msgstr ""
 
-#: includes/api/v1/class-wc-rest-products-controller.php:2069
+#: includes/api/v1/class-wc-rest-products-controller.php:2068
 msgid "List of upsell products IDs."
 msgstr ""
 
-#: includes/api/v1/class-wc-rest-products-controller.php:2189
-#: includes/api/v1/class-wc-rest-products-controller.php:2522
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:936
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:1918
+#: includes/api/v1/class-wc-rest-products-controller.php:2188
+#: includes/api/v1/class-wc-rest-products-controller.php:2520
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:935
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:1917
 msgid "Image position. 0 means that the image is featured."
 msgstr ""
 
-#: includes/api/v1/class-wc-rest-products-controller.php:2264
+#: includes/api/v1/class-wc-rest-products-controller.php:2263
 msgid "List of variations."
 msgstr ""
 
-#: includes/api/v1/class-wc-rest-products-controller.php:2271
+#: includes/api/v1/class-wc-rest-products-controller.php:2270
 msgid "Variation ID."
 msgstr ""
 
-#: includes/api/v1/class-wc-rest-products-controller.php:2339
+#: includes/api/v1/class-wc-rest-products-controller.php:2338
 msgid "If the variation is visible."
 msgstr ""
 
-#: includes/api/v1/class-wc-rest-products-controller.php:2417
-#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:819
+#: includes/api/v1/class-wc-rest-products-controller.php:2415
+#: includes/api/v2/class-wc-rest-product-variations-v2-controller.php:818
 msgid ""
 "Controls whether or not the variation is listed as \"in stock\" or \"out of "
 "stock\" on the frontend."
 msgstr ""
 
-#: includes/api/v1/class-wc-rest-products-controller.php:2585
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:2058
+#: includes/api/v1/class-wc-rest-products-controller.php:2583
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:2057
 msgid "Limit result set to products with a specific slug."
 msgstr ""
 
-#: includes/api/v1/class-wc-rest-products-controller.php:2591
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:2064
+#: includes/api/v1/class-wc-rest-products-controller.php:2589
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:2063
 msgid "Limit result set to products assigned a specific status."
 msgstr ""
 
-#: includes/api/v1/class-wc-rest-products-controller.php:2598
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:2071
+#: includes/api/v1/class-wc-rest-products-controller.php:2596
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:2070
 msgid "Limit result set to products assigned a specific type."
 msgstr ""
 
-#: includes/api/v1/class-wc-rest-products-controller.php:2605
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:2090
+#: includes/api/v1/class-wc-rest-products-controller.php:2603
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:2089
 msgid "Limit result set to products assigned a specific category ID."
 msgstr ""
 
-#: includes/api/v1/class-wc-rest-products-controller.php:2611
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:2096
+#: includes/api/v1/class-wc-rest-products-controller.php:2609
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:2095
 msgid "Limit result set to products assigned a specific tag ID."
 msgstr ""
 
-#: includes/api/v1/class-wc-rest-products-controller.php:2617
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:2102
+#: includes/api/v1/class-wc-rest-products-controller.php:2615
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:2101
 msgid "Limit result set to products assigned a specific shipping class ID."
 msgstr ""
 
-#: includes/api/v1/class-wc-rest-products-controller.php:2623
+#: includes/api/v1/class-wc-rest-products-controller.php:2621
 msgid "Limit result set to products with a specific attribute."
 msgstr ""
 
-#: includes/api/v1/class-wc-rest-products-controller.php:2629
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:2114
+#: includes/api/v1/class-wc-rest-products-controller.php:2627
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:2113
 msgid ""
 "Limit result set to products with a specific attribute term ID (required an "
 "assigned attribute)."
 msgstr ""
 
-#: includes/api/v1/class-wc-rest-products-controller.php:2635
+#: includes/api/v1/class-wc-rest-products-controller.php:2633
 msgid "Limit result set to products with a specific SKU."
 msgstr ""
 
@@ -19567,27 +19560,27 @@ msgstr ""
 msgid "If the payment was refunded via the API."
 msgstr ""
 
-#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:560
+#: includes/api/v2/class-wc-rest-order-refunds-v2-controller.php:561
 msgid "When true, the payment gateway API is used to generate the refund."
 msgstr ""
 
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:891
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:893
 msgid "The date the order was created, in the site's timezone."
 msgstr ""
 
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:903
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:905
 msgid "The date the order was last modified, in the site's timezone."
 msgstr ""
 
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1122
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1124
 msgid "The date the order was paid, as GMT."
 msgstr ""
 
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1134
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1136
 msgid "The date the order was completed, as GMT."
 msgstr ""
 
-#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1401
+#: includes/api/v2/class-wc-rest-orders-v2-controller.php:1403
 msgid "Shipping instance ID."
 msgstr ""
 
@@ -19604,37 +19597,37 @@ msgstr ""
 msgid "Define if the variation is visible on the product's page."
 msgstr ""
 
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:2078
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:2077
 msgid "Limit result set to products with specific SKU(s). Use commas to separate."
 msgstr ""
 
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:2084
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:2083
 msgid "Limit result set to featured products."
 msgstr ""
 
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:2108
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:2107
 msgid ""
 "Limit result set to products with a specific attribute. Use the taxonomy "
 "name/attribute slug."
 msgstr ""
 
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:2122
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:2121
 msgid "Limit result set to products with a specific tax class."
 msgstr ""
 
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:2131
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:2130
 msgid "Limit result set to products in stock or out of stock."
 msgstr ""
 
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:2137
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:2136
 msgid "Limit result set to products on sale."
 msgstr ""
 
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:2143
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:2142
 msgid "Limit result set to products based on a minimum price."
 msgstr ""
 
-#: includes/api/v2/class-wc-rest-products-v2-controller.php:2149
+#: includes/api/v2/class-wc-rest-products-v2-controller.php:2148
 msgid "Limit result set to products based on a maximum price."
 msgstr ""
 
@@ -21180,39 +21173,39 @@ msgstr ""
 msgid "Please enter a stronger password."
 msgstr ""
 
-#: includes/class-wc-install.php:365
+#: includes/class-wc-install.php:364
 msgid "Monthly"
 msgstr ""
 
-#: includes/class-wc-install.php:1159
+#: includes/class-wc-install.php:1174
 msgid "View WooCommerce settings"
 msgstr ""
 
-#: includes/class-wc-install.php:1175
+#: includes/class-wc-install.php:1190
 msgid "View WooCommerce documentation"
 msgstr ""
 
-#: includes/class-wc-install.php:1175
+#: includes/class-wc-install.php:1190
 msgid "Docs"
 msgstr ""
 
-#: includes/class-wc-install.php:1176
+#: includes/class-wc-install.php:1191
 msgid "View WooCommerce API docs"
 msgstr ""
 
-#: includes/class-wc-install.php:1176
+#: includes/class-wc-install.php:1191
 msgid "API docs"
 msgstr ""
 
-#: includes/class-wc-install.php:1177
+#: includes/class-wc-install.php:1192
 msgid "Visit premium customer support"
 msgstr ""
 
-#: includes/class-wc-install.php:1177
+#: includes/class-wc-install.php:1192
 msgid "Premium support"
 msgstr ""
 
-#: includes/class-wc-install.php:1304 includes/class-wc-install.php:1406
+#: includes/class-wc-install.php:1319 includes/class-wc-install.php:1421
 #. translators: 1: plugin name, 2: error message, 3: URL to install plugin
 #. manually.
 #. translators: 1: theme slug, 2: error message, 3: URL to install theme
@@ -21222,7 +21215,7 @@ msgid ""
 "manually by clicking here.</a>"
 msgstr ""
 
-#: includes/class-wc-install.php:1332
+#: includes/class-wc-install.php:1347
 #. translators: 1: plugin name, 2: URL to WP plugin page.
 msgid ""
 "%1$s was installed but could not be activated. <a href=\"%2$s\">Please "
@@ -26951,7 +26944,7 @@ msgid "Awaiting check payment"
 msgstr ""
 
 #: includes/admin/class-wc-admin-taxonomies.php:322
-#: includes/class-wc-install.php:508 includes/class-wc-install.php:514
+#: includes/class-wc-install.php:507 includes/class-wc-install.php:513
 msgctxt "Default category slug"
 msgid "Uncategorized"
 msgstr ""
@@ -27083,53 +27076,53 @@ msgctxt "Item name in quotes"
 msgid "&ldquo;%s&rdquo;"
 msgstr ""
 
-#: includes/class-wc-install.php:411
+#: includes/class-wc-install.php:410
 msgctxt "Page slug"
 msgid "shop"
 msgstr ""
 
-#: includes/class-wc-install.php:416
+#: includes/class-wc-install.php:415
 msgctxt "Page slug"
 msgid "cart"
 msgstr ""
 
-#: includes/class-wc-install.php:421
+#: includes/class-wc-install.php:420
 msgctxt "Page slug"
 msgid "checkout"
 msgstr ""
 
-#: includes/class-wc-install.php:426
+#: includes/class-wc-install.php:425
 msgctxt "Page slug"
 msgid "my-account"
 msgstr ""
 
-#: includes/class-wc-install.php:412
+#: includes/class-wc-install.php:411
 msgctxt "Page title"
 msgid "Shop"
 msgstr ""
 
-#: includes/class-wc-install.php:417
+#: includes/class-wc-install.php:416
 msgctxt "Page title"
 msgid "Cart"
 msgstr ""
 
-#: includes/class-wc-install.php:422
+#: includes/class-wc-install.php:421
 msgctxt "Page title"
 msgid "Checkout"
 msgstr ""
 
-#: includes/class-wc-install.php:427
+#: includes/class-wc-install.php:426
 msgctxt "Page title"
 msgid "My account"
 msgstr ""
 
-#: includes/class-wc-install.php:907
+#: includes/class-wc-install.php:922
 #. translators: user role
 msgctxt "User role"
 msgid "Customer"
 msgstr ""
 
-#: includes/class-wc-install.php:909
+#: includes/class-wc-install.php:924
 #. translators: user role
 msgctxt "User role"
 msgid "Shop manager"
