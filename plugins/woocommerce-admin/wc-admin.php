@@ -70,7 +70,6 @@ function activate_wc_admin_plugin() {
 	if ( ! wp_next_scheduled( 'wc_admin_daily' ) ) {
 		wp_schedule_event( time(), 'daily', 'wc_admin_daily' );
 	}
-
 }
 register_activation_hook( WC_ADMIN_PLUGIN_FILE, 'activate_wc_admin_plugin' );
 
