@@ -7,6 +7,10 @@ import { find } from 'lodash';
 import { __ } from '@wordpress/i18n';
 import { getSettings, format as formatDate } from '@wordpress/date';
 
+export const isoDateFormat = 'YYYY-MM-DD';
+const DEFAULT_PERIOD = 'month';
+const DEFAULT_COMPARE = 'previous_year';
+
 /**
  * DateValue Object
  *
@@ -26,8 +30,6 @@ import { getSettings, format as formatDate } from '@wordpress/date';
  * @param {moment.Moment|null} after - If the period supplied is "custom", this is the after date
  * @param {moment.Moment|null} before - If the period supplied is "custom", this is the before date
  */
-
-export const isoDateFormat = 'YYYY-MM-DD';
 
 export const presetValues = [
 	{ value: 'today', label: __( 'Today', 'wc-admin' ) },
@@ -258,8 +260,8 @@ function getDateValue( period, compare, after, before ) {
  */
 export const getDateParamsFromQuery = ( { period, compare, after, before } ) => {
 	return {
-		period: period || 'today',
-		compare: compare || 'previous_period',
+		period: period || DEFAULT_PERIOD,
+		compare: compare || DEFAULT_COMPARE,
 		after: after ? moment( after ) : null,
 		before: before ? moment( before ) : null,
 	};
