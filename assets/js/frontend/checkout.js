@@ -259,12 +259,12 @@ jQuery( function( $ ) {
 				city			 = $( '#billing_city' ).val(),
 				address			 = $( 'input#billing_address_1' ).val(),
 				address_2		 = $( 'input#billing_address_2' ).val(),
-				s_country		 = country,
-				s_state			 = state,
-				s_postcode		 = postcode,
-				s_city			 = city,
-				s_address		 = address,
-				s_address_2		 = address_2,
+				s_country		 = '',
+				s_state			 = '',
+				s_postcode		 = '',
+				s_city			 = '',
+				s_address		 = '',
+				s_address_2		 = '',
 				$required_inputs = $( wc_checkout_form.$checkout_form ).find( '.address-field.validate-required:visible' ),
 				has_full_address = true;
 
