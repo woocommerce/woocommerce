@@ -226,7 +226,9 @@ function wc_admin_admin_after_notices() {
 add_action( 'admin_notices', 'wc_admin_admin_after_notices', PHP_INT_MAX );
 
 /**
- * TODO Can we do some URL rewriting so we can figure out which page they are on server side?
+ * Edits Admin title based on section of wc-admin.
+ *
+ * @TODO Can we do some URL rewriting so we can figure out which page they are on server side?
  *
  * @param string $admin_title Modifies admin title.
  */
