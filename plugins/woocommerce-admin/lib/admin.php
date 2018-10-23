@@ -161,6 +161,7 @@ function wc_admin_link_structure() {
 	array_unshift( $submenu['woocommerce'], $menu );
 
 	// Rename "Analytics" to Overview (otherwise this reads Analytics > Analytics).
+	// phpcs:ignore
 	$submenu['wc-admin#/analytics'][0][0] = __( 'Overview', 'wc-admin' );
 }
 
