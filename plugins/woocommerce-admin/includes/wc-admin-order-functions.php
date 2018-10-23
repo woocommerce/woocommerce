@@ -1,4 +1,9 @@
 <?php
+/**
+ * Order Functions
+ *
+ * @package  WooCommerce Admin
+ */
 
 /**
  * Make an entry in the wc_admin_order_product_lookup table for an order.
