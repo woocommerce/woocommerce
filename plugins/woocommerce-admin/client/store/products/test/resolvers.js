@@ -6,6 +6,7 @@
  * External dependencies
  */
 import apiFetch from '@wordpress/api-fetch';
+import { dispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -14,6 +15,11 @@ import resolvers from '../resolvers';
 
 const { getProducts } = resolvers;
 
+jest.mock( '@wordpress/data', () => ( {
+	dispatch: jest.fn().mockReturnValue( {
+		setProducts: jest.fn(),
+	} ),
+} ) );
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
 
 describe( 'getProducts', () => {
@@ -40,20 +46,24 @@ describe( 'getProducts', () => {
 
 	beforeAll( () => {
 		apiFetch.mockImplementation( options => {
-			if ( options.path === '/wc/v3/products' ) {
+			if ( options.path === '/wc/v3/reports/products' ) {
 				return Promise.resolve( PRODUCTS_1 );
 			}
-			if ( options.path === '/wc/v3/products?orderby=date' ) {
+			if ( options.path === '/wc/v3/reports/products?orderby=date' ) {
 				return Promise.resolve( PRODUCTS_2 );
 			}
 		} );
 	} );
 
 	it( 'returns requested products', async () => {
-		getProducts().then( data => expect( data ).toEqual( PRODUCTS_1 ) );
+		expect.assertions( 1 );
+		await getProducts( {} );
+		expect( dispatch().setProducts ).toHaveBeenCalledWith( PRODUCTS_1, undefined );
 	} );
 
 	it( 'returns requested products for a specific query', async () => {
-		getProducts( { orderby: 'date' } ).then( data => expect( data ).toEqual( PRODUCTS_2 ) );
+		expect.assertions( 1 );
+		await getProducts( {}, { orderby: 'date' } );
+		expect( dispatch().setProducts ).toHaveBeenCalledWith( PRODUCTS_2, { orderby: 'date' } );
 	} );
 } );

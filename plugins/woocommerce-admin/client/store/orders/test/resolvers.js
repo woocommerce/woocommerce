@@ -6,6 +6,7 @@
  * External dependencies
  */
 import apiFetch from '@wordpress/api-fetch';
+import { dispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -14,6 +15,11 @@ import resolvers from '../resolvers';
 
 const { getOrders } = resolvers;
 
+jest.mock( '@wordpress/data', () => ( {
+	dispatch: jest.fn().mockReturnValue( {
+		setOrders: jest.fn(),
+	} ),
+} ) );
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
 
 describe( 'getOrders', () => {
@@ -26,17 +32,21 @@ describe( 'getOrders', () => {
 			if ( options.path === '/wc/v3/orders' ) {
 				return Promise.resolve( ORDERS_1 );
 			}
-			if ( options.path === '/wc/v3/orders&orderby=id' ) {
+			if ( options.path === '/wc/v3/orders?orderby=id' ) {
 				return Promise.resolve( ORDERS_2 );
 			}
 		} );
 	} );
 
 	it( 'returns requested report data', async () => {
-		getOrders().then( data => expect( data ).toEqual( ORDERS_1 ) );
+		expect.assertions( 1 );
+		await getOrders( {} );
+		expect( dispatch().setOrders ).toHaveBeenCalledWith( ORDERS_1, undefined );
 	} );
 
 	it( 'returns requested report data for a specific query', async () => {
-		getOrders( { orderby: 'id' } ).then( data => expect( data ).toEqual( ORDERS_2 ) );
+		expect.assertions( 1 );
+		await getOrders( {}, { orderby: 'id' } );
+		expect( dispatch().setOrders ).toHaveBeenCalledWith( ORDERS_2, { orderby: 'id' } );
 	} );
 } );
