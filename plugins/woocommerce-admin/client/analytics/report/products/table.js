@@ -10,23 +10,11 @@ import { map, orderBy } from 'lodash';
  * Internal dependencies
  */
 import { Card, Link, TableCard, TablePlaceholder } from '@woocommerce/components';
-import { downloadCSVFile, generateCSVDataFromTable, generateCSVFileName } from 'lib/csv';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
 import { onQueryChange } from 'lib/nav-utils';
 import ReportError from 'analytics/components/report-error';
 
 export default class ProductsReportTable extends Component {
-	onDownload( headers, rows, query ) {
-		// @TODO The current implementation only downloads the contents displayed in the table.
-		// Another solution is required when the data set is larger (see #311).
-		return () => {
-			downloadCSVFile(
-				generateCSVFileName( 'products', query ),
-				generateCSVDataFromTable( headers, rows )
-			);
-		};
-	}
-
 	getHeadersContent() {
 		return [
 			{
@@ -167,7 +155,7 @@ export default class ProductsReportTable extends Component {
 	}
 
 	renderTable( tableQuery ) {
-		const { products, query, totalRows } = this.props;
+		const { products, totalRows } = this.props;
 
 		const rowsPerPage = parseInt( tableQuery.per_page ) || 25;
 		const orderedProducts = orderBy( products, tableQuery.orderby, tableQuery.order );
@@ -189,10 +177,10 @@ export default class ProductsReportTable extends Component {
 				labels={ labels }
 				ids={ orderedProducts.map( p => p.product_id ) }
 				compareBy={ 'product' }
-				onClickDownload={ this.onDownload( headers, rows, query ) }
 				onQueryChange={ onQueryChange }
 				query={ tableQuery }
 				summary={ null } // @TODO
+				downloadable
 			/>
 		);
 	}
