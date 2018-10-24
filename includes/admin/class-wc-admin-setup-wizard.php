@@ -1991,31 +1991,28 @@ class WC_Admin_Setup_Wizard {
 			&& isset( $ppec_settings['enabled'] ) && 'yes' === $ppec_settings['enabled'];
 		$features['payment'] = $stripe_enabled || $ppec_enabled;
 
-		$features['taxes'] = (bool) get_option( 'woocommerce_setup_automated_taxes', false );
-
-		$domestic_rates  = (bool) get_option( 'woocommerce_setup_domestic_live_rates_zone', false );
-		$intl_rates      = (bool) get_option( 'woocommerce_setup_intl_live_rates_zone', false );
-		$features['rates'] = $domestic_rates || $intl_rates;
+		$features['taxes']  = (bool) get_option( 'woocommerce_setup_automated_taxes', false );
+		$features['labels'] = ( 'US' === WC()->countries->get_base_country() );
 
 		return $features;
 	}
 
 	protected function wc_setup_activate_get_feature_list_str() {
 		$features = $this->wc_setup_activate_get_feature_list();
-		if ( $features['payment'] && $features['taxes'] && $features['rates'] ) {
-			return __( 'payment setup, automated taxes, live rates and discounted shipping labels', 'woocommerce' );
+		if ( $features['payment'] && $features['taxes'] && $features['labels'] ) {
+			return __( 'payment setup, automated taxes and discounted shipping labels', 'woocommerce' );
 		} else if ( $features['payment'] && $features['taxes'] ) {
 			return __( 'payment setup and automated taxes', 'woocommerce' );
-		} else if ( $features['payment'] && $features['rates'] ) {
-			return __( 'payment setup, live rates and discounted shipping labels', 'woocommerce' );
+		} else if ( $features['payment'] && $features['labels'] ) {
+			return __( 'payment setup and discounted shipping labels', 'woocommerce' );
 		} else if ( $features['payment'] ) {
 			return __( 'payment setup', 'woocommerce' );
-		} else if ( $features['taxes'] && $features['rates'] ) {
-			return __( 'automated taxes, live rates and discounted shipping labels', 'woocommerce' );
+		} else if ( $features['taxes'] && $features['labels'] ) {
+			return __( 'automated taxes and discounted shipping labels', 'woocommerce' );
 		} else if ( $features['taxes'] ) {
 			return __( 'automated taxes', 'woocommerce' );
-		} else if ( $features['rates'] ) {
-			return __( 'live rates and discounted shipping labels', 'woocommerce' );
+		} else if ( $features['labels'] ) {
+			return __( 'discounted shipping labels', 'woocommerce' );
 		}
 		return false;
 	}
