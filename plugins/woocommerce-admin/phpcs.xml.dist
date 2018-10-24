@@ -15,6 +15,9 @@
 
 	<!-- Rules -->
 	<rule ref="WooCommerce-Core" />
+
+	<!-- Test PHP Compatibility for version >= 5.2 -->
+	<config name="testVersion" value="5.2-"/>
 	<rule ref="PHPCompatibility">
 		<exclude name="PHPCompatibility.PHP.NewFunctions.hash_equalsFound" />
 		<exclude name="PHPCompatibility.PHP.NewInterfaces.jsonserializableFound" />
