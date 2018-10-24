@@ -2,170 +2,77 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
-import { map, noop } from 'lodash';
+import { compose } from '@wordpress/compose';
+import { withSelect } from '@wordpress/data';
+import { get } from 'lodash';
 
 /**
  * Internal dependencies
  */
 import { filters } from './config';
-import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
-import { numberFormat } from 'lib/number';
-import { getAdminLink, onQueryChange } from 'lib/nav-utils';
-import { ReportFilters, TableCard } from '@woocommerce/components';
+import { ReportFilters } from '@woocommerce/components';
+import { appendTimestamp, getCurrentDates } from 'lib/date';
+import { getReportChartData } from 'store/reports/utils';
 import ProductsReportChart from './chart';
-
-import products from './__mocks__/data';
+import ProductsReportTable from './table';
 
 class ProductsReport extends Component {
-	getHeadersContent() {
-		return [
-			{
-				label: __( 'Product Title', 'wc-admin' ),
-				key: 'name',
-				required: true,
-				isLeftAligned: true,
-				isSortable: true,
-			},
-			{
-				label: __( 'Items Sold', 'wc-admin' ),
-				key: 'items_sold',
-				required: true,
-				defaultSort: true,
-				isSortable: true,
-				isNumeric: true,
-			},
-			{
-				label: __( 'Gross Revenue', 'wc-admin' ),
-				key: 'gross_revenue',
-				required: true,
-				isSortable: true,
-				isNumeric: true,
-			},
-			{
-				label: __( 'Orders', 'wc-admin' ),
-				key: 'orders_count',
-				required: false,
-				isSortable: true,
-				isNumeric: true,
-			},
-			{
-				label: __( 'Category', 'wc-admin' ),
-				key: 'product_cat',
-			},
-			{
-				label: __( 'Variations', 'wc-admin' ),
-				key: 'variation',
-			},
-			{
-				label: __( 'Status', 'wc-admin' ),
-				key: 'stock_status',
-			},
-			{
-				label: __( 'Stock', 'wc-admin' ),
-				key: 'stock',
-			},
-		];
-	}
-
-	getRowsContent( data = [] ) {
-		return map( data, row => {
-			const {
-				product_id,
-				items_sold,
-				gross_revenue,
-				orders_count,
-				name,
-				stock_quantity,
-				variations,
-			} = row;
-
-			return [
-				{
-					display: (
-						<a href={ getAdminLink( 'post.php?action=edit&post=' + product_id ) }>{ name }</a>
-					),
-					value: name,
-				},
-				{
-					display: items_sold,
-					value: Number( items_sold ),
-				},
-				{
-					display: formatCurrency( gross_revenue ),
-					value: getCurrencyFormatDecimal( gross_revenue ),
-				},
-				{
-					display: orders_count,
-					value: Number( orders_count ),
-				},
-				{
-					display: 'Categories',
-					value: false,
-				},
-				{
-					display: numberFormat( variations.length ),
-					value: false,
-				},
-				{
-					display: 'Status',
-					value: false,
-				},
-				{
-					display: numberFormat( stock_quantity ),
-					value: Number( stock_quantity ),
-				},
-			];
-		} );
-	}
-
-	renderTable() {
-		const { query } = this.props;
-
-		const rowsPerPage = parseInt( query.per_page ) || 25;
-
-		const rows = this.getRowsContent( products );
-		const headers = this.getHeadersContent();
-		const labels = {
-			helpText: __( 'Select at least two products to compare', 'wc-admin' ),
-			placeholder: __( 'Search by product name or SKU', 'wc-admin' ),
-		};
-
-		const tableQuery = {
-			...query,
-			orderby: query.orderby || 'date_start',
-			order: query.order || 'asc',
-		};
-		return (
-			<TableCard
-				title={ __( 'Products', 'wc-admin' ) }
-				rows={ rows }
-				totalRows={ 500 }
-				rowsPerPage={ rowsPerPage }
-				headers={ headers }
-				compareBy={ 'product' }
-				labels={ labels }
-				ids={ products.map( p => p.product_id ) }
-				onClickDownload={ noop }
-				onQueryChange={ onQueryChange }
-				query={ tableQuery }
-				summary={ null }
-			/>
-		);
-	}
-
 	render() {
-		const { query, path } = this.props;
+		const {
+			isProductsError,
+			isProductsRequesting,
+			path,
+			primaryData,
+			products,
+			query,
+		} = this.props;
 
 		return (
 			<Fragment>
 				<ReportFilters query={ query } path={ path } filters={ filters } />
 				<ProductsReportChart query={ query } />
-				{ this.renderTable() }
+				<ProductsReportTable
+					isError={ isProductsError || primaryData.isError }
+					isRequesting={ isProductsRequesting || primaryData.isRequesting }
+					products={ products }
+					query={ query }
+					totalRows={ get(
+						primaryData,
+						[ 'data', 'totals', 'products_count' ],
+						Object.keys( products ).length
+					) }
+				/>
 			</Fragment>
 		);
 	}
 }
 
-export default ProductsReport;
+export default compose(
+	withSelect( ( select, props ) => {
+		const { query } = props;
+		const datesFromQuery = getCurrentDates( query );
+		const primaryData = getReportChartData( 'products', 'primary', query, select );
+
+		const { getProducts, isGetProductsError, isGetProductsRequesting } = select( 'wc-admin' );
+		const tableQuery = {
+			orderby: query.orderby || 'items_sold',
+			order: query.order || 'desc',
+			page: query.page || 1,
+			per_page: query.per_page || 25,
+			after: appendTimestamp( datesFromQuery.primary.after, 'start' ),
+			before: appendTimestamp( datesFromQuery.primary.before, 'end' ),
+			extended_product_info: true,
+		};
+		const products = getProducts( tableQuery );
+		const isProductsError = isGetProductsError( tableQuery );
+		const isProductsRequesting = isGetProductsRequesting( tableQuery );
+
+		return {
+			isProductsError,
+			isProductsRequesting,
+			primaryData,
+			products,
+		};
+	} )
+)( ProductsReport );

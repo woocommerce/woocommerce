@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { get } from 'lodash';
+import { merge } from 'lodash';
 
 /**
  * Internal dependencies
@@ -10,34 +10,22 @@ import { get } from 'lodash';
 import { ERROR } from 'store/constants';
 import { getJsonString } from 'store/utils';
 
-export const DEFAULT_STATE = {
-	queries: {},
-};
+export const DEFAULT_STATE = {};
 
 export default function productsReducer( state = DEFAULT_STATE, action ) {
-	if ( 'SET_PRODUCTS' === action.type ) {
-		const prevQueries = get( state, 'queries', {} );
-		const queryKey = getJsonString( action.query );
-		const queries = {
-			...prevQueries,
-			[ queryKey ]: [ ...action.products ],
-		};
-		return {
-			...state,
-			queries,
-		};
+	const queryKey = getJsonString( action.query );
+
+	switch ( action.type ) {
+		case 'SET_PRODUCTS':
+			return merge( {}, state, {
+				[ queryKey ]: action.products,
+			} );
+
+		case 'SET_PRODUCTS_ERROR':
+			return merge( {}, state, {
+				[ queryKey ]: ERROR,
+			} );
 	}
-	if ( 'SET_PRODUCTS_ERROR' === action.type ) {
-		const prevQueries = get( state, 'queries', {} );
-		const queryKey = getJsonString( action.query );
-		const queries = {
-			...prevQueries,
-			[ queryKey ]: ERROR,
-		};
-		return {
-			...state,
-			queries,
-		};
-	}
+
 	return state;
 }

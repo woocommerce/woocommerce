@@ -198,7 +198,7 @@ export default class OrdersReportTable extends Component {
 
 	renderLinks( items = [] ) {
 		return items.map( ( item, i ) => (
-			<Link href={ item.href } key={ i } type={ 'wp-admin' }>
+			<Link href={ item.href } key={ i } type="wp-admin">
 				{ item.label }
 			</Link>
 		) );

@@ -38,7 +38,7 @@ describe( 'productsReducer', () => {
 			products,
 		} );
 		const queryKey = getJsonString( query );
-		expect( state.queries[ queryKey ] ).toEqual( products );
+		expect( state[ queryKey ] ).toEqual( products );
 	} );
 
 	it( 'returns received product data for multiple queries', () => {
@@ -76,8 +76,8 @@ describe( 'productsReducer', () => {
 
 		const queryKey1 = getJsonString( query1 );
 		const queryKey2 = getJsonString( query2 );
-		expect( finalState.queries[ queryKey1 ] ).toEqual( products1 );
-		expect( finalState.queries[ queryKey2 ] ).toEqual( products2 );
+		expect( finalState[ queryKey1 ] ).toEqual( products1 );
+		expect( finalState[ queryKey2 ] ).toEqual( products2 );
 	} );
 
 	it( 'returns error appropriately', () => {
@@ -91,6 +91,6 @@ describe( 'productsReducer', () => {
 			query,
 		} );
 		const queryKey = getJsonString( query );
-		expect( state.queries[ queryKey ] ).toEqual( ERROR );
+		expect( state[ queryKey ] ).toEqual( ERROR );
 	} );
 } );

@@ -5,7 +5,7 @@
 import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
 import { Component } from '@wordpress/element';
-import { fill, find, findIndex, first, isEqual, noop, partial, uniq } from 'lodash';
+import { find, findIndex, first, isEqual, noop, partial, uniq } from 'lodash';
 import { IconButton, ToggleControl } from '@wordpress/components';
 import PropTypes from 'prop-types';
 
@@ -39,7 +39,7 @@ class TableCard extends Component {
 		super( props );
 		const { compareBy, query } = props;
 		this.state = {
-			showCols: fill( Array( props.headers.length ), true ),
+			showCols: props.headers.map( ( { hiddenByDefault } ) => ! hiddenByDefault ),
 			selectedRows: getIdsFromQuery( query[ compareBy ] ),
 		};
 		this.toggleCols = this.toggleCols.bind( this );
@@ -302,6 +302,7 @@ TableCard.propTypes = {
 	 */
 	headers: PropTypes.arrayOf(
 		PropTypes.shape( {
+			hiddenByDefault: PropTypes.bool,
 			defaultSort: PropTypes.bool,
 			isSortable: PropTypes.bool,
 			key: PropTypes.string,

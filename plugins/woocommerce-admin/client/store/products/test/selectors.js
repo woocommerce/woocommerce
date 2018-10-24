@@ -15,16 +15,19 @@ import selectors from '../selectors';
 import { select } from '@wordpress/data';
 import { getJsonString } from 'store/utils';
 
-const { getProducts, isProductsRequesting, isProductsError } = selectors;
+const { getProducts, isGetProductsRequesting, isGetProductsError } = selectors;
 jest.mock( '@wordpress/data', () => ( {
 	...require.requireActual( '@wordpress/data' ),
 	select: jest.fn().mockReturnValue( {} ),
 } ) );
 
+const query = { orderby: 'date' };
+const queryKey = getJsonString( query );
+
 describe( 'getProducts', () => {
-	it( 'returns undefined when no query matches values in state', () => {
+	it( 'returns an empty array when no query matches values in state', () => {
 		const state = deepFreeze( {} );
-		expect( getProducts( state, { search: 'abc' } ) ).toEqual( undefined );
+		expect( getProducts( state, query ) ).toEqual( [] );
 	} );
 
 	it( 'returns products for a given query', () => {
@@ -34,20 +37,16 @@ describe( 'getProducts', () => {
 				name: 'my-product',
 			},
 		];
-		const query = { search: 'abc' };
-		const queryKey = getJsonString( query );
 		const state = deepFreeze( {
 			products: {
-				queries: {
-					[ queryKey ]: products,
-				},
+				[ queryKey ]: products,
 			},
 		} );
 		expect( getProducts( state, query ) ).toEqual( products );
 	} );
 } );
 
-describe( 'isProductsRequesting', () => {
+describe( 'isGetProductsRequesting', () => {
 	beforeAll( () => {
 		select( 'core/data' ).isResolving = jest.fn().mockReturnValue( false );
 	} );
@@ -55,8 +54,6 @@ describe( 'isProductsRequesting', () => {
 	afterAll( () => {
 		select( 'core/data' ).isResolving.mockRestore();
 	} );
-
-	const query = { search: 'abc' };
 
 	function setIsResolving( isResolving ) {
 		select( 'core/data' ).isResolving.mockImplementation(
@@ -66,39 +63,34 @@ describe( 'isProductsRequesting', () => {
 	}
 
 	it( 'returns false if never requested', () => {
-		const result = isProductsRequesting( query );
+		const result = isGetProductsRequesting( query );
 		expect( result ).toBe( false );
 	} );
 
 	it( 'returns false if request finished', () => {
 		setIsResolving( false );
-		const result = isProductsRequesting( query );
+		const result = isGetProductsRequesting( query );
 		expect( result ).toBe( false );
 	} );
 
 	it( 'returns true if requesting', () => {
 		setIsResolving( true );
-		const result = isProductsRequesting( query );
+		const result = isGetProductsRequesting( query );
 		expect( result ).toBe( true );
 	} );
 } );
 
-describe( 'isProductsError', () => {
-	const query = { search: 'abc' };
-
+describe( 'isGetProductsError', () => {
 	it( 'returns false by default', () => {
 		const state = deepFreeze( {} );
-		expect( isProductsError( state, query ) ).toEqual( false );
+		expect( isGetProductsError( state, query ) ).toEqual( false );
 	} );
 	it( 'returns true if ERROR constant is found', () => {
-		const queryKey = getJsonString( query );
 		const state = deepFreeze( {
 			products: {
-				queries: {
-					[ queryKey ]: ERROR,
-				},
+				[ queryKey ]: ERROR,
 			},
 		} );
-		expect( isProductsError( state, query ) ).toEqual( true );
+		expect( isGetProductsError( state, query ) ).toEqual( true );
 	} );
 } );

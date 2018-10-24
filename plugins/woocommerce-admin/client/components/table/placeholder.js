@@ -17,8 +17,9 @@ import Table from './table';
 class TablePlaceholder extends Component {
 	render() {
 		const { caption, headers, numberOfRows, query } = this.props;
+		const filteredHeaders = headers.filter( header => ! header.hiddenByDefault );
 		const rows = range( numberOfRows ).map( () =>
-			headers.map( () => ( { display: <span className="is-placeholder" /> } ) )
+			filteredHeaders.map( () => ( { display: <span className="is-placeholder" /> } ) )
 		);
 
 		return (
@@ -26,7 +27,7 @@ class TablePlaceholder extends Component {
 				ariaHidden={ true }
 				caption={ caption }
 				classNames="is-loading"
-				headers={ headers }
+				headers={ filteredHeaders }
 				rowHeader={ false }
 				rows={ rows }
 				query={ query }
@@ -49,6 +50,7 @@ TablePlaceholder.propTypes = {
 	 */
 	headers: PropTypes.arrayOf(
 		PropTypes.shape( {
+			hiddenByDefault: PropTypes.bool,
 			defaultSort: PropTypes.bool,
 			isSortable: PropTypes.bool,
 			key: PropTypes.string,

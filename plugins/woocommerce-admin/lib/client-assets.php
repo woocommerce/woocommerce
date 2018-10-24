@@ -85,6 +85,7 @@ function wc_admin_register_script() {
 			'dow' => get_option( 'start_of_week', 0 ),
 		),
 		'orderStatuses'    => wc_get_order_statuses(),
+		'stockStatuses'    => wc_get_product_stock_status_options(),
 		'siteTitle'        => get_bloginfo( 'name' ),
 		'trackingEnabled'  => $tracking_enabled,
 	);

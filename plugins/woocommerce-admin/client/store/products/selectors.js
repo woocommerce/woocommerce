@@ -20,8 +20,7 @@ import { getJsonString } from 'store/utils';
  * @return {Object}        Report details
  */
 function getProducts( state, query = {} ) {
-	const queries = get( state, 'products.queries', {} );
-	return queries[ getJsonString( query ) ];
+	return get( state, [ 'products', getJsonString( query ) ], [] );
 }
 
 export default {
@@ -33,7 +32,7 @@ export default {
 	 * @param  {Object} state  Current state
 	 * @return {Object}        True if the `getProducts` request is pending, false otherwise
 	 */
-	isProductsRequesting( state, ...args ) {
+	isGetProductsRequesting( state, ...args ) {
 		return select( 'core/data' ).isResolving( 'wc-admin', 'getProducts', args );
 	},
 
@@ -44,7 +43,7 @@ export default {
 	 * @param  {Object} query  Report query paremters
 	 * @return {Object}        True if the `getProducts` request has failed, false otherwise
 	 */
-	isProductsError( state, query ) {
+	isGetProductsError( state, query ) {
 		return ERROR === getProducts( state, query );
 	},
 };
