@@ -17,6 +17,7 @@ import Card from 'components/card';
 import CompareButton from 'components/filters/compare/button';
 import DowloadIcon from './download-icon';
 import EllipsisMenu from 'components/ellipsis-menu';
+import { downloadCSVFile, generateCSVDataFromTable, generateCSVFileName } from 'lib/csv';
 import { getIdsFromQuery } from 'lib/nav-utils';
 import MenuItem from 'components/ellipsis-menu/menu-item';
 import MenuTitle from 'components/ellipsis-menu/menu-title';
@@ -42,6 +43,7 @@ class TableCard extends Component {
 			selectedRows: getIdsFromQuery( query[ compareBy ] ),
 		};
 		this.toggleCols = this.toggleCols.bind( this );
+		this.onClickDownload = this.onClickDownload.bind( this );
 		this.onCompare = this.onCompare.bind( this );
 		this.onSearch = this.onSearch.bind( this );
 		this.selectRow = this.selectRow.bind( this );
@@ -77,6 +79,21 @@ class TableCard extends Component {
 				),
 			} ) );
 		};
+	}
+
+	onClickDownload() {
+		const { headers, query, onClickDownload, rows, title } = this.props;
+
+		// @TODO The current implementation only downloads the contents displayed in the table.
+		// Another solution is required when the data set is larger (see #311).
+		downloadCSVFile(
+			generateCSVFileName( title, query ),
+			generateCSVDataFromTable( headers, rows )
+		);
+
+		if ( onClickDownload ) {
+			onClickDownload();
+		}
 	}
 
 	onCompare() {
@@ -168,6 +185,7 @@ class TableCard extends Component {
 	render() {
 		const {
 			compareBy,
+			downloadable,
 			labels = {},
 			onClickDownload,
 			onQueryChange,
@@ -219,11 +237,11 @@ class TableCard extends Component {
 							onChange={ this.onSearch }
 						/>
 					),
-					onClickDownload && (
+					( downloadable || onClickDownload ) && (
 						<IconButton
 							key="download"
 							className="woocommerce-table__download-button"
-							onClick={ onClickDownload }
+							onClick={ this.onClickDownload }
 							isLink
 						>
 							<DowloadIcon />
@@ -309,7 +327,11 @@ TableCard.propTypes = {
 	 */
 	onQueryChange: PropTypes.func,
 	/**
-	 * A callback function which handles then "download" button press. Optional, if not used, the button won't appear.
+	 * Whether the table must be downloadable. If true, the download button will appear.
+	 */
+	downloadable: PropTypes.bool,
+	/**
+	 * A callback function called when the "download" button is pressed. Optional, if used, the download button will appear.
 	 */
 	onClickDownload: PropTypes.func,
 	/**
@@ -356,6 +378,7 @@ TableCard.propTypes = {
 };
 
 TableCard.defaultProps = {
+	downloadable: false,
 	onQueryChange: noop,
 	query: {},
 	rowHeader: 0,

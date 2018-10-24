@@ -34,14 +34,14 @@ describe( 'generateCSVFileName', () => {
 	} );
 
 	it( 'should generate a file name with the `name` and the date', () => {
-		const fileName = generateCSVFileName( 'revenue' );
-		expect( fileName ).toBe( 'revenue-' + moment().format( 'YYYY-MM-DD' ) + '.csv' );
+		const fileName = generateCSVFileName( 'Revenue table' );
+		expect( fileName ).toBe( 'revenue-table-' + moment().format( 'YYYY-MM-DD' ) + '.csv' );
 	} );
 
 	it( 'should generate a file name with the `name` and `params`', () => {
-		const fileName = generateCSVFileName( 'revenue', { orderby: 'revenue', order: 'desc' } );
+		const fileName = generateCSVFileName( 'Revenue table', { orderby: 'revenue', order: 'desc' } );
 		expect( fileName ).toBe(
-			'revenue-' + moment().format( 'YYYY-MM-DD' ) + '-orderby-revenue-order-desc.csv'
+			'revenue-table-' + moment().format( 'YYYY-MM-DD' ) + '-orderby-revenue-order-desc.csv'
 		);
 	} );
 } );

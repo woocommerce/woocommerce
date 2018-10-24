@@ -11,24 +11,12 @@ import { map } from 'lodash';
  * Internal dependencies
  */
 import { Card, Link, TableCard, TablePlaceholder } from '@woocommerce/components';
-import { downloadCSVFile, generateCSVDataFromTable, generateCSVFileName } from 'lib/csv';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
 import { getDateFormatsForInterval, getIntervalForQuery } from 'lib/date';
 import { onQueryChange } from 'lib/nav-utils';
 import ReportError from 'analytics/components/report-error';
 
 export default class RevenueReportTable extends Component {
-	onDownload( headers, rows, query ) {
-		// @TODO The current implementation only downloads the contents displayed in the table.
-		// Another solution is required when the data set is larger (see #311).
-		return () => {
-			downloadCSVFile(
-				generateCSVFileName( 'revenue', query ),
-				generateCSVDataFromTable( headers, rows )
-			);
-		};
-	}
-
 	getHeadersContent() {
 		return [
 			{
@@ -172,7 +160,7 @@ export default class RevenueReportTable extends Component {
 	}
 
 	renderTable( tableQuery ) {
-		const { tableData, query, totalRows } = this.props;
+		const { tableData, totalRows } = this.props;
 
 		const rowsPerPage =
 			( tableQuery && tableQuery.per_page && parseInt( tableQuery.per_page ) ) || 25;
@@ -187,10 +175,10 @@ export default class RevenueReportTable extends Component {
 				totalRows={ totalRows }
 				rowsPerPage={ rowsPerPage }
 				headers={ headers }
-				onClickDownload={ this.onDownload( headers, rows, query ) }
 				onQueryChange={ onQueryChange }
 				query={ tableQuery }
 				summary={ null }
+				downloadable
 			/>
 		);
 	}

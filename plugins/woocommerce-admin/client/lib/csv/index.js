@@ -42,7 +42,7 @@ export function generateCSVDataFromTable( headers, rows ) {
  */
 export function generateCSVFileName( name = '', params = {} ) {
 	const fileNameSections = [
-		name,
+		name.toLowerCase().replace( ' ', '-' ),
 		moment().format( 'YYYY-MM-DD' ),
 		Object.keys( params )
 			.map( key => key + '-' + params[ key ] )

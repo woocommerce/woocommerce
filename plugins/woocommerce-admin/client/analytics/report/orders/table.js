@@ -18,7 +18,6 @@ import {
 	TablePlaceholder,
 	ViewMoreList,
 } from '@woocommerce/components';
-import { downloadCSVFile, generateCSVDataFromTable, generateCSVFileName } from 'lib/csv';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
 import { getIntervalForQuery, getDateFormatsForInterval } from 'lib/date';
 import { getAdminLink, onQueryChange } from 'lib/nav-utils';
@@ -27,17 +26,6 @@ import './style.scss';
 export default class OrdersReportTable extends Component {
 	constructor( props ) {
 		super( props );
-	}
-
-	onDownload( headers, rows, query ) {
-		// @TODO The current implementation only downloads the contents displayed in the table.
-		// Another solution is required when the data set is larger (see #311).
-		return () => {
-			downloadCSVFile(
-				generateCSVFileName( 'orders', query ),
-				generateCSVDataFromTable( headers, rows )
-			);
-		};
 	}
 
 	getHeadersContent() {
@@ -243,7 +231,7 @@ export default class OrdersReportTable extends Component {
 	}
 
 	renderTable( tableQuery ) {
-		const { orders, query, totalRows } = this.props;
+		const { orders, totalRows } = this.props;
 
 		const rowsPerPage = parseInt( tableQuery.per_page ) || 25;
 		const rows = this.getRowsContent(
@@ -259,10 +247,10 @@ export default class OrdersReportTable extends Component {
 				totalRows={ totalRows }
 				rowsPerPage={ rowsPerPage }
 				headers={ headers }
-				onClickDownload={ this.onDownload( headers, rows, query ) }
 				onQueryChange={ onQueryChange }
 				query={ tableQuery }
 				summary={ null }
+				downloadable
 			/>
 		);
 	}
