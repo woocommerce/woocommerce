@@ -357,12 +357,9 @@ export const getDateSpaces = ( data, uniqueDates, width, xLineScale ) =>
 		};
 	} );
 
-export const compareStrings = ( s1, s2, params, splitChar ) => {
-	splitChar = typeof splitChar === 'undefined' ? ' ' : splitChar;
-	let string1 = new Array();
-	let string2 = new Array();
-	string1 = s1.split( splitChar );
-	string2 = s2.split( splitChar );
+export const compareStrings = ( s1, s2, splitChar = ' ' ) => {
+	const string1 = s1.split( splitChar );
+	const string2 = s2.split( splitChar );
 	const diff = new Array();
 	const long = s1.length > s2.length ? string1 : string2;
 	for ( let x = 0; x < long.length; x++ ) {
