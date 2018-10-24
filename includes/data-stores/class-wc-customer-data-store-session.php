@@ -1,4 +1,10 @@
 <?php
+/**
+ * Class WC_Customer_Data_Store_Session file.
+ *
+ * @package WooCommerce\DataStores
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -7,13 +13,12 @@ if ( ! defined( 'ABSPATH' ) ) {
  * WC Customer Data Store which stores the data in session.
  *
  * @version  3.0.0
- * @category Class
- * @author   WooThemes
  */
 class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Customer_Data_Store_Interface, WC_Object_Data_Store_Interface {
 
 	/**
 	 * Keys which are also stored in a session (so we can make sure they get updated...)
+	 *
 	 * @var array
 	 */
 	protected $session_keys = array(
@@ -48,7 +53,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	/**
 	 * Simply update the session.
 	 *
-	 * @param WC_Customer $customer
+	 * @param WC_Customer $customer Customer object.
 	 */
 	public function create( &$customer ) {
 		$this->save_to_session( $customer );
@@ -57,7 +62,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	/**
 	 * Simply update the session.
 	 *
-	 * @param WC_Customer $customer
+	 * @param WC_Customer $customer Customer object.
 	 */
 	public function update( &$customer ) {
 		$this->save_to_session( $customer );
@@ -66,7 +71,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	/**
 	 * Saves all customer data to the session.
 	 *
-	 * @param WC_Customer $customer
+	 * @param WC_Customer $customer Customer object.
 	 */
 	public function save_to_session( $customer ) {
 		$data = array();
@@ -85,7 +90,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	 * which case the stored ID will differ from the actual ID.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Customer $customer
+	 * @param WC_Customer $customer Customer object.
 	 */
 	public function read( &$customer ) {
 		$data = (array) WC()->session->get( 'customer' );
@@ -116,7 +121,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	/**
 	 * Load default values if props are unset.
 	 *
-	 * @param WC_Customer $customer
+	 * @param WC_Customer $customer Customer object.
 	 */
 	protected function set_defaults( &$customer ) {
 		try {
@@ -142,15 +147,16 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 				$current_user = wp_get_current_user();
 				$customer->set_billing_email( $current_user->user_email );
 			}
-		} catch ( WC_Data_Exception $e ) {}
+		} catch ( WC_Data_Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+		}
 	}
 
 	/**
 	 * Deletes a customer from the database.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Customer $customer
-	 * @param array $args Array of args to pass to the delete method.
+	 * @param WC_Customer $customer Customer object.
+	 * @param array       $args Array of args to pass to the delete method.
 	 */
 	public function delete( &$customer, $args = array() ) {
 		WC()->session->set( 'customer', null );
@@ -160,7 +166,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	 * Gets the customers last order.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Customer
+	 * @param WC_Customer $customer Customer object.
 	 * @return WC_Order|false
 	 */
 	public function get_last_order( &$customer ) {
@@ -171,7 +177,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	 * Return the number of orders this customer has.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Customer
+	 * @param WC_Customer $customer Customer object.
 	 * @return integer
 	 */
 	public function get_order_count( &$customer ) {
@@ -182,7 +188,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	 * Return how much money this customer has spent.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Customer
+	 * @param WC_Customer $customer Customer object.
 	 * @return float
 	 */
 	public function get_total_spent( &$customer ) {

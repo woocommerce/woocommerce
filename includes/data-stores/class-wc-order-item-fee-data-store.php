@@ -1,4 +1,10 @@
 <?php
+/**
+ * Class WC_Order_Item_Fee_Data_Store file.
+ *
+ * @package WooCommerce\DataStores
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -7,8 +13,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * WC Order Item Fee Data Store
  *
  * @version  3.0.0
- * @category Class
- * @author   WooCommerce
  */
 class WC_Order_Item_Fee_Data_Store extends Abstract_WC_Order_Item_Type_Data_Store implements WC_Object_Data_Store_Interface, WC_Order_Item_Type_Data_Store_Interface {
 
@@ -24,18 +28,20 @@ class WC_Order_Item_Fee_Data_Store extends Abstract_WC_Order_Item_Type_Data_Stor
 	 * Read/populate data properties specific to this order item.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Order_Item_Fee $item
+	 * @param WC_Order_Item_Fee $item Fee order item object.
 	 */
 	public function read( &$item ) {
 		parent::read( $item );
 		$id = $item->get_id();
-		$item->set_props( array(
-			'amount'     => get_metadata( 'order_item', $id, '_fee_amount', true ),
-			'tax_class'  => get_metadata( 'order_item', $id, '_tax_class', true ),
-			'tax_status' => get_metadata( 'order_item', $id, '_tax_status', true ),
-			'total'      => get_metadata( 'order_item', $id, '_line_total', true ),
-			'taxes'      => get_metadata( 'order_item', $id, '_line_tax_data', true ),
-		) );
+		$item->set_props(
+			array(
+				'amount'     => get_metadata( 'order_item', $id, '_fee_amount', true ),
+				'tax_class'  => get_metadata( 'order_item', $id, '_tax_class', true ),
+				'tax_status' => get_metadata( 'order_item', $id, '_tax_status', true ),
+				'total'      => get_metadata( 'order_item', $id, '_line_total', true ),
+				'taxes'      => get_metadata( 'order_item', $id, '_line_tax_data', true ),
+			)
+		);
 		$item->set_object_read( true );
 	}
 
@@ -44,7 +50,7 @@ class WC_Order_Item_Fee_Data_Store extends Abstract_WC_Order_Item_Type_Data_Stor
 	 * Ran after both create and update, so $id will be set.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Order_Item_Fee $item
+	 * @param WC_Order_Item_Fee $item Fee order item object.
 	 */
 	public function save_item_data( &$item ) {
 		$id          = $item->get_id();

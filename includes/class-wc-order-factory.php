@@ -1,18 +1,17 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 /**
- * Order Factory Class
+ * Order Factory
  *
  * The WooCommerce order factory creating the right order objects.
  *
- * @class 		WC_Order_Factory
- * @version		3.0.0
- * @package		WooCommerce/Classes
- * @category	Class
- * @author 		WooCommerce
+ * @version 3.0.0
+ * @package WooCommerce/Classes
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Order factory class
  */
 class WC_Order_Factory {
 
@@ -29,8 +28,9 @@ class WC_Order_Factory {
 			return false;
 		}
 
-		$order_type = WC_Data_Store::load( 'order' )->get_order_type( $order_id );
-		if ( $order_type_data = wc_get_order_type( $order_type ) ) {
+		$order_type      = WC_Data_Store::load( 'order' )->get_order_type( $order_id );
+		$order_type_data = wc_get_order_type( $order_type );
+		if ( $order_type_data ) {
 			$classname = $order_type_data['class_name'];
 		} else {
 			$classname = false;
@@ -75,22 +75,22 @@ class WC_Order_Factory {
 		if ( $id && $item_type ) {
 			$classname = false;
 			switch ( $item_type ) {
-				case 'line_item' :
-				case 'product' :
+				case 'line_item':
+				case 'product':
 					$classname = 'WC_Order_Item_Product';
-				break;
-				case 'coupon' :
+					break;
+				case 'coupon':
 					$classname = 'WC_Order_Item_Coupon';
-				break;
-				case 'fee' :
+					break;
+				case 'fee':
 					$classname = 'WC_Order_Item_Fee';
-				break;
-				case 'shipping' :
+					break;
+				case 'shipping':
 					$classname = 'WC_Order_Item_Shipping';
-				break;
-				case 'tax' :
+					break;
+				case 'tax':
 					$classname = 'WC_Order_Item_Tax';
-				break;
+					break;
 			}
 
 			$classname = apply_filters( 'woocommerce_get_order_item_classname', $classname, $item_type, $id );
@@ -117,7 +117,7 @@ class WC_Order_Factory {
 		global $post;
 
 		if ( false === $order && is_a( $post, 'WP_Post' ) && 'shop_order' === get_post_type( $post ) ) {
-			return $post->ID;
+			return absint( $post->ID );
 		} elseif ( is_numeric( $order ) ) {
 			return $order;
 		} elseif ( $order instanceof WC_Abstract_Order ) {

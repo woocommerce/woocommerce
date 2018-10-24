@@ -2,15 +2,11 @@
 /**
  * WooCommerce Admin Webhooks Class
  *
- * @author   Automattic
- * @category Admin
- * @package  WooCommerce/Admin
- * @version  3.3.0
+ * @package WooCommerce\Admin
+ * @version 3.3.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Webhooks.
@@ -21,8 +17,9 @@ class WC_Admin_Webhooks {
 	 * Initialize the webhooks admin actions.
 	 */
 	public function __construct() {
-		add_action( 'woocommerce_save_settings_api_webhooks', array( $this, 'allow_save_settings' ) );
 		add_action( 'admin_init', array( $this, 'actions' ) );
+		add_action( 'woocommerce_settings_page_init', array( $this, 'screen_option' ) );
+		add_filter( 'woocommerce_save_settings_advanced_webhooks', array( $this, 'allow_save_settings' ) );
 	}
 
 	/**
@@ -33,7 +30,7 @@ class WC_Admin_Webhooks {
 	 * @return bool
 	 */
 	public function allow_save_settings( $allow ) {
-		if ( ! isset( $_GET['edit-webhook'] ) ) {// WPCS: input var okay, CSRF ok.
+		if ( ! isset( $_GET['edit-webhook'] ) ) { // WPCS: input var okay, CSRF ok.
 			return false;
 		}
 
@@ -46,7 +43,7 @@ class WC_Admin_Webhooks {
 	 * @return bool
 	 */
 	private function is_webhook_settings_page() {
-		return isset( $_GET['page'], $_GET['tab'], $_GET['section'] ) && 'wc-settings' === $_GET['page'] && 'api' === $_GET['tab'] && 'webhooks' === $_GET['section']; // WPCS: input var okay, CSRF ok.
+		return isset( $_GET['page'], $_GET['tab'], $_GET['section'] ) && 'wc-settings' === $_GET['page'] && 'advanced' === $_GET['tab'] && 'webhooks' === $_GET['section']; // WPCS: input var okay, CSRF ok.
 	}
 
 	/**
@@ -130,7 +127,7 @@ class WC_Admin_Webhooks {
 		do_action( 'woocommerce_webhook_options_save', $webhook->get_id() );
 		if ( $errors ) {
 			// Redirect to webhook edit page to avoid settings save actions.
-			wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=' . $webhook->get_id() . '&error=' . rawurlencode( implode( '|', $errors ) ) ) );
+			wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks&edit-webhook=' . $webhook->get_id() . '&error=' . rawurlencode( implode( '|', $errors ) ) ) );
 			exit();
 		} elseif ( isset( $_POST['webhook_status'] ) && 'active' === $_POST['webhook_status'] && $webhook->get_pending_delivery() ) { // WPCS: input var okay, CSRF ok.
 			// Ping the webhook at the first time that is activated.
@@ -138,13 +135,13 @@ class WC_Admin_Webhooks {
 
 			if ( is_wp_error( $result ) ) {
 				// Redirect to webhook edit page to avoid settings save actions.
-				wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=' . $webhook->get_id() . '&error=' . rawurlencode( $result->get_error_message() ) ) );
+				wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks&edit-webhook=' . $webhook->get_id() . '&error=' . rawurlencode( $result->get_error_message() ) ) );
 				exit();
 			}
 		}
 
 		// Redirect to webhook edit page to avoid settings save actions.
-		wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=' . $webhook->get_id() . '&updated=1' ) );
+		wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks&edit-webhook=' . $webhook->get_id() . '&updated=1' ) );
 		exit();
 	}
 
@@ -153,7 +150,7 @@ class WC_Admin_Webhooks {
 	 *
 	 * @param array $webhooks List of webhooks IDs.
 	 */
-	private function bulk_delete( $webhooks ) {
+	public static function bulk_delete( $webhooks ) {
 		foreach ( $webhooks as $webhook_id ) {
 			$webhook = new WC_Webhook( (int) $webhook_id );
 			$webhook->delete( true );
@@ -163,7 +160,7 @@ class WC_Admin_Webhooks {
 		$status = isset( $_GET['status'] ) ? '&status=' . sanitize_text_field( wp_unslash( $_GET['status'] ) ) : ''; // WPCS: input var okay, CSRF ok.
 
 		// Redirect to webhooks page.
-		wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks' . $status . '&deleted=' . $qty ) );
+		wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks' . $status . '&deleted=' . $qty ) );
 		exit();
 	}
 
@@ -183,27 +180,6 @@ class WC_Admin_Webhooks {
 	}
 
 	/**
-	 * Bulk actions.
-	 */
-	private function bulk_actions() {
-		check_admin_referer( 'woocommerce-settings' );
-
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			wp_die( esc_html__( 'You do not have permission to edit Webhooks', 'woocommerce' ) );
-		}
-
-		if ( isset( $_REQUEST['action'] ) ) { // WPCS: input var okay, CSRF ok.
-			$webhooks = isset( $_REQUEST['webhook'] ) ? array_map( 'absint', (array) $_REQUEST['webhook'] ) : array(); // WPCS: input var okay, CSRF ok.
-
-			$action = sanitize_text_field( wp_unslash( $_REQUEST['action'] ) ); // WPCS: input var okay, CSRF ok.
-
-			if ( 'delete' === $action ) {
-				$this->bulk_delete( $webhooks );
-			}
-		}
-	}
-
-	/**
 	 * Webhooks admin actions.
 	 */
 	public function actions() {
@@ -211,11 +187,6 @@ class WC_Admin_Webhooks {
 			// Save.
 			if ( isset( $_POST['save'] ) && isset( $_POST['webhook_id'] ) ) { // WPCS: input var okay, CSRF ok.
 				$this->save();
-			}
-
-			// Bulk actions.
-			if ( isset( $_REQUEST['action'] ) && isset( $_REQUEST['webhook'] ) ) { // WPCS: input var okay, CSRF ok.
-				$this->bulk_actions();
 			}
 
 			// Delete webhook.
@@ -270,21 +241,43 @@ class WC_Admin_Webhooks {
 	}
 
 	/**
+	 * Add screen option.
+	 */
+	public function screen_option() {
+		global $webhooks_table_list;
+
+		if ( ! isset( $_GET['edit-webhook'] ) && $this->is_webhook_settings_page() ) { // WPCS: input var okay, CSRF ok.
+			$webhooks_table_list = new WC_Admin_Webhooks_Table_List();
+
+			// Add screen option.
+			add_screen_option(
+				'per_page',
+				array(
+					'default' => 10,
+					'option'  => 'woocommerce_webhooks_per_page',
+				)
+			);
+		}
+	}
+
+	/**
 	 * Table list output.
 	 */
 	private static function table_list_output() {
-		echo '<h2>' . esc_html__( 'Webhooks', 'woocommerce' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=0' ) ) . '" class="add-new-h2">' . esc_html__( 'Add webhook', 'woocommerce' ) . '</a></h2>';
+		global $webhooks_table_list;
+
+		echo '<h2>' . esc_html__( 'Webhooks', 'woocommerce' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks&edit-webhook=0' ) ) . '" class="add-new-h2">' . esc_html__( 'Add webhook', 'woocommerce' ) . '</a></h2>';
 
 		// Get the webhooks count.
 		$data_store = WC_Data_Store::load( 'webhook' );
 		$count      = count( $data_store->get_webhooks_ids() );
 
 		if ( 0 < $count ) {
-			$webhooks_table_list = new WC_Admin_Webhooks_Table_List();
+			$webhooks_table_list->process_bulk_action();
 			$webhooks_table_list->prepare_items();
 
 			echo '<input type="hidden" name="page" value="wc-settings" />';
-			echo '<input type="hidden" name="tab" value="api" />';
+			echo '<input type="hidden" name="tab" value="advanced" />';
 			echo '<input type="hidden" name="section" value="webhooks" />';
 
 			$webhooks_table_list->views();
@@ -294,10 +287,9 @@ class WC_Admin_Webhooks {
 			echo '<div class="woocommerce-BlankState woocommerce-BlankState--webhooks">';
 			?>
 			<h2 class="woocommerce-BlankState-message"><?php esc_html_e( 'Webhooks are event notifications sent to URLs of your choice. They can be used to integrate with third-party services which support them.', 'woocommerce' ); ?></h2>
-			<a class="woocommerce-BlankState-cta button-primary button" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=0' ) ); ?>"><?php esc_html_e( 'Create a new webhook', 'woocommerce' ); ?></a>
-
+			<a class="woocommerce-BlankState-cta button-primary button" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks&edit-webhook=0' ) ); ?>"><?php esc_html_e( 'Create a new webhook', 'woocommerce' ); ?></a>
+			<style type="text/css">#posts-filter .wp-list-table, #posts-filter .tablenav.top, .tablenav.bottom .actions { display: none; }</style>
 			<?php
-				echo '<style type="text/css">#posts-filter .wp-list-table, #posts-filter .tablenav.top, .tablenav.bottom .actions  { display: none; } </style></div>';
 		}
 	}
 

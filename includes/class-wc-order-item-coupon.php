@@ -1,20 +1,22 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+/**
+ * Order Line Item (coupon)
+ *
+ * @package WooCommerce/Classes
+ * @version 3.0.0
+ * @since   3.0.0
+ */
+
+defined( 'ABSPATH' ) || exit;
 
 /**
- * Order Line Item (coupon).
- *
- * @version     3.0.0
- * @since       3.0.0
- * @package     WooCommerce/Classes
- * @author      WooCommerce
+ * Order item coupon class.
  */
 class WC_Order_Item_Coupon extends WC_Order_Item {
 
 	/**
 	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
+	 *
 	 * @since 3.0.0
 	 * @var array
 	 */
@@ -33,8 +35,7 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	/**
 	 * Set order item name.
 	 *
-	 * @param string $value
-	 * @throws WC_Data_Exception
+	 * @param string $value Coupon code.
 	 */
 	public function set_name( $value ) {
 		return $this->set_code( $value );
@@ -43,8 +44,7 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	/**
 	 * Set code.
 	 *
-	 * @param string $value
-	 * @throws WC_Data_Exception
+	 * @param string $value Coupon code.
 	 */
 	public function set_code( $value ) {
 		$this->set_prop( 'code', wc_clean( $value ) );
@@ -53,8 +53,7 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	/**
 	 * Set discount amount.
 	 *
-	 * @param string $value
-	 * @throws WC_Data_Exception
+	 * @param string $value Discount.
 	 */
 	public function set_discount( $value ) {
 		$this->set_prop( 'discount', wc_format_decimal( $value ) );
@@ -63,8 +62,7 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	/**
 	 * Set discounted tax amount.
 	 *
-	 * @param string $value
-	 * @throws WC_Data_Exception
+	 * @param string $value Discount tax.
 	 */
 	public function set_discount_tax( $value ) {
 		$this->set_prop( 'discount_tax', wc_format_decimal( $value ) );
@@ -88,7 +86,7 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	/**
 	 * Get order item name.
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_name( $context = 'view' ) {
@@ -98,7 +96,7 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	/**
 	 * Get coupon code.
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_code( $context = 'view' ) {
@@ -108,7 +106,7 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	/**
 	 * Get discount amount.
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_discount( $context = 'view' ) {
@@ -118,7 +116,7 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	/**
 	 * Get discounted tax amount.
 	 *
-	 * @param string $context
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
 	 *
 	 * @return string
 	 */
@@ -136,9 +134,10 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	*/
 
 	/**
-	 * offsetGet for ArrayAccess/Backwards compatibility.
+	 * OffsetGet for ArrayAccess/Backwards compatibility.
+	 *
 	 * @deprecated Add deprecation notices in future release.
-	 * @param string $offset
+	 * @param string $offset Offset.
 	 * @return mixed
 	 */
 	public function offsetGet( $offset ) {
@@ -151,10 +150,11 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	}
 
 	/**
-	 * offsetSet for ArrayAccess/Backwards compatibility.
+	 * OffsetSet for ArrayAccess/Backwards compatibility.
+	 *
 	 * @deprecated Add deprecation notices in future release.
-	 * @param string $offset
-	 * @param mixed $value
+	 * @param string $offset Offset.
+	 * @param mixed  $value  Value.
 	 */
 	public function offsetSet( $offset, $value ) {
 		if ( 'discount_amount' === $offset ) {
@@ -166,12 +166,13 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	}
 
 	/**
-	 * offsetExists for ArrayAccess
-	 * @param string $offset
+	 * OffsetExists for ArrayAccess.
+	 *
+	 * @param string $offset Offset.
 	 * @return bool
 	 */
 	public function offsetExists( $offset ) {
-		if ( in_array( $offset, array( 'discount_amount', 'discount_amount_tax' ) ) ) {
+		if ( in_array( $offset, array( 'discount_amount', 'discount_amount_tax' ), true ) ) {
 			return true;
 		}
 		return parent::offsetExists( $offset );

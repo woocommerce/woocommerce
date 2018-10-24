@@ -7,9 +7,7 @@
  * @version 3.3.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Handles deprecation notices and triggering of legacy action hooks.
@@ -41,6 +39,19 @@ class WC_Deprecated_Action_Hooks extends WC_Deprecated_Hooks {
 		'woocommerce_new_payment_token'     => 'woocommerce_payment_token_created',
 		'woocommerce_new_product_variation' => 'woocommerce_create_product_variation',
 		'woocommerce_order_details_after_order_table_items' => 'woocommerce_order_items_table',
+
+		'woocommerce_settings_advanced_page_options' => array(
+			'woocommerce_settings_checkout_page_options',
+			'woocommerce_settings_account_page_options',
+		),
+		'woocommerce_settings_advanced_page_options_end' => array(
+			'woocommerce_settings_checkout_page_options_end',
+			'woocommerce_settings_account_page_options_end',
+		),
+		'woocommerce_settings_advanced_page_options_after' => array(
+			'woocommerce_settings_checkout_page_options_after',
+			'woocommerce_settings_account_page_options_after',
+		),
 	);
 
 	/**
@@ -49,21 +60,27 @@ class WC_Deprecated_Action_Hooks extends WC_Deprecated_Hooks {
 	 * @var array
 	 */
 	protected $deprecated_version = array(
-		'woocommerce_order_add_shipping'       => '3.0.0',
-		'woocommerce_order_add_coupon'         => '3.0.0',
-		'woocommerce_order_add_tax'            => '3.0.0',
-		'woocommerce_order_add_fee'            => '3.0.0',
-		'woocommerce_add_shipping_order_item'  => '3.0.0',
-		'woocommerce_add_order_item_meta'      => '3.0.0',
-		'woocommerce_add_order_fee_meta'       => '3.0.0',
-		'woocommerce_order_edit_product'       => '3.0.0',
-		'woocommerce_order_update_coupon'      => '3.0.0',
-		'woocommerce_order_update_shipping'    => '3.0.0',
-		'woocommerce_order_update_fee'         => '3.0.0',
-		'woocommerce_order_update_tax'         => '3.0.0',
-		'woocommerce_payment_token_created'    => '3.0.0',
-		'woocommerce_create_product_variation' => '3.0.0',
-		'woocommerce_order_items_table'        => '3.0.0',
+		'woocommerce_order_add_shipping'                   => '3.0.0',
+		'woocommerce_order_add_coupon'                     => '3.0.0',
+		'woocommerce_order_add_tax'                        => '3.0.0',
+		'woocommerce_order_add_fee'                        => '3.0.0',
+		'woocommerce_add_shipping_order_item'              => '3.0.0',
+		'woocommerce_add_order_item_meta'                  => '3.0.0',
+		'woocommerce_add_order_fee_meta'                   => '3.0.0',
+		'woocommerce_order_edit_product'                   => '3.0.0',
+		'woocommerce_order_update_coupon'                  => '3.0.0',
+		'woocommerce_order_update_shipping'                => '3.0.0',
+		'woocommerce_order_update_fee'                     => '3.0.0',
+		'woocommerce_order_update_tax'                     => '3.0.0',
+		'woocommerce_payment_token_created'                => '3.0.0',
+		'woocommerce_create_product_variation'             => '3.0.0',
+		'woocommerce_order_items_table'                    => '3.0.0',
+		'woocommerce_settings_checkout_page_options'       => '3.4.0',
+		'woocommerce_settings_account_page_options'        => '3.4.0',
+		'woocommerce_settings_checkout_page_options_end'   => '3.4.0',
+		'woocommerce_settings_account_page_options_end'    => '3.4.0',
+		'woocommerce_settings_checkout_page_options_after' => '3.4.0',
+		'woocommerce_settings_account_page_options_after'  => '3.4.0',
 	);
 
 	/**

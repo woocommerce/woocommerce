@@ -2,8 +2,6 @@
 /**
  * Manages WooCommerce plugin updating on the Plugins screen.
  *
- * @author      Automattic
- * @category    Admin
  * @package     WooCommerce/Admin
  * @version     3.2.0
  */
@@ -13,13 +11,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! class_exists( 'WC_Plugin_Updates' ) ) {
-	include_once( dirname( __FILE__ ) . '/class-wc-plugin-updates.php' );
+	include_once dirname( __FILE__ ) . '/class-wc-plugin-updates.php';
 }
 
+/**
+ * Class WC_Plugins_Screen_Updates
+ */
 class WC_Plugins_Screen_Updates extends WC_Plugin_Updates {
 
 	/**
 	 * The upgrade notice shown inline.
+	 *
 	 * @var string
 	 */
 	protected $upgrade_notice = '';
@@ -34,7 +36,8 @@ class WC_Plugins_Screen_Updates extends WC_Plugin_Updates {
 	/**
 	 * Show plugin changes on the plugins screen. Code adapted from W3 Total Cache.
 	 *
-	 * @param array $args
+	 * @param array    $args Unused parameter.
+	 * @param stdClass $response Plugin update response.
 	 */
 	public function in_plugin_update_message( $args, $response ) {
 		$this->new_version            = $response->new_version;
@@ -63,19 +66,20 @@ class WC_Plugins_Screen_Updates extends WC_Plugin_Updates {
 			add_action( 'admin_print_footer_scripts', array( $this, 'plugin_screen_modal_js' ) );
 		}
 
-		echo apply_filters( 'woocommerce_in_plugin_update_message', $this->upgrade_notice ? '</p>' . wp_kses_post( $this->upgrade_notice ) . '<p class="dummy">' : '' );
+		echo apply_filters( 'woocommerce_in_plugin_update_message', $this->upgrade_notice ? '</p>' . wp_kses_post( $this->upgrade_notice ) . '<p class="dummy">' : '' ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 	}
 
 	/**
 	 * Get the upgrade notice from WordPress.org.
 	 *
-	 * @param  string $version
+	 * @param  string $version WooCommerce new version.
 	 * @return string
 	 */
 	protected function get_upgrade_notice( $version ) {
 		$transient_name = 'wc_upgrade_notice_' . $version;
+		$upgrade_notice = get_transient( $transient_name );
 
-		if ( false === ( $upgrade_notice = get_transient( $transient_name ) ) ) {
+		if ( false === $upgrade_notice ) {
 			$response = wp_safe_remote_get( 'https://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt' );
 
 			if ( ! is_wp_error( $response ) && ! empty( $response['body'] ) ) {
@@ -89,17 +93,17 @@ class WC_Plugins_Screen_Updates extends WC_Plugin_Updates {
 	/**
 	 * Parse update notice from readme file.
 	 *
-	 * @param  string $content
-	 * @param  string $new_version
+	 * @param  string $content WooCommerce readme file content.
+	 * @param  string $new_version WooCommerce new version.
 	 * @return string
 	 */
 	private function parse_update_notice( $content, $new_version ) {
 		$version_parts     = explode( '.', $new_version );
 		$check_for_notices = array(
-			$version_parts[0] . '.0', // Major
-			$version_parts[0] . '.0.0', // Major
-			$version_parts[0] . '.' . $version_parts[1], // Minor
-			$version_parts[0] . '.' . $version_parts[1] . '.' . $version_parts[2], // Patch
+			$version_parts[0] . '.0', // Major.
+			$version_parts[0] . '.0.0', // Major.
+			$version_parts[0] . '.' . $version_parts[1], // Minor.
+			$version_parts[0] . '.' . $version_parts[1] . '.' . $version_parts[2], // Patch.
 		);
 		$notice_regexp     = '~==\s*Upgrade Notice\s*==\s*=\s*(.*)\s*=(.*)(=\s*' . preg_quote( $new_version ) . '\s*=|$)~Uis';
 		$upgrade_notice    = '';

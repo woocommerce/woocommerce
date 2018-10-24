@@ -2,18 +2,15 @@
 /**
  * Class for customer download logs.
  *
- * @version		3.3.0
- * @since		3.3.0
- * @package		WooCommerce/Classes
- * @author		Automattic
+ * @package WooCommerce/Classes
+ * @version 3.3.0
+ * @since   3.3.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
- * WC_Customer_Download_Log.
+ * Customer download log class.
  */
 class WC_Customer_Download_Log extends WC_Data {
 

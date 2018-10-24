@@ -4,13 +4,10 @@
  *
  * Functions for displaying product reviews data meta box.
  *
- * @author      WooThemes
- * @category    Admin
- * @package     WooCommerce/Admin/Meta Boxes
+ * @package WooCommerce/Admin/Meta Boxes
  */
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Meta_Box_Product_Reviews
@@ -18,9 +15,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Meta_Box_Product_Reviews {
 
 	/**
-	 * Output the metabox
+	 * Output the metabox.
 	 *
-	 * @param object $comment
+	 * @param object $comment Comment being shown.
 	 */
 	public static function output( $comment ) {
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
@@ -28,9 +25,11 @@ class WC_Meta_Box_Product_Reviews {
 		$current = get_comment_meta( $comment->comment_ID, 'rating', true );
 		?>
 		<select name="rating" id="rating">
-			<?php for ( $rating = 1; $rating <= 5; $rating ++ ) {
-				printf( '<option value="%1$s"%2$s>%1$s</option>', $rating, selected( $current, $rating, false ) );
-			} ?>
+			<?php
+			for ( $rating = 1; $rating <= 5; $rating ++ ) {
+				printf( '<option value="%1$s"%2$s>%1$s</option>', $rating, selected( $current, $rating, false ) ); // WPCS: XSS ok.
+			}
+			?>
 		</select>
 		<?php
 	}
@@ -38,25 +37,24 @@ class WC_Meta_Box_Product_Reviews {
 	/**
 	 * Save meta box data
 	 *
-	 * @param mixed $location
-	 * @param int $comment_id
-	 *
+	 * @param mixed $data Data to save.
 	 * @return mixed
 	 */
-	public static function save( $location, $comment_id ) {
-		// Not allowed, return regular value without updating meta
-		if ( ! wp_verify_nonce( $_POST['woocommerce_meta_nonce'], 'woocommerce_save_data' ) && ! isset( $_POST['rating'] ) ) {
-			return $location;
+	public static function save( $data ) {
+		// Not allowed, return regular value without updating meta.
+		if ( ! isset( $_POST['woocommerce_meta_nonce'], $_POST['rating'] ) || ! wp_verify_nonce( wp_unslash( $_POST['woocommerce_meta_nonce'] ), 'woocommerce_save_data' ) ) { // WPCS: input var ok, sanitization ok.
+			return $data;
 		}
 
-		// Update meta
-		update_comment_meta(
-			$comment_id,
-			'rating',
-			intval( $_POST['rating'] )
-		);
+		if ( $_POST['rating'] > 5 || $_POST['rating'] < 0 ) { // WPCS: input var ok.
+			return $data;
+		}
 
-		// Return regular value after updating
-		return $location;
+		$comment_id = $data['comment_ID'];
+
+		update_comment_meta( $comment_id, 'rating', intval( wp_unslash( $_POST['rating'] ) ) ); // WPCS: input var ok.
+
+		// Return regular value after updating.
+		return $data;
 	}
 }

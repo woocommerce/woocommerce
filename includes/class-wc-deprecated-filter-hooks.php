@@ -7,9 +7,7 @@
  * @version 3.3.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Handles deprecation notices and triggering of legacy filter hooks
@@ -71,6 +69,8 @@ class WC_Deprecated_Filter_Hooks extends WC_Deprecated_Hooks {
 			'wc_country_select_params',
 			'wc_password_strength_meter_params',
 		),
+		'woocommerce_settings_tabs_advanced' => 'woocommerce_settings_tabs_api',
+		'woocommerce_settings_advanced'      => 'woocommerce_settings_api',
 	);
 
 	/**
@@ -114,6 +114,8 @@ class WC_Deprecated_Filter_Hooks extends WC_Deprecated_Hooks {
 		'default_checkout_postcode'                  => '3.0.0',
 		'woocommerce_debug_posting'                  => '3.0.0',
 		'wocommerce_credit_card_type_labels'         => '3.0.0',
+		'woocommerce_settings_tabs_api'              => '3.4.0',
+		'woocommerce_settings_api'                   => '3.4.0',
 	);
 
 	/**

@@ -1,8 +1,20 @@
 <?php
+/**
+ * Product data meta box.
+ *
+ * @package WooCommerce/Admin
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 ?>
+
+<?php if ( 'publish' === get_post_status() ) : ?>
+	<style type="text/css">
+		#post-preview { display:none }
+	</style>
+<?php endif; ?>
 <div class="panel-wrap product_data">
 
 	<span class="type_box hidden"> &mdash;
@@ -16,7 +28,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</select>
 		</label>
 
-		<?php foreach ( self::get_product_type_options() as $key => $option ) :
+		<?php
+		foreach ( self::get_product_type_options() as $key => $option ) :
 			if ( metadata_exists( 'post', $post->ID, '_' . $key ) ) {
 				$selected_value = is_callable( array( $product_object, "is_$key" ) ) ? $product_object->{"is_$key"}() : 'yes' === get_post_meta( $post->ID, '_' . $key, true );
 			} else {
@@ -32,7 +45,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<ul class="product_data_tabs wc-tabs">
 		<?php foreach ( self::get_product_data_tabs() as $key => $tab ) : ?>
-			<li class="<?php echo esc_attr( $key ); ?>_options <?php echo esc_attr( $key ); ?>_tab <?php echo esc_attr( isset( $tab['class'] ) ? implode( ' ' , (array) $tab['class'] ) : '' ); ?>">
+			<li class="<?php echo esc_attr( $key ); ?>_options <?php echo esc_attr( $key ); ?>_tab <?php echo esc_attr( isset( $tab['class'] ) ? implode( ' ', (array) $tab['class'] ) : '' ); ?>">
 				<a href="#<?php echo esc_attr( $tab['target'] ); ?>"><span><?php echo esc_html( $tab['label'] ); ?></span></a>
 			</li>
 		<?php endforeach; ?>

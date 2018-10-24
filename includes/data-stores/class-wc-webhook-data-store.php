@@ -4,8 +4,6 @@
  *
  * @version  3.3.0
  * @package  WooCommerce/Classes/Data_Store
- * @category Class
- * @author   Automattic
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -85,20 +83,22 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 		}
 
 		if ( is_array( $data ) ) {
-			$webhook->set_props( array(
-				'id'               => $data['webhook_id'],
-				'status'           => $data['status'],
-				'name'             => $data['name'],
-				'user_id'          => $data['user_id'],
-				'delivery_url'     => $data['delivery_url'],
-				'secret'           => $data['secret'],
-				'topic'            => $data['topic'],
-				'date_created'     => '0000-00-00 00:00:00' === $data['date_created'] ? null : $data['date_created'],
-				'date_modified'    => '0000-00-00 00:00:00' === $data['date_modified'] ? null : $data['date_modified'],
-				'api_version'      => $data['api_version'],
-				'failure_count'    => $data['failure_count'],
-				'pending_delivery' => $data['pending_delivery'],
-			) );
+			$webhook->set_props(
+				array(
+					'id'               => $data['webhook_id'],
+					'status'           => $data['status'],
+					'name'             => $data['name'],
+					'user_id'          => $data['user_id'],
+					'delivery_url'     => $data['delivery_url'],
+					'secret'           => $data['secret'],
+					'topic'            => $data['topic'],
+					'date_created'     => '0000-00-00 00:00:00' === $data['date_created'] ? null : $data['date_created'],
+					'date_modified'    => '0000-00-00 00:00:00' === $data['date_modified'] ? null : $data['date_modified'],
+					'api_version'      => $data['api_version'],
+					'failure_count'    => $data['failure_count'],
+					'pending_delivery' => $data['pending_delivery'],
+				)
+			);
 			$webhook->set_object_read( true );
 
 			do_action( 'woocommerce_webhook_loaded', $webhook );
@@ -226,12 +226,14 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 	public function search_webhooks( $args ) {
 		global $wpdb;
 
-		$args = wp_parse_args( $args, array(
-			'limit'   => 10,
-			'offset'  => 0,
-			'order'   => 'DESC',
-			'orderby' => 'id',
-		) );
+		$args = wp_parse_args(
+			$args, array(
+				'limit'   => 10,
+				'offset'  => 0,
+				'order'   => 'DESC',
+				'orderby' => 'id',
+			)
+		);
 
 		// Map post statuses.
 		$statuses = array(
@@ -300,8 +302,8 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 			return $ids;
 		}
 
-		$query = trim( "
-			SELECT webhook_id
+		$query = trim(
+			"SELECT webhook_id
 			FROM {$wpdb->prefix}wc_webhooks
 			WHERE 1=1
 			{$status}
@@ -312,8 +314,8 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 			{$date_modified}
 			{$order}
 			{$limit}
-			{$offset}
-		" );
+			{$offset}"
+		);
 
 		$results = $wpdb->get_results( $query ); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
@@ -333,10 +335,14 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 		$counts   = array();
 
 		foreach ( $statuses as $status ) {
-			$count = count( $this->search_webhooks( array(
-				'limit'  => -1,
-				'status' => $status,
-			) ) );
+			$count = count(
+				$this->search_webhooks(
+					array(
+						'limit'  => -1,
+						'status' => $status,
+					)
+				)
+			);
 
 			$counts[ $status ] = $count;
 		}

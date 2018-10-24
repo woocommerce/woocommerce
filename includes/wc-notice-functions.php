@@ -119,8 +119,10 @@ function wc_clear_notices() {
  * Prints messages and errors which are stored in the session, then clears them.
  *
  * @since 2.1
+ * @param bool $return true to return rather than echo. @since 3.5.0.
+ * @return string|null
  */
-function wc_print_notices() {
+function wc_print_notices( $return = false ) {
 	if ( ! did_action( 'woocommerce_init' ) ) {
 		wc_doing_it_wrong( __FUNCTION__, __( 'This function should not be called before woocommerce_init.', 'woocommerce' ), '2.3' );
 		return;
@@ -128,6 +130,9 @@ function wc_print_notices() {
 
 	$all_notices  = WC()->session->get( 'wc_notices', array() );
 	$notice_types = apply_filters( 'woocommerce_notice_types', array( 'error', 'success', 'notice' ) );
+
+	// Buffer output.
+	ob_start();
 
 	foreach ( $notice_types as $notice_type ) {
 		if ( wc_notice_count( $notice_type ) > 0 ) {
@@ -138,10 +143,15 @@ function wc_print_notices() {
 	}
 
 	wc_clear_notices();
+
+	$notices = wc_kses_notice( ob_get_clean() );
+
+	if ( $return ) {
+		return $notices;
+	}
+
+	echo $notices; // WPCS: XSS ok.
 }
-add_action( 'woocommerce_shortcode_before_product_cat_loop', 'wc_print_notices', 10 );
-add_action( 'woocommerce_before_shop_loop', 'wc_print_notices', 10 );
-add_action( 'woocommerce_before_single_product', 'wc_print_notices', 10 );
 
 /**
  * Print a single notice immediately.
@@ -197,4 +207,24 @@ function wc_add_wp_error_notices( $errors ) {
 			wc_add_notice( $error, 'error' );
 		}
 	}
+}
+
+/**
+ * Filters out the same tags as wp_kses_post, but allows tabindex for <a> element.
+ *
+ * @since 3.5.0
+ * @param string $message Content to filter through kses.
+ * @return string
+ */
+function wc_kses_notice( $message ) {
+	return wp_kses( $message,
+		array_replace_recursive( // phpcs:ignore PHPCompatibility.PHP.NewFunctions.array_replace_recursiveFound
+			wp_kses_allowed_html( 'post' ),
+			array(
+				'a' => array(
+					'tabindex' => true,
+				),
+			)
+		)
+	);
 }

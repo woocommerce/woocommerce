@@ -1,15 +1,16 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+/**
+ * Order Line Item (product)
+ *
+ * @package WooCommerce/Classes
+ * @version 3.0.0
+ * @since   3.0.0
+ */
+
+defined( 'ABSPATH' ) || exit;
 
 /**
- * Order Line Item (product).
- *
- * @version     3.0.0
- * @since       3.0.0
- * @package     WooCommerce/Classes
- * @author      WooThemes
+ * Order item product class.
  */
 class WC_Order_Item_Product extends WC_Order_Item {
 
@@ -43,8 +44,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Set quantity.
 	 *
-	 * @param int $value
-	 * @throws WC_Data_Exception
+	 * @param int $value Quantity.
 	 */
 	public function set_quantity( $value ) {
 		$this->set_prop( 'quantity', wc_stock_amount( $value ) );
@@ -53,11 +53,10 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Set tax class.
 	 *
-	 * @param string $value
-	 * @throws WC_Data_Exception
+	 * @param string $value Tax class.
 	 */
 	public function set_tax_class( $value ) {
-		if ( $value && ! in_array( $value, WC_Tax::get_tax_class_slugs() ) ) {
+		if ( $value && ! in_array( $value, WC_Tax::get_tax_class_slugs(), true ) ) {
 			$this->error( 'order_item_product_invalid_tax_class', __( 'Invalid tax class', 'woocommerce' ) );
 		}
 		$this->set_prop( 'tax_class', $value );
@@ -66,8 +65,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Set Product ID
 	 *
-	 * @param int $value
-	 * @throws WC_Data_Exception
+	 * @param int $value Product ID.
 	 */
 	public function set_product_id( $value ) {
 		if ( $value > 0 && 'product' !== get_post_type( absint( $value ) ) ) {
@@ -79,8 +77,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Set variation ID.
 	 *
-	 * @param int $value
-	 * @throws WC_Data_Exception
+	 * @param int $value Variation ID.
 	 */
 	public function set_variation_id( $value ) {
 		if ( $value > 0 && 'product_variation' !== get_post_type( $value ) ) {
@@ -92,23 +89,33 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Line subtotal (before discounts).
 	 *
-	 * @param string $value
-	 * @throws WC_Data_Exception
+	 * @param string $value Subtotal.
 	 */
 	public function set_subtotal( $value ) {
-		$this->set_prop( 'subtotal', wc_format_decimal( $value ) );
+		$value = wc_format_decimal( $value );
+
+		if ( ! is_numeric( $value ) ) {
+			$value = 0;
+		}
+
+		$this->set_prop( 'subtotal', $value );
 	}
 
 	/**
 	 * Line total (after discounts).
 	 *
-	 * @param string $value
-	 * @throws WC_Data_Exception
+	 * @param string $value Total.
 	 */
 	public function set_total( $value ) {
-		$this->set_prop( 'total', wc_format_decimal( $value ) );
+		$value = wc_format_decimal( $value );
 
-		// Subtotal cannot be less than total
+		if ( ! is_numeric( $value ) ) {
+			$value = 0;
+		}
+
+		$this->set_prop( 'total', $value );
+
+		// Subtotal cannot be less than total.
 		if ( '' === $this->get_subtotal() || $this->get_subtotal() < $this->get_total() ) {
 			$this->set_subtotal( $value );
 		}
@@ -117,8 +124,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Line subtotal tax (before discounts).
 	 *
-	 * @param string $value
-	 * @throws WC_Data_Exception
+	 * @param string $value Subtotal tax.
 	 */
 	public function set_subtotal_tax( $value ) {
 		$this->set_prop( 'subtotal_tax', wc_format_decimal( $value ) );
@@ -127,8 +133,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Line total tax (after discounts).
 	 *
-	 * @param string $value
-	 * @throws WC_Data_Exception
+	 * @param string $value Total tax.
 	 */
 	public function set_total_tax( $value ) {
 		$this->set_prop( 'total_tax', wc_format_decimal( $value ) );
@@ -137,8 +142,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Set line taxes and totals for passed in taxes.
 	 *
-	 * @param array $raw_tax_data
-	 * @throws WC_Data_Exception
+	 * @param array $raw_tax_data Raw tax data.
 	 */
 	public function set_taxes( $raw_tax_data ) {
 		$raw_tax_data = maybe_unserialize( $raw_tax_data );
@@ -163,7 +167,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Set variation data (stored as meta data - write only).
 	 *
-	 * @param array $data Key/Value pairs
+	 * @param array $data Key/Value pairs.
 	 */
 	public function set_variation( $data = array() ) {
 		if ( is_array( $data ) ) {
@@ -176,8 +180,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Set properties based on passed in product object.
 	 *
-	 * @param WC_Product $product
-	 * @throws WC_Data_Exception
+	 * @param WC_Product $product Product instance.
 	 */
 	public function set_product( $product ) {
 		if ( ! is_a( $product, 'WC_Product' ) ) {
@@ -222,7 +225,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Get product ID.
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return int
 	 */
 	public function get_product_id( $context = 'view' ) {
@@ -232,7 +235,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Get variation ID.
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return int
 	 */
 	public function get_variation_id( $context = 'view' ) {
@@ -242,7 +245,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Get quantity.
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return int
 	 */
 	public function get_quantity( $context = 'view' ) {
@@ -252,7 +255,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Get tax class.
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_tax_class( $context = 'view' ) {
@@ -262,7 +265,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Get subtotal.
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_subtotal( $context = 'view' ) {
@@ -272,7 +275,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Get subtotal tax.
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_subtotal_tax( $context = 'view' ) {
@@ -282,7 +285,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Get total.
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_total( $context = 'view' ) {
@@ -292,7 +295,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Get total tax.
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_total_tax( $context = 'view' ) {
@@ -302,7 +305,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Get taxes.
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return array
 	 */
 	public function get_taxes( $context = 'view' ) {
@@ -321,7 +324,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			$product = wc_get_product( $this->get_product_id() );
 		}
 
-		// Backwards compatible filter from WC_Order::get_product_from_item()
+		// Backwards compatible filter from WC_Order::get_product_from_item().
 		if ( has_filter( 'woocommerce_get_product_from_item' ) ) {
 			$product = apply_filters( 'woocommerce_get_product_from_item', $product, $this, $this->get_order() );
 		}
@@ -332,18 +335,20 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Get the Download URL.
 	 *
-	 * @param  int $download_id
+	 * @param  int $download_id Download ID.
 	 * @return string
 	 */
 	public function get_item_download_url( $download_id ) {
 		$order = $this->get_order();
 
-		return $order ? add_query_arg( array(
-			'download_file' => $this->get_variation_id() ? $this->get_variation_id() : $this->get_product_id(),
-			'order'         => $order->get_order_key(),
-			'email'         => urlencode( $order->get_billing_email() ),
-			'key'           => $download_id,
-		), trailingslashit( home_url() ) ) : '';
+		return $order ? add_query_arg(
+			array(
+				'download_file' => $this->get_variation_id() ? $this->get_variation_id() : $this->get_product_id(),
+				'order'         => $order->get_order_key(),
+				'email'         => rawurlencode( $order->get_billing_email() ),
+				'key'           => $download_id,
+			), trailingslashit( home_url() )
+		) : '';
 	}
 
 	/**
@@ -356,28 +361,33 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		$product    = $this->get_product();
 		$order      = $this->get_order();
 		$product_id = $this->get_variation_id() ? $this->get_variation_id() : $this->get_product_id();
+		$email_hash = function_exists( 'hash' ) ? hash( 'sha256', $order->get_billing_email() ) : sha1( $order->get_billing_email() );
 
 		if ( $product && $order && $product->is_downloadable() && $order->is_download_permitted() ) {
 			$data_store         = WC_Data_Store::load( 'customer-download' );
-			$customer_downloads = $data_store->get_downloads( array(
-				'user_email' => $order->get_billing_email(),
-				'order_id'   => $order->get_id(),
-				'product_id' => $product_id,
-			) );
+			$customer_downloads = $data_store->get_downloads(
+				array(
+					'user_email' => $order->get_billing_email(),
+					'order_id'   => $order->get_id(),
+					'product_id' => $product_id,
+				)
+			);
 			foreach ( $customer_downloads as $customer_download ) {
 				$download_id = $customer_download->get_download_id();
 
 				if ( $product->has_file( $download_id ) ) {
-					$file                                         = $product->get_file( $download_id );
-					$files[ $download_id ]                        = $file->get_data();
+					$file                  = $product->get_file( $download_id );
+					$files[ $download_id ] = $file->get_data();
 					$files[ $download_id ]['downloads_remaining'] = $customer_download->get_downloads_remaining();
 					$files[ $download_id ]['access_expires']      = $customer_download->get_access_expires();
-					$files[ $download_id ]['download_url']        = add_query_arg( array(
-						'download_file' => $product_id,
-						'order'         => $order->get_order_key(),
-						'email'         => urlencode( $order->get_billing_email() ),
-						'key'           => $download_id,
-					), trailingslashit( home_url() ) );
+					$files[ $download_id ]['download_url']        = add_query_arg(
+						array(
+							'download_file' => $product_id,
+							'order'         => $order->get_order_key(),
+							'uid'           => $email_hash,
+							'key'           => $download_id,
+						), trailingslashit( home_url() )
+					);
 				}
 			}
 		}
@@ -387,6 +397,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
 	 * Get tax status.
+	 *
 	 * @return string
 	 */
 	public function get_tax_status() {
@@ -404,10 +415,10 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	*/
 
 	/**
-	 * offsetGet for ArrayAccess/Backwards compatibility.
+	 * OffsetGet for ArrayAccess/Backwards compatibility.
 	 *
 	 * @deprecated Add deprecation notices in future release.
-	 * @param string $offset
+	 * @param string $offset Offset.
 	 * @return mixed
 	 */
 	public function offsetGet( $offset ) {
@@ -428,11 +439,11 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	}
 
 	/**
-	 * offsetSet for ArrayAccess/Backwards compatibility.
+	 * OffsetSet for ArrayAccess/Backwards compatibility.
 	 *
 	 * @deprecated Add deprecation notices in future release.
-	 * @param string $offset
-	 * @param mixed $value
+	 * @param string $offset Offset.
+	 * @param mixed  $value  Value.
 	 */
 	public function offsetSet( $offset, $value ) {
 		if ( 'line_subtotal' === $offset ) {
@@ -452,13 +463,13 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	}
 
 	/**
-	 * offsetExists for ArrayAccess
+	 * OffsetExists for ArrayAccess.
 	 *
-	 * @param string $offset
+	 * @param string $offset Offset.
 	 * @return bool
 	 */
 	public function offsetExists( $offset ) {
-		if ( in_array( $offset, array( 'line_subtotal', 'line_subtotal_tax', 'line_total', 'line_tax', 'line_tax_data', 'item_meta_array', 'item_meta', 'qty' ) ) ) {
+		if ( in_array( $offset, array( 'line_subtotal', 'line_subtotal_tax', 'line_total', 'line_tax', 'line_tax_data', 'item_meta_array', 'item_meta', 'qty' ), true ) ) {
 			return true;
 		}
 		return parent::offsetExists( $offset );

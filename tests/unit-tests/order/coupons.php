@@ -16,26 +16,24 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 	/**
 	 * Setup an order.
 	 */
-	public function setUp() {
-		$this->delete_objects();
-
+	protected function init_test() {
 		$_SERVER['REMOTE_ADDR'] = '127.0.0.1';
 
 		update_option( 'woocommerce_default_customer_address', 'base' );
 		update_option( 'woocommerce_tax_based_on', 'base' );
 
 		$product = WC_Helper_Product::create_simple_product();
-		update_post_meta( $product->get_id(), '_regular_price', '1000' );
-		update_post_meta( $product->get_id(), '_price', '1000' );
+		$product->set_regular_price( 1000 );
+		$product->save();
 		$product = wc_get_product( $product->get_id() );
 
-		$coupon = new WC_Coupon;
+		$coupon = new WC_Coupon();
 		$coupon->set_code( 'test-coupon-1' );
 		$coupon->set_amount( 1.00 );
 		$coupon->set_discount_type( 'fixed_cart' );
 		$coupon->save();
 
-		$coupon2 = new WC_Coupon;
+		$coupon2 = new WC_Coupon();
 		$coupon2->set_code( 'test-coupon-2' );
 		$coupon2->set_amount( 20 );
 		$coupon2->set_discount_type( 'percent' );
@@ -118,51 +116,12 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Clean up after test.
-	 */
-	public function tearDown() {
-		update_option( 'woocommerce_calc_taxes', 'no' );
-		update_option( 'woocommerce_prices_include_tax', 'no' );
-		$this->delete_objects();
-	}
-
-	/**
-	 * delete objects.
-	 */
-	protected function delete_objects() {
-		if ( isset( $this->objects['coupons'] ) ) {
-			foreach ( $this->objects['coupons'] as $object ) {
-				$object->delete( true );
-			}
-		}
-
-		if ( isset( $this->objects['products'] ) ) {
-			foreach ( $this->objects['products'] as $object ) {
-				$object->delete( true );
-			}
-		}
-
-		if ( isset( $this->objects['order'] ) ) {
-			$this->objects['order']->delete( true );
-		}
-
-		if ( isset( $this->objects['tax_rate_ids'] ) ) {
-			foreach ( $this->objects['tax_rate_ids'] as $tax_rate_id ) {
-				WC_Tax::_delete_tax_rate( $tax_rate_id );
-			}
-		}
-
-		$this->objects = array();
-		wp_cache_flush();
-	}
-
-	/**
 	 * Test: test_remove_coupon_from_order
 	 */
-	function test_remove_coupon_from_order() {
+	public function test_remove_coupon_from_order() {
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
-		$this->setUp();
+		$this->init_test();
 
 		$order_id = $this->objects['order']->get_id();
 		$order    = wc_get_order( $order_id );
@@ -180,7 +139,7 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 		$this->assertEquals( '1000', $order->get_total(), $order->get_total() );
 
 		// Reset.
-		$this->setUp();
+		$this->init_test();
 
 		$order_id = $this->objects['order']->get_id();
 		$order    = wc_get_order( $order_id );
@@ -199,25 +158,33 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 	/**
 	 * Test: test_add_coupon_to_order
 	 */
-	function test_add_coupon_to_order() {
+	public function test_add_coupon_to_order() {
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
-		$this->setUp();
+		$this->init_test();
 
 		$order_id = $this->objects['order']->get_id();
 		$order    = wc_get_order( $order_id );
 
+		$this->assertEquals( '799', $order->get_total(), $order->get_total() );
+
+		/**
+		 * Discount should be based on subtotal unless coupons apply sequencially.
+		 *
+		 * Coupon will therefore discount 200. Compare the total without tax so we can compare the ex tax price and avoid rounding mishaps.
+		 */
 		$order->apply_coupon( 'test-coupon-2' );
-		$this->assertEquals( '639.2', $order->get_total(), $order->get_total() );
+		$this->assertEquals( 401, round( $order->get_total_discount( false ), 2 ), $order->get_total_discount( false ) );
+		$this->assertEquals( 598.99, $order->get_total(), $order->get_total() );
 	}
 
 	/**
 	 * Test: test_remove_coupon_from_order_ex_tax
 	 */
-	function test_remove_coupon_from_order_ex_tax() {
+	public function test_remove_coupon_from_order_ex_tax() {
 		update_option( 'woocommerce_prices_include_tax', 'no' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
-		$this->setUp();
+		$this->init_test();
 
 		$order_id = $this->objects['order']->get_id();
 		$order    = wc_get_order( $order_id );
@@ -235,7 +202,7 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 		$this->assertEquals( '1100', $order->get_total(), $order->get_total() );
 
 		// Reset.
-		$this->setUp();
+		$this->init_test();
 
 		$order_id = $this->objects['order']->get_id();
 		$order    = wc_get_order( $order_id );
@@ -254,25 +221,26 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 	/**
 	 * Test: test_add_coupon_to_order_ex_tax
 	 */
-	function test_add_coupon_to_order_ex_tax() {
+	public function test_add_coupon_to_order_ex_tax() {
 		update_option( 'woocommerce_prices_include_tax', 'no' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
-		$this->setUp();
+		$this->init_test();
 
 		$order_id = $this->objects['order']->get_id();
 		$order    = wc_get_order( $order_id );
 
 		$order->apply_coupon( 'test-coupon-2' );
-		$this->assertEquals( '703.12', $order->get_total(), $order->get_total() );
+		$this->assertEquals( 401, $order->get_discount_total(), $order->get_discount_total() );
+		$this->assertEquals( ( 1000 - 401 ) * 1.1, $order->get_total(), $order->get_total() );
 	}
 
 	/**
 	 * Test: test_remove_coupon_from_order_no_tax
 	 */
-	function test_remove_coupon_from_order_no_tax() {
+	public function test_remove_coupon_from_order_no_tax() {
 		update_option( 'woocommerce_prices_include_tax', 'no' );
 		update_option( 'woocommerce_calc_taxes', 'no' );
-		$this->setUp();
+		$this->init_test();
 
 		$order_id = $this->objects['order']->get_id();
 		$order    = wc_get_order( $order_id );
@@ -290,7 +258,7 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 		$this->assertEquals( '1000', $order->get_total(), $order->get_total() );
 
 		// Reset.
-		$this->setUp();
+		$this->init_test();
 
 		$order_id = $this->objects['order']->get_id();
 		$order    = wc_get_order( $order_id );
@@ -309,25 +277,25 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 	/**
 	 * Test: test_add_coupon_to_order_no_tax
 	 */
-	function test_add_coupon_to_order_no_tax() {
+	public function test_add_coupon_to_order_no_tax() {
 		update_option( 'woocommerce_prices_include_tax', 'no' );
 		update_option( 'woocommerce_calc_taxes', 'no' );
-		$this->setUp();
+		$this->init_test();
 
 		$order_id = $this->objects['order']->get_id();
 		$order    = wc_get_order( $order_id );
 
 		$order->apply_coupon( 'test-coupon-2' );
-		$this->assertEquals( '639.2', $order->get_total(), $order->get_total() );
+		$this->assertEquals( '599', $order->get_total(), $order->get_total() );
 	}
 
 	/**
 	 * Test: test_remove_coupon_from_order_no_tax
 	 */
-	function test_remove_coupon_from_order_no_tax_inc_prices_on() {
+	public function test_remove_coupon_from_order_no_tax_inc_prices_on() {
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'no' );
-		$this->setUp();
+		$this->init_test();
 
 		$order_id = $this->objects['order']->get_id();
 		$order    = wc_get_order( $order_id );
@@ -345,7 +313,7 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 		$this->assertEquals( '1000', $order->get_total(), $order->get_total() );
 
 		// Reset.
-		$this->setUp();
+		$this->init_test();
 
 		$order_id = $this->objects['order']->get_id();
 		$order    = wc_get_order( $order_id );
@@ -364,15 +332,15 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 	/**
 	 * Test: test_add_coupon_to_order_no_tax
 	 */
-	function test_add_coupon_to_order_no_tax_inc_prices_on() {
+	public function test_add_coupon_to_order_no_tax_inc_prices_on() {
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'no' );
-		$this->setUp();
+		$this->init_test();
 
 		$order_id = $this->objects['order']->get_id();
 		$order    = wc_get_order( $order_id );
 
 		$order->apply_coupon( 'test-coupon-2' );
-		$this->assertEquals( '639.2', $order->get_total(), $order->get_total() );
+		$this->assertEquals( '599', $order->get_total(), $order->get_total() );
 	}
 }

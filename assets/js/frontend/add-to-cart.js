@@ -86,7 +86,7 @@ jQuery( function( $ ) {
 				window.location = $thisbutton.attr( 'href' );
 				return;
 			}
-			$( document.body ).trigger( 'removed_from_cart', [ response.fragments, response.cart_hash ] );
+			$( document.body ).trigger( 'removed_from_cart', [ response.fragments, response.cart_hash, $thisbutton ] );
 		}).fail( function() {
 			window.location = $thisbutton.attr( 'href' );
 			return;

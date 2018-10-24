@@ -10,10 +10,9 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see 	    https://docs.woocommerce.com/document/template-structure/
- * @author		WooThemes
- * @package 	WooCommerce/Templates/Emails/Plain
- * @version		2.5.0
+ * @see https://docs.woocommerce.com/document/template-structure/
+ * @package WooCommerce/Templates/Emails/Plain
+ * @version 3.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -22,16 +21,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 echo '= ' . esc_html( $email_heading ) . " =\n\n";
 
-if ( $order->has_status( 'pending' ) ) {
+/* translators: %s: Customer first name */
+echo sprintf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $order->get_billing_first_name() ) ) . "\n\n";
 
+if ( $order->has_status( 'pending' ) ) {
 	echo sprintf(
-		/* translators: %1s item is the name of the site, %2s is a html link */
-		esc_html__( 'An order has been created for you on %1$s. %2$s', 'woocommerce' ),
+		/* translators: %1$s Site title, %2$s Order pay link */
+		__( 'An order has been created for you on %1$s. Your invoice is below, with a link to make payment when you’re ready: %2$s', 'woocommerce' ),
 		esc_html( get_bloginfo( 'name', 'display' ) ),
 		esc_url( $order->get_checkout_payment_url() )
 	) . "\n\n";
-}
 
+} else {
+	/* translators: %s Order date */
+	echo sprintf( esc_html__( 'Here are the details of your order placed on %s:', 'woocommerce' ), esc_html( wc_format_datetime( $this->object->get_date_created() ) ) ) . "\n\n";
+}
 echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
 /**
@@ -61,6 +65,8 @@ do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, 
  */
 do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email );
 
+echo esc_html__( 'Thanks for reading.', 'woocommerce' ) . "\n\n";
+
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
-echo wp_kses_post( apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) ) );
+echo esc_html( apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) ) );

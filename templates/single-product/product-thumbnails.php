@@ -13,34 +13,22 @@
  * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     3.1.0
+ * @version     3.3.2
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+defined( 'ABSPATH' ) || exit;
+
+// Note: `wc_get_gallery_image_html` was added in WC 3.3.2 and did not exist prior. This check protects against theme overrides being used on older versions of WC.
+if ( ! function_exists( 'wc_get_gallery_image_html' ) ) {
+	return;
 }
 
-global $post, $product;
+global $product;
 
 $attachment_ids = $product->get_gallery_image_ids();
 
 if ( $attachment_ids && has_post_thumbnail() ) {
 	foreach ( $attachment_ids as $attachment_id ) {
-		$full_size_image = wp_get_attachment_image_src( $attachment_id, 'full' );
-		$thumbnail       = wp_get_attachment_image_src( $attachment_id, 'woocommerce_thumbnail' );
-		$attributes      = array(
-			'title'                   => get_post_field( 'post_title', $attachment_id ),
-			'data-caption'            => get_post_field( 'post_excerpt', $attachment_id ),
-			'data-src'                => $full_size_image[0],
-			'data-large_image'        => $full_size_image[0],
-			'data-large_image_width'  => $full_size_image[1],
-			'data-large_image_height' => $full_size_image[2],
-		);
-
-		$html  = '<div data-thumb="' . esc_url( $thumbnail[0] ) . '" class="woocommerce-product-gallery__image"><a href="' . esc_url( $full_size_image[0] ) . '">';
-		$html .= wp_get_attachment_image( $attachment_id, 'woocommerce_single', false, $attributes );
- 		$html .= '</a></div>';
-
-		echo apply_filters( 'woocommerce_single_product_image_thumbnail_html', $html, $attachment_id );
+		echo apply_filters( 'woocommerce_single_product_image_thumbnail_html', wc_get_gallery_image_html( $attachment_id  ), $attachment_id );
 	}
 }
