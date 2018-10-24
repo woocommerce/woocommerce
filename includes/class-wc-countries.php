@@ -470,8 +470,6 @@ class WC_Countries {
 	 *
 	 * @return array
 	 */
-
-	 // removed - for country code IN that was mistakenly written causing wrong pattern generated
 	public function get_address_formats() {
 		if ( empty( $this->address_formats ) ) {
 			$this->address_formats = apply_filters(
