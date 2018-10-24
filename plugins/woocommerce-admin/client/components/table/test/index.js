@@ -40,6 +40,9 @@ describe( 'TableCard', () => {
 				downloadable
 			/>
 		);
+		tableCard.setState( {
+			showCols: [ true, true, true, true, false, true, true, true ],
+		} );
 
 		const downloadButton = tableCard.findWhere(
 			node => node.props().className === 'woocommerce-table__download-button'

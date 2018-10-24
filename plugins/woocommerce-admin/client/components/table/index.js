@@ -83,12 +83,15 @@ class TableCard extends Component {
 
 	onClickDownload() {
 		const { headers, query, onClickDownload, rows, title } = this.props;
+		const { showCols } = this.state;
+		const visibleHeaders = headers.filter( ( header, i ) => showCols[ i ] );
+		const visibleRows = rows.map( row => row.filter( ( cell, i ) => showCols[ i ] ) );
 
 		// @TODO The current implementation only downloads the contents displayed in the table.
 		// Another solution is required when the data set is larger (see #311).
 		downloadCSVFile(
 			generateCSVFileName( title, query ),
-			generateCSVDataFromTable( headers, rows )
+			generateCSVDataFromTable( visibleHeaders, visibleRows )
 		);
 
 		if ( onClickDownload ) {

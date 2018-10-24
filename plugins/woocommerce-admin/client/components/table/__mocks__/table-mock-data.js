@@ -19,8 +19,8 @@ export default [
 			value: 0,
 		},
 		{
-			display: '€0.00',
-			value: 0,
+			display: '€10.00',
+			value: 10,
 		},
 		{
 			display: '€0.00',
