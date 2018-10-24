@@ -357,6 +357,13 @@ export const getDateSpaces = ( data, uniqueDates, width, xLineScale ) =>
 		};
 	} );
 
+/**
+ * Compares 2 strings and returns a list of words that are unique from s2
+ * @param {string} s1 - base string to compare against
+ * @param {string} s2 - string to compare against the base string
+ * @param {string} splitChar - character to use to deliminate words
+ * @returns {array} of unique words that appear in s2 but not in s1, the base string
+ */
 export const compareStrings = ( s1, s2, splitChar = ' ' ) => {
 	const string1 = s1.split( splitChar );
 	const string2 = s2.split( splitChar );
