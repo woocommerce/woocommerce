@@ -747,8 +747,7 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
 		$props['thumb_src_h'] = $src[2];
 
 		// Image source.
-		$flexslider      = (bool) apply_filters( 'woocommerce_single_product_flexslider_enabled', get_theme_support( 'wc-product-gallery-slider' ) );
-		$image_size      = apply_filters( 'woocommerce_gallery_image_size', $flexslider ? 'woocommerce_single' : $gallery_thumbnail_size );
+		$image_size      = apply_filters( 'woocommerce_gallery_image_size', 'woocommerce_single' );
 		$src             = wp_get_attachment_image_src( $attachment_id, $image_size );
 		$props['src']    = $src[0];
 		$props['src_w']  = $src[1];
