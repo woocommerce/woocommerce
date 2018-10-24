@@ -357,6 +357,24 @@ export const getDateSpaces = ( data, uniqueDates, width, xLineScale ) =>
 		};
 	} );
 
+/**
+ * Compares 2 strings and returns a list of words that are unique from s2
+ * @param {string} s1 - base string to compare against
+ * @param {string} s2 - string to compare against the base string
+ * @param {string} splitChar - character to use to deliminate words
+ * @returns {array} of unique words that appear in s2 but not in s1, the base string
+ */
+export const compareStrings = ( s1, s2, splitChar = ' ' ) => {
+	const string1 = s1.split( splitChar );
+	const string2 = s2.split( splitChar );
+	const diff = new Array();
+	const long = s1.length > s2.length ? string1 : string2;
+	for ( let x = 0; x < long.length; x++ ) {
+		string1[ x ] !== string2[ x ] && diff.push( string2[ x ] );
+	}
+	return diff;
+};
+
 export const drawAxis = ( node, params ) => {
 	const xScale = params.type === 'line' ? params.xLineScale : params.xScale;
 
@@ -387,12 +405,18 @@ export const drawAxis = ( node, params ) => {
 			d3AxisBottom( xScale )
 				.tickValues( ticks )
 				.tickFormat( ( d, i ) => {
-					const monthDate = d instanceof Date ? d : new Date( d );
+					let monthDate = d instanceof Date ? d : new Date( d );
 					let prevMonth = i !== 0 ? ticks[ i - 1 ] : ticks[ i ];
 					prevMonth = prevMonth instanceof Date ? prevMonth : new Date( prevMonth );
-					return i === 0 || params.x2Format( monthDate ) !== params.x2Format( prevMonth )
-						? params.x2Format( monthDate )
-						: '';
+					monthDate =
+						i !== 0
+							? compareStrings(
+									params.x2Format( prevMonth ),
+									params.x2Format( monthDate ),
+									params
+								).join( ' ' )
+							: params.x2Format( monthDate );
+					return i === 0 || monthDate !== params.x2Format( prevMonth ) ? monthDate : '';
 				} )
 		)
 		.call( g => g.select( '.domain' ).remove() );
