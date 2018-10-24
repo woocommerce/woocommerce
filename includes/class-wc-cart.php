@@ -1374,11 +1374,6 @@ class WC_Cart extends WC_Legacy_Cart {
 			}
 		}
 
-		// If we're on the cart page, the user has not calculated shipping, hide the area.
-		if ( is_cart() && ! $this->get_customer()->has_calculated_shipping() ) {
-			return false;
-		}
-
 		return apply_filters( 'woocommerce_cart_ready_to_calc_shipping', true );
 	}
 
