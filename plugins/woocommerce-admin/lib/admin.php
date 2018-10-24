@@ -95,14 +95,6 @@ function wc_admin_register_pages() {
 
 	wc_admin_register_page(
 		array(
-			'title'  => __( 'Products', 'wc-admin' ),
-			'parent' => '/analytics',
-			'path'   => '/analytics/products',
-		)
-	);
-
-	wc_admin_register_page(
-		array(
 			'title'  => __( 'Orders', 'wc-admin' ),
 			'parent' => '/analytics',
 			'path'   => '/analytics/orders',
@@ -111,9 +103,9 @@ function wc_admin_register_pages() {
 
 	wc_admin_register_page(
 		array(
-			'title'  => __( 'Coupons', 'wc-admin' ),
+			'title'  => __( 'Products', 'wc-admin' ),
 			'parent' => '/analytics',
-			'path'   => '/analytics/coupons',
+			'path'   => '/analytics/products',
 		)
 	);
 
