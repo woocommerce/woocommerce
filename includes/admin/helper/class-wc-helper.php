@@ -1026,6 +1026,12 @@ class WC_Helper {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
+		/**
+		 * Clean the plugins cache since self::extra_headers() adds an additional plugin header
+		 * which needs to be parsed for detecting locally installed Woo plugins
+		 */
+		wp_clean_plugins_cache();
+
 		$plugins     = get_plugins();
 		$woo_plugins = array();
 
@@ -1068,6 +1074,13 @@ class WC_Helper {
 	 * Get locally installed Woo themes.
 	 */
 	public static function get_local_woo_themes() {
+
+		/**
+		 * Clean the themes cache since self::extra_headers() adds an additional theme header
+		 * which needs to be parsed for detecting locally installed Woo themes
+		 */
+		wp_clean_themes_cache();
+
 		$themes     = wp_get_themes();
 		$woo_themes = array();
 
