@@ -63,9 +63,9 @@ class WC_Admin_Notes_New_Sales_Record {
 			update_option( self::RECORD_AMOUNT_OPTION_KEY, $total );
 
 			$formatted_yesterday   = date( 'F jS', strtotime( $yesterday ) );
-			$formatted_total       = html_entity_decode( strip_tags( wc_price( $total ) ) );
+			$formatted_total       = html_entity_decode( wp_strip_all_tags( wc_price( $total ) ) );
 			$formatted_record_date = date( 'F jS', strtotime( $record_date ) );
-			$formatted_record_amt  = html_entity_decode( strip_tags( wc_price( $record_amt ) ) );
+			$formatted_record_amt  = html_entity_decode( wp_strip_all_tags( wc_price( $record_amt ) ) );
 
 			$content = sprintf(
 				/* translators: 1 and 4: Date (e.g. October 16th), 2 and 3: Amount (e.g. $160.00) */
