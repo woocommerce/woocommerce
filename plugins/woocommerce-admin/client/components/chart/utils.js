@@ -264,12 +264,9 @@ const getXTicksFromIncrementFactor = ( uniqueDates, incrementFactor ) => {
 		ticks.push( uniqueDates[ idx ] );
 	}
 
-	// If the first or last date is missing from the ticks array, add it back in.
+	// If the first date is missing from the ticks array, add it back in.
 	if ( ticks[ 0 ] !== uniqueDates[ 0 ] ) {
 		ticks.unshift( uniqueDates[ 0 ] );
-	}
-	if ( ticks[ ticks.length - 1 ] !== uniqueDates[ uniqueDates.length - 1 ] ) {
-		ticks.push( uniqueDates[ uniqueDates.length - 1 ] );
 	}
 
 	return ticks;
