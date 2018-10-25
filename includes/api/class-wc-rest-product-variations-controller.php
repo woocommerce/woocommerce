@@ -314,7 +314,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	 * @return array
 	 */
 	protected function get_image( $variation ) {
-		if ( ! has_post_thumbnail( $variation->get_id() ) ) {
+		if ( ! $variation->get_image_id() ) {
 			return;
 		}
 
