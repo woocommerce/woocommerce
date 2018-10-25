@@ -46,7 +46,7 @@ class InboxPanel extends Component {
 				return [];
 			}
 			return actions.map( action => (
-				<Button disabled isDefault href={ action.url }>
+				<Button isDefault href={ action.url }>
 					{ action.label }
 				</Button>
 			) );
