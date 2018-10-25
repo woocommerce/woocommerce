@@ -153,6 +153,26 @@ class WC_Admin_REST_Admin_Notes_Controller extends WC_REST_CRUD_Controller {
 	}
 
 	/**
+	 * Prepare a path or query for serialization to the client.
+	 *
+	 * @param string $query The query, path, or URL to transform.
+	 * @return string A fully formed URL.
+	 */
+	public function prepare_query_for_response( $query ) {
+		if ( 'https://' === substr( $query, 0, 8 ) ) {
+			return $query;
+		}
+		if ( 'http://' === substr( $query, 0, 7 ) ) {
+			return $query;
+		}
+		if ( '?' === substr( $query, 0, 1 ) ) {
+			return admin_url( 'admin.php' . $query );
+		}
+
+		return admin_url( $query );
+	}
+
+	/**
 	 * Prepare a note object for serialization.
 	 *
 	 * @param array           $data Note data.
@@ -170,6 +190,7 @@ class WC_Admin_REST_Admin_Notes_Controller extends WC_REST_CRUD_Controller {
 		$data['content']           = stripslashes( $data['content'] );
 		foreach ( (array) $data['actions'] as $key => $value ) {
 			$data['actions'][ $key ]->label = stripslashes( $data['actions'][ $key ]->label );
+			$data['actions'][ $key ]->url   = $this->prepare_query_for_response( $data['actions'][ $key ]->query );
 		}
 		$data = $this->filter_response_by_context( $data, $context );
 

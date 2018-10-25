@@ -111,6 +111,10 @@
 	& > * + * {
 		margin-left: 0.5em;
 	}
+
+	a.components-button.is-button {
+		color: $gray-text;
+	}
 }
 
 .woocommerce-activity-card.is-loading {

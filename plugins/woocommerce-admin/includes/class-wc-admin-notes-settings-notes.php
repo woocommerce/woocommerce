@@ -46,7 +46,7 @@ class WC_Admin_Notes_Settings_Notes {
 		$note->add_action(
 			'open-customizer',
 			__( 'Open Customizer', 'wc-admin' ),
-			'?page=wc-admin'
+			'customize.php'
 		);
 		$note->save();
 	}
