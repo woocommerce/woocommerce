@@ -1992,3 +1992,39 @@ function wc_update_350_reviews_comment_type() {
 function wc_update_350_db_version() {
 	WC_Install::update_db_version( '3.5.0' );
 }
+
+/**
+ * There is a bug in the wc_update_350_order_customer_id() update function which is responsible
+ * for copying all customer ids from the _customer_user postmeta to the wp_posts field
+ * post_author. If the database update is triggered via the wp-admin interface
+ * wc_update_350_order_customer_id() will not copy the customer id for orders placed manually
+ * via the wp-admin interface (see https://github.com/woocommerce/woocommerce/issues/21656). This
+ * update function copies the customer id for those orders.
+ */
+function wc_update_351_manual_orders_customer_id() {
+	global $wpdb;
+
+	$orders_to_update = $wpdb->get_col(
+		"SELECT `post_id` FROM {$wpdb->postmeta} WHERE `meta_key` = '_created_via' AND meta_value = 'admin'"
+	);
+
+	if ( ! empty( $orders_to_update ) ) {
+		$orders_meta_data = $wpdb->get_results(
+			// phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+			"SELECT `post_id`, `meta_value` as `customer_id` FROM {$wpdb->postmeta} WHERE `meta_key` = '_customer_user' AND `post_id` IN (" . implode( ', ', $orders_to_update ) . ')'
+		);
+
+		if ( ! empty( $orders_meta_data ) ) {
+			foreach ( $orders_meta_data as $order_meta ) {
+				$wpdb->update( $wpdb->posts, array( 'post_author' => $order_meta->customer_id ), array( 'ID' => $order_meta->post_id ) );
+			}
+		}
+	}
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_351_db_version() {
+	WC_Install::update_db_version( '3.5.1' );
+}
