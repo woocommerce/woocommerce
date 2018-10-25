@@ -1072,6 +1072,8 @@ class WC_Admin_Setup_Wizard {
 		$setup_wcs_labels  = isset( $_POST['setup_woocommerce_services'] ) && 'yes' === $_POST['setup_woocommerce_services'];
 		$setup_shipstation = isset( $_POST['setup_shipstation'] ) && 'yes' === $_POST['setup_shipstation'];
 
+		update_option( 'woocommerce_setup_shipping_labels', $setup_wcs_labels );
+
 		if ( $setup_wcs_labels ) {
 			$this->install_woocommerce_services();
 		}
@@ -1989,10 +1991,10 @@ class WC_Admin_Setup_Wizard {
 		$ppec_enabled    = is_array( $ppec_settings )
 			&& isset( $ppec_settings['reroute_requests'] ) && 'yes' === $ppec_settings['reroute_requests']
 			&& isset( $ppec_settings['enabled'] ) && 'yes' === $ppec_settings['enabled'];
-		$features['payment'] = $stripe_enabled || $ppec_enabled;
 
-		$features['taxes']  = (bool) get_option( 'woocommerce_setup_automated_taxes', false );
-		$features['labels'] = ( 'US' === WC()->countries->get_base_country() );
+		$features['payment'] = $stripe_enabled || $ppec_enabled;
+		$features['taxes']   = (bool) get_option( 'woocommerce_setup_automated_taxes', false );
+		$features['labels']  = (bool) get_option( 'woocommerce_setup_shipping_labels', false );
 
 		return $features;
 	}
