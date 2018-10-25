@@ -11,7 +11,7 @@ import { map, orderBy } from 'lodash';
  */
 import { Card, Link, TableCard, TablePlaceholder } from '@woocommerce/components';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
-import { onQueryChange } from 'lib/nav-utils';
+import { getNewPath, getTimeRelatedQuery, onQueryChange } from 'lib/nav-utils';
 import ReportError from 'analytics/components/report-error';
 
 export default class ProductsReportTable extends Component {
@@ -70,6 +70,8 @@ export default class ProductsReportTable extends Component {
 
 	getRowsContent( data = [] ) {
 		const { stockStatuses } = wcSettings;
+		const { query } = this.props;
+		const timeRelatedQuery = getTimeRelatedQuery( query );
 
 		return map( data, row => {
 			const {
@@ -84,6 +86,10 @@ export default class ProductsReportTable extends Component {
 				stock_status = 'outofstock', // @TODO
 				stock_quantity = '0', // @TODO
 			} = row;
+			const ordersLink = getNewPath( timeRelatedQuery, 'orders', {
+				filter: 'advanced',
+				product_includes: product_id,
+			} );
 
 			return [
 				{
@@ -105,7 +111,7 @@ export default class ProductsReportTable extends Component {
 				},
 				{
 					display: (
-						<Link href={ 'orders?filter=advanced&product_includes=' + product_id } type="wc-admin">
+						<Link href={ ordersLink } type="wc-admin">
 							{ orders_count }
 						</Link>
 					),

@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { Button, Dropdown, IconButton } from '@wordpress/components';
 import classnames from 'classnames';
 import { Component } from '@wordpress/element';
-import { find, omit, partial, pick, last, get, includes } from 'lodash';
+import { find, omit, partial, last, get, includes } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
@@ -15,7 +15,7 @@ import PropTypes from 'prop-types';
 import AnimationSlider from 'components/animation-slider';
 import DropdownButton from 'components/dropdown-button';
 import Search from 'components/search';
-import { updateQueryString } from 'lib/nav-utils';
+import { getTimeRelatedQuery, updateQueryString } from 'lib/nav-utils';
 import './style.scss';
 
 export const DEFAULT_FILTER = 'all';
@@ -103,12 +103,12 @@ class FilterPicker extends Component {
 	update( value, additionalQueries = {} ) {
 		const { path, query } = this.props;
 		// Keep only time related queries when updating to a new filter
-		const timeRelatedQueries = pick( query, [ 'period', 'compare', 'before', 'after' ] );
+		const timeRelatedQuery = getTimeRelatedQuery( query );
 		const update = {
 			filter: 'all' === value ? undefined : value,
 			...additionalQueries,
 		};
-		updateQueryString( update, path, timeRelatedQueries );
+		updateQueryString( update, path, timeRelatedQuery );
 	}
 
 	onTagChange( filter, onClose, tags ) {

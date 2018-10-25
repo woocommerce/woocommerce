@@ -4,7 +4,7 @@
  */
 import { Component, createElement } from '@wordpress/element';
 import { parse } from 'qs';
-import { find, omitBy, isUndefined, last } from 'lodash';
+import { find, last } from 'lodash';
 
 /**
  * Internal dependencies
@@ -13,7 +13,7 @@ import Analytics from 'analytics';
 import AnalyticsReport from 'analytics/report';
 import Dashboard from 'dashboard';
 import DevDocs from 'devdocs';
-import { stringifyQuery } from 'lib/nav-utils';
+import { getTimeRelatedQuery, stringifyQuery } from 'lib/nav-utils';
 
 const getPages = () => {
 	const pages = [
@@ -66,9 +66,8 @@ class Controller extends Component {
 }
 
 // Update links in wp-admin menu to persist time related queries
-window.wpNavMenuUrlUpdate = function( page, { period, compare, after, before } ) {
-	const timeRelatedQuery = omitBy( { period, compare, after, before }, isUndefined );
-	const search = stringifyQuery( timeRelatedQuery );
+window.wpNavMenuUrlUpdate = function( page, query ) {
+	const search = stringifyQuery( getTimeRelatedQuery( query ) );
 
 	Array.from(
 		document.querySelectorAll( `#${ page.wpOpenMenu } a, #${ page.wpClosedMenu } a` )
