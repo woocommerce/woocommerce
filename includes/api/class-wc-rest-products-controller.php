@@ -665,7 +665,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			$date = rest_parse_date( $request['date_created_gmt'], true );
 
 			if ( $date ) {
-				$product->set_date_created_gmt( $date );
+				$product->set_date_created( $date );
 			}
 		}
 
