@@ -308,7 +308,7 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 
 		if ( ! empty( $query['search'] ) ) {
 			$sql .= " AND (p.post_title LIKE %s OR p.post_content LIKE %s OR p.post_password LIKE %s)";
-			for( $i = 0; $i < 3; $i++ ) {
+			for ( $i = 0; $i < 3; $i++ ) {
 				$sql_params[] = sprintf( '%%%s%%', $query['search'] );
 			}
 		}

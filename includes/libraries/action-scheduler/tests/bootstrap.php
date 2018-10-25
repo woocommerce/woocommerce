@@ -18,7 +18,7 @@ foreach ( array('WP_CONTENT_DIR', 'WP_CONTENT_URL', 'WP_PLUGIN_DIR', 'WP_PLUGIN_
 // Otherwise, we'll just assume that this plugin is installed in the WordPress
 // SVN external checkout configured in the wordpress-tests repo.
 
-if( false !== getenv( 'WP_TESTS_DIR' ) ) {
+if ( false !== getenv( 'WP_TESTS_DIR' ) ) {
 	require getenv( 'WP_TESTS_DIR' ) . '/includes/bootstrap.php';
 } else {
 	require dirname( dirname( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) ) ) . '/tests/phpunit/includes/bootstrap.php';

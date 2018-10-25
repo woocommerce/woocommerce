@@ -336,19 +336,19 @@ class Simplify_PaymentsApi
 	 */
 	static function buildAuthenticationObject($authentication = null, $args, $expectedArgCount){
 
-		if(sizeof($args) > $expectedArgCount) {
+		if (sizeof($args) > $expectedArgCount) {
 			$authentication = new Simplify_Authentication($args[$expectedArgCount-1], $args[$expectedArgCount]);
 		}
 
-		if ($authentication == null){
+		if ($authentication == null) {
 			$authentication = new Simplify_Authentication();
 		}
 
 		// check that the keys have been set, if not use the global keys
-		if ( empty($authentication->publicKey)){
+		if ( empty($authentication->publicKey) ) {
 			$authentication->publicKey = Simplify::$publicKey;
 		}
-		if ( empty($authentication->privateKey)){
+		if ( empty($authentication->privateKey) ) {
 			$authentication->privateKey = Simplify::$privateKey;
 		}
 
