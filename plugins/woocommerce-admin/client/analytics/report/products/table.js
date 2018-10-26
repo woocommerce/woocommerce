@@ -13,6 +13,7 @@ import { Card, Link, TableCard, TablePlaceholder } from '@woocommerce/components
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
 import { getNewPath, getTimeRelatedQuery, onQueryChange } from 'lib/nav-utils';
 import ReportError from 'analytics/components/report-error';
+import { QUERY_DEFAULTS } from 'store/constants';
 
 export default class ProductsReportTable extends Component {
 	getHeadersContent() {
@@ -163,7 +164,7 @@ export default class ProductsReportTable extends Component {
 	renderTable( tableQuery ) {
 		const { products, totalRows } = this.props;
 
-		const rowsPerPage = parseInt( tableQuery.per_page ) || 25;
+		const rowsPerPage = parseInt( tableQuery.per_page ) || QUERY_DEFAULTS.pageSize;
 		const orderedProducts = orderBy( products, tableQuery.orderby, tableQuery.order );
 		const rows = this.getRowsContent( orderedProducts );
 

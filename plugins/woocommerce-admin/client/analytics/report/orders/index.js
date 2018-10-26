@@ -16,6 +16,7 @@ import { EmptyContent, ReportFilters } from '@woocommerce/components';
 import { filters, advancedFilterConfig } from './config';
 import { getAdminLink } from 'lib/nav-utils';
 import { appendTimestamp, getCurrentDates } from 'lib/date';
+import { QUERY_DEFAULTS } from 'store/constants';
 import { getReportChartData } from 'store/reports/utils';
 import OrdersReportChart from './chart';
 import OrdersReportTable from './table';
@@ -105,7 +106,7 @@ export default compose(
 			orderby: query.orderby || 'date',
 			order: query.order || 'asc',
 			page: query.page || 1,
-			per_page: query.per_page || 25,
+			per_page: query.per_page || QUERY_DEFAULTS.pageSize,
 			after: appendTimestamp( datesFromQuery.primary.after, 'start' ),
 			before: appendTimestamp( datesFromQuery.primary.before, 'end' ),
 			status: [ 'processing', 'on-hold', 'completed' ],

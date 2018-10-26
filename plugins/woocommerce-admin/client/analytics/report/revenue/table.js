@@ -15,6 +15,7 @@ import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
 import { getDateFormatsForInterval, getIntervalForQuery } from 'lib/date';
 import { onQueryChange } from 'lib/nav-utils';
 import ReportError from 'analytics/components/report-error';
+import { QUERY_DEFAULTS } from 'store/constants';
 
 export default class RevenueReportTable extends Component {
 	getHeadersContent() {
@@ -163,7 +164,8 @@ export default class RevenueReportTable extends Component {
 		const { tableData, totalRows } = this.props;
 
 		const rowsPerPage =
-			( tableQuery && tableQuery.per_page && parseInt( tableQuery.per_page ) ) || 25;
+			( tableQuery && tableQuery.per_page && parseInt( tableQuery.per_page ) ) ||
+			QUERY_DEFAULTS.pageSize;
 		const rows = this.getRowsContent( tableData.data.intervals );
 
 		const headers = this.getHeadersContent();

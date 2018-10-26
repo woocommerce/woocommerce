@@ -21,6 +21,7 @@ import {
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
 import { getIntervalForQuery, getDateFormatsForInterval } from 'lib/date';
 import { getAdminLink, onQueryChange } from 'lib/nav-utils';
+import { QUERY_DEFAULTS } from 'store/constants';
 import './style.scss';
 
 export default class OrdersReportTable extends Component {
@@ -233,7 +234,7 @@ export default class OrdersReportTable extends Component {
 	renderTable( tableQuery ) {
 		const { orders, totalRows } = this.props;
 
-		const rowsPerPage = parseInt( tableQuery.per_page ) || 25;
+		const rowsPerPage = parseInt( tableQuery.per_page ) || QUERY_DEFAULTS.pageSize;
 		const rows = this.getRowsContent(
 			orderBy( this.formatTableData( orders ), tableQuery.orderby, tableQuery.order )
 		);

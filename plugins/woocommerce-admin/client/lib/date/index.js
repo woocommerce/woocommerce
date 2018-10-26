@@ -7,9 +7,12 @@ import { find } from 'lodash';
 import { __ } from '@wordpress/i18n';
 import { getSettings, format as formatDate } from '@wordpress/date';
 
+/**
+ * Internal dependencies
+ */
+import { QUERY_DEFAULTS } from 'store/constants';
+
 export const isoDateFormat = 'YYYY-MM-DD';
-const DEFAULT_PERIOD = 'month';
-const DEFAULT_COMPARE = 'previous_year';
 
 /**
  * DateValue Object
@@ -260,8 +263,8 @@ function getDateValue( period, compare, after, before ) {
  */
 export const getDateParamsFromQuery = ( { period, compare, after, before } ) => {
 	return {
-		period: period || DEFAULT_PERIOD,
-		compare: compare || DEFAULT_COMPARE,
+		period: period || QUERY_DEFAULTS.period,
+		compare: compare || QUERY_DEFAULTS.compare,
 		after: after ? moment( after ) : null,
 		before: before ? moment( before ) : null,
 	};
