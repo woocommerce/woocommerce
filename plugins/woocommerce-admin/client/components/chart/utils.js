@@ -402,18 +402,14 @@ export const drawAxis = ( node, params ) => {
 			d3AxisBottom( xScale )
 				.tickValues( ticks )
 				.tickFormat( ( d, i ) => {
-					let monthDate = d instanceof Date ? d : new Date( d );
+					const monthDate = d instanceof Date ? d : new Date( d );
 					let prevMonth = i !== 0 ? ticks[ i - 1 ] : ticks[ i ];
 					prevMonth = prevMonth instanceof Date ? prevMonth : new Date( prevMonth );
-					monthDate =
-						i !== 0
-							? compareStrings(
-									params.x2Format( prevMonth ),
-									params.x2Format( monthDate ),
-									params
-								).join( ' ' )
-							: params.x2Format( monthDate );
-					return i === 0 || monthDate !== params.x2Format( prevMonth ) ? monthDate : '';
+					return i === 0
+						? params.x2Format( monthDate )
+						: compareStrings( params.x2Format( prevMonth ), params.x2Format( monthDate ) ).join(
+								' '
+							);
 				} )
 		)
 		.call( g => g.select( '.domain' ).remove() );
