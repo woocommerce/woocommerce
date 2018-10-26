@@ -653,7 +653,7 @@ export const drawLines = ( node, data, params ) => {
 
 	focusGrid
 		.selectAll( 'circle' )
-		.data( d => d.values )
+		.data( d => d.values.reverse() )
 		.enter()
 		.append( 'circle' )
 		.attr( 'r', dotRadius + 2 )
