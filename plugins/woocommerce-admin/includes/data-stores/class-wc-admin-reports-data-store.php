@@ -389,7 +389,8 @@ class WC_Admin_Reports_Data_Store {
 			$prev_start->setTimestamp( $prev_start_timestamp );
 			if ( $datetime_start ) {
 				$start_datetime                  = new DateTime( $datetime_start );
-				$intervals[ $key ]['date_start'] = ( $prev_start < $start_datetime ? $start_datetime : $prev_start )->format( 'Y-m-d H:i:s' );
+				$date_start                      = $prev_start < $start_datetime ? $start_datetime : $prev_start;
+				$intervals[ $key ]['date_start'] = $date_start->format( 'Y-m-d H:i:s' );
 			} else {
 				$intervals[ $key ]['date_start'] = $prev_start->format( 'Y-m-d H:i:s' );
 			}
@@ -399,7 +400,8 @@ class WC_Admin_Reports_Data_Store {
 			$next_end->setTimestamp( $next_end_timestamp );
 			if ( $datetime_end ) {
 				$end_datetime                  = new DateTime( $datetime_end );
-				$intervals[ $key ]['date_end'] = ( $next_end > $end_datetime ? $end_datetime : $next_end )->format( 'Y-m-d H:i:s' );
+				$date_end                      = $next_end > $end_datetime ? $end_datetime : $next_end;
+				$intervals[ $key ]['date_end'] = $date_end->format( 'Y-m-d H:i:s' );
 			} else {
 				$intervals[ $key ]['date_end'] = $next_end->format( 'Y-m-d H:i:s' );
 			}
