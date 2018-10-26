@@ -686,7 +686,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		$params['context']['default'] = 'view';
 
 		$params['exclude'] = array(
-			'description'       => __( 'Ensure result set excludes specific ids.', 'woocommerce' ),
+			'description'       => __( 'Ensure result set excludes specific IDs.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'integer',
