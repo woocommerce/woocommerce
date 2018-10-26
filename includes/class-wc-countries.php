@@ -662,7 +662,7 @@ class WC_Countries {
 				'priority'     => 50,
 			),
 			'address_2'  => array(
-				'label'        => __( 'Apartment, suite, or unit.', 'woocommerce' ),
+				'label'        => __( 'Apartment, suite, unit etc.', 'woocommerce' ),
 				'label_class'  => 'screen-reader-text',
 				'placeholder'  => esc_attr( $address_2_placeholder ),
 				'class'        => array( 'form-row-wide', 'address-field' ),
@@ -1012,12 +1012,12 @@ class WC_Countries {
 					),
 					'NG' => array(
 						'postcode' => array(
-							'label' => __( 'Postcode', 'woocommerce' ),
+							'label'    => __( 'Postcode', 'woocommerce' ),
 							'required' => false,
 							'hidden'   => true,
 						),
 						'state'    => array(
-							'label'    => __( 'State', 'woocommerce' ),
+							'label' => __( 'State', 'woocommerce' ),
 						),
 					),
 					'NZ' => array(
