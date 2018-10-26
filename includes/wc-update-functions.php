@@ -1883,7 +1883,7 @@ function wc_update_350_order_customer_id( $updater = false ) {
 			"INSERT IGNORE INTO customers_map (SELECT post_id, meta_value FROM {$wpdb->prefix}postmeta WHERE meta_key = '_customer_user')"
 		);
 
-		$wpdb->query( 'SET sql_safe_updates=1' );
+		$wpdb->query( 'SET sql_safe_updates=0' );
 
 		$wpdb->query(
 			$wpdb->prepare(
