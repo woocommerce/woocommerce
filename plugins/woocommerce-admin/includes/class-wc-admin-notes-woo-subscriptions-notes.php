@@ -303,18 +303,20 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes {
 
 		if ( ! $note ) {
 			$note = new WC_Admin_Note();
-			$note->set_title( $note_title );
-			$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_WARNING );
-			$note->set_icon( 'notice' );
-			$note->set_name( self::SUBSCRIPTION_NOTE_NAME );
-			$note->set_source( 'wc-admin' );
-			$note->add_action(
-				'enable-autorenew',
-				__( 'Enable Autorenew', 'wc-admin' ),
-				'https://woocommerce.com/my-account/my-subscriptions/'
-			);
 		}
 
+		// Reset everything in case we are repurposing an expired note as an expiring note.
+		$note->set_title( $note_title );
+		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_WARNING );
+		$note->set_icon( 'notice' );
+		$note->set_name( self::SUBSCRIPTION_NOTE_NAME );
+		$note->set_source( 'wc-admin' );
+		$note->clear_actions();
+		$note->add_action(
+			'enable-autorenew',
+			__( 'Enable Autorenew', 'wc-admin' ),
+			'https://woocommerce.com/my-account/my-subscriptions/'
+		);
 		$note->set_content( $note_content );
 		$note->set_content_data( $note_content_data );
 		$note->save();
@@ -337,7 +339,7 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes {
 			$note_content_data = $note->get_content_data();
 			if ( $note_content_data->expired ) {
 				// We've already got a full fledged expired note for this. Bail.
-				// These notes' content doesn't change with time.
+				// Expired notes' content don't change with time.
 				return;
 			}
 		}
@@ -373,6 +375,7 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes {
 		$note->set_icon( 'notice' );
 		$note->set_name( self::SUBSCRIPTION_NOTE_NAME );
 		$note->set_source( 'wc-admin' );
+		$note->clear_actions();
 		$note->add_action(
 			'renew-subscription',
 			__( 'Renew Subscription', 'wc-admin' ),
