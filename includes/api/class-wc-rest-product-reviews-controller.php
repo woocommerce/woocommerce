@@ -926,7 +926,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		$params['context']['default'] = 'view';
 
 		$params['after']            = array(
-			'description' => __( 'Limit response to reviews published after a given ISO8601 compliant date.', 'woocommerce' ),
+			'description' => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce' ),
 			'type'        => 'string',
 			'format'      => 'date-time',
 		);
