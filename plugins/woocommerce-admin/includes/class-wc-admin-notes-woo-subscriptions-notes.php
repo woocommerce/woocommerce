@@ -13,21 +13,17 @@ defined( 'ABSPATH' ) || exit;
  * WC_Admin_Notes_Woo_Subscriptions_Notes
  */
 class WC_Admin_Notes_Woo_Subscriptions_Notes {
-	const CONNECTION_NOTE_NAME   = 'wc-admin-wc-helper-connection';
-	const SUBSCRIPTION_NOTE_NAME = 'wc-admin-wc-helper-subscription';
-	const NOTIFY_WHEN_DAYS_LEFT  = 460; // TODO: Put this back to 60.
+	const LAST_REFRESH_OPTION_KEY = 'wc-admin-wc-helper-last-refresh';
+	const CONNECTION_NOTE_NAME    = 'wc-admin-wc-helper-connection';
+	const SUBSCRIPTION_NOTE_NAME  = 'wc-admin-wc-helper-subscription';
+	const NOTIFY_WHEN_DAYS_LEFT   = 60;
 
 	/**
 	 * Hook all the things.
 	 */
 	public function __construct() {
-		add_action( 'admin_init', array( $this, 'remove_notes' ) ); // TODO For testing only. Do not commit this line.
-		add_action( 'admin_init', array( $this, 'check_connection' ) );
-		add_action( 'admin_init', array( $this, 'prune_inactive_subscription_notes' ) ); // TODO For testing only. Do not commit this line.
-		add_action( 'admin_init', array( $this, 'refresh_subscription_notes' ) ); // TODO For testing only. Do not commit this line.
+		add_action( 'admin_init', array( $this, 'admin_init' ) );
 		add_action( 'update_option_woocommerce_helper_data', array( $this, 'update_option_woocommerce_helper_data' ), 10, 2 );
-		// TODO : prune_inactive_subscription_notes daily.
-		// TODO : refresh_subscription_notes daily.
 	}
 
 	/**
@@ -62,8 +58,35 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes {
 			$this->refresh_subscription_notes();
 			return;
 		}
+	}
 
-		// TODO - refresh our notes if the user changes a subscription to active.
+	/**
+	 * Things to do on admin_init.
+	 */
+	public function admin_init() {
+		$this->check_connection();
+
+		if ( $this->is_connected() ) {
+			$refresh_notes = false;
+
+			// Did the user just do something on the helper page?.
+			if ( isset( $_GET['wc-helper-status'] ) ) {
+				$refresh_notes = true;
+			}
+
+			// Has it been more than a day since we last checked?
+			// Note: We do it this way and not wp_scheduled_task since WC_Helper_Options is not loaded for cron.
+			$time_now_gmt = current_time( 'timestamp', 0 );
+			$last_refresh = intval( get_option( self::LAST_REFRESH_OPTION_KEY, 0 ) );
+			if ( $last_refresh + DAY_IN_SECONDS <= $time_now_gmt ) {
+				update_option( self::LAST_REFRESH_OPTION_KEY, $time_now_gmt );
+				$refresh_notes = true;
+			}
+
+			if ( $refresh_notes ) {
+				$this->refresh_subscription_notes();
+			}
+		}
 	}
 
 	/**
@@ -74,6 +97,7 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes {
 			$data_store = WC_Data_Store::load( 'admin-note' );
 			$note_ids   = $data_store->get_notes_with_name( self::CONNECTION_NOTE_NAME );
 			if ( ! empty( $note_ids ) ) {
+				// We already have a connection note. Exit early.
 				return;
 			}
 
@@ -243,9 +267,20 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes {
 		$product_name          = $subscription['product_name'];
 		$expires               = intval( $subscription['expires'] );
 		$time_now_gmt          = current_time( 'timestamp', 0 );
-		$days_until_expiration = ceil( ( $expires - $time_now_gmt ) / DAY_IN_SECONDS );
+		$days_until_expiration = intval( ceil( ( $expires - $time_now_gmt ) / DAY_IN_SECONDS ) );
 
 		$note = $this->find_note_for_product_id( $product_id );
+
+		if ( $note ) {
+			$content_data = $note->get_content_data();
+			if ( property_exists( $content_data, 'days_until_expiration' ) ) {
+				$note_days_until_expiration = intval( $content_data->days_until_expiration );
+				if ( $days_until_expiration === $note_days_until_expiration ) {
+					// Note is already up to date. Bail.
+					return;
+				}
+			}
+		}
 
 		$note_title = sprintf(
 			/* translators: name of the extension subscription expiring soon */
@@ -347,12 +382,14 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes {
 	}
 
 	/**
-	 * For each active subscription on this site, checks the expiration date and creates/updates notes.
+	 * For each active subscription on this site, checks the expiration date and creates/updates/deletes notes.
 	 */
 	public function refresh_subscription_notes() {
 		if ( ! $this->is_connected() ) {
 			return;
 		}
+
+		$this->prune_inactive_subscription_notes();
 
 		$subscriptions      = WC_Helper::get_subscriptions();
 		$active_product_ids = $this->get_subscription_active_product_ids();
