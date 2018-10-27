@@ -1742,7 +1742,10 @@ S2.define('select2/selection/multiple',[
       var selection = data[d];
 
       var $selection = this.selectionContainer();
-      var formatted = this.display(selection, $selection).trim();
+      var formatted = this.display(selection, $selection);
+      if ('string' === typeof formatted) {
+        formatted = formatted.trim();
+      }
 
       $selection.append(formatted);
       $selection.prop('title', selection.title || selection.text);
@@ -5462,12 +5465,11 @@ S2.define('select2/core',[
     $(document).on('keydown', function (evt) {
       var key = evt.which;
       if (self.isOpen()) {
-        if (key === KEYS.ESC || key === KEYS.TAB ||
-            (key === KEYS.UP && evt.altKey)) {
+        if (key === KEYS.ESC || (key === KEYS.UP && evt.altKey)) {
           self.close();
 
           evt.preventDefault();
-        } else if (key === KEYS.ENTER) {
+        } else if (key === KEYS.ENTER || key === KEYS.TAB) {
           self.trigger('results:select', {});
 
           evt.preventDefault();

@@ -43,8 +43,7 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 		// Test the default options are present.
 		WC()->query->init_query_vars();
 		$default_vars = WC()->query->get_query_vars();
-		$expected = array(
-			'product-page'               => '',
+		$expected     = array(
 			'order-pay'                  => 'order-pay',
 			'order-received'             => 'order-received',
 			'orders'                     => 'orders',
@@ -66,9 +65,6 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 		WC()->query->init_query_vars();
 		$updated_vars = WC()->query->get_query_vars();
 		$this->assertEquals( 'order-pay-new', $updated_vars['order-pay'] );
-
-		// Clean up.
-		update_option( 'woocommerce_checkout_pay_endpoint', 'order-pay' );
 	}
 
 	/**
@@ -169,6 +165,8 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 
 	/**
 	 * Test the remove_ordering_args method.
+	 *
+	 * @group core-only
 	 */
 	public function test_remove_ordering_args() {
 		WC()->query->get_catalog_ordering_args( 'price', 'DESC' );
@@ -180,6 +178,8 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 
 	/**
 	 * Test the get_catalog_ordering_args method.
+	 *
+	 * @group core-only
 	 */
 	public function test_get_catalog_ordering_args() {
 		$data = array(

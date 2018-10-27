@@ -32,8 +32,8 @@ class WC_Admin_Reports {
 		$current_tab    = ! empty( $_GET['tab'] ) ? sanitize_title( $_GET['tab'] ) : $first_tab[0];
 		$current_report = isset( $_GET['report'] ) ? sanitize_title( $_GET['report'] ) : current( array_keys( $reports[ $current_tab ]['reports'] ) );
 
-		include_once( dirname( __FILE__ ) . '/reports/class-wc-admin-report.php' );
-		include_once( dirname( __FILE__ ) . '/views/html-admin-page-reports.php' );
+		include_once dirname( __FILE__ ) . '/reports/class-wc-admin-report.php';
+		include_once dirname( __FILE__ ) . '/views/html-admin-page-reports.php';
 	}
 
 	/**
@@ -43,16 +43,16 @@ class WC_Admin_Reports {
 	 */
 	public static function get_reports() {
 		$reports = array(
-			'orders'     => array(
-				'title'  => __( 'Orders', 'woocommerce' ),
+			'orders'    => array(
+				'title'   => __( 'Orders', 'woocommerce' ),
 				'reports' => array(
-					'sales_by_date' => array(
+					'sales_by_date'     => array(
 						'title'       => __( 'Sales by date', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => true,
 						'callback'    => array( __CLASS__, 'get_report' ),
 					),
-					'sales_by_product' => array(
+					'sales_by_product'  => array(
 						'title'       => __( 'Sales by product', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => true,
@@ -64,13 +64,13 @@ class WC_Admin_Reports {
 						'hide_title'  => true,
 						'callback'    => array( __CLASS__, 'get_report' ),
 					),
-					'coupon_usage' => array(
+					'coupon_usage'      => array(
 						'title'       => __( 'Coupons by date', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => true,
 						'callback'    => array( __CLASS__, 'get_report' ),
 					),
-					'downloads' => array(
+					'downloads'         => array(
 						'title'       => __( 'Customer downloads', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => true,
@@ -79,9 +79,9 @@ class WC_Admin_Reports {
 				),
 			),
 			'customers' => array(
-				'title'  => __( 'Customers', 'woocommerce' ),
+				'title'   => __( 'Customers', 'woocommerce' ),
 				'reports' => array(
-					'customers' => array(
+					'customers'     => array(
 						'title'       => __( 'Customers vs. guests', 'woocommerce' ),
 						'description' => '',
 						'hide_title'  => true,
@@ -96,7 +96,7 @@ class WC_Admin_Reports {
 				),
 			),
 			'stock'     => array(
-				'title'  => __( 'Stock', 'woocommerce' ),
+				'title'   => __( 'Stock', 'woocommerce' ),
 				'reports' => array(
 					'low_in_stock' => array(
 						'title'       => __( 'Low in stock', 'woocommerce' ),
@@ -122,7 +122,7 @@ class WC_Admin_Reports {
 
 		if ( wc_tax_enabled() ) {
 			$reports['taxes'] = array(
-				'title'  => __( 'Taxes', 'woocommerce' ),
+				'title'   => __( 'Taxes', 'woocommerce' ),
 				'reports' => array(
 					'taxes_by_code' => array(
 						'title'       => __( 'Taxes by code', 'woocommerce' ),
@@ -167,7 +167,7 @@ class WC_Admin_Reports {
 		$name  = sanitize_title( str_replace( '_', '-', $name ) );
 		$class = 'WC_Report_' . str_replace( '-', '_', $name );
 
-		include_once( apply_filters( 'wc_admin_reports_path', 'reports/class-wc-report-' . $name . '.php', $name, $class ) );
+		include_once apply_filters( 'wc_admin_reports_path', 'reports/class-wc-report-' . $name . '.php', $name, $class );
 
 		if ( ! class_exists( $class ) ) {
 			return;

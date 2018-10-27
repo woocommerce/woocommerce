@@ -121,7 +121,7 @@
 					if ( response.success ) {
 						var data = response.data;
 
-						$( 'h3', self.el ).first().append( '<div class="wc-api-message updated"><p>' + data.message + '</p></div>' );
+						$( 'h2, h3', self.el ).first().append( '<div class="wc-api-message updated"><p>' + data.message + '</p></div>' );
 
 						if ( 0 < data.consumer_key.length && 0 < data.consumer_secret.length ) {
 							$( '#api-keys-options', self.el ).remove();

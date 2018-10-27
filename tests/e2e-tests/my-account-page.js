@@ -115,6 +115,13 @@ test.describe( 'My account page', function() {
 		assert.eventually.ok( myAccount.hasText( 'Account details' ), 'see "Account details" text' );
 	} );
 
+	// take screenshot
+	test.afterEach( function() {
+		if ( this.currentTest.state === 'failed' ) {
+			helper.takeScreenshot( manager, this.currentTest );
+		}
+	} );
+
 	// quit browser
 	test.after( () => {
 		manager.quitBrowser();

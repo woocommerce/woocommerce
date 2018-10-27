@@ -138,8 +138,9 @@
 							var $tr = view.$el.find( 'tr[data-id="' + rowData.instance_id + '"]');
 
 							if ( ! rowData.has_settings ) {
-								$tr.find( '.wc-shipping-zone-method-title a').replaceWith( $tr.find( '.wc-shipping-zone-method-title' ).text() );
-								$tr.find( '.wc-shipping-zone-method-settings' ).remove();
+								$tr.find( '.wc-shipping-zone-method-title > a' ).replaceWith('<span>' + $tr.find( '.wc-shipping-zone-method-title > a' ).text() + '</span>' );
+								var $del = $tr.find( '.wc-shipping-zone-method-delete' );
+								$tr.find( '.wc-shipping-zone-method-title .row-actions' ).empty().html($del);
 							}
 						} );
 

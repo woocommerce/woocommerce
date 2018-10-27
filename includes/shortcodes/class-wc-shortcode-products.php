@@ -110,26 +110,34 @@ class WC_Shortcode_Products {
 	protected function parse_attributes( $attributes ) {
 		$attributes = $this->parse_legacy_attributes( $attributes );
 
-		return shortcode_atts( array(
-			'limit'          => '-1',      // Results limit.
-			'columns'        => '3',       // Number of columns.
-			'rows'           => '',        // Number of rows. If defined, limit will be ignored.
-			'orderby'        => 'title',   // menu_order, title, date, rand, price, popularity, rating, or id.
-			'order'          => 'ASC',     // ASC or DESC.
-			'ids'            => '',        // Comma separated IDs.
-			'skus'           => '',        // Comma separated SKUs.
-			'category'       => '',        // Comma separated category slugs.
-			'cat_operator'   => 'IN',      // Operator to compare categories. Possible values are 'IN', 'NOT IN', 'AND'.
-			'attribute'      => '',        // Single attribute slug.
-			'terms'          => '',        // Comma separated term slugs.
-			'terms_operator' => 'IN',      // Operator to compare terms. Possible values are 'IN', 'NOT IN', 'AND'.
-			'tag'            => '',        // Comma separated tag slugs.
-			'visibility'     => 'visible', // Possible values are 'visible', 'catalog', 'search', 'hidden'.
-			'class'          => '',        // HTML class.
-			'page'           => 1,         // Page for pagination.
-			'paginate'       => false,     // Should results be paginated.
-			'cache'          => true,      // Should shortcode output be cached.
-		), $attributes, $this->type );
+		$attributes = shortcode_atts(
+			array(
+				'limit'          => '-1',      // Results limit.
+				'columns'        => '',        // Number of columns.
+				'rows'           => '',        // Number of rows. If defined, limit will be ignored.
+				'orderby'        => 'title',   // menu_order, title, date, rand, price, popularity, rating, or id.
+				'order'          => 'ASC',     // ASC or DESC.
+				'ids'            => '',        // Comma separated IDs.
+				'skus'           => '',        // Comma separated SKUs.
+				'category'       => '',        // Comma separated category slugs or ids.
+				'cat_operator'   => 'IN',      // Operator to compare categories. Possible values are 'IN', 'NOT IN', 'AND'.
+				'attribute'      => '',        // Single attribute slug.
+				'terms'          => '',        // Comma separated term slugs or ids.
+				'terms_operator' => 'IN',      // Operator to compare terms. Possible values are 'IN', 'NOT IN', 'AND'.
+				'tag'            => '',        // Comma separated tag slugs.
+				'visibility'     => 'visible', // Possible values are 'visible', 'catalog', 'search', 'hidden'.
+				'class'          => '',        // HTML class.
+				'page'           => 1,         // Page for pagination.
+				'paginate'       => false,     // Should results be paginated.
+				'cache'          => true,      // Should shortcode output be cached.
+			), $attributes, $this->type
+		);
+
+		if ( ! absint( $attributes['columns'] ) ) {
+			$attributes['columns'] = wc_get_default_products_per_row();
+		}
+
+		return $attributes;
 	}
 
 	/**
@@ -168,12 +176,17 @@ class WC_Shortcode_Products {
 			'post_status'         => 'publish',
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => false === wc_string_to_bool( $this->attributes['paginate'] ),
-			'orderby'             => $this->attributes['orderby'],
-			'order'               => strtoupper( $this->attributes['order'] ),
+			'orderby'             => empty( $_GET['orderby'] ) ? $this->attributes['orderby'] : wc_clean( wp_unslash( $_GET['orderby'] ) ),
 		);
 
+		$orderby_value         = explode( '-', $query_args['orderby'] );
+		$orderby               = esc_attr( $orderby_value[0] );
+		$order                 = ! empty( $orderby_value[1] ) ? $orderby_value[1] : strtoupper( $this->attributes['order'] );
+		$query_args['orderby'] = $orderby;
+		$query_args['order']   = $order;
+
 		if ( wc_string_to_bool( $this->attributes['paginate'] ) ) {
-			$this->attributes['page'] = get_query_var( 'product-page', 1 );
+			$this->attributes['page'] = absint( empty( $_GET['product-page'] ) ? 1 : $_GET['product-page'] ); // WPCS: input var ok, CSRF ok.
 		}
 
 		if ( ! empty( $this->attributes['rows'] ) ) {
@@ -269,10 +282,38 @@ class WC_Shortcode_Products {
 	 */
 	protected function set_attributes_query_args( &$query_args ) {
 		if ( ! empty( $this->attributes['attribute'] ) || ! empty( $this->attributes['terms'] ) ) {
+			$taxonomy = strstr( $this->attributes['attribute'], 'pa_' ) ? sanitize_title( $this->attributes['attribute'] ) : 'pa_' . sanitize_title( $this->attributes['attribute'] );
+			$terms    = $this->attributes['terms'] ? array_map( 'sanitize_title', explode( ',', $this->attributes['terms'] ) ) : array();
+			$field    = 'slug';
+
+			if ( $terms && is_numeric( $terms[0] ) ) {
+				$field = 'term_id';
+				$terms = array_map( 'absint', $terms );
+				// Check numeric slugs.
+				foreach ( $terms as $term ) {
+					$the_term = get_term_by( 'slug', $term, $taxonomy );
+					if ( false !== $the_term ) {
+						$terms[] = $the_term->term_id;
+					}
+				}
+			}
+
+			// If no terms were specified get all products that are in the attribute taxonomy.
+			if ( ! $terms ) {
+				$terms = get_terms(
+					array(
+						'taxonomy' => $taxonomy,
+						'fields'   => 'ids',
+					)
+				);
+				$field = 'term_id';
+			}
+
+			// We always need to search based on the slug as well, this is to accommodate numeric slugs.
 			$query_args['tax_query'][] = array(
-				'taxonomy' => strstr( $this->attributes['attribute'], 'pa_' ) ? sanitize_title( $this->attributes['attribute'] ) : 'pa_' . sanitize_title( $this->attributes['attribute'] ),
-				'terms'    => array_map( 'sanitize_title', explode( ',', $this->attributes['terms'] ) ),
-				'field'    => 'slug',
+				'taxonomy' => $taxonomy,
+				'terms'    => $terms,
+				'field'    => $field,
 				'operator' => $this->attributes['terms_operator'],
 			);
 		}
@@ -286,11 +327,32 @@ class WC_Shortcode_Products {
 	 */
 	protected function set_categories_query_args( &$query_args ) {
 		if ( ! empty( $this->attributes['category'] ) ) {
+			$categories = array_map( 'sanitize_title', explode( ',', $this->attributes['category'] ) );
+			$field      = 'slug';
+
+			if ( is_numeric( $categories[0] ) ) {
+				$field = 'term_id';
+				$categories = array_map( 'absint', $categories );
+				// Check numeric slugs.
+				foreach ( $categories as $cat ) {
+					$the_cat = get_term_by( 'slug', $cat, 'product_cat' );
+					if ( false !== $the_cat ) {
+						$categories[] = $the_cat->term_id;
+					}
+				}
+			}
+
 			$query_args['tax_query'][] = array(
-				'taxonomy' => 'product_cat',
-				'terms'    => array_map( 'sanitize_title', explode( ',', $this->attributes['category'] ) ),
-				'field'    => 'slug',
-				'operator' => $this->attributes['cat_operator'],
+				'taxonomy'         => 'product_cat',
+				'terms'            => $categories,
+				'field'            => $field,
+				'operator'         => $this->attributes['cat_operator'],
+
+				/*
+				 * When cat_operator is AND, the children categories should be excluded,
+				 * as only products belonging to all the children categories would be selected.
+				 */
+				'include_children' => 'AND' === $this->attributes['cat_operator'] ? false : true,
 			);
 		}
 	}
@@ -519,10 +581,8 @@ class WC_Shortcode_Products {
 				set_transient( $transient_name, $results, DAY_IN_SECONDS * 30 );
 			}
 		}
-		// Remove ordering query arguments.
-		if ( ! empty( $this->attributes['category'] ) ) {
-			WC()->query->remove_ordering_args();
-		}
+		// Remove ordering query arguments which may have been added by get_catalog_ordering_args.
+		WC()->query->remove_ordering_args();
 		return $results;
 	}
 
@@ -540,27 +600,34 @@ class WC_Shortcode_Products {
 		ob_start();
 
 		if ( $products && $products->ids ) {
-			// Prime meta cache to reduce future queries.
-			update_meta_cache( 'post', $products->ids );
-			update_object_term_cache( $products->ids, 'product' );
+			// Prime caches to reduce future queries.
+			if ( is_callable( '_prime_post_caches' ) ) {
+				_prime_post_caches( $products->ids );
+			}
 
 			// Setup the loop.
-			wc_setup_loop( array(
-				'columns'      => $columns,
-				'name'         => $this->type,
-				'is_shortcode' => true,
-				'is_search'    => false,
-				'is_paginated' => wc_string_to_bool( $this->attributes['paginate'] ),
-				'total'        => $products->total,
-				'total_pages'  => $products->total_pages,
-				'per_page'     => $products->per_page,
-				'current_page' => $products->current_page,
-			) );
+			wc_setup_loop(
+				array(
+					'columns'      => $columns,
+					'name'         => $this->type,
+					'is_shortcode' => true,
+					'is_search'    => false,
+					'is_paginated' => wc_string_to_bool( $this->attributes['paginate'] ),
+					'total'        => $products->total,
+					'total_pages'  => $products->total_pages,
+					'per_page'     => $products->per_page,
+					'current_page' => $products->current_page,
+				)
+			);
 
 			$original_post = $GLOBALS['post'];
 
 			do_action( "woocommerce_shortcode_before_{$this->type}_loop", $this->attributes );
-			do_action( 'woocommerce_before_shop_loop' );
+
+			// Fire standard shop loop hooks when paginating results so we can show result counts and so on.
+			if ( wc_string_to_bool( $this->attributes['paginate'] ) ) {
+				do_action( 'woocommerce_before_shop_loop' );
+			}
 
 			woocommerce_product_loop_start();
 
@@ -583,7 +650,11 @@ class WC_Shortcode_Products {
 			$GLOBALS['post'] = $original_post; // WPCS: override ok.
 			woocommerce_product_loop_end();
 
-			do_action( 'woocommerce_after_shop_loop' );
+			// Fire standard shop loop hooks when paginating results so we can show result counts and so on.
+			if ( wc_string_to_bool( $this->attributes['paginate'] ) ) {
+				do_action( 'woocommerce_after_shop_loop' );
+			}
+
 			do_action( "woocommerce_shortcode_after_{$this->type}_loop", $this->attributes );
 
 			wp_reset_postdata();

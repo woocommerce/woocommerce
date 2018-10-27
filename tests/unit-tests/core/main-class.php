@@ -42,7 +42,7 @@ class WC_Test_WooCommerce extends WC_Unit_Test_Case {
 		$this->assertEquals( str_replace( 'tests/unit-tests/core/', '', plugin_dir_path( __FILE__ ) ) . 'woocommerce.php', WC_PLUGIN_FILE );
 		$this->assertEquals( $this->wc->version, WC_VERSION );
 		$this->assertEquals( WC_VERSION, WOOCOMMERCE_VERSION );
-		$this->assertEquals( 4, WC_ROUNDING_PRECISION );
+		$this->assertEquals( 6, WC_ROUNDING_PRECISION );
 		$this->assertEquals( 2, WC_DISCOUNT_ROUNDING_MODE );
 		$this->assertEquals( 'wc_session_id', WC_SESSION_CACHE_GROUP );
 		$this->assertContains( WC_TAX_ROUNDING_MODE, array( 2, 1, 'auto' ) );

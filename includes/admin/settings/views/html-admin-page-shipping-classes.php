@@ -46,7 +46,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		foreach ( $shipping_class_columns as $class => $heading ) {
 			echo '<td class="' . esc_attr( $class ) . '">';
 			switch ( $class ) {
-				case 'wc-shipping-class-name' :
+				case 'wc-shipping-class-name':
 					?>
 					<div class="view">
 						{{ data.name }}
@@ -61,27 +61,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 						</div>
 					</div>
 					<?php
-				break;
-				case 'wc-shipping-class-slug' :
+					break;
+				case 'wc-shipping-class-slug':
 					?>
 					<div class="view">{{ data.slug }}</div>
 					<div class="edit"><input type="text" name="slug[{{ data.term_id }}]" data-attribute="slug" value="{{ data.slug }}" placeholder="<?php esc_attr_e( 'Slug', 'woocommerce' ); ?>" /></div>
 					<?php
-				break;
-				case 'wc-shipping-class-description' :
+					break;
+				case 'wc-shipping-class-description':
 					?>
 					<div class="view">{{ data.description }}</div>
 					<div class="edit"><input type="text" name="description[{{ data.term_id }}]" data-attribute="description" value="{{ data.description }}" placeholder="<?php esc_attr_e( 'Description for your reference', 'woocommerce' ); ?>" /></div>
 					<?php
-				break;
-				case 'wc-shipping-class-count' :
+					break;
+				case 'wc-shipping-class-count':
 					?>
 					<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=product&product_shipping_class=' ) ); ?>{{data.slug}}">{{ data.count }}</a>
 					<?php
-				break;
-				default :
+					break;
+				default:
 					do_action( 'woocommerce_shipping_classes_column_' . $class );
-				break;
+					break;
 			}
 			echo '</td>';
 		}

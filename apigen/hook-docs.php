@@ -58,34 +58,42 @@ class WC_HookFinder {
 	}
 
 	public static function process_hooks() {
-		// If we have one, get the PHP files from it.
-		$template_files 	= self::get_files( '*.php', GLOB_MARK, '../templates/' );
-		$template_files[]	= '../includes/wc-template-functions.php';
-		$template_files[]	= '../includes/wc-template-hooks.php';
+		self::$files_to_scan = array();
 
-		$shortcode_files 	= self::get_files( '*.php', GLOB_MARK, '../includes/shortcodes/' );
-		$widget_files	 	= self::get_files( '*.php', GLOB_MARK, '../includes/widgets/' );
-		$admin_files 		= self::get_files( '*.php', GLOB_MARK, '../includes/admin/' );
-		$class_files 		= self::get_files( '*.php', GLOB_MARK, '../includes/' );
-		$other_files		= array(
-			'../woocommerce.php'
+		self::$files_to_scan['Template Files']     = self::get_files( '*.php', GLOB_MARK, '../templates/' );
+		self::$files_to_scan['Template Functions'] = array( '../includes/wc-template-functions.php', '../includes/wc-template-hooks.php' );
+		self::$files_to_scan['Shortcodes']         = self::get_files( '*.php', GLOB_MARK, '../includes/shortcodes/' );
+		self::$files_to_scan['Widgets']            = self::get_files( '*.php', GLOB_MARK, '../includes/widgets/' );
+		self::$files_to_scan['Data Stores']        = self::get_files( '*.php', GLOB_MARK, '../includes/data-stores' );
+		self::$files_to_scan['Core Classes']       = array_merge(
+			self::get_files( '*.php', GLOB_MARK, '../includes/' ),
+			self::get_files( '*.php', GLOB_MARK, '../includes/abstracts/' ),
+			self::get_files( '*.php', GLOB_MARK, '../includes/customizer/' ),
+			self::get_files( '*.php', GLOB_MARK, '../includes/emails/' ),
+			self::get_files( '*.php', GLOB_MARK, '../includes/export/' ),
+			self::get_files( '*.php', GLOB_MARK, '../includes/gateways/' ),
+			self::get_files( '*.php', GLOB_MARK, '../includes/import/' ),
+			self::get_files( '*.php', GLOB_MARK, '../includes/shipping/' )
 		);
 
-		self::$files_to_scan = array(
-			'Template Hooks'  => $template_files,
-			'Shortcode Hooks' => $shortcode_files,
-			'Widget Hooks'    => $widget_files,
-			'Class Hooks'     => $class_files,
-			'Admin Hooks'     => $admin_files,
-			'Other Hooks'     => $other_files,
-		);
+		self::$files_to_scan = array_filter( self::$files_to_scan );
 
 		$scanned = array();
 
 		ob_start();
 
+		$index = array();
+
+		foreach ( self::$files_to_scan as $heading => $files ) {
+			$index[] = '<a href="#hooks-' . str_replace( ' ', '-', strtolower( $heading ) ) . '">' . $heading . '</a>';
+		}
+
 		echo '<div id="content">';
 		echo '<h1>Action and Filter Hook Reference</h1>';
+		echo '<div class="description">
+			<p>This is simply a list of action and filter hooks found within WooCommerce files. View the source to see supported params and usage.</p>
+			<p>' . implode( ', ', $index ) . '</p>
+		</div>';
 
 		foreach ( self::$files_to_scan as $heading => $files ) {
 			self::$custom_hooks_found = array();
@@ -125,43 +133,36 @@ class WC_HookFinder {
 								case 'filter' :
 								case 'action' :
 									$hook = trim( $token[1], "'" );
+									$hook = str_replace( '_FUNCTION_', strtoupper( $current_function ), $hook );
+									$hook = str_replace( '_CLASS_', strtoupper( $current_class ), $hook );
+									$hook = str_replace( '$this', strtoupper( $current_class ), $hook );
+									$hook = str_replace( array( '.', '{', '}', '"', "'", ' ', ')', '(' ), '', $hook );
 									$loop = 0;
 
-									if ( '_' === substr( $hook, '-1', 1 ) ) {
-										$hook .= '{';
-										$open = true;
-										// Keep adding to hook until we find a comma or colon
-										while ( 1 ) {
-											$loop ++;
-											$next_hook  = trim( trim( is_string( $tokens[ $index + $loop ] ) ? $tokens[ $index + $loop ] : $tokens[ $index + $loop ][1], '"' ), "'" );
+									// Keep adding to hook until we find a comma or colon
+									while ( 1 ) {
+										$loop ++;
+										$prev_hook = is_string( $tokens[ $index + $loop - 1 ] ) ? $tokens[ $index + $loop - 1 ] : $tokens[ $index + $loop - 1 ][1];
+										$next_hook = is_string( $tokens[ $index + $loop ] ) ? $tokens[ $index + $loop ] : $tokens[ $index + $loop ][1];
 
-											if ( in_array( $next_hook, array( '.', '{', '}', '"', "'", ' ' ) ) ) {
-												continue;
-											}
-
-											$hook_first = substr( $next_hook, 0, 1 );
-											$hook_last  = substr( $next_hook, -1, 1 );
-
-											if ( in_array( $next_hook, array( ',', ';' ) ) ) {
-												if ( $open ) {
-													$hook .= '}';
-													$open = false;
-												}
-												break;
-											}
-
-											if ( '_' === $hook_first ) {
-												$next_hook = '}' . $next_hook;
-												$open = false;
-											}
-
-											if ( '_' === $hook_last ) {
-												$next_hook .= '{';
-												$open = true;
-											}
-
-											$hook .= $next_hook;
+										if ( in_array( $next_hook, array( '.', '{', '}', '"', "'", ' ', ')', '(' ) ) ) {
+											continue;
 										}
+
+										if ( in_array( $next_hook, array( ',', ';' ) ) ) {
+											break;
+										}
+
+										$hook_first = substr( $next_hook, 0, 1 );
+										$hook_last  = substr( $next_hook, -1, 1 );
+
+										if ( '{' === $hook_first || '}' === $hook_last || '$' === $hook_first || ')' === $hook_last || '>' === substr( $prev_hook, -1, 1 ) ) {
+											$next_hook = strtoupper( $next_hook );
+										}
+
+										$next_hook = str_replace( array( '.', '{', '}', '"', "'", ' ', ')', '(' ), '', $next_hook );
+
+										$hook .= $next_hook;
 									}
 
 									if ( isset( self::$custom_hooks_found[ $hook ] ) ) {
@@ -185,14 +186,14 @@ class WC_HookFinder {
 
 			foreach ( self::$custom_hooks_found as $hook => $details ) {
 				if ( ! strstr( $hook, 'woocommerce' ) && ! strstr( $hook, 'product' ) && ! strstr( $hook, 'wc_' ) ) {
-					unset( self::$custom_hooks_found[ $hook ] );
+					//unset( self::$custom_hooks_found[ $hook ] );
 				}
 			}
 
 			ksort( self::$custom_hooks_found );
 
 			if ( ! empty( self::$custom_hooks_found ) ) {
-				echo '<div class="panel panel-default"><div class="panel-heading"><h2>' . $heading . '</h2></div>';
+				echo '<div class="panel panel-default"><div class="panel-heading"><h2 id="hooks-' . str_replace( ' ', '-', strtolower( $heading ) ) . '">' . $heading . '</h2></div>';
 
 				echo '<table class="summary table table-bordered table-striped"><thead><tr><th>Hook</th><th>Type</th><th>File(s)</th></tr></thead><tbody>';
 

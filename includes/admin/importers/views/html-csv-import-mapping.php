@@ -2,14 +2,14 @@
 /**
  * Admin View: Importer - CSV mapping
  *
- * @package WooCommerce/Admin
+ * @package WooCommerce\Admin\Importers
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 ?>
-<form class="wc-progress-form-content woocommerce-importer" method="post" action="<?php echo esc_url( $this->get_next_step_link() ) ?>">
+<form class="wc-progress-form-content woocommerce-importer" method="post" action="<?php echo esc_url( $this->get_next_step_link() ); ?>">
 	<header>
 		<h2><?php esc_html_e( 'Map CSV fields to products', 'woocommerce' ); ?></h2>
 		<p><?php esc_html_e( 'Select fields from your CSV file to map against products fields, or to ignore during import.', 'woocommerce' ); ?></p>

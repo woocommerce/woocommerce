@@ -88,7 +88,7 @@ class WC_Admin_Duplicate_Product {
 		}
 
 		if ( isset( $_GET['post'] ) ) {
-			$notify_url = wp_nonce_url( admin_url( "edit.php?post_type=product&action=duplicate_product&post=" . absint( $_GET['post'] ) ), 'woocommerce-duplicate-product_' . $_GET['post'] );
+			$notify_url = wp_nonce_url( admin_url( 'edit.php?post_type=product&action=duplicate_product&post=' . absint( $_GET['post'] ) ), 'woocommerce-duplicate-product_' . $_GET['post'] );
 			?>
 			<div id="duplicate-action"><a class="submitduplicate duplication" href="<?php echo esc_url( $notify_url ); ?>"><?php _e( 'Copy to a new draft', 'woocommerce' ); ?></a></div>
 			<?php
@@ -166,6 +166,7 @@ class WC_Admin_Duplicate_Product {
 				$child_duplicate = clone $child;
 				$child_duplicate->set_parent_id( $duplicate->get_id() );
 				$child_duplicate->set_id( 0 );
+				$child_duplicate->set_date_created( null );
 
 				if ( '' !== $child->get_sku( 'edit' ) ) {
 					$child_duplicate->set_sku( wc_product_generate_unique_sku( 0, $child->get_sku( 'edit' ) ) );

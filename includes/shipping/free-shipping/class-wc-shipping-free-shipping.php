@@ -1,4 +1,10 @@
 <?php
+/**
+ * Class WC_Shipping_Free_Shipping file.
+ *
+ * @package WooCommerce\Shipping
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -11,7 +17,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @class   WC_Shipping_Free_Shipping
  * @version 2.6.0
  * @package WooCommerce/Classes/Shipping
- * @author  WooThemes
  */
 class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 
@@ -70,14 +75,14 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 	 */
 	public function init_form_fields() {
 		$this->instance_form_fields = array(
-			'title' => array(
+			'title'      => array(
 				'title'       => __( 'Title', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
 				'default'     => $this->method_title,
 				'desc_tip'    => true,
 			),
-			'requires' => array(
+			'requires'   => array(
 				'title'   => __( 'Free shipping requires...', 'woocommerce' ),
 				'type'    => 'select',
 				'class'   => 'wc-enhanced-select',
@@ -108,8 +113,8 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 	 */
 	public function get_instance_form_fields() {
 		if ( is_admin() ) {
-			wc_enqueue_js( "
-				jQuery( function( $ ) {
+			wc_enqueue_js(
+				"jQuery( function( $ ) {
 					function wcFreeShippingShowHideMinAmountField( el ) {
 						var form = $( el ).closest( 'form' );
 						var minAmountField = $( '#woocommerce_free_shipping_min_amount', form ).closest( 'tr' );
@@ -131,8 +136,8 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 							wcFreeShippingShowHideMinAmountField( $( '#wc-backbone-modal-dialog #woocommerce_free_shipping_requires', evt.currentTarget ) );
 						}
 					} );
-				});
-			" );
+				});"
+			);
 		}
 
 		return parent::get_instance_form_fields();
@@ -148,8 +153,10 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 		$has_coupon         = false;
 		$has_met_min_amount = false;
 
-		if ( in_array( $this->requires, array( 'coupon', 'either', 'both' ) ) ) {
-			if ( $coupons = WC()->cart->get_coupons() ) {
+		if ( in_array( $this->requires, array( 'coupon', 'either', 'both' ), true ) ) {
+			$coupons = WC()->cart->get_coupons();
+
+			if ( $coupons ) {
 				foreach ( $coupons as $code => $coupon ) {
 					if ( $coupon->is_valid() && $coupon->get_free_shipping() ) {
 						$has_coupon = true;
@@ -159,7 +166,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 			}
 		}
 
-		if ( in_array( $this->requires, array( 'min_amount', 'either', 'both' ) ) ) {
+		if ( in_array( $this->requires, array( 'min_amount', 'either', 'both' ), true ) ) {
 			$total = WC()->cart->get_displayed_subtotal();
 
 			if ( WC()->cart->display_prices_including_tax() ) {
@@ -174,19 +181,19 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 		}
 
 		switch ( $this->requires ) {
-			case 'min_amount' :
+			case 'min_amount':
 				$is_available = $has_met_min_amount;
 				break;
-			case 'coupon' :
+			case 'coupon':
 				$is_available = $has_coupon;
 				break;
-			case 'both' :
+			case 'both':
 				$is_available = $has_met_min_amount && $has_coupon;
 				break;
-			case 'either' :
+			case 'either':
 				$is_available = $has_met_min_amount || $has_coupon;
 				break;
-			default :
+			default:
 				$is_available = true;
 				break;
 		}
@@ -202,11 +209,13 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 	 * @param array $package Shipping package.
 	 */
 	public function calculate_shipping( $package = array() ) {
-		$this->add_rate( array(
-			'label'   => $this->title,
-			'cost'    => 0,
-			'taxes'   => false,
-			'package' => $package,
-		) );
+		$this->add_rate(
+			array(
+				'label'   => $this->title,
+				'cost'    => 0,
+				'taxes'   => false,
+				'package' => $package,
+			)
+		);
 	}
 }

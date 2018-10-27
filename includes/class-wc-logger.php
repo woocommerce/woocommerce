@@ -1,16 +1,16 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 /**
  * Provides logging capabilities for debugging purposes.
  *
  * @class          WC_Logger
  * @version        2.0.0
  * @package        WooCommerce/Classes
- * @category       Class
- * @author         WooThemes
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * WC_Logger class.
  */
 class WC_Logger implements WC_Logger_Interface {
 
@@ -31,12 +31,8 @@ class WC_Logger implements WC_Logger_Interface {
 	/**
 	 * Constructor for the logger.
 	 *
-	 * @param array $handlers Optional. Array of log handlers. If $handlers is not provided,
-	 *     the filter 'woocommerce_register_log_handlers' will be used to define the handlers.
-	 *     If $handlers is provided, the filter will not be applied and the handlers will be
-	 *     used directly.
-	 * @param string $threshold Optional. Define an explicit threshold. May be configured
-	 *     via  WC_LOG_THRESHOLD. By default, all logs will be processed.
+	 * @param array  $handlers Optional. Array of log handlers. If $handlers is not provided, the filter 'woocommerce_register_log_handlers' will be used to define the handlers. If $handlers is provided, the filter will not be applied and the handlers will be used directly.
+	 * @param string $threshold Optional. Define an explicit threshold. May be configured via  WC_LOG_THRESHOLD. By default, all logs will be processed.
 	 */
 	public function __construct( $handlers = null, $threshold = null ) {
 		if ( null === $handlers ) {
@@ -48,7 +44,7 @@ class WC_Logger implements WC_Logger_Interface {
 		if ( ! empty( $handlers ) && is_array( $handlers ) ) {
 			foreach ( $handlers as $handler ) {
 				$implements = class_implements( $handler );
-				if ( is_object( $handler ) && is_array( $implements ) && in_array( 'WC_Log_Handler_Interface', $implements ) ) {
+				if ( is_object( $handler ) && is_array( $implements ) && in_array( 'WC_Log_Handler_Interface', $implements, true ) ) {
 					$register_handlers[] = $handler;
 				} else {
 					wc_doing_it_wrong(
@@ -80,7 +76,7 @@ class WC_Logger implements WC_Logger_Interface {
 	/**
 	 * Determine whether to handle or ignore log.
 	 *
-	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
+	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug.
 	 * @return bool True if the log should be handled.
 	 */
 	protected function should_handle( $level ) {
@@ -96,15 +92,17 @@ class WC_Logger implements WC_Logger_Interface {
 	 * This is not the preferred method for adding log messages. Please use log() or any one of
 	 * the level methods (debug(), info(), etc.). This method may be deprecated in the future.
 	 *
-	 * @param string $handle
-	 * @param string $message
-	 * @param string $level
-	 *
+	 * @param string $handle File handle.
+	 * @param string $message Message to log.
+	 * @param string $level Logging level.
 	 * @return bool
 	 */
 	public function add( $handle, $message, $level = WC_Log_Levels::NOTICE ) {
 		$message = apply_filters( 'woocommerce_logger_add_message', $message, $handle );
-		$this->log( $level, $message, array( 'source' => $handle, '_legacy' => true ) );
+		$this->log( $level, $message, array(
+			'source'  => $handle,
+			'_legacy' => true,
+		) );
 		wc_do_deprecated_action( 'woocommerce_log_add', array( $handle, $message ), '3.0', 'This action has been deprecated with no alternative.' );
 		return true;
 	}
@@ -122,7 +120,7 @@ class WC_Logger implements WC_Logger_Interface {
 	 *     'info': Informational messages.
 	 *     'debug': Debug-level messages.
 	 * @param string $message Log message.
-	 * @param array $context Optional. Additional information for log handlers.
+	 * @param array  $context Optional. Additional information for log handlers.
 	 */
 	public function log( $level, $message, $context = array() ) {
 		if ( ! WC_Log_Levels::is_valid_level( $level ) ) {
@@ -132,7 +130,7 @@ class WC_Logger implements WC_Logger_Interface {
 
 		if ( $this->should_handle( $level ) ) {
 			$timestamp = current_time( 'timestamp' );
-			$message = apply_filters( 'woocommerce_logger_log_message', $message, $level, $context );
+			$message   = apply_filters( 'woocommerce_logger_log_message', $message, $level, $context );
 
 			foreach ( $this->handlers as $handler ) {
 				$handler->handle( $timestamp, $level, $message, $context );
@@ -147,8 +145,8 @@ class WC_Logger implements WC_Logger_Interface {
 	 *
 	 * @see WC_Logger::log
 	 *
-	 * @param string $message
-	 * @param array $context
+	 * @param string $message Message to log.
+	 * @param array  $context Log context.
 	 */
 	public function emergency( $message, $context = array() ) {
 		$this->log( WC_Log_Levels::EMERGENCY, $message, $context );
@@ -162,8 +160,8 @@ class WC_Logger implements WC_Logger_Interface {
 	 *
 	 * @see WC_Logger::log
 	 *
-	 * @param string $message
-	 * @param array $context
+	 * @param string $message Message to log.
+	 * @param array  $context Log context.
 	 */
 	public function alert( $message, $context = array() ) {
 		$this->log( WC_Log_Levels::ALERT, $message, $context );
@@ -177,8 +175,8 @@ class WC_Logger implements WC_Logger_Interface {
 	 *
 	 * @see WC_Logger::log
 	 *
-	 * @param string $message
-	 * @param array $context
+	 * @param string $message Message to log.
+	 * @param array  $context Log context.
 	 */
 	public function critical( $message, $context = array() ) {
 		$this->log( WC_Log_Levels::CRITICAL, $message, $context );
@@ -192,8 +190,8 @@ class WC_Logger implements WC_Logger_Interface {
 	 *
 	 * @see WC_Logger::log
 	 *
-	 * @param string $message
-	 * @param array $context
+	 * @param string $message Message to log.
+	 * @param array  $context Log context.
 	 */
 	public function error( $message, $context = array() ) {
 		$this->log( WC_Log_Levels::ERROR, $message, $context );
@@ -209,8 +207,8 @@ class WC_Logger implements WC_Logger_Interface {
 	 *
 	 * @see WC_Logger::log
 	 *
-	 * @param string $message
-	 * @param array $context
+	 * @param string $message Message to log.
+	 * @param array  $context Log context.
 	 */
 	public function warning( $message, $context = array() ) {
 		$this->log( WC_Log_Levels::WARNING, $message, $context );
@@ -223,8 +221,8 @@ class WC_Logger implements WC_Logger_Interface {
 	 *
 	 * @see WC_Logger::log
 	 *
-	 * @param string $message
-	 * @param array $context
+	 * @param string $message Message to log.
+	 * @param array  $context Log context.
 	 */
 	public function notice( $message, $context = array() ) {
 		$this->log( WC_Log_Levels::NOTICE, $message, $context );
@@ -238,8 +236,8 @@ class WC_Logger implements WC_Logger_Interface {
 	 *
 	 * @see WC_Logger::log
 	 *
-	 * @param string $message
-	 * @param array $context
+	 * @param string $message Message to log.
+	 * @param array  $context Log context.
 	 */
 	public function info( $message, $context = array() ) {
 		$this->log( WC_Log_Levels::INFO, $message, $context );
@@ -252,25 +250,44 @@ class WC_Logger implements WC_Logger_Interface {
 	 *
 	 * @see WC_Logger::log
 	 *
-	 * @param string $message
-	 * @param array $context
+	 * @param string $message Message to log.
+	 * @param array  $context Log context.
 	 */
 	public function debug( $message, $context = array() ) {
 		$this->log( WC_Log_Levels::DEBUG, $message, $context );
 	}
 
 	/**
-	 * Clear entries from chosen file.
+	 * Clear entries for a chosen file/source.
 	 *
-	 * @deprecated 3.0.0
-	 *
-	 * @param string $handle
-	 *
+	 * @param string $source Source/handle to clear.
 	 * @return bool
 	 */
-	public function clear( $handle ) {
-		wc_deprecated_function( 'WC_Logger::clear', '3.0', 'WC_Log_Handler_File::clear' );
-		$handler = new WC_Log_Handler_File();
-		return $handler->clear( $handle );
+	public function clear( $source = '' ) {
+		if ( ! $source ) {
+			return false;
+		}
+		foreach ( $this->handlers as $handler ) {
+			if ( is_callable( array( $handler, 'clear' ) ) ) {
+				$handler->clear( $source );
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Clear all logs older than a defined number of days. Defaults to 30 days.
+	 *
+	 * @since 3.4.0
+	 */
+	public function clear_expired_logs() {
+		$days      = absint( apply_filters( 'woocommerce_logger_days_to_retain_logs', 30 ) );
+		$timestamp = strtotime( "-{$days} days" );
+
+		foreach ( $this->handlers as $handler ) {
+			if ( is_callable( array( $handler, 'delete_logs_before_timestamp' ) ) ) {
+				$handler->delete_logs_before_timestamp( $timestamp );
+			}
+		}
 	}
 }

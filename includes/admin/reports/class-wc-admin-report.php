@@ -90,8 +90,8 @@ class WC_Admin_Report {
 			'order_status'        => array( 'completed', 'processing', 'on-hold' ),
 			'parent_order_status' => false,
 		);
-		$args = apply_filters( 'woocommerce_reports_get_order_report_data_args', $args );
-		$args = wp_parse_args( $args, $default_args );
+		$args         = apply_filters( 'woocommerce_reports_get_order_report_data_args', $args );
+		$args         = wp_parse_args( $args, $default_args );
 
 		extract( $args );
 
@@ -113,22 +113,22 @@ class WC_Admin_Report {
 			}
 
 			switch ( $value['type'] ) {
-				case 'meta' :
+				case 'meta':
 					$get_key = "meta_{$key}.meta_value";
 					break;
-				case 'parent_meta' :
+				case 'parent_meta':
 					$get_key = "parent_meta_{$key}.meta_value";
 					break;
-				case 'post_data' :
+				case 'post_data':
 					$get_key = "posts.{$key}";
 					break;
-				case 'order_item_meta' :
+				case 'order_item_meta':
 					$get_key = "order_item_meta_{$key}.meta_value";
 					break;
-				case 'order_item' :
+				case 'order_item':
 					$get_key = "order_items.{$key}";
 					break;
-				default :
+				default:
 					continue;
 			}
 
@@ -141,7 +141,7 @@ class WC_Admin_Report {
 			$select[] = "{$get} as {$value['name']}";
 		}
 
-		$query['select'] = "SELECT " . implode( ',', $select );
+		$query['select'] = 'SELECT ' . implode( ',', $select );
 		$query['from']   = "FROM {$wpdb->posts} AS posts";
 
 		// Joins
@@ -153,25 +153,25 @@ class WC_Admin_Report {
 			$key       = sanitize_key( $raw_key );
 
 			switch ( $type ) {
-				case 'meta' :
+				case 'meta':
 					$joins[ "meta_{$key}" ] = "{$join_type} JOIN {$wpdb->postmeta} AS meta_{$key} ON ( posts.ID = meta_{$key}.post_id AND meta_{$key}.meta_key = '{$raw_key}' )";
 					break;
-				case 'parent_meta' :
+				case 'parent_meta':
 					$joins[ "parent_meta_{$key}" ] = "{$join_type} JOIN {$wpdb->postmeta} AS parent_meta_{$key} ON (posts.post_parent = parent_meta_{$key}.post_id) AND (parent_meta_{$key}.meta_key = '{$raw_key}')";
 					break;
-				case 'order_item_meta' :
-					$joins["order_items"] = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON (posts.ID = order_items.order_id)";
+				case 'order_item_meta':
+					$joins['order_items'] = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON (posts.ID = order_items.order_id)";
 
 					if ( ! empty( $value['order_item_type'] ) ) {
-						$joins["order_items"] .= " AND (order_items.order_item_type = '{$value['order_item_type']}')";
+						$joins['order_items'] .= " AND (order_items.order_item_type = '{$value['order_item_type']}')";
 					}
 
-					$joins[ "order_item_meta_{$key}" ]  = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_{$key} ON " .
+					$joins[ "order_item_meta_{$key}" ] = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_{$key} ON " .
 														"(order_items.order_item_id = order_item_meta_{$key}.order_item_id) " .
 														" AND (order_item_meta_{$key}.meta_key = '{$raw_key}')";
 					break;
-				case 'order_item' :
-					$joins["order_items"] = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_items.order_id";
+				case 'order_item':
+					$joins['order_items'] = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_items.order_id";
 					break;
 			}
 		}
@@ -187,7 +187,7 @@ class WC_Admin_Report {
 
 				if ( 'order_item_meta' === $type ) {
 
-					$joins["order_items"] = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_items.order_id";
+					$joins['order_items']              = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_items.order_id";
 					$joins[ "order_item_meta_{$key}" ] = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_{$key} ON order_items.order_item_id = order_item_meta_{$key}.order_item_id";
 
 				} else {
@@ -198,12 +198,12 @@ class WC_Admin_Report {
 		}
 
 		if ( ! empty( $parent_order_status ) ) {
-			$joins["parent"] = "LEFT JOIN {$wpdb->posts} AS parent ON posts.post_parent = parent.ID";
+			$joins['parent'] = "LEFT JOIN {$wpdb->posts} AS parent ON posts.post_parent = parent.ID";
 		}
 
 		$query['join'] = implode( ' ', $joins );
 
-		$query['where']  = "
+		$query['where'] = "
 			WHERE 	posts.post_type 	IN ( '" . implode( "','", $order_types ) . "' )
 			";
 
@@ -232,7 +232,7 @@ class WC_Admin_Report {
 
 			$relation = isset( $where_meta['relation'] ) ? $where_meta['relation'] : 'AND';
 
-			$query['where'] .= " AND (";
+			$query['where'] .= ' AND (';
 
 			foreach ( $where_meta as $index => $value ) {
 
@@ -282,7 +282,7 @@ class WC_Admin_Report {
 				}
 			}
 
-			$query['where'] .= ")";
+			$query['where'] .= ')';
 		}
 
 		if ( ! empty( $where ) ) {
@@ -332,8 +332,13 @@ class WC_Admin_Report {
 		}
 
 		if ( $debug || $nocache || false === $cached_results || ! isset( $cached_results[ $query_hash ] ) ) {
-			// Enable big selects for reports
-			$wpdb->query( 'SET SESSION SQL_BIG_SELECTS=1' );
+			static $big_selects = false;
+			// Enable big selects for reports, just once for this session
+			if ( ! $big_selects ) {
+				$wpdb->query( 'SET SESSION SQL_BIG_SELECTS=1' );
+				$big_selects = true;
+			}
+			
 			$cached_results[ $query_hash ] = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
 			set_transient( strtolower( get_class( $this ) ), $cached_results, DAY_IN_SECONDS );
 		}
@@ -346,10 +351,10 @@ class WC_Admin_Report {
 	/**
 	 * Put data with post_date's into an array of times.
 	 *
-	 * @param  array $data array of your data
+	 * @param  array  $data array of your data
 	 * @param  string $date_key key for the 'date' field. e.g. 'post_date'
 	 * @param  string $data_key key for the data you are charting
-	 * @param  int $interval
+	 * @param  int    $interval
 	 * @param  string $start_date
 	 * @param  string $group_by
 	 * @return array
@@ -388,13 +393,13 @@ class WC_Admin_Report {
 
 		foreach ( $data as $d ) {
 			switch ( $group_by ) {
-				case 'day' :
+				case 'day':
 					$time = strtotime( date( 'Ymd', strtotime( $d->$date_key ) ) ) . '000';
-				break;
-				case 'month' :
-				default :
+					break;
+				case 'month':
+				default:
 					$time = strtotime( date( 'Ym', strtotime( $d->$date_key ) ) . '01' ) . '000';
-				break;
+					break;
 			}
 
 			if ( ! isset( $prepared_data[ $time ] ) ) {
@@ -414,8 +419,8 @@ class WC_Admin_Report {
 	/**
 	 * Prepares a sparkline to show sales in the last X days.
 	 *
-	 * @param  int $id ID of the product to show. Blank to get all orders.
-	 * @param  int $days Days of stats to get.
+	 * @param  int    $id ID of the product to show. Blank to get all orders.
+	 * @param  int    $days Days of stats to get.
 	 * @param  string $type Type of sparkline to get. Ignored if ID is not set.
 	 * @return string
 	 */
@@ -424,68 +429,72 @@ class WC_Admin_Report {
 		if ( $id ) {
 			$meta_key = ( 'sales' === $type ) ? '_line_total' : '_qty';
 
-			$data = $this->get_order_report_data( array(
-				'data' => array(
-					'_product_id' => array(
-						'type'            => 'order_item_meta',
-						'order_item_type' => 'line_item',
-						'function'        => '',
-						'name'            => 'product_id',
+			$data = $this->get_order_report_data(
+				array(
+					'data'         => array(
+						'_product_id' => array(
+							'type'            => 'order_item_meta',
+							'order_item_type' => 'line_item',
+							'function'        => '',
+							'name'            => 'product_id',
+						),
+						$meta_key     => array(
+							'type'            => 'order_item_meta',
+							'order_item_type' => 'line_item',
+							'function'        => 'SUM',
+							'name'            => 'sparkline_value',
+						),
+						'post_date'   => array(
+							'type'     => 'post_data',
+							'function' => '',
+							'name'     => 'post_date',
+						),
 					),
-					$meta_key => array(
-						'type'            => 'order_item_meta',
-						'order_item_type' => 'line_item',
-						'function'        => 'SUM',
-						'name'            => 'sparkline_value',
+					'where'        => array(
+						array(
+							'key'      => 'post_date',
+							'value'    => date( 'Y-m-d', strtotime( 'midnight -' . ( $days - 1 ) . ' days', current_time( 'timestamp' ) ) ),
+							'operator' => '>',
+						),
+						array(
+							'key'      => 'order_item_meta__product_id.meta_value',
+							'value'    => $id,
+							'operator' => '=',
+						),
 					),
-					'post_date' => array(
-						'type'     => 'post_data',
-						'function' => '',
-						'name'     => 'post_date',
-					),
-				),
-				'where' => array(
-					array(
-						'key'      => 'post_date',
-						'value'    => date( 'Y-m-d', strtotime( 'midnight -' . ( $days - 1 ) . ' days', current_time( 'timestamp' ) ) ),
-						'operator' => '>',
-					),
-					array(
-						'key'      => 'order_item_meta__product_id.meta_value',
-						'value'    => $id,
-						'operator' => '=',
-					),
-				),
-				'group_by'     => 'YEAR(posts.post_date), MONTH(posts.post_date), DAY(posts.post_date)',
-				'query_type'   => 'get_results',
-				'filter_range' => false,
-			) );
+					'group_by'     => 'YEAR(posts.post_date), MONTH(posts.post_date), DAY(posts.post_date)',
+					'query_type'   => 'get_results',
+					'filter_range' => false,
+				)
+			);
 		} else {
 
-			$data = $this->get_order_report_data( array(
-				'data' => array(
-					'_order_total' => array(
-						'type'     => 'meta',
-						'function' => 'SUM',
-						'name'     => 'sparkline_value',
+			$data = $this->get_order_report_data(
+				array(
+					'data'         => array(
+						'_order_total' => array(
+							'type'     => 'meta',
+							'function' => 'SUM',
+							'name'     => 'sparkline_value',
+						),
+						'post_date'    => array(
+							'type'     => 'post_data',
+							'function' => '',
+							'name'     => 'post_date',
+						),
 					),
-					'post_date' => array(
-						'type'     => 'post_data',
-						'function' => '',
-						'name'     => 'post_date',
+					'where'        => array(
+						array(
+							'key'      => 'post_date',
+							'value'    => date( 'Y-m-d', strtotime( 'midnight -' . ( $days - 1 ) . ' days', current_time( 'timestamp' ) ) ),
+							'operator' => '>',
+						),
 					),
-				),
-				'where' => array(
-					array(
-						'key'      => 'post_date',
-						'value'    => date( 'Y-m-d', strtotime( 'midnight -' . ( $days - 1 ) . ' days', current_time( 'timestamp' ) ) ),
-						'operator' => '>',
-					),
-				),
-				'group_by'     => 'YEAR(posts.post_date), MONTH(posts.post_date), DAY(posts.post_date)',
-				'query_type'   => 'get_results',
-				'filter_range' => false,
-			) );
+					'group_by'     => 'YEAR(posts.post_date), MONTH(posts.post_date), DAY(posts.post_date)',
+					'query_type'   => 'get_results',
+					'filter_range' => false,
+				)
+			);
 		}
 
 		$total = 0;
@@ -515,8 +524,7 @@ class WC_Admin_Report {
 
 		switch ( $current_range ) {
 
-			case 'custom' :
-
+			case 'custom':
 				$this->start_date = max( strtotime( '-20 years' ), strtotime( sanitize_text_field( $_GET['start_date'] ) ) );
 
 				if ( empty( $_GET['end_date'] ) ) {
@@ -528,7 +536,7 @@ class WC_Admin_Report {
 				$interval = 0;
 				$min_date = $this->start_date;
 
-				while ( ( $min_date = strtotime( "+1 MONTH", $min_date ) ) <= $this->end_date ) {
+				while ( ( $min_date = strtotime( '+1 MONTH', $min_date ) ) <= $this->end_date ) {
 					$interval ++;
 				}
 
@@ -538,54 +546,54 @@ class WC_Admin_Report {
 				} else {
 					$this->chart_groupby = 'day';
 				}
-			break;
+				break;
 
-			case 'year' :
+			case 'year':
 				$this->start_date    = strtotime( date( 'Y-01-01', current_time( 'timestamp' ) ) );
 				$this->end_date      = strtotime( 'midnight', current_time( 'timestamp' ) );
 				$this->chart_groupby = 'month';
-			break;
+				break;
 
-			case 'last_month' :
+			case 'last_month':
 				$first_day_current_month = strtotime( date( 'Y-m-01', current_time( 'timestamp' ) ) );
 				$this->start_date        = strtotime( date( 'Y-m-01', strtotime( '-1 DAY', $first_day_current_month ) ) );
 				$this->end_date          = strtotime( date( 'Y-m-t', strtotime( '-1 DAY', $first_day_current_month ) ) );
 				$this->chart_groupby     = 'day';
-			break;
+				break;
 
-			case 'month' :
+			case 'month':
 				$this->start_date    = strtotime( date( 'Y-m-01', current_time( 'timestamp' ) ) );
 				$this->end_date      = strtotime( 'midnight', current_time( 'timestamp' ) );
 				$this->chart_groupby = 'day';
-			break;
+				break;
 
-			case '7day' :
+			case '7day':
 				$this->start_date    = strtotime( '-6 days', strtotime( 'midnight', current_time( 'timestamp' ) ) );
 				$this->end_date      = strtotime( 'midnight', current_time( 'timestamp' ) );
 				$this->chart_groupby = 'day';
-			break;
+				break;
 		}
 
 		// Group by
 		switch ( $this->chart_groupby ) {
 
-			case 'day' :
+			case 'day':
 				$this->group_by_query = 'YEAR(posts.post_date), MONTH(posts.post_date), DAY(posts.post_date)';
 				$this->chart_interval = absint( ceil( max( 0, ( $this->end_date - $this->start_date ) / ( 60 * 60 * 24 ) ) ) );
 				$this->barwidth       = 60 * 60 * 24 * 1000;
-			break;
+				break;
 
-			case 'month' :
+			case 'month':
 				$this->group_by_query = 'YEAR(posts.post_date), MONTH(posts.post_date)';
 				$this->chart_interval = 0;
 				$min_date             = strtotime( date( 'Y-m-01', $this->start_date ) );
 
-				while ( ( $min_date = strtotime( "+1 MONTH", $min_date ) ) <= $this->end_date ) {
+				while ( ( $min_date = strtotime( '+1 MONTH', $min_date ) ) <= $this->end_date ) {
 					$this->chart_interval ++;
 				}
 
 				$this->barwidth = 60 * 60 * 24 * 7 * 4 * 1000;
-			break;
+				break;
 		}
 	}
 

@@ -6,7 +6,6 @@
  *
  * @version 3.3.0
  * @package WooCommerce
- * @author  WooCommerce
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

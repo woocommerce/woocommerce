@@ -32,18 +32,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<td class="wc-shipping-zone-methods">
 				<ul>
 					<?php
-						$worldwide = new WC_Shipping_Zone( 0 );
-						$methods   = $worldwide->get_shipping_methods();
-						uasort( $methods, 'wc_shipping_zone_method_order_uasort_comparison' );
+					$worldwide = new WC_Shipping_Zone( 0 );
+					$methods   = $worldwide->get_shipping_methods();
+					uasort( $methods, 'wc_shipping_zone_method_order_uasort_comparison' );
 
-						if ( ! empty( $methods ) ) {
-							foreach ( $methods as $method ) {
-								$class_name = 'yes' === $method->enabled ? 'method_enabled' : 'method_disabled';
-								echo '<li class="wc-shipping-zone-method ' . esc_attr( $class_name ) . '">' . esc_html( $method->get_title() ) . '</li>';
-							}
-						} else {
-							echo '<li class="wc-shipping-zone-method">' . __( 'No shipping methods offered to this zone.', 'woocommerce' ) . '</li>';
+					if ( ! empty( $methods ) ) {
+						foreach ( $methods as $method ) {
+							$class_name = 'yes' === $method->enabled ? 'method_enabled' : 'method_disabled';
+							echo '<li class="wc-shipping-zone-method ' . esc_attr( $class_name ) . '">' . esc_html( $method->get_title() ) . '</li>';
 						}
+					} else {
+						echo '<li class="wc-shipping-zone-method">' . __( 'No shipping methods offered to this zone.', 'woocommerce' ) . '</li>';
+					}
 					?>
 				</ul>
 			</td>
@@ -104,12 +104,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 							<select name="add_method_id">
 								<?php
-									foreach ( WC()->shipping->load_shipping_methods() as $method ) {
-										if ( ! $method->supports( 'shipping-zones' ) ) {
-											continue;
-										}
-										echo '<option data-description="' . esc_attr( wp_kses_post( wpautop( $method->get_method_description() ) ) ) . '" value="' . esc_attr( $method->id ) . '">' . esc_attr( $method->get_method_title() ) . '</li>';
+								foreach ( WC()->shipping->load_shipping_methods() as $method ) {
+									if ( ! $method->supports( 'shipping-zones' ) ) {
+										continue;
 									}
+									echo '<option data-description="' . esc_attr( wp_kses_post( wpautop( $method->get_method_description() ) ) ) . '" value="' . esc_attr( $method->id ) . '">' . esc_attr( $method->get_method_title() ) . '</li>';
+								}
 								?>
 							</select>
 							<input type="hidden" name="zone_id" value="{{{ data.zone_id }}}" />
