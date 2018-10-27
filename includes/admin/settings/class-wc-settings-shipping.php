@@ -157,11 +157,18 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			$hide_save_button = true;
 			$this->output_shipping_class_screen();
 		} else {
+			$is_shipping_method = false;
 			foreach ( $shipping_methods as $method ) {
 				if ( in_array( $current_section, array( $method->id, sanitize_title( get_class( $method ) ) ), true ) && $method->has_settings() ) {
+					$is_shipping_method = true;
 					$method->admin_options();
 				}
 			}
+			if ( !$is_shipping_method ) {
+				$settings = $this->get_settings();
+				$settings = apply_filters( 'woocommerce_get_settings_' . $this->id, $settings, $current_section );
+				WC_Admin_Settings::output_fields( $settings );
+			}			
 		}
 	}
 
@@ -183,11 +190,16 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				break;
 			default:
 				$wc_shipping = WC_Shipping::instance();
+				$is_shipping_method = false;			
 
 				foreach ( $wc_shipping->get_shipping_methods() as $method_id => $method ) {
 					if ( in_array( $current_section, array( $method->id, sanitize_title( get_class( $method ) ) ), true ) ) {
+						$is_shipping_method = true;
 						do_action( 'woocommerce_update_options_' . $this->id . '_' . $method->id );
 					}
+				}
+				if ( !$is_shipping_method ) {
+					WC_Admin_Settings::save_fields( $this->get_settings( $current_section ) );
 				}
 				break;
 		}
