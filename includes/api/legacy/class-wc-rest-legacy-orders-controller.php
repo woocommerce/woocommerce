@@ -98,13 +98,14 @@ class WC_REST_Legacy_Orders_Controller extends WC_REST_CRUD_Controller {
 	 * @return WP_REST_Response $data
 	 */
 	public function prepare_item_for_response( $post, $request ) {
-		$this->request     = $request;
-		$statuses          = wc_get_order_statuses();
-		$order             = wc_get_order( $post );
-		$data              = array_merge( array( 'id' => $order->get_id() ), $order->get_data() );
-		$format_decimal    = array( 'discount_total', 'discount_tax', 'shipping_total', 'shipping_tax', 'shipping_total', 'shipping_tax', 'cart_tax', 'total', 'total_tax' );
-		$format_date       = array( 'date_created', 'date_modified', 'date_completed', 'date_paid' );
-		$format_line_items = array( 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines' );
+		$this->request       = $request;
+		$this->request['dp'] = is_null( $this->request['dp'] ) ? wc_get_price_decimals() : absint( $this->request['dp'] );
+		$statuses            = wc_get_order_statuses();
+		$order               = wc_get_order( $post );
+		$data                = array_merge( array( 'id' => $order->get_id() ), $order->get_data() );
+		$format_decimal      = array( 'discount_total', 'discount_tax', 'shipping_total', 'shipping_tax', 'shipping_total', 'shipping_tax', 'cart_tax', 'total', 'total_tax' );
+		$format_date         = array( 'date_created', 'date_modified', 'date_completed', 'date_paid' );
+		$format_line_items   = array( 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines' );
 
 		// Format decimal values.
 		foreach ( $format_decimal as $key ) {
@@ -215,7 +216,7 @@ class WC_REST_Legacy_Orders_Controller extends WC_REST_CRUD_Controller {
 		 * The dynamic portion of the hook name, $this->post_type, refers to post_type of the post being
 		 * prepared for the response.
 		 *
-		 * @param WC_Order           $order      The prder object.
+		 * @param WC_Order           $order      The Order object.
 		 * @param WP_REST_Request    $request    Request object.
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}", $order, $request );
@@ -246,6 +247,11 @@ class WC_REST_Legacy_Orders_Controller extends WC_REST_CRUD_Controller {
 			// Make sure customer exists.
 			if ( ! is_null( $request['customer_id'] ) && 0 !== $request['customer_id'] && false === get_user_by( 'id', $request['customer_id'] ) ) {
 				throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id',__( 'Customer ID is invalid.', 'woocommerce' ), 400 );
+			}
+
+			// Make sure customer is part of blog.
+			if ( is_multisite() && ! is_user_member_of_blog( $request['customer_id'] ) ) {
+				throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id_network',__( 'Customer ID does not belong to this site.', 'woocommerce' ), 400 );
 			}
 
 			$order = $this->prepare_item_for_database( $request );

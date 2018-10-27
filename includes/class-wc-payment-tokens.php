@@ -1,19 +1,18 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 /**
- * WooCommerce Payment Tokens.
+ * WooCommerce Payment Tokens
  *
  * An API for storing and managing tokens for gateways and customers.
  *
- * @class 		WC_Payment_Tokens
- * @version     3.0.0
- * @since		2.6.0
- * @package		WooCommerce/Classes
- * @category	Class
- * @author		WooThemes
+ * @package WooCommerce/Classes
+ * @version 3.0.0
+ * @since   2.6.0
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Payment tokens class.
  */
 class WC_Payment_Tokens {
 
@@ -21,16 +20,25 @@ class WC_Payment_Tokens {
 	 * Gets valid tokens from the database based on user defined criteria.
 	 *
 	 * @since  2.6.0
-	 * @param  array $args
+	 * @param  array $args Query argyments {
+	 *     Array of query parameters.
+	 *
+	 *     @type string $token_id   Token ID.
+	 *     @type string $user_id    User ID.
+	 *     @type string $gateway_id Gateway ID.
+	 *     @type string $type       Token type.
+	 * }
 	 * @return array
 	 */
 	public static function get_tokens( $args ) {
-		$args = wp_parse_args( $args, array(
-			'token_id'   => '',
-			'user_id'    => '',
-			'gateway_id' => '',
-			'type'       => '',
-		) );
+		$args = wp_parse_args(
+			$args, array(
+				'token_id'   => '',
+				'user_id'    => '',
+				'gateway_id' => '',
+				'type'       => '',
+			)
+		);
 
 		$data_store    = WC_Data_Store::load( 'payment-token' );
 		$token_results = $data_store->get_tokens( $args );
@@ -52,19 +60,21 @@ class WC_Payment_Tokens {
 	 * Returns an array of payment token objects associated with the passed customer ID.
 	 *
 	 * @since 2.6.0
-	 * @param  int    $customer_id  Customer ID
-	 * @param  string $gateway_id      Optional Gateway ID for getting tokens for a specific gateway
-	 * @return array                Array of token objects
+	 * @param  int    $customer_id Customer ID.
+	 * @param  string $gateway_id  Optional Gateway ID for getting tokens for a specific gateway.
+	 * @return array               Array of token objects.
 	 */
 	public static function get_customer_tokens( $customer_id, $gateway_id = '' ) {
 		if ( $customer_id < 1 ) {
 			return array();
 		}
 
-		$tokens = self::get_tokens( array(
-			'user_id'    => $customer_id,
-			'gateway_id' => $gateway_id,
-		) );
+		$tokens = self::get_tokens(
+			array(
+				'user_id'    => $customer_id,
+				'gateway_id' => $gateway_id,
+			)
+		);
 
 		return apply_filters( 'woocommerce_get_customer_payment_tokens', $tokens, $customer_id, $gateway_id );
 	}
@@ -72,8 +82,8 @@ class WC_Payment_Tokens {
 	/**
 	 * Returns a customers default token or NULL if there is no default token.
 	 *
-	 * @since 2.6.0
-	 * @param  int $customer_id
+	 * @since  2.6.0
+	 * @param  int $customer_id Customer ID.
 	 * @return WC_Payment_Token|null
 	 */
 	public static function get_customer_default_token( $customer_id ) {
@@ -95,8 +105,8 @@ class WC_Payment_Tokens {
 	 * Returns an array of payment token objects associated with the passed order ID.
 	 *
 	 * @since 2.6.0
-	 * @param int $order_id Order ID
-	 * @return array Array of token objects
+	 * @param int $order_id Order ID.
+	 * @return array Array of token objects.
 	 */
 	public static function get_order_tokens( $order_id ) {
 		$order = wc_get_order( $order_id );
@@ -111,9 +121,11 @@ class WC_Payment_Tokens {
 			return array();
 		}
 
-		$tokens = self::get_tokens( array(
-			'token_id' => $token_ids,
-		) );
+		$tokens = self::get_tokens(
+			array(
+				'token_id' => $token_ids,
+			)
+		);
 
 		return apply_filters( 'woocommerce_get_order_payment_tokens', $tokens, $order_id );
 	}
@@ -123,17 +135,16 @@ class WC_Payment_Tokens {
 	 *
 	 * @since 2.6.0
 	 *
-	 * @param int    $token_id Token ID
-	 * @param object $token_result
-	 *
-	 * @return null|WC_Payment_Token Returns a valid payment token or null if no token can be found
+	 * @param int    $token_id Token ID.
+	 * @param object $token_result Token result.
+	 * @return null|WC_Payment_Token Returns a valid payment token or null if no token can be found.
 	 */
 	public static function get( $token_id, $token_result = null ) {
 		$data_store = WC_Data_Store::load( 'payment-token' );
 
 		if ( is_null( $token_result ) ) {
 			$token_result = $data_store->get_token_by_id( $token_id );
-			// Still empty? Token doesn't exist? Don't continue
+			// Still empty? Token doesn't exist? Don't continue.
 			if ( empty( $token_result ) ) {
 				return null;
 			}
@@ -142,7 +153,7 @@ class WC_Payment_Tokens {
 		$token_class = 'WC_Payment_Token_' . $token_result->type;
 
 		if ( class_exists( $token_class ) ) {
-			$meta = $data_store->get_metadata( $token_id );
+			$meta        = $data_store->get_metadata( $token_id );
 			$passed_meta = array();
 			if ( ! empty( $meta ) ) {
 				foreach ( $meta as $meta_key => $meta_value ) {
@@ -157,8 +168,9 @@ class WC_Payment_Tokens {
 
 	/**
 	 * Remove a payment token from the database by ID.
+	 *
 	 * @since 2.6.0
-	 * @param WC_Payment_Token $token_id Token ID
+	 * @param WC_Payment_Token $token_id Token ID.
 	 */
 	public static function delete( $token_id ) {
 		$type = self::get_token_type_by_id( $token_id );
@@ -173,8 +185,8 @@ class WC_Payment_Tokens {
 	 * Loops through all of a users payment tokens and sets is_default to false for all but a specific token.
 	 *
 	 * @since 2.6.0
-	 * @param int $user_id  User to set a default for
-	 * @param int $token_id The ID of the token that should be default
+	 * @param int $user_id  User to set a default for.
+	 * @param int $token_id The ID of the token that should be default.
 	 */
 	public static function set_users_default( $user_id, $token_id ) {
 		$data_store   = WC_Data_Store::load( 'payment-token' );
@@ -192,9 +204,9 @@ class WC_Payment_Tokens {
 	/**
 	 * Returns what type (credit card, echeck, etc) of token a token is by ID.
 	 *
-	 * @since 2.6.0
-	 * @param  int $token_id Token ID
-	 * @return string        Type
+	 * @since  2.6.0
+	 * @param  int $token_id Token ID.
+	 * @return string        Type.
 	 */
 	public static function get_token_type_by_id( $token_id ) {
 		$data_store = WC_Data_Store::load( 'payment-token' );

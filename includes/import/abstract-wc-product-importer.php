@@ -2,11 +2,10 @@
 /**
  * Abstract Product importer
  *
- * @author   Automattic
- * @category Admin
  * @package  WooCommerce/Import
  * @version  3.1.0
  */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -15,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Include dependencies.
  */
 if ( ! class_exists( 'WC_Importer_Interface', false ) ) {
-	include_once( WC_ABSPATH . 'includes/interfaces/class-wc-importer-interface.php' );
+	include_once WC_ABSPATH . 'includes/interfaces/class-wc-importer-interface.php';
 }
 
 /**
@@ -126,6 +125,15 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	}
 
 	/**
+	 * Get importer parameters.
+	 *
+	 * @return array
+	 */
+	public function get_params() {
+		return $this->params;
+	}
+
+	/**
 	 * Get file pointer position from the last read.
 	 *
 	 * @return int
@@ -173,11 +181,19 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			}
 
 			$product = new $classname( $id );
-		} elseif ( isset( $data['id'] ) ) {
+		} elseif ( ! empty( $data['id'] ) ) {
 			$product = wc_get_product( $id );
 
 			if ( ! $product ) {
-				return new WP_Error( 'woocommerce_product_csv_importer_invalid_id', sprintf( __( 'Invalid product ID %d.', 'woocommerce' ), $id ), array( 'id' => $id, 'status' => 401 ) );
+				return new WP_Error(
+					'woocommerce_product_csv_importer_invalid_id',
+					/* translators: %d: product ID */
+					sprintf( __( 'Invalid product ID %d.', 'woocommerce' ), $id ),
+					array(
+						'id'     => $id,
+						'status' => 401,
+					)
+				);
 			}
 		} else {
 			$product = new WC_Product_Simple( $id );
@@ -189,6 +205,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	/**
 	 * Process a single item and save.
 	 *
+	 * @throws Exception If item cannot be processed.
 	 * @param  array $data Raw CSV data.
 	 * @return array|WC_Error
 	 */
@@ -197,8 +214,12 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			do_action( 'woocommerce_product_import_before_process_item', $data );
 
 			// Get product ID from SKU if created during the importation.
-			if ( empty( $data['id'] ) && ! empty( $data['sku'] ) && ( $product_id = wc_get_product_id_by_sku( $data['sku'] ) ) ) {
-				$data['id'] = $product_id;
+			if ( empty( $data['id'] ) && ! empty( $data['sku'] ) ) {
+				$product_id = wc_get_product_id_by_sku( $data['sku'] );
+
+				if ( $product_id ) {
+					$data['id'] = $product_id;
+				}
 			}
 
 			$object   = $this->get_product_object( $data );
@@ -213,7 +234,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			}
 
 			if ( 'external' === $object->get_type() ) {
-				unset( $data['manage_stock'], $data['stock_status'], $data['backorders'] );
+				unset( $data['manage_stock'], $data['stock_status'], $data['backorders'], $data['low_stock_amount'] );
 			}
 
 			if ( 'importing' === $object->get_status() ) {
@@ -292,14 +313,13 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 *
 	 * @param WC_Product $product Product instance.
 	 * @param array      $data    Item data.
-	 *
-	 * @return WC_Product|WP_Error
-	 * @throws Exception
+	 * @throws Exception If data cannot be set.
 	 */
 	protected function set_product_data( &$product, $data ) {
 		if ( isset( $data['raw_attributes'] ) ) {
-			$attributes         = array();
-			$default_attributes = array();
+			$attributes          = array();
+			$default_attributes  = array();
+			$existing_attributes = $product->get_attributes();
 
 			foreach ( $data['raw_attributes'] as $position => $attribute ) {
 				$attribute_id = 0;
@@ -316,12 +336,22 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 					$is_visible = 1;
 				}
 
-				// Set if is a variation attribute.
+				// Get name.
+				$attribute_name = $attribute_id ? wc_attribute_taxonomy_name_by_id( $attribute_id ) : $attribute['name'];
+
+				// Set if is a variation attribute based on existing attributes if possible so updates via CSV do not change this.
 				$is_variation = 0;
 
-				if ( $attribute_id ) {
-					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
+				if ( $existing_attributes ) {
+					foreach ( $existing_attributes as $existing_attribute ) {
+						if ( $existing_attribute->get_name() === $attribute_name ) {
+							$is_variation = $existing_attribute->get_variation();
+							break;
+						}
+					}
+				}
 
+				if ( $attribute_id ) {
 					if ( isset( $attribute['value'] ) ) {
 						$options = array_map( 'wc_sanitize_term_text_based', $attribute['value'] );
 						$options = array_filter( $options, 'strlen' );
@@ -330,7 +360,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 					}
 
 					// Check for default attributes and set "is_variation".
-					if ( ! empty( $attribute['default'] ) && in_array( $attribute['default'], $options ) ) {
+					if ( ! empty( $attribute['default'] ) && in_array( $attribute['default'], $options, true ) ) {
 						$default_term = get_term_by( 'name', $attribute['default'], $attribute_name );
 
 						if ( $default_term && ! is_wp_error( $default_term ) ) {
@@ -340,7 +370,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 						}
 
 						$default_attributes[ $attribute_name ] = $default;
-						$is_variation = 1;
+						$is_variation                          = 1;
 					}
 
 					if ( ! empty( $options ) ) {
@@ -355,7 +385,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 					}
 				} elseif ( isset( $attribute['value'] ) ) {
 					// Check for default attributes and set "is_variation".
-					if ( ! empty( $attribute['default'] ) && in_array( $attribute['default'], $attribute['value'] ) ) {
+					if ( ! empty( $attribute['default'] ) && in_array( $attribute['default'], $attribute['value'], true ) ) {
 						$default_attributes[ sanitize_title( $attribute['name'] ) ] = $attribute['default'];
 						$is_variation = 1;
 					}
@@ -384,9 +414,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 *
 	 * @param WC_Product $variation Product instance.
 	 * @param array      $data    Item data.
-	 *
 	 * @return WC_Product|WP_Error
-	 * @throws Exception
+	 * @throws Exception If data cannot be set.
 	 */
 	protected function set_variation_data( &$variation, $data ) {
 		$parent = false;
@@ -410,8 +439,12 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			$parent_attributes = $this->get_variation_parent_attributes( $data['raw_attributes'], $parent );
 
 			foreach ( $data['raw_attributes'] as $attribute ) {
+				$attribute_id = 0;
+
 				// Get ID if is a global attribute.
-				$attribute_id = wc_attribute_taxonomy_id_by_name( $attribute['name'] );
+				if ( ! empty( $attribute['taxonomy'] ) ) {
+					$attribute_id = $this->get_attribute_taxonomy_id( $attribute['name'] );
+				}
 
 				if ( $attribute_id ) {
 					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
@@ -471,7 +504,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 			// Check if attribute handle variations.
 			if ( isset( $parent_attributes[ $attribute_name ] ) && ! $parent_attributes[ $attribute_name ]->get_variation() ) {
-				// Re-create the attribute to CRUD save and genarate again.
+				// Re-create the attribute to CRUD save and generate again.
 				$parent_attributes[ $attribute_name ] = clone $parent_attributes[ $attribute_name ];
 				$parent_attributes[ $attribute_name ]->set_variation( 1 );
 
@@ -494,56 +527,67 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @param  string $url        Attachment URL.
 	 * @param  int    $product_id Product ID.
 	 * @return int
+	 * @throws Exception If attachment cannot be loaded.
 	 */
-	protected function get_attachment_id_from_url( $url, $product_id ) {
+	public function get_attachment_id_from_url( $url, $product_id ) {
 		if ( empty( $url ) ) {
 			return 0;
 		}
 
 		$id         = 0;
-		$upload_dir = wp_upload_dir();
+		$upload_dir = wp_upload_dir( null, false );
 		$base_url   = $upload_dir['baseurl'] . '/';
 
-		// Check first if attachment is on WordPress uploads directory.
-		if ( false !== strpos( $url, $base_url ) ) {
-			// Search for yyyy/mm/slug.extension
+		// Check first if attachment is inside the WordPress uploads directory, or we're given a filename only.
+		if ( false !== strpos( $url, $base_url ) || false === strpos( $url, '://' ) ) {
+			// Search for yyyy/mm/slug.extension or slug.extension - remove the base URL.
 			$file = str_replace( $base_url, '', $url );
 			$args = array(
 				'post_type'   => 'attachment',
 				'post_status' => 'any',
 				'fields'      => 'ids',
-				'meta_query'  => array(
+				'meta_query'  => array( // @codingStandardsIgnoreLine.
+					'relation' => 'OR',
 					array(
-						'value'   => $file,
+						'key'     => '_wp_attached_file',
+						'value'   => '^' . $file,
+						'compare' => 'REGEXP',
+					),
+					array(
+						'key'     => '_wp_attached_file',
+						'value'   => '/' . $file,
 						'compare' => 'LIKE',
-						'key'     => '_wp_attachment_metadata',
+					),
+					array(
+						'key'     => '_wc_attachment_source',
+						'value'   => '/' . $file,
+						'compare' => 'LIKE',
 					),
 				),
 			);
-
-			if ( $ids = get_posts( $args ) ) {
-				$id = current( $ids );
-			}
 		} else {
+			// This is an external URL, so compare to source.
 			$args = array(
 				'post_type'   => 'attachment',
 				'post_status' => 'any',
 				'fields'      => 'ids',
-				'meta_query'  => array(
+				'meta_query'  => array( // @codingStandardsIgnoreLine.
 					array(
 						'value' => $url,
 						'key'   => '_wc_attachment_source',
 					),
 				),
 			);
+		}
 
-			if ( $ids = get_posts( $args ) ) {
-				$id = current( $ids );
-			}
+		$ids = get_posts( $args ); // @codingStandardsIgnoreLine.
+
+		if ( $ids ) {
+			$id = current( $ids );
 		}
 
 		// Upload if attachment does not exists.
-		if ( ! $id ) {
+		if ( ! $id && stristr( $url, '://' ) ) {
 			$upload = wc_rest_upload_image_from_url( $url );
 
 			if ( is_wp_error( $upload ) ) {
@@ -553,11 +597,17 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			$id = wc_rest_set_uploaded_image_as_attachment( $upload, $product_id );
 
 			if ( ! wp_attachment_is_image( $id ) ) {
+				/* translators: %s: image URL */
 				throw new Exception( sprintf( __( 'Not able to attach "%s".', 'woocommerce' ), $url ), 400 );
 			}
 
 			// Save attachment source for future reference.
 			update_post_meta( $id, '_wc_attachment_source', $url );
+		}
+
+		if ( ! $id ) {
+			/* translators: %s: image URL */
+			throw new Exception( sprintf( __( 'Unable to use image "%s".', 'woocommerce' ), $url ), 400 );
 		}
 
 		return $id;
@@ -567,63 +617,62 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * Get attribute taxonomy ID from the imported data.
 	 * If does not exists register a new attribute.
 	 *
-	 * @param  string $name Attribute name.
+	 * @param  string $raw_name Attribute name.
 	 * @return int
+	 * @throws Exception If taxonomy cannot be loaded.
 	 */
-	protected function get_attribute_taxonomy_id( $raw_name ) {
+	public function get_attribute_taxonomy_id( $raw_name ) {
 		global $wpdb, $wc_product_attributes;
 
 		// These are exported as labels, so convert the label to a name if possible first.
 		$attribute_labels = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_label', 'attribute_name' );
-		$attribute_name   = '';
+		$attribute_name   = array_search( $raw_name, $attribute_labels, true );
 
-		if ( ! $attribute_name = array_search( $raw_name, $attribute_labels ) ) {
+		if ( ! $attribute_name ) {
 			$attribute_name = wc_sanitize_taxonomy_name( $raw_name );
 		}
 
+		$attribute_id = wc_attribute_taxonomy_id_by_name( $attribute_name );
+
 		// Get the ID from the name.
-		if ( $attribute_id = wc_attribute_taxonomy_id_by_name( $attribute_name ) ) {
+		if ( $attribute_id ) {
 			return $attribute_id;
 		}
 
 		// If the attribute does not exist, create it.
-		$args = array(
-			'attribute_label'   => $raw_name,
-			'attribute_name'    => $attribute_name,
-			'attribute_type'    => 'select',
-			'attribute_orderby' => 'menu_order',
-			'attribute_public'  => 0,
-		);
+		$attribute_id = wc_create_attribute( array(
+			'name'         => $raw_name,
+			'slug'         => $attribute_name,
+			'type'         => 'select',
+			'order_by'     => 'menu_order',
+			'has_archives' => false,
+		) );
 
-		// Validate attribute.
-		if ( strlen( $attribute_name ) >= 28 ) {
-			throw new Exception( sprintf( __( 'Slug "%s" is too long (28 characters max). Shorten it, please.', 'woocommerce' ), $attribute_name ), 400 );
-		} elseif ( wc_check_if_attribute_name_is_reserved( $attribute_name ) ) {
-			throw new Exception( sprintf( __( 'Slug "%s" is not allowed because it is a reserved term. Change it, please.', 'woocommerce' ), $attribute_name ), 400 );
-		} elseif ( taxonomy_exists( wc_attribute_taxonomy_name( $attribute_name ) ) ) {
-			throw new Exception( sprintf( __( 'Slug "%s" is already in use. Change it, please.', 'woocommerce' ), $attribute_name ), 400 );
+		if ( is_wp_error( $attribute_id ) ) {
+			throw new Exception( $attribute_id->get_error_message(), 400 );
 		}
-
-		$result = $wpdb->insert( $wpdb->prefix . 'woocommerce_attribute_taxonomies', $args, array( '%s', '%s', '%s', '%s', '%d' ) );
-
-		// Pass errors.
-		if ( is_wp_error( $result ) ) {
-			throw new Exception( $result->get_error_message(), 400 );
-		}
-
-		$attribute_id = absint( $wpdb->insert_id );
-
-		// Delete transient.
-		delete_transient( 'wc_attribute_taxonomies' );
 
 		// Register as taxonomy while importing.
-		register_taxonomy( wc_attribute_taxonomy_name( $attribute_name ), array( 'product' ), array( 'labels' => array( 'name' => $raw_name ) ) );
+		$taxonomy_name = wc_attribute_taxonomy_name( $attribute_name );
+		register_taxonomy(
+			$taxonomy_name,
+			apply_filters( 'woocommerce_taxonomy_objects_' . $taxonomy_name, array( 'product' ) ),
+			apply_filters( 'woocommerce_taxonomy_args_' . $taxonomy_name, array(
+				'labels'       => array(
+					'name' => $raw_name,
+				),
+				'hierarchical' => true,
+				'show_ui'      => false,
+				'query_var'    => true,
+				'rewrite'      => false,
+			) )
+		);
 
 		// Set product attributes global.
 		$wc_product_attributes = array();
 
-		foreach ( wc_get_attribute_taxonomies() as $tax ) {
-			$wc_product_attributes[ wc_attribute_taxonomy_name( $attribute_name ) ] = $tax;
+		foreach ( wc_get_attribute_taxonomies() as $taxonomy ) {
+			$wc_product_attributes[ wc_attribute_taxonomy_name( $taxonomy->attribute_name ) ] = $taxonomy;
 		}
 
 		return $attribute_id;
@@ -689,7 +738,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * separators.
 	 *
 	 * @since  3.2.0
-	 * @param  string $value
+	 * @param  string $value Value to explode.
 	 * @return array
 	 */
 	protected function explode_values( $value ) {
@@ -704,10 +753,29 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * Remove formatting and trim each value.
 	 *
 	 * @since  3.2.0
-	 * @param  string $value
+	 * @param  string $value Value to format.
 	 * @return string
 	 */
 	protected function explode_values_formatter( $value ) {
 		return trim( str_replace( '::separator::', ',', $value ) );
+	}
+
+	/**
+	 * The exporter prepends a ' to fields that start with a - which causes
+	 * issues with negative numbers. This removes the ' if the input is still a valid
+	 * number after removal.
+	 *
+	 * @since 3.3.0
+	 * @param string $value A numeric string that may or may not have ' prepended.
+	 * @return string
+	 */
+	protected function unescape_negative_number( $value ) {
+		if ( 0 === strpos( $value, "'-" ) ) {
+			$unescaped = trim( $value, "'" );
+			if ( is_numeric( $unescaped ) ) {
+				return $unescaped;
+			}
+		}
+		return $value;
 	}
 }

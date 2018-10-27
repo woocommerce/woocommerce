@@ -1,17 +1,17 @@
 <?php
 /**
  * Admin View: Product Export
+ *
+ * @package WooCommerce/Admin/Export
  */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 wp_enqueue_script( 'wc-product-export' );
 
-$exporter        = new WC_Product_CSV_Exporter();
-$product_count   = wp_count_posts( 'product' );
-$variation_count = wp_count_posts( 'product' );
-$total_rows      = $product_count->publish + $product_count->private + $variation_count->publish + $variation_count->private;
+$exporter = new WC_Product_CSV_Exporter();
 ?>
 <div class="wrap woocommerce">
 	<h1><?php esc_html_e( 'Export Products', 'woocommerce' ); ?></h1>
@@ -33,9 +33,9 @@ $total_rows      = $product_count->publish + $product_count->private + $variatio
 							<td>
 								<select id="woocommerce-exporter-columns" class="woocommerce-exporter-columns wc-enhanced-select" style="width:100%;" multiple data-placeholder="<?php esc_attr_e( 'Export all columns', 'woocommerce' ); ?>">
 									<?php
-										foreach ( $exporter->get_default_column_names() as $column_id => $column_name ) {
-											echo '<option value="' . esc_attr( $column_id ) . '">' . esc_html( $column_name ) . '</option>';
-										}
+									foreach ( $exporter->get_default_column_names() as $column_id => $column_name ) {
+										echo '<option value="' . esc_attr( $column_id ) . '">' . esc_html( $column_name ) . '</option>';
+									}
 									?>
 									<option value="downloads"><?php esc_html_e( 'Downloads', 'woocommerce' ); ?></option>
 									<option value="attributes"><?php esc_html_e( 'Attributes', 'woocommerce' ); ?></option>
@@ -49,12 +49,25 @@ $total_rows      = $product_count->publish + $product_count->private + $variatio
 							<td>
 								<select id="woocommerce-exporter-types" class="woocommerce-exporter-types wc-enhanced-select" style="width:100%;" multiple data-placeholder="<?php esc_attr_e( 'Export all products', 'woocommerce' ); ?>">
 									<?php
-										foreach ( wc_get_product_types() as $value => $label ) {
-											echo '<option value="' . esc_attr( $value ) . '">' . esc_html( $label ) . '</option>';
-										}
+									foreach ( wc_get_product_types() as $value => $label ) {
+										echo '<option value="' . esc_attr( $value ) . '">' . esc_html( $label ) . '</option>';
+									}
 									?>
 									<option value="variation"><?php esc_html_e( 'Product variations', 'woocommerce' ); ?></option>
 								</select>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row">
+								<label for="woocommerce-exporter-category"><?php esc_html_e( 'Which product category should be exported?', 'woocommerce' ); ?></label>
+							</th>
+							<td>
+								<select id="woocommerce-exporter-category" class="woocommerce-exporter-category wc-enhanced-select" style="width:100%;" multiple data-placeholder="<?php esc_attr_e( 'Export all categories', 'woocommerce' ); ?>">
+								<?php
+								foreach ( get_categories( array( 'taxonomy' => 'product_cat' ) ) as $category ) {
+									echo '<option value="' . esc_attr( $category->slug ) . '">' . esc_html( $category->name ) . '</option>';
+								}
+								?>
 							</td>
 						</tr>
 						<tr>
@@ -66,12 +79,13 @@ $total_rows      = $product_count->publish + $product_count->private + $variatio
 								<label for="woocommerce-exporter-meta"><?php esc_html_e( 'Yes, export all custom meta', 'woocommerce' ); ?></label>
 							</td>
 						</tr>
+						<?php do_action( 'woocommerce_product_export_row' ); ?>
 					</tbody>
 				</table>
 				<progress class="woocommerce-exporter-progress" max="100" value="0"></progress>
 			</section>
 			<div class="wc-actions">
-				<input type="submit" class="woocommerce-exporter-button button button-primary" value="<?php esc_attr_e( 'Generate CSV', 'woocommerce' ); ?>" />
+				<button type="submit" class="woocommerce-exporter-button button button-primary" value="<?php esc_attr_e( 'Generate CSV', 'woocommerce' ); ?>"><?php esc_html_e( 'Generate CSV', 'woocommerce' ); ?></button>
 			</div>
 		</form>
 	</div>

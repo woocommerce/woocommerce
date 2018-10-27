@@ -126,7 +126,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	 */
 	public function prepare_item_for_response( $post, $request ) {
 		$order = wc_get_order( $post );
-		$dp    = $request['dp'];
+		$dp    = is_null( $request['dp'] ) ? wc_get_price_decimals() : absint( $request['dp'] );
 
 		$data = array(
 			'id'                   => $order->get_id(),
@@ -404,15 +404,20 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		}
 
 		if ( isset( $request['customer'] ) ) {
-			if ( ! empty( $args['meta_query'] ) ) {
-				$args['meta_query'] = array();
-			}
+			// On WC 3.5.0 the ID of the user that placed the order was moved from the post meta _customer_user to the post_author field in the wp_posts table.
+			if ( version_compare( get_option( 'woocommerce_db_version' ), '3.5.0', '>=' ) ) {
+				$args['author'] = $request['customer'];
+			} else {
+				if ( ! empty( $args['meta_query'] ) ) {
+					$args['meta_query'] = array(); // WPCS: slow query ok.
+				}
 
-			$args['meta_query'][] = array(
-				'key'   => '_customer_user',
-				'value' => $request['customer'],
-				'type'  => 'NUMERIC',
-			);
+				$args['meta_query'][] = array(
+					'key'   => '_customer_user',
+					'value' => $request['customer'],
+					'type'  => 'NUMERIC',
+				);
+			}
 		}
 
 		// Search by product.
@@ -496,7 +501,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		 * The dynamic portion of the hook name, $this->post_type, refers to post_type of the post being
 		 * prepared for the response.
 		 *
-		 * @param WC_Order           $order      The prder object.
+		 * @param WC_Order           $order      The order object.
 		 * @param WP_REST_Request    $request    Request object.
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}", $order, $request );
@@ -513,7 +518,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
-	 * Only reutrn writeable props from schema.
+	 * Only return writable props from schema.
 	 * @param  array $schema
 	 * @return bool
 	 */
@@ -532,6 +537,11 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			// Make sure customer exists.
 			if ( ! is_null( $request['customer_id'] ) && 0 !== $request['customer_id'] && false === get_user_by( 'id', $request['customer_id'] ) ) {
 				throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id',__( 'Customer ID is invalid.', 'woocommerce' ), 400 );
+			}
+
+			// Make sure customer is part of blog.
+			if ( is_multisite() && ! is_user_member_of_blog( $request['customer_id'] ) ) {
+				throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id_network',__( 'Customer ID does not belong to this site.', 'woocommerce' ), 400 );
 			}
 
 			$order = $this->prepare_item_for_database( $request );
@@ -571,7 +581,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 
 			// If items have changed, recalculate order totals.
 			if ( isset( $request['billing'] ) || isset( $request['shipping'] ) || isset( $request['line_items'] ) || isset( $request['shipping_lines'] ) || isset( $request['fee_lines'] ) || isset( $request['coupon_lines'] ) ) {
-				$order->calculate_totals();
+				$order->calculate_totals( true );
 			}
 
 			return $order->get_id();
@@ -1211,7 +1221,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 							),
 							'name' => array(
 								'description' => __( 'Product name.', 'woocommerce' ),
-								'type'        => 'string',
+								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
@@ -1223,7 +1233,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 							),
 							'product_id' => array(
 								'description' => __( 'Product ID.', 'woocommerce' ),
-								'type'        => 'integer',
+								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'variation_id' => array(
@@ -1238,7 +1248,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 							),
 							'tax_class' => array(
 								'description' => __( 'Tax class of product.', 'woocommerce' ),
-								'type'        => 'integer',
+								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
@@ -1319,7 +1329,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 										),
 										'value' => array(
 											'description' => __( 'Meta value.', 'woocommerce' ),
-											'type'        => 'string',
+											'type'        => 'mixed',
 											'context'     => array( 'view', 'edit' ),
 											'readonly'    => true,
 										),
@@ -1397,12 +1407,12 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 							),
 							'method_title' => array(
 								'description' => __( 'Shipping method name.', 'woocommerce' ),
-								'type'        => 'string',
+								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'method_id' => array(
 								'description' => __( 'Shipping method ID.', 'woocommerce' ),
-								'type'        => 'string',
+								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'total' => array(
@@ -1457,7 +1467,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 							),
 							'name' => array(
 								'description' => __( 'Fee name.', 'woocommerce' ),
-								'type'        => 'string',
+								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'tax_class' => array(
@@ -1528,7 +1538,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 							),
 							'code' => array(
 								'description' => __( 'Coupon code.', 'woocommerce' ),
-								'type'        => 'string',
+								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'discount' => array(
@@ -1609,7 +1619,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['dp'] = array(
-			'default'           => 2,
+			'default'           => wc_get_price_decimals(),
 			'description'       => __( 'Number of decimal points to use in each resource.', 'woocommerce' ),
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',

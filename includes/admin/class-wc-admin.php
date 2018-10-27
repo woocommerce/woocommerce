@@ -30,6 +30,7 @@ class WC_Admin {
 		add_action( 'admin_init', array( $this, 'admin_redirects' ) );
 		add_action( 'admin_footer', 'wc_print_js', 25 );
 		add_filter( 'admin_footer_text', array( $this, 'admin_footer_text' ), 1 );
+		add_action( 'wp_ajax_setup_wizard_check_jetpack', array( $this, 'setup_wizard_check_jetpack' ) );
 	}
 
 	/**
@@ -43,46 +44,46 @@ class WC_Admin {
 	 * Include any classes we need within admin.
 	 */
 	public function includes() {
-		include_once( dirname( __FILE__ ) . '/wc-admin-functions.php' );
-		include_once( dirname( __FILE__ ) . '/wc-meta-box-functions.php' );
-		include_once( dirname( __FILE__ ) . '/class-wc-admin-post-types.php' );
-		include_once( dirname( __FILE__ ) . '/class-wc-admin-taxonomies.php' );
-		include_once( dirname( __FILE__ ) . '/class-wc-admin-menus.php' );
-		include_once( dirname( __FILE__ ) . '/class-wc-admin-customize.php' );
-		include_once( dirname( __FILE__ ) . '/class-wc-admin-notices.php' );
-		include_once( dirname( __FILE__ ) . '/class-wc-admin-assets.php' );
-		include_once( dirname( __FILE__ ) . '/class-wc-admin-api-keys.php' );
-		include_once( dirname( __FILE__ ) . '/class-wc-admin-webhooks.php' );
-		include_once( dirname( __FILE__ ) . '/class-wc-admin-pointers.php' );
-		include_once( dirname( __FILE__ ) . '/class-wc-admin-importers.php' );
-		include_once( dirname( __FILE__ ) . '/class-wc-admin-exporters.php' );
+		include_once dirname( __FILE__ ) . '/wc-admin-functions.php';
+		include_once dirname( __FILE__ ) . '/wc-meta-box-functions.php';
+		include_once dirname( __FILE__ ) . '/class-wc-admin-post-types.php';
+		include_once dirname( __FILE__ ) . '/class-wc-admin-taxonomies.php';
+		include_once dirname( __FILE__ ) . '/class-wc-admin-menus.php';
+		include_once dirname( __FILE__ ) . '/class-wc-admin-customize.php';
+		include_once dirname( __FILE__ ) . '/class-wc-admin-notices.php';
+		include_once dirname( __FILE__ ) . '/class-wc-admin-assets.php';
+		include_once dirname( __FILE__ ) . '/class-wc-admin-api-keys.php';
+		include_once dirname( __FILE__ ) . '/class-wc-admin-webhooks.php';
+		include_once dirname( __FILE__ ) . '/class-wc-admin-pointers.php';
+		include_once dirname( __FILE__ ) . '/class-wc-admin-importers.php';
+		include_once dirname( __FILE__ ) . '/class-wc-admin-exporters.php';
 
 		// Help Tabs
 		if ( apply_filters( 'woocommerce_enable_admin_help_tab', true ) ) {
-			include_once( dirname( __FILE__ ) . '/class-wc-admin-help.php' );
+			include_once dirname( __FILE__ ) . '/class-wc-admin-help.php';
 		}
 
 		// Setup/welcome
 		if ( ! empty( $_GET['page'] ) ) {
 			switch ( $_GET['page'] ) {
-				case 'wc-setup' :
-					include_once( dirname( __FILE__ ) . '/class-wc-admin-setup-wizard.php' );
-				break;
+				case 'wc-setup':
+					include_once dirname( __FILE__ ) . '/class-wc-admin-setup-wizard.php';
+					break;
 			}
 		}
 
 		// Importers
 		if ( defined( 'WP_LOAD_IMPORTERS' ) ) {
-			include_once( dirname( __FILE__ ) . '/class-wc-admin-importers.php' );
+			include_once dirname( __FILE__ ) . '/class-wc-admin-importers.php';
 		}
 
 		// Helper
-		include_once( dirname( __FILE__ ) . '/helper/class-wc-helper-options.php' );
-		include_once( dirname( __FILE__ ) . '/helper/class-wc-helper-api.php' );
-		include_once( dirname( __FILE__ ) . '/helper/class-wc-helper-updater.php' );
-		include_once( dirname( __FILE__ ) . '/helper/class-wc-helper-plugin-info.php' );
-		include_once( dirname( __FILE__ ) . '/helper/class-wc-helper-compat.php' );
-		include_once( dirname( __FILE__ ) . '/helper/class-wc-helper.php' );
+		include_once dirname( __FILE__ ) . '/helper/class-wc-helper-options.php';
+		include_once dirname( __FILE__ ) . '/helper/class-wc-helper-api.php';
+		include_once dirname( __FILE__ ) . '/helper/class-wc-helper-updater.php';
+		include_once dirname( __FILE__ ) . '/helper/class-wc-helper-plugin-info.php';
+		include_once dirname( __FILE__ ) . '/helper/class-wc-helper-compat.php';
+		include_once dirname( __FILE__ ) . '/helper/class-wc-helper.php';
 	}
 
 	/**
@@ -94,18 +95,25 @@ class WC_Admin {
 		}
 
 		switch ( $screen->id ) {
-			case 'dashboard' :
-				include( 'class-wc-admin-dashboard.php' );
-			break;
-			case 'options-permalink' :
-				include( 'class-wc-admin-permalink-settings.php' );
-			break;
-			case 'users' :
-			case 'user' :
-			case 'profile' :
-			case 'user-edit' :
-				include( 'class-wc-admin-profile.php' );
-			break;
+			case 'dashboard':
+			case 'dashboard-network':
+				include 'class-wc-admin-dashboard.php';
+				break;
+			case 'options-permalink':
+				include 'class-wc-admin-permalink-settings.php';
+				break;
+			case 'plugins':
+				include 'plugin-updates/class-wc-plugins-screen-updates.php';
+				break;
+			case 'update-core':
+				include 'plugin-updates/class-wc-updates-screen-updates.php';
+				break;
+			case 'users':
+			case 'user':
+			case 'profile':
+			case 'user-edit':
+				include 'class-wc-admin-profile.php';
+				break;
 		}
 	}
 
@@ -152,7 +160,7 @@ class WC_Admin {
 	public function prevent_admin_access() {
 		$prevent_access = false;
 
-		if ( 'yes' === get_option( 'woocommerce_lock_down_admin', 'yes' ) && ! is_ajax() && basename( $_SERVER["SCRIPT_FILENAME"] ) !== 'admin-post.php' ) {
+		if ( 'yes' === get_option( 'woocommerce_lock_down_admin', 'yes' ) && ! is_ajax() && basename( $_SERVER['SCRIPT_FILENAME'] ) !== 'admin-post.php' ) {
 			$has_cap     = false;
 			$access_caps = array( 'edit_posts', 'manage_woocommerce', 'view_admin_dashboard' );
 
@@ -176,8 +184,6 @@ class WC_Admin {
 
 	/**
 	 * Preview email template.
-	 *
-	 * @return string
 	 */
 	public function preview_emails() {
 
@@ -187,21 +193,21 @@ class WC_Admin {
 			}
 
 			// load the mailer class
-			$mailer        = WC()->mailer();
+			$mailer = WC()->mailer();
 
 			// get the preview email subject
 			$email_heading = __( 'HTML email template', 'woocommerce' );
 
 			// get the preview email content
 			ob_start();
-			include( 'views/html-email-template-preview.php' );
-			$message       = ob_get_clean();
+			include 'views/html-email-template-preview.php';
+			$message = ob_get_clean();
 
 			// create a new email
-			$email         = new WC_Email();
+			$email = new WC_Email();
 
 			// wrap the content with the email template and then add styles
-			$message       = apply_filters( 'woocommerce_mail_content', $email->style_inline( $mailer->wrap_message( $email_heading, $message ) ) );
+			$message = apply_filters( 'woocommerce_mail_content', $email->style_inline( $mailer->wrap_message( $email_heading, $message ) ) );
 
 			// print the preview email
 			echo $message;
@@ -230,20 +236,39 @@ class WC_Admin {
 		if ( isset( $current_screen->id ) && apply_filters( 'woocommerce_display_admin_footer_text', in_array( $current_screen->id, $wc_pages ) ) ) {
 			// Change the footer text
 			if ( ! get_option( 'woocommerce_admin_footer_text_rated' ) ) {
-				/* translators: %s: five stars */
-				$footer_text = sprintf( __( 'If you like <strong>WooCommerce</strong> please leave us a %s rating. A huge thanks in advance!', 'woocommerce' ), '<a href="https://wordpress.org/support/plugin/woocommerce/reviews?rate=5#new-post" target="_blank" class="wc-rating-link" data-rated="' . esc_attr__( 'Thanks :)', 'woocommerce' ) . '">&#9733;&#9733;&#9733;&#9733;&#9733;</a>' );
-				wc_enqueue_js( "
-					jQuery( 'a.wc-rating-link' ).click( function() {
+				$footer_text = sprintf(
+					/* translators: 1: WooCommerce 2:: five stars */
+					__( 'If you like %1$s please leave us a %2$s rating. A huge thanks in advance!', 'woocommerce' ),
+					sprintf( '<strong>%s</strong>', esc_html__( 'WooCommerce', 'woocommerce' ) ),
+					'<a href="https://wordpress.org/support/plugin/woocommerce/reviews?rate=5#new-post" target="_blank" class="wc-rating-link" data-rated="' . esc_attr__( 'Thanks :)', 'woocommerce' ) . '">&#9733;&#9733;&#9733;&#9733;&#9733;</a>'
+				);
+				wc_enqueue_js(
+					"jQuery( 'a.wc-rating-link' ).click( function() {
 						jQuery.post( '" . WC()->ajax_url() . "', { action: 'woocommerce_rated' } );
 						jQuery( this ).parent().text( jQuery( this ).data( 'rated' ) );
-					});
-				" );
+					});"
+				);
 			} else {
 				$footer_text = __( 'Thank you for selling with WooCommerce.', 'woocommerce' );
 			}
 		}
 
 		return $footer_text;
+	}
+
+	/**
+	 * Check on a Jetpack install queued by the Setup Wizard.
+	 *
+	 * See: WC_Admin_Setup_Wizard::install_jetpack()
+	 */
+	public function setup_wizard_check_jetpack() {
+		$jetpack_active = class_exists( 'Jetpack' );
+
+		wp_send_json_success(
+			array(
+				'is_active' => $jetpack_active ? 'yes' : 'no',
+			)
+		);
 	}
 }
 

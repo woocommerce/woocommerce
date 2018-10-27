@@ -1,45 +1,50 @@
 <?php
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 /**
  * Cart Shortcode
  *
  * Used on the cart page, the cart shortcode displays the cart contents and interface for coupon codes and other cart bits and pieces.
  *
- * @author 		WooThemes
- * @category 	Shortcodes
- * @package 	WooCommerce/Shortcodes/Cart
- * @version     2.3.0
+ * @package WooCommerce/Shortcodes/Cart
+ * @version 2.3.0
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Shortcode cart class.
  */
 class WC_Shortcode_Cart {
 
 	/**
 	 * Calculate shipping for the cart.
+	 *
+	 * @throws Exception When some data is invalid.
 	 */
 	public static function calculate_shipping() {
 		try {
 			WC()->shipping->reset_shipping();
 
-			$country  = wc_clean( $_POST['calc_shipping_country'] );
-			$state    = wc_clean( isset( $_POST['calc_shipping_state'] ) ? $_POST['calc_shipping_state'] : '' );
-			$postcode = apply_filters( 'woocommerce_shipping_calculator_enable_postcode', true ) ? wc_clean( $_POST['calc_shipping_postcode'] ) : '';
-			$city     = apply_filters( 'woocommerce_shipping_calculator_enable_city', false ) ? wc_clean( $_POST['calc_shipping_city'] ) : '';
+			$address = array();
 
-			if ( $postcode && ! WC_Validation::is_postcode( $postcode, $country ) ) {
+			$address['country']  = isset( $_POST['calc_shipping_country'] ) ? wc_clean( wp_unslash( $_POST['calc_shipping_country'] ) ) : ''; // WPCS: input var ok, CSRF ok, sanitization ok.
+			$address['state']    = isset( $_POST['calc_shipping_state'] ) ? wc_clean( wp_unslash( $_POST['calc_shipping_state'] ) ) : ''; // WPCS: input var ok, CSRF ok, sanitization ok.
+			$address['postcode'] = isset( $_POST['calc_shipping_postcode'] ) ? wc_clean( wp_unslash( $_POST['calc_shipping_postcode'] ) ) : ''; // WPCS: input var ok, CSRF ok, sanitization ok.
+			$address['city']     = isset( $_POST['calc_shipping_city'] ) ? wc_clean( wp_unslash( $_POST['calc_shipping_city'] ) ) : ''; // WPCS: input var ok, CSRF ok, sanitization ok.
+
+			$address = apply_filters( 'woocommerce_cart_calculate_shipping_address', $address );
+
+			if ( $address['postcode'] && ! WC_Validation::is_postcode( $address['postcode'], $address['country'] ) ) {
 				throw new Exception( __( 'Please enter a valid postcode / ZIP.', 'woocommerce' ) );
-			} elseif ( $postcode ) {
-				$postcode = wc_format_postcode( $postcode, $country );
+			} elseif ( $address['postcode'] ) {
+				$address['postcode'] = wc_format_postcode( $address['postcode'], $address['country'] );
 			}
 
-			if ( $country ) {
-				WC()->customer->set_location( $country, $state, $postcode, $city );
-				WC()->customer->set_shipping_location( $country, $state, $postcode, $city );
+			if ( $address['country'] ) {
+				WC()->customer->set_location( $address['country'], $address['state'], $address['postcode'], $address['city'] );
+				WC()->customer->set_shipping_location( $address['country'], $address['state'], $address['postcode'], $address['city'] );
 			} else {
-				WC()->customer->set_to_base();
-				WC()->customer->set_shipping_to_base();
+				WC()->customer->set_billing_address_to_base();
+				WC()->customer->set_shipping_address_to_base();
 			}
 
 			WC()->customer->set_calculated_shipping( true );
@@ -59,28 +64,27 @@ class WC_Shortcode_Cart {
 	/**
 	 * Output the cart shortcode.
 	 *
-	 * @param array $atts
+	 * @param array $atts Shortcode attributes.
 	 */
 	public static function output( $atts ) {
-		// Constants
-		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
-			define( 'WOOCOMMERCE_CART', true );
-		}
+		// Constants.
+		wc_maybe_define_constant( 'WOOCOMMERCE_CART', true );
 
-		$atts = shortcode_atts( array(), $atts, 'woocommerce_cart' );
+		$atts        = shortcode_atts( array(), $atts, 'woocommerce_cart' );
+		$nonce_value = wc_get_var( $_REQUEST['woocommerce-shipping-calculator-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // @codingStandardsIgnoreLine.
 
-		// Update Shipping
-		if ( ! empty( $_POST['calc_shipping'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-cart' ) ) {
+		// Update Shipping. Nonce check uses new value and old value (woocommerce-cart). @todo remove in 4.0.
+		if ( ! empty( $_POST['calc_shipping'] ) && ( wp_verify_nonce( $nonce_value, 'woocommerce-shipping-calculator' ) || wp_verify_nonce( $nonce_value, 'woocommerce-cart' ) ) ) { // WPCS: input var ok.
 			self::calculate_shipping();
 
-			// Also calc totals before we check items so subtotals etc are up to date
+			// Also calc totals before we check items so subtotals etc are up to date.
 			WC()->cart->calculate_totals();
 		}
 
-		// Check cart items are valid
+		// Check cart items are valid.
 		do_action( 'woocommerce_check_cart_items' );
 
-		// Calc totals
+		// Calc totals.
 		WC()->cart->calculate_totals();
 
 		if ( WC()->cart->is_empty() ) {

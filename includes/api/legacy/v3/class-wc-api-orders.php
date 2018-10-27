@@ -389,15 +389,11 @@ class WC_API_Orders extends WC_API_Resource {
 	 * Create an order
 	 *
 	 * @since 2.2
-	 *
 	 * @param array $data raw order data
-	 *
 	 * @return array|WP_Error
 	 */
 	public function create_order( $data ) {
 		global $wpdb;
-
-		wc_transaction_query( 'start' );
 
 		try {
 			if ( ! isset( $data['order'] ) ) {
@@ -506,16 +502,12 @@ class WC_API_Orders extends WC_API_Resource {
 			wc_delete_shop_order_transients( $order );
 
 			do_action( 'woocommerce_api_create_order', $order->get_id(), $data, $this );
-
-			wc_transaction_query( 'commit' );
+			do_action( 'woocommerce_new_order', $order->get_id() );
 
 			return $this->get_order( $order->get_id() );
-
 		} catch ( WC_Data_Exception $e ) {
-			wc_transaction_query( 'rollback' );
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => 400 ) );
 		} catch ( WC_API_Exception $e ) {
-			wc_transaction_query( 'rollback' );
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
@@ -671,6 +663,7 @@ class WC_API_Orders extends WC_API_Resource {
 			wc_delete_shop_order_transients( $order );
 
 			do_action( 'woocommerce_api_edit_order', $order->get_id(), $data, $this );
+			do_action( 'woocommerce_update_order', $order->get_id() );
 
 			return $this->get_order( $id );
 		} catch ( WC_Data_Exception $e ) {
@@ -1314,7 +1307,7 @@ class WC_API_Orders extends WC_API_Resource {
 				'id'            => $note->comment_ID,
 				'created_at'    => $this->server->format_datetime( $note->comment_date_gmt ),
 				'note'          => $note->comment_content,
-				'customer_note' => get_comment_meta( $note->comment_ID, 'is_customer_note', true ) ? true : false,
+				'customer_note' => (bool) get_comment_meta( $note->comment_ID, 'is_customer_note', true ),
 			);
 
 			return array( 'order_note' => apply_filters( 'woocommerce_api_order_note_response', $order_note, $id, $fields, $note, $order_id, $this ) );
@@ -1491,7 +1484,7 @@ class WC_API_Orders extends WC_API_Resource {
 			}
 
 			// Force delete since trashed order notes could not be managed through comments list table
-			$result = wp_delete_comment( $note->comment_ID, true );
+			$result = wc_delete_order_note( $note->comment_ID );
 
 			if ( ! $result ) {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_delete_order_note', __( 'This order note cannot be deleted', 'woocommerce' ), 500 );
@@ -1545,10 +1538,11 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @param string $order_id order ID
 	 * @param int $id
 	 * @param string|null $fields fields to limit response to
+	 * @param array $filter
 	 *
 	 * @return array|WP_Error
 	 */
-	public function get_order_refund( $order_id, $id, $fields = null ) {
+	public function get_order_refund( $order_id, $id, $fields = null, $filter = array() ) {
 		try {
 			// Validate order ID
 			$order_id = $this->validate_request( $order_id, $this->post_type, 'read' );

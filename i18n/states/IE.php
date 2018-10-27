@@ -2,42 +2,39 @@
 /**
  * Republic of Ireland
  *
- * @author      WooThemes
- * @category    i18n
- * @package     WooCommerce/i18n
- * @version     3.0.0
+ * @package WooCommerce/i18n
+ * @version 3.0.0
  */
+
 global $states;
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 $states['IE'] = array(
-	'CE' => __( 'Clare', 'woocommerce' ),
-	'CK' => __( 'Cork', 'woocommerce' ),
-	'CN' => __( 'Cavan', 'woocommerce' ),
 	'CW' => __( 'Carlow', 'woocommerce' ),
+	'CN' => __( 'Cavan', 'woocommerce' ),
+	'CE' => __( 'Clare', 'woocommerce' ),
+	'CO' => __( 'Cork', 'woocommerce' ),
 	'DL' => __( 'Donegal', 'woocommerce' ),
-	'DN' => __( 'Dublin', 'woocommerce' ),
-	'GY' => __( 'Galway', 'woocommerce' ),
+	'D'  => __( 'Dublin', 'woocommerce' ),
+	'G'  => __( 'Galway', 'woocommerce' ),
+	'KY' => __( 'Kerry', 'woocommerce' ),
 	'KE' => __( 'Kildare', 'woocommerce' ),
 	'KK' => __( 'Kilkenny', 'woocommerce' ),
-	'KY' => __( 'Kerry', 'woocommerce' ),
+	'LS' => __( 'Laois', 'woocommerce' ),
+	'LM' => __( 'Leitrim', 'woocommerce' ),
+	'LK' => __( 'Limerick', 'woocommerce' ),
 	'LD' => __( 'Longford', 'woocommerce' ),
 	'LH' => __( 'Louth', 'woocommerce' ),
-	'LK' => __( 'Limerick', 'woocommerce' ),
-	'LM' => __( 'Leitrim', 'woocommerce' ),
-	'LS' => __( 'Laois', 'woocommerce' ),
+	'MO' => __( 'Mayo', 'woocommerce' ),
 	'MH' => __( 'Meath', 'woocommerce' ),
 	'MN' => __( 'Monaghan', 'woocommerce' ),
-	'MO' => __( 'Mayo', 'woocommerce' ),
 	'OY' => __( 'Offaly', 'woocommerce' ),
 	'RN' => __( 'Roscommon', 'woocommerce' ),
 	'SO' => __( 'Sligo', 'woocommerce' ),
-	'TY' => __( 'Tipperary', 'woocommerce' ),
+	'TA' => __( 'Tipperary', 'woocommerce' ),
 	'WD' => __( 'Waterford', 'woocommerce' ),
 	'WH' => __( 'Westmeath', 'woocommerce' ),
-	'WW' => __( 'Wicklow', 'woocommerce' ),
 	'WX' => __( 'Wexford', 'woocommerce' ),
+	'WW' => __( 'Wicklow', 'woocommerce' ),
 );

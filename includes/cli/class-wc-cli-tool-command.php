@@ -1,4 +1,9 @@
 <?php
+/**
+ * WC_CLI_Tool_Command class file.
+ *
+ * @package WooCommerce\CLI
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -23,46 +28,46 @@ class WC_CLI_Tool_Command {
 	public static function register_commands() {
 		global $wp_rest_server;
 
-		$request       = new WP_REST_Request( 'OPTIONS', '/wc/v1/system_status/tools' );
+		$request       = new WP_REST_Request( 'OPTIONS', '/wc/v2/system_status/tools' );
 		$response      = $wp_rest_server->dispatch( $request );
 		$response_data = $response->get_data();
 		if ( empty( $response_data ) ) {
 			return;
 		}
 
-		$parent	            = "wc tool";
+		$parent             = 'wc tool';
 		$supported_commands = array( 'list', 'run' );
 		foreach ( $supported_commands as $command ) {
 			$synopsis = array();
 			if ( 'run' === $command ) {
 				$synopsis[] = array(
-					'name'		  => 'id',
-					'type'		  => 'positional',
+					'name'        => 'id',
+					'type'        => 'positional',
 					'description' => __( 'The id for the resource.', 'woocommerce' ),
-					'optional'	  => false,
+					'optional'    => false,
 				);
-				$method = 'update_item';
-				$route  = '/wc/v1/system_status/tools/(?P<id>[\w-]+)';
+				$method     = 'update_item';
+				$route      = '/wc/v2/system_status/tools/(?P<id>[\w-]+)';
 			} elseif ( 'list' === $command ) {
 				$synopsis[] = array(
-					'name'		  => 'fields',
-					'type'		  => 'assoc',
+					'name'        => 'fields',
+					'type'        => 'assoc',
 					'description' => __( 'Limit response to specific fields. Defaults to all fields.', 'woocommerce' ),
 					'optional'    => true,
 				);
 				$synopsis[] = array(
-					'name'		  => 'field',
-					'type'		  => 'assoc',
+					'name'        => 'field',
+					'type'        => 'assoc',
 					'description' => __( 'Get the value of an individual field.', 'woocommerce' ),
-					'optional'	  => true,
+					'optional'    => true,
 				);
 				$synopsis[] = array(
-					'name'		  => 'format',
-					'type'		  => 'assoc',
+					'name'        => 'format',
+					'type'        => 'assoc',
 					'description' => __( 'Render response in a particular format.', 'woocommerce' ),
-					'optional'	  => true,
-					'default'	  => 'table',
-					'options'	  => array(
+					'optional'    => true,
+					'default'     => 'table',
+					'options'     => array(
 						'table',
 						'json',
 						'csv',
@@ -74,26 +79,26 @@ class WC_CLI_Tool_Command {
 						'envelope',
 					),
 				);
-				$method = 'list_items';
-				$route  = '/wc/v1/system_status/tools';
+				$method     = 'list_items';
+				$route      = '/wc/v2/system_status/tools';
 			}
 
 			$before_invoke = null;
 			if ( empty( $command_args['when'] ) && WP_CLI::get_config( 'debug' ) ) {
 				$before_invoke = function() {
-					if ( ! defined( 'SAVEQUERIES' ) ) {
-						define( 'SAVEQUERIES', true );
-					}
+					wc_maybe_define_constant( 'SAVEQUERIES', true );
 				};
 			}
 
 			$rest_command = new WC_CLI_REST_Command( 'system_status_tool', $route, $response_data['schema'] );
 
-			WP_CLI::add_command( "{$parent} {$command}", array( $rest_command, $method ), array(
-				'synopsis'	    => $synopsis,
-				'when'		    => ! empty( $command_args['when'] ) ? $command_args['when'] : '',
-				'before_invoke' => $before_invoke,
-			) );
+			WP_CLI::add_command(
+				"{$parent} {$command}", array( $rest_command, $method ), array(
+					'synopsis'      => $synopsis,
+					'when'          => ! empty( $command_args['when'] ) ? $command_args['when'] : '',
+					'before_invoke' => $before_invoke,
+				)
+			);
 		}
 	}
 

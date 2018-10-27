@@ -240,38 +240,20 @@ class WC_REST_Product_Attributes_V1_Controller extends WC_REST_Controller {
 	public function create_item( $request ) {
 		global $wpdb;
 
-		$args = array(
-			'attribute_label'   => $request['name'],
-			'attribute_name'    => wc_sanitize_taxonomy_name( stripslashes( $request['slug'] ) ),
-			'attribute_type'    => ! empty( $request['type'] ) ? $request['type'] : 'select',
-			'attribute_orderby' => ! empty( $request['order_by'] ) ? $request['order_by'] : 'menu_order',
-			'attribute_public'  => true === $request['has_archives'],
-		);
-
-		// Set the attribute slug.
-		if ( empty( $args['attribute_name'] ) ) {
-			$args['attribute_name'] = wc_sanitize_taxonomy_name( stripslashes( $args['attribute_label'] ) );
-		} else {
-			$args['attribute_name'] = preg_replace( '/^pa\_/', '', wc_sanitize_taxonomy_name( stripslashes( $args['attribute_name'] ) ) );
-		}
-
-		$valid_slug = $this->validate_attribute_slug( $args['attribute_name'], true );
-		if ( is_wp_error( $valid_slug ) ) {
-			return $valid_slug;
-		}
-
-		$insert = $wpdb->insert(
-			$wpdb->prefix . 'woocommerce_attribute_taxonomies',
-			$args,
-			array( '%s', '%s', '%s', '%s', '%d' )
-		);
+		$id = wc_create_attribute( array(
+			'name'         => $request['name'],
+			'slug'         => wc_sanitize_taxonomy_name( stripslashes( $request['slug'] ) ),
+			'type'         => ! empty( $request['type'] ) ? $request['type'] : 'select',
+			'order_by'     => ! empty( $request['order_by'] ) ? $request['order_by'] : 'menu_order',
+			'has_archives' => true === $request['has_archives'],
+		) );
 
 		// Checks for errors.
-		if ( is_wp_error( $insert ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_create', $insert->get_error_message(), array( 'status' => 400 ) );
+		if ( is_wp_error( $id ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_create', $id->get_error_message(), array( 'status' => 400 ) );
 		}
 
-		$attribute = $this->get_attribute( $wpdb->insert_id );
+		$attribute = $this->get_attribute( $id );
 
 		if ( is_wp_error( $attribute ) ) {
 			return $attribute;
@@ -293,10 +275,6 @@ class WC_REST_Product_Attributes_V1_Controller extends WC_REST_Controller {
 		$response = rest_ensure_response( $response );
 		$response->set_status( 201 );
 		$response->header( 'Location', rest_url( '/' . $this->namespace . '/' . $this->rest_base . '/' . $attribute->attribute_id ) );
-
-		// Clear transients.
-		$this->flush_rewrite_rules();
-		delete_transient( 'wc_attribute_taxonomies' );
 
 		return $response;
 	}
@@ -329,48 +307,17 @@ class WC_REST_Product_Attributes_V1_Controller extends WC_REST_Controller {
 		global $wpdb;
 
 		$id     = (int) $request['id'];
-		$format = array( '%s', '%s', '%s', '%s', '%d' );
-		$args   = array(
-			'attribute_label'   => $request['name'],
-			'attribute_name'    => wc_sanitize_taxonomy_name( stripslashes( $request['slug'] ) ),
-			'attribute_type'    => $request['type'],
-			'attribute_orderby' => $request['order_by'],
-			'attribute_public'  => $request['has_archives'],
-		);
+		$edited = wc_update_attribute( $id, array(
+			'name'         => $request['name'],
+			'slug'         => wc_sanitize_taxonomy_name( stripslashes( $request['slug'] ) ),
+			'type'         => $request['type'],
+			'order_by'     => $request['order_by'],
+			'has_archives' => $request['has_archives'],
+		) );
 
-		$i = 0;
-		foreach ( $args as $key => $value ) {
-			if ( empty( $value ) && ! is_bool( $value ) ) {
-				unset( $args[ $key ] );
-				unset( $format[ $i ] );
-			}
-
-			$i++;
-		}
-
-		// Set the attribute slug.
-		if ( ! empty( $args['attribute_name'] ) ) {
-			$args['attribute_name'] = preg_replace( '/^pa\_/', '', wc_sanitize_taxonomy_name( stripslashes( $args['attribute_name'] ) ) );
-
-			$valid_slug = $this->validate_attribute_slug( $args['attribute_name'], false );
-			if ( is_wp_error( $valid_slug ) ) {
-				return $valid_slug;
-			}
-		}
-
-		if ( $args ) {
-			$update = $wpdb->update(
-				$wpdb->prefix . 'woocommerce_attribute_taxonomies',
-				$args,
-				array( 'attribute_id' => $id ),
-				$format,
-				array( '%d' )
-			);
-
-			// Checks for errors.
-			if ( false === $update ) {
-				return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Could not edit the attribute.', 'woocommerce' ), array( 'status' => 400 ) );
-			}
+		// Checks for errors.
+		if ( is_wp_error( $edited ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_edit', $edited->get_error_message(), array( 'status' => 400 ) );
 		}
 
 		$attribute = $this->get_attribute( $id );
@@ -393,10 +340,6 @@ class WC_REST_Product_Attributes_V1_Controller extends WC_REST_Controller {
 		$request->set_param( 'context', 'edit' );
 		$response = $this->prepare_item_for_response( $attribute, $request );
 
-		// Clear transients.
-		$this->flush_rewrite_rules();
-		delete_transient( 'wc_attribute_taxonomies' );
-
 		return rest_ensure_response( $response );
 	}
 
@@ -407,8 +350,6 @@ class WC_REST_Product_Attributes_V1_Controller extends WC_REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function delete_item( $request ) {
-		global $wpdb;
-
 		$force = isset( $request['force'] ) ? (bool) $request['force'] : false;
 
 		// We don't support trashing for this type, error out.
@@ -425,23 +366,10 @@ class WC_REST_Product_Attributes_V1_Controller extends WC_REST_Controller {
 		$request->set_param( 'context', 'edit' );
 		$response = $this->prepare_item_for_response( $attribute, $request );
 
-		$deleted = $wpdb->delete(
-			$wpdb->prefix . 'woocommerce_attribute_taxonomies',
-			array( 'attribute_id' => $attribute->attribute_id ),
-			array( '%d' )
-		);
+		$deleted = wc_delete_attribute( $attribute->attribute_id );
 
 		if ( false === $deleted ) {
 			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'The resource cannot be deleted.', 'woocommerce' ), array( 'status' => 500 ) );
-		}
-
-		$taxonomy = wc_attribute_taxonomy_name( $attribute->attribute_name );
-
-		if ( taxonomy_exists( $taxonomy ) ) {
-			$terms = get_terms( $taxonomy, 'orderby=name&hide_empty=0' );
-			foreach ( $terms as $term ) {
-				wp_delete_term( $term->term_id, $taxonomy );
-			}
 		}
 
 		/**
@@ -452,13 +380,6 @@ class WC_REST_Product_Attributes_V1_Controller extends WC_REST_Controller {
 		 * @param WP_REST_Request  $request  The request sent to the API.
 		 */
 		do_action( 'woocommerce_rest_delete_product_attribute', $attribute, $response, $request );
-
-		// Fires woocommerce_attribute_deleted hook.
-		do_action( 'woocommerce_attribute_deleted', $attribute->attribute_id, $attribute->attribute_name, $taxonomy );
-
-		// Clear transients.
-		$this->flush_rewrite_rules();
-		delete_transient( 'wc_attribute_taxonomies' );
 
 		return $response;
 	}
@@ -636,6 +557,7 @@ class WC_REST_Product_Attributes_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Validate attribute slug.
 	 *
+	 * @deprecated 3.2.0
 	 * @param string $slug
 	 * @param bool $new_data
 	 * @return bool|WP_Error
@@ -655,6 +577,7 @@ class WC_REST_Product_Attributes_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Schedule to flush rewrite rules.
 	 *
+	 * @deprecated 3.2.0
 	 * @since 3.0.0
 	 */
 	protected function flush_rewrite_rules() {

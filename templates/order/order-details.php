@@ -13,7 +13,7 @@
  * @see 	https://docs.woocommerce.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates
- * @version 3.2.0
+ * @version 3.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -34,6 +34,8 @@ if ( $show_downloads ) {
 }
 ?>
 <section class="woocommerce-order-details">
+	<?php do_action( 'woocommerce_order_details_before_order_table', $order ); ?>
+
 	<h2 class="woocommerce-order-details__title"><?php _e( 'Order details', 'woocommerce' ); ?></h2>
 
 	<table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
@@ -47,20 +49,23 @@ if ( $show_downloads ) {
 
 		<tbody>
 			<?php
-				foreach ( $order_items as $item_id => $item ) {
-					$product = apply_filters( 'woocommerce_order_item_product', $item->get_product(), $item );
+			do_action( 'woocommerce_order_details_before_order_table_items', $order );
 
-					wc_get_template( 'order/order-details-item.php', array(
-						'order'			     => $order,
-						'item_id'		     => $item_id,
-						'item'			     => $item,
-						'show_purchase_note' => $show_purchase_note,
-						'purchase_note'	     => $product ? $product->get_purchase_note() : '',
-						'product'	         => $product,
-					) );
-				}
+			foreach ( $order_items as $item_id => $item ) {
+				$product = $item->get_product();
+
+				wc_get_template( 'order/order-details-item.php', array(
+					'order'			     => $order,
+					'item_id'		     => $item_id,
+					'item'			     => $item,
+					'show_purchase_note' => $show_purchase_note,
+					'purchase_note'	     => $product ? $product->get_purchase_note() : '',
+					'product'	         => $product,
+				) );
+			}
+
+			do_action( 'woocommerce_order_details_after_order_table_items', $order );
 			?>
-			<?php do_action( 'woocommerce_order_items_table', $order ); ?>
 		</tbody>
 
 		<tfoot>

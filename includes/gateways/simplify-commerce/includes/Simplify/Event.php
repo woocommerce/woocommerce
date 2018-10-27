@@ -36,7 +36,7 @@ class Simplify_Event extends Simplify_Object {
 	/**
 	 * Creates an Event object
 	 * @param     array $hash A map of parameters; valid keys are:
-	 *     <dt><code>paylod</code></dt>    <dd>The raw JWS payload. </dd> <strong>required</strong>
+	 *     <dt><code>payload</code></dt>    <dd>The raw JWS payload. </dd> <strong>required</strong>
 	 *     <dt><code>url</code></dt>    <dd>The URL for the webhook.  If present it must match the URL registered for the webhook.</dd>
 	 * @param  $authentication Object that contains the API public and private keys.  If null the values of the static
 	 *         Simplify::$publicKey and Simplify::$privateKey will be used.
@@ -53,7 +53,7 @@ class Simplify_Event extends Simplify_Object {
 		$jsonObject = $paymentsApi->jwsDecode($hash, $authentication);
 
 		if ($jsonObject['event'] == null) {
-			throw new InvalidArgumentException("Incorect data in webhook event");
+			throw new InvalidArgumentException("Incorrect data in webhook event");
 		}
 
 		return  $paymentsApi->convertFromHashToObject($jsonObject['event'], self::getClazz());

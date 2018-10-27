@@ -252,14 +252,14 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 
 		$response = rest_ensure_response( $taxes );
 
-		// Store pagation values for headers then unset for count query.
+		// Store pagination values for headers then unset for count query.
 		$per_page = (int) $prepared_args['number'];
 		$page = ceil( ( ( (int) $prepared_args['offset'] ) / $per_page ) + 1 );
 
 		// Query only for ids.
 		$wpdb->get_results( str_replace( 'SELECT *', 'SELECT tax_rate_id', $query ) );
 
-		// Calcule totals.
+		// Calculate totals.
 		$total_taxes = (int) $wpdb->num_rows;
 		$response->header( 'X-WP-Total', (int) $total_taxes );
 		$max_pages = ceil( $total_taxes / $per_page );

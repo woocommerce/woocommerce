@@ -11,16 +11,22 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	 *
 	 * @var string
 	 */
-	protected $csv_file = string;
+	protected $csv_file = '';
 
 	/**
 	 * Load up the importer classes since they aren't loaded by default.
 	 */
 	public function setUp() {
+		parent::setUp();
+
+		// Callback used by WP_HTTP_TestCase to decide whether to perform HTTP requests or to provide a mocked response.
+		$this->http_responder = array( $this, 'mock_http_responses' );
+
 		$this->csv_file = dirname( __FILE__ ) . '/sample.csv';
 
 		$bootstrap = WC_Unit_Tests_Bootstrap::instance();
 		require_once $bootstrap->plugin_dir . '/includes/import/class-wc-product-csv-importer.php';
+		require_once $bootstrap->plugin_dir . '/includes/admin/importers/class-wc-product-csv-importer-controller.php';
 	}
 
 	/**
@@ -66,9 +72,10 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 			'Cross-sells'             => 'cross_sell_ids',
 			'Grouped products'        => 'grouped_products',
 			'External URL'            => 'product_url',
-			'Button text'             => 'button_text',
-			'Attribute 1 name'        => 'attributes:name1',
-			'Attribute 1 value(s)'    => 'attributes:value2',
+			'BUTTON TEXT'             => 'button_text',
+			'Position'                => 'menu_order',
+			'Attribute 1 Name'        => 'attributes:name1',
+			'Attribute 1 Value(s)'    => 'attributes:value2',
 			'Attribute 2 name'        => 'attributes:name2',
 			'Attribute 2 value(s)'    => 'attributes:value2',
 			'Attribute 1 default'     => 'attributes:default1',
@@ -96,11 +103,18 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		$this->assertEquals( 0, count( $results['failed'] ) );
 		$this->assertEquals( 0, count( $results['updated'] ) );
 		$this->assertEquals( 0, count( $results['skipped'] ) );
+	}
 
-		// Exclude imported products.
-		foreach ( $results['imported'] as $id ) {
-			wp_delete_post( $id, true );
-		}
+	/**
+	 * Test importing file located on another location on server.
+	 *
+	 * @return void
+	 */
+	public function test_server_file() {
+		copy( $this->csv_file, ABSPATH . '/sample.csv' );
+		$_POST['file_url'] = 'sample.csv';
+		$import_controller = new WC_Product_CSV_Importer_Controller();
+		$this->assertEquals( ABSPATH . 'sample.csv', $import_controller->handle_upload() );
 	}
 
 	/**
@@ -134,7 +148,13 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	 * @since 3.1.0
 	 */
 	public function test_get_raw_data() {
-		$importer = new WC_Product_CSV_Importer( $this->csv_file, array( 'parse' => false, 'lines' => 2 ) );
+		$importer = new WC_Product_CSV_Importer(
+			$this->csv_file,
+			array(
+				'parse' => false,
+				'lines' => 2,
+			)
+		);
 		$items    = array(
 			array(
 				'simple',
@@ -173,6 +193,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'',
 				'',
 				'',
+				'0',
 				'Color',
 				'Red',
 				'',
@@ -219,6 +240,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'',
 				'',
 				'',
+				'1',
 				'Label',
 				'WooCommerce',
 				'Vinyl',
@@ -287,6 +309,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 						'name' => 'Color',
 					),
 				),
+				'menu_order'            => 0,
 			),
 			array(
 				'type'                  => 'simple',
@@ -301,8 +324,8 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'tax_status'            => 'taxable',
 				'tax_class'             => 'standard',
 				'stock_status'          => 'instock',
-				'stock_quantity'        => 0,
-				'backorders'            => '',
+				'stock_quantity'        => '',
+				'backorders'            => 'no',
 				'sold_individually'     => '',
 				'weight'                => '',
 				'length'                => '',
@@ -338,6 +361,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 						'file' => 'http://woo.dev/albums/album.flac',
 					),
 				),
+				'menu_order'            => 1,
 			),
 			array(
 				'type'               => 'external',
@@ -352,8 +376,8 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'tax_status'         => 'taxable',
 				'tax_class'          => 'standard',
 				'stock_status'       => 'instock',
-				'stock_quantity'     => 0,
-				'backorders'         => '',
+				'stock_quantity'     => '',
+				'backorders'         => 'no',
 				'sold_individually'  => '',
 				'weight'             => '',
 				'length'             => '',
@@ -373,6 +397,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'virtual'            => false,
 				'downloadable'       => false,
 				'manage_stock'       => false,
+				'menu_order'         => 2,
 			),
 			array(
 				'type'                  => 'variable',
@@ -387,8 +412,8 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'tax_status'            => '',
 				'tax_class'             => '',
 				'stock_status'          => 'outofstock',
-				'stock_quantity'        => 0,
-				'backorders'            => '',
+				'stock_quantity'        => '',
+				'backorders'            => 'no',
 				'sold_individually'     => '',
 				'weight'                => '',
 				'length'                => '',
@@ -424,42 +449,43 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 						'default' => 'L',
 					),
 				),
+				'menu_order'            => 3,
 			),
 			array(
-				'type'                  => 'variation',
-				'sku'                   => '',
-				'name'                  => '',
-				'featured'              => '',
-				'catalog_visibility'    => 'visible',
-				'short_description'     => '',
-				'description'           => 'Lorem ipsum dolor sit amet, at exerci civibus appetere sit, iuvaret hendrerit mea no. Eam integre feugait liberavisse an.',
-				'date_on_sale_from'     => null,
-				'date_on_sale_to'       => null,
-				'tax_status'            => 'taxable',
-				'tax_class'             => 'standard',
-				'stock_status'          => 'instock',
-				'stock_quantity'        => 6,
-				'backorders'            => '',
-				'sold_individually'     => '',
-				'weight'                => 1.0,
-				'length'                => 2.0,
-				'width'                 => 25.0,
-				'height'                => 55.0,
-				'reviews_allowed'       => '',
-				'purchase_note'         => '',
-				'sale_price'            => '',
-				'regular_price'         => '20',
-				'shipping_class_id'     => 0,
-				'download_limit'        => 0,
-				'download_expiry'       => 0,
-				'product_url'           => '',
-				'button_text'           => '',
-				'status'                => 'publish',
-				'raw_image_id'          => 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_4_front.jpg',
-				'virtual'               => false,
-				'downloadable'          => false,
-				'manage_stock'          => true,
-				'raw_attributes'        => array(
+				'type'               => 'variation',
+				'sku'                => '',
+				'name'               => '',
+				'featured'           => '',
+				'catalog_visibility' => 'visible',
+				'short_description'  => '',
+				'description'        => 'Lorem ipsum dolor sit amet, at exerci civibus appetere sit, iuvaret hendrerit mea no. Eam integre feugait liberavisse an.',
+				'date_on_sale_from'  => null,
+				'date_on_sale_to'    => null,
+				'tax_status'         => 'taxable',
+				'tax_class'          => 'standard',
+				'stock_status'       => 'instock',
+				'stock_quantity'     => 6,
+				'backorders'         => 'no',
+				'sold_individually'  => '',
+				'weight'             => 1.0,
+				'length'             => 2.0,
+				'width'              => 25.0,
+				'height'             => 55.0,
+				'reviews_allowed'    => '',
+				'purchase_note'      => '',
+				'sale_price'         => '',
+				'regular_price'      => '20',
+				'shipping_class_id'  => 0,
+				'download_limit'     => 0,
+				'download_expiry'    => 0,
+				'product_url'        => '',
+				'button_text'        => '',
+				'status'             => 'publish',
+				'raw_image_id'       => 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_4_front.jpg',
+				'virtual'            => false,
+				'downloadable'       => false,
+				'manage_stock'       => true,
+				'raw_attributes'     => array(
 					array(
 						'name' => 'Color',
 					),
@@ -468,6 +494,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 						'name'  => 'Size',
 					),
 				),
+				'menu_order'         => 1,
 			),
 			array(
 				'type'               => 'variation',
@@ -512,6 +539,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 						'name'  => 'Size',
 					),
 				),
+				'menu_order'         => 2,
 			),
 			array(
 				'type'                  => 'grouped',
@@ -526,8 +554,8 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'tax_status'            => '',
 				'tax_class'             => '',
 				'stock_status'          => 'instock',
-				'stock_quantity'        => 0,
-				'backorders'            => '',
+				'stock_quantity'        => '',
+				'backorders'            => 'no',
 				'sold_individually'     => '',
 				'weight'                => '',
 				'length'                => '',
@@ -548,6 +576,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'virtual'               => false,
 				'downloadable'          => false,
 				'manage_stock'          => false,
+				'menu_order'            => 4,
 			),
 		);
 
@@ -559,15 +588,40 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		}
 
 		$this->assertEquals( $items, $parsed_data );
+	}
 
-		// Remove temporary products.
-		$temp_products = get_posts( array(
-			'post_status' => 'importing',
-			'post_type'   => 'product',
-			'fields'      => 'ids',
-		) );
-		foreach ( $temp_products as $id ) {
-			wp_delete_post( $id, true );
+	/**
+	 * Provides a mocked response for all images that are imported together with the products.
+	 * This way it is not necessary to perform a regular request to an external server which would
+	 * significantly slow down the tests.
+	 *
+	 * This function is called by WP_HTTP_TestCase::http_request_listner().
+	 *
+	 * @param array $request Request arguments.
+	 * @param string $url URL of the request.
+	 *
+	 * @return array|false mocked response or false to let WP perform a regular request.
+	 */
+	protected function mock_http_responses( $request, $url ) {
+		$mocked_response = false;
+
+		if ( false !== strpos( $url, 'http://demo.woothemes.com' ) ) {
+			$mocked_response = array(
+				'body'     => 'Mocked response',
+				'response' => array( 'code' => 200 ),
+			);
 		}
+
+		return $mocked_response;
+	}
+
+	/**
+	 * Test WC_Product_CSV_Importer_Controller::is_file_valid_csv.
+	 */
+	public function test_is_file_valid_csv() {
+		$this->assertTrue( WC_Product_CSV_Importer_Controller::is_file_valid_csv( 'C:/wamp64/www/test.local/wp-content/uploads/2018/10/products_all_gg-1.csv' ) );
+		$this->assertTrue( WC_Product_CSV_Importer_Controller::is_file_valid_csv( '/srv/www/woodev/wp-content/uploads/2018/10/1098488_single.csv' ) );
+		$this->assertFalse( WC_Product_CSV_Importer_Controller::is_file_valid_csv( '/srv/www/woodev/wp-content/uploads/2018/10/img.jpg' ) );
+		$this->assertFalse( WC_Product_CSV_Importer_Controller::is_file_valid_csv( 'file:///srv/www/woodev/wp-content/uploads/2018/10/1098488_single.csv' ) );
 	}
 }

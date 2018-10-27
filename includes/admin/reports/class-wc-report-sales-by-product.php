@@ -1,7 +1,12 @@
 <?php
+/**
+ * Sales By Product Reporting
+ *
+ * @package WooCommerce/Admin/Reporting
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit; // Exit if accessed directly.
 }
 
 /**
@@ -19,14 +24,14 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	 *
 	 * @var array
 	 */
-	public $chart_colours      = array();
+	public $chart_colours = array();
 
 	/**
 	 * Product ids.
 	 *
 	 * @var array
 	 */
-	public $product_ids        = array();
+	public $product_ids = array();
 
 	/**
 	 * Product ids with titles.
@@ -48,6 +53,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 
 	/**
 	 * Get the legend for the main chart sidebar.
+	 *
 	 * @return array
 	 */
 	public function get_chart_legend() {
@@ -56,63 +62,69 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 			return array();
 		}
 
-		$legend   = array();
+		$legend = array();
 
-		$total_sales = $this->get_order_report_data( array(
-			'data' => array(
-				'_line_total' => array(
-					'type'            => 'order_item_meta',
-					'order_item_type' => 'line_item',
-					'function' => 'SUM',
-					'name'     => 'order_item_amount',
+		$total_sales = $this->get_order_report_data(
+			array(
+				'data'         => array(
+					'_line_total' => array(
+						'type'            => 'order_item_meta',
+						'order_item_type' => 'line_item',
+						'function'        => 'SUM',
+						'name'            => 'order_item_amount',
+					),
 				),
-			),
-			'where_meta' => array(
-				'relation' => 'OR',
-				array(
-					'type'       => 'order_item_meta',
-					'meta_key'   => array( '_product_id', '_variation_id' ),
-					'meta_value' => $this->product_ids,
-					'operator'   => 'IN',
-				)
-			),
-			'query_type'   => 'get_var',
-			'filter_range' => true,
-		) );
+				'where_meta'   => array(
+					'relation' => 'OR',
+					array(
+						'type'       => 'order_item_meta',
+						'meta_key'   => array( '_product_id', '_variation_id' ),
+						'meta_value' => $this->product_ids,
+						'operator'   => 'IN',
+					),
+				),
+				'query_type'   => 'get_var',
+				'filter_range' => true,
+			)
+		);
 
-		$total_items = absint( $this->get_order_report_data( array(
-			'data' => array(
-				'_qty' => array(
-					'type'            => 'order_item_meta',
-					'order_item_type' => 'line_item',
-					'function'        => 'SUM',
-					'name'            => 'order_item_count',
-				),
-			),
-			'where_meta' => array(
-				'relation' => 'OR',
+		$total_items = absint(
+			$this->get_order_report_data(
 				array(
-					'type'       => 'order_item_meta',
-					'meta_key'   => array( '_product_id', '_variation_id' ),
-					'meta_value' => $this->product_ids,
-					'operator'   => 'IN',
+					'data'         => array(
+						'_qty' => array(
+							'type'            => 'order_item_meta',
+							'order_item_type' => 'line_item',
+							'function'        => 'SUM',
+							'name'            => 'order_item_count',
+						),
+					),
+					'where_meta'   => array(
+						'relation' => 'OR',
+						array(
+							'type'       => 'order_item_meta',
+							'meta_key'   => array( '_product_id', '_variation_id' ),
+							'meta_value' => $this->product_ids,
+							'operator'   => 'IN',
+						),
+					),
+					'query_type'   => 'get_var',
+					'filter_range' => true,
 				)
-			),
-			'query_type'   => 'get_var',
-			'filter_range' => true,
-		) ) );
+			)
+		);
 
 		$legend[] = array(
 			/* translators: %s: total items sold */
-			'title' => sprintf( __( '%s sales for the selected items', 'woocommerce' ), '<strong>' . wc_price( $total_sales ) . '</strong>' ),
-			'color' => $this->chart_colours['sales_amount'],
+			'title'            => sprintf( __( '%s sales for the selected items', 'woocommerce' ), '<strong>' . wc_price( $total_sales ) . '</strong>' ),
+			'color'            => $this->chart_colours['sales_amount'],
 			'highlight_series' => 1,
 		);
 
 		$legend[] = array(
 			/* translators: %s: total items purchased */
-			'title' => sprintf( __( '%s purchases for the selected items', 'woocommerce' ), '<strong>' . ( $total_items ) . '</strong>' ),
-			'color' => $this->chart_colours['item_count'],
+			'title'            => sprintf( __( '%s purchases for the selected items', 'woocommerce' ), '<strong>' . ( $total_items ) . '</strong>' ),
+			'color'            => $this->chart_colours['item_count'],
 			'highlight_series' => 0,
 		);
 
@@ -125,10 +137,10 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	public function output_report() {
 
 		$ranges = array(
-			'year'         => __( 'Year', 'woocommerce' ),
-			'last_month'   => __( 'Last month', 'woocommerce' ),
-			'month'        => __( 'This month', 'woocommerce' ),
-			'7day'         => __( 'Last 7 days', 'woocommerce' ),
+			'year'       => __( 'Year', 'woocommerce' ),
+			'last_month' => __( 'Last month', 'woocommerce' ),
+			'month'      => __( 'This month', 'woocommerce' ),
+			'7day'       => __( 'Last 7 days', 'woocommerce' ),
 		);
 
 		$this->chart_colours = array(
@@ -136,7 +148,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 			'item_count'   => '#d4d9dc',
 		);
 
-		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( $_GET['range'] ) : '7day';
+		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( wp_unslash( $_GET['range'] ) ) : '7day';
 
 		if ( ! in_array( $current_range, array( 'custom', 'year', 'last_month', 'month', '7day' ) ) ) {
 			$current_range = '7day';
@@ -145,7 +157,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 		$this->check_current_range_nonce( $current_range );
 		$this->calculate_current_range( $current_range );
 
-		include( WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php' );
+		include WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php';
 	}
 
 	/**
@@ -190,8 +202,8 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 			}
 		}
 
-		echo '<p>' . ' <strong>' . esc_html( implode( ', ', $this->product_ids_titles ) ) . '</strong></p>';
-		echo '<p><a class="button" href="' . esc_url( remove_query_arg( 'product_ids' ) ) . '">' . __( 'Reset', 'woocommerce' ) . '</a></p>';
+		echo '<p><strong>' . wp_kses_post( implode( ', ', $this->product_ids_titles ) ) . '</strong></p>';
+		echo '<p><a class="button" href="' . esc_url( remove_query_arg( 'product_ids' ) ) . '">' . esc_html__( 'Reset', 'woocommerce' ) . '</a></p>';
 	}
 
 	/**
@@ -199,12 +211,13 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	 */
 	public function products_widget() {
 		?>
-		<h4 class="section_title"><span><?php _e( 'Product search', 'woocommerce' ); ?></span></h4>
+		<h4 class="section_title"><span><?php esc_html_e( 'Product search', 'woocommerce' ); ?></span></h4>
 		<div class="section">
 			<form method="GET">
 				<div>
+					<?php // @codingStandardsIgnoreStart ?>
 					<select class="wc-product-search" style="width:203px;" multiple="multiple" id="product_ids" name="product_ids[]" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations"></select>
-					<input type="submit" class="submit button" value="<?php esc_attr_e( 'Show', 'woocommerce' ); ?>" />
+					<button type="submit" class="submit button" value="<?php esc_attr_e( 'Show', 'woocommerce' ); ?>"><?php esc_html_e( 'Show', 'woocommerce' ); ?></button>
 					<input type="hidden" name="range" value="<?php echo ( ! empty( $_GET['range'] ) ) ? esc_attr( $_GET['range'] ) : ''; ?>" />
 					<input type="hidden" name="start_date" value="<?php echo ( ! empty( $_GET['start_date'] ) ) ? esc_attr( $_GET['start_date'] ) : ''; ?>" />
 					<input type="hidden" name="end_date" value="<?php echo ( ! empty( $_GET['end_date'] ) ) ? esc_attr( $_GET['end_date'] ) : ''; ?>" />
@@ -212,133 +225,146 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 					<input type="hidden" name="tab" value="<?php echo ( ! empty( $_GET['tab'] ) ) ? esc_attr( $_GET['tab'] ) : ''; ?>" />
 					<input type="hidden" name="report" value="<?php echo ( ! empty( $_GET['report'] ) ) ? esc_attr( $_GET['report'] ) : ''; ?>" />
 					<?php wp_nonce_field( 'custom_range', 'wc_reports_nonce', false ); ?>
+					<?php // @codingStandardsIgnoreEnd ?>
 				</div>
 			</form>
 		</div>
-		<h4 class="section_title"><span><?php _e( 'Top sellers', 'woocommerce' ); ?></span></h4>
+		<h4 class="section_title"><span><?php esc_html_e( 'Top sellers', 'woocommerce' ); ?></span></h4>
 		<div class="section">
 			<table cellspacing="0">
 				<?php
-				$top_sellers = $this->get_order_report_data( array(
-					'data' => array(
-						'_product_id' => array(
-							'type'            => 'order_item_meta',
-							'order_item_type' => 'line_item',
-							'function'        => '',
-							'name'            => 'product_id',
+				$top_sellers = $this->get_order_report_data(
+					array(
+						'data'         => array(
+							'_product_id' => array(
+								'type'            => 'order_item_meta',
+								'order_item_type' => 'line_item',
+								'function'        => '',
+								'name'            => 'product_id',
+							),
+							'_qty'        => array(
+								'type'            => 'order_item_meta',
+								'order_item_type' => 'line_item',
+								'function'        => 'SUM',
+								'name'            => 'order_item_qty',
+							),
 						),
-						'_qty' => array(
-							'type'            => 'order_item_meta',
-							'order_item_type' => 'line_item',
-							'function'        => 'SUM',
-							'name'            => 'order_item_qty',
-						),
-					),
-					'order_by'     => 'order_item_qty DESC',
-					'group_by'     => 'product_id',
-					'limit'        => 12,
-					'query_type'   => 'get_results',
-					'filter_range' => true,
-				) );
+						'order_by'     => 'order_item_qty DESC',
+						'group_by'     => 'product_id',
+						'limit'        => 12,
+						'query_type'   => 'get_results',
+						'filter_range' => true,
+					)
+				);
 
 				if ( $top_sellers ) {
+					// @codingStandardsIgnoreStart
 					foreach ( $top_sellers as $product ) {
 						echo '<tr class="' . ( in_array( $product->product_id, $this->product_ids ) ? 'active' : '' ) . '">
-							<td class="count">' . $product->order_item_qty . '</td>
-							<td class="name"><a href="' . esc_url( add_query_arg( 'product_ids', $product->product_id ) ) . '">' . get_the_title( $product->product_id ) . '</a></td>
+							<td class="count">' . esc_html( $product->order_item_qty ) . '</td>
+							<td class="name"><a href="' . esc_url( add_query_arg( 'product_ids', $product->product_id ) ) . '">' . esc_html( get_the_title( $product->product_id ) ) . '</a></td>
 							<td class="sparkline">' . $this->sales_sparkline( $product->product_id, 7, 'count' ) . '</td>
 						</tr>';
 					}
+					// @codingStandardsIgnoreEnd
 				} else {
-					echo '<tr><td colspan="3">' . __( 'No products found in range', 'woocommerce' ) . '</td></tr>';
+					echo '<tr><td colspan="3">' . esc_html__( 'No products found in range', 'woocommerce' ) . '</td></tr>';
 				}
 				?>
 			</table>
 		</div>
-		<h4 class="section_title"><span><?php _e( 'Top freebies', 'woocommerce' ); ?></span></h4>
+		<h4 class="section_title"><span><?php esc_html_e( 'Top freebies', 'woocommerce' ); ?></span></h4>
 		<div class="section">
 			<table cellspacing="0">
 				<?php
-				$top_freebies = $this->get_order_report_data( array(
-					'data' => array(
-						'_product_id' => array(
-							'type'            => 'order_item_meta',
-							'order_item_type' => 'line_item',
-							'function'        => '',
-							'name'            => 'product_id',
+				$top_freebies = $this->get_order_report_data(
+					array(
+						'data'         => array(
+							'_product_id' => array(
+								'type'            => 'order_item_meta',
+								'order_item_type' => 'line_item',
+								'function'        => '',
+								'name'            => 'product_id',
+							),
+							'_qty'        => array(
+								'type'            => 'order_item_meta',
+								'order_item_type' => 'line_item',
+								'function'        => 'SUM',
+								'name'            => 'order_item_qty',
+							),
 						),
-						'_qty' => array(
-							'type'            => 'order_item_meta',
-							'order_item_type' => 'line_item',
-							'function'        => 'SUM',
-							'name'            => 'order_item_qty',
+						'where_meta'   => array(
+							array(
+								'type'       => 'order_item_meta',
+								'meta_key'   => '_line_subtotal',
+								'meta_value' => '0',
+								'operator'   => '=',
+							),
 						),
-					),
-					'where_meta'   => array(
-						array(
-							'type'       => 'order_item_meta',
-							'meta_key'   => '_line_subtotal',
-							'meta_value' => '0',
-							'operator'   => '=',
-						),
-					),
-					'order_by'     => 'order_item_qty DESC',
-					'group_by'     => 'product_id',
-					'limit'        => 12,
-					'query_type'   => 'get_results',
-					'filter_range' => true,
-				) );
+						'order_by'     => 'order_item_qty DESC',
+						'group_by'     => 'product_id',
+						'limit'        => 12,
+						'query_type'   => 'get_results',
+						'filter_range' => true,
+					)
+				);
 
 				if ( $top_freebies ) {
+					// @codingStandardsIgnoreStart
 					foreach ( $top_freebies as $product ) {
 						echo '<tr class="' . ( in_array( $product->product_id, $this->product_ids ) ? 'active' : '' ) . '">
-							<td class="count">' . $product->order_item_qty . '</td>
-							<td class="name"><a href="' . esc_url( add_query_arg( 'product_ids', $product->product_id ) ) . '">' . get_the_title( $product->product_id ) . '</a></td>
+							<td class="count">' . esc_html( $product->order_item_qty ) . '</td>
+							<td class="name"><a href="' . esc_url( add_query_arg( 'product_ids', $product->product_id ) ) . '">' . esc_html( get_the_title( $product->product_id ) ) . '</a></td>
 							<td class="sparkline">' . $this->sales_sparkline( $product->product_id, 7, 'count' ) . '</td>
 						</tr>';
 					}
+					// @codingStandardsIgnoreEnd
 				} else {
-					echo '<tr><td colspan="3">' . __( 'No products found in range', 'woocommerce' ) . '</td></tr>';
+					echo '<tr><td colspan="3">' . esc_html__( 'No products found in range', 'woocommerce' ) . '</td></tr>';
 				}
 				?>
 			</table>
 		</div>
-		<h4 class="section_title"><span><?php _e( 'Top earners', 'woocommerce' ); ?></span></h4>
+		<h4 class="section_title"><span><?php esc_html_e( 'Top earners', 'woocommerce' ); ?></span></h4>
 		<div class="section">
 			<table cellspacing="0">
 				<?php
-				$top_earners = $this->get_order_report_data( array(
-					'data' => array(
-						'_product_id' => array(
-							'type'            => 'order_item_meta',
-							'order_item_type' => 'line_item',
-							'function'        => '',
-							'name'            => 'product_id',
+				$top_earners = $this->get_order_report_data(
+					array(
+						'data'         => array(
+							'_product_id' => array(
+								'type'            => 'order_item_meta',
+								'order_item_type' => 'line_item',
+								'function'        => '',
+								'name'            => 'product_id',
+							),
+							'_line_total' => array(
+								'type'            => 'order_item_meta',
+								'order_item_type' => 'line_item',
+								'function'        => 'SUM',
+								'name'            => 'order_item_total',
+							),
 						),
-						'_line_total' => array(
-							'type'            => 'order_item_meta',
-							'order_item_type' => 'line_item',
-							'function'        => 'SUM',
-							'name'            => 'order_item_total',
-						),
-					),
-					'order_by'     => 'order_item_total DESC',
-					'group_by'     => 'product_id',
-					'limit'        => 12,
-					'query_type'   => 'get_results',
-					'filter_range' => true,
-				) );
+						'order_by'     => 'order_item_total DESC',
+						'group_by'     => 'product_id',
+						'limit'        => 12,
+						'query_type'   => 'get_results',
+						'filter_range' => true,
+					)
+				);
 
 				if ( $top_earners ) {
+					// @codingStandardsIgnoreStart
 					foreach ( $top_earners as $product ) {
 						echo '<tr class="' . ( in_array( $product->product_id, $this->product_ids ) ? 'active' : '' ) . '">
 							<td class="count">' . wc_price( $product->order_item_total ) . '</td>
-							<td class="name"><a href="' . esc_url( add_query_arg( 'product_ids', $product->product_id ) ) . '">' . get_the_title( $product->product_id ) . '</a></td>
+							<td class="name"><a href="' . esc_url( add_query_arg( 'product_ids', $product->product_id ) ) . '">' . esc_html( get_the_title( $product->product_id ) ) . '</a></td>
 							<td class="sparkline">' . $this->sales_sparkline( $product->product_id, 7, 'sales' ) . '</td>
 						</tr>';
 					}
+					// @codingStandardsIgnoreEnd
 				} else {
-					echo '<tr><td colspan="3">' . __( 'No products found in range', 'woocommerce' ) . '</td></tr>';
+					echo '<tr><td colspan="3">' . esc_html__( 'No products found in range', 'woocommerce' ) . '</td></tr>';
 				}
 				?>
 			</table>
@@ -370,25 +396,23 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	 */
 	public function get_export_button() {
 
-		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( $_GET['range'] ) : '7day';
+		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( wp_unslash( $_GET['range'] ) ) : '7day';
 		?>
 		<a
 			href="#"
-			download="report-<?php echo esc_attr( $current_range ); ?>-<?php echo date_i18n( 'Y-m-d', current_time( 'timestamp' ) ); ?>.csv"
+			download="report-<?php echo esc_attr( $current_range ); ?>-<?php echo esc_html( date_i18n( 'Y-m-d', current_time( 'timestamp' ) ) ); ?>.csv"
 			class="export_csv"
 			data-export="chart"
 			data-xaxes="<?php esc_attr_e( 'Date', 'woocommerce' ); ?>"
-			data-groupby="<?php echo $this->chart_groupby; ?>"
+			data-groupby="<?php echo $this->chart_groupby; ?>"<?php // @codingStandardsIgnoreLine ?>
 		>
-			<?php _e( 'Export CSV', 'woocommerce' ); ?>
+			<?php esc_html_e( 'Export CSV', 'woocommerce' ); ?>
 		</a>
 		<?php
 	}
 
 	/**
 	 * Get the main chart.
-	 *
-	 * @return string
 	 */
 	public function get_main_chart() {
 		global $wp_locale;
@@ -396,94 +420,101 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 		if ( empty( $this->product_ids ) ) {
 			?>
 			<div class="chart-container">
-				<p class="chart-prompt"><?php _e( 'Choose a product to view stats', 'woocommerce' ); ?></p>
+				<p class="chart-prompt"><?php esc_html_e( 'Choose a product to view stats', 'woocommerce' ); ?></p>
 			</div>
 			<?php
 		} else {
-			// Get orders and dates in range - we want the SUM of order totals, COUNT of order items, COUNT of orders, and the date
-			$order_item_counts = $this->get_order_report_data( array(
-				'data' => array(
-					'_qty' => array(
-						'type'            => 'order_item_meta',
-						'order_item_type' => 'line_item',
-						'function'        => 'SUM',
-						'name'            => 'order_item_count',
+			// Get orders and dates in range - we want the SUM of order totals, COUNT of order items, COUNT of orders, and the date.
+			$order_item_counts = $this->get_order_report_data(
+				array(
+					'data'         => array(
+						'_qty'        => array(
+							'type'            => 'order_item_meta',
+							'order_item_type' => 'line_item',
+							'function'        => 'SUM',
+							'name'            => 'order_item_count',
+						),
+						'post_date'   => array(
+							'type'     => 'post_data',
+							'function' => '',
+							'name'     => 'post_date',
+						),
+						'_product_id' => array(
+							'type'            => 'order_item_meta',
+							'order_item_type' => 'line_item',
+							'function'        => '',
+							'name'            => 'product_id',
+						),
 					),
-					'post_date' => array(
-						'type'     => 'post_data',
-						'function' => '',
-						'name'     => 'post_date',
+					'where_meta'   => array(
+						'relation' => 'OR',
+						array(
+							'type'       => 'order_item_meta',
+							'meta_key'   => array( '_product_id', '_variation_id' ),
+							'meta_value' => $this->product_ids,
+							'operator'   => 'IN',
+						),
 					),
-					'_product_id' => array(
-						'type'            => 'order_item_meta',
-						'order_item_type' => 'line_item',
-						'function'        => '',
-						'name'            => 'product_id',
-					),
-				),
-				'where_meta' => array(
-					'relation' => 'OR',
-					array(
-						'type'       => 'order_item_meta',
-						'meta_key'   => array( '_product_id', '_variation_id' ),
-						'meta_value' => $this->product_ids,
-						'operator'   => 'IN',
-					),
-				),
-				'group_by'     => 'product_id,' . $this->group_by_query,
-				'order_by'     => 'post_date ASC',
-				'query_type'   => 'get_results',
-				'filter_range' => true,
-			) );
+					'group_by'     => 'product_id,' . $this->group_by_query,
+					'order_by'     => 'post_date ASC',
+					'query_type'   => 'get_results',
+					'filter_range' => true,
+				)
+			);
 
-			$order_item_amounts = $this->get_order_report_data( array(
-				'data' => array(
-					'_line_total' => array(
-						'type'            => 'order_item_meta',
-						'order_item_type' => 'line_item',
-						'function' => 'SUM',
-						'name'     => 'order_item_amount',
+			$order_item_amounts = $this->get_order_report_data(
+				array(
+					'data'         => array(
+						'_line_total' => array(
+							'type'            => 'order_item_meta',
+							'order_item_type' => 'line_item',
+							'function'        => 'SUM',
+							'name'            => 'order_item_amount',
+						),
+						'post_date'   => array(
+							'type'     => 'post_data',
+							'function' => '',
+							'name'     => 'post_date',
+						),
+						'_product_id' => array(
+							'type'            => 'order_item_meta',
+							'order_item_type' => 'line_item',
+							'function'        => '',
+							'name'            => 'product_id',
+						),
 					),
-					'post_date' => array(
-						'type'     => 'post_data',
-						'function' => '',
-						'name'     => 'post_date',
+					'where_meta'   => array(
+						'relation' => 'OR',
+						array(
+							'type'       => 'order_item_meta',
+							'meta_key'   => array( '_product_id', '_variation_id' ),
+							'meta_value' => $this->product_ids,
+							'operator'   => 'IN',
+						),
 					),
-					'_product_id' => array(
-						'type'            => 'order_item_meta',
-						'order_item_type' => 'line_item',
-						'function'        => '',
-						'name'            => 'product_id',
-					),
-				),
-				'where_meta' => array(
-					'relation' => 'OR',
-					array(
-						'type'       => 'order_item_meta',
-						'meta_key'   => array( '_product_id', '_variation_id' ),
-						'meta_value' => $this->product_ids,
-						'operator'   => 'IN',
-					),
-				),
-				'group_by'     => 'product_id, ' . $this->group_by_query,
-				'order_by'     => 'post_date ASC',
-				'query_type'   => 'get_results',
-				'filter_range' => true,
-			) );
+					'group_by'     => 'product_id, ' . $this->group_by_query,
+					'order_by'     => 'post_date ASC',
+					'query_type'   => 'get_results',
+					'filter_range' => true,
+				)
+			);
 
-			// Prepare data for report
+			// Prepare data for report.
 			$order_item_counts  = $this->prepare_chart_data( $order_item_counts, 'post_date', 'order_item_count', $this->chart_interval, $this->start_date, $this->chart_groupby );
 			$order_item_amounts = $this->prepare_chart_data( $order_item_amounts, 'post_date', 'order_item_amount', $this->chart_interval, $this->start_date, $this->chart_groupby );
 
-			// Encode in json format
-			$chart_data = json_encode( array(
-				'order_item_counts'  => array_values( $order_item_counts ),
-				'order_item_amounts' => array_values( $order_item_amounts ),
-			) );
+			// Encode in json format.
+			$chart_data = json_encode(
+				array(
+					'order_item_counts'  => array_values( $order_item_counts ),
+					'order_item_amounts' => array_values( $order_item_amounts ),
+				)
+			);
 			?>
 			<div class="chart-container">
 				<div class="chart-placeholder main"></div>
 			</div>
+			<?php // @codingStandardsIgnoreStart ?>
 			<script type="text/javascript">
 				var main_chart;
 
@@ -588,6 +619,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 				});
 			</script>
 			<?php
+			// @codingStandardsIgnoreEnd
 		}
 	}
 }

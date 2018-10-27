@@ -53,7 +53,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</li>
 
 				<?php if ( is_user_logged_in() && $order->get_user_id() === get_current_user_id() && $order->get_billing_email() ) : ?>
-					<li class="woocommerce-order-overview__total total">
+					<li class="woocommerce-order-overview__email email">
 						<?php _e( 'Email:', 'woocommerce' ); ?>
 						<strong><?php echo $order->get_billing_email(); ?></strong>
 					</li>
