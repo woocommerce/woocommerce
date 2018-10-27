@@ -177,7 +177,7 @@ return array(
 	),
 	'sandbox_api_signature' => array(
 		'title'       => __( 'Sandbox API signature', 'woocommerce' ),
-		'type'        => 'text',
+		'type'        => 'password',
 		'description' => __( 'Get your API credentials from PayPal.', 'woocommerce' ),
 		'default'     => '',
 		'desc_tip'    => true,
