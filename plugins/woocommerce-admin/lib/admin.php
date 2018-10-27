@@ -79,7 +79,7 @@ function wc_admin_register_pages() {
 		__( 'WooCommerce Analytics', 'wc-admin' ),
 		__( 'Analytics', 'wc-admin' ),
 		'manage_options',
-		'wc-admin#/analytics',
+		'wc-admin#/analytics/revenue',
 		'wc_admin_page',
 		'dashicons-chart-bar',
 		56 // After WooCommerce & Product menu items.
@@ -88,7 +88,7 @@ function wc_admin_register_pages() {
 	wc_admin_register_page(
 		array(
 			'title'  => __( 'Revenue', 'wc-admin' ),
-			'parent' => '/analytics',
+			'parent' => '/analytics/revenue',
 			'path'   => '/analytics/revenue',
 		)
 	);
@@ -96,7 +96,7 @@ function wc_admin_register_pages() {
 	wc_admin_register_page(
 		array(
 			'title'  => __( 'Orders', 'wc-admin' ),
-			'parent' => '/analytics',
+			'parent' => '/analytics/revenue',
 			'path'   => '/analytics/orders',
 		)
 	);
@@ -104,7 +104,7 @@ function wc_admin_register_pages() {
 	wc_admin_register_page(
 		array(
 			'title'  => __( 'Products', 'wc-admin' ),
-			'parent' => '/analytics',
+			'parent' => '/analytics/revenue',
 			'path'   => '/analytics/products',
 		)
 	);
@@ -151,9 +151,6 @@ function wc_admin_link_structure() {
 	// Move menu item to top of array.
 	unset( $submenu['woocommerce'][ $wc_admin_key ] );
 	array_unshift( $submenu['woocommerce'], $menu );
-
-	// Rename "Analytics" to Overview (otherwise this reads Analytics > Analytics).
-	$submenu['wc-admin#/analytics'][0][0] = __( 'Overview', 'wc-admin' ); // WPCS: override ok.
 }
 
 // priority is 20 to run after https://github.com/woocommerce/woocommerce/blob/a55ae325306fc2179149ba9b97e66f32f84fdd9c/includes/admin/class-wc-admin-menus.php#L165.

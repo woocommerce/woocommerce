@@ -79,7 +79,9 @@ class Report extends Component {
 		const Container = report.component;
 		return (
 			<Fragment>
-				<Header sections={ [ [ '/analytics', __( 'Analytics', 'wc-admin' ) ], report.title ] } />
+				<Header
+					sections={ [ [ '/analytics/revenue', __( 'Analytics', 'wc-admin' ) ], report.title ] }
+				/>
 				<Container { ...this.props } />
 			</Fragment>
 		);
