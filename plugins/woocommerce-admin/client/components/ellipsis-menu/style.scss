@@ -1,7 +1,14 @@
 /** @format */
 
-.woocommerce-ellipsis-menu__toggle .dashicon {
-	transform: rotate(90deg);
+.woocommerce-ellipsis-menu__toggle {
+	height: 24px;
+	justify-content: center;
+	vertical-align: middle;
+	width: 24px;
+
+	.dashicon {
+		transform: rotate(90deg);
+	}
 }
 
 .woocommerce-ellipsis-menu__popover {

@@ -223,6 +223,7 @@ class TableCard extends Component {
 					compareBy && (
 						<CompareButton
 							key="compare"
+							className="woocommerce-table__compare"
 							count={ selectedRows.length }
 							helpText={
 								labels.helpText || __( 'Select at least two items to compare', 'wc-admin' )
@@ -248,7 +249,9 @@ class TableCard extends Component {
 							isLink
 						>
 							<DowloadIcon />
-							{ labels.downloadButton || __( 'Download', 'wc-admin' ) }
+							<span className="woocommerce-table__download-button__label">
+								{ labels.downloadButton || __( 'Download', 'wc-admin' ) }
+							</span>
 						</IconButton>
 					),
 				] }

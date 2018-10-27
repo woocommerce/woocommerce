@@ -3,6 +3,7 @@
 /**
  * External dependencies
  */
+import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import { Button, Tooltip } from '@wordpress/components';
 
@@ -11,22 +12,30 @@ import { Button, Tooltip } from '@wordpress/components';
  *
  * @return { object } -
  */
-const CompareButton = ( { count, children, helpText, onClick } ) =>
+const CompareButton = ( { className, count, children, helpText, onClick } ) =>
 	count < 2 ? (
 		<Tooltip text={ helpText }>
-			<span>
+			<span className={ className }>
 				<Button className="woocommerce-compare-button" isDefault disabled={ true }>
 					{ children }
 				</Button>
 			</span>
 		</Tooltip>
 	) : (
-		<Button className="woocommerce-compare-button" isDefault onClick={ onClick }>
+		<Button
+			className={ classnames( 'woocommerce-compare-button', className ) }
+			isDefault
+			onClick={ onClick }
+		>
 			{ children }
 		</Button>
 	);
 
 CompareButton.propTypes = {
+	/**
+	 * Additional CSS classes.
+	 */
+	className: PropTypes.string,
 	/**
 	 * The count of items selected.
 	 */
