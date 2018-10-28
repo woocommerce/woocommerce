@@ -35,6 +35,18 @@ class WC_Helper {
 		add_filter( 'extra_plugin_headers', array( __CLASS__, 'extra_headers' ) );
 		add_filter( 'extra_theme_headers', array( __CLASS__, 'extra_headers' ) );
 
+		/**
+		 * Clean the plugins cache since self::extra_headers() adds an additional plugin header
+		 * which needs to be parsed for detecting locally installed Woo plugins
+		 */
+		wp_clean_plugins_cache();
+
+		/**
+		 * Clean the themes cache since self::extra_headers() adds an additional theme header
+		 * which needs to be parsed for detecting locally installed Woo themes
+		 */
+		wp_clean_themes_cache();
+
 		// Attempt to toggle subscription state upon plugin activation/deactivation
 		add_action( 'activated_plugin', array( __CLASS__, 'activated_plugin' ) );
 		add_action( 'deactivated_plugin', array( __CLASS__, 'deactivated_plugin' ) );
@@ -1026,12 +1038,6 @@ class WC_Helper {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
-		/**
-		 * Clean the plugins cache since self::extra_headers() adds an additional plugin header
-		 * which needs to be parsed for detecting locally installed Woo plugins
-		 */
-		wp_clean_plugins_cache();
-
 		$plugins     = get_plugins();
 		$woo_plugins = array();
 
@@ -1074,13 +1080,6 @@ class WC_Helper {
 	 * Get locally installed Woo themes.
 	 */
 	public static function get_local_woo_themes() {
-
-		/**
-		 * Clean the themes cache since self::extra_headers() adds an additional theme header
-		 * which needs to be parsed for detecting locally installed Woo themes
-		 */
-		wp_clean_themes_cache();
-
 		$themes     = wp_get_themes();
 		$woo_themes = array();
 
