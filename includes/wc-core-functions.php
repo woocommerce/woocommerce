@@ -188,10 +188,6 @@ function wc_get_template_part( $slug, $name = '' ) {
  * @param string $default_path  Default path. (default: '').
  */
 function wc_get_template( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
-	if ( ! empty( $args ) && is_array( $args ) ) {
-		extract( $args ); // @codingStandardsIgnoreLine
-	}
-
 	$located = wc_locate_template( $template_name, $template_path, $default_path );
 
 	if ( ! file_exists( $located ) ) {
@@ -203,13 +199,23 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 	// Allow 3rd party plugin filter template file from their plugin.
 	$located = apply_filters( 'wc_get_template', $located, $template_name, $args, $template_path, $default_path );
 
-	do_action( 'woocommerce_before_template_part', $template_name, $template_path, $located, $args );
+	$action_args = array(
+		'template_name' => $template_name,
+		'template_path' => $template_path,
+		'located'       => $located,
+		'args'          => $args,
+	);
+
+	if ( ! empty( $args ) && is_array( $args ) ) {
+		extract( $args ); // @codingStandardsIgnoreLine
+	}
+
+	do_action( 'woocommerce_before_template_part', $action_args['template_name'], $action_args['template_path'], $action_args['located'], $action_args['args'] );
 
 	include $located;
 
-	do_action( 'woocommerce_after_template_part', $template_name, $template_path, $located, $args );
+	do_action( 'woocommerce_after_template_part', $action_args['template_name'], $action_args['template_path'], $action_args['located'], $action_args['args'] );
 }
-
 
 /**
  * Like wc_get_template, but returns the HTML instead of outputting.
