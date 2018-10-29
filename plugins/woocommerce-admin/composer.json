@@ -15,7 +15,7 @@
     "phpunit/phpunit": "7.4.3",
     "woocommerce/woocommerce-sniffs": "*",
     "wimg/php-compatibility": "9.0.0",
-    "dealerdirect/phpcodesniffer-composer-installer": "0.4.4"
+    "dealerdirect/phpcodesniffer-composer-installer": "0.5.0"
   },
   "scripts": {
     "test": [
