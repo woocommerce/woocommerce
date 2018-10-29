@@ -11,7 +11,7 @@ import { withSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { Card, EmptyTable, Table, TablePlaceholder } from '@woocommerce/components';
+import { Card, EmptyTable, TableCard } from '@woocommerce/components';
 import { getAdminLink } from 'lib/nav-utils';
 import { numberFormat } from 'lib/number';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
@@ -80,38 +80,38 @@ export class TopSellingProducts extends Component {
 		} );
 	}
 
-	getCardContents( title ) {
+	render() {
 		const { data, isRequesting, isError } = this.props;
 
 		const rows = isRequesting || isError ? [] : this.getRowsContent( data );
-		const headers = this.getHeadersContent();
-
-		if ( isRequesting ) {
-			return <TablePlaceholder caption={ title } headers={ headers } />;
-		}
+		const title = __( 'Top Selling Products', 'wc-admin' );
 
 		if ( isError ) {
 			// @TODO An error notice should be displayed when there is an error
 		}
 
-		if ( rows.length === 0 ) {
+		if ( ! isRequesting && rows.length === 0 ) {
 			return (
-				<EmptyTable>
-					{ __( 'When new orders arrive, popular products will be listed here.', 'wc-admin' ) }
-				</EmptyTable>
+				<Card title={ title } className="woocommerce-top-selling-products">
+					<EmptyTable>
+						{ __( 'When new orders arrive, popular products will be listed here.', 'wc-admin' ) }
+					</EmptyTable>
+				</Card>
 			);
 		}
 
-		return <Table caption={ title } rows={ rows } headers={ headers } />;
-	}
-
-	render() {
-		const title = __( 'Top Selling Products', 'wc-admin' );
+		const headers = this.getHeadersContent();
 
 		return (
-			<Card title={ title } className="woocommerce-top-selling-products">
-				{ this.getCardContents( title ) }
-			</Card>
+			<TableCard
+				className="woocommerce-top-selling-products"
+				headers={ headers }
+				isLoading={ isRequesting }
+				rows={ rows }
+				rowsPerPage={ 5 }
+				title={ title }
+				totalRows={ 5 }
+			/>
 		);
 	}
 }

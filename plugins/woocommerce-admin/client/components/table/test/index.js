@@ -5,7 +5,7 @@
  */
 import fetch from 'node-fetch';
 import moment from 'moment';
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 
 /**
  * Internal dependencies
@@ -24,6 +24,37 @@ jest.mock( 'lib/csv', () => ( {
 window.fetch = fetch;
 
 describe( 'TableCard', () => {
+	test( 'should render placeholder table while loading', () => {
+		const tableCard = shallow(
+			<TableCard
+				title="Revenue"
+				headers={ mockHeaders }
+				isLoading={ true }
+				rows={ [] }
+				rowsPerPage={ 5 }
+				totalRows={ 5 }
+			/>
+		);
+
+		expect( tableCard.find( 'TablePlaceholder' ).length ).toBe( 1 );
+	} );
+
+	test( 'should not render placeholder table when not loading', () => {
+		const tableCard = mount(
+			<TableCard
+				title="Revenue"
+				headers={ mockHeaders }
+				isLoading={ false }
+				rows={ mockData }
+				rowsPerPage={ 5 }
+				totalRows={ 5 }
+			/>
+		);
+
+		expect( tableCard.find( 'Table' ).length ).toBe( 1 );
+		expect( tableCard.find( 'TablePlaceholder' ).length ).toBe( 0 );
+	} );
+
 	test( 'should save CSV when clicking on download', () => {
 		global.Blob = ( content, options ) => ( { content, options } );
 

@@ -16,23 +16,12 @@ import Table from './table';
  */
 class TablePlaceholder extends Component {
 	render() {
-		const { caption, headers, numberOfRows, query } = this.props;
-		const filteredHeaders = headers.filter( header => ! header.hiddenByDefault );
+		const { numberOfRows, ...tableProps } = this.props;
 		const rows = range( numberOfRows ).map( () =>
-			filteredHeaders.map( () => ( { display: <span className="is-placeholder" /> } ) )
+			this.props.headers.map( () => ( { display: <span className="is-placeholder" /> } ) )
 		);
 
-		return (
-			<Table
-				ariaHidden={ true }
-				caption={ caption }
-				classNames="is-loading"
-				headers={ filteredHeaders }
-				rowHeader={ false }
-				rows={ rows }
-				query={ query }
-			/>
-		);
+		return <Table ariaHidden={ true } classNames="is-loading" rows={ rows } { ...tableProps } />;
 	}
 }
 
@@ -54,7 +43,7 @@ TablePlaceholder.propTypes = {
 			defaultSort: PropTypes.bool,
 			isSortable: PropTypes.bool,
 			key: PropTypes.string,
-			label: PropTypes.string,
+			label: PropTypes.node,
 			required: PropTypes.bool,
 		} )
 	),

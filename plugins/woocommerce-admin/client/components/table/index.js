@@ -24,6 +24,7 @@ import MenuTitle from 'components/ellipsis-menu/menu-title';
 import Pagination from 'components/pagination';
 import Search from 'components/search';
 import Table from './table';
+import TablePlaceholder from './placeholder';
 import TableSummary from './summary';
 
 /**
@@ -170,7 +171,7 @@ class TableCard extends Component {
 	getAllCheckbox() {
 		const { ids = [] } = this.props;
 		const { selectedRows } = this.state;
-		const isAllChecked = ids.length === selectedRows.length;
+		const isAllChecked = ids.length > 0 && ids.length === selectedRows.length;
 		return {
 			cellClassName: 'is-checkbox-column',
 			label: (
@@ -190,6 +191,7 @@ class TableCard extends Component {
 			compareBy,
 			downloadable,
 			labels = {},
+			isLoading,
 			onClickDownload,
 			onQueryChange,
 			query,
@@ -245,6 +247,7 @@ class TableCard extends Component {
 						<IconButton
 							key="download"
 							className="woocommerce-table__download-button"
+							disabled={ isLoading }
 							onClick={ this.onClickDownload }
 							isLink
 						>
@@ -275,14 +278,25 @@ class TableCard extends Component {
 					</EllipsisMenu>
 				}
 			>
-				<Table
-					rows={ rows }
-					headers={ headers }
-					rowHeader={ rowHeader }
-					caption={ title }
-					query={ query }
-					onSort={ onQueryChange( 'sort' ) }
-				/>
+				{ isLoading ? (
+					<TablePlaceholder
+						numberOfRows={ rowsPerPage }
+						headers={ headers }
+						rowHeader={ rowHeader }
+						caption={ title }
+						query={ query }
+						onSort={ onQueryChange( 'sort' ) }
+					/>
+				) : (
+					<Table
+						rows={ rows }
+						headers={ headers }
+						rowHeader={ rowHeader }
+						caption={ title }
+						query={ query }
+						onSort={ onQueryChange( 'sort' ) }
+					/>
+				) }
 
 				{ summary && <TableSummary data={ summary } /> }
 
@@ -329,6 +343,11 @@ TableCard.propTypes = {
 	 * A list of IDs, matching to the row list so that ids[ 0 ] contains the object ID for the object displayed in row[ 0 ].
 	 */
 	ids: PropTypes.arrayOf( PropTypes.number ),
+	/**
+	 * Defines if the table contents are loading.
+	 * It will display `TablePlaceholder` component instead of `Table` if that's the case.
+	 */
+	isLoading: PropTypes.bool,
 	/**
 	 * A function which returns a callback function to update the query string for a given `param`.
 	 */
@@ -386,6 +405,7 @@ TableCard.propTypes = {
 
 TableCard.defaultProps = {
 	downloadable: false,
+	isLoading: false,
 	onQueryChange: noop,
 	query: {},
 	rowHeader: 0,

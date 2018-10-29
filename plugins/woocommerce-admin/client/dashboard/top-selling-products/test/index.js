@@ -19,17 +19,10 @@ import mockData from '../__mocks__/top-selling-products-mock-data';
 // are not available on TestRenderer.
 jest.mock( '@woocommerce/components', () => ( {
 	...require.requireActual( '@woocommerce/components' ),
-	Table: () => null,
-	TablePlaceholder: () => null,
+	TableCard: () => null,
 } ) );
 
 describe( 'TopSellingProducts', () => {
-	test( 'should render placeholder table while requesting', () => {
-		const topSellingProducts = shallow( <TopSellingProducts data={ {} } isRequesting={ true } /> );
-
-		expect( topSellingProducts.find( 'TablePlaceholder' ).length ).toBe( 1 );
-	} );
-
 	test( 'should render empty message when there are no rows', () => {
 		const topSellingProducts = shallow( <TopSellingProducts data={ {} } /> );
 
@@ -38,7 +31,7 @@ describe( 'TopSellingProducts', () => {
 
 	test( 'should render correct data in the table', () => {
 		const topSellingProducts = shallow( <TopSellingProducts data={ mockData } /> );
-		const table = topSellingProducts.find( 'Table' );
+		const table = topSellingProducts.find( 'TableCard' );
 		const firstRow = table.props().rows[ 0 ];
 
 		expect( firstRow[ 0 ].value ).toBe( mockData[ 0 ].name );

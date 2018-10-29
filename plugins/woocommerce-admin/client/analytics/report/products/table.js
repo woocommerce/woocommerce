@@ -4,18 +4,22 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
-import { map, orderBy } from 'lodash';
+import { compose } from '@wordpress/compose';
+import { withSelect } from '@wordpress/data';
+import { get, map, orderBy } from 'lodash';
 
 /**
  * Internal dependencies
  */
-import { Card, Link, TableCard, TablePlaceholder } from '@woocommerce/components';
+import { Link, TableCard } from '@woocommerce/components';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
+import { appendTimestamp, getCurrentDates } from 'lib/date';
 import { getNewPath, getTimeRelatedQuery, onQueryChange } from 'lib/nav-utils';
 import ReportError from 'analytics/components/report-error';
+import { getFilterQuery, getReportChartData } from 'store/reports/utils';
 import { QUERY_DEFAULTS } from 'store/constants';
 
-export default class ProductsReportTable extends Component {
+class ProductsReportTable extends Component {
 	getHeadersContent() {
 		return [
 			{
@@ -144,31 +148,22 @@ export default class ProductsReportTable extends Component {
 		} );
 	}
 
-	renderPlaceholderTable( tableQuery ) {
+	render() {
+		const { isProductsError, isProductsRequesting, primaryData, products, tableQuery } = this.props;
+		const isError = isProductsError || primaryData.isError;
+
+		if ( isError ) {
+			return <ReportError isError />;
+		}
+
+		const isRequesting = isProductsRequesting || primaryData.isRequesting;
+
 		const headers = this.getHeadersContent();
-
-		return (
-			<Card
-				title={ __( 'Products', 'wc-admin' ) }
-				className="woocommerce-analytics__table-placeholder"
-			>
-				<TablePlaceholder
-					caption={ __( 'Products', 'wc-admin' ) }
-					headers={ headers }
-					query={ tableQuery }
-				/>
-			</Card>
-		);
-	}
-
-	renderTable( tableQuery ) {
-		const { products, totalRows } = this.props;
-
-		const rowsPerPage = parseInt( tableQuery.per_page ) || QUERY_DEFAULTS.pageSize;
 		const orderedProducts = orderBy( products, tableQuery.orderby, tableQuery.order );
 		const rows = this.getRowsContent( orderedProducts );
+		const rowsPerPage = parseInt( tableQuery.per_page ) || QUERY_DEFAULTS.pageSize;
+		const totalRows = get( primaryData, [ 'data', 'totals', 'products_count' ], products.length );
 
-		const headers = this.getHeadersContent();
 		const labels = {
 			helpText: __( 'Select at least two products to compare', 'wc-admin' ),
 			placeholder: __( 'Search by product name or SKU', 'wc-admin' ),
@@ -183,6 +178,7 @@ export default class ProductsReportTable extends Component {
 				headers={ headers }
 				labels={ labels }
 				ids={ orderedProducts.map( p => p.product_id ) }
+				isLoading={ isRequesting }
 				compareBy={ 'product' }
 				onQueryChange={ onQueryChange }
 				query={ tableQuery }
@@ -191,18 +187,36 @@ export default class ProductsReportTable extends Component {
 			/>
 		);
 	}
-
-	render() {
-		const { isError, isRequesting, tableQuery } = this.props;
-
-		if ( isError ) {
-			return <ReportError isError />;
-		}
-
-		if ( isRequesting ) {
-			return this.renderPlaceholderTable( tableQuery );
-		}
-
-		return this.renderTable( tableQuery );
-	}
 }
+
+export default compose(
+	withSelect( ( select, props ) => {
+		const { query } = props;
+		const datesFromQuery = getCurrentDates( query );
+		const primaryData = getReportChartData( 'products', 'primary', query, select );
+
+		const { getProducts, isGetProductsError, isGetProductsRequesting } = select( 'wc-admin' );
+		const filterQuery = getFilterQuery( 'products', query );
+		const tableQuery = {
+			orderby: query.orderby || 'items_sold',
+			order: query.order || 'desc',
+			page: query.page || 1,
+			per_page: query.per_page || QUERY_DEFAULTS.pageSize,
+			after: appendTimestamp( datesFromQuery.primary.after, 'start' ),
+			before: appendTimestamp( datesFromQuery.primary.before, 'end' ),
+			extended_product_info: true,
+			...filterQuery,
+		};
+		const products = getProducts( tableQuery );
+		const isProductsError = isGetProductsError( tableQuery );
+		const isProductsRequesting = isGetProductsRequesting( tableQuery );
+
+		return {
+			isProductsError,
+			isProductsRequesting,
+			primaryData,
+			products,
+			tableQuery,
+		};
+	} )
+)( ProductsReportTable );

@@ -5,19 +5,26 @@
 import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { format as formatDate } from '@wordpress/date';
-import { map } from 'lodash';
+import { compose } from '@wordpress/compose';
+import { withSelect } from '@wordpress/data';
+import { get, map } from 'lodash';
 
 /**
  * Internal dependencies
  */
-import { Card, Link, TableCard, TablePlaceholder } from '@woocommerce/components';
+import { Link, TableCard } from '@woocommerce/components';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
-import { getDateFormatsForInterval, getIntervalForQuery } from 'lib/date';
+import {
+	appendTimestamp,
+	getCurrentDates,
+	getDateFormatsForInterval,
+	getIntervalForQuery,
+} from 'lib/date';
 import { onQueryChange } from 'lib/nav-utils';
 import ReportError from 'analytics/components/report-error';
 import { QUERY_DEFAULTS } from 'store/constants';
 
-export default class RevenueReportTable extends Component {
+class RevenueReportTable extends Component {
 	getHeadersContent() {
 		return [
 			{
@@ -143,52 +150,10 @@ export default class RevenueReportTable extends Component {
 		} );
 	}
 
-	renderPlaceholderTable( tableQuery ) {
-		const headers = this.getHeadersContent();
-
-		return (
-			<Card
-				title={ __( 'Revenue', 'wc-admin' ) }
-				className="woocommerce-analytics__table-placeholder"
-			>
-				<TablePlaceholder
-					caption={ __( 'Revenue', 'wc-admin' ) }
-					headers={ headers }
-					query={ tableQuery }
-				/>
-			</Card>
-		);
-	}
-
-	renderTable( tableQuery ) {
-		const { tableData, totalRows } = this.props;
-
-		const rowsPerPage =
-			( tableQuery && tableQuery.per_page && parseInt( tableQuery.per_page ) ) ||
-			QUERY_DEFAULTS.pageSize;
-		const rows = this.getRowsContent( tableData.data.intervals );
-
-		const headers = this.getHeadersContent();
-
-		return (
-			<TableCard
-				title={ __( 'Revenue', 'wc-admin' ) }
-				rows={ rows }
-				totalRows={ totalRows }
-				rowsPerPage={ rowsPerPage }
-				headers={ headers }
-				onQueryChange={ onQueryChange }
-				query={ tableQuery }
-				summary={ null }
-				downloadable
-			/>
-		);
-	}
-
 	render() {
-		const { isError, isRequesting, query } = this.props;
+		const { isTableDataError, isTableDataRequesting, query, tableData } = this.props;
 
-		if ( isError ) {
+		if ( isTableDataError ) {
 			return <ReportError isError />;
 		}
 
@@ -198,10 +163,55 @@ export default class RevenueReportTable extends Component {
 			order: query.order || 'asc',
 		};
 
-		if ( isRequesting ) {
-			return this.renderPlaceholderTable( tableQuery );
-		}
+		const headers = this.getHeadersContent();
+		const rows = this.getRowsContent( get( tableData, [ 'data', 'intervals' ], [] ) );
+		const rowsPerPage =
+			( tableQuery && tableQuery.per_page && parseInt( tableQuery.per_page ) ) ||
+			QUERY_DEFAULTS.pageSize;
+		const totalRows = get( tableData, [ 'totalResults' ], Object.keys( rows ).length );
 
-		return this.renderTable( tableQuery );
+		return (
+			<TableCard
+				title={ __( 'Revenue', 'wc-admin' ) }
+				rows={ rows }
+				totalRows={ totalRows }
+				rowsPerPage={ rowsPerPage }
+				headers={ headers }
+				isLoading={ isTableDataRequesting }
+				onQueryChange={ onQueryChange }
+				query={ tableQuery }
+				summary={ null }
+				downloadable
+			/>
+		);
 	}
 }
+
+export default compose(
+	withSelect( ( select, props ) => {
+		const { query } = props;
+		const datesFromQuery = getCurrentDates( query );
+		const { getReportStats, isReportStatsRequesting, isReportStatsError } = select( 'wc-admin' );
+
+		// TODO Support hour here when viewing a single day
+		const tableQuery = {
+			interval: 'day',
+			orderby: query.orderby || 'date',
+			order: query.order || 'asc',
+			page: query.page || 1,
+			per_page: query.per_page || QUERY_DEFAULTS.pageSize,
+			after: appendTimestamp( datesFromQuery.primary.after, 'start' ),
+			before: appendTimestamp( datesFromQuery.primary.before, 'end' ),
+		};
+		const tableData = getReportStats( 'revenue', tableQuery );
+		const isTableDataError = isReportStatsError( 'revenue', tableQuery );
+		const isTableDataRequesting = isReportStatsRequesting( 'revenue', tableQuery );
+
+		return {
+			isTableDataError,
+			isTableDataRequesting,
+			tableQuery,
+			tableData,
+		};
+	} )
+)( RevenueReportTable );

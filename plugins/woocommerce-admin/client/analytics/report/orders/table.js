@@ -5,26 +5,28 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { format as formatDate } from '@wordpress/date';
-import { map, orderBy } from 'lodash';
+import { compose } from '@wordpress/compose';
+import { withSelect } from '@wordpress/data';
+import { get, map, orderBy } from 'lodash';
 
 /**
  * Internal dependencies
  */
-import {
-	Card,
-	Link,
-	OrderStatus,
-	TableCard,
-	TablePlaceholder,
-	ViewMoreList,
-} from '@woocommerce/components';
+import { Link, OrderStatus, TableCard, ViewMoreList } from '@woocommerce/components';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
-import { getIntervalForQuery, getDateFormatsForInterval } from 'lib/date';
+import {
+	appendTimestamp,
+	getCurrentDates,
+	getIntervalForQuery,
+	getDateFormatsForInterval,
+} from 'lib/date';
 import { getAdminLink, onQueryChange } from 'lib/nav-utils';
+import ReportError from 'analytics/components/report-error';
 import { QUERY_DEFAULTS } from 'store/constants';
+import { getReportChartData, getFilterQuery } from 'store/reports/utils';
 import './style.scss';
 
-export default class OrdersReportTable extends Component {
+class OrdersReportTable extends Component {
 	constructor( props ) {
 		super( props );
 	}
@@ -214,32 +216,28 @@ export default class OrdersReportTable extends Component {
 		);
 	}
 
-	renderPlaceholderTable( tableQuery ) {
+	render() {
+		const { isTableDataError, isTableDataRequesting, primaryData, query, orders } = this.props;
+		const isError = isTableDataError || primaryData.isError;
+
+		if ( isError ) {
+			return <ReportError isError />;
+		}
+
+		const isRequesting = isTableDataRequesting || primaryData.isRequesting;
+
+		const tableQuery = {
+			...query,
+			orderby: query.orderby || 'date',
+			order: query.order || 'asc',
+		};
+
 		const headers = this.getHeadersContent();
-
-		return (
-			<Card
-				title={ __( 'Orders', 'wc-admin' ) }
-				className="woocommerce-analytics__table-placeholder"
-			>
-				<TablePlaceholder
-					caption={ __( 'Orders', 'wc-admin' ) }
-					headers={ headers }
-					query={ tableQuery }
-				/>
-			</Card>
-		);
-	}
-
-	renderTable( tableQuery ) {
-		const { orders, totalRows } = this.props;
-
-		const rowsPerPage = parseInt( tableQuery.per_page ) || QUERY_DEFAULTS.pageSize;
 		const rows = this.getRowsContent(
 			orderBy( this.formatTableData( orders ), tableQuery.orderby, tableQuery.order )
 		);
-
-		const headers = this.getHeadersContent();
+		const rowsPerPage = parseInt( tableQuery.per_page ) || QUERY_DEFAULTS.pageSize;
+		const totalRows = get( primaryData, [ 'data', 'totals', 'orders_count' ], orders.length );
 
 		return (
 			<TableCard
@@ -248,6 +246,7 @@ export default class OrdersReportTable extends Component {
 				totalRows={ totalRows }
 				rowsPerPage={ rowsPerPage }
 				headers={ headers }
+				isLoading={ isRequesting }
 				onQueryChange={ onQueryChange }
 				query={ tableQuery }
 				summary={ null }
@@ -255,18 +254,35 @@ export default class OrdersReportTable extends Component {
 			/>
 		);
 	}
+}
 
-	render() {
-		const { isRequesting, query } = this.props;
+export default compose(
+	withSelect( ( select, props ) => {
+		const { query } = props;
+		const datesFromQuery = getCurrentDates( query );
+		const primaryData = getReportChartData( 'orders', 'primary', query, select );
+		const filterQuery = getFilterQuery( 'orders', query );
 
+		const { getOrders, isGetOrdersError, isGetOrdersRequesting } = select( 'wc-admin' );
 		const tableQuery = {
-			...query,
 			orderby: query.orderby || 'date',
 			order: query.order || 'asc',
+			page: query.page || 1,
+			per_page: query.per_page || QUERY_DEFAULTS.pageSize,
+			after: appendTimestamp( datesFromQuery.primary.after, 'start' ),
+			before: appendTimestamp( datesFromQuery.primary.before, 'end' ),
+			status: [ 'processing', 'on-hold', 'completed' ],
+			...filterQuery,
 		};
+		const orders = getOrders( tableQuery );
+		const isTableDataError = isGetOrdersError( tableQuery );
+		const isTableDataRequesting = isGetOrdersRequesting( tableQuery );
 
-		return isRequesting
-			? this.renderPlaceholderTable( tableQuery )
-			: this.renderTable( tableQuery );
-	}
-}
+		return {
+			isTableDataError,
+			isTableDataRequesting,
+			orders,
+			primaryData,
+		};
+	} )
+)( OrdersReportTable );
