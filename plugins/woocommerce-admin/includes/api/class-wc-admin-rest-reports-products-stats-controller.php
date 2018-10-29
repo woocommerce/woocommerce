@@ -228,15 +228,15 @@ class WC_Admin_REST_Reports_Products_Stats_Controller extends WC_REST_Reports_Co
 	 */
 	public function set_default_report_data( $results ) {
 		if ( empty( $results ) ) {
-			$results = new stdClass();
-			$results->total = 0;
-			$results->totals = new stdClass();
-			$results->totals->items_sold = 0;
+			$results                        = new stdClass();
+			$results->total                 = 0;
+			$results->totals                = new stdClass();
+			$results->totals->items_sold    = 0;
 			$results->totals->gross_revenue = 0;
-			$results->totals->orders_count = 0;
-			$results->intervals = array();
-			$results->pages = 1;
-			$results->page_no = 1;
+			$results->totals->orders_count  = 0;
+			$results->intervals             = array();
+			$results->pages                 = 1;
+			$results->page_no               = 1;
 		}
 		return $results;
 	}
