@@ -95,7 +95,6 @@ class WC_Install {
 			'wc_update_330_webhooks',
 			'wc_update_330_product_stock_status',
 			'wc_update_330_set_default_product_cat',
-			'wc_update_330_order_customer_id',
 			'wc_update_330_clear_transients',
 			'wc_update_330_set_paypal_sandbox_credentials',
 			'wc_update_330_db_version',
