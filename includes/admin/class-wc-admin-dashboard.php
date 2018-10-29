@@ -275,7 +275,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				"FROM {$wpdb->comments} comments
 				LEFT JOIN {$wpdb->posts} posts ON (comments.comment_post_ID = posts.ID)
 				WHERE comments.comment_approved = '1'
-				AND comments.comment_type = ''
+				AND comments.comment_type = 'review'
 				AND posts.post_password = ''
 				AND posts.post_type = 'product'
 				AND comments.comment_parent = 0
