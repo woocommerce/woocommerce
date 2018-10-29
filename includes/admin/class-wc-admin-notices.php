@@ -89,7 +89,7 @@ class WC_Admin_Notices {
 			WC_Admin_Notices::add_notice( 'simplify_commerce' );
 		}
 
-		if ( ! is_ssl() || 'https' !== substr( $shop_page, 0, 5 ) ) {
+		if ( ! isset( $_SERVER['REQUEST_SCHEME'] ) && ( ! is_ssl() || 'https' !== substr( $shop_page, 0, 5 ) ) ) {
 			WC_Admin_Notices::add_notice( 'no_secure_connection' );
 		}
 
