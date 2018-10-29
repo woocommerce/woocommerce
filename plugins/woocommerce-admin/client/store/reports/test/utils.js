@@ -380,13 +380,6 @@ describe( 'getFilterQuery', () => {
 		expect( filterQuery ).toEqual( {} );
 	} );
 
-	it( 'should return the query for a filter defined in the configs', () => {
-		const query = { filter: 'top_meal' };
-		const filterQuery = getFilterQuery( 'orders', query );
-
-		expect( filterQuery ).toEqual( { lunch: 'burritos' } );
-	} );
-
 	it( 'should return the query for an advanced filter', () => {
 		const query = { filter: 'advanced', mexican_is: 'delicious' };
 		const filterQuery = getFilterQuery( 'orders', query );

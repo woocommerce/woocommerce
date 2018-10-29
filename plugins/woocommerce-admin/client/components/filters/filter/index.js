@@ -129,7 +129,7 @@ class FilterPicker extends Component {
 
 		const selectFilter = event => {
 			onClose( event );
-			this.update( filter.value );
+			this.update( filter.value, filter.query || {} );
 			this.setState( { selectedTag: null } );
 		};
 

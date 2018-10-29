@@ -66,10 +66,6 @@ export function getFilterQuery( endpoint, query ) {
 		return {};
 	}
 
-	if ( filterConfig.query ) {
-		return filterConfig.query;
-	}
-
 	return {};
 }
 
