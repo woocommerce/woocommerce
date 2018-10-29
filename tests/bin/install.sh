@@ -70,10 +70,14 @@ install_wp() {
 
 install_test_suite() {
 	# portable in-place argument for both GNU sed and Mac OSX sed
-	if [[ $(uname -s) == 'Darwin' ]]; then
-		local ioption='-i .bak'
-	else
+	# Based on the fact that GNU sed understands the `--verison` argument where
+	# BSD sed does not.
+	if sed --version >/dev/null 2>&1; then
+		# GNU Sed
 		local ioption='-i'
+	else
+		# BSD Sed
+		local ioption='-i .bak'
 	fi
 
 	# set up testing suite if it doesn't yet exist
