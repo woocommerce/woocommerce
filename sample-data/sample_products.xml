@@ -30,68 +30,18 @@
 <wp:base_blog_url>https://themes.woocommerce.com/woocommerce</wp:base_blog_url>
 <wp:author>
   <wp:author_id>1</wp:author_id>
-  <wp:author_login>wooadmin</wp:author_login>
-  <wp:author_email>jay@woothemes.com</wp:author_email>
-  <wp:author_display_name><![CDATA[WooThemes]]></wp:author_display_name>
-  <wp:author_first_name><![CDATA[WooThemes]]></wp:author_first_name>
-  <wp:author_last_name><![CDATA[]]></wp:author_last_name>
-</wp:author>
-<wp:author>
-  <wp:author_id>3</wp:author_id>
-  <wp:author_login>wooteam</wp:author_login>
-  <wp:author_email>team@woothemes.com</wp:author_email>
-  <wp:author_display_name><![CDATA[WooThemes]]></wp:author_display_name>
-  <wp:author_first_name><![CDATA[Woo]]></wp:author_first_name>
-  <wp:author_last_name><![CDATA[Themes]]></wp:author_last_name>
-</wp:author>
-<wp:author>
-  <wp:author_id>5</wp:author_id>
-  <wp:author_login>admin</wp:author_login>
-  <wp:author_email>info@woothemes.com</wp:author_email>
-  <wp:author_display_name><![CDATA[WooThemes]]></wp:author_display_name>
-  <wp:author_first_name><![CDATA[WooThemes]]></wp:author_first_name>
-  <wp:author_last_name><![CDATA[]]></wp:author_last_name>
-</wp:author>
-<wp:author>
-  <wp:author_id>2189</wp:author_id>
-  <wp:author_login>jobthomas</wp:author_login>
-  <wp:author_email>job.thomas@automattic.com</wp:author_email>
-  <wp:author_display_name><![CDATA[jobthomas]]></wp:author_display_name>
-  <wp:author_first_name><![CDATA[]]></wp:author_first_name>
-  <wp:author_last_name><![CDATA[]]></wp:author_last_name>
-</wp:author>
-<wp:author>
-  <wp:author_id>6732</wp:author_id>
   <wp:author_login>shopmanager</wp:author_login>
-  <wp:author_email>shopmanager@woo.com</wp:author_email>
-  <wp:author_display_name><![CDATA[Shop Manager]]></wp:author_display_name>
-  <wp:author_first_name><![CDATA[Shop]]></wp:author_first_name>
-  <wp:author_last_name><![CDATA[Manager]]></wp:author_last_name>
+  <wp:author_email>info@woocommerce.com</wp:author_email>
+  <wp:author_display_name><![CDATA[WooCommerce]]></wp:author_display_name>
+  <wp:author_first_name><![CDATA[WooCommerce]]></wp:author_first_name>
+  <wp:author_last_name><![CDATA[]]></wp:author_last_name>
 </wp:author>
-<wp:term>
-  <wp:term_id>40</wp:term_id>
-  <wp:term_taxonomy>nav_menu</wp:term_taxonomy>
-  <wp:term_slug>handheld-menu</wp:term_slug>
-  <wp:term_name><![CDATA[Handheld Menu]]></wp:term_name>
-</wp:term>
-<wp:term>
-  <wp:term_id>41</wp:term_id>
-  <wp:term_taxonomy>nav_menu</wp:term_taxonomy>
-  <wp:term_slug>primary-menu</wp:term_slug>
-  <wp:term_name><![CDATA[Primary Menu]]></wp:term_name>
-</wp:term>
-<wp:term>
-  <wp:term_id>42</wp:term_id>
-  <wp:term_taxonomy>nav_menu</wp:term_taxonomy>
-  <wp:term_slug>secondary-menu</wp:term_slug>
-  <wp:term_name><![CDATA[Secondary Menu]]></wp:term_name>
-</wp:term>
 <generator>https://wordpress.org/?v=4.9.8</generator>
 <site xmlns="com-wordpress:feed-additions:1">137735017</site><item>
   <title>Beanie</title>
   <link>https://themes.woocommerce.com/woocommerce/product/beanie/</link>
   <pubDate>Tue, 23 May 2017 13:53:43 +0000</pubDate>
-  <dc:creator>admin</dc:creator>
+  <dc:creator>shopmanager</dc:creator>
   <guid isPermaLink="false">http://shop.dev/bookings/?p=28</guid>
   <description/>
   <content:encoded><![CDATA[Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.]]></content:encoded>
@@ -384,7 +334,7 @@
   <title>Belt</title>
   <link>https://themes.woocommerce.com/woocommerce/product/belt/</link>
   <pubDate>Tue, 23 May 2017 13:53:43 +0000</pubDate>
-  <dc:creator>admin</dc:creator>
+  <dc:creator>shopmanager</dc:creator>
   <guid isPermaLink="false">http://shop.dev/bookings/?p=29</guid>
   <description/>
   <content:encoded><![CDATA[Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.]]></content:encoded>
@@ -710,7 +660,7 @@
   <title>Cap</title>
   <link>https://themes.woocommerce.com/woocommerce/product/cap/</link>
   <pubDate>Tue, 23 May 2017 13:53:43 +0000</pubDate>
-  <dc:creator>admin</dc:creator>
+  <dc:creator>shopmanager</dc:creator>
   <guid isPermaLink="false">http://shop.dev/bookings/?p=30</guid>
   <description/>
   <content:encoded><![CDATA[Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.]]></content:encoded>
@@ -1043,7 +993,7 @@
   <title>Sunglasses</title>
   <link>https://themes.woocommerce.com/woocommerce/product/sunglasses/</link>
   <pubDate>Tue, 23 May 2017 13:53:43 +0000</pubDate>
-  <dc:creator>admin</dc:creator>
+  <dc:creator>shopmanager</dc:creator>
   <guid isPermaLink="false">http://shop.dev/bookings/?p=31</guid>
   <description/>
   <content:encoded><![CDATA[Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.]]></content:encoded>
@@ -1332,7 +1282,7 @@
   <title>Hoodie with Logo</title>
   <link>https://themes.woocommerce.com/woocommerce/product/hoodie-with-logo/</link>
   <pubDate>Tue, 23 May 2017 13:53:43 +0000</pubDate>
-  <dc:creator>admin</dc:creator>
+  <dc:creator>shopmanager</dc:creator>
   <guid isPermaLink="false">http://shop.dev/bookings/?p=32</guid>
   <description/>
   <content:encoded><![CDATA[Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.]]></content:encoded>
@@ -1625,7 +1575,7 @@
   <title>Hoodie with Pocket</title>
   <link>https://themes.woocommerce.com/woocommerce/product/hoodie-with-pocket/</link>
   <pubDate>Tue, 23 May 2017 13:53:43 +0000</pubDate>
-  <dc:creator>admin</dc:creator>
+  <dc:creator>shopmanager</dc:creator>
   <guid isPermaLink="false">http://shop.dev/bookings/?p=33</guid>
   <description/>
   <content:encoded><![CDATA[Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.]]></content:encoded>
@@ -1921,7 +1871,7 @@
   <title>Hoodie with Zipper</title>
   <link>https://themes.woocommerce.com/woocommerce/product/hoodie-with-zipper/</link>
   <pubDate>Tue, 23 May 2017 13:53:43 +0000</pubDate>
-  <dc:creator>admin</dc:creator>
+  <dc:creator>shopmanager</dc:creator>
   <guid isPermaLink="false">http://shop.dev/bookings/?p=34</guid>
   <description/>
   <content:encoded><![CDATA[Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.]]></content:encoded>
@@ -2210,7 +2160,7 @@
   <title>Hoodie</title>
   <link>https://themes.woocommerce.com/woocommerce/product/hoodie/</link>
   <pubDate>Tue, 23 May 2017 15:53:43 +0000</pubDate>
-  <dc:creator>admin</dc:creator>
+  <dc:creator>shopmanager</dc:creator>
   <guid isPermaLink="false">http://shop.dev/bookings/?p=35</guid>
   <description/>
   <content:encoded><![CDATA[Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.]]></content:encoded>
@@ -2513,7 +2463,7 @@
   <title>Long Sleeve Tee</title>
   <link>https://themes.woocommerce.com/woocommerce/product/long-sleeve-tee/</link>
   <pubDate>Tue, 23 May 2017 13:53:43 +0000</pubDate>
-  <dc:creator>admin</dc:creator>
+  <dc:creator>shopmanager</dc:creator>
   <guid isPermaLink="false">http://shop.dev/bookings/?p=36</guid>
   <description/>
   <content:encoded><![CDATA[Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.]]></content:encoded>
@@ -2806,7 +2756,7 @@
   <title>Polo</title>
   <link>https://themes.woocommerce.com/woocommerce/product/polo/</link>
   <pubDate>Tue, 23 May 2017 11:53:43 +0000</pubDate>
-  <dc:creator>admin</dc:creator>
+  <dc:creator>shopmanager</dc:creator>
   <guid isPermaLink="false">http://shop.dev/bookings/?p=37</guid>
   <description/>
   <content:encoded><![CDATA[Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.]]></content:encoded>
@@ -3103,7 +3053,7 @@
   <title>T-Shirt</title>
   <link>https://themes.woocommerce.com/woocommerce/product/tshirt/</link>
   <pubDate>Tue, 23 May 2017 11:53:43 +0000</pubDate>
-  <dc:creator>admin</dc:creator>
+  <dc:creator>shopmanager</dc:creator>
   <guid isPermaLink="false">http://shop.dev/bookings/?p=38</guid>
   <description/>
   <content:encoded><![CDATA[Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.]]></content:encoded>
@@ -3400,7 +3350,7 @@
   <title>V-Neck T-Shirt</title>
   <link>https://themes.woocommerce.com/woocommerce/product/vneck-tee/</link>
   <pubDate>Tue, 23 May 2017 13:53:43 +0000</pubDate>
-  <dc:creator>admin</dc:creator>
+  <dc:creator>shopmanager</dc:creator>
   <guid isPermaLink="false">http://shop.dev/bookings/?p=39</guid>
   <description/>
   <content:encoded><![CDATA[Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.]]></content:encoded>
@@ -3902,7 +3852,7 @@ Let us know if you have any questions!]]></wp:meta_value>
   <title>Album</title>
   <link>https://themes.woocommerce.com/woocommerce/product/album/</link>
   <pubDate>Mon, 07 Aug 2017 15:52:10 +0000</pubDate>
-  <dc:creator>admin</dc:creator>
+  <dc:creator>shopmanager</dc:creator>
   <guid isPermaLink="false">http://shop.dev/?post_type=product&amp;p=150</guid>
   <description/>
   <content:encoded><![CDATA[Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sagittis orci ac odio dictum tincidunt. Donec ut metus leo. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Sed luctus, dui eu sagittis sodales, nulla nibh sagittis augue, vel porttitor diam enim non metus. Vestibulum aliquam augue neque. Phasellus tincidunt odio eget ullamcorper efficitur. Cras placerat ut turpis pellentesque vulputate. Nam sed consequat tortor. Curabitur finibus sapien dolor. Ut eleifend tellus nec erat pulvinar dignissim. Nam non arcu purus. Vivamus et massa massa.]]></content:encoded>
@@ -4250,7 +4200,7 @@ Let us know if you have any questions!]]></wp:meta_value>
   <title>Single</title>
   <link>https://themes.woocommerce.com/woocommerce/product/single/</link>
   <pubDate>Mon, 07 Aug 2017 15:53:06 +0000</pubDate>
-  <dc:creator>admin</dc:creator>
+  <dc:creator>shopmanager</dc:creator>
   <guid isPermaLink="false">http://shop.dev/?post_type=product&amp;p=151</guid>
   <description/>
   <content:encoded><![CDATA[Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sagittis orci ac odio dictum tincidunt. Donec ut metus leo. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Sed luctus, dui eu sagittis sodales, nulla nibh sagittis augue, vel porttitor diam enim non metus. Vestibulum aliquam augue neque. Phasellus tincidunt odio eget ullamcorper efficitur. Cras placerat ut turpis pellentesque vulputate. Nam sed consequat tortor. Curabitur finibus sapien dolor. Ut eleifend tellus nec erat pulvinar dignissim. Nam non arcu purus. Vivamus et massa massa.]]></content:encoded>
@@ -4542,7 +4492,7 @@ Let us know if you have any questions!]]></wp:meta_value>
   <title>V-Neck T-Shirt - Red</title>
   <link>https://themes.woocommerce.com/woocommerce/product/vneck-tee/?attribute_pa_color=red</link>
   <pubDate>Mon, 29 May 2017 13:54:24 +0000</pubDate>
-  <dc:creator>admin</dc:creator>
+  <dc:creator>shopmanager</dc:creator>
   <guid isPermaLink="false">http://shop.dev/product/vneck-tee/</guid>
   <description/>
   <content:encoded><![CDATA[]]></content:encoded>
@@ -4732,7 +4682,7 @@ Let us know if you have any questions!]]></wp:meta_value>
   <title>V-Neck T-Shirt - Green</title>
   <link>https://themes.woocommerce.com/woocommerce/product/vneck-tee/?attribute_pa_color=green</link>
   <pubDate>Mon, 29 May 2017 13:54:24 +0000</pubDate>
-  <dc:creator>admin</dc:creator>
+  <dc:creator>shopmanager</dc:creator>
   <guid isPermaLink="false">http://shop.dev/product/vneck-tee/</guid>
   <description/>
   <content:encoded><![CDATA[]]></content:encoded>
@@ -4922,7 +4872,7 @@ Let us know if you have any questions!]]></wp:meta_value>
   <title>V-Neck T-Shirt - Blue</title>
   <link>https://themes.woocommerce.com/woocommerce/product/vneck-tee/?attribute_pa_color=blue</link>
   <pubDate>Mon, 07 Aug 2017 13:27:42 +0000</pubDate>
-  <dc:creator>admin</dc:creator>
+  <dc:creator>shopmanager</dc:creator>
   <guid isPermaLink="false">http://shop.dev/shop/hoodies/vneck-tee/</guid>
   <description/>
   <content:encoded><![CDATA[]]></content:encoded>
@@ -5112,7 +5062,7 @@ Let us know if you have any questions!]]></wp:meta_value>
   <title>Hoodie - Red</title>
   <link>https://themes.woocommerce.com/woocommerce/product/hoodie/?attribute_pa_color=red</link>
   <pubDate>Mon, 07 Aug 2017 15:55:40 +0000</pubDate>
-  <dc:creator>admin</dc:creator>
+  <dc:creator>shopmanager</dc:creator>
   <guid isPermaLink="false">http://shop.dev/shop/hoodies/hoodie/</guid>
   <description/>
   <content:encoded><![CDATA[]]></content:encoded>
@@ -5302,7 +5252,7 @@ Let us know if you have any questions!]]></wp:meta_value>
   <title>Hoodie - Green</title>
   <link>https://themes.woocommerce.com/woocommerce/product/hoodie/?attribute_pa_color=green</link>
   <pubDate>Mon, 07 Aug 2017 15:55:40 +0000</pubDate>
-  <dc:creator>admin</dc:creator>
+  <dc:creator>shopmanager</dc:creator>
   <guid isPermaLink="false">http://shop.dev/shop/hoodies/hoodie/</guid>
   <description/>
   <content:encoded><![CDATA[]]></content:encoded>
@@ -5492,7 +5442,7 @@ Let us know if you have any questions!]]></wp:meta_value>
   <title>Hoodie - Blue</title>
   <link>https://themes.woocommerce.com/woocommerce/product/hoodie/?attribute_pa_color=blue</link>
   <pubDate>Mon, 07 Aug 2017 15:55:40 +0000</pubDate>
-  <dc:creator>admin</dc:creator>
+  <dc:creator>shopmanager</dc:creator>
   <guid isPermaLink="false">http://shop.dev/shop/hoodies/hoodie/</guid>
   <description/>
   <content:encoded><![CDATA[]]></content:encoded>
@@ -5682,7 +5632,7 @@ Let us know if you have any questions!]]></wp:meta_value>
   <title>single</title>
   <link>https://themes.woocommerce.com/woocommerce/product/single/single-2/</link>
   <pubDate>Thu, 05 Oct 2017 13:34:18 +0000</pubDate>
-  <dc:creator>jobthomas</dc:creator>
+  <dc:creator>shopmanager</dc:creator>
   <guid isPermaLink="false">https://themes.woocommerce.com/wp-content/uploads/sites/56/2017/08/single.jpg</guid>
   <description/>
   <content:encoded><![CDATA[]]></content:encoded>
@@ -5705,7 +5655,7 @@ Let us know if you have any questions!]]></wp:meta_value>
   <title>album</title>
   <link>https://themes.woocommerce.com/woocommerce/product/album/album-2/</link>
   <pubDate>Thu, 05 Oct 2017 13:35:38 +0000</pubDate>
-  <dc:creator>jobthomas</dc:creator>
+  <dc:creator>shopmanager</dc:creator>
   <guid isPermaLink="false">https://themes.woocommerce.com/wp-content/uploads/sites/56/2017/08/album.jpg</guid>
   <description/>
   <content:encoded><![CDATA[]]></content:encoded>
@@ -5728,7 +5678,7 @@ Let us know if you have any questions!]]></wp:meta_value>
   <title>vnech-tee-blue</title>
   <link>https://themes.woocommerce.com/woocommerce/?attachment_id=239</link>
   <pubDate>Thu, 05 Oct 2017 13:36:37 +0000</pubDate>
-  <dc:creator>jobthomas</dc:creator>
+  <dc:creator>shopmanager</dc:creator>
   <guid isPermaLink="false">https://themes.woocommerce.com/wp-content/uploads/sites/56/2017/08/vnech-tee-blue.jpg</guid>
   <description/>
   <content:encoded><![CDATA[]]></content:encoded>
@@ -5751,7 +5701,7 @@ Let us know if you have any questions!]]></wp:meta_value>
   <title>vnech-tee-green</title>
   <link>https://themes.woocommerce.com/woocommerce/?attachment_id=240</link>
   <pubDate>Thu, 05 Oct 2017 13:36:38 +0000</pubDate>
-  <dc:creator>jobthomas</dc:creator>
+  <dc:creator>shopmanager</dc:creator>
   <guid isPermaLink="false">https://themes.woocommerce.com/wp-content/uploads/sites/56/2017/08/vnech-tee-green.jpg</guid>
   <description/>
   <content:encoded><![CDATA[]]></content:encoded>
@@ -5774,7 +5724,7 @@ Let us know if you have any questions!]]></wp:meta_value>
   <title>hoodie-blue</title>
   <link>https://themes.woocommerce.com/woocommerce/product/hoodie/hoodie-blue-2/</link>
   <pubDate>Thu, 05 Oct 2017 13:38:33 +0000</pubDate>
-  <dc:creator>jobthomas</dc:creator>
+  <dc:creator>shopmanager</dc:creator>
   <guid isPermaLink="false">https://themes.woocommerce.com/wp-content/uploads/sites/56/2017/05/hoodie-blue.jpg</guid>
   <description/>
   <content:encoded><![CDATA[]]></content:encoded>
@@ -5797,7 +5747,7 @@ Let us know if you have any questions!]]></wp:meta_value>
   <title>hoodie-green</title>
   <link>https://themes.woocommerce.com/woocommerce/product/hoodie/hoodie-green-2/</link>
   <pubDate>Thu, 05 Oct 2017 13:38:34 +0000</pubDate>
-  <dc:creator>jobthomas</dc:creator>
+  <dc:creator>shopmanager</dc:creator>
   <guid isPermaLink="false">https://themes.woocommerce.com/wp-content/uploads/sites/56/2017/05/hoodie-green.jpg</guid>
   <description/>
   <content:encoded><![CDATA[]]></content:encoded>
