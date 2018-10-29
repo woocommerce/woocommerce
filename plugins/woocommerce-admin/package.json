@@ -65,7 +65,7 @@
     "chalk": "2.4.1",
     "core-js": "2.5.7",
     "cross-env": "5.2.0",
-    "css-loader": "1.0.0",
+    "css-loader": "1.0.1",
     "deep-freeze": "0.0.1",
     "docsify-cli": "github:docsifyjs/docsify-cli#5df38996",
     "eslint": "5.8.0",
