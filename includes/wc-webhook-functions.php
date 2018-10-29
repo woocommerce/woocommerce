@@ -69,7 +69,7 @@ function wc_is_webhook_valid_topic( $topic ) {
 	}
 
 	// Custom topics are prefixed with woocommerce_ or wc_ are valid.
-	if ( ( 0 === strpos( $topic, 'action.woocommerce_' ) || 0 === strpos( $topic, 'action.wc_' ) ) ) {
+	if ( 0 === strpos( $topic, 'action.woocommerce_' ) || 0 === strpos( $topic, 'action.wc_' ) ) {
 		return true;
 	}
 
