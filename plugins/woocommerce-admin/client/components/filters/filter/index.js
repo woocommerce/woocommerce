@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { Button, Dropdown, IconButton } from '@wordpress/components';
 import classnames from 'classnames';
 import { Component } from '@wordpress/element';
-import { find, omit, partial, last, get, includes } from 'lodash';
+import { find, partial, last, get, includes } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
@@ -16,6 +16,7 @@ import AnimationSlider from 'components/animation-slider';
 import DropdownButton from 'components/dropdown-button';
 import Search from 'components/search';
 import { getTimeRelatedQuery, updateQueryString } from 'lib/nav-utils';
+import { flatenFilters } from './utils';
 import './style.scss';
 
 export const DEFAULT_FILTER = 'all';
@@ -52,23 +53,9 @@ class FilterPicker extends Component {
 		this.setState( { selectedTag: tags[ 0 ] } );
 	}
 
-	getAllFilters( filters ) {
-		const allFilters = [];
-		filters.forEach( f => {
-			if ( ! f.subFilters ) {
-				allFilters.push( f );
-			} else {
-				allFilters.push( omit( f, 'subFilters' ) );
-				const subFilters = this.getAllFilters( f.subFilters );
-				allFilters.push( ...subFilters );
-			}
-		} );
-		return allFilters;
-	}
-
 	getFilter( value = false ) {
 		const { filters, query } = this.props;
-		const allFilters = this.getAllFilters( filters );
+		const allFilters = flatenFilters( filters );
 		value = value || query.filter || DEFAULT_FILTER;
 		return find( allFilters, { value } ) || {};
 	}
@@ -142,7 +129,7 @@ class FilterPicker extends Component {
 
 		const selectFilter = event => {
 			onClose( event );
-			this.update( filter.value );
+			this.update( filter.value, filter.query || {} );
 			this.setState( { selectedTag: null } );
 		};
 
