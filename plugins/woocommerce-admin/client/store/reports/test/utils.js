@@ -343,12 +343,19 @@ describe( 'getFilterQuery', () => {
 	 * Mock the orders config
 	 */
 	const filters = [
-		{ value: 'top_meal', query: { lunch: 'burritos' } },
-		{ value: 'top_dessert', query: { dinner: 'ice_cream' } },
-		{ value: 'compare-cuisines', settings: { param: 'region' } },
 		{
-			value: 'food_destination',
-			subFilters: [ { value: 'choose_a_european_city', settings: { param: 'european_cities' } } ],
+			param: 'filter',
+			filters: [
+				{ value: 'top_meal', query: { lunch: 'burritos' } },
+				{ value: 'top_dessert', query: { dinner: 'ice_cream' } },
+				{ value: 'compare-cuisines', settings: { param: 'region' } },
+				{
+					value: 'food_destination',
+					subFilters: [
+						{ value: 'choose_a_european_city', settings: { param: 'european_cities' } },
+					],
+				},
+			],
 		},
 	];
 

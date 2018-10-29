@@ -44,8 +44,8 @@ class FilterPicker extends Component {
 
 		if ( selectedFilter.settings && selectedFilter.settings.getLabels ) {
 			const { query } = this.props;
-			const { param, getLabels } = selectedFilter.settings;
-			getLabels( query[ param ] ).then( this.updateSelectedTag );
+			const { param: filterParam, getLabels } = selectedFilter.settings;
+			getLabels( query[ filterParam ] ).then( this.updateSelectedTag );
 		}
 	}
 
@@ -53,10 +53,10 @@ class FilterPicker extends Component {
 		this.setState( { selectedTag: tags[ 0 ] } );
 	}
 
-	getFilter( value = false ) {
-		const { filters, query } = this.props;
-		const allFilters = flatenFilters( filters );
-		value = value || query.filter || DEFAULT_FILTER;
+	getFilter( value ) {
+		const { config, query } = this.props;
+		const allFilters = flatenFilters( config.filters );
+		value = value || query[ config.param ] || DEFAULT_FILTER;
 		return find( allFilters, { value } ) || {};
 	}
 
@@ -88,22 +88,26 @@ class FilterPicker extends Component {
 	}
 
 	update( value, additionalQueries = {} ) {
-		const { path, query } = this.props;
+		const { path, query, config } = this.props;
 		// Keep only time related queries when updating to a new filter
 		const timeRelatedQuery = getTimeRelatedQuery( query );
 		const update = {
-			filter: 'all' === value ? undefined : value,
+			[ config.param ]: 'all' === value ? undefined : value,
 			...additionalQueries,
 		};
+		// Keep any url parameters as designated by the config
+		config.staticParams.forEach( param => {
+			update[ param ] = query[ param ];
+		} );
 		updateQueryString( update, path, timeRelatedQuery );
 	}
 
 	onTagChange( filter, onClose, tags ) {
 		const tag = last( tags );
 		const { value, settings } = filter;
-		const { param } = settings;
+		const { param: filterParam } = settings;
 		if ( tag ) {
-			this.update( value, { [ param ]: tag.id } );
+			this.update( value, { [ filterParam ]: tag.id } );
 			onClose();
 		} else {
 			this.update( 'all' );
@@ -146,14 +150,14 @@ class FilterPicker extends Component {
 	}
 
 	render() {
-		const { filters } = this.props;
+		const { config } = this.props;
 		const { nav, animate } = this.state;
-		const visibleFilters = this.getVisibleFilters( filters, nav );
+		const visibleFilters = this.getVisibleFilters( config.filters, nav );
 		const parentFilter = nav.length ? this.getFilter( nav[ nav.length - 1 ] ) : false;
 		const selectedFilter = this.getFilter();
 		return (
 			<div className="woocommerce-filters-filter">
-				<p>{ __( 'Show', 'wc-admin' ) }:</p>
+				{ config.label && <span className="woocommerce-filters-label">{ config.label }:</span> }
 				<Dropdown
 					contentClassName="woocommerce-filters-filter__content"
 					position="bottom"
@@ -207,31 +211,52 @@ FilterPicker.propTypes = {
 	/**
 	 * An array of filters and subFilters to construct the menu.
 	 */
-	filters: PropTypes.arrayOf(
-		PropTypes.shape( {
-			/**
-			 * A custom component used instead of a button, might have special handling for filtering. TBD, not yet implemented.
-			 */
-			component: PropTypes.string,
-			/**
-			 * The label for this filter. Optional only for custom component filters.
-			 */
-			label: PropTypes.string,
-			/**
-			 * An array representing the "path" to this filter, if nested.
-			 */
-			path: PropTypes.string,
-			/**
-			 * An array of more filter objects that act as "children" to this item.
-			 * This set of filters is shown if the parent filter is clicked.
-			 */
-			subFilters: PropTypes.array,
-			/**
-			 * The value for this filter, used to set the `filter` query param when clicked, if there are no `subFilters`.
-			 */
-			value: PropTypes.string.isRequired,
-		} )
-	).isRequired,
+	config: PropTypes.shape( {
+		/**
+		 * A label above the filter selector.
+		 */
+		label: PropTypes.string,
+		/**
+		 * Url parameters to persist when selecting a new filter.
+		 */
+		staticParams: PropTypes.array.isRequired,
+		/**
+		 * The url paramter this filter will modify.
+		 */
+		param: PropTypes.string.isRequired,
+		/**
+		 * Determine if the filter should be shown. Supply a function with the query object as an argument returning a boolean.
+		 */
+		showFilters: PropTypes.func.isRequired,
+		/**
+		 * An array of filter a user can select.
+		 */
+		filters: PropTypes.arrayOf(
+			PropTypes.shape( {
+				/**
+				 * A custom component used instead of a button, might have special handling for filtering. TBD, not yet implemented.
+				 */
+				component: PropTypes.string,
+				/**
+				 * The label for this filter. Optional only for custom component filters.
+				 */
+				label: PropTypes.string,
+				/**
+				 * An array representing the "path" to this filter, if nested.
+				 */
+				path: PropTypes.string,
+				/**
+				 * An array of more filter objects that act as "children" to this item.
+				 * This set of filters is shown if the parent filter is clicked.
+				 */
+				subFilters: PropTypes.array,
+				/**
+				 * The value for this filter, used to set the `filter` query param when clicked, if there are no `subFilters`.
+				 */
+				value: PropTypes.string.isRequired,
+			} )
+		),
+	} ).isRequired,
 	/**
 	 * The `path` parameter supplied by React-Router.
 	 */

@@ -13,8 +13,16 @@ import { NAMESPACE } from 'store/constants';
 const { orderStatuses } = wcSettings;
 
 export const filters = [
-	{ label: __( 'All Orders', 'wc-admin' ), value: 'all' },
-	{ label: __( 'Advanced Filters', 'wc-admin' ), value: 'advanced' },
+	{
+		label: __( 'Show', 'wc-admin' ),
+		staticParams: [],
+		param: 'filter',
+		showFilters: () => true,
+		filters: [
+			{ label: __( 'All Orders', 'wc-admin' ), value: 'all' },
+			{ label: __( 'Advanced Filters', 'wc-admin' ), value: 'advanced' },
+		],
+	},
 ];
 
 /*eslint-disable max-len*/
