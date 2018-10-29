@@ -1992,3 +1992,27 @@ function wc_update_350_reviews_comment_type() {
 function wc_update_350_db_version() {
 	WC_Install::update_db_version( '3.5.0' );
 }
+
+/**
+ * There is a bug in the WC 3.5 wc_update_350_order_customer_id() update routine that
+ * makes it fail, but report success if the filter woocommerce_update_350_order_customer_id_post_types
+ * is used to add more post types and if the routine is triggered via WP-CLI
+ * (see https://github.com/woocommerce/woocommerce/issues/21687). It was caused by wrongly setting
+ * sql_safe_updates to true. Now we set this MySQL option to false, but we need to run
+ * wc_update_350_order_customer_id() again to migrate the data that wasn't migrated in the WC 3.5 update.
+ *
+ * @param WC_Background_Updater|false $updater Background updater instance or false if function is called from `wp wc update` WP-CLI command.
+ * @return true|void Return true if near memory limit and needs to restart. Return void if update completed.
+ */
+function wc_update_351_rerun_order_customer_id( $updater = false ) {
+	if ( has_filter( 'woocommerce_update_350_order_customer_id_post_types' ) ) {
+		return wc_update_350_order_customer_id( $updater );
+	}
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_351_db_version() {
+	WC_Install::update_db_version( '3.5.1' );
+}

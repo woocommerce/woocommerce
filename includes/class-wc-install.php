@@ -118,6 +118,10 @@ class WC_Install {
 			'wc_update_350_reviews_comment_type',
 			'wc_update_350_db_version',
 		),
+		'3.5.1' => array(
+			'wc_update_351_rerun_order_customer_id',
+			'wc_update_351_db_version',
+		),
 	);
 
 	/**
