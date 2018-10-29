@@ -13,7 +13,7 @@ import { ERROR } from 'store/constants';
 import { getJsonString } from 'store/utils';
 
 /**
- * Returns revenue report details for a specific report query.
+ * Returns products report details for a specific report query.
  *
  * @param  {Object} state  Current state
  * @param  {Object} query  Report query paremters
