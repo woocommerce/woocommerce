@@ -21,31 +21,31 @@ const getPages = () => {
 			container: Dashboard,
 			path: '/',
 			wpOpenMenu: 'toplevel_page_woocommerce',
-			wpClosedMenu: 'toplevel_page_wc-admin--analytics',
+			wpClosedMenu: 'toplevel_page_wc-admin--analytics-revenue',
 		},
 		{
 			container: Analytics,
 			path: '/analytics',
-			wpOpenMenu: 'toplevel_page_wc-admin--analytics',
+			wpOpenMenu: 'toplevel_page_wc-admin--analytics-revenue',
 			wpClosedMenu: 'toplevel_page_woocommerce',
 		},
 		{
 			container: AnalyticsReport,
 			path: '/analytics/:report',
-			wpOpenMenu: 'toplevel_page_wc-admin--analytics',
+			wpOpenMenu: 'toplevel_page_wc-admin--analytics-revenue',
 			wpClosedMenu: 'toplevel_page_woocommerce',
 		},
 		{
 			container: DevDocs,
 			path: '/devdocs',
 			wpOpenMenu: 'toplevel_page_woocommerce',
-			wpClosedMenu: 'toplevel_page_wc-admin--analytics',
+			wpClosedMenu: 'toplevel_page_wc-admin--analytics-revenue',
 		},
 		{
 			container: DevDocs,
 			path: '/devdocs/:component',
 			wpOpenMenu: 'toplevel_page_woocommerce',
-			wpClosedMenu: 'toplevel_page_wc-admin--analytics',
+			wpClosedMenu: 'toplevel_page_wc-admin--analytics-revenue',
 		},
 	];
 
@@ -105,26 +105,21 @@ window.wpNavMenuClassChange = function( page ) {
 	} );
 
 	const pageHash = window.location.hash.split( '?' )[ 0 ];
-	const currentItems = document.querySelectorAll( `li > a[href$="${ pageHash }"]` );
+	const currentItemsSelector =
+		pageHash === '#/'
+			? `li > a[href$="${ pageHash }"], li > a[href*="${ pageHash }?"]`
+			: `li > a[href*="${ pageHash }"]`;
+	const currentItems = document.querySelectorAll( currentItemsSelector );
 
 	Array.from( currentItems ).forEach( function( item ) {
 		item.parentElement.classList.add( 'current' );
 	} );
 
-	// Make revenue the default url
-	if ( page.wpOpenMenu === 'toplevel_page_wc-admin--analytics' ) {
-		page.wpOpenMenu = 'toplevel_page_wc-admin--analytics-revenue';
-	}
 	const currentMenu = document.querySelector( '#' + page.wpOpenMenu );
 	currentMenu.classList.remove( 'wp-not-current-submenu' );
 	currentMenu.classList.add( 'wp-has-current-submenu' );
 	currentMenu.classList.add( 'wp-menu-open' );
 	currentMenu.classList.add( 'current' );
-
-	// Make revenue the default url
-	if ( page.wpClosedMenu === 'toplevel_page_wc-admin--analytics' ) {
-		page.wpClosedMenu = 'toplevel_page_wc-admin--analytics-revenue';
-	}
 
 	// Sometimes navigating from the subMenu to Dashboard does not close subMenu
 	const closedMenu = document.querySelector( '#' + page.wpClosedMenu );
