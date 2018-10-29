@@ -166,6 +166,10 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			}
 		}
 
+		if ( ! wc_is_webhook_valid_topic( $this->get_topic() ) ) {
+			$should_deliver = false;
+		}
+
 		/*
 		 * Let other plugins intercept deliver for some messages queue like rabbit/zeromq.
 		 */

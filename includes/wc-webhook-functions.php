@@ -58,9 +58,18 @@ add_action( 'woocommerce_deliver_webhook_async', 'wc_deliver_webhook_async', 10,
  * @return bool
  */
 function wc_is_webhook_valid_topic( $topic ) {
+	$invalid_topics  = array(
+		'action.woocommerce_login_credentials',
+		'action.woocommerce_product_csv_importer_check_import_file_path',
+		'action.woocommerce_webhook_should_deliver',
+	);
+
+	if ( in_array( $topic, $invalid_topics, true ) ) {
+		return false;
+	}
 
 	// Custom topics are prefixed with woocommerce_ or wc_ are valid.
-	if ( 0 === strpos( $topic, 'action.woocommerce_' ) || 0 === strpos( $topic, 'action.wc_' ) ) {
+	if ( ( 0 === strpos( $topic, 'action.woocommerce_' ) || 0 === strpos( $topic, 'action.wc_' ) ) ) {
 		return true;
 	}
 
