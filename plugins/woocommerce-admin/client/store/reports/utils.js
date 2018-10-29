@@ -3,13 +3,75 @@
 /**
  * External dependencies
  */
-import { forEach, isNull } from 'lodash';
+import { find, forEach, isNull } from 'lodash';
 
 /**
  * Internal dependencies
  */
 import { MAX_PER_PAGE } from 'store/constants';
 import { appendTimestamp, getCurrentDates, getIntervalForQuery } from 'lib/date';
+import { getActiveFiltersFromQuery, getUrlKey } from 'components/filters/advanced/utils';
+import { flatenFilters } from 'components/filters/filter/utils';
+import * as couponsConfig from 'analytics/report/coupons/config';
+import * as ordersConfig from 'analytics/report/orders/config';
+import * as productsConfig from 'analytics/report/products/config';
+
+const reportConfigs = {
+	coupons: couponsConfig,
+	orders: ordersConfig,
+	products: productsConfig,
+};
+
+export function getFilterQuery( endpoint, query ) {
+	const { filter } = query;
+
+	if ( ! filter ) {
+		return {};
+	}
+
+	const { filters = [], advancedFilters = {} } = reportConfigs[ endpoint ];
+
+	if ( 'advanced' === filter ) {
+		const activeFilters = getActiveFiltersFromQuery( query, advancedFilters.filters );
+
+		if ( activeFilters.length === 0 ) {
+			return {};
+		}
+
+		return activeFilters.reduce(
+			( result, activeFilter ) => {
+				const { key, rule, value } = activeFilter;
+				result[ getUrlKey( key, rule ) ] = value;
+				return result;
+			},
+			{ match: query.match || 'all' }
+		);
+	}
+
+	const filterConfig = find( flatenFilters( filters ), { value: filter } );
+
+	if ( ! filterConfig ) {
+		return {};
+	}
+
+	if ( filterConfig.settings && filterConfig.settings.param ) {
+		const { param } = filterConfig.settings;
+
+		if ( query[ param ] ) {
+			return {
+				[ param ]: query[ param ],
+			};
+		}
+
+		return {};
+	}
+
+	if ( filterConfig.query ) {
+		return filterConfig.query;
+	}
+
+	return {};
+}
 
 /**
  * Returns true if a report object is empty.
@@ -36,19 +98,22 @@ export function isReportDataEmpty( report ) {
 /**
  * Constructs and returns a query associated with a Report data request.
  *
+ * @param  {String} endpoint Report API Endpoint
  * @param  {String} dataType 'primary' or 'secondary'.
  * @param  {Object} query  query parameters in the url.
  * @returns {Object} data request query parameters.
  */
-function getRequestQuery( dataType, query ) {
+function getRequestQuery( endpoint, dataType, query ) {
 	const datesFromQuery = getCurrentDates( query );
 	const interval = getIntervalForQuery( query );
+	const filterQuery = getFilterQuery( endpoint, query );
 	return {
 		order: 'asc',
 		interval,
 		per_page: MAX_PER_PAGE,
 		after: appendTimestamp( datesFromQuery[ dataType ].after, 'start' ),
 		before: appendTimestamp( datesFromQuery[ dataType ].before, 'end' ),
+		...filterQuery,
 	};
 }
 
@@ -71,7 +136,7 @@ export function getSummaryNumbers( endpoint, query, select ) {
 		},
 	};
 
-	const primaryQuery = getRequestQuery( 'primary', query );
+	const primaryQuery = getRequestQuery( endpoint, 'primary', query );
 	const primary = getReportStats( endpoint, primaryQuery );
 	if ( isReportStatsRequesting( endpoint, primaryQuery ) ) {
 		return { ...response, isRequesting: true };
@@ -81,7 +146,7 @@ export function getSummaryNumbers( endpoint, query, select ) {
 
 	const primaryTotals = ( primary && primary.data && primary.data.totals ) || null;
 
-	const secondaryQuery = getRequestQuery( 'secondary', query );
+	const secondaryQuery = getRequestQuery( endpoint, 'secondary', query );
 	const secondary = getReportStats( endpoint, secondaryQuery );
 	if ( isReportStatsRequesting( endpoint, secondaryQuery ) ) {
 		return { ...response, isRequesting: true };
@@ -116,7 +181,7 @@ export function getReportChartData( endpoint, dataType, query, select ) {
 		},
 	};
 
-	const requestQuery = getRequestQuery( dataType, query );
+	const requestQuery = getRequestQuery( endpoint, dataType, query );
 	const stats = getReportStats( endpoint, requestQuery );
 
 	if ( isReportStatsRequesting( endpoint, requestQuery ) ) {

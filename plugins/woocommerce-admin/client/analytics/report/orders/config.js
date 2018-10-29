@@ -18,7 +18,7 @@ export const filters = [
 ];
 
 /*eslint-disable max-len*/
-export const advancedFilterConfig = {
+export const advancedFilters = {
 	title: _x(
 		'Orders Match {{select /}} Filters',
 		'A sentence describing filters for Orders. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ',
