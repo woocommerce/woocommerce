@@ -259,7 +259,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		}
 
 		// If customer changed, update any downloadable permissions.
-		if ( in_array( 'customer_user', $updated_props ) || in_array( 'billing_email', $updated_props ) ) {
+		if ( in_array( 'customer_id', $updated_props ) || in_array( 'billing_email', $updated_props ) ) {
 			$data_store = WC_Data_Store::load( 'customer-download' );
 			$data_store->update_user_by_order_id( $id, $order->get_customer_id(), $order->get_billing_email() );
 		}
