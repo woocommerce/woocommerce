@@ -14,6 +14,7 @@ languages/*
 !languages/README.md
 
 .idea
+.vscode/
 
 # Composer
 /vendor/
