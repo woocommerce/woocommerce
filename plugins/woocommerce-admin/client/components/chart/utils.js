@@ -541,6 +541,55 @@ const handleMouseOutLineChart = ( parentNode, params ) => {
 	params.tooltip.style( 'visibility', 'hidden' );
 };
 
+export const WIDE_BREAKPOINT = 1100;
+
+const calculateTooltipXPosition = (
+	elementCoords,
+	chartCoords,
+	tooltipSize,
+	tooltipMargin,
+	elementWidthRatio
+) => {
+	const xPosition =
+		elementCoords.left + elementCoords.width * elementWidthRatio + tooltipMargin - chartCoords.left;
+
+	if ( chartCoords.width < WIDE_BREAKPOINT ) {
+		return Math.max(
+			tooltipMargin,
+			Math.min(
+				xPosition - tooltipSize.width / 2,
+				chartCoords.width - tooltipSize.width - tooltipMargin
+			)
+		);
+	}
+
+	if ( xPosition + tooltipSize.width + tooltipMargin > chartCoords.width ) {
+		return Math.max(
+			tooltipMargin,
+			elementCoords.left +
+				elementCoords.width * ( 1 - elementWidthRatio ) -
+				tooltipSize.width -
+				tooltipMargin -
+				chartCoords.left
+		);
+	}
+
+	return xPosition;
+};
+
+const calculateTooltipYPosition = ( elementCoords, chartCoords, tooltipSize, tooltipMargin ) => {
+	if ( chartCoords.width < WIDE_BREAKPOINT ) {
+		return chartCoords.height;
+	}
+
+	const yPosition = elementCoords.top + tooltipMargin - chartCoords.top;
+	if ( yPosition + tooltipSize.height + tooltipMargin > chartCoords.height ) {
+		return Math.max( 0, elementCoords.top - tooltipSize.height - tooltipMargin - chartCoords.top );
+	}
+
+	return yPosition;
+};
+
 const calculateTooltipPosition = ( element, chart, elementWidthRatio = 1 ) => {
 	const elementCoords = element.getBoundingClientRect();
 	const chartCoords = chart.getBoundingClientRect();
@@ -549,27 +598,20 @@ const calculateTooltipPosition = ( element, chart, elementWidthRatio = 1 ) => {
 		.getBoundingClientRect();
 	const tooltipMargin = 24;
 
-	let xPosition =
-		elementCoords.left + elementCoords.width * elementWidthRatio + tooltipMargin - chartCoords.left;
-	let yPosition = elementCoords.top + tooltipMargin - chartCoords.top;
-	if ( xPosition + tooltipSize.width + tooltipMargin > chartCoords.width ) {
-		xPosition = Math.max(
-			0,
-			elementCoords.left +
-				elementCoords.width * ( 1 - elementWidthRatio ) -
-				tooltipSize.width -
-				tooltipMargin -
-				chartCoords.left
-		);
-	}
-	if ( yPosition + tooltipSize.height + tooltipMargin > chartCoords.height ) {
-		yPosition = Math.max(
-			0,
-			elementCoords.top - tooltipSize.height - tooltipMargin - chartCoords.top
-		);
+	if ( chartCoords.width < WIDE_BREAKPOINT ) {
+		elementWidthRatio = 0;
 	}
 
-	return { x: xPosition, y: yPosition };
+	return {
+		x: calculateTooltipXPosition(
+			elementCoords,
+			chartCoords,
+			tooltipSize,
+			tooltipMargin,
+			elementWidthRatio
+		),
+		y: calculateTooltipYPosition( elementCoords, chartCoords, tooltipSize, tooltipMargin ),
+	};
 };
 
 export const drawLines = ( node, data, params ) => {

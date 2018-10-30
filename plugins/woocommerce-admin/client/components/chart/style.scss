@@ -90,6 +90,12 @@
 		justify-content: flex-start;
 		pointer-events: none;
 		visibility: hidden;
+		z-index: 1;
+
+		@include breakpoint( '<600px' ) {
+			min-width: auto;
+			width: calc(100% - #{$gap-large * 2});
+		}
 
 		h4 {
 			text-align: left;

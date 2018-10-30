@@ -19,11 +19,10 @@ import Gridicon from 'gridicons';
  */
 import D3Chart from './charts';
 import Legend from './legend';
+import { WIDE_BREAKPOINT } from './utils';
 import { H, Section } from 'components/section';
 import { gap, gaplarge } from 'stylesheets/abstracts/_variables.scss';
 import { updateQueryString } from 'lib/nav-utils';
-
-const WIDE_BREAKPOINT = 1100;
 
 d3FormatDefaultLocale( {
 	decimal: '.',
