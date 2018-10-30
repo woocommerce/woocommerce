@@ -603,7 +603,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		if ( ! did_action( 'wp_loaded' ) ) {
 			wc_doing_it_wrong( __FUNCTION__, __( 'Get cart should not be called before the wp_loaded action.', 'woocommerce' ), '2.3' );
 		}
-		if ( ! did_action( 'woocommerce_cart_loaded_from_session' ) ) {
+		if ( ! did_action( 'woocommerce_load_cart_from_session' ) ) {
 			$this->session->get_cart_from_session();
 		}
 		return array_filter( $this->get_cart_contents() );
