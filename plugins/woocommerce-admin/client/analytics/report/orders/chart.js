@@ -28,7 +28,7 @@ class OrdersReportChart extends Component {
 			},
 			{
 				key: 'avg_order_value',
-				label: __( 'Avergae Order Value', 'wc-admin' ),
+				label: __( 'Average Order Value', 'wc-admin' ),
 				type: 'currency',
 			},
 			{
