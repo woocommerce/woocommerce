@@ -44,8 +44,9 @@ class WC_Admin_Reports_Interval {
 
 		}
 
+		// Whenever this is changed, double check method time_interval_id to make sure they are in sync.
 		$mysql_date_format_mapping = array(
-			'hour'    => "DATE_FORMAT(date_created, '%Y-%m-%d %k')",
+			'hour'    => "DATE_FORMAT(date_created, '%Y-%m-%d %H')",
 			'day'     => "DATE_FORMAT(date_created, '%Y-%m-%d')",
 			'week'    => $week_format,
 			'month'   => "DATE_FORMAT(date_created, '%Y-%m')",
@@ -131,6 +132,7 @@ class WC_Admin_Reports_Interval {
 	 * @return string
 	 */
 	public static function time_interval_id( $time_interval, $datetime ) {
+		// Whenever this is changed, double check method db_datetime_format to make sure they are in sync.
 		$php_time_format_for = array(
 			'hour'    => 'Y-m-d H',
 			'day'     => 'Y-m-d',
