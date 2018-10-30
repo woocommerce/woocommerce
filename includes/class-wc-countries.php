@@ -1273,6 +1273,8 @@ class WC_Countries {
 				'priority'     => 110,
 			);
 		}
+		
+		uasort( $address_fields, array( $this, 'sortByFieldPriority' ) );
 
 		/**
 		 * Important note on this filter: Changes to address fields can and will be overridden by
@@ -1282,4 +1284,15 @@ class WC_Countries {
 		 */
 		return apply_filters( 'woocommerce_' . $type . 'fields', $address_fields, $country );
 	}
+	
+	/**
+	 * @param string[] $a
+	 * @param string[] $b
+	 *
+	 * @return int
+	 */
+	private function sortByFieldPriority($a, $b) {
+		return ( isset( $a['priority'] ) ? $a['priority'] : 0  ) - ( isset( $b['priority'] ) ? $b['priority'] : 0 );
+	}
+	
 }
