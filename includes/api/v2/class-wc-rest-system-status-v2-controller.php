@@ -722,9 +722,10 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		);
 
 		$site_tables_prefix = $wpdb->get_blog_prefix( get_current_blog_id() );
+		$global_tables = $wpdb->tables( 'global', true );
 		foreach ( $database_table_sizes as $table ) {
 			// Only include tables matching the prefix of the current site, this is to prevent displaying all tables on a MS install not relating to the current.
-			if ( is_multisite() && 0 !== strpos( $table->name, $site_tables_prefix ) ) {
+			if ( is_multisite() && 0 !== strpos( $table->name, $site_tables_prefix ) && ! in_array( $table->name, $global_tables, true ) ) {
 				continue;
 			}
 			$table_type = in_array( $table->name, $core_tables ) ? 'woocommerce' : 'other';
