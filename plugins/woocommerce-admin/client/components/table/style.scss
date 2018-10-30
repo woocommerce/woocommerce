@@ -114,7 +114,7 @@
 .woocommerce-table__table {
 	overflow-x: auto;
 
-	&:after {
+	&::after {
 		content: '';
 		position: absolute;
 		right: 0;
@@ -125,7 +125,7 @@
 		visibility: hidden;
 	}
 
-	&.is-scrollable:after {
+	&.is-scrollable::after {
 		visibility: visible;
 	}
 
@@ -294,7 +294,7 @@ th.woocommerce-table__item {
 		font-weight: 600;
 	}
 
-	& + .woocommerce-table__summary-item:before {
+	& + .woocommerce-table__summary-item::before {
 		content: '/';
 		margin: 0 $gap-smallest;
 	}

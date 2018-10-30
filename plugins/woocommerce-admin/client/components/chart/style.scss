@@ -349,7 +349,7 @@
 					width: 16px;
 					background-color: $white;
 
-					&:after {
+					&::after {
 						content: '';
 						position: absolute;
 						display: none;
@@ -359,7 +359,7 @@
 						background-color: currentColor;
 						border-color: currentColor;
 
-						&:after {
+						&::after {
 							display: block;
 							left: 5px;
 							top: 2px;

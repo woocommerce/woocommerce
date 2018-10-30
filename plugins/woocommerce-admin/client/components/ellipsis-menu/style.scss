@@ -14,8 +14,8 @@
 .woocommerce-ellipsis-menu__popover {
 	text-align: left;
 
-	&:not(.is-mobile):before,
-	&:not(.is-mobile):after {
+	&:not(.is-mobile)::before,
+	&:not(.is-mobile)::after {
 		margin-left: -16px;
 	}
 

@@ -61,8 +61,8 @@
 
 	.components-icon-button {
 		display: initial;
-		text-indent: 0px;
-		border-radius: 0px;
+		text-indent: 0;
+		border-radius: 0;
 	}
 
 	.woocommerce-layout__activity-panel-tab {
@@ -95,8 +95,8 @@
 			font-size: 13px;
 		}
 
-		&.has-unread:after,
-		&.woocommerce-layout__activity-panel-tab-wordpress-notices:after {
+		&.has-unread::after,
+		&.woocommerce-layout__activity-panel-tab-wordpress-notices::after {
 			content: ' ';
 			position: absolute;
 			padding: 1px;
@@ -131,8 +131,8 @@
 			background-color: $core-grey-light-200;
 			box-shadow: none;
 
-			&.has-unread:after,
-			&.woocommerce-layout__activity-panel-tab-wordpress-notices:after {
+			&.has-unread::after,
+			&.woocommerce-layout__activity-panel-tab-wordpress-notices::after {
 				border-color: $core-grey-light-200;
 			}
 		}
@@ -142,8 +142,8 @@
 		&:hover:not(.is-active),
 		&.components-button:not(.is-active):not(:disabled):not([aria-disabled='true']):hover {
 			border-bottom: 3px solid $core-grey-light-200;
-			&.has-unread:after,
-			&.woocommerce-layout__activity-panel-tab-wordpress-notices:after {
+			&.has-unread::after,
+			&.woocommerce-layout__activity-panel-tab-wordpress-notices::after {
 				border-color: $core-grey-light-200;
 			}
 		}
@@ -162,7 +162,7 @@
 	}
 }
 
-.woocommerce-layout__activity-panel-toggle-bubble.has-unread:after {
+.woocommerce-layout__activity-panel-toggle-bubble.has-unread::after {
 	content: ' ';
 	position: absolute;
 	padding: 1px;
@@ -198,10 +198,10 @@
 	min-height: calc(100vh - 80px);
 	background: $core-grey-light-200;
 	box-shadow: 0 12px 12px 0 rgba(85, 93, 102, 0.3);
-	width: 0px;
+	width: 0;
 	@include activity-panel-slide();
 	position: fixed;
-	right: 0px;
+	right: 0;
 	top: 92px;
 	z-index: 1000;
 	overflow-x: hidden;
@@ -245,7 +245,7 @@
 	}
 
 	.woocommerce-activity-card__subtitle {
-		span + span:before {
+		span + span::before {
 			content: ' \2022 ';
 		}
 	}

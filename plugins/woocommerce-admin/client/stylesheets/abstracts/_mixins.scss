@@ -23,7 +23,7 @@
 	background-color: $core-grey-light-500;
 	color: transparent;
 
-	&:after {
+	&::after {
 		content: '\00a0';
 	}
 }

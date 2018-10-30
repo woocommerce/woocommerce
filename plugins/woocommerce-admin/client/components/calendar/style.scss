@@ -117,10 +117,10 @@
 
 		.woocommerce-calendar__input-text {
 			border: 1px solid $error-red;
-			box-shadow: inset 0px 0px 8px $error-red;
+			box-shadow: inset 0 0 8px $error-red;
 
 			&:focus {
-				box-shadow: inset 0px 0px 8px $error-red, 0 0 6px rgba(30, 140, 190, 0.8);
+				box-shadow: inset 0 0 8px $error-red, 0 0 6px rgba(30, 140, 190, 0.8);
 			}
 		}
 	}
@@ -160,7 +160,7 @@
 				text-align: center;
 			}
 
-			&:not(.no-arrow):not(.is-mobile).is-bottom:before {
+			&:not(.no-arrow):not(.is-mobile).is-bottom::before {
 				border-bottom-color: $core-grey-dark-400;
 				z-index: 1;
 				top: -6px;

@@ -25,7 +25,7 @@
 		}
 	}
 
-	.wp-has-current-submenu:after {
+	.wp-has-current-submenu::after {
 		right: 0;
 		border: 8px solid transparent;
 		content: ' ';
@@ -90,7 +90,7 @@
 			left: -5px;
 			width: 60px;
 
-			.ab-icon:before {
+			.ab-icon::before {
 				color: $white;
 			}
 
@@ -107,7 +107,7 @@
 			left: -5px;
 			width: 60px;
 
-			.ab-icon:before {
+			.ab-icon::before {
 				color: $white !important;
 			}
 
