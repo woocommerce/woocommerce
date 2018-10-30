@@ -17,10 +17,10 @@ import { line as d3Line } from 'd3-shape';
 import { format as formatDate } from '@wordpress/date';
 
 /**
- * Internal dependencies
+ * WooCommerce dependencies
  */
-import { formatCurrency } from 'lib/currency';
-import { dayTicksThreshold } from 'lib/date';
+import { dayTicksThreshold } from '@woocommerce/date';
+import { formatCurrency } from '@woocommerce/currency';
 
 /**
  * Describes `smallestFactor`

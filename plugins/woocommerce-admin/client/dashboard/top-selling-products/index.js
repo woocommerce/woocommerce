@@ -9,12 +9,16 @@ import { compose } from '@wordpress/compose';
 import { withSelect } from '@wordpress/data';
 
 /**
- * Internal dependencies
+ * WooCommerce dependencies
  */
 import { Card, EmptyTable, TableCard } from '@woocommerce/components';
+import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
+
+/**
+ * Internal dependencies
+ */
 import { getAdminLink } from 'lib/nav-utils';
 import { numberFormat } from 'lib/number';
-import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
 import { NAMESPACE } from 'store/constants';
 import './style.scss';
 

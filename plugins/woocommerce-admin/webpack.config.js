@@ -1,10 +1,15 @@
 /** @format */
+/**
+ * External dependencies
+ */
 const path = require( 'path' );
 const ExtractTextPlugin = require( 'extract-text-webpack-plugin' );
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 const externals = {
 	'@woocommerce/components': { this: [ 'wc', 'components' ] },
+	'@woocommerce/currency': { this: [ 'wc', 'currency' ] },
+	'@woocommerce/date': { this: [ 'wc', 'date' ] },
 	'@wordpress/api-fetch': { this: [ 'wp', 'apiFetch' ] },
 	'@wordpress/blocks': { this: [ 'wp', 'blocks' ] },
 	'@wordpress/components': { this: [ 'wp', 'components' ] },
@@ -22,16 +27,28 @@ const externals = {
 	'react-dom': 'ReactDOM',
 };
 
+const wcAdminPackages = {
+	components: './client/components',
+	currency: './packages/currency',
+	date: './packages/date',
+};
+
+Object.keys( wcAdminPackages ).forEach( ( name ) => {
+	externals[ `@woocommerce/${ name }` ] = {
+		this: [ 'wc', name ],
+	};
+} );
+
 const webpackConfig = {
 	mode: NODE_ENV,
 	entry: {
-		index: './client/index.js',
-		components: './client/components/index.js',
+		app: './client/index.js',
 		embedded: './client/embedded.js',
+		...wcAdminPackages,
 	},
 	output: {
-		path: path.resolve( 'dist' ),
-		filename: '[name].js',
+		filename: './dist/[name]/index.js',
+		path: __dirname,
 		library: [ 'wc', '[name]' ],
 		libraryTarget: 'this',
 	},
@@ -77,12 +94,16 @@ const webpackConfig = {
 	},
 	resolve: {
 		extensions: [ '.json', '.js', '.jsx' ],
-		modules: [ path.join( __dirname, 'client' ), 'node_modules' ],
+		modules: [ path.join( __dirname, 'client' ), path.join( __dirname, 'packages' ), 'node_modules' ],
 		alias: {
 			'gutenberg-components': path.resolve( __dirname, 'node_modules/@wordpress/components/src' ),
 		},
 	},
-	plugins: [ new ExtractTextPlugin( 'css/[name].css' ) ],
+	plugins: [
+		new ExtractTextPlugin( {
+			filename: './dist/[name]/style.css',
+		} ),
+	],
 };
 
 if ( webpackConfig.mode !== 'production' ) {

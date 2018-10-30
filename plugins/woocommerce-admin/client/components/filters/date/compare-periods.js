@@ -7,10 +7,14 @@ import { Component } from '@wordpress/element';
 import PropTypes from 'prop-types';
 
 /**
+ * WooCommerce dependencies
+ */
+import { periods } from '@woocommerce/date';
+
+/**
  * Internal dependencies
  */
 import SegmentedSelection from 'components/segmented-selection';
-import { periods } from 'lib/date';
 
 class ComparePeriods extends Component {
 	render() {

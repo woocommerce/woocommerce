@@ -105,7 +105,7 @@ files.forEach( file => {
 		hasPhpLintErrors = true;
 	}
 
-	phpFiles += '' + file;
+	phpFiles += ' ' + file;
 } );
 
 if ( hasPhpLintErrors ) {

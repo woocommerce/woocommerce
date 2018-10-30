@@ -6,9 +6,13 @@ import { Component, Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
 
 /**
- * Internal dependencies
+ * WooCommerce dependencies
  */
 import { ReportFilters } from '@woocommerce/components';
+
+/**
+ * Internal dependencies
+ */
 import RevenueReportChart from './chart';
 import RevenueReportTable from './table';
 

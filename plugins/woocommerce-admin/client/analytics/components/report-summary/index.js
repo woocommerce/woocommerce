@@ -10,15 +10,19 @@ import { withSelect } from '@wordpress/data';
 import PropTypes from 'prop-types';
 
 /**
+ * WooCommerce dependencies
+ */
+import { formatCurrency } from '@woocommerce/currency';
+import { getDateParamsFromQuery } from '@woocommerce/date';
+import { SummaryList, SummaryListPlaceholder, SummaryNumber } from '@woocommerce/components';
+
+/**
  * Internal dependencies
  */
-import { formatCurrency } from 'lib/currency';
 import { getNewPath } from 'lib/nav-utils';
-import { SummaryList, SummaryListPlaceholder, SummaryNumber } from '@woocommerce/components';
-import { getDateParamsFromQuery } from 'lib/date';
 import { getSummaryNumbers } from 'store/reports/utils';
-import ReportError from 'analytics/components/report-error';
 import { numberFormat } from 'lib/number';
+import ReportError from 'analytics/components/report-error';
 
 class ReportSummary extends Component {
 	render() {

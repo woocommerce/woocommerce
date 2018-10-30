@@ -1,0 +1,30 @@
+{
+  "name": "@woocommerce/currency",
+  "version": "1.0.0-alpha.0",
+  "description": "WooCommerce currency utilities.",
+  "author": "Automattic",
+  "license": "GPL-2.0-or-later",
+  "keywords": [
+    "wordpress",
+    "woocommerce",
+    "currency"
+  ],
+  "homepage": "https://github.com/WooCommerce/wc-admin/tree/master/packages/currency/README.md",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/WooCommerce/wc-admin.git"
+  },
+  "bugs": {
+    "url": "https://github.com/WooCommerce/wc-admin/issues"
+  },
+  "main": "build/index.js",
+  "module": "build-module/index.js",
+  "react-native": "src/index",
+  "dependencies": {
+    "@babel/runtime": "^7.0.0",
+    "lodash": "^4.17.11"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

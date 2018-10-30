@@ -9,11 +9,15 @@ import { withSelect } from '@wordpress/data';
 import { get, map, orderBy } from 'lodash';
 
 /**
- * Internal dependencies
+ * WooCommerce dependencies
  */
 import { Link, TableCard } from '@woocommerce/components';
-import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
-import { appendTimestamp, getCurrentDates } from 'lib/date';
+import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
+import { appendTimestamp, getCurrentDates } from '@woocommerce/date';
+
+/**
+ * Internal dependencies
+ */
 import { getNewPath, getTimeRelatedQuery, onQueryChange } from 'lib/nav-utils';
 import ReportError from 'analytics/components/report-error';
 import { getFilterQuery, getReportChartData } from 'store/reports/utils';

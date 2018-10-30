@@ -290,7 +290,7 @@ class WC_Admin_Reports_Data_Store {
 	 */
 	protected function get_cache_key( $params ) {
 		// TODO: this is not working in PHP 5.2 (but revenue class has static methods, so it cannot use object property).
-		return 'woocommerce_' . $this::TABLE_NAME . '_' . md5( wp_json_encode( $params ) );
+		return 'woocommerce_' . $this::TABLE_NAME . '_' . md5( wp_json_encode( $params ) ); // phpcs:ignore PHPCompatibility.Syntax.NewDynamicAccessToStatic
 	}
 
 	/**

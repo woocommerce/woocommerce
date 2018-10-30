@@ -8,10 +8,14 @@ import { filter } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
+ * WooCommerce dependencies
+ */
+import { presetValues } from '@woocommerce/date';
+
+/**
  * Internal dependencies
  */
 import SegmentedSelection from 'components/segmented-selection';
-import { presetValues } from 'lib/date';
 
 class PresetPeriods extends Component {
 	render() {

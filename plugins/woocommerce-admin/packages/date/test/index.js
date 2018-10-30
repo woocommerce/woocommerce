@@ -22,7 +22,7 @@ import {
 	isoDateFormat,
 	getDateDifferenceInDays,
 	getPreviousDate,
-} from 'lib/date';
+} from '../src';
 
 describe( 'appendTimestamp', () => {
 	it( 'should append `start` timestamp', () => {

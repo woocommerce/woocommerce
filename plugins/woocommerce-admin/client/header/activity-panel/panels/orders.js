@@ -9,11 +9,8 @@ import PropTypes from 'prop-types';
 import { noop } from 'lodash';
 
 /**
- * Internal dependencies
+ * WooCommerce dependencies
  */
-import { ActivityCard } from '../activity-card';
-import ActivityHeader from '../activity-header';
-import ActivityOutboundLink from '../activity-outbound-link';
 import {
 	EllipsisMenu,
 	Gravatar,
@@ -23,7 +20,14 @@ import {
 	OrderStatus,
 	Section,
 } from '@woocommerce/components';
-import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
+import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
+
+/**
+ * Internal dependencies
+ */
+import { ActivityCard } from '../activity-card';
+import ActivityHeader from '../activity-header';
+import ActivityOutboundLink from '../activity-outbound-link';
 import { getOrderRefundTotal } from 'lib/order-values';
 
 function OrdersPanel( { orders } ) {

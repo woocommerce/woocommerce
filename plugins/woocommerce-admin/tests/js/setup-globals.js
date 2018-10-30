@@ -16,16 +16,27 @@ global.wp = {
 
 global.wc = {};
 
-Object.defineProperty( global.wp, 'element', {
-	get: () => require( '@wordpress/element' ),
+const wordPressPackages = [
+	'element',
+	'date',
+];
+
+const wooCommercePackages = [
+	'components',
+	'currency',
+	'date',
+];
+
+wordPressPackages.forEach( lib => {
+	Object.defineProperty( global.wp, lib, {
+		get: () => require( `@wordpress/${ lib }` ),
+	} );
 } );
 
-Object.defineProperty( global.wp, 'date', {
-	get: () => require( '@wordpress/date' ),
-} );
-
-Object.defineProperty( global.wc, 'components', {
-	get: () => require( '@woocommerce/components' ),
+wooCommercePackages.forEach( lib => {
+	Object.defineProperty( global.wc, lib, {
+		get: () => require( `@woocommerce/${ lib }` ),
+	} );
 } );
 
 global.wcSettings = {

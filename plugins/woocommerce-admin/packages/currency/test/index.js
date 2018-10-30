@@ -2,7 +2,7 @@
 /**
  * Internal dependencies
  */
-import { formatCurrency, getCurrencyFormatDecimal, getCurrencyFormatString } from '../index';
+import { formatCurrency, getCurrencyFormatDecimal, getCurrencyFormatString } from '../src';
 
 describe( 'formatCurrency', () => {
 	it( 'should default to wcSettings or USD when currency not passed in', () => {

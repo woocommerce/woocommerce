@@ -18,12 +18,16 @@ import PropTypes from 'prop-types';
 import 'react-dates/lib/css/_datepicker.css';
 
 /**
+ * WooCommerce dependencies
+ */
+import { validateDateInputForRange } from '@woocommerce/date';
+
+/**
  * Internal dependencies
  */
 import DateInput from './input';
 import { isMobileViewport } from 'lib/ui';
 import phrases from './phrases';
-import { validateDateInputForRange } from 'lib/date';
 import './style.scss';
 
 /**

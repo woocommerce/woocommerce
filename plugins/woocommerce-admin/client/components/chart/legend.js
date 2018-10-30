@@ -7,10 +7,14 @@ import { Component } from '@wordpress/element';
 import PropTypes from 'prop-types';
 
 /**
+ * WooCommerce dependencies
+ */
+import { formatCurrency } from '@woocommerce/currency';
+
+/**
  * Internal dependencies
  */
 import './style.scss';
-import { formatCurrency } from 'lib/currency';
 import { getColor } from './utils';
 
 function getFormatedTotal( total, valueType ) {

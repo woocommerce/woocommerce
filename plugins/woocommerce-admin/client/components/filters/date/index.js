@@ -8,11 +8,15 @@ import { Dropdown } from '@wordpress/components';
 import PropTypes from 'prop-types';
 
 /**
+ * WooCommerce dependencies
+ */
+import { getCurrentDates, getDateParamsFromQuery, isoDateFormat } from '@woocommerce/date';
+
+/**
  * Internal dependencies
  */
 import DatePickerContent from './content';
 import DropdownButton from 'components/dropdown-button';
-import { getCurrentDates, getDateParamsFromQuery, isoDateFormat } from 'lib/date';
 import { updateQueryString } from 'lib/nav-utils';
 import './style.scss';
 

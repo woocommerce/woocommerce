@@ -6,10 +6,14 @@
 import { find, forEach, isNull } from 'lodash';
 
 /**
+ * WooCommerce dependencies
+ */
+import { appendTimestamp, getCurrentDates, getIntervalForQuery } from '@woocommerce/date';
+
+/**
  * Internal dependencies
  */
 import { MAX_PER_PAGE } from 'store/constants';
-import { appendTimestamp, getCurrentDates, getIntervalForQuery } from 'lib/date';
 import { getActiveFiltersFromQuery, getUrlKey } from 'components/filters/advanced/utils';
 import { flatenFilters } from 'components/filters/filter/utils';
 import * as couponsConfig from 'analytics/report/coupons/config';

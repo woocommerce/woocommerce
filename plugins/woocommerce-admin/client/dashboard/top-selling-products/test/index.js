@@ -8,11 +8,15 @@ import { shallow } from 'enzyme';
 import { createRegistry, RegistryProvider } from '@wordpress/data';
 
 /**
+ * WooCommerce dependencies
+ */
+import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
+
+/**
  * Internal dependencies
  */
 import TopSellingProductsWithSelect, { TopSellingProducts } from '../';
 import { numberFormat } from 'lib/number';
-import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
 import mockData from '../__mocks__/top-selling-products-mock-data';
 
 // Mock <Table> to avoid tests failing due to it using DOM properties that

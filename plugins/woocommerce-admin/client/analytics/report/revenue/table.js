@@ -10,16 +10,20 @@ import { withSelect } from '@wordpress/data';
 import { get, map } from 'lodash';
 
 /**
- * Internal dependencies
+ * WooCommerce dependencies
  */
 import { Link, TableCard } from '@woocommerce/components';
-import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency';
+import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
 import {
 	appendTimestamp,
 	getCurrentDates,
 	getDateFormatsForInterval,
 	getIntervalForQuery,
-} from 'lib/date';
+} from '@woocommerce/date';
+
+/**
+ * Internal dependencies
+ */
 import { onQueryChange } from 'lib/nav-utils';
 import ReportError from 'analytics/components/report-error';
 import { QUERY_DEFAULTS } from 'store/constants';

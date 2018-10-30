@@ -27,6 +27,7 @@ node_js:
 
 script:
   - npm run lint
+  - npm run build
   - npm test
   - bash bin/phpunit.sh
   - bash bin/phpcs.sh

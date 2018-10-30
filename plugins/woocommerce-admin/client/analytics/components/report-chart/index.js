@@ -10,7 +10,7 @@ import { withSelect } from '@wordpress/data';
 import PropTypes from 'prop-types';
 
 /**
- * Internal dependencies
+ * WooCommerce dependencies
  */
 import { Chart, ChartPlaceholder } from '@woocommerce/components';
 import {
@@ -19,7 +19,11 @@ import {
 	getDateFormatsForInterval,
 	getIntervalForQuery,
 	getPreviousDate,
-} from 'lib/date';
+} from '@woocommerce/date';
+
+/**
+ * Internal dependencies
+ */
 import { getReportChartData } from 'store/reports/utils';
 import ReportError from 'analytics/components/report-error';
 
