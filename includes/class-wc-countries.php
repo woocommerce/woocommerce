@@ -663,7 +663,7 @@ class WC_Countries {
 			),
 			'address_2'  => array(
 				'label'        => __( 'Apartment, suite, unit etc.', 'woocommerce' ),
-				'label_class'  => 'screen-reader-text',
+				'label_class'  => array( 'screen-reader-text' ),
 				'placeholder'  => esc_attr( $address_2_placeholder ),
 				'class'        => array( 'form-row-wide', 'address-field' ),
 				'autocomplete' => 'address-line2',
