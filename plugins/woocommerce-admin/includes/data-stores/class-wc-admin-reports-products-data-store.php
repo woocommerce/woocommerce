@@ -162,6 +162,12 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 		$data      = wp_cache_get( $cache_key, $this->cache_group );
 
 		if ( false === $data ) {
+			$data         = (object) array(
+				'data'    => array(),
+				'total'   => 0,
+				'pages'   => 0,
+				'page_no' => 0,
+			);
 
 			$selections       = $this->selected_columns( $query_args );
 			$sql_query_params = $this->get_sql_query_params( $query_args );
@@ -183,7 +189,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 
 			$total_pages = (int) ceil( $db_records_count / $sql_query_params['per_page'] );
 			if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
-				return array();
+				return $data;
 			}
 
 			$product_data = $wpdb->get_results(
@@ -205,7 +211,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 			if ( null === $product_data ) {
-				return new WP_Error( 'woocommerce_reports_products_result_failed', __( 'Sorry, fetching revenue data failed.', 'wc-admin' ) );
+				return $data;
 			}
 
 			if ( $query_args['extended_product_info'] ) {
