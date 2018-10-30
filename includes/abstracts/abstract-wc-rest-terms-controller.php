@@ -537,8 +537,8 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		$default_category_id = absint( get_option( 'default_product_cat', 0 ) );
 
 		// Prevent deleting the default product category.
-		if ( $default_category_id === $term ) {
-			return new WP_Error( 'woocommerce_rest_default_product_cat_cannot_delete', __( 'Default product category cannot be deleted.', 'woocommerce' ), array( 'status' => 500 ) );
+		if ( $default_category_id === (int) $request['id'] ) {
+			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Default product category cannot be deleted.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
 		$request->set_param( 'context', 'edit' );
