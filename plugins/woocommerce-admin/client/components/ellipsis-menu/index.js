@@ -32,7 +32,7 @@ class EllipsisMenu extends Component {
 					className={ toggleClassname }
 					onClick={ onToggle }
 					icon="ellipsis"
-					label={ label }
+					title={ label }
 					aria-expanded={ isOpen }
 				/>
 			);
