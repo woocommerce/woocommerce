@@ -125,7 +125,4 @@ jQuery( function( $ ) {
 			rows.detach().appendTo( wrapper );
 		} );
 	});
-
-	// Make sure the locales are loaded on first page load.
-	$( '#billing_country' ).trigger( 'change' );
 });
