@@ -1514,15 +1514,13 @@ function wc_product_attribute_uasort_comparison( $a, $b ) {
  * @return int
  */
 function wc_shipping_zone_method_order_uasort_comparison( $a, $b ) {
-	if ( $a->method_order === $b->method_order ) {
-		return 0;
-	}
-	return ( $a->method_order < $b->method_order ) ? -1 : 1;
+	return wc_uasort_comparison( $a->method_order, $b->method_order );
 }
 
 /**
  * User to sort two values with ausort.
  *
+ * @since 3.5.1
  * @param int $a First value to compare.
  * @param int $b Second value to compare.
  * @return int
