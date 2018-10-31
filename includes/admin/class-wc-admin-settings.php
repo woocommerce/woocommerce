@@ -586,7 +586,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
 							<td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" data-placeholder="<?php esc_attr_e( 'Choose a country&hellip;', 'woocommerce' ); ?>" aria-label="<?php esc_attr_e( 'Country', 'woocommerce' ); ?>" class="wc-enhanced-select">
-								<?php WC()->countries->country_dropdown_options( $country, $state ); ?>
+								<?php WC()->countries->country_dropdown_options( $country, $state, false, false ); ?>
 							</select> <?php echo $description; // WPCS: XSS ok. ?>
 							</td>
 						</tr>
