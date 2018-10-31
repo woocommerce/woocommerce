@@ -27,7 +27,7 @@ export default class OrdersReport extends Component {
 					query={ query }
 					path={ path }
 					filters={ filters }
-					advancedConfig={ advancedFilters }
+					advancedFilters={ advancedFilters }
 				/>
 				<OrdersReportChart query={ query } />
 				<OrdersReportTable query={ query } />

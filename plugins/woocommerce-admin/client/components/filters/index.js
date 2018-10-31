@@ -24,28 +24,34 @@ import './style.scss';
  * @return { object } -
  */
 class ReportFilters extends Component {
-	renderCard() {
-		const { advancedConfig, filters, query, path } = this.props;
-		if ( ! query.filter ) {
+	constructor() {
+		super();
+		this.renderCard = this.renderCard.bind( this );
+	}
+
+	renderCard( config ) {
+		const { advancedFilters, query, path } = this.props;
+		const { filters, param } = config;
+		if ( ! query[ param ] ) {
 			return null;
 		}
 
-		if ( 0 === query.filter.indexOf( 'compare' ) ) {
-			const filter = find( filters, { value: query.filter } );
+		if ( 0 === query[ param ].indexOf( 'compare' ) ) {
+			const filter = find( filters, { value: query[ param ] } );
 			if ( ! filter ) {
 				return null;
 			}
 			const { settings = {} } = filter;
 			return (
-				<div className="woocommerce-filters__advanced-filters">
+				<div key={ param } className="woocommerce-filters__advanced-filters">
 					<CompareFilter path={ path } query={ query } { ...settings } />
 				</div>
 			);
 		}
-		if ( 'advanced' === query.filter ) {
+		if ( 'advanced' === query[ param ] ) {
 			return (
-				<div className="woocommerce-filters__advanced-filters">
-					<AdvancedFilters config={ advancedConfig } path={ path } query={ query } />
+				<div key={ param } className="woocommerce-filters__advanced-filters">
+					<AdvancedFilters config={ advancedFilters } path={ path } query={ query } />
 				</div>
 			);
 		}
@@ -59,11 +65,20 @@ class ReportFilters extends Component {
 				<Section component="div" className="woocommerce-filters">
 					<div className="woocommerce-filters__basic-filters">
 						<DatePicker key={ JSON.stringify( query ) } query={ query } path={ path } />
-						{ !! filters.length && (
-							<FilterPicker filters={ filters } query={ query } path={ path } />
-						) }
+						{ filters.map( config => {
+							if ( config.showFilters( query ) ) {
+								return (
+									<FilterPicker
+										key={ config.param }
+										config={ config }
+										query={ query }
+										path={ path }
+									/>
+								);
+							}
+						} ) }
 					</div>
-					{ this.renderCard() }
+					{ filters.map( this.renderCard ) }
 				</Section>
 			</Fragment>
 		);
@@ -74,7 +89,7 @@ ReportFilters.propTypes = {
 	/**
 	 * Config option passed through to `AdvancedFilters`
 	 */
-	advancedConfig: PropTypes.object,
+	advancedFilters: PropTypes.object,
 	/**
 	 * Config option passed through to `FilterPicker` - if not used, `FilterPicker` is not displayed.
 	 */
@@ -90,7 +105,7 @@ ReportFilters.propTypes = {
 };
 
 ReportFilters.defaultProps = {
-	advancedConfig: {},
+	advancedFilters: {},
 	filters: [],
 	query: {},
 };

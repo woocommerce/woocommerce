@@ -126,8 +126,8 @@ class DatePicker extends Component {
 			beforeError,
 		} = this.state;
 		return (
-			<div className="woocommerce-filters-date">
-				<p>{ __( 'Date Range', 'wc-admin' ) }:</p>
+			<div className="woocommerce-filters-filter">
+				<span className="woocommerce-filters-label">{ __( 'Date Range', 'wc-admin' ) }:</span>
 				<Dropdown
 					ref={ this.dropdownRef }
 					contentClassName="woocommerce-filters-date__content"
