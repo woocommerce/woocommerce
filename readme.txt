@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, claudiulodro,
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
 Requires at least: 4.7
 Tested up to: 4.9
-Stable tag: 3.5.0
+Stable tag: 3.5.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -157,6 +157,25 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 6. A product archive (grid).
 
 == Changelog ==
+
+= 3.5.1 - 2018-10-31 =
+* Fix - Use CRUD method to get product images to fix custom tables missing images. #21608
+* Fix - Use HTML entity for times sign when outputting dimensions to fix RTL support. #21633
+* Fix - Fix India address format to look nice in the shipping calculator. #21647
+* Fix - Don't default gallery variation images to gallery thumbnail size if flexslider is disabled. #21655
+* Fix - Revert show shipping behavior change to prevent missing shipping line on Cart page. #21658
+* Fix - Removed non-existing WC_Product_Simple->set_date_created_gmt method. #21675
+* Fix - Use correct comment_type when fetching recent reviews for widget. #21689
+* Fix - Do not include strong tags as part of translation string on subscriptions disconnect message. #21690
+* Fix - Make it possible to send webhooks with the v3 API. #21745
+* Fix - Fix get_cart_from_session infinite loop when filters used. #21749
+* Fix - Use array instead of string to define class for address line 2 input on checkout. #21757
+* Fix - Make checkout fields priority work correctly again. #21763
+* Tweak - Remove mentions of deprecated live shipping rates from setup wizard. #21645
+* Tweak- Update product block editor hook for WP 5.0. #21703
+* Tweak - Merged similar strings to reduce number of translateable strings. #21704
+* Tweak - Remove hated "Over to you" text from emails. #21709
+* Tweak - Revert problematiic customer as post author change. #21740
 
 = 3.5.0 - 2018-10-17 =
 * Feature - REST API v3. #20111
