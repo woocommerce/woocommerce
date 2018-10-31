@@ -1521,6 +1521,20 @@ function wc_shipping_zone_method_order_uasort_comparison( $a, $b ) {
 }
 
 /**
+ * User to sort two values with ausort.
+ *
+ * @param int $a First value to compare.
+ * @param int $b Second value to compare.
+ * @return int
+ */
+function wc_uasort_comparison( $a, $b ) {
+	if ( $a === $b ) {
+		return 0;
+	}
+	return ( $a < $b ) ? -1 : 1;
+}
+
+/**
  * Get rounding mode for internal tax calculations.
  *
  * @since 3.2.4
