@@ -153,7 +153,7 @@ return array(
 	),
 	'api_signature'         => array(
 		'title'       => __( 'Live API signature', 'woocommerce' ),
-		'type'        => 'text',
+		'type'        => 'password',
 		'description' => __( 'Get your API credentials from PayPal.', 'woocommerce' ),
 		'default'     => '',
 		'desc_tip'    => true,
