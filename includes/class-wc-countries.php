@@ -92,8 +92,10 @@ class WC_Countries {
 
 	/**
 	 * Load the states.
+	 *
+	 * @param bool $filter_by_selling_location Whether to filter the country states by selling location, defaults to true.
 	 */
-	public function load_country_states() {
+	public function load_country_states( $filter_by_selling_location = true ) {
 		global $states;
 
 		// States set to array() are blank i.e. the country has no use for the state field.
@@ -136,7 +138,7 @@ class WC_Countries {
 		);
 
 		// Load only the state files the shop owner wants/needs.
-		$allowed = array_merge( $this->get_allowed_countries(), $this->get_shipping_countries() );
+		$allowed = array_merge( $this->get_allowed_countries( $filter_by_selling_location ), $this->get_shipping_countries() );
 
 		if ( ! empty( $allowed ) ) {
 			foreach ( $allowed as $code => $country ) {
@@ -152,12 +154,13 @@ class WC_Countries {
 	/**
 	 * Get the states for a country.
 	 *
-	 * @param  string $cc Country code.
+	 * @param string $cc Country code.
+	 * @param bool   $filter_by_selling_location Whether to filter the results based on the selling location, defaults to true.
 	 * @return false|array of states
 	 */
-	public function get_states( $cc = null ) {
+	public function get_states( $cc = null, $filter_by_selling_location = true ) {
 		if ( empty( $this->states ) ) {
-			$this->load_country_states();
+			$this->load_country_states( $filter_by_selling_location );
 		}
 
 		if ( ! is_null( $cc ) ) {
@@ -234,10 +237,11 @@ class WC_Countries {
 	/**
 	 * Get the allowed countries for the store.
 	 *
+	 * @param bool $filter_by_allowed_countries Whether to only return results based on allowed countries. Defaults to true.
 	 * @return array
 	 */
-	public function get_allowed_countries() {
-		if ( 'all' === get_option( 'woocommerce_allowed_countries' ) ) {
+	public function get_allowed_countries( $filter_by_allowed_countries = true ) {
+		if ( ! $filter_by_allowed_countries || 'all' === get_option( 'woocommerce_allowed_countries' ) ) {
 			return apply_filters( 'woocommerce_countries_allowed_countries', $this->countries );
 		}
 
@@ -432,14 +436,15 @@ class WC_Countries {
 	/**
 	 * Outputs the list of countries and states for use in dropdown boxes.
 	 *
-	 * @param string $selected_country Selected country.
-	 * @param string $selected_state   Selected state.
-	 * @param bool   $escape           If should escape HTML.
+	 * @param string $selected_country           Selected country.
+	 * @param string $selected_state             Selected state.
+	 * @param bool   $escape                     If should escape HTML.
+	 * @param bool   $filter_by_selling_location If we should filter based on the selling location, defaults to true.
 	 */
-	public function country_dropdown_options( $selected_country = '', $selected_state = '', $escape = false ) {
+	public function country_dropdown_options( $selected_country = '', $selected_state = '', $escape = false, $filter_by_selling_location = true ) {
 		if ( $this->countries ) {
 			foreach ( $this->countries as $key => $value ) {
-				$states = $this->get_states( $key );
+				$states = $this->get_states( $key, $filter_by_selling_location );
 				if ( $states ) {
 					echo '<optgroup label="' . esc_attr( $value ) . '">';
 					foreach ( $states as $state_key => $state_value ) {
