@@ -36,6 +36,7 @@ export { default as Rating } from './rating';
 export { default as ReportFilters } from './filters';
 export { default as ReviewRating } from './rating/review';
 export { default as Search } from './search';
+export { default as SectionHeader } from './section-header';
 export { default as SegmentedSelection } from './segmented-selection';
 export { default as SplitButton } from './split-button';
 export { default as SummaryList } from './summary';

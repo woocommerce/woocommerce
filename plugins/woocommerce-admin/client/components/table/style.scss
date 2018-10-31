@@ -6,6 +6,10 @@
 		position: relative;
 	}
 
+	.woocommerce-search {
+		flex-grow: 1;
+	}
+
 	.woocommerce-card__action {
 		justify-self: flex-end;
 		margin: -($gap - 3) 0;

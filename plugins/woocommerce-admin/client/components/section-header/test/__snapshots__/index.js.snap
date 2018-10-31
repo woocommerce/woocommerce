@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SectionHeader it renders correctly 1`] = `
+<div
+  className="woocommerce-section-header"
+>
+  <h2
+    className="woocommerce-section-header__title woocommerce-section-header__header-item"
+  >
+    A SectionHeader Example
+  </h2>
+  <hr
+    role="presentation"
+  />
+</div>
+`;

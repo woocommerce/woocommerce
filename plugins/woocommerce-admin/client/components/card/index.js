@@ -26,15 +26,19 @@ class Card extends Component {
 		} );
 		return (
 			<div className={ className }>
-				<div className="woocommerce-card__header">
-					<H className="woocommerce-card__title woocommerce-card__header-item">{ title }</H>
-					{ action && (
-						<div className="woocommerce-card__action woocommerce-card__header-item">{ action }</div>
-					) }
-					{ menu && (
-						<div className="woocommerce-card__menu woocommerce-card__header-item">{ menu }</div>
-					) }
-				</div>
+				{ title && (
+					<div className="woocommerce-card__header">
+						<H className="woocommerce-card__title woocommerce-card__header-item">{ title }</H>
+						{ action && (
+							<div className="woocommerce-card__action woocommerce-card__header-item">
+								{ action }
+							</div>
+						) }
+						{ menu && (
+							<div className="woocommerce-card__menu woocommerce-card__header-item">{ menu }</div>
+						) }
+					</div>
+				) }
 				<Section className="woocommerce-card__body">{ children }</Section>
 			</div>
 		);
@@ -57,7 +61,7 @@ Card.propTypes = {
 	/**
 	 * The title to use for this card.
 	 */
-	title: PropTypes.oneOfType( [ PropTypes.string, PropTypes.node ] ).isRequired,
+	title: PropTypes.oneOfType( [ PropTypes.string, PropTypes.node ] ),
 };
 
 export default Card;
