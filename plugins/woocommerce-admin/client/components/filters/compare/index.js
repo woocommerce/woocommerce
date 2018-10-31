@@ -35,7 +35,7 @@ class CompareFilter extends Component {
 		this.updateLabels = this.updateLabels.bind( this );
 
 		if ( query[ param ] ) {
-			getLabels( query[ param ] ).then( this.updateLabels );
+			getLabels( query[ param ], query ).then( this.updateLabels );
 		}
 	}
 
@@ -52,7 +52,7 @@ class CompareFilter extends Component {
 		const prevIds = getIdsFromQuery( prevQuery[ param ] );
 		const currentIds = getIdsFromQuery( query[ param ] );
 		if ( ! isEqual( prevIds.sort(), currentIds.sort() ) ) {
-			getLabels( query[ param ] ).then( this.updateLabels );
+			getLabels( query[ param ], query ).then( this.updateLabels );
 		}
 	}
 

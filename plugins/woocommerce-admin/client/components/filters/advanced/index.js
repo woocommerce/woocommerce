@@ -148,7 +148,7 @@ class AdvancedFilters extends Component {
 	}
 
 	render() {
-		const { config } = this.props;
+		const { config, query } = this.props;
 		const { activeFilters, match } = this.state;
 		const availableFilterKeys = this.getAvailableFilterKeys();
 		const updateHref = this.getUpdateHref( activeFilters, match );
@@ -176,6 +176,7 @@ class AdvancedFilters extends Component {
 										config={ config.filters[ key ] }
 										onFilterChange={ this.onFilterChange }
 										isEnglish={ isEnglish }
+										query={ query }
 									/>
 								) }
 								<IconButton
