@@ -21,7 +21,10 @@ function wc_webhook_process_delivery( $webhook, $arg ) {
 	// user who triggered it.
 	if ( apply_filters( 'woocommerce_webhook_deliver_async', true, $webhook, $arg ) ) {
 		// Deliver in background.
-		WC()->queue()->add( 'woocommerce_deliver_webhook_async', array( 'webhook_id' => $webhook->get_id(), 'arg' => $arg ), 'woocommerce-webhooks' );
+		WC()->queue()->add( 'woocommerce_deliver_webhook_async', array(
+			'webhook_id' => $webhook->get_id(),
+			'arg'        => $arg,
+		), 'woocommerce-webhooks' );
 	} else {
 		// Deliver immediately.
 		$webhook->deliver( $arg );
@@ -123,4 +126,18 @@ function wc_get_webhook( $id ) {
 	$webhook = new WC_Webhook( $id );
 
 	return 0 !== $webhook->get_id() ? $webhook : null;
+}
+
+/**
+ * Get webhoook REST API versions.
+ *
+ * @since 3.5.1
+ * @return array
+ */
+function wc_get_webhook_rest_api_versions() {
+	return array(
+		'wp_api_v1',
+		'wp_api_v2',
+		'wp_api_v3',
+	);
 }
