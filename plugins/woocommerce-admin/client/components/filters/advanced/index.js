@@ -229,9 +229,11 @@ class AdvancedFilters extends Component {
 							{ __( 'Filter', 'wc-admin' ) }
 						</Link>
 					) }
-					<Link type="wc-admin" href={ this.getUpdateHref( [] ) } onClick={ this.clearFilters }>
-						{ __( 'Clear all filters', 'wc-admin' ) }
-					</Link>
+					{ activeFilters.length > 0 && (
+						<Link type="wc-admin" href={ this.getUpdateHref( [] ) } onClick={ this.clearFilters }>
+							{ __( 'Clear all filters', 'wc-admin' ) }
+						</Link>
+					) }
 				</div>
 			</Card>
 		);

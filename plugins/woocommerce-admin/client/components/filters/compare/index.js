@@ -4,6 +4,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
+import { Button } from '@wordpress/components';
 import { isEqual } from 'lodash';
 import PropTypes from 'prop-types';
 
@@ -12,8 +13,7 @@ import PropTypes from 'prop-types';
  */
 import Card from 'components/card';
 import CompareButton from './button';
-import Link from 'components/link';
-import { getIdsFromQuery, getNewPath, updateQueryString } from 'lib/nav-utils';
+import { getIdsFromQuery, updateQueryString } from 'lib/nav-utils';
 import Search from 'components/search';
 
 /**
@@ -54,7 +54,12 @@ class CompareFilter extends Component {
 
 	clearQuery() {
 		const { param, path, query } = this.props;
-		return getNewPath( { [ param ]: undefined }, path, query );
+
+		this.setState( {
+			selected: [],
+		} );
+
+		updateQueryString( { [ param ]: undefined }, path, query );
 	}
 
 	updateLabels( selected ) {
@@ -91,9 +96,11 @@ class CompareFilter extends Component {
 					>
 						{ labels.update }
 					</CompareButton>
-					<Link type="wc-admin" href={ this.clearQuery() }>
-						{ __( 'Clear all', 'wc-admin' ) }
-					</Link>
+					{ selected.length > 0 && (
+						<Button isLink={ true } onClick={ this.clearQuery }>
+							{ __( 'Clear all', 'wc-admin' ) }
+						</Button>
+					) }
 				</div>
 			</Card>
 		);
