@@ -29,3 +29,7 @@ There are also some helper scripts:
 ## Privacy
 
 If you have enabled WooCommerce usage tracking ( option `woocommerce_allow_tracking` ) then, in addition to the tracking described in https://woocommerce.com/usage-tracking/, this plugin also sends information about the actions that site administrators perform to Automattic - see https://automattic.com/privacy/#information-we-collect-automatically for more information.
+
+## Contributing
+
+There are many ways to contribute – reporting bugs, feature suggestions and fixing bugs. For full details, please see [CONTRIBUTING.md](./CONTRIBUTING.md)
