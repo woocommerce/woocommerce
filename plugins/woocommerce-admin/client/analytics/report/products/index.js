@@ -19,15 +19,16 @@ import getSelectedChart from 'lib/get-selected-chart';
 import ProductsReportTable from './table';
 import ReportChart from 'analytics/components/report-chart';
 import ReportSummary from 'analytics/components/report-summary';
+import VariationsReportTable from './table-variations';
 
 export default class ProductsReport extends Component {
 	render() {
 		const { path, query } = this.props;
+		const isProductDetailsView = query.products && 1 === query.products.split( ',' ).length;
 
-		const itemsLabel =
-			'single_product' === query.filter && !! query.products
-				? __( '%s variations', 'wc-admin' )
-				: __( '%s products', 'wc-admin' );
+		const itemsLabel = isProductDetailsView
+			? __( '%s variations', 'wc-admin' )
+			: __( '%s products', 'wc-admin' );
 
 		return (
 			<Fragment>
@@ -47,7 +48,11 @@ export default class ProductsReport extends Component {
 					query={ query }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 				/>
-				<ProductsReportTable query={ query } />
+				{ isProductDetailsView ? (
+					<VariationsReportTable query={ query } />
+				) : (
+					<ProductsReportTable query={ query } />
+				) }
 			</Fragment>
 		);
 	}

@@ -14,6 +14,7 @@ import products from 'store/products';
 import reports from 'store/reports';
 import notes from 'store/notes';
 import taxes from 'store/taxes';
+import variations from 'store/variations';
 
 const store = registerStore( 'wc-admin', {
 	reducer: combineReducers( {
@@ -23,6 +24,7 @@ const store = registerStore( 'wc-admin', {
 		reports: reports.reducer,
 		notes: notes.reducer,
 		taxes: taxes.reducer,
+		variations: variations.reducer,
 	} ),
 
 	actions: {
@@ -32,6 +34,7 @@ const store = registerStore( 'wc-admin', {
 		...reports.actions,
 		...notes.actions,
 		...taxes.actions,
+		...variations.actions,
 	},
 
 	selectors: {
@@ -41,6 +44,7 @@ const store = registerStore( 'wc-admin', {
 		...reports.selectors,
 		...notes.selectors,
 		...taxes.selectors,
+		...variations.selectors,
 	},
 
 	resolvers: {
@@ -50,6 +54,7 @@ const store = registerStore( 'wc-admin', {
 		...reports.resolvers,
 		...notes.resolvers,
 		...taxes.resolvers,
+		...variations.resolvers,
 	},
 } );
 

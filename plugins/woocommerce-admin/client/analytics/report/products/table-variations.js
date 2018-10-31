@@ -6,14 +6,14 @@ import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withSelect } from '@wordpress/data';
-import { get, map, orderBy } from 'lodash';
+import { map, orderBy } from 'lodash';
 
 /**
  * WooCommerce dependencies
  */
-import { appendTimestamp, getCurrentDates } from '@woocommerce/date';
 import { Link, TableCard } from '@woocommerce/components';
 import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
+import { appendTimestamp, getCurrentDates } from '@woocommerce/date';
 import { getNewPath, getPersistedQuery, onQueryChange } from '@woocommerce/navigation';
 
 /**
@@ -23,19 +23,21 @@ import ReportError from 'analytics/components/report-error';
 import { getFilterQuery, getReportChartData } from 'store/reports/utils';
 import { QUERY_DEFAULTS } from 'store/constants';
 
-class ProductsReportTable extends Component {
+class VariationsReportTable extends Component {
+	getVariationName( variation ) {
+		return variation.attributes.reduce( ( desc, attribute, index, arr ) => {
+			desc += `${ attribute.option }${ arr.length === index + 1 ? '' : ', ' }`;
+			return desc;
+		}, variation.product_name + ' / ' );
+	}
+
 	getHeadersContent() {
 		return [
 			{
-				label: __( 'Product Title', 'wc-admin' ),
+				label: __( 'Product / Variation Title', 'wc-admin' ),
 				key: 'name',
 				required: true,
 				isLeftAligned: true,
-			},
-			{
-				label: __( 'SKU', 'wc-admin' ),
-				key: 'sku',
-				hiddenByDefault: true,
 			},
 			{
 				label: __( 'Items Sold', 'wc-admin' ),
@@ -59,14 +61,6 @@ class ProductsReportTable extends Component {
 				isNumeric: true,
 			},
 			{
-				label: __( 'Category', 'wc-admin' ),
-				key: 'product_cat',
-			},
-			{
-				label: __( 'Variations', 'wc-admin' ),
-				key: 'variation',
-			},
-			{
 				label: __( 'Status', 'wc-admin' ),
 				key: 'stock_status',
 			},
@@ -85,38 +79,23 @@ class ProductsReportTable extends Component {
 
 		return map( data, row => {
 			const {
-				product_id,
-				sku = '', // @TODO
-				name,
 				items_sold,
 				gross_revenue,
 				orders_count,
-				categories = [], // @TODO
-				variations = [], // @TODO
-				stock_status = 'outofstock', // @TODO
-				stock_quantity = '0', // @TODO
+				stock_status = 'outofstock',
+				stock_quantity = '0',
+				product_id,
 			} = row;
+			const name = this.getVariationName( row );
 			const ordersLink = getNewPath( persistedQuery, 'orders', {
 				filter: 'advanced',
-				product_includes: product_id,
-			} );
-			const productDetailLink = getNewPath( persistedQuery, 'products', {
-				filter: 'single_product',
-				products: product_id,
+				product_includes: query.products,
 			} );
 
 			return [
 				{
-					display: (
-						<Link href={ productDetailLink } type="wc-admin">
-							{ name }
-						</Link>
-					),
+					display: name,
 					value: name,
-				},
-				{
-					display: sku,
-					value: sku,
 				},
 				{
 					display: items_sold,
@@ -135,16 +114,6 @@ class ProductsReportTable extends Component {
 					value: orders_count,
 				},
 				{
-					display: Array.isArray( categories )
-						? categories.map( cat => cat.name ).join( ', ' )
-						: '',
-					value: Array.isArray( categories ) ? categories.map( cat => cat.name ).join( ', ' ) : '',
-				},
-				{
-					display: variations.length,
-					value: variations.length,
-				},
-				{
 					display: (
 						<Link href={ 'post.php?action=edit&post=' + product_id } type="wp-admin">
 							{ stockStatuses[ stock_status ] }
@@ -161,37 +130,34 @@ class ProductsReportTable extends Component {
 	}
 
 	render() {
-		const { isProductsError, isProductsRequesting, primaryData, products, tableQuery } = this.props;
-		const isError = isProductsError || primaryData.isError;
+		const { isVariationsError, isVariationsRequesting, variations, tableQuery } = this.props;
 
-		if ( isError ) {
+		if ( isVariationsError ) {
 			return <ReportError isError />;
 		}
 
-		const isRequesting = isProductsRequesting || primaryData.isRequesting;
-
 		const headers = this.getHeadersContent();
-		const orderedProducts = orderBy( products, tableQuery.orderby, tableQuery.order );
-		const rows = this.getRowsContent( orderedProducts );
+		const orderedVariations = orderBy( variations, tableQuery.orderby, tableQuery.order );
+		const rows = this.getRowsContent( orderedVariations );
 		const rowsPerPage = parseInt( tableQuery.per_page ) || QUERY_DEFAULTS.pageSize;
-		const totalRows = get( primaryData, [ 'data', 'totals', 'products_count' ], products.length );
 
 		const labels = {
-			helpText: __( 'Select at least two products to compare', 'wc-admin' ),
-			placeholder: __( 'Search by product name or SKU', 'wc-admin' ),
+			helpText: __( 'Select at least two variations to compare', 'wc-admin' ),
+			placeholder: __( 'Search by variation name', 'wc-admin' ),
 		};
 
 		return (
 			<TableCard
-				title={ __( 'Products', 'wc-admin' ) }
+				title={ __( 'Variations', 'wc-admin' ) }
 				rows={ rows }
-				totalRows={ totalRows }
+				totalRows={ variations.length }
 				rowsPerPage={ rowsPerPage }
 				headers={ headers }
 				labels={ labels }
-				ids={ orderedProducts.map( p => p.product_id ) }
-				isLoading={ isRequesting }
-				compareBy={ 'products' }
+				ids={ orderedVariations.map( p => p.product_id ) }
+				isLoading={ isVariationsRequesting }
+				compareBy={ 'variations' }
+				compareParam={ 'filter-variations' }
 				onQueryChange={ onQueryChange }
 				query={ tableQuery }
 				summary={ null } // @TODO
@@ -204,31 +170,30 @@ class ProductsReportTable extends Component {
 export default compose(
 	withSelect( ( select, props ) => {
 		const { query } = props;
-		const datesFromQuery = getCurrentDates( query );
 		const primaryData = getReportChartData( 'products', 'primary', query, select );
 
-		const { getProducts, isGetProductsError, isGetProductsRequesting } = select( 'wc-admin' );
+		const { getVariations, isGetVariationsError, isGetVariationsRequesting } = select( 'wc-admin' );
 		const filterQuery = getFilterQuery( 'products', query );
+		const datesFromQuery = getCurrentDates( query );
 		const tableQuery = {
 			orderby: query.orderby || 'items_sold',
 			order: query.order || 'desc',
-			page: query.page || 1,
-			per_page: query.per_page || QUERY_DEFAULTS.pageSize,
 			after: appendTimestamp( datesFromQuery.primary.after, 'start' ),
 			before: appendTimestamp( datesFromQuery.primary.before, 'end' ),
-			extended_product_info: true,
+			page: query.page || 1,
+			per_page: query.per_page || QUERY_DEFAULTS.pageSize,
 			...filterQuery,
 		};
-		const products = getProducts( tableQuery );
-		const isProductsError = isGetProductsError( tableQuery );
-		const isProductsRequesting = isGetProductsRequesting( tableQuery );
+		const variations = getVariations( tableQuery );
+		const isVariationsError = isGetVariationsError( tableQuery );
+		const isVariationsRequesting = isGetVariationsRequesting( tableQuery );
 
 		return {
-			isProductsError,
-			isProductsRequesting,
+			isVariationsError,
+			isVariationsRequesting,
 			primaryData,
-			products,
+			variations,
 			tableQuery,
 		};
 	} )
-)( ProductsReportTable );
+)( VariationsReportTable );
