@@ -849,4 +849,25 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		$_SERVER['HTTP_USER_AGENT'] = $example_user_agent;
 		$this->assertEquals( $example_user_agent, wc_get_user_agent() );
 	}
+
+	/**
+	 * Test the wc_checkout_fields_uasort_comparison function.
+	 *
+	 * @return void
+	 */
+	public function test_wc_checkout_fields_uasort_comparison() {
+		$fields = array(
+			'billing_first_name' => array(
+				'priority' => 10,
+			),
+			'billing_last_name' => array(
+				'priority' => 20,
+			),
+			'billing_email' => array(
+				'priority' => 1,
+			),
+		);
+		uasort( $fields, 'wc_checkout_fields_uasort_comparison' );
+		$this->assertSame( 0, array_search( 'billing_email', array_keys( $fields ) ) );
+	}
 }
