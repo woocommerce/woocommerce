@@ -277,13 +277,19 @@ th.woocommerce-table__item {
 }
 
 .woocommerce-table__summary {
-	margin: $gap 0;
+	margin: 0;
+	padding: $gap 0;
 	text-align: center;
+	z-index: 1;
+	background: #fff;
+	position: relative;
 }
 
 .woocommerce-table__summary-item {
 	display: inline-block;
 	margin-bottom: 0;
+	margin-left: $gap-smaller;
+	margin-right: $gap-smaller;
 
 	.woocommerce-table__summary-label,
 	.woocommerce-table__summary-value {
@@ -296,10 +302,5 @@ th.woocommerce-table__item {
 
 	.woocommerce-table__summary-value {
 		font-weight: 600;
-	}
-
-	& + .woocommerce-table__summary-item::before {
-		content: '/';
-		margin: 0 $gap-smallest;
 	}
 }

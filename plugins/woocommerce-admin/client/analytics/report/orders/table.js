@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { format as formatDate } from '@wordpress/date';
 import { compose } from '@wordpress/compose';
@@ -203,6 +203,47 @@ class OrdersReportTable extends Component {
 		} );
 	}
 
+	getSummary( totals ) {
+		if ( ! totals ) {
+			return [];
+		}
+		return [
+			{
+				label: _n( 'order', 'orders', totals.num_items_sold, 'wc-admin' ),
+				value: totals.orders_count,
+			},
+			{
+				label: _n( 'new customer', 'new customers', totals.num_new_customers, 'wc-admin' ),
+				value: totals.num_new_customers,
+			},
+			{
+				label: _n(
+					'returning customer',
+					'returning customers',
+					totals.num_returning_customers,
+					'wc-admin'
+				),
+				value: totals.num_returning_customers,
+			},
+			{
+				label: _n( 'product', 'products', totals.products, 'wc-admin' ),
+				value: totals.products,
+			},
+			{
+				label: _n( 'item sold', 'items sold', totals.num_items_sold, 'wc-admin' ),
+				value: totals.num_items_sold,
+			},
+			{
+				label: _n( 'coupon', 'coupons', totals.coupons, 'wc-admin' ),
+				value: totals.coupons,
+			},
+			{
+				label: __( 'net revenue', 'wc-admin' ),
+				value: formatCurrency( totals.net_revenue ),
+			},
+		];
+	}
+
 	renderLinks( items = [] ) {
 		return items.map( ( item, i ) => (
 			<Link href={ item.href } key={ i } type="wp-admin">
@@ -242,6 +283,7 @@ class OrdersReportTable extends Component {
 		);
 		const rowsPerPage = parseInt( tableQuery.per_page ) || QUERY_DEFAULTS.pageSize;
 		const totalRows = get( primaryData, [ 'data', 'totals', 'orders_count' ], orders.length );
+		const summary = primaryData.data.totals ? this.getSummary( primaryData.data.totals ) : null;
 
 		return (
 			<TableCard
@@ -253,7 +295,7 @@ class OrdersReportTable extends Component {
 				isLoading={ isRequesting }
 				onQueryChange={ onQueryChange }
 				query={ tableQuery }
-				summary={ null }
+				summary={ summary }
 				downloadable
 			/>
 		);

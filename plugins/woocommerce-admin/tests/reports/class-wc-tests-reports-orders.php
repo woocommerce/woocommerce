@@ -45,16 +45,19 @@ class WC_Tests_Reports_Orders extends WC_Unit_Test_Case {
 		);
 		$expected_stats = array(
 			'totals'    => array(
-				'orders_count'        => 1,
-				'num_items_sold'      => 4,
-				'avg_items_per_order' => 4,
-				'avg_order_value'     => 97,
-				'gross_revenue'       => 97,
-				'coupons'             => 20,
-				'refunds'             => 0,
-				'taxes'               => 7,
-				'shipping'            => 10,
-				'net_revenue'         => 80,
+				'orders_count'            => 1,
+				'num_items_sold'          => 4,
+				'avg_items_per_order'     => 4,
+				'avg_order_value'         => 97,
+				'gross_revenue'           => 97,
+				'coupons'                 => 20,
+				'refunds'                 => 0,
+				'taxes'                   => 7,
+				'shipping'                => 10,
+				'net_revenue'             => 80,
+				'num_returning_customers' => 0,
+				'num_new_customers'       => 1,
+				'products'                => '1',
 			),
 			'intervals' => array(
 				array(

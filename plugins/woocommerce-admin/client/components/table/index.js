@@ -298,8 +298,6 @@ class TableCard extends Component {
 					/>
 				) }
 
-				{ summary && <TableSummary data={ summary } /> }
-
 				<Pagination
 					page={ parseInt( query.page ) || 1 }
 					perPage={ rowsPerPage }
@@ -307,6 +305,8 @@ class TableCard extends Component {
 					onPageChange={ onQueryChange( 'page' ) }
 					onPerPageChange={ onQueryChange( 'per_page' ) }
 				/>
+
+				{ summary && <TableSummary data={ summary } /> }
 			</Card>
 		);
 	}

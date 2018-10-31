@@ -308,6 +308,7 @@ class WC_Admin_Api_Init {
 			tax_total double DEFAULT 0 NOT NULL,
 			shipping_total double DEFAULT 0 NOT NULL,
 			net_total double DEFAULT 0 NOT NULL,
+			returning_customer boolean DEFAULT 0 NOT NULL,
 			PRIMARY KEY (order_id),
 			KEY date_created (date_created)
 		  ) $collate;
