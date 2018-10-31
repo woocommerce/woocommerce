@@ -238,8 +238,12 @@ class WC_Checkout {
 				'placeholder' => esc_attr__( 'Password', 'woocommerce' ),
 			);
 		}
-
 		$this->fields = apply_filters( 'woocommerce_checkout_fields', $this->fields );
+
+		foreach ( $this->fields as $field_type => $fields ) {
+			// Sort each of the checkout field sections based on priority.
+			uasort( $this->fields[ $field_type ], 'wc_checkout_fields_uasort_comparison' );
+		}
 
 		return $fieldset ? $this->fields[ $fieldset ] : $this->fields;
 	}
