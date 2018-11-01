@@ -10,7 +10,7 @@
 
 	@include breakpoint( '<782px' ) {
 		position: relative;
-		background: #fff;
+		background: $white;
 		margin: 0;
 		padding: 0;
 		top: -3px;
@@ -167,7 +167,7 @@
 	position: absolute;
 	padding: 1px;
 	background: $core-orange;
-	border: 2px solid white;
+	border: 2px solid $white;
 	width: 4px;
 	height: 4px;
 	display: inline-block;
