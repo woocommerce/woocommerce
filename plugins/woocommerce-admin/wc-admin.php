@@ -98,7 +98,10 @@ register_deactivation_hook( WC_ADMIN_PLUGIN_FILE, 'deactivate_wc_admin_plugin' )
  * update automatically.
  */
 function wc_admin_init() {
-	WC_Admin_Api_Init::create_db_tables();
+	// Only create/update tables on init if WP_DEBUG is true.
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+		WC_Admin_Api_Init::create_db_tables();
+	}
 }
 add_action( 'init', 'wc_admin_init' );
 
