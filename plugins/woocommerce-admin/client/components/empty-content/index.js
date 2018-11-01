@@ -88,9 +88,9 @@ class EmptyContent extends Component {
 	}
 
 	render() {
-		const { title, message, illustration } = this.props;
+		const { className, title, message, illustration } = this.props;
 		return (
-			<div className={ classnames( 'woocommerce-empty-content', this.props.className ) }>
+			<div className={ classnames( 'woocommerce-empty-content', className ) }>
 				{ illustration && this.renderIllustration() }
 				{ title ? <H className="woocommerce-empty-content__title">{ title }</H> : null }
 				{ message ? <p className="woocommerce-empty-content__message">{ message }</p> : null }
