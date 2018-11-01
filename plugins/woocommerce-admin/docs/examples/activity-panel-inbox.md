@@ -11,7 +11,7 @@ First, we’re splitting up notices into two broad categories.
 
 The first category is what we’re calling “Store Alerts” - similar to the notices you have today, this notices are present at the top of administration pages and will look something like this:
 
-[image]
+![Store Alerts](images/activity-panel-store-alerts.png)
 
 But unlike today’s notices, this part of the UI will be reserved for “priority” messages to the administrator - things like version and security updates and critical errors.  What sort of errors are “critical errors”? Well, things like a payment gateway that has stopped working because its connection is down, or when the store is set for physical product support but no shipping methods are defined.
 
@@ -19,7 +19,7 @@ But unlike today’s notices, this part of the UI will be reserved for “priori
 
 The second category is what we’re focusing on in this post - and what we expect the vast majority of extension developers will want to extend - we call it the “Activity Panel Inbox.” It will look something like this:
 
-[image]
+![Activity Panel Inbox](images/activity-panel-inbox.png)
 
 This section is dedicated to informational content coming from multiple sources such as WooCommerce core, WooCommerce.com Subscription management, extensions activity and store achievements. This section was also thought out to display more insightful content in the future, such as content that provides insights for the store data and that will help with the day to day tasks of managing and optimizing the store performance.
 
