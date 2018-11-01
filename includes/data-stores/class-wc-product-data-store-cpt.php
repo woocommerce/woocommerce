@@ -848,6 +848,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$exclude_term_ids            = array();
 		$outofstock_join             = '';
 		$outofstock_where            = '';
+		$non_published_where         = '';
 		$product_visibility_term_ids = wc_get_product_visibility_term_ids();
 
 		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && $product_visibility_term_ids['outofstock'] ) {
@@ -857,6 +858,17 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		if ( count( $exclude_term_ids ) ) {
 			$outofstock_join  = " LEFT JOIN ( SELECT object_id FROM {$wpdb->term_relationships} WHERE term_taxonomy_id IN ( " . implode( ',', array_map( 'absint', $exclude_term_ids ) ) . ' ) ) AS exclude_join ON exclude_join.object_id = id';
 			$outofstock_where = ' AND exclude_join.object_id IS NULL';
+		}
+
+		// Fetch a list of non-published parent products and exlude them, quicker than joining in the main query below.
+		$non_published_products = $wpdb->get_col(
+			"SELECT post.ID as id FROM `$wpdb->posts` AS post
+			WHERE post.post_type = 'product'
+			AND post.post_parent = 0
+			AND post.post_status != 'publish'"
+		);
+		if ( 0 < count( $non_published_products ) ) {
+			$non_published_where = ' AND post.post_parent NOT IN ( ' . implode( ',', $non_published_products ) . ')';
 		}
 
 		return $wpdb->get_results(
@@ -874,6 +886,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					AND CAST( meta.meta_value AS CHAR ) != ''
 					AND CAST( meta.meta_value AS DECIMAL( 10, %d ) ) = CAST( meta2.meta_value AS DECIMAL( 10, %d ) )
 					$outofstock_where
+					$non_published_where
 				GROUP BY post.ID",
 				$decimals,
 				$decimals
