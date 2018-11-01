@@ -38,18 +38,26 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Cont
 	 * @return array
 	 */
 	protected function prepare_reports_query( $request ) {
-		$args                 = array();
-		$args['before']       = $request['before'];
-		$args['after']        = $request['after'];
-		$args['interval']     = $request['interval'];
-		$args['page']         = $request['page'];
-		$args['per_page']     = $request['per_page'];
-		$args['orderby']      = $request['orderby'];
-		$args['order']        = $request['order'];
-		$args['categories']   = (array) $request['categories'];
-		$args['coupons']      = (array) $request['coupons'];
-		$args['products']     = (array) $request['products'];
-		$args['order_status'] = (array) $request['order_status'];
+		$args             = array();
+		$args['before']   = $request['before'];
+		$args['after']    = $request['after'];
+		$args['interval'] = $request['interval'];
+		$args['page']     = $request['page'];
+		$args['per_page'] = $request['per_page'];
+		$args['orderby']  = $request['orderby'];
+		$args['order']    = $request['order'];
+
+		$args['match']                = $request['match'];
+		$args['status_is']            = (array) $request['status_is'];
+		$args['status_is_not']        = (array) $request['status_is_not'];
+		$args['product_includes']     = (array) $request['product_includes'];
+		$args['product_excludes']     = (array) $request['product_excludes'];
+		$args['coupon_code_includes'] = (array) $request['coupon_code_includes'];
+		$args['coupon_code_excludes'] = (array) $request['coupon_code_excludes'];
+		$args['coupon_code_is']       = (array) $request['coupon_code_is'];
+		$args['coupon_code_is_not']   = (array) $request['coupon_code_is_not'];
+		$args['customer']             = (array) $request['customer'];
+		$args['categories']           = (array) $request['categories'];
 
 		return $args;
 	}
