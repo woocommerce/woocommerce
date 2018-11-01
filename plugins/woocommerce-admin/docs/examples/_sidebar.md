@@ -1,1 +1,5 @@
-* [Activity Panel Inbox](activity-panel-inbox)
+* [Home](/)
+
+* [Examples](examples/)
+
+  * [Activity Panel Inbox](examples/activity-panel-inbox.md)
