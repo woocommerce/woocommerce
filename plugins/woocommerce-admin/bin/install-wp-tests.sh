@@ -178,8 +178,10 @@ install_deps() {
 	cd "$WP_CORE_DIR"
 	php wp-cli.phar plugin activate woocommerce
 
-	# Install wc-admin, the correct branch
-	php wp-cli.phar plugin install https://github.com/$REPO/archive/$BRANCH.zip --activate
+	if [ "$TRAVIS_PULL_REQUEST_BRANCH" != "" ]; then
+		# Install wc-admin, the correct branch, if running from Travis CI.
+		php wp-cli.phar plugin install https://github.com/$REPO/archive/$BRANCH.zip --activate
+	fi
 
 	# Back to original dir
 	cd "$WORKING_DIR"
