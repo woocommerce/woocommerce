@@ -22,5 +22,3 @@ All materials contributed should be compatible with the GPLv2. This means that i
 
 1. Check that the code has a license. If you can't find one, you can try to contact the original author and get permission to use, or ask them to release under a compatible Open Source license.
 2. Check the license is compatible with [GPLv2](http://www.gnu.org/licenses/license-list.en.html#GPLCompatibleLicenses), note that the Apache 2.0 license is *not* compatible.
-3. Add the code source URL (e.g. a GitHub URL), the files where it's used in the WooCommerce Admin and the full license terms to [`CREDITS.md`](/CREDITS.md)
-4. Add attribution to the code, if applicable. This line should include the copyright notice of the source, and a reference to the license contained in [`CREDITS.md`](/CREDITS.md)
