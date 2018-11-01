@@ -23,7 +23,7 @@ export default class RevenueReport extends Component {
 		return (
 			<Fragment>
 				<ReportFilters query={ query } path={ path } />
-				<RevenueReportChart query={ query } />
+				<RevenueReportChart query={ query } path={ path } />
 				<RevenueReportTable query={ query } />
 			</Fragment>
 		);

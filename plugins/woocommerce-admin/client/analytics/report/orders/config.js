@@ -15,7 +15,7 @@ const { orderStatuses } = wcSettings;
 export const filters = [
 	{
 		label: __( 'Show', 'wc-admin' ),
-		staticParams: [],
+		staticParams: [ 'chart' ],
 		param: 'filter',
 		showFilters: () => true,
 		filters: [

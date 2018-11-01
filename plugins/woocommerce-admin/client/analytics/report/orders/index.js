@@ -29,7 +29,7 @@ export default class OrdersReport extends Component {
 					filters={ filters }
 					advancedFilters={ advancedFilters }
 				/>
-				<OrdersReportChart query={ query } />
+				<OrdersReportChart query={ query } path={ path } />
 				<OrdersReportTable query={ query } />
 			</Fragment>
 		);

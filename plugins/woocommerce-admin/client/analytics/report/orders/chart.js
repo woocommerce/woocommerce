@@ -51,7 +51,7 @@ class OrdersReportChart extends Component {
 	}
 
 	render() {
-		const { query } = this.props;
+		const { path, query } = this.props;
 		return (
 			<Fragment>
 				<ReportSummary
@@ -63,6 +63,7 @@ class OrdersReportChart extends Component {
 				<ReportChart
 					charts={ this.getCharts() }
 					endpoint="orders"
+					path={ path }
 					query={ query }
 					selectedChart={ this.getSelectedChart() }
 				/>
@@ -72,6 +73,7 @@ class OrdersReportChart extends Component {
 }
 
 OrdersReportChart.propTypes = {
+	path: PropTypes.string.isRequired,
 	query: PropTypes.object.isRequired,
 };
 

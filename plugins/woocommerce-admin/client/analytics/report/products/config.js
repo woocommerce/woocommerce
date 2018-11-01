@@ -12,7 +12,7 @@ import { NAMESPACE } from 'store/constants';
 
 const filterConfig = {
 	label: __( 'Show', 'wc-admin' ),
-	staticParams: [],
+	staticParams: [ 'chart' ],
 	param: 'filter',
 	showFilters: () => true,
 	filters: [
