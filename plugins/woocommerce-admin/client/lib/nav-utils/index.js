@@ -7,6 +7,12 @@ import { parse, stringify } from 'qs';
 import { isEmpty, pick, uniq } from 'lodash';
 
 /**
+ * Internal dependencies
+ */
+// Import the module into itself. Functions consumed from this import can be mocked in tests.
+import * as navUtils from './index';
+
+/**
  * Returns a string with the site's wp-admin URL appended. JS version of `admin_url`.
  *
  * @param {String} path Relative path.
@@ -35,7 +41,7 @@ export const stringifyQuery = query => ( isEmpty( query ) ? '' : '?' + stringify
  * @param {Object} query Query containing the parameters.
  * @return {Object} Object containing the time related queries.
  */
-export const getTimeRelatedQuery = query =>
+export const getTimeRelatedQuery = ( query = navUtils.getQuery() ) =>
 	pick( query, [ 'period', 'compare', 'before', 'after' ] );
 
 /**

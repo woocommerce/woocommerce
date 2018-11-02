@@ -15,6 +15,7 @@ import PropTypes from 'prop-types';
 import './style.scss';
 import ActivityPanel from './activity-panel';
 import { Link } from '@woocommerce/components';
+import { getNewPath, getTimeRelatedQuery } from 'lib/nav-utils';
 
 class Header extends Component {
 	constructor() {
@@ -83,7 +84,10 @@ class Header extends Component {
 					</span>
 					{ _sections.map( ( section, i ) => {
 						const sectionPiece = Array.isArray( section ) ? (
-							<Link href={ section[ 0 ] } type={ isEmbedded ? 'wp-admin' : 'wc-admin' }>
+							<Link
+								href={ getNewPath( getTimeRelatedQuery(), section[ 0 ], {} ) }
+								type={ isEmbedded ? 'wp-admin' : 'wc-admin' }
+							>
 								{ section[ 1 ] }
 							</Link>
 						) : (
