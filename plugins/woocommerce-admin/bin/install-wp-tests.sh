@@ -174,7 +174,7 @@ install_deps() {
 	# Install WooCommerce
 	cd "wp-content/plugins/"
 	# As zip file does not include tests, we have to get it from git repo.
-	git clone https://github.com/woocommerce/woocommerce.git
+	git clone --depth 1 https://github.com/woocommerce/woocommerce.git
 	cd "$WP_CORE_DIR"
 	php wp-cli.phar plugin activate woocommerce
 
