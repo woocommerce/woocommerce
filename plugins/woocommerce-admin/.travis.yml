@@ -23,7 +23,7 @@ node_js:
 
 before_script:
   - phpenv config-rm xdebug.ini
-  - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  - export PATH="$WP_CORE_DIR/wp-content/plugins/wc-admin/vendor/bin:$PATH"
   - bash bin/install-wp-tests.sh wc_admin_test root '' localhost $WP_VERSION
   - bash bin/travis.sh before
   - node --version
