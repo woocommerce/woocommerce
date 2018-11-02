@@ -126,7 +126,7 @@ class WC_Regenerate_Images {
 		}
 
 		// If cropping mode has changed, regenerate the image.
-		if ( '' === $size_data['height'] && empty( $image['uncropped'] ) ) {
+		if ( empty( $size_data['height'] ) && empty( $image['uncropped'] ) ) {
 			return false;
 		}
 
@@ -207,7 +207,7 @@ class WC_Regenerate_Images {
 		$ratio_match = false;
 
 		// If '' is passed to either size, we test ratios against the original file. It's uncropped.
-		if ( '' === $image_size['width'] || '' === $image_size['height'] ) {
+		if ( empty( $image_size['width'] ) || empty( $image_size['height'] ) ) {
 			$imagedata = wp_get_attachment_metadata( $attachment_id );
 
 			if ( ! $imagedata ) {
