@@ -93,6 +93,19 @@ function deactivate_wc_admin_plugin() {
 register_deactivation_hook( WC_ADMIN_PLUGIN_FILE, 'deactivate_wc_admin_plugin' );
 
 /**
+ * Update the database tables if needed. This hooked function does NOT need to
+ * be ported to WooCommerce's code base - WC_Install will do this on plugin
+ * update automatically.
+ */
+function wc_admin_init() {
+	// Only create/update tables on init if WP_DEBUG is true.
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+		WC_Admin_Api_Init::create_db_tables();
+	}
+}
+add_action( 'init', 'wc_admin_init' );
+
+/**
  * Set up the plugin, only if we can detect both Gutenberg and WooCommerce
  */
 function wc_admin_plugins_loaded() {
