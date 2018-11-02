@@ -944,7 +944,7 @@ class WC_AJAX {
 			$fee = new WC_Order_Item_Fee();
 			$fee->set_amount( $amount );
 			$fee->set_total( $amount );
-			$fee->set_name( sprintf( __( '%s fee', 'woocommerce' ), $formatted_amount ) );
+			$fee->set_name( sprintf( __( '%s fee', 'woocommerce' ), wc_clean( $formatted_amount ) ) );
 
 			$order->add_item( $fee );
 			$order->calculate_taxes( $calculate_tax_args );
