@@ -206,7 +206,7 @@ class WC_Regenerate_Images {
 		$image_size  = wc_get_image_size( $size );
 		$ratio_match = false;
 
-		// If '' is passed to either size, we test ratios against the original file. It's uncropped.
+		// If either size is empty, we test ratios against the original file. It's uncropped.
 		if ( empty( $image_size['width'] ) || empty( $image_size['height'] ) ) {
 			$imagedata = wp_get_attachment_metadata( $attachment_id );
 
