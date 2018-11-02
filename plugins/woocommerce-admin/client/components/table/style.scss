@@ -46,7 +46,7 @@
 			}
 		}
 
-		@include breakpoint( '<1100px' ) {
+		@include breakpoint( '<960px' ) {
 			.woocommerce-card__action {
 				grid-area: 1 / 1 / 3 / 4;
 				grid-gap: $gap-small;

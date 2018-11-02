@@ -1,7 +1,7 @@
 /** @format */
 
 .woocommerce_devdocs {
-	@include breakpoint( '>1100px' ) {
+	@include breakpoint( '>1280px' ) {
 		&.is-list {
 			column-gap: $gap-large;
 			columns: 2;

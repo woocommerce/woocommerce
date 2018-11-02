@@ -6,11 +6,7 @@ import { Component } from '@wordpress/element';
 import classnames from 'classnames';
 import { range } from 'lodash';
 import PropTypes from 'prop-types';
-
-/**
- * Internal dependencies
- */
-import { isMobileViewport, isTabletViewport } from 'lib/ui';
+import { withViewportMatch } from '@wordpress/viewport';
 
 /**
  * `SummaryListPlaceholder` behaves like `SummaryList` but displays placeholder summary items instead of data.
@@ -18,7 +14,7 @@ import { isMobileViewport, isTabletViewport } from 'lib/ui';
  */
 class SummaryListPlaceholder extends Component {
 	render() {
-		const isDropdownBreakpoint = isTabletViewport() || isMobileViewport();
+		const { isDropdownBreakpoint } = this.props;
 		const numberOfItems = isDropdownBreakpoint ? 1 : this.props.numberOfItems;
 
 		const hasItemsClass = numberOfItems < 10 ? `has-${ numberOfItems }-items` : 'has-10-items';
@@ -64,4 +60,6 @@ SummaryListPlaceholder.defaultProps = {
 	numberOfRows: 5,
 };
 
-export default SummaryListPlaceholder;
+export default withViewportMatch( {
+	isDropdownBreakpoint: '< large',
+} )( SummaryListPlaceholder );

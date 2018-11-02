@@ -2,19 +2,20 @@
 /**
  * External dependencies
  */
-import { Component } from '@wordpress/element';
-import moment from 'moment';
 import 'core-js/fn/object/assign';
 import 'core-js/fn/array/from';
+import { __, sprintf } from '@wordpress/i18n';
+import classnames from 'classnames';
+import { Component } from '@wordpress/element';
 import {
 	DayPickerRangeController,
 	isInclusivelyAfterDay,
 	isInclusivelyBeforeDay,
 } from 'react-dates';
+import moment from 'moment';
 import { partial } from 'lodash';
-import { __, sprintf } from '@wordpress/i18n';
-import classnames from 'classnames';
 import PropTypes from 'prop-types';
+import { withViewportMatch } from '@wordpress/viewport';
 import 'react-dates/lib/css/_datepicker.css';
 
 /**
@@ -26,7 +27,6 @@ import { validateDateInputForRange } from '@woocommerce/date';
  * Internal dependencies
  */
 import DateInput from './input';
-import { isMobileViewport } from 'lib/ui';
 import phrases from './phrases';
 import './style.scss';
 
@@ -114,14 +114,15 @@ class DateRange extends Component {
 			afterError,
 			beforeError,
 			shortDateFormat,
+			isViewportMobile,
+			isViewportSmall,
 		} = this.props;
 		const isOutsideRange = this.getOutsideRange();
-		const isMobile = isMobileViewport();
-		const isDoubleCalendar = isMobile && window.innerWidth > 624;
+		const isDoubleCalendar = isViewportMobile && ! isViewportSmall;
 		return (
 			<div
 				className={ classnames( 'woocommerce-calendar', {
-					'is-mobile': isMobile,
+					'is-mobile': isViewportMobile,
 				} ) }
 			>
 				<div className="woocommerce-calendar__inputs">
@@ -225,4 +226,7 @@ DateRange.propTypes = {
 	shortDateFormat: PropTypes.string.isRequired,
 };
 
-export default DateRange;
+export default withViewportMatch( {
+	isViewportMobile: '< medium',
+	isViewportSmall: '< small',
+} )( DateRange );

@@ -8,11 +8,11 @@ import { Children, cloneElement } from '@wordpress/element';
 import { Dropdown, NavigableMenu } from '@wordpress/components';
 import PropTypes from 'prop-types';
 import { uniqueId } from 'lodash';
+import { withViewportMatch } from '@wordpress/viewport';
 
 /**
  * Internal dependencies
  */
-import { isMobileViewport, isTabletViewport } from 'lib/ui';
 import './style.scss';
 
 /**
@@ -21,11 +21,10 @@ import './style.scss';
  *
  * @return { object } -
  */
-const SummaryList = ( { children, label } ) => {
+const SummaryList = ( { children, isDropdownBreakpoint, label } ) => {
 	if ( ! label ) {
 		label = __( 'Performance Indicators', 'wc-admin' );
 	}
-	const isDropdownBreakpoint = isTabletViewport() || isMobileViewport();
 
 	// We default to "one" because we can't have empty children.
 	const itemCount = Children.count( children ) || 1;
@@ -86,4 +85,6 @@ SummaryList.propTypes = {
 	label: PropTypes.string,
 };
 
-export default SummaryList;
+export default withViewportMatch( {
+	isDropdownBreakpoint: '< large',
+} )( SummaryList );

@@ -64,6 +64,7 @@
     "@wordpress/keycodes": "2.0.2",
     "@wordpress/postcss-themes": "1.0.4",
     "@wordpress/scripts": "2.4.0",
+    "@wordpress/viewport": "^2.0.7",
     "ast-types": "0.11.6",
     "autoprefixer": "9.3.1",
     "babel-core": "7.0.0-bridge.0",

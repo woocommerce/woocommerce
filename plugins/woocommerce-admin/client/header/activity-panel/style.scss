@@ -20,12 +20,12 @@
 		flex: 1 100%;
 	}
 
-	@include breakpoint( '782px-1100px' ) {
+	@include breakpoint( '782px-960px' ) {
 		max-width: 280px;
 		height: 60px;
 	}
 
-	@include breakpoint( '>1100px' ) {
+	@include breakpoint( '>960px' ) {
 		max-width: 400px;
 	}
 
@@ -40,7 +40,7 @@
 	height: 60px;
 	justify-content: flex-end;
 
-	@include breakpoint( '>1100px' ) {
+	@include breakpoint( '>960px' ) {
 		height: 80px;
 	}
 
@@ -53,7 +53,7 @@
 		width: 18px;
 		height: 18px;
 
-		@include breakpoint( '>1100px' ) {
+		@include breakpoint( '>960px' ) {
 			width: 24px;
 			height: 24px;
 		}
@@ -80,7 +80,7 @@
 		height: 60px;
 		border-bottom: 3px solid $white;
 
-		@include breakpoint( '>1100px' ) {
+		@include breakpoint( '>960px' ) {
 			height: 80px;
 		}
 
@@ -91,7 +91,7 @@
 		}
 
 		font-size: 11px;
-		@include breakpoint( '>1100px' ) {
+		@include breakpoint( '>960px' ) {
 			font-size: 13px;
 		}
 
@@ -109,14 +109,14 @@
 			top: 10px;
 			left: 50%;
 
-			@include breakpoint( '782px-1100px' ) {
+			@include breakpoint( '782px-960px' ) {
 				top: 8px;
 				right: 18px;
 				left: initial;
 				margin-left: 0;
 			}
 
-			@include breakpoint( '>1100px' ) {
+			@include breakpoint( '>960px' ) {
 				top: 16px;
 				right: 28px;
 				left: initial;
@@ -209,10 +209,10 @@
 
 	// Extra padding is needed at the bottom of the wrapper because of our positioning, height, and overflow rules. Otherwise, some content can get cut off.
 	padding-bottom: $gap-small * 6;
-	@include breakpoint( '782px-1100px' ) {
+	@include breakpoint( '782px-960px' ) {
 		padding-bottom: $gap-small;
 	}
-	@include breakpoint( '>1100px' ) {
+	@include breakpoint( '>960px' ) {
 		top: 112px;
 		padding-bottom: $gap * 2;
 	}
