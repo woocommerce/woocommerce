@@ -26184,11 +26184,6 @@ msgstr ""
 msgid "You’ve received the following order from %s:"
 msgstr ""
 
-#: templates/emails/admin-new-order.php:50
-#: templates/emails/plain/admin-new-order.php:50
-msgid "Over to you."
-msgstr ""
-
 #: templates/emails/customer-completed-order.php:28
 #: templates/emails/customer-invoice.php:30
 #: templates/emails/customer-new-account.php:27

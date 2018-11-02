@@ -114,7 +114,6 @@ class WC_Install {
 			'wc_update_344_db_version',
 		),
 		'3.5.0' => array(
-			'wc_update_350_order_customer_id',
 			'wc_update_350_reviews_comment_type',
 			'wc_update_350_db_version',
 		),
