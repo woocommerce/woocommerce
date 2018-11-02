@@ -3,12 +3,11 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { Component } from '@wordpress/element';
+import { Component, findDOMNode } from '@wordpress/element';
 import classnames from 'classnames';
 import { decodeEntities } from '@wordpress/html-entities';
 import { Fill } from 'react-slot-fill';
 import PropTypes from 'prop-types';
-import ReactDom from 'react-dom';
 
 /**
  * Internal dependencies
@@ -29,7 +28,7 @@ class Header extends Component {
 	}
 
 	componentDidMount() {
-		this.threshold = ReactDom.findDOMNode( this ).offsetTop;
+		this.threshold = findDOMNode( this ).offsetTop;
 		window.addEventListener( 'scroll', this.onWindowScroll );
 		this.updateIsScrolled();
 	}

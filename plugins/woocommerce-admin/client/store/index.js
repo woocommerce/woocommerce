@@ -2,8 +2,7 @@
 /**
  * External dependencies
  */
-import { registerStore } from '@wordpress/data';
-import { combineReducers } from 'redux';
+import { combineReducers, registerStore } from '@wordpress/data';
 
 /**
  * Internal dependencies
