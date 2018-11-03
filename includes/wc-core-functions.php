@@ -1523,6 +1523,15 @@ function wc_shipping_zone_method_order_uasort_comparison( $a, $b ) {
  * @return int
  */
 function wc_checkout_fields_uasort_comparison( $a, $b ) {
+	/*
+	 * We are not guanranteed to get a priority
+	 * setting. So don't compare if they don't
+	 * exist.
+	 */
+	if ( ! isset( $a['priority'], $b['priority'] ) ) {
+		return 0;
+	}
+
 	return wc_uasort_comparison( $a['priority'], $b['priority'] );
 }
 
