@@ -93,7 +93,7 @@
     "webpack-cli": "3.1.2"
   },
   "dependencies": {
-    "@wordpress/api-fetch": "2.2.0",
+    "@wordpress/api-fetch": "2.2.2",
     "@wordpress/babel-plugin-import-jsx-pragma": "1.1.2",
     "@wordpress/babel-plugin-makepot": "2.1.2",
     "@wordpress/babel-preset-default": "2.1.0",
@@ -106,9 +106,9 @@
     "@wordpress/html-entities": "2.0.2",
     "@wordpress/i18n": "2.0.0",
     "@wordpress/jest-preset-default": "2.0.6",
-    "@wordpress/keycodes": "2.0.2",
+    "@wordpress/keycodes": "2.0.3",
     "@wordpress/postcss-themes": "1.0.4",
-    "@wordpress/scripts": "2.4.0",
+    "@wordpress/scripts": "2.4.1",
     "@wordpress/viewport": "^2.0.7",
     "browser-filesaver": "^1.1.1",
     "classnames": "^2.2.5",
