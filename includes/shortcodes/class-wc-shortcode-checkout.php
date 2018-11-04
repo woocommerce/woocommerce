@@ -114,6 +114,11 @@ class WC_Shortcode_Checkout {
 					throw new Exception( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), wc_get_order_status_name( $order->get_status() ) ) );
 				}
 
+				// Terms.
+				if ( ! empty( $_POST['terms-field'] ) && empty( $_POST['terms'] ) ) {
+					throw new Exception( __( 'Please read and accept the terms and conditions to proceed with your order.', 'woocommerce' ) );
+				}
+
 				// Ensure order items are still stocked if paying for a failed order. Pending orders do not need this check because stock is held.
 				if ( ! $order->has_status( 'pending' ) ) {
 					$quantities = array();
