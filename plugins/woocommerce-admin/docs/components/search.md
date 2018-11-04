@@ -7,6 +7,13 @@ A search box which autocompletes results while typing, allowing for the user to 
 Props
 -----
 
+### `className`
+
+- Type: String
+- Default: null
+
+Class name applied to parent div.
+
 ### `onChange`
 
 - Type: Function
