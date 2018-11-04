@@ -54,7 +54,7 @@
     "babel-eslint": "10.0.1",
     "babel-loader": "8.0.4",
     "babel-plugin-transform-class-properties": "6.24.1",
-    "buble": "0.19.4",
+    "buble": "0.19.6",
     "chalk": "2.4.1",
     "concurrently": "^4.0.1",
     "cross-env": "5.2.0",
