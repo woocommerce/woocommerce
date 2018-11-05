@@ -49,7 +49,7 @@ class FilterPicker extends Component {
 		if ( selectedFilter.settings && selectedFilter.settings.getLabels ) {
 			const { query } = this.props;
 			const { param: filterParam, getLabels } = selectedFilter.settings;
-			getLabels( query[ filterParam ] ).then( this.updateSelectedTag );
+			getLabels( query[ filterParam ], query ).then( this.updateSelectedTag );
 		}
 	}
 
