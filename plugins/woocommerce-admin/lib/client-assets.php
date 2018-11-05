@@ -71,7 +71,7 @@ function wc_admin_register_script() {
 	// Set up the text domain and translations.
 	$locale_data = gutenberg_get_jed_locale_data( 'wc-admin' );
 	$content     = 'wp.i18n.setLocaleData( ' . json_encode( $locale_data ) . ', "wc-admin" );';
-	wp_add_inline_script( 'wc-components', $content, 'before' );
+	wp_add_inline_script( 'wp-i18n', $content, 'after' );
 
 	// Resets lodash to wp-admin's version of lodash.
 	wp_add_inline_script(
