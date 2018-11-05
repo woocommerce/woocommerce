@@ -3,13 +3,13 @@
  * External dependencies
  */
 import { Component } from '@wordpress/element';
-import PropTypes from 'prop-types';
 import { Link as RouterLink } from 'react-router-dom';
+import PropTypes from 'prop-types';
 
 /**
- * Internal dependencies
+ * WooCommerce dependencies
  */
-import { getAdminLink } from 'lib/nav-utils';
+import { getAdminLink } from '@woocommerce/navigation';
 
 /**
  * Use `Link` to create a link to another resource. It accepts a type to automatically

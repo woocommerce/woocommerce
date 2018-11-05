@@ -11,6 +11,11 @@ import Gridicon from 'gridicons';
 import interpolateComponents from 'interpolate-components';
 
 /**
+ * WooCommerce dependencies
+ */
+import { getNewPath } from '@woocommerce/navigation';
+
+/**
  * Internal dependencies
  */
 import Card from 'components/card';
@@ -22,7 +27,6 @@ import {
 	getQueryFromActiveFilters,
 	getDefaultOptionValue,
 } from './utils';
-import { getNewPath } from 'lib/nav-utils';
 import './style.scss';
 
 const matches = [

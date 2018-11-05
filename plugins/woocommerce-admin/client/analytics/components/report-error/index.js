@@ -7,10 +7,10 @@ import { Component } from '@wordpress/element';
 import PropTypes from 'prop-types';
 
 /**
- * Internal dependencies
+ * WooCommerce dependencies
  */
 import { EmptyContent } from '@woocommerce/components';
-import { getAdminLink } from 'lib/nav-utils';
+import { getAdminLink } from '@woocommerce/navigation';
 
 class ReportError extends Component {
 	render() {

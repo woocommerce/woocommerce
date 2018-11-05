@@ -10,6 +10,11 @@ import { IconButton, ToggleControl } from '@wordpress/components';
 import PropTypes from 'prop-types';
 
 /**
+ * WooCommerce dependencies
+ */
+import { getIdsFromQuery } from '@woocommerce/navigation';
+
+/**
  * Internal dependencies
  */
 import './style.scss';
@@ -18,7 +23,6 @@ import CompareButton from 'components/filters/compare/button';
 import DowloadIcon from './download-icon';
 import EllipsisMenu from 'components/ellipsis-menu';
 import { downloadCSVFile, generateCSVDataFromTable, generateCSVFileName } from 'lib/csv';
-import { getIdsFromQuery } from 'lib/nav-utils';
 import MenuItem from 'components/ellipsis-menu/menu-item';
 import MenuTitle from 'components/ellipsis-menu/menu-title';
 import Pagination from 'components/pagination';

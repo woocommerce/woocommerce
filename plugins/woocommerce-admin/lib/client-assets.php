@@ -27,6 +27,14 @@ function wc_admin_register_script() {
 	);
 
 	wp_register_script(
+		'wc-navigation',
+		wc_admin_url( 'dist/navigation/index.js' ),
+		array(),
+		filemtime( wc_admin_dir_path( 'dist/navigation/index.js' ) ),
+		true
+	);
+
+	wp_register_script(
 		'wc-date',
 		wc_admin_url( 'dist/date/index.js' ),
 		array( 'wp-date', 'wp-i18n' ),
@@ -46,6 +54,7 @@ function wc_admin_register_script() {
 			'wp-keycodes',
 			'wc-currency',
 			'wc-date',
+			'wc-navigation',
 		),
 		filemtime( wc_admin_dir_path( 'dist/components/index.js' ) ),
 		true
@@ -54,7 +63,7 @@ function wc_admin_register_script() {
 	wp_register_script(
 		WC_ADMIN_APP,
 		wc_admin_url( "dist/{$entry}/index.js" ),
-		array( 'wc-components', 'wp-date', 'wp-html-entities', 'wp-keycodes' ),
+		array( 'wc-components', 'wc-navigation', 'wp-date', 'wp-html-entities', 'wp-keycodes' ),
 		filemtime( wc_admin_dir_path( "dist/{$entry}/index.js" ) ),
 		true
 	);

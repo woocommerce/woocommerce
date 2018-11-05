@@ -10,12 +10,16 @@ import { find, partial, last, get, includes } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
+ * WooCommerce dependencies
+ */
+import { getTimeRelatedQuery, updateQueryString } from '@woocommerce/navigation';
+
+/**
  * Internal dependencies
  */
 import AnimationSlider from 'components/animation-slider';
 import DropdownButton from 'components/dropdown-button';
 import Search from 'components/search';
-import { getTimeRelatedQuery, updateQueryString } from 'lib/nav-utils';
 import { flatenFilters } from './utils';
 import './style.scss';
 

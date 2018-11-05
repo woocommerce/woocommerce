@@ -9,11 +9,15 @@ import { isEqual } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
+ * WooCommerce dependencies
+ */
+import { getIdsFromQuery, updateQueryString } from '@woocommerce/navigation';
+
+/**
  * Internal dependencies
  */
 import Card from 'components/card';
 import CompareButton from './button';
-import { getIdsFromQuery, updateQueryString } from 'lib/nav-utils';
 import Search from 'components/search';
 
 /**

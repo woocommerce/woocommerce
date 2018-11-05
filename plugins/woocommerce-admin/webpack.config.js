@@ -31,6 +31,7 @@ const wcAdminPackages = {
 	components: './client/components',
 	currency: './packages/currency',
 	date: './packages/date',
+	navigation: './packages/navigation',
 };
 
 Object.keys( wcAdminPackages ).forEach( ( name ) => {

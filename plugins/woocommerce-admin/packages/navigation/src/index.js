@@ -2,9 +2,16 @@
 /**
  * External dependencies
  */
-import history from 'lib/history';
-import { parse, stringify } from 'qs';
 import { isEmpty, pick, uniq } from 'lodash';
+import { parse, stringify } from 'qs';
+
+/**
+ * Internal dependencies
+ */
+import history from './history';
+
+// Expose history so all uses get the same history object.
+export { history };
 
 /**
  * Internal dependencies

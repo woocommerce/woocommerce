@@ -13,11 +13,11 @@ import { withSelect } from '@wordpress/data';
  */
 import { Card, EmptyTable, TableCard } from '@woocommerce/components';
 import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
+import { getAdminLink } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
  */
-import { getAdminLink } from 'lib/nav-utils';
 import { numberFormat } from 'lib/number';
 import ReportError from 'analytics/components/report-error';
 import { NAMESPACE } from 'store/constants';

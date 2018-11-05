@@ -7,9 +7,13 @@ import apiFetch from '@wordpress/api-fetch';
 import { dispatch } from '@wordpress/data';
 
 /**
+ * WooCommerce dependencies
+ */
+import { stringifyQuery } from '@woocommerce/navigation';
+
+/**
  * Internal dependencies
  */
-import { stringifyQuery } from 'lib/nav-utils';
 import { NAMESPACE } from 'store/constants';
 
 export default {

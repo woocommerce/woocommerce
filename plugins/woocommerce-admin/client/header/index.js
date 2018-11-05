@@ -10,12 +10,16 @@ import { Fill } from 'react-slot-fill';
 import PropTypes from 'prop-types';
 
 /**
+ * WooCommerce dependencies
+ */
+import { getNewPath, getTimeRelatedQuery } from '@woocommerce/navigation';
+import { Link } from '@woocommerce/components';
+
+/**
  * Internal dependencies
  */
 import './style.scss';
 import ActivityPanel from './activity-panel';
-import { Link } from '@woocommerce/components';
-import { getNewPath, getTimeRelatedQuery } from 'lib/nav-utils';
 
 class Header extends Component {
 	constructor() {

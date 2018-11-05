@@ -1,5 +1,4 @@
 /** @format */
-
 /**
  * External dependencies
  */
@@ -7,9 +6,13 @@ import { dispatch } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
+ * WooCommerce dependencies
+ */
+import { stringifyQuery } from '@woocommerce/navigation';
+
+/**
  * Internal dependencies
  */
-import { stringifyQuery } from 'lib/nav-utils';
 import { NAMESPACE } from 'store/constants';
 
 export default {

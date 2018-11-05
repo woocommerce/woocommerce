@@ -6,9 +6,9 @@ import apiFetch from '@wordpress/api-fetch';
 import { identity } from 'lodash';
 
 /**
- * Internal dependencies
+ * WooCommerce dependencies
  */
-import { getIdsFromQuery, stringifyQuery } from 'lib/nav-utils';
+import { getIdsFromQuery, stringifyQuery } from '@woocommerce/navigation';
 
 /**
  * Get a function that accepts ids as they are found in url parameter and

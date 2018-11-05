@@ -12,19 +12,19 @@ import { get, map } from 'lodash';
 /**
  * WooCommerce dependencies
  */
-import { Link, TableCard } from '@woocommerce/components';
-import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
 import {
 	appendTimestamp,
 	getCurrentDates,
 	getDateFormatsForInterval,
 	getIntervalForQuery,
 } from '@woocommerce/date';
+import { Link, TableCard } from '@woocommerce/components';
+import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
+import { onQueryChange } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
  */
-import { onQueryChange } from 'lib/nav-utils';
 import ReportError from 'analytics/components/report-error';
 import { QUERY_DEFAULTS } from 'store/constants';
 
