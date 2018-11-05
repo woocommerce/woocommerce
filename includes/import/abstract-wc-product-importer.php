@@ -434,6 +434,11 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			return new WP_Error( 'woocommerce_product_importer_missing_variation_parent_id', __( 'Variation cannot be imported: Missing parent ID or parent does not exist yet.', 'woocommerce' ), array( 'status' => 401 ) );
 		}
 
+		// Stop if parent is a product variation.
+		if ( $parent->post_type === 'product_variation' ) {
+			return new WP_Error( 'woocommerce_product_importer_parent_set_as_variation', __( 'Variation cannot be imported: Parent cannot be a product variation', 'woocommerce' ), array( 'status' => 401 ) );
+		}
+
 		if ( isset( $data['raw_attributes'] ) ) {
 			$attributes        = array();
 			$parent_attributes = $this->get_variation_parent_attributes( $data['raw_attributes'], $parent );
