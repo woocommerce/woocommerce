@@ -43,8 +43,16 @@ function wc_admin_plugins_notice() {
  * @return bool
  */
 function dependencies_satisfied() {
-	return ( defined( 'GUTENBERG_DEVELOPMENT_MODE' ) || defined( 'GUTENBERG_VERSION' ) )
-			&& class_exists( 'WooCommerce' ) && version_compare( WC_VERSION, '3.5', '>' );
+	$woocommerce_minimum_met      = class_exists( 'WooCommerce' ) && version_compare( WC_VERSION, '3.5', '>' );
+	if ( ! $woocommerce_minimum_met ) {
+		return false;
+	}
+
+	$wordpress_version            = get_bloginfo( 'version' );
+	$wordpress_includes_gutenberg = version_compare( $wordpress_version, '4.9.9', '>' );
+	$gutenberg_plugin_active      = defined( 'GUTENBERG_DEVELOPMENT_MODE' ) || defined( 'GUTENBERG_VERSION' );
+
+	return $wordpress_includes_gutenberg || $gutenberg_plugin_active;
 }
 
 /**
