@@ -79,6 +79,8 @@ class WC_Shortcode_Checkout {
 
 		do_action( 'before_woocommerce_pay' );
 
+		wc_print_notices();
+
 		$order_id = absint( $order_id );
 
 		// Pay for existing order.
