@@ -100,7 +100,7 @@
     "@wordpress/babel-preset-default": "2.1.0",
     "@wordpress/browserslist-config": "2.2.2",
     "@wordpress/components": "3.0.0",
-    "@wordpress/data": "2.1.4",
+    "@wordpress/data": "3.1.0",
     "@wordpress/date": "2.1.0",
     "@wordpress/element": "2.1.5",
     "@wordpress/hooks": "2.0.3",

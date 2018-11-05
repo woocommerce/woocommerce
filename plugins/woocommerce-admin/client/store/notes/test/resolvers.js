@@ -40,13 +40,13 @@ describe( 'getNotes', () => {
 
 	it( 'returns requested data', async () => {
 		expect.assertions( 1 );
-		await getNotes( {} );
+		await getNotes();
 		expect( dispatch().setNotes ).toHaveBeenCalledWith( NOTES_1, undefined );
 	} );
 
 	it( 'returns requested data for a specific query', async () => {
 		expect.assertions( 1 );
-		await getNotes( {}, { page: 2 } );
+		await getNotes( { page: 2 } );
 		expect( dispatch().setNotes ).toHaveBeenCalledWith( NOTES_2, { page: 2 } );
 	} );
 } );
