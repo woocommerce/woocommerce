@@ -1,15 +1,15 @@
 Activity Panel Inbox
 ====================
 
-Right now, installing and activating WooCommerce and a few extensions quickly results in a cascade of notices vying for the store administrator’s attention (and pushing whatever wp-admin content they were trying to get to on a page down, way down.
+Right now, installing and activating WooCommerce and a few extensions quickly results in a cascade of notices vying for the store administrator’s attention (and pushing whatever wp-admin content they were trying to get to on a page down, way down.)
 
-As part of the Dashboard and Analytics improvements coming to WooCommerce, we’re going to try and do something a bit dramatic to try and clean up this notice-palooza.
+As part of the Dashboard and Analytics improvements coming to WooCommerce, we’re going to do something a bit dramatic to try and clean up this notice-palooza.
 
 First, we’re splitting up notices into two broad categories.
 
 ## Category 1: Store Alerts
 
-The first category is what we’re calling “Store Alerts” - similar to the notices you have today, this notices are present at the top of administration pages and will look something like this:
+The first category is what we’re calling “Store Alerts” - similar to the notices you have today, these notices are present at the top of administration pages and will look something like this:
 
 ![Store Alerts](images/activity-panel-store-alerts.png)
 
@@ -17,16 +17,16 @@ But unlike today’s notices, this part of the UI will be reserved for “priori
 
 ## Category 2: Activity Panel Inbox
 
-The second category is what we’re focusing on in this post - and what we expect the vast majority of extension developers will want to extend - we call it the “Activity Panel Inbox.” It will look something like this:
+The second category is what we’re focusing on in this example - and what we expect the vast majority of extension developers will want to extend - we call it the “Activity Panel Inbox.” It will look something like this:
 
 ![Activity Panel Inbox](images/activity-panel-inbox.png)
 
-This section is dedicated to informational content coming from multiple sources such as WooCommerce core, WooCommerce.com Subscription management, extensions activity and store achievements. This section was also thought out to display more insightful content in the future, such as content that provides insights for the store data and that will help with the day to day tasks of managing and optimizing the store performance.
+This section is dedicated to informational content coming from multiple sources such as WooCommerce core, WooCommerce.com Subscription management, extensions activity and store achievements. This section was also envisioned to display more insightful content in the future, e.g. content that could help with the day to day tasks of managing and optimizing a store.
 
 Each notice or “note” has a type represented by an icon (Gridicon), a title, content, a timestamp and one or two actions (action title + link).
 
 ### Inbox Design Constraints and Best Practices
-Extensions can add their own notes via the API we’ll be covering below, but first… some constraints...
+Extensions can add their own notes via the data stores we’ll be covering below, but first... some constraints...
 
 There are some constraints extensions should follow when working with the inbox:
 
@@ -39,7 +39,7 @@ There are some constraints extensions should follow when working with the inbox:
 1. Notes can have 0, 1, or 2 action buttons. Action buttons have URLs. They can either be complete URLs (like in the case of an external link) or partial URLs (like in the case of an admin page on the site) - in the case of partial URLs you’ll want to give a string that is the same as what you’d supply to WordPress core’s admin_url function. You can even include query parameters in that string.
 1. You should store your extension’s name (slug) in the source property of the note. WooCommerce will store ‘woocommerce’ there. For example, the “Panda Payments” extension could use a name like “panda-payments” - this makes it easier to use built in functions to get (or delete) all notes with a certain name.
 1. You can use the name property of a note to store a sub-type of note. For example, if the Panda Payments extension generates notes for both connection problems AND for new features, they might both have ‘panda-payments’ in the source property but then use ‘connection-problem’ and ‘new-feature’ in the name property to distinguish between the two types of notes.
-1. Icons are Gridicons. You can find a gallery here: https://automattic.github.io/gridicons/
+1. Icons are Gridicons. You can find a gallery [here](https://automattic.github.io/gridicons/)
 1. As a best practice, have your extension remove its notes on deactivation or at least uninstall.
 
 So, enough rules - let’s get into how to code this up. And surprise, no JavaScript is necessary - you can work with the inbox exclusively through PHP -- the inbox front-end is React based, sure, but it draws all its data from a couple of new database tables and the PHP based REST API (and that’s where you can work with notes).
@@ -236,4 +236,5 @@ register_deactivation_hook( __FILE__, 'wapi_example_two_deactivate' );
 
 ## Questions?
 
-This is just the tip of the iceberg for possibilities for your own extensions to WooCommerce. Check out the wc-admin code itself for other examples of working with this fun new feature.
+This is just the tip of the iceberg for possibilities for your own extensions to WooCommerce. Check
+out the new [sales record notes](https://github.com/woocommerce/wc-admin/blob/master/includes/class-wc-admin-notes-new-sales-record.php) and the [settings notes](https://github.com/woocommerce/wc-admin/blob/master/includes/class-wc-admin-notes-settings-notes.php) for in the wc-admin code itself for other examples of working with this fun new feature.
