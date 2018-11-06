@@ -124,12 +124,37 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 				'query_type'          => 'get_results',
 				'filter_range'        => true,
 				'order_types'         => array_merge( wc_get_order_types( 'sales-reports' ), array( 'shop_order_refund' ) ),
-				'order_status'        => array( 'completed', 'processing', 'on-hold' ),
-				'parent_order_status' => array( 'completed', 'processing', 'on-hold' ), // Partial refunds inside refunded orders should be ignored
+				'order_status'        => array( 'completed', 'processing', 'on-hold', 'refunded' ),
+				'parent_order_status' => array( 'completed', 'processing', 'on-hold', 'refunded' ), // Partial refunds inside refunded orders should be ignored
 			)
 		);
 
-		// Merge
+		$tax_rows_full_refunds = $this->get_order_report_data( array(
+			'data'                => array(
+				'ID'          => array(
+					'type'     => 'post_data',
+					'distinct' => true,
+					'function' => '',
+					'name'     => 'ID',
+				),
+				'post_parent' => array(
+					'type'     => 'post_data',
+					'function' => '',
+					'name'     => 'post_parent',
+				),
+				'post_date'   => array(
+					'type'     => 'post_data',
+					'function' => '',
+					'name'     => 'post_date',
+				),
+			),
+			'query_type'          => 'get_results',
+			'filter_range'        => true,
+			'order_types'         => array( 'shop_order_refund' ),
+			'parent_order_status' => array( 'refunded' ),
+		) );
+
+		// Merge.
 		$tax_rows = array();
 
 		foreach ( $tax_rows_orders as $tax_row ) {
@@ -147,6 +172,24 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 			$tax_rows[ $key ]->tax_rate             = $tax_row->tax_rate;
 			$tax_rows[ $key ]->tax_amount          += wc_round_tax_total( $tax_row->tax_amount );
 			$tax_rows[ $key ]->shipping_tax_amount += wc_round_tax_total( $tax_row->shipping_tax_amount );
+		}
+
+		foreach ( $tax_rows_full_refunds as $tax_row ) {
+			$key              = $tax_row->rate_id;
+			$tax_rows[ $key ] = isset( $tax_rows[ $key ] ) ? $tax_rows[ $key ] : (object) array(
+				'tax_amount'          => 0,
+				'shipping_tax_amount' => 0,
+				'total_sales'         => 0,
+				'total_shipping'      => 0,
+				'total_orders'        => 0,
+			);
+			$parent_order     = wc_get_order( $tax_row->post_parent );
+			if ( $parent_order ) {
+				$tax_rows[ $key ]->tax_amount          += $parent_order->get_cart_tax() * -1;
+				$tax_rows[ $key ]->shipping_tax_amount += $parent_order->get_shipping_tax() * -1;
+				$tax_rows[ $key ]->total_sales         += $parent_order->get_total() * -1;
+				$tax_rows[ $key ]->total_shipping      += $parent_order->get_shipping_total() * -1;
+			}
 		}
 		?>
 		<table class="widefat">
