@@ -201,7 +201,7 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 	 */
 	public function handle_upload() {
 		// phpcs:disable WordPress.CSRF.NonceVerification.NoNonceVerification -- Nonce already verified in WC_Tax_Rate_Importer::dispatch()
-		$file_url = isset( $_POST['file_url'] ) ? esc_url_raw( wp_unslash( $_POST['file_url'] ) ) : '';
+		$file_url = isset( $_POST['file_url'] ) ? wc_clean( wp_unslash( $_POST['file_url'] ) ) : '';
 
 		if ( empty( $file_url ) ) {
 			$file = wp_import_handle_upload();
