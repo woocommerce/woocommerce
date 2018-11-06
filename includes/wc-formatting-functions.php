@@ -1232,10 +1232,14 @@ function wc_format_weight( $weight ) {
  * @return string
  */
 function wc_format_dimensions( $dimensions ) {
-	$dimension_string = implode( ' &times; ', array_filter( array_map( 'wc_format_localized_decimal', $dimensions ) ) );
+	$dimension_string = implode( ' x ', array_filter( array_map( 'wc_format_localized_decimal', $dimensions ) ) );
 
 	if ( ! empty( $dimension_string ) ) {
-		$dimension_string .= ' ' . get_option( 'woocommerce_dimension_unit' );
+		if ( is_rtl() ) {
+			$dimension_string = get_option( 'woocommerce_dimension_unit' ) . ' ' . $dimension_string;
+		} else {
+			$dimension_string .= ' ' . get_option( 'woocommerce_dimension_unit' );
+		}
 	} else {
 		$dimension_string = __( 'N/A', 'woocommerce' );
 	}
