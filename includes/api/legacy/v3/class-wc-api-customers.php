@@ -726,13 +726,13 @@ class WC_API_Customers extends WC_API_Resource {
 					break;
 
 				case 'edit':
-					if ( ! current_user_can( 'edit_users' ) ) {
+					if ( ! wc_rest_check_user_permissions( 'edit', $customer->ID ) ) {
 						throw new WC_API_Exception( 'woocommerce_api_user_cannot_edit_customer', __( 'You do not have permission to edit this customer', 'woocommerce' ), 401 );
 					}
 					break;
 
 				case 'delete':
-					if ( ! current_user_can( 'delete_users' ) ) {
+					if ( ! wc_rest_check_user_permissions( 'delete', $customer->ID ) ) {
 						throw new WC_API_Exception( 'woocommerce_api_user_cannot_delete_customer', __( 'You do not have permission to delete this customer', 'woocommerce' ), 401 );
 					}
 					break;

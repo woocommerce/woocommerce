@@ -1,7 +1,11 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+/**
+ * Admin view: Edit API keys
+ *
+ * @package WooCommerce/Admin/Settings
+ */
+
+defined( 'ABSPATH' ) || exit;
 ?>
 
 <div id="key-fields" class="settings-panel">
@@ -34,8 +38,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 					$curent_user_id = get_current_user_id();
 					$user_id        = ! empty( $key_data['user_id'] ) ? absint( $key_data['user_id'] ) : $curent_user_id;
 					$user           = get_user_by( 'id', $user_id );
-					/* translators: 1: user display name 2: user ID 3: user email */
-					$user_string = sprintf(
+					$user_string    = sprintf(
+						/* translators: 1: user display name 2: user ID 3: user email */
 						esc_html__( '%1$s (#%2$s &ndash; %3$s)', 'woocommerce' ),
 						$user->display_name,
 						absint( $user->ID ),
@@ -43,7 +47,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					);
 					?>
 					<select class="wc-customer-search" id="key_user" data-placeholder="<?php esc_attr_e( 'Search for a user&hellip;', 'woocommerce' ); ?>" data-allow_clear="true">
-						<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo $user_string; ?><option>
+						<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo esc_html( $user_string ); ?><option>
 					</select>
 				</td>
 			</tr>
@@ -91,7 +95,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							/* translators: 1: last access date 2: last access time */
 							$date = sprintf( __( '%1$s at %2$s', 'woocommerce' ), date_i18n( wc_date_format(), strtotime( $key_data['last_access'] ) ), date_i18n( wc_time_format(), strtotime( $key_data['last_access'] ) ) );
 
-							echo apply_filters( 'woocommerce_api_key_last_access_datetime', $date, $key_data['last_access'] );
+							echo esc_html( apply_filters( 'woocommerce_api_key_last_access_datetime', $date, $key_data['last_access'] ) );
 						} else {
 							esc_html_e( 'Unknown', 'woocommerce' );
 						}
@@ -106,7 +110,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<?php do_action( 'woocommerce_admin_key_fields', $key_data ); ?>
 
 	<?php
-	if ( 0 == $key_id ) {
+	if ( 0 === intval( $key_id ) ) {
 		submit_button( __( 'Generate API key', 'woocommerce' ), 'primary', 'update_api_key' );
 	} else {
 		?>

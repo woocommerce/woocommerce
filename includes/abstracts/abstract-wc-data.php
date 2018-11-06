@@ -445,7 +445,7 @@ abstract class WC_Data {
 			}
 		}
 
-		if ( $array_key ) {
+		if ( false !== $array_key ) {
 			$meta        = $this->meta_data[ $array_key ];
 			$meta->key   = $key;
 			$meta->value = $value;

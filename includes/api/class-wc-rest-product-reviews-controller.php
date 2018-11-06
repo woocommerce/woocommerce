@@ -391,7 +391,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		 * Do not allow a comment to be created with missing or empty comment_content. See wp_handle_comment_submission().
 		 */
 		if ( empty( $prepared_review['comment_content'] ) ) {
-			return new WP_Error( 'wc_rest_review_content_invalid', __( 'Invalid product review content.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_rest_review_content_invalid', __( 'Invalid review content.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		// Setting remaining values before wp_insert_comment so we can use wp_allow_comment().
@@ -926,7 +926,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		$params['context']['default'] = 'view';
 
 		$params['after']            = array(
-			'description' => __( 'Limit response to reviews published after a given ISO8601 compliant date.', 'woocommerce' ),
+			'description' => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce' ),
 			'type'        => 'string',
 			'format'      => 'date-time',
 		);
