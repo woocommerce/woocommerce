@@ -39,7 +39,7 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 			class="export_csv"
 			data-export="table"
 		>
-			<?php _esc_html_e( 'Export CSV', 'woocommerce' ); ?>
+			<?php esc_html_e( 'Export CSV', 'woocommerce' ); ?>
 		</a>
 		<?php
 	}
@@ -126,11 +126,21 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 				'order_by'            => 'posts.post_date ASC',
 				'query_type'          => 'get_results',
 				'filter_range'        => true,
-				'order_types'         => array_merge( wc_get_order_types( 'sales-reports' ), array( 'shop_order_refund' ) ),
+				'order_types'         => wc_get_order_types( 'sales-reports' ),
 				'order_status'        => array( 'completed', 'processing', 'on-hold', 'refunded' ),
 				'parent_order_status' => array( 'completed', 'processing', 'on-hold', 'refunded' ), // Partial refunds inside refunded orders should be ignored.
 			)
 		);
+
+		$tax_rows_partial_refunds = $this->get_order_report_data( array(
+			'data'                => $query_data,
+			'where'               => $query_where,
+			'order_by'            => 'posts.post_date ASC',
+			'query_type'          => 'get_results',
+			'filter_range'        => true,
+			'order_types'         => array( 'shop_order_refund' ),
+			'parent_order_status' => array( 'completed', 'processing', 'on-hold' ), // Partial refunds inside refunded orders should be ignored.
+		) );
 
 		$tax_rows_full_refunds = $this->get_order_report_data( array(
 			'data'                => array(
@@ -160,7 +170,7 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 		// Merge.
 		$tax_rows = array();
 
-		foreach ( $tax_rows_orders as $tax_row ) {
+		foreach ( $tax_rows_orders + $tax_rows_partial_refunds as $tax_row ) {
 			$key              = $tax_row->rate_id;
 			$tax_rows[ $key ] = isset( $tax_rows[ $key ] ) ? $tax_rows[ $key ] : (object) array(
 				'tax_amount'          => 0,
@@ -198,12 +208,12 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 		<table class="widefat">
 			<thead>
 				<tr>
-					<th><?php _esc_html_e( 'Tax', 'woocommerce' ); ?></th>
-					<th><?php _esc_html_e( 'Rate', 'woocommerce' ); ?></th>
-					<th class="total_row"><?php _esc_html_e( 'Number of orders', 'woocommerce' ); ?></th>
-					<th class="total_row"><?php _esc_html_e( 'Tax amount', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'This is the sum of the "Tax rows" tax amount within your orders.', 'woocommerce' ) ); ?></th>
-					<th class="total_row"><?php _esc_html_e( 'Shipping tax amount', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'This is the sum of the "Tax rows" shipping tax amount within your orders.', 'woocommerce' ) ); ?></th>
-					<th class="total_row"><?php _esc_html_e( 'Total tax', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'This is the total tax for the rate (shipping tax + product tax).', 'woocommerce' ) ); ?></th>
+					<th><?php esc_html_e( 'Tax', 'woocommerce' ); ?></th>
+					<th><?php esc_html_e( 'Rate', 'woocommerce' ); ?></th>
+					<th class="total_row"><?php esc_html_e( 'Number of orders', 'woocommerce' ); ?></th>
+					<th class="total_row"><?php esc_html_e( 'Tax amount', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'This is the sum of the "Tax rows" tax amount within your orders.', 'woocommerce' ) ); ?></th>
+					<th class="total_row"><?php esc_html_e( 'Shipping tax amount', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'This is the sum of the "Tax rows" shipping tax amount within your orders.', 'woocommerce' ) ); ?></th>
+					<th class="total_row"><?php esc_html_e( 'Total tax', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'This is the total tax for the rate (shipping tax + product tax).', 'woocommerce' ) ); ?></th>
 				</tr>
 			</thead>
 			<?php if ( ! empty( $tax_rows ) ) : ?>
@@ -235,7 +245,7 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 			<?php else : ?>
 				<tbody>
 					<tr>
-						<td><?php _esc_html_e( 'No taxes found in this period', 'woocommerce' ); ?></td>
+						<td><?php esc_html_e( 'No taxes found in this period', 'woocommerce' ); ?></td>
 					</tr>
 				</tbody>
 			<?php endif; ?>
