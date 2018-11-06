@@ -1,14 +1,17 @@
 <?php
+/**
+ * Taxes by tax code report.
+ *
+ * @package     WooCommerce/Admin/Reports
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit; // Exit if accessed directly.
 }
 
 /**
  * WC_Report_Taxes_By_Code
  *
- * @author      WooThemes
- * @category    Admin
  * @package     WooCommerce/Admin/Reports
  * @version     2.1.0
  */
@@ -28,15 +31,15 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 	 */
 	public function get_export_button() {
 
-		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( $_GET['range'] ) : 'last_month';
+		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( wp_unslash( $_GET['range'] ) ) : 'last_month';
 		?>
 		<a
 			href="#"
-			download="report-<?php echo esc_attr( $current_range ); ?>-<?php echo date_i18n( 'Y-m-d', current_time( 'timestamp' ) ); ?>.csv"
+			download="report-<?php echo esc_attr( $current_range ); ?>-<?php echo esc_attr( date_i18n( 'Y-m-d', current_time( 'timestamp' ) ) ); ?>.csv"
 			class="export_csv"
 			data-export="table"
 		>
-			<?php _e( 'Export CSV', 'woocommerce' ); ?>
+			<?php _esc_html_e( 'Export CSV', 'woocommerce' ); ?>
 		</a>
 		<?php
 	}
@@ -52,7 +55,7 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 			'month'      => __( 'This month', 'woocommerce' ),
 		);
 
-		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( $_GET['range'] ) : 'last_month';
+		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( wp_unslash( $_GET['range'] ) ) : 'last_month';
 
 		if ( ! in_array( $current_range, array( 'custom', 'year', 'last_month', 'month', '7day' ) ) ) {
 			$current_range = 'last_month';
@@ -125,7 +128,7 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 				'filter_range'        => true,
 				'order_types'         => array_merge( wc_get_order_types( 'sales-reports' ), array( 'shop_order_refund' ) ),
 				'order_status'        => array( 'completed', 'processing', 'on-hold', 'refunded' ),
-				'parent_order_status' => array( 'completed', 'processing', 'on-hold', 'refunded' ), // Partial refunds inside refunded orders should be ignored
+				'parent_order_status' => array( 'completed', 'processing', 'on-hold', 'refunded' ), // Partial refunds inside refunded orders should be ignored.
 			)
 		);
 
@@ -195,12 +198,12 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 		<table class="widefat">
 			<thead>
 				<tr>
-					<th><?php _e( 'Tax', 'woocommerce' ); ?></th>
-					<th><?php _e( 'Rate', 'woocommerce' ); ?></th>
-					<th class="total_row"><?php _e( 'Number of orders', 'woocommerce' ); ?></th>
-					<th class="total_row"><?php _e( 'Tax amount', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'This is the sum of the "Tax rows" tax amount within your orders.', 'woocommerce' ) ); ?></th>
-					<th class="total_row"><?php _e( 'Shipping tax amount', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'This is the sum of the "Tax rows" shipping tax amount within your orders.', 'woocommerce' ) ); ?></th>
-					<th class="total_row"><?php _e( 'Total tax', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'This is the total tax for the rate (shipping tax + product tax).', 'woocommerce' ) ); ?></th>
+					<th><?php _esc_html_e( 'Tax', 'woocommerce' ); ?></th>
+					<th><?php _esc_html_e( 'Rate', 'woocommerce' ); ?></th>
+					<th class="total_row"><?php _esc_html_e( 'Number of orders', 'woocommerce' ); ?></th>
+					<th class="total_row"><?php _esc_html_e( 'Tax amount', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'This is the sum of the "Tax rows" tax amount within your orders.', 'woocommerce' ) ); ?></th>
+					<th class="total_row"><?php _esc_html_e( 'Shipping tax amount', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'This is the sum of the "Tax rows" shipping tax amount within your orders.', 'woocommerce' ) ); ?></th>
+					<th class="total_row"><?php _esc_html_e( 'Total tax', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'This is the total tax for the rate (shipping tax + product tax).', 'woocommerce' ) ); ?></th>
 				</tr>
 			</thead>
 			<?php if ( ! empty( $tax_rows ) ) : ?>
@@ -232,7 +235,7 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 			<?php else : ?>
 				<tbody>
 					<tr>
-						<td><?php _e( 'No taxes found in this period', 'woocommerce' ); ?></td>
+						<td><?php _esc_html_e( 'No taxes found in this period', 'woocommerce' ); ?></td>
 					</tr>
 				</tbody>
 			<?php endif; ?>
