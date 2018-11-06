@@ -10,11 +10,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 
-<?php if ( 'publish' === get_post_status() ) : ?>
-	<style type="text/css">
-		#post-preview { display:none }
-	</style>
-<?php endif; ?>
 <div class="panel-wrap product_data">
 
 	<span class="type_box hidden"> &mdash;
