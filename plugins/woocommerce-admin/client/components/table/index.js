@@ -12,6 +12,11 @@ import PropTypes from 'prop-types';
 /**
  * WooCommerce dependencies
  */
+import {
+	downloadCSVFile,
+	generateCSVDataFromTable,
+	generateCSVFileName,
+} from '@woocommerce/csv-export';
 import { getIdsFromQuery } from '@woocommerce/navigation';
 
 /**
@@ -22,7 +27,6 @@ import Card from 'components/card';
 import CompareButton from 'components/filters/compare/button';
 import DowloadIcon from './download-icon';
 import EllipsisMenu from 'components/ellipsis-menu';
-import { downloadCSVFile, generateCSVDataFromTable, generateCSVFileName } from 'lib/csv';
 import MenuItem from 'components/ellipsis-menu/menu-item';
 import MenuTitle from 'components/ellipsis-menu/menu-title';
 import Pagination from 'components/pagination';

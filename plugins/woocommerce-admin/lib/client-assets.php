@@ -19,6 +19,14 @@ function wc_admin_register_script() {
 	}
 
 	wp_register_script(
+		'wc-csv',
+		wc_admin_url( 'dist/csv-export/index.js' ),
+		array(),
+		filemtime( wc_admin_dir_path( 'dist/csv-export/index.js' ) ),
+		true
+	);
+
+	wp_register_script(
 		'wc-currency',
 		wc_admin_url( 'dist/currency/index.js' ),
 		array(),
@@ -52,6 +60,7 @@ function wc_admin_register_script() {
 			'wp-hooks',
 			'wp-i18n',
 			'wp-keycodes',
+			'wc-csv',
 			'wc-currency',
 			'wc-date',
 			'wc-navigation',
