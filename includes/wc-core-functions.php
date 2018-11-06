@@ -1524,7 +1524,7 @@ function wc_shipping_zone_method_order_uasort_comparison( $a, $b ) {
  */
 function wc_checkout_fields_uasort_comparison( $a, $b ) {
 	/*
-	 * We are not guanranteed to get a priority
+	 * We are not guaranteed to get a priority
 	 * setting. So don't compare if they don't
 	 * exist.
 	 */
