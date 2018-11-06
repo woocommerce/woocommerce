@@ -84,7 +84,6 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * (default value: 0)
 	 *
 	 * @var int
-	 * @access protected
 	 */
 	protected $start_time = 0;
 
@@ -432,6 +431,11 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		// Stop if parent does not exists.
 		if ( ! $parent ) {
 			return new WP_Error( 'woocommerce_product_importer_missing_variation_parent_id', __( 'Variation cannot be imported: Missing parent ID or parent does not exist yet.', 'woocommerce' ), array( 'status' => 401 ) );
+		}
+
+		// Stop if parent is a product variation.
+		if ( $parent->is_type( 'variation' ) ) {
+			return new WP_Error( 'woocommerce_product_importer_parent_set_as_variation', __( 'Variation cannot be imported: Parent product cannot be a product variation', 'woocommerce' ), array( 'status' => 401 ) );
 		}
 
 		if ( isset( $data['raw_attributes'] ) ) {
