@@ -374,6 +374,14 @@ export const compareStrings = ( s1, s2, splitChar = ' ' ) => {
 
 export const drawAxis = ( node, params ) => {
 	const xScale = params.type === 'line' ? params.xLineScale : params.xScale;
+	const removeDuplicateDates = ( d, i, ticks, formatter ) => {
+		const monthDate = d instanceof Date ? d : new Date( d );
+		let prevMonth = i !== 0 ? ticks[ i - 1 ] : ticks[ i ];
+		prevMonth = prevMonth instanceof Date ? prevMonth : new Date( prevMonth );
+		return i === 0
+			? formatter( monthDate )
+			: compareStrings( formatter( prevMonth ), formatter( monthDate ) ).join( ' ' );
+	};
 
 	const yGrids = [];
 	for ( let i = 0; i < 4; i++ ) {
@@ -390,7 +398,7 @@ export const drawAxis = ( node, params ) => {
 		.call(
 			d3AxisBottom( xScale )
 				.tickValues( ticks )
-				.tickFormat( d => params.xFormat( d instanceof Date ? d : new Date( d ) ) )
+				.tickFormat( ( d, i ) => removeDuplicateDates( d, i, ticks, params.xFormat ) )
 		);
 
 	node
@@ -401,16 +409,7 @@ export const drawAxis = ( node, params ) => {
 		.call(
 			d3AxisBottom( xScale )
 				.tickValues( ticks )
-				.tickFormat( ( d, i ) => {
-					const monthDate = d instanceof Date ? d : new Date( d );
-					let prevMonth = i !== 0 ? ticks[ i - 1 ] : ticks[ i ];
-					prevMonth = prevMonth instanceof Date ? prevMonth : new Date( prevMonth );
-					return i === 0
-						? params.x2Format( monthDate )
-						: compareStrings( params.x2Format( prevMonth ), params.x2Format( monthDate ) ).join(
-								' '
-							);
-				} )
+				.tickFormat( ( d, i ) => removeDuplicateDates( d, i, ticks, params.x2Format ) )
 		)
 		.call( g => g.select( '.domain' ).remove() );
 

@@ -412,7 +412,7 @@ export function getIntervalForQuery( query ) {
 }
 
 export const dayTicksThreshold = 63;
-export const weekTicksThreshold = 7;
+export const weekTicksThreshold = 9;
 
 /**
  * Returns date formats for the current interval.
@@ -445,8 +445,13 @@ export function getDateFormatsForInterval( interval, ticks = 0 ) {
 			}
 			break;
 		case 'week':
-			xFormat = '%d';
-			x2Format = '%b %Y';
+			if ( ticks < weekTicksThreshold ) {
+				xFormat = '%d';
+				x2Format = '%b %Y';
+			} else {
+				xFormat = '%b';
+				x2Format = '%Y';
+			}
 			tooltipFormat = __( 'Week of %B %d %Y', 'wc-admin' );
 			break;
 		case 'quarter':
