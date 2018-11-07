@@ -19,7 +19,7 @@ import { format as formatDate } from '@wordpress/date';
 /**
  * WooCommerce dependencies
  */
-import { dayTicksThreshold } from '@woocommerce/date';
+import { dayTicksThreshold, weekTicksThreshold } from '@woocommerce/date';
 import { formatCurrency } from '@woocommerce/currency';
 
 /**
@@ -303,7 +303,10 @@ const calculateXTicksIncrementFactor = ( uniqueDates, maxTicks ) => {
 export const getXTicks = ( uniqueDates, width, layout, interval ) => {
 	const maxTicks = calculateMaxXTicks( width, layout );
 
-	if ( uniqueDates.length >= dayTicksThreshold && interval === 'day' ) {
+	if (
+		( uniqueDates.length >= dayTicksThreshold && interval === 'day' ) ||
+		( uniqueDates.length >= weekTicksThreshold && interval === 'week' )
+	) {
 		uniqueDates = getFirstDatePerMonth( uniqueDates );
 	}
 	if ( uniqueDates.length <= maxTicks ) {
