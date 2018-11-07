@@ -438,6 +438,13 @@ class WC_Admin_Note extends WC_Data {
 	}
 
 	/**
+	 * Clear actions from a note.
+	 */
+	public function clear_actions() {
+		$this->set_prop( 'actions', array() );
+	}
+
+	/**
 	 * Add an action to the note
 	 *
 	 * @param string $name Label name (not presented to user).

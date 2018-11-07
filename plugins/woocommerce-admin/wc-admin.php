@@ -133,6 +133,7 @@ function wc_admin_plugins_loaded() {
 	// Admin note providers.
 	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-notes-new-sales-record.php';
 	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-notes-settings-notes.php';
+	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-notes-woo-subscriptions-notes.php';
 }
 add_action( 'plugins_loaded', 'wc_admin_plugins_loaded' );
 
