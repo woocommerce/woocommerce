@@ -28,12 +28,25 @@ if ( ! defined( 'WC_ADMIN_PLUGIN_FILE' ) ) {
  * Notify users of the plugin requirements
  */
 function wc_admin_plugins_notice() {
-	$message = sprintf(
-		/* translators: 1: URL of Gutenberg plugin, 2: URL of WooCommerce plugin */
-		__( 'The WooCommerce Admin feature plugin requires both <a href="%1$s">Gutenberg</a> and <a href="%2$s">WooCommerce</a> (>3.5) to be installed and active.', 'wc-admin' ),
-		'https://wordpress.org/plugins/gutenberg/',
-		'https://wordpress.org/plugins/woocommerce/'
-	);
+	// The notice varies by WordPress version.
+	$wordpress_version            = get_bloginfo( 'version' );
+	$wordpress_includes_gutenberg = version_compare( $wordpress_version, '4.9.9', '>' );
+
+	if ( $wordpress_includes_gutenberg ) {
+		$message = sprintf(
+			// TODO: Remove the "and SCRIPT_DEBUG enabled" when https://github.com/woocommerce/wc-admin/issues/796 is fixed.
+			/* translators: URL of WooCommerce plugin */
+			__( 'The WooCommerce Admin feature plugin requires <a href="%s">WooCommerce</a> (>3.5) to be installed and active and SCRIPT_DEBUG enabled.', 'wc-admin' ),
+			'https://wordpress.org/plugins/woocommerce/'
+		);
+	} else {
+		$message = sprintf(
+			/* translators: 1: URL of Gutenberg plugin, 2: URL of WooCommerce plugin */
+			__( 'The WooCommerce Admin feature plugin requires both <a href="%1$s">Gutenberg</a> and <a href="%2$s">WooCommerce</a> (>3.5) to be installed and active.', 'wc-admin' ),
+			'https://wordpress.org/plugins/gutenberg/',
+			'https://wordpress.org/plugins/woocommerce/'
+		);
+	}
 	printf( '<div class="error"><p>%s</p></div>', $message ); /* WPCS: xss ok. */
 }
 
@@ -43,8 +56,20 @@ function wc_admin_plugins_notice() {
  * @return bool
  */
 function dependencies_satisfied() {
-	return ( defined( 'GUTENBERG_DEVELOPMENT_MODE' ) || defined( 'GUTENBERG_VERSION' ) )
-			&& class_exists( 'WooCommerce' ) && version_compare( WC_VERSION, '3.5', '>' );
+	$woocommerce_minimum_met = class_exists( 'WooCommerce' ) && version_compare( WC_VERSION, '3.5', '>' );
+	if ( ! $woocommerce_minimum_met ) {
+		return false;
+	}
+
+	$wordpress_version            = get_bloginfo( 'version' );
+	$wordpress_includes_gutenberg = version_compare( $wordpress_version, '4.9.9', '>' );
+	$gutenberg_plugin_active      = defined( 'GUTENBERG_DEVELOPMENT_MODE' ) || defined( 'GUTENBERG_VERSION' );
+
+	// Right now, there is a bug preventing us from running with WP5 with minified script.
+	// See https://github.com/woocommerce/wc-admin/issues/796 for details.
+	$script_debug_enabled = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG;
+
+	return ( $script_debug_enabled && $wordpress_includes_gutenberg ) || $gutenberg_plugin_active;
 }
 
 /**
