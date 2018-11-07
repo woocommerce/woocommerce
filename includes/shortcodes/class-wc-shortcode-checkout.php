@@ -143,6 +143,11 @@ class WC_Shortcode_Checkout {
 								throw new Exception( sprintf( __( 'Sorry, "%s" is no longer in stock so this order cannot be paid for. We apologize for any inconvenience caused.', 'woocommerce' ), $product->get_name() ) );
 							}
 
+							// We only need to check products managing stock, with a limited stock qty.
+							if ( ! $product->managing_stock() || $product->backorders_allowed() ) {
+								continue;
+							}
+
 							// Check stock based on all items in the cart and consider any held stock within pending orders.
 							$held_stock     = wc_get_held_stock_quantity( $product, $order->get_id() );
 							$required_stock = $quantities[ $product->get_stock_managed_by_id() ];
