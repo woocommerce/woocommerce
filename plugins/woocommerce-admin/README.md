@@ -14,6 +14,10 @@ This is a feature plugin for a modern, javascript-driven WooCommerce Admin exper
 
 For better debugging, it's also recommended you add `define( 'SCRIPT_DEBUG', true );` to your wp-config. This will load the unminified version of all libraries, and specifically the development build of React.
 
+### WordPress 5
+
+There is an unresolved bug ( https://github.com/woocommerce/wc-admin/issues/796 ) that prevents us from running with minified script. Until this is resolved, include `define( 'SCRIPT_DEBUG', true );` in your wp-config.
+
 ## Development
 
 After cloning the repo, install dependencies with `npm install`. Now you can build the files using one of these commands:
