@@ -24,7 +24,7 @@ Function called when selected results change, passed result list.
 ### `type`
 
 - **Required**
-- Type: One of: 'products', 'product_cats', 'orders', 'customers', 'coupons'
+- Type: One of: 'products', 'product_cats', 'orders', 'customers', 'coupons', 'variations'
 - Default: null
 
 The object type to be used in searching.
