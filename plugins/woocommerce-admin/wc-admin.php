@@ -43,7 +43,7 @@ function wc_admin_plugins_notice() {
  * @return bool
  */
 function dependencies_satisfied() {
-	$woocommerce_minimum_met      = class_exists( 'WooCommerce' ) && version_compare( WC_VERSION, '3.5', '>' );
+	$woocommerce_minimum_met = class_exists( 'WooCommerce' ) && version_compare( WC_VERSION, '3.5', '>' );
 	if ( ! $woocommerce_minimum_met ) {
 		return false;
 	}
