@@ -14,21 +14,12 @@ import { ReportFilters } from '@woocommerce/components';
  * Internal dependencies
  */
 import { advancedFilters, charts, filters } from './config';
+import getSelectedChart from 'lib/get-selected-chart';
 import OrdersReportTable from './table';
 import ReportChart from 'analytics/components/report-chart';
 import ReportSummary from 'analytics/components/report-summary';
 
 export default class OrdersReport extends Component {
-	getSelectedChart() {
-		const { query } = this.props;
-		const chart = find( charts, { key: query.chart } );
-		if ( chart ) {
-			return chart;
-		}
-
-		return charts[ 0 ];
-	}
-
 	render() {
 		const { path, query } = this.props;
 
@@ -44,14 +35,14 @@ export default class OrdersReport extends Component {
 					charts={ charts }
 					endpoint="orders"
 					query={ query }
-					selectedChart={ this.getSelectedChart() }
+					selectedChart={ getSelectedChart( query.chart, charts ) }
 				/>
 				<ReportChart
 					charts={ charts }
 					endpoint="orders"
 					path={ path }
 					query={ query }
-					selectedChart={ this.getSelectedChart() }
+					selectedChart={ getSelectedChart( query.chart, charts ) }
 				/>
 				<OrdersReportTable query={ query } />
 			</Fragment>
