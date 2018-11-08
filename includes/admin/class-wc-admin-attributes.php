@@ -173,7 +173,7 @@ class WC_Admin_Attributes {
 				echo '<div id="woocommerce_errors" class="error"><p>' . esc_html__( 'Error: non-existing attribute ID.', 'woocommerce' ) . '</p></div>';
 			} else {
 				$att_type    = $attribute_to_edit->attribute_type;
-				$att_label   = $attribute_to_edit->attribute_label;
+				$att_label   = format_to_edit( $attribute_to_edit->attribute_label );
 				$att_name    = $attribute_to_edit->attribute_name;
 				$att_orderby = $attribute_to_edit->attribute_orderby;
 				$att_public  = $attribute_to_edit->attribute_public;
