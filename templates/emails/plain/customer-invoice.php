@@ -27,14 +27,14 @@ echo sprintf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $order->get_billi
 if ( $order->has_status( 'pending' ) ) {
 	echo sprintf(
 		/* translators: %1$s Site title, %2$s Order pay link */
-		__( 'An order has been created for you on %1$s. Your invoice is below, with a link to make payment when you’re ready: %2$s', 'woocommerce' ),
+		esc_html__( 'An order has been created for you on %1$s. Your invoice is below, with a link to make payment when you’re ready: %2$s', 'woocommerce' ),
 		esc_html( get_bloginfo( 'name', 'display' ) ),
 		esc_url( $order->get_checkout_payment_url() )
 	) . "\n\n";
 
 } else {
 	/* translators: %s Order date */
-	echo sprintf( esc_html__( 'Here are the details of your order placed on %s:', 'woocommerce' ), esc_html( wc_format_datetime( $this->object->get_date_created() ) ) ) . "\n\n";
+	echo sprintf( esc_html__( 'Here are the details of your order placed on %s:', 'woocommerce' ), esc_html( wc_format_datetime( $order->get_date_created() ) ) ) . "\n\n";
 }
 echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
