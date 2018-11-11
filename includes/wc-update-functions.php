@@ -1872,3 +1872,30 @@ function wc_update_350_reviews_comment_type() {
 function wc_update_350_db_version() {
 	WC_Install::update_db_version( '3.5.0' );
 }
+
+/**
+ * Restore the authors id to 1 as the author_id patch was rolled back in 3.5.1 https://github.com/woocommerce/woocommerce/pull/21740 and not the DB changes.
+ *
+ * @return void
+ */
+function wc_update_352_restore_order_authors_to_admin() {
+	global $wpdb;
+
+	$wpdb->query( "
+		UPDATE $wpdb->posts as post
+		LEFT JOIN $wpdb->post_meta as post_meta on post.ID = post_meta.post_id
+		SET post.post_author = 1
+		WHERE post.post_type = 'shop_order'
+		AND post_meta.meta_key = '_created_via'
+		AND post_meta.meta_value <> 'admin'
+	" );
+}
+
+/**
+ * Update DB version.
+ *
+ * @return void
+ */
+function wc_update_352_db_version() {
+	WC_Install::update_db_version( '3.5.2' );
+}
