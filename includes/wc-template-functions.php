@@ -2771,6 +2771,7 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 			'id'               => '',
 			'class'            => '',
 			'show_option_none' => __( 'Choose an option', 'woocommerce' ),
+			'show_option_none_text' => __( 'Choose an option', 'woocommerce' ),
 		) );
 
 		// Get selected value.
@@ -2786,7 +2787,7 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 		$id                    = $args['id'] ? $args['id'] : sanitize_title( $attribute );
 		$class                 = $args['class'];
 		$show_option_none      = (bool) $args['show_option_none'];
-		$show_option_none_text = $args['show_option_none'] ? $args['show_option_none'] : __( 'Choose an option', 'woocommerce' ); // We'll do our best to hide the placeholder, but we'll need to show something when resetting options.
+		$show_option_none_text = $args['show_option_none_text']; // We'll do our best to hide the placeholder, but we'll need to show something when resetting options.
 
 		if ( empty( $options ) && ! empty( $product ) && ! empty( $attribute ) ) {
 			$attributes = $product->get_variation_attributes();
