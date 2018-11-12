@@ -23,8 +23,9 @@ import { H, Section } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
-import D3Chart from './charts';
-import Legend from './legend';
+import './style.scss';
+import D3Chart from 'components/d3chart';
+import Legend from 'components/d3chart/legend';
 
 d3FormatDefaultLocale( {
 	decimal: '.',
@@ -47,7 +48,7 @@ function getOrderedKeys( props ) {
 		visible: true,
 		focus: true,
 	} ) );
-	if ( props.layout === 'comparison' ) {
+	if ( props.mode === 'item-comparison' ) {
 		updatedKeys.sort( ( a, b ) => b.total - a.total );
 	}
 	return updatedKeys;
@@ -204,13 +205,12 @@ class Chart extends Component {
 		const {
 			dateParser,
 			itemsLabel,
-			layout,
 			mode,
-			pointLabelFormat,
 			isViewportLarge,
 			isViewportWide,
 			title,
-			tooltipFormat,
+			tooltipLabelFormat,
+			tooltipValueFormat,
 			tooltipTitle,
 			xFormat,
 			x2Format,
@@ -219,8 +219,9 @@ class Chart extends Component {
 			type,
 		} = this.props;
 		let { yFormat } = this.props;
-		const legendDirection = layout === 'standard' && isViewportWide ? 'row' : 'column';
-		const chartDirection = layout === 'comparison' && isViewportWide ? 'row' : 'column';
+		const legendDirection = mode === 'time-comparison' && isViewportWide ? 'row' : 'column';
+		const chartDirection = mode === 'item-comparison' && isViewportWide ? 'row' : 'column';
+
 		const chartHeight = this.getChartHeight();
 		const legend = (
 			<Legend
@@ -301,15 +302,15 @@ class Chart extends Component {
 								data={ visibleData }
 								dateParser={ dateParser }
 								height={ chartHeight }
+								interval={ interval }
 								margin={ margin }
 								mode={ mode }
 								orderedKeys={ orderedKeys }
-								pointLabelFormat={ pointLabelFormat }
-								tooltipFormat={ tooltipFormat }
+								tooltipLabelFormat={ tooltipLabelFormat }
+								tooltipValueFormat={ tooltipValueFormat }
 								tooltipPosition={ isViewportLarge ? 'over' : 'below' }
 								tooltipTitle={ tooltipTitle }
 								type={ type }
-								interval={ interval }
 								width={ chartDirection === 'row' ? width - 320 : width }
 								xFormat={ xFormat }
 								x2Format={ x2Format }
@@ -339,20 +340,19 @@ Chart.propTypes = {
 	 */
 	path: PropTypes.string,
 	/**
-	 * Date format of the point labels (might be used in tooltips and ARIA properties).
-	 */
-	pointLabelFormat: PropTypes.string,
-	/**
 	 * The query string represented in object form
 	 */
 	query: PropTypes.object,
 	/**
-	 * A datetime formatting string to format the date displayed as the title of the toolip
-	 * if `tooltipTitle` is missing, passed to d3TimeFormat.
+	 * A datetime formatting string or overriding function to format the tooltip label.
 	 */
-	tooltipFormat: PropTypes.string,
+	tooltipLabelFormat: PropTypes.oneOfType( [ PropTypes.string, PropTypes.func ] ),
 	/**
-	 * A string to use as a title for the tooltip. Takes preference over `tooltipFormat`.
+	 * A number formatting string or function to format the value displayed in the tooltips.
+	 */
+	tooltipValueFormat: PropTypes.oneOfType( [ PropTypes.string, PropTypes.func ] ),
+	/**
+	 * A string to use as a title for the tooltip. Takes preference over `tooltipLabelFormat`.
 	 */
 	tooltipTitle: PropTypes.string,
 	/**
@@ -367,11 +367,6 @@ Chart.propTypes = {
 	 * A number formatting string, passed to d3Format.
 	 */
 	yFormat: PropTypes.string,
-	/**
-	 * `standard` (default) legend layout in the header or `comparison` moves legend layout
-	 * to the left or 'compact' has the legend below
-	 */
-	layout: PropTypes.oneOf( [ 'standard', 'comparison', 'compact' ] ),
 	/**
 	 * `item-comparison` (default) or `time-comparison`, this is used to generate correct
 	 * ARIA properties.
@@ -406,11 +401,11 @@ Chart.propTypes = {
 Chart.defaultProps = {
 	data: [],
 	dateParser: '%Y-%m-%dT%H:%M:%S',
-	tooltipFormat: '%B %d, %Y',
+	tooltipLabelFormat: '%B %d, %Y',
+	tooltipValueFormat: ',',
 	xFormat: '%d',
 	x2Format: '%b %Y',
 	yFormat: '$.3s',
-	layout: 'standard',
 	mode: 'item-comparison',
 	type: 'line',
 	interval: 'day',

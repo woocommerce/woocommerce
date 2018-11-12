@@ -10,6 +10,7 @@ import { find, forEach, isNull } from 'lodash';
  */
 import { appendTimestamp, getCurrentDates, getIntervalForQuery } from '@woocommerce/date';
 import { flattenFilters, getActiveFiltersFromQuery, getUrlKey } from '@woocommerce/navigation';
+import { formatCurrency } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
@@ -246,4 +247,25 @@ export function getReportChartData( endpoint, dataType, query, select ) {
 	}
 
 	return { ...response, data: { totals, intervals } };
+}
+
+/**
+ * Returns a formatting function or string to be used by d3-format
+ *
+ * @param  {String} type Type of number, 'currency', 'number', 'percent', 'average'
+ * @return {String|Function}  returns a number format based on the type or an overriding formatting function
+ */
+export function getTooltipValueFormat( type ) {
+	switch ( type ) {
+		case 'currency':
+			return formatCurrency;
+		case 'percent':
+			return '.0%';
+		case 'number':
+			return ',';
+		case 'average':
+			return ',.2r';
+		default:
+			return ',';
+	}
 }

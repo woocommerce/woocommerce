@@ -27,7 +27,7 @@ import {
  * Internal dependencies
  */
 import { Chart, ChartPlaceholder } from 'components';
-import { getReportChartData } from 'store/reports/utils';
+import { getReportChartData, getTooltipValueFormat } from 'store/reports/utils';
 import ReportError from 'analytics/components/report-error';
 
 export const DEFAULT_FILTER = 'all';
@@ -107,13 +107,11 @@ export class ReportChart extends Component {
 					value: interval.subtotals[ selectedChart.key ] || 0,
 				},
 				[ secondaryKey ]: {
-					labelDate: secondaryDate,
+					labelDate: secondaryDate.format( 'YYYY-MM-DD HH:mm:ss' ),
 					value: ( secondaryInterval && secondaryInterval.subtotals[ selectedChart.key ] ) || 0,
 				},
 			};
 		} );
-		const mode = this.getChartMode();
-		const layout = mode === 'item-comparison' ? 'comparison' : 'standard';
 
 		return (
 			<Chart
@@ -125,9 +123,9 @@ export class ReportChart extends Component {
 				type={ getChartTypeForQuery( query ) }
 				allowedIntervals={ allowedIntervals }
 				itemsLabel={ itemsLabel }
-				layout={ layout }
-				mode={ mode }
-				pointLabelFormat={ formats.pointLabelFormat }
+				mode={ this.getChartMode() }
+				tooltipLabelFormat={ formats.tooltipLabelFormat }
+				tooltipValueFormat={ getTooltipValueFormat( selectedChart.type ) }
 				tooltipTitle={ selectedChart.label }
 				xFormat={ formats.xFormat }
 				x2Format={ formats.x2Format }
