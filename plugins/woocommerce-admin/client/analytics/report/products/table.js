@@ -99,11 +99,18 @@ class ProductsReportTable extends Component {
 				filter: 'advanced',
 				product_includes: product_id,
 			} );
+			const productDetailLink = getNewPath( timeRelatedQuery, 'products', {
+				filter: 'single_product',
+				products: product_id,
+			} );
 
 			return [
 				{
-					// @TODO Must link to the product detail report.
-					display: name,
+					display: (
+						<Link href={ productDetailLink } type="wc-admin">
+							{ name }
+						</Link>
+					),
 					value: name,
 				},
 				{

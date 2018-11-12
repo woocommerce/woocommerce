@@ -51,6 +51,20 @@ class FilterPicker extends Component {
 		}
 	}
 
+	componentDidUpdate( { query: prevQuery } ) {
+		const { query: nextQuery, config } = this.props;
+		if ( prevQuery[ config.param ] !== nextQuery[ [ config.param ] ] ) {
+			const selectedFilter = this.getFilter();
+			if ( selectedFilter && 'Search' === selectedFilter.component ) {
+				/* eslint-disable react/no-did-update-set-state */
+				this.setState( { nav: selectedFilter.path || [] } );
+				/* eslint-enable react/no-did-update-set-state */
+				const { param: filterParam, getLabels } = selectedFilter.settings;
+				getLabels( nextQuery[ filterParam ], nextQuery ).then( this.updateSelectedTag );
+			}
+		}
+	}
+
 	updateSelectedTag( tags ) {
 		this.setState( { selectedTag: tags[ 0 ] } );
 	}
