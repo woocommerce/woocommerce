@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AnimationSlider it renders correctly 1`] = `
+<div
+  className="woocommerce-slide-animation animate-left"
+>
+  <div>
+    <div />
+  </div>
+</div>
+`;
