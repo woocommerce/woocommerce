@@ -192,6 +192,7 @@ class Chart extends Component {
 		const { orderedKeys, type, visibleData, width } = this.state;
 		const {
 			dateParser,
+			itemsLabel,
 			layout,
 			mode,
 			pointLabelFormat,
@@ -211,12 +212,12 @@ class Chart extends Component {
 		chartHeight = width <= 783 ? 180 : chartHeight;
 		const legend = (
 			<Legend
-				className={ 'woocommerce-chart__legend' }
 				colorScheme={ d3InterpolateViridis }
 				data={ orderedKeys }
 				handleLegendHover={ this.handleLegendHover }
 				handleLegendToggle={ this.handleLegendToggle }
 				legendDirection={ legendDirection }
+				itemsLabel={ itemsLabel }
 				valueType={ valueType }
 			/>
 		);

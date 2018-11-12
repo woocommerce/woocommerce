@@ -2,6 +2,7 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
 
@@ -23,6 +24,11 @@ export default class ProductsReport extends Component {
 	render() {
 		const { path, query } = this.props;
 
+		const itemsLabel =
+			'single_product' === query.filter && !! query.products
+				? __( '%s variations', 'wc-admin' )
+				: __( '%s products', 'wc-admin' );
+
 		return (
 			<Fragment>
 				<ReportFilters query={ query } path={ path } filters={ filters } />
@@ -33,8 +39,10 @@ export default class ProductsReport extends Component {
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 				/>
 				<ReportChart
+					comparisonChart
 					charts={ charts }
 					endpoint="products"
+					itemsLabel={ itemsLabel }
 					path={ path }
 					query={ query }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
