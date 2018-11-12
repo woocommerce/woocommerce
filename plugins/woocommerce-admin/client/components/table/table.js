@@ -95,7 +95,7 @@ class Table extends Component {
 		const table = this.container.current;
 		const scrolledToEnd = table.scrollWidth - table.scrollLeft <= table.offsetWidth;
 		this.setState( {
-			isScrollable: scrolledToEnd ? false : true,
+			isScrollable: ! scrolledToEnd,
 		} );
 	};
 
@@ -110,9 +110,9 @@ class Table extends Component {
 			rowHeader,
 			rows,
 		} = this.props;
-		const { tabIndex } = this.state;
+		const { isScrollable, tabIndex } = this.state;
 		const classes = classnames( 'woocommerce-table__table', classNames, {
-			'is-scrollable': this.state.isScrollable,
+			'is-scrollable': isScrollable,
 		} );
 		const sortedBy = query.orderby || get( find( headers, { defaultSort: true } ), 'key', false );
 		const sortDir = query.order || DESC;
