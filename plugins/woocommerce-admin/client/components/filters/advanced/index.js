@@ -13,7 +13,12 @@ import interpolateComponents from 'interpolate-components';
 /**
  * WooCommerce dependencies
  */
-import { getNewPath } from '@woocommerce/navigation';
+import {
+	getActiveFiltersFromQuery,
+	getDefaultOptionValue,
+	getNewPath,
+	getQueryFromActiveFilters,
+} from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -22,11 +27,6 @@ import Card from 'components/card';
 import Link from 'components/link';
 import SelectFilter from './select-filter';
 import SearchFilter from './search-filter';
-import {
-	getActiveFiltersFromQuery,
-	getQueryFromActiveFilters,
-	getDefaultOptionValue,
-} from './utils';
 import './style.scss';
 
 const matches = [

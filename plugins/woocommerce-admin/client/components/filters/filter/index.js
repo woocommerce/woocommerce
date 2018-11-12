@@ -12,7 +12,7 @@ import PropTypes from 'prop-types';
 /**
  * WooCommerce dependencies
  */
-import { getTimeRelatedQuery, updateQueryString } from '@woocommerce/navigation';
+import { flattenFilters, getTimeRelatedQuery, updateQueryString } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -20,7 +20,6 @@ import { getTimeRelatedQuery, updateQueryString } from '@woocommerce/navigation'
 import AnimationSlider from 'components/animation-slider';
 import DropdownButton from 'components/dropdown-button';
 import Search from 'components/search';
-import { flatenFilters } from './utils';
 import './style.scss';
 
 export const DEFAULT_FILTER = 'all';
@@ -59,7 +58,7 @@ class FilterPicker extends Component {
 
 	getFilter( value ) {
 		const { config, query } = this.props;
-		const allFilters = flatenFilters( config.filters );
+		const allFilters = flattenFilters( config.filters );
 		value = value || query[ config.param ] || DEFAULT_FILTER;
 		return find( allFilters, { value } ) || {};
 	}

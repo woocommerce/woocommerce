@@ -1,18 +1,17 @@
-/**
- * @format
- */
-
-/**
- * External dependencies
- */
-
+/** @format */
 /**
  * Internal dependencies
  */
-import { getUrlKey, getActiveFiltersFromQuery, getQueryFromActiveFilters } from '../utils';
+import {
+	getActiveFiltersFromQuery,
+	getDefaultOptionValue,
+	getQueryFromActiveFilters,
+	getUrlKey,
+} from '../filters';
 
 const config = {
 	with_select: {
+		labels: { add: 'Order Status' },
 		rules: [ { value: 'is' } ],
 		input: {
 			component: 'SelectControl',
@@ -20,12 +19,14 @@ const config = {
 		},
 	},
 	with_search: {
+		labels: { add: 'Search' },
 		rules: [ { value: 'includes' } ],
 		input: {
 			component: 'Search',
 		},
 	},
 	with_no_rules: {
+		labels: { add: 'Order Status' },
 		input: {
 			component: 'SelectControl',
 			options: [ { value: 'pending' } ],
@@ -124,5 +125,46 @@ describe( 'getQueryFromActiveFilters', () => {
 		const nextQuery = getQueryFromActiveFilters( activeFilters, query, config );
 		expect( nextQuery.with_select_is ).toBeUndefined();
 		expect( nextQuery.with_search_includes ).toBeUndefined();
+	} );
+} );
+
+describe( 'getDefaultOptionValue', () => {
+	it( 'should return the default option value', () => {
+		const options = [ { value: 'new' }, { value: 'returning' } ];
+		const currentFilter = {
+			labels: { add: 'Customer Type' },
+			input: {
+				component: 'SelectControl',
+				options,
+				defaultOption: 'returning',
+			},
+		};
+		const value = getDefaultOptionValue( currentFilter, options );
+		expect( value ).toBe( 'returning' );
+	} );
+
+	it( 'should return the first option value when no default option', () => {
+		const options = [ { value: 'new' }, { value: 'returning' } ];
+		const currentFilter = {
+			labels: { add: 'Customer Type' },
+			input: {
+				component: 'SelectControl',
+				options,
+			},
+		};
+		const value = getDefaultOptionValue( currentFilter, options );
+		expect( value ).toBe( 'new' );
+	} );
+
+	it( 'should return undefined when no options are provided', () => {
+		const options = [];
+		const currentFilter = {
+			labels: { add: 'Product' },
+			input: {
+				component: 'Search',
+			},
+		};
+		const value = getDefaultOptionValue( currentFilter, options );
+		expect( value ).toBeUndefined();
 	} );
 } );

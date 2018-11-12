@@ -13,6 +13,9 @@ import history from './history';
 // Expose history so all uses get the same history object.
 export { history };
 
+// Export all filter utilities
+export * from './filters';
+
 /**
  * Internal dependencies
  */
