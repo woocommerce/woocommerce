@@ -108,8 +108,8 @@ export function onQueryChange( param, path = getPath(), query = getQuery() ) {
 		case 'sort':
 			return ( key, dir ) => updateQueryString( { orderby: key, order: dir }, path, query );
 		case 'compare':
-			return ( key, ids ) =>
-				updateQueryString( { filter: `compare-${ key }`, [ key ]: ids }, path, query );
+			return ( key, queryParam, ids ) =>
+				updateQueryString( { [ queryParam ]: `compare-${ key }`, [ key ]: ids }, path, query );
 		default:
 			return value => updateQueryString( { [ param ]: value }, path, query );
 	}

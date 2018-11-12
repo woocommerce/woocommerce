@@ -60,7 +60,7 @@ const filterConfig = {
 		},
 		{
 			label: __( 'Product Comparison', 'wc-admin' ),
-			value: 'compare-product',
+			value: 'compare-products',
 			settings: {
 				type: 'products',
 				param: 'products',
@@ -78,7 +78,7 @@ const filterConfig = {
 		},
 		{
 			label: __( 'Product Category Comparison', 'wc-admin' ),
-			value: 'compare-product_cat',
+			value: 'compare-product_cats',
 			settings: {
 				type: 'product_cats',
 				param: 'categories',
