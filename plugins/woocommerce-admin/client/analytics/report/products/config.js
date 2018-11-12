@@ -10,6 +10,24 @@ import { __ } from '@wordpress/i18n';
 import { getRequestByIdString } from 'lib/async-requests';
 import { NAMESPACE } from 'store/constants';
 
+export const charts = [
+	{
+		key: 'items_sold',
+		label: __( 'Items Sold', 'wc-admin' ),
+		type: 'number',
+	},
+	{
+		key: 'gross_revenue',
+		label: __( 'Gross Revenue', 'wc-admin' ),
+		type: 'currency',
+	},
+	{
+		key: 'orders_count',
+		label: __( 'Orders Count', 'wc-admin' ),
+		type: 'number',
+	},
+];
+
 const filterConfig = {
 	label: __( 'Show', 'wc-admin' ),
 	staticParams: [ 'chart' ],
