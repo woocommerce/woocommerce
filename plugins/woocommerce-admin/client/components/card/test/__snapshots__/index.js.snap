@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Card it renders correctly 1`] = `
+<div
+  className="woocommerce-card"
+>
+  <div
+    className="woocommerce-card__header"
+  >
+    <h2
+      className="woocommerce-card__title woocommerce-card__header-item"
+    >
+      A Card Example
+    </h2>
+  </div>
+  <div
+    className="woocommerce-card__body"
+  />
+</div>
+`;
