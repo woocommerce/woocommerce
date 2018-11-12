@@ -40,13 +40,13 @@ describe( 'getOrders', () => {
 
 	it( 'returns requested report data', async () => {
 		expect.assertions( 1 );
-		await getOrders( {} );
+		await getOrders();
 		expect( dispatch().setOrders ).toHaveBeenCalledWith( ORDERS_1, undefined );
 	} );
 
 	it( 'returns requested report data for a specific query', async () => {
 		expect.assertions( 1 );
-		await getOrders( {}, { orderby: 'id' } );
+		await getOrders( { orderby: 'id' } );
 		expect( dispatch().setOrders ).toHaveBeenCalledWith( ORDERS_2, { orderby: 'id' } );
 	} );
 } );

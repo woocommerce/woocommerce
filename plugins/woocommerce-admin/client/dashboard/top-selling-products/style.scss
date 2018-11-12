@@ -1,5 +1,9 @@
 /** @format */
 .woocommerce-top-selling-products {
+	&.woocommerce-empty-content {
+		margin-bottom: $gap-large;
+	}
+
 	.woocommerce-card__body {
 		padding: 0;
 	}

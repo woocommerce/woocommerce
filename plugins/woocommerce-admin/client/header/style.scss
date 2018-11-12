@@ -24,7 +24,7 @@
 		flex-flow: row wrap;
 	}
 
-	@include breakpoint( '782px-1100px' ) {
+	@include breakpoint( '782px-960px' ) {
 		height: 60px;
 	}
 
@@ -38,12 +38,12 @@
 		line-height: 50px;
 		background: $white;
 
-		@include breakpoint( '782px-1100px' ) {
+		@include breakpoint( '782px-960px' ) {
 			height: 60px;
 			line-height: 60px;
 		}
 
-		@include breakpoint( '>1100px' ) {
+		@include breakpoint( '>960px' ) {
 			height: 80px;
 			line-height: 80px;
 		}

@@ -8,7 +8,7 @@
 	margin: 80px 0 0 $fallback-gutter-large;
 	margin: 80px 0 0 $gutter-large;
 
-	@include breakpoint( '>1100px' ) {
+	@include breakpoint( '>960px' ) {
 		margin-top: 100px;
 	}
 }

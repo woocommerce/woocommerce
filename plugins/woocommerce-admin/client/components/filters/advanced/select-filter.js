@@ -10,9 +10,9 @@ import interpolateComponents from 'interpolate-components';
 import classnames from 'classnames';
 
 /**
- * Internal dependencies
+ * WooCommerce dependencies
  */
-import { getDefaultOptionValue } from './utils';
+import { getDefaultOptionValue } from '@woocommerce/navigation';
 
 class SelectFilter extends Component {
 	constructor( { filter, config, onFilterChange } ) {

@@ -104,6 +104,18 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 		global $wpdb;
 
 		if ( $note->get_id() ) {
+			$date_created           = $note->get_date_created();
+			$date_created_timestamp = $date_created->getTimestamp();
+			$date_created_to_db     = gmdate( 'Y-m-d H:i:s', $date_created_timestamp );
+
+			$date_reminder = $note->get_date_reminder();
+			if ( is_null( $date_reminder ) ) {
+				$date_reminder_to_db = null;
+			} else {
+				$date_reminder_timestamp = $date_reminder->getTimestamp();
+				$date_reminder_to_db     = gmdate( 'Y-m-d H:i:s', $date_reminder_timestamp );
+			}
+
 			$wpdb->update(
 				$wpdb->prefix . 'woocommerce_admin_notes',
 				array(
@@ -116,8 +128,8 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 					'content_data'  => wp_json_encode( $note->get_content_data() ),
 					'status'        => $note->get_status(),
 					'source'        => $note->get_source(),
-					'date_created'  => $note->get_date_created(),
-					'date_reminder' => $note->get_date_reminder(),
+					'date_created'  => $date_created_to_db,
+					'date_reminder' => $date_reminder_to_db,
 				),
 				array( 'note_id' => $note->get_id() )
 			);

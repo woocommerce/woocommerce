@@ -10,7 +10,7 @@
 	display: flex;
 	margin-bottom: $gap-large;
 
-	@include breakpoint( '<1100px' ) {
+	@include breakpoint( '<1280px' ) {
 		flex-direction: column;
 	}
 }
@@ -31,7 +31,7 @@
 		padding-right: 0;
 	}
 
-	@include breakpoint( '<1100px' ) {
+	@include breakpoint( '<1280px' ) {
 		width: 50%;
 		padding: 0;
 		min-height: 78px;
@@ -46,7 +46,7 @@
 	margin: 7px 0;
 	display: block;
 
-	@include breakpoint( '<1100px' ) {
+	@include breakpoint( '<1280px' ) {
 		margin: 5px 0;
 	}
 }

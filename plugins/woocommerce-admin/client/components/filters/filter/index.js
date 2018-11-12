@@ -10,13 +10,16 @@ import { find, partial, last, get, includes } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
+ * WooCommerce dependencies
+ */
+import { flattenFilters, getTimeRelatedQuery, updateQueryString } from '@woocommerce/navigation';
+
+/**
  * Internal dependencies
  */
 import AnimationSlider from 'components/animation-slider';
 import DropdownButton from 'components/dropdown-button';
 import Search from 'components/search';
-import { getTimeRelatedQuery, updateQueryString } from 'lib/nav-utils';
-import { flatenFilters } from './utils';
 import './style.scss';
 
 export const DEFAULT_FILTER = 'all';
@@ -45,7 +48,7 @@ class FilterPicker extends Component {
 		if ( selectedFilter.settings && selectedFilter.settings.getLabels ) {
 			const { query } = this.props;
 			const { param: filterParam, getLabels } = selectedFilter.settings;
-			getLabels( query[ filterParam ] ).then( this.updateSelectedTag );
+			getLabels( query[ filterParam ], query ).then( this.updateSelectedTag );
 		}
 	}
 
@@ -55,7 +58,7 @@ class FilterPicker extends Component {
 
 	getFilter( value ) {
 		const { config, query } = this.props;
-		const allFilters = flatenFilters( config.filters );
+		const allFilters = flattenFilters( config.filters );
 		value = value || query[ config.param ] || DEFAULT_FILTER;
 		return find( allFilters, { value } ) || {};
 	}

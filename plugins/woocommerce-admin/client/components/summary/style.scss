@@ -145,7 +145,7 @@ $inner-border: $core-grey-light-500;
 		@include wrap-contents;
 	}
 
-	@include breakpoint( '<1365px' ) {
+	@include breakpoint( '<1440px' ) {
 		&.has-4-items,
 		&.has-7-items,
 		&.has-8-items {
@@ -170,7 +170,7 @@ $inner-border: $core-grey-light-500;
 		}
 	}
 
-	@include breakpoint( '<1100px' ) {
+	@include breakpoint( '<960px' ) {
 		.woocommerce-summary__item {
 			// One-col layout for all items means right border is always "outer"
 			border-right-color: $outer-border;
@@ -281,7 +281,7 @@ $inner-border: $core-grey-light-500;
 .has-6-items .woocommerce-summary__item-container {
 	@include set-grid-item-position( 6, 6 );
 
-	@include breakpoint( '<1365px' ) {
+	@include breakpoint( '<1440px' ) {
 		@include set-grid-item-position( 3, 6 );
 	}
 }
@@ -297,7 +297,7 @@ $inner-border: $core-grey-light-500;
 .has-9-items .woocommerce-summary__item-container {
 	@include set-grid-item-position( 5, 9 );
 
-	@include breakpoint( '<1365px' ) {
+	@include breakpoint( '<1440px' ) {
 		@include set-grid-item-position( 3, 9 );
 	}
 }
@@ -305,12 +305,12 @@ $inner-border: $core-grey-light-500;
 .has-10-items .woocommerce-summary__item-container {
 	@include set-grid-item-position( 5, 10 );
 
-	@include breakpoint( '<1365px' ) {
+	@include breakpoint( '<1440px' ) {
 		@include set-grid-item-position( 4, 10 );
 	}
 }
 
-@include breakpoint( '<1100px' ) {
+@include breakpoint( '<960px' ) {
 	@for $i from 1 through 10 {
 		.woocommerce-summary > .woocommerce-summary__item-container:nth-child(#{$i}) {
 			grid-column-start: 1;

@@ -2,21 +2,27 @@
 /**
  * External dependencies
  */
-import { find, compact } from 'lodash';
+import { compact, find, get, omit } from 'lodash';
 
 /**
- * Get the url query key from the filter key and rule.
+ * Collapse an array of filter values with subFilters into a 1-dimensional array.
  *
- * @param {string} key - filter key.
- * @param {string} rule - filter rule.
- * @return {string} - url query key.
+ * @param {Array} filters Set of filters with possible subfilters.
+ * @return {Array} Flattened array of all filters.
  */
-export const getUrlKey = ( key, rule ) => {
-	if ( rule && rule.length ) {
-		return `${ key }_${ rule }`;
-	}
-	return key;
-};
+export function flattenFilters( filters ) {
+	const allFilters = [];
+	filters.forEach( f => {
+		if ( ! f.subFilters ) {
+			allFilters.push( f );
+		} else {
+			allFilters.push( omit( f, 'subFilters' ) );
+			const subFilters = flattenFilters( f.subFilters );
+			allFilters.push( ...subFilters );
+		}
+	} );
+	return allFilters;
+}
 
 /**
  * Describe activeFilter object.
@@ -34,7 +40,7 @@ export const getUrlKey = ( key, rule ) => {
  * @param {object} config - config object
  * @return {activeFilters[]} - array of activeFilters
  */
-export const getActiveFiltersFromQuery = ( query, config ) => {
+export function getActiveFiltersFromQuery( query, config ) {
 	return compact(
 		Object.keys( config ).map( configKey => {
 			const filter = config[ configKey ];
@@ -62,7 +68,30 @@ export const getActiveFiltersFromQuery = ( query, config ) => {
 			return null;
 		} )
 	);
-};
+}
+
+/**
+ * Get the default option's value from the configuration object for a given filter. The first
+ * option is used as default if no `defaultOption` is provided.
+ *
+ * @param {object} config - a filter config object.
+ * @param {array} options - select options.
+ * @return {string|undefined}  - the value of the default option.
+ */
+export function getDefaultOptionValue( config, options ) {
+	const { defaultOption } = config.input;
+	if ( config.input.defaultOption ) {
+		const option = find( options, { value: defaultOption } );
+		if ( ! option ) {
+			/* eslint-disable no-console */
+			console.warn( `invalid defaultOption ${ defaultOption } supplied to ${ config.labels.add }` );
+			/* eslint-enable */
+			return undefined;
+		}
+		return option.value;
+	}
+	return get( options, [ 0, 'value' ] );
+}
 
 /**
  * Given activeFilters, create a new query object to update the url. Use previousFilters to
@@ -73,7 +102,7 @@ export const getActiveFiltersFromQuery = ( query, config ) => {
  * @param {object} config - config object
  * @return {object} - query object representing the new parameters
  */
-export const getQueryFromActiveFilters = ( activeFilters, query, config ) => {
+export function getQueryFromActiveFilters( activeFilters, query, config ) {
 	const previousFilters = getActiveFiltersFromQuery( query, config );
 	const previousData = previousFilters.reduce( ( data, filter ) => {
 		data[ getUrlKey( filter.key, filter.rule ) ] = undefined;
@@ -87,24 +116,18 @@ export const getQueryFromActiveFilters = ( activeFilters, query, config ) => {
 	}, {} );
 
 	return { ...previousData, ...nextData };
-};
+}
 
 /**
  * Get the url query key from the filter key and rule.
  *
- * @param {object} config - a filter config object.
- * @param {array} options - select options.
- * @return {string|undefined}  - the value of the default option.
+ * @param {string} key - filter key.
+ * @param {string} rule - filter rule.
+ * @return {string} - url query key.
  */
-export const getDefaultOptionValue = ( config, options ) => {
-	const { defaultOption } = config.input;
-	if ( config.input.defaultOption ) {
-		const option = find( options, { value: defaultOption } );
-		if ( ! option ) {
-			console.warn( `invalid defaultOption ${ defaultOption } supplied to ${ config.labels.add }` );
-			return undefined;
-		}
-		return option.value;
+export function getUrlKey( key, rule ) {
+	if ( rule && rule.length ) {
+		return `${ key }_${ rule }`;
 	}
-	return options[ 0 ].value;
-};
+	return key;
+}

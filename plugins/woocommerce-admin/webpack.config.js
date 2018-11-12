@@ -2,14 +2,18 @@
 /**
  * External dependencies
  */
-const path = require( 'path' );
 const ExtractTextPlugin = require( 'extract-text-webpack-plugin' );
+const { get } = require( 'lodash' );
+const path = require( 'path' );
+
+/**
+ * WordPress dependencies
+ */
+const CustomTemplatedPathPlugin = require( '@wordpress/custom-templated-path-webpack-plugin' );
+
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 const externals = {
-	'@woocommerce/components': { this: [ 'wc', 'components' ] },
-	'@woocommerce/currency': { this: [ 'wc', 'currency' ] },
-	'@woocommerce/date': { this: [ 'wc', 'date' ] },
 	'@wordpress/api-fetch': { this: [ 'wp', 'apiFetch' ] },
 	'@wordpress/blocks': { this: [ 'wp', 'blocks' ] },
 	'@wordpress/components': { this: [ 'wp', 'components' ] },
@@ -29,13 +33,15 @@ const externals = {
 
 const wcAdminPackages = {
 	components: './client/components',
+	'csv-export': './packages/csv-export',
 	currency: './packages/currency',
 	date: './packages/date',
+	navigation: './packages/navigation',
 };
 
-Object.keys( wcAdminPackages ).forEach( ( name ) => {
+Object.keys( wcAdminPackages ).forEach( name => {
 	externals[ `@woocommerce/${ name }` ] = {
-		this: [ 'wc', name ],
+		this: [ 'wc', name.replace( /-([a-z])/g, ( match, letter ) => letter.toUpperCase() ) ],
 	};
 } );
 
@@ -49,7 +55,7 @@ const webpackConfig = {
 	output: {
 		filename: './dist/[name]/index.js',
 		path: __dirname,
-		library: [ 'wc', '[name]' ],
+		library: [ 'wc', '[modulename]' ],
 		libraryTarget: 'this',
 	},
 	externals,
@@ -94,12 +100,25 @@ const webpackConfig = {
 	},
 	resolve: {
 		extensions: [ '.json', '.js', '.jsx' ],
-		modules: [ path.join( __dirname, 'client' ), path.join( __dirname, 'packages' ), 'node_modules' ],
+		modules: [
+			path.join( __dirname, 'client' ),
+			path.join( __dirname, 'packages' ),
+			'node_modules',
+		],
 		alias: {
 			'gutenberg-components': path.resolve( __dirname, 'node_modules/@wordpress/components/src' ),
 		},
 	},
 	plugins: [
+		new CustomTemplatedPathPlugin( {
+			modulename( outputPath, data ) {
+				const entryName = get( data, [ 'chunk', 'name' ] );
+				if ( entryName ) {
+					return entryName.replace( /-([a-z])/g, ( match, letter ) => letter.toUpperCase() );
+				}
+				return outputPath;
+			},
+		} ),
 		new ExtractTextPlugin( {
 			filename: './dist/[name]/style.css',
 		} ),

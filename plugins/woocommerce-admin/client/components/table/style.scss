@@ -26,9 +26,27 @@
 			display: grid;
 			width: 100%;
 			grid-template-columns: auto 1fr auto;
+
+			.woocommerce-table__compare {
+				align-self: center;
+				grid-column-start: 1;
+				grid-column-end: 2;
+			}
+
+			.woocommerce-search {
+				align-self: center;
+				grid-column-start: 2;
+				grid-column-end: 3;
+			}
+
+			.woocommerce-table__download-button {
+				align-self: center;
+				grid-column-start: 3;
+				grid-column-end: 4;
+			}
 		}
 
-		@include breakpoint( '<1100px' ) {
+		@include breakpoint( '<960px' ) {
 			.woocommerce-card__action {
 				grid-area: 1 / 1 / 3 / 4;
 				grid-gap: $gap-small;
@@ -105,7 +123,7 @@
 		padding-top: $gap;
 		padding-bottom: $gap;
 		z-index: 1;
-		background: white;
+		background: $white;
 		position: relative;
 	}
 }
@@ -126,11 +144,13 @@
 		width: 41px;
 		height: 100%;
 		background: linear-gradient(90deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.2));
-		visibility: hidden;
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 0.3s;
 	}
 
 	&.is-scrollable::after {
-		visibility: visible;
+		opacity: 1;
 	}
 
 	table {

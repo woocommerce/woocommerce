@@ -11,13 +11,13 @@ import PropTypes from 'prop-types';
  * WooCommerce dependencies
  */
 import { getCurrentDates, getDateParamsFromQuery, isoDateFormat } from '@woocommerce/date';
+import { updateQueryString } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
  */
 import DatePickerContent from './content';
 import DropdownButton from 'components/dropdown-button';
-import { updateQueryString } from 'lib/nav-utils';
 import './style.scss';
 
 const shortDateFormat = __( 'MM/DD/YYYY', 'wc-admin' );

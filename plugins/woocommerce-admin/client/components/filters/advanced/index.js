@@ -11,18 +11,22 @@ import Gridicon from 'gridicons';
 import interpolateComponents from 'interpolate-components';
 
 /**
+ * WooCommerce dependencies
+ */
+import {
+	getActiveFiltersFromQuery,
+	getDefaultOptionValue,
+	getNewPath,
+	getQueryFromActiveFilters,
+} from '@woocommerce/navigation';
+
+/**
  * Internal dependencies
  */
 import Card from 'components/card';
 import Link from 'components/link';
 import SelectFilter from './select-filter';
 import SearchFilter from './search-filter';
-import {
-	getActiveFiltersFromQuery,
-	getQueryFromActiveFilters,
-	getDefaultOptionValue,
-} from './utils';
-import { getNewPath } from 'lib/nav-utils';
 import './style.scss';
 
 const matches = [
@@ -144,7 +148,7 @@ class AdvancedFilters extends Component {
 	}
 
 	render() {
-		const { config } = this.props;
+		const { config, query } = this.props;
 		const { activeFilters, match } = this.state;
 		const availableFilterKeys = this.getAvailableFilterKeys();
 		const updateHref = this.getUpdateHref( activeFilters, match );
@@ -172,6 +176,7 @@ class AdvancedFilters extends Component {
 										config={ config.filters[ key ] }
 										onFilterChange={ this.onFilterChange }
 										isEnglish={ isEnglish }
+										query={ query }
 									/>
 								) }
 								<IconButton

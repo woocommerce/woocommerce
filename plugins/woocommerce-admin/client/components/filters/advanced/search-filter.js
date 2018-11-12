@@ -15,7 +15,7 @@ import classnames from 'classnames';
 import Search from 'components/search';
 
 class SearchFilter extends Component {
-	constructor( { filter, config } ) {
+	constructor( { filter, config, query } ) {
 		super( ...arguments );
 		this.onSearchChange = this.onSearchChange.bind( this );
 		this.state = {
@@ -25,7 +25,7 @@ class SearchFilter extends Component {
 		this.updateLabels = this.updateLabels.bind( this );
 
 		if ( filter.value.length ) {
-			config.input.getLabels( filter.value ).then( this.updateLabels );
+			config.input.getLabels( filter.value, query ).then( this.updateLabels );
 		}
 	}
 
@@ -130,6 +130,10 @@ SearchFilter.propTypes = {
 	 * Function to be called on update.
 	 */
 	onFilterChange: PropTypes.func.isRequired,
+	/**
+	 * The query string represented in object form.
+	 */
+	query: PropTypes.object,
 };
 
 export default SearchFilter;

@@ -10,6 +10,24 @@ import { __ } from '@wordpress/i18n';
 import { getRequestByIdString } from 'lib/async-requests';
 import { NAMESPACE } from 'store/constants';
 
+export const charts = [
+	{
+		key: 'items_sold',
+		label: __( 'Items Sold', 'wc-admin' ),
+		type: 'number',
+	},
+	{
+		key: 'gross_revenue',
+		label: __( 'Gross Revenue', 'wc-admin' ),
+		type: 'currency',
+	},
+	{
+		key: 'orders_count',
+		label: __( 'Orders Count', 'wc-admin' ),
+		type: 'number',
+	},
+];
+
 const filterConfig = {
 	label: __( 'Show', 'wc-admin' ),
 	staticParams: [ 'chart' ],
@@ -99,13 +117,21 @@ const variationsConfig = {
 			label: __( 'Comparison', 'wc-admin' ),
 			value: 'compare',
 			settings: {
-				// @TODO create a variations autocompleter
-				type: 'products',
+				type: 'variations',
 				param: 'variations',
-				getLabels: getRequestByIdString( NAMESPACE + 'products', product => ( {
-					id: product.id,
-					label: product.name,
-				} ) ),
+				getLabels: getRequestByIdString(
+					query => NAMESPACE + `products/${ query.products }/variations`,
+					variation => {
+						return {
+							id: variation.id,
+							label: variation.attributes.reduce(
+								( desc, attribute, index, arr ) =>
+									desc + `${ attribute.option }${ arr.length === index + 1 ? '' : ', ' }`,
+								''
+							),
+						};
+					}
+				),
 				labels: {
 					helpText: __( 'Select at least two variations to compare', 'wc-admin' ),
 					placeholder: __( 'Search for variations to compare', 'wc-admin' ),

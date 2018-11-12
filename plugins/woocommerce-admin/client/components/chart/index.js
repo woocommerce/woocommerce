@@ -2,7 +2,6 @@
 /**
  * External dependencies
  */
-
 import { decodeEntities } from '@wordpress/html-entities';
 import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
@@ -15,14 +14,18 @@ import { formatDefaultLocale as d3FormatDefaultLocale } from 'd3-format';
 import Gridicon from 'gridicons';
 
 /**
+ * WooCommerce dependencies
+ */
+import { updateQueryString } from '@woocommerce/navigation';
+
+/**
  * Internal dependencies
  */
 import D3Chart from './charts';
+import { gap, gaplarge } from 'stylesheets/abstracts/_variables.scss';
+import { H, Section } from 'components/section';
 import Legend from './legend';
 import { WIDE_BREAKPOINT } from './utils';
-import { H, Section } from 'components/section';
-import { gap, gaplarge } from 'stylesheets/abstracts/_variables.scss';
-import { updateQueryString } from 'lib/nav-utils';
 
 d3FormatDefaultLocale( {
 	decimal: '.',

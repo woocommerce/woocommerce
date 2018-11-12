@@ -23,8 +23,10 @@ const wordPressPackages = [
 
 const wooCommercePackages = [
 	'components',
+	'csv',
 	'currency',
 	'date',
+	'navigation',
 ];
 
 wordPressPackages.forEach( lib => {

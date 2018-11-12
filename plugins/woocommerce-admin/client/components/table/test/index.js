@@ -1,11 +1,14 @@
+/** @format */
 /**
  * External dependencies
- *
- * @format
  */
 import fetch from 'node-fetch';
-import moment from 'moment';
 import { mount, shallow } from 'enzyme';
+
+/**
+ * WooCommerce dependencies
+ */
+import { downloadCSVFile, generateCSVFileName } from '@woocommerce/csv-export';
 
 /**
  * Internal dependencies
@@ -14,10 +17,10 @@ import TableCard from '../index';
 import mockHeaders from '../__mocks__/table-mock-headers';
 import mockData from '../__mocks__/table-mock-data';
 import mockCSV from '../__mocks__/table-mock-csv';
-import { downloadCSVFile } from 'lib/csv';
 
-jest.mock( 'lib/csv', () => ( {
-	...require.requireActual( 'lib/csv' ),
+jest.mock( '@woocommerce/csv-export', () => ( {
+	...require.requireActual( '@woocommerce/csv-export' ),
+	generateCSVFileName: jest.fn().mockReturnValue( 'filename.csv' ),
 	downloadCSVFile: jest.fn(),
 } ) );
 
@@ -80,9 +83,7 @@ describe( 'TableCard', () => {
 		);
 		downloadButton.props().onClick();
 
-		expect( downloadCSVFile ).toHaveBeenCalledWith(
-			'revenue-' + moment().format( 'YYYY-MM-DD' ) + '.csv',
-			mockCSV
-		);
+		expect( downloadCSVFile ).toHaveBeenCalledWith( 'filename.csv', mockCSV );
+		expect( generateCSVFileName ).toHaveBeenCalledWith( 'Revenue', {} );
 	} );
 } );

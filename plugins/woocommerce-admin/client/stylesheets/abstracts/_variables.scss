@@ -24,7 +24,9 @@ $dark-gray-300: $core-grey-dark-300;
 $dark-gray-900: $core-grey-dark-900;
 $alert-red: $error-red;
 
+/* stylelint-disable */
 :export {
 	gaplarge: $gap-large;
 	gap: $gap;
 }
+/* stylelint-enable */

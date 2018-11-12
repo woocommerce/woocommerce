@@ -21,6 +21,7 @@ The string to use as a query parameter when comparing row items.
 ### `headers`
 
 - Type: Array
+  - hiddenByDefault: Boolean
   - defaultSort: Boolean
   - isSortable: Boolean
   - key: String
@@ -49,6 +50,14 @@ Number
 
 A list of IDs, matching to the row list so that ids[ 0 ] contains the object ID for the object displayed in row[ 0 ].
 
+### `isLoading`
+
+- Type: Boolean
+- Default: `false`
+
+Defines if the table contents are loading.
+It will display `TablePlaceholder` component instead of `Table` if that's the case.
+
 ### `onQueryChange`
 
 - Type: Function
@@ -56,12 +65,19 @@ A list of IDs, matching to the row list so that ids[ 0 ] contains the object ID 
 
 A function which returns a callback function to update the query string for a given `param`.
 
+### `downloadable`
+
+- Type: Boolean
+- Default: `false`
+
+Whether the table must be downloadable. If true, the download button will appear.
+
 ### `onClickDownload`
 
 - Type: Function
 - Default: null
 
-A callback function which handles then "download" button press. Optional, if not used, the button won't appear.
+A callback function called when the "download" button is pressed. Optional, if used, the download button will appear.
 
 ### `query`
 
@@ -121,6 +137,25 @@ The title used in the card header, also used as the caption for the content in t
 
 The total number of rows (across all pages).
 
+`EmptyTable` (component)
+========================
+
+`EmptyTable` displays a blank space with an optional message passed as a children node
+with the purpose of replacing a table with no rows.
+It mimics the same height a table would have according to the `numberOfRows` prop.
+
+
+
+Props
+-----
+
+### `numberOfRows`
+
+- Type: Number
+- Default: `5`
+
+An integer with the number of rows the box should occupy.
+
 `TablePlaceholder` (component)
 ==============================
 
@@ -147,10 +182,11 @@ A label for the content in this table.
 ### `headers`
 
 - Type: Array
+  - hiddenByDefault: Boolean
   - defaultSort: Boolean
   - isSortable: Boolean
   - key: String
-  - label: String
+  - label: ReactNode
   - required: Boolean
 - Default: null
 
@@ -246,6 +282,7 @@ Additional CSS classes.
 
 - Type: Array
   - defaultSort: Boolean - Boolean, true if this column is the default for sorting. Only one column should have this set.
+  - isLeftAligned: Boolean - Boolean, true if this column should be aligned to the left.
   - isNumeric: Boolean - Boolean, true if this column is a number value.
   - isSortable: Boolean - Boolean, true if this column is sortable.
   - key: String - The API parameter name for this column, passed to `orderby` when sorting via API.

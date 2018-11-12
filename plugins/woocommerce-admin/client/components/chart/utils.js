@@ -541,7 +541,7 @@ const handleMouseOutLineChart = ( parentNode, params ) => {
 	params.tooltip.style( 'visibility', 'hidden' );
 };
 
-export const WIDE_BREAKPOINT = 1100;
+export const WIDE_BREAKPOINT = 960;
 
 const calculateTooltipXPosition = (
 	elementCoords,
