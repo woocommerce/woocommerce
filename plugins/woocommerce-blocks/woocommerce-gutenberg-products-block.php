@@ -16,18 +16,35 @@ defined( 'ABSPATH' ) || die();
 
 define( 'WGPB_VERSION', '1.1.2' );
 
+define( 'WGPB_DEVELOPMENT_MODE', true );
+
 /**
  * Load up the assets if Gutenberg is active.
  */
 function wgpb_initialize() {
+	$files_exist = file_exists( plugin_dir_path( __FILE__ ) . '/build/products-block.js' );
 
-	if ( function_exists( 'register_block_type' ) ) {
+	if ( $files_exist && function_exists( 'register_block_type' ) ) {
 		add_action( 'init', 'wgpb_register_products_block' );
 		add_action( 'rest_api_init', 'wgpb_register_api_routes' );
+		add_action( 'enqueue_block_editor_assets', 'wgpb_extra_gutenberg_scripts' );
+	}
+	
+	if ( defined( 'WGPB_DEVELOPMENT_MODE' ) && WGPB_DEVELOPMENT_MODE && ! $files_exist ) {
+		add_action( 'admin_notices', 'wgpb_plugins_notice' );
 	}
 
 }
 add_action( 'woocommerce_loaded', 'wgpb_initialize' );
+
+/**
+ * Display a warning about building files.
+ */
+function wgpb_plugins_notice() {
+	echo '<div class="error"><p>';
+	echo __( 'WooCommerce Product Blocks development mode requires files to be built. From the plugin directory, run <code>npm install</code> to install dependencies, <code>npm run build</code> to build the files or <code>npm start</code> to build the files and watch for changes.', 'woocommerce' );
+	echo '</p></div>';
+}
 
 /**
  * Register the Products block and its scripts.
@@ -47,6 +64,7 @@ function wgpb_extra_gutenberg_scripts() {
 		return;
 	}
 
+	// @todo Remove this dependency (as it adds a separate react instance).
 	wp_enqueue_script(
 		'react-transition-group',
 		plugins_url( 'assets/js/vendor/react-transition-group.js', __FILE__ ),
@@ -56,9 +74,9 @@ function wgpb_extra_gutenberg_scripts() {
 
 	wp_register_script(
 		'woocommerce-products-block-editor',
-		plugins_url( 'assets/js/products-block.js', __FILE__ ),
-		array( 'wp-element', 'wp-components', 'wp-blocks', 'wp-editor', 'wp-i18n', 'react-transition-group' ),
-		WGPB_VERSION
+		plugins_url( 'build/products-block.js', __FILE__ ),
+		array( 'wp-api-fetch', 'wp-element', 'wp-components', 'wp-blocks', 'wp-editor', 'wp-i18n', 'react-transition-group' ),
+		defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? filemtime( plugin_dir_path( __FILE__ ) . '/build/products-block.js' ) : WGPB_VERSION
 	);
 
 	$product_block_data = array(
@@ -75,12 +93,11 @@ function wgpb_extra_gutenberg_scripts() {
 
 	wp_enqueue_style(
 		'woocommerce-products-block-editor',
-		plugins_url( 'assets/css/gutenberg-products-block.css', __FILE__ ),
+		plugins_url( 'build/products-block.css', __FILE__ ),
 		array( 'wp-edit-blocks' ),
-		WGPB_VERSION
+		defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? filemtime( plugin_dir_path( __FILE__ ) . '/build/products-block.css' ) : WGPB_VERSION
 	);
 }
-add_action( 'enqueue_block_editor_assets', 'wgpb_extra_gutenberg_scripts' );
 
 /**
  * Register extra API routes with functionality not available in WC core yet.

@@ -1,26 +1,16 @@
 {
-	"presets": [
-		"es2015",
-		"stage-2",
-		[ "env", {
-			"modules": false,
-			"targets": {
-				"browsers": [
-					"last 2 Chrome versions",
-					"last 2 Firefox versions",
-					"last 2 Safari versions",
-					"last 2 iOS versions",
-					"last 1 Android version",
-					"last 1 ChromeAndroid version",
-					"ie 11"
-				]
-			}
-		} ]
-	],
+	"presets": [ "@wordpress/babel-preset-default" ],
 	"plugins": [
-		"add-module-exports",
-		[ "transform-react-jsx", {
-			"pragma": "wp.element.createElement"
-		} ]
+		[ "@babel/transform-react-jsx", {
+			"pragma": "createElement"
+		} ],
+		[
+			"@wordpress/babel-plugin-import-jsx-pragma",
+			{
+				"scopeVariable": "createElement",
+				"source": "@wordpress/element",
+				"isDefault": false
+			}
+		]
 	]
 }
