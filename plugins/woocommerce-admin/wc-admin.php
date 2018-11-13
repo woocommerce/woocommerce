@@ -34,9 +34,8 @@ function wc_admin_plugins_notice() {
 
 	if ( $wordpress_includes_gutenberg ) {
 		$message = sprintf(
-			// TODO: Remove the "and SCRIPT_DEBUG enabled" when https://github.com/woocommerce/wc-admin/issues/796 is fixed.
 			/* translators: URL of WooCommerce plugin */
-			__( 'The WooCommerce Admin feature plugin requires <a href="%s">WooCommerce</a> (>3.5) to be installed and active and SCRIPT_DEBUG enabled.', 'wc-admin' ),
+			__( 'The WooCommerce Admin feature plugin requires <a href="%s">WooCommerce</a> (>3.5) to be installed and active.', 'wc-admin' ),
 			'https://wordpress.org/plugins/woocommerce/'
 		);
 	} else {
@@ -65,11 +64,7 @@ function dependencies_satisfied() {
 	$wordpress_includes_gutenberg = version_compare( $wordpress_version, '4.9.9', '>' );
 	$gutenberg_plugin_active      = defined( 'GUTENBERG_DEVELOPMENT_MODE' ) || defined( 'GUTENBERG_VERSION' );
 
-	// Right now, there is a bug preventing us from running with WP5 with minified script.
-	// See https://github.com/woocommerce/wc-admin/issues/796 for details.
-	$script_debug_enabled = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG;
-
-	return ( $script_debug_enabled && $wordpress_includes_gutenberg ) || $gutenberg_plugin_active;
+	return $wordpress_includes_gutenberg || $gutenberg_plugin_active;
 }
 
 /**
