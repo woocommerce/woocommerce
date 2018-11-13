@@ -1,12 +1,12 @@
 const { __ } = wp.i18n;
-const { Toolbar, Dropdown, Dashicon } = wp.components;
+const { Component } = wp.element;
+const { Dashicon } = wp.components;
 const { apiFetch } = wp;
 
 /**
  * When the display mode is 'Product category' search for and select product categories to pull products from.
  */
-export class ProductsCategorySelect extends React.Component {
-
+export class ProductsCategorySelect extends Component {
 	/**
 	 * Constructor.
 	 */
@@ -18,12 +18,12 @@ export class ProductsCategorySelect extends React.Component {
 			openAccordion: [],
 			filterQuery: '',
 			firstLoad: true,
-		}
+		};
 
-		this.checkboxChange  = this.checkboxChange.bind( this );
+		this.checkboxChange = this.checkboxChange.bind( this );
 		this.accordionToggle = this.accordionToggle.bind( this );
-		this.filterResults   = this.filterResults.bind( this );
-		this.setFirstLoad    = this.setFirstLoad.bind( this );
+		this.filterResults = this.filterResults.bind( this );
+		this.setFirstLoad = this.setFirstLoad.bind( this );
 	}
 
 	/**
@@ -35,14 +35,14 @@ export class ProductsCategorySelect extends React.Component {
 	checkboxChange( checked, categories ) {
 		let selectedCategories = this.state.selectedCategories;
 
-		selectedCategories = selectedCategories.filter( category => ! categories.includes( category ) );
+		selectedCategories = selectedCategories.filter( ( category ) => ! categories.includes( category ) );
 
 		if ( checked ) {
 			selectedCategories.push( ...categories );
 		}
 
 		this.setState( {
-			selectedCategories: selectedCategories
+			selectedCategories: selectedCategories,
 		} );
 
 		this.props.update_display_setting_callback( selectedCategories );
@@ -57,13 +57,13 @@ export class ProductsCategorySelect extends React.Component {
 		let openAccordions = this.state.openAccordion;
 
 		if ( openAccordions.includes( category ) ) {
-			openAccordions = openAccordions.filter( c => c !== category );
+			openAccordions = openAccordions.filter( ( c ) => c !== category );
 		} else {
 			openAccordions.push( category );
 		}
 
 		this.setState( {
-			openAccordion: openAccordions
+			openAccordion: openAccordions,
 		} );
 	}
 
@@ -74,7 +74,7 @@ export class ProductsCategorySelect extends React.Component {
 	 */
 	filterResults( evt ) {
 		this.setState( {
-			filterQuery: evt.target.value
+			filterQuery: evt.target.value,
 		} );
 	}
 
@@ -85,7 +85,7 @@ export class ProductsCategorySelect extends React.Component {
 	 */
 	setFirstLoad( loaded ) {
 		this.setState( {
-			firstLoad: !! loaded
+			firstLoad: !! loaded,
 		} );
 	}
 
@@ -120,13 +120,12 @@ const ProductCategoryFilter = ( { filterResults } ) => {
 			<input className="wc-products-list-card__search" type="search" placeholder={ __( 'Search for categories' ) } onChange={ filterResults } />
 		</div>
 	);
-}
+};
 
 /**
  * Fetch and build a tree of product categories.
  */
-class ProductCategoryList extends React.Component {
-
+class ProductCategoryList extends Component {
 	/**
 	 * Constructor
 	 */
@@ -178,14 +177,14 @@ class ProductCategoryList extends React.Component {
 		const query = this.getQuery();
 
 		self.setState( {
-			loaded: false
+			loaded: false,
 		} );
 
-		apiFetch( { path: query } ).then( categories => {
+		apiFetch( { path: query } ).then( ( categories ) => {
 			self.setState( {
 				categories: categories,
 				loaded: true,
-				query: query
+				query: query,
 			} );
 		} );
 	}
@@ -205,7 +204,7 @@ class ProductCategoryList extends React.Component {
 		}
 
 		const handleCategoriesToCheck = ( evt, parent, categories ) => {
-			let ids = getCategoryChildren( parent, categories ).map( category => {
+			const ids = getCategoryChildren( parent, categories ).map( ( category ) => {
 				return category.id;
 			} );
 
@@ -215,7 +214,7 @@ class ProductCategoryList extends React.Component {
 		};
 
 		const getCategoryChildren = ( parent, categories ) => {
-			let children = [];
+			const children = [];
 
 			categories.filter( ( category ) => category.parent === parent.id ).forEach( function( category ) {
 				children.push( category );
@@ -230,25 +229,24 @@ class ProductCategoryList extends React.Component {
 		};
 
 		const isIndeterminate = ( category, categories ) => {
-
 			// Currect category selected?
 			if ( selectedCategories.includes( category.id ) ) {
 				return false;
 			}
 
 			// Has children?
-			let children = getCategoryChildren( category, categories ).map( category => {
-				return category.id;
+			const children = getCategoryChildren( category, categories ).map( ( cat ) => {
+				return cat.id;
 			} );
 
-			for ( let child of children ) {
+			for ( const child of children ) {
 				if ( selectedCategories.includes( child ) ) {
 					return true;
 				}
 			}
 
 			return false;
-		}
+		};
 
 		const AccordionButton = ( { category, categories } ) => {
 			let icon = 'arrow-down-alt2';
@@ -263,7 +261,7 @@ class ProductCategoryList extends React.Component {
 				style = {
 					visibility: 'hidden',
 				};
-			};
+			}
 
 			return (
 				<button onClick={ () => accordionToggle( category.id ) } className="wc-products-list-card__accordion-button" style={ style } type="button">
@@ -273,13 +271,13 @@ class ProductCategoryList extends React.Component {
 		};
 
 		const CategoryTree = ( { categories, parent } ) => {
-			let filteredCategories = categories.filter( ( category ) => category.parent === parent );
+			const filteredCategories = categories.filter( ( category ) => category.parent === parent );
 
 			if ( firstLoad && selectedCategories.length > 0 ) {
 				categoriesData.filter( ( category ) => category.parent === 0 ).forEach( function( category ) {
-					let children = getCategoryChildren( category, categoriesData );
+					const children = getCategoryChildren( category, categoriesData );
 
-					for ( let child of children ) {
+					for ( const child of children ) {
 						if ( selectedCategories.includes( child.id ) && ! openAccordion.includes( category.id ) ) {
 							accordionToggle( category.id );
 							break;
@@ -294,13 +292,13 @@ class ProductCategoryList extends React.Component {
 				<ul>
 					{ filteredCategories.map( ( category ) => (
 						<li key={ category.id } className={ ( openAccordion.includes( category.id ) ? 'wc-products-list-card__item wc-products-list-card__accordion-open' : 'wc-products-list-card__item' ) }>
-							<label className={ ( 0 === category.parent ) ? 'wc-products-list-card__content' : ''  } htmlFor={ 'product-category-' + category.id }>
+							<label className={ ( 0 === category.parent ) ? 'wc-products-list-card__content' : '' } htmlFor={ 'product-category-' + category.id }>
 								<input type="checkbox"
-								       id={ 'product-category-' + category.id }
-								       value={ category.id }
-								       checked={ selectedCategories.includes( category.id ) }
-								       onChange={ ( evt ) => handleCategoriesToCheck( evt, category, categories ) }
-								       ref={ el => el && ( el.indeterminate = isIndeterminate( category, categories ) ) }
+									id={ 'product-category-' + category.id }
+									value={ category.id }
+									checked={ selectedCategories.includes( category.id ) }
+									onChange={ ( evt ) => handleCategoriesToCheck( evt, category, categories ) }
+									ref={ ( el ) => el && ( el.indeterminate = isIndeterminate( category, categories ) ) }
 								/> { category.name }
 								{ 0 === category.parent &&
 									<AccordionButton category={ category } categories={ categories } />
@@ -317,7 +315,7 @@ class ProductCategoryList extends React.Component {
 		let categoriesData = this.state.categories;
 
 		if ( '' !== filterQuery ) {
-			categoriesData = categoriesData.filter( category => category.slug.includes( filterQuery.toLowerCase() ) );
+			categoriesData = categoriesData.filter( ( category ) => category.slug.includes( filterQuery.toLowerCase() ) );
 		}
 
 		return (

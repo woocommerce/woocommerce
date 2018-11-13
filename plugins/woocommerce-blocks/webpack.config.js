@@ -3,8 +3,8 @@
  * External dependencies
  */
 const path = require( 'path' );
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const CleanWebpackPlugin = require('clean-webpack-plugin');
+const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
+const CleanWebpackPlugin = require( 'clean-webpack-plugin' );
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 const externals = {
@@ -22,7 +22,7 @@ const externals = {
 /**
  * Config for compiling Gutenberg blocks JS.
  */
-var GutenbergBlocksConfig = {
+const GutenbergBlocksConfig = {
 	mode: NODE_ENV,
 	entry: {
 		'products-block': './assets/js/products-block.jsx',
@@ -39,7 +39,7 @@ var GutenbergBlocksConfig = {
 			{
 				test: /\.jsx?$/,
 				exclude: /node_modules/,
-				loader: "babel-loader"
+				loader: 'babel-loader',
 			},
 			{
 				test: /\.s[c|a]ss$/,
@@ -49,16 +49,16 @@ var GutenbergBlocksConfig = {
 					'css-loader',
 					'postcss-loader',
 					'sass-loader',
-				]
-			}
-		]
+				],
+			},
+		],
 	},
 	plugins: [
 		new CleanWebpackPlugin( 'build', {} ),
-		new MiniCssExtractPlugin({
+		new MiniCssExtractPlugin( {
 			filename: '[name].css',
-		}),
-	]
+		} ),
+	],
 };
 
 module.exports = [ GutenbergBlocksConfig ];
