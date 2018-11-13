@@ -11,17 +11,26 @@
   "main": "Gruntfile.js",
   "scripts": {
     "build": "cross-env BABEL_ENV=default NODE_ENV=production webpack",
-    "start": "cross-env BABEL_ENV=default webpack --watch"
+    "start": "cross-env BABEL_ENV=default webpack --watch",
+    "lint": "npm run lint:js",
+    "lint:js": "eslint assets/js --ext=js,jsx"
   },
   "devDependencies": {
     "@babel/core": "^7.1.5",
     "@wordpress/babel-plugin-import-jsx-pragma": "^1.1.2",
     "@wordpress/babel-preset-default": "^3.0.1",
     "autoprefixer": "^9.3.1",
+    "babel-eslint": "^10.0.1",
     "babel-loader": "^8.0.4",
     "clean-webpack-plugin": "^0.1.19",
     "cross-env": "5.2.0",
     "css-loader": "^1.0.1",
+    "eslint": "^5.9.0",
+    "eslint-config-wordpress": "^2.0.0",
+    "eslint-plugin-jest": "^22.0.0",
+    "eslint-plugin-jsx-a11y": "^6.1.2",
+    "eslint-plugin-react": "^7.11.1",
+    "eslint-plugin-wordpress": "git://github.com/WordPress-Coding-Standards/eslint-plugin-wordpress.git#1774343f6226052a46b081e01db3fca8793cc9f1",
     "mini-css-extract-plugin": "^0.4.4",
     "node-sass": "^4.10.0",
     "postcss-loader": "^3.0.0",
