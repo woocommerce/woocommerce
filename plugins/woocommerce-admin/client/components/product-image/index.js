@@ -5,6 +5,7 @@
  */
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
+import { get } from 'lodash';
 
 /**
  * Internal dependencies
@@ -12,14 +13,15 @@ import PropTypes from 'prop-types';
 import './style.scss';
 
 /**
- * Use `ProductImage` to display a product's featured image. If no image can be found, a placeholder matching the front-end image
+ * Use `ProductImage` to display a product's or variation's featured image.
+ * If no image can be found, a placeholder matching the front-end image
  * placeholder will be displayed.
  *
  * @return { object } -
  */
 const ProductImage = ( { product, alt, width, height, className, ...props } ) => {
 	// The first returned image from the API is the featured/product image.
-	const productImage = product && product.images && product.images[ 0 ];
+	const productImage = get( product, [ 'images', 0 ] ) || get( product, [ 'image' ] );
 	const src = ( productImage && productImage.src ) || false;
 	const altText = alt || ( productImage && productImage.alt ) || '';
 
@@ -53,8 +55,10 @@ ProductImage.propTypes = {
 	 */
 	className: PropTypes.string,
 	/**
-	 * Product object. The image to display will be pulled from `product.images`.
+	 * Product or variation object. The image to display will be pulled from
+	 * `product.images` or `variation.image`.
 	 * See https://woocommerce.github.io/woocommerce-rest-api-docs/#product-properties
+	 * and https://woocommerce.github.io/woocommerce-rest-api-docs/#product-variation-properties
 	 */
 	product: PropTypes.object,
 	/**

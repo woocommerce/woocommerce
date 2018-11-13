@@ -8,6 +8,7 @@ import apiFetch from '@wordpress/api-fetch';
  * Internal dependencies
  */
 import { computeSuggestionMatch } from './utils';
+import ProductImage from 'components/product-image';
 import { stringifyQuery, getQuery } from '@woocommerce/navigation';
 import { NAMESPACE } from 'store/constants';
 
@@ -57,7 +58,14 @@ export default {
 	getOptionLabel( variation, query ) {
 		const match = computeSuggestionMatch( getVariationName( variation ), query ) || {};
 		return [
-			// @TODO: make VariationsImage, modify ProductImage, or leave as is?
+			<ProductImage
+				key="thumbnail"
+				className="woocommerce-search__result-thumbnail"
+				product={ variation }
+				width={ 18 }
+				height={ 18 }
+				alt=""
+			/>,
 			<span
 				key="name"
 				className="woocommerce-search__result-name"

@@ -1,7 +1,8 @@
 `ProductImage` (component)
 ==========================
 
-Use `ProductImage` to display a product's featured image. If no image can be found, a placeholder matching the front-end image
+Use `ProductImage` to display a product's or variation's featured image.
+If no image can be found, a placeholder matching the front-end image
 placeholder will be displayed.
 
 
@@ -35,8 +36,10 @@ Additional CSS classes.
 - Type: Object
 - Default: null
 
-Product object. The image to display will be pulled from `product.images`.
+Product or variation object. The image to display will be pulled from
+`product.images` or `variation.image`.
 See https://woocommerce.github.io/woocommerce-rest-api-docs/#product-properties
+and https://woocommerce.github.io/woocommerce-rest-api-docs/#product-variation-properties
 
 ### `alt`
 

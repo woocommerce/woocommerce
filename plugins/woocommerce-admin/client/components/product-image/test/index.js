@@ -61,6 +61,17 @@ describe( 'ProductImage', () => {
 		expect( image ).toMatchSnapshot();
 	} );
 
+	test( 'should render a variations image', () => {
+		const variation = {
+			name: 'Test Variation',
+			image: {
+				src: 'https://i.cloudup.com/pt4DjwRB84-3000x3000.png',
+			},
+		};
+		const image = shallow( <ProductImage product={ variation } /> );
+		expect( image ).toMatchSnapshot();
+	} );
+
 	test( 'should render a placeholder image if no product images are found', () => {
 		global.wcSettings.wcAssetUrl = 'https://woocommerce.com/wp-content/plugins/woocommerce/assets/';
 		const product = {
