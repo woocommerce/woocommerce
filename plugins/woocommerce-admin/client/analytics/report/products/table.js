@@ -183,7 +183,7 @@ class ProductsReportTable extends Component {
 				labels={ labels }
 				ids={ orderedProducts.map( p => p.product_id ) }
 				isLoading={ isRequesting }
-				compareBy={ 'product' }
+				compareBy={ 'products' }
 				onQueryChange={ onQueryChange }
 				query={ tableQuery }
 				summary={ null } // @TODO
