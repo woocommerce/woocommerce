@@ -19,7 +19,7 @@ import { format as formatDate } from '@wordpress/date';
 /**
  * WooCommerce dependencies
  */
-import { dayTicksThreshold } from '@woocommerce/date';
+import { dayTicksThreshold, weekTicksThreshold } from '@woocommerce/date';
 import { formatCurrency } from '@woocommerce/currency';
 
 /**
@@ -303,7 +303,10 @@ const calculateXTicksIncrementFactor = ( uniqueDates, maxTicks ) => {
 export const getXTicks = ( uniqueDates, width, layout, interval ) => {
 	const maxTicks = calculateMaxXTicks( width, layout );
 
-	if ( uniqueDates.length >= dayTicksThreshold && interval === 'day' ) {
+	if (
+		( uniqueDates.length >= dayTicksThreshold && interval === 'day' ) ||
+		( uniqueDates.length >= weekTicksThreshold && interval === 'week' )
+	) {
 		uniqueDates = getFirstDatePerMonth( uniqueDates );
 	}
 	if ( uniqueDates.length <= maxTicks ) {
@@ -374,6 +377,14 @@ export const compareStrings = ( s1, s2, splitChar = ' ' ) => {
 
 export const drawAxis = ( node, params ) => {
 	const xScale = params.type === 'line' ? params.xLineScale : params.xScale;
+	const removeDuplicateDates = ( d, i, ticks, formatter ) => {
+		const monthDate = d instanceof Date ? d : new Date( d );
+		let prevMonth = i !== 0 ? ticks[ i - 1 ] : ticks[ i ];
+		prevMonth = prevMonth instanceof Date ? prevMonth : new Date( prevMonth );
+		return i === 0
+			? formatter( monthDate )
+			: compareStrings( formatter( prevMonth ), formatter( monthDate ) ).join( ' ' );
+	};
 
 	const yGrids = [];
 	for ( let i = 0; i < 4; i++ ) {
@@ -390,7 +401,7 @@ export const drawAxis = ( node, params ) => {
 		.call(
 			d3AxisBottom( xScale )
 				.tickValues( ticks )
-				.tickFormat( d => params.xFormat( d instanceof Date ? d : new Date( d ) ) )
+				.tickFormat( ( d, i ) => removeDuplicateDates( d, i, ticks, params.xFormat ) )
 		);
 
 	node
@@ -401,16 +412,7 @@ export const drawAxis = ( node, params ) => {
 		.call(
 			d3AxisBottom( xScale )
 				.tickValues( ticks )
-				.tickFormat( ( d, i ) => {
-					const monthDate = d instanceof Date ? d : new Date( d );
-					let prevMonth = i !== 0 ? ticks[ i - 1 ] : ticks[ i ];
-					prevMonth = prevMonth instanceof Date ? prevMonth : new Date( prevMonth );
-					return i === 0
-						? params.x2Format( monthDate )
-						: compareStrings( params.x2Format( prevMonth ), params.x2Format( monthDate ) ).join(
-								' '
-							);
-				} )
+				.tickFormat( ( d, i ) => removeDuplicateDates( d, i, ticks, params.x2Format ) )
 		)
 		.call( g => g.select( '.domain' ).remove() );
 
