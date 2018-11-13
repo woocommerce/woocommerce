@@ -44,3 +44,6 @@ tests/cli/vendor
 
 # Composer
 /vendor/
+
+# Built files
+/build/
