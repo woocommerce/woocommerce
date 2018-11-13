@@ -50,14 +50,14 @@ function wgpb_extra_gutenberg_scripts() {
 	wp_enqueue_script(
 		'react-transition-group',
 		plugins_url( 'assets/js/vendor/react-transition-group.js', __FILE__ ),
-		array( 'wp-blocks', 'wp-element' ),
+		array(),
 		'2.2.1'
 	);
 
 	wp_register_script(
 		'woocommerce-products-block-editor',
 		plugins_url( 'assets/js/products-block.js', __FILE__ ),
-		array( 'wp-blocks', 'wp-element', 'react-transition-group' ),
+		array( 'wp-element', 'wp-components', 'wp-blocks', 'wp-editor', 'wp-i18n', 'react-transition-group' ),
 		WGPB_VERSION
 	);
 
