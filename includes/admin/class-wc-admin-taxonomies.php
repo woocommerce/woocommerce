@@ -155,10 +155,10 @@ class WC_Admin_Taxonomies {
 					// When an image is selected, run a callback.
 					file_frame.on( 'select', function() {
 						var attachment           = file_frame.state().get( 'selection' ).first().toJSON();
-						var attachment_thumbnail = attachment.sizes.thumbnail || attachment.sizes.full;
+						var url = attachment.sizes && attachment.sizes.thumbnail ? attachment.sizes.thumbnail.url : attachment.url;
 
 						jQuery( '#product_cat_thumbnail_id' ).val( attachment.id );
-						jQuery( '#product_cat_thumbnail' ).find( 'img' ).attr( 'src', attachment_thumbnail.url );
+						jQuery( '#product_cat_thumbnail' ).find( 'img' ).attr( 'src', url );
 						jQuery( '.remove_image_button' ).show();
 					});
 
@@ -265,10 +265,10 @@ class WC_Admin_Taxonomies {
 						// When an image is selected, run a callback.
 						file_frame.on( 'select', function() {
 							var attachment           = file_frame.state().get( 'selection' ).first().toJSON();
-							var attachment_thumbnail = attachment.sizes.thumbnail || attachment.sizes.full;
+							var url = attachment.sizes && attachment.sizes.thumbnail ? attachment.sizes.thumbnail.url : attachment.url;
 
 							jQuery( '#product_cat_thumbnail_id' ).val( attachment.id );
-							jQuery( '#product_cat_thumbnail' ).find( 'img' ).attr( 'src', attachment_thumbnail.url );
+							jQuery( '#product_cat_thumbnail' ).find( 'img' ).attr( 'src', url );
 							jQuery( '.remove_image_button' ).show();
 						});
 
