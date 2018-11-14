@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DropdownButton it renders correctly 1`] = `
+<button
+  className="components-button woocommerce-dropdown-button"
+  type="button"
+>
+  <div
+    className="woocommerce-dropdown-button__labels"
+  >
+    <span>
+      foo
+    </span>
+  </div>
+</button>
+`;

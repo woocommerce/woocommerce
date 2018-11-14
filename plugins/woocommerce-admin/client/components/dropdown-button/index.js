@@ -37,7 +37,7 @@ DropdownButton.propTypes = {
 	/**
 	 * An array of elements to be rendered as the content of the button.
 	 */
-	labels: PropTypes.array,
+	labels: PropTypes.array.isRequired,
 	/**
 	 * Boolean describing if the dropdown in open or not.
 	 */
