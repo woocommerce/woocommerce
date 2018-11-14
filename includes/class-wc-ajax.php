@@ -381,6 +381,7 @@ class WC_AJAX {
 		$product_status    = get_post_status( $product_id );
 		$variation_id      = 0;
 		$variation         = array();
+		$cart_item_data    = empty( $_POST['cart_item_data'] ) ? array() : wc_clean( $_POST['cart_item_data'] );
 
 		if ( $product && 'variation' === $product->get_type() ) {
 			$variation_id = $product_id;
@@ -388,7 +389,7 @@ class WC_AJAX {
 			$variation    = $product->get_variation_attributes();
 		}
 
-		if ( $passed_validation && false !== WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variation ) && 'publish' === $product_status ) {
+		if ( $passed_validation && false !== WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variation, $cart_item_data ) && 'publish' === $product_status ) {
 
 			do_action( 'woocommerce_ajax_added_to_cart', $product_id );
 
