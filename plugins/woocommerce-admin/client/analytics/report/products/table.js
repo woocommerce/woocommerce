@@ -14,7 +14,7 @@ import { get, map, orderBy } from 'lodash';
 import { appendTimestamp, getCurrentDates } from '@woocommerce/date';
 import { Link, TableCard } from '@woocommerce/components';
 import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
-import { getNewPath, getTimeRelatedQuery, onQueryChange } from '@woocommerce/navigation';
+import { getNewPath, getPersistedQuery, onQueryChange } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -80,7 +80,7 @@ class ProductsReportTable extends Component {
 	getRowsContent( data = [] ) {
 		const { stockStatuses } = wcSettings;
 		const { query } = this.props;
-		const timeRelatedQuery = getTimeRelatedQuery( query );
+		const persistedQuery = getPersistedQuery( query );
 
 		return map( data, row => {
 			const {
@@ -95,7 +95,7 @@ class ProductsReportTable extends Component {
 				stock_status = 'outofstock', // @TODO
 				stock_quantity = '0', // @TODO
 			} = row;
-			const ordersLink = getNewPath( timeRelatedQuery, 'orders', {
+			const ordersLink = getNewPath( persistedQuery, 'orders', {
 				filter: 'advanced',
 				product_includes: product_id,
 			} );

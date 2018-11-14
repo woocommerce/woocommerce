@@ -9,7 +9,7 @@ import { find, last } from 'lodash';
 /**
  * WooCommerce dependencies
  */
-import { getTimeRelatedQuery, stringifyQuery } from '@woocommerce/navigation';
+import { getPersistedQuery, stringifyQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -71,7 +71,7 @@ class Controller extends Component {
 
 // Update links in wp-admin menu to persist time related queries
 window.wpNavMenuUrlUpdate = function( page, query ) {
-	const search = stringifyQuery( getTimeRelatedQuery( query ) );
+	const search = stringifyQuery( getPersistedQuery( query ) );
 
 	Array.from(
 		document.querySelectorAll( `#${ page.wpOpenMenu } a, #${ page.wpClosedMenu } a` )

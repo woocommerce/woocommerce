@@ -12,7 +12,7 @@ import PropTypes from 'prop-types';
 /**
  * WooCommerce dependencies
  */
-import { flattenFilters, getTimeRelatedQuery, updateQueryString } from '@woocommerce/navigation';
+import { flattenFilters, getPersistedQuery, updateQueryString } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -92,7 +92,7 @@ class FilterPicker extends Component {
 	update( value, additionalQueries = {} ) {
 		const { path, query, config } = this.props;
 		// Keep only time related queries when updating to a new filter
-		const timeRelatedQuery = getTimeRelatedQuery( query );
+		const persistedQuery = getPersistedQuery( query );
 		const update = {
 			[ config.param ]: 'all' === value ? undefined : value,
 			...additionalQueries,
@@ -101,7 +101,7 @@ class FilterPicker extends Component {
 		config.staticParams.forEach( param => {
 			update[ param ] = query[ param ];
 		} );
-		updateQueryString( update, path, timeRelatedQuery );
+		updateQueryString( update, path, persistedQuery );
 	}
 
 	onTagChange( filter, onClose, tags ) {

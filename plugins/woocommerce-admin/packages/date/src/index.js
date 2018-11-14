@@ -412,6 +412,19 @@ export function getIntervalForQuery( query ) {
 	return current;
 }
 
+/**
+ * Returns the current chart type to use.
+ *
+ * @param  {Object} query Current query
+ * @return {String} Current chart type.
+ */
+export function getChartTypeForQuery( { type } ) {
+	if ( [ 'line', 'bar' ].includes( type ) ) {
+		return type;
+	}
+	return 'line';
+}
+
 export const dayTicksThreshold = 63;
 export const weekTicksThreshold = 9;
 
