@@ -66,7 +66,7 @@
     "concurrently": "4.0.1",
     "cross-env": "5.2.0",
     "css-loader": "1.0.1",
-    "deasync": "0.1.13",
+    "deasync": "0.1.14",
     "deep-freeze": "0.0.1",
     "docsify-cli": "github:docsifyjs/docsify-cli#5df38996",
     "eslint": "5.9.0",
