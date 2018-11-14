@@ -56,6 +56,27 @@ class WC_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 
+		$this->assertEquals( 1, $note['id'] );
+		$this->assertEquals( 'PHPUNIT_TEST_NOTE_NAME', $note['name'] );
+		$this->assertEquals( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL, $note['type'] );
+		$this->assertArrayHasKey( 'locale', $note );
+		$this->assertEquals( 'PHPUNIT_TEST_NOTE_1_TITLE', $note['title'] );
+
+		$this->assertEquals( 'PHPUNIT_TEST_NOTE_1_CONTENT', $note['content'] );
+		$this->assertEquals( 'info', $note['icon'] );
+		$this->assertArrayHasKey( 'content_data', $note );
+		$this->assertEquals( 1.23, $note['content_data']->amount );
+		$this->assertEquals( WC_Admin_Note::E_WC_ADMIN_NOTE_UNACTIONED, $note['status'] );
+		$this->assertEquals( 'PHPUNIT_TEST', $note['source'] );
+
+		$this->assertArrayHasKey( 'date_created', $note );
+		$this->assertArrayHasKey( 'date_created_gmt', $note );
+		$this->assertArrayHasKey( 'date_reminder', $note );
+		$this->assertArrayHasKey( 'date_reminder_gmt', $note );
+		$this->assertArrayHasKey( 'actions', $note );
+
+		$this->assertEquals( 'PHPUNIT_TEST_NOTE_1_ACTION_1_SLUG', $note['actions'][0]->name );
+		$this->assertEquals( 'http://example.org/wp-admin/admin.php?s=PHPUNIT_TEST_NOTE_1_ACTION_1_URL', $note['actions'][0]->url );
 	}
 
 	/**
