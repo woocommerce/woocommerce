@@ -14,7 +14,7 @@ import { stringifyQuery } from '@woocommerce/navigation';
 /**
  * Internal dependencies
  */
-import { NAMESPACE } from 'store/constants';
+import { NAMESPACE, SWAGGERNAMESPACE } from 'store/constants';
 
 export default {
 	// TODO: Use controls data plugin or fresh-data instead of async
@@ -26,6 +26,21 @@ export default {
 		const statEndpoints = [ 'orders', 'revenue', 'products' ];
 
 		let apiPath = endpoint + stringifyQuery( query );
+
+		// TODO: Remove once swagger endpoints are phased out.
+		const swaggerEndpoints = [ 'taxes' ];
+		if ( swaggerEndpoints.indexOf( endpoint ) >= 0 ) {
+			apiPath = SWAGGERNAMESPACE + 'reports/' + endpoint + '/stats' + stringifyQuery( query );
+			try {
+				const response = await fetch( apiPath );
+
+				const report = await response.json();
+				dispatch( 'wc-admin' ).setReportStats( endpoint, report, query );
+			} catch ( error ) {
+				dispatch( 'wc-admin' ).setReportStatsError( endpoint, query );
+			}
+			return;
+		}
 
 		if ( statEndpoints.indexOf( endpoint ) >= 0 ) {
 			apiPath = NAMESPACE + 'reports/' + endpoint + '/stats' + stringifyQuery( query );

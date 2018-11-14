@@ -18,11 +18,13 @@ import { MAX_PER_PAGE } from 'store/constants';
 import * as couponsConfig from 'analytics/report/coupons/config';
 import * as ordersConfig from 'analytics/report/orders/config';
 import * as productsConfig from 'analytics/report/products/config';
+import * as taxesConfig from 'analytics/report/taxes/config';
 
 const reportConfigs = {
 	coupons: couponsConfig,
 	orders: ordersConfig,
 	products: productsConfig,
+	taxes: taxesConfig,
 };
 
 export function getFilterQuery( endpoint, query ) {
