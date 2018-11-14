@@ -1,33 +1,36 @@
 sudo: required
 
 language: php
-php:
-  - 7.1
 
-env:
-  - WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1 WP_CORE_DIR=/tmp/wordpress NODE_RELEASE=8.x
+matrix:
+  include:
+  - name: "PHP 7.2 unit tests, PHP Coding standards check and JS tests"
+    php: 7.2
+    env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress NODE_RELEASE=8.x RUN_PHPCS=1 RUN_JS=1
+  - name: "PHP 7.1 unit tests"
+    php: 7.1
+    env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress NODE_RELEASE=8.x
+  - name: "PHP 7.0 unit tests"
+    php: 7.0
+    env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress NODE_RELEASE=8.x
+  - name: "PHP 5.6 unit tests"
+    php: 5.6
+    env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress NODE_RELEASE=8.x
 
-before_script:
-  - phpenv config-rm xdebug.ini
-  - export PATH="$HOME/.composer/vendor/bin:$PATH"
-  - bash bin/install-wp-tests.sh wc_admin_test root '' localhost $WP_VERSION
-  - bash bin/travis.sh before
-  - sudo rm -rf ~/.nvm
-  - curl -sL "https://deb.nodesource.com/setup_${NODE_RELEASE}" | sudo -E bash -
-  - sudo apt-get install -y nodejs
-  - node --version
-  - npm --version
-
-
-install:
-  - npm install
 
 node_js:
   - "8"
 
+before_script:
+  - phpenv config-rm xdebug.ini
+  - export PATH="$WP_CORE_DIR/wp-content/plugins/wc-admin/vendor/bin:$PATH"
+  - bash bin/install-wp-tests.sh wc_admin_test root '' localhost $WP_VERSION
+  - bash bin/travis.sh before
+  - node --version
+  - npm --version
+  - timedatectl
+
 script:
-  - npm run lint
-  - npm run build
-  - npm test
+  - bash bin/js_lint_test.sh
   - bash bin/phpunit.sh
   - bash bin/phpcs.sh
