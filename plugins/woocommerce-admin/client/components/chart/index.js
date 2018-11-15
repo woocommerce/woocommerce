@@ -2,28 +2,28 @@
 /**
  * External dependencies
  */
-import { decodeEntities } from '@wordpress/html-entities';
 import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
-import { get, isEqual, partial } from 'lodash';
 import { Component, createRef } from '@wordpress/element';
-import { IconButton, NavigableMenu, SelectControl } from '@wordpress/components';
-import PropTypes from 'prop-types';
-import { interpolateViridis as d3InterpolateViridis } from 'd3-scale-chromatic';
+import { decodeEntities } from '@wordpress/html-entities';
 import { formatDefaultLocale as d3FormatDefaultLocale } from 'd3-format';
+import { get, isEqual, partial } from 'lodash';
 import Gridicon from 'gridicons';
+import { IconButton, NavigableMenu, SelectControl } from '@wordpress/components';
+import { interpolateViridis as d3InterpolateViridis } from 'd3-scale-chromatic';
+import PropTypes from 'prop-types';
 import { withViewportMatch } from '@wordpress/viewport';
 
 /**
  * WooCommerce dependencies
  */
 import { updateQueryString } from '@woocommerce/navigation';
+import { H, Section } from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
 import D3Chart from './charts';
-import { H, Section } from 'components/section';
 import Legend from './legend';
 
 d3FormatDefaultLocale( {

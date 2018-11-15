@@ -15,6 +15,7 @@ const { namedTypes } = types;
 const { camelCaseDash } = require( './formatting' );
 
 const COMPONENTS_FOLDER = path.resolve( __dirname, '../../../client/components/' );
+const PACKAGES_FOLDER = path.resolve( __dirname, '../../../packages/components/src/' );
 const DOCS_FOLDER = path.resolve( __dirname, '../../../docs/components/' );
 
 /**
@@ -78,7 +79,7 @@ function getMdFileName( filepath, absolute = true ) {
 	if ( ! fileParts || ! fileParts[ 1 ] ) {
 		return;
 	}
-	const name = fileParts[ 1 ].split( '/' )[ 0 ];
+	const name = fileParts[ 1 ].replace( 'src/', '' ).split( '/' )[ 0 ];
 	if ( ! absolute ) {
 		return name + '.md';
 	}
@@ -148,7 +149,7 @@ function isFile( file ) {
  * @param { array } files A list of readme files.
  */
 function writeTableOfContents( files ) {
-	const mdFiles = files.map( f => getMdFileName( f, false ) );
+	const mdFiles = files.map( f => getMdFileName( f, false ) ).sort();
 	const TOC = uniq( mdFiles ).map( doc => {
 		const name = camelCaseDash( doc.replace( '.md', '' ) );
 		return `  * [${ name }](components/${ doc })`;
@@ -161,6 +162,7 @@ function writeTableOfContents( files ) {
 module.exports = {
 	COMPONENTS_FOLDER,
 	DOCS_FOLDER,
+	PACKAGES_FOLDER,
 	deleteExistingDocs,
 	getExportedFileList,
 	getMdFileName,

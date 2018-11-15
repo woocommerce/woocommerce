@@ -137,6 +137,13 @@ The title used in the card header, also used as the caption for the content in t
 
 The total number of rows (across all pages).
 
+### `compareParam`
+
+- Type: String
+- Default: `'filter'`
+
+Url query parameter compare function operates on
+
 `EmptyTable` (component)
 ========================
 

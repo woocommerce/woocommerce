@@ -13,6 +13,7 @@ const { parse, resolver } = require( 'react-docgen' );
 const { getDescription, getProps, getTitle } = require( './lib/formatting' );
 const {
 	COMPONENTS_FOLDER,
+	PACKAGES_FOLDER,
 	deleteExistingDocs,
 	getExportedFileList,
 	getMdFileName,
@@ -20,13 +21,14 @@ const {
 	writeTableOfContents,
 } = require( './lib/file-system' );
 
-const filePath = path.resolve( COMPONENTS_FOLDER, 'index.js' );
-
 // Start by wiping the existing docs. **Change this if we end up manually editing docs**
 deleteExistingDocs();
 
 // Read components file to get a list of exported files, convert that to a list of absolute paths to public components.
-const files = getRealFilePaths( getExportedFileList( filePath ) );
+const files = [
+	...getRealFilePaths( getExportedFileList( path.resolve( COMPONENTS_FOLDER, 'index.js' ) ) ),
+	...getRealFilePaths( getExportedFileList( path.resolve( PACKAGES_FOLDER, 'index.js' ) ), PACKAGES_FOLDER ),
+];
 
 // Build the documentation by reading each file.
 files.forEach( file => {

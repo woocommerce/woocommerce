@@ -121,16 +121,14 @@ function buildScssFile( styleFile ) {
 	mkdirp.sync( path.dirname( outputFile ) );
 	const builtSass = sass.renderSync( {
 		file: styleFile,
-		includePaths: [ path.resolve( __dirname, '../../assets/stylesheets' ) ],
+		includePaths: [ path.resolve( __dirname, '../../client/stylesheets/abstracts' ) ],
 		data: (
 			[
 				'colors',
-				'breakpoints',
 				'variables',
+				'breakpoints',
 				'mixins',
-				'animations',
-				'z-index',
-			].map( ( imported ) => `@import "${ imported }";` ).join( ' ' )	+
+			].map( ( imported ) => `@import "_${ imported }";` ).join( ' ' ) +
 			fs.readFileSync( styleFile, 'utf8' )
 		),
 	} );

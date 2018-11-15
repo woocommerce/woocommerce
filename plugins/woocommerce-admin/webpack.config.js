@@ -5,6 +5,7 @@
 const ExtractTextPlugin = require( 'extract-text-webpack-plugin' );
 const { get } = require( 'lodash' );
 const path = require( 'path' );
+const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 
 /**
  * WordPress dependencies
@@ -31,18 +32,20 @@ const externals = {
 	'react-dom': 'ReactDOM',
 };
 
-const wcAdminPackages = {
-	components: './client/components',
-	'csv-export': './packages/csv-export',
-	currency: './packages/currency',
-	date: './packages/date',
-	navigation: './packages/navigation',
-};
+const wcAdminPackages = [
+	'components',
+	'csv-export',
+	'currency',
+	'date',
+	'navigation',
+];
 
-Object.keys( wcAdminPackages ).forEach( name => {
+const entryPoints = {};
+wcAdminPackages.forEach( name => {
 	externals[ `@woocommerce/${ name }` ] = {
 		this: [ 'wc', name.replace( /-([a-z])/g, ( match, letter ) => letter.toUpperCase() ) ],
 	};
+	entryPoints[ name ] = `./packages/${ name }`;
 } );
 
 const webpackConfig = {
@@ -50,7 +53,7 @@ const webpackConfig = {
 	entry: {
 		app: './client/index.js',
 		embedded: './client/embedded.js',
-		...wcAdminPackages,
+		...entryPoints,
 	},
 	output: {
 		filename: './dist/[name]/index.js',
@@ -68,7 +71,7 @@ const webpackConfig = {
 			},
 			{ test: /\.md$/, use: 'raw-loader' },
 			{
-				test: /\.(scss|css)$/,
+				test: /\.s?css$/,
 				use: ExtractTextPlugin.extract( {
 					fallback: 'style-loader',
 					use: [
@@ -122,6 +125,14 @@ const webpackConfig = {
 		new ExtractTextPlugin( {
 			filename: './dist/[name]/style.css',
 		} ),
+		new CopyWebpackPlugin(
+			wcAdminPackages.map( packageName => ( {
+				from: `./packages/${ packageName }/build-style/*.css`,
+				to: `./dist/${ packageName }/`,
+				flatten: true,
+				transform: content => content,
+			} ) )
+		),
 	],
 };
 

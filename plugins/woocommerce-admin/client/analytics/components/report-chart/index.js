@@ -12,7 +12,6 @@ import PropTypes from 'prop-types';
 /**
  * WooCommerce dependencies
  */
-import { Chart, ChartPlaceholder } from '@woocommerce/components';
 import {
 	getAllowedIntervalsForQuery,
 	getCurrentDates,
@@ -24,6 +23,7 @@ import {
 /**
  * Internal dependencies
  */
+import { Chart, ChartPlaceholder } from 'components';
 import { getReportChartData } from 'store/reports/utils';
 import ReportError from 'analytics/components/report-error';
 

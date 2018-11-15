@@ -12,6 +12,7 @@ Props
 
 ### `labels`
 
+- **Required**
 - Type: Array
 - Default: null
 
