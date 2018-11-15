@@ -559,26 +559,166 @@ class WC_Admin_Reports_Data_Store {
 	}
 
 	/**
-	 * Returns ids of allowed products, based on query arguments from the user.
+	 * Returns comma separated ids of allowed products, based on query arguments from the user.
 	 *
 	 * @param array $query_args Parameters supplied by the user.
-	 * @return array
+	 * @return string
 	 */
-	protected function get_allowed_products( $query_args ) {
-		$allowed_products = array();
+	protected function get_included_products( $query_args ) {
+		$included_products    = array();
+		$operator             = $this->get_match_operator( $query_args );
+
 		if ( isset( $query_args['categories'] ) && is_array( $query_args['categories'] ) && count( $query_args['categories'] ) > 0 ) {
-			$allowed_products = $this->get_products_by_cat_ids( $query_args['categories'] );
-			$allowed_products = wc_list_pluck( $allowed_products, 'get_id' );
+			$included_products = $this->get_products_by_cat_ids( $query_args['categories'] );
+			$included_products = wc_list_pluck( $included_products, 'get_id' );
 		}
 
-		if ( isset( $query_args['products'] ) && is_array( $query_args['products'] ) && count( $query_args['products'] ) > 0 ) {
-			if ( count( $allowed_products ) > 0 ) {
-				$allowed_products = array_intersect( $allowed_products, $query_args['products'] );
+		if ( isset( $query_args['product_includes'] ) && is_array( $query_args['product_includes'] ) && count( $query_args['product_includes'] ) > 0 ) {
+			if ( count( $included_products ) > 0 ) {
+				if ( 'AND' === $operator ) {
+					$included_products = array_intersect( $included_products, $query_args['product_includes'] );
+				} elseif ( 'OR' === $operator ) {
+					// Union of products from selected categories and manually included products.
+					$included_products = array_unique( array_merge( $included_products, $query_args['product_includes'] ) );
+				}
 			} else {
-				$allowed_products = $query_args['products'];
+				$included_products = $query_args['products_includes'];
 			}
 		}
-		return $allowed_products;
+
+		$included_products_str = implode( ',', $included_products );
+		return $included_products_str;
+	}
+
+	/**
+	 * Returns comma separated ids of excluded products, based on query arguments from the user.
+	 *
+	 * @param array $query_args Parameters supplied by the user.
+	 * @return string
+	 */
+	protected function get_excluded_products( $query_args ) {
+		$excluded_products_str = '';
+
+		if ( isset( $query_args['product_excludes'] ) && is_array( $query_args['product_excludes'] ) && count( $query_args['product_excludes'] ) > 0 ) {
+			$excluded_products_str = implode( ',', $query_args['product_excludes'] );
+		}
+		return $excluded_products_str;
+	}
+
+	/**
+	 * Returns products subquery to be used in WHERE SQL query, based on query arguments from the user.
+	 *
+	 * @param array  $query_args Parameters supplied by the user.
+	 * @param string $operator   AND or OR, based on match query argument.
+	 * @return string
+	 */
+	protected function get_products_subquery( $query_args, $operator ) {
+		global $wpdb;
+
+		$included_products          = $this->get_included_products( $query_args );
+		$excluded_products          = $this->get_excluded_products( $query_args );
+		$included_products_subquery = '';
+		if ( $excluded_products ) {
+			$included_products_subquery = "{$wpdb->prefix}wc_order_product_lookup.product_id IN ({$included_products})";
+		}
+
+		$excluded_products_subquery = '';
+		if ( $excluded_products ) {
+			$excluded_products_subquery = "{$wpdb->prefix}wc_order_product_lookup.product_id NOT IN ({$excluded_products})";
+		}
+
+		return implode( $operator, array( $included_products_subquery, $excluded_products_subquery ) );
+	}
+
+	/**
+	 * Returns coupons subquery to be used in WHERE SQL query, based on query arguments from the user.
+	 *
+	 * @param array  $query_args Parameters supplied by the user.
+	 * @param string $operator   AND or OR, based on match query argument.
+	 * @return string
+	 */
+	protected function get_coupon_subquery( $query_args, $operator ) {
+		global $wpdb;
+
+		$include_coupons_subquery = '';
+		if ( is_array( $query_args['coupons_includes'] ) && count( $query_args['coupons_includes'] ) > 0 ) {
+			$include_coupons           = implode( ', ', $query_args['coupons_includes'] );
+			$include_coupons_subquery = "{$wpdb->prefix}wc_order_coupon_lookup.coupon_id IN ({$include_coupons})";
+		}
+
+		$exclude_coupons_subquery = '';
+		if ( is_array( $query_args['coupons_excludes'] ) && count( $query_args['coupons_excludes'] ) > 0 ) {
+			$exclude_coupons          = implode( ', ', $query_args['coupons_excludes'] );
+			$exclude_coupons_subquery = "{$wpdb->prefix}wc_order_coupon_lookup.coupon_id NOT IN ({$exclude_coupons})";
+		}
+
+		return implode( $operator, array( $include_coupons_subquery, $exclude_coupons_subquery ) );
+	}
+
+	/**
+	 * Returns order status subquery to be used in WHERE SQL query, based on query arguments from the user.
+	 *
+	 * @param array  $query_args Parameters supplied by the user.
+	 * @param string $operator   AND or OR, based on match query argument.
+	 * @return string
+	 */
+	protected function get_status_subquery( $query_args, $operator ) {
+		global $wpdb;
+
+		$included_orders = '';
+		if ( is_array( $query_args['status_is'] ) && count( $query_args['status_is'] ) > 0 ) {
+			$allowed_statuses = array_map( array( $this, 'normalize_order_status' ), $query_args['status_is'] );
+			if ( $allowed_statuses ) {
+				$included_orders = " {$wpdb->prefix}posts.post_status IN ( '" . implode( "','", $allowed_statuses ) . "' ) ";
+			}
+		}
+
+		$excluded_orders = '';
+		if ( is_array( $query_args['status_is_not'] ) && count( $query_args['status_is_not'] ) > 0 ) {
+			$forbidden_statuses = array_map( array( $this, 'normalize_order_status' ), $query_args['status_is_not'] );
+			if ( $forbidden_statuses ) {
+				$excluded_orders = " {$wpdb->prefix}posts.post_status NOT IN ( '" . implode( "','", $forbidden_statuses ) . "' ) ";
+			}
+		}
+
+		return implode( $operator, array( $included_orders, $excluded_orders ) );
+	}
+
+	/**
+	 * Returns customer subquery to be used in WHERE SQL query, based on query arguments from the user.
+	 *
+	 * @param array $query_args Parameters supplied by the user.
+	 * @return string
+	 */
+	protected function get_customer_subquery( $query_args ) {
+		global $wpdb;
+
+		$customer_filter = '';
+		if ( isset( $query_args['customer'] ) ) {
+			if ( 'new' === strtolower( $query_args['customer'] ) ) {
+				$customer_filter = " {$wpdb->prefix}wc_order_stats.returning_customer = 0";
+			} elseif ( 'returning' === strtolower( $query_args['customer'] ) ) {
+				$customer_filter = " {$wpdb->prefix}wc_order_stats.returning_customer = 0";
+			}
+		}
+
+		return $customer_filter;
+	}
+
+	/**
+	 * Returns logic operator for WHERE subclause based on 'match' query argument.
+	 *
+	 * @param array $query_args Parameters supplied by the user.
+	 * @return string
+	 */
+	protected function get_match_operator( $query_args ) {
+		$operator = 'AND';
+		if ( 'all' === strtolower( $query_args['match'] ) ) {
+			$operator = 'AND';
+		} elseif ( 'any' === strtolower( $query_args['match'] ) ) {
+			$operator = 'OR';
+		}
+		return $operator;
 	}
 
 }

@@ -173,49 +173,51 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 		// TODO: performance of all of this?
 		global $wpdb;
 
-		$where_clause = '';
-		$from_clause  = '';
-
+		$from_clause        = '';
 		$orders_stats_table = $wpdb->prefix . self::TABLE_NAME;
-		$allowed_products   = $this->get_allowed_products( $query_args );
+		$operator           = $this->get_match_operator( $query_args );
 
-		if ( count( $allowed_products ) > 0 ) {
-			$allowed_products_str = implode( ',', $allowed_products );
-
-			$where_clause .= " AND {$orders_stats_table}.order_id IN (
+		$products_filter   = '';
+		$products_subquery = $this->get_products_subquery( $query_args, $operator );
+		if ( $products_subquery ) {
+			$products_filter = " {$orders_stats_table}.order_id IN (
 			SELECT
 				DISTINCT {$wpdb->prefix}wc_order_product_lookup.order_id
 			FROM
 				{$wpdb->prefix}wc_order_product_lookup
 			WHERE
-				{$wpdb->prefix}wc_order_product_lookup.product_id IN ({$allowed_products_str})
+				1=1 AND
+				{$products_subquery}
 			)";
 		}
 
-		if ( is_array( $query_args['coupons'] ) && count( $query_args['coupons'] ) > 0 ) {
-			$allowed_coupons_str = implode( ', ', $query_args['coupons'] );
-
-			$where_clause .= " AND {$orders_stats_table}.order_id IN (
-			SELECT
-				DISTINCT {$wpdb->prefix}wc_order_coupon_lookup.order_id
-			FROM
-				{$wpdb->prefix}wc_order_coupon_lookup
-			WHERE
-				{$wpdb->prefix}wc_order_coupon_lookup.coupon_id IN ({$allowed_coupons_str})
-			)";
+		$coupon_filter    = '';
+		$coupons_subquery = $this->get_coupon_subquery( $query_args, $operator );
+		if ( $coupons_subquery ) {
+			$coupon_filter = " {$orders_stats_table}.order_id IN (
+				SELECT
+					DISTINCT {$wpdb->prefix}wc_order_coupon_lookup.order_id
+				FROM
+					{$wpdb->prefix}wc_order_coupon_lookup
+				WHERE
+					1=1 AND
+					{$coupons_subquery}
+				)";
 		}
 
-		if ( is_array( $query_args['order_status'] ) && count( $query_args['order_status'] ) > 0 ) {
-			$statuses = array_map( array( $this, 'normalize_order_status' ), $query_args['order_status'] );
-
-			$from_clause  .= " JOIN {$wpdb->prefix}posts ON {$orders_stats_table}.order_id = {$wpdb->prefix}posts.ID";
-			$where_clause .= " AND {$wpdb->prefix}posts.post_status IN ( '" . implode( "','", $statuses ) . "' ) ";
+		$order_status_filter = $this->get_status_subquery( $query_args, $operator );
+		if ( $order_status_filter ) {
+			$from_clause .= " JOIN {$wpdb->prefix}posts ON {$orders_stats_table}.order_id = {$wpdb->prefix}posts.ID";
 		}
+
+		$customer_filter = $this->get_customer_subquery( $query_args );
+
+		$where_subclause = implode( $operator, array( $products_filter, $coupon_filter, $order_status_filter, $customer_filter ) );
 
 		// To avoid requesting the subqueries twice, the result is applied to all queries passed to the method.
-		$totals_query['where_clause']    .= $where_clause;
+		$totals_query['where_clause']    .= "AND ( $where_subclause )";
 		$totals_query['from_clause']     .= $from_clause;
-		$intervals_query['where_clause'] .= $where_clause;
+		$intervals_query['where_clause'] .= "AND ( $where_subclause )";
 		$intervals_query['from_clause']  .= $from_clause;
 	}
 

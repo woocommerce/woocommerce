@@ -50,14 +50,13 @@ class WC_Admin_Reports_Products_Stats_Data_Store extends WC_Admin_Reports_Produc
 	protected function update_sql_query_params( $query_args, &$totals_params, &$intervals_params ) {
 		global $wpdb;
 
-		$allowed_products      = $this->get_allowed_products( $query_args );
+		$allowed_products      = $this->get_included_products( $query_args );
 		$products_where_clause = '';
 		$products_from_clause  = '';
 
 		$order_product_lookup_table = $wpdb->prefix . self::TABLE_NAME;
 		if ( count( $allowed_products ) > 0 ) {
-			$allowed_products_str   = implode( ',', $allowed_products );
-			$products_where_clause .= " AND {$order_product_lookup_table}.product_id IN ({$allowed_products_str})";
+			$products_where_clause .= " AND {$order_product_lookup_table}.product_id IN ({$allowed_products})";
 		}
 
 		if ( is_array( $query_args['order_status'] ) && count( $query_args['order_status'] ) > 0 ) {

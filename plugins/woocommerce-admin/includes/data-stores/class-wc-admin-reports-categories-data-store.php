@@ -74,11 +74,10 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 
 		$order_product_lookup_table = $wpdb->prefix . self::TABLE_NAME;
 
-		$allowed_products = $this->get_allowed_products( $query_args );
+		$allowed_products = $this->get_included_products( $query_args );
 
 		if ( count( $allowed_products ) > 0 ) {
-			$allowed_products_str              = implode( ',', $allowed_products );
-			$sql_query_params['where_clause'] .= " AND {$order_product_lookup_table}.product_id IN ({$allowed_products_str})";
+			$sql_query_params['where_clause'] .= " AND {$order_product_lookup_table}.product_id IN ({$allowed_products})";
 		}
 
 		if ( is_array( $query_args['order_status'] ) && count( $query_args['order_status'] ) > 0 ) {
