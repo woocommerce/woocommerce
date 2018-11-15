@@ -247,6 +247,8 @@ function wc_increase_stock_levels( $order_id ) {
 		return;
 	}
 
+	$changes = array();
+
 	// Loop over all items.
 	foreach ( $order->get_items() as $item ) {
 		if ( ! $item->is_type( 'line_item' ) ) {
