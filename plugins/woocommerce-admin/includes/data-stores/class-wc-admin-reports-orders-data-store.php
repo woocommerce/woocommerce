@@ -237,18 +237,24 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 
 		// These defaults are only applied when not using REST API, as the API has its own defaults that overwrite these for most values (except before, after, etc).
 		$defaults   = array(
-			'per_page'     => get_option( 'posts_per_page' ),
-			'page'         => 1,
-			'order'        => 'DESC',
-			'orderby'      => 'date',
-			'before'       => date( WC_Admin_Reports_Interval::$iso_datetime_format, $now ),
-			'after'        => date( WC_Admin_Reports_Interval::$iso_datetime_format, $week_back ),
-			'interval'     => 'week',
-			'fields'       => '*',
-			'categories'   => array(),
-			'coupons'      => array(),
-			'order_status' => parent::get_report_order_statuses(),
-			'products'     => array(),
+			'per_page'         => get_option( 'posts_per_page' ),
+			'page'             => 1,
+			'order'            => 'DESC',
+			'orderby'          => 'date',
+			'before'           => date( WC_Admin_Reports_Interval::$iso_datetime_format, $now ),
+			'after'            => date( WC_Admin_Reports_Interval::$iso_datetime_format, $week_back ),
+			'interval'         => 'week',
+			'fields'           => '*',
+
+			'match'            => 'ALL',
+			'status_is'        => array(),
+			'status_is_not'    => array(),
+			'product_includes' => array(),
+			'product_excludes' => array(),
+			'code_includes'    => array(),
+			'code_excludes'    => array(),
+			'customer'         => '',
+			'categories'       => array(),
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
 
