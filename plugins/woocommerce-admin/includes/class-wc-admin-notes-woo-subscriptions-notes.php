@@ -298,9 +298,8 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes {
 
 				foreach ( (array) $bump_thresholds as $bump_threshold ) {
 					if ( ( $note_days_until_expiration > $bump_threshold ) && ( $days_until_expiration <= $bump_threshold ) ) {
-						error_log( "note crossed the $bump_threshold days until expiration threshold" );
 						$note->delete();
-						unset( $note );
+						$note = false;
 						continue;
 					}
 				}
