@@ -11,7 +11,7 @@
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce/Templates
- * @version 3.5.0
+ * @version 3.5.2
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -29,7 +29,7 @@ if ( ! is_a( $product, 'WC_Product' ) ) {
 	<?php do_action( 'woocommerce_widget_product_item_start', $args ); ?>
 
 	<a href="<?php echo esc_url( $product->get_permalink() ); ?>">
-		<?php echo wp_kses_post( $product->get_image() ); ?>
+		<?php echo $product->get_image(); ?>
 		<span class="product-title"><?php echo esc_html( $product->get_name() ); ?></span>
 	</a>
 
@@ -37,7 +37,7 @@ if ( ! is_a( $product, 'WC_Product' ) ) {
 		<?php echo wp_kses_post( wc_get_rating_html( $product->get_average_rating() ) ); ?>
 	<?php endif; ?>
 
-	<?php echo wp_kses_post( $product->get_price_html() ); ?>
+	<?php echo $product->get_price_html(); ?>
 
 	<?php do_action( 'woocommerce_widget_product_item_end', $args ); ?>
 </li>
