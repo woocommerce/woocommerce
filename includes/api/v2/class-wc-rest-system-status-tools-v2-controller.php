@@ -191,13 +191,13 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 				'button' => __( 'Regenerate', 'woocommerce' ),
 				'desc'   => __( 'This will regenerate all shop thumbnails to match your theme and/or image settings.', 'woocommerce' ),
 			),
-			'db_upgrade_routine'                 => array(
-				'name'   => __( 'Upgrade database', 'woocommerce' ),
-				'button' => __( 'Upgrade database', 'woocommerce' ),
+			'db_update_routine'                  => array(
+				'name'   => __( 'Update database', 'woocommerce' ),
+				'button' => __( 'Update database', 'woocommerce' ),
 				'desc'   => sprintf(
 					'<strong class="red">%1$s</strong> %2$s',
 					__( 'Note:', 'woocommerce' ),
-					__( 'This tool will upgrade your WooCommerce database to the latest version. Please ensure you make sufficient backups before proceeding.', 'woocommerce' )
+					__( 'This tool will update your WooCommerce database to the latest version. Please ensure you make sufficient backups before proceeding.', 'woocommerce' )
 				),
 			)
 		);
@@ -545,7 +545,7 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 				$message = __( 'Thumbnail regeneration has been scheduled to run in the background.', 'woocommerce' );
 				break;
 
-			case 'db_upgrade_routine':
+			case 'db_update_routine':
 				$blog_id = get_current_blog_id();
 				// Used to fire an action added in WP_Background_Process::_construct() that calls WP_Background_Process::handle_cron_healthcheck().
 				// This method will make sure the database updates are executed even if cron is disabled. Nothing will happen if the updates are already running.
