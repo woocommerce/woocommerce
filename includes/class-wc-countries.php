@@ -547,8 +547,8 @@ class WC_Countries {
 		// Handle full country name.
 		$full_country = ( isset( $this->countries[ $country ] ) ) ? $this->countries[ $country ] : $country;
 
-		// Country is not needed if the same as base.
-		if ( $country === $this->get_base_country() && ! apply_filters( 'woocommerce_formatted_address_force_country_display', true ) ) {
+		// Country is not needed if the same as base except in shipping calculator.
+		if ( $country === $this->get_base_country() && ! apply_filters( 'woocommerce_formatted_address_force_country_display', is_cart() ) ) {
 			$format = str_replace( '{country}', '', $format );
 		}
 
