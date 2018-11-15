@@ -354,7 +354,7 @@ abstract class WC_CSV_Exporter {
 		$active_content_triggers = array( '=', '+', '-', '@' );
 
 		if ( in_array( mb_substr( $data, 0, 1 ), $active_content_triggers, true ) ) {
-			$data = "'" . $data . "'";
+			$data = "'" . $data;
 		}
 
 		return $data;
