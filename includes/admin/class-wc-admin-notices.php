@@ -368,8 +368,7 @@ class WC_Admin_Notices {
 	 * @todo  Remove this notice and associated code once the feature plugin has been merged into core.
 	 */
 	public static function add_wootenberg_feature_plugin_notice() {
-		global $wp_version;
-		if ( ( is_plugin_active( 'gutenberg/gutenberg.php' ) || version_compare( $wp_version, '5.0', '>=' ) ) && ! is_plugin_active( 'woo-gutenberg-products-block/woocommerce-gutenberg-products-block.php' ) ) {
+		if ( ( is_plugin_active( 'gutenberg/gutenberg.php' ) || version_compare( get_bloginfo( 'version' ), '5.0', '>=' ) ) && ! is_plugin_active( 'woo-gutenberg-products-block/woocommerce-gutenberg-products-block.php' ) ) {
 			self::add_notice( 'wootenberg' );
 		}
 	}
@@ -381,8 +380,7 @@ class WC_Admin_Notices {
 	 * @todo  Remove this notice and associated code once the feature plugin has been merged into core.
 	 */
 	public static function add_wootenberg_feature_plugin_notice_on_gutenberg_activate() {
-		global $wp_version;
-		if ( ! is_plugin_active( 'woo-gutenberg-products-block/woocommerce-gutenberg-products-block.php' ) && version_compare( $wp_version, '5.0', '<' ) ) {
+		if ( ! is_plugin_active( 'woo-gutenberg-products-block/woocommerce-gutenberg-products-block.php' ) && version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
 			self::add_notice( 'wootenberg' );
 		}
 	}
