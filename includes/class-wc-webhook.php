@@ -285,7 +285,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 */
 	private function get_wp_api_payload( $resource, $resource_id, $event ) {
 		$rest_api_versions = wc_get_webhook_rest_api_versions();
-		$version_suffix    = end( $rest_api_versions ) === $this->get_api_version() ? strtoupper( str_replace( 'wp_api', '', $this->get_api_version() ) ) : '';
+		$version_suffix    = end( $rest_api_versions ) !== $this->get_api_version() ? strtoupper( str_replace( 'wp_api', '', $this->get_api_version() ) ) : '';
 
 		switch ( $resource ) {
 			case 'coupon':
