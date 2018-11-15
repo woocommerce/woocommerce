@@ -12,6 +12,7 @@ import PropTypes from 'prop-types';
 import { interpolateViridis as d3InterpolateViridis } from 'd3-scale-chromatic';
 import { formatDefaultLocale as d3FormatDefaultLocale } from 'd3-format';
 import Gridicon from 'gridicons';
+import { withViewportMatch } from '@wordpress/viewport';
 
 /**
  * WooCommerce dependencies
@@ -22,10 +23,8 @@ import { updateQueryString } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import D3Chart from './charts';
-import { gap, gaplarge } from 'stylesheets/abstracts/_variables.scss';
 import { H, Section } from 'components/section';
 import Legend from './legend';
-import { WIDE_BREAKPOINT } from './utils';
 
 d3FormatDefaultLocale( {
 	decimal: '.',
@@ -60,16 +59,13 @@ function getOrderedKeys( props ) {
 class Chart extends Component {
 	constructor( props ) {
 		super( props );
-		this.chartRef = createRef();
-		const wpBody = document.getElementById( 'wpbody' ).getBoundingClientRect().width;
-		const wpWrap = document.getElementById( 'wpwrap' ).getBoundingClientRect().width;
-		const calcGap = wpWrap > 782 ? gaplarge.match( /\d+/ )[ 0 ] : gap.match( /\d+/ )[ 0 ];
+		this.chartBodyRef = createRef();
 		this.state = {
 			data: props.data,
 			orderedKeys: getOrderedKeys( props ),
 			type: props.type,
 			visibleData: [ ...props.data ],
-			width: wpBody - 2 * calcGap,
+			width: 0,
 		};
 		this.handleTypeToggle = this.handleTypeToggle.bind( this );
 		this.handleLegendToggle = this.handleLegendToggle.bind( this );
@@ -93,6 +89,7 @@ class Chart extends Component {
 	}
 
 	componentDidMount() {
+		this.updateDimensions();
 		window.addEventListener( 'resize', this.updateDimensions );
 	}
 
@@ -140,7 +137,7 @@ class Chart extends Component {
 
 	updateDimensions() {
 		this.setState( {
-			width: this.chartRef.current.offsetWidth,
+			width: this.chartBodyRef.current.offsetWidth,
 		} );
 	}
 
@@ -188,6 +185,20 @@ class Chart extends Component {
 		);
 	}
 
+	getChartHeight() {
+		const { isViewportLarge, isViewportMobile } = this.props;
+
+		if ( isViewportMobile ) {
+			return 180;
+		}
+
+		if ( isViewportLarge ) {
+			return 300;
+		}
+
+		return 220;
+	}
+
 	render() {
 		const { orderedKeys, type, visibleData, width } = this.state;
 		const {
@@ -196,6 +207,8 @@ class Chart extends Component {
 			layout,
 			mode,
 			pointLabelFormat,
+			isViewportLarge,
+			isViewportWide,
 			title,
 			tooltipFormat,
 			tooltipTitle,
@@ -205,11 +218,9 @@ class Chart extends Component {
 			valueType,
 		} = this.props;
 		let { yFormat } = this.props;
-		const legendDirection = layout === 'standard' && width >= WIDE_BREAKPOINT ? 'row' : 'column';
-		const chartDirection = layout === 'comparison' && width >= WIDE_BREAKPOINT ? 'row' : 'column';
-		let chartHeight = width > 1329 ? 300 : 220;
-		chartHeight = width <= 1329 && width > 783 ? 220 : chartHeight;
-		chartHeight = width <= 783 ? 180 : chartHeight;
+		const legendDirection = layout === 'standard' && isViewportWide ? 'row' : 'column';
+		const chartDirection = layout === 'comparison' && isViewportWide ? 'row' : 'column';
+		const chartHeight = this.getChartHeight();
 		const legend = (
 			<Legend
 				colorScheme={ d3InterpolateViridis }
@@ -240,10 +251,10 @@ class Chart extends Component {
 				break;
 		}
 		return (
-			<div className="woocommerce-chart" ref={ this.chartRef }>
+			<div className="woocommerce-chart">
 				<div className="woocommerce-chart__header">
 					<H className="woocommerce-chart__title">{ title }</H>
-					{ width >= WIDE_BREAKPOINT && legendDirection === 'row' && legend }
+					{ isViewportWide && legendDirection === 'row' && legend }
 					{ this.renderIntervalSelector() }
 					<NavigableMenu
 						className="woocommerce-chart__types"
@@ -280,29 +291,33 @@ class Chart extends Component {
 							'woocommerce-chart__body',
 							`woocommerce-chart__body-${ chartDirection }`
 						) }
+						ref={ this.chartBodyRef }
 					>
-						{ width >= WIDE_BREAKPOINT && legendDirection === 'column' && legend }
-						<D3Chart
-							colorScheme={ d3InterpolateViridis }
-							data={ visibleData }
-							dateParser={ dateParser }
-							height={ chartHeight }
-							margin={ margin }
-							mode={ mode }
-							orderedKeys={ orderedKeys }
-							pointLabelFormat={ pointLabelFormat }
-							tooltipFormat={ tooltipFormat }
-							tooltipTitle={ tooltipTitle }
-							type={ type }
-							interval={ interval }
-							width={ chartDirection === 'row' ? width - 320 : width }
-							xFormat={ xFormat }
-							x2Format={ x2Format }
-							yFormat={ yFormat }
-							valueType={ valueType }
-						/>
+						{ isViewportWide && legendDirection === 'column' && legend }
+						{ width > 0 && (
+							<D3Chart
+								colorScheme={ d3InterpolateViridis }
+								data={ visibleData }
+								dateParser={ dateParser }
+								height={ chartHeight }
+								margin={ margin }
+								mode={ mode }
+								orderedKeys={ orderedKeys }
+								pointLabelFormat={ pointLabelFormat }
+								tooltipFormat={ tooltipFormat }
+								tooltipPosition={ isViewportLarge ? 'over' : 'below' }
+								tooltipTitle={ tooltipTitle }
+								type={ type }
+								interval={ interval }
+								width={ chartDirection === 'row' ? width - 320 : width }
+								xFormat={ xFormat }
+								x2Format={ x2Format }
+								yFormat={ yFormat }
+								valueType={ valueType }
+							/>
+						) }
 					</div>
-					{ width < WIDE_BREAKPOINT && <div className="woocommerce-chart__footer">{ legend }</div> }
+					{ ! isViewportWide && <div className="woocommerce-chart__footer">{ legend }</div> }
 				</Section>
 			</div>
 		);
@@ -400,4 +415,8 @@ Chart.defaultProps = {
 	interval: 'day',
 };
 
-export default Chart;
+export default withViewportMatch( {
+	isViewportMobile: '< medium',
+	isViewportLarge: '>= large',
+	isViewportWide: '>= wide',
+} )( Chart );

@@ -188,14 +188,13 @@ export const getYScale = ( height, yMax ) =>
 /**
  * Describes getyTickOffset
  * @param {number} height - calculated height of the charting space
- * @param {number} scale - ratio of the expected width to calculated width (given the viewbox)
  * @param {number} yMax - from `getYMax`
  * @returns {function} the D3 linear scale from 0 to the value from `getYMax`, offset by 12 pixels down
  */
-export const getYTickOffset = ( height, scale, yMax ) =>
+export const getYTickOffset = ( height, yMax ) =>
 	d3ScaleLinear()
 		.domain( [ 0, yMax ] )
-		.rangeRound( [ height + scale * 12, scale * 12 ] );
+		.rangeRound( [ height + 12, 12 ] );
 
 /**
  * Describes getyTickOffset
@@ -417,10 +416,6 @@ export const drawAxis = ( node, params ) => {
 		.call( g => g.select( '.domain' ).remove() );
 
 	node
-		.selectAll( '.axis-month .tick text' )
-		.style( 'font-size', `${ Math.round( params.scale * 10 ) }px` );
-
-	node
 		.append( 'g' )
 		.attr( 'class', 'pipes' )
 		.attr( 'transform', `translate(0, ${ params.height })` )
@@ -454,10 +449,6 @@ export const drawAxis = ( node, params ) => {
 				.tickValues( yGrids )
 				.tickFormat( d => d3Format( params.yFormat )( d !== 0 ? d : 0 ) )
 		);
-
-	node
-		.selectAll( '.y-axis .tick text' )
-		.style( 'font-size', `${ Math.round( params.scale * 10 ) }px` );
 
 	node.selectAll( '.domain' ).remove();
 	node
@@ -543,19 +534,18 @@ const handleMouseOutLineChart = ( parentNode, params ) => {
 	params.tooltip.style( 'visibility', 'hidden' );
 };
 
-export const WIDE_BREAKPOINT = 960;
-
 const calculateTooltipXPosition = (
 	elementCoords,
 	chartCoords,
 	tooltipSize,
 	tooltipMargin,
-	elementWidthRatio
+	elementWidthRatio,
+	tooltipPosition
 ) => {
 	const xPosition =
 		elementCoords.left + elementCoords.width * elementWidthRatio + tooltipMargin - chartCoords.left;
 
-	if ( chartCoords.width < WIDE_BREAKPOINT ) {
+	if ( tooltipPosition === 'below' ) {
 		return Math.max(
 			tooltipMargin,
 			Math.min(
@@ -579,8 +569,14 @@ const calculateTooltipXPosition = (
 	return xPosition;
 };
 
-const calculateTooltipYPosition = ( elementCoords, chartCoords, tooltipSize, tooltipMargin ) => {
-	if ( chartCoords.width < WIDE_BREAKPOINT ) {
+const calculateTooltipYPosition = (
+	elementCoords,
+	chartCoords,
+	tooltipSize,
+	tooltipMargin,
+	tooltipPosition
+) => {
+	if ( tooltipPosition === 'below' ) {
 		return chartCoords.height;
 	}
 
@@ -592,7 +588,7 @@ const calculateTooltipYPosition = ( elementCoords, chartCoords, tooltipSize, too
 	return yPosition;
 };
 
-const calculateTooltipPosition = ( element, chart, elementWidthRatio = 1 ) => {
+const calculateTooltipPosition = ( element, chart, tooltipPosition, elementWidthRatio = 1 ) => {
 	const elementCoords = element.getBoundingClientRect();
 	const chartCoords = chart.getBoundingClientRect();
 	const tooltipSize = d3Select( '.tooltip' )
@@ -600,7 +596,7 @@ const calculateTooltipPosition = ( element, chart, elementWidthRatio = 1 ) => {
 		.getBoundingClientRect();
 	const tooltipMargin = 24;
 
-	if ( chartCoords.width < WIDE_BREAKPOINT ) {
+	if ( tooltipPosition === 'below' ) {
 		elementWidthRatio = 0;
 	}
 
@@ -610,9 +606,16 @@ const calculateTooltipPosition = ( element, chart, elementWidthRatio = 1 ) => {
 			chartCoords,
 			tooltipSize,
 			tooltipMargin,
-			elementWidthRatio
+			elementWidthRatio,
+			tooltipPosition
 		),
-		y: calculateTooltipYPosition( elementCoords, chartCoords, tooltipSize, tooltipMargin ),
+		y: calculateTooltipYPosition(
+			elementCoords,
+			chartCoords,
+			tooltipSize,
+			tooltipMargin,
+			tooltipPosition
+		),
 	};
 };
 
@@ -669,7 +672,11 @@ export const drawLines = ( node, data, params ) => {
 				return `${ label } ${ formatCurrency( d.value ) }`;
 			} )
 			.on( 'focus', ( d, i, nodes ) => {
-				const position = calculateTooltipPosition( d3Event.target, node.node() );
+				const position = calculateTooltipPosition(
+					d3Event.target,
+					node.node(),
+					params.tooltipPosition
+				);
 				handleMouseOverLineChart( d.date, nodes[ i ].parentNode, node, data, params, position );
 			} )
 			.on( 'blur', ( d, i, nodes ) => handleMouseOutLineChart( nodes[ i ].parentNode, params ) );
@@ -717,7 +724,12 @@ export const drawLines = ( node, data, params ) => {
 		.attr( 'opacity', 0 )
 		.on( 'mouseover', ( d, i, nodes ) => {
 			const elementWidthRatio = i === 0 || i === params.dateSpaces.length - 1 ? 0 : 0.5;
-			const position = calculateTooltipPosition( d3Event.target, node.node(), elementWidthRatio );
+			const position = calculateTooltipPosition(
+				d3Event.target,
+				node.node(),
+				params.tooltipPosition,
+				elementWidthRatio
+			);
 			handleMouseOverLineChart( d.date, nodes[ i ].parentNode, node, data, params, position );
 		} )
 		.on( 'mouseout', ( d, i, nodes ) => handleMouseOutLineChart( nodes[ i ].parentNode, params ) );
@@ -782,7 +794,7 @@ export const drawBars = ( node, data, params ) => {
 		} )
 		.on( 'focus', ( d, i, nodes ) => {
 			const targetNode = d.value > 0 ? d3Event.target : d3Event.target.parentNode;
-			const position = calculateTooltipPosition( targetNode, node.node() );
+			const position = calculateTooltipPosition( targetNode, node.node(), params.tooltipPosition );
 			handleMouseOverBarChart( d.date, nodes[ i ].parentNode, node, data, params, position );
 		} )
 		.on( 'blur', ( d, i, nodes ) => handleMouseOutBarChart( nodes[ i ].parentNode, params ) );
@@ -796,7 +808,11 @@ export const drawBars = ( node, data, params ) => {
 		.attr( 'height', params.height )
 		.attr( 'opacity', '0' )
 		.on( 'mouseover', ( d, i, nodes ) => {
-			const position = calculateTooltipPosition( d3Event.target, node.node() );
+			const position = calculateTooltipPosition(
+				d3Event.target,
+				node.node(),
+				params.tooltipPosition
+			);
 			handleMouseOverBarChart( d.date, nodes[ i ].parentNode, node, data, params, position );
 		} )
 		.on( 'mouseout', ( d, i, nodes ) => handleMouseOutBarChart( nodes[ i ].parentNode, params ) );

@@ -8,6 +8,7 @@
 
 	&.woocommerce-legend__direction-column {
 		border-right: 1px solid $core-grey-light-700;
+		min-width: 320px;
 
 		.woocommerce-chart__footer & {
 			border-right: none;
@@ -24,7 +25,6 @@
 	.woocommerce-legend__direction-column & {
 		flex-direction: column;
 		height: 300px;
-		min-width: 320px;
 		overflow: auto;
 
 		.woocommerce-chart__footer & {
@@ -36,6 +36,8 @@
 	}
 
 	.has-total.woocommerce-legend__direction-column & {
+		height: 250px;
+
 		.woocommerce-chart__footer & {
 			height: auto;
 			max-height: 220px;

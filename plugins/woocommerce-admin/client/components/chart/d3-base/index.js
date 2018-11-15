@@ -32,7 +32,6 @@ export default class D3Base extends Component {
 		drawChart: PropTypes.func.isRequired,
 		getParams: PropTypes.func.isRequired,
 		type: PropTypes.string,
-		width: PropTypes.number,
 	};
 
 	state = {
@@ -41,7 +40,6 @@ export default class D3Base extends Component {
 		drawChart: null,
 		getParams: null,
 		type: null,
-		width: null,
 	};
 
 	chartRef = createRef();
@@ -59,10 +57,6 @@ export default class D3Base extends Component {
 
 		if ( ! isEqual( nextProps.getParams, prevState.getParams ) ) {
 			state = { ...state, getParams: nextProps.getParams };
-		}
-
-		if ( nextProps.width !== prevState.width ) {
-			state = { ...state, width: nextProps.width };
 		}
 
 		if ( nextProps.type !== prevState.type ) {
@@ -86,7 +80,6 @@ export default class D3Base extends Component {
 		return (
 			( nextState.params !== null && ! isEqual( this.state.params, nextState.params ) ) ||
 			! isEqual( this.state.data, nextState.data ) ||
-			this.state.width !== nextState.width ||
 			this.state.type !== nextState.type
 		);
 	}
@@ -129,6 +122,8 @@ export default class D3Base extends Component {
 		const svg = d3Select( this.chartRef.current )
 			.append( 'svg' )
 			.attr( 'viewBox', `0 0 ${ width } ${ height }` )
+			.attr( 'height', height )
+			.attr( 'width', width )
 			.attr( 'preserveAspectRatio', 'xMidYMid meet' );
 
 		if ( className ) {

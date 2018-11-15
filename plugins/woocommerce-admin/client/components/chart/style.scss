@@ -176,6 +176,12 @@
 			}
 		}
 	}
+	.y-axis,
+	.axis-month {
+		.tick text {
+			font-size: 10px;
+		}
+	}
 
 	.focus-grid {
 		line {

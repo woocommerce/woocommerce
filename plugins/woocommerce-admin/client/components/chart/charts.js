@@ -105,6 +105,7 @@ class D3Chart extends Component {
 			mode,
 			orderedKeys,
 			pointLabelFormat,
+			tooltipPosition,
 			tooltipFormat,
 			tooltipTitle,
 			type,
@@ -116,7 +117,6 @@ class D3Chart extends Component {
 		const { width } = this.state;
 		const calculatedWidth = width || node.offsetWidth;
 		const calculatedHeight = height || node.offsetHeight;
-		const scale = width / node.offsetWidth;
 		const adjHeight = calculatedHeight - margin.top - margin.bottom;
 		const adjWidth = calculatedWidth - margin.left - margin.right;
 		const uniqueKeys = getUniqueKeys( data );
@@ -140,7 +140,7 @@ class D3Chart extends Component {
 			orderedKeys: newOrderedKeys,
 			pointLabelFormat,
 			parseDate,
-			scale,
+			tooltipPosition,
 			tooltipFormat: d3TimeFormat( tooltipFormat ),
 			tooltipTitle,
 			type,
@@ -155,7 +155,7 @@ class D3Chart extends Component {
 			xScale,
 			yMax,
 			yScale,
-			yTickOffset: getYTickOffset( adjHeight, scale, yMax ),
+			yTickOffset: getYTickOffset( adjHeight, yMax ),
 			yFormat,
 			valueType,
 		};
@@ -242,6 +242,10 @@ D3Chart.propTypes = {
 	 */
 	tooltipFormat: PropTypes.string,
 	/**
+	 * The position where to render the tooltip can be `over` the chart or `below` the chart.
+	 */
+	tooltipPosition: PropTypes.oneOf( [ 'below', 'over' ] ),
+	/**
 	 * A string to use as a title for the tooltip. Takes preference over `tooltipFormat`.
 	 */
 	tooltipTitle: PropTypes.string,
@@ -280,6 +284,7 @@ D3Chart.defaultProps = {
 	layout: 'standard',
 	mode: 'item-comparison',
 	tooltipFormat: '%B %d, %Y',
+	tooltipPosition: 'over',
 	type: 'line',
 	width: 600,
 	xFormat: '%Y-%m-%d',

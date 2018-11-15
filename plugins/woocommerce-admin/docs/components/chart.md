@@ -239,6 +239,13 @@ The list of labels for this chart.
 A datetime formatting string to format the date displayed as the title of the toolip
 if `tooltipTitle` is missing, passed to d3TimeFormat.
 
+### `tooltipPosition`
+
+- Type: String
+- Default: `'over'`
+
+The position where to render the tooltip can be `over` the chart or `below` the chart.
+
 ### `tooltipTitle`
 
 - Type: String
@@ -331,6 +338,14 @@ Handles `onMouseEnter`/`onMouseLeave` events.
 - Default: `'row'`
 
 Display legend items as a `row` or `column` inside a flex-box.
+
+### `itemsLabel`
+
+- Type: String
+- Default: null
+
+Label to describe the legend items. It will be displayed in the legend of
+comparison charts when there are many.
 
 ### `valueType`
 
