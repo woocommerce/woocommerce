@@ -20,6 +20,7 @@ After cloning the repo, install dependencies with `npm install`. Now you can bui
 
  - `npm run build` : Build a production version
  - `npm start` : Build a development version, watch files for changes
+ - `npm run build:release` : Build a WordPress plugin ZIP file (`wc-admin.zip` will be created in the repository root)
 
 There are also some helper scripts:
 
