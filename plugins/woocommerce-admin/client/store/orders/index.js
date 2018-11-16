@@ -2,15 +2,14 @@
 /**
  * Internal dependencies
  */
-
-import reducer from './reducer';
 import actions from './actions';
-import selectors from './selectors';
+import reducer from './reducer';
 import resolvers from './resolvers';
+import selectors from './selectors';
 
 export default {
-	reducer,
 	actions,
-	selectors,
+	reducer,
 	resolvers,
+	selectors,
 };

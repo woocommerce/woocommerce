@@ -6,13 +6,13 @@
  * External dependencies
  */
 import deepFreeze from 'deep-freeze';
+import { select } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import { ERROR } from 'store/constants';
 import selectors from '../selectors';
-import { select } from '@wordpress/data';
 import { getJsonString } from 'store/utils';
 
 const { getProducts, isGetProductsRequesting, isGetProductsError } = selectors;

@@ -17,7 +17,7 @@ import { getJsonString } from 'store/utils';
  *
  * @param  {Object} state     Current state
  * @param  {String} endpoint  Stats endpoint
- * @param  {Object} query     Report query paremters
+ * @param  {Object} query     Report query parameters
  * @return {Object}           Report details
  */
 function getReportStats( state, endpoint, query = {} ) {
@@ -29,7 +29,7 @@ export default {
 	getReportStats,
 
 	/**
-	 * Returns true if a stat query is pending.
+	 * Returns true if a stats query is pending.
 	 *
 	 * @param  {Object} state  Current state
 	 * @return {Boolean}        True if the `getReportRevenueStats` request is pending, false otherwise

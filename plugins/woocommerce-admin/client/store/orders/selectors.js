@@ -16,7 +16,7 @@ import { ERROR } from 'store/constants';
  * Returns orders for a specific query.
  *
  * @param  {Object} state     Current state
- * @param  {Object} query     Report query paremters
+ * @param  {Object} query     Report query parameters
  * @return {Array}            Report details
  */
 function getOrders( state, query = {} ) {
@@ -27,7 +27,7 @@ export default {
 	getOrders,
 
 	/**
-	 * Returns true if a query is pending.
+	 * Returns true if a getOrders request is pending.
 	 *
 	 * @param  {Object} state   Current state
 	 * @return {Boolean}        True if the `getOrders` request is pending, false otherwise
@@ -37,7 +37,7 @@ export default {
 	},
 
 	/**
-	 * Returns true if a get orders request has returned an error.
+	 * Returns true if a getOrders request has returned an error.
 	 *
 	 * @param  {Object} state     Current state
 	 * @param  {Object} query     Query parameters
