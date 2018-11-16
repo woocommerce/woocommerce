@@ -76,8 +76,8 @@ class WC_Widget_Price_Filter extends WC_Widget {
 
 		// Find min and max price in current result set.
 		$prices = $this->get_filtered_price();
-		$min    = floor( $prices->min_price );
-		$max    = ceil( $prices->max_price );
+		$min    = $prices->min_price;
+		$max    = $prices->max_price;
 
 		// Check to see if we should add taxes to the prices if store are excl tax but display incl.
 		$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
@@ -88,8 +88,8 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			foreach ( $tax_classes as $tax_class ) {
 				$tax_rates = WC_Tax::get_rates( $tax_class );
 				if ( $tax_rates ) {
-					$class_min = $min + WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $min, $tax_rates ) );
-					$class_max = $max + WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $max, $tax_rates ) );
+					$class_min = floor( $min + WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $min, $tax_rates ) ) );
+					$class_max = ceil( $max + WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $max, $tax_rates ) ) );
 				}
 			}
 			$min = $class_min;
@@ -108,8 +108,8 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			$form_action = preg_replace( '%\/page/[0-9]+%', '', home_url( trailingslashit( $wp->request ) ) );
 		}
 
-		$min_price = isset( $_GET['min_price'] ) ? wc_clean( wp_unslash( $_GET['min_price'] ) ) : apply_filters( 'woocommerce_price_filter_widget_min_amount', $min ); // WPCS: input var ok, CSRF ok.
-		$max_price = isset( $_GET['max_price'] ) ? wc_clean( wp_unslash( $_GET['max_price'] ) ) : apply_filters( 'woocommerce_price_filter_widget_max_amount', $max ); // WPCS: input var ok, CSRF ok.
+		$min_price = floor( isset( $_GET['min_price'] ) ? wc_clean( wp_unslash( $_GET['min_price'] ) ) : apply_filters( 'woocommerce_price_filter_widget_min_amount', $min ) ); // WPCS: input var ok, CSRF ok.
+		$max_price = floor( isset( $_GET['max_price'] ) ? wc_clean( wp_unslash( $_GET['max_price'] ) ) : apply_filters( 'woocommerce_price_filter_widget_max_amount', $max ) ); // WPCS: input var ok, CSRF ok.
 		echo '<form method="get" action="' . esc_url( $form_action ) . '">
 			<div class="price_slider_wrapper">
 				<div class="price_slider" style="display:none;"></div>
