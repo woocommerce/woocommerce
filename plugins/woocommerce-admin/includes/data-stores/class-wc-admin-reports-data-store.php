@@ -711,6 +711,11 @@ class WC_Admin_Reports_Data_Store {
 	 */
 	protected function get_match_operator( $query_args ) {
 		$operator = 'AND';
+
+		if ( ! isset( $query_args['match'] ) ) {
+			return $operator;
+		}
+
 		if ( 'all' === strtolower( $query_args['match'] ) ) {
 			$operator = 'AND';
 		} elseif ( 'any' === strtolower( $query_args['match'] ) ) {
