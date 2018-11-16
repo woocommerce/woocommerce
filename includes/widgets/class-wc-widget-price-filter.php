@@ -35,7 +35,9 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		wp_register_script( 'wc-jquery-ui-touchpunch', WC()->plugin_url() . '/assets/js/jquery-ui-touch-punch/jquery-ui-touch-punch' . $suffix . '.js', array( 'jquery-ui-slider' ), WC_VERSION, true );
 		wp_register_script( 'wc-price-slider', WC()->plugin_url() . '/assets/js/frontend/price-slider' . $suffix . '.js', array( 'jquery-ui-slider', 'wc-jquery-ui-touchpunch', 'accounting' ), WC_VERSION, true );
 		wp_localize_script(
-			'wc-price-slider', 'woocommerce_price_slider_params', array(
+			'wc-price-slider',
+			'woocommerce_price_slider_params',
+			array(
 				'currency_format_num_decimals' => 0,
 				'currency_format_symbol'       => get_woocommerce_currency_symbol(),
 				'currency_format_decimal_sep'  => esc_attr( wc_get_price_decimal_separator() ),
@@ -77,6 +79,23 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		$min    = floor( $prices->min_price );
 		$max    = ceil( $prices->max_price );
 
+		// Check to see if we should add taxes to the prices if store are excl tax but display incl.
+		$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
+		if ( wc_tax_enabled() && ! wc_prices_include_tax() && 'incl' === $tax_display_mode ) {
+			$class_min   = $min;
+			$class_max   = $max;
+			$tax_classes = array_merge( array( '' ), WC_Tax::get_tax_classes() );
+			foreach ( $tax_classes as $tax_class ) {
+				$tax_rates = WC_Tax::get_rates( $tax_class );
+				if ( $tax_rates ) {
+					$class_min = $min + WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $min, $tax_rates ) );
+					$class_max = $max + WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $max, $tax_rates ) );
+				}
+			}
+			$min = $class_min;
+			$max = $class_max;
+		}
+
 		if ( $min === $max ) {
 			return;
 		}
@@ -91,13 +110,13 @@ class WC_Widget_Price_Filter extends WC_Widget {
 
 		$min_price = isset( $_GET['min_price'] ) ? wc_clean( wp_unslash( $_GET['min_price'] ) ) : apply_filters( 'woocommerce_price_filter_widget_min_amount', $min ); // WPCS: input var ok, CSRF ok.
 		$max_price = isset( $_GET['max_price'] ) ? wc_clean( wp_unslash( $_GET['max_price'] ) ) : apply_filters( 'woocommerce_price_filter_widget_max_amount', $max ); // WPCS: input var ok, CSRF ok.
-
 		echo '<form method="get" action="' . esc_url( $form_action ) . '">
 			<div class="price_slider_wrapper">
 				<div class="price_slider" style="display:none;"></div>
 				<div class="price_slider_amount">
 					<input type="text" id="min_price" name="min_price" value="' . esc_attr( $min_price ) . '" data-min="' . esc_attr( apply_filters( 'woocommerce_price_filter_widget_min_amount', $min ) ) . '" placeholder="' . esc_attr__( 'Min price', 'woocommerce' ) . '" />
 					<input type="text" id="max_price" name="max_price" value="' . esc_attr( $max_price ) . '" data-max="' . esc_attr( apply_filters( 'woocommerce_price_filter_widget_max_amount', $max ) ) . '" placeholder="' . esc_attr__( 'Max price', 'woocommerce' ) . '" />
+					<input type="hidden" name="min_max_source" value="price_filter_widget" />
 					<button type="submit" class="button">' . esc_html__( 'Filter', 'woocommerce' ) . '</button>
 					<div class="price_label" style="display:none;">
 						' . esc_html__( 'Price:', 'woocommerce' ) . ' <span class="from"></span> &mdash; <span class="to"></span>
