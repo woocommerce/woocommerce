@@ -348,7 +348,7 @@ class ProductsBlockSettingsEditor extends Component {
 /**
  * One product in the product block preview.
  */
-class ProductPreview extends Component {
+export class ProductPreview extends Component {
 	render() {
 		const { product } = this.props;
 

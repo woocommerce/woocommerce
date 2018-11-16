@@ -10,6 +10,7 @@ module.exports = {
 		browser: false,
 		es6: true,
 		node: true,
+		'jest/globals': true,
 	},
 	parserOptions: {
 		sourceType: 'module',
@@ -26,6 +27,7 @@ module.exports = {
 		'wordpress',
 		'react',
 		'jsx-a11y',
+		'jest',
 	],
 	rules: {
 		'array-bracket-spacing': [ 'error', 'always' ],
