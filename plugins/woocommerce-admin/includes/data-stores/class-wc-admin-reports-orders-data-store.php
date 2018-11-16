@@ -48,6 +48,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 		'avg_order_value'         => 'floatval',
 		'num_returning_customers' => 'intval',
 		'num_new_customers'       => 'intval',
+		'products'                => 'intval',
 	);
 
 	/**
@@ -297,7 +298,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 				return new WP_Error( 'woocommerce_reports_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'wc-admin' ) );
 			}
 
-			$unique_products = $this->get_unique_products( $totals_query['where_clause'] );
+			$unique_products = $this->get_unique_product_count( $totals_query['where_clause'] );
 			$totals[0]['products'] = $unique_products;
 
 			// Specification says these are not included in totals.
@@ -385,7 +386,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 	 * @param string $where_clause Where clause with date query.
 	 * @return integer Unique product count.
 	 */
-	public function get_unique_products( $where_clause ) {
+	public function get_unique_product_count( $where_clause ) {
 		global $wpdb;
 
 		return $wpdb->get_var(
