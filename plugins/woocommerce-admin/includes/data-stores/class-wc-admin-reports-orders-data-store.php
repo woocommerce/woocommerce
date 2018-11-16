@@ -216,7 +216,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 			$where_filters[] = $customer_filter;
 		}
 
-		$where_subclause = implode( $operator, $where_filters );
+		$where_subclause = implode( " $operator ", $where_filters );
 
 		// To avoid requesting the subqueries twice, the result is applied to all queries passed to the method.
 		if ( $where_subclause ) {
