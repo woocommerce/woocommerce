@@ -327,7 +327,7 @@ final class WC_Cart_Session {
 			$cart_id          = WC()->cart->generate_cart_id( $product_id, $variation_id, $variations, $cart_item_data );
 			$product_data     = wc_get_product( $variation_id ? $variation_id : $product_id );
 			$cart[ $cart_id ] = apply_filters(
-				'woocommerce_add_cart_item', array_merge(
+				'woocommerce_add_order_again_cart_item', array_merge(
 					$cart_item_data, array(
 						'key'          => $cart_id,
 						'product_id'   => $product_id,
