@@ -177,10 +177,10 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 		$orders_stats_table = $wpdb->prefix . self::TABLE_NAME;
 		$operator           = $this->get_match_operator( $query_args );
 
-		$products_filter   = '';
+		$where_filters     = array();
 		$products_subquery = $this->get_products_subquery( $query_args, $operator );
 		if ( $products_subquery ) {
-			$products_filter = " {$orders_stats_table}.order_id IN (
+			$where_filters[] = " {$orders_stats_table}.order_id IN (
 			SELECT
 				DISTINCT {$wpdb->prefix}wc_order_product_lookup.order_id
 			FROM
@@ -191,10 +191,9 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 			)";
 		}
 
-		$coupon_filter    = '';
 		$coupons_subquery = $this->get_coupon_subquery( $query_args, $operator );
 		if ( $coupons_subquery ) {
-			$coupon_filter = " {$orders_stats_table}.order_id IN (
+			$where_filters[] = " {$orders_stats_table}.order_id IN (
 				SELECT
 					DISTINCT {$wpdb->prefix}wc_order_coupon_lookup.order_id
 				FROM
@@ -207,18 +206,24 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 
 		$order_status_filter = $this->get_status_subquery( $query_args, $operator );
 		if ( $order_status_filter ) {
-			$from_clause .= " JOIN {$wpdb->prefix}posts ON {$orders_stats_table}.order_id = {$wpdb->prefix}posts.ID";
+			$from_clause    .= " JOIN {$wpdb->prefix}posts ON {$orders_stats_table}.order_id = {$wpdb->prefix}posts.ID";
+			$where_filters[] = $order_status_filter;
 		}
 
 		$customer_filter = $this->get_customer_subquery( $query_args );
+		if ( $customer_filter ) {
+			$where_filters[] = $customer_filter;
+		}
 
-		$where_subclause = implode( $operator, array( $products_filter, $coupon_filter, $order_status_filter, $customer_filter ) );
+		$where_subclause = implode( $operator, $where_filters );
 
 		// To avoid requesting the subqueries twice, the result is applied to all queries passed to the method.
-		$totals_query['where_clause']    .= "AND ( $where_subclause )";
-		$totals_query['from_clause']     .= $from_clause;
-		$intervals_query['where_clause'] .= "AND ( $where_subclause )";
-		$intervals_query['from_clause']  .= $from_clause;
+		if ( $where_subclause ) {
+			$totals_query['where_clause']    .= "AND ( $where_subclause )";
+			$totals_query['from_clause']     .= $from_clause;
+			$intervals_query['where_clause'] .= "AND ( $where_subclause )";
+			$intervals_query['from_clause']  .= $from_clause;
+		}
 	}
 
 	/**
@@ -246,7 +251,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 			'interval'         => 'week',
 			'fields'           => '*',
 
-			'match'            => 'ALL',
+			'match'            => 'all',
 			'status_is'        => array(),
 			'status_is_not'    => array(),
 			'product_includes' => array(),

@@ -565,8 +565,8 @@ class WC_Admin_Reports_Data_Store {
 	 * @return string
 	 */
 	protected function get_included_products( $query_args ) {
-		$included_products    = array();
-		$operator             = $this->get_match_operator( $query_args );
+		$included_products = array();
+		$operator          = $this->get_match_operator( $query_args );
 
 		if ( isset( $query_args['categories'] ) && is_array( $query_args['categories'] ) && count( $query_args['categories'] ) > 0 ) {
 			$included_products = $this->get_products_by_cat_ids( $query_args['categories'] );
@@ -615,19 +615,18 @@ class WC_Admin_Reports_Data_Store {
 	protected function get_products_subquery( $query_args, $operator ) {
 		global $wpdb;
 
-		$included_products          = $this->get_included_products( $query_args );
-		$excluded_products          = $this->get_excluded_products( $query_args );
-		$included_products_subquery = '';
+		$included_products = $this->get_included_products( $query_args );
+		$excluded_products = $this->get_excluded_products( $query_args );
+		$subqueries        = array();
 		if ( $excluded_products ) {
-			$included_products_subquery = "{$wpdb->prefix}wc_order_product_lookup.product_id IN ({$included_products})";
+			$subqueries[] = "{$wpdb->prefix}wc_order_product_lookup.product_id IN ({$included_products})";
 		}
 
-		$excluded_products_subquery = '';
 		if ( $excluded_products ) {
-			$excluded_products_subquery = "{$wpdb->prefix}wc_order_product_lookup.product_id NOT IN ({$excluded_products})";
+			$subqueries[] = "{$wpdb->prefix}wc_order_product_lookup.product_id NOT IN ({$excluded_products})";
 		}
 
-		return implode( $operator, array( $included_products_subquery, $excluded_products_subquery ) );
+		return implode( $operator, $subqueries );
 	}
 
 	/**
@@ -640,19 +639,18 @@ class WC_Admin_Reports_Data_Store {
 	protected function get_coupon_subquery( $query_args, $operator ) {
 		global $wpdb;
 
-		$include_coupons_subquery = '';
-		if ( is_array( $query_args['coupons_includes'] ) && count( $query_args['coupons_includes'] ) > 0 ) {
-			$include_coupons           = implode( ', ', $query_args['coupons_includes'] );
-			$include_coupons_subquery = "{$wpdb->prefix}wc_order_coupon_lookup.coupon_id IN ({$include_coupons})";
+		$subqueries = array();
+		if ( isset( $query_args['coupons_includes'] ) && is_array( $query_args['coupons_includes'] ) && count( $query_args['coupons_includes'] ) > 0 ) {
+			$include_coupons = implode( ', ', $query_args['coupons_includes'] );
+			$subqueries[]    = "{$wpdb->prefix}wc_order_coupon_lookup.coupon_id IN ({$include_coupons})";
 		}
 
-		$exclude_coupons_subquery = '';
-		if ( is_array( $query_args['coupons_excludes'] ) && count( $query_args['coupons_excludes'] ) > 0 ) {
-			$exclude_coupons          = implode( ', ', $query_args['coupons_excludes'] );
-			$exclude_coupons_subquery = "{$wpdb->prefix}wc_order_coupon_lookup.coupon_id NOT IN ({$exclude_coupons})";
+		if ( isset( $query_args['coupons_excludes'] ) && is_array( $query_args['coupons_excludes'] ) && count( $query_args['coupons_excludes'] ) > 0 ) {
+			$exclude_coupons = implode( ', ', $query_args['coupons_excludes'] );
+			$subqueries[]    = "{$wpdb->prefix}wc_order_coupon_lookup.coupon_id NOT IN ({$exclude_coupons})";
 		}
 
-		return implode( $operator, array( $include_coupons_subquery, $exclude_coupons_subquery ) );
+		return implode( $operator, $subqueries );
 	}
 
 	/**
@@ -665,23 +663,23 @@ class WC_Admin_Reports_Data_Store {
 	protected function get_status_subquery( $query_args, $operator ) {
 		global $wpdb;
 
-		$included_orders = '';
-		if ( is_array( $query_args['status_is'] ) && count( $query_args['status_is'] ) > 0 ) {
+		$subqueries = array();
+		if ( isset( $query_args['status_is'] ) && is_array( $query_args['status_is'] ) && count( $query_args['status_is'] ) > 0 ) {
 			$allowed_statuses = array_map( array( $this, 'normalize_order_status' ), $query_args['status_is'] );
 			if ( $allowed_statuses ) {
-				$included_orders = " {$wpdb->prefix}posts.post_status IN ( '" . implode( "','", $allowed_statuses ) . "' ) ";
+				$subqueries[] = "{$wpdb->prefix}posts.post_status IN ( '" . implode( "','", $allowed_statuses ) . "' )";
 			}
 		}
 
 		$excluded_orders = '';
-		if ( is_array( $query_args['status_is_not'] ) && count( $query_args['status_is_not'] ) > 0 ) {
+		if ( isset( $query_args['status_is_not'] ) && is_array( $query_args['status_is_not'] ) && count( $query_args['status_is_not'] ) > 0 ) {
 			$forbidden_statuses = array_map( array( $this, 'normalize_order_status' ), $query_args['status_is_not'] );
 			if ( $forbidden_statuses ) {
-				$excluded_orders = " {$wpdb->prefix}posts.post_status NOT IN ( '" . implode( "','", $forbidden_statuses ) . "' ) ";
+				$subqueries[] = "{$wpdb->prefix}posts.post_status NOT IN ( '" . implode( "','", $forbidden_statuses ) . "' )";
 			}
 		}
 
-		return implode( $operator, array( $included_orders, $excluded_orders ) );
+		return implode( $operator, $subqueries );
 	}
 
 	/**
