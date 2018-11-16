@@ -298,12 +298,8 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 				return new WP_Error( 'woocommerce_reports_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'wc-admin' ) );
 			}
 
-			$unique_products = $this->get_unique_product_count( $totals_query['where_clause'] );
+			$unique_products       = $this->get_unique_product_count( $totals_query['where_clause'] );
 			$totals[0]['products'] = $unique_products;
-
-			// Specification says these are not included in totals.
-			unset( $totals[0]['date_start'] );
-			unset( $totals[0]['date_end'] );
 
 			$totals = (object) $this->cast_numbers( $totals[0] );
 
