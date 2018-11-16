@@ -121,6 +121,8 @@ class WC_Admin_Reports_Data_Store {
 		foreach ( $totals_arr as $key => $val ) {
 			$totals_arr[ $key ] = 0;
 		}
+		// TODO: should 'products' be in intervals?
+		unset( $totals_arr['products'] );
 		while ( $datetime <= $end_datetime ) {
 			$next_start = WC_Admin_Reports_Interval::iterate( $datetime, $time_interval );
 			$time_id    = WC_Admin_Reports_Interval::time_interval_id( $time_interval, $datetime );
@@ -258,12 +260,12 @@ class WC_Admin_Reports_Data_Store {
 					$new_start_date->setTimestamp( $new_start_date_timestamp );
 				}
 			}
-			$query_args['adj_after']          = $new_start_date->format( WC_Admin_Reports_Interval::$iso_datetime_format );
-			$query_args['adj_before']         = $new_end_date->format( WC_Admin_Reports_Interval::$iso_datetime_format );
-			$intervals_query['where_clause']  = '';
-			$intervals_query['where_clause'] .= " AND date_created <= '{$query_args['adj_before']}'";
-			$intervals_query['where_clause'] .= " AND date_created >= '{$query_args['adj_after']}'";
-			$intervals_query['limit']         = 'LIMIT 0,' . $intervals_query['per_page'];
+			$query_args['adj_after']               = $new_start_date->format( WC_Admin_Reports_Interval::$iso_datetime_format );
+			$query_args['adj_before']              = $new_end_date->format( WC_Admin_Reports_Interval::$iso_datetime_format );
+			$intervals_query['where_time_clause']  = '';
+			$intervals_query['where_time_clause'] .= " AND date_created <= '{$query_args['adj_before']}'";
+			$intervals_query['where_time_clause'] .= " AND date_created >= '{$query_args['adj_after']}'";
+			$intervals_query['limit']              = 'LIMIT 0,' . $intervals_query['per_page'];
 		} else {
 			if ( 'asc' === $query_args['order'] ) {
 				$offset = ( ( $query_args['page'] - 1 ) * $intervals_query['per_page'] ) - ( $expected_interval_count - $db_interval_count );
@@ -443,21 +445,22 @@ class WC_Admin_Reports_Data_Store {
 	 */
 	protected function get_time_period_sql_params( $query_args ) {
 		$sql_query = array(
-			'from_clause'  => '',
-			'where_clause' => '',
+			'from_clause'       => '',
+			'where_time_clause' => '',
+			'where_clause'      => '',
 		);
 
 		if ( isset( $query_args['before'] ) && '' !== $query_args['before'] ) {
-			$datetime                   = new DateTime( $query_args['before'] );
-			$datetime_str               = $datetime->format( WC_Admin_Reports_Interval::$sql_datetime_format );
-			$sql_query['where_clause'] .= " AND date_created <= '$datetime_str'";
+			$datetime                        = new DateTime( $query_args['before'] );
+			$datetime_str                    = $datetime->format( WC_Admin_Reports_Interval::$sql_datetime_format );
+			$sql_query['where_time_clause'] .= " AND date_created <= '$datetime_str'";
 
 		}
 
 		if ( isset( $query_args['after'] ) && '' !== $query_args['after'] ) {
-			$datetime                   = new DateTime( $query_args['after'] );
-			$datetime_str               = $datetime->format( WC_Admin_Reports_Interval::$sql_datetime_format );
-			$sql_query['where_clause'] .= " AND date_created >= '$datetime_str'";
+			$datetime                        = new DateTime( $query_args['after'] );
+			$datetime_str                    = $datetime->format( WC_Admin_Reports_Interval::$sql_datetime_format );
+			$sql_query['where_time_clause'] .= " AND date_created >= '$datetime_str'";
 		}
 
 		return $sql_query;
@@ -513,8 +516,9 @@ class WC_Admin_Reports_Data_Store {
 	 */
 	protected function get_intervals_sql_params( $query_args ) {
 		$intervals_query = array(
-			'from_clause'  => '',
-			'where_clause' => '',
+			'from_clause'       => '',
+			'where_time_clause' => '',
+			'where_clause'      => '',
 		);
 
 		$intervals_query = array_merge( $intervals_query, $this->get_time_period_sql_params( $query_args ) );
@@ -612,7 +616,7 @@ class WC_Admin_Reports_Data_Store {
 	 * @param string $operator   AND or OR, based on match query argument.
 	 * @return string
 	 */
-	protected function get_products_subquery( $query_args, $operator ) {
+	protected function get_products_subquery( $query_args, $operator = 'AND' ) {
 		global $wpdb;
 
 		$included_products = $this->get_included_products( $query_args );
@@ -626,7 +630,7 @@ class WC_Admin_Reports_Data_Store {
 			$subqueries[] = "{$wpdb->prefix}wc_order_product_lookup.product_id NOT IN ({$excluded_products})";
 		}
 
-		return implode( $operator, $subqueries );
+		return implode( " $operator ", $subqueries );
 	}
 
 	/**
@@ -650,7 +654,7 @@ class WC_Admin_Reports_Data_Store {
 			$subqueries[]    = "{$wpdb->prefix}wc_order_coupon_lookup.coupon_id NOT IN ({$exclude_coupons})";
 		}
 
-		return implode( $operator, $subqueries );
+		return implode( " $operator ", $subqueries );
 	}
 
 	/**
@@ -660,7 +664,7 @@ class WC_Admin_Reports_Data_Store {
 	 * @param string $operator   AND or OR, based on match query argument.
 	 * @return string
 	 */
-	protected function get_status_subquery( $query_args, $operator ) {
+	protected function get_status_subquery( $query_args, $operator = 'AND' ) {
 		global $wpdb;
 
 		$subqueries = array();
@@ -671,7 +675,6 @@ class WC_Admin_Reports_Data_Store {
 			}
 		}
 
-		$excluded_orders = '';
 		if ( isset( $query_args['status_is_not'] ) && is_array( $query_args['status_is_not'] ) && count( $query_args['status_is_not'] ) > 0 ) {
 			$forbidden_statuses = array_map( array( $this, 'normalize_order_status' ), $query_args['status_is_not'] );
 			if ( $forbidden_statuses ) {
@@ -679,7 +682,7 @@ class WC_Admin_Reports_Data_Store {
 			}
 		}
 
-		return implode( $operator, $subqueries );
+		return implode( " $operator ", $subqueries );
 	}
 
 	/**
@@ -696,7 +699,7 @@ class WC_Admin_Reports_Data_Store {
 			if ( 'new' === strtolower( $query_args['customer'] ) ) {
 				$customer_filter = " {$wpdb->prefix}wc_order_stats.returning_customer = 0";
 			} elseif ( 'returning' === strtolower( $query_args['customer'] ) ) {
-				$customer_filter = " {$wpdb->prefix}wc_order_stats.returning_customer = 0";
+				$customer_filter = " {$wpdb->prefix}wc_order_stats.returning_customer = 1";
 			}
 		}
 

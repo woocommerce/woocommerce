@@ -233,14 +233,54 @@ class WC_Admin_REST_Reports_Products_Controller extends WC_REST_Reports_Controll
 				'type' => 'integer',
 			),
 		);
-		$params['products']              = array(
-			'description'       => __( 'Limit result to items with specified product ids.', 'wc-admin' ),
-			'type'              => 'array',
-			'sanitize_callback' => 'wp_parse_id_list',
+		$params['match']                 = array(
+			'description'       => __( 'Indicates whether all the conditions should be true for the resulting set, or if any one of them is sufficient. Match affects the following parameters: status_is, status_is_not, product_includes, product_excludes, code_includes, code_excludes, customer, categories', 'wc-admin' ),
+			'type'              => 'string',
+			'default'           => 'all',
+			'enum'              => array(
+				'all',
+				'any',
+			),
 			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['status_is']             = array(
+			'description'       => __( 'Limit result set to items that have the specified order status.', 'wc-admin' ),
+			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_slug_list',
+			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'enum' => $this->get_order_statuses(),
+				'type' => 'string',
+			),
+		);
+		$params['status_is_not']         = array(
+			'description'       => __( 'Limit result set to items that don\'t have the specified order status.', 'wc-admin' ),
+			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_slug_list',
+			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'enum' => $this->get_order_statuses(),
+				'type' => 'string',
+			),
+		);
+		$params['product_includes']      = array(
+			'description'       => __( 'Limit result set to items that have the specified product(s) assigned.', 'wc-admin' ),
+			'type'              => 'array',
 			'items'             => array(
 				'type' => 'integer',
 			),
+			'default'           => array(),
+			'sanitize_callback' => 'wp_parse_id_list',
+
+		);
+		$params['product_excludes']      = array(
+			'description'       => __( 'Limit result set to items that don\'t have the specified product(s) assigned.', 'wc-admin' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'integer',
+			),
+			'default'           => array(),
+			'sanitize_callback' => 'wp_parse_id_list',
 		);
 		$params['extended_product_info'] = array(
 			'description'       => __( 'Add additional piece of info about each product to the report.', 'wc-admin' ),

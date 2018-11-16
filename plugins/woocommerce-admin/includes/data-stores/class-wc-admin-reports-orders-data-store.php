@@ -220,9 +220,9 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 
 		// To avoid requesting the subqueries twice, the result is applied to all queries passed to the method.
 		if ( $where_subclause ) {
-			$totals_query['where_clause']    .= "AND ( $where_subclause )";
+			$totals_query['where_clause']    .= " AND ( $where_subclause )";
 			$totals_query['from_clause']     .= $from_clause;
-			$intervals_query['where_clause'] .= "AND ( $where_subclause )";
+			$intervals_query['where_clause'] .= " AND ( $where_subclause )";
 			$intervals_query['from_clause']  .= $from_clause;
 		}
 	}
@@ -291,6 +291,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 						{$totals_query['from_clause']}
 					WHERE
 						1=1
+						{$totals_query['where_time_clause']}
 						{$totals_query['where_clause']}",
 				ARRAY_A
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
@@ -311,6 +312,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 							{$intervals_query['from_clause']}
 						WHERE
 							1=1
+							{$intervals_query['where_time_clause']}
 							{$intervals_query['where_clause']}
 						GROUP BY
 							time_interval"
@@ -340,6 +342,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 							{$intervals_query['from_clause']}
 						WHERE
 							1=1
+							{$intervals_query['where_time_clause']}
 							{$intervals_query['where_clause']}
 						GROUP BY
 							time_interval

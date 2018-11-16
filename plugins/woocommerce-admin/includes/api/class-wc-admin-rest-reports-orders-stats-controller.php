@@ -54,7 +54,7 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Cont
 		$args['product_excludes'] = (array) $request['product_excludes'];
 		$args['code_includes']    = (array) $request['code_includes'];
 		$args['code_excludes']    = (array) $request['code_excludes'];
-		$args['customer']         = (array) $request['customer'];
+		$args['customer']         = $request['customer'];
 		$args['categories']       = (array) $request['categories'];
 
 		return $args;
@@ -374,7 +374,6 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Cont
 		$params['customer']         = array(
 			'description'       => __( 'Limit result set to items that don\'t have the specified coupon(s) assigned.', 'wc-admin' ),
 			'type'              => 'string',
-			'default'           => '',
 			'enum'              => array(
 				'new',
 				'returning',
@@ -383,20 +382,5 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Cont
 		);
 
 		return $params;
-	}
-
-	/**
-	 * Get order statuses without prefixes.
-	 *
-	 * @return array
-	 */
-	protected function get_order_statuses() {
-		$order_statuses = array();
-
-		foreach ( array_keys( wc_get_order_statuses() ) as $status ) {
-			$order_statuses[] = str_replace( 'wc-', '', $status );
-		}
-
-		return $order_statuses;
 	}
 }
