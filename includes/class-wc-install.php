@@ -250,7 +250,7 @@ class WC_Install {
 	/**
 	 * Is this a brand new WC install?
 	 *
-	 * @since 3.2.0
+	 * @since  3.2.0
 	 * @return boolean
 	 */
 	private static function is_new_install() {
@@ -260,7 +260,7 @@ class WC_Install {
 	/**
 	 * Is a DB update needed?
 	 *
-	 * @since 3.2.0
+	 * @since  3.2.0
 	 * @return boolean
 	 */
 	private static function needs_db_update() {
@@ -357,7 +357,8 @@ class WC_Install {
 	/**
 	 * Add more cron schedules.
 	 *
-	 * @param  array $schedules List of WP scheduled cron jobs.
+	 * @param array $schedules List of WP scheduled cron jobs.
+	 *
 	 * @return array
 	 */
 	public static function cron_schedules( $schedules ) {
@@ -899,7 +900,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	/**
 	 * Uninstall tables when MU blog is deleted.
 	 *
-	 * @param  array $tables List of tables that will be deleted by WP.
+	 * @param array $tables List of tables that will be deleted by WP.
+	 *
 	 * @return string[]
 	 */
 	public static function wpmu_drop_tables( $tables ) {
@@ -1169,8 +1171,9 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	/**
 	 * Show action links on the plugin screen.
 	 *
-	 * @param   mixed $links Plugin Action links.
-	 * @return  array
+	 * @param mixed $links Plugin Action links.
+	 *
+	 * @return array
 	 */
 	public static function plugin_action_links( $links ) {
 		$action_links = array(
@@ -1183,9 +1186,10 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	/**
 	 * Show row meta on the plugin screen.
 	 *
-	 * @param   mixed $links Plugin Row Meta.
-	 * @param   mixed $file  Plugin Base file.
-	 * @return  array
+	 * @param mixed $links Plugin Row Meta.
+	 * @param mixed $file  Plugin Base file.
+	 *
+	 * @return array
 	 */
 	public static function plugin_row_meta( $links, $file ) {
 		if ( WC_PLUGIN_BASENAME === $file ) {
@@ -1220,8 +1224,9 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	 *
 	 * @param string $plugin_to_install_id Plugin ID.
 	 * @param array  $plugin_to_install Plugin information.
+	 *
 	 * @throws Exception If unable to proceed with plugin installation.
-	 * @since 2.6.0
+	 * @since  2.6.0
 	 */
 	public static function background_installer( $plugin_to_install_id, $plugin_to_install ) {
 		// Explicitly clear the event.
@@ -1375,8 +1380,9 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	 * Install a theme from .org in the background via a cron job (used by installer - opt in).
 	 *
 	 * @param string $theme_slug Theme slug.
+	 *
 	 * @throws Exception If unable to proceed with theme installation.
-	 * @since 3.1.0
+	 * @since  3.1.0
 	 */
 	public static function theme_background_installer( $theme_slug ) {
 		// Explicitly clear the event.
