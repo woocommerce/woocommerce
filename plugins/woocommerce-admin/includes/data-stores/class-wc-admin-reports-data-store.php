@@ -586,7 +586,7 @@ class WC_Admin_Reports_Data_Store {
 					$included_products = array_unique( array_merge( $included_products, $query_args['product_includes'] ) );
 				}
 			} else {
-				$included_products = $query_args['products_includes'];
+				$included_products = $query_args['product_includes'];
 			}
 		}
 
@@ -622,7 +622,7 @@ class WC_Admin_Reports_Data_Store {
 		$included_products = $this->get_included_products( $query_args );
 		$excluded_products = $this->get_excluded_products( $query_args );
 		$subqueries        = array();
-		if ( $excluded_products ) {
+		if ( $included_products ) {
 			$subqueries[] = "{$wpdb->prefix}wc_order_product_lookup.product_id IN ({$included_products})";
 		}
 
