@@ -2,8 +2,8 @@
 /**
  * List tables: products.
  *
- * @package  WooCommerce/Admin
- * @version  3.3.0
+ * @package WooCommerce/Admin
+ * @version 3.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -67,6 +67,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 *
 	 * @param array   $actions Array of actions.
 	 * @param WP_Post $post Current post object.
+	 *
 	 * @return array
 	 */
 	protected function get_row_actions( $actions, $post ) {
@@ -78,6 +79,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * Define which columns are sortable.
 	 *
 	 * @param array $columns Existing columns.
+	 *
 	 * @return array
 	 */
 	public function define_sortable_columns( $columns ) {
@@ -93,6 +95,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * Define which columns to show on this screen.
 	 *
 	 * @param array $columns Existing columns.
+	 *
 	 * @return array
 	 */
 	public function define_columns( $columns ) {
@@ -278,6 +281,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * Query vars for custom searches.
 	 *
 	 * @param mixed $public_query_vars Array of query vars.
+	 *
 	 * @return array
 	 */
 	public function add_custom_query_var( $public_query_vars ) {
@@ -384,6 +388,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * Handle any custom filters.
 	 *
 	 * @param array $query_vars Query vars.
+	 *
 	 * @return array
 	 */
 	protected function query_filters( $query_vars ) {
@@ -451,8 +456,10 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	/**
 	 * Search by SKU or ID for products.
 	 *
-	 * @deprecated Logic moved to query_filters.
 	 * @param string $where Where clause SQL.
+	 *
+	 * @deprecated Logic moved to query_filters.
+	 *
 	 * @return string
 	 */
 	public function sku_search( $where ) {
@@ -462,7 +469,8 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	/**
 	 * Change views on the edit product screen.
 	 *
-	 * @param  array $views Array of views.
+	 * @param array $views Array of views.
+	 *
 	 * @return array
 	 */
 	public function product_views( $views ) {
@@ -487,6 +495,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * Change the label when searching products
 	 *
 	 * @param string $query Search Query.
+	 *
 	 * @return string
 	 */
 	public function search_label( $query ) {
@@ -504,7 +513,8 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 *
 	 * @param array    $pieces   Array of SELECT statement pieces (from, where, etc).
 	 * @param WP_Query $wp_query WP_Query instance.
-	 * @return array             Array of products, including parents of variations.
+	 *
+	 * @return array Array of products, including parents of variations.
 	 */
 	public function add_variation_parents_for_shipping_class( $pieces, $wp_query ) {
 		global $wpdb;
