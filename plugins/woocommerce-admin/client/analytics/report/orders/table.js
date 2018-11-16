@@ -31,10 +31,6 @@ import { getReportChartData, getFilterQuery } from 'store/reports/utils';
 import './style.scss';
 
 class OrdersReportTable extends Component {
-	constructor( props ) {
-		super( props );
-	}
-
 	getHeadersContent() {
 		return [
 			{
