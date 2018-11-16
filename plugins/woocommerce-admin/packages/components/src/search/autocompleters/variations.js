@@ -14,7 +14,6 @@ import { stringifyQuery, getQuery } from '@woocommerce/navigation';
  */
 import { computeSuggestionMatch } from './utils';
 import ProductImage from '../../product-image';
-import { NAMESPACE } from 'store/constants';
 
 /**
  * Create a variation name by concatenating each of the variation's
@@ -53,7 +52,7 @@ export default {
 		if ( ! product || product.includes( ',' ) ) {
 			console.warn( 'Invalid product id supplied to Variations autocompleter' );
 		}
-		return apiFetch( { path: `${ NAMESPACE }products/${ product }/variations${ payload }` } );
+		return apiFetch( { path: `/wc/v3/products/${ product }/variations${ payload }` } );
 	},
 	isDebounced: true,
 	getOptionKeywords( variation ) {

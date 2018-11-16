@@ -7,10 +7,11 @@ import { find } from 'lodash';
 import { __ } from '@wordpress/i18n';
 import { getSettings, format as formatDate } from '@wordpress/date';
 
-/**
- * Internal dependencies
- */
-import { QUERY_DEFAULTS } from 'store/constants';
+const QUERY_DEFAULTS = {
+	pageSize: 25,
+	period: 'month',
+	compare: 'previous_year',
+};
 
 export const isoDateFormat = 'YYYY-MM-DD';
 

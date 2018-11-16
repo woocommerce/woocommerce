@@ -13,7 +13,6 @@ import { stringifyQuery } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import { computeSuggestionMatch } from './utils';
-import { NAMESPACE } from 'store/constants';
 
 /**
  * A coupon completer.
@@ -33,7 +32,7 @@ export default {
 			};
 			payload = stringifyQuery( query );
 		}
-		return apiFetch( { path: `${ NAMESPACE }coupons${ payload }` } );
+		return apiFetch( { path: `/wc/v3/coupons${ payload }` } );
 	},
 	isDebounced: true,
 	getOptionKeywords( coupon ) {
