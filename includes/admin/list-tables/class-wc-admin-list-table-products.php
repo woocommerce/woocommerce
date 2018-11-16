@@ -293,11 +293,14 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * Render any custom filters and search inputs for the list table.
 	 */
 	protected function render_filters() {
-		$filters = apply_filters( 'woocommerce_products_admin_list_table_filters', array(
-			'product_category' => array( $this, 'render_products_category_filter' ),
-			'product_type'     => array( $this, 'render_products_type_filter' ),
-			'stock_status'     => array( $this, 'render_products_stock_status_filter' ),
-		) );
+		$filters = apply_filters(
+			'woocommerce_products_admin_list_table_filters',
+			array(
+				'product_category' => array( $this, 'render_products_category_filter' ),
+				'product_type'     => array( $this, 'render_products_type_filter' ),
+				'stock_status'     => array( $this, 'render_products_stock_status_filter' ),
+			)
+		);
 
 		ob_start();
 		foreach ( $filters as $filter_callback ) {
@@ -394,18 +397,24 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	protected function query_filters( $query_vars ) {
 		if ( isset( $query_vars['orderby'] ) ) {
 			if ( 'price' === $query_vars['orderby'] ) {
-				$query_vars = array_merge( $query_vars, array(
-					// phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_key
-					'meta_key' => '_price',
-					'orderby'  => 'meta_value_num',
-				) );
+				$query_vars = array_merge(
+					$query_vars,
+					array(
+						// phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_key
+						'meta_key' => '_price',
+						'orderby'  => 'meta_value_num',
+					)
+				);
 			}
 			if ( 'sku' === $query_vars['orderby'] ) {
-				$query_vars = array_merge( $query_vars, array(
-					// phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_key
-					'meta_key' => '_sku',
-					'orderby'  => 'meta_value',
-				) );
+				$query_vars = array_merge(
+					$query_vars,
+					array(
+						// phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_key
+						'meta_key' => '_sku',
+						'orderby'  => 'meta_value',
+					)
+				);
 			}
 		}
 
