@@ -593,7 +593,7 @@ class WC_Install {
 
 		// Add constraint to download logs if the columns matches.
 		if ( ! empty( $download_permissions_column_type ) && ! empty( $download_log_column_type ) && $download_permissions_column_type === $download_log_column_type ) {
-			$constraint_prefix = ! is_multisite() || ( is_main_site() && is_main_network() ) ? 'fk_' : str_replace( $wpdb->base_prefix, 'fk_', $wpdb->prefix );
+			$constraint_prefix = ! is_multisite() || ( is_main_site() && is_main_network() ) ? 'fk_' . $wpdb->prefix : str_replace( $wpdb->base_prefix, 'fk_', $wpdb->prefix );
 			$fk_result = $wpdb->get_row( "
 				SELECT COUNT(*) AS fk_count
 				FROM information_schema.TABLE_CONSTRAINTS
