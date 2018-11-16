@@ -17,21 +17,31 @@ class WC_Twenty_Nineteen {
 	 * Theme init.
 	 */
 	public static function init() {
+
+		// Change WooCommerce wrappers.
 		remove_action( 'woocommerce_before_main_content', 'woocommerce_output_content_wrapper', 10 );
 		remove_action( 'woocommerce_after_main_content', 'woocommerce_output_content_wrapper_end', 10 );
 
 		add_action( 'woocommerce_before_main_content', array( __CLASS__, 'output_content_wrapper' ), 10 );
 		add_action( 'woocommerce_after_main_content', array( __CLASS__, 'output_content_wrapper_end' ), 10 );
 
+		// This theme doesn't have a traditional sidebar.
+		remove_action( 'woocommerce_sidebar', 'woocommerce_get_sidebar', 10 );
+
+		// Enqueue theme compatibility styles.
 		add_filter( 'woocommerce_enqueue_styles', array( __CLASS__, 'enqueue_styles' ) );
 
+		// Register theme features.
 		add_theme_support( 'wc-product-gallery-zoom' );
 		add_theme_support( 'wc-product-gallery-lightbox' );
 		add_theme_support( 'wc-product-gallery-slider' );
 		add_theme_support( 'woocommerce', array(
-			'thumbnail_image_width' => 250,
-			'single_image_width'    => 350,
+			'thumbnail_image_width' => 300,
+			'single_image_width'    => 450,
 		) );
+
+		// Tweak Twenty Nineteen features.
+		add_action( 'wp', array( __CLASS__, 'tweak_theme_features' ) );
 	}
 
 	/**
@@ -68,6 +78,15 @@ class WC_Twenty_Nineteen {
 		);
 
 		return apply_filters( 'woocommerce_twenty_nineteen_styles', $styles );
+	}
+
+	/**
+	 * Tweak Twenty Nineteen features.
+	 */
+	public static function tweak_theme_features() {
+		if ( is_woocommerce() ) {
+			add_filter( 'twentynineteen_can_show_post_thumbnail', '__return_false' );
+		}
 	}
 }
 
