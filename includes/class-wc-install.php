@@ -117,6 +117,9 @@ class WC_Install {
 			'wc_update_350_reviews_comment_type',
 			'wc_update_350_db_version',
 		),
+		'3.5.2' => array(
+			'wc_update_352_drop_download_log_fk',
+		)
 	);
 
 	/**
