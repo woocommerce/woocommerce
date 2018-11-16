@@ -117,11 +117,13 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 		wp_update_user(
 			apply_filters(
-				'woocommerce_update_customer_args', array(
+				'woocommerce_update_customer_args',
+				array(
 					'ID'           => $customer->get_id(),
 					'role'         => $customer->get_role(),
 					'display_name' => $customer->get_display_name(),
-				), $customer
+				),
+				$customer
 			)
 		);
 		$wp_user = new WP_User( $customer->get_id() );
@@ -186,11 +188,13 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	public function update( &$customer ) {
 		wp_update_user(
 			apply_filters(
-				'woocommerce_update_customer_args', array(
+				'woocommerce_update_customer_args',
+				array(
 					'ID'           => $customer->get_id(),
 					'user_email'   => $customer->get_email(),
 					'display_name' => $customer->get_display_name(),
-				), $customer
+				),
+				$customer
 			)
 		);
 
@@ -225,7 +229,8 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		}
 
 		$args = wp_parse_args(
-			$args, array(
+			$args,
+			array(
 				'reassign' => 0,
 			)
 		);
@@ -437,18 +442,23 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 		$query = new WP_User_Query(
 			apply_filters(
-				'woocommerce_customer_search_customers', array(
+				'woocommerce_customer_search_customers',
+				array(
 					'search'         => '*' . esc_attr( $term ) . '*',
 					'search_columns' => array( 'user_login', 'user_url', 'user_email', 'user_nicename', 'display_name' ),
 					'fields'         => 'ID',
 					'number'         => $limit,
-				), $term, $limit, 'main_query'
+				),
+				$term,
+				$limit,
+				'main_query'
 			)
 		);
 
 		$query2 = new WP_User_Query(
 			apply_filters(
-				'woocommerce_customer_search_customers', array(
+				'woocommerce_customer_search_customers',
+				array(
 					'fields'     => 'ID',
 					'number'     => $limit,
 					'meta_query' => array(
@@ -464,7 +474,10 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 							'compare' => 'LIKE',
 						),
 					),
-				), $term, $limit, 'meta_query'
+				),
+				$term,
+				$limit,
+				'meta_query'
 			)
 		);
 
