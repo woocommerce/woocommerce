@@ -9,12 +9,16 @@ import PropTypes from 'prop-types';
 import { get } from 'lodash';
 
 /**
+ * WooCommerce dependencies
+ */
+import { history } from '@woocommerce/navigation';
+
+/**
  * Internal dependencies
  */
 import './style.scss';
 import { Controller, getPages } from './controller';
 import Header from 'header';
-import history from 'lib/history';
 import Notices from './notices';
 import { recordPageView } from 'lib/tracks';
 

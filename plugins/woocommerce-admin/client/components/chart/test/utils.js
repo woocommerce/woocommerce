@@ -172,12 +172,9 @@ describe( 'getYScale', () => {
 
 describe( 'getYTickOffset', () => {
 	it( 'properly scale the y values for the y-axis ticks given the height and maximum y value', () => {
-		const testYTickOffset1 = getYTickOffset( 100, 1, testYMax );
+		const testYTickOffset1 = getYTickOffset( 100, testYMax );
 		expect( testYTickOffset1( 0 ) ).toEqual( 112 );
 		expect( testYTickOffset1( testYMax ) ).toEqual( 12 );
-		const testYTickOffset2 = getYTickOffset( 100, 2, testYMax );
-		expect( testYTickOffset2( 0 ) ).toEqual( 124 );
-		expect( testYTickOffset2( testYMax ) ).toEqual( 24 );
 	} );
 } );
 

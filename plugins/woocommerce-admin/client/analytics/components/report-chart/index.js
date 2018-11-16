@@ -12,7 +12,6 @@ import PropTypes from 'prop-types';
 /**
  * WooCommerce dependencies
  */
-import { Chart, ChartPlaceholder } from '@woocommerce/components';
 import {
 	getAllowedIntervalsForQuery,
 	getCurrentDates,
@@ -24,12 +23,21 @@ import {
 /**
  * Internal dependencies
  */
+import { Chart, ChartPlaceholder } from 'components';
 import { getReportChartData } from 'store/reports/utils';
 import ReportError from 'analytics/components/report-error';
 
 class ReportChart extends Component {
 	render() {
-		const { path, primaryData, secondaryData, selectedChart, query } = this.props;
+		const {
+			comparisonChart,
+			query,
+			itemsLabel,
+			path,
+			primaryData,
+			secondaryData,
+			selectedChart,
+		} = this.props;
 
 		if ( primaryData.isError || secondaryData.isError ) {
 			return <ReportError isError />;
@@ -84,7 +92,9 @@ class ReportChart extends Component {
 				title={ selectedChart.label }
 				interval={ currentInterval }
 				allowedIntervals={ allowedIntervals }
-				mode="time-comparison"
+				itemsLabel={ itemsLabel }
+				layout={ comparisonChart ? 'comparison' : 'standard' }
+				mode={ comparisonChart ? 'item-comparison' : 'time-comparison' }
 				pointLabelFormat={ formats.pointLabelFormat }
 				tooltipTitle={ selectedChart.label }
 				xFormat={ formats.xFormat }
@@ -97,6 +107,8 @@ class ReportChart extends Component {
 }
 
 ReportChart.propTypes = {
+	comparisonChart: PropTypes.bool,
+	itemsLabel: PropTypes.string,
 	path: PropTypes.string.isRequired,
 	primaryData: PropTypes.object.isRequired,
 	query: PropTypes.object.isRequired,

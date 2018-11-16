@@ -7,6 +7,13 @@ A search box which autocompletes results while typing, allowing for the user to 
 Props
 -----
 
+### `className`
+
+- Type: String
+- Default: null
+
+Class name applied to parent div.
+
 ### `onChange`
 
 - Type: Function
@@ -17,7 +24,7 @@ Function called when selected results change, passed result list.
 ### `type`
 
 - **Required**
-- Type: One of: 'products', 'product_cats', 'orders', 'customers', 'coupons'
+- Type: One of: 'products', 'product_cats', 'orders', 'customers', 'coupons', 'variations'
 - Default: null
 
 The object type to be used in searching.

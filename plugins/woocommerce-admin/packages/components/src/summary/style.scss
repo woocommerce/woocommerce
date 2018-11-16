@@ -1,0 +1,482 @@
+/** @format */
+
+// Set up some local color variables to make the CSS more clear
+$outer-border: $core-grey-light-700;
+$inner-border: $core-grey-light-500;
+
+// A local mixin to generate the grid template and border logic
+@mixin make-cols( $i ) {
+	grid-template-columns: repeat($i, 1fr);
+
+	.woocommerce-summary__item-container:nth-of-type(#{$i}n) .woocommerce-summary__item {
+		border-right-color: $outer-border;
+	}
+}
+
+@mixin wrap-contents() {
+	.woocommerce-summary__item-value,
+	.woocommerce-summary__item-delta {
+		min-width: 100%;
+	}
+
+	.woocommerce-summary__item-prev-label,
+	.woocommerce-summary__item-prev-value {
+		display: block;
+	}
+}
+
+@mixin reset-wrap() {
+	.woocommerce-summary__item-value,
+	.woocommerce-summary__item-delta {
+		min-width: auto;
+	}
+
+	.woocommerce-summary__item-prev-label,
+	.woocommerce-summary__item-prev-value {
+		display: inline;
+	}
+}
+
+.woocommerce-summary {
+	margin: $gap 0;
+	display: grid;
+	border-width: 1px 0 0 1px;
+	border-style: solid;
+	border-color: $outer-border;
+	background-color: $core-grey-light-300;
+	box-shadow: inset -1px -1px 0 $outer-border;
+
+	@include breakpoint( '<782px' ) {
+		&.is-placeholder {
+			border-top: 0;
+		}
+
+		.woocommerce-summary__item-container.is-placeholder {
+			border-top: 1px solid $outer-border;
+		}
+	}
+
+	// Specificity
+	.components-popover.components-popover {
+		// !important to override element-level styles
+		position: static !important;
+		top: auto !important;
+		left: auto !important;
+		right: auto !important;
+		bottom: auto !important;
+		margin-top: 0 !important;
+		margin-left: 0;
+
+		.components-popover__header {
+			display: none;
+		}
+
+		.components-popover__content {
+			position: static;
+			left: auto;
+			right: auto;
+			margin: 0;
+			width: 100%;
+			max-width: 100% !important;
+			max-height: 100% !important;
+			box-shadow: none;
+			border: none;
+			transform: none;
+
+			.woocommerce-summary__item.is-selected {
+				display: none;
+			}
+		}
+	}
+
+	.components-popover__content & {
+		max-height: 100%;
+		margin-top: 0;
+		margin-bottom: 0;
+		overflow-y: scroll;
+		border: none;
+	}
+
+	.woocommerce-summary__item-data {
+		display: flex;
+		flex-wrap: wrap;
+	}
+
+	.woocommerce-summary__item-value,
+	.woocommerce-summary__item-delta {
+		flex: 1 0 auto;
+	}
+
+	.woocommerce-summary__item-delta {
+		flex: 0 1 auto;
+		display: flex;
+		flex-wrap: none;
+	}
+
+	&,
+	&.has-one-item,
+	&.has-1-items {
+		grid-template-columns: 1fr;
+	}
+
+	&.has-2-items {
+		@include make-cols( 2 );
+	}
+
+	&.has-3-items {
+		@include make-cols( 3 );
+	}
+
+	&.has-4-items,
+	&.has-7-items,
+	&.has-8-items {
+		@include make-cols( 4 );
+	}
+
+	&.has-5-items,
+	&.has-9-items,
+	&.has-10-items {
+		@include make-cols( 5 );
+		@include wrap-contents;
+	}
+
+	&.has-6-items {
+		@include make-cols( 6 );
+		@include wrap-contents;
+	}
+
+	@include breakpoint( '<1440px' ) {
+		&.has-4-items,
+		&.has-7-items,
+		&.has-8-items {
+			@include wrap-contents;
+		}
+
+		&.has-6-items,
+		&.has-9-items {
+			@include make-cols( 3 );
+			@include reset-wrap;
+		}
+
+		&.has-10-items {
+			@include make-cols( 4 );
+		}
+
+		&.has-9-items,
+		&.has-10-items {
+			.woocommerce-summary__item-container:nth-of-type(5n) .woocommerce-summary__item {
+				border-right-color: $inner-border;
+			}
+		}
+	}
+
+	@include breakpoint( '<960px' ) {
+		.woocommerce-summary__item {
+			// One-col layout for all items means right border is always "outer"
+			border-right-color: $outer-border;
+		}
+	}
+
+	@include breakpoint( '<782px' ) {
+		.woocommerce-summary__item-container.is-dropdown-button,
+		.woocommerce-summary__item-container:only-child {
+			margin-left: -16px;
+			margin-right: -16px;
+			width: auto;
+
+			.woocommerce-summary__item {
+				// Remove the border when the button is edge-to-edge
+				border-right: none;
+			}
+		}
+		.components-popover.components-popover {
+			margin-left: -16px;
+			margin-right: -16px;
+
+			.woocommerce-summary__item-container {
+				margin-left: 0;
+				margin-right: 0;
+			}
+		}
+	}
+}
+
+.woocommerce-summary__item-container {
+	margin-bottom: 0;
+	width: 100%;
+
+	&:last-of-type .woocommerce-summary__item {
+		// Make sure the last item always uses the outer-border color.
+		border-right-color: $outer-border !important;
+	}
+
+	&.is-dropdown-button {
+		padding: 0;
+		list-style: none;
+		border-bottom: 1px solid $outer-border;
+		border-right: 1px solid $outer-border;
+
+		.components-button {
+			text-align: left;
+			display: block;
+		}
+
+		@include breakpoint( '<782px' ) {
+			border-right: none;
+		}
+	}
+
+	&.is-placeholder {
+		.woocommerce-summary__item-label {
+			@include placeholder();
+			display: inline-block;
+			height: 16px;
+			max-width: 110px;
+			width: 70%;
+		}
+
+		.woocommerce-summary__item-data {
+			justify-content: space-between;
+		}
+
+		.woocommerce-summary__item-value,
+		.woocommerce-summary__item-prev-value {
+			@include placeholder();
+			display: inline-block;
+			height: 16px;
+			max-width: 140px;
+			width: 80%;
+		}
+
+		.woocommerce-summary__item-delta-value {
+			@include placeholder();
+			display: inline-block;
+			height: 16px;
+			width: 20px;
+		}
+	}
+}
+
+// IE11 doesn't auto-position grid children, so their position must be set manually
+.has-1-items .woocommerce-summary__item-container {
+	@include set-grid-item-position( 1, 1 );
+}
+
+.has-2-items .woocommerce-summary__item-container {
+	@include set-grid-item-position( 2, 2 );
+}
+
+.has-3-items .woocommerce-summary__item-container {
+	@include set-grid-item-position( 3, 3 );
+}
+
+.has-4-items .woocommerce-summary__item-container {
+	@include set-grid-item-position( 4, 4 );
+}
+
+.has-5-items .woocommerce-summary__item-container {
+	@include set-grid-item-position( 5, 5 );
+}
+
+.has-6-items .woocommerce-summary__item-container {
+	@include set-grid-item-position( 6, 6 );
+
+	@include breakpoint( '<1440px' ) {
+		@include set-grid-item-position( 3, 6 );
+	}
+}
+
+.has-7-items .woocommerce-summary__item-container {
+	@include set-grid-item-position( 4, 7 );
+}
+
+.has-8-items .woocommerce-summary__item-container {
+	@include set-grid-item-position( 4, 8 );
+}
+
+.has-9-items .woocommerce-summary__item-container {
+	@include set-grid-item-position( 5, 9 );
+
+	@include breakpoint( '<1440px' ) {
+		@include set-grid-item-position( 3, 9 );
+	}
+}
+
+.has-10-items .woocommerce-summary__item-container {
+	@include set-grid-item-position( 5, 10 );
+
+	@include breakpoint( '<1440px' ) {
+		@include set-grid-item-position( 4, 10 );
+	}
+}
+
+@include breakpoint( '<960px' ) {
+	@for $i from 1 through 10 {
+		.woocommerce-summary > .woocommerce-summary__item-container:nth-child(#{$i}) {
+			grid-column-start: 1;
+			grid-column-end: 2;
+			grid-row-start: #{$i};
+			grid-row-end: #{$i+1};
+		}
+	}
+}
+
+.woocommerce-summary__item {
+	display: block;
+	height: 100%;
+	padding: $spacing;
+	background-color: $core-grey-light-100;
+	border-bottom: 1px solid $outer-border;
+	border-right: 1px solid $inner-border;
+	text-decoration: none;
+
+	&:hover {
+		background-color: $core-grey-light-200;
+	}
+
+	&:active {
+		background-color: $core-grey-light-300;
+	}
+
+	&:focus {
+		// !important to override button styles
+		box-shadow: inset -2px -2px 0 $black, inset 2px 2px 0 $black !important;
+	}
+
+	&.is-selected {
+		margin-top: -1px;
+		height: calc(100% + 1px); // Hack to avoid double border
+
+		&:focus {
+			// !important to override button styles
+			box-shadow: inset -2px -2px 0 $black, inset 2px 2px 0 $black, inset 0 4px 0 $woocommerce !important;
+		}
+	}
+
+	.is-dropdown-button & {
+		position: relative;
+		width: 100%;
+		padding-right: 2 * $gap + 24px;
+
+		@include breakpoint( '<782px' ) {
+			border-right: none;
+		}
+	}
+
+	.woocommerce-summary__item-label {
+		display: block;
+		margin-bottom: $gap;
+		@include font-size( 11 );
+		text-transform: uppercase;
+		color: $core-grey-dark-300;
+	}
+
+	.woocommerce-summary__item-value {
+		margin-bottom: $gap-smallest;
+		@include font-size( 18 );
+		font-weight: 500;
+		color: $core-grey-dark-900;
+	}
+
+	.woocommerce-summary__item-delta {
+		margin-bottom: $gap-small;
+		@include font-size( 18 );
+		font-weight: 300;
+		color: $core-grey-dark-500;
+	}
+
+	&.is-selected {
+		background: $white;
+		box-shadow: inset 0 4px 0 $woocommerce;
+
+		.woocommerce-summary__item-value {
+			font-weight: 600;
+		}
+
+		.woocommerce-summary__item-delta {
+			font-weight: 400;
+		}
+	}
+
+	&.is-good-trend .woocommerce-summary__item-delta {
+		color: $valid-green;
+	}
+
+	&.is-bad-trend .woocommerce-summary__item-delta {
+		color: $error-red;
+	}
+
+	.woocommerce-summary__item-delta-icon {
+		vertical-align: middle;
+		margin-right: 3px;
+		fill: currentColor;
+
+		&.gridicons-arrow-up {
+			transform: rotate(45deg);
+		}
+
+		&.gridicons-arrow-down {
+			transform: rotate(-45deg);
+		}
+	}
+
+	.woocommerce-summary__item-prev-label,
+	.woocommerce-summary__item-prev-value {
+		@include font-size( 13 );
+		color: $core-grey-dark-500;
+	}
+
+	.woocommerce-summary__toggle {
+		position: absolute;
+		top: 44px;
+		right: $gap;
+		@include animate-transform;
+	}
+
+	.is-dropdown-expanded & {
+		.woocommerce-summary__toggle {
+			transform: rotate(-180deg);
+		}
+	}
+
+	.components-popover__content & {
+		.woocommerce-summary__item-label {
+			margin-bottom: 0;
+		}
+
+		.woocommerce-summary__item-value,
+		.woocommerce-summary__item-delta {
+			@include font-size( 13 );
+			margin-bottom: 0;
+		}
+
+		.woocommerce-summary__item-prev-label,
+		.woocommerce-summary__item-prev-value {
+			@include font-size( 11 );
+		}
+	}
+}
+
+.woocommerce-card {
+	.woocommerce-summary {
+		background-color: $core-grey-light-100;
+		border: none;
+	}
+
+	.woocommerce-summary__item {
+		background-color: $white;
+
+		&:hover {
+			background-color: $core-grey-light-200;
+		}
+
+		&:active {
+			background-color: $core-grey-light-300;
+		}
+	}
+
+	.woocommerce-summary__item.is-selected {
+		margin-top: 0;
+		box-shadow: none;
+	}
+}

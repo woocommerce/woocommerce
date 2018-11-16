@@ -3,19 +3,23 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { Component } from '@wordpress/element';
+import { Component, findDOMNode } from '@wordpress/element';
 import classnames from 'classnames';
 import { decodeEntities } from '@wordpress/html-entities';
 import { Fill } from 'react-slot-fill';
 import PropTypes from 'prop-types';
-import ReactDom from 'react-dom';
+
+/**
+ * WooCommerce dependencies
+ */
+import { getNewPath, getTimeRelatedQuery } from '@woocommerce/navigation';
+import { Link } from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 import ActivityPanel from './activity-panel';
-import { Link } from '@woocommerce/components';
 
 class Header extends Component {
 	constructor() {
@@ -29,7 +33,7 @@ class Header extends Component {
 	}
 
 	componentDidMount() {
-		this.threshold = ReactDom.findDOMNode( this ).offsetTop;
+		this.threshold = findDOMNode( this ).offsetTop;
 		window.addEventListener( 'scroll', this.onWindowScroll );
 		this.updateIsScrolled();
 	}
@@ -84,7 +88,10 @@ class Header extends Component {
 					</span>
 					{ _sections.map( ( section, i ) => {
 						const sectionPiece = Array.isArray( section ) ? (
-							<Link href={ section[ 0 ] } type={ isEmbedded ? 'wp-admin' : 'wc-admin' }>
+							<Link
+								href={ getNewPath( getTimeRelatedQuery(), section[ 0 ], {} ) }
+								type={ isEmbedded ? 'wp-admin' : 'wc-admin' }
+							>
 								{ section[ 1 ] }
 							</Link>
 						) : (

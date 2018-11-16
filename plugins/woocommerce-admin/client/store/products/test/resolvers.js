@@ -57,13 +57,13 @@ describe( 'getProducts', () => {
 
 	it( 'returns requested products', async () => {
 		expect.assertions( 1 );
-		await getProducts( {} );
+		await getProducts();
 		expect( dispatch().setProducts ).toHaveBeenCalledWith( PRODUCTS_1, undefined );
 	} );
 
 	it( 'returns requested products for a specific query', async () => {
 		expect.assertions( 1 );
-		await getProducts( {}, { orderby: 'date' } );
+		await getProducts( { orderby: 'date' } );
 		expect( dispatch().setProducts ).toHaveBeenCalledWith( PRODUCTS_2, { orderby: 'date' } );
 	} );
 } );

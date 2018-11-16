@@ -6,13 +6,13 @@
  * External dependencies
  */
 import deepFreeze from 'deep-freeze';
+import { select } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import { ERROR } from 'store/constants';
 import selectors from '../selectors';
-import { select } from '@wordpress/data';
 
 const { getReportStats, isReportStatsRequesting, isReportStatsError } = selectors;
 jest.mock( '@wordpress/data', () => ( {

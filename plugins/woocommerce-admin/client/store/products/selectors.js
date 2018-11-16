@@ -16,7 +16,7 @@ import { getJsonString } from 'store/utils';
  * Returns products report details for a specific report query.
  *
  * @param  {Object} state  Current state
- * @param  {Object} query  Report query paremters
+ * @param  {Object} query  Report query parameters
  * @return {Object}        Report details
  */
 function getProducts( state, query = {} ) {
@@ -27,21 +27,21 @@ export default {
 	getProducts,
 
 	/**
-	 * Returns true if a products request is pending.
+	 * Returns true if a getProducts request is pending.
 	 *
 	 * @param  {Object} state  Current state
-	 * @return {Object}        True if the `getProducts` request is pending, false otherwise
+	 * @return {Boolean}        True if the `getProducts` request is pending, false otherwise
 	 */
 	isGetProductsRequesting( state, ...args ) {
 		return select( 'core/data' ).isResolving( 'wc-admin', 'getProducts', args );
 	},
 
 	/**
-	 * Returns true if a products request has returned an error.
+	 * Returns true if a getProducts request has returned an error.
 	 *
 	 * @param  {Object} state  Current state
-	 * @param  {Object} query  Report query paremters
-	 * @return {Object}        True if the `getProducts` request has failed, false otherwise
+	 * @param  {Object} query  Report query parameters
+	 * @return {Boolean}        True if the `getProducts` request has failed, false otherwise
 	 */
 	isGetProductsError( state, query ) {
 		return ERROR === getProducts( state, query );

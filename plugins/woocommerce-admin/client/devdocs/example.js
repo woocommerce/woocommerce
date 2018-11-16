@@ -16,7 +16,8 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import * as components from '@woocommerce/components';
+import * as components from 'components';
+import * as pkgComponents from '@woocommerce/components';
 
 class Example extends Component {
 	state = {
@@ -28,7 +29,15 @@ class Example extends Component {
 	}
 
 	async getCode() {
-		const readme = require( `components/${ this.props.filePath }/example.md` );
+		let readme;
+		try {
+			readme = require( `components/src/${ this.props.filePath }/example.md` );
+		} catch ( e ) {
+			readme = require( `components/${ this.props.filePath }/example.md` );
+		}
+		if ( ! readme ) {
+			return;
+		}
 
 		// Example to render is the first jsx code block that appears in the readme
 		let code = codeBlocks( readme ).find( block => 'jsx' === block.lang ).code;
@@ -47,6 +56,7 @@ class Example extends Component {
 		const scope = {
 			...wpComponents,
 			...components,
+			...pkgComponents,
 			Component,
 			withState,
 			getSettings,

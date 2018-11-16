@@ -109,6 +109,22 @@ function wc_admin_register_pages() {
 		)
 	);
 
+	wc_admin_register_page(
+		array(
+			'title'  => __( 'Coupons', 'wc-admin' ),
+			'parent' => '/analytics/revenue',
+			'path'   => '/analytics/coupons',
+		)
+	);
+
+	wc_admin_register_page(
+		array(
+			'title'  => __( 'Taxes', 'wc-admin' ),
+			'parent' => '/analytics/revenue',
+			'path'   => '/analytics/taxes',
+		)
+	);
+
 	if ( defined( 'WP_DEBUG' ) && WP_DEBUG && defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) {
 		wc_admin_register_page(
 			array(

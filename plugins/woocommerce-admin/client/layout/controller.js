@@ -7,13 +7,17 @@ import { parse } from 'qs';
 import { find, last } from 'lodash';
 
 /**
+ * WooCommerce dependencies
+ */
+import { getTimeRelatedQuery, stringifyQuery } from '@woocommerce/navigation';
+
+/**
  * Internal dependencies
  */
 import Analytics from 'analytics';
 import AnalyticsReport from 'analytics/report';
 import Dashboard from 'dashboard';
 import DevDocs from 'devdocs';
-import { getTimeRelatedQuery, stringifyQuery } from 'lib/nav-utils';
 
 const getPages = () => {
 	const pages = [

@@ -20,12 +20,26 @@ An array of data.
 
 Format to parse dates into d3 time format
 
+### `path`
+
+- Type: String
+- Default: null
+
+Current path
+
 ### `pointLabelFormat`
 
 - Type: String
 - Default: null
 
 Date format of the point labels (might be used in tooltips and ARIA properties).
+
+### `query`
+
+- Type: Object
+- Default: null
+
+The query string represented in object form
 
 ### `tooltipFormat`
 
@@ -113,6 +127,13 @@ Interval specification (hourly, daily, weekly etc).
 - Default: null
 
 Allowed intervals to show in a dropdown.
+
+### `valueType`
+
+- Type: String
+- Default: null
+
+What type of data is to be displayed? Number, Average, String?
 
 `D3Chart` (component)
 =====================
@@ -218,6 +239,13 @@ The list of labels for this chart.
 A datetime formatting string to format the date displayed as the title of the toolip
 if `tooltipTitle` is missing, passed to d3TimeFormat.
 
+### `tooltipPosition`
+
+- Type: String
+- Default: `'over'`
+
+The position where to render the tooltip can be `over` the chart or `below` the chart.
+
 ### `tooltipTitle`
 
 - Type: String
@@ -310,6 +338,21 @@ Handles `onMouseEnter`/`onMouseLeave` events.
 - Default: `'row'`
 
 Display legend items as a `row` or `column` inside a flex-box.
+
+### `itemsLabel`
+
+- Type: String
+- Default: null
+
+Label to describe the legend items. It will be displayed in the legend of
+comparison charts when there are many.
+
+### `valueType`
+
+- Type: String
+- Default: null
+
+What type of data is to be displayed? Number, Average, String?
 
 `ChartPlaceholder` (component)
 ==============================

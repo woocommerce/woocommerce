@@ -6,5 +6,5 @@ _Replace this with a good description of your changes & reasoning._
 
 ### Detailed test instructions:
 
- - Ex: Open page `url`
- - Click XYZ…
+- Ex: Open page `url`
+- Click XYZ…

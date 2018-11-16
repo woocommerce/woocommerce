@@ -6,9 +6,13 @@ import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 
 /**
+ * WooCommerce dependencies
+ */
+import { Card } from '@woocommerce/components';
+
+/**
  * Internal dependencies
  */
-import Card from 'components/card';
 import Chart from './index';
 import dummyOrders from './test/fixtures/dummy-hour';
 

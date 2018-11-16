@@ -14,12 +14,12 @@ import PropTypes from 'prop-types';
  */
 import { formatCurrency } from '@woocommerce/currency';
 import { getDateParamsFromQuery } from '@woocommerce/date';
+import { getNewPath } from '@woocommerce/navigation';
 import { SummaryList, SummaryListPlaceholder, SummaryNumber } from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
-import { getNewPath } from 'lib/nav-utils';
 import { getSummaryNumbers } from 'store/reports/utils';
 import { numberFormat } from 'lib/number';
 import ReportError from 'analytics/components/report-error';

@@ -11,8 +11,8 @@
   },
   "require-dev": {
     "squizlabs/php_codesniffer": "*",
-    "wp-coding-standards/wpcs": "1.1.0",
-    "phpunit/phpunit": "7.4.3",
+    "wp-coding-standards/wpcs": "1.2.0",
+    "phpunit/phpunit": "6.5.13",
     "woocommerce/woocommerce-sniffs": "*",
     "wimg/php-compatibility": "9.0.0",
     "dealerdirect/phpcodesniffer-composer-installer": "0.5.0"

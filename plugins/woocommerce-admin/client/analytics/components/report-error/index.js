@@ -7,14 +7,14 @@ import { Component } from '@wordpress/element';
 import PropTypes from 'prop-types';
 
 /**
- * Internal dependencies
+ * WooCommerce dependencies
  */
 import { EmptyContent } from '@woocommerce/components';
-import { getAdminLink } from 'lib/nav-utils';
+import { getAdminLink } from '@woocommerce/navigation';
 
 class ReportError extends Component {
 	render() {
-		const { isError, isEmpty } = this.props;
+		const { className, isError, isEmpty } = this.props;
 		let title, actionLabel, actionURL, actionCallback;
 
 		if ( isError ) {
@@ -31,6 +31,7 @@ class ReportError extends Component {
 		}
 		return (
 			<EmptyContent
+				className={ className }
 				title={ title }
 				actionLabel={ actionLabel }
 				actionURL={ actionURL }
@@ -41,8 +42,13 @@ class ReportError extends Component {
 }
 
 ReportError.propTypes = {
+	className: PropTypes.string,
 	isError: PropTypes.bool,
 	isEmpty: PropTypes.bool,
+};
+
+ReportError.defaultProps = {
+	className: '',
 };
 
 export default ReportError;

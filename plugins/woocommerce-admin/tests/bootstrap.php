@@ -29,6 +29,34 @@ function wc_dir() {
 }
 
 /**
+ * Install wc admin.
+ */
+function wc_admin_install() {
+	// Clean existing install first.
+	define( 'WP_UNINSTALL_PLUGIN', true );
+	define( 'WC_REMOVE_ALL_DATA', true );
+
+	// Initialize the WC API extensions.
+	require_once dirname( dirname( __FILE__ ) ) . '/includes/class-wc-admin-api-init.php';
+
+	WC_Admin_Api_Init::install();
+
+	if ( ! wp_next_scheduled( 'wc_admin_daily' ) ) {
+		wp_schedule_event( time(), 'daily', 'wc_admin_daily' );
+	}
+
+	// Reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374.
+	if ( version_compare( $GLOBALS['wp_version'], '4.7', '<' ) ) {
+		$GLOBALS['wp_roles']->reinit();
+	} else {
+		$GLOBALS['wp_roles'] = null; // WPCS: override ok.
+		wp_roles();
+	}
+
+	echo esc_html( 'Installing wc-admin...' . PHP_EOL );
+}
+
+/**
  * Adds WooCommerce testing framework classes.
  */
 function wc_test_includes() {
@@ -72,6 +100,8 @@ function _manually_load_plugin() {
 	define( 'WC_USE_TRANSACTIONS', false );
 	require_once wc_dir() . '/woocommerce.php';
 
+	wc_admin_install();
+
 	require dirname( dirname( __FILE__ ) ) . '/wc-admin.php';
 }
 tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
@@ -83,5 +113,4 @@ wc_test_includes();
 
 // Include wc-admin helpers.
 require_once dirname( __FILE__ ) . '/framework/helpers/class-wc-helper-reports.php';
-
-
+require_once dirname( __FILE__ ) . '/framework/helpers/class-wc-helper-admin-notes.php';

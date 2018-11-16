@@ -1,5 +1,5 @@
 ```jsx
-import { D3Chart, Legend } from '@woocommerce/components';
+import { D3Chart, Legend } from 'components';
 
 const noop = () => {};
 

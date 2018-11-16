@@ -12,6 +12,29 @@ import { NAMESPACE } from 'store/constants';
 
 const { orderStatuses } = wcSettings;
 
+export const charts = [
+	{
+		key: 'orders_count',
+		label: __( 'Orders Count', 'wc-admin' ),
+		type: 'number',
+	},
+	{
+		key: 'net_revenue',
+		label: __( 'Net Revenue', 'wc-admin' ),
+		type: 'currency',
+	},
+	{
+		key: 'avg_order_value',
+		label: __( 'Average Order Value', 'wc-admin' ),
+		type: 'currency',
+	},
+	{
+		key: 'avg_items_per_order',
+		label: __( 'Average Items Per Order', 'wc-admin' ),
+		type: 'average',
+	},
+];
+
 export const filters = [
 	{
 		label: __( 'Show', 'wc-admin' ),

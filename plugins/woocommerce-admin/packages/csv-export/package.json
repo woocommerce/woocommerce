@@ -1,0 +1,31 @@
+{
+  "name": "@woocommerce/csv-export",
+  "version": "1.0.0",
+  "description": "WooCommerce utility library to convert data to CSV files.",
+  "author": "Automattic",
+  "license": "GPL-2.0-or-later",
+  "keywords": [
+    "wordpress",
+    "woocommerce",
+    "csv"
+  ],
+  "homepage": "https://github.com/WooCommerce/wc-admin/tree/master/packages/csv-export/README.md",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/WooCommerce/wc-admin.git"
+  },
+  "bugs": {
+    "url": "https://github.com/WooCommerce/wc-admin/issues"
+  },
+  "main": "build/index.js",
+  "module": "build-module/index.js",
+  "react-native": "src/index",
+  "dependencies": {
+    "@babel/runtime-corejs2": "7.1.5",
+    "browser-filesaver": "^1.1.1",
+    "moment": "^2.22.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

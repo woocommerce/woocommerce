@@ -9,7 +9,7 @@ or a comparison card if "advanced" or "compare" are picked from `FilterPicker`.
 Props
 -----
 
-### `advancedConfig`
+### `advancedFilters`
 
 - Type: Object
 - Default: `{}`
@@ -50,11 +50,14 @@ Props
 
 - **Required**
 - Type: Object
+  - title: String
+  - filters: Object
   - labels: Object
   - add: String
-  - placeholder: String
   - remove: String
+  - rule: String
   - title: String
+  - filter: String
   - rules: Array
 Object
   - input: Object
@@ -62,21 +65,13 @@ Object
 
 The configuration object required to render filters.
 
-### `filterTitle`
-
-- **Required**
-- Type: String
-- Default: null
-
-Name of this filter, used in translations.
-
 ### `path`
 
 - **Required**
 - Type: String
 - Default: null
 
-The `path` parameter supplied by React-Router.
+Name of this filter, used in translations.
 
 ### `query`
 
@@ -174,10 +169,15 @@ This component manipulates the `filter` query parameter.
 Props
 -----
 
-### `filters`
+### `config`
 
 - **Required**
-- Type: Array
+- Type: Object
+  - label: String - A label above the filter selector.
+  - staticParams: Array - Url parameters to persist when selecting a new filter.
+  - param: String - The url paramter this filter will modify.
+  - showFilters: Function - Determine if the filter should be shown. Supply a function with the query object as an argument returning a boolean.
+  - filters: Array
   - component: String - A custom component used instead of a button, might have special handling for filtering. TBD, not yet implemented.
   - label: String - The label for this filter. Optional only for custom component filters.
   - path: String - An array representing the "path" to this filter, if nested.

@@ -29,7 +29,6 @@ An `EllipsisMenu`, with filters used to control the content visible in this card
 
 ### `title`
 
-- **Required**
 - Type: One of type: string, node
 - Default: null
 

@@ -1,0 +1,60 @@
+{
+  "name": "@woocommerce/components",
+  "version": "1.0.0",
+  "description": "UI components for WooCommerce.",
+  "author": "Automattic",
+  "license": "GPL-2.0-or-later",
+  "keywords": [
+    "wordpress",
+    "woocommerce",
+    "components"
+  ],
+  "homepage": "https://github.com/WooCommerce/wc-admin/tree/master/packages/components/README.md",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/WooCommerce/wc-admin.git"
+  },
+  "bugs": {
+    "url": "https://github.com/WooCommerce/wc-admin/issues"
+  },
+  "main": "build/index.js",
+  "module": "build-module/index.js",
+  "react-native": "src/index",
+  "dependencies": {
+    "@babel/runtime-corejs2": "7.1.2",
+    "@woocommerce/csv-export": "^1.0.0",
+    "@woocommerce/currency": "^1.0.0",
+    "@woocommerce/date": "^1.0.0",
+    "@woocommerce/navigation": "^1.0.0",
+    "@wordpress/components": "3.0.0",
+    "@wordpress/compose": "3.0.0",
+    "@wordpress/date": "2.1.0",
+    "@wordpress/element": "2.1.5",
+    "@wordpress/html-entities": "2.0.2",
+    "@wordpress/i18n": "2.0.0",
+    "@wordpress/keycodes": "2.0.2",
+    "@wordpress/viewport": "^2.0.7",
+    "classnames": "^2.2.5",
+    "core-js": "2.5.7",
+    "d3-array": "^1.2.4",
+    "d3-axis": "^1.0.12",
+    "d3-format": "^1.3.2",
+    "d3-scale": "^2.1.2",
+    "d3-scale-chromatic": "^1.3.3",
+    "d3-selection": "^1.3.2",
+    "d3-shape": "^1.2.2",
+    "d3-time-format": "^2.1.3",
+    "gridicons": "3.1.1",
+    "lodash": "^4.17.11",
+    "moment": "^2.22.1",
+    "prop-types": "15.6.2",
+    "qs": "^6.5.2",
+    "react-dates": "^18.0.4",
+    "react-router-dom": "4.3.1",
+    "react-transition-group": "^2.4.0",
+    "react-world-flags": "1.2.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
