@@ -168,7 +168,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				$settings = $this->get_settings();
 				$settings = apply_filters( 'woocommerce_get_settings_' . $this->id, $settings, $current_section );
 				WC_Admin_Settings::output_fields( $settings );
-			}			
+			}
 		}
 	}
 
@@ -189,7 +189,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			case '':
 				break;
 			default:
-				$wc_shipping = WC_Shipping::instance();
+				$wc_shipping        = WC_Shipping::instance();
 				$is_shipping_method = false;
 
 				foreach ( $wc_shipping->get_shipping_methods() as $method_id => $method ) {
