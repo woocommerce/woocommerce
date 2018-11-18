@@ -46,7 +46,7 @@ class WC_Admin_Post_Types {
 		// Extra post data and screen elements.
 		add_action( 'edit_form_top', array( $this, 'edit_form_top' ) );
 		add_filter( 'enter_title_here', array( $this, 'enter_title_here' ), 1, 2 );
-		add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
+		add_action( 'current_screen', array( $this, 'edit_coupon_form_after_title' ) );
 		add_filter( 'default_hidden_meta_boxes', array( $this, 'hidden_meta_boxes' ), 10, 2 );
 		add_action( 'post_submitbox_misc_actions', array( $this, 'product_data_visibility' ) );
 
@@ -691,6 +691,24 @@ class WC_Admin_Post_Types {
 		}
 		return $text;
 	}
+	
+	/**
+	 * Looks at the current screen and adds an action on coupon edit screen to print coupon description.
+	 *
+	 * @since 3.5.1
+	 */
+	public function edit_coupon_form_after_title() {
+		$screen_id = false;
+		
+		if ( function_exists( 'get_current_screen' ) ) {
+			$screen    = get_current_screen();
+			$screen_id = isset( $screen, $screen->id ) ? $screen->id : '';
+		}
+		
+		if ( 'shop_coupon' == $screen_id ) {
+			add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
+		}
+	}
 
 	/**
 	 * Print coupon description textarea field.
@@ -698,11 +716,9 @@ class WC_Admin_Post_Types {
 	 * @param WP_Post $post Current post object.
 	 */
 	public function edit_form_after_title( $post ) {
-		if ( 'shop_coupon' === $post->post_type ) {
-			?>
-			<textarea id="woocommerce-coupon-description" name="excerpt" cols="5" rows="2" placeholder="<?php esc_attr_e( 'Description (optional)', 'woocommerce' ); ?>"><?php echo $post->post_excerpt; // WPCS: XSS ok. ?></textarea>
-			<?php
-		}
+		?>
+		<textarea id="woocommerce-coupon-description" name="excerpt" cols="5" rows="2" placeholder="<?php esc_attr_e( 'Description (optional)', 'woocommerce' ); ?>"><?php echo $post->post_excerpt; // WPCS: XSS ok. ?></textarea>
+		<?php
 	}
 
 	/**
