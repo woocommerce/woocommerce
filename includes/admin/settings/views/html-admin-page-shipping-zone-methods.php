@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<span class="wc-shipping-zone-name"><?php echo esc_html( $zone->get_zone_name() ? $zone->get_zone_name() : __( 'Zone', 'woocommerce' ) ); ?></span>
 </h2>
 
-<?php do_action( 'woocommerce_shipping_zone_before_methods_table' ); ?>
+<?php do_action( 'woocommerce_shipping_zone_before_methods_table', $zone ); ?>
 
 <table class="form-table wc-shipping-zone-settings">
 	<tbody>
@@ -100,7 +100,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</tbody>
 </table>
 
-<?php do_action( 'woocommerce_shipping_zone_after_methods_table' ); ?>
+<?php do_action( 'woocommerce_shipping_zone_after_methods_table', $zone ); ?>
 
 <p class="submit">
 	<button type="submit" name="submit" id="submit" class="button button-primary button-large wc-shipping-zone-method-save" value="<?php esc_attr_e( 'Save changes', 'woocommerce' ); ?>" disabled><?php esc_html_e( 'Save changes', 'woocommerce' ); ?></button>
