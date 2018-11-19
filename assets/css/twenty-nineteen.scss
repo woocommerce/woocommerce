@@ -73,37 +73,27 @@ a.button {
 }
 
 .woocommerce-pagination {
-	padding-top: 2rem;
-	margin-top: 4rem;
+	padding-top: 1rem;
+	margin-top: 1rem;
 	border-top: 1px solid #eee;
+	font-family: $headings;
 	font-size: 0.88889em;
 
 	ul.page-numbers {
+		margin: 0;
 		padding: 0;
 		display: block;
+		font-weight: 700;
+		letter-spacing: -0.02em;
+		line-height: 1.2;
 	}
 
 	span.page-numbers,
 	a.page-numbers,
 	.next.page-numbers,
 	.prev.page-numbers {
-		padding: 0.5em 1em;
-		background: #ddd;
+		padding: 1rem;
 		display: inline-block;
-		font-size: 1em;
-		float: none;
-		line-height: 1.5;
-		border-radius: 5px;
-		transition: background-color ease-in-out 0.3s;
-	}
-
-	span.page-numbers {
-		background-color: #fff;
-	}
-
-	a.page-numbers:hover {
-		background-color: #767676;
-		color: #fff;
 	}
 }
 
@@ -117,8 +107,9 @@ a.button {
 	display: inline-block;
 	font-family: $headings;
 	font-size: 0.71111em;
-	font-weight: bold;
-	line-height: 1;
+	font-weight: 700;
+	letter-spacing: -0.02em;
+	line-height: 1.2;
 	padding: 0.5rem;
 	position: absolute;
 	text-transform: uppercase;
