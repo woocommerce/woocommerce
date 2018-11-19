@@ -26,18 +26,18 @@ const data = [
 
 describe( 'Legend', () => {
 	test( 'should not disable any button if more than one is active', () => {
-		const topSellingProducts = mount( <Legend colorScheme={ colorScheme } data={ data } /> );
+		const legend = mount( <Legend colorScheme={ colorScheme } data={ data } /> );
 
-		expect( topSellingProducts.find( 'button' ).get( 0 ).props.disabled ).toBeFalsy();
-		expect( topSellingProducts.find( 'button' ).get( 1 ).props.disabled ).toBeFalsy();
+		expect( legend.find( 'button' ).get( 0 ).props.disabled ).toBeFalsy();
+		expect( legend.find( 'button' ).get( 1 ).props.disabled ).toBeFalsy();
 	} );
 
 	test( 'should disable the last active button', () => {
 		data[ 1 ].visible = false;
 
-		const topSellingProducts = mount( <Legend colorScheme={ colorScheme } data={ data } /> );
+		const legend = mount( <Legend colorScheme={ colorScheme } data={ data } /> );
 
-		expect( topSellingProducts.find( 'button' ).get( 0 ).props.disabled ).toBeTruthy();
-		expect( topSellingProducts.find( 'button' ).get( 1 ).props.disabled ).toBeFalsy();
+		expect( legend.find( 'button' ).get( 0 ).props.disabled ).toBeTruthy();
+		expect( legend.find( 'button' ).get( 1 ).props.disabled ).toBeFalsy();
 	} );
 } );
