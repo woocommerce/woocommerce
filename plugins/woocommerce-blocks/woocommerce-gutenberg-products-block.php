@@ -29,7 +29,7 @@ function wgpb_initialize() {
 		add_action( 'rest_api_init', 'wgpb_register_api_routes' );
 		add_action( 'enqueue_block_editor_assets', 'wgpb_extra_gutenberg_scripts' );
 	}
-	
+
 	if ( defined( 'WGPB_DEVELOPMENT_MODE' ) && WGPB_DEVELOPMENT_MODE && ! $files_exist ) {
 		add_action( 'admin_notices', 'wgpb_plugins_notice' );
 	}
@@ -69,14 +69,24 @@ function wgpb_extra_gutenberg_scripts() {
 		'react-transition-group',
 		plugins_url( 'assets/js/vendor/react-transition-group.js', __FILE__ ),
 		array(),
-		'2.2.1'
+		'2.2.1',
+		true
+	);
+
+	wp_register_script(
+		'woocommerce-products-category-block',
+		plugins_url( 'build/product-category-block.js', __FILE__ ),
+		array( 'wp-element', 'wp-blocks', 'wp-i18n' ),
+		defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? filemtime( plugin_dir_path( __FILE__ ) . '/build/product-category-block.js' ) : WGPB_VERSION,
+		true
 	);
 
 	wp_register_script(
 		'woocommerce-products-block-editor',
 		plugins_url( 'build/products-block.js', __FILE__ ),
 		array( 'wp-api-fetch', 'wp-element', 'wp-components', 'wp-blocks', 'wp-editor', 'wp-i18n', 'react-transition-group' ),
-		defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? filemtime( plugin_dir_path( __FILE__ ) . '/build/products-block.js' ) : WGPB_VERSION
+		defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? filemtime( plugin_dir_path( __FILE__ ) . '/build/products-block.js' ) : WGPB_VERSION,
+		true
 	);
 
 	$product_block_data = array(
@@ -89,7 +99,10 @@ function wgpb_extra_gutenberg_scripts() {
 	);
 	wp_localize_script( 'woocommerce-products-block-editor', 'wc_product_block_data', $product_block_data );
 
+	wp_set_script_translations( 'woocommerce-products-category-block', 'woocommerce' );
+
 	wp_enqueue_script( 'woocommerce-products-block-editor' );
+	wp_enqueue_script( 'woocommerce-products-category-block' );
 
 	wp_enqueue_style(
 		'woocommerce-products-block-editor',
@@ -97,7 +110,42 @@ function wgpb_extra_gutenberg_scripts() {
 		array( 'wp-edit-blocks' ),
 		defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? filemtime( plugin_dir_path( __FILE__ ) . '/build/products-block.css' ) : WGPB_VERSION
 	);
+
+	wp_enqueue_style(
+		'woocommerce-products-category-block',
+		plugins_url( 'build/product-category-block.css', __FILE__ ),
+		array( 'wp-edit-blocks' ),
+		defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? filemtime( plugin_dir_path( __FILE__ ) . '/build/product-category-block.css' ) : WGPB_VERSION
+	);
 }
+
+/**
+ * Output the wcSettings global before printing any script tags.
+ */
+function wgpb_print_script_settings() {
+	$code = get_woocommerce_currency();
+
+	// Settings and variables can be passed here for access in the app.
+	$settings = array(
+		'adminUrl'         => admin_url(),
+		'wcAssetUrl'       => plugins_url( 'assets/', WC_PLUGIN_FILE ),
+		'siteLocale'       => esc_attr( get_bloginfo( 'language' ) ),
+		'currency'         => array(
+			'code'      => $code,
+			'precision' => wc_get_price_decimals(),
+			'symbol'    => get_woocommerce_currency_symbol( $code ),
+		),
+		'date'             => array(
+			'dow' => get_option( 'start_of_week', 0 ),
+		),
+	);
+	?>
+	<script type="text/javascript">
+		var wcSettings = <?php echo json_encode( $settings ); ?>;
+	</script>
+	<?php
+}
+add_action( 'admin_print_footer_scripts', 'wgpb_print_script_settings', 1 );
 
 /**
  * Register extra API routes with functionality not available in WC core yet.

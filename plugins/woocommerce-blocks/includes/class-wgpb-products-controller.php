@@ -70,7 +70,7 @@ class WGPB_Products_Controller extends WC_REST_Products_Controller {
 	}
 
 	/**
-	 * Make extra product orderby features supported by WooCommerce available to the WC API. 
+	 * Make extra product orderby features supported by WooCommerce available to the WC API.
 	 * This includes 'price', 'popularity', and 'rating'.
 	 *
 	 * @param WP_REST_Request $request Request data.
@@ -160,7 +160,7 @@ class WGPB_Products_Controller extends WC_REST_Products_Controller {
 	 */
 	public function get_collection_params() {
 		$params = parent::get_collection_params();
-		$params['orderby']['enum'] = array_merge( $params['orderby']['enum'], array( 'price', 'popularity', 'rating' ) );
+		$params['orderby']['enum'] = array_merge( $params['orderby']['enum'], array( 'price', 'popularity', 'rating', 'menu_order' ) );
 		return $params;
 	}
 

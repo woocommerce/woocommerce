@@ -26,6 +26,8 @@ const GutenbergBlocksConfig = {
 	entry: {
 		// Legacy block
 		'products-block': './assets/js/legacy/products-block.jsx',
+		// New blocks
+		'product-category-block': './assets/js/product-category-block.js',
 	},
 	output: {
 		path: path.resolve( __dirname, './build/' ),
