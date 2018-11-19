@@ -92,7 +92,7 @@
     "raw-loader": "0.5.1",
     "react-docgen": "2.21.0",
     "readline-sync": "1.4.9",
-    "recast": "0.16.0",
+    "recast": "0.16.1",
     "rimraf": "2.6.2",
     "rtlcss": "2.4.0",
     "sass-loader": "7.1.0",
