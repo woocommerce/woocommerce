@@ -14,7 +14,7 @@
     "nette/utils": "~2.3.0",
     "phpunit/phpunit": "6.*",
     "woocommerce/woocommerce-git-hooks": "*",
-    "woocommerce/woocommerce-sniffs": "^0.0.3"
+    "woocommerce/woocommerce-sniffs": "^0.0.4"
   },
   "scripts": {
     "pre-update-cmd": [
