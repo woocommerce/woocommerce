@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "470ecc8e426f34740724ae94f0345793",
+    "content-hash": "72f88878345bb2464472ec2192173fed",
     "packages": [
         {
             "name": "composer/installers",
@@ -3784,39 +3784,6 @@
                 "standards"
             ],
             "time": "2018-10-07T17:38:02+00:00"
-        },
-        {
-            "name": "woocommerce/woocommerce-git-hooks",
-            "version": "1.0.5",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/woocommerce/woocommerce-git-hooks.git",
-                "reference": "1e55118258e8487c68b17c06cfde3b48a692d9d4"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-git-hooks/zipball/1e55118258e8487c68b17c06cfde3b48a692d9d4",
-                "reference": "1e55118258e8487c68b17c06cfde3b48a692d9d4",
-                "shasum": ""
-            },
-            "type": "scripts",
-            "autoload": {
-                "psr-4": {
-                    "WooCommerce\\GitHooks\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Claudio Sanches",
-                    "email": "claudio@automattic.com"
-                }
-            ],
-            "description": "WooCommerce Git Hooks",
-            "time": "2017-12-18T16:55:42+00:00"
         },
         {
             "name": "woocommerce/woocommerce-sniffs",
