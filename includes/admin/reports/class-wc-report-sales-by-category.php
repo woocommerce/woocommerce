@@ -1,7 +1,12 @@
 <?php
+/**
+ * Sales by category report functionality
+ *
+ * @package WooCommerce/Admin/Reporting
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit; // Exit if accessed directly.
 }
 
 /**
@@ -19,21 +24,21 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 	 *
 	 * @var array
 	 */
-	public $chart_colours         = array();
+	public $chart_colours = array();
 
 	/**
 	 * Categories ids.
 	 *
 	 * @var array
 	 */
-	public $show_categories       = array();
+	public $show_categories = array();
 
 	/**
 	 * Item sales.
 	 *
 	 * @var array
 	 */
-	private $item_sales           = array();
+	private $item_sales = array();
 
 	/**
 	 * Item sales and times.
@@ -54,7 +59,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 	/**
 	 * Get all product ids in a category (and its children).
 	 *
-	 * @param  int $category_id
+	 * @param  int $category_id Category ID.
 	 * @return array
 	 */
 	public function get_products_in_category( $category_id ) {
@@ -111,15 +116,15 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 	public function output_report() {
 
 		$ranges = array(
-			'year'         => __( 'Year', 'woocommerce' ),
-			'last_month'   => __( 'Last month', 'woocommerce' ),
-			'month'        => __( 'This month', 'woocommerce' ),
-			'7day'         => __( 'Last 7 days', 'woocommerce' ),
+			'year'       => __( 'Year', 'woocommerce' ),
+			'last_month' => __( 'Last month', 'woocommerce' ),
+			'month'      => __( 'This month', 'woocommerce' ),
+			'7day'       => __( 'Last 7 days', 'woocommerce' ),
 		);
 
 		$this->chart_colours = array( '#3498db', '#34495e', '#1abc9c', '#2ecc71', '#f1c40f', '#e67e22', '#e74c3c', '#2980b9', '#8e44ad', '#2c3e50', '#16a085', '#27ae60', '#f39c12', '#d35400', '#c0392b' );
 
-		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( $_GET['range'] ) : '7day';
+		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( wp_unslash( $_GET['range'] ) ) : '7day';
 
 		if ( ! in_array( $current_range, array( 'custom', 'year', 'last_month', 'month', '7day' ) ) ) {
 			$current_range = '7day';
@@ -128,32 +133,34 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 		$this->check_current_range_nonce( $current_range );
 		$this->calculate_current_range( $current_range );
 
-		// Get item sales data
+		// Get item sales data.
 		if ( ! empty( $this->show_categories ) ) {
-			$order_items = $this->get_order_report_data( array(
-				'data' => array(
-					'_product_id' => array(
-						'type'            => 'order_item_meta',
-						'order_item_type' => 'line_item',
-						'function'        => '',
-						'name'            => 'product_id',
+			$order_items = $this->get_order_report_data(
+				array(
+					'data'         => array(
+						'_product_id' => array(
+							'type'            => 'order_item_meta',
+							'order_item_type' => 'line_item',
+							'function'        => '',
+							'name'            => 'product_id',
+						),
+						'_line_total' => array(
+							'type'            => 'order_item_meta',
+							'order_item_type' => 'line_item',
+							'function'        => 'SUM',
+							'name'            => 'order_item_amount',
+						),
+						'post_date'   => array(
+							'type'     => 'post_data',
+							'function' => '',
+							'name'     => 'post_date',
+						),
 					),
-					'_line_total' => array(
-						'type'            => 'order_item_meta',
-						'order_item_type' => 'line_item',
-						'function'        => 'SUM',
-						'name'            => 'order_item_amount',
-					),
-					'post_date' => array(
-						'type'     => 'post_data',
-						'function' => '',
-						'name'     => 'post_date',
-					),
-				),
-				'group_by'     => 'ID, product_id, post_date',
-				'query_type'   => 'get_results',
-				'filter_range' => true,
-			) );
+					'group_by'     => 'ID, product_id, post_date',
+					'query_type'   => 'get_results',
+					'filter_range' => true,
+				)
+			);
 
 			$this->item_sales           = array();
 			$this->item_sales_and_times = array();
@@ -163,13 +170,13 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 				foreach ( $order_items as $order_item ) {
 
 					switch ( $this->chart_groupby ) {
-						case 'day' :
+						case 'day':
 							$time = strtotime( date( 'Ymd', strtotime( $order_item->post_date ) ) ) * 1000;
-						break;
-						case 'month' :
-						default :
+							break;
+						case 'month':
+						default:
 							$time = strtotime( date( 'Ym', strtotime( $order_item->post_date ) ) . '01' ) * 1000;
-						break;
+							break;
 					}
 
 					$this->item_sales_and_times[ $time ][ $order_item->product_id ] = isset( $this->item_sales_and_times[ $time ][ $order_item->product_id ] ) ? $this->item_sales_and_times[ $time ][ $order_item->product_id ] + $order_item->order_item_amount : $order_item->order_item_amount;
@@ -179,7 +186,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 			}
 		}
 
-		include( WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php' );
+		include WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php';
 	}
 
 	/**
@@ -208,27 +215,29 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 			<div>
 				<select multiple="multiple" data-placeholder="<?php esc_attr_e( 'Select categories&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select" id="show_categories" name="show_categories[]" style="width: 205px;">
 					<?php
-						$r = array();
-						$r['pad_counts'] 	= 1;
-						$r['hierarchical'] 	= 1;
-						$r['hide_empty'] 	= 1;
-						$r['value']			= 'id';
-						$r['selected'] 		= $this->show_categories;
+						$r                 = array();
+						$r['pad_counts']   = 1;
+						$r['hierarchical'] = 1;
+						$r['hide_empty']   = 1;
+						$r['value']        = 'id';
+						$r['selected']     = $this->show_categories;
 
-						include_once( WC()->plugin_path() . '/includes/walkers/class-product-cat-dropdown-walker.php' );
+						include_once WC()->plugin_path() . '/includes/walkers/class-wc-product-cat-dropdown-walker.php';
 
-						echo wc_walk_category_dropdown_tree( $categories, 0, $r );
+						echo wc_walk_category_dropdown_tree( $categories, 0, $r ); // @codingStandardsIgnoreLine
 					?>
 				</select>
-				<a href="#" class="select_none"><?php _e( 'None', 'woocommerce' ); ?></a>
-				<a href="#" class="select_all"><?php _e( 'All', 'woocommerce' ); ?></a>
-				<input type="submit" class="submit button" value="<?php esc_attr_e( 'Show', 'woocommerce' ); ?>" />
-				<input type="hidden" name="range" value="<?php echo ( ! empty( $_GET['range'] ) ) ? esc_attr( $_GET['range'] ) : ''; ?>" />
-				<input type="hidden" name="start_date" value="<?php echo ( ! empty( $_GET['start_date'] ) ) ? esc_attr( $_GET['start_date'] ) : ''; ?>" />
-				<input type="hidden" name="end_date" value="<?php echo ( ! empty( $_GET['end_date'] ) ) ? esc_attr( $_GET['end_date'] ) : ''; ?>" />
-				<input type="hidden" name="page" value="<?php echo ( ! empty( $_GET['page'] ) ) ? esc_attr( $_GET['page'] ) : ''; ?>" />
-				<input type="hidden" name="tab" value="<?php echo ( ! empty( $_GET['tab'] ) ) ? esc_attr( $_GET['tab'] ) : ''; ?>" />
-				<input type="hidden" name="report" value="<?php echo ( ! empty( $_GET['report'] ) ) ? esc_attr( $_GET['report'] ) : ''; ?>" />
+				<?php // @codingStandardsIgnoreStart ?>
+				<a href="#" class="select_none"><?php esc_html_e( 'None', 'woocommerce' ); ?></a>
+				<a href="#" class="select_all"><?php esc_html_e( 'All', 'woocommerce' ); ?></a>
+				<button type="submit" class="submit button" value="<?php esc_attr_e( 'Show', 'woocommerce' ); ?>"><?php esc_html_e( 'Show', 'woocommerce' ); ?></button>
+				<input type="hidden" name="range" value="<?php echo ( ! empty( $_GET['range'] ) ) ? esc_attr( wp_unslash( $_GET['range'] ) ) : ''; ?>" />
+				<input type="hidden" name="start_date" value="<?php echo ( ! empty( $_GET['start_date'] ) ) ? esc_attr( wp_unslash( $_GET['start_date'] ) ) : ''; ?>" />
+				<input type="hidden" name="end_date" value="<?php echo ( ! empty( $_GET['end_date'] ) ) ? esc_attr( wp_unslash( $_GET['end_date'] ) ) : ''; ?>" />
+				<input type="hidden" name="page" value="<?php echo ( ! empty( $_GET['page'] ) ) ? esc_attr( wp_unslash( $_GET['page'] ) ) : ''; ?>" />
+				<input type="hidden" name="tab" value="<?php echo ( ! empty( $_GET['tab'] ) ) ? esc_attr( wp_unslash( $_GET['tab'] ) ) : ''; ?>" />
+				<input type="hidden" name="report" value="<?php echo ( ! empty( $_GET['report'] ) ) ? esc_attr( wp_unslash( $_GET['report'] ) ) : ''; ?>" />
+				<?php // @codingStandardsIgnoreEnd ?>
 			</div>
 			<script type="text/javascript">
 				jQuery(function(){
@@ -255,17 +264,17 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 	 */
 	public function get_export_button() {
 
-		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( $_GET['range'] ) : '7day';
+		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( wp_unslash( $_GET['range'] ) ) : '7day';
 		?>
 		<a
 			href="#"
-			download="report-<?php echo esc_attr( $current_range ); ?>-<?php echo date_i18n( 'Y-m-d', current_time( 'timestamp' ) ); ?>.csv"
+			download="report-<?php echo esc_attr( $current_range ); ?>-<?php echo esc_attr( date_i18n( 'Y-m-d', current_time( 'timestamp' ) ) ); ?>.csv"
 			class="export_csv"
 			data-export="chart"
 			data-xaxes="<?php esc_attr_e( 'Date', 'woocommerce' ); ?>"
-			data-groupby="<?php echo $this->chart_groupby; ?>"
+			data-groupby="<?php echo esc_attr( $this->chart_groupby ); ?>"
 		>
-			<?php _e( 'Export CSV', 'woocommerce' ); ?>
+			<?php esc_html_e( 'Export CSV', 'woocommerce' ); ?>
 		</a>
 		<?php
 	}
@@ -279,7 +288,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 		if ( empty( $this->show_categories ) ) {
 			?>
 			<div class="chart-container">
-				<p class="chart-prompt"><?php _e( 'Choose a category to view stats', 'woocommerce' ); ?></p>
+				<p class="chart-prompt"><?php esc_html_e( 'Choose a category to view stats', 'woocommerce' ); ?></p>
 			</div>
 			<?php
 		} else {
@@ -297,13 +306,13 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 					$interval_total = 0;
 
 					switch ( $this->chart_groupby ) {
-						case 'day' :
+						case 'day':
 							$time = strtotime( date( 'Ymd', strtotime( "+{$i} DAY", $this->start_date ) ) ) * 1000;
-						break;
-						case 'month' :
-						default :
+							break;
+						case 'month':
+						default:
 							$time = strtotime( date( 'Ym', strtotime( "+{$i} MONTH", $this->start_date ) ) . '01' ) * 1000;
-						break;
+							break;
 					}
 
 					foreach ( $product_ids as $id ) {
@@ -317,7 +326,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 				}
 
 				$chart_data[ $category->term_id ]['category'] = $category->name;
-				$chart_data[ $category->term_id ]['data'] = $category_chart_data;
+				$chart_data[ $category->term_id ]['data']     = $category_chart_data;
 
 				$index++;
 			}
@@ -325,6 +334,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 			<div class="chart-container">
 				<div class="chart-placeholder main"></div>
 			</div>
+			<?php // @codingStandardsIgnoreStart ?>
 			<script type="text/javascript">
 				var main_chart;
 
@@ -342,22 +352,22 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 										$series[ $key ][0] = $series_data[0] + $offset;
 									}
 									echo '{
-										label: "' . esc_js( $data['category'] ) . '",
-										data: jQuery.parseJSON( "' . json_encode( $series ) . '" ),
-										color: "' . $color . '",
-										bars: {
-											fillColor: "' . $color . '",
-											fill: true,
-											show: true,
-											lineWidth: 1,
-											align: "center",
-											barWidth: ' . $width * 0.75 . ',
-											stack: false
-										},
-										' . $this->get_currency_tooltip() . ',
-										enable_tooltip: true,
-										prepend_label: true
-									},';
+											label: "' . esc_js( $data['category'] ) . '",
+											data: jQuery.parseJSON( "' . json_encode( $series ) . '" ),
+											color: "' . $color . '",
+											bars: {
+												fillColor: "' . $color . '",
+												fill: true,
+												show: true,
+												lineWidth: 1,
+												align: "center",
+												barWidth: ' . $width * 0.75 . ',
+												stack: false
+											},
+											' . $this->get_currency_tooltip() . ',
+											enable_tooltip: true,
+											prepend_label: true
+										},';
 									$index++;
 								}
 							?>
@@ -432,6 +442,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 					);
 				});
 			</script>
+			<?php // @codingStandardsIgnoreEnd ?>
 			<?php
 		}
 	}

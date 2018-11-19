@@ -1,7 +1,12 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+/**
+ * Locales information
+ *
+ * @package WooCommerce/i18n
+ * @version 3.5.0
+ */
+
+defined( 'ABSPATH' ) || exit;
 
 return array(
 	'AU' => array(
@@ -54,7 +59,7 @@ return array(
 		'dimension_unit' => 'cm',
 		'tax_rates'      => array(
 			'' => array(
-			  array(
+				array(
 					'country'  => 'BE',
 					'state'    => '',
 					'rate'     => '21.0000',
@@ -123,7 +128,7 @@ return array(
 					'priority' => 2,
 				),
 			),
-			'*' => array(
+			'*'  => array(
 				array(
 					'country'  => 'CA',
 					'state'    => 'ON',
@@ -300,19 +305,19 @@ return array(
 	),
 	'GB' => array(
 		'currency_code'  => 'GBP',
-		'currency_pos'	=> 'left',
-		'thousand_sep'	=> ',',
-		'decimal_sep'	 => '.',
-		'num_decimals'	=> 2,
-		'weight_unit'	 => 'kg',
+		'currency_pos'   => 'left',
+		'thousand_sep'   => ',',
+		'decimal_sep'    => '.',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'kg',
 		'dimension_unit' => 'cm',
-		'tax_rates'		=> array(
+		'tax_rates'      => array(
 			'' => array(
 				array(
 					'country'  => 'GB',
-					'state'	 => '',
-					'rate'	  => '20.0000',
-					'name'	  => 'VAT',
+					'state'    => '',
+					'rate'     => '20.0000',
+					'name'     => 'VAT',
 					'shipping' => true,
 				),
 			),
@@ -373,6 +378,26 @@ return array(
 					'state'    => '',
 					'rate'     => '8.0000',
 					'name'     => __( 'Consumption tax', 'woocommerce' ),
+					'shipping' => true,
+				),
+			),
+		),
+	),
+	'MD' => array(
+		'currency_code'  => 'MDL',
+		'currency_pos'   => 'right_space',
+		'thousand_sep'   => '.',
+		'decimal_sep'    => ',',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+		'tax_rates'      => array(
+			'' => array(
+				array(
+					'country'  => 'MD',
+					'state'    => '',
+					'rate'     => '20.0000',
+					'name'     => 'TVA',
 					'shipping' => true,
 				),
 			),
@@ -448,10 +473,30 @@ return array(
 		'dimension_unit' => 'cm',
 		'tax_rates'      => array(
 			'' => array(
-			 	array(
+				array(
 					'country'  => 'PL',
 					'state'    => '',
 					'rate'     => '23.0000',
+					'name'     => 'VAT',
+					'shipping' => true,
+				),
+			),
+		),
+	),
+	'PY' => array(
+		'currency_code'  => 'PYG',
+		'currency_pos'   => 'left',
+		'thousand_sep'   => '.',
+		'decimal_sep'    => ',',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+		'tax_rates'      => array(
+			'' => array(
+				array(
+					'country'  => 'PY',
+					'state'    => '',
+					'rate'     => '10.0000',
 					'name'     => 'VAT',
 					'shipping' => true,
 				),
@@ -520,13 +565,13 @@ return array(
 	),
 	'US' => array(
 		'currency_code'  => 'USD',
-		'currency_pos'	=> 'left',
-		'thousand_sep'	=> ',',
-		'decimal_sep'	 => '.',
-		'num_decimals'	=> 2,
-		'weight_unit'	 => 'lbs',
+		'currency_pos'   => 'left',
+		'thousand_sep'   => ',',
+		'decimal_sep'    => '.',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'oz',
 		'dimension_unit' => 'in',
-		'tax_rates'		=> array(
+		'tax_rates'      => array(
 			'AL' => array(
 				array(
 					'country'  => 'US',
@@ -774,7 +819,7 @@ return array(
 				array(
 					'country'  => 'US',
 					'state'    => 'NJ',
-					'rate'     => '7.0000',
+					'rate'     => '6.8750',
 					'name'     => 'State Tax',
 					'shipping' => true,
 				),
@@ -974,7 +1019,7 @@ return array(
 				array(
 					'country'  => 'ZA',
 					'state'    => '',
-					'rate'     => '14.0000',
+					'rate'     => '15.0000',
 					'name'     => 'VAT',
 					'shipping' => true,
 				),

@@ -1,16 +1,44 @@
 <?php defined( 'ABSPATH' ) or exit(); ?>
 
 <div class="wrap woocommerce wc_addons_wrap wc-helper">
-	<?php include( WC_Helper::get_view_filename( 'html-section-nav.php' ) ); ?>
+	<?php require WC_Helper::get_view_filename( 'html-section-nav.php' ); ?>
 	<h1 class="screen-reader-text"><?php _e( 'WooCommerce Extensions', 'woocommerce' ); ?></h1>
 
-	<?php include( WC_Helper::get_view_filename( 'html-section-notices.php' ) ); ?>
+	<?php require WC_Helper::get_view_filename( 'html-section-notices.php' ); ?>
 
 	<div class="subscriptions-header">
 		<h2><?php _e( 'Subscriptions', 'woocommerce' ); ?></h2>
-		<?php include( WC_Helper::get_view_filename( 'html-section-account.php' ) ); ?>
-		<p><?php _e( 'Below is a list of products available on your WooCommerce.com account. To receive plugin updates please make sure the product is installed, activated and connected to your WooCommerce.com account.', 'woocommerce' ); ?></p>
+		<?php require WC_Helper::get_view_filename( 'html-section-account.php' ); ?>
+		<p><?php printf( __( 'Below is a list of extensions available on your WooCommerce.com account. To receive extension updates please make sure the extension is installed, and its subscription activated and connected to your WooCommerce.com account. Extensions can be activated from the <a href="%s">Plugins</a> screen.', 'woocommerce' ), admin_url( 'plugins.php' ) ); ?></p>
 	</div>
+
+	<ul class="subscription-filter">
+		<label><?php _e( 'Sort by:', 'woocommerce' ); ?> <span class="chevron dashicons dashicons-arrow-up-alt2"></span></label>
+		<?php
+			$filters        = array_keys( WC_Helper::get_filters() );
+			$last_filter    = array_pop( $filters );
+			$current_filter = WC_Helper::get_current_filter();
+			$counts         = WC_Helper::get_filters_counts();
+		?>
+
+		<?php
+		foreach ( WC_Helper::get_filters() as $key => $label ) :
+			// Don't show empty filters.
+			if ( empty( $counts[ $key ] ) ) {
+				continue;
+			}
+
+			$url        = admin_url( 'admin.php?page=wc-addons&section=helper&filter=' . $key );
+			$class_html = $current_filter === $key ? 'class="current"' : '';
+			?>
+			<li>
+				<a <?php echo $class_html; ?> href="<?php echo esc_url( $url ); ?>">
+					<?php echo esc_html( $label ); ?>
+					<span class="count">(<?php echo absint( $counts[ $key ] ); ?>)</span>
+				</a>
+			</li>
+		<?php endforeach; ?>
+	</ul>
 
 	<table class="wp-list-table widefat fixed striped">
 		<?php if ( ! empty( $subscriptions ) ) : ?>
@@ -19,12 +47,17 @@
 				<tr class="wp-list-table__row is-ext-header">
 					<td class="wp-list-table__ext-details">
 						<div class="wp-list-table__ext-title">
-							<a href="<?php echo esc_url( $subscription['product_url'] ); ?>" target="_blank"><?php
-								echo esc_html( $subscription['product_name'] ); ?></a>
+							<a href="<?php echo esc_url( $subscription['product_url'] ); ?>" target="_blank">
+								<?php echo esc_html( $subscription['product_name'] ); ?>
+							</a>
 						</div>
 
 						<div class="wp-list-table__ext-description">
-							<?php if ( $subscription['expired'] ) : ?>
+							<?php if ( $subscription['lifetime'] ) : ?>
+								<span class="renews">
+									<?php _e( 'Lifetime Subscription', 'woocommerce' ); ?>
+								</span>
+							<?php elseif ( $subscription['expired'] ) : ?>
 								<span class="renews">
 									<strong><?php _e( 'Expired :(', 'woocommerce' ); ?></strong>
 									<?php echo date_i18n( 'F jS, Y', $subscription['expires'] ); ?>
@@ -48,7 +81,7 @@
 
 							<br/>
 							<span class="subscription">
-							<?php
+								<?php
 								if ( ! $subscription['active'] && $subscription['maxed'] ) {
 									/* translators: %1$d: sites active, %2$d max sites active */
 									printf( __( 'Subscription: Not available - %1$d of %2$d already in use', 'woocommerce' ), absint( $subscription['sites_active'] ), absint( $subscription['sites_max'] ) );
@@ -58,10 +91,14 @@
 								} else {
 									_e( 'Subscription: Unlimited', 'woocommerce' );
 								}
-								if ( isset( $subscription['master_user_email'] ) ) {
+
+								// Check shared.
+								if ( ! empty( $subscription['is_shared'] ) && ! empty( $subscription['owner_email'] ) ) {
+									printf( '</br>' . __( 'Shared by %s', 'woocommerce' ), esc_html( $subscription['owner_email'] ) );
+								} elseif ( isset( $subscription['master_user_email'] ) ) {
 									printf( '</br>' . __( 'Shared by %s', 'woocommerce' ), esc_html( $subscription['master_user_email'] ) );
 								}
-							?>
+								?>
 							</span>
 						</div>
 					</td>

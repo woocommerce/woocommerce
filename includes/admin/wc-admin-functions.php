@@ -58,17 +58,17 @@ function wc_get_screen_ids() {
 /**
  * Create a page and store the ID in an option.
  *
- * @param mixed $slug Slug for the new page
+ * @param mixed  $slug Slug for the new page
  * @param string $option Option name to store the page's ID
  * @param string $page_title (default: '') Title for the new page
  * @param string $page_content (default: '') Content for the new page
- * @param int $post_parent (default: 0) Parent for the new page
+ * @param int    $post_parent (default: 0) Parent for the new page
  * @return int page ID
  */
 function wc_create_page( $slug, $option = '', $page_title = '', $page_content = '', $post_parent = 0 ) {
 	global $wpdb;
 
-	$option_value     = get_option( $option );
+	$option_value = get_option( $option );
 
 	if ( $option_value > 0 && ( $page_object = get_post( $option_value ) ) ) {
 		if ( 'page' === $page_object->post_type && ! in_array( $page_object->post_status, array( 'pending', 'trash', 'future', 'auto-draft' ) ) ) {
@@ -106,10 +106,10 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 	if ( $trashed_page_found ) {
 		$page_id   = $trashed_page_found;
 		$page_data = array(
-			'ID'             => $page_id,
-			'post_status'    => 'publish',
+			'ID'          => $page_id,
+			'post_status' => 'publish',
 		);
-	 	wp_update_post( $page_data );
+		wp_update_post( $page_data );
 	} else {
 		$page_data = array(
 			'post_status'    => 'publish',
@@ -121,7 +121,7 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 			'post_parent'    => $post_parent,
 			'comment_status' => 'closed',
 		);
-		$page_id = wp_insert_post( $page_data );
+		$page_id   = wp_insert_post( $page_data );
 	}
 
 	if ( $option ) {
@@ -141,7 +141,7 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 function woocommerce_admin_fields( $options ) {
 
 	if ( ! class_exists( 'WC_Admin_Settings', false ) ) {
-		include( dirname( __FILE__ ) . '/class-wc-admin-settings.php' );
+		include dirname( __FILE__ ) . '/class-wc-admin-settings.php';
 	}
 
 	WC_Admin_Settings::output_fields( $options );
@@ -156,7 +156,7 @@ function woocommerce_admin_fields( $options ) {
 function woocommerce_update_options( $options, $data = null ) {
 
 	if ( ! class_exists( 'WC_Admin_Settings', false ) ) {
-		include( dirname( __FILE__ ) . '/class-wc-admin-settings.php' );
+		include dirname( __FILE__ ) . '/class-wc-admin-settings.php';
 	}
 
 	WC_Admin_Settings::save_fields( $options, $data );
@@ -172,7 +172,7 @@ function woocommerce_update_options( $options, $data = null ) {
 function woocommerce_settings_get_option( $option_name, $default = '' ) {
 
 	if ( ! class_exists( 'WC_Admin_Settings', false ) ) {
-		include( dirname( __FILE__ ) . '/class-wc-admin-settings.php' );
+		include dirname( __FILE__ ) . '/class-wc-admin-settings.php';
 	}
 
 	return WC_Admin_Settings::get_option( $option_name, $default );
@@ -182,16 +182,14 @@ function woocommerce_settings_get_option( $option_name, $default = '' ) {
  * Save order items. Uses the CRUD.
  *
  * @since 2.2
- * @param int $order_id Order ID
+ * @param int   $order_id Order ID
  * @param array $items Order items to save
  */
 function wc_save_order_items( $order_id, $items ) {
-	// Allow other plugins to check change in order items before they are saved
+	// Allow other plugins to check change in order items before they are saved.
 	do_action( 'woocommerce_before_save_order_items', $order_id, $items );
 
-	$order = wc_get_order( $order_id );
-
-	// Line items and fees
+	// Line items and fees.
 	if ( isset( $items['order_item_id'] ) ) {
 		$data_keys = array(
 			'line_tax'             => array(),
@@ -203,14 +201,14 @@ function wc_save_order_items( $order_id, $items ) {
 			'line_subtotal'        => null,
 		);
 		foreach ( $items['order_item_id'] as $item_id ) {
-			if ( ! $item = $order->get_item( absint( $item_id ) ) ) {
+			if ( ! $item = WC_Order_Factory::get_order_item( absint( $item_id ) ) ) {
 				continue;
 			}
 
 			$item_data = array();
 
 			foreach ( $data_keys as $key => $default ) {
-				$item_data[ $key ] = isset( $items[ $key ][ $item_id ] ) ? wc_clean( wp_unslash( $items[ $key ][ $item_id ] ) ) : $default;
+				$item_data[ $key ] = isset( $items[ $key ][ $item_id ] ) ? wc_check_invalid_utf8( wp_unslash( $items[ $key ][ $item_id ] ) ) : $default;
 			}
 
 			if ( '0' === $item_data['order_item_qty'] ) {
@@ -218,20 +216,27 @@ function wc_save_order_items( $order_id, $items ) {
 				continue;
 			}
 
-			$item->set_props( array(
-				'name'         => $item_data['order_item_name'],
-				'quantity'     => $item_data['order_item_qty'],
-				'tax_class'    => $item_data['order_item_tax_class'],
-				'total'        => $item_data['line_total'],
-				'subtotal'     => $item_data['line_subtotal'],
-				'taxes'        => array(
-					'total'    => $item_data['line_tax'],
-					'subtotal' => $item_data['line_subtotal_tax'],
-				),
-			) );
+			$item->set_props(
+				array(
+					'name'      => $item_data['order_item_name'],
+					'quantity'  => $item_data['order_item_qty'],
+					'tax_class' => $item_data['order_item_tax_class'],
+					'total'     => $item_data['line_total'],
+					'subtotal'  => $item_data['line_subtotal'],
+					'taxes'     => array(
+						'total'    => $item_data['line_tax'],
+						'subtotal' => $item_data['line_subtotal_tax'],
+					),
+				)
+			);
+
+			if ( 'fee' === $item->get_type() ) {
+				$item->set_amount( $item_data['line_total'] );
+			}
 
 			if ( isset( $items['meta_key'][ $item_id ], $items['meta_value'][ $item_id ] ) ) {
 				foreach ( $items['meta_key'][ $item_id ] as $meta_id => $meta_key ) {
+					$meta_key   = substr( wp_unslash( $meta_key ), 0, 255 );
 					$meta_value = isset( $items['meta_value'][ $item_id ][ $meta_id ] ) ? wp_unslash( $items['meta_value'][ $item_id ][ $meta_id ] ) : '';
 
 					if ( '' === $meta_key && '' === $meta_value ) {
@@ -245,6 +250,9 @@ function wc_save_order_items( $order_id, $items ) {
 					}
 				}
 			}
+
+			// Allow other plugins to change item object before it is saved.
+			do_action( 'woocommerce_before_save_order_item', $item );
 
 			$item->save();
 		}
@@ -260,7 +268,7 @@ function wc_save_order_items( $order_id, $items ) {
 		);
 
 		foreach ( $items['shipping_method_id'] as $item_id ) {
-			if ( ! $item = $order->get_item( absint( $item_id ) ) ) {
+			if ( ! $item = WC_Order_Factory::get_order_item( absint( $item_id ) ) ) {
 				continue;
 			}
 
@@ -270,14 +278,16 @@ function wc_save_order_items( $order_id, $items ) {
 				$item_data[ $key ] = isset( $items[ $key ][ $item_id ] ) ? wc_clean( wp_unslash( $items[ $key ][ $item_id ] ) ) : $default;
 			}
 
-			$item->set_props( array(
-				'method_id'    => $item_data['shipping_method'],
-				'method_title' => $item_data['shipping_method_title'],
-				'total'        => $item_data['shipping_cost'],
-				'taxes'        => array(
-					'total'    => $item_data['shipping_taxes'],
-				),
-			) );
+			$item->set_props(
+				array(
+					'method_id'    => $item_data['shipping_method'],
+					'method_title' => $item_data['shipping_method_title'],
+					'total'        => $item_data['shipping_cost'],
+					'taxes'        => array(
+						'total' => $item_data['shipping_taxes'],
+					),
+				)
+			);
 
 			if ( isset( $items['meta_key'][ $item_id ], $items['meta_value'][ $item_id ] ) ) {
 				foreach ( $items['meta_key'][ $item_id ] as $meta_id => $meta_key ) {
@@ -299,12 +309,31 @@ function wc_save_order_items( $order_id, $items ) {
 		}
 	}
 
-	// Updates tax totals
+	$order = wc_get_order( $order_id );
 	$order->update_taxes();
-
-	// Calc totals - this also triggers save
 	$order->calculate_totals( false );
 
 	// Inform other plugins that the items have been saved
 	do_action( 'woocommerce_saved_order_items', $order_id, $items );
+}
+
+/**
+ * Get HTML for some action buttons. Used in list tables.
+ *
+ * @since 3.3.0
+ * @param array $actions Actions to output.
+ * @return string
+ */
+function wc_render_action_buttons( $actions ) {
+	$actions_html = '';
+
+	foreach ( $actions as $action ) {
+		if ( isset( $action['group'] ) ) {
+			$actions_html .= '<div class="wc-action-button-group"><label>' . $action['group'] . '</label> <span class="wc-action-button-group__items">' . wc_render_action_buttons( $action['actions'] ) . '</span></div>';
+		} elseif ( isset( $action['action'], $action['url'], $action['name'] ) ) {
+			$actions_html .= sprintf( '<a class="button wc-action-button wc-action-button-%1$s %1$s" href="%2$s" aria-label="%3$s" title="%3$s">%4$s</a>', esc_attr( $action['action'] ), esc_url( $action['url'] ), esc_attr( isset( $action['title'] ) ? $action['title'] : $action['name'] ), esc_html( $action['name'] ) );
+		}
+	}
+
+	return $actions_html;
 }

@@ -1,4 +1,4 @@
-/* global jQuery, woocommerce_admin_system_status */
+/* global jQuery, woocommerce_admin_system_status, wcSetClipboard, wcClearClipboard */
 jQuery( function ( $ ) {
 
 	/**
@@ -9,8 +9,9 @@ jQuery( function ( $ ) {
 			$( document.body )
 				.on( 'click', 'a.help_tip, a.woocommerce-help-tip', this.preventTipTipClick )
 				.on( 'click', 'a.debug-report', this.generateReport )
-				.on( 'copy', '#copy-for-support', this.copyReport )
-				.on( 'aftercopy', '#copy-for-support', this.afterCopyReport );
+				.on( 'click', '#copy-for-support', this.copyReport )
+				.on( 'aftercopy', '#copy-for-support', this.copySuccess )
+				.on( 'aftercopyfailure', '#copy-for-support', this.copyFail );
 		},
 
 		/**
@@ -84,31 +85,30 @@ jQuery( function ( $ ) {
 		 * @param {Object} evt Copy event.
 		 */
 		copyReport: function( evt ) {
-			evt.clipboardData.clearData();
-			evt.clipboardData.setData( 'text/plain', $( '#debug-report' ).find( 'textarea' ).val() );
+			wcClearClipboard();
+			wcSetClipboard( $( '#debug-report' ).find( 'textarea' ).val(), $( this ) );
 			evt.preventDefault();
 		},
 
 		/**
-		 * Actions after copying the report.
-		 * Display a "Copied!" tip when success copied
-		 * or display an error message.
-		 *
-		 * @param {Object} evt Copy event.
+		 * Display a "Copied!" tip when success copying
 		 */
-		afterCopyReport: function( evt ) {
-			if ( true === evt.success['text/plain'] ) {
-				$( '#copy-for-support' ).tipTip({
-					'attribute':  'data-tip',
-					'activation': 'focus',
-					'fadeIn':     50,
-					'fadeOut':    50,
-					'delay':      0
-				}).focus();
-			} else {
-				$( '.copy-error' ).removeClass( 'hidden' );
-				$( '#debug-report' ).find( 'textarea' ).focus().select();
-			}
+		copySuccess: function() {
+			$( '#copy-for-support' ).tipTip({
+				'attribute':  'data-tip',
+				'activation': 'focus',
+				'fadeIn':     50,
+				'fadeOut':    50,
+				'delay':      0
+			}).focus();
+		},
+
+		/**
+		 * Displays the copy error message when failure copying.
+		 */
+		copyFail: function() {
+			$( '.copy-error' ).removeClass( 'hidden' );
+			$( '#debug-report' ).find( 'textarea' ).focus().select();
 		}
 	};
 

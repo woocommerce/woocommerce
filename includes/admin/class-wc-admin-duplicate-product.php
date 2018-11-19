@@ -12,7 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @version     3.0.0
  */
 
-if ( ! class_exists( 'WC_Admin_Duplicate_Product', false ) ) :
+if ( class_exists( 'WC_Admin_Duplicate_Product', false ) ) {
+	return new WC_Admin_Duplicate_Product();
+}
 
 /**
  * WC_Admin_Duplicate_Product Class.
@@ -30,17 +32,35 @@ class WC_Admin_Duplicate_Product {
 
 	/**
 	 * Show the "Duplicate" link in admin products list.
-	 * @param  array   $actions
-	 * @param  WP_Post $post Post object
+	 *
+	 * @param array   $actions Array of actions.
+	 * @param WP_Post $post Post object.
 	 * @return array
 	 */
 	public function dupe_link( $actions, $post ) {
+		global $the_product;
+
 		if ( ! current_user_can( apply_filters( 'woocommerce_duplicate_product_capability', 'manage_woocommerce' ) ) ) {
 			return $actions;
 		}
 
 		if ( 'product' !== $post->post_type ) {
 			return $actions;
+		}
+
+		// Add Class to Delete Permanently link in row actions.
+		if ( empty( $the_product ) || $the_product->get_id() !== $post->ID ) {
+			$the_product = wc_get_product( $post );
+		}
+
+		if ( 'publish' === $post->post_status && $the_product && 0 < $the_product->get_total_sales() ) {
+			$actions['trash'] = sprintf(
+				'<a href="%s" class="submitdelete trash-product" aria-label="%s">%s</a>',
+				get_delete_post_link( $the_product->get_id(), '', false ),
+				/* translators: %s: post title */
+				esc_attr( sprintf( __( 'Move &#8220;%s&#8221; to the Trash', 'woocommerce' ), $the_product->get_name() ) ),
+				__( 'Trash', 'woocommerce' )
+			);
 		}
 
 		$actions['duplicate'] = '<a href="' . wp_nonce_url( admin_url( 'edit.php?post_type=product&action=duplicate_product&amp;post=' . $post->ID ), 'woocommerce-duplicate-product_' . $post->ID ) . '" aria-label="' . esc_attr__( 'Make a duplicate from this product', 'woocommerce' )
@@ -68,7 +88,7 @@ class WC_Admin_Duplicate_Product {
 		}
 
 		if ( isset( $_GET['post'] ) ) {
-			$notify_url = wp_nonce_url( admin_url( "edit.php?post_type=product&action=duplicate_product&post=" . absint( $_GET['post'] ) ), 'woocommerce-duplicate-product_' . $_GET['post'] );
+			$notify_url = wp_nonce_url( admin_url( 'edit.php?post_type=product&action=duplicate_product&post=' . absint( $_GET['post'] ) ), 'woocommerce-duplicate-product_' . $_GET['post'] );
 			?>
 			<div id="duplicate-action"><a class="submitduplicate duplication" href="<?php echo esc_url( $notify_url ); ?>"><?php _e( 'Copy to a new draft', 'woocommerce' ); ?></a></div>
 			<?php
@@ -146,6 +166,7 @@ class WC_Admin_Duplicate_Product {
 				$child_duplicate = clone $child;
 				$child_duplicate->set_parent_id( $duplicate->get_id() );
 				$child_duplicate->set_id( 0 );
+				$child_duplicate->set_date_created( null );
 
 				if ( '' !== $child->get_sku( 'edit' ) ) {
 					$child_duplicate->set_sku( wc_product_generate_unique_sku( 0, $child->get_sku( 'edit' ) ) );
@@ -195,7 +216,5 @@ class WC_Admin_Duplicate_Product {
 		return $post;
 	}
 }
-
-endif;
 
 return new WC_Admin_Duplicate_Product();

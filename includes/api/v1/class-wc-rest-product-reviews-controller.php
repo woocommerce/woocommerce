@@ -475,6 +475,14 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 			$prepared_review['comment_author_email'] = $request['email'];
 		}
 
+		if ( isset( $request['date_created'] ) ) {
+			$prepared_review['comment_date'] = $request['date_created'];
+		}
+
+		if ( isset( $request['date_created_gmt'] ) ) {
+			$prepared_review['comment_date_gmt'] = $request['date_created_gmt'];
+		}
+
 		return apply_filters( 'rest_preprocess_product_review', $prepared_review, $request );
 	}
 

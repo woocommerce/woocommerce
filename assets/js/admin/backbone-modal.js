@@ -79,7 +79,7 @@
 		render: function() {
 			var template = wp.template( this._target );
 
-			this.$el.attr( 'tabindex' , '0' ).append(
+			this.$el.append(
 				template( this._string )
 			);
 
@@ -88,7 +88,8 @@
 			}).append( this.$el );
 
 			this.resizeContent();
-			this.$el.focus();
+			this.$( '.wc-backbone-modal-content' ).attr( 'tabindex' , '0' ).focus();
+
 			$( document.body ).trigger( 'init_tooltips' );
 
 			$( document.body ).trigger( 'wc_backbone_modal_loaded', this._target );

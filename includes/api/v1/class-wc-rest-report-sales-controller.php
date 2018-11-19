@@ -378,7 +378,7 @@ class WC_REST_Report_Sales_V1_Controller extends WC_REST_Controller {
 			),
 			'date_min' => array(
 				/* translators: %s: date format */
-				'description'       => sprintf( __( 'Return sales for a specific start date, the date need to be in the %s format.', 'woocommerce' ), 'YYYY-MM-AA' ),
+				'description'       => sprintf( __( 'Return sales for a specific start date, the date need to be in the %s format.', 'woocommerce' ), 'YYYY-MM-DD' ),
 				'type'              => 'string',
 				'format'            => 'date',
 				'validate_callback' => 'wc_rest_validate_reports_request_arg',
@@ -386,7 +386,7 @@ class WC_REST_Report_Sales_V1_Controller extends WC_REST_Controller {
 			),
 			'date_max' => array(
 				/* translators: %s: date format */
-				'description'       => sprintf( __( 'Return sales for a specific end date, the date need to be in the %s format.', 'woocommerce' ), 'YYYY-MM-AA' ),
+				'description'       => sprintf( __( 'Return sales for a specific end date, the date need to be in the %s format.', 'woocommerce' ), 'YYYY-MM-DD' ),
 				'type'              => 'string',
 				'format'            => 'date',
 				'validate_callback' => 'wc_rest_validate_reports_request_arg',

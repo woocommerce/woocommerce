@@ -145,7 +145,7 @@
 						classes   = _.indexBy( model.get( 'classes' ), 'term_id' ),
 						changes = {},
 						size    = _.size( classes ),
-						newRow  = _.extend( {}, data.default_class, {
+						newRow  = _.extend( {}, data.default_shipping_class, {
 							term_id: 'new-' + size + '-' + Date.now(),
 							editing: true,
 							newRow : true
