@@ -42,6 +42,9 @@ class WC_Twenty_Nineteen {
 
 		// Tweak Twenty Nineteen features.
 		add_action( 'wp', array( __CLASS__, 'tweak_theme_features' ) );
+
+		// Color scheme CSS
+		add_filter( 'twentynineteen_custom_colors_css', array( __CLASS__, 'custom_colors_css' ), 10, 3 );
 	}
 
 	/**
@@ -87,6 +90,37 @@ class WC_Twenty_Nineteen {
 		if ( is_woocommerce() ) {
 			add_filter( 'twentynineteen_can_show_post_thumbnail', '__return_false' );
 		}
+	}
+
+	/**
+	 * Filters Twenty Nineteen custom colors CSS.
+	 *
+	 * @param string $css           Base theme colors CSS.
+	 * @param int    $primary_color The user's selected color hue.
+	 * @param string $saturation    Filtered theme color saturation level.
+	 */
+	public static function custom_colors_css( $css, $primary_color, $saturation ) {
+		if ( function_exists( 'register_block_type' ) && is_admin() ) {
+			return $css;
+		}
+
+		$lightness = absint( apply_filters( 'twentynineteen_custom_colors_lightness', 33 ) );
+		$lightness = $lightness . '%';
+
+		$css .= '
+			.onsale,
+			.woocommerce-info,
+			.woocommerce-store-notice {
+				background-color: hsl( ' . $primary_color . ', ' . $saturation . ', ' . $lightness . ' );
+			}
+
+			.woocommerce-tabs ul li.active a {
+				color: hsl( ' . $primary_color . ', ' . $saturation . ', ' . $lightness . ' );
+				box-shadow: 0 2px 0 hsl( ' . $primary_color . ', ' . $saturation . ', ' . $lightness . ' );
+			}
+		';
+
+		return $css;
 	}
 }
 
