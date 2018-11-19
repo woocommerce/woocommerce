@@ -73,9 +73,6 @@ a.button {
 }
 
 .woocommerce-pagination {
-	padding-top: 1rem;
-	margin-top: 1rem;
-	border-top: 1px solid #eee;
 	font-family: $headings;
 	font-size: 0.88889em;
 
@@ -92,7 +89,7 @@ a.button {
 	a.page-numbers,
 	.next.page-numbers,
 	.prev.page-numbers {
-		padding: 1rem;
+		padding: 0 calc(.5 * 1rem);
 		display: inline-block;
 	}
 }
@@ -1202,6 +1199,15 @@ table.variations {
 	*/
 	.woocommerce-products-header__title.page-title {
 		font-size: 2.25em;
+	}
+
+	.woocommerce-pagination {
+		span.page-numbers,
+		a.page-numbers,
+		.next.page-numbers,
+		.prev.page-numbers {
+			padding: 1rem;
+		}
 	}
 
 	/**
