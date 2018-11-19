@@ -151,22 +151,35 @@ class WC_Tests_Shipping_Zone extends WC_Unit_Test_Case {
 	 * Test: WC_Shipping_Zone::add_location
 	 */
 	public function test_add_location() {
-		// Test
+		// Test.
 		$zone = WC_Shipping_Zones::get_zone( 1 );
 
-		// Assert
+		// Assert.
 		$this->assertTrue( $zone->is_valid_location_type( 'state' ) );
 		$this->assertTrue( $zone->is_valid_location_type( 'country' ) );
 		$this->assertTrue( $zone->is_valid_location_type( 'continent' ) );
 		$this->assertTrue( $zone->is_valid_location_type( 'postcode' ) );
 		$this->assertFalse( $zone->is_valid_location_type( 'poop' ) );
+		add_filter( 'woocommerce_valid_location_types', array( $this, 'add_valid_zone_location' ) );
+		$this->assertTrue( $zone->is_valid_location_type( 'poop' ) );
+		remove_filter( 'woocommerce_valid_location_types', array( $this, 'add_valid_zone_location' ), 10 );
+	}
+
+	/**
+	 * Add a custom zone location.
+	 *
+	 * @param array $locations Valid zone locations.
+	 * @return array New list of valid zone locations.
+	 */
+	public function add_valid_zone_location( $locations ) {
+		return array_merge( $locations, array( 'poop' ) );
 	}
 
 	/**
 	 * Test: WC_Shipping_Zone::clear_locations
 	 */
 	public function test_clear_locations() {
-		// Test
+		// Test.
 		$zone = WC_Shipping_Zones::get_zone( 1 );
 		$zone->clear_locations();
 
@@ -257,8 +270,13 @@ class WC_Tests_Shipping_Zone extends WC_Unit_Test_Case {
 		$zone->set_zone_order( 1 );
 		$zone->add_location( 'GB', 'country' );
 		$zone->add_location( 'CB*', 'postcode' );
+		// Test invalid zone location.
+		$zone->add_location( '1234', 'custom_type' );
 		$zone->save();
 		$zone_id = $zone->get_id();
+
+		// Count zone locations, there should only be 2 as one is invalid.
+		$this->assertSame( 2, count( $zone->get_zone_locations() ) );
 
 		$zone_read = new WC_Shipping_Zone();
 		$zone_read->read( $zone_id );
