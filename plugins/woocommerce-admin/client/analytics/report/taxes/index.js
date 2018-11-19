@@ -17,6 +17,8 @@ import { charts, filters } from './config';
 import getSelectedChart from 'lib/get-selected-chart';
 import ReportChart from 'analytics/components/report-chart';
 import ReportSummary from 'analytics/components/report-summary';
+import TaxesReportTable from './table';
+
 export default class TaxesReport extends Component {
 	render() {
 		const { query, path } = this.props;
@@ -36,6 +38,7 @@ export default class TaxesReport extends Component {
 					query={ query }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 				/>
+				<TaxesReportTable query={ query } />
 			</Fragment>
 		);
 	}

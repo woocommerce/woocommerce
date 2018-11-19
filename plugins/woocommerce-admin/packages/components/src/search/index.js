@@ -14,7 +14,7 @@ import classnames from 'classnames';
  * Internal dependencies
  */
 import Autocomplete from './autocomplete';
-import { product, productCategory, coupons, variations } from './autocompleters';
+import { coupons, product, productCategory, taxes, variations } from './autocompleters';
 import Tag from '../tag';
 
 /**
@@ -72,6 +72,8 @@ class Search extends Component {
 				return productCategory;
 			case 'coupons':
 				return coupons;
+			case 'taxes':
+				return taxes;
 			case 'variations':
 				return variations;
 			default:
@@ -204,6 +206,7 @@ Search.propTypes = {
 		'orders',
 		'customers',
 		'coupons',
+		'taxes',
 		'variations',
 	] ).isRequired,
 	/**

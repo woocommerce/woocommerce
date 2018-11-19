@@ -13,6 +13,7 @@ import orders from 'store/orders';
 import products from 'store/products';
 import reports from 'store/reports';
 import notes from 'store/notes';
+import taxes from 'store/taxes';
 
 const store = registerStore( 'wc-admin', {
 	reducer: combineReducers( {
@@ -21,6 +22,7 @@ const store = registerStore( 'wc-admin', {
 		products: products.reducer,
 		reports: reports.reducer,
 		notes: notes.reducer,
+		taxes: taxes.reducer,
 	} ),
 
 	actions: {
@@ -29,6 +31,7 @@ const store = registerStore( 'wc-admin', {
 		...products.actions,
 		...reports.actions,
 		...notes.actions,
+		...taxes.actions,
 	},
 
 	selectors: {
@@ -37,6 +40,7 @@ const store = registerStore( 'wc-admin', {
 		...products.selectors,
 		...reports.selectors,
 		...notes.selectors,
+		...taxes.selectors,
 	},
 
 	resolvers: {
@@ -45,6 +49,7 @@ const store = registerStore( 'wc-admin', {
 		...products.resolvers,
 		...reports.resolvers,
 		...notes.resolvers,
+		...taxes.resolvers,
 	},
 } );
 
