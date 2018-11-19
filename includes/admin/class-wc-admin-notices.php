@@ -118,7 +118,8 @@ class WC_Admin_Notices {
 	/**
 	 * See if a notice is being shown.
 	 *
-	 * @param  string $name Notice name.
+	 * @param string $name Notice name.
+	 *
 	 * @return boolean
 	 */
 	public static function has_notice( $name ) {
@@ -364,10 +365,10 @@ class WC_Admin_Notices {
 	 * If Gutenberg is active, tell people about the Products block feature plugin.
 	 *
 	 * @since 3.4.3
-	 * @todo Remove this notice and associated code once the feature plugin has been merged into core.
+	 * @todo  Remove this notice and associated code once the feature plugin has been merged into core.
 	 */
 	public static function add_wootenberg_feature_plugin_notice() {
-		if ( is_plugin_active( 'gutenberg/gutenberg.php' ) && ! is_plugin_active( 'woo-gutenberg-products-block/woocommerce-gutenberg-products-block.php' ) ) {
+		if ( ( is_plugin_active( 'gutenberg/gutenberg.php' ) || version_compare( get_bloginfo( 'version' ), '5.0', '>=' ) ) && ! is_plugin_active( 'woo-gutenberg-products-block/woocommerce-gutenberg-products-block.php' ) ) {
 			self::add_notice( 'wootenberg' );
 		}
 	}
@@ -376,10 +377,10 @@ class WC_Admin_Notices {
 	 * Tell people about the Products block feature plugin when they activate Gutenberg.
 	 *
 	 * @since 3.4.3
-	 * @todo Remove this notice and associated code once the feature plugin has been merged into core.
+	 * @todo  Remove this notice and associated code once the feature plugin has been merged into core.
 	 */
 	public static function add_wootenberg_feature_plugin_notice_on_gutenberg_activate() {
-		if ( ! is_plugin_active( 'woo-gutenberg-products-block/woocommerce-gutenberg-products-block.php' ) ) {
+		if ( ! is_plugin_active( 'woo-gutenberg-products-block/woocommerce-gutenberg-products-block.php' ) && version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
 			self::add_notice( 'wootenberg' );
 		}
 	}
@@ -400,7 +401,7 @@ class WC_Admin_Notices {
 	 * Determine if the store is running SSL.
 	 *
 	 * @return bool Flag SSL enabled.
-	 * @since 3.5.1
+	 * @since  3.5.1
 	 */
 	protected static function is_ssl() {
 		$shop_page = 0 < wc_get_page_id( 'shop' ) ? get_permalink( wc_get_page_id( 'shop' ) ) : get_home_url();
