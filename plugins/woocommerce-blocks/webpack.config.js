@@ -24,8 +24,8 @@ const externals = {
 const GutenbergBlocksConfig = {
 	mode: NODE_ENV,
 	entry: {
-		'products-block': './assets/js/products-block.jsx',
-		// 'next-block-name': './assets/js/gutenberg/some-other-block.jsx', <-- How to add more gutenblocks to this.
+		// Legacy block
+		'products-block': './assets/js/legacy/products-block.jsx',
 	},
 	output: {
 		path: path.resolve( __dirname, './build/' ),
