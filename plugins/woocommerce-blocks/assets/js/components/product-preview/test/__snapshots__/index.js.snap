@@ -1,0 +1,55 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ProductPreview should render a single product preview with an image 1`] = `
+<div
+  className="wc-product-preview"
+>
+  <img
+    alt=""
+    src="https://example.local/product.jpg"
+  />
+  <div
+    className="wc-product-preview__title"
+  >
+    Winter Jacket
+  </div>
+  <div
+    className="wc-product-preview__price"
+    dangerouslySetInnerHTML={
+      Object {
+        "__html": "<span class=\\"woocommerce-Price-amount amount\\"><span class=\\"woocommerce-Price-currencySymbol\\">&#36;</span>65.00</span>",
+      }
+    }
+  />
+  <span
+    className="wc-product-preview__add-to-cart"
+  >
+    Add to cart
+  </span>
+</div>
+`;
+
+exports[`ProductPreview should render a single product preview without an image 1`] = `
+<div
+  className="wc-product-preview"
+>
+  <div
+    className="wc-product-preview__title"
+  >
+    Winter Jacket
+  </div>
+  <div
+    className="wc-product-preview__price"
+    dangerouslySetInnerHTML={
+      Object {
+        "__html": "<span class=\\"woocommerce-Price-amount amount\\"><span class=\\"woocommerce-Price-currencySymbol\\">&#36;</span>65.00</span>",
+      }
+    }
+  />
+  <span
+    className="wc-product-preview__add-to-cart"
+  >
+    Add to cart
+  </span>
+</div>
+`;
