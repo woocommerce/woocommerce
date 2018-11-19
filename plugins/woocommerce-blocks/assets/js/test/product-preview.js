@@ -6,7 +6,7 @@ import renderer from 'react-test-renderer';
 /**
  * Internal dependencies
  */
-import { ProductPreview } from '../products-block';
+import { ProductPreview } from '../legacy/products-block';
 
 describe( 'ProductPreview', () => {
 	test( 'should render a single product preview with an image', () => {
