@@ -24,7 +24,7 @@ class DatePickerContent extends Component {
 		this.onTabSelect = this.onTabSelect.bind( this );
 	}
 	onTabSelect( tab ) {
-		const { onUpdate, period, refreshDropdown } = this.props;
+		const { onUpdate, period } = this.props;
 
 		/**
 		 * If the period is `custom` and the user switches tabs to view the presets,
@@ -34,8 +34,6 @@ class DatePickerContent extends Component {
 		if ( 'period' === tab && 'custom' === period ) {
 			onUpdate( { period: 'today' } );
 		}
-
-		refreshDropdown();
 	}
 
 	render() {

@@ -260,7 +260,7 @@ export class Autocomplete extends Component {
 	}
 
 	render() {
-		const { children, instanceId, completer: { className = '' } } = this.props;
+		const { children, instanceId, completer: { className = '' }, staticResults } = this.props;
 		const { selectedIndex, filteredOptions, query } = this.state;
 		const { key: selectedKey = '' } = filteredOptions[ selectedIndex ] || {};
 		const isExpanded = filteredOptions.length > 0 && !! query;
@@ -268,11 +268,14 @@ export class Autocomplete extends Component {
 		const activeId = isExpanded
 			? `woocommerce-search__autocomplete-${ instanceId }-${ selectedKey }`
 			: null;
+		const resultsClasses = classnames( 'woocommerce-search__autocomplete-results', {
+			'is-static-results': staticResults,
+		} );
 		return (
 			<div ref={ this.bindNode } className="woocommerce-search__autocomplete">
 				{ children( { isExpanded, listBoxId, activeId, onChange: this.search } ) }
 				{ isExpanded && (
-					<div id={ listBoxId } role="listbox" className="woocommerce-search__autocomplete-results">
+					<div id={ listBoxId } role="listbox" className={ resultsClasses }>
 						{ isExpanded &&
 							map( filteredOptions, ( option, index ) => (
 								<Button
