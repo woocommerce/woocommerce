@@ -752,6 +752,12 @@ class WC_Countries {
 							'required' => false,
 						),
 					),
+					'AO' => array(
+						'postcode' => array(
+							'required' => false,
+							'hidden'   => true,
+						),
+					),
 					'AT' => array(
 						'postcode' => array(
 							'priority' => 65,
