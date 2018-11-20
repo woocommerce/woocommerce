@@ -38,10 +38,12 @@ const filterConfig = {
 		{
 			label: __( 'Single Product', 'wc-admin' ),
 			value: 'select_product',
+			chartMode: 'item-comparison',
 			subFilters: [
 				{
 					component: 'Search',
 					value: 'single_product',
+					chartMode: 'item-comparison',
 					path: [ 'select_product' ],
 					settings: {
 						type: 'products',
@@ -61,6 +63,7 @@ const filterConfig = {
 		{
 			label: __( 'Product Comparison', 'wc-admin' ),
 			value: 'compare-products',
+			chartMode: 'item-comparison',
 			settings: {
 				type: 'products',
 				param: 'products',
@@ -79,6 +82,7 @@ const filterConfig = {
 		{
 			label: __( 'Product Category Comparison', 'wc-admin' ),
 			value: 'compare-product_cats',
+			chartMode: 'item-comparison',
 			settings: {
 				type: 'product_cats',
 				param: 'categories',
@@ -97,11 +101,13 @@ const filterConfig = {
 		{
 			label: __( 'Top Products by Items Sold', 'wc-admin' ),
 			value: 'top_items',
+			chartMode: 'item-comparison',
 			query: { orderby: 'items_sold', order: 'desc' },
 		},
 		{
 			label: __( 'Top Products by Gross Revenue', 'wc-admin' ),
 			value: 'top_sales',
+			chartMode: 'item-comparison',
 			query: { orderby: 'gross_revenue', order: 'desc' },
 		},
 	],
@@ -112,9 +118,10 @@ const variationsConfig = {
 	staticParams: [ 'filter', 'products' ],
 	param: 'filter-variations',
 	filters: [
-		{ label: __( 'All Variations', 'wc-admin' ), value: 'all' },
+		{ label: __( 'All Variations', 'wc-admin' ), chartMode: 'item-comparison', value: 'all' },
 		{
 			label: __( 'Comparison', 'wc-admin' ),
+			chartMode: 'item-comparison',
 			value: 'compare-variations',
 			settings: {
 				type: 'variations',
@@ -142,11 +149,13 @@ const variationsConfig = {
 		},
 		{
 			label: __( 'Top Variations by Items Sold', 'wc-admin' ),
+			chartMode: 'item-comparison',
 			value: 'top_items',
 			query: { orderby: 'items_sold', order: 'desc' },
 		},
 		{
 			label: __( 'Top Variations by Gross Revenue', 'wc-admin' ),
+			chartMode: 'item-comparison',
 			value: 'top_sales',
 			query: { orderby: 'gross_revenue', order: 'desc' },
 		},

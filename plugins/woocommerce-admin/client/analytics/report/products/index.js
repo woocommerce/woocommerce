@@ -40,7 +40,7 @@ export default class ProductsReport extends Component {
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 				/>
 				<ReportChart
-					comparisonChart
+					filters={ filters }
 					charts={ charts }
 					endpoint="products"
 					itemsLabel={ itemsLabel }

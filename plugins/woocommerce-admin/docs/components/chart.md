@@ -241,7 +241,7 @@ if `tooltipTitle` is missing, passed to d3TimeFormat.
 
 ### `tooltipPosition`
 
-- Type: String
+- Type: One of: 'below', 'over'
 - Default: `'over'`
 
 The position where to render the tooltip can be `over` the chart or `below` the chart.

@@ -250,6 +250,10 @@ FilterPicker.propTypes = {
 		filters: PropTypes.arrayOf(
 			PropTypes.shape( {
 				/**
+				 * The chart display mode to use for charts displayed when this filter is active.
+				 */
+				chartMode: PropTypes.oneOf( [ 'item-comparison', 'time-comparison' ] ),
+				/**
 				 * A custom component used instead of a button, might have special handling for filtering. TBD, not yet implemented.
 				 */
 				component: PropTypes.string,
