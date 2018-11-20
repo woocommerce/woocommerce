@@ -22,6 +22,7 @@ import {
 	isoDateFormat,
 	getDateDifferenceInDays,
 	getPreviousDate,
+	getChartTypeForQuery,
 } from '../src';
 
 describe( 'appendTimestamp', () => {
@@ -741,5 +742,25 @@ describe( 'getPreviousDate', () => {
 			'day'
 		);
 		expect( previousDate.format( isoDateFormat ) ).toBe( '2017-08-21' );
+	} );
+} );
+
+describe( 'getChartTypeForQuery', () => {
+	it( 'should return allowed type', () => {
+		const query = {
+			type: 'bar',
+		};
+		expect( getChartTypeForQuery( query ) ).toBe( 'bar' );
+	} );
+
+	it( 'should default to line', () => {
+		expect( getChartTypeForQuery( {} ) ).toBe( 'line' );
+	} );
+
+	it( 'should return line for not allowed type', () => {
+		const query = {
+			type: 'burrito',
+		};
+		expect( getChartTypeForQuery( query ) ).toBe( 'line' );
 	} );
 } );

@@ -2,7 +2,7 @@
 /**
  * Internal dependencies
  */
-import { getTimeRelatedQuery } from '../index';
+import { getPersistedQuery } from '../index';
 
 jest.mock( '../index', () => ( {
 	...require.requireActual( '../index' ),
@@ -13,18 +13,19 @@ jest.mock( '../index', () => ( {
 		compare: 'previous_year',
 		after: '2018-02-01',
 		before: '2018-01-01',
+		interval: 'day',
 	} ),
 } ) );
 
-describe( 'getTimeRelatedQuery', () => {
+describe( 'getPersistedQuery', () => {
 	it( "should return an empty object it the query doesn't contain any time related parameters", () => {
 		const query = {
 			filter: 'advanced',
 			product_includes: 127,
 		};
-		const timeRelatedQuery = {};
+		const persistedQuery = {};
 
-		expect( getTimeRelatedQuery( query ) ).toEqual( timeRelatedQuery );
+		expect( getPersistedQuery( query ) ).toEqual( persistedQuery );
 	} );
 
 	it( 'should return time related parameters', () => {
@@ -35,25 +36,30 @@ describe( 'getTimeRelatedQuery', () => {
 			compare: 'previous_year',
 			after: '2018-02-01',
 			before: '2018-01-01',
+			type: 'bar',
+			interval: 'day',
 		};
-		const timeRelatedQuery = {
+		const persistedQuery = {
 			period: 'year',
 			compare: 'previous_year',
 			after: '2018-02-01',
 			before: '2018-01-01',
+			type: 'bar',
+			interval: 'day',
 		};
 
-		expect( getTimeRelatedQuery( query ) ).toEqual( timeRelatedQuery );
+		expect( getPersistedQuery( query ) ).toEqual( persistedQuery );
 	} );
 
 	it( 'should get the query from getQuery() when none is provided in the params', () => {
-		const timeRelatedQuery = {
+		const persistedQuery = {
 			period: 'year',
 			compare: 'previous_year',
 			after: '2018-02-01',
 			before: '2018-01-01',
+			interval: 'day',
 		};
 
-		expect( getTimeRelatedQuery() ).toEqual( timeRelatedQuery );
+		expect( getPersistedQuery() ).toEqual( persistedQuery );
 	} );
 } );

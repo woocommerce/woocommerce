@@ -63,7 +63,6 @@ class Chart extends Component {
 		this.state = {
 			data: props.data,
 			orderedKeys: getOrderedKeys( props ),
-			type: props.type,
 			visibleData: [ ...props.data ],
 			width: 0,
 		};
@@ -98,8 +97,9 @@ class Chart extends Component {
 	}
 
 	handleTypeToggle( type ) {
-		if ( this.state.type !== type ) {
-			this.setState( { type } );
+		if ( this.props.type !== type ) {
+			const { path, query } = this.props;
+			updateQueryString( { type }, path, query );
 		}
 	}
 
@@ -200,7 +200,7 @@ class Chart extends Component {
 	}
 
 	render() {
-		const { orderedKeys, type, visibleData, width } = this.state;
+		const { orderedKeys, visibleData, width } = this.state;
 		const {
 			dateParser,
 			itemsLabel,
@@ -216,6 +216,7 @@ class Chart extends Component {
 			x2Format,
 			interval,
 			valueType,
+			type,
 		} = this.props;
 		let { yFormat } = this.props;
 		const legendDirection = layout === 'standard' && isViewportWide ? 'row' : 'column';

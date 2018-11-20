@@ -17,6 +17,7 @@ import {
 	getCurrentDates,
 	getDateFormatsForInterval,
 	getIntervalForQuery,
+	getChartTypeForQuery,
 	getPreviousDate,
 } from '@woocommerce/date';
 
@@ -91,6 +92,7 @@ class ReportChart extends Component {
 				data={ chartData }
 				title={ selectedChart.label }
 				interval={ currentInterval }
+				type={ getChartTypeForQuery( query ) }
 				allowedIntervals={ allowedIntervals }
 				itemsLabel={ itemsLabel }
 				layout={ comparisonChart ? 'comparison' : 'standard' }

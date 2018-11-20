@@ -46,13 +46,14 @@ export const getPath = () => history.location.pathname;
 export const stringifyQuery = query => ( isEmpty( query ) ? '' : '?' + stringify( query ) );
 
 /**
- * Gets time related parameters from a query.
+ * Gets query parameters that should persist between screens or updates
+ * to reports, such as filtering.
  *
  * @param {Object} query Query containing the parameters.
- * @return {Object} Object containing the time related queries.
+ * @return {Object} Object containing the persisted queries.
  */
-export const getTimeRelatedQuery = ( query = navUtils.getQuery() ) =>
-	pick( query, [ 'period', 'compare', 'before', 'after' ] );
+export const getPersistedQuery = ( query = navUtils.getQuery() ) =>
+	pick( query, [ 'period', 'compare', 'before', 'after', 'interval', 'type' ] );
 
 /**
  * Get an array of IDs from a comma-separated query parameter.
