@@ -115,7 +115,7 @@ const variationsConfig = {
 		{ label: __( 'All Variations', 'wc-admin' ), value: 'all' },
 		{
 			label: __( 'Comparison', 'wc-admin' ),
-			value: 'compare',
+			value: 'compare-variations',
 			settings: {
 				type: 'variations',
 				param: 'variations',
