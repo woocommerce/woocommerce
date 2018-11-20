@@ -23,7 +23,7 @@
 				discardChanges: function( id ) {
 					var changes      = this.changes || {},
 						set_position = null,
-						zones        = _.indexBy( this.get( 'zones' ), 'zone_id' );
+						zones        = _.keyBy( this.get( 'zones' ), 'zone_id' );
 
 					// Find current set position if it has moved since last save
 					if ( changes[ id ] && changes[ id ].zone_order !== undefined ) {
@@ -94,7 +94,7 @@
 					$( this.el ).unblock();
 				},
 				render: function() {
-					var zones = _.indexBy( this.model.get( 'zones' ), 'zone_id' ),
+					var zones = _.keyBy( this.model.get( 'zones' ), 'zone_id' ),
 						view  = this;
 
 					view.$el.empty();
@@ -170,7 +170,7 @@
 				onDeleteRow: function( event ) {
 					var view    = event.data.view,
 						model   = view.model,
-						zones   = _.indexBy( model.get( 'zones' ), 'zone_id' ),
+						zones   = _.keyBy( model.get( 'zones' ), 'zone_id' ),
 						changes = {},
 						row     = $( this ).closest('tr'),
 						zone_id = row.data('id');
@@ -209,7 +209,7 @@
 						zone_id   = $target.closest( 'tr' ).data( 'id' ),
 						attribute = $target.data( 'attribute' ),
 						value     = $target.val(),
-						zones   = _.indexBy( model.get( 'zones' ), 'zone_id' ),
+						zones   = _.keyBy( model.get( 'zones' ), 'zone_id' ),
 						changes = {};
 
 					if ( ! zones[ zone_id ] || zones[ zone_id ][ attribute ] !== value ) {
@@ -222,7 +222,7 @@
 				updateModelOnSort: function( event ) {
 					var view    = event.data.view,
 						model   = view.model,
-						zones   = _.indexBy( model.get( 'zones' ), 'zone_id' ),
+						zones   = _.keyBy( model.get( 'zones' ), 'zone_id' ),
 						rows    = $( 'tbody.wc-shipping-zone-rows tr' ),
 						changes = {};
 

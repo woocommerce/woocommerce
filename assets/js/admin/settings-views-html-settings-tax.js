@@ -24,7 +24,7 @@
 			WCTaxTableModelConstructor = Backbone.Model.extend({
 				changes: {},
 				setRateAttribute: function( rateID, attribute, value ) {
-					var rates   = _.indexBy( this.get( 'rates' ), 'tax_rate_id' ),
+					var rates   = _.keyBy( this.get( 'rates' ), 'tax_rate_id' ),
 						changes = {};
 
 					if ( rates[ rateID ][ attribute ] !== value ) {
@@ -207,7 +207,7 @@
 				onAddNewRow: function( event ) {
 					var view    = event.data.view,
 						model   = view.model,
-						rates   = _.indexBy( model.get( 'rates' ), 'tax_rate_id' ),
+						rates   = _.keyBy( model.get( 'rates' ), 'tax_rate_id' ),
 						changes = {},
 						size    = _.size( rates ),
 						newRow  = _.extend( {}, data.default_rate, {
@@ -258,7 +258,7 @@
 				onDeleteRow: function( event ) {
 					var view    = event.data.view,
 						model   = view.model,
-						rates   = _.indexBy( model.get( 'rates' ), 'tax_rate_id' ),
+						rates   = _.keyBy( model.get( 'rates' ), 'tax_rate_id' ),
 						changes = {},
 						$current, current_id;
 

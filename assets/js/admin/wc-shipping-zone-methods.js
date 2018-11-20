@@ -108,7 +108,7 @@
 					$( this.el ).unblock();
 				},
 				render: function() {
-					var methods     = _.indexBy( this.model.get( 'methods' ), 'instance_id' ),
+					var methods     = _.keyBy( this.model.get( 'methods' ), 'instance_id' ),
 						zone_name   = this.model.get( 'zone_name' ),
 						view        = this;
 
@@ -166,7 +166,7 @@
 				onDeleteRow: function( event ) {
 					var view    = event.data.view,
 						model   = view.model,
-						methods   = _.indexBy( model.get( 'methods' ), 'instance_id' ),
+						methods   = _.keyBy( model.get( 'methods' ), 'instance_id' ),
 						changes = {},
 						instance_id = $( this ).closest('tr').data('id');
 
@@ -183,7 +183,7 @@
 					var view        = event.data.view,
 						$target     = $( event.target ),
 						model       = view.model,
-						methods     = _.indexBy( model.get( 'methods' ), 'instance_id' ),
+						methods     = _.keyBy( model.get( 'methods' ), 'instance_id' ),
 						instance_id = $target.closest( 'tr' ).data( 'id' ),
 						enabled     = $target.closest( 'tr' ).data( 'enabled' ) === 'yes' ? 'no' : 'yes',
 						changes     = {};
@@ -217,7 +217,7 @@
 						instance_id   = $target.closest( 'tr' ).data( 'id' ),
 						attribute = $target.data( 'attribute' ),
 						value     = $target.val(),
-						methods   = _.indexBy( model.get( 'methods' ), 'instance_id' ),
+						methods   = _.keyBy( model.get( 'methods' ), 'instance_id' ),
 						changes = {};
 
 					if ( methods[ instance_id ][ attribute ] !== value ) {
@@ -231,7 +231,7 @@
 				updateModelOnSort: function( event ) {
 					var view         = event.data.view,
 						model        = view.model,
-						methods        = _.indexBy( model.get( 'methods' ), 'instance_id' ),
+						methods        = _.keyBy( model.get( 'methods' ), 'instance_id' ),
 						changes      = {};
 
 					_.each( methods, function( method ) {
@@ -252,7 +252,7 @@
 				onConfigureShippingMethod: function( event ) {
 					var instance_id = $( this ).closest( 'tr' ).data( 'id' ),
 						model       = event.data.view.model,
-						methods     = _.indexBy( model.get( 'methods' ), 'instance_id' ),
+						methods     = _.keyBy( model.get( 'methods' ), 'instance_id' ),
 						method      = methods[ instance_id ];
 
 					// Only load modal if supported

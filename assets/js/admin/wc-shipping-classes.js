@@ -83,7 +83,7 @@
 					$( this.el ).unblock();
 				},
 				render: function() {
-					var classes       = _.indexBy( this.model.get( 'classes' ), 'term_id' ),
+					var classes       = _.keyBy( this.model.get( 'classes' ), 'term_id' ),
 						view        = this;
 
 					this.$el.empty();
@@ -142,7 +142,7 @@
 
 					var view    = event.data.view,
 						model   = view.model,
-						classes   = _.indexBy( model.get( 'classes' ), 'term_id' ),
+						classes   = _.keyBy( model.get( 'classes' ), 'term_id' ),
 						changes = {},
 						size    = _.size( classes ),
 						newRow  = _.extend( {}, data.default_shipping_class, {
@@ -167,7 +167,7 @@
 				onDeleteRow: function( event ) {
 					var view    = event.data.view,
 						model   = view.model,
-						classes = _.indexBy( model.get( 'classes' ), 'term_id' ),
+						classes = _.keyBy( model.get( 'classes' ), 'term_id' ),
 						changes = {},
 						term_id = $( this ).closest('tr').data('id');
 
@@ -187,7 +187,7 @@
 						model   = view.model,
 						row     = $( this ).closest('tr'),
 						term_id = $( this ).closest('tr').data('id'),
-						classes = _.indexBy( model.get( 'classes' ), 'term_id' );
+						classes = _.keyBy( model.get( 'classes' ), 'term_id' );
 
 					event.preventDefault();
 					model.discardChanges( term_id );
@@ -221,7 +221,7 @@
 						term_id   = $target.closest( 'tr' ).data( 'id' ),
 						attribute = $target.data( 'attribute' ),
 						value     = $target.val(),
-						classes   = _.indexBy( model.get( 'classes' ), 'term_id' ),
+						classes   = _.keyBy( model.get( 'classes' ), 'term_id' ),
 						changes = {};
 
 					if ( ! classes[ term_id ] || classes[ term_id ][ attribute ] !== value ) {
