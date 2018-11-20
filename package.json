@@ -12,6 +12,7 @@
   "scripts": {
     "build": "grunt",
     "build-watch": "grunt watch",
+    "lint:js": "eslint assets/js --ext=js",
     "test": "cross-env NODE_CONFIG_DIR='./tests/e2e-tests/config' BABEL_ENV=commonjs mocha \"tests/e2e-tests\" --require babel-register --recursive",
     "test:grep": "cross-env NODE_CONFIG_DIR='./tests/e2e-tests/config' BABEL_ENV=commonjs mocha \"tests/e2e-tests\" --require babel-register --grep ",
     "test:single": "cross-env NODE_CONFIG_DIR='./tests/e2e-tests/config' BABEL_ENV=commonjs mocha --require babel-register"
@@ -29,6 +30,9 @@
     "chromedriver": "^2.40.0",
     "config": "^1.24.0",
     "cross-env": "^5.1.6",
+    "eslint": "5.8.0",
+    "eslint-config-wpcalypso": "4.0.1",
+    "eslint-plugin-wpcalypso": "4.0.2",
     "grunt": "^1.0.3",
     "grunt-checktextdomain": "~1.0.1",
     "grunt-contrib-clean": "~1.1.0",
@@ -47,6 +51,7 @@
     "grunt-wp-i18n": "~1.0.1",
     "istanbul": "^1.0.0-alpha",
     "mocha": "^5.2.0",
+    "prettier": "github:automattic/calypso-prettier#c56b4251",
     "stylelint": "~9.2.1",
     "wc-e2e-page-objects": "0.10.0"
   },

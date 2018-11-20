@@ -378,7 +378,7 @@ function wc_clean( $var ) {
 }
 
 /**
- * wp_check_invalid_utf8 with recursive array support.
+ * Function wp_check_invalid_utf8 with recursive array support.
  *
  * @param string|array $var Data to sanitize.
  * @return string|array
@@ -1232,7 +1232,7 @@ function wc_format_weight( $weight ) {
  * @return string
  */
 function wc_format_dimensions( $dimensions ) {
-	$dimension_string = implode( ' x ', array_filter( array_map( 'wc_format_localized_decimal', $dimensions ) ) );
+	$dimension_string = implode( ' &times; ', array_filter( array_map( 'wc_format_localized_decimal', $dimensions ) ) );
 
 	if ( ! empty( $dimension_string ) ) {
 		$dimension_string .= ' ' . get_option( 'woocommerce_dimension_unit' );

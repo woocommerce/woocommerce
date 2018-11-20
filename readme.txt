@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, claudiulodro,
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
 Requires at least: 4.7
 Tested up to: 4.9
-Stable tag: 3.4.5
+Stable tag: 3.5.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -158,7 +158,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 
 == Changelog ==
 
-= 3.5.0 - 2018-10-XX =
+= 3.5.0 - 2018-10-17 =
 * Feature - REST API v3. #20111
 * Feature - Option has been added on the inventory tab of the edit product page to set a low stock threshold for individual products. #20260
 * Feature - Add ability to export products by category to the CSV exporter. #20870
@@ -206,7 +206,11 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Product shortcode numeric term slug matching. #21560
 * Fix - Remove the erasure tools links from the descriptions of the erasure settings for users without the manage_privacy_options capability. #21565
 * Fix - Don't double urldecode posted variation attributes. #21570
-* Fix - New helper functions wc_user_has_role and wc_current_user_has_role to correctly check user roles. #21569
+* Fix - Don't double-sanitize cart images. #21574
+* Fix - Check if ID exists and is not empty before set Product's download ID in API. #21588
+* Fix - Ensure wp_list_pluck() gets a array and not possibly null in WC_Product_Data_Store_CPT::update_attributes. #21591
+* Fix - Trim CSV header rows to prevent leading/trailing whitespace issues. #21614
+* Fix - Show draft products in previews on unsupported themes. #21619
 * Fix/Tweak - Fire `woocommerce_grant_product_download_access` hook after the download has its ID set. #20905
 * Fix/Tweak/Performance - Change wp_woocommerce_sessions primary key to session_id. #21245
 * Tweak - Show empty terms in admin product category filter dropdown. #20324

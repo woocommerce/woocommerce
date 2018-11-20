@@ -61,6 +61,7 @@ final class WC_Cart_Session {
 	 * @since 3.2.0
 	 */
 	public function get_cart_from_session() {
+		do_action( 'woocommerce_load_cart_from_session' );
 		$this->cart->set_totals( WC()->session->get( 'cart_totals', null ) );
 		$this->cart->set_applied_coupons( WC()->session->get( 'applied_coupons', array() ) );
 		$this->cart->set_coupon_discount_totals( WC()->session->get( 'coupon_discount_totals', array() ) );

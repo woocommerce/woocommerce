@@ -490,7 +490,7 @@ class WC_Countries {
 					'FR'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city_upper}\n{country}",
 					'HK'      => "{company}\n{first_name} {last_name_upper}\n{address_1}\n{address_2}\n{city_upper}\n{state_upper}\n{country}",
 					'HU'      => "{name}\n{company}\n{city}\n{address_1}\n{address_2}\n{postcode}\n{country}",
-					'IN'      => "{company}\n{name}\n{address_1}\n{address_2}\n{city} - {postcode}\n{state}, {country}",
+					'IN'      => "{company}\n{name}\n{address_1}\n{address_2}\n{city} {postcode}\n{state}, {country}",
 					'IS'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
 					'IT'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode}\n{city}\n{state_upper}\n{country}",
 					'JP'      => "{postcode}\n{state} {city} {address_1}\n{address_2}\n{company}\n{last_name} {first_name}\n{country}",
@@ -662,8 +662,8 @@ class WC_Countries {
 				'priority'     => 50,
 			),
 			'address_2'  => array(
-				'label'        => __( 'Apartment, suite, or unit.', 'woocommerce' ),
-				'label_class'  => 'screen-reader-text',
+				'label'        => __( 'Apartment, suite, unit etc.', 'woocommerce' ),
+				'label_class'  => array( 'screen-reader-text' ),
 				'placeholder'  => esc_attr( $address_2_placeholder ),
 				'class'        => array( 'form-row-wide', 'address-field' ),
 				'autocomplete' => 'address-line2',
@@ -704,7 +704,11 @@ class WC_Countries {
 			unset( $fields['address_2'] );
 		}
 
-		return apply_filters( 'woocommerce_default_address_fields', $fields );
+		$default_address_fields = apply_filters( 'woocommerce_default_address_fields', $fields );
+		// Sort each of the fields based on priority.
+		uasort( $default_address_fields, 'wc_checkout_fields_uasort_comparison' );
+
+		return $default_address_fields;
 	}
 
 	/**
@@ -1012,12 +1016,12 @@ class WC_Countries {
 					),
 					'NG' => array(
 						'postcode' => array(
-							'label' => __( 'Postcode', 'woocommerce' ),
+							'label'    => __( 'Postcode', 'woocommerce' ),
 							'required' => false,
 							'hidden'   => true,
 						),
 						'state'    => array(
-							'label'    => __( 'State', 'woocommerce' ),
+							'label' => __( 'State', 'woocommerce' ),
 						),
 					),
 					'NZ' => array(
@@ -1280,6 +1284,10 @@ class WC_Countries {
 		 * on country selection. If you want to change things like the required status of an
 		 * address field, filter woocommerce_default_address_fields instead.
 		 */
-		return apply_filters( 'woocommerce_' . $type . 'fields', $address_fields, $country );
+		$address_fields = apply_filters( 'woocommerce_' . $type . 'fields', $address_fields, $country );
+		// Sort each of the fields based on priority.
+		uasort( $address_fields, 'wc_checkout_fields_uasort_comparison' );
+
+		return $address_fields;
 	}
 }

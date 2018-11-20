@@ -533,7 +533,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 			'GYD' => '&#36;',
 			'HKD' => '&#36;',
 			'HNL' => 'L',
-			'HRK' => 'Kn',
+			'HRK' => 'kn',
 			'HTG' => 'G',
 			'HUF' => '&#70;&#116;',
 			'IDR' => 'Rp',
@@ -1499,10 +1499,7 @@ function wc_nocache_headers() {
  * @return int
  */
 function wc_product_attribute_uasort_comparison( $a, $b ) {
-	if ( $a['position'] === $b['position'] ) {
-		return 0;
-	}
-	return ( $a['position'] < $b['position'] ) ? -1 : 1;
+	return wc_uasort_comparison( $a['position'], $b['position'] );
 }
 
 /**
@@ -1514,10 +1511,43 @@ function wc_product_attribute_uasort_comparison( $a, $b ) {
  * @return int
  */
 function wc_shipping_zone_method_order_uasort_comparison( $a, $b ) {
-	if ( $a->method_order === $b->method_order ) {
+	return wc_uasort_comparison( $a->method_order, $b->method_order );
+}
+
+/**
+ * User to sort checkout fields based on priority with uasort.
+ *
+ * @since 3.5.1
+ * @param array $a First field to compare.
+ * @param array $b Second field to compare.
+ * @return int
+ */
+function wc_checkout_fields_uasort_comparison( $a, $b ) {
+	/*
+	 * We are not guaranteed to get a priority
+	 * setting. So don't compare if they don't
+	 * exist.
+	 */
+	if ( ! isset( $a['priority'], $b['priority'] ) ) {
 		return 0;
 	}
-	return ( $a->method_order < $b->method_order ) ? -1 : 1;
+
+	return wc_uasort_comparison( $a['priority'], $b['priority'] );
+}
+
+/**
+ * User to sort two values with ausort.
+ *
+ * @since 3.5.1
+ * @param int $a First value to compare.
+ * @param int $b Second value to compare.
+ * @return int
+ */
+function wc_uasort_comparison( $a, $b ) {
+	if ( $a === $b ) {
+		return 0;
+	}
+	return ( $a < $b ) ? -1 : 1;
 }
 
 /**

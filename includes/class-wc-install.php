@@ -114,9 +114,7 @@ class WC_Install {
 			'wc_update_344_db_version',
 		),
 		'3.5.0' => array(
-			'wc_update_350_order_customer_id',
 			'wc_update_350_reviews_comment_type',
-			'wc_update_350_change_woocommerce_sessions_schema',
 			'wc_update_350_db_version',
 		),
 	);
@@ -554,6 +552,22 @@ class WC_Install {
 			}
 		}
 
+		/**
+		 * Change wp_woocommerce_sessions schema to use a bigint auto increment field instead of char(32) field as
+		 * the primary key as it is not a good practice to use a char(32) field as the primary key of a table and as
+		 * there were reports of issues with this table (see https://github.com/woocommerce/woocommerce/issues/20912).
+		 *
+		 * This query needs to run before dbDelta() as this WP function is not able to handle primary key changes
+		 * (see https://github.com/woocommerce/woocommerce/issues/21534 and https://core.trac.wordpress.org/ticket/40357).
+		 */
+		if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}woocommerce_sessions'" ) ) {
+			if ( ! $wpdb->get_var( "SHOW KEYS FROM {$wpdb->prefix}woocommerce_sessions WHERE Key_name = 'PRIMARY' AND Column_name = 'session_id'" ) ) {
+				$wpdb->query(
+					"ALTER TABLE `{$wpdb->prefix}woocommerce_sessions` DROP PRIMARY KEY, DROP KEY `session_id`, ADD PRIMARY KEY(`session_id`), ADD UNIQUE KEY(`session_key`)"
+				);
+			}
+		}
+
 		dbDelta( self::get_schema() );
 
 		$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE column_name = 'comment_type' and key_name = 'woo_idx_comment_type'" );
@@ -579,21 +593,22 @@ class WC_Install {
 
 		// Add constraint to download logs if the columns matches.
 		if ( ! empty( $download_permissions_column_type ) && ! empty( $download_log_column_type ) && $download_permissions_column_type === $download_log_column_type ) {
+			$constraint_prefix = ! is_multisite() || ( is_main_site() && is_main_network() ) ? 'fk_' : str_replace( $wpdb->base_prefix, 'fk_', $wpdb->prefix );
 			$fk_result = $wpdb->get_row( "
 				SELECT COUNT(*) AS fk_count
 				FROM information_schema.TABLE_CONSTRAINTS
 				WHERE CONSTRAINT_SCHEMA = '{$wpdb->dbname}'
-				AND CONSTRAINT_NAME = 'fk_wc_download_log_permission_id'
+				AND CONSTRAINT_NAME = '{$constraint_prefix}wc_download_log_permission_id'
 				AND CONSTRAINT_TYPE = 'FOREIGN KEY'
 				AND TABLE_NAME = '{$wpdb->prefix}wc_download_log'
-			" );
+			" ); // WPCS: unprepared SQL ok.
 			if ( 0 === (int) $fk_result->fk_count ) {
 				$wpdb->query( "
 					ALTER TABLE `{$wpdb->prefix}wc_download_log`
-					ADD CONSTRAINT `fk_wc_download_log_permission_id`
+					ADD CONSTRAINT `{$constraint_prefix}wc_download_log_permission_id`
 					FOREIGN KEY (`permission_id`)
 					REFERENCES `{$wpdb->prefix}woocommerce_downloadable_product_permissions` (`permission_id`) ON DELETE CASCADE;
-				" );
+				" ); // WPCS: unprepared SQL ok.
 			}
 		}
 	}

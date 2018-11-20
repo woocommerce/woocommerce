@@ -35,6 +35,7 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 			array( false, wc_is_webhook_valid_topic( 'wc.product.updated' ) ),
 			array( false, wc_is_webhook_valid_topic( 'missingdot' ) ),
 			array( false, wc_is_webhook_valid_topic( 'with space' ) ),
+			array( false, wc_is_webhook_valid_topic( 'action.woocommerce_login_credentials' ) ),
 		);
 	}
 

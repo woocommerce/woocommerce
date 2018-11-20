@@ -944,7 +944,7 @@ class WC_AJAX {
 			$fee = new WC_Order_Item_Fee();
 			$fee->set_amount( $amount );
 			$fee->set_total( $amount );
-			$fee->set_name( sprintf( __( '%s fee', 'woocommerce' ), $formatted_amount ) );
+			$fee->set_name( sprintf( __( '%s fee', 'woocommerce' ), wc_clean( $formatted_amount ) ) );
 
 			$order->add_item( $fee );
 			$order->calculate_taxes( $calculate_tax_args );
@@ -1758,6 +1758,13 @@ class WC_AJAX {
 			$description = sanitize_text_field( wp_unslash( $_POST['description'] ) );
 			$permissions = ( in_array( $_POST['permissions'], array( 'read', 'write', 'read_write' ) ) ) ? sanitize_text_field( $_POST['permissions'] ) : 'read';
 			$user_id     = absint( $_POST['user'] );
+
+			// Check if current user can edit other users.
+			if ( $user_id && ! current_user_can( 'edit_user', $user_id ) ) {
+				if ( get_current_user_id() !== $user_id ) {
+					throw new Exception( __( 'You do not have permission to assign API Keys to the selected user.', 'woocommerce' ) );
+				}
+			}
 
 			if ( 0 < $key_id ) {
 				$data = array(

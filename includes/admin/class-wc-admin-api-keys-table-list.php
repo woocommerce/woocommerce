@@ -70,24 +70,35 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_title( $key ) {
-		$url = admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys&edit-key=' . $key['key_id'] );
+		$url     = admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys&edit-key=' . $key['key_id'] );
+		$user_id = intval( $key['user_id'] );
 
-		$output  = '<strong>';
-		$output .= '<a href="' . esc_url( $url ) . '" class="row-title">';
+		// Check if current user can edit other users or if it's the same user.
+		$can_edit = current_user_can( 'edit_user', $user_id ) || get_current_user_id() === $user_id;
+
+		$output = '<strong>';
+		if ( $can_edit ) {
+			$output .= '<a href="' . esc_url( $url ) . '" class="row-title">';
+		}
 		if ( empty( $key['description'] ) ) {
 			$output .= esc_html__( 'API key', 'woocommerce' );
 		} else {
 			$output .= esc_html( $key['description'] );
 		}
-		$output .= '</a>';
+		if ( $can_edit ) {
+			$output .= '</a>';
+		}
 		$output .= '</strong>';
 
 		// Get actions.
 		$actions = array(
 			/* translators: %s: API key ID. */
-			'id'    => sprintf( __( 'ID: %d', 'woocommerce' ), $key['key_id'] ),
-			'edit'  => '<a href="' . esc_url( $url ) . '">' . __( 'View/Edit', 'woocommerce' ) . '</a>',
-			'trash' => '<a class="submitdelete" aria-label="' . esc_attr__( 'Revoke API key', 'woocommerce' ) . '" href="' . esc_url(
+			'id' => sprintf( __( 'ID: %d', 'woocommerce' ), $key['key_id'] ),
+		);
+
+		if ( $can_edit ) {
+			$actions['edit']  = '<a href="' . esc_url( $url ) . '">' . __( 'View/Edit', 'woocommerce' ) . '</a>';
+			$actions['trash'] = '<a class="submitdelete" aria-label="' . esc_attr__( 'Revoke API key', 'woocommerce' ) . '" href="' . esc_url(
 				wp_nonce_url(
 					add_query_arg(
 						array(
@@ -95,8 +106,8 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 						), admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys' )
 					), 'revoke'
 				)
-			) . '">' . esc_html__( 'Revoke', 'woocommerce' ) . '</a>',
-		);
+			) . '">' . esc_html__( 'Revoke', 'woocommerce' ) . '</a>';
+		}
 
 		$row_actions = array();
 
@@ -183,6 +194,10 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	 * @return array
 	 */
 	protected function get_bulk_actions() {
+		if ( ! current_user_can( 'remove_users' ) ) {
+			return array();
+		}
+
 		return array(
 			'revoke' => __( 'Revoke', 'woocommerce' ),
 		);

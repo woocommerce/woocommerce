@@ -21,7 +21,10 @@ function wc_webhook_process_delivery( $webhook, $arg ) {
 	// user who triggered it.
 	if ( apply_filters( 'woocommerce_webhook_deliver_async', true, $webhook, $arg ) ) {
 		// Deliver in background.
-		WC()->queue()->add( 'woocommerce_deliver_webhook_async', array( 'webhook_id' => $webhook->get_id(), 'arg' => $arg ), 'woocommerce-webhooks' );
+		WC()->queue()->add( 'woocommerce_deliver_webhook_async', array(
+			'webhook_id' => $webhook->get_id(),
+			'arg'        => $arg,
+		), 'woocommerce-webhooks' );
 	} else {
 		// Deliver immediately.
 		$webhook->deliver( $arg );
@@ -55,6 +58,15 @@ add_action( 'woocommerce_deliver_webhook_async', 'wc_deliver_webhook_async', 10,
  * @return bool
  */
 function wc_is_webhook_valid_topic( $topic ) {
+	$invalid_topics  = array(
+		'action.woocommerce_login_credentials',
+		'action.woocommerce_product_csv_importer_check_import_file_path',
+		'action.woocommerce_webhook_should_deliver',
+	);
+
+	if ( in_array( $topic, $invalid_topics, true ) ) {
+		return false;
+	}
 
 	// Custom topics are prefixed with woocommerce_ or wc_ are valid.
 	if ( 0 === strpos( $topic, 'action.woocommerce_' ) || 0 === strpos( $topic, 'action.wc_' ) ) {
@@ -123,4 +135,18 @@ function wc_get_webhook( $id ) {
 	$webhook = new WC_Webhook( $id );
 
 	return 0 !== $webhook->get_id() ? $webhook : null;
+}
+
+/**
+ * Get webhoook REST API versions.
+ *
+ * @since 3.5.1
+ * @return array
+ */
+function wc_get_webhook_rest_api_versions() {
+	return array(
+		'wp_api_v1',
+		'wp_api_v2',
+		'wp_api_v3',
+	);
 }
