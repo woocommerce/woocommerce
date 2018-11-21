@@ -95,6 +95,12 @@ if ( wc_tax_enabled() ) {
 		</tbody>
 	</table>
 </div>
+<div class="wc-order-data-row wc-order-item-bulk-edit" style="display:none;">
+	<?php if ( $order->allow_manual_stock_adjustment() ) : ?>
+	<button type="button" class="button bulk-decrease-stock"><?php esc_html_e( 'Reduce stock', 'woocommerce' ); ?></button>
+	<button type="button" class="button bulk-increase-stock"><?php esc_html_e( 'Increase stock', 'woocommerce' ); ?></button>
+	<?php endif; ?>
+</div>
 <div class="wc-order-data-row wc-order-totals-items wc-order-items-editable">
 	<?php
 	$coupons = $order->get_items( 'coupon' );

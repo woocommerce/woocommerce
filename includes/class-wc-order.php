@@ -1990,4 +1990,22 @@ class WC_Order extends WC_Abstract_Order {
 
 		return apply_filters( 'woocommerce_get_order_item_totals', $total_rows, $this, $tax_display );
 	}
+
+	/**
+	 * Determine whether manual stock adjustments are allowed.
+	 *
+	 * @since 3.5.3
+	 * @return bool True when allowed, otherwise false.
+	 */
+	public function allow_manual_stock_adjustment() {
+		if ( ! $this->is_editable() ) {
+			return false;
+		}
+
+		if ( 'yes' !== get_option( 'woocommerce_manage_stock', 'no' ) ) {
+			return false;
+		}
+
+		return apply_filters( 'woocommerce_order_allow_manual_stock_adjustment', false );
+	}
 }

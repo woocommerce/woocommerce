@@ -254,8 +254,22 @@ jQuery( function ( $ ) {
 
 				// Bulk edit
 				.on( 'click', 'tr.item', function() {
+					if ( $( this ).find( ':focus' ).length ) {
+						return;
+					}
+
 					$( this ).toggleClass( 'selected' );
+					if ( ! $( 'div.wc-order-item-bulk-edit' ).children().length ) {
+						return;
+					}
+
+					if ( $( 'tr.item.selected').length ) {
+						$( 'div.wc-order-item-bulk-edit' ).slideDown();
+					} else {
+						$( 'div.wc-order-item-bulk-edit' ).slideUp();
+					}
 				})
+
 				// Qty
 				.on( 'change', 'input.quantity', this.quantity_changed )
 
@@ -532,6 +546,7 @@ jQuery( function ( $ ) {
 			$( this ).hide();
 			$( 'button.add-line-item' ).click();
 			$( 'button.cancel-action' ).attr( 'data-reload', true );
+			$( 'div.wc-order-item-bulk-edit' ).slideUp();
 			return false;
 		},
 
