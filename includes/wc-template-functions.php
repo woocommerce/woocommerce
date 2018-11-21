@@ -1426,7 +1426,8 @@ function wc_get_gallery_image_html( $attachment_id, $main_image = false ) {
 				'class'                   => $main_image ? 'wp-post-image' : '',
 			),
 			$attachment_id,
-			$image_size
+			$image_size,
+			$main_image
 		)
 	);
 
