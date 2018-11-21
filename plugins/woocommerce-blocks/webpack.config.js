@@ -49,7 +49,16 @@ const GutenbergBlocksConfig = {
 					MiniCssExtractPlugin.loader,
 					'css-loader',
 					'postcss-loader',
-					'sass-loader',
+					{
+						loader: 'sass-loader',
+						query: {
+							includePaths: [ 'assets/css/abstracts' ],
+							data:
+								'@import "_colors"; ' +
+								'@import "_breakpoints"; ' +
+								'@import "_mixins"; ',
+						},
+					}
 				],
 			},
 		],

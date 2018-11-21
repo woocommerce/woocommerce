@@ -11,11 +11,13 @@ import {
 	InspectorControls,
 } from '@wordpress/editor';
 import {
+	Button,
 	PanelBody,
 	Placeholder,
 	RangeControl,
 	SelectControl,
 	Spinner,
+	Toolbar,
 	TreeSelect,
 } from '@wordpress/components';
 import PropTypes from 'prop-types';
@@ -161,9 +163,50 @@ class ProductByCategoryBlock extends Component {
 		);
 	}
 
+	renderEditMode() {
+		const { setAttributes } = this.props;
+		const { categories } = this.props.attributes;
+		const { categoriesList } = this.state;
+
+		return (
+			<Placeholder
+				icon="category"
+				label={ __( 'Products by Category', 'woocommerce' ) }
+			>
+				{ __(
+					'Display a grid of products from your selected categories',
+					'woocommerce'
+				) }
+				{ categoriesList.length ? (
+					<div className="wc-block-products-category__selection">
+						<TreeSelect
+							label={ __( 'Product Category', 'woocommerce' ) }
+							tree={ categoriesList }
+							selectedId={ categories }
+							multiple
+							onChange={ ( value ) => {
+								setAttributes( { categories: value ? value : [] } );
+							} }
+						/>
+						<Button
+							isDefault
+							onClick={ () => setAttributes( { editMode: false } ) }
+						>
+							{ __( 'Done', 'woocommerce' ) }
+						</Button>
+					</div>
+				) : (
+					<div className="wc-block-products-category__selection">
+						<Spinner />
+					</div>
+				) }
+			</Placeholder>
+		);
+	}
+
 	render() {
 		const { setAttributes } = this.props;
-		const { columns, align } = this.props.attributes;
+		const { columns, align, editMode } = this.props.attributes;
 		const { loaded, products } = this.state;
 
 		return (
@@ -174,26 +217,40 @@ class ProductByCategoryBlock extends Component {
 						value={ align }
 						onChange={ ( nextAlign ) => setAttributes( { align: nextAlign } ) }
 					/>
+					<Toolbar
+						controls={ [
+							{
+								icon: 'edit',
+								title: __( 'Edit' ),
+								onClick: () => setAttributes( { editMode: ! editMode } ),
+								isActive: editMode,
+							},
+						] }
+					/>
 				</BlockControls>
 				{ this.getInspectorControls() }
-				<div className={ `wc-block-products-category cols-${ columns }` }>
-					{ products.length ? (
-						products.map( ( product ) => (
-							<ProductPreview product={ product } key={ product.id } />
-						) )
-					) : (
-						<Placeholder
-							icon="category"
-							label={ __( 'Products by Category', 'woocommerce' ) }
-						>
-							{ ! loaded ? (
-								<Spinner />
-							) : (
-								__( 'No products in this category.', 'woocommerce' )
-							) }
-						</Placeholder>
-					) }
-				</div>
+				{ editMode ? (
+					this.renderEditMode()
+				) : (
+					<div className={ `wc-block-products-category cols-${ columns }` }>
+						{ products.length ? (
+							products.map( ( product ) => (
+								<ProductPreview product={ product } key={ product.id } />
+							) )
+						) : (
+							<Placeholder
+								icon="category"
+								label={ __( 'Products by Category', 'woocommerce' ) }
+							>
+								{ ! loaded ? (
+									<Spinner />
+								) : (
+									__( 'No products in this category.', 'woocommerce' )
+								) }
+							</Placeholder>
+						) }
+					</div>
+				) }
 			</Fragment>
 		);
 	}
@@ -219,10 +276,13 @@ registerBlockType( 'woocommerce/product-category', {
 	title: __( 'Products by Category', 'woocommerce' ),
 	icon: 'category',
 	category: 'widgets',
-	description: __( 'Display a grid of products from your selected categories.', 'woocommerce' ),
+	description: __(
+		'Display a grid of products from your selected categories.',
+		'woocommerce'
+	),
 	attributes: {
 		...sharedAttributes,
-		edit_mode: {
+		editMode: {
 			type: 'boolean',
 			default: true,
 		},
@@ -255,6 +315,6 @@ registerBlockType( 'woocommerce/product-category', {
 		const {
 			align,
 		} = props.attributes; /* eslint-disable-line react/prop-types */
-		return <RawHTML className={ `align${ align }` }>{ getShortcode( props ) }</RawHTML>;
+		return <RawHTML className={ align ? `align${ align }` : '' }>{ getShortcode( props ) }</RawHTML>;
 	},
 } );
