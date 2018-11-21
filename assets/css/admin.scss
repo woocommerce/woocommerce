@@ -1444,6 +1444,16 @@
 				 }
 			 }
 
+			tbody tr {
+				&.selected {
+					background: #f5ebf3;
+					td {
+						border-color: #e6cce1;
+						opacity: 0.8;
+					}
+				}
+			}
+
 			 tbody tr:last-child td {
 				 border-bottom: 1px solid #dfdfdf;
 			 }

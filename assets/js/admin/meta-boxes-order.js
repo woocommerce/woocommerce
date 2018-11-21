@@ -252,6 +252,10 @@ jQuery( function ( $ ) {
 				.on( 'change keyup', '.wc-order-refund-items #refund_amount', this.refunds.amount_changed )
 				.on( 'change', 'input.refund_order_item_qty', this.refunds.refund_quantity_changed )
 
+				// Bulk edit
+				.on( 'click', 'tr.item', function() {
+					$( this ).toggleClass( 'selected' );
+				})
 				// Qty
 				.on( 'change', 'input.quantity', this.quantity_changed )
 
