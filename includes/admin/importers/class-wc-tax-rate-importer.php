@@ -101,7 +101,7 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 	 */
 	private function import_start() {
 		if ( function_exists( 'gc_enable' ) ) {
-			gc_enable(); // phpcs:ignore PHPCompatibility.PHP.NewFunctions.gc_enableFound
+			gc_enable(); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctions.gc_enableFound
 		}
 		wc_set_time_limit( 0 );
 		@ob_flush();
