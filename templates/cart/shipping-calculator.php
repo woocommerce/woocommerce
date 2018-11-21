@@ -15,7 +15,7 @@
  * @version 3.5.0
  */
 
-defined( 'ABSPATH' ) || exit;
+defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 
 do_action( 'woocommerce_before_shipping_calculator' ); ?>
 
