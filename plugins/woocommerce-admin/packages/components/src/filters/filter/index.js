@@ -143,6 +143,7 @@ class FilterPicker extends Component {
 					selected={ selectedTag ? [ selectedTag ] : [] }
 					onChange={ partial( this.onTagChange, filter, onClose ) }
 					inlineTags
+					staticResults
 				/>
 			);
 		}

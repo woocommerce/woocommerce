@@ -116,7 +116,7 @@ class Search extends Component {
 
 	render() {
 		const autocompleter = this.getAutocompleter();
-		const { placeholder, inlineTags, selected, instanceId, className } = this.props;
+		const { placeholder, inlineTags, selected, instanceId, className, staticResults } = this.props;
 		const { value = '', isActive } = this.state;
 		const aria = {
 			'aria-labelledby': this.props[ 'aria-labelledby' ],
@@ -125,7 +125,11 @@ class Search extends Component {
 		return (
 			<div className={ classnames( 'woocommerce-search', className ) }>
 				<Gridicon className="woocommerce-search__icon" icon="search" size={ 18 } />
-				<Autocomplete completer={ autocompleter } onSelect={ this.selectResult }>
+				<Autocomplete
+					completer={ autocompleter }
+					onSelect={ this.selectResult }
+					staticResults={ staticResults }
+				>
 					{ ( { listBoxId, activeId, onChange } ) =>
 						// Disable reason: The div below visually simulates an input field. Its
 						// child input is the actual input and responds accordingly to all keyboard
@@ -223,15 +227,20 @@ Search.propTypes = {
 		} )
 	),
 	/**
-	 * Render tags inside input, otherwise render below input
+	 * Render tags inside input, otherwise render below input.
 	 */
 	inlineTags: PropTypes.bool,
+	/**
+	 * Render results list positioned statically instead of absolutely.
+	 */
+	staticResults: PropTypes.bool,
 };
 
 Search.defaultProps = {
 	onChange: noop,
 	selected: [],
 	inlineTags: false,
+	staticResults: false,
 };
 
 export default withInstanceId( Search );

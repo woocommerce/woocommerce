@@ -35,14 +35,6 @@ class DatePicker extends Component {
 		this.onSelect = this.onSelect.bind( this );
 		this.isValidSelection = this.isValidSelection.bind( this );
 		this.resetCustomValues = this.resetCustomValues.bind( this );
-		this.refreshDropdown = this.refreshDropdown.bind( this );
-	}
-
-	refreshDropdown() {
-		setTimeout( () => {
-			const dropdown = this.dropdownRef.current;
-			dropdown.refresh && dropdown.refresh();
-		} );
 	}
 
 	getResetState() {
@@ -156,7 +148,6 @@ class DatePicker extends Component {
 							afterError={ afterError }
 							beforeError={ beforeError }
 							shortDateFormat={ shortDateFormat }
-							refreshDropdown={ this.refreshDropdown }
 						/>
 					) }
 				/>
