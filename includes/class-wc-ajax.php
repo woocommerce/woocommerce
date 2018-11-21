@@ -1911,6 +1911,138 @@ class WC_AJAX {
 	}
 
 	/**
+	 * Reduce order item stock.
+	 *
+	 * @since 3.5.3
+	 */
+	public static function reduce_order_item_stock() {
+		check_ajax_referer( 'order-item', 'security' );
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			wp_die( -1 );
+		}
+
+		$order_id       = absint( $_POST['order_id'] );
+		$order_item_ids = isset( $_POST['order_item_ids'] ) ? $_POST['order_item_ids'] : array();
+		$order          = wc_get_order( $order_id );
+		$order_items    = $order->get_items();
+		$return         = array();
+
+		if ( $order && $order->allow_manual_stock_adjustment() && ! empty( $order_items ) && sizeof( $order_item_ids ) > 0 ) {
+			foreach ( $order_items as $item_id => $order_item ) {
+				// Only reduce checked items
+				if ( ! in_array( $item_id, $order_item_ids ) ) {
+					continue;
+				}
+
+				$_product = $order_item->get_product();
+				if ( $_product && $_product->exists() && $_product->managing_stock() ) {
+					$net_stock_change = $order_item->get_quantity();
+					$reduced = $order_item->get_meta( '_reduced_stock', true );
+					if ( ! $reduced ) {
+						$reduced = $net_stock_change;
+					} elseif ( $net_stock_change <= 								$reduced ) {
+					// Don't reduce if the item has already been reduced by at least this amount.
+						continue;
+					} else {
+						// Reduce by the net amount. Update order with new reduced amount.
+						$stock_change = $net_stock_change - $reduced;
+						$reduced = $net_stock_change;
+						$net_stock_change = $stock_change;
+					}
+
+					$stock_change = apply_filters( 'woocommerce_reduce_order_stock_quantity', $net_stock_change, $item_id );
+					$new_stock    = wc_update_product_stock( $_product, $stock_change, 'decrease' );
+					$item_name    = $_product->get_formatted_name();
+					$return[]     = array(
+						'note'    => sprintf( wp_kses_post( __( '%1$s stock reduced from %2$s to %3$s.', 'woocommerce' ) ), $item_name, $new_stock + $stock_change, $new_stock ),
+						'success' => true,
+					);
+
+					$order_item->update_meta_data( '_reduced_stock', $reduced, true );
+					$order_item->save();
+				}
+			}
+			do_action( 'woocommerce_reduce_order_stock', $order );
+
+			if ( empty( $return ) ) {
+				$return[] = array(
+					'note'    => wp_kses_post( __( 'No products had their stock reduced - they may not have stock management enabled.', 'woocommerce' ) ),
+					'success' => false,
+				);
+			}
+
+			wp_send_json_success( $return );
+		}
+		wp_send_json_error();
+	}
+
+	/**
+	 * Increase order item stock.
+	 *
+	 * @since 3.5.3
+	 */
+	public static function increase_order_item_stock() {
+		check_ajax_referer( 'order-item', 'security' );
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			wp_die( -1 );
+		}
+		$order_id       = absint( $_POST['order_id'] );
+		$order_item_ids = isset( $_POST['order_item_ids'] ) ? $_POST['order_item_ids'] : array();
+		$order          = wc_get_order( $order_id );
+		$order_items    = $order->get_items();
+		$return         = array();
+
+		if ( $order && $order->allow_manual_stock_adjustment() && ! empty( $order_items ) && sizeof( $order_item_ids ) > 0 ) {
+			foreach ( $order_items as $item_id => $order_item ) {
+				// Only increase checked items that have been reduced
+				if ( ! in_array( $item_id, $order_item_ids ) ) {
+					continue;
+				}
+
+				$_product = $order_item->get_product();
+				if ( $_product && $_product->exists() && $_product->managing_stock() ) {
+					$net_stock_change = $order_item->get_quantity();
+					$reduced = $order_item->get_meta( '_reduced_stock', true );
+
+					if ( ! $reduced ) {
+						continue;
+					}
+
+					// Calculate max / net increase with stock reductions.
+					if ( $reduced <= $net_stock_change ) {
+						$net_stock_change = $reduced;
+						$order_item->delete_meta_data( '_reduced_stock' );
+					} else {
+						$reduced -= $net_stock_change;
+						$order_item->update_meta_data( '_reduced_stock', $reduced, true );
+					}
+
+					$old_stock    = $_product->get_stock_quantity();
+					$stock_change = apply_filters( 'woocommerce_restore_order_stock_quantity', $net_stock_change, $item_id );
+					$new_quantity = wc_update_product_stock( $_product, $stock_change, 'increase' );
+					$item_name    = $_product->get_formatted_name();
+					$return[]     = array(
+						'note'    => sprintf( wp_kses_post( __( '%1$s stock increased from %2$s to %3$s.', 'woocommerce' ) ), $item_name, $old_stock, $new_quantity ),
+						'success' => true,
+					);
+
+					$order_item->save();
+				}
+			}
+			do_action( 'woocommerce_restore_order_stock', $order );
+			if ( empty( $return ) ) {
+				$return[] = array(
+					'note'    => wp_kses_post( __( 'No products had their stock increased - they may not have stock management enabled.', 'woocommerce' ) ),
+					'success' => false,
+				);
+			}
+
+			wp_send_json_success( $return );
+		}
+		wp_send_json_error();
+	}
+
+	/**
 	 * Bulk action - Toggle Enabled.
 	 *
 	 * @access private
