@@ -200,7 +200,7 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 	 * @return bool False if error uploading or invalid file, true otherwise
 	 */
 	public function handle_upload() {
-		// phpcs:disable WordPress.CSRF.NonceVerification.NoNonceVerification -- Nonce already verified in WC_Tax_Rate_Importer::dispatch()
+		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification -- Nonce already verified in WC_Tax_Rate_Importer::dispatch()
 		$file_url = isset( $_POST['file_url'] ) ? wc_clean( wp_unslash( $_POST['file_url'] ) ) : '';
 
 		if ( empty( $file_url ) ) {
