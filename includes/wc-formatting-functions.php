@@ -412,7 +412,8 @@ function wc_sanitize_textarea( $var ) {
 function wc_sanitize_tooltip( $var ) {
 	return htmlspecialchars(
 		wp_kses(
-			html_entity_decode( $var ), array(
+			html_entity_decode( $var ),
+			array(
 				'br'     => array(),
 				'em'     => array(),
 				'strong' => array(),
@@ -541,8 +542,10 @@ function wc_get_price_decimals() {
  */
 function wc_price( $price, $args = array() ) {
 	$args = apply_filters(
-		'wc_price_args', wp_parse_args(
-			$args, array(
+		'wc_price_args',
+		wp_parse_args(
+			$args,
+			array(
 				'ex_tax_label'       => false,
 				'currency'           => '',
 				'decimal_separator'  => wc_get_price_decimal_separator(),
@@ -1032,7 +1035,8 @@ function wc_format_product_short_description( $content ) {
 
 		return wpautop(
 			$markdown->transform(
-				$content, array(
+				$content,
+				array(
 					'unslash' => false,
 				)
 			)
@@ -1380,10 +1384,13 @@ function wc_parse_relative_date_option( $raw_value ) {
 		'years'  => __( 'Year(s)', 'woocommerce' ),
 	);
 
-	$value = wp_parse_args( (array) $raw_value, array(
-		'number' => '',
-		'unit'   => 'days',
-	) );
+	$value = wp_parse_args(
+		(array) $raw_value,
+		array(
+			'number' => '',
+			'unit'   => 'days',
+		)
+	);
 
 	$value['number'] = ! empty( $value['number'] ) ? absint( $value['number'] ) : '';
 

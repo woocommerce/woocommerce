@@ -96,7 +96,7 @@ class WC_Product_CSV_Importer_Controller {
 		}
 
 		$valid_filetypes = self::get_valid_csv_filetypes();
-		$filetype = wp_check_filetype( $file, $valid_filetypes );
+		$filetype        = wp_check_filetype( $file, $valid_filetypes );
 		if ( in_array( $filetype['type'], $valid_filetypes, true ) ) {
 			return true;
 		}
@@ -111,7 +111,8 @@ class WC_Product_CSV_Importer_Controller {
 	 */
 	protected static function get_valid_csv_filetypes() {
 		return apply_filters(
-			'woocommerce_csv_product_import_valid_filetypes', array(
+			'woocommerce_csv_product_import_valid_filetypes',
+			array(
 				'csv' => 'text/csv',
 				'txt' => 'text/plain',
 			)
@@ -424,7 +425,9 @@ class WC_Product_CSV_Importer_Controller {
 		// phpcs:enable
 
 		wp_localize_script(
-			'wc-product-import', 'wc_product_import_params', array(
+			'wc-product-import',
+			'wc_product_import_params',
+			array(
 				'import_nonce'    => wp_create_nonce( 'wc-product-import' ),
 				'mapping'         => array(
 					'from' => $mapping_from,
@@ -491,7 +494,8 @@ class WC_Product_CSV_Importer_Controller {
 		 */
 		$default_columns = $this->normalize_columns_names(
 			apply_filters(
-				'woocommerce_csv_product_import_mapping_default_columns', array(
+				'woocommerce_csv_product_import_mapping_default_columns',
+				array(
 					__( 'ID', 'woocommerce' )             => 'id',
 					__( 'Type', 'woocommerce' )           => 'type',
 					__( 'SKU', 'woocommerce' )            => 'sku',
