@@ -12,12 +12,12 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see https://docs.woocommerce.com/document/template-structure/
+ * @see     https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce/Templates
  * @version 3.5.0
  */
 
-defined( 'ABSPATH' ) || exit;
+defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 
 $formatted_destination    = isset( $formatted_destination ) ? $formatted_destination : WC()->countries->get_formatted_address( $package['destination'], ', ' );
 $has_calculated_shipping  = ! empty( $has_calculated_shipping );
