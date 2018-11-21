@@ -14,13 +14,25 @@ import {
 } from 'd3-scale';
 import { event as d3Event, select as d3Select } from 'd3-selection';
 import { line as d3Line } from 'd3-shape';
-import { format as formatDate } from '@wordpress/date';
+
+const dayTicksThreshold = 63;
+const weekTicksThreshold = 9;
+const smallBreak = 783;
+const mediumBreak = 1130;
+const wideBreak = 1365;
+const smallPoints = 7;
+const mediumPoints = 12;
+const largePoints = 16;
+const mostPoints = 31;
 
 /**
- * WooCommerce dependencies
+ * Allows an overriding formatter or defaults to d3Format or d3TimeFormat
+ * @param {string|function} format - either a format string for the D3 formatters or an overriding fomatting method
+ * @param {function} formatter - default d3Format or another formatting method, which accepts the string `format`
+ * @returns {function} to be used to format an input given the format and formatter
  */
-import { dayTicksThreshold, weekTicksThreshold } from '@woocommerce/date';
-import { formatCurrency } from '@woocommerce/currency';
+export const getFormatter = ( format, formatter = d3Format ) =>
+	typeof format === 'function' ? format : formatter( format );
 
 /**
  * Describes `smallestFactor`
@@ -208,35 +220,31 @@ export const getLine = ( xLineScale, yScale ) =>
 		.y( d => yScale( d.value ) );
 
 /**
- * Calculate the maximum number of ticks allowed in the x-axis based on the width and layout of the chart
+ * Calculate the maximum number of ticks allowed in the x-axis based on the width and mode of the chart
  * @param {integer} width - calculated page width
- * @param {string} layout - standard, comparison or compact chart types
- * @returns {integer} number of x-axis ticks based on width and chart layout
+ * @param {string} mode - item-comparison or time-comparison
+ * @returns {integer} number of x-axis ticks based on width and chart mode
  */
-const calculateMaxXTicks = ( width, layout ) => {
-	if ( width < 783 ) {
-		return 7;
-	} else if ( width >= 783 && width < 1129 ) {
-		return 12;
-	} else if ( width >= 1130 && width < 1365 ) {
-		if ( layout === 'standard' ) {
-			return 16;
-		} else if ( layout === 'comparison' ) {
-			return 12;
-		} else if ( layout === 'compact' ) {
-			return 7;
+export const calculateMaxXTicks = ( width, mode ) => {
+	if ( width < smallBreak ) {
+		return smallPoints;
+	} else if ( width >= smallBreak && width <= mediumBreak ) {
+		return mediumPoints;
+	} else if ( width > mediumBreak && width <= wideBreak ) {
+		if ( mode === 'time-comparison' ) {
+			return largePoints;
+		} else if ( mode === 'item-comparison' ) {
+			return mediumPoints;
 		}
-	} else if ( width >= 1365 ) {
-		if ( layout === 'standard' ) {
-			return 31;
-		} else if ( layout === 'comparison' ) {
-			return 16;
-		} else if ( layout === 'compact' ) {
-			return 12;
+	} else if ( width > wideBreak ) {
+		if ( mode === 'time-comparison' ) {
+			return mostPoints;
+		} else if ( mode === 'item-comparison' ) {
+			return largePoints;
 		}
 	}
 
-	return 16;
+	return largePoints;
 };
 
 /**
@@ -244,7 +252,7 @@ const calculateMaxXTicks = ( width, layout ) => {
  * @param {array} dates - string dates.
  * @returns {array} Filtered dates.
  */
-const getFirstDatePerMonth = dates => {
+export const getFirstDatePerMonth = dates => {
 	return dates.filter(
 		( date, i ) => i === 0 || new Date( date ).getMonth() !== new Date( dates[ i - 1 ] ).getMonth()
 	);
@@ -256,7 +264,7 @@ const getFirstDatePerMonth = dates => {
  * @param {integer} incrementFactor - increment factor for the visible ticks.
  * @returns {array} Ticks for the x-axis.
  */
-const getXTicksFromIncrementFactor = ( uniqueDates, incrementFactor ) => {
+export const getXTicksFromIncrementFactor = ( uniqueDates, incrementFactor ) => {
 	const ticks = [];
 
 	for ( let idx = 0; idx < uniqueDates.length; idx = idx + incrementFactor ) {
@@ -277,7 +285,7 @@ const getXTicksFromIncrementFactor = ( uniqueDates, incrementFactor ) => {
  * @param {integer} maxTicks - maximum number of ticks that can be displayed in the x-axis
  * @returns {integer} x-axis ticks increment factor
  */
-const calculateXTicksIncrementFactor = ( uniqueDates, maxTicks ) => {
+export const calculateXTicksIncrementFactor = ( uniqueDates, maxTicks ) => {
 	let factors = [];
 	let i = 1;
 	// First we get all the factors of the length of the uniqueDates array
@@ -295,12 +303,12 @@ const calculateXTicksIncrementFactor = ( uniqueDates, maxTicks ) => {
  * Returns ticks for the x-axis.
  * @param {array} uniqueDates - all the unique dates from the input data for the chart
  * @param {integer} width - calculated page width
- * @param {string} layout - standard, comparison or compact chart types
+ * @param {string} mode - item-comparison or time-comparison
  * @param {string} interval - string of the interval used in the graph (hour, day, week...)
- * @returns {integer} number of x-axis ticks based on width and chart layout
+ * @returns {integer} number of x-axis ticks based on width and chart mode
  */
-export const getXTicks = ( uniqueDates, width, layout, interval ) => {
-	const maxTicks = calculateMaxXTicks( width, layout );
+export const getXTicks = ( uniqueDates, width, mode, interval ) => {
+	const maxTicks = calculateMaxXTicks( width, mode );
 
 	if (
 		( uniqueDates.length >= dayTicksThreshold && interval === 'day' ) ||
@@ -323,7 +331,7 @@ export const getXTicks = ( uniqueDates, width, layout, interval ) => {
  * @param {array} uniqueDates - from `getUniqueDates`
  * @param {number} width - calculated width of the charting space
  * @param {function} xLineScale - from `getXLineScale`
- * @returns {array} that icnludes the date, start (x position) and width to layout the mouseover rectangles
+ * @returns {array} that icnludes the date, start (x position) and width to mode the mouseover rectangles
  */
 export const getDateSpaces = ( data, uniqueDates, width, xLineScale ) =>
 	uniqueDates.map( ( d, i ) => {
@@ -447,7 +455,7 @@ export const drawAxis = ( node, params ) => {
 		.call(
 			d3AxisLeft( params.yTickOffset )
 				.tickValues( yGrids )
-				.tickFormat( d => d3Format( params.yFormat )( d !== 0 ? d : 0 ) )
+				.tickFormat( d => params.yFormat( d !== 0 ? d : 0 ) )
 		);
 
 	node.selectAll( '.domain' ).remove();
@@ -458,22 +466,15 @@ export const drawAxis = ( node, params ) => {
 		.remove();
 };
 
-const getTooltipRowLabel = ( d, row, params ) =>
-	d[ row.key ].labelDate ? formatDate( params.pointLabelFormat, d[ row.key ].labelDate ) : row.key;
-
-const getFormatedTotal = ( total, valueType ) => {
-	let rowTotal = total;
-	switch ( valueType ) {
-		case 'average':
-			rowTotal = Math.round( total );
-			break;
-		case 'currency':
-			rowTotal = formatCurrency( total );
-			break;
-		case 'number':
-			break;
+const getTooltipRowLabel = ( d, row, params ) => {
+	if ( d[ row.key ].labelDate ) {
+		return params.tooltipLabelFormat(
+			d[ row.key ].labelDate instanceof Date
+				? d[ row.key ].labelDate
+				: new Date( d[ row.key ].labelDate )
+		);
 	}
-	return rowTotal;
+	return row.key;
 };
 
 const showTooltip = ( params, d, position ) => {
@@ -484,14 +485,14 @@ const showTooltip = ( params, d, position ) => {
 						<span class="key-color" style="background-color:${ getColor( row.key, params ) }"></span>
 						<span class="key-key">${ getTooltipRowLabel( d, row, params ) }</span>
 					</div>
-					<span class="key-value">${ getFormatedTotal( d[ row.key ].value, params.valueType ) }</span>
+					<span class="key-value">${ params.tooltipValueFormat( d[ row.key ].value ) }</span>
 				</li>
 			`
 	);
 
 	const tooltipTitle = params.tooltipTitle
 		? params.tooltipTitle
-		: params.tooltipFormat( d.date instanceof Date ? d.date : new Date( d.date ) );
+		: params.tooltipLabelFormat( d.date instanceof Date ? d.date : new Date( d.date ) );
 
 	params.tooltip
 		.style( 'left', position.x + 'px' )
@@ -591,7 +592,7 @@ const calculateTooltipYPosition = (
 const calculateTooltipPosition = ( element, chart, tooltipPosition, elementWidthRatio = 1 ) => {
 	const elementCoords = element.getBoundingClientRect();
 	const chartCoords = chart.getBoundingClientRect();
-	const tooltipSize = d3Select( '.tooltip' )
+	const tooltipSize = d3Select( '.d3-chart__tooltip' )
 		.node()
 		.getBoundingClientRect();
 	const tooltipMargin = 24;
@@ -631,9 +632,9 @@ export const drawLines = ( node, data, params ) => {
 		.attr( 'role', 'region' )
 		.attr( 'aria-label', d => d.key );
 
-	let lineStroke = params.width <= 1329 || params.uniqueDates.length > 50 ? 2 : 3;
-	lineStroke = params.width <= 783 ? 1.25 : lineStroke;
-	const dotRadius = params.width <= 1329 ? 4 : 6;
+	let lineStroke = params.width <= wideBreak || params.uniqueDates.length > 50 ? 2 : 3;
+	lineStroke = params.width <= smallBreak ? 1.25 : lineStroke;
+	const dotRadius = params.width <= wideBreak ? 4 : 6;
 
 	series
 		.append( 'path' )
@@ -648,7 +649,9 @@ export const drawLines = ( node, data, params ) => {
 		} )
 		.attr( 'd', d => params.line( d.values ) );
 
-	params.width / params.uniqueDates.length > 36 &&
+	const minDataPointSpacing = 36;
+
+	params.width / params.uniqueDates.length > minDataPointSpacing &&
 		series
 			.selectAll( 'circle' )
 			.data( ( d, i ) => d.values.map( row => ( { ...row, i, visible: d.visible, key: d.key } ) ) )
@@ -668,8 +671,8 @@ export const drawLines = ( node, data, params ) => {
 			.attr( 'aria-label', d => {
 				const label = d.label
 					? d.label
-					: params.tooltipFormat( d.date instanceof Date ? d.date : new Date( d.date ) );
-				return `${ label } ${ formatCurrency( d.value ) }`;
+					: params.tooltipLabelFormat( d.date instanceof Date ? d.date : new Date( d.date ) );
+				return `${ label } ${ params.tooltipValueFormat( d.value ) }`;
 			} )
 			.on( 'focus', ( d, i, nodes ) => {
 				const position = calculateTooltipPosition(
@@ -750,7 +753,7 @@ export const drawBars = ( node, data, params ) => {
 			'aria-label',
 			d =>
 				params.mode === 'item-comparison'
-					? params.tooltipFormat( d.date instanceof Date ? d.date : new Date( d.date ) )
+					? params.tooltipLabelFormat( d.date instanceof Date ? d.date : new Date( d.date ) )
 					: null
 		);
 
@@ -786,7 +789,7 @@ export const drawBars = ( node, data, params ) => {
 		.attr( 'tabindex', '0' )
 		.attr( 'aria-label', d => {
 			const label = params.mode === 'time-comparison' && d.label ? d.label : d.key;
-			return `${ label } ${ formatCurrency( d.value ) }`;
+			return `${ label } ${ params.tooltipValueFormat( d.value ) }`;
 		} )
 		.style( 'opacity', d => {
 			const opacity = d.focus ? 1 : 0.1;

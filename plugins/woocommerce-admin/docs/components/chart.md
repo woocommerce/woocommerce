@@ -27,13 +27,6 @@ Format to parse dates into d3 time format
 
 Current path
 
-### `pointLabelFormat`
-
-- Type: String
-- Default: null
-
-Date format of the point labels (might be used in tooltips and ARIA properties).
-
 ### `query`
 
 - Type: Object
@@ -41,7 +34,7 @@ Date format of the point labels (might be used in tooltips and ARIA properties).
 
 The query string represented in object form
 
-### `tooltipFormat`
+### `tooltipLabelFormat`
 
 - Type: String
 - Default: `'%B %d, %Y'`
@@ -49,12 +42,19 @@ The query string represented in object form
 A datetime formatting string to format the date displayed as the title of the toolip
 if `tooltipTitle` is missing, passed to d3TimeFormat.
 
+### `tooltipValueFormat`
+
+- Type: String | Function
+- Default: `','`
+
+A number formatting string or function to format the value displayed in the tooltips.
+
 ### `tooltipTitle`
 
 - Type: String
 - Default: null
 
-A string to use as a title for the tooltip. Takes preference over `tooltipFormat`.
+A string to use as a title for the tooltip. Takes preference over `tooltipLabelFormat`.
 
 ### `xFormat`
 
@@ -231,7 +231,7 @@ ARIA properties.
 
 The list of labels for this chart.
 
-### `tooltipFormat`
+### `tooltipLabelFormat`
 
 - Type: String
 - Default: `'%B %d, %Y'`
@@ -251,7 +251,7 @@ The position where to render the tooltip can be `over` the chart or `below` the 
 - Type: String
 - Default: null
 
-A string to use as a title for the tooltip. Takes preference over `tooltipFormat`.
+A string to use as a title for the tooltip. Takes preference over `tooltipLabelFormat`.
 
 ### `type`
 

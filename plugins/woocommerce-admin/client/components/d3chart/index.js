@@ -32,6 +32,7 @@ import {
 	getYMax,
 	getYScale,
 	getYTickOffset,
+	getFormatter,
 } from './utils';
 
 /**
@@ -99,14 +100,13 @@ class D3Chart extends Component {
 			data,
 			dateParser,
 			height,
-			layout,
 			interval,
 			margin,
 			mode,
 			orderedKeys,
-			pointLabelFormat,
 			tooltipPosition,
-			tooltipFormat,
+			tooltipLabelFormat,
+			tooltipValueFormat,
 			tooltipTitle,
 			type,
 			xFormat,
@@ -115,7 +115,7 @@ class D3Chart extends Component {
 			valueType,
 		} = this.props;
 		const { width } = this.state;
-		const calculatedWidth = width || node.offsetWidth;
+		const calculatedWidth = width && width > 0 ? width : node.offsetWidth;
 		const calculatedHeight = height || node.offsetHeight;
 		const adjHeight = calculatedHeight - margin.top - margin.bottom;
 		const adjWidth = calculatedWidth - margin.left - margin.right;
@@ -128,7 +128,7 @@ class D3Chart extends Component {
 		const uniqueDates = getUniqueDates( lineData, parseDate );
 		const xLineScale = getXLineScale( uniqueDates, adjWidth );
 		const xScale = getXScale( uniqueDates, adjWidth );
-		const xTicks = getXTicks( uniqueDates, adjWidth, layout, interval );
+		const xTicks = getXTicks( uniqueDates, adjWidth, mode, interval );
 		return {
 			colorScheme,
 			dateSpaces: getDateSpaces( data, uniqueDates, adjWidth, xLineScale ),
@@ -138,17 +138,17 @@ class D3Chart extends Component {
 			margin,
 			mode,
 			orderedKeys: newOrderedKeys,
-			pointLabelFormat,
 			parseDate,
 			tooltipPosition,
-			tooltipFormat: d3TimeFormat( tooltipFormat ),
+			tooltipLabelFormat: getFormatter( tooltipLabelFormat, d3TimeFormat ),
+			tooltipValueFormat: getFormatter( tooltipValueFormat ),
 			tooltipTitle,
 			type,
 			uniqueDates,
 			uniqueKeys,
 			width: calculatedWidth,
-			xFormat: d3TimeFormat( xFormat ),
-			x2Format: d3TimeFormat( x2Format ),
+			xFormat: getFormatter( xFormat, d3TimeFormat ),
+			x2Format: getFormatter( x2Format, d3TimeFormat ),
 			xGroupScale: getXGroupScale( orderedKeys, xScale ),
 			xLineScale,
 			xTicks,
@@ -156,7 +156,7 @@ class D3Chart extends Component {
 			yMax,
 			yScale,
 			yTickOffset: getYTickOffset( adjHeight, yMax ),
-			yFormat,
+			yFormat: getFormatter( yFormat ),
 			valueType,
 		};
 	}
@@ -167,7 +167,7 @@ class D3Chart extends Component {
 		}
 		return (
 			<div
-				className={ classNames( 'woocommerce-chart__container', this.props.className ) }
+				className={ classNames( 'd3-chart__container', this.props.className ) }
 				style={ { height: this.props.height } }
 			>
 				<D3Base
@@ -178,7 +178,7 @@ class D3Chart extends Component {
 					type={ this.state.type }
 					width={ this.state.width }
 				/>
-				<div className="tooltip" ref={ this.tooltipRef } />
+				<div className="d3-chart__tooltip" ref={ this.tooltipRef } />
 			</div>
 		);
 	}
@@ -210,15 +210,6 @@ D3Chart.propTypes = {
 	 */
 	interval: PropTypes.oneOf( [ 'hour', 'day', 'week', 'month', 'quarter', 'year' ] ),
 	/**
-	 * `standard` (default) legend layout in the header or `comparison` moves legend layout
-	 * to the left or 'compact' has the legend below
-	 */
-	layout: PropTypes.oneOf( [ 'standard', 'comparison', 'compact' ] ),
-	/**
-	 * Date format of the point labels (might be used in tooltips and ARIA properties).
-	 */
-	pointLabelFormat: PropTypes.string,
-	/**
 	 * Margins for axis and chart padding.
 	 */
 	margin: PropTypes.shape( {
@@ -237,10 +228,13 @@ D3Chart.propTypes = {
 	 */
 	orderedKeys: PropTypes.array,
 	/**
-	 * A datetime formatting string to format the date displayed as the title of the toolip
-	 * if `tooltipTitle` is missing, passed to d3TimeFormat.
+	 * A datetime formatting string or overriding function to format the tooltip label.
 	 */
-	tooltipFormat: PropTypes.string,
+	tooltipLabelFormat: PropTypes.oneOfType( [ PropTypes.string, PropTypes.func ] ),
+	/**
+	 * A number formatting string or function to format the value displayed in the tooltips.
+	 */
+	tooltipValueFormat: PropTypes.oneOfType( [ PropTypes.string, PropTypes.func ] ),
 	/**
 	 * The position where to render the tooltip can be `over` the chart or `below` the chart.
 	 */
@@ -258,17 +252,17 @@ D3Chart.propTypes = {
 	 */
 	width: PropTypes.number,
 	/**
-	 * A datetime formatting string, passed to d3TimeFormat.
+	 * A datetime formatting string or function, passed to d3TimeFormat.
 	 */
-	xFormat: PropTypes.string,
+	xFormat: PropTypes.oneOfType( [ PropTypes.string, PropTypes.func ] ),
 	/**
-	 * A datetime formatting string, passed to d3TimeFormat.
+	 * A datetime formatting string or function, passed to d3TimeFormat.
 	 */
-	x2Format: PropTypes.string,
+	x2Format: PropTypes.oneOfType( [ PropTypes.string, PropTypes.func ] ),
 	/**
-	 * A number formatting string, passed to d3Format.
+	 * A number formatting string or function, passed to d3Format.
 	 */
-	yFormat: PropTypes.string,
+	yFormat: PropTypes.oneOfType( [ PropTypes.string, PropTypes.func ] ),
 };
 
 D3Chart.defaultProps = {
@@ -281,10 +275,10 @@ D3Chart.defaultProps = {
 		right: 0,
 		top: 20,
 	},
-	layout: 'standard',
 	mode: 'item-comparison',
-	tooltipFormat: '%B %d, %Y',
 	tooltipPosition: 'over',
+	tooltipLabelFormat: '%B %d, %Y',
+	tooltipValueFormat: ',',
 	type: 'line',
 	width: 600,
 	xFormat: '%Y-%m-%d',

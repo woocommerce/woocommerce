@@ -43,7 +43,6 @@ describe( 'ReportChart', () => {
 		const chart = reportChart.find( 'Chart' );
 
 		expect( chart.props().mode ).toEqual( null );
-		expect( chart.props().layout ).toEqual( 'standard' );
 	} );
 
 	test( 'should set the mode prop depending on the active filter', () => {
@@ -77,6 +76,5 @@ describe( 'ReportChart', () => {
 		const chart = reportChart.find( 'Chart' );
 
 		expect( chart.props().mode ).toEqual( 'item-comparison' );
-		expect( chart.props().layout ).toEqual( 'comparison' );
 	} );
 } );
