@@ -90,11 +90,6 @@ class WC_Session_Handler extends WC_Session {
 		add_action( 'shutdown', array( $this, 'save_data' ), 20 );
 		add_action( 'wp_logout', array( $this, 'destroy_session' ) );
 
-		// Support for the User Switching plugin.
-		add_action( 'switch_to_user', array( $this, 'forget_session' ) );
-		add_action( 'switch_back_user', array( $this, 'forget_session' ) );
-		add_action( 'switch_off_user', array( $this, 'forget_session' ) );
-
 		if ( ! is_user_logged_in() ) {
 			add_filter( 'nonce_user_logged_out', array( $this, 'nonce_user_logged_out' ) );
 		}
