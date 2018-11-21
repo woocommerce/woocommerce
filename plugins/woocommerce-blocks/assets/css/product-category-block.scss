@@ -5,3 +5,14 @@
 .wc-block-products-category {
 	overflow: hidden;
 }
+
+.wc-block-products-category__selection {
+	margin-top: 16px;
+	padding: 16px;
+	width: 100%;
+	border-top: 1px solid $core-grey-light-500;
+
+	.components-spinner {
+		float: none;
+	}
+}

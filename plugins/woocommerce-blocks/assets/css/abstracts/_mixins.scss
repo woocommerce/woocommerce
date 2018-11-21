@@ -1,0 +1,36 @@
+// Rem output with px fallback
+@mixin font-size($sizeValue: 16, $lineHeight: false ) {
+	font-size: $sizeValue + px;
+	font-size: ($sizeValue / 16) + rem;
+	@if ($lineHeight) {
+		line-height: $lineHeight;
+	}
+}
+
+@mixin hover-state {
+	&:hover,
+	&:active,
+	&:focus {
+		@content;
+	}
+}
+
+// Adds animation to placeholder section
+@mixin placeholder( $lighten-percentage: 30% ) {
+	animation: loading-fade 1.6s ease-in-out infinite;
+	background-color: $core-grey-light-500;
+	color: transparent;
+
+	&::after {
+		content: '\00a0';
+	}
+}
+
+// Adds animation to transforms
+@mixin animate-transform( $duration: 0.2s ) {
+	transition: transform ease $duration;
+
+	@media screen and (prefers-reduced-motion: reduce) {
+		transition: none;
+	}
+}
