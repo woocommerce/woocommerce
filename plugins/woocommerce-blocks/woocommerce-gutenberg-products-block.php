@@ -99,7 +99,9 @@ function wgpb_extra_gutenberg_scripts() {
 	);
 	wp_localize_script( 'woocommerce-products-block-editor', 'wc_product_block_data', $product_block_data );
 
-	wp_set_script_translations( 'woocommerce-products-category-block', 'woocommerce' );
+	if ( function_exists( 'wp_set_script_translations' ) ) {
+		wp_set_script_translations( 'woocommerce-products-category-block', 'woocommerce' );
+	}
 
 	wp_enqueue_script( 'woocommerce-products-block-editor' );
 	wp_enqueue_script( 'woocommerce-products-category-block' );
