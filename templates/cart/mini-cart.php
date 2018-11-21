@@ -17,8 +17,9 @@
  * @package WooCommerce/Templates
  * @version 3.5.0
  */
+
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+	exit; // Exit if accessed directly.
 }
 
 do_action( 'woocommerce_before_mini_cart' ); ?>
