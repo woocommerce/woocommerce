@@ -226,12 +226,11 @@ export function getReportChartData( endpoint, dataType, query, select ) {
 				isFetching = false;
 				break;
 			}
-			if ( ! isReportStatsRequesting( endpoint, nextQuery ) ) {
-				pagedData.push( _data );
-				if ( i === totalPages ) {
-					isFetching = false;
-					break;
-				}
+
+			pagedData.push( _data );
+			if ( i === totalPages ) {
+				isFetching = false;
+				break;
 			}
 		}
 
