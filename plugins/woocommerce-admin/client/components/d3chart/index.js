@@ -275,7 +275,7 @@ D3Chart.defaultProps = {
 		right: 0,
 		top: 20,
 	},
-	mode: 'item-comparison',
+	mode: 'time-comparison',
 	tooltipPosition: 'over',
 	tooltipLabelFormat: '%B %d, %Y',
 	tooltipValueFormat: ',',

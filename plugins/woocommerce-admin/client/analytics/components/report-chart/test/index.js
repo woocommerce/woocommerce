@@ -42,7 +42,7 @@ describe( 'ReportChart', () => {
 		);
 		const chart = reportChart.find( 'Chart' );
 
-		expect( chart.props().mode ).toEqual( null );
+		expect( chart.props().mode ).toBeUndefined();
 	} );
 
 	test( 'should set the mode prop depending on the active filter', () => {

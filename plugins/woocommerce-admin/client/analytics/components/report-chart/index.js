@@ -57,7 +57,7 @@ export class ReportChart extends Component {
 	getChartMode() {
 		const { filters, query } = this.props;
 		if ( ! filters ) {
-			return null;
+			return;
 		}
 		const clonedFilters = filters.slice( 0 );
 		const selectedFilter = this.getSelectedFilter( clonedFilters, query );

@@ -409,7 +409,7 @@ Chart.defaultProps = {
 	xFormat: '%d',
 	x2Format: '%b %Y',
 	yFormat: '$.3s',
-	mode: 'item-comparison',
+	mode: 'time-comparison',
 	type: 'line',
 	interval: 'day',
 };
