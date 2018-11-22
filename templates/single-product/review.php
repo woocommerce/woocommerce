@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 ?>
-<li <?php comment_class(); ?> id="li-comment-<?php comment_ID() ?>">
+<li <?php comment_class(); ?> id="li-comment-<?php comment_ID(); ?>">
 
 	<div id="comment-<?php comment_ID(); ?>" class="comment_container">
 
