@@ -6,8 +6,8 @@ import { __ } from '@wordpress/i18n';
 
 export const charts = [
 	{
-		key: 'orders_count',
-		label: __( 'Orders Count', 'wc-admin' ),
+		key: 'items_sold',
+		label: __( 'Items Sold', 'wc-admin' ),
 		type: 'number',
 	},
 	{
@@ -16,13 +16,8 @@ export const charts = [
 		type: 'currency',
 	},
 	{
-		key: 'items_sold',
-		label: __( 'Items Sold', 'wc-admin' ),
-		type: 'number',
-	},
-	{
-		key: 'products_count',
-		label: __( 'Number of Products', 'wc-admin' ),
+		key: 'orders_count',
+		label: __( 'Orders Count', 'wc-admin' ),
 		type: 'number',
 	},
 ];

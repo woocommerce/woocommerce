@@ -12,49 +12,14 @@ import { NAMESPACE } from 'store/constants';
 
 export const charts = [
 	{
-		key: 'avg_items_per_order',
-		label: __( 'Average Items Per Order', 'wc-admin' ),
+		key: 'discounted_orders',
+		label: __( 'Discounted Orders', 'wc-admin' ),
 		type: 'number',
-	},
-	{
-		key: 'avg_order_value',
-		label: __( 'Average Order Value', 'wc-admin' ),
-		type: 'currency',
 	},
 	{
 		key: 'coupons',
-		label: __( 'Coupons', 'wc-admin' ),
-		type: 'number',
-	},
-	{
-		key: 'net_revenue',
-		label: __( 'Net Revenue', 'wc-admin' ),
+		label: __( 'Gross Discounted', 'wc-admin' ),
 		type: 'currency',
-	},
-	{
-		key: 'num_items_sold',
-		label: __( 'Number of Items Sold', 'wc-admin' ),
-		type: 'number',
-	},
-	{
-		key: 'num_new_customers',
-		label: __( 'Number of New Customers', 'wc-admin' ),
-		type: 'number',
-	},
-	{
-		key: 'num_returning_customers',
-		label: __( 'Number of Returning Customers', 'wc-admin' ),
-		type: 'number',
-	},
-	{
-		key: 'orders_count',
-		label: __( 'Orders Count', 'wc-admin' ),
-		type: 'number',
-	},
-	{
-		key: 'products',
-		label: __( 'Products', 'wc-admin' ),
-		type: 'number',
 	},
 ];
 
