@@ -7,7 +7,7 @@ import classNames from 'classnames';
 import { Component, createRef } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import { formatDefaultLocale as d3FormatDefaultLocale } from 'd3-format';
-import { get, isEqual, partial } from 'lodash';
+import { get, isEqual, partial, find } from 'lodash';
 import Gridicon from 'gridicons';
 import { IconButton, NavigableMenu, SelectControl } from '@wordpress/components';
 import { interpolateViridis as d3InterpolateViridis } from 'd3-scale-chromatic';
@@ -34,7 +34,7 @@ d3FormatDefaultLocale( {
 	currency: [ decodeEntities( get( wcSettings, 'currency.symbol', '' ) ), '' ],
 } );
 
-function getOrderedKeys( props ) {
+function getOrderedKeys( props, previousOrderedKeys = [] ) {
 	const updatedKeys = [
 		...new Set(
 			props.data.reduce( ( accum, curr ) => {
@@ -42,12 +42,15 @@ function getOrderedKeys( props ) {
 				return accum;
 			}, [] )
 		),
-	].map( key => ( {
-		key,
-		total: props.data.reduce( ( a, c ) => a + c[ key ].value, 0 ),
-		visible: true,
-		focus: true,
-	} ) );
+	].map( key => {
+		const previousKey = previousOrderedKeys.find( item => key === item.key );
+		return {
+			key,
+			total: props.data.reduce( ( a, c ) => a + c[ key ].value, 0 ),
+			visible: previousKey ? previousKey.visible : true,
+			focus: true,
+		};
+	} );
 	if ( props.mode === 'item-comparison' ) {
 		updatedKeys.sort( ( a, b ) => b.total - a.total );
 	}
@@ -77,11 +80,11 @@ class Chart extends Component {
 
 	componentDidUpdate( prevProps ) {
 		const { data } = this.props;
-		const orderedKeys = getOrderedKeys( this.props );
 		if ( ! isEqual( [ ...data ].sort(), [ ...prevProps.data ].sort() ) ) {
+			const orderedKeys = getOrderedKeys( this.props, this.state.orderedKeys );
 			/* eslint-disable react/no-did-update-set-state */
 			this.setState( {
-				orderedKeys: orderedKeys,
+				orderedKeys,
 				visibleData: this.getVisibleData( data, orderedKeys ),
 			} );
 			/* eslint-enable react/no-did-update-set-state */
