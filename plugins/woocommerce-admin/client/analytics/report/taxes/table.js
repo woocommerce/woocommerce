@@ -11,7 +11,6 @@ import { get, map, orderBy } from 'lodash';
 /**
  * WooCommerce dependencies
  */
-import { appendTimestamp, getCurrentDates } from '@woocommerce/date';
 import { Link, TableCard } from '@woocommerce/components';
 import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
 import { onQueryChange } from '@woocommerce/navigation';
@@ -20,8 +19,7 @@ import { onQueryChange } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import ReportError from 'analytics/components/report-error';
-import { QUERY_DEFAULTS } from 'store/constants';
-import { getReportChartData, getFilterQuery } from 'store/reports/utils';
+import { getReportChartData, getReportTableData } from 'store/reports/utils';
 
 class TaxesReportTable extends Component {
 	getHeadersContent() {
@@ -139,27 +137,21 @@ class TaxesReportTable extends Component {
 	}
 
 	render() {
-		const { taxes, isTableDataError, isTableDataRequesting, primaryData, query } = this.props;
+		const { primaryData, tableData } = this.props;
+		const { items, query } = tableData;
 
-		const isError = isTableDataError || primaryData.isError;
+		const isError = tableData.isError || primaryData.isError;
 
 		if ( isError ) {
 			return <ReportError isError />;
 		}
 
-		const isRequesting = isTableDataRequesting || primaryData.isRequesting;
-
-		const tableQuery = {
-			...query,
-			orderby: query.orderby || 'date',
-			order: query.order || 'asc',
-		};
+		const isRequesting = tableData.isLoading || primaryData.isRequesting;
 
 		const headers = this.getHeadersContent();
-		const orderedTaxes = orderBy( taxes, tableQuery.orderby, tableQuery.order );
+		const orderedTaxes = orderBy( items, query.orderby, query.order );
 		const rows = this.getRowsContent( orderedTaxes );
-		const rowsPerPage = parseInt( tableQuery.per_page ) || QUERY_DEFAULTS.pageSize;
-		const totalRows = get( primaryData, [ 'data', 'totals', 'taxes_count' ], taxes.length );
+		const totalRows = get( primaryData, [ 'data', 'totals', 'taxes_count' ], items.length );
 		const summary = primaryData.data.totals ? this.getSummary( primaryData.data.totals ) : null;
 
 		return (
@@ -169,11 +161,11 @@ class TaxesReportTable extends Component {
 				ids={ orderedTaxes.map( tax => tax.tax_rate_id ) }
 				rows={ rows }
 				totalRows={ totalRows }
-				rowsPerPage={ rowsPerPage }
+				rowsPerPage={ query.per_page }
 				headers={ headers }
 				isLoading={ isRequesting }
 				onQueryChange={ onQueryChange }
-				query={ tableQuery }
+				query={ query }
 				summary={ summary }
 				downloadable
 			/>
@@ -184,29 +176,12 @@ class TaxesReportTable extends Component {
 export default compose(
 	withSelect( ( select, props ) => {
 		const { query } = props;
-		const datesFromQuery = getCurrentDates( query );
 		const primaryData = getReportChartData( 'taxes', 'primary', query, select );
-		const filterQuery = getFilterQuery( 'taxes', query );
-
-		const { getTaxes, isGetTaxesError, isGetTaxesRequesting } = select( 'wc-admin' );
-		const tableQuery = {
-			orderby: query.orderby || 'date',
-			order: query.order || 'asc',
-			page: query.page || 1,
-			per_page: query.per_page || QUERY_DEFAULTS.pageSize,
-			after: appendTimestamp( datesFromQuery.primary.after, 'start' ),
-			before: appendTimestamp( datesFromQuery.primary.before, 'end' ),
-			...filterQuery,
-		};
-		const taxes = getTaxes( tableQuery );
-		const isTableDataError = isGetTaxesError( tableQuery );
-		const isTableDataRequesting = isGetTaxesRequesting( tableQuery );
+		const tableData = getReportTableData( 'taxes', query, select );
 
 		return {
-			isTableDataError,
-			isTableDataRequesting,
-			taxes,
 			primaryData,
+			tableData,
 		};
 	} )
 )( TaxesReportTable );

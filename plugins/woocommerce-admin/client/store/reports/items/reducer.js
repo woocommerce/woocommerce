@@ -1,4 +1,5 @@
 /** @format */
+
 /**
  * External dependencies
  */
@@ -10,20 +11,24 @@ import { merge } from 'lodash';
 import { ERROR } from 'store/constants';
 import { getJsonString } from 'store/utils';
 
-export const DEFAULT_STATE = {};
+const DEFAULT_STATE = {};
 
-export default function variationsReducer( state = DEFAULT_STATE, action ) {
+export default function reportItemsReducer( state = DEFAULT_STATE, action ) {
 	const queryKey = getJsonString( action.query );
 
 	switch ( action.type ) {
-		case 'SET_VARIATIONS':
+		case 'SET_REPORT_ITEMS':
 			return merge( {}, state, {
-				[ queryKey ]: action.variations,
+				[ action.endpoint ]: {
+					[ queryKey ]: action.items,
+				},
 			} );
 
-		case 'SET_VARIATIONS_ERROR':
+		case 'SET_REPORT_ITEMS_ERROR':
 			return merge( {}, state, {
-				[ queryKey ]: ERROR,
+				[ action.endpoint ]: {
+					[ queryKey ]: ERROR,
+				},
 			} );
 	}
 

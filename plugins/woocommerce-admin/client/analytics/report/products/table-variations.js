@@ -13,15 +13,13 @@ import { map, orderBy } from 'lodash';
  */
 import { Link, TableCard } from '@woocommerce/components';
 import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
-import { appendTimestamp, getCurrentDates } from '@woocommerce/date';
 import { getNewPath, getPersistedQuery, onQueryChange } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
  */
 import ReportError from 'analytics/components/report-error';
-import { getFilterQuery, getReportChartData } from 'store/reports/utils';
-import { QUERY_DEFAULTS } from 'store/constants';
+import { getReportChartData, getReportTableData } from 'store/reports/utils';
 
 class VariationsReportTable extends Component {
 	getVariationName( variation ) {
@@ -130,16 +128,16 @@ class VariationsReportTable extends Component {
 	}
 
 	render() {
-		const { isVariationsError, isVariationsRequesting, variations, tableQuery } = this.props;
+		const { tableData } = this.props;
+		const { isError, isRequesting, items, query } = tableData;
 
-		if ( isVariationsError ) {
+		if ( isError ) {
 			return <ReportError isError />;
 		}
 
 		const headers = this.getHeadersContent();
-		const orderedVariations = orderBy( variations, tableQuery.orderby, tableQuery.order );
+		const orderedVariations = orderBy( items, query.orderby, query.order );
 		const rows = this.getRowsContent( orderedVariations );
-		const rowsPerPage = parseInt( tableQuery.per_page ) || QUERY_DEFAULTS.pageSize;
 
 		const labels = {
 			helpText: __( 'Select at least two variations to compare', 'wc-admin' ),
@@ -150,16 +148,16 @@ class VariationsReportTable extends Component {
 			<TableCard
 				title={ __( 'Variations', 'wc-admin' ) }
 				rows={ rows }
-				totalRows={ variations.length }
-				rowsPerPage={ rowsPerPage }
+				totalRows={ items.length }
+				rowsPerPage={ query.per_page }
 				headers={ headers }
 				labels={ labels }
 				ids={ orderedVariations.map( p => p.product_id ) }
-				isLoading={ isVariationsRequesting }
+				isLoading={ isRequesting }
 				compareBy={ 'variations' }
 				compareParam={ 'filter-variations' }
 				onQueryChange={ onQueryChange }
-				query={ tableQuery }
+				query={ query }
 				summary={ null } // @TODO
 				downloadable
 			/>
@@ -171,29 +169,14 @@ export default compose(
 	withSelect( ( select, props ) => {
 		const { query } = props;
 		const primaryData = getReportChartData( 'products', 'primary', query, select );
-
-		const { getVariations, isGetVariationsError, isGetVariationsRequesting } = select( 'wc-admin' );
-		const filterQuery = getFilterQuery( 'products', query );
-		const datesFromQuery = getCurrentDates( query );
-		const tableQuery = {
+		const tableData = getReportTableData( 'variations', query, select, {
 			orderby: query.orderby || 'items_sold',
 			order: query.order || 'desc',
-			after: appendTimestamp( datesFromQuery.primary.after, 'start' ),
-			before: appendTimestamp( datesFromQuery.primary.before, 'end' ),
-			page: query.page || 1,
-			per_page: query.per_page || QUERY_DEFAULTS.pageSize,
-			...filterQuery,
-		};
-		const variations = getVariations( tableQuery );
-		const isVariationsError = isGetVariationsError( tableQuery );
-		const isVariationsRequesting = isGetVariationsRequesting( tableQuery );
+		} );
 
 		return {
-			isVariationsError,
-			isVariationsRequesting,
 			primaryData,
-			variations,
-			tableQuery,
+			tableData,
 		};
 	} )
 )( VariationsReportTable );

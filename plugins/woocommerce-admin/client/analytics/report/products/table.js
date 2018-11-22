@@ -11,7 +11,6 @@ import { get, map, orderBy } from 'lodash';
 /**
  * WooCommerce dependencies
  */
-import { appendTimestamp, getCurrentDates } from '@woocommerce/date';
 import { Link, TableCard } from '@woocommerce/components';
 import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
 import { getNewPath, getPersistedQuery, onQueryChange } from '@woocommerce/navigation';
@@ -20,8 +19,7 @@ import { getNewPath, getPersistedQuery, onQueryChange } from '@woocommerce/navig
  * Internal dependencies
  */
 import ReportError from 'analytics/components/report-error';
-import { getFilterQuery, getReportChartData } from 'store/reports/utils';
-import { QUERY_DEFAULTS } from 'store/constants';
+import { getReportChartData, getReportTableData } from 'store/reports/utils';
 
 class ProductsReportTable extends Component {
 	getHeadersContent() {
@@ -161,20 +159,20 @@ class ProductsReportTable extends Component {
 	}
 
 	render() {
-		const { isProductsError, isProductsRequesting, primaryData, products, tableQuery } = this.props;
-		const isError = isProductsError || primaryData.isError;
+		const { primaryData, tableData } = this.props;
+		const { items, query } = tableData;
+		const isError = tableData.isError || primaryData.isError;
 
 		if ( isError ) {
 			return <ReportError isError />;
 		}
 
-		const isRequesting = isProductsRequesting || primaryData.isRequesting;
+		const isRequesting = tableData.isRequesting || primaryData.isRequesting;
 
 		const headers = this.getHeadersContent();
-		const orderedProducts = orderBy( products, tableQuery.orderby, tableQuery.order );
+		const orderedProducts = orderBy( items, query.orderby, query.order );
 		const rows = this.getRowsContent( orderedProducts );
-		const rowsPerPage = parseInt( tableQuery.per_page ) || QUERY_DEFAULTS.pageSize;
-		const totalRows = get( primaryData, [ 'data', 'totals', 'products_count' ], products.length );
+		const totalRows = get( primaryData, [ 'data', 'totals', 'products_count' ], items.length );
 
 		const labels = {
 			helpText: __( 'Select at least two products to compare', 'wc-admin' ),
@@ -186,14 +184,14 @@ class ProductsReportTable extends Component {
 				title={ __( 'Products', 'wc-admin' ) }
 				rows={ rows }
 				totalRows={ totalRows }
-				rowsPerPage={ rowsPerPage }
+				rowsPerPage={ query.per_page }
 				headers={ headers }
 				labels={ labels }
 				ids={ orderedProducts.map( p => p.product_id ) }
 				isLoading={ isRequesting }
 				compareBy={ 'products' }
 				onQueryChange={ onQueryChange }
-				query={ tableQuery }
+				query={ query }
 				summary={ null } // @TODO
 				downloadable
 			/>
@@ -204,31 +202,16 @@ class ProductsReportTable extends Component {
 export default compose(
 	withSelect( ( select, props ) => {
 		const { query } = props;
-		const datesFromQuery = getCurrentDates( query );
 		const primaryData = getReportChartData( 'products', 'primary', query, select );
-
-		const { getProducts, isGetProductsError, isGetProductsRequesting } = select( 'wc-admin' );
-		const filterQuery = getFilterQuery( 'products', query );
-		const tableQuery = {
+		const tableData = getReportTableData( 'products', query, select, {
 			orderby: query.orderby || 'items_sold',
 			order: query.order || 'desc',
-			page: query.page || 1,
-			per_page: query.per_page || QUERY_DEFAULTS.pageSize,
-			after: appendTimestamp( datesFromQuery.primary.after, 'start' ),
-			before: appendTimestamp( datesFromQuery.primary.before, 'end' ),
 			extended_product_info: true,
-			...filterQuery,
-		};
-		const products = getProducts( tableQuery );
-		const isProductsError = isGetProductsError( tableQuery );
-		const isProductsRequesting = isGetProductsRequesting( tableQuery );
+		} );
 
 		return {
-			isProductsError,
-			isProductsRequesting,
 			primaryData,
-			products,
-			tableQuery,
+			tableData,
 		};
 	} )
 )( ProductsReportTable );

@@ -12,12 +12,7 @@ import { get, map, orderBy } from 'lodash';
 /**
  * WooCommerce dependencies
  */
-import {
-	appendTimestamp,
-	getCurrentDates,
-	getIntervalForQuery,
-	getDateFormatsForInterval,
-} from '@woocommerce/date';
+import { getIntervalForQuery, getDateFormatsForInterval } from '@woocommerce/date';
 import { Link, TableCard } from '@woocommerce/components';
 import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
 import { onQueryChange } from '@woocommerce/navigation';
@@ -26,8 +21,7 @@ import { onQueryChange } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import ReportError from 'analytics/components/report-error';
-import { QUERY_DEFAULTS } from 'store/constants';
-import { getReportChartData, getFilterQuery } from 'store/reports/utils';
+import { getReportChartData, getReportTableData } from 'store/reports/utils';
 
 class CouponsReportTable extends Component {
 	getHeadersContent() {
@@ -150,27 +144,21 @@ class CouponsReportTable extends Component {
 	}
 
 	render() {
-		const { coupons, isTableDataError, isTableDataRequesting, primaryData, query } = this.props;
+		const { tableData, primaryData } = this.props;
+		const { items, query } = tableData;
 
-		const isError = isTableDataError || primaryData.isError;
+		const isError = tableData.isError || primaryData.isError;
 
 		if ( isError ) {
 			return <ReportError isError />;
 		}
 
-		const isRequesting = isTableDataRequesting || primaryData.isRequesting;
-
-		const tableQuery = {
-			...query,
-			orderby: query.orderby || 'date',
-			order: query.order || 'asc',
-		};
+		const isRequesting = tableData.isRequesting || primaryData.isRequesting;
 
 		const headers = this.getHeadersContent();
-		const orderedCoupons = orderBy( coupons, tableQuery.orderby, tableQuery.order );
+		const orderedCoupons = orderBy( items, query.orderby, query.order );
 		const rows = this.getRowsContent( orderedCoupons );
-		const rowsPerPage = parseInt( tableQuery.per_page ) || QUERY_DEFAULTS.pageSize;
-		const totalRows = get( primaryData, [ 'data', 'totals', 'coupons_count' ], coupons.length );
+		const totalRows = get( primaryData, [ 'data', 'totals', 'coupons_count' ], items.length );
 		const summary = primaryData.data.totals ? this.getSummary( primaryData.data.totals ) : null;
 
 		return (
@@ -180,11 +168,11 @@ class CouponsReportTable extends Component {
 				ids={ orderedCoupons.map( coupon => coupon.coupon_id ) }
 				rows={ rows }
 				totalRows={ totalRows }
-				rowsPerPage={ rowsPerPage }
+				rowsPerPage={ query.per_page }
 				headers={ headers }
 				isLoading={ isRequesting }
 				onQueryChange={ onQueryChange }
-				query={ tableQuery }
+				query={ query }
 				summary={ summary }
 				downloadable
 			/>
@@ -195,29 +183,12 @@ class CouponsReportTable extends Component {
 export default compose(
 	withSelect( ( select, props ) => {
 		const { query } = props;
-		const datesFromQuery = getCurrentDates( query );
 		const primaryData = getReportChartData( 'coupons', 'primary', query, select );
-		const filterQuery = getFilterQuery( 'coupons', query );
-
-		const { getCoupons, isGetCouponsError, isGetCouponsRequesting } = select( 'wc-admin' );
-		const tableQuery = {
-			orderby: query.orderby || 'date',
-			order: query.order || 'asc',
-			page: query.page || 1,
-			per_page: query.per_page || QUERY_DEFAULTS.pageSize,
-			after: appendTimestamp( datesFromQuery.primary.after, 'start' ),
-			before: appendTimestamp( datesFromQuery.primary.before, 'end' ),
-			...filterQuery,
-		};
-		const coupons = getCoupons( tableQuery );
-		const isTableDataError = isGetCouponsError( tableQuery );
-		const isTableDataRequesting = isGetCouponsRequesting( tableQuery );
+		const tableData = getReportTableData( 'coupons', query, select );
 
 		return {
-			isTableDataError,
-			isTableDataRequesting,
-			coupons,
 			primaryData,
+			tableData,
 		};
 	} )
 )( CouponsReportTable );

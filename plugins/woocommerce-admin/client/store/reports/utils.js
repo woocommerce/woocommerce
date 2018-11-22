@@ -15,12 +15,13 @@ import { formatCurrency } from '@woocommerce/currency';
 /**
  * Internal dependencies
  */
-import { MAX_PER_PAGE } from 'store/constants';
+import { MAX_PER_PAGE, QUERY_DEFAULTS } from 'store/constants';
 import * as categoriesConfig from 'analytics/report/categories/config';
 import * as couponsConfig from 'analytics/report/coupons/config';
 import * as ordersConfig from 'analytics/report/orders/config';
 import * as productsConfig from 'analytics/report/products/config';
 import * as taxesConfig from 'analytics/report/taxes/config';
+import * as reportsUtils from './utils';
 
 const reportConfigs = {
 	categories: categoriesConfig,
@@ -267,4 +268,52 @@ export function getTooltipValueFormat( type ) {
 		default:
 			return ',';
 	}
+}
+
+export function getReportTableQuery( urlQuery, query ) {
+	const filterQuery = getFilterQuery( 'products', urlQuery );
+	const datesFromQuery = getCurrentDates( urlQuery );
+
+	return {
+		orderby: urlQuery.orderby || 'date',
+		order: urlQuery.order || 'asc',
+		after: appendTimestamp( datesFromQuery.primary.after, 'start' ),
+		before: appendTimestamp( datesFromQuery.primary.before, 'end' ),
+		page: urlQuery.page || 1,
+		per_page: urlQuery.per_page || QUERY_DEFAULTS.pageSize,
+		...filterQuery,
+		...query,
+	};
+}
+
+/**
+ * Returns table data needed to render a report page.
+ *
+ * @param  {String} endpoint  Report API Endpoint
+ * @param  {Object} urlQuery  Query parameters in the url
+ * @param  {object} select    Instance of @wordpress/select
+ * @param  {Object} query     Query parameters specific for that endpoint
+ * @return {Object} Object    Table data response
+ */
+export function getReportTableData( endpoint, urlQuery, select, query = {} ) {
+	const { getReportItems, isGetReportItemsRequesting, isGetReportItemsError } = select(
+		'wc-admin'
+	);
+
+	const tableQuery = reportsUtils.getReportTableQuery( urlQuery, query );
+	const response = {
+		query: tableQuery,
+		isRequesting: false,
+		isError: false,
+		items: [],
+	};
+
+	const items = getReportItems( endpoint, tableQuery );
+	if ( isGetReportItemsRequesting( endpoint, tableQuery ) ) {
+		return { ...response, isRequesting: true };
+	} else if ( isGetReportItemsError( endpoint, tableQuery ) ) {
+		return { ...response, isError: true };
+	}
+
+	return { ...response, items };
 }
