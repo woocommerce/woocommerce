@@ -4,10 +4,10 @@
  */
 import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
-import { Component, createRef } from '@wordpress/element';
+import { Component, createRef, Fragment } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import { formatDefaultLocale as d3FormatDefaultLocale } from 'd3-format';
-import { get, isEqual, partial, find } from 'lodash';
+import { get, isEqual, partial } from 'lodash';
 import Gridicon from 'gridicons';
 import { IconButton, NavigableMenu, SelectControl } from '@wordpress/components';
 import { interpolateViridis as d3InterpolateViridis } from 'd3-scale-chromatic';
@@ -26,6 +26,7 @@ import { H, Section } from '@woocommerce/components';
 import './style.scss';
 import D3Chart from 'components/d3chart';
 import Legend from 'components/d3chart/legend';
+import ChartPlaceholder from './placeholder';
 
 d3FormatDefaultLocale( {
 	decimal: '.',
@@ -81,7 +82,13 @@ class Chart extends Component {
 	componentDidUpdate( prevProps ) {
 		const { data } = this.props;
 		if ( ! isEqual( [ ...data ].sort(), [ ...prevProps.data ].sort() ) ) {
-			const orderedKeys = getOrderedKeys( this.props, this.state.orderedKeys );
+			/**
+			 * Only update the orderedKeys when data is present so that
+			 * selection may persist while requesting new data.
+			 */
+			const orderedKeys = data.length
+				? getOrderedKeys( this.props, this.state.orderedKeys )
+				: this.state.orderedKeys;
 			/* eslint-disable react/no-did-update-set-state */
 			this.setState( {
 				orderedKeys,
@@ -220,6 +227,7 @@ class Chart extends Component {
 			interval,
 			valueType,
 			type,
+			isRequesting,
 		} = this.props;
 		let { yFormat } = this.props;
 		const legendDirection = mode === 'time-comparison' && isViewportWide ? 'row' : 'column';
@@ -299,28 +307,37 @@ class Chart extends Component {
 						ref={ this.chartBodyRef }
 					>
 						{ isViewportWide && legendDirection === 'column' && legend }
-						{ width > 0 && (
-							<D3Chart
-								colorScheme={ d3InterpolateViridis }
-								data={ visibleData }
-								dateParser={ dateParser }
-								height={ chartHeight }
-								interval={ interval }
-								margin={ margin }
-								mode={ mode }
-								orderedKeys={ orderedKeys }
-								tooltipLabelFormat={ tooltipLabelFormat }
-								tooltipValueFormat={ tooltipValueFormat }
-								tooltipPosition={ isViewportLarge ? 'over' : 'below' }
-								tooltipTitle={ tooltipTitle }
-								type={ type }
-								width={ chartDirection === 'row' ? width - 320 : width }
-								xFormat={ xFormat }
-								x2Format={ x2Format }
-								yFormat={ yFormat }
-								valueType={ valueType }
-							/>
+						{ isRequesting && (
+							<Fragment>
+								<span className="screen-reader-text">
+									{ __( 'Your requested data is loading', 'wc-admin' ) }
+								</span>
+								<ChartPlaceholder />
+							</Fragment>
 						) }
+						{ ! isRequesting &&
+							width > 0 && (
+								<D3Chart
+									colorScheme={ d3InterpolateViridis }
+									data={ visibleData }
+									dateParser={ dateParser }
+									height={ chartHeight }
+									interval={ interval }
+									margin={ margin }
+									mode={ mode }
+									orderedKeys={ orderedKeys }
+									tooltipLabelFormat={ tooltipLabelFormat }
+									tooltipValueFormat={ tooltipValueFormat }
+									tooltipPosition={ isViewportLarge ? 'over' : 'below' }
+									tooltipTitle={ tooltipTitle }
+									type={ type }
+									width={ chartDirection === 'row' ? width - 320 : width }
+									xFormat={ xFormat }
+									x2Format={ x2Format }
+									yFormat={ yFormat }
+									valueType={ valueType }
+								/>
+							) }
 					</div>
 					{ ! isViewportWide && <div className="woocommerce-chart__footer">{ legend }</div> }
 				</Section>
@@ -399,6 +416,10 @@ Chart.propTypes = {
 	 * What type of data is to be displayed? Number, Average, String?
 	 */
 	valueType: PropTypes.string,
+	/**
+	 * Render a chart placeholder to signify an in-flight data request.
+	 */
+	isRequesting: PropTypes.bool,
 };
 
 Chart.defaultProps = {

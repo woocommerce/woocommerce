@@ -2,8 +2,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
-import { Component, Fragment } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { format as formatDate } from '@wordpress/date';
 import { withSelect } from '@wordpress/data';
@@ -26,7 +25,7 @@ import {
 /**
  * Internal dependencies
  */
-import { Chart, ChartPlaceholder } from 'components';
+import { Chart } from 'components';
 import { getReportChartData, getTooltipValueFormat } from 'store/reports/utils';
 import ReportError from 'analytics/components/report-error';
 
@@ -70,17 +69,6 @@ export class ReportChart extends Component {
 
 		if ( primaryData.isError || secondaryData.isError ) {
 			return <ReportError isError />;
-		}
-
-		if ( primaryData.isRequesting || secondaryData.isRequesting ) {
-			return (
-				<Fragment>
-					<span className="screen-reader-text">
-						{ __( 'Your requested data is loading', 'wc-admin' ) }
-					</span>
-					<ChartPlaceholder />
-				</Fragment>
-			);
 		}
 
 		const currentInterval = getIntervalForQuery( query );
@@ -131,6 +119,7 @@ export class ReportChart extends Component {
 				x2Format={ formats.x2Format }
 				dateParser={ '%Y-%m-%dT%H:%M:%S' }
 				valueType={ selectedChart.type }
+				isRequesting={ primaryData.isRequesting || secondaryData.isRequesting }
 			/>
 		);
 	}
