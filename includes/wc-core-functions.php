@@ -1081,7 +1081,7 @@ function wc_get_customer_default_location() {
 			break;
 		default:
 			$countries = WC()->countries->get_allowed_countries();
-			$location = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', 1 === count( $countries ) ? key( $countries ) : '' ) );
+			$location  = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', 1 === count( $countries ) ? key( $countries ) : '' ) );
 			break;
 	}
 
