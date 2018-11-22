@@ -473,7 +473,8 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 	}
 
 	$symbols         = apply_filters(
-		'woocommerce_currency_symbols', array(
+		'woocommerce_currency_symbols',
+		array(
 			'AED' => '&#x62f;.&#x625;',
 			'AFN' => '&#x60b;',
 			'ALL' => 'L',
@@ -1315,7 +1316,8 @@ function wc_get_credit_card_type_label( $type ) {
 	$type = str_replace( '_', ' ', $type );
 
 	$labels = apply_filters(
-		'woocommerce_credit_card_type_labels', array(
+		'woocommerce_credit_card_type_labels',
+		array(
 			'mastercard'       => __( 'MasterCard', 'woocommerce' ),
 			'visa'             => __( 'Visa', 'woocommerce' ),
 			'discover'         => __( 'Discover', 'woocommerce' ),
@@ -1476,7 +1478,7 @@ function wc_get_shipping_method_count( $include_legacy = false ) {
  * @param int $limit Time limit.
  */
 function wc_set_time_limit( $limit = 0 ) {
-	if ( function_exists( 'set_time_limit' ) && false === strpos( ini_get( 'disable_functions' ), 'set_time_limit' ) && ! ini_get( 'safe_mode' ) ) { // phpcs:ignore PHPCompatibility.PHP.DeprecatedIniDirectives.safe_modeDeprecatedRemoved
+	if ( function_exists( 'set_time_limit' ) && false === strpos( ini_get( 'disable_functions' ), 'set_time_limit' ) && ! ini_get( 'safe_mode' ) ) { // phpcs:ignore PHPCompatibility.IniDirectives.RemovedIniDirectives.safe_modeDeprecatedRemoved
 		@set_time_limit( $limit ); // @codingStandardsIgnoreLine
 	}
 }
@@ -1836,7 +1838,8 @@ function wc_list_pluck( $list, $callback_or_field, $index_key = null ) {
 function wc_get_permalink_structure() {
 	$saved_permalinks = (array) get_option( 'woocommerce_permalinks', array() );
 	$permalinks       = wp_parse_args(
-		array_filter( $saved_permalinks ), array(
+		array_filter( $saved_permalinks ),
+		array(
 			'product_base'           => _x( 'product', 'slug', 'woocommerce' ),
 			'category_base'          => _x( 'product-category', 'slug', 'woocommerce' ),
 			'tag_base'               => _x( 'product-tag', 'slug', 'woocommerce' ),
@@ -2113,7 +2116,7 @@ function wc_decimal_to_fraction( $decimal ) {
  */
 function wc_round_discount( $value, $precision ) {
 	if ( version_compare( PHP_VERSION, '5.3.0', '>=' ) ) {
-		return round( $value, $precision, WC_DISCOUNT_ROUNDING_MODE ); // phpcs:ignore PHPCompatibility.PHP.NewFunctionParameters.round_modeFound
+		return round( $value, $precision, WC_DISCOUNT_ROUNDING_MODE ); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctionParameters.round_modeFound
 	}
 
 	if ( 2 === WC_DISCOUNT_ROUNDING_MODE ) {

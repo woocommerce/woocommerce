@@ -1175,6 +1175,15 @@ class WC_Countries {
 							'required' => false,
 						),
 					),
+					'ST' => array(
+						'postcode' => array(
+							'required' => false,
+							'hidden'   => true,
+						),
+						'state'    => array(
+							'label' => __( 'District', 'woocommerce' ),
+						),
+					),
 					'VN' => array(
 						'state'     => array(
 							'required' => false,

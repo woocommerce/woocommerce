@@ -166,7 +166,7 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 		 * @see http://php.net/manual/en/function.debug-backtrace.php#refsect1-function.debug-backtrace-parameters
 		 */
 		if ( defined( 'DEBUG_BACKTRACE_IGNORE_ARGS' ) ) {
-			$debug_backtrace_arg = DEBUG_BACKTRACE_IGNORE_ARGS; // phpcs:ignore PHPCompatibility.PHP.NewConstants.debug_backtrace_ignore_argsFound
+			$debug_backtrace_arg = DEBUG_BACKTRACE_IGNORE_ARGS; // phpcs:ignore PHPCompatibility.Constants.NewConstants.debug_backtrace_ignore_argsFound
 		} else {
 			$debug_backtrace_arg = false;
 		}
