@@ -1560,8 +1560,9 @@ class WC_Cart extends WC_Legacy_Cart {
 			 *     false if it doesn't belong to any external discount and a proper error message for the user has
 			 *     already been constructed, or any other value to keep the default WooCommerce behaviour.
 			 * @param string $coupon_code Coupon code as provided by the user, after being formatted by WooCommerce
+			 * @param WC_Cart $this Cart to which the discount should be applied
 			 */
-			$external_discount_found = apply_filters( 'woocommerce_not_found_coupon', false, $coupon_code );
+			$external_discount_found = apply_filters( 'woocommerce_not_found_coupon', false, $coupon_code, $this );
 			if ( is_bool( $external_discount_found ) ) {
 				return $external_coupon_found;
 			}
