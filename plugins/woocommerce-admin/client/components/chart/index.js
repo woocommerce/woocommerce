@@ -312,7 +312,7 @@ class Chart extends Component {
 								<span className="screen-reader-text">
 									{ __( 'Your requested data is loading', 'wc-admin' ) }
 								</span>
-								<ChartPlaceholder />
+								<ChartPlaceholder height={ chartHeight } />
 							</Fragment>
 						) }
 						{ ! isRequesting &&
@@ -433,6 +433,7 @@ Chart.defaultProps = {
 	mode: 'time-comparison',
 	type: 'line',
 	interval: 'day',
+	isRequesting: false,
 };
 
 export default withViewportMatch( {

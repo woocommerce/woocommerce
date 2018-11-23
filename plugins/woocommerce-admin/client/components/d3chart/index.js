@@ -202,7 +202,7 @@ D3Chart.propTypes = {
 	 */
 	dateParser: PropTypes.string.isRequired,
 	/**
-	 * Relative viewpoirt height of the `svg`.
+	 * Height of the `svg`.
 	 */
 	height: PropTypes.number,
 	/**
@@ -248,7 +248,7 @@ D3Chart.propTypes = {
 	 */
 	type: PropTypes.oneOf( [ 'bar', 'line' ] ),
 	/**
-	 * Relative viewport width of the `svg`.
+	 * Width of the `svg`.
 	 */
 	width: PropTypes.number,
 	/**

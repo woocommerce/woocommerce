@@ -62,13 +62,12 @@
 	.woocommerce-chart__footer {
 		width: 100%;
 	}
+}
 
-	&.is-placeholder {
-		@include placeholder();
-		height: 200px;
-		width: 100%;
-		padding: 0;
-	}
+.woocommerce-chart-placeholder {
+	@include placeholder();
+	padding: 0;
+	width: 100%;
 }
 
 .woocommerce-chart__interval-select {
