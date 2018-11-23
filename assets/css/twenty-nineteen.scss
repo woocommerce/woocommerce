@@ -39,6 +39,10 @@ $highlights-color: #0073aa;
  * Global elements
  */
 a.button {
+	display: inline-block;
+	text-align: center;
+	box-sizing: border-box;
+	word-break: break-all;
 	color: #fff;
 	text-decoration: none !important;
 
@@ -132,7 +136,9 @@ a.button {
 	margin-bottom: 1.5rem;
 	padding: 1rem;
 	background: #eee;
+	font-size: 0.88889em;
 	font-family: $headings;
+	list-style: none;
 	overflow: hidden;
 }
 
@@ -150,6 +156,10 @@ a.button {
 
 		&:hover {
 			color: #fff;
+		}
+
+		&.button {
+			background: #111;
 		}
 	}
 }
@@ -184,6 +194,18 @@ a.button {
 	&:hover {
 		text-decoration: underline;
 		color: #fff;
+	}
+}
+
+/**
+* Tables
+*/
+.woocommerce,
+.woocommerce-page {
+	table.shop_table {
+		td, th {
+			word-break: normal;
+		}
 	}
 }
 
@@ -662,8 +684,11 @@ table.variations {
 		padding: 0.5rem 0;
 
 		a.remove {
-			float: right;
-			margin-top: 2px;
+			float: left;
+			margin-top: 7px;
+			line-height: 20px;
+			color: #fff;
+			margin-right: .5rem;
 		}
 	}
 
@@ -815,13 +840,6 @@ table.variations {
 			padding: 0.5rem 0;
 			border-bottom: 1px solid #ccc;
 
-			&:before {
-				content: "→";
-				display: inline-block;
-				margin-right: 0.25rem;
-				color: $body-color;
-			}
-
 			&:first-child {
 				padding-top: 0;
 			}
@@ -842,6 +860,12 @@ table.variations {
 					text-decoration: underline;
 				}
 			}
+		}
+	}
+
+	table.account-orders-table {
+		.button {
+			margin: 0 .35rem .35rem 0;
 		}
 	}
 }
@@ -910,6 +934,7 @@ table.variations {
 #shipping_method {
 	list-style: none;
 	margin: 0;
+	padding: 0;
 
 	li {
 		margin-bottom: 0.5rem;
@@ -946,6 +971,9 @@ table.variations {
  * Checkout
  */
  #ship-to-different-address {
+	font-size: 1em;
+	display: inline-block;
+
 	label {
 		font-weight: 300;
 		cursor: pointer;
@@ -953,6 +981,8 @@ table.variations {
 		span {
 			position: relative;
 			display: block;
+			text-align: right;
+			padding-right: 45px;
 
 			&:before {
 				content: "";
@@ -1106,16 +1136,16 @@ table.variations {
 
 .woocommerce-checkout-review-order {
 	ul {
+		margin: 2rem 0 1rem;
 		padding-left: 0;
 	}
 }
 
 .wc_payment_method {
 	list-style: none;
-	border-bottom: 1px solid #ddd;
 
 	.payment_box {
-		padding: 2rem;
+		padding: 1rem;
 		background: #eee;
 
 		ul,
@@ -1136,12 +1166,19 @@ table.variations {
 			list-style: none;
 		}
 
-		p:last-child {
-			margin-bottom: 0;
+		p {
+			&:first-child {
+				margin-top: 0;
+			}
+
+			&:last-child {
+				margin-bottom: 0;
+			}
 		}
 	}
 
 	> label:first-of-type {
+		display: block;
 		margin: 1rem 0;
 
 		img {
@@ -1182,6 +1219,14 @@ table.variations {
 	}
 }
 
+.woocommerce-order-overview  {
+	margin-bottom: 2rem;
+}
+
+.woocommerce-table--order-details {
+	margin-bottom: 2rem;
+}
+
 /**
  * Layout stuff
  */
@@ -1193,7 +1238,48 @@ table.variations {
 	}
 }
 
+@media only screen and (max-width: 768px) {
+	.woocommerce,
+	.woocommerce-page {
+		table.shop_table_responsive {
+			tr {
+				margin: 0 0 1.5rem;
+
+				&:first-child {
+					border-top: 1px solid;
+				}
+
+				&:last-child {
+					margin-bottom: 0;
+				}
+
+				td {
+					border-bottom-width: 0;
+
+					&:last-child {
+						border-bottom-width: 1px;
+					}
+				}
+			}
+		}
+	}
+}
+
 @media only screen and (min-width: 768px) {
+	/**
+	* Tables
+	*/
+	.woocommerce,
+	.woocommerce-page {
+		table.shop_table {
+			tbody {
+				tr {
+					font-size: 0.88889em;
+				}
+			}
+		}
+	}
+
 	/**
 	* Shop page
 	*/
@@ -1215,14 +1301,33 @@ table.variations {
 	*/
 	.woocommerce-account {
 		.woocommerce-MyAccount-navigation {
-			float: right;
-			width: 25%;
-			margin-bottom: 0;
+			float: none;
+			width: 100%;
+			margin-bottom: 1.5rem;
+
+			li {
+				display: inline-block;
+				margin: 0 1rem 0 0;
+				padding: 0;
+				border-bottom: 0;
+
+				&:last-child {
+					margin-right: 0;
+				}
+			}
 		}
 
 		.woocommerce-MyAccount-content {
-			float: left;
+			float: none;
+			width: 100%;
 		}
+	}
+
+	/**
+	* Checkout
+	*/
+	#ship-to-different-address {
+		display: block;
 	}
 
 	/**
