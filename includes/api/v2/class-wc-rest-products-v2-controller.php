@@ -524,7 +524,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_Legacy_Products_Controller 
 			foreach ( $product->get_variation_attributes() as $attribute_name => $attribute ) {
 				$name = str_replace( 'attribute_', '', $attribute_name );
 
-				if ( ! $attribute ) {
+				if ( empty( $attribute ) && '0' !== $attribute ) {
 					continue;
 				}
 
