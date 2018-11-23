@@ -762,6 +762,9 @@ class WC_Countries {
 							'required' => false,
 							'hidden'   => true,
 						),
+						'state' => array(
+							'label' => __( 'Province', 'woocommerce' ),
+						),
 					),
 					'AT' => array(
 						'postcode' => array(
