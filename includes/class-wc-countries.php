@@ -473,7 +473,8 @@ class WC_Countries {
 	public function get_address_formats() {
 		if ( empty( $this->address_formats ) ) {
 			$this->address_formats = apply_filters(
-				'woocommerce_localisation_address_formats', array(
+				'woocommerce_localisation_address_formats',
+				array(
 					'default' => "{name}\n{company}\n{address_1}\n{address_2}\n{city}\n{state}\n{postcode}\n{country}",
 					'AU'      => "{name}\n{company}\n{address_1}\n{address_2}\n{city} {state} {postcode}\n{country}",
 					'AT'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
@@ -557,8 +558,10 @@ class WC_Countries {
 
 		// Substitute address parts into the string.
 		$replace = array_map(
-			'esc_html', apply_filters(
-				'woocommerce_formatted_address_replacements', array(
+			'esc_html',
+			apply_filters(
+				'woocommerce_formatted_address_replacements',
+				array(
 					'{first_name}'       => $args['first_name'],
 					'{last_name}'        => $args['last_name'],
 					'{name}'             => $args['first_name'] . ' ' . $args['last_name'],
@@ -580,7 +583,8 @@ class WC_Countries {
 					'{state_code}'       => strtoupper( $state ),
 					'{postcode_upper}'   => strtoupper( $args['postcode'] ),
 					'{country_upper}'    => strtoupper( $full_country ),
-				), $args
+				),
+				$args
 			)
 		);
 
@@ -737,7 +741,8 @@ class WC_Countries {
 	public function get_country_locale() {
 		if ( empty( $this->locale ) ) {
 			$this->locale = apply_filters(
-				'woocommerce_get_country_locale', array(
+				'woocommerce_get_country_locale',
+				array(
 					'AE' => array(
 						'postcode' => array(
 							'required' => false,
