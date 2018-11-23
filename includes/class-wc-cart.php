@@ -1550,9 +1550,12 @@ class WC_Cart extends WC_Legacy_Cart {
 
 		// Prevent adding coupons by post ID.
 		if ( $the_coupon->get_code() !== $coupon_code ) {
-			$the_coupon->set_code( $coupon_code );
-			$the_coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_NOT_EXIST );
-			return false;
+			$coupon_found = apply_filters( 'woocommerce_not_found_coupon', false, $coupon_code );
+			if ( ! $coupon_found ) {			
+				$the_coupon->set_code( $coupon_code );
+				$the_coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_NOT_EXIST );
+			}
+			return $coupon_found;
 		}
 
 		// Check it can be used with cart.
