@@ -7,7 +7,7 @@ import classNames from 'classnames';
 import { Component, createRef, Fragment } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import { formatDefaultLocale as d3FormatDefaultLocale } from 'd3-format';
-import { get, isEqual, partial } from 'lodash';
+import { get, isEmpty, isEqual, partial } from 'lodash';
 import Gridicon from 'gridicons';
 import { IconButton, NavigableMenu, SelectControl } from '@wordpress/components';
 import { interpolateViridis as d3InterpolateViridis } from 'd3-scale-chromatic';
@@ -263,6 +263,7 @@ class Chart extends Component {
 				yFormat = '.0f';
 				break;
 		}
+		const showChart = ! isRequesting && ! isEmpty( visibleData );
 		return (
 			<div className="woocommerce-chart">
 				<div className="woocommerce-chart__header">
@@ -307,7 +308,7 @@ class Chart extends Component {
 						ref={ this.chartBodyRef }
 					>
 						{ isViewportWide && legendDirection === 'column' && legend }
-						{ isRequesting && (
+						{ ! showChart && (
 							<Fragment>
 								<span className="screen-reader-text">
 									{ __( 'Your requested data is loading', 'wc-admin' ) }
@@ -315,7 +316,7 @@ class Chart extends Component {
 								<ChartPlaceholder />
 							</Fragment>
 						) }
-						{ ! isRequesting &&
+						{ showChart &&
 							width > 0 && (
 								<D3Chart
 									colorScheme={ d3InterpolateViridis }
