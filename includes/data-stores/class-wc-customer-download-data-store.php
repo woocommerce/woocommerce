@@ -281,7 +281,8 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 		global $wpdb;
 
 		$args = wp_parse_args(
-			$args, array(
+			$args,
+			array(
 				'user_email'  => '',
 				'user_id'     => '',
 				'order_id'    => '',

@@ -43,7 +43,8 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 						'is_visible'   => 0,
 						'is_variation' => 0,
 						'is_taxonomy'  => 0,
-					), (array) $meta_attribute_value
+					),
+					(array) $meta_attribute_value
 				);
 
 				// Maintain data integrity. 4.9 changed sanitization functions - update the values here so variations function correctly.
@@ -184,7 +185,8 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				$values = array_unique(
 					$wpdb->get_col(
 						$wpdb->prepare(
-							"SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN (" . implode( ',', array_map( 'absint', $child_ids ) ) . ')', // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+							// phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+							"SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN (" . implode( ',', array_map( 'absint', $child_ids ) ) . ')',
 							wc_variation_attribute_name( $attribute['name'] )
 						)
 					)
@@ -286,38 +288,44 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 						if ( $for_display ) {
 							if ( 'incl' === get_option( 'woocommerce_tax_display_shop' ) ) {
 								$price         = '' === $price ? '' : wc_get_price_including_tax(
-									$variation, array(
+									$variation,
+									array(
 										'qty'   => 1,
 										'price' => $price,
 									)
 								);
 								$regular_price = '' === $regular_price ? '' : wc_get_price_including_tax(
-									$variation, array(
+									$variation,
+									array(
 										'qty'   => 1,
 										'price' => $regular_price,
 									)
 								);
 								$sale_price    = '' === $sale_price ? '' : wc_get_price_including_tax(
-									$variation, array(
+									$variation,
+									array(
 										'qty'   => 1,
 										'price' => $sale_price,
 									)
 								);
 							} else {
 								$price         = '' === $price ? '' : wc_get_price_excluding_tax(
-									$variation, array(
+									$variation,
+									array(
 										'qty'   => 1,
 										'price' => $price,
 									)
 								);
 								$regular_price = '' === $regular_price ? '' : wc_get_price_excluding_tax(
-									$variation, array(
+									$variation,
+									array(
 										'qty'   => 1,
 										'price' => $regular_price,
 									)
 								);
 								$sale_price    = '' === $sale_price ? '' : wc_get_price_excluding_tax(
-									$variation, array(
+									$variation,
+									array(
 										'qty'   => 1,
 										'price' => $sale_price,
 									)
@@ -437,7 +445,8 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		if ( $children ) {
 			$children_with_status = $wpdb->get_var(
 				$wpdb->prepare(
-					"SELECT COUNT( post_id ) FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = %s AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )', // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+					// phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+					"SELECT COUNT( post_id ) FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = %s AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )',
 					$status
 				)
 			);

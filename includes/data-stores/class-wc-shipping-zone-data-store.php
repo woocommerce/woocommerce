@@ -25,7 +25,8 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	public function create( &$zone ) {
 		global $wpdb;
 		$wpdb->insert(
-			$wpdb->prefix . 'woocommerce_shipping_zones', array(
+			$wpdb->prefix . 'woocommerce_shipping_zones',
+			array(
 				'zone_name'  => $zone->get_zone_name(),
 				'zone_order' => $zone->get_zone_order(),
 			)
@@ -48,10 +49,12 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 		global $wpdb;
 		if ( $zone->get_id() ) {
 			$wpdb->update(
-				$wpdb->prefix . 'woocommerce_shipping_zones', array(
+				$wpdb->prefix . 'woocommerce_shipping_zones',
+				array(
 					'zone_name'  => $zone->get_zone_name(),
 					'zone_order' => $zone->get_zone_order(),
-				), array( 'zone_id' => $zone->get_id() )
+				),
+				array( 'zone_id' => $zone->get_id() )
 			);
 		}
 		$zone->save_meta_data();
@@ -317,7 +320,8 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 
 		foreach ( $zone->get_zone_locations( 'edit' ) as $location ) {
 			$wpdb->insert(
-				$wpdb->prefix . 'woocommerce_shipping_zone_locations', array(
+				$wpdb->prefix . 'woocommerce_shipping_zone_locations',
+				array(
 					'zone_id'       => $zone->get_id(),
 					'location_code' => $location->code,
 					'location_type' => $location->type,

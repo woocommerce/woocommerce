@@ -235,7 +235,8 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	public function get_tokens( $args ) {
 		global $wpdb;
 		$args = wp_parse_args(
-			$args, array(
+			$args,
+			array(
 				'token_id'   => '',
 				'user_id'    => '',
 				'gateway_id' => '',
