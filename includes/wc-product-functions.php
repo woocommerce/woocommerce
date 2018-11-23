@@ -134,6 +134,14 @@ function wc_delete_product_transients( $post_id = 0 ) {
 					'products'
 				);
 			}
+
+			$attributes = $product->get_attributes();
+
+			if ( $attributes ) {
+				foreach ( $attributes as $attribute_key => $attribute ) {
+					$transients_to_clear[] = 'wc_layered_nav_counts_' . $attribute_key;
+				}
+			}
 		}
 	}
 
