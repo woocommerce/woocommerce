@@ -1548,14 +1548,31 @@ class WC_Cart extends WC_Legacy_Cart {
 		// Get the coupon.
 		$the_coupon = new WC_Coupon( $coupon_code );
 
+		// No coupon exists with that coupon code
+		if ( 0 === $the_coupon->id ) {
+			/**
+			 * Filter to allow externally-defined coupon codes
+			 *
+			 * @since 4.5.x
+			 *
+			 * @param bool|int $return Boolean that define if any external coupon code has been found or not. The
+			 *     returned value should be true if an externally-defined coupon has been found, false if no external
+			 *     coupon has been found and a proper error message has been constructed, or any other value to keep the
+			 *     default WooCommerce behaviour.
+			 * @param string $coupon_code Coupon code as provided by the user, after being formatted by WooCommerce
+			 * @param WC_Coupon $the_coupon Coupon object, just created with default values, after not being found. This
+			 *     object could be used to dynamically complete the coupon properties to create virtual coupons
+			 */
+			$external_coupon_found = apply_filters( 'woocommerce_not_found_coupon', false, $coupon_code );
+			if ( $external_coupon_found === true || $external_coupon_found === false ) {
+				return $external_coupon_found;
+		}
+
 		// Prevent adding coupons by post ID.
 		if ( $the_coupon->get_code() !== $coupon_code ) {
-			$coupon_found = apply_filters( 'woocommerce_not_found_coupon', false, $coupon_code );
-			if ( ! $coupon_found ) {			
-				$the_coupon->set_code( $coupon_code );
-				$the_coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_NOT_EXIST );
-			}
-			return $coupon_found;
+			$the_coupon->set_code( $coupon_code );
+			$the_coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_NOT_EXIST );
+			return false;
 		}
 
 		// Check it can be used with cart.
