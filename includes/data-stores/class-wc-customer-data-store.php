@@ -331,7 +331,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		global $wpdb;
 
 		$last_order = $wpdb->get_var(
-			// phpcs:disable WordPress.WP.PreparedSQL.NotPrepared
+			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 			"SELECT posts.ID
 			FROM $wpdb->posts AS posts
 			LEFT JOIN {$wpdb->postmeta} AS meta on posts.ID = meta.post_id
@@ -364,7 +364,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			global $wpdb;
 
 			$count = $wpdb->get_var(
-				// phpcs:disable WordPress.WP.PreparedSQL.NotPrepared
+				// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 				"SELECT COUNT(*)
 				FROM $wpdb->posts as posts
 				LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
@@ -399,7 +399,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 			$statuses = array_map( 'esc_sql', wc_get_is_paid_statuses() );
 			$spent    = $wpdb->get_var(
-				// phpcs:disable WordPress.WP.PreparedSQL.NotPrepared
+				// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 				apply_filters(
 					'woocommerce_customer_get_total_spent_query',
 					"SELECT SUM(meta2.meta_value)

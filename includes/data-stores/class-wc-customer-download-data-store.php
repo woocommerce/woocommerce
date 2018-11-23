@@ -346,7 +346,7 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 			$query[] = $wpdb->prepare( 'LIMIT %d, %d', absint( $args['limit'] ) * absint( $args['page'] - 1 ), absint( $args['limit'] ) );
 		}
 
-		// phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$results = $wpdb->get_results( implode( ' ', $query ), $get_results_output );
 
 		switch ( $args['return'] ) {

@@ -276,7 +276,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 			$where[] = $wpdb->prepare( 'type = %s', $args['type'] );
 		}
 
-		// phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$token_results = $wpdb->get_results( $sql . ' WHERE ' . implode( ' AND ', $where ) . ' ' . $limits );
 
 		return $token_results;

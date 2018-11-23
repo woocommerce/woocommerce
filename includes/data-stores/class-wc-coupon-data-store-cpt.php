@@ -345,7 +345,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		add_post_meta( $id, 'usage_count', $coupon->get_usage_count( 'edit' ), true );
 		$wpdb->query(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 				"UPDATE $wpdb->postmeta SET meta_value = meta_value {$operator} 1 WHERE meta_key = 'usage_count' AND post_id = %d;",
 				$id
 			)

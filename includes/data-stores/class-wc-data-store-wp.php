@@ -75,7 +75,7 @@ class WC_Data_Store_WP {
 		$db_info       = $this->get_db_info();
 		$raw_meta_data = $wpdb->get_results(
 			$wpdb->prepare(
-				// phpcs:disable WordPress.WP.PreparedSQL.NotPrepared
+				// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 				"SELECT {$db_info['meta_id_field']} as meta_id, meta_key, meta_value
 				FROM {$db_info['table']}
 				WHERE {$db_info['object_id_field']} = %d

@@ -434,7 +434,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			// Remove old taxonomies attributes so data is kept up to date - first get attribute key names.
 			$delete_attribute_keys = $wpdb->get_col(
 				$wpdb->prepare(
-					// phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.QuotedDynamicPlaceholderGeneration
+					// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.QuotedDynamicPlaceholderGeneration
 					"SELECT meta_key FROM {$wpdb->postmeta} WHERE meta_key LIKE %s AND meta_key NOT IN ( '" . implode( "','", array_map( 'esc_sql', $updated_attribute_keys ) ) . "' ) AND post_id = %d",
 					$wpdb->esc_like( 'attribute_' ) . '%',
 					$product->get_id()
