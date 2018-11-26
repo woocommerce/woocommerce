@@ -148,8 +148,11 @@ class WC_Breadcrumb {
 			$this->prepend_shop_page();
 
 			$terms = wc_get_product_terms(
-				$post->ID, 'product_cat', apply_filters(
-					'woocommerce_breadcrumb_product_terms_args', array(
+				$post->ID,
+				'product_cat',
+				apply_filters(
+					'woocommerce_breadcrumb_product_terms_args',
+					array(
 						'orderby' => 'parent',
 						'order'   => 'DESC',
 					)
