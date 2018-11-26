@@ -116,7 +116,8 @@ ReportTable.defaultProps = {
 export default compose(
 	withSelect( ( select, props ) => {
 		const { endpoint, getSummary, query, tableQuery } = props;
-		const primaryData = getSummary ? getReportChartData( endpoint, 'primary', query, select ) : {};
+		const chartEndpoint = 'variations' === endpoint ? 'products' : endpoint;
+		const primaryData = getSummary ? getReportChartData( chartEndpoint, 'primary', query, select ) : {};
 		const tableData = getReportTableData( endpoint, query, select, tableQuery );
 
 		return {

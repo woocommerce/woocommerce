@@ -2,9 +2,9 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, _n } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
-import { map } from 'lodash';
+import { map, get } from 'lodash';
 
 /**
  * WooCommerce dependencies
@@ -17,6 +17,7 @@ import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import ReportTable from 'analytics/components/report-table';
+import { numberFormat } from 'lib/number';
 
 export default class VariationsReportTable extends Component {
 	constructor() {
@@ -26,11 +27,11 @@ export default class VariationsReportTable extends Component {
 		this.getRowsContent = this.getRowsContent.bind( this );
 	}
 
-	getVariationName( variation ) {
-		return variation.attributes.reduce( ( desc, attribute, index, arr ) => {
-			desc += `${ attribute.option }${ arr.length === index + 1 ? '' : ', ' }`;
-			return desc;
-		}, variation.product_name + ' / ' );
+	getVariationName( row ) {
+		const extendedInfo = get( row, 'extended_info', {} );
+		const attributes = get( extendedInfo, 'attributes', {} );
+
+		return extendedInfo.name + ' / ' + attributes.map( a => a.option ).join( ', ' );
 	}
 
 	getHeadersContent() {
@@ -94,10 +95,15 @@ export default class VariationsReportTable extends Component {
 				filter: 'advanced',
 				product_includes: query.products,
 			} );
+			const editPostLink = `post.php?post=${ product_id }&action=edit`;
 
 			return [
 				{
-					display: name,
+					display: (
+						<Link href={ editPostLink } type="wp-admin">
+							{ name }
+						</Link>
+					),
 					value: name,
 				},
 				{
@@ -118,7 +124,7 @@ export default class VariationsReportTable extends Component {
 				},
 				{
 					display: (
-						<Link href={ 'post.php?action=edit&post=' + product_id } type="wp-admin">
+						<Link href={ editPostLink } type="wp-admin">
 							{ stockStatuses[ stock_status ] }
 						</Link>
 					),
@@ -130,6 +136,31 @@ export default class VariationsReportTable extends Component {
 				},
 			];
 		} );
+	}
+
+	getSummary( totals ) {
+		if ( ! totals ) {
+			return [];
+		}
+		return [
+			{
+				// @TODO: When primaryData is segmented, fix this to reflect variations, not products.
+				label: _n( 'variation sold', 'variations sold', totals.products_count, 'wc-admin' ),
+				value: numberFormat( totals.products_count ),
+			},
+			{
+				label: _n( 'item sold', 'items sold', totals.items_sold, 'wc-admin' ),
+				value: numberFormat( totals.items_sold ),
+			},
+			{
+				label: __( 'gross revenue', 'wc-admin' ),
+				value: formatCurrency( totals.gross_revenue ),
+			},
+			{
+				label: _n( 'orders', 'orders', totals.orders_count, 'wc-admin' ),
+				value: numberFormat( totals.orders_count ),
+			},
+		];
 	}
 
 	render() {
@@ -150,9 +181,11 @@ export default class VariationsReportTable extends Component {
 				itemIdField="product_id"
 				labels={ labels }
 				query={ query }
+				getSummary={ this.getSummary }
 				tableQuery={ {
 					orderby: query.orderby || 'items_sold',
 					order: query.order || 'desc',
+					extended_info: true,
 				} }
 				title={ __( 'Variations', 'wc-admin' ) }
 			/>
