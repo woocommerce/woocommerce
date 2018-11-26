@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, _n } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withSelect } from '@wordpress/data';
@@ -159,6 +159,30 @@ class ProductsReportTable extends Component {
 		} );
 	}
 
+	getSummary( totals ) {
+		if ( ! totals ) {
+			return [];
+		}
+		return [
+			{
+				label: _n( 'product sold', 'products sold', totals.products_count, 'wc-admin' ),
+				value: numberFormat( totals.products_count ),
+			},
+			{
+				label: _n( 'item sold', 'items sold', totals.items_sold, 'wc-admin' ),
+				value: numberFormat( totals.items_sold ),
+			},
+			{
+				label: __( 'gross revenue', 'wc-admin' ),
+				value: formatCurrency( totals.gross_revenue ),
+			},
+			{
+				label: _n( 'orders', 'orders', totals.orders_count, 'wc-admin' ),
+				value: numberFormat( totals.orders_count ),
+			},
+		];
+	}
+
 	render() {
 		const { primaryData, tableData } = this.props;
 		const { items, query } = tableData;
@@ -174,6 +198,7 @@ class ProductsReportTable extends Component {
 		const orderedProducts = orderBy( items, query.orderby, query.order );
 		const rows = this.getRowsContent( orderedProducts );
 		const totalRows = get( primaryData, [ 'data', 'totals', 'products_count' ], items.length );
+		const summary = primaryData.data.totals ? this.getSummary( primaryData.data.totals ) : null;
 
 		const labels = {
 			helpText: __( 'Select at least two products to compare', 'wc-admin' ),
@@ -193,7 +218,7 @@ class ProductsReportTable extends Component {
 				compareBy={ 'products' }
 				onQueryChange={ onQueryChange }
 				query={ query }
-				summary={ null } // @TODO
+				summary={ summary }
 				downloadable
 			/>
 		);
